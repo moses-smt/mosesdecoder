@@ -14,6 +14,7 @@
 #include "moses/Syntax/SVertexRecombinationOrderer.h"
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
+#include "DerivationWriter.h"
 
 #include "OovHandler.h"
 #include "PChart.h"
@@ -409,7 +410,18 @@ void Manager<Parser>::OutputAlignment(OutputCollector *collector) const
 
 template<typename Parser>
 void Manager<Parser>::OutputDetailedTranslationReport(OutputCollector *collector) const
-{}
+{
+  const SHyperedge *best = GetBestSHyperedge();
+  if (best == NULL || collector == NULL) {
+	return;
+  }
+
+  long translationId = m_source.GetTranslationId();
+  std::ostringstream out;
+  Syntax::S2T::DerivationWriter::Write(*best, translationId, out);
+  collector->Write(translationId, out.str());
+
+}
 
 template<typename Parser>
 void Manager<Parser>::OutputNBestList(OutputCollector *collector,

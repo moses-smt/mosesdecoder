@@ -67,11 +67,8 @@ private:
 
     // Write 1-best derivation (-translation-details / -T option).
 
-    /*
-    if (staticData.IsDetailedTranslationReportingEnabled()) {
-      m_ioWrapper.OutputDetailedTranslationReport(best, translationId);
-    }
-    */
+    manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
+
     // Write unknown words file (-output-unknowns option)
     if (!staticData.GetOutputUnknownsFile().empty()) {
       m_ioWrapper.OutputUnknowns(manager.GetUnknownWords(), translationId);
