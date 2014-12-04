@@ -35,8 +35,6 @@ void SoftSourceSyntacticConstraintsFeature::SetParameter(const std::string& key,
     m_coreSourceLabelSetFile = value;
   } else if (key == "targetSourceLeftHandSideJointCountFile") {
     m_targetSourceLHSJointCountFile = value;
-  } else if (key == "tuneable") {
-    m_tuneable = Scan<bool>(value);
   } else if (key == "featureVariant") {
     m_featureVariant = Scan<size_t>(value); // 0: only dense features, 1: no mismatches (also set weights 1 0 0 and tuneable=false), 2: with sparse features, 3: with sparse features for core labels only
   } else {
