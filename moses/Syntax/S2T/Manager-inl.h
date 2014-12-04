@@ -424,6 +424,23 @@ void Manager<Parser>::OutputDetailedTranslationReport(OutputCollector *collector
 }
 
 template<typename Parser>
+void Manager<Parser>::OutputUnknowns(OutputCollector *collector) const
+{
+  if (collector) {
+	  long translationId = m_source.GetTranslationId();
+
+	  std::ostringstream out;
+	  for (std::set<Moses::Word>::const_iterator p = m_oovs.begin();
+	       p != m_oovs.end(); ++p) {
+	    out << *p;
+	  }
+	  out << std::endl;
+	  collector->Write(translationId, out.str());
+  }
+
+}
+
+template<typename Parser>
 void Manager<Parser>::OutputNBestList(OutputCollector *collector,
 		const Syntax::KBestExtractor::KBestVec &nBestList,
 		long translationId) const

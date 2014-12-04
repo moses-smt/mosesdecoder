@@ -47,6 +47,7 @@ class Manager : public BaseManager
   void OutputLatticeSamples(OutputCollector *collector) const;
   void OutputAlignment(OutputCollector *collector) const;
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
+  void OutputUnknowns(OutputCollector *collector) const;
 
  private:
   void FindOovs(const PChart &, std::set<Word> &, std::size_t);

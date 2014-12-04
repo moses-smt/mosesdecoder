@@ -290,15 +290,7 @@ void TranslationTask::RunPb()
   }
 
   //list of unknown words
-  if (m_ioWrapper.GetUnknownsCollector()) {
-    const vector<const Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
-    ostringstream out;
-    for (size_t i = 0; i < unknowns.size(); ++i) {
-      out << *(unknowns[i]);
-    }
-    out << endl;
-    m_ioWrapper.GetUnknownsCollector()->Write(m_source->GetTranslationId(), out.str());
-  }
+  manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
 
   // report additional statistics
   manager.CalcDecoderStatistics();
@@ -380,10 +372,8 @@ void TranslationTask::RunChart()
 	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
 	  m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
 	}
-	if (!staticData.GetOutputUnknownsFile().empty()) {
-	  m_ioWrapper.OutputUnknowns(manager.GetParser().GetUnknownSources(),
-								 translationId);
-	}
+
+	manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
 
 	//DIMw
 	if (staticData.IsDetailedAllTranslationReportingEnabled()) {

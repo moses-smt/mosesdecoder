@@ -671,17 +671,6 @@ void IOWrapper::OutputDetailedAllTranslationReport(
   m_detailedTranslationCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputUnknowns(const std::vector<Moses::Phrase*> &unknowns,
-                               long translationId)
-{
-  std::ostringstream out;
-  for (std::size_t i = 0; i < unknowns.size(); ++i) {
-    out << *(unknowns[i]);
-  }
-  out << std::endl;
-  m_unknownsCollector->Write(translationId, out.str());
-}
-
 //////////////////////////////////////////////////////////////////////////
 /***
  * print surface factor only for the given phrase
@@ -1051,18 +1040,6 @@ void IOWrapper::OutputBestHypo(const Syntax::SHyperedge *best,
     out << '\n';
   }
   m_singleBestOutputCollector->Write(translationId, out.str());
-}
-
-void IOWrapper::OutputUnknowns(const std::set<Moses::Word> &unknowns,
-                               long translationId)
-{
-  std::ostringstream out;
-  for (std::set<Moses::Word>::const_iterator p = unknowns.begin();
-       p != unknowns.end(); ++p) {
-    out << *p;
-  }
-  out << std::endl;
-  m_unknownsCollector->Write(translationId, out.str());
 }
 
 } // namespace

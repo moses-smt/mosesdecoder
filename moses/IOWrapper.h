@@ -184,9 +184,6 @@ public:
 
   void OutputDetailedAllTranslationReport(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
 
-  void OutputUnknowns(const std::vector<Moses::Phrase*> &, long);
-  void OutputUnknowns(const std::set<Moses::Word> &, long);
-
   void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo,
 		  	  	  	  	  	  const Moses::Sentence &sentence,
 		  	  	  	  	  	  long translationId);

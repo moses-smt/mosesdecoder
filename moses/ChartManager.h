@@ -146,6 +146,7 @@ public:
   {}
   void OutputAlignment(OutputCollector *collector) const;
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
+  void OutputUnknowns(OutputCollector *collector) const;
 
 };
 

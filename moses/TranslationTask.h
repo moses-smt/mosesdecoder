@@ -69,10 +69,7 @@ private:
 
     manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
 
-    // Write unknown words file (-output-unknowns option)
-    if (!staticData.GetOutputUnknownsFile().empty()) {
-      m_ioWrapper.OutputUnknowns(manager.GetUnknownWords(), translationId);
-    }
+    manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
   }
 
 };
