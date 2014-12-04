@@ -45,7 +45,7 @@ void FeatureFunction::CallChangeSource(InputType *&input)
 FeatureFunction::
 FeatureFunction(const std::string& line)
   : m_tuneable(true)
-  , m_verbosity(1)
+  , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(1)
 {
   Initialize(line);
@@ -55,7 +55,7 @@ FeatureFunction::
 FeatureFunction(size_t numScoreComponents,
                 const std::string& line)
   : m_tuneable(true)
-  , m_verbosity(0)
+  , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(numScoreComponents)
 {
   Initialize(line);
