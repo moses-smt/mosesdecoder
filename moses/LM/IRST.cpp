@@ -41,6 +41,7 @@ namespace Moses
 {
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor(line)
+  ,m_lmtb_dub(0)
 {
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
