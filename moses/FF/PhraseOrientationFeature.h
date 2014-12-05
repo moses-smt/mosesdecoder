@@ -102,9 +102,22 @@ public:
   }
 
 
-  int Compare(const FFState& other) const { return 0; };
+  int Compare(const FFState& other) const 
+  {
+    return 0; 
+  };
 
 private:
+
+  template<std::size_t N> bool Smaller(const std::bitset<N>& x, const std::bitset<N>& y) const
+  {
+    for (size_t i=0; i<N; ++i) 
+    {
+      if (x[i] ^ y[i]) 
+        return y[i];
+    }
+    return false;
+  }
 
   std::vector<float> m_leftBoundaryNonTerminalL2RScores;
   std::vector<float> m_rightBoundaryNonTerminalR2LScores;

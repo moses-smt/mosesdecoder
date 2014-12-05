@@ -149,7 +149,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
                                    , size_t /* tableLimit */
                                    , RuleTableTrie &ruleTable)
 {
-  PrintUserTime(string("Start loading text phrase table. ") + (format==MosesFormat?"Moses ":"Hiero ") + " format");
+  PrintUserTime(string("Start loading text phrase table. ") + (format==MosesFormat?"Moses":"Hiero") + " format");
 
   const StaticData &staticData = StaticData::Instance();
 
