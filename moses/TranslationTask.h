@@ -27,7 +27,6 @@ class TranslationTask : public Moses::Task
 public:
 
   TranslationTask(Moses::InputType* source, Moses::IOWrapper &ioWrapper,
-                  bool outputSearchGraphSLF,
                   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > hypergraphOutput);
 
   TranslationTask(Moses::InputType *source, IOWrapper &ioWrapper,
@@ -45,7 +44,6 @@ private:
   Moses::InputType* m_source;
   Moses::IOWrapper &m_ioWrapper;
 
-  bool m_outputSearchGraphSLF;
   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > m_hypergraphOutput;
   boost::shared_ptr<Moses::HypergraphOutput<Moses::ChartManager> > m_hypergraphOutputChart;
 

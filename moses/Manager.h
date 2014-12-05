@@ -198,6 +198,7 @@ public:
   {}
   void OutputWordGraph(OutputCollector *collector) const;
   void OutputSearchGraph(OutputCollector *collector) const;
+  void OutputSearchGraphSLF() const;
 
 };
 

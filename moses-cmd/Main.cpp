@@ -175,7 +175,6 @@ int main(int argc, char** argv)
       else {
     	  // pb
 		  task = new TranslationTask(source, *ioWrapper,
-								staticData.GetOutputSearchGraphSLF(),
 								hypergraphOutput);
       }
 

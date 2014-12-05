@@ -21,11 +21,9 @@ namespace Moses
 {
 
 TranslationTask::TranslationTask(InputType* source, Moses::IOWrapper &ioWrapper,
-                bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput)
 : m_source(source)
 , m_ioWrapper(ioWrapper)
-, m_outputSearchGraphSLF(outputSearchGraphSLF)
 , m_hypergraphOutput(hypergraphOutput)
 , m_pbOrChart(1)
 {}
@@ -95,27 +93,7 @@ void TranslationTask::RunPb()
   // output search graph
   manager.OutputSearchGraph(m_ioWrapper.GetSearchGraphOutputCollector());
 
-  // Output search graph in HTK standard lattice format (SLF)
-  if (m_outputSearchGraphSLF) {
-    stringstream fileName;
-
-    string dir;
-    staticData.GetParameter().SetParameter<string>(dir, "output-search-graph-slf", "");
-
-    fileName << dir << "/" << m_source->GetTranslationId() << ".slf";
-    ofstream *file = new ofstream;
-    file->open(fileName.str().c_str());
-    if (file->is_open() && file->good()) {
-      ostringstream out;
-      FixPrecision(out,PRECISION);
-      manager.OutputSearchGraphAsSLF(m_source->GetTranslationId(), out);
-      *file << out.str();
-      file -> flush();
-    } else {
-      TRACE_ERR("Cannot output HTK standard lattice for line " << m_source->GetTranslationId() << " because the output file is not open or not ready for writing" << endl);
-    }
-    delete file;
-  }
+  manager.OutputSearchGraphSLF();
 
   // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
   if (m_hypergraphOutput.get()) {

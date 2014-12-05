@@ -56,6 +56,8 @@ class Manager : public BaseManager
   {}
   void OutputSearchGraph(OutputCollector *collector) const
   {}
+  void OutputSearchGraphSLF() const
+  {}
 
  private:
   void FindOovs(const PChart &, std::set<Word> &, std::size_t);

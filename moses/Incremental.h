@@ -52,7 +52,8 @@ public:
   {}
   void OutputSearchGraph(OutputCollector *collector) const
   {}
-
+  void OutputSearchGraphSLF() const
+  {}
 
 
 private:

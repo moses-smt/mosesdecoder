@@ -1780,4 +1780,34 @@ void Manager::OutputSearchGraph(OutputCollector *collector) const
 
 }
 
+void Manager::OutputSearchGraphSLF() const
+{
+  const StaticData &staticData = StaticData::Instance();
+  long translationId = m_source.GetTranslationId();
+
+  // Output search graph in HTK standard lattice format (SLF)
+  bool slf = staticData.GetOutputSearchGraphSLF();
+  if (slf) {
+	stringstream fileName;
+
+	string dir;
+	staticData.GetParameter().SetParameter<string>(dir, "output-search-graph-slf", "");
+
+	fileName << dir << "/" << translationId << ".slf";
+	ofstream *file = new ofstream;
+	file->open(fileName.str().c_str());
+	if (file->is_open() && file->good()) {
+	  ostringstream out;
+	  FixPrecision(out,PRECISION);
+	  OutputSearchGraphAsSLF(translationId, out);
+	  *file << out.str();
+	  file -> flush();
+	} else {
+	  TRACE_ERR("Cannot output HTK standard lattice for line " << translationId << " because the output file is not open or not ready for writing" << endl);
+	}
+	delete file;
+  }
+
 }
+
+} // namespace
