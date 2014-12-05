@@ -102,9 +102,91 @@ public:
   }
 
 
-  int Compare(const FFState& other) const { return 0; };
+  int Compare(const FFState& other) const 
+  {
+    const PhraseOrientationFeatureState &otherFF = static_cast<const PhraseOrientationFeatureState&>(other);
+
+    if (!m_leftBoundaryIsSet && !otherFF.m_leftBoundaryIsSet &&
+        !m_rightBoundaryIsSet && !otherFF.m_rightBoundaryIsSet) 
+    {
+      return 0;
+    }
+    if (m_leftBoundaryIsSet && !otherFF.m_leftBoundaryIsSet)
+    {
+      return 1;
+    }
+    if (!m_leftBoundaryIsSet && otherFF.m_leftBoundaryIsSet)
+    {
+      return -1;
+    }
+    if (m_rightBoundaryIsSet && !otherFF.m_rightBoundaryIsSet) 
+    {
+      return 1;
+    }
+    if (!m_rightBoundaryIsSet && otherFF.m_rightBoundaryIsSet) 
+    {
+      return -1;
+    }
+
+    if (m_leftBoundaryIsSet) 
+    {
+      if ( Smaller(otherFF.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations, m_leftBoundaryNonTerminalL2RPossibleFutureOrientations) )
+      {
+        return 1;
+      }
+      if ( Smaller(m_leftBoundaryNonTerminalL2RPossibleFutureOrientations, otherFF.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations) )
+      {
+        return -1;
+      }
+      for (size_t i=0; i<m_leftBoundaryNonTerminalL2RScores.size(); ++i)
+      {
+        if (m_leftBoundaryNonTerminalL2RScores[i] > otherFF.m_leftBoundaryNonTerminalL2RScores[i])
+        {
+          return 1;
+        }
+        if (m_leftBoundaryNonTerminalL2RScores[i] < otherFF.m_leftBoundaryNonTerminalL2RScores[i])
+        {
+          return -1;
+        }
+      }
+    }
+    if (m_rightBoundaryIsSet) 
+    {
+      if ( Smaller(otherFF.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations, m_rightBoundaryNonTerminalR2LPossibleFutureOrientations) )
+      {
+        return 1;
+      }
+      if ( Smaller(m_rightBoundaryNonTerminalR2LPossibleFutureOrientations, otherFF.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations) )
+      {
+        return -1;
+      }
+      for (size_t i=0; i<m_rightBoundaryNonTerminalR2LScores.size(); ++i)
+      {
+        if (m_rightBoundaryNonTerminalR2LScores[i] > otherFF.m_rightBoundaryNonTerminalR2LScores[i])
+        {
+          return 1;
+        }
+        if (m_rightBoundaryNonTerminalR2LScores[i] < otherFF.m_rightBoundaryNonTerminalR2LScores[i])
+        {
+          return -1;
+        }
+      }
+    }
+
+    return 0; 
+  };
 
 private:
+
+  template<std::size_t N> bool Smaller(const std::bitset<N>& x, const std::bitset<N>& y) const
+  {
+    for (size_t i=0; i<N; ++i) 
+    {
+      if (x[i] ^ y[i]) 
+        return y[i];
+    }
+    return false;
+  }
 
   std::vector<float> m_leftBoundaryNonTerminalL2RScores;
   std::vector<float> m_rightBoundaryNonTerminalR2LScores;
