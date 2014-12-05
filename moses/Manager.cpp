@@ -472,7 +472,7 @@ void Manager::CalcDecoderStatistics() const
   }
 }
 
-void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId)
+void Manager::OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId) const
 {
 
   const Hypothesis *prevHypo = hypo->GetPrevHypo();
@@ -1741,6 +1741,41 @@ void Manager::OutputUnknowns(OutputCollector *collector) const
 	}
 	out << endl;
 	collector->Write(translationId, out.str());
+  }
+
+}
+
+void Manager::OutputWordGraph(OutputCollector *collector) const
+{
+  if (collector) {
+    long translationId = m_source.GetTranslationId();
+	ostringstream out;
+	FixPrecision(out,PRECISION);
+	GetWordGraph(translationId, out);
+	collector->Write(translationId, out.str());
+  }
+}
+
+void Manager::OutputSearchGraph(OutputCollector *collector) const
+{
+  if (collector) {
+	long translationId = m_source.GetTranslationId();
+	ostringstream out;
+	FixPrecision(out,PRECISION);
+	OutputSearchGraph(translationId, out);
+	collector->Write(translationId, out.str());
+
+#ifdef HAVE_PROTOBUF
+    const StaticData &staticData = StaticData::Instance();
+	if (staticData.GetOutputSearchGraphPB()) {
+	  ostringstream sfn;
+	  sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << translationId << ".pb" << ends;
+	  string fn = sfn.str();
+	  VERBOSE(2, "Writing search graph to " << fn << endl);
+	  fstream output(fn.c_str(), ios::trunc | ios::binary | ios::out);
+	  SerializeSearchGraphPB(translationId, output);
+	}
+#endif
   }
 
 }

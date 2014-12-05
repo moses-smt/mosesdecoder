@@ -153,6 +153,9 @@ public:
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
   void OutputUnknowns(OutputCollector *collector) const;
   void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const;
+  void OutputWordGraph(OutputCollector *collector) const
+  {}
+  void OutputSearchGraph(OutputCollector *collector) const;
 
 };
 

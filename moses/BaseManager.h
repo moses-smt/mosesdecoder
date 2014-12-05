@@ -52,6 +52,8 @@ public:
   virtual void OutputAlignment(OutputCollector *collector) const = 0;
   virtual void OutputDetailedTranslationReport(OutputCollector *collector) const = 0;
   virtual void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const = 0;
+  virtual void OutputWordGraph(OutputCollector *collector) const = 0;
+  virtual void OutputSearchGraph(OutputCollector *collector) const = 0;
 
 
 };

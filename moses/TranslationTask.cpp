@@ -90,31 +90,10 @@ void TranslationTask::RunPb()
   additionalReportingTime.start();
 
   // output word graph
-  if (m_ioWrapper.GetWordGraphCollector()) {
-    ostringstream out;
-    FixPrecision(out,PRECISION);
-    manager.GetWordGraph(m_source->GetTranslationId(), out);
-    m_ioWrapper.GetWordGraphCollector()->Write(m_source->GetTranslationId(), out.str());
-  }
+  manager.OutputWordGraph(m_ioWrapper.GetWordGraphCollector());
 
   // output search graph
-  if (m_ioWrapper.GetSearchGraphOutputCollector()) {
-    ostringstream out;
-    FixPrecision(out,PRECISION);
-    manager.OutputSearchGraph(m_source->GetTranslationId(), out);
-    m_ioWrapper.GetSearchGraphOutputCollector()->Write(m_source->GetTranslationId(), out.str());
-
-#ifdef HAVE_PROTOBUF
-    if (staticData.GetOutputSearchGraphPB()) {
-      ostringstream sfn;
-      sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << m_source->GetTranslationId() << ".pb" << ends;
-      string fn = sfn.str();
-      VERBOSE(2, "Writing search graph to " << fn << endl);
-      fstream output(fn.c_str(), ios::trunc | ios::binary | ios::out);
-      manager.SerializeSearchGraphPB(m_source->GetTranslationId(), output);
-    }
-#endif
-  }
+  manager.OutputSearchGraph(m_ioWrapper.GetSearchGraphOutputCollector());
 
   // Output search graph in HTK standard lattice format (SLF)
   if (m_outputSearchGraphSLF) {
@@ -373,13 +352,7 @@ void TranslationTask::RunChart()
 	// n-best
 	manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
 
-	if (staticData.GetOutputSearchGraph()) {
-	  std::ostringstream out;
-	  manager.OutputSearchGraphMoses( out);
-	  OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
-	  UTIL_THROW_IF2(oc == NULL, "File for search graph output not specified");
-	  oc->Write(translationId, out.str());
-	}
+	manager.OutputSearchGraph(m_ioWrapper.GetSearchGraphOutputCollector());
 
 	IFVERBOSE(2) {
 	  PrintUserTime("Sentence Decoding Time:");

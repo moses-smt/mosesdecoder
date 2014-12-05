@@ -46,6 +46,10 @@ public:
   void OutputAlignment(OutputCollector *collector) const
   {}
   void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const;
+  void OutputWordGraph(OutputCollector *collector) const
+  {}
+  void OutputSearchGraph(OutputCollector *collector) const
+  {}
 
 
 

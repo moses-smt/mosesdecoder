@@ -743,5 +743,14 @@ void ChartManager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
   }
 }
 
+void ChartManager::OutputSearchGraph(OutputCollector *collector) const
+{
+	if (collector) {
+	  long translationId = m_source.GetTranslationId();
+	  std::ostringstream out;
+	  OutputSearchGraphMoses( out);
+	  collector->Write(translationId, out.str());
+	}
+}
 
 } // namespace Moses

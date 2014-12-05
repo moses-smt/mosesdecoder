@@ -52,6 +52,10 @@ class Manager : public BaseManager
   void OutputUnknowns(OutputCollector *collector) const;
   void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
   {}
+  void OutputWordGraph(OutputCollector *collector) const
+  {}
+  void OutputSearchGraph(OutputCollector *collector) const
+  {}
 
  private:
   void FindOovs(const PChart &, std::set<Word> &, std::size_t);
