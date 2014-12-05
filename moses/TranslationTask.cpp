@@ -83,7 +83,7 @@ void TranslationTask::RunPb()
   initTime.start();
   Manager manager(*m_source,staticData.GetSearchAlgorithm());
   VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Initialize search took " << initTime << " seconds total" << endl);
-  manager.ProcessSentence();
+  manager.Decode();
 
   // we are done with search, let's look what we got
   Timer additionalReportingTime;
@@ -301,7 +301,8 @@ void TranslationTask::RunChart()
 
 	if (staticData.GetSearchAlgorithm() == ChartIncremental) {
 	  Incremental::Manager manager(*m_source);
-	  const std::vector<search::Applied> &nbest = manager.ProcessSentence();
+	  manager.Decode();
+	  const std::vector<search::Applied> &nbest = manager.GetNBest();
 	  if (!nbest.empty()) {
 		m_ioWrapper.OutputBestHypo(nbest[0], translationId);
 
@@ -318,7 +319,7 @@ void TranslationTask::RunChart()
 	}
 
 	ChartManager manager(*m_source);
-	manager.ProcessSentence();
+	manager.Decode();
 
 	UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
 
@@ -339,15 +340,6 @@ void TranslationTask::RunChart()
     manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
     manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
 	manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
-
-	//DIMw
-	if (staticData.IsDetailedAllTranslationReportingEnabled()) {
-	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-	  size_t nBestSize = staticData.GetNBestSize();
-	  std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
-	  manager.CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
-	  m_ioWrapper.OutputDetailedAllTranslationReport(nBestList, manager, sentence, translationId);
-	}
 
 	// n-best
 	manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());

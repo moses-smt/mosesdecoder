@@ -30,7 +30,9 @@ public:
 
   template <class Model> void LMCallback(const Model &model, const std::vector<lm::WordIndex> &words);
 
-  const std::vector<search::Applied> &ProcessSentence();
+  void Decode();
+
+  const std::vector<search::Applied> &GetNBest() const;
 
   // Call to get the same value as ProcessSentence returned.
   const std::vector<search::Applied> &Completed() const {

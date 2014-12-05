@@ -283,7 +283,7 @@ public:
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
         ChartManager manager(tinput);
-        manager.ProcessSentence();
+        manager.Decode();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
         if (addGraphInfo) {
@@ -302,7 +302,7 @@ public:
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
         Manager manager(sentence, staticData.GetSearchAlgorithm());
-	      manager.ProcessSentence();
+	      manager.Decode();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
         vector<xmlrpc_c::value> alignInfo;

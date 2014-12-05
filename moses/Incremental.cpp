@@ -273,9 +273,13 @@ template void Manager::LMCallback<lm::ngram::QuantTrieModel>(const lm::ngram::Qu
 template void Manager::LMCallback<lm::ngram::ArrayTrieModel>(const lm::ngram::ArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 template void Manager::LMCallback<lm::ngram::QuantArrayTrieModel>(const lm::ngram::QuantArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 
-const std::vector<search::Applied> &Manager::ProcessSentence()
+void Manager::Decode()
 {
   LanguageModel::GetFirstLM().IncrementalCallback(*this);
+}
+
+const std::vector<search::Applied> &Manager::GetNBest() const
+{
   return *completed_nbest_;
 }
 

@@ -79,7 +79,7 @@ Manager::~Manager()
  * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
  */
-void Manager::ProcessSentence()
+void Manager::Decode()
 {
   // initialize statistics
   ResetSentenceStats(m_source);

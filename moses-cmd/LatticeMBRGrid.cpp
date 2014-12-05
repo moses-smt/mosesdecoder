@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
     source->SetTranslationId(lineCount);
 
     Manager manager(*source, staticData.GetSearchAlgorithm());
-    manager.ProcessSentence();
+    manager.Decode();
     TrellisPathList nBestList;
     manager.CalcNBest(nBestSize, nBestList,true);
     //grid search

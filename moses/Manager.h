@@ -151,7 +151,7 @@ public:
   ~Manager();
   const  TranslationOptionCollection* getSntTranslationOptions();
 
-  void ProcessSentence();
+  void Decode();
   const Hypothesis *GetBestHypothesis() const;
   const Hypothesis *GetActualBestHypothesis() const;
   void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;

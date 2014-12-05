@@ -533,39 +533,6 @@ void IOWrapper::OutputSurface(std::ostream &out, const Phrase &phrase, const std
 
 
 
-//DIMw
-void IOWrapper::OutputDetailedAllTranslationReport(
-  const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList,
-  const ChartManager &manager,
-  const Sentence &sentence,
-  long translationId)
-{
-  std::ostringstream out;
-  ApplicationContext applicationContext;
-
-  const ChartCellCollection& cells = manager.GetChartCellCollection();
-  size_t size = manager.GetSource().GetSize();
-  for (size_t width = 1; width <= size; ++width) {
-    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
-      size_t endPos = startPos + width - 1;
-      WordsRange range(startPos, endPos);
-      const ChartCell& cell = cells.Get(range);
-      const HypoList* hyps = cell.GetAllSortedHypotheses();
-      out << "Chart Cell [" << startPos << ".." << endPos << "]" << endl;
-      HypoList::const_iterator iter;
-      size_t c = 1;
-      for (iter = hyps->begin(); iter != hyps->end(); ++iter) {
-        out << "----------------Item " << c++ << " ---------------------"
-            << endl;
-        OutputTranslationOptions(out, applicationContext, *iter,
-                                 sentence, translationId);
-      }
-    }
-  }
-  UTIL_THROW_IF2(m_detailedTranslationCollector == NULL,
-		  "No output file for details specified");
-  m_detailedTranslationCollector->Write(translationId, out.str());
-}
 
 //////////////////////////////////////////////////////////////////////////
 /***

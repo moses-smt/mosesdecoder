@@ -96,11 +96,16 @@ private:
 		  const ChartHypothesis *hypo,
 		  const Sentence &sentence,
 		  long translationId) const;
+  void OutputDetailedAllTranslationReport(
+		  OutputCollector *collector,
+		  const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList,
+		  const Sentence &sentence,
+		  long translationId) const;
 
 public:
   ChartManager(InputType const& source);
   ~ChartManager();
-  void ProcessSentence();
+  void Decode();
   void AddXmlChartOptions();
   const ChartHypothesis *GetBestHypothesis() const;
   void CalcNBest(size_t n, std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > &nBestList, bool onlyDistinct=false) const;
