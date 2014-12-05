@@ -111,7 +111,6 @@ private:
 
 protected:
   // data
-//	InputType const& m_source; /**< source sentence to be translated */
   TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
   Search *m_search;
 
@@ -146,7 +145,6 @@ protected:
   void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId) const;
 
 public:
-  InputType const& m_source; /**< source sentence to be translated */
   Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
   ~Manager();
   const  TranslationOptionCollection* getSntTranslationOptions();
@@ -199,6 +197,7 @@ public:
   void OutputWordGraph(OutputCollector *collector) const;
   void OutputSearchGraph(OutputCollector *collector) const;
   void OutputSearchGraphSLF() const;
+  void OutputSearchGraphHypergraph() const;
 
 };
 

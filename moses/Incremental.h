@@ -54,12 +54,13 @@ public:
   {}
   void OutputSearchGraphSLF() const
   {}
+  void OutputSearchGraphHypergraph() const
+  {}
 
 
 private:
   template <class Model, class Best> search::History PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out);
 
-  const InputType &source_;
   ChartCellCollectionBase cells_;
   ChartParser parser_;
 

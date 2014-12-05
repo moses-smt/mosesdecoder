@@ -89,7 +89,7 @@ lib moses :
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
 
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-$(TOP)//boost_iostreams mmlib
+$(TOP)//boost_filesystem $(TOP)//boost_iostreams mmlib
 :
 <threading>single:<source>../util//rt
 ;
@@ -99,5 +99,5 @@ alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] ..//boost_filesystem moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
 

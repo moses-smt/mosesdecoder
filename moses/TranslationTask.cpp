@@ -20,20 +20,10 @@ using namespace std;
 namespace Moses
 {
 
-TranslationTask::TranslationTask(InputType* source, Moses::IOWrapper &ioWrapper,
-                boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput)
+TranslationTask::TranslationTask(InputType* source, Moses::IOWrapper &ioWrapper, int pbOrChart)
 : m_source(source)
 , m_ioWrapper(ioWrapper)
-, m_hypergraphOutput(hypergraphOutput)
-, m_pbOrChart(1)
-{}
-
-TranslationTask::TranslationTask(InputType *source, IOWrapper &ioWrapper,
-boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutputChart)
-: m_source(source)
-, m_ioWrapper(ioWrapper)
-, m_hypergraphOutputChart(hypergraphOutputChart)
-, m_pbOrChart(2)
+, m_pbOrChart(pbOrChart)
 {}
 
 TranslationTask::~TranslationTask() {
@@ -96,9 +86,7 @@ void TranslationTask::RunPb()
   manager.OutputSearchGraphSLF();
 
   // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
-  if (m_hypergraphOutput.get()) {
-    m_hypergraphOutput->Write(manager);
-  }
+  manager.OutputSearchGraphHypergraph();
 
   additionalReportingTime.stop();
 
@@ -302,10 +290,7 @@ void TranslationTask::RunChart()
 	UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
 
 	// Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
-	if (m_hypergraphOutputChart.get()) {
-	  m_hypergraphOutputChart->Write(manager);
-	}
-
+	manager.OutputSearchGraphHypergraph();
 
 	// 1-best
 	const ChartHypothesis *bestHypo = manager.GetBestHypothesis();

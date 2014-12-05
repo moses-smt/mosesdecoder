@@ -25,7 +25,6 @@
 #include <boost/unordered_map.hpp>
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
-#include "InputType.h"
 #include "WordsRange.h"
 #include "SentenceStats.h"
 #include "ChartTranslationOptionList.h"
@@ -47,7 +46,6 @@ class ChartSearchGraphWriter;
 class ChartManager : public BaseManager
 {
 private:
-  InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
   std::auto_ptr<SentenceStats> m_sentenceStats;
   clock_t m_start; /**< starting time, used for logging */
@@ -116,12 +114,6 @@ public:
   /** Output in (modified) Kenneth hypergraph format */
   void OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const;
 
-
-  //! the input sentence being decoded
-  const InputType& GetSource() const {
-    return m_source;
-  }
-
   //! debug data collected when decoding sentence
   SentenceStats& GetSentenceStats() const {
     return *m_sentenceStats;
@@ -163,6 +155,7 @@ public:
   void OutputSearchGraph(OutputCollector *collector) const;
   void OutputSearchGraphSLF() const
   {}
+  void OutputSearchGraphHypergraph() const;
 
 };
 

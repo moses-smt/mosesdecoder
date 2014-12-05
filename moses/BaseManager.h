@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "ScoreComponentCollection.h"
+#include "InputType.h"
 
 namespace Moses
 {
@@ -13,6 +14,11 @@ class OutputCollector;
 class BaseManager
 {
 protected:
+  const InputType &m_source; /**< source sentence to be translated */
+
+  BaseManager(const InputType &source)
+  :m_source(source)
+  {}
 
   // output
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
@@ -46,6 +52,11 @@ protected:
   }
 
 public:
+  //! the input sentence being decoded
+  const InputType& GetSource() const {
+    return m_source;
+  }
+
   virtual void Decode() = 0;
   // outputs
   virtual void OutputNBest(OutputCollector *collector) const = 0;
@@ -56,6 +67,7 @@ public:
   virtual void OutputWordGraph(OutputCollector *collector) const = 0;
   virtual void OutputSearchGraph(OutputCollector *collector) const = 0;
   virtual void OutputSearchGraphSLF() const = 0;
+  virtual void OutputSearchGraphHypergraph() const = 0;
 
 
 };

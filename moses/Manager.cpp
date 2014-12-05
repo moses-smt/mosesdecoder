@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/LM/Base.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationAnalysis.h"
+#include "moses/HypergraphOutput.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -57,11 +58,11 @@ using namespace std;
 namespace Moses
 {
 Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
-  :m_transOptColl(source.CreateTranslationOptionCollection())
+  :BaseManager(source)
+  ,m_transOptColl(source.CreateTranslationOptionCollection())
   ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
   ,interrupted_flag(0)
   ,m_hypoId(0)
-  ,m_source(source)
 {
   StaticData::Instance().InitializeForInput(m_source);
 }
@@ -1808,6 +1809,15 @@ void Manager::OutputSearchGraphSLF() const
 	delete file;
   }
 
+}
+
+void Manager::OutputSearchGraphHypergraph() const
+{
+  const StaticData &staticData = StaticData::Instance();
+  if (staticData.GetOutputSearchGraphHypergraph()) {
+	  HypergraphOutput<Manager> hypergraphOutput(PRECISION);
+	  hypergraphOutput.Write(*this);
+  }
 }
 
 } // namespace

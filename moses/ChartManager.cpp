@@ -33,6 +33,7 @@
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/OutputCollector.h"
 #include "moses/ChartKBestExtractor.h"
+#include "moses/HypergraphOutput.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ extern bool g_mosesDebug;
  * \param system which particular set of models to use.
  */
 ChartManager::ChartManager(InputType const& source)
-  :m_source(source)
+  :BaseManager(source)
   ,m_hypoStackColl(source, *this)
   ,m_start(clock())
   ,m_hypothesisId(0)
@@ -795,6 +796,15 @@ void ChartManager::OutputDetailedAllTranslationReport(
     }
   }
   collector->Write(translationId, out.str());
+}
+
+void ChartManager::OutputSearchGraphHypergraph() const
+{
+  const StaticData &staticData = StaticData::Instance();
+  if (staticData.GetOutputSearchGraphHypergraph()) {
+	  HypergraphOutput<ChartManager> hypergraphOutputChart(PRECISION);
+	  hypergraphOutputChart.Write(*this);
+  }
 }
 
 } // namespace Moses

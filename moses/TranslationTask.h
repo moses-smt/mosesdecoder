@@ -26,11 +26,7 @@ class TranslationTask : public Moses::Task
 
 public:
 
-  TranslationTask(Moses::InputType* source, Moses::IOWrapper &ioWrapper,
-                  boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > hypergraphOutput);
-
-  TranslationTask(Moses::InputType *source, IOWrapper &ioWrapper,
-    boost::shared_ptr<Moses::HypergraphOutput<Moses::ChartManager> > hypergraphOutputChart);
+  TranslationTask(Moses::InputType* source, Moses::IOWrapper &ioWrapper, int pbOrChart);
 
   ~TranslationTask();
 
@@ -43,9 +39,6 @@ private:
   int m_pbOrChart; // 1=pb. 2=chart
   Moses::InputType* m_source;
   Moses::IOWrapper &m_ioWrapper;
-
-  boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > m_hypergraphOutput;
-  boost::shared_ptr<Moses::HypergraphOutput<Moses::ChartManager> > m_hypergraphOutputChart;
 
   void RunPb();
   void RunChart();

@@ -204,7 +204,7 @@ struct ChartCellBaseFactory {
 } // namespace
 
 Manager::Manager(const InputType &source) :
-  source_(source),
+  BaseManager(source),
   cells_(source, ChartCellBaseFactory()),
   parser_(source, cells_),
   n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
@@ -221,7 +221,7 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
   search::Config config(abstract.GetWeight() * M_LN10, data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
   search::Context<Model> context(config, model);
 
-  size_t size = source_.GetSize();
+  size_t size = m_source.GetSize();
   boost::object_pool<search::Vertex> vertex_pool(std::max<size_t>(size * size / 2, 32));
 
   for (int startPos = size-1; startPos >= 0; --startPos) {
@@ -289,7 +289,7 @@ void Manager::OutputNBest(OutputCollector *collector)  const
 	  return;
   }
 
-  OutputNBestList(collector, *completed_nbest_, source_.GetTranslationId());
+  OutputNBestList(collector, *completed_nbest_, m_source.GetTranslationId());
 }
 
 void Manager::OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const
@@ -329,8 +329,8 @@ void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
 		const search::Applied &applied = completed_nbest_->at(0);
 		OutputDetailedTranslationReport(collector,
 										&applied,
-										static_cast<const Sentence&>(source_),
-										source_.GetTranslationId());
+										static_cast<const Sentence&>(m_source),
+										m_source.GetTranslationId());
 	}
 
 }
@@ -422,8 +422,8 @@ void Manager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *coll
   }
 
   const search::Applied *applied = &Completed()[0];
-  const Sentence &sentence = dynamic_cast<const Sentence &>(source_);
-  const size_t translationId = source_.GetTranslationId();
+  const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+  const size_t translationId = m_source.GetTranslationId();
 
   std::ostringstream out;
   ApplicationContext applicationContext;

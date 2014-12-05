@@ -58,6 +58,8 @@ class Manager : public BaseManager
   {}
   void OutputSearchGraphSLF() const
   {}
+  void OutputSearchGraphHypergraph() const
+  {}
 
  private:
   void FindOovs(const PChart &, std::set<Word> &, std::size_t);
@@ -70,7 +72,6 @@ class Manager : public BaseManager
 
   void PrunePChart(const SChart::Cell &, PChart::Cell &);
 
-  const InputType &m_source;
   PChart m_pchart;
   SChart m_schart;
   std::set<Word> m_oovs;

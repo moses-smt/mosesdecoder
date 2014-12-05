@@ -30,7 +30,7 @@ namespace S2T
 
 template<typename Parser>
 Manager<Parser>::Manager(const InputType &source)
-    : m_source(source)
+    : BaseManager(source)
     , m_pchart(source.GetSize(), Parser::RequiresCompressedChart())
     , m_schart(source.GetSize())
 {

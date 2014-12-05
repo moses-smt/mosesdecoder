@@ -1,24 +1,24 @@
-exe processPhraseTable : GenerateTuples.cpp  processPhraseTable.cpp ../moses//moses ;
+exe processPhraseTable : GenerateTuples.cpp  processPhraseTable.cpp ..//boost_filesystem ../moses//moses ;
 
-exe processLexicalTable : processLexicalTable.cpp ../moses//moses ;
+exe processLexicalTable : processLexicalTable.cpp ..//boost_filesystem ../moses//moses ;
 
-exe queryPhraseTable : queryPhraseTable.cpp ../moses//moses ;
+exe queryPhraseTable : queryPhraseTable.cpp ..//boost_filesystem ../moses//moses ;
 
-exe queryLexicalTable : queryLexicalTable.cpp ../moses//moses ;
+exe queryLexicalTable : queryLexicalTable.cpp ..//boost_filesystem ../moses//moses ;
 
-exe generateSequences : GenerateSequences.cpp ../moses//moses ; 
+exe generateSequences : GenerateSequences.cpp ..//boost_filesystem ../moses//moses ; 
 
-exe TMining : TransliterationMining.cpp ../moses//moses ;
+exe TMining : TransliterationMining.cpp ..//boost_filesystem ../moses//moses ;
 
-exe 1-1-Extraction : 1-1-Extraction.cpp ../moses//moses ;
+exe 1-1-Extraction : 1-1-Extraction.cpp ..//boost_filesystem ../moses//moses ;
 
-exe prunePhraseTable : prunePhraseTable.cpp ../moses//moses ..//boost_program_options  ;
+exe prunePhraseTable : prunePhraseTable.cpp ..//boost_filesystem ../moses//moses ..//boost_program_options  ;
 
 local with-cmph = [ option.get "with-cmph" ] ;
 if $(with-cmph) {
-    exe processPhraseTableMin : processPhraseTableMin.cpp ../moses//moses ;
-    exe processLexicalTableMin : processLexicalTableMin.cpp ../moses//moses ;
-    exe queryPhraseTableMin : queryPhraseTableMin.cpp ../moses//moses ;
+    exe processPhraseTableMin : processPhraseTableMin.cpp ..//boost_filesystem ../moses//moses ;
+    exe processLexicalTableMin : processLexicalTableMin.cpp ..//boost_filesystem ../moses//moses ;
+    exe queryPhraseTableMin : queryPhraseTableMin.cpp ..//boost_filesystem ../moses//moses ;
 
     alias programsMin : processPhraseTableMin processLexicalTableMin queryPhraseTableMin ;
 #    alias programsMin : processPhraseTableMin processLexicalTableMin ;
@@ -29,8 +29,8 @@ else {
 
 if [ option.get "with-probing-pt" : : "yes" ]
 {
-    exe CreateProbingPT : CreateProbingPT.cpp ../moses//moses ;
-    exe QueryProbingPT : QueryProbingPT.cpp ../moses//moses ;
+    exe CreateProbingPT : CreateProbingPT.cpp ..//boost_filesystem ../moses//moses ;
+    exe QueryProbingPT : QueryProbingPT.cpp ..//boost_filesystem ../moses//moses ;
 
     alias programsProbing : CreateProbingPT QueryProbingPT ;
 }
