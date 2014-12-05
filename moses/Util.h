@@ -57,13 +57,13 @@ namespace Moses
 /** verbose macros
  * */
 
-#define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
+#define VERBOSE(level,str) { IFVERBOSE(level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
-#define XVERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR("[" << __FILE__ << ":" << __LINE__ << "] "); TRACE_ERR(str); } }
+#define XVERBOSE(level,str) VERBOSE(level, "[" << HERE << "] " << str)
 #define HERE __FILE__ << ":" << __LINE__
-#define FEATUREVERBOSE(level,str) { if (m_verbosity >= level) { TRACE_ERR("[" << GetScoreProducerDescription() << "] "); FEATUREVERBOSE2(level,str); } }
-#define FEATUREVERBOSE2(level,str) { if (m_verbosity >= level) { TRACE_ERR(str); } }
-#define IFFEATUREVERBOSE(level) if (m_verbosity >= level)
+#define FEATUREVERBOSE(level,str) FEATUREVERBOSE2(level, "[" << GetScoreProducerDescription() << "] " << str)
+#define FEATUREVERBOSE2(level,str) { IFFEATUREVERBOSE(level) { TRACE_ERR(str); } }
+#define IFFEATUREVERBOSE(level) if ((m_verbosity == std::numeric_limits<std::size_t>::max() && StaticData::Instance().GetVerboseLevel() >= level) || (m_verbosity != std::numeric_limits<std::size_t>::max() && m_verbosity >= level))
 
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)

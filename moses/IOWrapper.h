@@ -75,20 +75,18 @@ protected:
 
   const std::vector<Moses::FactorType>	*m_inputFactorOrder;
   const std::vector<Moses::FactorType>	*m_outputFactorOrder;
-  Moses::FactorMask				m_inputFactorUsed;
-  std::string										m_inputFilePath;
-  Moses::InputFileStream				*m_inputFile;
-  std::istream									*m_inputStream;
+  Moses::FactorMask	m_inputFactorUsed;
+  std::string m_inputFilePath;
+  Moses::InputFileStream *m_inputFile;
+  std::istream *m_inputStream;
   std::ostream *m_nBestStream;
   std::ostream *m_outputWordGraphStream;
+  std::ostream *m_outputSearchGraphStream;
   std::ostream *m_detailedTranslationReportingStream;
-  std::ofstream *m_alignmentInfoStream;
-  std::ostream  *m_unknownsStream;
-  std::ostream  *m_outputSearchGraphStream;
-  std::ofstream *m_latticeSamplesStream;
+  std::ostream *m_unknownsStream;
   std::ostream *m_detailedTreeFragmentsTranslationReportingStream;
-
-  bool m_surpressSingleBestOutput;
+  std::ofstream *m_alignmentInfoStream;
+  std::ofstream *m_latticeSamplesStream;
 
   Moses::OutputCollector *m_singleBestOutputCollector;
   Moses::OutputCollector *m_nBestOutputCollector;
@@ -99,6 +97,8 @@ protected:
   Moses::OutputCollector *m_wordGraphCollector;
   Moses::OutputCollector *m_latticeSamplesCollector;
   Moses::OutputCollector *m_detailTreeFragmentsOutputCollector;
+
+  bool m_surpressSingleBestOutput;
 
   // CHART
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;

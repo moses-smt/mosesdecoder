@@ -40,11 +40,7 @@ PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
 
 void PhraseOrientationFeature::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "tuneable") 
-  {
-    m_tuneable = Scan<bool>(value);
-  } 
-  else if (key == "glueTargetLHS") 
+  if (key == "glueTargetLHS") 
   {
     m_glueTargetLHSStr = value;
   } 
