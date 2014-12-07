@@ -2,12 +2,14 @@
 
 #include <string>
 
-#include "NumberedSet.h"
+#include "syntax-common/numbered_set.h"
 
-namespace Moses {
+namespace MosesTraining {
+namespace Syntax {
 namespace ScoreStsg {
 
 typedef NumberedSet<std::string, std::size_t> Vocabulary;
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

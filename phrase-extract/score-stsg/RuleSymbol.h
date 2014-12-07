@@ -2,7 +2,9 @@
 
 #include "util/string_piece.hh"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -14,4 +16,5 @@ struct RuleSymbol
 };
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

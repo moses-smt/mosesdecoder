@@ -1,10 +1,10 @@
-#include "TreeFragmentTokenizer.h"
+#include "tree_fragment_tokenizer.h"
 
 #include <cctype>
 
-namespace Moses
+namespace MosesTraining
 {
-namespace ScoreStsg
+namespace Syntax
 {
 
 TreeFragmentToken::TreeFragmentToken(TreeFragmentTokenType t,
@@ -86,5 +86,5 @@ bool operator!=(const TreeFragmentTokenizer &lhs,
   return !(lhs == rhs);
 }
 
-}  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

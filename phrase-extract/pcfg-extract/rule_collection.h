@@ -21,21 +21,19 @@
 #ifndef PCFG_EXTRACT_RULE_COLLECTION_H_
 #define PCFG_EXTRACT_RULE_COLLECTION_H_
 
-#include "pcfg-common/pcfg.h"
+#include <vector>
 
 #include <boost/unordered_map.hpp>
 
-#include <vector>
+#include "pcfg-common/pcfg.h"
 
-namespace Moses
-{
-namespace PCFG
-{
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
 
 // Contains PCFG rules and their counts.
-class RuleCollection
-{
-public:
+class RuleCollection {
+ public:
   typedef boost::unordered_map<std::vector<std::size_t>, std::size_t> RhsCountMap;
   typedef boost::unordered_map<std::size_t, RhsCountMap> Map;
   typedef Map::iterator iterator;
@@ -43,28 +41,21 @@ public:
 
   RuleCollection() {}
 
-  iterator begin() {
-    return collection_.begin();
-  }
-  const_iterator begin() const {
-    return collection_.begin();
-  }
+  iterator begin() { return collection_.begin(); }
+  const_iterator begin() const { return collection_.begin(); }
 
-  iterator end() {
-    return collection_.end();
-  }
-  const_iterator end() const {
-    return collection_.end();
-  }
+  iterator end() { return collection_.end(); }
+  const_iterator end() const { return collection_.end(); }
 
   void Add(std::size_t, const std::vector<std::size_t> &);
   void CreatePcfg(Pcfg &);
 
-private:
+ private:
   Map collection_;
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Synatx
+}  // namespace MosesTraining
 
 #endif

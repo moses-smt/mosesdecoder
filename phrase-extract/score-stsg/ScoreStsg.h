@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "ExtractionPhrasePair.h"
+#include "OutputFileStream.h"
 
 #include "LexicalTable.h"
 #include "Options.h"
@@ -14,11 +15,10 @@
 #include "TokenizedRuleHalf.h"
 #include "Vocabulary.h"
 
-namespace Moses
+namespace MosesTraining
 {
-
-class OutputFileStream;
-
+namespace Syntax
+{
 namespace ScoreStsg
 {
 
@@ -41,14 +41,14 @@ private:
 
   double ComputeLexProb(const std::vector<RuleSymbol> &,
                         const std::vector<RuleSymbol> &,
-                        const MosesTraining::ALIGNMENT &);
+                        const ALIGNMENT &);
 
   void Error(const std::string &) const;
 
-  void OpenOutputFileOrDie(const std::string &, OutputFileStream &);
+  void OpenOutputFileOrDie(const std::string &, Moses::OutputFileStream &);
 
   void ParseAlignmentString(const std::string &, int,
-                            MosesTraining::ALIGNMENT &);
+                            ALIGNMENT &);
 
   void ProcessOptions(int, char *[], Options &) const;
 
@@ -68,8 +68,9 @@ private:
   int m_totalDistinct;
   TokenizedRuleHalf m_sourceHalf;
   TokenizedRuleHalf m_targetHalf;
-  MosesTraining::ALIGNMENT m_tgtToSrc;
+  ALIGNMENT m_tgtToSrc;
 };
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

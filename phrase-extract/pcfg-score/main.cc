@@ -20,6 +20,6 @@
 #include "pcfg_score.h"
 
 int main(int argc, char *argv[]) {
-  Moses::PCFG::PcfgScore tool;
+  MosesTraining::Syntax::PCFG::PcfgScore tool;
   return tool.Main(argc, argv);
 }

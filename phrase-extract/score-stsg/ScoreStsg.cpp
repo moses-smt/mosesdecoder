@@ -15,15 +15,19 @@
 #include "util/string_piece_hash.hh"
 #include "util/tokenize_piece.hh"
 
-#include "Exception.h"
 #include "InputFileStream.h"
-#include "LexicalTable.h"
 #include "OutputFileStream.h"
+
+#include "syntax-common/exception.h"
+
+#include "LexicalTable.h"
 #include "Options.h"
 #include "RuleGroup.h"
 #include "RuleTableWriter.h"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -44,12 +48,12 @@ int ScoreStsg::Main(int argc, char *argv[])
   ProcessOptions(argc, argv, m_options);
 
   // Open input files.
-  InputFileStream extractStream(m_options.extractFile);
-  InputFileStream lexStream(m_options.lexFile);
+  Moses::InputFileStream extractStream(m_options.extractFile);
+  Moses::InputFileStream lexStream(m_options.lexFile);
 
   // Open output files.
-  OutputFileStream outStream;
-  OutputFileStream countOfCountsStream;
+  Moses::OutputFileStream outStream;
+  Moses::OutputFileStream countOfCountsStream;
   OpenOutputFileOrDie(m_options.tableFile, outStream);
   if (m_options.goodTuring || m_options.kneserNey) {
     OpenOutputFileOrDie(m_options.tableFile+".coc", countOfCountsStream);
@@ -161,7 +165,7 @@ void ScoreStsg::ProcessRuleGroupOrDie(const RuleGroup &group,
   } catch (const Exception &e) {
     std::ostringstream msg;
     msg << "failed to process rule group at lines " << start << "-" << end
-        << ": " << e.GetMsg();
+        << ": " << e.msg();
     Error(msg.str());
   } catch (const std::exception &e) {
     std::ostringstream msg;
@@ -228,7 +232,7 @@ void ScoreStsg::ProcessRuleGroup(const RuleGroup &group,
 }
 
 void ScoreStsg::ParseAlignmentString(const std::string &s, int numTgtWords,
-                                     MosesTraining::ALIGNMENT &tgtToSrc)
+                                     ALIGNMENT &tgtToSrc)
 {
   tgtToSrc.clear();
   tgtToSrc.resize(numTgtWords);
@@ -262,7 +266,7 @@ void ScoreStsg::ParseAlignmentString(const std::string &s, int numTgtWords,
 
 double ScoreStsg::ComputeLexProb(const std::vector<RuleSymbol> &sourceFrontier,
                                  const std::vector<RuleSymbol> &targetFrontier,
-                                 const MosesTraining::ALIGNMENT &tgtToSrc)
+                                 const ALIGNMENT &tgtToSrc)
 {
   double lexScore = 1.0;
   for (std::size_t i = 0; i < targetFrontier.size(); ++i) {
@@ -293,7 +297,7 @@ double ScoreStsg::ComputeLexProb(const std::vector<RuleSymbol> &sourceFrontier,
 }
 
 void ScoreStsg::OpenOutputFileOrDie(const std::string &filename,
-                                    OutputFileStream &stream)
+                                    Moses::OutputFileStream &stream)
 {
   bool ret = stream.Open(filename);
   if (!ret) {
@@ -437,4 +441,5 @@ void ScoreStsg::Error(const std::string &msg) const
 }
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

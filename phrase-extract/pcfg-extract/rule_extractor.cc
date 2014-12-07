@@ -21,7 +21,8 @@
 
 #include "pcfg-common/pcfg_tree.h"
 
-namespace Moses {
+namespace MosesTraining {
+namespace Syntax {
 namespace PCFG {
 
 RuleExtractor::RuleExtractor(Vocabulary &non_term_vocab)
@@ -48,4 +49,5 @@ void RuleExtractor::Extract(const PcfgTree &tree, RuleCollection &rc) const {
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

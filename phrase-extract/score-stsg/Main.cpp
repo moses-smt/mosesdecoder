@@ -2,6 +2,6 @@
 
 int main(int argc, char *argv[])
 {
-  Moses::ScoreStsg::ScoreStsg tool;
+  MosesTraining::Syntax::ScoreStsg::ScoreStsg tool;
   return tool.Main(argc, argv);
 }

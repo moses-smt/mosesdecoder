@@ -1,1 +1,1 @@
-lib pcfg_common : [ glob *.cc ] ..//deps : <include>.. ;
+lib pcfg_common : [ glob *.cc ] ..//syntax-common ..//deps : <include>.. ;

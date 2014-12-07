@@ -2,10 +2,8 @@
 
 #include "util/string_piece.hh"
 
-namespace Moses
-{
-namespace ScoreStsg
-{
+namespace MosesTraining {
+namespace Syntax {
 
 enum TreeFragmentTokenType {
   TreeFragmentToken_EOS,
@@ -24,10 +22,11 @@ struct TreeFragmentToken {
 
 // Tokenizes tree fragment strings in Moses format.
 //
-// For example, the string "[NP [NP [NN a]] [NP]]" is tokenized to the sequence:
+// For example, the string "[S [NP [NN weasels]] [VP]]" is tokenized to the
+// sequence:
 //
 //    1   LSB   "["
-//    2   WORD  "NP"
+//    2   WORD  "S"
 //    3   LSB   "["
 //    4   WORD  "NP"
 //    5   LSB   "["
@@ -36,7 +35,7 @@ struct TreeFragmentToken {
 //    8   RSB   "]"
 //    9   RSB   "]"
 //    10  LSB   "["
-//    11  WORD  "NP"
+//    11  WORD  "VP"
 //    12  RSB   "]"
 //    13  RSB   "]"
 //    14  EOS   undefined
@@ -66,5 +65,5 @@ class TreeFragmentTokenizer {
   std::size_t pos_;
 };
 
-}  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

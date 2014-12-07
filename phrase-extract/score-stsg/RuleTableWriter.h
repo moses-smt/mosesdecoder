@@ -8,7 +8,9 @@
 #include "Options.h"
 #include "TokenizedRuleHalf.h"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -16,7 +18,7 @@ namespace ScoreStsg
 class RuleTableWriter
 {
 public:
-  RuleTableWriter(const Options &options, OutputFileStream &out)
+  RuleTableWriter(const Options &options, Moses::OutputFileStream &out)
       : m_options(options)
       , m_out(out) {}
 
@@ -34,8 +36,9 @@ private:
   void WriteRuleHalf(const TokenizedRuleHalf &);
 
   const Options &m_options;
-  OutputFileStream &m_out;
+  Moses::OutputFileStream &m_out;
 };
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

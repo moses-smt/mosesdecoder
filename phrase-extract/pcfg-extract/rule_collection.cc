@@ -23,7 +23,8 @@
 
 #include <cmath>
 
-namespace Moses {
+namespace MosesTraining {
+namespace Syntax {
 namespace PCFG {
 
 void RuleCollection::Add(std::size_t lhs, const std::vector<std::size_t> &rhs) {
@@ -55,4 +56,5 @@ void RuleCollection::CreatePcfg(Pcfg &pcfg) {
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

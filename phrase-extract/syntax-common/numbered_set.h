@@ -6,10 +6,10 @@
 
 #include <boost/unordered_map.hpp>
 
-#include "Exception.h"
+#include "exception.h"
 
-namespace Moses {
-namespace ScoreStsg {
+namespace MosesTraining {
+namespace Syntax {
 
 // Stores a set of elements of type T, each of which is allocated an integral
 // ID of type I.  IDs are contiguous starting at 0.  Individual elements cannot
@@ -106,5 +106,5 @@ void NumberedSet<T, I>::Clear() {
   id_to_element_.clear();
 }
 
-}  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

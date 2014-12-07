@@ -77,7 +77,7 @@ void init(int argc, char* argv[])
 
   if (argc < 2) {
     cerr << "syntax: relax-parse < in-parse > out-parse ["
-         << " --LeftBinarize | ---RightBinarize |"
+         << " --LeftBinarize | --RightBinarize |"
          << " --SAMT 1-4 ]" << endl;
     exit(1);
   }

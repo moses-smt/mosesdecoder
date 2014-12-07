@@ -3,10 +3,13 @@
 #include <string>
 #include <vector>
 
-#include "RuleSymbol.h"
-#include "TreeFragmentTokenizer.h"
+#include "syntax-common/tree_fragment_tokenizer.h"
 
-namespace Moses
+#include "RuleSymbol.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -42,4 +45,5 @@ struct TokenizedRuleHalf
 };
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

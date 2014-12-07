@@ -12,14 +12,15 @@
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
 
-#include "Exception.h"
 #include "InputFileStream.h"
 #include "LexicalTable.h"
 #include "OutputFileStream.h"
 #include "Options.h"
 #include "RuleGroup.h"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -75,4 +76,5 @@ void RuleTableWriter::WriteRuleHalf(const TokenizedRuleHalf &half)
 }
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

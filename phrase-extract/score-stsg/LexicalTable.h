@@ -8,7 +8,9 @@
 
 #include "Vocabulary.h"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -40,4 +42,5 @@ private:
 };
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

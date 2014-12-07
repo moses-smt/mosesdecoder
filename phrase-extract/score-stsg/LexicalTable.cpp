@@ -5,7 +5,9 @@
 #include <cstdlib>
 #include <iostream>
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -50,4 +52,5 @@ void LexicalTable::Load(std::istream &input)
 }
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

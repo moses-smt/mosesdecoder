@@ -1,6 +1,8 @@
 #include "RuleGroup.h"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -39,4 +41,5 @@ void RuleGroup::AddRule(const StringPiece &target, const StringPiece &ntAlign,
 }
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

@@ -1,6 +1,8 @@
 #include "TokenizedRuleHalf.h"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace ScoreStsg
 {
@@ -34,4 +36,5 @@ bool TokenizedRuleHalf::IsTree() const
 }
 
 }  // namespace ScoreStsg
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
