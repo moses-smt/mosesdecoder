@@ -772,7 +772,7 @@ parse-relax-input
 	default-name: tuning/input.parse-relaxed
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-    template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
+    template: $input-parse-relaxer < IN > OUT
 parse-relax-input-devtest
 	in: parsed-input-devtest
 	out: parse-relaxed-input-devtest
@@ -780,7 +780,7 @@ parse-relax-input-devtest
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira
-    template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
+    template: $input-parse-relaxer < IN > OUT
 factorize-input
 	in: parse-relaxed-input
 	out: factorized-input
@@ -1044,10 +1044,10 @@ parse-input
 parse-relax-input
 	in: parsed-input
 	out: parse-relaxed-input
-	default-name: tuning/input.parse-relaxed
+	default-name: evaluation/input.parse-relaxed
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-    template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
+    template: $input-parse-relaxer < IN > OUT
 factorize-input
 	in: parse-relaxed-input
 	out: factorized-input
