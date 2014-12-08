@@ -22,6 +22,7 @@ public:
 
   StatelessFeatureFunction(const std::string &line);
   StatelessFeatureFunction(size_t numScoreComponents, const std::string &line);
+
   /**
     * This should be implemented for features that apply to phrase-based models.
     **/
