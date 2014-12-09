@@ -256,7 +256,7 @@ void DynamicCacheBasedLanguageModel::Insert(std::string &entries)
 void DynamicCacheBasedLanguageModel::Insert(std::vector<std::string> ngrams)
 {
   VERBOSE(3,"DynamicCacheBasedLanguageModel Insert ngrams.size():|" << ngrams.size() << "|" << std::endl);
-  if (m_constant == false){
+  if (m_constant == false) {
     Decay();
   }
   Update(ngrams,1);
