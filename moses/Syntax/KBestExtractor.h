@@ -5,6 +5,7 @@
 #include <queue>
 #include <vector>
 
+#include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/weak_ptr.hpp>
 

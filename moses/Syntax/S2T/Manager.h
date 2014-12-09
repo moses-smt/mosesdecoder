@@ -1,13 +1,15 @@
 #pragma once
 
+#include <set>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
 
 #include "moses/InputType.h"
-#include "moses/BaseManager.h"
 #include "moses/Syntax/KBestExtractor.h"
+#include "moses/Syntax/Manager.h"
 #include "moses/Syntax/SVertexStack.h"
+#include "moses/Word.h"
 
 #include "OovHandler.h"
 #include "ParserCallback.h"
@@ -19,14 +21,13 @@ namespace Moses
 namespace Syntax
 {
 
-class SDerivation;
 struct SHyperedge;
 
 namespace S2T
 {
 
 template<typename Parser>
-class Manager : public BaseManager
+class Manager : public Syntax::Manager
 {
  public:
   Manager(const InputType &);
@@ -41,25 +42,7 @@ class Manager : public BaseManager
       std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
       bool onlyDistinct=false) const;
 
-  const std::set<Word> &GetUnknownWords() const { return m_oovs; }
-
-  void OutputNBest(OutputCollector *collector) const;
-  void OutputLatticeSamples(OutputCollector *collector) const
-  {}
-  void OutputAlignment(OutputCollector *collector) const
-  {}
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
-  void OutputUnknowns(OutputCollector *collector) const;
-  void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
-  {}
-  void OutputWordGraph(OutputCollector *collector) const
-  {}
-  void OutputSearchGraph(OutputCollector *collector) const
-  {}
-  void OutputSearchGraphSLF() const
-  {}
-  void OutputSearchGraphHypergraph() const
-  {}
 
  private:
   void FindOovs(const PChart &, std::set<Word> &, std::size_t);
@@ -74,19 +57,8 @@ class Manager : public BaseManager
 
   PChart m_pchart;
   SChart m_schart;
-  std::set<Word> m_oovs;
   boost::shared_ptr<typename Parser::RuleTrie> m_oovRuleTrie;
   std::vector<boost::shared_ptr<Parser> > m_parsers;
-
-  // output
-  void OutputNBestList(OutputCollector *collector,
-		  const Moses::Syntax::KBestExtractor::KBestVec &nBestList,
-		  long translationId) const;
-  std::size_t OutputAlignmentNBest(Alignments &retAlign,
-		  const Moses::Syntax::KBestExtractor::Derivation &derivation,
-		  std::size_t startTarget) const;
-  size_t CalcSourceSize(const Syntax::KBestExtractor::Derivation &d) const;
-
 };
 
 }  // S2T

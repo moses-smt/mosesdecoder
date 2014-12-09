@@ -4,6 +4,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "moses/Phrase.h"
 #include "moses/Syntax/RuleTableFF.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Word.h"
