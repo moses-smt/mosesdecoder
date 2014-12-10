@@ -81,3 +81,11 @@ mingw/MosesGUI/MosesGUI.e4p
 mingw/MosesGUI/_eric4project/
 
 contrib/m4m/merge-sorted
+
+contrib/word2vec/compute-accuracy
+contrib/word2vec/text8
+contrib/word2vec/text8-phrase
+contrib/word2vec/vectors-phrase.bin
+contrib/word2vec/word-analogy
+contrib/word2vec/word2phrase
+contrib/word2vec/word2vec
