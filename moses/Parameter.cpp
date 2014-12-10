@@ -141,6 +141,7 @@ Parameter::Parameter()
   AddParam("print-alignment-info", "Output word-to-word alignment to standard out, separated from translation by |||. Word-to-word alignments are takne from the phrase table if any. Default is false");
   AddParam("include-segmentation-in-n-best", "include phrasal segmentation in the n-best list. default is false");
   AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
+  AddParam("wipo-n-best", "Use WIPO-specific n-best list format. Default is false");
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");

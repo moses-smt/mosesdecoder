@@ -129,6 +129,7 @@ protected:
   bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
+  bool m_WipoNBest;
 
   std::string m_alignmentOutputFile;
 
@@ -623,9 +624,15 @@ public:
   bool PrintAlignmentInfo() const {
     return m_PrintAlignmentInfo;
   }
+
   bool PrintAlignmentInfoInNbest() const {
     return m_PrintAlignmentInfoNbest;
   }
+
+  bool WipoNBest() const {
+    return m_WipoNBest;
+  }
+
   WordAlignmentSort GetWordAlignmentSort() const {
     return m_wordAlignmentSort;
   }

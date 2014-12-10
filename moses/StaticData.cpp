@@ -164,6 +164,11 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
+  SetBooleanParameter( &m_WipoNBest, "wipo-n-best", false );
+  if (m_WipoNBest) {
+    m_WipoNBest = true;
+  }
+
   if (m_parameter->GetParam("alignment-output-file").size() > 0) {
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
     m_needAlignmentInfo = true;

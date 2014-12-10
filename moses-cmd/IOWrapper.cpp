@@ -463,13 +463,20 @@ void OutputNBest(std::ostream& out
   bool reportAllFactors = staticData.GetReportAllFactorsNBest();
   bool includeSegmentation = staticData.NBestIncludesSegmentation();
   bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
-
+  bool wipoNBest = staticData.WipoNBest();
+  
+  if(wipoNBest)
+    out << "OUT: " << std::distance(nBestList.begin(), nBestList.end()) << std::endl;
+    
   TrellisPathList::const_iterator iter;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
     const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
     // print the surface factor of the translation
+    if(wipoNBest)
+      out << "OUT: ";
+  
     out << translationId << " ||| ";
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
