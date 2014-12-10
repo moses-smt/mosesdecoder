@@ -173,7 +173,6 @@ public:
   // CHART
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
   void OutputBestHypo(search::Applied applied, long translationId);
-  void OutputBestHypo(const Moses::Syntax::SHyperedge *, long translationId);
 
   void OutputBestNone(long translationId);
 

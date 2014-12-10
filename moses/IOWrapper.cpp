@@ -872,38 +872,5 @@ void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solu
   OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
 }
 
-////////////////////////////
-#include "moses/Syntax/PVertex.h"
-#include "moses/Syntax/S2T/DerivationWriter.h"
-
-void IOWrapper::OutputBestHypo(const Syntax::SHyperedge *best,
-                               long translationId)
-{
-  if (!m_singleBestOutputCollector) {
-    return;
-  }
-  std::ostringstream out;
-  FixPrecision(out);
-  if (best == NULL) {
-    VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << "0 ";
-    }
-  } else {
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << best->score << " ";
-    }
-    Phrase yield = Syntax::GetOneBestTargetYield(*best);
-    // delete 1st & last
-    UTIL_THROW_IF2(yield.GetSize() < 2,
-        "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-    yield.RemoveWord(0);
-    yield.RemoveWord(yield.GetSize()-1);
-    out << yield.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
-    out << '\n';
-  }
-  m_singleBestOutputCollector->Write(translationId, out.str());
-}
-
 } // namespace
 

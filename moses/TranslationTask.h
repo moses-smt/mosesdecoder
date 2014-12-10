@@ -51,8 +51,8 @@ private:
     Syntax::S2T::Manager<Parser> manager(*m_source);
     manager.Decode();
     // 1-best
-    const Syntax::SHyperedge *best = manager.GetBestSHyperedge();
-    m_ioWrapper.OutputBestHypo(best, translationId);
+    manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+
     // n-best
     manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
 
