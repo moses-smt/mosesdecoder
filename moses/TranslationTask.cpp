@@ -268,17 +268,9 @@ void TranslationTask::RunChart()
 	if (staticData.GetSearchAlgorithm() == ChartIncremental) {
 	  Incremental::Manager manager(*m_source);
 	  manager.Decode();
-	  const std::vector<search::Applied> &nbest = manager.GetNBest();
-	  if (!nbest.empty()) {
-		m_ioWrapper.OutputBestHypo(nbest[0], translationId);
-
-		manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
-	    manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
-
-	  } else {
-		m_ioWrapper.OutputBestNone(translationId);
-	  }
-
+	  manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+	  manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
+      manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
 	  manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
 
 	  return;

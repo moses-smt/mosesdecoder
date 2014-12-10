@@ -40,6 +40,7 @@ public:
   }
 
   // output
+  void OutputBest(OutputCollector *collector) const;
   void OutputNBest(OutputCollector *collector) const;
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
   void OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const;
@@ -98,6 +99,8 @@ private:
     		const search::Applied *applied,
     		const Sentence &sentence,
     		long translationId) const;
+    void OutputBestHypo(OutputCollector *collector, search::Applied applied, long translationId) const;
+    void OutputBestNone(OutputCollector *collector, long translationId) const;
 
 };
 
