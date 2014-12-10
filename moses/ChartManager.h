@@ -99,6 +99,8 @@ private:
 		  const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList,
 		  const Sentence &sentence,
 		  long translationId) const;
+  void OutputBestHypo(OutputCollector *collector, const ChartHypothesis *hypo, long translationId) const;
+  void Backtrack(const ChartHypothesis *hypo) const;
 
 public:
   ChartManager(InputType const& source);
@@ -143,6 +145,7 @@ public:
   const ChartParser &GetParser() const { return m_parser; }
 
   // outputs
+  void OutputBest(OutputCollector *collector) const;
   void OutputNBest(OutputCollector *collector) const;
   void OutputLatticeSamples(OutputCollector *collector) const
   {}

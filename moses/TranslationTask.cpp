@@ -90,6 +90,8 @@ void TranslationTask::RunPb()
 
   additionalReportingTime.stop();
 
+  manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+
   // apply decision rule and output best translation(s)
   if (m_ioWrapper.GetSingleBestOutputCollector()) {
     ostringstream out;
@@ -285,8 +287,8 @@ void TranslationTask::RunChart()
 	manager.OutputSearchGraphHypergraph();
 
 	// 1-best
-	const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
-	m_ioWrapper.OutputBestHypo(bestHypo, translationId);
+	manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+
 	IFVERBOSE(2) {
 	  PrintUserTime("Best Hypothesis Generation Time:");
 	}
