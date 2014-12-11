@@ -187,6 +187,7 @@ public:
                                      std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps, std::vector< float>* pFwdBwdScores) const;
 
   // outputs
+  void OutputBest(OutputCollector *collector)  const;
   void OutputNBest(OutputCollector *collector)  const;
   void OutputAlignment(OutputCollector *collector) const;
   void OutputLatticeSamples(OutputCollector *collector) const;

@@ -499,7 +499,7 @@ bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b)
   return a->GetWordsBitmap().GetNumWordsCovered() <  b->GetWordsBitmap().GetNumWordsCovered();
 }
 
-void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList,
+void getLatticeMBRNBest(const Manager& manager, const TrellisPathList& nBestList,
                         vector<LatticeMBRSolution>& solutions, size_t n)
 {
   const StaticData& staticData = StaticData::Instance();
@@ -546,7 +546,7 @@ void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList,
   VERBOSE(2,"LMBR Score: " << solutions[0].GetScore() << endl);
 }
 
-vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList)
+vector<Word> doLatticeMBR(const Manager& manager, const TrellisPathList& nBestList)
 {
 
   vector<LatticeMBRSolution> solutions;
@@ -554,7 +554,7 @@ vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList)
   return solutions.at(0).GetWords();
 }
 
-const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestList)
+const TrellisPath doConsensusDecoding(const Manager& manager, const TrellisPathList& nBestList)
 {
   static const int BLEU_ORDER = 4;
   static const float SMOOTH = 1;

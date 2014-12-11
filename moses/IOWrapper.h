@@ -103,7 +103,6 @@ protected:
   // CHART
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
 
-  void Backtrack(const ChartHypothesis *hypo);
   void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
@@ -171,11 +170,6 @@ public:
 
 
   // CHART
-  void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
-  void OutputBestHypo(search::Applied applied, long translationId);
-  void OutputBestHypo(const Moses::Syntax::SHyperedge *, long translationId);
-
-  void OutputBestNone(long translationId);
 
   // phrase-based
   void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors);
