@@ -248,7 +248,7 @@ foreach my $step (@step_conf) {
 
 # supporting binaries from other packages
 my $MKCLS = "$_EXTERNAL_BINDIR/mkcls";
-my $MGIZA_MERGE_ALIGN = "$_EXTERNAL_BINDIR/merge_alignment.py";
+my $MGIZA_MERGE_ALIGN = "$_EXTERNAL_BINDIR/../scripts/merge_alignment.py";
 my $GIZA;
 my $SNT2COOC;
 
