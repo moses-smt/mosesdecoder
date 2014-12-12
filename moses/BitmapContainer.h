@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "WordsBitmap.h"
 
+#include <boost/unordered_set.hpp>
+
 namespace Moses
 {
 
@@ -165,7 +167,7 @@ private:
   const SquareMatrix &m_futurescore;
 
   std::vector< const Hypothesis* > m_hypotheses;
-  std::set< int > m_seenPosition;
+  boost::unordered_set< int > m_seenPosition;
 
   // We don't want to instantiate "empty" objects.
   BackwardsEdge();
