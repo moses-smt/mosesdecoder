@@ -2115,7 +2115,7 @@ sub create_ini {
       my $path = `pwd`; chop($path);
       $fn = $path."/".$fn;
     }
-    $type = "SRILM" unless defined $type; # default to SRILM if no type given
+    $type = "KENLM" unless defined $type; # default to KENLM if no type given
 
     if ($type =~ /^\d+$/) {
       # backwards compatibility if the type is given not as string but as a number
