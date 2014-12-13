@@ -31,7 +31,6 @@ class FeatureFunction
 protected:
   /**< all the score producers in this run */
   static std::vector<FeatureFunction*> s_staticColl;
-  static std::vector<const DistortionScoreProducer*> s_staticCollDistortion;
 
   std::string m_description, m_argLine;
   std::vector<std::vector<std::string> > m_args;
@@ -47,10 +46,6 @@ protected:
 public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
     return s_staticColl;
-  }
-
-  static const std::vector<const DistortionScoreProducer*>& GetDistortionFeatureFunctions() {
-    return s_staticCollDistortion;
   }
 
   static FeatureFunction &FindFeatureFunction(const std::string& name);

@@ -17,7 +17,6 @@ namespace Moses
 multiset<string> FeatureFunction::description_counts;
 
 std::vector<FeatureFunction*> FeatureFunction::s_staticColl;
-std::vector<const DistortionScoreProducer*> FeatureFunction::s_staticCollDistortion;
 
 FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 {
@@ -71,10 +70,6 @@ Initialize(const std::string &line)
 
   ScoreComponentCollection::RegisterScoreProducer(this);
   s_staticColl.push_back(this);
-
-  const DistortionScoreProducer *distortion = dynamic_cast<const DistortionScoreProducer*>(this);
-  if(distortion)
-    s_staticCollDistortion.push_back (distortion);
 }
 
 FeatureFunction::~FeatureFunction() {}
