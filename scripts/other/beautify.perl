@@ -40,6 +40,8 @@ sub Beautify($)
 		 next if ($name eq "srilm");
 		 next if ($name eq "irstlm");
 		 next if ($name eq "UG");
+		 next if ($name eq "pcfg-common");
+		 next if ($name eq "syntax-common");
 
 		 $name = $path ."/" .$name;
 		 if (-d $name) {

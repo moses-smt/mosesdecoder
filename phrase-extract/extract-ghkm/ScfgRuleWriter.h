@@ -32,7 +32,7 @@ namespace GHKM
 
 struct Options;
 class ScfgRule;
-struct Symbol;
+class Symbol;
 
 class ScfgRuleWriter
 {
@@ -44,7 +44,7 @@ public:
 
   void Write(const ScfgRule &rule, bool printEndl=true);
 
-  void Write(const ScfgRule &rule, const Subgraph &g);
+  void Write(const ScfgRule &rule, const Subgraph &g, bool printEndl=true); 
 
 private:
   // Disallow copying

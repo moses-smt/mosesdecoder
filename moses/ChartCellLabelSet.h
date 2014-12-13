@@ -72,6 +72,8 @@ public:
     size_t idx = w[0]->GetId();
     if (! ChartCellExists(idx)) {
       m_size++;
+
+
       m_map[idx] = new ChartCellLabel(m_coverage, w);
     }
   }
@@ -115,6 +117,15 @@ public:
     try {
       return m_map.at(idx);
     } catch (const std::out_of_range& oor) {
+      return NULL;
+    }
+  }
+
+  const ChartCellLabel *Find(size_t idx) const {
+    try {
+      return m_map.at(idx);
+    }
+    catch (const std::out_of_range& oor) {
       return NULL;
     }
   }

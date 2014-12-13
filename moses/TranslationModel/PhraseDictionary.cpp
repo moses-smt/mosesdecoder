@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/DecodeStep.h"
 #include "moses/DecodeGraph.h"
 #include "moses/InputPath.h"
 #include "util/exception.hh"
@@ -36,11 +37,11 @@ std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
 CacheColl::~CacheColl()
 {
-  for (iterator iter = begin(); iter != end(); ++iter) {
-    std::pair<const TargetPhraseCollection*, clock_t> &key = iter->second;
-    const TargetPhraseCollection *tps = key.first;
-    delete tps;
-  }
+	for (iterator iter = begin(); iter != end(); ++iter) {
+		std::pair<const TargetPhraseCollection*, clock_t> &key = iter->second;
+		const TargetPhraseCollection *tps = key.first;
+		delete tps;
+	}
 }
 
 PhraseDictionary::PhraseDictionary(const std::string &line)
@@ -48,7 +49,8 @@ PhraseDictionary::PhraseDictionary(const std::string &line)
   ,m_tableLimit(20) // default
   ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
-  s_staticColl.push_back(this);
+	m_id = s_staticColl.size();
+	s_staticColl.push_back(this);
 }
 
 bool
@@ -137,22 +139,22 @@ SetFeaturesToApply()
   }
 }
 
+  
+  // tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
+  void
+  PhraseDictionary::
+  Release(TargetPhraseCollection const* tpc) const
+  {
+    // do nothing by default
+    return;
+  }
 
-// tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
-void
-PhraseDictionary::
-Release(TargetPhraseCollection const* tpc) const
-{
-  // do nothing by default
-  return;
-}
-
-bool
-PhraseDictionary::
-PrefixExists(Phrase const& phrase) const
-{
-  return true;
-}
+  bool
+  PhraseDictionary::
+  PrefixExists(Phrase const& phrase) const
+  {
+    return true;
+  }
 
 void
 PhraseDictionary::
@@ -164,7 +166,7 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 
     // backoff
     if (!SatisfyBackoff(inputPath)) {
-      continue;
+    	continue;
     }
 
     const Phrase &phrase = inputPath.GetPhrase();
@@ -173,6 +175,32 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
   }
 }
 
+// persistent cache handling
+// saving presistent cache to disk
+//void PhraseDictionary::SaveCache() const
+//{
+//  CacheColl &cache = GetCache();
+//  for( std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter,
+//       iter != cache.end(),
+//       iter++ ) {
+//    
+//  }
+//}
+
+// loading persistent cache from disk
+//void PhraseDictionary::LoadCache() const
+//{
+//  CacheColl &cache = GetCache();
+//  std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
+//  iter = cache.begin();
+//  while( iter != cache.end() ) {
+//    std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
+//    delete iterRemove->second.first;
+//    cache.erase(iterRemove);
+//  }
+//}
+
+// reduce presistent cache by half of maximum size
 void PhraseDictionary::ReduceCache() const
 {
   Timer reduceCacheTime;
@@ -225,25 +253,25 @@ bool PhraseDictionary::SatisfyBackoff(const InputPath &inputPath) const
   size_t backoff = decodeGraph.GetBackoff();
 
   if (backoff == 0) {
-    // ie. don't backoff. Collect ALL translations
-    return true;
+	  // ie. don't backoff. Collect ALL translations
+	  return true;
   }
 
   if (sourcePhrase.GetSize() > backoff) {
-    // source phrase too big
-    return false;
+	  // source phrase too big
+	  return false;
   }
 
   // lookup translation only if no other translations
   InputPath::TargetPhrases::const_iterator iter;
   for (iter = inputPath.GetTargetPhrases().begin(); iter != inputPath.GetTargetPhrases().end(); ++iter) {
-    const std::pair<const TargetPhraseCollection*, const void*> &temp = iter->second;
-    const TargetPhraseCollection *tpCollPrev = temp.first;
+  	const std::pair<const TargetPhraseCollection*, const void*> &temp = iter->second;
+  	const TargetPhraseCollection *tpCollPrev = temp.first;
 
-    if (tpCollPrev && tpCollPrev->GetSize()) {
-      // already have translation from another pt. Don't create translations
-      return false;
-    }
+  	if (tpCollPrev && tpCollPrev->GetSize()) {
+  		// already have translation from another pt. Don't create translations
+  		return false;
+  	}
   }
 
   return true;

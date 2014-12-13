@@ -1,6 +1,6 @@
 // build a phrase table for the given input
 // #include "ug_lexical_phrase_scorer2.h"
-
+#if 0
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -24,7 +24,7 @@
 #include "tpt_pickler.h"
 #include "ug_bitext.h"
 #include "ug_lexical_phrase_scorer2.h"
-
+#include "../sapt_phrase_scorers.h"
 using namespace std;
 using namespace ugdiss;
 using namespace Moses;
@@ -44,8 +44,8 @@ float lbsmooth = .005;
 
 PScorePfwd<Token> calc_pfwd;
 PScorePbwd<Token> calc_pbwd;
-PScoreLex<Token>  calc_lex;
-PScoreWP<Token>   apply_wp;
+PScoreLex<Token>  calc_lex(1.0);
+PScoreWC<Token>   apply_wp;
 vector<float> fweights;
 
 void
@@ -109,6 +109,7 @@ int main(int argc, char* argv[])
 {
   // assert(argc == 4);
 #if 0
+#if 0
   string base = argv[1];
   string L1   = argv[2];
   string L2   = argv[3];
@@ -129,8 +130,8 @@ int main(int argc, char* argv[])
   bt.setDefaultSampleSize(max_samples);
 
   size_t i;
-  i = calc_pfwd.init(0,.05);
-  i = calc_pbwd.init(i,.05);
+  i = calc_pfwd.init(0,.05,'g');
+  i = calc_pbwd.init(i,.05,'g');
   i = calc_lex.init(i,base+L1+"-"+L2+".lex");
   i = apply_wp.init(i);
 
@@ -181,7 +182,7 @@ int main(int argc, char* argv[])
       	    }
       	}
     }
-  
+#endif  
     exit(0);
 }
-
+#endif

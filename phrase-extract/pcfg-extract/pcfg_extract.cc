@@ -23,7 +23,8 @@
 #include "rule_collection.h"
 #include "rule_extractor.h"
 
-#include "pcfg-common/exception.h"
+#include "syntax-common/exception.h"
+
 #include "pcfg-common/pcfg.h"
 #include "pcfg-common/pcfg_tree.h"
 #include "pcfg-common/syntax_tree.h"
@@ -42,7 +43,8 @@
 #include <string>
 #include <vector>
 
-namespace Moses {
+namespace MosesTraining {
+namespace Syntax {
 namespace PCFG {
 
 int PcfgExtract::Main(int argc, char *argv[]) {
@@ -128,4 +130,5 @@ void PcfgExtract::ProcessOptions(int argc, char *argv[],
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

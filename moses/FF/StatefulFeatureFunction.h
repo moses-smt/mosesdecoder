@@ -2,6 +2,8 @@
 
 #include "FeatureFunction.h"
 
+#include "moses/Syntax/SHyperedge.h"
+
 namespace Moses
 {
 class FFState;
@@ -29,15 +31,20 @@ public:
    * hypothesis, you should store it in an FFState object which will be passed
    * in as prev_state.  If you don't do this, you will get in trouble.
    */
-  virtual FFState* Evaluate(
+  virtual FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const = 0;
 
-  virtual FFState* EvaluateChart(
+  virtual FFState* EvaluateWhenApplied(
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const = 0;
+
+  virtual FFState* EvaluateWhenApplied(
+    const Syntax::SHyperedge& /* cur_hypo */,
+    int /* featureID - used to index the state in the previous hypotheses */,
+    ScoreComponentCollection* accumulator) const { assert(false); return 0; /* FIXME */ }
 
   //! return the state associated with the empty hypothesis for a given sentence
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;

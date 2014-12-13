@@ -53,7 +53,7 @@ TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
   string str = sourcePhrase.GetWord(0).GetFactor(0)->GetString().as_string();
   str = "SkeletonPT:" + str;
 
-  TargetPhrase *tp = new TargetPhrase();
+  TargetPhrase *tp = new TargetPhrase(this);
   Word &word = tp->AddWord();
   word.CreateFromString(Output, m_output, str, false);
 
@@ -62,7 +62,7 @@ TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
   tp->GetScoreBreakdown().PlusEquals(this, scores);
 
   // score of all other ff when this rule is being loaded
-  tp->Evaluate(sourcePhrase, GetFeaturesToApply());
+  tp->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
   return tp;
 }

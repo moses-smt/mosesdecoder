@@ -127,8 +127,8 @@ my $___NOCASE = 0;
 # Use "--nonorm" to non normalize translation before computing scores
 my $___NONORM = 0;
 
-# set 0 if input type is text, set 1 if input type is confusion network
-my $___INPUTTYPE = 0;
+# set 0 if input type is text, set 1 if input type is confusion network, set 3 if input type is parse tree
+my $___INPUTTYPE;
 
 
 my $mertdir = undef; # path to new mert directory
@@ -159,6 +159,12 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
                                   # and so on
 my $maximum_iterations = 25;
+
+# Simulated post-editing
+my $___MOSES_SIM_PE = "$SCRIPTS_ROOTDIR/generic/moses_sim_pe.py";
+my $___DEV_SYMAL = undef;
+my $dev_symal_abs = undef;
+my $working_dir_abs = undef;
 
 use Getopt::Long;
 GetOptions(
@@ -213,7 +219,8 @@ GetOptions(
   "batch-mira-args=s" => \$batch_mira_args,
   "promix-training=s" => \$__PROMIX_TRAINING,
   "promix-table=s" => \@__PROMIX_TABLES,
-  "threads=i" => \$__THREADS
+  "threads=i" => \$__THREADS,
+  "spe-symal=s" => \$___DEV_SYMAL
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -308,6 +315,8 @@ Options:
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
+  --spe-symal=SYMAL      ... Use simulated post-editing when decoding.
+                             (SYMAL aligns input to refs)
 ";
   exit 1;
 }
@@ -377,14 +386,28 @@ if ($__PROMIX_TRAINING) {
   die "To use promix training, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
 }
 
-$mertargs = "" if !defined $mertargs;
+if (!defined $mertargs) {
+  if (defined $batch_mira_args) {
+    $mertargs = $batch_mira_args;
+  }
+  else {
+    $mertargs = "";
+  }
+}
 
 my $scconfig = undef;
-if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {
+if ($mertargs =~ /\-\-scconfig(?:\s+|=)(.+?)(\s|$)/) {
   $scconfig = $1;
   $scconfig =~ s/\,/ /g;
-  $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
+  $mertargs =~ s/\-\-scconfig(?:\s+|=)(.+?)(\s|$)//;
 }
+
+my $sctype = "--sctype BLEU";
+if ($mertargs =~ /(\-\-sctype(?:\s+|=).+?)(\s|$)/) {
+  $sctype = $1;
+  $mertargs =~ s/(\-\-sctype(?:\s+|=)+.+?)(\s|$)//;
+}
+
 
 # handling reference lengh strategy
 $scconfig .= &setup_reference_length_type();
@@ -398,8 +421,7 @@ $scconfig =~ s/\s+/,/g;
 
 $scconfig = "--scconfig $scconfig" if ($scconfig);
 
-my $mert_extract_args = $mertargs;
-$mert_extract_args .= " $scconfig";
+my $mert_extract_args = "$sctype $scconfig";
 
 $extractorargs = "" unless $extractorargs;
 $mert_extract_args .= " $extractorargs";
@@ -410,7 +432,7 @@ $proargs = "" unless $proargs;
 
 my $mert_mert_args = "$mertargs $mertmertargs";
 $mert_mert_args =~ s/\-+(binary|b)\b//;
-$mert_mert_args .= " $scconfig";
+$mert_mert_args .= "$sctype $scconfig";
 if ($___ACTIVATE_FEATURES) {
   $mert_mert_args .= " -o \"$___ACTIVATE_FEATURES\"";
 }
@@ -465,6 +487,12 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
     || $___DECODER_FLAGS =~ /(^|\s)-(global-lexical-file) /
   ) {
   die "It is forbidden to supply any of -config, -ttable-file, -distortion-file, -generation-file or -lmodel-file in the --decoder-flags.\nPlease use only the --config option to give the config file that lists all the supplementary files.";
+}
+
+# Paths needed for simulated post-editing
+$working_dir_abs = ensure_full_path($___WORKING_DIR);
+if (defined $___DEV_SYMAL) {
+   $dev_symal_abs = ensure_full_path($___DEV_SYMAL);
 }
 
 # as weights are normalized in the next steps (by cmert)
@@ -863,8 +891,8 @@ while (1) {
     $mira_settings .= "$batch_mira_args ";
   }
 
-  $mira_settings .= " --dense-init run$run.$weights_in_file";
-  #$mira_settings .= " --dense-init run$run.dense";
+  #$mira_settings .= " --dense-init run$run.$weights_in_file";
+  $mira_settings .= " --dense-init run$run.dense";
   if (-e "run$run.sparse-weights") {
     $mira_settings .= " --sparse-init run$run.sparse-weights";
   }
@@ -1098,7 +1126,7 @@ if($___RETURN_BEST_DEV) {
   my $bestbleu=0;
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
-    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " -s BLEU --candidate run$i.out";
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " $mert_extract_args --nbest run$i.best$___N_BEST_LIST_SIZE.out.gz";
     $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
     safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
@@ -1228,16 +1256,27 @@ sub run_decoder {
 
     if (defined $___JOBS && $___JOBS > 0) {
       die "Hypergraph mira not supported by moses-parallel" if $___HG_MIRA;
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG";
+      $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE); 
+      $decoder_cmd .= " -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE distinct\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      my $nbest_list_cmd = "-n-best-list $filename $___N_BEST_LIST_SIZE";
+      my $nbest_list_cmd = "-n-best-list $filename $___N_BEST_LIST_SIZE distinct";
       if ($___HG_MIRA) {
         safesystem("rm -rf $hypergraph_dir");
         $nbest_list_cmd = "-output-search-graph-hypergraph true gz";
       }
-      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG";
+      $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
+      $decoder_cmd .= " $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F";
+      if (defined $___DEV_SYMAL) {
+        # If simulating post-editing, route command through moses_sim_pe.py
+        # Always use single (first) reference.  Simulated post-editing undefined for multiple references.
+        $decoder_cmd = "$___MOSES_SIM_PE $decoder_cmd -ref $references[0] -symal $dev_symal_abs -tmp $working_dir_abs > run$run.out";
+      }
+      $decoder_cmd .= " > run$run.out";
     }
 
+    print STDERR "Executing: $decoder_cmd \n";
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
 
     if (!$___HG_MIRA) {
@@ -1308,7 +1347,10 @@ sub get_featlist_from_moses {
     print STDERR "Using cached features list: $featlistfn\n";
   } else {
     print STDERR "Asking moses for feature names and values from $___CONFIG\n";
-    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
+    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn";
+    $cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
+    $cmd .= " -show-weights > $featlistfn";
+    print STDERR "Executing: $cmd\n";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }
   return get_featlist_from_file($featlistfn);
@@ -1605,7 +1647,7 @@ sub create_extractor_script() {
 
   open my $out, '>', $script_path
       or die "Couldn't open $script_path for writing: $!\n";
-  print $out "#!/bin/bash\n";
+  print $out "#!/usr/bin/env bash\n";
   print $out "cd $outdir\n";
   print $out "$cmd\n";
   close $out;

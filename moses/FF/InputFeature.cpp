@@ -44,7 +44,7 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 
 }
 
-void InputFeature::Evaluate(const InputType &input
+void InputFeature::EvaluateWithSourceContext(const InputType &input
                             , const InputPath &inputPath
                             , const TargetPhrase &targetPhrase
                             , const StackVec *stackVec

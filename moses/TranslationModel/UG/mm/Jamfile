@@ -18,6 +18,15 @@ $(TOP)/moses/TranslationModel/UG/mm//mm
 $(TOP)/util//kenutil 
 ; 
 
+exe mtt-demo1 : 
+mtt-demo1.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
 exe mtt-count-words : 
 mtt-count-words.cc 
 $(TOP)/moses/TranslationModel/UG/generic//generic 
@@ -72,15 +81,15 @@ $(TOP)/moses/TranslationModel/UG/mm//mm
 $(TOP)/util//kenutil 
 ; 
 
-exe custom-pt : 
-custom-pt.cc 
-$(TOP)/moses//moses
-$(TOP)//boost_iostreams 
-$(TOP)//boost_program_options 
-$(TOP)/moses/TranslationModel/UG/mm//mm 
-$(TOP)/moses/TranslationModel/UG/generic//generic 
-$(TOP)/util//kenutil 
-; 
+# exe custom-pt : 
+# custom-pt.cc 
+# $(TOP)/moses//moses
+# $(TOP)//boost_iostreams 
+# $(TOP)//boost_program_options 
+# $(TOP)/moses/TranslationModel/UG/mm//mm 
+# $(TOP)/moses/TranslationModel/UG/generic//generic 
+# $(TOP)/util//kenutil 
+# ; 
 
 
 exe calc-coverage : 
@@ -98,12 +107,11 @@ mtt-dump
 mtt-count-words 
 symal2mam 
 mam2symal 
-custom-pt 
 mmlex-build 
 mmlex-lookup
 mam_verify 
 calc-coverage
 ; 
 
-fakelib mm : [ glob ug_*.cc tpt_*.cc ] ;
+fakelib mm : [ glob ug_*.cc tpt_*.cc num_read_write.cc ] ;
 

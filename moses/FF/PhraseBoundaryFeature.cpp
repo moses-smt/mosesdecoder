@@ -66,7 +66,7 @@ void PhraseBoundaryFeature::AddFeatures(
 
 }
 
-FFState* PhraseBoundaryFeature::Evaluate
+FFState* PhraseBoundaryFeature::EvaluateWhenApplied
 (const Hypothesis& cur_hypo, const FFState* prev_state,
  ScoreComponentCollection* scores) const
 {

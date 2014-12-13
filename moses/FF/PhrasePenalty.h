@@ -14,20 +14,22 @@ public:
     return true;
   }
 
-  virtual void Evaluate(const Phrase &source
+  virtual void EvaluateInIsolation(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
 
-  void Evaluate(const Hypothesis& hypo,
+  void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
-
-  void EvaluateChart(const ChartHypothesis &hypo,
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
+                     ScoreComponentCollection* accumulator) const
+  {}
+  void EvaluateWhenApplied(const Syntax::SHyperedge &hyperedge,
                      ScoreComponentCollection* accumulator) const
   {}
 
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
@@ -35,6 +37,10 @@ public:
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
+  void SetParameter(const std::string& key, const std::string& value);
+
+protected:
+  bool m_perPhraseTable;
 };
 
 } //namespace

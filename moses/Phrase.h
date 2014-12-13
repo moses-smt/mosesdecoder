@@ -47,8 +47,8 @@ class WordsRange;
 class Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const Phrase&);
-private:
-
+  // private:
+protected:
   std::vector<Word>			m_words;
 
 public:

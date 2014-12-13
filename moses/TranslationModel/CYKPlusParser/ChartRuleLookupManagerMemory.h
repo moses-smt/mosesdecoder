@@ -40,6 +40,10 @@ class WordsRange;
 class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
 {
 public:
+  typedef std::vector<ChartCellCache> CompressedColumn;
+  typedef std::vector<CompressedColumn> CompressedMatrix;
+
+
   ChartRuleLookupManagerMemory(const ChartParser &parser,
                                const ChartCellCollectionBase &cellColl,
                                const PhraseDictionaryMemory &ruleTable);
@@ -59,13 +63,15 @@ private:
 
   void GetNonTerminalExtension(
     const PhraseDictionaryNodeMemory *node,
-    size_t startPos,
-    size_t endPos);
+    size_t startPos);
 
   void AddAndExtend(
     const PhraseDictionaryNodeMemory *node,
+    size_t endPos);
+
+  void UpdateCompressedMatrix(size_t startPos,
     size_t endPos,
-    const ChartCellLabel *cellLabel);
+    size_t lastPos);
 
   const PhraseDictionaryMemory &m_ruleTable;
 
@@ -80,7 +86,12 @@ private:
   size_t m_unaryPos;
 
   StackVec m_stackVec;
+  std::vector<float> m_stackScores;
+  std::vector<const Word*> m_sourceWords;
   ChartParserCallback* m_outColl;
+
+  std::vector<CompressedMatrix> m_compressedMatrixVec;
+
 
 };
 

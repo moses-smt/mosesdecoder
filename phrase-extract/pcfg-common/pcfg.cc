@@ -19,14 +19,15 @@
 
 #include "pcfg.h"
 
-#include "exception.h"
+#include <cassert>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <cassert>
+#include "syntax-common/exception.h"
 
-namespace Moses {
+namespace MosesTraining {
+namespace Syntax {
 namespace PCFG {
 
 void Pcfg::Add(const Key &key, double score) {
@@ -103,4 +104,5 @@ void Pcfg::Write(const Vocabulary &vocab, std::ostream &output) const {
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

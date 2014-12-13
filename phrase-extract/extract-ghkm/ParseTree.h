@@ -63,7 +63,7 @@ public:
   bool IsLeaf() const;
 
   template<typename OutputIterator>
-  void GetLeaves(OutputIterator);
+  void GetLeaves(OutputIterator) const;
 
 private:
   // Disallow copying
@@ -77,7 +77,7 @@ private:
 };
 
 template<typename OutputIterator>
-void ParseTree::GetLeaves(OutputIterator result)
+void ParseTree::GetLeaves(OutputIterator result) const
 {
   if (IsLeaf()) {
     *result++ = this;

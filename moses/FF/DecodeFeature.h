@@ -62,20 +62,23 @@ public:
   bool IsUseable(const FactorMask &mask) const;
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Evaluate(const Hypothesis& hypo,
+  void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
-  void EvaluateChart(const ChartHypothesis &hypo,
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
-  void Evaluate(const InputType &input
+  void EvaluateWhenApplied(const Syntax::SHyperedge &hyperedge,
+                     ScoreComponentCollection* accumulator) const
+  {}
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const

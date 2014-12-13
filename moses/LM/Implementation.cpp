@@ -134,7 +134,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
   }
 }
 
-FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
+FFState *LanguageModelImplementation::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   // In this function, we only compute the LM scores of n-grams that overlap a
   // phrase boundary. Phrase-internal scores are taken directly from the
@@ -222,7 +222,7 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
   return res;
 }
 
-FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out) const
+FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out) const
 {
   LanguageModelChartState *ret = new LanguageModelChartState(hypo, featureID, GetNGramOrder());
   // data structure for factored context phrase (history and predicted word)
@@ -338,7 +338,15 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
   }
 
   // assign combined score to score breakdown
-  out->Assign(this, prefixScore + finalizedScore);
+  if (OOVFeatureEnabled()) {
+    vector<float> scores(2);
+    scores[0] = prefixScore + finalizedScore;
+    scores[1] = out->GetScoresForProducer(this)[1];
+    out->Assign(this, scores);
+  }
+  else {
+    out->Assign(this, prefixScore + finalizedScore);
+  }
 
   ret->Set(prefixScore, lmState);
   return ret;

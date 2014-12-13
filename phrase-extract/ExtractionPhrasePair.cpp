@@ -19,7 +19,6 @@
 
 #include <sstream>
 #include "ExtractionPhrasePair.h"
-#include "SafeGetline.h"
 #include "tables-core.h"
 #include "score.h"
 #include "moses/Util.h"
@@ -322,6 +321,239 @@ std::string ExtractionPhrasePair::CollectAllPropertyValues(const std::string &ke
   std::string allPropertyValuesString(oss.str());
   return allPropertyValuesString;
 }
+
+
+std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::string& propertyKey,
+                                                                    std::set<std::string>& labelSet,
+                                                                    boost::unordered_map<std::string,float>& countsLabelsLHS, 
+                                                                    boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& jointCountsRulesTargetLHSAndLabelsLHS, 
+                                                                    Vocabulary &vcbT) const
+{
+  const PROPERTY_VALUES *allPropertyValues = GetProperty( propertyKey );
+
+  if ( allPropertyValues == NULL ) {
+    return "";
+  }
+
+  std::string lhs="", rhs="", currentRhs="";
+  float currentRhsCount = 0.0;
+  std::list< std::pair<std::string,float> > lhsGivenCurrentRhsCounts;
+
+  std::ostringstream oss;
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin(); 
+       iter!=allPropertyValues->end(); ++iter) {
+
+    size_t space = (iter->first).find_last_of(' ');
+    if ( space == string::npos ) {
+      lhs = iter->first;
+      rhs.clear();
+    } else {
+      lhs = (iter->first).substr(space+1);
+      rhs = (iter->first).substr(0,space);
+    }
+
+    labelSet.insert(lhs);
+
+    if ( rhs.compare(currentRhs) ) {
+
+      if ( iter!=allPropertyValues->begin() ) {
+        if ( !currentRhs.empty() ) {
+          istringstream tokenizer(currentRhs);
+          std::string rhsLabel;
+          while ( tokenizer.peek() != EOF ) {
+            tokenizer >> rhsLabel;
+            labelSet.insert(rhsLabel);
+          }
+          oss << " " << currentRhs << " " << currentRhsCount;
+        }
+        if ( lhsGivenCurrentRhsCounts.size() > 0 ) {
+          if ( !currentRhs.empty() ) {
+            oss << " " << lhsGivenCurrentRhsCounts.size();
+          }
+          for ( std::list< std::pair<std::string,float> >::const_iterator iter2=lhsGivenCurrentRhsCounts.begin();
+                iter2!=lhsGivenCurrentRhsCounts.end(); ++iter2 ) {
+            oss << " " << iter2->first << " " << iter2->second;
+
+            // update countsLabelsLHS and jointCountsRulesTargetLHSAndLabelsLHS
+            std::string ruleTargetLhs = vcbT.getWord(m_phraseTarget->back());
+            ruleTargetLhs.erase(ruleTargetLhs.begin());  // strip square brackets
+            ruleTargetLhs.erase(ruleTargetLhs.size()-1);
+
+            std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedCountsLabelsLHS = 
+                countsLabelsLHS.insert(std::pair<std::string,float>(iter2->first,iter2->second));
+            if (!insertedCountsLabelsLHS.second) {
+              (insertedCountsLabelsLHS.first)->second += iter2->second;
+            }
+
+            boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::iterator jointCountsRulesTargetLHSAndLabelsLHSIter = 
+                jointCountsRulesTargetLHSAndLabelsLHS.find(ruleTargetLhs);
+            if ( jointCountsRulesTargetLHSAndLabelsLHSIter == jointCountsRulesTargetLHSAndLabelsLHS.end() ) {
+              boost::unordered_map<std::string,float>* jointCounts = new boost::unordered_map<std::string,float>;
+              jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+              jointCountsRulesTargetLHSAndLabelsLHS.insert(std::pair<std::string,boost::unordered_map<std::string,float>* >(ruleTargetLhs,jointCounts));
+            } else {
+              boost::unordered_map<std::string,float>* jointCounts = jointCountsRulesTargetLHSAndLabelsLHSIter->second;
+              std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedJointCounts = 
+                  jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+              if (!insertedJointCounts.second) {
+                (insertedJointCounts.first)->second += iter2->second;
+              }
+            }
+
+          } 
+        }
+
+        lhsGivenCurrentRhsCounts.clear();
+      }
+
+      currentRhsCount = 0.0;
+      currentRhs = rhs;
+    }
+
+    currentRhsCount += iter->second; 
+    lhsGivenCurrentRhsCounts.push_back( std::pair<std::string,float>(lhs,iter->second) );
+  }
+
+  if ( !currentRhs.empty() ) {
+    istringstream tokenizer(currentRhs);
+    std::string rhsLabel;
+    while ( tokenizer.peek() != EOF ) {
+      tokenizer >> rhsLabel;
+      labelSet.insert(rhsLabel);
+    }
+    oss << " " << currentRhs << " " << currentRhsCount;
+  }
+  if ( lhsGivenCurrentRhsCounts.size() > 0 ) {
+    if ( !currentRhs.empty() ) {
+      oss << " " << lhsGivenCurrentRhsCounts.size();
+    }
+    for ( std::list< std::pair<std::string,float> >::const_iterator iter2=lhsGivenCurrentRhsCounts.begin();
+          iter2!=lhsGivenCurrentRhsCounts.end(); ++iter2 ) {
+      oss << " " << iter2->first << " " << iter2->second;
+
+      // update countsLabelsLHS and jointCountsRulesTargetLHSAndLabelsLHS
+      std::string ruleTargetLhs = vcbT.getWord(m_phraseTarget->back());
+      ruleTargetLhs.erase(ruleTargetLhs.begin());  // strip square brackets
+      ruleTargetLhs.erase(ruleTargetLhs.size()-1);
+
+      std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedCountsLabelsLHS = 
+          countsLabelsLHS.insert(std::pair<std::string,float>(iter2->first,iter2->second));
+      if (!insertedCountsLabelsLHS.second) {
+        (insertedCountsLabelsLHS.first)->second += iter2->second;
+      }
+
+      boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::iterator jointCountsRulesTargetLHSAndLabelsLHSIter = 
+          jointCountsRulesTargetLHSAndLabelsLHS.find(ruleTargetLhs);
+      if ( jointCountsRulesTargetLHSAndLabelsLHSIter == jointCountsRulesTargetLHSAndLabelsLHS.end() ) {
+        boost::unordered_map<std::string,float>* jointCounts = new boost::unordered_map<std::string,float>;
+        jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+        jointCountsRulesTargetLHSAndLabelsLHS.insert(std::pair<std::string,boost::unordered_map<std::string,float>* >(ruleTargetLhs,jointCounts));
+      } else {
+        boost::unordered_map<std::string,float>* jointCounts = jointCountsRulesTargetLHSAndLabelsLHSIter->second;
+        std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedJointCounts = 
+            jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+        if (!insertedJointCounts.second) {
+          (insertedJointCounts.first)->second += iter2->second;
+        }
+      }
+
+    } 
+  }
+
+  std::string allPropertyValuesString(oss.str());
+  return allPropertyValuesString;
+}
+
+
+void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key, 
+                                                        const std::vector<float> &orientationClassPriorsL2R, 
+                                                        const std::vector<float> &orientationClassPriorsR2L,
+                                                        double smoothingFactor, 
+                                                        std::ostream &out) const
+{
+  assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dleft dright
+
+  const PROPERTY_VALUES *allPropertyValues = GetProperty( key );
+
+  if ( allPropertyValues == NULL ) {
+    return;
+  }
+
+  // bidirectional MSLR phrase orientation with 2x4 orientation classes: 
+  // mono swap dright dleft
+  std::vector<float> orientationClassCountSumL2R(4,0);
+  std::vector<float> orientationClassCountSumR2L(4,0);
+
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin(); 
+       iter!=allPropertyValues->end(); ++iter) {
+    std::string l2rOrientationClass, r2lOrientationClass;
+    try {
+      istringstream tokenizer(iter->first);
+      tokenizer >> l2rOrientationClass;
+      tokenizer >> r2lOrientationClass;
+      if ( tokenizer.peek() != EOF ) {
+        UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+                   << ": Collecting phrase orientations failed. "
+                   << "Too many tokens?");
+      }
+    } catch (const std::exception &e) {
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+                 << ": Collecting phrase orientations failed. "
+                 << "Flawed property value in extract file?");
+    }
+
+    int l2rOrientationClassId = -1;
+    if (!l2rOrientationClass.compare("mono")) {
+      l2rOrientationClassId = 0;
+    }
+    if (!l2rOrientationClass.compare("swap")) {
+      l2rOrientationClassId = 1;
+    }
+    if (!l2rOrientationClass.compare("dleft")) {
+      l2rOrientationClassId = 2;
+    }
+    if (!l2rOrientationClass.compare("dright")) {
+      l2rOrientationClassId = 3;
+    }
+    if (l2rOrientationClassId == -1) {
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+                 << ": Collecting phrase orientations failed. "
+                 << "Unknown orientation class \"" << l2rOrientationClass << "\"." );
+    }
+    int r2lOrientationClassId = -1;
+    if (!r2lOrientationClass.compare("mono")) {
+      r2lOrientationClassId = 0;
+    }
+    if (!r2lOrientationClass.compare("swap")) {
+      r2lOrientationClassId = 1;
+    }
+    if (!r2lOrientationClass.compare("dleft")) {
+      r2lOrientationClassId = 2;
+    }
+    if (!r2lOrientationClass.compare("dright")) {
+      r2lOrientationClassId = 3;
+    }
+    if (r2lOrientationClassId == -1) {
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+                 << ": Collecting phrase orientations failed. "
+                 << "Unknown orientation class \"" << r2lOrientationClass << "\"." );
+    }
+
+    orientationClassCountSumL2R[l2rOrientationClassId] += iter->second;
+    orientationClassCountSumR2L[r2lOrientationClassId] += iter->second;
+  }
+
+  for (size_t i=0; i<4; ++i) {
+    if (i>0) {
+      out << " ";
+    }
+    out << (float)( (smoothingFactor*orientationClassPriorsL2R[i] + orientationClassCountSumL2R[i]) / (smoothingFactor + m_count) );
+  }
+  for (size_t i=0; i<4; ++i) {
+    out << " " << (float)( (smoothingFactor*orientationClassPriorsR2L[i] + orientationClassCountSumR2L[i]) / (smoothingFactor + m_count) );
+  }
+}
+
 
 
 }

@@ -146,7 +146,7 @@ void MeteorScorer::prepareStats(size_t sid, const string& text, ScoreStats& entr
   entry.set(stats_str);
 }
 
-float MeteorScorer::calculateScore(const vector<int>& comps) const
+float MeteorScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   string score;
   stringstream input;
@@ -184,7 +184,7 @@ void MeteorScorer::setReferenceFiles(const vector<string>& referenceFiles) {}
 
 void MeteorScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry) {}
 
-float MeteorScorer::calculateScore(const vector<int>& comps) const
+float MeteorScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   // Should never be reached
   return 0.0;

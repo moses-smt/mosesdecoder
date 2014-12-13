@@ -44,9 +44,9 @@ public:
     return m_scoreBreakdown;
   }
 
-  void Evaluate(const InputType &input,
-                const InputPath &inputPath,
-                const StackVec &stackVec);
+  void EvaluateWithSourceContext(const InputType &input,
+		  const InputPath &inputPath,
+		  const StackVec &stackVec);
 };
 
 }

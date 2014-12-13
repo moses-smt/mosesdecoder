@@ -40,11 +40,15 @@ public:
     , maxScope(3)
     , minimal(false)
     , pcfg(false)
-    , treeFragments(false)
+    , phraseOrientation(false)
     , sentenceOffset(0)
-    , unpairedExtractFormat(false)
+    , sourceLabels(false)
+    , stsg(false)
+    , t2s(false)
+    , treeFragments(false)
     , unknownWordMinRelFreq(0.03f)
-    , unknownWordUniform(false) {}
+    , unknownWordUniform(false)
+    , unpairedExtractFormat(false) {}
 
   // Positional options
   std::string targetFile;
@@ -63,13 +67,19 @@ public:
   int maxScope;
   bool minimal;
   bool pcfg;
-  bool treeFragments;
+  bool phraseOrientation;
   int sentenceOffset;
-  bool unpairedExtractFormat;
-  std::string unknownWordFile;
-  std::string unknownWordSoftMatchesFile;
+  bool sourceLabels;
+  std::string sourceLabelSetFile;
+  std::string sourceUnknownWordFile;
+  bool stsg;
+  bool t2s;
+  std::string targetUnknownWordFile;
+  bool treeFragments;
   float unknownWordMinRelFreq;
+  std::string unknownWordSoftMatchesFile;
   bool unknownWordUniform;
+  bool unpairedExtractFormat;
 };
 
 }  // namespace GHKM

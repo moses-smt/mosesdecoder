@@ -26,11 +26,6 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>ExtractedRule.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ExtractedRule.h</locationURI>
-		</link>
-		<link>
 			<name>Hole.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/Hole.h</locationURI>
@@ -64,11 +59,6 @@
 			<name>OutputFileStream.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/OutputFileStream.h</locationURI>
-		</link>
-		<link>
-			<name>RuleExtractionOptions.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/RuleExtractionOptions.h</locationURI>
 		</link>
 		<link>
 			<name>SentenceAlignment.cpp</name>
@@ -114,11 +104,6 @@
 			<name>extract-rules-main.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-rules-main.cpp</locationURI>
-		</link>
-		<link>
-			<name>gzfilebuf.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/gzfilebuf.h</locationURI>
 		</link>
 		<link>
 			<name>tables-core.cpp</name>

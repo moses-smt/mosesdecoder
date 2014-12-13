@@ -21,10 +21,6 @@
 #ifndef PCFG_XML_TREE_WRITER_H_
 #define PCFG_XML_TREE_WRITER_H_
 
-#include "syntax_tree.h"
-
-#include "XmlTree.h"
-
 #include <cassert>
 #include <map>
 #include <memory>
@@ -32,15 +28,17 @@
 #include <vector>
 #include <string>
 
-namespace Moses
-{
-namespace PCFG
-{
+#include "XmlTree.h"
+
+#include "syntax_tree.h"
+
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
 
 template<typename InputTree>
-class XmlOutputHandler
-{
-public:
+class XmlOutputHandler {
+ public:
   typedef std::map<std::string, std::string> AttributeMap;
 
   void GetLabel(const InputTree &, std::string &) const;
@@ -48,19 +46,17 @@ public:
 };
 
 template<typename InputTree>
-class XmlTreeWriter : public XmlOutputHandler<InputTree>
-{
-public:
+class XmlTreeWriter : public XmlOutputHandler<InputTree> {
+ public:
   typedef XmlOutputHandler<InputTree> Base;
   void Write(const InputTree &, std::ostream &) const;
-private:
+ private:
   std::string Escape(const std::string &) const;
 };
 
 template<typename InputTree>
 void XmlTreeWriter<InputTree>::Write(const InputTree &tree,
-                                     std::ostream &out) const
-{
+                                     std::ostream &out) const {
   assert(!tree.IsLeaf());
 
   // Opening tag
@@ -104,8 +100,7 @@ void XmlTreeWriter<InputTree>::Write(const InputTree &tree,
 
 // Escapes XML special characters.
 template<typename InputTree>
-std::string XmlTreeWriter<InputTree>::Escape(const std::string &s) const
-{
+std::string XmlTreeWriter<InputTree>::Escape(const std::string &s) const {
   std::string t;
   std::size_t len = s.size();
   t.reserve(len);
@@ -134,6 +129,7 @@ std::string XmlTreeWriter<InputTree>::Escape(const std::string &s) const
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

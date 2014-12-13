@@ -25,13 +25,17 @@
 #include "ChartHypothesis.h"
 #include "ChartKBestExtractor.h"
 #include "ChartTranslationOptions.h"
+#include "HypergraphOutput.h"
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "TreeInput.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/WordPenaltyProducer.h"
+#include "moses/OutputCollector.h"
+#include "moses/ChartKBestExtractor.h"
+#include "moses/HypergraphOutput.h"
 
 using namespace std;
-using namespace Moses;
 
 namespace Moses
 {
@@ -42,7 +46,7 @@ extern bool g_mosesDebug;
  * \param system which particular set of models to use.
  */
 ChartManager::ChartManager(InputType const& source)
-  :m_source(source)
+  :BaseManager(source)
   ,m_hypoStackColl(source, *this)
   ,m_start(clock())
   ,m_hypothesisId(0)
@@ -61,7 +65,7 @@ ChartManager::~ChartManager()
 }
 
 //! decode the sentence. This contains the main laps. Basically, the CKY++ algorithm
-void ChartManager::ProcessSentence()
+void ChartManager::Decode()
 {
   VERBOSE(1,"Translating: " << m_source << endl);
 
@@ -85,7 +89,7 @@ void ChartManager::ProcessSentence()
       m_translationOptionList.ApplyThreshold();
 
       const InputPath &inputPath = m_parser.GetInputPath(range);
-      m_translationOptionList.Evaluate(m_source, inputPath);
+      m_translationOptionList.EvaluateWithSourceContext(m_source, inputPath);
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
@@ -125,7 +129,7 @@ void ChartManager::ProcessSentence()
  */
 void ChartManager::AddXmlChartOptions()
 {
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {
@@ -141,7 +145,7 @@ void ChartManager::AddXmlChartOptions()
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
-    hypo->Evaluate();
+    hypo->EvaluateWhenApplied();
 
 
     ChartCell &cell = m_hypoStackColl.Get(range);
@@ -222,8 +226,9 @@ void ChartManager::CalcNBest(
   }
 }
 
-void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+void ChartManager::WriteSearchGraph(const ChartSearchGraphWriter& writer) const
 {
+
   size_t size = m_source.GetSize();
 
   // which hypotheses are reachable?
@@ -236,7 +241,11 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
     // no hypothesis
     return;
   }
-  FindReachableHypotheses( hypo, reachable);
+  size_t winners = 0;
+  size_t losers = 0;
+
+  FindReachableHypotheses( hypo, reachable, &winners, &losers);
+  writer.WriteHeader(winners, losers);
 
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
@@ -245,12 +254,13 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
       TRACE_ERR(" " << range << "=");
 
       const ChartCell &cell = m_hypoStackColl.Get(range);
-      cell.GetSearchGraph(translationId, outputSearchGraphStream, reachable);
+      cell.WriteSearchGraph(writer, reachable);
     }
   }
 }
 
-void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const
+void ChartManager::FindReachableHypotheses(
+  const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable, size_t* winners, size_t* losers) const
 {
   // do not recurse, if already visited
   if (reachable.find(hypo->GetId()) != reachable.end()) {
@@ -259,9 +269,14 @@ void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::ma
 
   // recurse
   reachable[ hypo->GetId() ] = true;
+  if (hypo->GetWinningHypothesis() == hypo) {
+    (*winners)++;
+  } else {
+    (*losers)++;
+  }
   const std::vector<const ChartHypothesis*> &previous = hypo->GetPrevHypos();
   for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i) {
-    FindReachableHypotheses( *i, reachable );
+    FindReachableHypotheses( *i, reachable, winners, losers );
   }
 
   // also loop over recombined hypotheses (arcs)
@@ -270,8 +285,525 @@ void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::ma
     ChartArcList::const_iterator iterArc;
     for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
       const ChartHypothesis &arc = **iterArc;
-      FindReachableHypotheses( &arc, reachable );
+      FindReachableHypotheses( &arc, reachable, winners, losers );
     }
+  }
+}
+
+void ChartManager::OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const {
+  ChartSearchGraphWriterHypergraph writer(&outputSearchGraphStream);
+  WriteSearchGraph(writer);
+}
+
+void ChartManager::OutputSearchGraphMoses(std::ostream &outputSearchGraphStream) const {
+  ChartSearchGraphWriterMoses writer(&outputSearchGraphStream, m_source.GetTranslationId());
+  WriteSearchGraph(writer);
+}
+
+void ChartManager::OutputNBest(OutputCollector *collector) const
+{
+	const StaticData &staticData = StaticData::Instance();
+	size_t nBestSize = staticData.GetNBestSize();
+	if (nBestSize > 0) {
+  	  const size_t translationId = m_source.GetTranslationId();
+
+	  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+	  std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
+	  CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
+	  OutputNBestList(collector, nBestList, translationId);
+	  IFVERBOSE(2) {
+		PrintUserTime("N-Best Hypotheses Generation Time:");
+	  }
+	}
+
+}
+
+void ChartManager::OutputNBestList(OutputCollector *collector,
+								const ChartKBestExtractor::KBestVec &nBestList,
+                                long translationId) const
+{
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<Moses::FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
+
+  std::ostringstream out;
+
+  if (collector->OutputIsCout()) {
+    // Set precision only if we're writing the n-best list to cout.  This is to
+    // preserve existing behaviour, but should probably be done either way.
+    FixPrecision(out);
+  }
+
+  bool includeWordAlignment =
+      StaticData::Instance().PrintAlignmentInfoInNbest();
+
+  bool PrintNBestTrees = StaticData::Instance().PrintNBestTrees();
+
+  for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
+       p != nBestList.end(); ++p) {
+    const ChartKBestExtractor::Derivation &derivation = **p;
+
+    // get the derivation's target-side yield
+    Phrase outputPhrase = ChartKBestExtractor::GetOutputPhrase(derivation);
+
+    // delete <s> and </s>
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
+        "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+    outputPhrase.RemoveWord(0);
+    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
+
+    // print the translation ID, surface factors, and scores
+    out << translationId << " ||| ";
+    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    out << " ||| ";
+    OutputAllFeatureScores(derivation.scoreBreakdown, out);
+    out << " ||| " << derivation.score;
+
+    // optionally, print word alignments
+    if (includeWordAlignment) {
+      out << " ||| ";
+      Alignments align;
+      OutputAlignmentNBest(align, derivation, 0);
+      for (Alignments::const_iterator q = align.begin(); q != align.end();
+           ++q) {
+        out << q->first << "-" << q->second << " ";
+      }
+    }
+
+    // optionally, print tree
+    if (PrintNBestTrees) {
+      TreePointer tree = ChartKBestExtractor::GetOutputTree(derivation);
+      out << " ||| " << tree->GetString();
+    }
+
+    out << std::endl;
+  }
+
+  assert(collector);
+  collector->Write(translationId, out.str());
+}
+
+size_t ChartManager::CalcSourceSize(const Moses::ChartHypothesis *hypo) const
+{
+  size_t ret = hypo->GetCurrSourceRange().GetNumWordsCovered();
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  for (size_t i = 0; i < prevHypos.size(); ++i) {
+    size_t childSize = prevHypos[i]->GetCurrSourceRange().GetNumWordsCovered();
+    ret -= (childSize - 1);
+  }
+  return ret;
+}
+
+size_t ChartManager::OutputAlignmentNBest(
+    Alignments &retAlign,
+    const Moses::ChartKBestExtractor::Derivation &derivation,
+    size_t startTarget) const
+{
+  const ChartHypothesis &hypo = derivation.edge.head->hypothesis;
+
+  size_t totalTargetSize = 0;
+  size_t startSource = hypo.GetCurrSourceRange().GetStartPos();
+
+  const TargetPhrase &tp = hypo.GetCurrTargetPhrase();
+
+  size_t thisSourceSize = CalcSourceSize(&hypo);
+
+  // position of each terminal word in translation rule, irrespective of alignment
+  // if non-term, number is undefined
+  vector<size_t> sourceOffsets(thisSourceSize, 0);
+  vector<size_t> targetOffsets(tp.GetSize(), 0);
+
+  const AlignmentInfo &aiNonTerm = hypo.GetCurrTargetPhrase().GetAlignNonTerm();
+  vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
+  const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
+
+  UTIL_THROW_IF2(sourceInd2pos.size() != derivation.subderivations.size(),
+                 "Error");
+
+  size_t targetInd = 0;
+  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
+    if (tp.GetWord(targetPos).IsNonTerminal()) {
+      UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
+      size_t sourceInd = targetPos2SourceInd[targetPos];
+      size_t sourcePos = sourceInd2pos[sourceInd];
+
+      const Moses::ChartKBestExtractor::Derivation &subderivation =
+        *derivation.subderivations[sourceInd];
+
+      // calc source size
+      size_t sourceSize = subderivation.edge.head->hypothesis.GetCurrSourceRange().GetNumWordsCovered();
+      sourceOffsets[sourcePos] = sourceSize;
+
+      // calc target size.
+      // Recursively look thru child hypos
+      size_t currStartTarget = startTarget + totalTargetSize;
+      size_t targetSize = OutputAlignmentNBest(retAlign, subderivation,
+                                               currStartTarget);
+      targetOffsets[targetPos] = targetSize;
+
+      totalTargetSize += targetSize;
+      ++targetInd;
+    } else {
+      ++totalTargetSize;
+    }
+  }
+
+  // convert position within translation rule to absolute position within
+  // source sentence / output sentence
+  ShiftOffsets(sourceOffsets, startSource);
+  ShiftOffsets(targetOffsets, startTarget);
+
+  // get alignments from this hypo
+  const AlignmentInfo &aiTerm = hypo.GetCurrTargetPhrase().GetAlignTerm();
+
+  // add to output arg, offsetting by source & target
+  AlignmentInfo::const_iterator iter;
+  for (iter = aiTerm.begin(); iter != aiTerm.end(); ++iter) {
+    const std::pair<size_t,size_t> &align = *iter;
+    size_t relSource = align.first;
+    size_t relTarget = align.second;
+    size_t absSource = sourceOffsets[relSource];
+    size_t absTarget = targetOffsets[relTarget];
+
+    pair<size_t, size_t> alignPoint(absSource, absTarget);
+    pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
+    UTIL_THROW_IF2(!ret.second, "Error");
+  }
+
+  return totalTargetSize;
+}
+
+void ChartManager::OutputAlignment(OutputCollector *collector) const
+{
+  if (collector == NULL) {
+	  return;
+  }
+
+  ostringstream out;
+
+  const ChartHypothesis *hypo = GetBestHypothesis();
+  if (hypo) {
+	Alignments retAlign;
+	OutputAlignment(retAlign, hypo, 0);
+
+	// output alignments
+	Alignments::const_iterator iter;
+	for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
+	  const pair<size_t, size_t> &alignPoint = *iter;
+	  out << alignPoint.first << "-" << alignPoint.second << " ";
+	}
+  }
+  out << endl;
+
+  collector->Write(m_source.GetTranslationId(), out.str());
+
+}
+
+size_t ChartManager::OutputAlignment(Alignments &retAlign,
+							const Moses::ChartHypothesis *hypo,
+							size_t startTarget) const
+{
+  size_t totalTargetSize = 0;
+  size_t startSource = hypo->GetCurrSourceRange().GetStartPos();
+
+  const TargetPhrase &tp = hypo->GetCurrTargetPhrase();
+
+  size_t thisSourceSize = CalcSourceSize(hypo);
+
+  // position of each terminal word in translation rule, irrespective of alignment
+  // if non-term, number is undefined
+  vector<size_t> sourceOffsets(thisSourceSize, 0);
+  vector<size_t> targetOffsets(tp.GetSize(), 0);
+
+  const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+
+  const AlignmentInfo &aiNonTerm = hypo->GetCurrTargetPhrase().GetAlignNonTerm();
+  vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
+  const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
+
+  UTIL_THROW_IF2(sourceInd2pos.size() != prevHypos.size(), "Error");
+
+  size_t targetInd = 0;
+  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
+    if (tp.GetWord(targetPos).IsNonTerminal()) {
+  	  UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
+      size_t sourceInd = targetPos2SourceInd[targetPos];
+      size_t sourcePos = sourceInd2pos[sourceInd];
+
+      const ChartHypothesis *prevHypo = prevHypos[sourceInd];
+
+      // calc source size
+      size_t sourceSize = prevHypo->GetCurrSourceRange().GetNumWordsCovered();
+      sourceOffsets[sourcePos] = sourceSize;
+
+      // calc target size.
+      // Recursively look thru child hypos
+      size_t currStartTarget = startTarget + totalTargetSize;
+      size_t targetSize = OutputAlignment(retAlign, prevHypo, currStartTarget);
+      targetOffsets[targetPos] = targetSize;
+
+      totalTargetSize += targetSize;
+      ++targetInd;
+    } else {
+      ++totalTargetSize;
+    }
+  }
+
+  // convert position within translation rule to absolute position within
+  // source sentence / output sentence
+  ShiftOffsets(sourceOffsets, startSource);
+  ShiftOffsets(targetOffsets, startTarget);
+
+  // get alignments from this hypo
+  const AlignmentInfo &aiTerm = hypo->GetCurrTargetPhrase().GetAlignTerm();
+
+  // add to output arg, offsetting by source & target
+  AlignmentInfo::const_iterator iter;
+  for (iter = aiTerm.begin(); iter != aiTerm.end(); ++iter) {
+    const std::pair<size_t,size_t> &align = *iter;
+    size_t relSource = align.first;
+    size_t relTarget = align.second;
+    size_t absSource = sourceOffsets[relSource];
+    size_t absTarget = targetOffsets[relTarget];
+
+    pair<size_t, size_t> alignPoint(absSource, absTarget);
+    pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
+    UTIL_THROW_IF2(!ret.second, "Error");
+
+  }
+
+  return totalTargetSize;
+}
+
+void ChartManager::OutputDetailedTranslationReport(OutputCollector *collector) const
+{
+	if (collector) {
+		OutputDetailedTranslationReport(collector,
+										GetBestHypothesis(),
+										static_cast<const Sentence&>(m_source),
+										m_source.GetTranslationId());
+	}
+}
+
+void ChartManager::OutputDetailedTranslationReport(
+		  OutputCollector *collector,
+		  const ChartHypothesis *hypo,
+		  const Sentence &sentence,
+		  long translationId) const
+{
+  if (hypo == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+  collector->Write(translationId, out.str());
+
+	//DIMw
+	const StaticData &staticData = StaticData::Instance();
+
+	if (staticData.IsDetailedAllTranslationReportingEnabled()) {
+	  const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+	  size_t nBestSize = staticData.GetNBestSize();
+	  std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
+	  CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
+	  OutputDetailedAllTranslationReport(collector, nBestList, sentence, translationId);
+	}
+
+}
+
+void ChartManager::OutputTranslationOptions(std::ostream &out,
+					ApplicationContext &applicationContext,
+					const ChartHypothesis *hypo,
+					const Sentence &sentence,
+					long translationId) const
+{
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
+void ChartManager::OutputTranslationOption(std::ostream &out,
+			ApplicationContext &applicationContext,
+			const ChartHypothesis *hypo,
+			const Sentence &sentence,
+			long translationId) const
+{
+  ReconstructApplicationContext(*hypo, sentence, applicationContext);
+  out << "Trans Opt " << translationId
+      << " " << hypo->GetCurrSourceRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+      << "->" << hypo->GetCurrTargetPhrase()
+      << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+}
+
+// Given a hypothesis and sentence, reconstructs the 'application context' --
+// the source RHS symbols of the SCFG rule that was applied, plus their spans.
+void ChartManager::ReconstructApplicationContext(const ChartHypothesis &hypo,
+    const Sentence &sentence,
+    ApplicationContext &context) const
+{
+  context.clear();
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo.GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator p = prevHypos.begin();
+  std::vector<const ChartHypothesis*>::const_iterator end = prevHypos.end();
+  const WordsRange &span = hypo.GetCurrSourceRange();
+  size_t i = span.GetStartPos();
+  while (i <= span.GetEndPos()) {
+    if (p == end || i < (*p)->GetCurrSourceRange().GetStartPos()) {
+      // Symbol is a terminal.
+      const Word &symbol = sentence.GetWord(i);
+      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
+      ++i;
+    } else {
+      // Symbol is a non-terminal.
+      const Word &symbol = (*p)->GetTargetLHS();
+      const WordsRange &range = (*p)->GetCurrSourceRange();
+      context.push_back(std::make_pair(symbol, range));
+      i = range.GetEndPos()+1;
+      ++p;
+    }
+  }
+}
+
+void ChartManager::OutputUnknowns(OutputCollector *collector) const
+{
+  if (collector) {
+	  long translationId = m_source.GetTranslationId();
+	  const std::vector<Phrase*> &oovs = GetParser().GetUnknownSources();
+
+	  std::ostringstream out;
+	  for (std::vector<Phrase*>::const_iterator p = oovs.begin();
+		   p != oovs.end(); ++p) {
+		out << *p;
+	  }
+	  out << std::endl;
+	  collector->Write(translationId, out.str());
+  }
+
+}
+
+void ChartManager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
+{
+  const ChartHypothesis *hypo = GetBestHypothesis();
+  if (collector == NULL || hypo == NULL) {
+	return;
+  }
+
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+  const size_t translationId = m_source.GetTranslationId();
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+
+  //Tree of full sentence
+  const StatefulFeatureFunction* treeStructure = StaticData::Instance().GetTreeStructure();
+  if (treeStructure != NULL) {
+	const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+	for( size_t i=0; i<sff.size(); i++ ) {
+		if (sff[i] == treeStructure) {
+		const TreeState* tree = dynamic_cast<const TreeState*>(hypo->GetFFState(i));
+		out << "Full Tree " << translationId << ": " << tree->GetTree()->GetString() << "\n";
+		break;
+		}
+	}
+  }
+
+  collector->Write(translationId, out.str());
+
+}
+
+void ChartManager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
+		ApplicationContext &applicationContext,
+		const ChartHypothesis *hypo,
+		const Sentence &sentence,
+		long translationId) const
+{
+
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+
+    const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
+
+    out << " ||| ";
+    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
+      out << " " << *property->GetValueString();
+    } else {
+      out << " " << "noTreeInfo";
+    }
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
+void ChartManager::OutputSearchGraph(OutputCollector *collector) const
+{
+	if (collector) {
+	  long translationId = m_source.GetTranslationId();
+	  std::ostringstream out;
+	  OutputSearchGraphMoses( out);
+	  collector->Write(translationId, out.str());
+	}
+}
+
+//DIMw
+void ChartManager::OutputDetailedAllTranslationReport(
+		OutputCollector *collector,
+		const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList,
+		const Sentence &sentence,
+		long translationId) const
+{
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  const ChartCellCollection& cells = GetChartCellCollection();
+  size_t size = GetSource().GetSize();
+  for (size_t width = 1; width <= size; ++width) {
+    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+      size_t endPos = startPos + width - 1;
+      WordsRange range(startPos, endPos);
+      const ChartCell& cell = cells.Get(range);
+      const HypoList* hyps = cell.GetAllSortedHypotheses();
+      out << "Chart Cell [" << startPos << ".." << endPos << "]" << endl;
+      HypoList::const_iterator iter;
+      size_t c = 1;
+      for (iter = hyps->begin(); iter != hyps->end(); ++iter) {
+        out << "----------------Item " << c++ << " ---------------------"
+            << endl;
+        OutputTranslationOptions(out, applicationContext, *iter,
+                                 sentence, translationId);
+      }
+    }
+  }
+  collector->Write(translationId, out.str());
+}
+
+void ChartManager::OutputSearchGraphHypergraph() const
+{
+  const StaticData &staticData = StaticData::Instance();
+  if (staticData.GetOutputSearchGraphHypergraph()) {
+	  HypergraphOutput<ChartManager> hypergraphOutputChart(PRECISION);
+	  hypergraphOutputChart.Write(*this);
   }
 }
 

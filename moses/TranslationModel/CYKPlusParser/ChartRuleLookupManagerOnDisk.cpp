@@ -39,14 +39,12 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
   const std::vector<FactorType> &inputFactorsVec,
-  const std::vector<FactorType> &outputFactorsVec,
-  const std::string &filePath)
+  const std::vector<FactorType> &outputFactorsVec)
   : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_dictionary(dictionary)
   , m_dbWrapper(dbWrapper)
   , m_inputFactorsVec(inputFactorsVec)
   , m_outputFactorsVec(outputFactorsVec)
-  , m_filePath(filePath)
 {
   UTIL_THROW_IF2(m_expandableDottedRuleListVec.size() != 0,
                  "Dotted rule collection not correctly initialized");
@@ -82,6 +80,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   ChartParserCallback &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
+  const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal();
+
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
 
@@ -137,8 +137,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       stackInd = relEndPos + 1;
     }
 
-    // size_t nonTermNumWordsCovered = endPos - startPos + 1;
-
     // get target nonterminals in this span from chart
     const ChartCellLabelSet &chartNonTermSet =
       GetTargetLabelSet(startPos, endPos);
@@ -174,11 +172,18 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         }
         const ChartCellLabel &cellLabel = **iterChartNonTerm;
 
-        //cerr << sourceLHS << " " << defaultSourceNonTerm << " " << chartNonTerm << " " << defaultTargetNonTerm << endl;
+        bool doSearch = true;
+        if (m_dictionary.m_maxSpanDefault != NOT_FOUND) {
+            // for Hieu's source syntax
 
-        //bool isSyntaxNonTerm = (sourceLHS != defaultSourceNonTerm) || (chartNonTerm != defaultTargetNonTerm);
-        bool doSearch = true; //isSyntaxNonTerm ? nonTermNumWordsCovered <=  maxSyntaxSpan :
-        //						nonTermNumWordsCovered <= maxDefaultSpan;
+			bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
+		    size_t nonTermNumWordsCovered = endPos - startPos + 1;
+
+			doSearch = isSourceSyntaxNonTerm ?
+					nonTermNumWordsCovered <=  m_dictionary.m_maxSpanLabelled :
+					nonTermNumWordsCovered <= m_dictionary.m_maxSpanDefault;
+
+        }
 
         if (doSearch) {
 

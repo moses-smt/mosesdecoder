@@ -70,6 +70,7 @@
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
 #--clean to clean
+#--debug-build to build with Og. Only available with gcc 4.8+
 
 import option ;
 import modules ;
@@ -77,7 +78,7 @@ import path ;
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
 
-boost 103600 ;
+boost 104400 ;
 external-lib z ;
 
 lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
@@ -97,6 +98,11 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
 }
 
+if [ option.get "debug-build" : : "yes" ] {
+   requirements += <cxxflags>-Og ;
+   echo "Building with -Og to enable easier profiling and debugging. Only available on gcc 4.8+." ;
+}
+
 if [ option.get "enable-mpi" : : "yes" ] {
   import mpi ;
   using mpi ;
@@ -114,8 +120,35 @@ requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
 requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
-if [ option.get "with-cmph" ] {
+if [ option.get "with-oxlm" ] {
+  external-lib boost_serialization ;
+  external-lib gomp ;
+  requirements += <library>boost_serialization ;
+  requirements += <library>gomp ;
+}
+
+if [ option.get "with-cmph" : : "yes" ] {
   requirements += <define>HAVE_CMPH ;
+}
+
+if [ option.get "with-icu" : : "yes" ]
+{
+  external-lib icuuc ;
+  external-lib icuio ;
+  external-lib icui18n ;
+  requirements += <library>icuuc/<link>shared ;
+  requirements += <library>icuio/<link>shared ;
+  requirements += <library>icui18n/<link>shared ;
+  requirements += <cxxflags>-fPIC ;
+  requirements += <address-model>64 ;
+  requirements += <runtime-link>shared ;
+}
+
+if [ option.get "with-probing-pt" : : "yes" ]
+{
+  external-lib boost_serialization ;
+  requirements += <define>HAVE_PROBINGPT ;
+  requirements += <library>boost_serialization ;
 }
 
 project : default-build
@@ -140,17 +173,21 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;
+build-projects lm util phrase-extract phrase-extract/syntax-common search moses moses/LM mert moses-cmd mira scripts regression-testing  ;
 
 if [ option.get "with-mm" : : "yes" ]
 {
  alias mm :  
+  moses/TranslationModel/UG//ptable-describe-features 
+  moses/TranslationModel/UG//count-ptable-features 
+  moses/TranslationModel/UG//ptable-lookup 
+  moses/TranslationModel/UG//spe-check-coverage 
+  moses/TranslationModel/UG/mm//mtt-demo1 
   moses/TranslationModel/UG/mm//mtt-build 
   moses/TranslationModel/UG/mm//mtt-dump 
   moses/TranslationModel/UG/mm//symal2mam 
   moses/TranslationModel/UG/mm//mam2symal 
   moses/TranslationModel/UG/mm//mam_verify 
-  moses/TranslationModel/UG/mm//custom-pt 
   moses/TranslationModel/UG/mm//mmlex-build 
   moses/TranslationModel/UG/mm//mmlex-lookup 
   moses/TranslationModel/UG/mm//mtt-count-words 
@@ -163,9 +200,19 @@ else
  alias mm ; 
 }
 
+if [ option.get "with-rephraser" : : "yes" ]
+{
+  alias rephraser :
+  contrib/rephraser//paraphrase
+  ;
+}
+else
+{
+  alias rephraser ;
+}
+
 alias programs : 
 lm//programs 
-moses-chart-cmd//moses_chart 
 moses-cmd//programs 
 OnDiskPt//CreateOnDiskPt 
 OnDiskPt//queryOnDiskPt 
@@ -177,15 +224,19 @@ phrase-extract//lexical-reordering
 phrase-extract//extract-ghkm 
 phrase-extract//pcfg-extract 
 phrase-extract//pcfg-score 
+phrase-extract//extract-mixed-syntax 
+phrase-extract//score-stsg
+phrase-extract//filter-rule-table
 biconcor 
 mira//mira 
 contrib/server//mosesserver 
 mm
+rephraser
 ;
 
 
 install-bin-libs programs ;
-install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
+install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
 install-headers headers-moses : moses//headers-to-install : moses ;
 
 alias install : prefix-bin prefix-lib headers-base headers-moses ;
@@ -199,3 +250,11 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
   echo "To disable this message, delete $(TOP)/dist ." ;
   echo ;
 }
+
+#local temp = [ _shell "bash source ./s.sh" ] ;
+local temp = [ _shell "mkdir bin" ] ;
+local temp = [ _shell "rm bin/moses_chart" ] ;
+local temp = [ _shell "cd bin && ln -s moses moses_chart" ] ;
+
+
+

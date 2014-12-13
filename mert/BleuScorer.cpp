@@ -186,7 +186,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   entry.set(stats);
 }
 
-statscore_t BleuScorer::calculateScore(const vector<int>& comps) const
+statscore_t BleuScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   UTIL_THROW_IF(comps.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
@@ -266,12 +266,12 @@ float smoothedSentenceBleu
 float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg)
 {
   // Sum sent and background
-  std::vector<float> stats;
   UTIL_THROW_IF(sent.size()!=bg.size(), util::Exception, "Error");
   UTIL_THROW_IF(sent.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
+  std::vector<float> stats(sent.size());
 
   for(size_t i=0; i<sent.size(); i++)
-    stats.push_back(sent[i]+bg[i]);
+    stats[i] = sent[i]+bg[i];
 
   // Calculate BLEU
   float logbleu = 0.0;
@@ -287,23 +287,6 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
 
   // Exponentiate and scale by reference length (as per Chiang et al 08)
   return exp(logbleu) * stats[kBleuNgramOrder*2];
-}
-
-float unsmoothedBleu(const std::vector<float>& stats)
-{
-  UTIL_THROW_IF(stats.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
-
-  float logbleu = 0.0;
-  for (int j = 0; j < kBleuNgramOrder; j++) {
-    logbleu += log(stats[2 * j]) - log(stats[2 * j + 1]);
-  }
-  logbleu /= kBleuNgramOrder;
-  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
-
-  if (brevity < 0.0) {
-    logbleu += brevity;
-  }
-  return exp(logbleu);
 }
 
 vector<float> BleuScorer::ScoreNbestList(const string& scoreFile, const string& featureFile)

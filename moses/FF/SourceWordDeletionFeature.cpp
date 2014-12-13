@@ -63,7 +63,7 @@ bool SourceWordDeletionFeature::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-void SourceWordDeletionFeature::Evaluate(const Phrase &source
+void SourceWordDeletionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const
@@ -83,10 +83,7 @@ void SourceWordDeletionFeature::ComputeFeatures(const Phrase &source,
   if (targetLength == 1 && sourceLength == 1 && !alignmentInfo.GetSize()) return;
 
   // flag aligned words
-  bool aligned[16];
-  UTIL_THROW_IF2(sourceLength >= 16, "Source length must be less than 16 words");
-  for(size_t i=0; i<sourceLength; i++)
-    aligned[i] = false;
+  std::vector<bool> aligned(sourceLength, false);
   for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++)
     aligned[ alignmentPoint->first ] = true;
 

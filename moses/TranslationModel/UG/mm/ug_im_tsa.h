@@ -52,12 +52,12 @@ namespace ugdiss
     
   public:
     imTSA();
-    imTSA(shared_ptr<Ttrack<TOKEN> const> c, 
+    imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, 
 	  bdBitset const* filt, 
 	  ostream* log = NULL);
 
     imTSA(imTSA<TOKEN> const& prior, 
-	  shared_ptr<imTtrack<TOKEN> const> const&   crp,
+	  boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
 	  vector<id_type> const& newsids, size_t const vsize);
 
     count_type 
@@ -74,13 +74,13 @@ namespace ugdiss
     readSid(char const* p, char const* q, id_type& sid) const;
     
     char const* 
-    readSid(char const* p, char const* q, uint64_t& sid) const;
+    readSid(char const* p, char const* q, ::uint64_t& sid) const;
 
     char const* 
     readOffset(char const* p, char const* q, uint16_t& offset) const;
 
     char const* 
-    readOffset(char const* p, char const* q, uint64_t& offset) const;
+    readOffset(char const* p, char const* q, ::uint64_t& offset) const;
     
     void 
     sanityCheck() const;
@@ -140,7 +140,7 @@ namespace ugdiss
   // specified in filter
   template<typename TOKEN>
   imTSA<TOKEN>::
-  imTSA(shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filter, ostream* log)
+  imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filter, ostream* log)
   {
     assert(c);
     this->corpus = c;
@@ -267,7 +267,7 @@ namespace ugdiss
   template<typename TOKEN>
   char const*
   imTSA<TOKEN>::
-  readSid(char const* p, char const* q, uint64_t& sid) const
+  readSid(char const* p, char const* q, ::uint64_t& sid) const
   {
     assert(reinterpret_cast<cpos const*>(p) >= &(this->sufa.front()));
     assert(reinterpret_cast<cpos const*>(p) <= &(this->sufa.back()));
@@ -289,7 +289,7 @@ namespace ugdiss
   template<typename TOKEN>
   char const*
   imTSA<TOKEN>::
-  readOffset(char const* p, char const* q, uint64_t& offset) const
+  readOffset(char const* p, char const* q, ::uint64_t& offset) const
   {
     assert(reinterpret_cast<cpos const*>(p) >= &(this->sufa.front()));
     assert(reinterpret_cast<cpos const*>(p) <= &(this->sufa.back()));
@@ -359,7 +359,7 @@ namespace ugdiss
   template<typename TOKEN>
   imTSA<TOKEN>::
   imTSA(imTSA<TOKEN> const& prior, 
-  	shared_ptr<imTtrack<TOKEN> const> const&   crp,
+  	boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
   	vector<id_type> const& newsids, size_t const vsize)
   {
     typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(crp.get());

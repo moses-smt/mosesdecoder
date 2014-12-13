@@ -135,7 +135,7 @@ public:
     return m_targetPhrase.GetScoreBreakdown();
   }
 
-  void Evaluate(const InputType &input);
+  void EvaluateWithSourceContext(const InputType &input);
 
   /** returns cached scores */
   inline const Scores *GetLexReorderingScores(const LexicalReordering *scoreProducer) const {

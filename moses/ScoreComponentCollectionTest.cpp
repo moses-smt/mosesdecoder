@@ -34,16 +34,16 @@ class MockStatelessFeatureFunction : public StatelessFeatureFunction
 public:
   MockStatelessFeatureFunction(size_t n, const string &line) :
     StatelessFeatureFunction(n, line) {}
-  void Evaluate(const Hypothesis&, ScoreComponentCollection*) const {}
-  void EvaluateChart(const ChartHypothesis&, ScoreComponentCollection*) const {}
-  void Evaluate(const InputType &input
+  void EvaluateWhenApplied(const Hypothesis&, ScoreComponentCollection*) const {}
+  void EvaluateWhenApplied(const ChartHypothesis&, ScoreComponentCollection*) const {}
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore) const
   {}
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const

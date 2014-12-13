@@ -22,6 +22,7 @@
 #include <algorithm>
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
+#include "HypergraphOutput.h"
 #include "RuleCubeQueue.h"
 #include "RuleCube.h"
 #include "WordsRange.h"
@@ -59,7 +60,7 @@ ChartCell::~ChartCell() {}
 
 /** Add the given hypothesis to the cell.
  *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
- *  This function just calls the correspondind AddHypothesis() in ChartHypothesisCollection
+ *  This function just calls the corresponding AddHypothesis() in ChartHypothesisCollection
  *  \param hypo Hypothesis to be added
  */
 bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
@@ -195,13 +196,13 @@ const HypoList *ChartCell::GetAllSortedHypotheses() const
   return ret;
 }
 
-//! call GetSearchGraph() for each hypo collection
-void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned, bool> &reachable) const
+//! call WriteSearchGraph() for each hypo collection
+void ChartCell::WriteSearchGraph(const ChartSearchGraphWriter& writer, const std::map<unsigned, bool> &reachable) const
 {
   MapType::const_iterator iterOutside;
   for (iterOutside = m_hypoColl.begin(); iterOutside != m_hypoColl.end(); ++iterOutside) {
     const ChartHypothesisCollection &coll = iterOutside->second;
-    coll.GetSearchGraph(translationId, outputSearchGraphStream, reachable);
+    coll.WriteSearchGraph(writer, reachable);
   }
 }
 

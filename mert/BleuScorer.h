@@ -13,7 +13,7 @@
 namespace MosesTuning
 {
 
-const int kBleuNgramOrder = 4;
+const size_t kBleuNgramOrder = 4;
 
 class NgramCounts;
 class Reference;
@@ -37,7 +37,7 @@ public:
 
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
-  virtual statscore_t calculateScore(const std::vector<int>& comps) const;
+  virtual statscore_t calculateScore(const std::vector<ScoreStatsType>& comps) const;
   virtual std::size_t NumberOfScores() const {
     return 2 * kBleuNgramOrder + 1;
   }
@@ -53,6 +53,10 @@ public:
 
   const std::vector<Reference*>& GetReferences() const {
     return m_references.get();
+  }
+
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const {
+    return totals[kBleuNgramOrder*2];
   }
 
   /**
@@ -92,11 +96,6 @@ float smoothedSentenceBleu
  * This function is used in batch MIRA.
  */
 float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg);
-
-/**
- * Computes plain old BLEU from a vector of stats
- */
-float unsmoothedBleu(const std::vector<float>& stats);
 
 }
 

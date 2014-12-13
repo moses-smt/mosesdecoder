@@ -46,8 +46,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 #include <set>
 
-#include "IOWrapper.h"
-#include "LatticeMBR.h"
+#include "moses/IOWrapper.h"
+#include "moses/LatticeMBR.h"
 #include "moses/Manager.h"
 #include "moses/StaticData.h"
 #include "util/exception.hh"
@@ -55,12 +55,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
-using namespace MosesCmd;
 
 //keys
 enum gridkey {lmbr_p,lmbr_r,lmbr_prune,lmbr_scale};
 
-namespace MosesCmd
+namespace Moses
 {
 
 class Grid
@@ -159,8 +158,8 @@ int main(int argc, char* argv[])
 
   StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
   staticData.SetUseLatticeMBR(true);
-  IOWrapper* ioWrapper = GetIOWrapper(staticData);
 
+  IOWrapper* ioWrapper = new IOWrapper();
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }
@@ -178,11 +177,12 @@ int main(int argc, char* argv[])
   const vector<float>& prune_grid = grid.getGrid(lmbr_prune);
   const vector<float>& scale_grid = grid.getGrid(lmbr_scale);
 
-  while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+  while(ioWrapper->ReadInput(staticData.GetInputType(),source)) {
     ++lineCount;
-    Sentence sentence;
-    Manager manager(lineCount, *source, staticData.GetSearchAlgorithm());
-    manager.ProcessSentence();
+    source->SetTranslationId(lineCount);
+
+    Manager manager(*source, staticData.GetSearchAlgorithm());
+    manager.Decode();
     TrellisPathList nBestList;
     manager.CalcNBest(nBestSize, nBestList,true);
     //grid search
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
             staticData.SetMBRScale(scale);
             cout << lineCount << " ||| " << p << " " << r << " " << prune << " " << scale << " ||| ";
             vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-            OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
+            ioWrapper->OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
                            staticData.GetReportAllFactors(),cout);
           }
         }

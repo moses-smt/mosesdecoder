@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/ChartHypothesis.h"
 #include "moses/Incremental.h"
 #include "moses/UserMessage.h"
+#include "moses/Syntax/SVertex.h"
 
 using namespace std;
 
@@ -79,7 +80,7 @@ struct KenLMState : public FFState {
 //
 //  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 //
-//  FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+//  FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
 //
 //  void IncrementalCallback(Incremental::Manager &manager) const {
 //    manager.LMCallback(*m_ngram, m_lmIdLookup);
@@ -229,7 +230,7 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
   fullScore = TransformLMScore(fullScore);
 }
 
-template <class Model> FFState *LanguageModelKen<Model>::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
 
@@ -307,7 +308,7 @@ private:
   lm::ngram::ChartState m_state;
 };
 
-template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const
 {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
@@ -340,6 +341,59 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
       float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      ruleScore.NonTerminal(prevState, prob);
+    } else {
+      ruleScore.Terminal(TranslateID(word));
+    }
+  }
+
+  float score = ruleScore.Finish();
+  score = TransformLMScore(score);
+  if (OOVFeatureEnabled()) {
+    std::vector<float> scores(2);
+    scores[0] = score;
+    scores[1] = 0.0;
+    accumulator->Assign(this, scores);
+  }
+  else {
+    accumulator->Assign(this, score);
+  }
+  return newState;
+}
+
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const
+{
+  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
+  const TargetPhrase &target = *hyperedge.translation;
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    target.GetAlignNonTerm().GetNonTermIndexMap2();
+
+  const size_t size = target.GetSize();
+  size_t phrasePos = 0;
+  // Special cases for first word.
+  if (size) {
+    const Word &word = target.GetWord(0);
+    if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
+      // Begin of sentence
+      ruleScore.BeginSentence();
+      phrasePos++;
+    } else if (word.IsNonTerminal()) {
+      // Non-terminal is first so we can copy instead of rescoring.
+      const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
+      float prob = UntransformLMScore(pred->best->scoreBreakdown.GetScoresForProducer(this)[0]);
+      ruleScore.BeginNonTerminal(prevState, prob);
+      phrasePos++;
+    }
+  }
+
+  for (; phrasePos < size; phrasePos++) {
+    const Word &word = target.GetWord(phrasePos);
+    if (word.IsNonTerminal()) {
+      const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
+      float prob = UntransformLMScore(pred->best->scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.NonTerminal(prevState, prob);
     } else {
       ruleScore.Terminal(TranslateID(word));

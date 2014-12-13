@@ -31,8 +31,8 @@ void create_xml(const string &inPath)
   ofstream rule((inPath + ".extract").c_str());
   ofstream ruleInv((inPath + ".extract.inv").c_str());
 
-  int setenceId;
-  float score;
+  // int setenceId;
+  // float score;
   string source, target, align, path;
   string *input = NULL;
   int count;
@@ -47,11 +47,11 @@ void create_xml(const string &inPath)
     //cout << inLine << endl;
     switch (step) {
     case 0:
-      setenceId = Scan<int>(inLine);
+      /*setenceId = */ Scan<int>(inLine);
       ++step;
       break;
     case 1:
-      score = Scan<float>(inLine);
+      /*score = */ Scan<float>(inLine);
       ++step;
       break;
     case 2:
@@ -124,7 +124,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
   int start_s = 0, start_i = 0;
 
   //cerr << input << endl << source << endl << target << endl << path << endl;
-  for ( int p = 0 ; p < path.length() ; p++ ) {
+  for ( int p = 0 ; p < int(path.length()) ; p++ ) {
     string action = path.substr(p, 1);
 
     // beginning of a mismatch
@@ -176,7 +176,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
         }
 
         // end of sentence? add to end
-        if ( start_t == 1000 && i > inputToks.size() - 1 ) {
+        if ( start_t == 1000 && i > int(inputToks.size()) - 1 ) {
           start_t = targetsToks.size() - 1;
         }
 
@@ -216,13 +216,13 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
     if ( action != "I" ) {
       //cerr << " ->";
 
-      if (s < alignments.m_alignS2T.size()) {
+      if (s < int(alignments.m_alignS2T.size())) {
         const std::map<int, int> &targets = alignments.m_alignS2T[s];
         //cerr << "s=" << s << endl;
 
         std::map<int, int>::const_iterator iter;
         for (iter = targets.begin(); iter != targets.end(); ++iter) {
-          int tt = iter->first;
+          // int tt = iter->first;
           //cerr << " " << tt;
         }
       }
@@ -245,7 +245,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
   } // for ( int p = 0
 
   //cerr << target << endl;
-  for (int i = 0; i < targetBitmap.size(); ++i) {
+  for (size_t i = 0; i < targetBitmap.size(); ++i) {
     //cerr << targetBitmap[i];
   }
   //cerr << endl;
@@ -260,13 +260,13 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
   int rule_pos_s = 0;
   map<int, int> ruleAlignS;
 
-  for (int i = 0 ; i < inputBitmap.size() ; ++i ) {
+  for (int i = 0 ; i < int(inputBitmap.size()) ; ++i ) {
     if ( inputBitmap[i] ) {
       ret.ruleS += inputToks[i] + " ";
       ruleAlignS[ alignI2S[i] ] = rule_pos_s++;
     }
 
-    for (int j = 0; j < nonTerms.size(); ++j) {
+    for (size_t j = 0; j < nonTerms.size(); ++j) {
       map<string, int> &nt = nonTerms[j];
       if (i == nt["start_i"]) {
         ret.ruleS += "[X][X] ";
@@ -284,7 +284,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
       ruleAlignT[t] = rule_pos_t++;
     }
 
-    for (int i = 0; i < nonTerms.size(); ++i) {
+    for (size_t i = 0; i < nonTerms.size(); ++i) {
       map<string, int> &nt = nonTerms[i];
 
       if (t == nt["start_t"]) {
@@ -300,7 +300,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
   for (map<int, int>::const_iterator iter = ruleAlignS.begin(); iter != ruleAlignS.end(); ++iter) {
     int s = iter->first;
 
-    if (s < alignments.m_alignS2T.size()) {
+    if (s < int(alignments.m_alignS2T.size())) {
       const std::map<int, int> &targets = alignments.m_alignS2T[s];
 
       std::map<int, int>::const_iterator iter;
@@ -316,7 +316,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
 
   //cerr << "numAlign=" << numAlign << endl;
 
-  for (int i = 0; i < nonTerms.size(); ++i) {
+  for (size_t i = 0; i < nonTerms.size(); ++i) {
     map<string, int> &nt = nonTerms[i];
     ret.ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
     ++numAlign;
@@ -329,7 +329,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
   ret.ruleAlignment = TrimInternal(ret.ruleAlignment);
 
   vector<string> ruleAlignmentToks = Tokenize(ret.ruleAlignment);
-  for (int i = 0; i < ruleAlignmentToks.size(); ++i) {
+  for (size_t i = 0; i < ruleAlignmentToks.size(); ++i) {
     const string &alignPoint = ruleAlignmentToks[i];
     vector<string> toks = Tokenize(alignPoint, "-");
     assert(toks.size() == 2);
@@ -338,7 +338,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
   ret.ruleAlignmentInv = TrimInternal(ret.ruleAlignmentInv);
 
   // frame
-  ret.frame;
+  // ret.frame;
   if (frameInput.find(-1) == frameInput.end())
     ret.frame = frameInput[-1];
 
@@ -346,7 +346,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
   int start_t            = -1;
   targetBitmap.push_back(0);
 
-  for (int t = 0 ; t <= targetsToks.size() ; t++ ) {
+  for (size_t t = 0 ; t <= targetsToks.size() ; t++ ) {
     // beginning of tm target inclusion
     if ( !currently_included && targetBitmap[t] ) {
       start_t            = t;
@@ -360,7 +360,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
       if ( start_t >= 0 ) {
         string target = "";
         //cerr << "for(tt=$start_t;tt<$t+$TARGET_BITMAP[$t]);\n";
-        for (int tt = start_t ; tt < t + targetBitmap[t] ; tt++ ) {
+        for (size_t tt = start_t ; tt < t + targetBitmap[t] ; tt++ ) {
           target += targetsToks[tt] + " ";
         }
         // target = Trim(target); TODO

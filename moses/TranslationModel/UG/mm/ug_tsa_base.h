@@ -53,7 +53,7 @@ namespace ugdiss
     /* an entry in the array, for iteration over all occurrences of a
      * particular sequence */
     // typedef boost::dynamic_bitset<uint64_t>           bitset; 
-    typedef shared_ptr<bitvector>         bitset_pointer;
+    typedef boost::shared_ptr<bitvector>         bitset_pointer;
     typedef TKN                                        Token;
     typedef BitSetCache<TSA<TKN> >                     BSC_t; 
     /* to allow caching of bit vectors that are expensive to create on
@@ -62,7 +62,7 @@ namespace ugdiss
     friend class TSA_tree_iterator<TKN>;
 
   protected:
-    shared_ptr<Ttrack<TKN> const> corpus; // pointer to the underlying corpus
+    boost::shared_ptr<Ttrack<TKN> const> corpus; // pointer to the underlying corpus
     char const*               startArray; // beginning ...
     char const*                 endArray; // ... and end ...
     // of memory block storing the actual TSA
@@ -139,7 +139,7 @@ namespace ugdiss
     getUpperBound(id_type id) const = 0;
 
   public:
-    shared_ptr<BSC_t> bsc;
+    boost::shared_ptr<BSC_t> bsc;
     
     char const* arrayStart() const { return startArray; }
     char const* arrayEnd()   const { return endArray;   }
@@ -182,7 +182,7 @@ namespace ugdiss
 
     count_type
     setBits(char const* startRange, char const* endRange,
-            boost::dynamic_bitset<uint64_t>& bs) const;
+            boost::dynamic_bitset<typename ::uint64_t>& bs) const;
 
     void
     setTokenBits(char const* startRange, char const* endRange, size_t len,
@@ -201,7 +201,7 @@ namespace ugdiss
 
     virtual
     char const* 
-    readSid(char const* p, char const* q, uint64_t& sid) const = 0;
+    readSid(char const* p, char const* q, ::uint64_t& sid) const = 0;
 
     /** read the offset part of the index entry into /offset/ 
      *  @return position of the next entry in the index. 
@@ -216,7 +216,7 @@ namespace ugdiss
 
     virtual
     char const* 
-    readOffset(char const* p, char const* q, uint64_t& offset) const = 0;
+    readOffset(char const* p, char const* q, ::uint64_t& offset) const = 0;
 
     /** @return sentence count 
      */
@@ -268,26 +268,26 @@ namespace ugdiss
         next 16 bits: offset from the start of the sentence
         next 16 bits: length of the phrase
     */
-    uint64_t 
+    ::uint64_t 
     getSequenceId(typename vector<TKN>::const_iterator const& pstart,
                   typename vector<TKN>::const_iterator const& pstop) const;
     
-    uint64_t 
+    ::uint64_t 
     getSequenceId(TKN const* t, ushort plen) const;
     
     /** Return the phrase represented by phrase ID pid_ */
     string
-    getSequence(uint64_t pid, TokenIndex const& V) const;
+    getSequence(::uint64_t pid, TokenIndex const& V) const;
     
     /** Return the phrase represented by phrase ID pid_ */
     vector<TKN>
-    getSequence(uint64_t pid) const;
+    getSequence(::uint64_t pid) const;
 
     TKN const* 
-    getSequenceStart(uint64_t) const;
+    getSequenceStart(::uint64_t) const;
 
     ushort
-    getSequenceLength(uint64_t) const;
+    getSequenceLength(::uint64_t) const;
 
     size_t 
     getCorpusSize() const;
@@ -298,7 +298,7 @@ namespace ugdiss
     bitset_pointer
     getBitSet(TKN const* startKey, size_t keyLen) const;
     
-    shared_ptr<bitvector>
+    boost::shared_ptr<bitvector>
     findTree(TKN const* treeStart, TKN const* treeEnd, 
              bitvector const* filter) const;
     
@@ -638,7 +638,7 @@ namespace ugdiss
   //---------------------------------------------------------------------------
 
   template<typename TKN>
-  uint64_t
+  ::uint64_t
   TSA<TKN>::
   getSequenceId(typename vector<TKN>::const_iterator const& pstart,
                 typename vector<TKN>::const_iterator const& pstop) const
@@ -649,7 +649,7 @@ namespace ugdiss
   //---------------------------------------------------------------------------
 
   template<typename TKN>
-  uint64_t
+  ::uint64_t
   TSA<TKN>::
   getSequenceId(TKN const* pstart, ushort plen) const
   {
@@ -657,7 +657,7 @@ namespace ugdiss
     if (!p) return 0; // not found!
     ArrayEntry I;
     readEntry(p,I);
-    uint64_t ret = I.sid;
+    ::uint64_t ret = I.sid;
     ret <<= 16;
     ret += I.offset;
     ret <<= 16;
@@ -670,7 +670,7 @@ namespace ugdiss
   template<typename TKN> 
   vector<TKN>
   TSA<TKN>::
-  getSequence(uint64_t pid) const
+  getSequence(::uint64_t pid) const
   {
     size_t   plen = pid % 65536;
     size_t offset = (pid >> 16) % 65536;
@@ -687,7 +687,7 @@ namespace ugdiss
   template<typename TKN> 
   string
   TSA<TKN>::
-  getSequence(uint64_t pid, TokenIndex const& V) const
+  getSequence(::uint64_t pid, TokenIndex const& V) const
   {
     ostringstream buf;
     TKN const* a = getSequenceStart(pid);
@@ -704,7 +704,7 @@ namespace ugdiss
   template<typename TKN> 
   TKN const*
   TSA<TKN>::
-  getSequenceStart(uint64_t pid) const
+  getSequenceStart(::uint64_t pid) const
   {
     size_t offset = (pid >> 16) % 65536;
     return corpus->sntStart(pid >> 32)+offset;    
@@ -715,7 +715,7 @@ namespace ugdiss
   template<typename TKN> 
   ushort
   TSA<TKN>::
-  getSequenceLength(uint64_t pid) const
+  getSequenceLength(::uint64_t pid) const
   {
     return (pid % 65536);
   }

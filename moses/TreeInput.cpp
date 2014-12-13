@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "XmlOption.h"
 #include "FactorCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 
@@ -28,6 +29,12 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
   // no xml tag? we're done.
   if (line.find_first_of('<') == string::npos) {
     return true;
+  }
+
+  // hack. What pt should XML trans opt be assigned to?
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
   }
 
   // break up input into a vector of xml tags and text
@@ -145,8 +152,12 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
         VERBOSE(3,"XML TAG " << tagName << " (" << tagContent << ") spanning " << startPos << " to " << (endPos-1) << " complete, commence processing" << endl);
 
-        if (startPos >= endPos) {
-          TRACE_ERR("ERROR: tag " << tagName << " must span at least one word: " << line << endl);
+        if (startPos == endPos) {
+          TRACE_ERR("WARNING: tag " << tagName << " span is empty. Ignoring: " << line << endl);
+          continue;
+        }
+        else if (startPos > endPos) {
+          TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
           return false;
         }
 
@@ -169,7 +180,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           //TRACE_ERR("number of translations: " << altTexts.size() << endl);
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
-            TargetPhrase targetPhrase;
+            TargetPhrase targetPhrase(firstPt);
             // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
             targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 
@@ -199,7 +210,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             // convert from prob to log-prob
             float scoreValue = FloorScore(TransformScore(probValue));
             targetPhrase.SetXMLScore(scoreValue);
-            targetPhrase.Evaluate(sourcePhrase);
+            targetPhrase.EvaluateInIsolation(sourcePhrase);
 
             // set span and create XmlOption
             WordsRange range(startPos+1,endPos);
@@ -266,7 +277,10 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // default label
   for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
-      AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
+      NonTerminalSet &list = GetLabelSet(startPos, endPos);
+      if (list.size() == 0 || !staticData.GetDefaultNonTermOnlyForEmptyRange()) {
+        AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
+      }
     }
   }
 

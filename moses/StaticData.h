@@ -206,7 +206,10 @@ protected:
 
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
-  bool m_adjacentOnly;
+  bool m_defaultNonTermOnlyForEmptyRange;
+  bool m_useS2TDecoder;
+  S2TParsingAlgorithm m_s2tParsingAlgorithm;
+  bool m_printNBestTrees;
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
@@ -215,9 +218,6 @@ protected:
 
   void LoadChartDecodingParameters();
   void LoadNonTerminals();
-
-  //! helper fn to set bool param from ini file/command line
-  void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
 
   //! load decoding steps
   bool LoadDecodeGraphs();
@@ -269,8 +269,8 @@ public:
   bool LoadData(Parameter *parameter);
   void ClearData();
 
-  const PARAM_VEC &GetParam(const std::string &paramName) const {
-    return m_parameter->GetParam(paramName);
+  const Parameter &GetParameter() const {
+    return *m_parameter;
   }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
@@ -399,10 +399,6 @@ public:
     return m_minlexrMemory;
   }
 
-  const std::vector<std::string> &GetDescription() const {
-    return m_parameter->GetParam("description");
-  }
-
   // for mert
   size_t GetNBestSize() const {
     return m_nBestSize;
@@ -463,10 +459,6 @@ public:
   //Weights for feature with fixed number of values
   std::vector<float> GetWeights(const FeatureFunction* sp) const {
     return m_allWeights.GetScoresForProducer(sp);
-  }
-
-  float GetSparseWeight(const FName& featureName) const {
-    return m_allWeights.GetSparseWeight(featureName);
   }
 
   //Weights for feature with fixed number of values
@@ -778,14 +770,7 @@ public:
     return m_softMatchesMap;
   }
 
-
-  bool AdjacentOnly() const {
-    return m_adjacentOnly;
-  }
-
-
   void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
-
 
   // need global access for output of tree structure
   const StatefulFeatureFunction* GetTreeStructure() const {
@@ -794,6 +779,20 @@ public:
 
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
     m_treeStructure = treeStructure;
+  }
+
+  bool GetDefaultNonTermOnlyForEmptyRange() const
+  { return m_defaultNonTermOnlyForEmptyRange; }
+
+  bool UseS2TDecoder() const {
+    return m_useS2TDecoder;
+  }
+  S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
+    return m_s2tParsingAlgorithm;
+  }
+
+  bool PrintNBestTrees() const {
+    return m_printNBestTrees;
   }
 
 };

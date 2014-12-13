@@ -93,7 +93,9 @@ void SearchNormal::ProcessSentence()
 
     // this stack is fully expanded;
     actual_hypoStack = &sourceHypoColl;
+
   }
+  //OutputHypoStack();
 }
 
 
@@ -253,11 +255,6 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
     expectedScore += m_transOptColl.GetFutureScore().CalcFutureScore( hypothesis.GetWordsBitmap(), startPos, endPos );
   }
 
-  if (StaticData::Instance().AdjacentOnly() &&
-      !hypothesis.GetWordsBitmap().IsAdjacent(startPos, endPos)) {
-    return;
-  }
-
   // loop through all translation options
   const TranslationOptionList &transOptList = m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
   TranslationOptionList::const_iterator iter;
@@ -291,7 +288,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
       stats.StopTimeBuildHyp();
     }
     if (newHypo==NULL) return;
-    newHypo->Evaluate(m_transOptColl.GetFutureScore());
+    newHypo->EvaluateWhenApplied(m_transOptColl.GetFutureScore());
   } else
     // early discarding: check if hypothesis is too bad to build
   {
@@ -384,6 +381,17 @@ void SearchNormal::OutputHypoStackSize()
     TRACE_ERR( ", " << (int)(*iterStack)->size());
   }
   TRACE_ERR( endl);
+}
+
+void SearchNormal::OutputHypoStack()
+{
+    // all stacks
+    int i = 0;
+    vector < HypothesisStack* >::iterator iterStack;
+    for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
+      HypothesisStackNormal &hypoColl = *static_cast<HypothesisStackNormal*>(*iterStack);
+      TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
+    }
 }
 
 }

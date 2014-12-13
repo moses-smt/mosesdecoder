@@ -53,14 +53,30 @@ class HypothesisScoreOrdererWithDistortion
 {
 public:
   HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange) :
-    m_transOptRange(transOptRange) {}
+    m_transOptRange(transOptRange) {
+    m_totalWeightDistortion = 0;
+    const StaticData &staticData = StaticData::Instance();
+    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+    std::vector<FeatureFunction*>::const_iterator iter;
+    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+      const FeatureFunction *ff = *iter;
+
+      const DistortionScoreProducer *model = dynamic_cast<const DistortionScoreProducer*>(ff);
+      if (model) {
+        float weight =staticData.GetAllWeights().GetScoreForProducer(model);
+        m_totalWeightDistortion += weight;
+      }
+    }
+  
+      
+  }
 
   const WordsRange* m_transOptRange;
+  float m_totalWeightDistortion;
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
     UTIL_THROW_IF2(m_transOptRange == NULL, "Words range not set");
 
-    const StaticData &staticData = StaticData::Instance();
 
     const float distortionScoreA = DistortionScoreProducer::CalculateDistortionScore(
                                      *hypoA,
@@ -76,20 +92,8 @@ public:
                                    );
 
 
-    float totalWeightDistortion = 0;
-    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-    std::vector<FeatureFunction*>::const_iterator iter;
-    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-      const FeatureFunction *ff = *iter;
-
-      const DistortionScoreProducer *model = dynamic_cast<const DistortionScoreProducer*>(ff);
-      if (model) {
-        float weight =staticData.GetAllWeights().GetScoreForProducer(model);
-        totalWeightDistortion += weight;
-      }
-    }
-    const float scoreA = hypoA->GetScore() + distortionScoreA * totalWeightDistortion;
-    const float scoreB = hypoB->GetScore() + distortionScoreB * totalWeightDistortion;
+    const float scoreA = hypoA->GetScore() + distortionScoreA * m_totalWeightDistortion;
+    const float scoreB = hypoB->GetScore() + distortionScoreB * m_totalWeightDistortion;
 
 
     if (scoreA > scoreB) {
@@ -162,12 +166,16 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 
   if (m_translations.size() > 1) {
     UTIL_THROW_IF2(m_translations.Get(0)->GetFutureScore() < m_translations.Get(1)->GetFutureScore(),
-                   "Non-monotonic future score");
+		   "Non-monotonic future score: " 
+		   << m_translations.Get(0)->GetFutureScore() << " vs. " 
+		   << m_translations.Get(1)->GetFutureScore());
   }
 
   if (m_hypotheses.size() > 1) {
     UTIL_THROW_IF2(m_hypotheses[0]->GetTotalScore() < m_hypotheses[1]->GetTotalScore(),
-                   "Non-monotonic total score");
+		   "Non-monotonic total score" 
+		   << m_hypotheses[0]->GetTotalScore() << " vs. "
+		   << m_hypotheses[1]->GetTotalScore());
   }
 
   HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
@@ -207,7 +215,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
-  newHypo->Evaluate(m_futurescore);
+  newHypo->EvaluateWhenApplied(m_futurescore);
 
   return newHypo;
 }
@@ -442,7 +450,9 @@ BitmapContainer::ProcessBestHypothesis()
   if (!Empty()) {
     HypothesisQueueItem *check = Dequeue(true);
     UTIL_THROW_IF2(item->GetHypothesis()->GetTotalScore() < check->GetHypothesis()->GetTotalScore(),
-                   "Non-monotonic total score");
+		   "Non-monotonic total score: "
+		   << item->GetHypothesis()->GetTotalScore() << " vs. "
+		   << check->GetHypothesis()->GetTotalScore());
   }
 
   // Logging for the criminally insane

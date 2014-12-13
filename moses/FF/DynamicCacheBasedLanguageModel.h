@@ -74,10 +74,8 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
 
   void Insert(std::vector<std::string> ngrams);
 
-  void Evaluate( const TargetPhrase&, ScoreComponentCollection* ) const;
-
+//  void EvaluateInIsolation(const Phrase&, const TargetPhrase&, ScoreComponentCollection&, ScoreComponentCollection& ) const;
   void Print() const;
-
 
 protected:
   static DynamicCacheBasedLanguageModel *s_instance;
@@ -124,43 +122,30 @@ public:
   void Insert(std::string &entries);
   void Clear();
 
-  virtual void Evaluate(const Phrase &source
+  virtual void EvaluateInIsolation(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
 
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
-  virtual void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , const TargetPhrase &targetPhrase
-                        , const StackVec *stackVec
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-
-  void Evaluate(const Hypothesis& hypo,
+  void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
 
-  void EvaluateChart(const ChartHypothesis &hypo,
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
-  {}
-
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , ScoreComponentCollection &scoreBreakdown) const
   {}
 
   void SetQueryType(size_t type);
   void SetScoreType(size_t type);
   void SetMaxAge(unsigned int age);
-
 };
 
 }

@@ -3,6 +3,7 @@
 #include "moses/FeatureVector.h"
 #include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include "util/exception.hh"
+#include "moses/StaticData.h"
 
 #include <map>
 #include <sstream>
@@ -233,7 +234,8 @@ public:
   typedef PhraseDictionaryTree::PrefixPtr PPtr;
 
   void GetTargetCandidates(PPtr p,TgtCands& tgtCands) {
-    UTIL_THROW_IF2(p == NULL, "Error");
+    UTIL_THROW_IF2(p == 0L, "Error"); 
+    // UTIL_THROW_IF2(p == NULL, "Error");
 
     if(p.imp->isRoot()) return;
     OFF_T tCandOffset=p.imp->ptr()->getData(p.imp->idx);
@@ -278,7 +280,8 @@ public:
   }
 
   PPtr Extend(PPtr p,const std::string& w) {
-    UTIL_THROW_IF2(p == NULL, "Error");
+	UTIL_THROW_IF2(p == 0L, "Error");
+	// UTIL_THROW_IF2(p == NULL, "Error");
 
     if(w.empty() || w==EPSILON) return p;
 
@@ -349,8 +352,8 @@ int PDTimp::Read(const std::string& fn)
   sv.Read(ifsv);
   tv.Read(iftv);
 
-  TRACE_ERR("binary phrasefile loaded, default OFF_T: "<<PTF::getDefault()
-            <<"\n");
+  VERBOSE(1,"binary phrasefile loaded, default OFF_T: "
+	  <<PTF::getDefault() <<"\n");
   return 1;
 }
 
@@ -380,8 +383,8 @@ PhraseDictionaryTree::PhraseDictionaryTree()
   : imp(new PDTimp)
 {
   if(sizeof(OFF_T)!=8) {
-    UTIL_THROW2("ERROR: size of type 'OFF_T' has to be 64 bit!\n"
-                "In gcc, use compiler settings '-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES'\n");
+	UTIL_THROW2("ERROR: size of type 'OFF_T' has to be 64 bit!\n"
+              "In gcc, use compiler settings '-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES'\n");
   }
 }
 
@@ -500,7 +503,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       // init numElement
       numElement = tokens.size();
       UTIL_THROW_IF2(numElement < (PrintWordAlignment()?4:3),
-                     "Format error");
+    		  "Format error");
     }
 
     if (tokens.size() != numElement) {
@@ -549,8 +552,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       PSA::Data& d=psa->insert(f);
       if(d==InvalidOffT) d=fTell(ot);
       else {
-        UTIL_THROW2("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '"
-                    <<line);
+    	UTIL_THROW2("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '"
+                  <<line);
       }
     }
 
@@ -559,8 +562,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (!sparseFeatureString.empty()) {
       std::vector<std::string> sparseTokens = Tokenize(sparseFeatureString);
       if (sparseTokens.size() % 2 != 0) {
-        UTIL_THROW2("ERROR: incorrectly formatted sparse feature string: " <<
-                    sparseFeatureString);
+    	UTIL_THROW2("ERROR: incorrectly formatted sparse feature string: " <<
+                  sparseFeatureString);
       }
       for (size_t i = 0; i < sparseTokens.size(); i+=2) {
         fnames.push_back(imp->tv.add(sparseTokens[i]));
@@ -601,13 +604,13 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       PSA::Data& d=psa->insert(f);
       if(d==InvalidOffT) d=fTell(ot);
       else {
-        UTIL_THROW2("ERROR: xsource phrase already inserted (B)!\nline(" << lnc << "): '"
-                    <<line);
+    	UTIL_THROW2("ERROR: xsource phrase already inserted (B)!\nline(" << lnc << "): '"
+                  <<line);
       }
     }
     tgtCands.push_back(TgtCand(e,sc, alignmentString));
     UTIL_THROW_IF2(currFirstWord == InvalidLabelId,
-                   "Uninitialize word");
+    		"Uninitialize word");
     tgtCands.back().SetFeatures(fnames, fvalues);
   }
   if (PrintWordAlignment())
@@ -660,7 +663,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
 int PhraseDictionaryTree::Read(const std::string& fn)
 {
-  TRACE_ERR("size of OFF_T "<<sizeof(OFF_T)<<"\n");
+  VERBOSE(1,"size of OFF_T "<<sizeof(OFF_T)<<"\n");
   return imp->Read(fn);
 }
 

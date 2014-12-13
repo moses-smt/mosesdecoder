@@ -124,6 +124,35 @@ Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
   return ret;
 }
 
+// Generate the target tree of the derivation d.
+TreePointer ChartKBestExtractor::GetOutputTree(const Derivation &d)
+{
+  const ChartHypothesis &hypo = d.edge.head->hypothesis;
+  const TargetPhrase &phrase = hypo.GetCurrTargetPhrase();
+  if (const PhraseProperty *property = phrase.GetProperty("Tree")) {
+    const std::string *tree = property->GetValueString();
+    TreePointer mytree (boost::make_shared<InternalTree>(*tree));
+
+    //get subtrees (in target order)
+    std::vector<TreePointer> previous_trees;
+    for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+      const Word &word = phrase.GetWord(pos);
+      if (word.IsNonTerminal()) {
+        size_t nonTermInd = phrase.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+        const Derivation &subderivation = *d.subderivations[nonTermInd];
+        const TreePointer prev_tree = GetOutputTree(subderivation);
+        previous_trees.push_back(prev_tree);
+      }
+    }
+
+    mytree->Combine(previous_trees);
+    return mytree;
+  }
+  else {
+    UTIL_THROW2("Error: TreeStructureFeature active, but no internal tree structure found");
+  }
+}
+
 // Create an unweighted hyperarc corresponding to the given ChartHypothesis.
 ChartKBestExtractor::UnweightedHyperarc ChartKBestExtractor::CreateEdge(
   const ChartHypothesis &h)

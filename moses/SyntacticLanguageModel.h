@@ -30,7 +30,7 @@ public:
                     const FFState* prev_state,
                     ScoreComponentCollection* accumulator) const;
 
-  FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
+  FFState* EvaluateWhenApplied(const ChartHypothesis& cur_hypo,
                          int featureID,
                          ScoreComponentCollection* accumulator) const {
     throw std::runtime_error("Syntactic LM can only be used with phrase-based decoder.");

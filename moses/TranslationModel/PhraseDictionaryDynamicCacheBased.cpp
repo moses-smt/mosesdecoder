@@ -163,7 +163,7 @@ const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhrase
     std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
 
     while (it2 != tpc->end()) {
-      ((TargetPhrase*) *it2)->Evaluate(source, GetFeaturesToApply());
+      ((TargetPhrase*) *it2)->EvaluateInIsolation(source, GetFeaturesToApply());
       it2++;
     }
   }
@@ -515,7 +515,7 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
   const StaticData &staticData = StaticData::Instance();
   const std::string& factorDelimiter = staticData.GetFactorDelimiter();
   Phrase sourcePhrase(0);
-  Phrase targetPhrase(0);
+  TargetPhrase targetPhrase(0);
 
   VERBOSE(3, "ageString:|" << ageString << "|" << std::endl);
   char *err_ind_temp;
@@ -541,9 +541,9 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
   Update(sourcePhrase, targetPhrase, age, waString);
 }
 
-void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age, std::string waString)
+void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int age, std::string waString)
 {
-  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age, std::string waString)" << std::endl);
+  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int age, std::string waString)" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
@@ -560,14 +560,15 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age, st
     TargetCollectionAgePair TgtCollAgePair = it->second;
     TargetPhraseCollection* tpc = TgtCollAgePair.first;
     AgeCollection* ac = TgtCollAgePair.second;
+//    const TargetPhrase* p_ptr = NULL;
     const Phrase* p_ptr = NULL;
     TargetPhrase* tp_ptr = NULL;
     bool found = false;
     size_t tp_pos=0;
     while (!found && tp_pos < tpc->GetSize()) {
       tp_ptr = (TargetPhrase*) tpc->GetTargetPhrase(tp_pos);
-      p_ptr = (const Phrase*) tp_ptr;
-      if (tp == *p_ptr) {
+      p_ptr = (const TargetPhrase*) tp_ptr;
+      if ((Phrase) tp == *p_ptr) {
         found = true;
         continue;
       }

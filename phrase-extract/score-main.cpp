@@ -28,8 +28,8 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include <boost/unordered_map.hpp>
 
-#include "SafeGetline.h"
 #include "ScoreFeature.h"
 #include "tables-core.h"
 #include "ExtractionPhrasePair.h"
@@ -40,15 +40,18 @@
 using namespace std;
 using namespace MosesTraining;
 
-#define LINE_MAX_LENGTH 100000
-
 namespace MosesTraining
 {
 LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
 bool pcfgFlag = false;
+bool phraseOrientationFlag = false;
 bool treeFragmentsFlag = false;
+bool sourceSyntaxLabelsFlag = false;
+bool sourceSyntaxLabelSetFlag = false;
+bool sourceSyntaxLabelCountsLHSFlag = false;
+bool targetPreferenceLabelsFlag = false;
 bool unpairedExtractFormatFlag = false;
 bool conditionOnTargetLhsFlag = false;
 bool wordAlignmentFlag = true;
@@ -61,15 +64,28 @@ bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
 bool crossedNonTerm = false;
+bool spanLength = false;
+bool nonTermContext = false;
+
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
-std::map<std::string,float> sourceLHSCounts;
-std::map<std::string, std::map<std::string,float>* > targetLHSAndSourceLHSJointCounts;
+bool phraseOrientationPriorsFlag = false;
 
+boost::unordered_map<std::string,float> sourceLHSCounts;
+boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > targetLHSAndSourceLHSJointCounts;
 std::set<std::string> sourceLabelSet;
-std::map<std::string,size_t> sourceLabels;
+std::map<std::string,size_t> sourceLabels; 
 std::vector<std::string> sourceLabelsByIndex;
+
+boost::unordered_map<std::string,float> targetPreferenceLHSCounts;
+boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > ruleTargetLHSAndTargetPreferenceLHSJointCounts;
+std::set<std::string> targetPreferenceLabelSet;
+std::map<std::string,size_t> targetPreferenceLabels; 
+std::vector<std::string> targetPreferenceLabelsByIndex;
+
+std::vector<float> orientationClassPriorsL2R(4,0); // mono swap dright dleft
+std::vector<float> orientationClassPriorsR2L(4,0); // mono swap dright dleft
 
 Vocabulary vcbT;
 Vocabulary vcbS;
@@ -79,17 +95,23 @@ Vocabulary vcbS;
 std::vector<std::string> tokenize( const char [] );
 
 void processLine( std::string line,
-                  int lineID, bool includeSentenceIdFlag, int &sentenceId,
+                  int lineID, bool includeSentenceIdFlag, int &sentenceId,  
                   PHRASE *phraseSource, PHRASE *phraseTarget, ALIGNMENT *targetToSourceAlignment,
                   std::string &additionalPropertiesString,
                   float &count, float &pcfgSum );
 void writeCountOfCounts( const std::string &fileNameCountOfCounts );
-void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile,
+void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float> &countsLabelLHS,
+                                   const boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > &jointCountsLabelLHS,
+                                   const std::string &fileNameLeftHandSideSourceLabelCounts, 
+                                   const std::string &fileNameLeftHandSideTargetSourceLabelCounts );
+void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fileName );
+void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile, 
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb );
 void outputPhrasePair(const ExtractionPhrasePair &phrasePair, float, int, ostream &phraseTableFile, const ScoreFeatureManager &featureManager, const MaybeLog &maybeLog );
 double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
 double computeUnalignedPenalty( const ALIGNMENT *alignmentTargetToSource );
 set<std::string> functionWordList;
+void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors, std::vector<float> &orientationClassPriorsL2R, std::vector<float> &orientationClassPriorsR2L);
 void loadFunctionWords( const string &fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
 int calcCrossedNonTerm( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
@@ -100,20 +122,27 @@ void invertAlignment( const PHRASE *phraseSource, const PHRASE *phraseTarget, co
 
 int main(int argc, char* argv[])
 {
-  std::cerr << "Score v2.1 -- "
+  std::cerr << "Score v2.1 -- " 
             << "scoring methods for extracted rules" << std::endl;
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--SourceLabels] [--SourceLabelSet] [--SourceLabelCountsLHS] [--TargetPreferenceLabels] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }
   std::string fileNameExtract = argv[1];
   std::string fileNameLex = argv[2];
   std::string fileNamePhraseTable = argv[3];
+  std::string fileNameSourceLabelSet;
   std::string fileNameCountOfCounts;
   std::string fileNameFunctionWords;
+  std::string fileNameLeftHandSideSourceLabelCounts;
+  std::string fileNameLeftHandSideTargetSourceLabelCounts;
+  std::string fileNameTargetPreferenceLabelSet;
+  std::string fileNameLeftHandSideTargetPreferenceLabelCounts;
+  std::string fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts;
+  std::string fileNamePhraseOrientationPriors;
   std::vector<std::string> featureArgs; // all unknown args passed to feature manager
 
   for(int i=4; i<argc; i++) {
@@ -126,9 +155,32 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--PCFG") == 0) {
       pcfgFlag = true;
       std::cerr << "including PCFG scores" << std::endl;
+    } else if (strcmp(argv[i],"--PhraseOrientation") == 0) {
+      phraseOrientationFlag = true;
+      std::cerr << "including phrase orientation information" << std::endl;
     } else if (strcmp(argv[i],"--TreeFragments") == 0) {
       treeFragmentsFlag = true;
-      std::cerr << "including tree fragment information from syntactic parse\n";
+      std::cerr << "including tree fragment information from syntactic parse" << std::endl;
+    } else if (strcmp(argv[i],"--SourceLabels") == 0) {
+      sourceSyntaxLabelsFlag = true;
+      std::cerr << "including source label information" << std::endl;
+    } else if (strcmp(argv[i],"--SourceLabelSet") == 0) {
+      sourceSyntaxLabelSetFlag = true;
+      fileNameSourceLabelSet = std::string(fileNamePhraseTable) + ".syntaxLabels.src";
+      std::cerr << "writing source syntax label set to file " << fileNameSourceLabelSet << std::endl;
+    } else if (strcmp(argv[i],"--SourceLabelCountsLHS") == 0) {
+      sourceSyntaxLabelCountsLHSFlag = true;
+      fileNameLeftHandSideSourceLabelCounts = std::string(fileNamePhraseTable) + ".src.lhs";
+      fileNameLeftHandSideTargetSourceLabelCounts = std::string(fileNamePhraseTable) + ".tgt-src.lhs";
+      std::cerr << "counting left-hand side source labels and writing them to files " << fileNameLeftHandSideSourceLabelCounts << " and " << fileNameLeftHandSideTargetSourceLabelCounts << std::endl;
+    } else if (strcmp(argv[i],"--TargetPreferenceLabels") == 0) {
+      targetPreferenceLabelsFlag = true;
+      std::cerr << "including target preference label information" << std::endl;
+      fileNameTargetPreferenceLabelSet = std::string(fileNamePhraseTable) + ".syntaxLabels.tgtpref";
+      std::cerr << "writing target preference label set to file " << fileNameTargetPreferenceLabelSet << std::endl;
+      fileNameLeftHandSideTargetPreferenceLabelCounts = std::string(fileNamePhraseTable) + ".tgtpref.lhs";
+      fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts = std::string(fileNamePhraseTable) + ".tgt-tgtpref.lhs";
+      std::cerr << "counting left-hand side target preference labels and writing them to files " << fileNameLeftHandSideTargetPreferenceLabelCounts << " and " << fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts << std::endl;
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       unpairedExtractFormatFlag = true;
       std::cerr << "processing unpaired extract format" << std::endl;
@@ -155,7 +207,7 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--UnalignedFunctionWordPenalty") == 0) {
       unalignedFWFlag = true;
       if (i+1==argc) {
-        std::cerr << "ERROR: specify function words file for unaligned function word penalty!" << std::endl;
+          std::cerr << "ERROR: specify function words file for unaligned function word penalty!" << std::endl;
         exit(1);
       }
       fileNameFunctionWords = argv[++i];
@@ -174,6 +226,20 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
       crossedNonTerm = true;
       std::cerr << "crossed non-term reordering feature" << std::endl;
+    } else if (strcmp(argv[i],"--PhraseOrientationPriors") == 0) {
+      phraseOrientationPriorsFlag = true;
+      if (i+1==argc) {
+          std::cerr << "ERROR: specify priors file for phrase orientation!" << std::endl;
+        exit(1);
+      }
+      fileNamePhraseOrientationPriors = argv[++i];
+      std::cerr << "smoothing phrase orientation with priors from " << fileNamePhraseOrientationPriors << std::endl;
+    } else if (strcmp(argv[i],"--SpanLength") == 0) {
+      spanLength = true;
+      std::cerr << "span length feature" << std::endl;
+    } else if (strcmp(argv[i],"--NonTermContext") == 0) {
+      nonTermContext = true;
+      std::cerr << "non-term context" << std::endl;
     } else {
       featureArgs.push_back(argv[i]);
       ++i;
@@ -206,6 +272,10 @@ int main(int argc, char* argv[])
     for(int i=1; i<=COC_MAX; i++) countOfCounts[i] = 0;
   }
 
+  if (phraseOrientationPriorsFlag) {
+    loadOrientationPriors(fileNamePhraseOrientationPriors,orientationClassPriorsL2R,orientationClassPriorsR2L);
+  }
+
   // sorted phrase extraction file
   Moses::InputFileStream extractFile(fileNameExtract);
 
@@ -224,15 +294,15 @@ int main(int argc, char* argv[])
     Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
     bool success = outputFile->Open(fileNamePhraseTable);
     if (!success) {
-      std::cerr << "ERROR: could not open file phrase table file "
-                << fileNamePhraseTable << std::endl;
+        std::cerr << "ERROR: could not open file phrase table file "
+                  << fileNamePhraseTable << std::endl;
       exit(1);
     }
     phraseTableFile = outputFile;
   }
 
   // loop through all extracted phrase translations
-  char line[LINE_MAX_LENGTH], lastLine[LINE_MAX_LENGTH];
+  string line, lastLine;
   lastLine[0] = '\0';
   ExtractionPhrasePair *phrasePair = NULL;
   std::vector< ExtractionPhrasePair* > phrasePairsWithSameSource;
@@ -245,18 +315,18 @@ int main(int argc, char* argv[])
   float tmpCount=0.0f, tmpPcfgSum=0.0f;
 
   int i=0;
-  SAFE_GETLINE( (extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__ );
-  if ( !extractFileP.eof() ) {
+  // TODO why read only the 1st line?
+  if ( getline(extractFileP, line) ) {
     ++i;
     tmpPhraseSource = new PHRASE();
     tmpPhraseTarget = new PHRASE();
     tmpTargetToSourceAlignment = new ALIGNMENT();
-    processLine( std::string(line),
+    processLine( std::string(line), 
                  i, featureManager.includeSentenceId(), tmpSentenceId,
-                 tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment,
+                 tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment, 
                  tmpAdditionalPropertiesString,
                  tmpCount, tmpPcfgSum);
-    phrasePair = new ExtractionPhrasePair( tmpPhraseSource, tmpPhraseTarget,
+    phrasePair = new ExtractionPhrasePair( tmpPhraseSource, tmpPhraseTarget, 
                                            tmpTargetToSourceAlignment,
                                            tmpCount, tmpPcfgSum );
     phrasePair->AddProperties( tmpAdditionalPropertiesString, tmpCount );
@@ -265,39 +335,35 @@ int main(int argc, char* argv[])
     if ( hierarchicalFlag ) {
       phrasePairsWithSameSourceAndTarget.push_back( phrasePair );
     }
-    strcpy( lastLine, line );
-    SAFE_GETLINE( (extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__ );
+    lastLine = line;
   }
 
-  while ( !extractFileP.eof() ) {
+  while ( getline(extractFileP, line) ) {
 
     if ( ++i % 100000 == 0 ) {
       std::cerr << "." << std::flush;
     }
 
     // identical to last line? just add count
-    if (strcmp(line,lastLine) == 0) {
+    if (line == lastLine) {
       phrasePair->IncrementPrevious(tmpCount,tmpPcfgSum);
-      SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
       continue;
     } else {
-      strcpy( lastLine, line );
+      lastLine = line;
     }
 
     tmpPhraseSource = new PHRASE();
     tmpPhraseTarget = new PHRASE();
     tmpTargetToSourceAlignment = new ALIGNMENT();
     tmpAdditionalPropertiesString.clear();
-    processLine( std::string(line),
+    processLine( std::string(line), 
                  i, featureManager.includeSentenceId(), tmpSentenceId,
-                 tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment,
+                 tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment, 
                  tmpAdditionalPropertiesString,
-                 tmpCount, tmpPcfgSum);
+                 tmpCount, tmpPcfgSum); 
 
     bool matchesPrevious = false;
-    bool sourceMatch = true;
-    bool targetMatch = true;
-    bool alignmentMatch = true; // be careful with these,
+    bool sourceMatch = true; bool targetMatch = true; bool alignmentMatch = true; // be careful with these,
     // ExtractionPhrasePair::Matches() checks them in order and does not continue with the others
     // once the first of them has been found to have to be set to false
 
@@ -332,7 +398,7 @@ int main(int argc, char* argv[])
       if ( !phrasePairsWithSameSource.empty() &&
            !sourceMatch ) {
         processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
-        for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+        for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin(); 
               iter!=phrasePairsWithSameSource.end(); ++iter) {
           delete *iter;
         }
@@ -349,8 +415,8 @@ int main(int argc, char* argv[])
         }
       }
 
-      phrasePair = new ExtractionPhrasePair( tmpPhraseSource, tmpPhraseTarget,
-                                             tmpTargetToSourceAlignment,
+      phrasePair = new ExtractionPhrasePair( tmpPhraseSource, tmpPhraseTarget, 
+                                             tmpTargetToSourceAlignment, 
                                              tmpCount, tmpPcfgSum );
       phrasePair->AddProperties( tmpAdditionalPropertiesString, tmpCount );
       featureManager.addPropertiesToPhrasePair( *phrasePair, tmpCount, tmpSentenceId );
@@ -361,12 +427,10 @@ int main(int argc, char* argv[])
       }
     }
 
-    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-
   }
 
   processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
-  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin(); 
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     delete *iter;
   }
@@ -382,16 +446,37 @@ int main(int argc, char* argv[])
   if (goodTuringFlag || kneserNeyFlag) {
     writeCountOfCounts( fileNameCountOfCounts );
   }
+
+  // source syntax labels
+  if (sourceSyntaxLabelsFlag && sourceSyntaxLabelSetFlag && !inverseFlag) {
+    writeLabelSet( sourceLabelSet, fileNameSourceLabelSet );
+  }
+  if (sourceSyntaxLabelsFlag && sourceSyntaxLabelCountsLHSFlag && !inverseFlag) {
+    writeLeftHandSideLabelCounts( sourceLHSCounts,
+                                  targetLHSAndSourceLHSJointCounts,
+                                  fileNameLeftHandSideSourceLabelCounts, 
+                                  fileNameLeftHandSideTargetSourceLabelCounts );
+  }
+
+  // target preference labels
+  if (targetPreferenceLabelsFlag && !inverseFlag) {
+    writeLabelSet( targetPreferenceLabelSet, fileNameTargetPreferenceLabelSet );
+    writeLeftHandSideLabelCounts( targetPreferenceLHSCounts,
+                                  ruleTargetLHSAndTargetPreferenceLHSJointCounts,
+                                  fileNameLeftHandSideTargetPreferenceLabelCounts, 
+                                  fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts );
+  }
 }
 
 
 void processLine( std::string line,
-                  int lineID, bool includeSentenceIdFlag, int &sentenceId,
+                  int lineID, bool includeSentenceIdFlag, int &sentenceId,  
                   PHRASE *phraseSource, PHRASE *phraseTarget, ALIGNMENT *targetToSourceAlignment,
                   std::string &additionalPropertiesString,
                   float &count, float &pcfgSum )
 {
-  size_t foundAdditionalProperties = line.find("{{");
+  size_t foundAdditionalProperties = line.rfind("|||");
+  foundAdditionalProperties = line.find("{{",foundAdditionalProperties);
   if (foundAdditionalProperties != std::string::npos) {
     additionalPropertiesString = line.substr(foundAdditionalProperties);
     line = line.substr(0,foundAdditionalProperties);
@@ -476,7 +561,71 @@ void writeCountOfCounts( const string &fileNameCountOfCounts )
 }
 
 
-void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile,
+void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float> &countsLabelLHS,
+                                   const boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > &jointCountsLabelLHS,
+                                   const std::string &fileNameLeftHandSideSourceLabelCounts,
+                                   const std::string &fileNameLeftHandSideTargetSourceLabelCounts )
+{
+  // open file
+  Moses::OutputFileStream leftHandSideSourceLabelCounts;
+  bool success = leftHandSideSourceLabelCounts.Open(fileNameLeftHandSideSourceLabelCounts.c_str());
+  if (!success) {
+    std::cerr << "ERROR: could not open left-hand side label counts file "
+              << fileNameLeftHandSideSourceLabelCounts << std::endl;
+    return;
+  }
+
+  // write source left-hand side counts
+  for (boost::unordered_map<std::string,float>::const_iterator iter=sourceLHSCounts.begin();
+       iter!=sourceLHSCounts.end(); ++iter) {
+    leftHandSideSourceLabelCounts << iter->first << " " << iter->second << std::endl;
+  }
+
+  leftHandSideSourceLabelCounts.Close();
+
+  // open file
+  Moses::OutputFileStream leftHandSideTargetSourceLabelCounts;
+  success = leftHandSideTargetSourceLabelCounts.Open(fileNameLeftHandSideTargetSourceLabelCounts.c_str());
+  if (!success) {
+    std::cerr << "ERROR: could not open left-hand side label joint counts file "
+              << fileNameLeftHandSideTargetSourceLabelCounts << std::endl;
+    return;
+  }
+
+  // write source left-hand side / target left-hand side joint counts
+  for (boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::const_iterator iter=targetLHSAndSourceLHSJointCounts.begin();
+       iter!=targetLHSAndSourceLHSJointCounts.end(); ++iter) {
+    for (boost::unordered_map<std::string,float>::const_iterator iter2=(iter->second)->begin();
+         iter2!=(iter->second)->end(); ++iter2) {
+      leftHandSideTargetSourceLabelCounts << iter->first << " "<< iter2->first << " " << iter2->second << std::endl;
+    }
+  }
+
+  leftHandSideTargetSourceLabelCounts.Close();
+}
+
+
+void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fileName )
+{
+  // open file
+  Moses::OutputFileStream out;
+  bool success = out.Open(fileName.c_str());
+  if (!success) {
+    std::cerr << "ERROR: could not open label set file "
+              << fileName << std::endl;
+    return;
+  }
+
+  for (std::set<std::string>::const_iterator iter=labelSet.begin();
+       iter!=labelSet.end(); ++iter) {
+    out << *iter << std::endl;
+  }
+
+  out.Close();
+}
+
+
+void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile, 
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb )
 {
   if (phrasePairsWithSameSource.size() == 0) {
@@ -488,23 +637,23 @@ void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSa
   //std::cerr << "phrasePairs.size() = " << phrasePairs.size() << std::endl;
 
   // loop through phrase pairs
-  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin(); 
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     // add to total count
     totalSource += (*iter)->GetCount();
   }
 
   // output the distinct phrase pairs, one at a time
-  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin(); 
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     // add to total count
     outputPhrasePair( **iter, totalSource, phrasePairsWithSameSource.size(), phraseTableFile, featureManager, maybeLogProb );
   }
 }
 
-void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
-                      float totalCount, int distinctCount,
-                      ostream &phraseTableFile,
+void outputPhrasePair(const ExtractionPhrasePair &phrasePair, 
+                      float totalCount, int distinctCount, 
+                      ostream &phraseTableFile, 
                       const ScoreFeatureManager& featureManager,
                       const MaybeLog& maybeLogProb )
 {
@@ -559,45 +708,45 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
 
   // alignment
   if ( hierarchicalFlag ) {
-    // always output alignment if hiero style
-    assert(phraseTarget->size() == bestAlignmentT2S->size()+1);
-    std::vector<std::string> alignment;
-    for ( size_t j = 0; j < phraseTarget->size() - 1; ++j ) {
-      if ( isNonTerminal(vcbT.getWord( phraseTarget->at(j) ))) {
-        if ( bestAlignmentT2S->at(j).size() != 1 ) {
-          std::cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << std::endl;
-          phraseTableFile.flush();
-          assert(bestAlignmentT2S->at(j).size() == 1);
-        }
-        size_t sourcePos = *(bestAlignmentT2S->at(j).begin());
-        //phraseTableFile << sourcePos << "-" << j << " ";
-        std::stringstream point;
-        point << sourcePos << "-" << j;
-        alignment.push_back(point.str());
-      } else {
-        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin();
-              setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
-          size_t sourcePos = *setIter;
+      // always output alignment if hiero style
+      assert(phraseTarget->size() == bestAlignmentT2S->size()+1);
+      std::vector<std::string> alignment;
+      for ( size_t j = 0; j < phraseTarget->size() - 1; ++j ) {
+        if ( isNonTerminal(vcbT.getWord( phraseTarget->at(j) ))) {
+          if ( bestAlignmentT2S->at(j).size() != 1 ) {
+            std::cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << std::endl;
+            phraseTableFile.flush();
+            assert(bestAlignmentT2S->at(j).size() == 1);
+          }
+          size_t sourcePos = *(bestAlignmentT2S->at(j).begin());
+          //phraseTableFile << sourcePos << "-" << j << " ";
           std::stringstream point;
           point << sourcePos << "-" << j;
           alignment.push_back(point.str());
+        } else {
+          for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin();
+                setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
+            size_t sourcePos = *setIter;
+            std::stringstream point;
+            point << sourcePos << "-" << j;
+            alignment.push_back(point.str());
+          }
         }
       }
-    }
-    // now print all alignments, sorted by source index
-    sort(alignment.begin(), alignment.end());
-    for (size_t i = 0; i < alignment.size(); ++i) {
-      phraseTableFile << alignment[i] << " ";
-    }
-  } else if ( !inverseFlag && wordAlignmentFlag) {
-    // alignment info in pb model
-    for (size_t j = 0; j < bestAlignmentT2S->size(); ++j) {
-      for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin();
-            setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
-        size_t sourcePos = *setIter;
-        phraseTableFile << sourcePos << "-" << j << " ";
+      // now print all alignments, sorted by source index
+      sort(alignment.begin(), alignment.end());
+      for (size_t i = 0; i < alignment.size(); ++i) {
+        phraseTableFile << alignment[i] << " ";
       }
-    }
+  } else if ( !inverseFlag && wordAlignmentFlag) {
+      // alignment info in pb model
+      for (size_t j = 0; j < bestAlignmentT2S->size(); ++j) {
+        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin();
+              setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
+          size_t sourcePos = *setIter;
+          phraseTableFile << sourcePos << "-" << j << " ";
+        }
+      }
   }
 
   phraseTableFile << " ||| ";
@@ -648,11 +797,6 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   if (kneserNeyFlag)
     phraseTableFile << " " << distinctCount;
 
-  if ((treeFragmentsFlag) &&
-      !inverseFlag) {
-    phraseTableFile << " |||";
-  }
-
   phraseTableFile << " |||";
 
   // tree fragments
@@ -663,7 +807,159 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     }
   }
 
+  // syntax labels
+  if ((sourceSyntaxLabelsFlag || targetPreferenceLabelsFlag) && !inverseFlag) {
+    unsigned nNTs = 1;
+    for(size_t j=0; j<phraseSource->size()-1; ++j) {
+      if (isNonTerminal(vcbS.getWord( phraseSource->at(j) )))
+        ++nNTs;
+    }
+    // source syntax labels
+    if (sourceSyntaxLabelsFlag) {
+      std::string sourceLabelCounts;
+      sourceLabelCounts = phrasePair.CollectAllLabelsSeparateLHSAndRHS("SourceLabels",
+                                                                       sourceLabelSet, 
+                                                                       sourceLHSCounts, 
+                                                                       targetLHSAndSourceLHSJointCounts, 
+                                                                       vcbT);
+      if ( !sourceLabelCounts.empty() ) {
+        phraseTableFile << " {{SourceLabels "
+                        << nNTs // for convenience: number of non-terminal symbols in this rule (incl. left hand side NT)
+                        << " "
+                        << count // rule count
+                        << sourceLabelCounts
+                        << "}}";
+      }
+    }
+    // target preference labels
+    if (targetPreferenceLabelsFlag) {
+      std::string targetPreferenceLabelCounts;
+      targetPreferenceLabelCounts = phrasePair.CollectAllLabelsSeparateLHSAndRHS("TargetPreferences",
+                                                                                 targetPreferenceLabelSet, 
+                                                                                 targetPreferenceLHSCounts, 
+                                                                                 ruleTargetLHSAndTargetPreferenceLHSJointCounts, 
+                                                                                 vcbT);
+      if ( !targetPreferenceLabelCounts.empty() ) {
+        phraseTableFile << " {{TargetPreferences "
+                        << nNTs // for convenience: number of non-terminal symbols in this rule (incl. left hand side NT)
+                        << " "
+                        << count // rule count
+                        << targetPreferenceLabelCounts
+                        << "}}";
+      }
+    }
+  }
+
+  // phrase orientation
+  if (phraseOrientationFlag && !inverseFlag) {
+    phraseTableFile << " {{Orientation ";
+    phrasePair.CollectAllPhraseOrientations("Orientation",orientationClassPriorsL2R,orientationClassPriorsR2L,0.5,phraseTableFile);
+    phraseTableFile << "}}";
+  }
+
+  if (spanLength && !inverseFlag) {
+	  string propValue = phrasePair.CollectAllPropertyValues("SpanLength");
+	  if (!propValue.empty()) {
+  	    phraseTableFile << " {{SpanLength " << propValue << "}}";
+	  }
+  }
+
+  if (nonTermContext && !inverseFlag) {
+	  string propValue = phrasePair.CollectAllPropertyValues("NonTermContext");
+	  if (!propValue.empty()) {
+  	    phraseTableFile << " {{NonTermContext " << propValue << "}}";
+	  }
+  }
+
   phraseTableFile << std::endl;
+}
+
+
+
+void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors, 
+                           std::vector<float> &orientationClassPriorsL2R, 
+                           std::vector<float> &orientationClassPriorsR2L)
+{
+  assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dright dleft
+  
+  std::cerr << "Loading phrase orientation priors from " << fileNamePhraseOrientationPriors;
+  ifstream inFile;
+  inFile.open(fileNamePhraseOrientationPriors.c_str());
+  if (inFile.fail()) {
+    std::cerr << " - ERROR: could not open file" << std::endl;
+    exit(1);
+  }
+
+  std::string line;
+  size_t linesRead = 0;
+  float l2rSum = 0;
+  float r2lSum = 0;
+  while (getline(inFile, line)) {
+    istringstream tokenizer(line);
+    std::string key;
+    tokenizer >> key;
+
+    bool l2rFlag = false;
+    bool r2lFlag = false;
+    if (!key.substr(0,4).compare("L2R_")) {
+      l2rFlag = true;
+    }
+    if (!key.substr(0,4).compare("R2L_")) {
+      r2lFlag = true;
+    }
+    if (!l2rFlag && !r2lFlag) {
+       std::cerr << " - ERROR: malformed line in orientation priors file" << std::endl;
+    }
+    key.erase(0,4);
+
+    int orientationClassId = -1;
+    if (!key.compare("mono")) {
+      orientationClassId = 0;
+    }
+    if (!key.compare("swap")) {
+      orientationClassId = 1;
+    }
+    if (!key.compare("dright")) {
+      orientationClassId = 2;
+    }
+    if (!key.compare("dleft")) {
+      orientationClassId = 3;
+    }
+    if (orientationClassId == -1) {
+       std::cerr << " - ERROR: malformed line in orientation priors file" << std::endl;
+    }
+
+    float count;
+    tokenizer >> count;
+
+    if (l2rFlag) {
+      orientationClassPriorsL2R[orientationClassId] += count;
+      l2rSum += count;
+    }
+    if (r2lFlag) {
+      orientationClassPriorsR2L[orientationClassId] += count;
+      r2lSum += count;
+    }
+
+    ++linesRead;
+  }
+
+  // normalization: return prior probabilities, not counts
+  if (l2rSum != 0) {
+    for (std::vector<float>::iterator orientationClassPriorsL2RIt = orientationClassPriorsL2R.begin();
+         orientationClassPriorsL2RIt != orientationClassPriorsL2R.end(); ++orientationClassPriorsL2RIt) {
+      *orientationClassPriorsL2RIt /= l2rSum;
+    }
+  }
+  if (r2lSum != 0) {
+    for (std::vector<float>::iterator orientationClassPriorsR2LIt = orientationClassPriorsR2L.begin();
+         orientationClassPriorsR2LIt != orientationClassPriorsR2L.end(); ++orientationClassPriorsR2LIt) {
+      *orientationClassPriorsR2LIt /= r2lSum;
+    }
+  }
+
+  std::cerr << " - read " << linesRead << " lines from orientation priors file" << std::endl;
+  inFile.close();
 }
 
 
@@ -675,7 +971,7 @@ bool calcCrossedNonTerm( size_t targetPos, size_t sourcePos, const ALIGNMENT *al
       // skip
     } else {
       const std::set<size_t> &sourceSet = alignmentTargetToSource->at(currTarget);
-      for (std::set<size_t>::const_iterator iter = sourceSet.begin();
+      for (std::set<size_t>::const_iterator iter = sourceSet.begin(); 
            iter != sourceSet.end(); ++iter) {
         size_t currSource = *iter;
 
@@ -752,11 +1048,9 @@ void loadFunctionWords( const string &fileName )
   }
   istream *inFileP = &inFile;
 
-  char line[LINE_MAX_LENGTH];
-  while(true) {
-    SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (inFileP->eof()) break;
-    std::vector<string> token = tokenize( line );
+  string line;
+  while(getline(*inFileP, line)) {
+    std::vector<string> token = tokenize( line.c_str() );
     if (token.size() > 0)
       functionWordList.insert( token[0] );
   }
@@ -801,20 +1095,17 @@ void LexicalTable::load( const string &fileName )
   }
   istream *inFileP = &inFile;
 
-  char line[LINE_MAX_LENGTH];
-
+  string line;
   int i=0;
-  while(true) {
+  while(getline(*inFileP, line)) {
     i++;
     if (i%100000 == 0) std::cerr << "." << flush;
-    SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (inFileP->eof()) break;
 
-    std::vector<string> token = tokenize( line );
+    std::vector<string> token = tokenize( line.c_str() );
     if (token.size() != 3) {
-      std::cerr << "line " << i << " in " << fileName
-                << " has wrong number of tokens, skipping:" << std::endl
-                << token.size() << " " << token[0] << " " << line << std::endl;
+        std::cerr << "line " << i << " in " << fileName
+           << " has wrong number of tokens, skipping:" << std::endl
+           << token.size() << " " << token[0] << " " << line << std::endl;
       continue;
     }
 
@@ -893,19 +1184,19 @@ void printTargetPhrase(const PHRASE *phraseSource, const PHRASE *phraseTarget,
 
 
 void invertAlignment(const PHRASE *phraseSource, const PHRASE *phraseTarget,
-                     const ALIGNMENT *inTargetToSourceAlignment, ALIGNMENT *outSourceToTargetAlignment)
-{
-// typedef std::vector< std::set<size_t> > ALIGNMENT;
+                     const ALIGNMENT *inTargetToSourceAlignment, ALIGNMENT *outSourceToTargetAlignment) {
+// typedef std::vector< std::set<size_t> > ALIGNMENT; 
 
   outSourceToTargetAlignment->clear();
   size_t numberOfSourceSymbols = (hierarchicalFlag ? phraseSource->size()-1 : phraseSource->size());
   outSourceToTargetAlignment->resize(numberOfSourceSymbols);
   // add alignment point
   for (size_t targetPosition = 0; targetPosition < inTargetToSourceAlignment->size(); ++targetPosition) {
-    for ( std::set<size_t>::iterator setIter = (inTargetToSourceAlignment->at(targetPosition)).begin();
+    for ( std::set<size_t>::iterator setIter = (inTargetToSourceAlignment->at(targetPosition)).begin(); 
           setIter != (inTargetToSourceAlignment->at(targetPosition)).end(); ++setIter ) {
       size_t sourcePosition = *setIter;
       outSourceToTargetAlignment->at(sourcePosition).insert(targetPosition);
     }
   }
 }
+

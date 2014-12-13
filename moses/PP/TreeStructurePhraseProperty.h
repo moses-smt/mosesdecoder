@@ -10,7 +10,7 @@ namespace Moses
 class TreeStructurePhraseProperty : public PhraseProperty
 {
 public:
-  TreeStructurePhraseProperty(const std::string &value) :  PhraseProperty(value) {};
+  TreeStructurePhraseProperty() {};
 
 };
 

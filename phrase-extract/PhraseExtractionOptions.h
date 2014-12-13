@@ -18,7 +18,6 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-/* Created by Rohit Gupta, CDAC, Mumbai, India on 18 July, 2012*/
 
 #include <string>
 #include <vector>

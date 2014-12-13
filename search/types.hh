@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-namespace lm { namespace ngram { class ChartState; } }
+namespace lm { namespace ngram { struct ChartState; } }
 
 namespace search {
 

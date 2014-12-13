@@ -28,26 +28,26 @@ public:
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
-  virtual FFState* Evaluate(
+  virtual FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
-  virtual FFState* EvaluateChart(
+  virtual FFState* EvaluateWhenApplied(
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection*) const {
     throw std::logic_error("DistortionScoreProducer not supported in chart decoder, yet");
   }
 
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const

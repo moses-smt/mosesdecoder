@@ -18,8 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_ALIGNMENT_H_
-#define EXTRACT_GHKM_ALIGNMENT_H_
 
 #include <string>
 #include <utility>
@@ -34,7 +32,8 @@ typedef std::vector<std::pair<int, int> > Alignment;
 
 void ReadAlignment(const std::string &, Alignment &);
 
+void FlipAlignment(Alignment &);
+
 }  // namespace GHKM
 }  // namespace Moses
 
-#endif

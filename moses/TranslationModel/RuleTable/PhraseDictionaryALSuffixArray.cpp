@@ -49,8 +49,8 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
   bool ret = loader->Load(m_input, m_output, grammarFile, m_tableLimit,
                           *this);
 
-  UTIL_THROW_IF2(ret == NULL,
-                 "Rules not successfully loaded for sentence id " << translationId);
+  UTIL_THROW_IF2(!ret,
+		  "Rules not successfully loaded for sentence id " << translationId);
 }
 
 void PhraseDictionaryALSuffixArray::CleanUpAfterSentenceProcessing(const InputType &source)

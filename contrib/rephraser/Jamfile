@@ -1,0 +1,1 @@
+exe paraphrase : paraphrase.cpp ../../moses//moses ../..//boost_program_options ;

@@ -51,7 +51,7 @@ ChartTranslationOptions::~ChartTranslationOptions()
 
 }
 
-void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &inputPath)
+void ChartTranslationOptions::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
   SetInputPath(&inputPath);
   if (StaticData::Instance().GetPlaceholderFactor() != NOT_FOUND) {
@@ -62,7 +62,7 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
     ChartTranslationOption &transOpt = **iter;
     transOpt.SetInputPath(&inputPath);
-    transOpt.Evaluate(input, inputPath, m_stackVec);
+    transOpt.EvaluateWithSourceContext(input, inputPath, m_stackVec);
   }
 
   // get rid of -inf trans opts
@@ -71,9 +71,10 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
     ChartTranslationOption *transOpt = m_collection[i].get();
 
     if (transOpt->GetScores().GetWeightedScore() == - std::numeric_limits<float>::infinity()) {
-      ++numDiscard;
-    } else if (numDiscard) {
-      m_collection[i - numDiscard] = boost::shared_ptr<ChartTranslationOption>(transOpt);
+    	++numDiscard;
+    }
+    else if (numDiscard) {
+    	m_collection[i - numDiscard] = m_collection[i];
     }
   }
 
@@ -134,12 +135,12 @@ void ChartTranslationOptions::CreateSourceRuleFromInputPath()
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptions &obj)
 {
-  for (size_t i = 0; i < obj.m_collection.size(); ++i) {
-    const ChartTranslationOption &transOpt = *obj.m_collection[i];
-    out << transOpt << endl;
-  }
+	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+		const ChartTranslationOption &transOpt = *obj.m_collection[i];
+		out << transOpt << endl;
+	}
 
-  return out;
+	return out;
 }
 
 }

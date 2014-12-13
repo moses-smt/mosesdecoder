@@ -38,7 +38,7 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase( std::string out_string)
+TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   :Phrase(0)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -46,6 +46,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_container(pt)
 {
 
   //ACAT
@@ -55,7 +56,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
                    NULL);
 }
 
-TargetPhrase::TargetPhrase()
+TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
   :Phrase()
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -63,10 +64,11 @@ TargetPhrase::TargetPhrase()
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_container(pt)
 {
 }
 
-TargetPhrase::TargetPhrase(const Phrase &phrase)
+TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
   : Phrase(phrase)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -74,6 +76,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_container(pt)
 {
 }
 
@@ -84,6 +87,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
+  , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(*copy.m_lhsTarget);
@@ -115,13 +119,13 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
-void TargetPhrase::Evaluate(const Phrase &source)
+void TargetPhrase::EvaluateInIsolation(const Phrase &source)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-  Evaluate(source, ffs);
+  EvaluateInIsolation(source, ffs);
 }
 
-void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
+void TargetPhrase::EvaluateInIsolation(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
 {
   if (ffs.size()) {
     const StaticData &staticData = StaticData::Instance();
@@ -129,7 +133,7 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
     for (size_t i = 0; i < ffs.size(); ++i) {
       const FeatureFunction &ff = *ffs[i];
       if (! staticData.IsFeatureFunctionIgnored( ff )) {
-        ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
+        ff.EvaluateInIsolation(source, *this, m_scoreBreakdown, futureScoreBreakdown);
       }
     }
 
@@ -139,7 +143,7 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
   }
 }
 
-void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
+void TargetPhrase::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   const StaticData &staticData = StaticData::Instance();
@@ -147,7 +151,7 @@ void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     if (! staticData.IsFeatureFunctionIgnored( ff )) {
-      ff.Evaluate(input, inputPath, *this, NULL, m_scoreBreakdown, &futureScoreBreakdown);
+      ff.EvaluateWithSourceContext(input, inputPath, *this, NULL, m_scoreBreakdown, &futureScoreBreakdown);
     }
   }
   float weightedScore = m_scoreBreakdown.GetWeightedScore();
@@ -189,18 +193,18 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
   //		cerr << "TargetPhrase::SetAlignmentInfo(const StringPiece &alignString) this:|" << *this << "|\n";
 }
 
-void TargetPhrase::SetAlignTerm(const AlignmentInfo::CollType &coll)
-{
-  const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
-  m_alignTerm = alignmentInfo;
+// void TargetPhrase::SetAlignTerm(const AlignmentInfo::CollType &coll)
+// {
+//   const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
+//   m_alignTerm = alignmentInfo;
 
-}
+// }
 
-void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)
-{
-  const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
-  m_alignNonTerm = alignmentInfo;
-}
+// void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)
+// {
+//   const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
+//   m_alignNonTerm = alignmentInfo;
+// }
 
 void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString)
 {
@@ -246,15 +250,15 @@ void TargetPhrase::SetProperty(const std::string &key, const std::string &value)
   m_properties[key] = phrasePropertyFactory.ProduceProperty(key,value);
 }
 
-bool TargetPhrase::GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &value) const
+const PhraseProperty *TargetPhrase::GetProperty(const std::string &key) const
 {
   std::map<std::string, boost::shared_ptr<PhraseProperty> >::const_iterator iter;
   iter = m_properties.find(key);
   if (iter != m_properties.end()) {
-    value = iter->second;
-    return true;
+    const boost::shared_ptr<PhraseProperty> &pp = iter->second;
+    return pp.get();
   }
-  return false;
+  return NULL;
 }
 
 void TargetPhrase::SetRuleSource(const Phrase &ruleSource) const
@@ -284,15 +288,28 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   }
 
   os << static_cast<const Phrase&>(tp) << ":" << flush;
-  //	  os << tp.GetAlignNonTerm() << flush;
+  os << tp.GetAlignNonTerm() << flush;
   os << ": term=" << tp.GetAlignTerm() << flush;
   os << ": nonterm=" << tp.GetAlignNonTerm() << flush;
   os << ": c=" << tp.m_fullScore << flush;
   os << " " << tp.m_scoreBreakdown << flush;
-
+  
   const Phrase *sourcePhrase = tp.GetRuleSource();
   if (sourcePhrase) {
     os << " sourcePhrase=" << *sourcePhrase << flush;
+  }
+
+  if (tp.m_properties.size()) {
+	os << " properties: " << flush;
+
+	TargetPhrase::Properties::const_iterator iter;
+	for (iter = tp.m_properties.begin(); iter != tp.m_properties.end(); ++iter) {
+		const string &key = iter->first;
+		const PhraseProperty *prop = iter->second.get();
+		assert(prop);
+
+		os << key << "=" << *prop << " ";
+	}
   }
 
   return os;

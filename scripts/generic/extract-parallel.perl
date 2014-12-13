@@ -29,6 +29,8 @@ my $otherExtractArgs= "";
 my $weights = "";
 my $baselineExtract;
 my $glueFile;
+my $phraseOrientation = 0;
+my $phraseOrientationPriorsFile;
 
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
@@ -43,6 +45,11 @@ for (my $i = 8; $i < $#ARGV + 1; ++$i)
   }
   if ($ARGV[$i] eq '--GlueGrammar') {
     $glueFile = $ARGV[++$i];
+    next;
+  }
+  $phraseOrientation = 1 if $ARGV[$i] eq "--PhraseOrientation";
+  if ($ARGV[$i] eq '--PhraseOrientationPriors') {
+    $phraseOrientationPriorsFile = $ARGV[++$i];
     next;
   }
 
@@ -64,20 +71,20 @@ my $pid;
 
 if ($numParallel > 1)
 {
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $target $TMPDIR/target.";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $target $TMPDIR/target.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 	
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $source $TMPDIR/source.";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $source $TMPDIR/source.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $align $TMPDIR/align.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
   if ($weights) {
-    $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $weights $TMPDIR/weights.";
+    $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
     $pid = RunFork($cmd);
     push(@children, $pid);
   }
@@ -212,11 +219,37 @@ foreach (@children) {
 	waitpid($_, 0);
 }
 
-# glue rules
+# merge glue rules
 if (defined($glueFile)) {
   my $cmd = "cat $TMPDIR/glue.* | LC_ALL=C sort | uniq > $glueFile";
   print STDERR "Merging glue rules: $cmd \n";
   print STDERR `$cmd`;
+}
+
+# merge phrase orientation priors (GHKM extraction)
+if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
+  print STDERR "Merging phrase orientation priors\n";
+
+  my @orientationPriorsCountFiles = glob("$TMPDIR/*.phraseOrientationPriors");
+  my %priorCounts;
+
+  foreach my $filenamePhraseOrientationPriors (@orientationPriorsCountFiles) {
+    if (-f $filenamePhraseOrientationPriors) {
+      open my $infilePhraseOrientationPriors, '<', $filenamePhraseOrientationPriors or die "cannot open $filenamePhraseOrientationPriors: $!";
+      while (my $line = <$infilePhraseOrientationPriors>) { 
+        print $line; 
+        my ($key, $value) = split / /, $line;
+        $priorCounts{$key} += $value;
+      }
+      close $infilePhraseOrientationPriors;
+    }
+  }
+
+  open my $outPhraseOrientationPriors, '>', $phraseOrientationPriorsFile or die "cannot open $phraseOrientationPriorsFile: $!";
+  foreach my $key (sort keys %priorCounts) {
+    print $outPhraseOrientationPriors $key." ".$priorCounts{$key}."\n";
+  }
+  close($outPhraseOrientationPriors);
 }
 
 # delete temporary files
@@ -259,15 +292,21 @@ sub NumStr($)
     my $i = shift;
     my $numStr;
     if ($i < 10) {
-	$numStr = "0000$i";
+	$numStr = "000000$i";
     }
     elsif ($i < 100) {
-	$numStr = "000$i";
+	$numStr = "00000$i";
     }
     elsif ($i < 1000) {
-	$numStr = "00$i";
+	$numStr = "0000$i";
     }
     elsif ($i < 10000) {
+	$numStr = "000$i";
+    }
+    elsif ($i < 100000) {
+	$numStr = "00$i";
+    }
+    elsif ($i < 1000000) {
 	$numStr = "0$i";
     }
     else {

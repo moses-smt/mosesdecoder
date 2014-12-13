@@ -16,13 +16,20 @@ int SkeletonState::Compare(const FFState& other) const
   return (m_targetLen < otherState.m_targetLen) ? -1 : +1;
 }
 
-void SkeletonStatefulFF::Evaluate(const Phrase &source
+////////////////////////////////////////////////////////////////
+SkeletonStatefulFF::SkeletonStatefulFF(const std::string &line)
+  :StatefulFeatureFunction(3, line)
+{
+  ReadParameters();
+}
+
+void SkeletonStatefulFF::EvaluateInIsolation(const Phrase &source
                                   , const TargetPhrase &targetPhrase
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection &estimatedFutureScore) const
 {}
 
-void SkeletonStatefulFF::Evaluate(const InputType &input
+void SkeletonStatefulFF::EvaluateWithSourceContext(const InputType &input
                                   , const InputPath &inputPath
                                   , const TargetPhrase &targetPhrase
                                   , const StackVec *stackVec
@@ -30,7 +37,7 @@ void SkeletonStatefulFF::Evaluate(const InputType &input
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {}
 
-FFState* SkeletonStatefulFF::Evaluate(
+FFState* SkeletonStatefulFF::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
@@ -49,7 +56,7 @@ FFState* SkeletonStatefulFF::Evaluate(
   return new SkeletonState(0);
 }
 
-FFState* SkeletonStatefulFF::EvaluateChart(
+FFState* SkeletonStatefulFF::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
@@ -57,6 +64,14 @@ FFState* SkeletonStatefulFF::EvaluateChart(
   return new SkeletonState(0);
 }
 
+void SkeletonStatefulFF::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "arg") {
+    // set value here
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
+}
 
 }
 

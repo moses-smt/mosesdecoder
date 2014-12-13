@@ -30,26 +30,37 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
 {
   ReadParameters();
 
-  if (m_mode != "interpolate") {
+  if (m_mode == "interpolate") {
+    size_t numWeights = m_numScoreComponents;
+    UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
+	    m_pdStr.size()*numWeights != m_multimodelweights.size(),
+        "Number of scores and weights are not equal");
+  } else if (m_mode == "all" || m_mode == "all-restrict") {
+    size_t componentWeights = 0;
+    for(size_t i = 0; i < m_numModels; ++i) {
+      const string &ptName = m_pdStr[i];
+      PhraseDictionary *pt = FindPhraseDictionary(ptName);
+      UTIL_THROW_IF2(pt == NULL,
+          "Could not find component phrase table " << ptName);
+      componentWeights += pt->GetNumScoreComponents();
+    }
+    UTIL_THROW_IF2(componentWeights != m_numScoreComponents,
+        "Total number of component model scores is unequal to specified number of scores");
+  } else {
     ostringstream msg;
     msg << "combination mode unknown: " << m_mode;
     throw runtime_error(msg.str());
   }
-
-  size_t numWeights = m_numScoreComponents;
-  UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &
-                 m_pdStr.size()*numWeights != m_multimodelweights.size(),
-                 "Number of scores and weights are not equal");
 }
 
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(int type, const std::string &line)
   :PhraseDictionary(line)
 {
   if (type == 1) {
-    // PhraseDictionaryMultiModelCounts
+	// PhraseDictionaryMultiModelCounts
     UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
-                   m_pdStr.size()*4 != m_multimodelweights.size(),
-                   "Number of scores and weights are not equal");
+    		m_pdStr.size()*4 != m_multimodelweights.size(),
+  		  "Number of scores and weights are not equal");
   }
 }
 
@@ -80,7 +91,7 @@ void PhraseDictionaryMultiModel::Load()
 
     PhraseDictionary *pt = FindPhraseDictionary(ptName);
     UTIL_THROW_IF2(pt == NULL,
-                   "Could not find component phrase table " << ptName);
+    		"Could not find component phrase table " << ptName);
     m_pd.push_back(pt);
   }
 }
@@ -95,20 +106,23 @@ const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollect
     multimodelweights = getWeights(m_numScoreComponents, true);
   }
 
-  std::map<std::string,multiModelStatistics*>* allStats = new(std::map<std::string,multiModelStatistics*>);
-
-  CollectSufficientStatistics(src, allStats);
-
   TargetPhraseCollection *ret = NULL;
+
   if (m_mode == "interpolate") {
+    std::map<std::string,multiModelStatistics*>* allStats = new(std::map<std::string,multiModelStatistics*>);
+    CollectSufficientStatistics(src, allStats);
     ret = CreateTargetPhraseCollectionLinearInterpolation(src, allStats, multimodelweights);
+    RemoveAllInMap(*allStats);
+    delete allStats;
+  } else if (m_mode == "all") {
+    ret = CreateTargetPhraseCollectionAll(src, false);
+  } else if (m_mode == "all-restrict") {
+    ret = CreateTargetPhraseCollectionAll(src, true);
   }
 
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
   const_cast<PhraseDictionaryMultiModel*>(this)->CacheForCleanup(ret);
-  RemoveAllInMap(*allStats);
-  delete allStats;
-
+  
   return ret;
 }
 
@@ -147,7 +161,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           vector<FeatureFunction*> pd_feature;
           pd_feature.push_back(m_pd[i]);
           const vector<FeatureFunction*> pd_feature_const(pd_feature);
-          statistics->targetPhrase->Evaluate(src, pd_feature_const);
+          statistics->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
           // zero out scores from original phrase table
           statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
 
@@ -165,7 +179,6 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
     }
   }
 }
-
 
 TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollectionLinearInterpolation(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const
 {
@@ -186,13 +199,95 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
     vector<FeatureFunction*> pd_feature;
     pd_feature.push_back(const_cast<PhraseDictionaryMultiModel*>(this));
     const vector<FeatureFunction*> pd_feature_const(pd_feature);
-    statistics->targetPhrase->Evaluate(src, pd_feature_const);
+    statistics->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
 
     ret->Add(new TargetPhrase(*statistics->targetPhrase));
   }
   return ret;
 }
 
+TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollectionAll(const Phrase& src, const bool restricted) const
+{
+  // Collect phrases from all models
+  std::map<std::string, multiModelPhrase*> allPhrases;
+  size_t offset = 0;
+  for(size_t i = 0; i < m_numModels; ++i) {
+    const PhraseDictionary &pd = *m_pd[i];
+
+    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*) pd.GetTargetPhraseCollectionLEGACY(src);
+    if (ret_raw != NULL) {
+
+      TargetPhraseCollection::iterator iterTargetPhrase, iterLast;
+      if (m_tableLimit != 0 && ret_raw->GetSize() > m_tableLimit) {
+        iterLast = ret_raw->begin() + m_tableLimit;
+      } else {
+        iterLast = ret_raw->end();
+      }
+
+      for (iterTargetPhrase = ret_raw->begin(); iterTargetPhrase != iterLast;  ++iterTargetPhrase) {
+        const TargetPhrase* targetPhrase = *iterTargetPhrase;
+        std::vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
+
+        std::string targetString = targetPhrase->GetStringRep(m_output);
+        // Phrase not in collection -> add if unrestricted (all) or first model (all-restrict)
+        if (allPhrases.find(targetString) == allPhrases.end()) {
+          // all-restrict and not first model: skip adding unseen phrase
+          if (restricted && i > 0) {
+            continue;
+          }
+
+          multiModelPhrase* phrase = new multiModelPhrase;
+          phrase->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
+          // p contains scores from all models in order.  Values default to zero for models that do not contain phrase.
+          phrase->p.resize(m_numScoreComponents, 0);
+
+          //correct future cost estimates and total score
+          phrase->targetPhrase->GetScoreBreakdown().InvertDenseFeatures(&pd);
+          vector<FeatureFunction*> pd_feature;
+          pd_feature.push_back(m_pd[i]);
+          const vector<FeatureFunction*> pd_feature_const(pd_feature);
+          phrase->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
+          // zero out scores from original phrase table
+          phrase->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
+
+          allPhrases[targetString] = phrase;
+
+        }
+        multiModelPhrase* phrase = allPhrases[targetString];
+
+        for(size_t j = 0; j < pd.GetNumScoreComponents(); ++j) {
+          phrase->p[offset + j] = raw_scores[j];
+        }
+      }
+    }
+    offset += pd.GetNumScoreComponents();
+  }
+
+  // Copy accumulated score vectors to phrases
+  TargetPhraseCollection* ret = new TargetPhraseCollection();
+  for (std::map<std::string, multiModelPhrase*>::const_iterator iter = allPhrases.begin(); iter != allPhrases.end(); ++iter) {
+
+    multiModelPhrase* phrase = iter->second;
+    Scores scoreVector(m_numScoreComponents);
+
+    for(size_t i = 0; i < m_numScoreComponents; ++i) {
+      scoreVector[i] = phrase->p[i];
+    }
+
+    phrase->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
+
+    //correct future cost estimates and total score
+    vector<FeatureFunction*> pd_feature;
+    pd_feature.push_back(const_cast<PhraseDictionaryMultiModel*>(this));
+    const vector<FeatureFunction*> pd_feature_const(pd_feature);
+    phrase->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
+
+    ret->Add(new TargetPhrase(*phrase->targetPhrase));
+  }
+
+  RemoveAllInMap(allPhrases);
+  return ret;
+}
 
 //TODO: is it worth caching the results as long as weights don't change?
 std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t numWeights, bool normalize) const
@@ -323,9 +418,6 @@ void PhraseDictionaryMultiModel::SetTemporaryMultiModelWeightsVector(std::vector
 vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string, string> > &phrase_pair_vector)
 {
 
-  const StaticData &staticData = StaticData::Instance();
-  const string& factorDelimiter = staticData.GetFactorDelimiter();
-
   map<pair<string, string>, size_t> phrase_pair_map;
 
   for ( vector<pair<string, string> >::const_iterator iter = phrase_pair_vector.begin(); iter != phrase_pair_vector.end(); ++iter ) {
@@ -344,7 +436,7 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
     map<string,multiModelStatistics*>* allStats = new(map<string,multiModelStatistics*>);
 
     Phrase sourcePhrase(0);
-    sourcePhrase.CreateFromString(Input, m_input, source_string, factorDelimiter, NULL);
+    sourcePhrase.CreateFromString(Input, m_input, source_string, NULL);
 
     CollectSufficientStatistics(sourcePhrase, allStats); //optimization potential: only call this once per source phrase
 

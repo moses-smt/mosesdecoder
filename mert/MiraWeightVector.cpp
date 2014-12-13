@@ -93,6 +93,14 @@ void MiraWeightVector::update(size_t index, ValType delta)
   m_lastUpdated[index] = m_numUpdates;
 }
 
+void MiraWeightVector::ToSparse(SparseVector* sparse) const {
+  for (size_t i = 0; i < m_weights.size(); ++i) {
+    if(abs(m_weights[i])>1e-8) {
+      sparse->set(i,m_weights[i]);
+    }
+  }
+}
+
 /**
  * Make sure everyone's total is up-to-date
  */
@@ -131,7 +139,7 @@ ostream& operator<<(ostream& o, const MiraWeightVector& e)
   for(size_t i=0; i<e.m_weights.size(); i++) {
     if(abs(e.m_weights[i])>1e-8) {
       if(i>0) o << " ";
-      cerr << i << ":" << e.m_weights[i];
+      o << i << ":" << e.m_weights[i];
     }
   }
   return o;
@@ -161,6 +169,15 @@ ValType AvgWeightVector::score(const MiraFeatureVector& fv) const
 size_t AvgWeightVector::size() const
 {
   return m_wv.m_weights.size();
+}
+
+void AvgWeightVector::ToSparse(SparseVector* sparse) const {
+  for (size_t i = 0; i < size(); ++i) {
+    ValType w = weight(i);
+    if(abs(w)>1e-8) {
+      sparse->set(i,w);
+    }
+  }
 }
 
 // --Emacs trickery--

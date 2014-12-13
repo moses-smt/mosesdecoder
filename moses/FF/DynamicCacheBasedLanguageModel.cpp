@@ -85,7 +85,7 @@ void DynamicCacheBasedLanguageModel::SetParameter(const std::string& key, const 
   }
 }
 
-void DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp
+void DynamicCacheBasedLanguageModel::EvaluateInIsolation(const Phrase &sp
     , const TargetPhrase &tp
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const

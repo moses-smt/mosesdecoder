@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <string>
+#include "moses/FeatureVector.h"
 #include "moses/TypeDef.h"
 
 namespace Moses
@@ -33,6 +34,7 @@ protected:
   std::string m_description, m_argLine;
   std::vector<std::vector<std::string> > m_args;
   bool m_tuneable;
+  size_t m_verbosity;
   size_t m_numScoreComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
@@ -46,6 +48,8 @@ public:
   }
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
+
+  static void CallChangeSource(InputType *&input);
 
   FeatureFunction(const std::string &line);
   FeatureFunction(size_t numScoreComponents, const std::string &line);
@@ -70,6 +74,11 @@ public:
   const std::string& GetScoreProducerDescription() const {
     return m_description;
   }
+
+  FName GetFeatureName(const std::string& name) const {
+    return FName(GetScoreProducerDescription(), name);
+  }
+
 
   //! if false, then this feature is not displayed in the n-best list.
   // use with care
@@ -98,10 +107,14 @@ public:
   // source phrase is the substring that the phrase table uses to look up the target phrase,
   // may have more factors than actually need, but not guaranteed.
   // For SCFG decoding, the source contains non-terminals, NOT the raw source from the input sentence
-  virtual void Evaluate(const Phrase &source
+  virtual void EvaluateInIsolation(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const = 0;
+
+  // override this method if you want to change the input before decoding
+  virtual void ChangeSource(InputType *&input) const
+  {}
 
   // This method is called once all the translation options are retrieved from the phrase table, and
   // just before search.
@@ -110,7 +123,7 @@ public:
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
   // No FF should set estimatedFutureScore in both overloads!
-  virtual void Evaluate(const InputType &input
+  virtual void EvaluateWithSourceContext(const InputType &input
                         , const InputPath &inputPath
                         , const TargetPhrase &targetPhrase
                         , const StackVec *stackVec

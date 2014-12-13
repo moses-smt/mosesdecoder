@@ -101,7 +101,7 @@ $VERSION = $DELETE_VERSION if $DELETE_VERSION;
 `mkdir -p steps/$VERSION` unless -d "steps/$VERSION";
 
 &log_config() unless $DELETE_CRASHED || $DELETE_VERSION;
-print "running experimenal run number $VERSION\n";
+print "running experimental run number $VERSION\n";
 
 print "\nESTABLISH WHICH STEPS NEED TO BE RUN\n";
 my (%NEEDED,     # mapping of input files to step numbers
@@ -281,6 +281,7 @@ sub read_meta {
 		$escaped_template =~ s/^IN/EMS_IN_EMS/;
 		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
 		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
+		$escaped_template =~ s/TMP/EMS_TMP_EMS/g;
 		$TEMPLATE{"$module:$step"} = $escaped_template;
 	    }
 	    elsif ($1 eq "template-if") {
@@ -288,6 +289,7 @@ sub read_meta {
 		$escaped_template =~ s/^IN/EMS_IN_EMS/;
 		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
 		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
+		$escaped_template =~ s/TMP/EMS_TMP_EMS/g;
 		my @IF = split(/\s+/,$escaped_template);
 		push @{$TEMPLATE_IF{"$module:$step"}}, \@IF;
 	    }
@@ -450,7 +452,9 @@ sub find_steps {
     }
 
     # go through each module
-    for(my $m=$#MODULE; $m>=0; $m--) {
+    while(1) {
+      my $step_count_before = scalar(@DO_STEP);
+      for(my $m=$#MODULE; $m>=0; $m--) {
 	my $module = $MODULE[$m];
 
 	# if module is "multiple" go through each set
@@ -475,6 +479,8 @@ sub find_steps {
 	    &find_steps_for_module($module,"");
 	}
     }
+    last if $step_count_before == scalar(@DO_STEP);
+  }
 }
 
 sub find_steps_for_module {
@@ -487,6 +493,7 @@ sub find_steps_for_module {
 
 	my $step = &construct_name($module,$set,$stepname);
 	my $defined_step = &defined_step($step); # without set
+	next if defined($STEP_LOOKUP{$step});
 
 	# FIRST, some checking...
 	print "\tchecking step: $step\n" if $VERBOSE;
@@ -716,9 +723,11 @@ sub delete_crashed {
   for(my $i=0;$i<=$#DO_STEP;$i++) {
     my $step_file = &versionize(&step_file($i),$DELETE_CRASHED);
     next unless -e $step_file;
-    next unless &check_if_crashed($i,$DELETE_CRASHED,"no wait");
-    &delete_step($DO_STEP[$i],$DELETE_CRASHED);
-    $crashed++;
+    if (! -e $step_file.".DONE" ||     # interrupted (machine went down)
+        &check_if_crashed($i,$DELETE_CRASHED,"no wait")) { # noted crash
+      &delete_step($DO_STEP[$i],$DELETE_CRASHED);
+      $crashed++;
+    }
   }
   print "run with -exec to delete steps\n" if $crashed && !$EXECUTE;
   print "nothing to do\n" unless $crashed;
@@ -813,7 +822,6 @@ sub delete_output {
   if (-d $file) {
     print "\tdelete directory $file\n";
     `rm -r $file` if $EXECUTE;
-    return;
   }
   # delete regular file that matches exactly
   if (-e $file) {
@@ -821,11 +829,20 @@ sub delete_output {
     `rm $file` if $EXECUTE;
   } 
   # delete files that have additional extension
+  $file =~ /^(.+)\/([^\/]+)$/;
+  my ($dir,$f) = ($1,$2);
   my @FILES = `ls $file.* 2>/dev/null`;
-  foreach (@FILES) {
+  foreach (`ls $dir`) {
     chop;
-    print "\tdelete file $_\n";
-    `rm $_` if $EXECUTE;
+    next unless substr($_,0,length($f)) eq $f;
+    if (-e $_) {
+      print "\tdelete file $dir/$_\n";
+      `rm $dir/$_` if $EXECUTE;
+    }
+    else {
+      print "\tdelete directory $dir/$_\n";
+      `rm -r $dir/$_` if $EXECUTE;
+    }
   }
 }
 
@@ -1513,9 +1530,9 @@ sub check_if_crashed {
 			     'error','killed','core dumped','can\'t read',
 			     'no such file or directory','unknown option',
 			     'died at','exit code','permission denied',
-           'segmentation fault','abort',
-           'no space left on device',
-           'can\'t locate', 'unrecognized option', 'Exception') {
+			     'segmentation fault','abort',
+			     'no space left on device', ': not found',
+			     'can\'t locate', 'unrecognized option', 'Exception') {
 	    if (/$pattern/i) {
 		my $not_error = 0;
 		if (defined($NOT_ERROR{&defined_step_id($i)})) {
@@ -1535,7 +1552,6 @@ sub check_if_crashed {
 
     # check if output file empty
     my $output = &get_default_file(&deconstruct_name($DO_STEP[$i]));
-    print STDERR "".$DO_STEP[$i]." -> $output\n";
     # currently only works for single output file
     if (-e $output && -z $output) {
       push @DIGEST,"output file $output is empty";
@@ -1861,7 +1877,7 @@ sub define_tuning_tune {
 	$cmd .= " --lambdas \"$lambda\"" if $lambda;
 	$cmd .= " --continue" if $tune_continue;
 	$cmd .= " --skip-decoder" if $skip_decoder;
-	$cmd .= " --inputtype $tune_inputtype" if $tune_inputtype;
+	$cmd .= " --inputtype $tune_inputtype" if defined($tune_inputtype);
     
 	my $qsub_args = &get_qsub_args("TUNING");
 	$cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
@@ -2152,13 +2168,14 @@ sub define_training_build_transliteration_model {
 
     my ($model, $corpus, $alignment) = &get_output_and_input($step_id);
 
-		my $moses_script_dir = &check_and_get("GENERAL:moses-script-dir");
-		my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
-		my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
-		my $sym_method = &check_and_get("TRAINING:alignment-symmetrization-method");
-		my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
-		my $external_bin_dir = &check_and_get("GENERAL:external-bin-dir");
-		my $srilm_dir = &check_and_get("GENERAL:srilm-dir");
+    my $moses_script_dir = &check_and_get("GENERAL:moses-script-dir");
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+    my $sym_method = &check_and_get("TRAINING:alignment-symmetrization-method");
+    my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+    my $external_bin_dir = &check_and_get("GENERAL:external-bin-dir");
+    my $srilm_dir = &check_and_get("TRAINING:srilm-dir");
+    my $decoder = &get("TRAINING:transliteration-decoder");
 
     my $cmd = "$moses_script_dir/Transliteration/train-transliteration-module.pl";
     $cmd .= " --corpus-f $corpus.$input_extension";
@@ -2166,6 +2183,7 @@ sub define_training_build_transliteration_model {
     $cmd .= " --alignment $alignment.$sym_method";
     $cmd .= " --out-dir $model";
     $cmd .= " --moses-src-dir $moses_src_dir";
+    $cmd .= " --decoder $decoder" if defined($decoder);
     $cmd .= " --external-bin-dir $external_bin_dir";
     $cmd .= " --srilm-dir $srilm_dir";
     $cmd .= " --input-extension $input_extension";
@@ -2174,7 +2192,7 @@ sub define_training_build_transliteration_model {
     $cmd .= " --source-syntax " if &get("GENERAL:input-parser");
     $cmd .= " --target-syntax " if &get("GENERAL:output-parser");
 
-		&create_step($step_id, $cmd);
+    &create_step($step_id, $cmd);
 }
 
 sub define_training_extract_phrases {
@@ -2194,9 +2212,10 @@ sub define_training_extract_phrases {
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
 
       if (&get("GENERAL:output-parser") && (&get("TRAINING:use-unknown-word-labels") || &get("TRAINING:use-unknown-word-soft-matches"))) {
-	  my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
-	  $cmd .= "-unknown-word-label $unknown_word_label ";
+        my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
+        $cmd .= "-unknown-word-label $unknown_word_label ";
       }
+
       if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-soft-matches")) {
           my $unknown_word_soft_matches = &versionize(&long_file_name("unknown-word-soft-matches","model",""));
           $cmd .= "-unknown-word-soft-matches $unknown_word_soft_matches ";
@@ -2208,6 +2227,16 @@ sub define_training_extract_phrases {
 
       if (&get("TRAINING:ghkm-tree-fragments")) {
         $cmd .= "-ghkm-tree-fragments ";
+      }
+
+      if (&get("TRAINING:ghkm-phrase-orientation")) {
+        $cmd .= "-ghkm-phrase-orientation ";
+        my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
+        $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
+      }
+
+      if (&get("TRAINING:ghkm-source-labels")) {
+        $cmd .= "-ghkm-source-labels ";
       }
     }
 
@@ -2240,6 +2269,16 @@ sub define_training_build_ttable {
     if (&get("TRAINING:hierarchical-rule-set")) {
       if (&get("TRAINING:ghkm-tree-fragments")) {
         $cmd .= "-ghkm-tree-fragments ";
+      }
+      if (&get("TRAINING:ghkm-phrase-orientation")) {
+        $cmd .= "-ghkm-phrase-orientation ";
+        my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
+        $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
+      }
+      if (&get("TRAINING:ghkm-source-labels")) {
+        $cmd .= "-ghkm-source-labels ";
+        my $source_labels_file = &versionize(&long_file_name("source-labels","model",""));
+        $cmd .= "-ghkm-source-labels-file $source_labels_file ";
       }
     }
     
@@ -2349,6 +2388,15 @@ sub get_config_tables {
       }
     }
 
+    # memory mapped suffix array phrase table
+    my $mmsapt = &get("TRAINING:mmsapt");
+    if (defined($mmsapt)) {
+      $ptImpl = 11; # mmsapt
+      $mmsapt =~ s/num-features=(\d+) // || die("ERROR: mmsapt setting needs to set num-features");
+      $numFF = $1;
+      $cmd .= "-mmsapt '$mmsapt' ";
+    }
+
     # additional settings for factored models
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $phrase_translation_table);
     $cmd = trim($cmd);
@@ -2406,24 +2454,22 @@ sub define_training_create_config {
 	 $cmd .= "-transliteration-phrase-table $transliteration_pt ";
     }	
 
-    if($osm){
-      
+    if ($osm) {
       my $osm_settings = &get("TRAINING:operation-sequence-model-settings"); 
-     
-
-	if($osm_settings =~ /factor/){
-	
-		$cmd .= "-osm-model $osm/ ";
-		my $find = "--factor";
-		my $replace = "-osm-setting";
-		$osm_settings =~ s/$find/$replace/g;
-      		$cmd .= "$osm_settings ";       
-       }
-	else{
-	 $cmd .= "-osm-model $osm/operationLM.bin ";
-	}
+      if ($osm_settings =~ /-factor *(\S+)/){
+        $cmd .= "-osm-model $osm/ -osm-setting $1 ";
+      }
+      else {
+        $cmd .= "-osm-model $osm/operationLM.bin ";
+      }
     }
-	
+
+    if (&get("TRAINING:ghkm-source-labels")) {
+      $cmd .= "-ghkm-source-labels ";
+      my $source_labels_file = &versionize(&long_file_name("source-labels","model",""));
+      $cmd .= "-ghkm-source-labels-file $source_labels_file ";
+    }
+
     # sparse lexical features provide additional content for config file
     $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
 
@@ -2504,9 +2550,18 @@ sub define_interpolated_lm_interpolate {
 	$interpolation_script, $tuning, @LM) = &get_output_and_input($step_id);
     my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
     my $group = &get("INTERPOLATED-LM:group");
+    my $weights = &get("INTERPOLATED-LM:weights");
     my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
 
     my $cmd = "";
+
+    my %WEIGHT;
+    if (defined($weights)) {
+      foreach (split(/ *, */,$weights)) {
+        /^ *(\S+) *= *(\S+)/ || die("ERROR: wrong interpolation weight specification $_ ($weights)");
+        $WEIGHT{$1} = $2;
+      }
+    }
 
     # go through language models by factor and order 
     my ($icount,$ILM_SETS) = &get_interpolated_lm_sets();
@@ -2516,11 +2571,18 @@ sub define_interpolated_lm_interpolate {
 
         # get list of language model files
         my $lm_list = "";
+        my $weight_list = "";
         foreach my $id_set (@{$$ILM_SETS{$factor}{$order}}) {
           my ($id,$set) = split(/ /,$id_set,2);
           $lm_list .= $LM[$id].",";
+          if (defined($weights)) { 
+            die("ERROR: no interpolation weight set for $factor:$order:$set (factor:order:set)") 
+              unless defined($WEIGHT{"$factor:$order:$set"});
+            $weight_list .= $WEIGHT{"$factor:$order:$set"}.",";
+          }
         }
         chop($lm_list);
+        chop($weight_list);
 
         # if grouping, identify position in list
         my $numbered_string = "";
@@ -2561,6 +2623,7 @@ sub define_interpolated_lm_interpolate {
         }
         $cmd .= "$interpolation_script --tuning $factored_tuning --name $name --srilm $srilm_dir --lm $lm_list";
         $cmd .= " --group \"$numbered_string\"" if defined($group);
+        $cmd .= " --weights \"$weight_list\"" if defined($weights);
         $cmd .= "\n";
       }
     }
@@ -3234,6 +3297,7 @@ sub define_template {
 		#  replace IN and OUT with %s
 		$single_cmd =~ s/EMS_IN_EMS\S*/\%s/;
 		$single_cmd =~ s/EMS_OUT_EMS\S*/\%s/;
+		$single_cmd =~ s/EMS_SLASH_OUT_EMS\S*/\%s/;
 		# build tmp
 		my $tmp_dir = $module;
 		$tmp_dir =~ tr/A-Z/a-z/;
@@ -3274,6 +3338,10 @@ sub define_template {
 	$cmd =~ s/EMS_IN_EMS/$INPUT[0]/g;
     }
     $cmd =~ s/EMS_OUT_EMS/$output/g;
+    if (defined($STEP_TMPNAME{"$module:$stepname"})) {
+      my $tmp = $dir."/".$STEP_TMPNAME{"$module:$stepname"}.".$VERSION";
+      $cmd =~ s/EMS_TMP_EMS/$tmp/g;
+    }
     $cmd =~ s/VERSION/$VERSION/g;
     print "\tcmd is $cmd\n" if $VERBOSE;
     while ($cmd =~ /^([\S\s]*)\$\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
@@ -3381,7 +3449,7 @@ sub check_backoff_and_get_array {
 # the following two functions deal with getting information about
 # files that are passed between steps. this are either specified
 # in the meta file (default) or in the configuration file (here called
-# 'specified', in the step management refered to as 'given').
+# 'specified', in the step management referred to as 'given').
 
 sub get_specified_or_default_file {
     my ($specified_module,$specified_set,$specified_parameter,
@@ -3426,10 +3494,11 @@ sub get_default_file {
 	    my $name = &construct_name($module,$set,$out);
 	    return &check_backoff_and_get($name);
 	}
-#	print "\t\tpassing $step -> ";
+#	print "\t\tpassing $step\n";
 	$i = $DEPENDENCY[$i][0];
 	$step = $DO_STEP[$i];
 #	print "\t\tbacking off to $step\n";
+        ($default_module,$default_set,$default_step) = &deconstruct_name($step);
     }
 
     # get file name

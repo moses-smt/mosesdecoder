@@ -13,12 +13,12 @@ public:
     return true;
   }
 
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const;
 
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
@@ -26,11 +26,11 @@ public:
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
-  void Evaluate(const Hypothesis& hypo,
+  void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
 
-  void EvaluateChart(
+  void EvaluateWhenApplied(
     const ChartHypothesis& hypo,
     ScoreComponentCollection* accumulator) const
   {}

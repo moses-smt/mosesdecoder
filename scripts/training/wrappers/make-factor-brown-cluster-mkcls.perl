@@ -2,7 +2,7 @@
 
 use strict;
 
-my ($cluster_file,$in,$out,$tmp) = @ARGV;
+my ($lowercase, $cluster_file,$in,$out,$tmp) = @ARGV;
 
 my $CLUSTER = &read_cluster_from_mkcls($cluster_file);
 
@@ -17,7 +17,10 @@ while(<IN>) {
   s/ $//;
   my $first = 1;
   foreach my $word (split) {
-    my $cluster = defined($$CLUSTER{$word}) ? $$CLUSTER{$word} : "<unk>";
+    if ($lowercase) {
+      $word = lc($word);
+    }
+    my $cluster = defined($$CLUSTER{$word}) ? $$CLUSTER{$word} : "0";
     print OUT " " unless $first;
     print OUT $cluster;
     $first = 0;
@@ -31,6 +34,7 @@ sub read_cluster_from_mkcls {
   my ($file) = @_;
   my %CLUSTER;
   open(CLUSTER_FILE,$file) || die("ERROR: could not open cluster file '$file'");
+  binmode(CLUSTER_FILE, ":utf8");
   while(<CLUSTER_FILE>) {
     chop;
     my ($word,$cluster) = split;
@@ -42,3 +46,5 @@ sub read_cluster_from_mkcls {
 
 sub add_cluster_to_string {
 }
+
+

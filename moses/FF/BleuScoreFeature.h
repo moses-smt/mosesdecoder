@@ -115,20 +115,20 @@ public:
                                        std::vector< size_t >&,
                                        size_t skip = 0) const;
 
-  FFState* Evaluate( const Hypothesis& cur_hypo,
+  FFState* EvaluateWhenApplied( const Hypothesis& cur_hypo,
                      const FFState* prev_state,
                      ScoreComponentCollection* accumulator) const;
-  FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
+  FFState* EvaluateWhenApplied(const ChartHypothesis& cur_hypo,
                          int featureID,
                          ScoreComponentCollection* accumulator) const;
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const

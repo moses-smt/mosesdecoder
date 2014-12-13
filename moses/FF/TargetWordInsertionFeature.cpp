@@ -53,7 +53,7 @@ void TargetWordInsertionFeature::Load()
   m_unrestricted = false;
 }
 
-void TargetWordInsertionFeature::Evaluate(const Phrase &source
+void TargetWordInsertionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const
@@ -73,11 +73,7 @@ void TargetWordInsertionFeature::ComputeFeatures(const Phrase &source,
   if (targetLength == 1 && sourceLength == 1 && !alignmentInfo.GetSize()) return;
 
   // flag aligned words
-  bool aligned[16];
-  UTIL_THROW_IF2(targetLength >= 16, "Target length must be less than 16 words");
-  for(size_t i=0; i<targetLength; i++) {
-    aligned[i] = false;
-  }
+  std::vector<bool> aligned(targetLength, false);
   for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++) {
     aligned[ alignmentPoint->second ] = true;
   }

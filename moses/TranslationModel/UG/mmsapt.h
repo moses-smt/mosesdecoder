@@ -19,6 +19,7 @@
 #include "moses/TranslationModel/UG/mm/ug_typedefs.h"
 #include "moses/TranslationModel/UG/mm/tpt_pickler.h"
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
+#include "moses/TranslationModel/UG/mm/ug_phrasepair.h"
 #include "moses/TranslationModel/UG/mm/ug_lexical_phrase_scorer2.h"
 
 #include "moses/InputFileStream.h"
@@ -26,9 +27,11 @@
 #include "moses/TargetPhrase.h"
 #include <boost/dynamic_bitset.hpp>
 #include "moses/TargetPhraseCollection.h"
+#include "util/usage.hh"
 #include <map>
 
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "sapt_phrase_scorers.h"
 
 // TO DO:
 // - make lexical phrase scorer take addition to the "dynamic overlay" into account
@@ -46,42 +49,85 @@ namespace Moses
 #endif
   {
     friend class Alignment;
+    map<string,string> param;
+    vector<float> bias;
+    string m_name;
   public:    
     typedef L2R_Token<SimpleWordId> Token;
     typedef mmBitext<Token> mmbitext;
     typedef imBitext<Token> imbitext;
+    typedef Bitext<Token>     bitext;
     typedef TSA<Token>           tsa;
+    typedef PhraseScorer<Token> pscorer;
   private:
+    // vector<sptr<bitext> > shards;
     mmbitext btfix; 
-    sptr<imbitext> btdyn;
-    string bname,extra_data;
+    sptr<imbitext> btdyn; 
+    string bname,extra_data,bias_file;
     string L1;
     string L2;
-    float  m_lbop_parameter;
+    float  m_lbop_conf; // confidence level for lbop smoothing
+    float  m_lex_alpha; // alpha paramter (j+a)/(m+a) for lexical smoothing
+    // alpha parameter for lexical smoothing (joint+alpha)/(marg + alpha)
+    // must be > 0 if dynamic 
     size_t m_default_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
-    char m_pfwd_denom; // denominator for computation of fwd phrase score:
-    // 'r' - divide by raw count
-    // 's' - divide by sample count
-    // 'g' - devide by number of "good" (i.e. coherent) samples 
-    // size_t num_features;
+    vector<string> m_feature_set_names; // one or more of: standard, datasource
+ 
+    // // deprecated!
+    // char m_pfwd_denom; // denominator for computation of fwd phrase score:
+    // // 'r' - divide by raw count
+    // // 's' - divide by sample count
+    // // 'g' - devide by number of "good" (i.e. coherent) samples 
+    // // size_t num_features;
+
     size_t input_factor;
     size_t output_factor; // we can actually return entire Tokens!
+
+    // bool withLogCountFeatures; // add logs of counts as features?
+    // bool withCoherence; 
+    // string m_pfwd_features; // which pfwd functions to use
+    // string m_pbwd_features; // which pbwd functions to use
+
+    // for display for human inspection (ttable dumps):
+    vector<string> m_feature_names; // names of features activated
+    vector<bool> m_is_logval;  // keeps track of which features are log valued 
+    vector<bool> m_is_integer; // keeps track of which features are integer valued 
+
+    vector<sptr<pscorer > > m_active_ff_fix; // activated feature functions (fix)
+    vector<sptr<pscorer > > m_active_ff_dyn; // activated feature functions (dyn)
+    vector<sptr<pscorer > > m_active_ff_common; // activated feature functions (dyn)
+
+    void
+    register_ff(sptr<pscorer> const& ff, vector<sptr<pscorer> > & registry);
+
+    template<typename fftype>
+    void 
+    check_ff(string const ffname,vector<sptr<pscorer> >* registry = NULL);
+    // add feature function if specified 
+    
+    template<typename fftype>
+    void 
+    check_ff(string const ffname, float const xtra, vector<sptr<pscorer> >* registry = NULL);
+    // add feature function if specified
+
+    void
+    add_corpus_specific_features(vector<sptr<pscorer > >& ffvec);
+    
     // built-in feature functions
-    PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
-    PScorePbwd<Token> calc_pbwd_fix, calc_pbwd_dyn;
-    PScoreLex<Token>  calc_lex; // this one I'd like to see as an external ff eventually
-    PScorePP<Token>   apply_pp; // apply phrase penalty 
-    PScoreLogCounts<Token>   add_logcounts_fix;
-    PScoreLogCounts<Token>   add_logcounts_dyn;
+    // PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
+    // PScorePbwd<Token> calc_pbwd_fix, calc_pbwd_dyn;
+    // PScoreLex<Token>  calc_lex; // this one I'd like to see as an external ff eventually
+    // PScorePC<Token>   apply_pp; // apply phrase penalty 
+    // PScoreLogCounts<Token>   add_logcounts_fix;
+    // PScoreLogCounts<Token>   add_logcounts_dyn;
     void init(string const& line);
     mutable boost::mutex lock;
+    bool withPbwd;
     bool poolCounts;
-    bool withLogCountFeatures; // add logs of counts as features?
-    bool withPfwd,withPbwd;
     vector<FactorType> ofactor;
 
-    
+
   public:
     // typedef boost::unordered_map<uint64_t, sptr<TargetPhraseCollection> > tpcoll_cache_t;
     class TargetPhraseCollectionWrapper 
@@ -89,11 +135,15 @@ namespace Moses
     {
     public:
       size_t   const revision; // time stamp from dynamic bitext
-      uint64_t const      key; // phrase key
+      ::uint64_t const      key; // phrase key
       uint32_t       refCount; // reference count
+#if defined(timespec)
       timespec         tstamp; // last use
+#else
+      timeval          tstamp; // last use
+#endif
       int                 idx; // position in history heap
-      TargetPhraseCollectionWrapper(size_t r, uint64_t const k);
+      TargetPhraseCollectionWrapper(size_t r, ::uint64_t const k);
       ~TargetPhraseCollectionWrapper();
     };
 
@@ -107,7 +157,7 @@ namespace Moses
     void
     decache(TargetPhraseCollectionWrapper* ptr) const;
 
-    typedef map<uint64_t, TargetPhraseCollectionWrapper*> tpc_cache_t;
+    typedef map<typename ::uint64_t, TargetPhraseCollectionWrapper*> tpc_cache_t;
     mutable tpc_cache_t m_cache;
     mutable vector<TargetPhraseCollectionWrapper*> m_history;
     // phrase table feature weights for alignment:
@@ -119,16 +169,28 @@ namespace Moses
     mm2dtable_t COOCraw;
 
     TargetPhrase* 
-    createTargetPhrase
+    mkTPhrase(Phrase const& src, 
+	      Moses::bitext::PhrasePair<Token>* fix, 
+	      Moses::bitext::PhrasePair<Token>* dyn, 
+	      sptr<Bitext<Token> > const& dynbt) const;
+
+    // template<typename Token>
+    // void 
+    // expand(typename Bitext<Token>::iter const& m, Bitext<Token> const& bt, 
+    // 	   pstats const& pstats, vector<PhrasePair<Token> >& dest);
+    
+#if 0
+    TargetPhrase* 
+    mkTPhrase
     (Phrase        const& src, 
      Bitext<Token> const& bt, 
-     bitext::PhrasePair    const& pp
+     Moses::bitext::PhrasePair const& pp
      ) const;
-
+#endif
     void
     process_pstats
     (Phrase   const& src,
-     uint64_t const  pid1, 
+     ::uint64_t const  pid1, 
      pstats   const& stats, 
      Bitext<Token> const & bt, 
      TargetPhraseCollection* tpcoll
@@ -137,10 +199,10 @@ namespace Moses
     bool
     pool_pstats
     (Phrase   const& src,
-     uint64_t const  pid1a, 
+     ::uint64_t const  pid1a, 
      pstats        * statsa, 
      Bitext<Token> const & bta,
-     uint64_t const  pid1b, 
+     ::uint64_t const  pid1b, 
      pstats   const* statsb, 
      Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll
@@ -149,25 +211,38 @@ namespace Moses
     bool
     combine_pstats
     (Phrase   const& src,
-     uint64_t const  pid1a, 
+     ::uint64_t const  pid1a, 
      pstats   * statsa, 
      Bitext<Token> const & bta,
-     uint64_t const  pid1b, 
+     ::uint64_t const  pid1b, 
      pstats   const* statsb, 
      Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll
      ) const;
 
     void
-    load_extra_data(string bname);
+    load_extra_data(string bname, bool locking);
+
+    void
+    load_bias(string bname);
 
     mutable size_t m_tpc_ctr;
   public:
     // Mmsapt(string const& description, string const& line);
     Mmsapt(string const& line);
+
     void
     Load();
+
+    void
+    Load(bool with_checks);
     
+    // returns the prior table limit
+    size_t SetTableLimit(size_t limit);
+
+    string const&
+    GetName() const;
+
 #ifndef NO_MOSES
     TargetPhraseCollection const* 
     GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
@@ -202,7 +277,22 @@ namespace Moses
     
     /// return true if prefix /phrase/ exists
     bool
+    PrefixExists(Phrase const& phrase, vector<float> const* const bias) const;
+
+    bool
     PrefixExists(Phrase const& phrase) const;
+
+    vector<string> const&
+    GetFeatureNames() const;
+    
+    // void
+    // ScorePPfix(bitext::PhrasePair& pp) const;
+
+    bool
+    isLogVal(int i) const;
+    
+    bool
+    isInteger(int i) const;
 
   private:
   };
