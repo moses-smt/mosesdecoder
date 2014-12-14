@@ -25,8 +25,6 @@ Search *Search::CreateSearch(Manager& manager, const InputType &source,
     return new SearchNormal(manager,source, transOptColl);
   case CubePruning:
     return new SearchCubePruning(manager, source, transOptColl);
-  case CubeGrowing:
-    return NULL;
   case NormalBatch:
     return new SearchNormalBatch(manager, source, transOptColl);
   default:

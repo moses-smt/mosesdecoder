@@ -419,7 +419,7 @@ public:
     return m_searchAlgorithm;
   }
   bool IsChart() const {
-    return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
+    return m_searchAlgorithm == CYKPlus || m_searchAlgorithm == ChartIncremental;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
