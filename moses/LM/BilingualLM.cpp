@@ -430,7 +430,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
   getAllAlignments(cur_hypo, featureID, alignments);
 
   bool sentence_begin = false; //Check if this hypothesis' target words are located in the beginning of the sentence
-  if (neuralLMids[0] == getNeuralLMId(BOS_word, true)){
+  if (neuralLMids[0] == getNeuralLMId(BOS_word, false)){
     sentence_begin = true;
   }
   
