@@ -78,8 +78,8 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
   void Print() const;
 
 protected:
-  static DynamicCacheBasedLanguageModel *s_instance;
-  static std::map< const std::string, DynamicCacheBasedLanguageModel * > s_instance_map;
+  static DynamicCacheBasedLanguageModel* s_instance;
+  static std::map< const std::string, DynamicCacheBasedLanguageModel* > s_instance_map;
 
 public:
   DynamicCacheBasedLanguageModel(const std::string &line);
@@ -92,15 +92,18 @@ public:
     m_name = name;
   }
 
-  static const DynamicCacheBasedLanguageModel& Instance(const std::string name) {
-    UTIL_THROW_IF2(s_instance_map.find(name) == s_instance_map.end(), "The DynamicCacheBasedLanguageModel feature named " + name + " does not exist!");
-    return *(s_instance_map[name]);
+  static const DynamicCacheBasedLanguageModel* Instance(const std::string& name) {
+    if (s_instance_map.find(name) == s_instance_map.end()){ return NULL; }
+    return s_instance_map[name];
   }
 
-  static DynamicCacheBasedLanguageModel& InstanceNonConst(const std::string name) {
-    UTIL_THROW_IF2(s_instance_map.find(name) == s_instance_map.end(), "The DynamicCacheBasedLanguageModel feature named " + name + " does not exist!");
-    return *(s_instance_map[name]);
+  static DynamicCacheBasedLanguageModel* InstanceNonConst(const std::string& name) {
+    if (s_instance_map.find(name) == s_instance_map.end()){ return NULL; }
+    return s_instance_map[name];
   }
+
+
+
   static const DynamicCacheBasedLanguageModel& Instance() {
     return *s_instance;
   }

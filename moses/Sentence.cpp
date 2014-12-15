@@ -141,7 +141,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
         if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
           id = (*dlt_meta_it)["id"];
         }
-        cbtm = &PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
+        cbtm = PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
         if (cbtm) cbtm->ExecuteDlt(*dlt_meta_it);
       }
       if ((*dlt_meta_it)["type"] == "cblm") {
@@ -149,7 +149,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
         if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
           id = (*dlt_meta_it)["id"];
         }
-        cblm = &DynamicCacheBasedLanguageModel::InstanceNonConst(id);
+        cblm = DynamicCacheBasedLanguageModel::InstanceNonConst(id);
         if (cblm) cblm->ExecuteDlt(*dlt_meta_it);
       }
     }

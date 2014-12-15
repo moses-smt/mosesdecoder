@@ -85,15 +85,16 @@ public:
     m_name = name;
   }
 
-  static const PhraseDictionaryDynamicCacheBased& Instance(const std::string name) {
-    UTIL_THROW_IF2(s_instance_map.find(name) == s_instance_map.end(), "The PhraseDictionaryDynamicCacheBased feature named " + name + " does not exist!");
-    return *(s_instance_map[name]);
+  static const PhraseDictionaryDynamicCacheBased* Instance(const std::string& name) {
+    if (s_instance_map.find(name) == s_instance_map.end()){ return NULL; }
+    return s_instance_map[name];
   }
 
-  static PhraseDictionaryDynamicCacheBased& InstanceNonConst(const std::string name) {
-    UTIL_THROW_IF2(s_instance_map.find(name) == s_instance_map.end(), "The PhraseDictionaryDynamicCacheBased feature named " + name + " does not exist!");
-    return *(s_instance_map[name]);
+  static PhraseDictionaryDynamicCacheBased* InstanceNonConst(const std::string& name) {
+    if (s_instance_map.find(name) == s_instance_map.end()){ return NULL; }
+    return s_instance_map[name];
   }
+
 
   static const PhraseDictionaryDynamicCacheBased& Instance() {
     return *s_instance;

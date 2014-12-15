@@ -139,11 +139,11 @@ enum DictionaryFind {
 
 enum SearchAlgorithm {
   Normal				= 0
-                  ,CubePruning	= 1
-                                  ,CubeGrowing	= 2
-                                      ,ChartDecoding= 3
-                                          ,NormalBatch  = 4
-                                              ,ChartIncremental = 5
+  ,CubePruning	= 1
+  //,CubeGrowing	= 2
+  ,CYKPlus = 3
+  ,NormalBatch  = 4
+  ,ChartIncremental = 5
 };
 
 enum SourceLabelOverlap {

@@ -278,97 +278,6 @@ std::map<size_t, const Factor*> IOWrapper::GetPlaceholders(const Hypothesis &hyp
   return ret;
 }
 
-
-void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
-{
-  if (!m_singleBestOutputCollector)
-    return;
-  std::ostringstream out;
-  FixPrecision(out);
-  if (hypo != NULL) {
-    VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
-    VERBOSE(3,"Best path: ");
-    Backtrack(hypo);
-    VERBOSE(3,"0" << std::endl);
-
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << hypo->GetTotalScore() << " ";
-    }
-
-    if (StaticData::Instance().IsPathRecoveryEnabled()) {
-      out << "||| ";
-    }
-    Phrase outPhrase(ARRAY_SIZE_INCR);
-    hypo->GetOutputPhrase(outPhrase);
-
-    // delete 1st & last
-    UTIL_THROW_IF2(outPhrase.GetSize() < 2,
-  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-
-    outPhrase.RemoveWord(0);
-    outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-
-    const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-    string output = outPhrase.GetStringRep(outputFactorOrder);
-    out << output << endl;
-  } else {
-    VERBOSE(1, "NO BEST TRANSLATION" << endl);
-
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << "0 ";
-    }
-
-    out << endl;
-  }
-  m_singleBestOutputCollector->Write(translationId, out.str());
-}
-
-void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
-{
-  if (!m_singleBestOutputCollector) return;
-  std::ostringstream out;
-  FixPrecision(out);
-  if (StaticData::Instance().GetOutputHypoScore()) {
-    out << applied.GetScore() << ' ';
-  }
-  Phrase outPhrase;
-  Incremental::ToPhrase(applied, outPhrase);
-  // delete 1st & last
-  UTIL_THROW_IF2(outPhrase.GetSize() < 2,
-		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-  outPhrase.RemoveWord(0);
-  outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-  out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
-  out << '\n';
-  m_singleBestOutputCollector->Write(translationId, out.str());
-
-  VERBOSE(1,"BEST TRANSLATION: " << outPhrase << "[total=" << applied.GetScore() << "]" << endl);
-}
-
-void IOWrapper::OutputBestNone(long translationId)
-{
-  if (!m_singleBestOutputCollector) return;
-  if (StaticData::Instance().GetOutputHypoScore()) {
-    m_singleBestOutputCollector->Write(translationId, "0 \n");
-  } else {
-    m_singleBestOutputCollector->Write(translationId, "\n");
-  }
-}
-
-void IOWrapper::Backtrack(const ChartHypothesis *hypo)
-{
-  const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
-
-  vector<const ChartHypothesis*>::const_iterator iter;
-  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
-    const ChartHypothesis *prevHypo = *iter;
-
-    VERBOSE(3,prevHypo->GetId() << " <= ");
-    Backtrack(prevHypo);
-  }
-}
-
-
 void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
   if (hypo != NULL) {
@@ -870,39 +779,6 @@ void IOWrapper::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBR
 void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solutions,long translationId)
 {
   OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
-}
-
-////////////////////////////
-#include "moses/Syntax/PVertex.h"
-#include "moses/Syntax/S2T/DerivationWriter.h"
-
-void IOWrapper::OutputBestHypo(const Syntax::SHyperedge *best,
-                               long translationId)
-{
-  if (!m_singleBestOutputCollector) {
-    return;
-  }
-  std::ostringstream out;
-  FixPrecision(out);
-  if (best == NULL) {
-    VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << "0 ";
-    }
-  } else {
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << best->score << " ";
-    }
-    Phrase yield = Syntax::GetOneBestTargetYield(*best);
-    // delete 1st & last
-    UTIL_THROW_IF2(yield.GetSize() < 2,
-        "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-    yield.RemoveWord(0);
-    yield.RemoveWord(yield.GetSize()-1);
-    out << yield.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
-    out << '\n';
-  }
-  m_singleBestOutputCollector->Write(translationId, out.str());
 }
 
 } // namespace

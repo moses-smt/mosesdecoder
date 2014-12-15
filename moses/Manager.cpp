@@ -1450,6 +1450,11 @@ SentenceStats& Manager::GetSentenceStats() const
 
 }
 
+void Manager::OutputBest(OutputCollector *collector)  const
+{
+
+}
+
 void Manager::OutputNBest(OutputCollector *collector) const
 {
   const StaticData &staticData = StaticData::Instance();

@@ -1856,6 +1856,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/KBestExtractor.h</locationURI>
 		</link>
 		<link>
+			<name>Syntax/Manager.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/Manager.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/Manager.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/Manager.h</locationURI>
+		</link>
+		<link>
 			<name>Syntax/NonTerminalMap.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/NonTerminalMap.h</locationURI>

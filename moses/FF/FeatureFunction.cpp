@@ -7,6 +7,7 @@
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
 #include "moses/Util.h"
+#include "moses/FF/DistortionScoreProducer.h"
 
 using namespace std;
 

@@ -19,7 +19,7 @@ if $(with-irstlm) {
   dependencies += irst ;
   lmmacros += LM_IRST ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking with the IRSTLM library; be sure the release is >= 5.70.02 !!!" ;
+  echo "!!! You are linking with the IRSTLM library; be sure the release is >= 5.80.06 !!!" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
 }
 

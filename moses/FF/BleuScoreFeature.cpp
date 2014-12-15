@@ -118,7 +118,7 @@ void BleuScoreFeature::SetParameter(const std::string& key, const std::string& v
       }
       string line;
       while (getline(in,line)) {
-        /*  if (GetSearchAlgorithm() == ChartDecoding) {
+        /*  if (GetSearchAlgorithm() == CYKPlus) {
         stringstream tmp;
         tmp << "<s> " << line << " </s>";
         line = tmp.str();

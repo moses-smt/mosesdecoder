@@ -22,6 +22,7 @@ class WordsRange;
 class FactorMask;
 class InputPath;
 class StackVec;
+class DistortionScoreProducer;
 
 /** base class for all feature functions.
  */
@@ -46,6 +47,7 @@ public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
     return s_staticColl;
   }
+
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 

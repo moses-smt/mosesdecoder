@@ -90,6 +90,8 @@ void TranslationTask::RunPb()
 
   additionalReportingTime.stop();
 
+  manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+
   // apply decision rule and output best translation(s)
   if (m_ioWrapper.GetSingleBestOutputCollector()) {
     ostringstream out;
@@ -268,17 +270,9 @@ void TranslationTask::RunChart()
 	if (staticData.GetSearchAlgorithm() == ChartIncremental) {
 	  Incremental::Manager manager(*m_source);
 	  manager.Decode();
-	  const std::vector<search::Applied> &nbest = manager.GetNBest();
-	  if (!nbest.empty()) {
-		m_ioWrapper.OutputBestHypo(nbest[0], translationId);
-
-		manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
-	    manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
-
-	  } else {
-		m_ioWrapper.OutputBestNone(translationId);
-	  }
-
+	  manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+	  manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
+      manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
 	  manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
 
 	  return;
@@ -293,8 +287,8 @@ void TranslationTask::RunChart()
 	manager.OutputSearchGraphHypergraph();
 
 	// 1-best
-	const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
-	m_ioWrapper.OutputBestHypo(bestHypo, translationId);
+	manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+
 	IFVERBOSE(2) {
 	  PrintUserTime("Best Hypothesis Generation Time:");
 	}

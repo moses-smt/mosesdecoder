@@ -1120,6 +1120,7 @@ sub run_single_giza {
 	 m2 => 0 , 
 	 m3 => 3 , 
 	 m4 => 3 , 
+	 hmmiterations => 0 ,
 	 o => "giza" ,
 	 nodumps => 1 ,
 	 onlyaldumps => 1 ,
@@ -1141,7 +1142,6 @@ sub run_single_giza {
     if ($_HMM_ALIGN) {
        $GizaDefaultOptions{m3} = 0;
        $GizaDefaultOptions{m4} = 0;
-       $GizaDefaultOptions{hmmiterations} = 5;
        $GizaDefaultOptions{hmmdumpfrequency} = 5;
        $GizaDefaultOptions{nodumps} = 0;
     }
@@ -2115,7 +2115,7 @@ sub create_ini {
       my $path = `pwd`; chop($path);
       $fn = $path."/".$fn;
     }
-    $type = "SRILM" unless defined $type; # default to SRILM if no type given
+    $type = "KENLM" unless defined $type; # default to KENLM if no type given
 
     if ($type =~ /^\d+$/) {
       # backwards compatibility if the type is given not as string but as a number
