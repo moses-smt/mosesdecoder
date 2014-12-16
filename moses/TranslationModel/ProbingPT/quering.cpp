@@ -73,7 +73,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(std::vector<uint64
     //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
     uint64_t key = 0;
     for (int i = 0; i < source_phrase.size(); i++){
-        key += source_phrase[i];
+        key += (source_phrase[i] << i);
     }
 
 
@@ -114,7 +114,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(StringPiece source
     //uint64_t key = util::MurmurHashNative(&source_phrase_vid[0], source_phrase_vid.size());
     uint64_t key = 0;
     for (int i = 0; i < source_phrase_vid.size(); i++){
-        key += source_phrase_vid[i];
+        key += (source_phrase_vid[i] << i);
     }
 
     found = table.Find(key, entry);
