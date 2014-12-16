@@ -51,9 +51,9 @@ DomainFeature::DomainFeature(const string& domainFile) : m_propertyKey("domain")
   m_domain.load(domainFile);
 }
 
-void DomainFeature::addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
-                                              float count, 
-                                              int sentenceId) const
+void DomainFeature::addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+    float count,
+    int sentenceId) const
 {
   std::string value = m_domain.getDomainOfSentence(sentenceId);
   phrasePair.AddProperty(m_propertyKey, value, count);
@@ -65,13 +65,13 @@ void DomainFeature::add(const ScoreFeatureContext& context,
 {
   const map<string,float> *domainCount = context.phrasePair.GetProperty(m_propertyKey);
   assert( domainCount != NULL );
-  add(*domainCount, 
-      context.phrasePair.GetCount(), 
-      context.maybeLog, 
+  add(*domainCount,
+      context.phrasePair.GetCount(),
+      context.maybeLog,
       denseValues, sparseValues);
 }
 
-void SubsetDomainFeature::add(const map<string,float>& domainCount, 
+void SubsetDomainFeature::add(const map<string,float>& domainCount,
                               float count,
                               const MaybeLog& maybeLog,
                               std::vector<float>& denseValues,

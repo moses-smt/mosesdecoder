@@ -23,23 +23,22 @@
 
 #include "pcfg-common/tool.h"
 
-namespace Moses
-{
-namespace PCFG
-{
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
 
-class Options;
+struct Options;
 
-class PcfgScore : public Tool
-{
-public:
+class PcfgScore : public Tool {
+ public:
   PcfgScore() : Tool("pcfg-score") {}
   virtual int Main(int, char *[]);
-private:
+ private:
   void ProcessOptions(int, char *[], Options &) const;
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

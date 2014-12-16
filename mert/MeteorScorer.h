@@ -20,7 +20,7 @@ class ifdstream;
 class ScoreStats;
 
 /**
- * Meteor scoring 
+ * Meteor scoring
  *
  * https://github.com/mjdenkowski/meteor
  * http://statmt.org/wmt11/pdf/WMT07.pdf
@@ -54,7 +54,7 @@ public:
     return 23;
   }
 
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
 private:
   // Meteor and process IO

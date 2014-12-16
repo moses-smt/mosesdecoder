@@ -39,17 +39,15 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
   const std::vector<FactorType> &inputFactorsVec,
-  const std::vector<FactorType> &outputFactorsVec,
-  const std::string &filePath)
+  const std::vector<FactorType> &outputFactorsVec)
   : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_dictionary(dictionary)
   , m_dbWrapper(dbWrapper)
   , m_inputFactorsVec(inputFactorsVec)
   , m_outputFactorsVec(outputFactorsVec)
-  , m_filePath(filePath)
 {
   UTIL_THROW_IF2(m_expandableDottedRuleListVec.size() != 0,
-		  "Dotted rule collection not correctly initialized");
+                 "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
@@ -177,7 +175,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         bool doSearch = true;
         if (m_dictionary.m_maxSpanDefault != NOT_FOUND) {
             // for Hieu's source syntax
-			const Word &targetLHS = cellLabel.GetLabel();
 
 			bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
 		    size_t nonTermNumWordsCovered = endPos - startPos + 1;
@@ -186,8 +183,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 					nonTermNumWordsCovered <=  m_dictionary.m_maxSpanLabelled :
 					nonTermNumWordsCovered <= m_dictionary.m_maxSpanDefault;
 
-			//cerr << "sourceLHS=" << sourceLHS << " targetLHS=" << targetLHS
-			//		<< "doSearch=" << doSearch << endl;
         }
 
         if (doSearch) {
@@ -251,12 +246,12 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
             std::vector<float> weightT = staticData.GetWeights(&m_dictionary);
             targetPhraseCollection
-            = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
-                                               ,m_outputFactorsVec
-                                               ,m_dictionary
-                                               ,weightT
-                                               ,m_dbWrapper.GetVocab()
-                                               ,true);
+              = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
+                                                 ,m_outputFactorsVec
+                                                 ,m_dictionary
+                                                 ,weightT
+                                                 ,m_dbWrapper.GetVocab()
+                                                 ,true);
 
             delete tpcollBerkeleyDb;
             m_cache[tpCollFilePos] = targetPhraseCollection;

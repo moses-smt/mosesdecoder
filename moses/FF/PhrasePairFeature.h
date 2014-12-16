@@ -35,31 +35,32 @@ class PhrasePairFeature: public StatelessFeatureFunction
 public:
   PhrasePairFeature(const std::string &line);
 
+  void Load();
+  void SetParameter(const std::string& key, const std::string& value);
+
   bool IsUseable(const FactorMask &mask) const;
 
-  void EvaluateWhenApplied(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const;
-
-  void EvaluateWhenApplied(const ChartHypothesis& hypo,
-                     ScoreComponentCollection*) const {
-    throw std::logic_error("PhrasePairFeature not valid in chart decoder");
-  }
-
-  void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
   void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
-  void Load();
-  void SetParameter(const std::string& key, const std::string& value);
+  void EvaluateWithSourceContext(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+
+  void EvaluateWhenApplied(const Hypothesis& hypo,
+                ScoreComponentCollection* accumulator) const
+  {}
+
+  void EvaluateWhenApplied(const ChartHypothesis& hypo,
+                     ScoreComponentCollection*) const
+  {}
+
 
 };
 

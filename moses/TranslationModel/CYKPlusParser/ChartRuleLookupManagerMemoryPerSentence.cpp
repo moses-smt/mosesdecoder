@@ -70,24 +70,13 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
 
   const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode(GetParser().GetTranslationId());
 
-  // size-1 terminal rules
+  // all rules starting with terminal
   if (startPos == absEndPos) {
-    const Word &sourceWord = GetSourceAt(absEndPos).GetLabel();
-    const PhraseDictionaryNodeMemory *child = rootNode.GetChild(sourceWord);
-
-    // if we found a new rule -> directly add it to the out collection
-    if (child != NULL) {
-        const TargetPhraseCollection &tpc = child->GetTargetPhraseCollection();
-        outColl.Add(tpc, m_stackVec, range);
-    }
+    GetTerminalExtension(&rootNode, startPos);
   }
   // all rules starting with nonterminal
   else if (absEndPos > startPos) {
     GetNonTerminalExtension(&rootNode, startPos);
-    // all (non-unary) rules starting with terminal
-    if (absEndPos == startPos+1) {
-      GetTerminalExtension(&rootNode, absEndPos-1);
-    }
   }
 
   // copy temporarily stored rules to out collection
@@ -154,7 +143,6 @@ void ChartRuleLookupManagerMemoryPerSentence::UpdateCompressedMatrix(size_t star
 #if !defined(UNLABELLED_SOURCE)
         // source non-terminal labels for the span
         const InputPath &inputPath = GetParser().GetInputPath(startPos, endPos);
-        const std::vector<bool> &sourceNonTermArray = inputPath.GetNonTerminalArray();
 
         // can this ever be true? Moses seems to pad the non-terminal set of the input with [X]
         if (inputPath.GetNonTerminalSet().size() == 0) {
@@ -178,8 +166,8 @@ void ChartRuleLookupManagerMemoryPerSentence::AddAndExtend(
     size_t endPos) {
 
     const TargetPhraseCollection &tpc = node->GetTargetPhraseCollection();
-    // add target phrase collection (except if rule is empty or unary)
-    if (!tpc.IsEmpty() && endPos != m_unaryPos) {
+    // add target phrase collection (except if rule is empty or a unary non-terminal rule)
+    if (!tpc.IsEmpty() && (m_stackVec.empty() || endPos != m_unaryPos)) {
       m_completedRules[endPos].Add(tpc, m_stackVec, m_stackScores, *m_outColl);
     }
 

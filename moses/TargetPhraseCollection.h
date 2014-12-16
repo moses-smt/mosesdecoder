@@ -76,6 +76,18 @@ public:
     return m_collection;
   }
 
+  //! delete an entry from the collection
+  void Remove(const size_t pos) {
+    if (pos < m_collection.size()) {
+      m_collection.erase(begin() + pos);
+    }
+  }
+
+  //! return an entry of the collection
+  const TargetPhrase* GetTargetPhrase(const size_t pos) const {
+    return m_collection[pos];
+  }
+
   //! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
   void NthElement(size_t tableLimit);
 

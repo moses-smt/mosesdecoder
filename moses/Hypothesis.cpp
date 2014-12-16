@@ -47,7 +47,7 @@ ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 
 Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt)
   : m_prevHypo(NULL)
-  , m_sourceCompleted(source.GetSize(), manager.m_source.m_sourceCompleted)
+  , m_sourceCompleted(source.GetSize(), manager.GetSource().m_sourceCompleted)
   , m_sourceInput(source)
   , m_currSourceWordsRange(
     m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,

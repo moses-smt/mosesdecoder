@@ -57,10 +57,13 @@ namespace Moses
 /** verbose macros
  * */
 
-#define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
+#define VERBOSE(level,str) { IFVERBOSE(level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
-#define XVERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR("[" << __FILE__ << ":" << __LINE__ << "] ");TRACE_ERR(str); } }
+#define XVERBOSE(level,str) VERBOSE(level, "[" << HERE << "] " << str)
 #define HERE __FILE__ << ":" << __LINE__
+#define FEATUREVERBOSE(level,str) FEATUREVERBOSE2(level, "[" << GetScoreProducerDescription() << "] " << str)
+#define FEATUREVERBOSE2(level,str) { IFFEATUREVERBOSE(level) { TRACE_ERR(str); } }
+#define IFFEATUREVERBOSE(level) if ((m_verbosity == std::numeric_limits<std::size_t>::max() && StaticData::Instance().GetVerboseLevel() >= level) || (m_verbosity != std::numeric_limits<std::size_t>::max() && m_verbosity >= level))
 
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)
@@ -100,6 +103,52 @@ template<>
 inline std::string Scan<std::string>(const std::string &input)
 {
   return input;
+}
+
+template<>
+inline WordAlignmentSort Scan<WordAlignmentSort>(const std::string &input)
+{
+  return (WordAlignmentSort) Scan<size_t>(input);
+}
+
+template<>
+inline InputTypeEnum Scan<InputTypeEnum>(const std::string &input)
+{
+  return (InputTypeEnum) Scan<size_t>(input);
+}
+
+template<>
+inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
+{
+  return (SearchAlgorithm) Scan<size_t>(input);
+}
+
+template<>
+inline S2TParsingAlgorithm Scan<S2TParsingAlgorithm>(const std::string &input)
+{
+  return (S2TParsingAlgorithm) Scan<size_t>(input);
+}
+
+template<>
+inline SourceLabelOverlap Scan<SourceLabelOverlap>(const std::string &input)
+{
+  return (SourceLabelOverlap) Scan<size_t>(input);
+}
+
+template<>
+inline XmlInputType Scan<XmlInputType>(const std::string &input)
+{
+  XmlInputType ret;
+  if (input=="exclusive") ret = XmlExclusive;
+  else if (input=="inclusive") ret = XmlInclusive;
+  else if (input=="constraint") ret = XmlConstraint;
+  else if (input=="ignore") ret = XmlIgnore;
+  else if (input=="pass-through") ret = XmlPassThrough;
+  else {
+	  UTIL_THROW2("Unknown XML input type");
+  }
+
+  return ret;
 }
 
 //! Specialisation to understand yes/no y/n true/false 0/1
@@ -320,7 +369,7 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
                                   const std::vector<float> &weightT)
 {
   UTIL_THROW_IF2(weightT.size() != probVector.size(),
-		  "Weight and score vector sizes not the same");
+                 "Weight and score vector sizes not the same");
   float rv=0.0;
   for(float const *sb=&probVector[0],*se=sb+probVector.size(),*wb=&weightT[0];
       sb!=se; ++sb, ++wb)
@@ -387,6 +436,9 @@ void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
 
+// dump SGML parser for <dlt> tags
+std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string &line);
+
 // dump SGML parser for <seg> tags
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
 
@@ -431,7 +483,19 @@ T log_sum (T log_a, T log_b)
   return ( v );
 }
 
-
+/** Enforce rounding */
+inline void FixPrecision(std::ostream& stream, size_t size = 3)
+{
+  stream.setf(std::ios::fixed);
+  stream.precision(size);
 }
+
+class FeatureFunction;
+
+void PrintFeatureWeight(const FeatureFunction* ff);
+void ShowWeights();
+
+
+} // namespace
 
 #endif

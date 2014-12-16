@@ -135,7 +135,7 @@ void Data::load(const std::string &featfile, const std::string &scorefile)
   m_score_data->load(scorefile);
 }
 
-void Data::loadNBest(const string &file)
+void Data::loadNBest(const string &file, bool oneBest)
 {
   TRACE_ERR("loading nbest from " << file << endl);
   util::FilePiece in(file.c_str());
@@ -154,6 +154,7 @@ void Data::loadNBest(const string &file)
       util::TokenIter<util::MultiCharacter> it(line, util::MultiCharacter("|||"));
 
       sentence_index = ParseInt(*it);
+      if (oneBest && m_score_data->exists(sentence_index)) continue;
       ++it;
       sentence = it->as_string();
       ++it;
@@ -164,10 +165,9 @@ void Data::loadNBest(const string &file)
         ++it;                             // skip model score.
 
         if (it) {
-          ++it;
           alignment = it->as_string(); //fifth field (if present) is either phrase or word alignment
+          ++it;
           if (it) {
-            ++it;
             alignment = it->as_string(); //sixth field (if present) is word alignment
           }
         }
@@ -263,13 +263,13 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
 {
   UTIL_THROW_IF(shard_count == 0, util::Exception, "Must have at least 1 shard");
   UTIL_THROW_IF(shard_size < 0 || shard_size > 1,
-		  util::Exception,
-		  "Shard size must be between 0 and 1, inclusive. Currently " << shard_size);
+                util::Exception,
+                "Shard size must be between 0 and 1, inclusive. Currently " << shard_size);
 
   size_t data_size = m_score_data->size();
   UTIL_THROW_IF(data_size != m_feature_data->size(),
-  	  	  util::Exception,
-  	  	  "Error");
+                util::Exception,
+                "Error");
 
   shard_size *= data_size;
   const float coeff = static_cast<float>(data_size) / shard_count;

@@ -106,10 +106,10 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
 
   // Prune if bursting
   if (m_ruleLimit && m_size == m_ruleLimit * 2) {
-	NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin() + m_ruleLimit - 1,
-                     m_collection.begin() + m_size,
-                     ChartTranslationOptionOrderer());
+    NTH_ELEMENT4(m_collection.begin(),
+                 m_collection.begin() + m_ruleLimit - 1,
+                 m_collection.begin() + m_size,
+                 ChartTranslationOptionOrderer());
     m_scoreThreshold = m_collection[m_ruleLimit-1]->GetEstimateOfBestScore();
     m_size = m_ruleLimit;
   }
@@ -133,9 +133,9 @@ void ChartTranslationOptionList::ApplyThreshold()
     // Reduce the list to the best m_ruleLimit options.  The remaining
     // options can be overwritten on subsequent calls to Add().
     NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin()+m_ruleLimit,
-                     m_collection.begin()+m_size,
-                     ChartTranslationOptionOrderer());
+                 m_collection.begin()+m_ruleLimit,
+                 m_collection.begin()+m_size,
+                 ChartTranslationOptionOrderer());
     m_size = m_ruleLimit;
   }
 
@@ -161,11 +161,11 @@ void ChartTranslationOptionList::ApplyThreshold()
 
 float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) const
 {
-    const HypoList *stack = chartCell->GetStack().cube;
-    assert(stack);
-    assert(!stack->empty());
-	const ChartHypothesis &bestHypo = **(stack->begin());
-	return bestHypo.GetTotalScore();
+  const HypoList *stack = chartCell->GetStack().cube;
+  assert(stack);
+  assert(!stack->empty());
+  const ChartHypothesis &bestHypo = **(stack->begin());
+  return bestHypo.GetTotalScore();
 }
 
 void ChartTranslationOptionList::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
@@ -182,12 +182,11 @@ void ChartTranslationOptionList::EvaluateWithSourceContext(const InputType &inpu
   for (size_t i = 0; i < m_size; ++i) {
     ChartTranslationOptions *transOpts = m_collection[i];
     if (transOpts->GetSize() == 0) {
-    	//delete transOpts;
-      	++numDiscard;
-    }
-    else if (numDiscard) {
-    	SwapTranslationOptions(i - numDiscard, i);
-    	//m_collection[] = transOpts;
+      //delete transOpts;
+      ++numDiscard;
+    } else if (numDiscard) {
+      SwapTranslationOptions(i - numDiscard, i);
+      //m_collection[] = transOpts;
     }
   }
 
@@ -205,11 +204,11 @@ void ChartTranslationOptionList::SwapTranslationOptions(size_t a, size_t b)
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionList &obj)
 {
-	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
-		const ChartTranslationOptions &transOpts = *obj.m_collection[i];
-		out << transOpts << endl;
-	}
-	return out;
+  for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+    const ChartTranslationOptions &transOpts = *obj.m_collection[i];
+    out << transOpts << endl;
+  }
+  return out;
 }
 
 }

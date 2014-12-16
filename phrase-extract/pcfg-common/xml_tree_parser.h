@@ -21,28 +21,26 @@
 #ifndef PCFG_XML_TREE_PARSER_H_
 #define PCFG_XML_TREE_PARSER_H_
 
-#include "pcfg_tree.h"
-#include "SyntaxTree.h"
-
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
-namespace Moses
-{
-namespace PCFG
-{
+#include "pcfg_tree.h"
+#include "SyntaxTree.h"
+
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
 
 // Parses a string in Moses' XML parse tree format and returns a PcfgTree
 // object.
-class XmlTreeParser
-{
-public:
+class XmlTreeParser {
+ public:
   XmlTreeParser();
   std::auto_ptr<PcfgTree> Parse(const std::string &);
-private:
+ private:
   std::auto_ptr<PcfgTree> ConvertTree(const MosesTraining::SyntaxNode &,
                                       const std::vector<std::string> &);
 
@@ -54,6 +52,7 @@ private:
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

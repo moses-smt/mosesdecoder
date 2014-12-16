@@ -62,7 +62,7 @@ class BleuScoreFeature : public StatefulFeatureFunction
 {
 public:
   static const std::vector<BleuScoreFeature*>& GetColl() {
-	return s_staticColl;
+    return s_staticColl;
   }
 
   typedef boost::unordered_map<size_t, RefValue > RefCounts;

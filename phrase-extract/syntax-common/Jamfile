@@ -1,0 +1,8 @@
+lib syntax_common : [ glob *.cc : *_test.cc ] ..//deps : <include>.. ;
+
+import testing ;
+
+for local t in [ glob *_test.cc ] {
+  local name = [ MATCH "(.*)\.cc" : $(t) ] ;
+  unit-test $(name) : $(t) syntax_common /top//boost_unit_test_framework /top//boost_system ;
+}

@@ -101,7 +101,7 @@ void PhraseDictionaryCompact::Load()
     phraseSize = m_targetPhrasesMapped.load(pFile, true);
 
   UTIL_THROW_IF2(indexSize == 0 || coderSize == 0 || phraseSize == 0,
-		  "Not successfully loaded");
+                 "Not successfully loaded");
 }
 
 // now properly declared in TargetPhraseCollection.h
@@ -123,7 +123,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
 
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
-  = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, true);
+    = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, true);
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));

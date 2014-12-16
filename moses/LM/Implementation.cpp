@@ -114,7 +114,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
     } else {
       ShiftOrPush(contextFactor, word);
       UTIL_THROW_IF2(contextFactor.size() > GetNGramOrder(),
-    		  "Can only calculate LM score of phrases up to the n-gram order");
+                     "Can only calculate LM score of phrases up to the n-gram order");
 
       if (word == GetSentenceStartWord()) {
         // do nothing, don't include prob for <s> unigram
@@ -253,8 +253,8 @@ FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis&
 
       // beginning of sentence symbol <s>? -> just update state
       if (word == GetSentenceStartWord()) {
-    	UTIL_THROW_IF2(phrasePos != 0,
-    			"Sentence start symbol must be at the beginning of sentence");
+        UTIL_THROW_IF2(phrasePos != 0,
+                       "Sentence start symbol must be at the beginning of sentence");
         delete lmState;
         lmState = NewState( GetBeginSentenceState() );
       }
@@ -338,7 +338,15 @@ FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis&
   }
 
   // assign combined score to score breakdown
-  out->Assign(this, prefixScore + finalizedScore);
+  if (OOVFeatureEnabled()) {
+    vector<float> scores(2);
+    scores[0] = prefixScore + finalizedScore;
+    scores[1] = out->GetScoresForProducer(this)[1];
+    out->Assign(this, scores);
+  }
+  else {
+    out->Assign(this, prefixScore + finalizedScore);
+  }
 
   ret->Set(prefixScore, lmState);
   return ret;

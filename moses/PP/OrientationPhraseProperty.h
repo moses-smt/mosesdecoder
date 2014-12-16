@@ -24,12 +24,16 @@ public:
     return m_l2rSwapProbability;
   };
 
+  double GetLeftToRightProbabilityDleft() const {
+    return m_l2rDleftProbability;
+  };
+
   double GetLeftToRightProbabilityDright() const {
     return m_l2rDrightProbability;
   };
 
-  double GetLeftToRightProbabilityDleft() const {
-    return m_l2rDleftProbability;
+  double GetLeftToRightProbabilityDiscontinuous() const {
+    return m_l2rDleftProbability + m_l2rDrightProbability;
   };
 
 
@@ -41,12 +45,16 @@ public:
     return m_r2lSwapProbability;
   };
 
+  double GetRightToLeftProbabilityDleft() const {
+    return m_r2lDleftProbability;
+  };
+
   double GetRightToLeftProbabilityDright() const {
     return m_r2lDrightProbability;
   };
 
-  double GetRightToLeftProbabilityDleft() const {
-    return m_r2lDleftProbability;
+  double GetRightToLeftProbabilityDiscontinuous() const {
+    return m_r2lDleftProbability + m_r2lDrightProbability;
   };
 
 

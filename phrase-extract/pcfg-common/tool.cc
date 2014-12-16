@@ -21,7 +21,8 @@
 
 #include <sstream>
 
-namespace Moses {
+namespace MosesTraining {
+namespace Syntax {
 namespace PCFG {
 
 std::istream &Tool::OpenInputOrDie(const std::string &filename) {
@@ -77,4 +78,5 @@ void Tool::OpenNamedOutputOrDie(const std::string &filename,
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

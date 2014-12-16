@@ -34,16 +34,15 @@ namespace Moses
 {
 
 // temporary storage for a completed rule (because we use lookahead to find rules before ChartManager wants us to)
-struct CompletedRule
-{
+struct CompletedRule {
 public:
 
   CompletedRule(const TargetPhraseCollection &tpc,
-           const StackVec &stackVec,
-           const float score)
-           : m_stackVec(stackVec)
-           , m_tpc(tpc)
-           , m_score(score) {}
+                const StackVec &stackVec,
+                const float score)
+    : m_stackVec(stackVec)
+    , m_tpc(tpc)
+    , m_score(score) {}
 
   const TargetPhraseCollection & GetTPC() const {
     return m_tpc;
@@ -72,23 +71,22 @@ public:
   }
 };
 
-struct CompletedRuleCollection
-{
+struct CompletedRuleCollection {
 public:
 
   CompletedRuleCollection();
 
   CompletedRuleCollection(const CompletedRuleCollection &old)
-  : m_collection(old.m_collection)
-  , m_scoreThreshold(old.m_scoreThreshold)
-  , m_ruleLimit(old.m_ruleLimit) {}
+    : m_collection(old.m_collection)
+    , m_scoreThreshold(old.m_scoreThreshold)
+    , m_ruleLimit(old.m_ruleLimit) {}
 
   CompletedRuleCollection & operator=(const CompletedRuleCollection &old) {
 
-  m_collection = old.m_collection;
-  m_scoreThreshold = old.m_scoreThreshold;
-  m_ruleLimit = old.m_ruleLimit;
-  return *this;
+    m_collection = old.m_collection;
+    m_scoreThreshold = old.m_scoreThreshold;
+    m_ruleLimit = old.m_ruleLimit;
+    return *this;
   }
 
   std::vector<CompletedRule*>::const_iterator begin() const {

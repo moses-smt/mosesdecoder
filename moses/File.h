@@ -44,7 +44,7 @@ static const OFF_T InvalidOffT=-1;
 template<typename T> inline size_t fWrite(FILE* f,const T& t)
 {
   if(fwrite(&t,sizeof(t),1,f)!=1) {
-	UTIL_THROW2("ERROR:: fwrite!");
+    UTIL_THROW2("ERROR:: fwrite!");
   }
   return sizeof(t);
 }
@@ -52,7 +52,7 @@ template<typename T> inline size_t fWrite(FILE* f,const T& t)
 template<typename T> inline void fRead(FILE* f,T& t)
 {
   if(fread(&t,sizeof(t),1,f)!=1) {
-	UTIL_THROW2("ERROR: fread!");
+    UTIL_THROW2("ERROR: fread!");
   }
 }
 
@@ -61,7 +61,7 @@ template<typename T> inline size_t fWrite(FILE* f,const T* b,const T* e)
   UINT32 s=std::distance(b,e);
   size_t rv=fWrite(f,s);
   if(fwrite(b,sizeof(T),s,f)!=s) {
-	UTIL_THROW2("ERROR: fwrite!");
+    UTIL_THROW2("ERROR: fwrite!");
   }
   return rv+sizeof(T)*s;
 }
@@ -71,7 +71,7 @@ template<typename T> inline size_t fWrite(FILE* f,const T b,const T e)
   UINT32 s=std::distance(b,e);
   size_t rv=fWrite(f,s);
   if(fwrite(&(*b),sizeof(T),s,f)!=s) {
-	UTIL_THROW2("ERROR: fwrite!");
+    UTIL_THROW2("ERROR: fwrite!");
   }
   return rv+sizeof(T)*s;
 }
@@ -81,7 +81,7 @@ template<typename C> inline size_t fWriteVector(FILE* f,const C& v)
   UINT32 s=v.size();
   size_t rv=fWrite(f,s);
   if(fwrite(&v[0],sizeof(typename C::value_type),s,f)!=s) {
-	UTIL_THROW2("ERROR: fwrite!");
+    UTIL_THROW2("ERROR: fwrite!");
   }
   return rv+sizeof(typename C::value_type)*s;
 }
@@ -93,7 +93,7 @@ template<typename C> inline void fReadVector(FILE* f, C& v)
   v.resize(s);
   size_t r=fread(&(*v.begin()),sizeof(typename C::value_type),s,f);
   if(r!=s) {
-	UTIL_THROW2("ERROR: freadVec! "<<r<<" "<<s);
+    UTIL_THROW2("ERROR: freadVec! "<<r<<" "<<s);
   }
 }
 
@@ -112,7 +112,7 @@ inline void fReadString(FILE* f,std::string& e)
   fRead(f,s);
   char* a=new char[s+1];
   if(fread(a,sizeof(char),s,f)!=s) {
-	UTIL_THROW2("ERROR: fread!");
+    UTIL_THROW2("ERROR: fread!");
   }
   a[s]='\0';
   e.assign(a);
@@ -148,8 +148,8 @@ inline OFF_T fTell(FILE* f)
 inline void fSeek(FILE* f,OFF_T o)
 {
   if(FSEEKO(f,o,SEEK_SET)<0) {
-	std::stringstream strme;
-	strme << "ERROR: could not fseeko position " << o <<"\n";
+    std::stringstream strme;
+    strme << "ERROR: could not fseeko position " << o <<"\n";
     if(o==InvalidOffT) strme << "You tried to seek for 'InvalidOffT'!\n";
     UTIL_THROW2(strme.str());
   }

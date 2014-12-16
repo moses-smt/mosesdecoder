@@ -2,15 +2,17 @@
 #include "moses/StaticData.h"
 
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryScope3.h"
 #include "moses/TranslationModel/PhraseDictionaryTransliteration.h"
+#include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
+
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -39,10 +41,12 @@
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
+#include "moses/FF/DynamicCacheBasedLanguageModel.h"
 #include "moses/FF/SourceGHKMTreeInputMatchFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/SetSourcePhrase.h"
 #include "moses/FF/CheckTargetNgrams.h"
+#include "moses/FF/PhraseOrientationFeature.h"
 #include "CountNonTerms.h"
 #include "ReferenceComparison.h"
 #include "RuleScope.h"
@@ -54,8 +58,10 @@
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
+#include "moses/LM/BilingualLM.h"
 #include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
+#include "moses/Syntax/RuleTableFF.h"
 
 #ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
@@ -90,14 +96,16 @@
 
 #ifdef LM_NEURAL
 #include "moses/LM/NeuralLMWrapper.h"
+#include "moses/LM/bilingual-lm/BiLM_NPLM.h"
 #endif
 
 #ifdef LM_DALM
 #include "moses/LM/DALMWrapper.h"
 #endif
 
-#ifdef LM_LBL
-#include "moses/LM/oxlm/LBLLM.h"
+#ifdef LM_OXLM
+#include "moses/LM/oxlm/OxLM.h"
+#include "moses/LM/oxlm/SourceOxLM.h"
 #endif
 
 #include "util/exception.hh"
@@ -173,7 +181,9 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(PhraseDictionaryTransliteration);
+  MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
+  MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
 
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
@@ -202,6 +212,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SoftSourceSyntacticConstraintsFeature);
   MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
+  MOSES_FNAME(DynamicCacheBasedLanguageModel);
   MOSES_FNAME(HyperParameterAsWeight);
   MOSES_FNAME(SetSourcePhrase);
   MOSES_FNAME(CheckTargetNgrams);
@@ -213,6 +224,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SparseHieroReorderingFeature);
   MOSES_FNAME(SpanLength);
   MOSES_FNAME(SyntaxRHS);
+  MOSES_FNAME(PhraseOrientationFeature);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
@@ -248,14 +260,17 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_NEURAL
   MOSES_FNAME2("NeuralLM", NeuralLMWrapper);
+  MOSES_FNAME2("BilingualNPLM", BilingualLM_NPLM);
 #endif
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
 #endif
-#ifdef LM_LBL
-  MOSES_FNAME2("LBLLM-LM", LBLLM<oxlm::LM>);
-  MOSES_FNAME2("LBLLM-FactoredLM", LBLLM<oxlm::FactoredLM>);
-  MOSES_FNAME2("LBLLM-FactoredMaxentLM", LBLLM<oxlm::FactoredMaxentLM>);
+#ifdef LM_OXLM
+  MOSES_FNAME2("OxLM", OxLM<oxlm::LM>);
+  MOSES_FNAME2("OxFactoredLM", OxLM<oxlm::FactoredLM>);
+  MOSES_FNAME2("OxFactoredMaxentLM", OxLM<oxlm::FactoredMaxentLM>);
+  MOSES_FNAME2("OxSourceFactoredLM", SourceOxLM);
+  MOSES_FNAME2("OxTreeLM", OxLM<oxlm::FactoredTreeLM>);
 #endif
 
   Add("KENLM", new KenFactory());

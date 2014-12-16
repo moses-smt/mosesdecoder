@@ -43,6 +43,19 @@ public:
   virtual std::size_t NumberOfScores() const = 0;
 
   /**
+   * Calculate score based on a vector of sufficient statistics.
+   */
+  virtual float calculateScore(const std::vector<ScoreStatsType>& totals) const = 0;
+
+  float calculateSentenceLevelBackgroundScore(const std::vector<ScoreStatsType>& totals, const std::vector<ScoreStatsType>& bg) {
+    std::vector<ScoreStatsType> stats(totals.size());
+    for(size_t i=0; i<stats.size(); i++)
+      stats[i] = totals[i]+bg[i];
+    // Get score and scale by reference length (as per Chiang et al 08)
+    return calculateScore(stats) * getReferenceLength(stats);
+  }
+
+  /**
    * Set the reference files. This must be called before prepareStats().
    */
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles) {
@@ -96,6 +109,11 @@ public:
     }
     return 0;
   }
+
+  /**
+   * Based on vector of sufficient statistics, return length of reference.
+   */
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const = 0;
 
   /**
    * Set the score data, prior to scoring.

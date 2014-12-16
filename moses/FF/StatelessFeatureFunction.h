@@ -2,6 +2,8 @@
 
 #include "FeatureFunction.h"
 
+#include "moses/Syntax/SHyperedge.h"
+
 namespace Moses
 {
 
@@ -20,6 +22,7 @@ public:
 
   StatelessFeatureFunction(const std::string &line);
   StatelessFeatureFunction(size_t numScoreComponents, const std::string &line);
+
   /**
     * This should be implemented for features that apply to phrase-based models.
     **/
@@ -31,6 +34,9 @@ public:
     **/
   virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
                              ScoreComponentCollection* accumulator) const = 0;
+
+  virtual void EvaluateWhenApplied(const Syntax::SHyperedge &,
+                             ScoreComponentCollection*) const { assert(false); }
 
   virtual bool IsStateless() const {
     return true;

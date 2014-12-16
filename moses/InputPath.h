@@ -92,8 +92,9 @@ public:
                         , const TargetPhraseCollection *targetPhrases
                         , const void *ptNode);
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
-  const TargetPhrases &GetTargetPhrases() const
-  { return m_targetPhrases; }
+  const TargetPhrases &GetTargetPhrases() const {
+    return m_targetPhrases;
+  }
 
   // pointer to internal node in phrase-table. Since this is implementation dependent, this is a void*
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;

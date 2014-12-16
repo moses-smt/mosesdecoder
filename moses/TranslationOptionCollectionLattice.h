@@ -15,10 +15,10 @@ class WordLattice;
 class TranslationOptionCollectionLattice : public TranslationOptionCollection
 {
 protected:
-	/* forcibly create translation option for a 1 word.
-		* call the base class' ProcessOneUnknownWord() for each possible word in the confusion network
-		* at a particular source position
-	*/
+  /* forcibly create translation option for a 1 word.
+  	* call the base class' ProcessOneUnknownWord() for each possible word in the confusion network
+  	* at a particular source position
+  */
   void ProcessUnknownWord(size_t sourcePos); // do not implement
 
 public:
@@ -27,10 +27,10 @@ public:
   void CreateTranslationOptions();
 
   void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-      , size_t startPosition
-      , size_t endPosition
-      , bool adhereTableLimit
-      , size_t graphInd); // do not implement
+                                        , size_t startPosition
+                                        , size_t endPosition
+                                        , bool adhereTableLimit
+                                        , size_t graphInd); // do not implement
 
 protected:
   void Extend(const InputPath &prevPath, const WordLattice &input);

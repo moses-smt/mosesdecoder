@@ -4,7 +4,7 @@ for local d in $(most-deps) {
   obj $(d:B).o : $(d) ;
 }
 #and stuff them into an alias.
-alias deps : $(most-deps:B).o ..//z ..//boost_iostreams ../moses//moses ../moses//ThreadPool ../moses//Util ../util//kenutil ;
+alias deps : $(most-deps:B).o ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ../moses//ThreadPool ../moses//Util ../util//kenutil ;
 
 #ExtractionPhrasePair.cpp requires that main define some global variables.  
 #Build the mains that do not need these global variables.  

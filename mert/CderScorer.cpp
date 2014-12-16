@@ -52,18 +52,18 @@ void CderScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
   string sentence = this->preprocessSentence(text);
 
-  vector<int> stats;
+  vector<ScoreStatsType> stats;
   prepareStatsVector(sid, sentence, stats);
   entry.set(stats);
 }
 
-void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>& stats)
+void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<ScoreStatsType>& stats)
 {
   sent_t cand;
   TokenizeAndEncode(text, cand);
 
   float max = -2;
-  vector<int> tmp;
+  vector<ScoreStatsType> tmp;
   for (size_t rid = 0; rid < m_ref_sentences.size(); ++rid) {
     const sent_t& ref = m_ref_sentences[rid][sid];
     tmp.clear();
@@ -79,7 +79,7 @@ void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>&
   }
 }
 
-float CderScorer::calculateScore(const vector<int>& comps) const
+float CderScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   if (comps.size() != 2) {
     throw runtime_error("Size of stat vector for CDER is not 2");
@@ -89,7 +89,7 @@ float CderScorer::calculateScore(const vector<int>& comps) const
 }
 
 void CderScorer::computeCD(const sent_t& cand, const sent_t& ref,
-                           vector<int>& stats) const
+                           vector<ScoreStatsType>& stats) const
 {
   int I = cand.size() + 1; // Number of inter-words positions in candidate sentence
   int L = ref.size() + 1; // Number of inter-words positions in reference sentence

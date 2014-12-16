@@ -33,15 +33,16 @@ public:
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
-  {};
+  {
+    targetPhrase.SetRuleSource(source);
+  };
 
   void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {};
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
   void EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
@@ -50,7 +51,8 @@ public:
 
   void EvaluateWhenApplied(
     const ChartHypothesis& cur_hypo,
-    ScoreComponentCollection* accumulator) const;
+    ScoreComponentCollection* accumulator) const
+  {};
 
 private:
   std::string m_sourceLabelSetFile;

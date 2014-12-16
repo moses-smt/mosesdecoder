@@ -40,8 +40,8 @@ public:
 protected:
   bool m_hardConstraint;
   bool ContainTerm(const InputType &input,
-		  	  	  const WordsRange &ntRange,
-		  	  	  const std::set<Word> &terms) const;
+                   const WordsRange &ntRange,
+                   const std::set<Word> &terms) const;
 };
 
 }

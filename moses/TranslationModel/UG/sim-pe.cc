@@ -42,7 +42,8 @@ translate(string const& source)
   istringstream ibuf(source+"\n"); 
   sentence.Read(ibuf,ifo);
 
-  Manager manager(lineNumber, sentence, global.GetSearchAlgorithm());
+  // Manager manager(lineNumber, sentence, global.GetSearchAlgorithm());
+  Manager manager(sentence, global.GetSearchAlgorithm());
   manager.ProcessSentence();
   
   ostringstream obuf;

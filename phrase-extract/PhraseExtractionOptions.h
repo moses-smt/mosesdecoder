@@ -72,9 +72,9 @@ public:
     includeSentenceIdFlag(false),
     onlyOutputSpanInfo(false),
     gzOutput(false),
-	flexScoreFlag(false), 
-	debug(false)
-{}
+    flexScoreFlag(false),
+    debug(false)
+  {}
 
   //functions for initialization of options
   void initAllModelsOutputFlag(const bool initallModelsOutputFlag) {

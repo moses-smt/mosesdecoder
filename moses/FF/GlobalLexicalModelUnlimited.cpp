@@ -14,7 +14,7 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
   :StatelessFeatureFunction(0, line)
 {
   UTIL_THROW(util::Exception,
-		  "GlobalLexicalModelUnlimited hasn't been refactored for new feature function framework yet"); // TODO need to update arguments to key=value
+             "GlobalLexicalModelUnlimited hasn't been refactored for new feature function framework yet"); // TODO need to update arguments to key=value
 
   const vector<string> modelSpec = Tokenize(line);
 

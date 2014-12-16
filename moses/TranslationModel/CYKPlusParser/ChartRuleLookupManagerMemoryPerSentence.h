@@ -44,8 +44,8 @@ public:
   typedef std::vector<CompressedColumn> CompressedMatrix;
 
   ChartRuleLookupManagerMemoryPerSentence(const ChartParser &parser,
-                               const ChartCellCollectionBase &cellColl,
-                               const PhraseDictionaryFuzzyMatch &ruleTable);
+                                          const ChartCellCollectionBase &cellColl,
+                                          const PhraseDictionaryFuzzyMatch &ruleTable);
 
   ~ChartRuleLookupManagerMemoryPerSentence() {};
 

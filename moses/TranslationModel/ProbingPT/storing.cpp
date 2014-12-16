@@ -89,11 +89,12 @@ void createProbingPT(const char * phrasetable_path, const char * target_path){
                 //Create an entry for the previous source phrase:
                 Entry pesho;
                 pesho.value = entrystartidx;
-                //The key is the sum of hashes of individual words. Probably not entirerly correct, but fast
+                //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
+                //Probably not entirerly correct, but fast and seems to work fine in practise.
                 pesho.key = 0;
                 std::vector<uint64_t> vocabid_source = getVocabIDs(prev_line.source_phrase);
                 for (int i = 0; i < vocabid_source.size(); i++){
-                    pesho.key += vocabid_source[i];
+                    pesho.key += (vocabid_source[i] << i);
                 }
                 pesho.bytes_toread = binfile.dist_from_start + binfile.extra_counter - entrystartidx;
 
@@ -127,7 +128,7 @@ void createProbingPT(const char * phrasetable_path, const char * target_path){
             pesho.key = 0;
             std::vector<uint64_t> vocabid_source = getVocabIDs(prev_line.source_phrase);
             for (int i = 0; i < vocabid_source.size(); i++){
-                pesho.key += vocabid_source[i];
+                pesho.key += (vocabid_source[i] << i);
             }
             pesho.bytes_toread = binfile.dist_from_start + binfile.extra_counter - entrystartidx;
             //Put into table

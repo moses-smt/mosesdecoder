@@ -49,8 +49,8 @@ public:
   DecodeGraph(size_t id)
     : m_id(id)
     , m_maxChartSpan(NOT_FOUND)
-	, m_backoff(0)
-	{}
+    , m_backoff(0)
+  {}
 
   // for chart decoding
   DecodeGraph(size_t id, size_t maxChartSpan)
@@ -78,7 +78,7 @@ public:
   }
 
   size_t GetMaxChartSpan() const {
-	UTIL_THROW_IF2(m_maxChartSpan == NOT_FOUND, "Max chart span not specified");
+    UTIL_THROW_IF2(m_maxChartSpan == NOT_FOUND, "Max chart span not specified");
     return m_maxChartSpan;
   }
 
@@ -86,7 +86,7 @@ public:
     return m_backoff;
   }
 
-  void SetBackoff(size_t backoff){
+  void SetBackoff(size_t backoff) {
     m_backoff = backoff;
   }
 

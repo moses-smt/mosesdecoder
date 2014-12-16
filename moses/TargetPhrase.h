@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
+#include "AlignmentInfoCollection.h"
 #include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
 
@@ -66,6 +67,7 @@ private:
 
 public:
   TargetPhrase(const PhraseDictionary *pt = NULL);
+  TargetPhrase(std::string out_string, const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
   ~TargetPhrase();
@@ -106,6 +108,15 @@ public:
     return m_scoreBreakdown;
   }
 
+  /*
+    //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
+    void SetSourcePhrase(const Phrase&  p) {
+      m_sourcePhrase=p;
+    }
+    const Phrase& GetSourcePhrase() const {
+      return m_sourcePhrase;
+    }
+  */
   void SetTargetLHS(const Word *lhs) {
     m_lhsTarget = lhs;
   }
@@ -121,8 +132,24 @@ public:
     m_alignNonTerm = alignNonTerm;
   }
 
-  void SetAlignTerm(const AlignmentInfo::CollType &coll);
-  void SetAlignNonTerm(const AlignmentInfo::CollType &coll);
+  // ALNREP = alignment representation, 
+  // see AlignmentInfo constructors for supported representations
+  template<typename ALNREP>
+  void 
+  SetAlignTerm(const ALNREP &coll)
+  {
+    m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
+  }
+
+  // ALNREP = alignment representation, 
+  // see AlignmentInfo constructors for supported representations
+  template<typename ALNREP> 
+  void 
+  SetAlignNonTerm(const ALNREP &coll)
+  {
+    m_alignNonTerm = AlignmentInfoCollection::Instance().Add(coll);
+  }
+
 
   const AlignmentInfo &GetAlignTerm() const {
     return *m_alignTerm;

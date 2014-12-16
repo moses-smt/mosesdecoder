@@ -34,8 +34,8 @@ namespace Moses
 
 // Extract the k-best list from the search graph.
 void ChartKBestExtractor::Extract(
-    const std::vector<const ChartHypothesis*> &topLevelHypos, std::size_t k,
-    KBestVec &kBestList)
+  const std::vector<const ChartHypothesis*> &topLevelHypos, std::size_t k,
+  KBestVec &kBestList)
 {
   kBestList.clear();
   if (topLevelHypos.empty()) {
@@ -47,7 +47,7 @@ void ChartKBestExtractor::Extract(
   std::vector<const ChartHypothesis*>::const_iterator p = topLevelHypos.begin();
   const ChartHypothesis &bestTopLevelHypo = **p;
   boost::scoped_ptr<ChartHypothesis> supremeHypo(
-      new ChartHypothesis(bestTopLevelHypo, *this));
+    new ChartHypothesis(bestTopLevelHypo, *this));
 
   // Do the same for each alternative top-level hypothesis, but add the new
   // ChartHypothesis objects as arcs from supremeHypo, as if they had been
@@ -70,8 +70,8 @@ void ChartKBestExtractor::Extract(
   // each derivation.
   kBestList.reserve(targetVertex->kBestList.size());
   for (std::vector<boost::weak_ptr<Derivation> >::const_iterator
-        q = targetVertex->kBestList.begin();
-        q != targetVertex->kBestList.end(); ++q) {
+       q = targetVertex->kBestList.begin();
+       q != targetVertex->kBestList.end(); ++q) {
     const boost::shared_ptr<Derivation> d(*q);
     assert(d);
     assert(d->subderivations.size() == 1);
@@ -124,9 +124,38 @@ Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
   return ret;
 }
 
+// Generate the target tree of the derivation d.
+TreePointer ChartKBestExtractor::GetOutputTree(const Derivation &d)
+{
+  const ChartHypothesis &hypo = d.edge.head->hypothesis;
+  const TargetPhrase &phrase = hypo.GetCurrTargetPhrase();
+  if (const PhraseProperty *property = phrase.GetProperty("Tree")) {
+    const std::string *tree = property->GetValueString();
+    TreePointer mytree (boost::make_shared<InternalTree>(*tree));
+
+    //get subtrees (in target order)
+    std::vector<TreePointer> previous_trees;
+    for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+      const Word &word = phrase.GetWord(pos);
+      if (word.IsNonTerminal()) {
+        size_t nonTermInd = phrase.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+        const Derivation &subderivation = *d.subderivations[nonTermInd];
+        const TreePointer prev_tree = GetOutputTree(subderivation);
+        previous_trees.push_back(prev_tree);
+      }
+    }
+
+    mytree->Combine(previous_trees);
+    return mytree;
+  }
+  else {
+    UTIL_THROW2("Error: TreeStructureFeature active, but no internal tree structure found");
+  }
+}
+
 // Create an unweighted hyperarc corresponding to the given ChartHypothesis.
 ChartKBestExtractor::UnweightedHyperarc ChartKBestExtractor::CreateEdge(
-    const ChartHypothesis &h)
+  const ChartHypothesis &h)
 {
   UnweightedHyperarc edge;
   edge.head = FindOrCreateVertex(h);
@@ -162,7 +191,7 @@ ChartKBestExtractor::FindOrCreateVertex(const ChartHypothesis &h)
   }
   boost::shared_ptr<Derivation> bestDerivation(new Derivation(bestEdge));
 #ifndef NDEBUG
-  std::pair<DerivationSet::iterator, bool> q = 
+  std::pair<DerivationSet::iterator, bool> q =
 #endif
     m_derivations.insert(bestDerivation);
   assert(q.second);

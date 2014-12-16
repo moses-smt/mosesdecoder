@@ -37,6 +37,9 @@ public:
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
+  void EvaluateWhenApplied(const Syntax::SHyperedge &hyperedge,
+                     ScoreComponentCollection* accumulator) const
+  {}
   void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
@@ -45,6 +48,11 @@ public:
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
+
+  /*
+    virtual void Evaluate(const InputType &source
+                          , ScoreComponentCollection &scoreBreakdown) const;
+  */
 };
 
 }

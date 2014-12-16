@@ -22,6 +22,7 @@
 #include <cassert>
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
+#include "FF/InternalTree.h"
 
 #include <boost/unordered_set.hpp>
 #include <boost/weak_ptr.hpp>
@@ -70,8 +71,8 @@ public:
 
   struct Vertex {
     typedef std::priority_queue<boost::weak_ptr<Derivation>,
-                                std::vector<boost::weak_ptr<Derivation> >,
-                                DerivationOrderer> DerivationQueue;
+            std::vector<boost::weak_ptr<Derivation> >,
+            DerivationOrderer> DerivationQueue;
 
     Vertex(const ChartHypothesis &h) : hypothesis(h), visited(false) {}
 
@@ -89,10 +90,11 @@ public:
                std::size_t k, KBestVec &);
 
   static Phrase GetOutputPhrase(const Derivation &);
+  static TreePointer GetOutputTree(const Derivation &);
 
 private:
   typedef boost::unordered_map<const ChartHypothesis *,
-                               boost::shared_ptr<Vertex> > VertexMap;
+          boost::shared_ptr<Vertex> > VertexMap;
 
   struct DerivationHasher {
     std::size_t operator()(const boost::shared_ptr<Derivation> &d) const {
@@ -114,7 +116,7 @@ private:
   };
 
   typedef boost::unordered_set<boost::shared_ptr<Derivation>, DerivationHasher,
-                               DerivationEqualityPred> DerivationSet;
+          DerivationEqualityPred> DerivationSet;
 
   UnweightedHyperarc CreateEdge(const ChartHypothesis &);
   boost::shared_ptr<Vertex> FindOrCreateVertex(const ChartHypothesis &);

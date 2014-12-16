@@ -38,7 +38,7 @@ DecodeFeature::DecodeFeature(const std::string &line)
 }
 
 DecodeFeature::DecodeFeature(size_t numScoreComponents
-                               , const std::string &line)
+                             , const std::string &line)
   : StatelessFeatureFunction(numScoreComponents, line)
   , m_container(NULL)
 {
@@ -50,8 +50,8 @@ DecodeFeature::DecodeFeature(size_t numScoreComponents
                              , const std::vector<FactorType> &output
                              , const std::string &line)
   : StatelessFeatureFunction(numScoreComponents, line)
-  , m_container(NULL)
   , m_input(input), m_output(output)
+  , m_container(NULL)
 {
   m_inputFactors = FactorMask(input);
   m_outputFactors = FactorMask(output);

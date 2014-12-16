@@ -21,48 +21,40 @@
 #ifndef PCFG_PCFG_TREE_H_
 #define PCFG_PCFG_TREE_H_
 
+#include <string>
+
 #include "syntax_tree.h"
 #include "xml_tree_writer.h"
 
-#include <string>
-
-namespace Moses
-{
-namespace PCFG
-{
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
 
 template<typename DerivedType>
-class PcfgTreeBase : public SyntaxTreeBase<std::string, DerivedType>
-{
-public:
+class PcfgTreeBase : public SyntaxTreeBase<std::string, DerivedType> {
+ public:
   typedef std::string LabelType;
   typedef SyntaxTreeBase<LabelType, DerivedType> BaseType;
 
   PcfgTreeBase(const LabelType &label) : BaseType(label), score_(0.0) {}
 
-  double score() const {
-    return score_;
-  }
-  void set_score(double s) {
-    score_ = s;
-  }
+  double score() const { return score_; }
+  void set_score(double s) { score_ = s; }
 
-private:
+ private:
   double score_;
 };
 
-class PcfgTree : public PcfgTreeBase<PcfgTree>
-{
-public:
+class PcfgTree : public PcfgTreeBase<PcfgTree> {
+ public:
   typedef PcfgTreeBase<PcfgTree> BaseType;
   PcfgTree(const BaseType::LabelType &label) : BaseType(label) {}
 };
 
 // Specialise XmlOutputHandler for PcfgTree.
 template<>
-class XmlOutputHandler<PcfgTree>
-{
-public:
+class XmlOutputHandler<PcfgTree> {
+ public:
   typedef std::map<std::string, std::string> AttributeMap;
 
   void GetLabel(const PcfgTree &tree, std::string &label) const {
@@ -81,6 +73,7 @@ public:
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

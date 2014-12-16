@@ -31,6 +31,8 @@
 #include "ScfgRule.h"
 #include "ScfgRuleWriter.h"
 #include "Span.h"
+#include "StsgRule.h"
+#include "StsgRuleWriter.h"
 #include "SyntaxTree.h"
 #include "tables-core.h"
 #include "XmlException.h"
@@ -60,8 +62,18 @@ int ExtractGHKM::Main(int argc, char *argv[])
   ProcessOptions(argc, argv, options);
 
   // Open input files.
-  InputFileStream targetStream(options.targetFile);
-  InputFileStream sourceStream(options.sourceFile);
+  //
+  // The GHKM algorithm is neutral about whether the model is string-to-tree or
+  // tree-to-string.  This implementation assumes the model to be
+  // string-to-tree, but if the -t2s option is given then the source and target
+  // input files are switched prior to extraction and then the source and
+  // target of the extracted rules are switched on output.
+  std::string effectiveTargetFile = options.t2s ? options.sourceFile
+                                                : options.targetFile;
+  std::string effectiveSourceFile = options.t2s ? options.targetFile
+                                                : options.sourceFile;
+  InputFileStream targetStream(effectiveTargetFile);
+  InputFileStream sourceStream(effectiveSourceFile);
   InputFileStream alignmentStream(options.alignmentFile);
 
   // Open output files.
@@ -95,7 +107,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     if (!options.sourceLabels) {
       Error("SourceLabels should be active if SourceLabelSet is supposed to be written to a file");
     }
-    OpenOutputFileOrDie(options.sourceLabelSetFile, sourceLabelSetStream); // TODO: global sourceLabelSet cannot be determined during parallelized extraction
+    OpenOutputFileOrDie(options.sourceLabelSetFile, sourceLabelSetStream); // note that this is not a global source label set if extraction is parallelized
   }
   if (!options.unknownWordSoftMatchesFile.empty()) {
     OpenOutputFileOrDie(options.unknownWordSoftMatchesFile, unknownWordSoftMatchesStream);
@@ -123,7 +135,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
   Alignment alignment;
   XmlTreeParser targetXmlTreeParser(targetLabelSet, targetTopLabelSet);
 //  XmlTreeParser sourceXmlTreeParser(sourceLabelSet, sourceTopLabelSet);
-  ScfgRuleWriter writer(fwdExtractStream, invExtractStream, options);
+  ScfgRuleWriter scfgWriter(fwdExtractStream, invExtractStream, options);
+  StsgRuleWriter stsgWriter(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
   while (true) {
     std::getline(targetStream, targetLine);
@@ -215,6 +228,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
       std::cerr << "skipping line " << lineNum << " without alignment points\n";
       continue;
     }
+    if (options.t2s) {
+      FlipAlignment(alignment);
+    }
 
     // Record word counts.
     if (!options.targetUnknownWordFile.empty()) {
@@ -239,7 +255,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     }
 
     // Initialize phrase orientation scoring object
-    PhraseOrientation phraseOrientation( sourceTokens, targetXmlTreeParser.GetWords(), alignment);
+    PhraseOrientation phraseOrientation( sourceTokens.size(), targetXmlTreeParser.GetWords().size(), alignment);
 
     // Write the rules, subject to scope pruning.
     const std::vector<Node *> &targetNodes = graph.GetTargetNodes();
@@ -248,18 +264,27 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
       const std::vector<const Subgraph *> &rules = (*p)->GetRules();
 
-      REO_POS l2rOrientation=UNKNOWN, r2lOrientation=UNKNOWN;
+      Moses::GHKM::PhraseOrientation::REO_CLASS l2rOrientation=Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN, r2lOrientation=Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN;
       if (options.phraseOrientation && !rules.empty()) {
         int sourceSpanBegin = *((*p)->GetSpan().begin());
         int sourceSpanEnd   = *((*p)->GetSpan().rbegin());
-        l2rOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,L2R);
-        r2lOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,R2L);
+        l2rOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,Moses::GHKM::PhraseOrientation::REO_DIR_L2R);
+        r2lOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,Moses::GHKM::PhraseOrientation::REO_DIR_R2L);
         // std::cerr << "span " << sourceSpanBegin << " " << sourceSpanEnd << std::endl;
         // std::cerr << "phraseOrientation " << phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd) << std::endl;
       }
 
       for (std::vector<const Subgraph *>::const_iterator q = rules.begin();
            q != rules.end(); ++q) {
+        // STSG output.
+        if (options.stsg) {
+          StsgRule rule(**q);
+          if (rule.Scope() <= options.maxScope) {
+            stsgWriter.Write(rule);
+          }
+          continue;
+        }
+        // SCFG output.
         ScfgRule *r = 0;
         if (options.sourceLabels) {
           r = new ScfgRule(**q, &sourceSyntaxTree);
@@ -269,9 +294,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
         // TODO Can scope pruning be done earlier?
         if (r->Scope() <= options.maxScope) {
           if (!options.treeFragments) {
-            writer.Write(*r,false);
+            scfgWriter.Write(*r,false);
           } else {
-            writer.Write(*r,**q,false);
+            scfgWriter.Write(*r,**q,false);
           }
           if (options.phraseOrientation) {
             fwdExtractStream << " {{Orientation ";
@@ -279,8 +304,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
             fwdExtractStream << " ";
             phraseOrientation.WriteOrientation(fwdExtractStream,r2lOrientation);
             fwdExtractStream << "}}";
-            phraseOrientation.IncrementPriorCount(L2R,l2rOrientation,1);
-            phraseOrientation.IncrementPriorCount(R2L,r2lOrientation,1);
+            phraseOrientation.IncrementPriorCount(Moses::GHKM::PhraseOrientation::REO_DIR_L2R,l2rOrientation,1);
+            phraseOrientation.IncrementPriorCount(Moses::GHKM::PhraseOrientation::REO_DIR_R2L,r2lOrientation,1);
           }
           fwdExtractStream << std::endl;
           invExtractStream << std::endl;
@@ -436,6 +461,10 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "include score based on PCFG scores in target corpus")
   ("PhraseOrientation",
    "output phrase orientation information")
+  ("STSG",
+   "output STSG rules (default is SCFG)")
+  ("T2S",
+   "enable tree-to-string rule extraction (string-to-tree is assumed by default)")
   ("TreeFragments",
    "output parse tree information")
   ("SourceLabels",
@@ -543,6 +572,12 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("PhraseOrientation")) {
     options.phraseOrientation = true;
   }
+  if (vm.count("STSG")) {
+    options.stsg = true;
+  }
+  if (vm.count("T2S")) {
+    options.t2s = true;
+  }
   if (vm.count("TreeFragments")) {
     options.treeFragments = true;
   }
@@ -621,33 +656,42 @@ void ExtractGHKM::WriteGlueGrammar(
   size_t sourceLabelGlueX = 1;
 
   // basic rules
-  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| ||| ||| |||";
+  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
   if (options.treeFragments) {
-    out << " {{Tree [" << topLabel << " <s>]}}";
+    out << " {{Tree [" << topLabel << " [SSTART <s>]]}}";
   }
   if (options.sourceLabels) {
     out << " {{SourceLabels 1 1 " << sourceLabelGlueTop << " 1}}";
   }
+  if (options.phraseOrientation) {
+    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+  }
   out << std::endl;
 
-  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
+  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
   if (options.treeFragments) {
-    out << " {{Tree [" << topLabel << " [" << topLabel << "] </s>]}}";
+    out << " {{Tree [" << topLabel << " [" << topLabel << "] [SEND </s>]]}}";
   }
   if (options.sourceLabels) {
     out << " {{SourceLabels 2 1 " << sourceLabelGlueTop << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
+    if (options.phraseOrientation) {
+      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+    }
   out << std::endl;
 
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1 ||| ||| |||";
+    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
     if (options.treeFragments) { 
-      out << " {{Tree [" << topLabel << " <s> [" << i->first << "] </s>]}}";
+      out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
     }
     if (options.sourceLabels) {
       out << " {{SourceLabels 2 1 " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
+    }
+    if (options.phraseOrientation) {
+      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
     }
     out << std::endl;
   }
@@ -660,7 +704,10 @@ void ExtractGHKM::WriteGlueGrammar(
       out << " {{Tree [" << topLabel << " ["<< topLabel << "] [" << *i << "]]}}";
     }
     if (options.sourceLabels) {
-      out << " {{SourceLabels 3 2.718 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 2.718 1 " << sourceLabelGlueTop << " 2.718}}"; // TODO: there should be better options than using "SOMELABEL" 
+      out << " {{SourceLabels 3 2.718 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 2.718 1 " << sourceLabelGlueTop << " 2.718}}"; 
+    }
+    if (options.phraseOrientation) {
+      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
     }
     out << std::endl;
   }
@@ -671,7 +718,10 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [X]]}}";
   }
   if (options.sourceLabels) {
-    out << " {{SourceLabels 3 1 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}"; // TODO: there should be better options than using "SOMELABEL"
+    out << " {{SourceLabels 3 1 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
+  }
+  if (options.phraseOrientation) {
+    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
   }
   out << std::endl;
 }

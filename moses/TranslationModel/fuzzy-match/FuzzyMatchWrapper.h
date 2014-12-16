@@ -60,8 +60,8 @@ protected:
   void load_alignment( const std::string &fileName, std::vector< std::vector< tmmt::SentenceAlignment > > &corpus );
 
   /** brute force method: compare input to all corpus sentences */
-  int basic_fuzzy_match( std::vector< std::vector< tmmt::WORD_ID > > source,
-                         std::vector< std::vector< tmmt::WORD_ID > > input ) ;
+  void basic_fuzzy_match( std::vector< std::vector< tmmt::WORD_ID > > source,
+                          std::vector< std::vector< tmmt::WORD_ID > > input ) ;
 
   /** utlility function: compute length of sentence in characters
    (spaces do not count) */

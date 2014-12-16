@@ -106,9 +106,9 @@ public:
     if (indexIter == s_scoreIndexes.end()) {
       std::stringstream strme;
       strme << "ERROR: FeatureFunction: " << sp->GetScoreProducerDescription() <<
-                " not registered with ScoreIndexMap" << std::endl;
+            " not registered with ScoreIndexMap" << std::endl;
       strme << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
-                " for every FeatureFunction" << std::endl;
+            " for every FeatureFunction" << std::endl;
       UTIL_THROW2(strme.str());
     }
     return indexIter->second;
@@ -237,7 +237,7 @@ public:
   void PlusEquals(const FeatureFunction* sp, const std::vector<float>& scores) {
     IndexPair indexes = GetIndexes(sp);
     UTIL_THROW_IF2(scores.size() != indexes.second - indexes.first,
-    		"Number of scores is incorrect");
+                   "Number of scores is incorrect");
     for (size_t i = 0; i < scores.size(); ++i) {
       m_scores[i + indexes.first] += scores[i];
     }
@@ -249,7 +249,7 @@ public:
   void PlusEquals(const FeatureFunction* sp, float score) {
     IndexPair indexes = GetIndexes(sp);
     UTIL_THROW_IF2(1 != indexes.second - indexes.first,
-    		"Number of scores is incorrect");
+                   "Number of scores is incorrect");
     m_scores[indexes.first] += score;
   }
 
@@ -284,7 +284,7 @@ public:
   void Assign(const FeatureFunction* sp, float score) {
     IndexPair indexes = GetIndexes(sp);
     UTIL_THROW_IF2(1 != indexes.second - indexes.first,
-    		"Feature function must must only contain 1 score");
+                   "Feature function must must only contain 1 score");
     m_scores[indexes.first] = score;
   }
 
@@ -315,7 +315,7 @@ public:
   float PartialInnerProduct(const FeatureFunction* sp, const std::vector<float>& rhs) const {
     std::vector<float> lhs = GetScoresForProducer(sp);
     UTIL_THROW_IF2(lhs.size() != rhs.size(),
-    		"Number of weights must match number of scores");
+                   "Number of weights must match number of scores");
     return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f);
   }
 
@@ -369,7 +369,7 @@ public:
   float GetScoreForProducer(const FeatureFunction* sp) const {
     IndexPair indexes = GetIndexes(sp);
     UTIL_THROW_IF2(indexes.second - indexes.first != 1,
-    		"Feature function must must only contain 1 score");
+                   "Feature function must must only contain 1 score");
     return m_scores[indexes.first];
   }
 

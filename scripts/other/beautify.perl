@@ -11,8 +11,8 @@ my $version = `astyle --version 2> /dev/stdout`;
 chomp($version);
 print STDERR "version=$version";
 
-if ($version ne "Artistic Style Version 2.01") {
-    print STDERR "\nMust be astyle version 2.01. Quitting\n";
+if ($version ne "Artistic Style Version 2.01" && $version ne "Artistic Style Version 2.02.1") {
+    print STDERR "\nMust be astyle version 2.01 or 2.02.1. Quitting\n";
     exit(1);
 }
 
@@ -40,6 +40,8 @@ sub Beautify($)
 		 next if ($name eq "srilm");
 		 next if ($name eq "irstlm");
 		 next if ($name eq "UG");
+		 next if ($name eq "pcfg-common");
+		 next if ($name eq "syntax-common");
 
 		 $name = $path ."/" .$name;
 		 if (-d $name) {

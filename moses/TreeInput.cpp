@@ -196,7 +196,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             Word *targetLHS = new Word(true);
             targetLHS->CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
             UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL,
-            		"Null factor left-hand-side");
+                           "Null factor left-hand-side");
             targetPhrase.SetTargetLHS(targetLHS);
 
             // not tested
@@ -304,7 +304,7 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
                               , const std::vector<FactorType>& /* factorOrder */)
 {
   UTIL_THROW_IF2(!label.IsNonTerminal(),
-		  "Label must be a non-terminal");
+                 "Label must be a non-terminal");
 
   SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
   NonTerminalSet &list = GetLabelSet(startPos, endPos);
@@ -346,7 +346,7 @@ std::ostream& operator<<(std::ostream &out, const TreeInput &input)
       for (iter = labelSet.begin(); iter != labelSet.end(); ++iter) {
         const Word &word = *iter;
         UTIL_THROW_IF2(!word.IsNonTerminal(),
-      		  "Word must be a non-terminal");
+                       "Word must be a non-terminal");
         out << "[" << startPos <<"," << endPos << "]="
             << word << "(" << word.IsNonTerminal() << ") ";
       }

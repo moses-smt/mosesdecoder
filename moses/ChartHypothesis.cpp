@@ -124,12 +124,12 @@ void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
         if (sourcePosSet.size() == 1) {
           const std::vector<const Word*> *ruleSourceFromInputPath = GetTranslationOption().GetSourceRuleFromInputPath();
           UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
-        		  "No source rule");
+                         "No source rule");
 
           size_t sourcePos = *sourcePosSet.begin();
           const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
           UTIL_THROW_IF2(sourceWord == NULL,
-        		  "No source word");
+                         "No source word");
           const Factor *factor = sourceWord->GetFactor(placeholderFactor);
           if (factor) {
             outPhrase.Back()[0] = factor;
@@ -297,10 +297,10 @@ void ChartHypothesis::CleanupArcList()
 
   if (!distinctNBest && m_arcList->size() > nBestSize) {
     // prune arc list only if there too many arcs
-	NTH_ELEMENT4(m_arcList->begin()
-                , m_arcList->begin() + nBestSize - 1
-                , m_arcList->end()
-                , CompareChartChartHypothesisTotalScore());
+    NTH_ELEMENT4(m_arcList->begin()
+                 , m_arcList->begin() + nBestSize - 1
+                 , m_arcList->end()
+                 , CompareChartChartHypothesisTotalScore());
 
     // delete bad ones
     ChartArcList::iterator iter;

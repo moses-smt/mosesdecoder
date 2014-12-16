@@ -22,6 +22,7 @@ class WordsRange;
 class FactorMask;
 class InputPath;
 class StackVec;
+class DistortionScoreProducer;
 
 /** base class for all feature functions.
  */
@@ -34,6 +35,7 @@ protected:
   std::string m_description, m_argLine;
   std::vector<std::vector<std::string> > m_args;
   bool m_tuneable;
+  size_t m_verbosity;
   size_t m_numScoreComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
@@ -45,6 +47,7 @@ public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
     return s_staticColl;
   }
+
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 

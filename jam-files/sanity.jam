@@ -58,7 +58,7 @@ if $(FORCE-STATIC) {
 
 rule test_library ( name ) {
   if $(FORCE-STATIC) {
-    return [ test_flags "-l$(name) -static" ] ;
+    return [ test_flags "-Wl,-Bstatic -l$(name) -Wl,-Bdynamic" ] ;
   } else {
     return [ test_flags "-l$(name)" ] ;
   }
@@ -88,7 +88,7 @@ rule auto-shared ( name : additional * ) {
   if $(shared-command-line) = "<link>shared" {
     return "<link>shared" ;
   } else {
-    if [ test_flags $(additional)" -static -l"$(name) ] {
+    if [ test_flags $(additional)" -Wl,-Bstatic -l"$(name)" -Wl,-Bdynamic" ] {
       return ;
     } else {
       if $(FORCE-STATIC) {
@@ -131,10 +131,7 @@ if $(with-macports) {
  
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost-lib ( name macro : deps * ) {
-  #Link multi-threaded programs against the -mt version if available.  Old 
-  #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
-  #boost.jam does not handle this correctly.  
-  flags = $(L-boost-search)" -lboost_"$(name)"-mt$(boost-lib-version)" ;
+  flags = $(L-boost-search)" -lboost_"$(name)"$(boost-lib-version)" ;
   local main ;
   if $(name) = "unit_test_framework" {
     main = "BOOST_AUTO_TEST_CASE(foo) {}" ;
@@ -143,11 +140,11 @@ rule boost-lib ( name macro : deps * ) {
   if $(boost-auto-shared) = "<link>shared" {
     flags += " -DBOOST_$(macro)" ;
   } else {
-    flags += " -static" ;
+    flags = " -Wl,-Bstatic $(flags) -Wl,-Bdynamic " ;
   }
   if [ test_flags $(flags) : $(main) ] {
     lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name)$(boost-lib-version) : <link>static : <library>$(deps) ;
-    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt$(boost-lib-version) : <link>static : <library>$(deps) ;
+    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)$(boost-lib-version) : <link>static : <library>$(deps) ;
   } else {
     lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name)$(boost-lib-version) : : <library>$(deps) ;
   }

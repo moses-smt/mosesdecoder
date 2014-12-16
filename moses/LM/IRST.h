@@ -41,6 +41,7 @@ class ngram;
 class dictionary;
 #endif
 
+
 namespace Moses
 {
 class Phrase;

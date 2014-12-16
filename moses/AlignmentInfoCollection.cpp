@@ -38,23 +38,23 @@ const AlignmentInfo &AlignmentInfoCollection::GetEmptyAlignmentInfo() const
   return *m_emptyAlignmentInfo;
 }
 
-const AlignmentInfo *AlignmentInfoCollection::Add(
-  const std::set<std::pair<size_t,size_t> > &pairs)
+AlignmentInfo const *
+AlignmentInfoCollection::
+Add(AlignmentInfo const& ainfo)
 {
-  AlignmentInfo pairsAlignmentInfo(pairs);
 #ifdef WITH_THREADS
   {
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-    AlignmentInfoSet::const_iterator i = m_collection.find(pairsAlignmentInfo);
+    AlignmentInfoSet::const_iterator i = m_collection.find(ainfo);
     if (i != m_collection.end())
       return &*i;
   }
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
-  std::pair<AlignmentInfoSet::iterator, bool> ret =
-    m_collection.insert(pairsAlignmentInfo);
+  std::pair<AlignmentInfoSet::iterator, bool> ret = m_collection.insert(ainfo);
   return &(*ret.first);
 }
+
 
 
 }

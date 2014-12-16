@@ -19,18 +19,6 @@
 
 #include "pcfg_score.h"
 
-#include "options.h"
-#include "tree_scorer.h"
-
-#include "pcfg-common/exception.h"
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/pcfg_tree.h"
-#include "pcfg-common/syntax_tree.h"
-#include "pcfg-common/typedef.h"
-#include "pcfg-common/xml_tree_parser.h"
-
-#include <boost/program_options.hpp>
-
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
@@ -40,8 +28,21 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "options.h"
+#include "tree_scorer.h"
 
-namespace Moses {
+#include <boost/program_options.hpp>
+
+#include "syntax-common/exception.h"
+
+#include "pcfg-common/pcfg.h"
+#include "pcfg-common/pcfg_tree.h"
+#include "pcfg-common/syntax_tree.h"
+#include "pcfg-common/typedef.h"
+#include "pcfg-common/xml_tree_parser.h"
+
+namespace MosesTraining {
+namespace Syntax {
 namespace PCFG {
 
 int PcfgScore::Main(int argc, char *argv[]) {
@@ -149,4 +150,5 @@ void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const {
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

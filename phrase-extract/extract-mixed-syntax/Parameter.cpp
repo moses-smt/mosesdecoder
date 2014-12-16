@@ -45,6 +45,8 @@ Parameter::Parameter()
 
 ,numSourceFactors(1)
 ,numTargetFactors(1)
+
+,nonTermConsecSourceMixedSyntax(1)
 {}
 
 Parameter::~Parameter() {

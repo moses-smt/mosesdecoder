@@ -202,6 +202,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/mert/GzFileBuf.h</locationURI>
 		</link>
 		<link>
+			<name>HwcmScorer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/HwcmScorer.cpp</locationURI>
+		</link>
+		<link>
+			<name>HwcmScorer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/HwcmScorer.h</locationURI>
+		</link>
+		<link>
 			<name>HypPackEnumerator.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/mert/HypPackEnumerator.cpp</locationURI>
@@ -210,6 +220,16 @@
 			<name>HypPackEnumerator.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/mert/HypPackEnumerator.h</locationURI>
+		</link>
+		<link>
+			<name>InternalTree.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalTree.cpp</locationURI>
+		</link>
+		<link>
+			<name>InternalTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalTree.h</locationURI>
 		</link>
 		<link>
 			<name>InterpolatedScorer.cpp</name>

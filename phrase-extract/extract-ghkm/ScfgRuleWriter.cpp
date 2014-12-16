@@ -47,14 +47,26 @@ void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
   }
 
   // Write the rule to the forward and inverse extract files.
-  m_fwd << sourceSS.str() << " ||| " << targetSS.str() << " |||";
-  m_inv << targetSS.str() << " ||| " << sourceSS.str() << " |||";
+  if (m_options.t2s) {
+    // If model is tree-to-string then flip the source and target.
+    m_fwd << targetSS.str() << " ||| " << sourceSS.str() << " |||";
+    m_inv << sourceSS.str() << " ||| " << targetSS.str() << " |||";
+  } else {
+    m_fwd << sourceSS.str() << " ||| " << targetSS.str() << " |||";
+    m_inv << targetSS.str() << " ||| " << sourceSS.str() << " |||";
+  }
 
   const Alignment &alignment = rule.GetAlignment();
   for (Alignment::const_iterator p = alignment.begin();
        p != alignment.end(); ++p) {
-    m_fwd << " " << p->first << "-" << p->second;
-    m_inv << " " << p->second << "-" << p->first;
+    if (m_options.t2s) {
+      // If model is tree-to-string then flip the source and target.
+      m_fwd << " " << p->second << "-" << p->first;
+      m_inv << " " << p->first << "-" << p->second;
+    } else {
+      m_fwd << " " << p->first << "-" << p->second;
+      m_inv << " " << p->second << "-" << p->first;
+    }
   }
 
   // Write a count of 1.
@@ -65,6 +77,8 @@ void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
   if (m_options.pcfg) {
     m_fwd << " ||| " << std::exp(rule.GetPcfgScore());
   }
+
+  m_fwd << " |||";
 
   if (m_options.sourceLabels && rule.HasSourceLabels()) {
     m_fwd << " {{SourceLabels";

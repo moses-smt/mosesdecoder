@@ -25,26 +25,25 @@
 #include "pcfg-common/pcfg_tree.h"
 #include "pcfg-common/typedef.h"
 
-namespace Moses
-{
-namespace PCFG
-{
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
 
-class TreeScorer
-{
-public:
+class TreeScorer {
+ public:
   TreeScorer(const Pcfg &, const Vocabulary &);
 
   // Score tree according to PCFG.  Returns false if unsuccessful (due to
   // missing rule).
   bool Score(PcfgTree &) const;
 
-private:
+ private:
   const Pcfg &pcfg_;
   const Vocabulary &non_term_vocab_;
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

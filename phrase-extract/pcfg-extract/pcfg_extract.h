@@ -23,15 +23,13 @@
 
 #include "pcfg-common/tool.h"
 
-namespace Moses
-{
-namespace PCFG
-{
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
 
-class Options;
+struct Options;
 
-class PcfgExtract : public Tool
-{
+class PcfgExtract : public Tool {
 public:
   PcfgExtract() : Tool("pcfg-extract") {}
   virtual int Main(int, char *[]);
@@ -40,6 +38,7 @@ private:
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

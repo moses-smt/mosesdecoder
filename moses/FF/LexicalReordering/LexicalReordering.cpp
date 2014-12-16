@@ -15,6 +15,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
   std::cerr << "Initializing LexicalReordering.." << std::endl;
 
   map<string,string> sparseArgs;
+  m_haveDefaultScores = false;    
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
@@ -30,6 +31,12 @@ LexicalReordering::LexicalReordering(const std::string &line)
       m_filePath = args[1];
     } else if (args[0].substr(0,7) == "sparse-") {
       sparseArgs[args[0].substr(7)] = args[1];
+    } else if (args[0] == "default-scores") {
+      vector<string> tokens = Tokenize(args[1],",");
+      for(size_t i=0; i<tokens.size(); i++) {
+        m_defaultScores.push_back( TransformScore( Scan<float>(tokens[i]) ) );
+      }
+      m_haveDefaultScores = true; 
     } else {
       UTIL_THROW(util::Exception,"Unknown argument " + args[0]);
     }
@@ -50,6 +57,13 @@ LexicalReordering::LexicalReordering(const std::string &line)
     break;
   default:
     UTIL_THROW(util::Exception,"Unknown conditioning option!");
+  }
+
+  // sanity check: number of default scores
+  if (m_haveDefaultScores) {
+    if(m_defaultScores.size() != m_configuration->GetNumScoreComponents()) {
+      UTIL_THROW(util::Exception,"wrong number of default scores (" << m_defaultScores.size() << ") for lexicalized reordering model (expected " << m_configuration->GetNumScoreComponents() << ")");
+    }
   }
 
   m_configuration->ConfigureSparse(sparseArgs, this);
@@ -73,11 +87,13 @@ FFState* LexicalReordering::EvaluateWhenApplied(const Hypothesis& hypo,
                                      const FFState* prev_state,
                                      ScoreComponentCollection* out) const
 {
+  VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) START" << std::endl);
   Scores score(GetNumScoreComponents(), 0);
   const LexicalReorderingState *prev = dynamic_cast<const LexicalReorderingState *>(prev_state);
   LexicalReorderingState *next_state = prev->Expand(hypo.GetTranslationOption(), hypo.GetInput(), out);
 
   out->PlusEquals(this, score);
+  VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) END" << std::endl);
 
   return next_state;
 }

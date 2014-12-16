@@ -54,6 +54,8 @@ public:
 
   int numSourceFactors, numTargetFactors;
 
+  int nonTermConsecSourceMixedSyntax;
+
   std::string scopeSpanStr;
   std::vector<std::pair<int,int> > scopeSpan;
 

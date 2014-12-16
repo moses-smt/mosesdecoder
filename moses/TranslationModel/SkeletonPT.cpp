@@ -14,7 +14,7 @@ SkeletonPT::SkeletonPT(const std::string &line)
 
 void SkeletonPT::Load()
 {
-	SetFeaturesToApply();
+  SetFeaturesToApply();
 }
 
 void SkeletonPT::InitializeForInput(InputType const& source)
@@ -37,8 +37,8 @@ void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQu
 
     // add target phrase to phrase-table cache
     size_t hash = hash_value(sourcePhrase);
-	std::pair<const TargetPhraseCollection*, clock_t> value(tpColl, clock());
-	cache[hash] = value;
+    std::pair<const TargetPhraseCollection*, clock_t> value(tpColl, clock());
+    cache[hash] = value;
 
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
   }

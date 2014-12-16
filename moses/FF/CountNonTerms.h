@@ -9,8 +9,9 @@ class CountNonTerms : public StatelessFeatureFunction
 {
 public:
   CountNonTerms(const std::string &line);
-  bool IsUseable(const FactorMask &mask) const
-  { return true; }
+  bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 
   void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
