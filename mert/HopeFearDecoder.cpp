@@ -182,6 +182,7 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
   for (fs::directory_iterator di(hypergraphDir); di != dend; ++di) {
     const fs::path& hgpath = di->path();
     if (hgpath.filename() == kWeights) continue;
+  //  cerr << "Reading " << hgpath.filename() << endl;
     Graph graph(vocab_);
     size_t id = boost::lexical_cast<size_t>(hgpath.stem().string());
     util::scoped_fd fd(util::OpenReadOrThrow(hgpath.string().c_str()));
@@ -195,7 +196,7 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
     prunedGraph.reset(new Graph(vocab_));
     graph.Prune(prunedGraph.get(), weights, edgeCount);
     graphs_[id] = prunedGraph;
-    //cerr << "Pruning to v=" << graphs_[id]->VertexSize() << " e=" << graphs_[id]->EdgeSize()  << endl;
+   // cerr << "Pruning to v=" << graphs_[id]->VertexSize() << " e=" << graphs_[id]->EdgeSize()  << endl;
     ++fileCount;
     if (fileCount % 10 == 0) cerr << ".";
     if (fileCount % 400 ==  0) cerr << " [count=" << fileCount << "]\n";
@@ -325,6 +326,7 @@ void HypergraphHopeFearDecoder::MaxModel(const AvgWeightVector& wv, vector<ValTy
   SparseVector weights;
   wv.ToSparse(&weights);
   vector<ValType> bg(scorer_->NumberOfScores());
+  //cerr << "Calculating bleu on " << sentenceId << endl;
   Viterbi(*(graphs_[sentenceId]), weights, 0, references_, sentenceId, bg, &bestHypo);
   stats->resize(bestHypo.bleuStats.size());
   /*

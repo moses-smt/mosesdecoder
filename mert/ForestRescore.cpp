@@ -341,7 +341,7 @@ void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, 
   HgBleuScorer bleuScorer(references, graph, sentenceId, backgroundBleu);
   vector<FeatureStatsType> winnerStats(kBleuNgramOrder*2+1);
   for (size_t vi = 0; vi < graph.VertexSize(); ++vi) {
-    //cerr << "vertex id " << vi <<  endl;
+//    cerr << "vertex id " << vi <<  endl;
     FeatureStatsType winnerScore = kMinScore;
     const Vertex& vertex = graph.GetVertex(vi);
     const vector<const Edge*>& incoming = vertex.GetIncoming();
@@ -349,7 +349,7 @@ void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, 
       //UTIL_THROW(HypergraphException, "Vertex " << vi << " has no incoming edges");
       //If no incoming edges, vertex is a dead end
       backPointers[vi].first = NULL;
-      backPointers[vi].second = kMinScore/2;  
+      backPointers[vi].second = kMinScore;  
     } else {
       //cerr << "\nVertex: " << vi << endl;
       for (size_t ei = 0; ei < incoming.size(); ++ei) {
@@ -357,9 +357,9 @@ void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, 
         FeatureStatsType incomingScore = incoming[ei]->GetScore(weights);
         for (size_t i = 0; i < incoming[ei]->Children().size(); ++i) {
           size_t childId = incoming[ei]->Children()[i];
-          UTIL_THROW_IF(backPointers[childId].second == kMinScore,
-            HypergraphException, "Graph was not topologically sorted. curr=" << vi << " prev=" << childId);
-          incomingScore += backPointers[childId].second;
+          //UTIL_THROW_IF(backPointers[childId].second == kMinScore,
+          //  HypergraphException, "Graph was not topologically sorted. curr=" << vi << " prev=" << childId);
+          incomingScore = max(incomingScore + backPointers[childId].second, kMinScore);
         }
         vector<FeatureStatsType> bleuStats(kBleuNgramOrder*2+1);
        // cerr << "Score: " << incomingScore << " Bleu: ";
@@ -394,9 +394,12 @@ void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, 
       //update with winner
       //if (bleuWeight) {
       //TODO: Not sure if we need this when computing max-model solution
-      bleuScorer.UpdateState(*(backPointers[vi].first), vi, winnerStats);
+      if (backPointers[vi].first) {
+        bleuScorer.UpdateState(*(backPointers[vi].first), vi, winnerStats);
+      }
 
     }
+//    cerr  << "backpointer[" << vi << "] = (" << backPointers[vi].first << "," << backPointers[vi].second << ")" << endl;
   }
 
   //expand back pointers
