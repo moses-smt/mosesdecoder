@@ -242,17 +242,15 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
 void BilingualLM::getAllTargetIdsChart(const ChartHypothesis& cur_hypo, size_t featureID, std::vector<int>& wordIds) const {
   const TargetPhrase targetPhrase = cur_hypo.GetCurrTargetPhrase();
-  int next_nonterminal_index = 0;
 
   for (int i = 0; i < targetPhrase.GetSize(); i++){
     if (targetPhrase.GetWord(i).IsNonTerminal()){ //Nonterminal get from prev state
-      const ChartHypothesis * prev_hypo = cur_hypo.GetPrevHypo(next_nonterminal_index);
+      const ChartHypothesis * prev_hypo = cur_hypo.GetPrevHypo(targetPhrase.GetAlignNonTerm().GetNonTermIndexMap()[i]);
       const BilingualLMState * prev_state = static_cast<const BilingualLMState *>(prev_hypo->GetFFState(featureID));
       const std::vector<int> prevWordIDs = prev_state->GetWordIdsVector();
       for (std::vector<int>::const_iterator it = prevWordIDs.begin(); it!= prevWordIDs.end(); it++){
         wordIds.push_back(*it);
       }
-      next_nonterminal_index++;
     } else {
       wordIds.push_back(getNeuralLMId(targetPhrase.GetWord(i), false));
     }
