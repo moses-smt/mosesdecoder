@@ -262,15 +262,15 @@ Stats computeBLEUstats(const Sentence& c, const Sentence& r) {
 }
 
 
-float computeBLEU(Stats& stats) {
+float computeBLEU(Stats stats) {
   UTIL_THROW_IF(stats.size() != MAX_NGRAM_ORDER * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
   for (size_t i = 0; i < MAX_NGRAM_ORDER; ++i) {
-    if (stats[2*i] == 0) {
+    if (stats[2*i] + 0.5 == 0) {
       return 0.0;
     }
-    logbleu += log(stats[2*i]) - log(stats[2*i+1]);
+    logbleu += log(stats[2*i] + 0.5) - log(stats[2*i+1] + 0.5);
 
   }
   logbleu /= MAX_NGRAM_ORDER;
@@ -344,8 +344,20 @@ int main(int argc, char** argv)
   
   Stats empty;
   
+  std::vector<std::string> pairs;
+  
+  for(size_t i = 0; i < target.size(); i++) {
+    S[0][i] = computeBLEUstats(source[0], target[i]);
+  }
+  for(size_t i = 1; i < source.size(); i++) {
+    S[i][0] = computeBLEUstats(source[i], target[0]);
+  }
+  
   for(size_t i = 0; i < S.size(); i++) {
-    for(size_t j = 0; j < S[i].size(); j++) {
+    //for(size_t j = 0; j < S[i].size(); j++) {
+      size_t j = i;
+        
+      pairs.push_back("");
       
       Stats a01 = (j > 0) ? S[i][j-1] : empty;
       Stats a10 = (i > 0) ? S[i-1][j] : empty;
@@ -354,43 +366,53 @@ int main(int argc, char** argv)
       Stats a21 = (i > 1 && j > 0) ? S[i-2][j-1] + computeBLEUstats(source[i-1] + source[i], target[j]) : empty;
             
       Stats bestStats;
-      float bestBLEU = 0;
+      float bestBLEU = -10;
       float temp = 0;
       
       temp = computeBLEU(a01);
       if(temp > bestBLEU) {
         bestBLEU = temp;
         bestStats = a01;
+        pairs.back() = "0-1";
       }
 
       temp = computeBLEU(a10);
       if(temp > bestBLEU) {
         bestBLEU = temp;
         bestStats = a10;
+        pairs.back() = "1-0";
       }
 
       temp = computeBLEU(a11);
       if(temp > bestBLEU) {
         bestBLEU = temp;
         bestStats = a11;
+        pairs.back() = "1-1";
       }
 
       temp = computeBLEU(a12);
       if(temp > bestBLEU) {
         bestBLEU = temp;
         bestStats = a12;
+        pairs.back() = "1-2";
       }
 
       temp = computeBLEU(a21);
       if(temp > bestBLEU) {
         bestBLEU = temp;
         bestStats = a21;
+        pairs.back() = "2-1";
       }
             
       S[i][j] = bestStats;
-    }
+    //}
   }
   
   std::cout << computeBLEU(S.back().back()) << std::endl;
-
+  
+  for(size_t i = 0; i < S.back().back().size(); i++) {
+    std::cout << S.back().back()[i] << " ";
+  }
+  std::cout << std::endl;
+  
 }
