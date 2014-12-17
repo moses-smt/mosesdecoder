@@ -173,7 +173,41 @@ class Corpus {
     std::vector<Sentence> m_sentences;
 };
 
-typedef std::vector<float> Stats;
+class Stats {
+  public:
+    Stats()
+    : m_stats(MAX_NGRAM_ORDER * 2 + 1, 0)
+    {}
+    
+    float& operator[](size_t i) {
+      return m_stats[i];
+    }
+    
+    float& back() {
+      return m_stats.back();
+    }
+    
+    size_t size() const {
+      return m_stats.size();
+    }
+    
+    Stats& operator+=(Stats& o) {
+      for(size_t i = 0; i < m_stats.size(); i++)
+        m_stats[i] += o[i];
+      return *this;
+    }
+    
+    Stats operator+(Stats o) {
+      Stats out;
+      out += o;
+      out += *this;
+      return out;
+    }
+    
+  private:
+    std::vector<float> m_stats;
+};
+
 
 void computeBLEUstats(const Sentence& c, const Sentence& r, Stats& stats) {
   size_t cLen = c.size();
@@ -204,7 +238,7 @@ void computeBLEUstats(const Sentence& c, const Sentence& r, Stats& stats) {
         rcounts[ngram] = CountOrder(j, 1);
     }
   }
-  
+    
   for(NGramCounts::iterator it = ccounts.begin(); it != ccounts.end(); it++) {
     
     size_t order = it->second.first;
@@ -221,7 +255,14 @@ void computeBLEUstats(const Sentence& c, const Sentence& r, Stats& stats) {
   stats.back() = rLen;
 }
 
-float computeBLEU(const Stats& stats) {
+Stats computeBLEUstats(const Sentence& c, const Sentence& r) {
+  Stats stats;
+  computeBLEUstats(c, r, stats);
+  return stats;
+}
+
+
+float computeBLEU(Stats& stats) {
   UTIL_THROW_IF(stats.size() != MAX_NGRAM_ORDER * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
@@ -285,15 +326,71 @@ int main(int argc, char** argv)
   Corpus source(sourceFileName);
   Corpus target(targetFileName);
   
-  Stats stats(9, 0);
-  for(size_t i = 0; i < source.size() && i < target.size(); i++)
+  Stats final;
+  for(size_t i = 0; i < source.size() && i < target.size(); i++) {
+    Stats stats;
     computeBLEUstats(source[i], target[i], stats);
+    final = final + stats;
+  }
 
-  for(size_t i = 0; i < stats.size(); i++) {
-    std::cout << stats[i] << " ";
+  for(size_t i = 0; i < final.size(); i++) {
+    std::cout << final[i] << " ";
   }
   std::cout << std::endl;
   
-  std::cout << computeBLEU(stats) << std::endl;
+  std::cout << computeBLEU(final) << std::endl;
+  
+  std::vector< std::vector<Stats> > S(source.size(), std::vector<Stats>(target.size()));
+  
+  Stats empty;
+  
+  for(size_t i = 0; i < S.size(); i++) {
+    for(size_t j = 0; j < S[i].size(); j++) {
+      
+      Stats a01 = (j > 0) ? S[i][j-1] : empty;
+      Stats a10 = (i > 0) ? S[i-1][j] : empty;
+      Stats a11 = (i > 0 && j > 0) ? S[i-1][j-1] + computeBLEUstats(source[i], target[j]) : empty;
+      Stats a12 = (i > 0 && j > 1) ? S[i-1][j-2] + computeBLEUstats(source[i], target[j-1] + target[j]) : empty;
+      Stats a21 = (i > 1 && j > 0) ? S[i-2][j-1] + computeBLEUstats(source[i-1] + source[i], target[j]) : empty;
+            
+      Stats bestStats;
+      float bestBLEU = 0;
+      float temp = 0;
+      
+      temp = computeBLEU(a01);
+      if(temp > bestBLEU) {
+        bestBLEU = temp;
+        bestStats = a01;
+      }
+
+      temp = computeBLEU(a10);
+      if(temp > bestBLEU) {
+        bestBLEU = temp;
+        bestStats = a10;
+      }
+
+      temp = computeBLEU(a11);
+      if(temp > bestBLEU) {
+        bestBLEU = temp;
+        bestStats = a11;
+      }
+
+      temp = computeBLEU(a12);
+      if(temp > bestBLEU) {
+        bestBLEU = temp;
+        bestStats = a12;
+      }
+
+      temp = computeBLEU(a21);
+      if(temp > bestBLEU) {
+        bestBLEU = temp;
+        bestStats = a21;
+      }
+            
+      S[i][j] = bestStats;
+    }
+  }
+  
+  std::cout << computeBLEU(S.back().back()) << std::endl;
 
 }
