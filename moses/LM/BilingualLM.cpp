@@ -422,7 +422,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
   std::vector<int> source_words;
   source_words.reserve(source_ngrams);
   std::vector<int> target_words;
-  target_words.reserve(target_ngrams);
+  target_words.reserve(target_ngrams+1);
 
   float value = 0; //NeuralLM score
   const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
@@ -471,7 +471,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 }
 
 void BilingualLM::SetParameter(const std::string& key, const std::string& value) {
-  if (key == "filepath") {
+  if (key == "path") {
     m_filePath = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);

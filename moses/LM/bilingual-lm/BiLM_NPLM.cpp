@@ -69,10 +69,10 @@ void BilingualLM_NPLM::initSharedPointer() const {
 }
 
 void BilingualLM_NPLM::SetParameter(const std::string& key, const std::string& value) {
-  if (key == "target_ngrams") {
-    target_ngrams = Scan<int>(value);
-  } else if (key == "source_ngrams") {
-    source_ngrams = Scan<int>(value);
+  if (key == "order") {
+    target_ngrams = Scan<int>(value)-1;
+  } else if (key == "source_window") {
+    source_ngrams = Scan<int>(value)*2+1;
   } else if (key == "factored") {
     factored = Scan<bool>(value);
   } else if (key == "pos_factor") {
