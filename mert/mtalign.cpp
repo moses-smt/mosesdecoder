@@ -29,7 +29,7 @@ using namespace MosesTuning;
 
 namespace po = boost::program_options;
 
-const size_t MAX_NGRAM_ORDER = 2;
+const size_t MAX_NGRAM_ORDER = 4;
 
 StringPiece operator+(const StringPiece& s1, const StringPiece& s2) {
   const char* start = std::min(s1.data(), s2.data()); 
@@ -346,89 +346,46 @@ float computeBLEU2(const Sentence& c, const Sentence& r) {
 std::vector< std::vector<float> > seen;
 std::vector< std::vector< std::pair<size_t, size_t> > > prev;
 
-float S(size_t i, size_t j, Corpus& s, Corpus& t) {
+float S(size_t i, size_t j, Corpus& s, Corpus& t, bool slowRun = true) {  
   if(i == 0 || j == 0)
     return 0;
   
   if(seen[i][j] != -100)
     return seen[i][j];
   
-  size_t fast[][2] = { {0,1}, {1,0}, {1,1} }; 
-  size_t slow[][2] = { {1,2}, {2,1}, {2,2}, {1,3}, {3,1}, {1,4}, {4,1} }; 
+  // Used to create first pass 1-1 alignment
+  size_t fast[3][2] = { {0,1}, {1,0}, {1,1} }; 
   
-  float bestBLEU = -1;
-  size_t bestIType = 1;
-  size_t bestJType = 0;
+  // Used to create full alignment
+  size_t slow[10][2] = { {0,1}, {1,0}, {1,1},
+                       {1,2}, {2,1}, {2,2},
+                       {1,3}, {3,1}, {1,4},
+                       {4,1} }; 
   
-  for(int k = 0; k < 3; k++) {
-    size_t iType = fast[k][0];
-    size_t jType = fast[k][1];
+  size_t (*rungTypes)[2] = fast;
+  if(slowRun)
+    rungTypes = slow;
+  
+  float bestBLEU = 0;
+  size_t bestIType = rungTypes[0][0];
+  size_t bestJType = rungTypes[0][1];
+  
+  for(int k = 0; k < (slowRun ? 10 : 3); k++) {
+    size_t iType = rungTypes[k][0];
+    size_t jType = rungTypes[k][1];
     
-    float result = S(i-iType, j-jType, s, t) + computeBLEU2(s(i-iType, i-1), t(j-jType, j-1));
+    float result = -10;
+    if(i >= iType && j >= jType) {
+      result = S(i-iType, j-jType, s, t, slowRun)
+               + computeBLEU2(s(i-iType, i-1), t(j-jType, j-1));
     
-    if(result > bestBLEU) {
-      bestBLEU = result;
-      bestIType = fast[k][0];
-      bestJType = fast[k][1];
+      if(result > bestBLEU) {
+        bestBLEU = result;
+        bestIType = iType;
+        bestJType = jType;
+      }
     }
   }
-  
-  //float a01 = (j > 0) ? S(i, j-1, s, t) : -10;
-  //float a10 = (i > 0) ? S(i-1, j, s, t) : -10;
-  //float a11 = (i > 0 && j > 0) ? S(i-1, j-1, s, t) + computeBLEU2(s[i-1], t[j-1]) : -10;
-  //float a12 = (i > 0 && j > 1) ? S(i-1, j-2, s, t) + computeBLEU2(s[i-1], t[j-2] + t[j-1]) : -10;
-  //float a21 = (i > 1 && j > 0) ? S(i-2, j-1, s, t) + computeBLEU2(s[i-2] + s[i-1], t[j-1]) : -10;
-  //float a22 = (i > 1 && j > 1) ? S(i-1, j-1, s, t) + computeBLEU2(s[i-2] + s[i-1], t[j-2] + t[j-1]) : -10;
-  //float a13 = (i > 0 && j > 2) ? S(i-1, j-3, s, t) + computeBLEU2(s[i-1], t[j-2] + t[j-1]) : -10;
-  //float a31 = (i > 2 && j > 0) ? S(i-3, j-1, s, t) + computeBLEU2(s[i-3] + s[i-1], t[j-1]) : -10;
-  //float a23 = (i > 1 && j > 2) ? S(i-2, j-3, s, t) + computeBLEU2(s[i-2] + s[i-1], t[j-3] + t[j-1]) : -10;
-  //float a32 = (i > 2 && j > 1) ? S(i-3, j-2, s, t) + computeBLEU2(s[i-3] + s[i-1], t[j-2] + t[j-1]) : -10;
-        
-  //float bestBLEU = -1;
-  //size_t bestI = 1;
-  //size_t bestJ = 0;
-  //
-  //if(a01 > bestBLEU) {
-  //  bestBLEU = a01;
-  //  bestI = 0; bestJ = 1;
-  //}
-  //if(a10 > bestBLEU) {
-  //  bestBLEU = a10;
-  //  bestI = 1; bestJ = 0;
-  //}
-  //if(a11 > bestBLEU) {
-  //  bestBLEU = a11;
-  //  bestI = 1; bestJ = 1;
-  //}
-  
-  //if(a21 > bestBLEU) {
-  //  bestBLEU = a21;
-  //  bestI = 2; bestJ = 1;
-  //}
-  //if(a12 > bestBLEU) {
-  //  bestBLEU = a12;
-  //  bestI = 1; bestJ = 2;
-  //}
-  //if(a22 > bestBLEU) {
-  //  bestBLEU = a22;
-  //  bestI = 2; bestJ = 2;
-  //}
-  //if(a31 > bestBLEU) {
-  //  bestBLEU = a31;
-  //  bestI = 3; bestJ = 1;
-  //}
-  //if(a13 > bestBLEU) {
-  //  bestBLEU = a13;
-  //  bestI = 1; bestJ = 3;
-  //}  
-  //if(a32 > bestBLEU) {
-  //  bestBLEU = a32;
-  //  bestI = 3; bestJ = 2;
-  //}
-  //if(a23 > bestBLEU) {
-  //  bestBLEU = a23;
-  //  bestI = 2; bestJ = 3;
-  //}
   
   seen[i][j] = bestBLEU;
   prev[i][j] = std::make_pair(bestIType, bestJType);
