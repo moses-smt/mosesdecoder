@@ -11,6 +11,7 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <iterator>
 
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -37,9 +38,8 @@ StringPiece operator+(const StringPiece& s1, const StringPiece& s2) {
   return StringPiece(start, length);
 }
 
-typedef std::pair<size_t, size_t> CountOrder;
-typedef boost::unordered_map<StringPiece, CountOrder> NGramCounts;
-
+typedef std::vector<StringPiece> NGramsByOrder;
+typedef std::vector<NGramsByOrder> NGrams;    
 
 class Sentence {
   public:
@@ -47,7 +47,7 @@ class Sentence {
              std::vector<StringPiece>& tokens)
     : m_sentence(sentence), m_tokens(&tokens), m_start(start), m_length(length)
     {
-      countNgrams();
+      CollectNGrams();
     }
         
     StringPiece str() const {
@@ -69,21 +69,21 @@ class Sentence {
       return Sentence(m_sentence + s.m_sentence, start, length, *m_tokens);
     }
     
-    void countNgrams() {
-      if(m_ngrams.empty()) { 
+    void CollectNGrams() {
+      if(m_ngrams.empty()) {
+        m_ngrams.resize(MAX_NGRAM_ORDER);
         for(size_t i = 0; i < size(); i++) {
           for(size_t j = 0; j < MAX_NGRAM_ORDER && i + j < size(); j++) {
             StringPiece ngram = (*this)[i] + (*this)[i + j];
-            if(m_ngrams.count(ngram) > 0)
-              m_ngrams[ngram].second++;
-            else
-              m_ngrams[ngram] = CountOrder(j, 1);
+            m_ngrams[j].push_back(ngram);
           }
         }
+        for(size_t i = 0; i < MAX_NGRAM_ORDER; i++)
+          std::sort(m_ngrams[i].begin(), m_ngrams[i].end());
       }
     }
     
-    const NGramCounts& ngrams() const {
+    const NGrams& ngrams() const {
       return m_ngrams;
     }
     
@@ -93,7 +93,7 @@ class Sentence {
     size_t m_start;
     size_t m_length;
 
-    NGramCounts m_ngrams;
+    NGrams m_ngrams;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const Sentence& sentence) {
@@ -183,14 +183,6 @@ class Corpus {
       return m_sentences.size();
     }
     
-    //size_t pos(size_t i) const {
-    //  return m_sentences[i].data() - m_sentences[0].data();
-    //}
-    //
-    //const NGramsPos& ngrams() const {
-    //  return m_ngrams;
-    //}
-    
   private:
     std::string m_fileName;
     
@@ -234,29 +226,41 @@ class Stats {
     std::vector<float> m_stats;
 };
 
-
-void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
-  for(NGramCounts::const_iterator it = c.ngrams().begin(); it != c.ngrams().end(); it++) {
-    
-    size_t order = it->second.first;
-    size_t guess1 = it->second.second;
-    size_t guess2 = 0;
-    NGramCounts::const_iterator vit = r.ngrams().find(it->first);
-    if(vit != r.ngrams().end()) {
-      guess2 = vit->second.second;
-    }
-    size_t correct = std::min(guess1, guess2);
-    
-    stats[order * 3]     += correct;
-    stats[order * 3 + 1] += guess1;
-    stats[order * 3 + 2] += guess2;
+inline std::ostream& operator<<(std::ostream& o, const Stats& stats) {
+  for(size_t i = 0; i < stats.size(); i++) {
+    o << const_cast<Stats&>(stats)[i];
+    if(i < stats.size() - 1)
+      o << " ";
   }
+  return o;
 }
 
-Stats computeBLEUstats(const Sentence& c, const Sentence& r) {
-  Stats stats;
-  computeBLEU2stats(c, r, stats);
-  return stats;
+void countCommon(const NGramsByOrder& n1, const NGramsByOrder& n2, size_t& common) {
+  common = 0;
+  NGramsByOrder n_intersection;
+  std::set_intersection(n1.begin(), n1.end(),
+                        n2.begin(), n2.end(),
+                        std::back_inserter(n_intersection));
+  common = n_intersection.size();
+}
+
+void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
+  const NGrams& cgrams = c.ngrams();
+  const NGrams& rgrams = r.ngrams();
+  
+  for(size_t i = 0; i < MAX_NGRAM_ORDER; i++) {
+    size_t correct = 0;
+    
+    // if there were common n-1-grams there can be common n-grams
+    if(i == 0 || (i > 0 && stats[(i-1) * 3] > 0)) 
+      countCommon(cgrams[i], rgrams[i], correct);
+    
+    stats[i * 3]     += correct;
+    stats[i * 3 + 1] += cgrams[i].size();
+    stats[i * 3 + 2] += rgrams[i].size();
+  }
+  
+  //std::cout << stats << std::endl;
 }
 
 float smoothing = 1.0;
@@ -282,12 +286,14 @@ float computeBLEU2(Stats stats) {
   if (brevity2 < 0.0) {
     logbleu2 += brevity2;
   }
-  return exp(logbleu1);
-  //return exp((logbleu1 + logbleu2)/2);
+
+  return exp((logbleu1 + logbleu2)/2);
 }
 
 float computeBLEU2(const Sentence& c, const Sentence& r) {
-  return computeBLEU2(computeBLEUstats(c, r));
+  Stats stats;
+  computeBLEU2stats(c, r, stats);
+  return computeBLEU2(stats);
 }
 
 boost::unordered_map< size_t, boost::unordered_map<size_t, float> > seen;
