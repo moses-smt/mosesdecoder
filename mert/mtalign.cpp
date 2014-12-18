@@ -201,6 +201,10 @@ class Stats {
       return m_stats[i];
     }
     
+    const float& operator[](size_t i) const {
+      return m_stats[i];
+    }
+    
     float& back() {
       return m_stats.back();
     }
@@ -243,7 +247,8 @@ void countCommon(const NGramsByOrder& n1, const NGramsByOrder& n2, size_t& commo
   while (it1 != n1.end() && it2 != n2.end()) {
     if (*it1 < *it2) {
       ++it1;
-    } else  {
+    }
+    else {
       if (!(*it2 < *it1)) {
         ++common;
         ++it1;
@@ -251,12 +256,6 @@ void countCommon(const NGramsByOrder& n1, const NGramsByOrder& n2, size_t& commo
       ++it2;
     }
   }
-  
-  NGramsByOrder n_intersection;
-  std::set_intersection(n1.begin(), n1.end(),
-                        n2.begin(), n2.end(),
-                        std::back_inserter(n_intersection));
-  common = n_intersection.size();
 }
 
 void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
@@ -267,7 +266,7 @@ void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
     size_t correct = 0;
     
     // if there were common n-1-grams there can be common n-grams
-    if(i == 0 || (i > 0 && stats[(i-1) * 3] > 0)) 
+    if(i == 0 || (i > 0 && stats[(i - 1) * 3] > 0)) 
       countCommon(cgrams[i], rgrams[i], correct);
     
     stats[i * 3]     += correct;
@@ -280,7 +279,7 @@ void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
 
 float smoothing = 1.0;
 
-float computeBLEU2(Stats stats) {
+float computeBLEU2(const Stats& stats) {
   UTIL_THROW_IF(stats.size() != MAX_NGRAM_ORDER * 3, util::Exception, "Error");
 
   float logbleu1 = 0.0;
