@@ -35,14 +35,20 @@ StringPiece operator+(const StringPiece& s1, const StringPiece& s2) {
   const char* end   = std::max(s1.data() + s1.length(), s2.data() + s2.length());
   size_t length = end - start;
   return StringPiece(start, length);
-}  
+}
+
+typedef std::pair<size_t, size_t> CountOrder;
+typedef boost::unordered_map<StringPiece, CountOrder> NGramCounts;
+
 
 class Sentence {
   public:
     Sentence(StringPiece sentence, size_t start, size_t length,
              std::vector<StringPiece>& tokens)
     : m_sentence(sentence), m_tokens(&tokens), m_start(start), m_length(length)
-    {}
+    {
+      countNgrams();
+    }
         
     StringPiece str() const {
       return m_sentence;
@@ -63,11 +69,31 @@ class Sentence {
       return Sentence(m_sentence + s.m_sentence, start, length, *m_tokens);
     }
     
+    void countNgrams() {
+      if(m_ngrams.empty()) { 
+        for(size_t i = 0; i < size(); i++) {
+          for(size_t j = 0; j < MAX_NGRAM_ORDER && i + j < size(); j++) {
+            StringPiece ngram = (*this)[i] + (*this)[i + j];
+            if(m_ngrams.count(ngram) > 0)
+              m_ngrams[ngram].second++;
+            else
+              m_ngrams[ngram] = CountOrder(j, 1);
+          }
+        }
+      }
+    }
+    
+    const NGramCounts& ngrams() const {
+      return m_ngrams;
+    }
+    
   private:
     StringPiece m_sentence;
     std::vector<StringPiece>* m_tokens;
     size_t m_start;
     size_t m_length;
+
+    NGramCounts m_ngrams;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const Sentence& sentence) {
@@ -176,7 +202,7 @@ class Corpus {
 class Stats {
   public:
     Stats()
-    : m_stats(MAX_NGRAM_ORDER * 2 + 1, 0)
+    : m_stats(MAX_NGRAM_ORDER * 3, 0)
     {}
     
     float& operator[](size_t i) {
@@ -209,95 +235,173 @@ class Stats {
 };
 
 
-void computeBLEUstats(const Sentence& c, const Sentence& r, Stats& stats) {
-  size_t cLen = c.size();
-  size_t rLen = r.size();
-  
-  typedef std::pair<size_t, size_t> CountOrder;
-  typedef boost::unordered_map<StringPiece, CountOrder> NGramCounts;
-  
-  NGramCounts ccounts;
-  NGramCounts rcounts;
-  
-  for(size_t i = 0; i < cLen; i++) {
-    for(size_t j = 0; j < MAX_NGRAM_ORDER && i + j < cLen; j++) {
-      StringPiece ngram = c[i] + c[i + j];
-      if(ccounts.count(ngram) > 0)
-        ccounts[ngram].second++;
-      else
-        ccounts[ngram] = CountOrder(j, 1);
-    }
-  }
-  
-  for(size_t i = 0; i < rLen; i++) {
-    for(size_t j = 0; j < MAX_NGRAM_ORDER && i + j < rLen; j++) {
-      StringPiece ngram = r[i] + r[i + j];
-      if(rcounts.count(ngram) > 0)
-        rcounts[ngram].second++;
-      else
-        rcounts[ngram] = CountOrder(j, 1);
-    }
-  }
-    
-  for(NGramCounts::iterator it = ccounts.begin(); it != ccounts.end(); it++) {
+void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
+  for(NGramCounts::const_iterator it = c.ngrams().begin(); it != c.ngrams().end(); it++) {
     
     size_t order = it->second.first;
-    size_t guess = it->second.second;
-    size_t v = 0;
-    if(rcounts.count(it->first))
-      v = rcounts[it->first].second;
-    size_t correct = std::min(v, guess);
+    size_t guess1 = it->second.second;
+    size_t guess2 = 0;
+    NGramCounts::const_iterator vit = r.ngrams().find(it->first);
+    if(vit != r.ngrams().end()) {
+      guess2 = vit->second.second;
+    }
+    size_t correct = std::min(guess1, guess2);
     
-    stats[order * 2]     += correct;
-    stats[order * 2 + 1] += guess;
+    stats[order * 3]     += correct;
+    stats[order * 3 + 1] += guess1;
+    stats[order * 3 + 2] += guess2;
   }
-  
-  stats.back() = rLen;
 }
 
 Stats computeBLEUstats(const Sentence& c, const Sentence& r) {
   Stats stats;
-  computeBLEUstats(c, r, stats);
+  computeBLEU2stats(c, r, stats);
   return stats;
 }
 
+float smoothing = 1.0;
 
-float computeBLEU(Stats stats) {
-  UTIL_THROW_IF(stats.size() != MAX_NGRAM_ORDER * 2 + 1, util::Exception, "Error");
+float computeBLEU2(Stats stats) {
+  UTIL_THROW_IF(stats.size() != MAX_NGRAM_ORDER * 3, util::Exception, "Error");
 
-  float logbleu = 0.0;
+  float logbleu1 = 0.0;
+  float logbleu2 = 0.0;
   for (size_t i = 0; i < MAX_NGRAM_ORDER; ++i) {
-    if (stats[2*i] + 0.5 == 0) {
-      return 0.0;
-    }
-    logbleu += log(stats[2*i] + 0.5) - log(stats[2*i+1] + 0.5);
-
+    logbleu1 += log(stats[3*i] + smoothing) - log(stats[3*i+1] + smoothing);
+    logbleu2 += log(stats[3*i] + smoothing) - log(stats[3*i+2] + smoothing);
   }
-  logbleu /= MAX_NGRAM_ORDER;
+  logbleu1 /= MAX_NGRAM_ORDER;
+  logbleu2 /= MAX_NGRAM_ORDER;
+  
   // reflength divided by test length
-  const float brevity = 1.0 - static_cast<float>(stats[MAX_NGRAM_ORDER * 2]) / stats[1];
-  if (brevity < 0.0) {
-    logbleu += brevity;
+  const float brevity1 = 1.0 - static_cast<float>(stats[2]) / stats[1];
+  if (brevity1 < 0.0) {
+    logbleu1 += brevity1;
   }
-  return exp(logbleu);
+  const float brevity2 = 1.0 - static_cast<float>(stats[1]) / stats[2];
+  if (brevity2 < 0.0) {
+    logbleu2 += brevity2;
+  }
+  return exp(logbleu1);
+  //return exp((logbleu1 + logbleu2)/2);
+}
+
+float computeBLEU2(const Sentence& c, const Sentence& r) {
+  return computeBLEU2(computeBLEUstats(c, r));
+}
+
+boost::unordered_map< size_t, boost::unordered_map<size_t, float> > seen;
+boost::unordered_map< size_t, boost::unordered_map<size_t, std::pair<size_t, size_t> > > prev;
+
+float S(size_t i, size_t j, const Corpus& s, const Corpus& t) {
+  if(i == 0 || j == 0)
+    return 0;
+  
+  if(seen.count(i) && seen[i].count(j))
+    return seen[i][j];
+  
+  float a01 = (j > 0) ? S(i, j-1, s, t) : -10;
+  float a10 = (i > 0) ? S(i-1, j, s, t) : -10;
+  float a11 = (i > 0 && j > 0) ? S(i-1, j-1, s, t) + computeBLEU2(s[i-1], t[j-1]) : -10;
+  //float a12 = (i > 0 && j > 1) ? S(i-1, j-2, s, t) + computeBLEU2(s[i-1], t[j-2] + t[j-1]) : -10;
+  //float a21 = (i > 1 && j > 0) ? S(i-2, j-1, s, t) + computeBLEU2(s[i-2] + s[i-1], t[j-1]) : -10;
+  //float a22 = (i > 1 && j > 1) ? S(i-1, j-1, s, t) + computeBLEU2(s[i-2] + s[i-1], t[j-2] + t[j-1]) : -10;
+  //float a13 = (i > 0 && j > 2) ? S(i-1, j-3, s, t) + computeBLEU2(s[i-1], t[j-2] + t[j-1]) : -10;
+  //float a31 = (i > 2 && j > 0) ? S(i-3, j-1, s, t) + computeBLEU2(s[i-3] + s[i-1], t[j-1]) : -10;
+  //float a23 = (i > 1 && j > 2) ? S(i-2, j-3, s, t) + computeBLEU2(s[i-2] + s[i-1], t[j-3] + t[j-1]) : -10;
+  //float a32 = (i > 2 && j > 1) ? S(i-3, j-2, s, t) + computeBLEU2(s[i-3] + s[i-1], t[j-2] + t[j-1]) : -10;
+        
+  float bestBLEU = -1;
+  size_t bestI = 1;
+  size_t bestJ = 0;
+  
+  if(a01 > bestBLEU) {
+    bestBLEU = a01;
+    bestI = 0; bestJ = 1;
+  }
+  if(a10 > bestBLEU) {
+    bestBLEU = a10;
+    bestI = 1; bestJ = 0;
+  }
+  if(a11 > bestBLEU) {
+    bestBLEU = a11;
+    bestI = 1; bestJ = 1;
+  }
+  //if(a21 > bestBLEU) {
+  //  bestBLEU = a21;
+  //  bestI = 2; bestJ = 1;
+  //}
+  //if(a12 > bestBLEU) {
+  //  bestBLEU = a12;
+  //  bestI = 1; bestJ = 2;
+  //}
+  //if(a22 > bestBLEU) {
+  //  bestBLEU = a22;
+  //  bestI = 2; bestJ = 2;
+  //}
+  //if(a31 > bestBLEU) {
+  //  bestBLEU = a31;
+  //  bestI = 3; bestJ = 1;
+  //}
+  //if(a13 > bestBLEU) {
+  //  bestBLEU = a13;
+  //  bestI = 1; bestJ = 3;
+  //}  
+  //if(a32 > bestBLEU) {
+  //  bestBLEU = a32;
+  //  bestI = 3; bestJ = 2;
+  //}
+  //if(a23 > bestBLEU) {
+  //  bestBLEU = a23;
+  //  bestI = 2; bestJ = 3;
+  //}
+  
+  seen[i][j] = bestBLEU;
+  prev[i][j] = std::make_pair(bestI, bestJ);
+  return bestBLEU;
+}
+
+struct Rung {
+  size_t i;
+  size_t j;
+
+  size_t iType;
+  size_t jType;
+};
+
+void backTrack(size_t i, size_t j, std::vector<Rung>& rungs) {
+  std::pair<size_t, size_t> p = prev[i][j];
+  if(i > p.first && j > p.second) 
+    backTrack(i - p.first, j - p.second, rungs);
+  
+  Rung rung;
+  rung.i = i;
+  rung.j = j;
+  rung.iType = p.first;
+  rung.jType = p.second;
+  rungs.push_back(rung);
 }
 
 int main(int argc, char** argv)
 {
   bool help;
-  std::string sctype = "BLEU";
-  std::string scconfig = "";
+  
   std::string sourceFileName;
   std::string targetFileName;
 
-  // Command-line processing follows pro.cpp
+  std::string sourceFileNameOrig;
+  std::string targetFileNameOrig;
+
+  bool ladder;
+  
   po::options_description desc("Allowed options");
   desc.add_options()
     ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-    ("sctype", po::value<std::string>(&sctype), "the scorer type (default BLEU)")
-    ("scconfig,c", po::value<std::string>(&scconfig), "configuration string passed to scorer")
-    ("source,s", po::value<std::string>(&sourceFileName)->required(), "source language file")
-    ("target,t", po::value<std::string>(&targetFileName)->required(), "target language file")
+    ("source,s", po::value<std::string>(&sourceFileName)->required(), "source language file (Processed)")
+    ("target,t", po::value<std::string>(&targetFileName)->required(), "target language file (Processed)")
+    ("Source,S", po::value<std::string>(&sourceFileNameOrig), "source language file (Original), if given will replace output of --source")
+    ("Target,T", po::value<std::string>(&targetFileNameOrig), "target language file (Original), if given will replace output of --target")
+    ("ladder,l", po::value(&ladder)->zero_tokens()->default_value(false), "Output in hunalign ladder format")
   ;
 
   po::options_description cmdline_options;
@@ -323,96 +427,71 @@ int main(int argc, char** argv)
     exit(0);
   }
   
-  Corpus source(sourceFileName);
-  Corpus target(targetFileName);
+  Corpus* sourceProc = new Corpus(sourceFileName);
+  Corpus* targetProc = new Corpus(targetFileName);
   
-  Stats final;
-  for(size_t i = 0; i < source.size() && i < target.size(); i++) {
-    Stats stats;
-    computeBLEUstats(source[i], target[i], stats);
-    final = final + stats;
-  }
-
-  for(size_t i = 0; i < final.size(); i++) {
-    std::cout << final[i] << " ";
-  }
-  std::cout << std::endl;
+  Corpus* sourceOrig = sourceProc;
+  if(sourceFileNameOrig.size())
+    sourceOrig = new Corpus(sourceFileNameOrig);
   
-  std::cout << computeBLEU(final) << std::endl;
+  Corpus* targetOrig = targetProc;
+  if(targetFileNameOrig.size())
+    targetOrig = new Corpus(targetFileNameOrig);
   
-  std::vector< std::vector<Stats> > S(source.size(), std::vector<Stats>(target.size()));
+  //for(size_t i = 0; i < sourceProc->size(); i++)
+  //  for(size_t j = 0; j < targetProc->size(); j++)
+  //    computeBLEU2((*sourceProc)[i], (*targetProc)[j]);
+  //exit(0);
   
-  Stats empty;
+  S(sourceProc->size(), targetProc->size(), *sourceProc, *targetProc);
+    
+  std::vector<Rung> rungs;
+  backTrack(sourceProc->size(), targetProc->size(), rungs);
   
-  std::vector<std::string> pairs;
+  float bleuSum = 0;
+  size_t keptRungs = 0;
+    
+  size_t iLadder = 0;
+  size_t jLadder = 0;
   
-  for(size_t i = 0; i < target.size(); i++) {
-    S[0][i] = computeBLEUstats(source[0], target[i]);
-  }
-  for(size_t i = 1; i < source.size(); i++) {
-    S[i][0] = computeBLEUstats(source[i], target[0]);
-  }
-  
-  for(size_t i = 0; i < S.size(); i++) {
-    //for(size_t j = 0; j < S[i].size(); j++) {
-      size_t j = i;
-        
-      pairs.push_back("");
+  for(size_t i = 0; i < rungs.size(); i++) {
+    Rung r = rungs[i];
+    if(r.iType && r.jType) {
+      Sentence s1Orig = (*sourceOrig)[r.i-1];
+      Sentence s2Orig = (*targetOrig)[r.j-1];
+      //Sentence s1proc = (*sourceProc)[r.i - r.iType] + (*sourceProc)[r.i - 1];
+      //Sentence s2proc = (*targetProc)[r.j - r.jType] + (*targetProc)[r.j - 1];
+      //float bleu = computeBLEU2(s1proc, s2proc);
+      float bleu = computeBLEU2(s1Orig, s2Orig);
       
-      Stats a01 = (j > 0) ? S[i][j-1] : empty;
-      Stats a10 = (i > 0) ? S[i-1][j] : empty;
-      Stats a11 = (i > 0 && j > 0) ? S[i-1][j-1] + computeBLEUstats(source[i], target[j]) : empty;
-      Stats a12 = (i > 0 && j > 1) ? S[i-1][j-2] + computeBLEUstats(source[i], target[j-1] + target[j]) : empty;
-      Stats a21 = (i > 1 && j > 0) ? S[i-2][j-1] + computeBLEUstats(source[i-1] + source[i], target[j]) : empty;
-            
-      Stats bestStats;
-      float bestBLEU = -10;
-      float temp = 0;
-      
-      temp = computeBLEU(a01);
-      if(temp > bestBLEU) {
-        bestBLEU = temp;
-        bestStats = a01;
-        pairs.back() = "0-1";
+      if(ladder) {
+        std::cout << iLadder << "\t" << jLadder << "\t" << bleu << std::endl;
       }
-
-      temp = computeBLEU(a10);
-      if(temp > bestBLEU) {
-        bestBLEU = temp;
-        bestStats = a10;
-        pairs.back() = "1-0";
-      }
-
-      temp = computeBLEU(a11);
-      if(temp > bestBLEU) {
-        bestBLEU = temp;
-        bestStats = a11;
-        pairs.back() = "1-1";
-      }
-
-      temp = computeBLEU(a12);
-      if(temp > bestBLEU) {
-        bestBLEU = temp;
-        bestStats = a12;
-        pairs.back() = "1-2";
-      }
-
-      temp = computeBLEU(a21);
-      if(temp > bestBLEU) {
-        bestBLEU = temp;
-        bestStats = a21;
-        pairs.back() = "2-1";
+      else {
+        //Sentence s1Orig = (*sourceOrig)[r.i - r.iType] + (*sourceOrig)[r.i - 1];
+        //Sentence s2Orig = (*targetOrig)[r.j - r.jType] + (*targetOrig)[r.j - 1];
+        std::cout << r.iType << "-" << r.jType << "\t" << bleu <<  "\t" << s1Orig << "\t" << s2Orig << std::endl;
       }
             
-      S[i][j] = bestStats;
-    //}
+      bleuSum += bleu;
+      keptRungs++;
+    }
+    if(ladder) {
+      if(r.iType && !r.jType) {
+        std::cout << iLadder << "\t" << jLadder << "\t" << -1 << std::endl;
+        //Sentence s1 = s[i - p.first + 1] + s[i];
+        //std::cout << p.first << "-" << 0 << "\t" << 0 <<  "\t" << s1 << "\t" << std::endl;
+      }
+      if(!r.iType && r.jType) {
+        std::cout << iLadder << "\t" << jLadder << "\t" << -1 << std::endl;
+        //Sentence s2 = t[j - p.second + 1] + t[j];
+        //std::cout << 0 << "-" << 1 << "\t" << 0 <<  "\t" << "\t" << s2 << std::endl;
+      }
+    }
+    
+    iLadder += r.iType;
+    jLadder += r.jType;
+
   }
-  
-  std::cout << computeBLEU(S.back().back()) << std::endl;
-  
-  for(size_t i = 0; i < S.back().back().size(); i++) {
-    std::cout << S.back().back()[i] << " ";
-  }
-  std::cout << std::endl;
-  
+  std::cerr << "Quality " << bleuSum/keptRungs << "/" << bleuSum/rungs.size() << std::endl;
 }
