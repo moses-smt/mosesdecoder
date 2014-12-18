@@ -370,55 +370,6 @@ float computeBLEU2(const Sentence& c, const Sentence& r) {
   //return bleu[cid][rid];
 }
 
-std::vector< std::vector<float> > seen;
-std::vector< std::vector< std::pair<size_t, size_t> > > prev;
-
-float S(size_t i, size_t j, Corpus& s, Corpus& t, bool slowRun = true) {  
-  if(i == 0 || j == 0)
-    return 0;
-  
-  if(seen[i][j] != -100)
-    return seen[i][j];
-  
-  // Used to create first pass 1-1 alignment
-  size_t fast[3][2] = { {0,1}, {1,0}, {1,1} }; 
-  
-  // Used to create full alignment
-  size_t slow[10][2] = { {0,1}, {1,0}, {1,1},
-                       {1,2}, {2,1}, {2,2},
-                       {1,3}, {3,1}, {1,4},
-                       {4,1} }; 
-  
-  size_t (*rungTypes)[2] = fast;
-  if(slowRun)
-    rungTypes = slow;
-  
-  float bestBLEU = 0;
-  size_t bestIType = rungTypes[0][0];
-  size_t bestJType = rungTypes[0][1];
-  
-  for(int k = 0; k < (slowRun ? 10 : 3); k++) {
-    size_t iType = rungTypes[k][0];
-    size_t jType = rungTypes[k][1];
-    
-    float result = -10;
-    if(i >= iType && j >= jType) {
-      result = S(i-iType, j-jType, s, t, slowRun)
-               + computeBLEU2(s(i-iType, i-1), t(j-jType, j-1));
-    
-      if(result > bestBLEU) {
-        bestBLEU = result;
-        bestIType = iType;
-        bestJType = jType;
-      }
-    }
-  }
-  
-  seen[i][j] = bestBLEU;
-  prev[i][j] = std::make_pair(bestIType, bestJType);
-  return bestBLEU;
-}
-
 struct Rung {
   size_t i;
   size_t j;
@@ -427,17 +378,94 @@ struct Rung {
   size_t jType;
 };
 
-void backTrack(size_t i, size_t j, std::vector<Rung>& rungs) {
-  std::pair<size_t, size_t> p = prev[i][j];
-  if(i > p.first && j > p.second) 
-    backTrack(i - p.first, j - p.second, rungs);
+typedef std::vector<Rung> Rungs;
+
+template<class ScorerType, class CorpusType>
+class Dynamic {
+  public:
+    Dynamic(ScorerType scorer, CorpusType corpus1, CorpusType corpus2)
+    : m_slowRun(false), m_scorer(scorer), m_corpus1(corpus1), m_corpus1(corpus2)
+    { }
+    
+    Rungs& align() {
+      align(corpus1.size() corpus2.size());
+    }
+    
+    float align(size_t i, size_t j) {
+      if(i == 0 || j == 0)
+        return 0;
+      
+      if(m_seen[i][j] != -100)
+        return m_seen[i][j];
+      
+      // Used to create first pass 1-1 alignment
+      size_t fast[3][2] = { {0,1}, {1,0}, {1,1} }; 
+      
+      // Used to create full alignment
+      size_t slow[10][2] = { {0,1}, {1,0}, {1,1},
+                           {1,2}, {2,1}, {2,2},
+                           {1,3}, {3,1}, {1,4},
+                           {4,1} }; 
+      
+      size_t (*rungTypes)[2] = fast;
+      if(m_slowRun)
+        rungTypes = slow;
+      
+      float best = 0;
+      size_t bestIType = rungTypes[0][0];
+      size_t bestJType = rungTypes[0][1];
+      
+      for(int k = 0; k < (slowRun ? 10 : 3); k++) {
+        size_t iType = rungTypes[k][0];
+        size_t jType = rungTypes[k][1];
+        
+        float result = -10;
+        if(i >= iType && j >= jType) {
+          result = align(i-iType, j-jType)
+                   + scorer(corpus1(i-iType, i-1), corpus2(j-jType, j-1));
+        
+          if(result > best) {
+            best = result;
+            bestIType = iType;
+            bestJType = jType;
+          }
+        }
+      }
+      
+      m_seen[i][j] = best;
+      m_prev[i][j] = std::make_pair(bestIType, bestJType);
+      return best;    
+    }
   
-  Rung rung;
-  rung.i = i;
-  rung.j = j;
-  rung.iType = p.first;
-  rung.jType = p.second;
-  rungs.push_back(rung);
+    std::vector<Rung>& backTrack() {
+      Rungs rungs;
+      backTrack(corpus1.size() corpus2.size(), rungs);
+      return rungs;
+    }
+  
+    void backTrack(size_t i, size_t j, Rungs& rungs) {
+      std::pair<size_t, size_t> p = m_prev[i][j];
+      if(i > p.first && j > p.second) 
+        backTrack(i - p.first, j - p.second, rungs);
+      
+      Rung rung;
+      rung.i = i;
+      rung.j = j;
+      rung.iType = p.first;
+      rung.jType = p.second;
+      rungs.push_back(rung);
+    }
+
+    
+  private:
+    bool m_slowRun;
+    
+    std::vector< std::vector<float> > m_seen;
+    std::vector< std::vector< std::pair<size_t, size_t> > > m_prev;
+
+    ScorerType m_scorer;
+    CorpusType m_corpus1;
+    CorpusType m_corpus2;
 }
 
 int main(int argc, char** argv)
