@@ -29,7 +29,7 @@ using namespace MosesTuning;
 
 namespace po = boost::program_options;
 
-const size_t MAX_NGRAM_ORDER = 4;
+const size_t MAX_NGRAM_ORDER = 2;
 
 StringPiece operator+(const StringPiece& s1, const StringPiece& s2) {
   const char* start = std::min(s1.data(), s2.data()); 
@@ -44,16 +44,24 @@ typedef std::vector<NGramsByOrder> NGrams;
 class Sentence {
   public:
     Sentence(std::vector<StringPiece>& tokens)
-    : m_sentence(StringPiece()), m_tokens(&tokens), m_start(0), m_length(0)
+    : /*m_id(0),*/ m_sentence(StringPiece()), m_tokens(&tokens), m_start(0), m_length(0)
     {}
     
     Sentence(StringPiece sentence, size_t start, size_t length,
              std::vector<StringPiece>& tokens)
-    : m_sentence(sentence), m_tokens(&tokens), m_start(start), m_length(length)
+    : /*m_id(0),*/ m_sentence(sentence), m_tokens(&tokens), m_start(start), m_length(length)
     {
       CollectNGrams();
     }
         
+    //void setId(size_t id) {
+    //  m_id = id;  
+    //}
+    //
+    //size_t getId() const {
+    //  return m_id;
+    //}
+    
     StringPiece str() const {
       return m_sentence;
     }
@@ -92,6 +100,7 @@ class Sentence {
     }
     
   private:
+    //size_t m_id;
     StringPiece m_sentence;
     std::vector<StringPiece>* m_tokens;
     size_t m_start;
@@ -155,6 +164,7 @@ class Corpus {
         Sentence sentence(StringPiece(m_corpus.c_str() + start, length),
                           j, tokens, m_tokens);
         m_sentences.push_back(sentence);
+        //m_sentences.back().setId(m_sentences.size());
         
         j += tokens;
       }
@@ -180,6 +190,7 @@ class Corpus {
       Sentence sentence(StringPiece(m_corpus.c_str() + start, length),
                         j, tokens, m_tokens);
       m_sentences.push_back(sentence);
+      //m_sentences.back().setId(m_sentences.size());
     }
     
     const Sentence& operator()(size_t i, size_t j) {
@@ -195,7 +206,8 @@ class Corpus {
         else {
           Sentence* sentenceRange = new Sentence(m_sentences[i] + m_sentences[j]);
           m_ranges[range] = sentenceRange;
-          return *m_ranges[range];
+          //sentenceRange->setId(m_sentences.size() + m_ranges.size());
+          return *sentenceRange;
         }
       }
       else {
@@ -295,7 +307,7 @@ void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
   for(size_t i = 0; i < MAX_NGRAM_ORDER; i++) {
     size_t correct = 0;
     
-    // if there were common n-1-grams there can be common n-grams
+    // Check for common n-grams if there where common (n-1)-grams
     if(i == 0 || (i > 0 && stats[(i - 1) * 3] > 0)) 
       countCommon(cgrams[i], rgrams[i], correct);
     
@@ -303,8 +315,6 @@ void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
     stats[i * 3 + 1] += cgrams[i].size();
     stats[i * 3 + 2] += rgrams[i].size();
   }
-  
-  //std::cout << stats << std::endl;
 }
 
 float smoothing = 1.0;
@@ -334,13 +344,30 @@ float computeBLEU2(const Stats& stats) {
   return exp((logbleu1 + logbleu2)/2);
 }
 
+std::vector< std::vector<float> > bleu;
+
 float computeBLEU2(const Sentence& c, const Sentence& r) {
   if(c.size() == 0 || r.size() == 0)
     return 0;
   
-  Stats stats;
-  computeBLEU2stats(c, r, stats);
-  return computeBLEU2(stats);
+  //size_t cid = c.getId();
+  //size_t rid = r.getId();
+  
+  //std::cout << cid << " " << rid << std::endl;
+  
+  //if(bleu.size() <= cid)
+  //  bleu.resize(cid + 1);
+  
+  //if(bleu[cid].size() <= rid)
+  //  bleu[cid].resize(rid + 1, -100);
+  
+  //if(bleu[cid][rid] == -100) {
+    Stats stats;
+    computeBLEU2stats(c, r, stats);
+    return computeBLEU2(stats);
+  //  bleu[cid][rid] = computeBLEU2(stats);
+  //}
+  //return bleu[cid][rid];
 }
 
 std::vector< std::vector<float> > seen;
@@ -486,16 +513,16 @@ int main(int argc, char** argv)
   for(size_t i = 0; i < rungs.size(); i++) {
     Rung r = rungs[i];
     if(r.iType && r.jType) {
-      Sentence s1Proc = (*sourceProc)[r.i - r.iType] + (*sourceProc)[r.i - 1];
-      Sentence s2Proc = (*targetProc)[r.j - r.jType] + (*targetProc)[r.j - 1];
+      const Sentence& s1Proc = (*sourceProc)(r.i - r.iType, r.i - 1);
+      const Sentence& s2Proc = (*targetProc)(r.j - r.jType, r.j - 1);
       float bleu = computeBLEU2(s1Proc, s2Proc);
       
       if(ladder) {
         std::cout << iLadder << "\t" << jLadder << "\t" << bleu << std::endl;
       }
       else {
-        Sentence s1Orig = (*sourceOrig)[r.i - r.iType] + (*sourceOrig)[r.i - 1];
-        Sentence s2Orig = (*targetOrig)[r.j - r.jType] + (*targetOrig)[r.j - 1];
+        const Sentence& s1Orig = (*sourceOrig)(r.i - r.iType, r.i - 1);
+        const Sentence& s2Orig = (*targetOrig)(r.j - r.jType, r.j - 1);
         std::cout << r.iType << "-" << r.jType << "\t" << bleu <<  "\t" << s1Orig << "\t" << s2Orig << std::endl;
       }
             
