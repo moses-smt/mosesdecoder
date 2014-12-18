@@ -29,7 +29,7 @@ using namespace MosesTuning;
 
 namespace po = boost::program_options;
 
-const size_t MAX_NGRAM_ORDER = 4;
+const size_t MAX_NGRAM_ORDER = 2;
 
 StringPiece operator+(const StringPiece& s1, const StringPiece& s2) {
   const char* start = std::min(s1.data(), s2.data()); 
@@ -310,14 +310,14 @@ float computeBLEU2(const Sentence& c, const Sentence& r) {
   return computeBLEU2(stats);
 }
 
-boost::unordered_map< size_t, boost::unordered_map<size_t, float> > seen;
-boost::unordered_map< size_t, boost::unordered_map<size_t, std::pair<size_t, size_t> > > prev;
+std::vector< std::vector<float> > seen;
+std::vector< std::vector< std::pair<size_t, size_t> > > prev;
 
 float S(size_t i, size_t j, const Corpus& s, const Corpus& t) {
   if(i == 0 || j == 0)
     return 0;
   
-  if(seen.count(i) && seen[i].count(j))
+  if(seen[i][j] != -100)
     return seen[i][j];
   
   float a01 = (j > 0) ? S(i, j-1, s, t) : -10;
@@ -462,6 +462,9 @@ int main(int argc, char** argv)
   //  for(size_t j = 0; j < targetProc->size(); j++)
   //    computeBLEU2((*sourceProc)[i], (*targetProc)[j]);
   //exit(0);
+  
+  seen.resize(sourceProc->size() + 1, std::vector<float>(targetProc->size() + 1, -100) );
+  prev.resize(sourceProc->size() + 1, std::vector< std::pair<size_t,size_t> >(targetProc->size() + 1, std::make_pair(-1,-1)) );
   
   S(sourceProc->size(), targetProc->size(), *sourceProc, *targetProc);
     
