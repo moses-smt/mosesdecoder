@@ -236,7 +236,22 @@ inline std::ostream& operator<<(std::ostream& o, const Stats& stats) {
 }
 
 void countCommon(const NGramsByOrder& n1, const NGramsByOrder& n2, size_t& common) {
+  NGramsByOrder::const_iterator it1 = n1.begin();
+  NGramsByOrder::const_iterator it2 = n2.begin();
+  
   common = 0;
+  while (it1 != n1.end() && it2 != n2.end()) {
+    if (*it1 < *it2) {
+      ++it1;
+    } else  {
+      if (!(*it2 < *it1)) {
+        ++common;
+        ++it1;
+      }
+      ++it2;
+    }
+  }
+  
   NGramsByOrder n_intersection;
   std::set_intersection(n1.begin(), n1.end(),
                         n2.begin(), n2.end(),
