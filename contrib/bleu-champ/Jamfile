@@ -1,0 +1,6 @@
+
+exe bleu-champ : bleu-champ.cpp ../../util//kenutil ../..//boost_program_options ../..//boost_filesystem ;
+
+alias programs : bleu-champ ;
+
+install legacy : programs : <location>. ;

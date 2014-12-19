@@ -15,21 +15,14 @@
 
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 #include "util/exception.hh"
 #include "util/string_piece.hh"
 #include "util/string_piece_hash.hh"
 
-#include "Scorer.h"
-#include "ScorerFactory.h"
-
-#include <boost/unordered_map.hpp>
-
-using namespace MosesTuning;
 
 namespace po = boost::program_options;
-
-const size_t MAX_NGRAM_ORDER = 2;
 
 StringPiece operator+(const StringPiece& s1, const StringPiece& s2) {
   const char* start = std::min(s1.data(), s2.data()); 
@@ -40,6 +33,8 @@ StringPiece operator+(const StringPiece& s1, const StringPiece& s2) {
 
 typedef std::vector<StringPiece> NGramsByOrder;
 typedef std::vector<NGramsByOrder> NGrams;    
+
+const size_t MAX_NGRAM_ORDER = 4;
 
 class Sentence {
   public:
@@ -233,142 +228,156 @@ class Corpus {
     Ranges m_ranges;
 };
 
-class Stats {
+template <size_t MAX_NGRAM_ORDER = 4, bool SMOOTH = true>
+class BLEU {      
+  public:    
+    template <class Sentence>
+    float operator()(const Sentence& c, const Sentence& r) const {
+      if(c.size() == 0 || r.size() == 0)
+        return 0;
+      
+      std::vector<float> stats(MAX_NGRAM_ORDER * 3, 0);
+      computeBLEUSymStats(c, r, stats);
+      return computeBLEUSym(stats);
+    }
+    
+    float computeBLEUSym(const std::vector<float>& stats) const {
+      UTIL_THROW_IF(stats.size() != MAX_NGRAM_ORDER * 3, util::Exception, "Error");
+    
+      float logbleu1 = 0.0;
+      float logbleu2 = 0.0;
+      
+      float smoothing = 0;
+      for (size_t i = 0; i < MAX_NGRAM_ORDER; ++i) {
+        
+        if(SMOOTH && i > 0)
+          smoothing = 1;
+      
+        if(stats[3*i+1] + smoothing == 0)
+          return 0.0;
+      
+        logbleu1 += log(stats[3*i] + smoothing) - log(stats[3*i+1] + smoothing);
+        logbleu2 += log(stats[3*i] + smoothing) - log(stats[3*i+2] + smoothing);
+      }
+      logbleu1 /= MAX_NGRAM_ORDER;
+      logbleu2 /= MAX_NGRAM_ORDER;
+      
+      // reflength divided by test length
+      const float brevity1 = 1.0 - static_cast<float>(stats[2]) / stats[1];
+      if (brevity1 < 0.0) {
+        logbleu1 += brevity1;
+      }
+      const float brevity2 = 1.0 - static_cast<float>(stats[1]) / stats[2];
+      if (brevity2 < 0.0) {
+        logbleu2 += brevity2;
+      }
+    
+      return exp((logbleu1 + logbleu2)/2);
+    }
+    
+    template <class Sentence>
+    void computeBLEUSymStats(const Sentence& c, const Sentence& r,
+                             std::vector<float>& stats) const {
+      
+      for(size_t i = 0; i < MAX_NGRAM_ORDER; i++) {
+        size_t correct = 0;
+        
+        // Check for common n-grams if there where common (n-1)-grams
+        if(i == 0 || (i > 0 && stats[(i - 1) * 3] > 0)) 
+          countCommon(c.ngrams()[i], r.ngrams()[i], correct);
+        
+        stats[i * 3]     += correct;
+        stats[i * 3 + 1] += c.ngrams()[i].size();
+        stats[i * 3 + 2] += r.ngrams()[i].size();
+      }
+    }
+    
+    size_t numStats() {
+      return MAX_NGRAM_ORDER * 3;
+    }
+
+  private:
+    
+    template <class SortedNGrams>
+    void countCommon(const SortedNGrams& n1,
+                     const SortedNGrams& n2,
+                     size_t& common) const {
+      NGramsByOrder::const_iterator it1 = n1.begin();
+      NGramsByOrder::const_iterator it2 = n2.begin();
+      
+      common = 0;
+      while (it1 != n1.end() && it2 != n2.end()) {
+        if (*it1 < *it2) {
+          ++it1;
+        }
+        else {
+          if (!(*it2 < *it1)) {
+            ++common;
+            ++it1;
+          }
+          ++it2;
+        }
+      }
+    }    
+};
+
+struct SearchType {
+  inline size_t& operator[](size_t i) {
+    return pair[i];
+  }
+
+  inline const size_t& operator[](size_t i) const {
+    return pair[i];
+  }
+  
+  size_t pair[2];
+};
+
+typedef std::vector<SearchType> SearchTypes;
+
+struct Search {
   public:
-    Stats()
-    : m_stats(MAX_NGRAM_ORDER * 3, 0)
-    {}
-    
-    float& operator[](size_t i) {
-      return m_stats[i];
+    Search(SearchType array[], size_t n)
+    {
+      std::copy(array, array + n,
+          std::back_inserter(m_searchTypes));
     }
     
-    const float& operator[](size_t i) const {
-      return m_stats[i];
+    virtual const SearchTypes& operator()() const {
+      return m_searchTypes;
+    }
+  
+  protected:
+    SearchTypes m_searchTypes;
+};
+
+SearchType fastTypes[] = {{0,1}, {1,0}, {1,1}};
+struct Fast : public Search {
+  Fast() : Search(fastTypes, sizeof(fastTypes)/sizeof(SearchType)) {}
+};
+
+SearchType fullTypes[] = {{0,1}, {1,0}, {1,1}, {1,2}, {2,1},
+                          {2,2}, {1,3}, {3,1}, {2,3}, {3,2},
+                          {1,4}, {4,1}};
+struct Full : public Search {
+  Full() : Search(fullTypes, sizeof(fullTypes)/sizeof(SearchType)) {}
+};
+
+template <class ScorerType, class SearchType>
+class Config {
+  public:
+    const ScorerType& scorer() const {
+      return m_scorer;
     }
     
-    float& back() {
-      return m_stats.back();
-    }
-    
-    size_t size() const {
-      return m_stats.size();
-    }
-    
-    Stats& operator+=(Stats& o) {
-      for(size_t i = 0; i < m_stats.size(); i++)
-        m_stats[i] += o[i];
-      return *this;
-    }
-    
-    Stats operator+(Stats o) {
-      Stats out;
-      out += o;
-      out += *this;
-      return out;
+    const SearchType& search() const {
+      return m_search;
     }
     
   private:
-    std::vector<float> m_stats;
+    ScorerType m_scorer;
+    SearchType m_search;
 };
-
-inline std::ostream& operator<<(std::ostream& o, const Stats& stats) {
-  for(size_t i = 0; i < stats.size(); i++) {
-    o << const_cast<Stats&>(stats)[i];
-    if(i < stats.size() - 1)
-      o << " ";
-  }
-  return o;
-}
-
-void countCommon(const NGramsByOrder& n1, const NGramsByOrder& n2, size_t& common) {
-  NGramsByOrder::const_iterator it1 = n1.begin();
-  NGramsByOrder::const_iterator it2 = n2.begin();
-  
-  common = 0;
-  while (it1 != n1.end() && it2 != n2.end()) {
-    if (*it1 < *it2) {
-      ++it1;
-    }
-    else {
-      if (!(*it2 < *it1)) {
-        ++common;
-        ++it1;
-      }
-      ++it2;
-    }
-  }
-}
-
-void computeBLEU2stats(const Sentence& c, const Sentence& r, Stats& stats) {
-  const NGrams& cgrams = c.ngrams();
-  const NGrams& rgrams = r.ngrams();
-  
-  for(size_t i = 0; i < MAX_NGRAM_ORDER; i++) {
-    size_t correct = 0;
-    
-    // Check for common n-grams if there where common (n-1)-grams
-    if(i == 0 || (i > 0 && stats[(i - 1) * 3] > 0)) 
-      countCommon(cgrams[i], rgrams[i], correct);
-    
-    stats[i * 3]     += correct;
-    stats[i * 3 + 1] += cgrams[i].size();
-    stats[i * 3 + 2] += rgrams[i].size();
-  }
-}
-
-float smoothing = 1.0;
-
-float computeBLEU2(const Stats& stats) {
-  UTIL_THROW_IF(stats.size() != MAX_NGRAM_ORDER * 3, util::Exception, "Error");
-
-  float logbleu1 = 0.0;
-  float logbleu2 = 0.0;
-  for (size_t i = 0; i < MAX_NGRAM_ORDER; ++i) {
-    logbleu1 += log(stats[3*i] + smoothing) - log(stats[3*i+1] + smoothing);
-    logbleu2 += log(stats[3*i] + smoothing) - log(stats[3*i+2] + smoothing);
-  }
-  logbleu1 /= MAX_NGRAM_ORDER;
-  logbleu2 /= MAX_NGRAM_ORDER;
-  
-  // reflength divided by test length
-  const float brevity1 = 1.0 - static_cast<float>(stats[2]) / stats[1];
-  if (brevity1 < 0.0) {
-    logbleu1 += brevity1;
-  }
-  const float brevity2 = 1.0 - static_cast<float>(stats[1]) / stats[2];
-  if (brevity2 < 0.0) {
-    logbleu2 += brevity2;
-  }
-
-  return exp((logbleu1 + logbleu2)/2);
-}
-
-std::vector< std::vector<float> > bleu;
-
-float computeBLEU2(const Sentence& c, const Sentence& r) {
-  if(c.size() == 0 || r.size() == 0)
-    return 0;
-  
-  //size_t cid = c.getId();
-  //size_t rid = r.getId();
-  
-  //std::cout << cid << " " << rid << std::endl;
-  
-  //if(bleu.size() <= cid)
-  //  bleu.resize(cid + 1);
-  
-  //if(bleu[cid].size() <= rid)
-  //  bleu[cid].resize(rid + 1, -100);
-  
-  //if(bleu[cid][rid] == -100) {
-    Stats stats;
-    computeBLEU2stats(c, r, stats);
-    return computeBLEU2(stats);
-  //  bleu[cid][rid] = computeBLEU2(stats);
-  //}
-  //return bleu[cid][rid];
-}
 
 struct Rung {
   size_t i;
@@ -380,15 +389,17 @@ struct Rung {
 
 typedef std::vector<Rung> Rungs;
 
-template<class ScorerType, class CorpusType>
+template<class ConfigType, class CorpusType>
 class Dynamic {
   public:
-    Dynamic(ScorerType scorer, CorpusType corpus1, CorpusType corpus2)
-    : m_slowRun(false), m_scorer(scorer), m_corpus1(corpus1), m_corpus1(corpus2)
-    { }
+    Dynamic(CorpusType& corpus1, CorpusType& corpus2)
+    : m_corpus1(corpus1), m_corpus2(corpus2),
+      m_seen(m_corpus1.size() + 1, std::vector<float>(m_corpus2.size() + 1, -100)),
+      m_prev(m_corpus1.size() + 1, std::vector<SearchType>(m_corpus2.size() + 1))
+    {}
     
-    Rungs& align() {
-      align(corpus1.size() corpus2.size());
+    void align() {
+      align(m_corpus1.size(), m_corpus2.size());
     }
     
     float align(size_t i, size_t j) {
@@ -398,75 +409,66 @@ class Dynamic {
       if(m_seen[i][j] != -100)
         return m_seen[i][j];
       
-      // Used to create first pass 1-1 alignment
-      size_t fast[3][2] = { {0,1}, {1,0}, {1,1} }; 
+      SearchTypes searchTypes = m_config.search()();
       
-      // Used to create full alignment
-      size_t slow[10][2] = { {0,1}, {1,0}, {1,1},
-                           {1,2}, {2,1}, {2,2},
-                           {1,3}, {3,1}, {1,4},
-                           {4,1} }; 
+      float bestScore = 0;
+      SearchType bestSearchType = searchTypes[0];
       
-      size_t (*rungTypes)[2] = fast;
-      if(m_slowRun)
-        rungTypes = slow;
-      
-      float best = 0;
-      size_t bestIType = rungTypes[0][0];
-      size_t bestJType = rungTypes[0][1];
-      
-      for(int k = 0; k < (slowRun ? 10 : 3); k++) {
-        size_t iType = rungTypes[k][0];
-        size_t jType = rungTypes[k][1];
+      for(size_t k = 0; k < searchTypes.size(); k++) {
+        size_t iType = searchTypes[k][0];
+        size_t jType = searchTypes[k][1];
         
-        float result = -10;
+        float score = -10;
         if(i >= iType && j >= jType) {
-          result = align(i-iType, j-jType)
-                   + scorer(corpus1(i-iType, i-1), corpus2(j-jType, j-1));
+          score = align(i-iType, j-jType)
+                   + m_config.scorer()(m_corpus1(i-iType, i-1), m_corpus2(j-jType, j-1));
         
-          if(result > best) {
-            best = result;
-            bestIType = iType;
-            bestJType = jType;
+          if(score > bestScore) {
+            bestScore = score;
+            bestSearchType = searchTypes[k];
           }
         }
       }
       
-      m_seen[i][j] = best;
-      m_prev[i][j] = std::make_pair(bestIType, bestJType);
-      return best;    
+      m_seen[i][j] = bestScore;
+      m_prev[i][j] = bestSearchType;
+      return bestScore;    
     }
   
-    std::vector<Rung>& backTrack() {
+    std::vector<Rung> backTrack() {
       Rungs rungs;
-      backTrack(corpus1.size() corpus2.size(), rungs);
+      backTrack(m_corpus1.size(), m_corpus2.size(), rungs);
       return rungs;
     }
   
     void backTrack(size_t i, size_t j, Rungs& rungs) {
-      std::pair<size_t, size_t> p = m_prev[i][j];
-      if(i > p.first && j > p.second) 
-        backTrack(i - p.first, j - p.second, rungs);
+      SearchType p = m_prev[i][j];
+      if(i > p[0] && j > p[1]) 
+        backTrack(i - p[0], j - p[1], rungs);
       
       Rung rung;
       rung.i = i;
       rung.j = j;
-      rung.iType = p.first;
-      rung.jType = p.second;
+      rung.iType = p[0];
+      rung.jType = p[1];
       rungs.push_back(rung);
     }
 
     
   private:
-    bool m_slowRun;
+    ConfigType m_config;
+    CorpusType& m_corpus1;
+    CorpusType& m_corpus2;
     
     std::vector< std::vector<float> > m_seen;
-    std::vector< std::vector< std::pair<size_t, size_t> > > m_prev;
+    std::vector< std::vector<SearchType> > m_prev;
+};
 
-    ScorerType m_scorer;
-    CorpusType m_corpus1;
-    CorpusType m_corpus2;
-}
+typedef Config<BLEU<2>, Fast> FastBLEU2;
+typedef Config<BLEU<2>, Full> FullBLEU2;
+
+typedef Dynamic<FastBLEU2, Corpus> FastBLEU2Aligner;
+typedef Dynamic<FullBLEU2, Corpus> FullBLEU2Aligner;
 
 int main(int argc, char** argv)
 {
@@ -513,66 +515,52 @@ int main(int argc, char** argv)
     exit(0);
   }
   
-  Corpus* sourceProc = new Corpus(sourceFileName);
-  Corpus* targetProc = new Corpus(targetFileName);
+  Corpus source(sourceFileName);
+  Corpus target(targetFileName);
   
-  Corpus* sourceOrig = sourceProc;
-  if(sourceFileNameOrig.size())
-    sourceOrig = new Corpus(sourceFileNameOrig);
-  
-  Corpus* targetOrig = targetProc;
-  if(targetFileNameOrig.size())
-    targetOrig = new Corpus(targetFileNameOrig);
-  
-  seen.resize(sourceProc->size() + 1, std::vector<float>(targetProc->size() + 1, -100) );
-  prev.resize(sourceProc->size() + 1, std::vector< std::pair<size_t,size_t> >(targetProc->size() + 1, std::make_pair(-1,-1)) );
-  
-  S(sourceProc->size(), targetProc->size(), *sourceProc, *targetProc);
-    
-  std::vector<Rung> rungs;
-  backTrack(sourceProc->size(), targetProc->size(), rungs);
+  FullBLEU2Aligner fb2Align(source, target);
+  fb2Align.align();
+  Rungs rungs = fb2Align.backTrack();
   
   float bleuSum = 0;
   size_t keptRungs = 0;
-    
-  size_t iLadder = 0;
-  size_t jLadder = 0;
   
+  BLEU<2> scorer;
+  BLEU<2, false> docScorer; 
+  std::vector<float> stats(docScorer.numStats(), 0);
+  
+  if(ladder && rungs.size() > 0) {
+    Rung r = rungs[0];
+    if(r.i - r.iType != 0 || r.j - r.jType != 0)
+      std::cout << 0 << "\t" << 0 << "\t" << -1 << std::endl;
+  }
   for(size_t i = 0; i < rungs.size(); i++) {
     Rung r = rungs[i];
     if(r.iType && r.jType) {
-      const Sentence& s1Proc = (*sourceProc)(r.i - r.iType, r.i - 1);
-      const Sentence& s2Proc = (*targetProc)(r.j - r.jType, r.j - 1);
-      float bleu = computeBLEU2(s1Proc, s2Proc);
+      const Sentence& s1 = source(r.i - r.iType, r.i - 1);
+      const Sentence& s2 = target(r.j - r.jType, r.j - 1);
+      float bleu = scorer(s1, s2);
       
-      if(ladder) {
-        std::cout << iLadder << "\t" << jLadder << "\t" << bleu << std::endl;
+      docScorer.computeBLEUSymStats(s1, s2, stats);
+      
+      if(ladder) { 
+        std::cout << r.i-r.iType << "\t" << r.j-r.jType << "\t" << bleu << std::endl;
       }
       else {
-        const Sentence& s1Orig = (*sourceOrig)(r.i - r.iType, r.i - 1);
-        const Sentence& s2Orig = (*targetOrig)(r.j - r.jType, r.j - 1);
-        std::cout << r.iType << "-" << r.jType << "\t" << bleu <<  "\t" << s1Orig << "\t" << s2Orig << std::endl;
+        std::cout << r.iType << "-" << r.jType << "\t" << bleu <<  "\t" << s1 << "\t" << s2 << std::endl;
       }
             
       bleuSum += bleu;
       keptRungs++;
     }
-    if(ladder) {
-      if(r.iType && !r.jType) {
-        std::cout << iLadder << "\t" << jLadder << "\t" << -1 << std::endl;
-        //Sentence s1 = s[i - p.first + 1] + s[i];
-        //std::cout << p.first << "-" << 0 << "\t" << 0 <<  "\t" << s1 << "\t" << std::endl;
-      }
-      if(!r.iType && r.jType) {
-        std::cout << iLadder << "\t" << jLadder << "\t" << -1 << std::endl;
-        //Sentence s2 = t[j - p.second + 1] + t[j];
-        //std::cout << 0 << "-" << 1 << "\t" << 0 <<  "\t" << "\t" << s2 << std::endl;
-      }
+    else if(ladder) {
+        std::cout << r.i-r.iType << "\t" << r.j-r.jType << "\t" << -1 << std::endl;
     }
-    
-    iLadder += r.iType;
-    jLadder += r.jType;
-
   }
+  if(ladder) {
+    std::cout << source.size() << "\t" << target.size() << "\t" << 0 << std::endl;
+  }
+  
+  std::cerr << "Document BLEU-2: " << docScorer.computeBLEUSym(stats) << std::endl;
   std::cerr << "Quality " << bleuSum/keptRungs << "/" << bleuSum/rungs.size() << std::endl;
 }

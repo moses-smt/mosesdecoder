@@ -211,6 +211,7 @@ phrase-extract//extract-mixed-syntax
 biconcor 
 mira//mira 
 contrib/server//mosesserver 
+contrib/bleu-champ//programs 
 mm
 ;
 
