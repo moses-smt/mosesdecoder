@@ -1,0 +1,4 @@
+
+exe word2vec : word2vec.c ;
+
+install legacy : word2vec : <location>. ;
