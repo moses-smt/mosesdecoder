@@ -1,5 +1,5 @@
 
-exe bleu-champ : bleu-champ.cpp ../../util//kenutil ../..//boost_program_options ../..//boost_filesystem ;
+exe bleu-champ : bleu-champ.cpp ../../util//kenutil ../..//boost_program_options ../..//boost_filesystem : <linkflags>-lboost_timer <cxxflags>-O3 <cxxflags>-funroll-loops <cxxflags>-std=c++11 ;
 
 alias programs : bleu-champ ;
 
