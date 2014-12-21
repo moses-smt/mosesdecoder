@@ -40,6 +40,9 @@ bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
 bool sourceLabelsFlag = false;
 bool logProbFlag = false;
+float minScore0 = 0;
+float minScore2 = 0;
+
 inline float maybeLogProb( float a )
 {
   return logProbFlag ? log(a) : a;
@@ -59,14 +62,14 @@ int main(int argc, char* argv[])
        << "consolidating direct and indirect rule tables\n";
 
   if (argc < 4) {
-    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] [--PhraseCount] [--GoodTuring counts-of-counts-file] [--KneserNey counts-of-counts-file] [--LowCountFeature] [--SourceLabels source-labels-file] \n";
+    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] [--PhraseCount] [--GoodTuring counts-of-counts-file] [--KneserNey counts-of-counts-file] [--LowCountFeature] [--SourceLabels source-labels-file] [--MinScore  id:threshold[,id:threshold]*]\n";
     exit(1);
   }
   char* &fileNameDirect = argv[1];
   char* &fileNameIndirect = argv[2];
   char* &fileNameConsolidated = argv[3];
-  char* fileNameCountOfCounts;
-  char* fileNameSourceLabelSet;
+  char* fileNameCountOfCounts = 0;
+  char* fileNameSourceLabelSet = 0;
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"--Hierarchical") == 0) {
@@ -125,6 +128,39 @@ int main(int argc, char* argv[])
       }
       fileNameSourceLabelSet = argv[++i];
       cerr << "processing source labels property\n";
+    } else if (strcmp(argv[i],"--MinScore") == 0) {
+      string setting = argv[++i];
+      bool done = false;
+      while (!done) {
+        string single_setting;
+	size_t pos;
+        if ((pos = setting.find(",")) != std::string::npos) {
+          single_setting = setting.substr(0, pos);
+          setting.erase(0, pos + 1);
+        }
+        else {
+          single_setting = setting;
+          done = true;
+        }
+        if ((pos = single_setting.find(":")) == std::string::npos) {
+          cerr << "ERROR: faulty MinScore setting '" << single_setting << "' in '" << argv[i] << "'" << endl;
+          exit(1);
+        }
+        unsigned int field = atoi( single_setting.substr(0,pos).c_str() );
+        float threshold = atof( single_setting.substr(pos+1).c_str() );
+        if (field == 0) {
+          minScore0 = threshold;
+          cerr << "setting minScore0 to " << threshold << endl;
+        }
+        else if (field == 2) {
+          minScore2 = threshold;
+          cerr << "setting minScore2 to " << threshold << endl;
+        }
+        else {
+          cerr << "ERROR: MinScore currently only supported for indirect (0) and direct (2) phrase translation probabilities" << endl;
+          exit(1);
+        }
+      }
     } else {
       cerr << "ERROR: unknown option " << argv[i] << endl;
       exit(1);
@@ -243,9 +279,6 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
       exit(1);
     }
 
-    // output hierarchical phrase pair (with separated labels)
-    fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " |||";
-
     // SCORES ...
     string directScores, directSparseScores, indirectScores, indirectSparseScores;
     breakdownCoreAndSparse( itemDirect[3], directScores, directSparseScores );
@@ -284,6 +317,15 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
       float alpha_E = D * n1_E / countE; // available mass
       adjustedCountEF_indirect = countEF - D + countE * alpha_E * p_b_F;
     }
+
+    // drop due to MinScore thresholding
+    if ((minScore0 > 0 && adjustedCountEF_indirect/countE < minScore0) ||
+        (minScore2 > 0 && adjustedCountEF         /countF < minScore2)) {
+      continue;
+    }
+    
+    // output hierarchical phrase pair (with separated labels)
+    fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " |||";
 
     // prob indirect
     if (!onlyDirectFlag) {
