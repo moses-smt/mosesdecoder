@@ -18,7 +18,7 @@ StringPiece operator+(const StringPiece& s1, const StringPiece& s2) {
 typedef std::vector<StringPiece> NGramsByOrder;
 typedef std::vector<NGramsByOrder> NGrams;    
 
-const size_t MAX_NGRAM_ORDER = 4;
+const size_t MAX_NGRAM_ORDER = 2;
 
 class Sentence {
   public:
@@ -71,7 +71,6 @@ class Sentence {
     }
     
   private:
-    //size_t m_id;
     StringPiece m_sentence;
     std::vector<StringPiece>* m_tokens;
     size_t m_start;
@@ -135,7 +134,6 @@ class Corpus {
         Sentence sentence(StringPiece(m_corpus.c_str() + start, length),
                           j, tokens, m_tokens);
         m_sentences.push_back(sentence);
-        //m_sentences.back().setId(m_sentences.size());
         
         j += tokens;
       }
@@ -161,7 +159,6 @@ class Corpus {
       Sentence sentence(StringPiece(m_corpus.c_str() + start, length),
                         j, tokens, m_tokens);
       m_sentences.push_back(sentence);
-      //m_sentences.back().setId(m_sentences.size());
     }
     
     const Sentence& operator()(int i, int j) const {
@@ -184,7 +181,6 @@ class Corpus {
         else {
           Sentence* sentenceRange = new Sentence(m_sentences[i] + m_sentences[j]);
           m_ranges[range] = sentenceRange;
-          //sentenceRange->setId(m_sentences.size() + m_ranges.size());
           return *sentenceRange;
         }
       }

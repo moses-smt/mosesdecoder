@@ -1,7 +1,6 @@
 
 #include <iostream>
 #include <vector>
-#include <map>
 
 #include <boost/program_options.hpp>
 #include <boost/timer/timer.hpp>
@@ -11,84 +10,48 @@
 #include "Dynamic.hpp"
 #include "Scorer.hpp"
 #include "Corpus.hpp"
+#include "Printer.hpp"
 
 namespace po = boost::program_options;
 
 template <class Config, class Corpus>
-Ladder FirstPass(Corpus &source, Corpus &target) {
-  std::cerr << " Pass 1: Tracing path with 1-1 beads:" << std::endl;
-  std::cerr << "         Computing best path" << std::endl;
+Ladder FirstPass(Corpus &source, Corpus &target, bool quiet) {
+  boost::timer::auto_cpu_timer t(std::cerr, 2, "    Time: %t sec CPU, %w sec real\n");
+  if(!quiet) std::cerr << "Pass 1: Tracing path with 1-1 beads:" << std::endl;
+  if(!quiet) std::cerr << "    Computing best path" << std::endl;
   Dynamic<Config, Corpus> aligner(source, target);
   aligner.Align();
-  std::cerr << "         Back-tracking" << std::endl;
+  if(!quiet) std::cerr << "    Back-tracking" << std::endl;
   Ladder path = aligner.BackTrack();
-  std::cerr << "         Done" << std::endl;
-  std::cerr << std::endl;
+  t.stop();
+  if(!quiet) t.report();
+  if(!quiet) std::cerr << std::endl;
   return path;
 }
 
 template <class Config, class Corpus>
-Ladder SecondPass(Corpus &source, Corpus &target, const Ladder& path, size_t corridorWidth) {
-  std::cerr << " Pass 2: Tracing path with all beads:" << std::endl;
-  std::cerr << "         Setting corridor width to " << corridorWidth << std::endl;
+Ladder SecondPass(Corpus &source, Corpus &target, const Ladder& path, size_t corridorWidth, bool quiet) {
+  boost::timer::auto_cpu_timer t(std::cerr, 2, "    Time: %t sec CPU, %w sec real\n");
+  if(!quiet) std::cerr << "Pass 2: Tracing path with all beads:" << std::endl;
+  if(!quiet) std::cerr << "    Setting corridor width to " << corridorWidth << std::endl;
   Dynamic<Config, Corpus> aligner(source, target);
   aligner.SetCorridor(path, corridorWidth);
-  std::cerr << "         Computing best path within corridor" << std::endl;
+  if(!quiet) std::cerr << "    Computing best path within corridor" << std::endl;
   aligner.Align();
-  std::cerr << "         Back-tracking" << std::endl;
+  if(!quiet) std::cerr << "    Back-tracking" << std::endl;
   Ladder rungs = aligner.BackTrack();
-  std::cerr << "         Done" << std::endl;
-  std::cerr << std::endl;
+  t.stop();
+  if(!quiet) t.report();
+  if(!quiet) std::cerr << std::endl;
   return rungs;
-}
-
-struct PrintParams {
-  bool printIds = false;
-  bool printBeads  = false;
-  bool printScores = false;
-  bool printUnaligned = false;
-  bool print11 = false;
-  float printThreshold = 0;
-};
-
-struct TextFormat {
-  static void Print(const Rung& r, const Corpus& source, const Corpus& target, const PrintParams& params) {
-    if(r.score < params.printThreshold)
-      return;
-    if(params.print11 && (r.bead[0] != 1 || r.bead[1] != 1))
-      return;
-    if(!params.printUnaligned && (r.bead[0] == 0 || r.bead[1] == 0))
-      return;
-  
-    const Sentence& s1 = source(r.i, r.i + r.bead[0] - 1);
-    const Sentence& s2 = target(r.j, r.j + r.bead[1] - 1);
-    
-    if(params.printIds)    std::cout << r.i << " " << r.j << "\t";
-    if(params.printBeads)  std::cout << r.bead << "\t";
-    if(params.printScores) std::cout << r.score <<  "\t";
-    
-    std::cout << s1 << "\t" << s2 << std::endl;
-  }
-};
-
-struct LadderFormat {
-  static void Print(const Rung& r, const Corpus& source, const Corpus& target, const PrintParams& params) {
-    std::cout << r.i << "\t" << r.j << "\t" << r.score << std::endl;
-  }
-};
-
-template <class Format, class Corpus>
-void Print(const Ladder& ladder, const Corpus& source, const Corpus& target, const PrintParams& params) {
-  for(const Rung& rung : ladder) {
-    Format::Print(rung, source, target, params);
-  }
 }
 
 int main(int argc, char** argv)
 {
-  boost::timer::auto_cpu_timer t(std::cerr);
-  
   bool help;
+  bool skip1st;
+  bool skip2nd;
+  bool quiet;
   
   std::string sourceFileName;
   std::string targetFileName;
@@ -101,44 +64,59 @@ int main(int argc, char** argv)
   
   PrintParams params;
   
-  po::options_description desc("Allowed options");
-  desc.add_options()
+  po::options_description general("General options");
+  general.add_options()
     ("source,s", po::value<std::string>(&sourceFileName)->required(),
      "Source language file, used for alignment computation")
     ("target,t", po::value<std::string>(&targetFileName)->required(),
      "Target language file, used for alignment computation")
-    
-    ("Source,S", po::value<std::string>(&sourceFileNameOrig),
-     "Substitute source language file, if given will replace output of --source")
-    ("Target,T", po::value<std::string>(&targetFileNameOrig),
-     "Substitute target language file, if given will replace output of --target")
+    ("help,h", po::value(&help)->zero_tokens()->default_value(false),
+     "Print this help message and exit")
+    ("quiet,q", po::value(&quiet)->zero_tokens()->default_value(false),
+     "Do not print anything to stderr")
+  ;
 
+  po::options_description algo("Alignment algorithm options");
+  algo.add_options()
     ("width,w", po::value(&corridorWidth)->default_value(30),
      "Width of search corridor around 1-1 path")
-    
+    ("skip-1st", po::value(&skip1st)->zero_tokens()->default_value(false),
+     "Skip 1st pass. Can be very slow for larger files")
+    ("skip-2nd", po::value(&skip2nd)->zero_tokens()->default_value(false),
+     "Skip 2nd pass and output only 1-1 path")
+  ;
+
+  po::options_description output("Output options");
+  output.add_options()
+  
     ("ladder,l", po::value(&ladderFormat)->zero_tokens()->default_value(false),
      "Output in hunalign ladder format (not affected by other printing options)")
 
+    ("Source,S", po::value<std::string>(&sourceFileNameOrig),
+     "Substitute source language file, used only for output in text mode. "
+     "Has to be sentence aligned with --source  arg")
+    ("Target,T", po::value<std::string>(&targetFileNameOrig),
+     "Substitute target language file, used only for output in text mode. "
+     "Has to be sentence aligned with --target  arg")
+
+     
     ("min-score,m", po::value(&params.printThreshold)->default_value(0),
      "Print rungs with scores of at least  arg")
     
     ("print-beads,b", po::value(&params.printBeads)->zero_tokens()->default_value(false),
-     "Print column of beads")
+     "Print column with beads")
     ("print-ids,i", po::value(&params.printIds)->zero_tokens()->default_value(false),
-     "Print column of sentence ids")
+     "Print column with sentence ids")
     ("print-scores,p", po::value(&params.printScores)->zero_tokens()->default_value(false),
-     "Print column of scores")
+     "Print column with scores")
     ("print-1-1,1", po::value(&params.print11)->zero_tokens()->default_value(false),
      "Print only 1-1 rungs")
     ("print-unaligned,u", po::value(&params.printUnaligned)->zero_tokens()->default_value(false),
      "Print unaligned sentences")
-    
-    ("help,h", po::value(&help)->zero_tokens()->default_value(false),
-     "Print this help message and exit")
   ;
 
-  po::options_description cmdline_options;
-  cmdline_options.add(desc);
+  po::options_description cmdline_options("Allowed options");
+  cmdline_options.add(general).add(algo).add(output);
   po::variables_map vm;
   
   try { 
@@ -150,47 +128,54 @@ int main(int argc, char** argv)
     std::cout << "Error: " << e.what() << std::endl << std::endl;
     
     std::cout << "Usage: " + std::string(argv[0]) +  " [options]" << std::endl;
-    std::cout << desc << std::endl;
+    std::cout << cmdline_options << std::endl;
     exit(0);
   }
   
   if (help) {
     std::cout << "Usage: " + std::string(argv[0]) +  " [options]" << std::endl;
-    std::cout << desc << std::endl;
+    std::cout << cmdline_options << std::endl;
     exit(0);
   }
-  
-  std::cerr << std::endl;
-  
-  Corpus source(sourceFileName);
-  std::cerr << " Loaded " << source.size() << " source sentences" << std::endl;
-  Corpus target(targetFileName);
-  std::cerr << " Loaded " << target.size() << " target sentences" << std::endl;
-  std::cerr << std::endl;
 
-  Ladder rungs11 = FirstPass<Config<BLEU<2>, Fast>, Corpus>(source, target);
-  Ladder rungsMN = SecondPass<Config<BLEU<2>, Full>, Corpus>(source, target, rungs11, corridorWidth);
+  boost::timer::auto_cpu_timer t(std::cerr, 2, "Total time: %t sec CPU, %w sec real\n");
   
-  if(ladderFormat) {
-    Print<LadderFormat>(rungsMN, source, target, params);
+  if(!quiet) std::cerr << std::endl;
+  std::shared_ptr<Corpus> source(new Corpus(sourceFileName));
+  if(!quiet) std::cerr << "Loaded " << source->size() << " source sentences" << std::endl;
+  std::shared_ptr<Corpus> target(new Corpus(targetFileName));
+  if(!quiet) std::cerr << "Loaded " << target->size() << " target sentences" << std::endl;
+  if(!quiet) std::cerr << std::endl;
+  
+  Ladder rungsMN;
+
+  if(skip2nd) {
+    rungsMN = FirstPass<Config<BLEU<2>, Fast>, Corpus>(*source, *target, quiet);
+  }
+  else if(skip1st) {
+    rungsMN = FirstPass<Config<BLEU<2>, Full>, Corpus>(*source, *target, quiet);    
   }
   else {
-    Print<TextFormat>(rungsMN, source, target, params);
+    Ladder rungs11 = FirstPass<Config<BLEU<2>, Fast>, Corpus>(*source, *target, quiet);
+    rungsMN = SecondPass<Config<BLEU<2>, Full>, Corpus>(*source, *target, rungs11, corridorWidth, quiet);
+  }  
+
+  t.stop();
+  if(!quiet) t.report();
+  if(!quiet) std::cerr << std::endl;
+  
+  if(sourceFileNameOrig.size())
+    source.reset(new Corpus(sourceFileNameOrig));
+  if(targetFileNameOrig.size())
+    target.reset(new Corpus(targetFileNameOrig));
+    
+  if(ladderFormat) {
+    Print<LadderFormat>(rungsMN, *source, *target, params);
+  }
+  else {
+    Print<TextFormat>(rungsMN, *source, *target, params);
   }
   
-  //float scoreSum = 0;
-  //size_t keptRungs = 0;
-  //
-  //std::map<std::pair<size_t,size_t>, size_t> stats;
-  //
-  //      stats[std::make_pair(r.bead[0], r.bead[1])]++;
-  //
-  //std::cerr << " Bead statistics: " << std::endl;
-  //for(auto& item : stats)
-  //  std::cerr << "   " << item.first.first << "-" << item.first.second << " : " << item.second << std::endl;
-  //  
-  //std::cerr << std::endl;
-  //std::cerr << " Quality of aligned rungs: " << scoreSum/keptRungs << std::endl;
-  //std::cerr << " Quality: " << scoreSum/rungs.size() << std::endl;
-  //std::cerr << std::endl;
+  if(!quiet)
+    PrintStatistics(rungsMN);
 }

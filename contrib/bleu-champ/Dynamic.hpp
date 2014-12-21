@@ -3,8 +3,11 @@
 #include <vector>
 #include <iostream>
 #include <algorithm> 
+#include <limits>
 
 /******************************************************************************/
+
+const float MIN = std::numeric_limits<float>::min();
 
 struct Bead {
   Bead() : m_bead{0 ,0} {}
@@ -18,6 +21,10 @@ struct Bead {
 
   inline const size_t& operator[](size_t i) const {
     return const_cast<Bead&>(*this)[i];
+  }
+  
+  bool operator<(const Bead& b) const {
+    return m_bead[0] < b[0] || (m_bead[0] == b[0] && m_bead[1] < b[1]);
   }
   
   size_t m_bead[2];
@@ -91,7 +98,7 @@ class Dynamic {
   public:
     Dynamic(CorpusType& corpus1, CorpusType& corpus2)
     : m_corpus1(corpus1), m_corpus2(corpus2),
-      m_seen(m_corpus1.size() + 1, std::vector<float>(m_corpus2.size() + 1, -100)),
+      m_seen(m_corpus1.size() + 1, std::vector<float>(m_corpus2.size() + 1, MIN)),
       m_prev(m_corpus1.size() + 1, std::vector<Bead>(m_corpus2.size() + 1))
     {}
     
@@ -100,19 +107,19 @@ class Dynamic {
     }
     
     float Align(int i, int j) {
-      if(i <= 0 && j <= 0)
+      if(i < 0 || j < 0 || (i == 0 && j == 0))
         return 0;
       
-      if(m_seen[i][j] != -100)
+      if(m_seen[i][j] != MIN)
         return m_seen[i][j];
       
       Beads allowedBeads = m_config.Search()();
       
-      float bestScore = -1;
+      float bestScore = MIN;
       Bead bestBead = allowedBeads[0];
       
       for(Bead& bead : allowedBeads) {
-        float score = -10;
+        float score = MIN;
         if(i >= bead[0] && j >= bead[1] && InCorridor(i - bead[0], j - bead[1])) {
           score = Align(i - bead[0], j - bead[1])
                    + m_config.Scorer()(m_corpus1(i - bead[0], i - 1),
@@ -132,7 +139,6 @@ class Dynamic {
 
     bool InCorridor(size_t i, size_t j) {
       if(!m_corridor.empty()) {
-        //std::cout << "Corr: " << i << " " << j << std::endl;
         return m_corridor[i][j];
       }
       return true;
@@ -151,8 +157,8 @@ class Dynamic {
       return ladder;
     }
   
-    void BackTrack(size_t i, size_t j, Ladder& ladder) {
-      if(i == 0 && j == 0)
+    void BackTrack(int i, int j, Ladder& ladder) {
+      if(i < 0 || j < 0 || (i == 0 && j == 0))
         return;
       
       Bead bead = m_prev[i][j];
@@ -163,10 +169,10 @@ class Dynamic {
       rung.j = j - bead[1];
       rung.bead = bead;
       
-      if(m_seen[i - bead[0]][j - bead[1]] != -100)
+      if(m_seen[i - bead[0]][j - bead[1]] != MIN)
         rung.score = m_seen[i][j] - m_seen[i - bead[0]][j - bead[1]];
       else
-        rung.score = 0;
+        rung.score = m_seen[i][j];
         
       ladder.push_back(rung);
     }
@@ -181,7 +187,7 @@ class Dynamic {
       int distance = width/2;
       m_corridor.resize(m + 1, std::vector<bool>(n + 1, false));
       for(const Rung& r : ladder) {
-        for(int j = std::max(0, (int)r.j - distance); j < std::min((int)r.j + distance, (int)n); j++)
+        for(int j = std::max(0, (int)r.j - distance); j <= std::min((int)r.j + distance, (int)n); j++)
           m_corridor[r.i][j] = true;
       }
     }
