@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 
   po::options_description algo("Alignment algorithm options");
   algo.add_options()
-    ("width,w", po::value(&corridorWidth)->default_value(30),
+    ("width,w", po::value(&corridorWidth)->default_value(10),
      "Width of search corridor around 1-1 path")
     ("skip-1st", po::value(&skip1st)->zero_tokens()->default_value(false),
      "Skip 1st pass. Can be very slow for larger files")
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
      "Has to be sentence aligned with --target  arg")
 
      
-    ("min-score,m", po::value(&params.printThreshold)->default_value(0),
+    ("min-score,m", po::value(&params.printThreshold)->default_value(MIN),
      "Print rungs with scores of at least  arg")
     
     ("print-beads,b", po::value(&params.printBeads)->zero_tokens()->default_value(false),

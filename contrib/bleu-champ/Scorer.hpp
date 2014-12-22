@@ -8,7 +8,7 @@ class BLEU {
     template <class Sentence>
     float operator()(const Sentence& c, const Sentence& r) const {
       if(c.size() == 0 || r.size() == 0)
-        return 0;
+        return 0.0;
       
       std::vector<float> stats(MAX_NGRAM_ORDER * 3, 0);
       computeBLEUSymStats(c, r, stats);

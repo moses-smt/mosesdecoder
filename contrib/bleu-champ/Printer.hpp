@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <cstdio>
+#include <limits>
 
 #include "Dynamic.hpp"
 
@@ -12,7 +13,7 @@ struct PrintParams {
   bool printScores = false;
   bool printUnaligned = false;
   bool print11 = false;
-  float printThreshold = 0;
+  float printThreshold = MIN;
 };
 
 struct TextFormat {

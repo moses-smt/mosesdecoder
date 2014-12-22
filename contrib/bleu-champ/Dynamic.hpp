@@ -4,10 +4,11 @@
 #include <iostream>
 #include <algorithm> 
 #include <limits>
+#include <cmath>
 
 /******************************************************************************/
 
-const float MIN = std::numeric_limits<float>::min();
+const float MIN = std::numeric_limits<float>::lowest();
 
 struct Bead {
   Bead() : m_bead{0 ,0} {}
@@ -61,6 +62,13 @@ struct Search {
     virtual const Beads& operator()() const {
       return m_allowedBeads;
     }
+    
+    virtual float Penalty(const Bead& bead) const {
+      // TODO: EVIL!!! Satan did this!
+      if(bead[0] == 0 || bead[1] == 0)
+        return -0.1;
+      return 0.0;
+    }
   
   private:
     Beads& m_allowedBeads;
@@ -107,8 +115,8 @@ class Dynamic {
       Align(m_corpus1.size(), m_corpus2.size());
     }
     
-    float Align(int i, int j) {
-      if(i < 0 || j < 0 || (i == 0 && j == 0))
+    float Align(size_t i, size_t j) {
+      if(i == 0 && j == 0)
         return 0;
       
       if(m_seen[i][j] != MIN)
@@ -123,9 +131,10 @@ class Dynamic {
         float score = MIN;
         if(i >= bead[0] && j >= bead[1] && InCorridor(i - bead[0], j - bead[1])) {
           score = Align(i - bead[0], j - bead[1])
-                   + m_config.Scorer()(m_corpus1(i - bead[0], i - 1),
-                                       m_corpus2(j - bead[1], j - 1));
-        
+                  + m_config.Scorer()(m_corpus1(i - bead[0], i - 1),
+                                      m_corpus2(j - bead[1], j - 1))
+                  + m_config.Search().Penalty(bead);
+          
           if(score > bestScore) {
             bestScore = score;
             bestBead = bead;
@@ -158,8 +167,8 @@ class Dynamic {
       return ladder;
     }
   
-    void BackTrack(int i, int j, Ladder& ladder) {
-      if(i < 0 || j < 0 || (i == 0 && j == 0))
+    void BackTrack(size_t i, size_t j, Ladder& ladder) {
+      if(i == 0 && j == 0)
         return;
       
       Bead bead = m_prev[i][j];
@@ -178,19 +187,29 @@ class Dynamic {
       ladder.push_back(rung);
     }
     
-    // @TODO: correct this to include all points in circle.
-    void SetCorridor(const Ladder& ladder, size_t width = 20) {
+    // @TODO: correct this to include all points in hamming circle.
+    void SetCorridor(const Ladder& ladder, int width = 10) {
       UTIL_THROW_IF(ladder.empty(), util::Exception,
                     "Error: No elements in ladder.");
       
       size_t m = ladder.back().i;
       size_t n = ladder.back().j;
       
-      int distance = width/2;
+      int radius = std::max(width / 2, 1);
       m_corridor.resize(m + 1, std::vector<bool>(n + 1, false));
+      
       for(const Rung& r : ladder) {
-        for(int j = std::max(0, (int)r.j - distance); j <= std::min((int)r.j + distance, (int)n); j++)
-          m_corridor[r.i][j] = true;
+        size_t left = std::max(0, (int)r.i - radius);
+        size_t right = std::min((int)m + 1, (int)r.i + radius);
+        
+        for(size_t i = left; i < right; i++) {
+          size_t bottom = std::max(0, (int)r.j - radius);
+          size_t top = std::min((int)n + 1, (int)r.j + radius);
+          
+          for(size_t j = bottom; j < top; j++) {
+            m_corridor[i][j] = true;
+          }
+        }
       }
     }
     
