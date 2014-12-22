@@ -8,7 +8,7 @@ class BLEU {
     template <class Sentence>
     float operator()(const Sentence& c, const Sentence& r) const {
       if(c.size() == 0 || r.size() == 0)
-        return 0.0;
+        return -0.1;
       
       std::vector<float> stats(MAX_NGRAM_ORDER * 3, 0);
       computeBLEUSymStats(c, r, stats);
@@ -29,7 +29,7 @@ class BLEU {
           smoothing = 1.0;
       
         if(stats[3*i+1] + smoothing == 0)
-          return 0.0;
+          return -0.1;
       
         logbleu1 += log(stats[3*i] + smoothing) - log(stats[3*i+1] + smoothing);
         logbleu2 += log(stats[3*i] + smoothing) - log(stats[3*i+2] + smoothing);
@@ -47,7 +47,10 @@ class BLEU {
         logbleu2 += brevity2;
       }
     
-      return exp((logbleu1 + logbleu2)/2);
+      float bleu = exp((logbleu1 + logbleu2)/2);
+      if(bleu == 0)
+        return -0.1;
+      return bleu;
     }
     
     template <class Sentence>

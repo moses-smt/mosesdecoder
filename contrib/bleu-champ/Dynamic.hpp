@@ -63,12 +63,12 @@ struct Search {
       return m_allowedBeads;
     }
     
-    virtual float Penalty(const Bead& bead) const {
-      // TODO: EVIL!!! Satan did this!
-      if(bead[0] == 0 || bead[1] == 0)
-        return -0.1;
-      return 0.0;
-    }
+    //virtual float Penalty(const Bead& bead) const {
+    //  // TODO: EVIL!!! Satan did this!
+    //  if(bead[0] == 0 || bead[1] == 0)
+    //    return -0.1;
+    //  return 0.0;
+    //}
   
   private:
     Beads& m_allowedBeads;
@@ -133,7 +133,7 @@ class Dynamic {
           score = Align(i - bead[0], j - bead[1])
                   + m_config.Scorer()(m_corpus1(i - bead[0], i - 1),
                                       m_corpus2(j - bead[1], j - 1))
-                  + m_config.Search().Penalty(bead);
+                  ; //+ m_config.Search().Penalty(bead);
           
           if(score > bestScore) {
             bestScore = score;
