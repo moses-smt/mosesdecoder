@@ -55,6 +55,7 @@ struct Search {
     {
       UTIL_THROW_IF(m_allowedBeads.size() < 1, util::Exception,
                     "Error: You have to define at least one search bead.");
+      std::sort(m_allowedBeads.begin(), m_allowedBeads.end());
     }
     
     virtual const Beads& operator()() const {
@@ -177,6 +178,7 @@ class Dynamic {
       ladder.push_back(rung);
     }
     
+    // @TODO: correct this to include all points in circle.
     void SetCorridor(const Ladder& ladder, size_t width = 20) {
       UTIL_THROW_IF(ladder.empty(), util::Exception,
                     "Error: No elements in ladder.");

@@ -17,7 +17,12 @@ namespace po = boost::program_options;
 template <class Config, class Corpus>
 Ladder FirstPass(Corpus &source, Corpus &target, bool quiet) {
   boost::timer::auto_cpu_timer t(std::cerr, 2, "    Time: %t sec CPU, %w sec real\n");
-  if(!quiet) std::cerr << "Pass 1: Tracing path with 1-1 beads:" << std::endl;
+  if(!quiet) std::cerr << "Pass 1: Tracing path with beads:";
+  if(!quiet) {
+    for(const Bead& bead : Config().Search()())
+      std::cerr << " " << bead;
+    std::cerr << std::endl;
+  }
   if(!quiet) std::cerr << "    Computing best path" << std::endl;
   Dynamic<Config, Corpus> aligner(source, target);
   aligner.Align();
@@ -32,7 +37,12 @@ Ladder FirstPass(Corpus &source, Corpus &target, bool quiet) {
 template <class Config, class Corpus>
 Ladder SecondPass(Corpus &source, Corpus &target, const Ladder& path, size_t corridorWidth, bool quiet) {
   boost::timer::auto_cpu_timer t(std::cerr, 2, "    Time: %t sec CPU, %w sec real\n");
-  if(!quiet) std::cerr << "Pass 2: Tracing path with all beads:" << std::endl;
+  if(!quiet) std::cerr << "Pass 2: Tracing path with beads:";
+  if(!quiet) {
+    for(const Bead& bead : Config().Search()())
+      std::cerr << " " << bead;
+    std::cerr << std::endl;
+  }
   if(!quiet) std::cerr << "    Setting corridor width to " << corridorWidth << std::endl;
   Dynamic<Config, Corpus> aligner(source, target);
   aligner.SetCorridor(path, corridorWidth);
