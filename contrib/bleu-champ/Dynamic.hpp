@@ -187,7 +187,6 @@ class Dynamic {
       ladder.push_back(rung);
     }
     
-    // @TODO: correct this to include all points in hamming circle.
     void SetCorridor(const Ladder& ladder, int width = 10) {
       UTIL_THROW_IF(ladder.empty(), util::Exception,
                     "Error: No elements in ladder.");
