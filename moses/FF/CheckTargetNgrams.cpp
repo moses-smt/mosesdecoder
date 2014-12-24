@@ -9,6 +9,8 @@ using namespace std;
 
 namespace Moses
 {
+  static int m_CheckTargetNgrams_EvaluateWhenApplied_calls;
+
 int CheckTargetNgramsState::Compare(const FFState& other) const
 {
   const CheckTargetNgramsState &otherState = static_cast<const CheckTargetNgramsState&>(other);
@@ -30,6 +32,7 @@ CheckTargetNgrams::CheckTargetNgrams(const std::string &line)
   std::ostringstream tmp_bos;
   tmp_bos << BOS_;
   m_bos = tmp_bos.str();
+  m_CheckTargetNgrams_EvaluateWhenApplied_calls = 0;
 }
 
 void CheckTargetNgrams::EvaluateInIsolation(const Phrase &source
@@ -51,12 +54,151 @@ FFState* CheckTargetNgrams::EvaluateWhenApplied(
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
+  Moses::m_CheckTargetNgrams_EvaluateWhenApplied_calls++;
+//  VERBOSE(4, GetScoreProducerDescription() << " EvaluateWhenApplied_char" << std::endl);
+//  if (Moses::m_CheckTargetNgrams_EvaluateWhenApplied_calls%100 == 0) { VERBOSE(1,GetScoreProducerDescription() << " EvaluateWhenApplied calls:|"<< Moses::m_CheckTargetNgrams_EvaluateWhenApplied_calls << "|" << std::endl); }
+
+  //[currStartPos, currEndPos) in STL-like fashion.
+  const size_t currStartPos = cur_hypo.GetCurrTargetWordsRange().GetStartPos();
+  const size_t currEndPos = cur_hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
+  const int fullStartPos = currStartPos - m_maxorder + 1;
+
+  const size_t m_target_words_number = currEndPos - currStartPos;
+  const size_t m_words_number = currEndPos - fullStartPos;
+
+//  VERBOSE(5, GetScoreProducerDescription() << " currStartPos:|" << currStartPos << "| currEndPos:|" << currEndPos << "| fullStartPos:|" << fullStartPos << "| m_words_number|" << m_words_number << "| m_maxorder:|" << m_maxorder << "|" << std::endl);
+
+  //[startPosChar, endPosChar) in STL-like fashion, start and end character positions for all words considered, computed right-to-left, and then reverse left-to-right
+  size_t* startPosChar = new size_t[m_words_number];
+  size_t* endPosChar = new size_t[m_words_number];
+
+  int currPos=currEndPos - 1;
+  size_t idx=0;
+
+  std::string full_string = cur_hypo.GetWord(currPos).GetString(m_factorType).as_string();
+//  VERBOSE(6, GetScoreProducerDescription() << " idx:|" << idx << "| currPos:|" << currPos << "|  full_string:|" << full_string  << "|"  << std::endl);
+
+  startPosChar[idx] = full_string.length();
+//  VERBOSE(6, GetScoreProducerDescription() << " idx:|" << idx << "|  startPosChar[idx]:|" <<  startPosChar[idx]  << "| full_string:|" << full_string << "|"  << std::endl);
+  ++idx;
+  --currPos;
+
+  while (currPos >= fullStartPos){
+    if (currPos >= 0)
+      full_string = cur_hypo.GetWord(currPos).GetString(m_factorType).as_string() + " " + full_string;
+    else
+      full_string = m_bos + " " + full_string;
+
+    startPosChar[idx] = full_string.length();
+//    VERBOSE(6, GetScoreProducerDescription() << " idx:|" << idx << "|  startPosChar[idx]:|" <<  startPosChar[idx]  << "| full_string:|" << full_string << "|"  << std::endl);
+    ++idx;
+    --currPos;
+  }
+  size_t maxLenChar = startPosChar[idx-1];
+//  VERBOSE(5, GetScoreProducerDescription() << " maxLenChar:|" << maxLenChar << "|" << std::endl);
+
+  //reverse positions of character start and end
+  for (size_t index=0; index < m_words_number; ++index){
+    startPosChar[index] = maxLenChar - startPosChar[index];
+//    VERBOSE(6, GetScoreProducerDescription() << " index:|" << index << "|  startPosChar[index]:|" <<  startPosChar[index]  << "|"  << std::endl);
+  }
+  endPosChar[0] = maxLenChar;
+//  VERBOSE(6, GetScoreProducerDescription() << " index:|" << 0 << "|  endPosChar[index]:|" <<  endPosChar[0]  << "|"  << std::endl);
+  for (size_t index=1; index < m_words_number; ++index){
+    endPosChar[index] = startPosChar[index-1] - 1;
+//    VERBOSE(6, GetScoreProducerDescription() << " index:|" << index << "|  endPosChar[index]:|" <<  endPosChar[index]  << "|"  << std::endl);
+  }
+//  for (size_t index=0; index < m_words_number; ++index){
+//    VERBOSE(6, GetScoreProducerDescription() << " index:|" << index << "|  startPosChar[index]:|" <<  startPosChar[index]  << "|  endPosChar[index]:|" <<  endPosChar[index]  << "|"  << std::endl);
+//  } 
+  const unsigned char* full_string_aschar = (const unsigned char*) full_string.c_str();
+
+  vector<float> newScores(m_numScoreComponents);
+  vector<bool> matches(m_numScoreComponents);
+  size_t score_index;
+
+  size_t currStartPosChar;
+  size_t currEndPosChar;
+  size_t currLenChar;
+
+  for (size_t start_index=0; start_index < m_target_words_number; ++start_index){
+
+    for (score_index = 0; score_index < m_numScoreComponents - 1; ++score_index){
+      matches[score_index] = false;
+    }
+
+    size_t end_index = start_index + m_maxorder - 1;
+    size_t offset = start_index + (m_maxorder - m_numScoreComponents);
+    score_index=m_numScoreComponents - 1;
+//    VERBOSE(6, GetScoreProducerDescription() << " start_index:|" << start_index << "| offset:|" << offset << "| end_index:|" << end_index << "|" << std::endl);
+    while (offset <= end_index){
+      
+      currStartPosChar = startPosChar[offset];
+      currEndPosChar = endPosChar[start_index];
+      currLenChar = currEndPosChar - currStartPosChar;
+//      VERBOSE(6, GetScoreProducerDescription() << " checking start_index:|" << start_index << "| offset:|" << offset << "| end_index:|" << end_index << "| currStartPosChar:|" << currStartPosChar << "| currEndPosChar:|" << currEndPosChar << "| currLenChar:|" << currLenChar << "|" << std::endl);
+
+      matches[score_index] = m_bloomfilter.contains(&(full_string_aschar[currStartPosChar]), currLenChar);
+//      VERBOSE(6, GetScoreProducerDescription() << " score_index:|" << score_index << "| matches[score_index]:|" << matches[score_index] << "|" << std::endl);
+  
+      //check consistency
+      if (matches[score_index] == true){
+        if ((score_index < m_numScoreComponents - 1) && (matches[score_index+1] == false)){
+          UTIL_THROW_IF2(1, "Data are not consistent: n-gram [" << start_index << "," << offset<< "] is present, but its shorter version is not");
+        }
+
+        newScores[score_index] += 1.0;
+//        VERBOSE(6, GetScoreProducerDescription() << " score_index:|" << score_index << "| end_index:|" << end_index << "| offset:|" << offset << "| score:|" << newScores[score_index] << "|" << std::endl);
+        --score_index;
+      }
+      else{ //exit the loop because longer n-grams do not match as well due to consistency requirement 
+        break;
+      }
+
+      ++offset;
+    }
+  }
+  accumulator->PlusEquals(this, newScores);
+
+  score_index = 1;
+//  VERBOSE(5, GetScoreProducerDescription() << " looking for the longest match, score_index:|" << score_index << "|" << std::endl);
+  while ( score_index < m_numScoreComponents && matches[score_index] == false){
+    ++score_index;
+  }
+//  VERBOSE(5, GetScoreProducerDescription() << " final matching score index:|" << score_index << "|" << std::endl);
+  //score_index=0 is not considered
+  //if score_index=1, then state is the hash of an n-gram of order (m_maxorder - 1)
+  //if score_index=2, then state is the hash of an n-gram of order (m_maxorder - 2)
+  //etc... up to (m_numScoreComponents-1)
+
+  currStartPosChar = startPosChar[m_maxorder - score_index - 1];
+  currEndPosChar = endPosChar[0];
+  currLenChar = currEndPosChar - currStartPosChar;
+
+  unsigned int history = m_bloomfilter.simple_hash_key(&(full_string_aschar[currStartPosChar]), currLenChar);
+
+//  VERBOSE(5, GetScoreProducerDescription() << " final string to hash, number of words:|" << (m_maxorder - score_index - 1) << "| state:|" << history << "|" << std::endl);
+
+  delete []startPosChar;
+  delete []endPosChar;
+ 
+  return new CheckTargetNgramsState(history); 
+}
+
+/*
+FFState* CheckTargetNgrams::EvaluateWhenApplied(
+  const Hypothesis& cur_hypo,
+  const FFState* prev_state,
+  ScoreComponentCollection* accumulator) const
+{
+  Moses::m_CheckTargetNgrams_EvaluateWhenApplied_calls++;
   VERBOSE(4, GetScoreProducerDescription() << " EvaluateWhenApplied" << std::endl);
+//  if (Moses::m_CheckTargetNgrams_EvaluateWhenApplied_calls%100 == 0) { VERBOSE(1,GetScoreProducerDescription() << " EvaluateWhenApplied calls:|"<< Moses::m_CheckTargetNgrams_EvaluateWhenApplied_calls << "|" << std::endl); }
 
   const size_t currStartPos = cur_hypo.GetCurrTargetWordsRange().GetStartPos();
   const size_t m_words_number = cur_hypo.GetCurrTargetLength() + m_maxorder - 1;
 
-  VERBOSE(5, GetScoreProducerDescription() << " currStartPos:|" << currStartPos << "| cur_hypo.GetCurrTargetLength():|" << cur_hypo.GetCurrTargetLength()<< "| m_words_number|" << m_words_number << "| m_maxorder:|" << m_maxorder << "|" << std::endl);
+//  VERBOSE(5, GetScoreProducerDescription() << " currStartPos:|" << currStartPos << "| cur_hypo.GetCurrTargetLength():|" << cur_hypo.GetCurrTargetLength()<< "| m_words_number|" << m_words_number << "| m_maxorder:|" << m_maxorder << "|" << std::endl);
 
   // 1st n-gram
   vector<std::string> m_words(m_words_number);
@@ -138,9 +280,11 @@ FFState* CheckTargetNgrams::EvaluateWhenApplied(
   min_offset=word_index - ( m_maxorder - score_index ) + 1;
   VERBOSE(5, GetScoreProducerDescription() << " creating string for the state from word_index:|" << word_index << "| up to  min_offset:|" << min_offset << "|" << std::endl);
   ngr = m_words[word_index];
+  VERBOSE(6, GetScoreProducerDescription() << " word_index:|" << word_index << "| ngr:|" << ngr << "|" << std::endl);
   while (word_index > min_offset){
     --word_index;
     ngr = m_words[word_index] + " " + ngr;
+    VERBOSE(6, GetScoreProducerDescription() << " word_index:|" << word_index << "| ngr:|" << ngr << "|" << std::endl);
   }
   accumulator->PlusEquals(this, newScores);
 
@@ -150,6 +294,7 @@ FFState* CheckTargetNgrams::EvaluateWhenApplied(
  
   return new CheckTargetNgramsState(history); 
 }
+*/
 
 FFState* CheckTargetNgrams::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,

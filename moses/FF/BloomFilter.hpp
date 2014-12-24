@@ -336,6 +336,11 @@ public:
       return simple_hash_key(reinterpret_cast<const unsigned char*>(&t),sizeof(T));
    }
 
+   inline unsigned int simple_hash_key(const std::string& key) const
+   {
+      return simple_hash_key(reinterpret_cast<const unsigned char*>(key.c_str()),key.size());
+   }
+
    inline unsigned int simple_hash_key(const unsigned char* key,const size_t& length) const
    {
         //returns hash value over the unsigned int range: very little chance of collision
