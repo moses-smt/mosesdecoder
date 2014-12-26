@@ -93,7 +93,7 @@ void ChartManager::Decode()
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
-      cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+      cell.Decode(m_translationOptionList, m_hypoStackColl);
 
       m_translationOptionList.Clear();
       cell.PruneToSize();

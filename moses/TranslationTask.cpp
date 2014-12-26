@@ -150,7 +150,7 @@ void TranslationTask::RunPb()
       }
 
       out << endl;
-    }
+    } // if (!staticData.UseMBR())
 
     // MBR decoding (n-best MBR, lattice MBR, consensus)
     else {
@@ -218,7 +218,7 @@ void TranslationTask::RunPb()
 
     decisionRuleTime.stop();
     VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
-  }
+  } // if (m_ioWrapper.GetSingleBestOutputCollector())
 
   additionalReportingTime.start();
 

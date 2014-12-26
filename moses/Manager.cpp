@@ -115,7 +115,7 @@ void Manager::Decode()
   // search for best translation with the specified algorithm
   Timer searchTime;
   searchTime.start();
-  m_search->ProcessSentence();
+  m_search->Decode();
   VERBOSE(1, "Line " << m_source.GetTranslationId() << ": Search took " << searchTime << " seconds" << endl);
     IFVERBOSE(2) {
     GetSentenceStats().StopTimeTotal();

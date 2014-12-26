@@ -35,7 +35,7 @@ public:
   SearchCubePruning(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
   ~SearchCubePruning();
 
-  void ProcessSentence();
+  void Decode();
 
   void OutputHypoStackSize();
   void OutputHypoStack(int stack);

@@ -84,7 +84,7 @@ void ChartCell::PruneToSize()
  * \param transOptList list of applicable rules to create hypotheses for the cell
  * \param allChartCells entire chart - needed to look up underlying hypotheses
  */
-void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
+void ChartCell::Decode(const ChartTranslationOptionList &transOptList
                                 , const ChartCellCollection &allChartCells)
 {
   const StaticData &staticData = StaticData::Instance();
