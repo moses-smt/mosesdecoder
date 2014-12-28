@@ -117,7 +117,7 @@ void TranslationTask::RunPb()
           out << bestHypo->GetTotalScore() << ' ';
         }
         if (staticData.IsPathRecoveryEnabled()) {
-          m_ioWrapper.OutputInput(out, bestHypo);
+        	bestHypo->OutputInput(out);
           out << "||| ";
         }
 

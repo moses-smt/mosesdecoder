@@ -472,5 +472,22 @@ void Hypothesis::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t s
 
 }
 
+void Hypothesis::OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
+{
+  if (hypo->GetPrevHypo()) {
+    OutputInput(map, hypo->GetPrevHypo());
+    map[hypo->GetCurrSourceWordsRange().GetStartPos()] = &hypo->GetTranslationOption().GetInputPath().GetPhrase();
+  }
+}
+
+void Hypothesis::OutputInput(std::ostream& os) const
+{
+  size_t len = this->GetInput().GetSize();
+  std::vector<const Phrase*> inp_phrases(len, 0);
+  OutputInput(inp_phrases, this);
+  for (size_t i=0; i<len; ++i)
+    if (inp_phrases[i]) os << *inp_phrases[i];
+}
+
 }
 

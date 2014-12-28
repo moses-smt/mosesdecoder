@@ -593,24 +593,6 @@ void IOWrapper::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*tra
   out << endl;
 }
 
-
-void IOWrapper::OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
-{
-  if (hypo->GetPrevHypo()) {
-    OutputInput(map, hypo->GetPrevHypo());
-    map[hypo->GetCurrSourceWordsRange().GetStartPos()] = &hypo->GetTranslationOption().GetInputPath().GetPhrase();
-  }
-}
-
-void IOWrapper::OutputInput(std::ostream& os, const Hypothesis* hypo)
-{
-  size_t len = hypo->GetInput().GetSize();
-  std::vector<const Phrase*> inp_phrases(len, 0);
-  OutputInput(inp_phrases, hypo);
-  for (size_t i=0; i<len; ++i)
-    if (inp_phrases[i]) os << *inp_phrases[i];
-}
-
 void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, char reportSegmentation, bool reportAllFactors)
 {
   if (hypo != NULL) {
@@ -624,7 +606,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
       }
 
       if (StaticData::Instance().IsPathRecoveryEnabled()) {
-        OutputInput(cout, hypo);
+    	  hypo->OutputInput(cout);
         cout << "||| ";
       }
       OutputBestSurface(cout, hypo, *m_outputFactorOrder, reportSegmentation, reportAllFactors);

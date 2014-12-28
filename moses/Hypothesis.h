@@ -274,6 +274,9 @@ public:
   static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
   static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
 
+  void OutputInput(std::ostream& os) const;
+  static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
+
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
