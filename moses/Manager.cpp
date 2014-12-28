@@ -553,7 +553,8 @@ void Manager::OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothe
   outputWordGraphStream << endl;
 }
 
-void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) {
+void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) const
+{
   Phrase translation;
   hypo->GetOutputPhrase(translation);
   const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();

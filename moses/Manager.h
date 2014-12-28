@@ -157,7 +157,7 @@ public:
   void PrintAllDerivations(long translationId, std::ostream& outputStream) const;
   void printDivergentHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase*> & remainingPhrases, float remainingScore , std::ostream& outputStream) const;
   void printThisHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase* > & remainingPhrases, float remainingScore , std::ostream& outputStream) const;
-  void GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo );
+  void GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) const;
   void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
   int GetNextHypoId();
 
