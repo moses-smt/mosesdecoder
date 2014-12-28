@@ -277,7 +277,7 @@ public:
   void OutputInput(std::ostream& os) const;
   static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
 
-  void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors) const;
+  void OutputBestSurface(std::ostream &out, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors) const;
   void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
                      char reportSegmentation, bool reportAllFactors) const;
 

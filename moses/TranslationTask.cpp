@@ -131,7 +131,6 @@ void TranslationTask::RunPb()
 	  }
 	  bestHypo->OutputBestSurface(
           out,
-          bestHypo,
           staticData.GetOutputFactorOrder(),
           staticData.GetReportSegmentation(),
           staticData.GetReportAllFactors());

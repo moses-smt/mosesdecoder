@@ -490,14 +490,14 @@ void Hypothesis::OutputInput(std::ostream& os) const
     if (inp_phrases[i]) os << *inp_phrases[i];
 }
 
-void Hypothesis::OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
+void Hypothesis::OutputBestSurface(std::ostream &out, const std::vector<FactorType> &outputFactorOrder,
                        char reportSegmentation, bool reportAllFactors) const
 {
-  if (hypo != NULL) {
+  if (m_prevHypo) {
     // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
-    OutputBestSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
-    OutputSurface(out, *hypo, outputFactorOrder, reportSegmentation, reportAllFactors);
+    m_prevHypo->OutputBestSurface(out, outputFactorOrder, reportSegmentation, reportAllFactors);
   }
+  OutputSurface(out, *this, outputFactorOrder, reportSegmentation, reportAllFactors);
 }
 
 //////////////////////////////////////////////////////////////////////////
