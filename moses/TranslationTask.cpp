@@ -129,7 +129,7 @@ void TranslationTask::RunPb()
 	  if (staticData.GetReportSegmentation() == 2) {
 	    manager.GetOutputLanguageModelOrder(out, bestHypo);
 	  }
-        m_ioWrapper.OutputBestSurface(
+	  bestHypo->OutputBestSurface(
           out,
           bestHypo,
           staticData.GetOutputFactorOrder(),

@@ -520,15 +520,6 @@ void IOWrapper::OutputSurface(std::ostream &out, const Hypothesis &edge, const s
   }
 }
 
-void IOWrapper::OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
-                       char reportSegmentation, bool reportAllFactors)
-{
-  if (hypo != NULL) {
-    // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
-    OutputBestSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
-    OutputSurface(out, *hypo, outputFactorOrder, reportSegmentation, reportAllFactors);
-  }
-}
 
 
 void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
@@ -591,33 +582,6 @@ void IOWrapper::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*tra
     else     out << *factor;
   }
   out << endl;
-}
-
-void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, char reportSegmentation, bool reportAllFactors)
-{
-  if (hypo != NULL) {
-    VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
-    VERBOSE(3,"Best path: ");
-    Backtrack(hypo);
-    VERBOSE(3,"0" << std::endl);
-    if (!m_surpressSingleBestOutput) {
-      if (StaticData::Instance().GetOutputHypoScore()) {
-        cout << hypo->GetTotalScore() << " ";
-      }
-
-      if (StaticData::Instance().IsPathRecoveryEnabled()) {
-    	  hypo->OutputInput(cout);
-        cout << "||| ";
-      }
-      OutputBestSurface(cout, hypo, *m_outputFactorOrder, reportSegmentation, reportAllFactors);
-      cout << endl;
-    }
-  } else {
-    VERBOSE(1, "NO BEST TRANSLATION" << endl);
-    if (!m_surpressSingleBestOutput) {
-      cout << endl;
-    }
-  }
 }
 
 bool IOWrapper::ReadInput(InputTypeEnum inputType, InputType*& source)
