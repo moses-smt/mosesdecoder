@@ -508,7 +508,7 @@ void IOWrapper::OutputSurface(std::ostream &out, const Hypothesis &edge, const s
     if (reportSegmentation == 2) {
       out << ",wa=";
       const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-      OutputAlignment(out, ai, 0, 0);
+      Hypothesis::OutputAlignment(out, ai, 0, 0);
       out << ",total=";
       out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
       out << ",";
@@ -530,54 +530,11 @@ void IOWrapper::OutputBestSurface(std::ostream &out, const Hypothesis *hypo, con
   }
 }
 
-void IOWrapper::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
-{
-  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
-  AlignVec alignments = ai.GetSortedAlignments();
-
-  AlignVec::const_iterator it;
-  for (it = alignments.begin(); it != alignments.end(); ++it) {
-    const std::pair<size_t,size_t> &alignment = **it;
-    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
-  }
-
-}
-
-void IOWrapper::OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
-{
-  size_t targetOffset = 0;
-
-  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
-    const Hypothesis &edge = *edges[currEdge];
-    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
-    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-
-    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
-
-    targetOffset += tp.GetSize();
-  }
-  // Removing std::endl here breaks -alignment-output-file, so stop doing that, please :)
-  // Or fix it somewhere else.
-  out << std::endl;
-}
-
-void IOWrapper::OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)
-{
-  std::vector<const Hypothesis *> edges;
-  const Hypothesis *currentHypo = hypo;
-  while (currentHypo) {
-    edges.push_back(currentHypo);
-    currentHypo = currentHypo->GetPrevHypo();
-  }
-
-  OutputAlignment(out, edges);
-
-}
 
 void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
 {
   ostringstream out;
-  OutputAlignment(out, edges);
+  Hypothesis::OutputAlignment(out, edges);
 
   collector->Write(lineNo,out.str());
 }

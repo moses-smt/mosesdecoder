@@ -137,7 +137,7 @@ void TranslationTask::RunPb()
           staticData.GetReportAllFactors());
         if (staticData.PrintAlignmentInfo()) {
           out << "||| ";
-          m_ioWrapper.OutputAlignment(out, bestHypo);
+          bestHypo->OutputAlignment(out);
         }
 
         manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());

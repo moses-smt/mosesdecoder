@@ -187,10 +187,6 @@ public:
   void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
   void OutputAlignment(OutputCollector* collector, size_t lineNo , const std::vector<const Hypothesis *> &edges);
 
-  static void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo);
-  static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
-  static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
-
   static void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
                               , std::ostream &out);
   static void OutputFeatureScores( std::ostream& out

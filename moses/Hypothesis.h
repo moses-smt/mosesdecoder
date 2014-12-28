@@ -269,6 +269,11 @@ public:
   const TranslationOption &GetTranslationOption() const {
     return m_transOpt;
   }
+
+  void OutputAlignment(std::ostream &out) const;
+  static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
+  static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
+
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

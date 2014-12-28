@@ -428,5 +428,49 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
   return GetTargetPhraseStringRep(allFactors);
 }
 
+void Hypothesis::OutputAlignment(std::ostream &out) const
+{
+  std::vector<const Hypothesis *> edges;
+  const Hypothesis *currentHypo = this;
+  while (currentHypo) {
+    edges.push_back(currentHypo);
+    currentHypo = currentHypo->GetPrevHypo();
+  }
+
+  OutputAlignment(out, edges);
+
+}
+
+void Hypothesis::OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
+{
+  size_t targetOffset = 0;
+
+  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+    const Hypothesis &edge = *edges[currEdge];
+    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
+    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
+
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
+
+    targetOffset += tp.GetSize();
+  }
+  // Removing std::endl here breaks -alignment-output-file, so stop doing that, please :)
+  // Or fix it somewhere else.
+  out << std::endl;
+}
+
+void Hypothesis::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
+{
+  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
+  AlignVec alignments = ai.GetSortedAlignments();
+
+  AlignVec::const_iterator it;
+  for (it = alignments.begin(); it != alignments.end(); ++it) {
+    const std::pair<size_t,size_t> &alignment = **it;
+    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+  }
+
+}
+
 }
 
