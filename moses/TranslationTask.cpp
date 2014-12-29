@@ -174,7 +174,7 @@ void TranslationTask::RunPb()
           size_t n  = min(nBestSize, staticData.GetNBestSize());
           getLatticeMBRNBest(manager,nBestList,solutions,n);
           ostringstream out;
-          m_ioWrapper.OutputLatticeMBRNBest(out, solutions,m_source->GetTranslationId());
+          Manager::OutputLatticeMBRNBest(out, solutions, m_source->GetTranslationId());
           m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
         } else {
           //Lattice MBR decoding

@@ -42,6 +42,7 @@ namespace Moses
 class SentenceStats;
 class TrellisPath;
 class TranslationOptionCollection;
+class LatticeMBRSolution;
 
 /** Used to output the search graph */
 struct SearchGraphNode {
@@ -199,6 +200,8 @@ public:
   void OutputSearchGraph(OutputCollector *collector) const;
   void OutputSearchGraphSLF() const;
   void OutputSearchGraphHypergraph() const;
+
+  static void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 
 };
 

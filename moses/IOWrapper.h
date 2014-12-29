@@ -128,7 +128,6 @@ public:
   Moses::InputType* GetInput(Moses::InputType *inputType);
   bool ReadInput(Moses::InputTypeEnum inputType, Moses::InputType*& source);
 
-  void OutputLatticeMBRNBestList(const std::vector<LatticeMBRSolution>& solutions,long translationId);
   void Backtrack(const Moses::Hypothesis *hypo);
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
@@ -171,7 +170,6 @@ public:
   // CHART
 
   // phrase-based
-  void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
   void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
                       char reportSegmentation, bool reportAllFactors, std::ostream& out);
   void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,char reportSegmentation, bool reportAllFactors, std::ostream &out);

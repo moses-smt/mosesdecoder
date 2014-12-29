@@ -654,35 +654,6 @@ void IOWrapper::OutputFeatureScores( std::ostream& out
   }
 }
 
-void IOWrapper::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId)
-{
-  for (vector<LatticeMBRSolution>::const_iterator si = solutions.begin(); si != solutions.end(); ++si) {
-    out << translationId;
-    out << " |||";
-    const vector<Word> mbrHypo = si->GetWords();
-    for (size_t i = 0 ; i < mbrHypo.size() ; i++) {
-      const Factor *factor = mbrHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
-      if (i>0) out << " " << *factor;
-      else     out << *factor;
-    }
-    out << " |||";
-    out << " map: " << si->GetMapScore();
-    out << " w: " << mbrHypo.size();
-    const vector<float>& ngramScores = si->GetNgramScores();
-    for (size_t i = 0; i < ngramScores.size(); ++i) {
-      out << " " << ngramScores[i];
-    }
-    out << " ||| " << si->GetScore();
-
-    out << endl;
-  }
-}
-
-
-void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solutions,long translationId)
-{
-  OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
-}
 
 } // namespace
 
