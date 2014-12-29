@@ -179,7 +179,7 @@ void TranslationTask::RunPb()
         } else {
           //Lattice MBR decoding
           vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-          m_ioWrapper.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
+          Manager::OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
                          staticData.GetReportAllFactors(),out);
           IFVERBOSE(2) {
             PrintUserTime("finished Lattice MBR decoding");

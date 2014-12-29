@@ -1851,4 +1851,17 @@ void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSo
   }
 }
 
+void Manager::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, char /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out)
+{
+
+  for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
+    const Factor *factor = mbrBestHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+    UTIL_THROW_IF2(factor == NULL,
+  		  "No factor 0 at position " << i);
+    if (i>0) out << " " << *factor;
+    else     out << *factor;
+  }
+  out << endl;
+}
+
 } // namespace

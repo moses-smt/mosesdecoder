@@ -170,8 +170,6 @@ public:
   // CHART
 
   // phrase-based
-  void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
-                      char reportSegmentation, bool reportAllFactors, std::ostream& out);
   void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,char reportSegmentation, bool reportAllFactors, std::ostream &out);
 
   void OutputPassthroughInformation(std::string& passthrough, const Moses::Hypothesis* hypo);

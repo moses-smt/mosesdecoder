@@ -162,6 +162,10 @@ public:
   void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
   int GetNextHypoId();
 
+  static void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
+  static void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
+                      char reportSegmentation, bool reportAllFactors, std::ostream& out);
+
 #ifdef HAVE_PROTOBUF
   void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
 #endif
@@ -200,8 +204,6 @@ public:
   void OutputSearchGraph(OutputCollector *collector) const;
   void OutputSearchGraphSLF() const;
   void OutputSearchGraphHypergraph() const;
-
-  static void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 
 };
 
