@@ -82,7 +82,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, outputFactorOrder, false);
     out << " ||| ";
-    OutputAllFeatureScores(derivation.scoreBreakdown, out);
+    derivation.scoreBreakdown.OutputAllFeatureScores(out);
     out << " ||| " << derivation.score;
 
     // optionally, print word alignments

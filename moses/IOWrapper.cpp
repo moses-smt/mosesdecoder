@@ -258,26 +258,6 @@ GetInput(InputType* inputType)
   }
 }
 
-std::map<size_t, const Factor*> IOWrapper::GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
-{
-  const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
-  const Phrase &inputPhrase = inputPath.GetPhrase();
-
-  std::map<size_t, const Factor*> ret;
-
-  for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
-    const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
-    if (factor) {
-      std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
-      UTIL_THROW_IF2(targetPos.size() != 1,
-    		  "Placeholder should be aligned to 1, and only 1, word");
-      ret[*targetPos.begin()] = factor;
-    }
-  }
-
-  return ret;
-}
-
 void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
   if (hypo != NULL) {
@@ -411,117 +391,6 @@ void IOWrapper::WriteApplicationContext(std::ostream &out,
   }
 }
 
-/***
- * print surface factor only for the given phrase
- */
-void IOWrapper::OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
-{
-  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
-		  "Cannot be empty phrase");
-  if (reportAllFactors == true) {
-    out << phrase;
-  } else {
-    size_t size = phrase.GetSize();
-    for (size_t pos = 0 ; pos < size ; pos++) {
-      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-      out << *factor;
-      UTIL_THROW_IF2(factor == NULL,
-    		  "Empty factor 0 at position " << pos);
-
-      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
-        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        UTIL_THROW_IF2(factor == NULL,
-      		  "Empty factor " << i << " at position " << pos);
-
-        out << "|" << *factor;
-      }
-      out << " ";
-    }
-  }
-}
-
-
-
-
-//////////////////////////////////////////////////////////////////////////
-/***
- * print surface factor only for the given phrase
- */
-void IOWrapper::OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                   char reportSegmentation, bool reportAllFactors)
-{
-  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
-		  "Must specific at least 1 output factor");
-  const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
-  bool markUnknown = StaticData::Instance().GetMarkUnknown();
-  if (reportAllFactors == true) {
-    out << phrase;
-  } else {
-    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
-
-    std::map<size_t, const Factor*> placeholders;
-    if (placeholderFactor != NOT_FOUND) {
-      // creates map of target position -> factor for placeholders
-      placeholders = GetPlaceholders(edge, placeholderFactor);
-    }
-
-    size_t size = phrase.GetSize();
-    for (size_t pos = 0 ; pos < size ; pos++) {
-      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-
-      if (placeholders.size()) {
-        // do placeholders
-        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
-        if (iter != placeholders.end()) {
-          factor = iter->second;
-        }
-      }
-
-      UTIL_THROW_IF2(factor == NULL,
-    		  "No factor 0 at position " << pos);
-
-      //preface surface form with UNK if marking unknowns
-      const Word &word = phrase.GetWord(pos);
-      if(markUnknown && word.IsOOV()) {
-        out << "UNK" << *factor;
-      } else {
-        out << *factor;
-      }
-
-      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
-        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        UTIL_THROW_IF2(factor == NULL,
-      		  "No factor " << i << " at position " << pos);
-
-        out << "|" << *factor;
-      }
-      out << " ";
-    }
-  }
-
-  // trace ("report segmentation") option "-t" / "-tt"
-  if (reportSegmentation > 0 && phrase.GetSize() > 0) {
-    const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
-    const int sourceStart = sourceRange.GetStartPos();
-    const int sourceEnd = sourceRange.GetEndPos();
-    out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
-    if (reportSegmentation == 2) {
-      out << ",wa=";
-      const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-      Hypothesis::OutputAlignment(out, ai, 0, 0);
-      out << ",total=";
-      out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
-      out << ",";
-      ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
-      scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      OutputAllFeatureScores(scoreBreakdown, out);
-    }
-    out << "| ";
-  }
-}
-
-
-
 void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
 {
   ostringstream out;
@@ -549,17 +418,6 @@ void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , cons
   if (collector) {
     OutputAlignment(collector,lineNo, path.GetEdges());
   }
-}
-
-void IOWrapper::OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/, char reportSegmentation, bool reportAllFactors, std::ostream &out)
-{
-  const std::vector<const Hypothesis *> &edges = path.GetEdges();
-
-  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
-    const Hypothesis &edge = *edges[currEdge];
-    OutputSurface(out, edge, StaticData::Instance().GetOutputFactorOrder(), reportSegmentation, reportAllFactors);
-  }
-  out << endl;
 }
 
 void IOWrapper::Backtrack(const Hypothesis *hypo)
@@ -592,55 +450,6 @@ bool IOWrapper::ReadInput(InputTypeEnum inputType, InputType*& source)
   }
   return (source ? true : false);
 }
-
-void IOWrapper::OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
-                            , std::ostream &out)
-{
-  std::string lastName = "";
-  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  for( size_t i=0; i<sff.size(); i++ ) {
-    const StatefulFeatureFunction *ff = sff[i];
-    if (ff->GetScoreProducerDescription() != "BleuScoreFeature"
-        && ff->IsTuneable()) {
-      OutputFeatureScores( out, features, ff, lastName );
-    }
-  }
-  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  for( size_t i=0; i<slf.size(); i++ ) {
-    const StatelessFeatureFunction *ff = slf[i];
-    if (ff->IsTuneable()) {
-      OutputFeatureScores( out, features, ff, lastName );
-    }
-  }
-}
-
-void IOWrapper::OutputFeatureScores( std::ostream& out
-                          , const ScoreComponentCollection &features
-                          , const FeatureFunction *ff
-                          , std::string &lastName )
-{
-  const StaticData &staticData = StaticData::Instance();
-  bool labeledOutput = staticData.IsLabeledNBestList();
-
-  // regular features (not sparse)
-  if (ff->GetNumScoreComponents() != 0) {
-    if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
-      lastName = ff->GetScoreProducerDescription();
-      out << " " << lastName << "=";
-    }
-    vector<float> scores = features.GetScoresForProducer( ff );
-    for (size_t j = 0; j<scores.size(); ++j) {
-      out << " " << scores[j];
-    }
-  }
-
-  // sparse features
-  const FVector scores = features.GetVectorForProducer( ff );
-  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
-    out << " " << i->first << "= " << i->second;
-  }
-}
-
 
 } // namespace
 

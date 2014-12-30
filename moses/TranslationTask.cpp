@@ -190,7 +190,7 @@ void TranslationTask::RunPb()
       // consensus decoding
       else if (staticData.UseConsensusDecoding()) {
         const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
-        m_ioWrapper.OutputBestHypo(conBestHypo, m_source->GetTranslationId(),
+        manager.OutputBestHypo(conBestHypo, m_source->GetTranslationId(),
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
         m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), conBestHypo);
@@ -202,7 +202,7 @@ void TranslationTask::RunPb()
       // n-best MBR decoding
       else {
         const TrellisPath &mbrBestHypo = doMBR(nBestList);
-        m_ioWrapper.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(),
+        manager.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(),
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
         m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), mbrBestHypo);

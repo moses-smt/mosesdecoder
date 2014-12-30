@@ -1497,7 +1497,7 @@ void Manager::OutputNBest(std::ostream& out
     out << " |||";
 
     // print scores with feature names
-    OutputAllFeatureScores(path.GetScoreBreakdown(), out );
+    path.GetScoreBreakdown().OutputAllFeatureScores(out );
 
     // total
     out << " ||| " << path.GetTotalScore();
@@ -1617,7 +1617,7 @@ void Manager::OutputSurface(std::ostream &out, const Hypothesis &edge, const std
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      OutputAllFeatureScores(scoreBreakdown, out);
+      scoreBreakdown.OutputAllFeatureScores(out);
     }
     out << "| ";
   }
@@ -1860,6 +1860,17 @@ void Manager::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*trans
   		  "No factor 0 at position " << i);
     if (i>0) out << " " << *factor;
     else     out << *factor;
+  }
+  out << endl;
+}
+
+void Manager::OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/, char reportSegmentation, bool reportAllFactors, std::ostream &out) const
+{
+  const std::vector<const Hypothesis *> &edges = path.GetEdges();
+
+  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+    const Hypothesis &edge = *edges[currEdge];
+    OutputSurface(out, edge, StaticData::Instance().GetOutputFactorOrder(), reportSegmentation, reportAllFactors);
   }
   out << endl;
 }

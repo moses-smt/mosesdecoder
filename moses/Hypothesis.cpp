@@ -571,7 +571,7 @@ void Hypothesis::OutputSurface(std::ostream &out, const Hypothesis &edge, const 
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      IOWrapper::OutputAllFeatureScores(scoreBreakdown, out);
+      scoreBreakdown.OutputAllFeatureScores(out);
     }
     out << "| ";
   }
