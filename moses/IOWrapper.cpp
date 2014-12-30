@@ -399,20 +399,6 @@ void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , cons
   collector->Write(lineNo,out.str());
 }
 
-void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo)
-{
-  if (collector) {
-    std::vector<const Hypothesis *> edges;
-    const Hypothesis *currentHypo = hypo;
-    while (currentHypo) {
-      edges.push_back(currentHypo);
-      currentHypo = currentHypo->GetPrevHypo();
-    }
-
-    OutputAlignment(collector,lineNo, edges);
-  }
-}
-
 void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPath &path)
 {
   if (collector) {
