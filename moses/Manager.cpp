@@ -1827,7 +1827,7 @@ void Manager::OutputSearchGraphHypergraph() const
   }
 }
 
-void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId)
+void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId) const
 {
   for (vector<LatticeMBRSolution>::const_iterator si = solutions.begin(); si != solutions.end(); ++si) {
     out << translationId;
@@ -1851,7 +1851,7 @@ void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSo
   }
 }
 
-void Manager::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, char /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out)
+void Manager::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, char /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out) const
 {
 
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {

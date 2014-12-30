@@ -174,12 +174,12 @@ void TranslationTask::RunPb()
           size_t n  = min(nBestSize, staticData.GetNBestSize());
           getLatticeMBRNBest(manager,nBestList,solutions,n);
           ostringstream out;
-          Manager::OutputLatticeMBRNBest(out, solutions, m_source->GetTranslationId());
+          manager.OutputLatticeMBRNBest(out, solutions, m_source->GetTranslationId());
           m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
         } else {
           //Lattice MBR decoding
           vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-          Manager::OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
+          manager.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
                          staticData.GetReportAllFactors(),out);
           IFVERBOSE(2) {
             PrintUserTime("finished Lattice MBR decoding");
