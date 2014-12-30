@@ -42,7 +42,6 @@ class Manager : public Syntax::Manager
       std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
       bool onlyDistinct=false) const;
 
-  void OutputBest(OutputCollector *collector) const;
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
 
  private:
