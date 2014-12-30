@@ -166,8 +166,6 @@ public:
   // CHART
 
   // phrase-based
-  void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
-  void OutputAlignment(OutputCollector* collector, size_t lineNo , const std::vector<const Hypothesis *> &edges);
 
   // post editing
   std::ifstream *spe_src, *spe_trg, *spe_aln;

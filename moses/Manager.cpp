@@ -1875,4 +1875,19 @@ void Manager::OutputBestHypo(const Moses::TrellisPath &path, long /*translationI
   out << endl;
 }
 
+void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
+{
+  ostringstream out;
+  Hypothesis::OutputAlignment(out, edges);
+
+  collector->Write(lineNo,out.str());
+}
+
+void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPath &path)
+{
+  if (collector) {
+    OutputAlignment(collector,lineNo, path.GetEdges());
+  }
+}
+
 } // namespace

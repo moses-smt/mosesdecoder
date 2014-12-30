@@ -391,21 +391,6 @@ void IOWrapper::WriteApplicationContext(std::ostream &out,
   }
 }
 
-void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
-{
-  ostringstream out;
-  Hypothesis::OutputAlignment(out, edges);
-
-  collector->Write(lineNo,out.str());
-}
-
-void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPath &path)
-{
-  if (collector) {
-    OutputAlignment(collector,lineNo, path.GetEdges());
-  }
-}
-
 void IOWrapper::Backtrack(const Hypothesis *hypo)
 {
 

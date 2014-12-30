@@ -193,7 +193,7 @@ void TranslationTask::RunPb()
         manager.OutputBestHypo(conBestHypo, m_source->GetTranslationId(),
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
-        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), conBestHypo);
+        manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), conBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished Consensus decoding");
         }
@@ -205,7 +205,7 @@ void TranslationTask::RunPb()
         manager.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(),
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
-        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), mbrBestHypo);
+        manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), mbrBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished MBR decoding");
         }
