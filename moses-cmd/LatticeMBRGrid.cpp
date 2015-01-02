@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
     ++lineCount;
     source->SetTranslationId(lineCount);
 
-    Manager manager(*source, staticData.GetSearchAlgorithm());
+    Manager manager(*source);
     manager.Decode();
     TrellisPathList nBestList;
     manager.CalcNBest(nBestSize, nBestList,true);

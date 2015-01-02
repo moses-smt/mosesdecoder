@@ -59,13 +59,16 @@ using namespace std;
 
 namespace Moses
 {
-Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
+Manager::Manager(InputType const& source)
   :BaseManager(source)
   ,m_transOptColl(source.CreateTranslationOptionCollection())
-  ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
   ,interrupted_flag(0)
   ,m_hypoId(0)
 {
+  const StaticData &staticData = StaticData::Instance();
+  SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
+  m_search = Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl);
+
   StaticData::Instance().InitializeForInput(m_source);
 }
 

@@ -151,7 +151,7 @@ protected:
   void OutputAlignment(std::ostringstream &out, const TrellisPath &path) const;
 
 public:
-  Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
+  Manager(InputType const& source);
   ~Manager();
   const  TranslationOptionCollection* getSntTranslationOptions();
 

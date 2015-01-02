@@ -301,7 +301,7 @@ public:
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence, staticData.GetSearchAlgorithm());
+        Manager manager(sentence);
 	      manager.Decode();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 

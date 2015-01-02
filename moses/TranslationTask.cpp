@@ -50,6 +50,7 @@ void TranslationTask::RunPb()
 {
   // shorthand for "global data"
   const StaticData &staticData = StaticData::Instance();
+	const size_t translationId = m_source->GetTranslationId();
 
   // input sentence
   Sentence sentence;
@@ -60,7 +61,7 @@ void TranslationTask::RunPb()
 
   // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
-  TRACE_ERR("Translating line " << m_source->GetTranslationId() << "  in thread id " << pthread_self() << endl);
+  TRACE_ERR("Translating line " << translationId << "  in thread id " << pthread_self() << endl);
 #endif
 
 
@@ -69,50 +70,52 @@ void TranslationTask::RunPb()
   //       we still need to apply the decision rule (MAP, MBR, ...)
   Timer initTime;
   initTime.start();
-  Manager manager(*m_source,staticData.GetSearchAlgorithm());
-  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Initialize search took " << initTime << " seconds total" << endl);
-  manager.Decode();
+  Manager *manager = new Manager(*m_source);
+  VERBOSE(1, "Line " << translationId << ": Initialize search took " << initTime << " seconds total" << endl);
+  manager->Decode();
 
   // we are done with search, let's look what we got
   Timer additionalReportingTime;
   additionalReportingTime.start();
 
-  manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+  manager->OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
 
   // output word graph
-  manager.OutputWordGraph(m_ioWrapper.GetWordGraphCollector());
+  manager->OutputWordGraph(m_ioWrapper.GetWordGraphCollector());
 
   // output search graph
-  manager.OutputSearchGraph(m_ioWrapper.GetSearchGraphOutputCollector());
+  manager->OutputSearchGraph(m_ioWrapper.GetSearchGraphOutputCollector());
 
-  manager.OutputSearchGraphSLF();
+  manager->OutputSearchGraphSLF();
 
   // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
-  manager.OutputSearchGraphHypergraph();
+  manager->OutputSearchGraphHypergraph();
 
   additionalReportingTime.stop();
 
   additionalReportingTime.start();
 
   // output n-best list
-  manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
+  manager->OutputNBest(m_ioWrapper.GetNBestOutputCollector());
 
   //lattice samples
-  manager.OutputLatticeSamples(m_ioWrapper.GetLatticeSamplesCollector());
+  manager->OutputLatticeSamples(m_ioWrapper.GetLatticeSamplesCollector());
 
   // detailed translation reporting
-  manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
+  manager->OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
 
   //list of unknown words
-  manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
+  manager->OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
 
   // report additional statistics
-  manager.CalcDecoderStatistics();
-  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
-  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Translation took " << translationTime << " seconds total" << endl);
+  manager->CalcDecoderStatistics();
+  VERBOSE(1, "Line " << translationId << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
+  VERBOSE(1, "Line " << translationId << ": Translation took " << translationTime << " seconds total" << endl);
   IFVERBOSE(2) {
     PrintUserTime("Sentence Decoding Time:");
   }
+
+  delete manager;
 }
 
 
