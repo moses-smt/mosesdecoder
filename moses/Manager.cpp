@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationAnalysis.h"
 #include "moses/HypergraphOutput.h"
+#include "moses/mbr.h"
 #include "moses/LatticeMBR.h"
 
 #ifdef HAVE_PROTOBUF
@@ -1454,14 +1455,151 @@ SentenceStats& Manager::GetSentenceStats() const
 
 void Manager::OutputBest(OutputCollector *collector)  const
 {
+  const StaticData &staticData = StaticData::Instance();
+  long translationId = m_source.GetTranslationId();
+
+  Timer additionalReportingTime;
+
+  // apply decision rule and output best translation(s)
+  if (collector) {
+	ostringstream out;
+	ostringstream debug;
+	FixPrecision(debug,PRECISION);
+
+	// all derivations - send them to debug stream
+	if (staticData.PrintAllDerivations()) {
+	  additionalReportingTime.start();
+	  PrintAllDerivations(translationId, debug);
+	  additionalReportingTime.stop();
+	}
+
+	Timer decisionRuleTime;
+	decisionRuleTime.start();
+
+	// MAP decoding: best hypothesis
+	const Hypothesis* bestHypo = NULL;
+	if (!staticData.UseMBR()) {
+	  bestHypo = GetBestHypothesis();
+	  if (bestHypo) {
+		if (StaticData::Instance().GetOutputHypoScore()) {
+		  out << bestHypo->GetTotalScore() << ' ';
+		}
+		if (staticData.IsPathRecoveryEnabled()) {
+			bestHypo->OutputInput(out);
+		  out << "||| ";
+		}
+
+		const PARAM_VEC *params = staticData.GetParameter().GetParam("print-id");
+		if (params && params->size() && Scan<bool>(params->at(0)) ) {
+		  out << translationId << " ";
+		}
+
+	  if (staticData.GetReportSegmentation() == 2) {
+		GetOutputLanguageModelOrder(out, bestHypo);
+	  }
+	  bestHypo->OutputBestSurface(
+		  out,
+		  staticData.GetOutputFactorOrder(),
+		  staticData.GetReportSegmentation(),
+		  staticData.GetReportAllFactors());
+		if (staticData.PrintAlignmentInfo()) {
+		  out << "||| ";
+		  bestHypo->OutputAlignment(out);
+		}
+
+		IFVERBOSE(1) {
+		  debug << "BEST TRANSLATION: " << *bestHypo << endl;
+		}
+	  } else {
+		VERBOSE(1, "NO BEST TRANSLATION" << endl);
+	  }
+
+	  out << endl;
+	} // if (!staticData.UseMBR())
+
+	// MBR decoding (n-best MBR, lattice MBR, consensus)
+	else {
+	  // we first need the n-best translations
+	  size_t nBestSize = staticData.GetMBRSize();
+	  if (nBestSize <= 0) {
+		cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
+		exit(1);
+	  }
+	  TrellisPathList nBestList;
+	  CalcNBest(nBestSize, nBestList,true);
+	  VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+	  IFVERBOSE(2) {
+		PrintUserTime("calculated n-best list for (L)MBR decoding");
+	  }
+
+	  // lattice MBR
+	  if (staticData.UseLatticeMBR()) {
+		if (staticData.IsNBestEnabled()) {
+		  //lattice mbr nbest
+		  vector<LatticeMBRSolution> solutions;
+		  size_t n  = min(nBestSize, staticData.GetNBestSize());
+		  getLatticeMBRNBest(*this,nBestList,solutions,n);
+		  OutputLatticeMBRNBest(m_latticeNBestOut, solutions, translationId);
+		} else {
+		  //Lattice MBR decoding
+		  vector<Word> mbrBestHypo = doLatticeMBR(*this,nBestList);
+		  OutputBestHypo(mbrBestHypo, translationId, staticData.GetReportSegmentation(),
+						 staticData.GetReportAllFactors(),out);
+		  IFVERBOSE(2) {
+			PrintUserTime("finished Lattice MBR decoding");
+		  }
+		}
+	  }
+
+	  // consensus decoding
+	  else if (staticData.UseConsensusDecoding()) {
+		const TrellisPath &conBestHypo = doConsensusDecoding(*this,nBestList);
+		OutputBestHypo(conBestHypo, translationId,
+					   staticData.GetReportSegmentation(),
+					   staticData.GetReportAllFactors(),out);
+		OutputAlignment(m_alignmentOut, conBestHypo);
+		IFVERBOSE(2) {
+		  PrintUserTime("finished Consensus decoding");
+		}
+	  }
+
+	  // n-best MBR decoding
+	  else {
+		const TrellisPath &mbrBestHypo = doMBR(nBestList);
+		OutputBestHypo(mbrBestHypo, translationId,
+					   staticData.GetReportSegmentation(),
+					   staticData.GetReportAllFactors(),out);
+		OutputAlignment(m_alignmentOut, mbrBestHypo);
+		IFVERBOSE(2) {
+		  PrintUserTime("finished MBR decoding");
+		}
+	  }
+	}
+
+	// report best translation to output collector
+	collector->Write(translationId,out.str(),debug.str());
+
+	decisionRuleTime.stop();
+	VERBOSE(1, "Line " << translationId << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
+  } // if (m_ioWrapper.GetSingleBestOutputCollector())
 
 }
 
 void Manager::OutputNBest(OutputCollector *collector) const
 {
-  const StaticData &staticData = StaticData::Instance();
+  if (collector == NULL) {
+	  return;
+  }
 
-  if (collector && !staticData.UseLatticeMBR()) {
+  const StaticData &staticData = StaticData::Instance();
+  long translationId = m_source.GetTranslationId();
+
+  if (staticData.UseLatticeMBR()) {
+	if (staticData.IsNBestEnabled()) {
+	  collector->Write(translationId, m_latticeNBestOut.str());
+	}
+  }
+  else {
 	TrellisPathList nBestList;
 	ostringstream out;
 	CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
@@ -1689,7 +1827,14 @@ void Manager::OutputLatticeSamples(OutputCollector *collector) const
 
 void Manager::OutputAlignment(OutputCollector *collector) const
 {
-  if (collector) {
+  if (collector == NULL) {
+	  return;
+  }
+
+  if (!m_alignmentOut.str().empty()) {
+    collector->Write(m_source.GetTranslationId(), m_alignmentOut.str());
+  }
+  else {
 	std::vector<const Hypothesis *> edges;
 	const Hypothesis *currentHypo = GetBestHypothesis();
 	while (currentHypo) {
@@ -1875,19 +2020,9 @@ void Manager::OutputBestHypo(const Moses::TrellisPath &path, long /*translationI
   out << endl;
 }
 
-void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
+void Manager::OutputAlignment(std::ostringstream &out, const TrellisPath &path) const
 {
-  ostringstream out;
-  Hypothesis::OutputAlignment(out, edges);
-
-  collector->Write(lineNo,out.str());
-}
-
-void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPath &path)
-{
-  if (collector) {
-    OutputAlignment(collector,lineNo, path.GetEdges());
-  }
+	Hypothesis::OutputAlignment(out, path.GetEdges());
 }
 
 } // namespace

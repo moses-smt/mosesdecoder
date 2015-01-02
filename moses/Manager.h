@@ -129,6 +129,9 @@ protected:
 
   // output
   // nbest
+  mutable std::ostringstream m_latticeNBestOut;
+  mutable std::ostringstream m_alignmentOut;
+
   void OutputNBest(std::ostream& out
                    , const Moses::TrellisPathList &nBestList
                    , const std::vector<Moses::FactorType>& outputFactorOrder
@@ -144,6 +147,8 @@ protected:
   void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges) const;
 
   void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId) const;
+
+  void OutputAlignment(std::ostringstream &out, const TrellisPath &path) const;
 
 public:
   Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
@@ -166,9 +171,6 @@ public:
   void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
                       char reportSegmentation, bool reportAllFactors, std::ostream& out) const;
   void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,char reportSegmentation, bool reportAllFactors, std::ostream &out) const;
-
-  void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
-  void OutputAlignment(OutputCollector* collector, size_t lineNo , const std::vector<const Hypothesis *> &edges);
 
 #ifdef HAVE_PROTOBUF
   void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;

@@ -77,6 +77,8 @@ void TranslationTask::RunPb()
   Timer additionalReportingTime;
   additionalReportingTime.start();
 
+  manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
+
   // output word graph
   manager.OutputWordGraph(m_ioWrapper.GetWordGraphCollector());
 
@@ -89,135 +91,6 @@ void TranslationTask::RunPb()
   manager.OutputSearchGraphHypergraph();
 
   additionalReportingTime.stop();
-
-  manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
-
-  // apply decision rule and output best translation(s)
-  if (m_ioWrapper.GetSingleBestOutputCollector()) {
-    ostringstream out;
-    ostringstream debug;
-    FixPrecision(debug,PRECISION);
-
-    // all derivations - send them to debug stream
-    if (staticData.PrintAllDerivations()) {
-      additionalReportingTime.start();
-      manager.PrintAllDerivations(m_source->GetTranslationId(), debug);
-      additionalReportingTime.stop();
-    }
-
-    Timer decisionRuleTime;
-    decisionRuleTime.start();
-
-    // MAP decoding: best hypothesis
-    const Hypothesis* bestHypo = NULL;
-    if (!staticData.UseMBR()) {
-      bestHypo = manager.GetBestHypothesis();
-      if (bestHypo) {
-        if (StaticData::Instance().GetOutputHypoScore()) {
-          out << bestHypo->GetTotalScore() << ' ';
-        }
-        if (staticData.IsPathRecoveryEnabled()) {
-        	bestHypo->OutputInput(out);
-          out << "||| ";
-        }
-
-        const PARAM_VEC *params = staticData.GetParameter().GetParam("print-id");
-        if (params && params->size() && Scan<bool>(params->at(0)) ) {
-          out << m_source->GetTranslationId() << " ";
-        }
-
-	  if (staticData.GetReportSegmentation() == 2) {
-	    manager.GetOutputLanguageModelOrder(out, bestHypo);
-	  }
-	  bestHypo->OutputBestSurface(
-          out,
-          staticData.GetOutputFactorOrder(),
-          staticData.GetReportSegmentation(),
-          staticData.GetReportAllFactors());
-        if (staticData.PrintAlignmentInfo()) {
-          out << "||| ";
-          bestHypo->OutputAlignment(out);
-        }
-
-        manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
-
-        IFVERBOSE(1) {
-          debug << "BEST TRANSLATION: " << *bestHypo << endl;
-        }
-      } else {
-        VERBOSE(1, "NO BEST TRANSLATION" << endl);
-      }
-
-      out << endl;
-    } // if (!staticData.UseMBR())
-
-    // MBR decoding (n-best MBR, lattice MBR, consensus)
-    else {
-      // we first need the n-best translations
-      size_t nBestSize = staticData.GetMBRSize();
-      if (nBestSize <= 0) {
-        cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
-        exit(1);
-      }
-      TrellisPathList nBestList;
-      manager.CalcNBest(nBestSize, nBestList,true);
-      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
-      IFVERBOSE(2) {
-        PrintUserTime("calculated n-best list for (L)MBR decoding");
-      }
-
-      // lattice MBR
-      if (staticData.UseLatticeMBR()) {
-        if (m_ioWrapper.GetNBestOutputCollector()) {
-          //lattice mbr nbest
-          vector<LatticeMBRSolution> solutions;
-          size_t n  = min(nBestSize, staticData.GetNBestSize());
-          getLatticeMBRNBest(manager,nBestList,solutions,n);
-          ostringstream out;
-          manager.OutputLatticeMBRNBest(out, solutions, m_source->GetTranslationId());
-          m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
-        } else {
-          //Lattice MBR decoding
-          vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-          manager.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
-                         staticData.GetReportAllFactors(),out);
-          IFVERBOSE(2) {
-            PrintUserTime("finished Lattice MBR decoding");
-          }
-        }
-      }
-
-      // consensus decoding
-      else if (staticData.UseConsensusDecoding()) {
-        const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
-        manager.OutputBestHypo(conBestHypo, m_source->GetTranslationId(),
-                       staticData.GetReportSegmentation(),
-                       staticData.GetReportAllFactors(),out);
-        manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), conBestHypo);
-        IFVERBOSE(2) {
-          PrintUserTime("finished Consensus decoding");
-        }
-      }
-
-      // n-best MBR decoding
-      else {
-        const TrellisPath &mbrBestHypo = doMBR(nBestList);
-        manager.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(),
-                       staticData.GetReportSegmentation(),
-                       staticData.GetReportAllFactors(),out);
-        manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), mbrBestHypo);
-        IFVERBOSE(2) {
-          PrintUserTime("finished MBR decoding");
-        }
-      }
-    }
-
-    // report best translation to output collector
-    m_ioWrapper.GetSingleBestOutputCollector()->Write(m_source->GetTranslationId(),out.str(),debug.str());
-
-    decisionRuleTime.stop();
-    VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
-  } // if (m_ioWrapper.GetSingleBestOutputCollector())
 
   additionalReportingTime.start();
 
