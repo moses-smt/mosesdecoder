@@ -20,7 +20,7 @@ public:
     , negLogProb(false)
     , noLex(false)
     , noWordAlignment(false)
-    , pcfg(false) {}
+    , treeScore(false) {}
 
   // Positional options
   std::string extractFile;
@@ -36,7 +36,7 @@ public:
   bool negLogProb;
   bool noLex;
   bool noWordAlignment;
-  bool pcfg;
+  bool treeScore;
 };
 
 }  // namespace ScoreStsg

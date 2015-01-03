@@ -23,7 +23,7 @@ public:
       , m_out(out) {}
 
   void WriteLine(const TokenizedRuleHalf &, const TokenizedRuleHalf &,
-                 const std::string &, double, int, int, int);
+                 const std::string &, double, double, int, int, int);
 
 private:
   double MaybeLog(double a) const {
