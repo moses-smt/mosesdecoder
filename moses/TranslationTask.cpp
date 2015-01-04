@@ -20,10 +20,9 @@ using namespace std;
 namespace Moses
 {
 
-TranslationTask::TranslationTask(InputType* source, Moses::IOWrapper &ioWrapper, int pbOrChart)
+TranslationTask::TranslationTask(InputType* source, Moses::IOWrapper &ioWrapper)
 : m_source(source)
 , m_ioWrapper(ioWrapper)
-, m_pbOrChart(pbOrChart)
 {}
 
 TranslationTask::~TranslationTask() {
@@ -32,25 +31,9 @@ TranslationTask::~TranslationTask() {
 
 void TranslationTask::Run()
 {
-	switch (m_pbOrChart)
-	{
-	case 1:
-		RunPb();
-		break;
-	case 2:
-		RunChart();
-		break;
-	default:
-	    UTIL_THROW(util::Exception, "Unknown value: " << m_pbOrChart);
-	}
-}
-
-
-void TranslationTask::RunPb()
-{
   // shorthand for "global data"
   const StaticData &staticData = StaticData::Instance();
-	const size_t translationId = m_source->GetTranslationId();
+  const size_t translationId = m_source->GetTranslationId();
 
   // input sentence
   Sentence sentence;
@@ -70,7 +53,39 @@ void TranslationTask::RunPb()
   //       we still need to apply the decision rule (MAP, MBR, ...)
   Timer initTime;
   initTime.start();
-  Manager *manager = new Manager(*m_source);
+
+  // which manager
+  BaseManager *manager;
+
+	switch (staticData.IsChart())
+	{
+	case false:
+		manager = new Manager(*m_source);
+		break;
+	case true:
+	    if (staticData.UseS2TDecoder()) {
+	      S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+	      if (algorithm == RecursiveCYKPlus) {
+	        typedef Syntax::S2T::EagerParserCallback Callback;
+	        typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
+	        manager = new Syntax::S2T::Manager<Parser>(*m_source);
+	      } else if (algorithm == Scope3) {
+	        typedef Syntax::S2T::StandardParserCallback Callback;
+	        typedef Syntax::S2T::Scope3Parser<Callback> Parser;
+	        manager = new Syntax::S2T::Manager<Parser>(*m_source);
+	      } else {
+	        UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
+	      }
+	    }
+	    else if (staticData.GetSearchAlgorithm() == ChartIncremental) {
+			manager = new Incremental::Manager(*m_source);
+		}
+		else {
+			manager = new ChartManager(*m_source);
+		}
+		break;
+	}
+
   VERBOSE(1, "Line " << translationId << ": Initialize search took " << initTime << " seconds total" << endl);
   manager->Decode();
 
@@ -116,72 +131,6 @@ void TranslationTask::RunPb()
   }
 
   delete manager;
-}
-
-
-void TranslationTask::RunChart()
-{
-	const StaticData &staticData = StaticData::Instance();
-	const size_t translationId = m_source->GetTranslationId();
-
-	VERBOSE(2,"\nTRANSLATING(" << translationId << "): " << *m_source);
-
-    if (staticData.UseS2TDecoder()) {
-      S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
-      if (algorithm == RecursiveCYKPlus) {
-        typedef Syntax::S2T::EagerParserCallback Callback;
-        typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
-        DecodeS2T<Parser>();
-      } else if (algorithm == Scope3) {
-        typedef Syntax::S2T::StandardParserCallback Callback;
-        typedef Syntax::S2T::Scope3Parser<Callback> Parser;
-        DecodeS2T<Parser>();
-      } else {
-        UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
-      }
-      return;
-    }
-
-	if (staticData.GetSearchAlgorithm() == ChartIncremental) {
-	  Incremental::Manager manager(*m_source);
-	  manager.Decode();
-	  manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
-	  manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
-      manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
-	  manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
-
-	  return;
-	}
-
-	ChartManager manager(*m_source);
-	manager.Decode();
-
-	UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
-
-	// Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
-	manager.OutputSearchGraphHypergraph();
-
-	// 1-best
-	manager.OutputBest(m_ioWrapper.GetSingleBestOutputCollector());
-
-	IFVERBOSE(2) {
-	  PrintUserTime("Best Hypothesis Generation Time:");
-	}
-
-    manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
-    manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
-    manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
-	manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
-
-	// n-best
-	manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
-
-	manager.OutputSearchGraph(m_ioWrapper.GetSearchGraphOutputCollector());
-
-	IFVERBOSE(2) {
-	  PrintUserTime("Sentence Decoding Time:");
-	}
-	manager.CalcDecoderStatistics();
 }
 
 }

@@ -154,15 +154,7 @@ int main(int argc, char** argv)
       FeatureFunction::CallChangeSource(source);
 
       // set up task of translating one sentence
-      TranslationTask* task;
-      if (staticData.IsChart()) {
-    	  // scfg
-          task = new TranslationTask(source, *ioWrapper, 2);
-      }
-      else {
-    	  // pb
-		  task = new TranslationTask(source, *ioWrapper, 1);
-      }
+      TranslationTask* task = new TranslationTask(source, *ioWrapper);
 
       // execute task
 #ifdef WITH_THREADS
