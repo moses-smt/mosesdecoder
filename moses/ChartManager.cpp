@@ -93,7 +93,7 @@ void ChartManager::Decode()
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
-      cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+      cell.Decode(m_translationOptionList, m_hypoStackColl);
 
       m_translationOptionList.Clear();
       cell.PruneToSize();
@@ -365,7 +365,7 @@ void ChartManager::OutputNBestList(OutputCollector *collector,
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, outputFactorOrder, false);
     out << " ||| ";
-    OutputAllFeatureScores(derivation.scoreBreakdown, out);
+    derivation.scoreBreakdown.OutputAllFeatureScores(out);
     out << " ||| " << derivation.score;
 
     // optionally, print word alignments

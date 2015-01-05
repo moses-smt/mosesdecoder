@@ -25,13 +25,14 @@ class RuleGroup
 {
 public:
   // Stores the target-side and NT-alignment of a distinct rule.  Also records
-  // the rule's count and the observed symbol alignments (plus their
-  // frequencies).
+  // the rule's count, the observed symbol alignments (plus their frequencies),
+  // and the tree score.
   struct DistinctRule {
     std::string target;
     std::string ntAlign;
     std::vector<std::pair<std::string, int> > alignments;
     int count;
+    double treeScore;
   };
 
   typedef std::vector<DistinctRule>::const_iterator ConstIterator;
@@ -58,7 +59,7 @@ public:
   // values will be checked against those of the previous rule only (in other
   // words, the input is assumed to be ordered).
   void AddRule(const StringPiece &target, const StringPiece &ntAlign,
-               const StringPiece &fullAlign, int count);
+               const StringPiece &fullAlign, int count, double treeScore);
 
 private:
   std::string m_source;

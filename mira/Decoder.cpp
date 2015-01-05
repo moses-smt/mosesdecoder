@@ -143,7 +143,7 @@ vector< vector<const Word*> > MosesDecoder::runDecoder(const std::string& source
     string filename)
 {
   // run the decoder
-  m_manager = new Moses::Manager(*m_sentence, search);
+  m_manager = new Moses::Manager(*m_sentence);
   m_manager->Decode();
   TrellisPathList nBestList;
   m_manager->CalcNBest(nBestSize, nBestList, distinct);

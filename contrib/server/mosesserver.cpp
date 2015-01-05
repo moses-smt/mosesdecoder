@@ -301,7 +301,7 @@ public:
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence, staticData.GetSearchAlgorithm());
+        Manager manager(sentence);
 	      manager.Decode();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
@@ -312,7 +312,7 @@ public:
         }
         if (addWordAlignInfo) {
           stringstream wordAlignment;
-          IOWrapper::OutputAlignment(wordAlignment, hypo);
+          hypo->OutputAlignment(wordAlignment);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -475,7 +475,8 @@ public:
 
         if ((int)edges.size() > 0) {
           stringstream wordAlignment;
-          IOWrapper::OutputAlignment(wordAlignment, edges[0]);
+					const Hypothesis *edge = edges[0];
+          edge->OutputAlignment(wordAlignment);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -493,7 +494,7 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  IOWrapper::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
+	  path.GetScoreBreakdown().OutputAllFeatureScores(buf);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 

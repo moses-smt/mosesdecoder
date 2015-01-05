@@ -1111,6 +1111,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.h</locationURI>
 		</link>
 		<link>
+			<name>FF/DynamicCacheBasedLanguageModel.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DynamicCacheBasedLanguageModel.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/DynamicCacheBasedLanguageModel.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DynamicCacheBasedLanguageModel.h</locationURI>
+		</link>
+		<link>
 			<name>FF/ExternalFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExternalFeature.cpp</locationURI>
@@ -2009,6 +2019,16 @@
 			<name>TranslationModel/PhraseDictionaryDynSuffixArray.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryDynamicCacheBased.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynamicCacheBased.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryDynamicCacheBased.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/PhraseDictionaryMemory.cpp</name>

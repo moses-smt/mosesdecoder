@@ -17,6 +17,35 @@ Manager::Manager(const InputType &source)
 {
 }
 
+void Manager::OutputBest(OutputCollector *collector) const
+{
+  if (!collector) {
+    return;
+  }
+  std::ostringstream out;
+  FixPrecision(out);
+  const SHyperedge *best = GetBestSHyperedge();
+  if (best == NULL) {
+    VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      out << "0 ";
+    }
+  } else {
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      out << best->score << " ";
+    }
+    Phrase yield = GetOneBestTargetYield(*best);
+    // delete 1st & last
+    UTIL_THROW_IF2(yield.GetSize() < 2,
+      "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+    yield.RemoveWord(0);
+    yield.RemoveWord(yield.GetSize()-1);
+    out << yield.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
+    out << '\n';
+  }
+  collector->Write(m_source.GetTranslationId(), out.str());
+}
+
 void Manager::OutputNBest(OutputCollector *collector) const
 {
   if (collector) {
@@ -82,7 +111,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, outputFactorOrder, false);
     out << " ||| ";
-    OutputAllFeatureScores(derivation.scoreBreakdown, out);
+    derivation.scoreBreakdown.OutputAllFeatureScores(out);
     out << " ||| " << derivation.score;
 
     // optionally, print word alignments

@@ -45,6 +45,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationAnalysis.h"
 #include "moses/HypergraphOutput.h"
+#include "moses/mbr.h"
+#include "moses/LatticeMBR.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -57,13 +59,16 @@ using namespace std;
 
 namespace Moses
 {
-Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
+Manager::Manager(InputType const& source)
   :BaseManager(source)
   ,m_transOptColl(source.CreateTranslationOptionCollection())
-  ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
   ,interrupted_flag(0)
   ,m_hypoId(0)
 {
+  const StaticData &staticData = StaticData::Instance();
+  SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
+  m_search = Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl);
+
   StaticData::Instance().InitializeForInput(m_source);
 }
 
@@ -115,7 +120,7 @@ void Manager::Decode()
   // search for best translation with the specified algorithm
   Timer searchTime;
   searchTime.start();
-  m_search->ProcessSentence();
+  m_search->Decode();
   VERBOSE(1, "Line " << m_source.GetTranslationId() << ": Search took " << searchTime << " seconds" << endl);
     IFVERBOSE(2) {
     GetSentenceStats().StopTimeTotal();
@@ -553,7 +558,8 @@ void Manager::OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothe
   outputWordGraphStream << endl;
 }
 
-void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) {
+void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) const
+{
   Phrase translation;
   hypo->GetOutputPhrase(translation);
   const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
@@ -1452,14 +1458,151 @@ SentenceStats& Manager::GetSentenceStats() const
 
 void Manager::OutputBest(OutputCollector *collector)  const
 {
+  const StaticData &staticData = StaticData::Instance();
+  long translationId = m_source.GetTranslationId();
+
+  Timer additionalReportingTime;
+
+  // apply decision rule and output best translation(s)
+  if (collector) {
+	ostringstream out;
+	ostringstream debug;
+	FixPrecision(debug,PRECISION);
+
+	// all derivations - send them to debug stream
+	if (staticData.PrintAllDerivations()) {
+	  additionalReportingTime.start();
+	  PrintAllDerivations(translationId, debug);
+	  additionalReportingTime.stop();
+	}
+
+	Timer decisionRuleTime;
+	decisionRuleTime.start();
+
+	// MAP decoding: best hypothesis
+	const Hypothesis* bestHypo = NULL;
+	if (!staticData.UseMBR()) {
+	  bestHypo = GetBestHypothesis();
+	  if (bestHypo) {
+		if (StaticData::Instance().GetOutputHypoScore()) {
+		  out << bestHypo->GetTotalScore() << ' ';
+		}
+		if (staticData.IsPathRecoveryEnabled()) {
+			bestHypo->OutputInput(out);
+		  out << "||| ";
+		}
+
+		const PARAM_VEC *params = staticData.GetParameter().GetParam("print-id");
+		if (params && params->size() && Scan<bool>(params->at(0)) ) {
+		  out << translationId << " ";
+		}
+
+	  if (staticData.GetReportSegmentation() == 2) {
+		GetOutputLanguageModelOrder(out, bestHypo);
+	  }
+	  bestHypo->OutputBestSurface(
+		  out,
+		  staticData.GetOutputFactorOrder(),
+		  staticData.GetReportSegmentation(),
+		  staticData.GetReportAllFactors());
+		if (staticData.PrintAlignmentInfo()) {
+		  out << "||| ";
+		  bestHypo->OutputAlignment(out);
+		}
+
+		IFVERBOSE(1) {
+		  debug << "BEST TRANSLATION: " << *bestHypo << endl;
+		}
+	  } else {
+		VERBOSE(1, "NO BEST TRANSLATION" << endl);
+	  }
+
+	  out << endl;
+	} // if (!staticData.UseMBR())
+
+	// MBR decoding (n-best MBR, lattice MBR, consensus)
+	else {
+	  // we first need the n-best translations
+	  size_t nBestSize = staticData.GetMBRSize();
+	  if (nBestSize <= 0) {
+		cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
+		exit(1);
+	  }
+	  TrellisPathList nBestList;
+	  CalcNBest(nBestSize, nBestList,true);
+	  VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+	  IFVERBOSE(2) {
+		PrintUserTime("calculated n-best list for (L)MBR decoding");
+	  }
+
+	  // lattice MBR
+	  if (staticData.UseLatticeMBR()) {
+		if (staticData.IsNBestEnabled()) {
+		  //lattice mbr nbest
+		  vector<LatticeMBRSolution> solutions;
+		  size_t n  = min(nBestSize, staticData.GetNBestSize());
+		  getLatticeMBRNBest(*this,nBestList,solutions,n);
+		  OutputLatticeMBRNBest(m_latticeNBestOut, solutions, translationId);
+		} else {
+		  //Lattice MBR decoding
+		  vector<Word> mbrBestHypo = doLatticeMBR(*this,nBestList);
+		  OutputBestHypo(mbrBestHypo, translationId, staticData.GetReportSegmentation(),
+						 staticData.GetReportAllFactors(),out);
+		  IFVERBOSE(2) {
+			PrintUserTime("finished Lattice MBR decoding");
+		  }
+		}
+	  }
+
+	  // consensus decoding
+	  else if (staticData.UseConsensusDecoding()) {
+		const TrellisPath &conBestHypo = doConsensusDecoding(*this,nBestList);
+		OutputBestHypo(conBestHypo, translationId,
+					   staticData.GetReportSegmentation(),
+					   staticData.GetReportAllFactors(),out);
+		OutputAlignment(m_alignmentOut, conBestHypo);
+		IFVERBOSE(2) {
+		  PrintUserTime("finished Consensus decoding");
+		}
+	  }
+
+	  // n-best MBR decoding
+	  else {
+		const TrellisPath &mbrBestHypo = doMBR(nBestList);
+		OutputBestHypo(mbrBestHypo, translationId,
+					   staticData.GetReportSegmentation(),
+					   staticData.GetReportAllFactors(),out);
+		OutputAlignment(m_alignmentOut, mbrBestHypo);
+		IFVERBOSE(2) {
+		  PrintUserTime("finished MBR decoding");
+		}
+	  }
+	}
+
+	// report best translation to output collector
+	collector->Write(translationId,out.str(),debug.str());
+
+	decisionRuleTime.stop();
+	VERBOSE(1, "Line " << translationId << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
+  } // if (m_ioWrapper.GetSingleBestOutputCollector())
 
 }
 
 void Manager::OutputNBest(OutputCollector *collector) const
 {
-  const StaticData &staticData = StaticData::Instance();
+  if (collector == NULL) {
+	  return;
+  }
 
-  if (collector && !staticData.UseLatticeMBR()) {
+  const StaticData &staticData = StaticData::Instance();
+  long translationId = m_source.GetTranslationId();
+
+  if (staticData.UseLatticeMBR()) {
+	if (staticData.IsNBestEnabled()) {
+	  collector->Write(translationId, m_latticeNBestOut.str());
+	}
+  }
+  else {
 	TrellisPathList nBestList;
 	ostringstream out;
 	CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
@@ -1495,7 +1638,7 @@ void Manager::OutputNBest(std::ostream& out
     out << " |||";
 
     // print scores with feature names
-    OutputAllFeatureScores(path.GetScoreBreakdown(), out );
+    path.GetScoreBreakdown().OutputAllFeatureScores(out );
 
     // total
     out << " ||| " << path.GetTotalScore();
@@ -1615,7 +1758,7 @@ void Manager::OutputSurface(std::ostream &out, const Hypothesis &edge, const std
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      OutputAllFeatureScores(scoreBreakdown, out);
+      scoreBreakdown.OutputAllFeatureScores(out);
     }
     out << "| ";
   }
@@ -1687,7 +1830,14 @@ void Manager::OutputLatticeSamples(OutputCollector *collector) const
 
 void Manager::OutputAlignment(OutputCollector *collector) const
 {
-  if (collector) {
+  if (collector == NULL) {
+	  return;
+  }
+
+  if (!m_alignmentOut.str().empty()) {
+    collector->Write(m_source.GetTranslationId(), m_alignmentOut.str());
+  }
+  else {
 	std::vector<const Hypothesis *> edges;
 	const Hypothesis *currentHypo = GetBestHypothesis();
 	while (currentHypo) {
@@ -1823,6 +1973,59 @@ void Manager::OutputSearchGraphHypergraph() const
 	  HypergraphOutput<Manager> hypergraphOutput(PRECISION);
 	  hypergraphOutput.Write(*this);
   }
+}
+
+void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId) const
+{
+  for (vector<LatticeMBRSolution>::const_iterator si = solutions.begin(); si != solutions.end(); ++si) {
+    out << translationId;
+    out << " |||";
+    const vector<Word> mbrHypo = si->GetWords();
+    for (size_t i = 0 ; i < mbrHypo.size() ; i++) {
+      const Factor *factor = mbrHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+      if (i>0) out << " " << *factor;
+      else     out << *factor;
+    }
+    out << " |||";
+    out << " map: " << si->GetMapScore();
+    out << " w: " << mbrHypo.size();
+    const vector<float>& ngramScores = si->GetNgramScores();
+    for (size_t i = 0; i < ngramScores.size(); ++i) {
+      out << " " << ngramScores[i];
+    }
+    out << " ||| " << si->GetScore();
+
+    out << endl;
+  }
+}
+
+void Manager::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, char /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out) const
+{
+
+  for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
+    const Factor *factor = mbrBestHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+    UTIL_THROW_IF2(factor == NULL,
+  		  "No factor 0 at position " << i);
+    if (i>0) out << " " << *factor;
+    else     out << *factor;
+  }
+  out << endl;
+}
+
+void Manager::OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/, char reportSegmentation, bool reportAllFactors, std::ostream &out) const
+{
+  const std::vector<const Hypothesis *> &edges = path.GetEdges();
+
+  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+    const Hypothesis &edge = *edges[currEdge];
+    OutputSurface(out, edge, StaticData::Instance().GetOutputFactorOrder(), reportSegmentation, reportAllFactors);
+  }
+  out << endl;
+}
+
+void Manager::OutputAlignment(std::ostringstream &out, const TrellisPath &path) const
+{
+	Hypothesis::OutputAlignment(out, path.GetEdges());
 }
 
 } // namespace

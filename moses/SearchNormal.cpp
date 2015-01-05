@@ -47,7 +47,7 @@ SearchNormal::~SearchNormal()
  * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
  */
-void SearchNormal::ProcessSentence()
+void SearchNormal::Decode()
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();

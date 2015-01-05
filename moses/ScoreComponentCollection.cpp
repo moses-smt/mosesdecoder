@@ -3,6 +3,8 @@
 #include "util/exception.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 
 using namespace std;
 
@@ -298,6 +300,52 @@ void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const Score
     const StringPiece &key = iter->first;
     float value = iter->second;
     PlusEquals(sp, key, value);
+  }
+}
+
+void ScoreComponentCollection::OutputAllFeatureScores(std::ostream &out) const
+{
+  std::string lastName = "";
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for( size_t i=0; i<sff.size(); i++ ) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->GetScoreProducerDescription() != "BleuScoreFeature"
+        && ff->IsTuneable()) {
+      OutputFeatureScores( out, ff, lastName );
+    }
+  }
+  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  for( size_t i=0; i<slf.size(); i++ ) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      OutputFeatureScores( out, ff, lastName );
+    }
+  }
+}
+
+void ScoreComponentCollection::OutputFeatureScores( std::ostream& out
+                          , const FeatureFunction *ff
+                          , std::string &lastName ) const
+{
+  const StaticData &staticData = StaticData::Instance();
+  bool labeledOutput = staticData.IsLabeledNBestList();
+
+  // regular features (not sparse)
+  if (ff->GetNumScoreComponents() != 0) {
+    if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
+      lastName = ff->GetScoreProducerDescription();
+      out << " " << lastName << "=";
+    }
+    vector<float> scores = GetScoresForProducer( ff );
+    for (size_t j = 0; j<scores.size(); ++j) {
+      out << " " << scores[j];
+    }
+  }
+
+  // sparse features
+  const FVector scores = GetVectorForProducer( ff );
+  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+    out << " " << i->first << "= " << i->second;
   }
 }
 

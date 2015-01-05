@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 #include "Manager.h"
+#include "IOWrapper.h"
 #include "moses/FF/FFState.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
@@ -426,6 +427,174 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
     allFactors.push_back(i);
   }
   return GetTargetPhraseStringRep(allFactors);
+}
+
+void Hypothesis::OutputAlignment(std::ostream &out) const
+{
+  std::vector<const Hypothesis *> edges;
+  const Hypothesis *currentHypo = this;
+  while (currentHypo) {
+    edges.push_back(currentHypo);
+    currentHypo = currentHypo->GetPrevHypo();
+  }
+
+  OutputAlignment(out, edges);
+
+}
+
+void Hypothesis::OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
+{
+  size_t targetOffset = 0;
+
+  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+    const Hypothesis &edge = *edges[currEdge];
+    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
+    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
+
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
+
+    targetOffset += tp.GetSize();
+  }
+  // Removing std::endl here breaks -alignment-output-file, so stop doing that, please :)
+  // Or fix it somewhere else.
+  out << std::endl;
+}
+
+void Hypothesis::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
+{
+  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
+  AlignVec alignments = ai.GetSortedAlignments();
+
+  AlignVec::const_iterator it;
+  for (it = alignments.begin(); it != alignments.end(); ++it) {
+    const std::pair<size_t,size_t> &alignment = **it;
+    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+  }
+
+}
+
+void Hypothesis::OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
+{
+  if (hypo->GetPrevHypo()) {
+    OutputInput(map, hypo->GetPrevHypo());
+    map[hypo->GetCurrSourceWordsRange().GetStartPos()] = &hypo->GetTranslationOption().GetInputPath().GetPhrase();
+  }
+}
+
+void Hypothesis::OutputInput(std::ostream& os) const
+{
+  size_t len = this->GetInput().GetSize();
+  std::vector<const Phrase*> inp_phrases(len, 0);
+  OutputInput(inp_phrases, this);
+  for (size_t i=0; i<len; ++i)
+    if (inp_phrases[i]) os << *inp_phrases[i];
+}
+
+void Hypothesis::OutputBestSurface(std::ostream &out, const std::vector<FactorType> &outputFactorOrder,
+                       char reportSegmentation, bool reportAllFactors) const
+{
+  if (m_prevHypo) {
+    // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
+    m_prevHypo->OutputBestSurface(out, outputFactorOrder, reportSegmentation, reportAllFactors);
+  }
+  OutputSurface(out, *this, outputFactorOrder, reportSegmentation, reportAllFactors);
+}
+
+//////////////////////////////////////////////////////////////////////////
+/***
+ * print surface factor only for the given phrase
+ */
+void Hypothesis::OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
+                   char reportSegmentation, bool reportAllFactors) const
+{
+  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
+		  "Must specific at least 1 output factor");
+  const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
+  bool markUnknown = StaticData::Instance().GetMarkUnknown();
+  if (reportAllFactors == true) {
+    out << phrase;
+  } else {
+    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+
+    std::map<size_t, const Factor*> placeholders;
+    if (placeholderFactor != NOT_FOUND) {
+      // creates map of target position -> factor for placeholders
+      placeholders = GetPlaceholders(edge, placeholderFactor);
+    }
+
+    size_t size = phrase.GetSize();
+    for (size_t pos = 0 ; pos < size ; pos++) {
+      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+
+      if (placeholders.size()) {
+        // do placeholders
+        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
+        if (iter != placeholders.end()) {
+          factor = iter->second;
+        }
+      }
+
+      UTIL_THROW_IF2(factor == NULL,
+    		  "No factor 0 at position " << pos);
+
+      //preface surface form with UNK if marking unknowns
+      const Word &word = phrase.GetWord(pos);
+      if(markUnknown && word.IsOOV()) {
+        out << "UNK" << *factor;
+      } else {
+        out << *factor;
+      }
+
+      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
+        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+        UTIL_THROW_IF2(factor == NULL,
+      		  "No factor " << i << " at position " << pos);
+
+        out << "|" << *factor;
+      }
+      out << " ";
+    }
+  }
+
+  // trace ("report segmentation") option "-t" / "-tt"
+  if (reportSegmentation > 0 && phrase.GetSize() > 0) {
+    const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+    const int sourceStart = sourceRange.GetStartPos();
+    const int sourceEnd = sourceRange.GetEndPos();
+    out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
+    if (reportSegmentation == 2) {
+      out << ",wa=";
+      const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
+      Hypothesis::OutputAlignment(out, ai, 0, 0);
+      out << ",total=";
+      out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
+      out << ",";
+      ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
+      scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
+      scoreBreakdown.OutputAllFeatureScores(out);
+    }
+    out << "| ";
+  }
+}
+
+std::map<size_t, const Factor*> Hypothesis::GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const
+{
+  const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
+  const Phrase &inputPhrase = inputPath.GetPhrase();
+
+  std::map<size_t, const Factor*> ret;
+
+  for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
+    const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
+    if (factor) {
+      std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
+      UTIL_THROW_IF2(targetPos.size() != 1,
+    		  "Placeholder should be aligned to 1, and only 1, word");
+      ret[*targetPos.begin()] = factor;
+    }
+  }
+
+  return ret;
 }
 
 }

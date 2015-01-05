@@ -24,12 +24,6 @@ protected:
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
 
-  void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features,
-							  std::ostream &out) const;
-  void OutputFeatureScores( std::ostream& out,
-							const ScoreComponentCollection &features,
-							const FeatureFunction *ff,
-							std::string &lastName ) const;
   void OutputSurface(std::ostream &out,
 		  	  	  	  const Phrase &phrase,
 		  	  	  	  const std::vector<FactorType> &outputFactorOrder,
