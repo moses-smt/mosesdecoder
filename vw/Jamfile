@@ -1,14 +1,14 @@
-alias headers : : : : <include>. <include>..//..//moses// <include>.. ;
+alias headers : : : : <include>. <include>..//moses// <include>.. ;
 
 boost 103600 ;
 
 # VW
 local with-vw = [ option.get "with-vw" ] ;
 if $(with-vw) {
-  lib vw : : <search>$(with-vw)/lib ;
+  lib vwlib : : <search>$(with-vw)/lib ;
   lib allreduce : : <search>$(with-vw)/lib ;
   obj VWLibraryConsumer.o : VWLibraryConsumer.cpp headers : <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
-  alias vw_objects : VWLibraryConsumer.o vw allreduce : : : <library>boost_program_options ;
-  lib classifier : [ glob *.cpp : VWLibraryConsumer.cpp ] vw_objects headers ;
+  alias vw_objects : VWLibraryConsumer.o vwlib allreduce : : : <library>boost_program_options ;
+  lib vw : [ glob *.cpp : VWLibraryConsumer.cpp ] vw_objects headers ;
   echo "Linking with Vowpal Wabbit" ;
 }

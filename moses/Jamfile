@@ -17,7 +17,12 @@ if $(with-oxlm) {
   oxlm = ;
 }
 
-alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(oxlm) ; 
+local vw = ;
+if [ option.get "with-vw" ] {
+  classifier += ..//vw//vw ;
+}
+
+alias headers : ../util//kenutil $(vw) : : : $(max-factors) $(dlib) $(oxlm) ; 
 alias ThreadPool : ThreadPool.cpp ;
 alias Util : Util.cpp Timer.cpp ;
 
