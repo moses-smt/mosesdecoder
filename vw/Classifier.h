@@ -111,8 +111,6 @@ protected:
 
   ::vw *m_VWInstance;
   ::ezexample *m_ex;
-  // this contains state about which namespaces are shared
-  bool m_shared;
   // if true, then the VW instance is owned by an external party and should NOT be
   // deleted at end; if false, then we own the VW instance and must clean up after it.
   bool m_sharedVwInstance;
