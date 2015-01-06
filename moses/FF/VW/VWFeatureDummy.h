@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "StatelessFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TranslationOptionList.h"
 #include "moses/Util.h"
 #include "Normalizer.h"
@@ -49,7 +49,7 @@ public:
                 , const TranslationOptionList &translationOptionList) const
   {
     Discriminative::Classifier *classifier = m_train ? m_trainer : m_predictorFactory->Acquire();
-    std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures();
+    std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures(GetScoreProducerDescription());
 
     std::vector<float> losses;
 

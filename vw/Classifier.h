@@ -155,7 +155,7 @@ private:
   boost::mutex m_mutex;
   boost::condition_variable m_cond;
 
-  const int DEFAULT_POOL_SIZE = 32;
+  const static int DEFAULT_POOL_SIZE = 32;
 };
 
 } // namespace Discriminative
