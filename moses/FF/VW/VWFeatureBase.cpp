@@ -5,6 +5,6 @@
 
 namespace Moses
 {
-  std::vector<VWFeatureBase*> VWFeatureBase::s_features;
+  std::map<std::string, std::vector<VWFeatureBase*> > VWFeatureBase::s_features;
 }
 

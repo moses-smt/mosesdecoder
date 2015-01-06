@@ -1,10 +1,10 @@
 #pragma once
 
 #include <string>
-#include <Util.h>
-#include <TranslationOptionList.h>
-#include <Normalizer.h>
 #include "StatelessFeatureFunction.h"
+#include "moses/TranslationOptionList.h"
+#include "moses/Util.h"
+#include "Normalizer.h"
 #include "Classifier.h"
 #include "VWFeatureBase.h"
 
