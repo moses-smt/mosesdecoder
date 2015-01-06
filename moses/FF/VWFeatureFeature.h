@@ -44,16 +44,13 @@ class VWFeatureFeature : public StatelessFeatureFunction
     
     void SetParameter(const std::string& key, const std::string& value)
     {
-      if(key == "name") {
-        m_name = value;
-      }
     }
     
     void DoSomething(const InputType &input
                   , const InputPath &inputPath
                   , const TargetPhrase &targetPhrase) {
 
-      std::cerr << m_name << " got TargetPhrase: " << targetPhrase << std::endl;
+      std::cerr << GetScoreProducerDescription() << " got TargetPhrase: " << targetPhrase << std::endl;
 
     }
     
@@ -62,7 +59,6 @@ class VWFeatureFeature : public StatelessFeatureFunction
     }
   
   private:
-    std::string m_name;
     static std::vector<VWFeatureFeature*> s_features;
   };
 }
