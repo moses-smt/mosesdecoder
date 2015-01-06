@@ -11,7 +11,7 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/InputType.h"
 #include "vw/FeatureExtractor.h"
-#include "vw/FeatureConsumer.h"
+#include "vw/Classifier.h"
 
 #include <map>
 #include <string>
