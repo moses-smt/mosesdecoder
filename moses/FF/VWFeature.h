@@ -10,8 +10,8 @@
 #include "moses/TranslationOption.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/InputType.h"
-#include "contrib/classifier/FeatureExtractor.h"
-#include "contrib/classifier/FeatureConsumer.h"
+#include "vw/FeatureExtractor.h"
+#include "vw/FeatureConsumer.h"
 
 #include <map>
 #include <string>

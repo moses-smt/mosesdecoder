@@ -7,11 +7,8 @@
 #include <boost/bimap/bimap.hpp>
 #include "IniReader.h"
 
-namespace Classifier
+namespace Discriminative
 {
-
-const size_t FACTOR_FORM = 0; // index of surface forms
-const size_t P_E_F_INDEX = 2; // index of P(e|f) score in phrase table
 
 class ExtractorConfig
 {
@@ -55,6 +52,6 @@ class ExtractorConfig
     bool m_isLoaded;
 };
 
-} // namespace Classifier
+} // namespace Discriminative
 
 #endif // moses_ExtractorConfig_h
