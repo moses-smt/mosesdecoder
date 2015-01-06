@@ -44,6 +44,15 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
+  void EvaluateWithSourceContextCollection(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhraseCollection &targetPhraseCollection
+                , const StackVec *stackVec
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  {}
+
+                
   void EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     ScoreComponentCollection* accumulator) const

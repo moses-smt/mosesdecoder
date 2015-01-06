@@ -47,6 +47,15 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
+  
+  void EvaluateWithSourceContextCollection(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhraseCollection &targetPhraseCollection
+                , const StackVec *stackVec
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  {}
+
 
 
   /*

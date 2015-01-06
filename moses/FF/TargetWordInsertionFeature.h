@@ -45,6 +45,14 @@ public:
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
+  
+  void EvaluateWithSourceContextCollection(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhraseCollection &targetPhraseCollection
+                , const StackVec *stackVec
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  {}
 
   void ComputeFeatures(const Phrase &source,
                        const TargetPhrase& targetPhrase,

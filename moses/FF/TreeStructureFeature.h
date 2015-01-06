@@ -62,6 +62,16 @@ public:
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {};
+  
+  void EvaluateWithSourceContextCollection(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhraseCollection &targetPhraseCollection
+                , const StackVec *stackVec
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  {}
+
+  
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

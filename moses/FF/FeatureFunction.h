@@ -12,6 +12,7 @@ namespace Moses
 
 class Phrase;
 class TargetPhrase;
+class TargetPhraseCollection;
 class TranslationOption;
 class Hypothesis;
 class ChartHypothesis;
@@ -128,6 +129,20 @@ public:
   virtual void EvaluateWithSourceContext(const InputType &input
                         , const InputPath &inputPath
                         , const TargetPhrase &targetPhrase
+                        , const StackVec *stackVec
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
+  
+  // This method is called once all the translation options are retrieved from the phrase table, and
+  // just before search.
+  // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
+  // 'stackVec' is a vector of chart cells that the RHS non-terms cover.
+  // It is guaranteed to be in the same order as the non-terms in the source phrase.
+  // For pb models, stackvec is NULL.
+  // No FF should set estimatedFutureScore in both overloads!
+  virtual void EvaluateWithSourceContextCollection(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhraseCollection &targetPhraseCollection
                         , const StackVec *stackVec
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
