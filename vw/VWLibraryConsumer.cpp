@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace Classifier
+namespace Discriminative
 {
 
 //
@@ -203,4 +203,4 @@ VWLibraryPredictConsumer::VWLibraryPredictConsumer(vw * instance, int index)
   m_index = index;
 }
 
-} // namespace Classifier
+} // namespace Discriminative

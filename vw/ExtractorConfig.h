@@ -7,7 +7,7 @@
 #include <boost/bimap/bimap.hpp>
 #include "IniReader.h"
 
-namespace Classifier
+namespace Discriminative
 {
 
 class ExtractorConfig
@@ -52,6 +52,6 @@ class ExtractorConfig
     bool m_isLoaded;
 };
 
-} // namespace Classifier
+} // namespace Discriminative
 
 #endif // moses_ExtractorConfig_h

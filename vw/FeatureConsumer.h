@@ -21,7 +21,7 @@
   class ezexample;
 // #endif
 
-namespace Classifier
+namespace Discriminative
 {
 
 class Classifier
@@ -151,6 +151,6 @@ private:
 
 // #endif // HAVE_VW
 
-} // namespace Classifier
+} // namespace Discriminative
 
 #endif // moses_FeatureConsumer_h

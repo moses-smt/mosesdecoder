@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <map>
 
-namespace Classifier
+namespace Discriminative
 {
 
 // label index passed to the classifier, this value is not used in our setting
@@ -83,6 +83,6 @@ private:
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 
-} // namespace Classifier
+} // namespace Discriminative
 
 #endif // moses_FeatureExtractor_h

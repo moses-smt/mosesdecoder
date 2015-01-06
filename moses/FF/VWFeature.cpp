@@ -15,7 +15,7 @@
 #include <exception>
 
 using namespace std;
-using namespace Classifier;
+using namespace Discriminative;
 
 namespace Moses
 {

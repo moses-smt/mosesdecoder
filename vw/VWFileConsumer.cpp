@@ -8,7 +8,7 @@
 using namespace std;
 using namespace Moses;
 
-namespace Classifier
+namespace Discriminative
 {
 
 VWFileTrainConsumer::VWFileTrainConsumer(const std::string &outputFile)
@@ -82,4 +82,4 @@ std::string VWFileTrainConsumer::EscapeSpecialChars(const std::string &str)
   return out;
 }
 
-} // namespace Classifier
+} // namespace Discriminative

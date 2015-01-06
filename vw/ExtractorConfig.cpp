@@ -10,7 +10,7 @@ using namespace std;
 using namespace boost::bimaps;
 using namespace Moses;
 
-namespace Classifier
+namespace Discriminative
 {
 
 void ExtractorConfig::Load(const string &configFile)
@@ -48,4 +48,4 @@ void ExtractorConfig::Load(const string &configFile)
   }
 }
 
-} // namespace Classifier
+} // namespace Discriminative

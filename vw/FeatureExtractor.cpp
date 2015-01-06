@@ -7,7 +7,7 @@
 using namespace std;
 using namespace Moses;
 
-namespace Classifier
+namespace Discriminative
 {
 
 FeatureExtractor::FeatureExtractor(const ExtractorConfig &config, bool train)
@@ -229,4 +229,4 @@ void FeatureExtractor::GenerateTTableEntryFeatures(const std::vector<TTableEntry
   }
 }
 
-} // namespace Classifier
+} // namespace Discriminative
