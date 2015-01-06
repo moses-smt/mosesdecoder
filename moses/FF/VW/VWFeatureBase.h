@@ -50,7 +50,7 @@ class VWFeatureBase : public StatelessFeatureFunction
 
     void SetParameter(const std::string& key, const std::string& value)
     {
-      if (key == "usedBy") {
+      if (key == "used-by") {
         ParseUsedBy(value);
       } else {
         StatelessFeatureFunction::SetParameter(key, value);
