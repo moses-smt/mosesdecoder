@@ -82,6 +82,8 @@ public:
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
   void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
 
+  void UpdateScore(ScoreComponentCollection *futureScoreBreakdown = NULL);
+  
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
   // used to set translation or gen score

@@ -43,9 +43,11 @@ public:
     for(iterTransOpt = translationOptionList.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt) {
       TranslationOption &transOpt = **iterTransOpt;
-      ScoreComponentCollection &scoreBreakDown
-        = const_cast<ScoreComponentCollection&>(transOpt.GetTargetPhrase().GetScoreBreakdown());
+      
+      ScoreComponentCollection &scoreBreakDown = transOpt.GetScoreBreakdown();
       scoreBreakDown.PlusEquals(this, newScores);
+      
+      transOpt.UpdateScore();
     }
   }
 

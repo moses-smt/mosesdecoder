@@ -159,6 +159,13 @@ void TargetPhrase::EvaluateWithSourceContext(const InputType &input, const Input
   m_fullScore = weightedScore + m_futureScore;
 }
 
+void TargetPhrase::UpdateScore(ScoreComponentCollection* futureScoreBreakdown) {
+  float weightedScore = m_scoreBreakdown.GetWeightedScore();
+  if(futureScoreBreakdown)
+    m_futureScore += futureScoreBreakdown->GetWeightedScore();
+  m_fullScore = weightedScore + m_futureScore;  
+}
+
 void TargetPhrase::SetXMLScore(float score)
 {
   const FeatureFunction* prod = PhraseDictionary::GetColl()[0];
