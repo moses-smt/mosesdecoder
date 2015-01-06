@@ -1,9 +1,9 @@
 #pragma once
 
 #include <string>
-#include "StatelessFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
-#include "VWFeatureFeature.h"
+#include "VWFeatureBase.h"
 
 namespace Moses
 {
@@ -38,7 +38,7 @@ public:
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
                 , const TranslationOptionList &translationOptionList) const
   {
-    std::vector<VWFeatureFeature*>& features = VWFeatureFeature::GetFeatures();
+    std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures();
     
     TranslationOptionList::const_iterator iterTransOpt;
     for(iterTransOpt = translationOptionList.begin() ;
@@ -47,7 +47,7 @@ public:
       TranslationOption &transOpt = **iterTransOpt;
       for(size_t i = 0; i < features.size(); ++i)
       
-        features[i]->DoSomething(input, transOpt.GetInputPath(), transOpt.GetTargetPhrase());
+        (*features[i])(input, transOpt.GetInputPath(), transOpt.GetTargetPhrase());
     }
     
     for(iterTransOpt = translationOptionList.begin() ;
