@@ -17,7 +17,7 @@ FeatureExtractor::FeatureExtractor(const ExtractorConfig &config, bool train)
     throw logic_error("configuration file not loaded");
 }
 
-void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
+void FeatureExtractor::GenerateFeatures(Classifier *fc,
   const ContextType &context,
   size_t spanStart,
   size_t spanEnd,
@@ -88,7 +88,7 @@ string FeatureExtractor::BuildContextFeature(size_t factor, int index, const str
 void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   size_t spanStart,
   size_t spanEnd,
-  FeatureConsumer *fc)
+  Classifier *fc)
 {
   vector<size_t>::const_iterator factIt;
   for (factIt = m_config.GetFactors().begin(); factIt != m_config.GetFactors().end(); factIt++) {
@@ -105,12 +105,12 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   }
 }
 
-void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, FeatureConsumer *fc)
+void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Classifier *fc)
 {
   fc->AddFeature("p^" + Join("_", span));
 }
 
-void FeatureExtractor::GenerateConcatIndicatorFeature(const vector<string> &span1, const vector<string> &span2, FeatureConsumer *fc)
+void FeatureExtractor::GenerateConcatIndicatorFeature(const vector<string> &span1, const vector<string> &span2, Classifier *fc)
 {
   fc->AddFeature("p^" + Join("_", span1) + "^" + Join("_", span2));
 }
@@ -119,7 +119,7 @@ void FeatureExtractor::GenerateSTSE(const vector<string> &span1, const vector<st
   const ContextType &context,
   size_t spanStart,
   size_t spanEnd,
-  FeatureConsumer *fc)
+  Classifier *fc)
 {
   vector<size_t>::const_iterator factIt;
   for (factIt = m_config.GetFactors().begin(); factIt != m_config.GetFactors().end(); factIt++) {
@@ -136,7 +136,7 @@ void FeatureExtractor::GenerateSTSE(const vector<string> &span1, const vector<st
   }
 }
 
-void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
+void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Classifier *fc)
 {
   vector<string>::const_iterator it;
   for (it = span.begin(); it != span.end(); it++) {
@@ -144,7 +144,7 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   }
 }
 
-void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc)
+void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, Classifier *fc)
 {
   for (size_t i = 0; i < spanStart; i++)
     fc->AddFeature("bow^" + context[i][factorID]);
@@ -152,7 +152,7 @@ void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, si
     fc->AddFeature("bow^" + context[i][factorID]);
 }
 
-void FeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc)
+void FeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, Classifier *fc)
 {
   for (size_t i = spanStart; i <= spanEnd; i++) {
     vector<size_t>::const_iterator factIt;
@@ -163,7 +163,7 @@ void FeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &context, 
 }
 
 void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, const vector<string> &tgtPhrase, 
-    const AlignmentType &align, FeatureConsumer *fc)
+    const AlignmentType &align, Classifier *fc)
 {
   AlignmentType::const_iterator it;
   set<size_t> srcAligned;
@@ -186,7 +186,7 @@ void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, c
   }
 }
 
-void FeatureExtractor::GenerateScoreFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc)
+void FeatureExtractor::GenerateScoreFeatures(const std::vector<TTableEntry> &ttableScores, Classifier *fc)
 {
   vector<size_t>::const_iterator scoreIt;
   vector<float>::const_iterator binIt;
@@ -209,7 +209,7 @@ void FeatureExtractor::GenerateScoreFeatures(const std::vector<TTableEntry> &tta
   }
 }
 
-void FeatureExtractor::GenerateMostFrequentFeature(const std::vector<TTableEntry> &ttableScores, const map<string, float> &maxProbs, FeatureConsumer *fc)
+void FeatureExtractor::GenerateMostFrequentFeature(const std::vector<TTableEntry> &ttableScores, const map<string, float> &maxProbs, Classifier *fc)
 {
   vector<TTableEntry>::const_iterator it;
   for (it = ttableScores.begin(); it != ttableScores.end(); it++) {
@@ -220,7 +220,7 @@ void FeatureExtractor::GenerateMostFrequentFeature(const std::vector<TTableEntry
   }
 }
 
-void FeatureExtractor::GenerateTTableEntryFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc)
+void FeatureExtractor::GenerateTTableEntryFeatures(const std::vector<TTableEntry> &ttableScores, Classifier *fc)
 {
   vector<TTableEntry>::const_iterator it;
   for (it = ttableScores.begin(); it != ttableScores.end(); it++) {
