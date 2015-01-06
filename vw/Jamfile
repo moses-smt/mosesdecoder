@@ -7,8 +7,8 @@ local with-vw = [ option.get "with-vw" ] ;
 if $(with-vw) {
   lib vwlib : : <search>$(with-vw)/lib ;
   lib allreduce : : <search>$(with-vw)/lib ;
-  obj VWLibraryConsumer.o : VWLibraryConsumer.cpp headers : <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
-  alias vw_objects : VWLibraryConsumer.o vwlib allreduce : : : <library>boost_program_options ;
-  lib vw : [ glob *.cpp : VWLibraryConsumer.cpp ] vw_objects headers ;
+  obj VWPredictor.o : VWPredictor.cpp VWPredictorFactory.cpp headers : <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
+  alias vw_objects : VWPredictor.o vwlib allreduce : : : <library>boost_program_options ;
+  lib vw : [ glob *.cpp : VWPredictor.cpp VWPredictorFactory.cpp ] vw_objects headers ;
   echo "Linking with Vowpal Wabbit" ;
 }
