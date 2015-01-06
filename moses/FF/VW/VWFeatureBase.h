@@ -63,6 +63,7 @@ class VWFeatureBase : public StatelessFeatureFunction
                   , Discriminative::Classifier *classifier) const = 0;
 
     static const std::vector<VWFeatureBase*>& GetFeatures(std::string name = "VW0") {
+      UTIL_THROW_IF2(s_features.count(name) == 0, "No features registered for parent classifier: " + name);
       return s_features[name];
     }
 
