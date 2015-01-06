@@ -54,7 +54,7 @@ class VWFeatureFeature : public StatelessFeatureFunction
 
     }
     
-    static std::vector<VWFeatureFeature*>& GetFeatures() {
+    static const std::vector<VWFeatureFeature*>& GetFeatures() const {
       return s_features;  
     }
   

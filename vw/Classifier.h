@@ -63,6 +63,10 @@ public:
   }
 };
 
+// some of VW settings are hard-coded because they are always needed in our scenario
+// (e.g. quadratic source X target features)
+const std::string VW_OPTIONS = " --hash all --noconstant -q st ";
+
 /** 
  * Produce VW training file (does not use the VW library!)
  */
@@ -129,7 +133,7 @@ private:
 class VWPredictorFactory : private boost::noncopyable
 {
 public:
-  VWPredictorFactory(const std::string &modelFile, const std::string &vwOptions, const int poolSize);
+  VWPredictorFactory(const std::string &modelFile, const std::string &vwOptions, const int poolSize = DEFAULT_POOL_SIZE);
 
   /**
   * Get an instance of VWPredictor from the pool.
@@ -150,6 +154,8 @@ private:
   std::vector<VWPredictor *> m_predictors;
   boost::mutex m_mutex;
   boost::condition_variable m_cond;
+
+  const int DEFAULT_POOL_SIZE = 32;
 };
 
 } // namespace Discriminative

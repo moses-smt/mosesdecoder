@@ -1,8 +1,10 @@
 #pragma once
 
 #include <string>
+#include <Util.h>
+#include <TranslationOptionList.h>
 #include "StatelessFeatureFunction.h"
-
+#include "Classifier.h"
 #include "VWFeatureFeature.h"
 
 namespace Moses
@@ -12,9 +14,14 @@ class VWFeatureDummy : public StatelessFeatureFunction
 {
 public:
   VWFeatureDummy(const std::string &line)
-    :StatelessFeatureFunction(1, line)
+    :StatelessFeatureFunction(1, line), m_train(false)
   {
     ReadParameters();
+    if (m_train) {
+      m_trainer = new Discriminative::VWTrainer(m_modelPath);
+    } else {
+      m_predictorFactory = new Discriminative::VWPredictorFactory(m_modelPath, m_vwOptions);
+    }
   }
 
   bool IsUseable(const FactorMask &mask) const {
@@ -38,6 +45,7 @@ public:
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
                 , const TranslationOptionList &translationOptionList) const
   {
+    Discriminative::Classifier *classifier = m_train ? m_trainer : m_predictorFactory->Acquire();
     std::vector<VWFeatureFeature*>& features = VWFeatureFeature::GetFeatures();
     
     TranslationOptionList::const_iterator iterTransOpt;
@@ -75,8 +83,23 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value)
   {
+    if (key == "train") {
+      m_train = Scan<bool>(value);
+    } else if (key == "model") {
+      m_modelPath = value;
+    } else if (key == "vw-options") {
+      m_vwOptions = value;
+    } else {
+      StatelessFeatureFunction::SetParameter(key, value);
+    }
   }
 
+private:
+  bool m_train; // false means predict
+  std::string m_modelPath;
+  std::string m_vwOptions;
+  Discriminative::Classifier *m_trainer;
+  Discriminative::VWPredictorFactory *m_predictorFactory;
 };
 
 }
