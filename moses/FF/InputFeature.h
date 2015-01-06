@@ -54,14 +54,9 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
-  void EvaluateWithSourceContextCollection(const InputType &input
-              , const InputPath &inputPath
-              , const TargetPhraseCollection &targetPhraseCollection
-              , const StackVec *stackVec
-              , ScoreComponentCollection &scoreBreakdown
-              , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+              , const TranslationOptionList &translationOptionList) const
   {}
-
                 
   void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const

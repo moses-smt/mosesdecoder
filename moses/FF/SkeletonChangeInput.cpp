@@ -47,12 +47,8 @@ void SkeletonChangeInput::EvaluateWithSourceContext(const InputType &input
 
 }
 
-void SkeletonChangeInput::EvaluateWithSourceContextCollection(const InputType &input
-								  , const InputPath &inputPath
-								  , const TargetPhraseCollection &targetPhraseCollection
-								  , const StackVec *stackVec
-								  , ScoreComponentCollection &scoreBreakdown
-								  , ScoreComponentCollection *estimatedFutureScore) const
+void SkeletonChangeInput::EvaluateTranslationOptionListWithSourceContext(const InputType &input
+								  , const TranslationOptionList &translationOptionList) const
 {}
 
 void SkeletonChangeInput::EvaluateWhenApplied(const Hypothesis& hypo,
