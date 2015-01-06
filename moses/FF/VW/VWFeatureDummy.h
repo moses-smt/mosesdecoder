@@ -53,24 +53,24 @@ public:
       : (Discriminative::Classifier *)m_predictorFactory->Acquire();
     const std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures(GetScoreProducerDescription());
 
-    std::vector<float> losses;
+    std::vector<float> losses(translationOptionList.size());
 
+    std::vector<float>::iterator iterLoss;
     TranslationOptionList::const_iterator iterTransOpt;
-    for(iterTransOpt = translationOptionList.begin() ;
-        iterTransOpt != translationOptionList.end() ; ++iterTransOpt) {
+    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
+        iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
      
       TranslationOption &transOpt = **iterTransOpt;
       for(size_t i = 0; i < features.size(); ++i)
         (*features[i])(input, transOpt.GetInputPath(), transOpt.GetTargetPhrase(), classifier);
 
-      losses.push_back(classifier->Predict("DUMMY")); // VW does not use the label!!
+      *iterLoss = classifier->Predict("DUMMY"); // VW does not use the label!!
       // TODO handle training somehow
     }
 
     (*m_normalizer)(losses);
 
-    std::vector<float>::const_iterator iterLoss = losses.begin();
-    for(iterTransOpt = translationOptionList.begin() ;
+    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
       TranslationOption &transOpt = **iterTransOpt;
       
