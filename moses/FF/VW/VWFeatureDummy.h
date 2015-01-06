@@ -1,11 +1,12 @@
 #pragma once
 
 #include <string>
+#include "StatelessFeatureFunction.h"
 #include "moses/TranslationOptionList.h"
 #include "moses/Util.h"
+#include "Normalizer.h"
 #include "Classifier.h"
-#include "VWFeatureFeature.h"
-#include "moses/FF/StatelessFeatureFunction.h"
+#include "VWFeatureBase.h"
 
 #include "VWFeatureBase.h"
 
@@ -50,22 +51,29 @@ public:
     Discriminative::Classifier *classifier = m_train ? m_trainer : m_predictorFactory->Acquire();
     std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures();
 
+    std::vector<float> losses;
+
     TranslationOptionList::const_iterator iterTransOpt;
     for(iterTransOpt = translationOptionList.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt) {
      
       TranslationOption &transOpt = **iterTransOpt;
       for(size_t i = 0; i < features.size(); ++i)
-      
-        (*features[i])(input, transOpt.GetInputPath(), transOpt.GetTargetPhrase());
+        (*features[i])(input, transOpt.GetInputPath(), transOpt.GetTargetPhrase(), classifier);
+
+      losses.push_back(classifier->Predict("DUMMY")); // VW does not use the label!!
+      // TODO handle training somehow
     }
-    
+
+    normalizer->(losses);
+
+    std::vector<float>::const_iterator iterLoss = losses.begin();
     for(iterTransOpt = translationOptionList.begin() ;
-        iterTransOpt != translationOptionList.end() ; ++iterTransOpt) {
+        iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
       TranslationOption &transOpt = **iterTransOpt;
       
-      vector<float> newScores(m_numScoreComponents);
-      newScores[0] = 1; // Future result of VW
+      std::vector<float> newScores(m_numScoreComponents);
+      newScores[0] = *iterLoss;
     
       ScoreComponentCollection &scoreBreakDown = transOpt.GetScoreBreakdown();
       scoreBreakDown.PlusEquals(this, newScores);
@@ -91,6 +99,10 @@ public:
       m_modelPath = value;
     } else if (key == "vw-options") {
       m_vwOptions = value;
+    } else if (key == "loss") {
+      normalizer = value == "logistic"
+          ? new Discriminative::LogisticLossNormalizer()
+          : new Discriminative::SquaredLossNormalizer();
     } else {
       StatelessFeatureFunction::SetParameter(key, value);
     }
@@ -100,6 +112,7 @@ private:
   bool m_train; // false means predict
   std::string m_modelPath;
   std::string m_vwOptions;
+  Discriminative::Normalizer *normalizer;
   Discriminative::Classifier *m_trainer;
   Discriminative::VWPredictorFactory *m_predictorFactory;
 };
