@@ -12,7 +12,6 @@ using namespace std;
 
 VWPredictor::VWPredictor(const string &modelFile, const string &vwOptions)
 {
-  m_shared = true;
   m_VWInstance = VW::initialize(vwOptions + " -i " + modelFile);
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
@@ -24,7 +23,6 @@ VWPredictor::VWPredictor(vw * instance, int index)
   m_VWInstance = instance;
   m_sharedVwInstance = true;
   m_ex = new ::ezexample(m_VWInstance, false);
-  m_shared = true;
   m_index = index;
   m_isFirstSource = m_isFirstTarget = true;
 }
