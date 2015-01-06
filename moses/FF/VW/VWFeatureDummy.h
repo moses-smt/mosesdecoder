@@ -48,8 +48,10 @@ public:
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
                 , const TranslationOptionList &translationOptionList) const
   {
-    Discriminative::Classifier *classifier = m_train ? m_trainer : m_predictorFactory->Acquire();
-    std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures(GetScoreProducerDescription());
+    Discriminative::Classifier *classifier = m_train 
+      ? m_trainer 
+      : (Discriminative::Classifier *)m_predictorFactory->Acquire();
+    const std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures(GetScoreProducerDescription());
 
     std::vector<float> losses;
 
@@ -65,7 +67,7 @@ public:
       // TODO handle training somehow
     }
 
-    normalizer->(losses);
+    (*m_normalizer)(losses);
 
     std::vector<float>::const_iterator iterLoss = losses.begin();
     for(iterTransOpt = translationOptionList.begin() ;
@@ -100,9 +102,9 @@ public:
     } else if (key == "vw-options") {
       m_vwOptions = value;
     } else if (key == "loss") {
-      normalizer = value == "logistic"
-          ? new Discriminative::LogisticLossNormalizer()
-          : new Discriminative::SquaredLossNormalizer();
+      m_normalizer = value == "logistic"
+          ? (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer()
+          : (Discriminative::Normalizer *) new Discriminative::SquaredLossNormalizer();
     } else {
       StatelessFeatureFunction::SetParameter(key, value);
     }
@@ -112,7 +114,7 @@ private:
   bool m_train; // false means predict
   std::string m_modelPath;
   std::string m_vwOptions;
-  Discriminative::Normalizer *normalizer;
+  Discriminative::Normalizer *m_normalizer;
   Discriminative::Classifier *m_trainer;
   Discriminative::VWPredictorFactory *m_predictorFactory;
 };
