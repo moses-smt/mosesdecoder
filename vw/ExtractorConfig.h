@@ -10,9 +10,6 @@
 namespace Classifier
 {
 
-const size_t FACTOR_FORM = 0; // index of surface forms
-const size_t P_E_F_INDEX = 2; // index of P(e|f) score in phrase table
-
 class ExtractorConfig
 {
   public:

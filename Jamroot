@@ -151,6 +151,10 @@ if [ option.get "with-probing-pt" : : "yes" ]
   requirements += <library>boost_serialization ;
 }
 
+if [ option.get "with-vw" ] {
+  requirements += <define>HAVE_VW ;
+}
+
 project : default-build
   <threading>multi
   <warnings>on

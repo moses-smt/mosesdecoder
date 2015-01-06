@@ -17,21 +17,6 @@ FeatureExtractor::FeatureExtractor(const ExtractorConfig &config, bool train)
     throw logic_error("configuration file not loaded");
 }
 
-map<string, float> FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
-{
-  map<string, float> maxProbs;
-  vector<Translation>::const_iterator it;
-  vector<TTableEntry>::const_iterator tableIt;
-  for (it = translations.begin(); it != translations.end(); it++) {
-    for (tableIt = it->m_ttableScores.begin(); tableIt != it->m_ttableScores.end(); tableIt++) {
-      if (tableIt->m_exists) {
-        maxProbs[tableIt->m_id] = max(tableIt->m_scores[P_E_F_INDEX], maxProbs[tableIt->m_id]);
-      }
-    }
-  }
-  return maxProbs;
-}
-
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
   size_t spanStart,

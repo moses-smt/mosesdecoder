@@ -24,6 +24,27 @@
 namespace Classifier
 {
 
+class Classifier
+{
+public:
+  // implement in derived classes
+  virtual void AddLabelIndependentFeature(const StringPiece &name, float value) = 0;
+  virtual void AddLabelDependentFeature(const StringPiece &name, float value) = 0;
+  virtual void Train(const StringPiece &label, float loss) = 0;
+  virtual float Predict(const StringPiece &label) = 0;
+
+  // helper methods for indicator features
+  void AddLabelIndependentFeature(const StringPiece &name)
+  {
+    AddLabelIndependentFeature(name, 1.0);
+  }
+
+  void AddLabelDependentFeature(const StringPiece &name) 
+  {
+    AddLabelDependentFeature(name, 1.0);
+  }
+};
+
 // abstract consumer
 class FeatureConsumer
 {
