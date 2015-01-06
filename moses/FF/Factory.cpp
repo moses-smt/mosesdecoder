@@ -63,8 +63,10 @@
 #include "moses/TranslationModel/SkeletonPT.h"
 #include "moses/Syntax/RuleTableFF.h"
 
+#ifdef HAVE_VW
 #include "moses/FF/VW/VWFeatureDummy.h"
 #include "moses/FF/VW/VWFeatureBagOfWords.h"
+#endif
 
 #ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
@@ -235,8 +237,10 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonTranslationOptionListFeature);
   MOSES_FNAME(SkeletonPT);
   
+#ifdef HAVE_VW
   MOSES_FNAME(VWFeatureDummy);
   MOSES_FNAME(VWFeatureBagOfWords);
+#endif
 
 #ifdef HAVE_CMPH
   MOSES_FNAME(PhraseDictionaryCompact);
