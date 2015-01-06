@@ -77,6 +77,9 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 // output floats with five significant digits
 static const size_t PRECISION = 3;
 
+// tolerance for equality in floating point comparisons
+const float FLOAT_EPSILON = 0.0001;
+
 // enums.
 // must be 0, 1, 2, ..., unless otherwise stated
 
