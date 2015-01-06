@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+
+#include "moses/Util.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 
 namespace Moses
@@ -13,7 +15,13 @@ class VWFeatureBase : public StatelessFeatureFunction
       :StatelessFeatureFunction(0, line)
     {
       ReadParameters();
-      s_features.push_back(this);
+      
+      if(m_usedBy.empty())
+        m_usedBy.push_back("VW0");
+        
+      for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
+          it != m_usedBy.end(); it++)
+        s_features[*it].push_back(this);
     }
   
     bool IsUseable(const FactorMask &mask) const {
@@ -41,18 +49,29 @@ class VWFeatureBase : public StatelessFeatureFunction
                        ScoreComponentCollection* accumulator) const {}
     
     void SetParameter(const std::string& key, const std::string& value)
-    {}
+    {
+      if (key == "usedBy") {
+        ParseUsedBy(value);
+      } else {
+        StatelessFeatureFunction::SetParameter(key, value);
+      }
+    }
     
     virtual void operator()(const InputType &input
                   , const InputPath &inputPath
                   , const TargetPhrase &targetPhrase) const = 0;
     
-    static const std::vector<VWFeatureBase*>& GetFeatures() const {
-      return s_features;
+    static const std::vector<VWFeatureBase*>& GetFeatures(std::string name = "VW0") {
+      return s_features[name];
     }
   
   private:
-    static std::vector<VWFeatureBase*> s_features;
+    void ParseUsedBy(const std::string &usedBy) {
+      Tokenize(m_usedBy, usedBy, ",");
+    }
+    
+    std::vector<std::string> m_usedBy;
+    static std::map<std::string, std::vector<VWFeatureBase*> > s_features;
 };
 
 }

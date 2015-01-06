@@ -1,9 +1,8 @@
 #pragma once
 
 #include <string>
-#include <Util.h>
-#include <TranslationOptionList.h>
-#include "StatelessFeatureFunction.h"
+#include "moses/TranslationOptionList.h"
+#include "moses/Util.h"
 #include "Classifier.h"
 #include "VWFeatureFeature.h"
 #include "moses/FF/StatelessFeatureFunction.h"
