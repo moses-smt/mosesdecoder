@@ -15,7 +15,8 @@ class VWFeatureBagOfWords : public VWFeatureBase
   
     void operator()(const InputType &input
                   , const InputPath &inputPath
-                  , const TargetPhrase &targetPhrase) const
+                  , const TargetPhrase &targetPhrase
+                  , Discriminative::Classifier *classifier) const
     {
       std::cerr << GetScoreProducerDescription() << " got TargetPhrase: " << targetPhrase << std::endl;
     }

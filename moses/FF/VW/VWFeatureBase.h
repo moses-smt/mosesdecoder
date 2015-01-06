@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <Classifier.h>
 #include "moses/FF/StatelessFeatureFunction.h"
 
 namespace Moses
@@ -45,7 +46,8 @@ class VWFeatureBase : public StatelessFeatureFunction
     
     virtual void operator()(const InputType &input
                   , const InputPath &inputPath
-                  , const TargetPhrase &targetPhrase) const = 0;
+                  , const TargetPhrase &targetPhrase
+                  , Discriminative::Classifier *classifier) const = 0;
     
     static const std::vector<VWFeatureBase*>& GetFeatures() const {
       return s_features;
