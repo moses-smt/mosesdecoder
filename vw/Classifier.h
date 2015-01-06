@@ -78,7 +78,6 @@ public:
 
 protected:
   void AddFeature(const StringPiece &name, float value);
-  void FinishExample();
   void Finish();
 
   bool m_isFirstSource, m_isFirstTarget, m_isFirstExample;
@@ -108,7 +107,6 @@ public:
 
 protected:
   void AddFeature(const StringPiece &name, float value);
-  void FinishExample();
   void Finish();
 
   ::vw *m_VWInstance;
