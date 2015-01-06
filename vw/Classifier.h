@@ -141,7 +141,7 @@ public:
   /**
   * Release a VWPredictor instance.
   */
-  void Release(VWPredictor * fc);
+  void Release(VWPredictor *vwpred);
 
   ~VWPredictorFactory();
 

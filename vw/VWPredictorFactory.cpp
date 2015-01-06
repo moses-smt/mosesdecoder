@@ -1,10 +1,5 @@
 #include "Classifier.h"
 #include "vw.h"
-#include "Util.h"
-#include "ezexample.h"
-#include <stdexcept>
-#include <exception>
-#include <string>
 
 using namespace std;
 
@@ -63,7 +58,7 @@ VWPredictorFactory::~VWPredictorFactory()
   VW::finish(*m_VWInstance);
 }
 
-VWPredictor * VWPredictorFactory::Acquire()
+VWPredictor *VWPredictorFactory::Acquire()
 {
   boost::unique_lock<boost::mutex> lock(m_mutex);
   while (m_firstFree == EMPTY_LIST)
@@ -74,17 +69,17 @@ VWPredictor * VWPredictorFactory::Acquire()
   return m_predictors[free];
 }
 
-void VWPredictorFactory::Release(VWPredictor * fc)
+void VWPredictorFactory::Release(VWPredictor *vwpred)
 {
   // use scope block to handle the lock
   {
     boost::unique_lock<boost::mutex> lock(m_mutex);
-    int index = fc->m_index;
+    int index = vwpred->m_index;
 
     if (index < 0 || index >= (int)m_predictors.size())
       throw std::runtime_error("bad index at VWPredictorFactory::Release");
 
-    if (fc != m_predictors[index])
+    if (vwpred != m_predictors[index])
       throw std::runtime_error("mismatched pointer at VWPredictorFactory::Release");
 
     m_nextFree[index] = m_firstFree;

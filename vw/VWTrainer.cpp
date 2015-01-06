@@ -1,8 +1,5 @@
 #include "Util.h"
 #include "Classifier.h"
-#include <stdexcept>
-#include <exception>
-#include <string>
 #include <boost/iostreams/device/file.hpp>
 
 using namespace std;
