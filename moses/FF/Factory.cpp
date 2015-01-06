@@ -63,6 +63,9 @@
 #include "moses/TranslationModel/SkeletonPT.h"
 #include "moses/Syntax/RuleTableFF.h"
 
+#include "moses/FF/VWFeatureDummy.h"
+#include "moses/FF/VWFeatureFeature.h"
+
 #ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
@@ -231,6 +234,9 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonChangeInput);
   MOSES_FNAME(SkeletonTranslationOptionListFeature);
   MOSES_FNAME(SkeletonPT);
+  
+  MOSES_FNAME(VWFeatureDummy);
+  MOSES_FNAME(VWFeatureFeature);
 
 #ifdef HAVE_CMPH
   MOSES_FNAME(PhraseDictionaryCompact);
