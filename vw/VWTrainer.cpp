@@ -1,8 +1,5 @@
 #include "Util.h"
 #include "Classifier.h"
-#include <stdexcept>
-#include <exception>
-#include <string>
 #include <boost/iostreams/device/file.hpp>
 
 using namespace std;
@@ -68,7 +65,6 @@ float VWTrainer::Predict(const StringPiece &label)
 
 void VWTrainer::AddFeature(const StringPiece &name, float value)
 {
-  // TODO take advantage of StringPiece here somehow?
   m_outputBuffer.push_back(EscapeSpecialChars(name.as_string()) + ":" + SPrint(value));
 }
 

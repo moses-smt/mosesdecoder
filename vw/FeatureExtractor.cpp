@@ -1,9 +1,6 @@
 #include "FeatureExtractor.h"
 #include "Util.h"
 
-#include <algorithm>
-#include <set>
-
 using namespace std;
 using namespace Moses;
 

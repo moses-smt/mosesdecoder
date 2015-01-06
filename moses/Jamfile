@@ -19,7 +19,7 @@ if $(with-oxlm) {
 
 local vw = ;
 if [ option.get "with-vw" ] {
-  classifier += ..//vw//vw ;
+  vw += ..//vw//vw ;
 }
 
 alias headers : ../util//kenutil $(vw) : : : $(max-factors) $(dlib) $(oxlm) ; 

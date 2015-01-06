@@ -1,10 +1,6 @@
 #include "Classifier.h"
 #include "vw.h"
-#include "Util.h"
 #include "ezexample.h"
-#include <stdexcept>
-#include <exception>
-#include <string>
 
 namespace Discriminative {
 
@@ -18,7 +14,7 @@ VWPredictor::VWPredictor(const string &modelFile, const string &vwOptions)
   m_isFirstSource = m_isFirstTarget = true;
 }
 
-VWPredictor::VWPredictor(vw * instance, int index)
+VWPredictor::VWPredictor(vw *instance, int index)
 {
   m_VWInstance = instance;
   m_sharedVwInstance = true;
@@ -29,17 +25,26 @@ VWPredictor::VWPredictor(vw * instance, int index)
 
 void VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float value)
 {
+  // label-independent features are kept in a different feature namespace ('s' = source)
+
   if (m_isFirstSource) {
+    // the first feature of a new example => create the source namespace for
+    // label-independent features to live in
     m_isFirstSource = false;
     m_ex->clear_features(); // removes all namespaces along with features
     m_ex->addns('s');
   }
-  AddFeature(name, value);
+  AddFeature(name, value); // namespace 's' is set up, add the feature
 }
 
 void VWPredictor::AddLabelDependentFeature(const StringPiece &name, float value)
 {
+  // VW does not use the label directly, instead, we do a Cartesian product between source and target feature
+  // namespaces, where the source namespace ('s') contains label-independent features and the target
+  // namespace ('t') contains label-dependent features
+
   if (m_isFirstTarget) {
+    // the first target-side feature => create namespace 't'
     m_isFirstTarget = false;
     m_ex->addns('t');
   }

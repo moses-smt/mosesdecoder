@@ -41,11 +41,13 @@ public:
 
   /**
    * Train using current example. Use loss to distinguish positive and negative training examples.
+   * Throws away current label-dependent features (so that features for another label/class can now be set).
    */
   virtual void Train(const StringPiece &label, float loss) = 0;
   
   /**
    * Predict the loss (inverse of score) of current example.
+   * Throws away current label-dependent features (so that features for another label/class can now be set).
    */
   virtual float Predict(const StringPiece &label) = 0;
 
@@ -76,7 +78,6 @@ public:
 
 protected:
   void AddFeature(const StringPiece &name, float value);
-  void FinishExample();
   void Finish();
 
   bool m_isFirstSource, m_isFirstTarget, m_isFirstExample;
@@ -106,7 +107,6 @@ public:
 
 protected:
   void AddFeature(const StringPiece &name, float value);
-  void FinishExample();
   void Finish();
 
   ::vw *m_VWInstance;
@@ -139,7 +139,7 @@ public:
   /**
   * Release a VWPredictor instance.
   */
-  void Release(VWPredictor * fc);
+  void Release(VWPredictor *vwpred);
 
   ~VWPredictorFactory();
 
