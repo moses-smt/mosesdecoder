@@ -46,8 +46,8 @@ private:
   // Construct a ScoreComponentCollection with Classifier feature set to given score
   ScoreComponentCollection ScoreFactory(float score) const;
 
-  // Build Classifier::Translation object from Moses structures
-  Classifier::Translation GetClassifierTranslation(const TranslationOption *option) const;
+  // Build Discriminative::Translation object from Moses structures
+  Discriminative::Translation GetClassifierTranslation(const TranslationOption *option) const;
 
   static void NormalizeSquaredLoss(std::vector<float> &losses);
   static void NormalizeLogisticLossBasic(std::vector<float> &losses);
@@ -64,9 +64,9 @@ private:
   }
 
   std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
-  mutable Classifier::VWLibraryPredictConsumerFactory	*m_consumerFactory; // XXX mutable
-  mutable Classifier::FeatureExtractor *m_extractor; // XXX mutable
-  Classifier::ExtractorConfig m_extractorConfig;
+  mutable Discriminative::VWLibraryPredictConsumerFactory	*m_consumerFactory; // XXX mutable
+  mutable Discriminative::FeatureExtractor *m_extractor; // XXX mutable
+  Discriminative::ExtractorConfig m_extractorConfig;
   void (*m_normalizer)(std::vector<float> &); // normalization function
   std::string m_configFile, m_modelFile;
 };

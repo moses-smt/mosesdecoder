@@ -483,6 +483,12 @@ T log_sum (T log_a, T log_b)
   return ( v );
 }
 
+inline bool Equals(float a, float b)
+{
+  return fabs(a - b) < FLOAT_EPSILON;
+}
+
+
 /** Enforce rounding */
 inline void FixPrecision(std::ostream& stream, size_t size = 3)
 {

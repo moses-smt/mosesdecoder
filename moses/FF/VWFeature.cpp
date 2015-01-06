@@ -3,7 +3,6 @@
 #ifdef HAVE_VW
 
 #include "VWFeature.h"
-#include "util/check.hh"
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
 #include "moses/Util.h"
