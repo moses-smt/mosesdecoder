@@ -6,6 +6,9 @@
 #include "StatelessFeatureFunction.h"
 #include "Classifier.h"
 #include "VWFeatureFeature.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+
+#include "VWFeatureBase.h"
 
 namespace Moses
 {
@@ -46,8 +49,8 @@ public:
                 , const TranslationOptionList &translationOptionList) const
   {
     Discriminative::Classifier *classifier = m_train ? m_trainer : m_predictorFactory->Acquire();
-    std::vector<VWFeatureFeature*>& features = VWFeatureFeature::GetFeatures();
-    
+    std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures();
+
     TranslationOptionList::const_iterator iterTransOpt;
     for(iterTransOpt = translationOptionList.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt) {
@@ -55,7 +58,7 @@ public:
       TranslationOption &transOpt = **iterTransOpt;
       for(size_t i = 0; i < features.size(); ++i)
       
-        features[i]->DoSomething(input, transOpt.GetInputPath(), transOpt.GetTargetPhrase());
+        (*features[i])(input, transOpt.GetInputPath(), transOpt.GetTargetPhrase());
     }
     
     for(iterTransOpt = translationOptionList.begin() ;

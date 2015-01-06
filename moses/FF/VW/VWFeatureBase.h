@@ -1,17 +1,15 @@
 #pragma once
 
 #include <string>
-#include "StatelessFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 namespace Moses
 {
   
-  // BE IGNORED BY STATIC DATA.
-
-class VWFeatureFeature : public StatelessFeatureFunction
+class VWFeatureBase : public StatelessFeatureFunction
 {
   public:
-    VWFeatureFeature(const std::string &line)
+    VWFeatureBase(const std::string &line)
       :StatelessFeatureFunction(0, line)
     {
       ReadParameters();
@@ -43,23 +41,19 @@ class VWFeatureFeature : public StatelessFeatureFunction
                        ScoreComponentCollection* accumulator) const {}
     
     void SetParameter(const std::string& key, const std::string& value)
-    {
-    }
+    {}
     
-    void DoSomething(const InputType &input
+    virtual void operator()(const InputType &input
                   , const InputPath &inputPath
-                  , const TargetPhrase &targetPhrase) {
-
-      std::cerr << GetScoreProducerDescription() << " got TargetPhrase: " << targetPhrase << std::endl;
-
-    }
+                  , const TargetPhrase &targetPhrase) const = 0;
     
-    static const std::vector<VWFeatureFeature*>& GetFeatures() const {
-      return s_features;  
+    static const std::vector<VWFeatureBase*>& GetFeatures() const {
+      return s_features;
     }
   
   private:
-    static std::vector<VWFeatureFeature*> s_features;
-  };
+    static std::vector<VWFeatureBase*> s_features;
+};
+
 }
 
