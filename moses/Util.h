@@ -483,6 +483,9 @@ T log_sum (T log_a, T log_b)
   return ( v );
 }
 
+/**
+ * Compare floats for equality with some tolerance.
+ */
 inline bool Equals(float a, float b)
 {
   return fabs(a - b) < FLOAT_EPSILON;
