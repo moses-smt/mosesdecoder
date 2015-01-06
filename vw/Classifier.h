@@ -37,7 +37,7 @@ public:
   /**
    * Add a feature that is specific for the given class.
    */
-  virtual void AddLabelDependentFeature(const StringPiece &label, const StringPiece &name, float value) = 0;
+  virtual void AddLabelDependentFeature(const StringPiece &name, float value) = 0;
 
   /**
    * Train using current example. Use loss to distinguish positive and negative training examples.
@@ -55,9 +55,9 @@ public:
     AddLabelIndependentFeature(name, 1.0);
   }
 
-  void AddLabelDependentFeature(const StringPiece &label, const StringPiece &name) 
+  void AddLabelDependentFeature(const StringPiece &name)
   {
-    AddLabelDependentFeature(label, name, 1.0);
+    AddLabelDependentFeature(name, 1.0);
   }
 };
 
@@ -70,7 +70,7 @@ public:
   VWTrainer(const std::string &outputFile);
 
   virtual void AddLabelIndependentFeature(const StringPiece &name, float value);
-  virtual void AddLabelDependentFeature(const StringPiece &label, const StringPiece &name, float value);
+  virtual void AddLabelDependentFeature(const StringPiece &name, float value);
   virtual void Train(const StringPiece &label, float loss);
   virtual float Predict(const StringPiece &label);
 
@@ -98,7 +98,7 @@ public:
   VWPredictor(const std::string &modelFile, const std::string &vwOptions);
 
   virtual void AddLabelIndependentFeature(const StringPiece &name, float value);
-  virtual void AddLabelDependentFeature(const StringPiece &label, const StringPiece &name, float value);
+  virtual void AddLabelDependentFeature(const StringPiece &name, float value);
   virtual void Train(const StringPiece &label, float loss);
   virtual float Predict(const StringPiece &label);
 

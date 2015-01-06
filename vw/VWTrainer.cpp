@@ -41,7 +41,7 @@ void VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
   AddFeature(name, value);
 }
 
-void VWTrainer::AddLabelDependentFeature(const StringPiece &label, const StringPiece &name, float value)
+void VWTrainer::AddLabelDependentFeature(const StringPiece &name, float value)
 {
   if (m_isFirstTarget) {
     m_isFirstTarget = false;

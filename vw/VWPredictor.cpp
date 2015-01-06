@@ -39,7 +39,7 @@ void VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float valu
   AddFeature(name, value);
 }
 
-void VWPredictor::AddLabelDependentFeature(const StringPiece &label, const StringPiece &name, float value)
+void VWPredictor::AddLabelDependentFeature(const StringPiece &name, float value)
 {
   if (m_isFirstTarget) {
     m_isFirstTarget = false;
