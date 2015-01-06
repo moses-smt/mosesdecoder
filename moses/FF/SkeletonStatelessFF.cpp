@@ -43,12 +43,9 @@ void SkeletonStatelessFF::EvaluateWithSourceContext(const InputType &input
 	}
 }
 
-void SkeletonStatelessFF::EvaluateWithSourceContextCollection(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhraseCollection &targetPhraseCollection
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore) const
+void SkeletonStatelessFF::EvaluateTranslationOptionListWithSourceContext(const InputType &input
+
+                , const TranslationOptionList &translationOptionList) const
 {}
 
 void SkeletonStatelessFF::EvaluateWhenApplied(const Hypothesis& hypo,

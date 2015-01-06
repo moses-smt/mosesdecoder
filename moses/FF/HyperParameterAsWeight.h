@@ -32,14 +32,9 @@ public:
                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
-  virtual void EvaluateWithSourceContextCollection(const InputType &input
-              , const InputPath &inputPath
-              , const TargetPhraseCollection &targetPhraseCollection
-              , const StackVec *stackVec
-              , ScoreComponentCollection &scoreBreakdown
-              , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+              , const TranslationOptionList &translationOptionList) const
   {}
-
   
   virtual void EvaluateWhenApplied(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const

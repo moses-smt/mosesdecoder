@@ -60,12 +60,8 @@ public:
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
-  void EvaluateWithSourceContextCollection(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhraseCollection &targetPhraseCollection
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+                , const TranslationOptionList &translationOptionList) const
   {}
   
   void SetParameter(const std::string& key, const std::string& value);
