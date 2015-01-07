@@ -28,9 +28,9 @@ public:
 
   TO_STRING();
 
+  TargetPhrase *CreateTargetPhrase(const Word &sourceWord) const;
 
 protected:
-  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase) const;
 };
 
 }  // namespace Moses

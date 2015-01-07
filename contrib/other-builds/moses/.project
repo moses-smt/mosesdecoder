@@ -2456,6 +2456,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOOVPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOOVPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOOVPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOOVPT.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp</locationURI>
