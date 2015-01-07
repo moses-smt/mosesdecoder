@@ -25,7 +25,7 @@ class VWFeatureSource : public VWFeatureBase
     {}
     
     virtual void SetParameter(const std::string& key, const std::string& value) {
-      VMFeatureBase::SetParameter(key, value);
+      VWFeatureBase::SetParameter(key, value);
     }
 };
 

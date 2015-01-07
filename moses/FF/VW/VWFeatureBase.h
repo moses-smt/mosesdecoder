@@ -13,7 +13,7 @@ class VWFeatureBase : public StatelessFeatureFunction
 {
   public:
     VWFeatureBase(const std::string &line, bool isSource = true)
-      :StatelessFeatureFunction(0, line), m_usedBy(1, "VW0")
+      :StatelessFeatureFunction(0, line), m_usedBy(1, "VW0"), m_isSource(isSource)
     { }
 
     bool IsUseable(const FactorMask &mask) const {
@@ -43,7 +43,7 @@ class VWFeatureBase : public StatelessFeatureFunction
     virtual void SetParameter(const std::string& key, const std::string& value)
     {
       if (key == "used-by") {
-        ParseUsedBy(value, m_usedBy);
+        ParseUsedBy(value);
       } else if (key == "source-factors") {
         ParseFactorDefinition(value, m_sourceFactors);
       } else if (key == "target-factors") {
@@ -94,7 +94,7 @@ class VWFeatureBase : public StatelessFeatureFunction
       for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
           it != m_usedBy.end(); it++) {
         s_features[*it].push_back(this);
-        if(isSource)
+        if(m_isSource)
           s_sourceFeatures[*it].push_back(this);
         else
           s_targetFeatures[*it].push_back(this);
@@ -102,6 +102,7 @@ class VWFeatureBase : public StatelessFeatureFunction
     }
 
     std::vector<std::string> m_usedBy;
+    bool m_isSource;
     static std::map<std::string, std::vector<VWFeatureBase*> > s_features;
     static std::map<std::string, std::vector<VWFeatureBase*> > s_sourceFeatures;
     static std::map<std::string, std::vector<VWFeatureBase*> > s_targetFeatures;
