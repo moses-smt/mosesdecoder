@@ -23,6 +23,10 @@ class VWFeatureSource : public VWFeatureBase
                             , const TargetPhrase &targetPhrase
                             , Discriminative::Classifier *classifier) const
     {}
+    
+    virtual void SetParameter(const std::string& key, const std::string& value) {
+      VMFeatureBase::SetParameter(key, value);
+    }
 };
 
 }

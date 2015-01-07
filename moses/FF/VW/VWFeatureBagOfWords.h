@@ -14,7 +14,7 @@ class VWFeatureBagOfWords : public VWFeatureSource
     {
       ReadParameters();
     }
-  
+
     void operator()(const InputType &input
                   , const InputPath &inputPath
                   , const WordsRange &sourceRange
@@ -23,6 +23,10 @@ class VWFeatureBagOfWords : public VWFeatureSource
       for (size_t i = 0; i < input.GetSize(); i++) {
         classifier->AddLabelIndependentFeature("bow^" + input.GetWord(i).GetString(m_sourceFactors, false));
       }
+    }
+    
+    virtual void SetParameter(const std::string& key, const std::string& value) {
+      VWFeatureSource::SetParameter(key, value);
     }
 };
 
