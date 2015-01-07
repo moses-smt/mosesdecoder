@@ -11,6 +11,8 @@
 namespace Moses
 {
 
+const std::string VW_DUMMY_LABEL = "1111"; // VW does not use the actual label, other classifiers might
+
 class VW : public StatelessFeatureFunction
 {
 public:
@@ -51,6 +53,7 @@ public:
       : (Discriminative::Classifier *)m_predictorFactory->Acquire();
     
     UTIL_THROW_IF2(translationOptionList.size() == 0, "There are not translation options.");
+    VERBOSE(2, "VW :: Evaluating translation options");
     
     const std::vector<VWFeatureBase*>& sourceFeatures = VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
     
@@ -69,11 +72,11 @@ public:
     for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
      
-      TranslationOption &transOpt = **iterTransOpt;
+      const TargetPhrase &targetPhrase = (*iterTransOpt)->GetTargetPhrase();
       for(size_t i = 0; i < targetFeatures.size(); ++i)
-        (*targetFeatures[i])(input, inputPath, transOpt.GetTargetPhrase(), classifier);
+        (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
 
-      *iterLoss = classifier->Predict("DUMMY"); // VW does not use the label!!
+      *iterLoss = classifier->Predict(MakeTargetLabel(targetPhrase));
       // TODO handle training somehow
     }
 
@@ -120,6 +123,11 @@ public:
   }
 
 private:
+  std::string MakeTargetLabel(const TargetPhrase &targetPhrase) const
+  {
+    return VW_DUMMY_LABEL;
+  }
+
   bool m_train; // false means predict
   std::string m_modelPath;
   std::string m_vwOptions;

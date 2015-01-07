@@ -15,6 +15,7 @@
 #include <boost/iostreams/filtering_stream.hpp> 
 #include <boost/iostreams/filter/gzip.hpp>
 #include "../util/string_piece.hh"
+#include "../moses/Util.h"
 
 // forward declarations to avoid dependency on VW 
 struct vw;
@@ -60,6 +61,19 @@ public:
   void AddLabelDependentFeature(const StringPiece &name)
   {
     AddLabelDependentFeature(name, 1.0);
+  }
+
+  /**
+   * Escape special characters in a unified way.
+   */
+  static std::string EscapeSpecialChars(const std::string &str)
+  {
+    std::string out;
+    out = Moses::Replace(str, "\\", "\\\\");
+    out = Moses::Replace(out, "|", "\\/");
+    out = Moses::Replace(out, ":", "\\;");
+    out = Moses::Replace(out, " ", "\\_");
+    return out;
   }
 };
 
