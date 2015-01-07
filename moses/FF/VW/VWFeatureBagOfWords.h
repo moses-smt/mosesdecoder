@@ -11,14 +11,18 @@ class VWFeatureBagOfWords : public VWFeatureSource
   public:
     VWFeatureBagOfWords(const std::string &line)
       : VWFeatureSource(line)
-    {}
+    {
+      ReadParameters();
+    }
   
     void operator()(const InputType &input
                   , const InputPath &inputPath
                   , const WordsRange &sourceRange
                   , Discriminative::Classifier *classifier) const
     {
-      std::cerr << GetScoreProducerDescription() << " got Phrase: " << sourceRange << std::endl;
+      for (size_t i = 0; i < input.GetSize(); i++) {
+        classifier->AddLabelIndependentFeature("bow^" + input.GetWord(i).GetString(m_sourceFactors, false));
+      }
     }
 };
 
