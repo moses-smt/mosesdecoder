@@ -58,7 +58,7 @@ public:
   }
 
   void GetChartRuleCollection(
-    const WordsRange &range,
+		  const InputPath &inputPath,
     size_t last,
     ChartParserCallback &outColl);
 

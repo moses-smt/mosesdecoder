@@ -39,10 +39,11 @@ namespace Moses
 {
 
 void Scope3Parser::GetChartRuleCollection(
-  const WordsRange &range,
+		const InputPath &inputPath,
   size_t last,
   ChartParserCallback &outColl)
 {
+  const WordsRange &range = inputPath.GetWordsRange();
   const size_t start = range.GetStartPos();
   const size_t end = range.GetEndPos();
 

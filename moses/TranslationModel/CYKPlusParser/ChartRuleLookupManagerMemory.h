@@ -51,7 +51,7 @@ public:
   ~ChartRuleLookupManagerMemory() {};
 
   virtual void GetChartRuleCollection(
-    const WordsRange &range,
+    const InputPath &inputPath,
     size_t lastPos, // last position to consider if using lookahead
     ChartParserCallback &outColl);
 

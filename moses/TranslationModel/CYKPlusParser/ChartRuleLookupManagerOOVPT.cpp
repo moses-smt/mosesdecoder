@@ -52,10 +52,12 @@ ChartRuleLookupManagerOOVPT::~ChartRuleLookupManagerOOVPT()
 }
 
 void ChartRuleLookupManagerOOVPT::GetChartRuleCollection(
-  const WordsRange &range,
+  const InputPath &inputPath,
   size_t last,
   ChartParserCallback &outColl)
 {
+  const WordsRange &range = inputPath.GetWordsRange();
+
   //m_tpColl.push_back(TargetPhraseCollection());
   //TargetPhraseCollection &tpColl = m_tpColl.back();
   TargetPhraseCollection *tpColl = new TargetPhraseCollection();
