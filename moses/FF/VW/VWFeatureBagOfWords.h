@@ -13,6 +13,9 @@ class VWFeatureBagOfWords : public VWFeatureSource
       : VWFeatureSource(line)
     {
       ReadParameters();
+      
+      // Call this last
+      VWFeatureBase::UpdateRegister();
     }
     
     void operator()(const InputType &input
