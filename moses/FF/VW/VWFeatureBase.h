@@ -90,6 +90,17 @@ class VWFeatureBase : public StatelessFeatureFunction
   protected:
     std::vector<FactorType> m_sourceFactors, m_targetFactors;
 
+    void UpdateRegister() {
+      for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
+          it != m_usedBy.end(); it++) {
+        s_features[*it].push_back(this);
+        if(m_isSource)
+          s_sourceFeatures[*it].push_back(this);
+        else
+          s_targetFeatures[*it].push_back(this);
+      }
+    }
+
   private:
     void ParseFactorDefinition(const std::string &list, /* out */ std::vector<FactorType> &out)
     {
@@ -103,17 +114,6 @@ class VWFeatureBase : public StatelessFeatureFunction
       UpdateRegister();
     }
     
-    void UpdateRegister() {
-      for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
-          it != m_usedBy.end(); it++) {
-        s_features[*it].push_back(this);
-        if(m_isSource)
-          s_sourceFeatures[*it].push_back(this);
-        else
-          s_targetFeatures[*it].push_back(this);
-      }
-    }
-
     std::vector<std::string> m_usedBy;
     bool m_isSource;
     static std::map<std::string, std::vector<VWFeatureBase*> > s_features;

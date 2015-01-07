@@ -13,6 +13,8 @@ class VWFeatureTargetIndicator : public VWFeatureTarget
       : VWFeatureTarget(line)
     {
       ReadParameters();
+      
+      VWFeatureBase::UpdateRegister();
     }
 
     void operator()(const InputType &input
