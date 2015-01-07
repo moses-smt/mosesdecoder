@@ -303,9 +303,7 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
     weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   } else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
     //TODO: can we pass error message to client if weights are malformed?
-    std::stringstream strme;
-    strme << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ". Reverting to weights in config";
-    UserMessage::Add(strme.str());
+	std::cerr << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ". Reverting to weights in config";
     weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   }
 

@@ -1,7 +1,6 @@
 #include "BleuScoreFeature.h"
 
 #include "moses/StaticData.h"
-#include "moses/UserMessage.h"
 #include "moses/Hypothesis.h"
 #include "moses/FactorCollection.h"
 #include "util/exception.hh"

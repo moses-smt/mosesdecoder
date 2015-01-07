@@ -89,13 +89,13 @@ LexicalReorderingConfiguration::LexicalReorderingConfiguration(const std::string
     } else if (config[i] == "allff") {
       m_collapseScores = false;
     } else {
-      UserMessage::Add("Illegal part in the lexical reordering configuration string: "+config[i]);
+      std::cerr << "Illegal part in the lexical reordering configuration string: " << config[i] << std::endl;
       exit(1);
     }
   }
 
   if (m_modelType == None) {
-    UserMessage::Add("You need to specify the type of the reordering model (msd, monotonicity,...)");
+	std::cerr << "You need to specify the type of the reordering model (msd, monotonicity,...)" << std::endl;
     exit(1);
   }
 }

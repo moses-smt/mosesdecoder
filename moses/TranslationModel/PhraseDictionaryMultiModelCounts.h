@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Util.h"
-#include "moses/UserMessage.h"
 #include <exception>
 
 namespace Moses

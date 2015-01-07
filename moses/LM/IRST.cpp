@@ -35,7 +35,6 @@ using namespace irstlm;
 #include "moses/Phrase.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/UserMessage.h"
 
 using namespace std;
 

@@ -37,7 +37,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "UserMessage.h"
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
@@ -177,7 +176,7 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_onlyDistinctNBest=(params->size()>2 && params->at(2)=="distinct");
 	  }
 	  else {
-		  UserMessage::Add(string("wrong format for switch -n-best-list file size [disinct]"));
+		  std::cerr << "wrong format for switch -n-best-list file size [disinct]";
 		  return false;
 	  }
   } else {
@@ -194,7 +193,7 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_latticeSamplesSize = Scan<size_t>(params->at(1));
 	  }
 	  else {
-		UserMessage::Add(string("wrong format for switch -lattice-samples file size"));
+		  std::cerr <<"wrong format for switch -lattice-samples file size";
 		return false;
 	  }
   }
@@ -213,7 +212,7 @@ bool StaticData::LoadData(Parameter *parameter)
   params = m_parameter->GetParam("output-search-graph");
   if (params && params->size()) {
     if (params->size() != 1) {
-      UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph file"));
+    	std::cerr << "ERROR: wrong format for switch -output-search-graph file";
       return false;
     }
     m_outputSearchGraph = true;
@@ -222,7 +221,7 @@ bool StaticData::LoadData(Parameter *parameter)
   else if (m_parameter->GetParam("output-search-graph-extended") &&
 		  m_parameter->GetParam("output-search-graph-extended")->size()) {
     if (m_parameter->GetParam("output-search-graph-extended")->size() != 1) {
-      UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-extended file"));
+    	std::cerr << "ERROR: wrong format for switch -output-search-graph-extended file";
       return false;
     }
     m_outputSearchGraph = true;
@@ -249,7 +248,7 @@ bool StaticData::LoadData(Parameter *parameter)
   params = m_parameter->GetParam("output-search-graph-pb");
   if (params && params->size()) {
     if (params->size() != 1) {
-      UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-pb path"));
+      cerr << "ERROR: wrong format for switch -output-search-graph-pb path";
       return false;
     }
     m_outputSearchGraphPB = true;
@@ -328,11 +327,11 @@ bool StaticData::LoadData(Parameter *parameter)
   params = m_parameter->GetParam("stack-diversity");
   if (params && params->size()) {
     if (m_maxDistortion > 15) {
-      UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
+    	std::cerr << "stack diversity > 0 is not allowed for distortion limits larger than 15";
       return false;
     }
     if (m_inputType == WordLatticeInput) {
-      UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
+    	std::cerr << "stack diversity > 0 is not allowed for lattice input";
       return false;
     }
     m_minHypoStackDiversity = Scan<size_t>(params->at(0));
@@ -424,22 +423,22 @@ bool StaticData::LoadData(Parameter *parameter)
 #ifdef WITH_THREADS
       m_threadCount = boost::thread::hardware_concurrency();
       if (!m_threadCount) {
-        UserMessage::Add("-threads all specified but Boost doesn't know how many cores there are");
+    	  std::cerr << "-threads all specified but Boost doesn't know how many cores there are";
         return false;
       }
 #else
-      UserMessage::Add("-threads all specified but moses not built with thread support");
+      std::cerr << "-threads all specified but moses not built with thread support";
       return false;
 #endif
     } else {
       m_threadCount = Scan<int>(params->at(0));
       if (m_threadCount < 1) {
-        UserMessage::Add("Specify at least one thread.");
+    	  std::cerr << "Specify at least one thread.";
         return false;
       }
 #ifndef WITH_THREADS
       if (m_threadCount > 1) {
-        UserMessage::Add(std::string("Error: Thread count of ") + params->at(0) + " but moses not built with thread support");
+    	  std::cerr << "Error: Thread count of " << params->at(0) << " but moses not built with thread support";
         return false;
       }
 #endif
@@ -517,7 +516,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!weightFile.empty()) {
     ScoreComponentCollection extraWeights;
     if (!extraWeights.Load(weightFile)) {
-      UserMessage::Add("Unable to load weights from " + weightFile);
+    	std::cerr << "Unable to load weights from " << weightFile;
       return false;
     }
     m_allWeights.PlusEquals(extraWeights);
@@ -1008,12 +1007,12 @@ bool StaticData::LoadAlternateWeightSettings()
         // sparse weights
         if (args[0] == "weight-file") {
           if (args.size() != 2) {
-            UserMessage::Add("One argument should be supplied for weight-file");
+        	  std::cerr << "One argument should be supplied for weight-file";
             return false;
           }
           ScoreComponentCollection extraWeights;
           if (!extraWeights.Load(args[1])) {
-            UserMessage::Add("Unable to load weights from " + args[1]);
+        	  std::cerr << "Unable to load weights from " << args[1];
             return false;
           }
           m_weightSetting[ currentId ]->PlusEquals(extraWeights);

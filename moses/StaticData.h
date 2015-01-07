@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <utility>
 #include <fstream>
 #include <string>
-#include "UserMessage.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -698,7 +697,7 @@ public:
 
     // model must support alternate weight settings
     if (!GetHasAlternateWeightSettings()) {
-      UserMessage::Add("Warning: Input specifies weight setting, but model does not support alternate weight settings.");
+      std::cerr << "Warning: Input specifies weight setting, but model does not support alternate weight settings.";
       return;
     }
 
@@ -709,10 +708,8 @@ public:
 
     // if not found, resort to default
     if (i == m_weightSetting.end()) {
-      std::stringstream strme;
-      strme << "Warning: Specified weight setting " << settingName
+      std::cerr << "Warning: Specified weight setting " << settingName
             << " does not exist in model, using default weight setting instead";
-      UserMessage::Add(strme.str());
       i = m_weightSetting.find( "default" );
       m_currentWeightSetting = "default";
     }

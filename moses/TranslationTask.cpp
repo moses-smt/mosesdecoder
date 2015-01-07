@@ -60,10 +60,12 @@ void TranslationTask::Run()
 	switch (staticData.IsChart())
 	{
 	case false:
+		// phrase-based
 		manager = new Manager(*m_source);
 		break;
 	case true:
 	    if (staticData.UseS2TDecoder()) {
+	      // various syntax models by Phul Williams
 	      S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
 	      if (algorithm == RecursiveCYKPlus) {
 	        typedef Syntax::S2T::EagerParserCallback Callback;
@@ -78,9 +80,11 @@ void TranslationTask::Run()
 	      }
 	    }
 	    else if (staticData.GetSearchAlgorithm() == ChartIncremental) {
+	    	// Ken's incremental decoding
 			manager = new Incremental::Manager(*m_source);
 		}
 		else {
+			// original SCFG manager
 			manager = new ChartManager(*m_source);
 		}
 		break;
