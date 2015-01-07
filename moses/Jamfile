@@ -65,6 +65,13 @@ if [ option.get "with-mm" : no : yes ] = yes
   alias mmlib ;
 }
 
+local with-vw = [ option.get "with-vw" ] ;
+if $(with-vw) {
+  alias vwfiles : [ glob FF/VW/*.cpp ] ;
+} else {
+  alias vwfiles ;
+}
+
 lib moses :
 [ glob 
   *.cpp
@@ -83,7 +90,7 @@ lib moses :
   FF/*.cpp
   FF/bilingual-lm/*.cpp
   FF/OSM-Feature/*.cpp
-  FF/VW/*.cpp
+  vwfiles
   FF/LexicalReordering/*.cpp
   PP/*.cpp
 : #exceptions
