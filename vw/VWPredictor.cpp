@@ -66,7 +66,7 @@ float VWPredictor::Predict(const StringPiece &label)
   m_ex->set_label(label.as_string());
   m_isFirstSource = true;
   m_isFirstTarget = true;
-  float loss = m_ex->predict();
+  float loss = m_ex->predict_partial();
   if (DEBUG) std::cerr << "VW :: Predicted loss: " << loss << "\n";
   m_ex->remns(); // remove target namespace
   return loss;
@@ -74,7 +74,7 @@ float VWPredictor::Predict(const StringPiece &label)
 
 void VWPredictor::AddFeature(const StringPiece &name, float value)
 {
-  if (DEBUG) std::cerr << "VW :: Adding feature: " << name.as_string() << "\n";
+  if (DEBUG) std::cerr << "VW :: Adding feature: " << EscapeSpecialChars(name.as_string()) << ":" << value << "\n";
   m_ex->addf(EscapeSpecialChars(name.as_string()), value);
 }
 
