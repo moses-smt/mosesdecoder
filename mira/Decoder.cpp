@@ -229,7 +229,7 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
   for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
        p != nBestList.end(); ++p) {
     const ChartKBestExtractor::Derivation &derivation = **p;
-    featureValues.push_back(derivation.scoreBreakdown);
+    featureValues.push_back(*ChartKBestExtractor::GetOutputScoreBreakdown(derivation));
     float bleuScore, dynBleuScore, realBleuScore;
     dynBleuScore = getBleuScore(featureValues.back());
     Phrase outputPhrase = ChartKBestExtractor::GetOutputPhrase(derivation);

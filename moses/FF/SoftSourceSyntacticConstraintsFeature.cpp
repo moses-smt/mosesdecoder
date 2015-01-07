@@ -237,12 +237,6 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       FEATUREVERBOSE(2, "stackVec[ " << i << " ] : " << ntRange.GetStartPos() << " - " << ntRange.GetEndPos() << std::endl);
     }
 
-    for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignTerm().begin();
-         it!=targetPhrase.GetAlignTerm().end(); ++it) 
-    {
-      FEATUREVERBOSE(2, "alignTerm " << it->first << " " << it->second << std::endl);
-    }
-
     for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
          it!=targetPhrase.GetAlignNonTerm().end(); ++it) 
     {

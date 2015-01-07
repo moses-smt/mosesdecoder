@@ -200,6 +200,11 @@ public:
     m_scores.sparsePlusEquals(rhs.m_scores);
   }
 
+  // add only core features
+  void CorePlusEquals(const ScoreComponentCollection& rhs) {
+    m_scores.corePlusEquals(rhs.m_scores);
+  }
+
   void PlusEquals(const FVector& scores) {
     m_scores += scores;
   }
