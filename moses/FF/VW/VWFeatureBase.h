@@ -32,15 +32,14 @@ class VWFeatureBase : public StatelessFeatureFunction
                   , const StackVec *stackVec
                   , ScoreComponentCollection &scoreBreakdown
                   , ScoreComponentCollection *estimatedFutureScore = NULL) const {}
-
     void EvaluateTranslationOptionListWithSourceContext(const InputType &input
                   , const TranslationOptionList &translationOptionList) const {}
-
     void EvaluateWhenApplied(const Hypothesis& hypo,
                   ScoreComponentCollection* accumulator) const {}
     void EvaluateWhenApplied(const ChartHypothesis &hypo,
                        ScoreComponentCollection* accumulator) const {}
 
+                       
     // Common parameters for classifier features, both source and target features
     virtual void SetParameter(const std::string& key, const std::string& value)
     {
