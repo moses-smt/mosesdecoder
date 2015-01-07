@@ -5,6 +5,14 @@
 
 namespace Moses
 {
+ 
+// Inherit from this for source-dependent classifier features. They will
+// automatically register with the classifier class named VW0 or one or more
+// names specified by the used-by=name1,name2,... parameter.
+//
+// The classifier gets a full list by calling
+// VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription())
+
   
 class VWFeatureSource : public VWFeatureBase
 {
@@ -13,10 +21,7 @@ class VWFeatureSource : public VWFeatureBase
       : VWFeatureBase(line, true)
     {}
     
-    virtual void operator()(const InputType &input
-                            , const InputPath &inputPath
-                            , const WordsRange &sourceRange
-                            , Discriminative::Classifier *classifier) const = 0;
+    // Gets its pure virtual functions from VWFeatureBase
     
     virtual void operator()(const InputType &input
                             , const InputPath &inputPath

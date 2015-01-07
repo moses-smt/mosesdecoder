@@ -6,6 +6,13 @@
 namespace Moses
 {
   
+// Inherit from this for target-dependent classifier features. They will
+// automatically register with the classifier class named VW0 or one or more
+// names specified by the used-by=name1,name2,... parameter.
+//
+// The classifier gets a full list by calling
+// VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription())
+  
 class VWFeatureTarget : public VWFeatureBase
 {
   public:
@@ -13,10 +20,7 @@ class VWFeatureTarget : public VWFeatureBase
       : VWFeatureBase(line, false)
     {}
     
-    virtual void operator()(const InputType &input
-                            , const InputPath &inputPath
-                            , const TargetPhrase &targetPhrase
-                            , Discriminative::Classifier *classifier) const = 0;
+    // Gets its pure virtual functions from VWFeatureBase
     
     virtual void operator()(const InputType &input
                             , const InputPath &inputPath
