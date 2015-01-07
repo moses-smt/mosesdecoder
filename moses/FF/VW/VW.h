@@ -85,6 +85,9 @@ public:
       // TODO handle training somehow
     }
 
+    if (!m_train)
+      m_predictorFactory->Release(static_cast<Discriminative::VWPredictor *>(classifier));
+
     (*m_normalizer)(losses);
 
     for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
