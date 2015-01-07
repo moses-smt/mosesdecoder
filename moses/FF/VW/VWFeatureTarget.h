@@ -10,7 +10,7 @@ namespace Moses
 // automatically register with the classifier class named VW0 or one or more
 // names specified by the used-by=name1,name2,... parameter.
 //
-// The classifier get a full list by calling
+// The classifier gets a full list by calling
 // VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription())
   
 class VWFeatureTarget : public VWFeatureBase
