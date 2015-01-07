@@ -13,10 +13,10 @@
 namespace Moses
 {
 
-class VWFeatureDummy : public StatelessFeatureFunction
+class VW : public StatelessFeatureFunction
 {
 public:
-  VWFeatureDummy(const std::string &line)
+  VW(const std::string &line)
     :StatelessFeatureFunction(1, line), m_train(false)
   {
     ReadParameters();

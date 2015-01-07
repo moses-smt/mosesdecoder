@@ -64,7 +64,7 @@
 #include "moses/Syntax/RuleTableFF.h"
 
 #ifdef HAVE_VW
-#include "moses/FF/VW/VWFeatureDummy.h"
+#include "moses/FF/VW/VW.h"
 #include "moses/FF/VW/VWFeatureBagOfWords.h"
 #endif
 
@@ -238,7 +238,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonPT);
   
 #ifdef HAVE_VW
-  MOSES_FNAME(VWFeatureDummy);
+  MOSES_FNAME(VW);
   MOSES_FNAME(VWFeatureBagOfWords);
 #endif
 

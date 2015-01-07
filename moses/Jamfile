@@ -90,7 +90,6 @@ lib moses :
   FF/*.cpp
   FF/bilingual-lm/*.cpp
   FF/OSM-Feature/*.cpp
-  vwfiles
   FF/LexicalReordering/*.cpp
   PP/*.cpp
 : #exceptions
@@ -98,7 +97,7 @@ lib moses :
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
-]
+] vwfiles 
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
 
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
