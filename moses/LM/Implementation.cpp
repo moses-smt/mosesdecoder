@@ -280,7 +280,7 @@ FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis&
 
         // get prefixScore and finalizedScore
         prefixScore = prevState->GetPrefixScore();
-        finalizedScore = prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0] - prefixScore;
+        finalizedScore = -prefixScore;
 
         // get language model state
         delete lmState;
@@ -308,13 +308,10 @@ FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis&
           updateChartScore( &prefixScore, &finalizedScore, GetValueGivenState(contextFactor, *lmState).score, ++wordPos );
         }
 
+        finalizedScore -= prevState->GetPrefixScore();
+
         // check if we are dealing with a large sub-phrase
         if (subPhraseLength > GetNGramOrder() - 1) {
-          // add its finalized language model score
-          finalizedScore +=
-            prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0] // full score
-            - prevState->GetPrefixScore();                              // - prefix score
-
           // copy language model state
           delete lmState;
           lmState = NewState( prevState->GetRightContext() );
@@ -337,15 +334,16 @@ FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis&
     }
   }
 
-  // assign combined score to score breakdown
+  // add combined score to score breakdown
   if (OOVFeatureEnabled()) {
     vector<float> scores(2);
-    scores[0] = prefixScore + finalizedScore;
-    scores[1] = out->GetScoresForProducer(this)[1];
-    out->Assign(this, scores);
+    scores[0] = prefixScore + finalizedScore - hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0];
+    // scores[1] = out->GetScoresForProducer(this)[1];
+    scores[1] = 0;
+    out->PlusEquals(this, scores);
   }
   else {
-    out->Assign(this, prefixScore + finalizedScore);
+    out->PlusEquals(this, prefixScore + finalizedScore - hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0]);
   }
 
   ret->Set(prefixScore, lmState);
