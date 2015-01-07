@@ -220,7 +220,9 @@ protected:
   void LoadNonTerminals();
 
   //! load decoding steps
-  bool LoadDecodeGraphs();
+  void LoadDecodeGraphs();
+  void LoadDecodeGraphsOld(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans);
+  void LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans);
 
   void NoCache();
 
@@ -612,9 +614,6 @@ public:
     return m_continuePartialTranslation;
   }
 
-  void ReLoadParameter();
-  void ReLoadBleuScoreFeatureParameter(float weight);
-
   Parameter* GetParameter() {
     return m_parameter;
   }
@@ -723,7 +722,6 @@ public:
   }
 
   float GetWeightWordPenalty() const;
-  float GetWeightUnknownWordPenalty() const;
 
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;
