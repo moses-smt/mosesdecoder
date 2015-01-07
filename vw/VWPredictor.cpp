@@ -1,6 +1,9 @@
+#include <iostream>
+
 #include "Classifier.h"
 #include "vw.h"
 #include "ezexample.h"
+#include "../moses/Util.h"
 
 namespace Discriminative {
 
@@ -33,6 +36,7 @@ void VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float valu
     m_isFirstSource = false;
     m_ex->clear_features(); // removes all namespaces along with features
     m_ex->addns('s');
+    if (DEBUG) std::cerr << "VW :: Setting source namespace\n";
   }
   AddFeature(name, value); // namespace 's' is set up, add the feature
 }
@@ -47,6 +51,7 @@ void VWPredictor::AddLabelDependentFeature(const StringPiece &name, float value)
     // the first target-side feature => create namespace 't'
     m_isFirstTarget = false;
     m_ex->addns('t');
+    if (DEBUG) std::cerr << "VW :: Setting target namespace\n";
   }
   AddFeature(name, value);
 }
@@ -62,12 +67,14 @@ float VWPredictor::Predict(const StringPiece &label)
   m_isFirstSource = true;
   m_isFirstTarget = true;
   float loss = m_ex->predict();
+  if (DEBUG) std::cerr << "VW :: Predicted loss: " << loss << "\n";
   m_ex->remns(); // remove target namespace
   return loss;
 }
 
 void VWPredictor::AddFeature(const StringPiece &name, float value)
 {
+  if (DEBUG) std::cerr << "VW :: Adding feature: " << name.as_string() << "\n";
   m_ex->addf(EscapeSpecialChars(name.as_string()), value);
 }
 

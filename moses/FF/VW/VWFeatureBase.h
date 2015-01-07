@@ -14,7 +14,11 @@ class VWFeatureBase : public StatelessFeatureFunction
   public:
     VWFeatureBase(const std::string &line, bool isSource = true)
       : StatelessFeatureFunction(0, line), m_usedBy(1, "VW0"), m_isSource(isSource)
-    { }
+    { 
+      // defaults
+      m_sourceFactors.push_back(0);
+      m_targetFactors.push_back(0);
+    }
 
     bool IsUseable(const FactorMask &mask) const {
       return true;

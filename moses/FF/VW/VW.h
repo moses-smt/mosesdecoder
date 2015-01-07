@@ -25,6 +25,11 @@ public:
     } else {
       m_predictorFactory = new Discriminative::VWPredictorFactory(m_modelPath, m_vwOptions);
     }
+
+    if (! m_normalizer) {
+      VERBOSE(1, "VW :: No loss function specified, normalizing using softmax.\n");
+      m_normalizer = (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer();
+    }
   }
 
   bool IsUseable(const FactorMask &mask) const {
@@ -53,7 +58,7 @@ public:
       : (Discriminative::Classifier *)m_predictorFactory->Acquire();
     
     UTIL_THROW_IF2(translationOptionList.size() == 0, "There are not translation options.");
-    VERBOSE(2, "VW :: Evaluating translation options");
+    VERBOSE(2, "VW :: Evaluating translation options\n");
     
     const std::vector<VWFeatureBase*>& sourceFeatures = VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
     
@@ -87,7 +92,7 @@ public:
       TranslationOption &transOpt = **iterTransOpt;
       
       std::vector<float> newScores(m_numScoreComponents);
-      newScores[0] = *iterLoss;
+      newScores[0] = TransformScore(*iterLoss);
     
       ScoreComponentCollection &scoreBreakDown = transOpt.GetScoreBreakdown();
       scoreBreakDown.PlusEquals(this, newScores);
@@ -109,7 +114,7 @@ public:
   {
     if (key == "train") {
       m_train = Scan<bool>(value);
-    } else if (key == "model") {
+    } else if (key == "path") {
       m_modelPath = value;
     } else if (key == "vw-options") {
       m_vwOptions = value;
@@ -131,9 +136,9 @@ private:
   bool m_train; // false means predict
   std::string m_modelPath;
   std::string m_vwOptions;
-  Discriminative::Normalizer *m_normalizer;
-  Discriminative::Classifier *m_trainer;
-  Discriminative::VWPredictorFactory *m_predictorFactory;
+  Discriminative::Normalizer *m_normalizer = NULL;
+  Discriminative::Classifier *m_trainer = NULL;
+  Discriminative::VWPredictorFactory *m_predictorFactory = NULL;
 };
 
 }
