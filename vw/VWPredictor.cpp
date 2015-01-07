@@ -68,7 +68,7 @@ float VWPredictor::Predict(const StringPiece &label)
 
 void VWPredictor::AddFeature(const StringPiece &name, float value)
 {
-  m_ex->addf(name.as_string(), value);
+  m_ex->addf(EscapeSpecialChars(name.as_string()), value);
 }
 
 void VWPredictor::Finish()
