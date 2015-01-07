@@ -65,7 +65,7 @@ public:
 
 // some of VW settings are hard-coded because they are always needed in our scenario
 // (e.g. quadratic source X target features)
-const std::string VW_OPTIONS = " --hash all --noconstant -q st ";
+const std::string VW_DEFAULT_OPTIONS = " --hash all --noconstant -q st -t --csoaa_ldf s ";
 
 /** 
  * Produce VW training file (does not use the VW library!)

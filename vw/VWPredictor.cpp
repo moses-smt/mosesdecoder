@@ -8,7 +8,7 @@ using namespace std;
 
 VWPredictor::VWPredictor(const string &modelFile, const string &vwOptions)
 {
-  m_VWInstance = VW::initialize(vwOptions + " -i " + modelFile + " -t --hash all --noconstant -b 26 -q st --csoaa_ldf s");
+  m_VWInstance = VW::initialize(VW_DEFAULT_OPTIONS + " -i " + modelFile + vwOptions);
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
   m_isFirstSource = m_isFirstTarget = true;
