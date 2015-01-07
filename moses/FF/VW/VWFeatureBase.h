@@ -115,7 +115,6 @@ class VWFeatureBase : public StatelessFeatureFunction
     void ParseUsedBy(const std::string &usedBy) {
       m_usedBy.clear();
       Tokenize(m_usedBy, usedBy, ",");
-      UpdateRegister();
     }
     
     std::vector<std::string> m_usedBy;
