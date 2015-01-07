@@ -139,6 +139,7 @@ protected:
 
 private:
   VWPredictor(vw * instance, int index); // instantiation by VWPredictorFactory
+  const static bool DEBUG = true;
 };
   
 /**
