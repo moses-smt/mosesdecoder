@@ -1,24 +1,24 @@
 #pragma once
 
 #include <string>
-#include "VWFeatureBase.h"
+#include "VWFeatureSource.h"
 
 namespace Moses
 {
   
-class VWFeatureBagOfWords : public VWFeatureBase
+class VWFeatureBagOfWords : public VWFeatureSource
 {
   public:
     VWFeatureBagOfWords(const std::string &line)
-      : VWFeatureBase(line)
+      : VWFeatureSource(line)
     {}
   
     void operator()(const InputType &input
                   , const InputPath &inputPath
-                  , const TargetPhrase &targetPhrase
+                  , const WordsRange &sourceRange
                   , Discriminative::Classifier *classifier) const
     {
-      std::cerr << GetScoreProducerDescription() << " got TargetPhrase: " << targetPhrase << std::endl;
+      std::cerr << GetScoreProducerDescription() << " got Phrase: " << sourceRange << std::endl;
     }
 };
 

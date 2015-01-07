@@ -8,8 +8,6 @@
 #include "Classifier.h"
 #include "VWFeatureBase.h"
 
-#include "VWFeatureBase.h"
-
 namespace Moses
 {
 
@@ -51,7 +49,18 @@ public:
     Discriminative::Classifier *classifier = m_train 
       ? m_trainer 
       : (Discriminative::Classifier *)m_predictorFactory->Acquire();
-    const std::vector<VWFeatureBase*>& features = VWFeatureBase::GetFeatures(GetScoreProducerDescription());
+    
+    UTIL_THROW_IF2(translationOptionList.size() == 0, "There are not translation options.");
+    
+    const std::vector<VWFeatureBase*>& sourceFeatures = VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
+    
+    const WordsRange &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
+    const InputPath  &inputPath   = translationOptionList.Get(0)->GetInputPath();
+    
+    for(size_t i = 0; i < sourceFeatures.size(); ++i) 
+        (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
+
+    const std::vector<VWFeatureBase*>& targetFeatures = VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
     std::vector<float> losses(translationOptionList.size());
 
@@ -61,8 +70,8 @@ public:
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
      
       TranslationOption &transOpt = **iterTransOpt;
-      for(size_t i = 0; i < features.size(); ++i)
-        (*features[i])(input, transOpt.GetInputPath(), transOpt.GetTargetPhrase(), classifier);
+      for(size_t i = 0; i < targetFeatures.size(); ++i)
+        (*targetFeatures[i])(input, inputPath, transOpt.GetTargetPhrase(), classifier);
 
       *iterLoss = classifier->Predict("DUMMY"); // VW does not use the label!!
       // TODO handle training somehow
