@@ -13,22 +13,8 @@ class VWFeatureBase : public StatelessFeatureFunction
 {
   public:
     VWFeatureBase(const std::string &line, bool isSource = true)
-      :StatelessFeatureFunction(0, line)
-    {
-      ReadParameters();
-
-      if(m_usedBy.empty())
-        m_usedBy.push_back("VW0");
-
-      for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
-          it != m_usedBy.end(); it++) {
-        s_features[*it].push_back(this);
-        if(isSource)
-          s_sourceFeatures[*it].push_back(this);
-        else
-          s_targetFeatures[*it].push_back(this);
-      }
-    }
+      :StatelessFeatureFunction(0, line), m_usedBy(1, "VW0")
+    { }
 
     bool IsUseable(const FactorMask &mask) const {
       return true;
@@ -54,10 +40,10 @@ class VWFeatureBase : public StatelessFeatureFunction
     void EvaluateWhenApplied(const ChartHypothesis &hypo,
                        ScoreComponentCollection* accumulator) const {}
 
-    void SetParameter(const std::string& key, const std::string& value)
+    virtual void SetParameter(const std::string& key, const std::string& value)
     {
       if (key == "used-by") {
-        ParseUsedBy(value);
+        ParseUsedBy(value, m_usedBy);
       } else if (key == "source-factors") {
         ParseFactorDefinition(value, m_sourceFactors);
       } else if (key == "target-factors") {
@@ -103,7 +89,16 @@ class VWFeatureBase : public StatelessFeatureFunction
     }
 
     void ParseUsedBy(const std::string &usedBy) {
+      m_usedBy.clear();
       Tokenize(m_usedBy, usedBy, ",");
+      for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
+          it != m_usedBy.end(); it++) {
+        s_features[*it].push_back(this);
+        if(isSource)
+          s_sourceFeatures[*it].push_back(this);
+        else
+          s_targetFeatures[*it].push_back(this);
+      }
     }
 
     std::vector<std::string> m_usedBy;
