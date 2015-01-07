@@ -2,6 +2,7 @@
 
 #include <string>
 #include "Classifier.h"
+#include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 
@@ -52,6 +53,10 @@ class VWFeatureBase : public StatelessFeatureFunction
     {
       if (key == "used-by") {
         ParseUsedBy(value);
+      } else if (key == "source-factors") {
+        ParseFactorDefinition(value, m_sourceFactors);
+      } else if (key == "target-factors") {
+        ParseFactorDefinition(value, m_targetFactors);
       } else {
         StatelessFeatureFunction::SetParameter(key, value);
       }
@@ -67,7 +72,16 @@ class VWFeatureBase : public StatelessFeatureFunction
       return s_features[name];
     }
 
+  protected:
+    std::vector<FactorType> m_sourceFactors, m_targetFactors;
+
   private:
+    void ParseFactorDefinition(const std::string &list, /* out */ std::vector<FactorType> &out)
+    {
+      std::vector<std::string> split = Tokenize(list, ",");
+      Scan<int>(out, split);
+    }
+
     void ParseUsedBy(const std::string &usedBy) {
       Tokenize(m_usedBy, usedBy, ",");
     }
