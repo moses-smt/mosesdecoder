@@ -84,6 +84,7 @@ protected:
 // some of VW settings are hard-coded because they are always needed in our scenario
 // (e.g. quadratic source X target features)
 const std::string VW_DEFAULT_OPTIONS = " --hash all --noconstant -q st -t --ldf_override s ";
+const std::string VW_DEFAULT_PARSER_OPTIONS = " --quiet --hash all --noconstant -q st -t --csoaa_ldf s ";
 
 /** 
  * Produce VW training file (does not use the VW library!)
@@ -128,10 +129,10 @@ public:
   friend class VWPredictorFactory;
 
 protected:
-  void AddFeature(const StringPiece &name, float value);
+  void AddFeature(const StringPiece &name, float values);
   void Finish();
 
-  ::vw *m_VWInstance;
+  ::vw *m_VWInstance, *m_VWParser;
   ::ezexample *m_ex;
   // if true, then the VW instance is owned by an external party and should NOT be
   // deleted at end; if false, then we own the VW instance and must clean up after it.
@@ -142,7 +143,8 @@ protected:
   ~VWPredictor();
 
 private:
-  VWPredictor(vw * instance, int index); // instantiation by VWPredictorFactory
+  // instantiation by VWPredictorFactory
+  VWPredictor(vw * instance, int index, const std::string &vwOption); 
 };
   
 /**

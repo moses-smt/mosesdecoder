@@ -12,16 +12,18 @@ using namespace std;
 VWPredictor::VWPredictor(const string &modelFile, const string &vwOptions)
 {
   m_VWInstance = VW::initialize(VW_DEFAULT_OPTIONS + " -i " + modelFile + vwOptions);
+  m_VWParser = VW::initialize(VW_DEFAULT_PARSER_OPTIONS + vwOptions + " --noop");
   m_sharedVwInstance = false;
-  m_ex = new ::ezexample(m_VWInstance, false);
+  m_ex = new ::ezexample(m_VWInstance, false, m_VWParser);
   m_isFirstSource = m_isFirstTarget = true;
 }
 
-VWPredictor::VWPredictor(vw *instance, int index)
+VWPredictor::VWPredictor(vw *instance, int index, const string &vwOptions)
 {
   m_VWInstance = instance;
+  m_VWParser = VW::initialize(vwOptions + " --noop");
   m_sharedVwInstance = true;
-  m_ex = new ::ezexample(m_VWInstance, false);
+  m_ex = new ::ezexample(m_VWInstance, false, m_VWParser);
   m_index = index;
   m_isFirstSource = m_isFirstTarget = true;
 }
