@@ -34,7 +34,8 @@ BinaryFileWriter::~BinaryFileWriter (){
     binfile.clear();
 }
 
-void createProbingPT(const char * phrasetable_path, const char * target_path){
+void createProbingPT(const char * phrasetable_path, const char * target_path,
+    const char * num_scores, const char * is_reordering){
     //Get basepath and create directory if missing
     std::string basepath(target_path);
     mkdir(basepath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -147,6 +148,9 @@ void createProbingPT(const char * phrasetable_path, const char * target_path){
     //Write configfile
     std::ofstream configfile;
     configfile.open((basepath + "/config").c_str());
+    configfile << API_VERSION << '\n';
     configfile << uniq_entries << '\n';
+    configfile << num_scores << '\n';
+    configfile << is_reordering << '\n';
     configfile.close();
 }

@@ -33,7 +33,6 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "util/file_piece.hh"

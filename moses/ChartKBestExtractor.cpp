@@ -124,6 +124,28 @@ Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
   return ret;
 }
 
+// Generate the score breakdown of the derivation d.
+boost::shared_ptr<ScoreComponentCollection> 
+ChartKBestExtractor::GetOutputScoreBreakdown(const Derivation &d)
+{
+  const ChartHypothesis &hypo = d.edge.head->hypothesis;
+  boost::shared_ptr<ScoreComponentCollection> scoreBreakdown(new ScoreComponentCollection());
+  scoreBreakdown->PlusEquals(hypo.GetDeltaScoreBreakdown());
+  const TargetPhrase &phrase = hypo.GetCurrTargetPhrase();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    phrase.GetAlignNonTerm().GetNonTermIndexMap();
+  for (std::size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+    const Word &word = phrase.GetWord(pos);
+    if (word.IsNonTerminal()) {
+      std::size_t nonTermInd = nonTermIndexMap[pos];
+      const Derivation &subderivation = *d.subderivations[nonTermInd];
+      scoreBreakdown->PlusEquals(*GetOutputScoreBreakdown(subderivation));
+    }
+  }
+
+  return scoreBreakdown;
+}
+
 // Generate the target tree of the derivation d.
 TreePointer ChartKBestExtractor::GetOutputTree(const Derivation &d)
 {
@@ -286,7 +308,6 @@ ChartKBestExtractor::Derivation::Derivation(const UnweightedHyperarc &e)
     boost::shared_ptr<Derivation> sub(pred.kBestList[0]);
     subderivations.push_back(sub);
   }
-  scoreBreakdown = edge.head->hypothesis.GetScoreBreakdown();
   score = edge.head->hypothesis.GetTotalScore();
 }
 
@@ -298,15 +319,14 @@ ChartKBestExtractor::Derivation::Derivation(const Derivation &d, std::size_t i)
   backPointers = d.backPointers;
   subderivations = d.subderivations;
   std::size_t j = ++backPointers[i];
-  scoreBreakdown = d.scoreBreakdown;
+  score = d.score;
   // Deduct the score of the old subderivation.
-  scoreBreakdown.MinusEquals(subderivations[i]->scoreBreakdown);
+  score -= subderivations[i]->score;
   // Update the subderivation pointer.
   boost::shared_ptr<Derivation> newSub(edge.tail[i]->kBestList[j]);
   subderivations[i] = newSub;
   // Add the score of the new subderivation.
-  scoreBreakdown.PlusEquals(subderivations[i]->scoreBreakdown);
-  score = scoreBreakdown.GetWeightedScore();
+  score += subderivations[i]->score;
 }
 
 }  // namespace Moses

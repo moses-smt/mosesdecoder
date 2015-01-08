@@ -389,40 +389,6 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
 }
 
 template<typename Parser>
-void Manager<Parser>::OutputBest(OutputCollector *collector) const
-{
-  if (!collector) {
-	return;
-  }
-
-  const Syntax::SHyperedge *best = GetBestSHyperedge();
-  const long translationId = m_source.GetTranslationId();
-
-  std::ostringstream out;
-  FixPrecision(out);
-  if (best == NULL) {
-	VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
-	if (StaticData::Instance().GetOutputHypoScore()) {
-	  out << "0 ";
-	}
-  } else {
-	if (StaticData::Instance().GetOutputHypoScore()) {
-	  out << best->score << " ";
-	}
-	Phrase yield = Syntax::GetOneBestTargetYield(*best);
-	// delete 1st & last
-	UTIL_THROW_IF2(yield.GetSize() < 2,
-		"Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-	yield.RemoveWord(0);
-	yield.RemoveWord(yield.GetSize()-1);
-	out << yield.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
-	out << '\n';
-  }
-  collector->Write(translationId, out.str());
-
-}
-
-template<typename Parser>
 void Manager<Parser>::OutputDetailedTranslationReport(
     OutputCollector *collector) const
 {

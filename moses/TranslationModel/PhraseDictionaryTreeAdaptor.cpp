@@ -13,7 +13,6 @@
 #include "moses/StaticData.h"
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
-#include "moses/UserMessage.h"
 #include "util/exception.hh"
 
 using namespace std;

@@ -1,6 +1,6 @@
 /***********************************************************************
   Moses - factored phrase-based language decoder
-  Copyright (C) 2010 University of Edinburgh
+  Copyright (C) 2011 University of Edinburgh
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -18,18 +18,40 @@
  ***********************************************************************/
 
 #pragma once
-#ifndef SAFE_GETLINE_INCLUDED_
-#define SAFE_GETLINE_INCLUDED_
 
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM, _FILE) {            \
-    _IS.getline(_LINE, _SIZE, _DELIM);                              \
-    if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear();         \
-    if (_IS.gcount() == _SIZE-1) {                                  \
-      cerr << "Line too long! Buffer overflow. Delete lines >="     \
-       << _SIZE << " chars or raise LINE_MAX_LENGTH in " << _FILE   \
-       << endl;                                                     \
-      exit(1);                                                      \
-    }                                                               \
-  }
+#include <vector>
+#include "moses/ChartRuleLookupManager.h"
+#include "moses/StackVec.h"
 
-#endif
+namespace Moses
+{
+class TargetPhraseCollection;
+class ChartParserCallback;
+class DottedRuleColl;
+class WordsRange;
+class OOVPT;
+
+class ChartRuleLookupManagerOOVPT : public ChartRuleLookupManager
+{
+public:
+  ChartRuleLookupManagerOOVPT(const ChartParser &parser,
+                                 const ChartCellCollectionBase &cellColl,
+                                 const OOVPT &oovPt);
+
+  ~ChartRuleLookupManagerOOVPT();
+
+  virtual void GetChartRuleCollection(
+    const InputPath &inputPath,
+    size_t last,
+    ChartParserCallback &outColl);
+
+private:
+  void CreateTargetPhrases(const Word &sourceWord, TargetPhraseCollection &tpColl) const;
+
+  StackVec m_stackVec;
+  std::vector<TargetPhraseCollection*> m_tpColl;
+  const OOVPT &m_oovPt;
+};
+
+}  // namespace Moses
+

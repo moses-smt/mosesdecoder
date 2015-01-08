@@ -143,7 +143,7 @@ vector< vector<const Word*> > MosesDecoder::runDecoder(const std::string& source
     string filename)
 {
   // run the decoder
-  m_manager = new Moses::Manager(*m_sentence, search);
+  m_manager = new Moses::Manager(*m_sentence);
   m_manager->Decode();
   TrellisPathList nBestList;
   m_manager->CalcNBest(nBestSize, nBestList, distinct);
@@ -229,7 +229,7 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
   for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
        p != nBestList.end(); ++p) {
     const ChartKBestExtractor::Derivation &derivation = **p;
-    featureValues.push_back(derivation.scoreBreakdown);
+    featureValues.push_back(*ChartKBestExtractor::GetOutputScoreBreakdown(derivation));
     float bleuScore, dynBleuScore, realBleuScore;
     dynBleuScore = getBleuScore(featureValues.back());
     Phrase outputPhrase = ChartKBestExtractor::GetOutputPhrase(derivation);

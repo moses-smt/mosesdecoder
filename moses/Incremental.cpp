@@ -329,7 +329,7 @@ void Manager::OutputNBestList(OutputCollector *collector, const std::vector<sear
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, outputFactorOrder, false);
     out << " ||| ";
-    OutputAllFeatureScores(features, out);
+    features.OutputAllFeatureScores(out);
     out << " ||| " << i->GetScore() << '\n';
   }
   out << std::flush;

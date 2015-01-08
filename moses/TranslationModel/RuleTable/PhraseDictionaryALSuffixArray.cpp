@@ -12,7 +12,6 @@
 #include "moses/InputFileStream.h"
 #include "moses/TypeDef.h"
 #include "moses/StaticData.h"
-#include "moses/UserMessage.h"
 #include "Loader.h"
 #include "LoaderFactory.h"
 #include "util/exception.hh"

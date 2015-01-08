@@ -269,6 +269,21 @@ public:
   const TranslationOption &GetTranslationOption() const {
     return m_transOpt;
   }
+
+  void OutputAlignment(std::ostream &out) const;
+  static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
+  static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
+
+  void OutputInput(std::ostream& os) const;
+  static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
+
+  void OutputBestSurface(std::ostream &out, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors) const;
+  void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
+                     char reportSegmentation, bool reportAllFactors) const;
+
+  // creates a map of TARGET positions which should be replaced by word using placeholder
+  std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
+
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

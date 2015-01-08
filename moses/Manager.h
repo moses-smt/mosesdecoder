@@ -42,6 +42,7 @@ namespace Moses
 class SentenceStats;
 class TrellisPath;
 class TranslationOptionCollection;
+class LatticeMBRSolution;
 
 /** Used to output the search graph */
 struct SearchGraphNode {
@@ -128,6 +129,9 @@ protected:
 
   // output
   // nbest
+  mutable std::ostringstream m_latticeNBestOut;
+  mutable std::ostringstream m_alignmentOut;
+
   void OutputNBest(std::ostream& out
                    , const Moses::TrellisPathList &nBestList
                    , const std::vector<Moses::FactorType>& outputFactorOrder
@@ -144,8 +148,10 @@ protected:
 
   void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId) const;
 
+  void OutputAlignment(std::ostringstream &out, const TrellisPath &path) const;
+
 public:
-  Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
+  Manager(InputType const& source);
   ~Manager();
   const  TranslationOptionCollection* getSntTranslationOptions();
 
@@ -157,9 +163,14 @@ public:
   void PrintAllDerivations(long translationId, std::ostream& outputStream) const;
   void printDivergentHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase*> & remainingPhrases, float remainingScore , std::ostream& outputStream) const;
   void printThisHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase* > & remainingPhrases, float remainingScore , std::ostream& outputStream) const;
-  void GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo );
+  void GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) const;
   void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
   int GetNextHypoId();
+
+  void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId) const;
+  void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
+                      char reportSegmentation, bool reportAllFactors, std::ostream& out) const;
+  void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,char reportSegmentation, bool reportAllFactors, std::ostream &out) const;
 
 #ifdef HAVE_PROTOBUF
   void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;

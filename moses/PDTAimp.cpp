@@ -174,9 +174,7 @@ void PDTAimp::Create(const std::vector<FactorType> &input
 //		m_dict->Read(filePath);
   bool res=m_dict->Read(filePath);
   if (!res) {
-    std::stringstream strme;
-    strme << "bin ttable was read in a wrong way\n";
-    UserMessage::Add(strme.str());
+	std::cerr << "bin ttable was read in a wrong way\n";
     exit(1);
   }
 }

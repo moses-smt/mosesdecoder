@@ -24,12 +24,6 @@ protected:
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
 
-  void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features,
-							  std::ostream &out) const;
-  void OutputFeatureScores( std::ostream& out,
-							const ScoreComponentCollection &features,
-							const FeatureFunction *ff,
-							std::string &lastName ) const;
   void OutputSurface(std::ostream &out,
 		  	  	  	  const Phrase &phrase,
 		  	  	  	  const std::vector<FactorType> &outputFactorOrder,
@@ -52,6 +46,9 @@ protected:
   }
 
 public:
+  virtual ~BaseManager()
+  {}
+
   //! the input sentence being decoded
   const InputType& GetSource() const {
     return m_source;
@@ -59,6 +56,7 @@ public:
 
   virtual void Decode() = 0;
   // outputs
+  virtual void OutputBest(OutputCollector *collector) const = 0;
   virtual void OutputNBest(OutputCollector *collector) const = 0;
   virtual void OutputLatticeSamples(OutputCollector *collector) const = 0;
   virtual void OutputAlignment(OutputCollector *collector) const = 0;
@@ -66,9 +64,14 @@ public:
   virtual void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const = 0;
   virtual void OutputWordGraph(OutputCollector *collector) const = 0;
   virtual void OutputSearchGraph(OutputCollector *collector) const = 0;
+  virtual void OutputUnknowns(OutputCollector *collector) const = 0;
   virtual void OutputSearchGraphSLF() const = 0;
   virtual void OutputSearchGraphHypergraph() const = 0;
 
+  /***
+   * to be called after processing a sentence
+   */
+  virtual void CalcDecoderStatistics() const = 0;
 
 };
 

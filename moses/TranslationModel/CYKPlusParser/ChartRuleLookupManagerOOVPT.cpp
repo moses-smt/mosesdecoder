@@ -18,7 +18,7 @@
  ***********************************************************************/
 
 #include <iostream>
-#include "ChartRuleLookupManagerSkeleton.h"
+#include "ChartRuleLookupManagerOOVPT.h"
 #include "DotChartInMemory.h"
 
 #include "moses/Util.h"
@@ -29,77 +29,76 @@
 #include "moses/NonTerminal.h"
 #include "moses/ChartCellCollection.h"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
-#include "moses/TranslationModel/SkeletonPT.h"
+#include "moses/TranslationModel/OOVPT.h"
 
 using namespace std;
 
 namespace Moses
 {
 
-ChartRuleLookupManagerSkeleton::ChartRuleLookupManagerSkeleton(
+ChartRuleLookupManagerOOVPT::ChartRuleLookupManagerOOVPT(
   const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
-  const SkeletonPT &skeletonPt)
+  const OOVPT &oovPt)
   : ChartRuleLookupManager(parser, cellColl)
-  , m_skeletonPT(skeletonPt)
+  , m_oovPt(oovPt)
 {
-  cerr << "starting ChartRuleLookupManagerSkeleton" << endl;
+  cerr << "starting ChartRuleLookupManagerOOVPT" << endl;
 }
 
-ChartRuleLookupManagerSkeleton::~ChartRuleLookupManagerSkeleton()
+ChartRuleLookupManagerOOVPT::~ChartRuleLookupManagerOOVPT()
 {
   RemoveAllInColl(m_tpColl);
 }
 
-void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
+void ChartRuleLookupManagerOOVPT::GetChartRuleCollection(
   const InputPath &inputPath,
   size_t last,
   ChartParserCallback &outColl)
 {
+  const WordsRange &range = inputPath.GetWordsRange();
+
   //m_tpColl.push_back(TargetPhraseCollection());
   //TargetPhraseCollection &tpColl = m_tpColl.back();
   TargetPhraseCollection *tpColl = new TargetPhraseCollection();
   m_tpColl.push_back(tpColl);
 
-  const WordsRange &range = inputPath.GetWordsRange();
-
   if (range.GetNumWordsCovered() == 1) {
     const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
     const Word &sourceWord = sourceWordLabel.GetLabel();
-    TargetPhrase *tp = CreateTargetPhrase(sourceWord);
-    tpColl->Add(tp);
+    CreateTargetPhrases(sourceWord, *tpColl);
   }
 
   outColl.Add(*tpColl, m_stackVec, range);
 }
 
-TargetPhrase *ChartRuleLookupManagerSkeleton::CreateTargetPhrase(const Word &sourceWord) const
+void ChartRuleLookupManagerOOVPT::CreateTargetPhrases(const Word &sourceWord, TargetPhraseCollection &tpColl) const
 {
-  // create a target phrase from the 1st word of the source, prefix with 'ChartManagerSkeleton:'
-  string str = sourceWord.GetFactor(0)->GetString().as_string();
-  str = "ChartManagerSkeleton:" + str;
+  const StaticData &staticData = StaticData::Instance();
+    const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
+    UnknownLHSList::const_iterator iterLHS;
+    for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
+      const string &targetLHSStr = iterLHS->first;
+      float prob = iterLHS->second;
 
-  TargetPhrase *tp = new TargetPhrase(&m_skeletonPT);
-  Word &word = tp->AddWord();
-  word.CreateFromString(Output, m_skeletonPT.GetOutput(), str, false);
+      // lhs
+      //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
+      Word *targetLHS = new Word(true);
 
-  // create hiero-style non-terminal for LHS
-  Word *targetLHS = new Word();
-  targetLHS->CreateFromString(Output, m_skeletonPT.GetOutput(), "X", true);
-  tp->SetTargetLHS(targetLHS);
+      targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
+      UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
-  // word alignement
-  tp->SetAlignmentInfo("0-0");
+      // add to dictionary
+      TargetPhrase *targetPhrase = m_oovPt.CreateTargetPhrase(sourceWord);
 
-  // score for this phrase table
-  vector<float> scores(m_skeletonPT.GetNumScoreComponents(), 1.3);
-  tp->GetScoreBreakdown().PlusEquals(&m_skeletonPT, scores);
+      //targetPhrase->EvaluateInIsolation(*unksrc);
+      targetPhrase->SetTargetLHS(targetLHS);
+      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.PrintNBestTrees() || staticData.GetTreeStructure() != NULL) {
+        targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
+      }
 
-  // score of all other ff when this rule is being loaded
-  Phrase sourcePhrase;
-  sourcePhrase.AddWord(sourceWord);
-  //tp->Evaluate(sourcePhrase, m_skeletonPT.GetFeaturesToApply());
-
-  return tp;
+      // chart rule
+      tpColl.Add(targetPhrase);
+    }
 }
 }  // namespace Moses

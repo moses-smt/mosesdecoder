@@ -102,6 +102,11 @@ private:
     void OutputBestHypo(OutputCollector *collector, search::Applied applied, long translationId) const;
     void OutputBestNone(OutputCollector *collector, long translationId) const;
 
+    void OutputUnknowns(OutputCollector *collector) const
+    {}
+    void CalcDecoderStatistics() const
+    {}
+
 };
 
 // Just get the phrase.

@@ -24,6 +24,7 @@ NTLabel m_value_nt;
 std::vector<TreePointer> m_children;
 bool m_isTerminal;
 public:
+    InternalTree(const std::string & line, size_t start, size_t len, const bool terminal);
     InternalTree(const std::string & line, const bool terminal = false);
     InternalTree(const InternalTree & tree):
         m_value(tree.m_value),

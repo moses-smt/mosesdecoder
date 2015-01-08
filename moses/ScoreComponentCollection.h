@@ -200,6 +200,11 @@ public:
     m_scores.sparsePlusEquals(rhs.m_scores);
   }
 
+  // add only core features
+  void CorePlusEquals(const ScoreComponentCollection& rhs) {
+    m_scores.corePlusEquals(rhs.m_scores);
+  }
+
   void PlusEquals(const FVector& scores) {
     m_scores += scores;
   }
@@ -428,6 +433,11 @@ public:
   void Merge(const ScoreComponentCollection &other) {
     m_scores.merge(other.m_scores);
   }
+
+  void OutputAllFeatureScores(std::ostream &out) const;
+  void OutputFeatureScores( std::ostream& out
+                            , const Moses::FeatureFunction *ff
+                            , std::string &lastName ) const;
 
 #ifdef MPI_ENABLE
 public:
