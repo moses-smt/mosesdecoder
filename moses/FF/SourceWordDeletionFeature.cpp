@@ -6,7 +6,6 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
-#include "moses/UserMessage.h"
 #include "moses/Util.h"
 
 #include "util/string_piece_hash.hh"

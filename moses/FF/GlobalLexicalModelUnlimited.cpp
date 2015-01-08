@@ -2,7 +2,6 @@
 #include <fstream>
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
-#include "moses/UserMessage.h"
 #include "moses/Hypothesis.h"
 #include "util/string_piece_hash.hh"
 
@@ -28,8 +27,8 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
     // read optional punctuation and bias specifications
     if (spec.size() > 0) {
       if (spec.size() != 2 && spec.size() != 3 && spec.size() != 4 && spec.size() != 6) {
-        UserMessage::Add("Format of glm feature is <factor-src>-<factor-tgt> [ignore-punct] [use-bias] "
-                         "[context-type] [filename-src filename-tgt]");
+    	  std::cerr << "Format of glm feature is <factor-src>-<factor-tgt> [ignore-punct] [use-bias] "
+                       <<  "[context-type] [filename-src filename-tgt]";
         //return false;
       }
 
@@ -49,7 +48,7 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
       factors = Tokenize(modelSpec[i],"-");
 
     if ( factors.size() != 2 ) {
-      UserMessage::Add("Wrong factor definition for global lexical model unlimited: " + modelSpec[i]);
+    	std::cerr << "Wrong factor definition for global lexical model unlimited: " << modelSpec[i];
       //return false;
     }
 
@@ -61,7 +60,10 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
     if (restricted) {
       cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
       if (!glmu->Load(filenameSource, filenameTarget)) {
-        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+    	  std::cerr << "Unable to load word lists for word translation feature from files "
+    			  << filenameSource
+    			  << " and "
+    			  << filenameTarget;
         //return false;
       }
     }

@@ -74,8 +74,6 @@ class IOWrapper
 protected:
 
   const std::vector<Moses::FactorType>	*m_inputFactorOrder;
-  const std::vector<Moses::FactorType>	*m_outputFactorOrder;
-  Moses::FactorMask	m_inputFactorUsed;
   std::string m_inputFilePath;
   Moses::InputFileStream *m_inputFile;
   std::istream *m_inputStream;
@@ -100,22 +98,6 @@ protected:
 
   bool m_surpressSingleBestOutput;
 
-  // CHART
-  typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
-
-  void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
-  void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
-  void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
-  void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
-
-  void ReconstructApplicationContext(const Moses::ChartHypothesis &hypo,
-                                     const Moses::Sentence &sentence,
-                                     ApplicationContext &context);
-  void ReconstructApplicationContext(const search::Applied *applied,
-                                     const Moses::Sentence &sentence,
-                                     ApplicationContext &context);
-  void WriteApplicationContext(std::ostream &out,
-                               const ApplicationContext &context);
 
 public:
   IOWrapper();
@@ -123,8 +105,6 @@ public:
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
   bool ReadInput(Moses::InputTypeEnum inputType, Moses::InputType*& source);
-
-  void Backtrack(const Moses::Hypothesis *hypo);
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector;
@@ -161,11 +141,6 @@ public:
   Moses::OutputCollector *GetDetailTreeFragmentsOutputCollector() {
     return m_detailTreeFragmentsOutputCollector;
   }
-
-
-  // CHART
-
-  // phrase-based
 
   // post editing
   std::ifstream *spe_src, *spe_trg, *spe_aln;

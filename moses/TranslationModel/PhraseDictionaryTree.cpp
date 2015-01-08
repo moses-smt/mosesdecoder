@@ -320,9 +320,7 @@ int PDTimp::Read(const std::string& fn)
 
   if (NeedAlignmentInfo() && !HasAlignmentInfo()) {
     //    ERROR
-    std::stringstream strme;
-    strme << "You are asking for word alignment but the binary phrase table does not contain any alignment info. Please check if you had generated the correct phrase table with word alignment (.wa)\n";
-    UserMessage::Add(strme.str());
+	std::cerr << "You are asking for word alignment but the binary phrase table does not contain any alignment info. Please check if you had generated the correct phrase table with word alignment (.wa)\n";
     return false;
   }
 

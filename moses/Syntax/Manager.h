@@ -32,6 +32,9 @@ class Manager : public BaseManager
   void OutputSearchGraphHypergraph() const {}
   void OutputSearchGraphSLF() const {}
   void OutputWordGraph(OutputCollector *collector) const {}
+  void OutputDetailedTranslationReport(OutputCollector *collector) const {}
+
+  void CalcDecoderStatistics() const {}
 
   // Syntax-specific virtual functions that derived classes must implement.
   virtual void ExtractKBest(
