@@ -32,6 +32,11 @@ class VWFeatureSource : public VWFeatureBase
     virtual void SetParameter(const std::string& key, const std::string& value) {
       VWFeatureBase::SetParameter(key, value);
     }
+
+  protected:
+    inline std::string GetWord(const InputType &input, size_t pos) const {
+      return input.GetWord(pos).GetString(m_sourceFactors, false);
+    }
 };
 
 }

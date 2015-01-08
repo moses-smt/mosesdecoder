@@ -27,7 +27,7 @@ public:
     }
 
     if (! m_normalizer) {
-      VERBOSE(1, "VW :: No loss function specified, normalizing using softmax.\n");
+      VERBOSE(1, "VW :: No loss function specified, assuming logistic loss.\n");
       m_normalizer = (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer();
     }
   }
@@ -57,7 +57,9 @@ public:
       ? m_trainer 
       : (Discriminative::Classifier *)m_predictorFactory->Acquire();
     
-    UTIL_THROW_IF2(translationOptionList.size() == 0, "There are not translation options.");
+    if (translationOptionList.size() == 0)
+      return; // nothing to do
+
     VERBOSE(2, "VW :: Evaluating translation options\n");
     
     const std::vector<VWFeatureBase*>& sourceFeatures = VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());

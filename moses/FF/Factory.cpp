@@ -65,9 +65,13 @@
 
 #ifdef HAVE_VW
 #include "moses/FF/VW/VW.h"
-#include "moses/FF/VW/VWFeatureBagOfWords.h"
+#include "moses/FF/VW/VWFeatureSourceBagOfWords.h"
+#include "moses/FF/VW/VWFeatureSourceIndicator.h"
+#include "moses/FF/VW/VWFeatureSourcePhraseInternal.h"
+#include "moses/FF/VW/VWFeatureSourceWindow.h"
 #include "moses/FF/VW/VWFeatureTargetIndicator.h"
 #include "moses/FF/VW/VWFeatureSourceExternalFeatures.h"
+#include "moses/FF/VW/VWFeatureTargetPhraseInternal.h"
 #endif
 
 #ifdef HAVE_CMPH
@@ -241,7 +245,11 @@ FeatureRegistry::FeatureRegistry()
   
 #ifdef HAVE_VW
   MOSES_FNAME(VW);
-  MOSES_FNAME(VWFeatureBagOfWords);
+  MOSES_FNAME(VWFeatureSourceBagOfWords);
+  MOSES_FNAME(VWFeatureSourceIndicator);
+  MOSES_FNAME(VWFeatureSourcePhraseInternal);
+  MOSES_FNAME(VWFeatureSourceWindow);
+  MOSES_FNAME(VWFeatureTargetPhraseInternal);
   MOSES_FNAME(VWFeatureTargetIndicator);
   MOSES_FNAME(VWFeatureSourceExternalFeatures);
 #endif

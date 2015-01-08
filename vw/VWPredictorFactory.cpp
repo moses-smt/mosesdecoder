@@ -1,5 +1,6 @@
 #include "Classifier.h"
 #include "vw.h"
+#include <iostream>
 
 using namespace std;
 
@@ -19,12 +20,15 @@ VWPredictorFactory::VWPredictorFactory(
   if (poolSize < 1)
     throw runtime_error("VWPredictorFactory pool size must be greater than zero!");
   int lastFree = EMPTY_LIST;
+  if (VWPredictor::DEBUG) std::cerr << "VW :: filling VWPredictor pool: ";
   for (int i = 0; i < poolSize; ++i)
   {
     m_predictors.push_back(new VWPredictor(m_VWInstance, i));
     m_nextFree.push_back(lastFree);
     lastFree = i;
+    if (VWPredictor::DEBUG) std::cerr << ".";
   }
+  if (VWPredictor::DEBUG) std::cerr << "done.\n";
   m_firstFree = lastFree;
 }
 
