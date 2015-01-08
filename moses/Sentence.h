@@ -91,12 +91,12 @@ public:
   void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
   std::vector <ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 
-  int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
   void Print(std::ostream& out) const;
 
   TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
-  void CreateFromString(const std::vector<FactorType> &factorOrder
+  virtual void CreateFromString(const std::vector<FactorType> &factorOrder
                         , const std::string &phraseString);  // , const std::string &factorDelimiter);
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {

@@ -272,6 +272,9 @@ bool IOWrapper::ReadInput(InputTypeEnum inputType, InputType*& source)
   case TreeInputType:
     source = GetInput(new TreeInput);
     break;
+  case TabbedSentenceInput:
+    source = GetInput(new TabbedSentence);
+    break;
   default:
     TRACE_ERR("Unknown input type: " << inputType << "\n");
   }

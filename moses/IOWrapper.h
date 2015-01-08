@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"
+#include "moses/TabbedSentence.h"
 #include "moses/FactorTypeSet.h"
 #include "moses/FactorCollection.h"
 #include "moses/Hypothesis.h"

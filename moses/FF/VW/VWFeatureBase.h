@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <boost/thread/tss.hpp>
+
 #include "Classifier.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
@@ -8,6 +10,10 @@
 
 namespace Moses
 {
+
+typedef std::vector<std::string> Features;
+typedef std::map<std::string, Features> NameFeatureMap;
+typedef boost::thread_specific_ptr<NameFeatureMap> TSNameFeatureMap;
 
 class VWFeatureBase : public StatelessFeatureFunction
 {
