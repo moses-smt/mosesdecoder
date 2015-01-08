@@ -2,6 +2,7 @@
 
 #include <string>
 #include "VWFeatureBase.h"
+#include "moses/InputType.h"
 
 namespace Moses
 {

@@ -34,13 +34,13 @@ namespace Moses
  * processing and stuff. Then it contains a vector of strings that contains all
  * other columns.
  *
- * At creation time calls FeatureFunction::ProcessColumns(m_columns) once for all
- * feature functions. So any feature function can do anything with any column.
- * Ideally, feature functions should keep the parse results for the columns in
- * thread-specific storage, e.g. boost::thread_specific_ptr<Something>.
+ * Aany feature function can do anything with any column. Ideally, feature
+ * functions should keep the parse results for the columns in thread-specific
+ * storage, e.g. boost::thread_specific_ptr<Something>.
  *
  * In theory a column can contain anything, even text-serialized parse trees or
- * classifier features etc.
+ * classifier features as long it can be represented as text and does not contain
+ * tab characters. 
  * 
  */
 
@@ -49,13 +49,8 @@ typedef std::vector<std::string> TabbedColumns;
 class TabbedSentence : public Sentence
 {
 
-protected:
-
-
 public:
-  TabbedSentence() {
-    std::cerr << "I am a TabbedSentence" << std::endl;
-  }
+  TabbedSentence() {}
   ~TabbedSentence() {}
 
   InputTypeEnum GetType() const {
