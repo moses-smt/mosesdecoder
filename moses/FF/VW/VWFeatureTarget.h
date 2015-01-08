@@ -31,6 +31,11 @@ class VWFeatureTarget : public VWFeatureBase
     virtual void SetParameter(const std::string& key, const std::string& value) {
       VWFeatureBase::SetParameter(key, value);
     }
+
+  protected:
+    inline std::string GetWord(const TargetPhrase &phrase, size_t pos) const {
+      return phrase.GetWord(pos).GetString(m_targetFactors, false);
+    }
 };
 
 }

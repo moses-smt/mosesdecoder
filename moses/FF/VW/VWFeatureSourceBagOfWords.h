@@ -6,10 +6,10 @@
 namespace Moses
 {
   
-class VWFeatureBagOfWords : public VWFeatureSource
+class VWFeatureSourceBagOfWords : public VWFeatureSource
 {
   public:
-    VWFeatureBagOfWords(const std::string &line)
+    VWFeatureSourceBagOfWords(const std::string &line)
       : VWFeatureSource(line)
     {
       ReadParameters();
@@ -24,7 +24,7 @@ class VWFeatureBagOfWords : public VWFeatureSource
                   , Discriminative::Classifier *classifier) const
     {
       for (size_t i = 0; i < input.GetSize(); i++) {
-        classifier->AddLabelIndependentFeature("bow^" + input.GetWord(i).GetString(m_sourceFactors, false));
+        classifier->AddLabelIndependentFeature("bow^" + GetWord(input, i));
       }
     }
     
