@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <string>
+#include <cstdlib>
 #include "Sentence.h"
 
 namespace Moses
@@ -68,6 +69,12 @@ public:
 
   const TabbedColumns& GetColumns() const {
     return m_columns;
+  }
+  
+  const std::string& GetColumn(size_t i) const {
+    UTIL_THROW_IF2(m_columns.size() <= i,
+                  "There is no column with index " << i);
+    return m_columns[i];
   }
 
 private:

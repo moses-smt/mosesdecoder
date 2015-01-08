@@ -3,17 +3,19 @@
 #include <string>
 #include <cstdlib>
 
+#include "ThreadLocalFeatureStorage.h"
 #include "VWFeatureSource.h"
 #include "TabbedSentence.h"
 
 namespace Moses
 {
   
-class VWFeatureSourceExternalFeatures : public VWFeatureSource
+class VWFeatureSourceExternalFeatures : public VWFeatureSource,
+                                        public ThreadLocalFeatureStorage
 {
   public:
     VWFeatureSourceExternalFeatures(const std::string &line)
-      : VWFeatureSource(line), m_column(0)
+      : VWFeatureSource(line), ThreadLocalFeatureStorage(this), m_column(0)
     {
       ReadParameters();
       
@@ -26,7 +28,7 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource
                   , const WordsRange &sourceRange
                   , Discriminative::Classifier *classifier) const
     {
-      Features& features = (*m_nameMap)[GetScoreProducerDescription()];
+      const Features& features = GetStoredFeatures();
       for (size_t i = 0; i < features.size(); i++) {
         classifier->AddLabelIndependentFeature(features[i]);
       }
@@ -40,26 +42,21 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource
     }
     
     virtual void InitializeForInput(InputType const& source) {
-      UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput, "This feature function requires the TabbedSentence input type");
+      ThreadLocalFeatureStorage::InitializeForInput(source);
+      
+      UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
+                     "This feature function requires the TabbedSentence input type");
+      
       
       const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
-      UTIL_THROW_IF2(tabbedSentence.GetColumns().size() <= m_column, "There is no column with index: " << m_column);
-    
-      if(!m_nameMap.get())
-        m_nameMap.reset(new NameFeatureMap());
+      const std::string &column = tabbedSentence.GetColumn(m_column);
       
-      (*m_nameMap)[GetScoreProducerDescription()].clear();
-      
-      Features& features = (*m_nameMap)[GetScoreProducerDescription()];
-      const std::string &column = tabbedSentence.GetColumns()[m_column];
-      
+      Features& features = GetStoredFeatures();
       Tokenize(features, column, " ");
     }
     
   private:
     size_t m_column;
-    
-    static TSNameFeatureMap m_nameMap;
 };
 
 }
