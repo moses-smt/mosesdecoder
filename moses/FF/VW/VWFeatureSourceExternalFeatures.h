@@ -44,7 +44,7 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource
       
       const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
       UTIL_THROW_IF2(tabbedSentence.GetColumns().size() <= m_column, "There is no column with index: " << m_column);
-      
+    
       if(!m_nameMap.get())
         m_nameMap.reset(new NameFeatureMap());
       
