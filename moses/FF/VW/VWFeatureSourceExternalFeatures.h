@@ -9,7 +9,8 @@
 
 namespace Moses
 {
-  
+
+// Assuming a given column of TabbedSentence contains space separated source features
 class VWFeatureSourceExternalFeatures : public VWFeatureSource,
                                         public ThreadLocalFeatureStorage
 {
@@ -46,7 +47,6 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource,
       
       UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
                      "This feature function requires the TabbedSentence input type");
-      
       
       const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
       const std::string &column = tabbedSentence.GetColumn(m_column);

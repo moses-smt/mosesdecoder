@@ -153,7 +153,7 @@ int main(int argc, char** argv)
 
       FeatureFunction::CallChangeSource(source);
 
-      // set up task of translating one sentence
+      // set up task of training one sentence
       TrainingTask* task = new TrainingTask(source, *ioWrapper);
 
       // execute task

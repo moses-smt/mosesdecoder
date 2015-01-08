@@ -1,4 +1,5 @@
 alias headers : : : : <include>. <include>..//moses// <include>.. ;
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ;
 
 boost 103600 ;
 
@@ -11,5 +12,7 @@ if $(with-vw) {
   obj VWPredictor.o : VWPredictor.cpp headers : <include>$(with-vw)/include/vowpalwabbit ;
   alias vw_objects : VWPredictor.o VWPredictorFactory.o vw allreduce : : : <library>boost_program_options ;
   lib classifier : [ glob *.cpp : VWPredictor.cpp VWPredictorFactory.cpp ] vw_objects headers ;
+
+  exe vwtrainer : MainVW deps ;
   echo "Linking with Vowpal Wabbit" ;
 }
