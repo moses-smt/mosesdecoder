@@ -3,20 +3,25 @@
 #include <string>
 #include <cstdlib>
 
-#include "ThreadLocalFeatureStorage.h"
+#include "ThreadLocalByFeatureStorage.h"
 #include "VWFeatureSource.h"
 #include "TabbedSentence.h"
 
 namespace Moses
 {
 
+typedef std::vector<std::string> Features;
+typedef ThreadLocalByFeatureStorage<Features> TLSFeatures;
+
 // Assuming a given column of TabbedSentence contains space separated source features
 class VWFeatureSourceExternalFeatures : public VWFeatureSource,
-                                        public ThreadLocalFeatureStorage
+                                        public TLSFeatures
 {
   public:
     VWFeatureSourceExternalFeatures(const std::string &line)
-      : VWFeatureSource(line), ThreadLocalFeatureStorage(this), m_column(0)
+      : VWFeatureSource(line),
+        TLSFeatures(this),
+        m_column(0)
     {
       ReadParameters();
       
@@ -29,7 +34,7 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource,
                   , const WordsRange &sourceRange
                   , Discriminative::Classifier *classifier) const
     {
-      const Features& features = GetStoredFeatures();
+      const Features& features = *GetStored();
       for (size_t i = 0; i < features.size(); i++) {
         classifier->AddLabelIndependentFeature(features[i]);
       }
@@ -43,7 +48,7 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource,
     }
     
     virtual void InitializeForInput(InputType const& source) {
-      ThreadLocalFeatureStorage::InitializeForInput(source);
+      TLSFeatures::InitializeForInput(source);
       
       UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
                      "This feature function requires the TabbedSentence input type");
@@ -51,7 +56,9 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource,
       const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
       const std::string &column = tabbedSentence.GetColumn(m_column);
       
-      Features& features = GetStoredFeatures();
+      Features& features = *GetStored();
+      features.clear();
+      
       Tokenize(features, column, " ");
     }
     
