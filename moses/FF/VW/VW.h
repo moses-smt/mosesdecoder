@@ -27,7 +27,7 @@ public:
     }
 
     if (! m_normalizer) {
-      VERBOSE(1, "VW :: No loss function specified, normalizing using softmax.\n");
+      VERBOSE(1, "VW :: No loss function specified, assuming logistic loss.\n");
       m_normalizer = (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer();
     }
   }
