@@ -124,6 +124,7 @@ enum InputTypeEnum {
                                 ,WordLatticeInput				= 2
                                     ,TreeInputType					= 3
                                         ,WordLatticeInput2			= 4
+                                        , TabbedSentenceInput = 5
 
 };
 
