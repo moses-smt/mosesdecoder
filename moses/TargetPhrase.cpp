@@ -51,6 +51,7 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
+  // XXX should this really be InputFactorOrder???
   CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
                    // staticData.GetFactorDelimiter(), // eliminated [UG]
                    NULL);

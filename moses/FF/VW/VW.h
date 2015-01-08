@@ -1,17 +1,37 @@
 #pragma once
 
 #include <string>
+#include <map>
+#include <boost/thread/tss.hpp>
+
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TranslationOptionList.h"
+#include "moses/TranslationOption.h"
 #include "moses/Util.h"
+#include "moses/TypeDef.h"
+#include "moses/StaticData.h"
+#include "moses/Phrase.h"
+#include "moses/AlignmentInfo.h"
+
 #include "Normalizer.h"
 #include "Classifier.h"
 #include "VWFeatureBase.h"
+#include "TabbedSentence.h"
 
 namespace Moses
 {
 
 const std::string VW_DUMMY_LABEL = "1111"; // VW does not use the actual label, other classifiers might
+
+struct VWTargetSentence {
+  VWTargetSentence(const Phrase &sentence, const AlignmentInfo &alignment) : m_sentence(sentence), m_alignment(alignment)
+  {}
+
+  Phrase m_sentence;
+  AlignmentInfo m_alignment;
+};
+
+typedef std::map<std::string, VWTargetSentence> VWTargetSentenceMap;
 
 class VW : public StatelessFeatureFunction
 {
@@ -132,6 +152,35 @@ public:
     }
   }
 
+  virtual void InitializeForInput(InputType const& source) {
+    // tabbed sentence is assumed only in training
+    if (! m_train)
+      return;
+
+    UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput, "This feature function requires the TabbedSentence input type");
+
+    const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
+    UTIL_THROW_IF2(tabbedSentence.GetColumns().size() < 2, "TabbedSentence must contain target<tab>alignment");
+
+    if (! m_targetSentenceMap.get())
+      m_targetSentenceMap.reset(new VWTargetSentenceMap());
+
+    // target sentence represented as a phrase
+    Phrase target;
+    target.CreateFromString(
+        Output,
+        StaticData::Instance().GetOutputFactorOrder(),
+        tabbedSentence.GetColumns()[0],
+        NULL);
+
+    // word alignment between source and target sentence
+    // we don't store alignment info in AlignmentInfoCollection because we keep alignments of whole 
+    // sentences, not phrases
+    AlignmentInfo alignment(tabbedSentence.GetColumns()[1]);
+
+    (*m_targetSentenceMap).insert(std::make_pair(GetScoreProducerDescription(), VWTargetSentence(target, alignment)));
+  }
+
 private:
   std::string MakeTargetLabel(const TargetPhrase &targetPhrase) const
   {
@@ -144,6 +193,8 @@ private:
   Discriminative::Normalizer *m_normalizer = NULL;
   Discriminative::Classifier *m_trainer = NULL;
   Discriminative::VWPredictorFactory *m_predictorFactory = NULL;
+
+  static boost::thread_specific_ptr<VWTargetSentenceMap> m_targetSentenceMap;
 };
 
 }
