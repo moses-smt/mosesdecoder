@@ -24,7 +24,8 @@ namespace Moses
 const std::string VW_DUMMY_LABEL = "1111"; // VW does not use the actual label, other classifiers might
 
 struct VWTargetSentence {
-  VWTargetSentence(const Phrase &sentence, const AlignmentInfo &alignment) : m_sentence(sentence), m_alignment(alignment)
+  VWTargetSentence(const Phrase &sentence, const AlignmentInfo &alignment) 
+    : m_sentence(sentence), m_alignment(alignment)
   {}
 
   Phrase m_sentence;
@@ -103,8 +104,12 @@ public:
       for(size_t i = 0; i < targetFeatures.size(); ++i)
         (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
 
-      *iterLoss = classifier->Predict(MakeTargetLabel(targetPhrase));
-      // TODO handle training somehow
+      if (m_train) {
+        *iterLoss = classifier->Predict(MakeTargetLabel(targetPhrase));
+      } else {
+        float loss = IsCorrectTranslationOption(**iterTransOpt) ? 0.0 : 1.0;
+        classifier->Train(MakeTargetLabel(targetPhrase), loss);
+      }
     }
 
     if (!m_train)
@@ -181,10 +186,43 @@ public:
     (*m_targetSentenceMap).insert(std::make_pair(GetScoreProducerDescription(), VWTargetSentence(target, alignment)));
   }
 
+
 private:
   std::string MakeTargetLabel(const TargetPhrase &targetPhrase) const
   {
     return VW_DUMMY_LABEL;
+  }
+
+  bool IsCorrectTranslationOption(const TranslationOption &topt) const {
+    size_t sourceStart = topt.GetSourceWordsRange().GetStartPos();
+    const VWTargetSentence &targetSentence = m_targetSentenceMap->find(GetScoreProducerDescription())->second;
+    
+    // get the left-most alignment point withitn sourceRange
+    std::set<size_t> aligned;
+    while ((aligned = targetSentence.m_alignment.GetAlignmentsForSource(sourceStart)).empty())
+      sourceStart++;
+
+    size_t targetSentOffset = *aligned.begin(); // index of first aligned target word covered in source span
+
+    const TargetPhrase &tphrase = topt.GetTargetPhrase();
+
+    // get the left-most alignment point within topt
+    size_t targetStart = 0;
+    while ((aligned = tphrase.GetAlignTerm().GetAlignmentsForSource(targetStart)).empty())
+      targetStart++;
+
+    size_t toptOffset = *aligned.begin(); // index of first aligned target word in the translation option
+
+    size_t startAt = targetSentOffset - toptOffset;
+    bool matches = true;
+    for (size_t i = 0; i < tphrase.GetSize(); i++) {
+      if (tphrase.GetWord(i) != targetSentence.m_sentence.GetWord(startAt + i)) {
+        matches = false;
+        break;
+      }
+    }
+
+    return matches;
   }
 
   bool m_train; // false means predict
