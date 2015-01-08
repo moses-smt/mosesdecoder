@@ -104,7 +104,7 @@ public:
       for(size_t i = 0; i < targetFeatures.size(); ++i)
         (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
 
-      if (m_train) {
+      if (! m_train) {
         *iterLoss = classifier->Predict(MakeTargetLabel(targetPhrase));
       } else {
         float loss = IsCorrectTranslationOption(**iterTransOpt) ? 0.0 : 1.0;
