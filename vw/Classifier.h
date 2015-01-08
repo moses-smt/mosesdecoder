@@ -77,7 +77,7 @@ protected:
     return out;
   }
 
-  const static bool DEBUG = true;
+  const static bool DEBUG = false;
 
 };
 

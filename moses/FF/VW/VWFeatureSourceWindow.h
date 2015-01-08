@@ -34,7 +34,7 @@ class VWFeatureSourceWindow : public VWFeatureSource
       }
 
       for (int i = end; i < std::min(end + m_size, inputLen); i++) {
-        classifier->AddLabelIndependentFeature("c^" + SPrint(end - i + 1) + "^" + GetWord(input, i));
+        classifier->AddLabelIndependentFeature("c^" + SPrint(i - end + 1) + "^" + GetWord(input, i));
       }
     }
     
