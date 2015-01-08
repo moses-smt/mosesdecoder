@@ -57,7 +57,9 @@ public:
       ? m_trainer 
       : (Discriminative::Classifier *)m_predictorFactory->Acquire();
     
-    UTIL_THROW_IF2(translationOptionList.size() == 0, "There are not translation options.");
+    if (translationOptionList.size() == 0)
+      return; // nothing to do
+
     VERBOSE(2, "VW :: Evaluating translation options\n");
     
     const std::vector<VWFeatureBase*>& sourceFeatures = VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());

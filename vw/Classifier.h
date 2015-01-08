@@ -63,6 +63,7 @@ public:
     AddLabelDependentFeature(name, 1.0);
   }
 
+protected:
   /**
    * Escape special characters in a unified way.
    */
@@ -75,6 +76,9 @@ public:
     out = Moses::Replace(out, " ", "\\_");
     return out;
   }
+
+  const static bool DEBUG = true;
+
 };
 
 // some of VW settings are hard-coded because they are always needed in our scenario
@@ -139,7 +143,6 @@ protected:
 
 private:
   VWPredictor(vw * instance, int index); // instantiation by VWPredictorFactory
-  const static bool DEBUG = false;
 };
   
 /**
@@ -170,7 +173,7 @@ private:
   boost::mutex m_mutex;
   boost::condition_variable m_cond;
 
-  const static int DEFAULT_POOL_SIZE = 255;
+  const static int DEFAULT_POOL_SIZE = 128;
 };
 
 } // namespace Discriminative
