@@ -56,9 +56,9 @@ class VWFeatureBase : public StatelessFeatureFunction
       if (key == "used-by") {
         ParseUsedBy(value);
       } else if (key == "source-factors") {
-        ParseFactorDefinition(value, m_sourceFactors);
+        Tokenize<FactorType>(m_sourceFactors, value, ",");
       } else if (key == "target-factors") {
-        ParseFactorDefinition(value, m_targetFactors);
+        Tokenize<FactorType>(m_targetFactors, value, ",");
       } else {
         StatelessFeatureFunction::SetParameter(key, value);
       }
@@ -112,12 +112,6 @@ class VWFeatureBase : public StatelessFeatureFunction
     }
 
   private:
-    void ParseFactorDefinition(const std::string &list, /* out */ std::vector<FactorType> &out)
-    {
-      std::vector<std::string> split = Tokenize(list, ",");
-      Scan<FactorType>(out, split);
-    }
-
     void ParseUsedBy(const std::string &usedBy) {
       m_usedBy.clear();
       Tokenize(m_usedBy, usedBy, ",");
