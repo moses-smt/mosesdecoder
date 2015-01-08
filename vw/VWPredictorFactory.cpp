@@ -23,7 +23,7 @@ VWPredictorFactory::VWPredictorFactory(
   if (VWPredictor::DEBUG) std::cerr << "VW :: filling VWPredictor pool: ";
   for (int i = 0; i < poolSize; ++i)
   {
-    m_predictors.push_back(new VWPredictor(m_VWInstance, i));
+    m_predictors.push_back(new VWPredictor(m_VWInstance, i, VW_DEFAULT_PARSER_OPTIONS + vwOptions));
     m_nextFree.push_back(lastFree);
     lastFree = i;
     if (VWPredictor::DEBUG) std::cerr << ".";
