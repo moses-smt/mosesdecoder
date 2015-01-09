@@ -10,6 +10,7 @@ namespace Discriminative
 class Normalizer {
 public:
   virtual void operator()(std::vector<float> &losses) const = 0;
+  virtual ~Normalizer() {}
 };
 
 class SquaredLossNormalizer : public Normalizer {
@@ -39,6 +40,8 @@ public:
         *it = 1.0 / losses.size();
     }
   }
+
+  virtual ~SquaredLossNormalizer() {}
 };
 
 class LogisticLossNormalizer : public Normalizer {
@@ -55,6 +58,8 @@ public:
       *it /= sum;
     }
   }
+
+  virtual ~LogisticLossNormalizer() {}
 };
 
 } // namespace Discriminative

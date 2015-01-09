@@ -31,7 +31,7 @@ class ThreadLocalByFeatureStorage
                                 Factory factory = Factory())
     : m_ff(ff), m_factory(factory) {}
     
-    ~ThreadLocalByFeatureStorage() {
+    virtual ~ThreadLocalByFeatureStorage() {
       if(m_nameMap.get()) {
         for(typename NameValueMap::iterator it = m_nameMap->begin();
             it != m_nameMap->end(); it++)

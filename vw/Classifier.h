@@ -63,6 +63,8 @@ public:
     AddLabelDependentFeature(name, 1.0);
   }
 
+  virtual ~Classifier() {}
+
 protected:
   /**
    * Escape special characters in a unified way.
