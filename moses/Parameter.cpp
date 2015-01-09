@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
-#include "UserMessage.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -298,12 +297,12 @@ bool Parameter::LoadParam(int argc, char* argv[])
     PrintFF();
 
     cerr << endl;
-    UserMessage::Add("No configuration file was specified.  Use -config or -f");
+    cerr << "No configuration file was specified.  Use -config or -f";
     cerr << endl;
     return false;
   } else {
     if (!ReadConfigFile(configPath)) {
-      UserMessage::Add("Could not read "+configPath);
+      std::cerr << "Could not read " << configPath;
       return false;
     }
   }
@@ -375,7 +374,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
       string paramSwitch = (string) argv[i];
       string paramName = paramSwitch.substr(1);
       if (m_valid.find(paramName) == m_valid.end()) {
-        UserMessage::Add("illegal switch: " + paramSwitch);
+    	std::cerr << "illegal switch: " << paramSwitch;
         noErrorFlag = false;
       }
     }
@@ -525,9 +524,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       for(size_t i = 1; i < translationVector.size(); i++)
         maxTargetPhrase.push_back(maxTargetPhrase[0]);
     } else if(maxTargetPhrase.size() != 1 && maxTargetPhrase.size() < translationVector.size()) {
-      stringstream strme;
-      strme << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
-      UserMessage::Add(strme.str());
+      std::cerr << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
       return;
     }
 
@@ -541,7 +538,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       vector<string> token = Tokenize(translationVector[currDict]);
 
       if(currDict == 0 && token.size() == 4) {
-        UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
+    	std::cerr << "Phrase table specification in old 4-field format. No longer supported";
         return;
       }
       UTIL_THROW_IF2(token.size() < 5, "Phrase table must have at least 5 scores");
@@ -1012,41 +1009,22 @@ bool Parameter::Validate()
     const std::string &key = iterParams->first;
 
     if (m_valid.find(key) == m_valid.end()) {
-      UserMessage::Add("Unknown parameter " + key);
+      std::cerr << "Unknown parameter " << key;
       noErrorFlag = false;
     }
   }
 
   if (m_setting["lmodel-dub"].size() > 0) {
     if (m_setting["lmodel-file"].size() != m_setting["lmodel-dub"].size()) {
-      stringstream errorMsg("");
-      errorMsg << "Config and parameters specify "
+      std::cerr << "Config and parameters specify "
                << static_cast<int>(m_setting["lmodel-file"].size())
                << " language model files (lmodel-file), but "
                << static_cast<int>(m_setting["lmodel-dub"].size())
                << " LM upperbounds (lmodel-dub)"
                << endl;
-      UserMessage::Add(errorMsg.str());
       noErrorFlag = false;
     }
   }
-
-  /*
-  const vector<float> &lmWeights = GetWeights("LM");
-  if (m_setting["lmodel-file"].size() * (m_setting.find("lmodel-oov-feature") != m_setting.end() ? 2 : 1)
-         != lmWeights.size()) {
-    stringstream errorMsg("");
-    errorMsg << "Config and parameters specify "
-             << static_cast<int>(m_setting["lmodel-file"].size())
-             << " language model files (lmodel-file), but "
-             << static_cast<int>(lmWeights.size())
-             << " weights (weight-l)";
-    errorMsg << endl << "You might be giving '-lmodel-file TYPE FACTOR ORDER FILENAME' but you should be giving these four as a single argument, i.e. '-lmodel-file \"TYPE FACTOR ORDER FILENAME\"'";
-    errorMsg << endl << "You should also remember that each language model requires 2 weights, if and only if lmodel-oov-feature is on.";
-    UserMessage::Add(errorMsg.str());
-    noErrorFlag = false;
-  }
-  */
 
   // do files exist?
 
@@ -1054,9 +1032,7 @@ bool Parameter::Validate()
   if (noErrorFlag && m_setting["input-file"].size() == 1) {
     noErrorFlag = FileExists(m_setting["input-file"][0]);
     if (!noErrorFlag) {
-      stringstream errorMsg("");
-      errorMsg << endl << "Input file " << m_setting["input-file"][0] << " does not exist";
-      UserMessage::Add(errorMsg.str());
+    	std::cerr << endl << "Input file " << m_setting["input-file"][0] << " does not exist";
     }
   }
   // generation tables
@@ -1104,11 +1080,9 @@ bool Parameter::FilesExist(const string &paramName, int fieldNo, std::vector<std
       tokenizeIndex = static_cast<size_t>(fieldNo);
 
     if (tokenizeIndex >= vec.size()) {
-      stringstream errorMsg("");
-      errorMsg << "Expected at least " << (tokenizeIndex+1) << " tokens per entry in '"
+    	std::cerr << "Expected at least " << (tokenizeIndex+1) << " tokens per entry in '"
                << paramName << "', but only found "
                << vec.size();
-      UserMessage::Add(errorMsg.str());
       return false;
     }
     const string &pathStr = vec[tokenizeIndex];
@@ -1118,9 +1092,7 @@ bool Parameter::FilesExist(const string &paramName, int fieldNo, std::vector<std
       fileFound|=FileExists(pathStr + extensions[i]);
     }
     if(!fileFound) {
-      stringstream errorMsg("");
-      errorMsg << "File " << pathStr << " does not exist";
-      UserMessage::Add(errorMsg.str());
+      std::cerr << "File " << pathStr << " does not exist";
       return false;
     }
   }
@@ -1137,9 +1109,7 @@ string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
       if (i+1 < argc) {
         return argv[i+1];
       } else {
-        stringstream errorMsg("");
-        errorMsg << "Option " << paramSwitch << " requires a parameter!";
-        UserMessage::Add(errorMsg.str());
+    	  std::cerr << "Option " << paramSwitch << " requires a parameter!";
         // TODO return some sort of error, not the empty string
       }
     }

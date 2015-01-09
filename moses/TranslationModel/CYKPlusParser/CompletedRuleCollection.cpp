@@ -32,6 +32,11 @@ CompletedRuleCollection::CompletedRuleCollection() : m_ruleLimit(StaticData::Ins
   m_scoreThreshold = numeric_limits<float>::infinity();
 }
 
+CompletedRuleCollection::~CompletedRuleCollection()
+{
+  Clear();
+}
+
 // copies some functionality (pruning) from ChartTranslationOptionList::Add
 void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
                                   const StackVec &stackVec,

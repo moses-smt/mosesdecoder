@@ -191,7 +191,8 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
       last = min(last, wordsRange.GetStartPos()+maxSpan);
     }
     if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, last, to);
+      const InputPath &inputPath = GetInputPath(wordsRange);
+      ruleLookupManager.GetChartRuleCollection(inputPath, last, to);
     }
   }
 
@@ -236,7 +237,7 @@ void ChartParser::CreateInputPaths(const InputType &input)
   }
 }
 
-const InputPath &ChartParser::GetInputPath(WordsRange &range) const
+const InputPath &ChartParser::GetInputPath(const WordsRange &range) const
 {
   return GetInputPath(range.GetStartPos(), range.GetEndPos());
 }

@@ -3,6 +3,16 @@
 namespace Moses
 {
 
+InternalTree::InternalTree(const std::string & line, size_t start, size_t len, const bool terminal):
+    m_value_nt(0),
+    m_isTerminal(terminal)
+    {
+
+    if (len > 0) {
+        m_value.assign(line, start, len);
+    }
+}
+
 InternalTree::InternalTree(const std::string & line, const bool terminal):
     m_value_nt(0),
     m_isTerminal(terminal)
@@ -13,7 +23,6 @@ InternalTree::InternalTree(const std::string & line, const bool terminal):
     if (found == line.npos) {
         m_value = line;
     }
-
     else {
         AddSubTree(line, 0);
     }
@@ -21,8 +30,8 @@ InternalTree::InternalTree(const std::string & line, const bool terminal):
 
 size_t InternalTree::AddSubTree(const std::string & line, size_t pos) {
 
-    std::string value;
     char token = 0;
+    size_t len = 0;
 
     while (token != ']' && pos != std::string::npos)
     {
@@ -30,34 +39,34 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos) {
         pos = line.find_first_of("[] ", pos);
         if (pos == std::string::npos) break;
         token = line[pos];
-        value = line.substr(oldpos,pos-oldpos);
+        len = pos-oldpos;
 
         if (token == '[') {
-            if (m_value.size() > 0) {
-                m_children.push_back(boost::make_shared<InternalTree>(value,false));
+            if (!m_value.empty()) {
+                m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, false));
                 pos = m_children.back()->AddSubTree(line, pos+1);
             }
             else {
-                if (value.size() > 0) {
-                    m_value = value;
+                if (len > 0) {
+                    m_value.assign(line, oldpos, len);
                 }
                 pos = AddSubTree(line, pos+1);
             }
         }
         else if (token == ' ' || token == ']') {
-            if (value.size() > 0 && !(m_value.size() > 0)) {
-                m_value = value;
+            if (len > 0 && m_value.empty()) {
+                m_value.assign(line, oldpos, len);
             }
-            else if (value.size() > 0) {
+            else if (len > 0) {
                 m_isTerminal = false;
-                m_children.push_back(boost::make_shared<InternalTree>(value,true));
+                m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, true));
             }
             if (token == ' ') {
                 pos++;
             }
         }
 
-        if (m_children.size() > 0) {
+        if (!m_children.empty()) {
             m_isTerminal = false;
         }
     }

@@ -465,7 +465,8 @@ FFState* BilingualLM::EvaluateWhenApplied(
   }
   size_t new_state = getStateChart(neuralLMids);
 
-  accumulator->Assign(this, value);
+  accumulator->PlusEquals(this, -accumulator->GetScoreForProducer(this));
+  accumulator->PlusEquals(this, value);
 
   return new BilingualLMState(new_state, alignments, neuralLMids);
 }

@@ -52,10 +52,11 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
 }
 
 void ChartRuleLookupManagerMemory::GetChartRuleCollection(
-  const WordsRange &range,
+  const InputPath &inputPath,
   size_t lastPos,
   ChartParserCallback &outColl)
 {
+  const WordsRange &range = inputPath.GetWordsRange();
   size_t startPos = range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
 
@@ -80,12 +81,12 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   }
 
   // copy temporarily stored rules to out collection
-  CompletedRuleCollection rules = m_completedRules[absEndPos];
+  CompletedRuleCollection & rules = m_completedRules[absEndPos];
   for (vector<CompletedRule*>::const_iterator iter = rules.begin(); iter != rules.end(); ++iter) {
     outColl.Add((*iter)->GetTPC(), (*iter)->GetStackVector(), range);
   }
 
-  m_completedRules[absEndPos].Clear();
+  rules.Clear();
 
 }
 

@@ -173,7 +173,8 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-projects lm util phrase-extract phrase-extract/syntax-common search moses moses/LM mert moses-cmd mira scripts regression-testing  ;
+build-projects lm util phrase-extract phrase-extract/syntax-common search moses moses/LM mert moses-cmd scripts regression-testing ;
+# contrib/mira
 
 if [ option.get "with-mm" : : "yes" ]
 {
@@ -228,7 +229,7 @@ phrase-extract//extract-mixed-syntax
 phrase-extract//score-stsg
 phrase-extract//filter-rule-table
 biconcor 
-mira//mira 
+#contrib/mira//mira 
 contrib/server//mosesserver 
 mm
 rephraser

@@ -61,7 +61,8 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
   const std::vector<HypothesisDimension> &childEntries = item.GetHypothesisDimensions();
   m_prevHypos.reserve(childEntries.size());
   std::vector<HypothesisDimension>::const_iterator iter;
-  for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) {
+  for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) 
+  {
     m_prevHypos.push_back(iter->GetHypothesis());
   }
 }
@@ -71,7 +72,6 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
 ChartHypothesis::ChartHypothesis(const ChartHypothesis &pred,
                                  const ChartKBestExtractor & /*unused*/)
   :m_currSourceWordsRange(pred.m_currSourceWordsRange)
-  ,m_scoreBreakdown(pred.m_scoreBreakdown)
   ,m_totalScore(pred.m_totalScore)
   ,m_arcList(NULL)
   ,m_winningHypo(NULL)
@@ -85,14 +85,17 @@ ChartHypothesis::ChartHypothesis(const ChartHypothesis &pred,
 ChartHypothesis::~ChartHypothesis()
 {
   // delete feature function states
-  for (unsigned i = 0; i < m_ffStates.size(); ++i) {
+  for (unsigned i = 0; i < m_ffStates.size(); ++i) 
+  {
     delete m_ffStates[i];
   }
 
   // delete hypotheses that are not in the chart (recombined away)
-  if (m_arcList) {
+  if (m_arcList) 
+  {
     ChartArcList::iterator iter;
-    for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
+    for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) 
+    {
       ChartHypothesis *hypo = *iter;
       Delete(hypo);
     }
@@ -109,19 +112,25 @@ void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
 {
   FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
 
-  for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
+  for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) 
+  {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
-    if (word.IsNonTerminal()) {
+    if (word.IsNonTerminal()) 
+    {
       // non-term. fill out with prev hypo
       size_t nonTermInd = GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->GetOutputPhrase(outPhrase);
-    } else {
+    } 
+    else 
+    {
       outPhrase.AddWord(word);
 
-      if (placeholderFactor != NOT_FOUND) {
+      if (placeholderFactor != NOT_FOUND) 
+      {
         std::set<size_t> sourcePosSet = GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
-        if (sourcePosSet.size() == 1) {
+        if (sourcePosSet.size() == 1) 
+        {
           const std::vector<const Word*> *ruleSourceFromInputPath = GetTranslationOption().GetSourceRuleFromInputPath();
           UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
                          "No source rule");
@@ -131,7 +140,8 @@ void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
           UTIL_THROW_IF2(sourceWord == NULL,
                          "No source word");
           const Factor *factor = sourceWord->GetFactor(placeholderFactor);
-          if (factor) {
+          if (factor) 
+          {
             outPhrase.Back()[0] = factor;
           }
         }
@@ -149,37 +159,45 @@ Phrase ChartHypothesis::GetOutputPhrase() const
   return outPhrase;
 }
 
-void ChartHypothesis::GetOutputPhrase(int leftRightMost, int numWords, Phrase &outPhrase) const
+/** TODO: this method isn't used anywhere. Remove? */
+void ChartHypothesis::GetOutputPhrase(size_t leftRightMost, size_t numWords, Phrase &outPhrase) const
 {
   const TargetPhrase &tp = GetCurrTargetPhrase();
 
-  int targetSize = tp.GetSize();
-  for (int i = 0; i < targetSize; ++i) {
-	int pos;
-	if (leftRightMost == 1) {
-	  pos = i;
-	}
-	else if (leftRightMost == 2) {
-	  pos = targetSize - i - 1;
-	}
-	else {
-		abort();
-	}
+  size_t targetSize = tp.GetSize();
+  for (size_t i = 0; i < targetSize; ++i) 
+  {
+    size_t pos;
+    if (leftRightMost == 1) 
+    {
+      pos = i;
+    }
+    else if (leftRightMost == 2) 
+    {
+      pos = targetSize - i - 1;
+    }
+    else 
+    {
+      abort();
+    }
 
-	const Word &word = tp.GetWord(pos);
+    const Word &word = tp.GetWord(pos);
 
-	if (word.IsNonTerminal()) {
-	  // non-term. fill out with prev hypo
-	  size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
-	  const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
-	  prevHypo->GetOutputPhrase(outPhrase);
-	} else {
-	  outPhrase.AddWord(word);
-	}
+    if (word.IsNonTerminal()) 
+    {
+      // non-term. fill out with prev hypo
+      size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+      const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
+      prevHypo->GetOutputPhrase(outPhrase);
+    } 
+    else 
+    {
+      outPhrase.AddWord(word);
+    }
 
-	if (outPhrase.GetSize() >= numWords) {
-		return;
-	}
+    if (outPhrase.GetSize() >= numWords) {
+      return;
+    }
   }
 }
 
@@ -209,64 +227,71 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
   return 0;
 }
 
-/** calculate total score
-  * @todo this should be in ScoreBreakdown
- */
+/** calculate total score */
 void ChartHypothesis::EvaluateWhenApplied()
 {
   const StaticData &staticData = StaticData::Instance();
-  // total scores from prev hypos
-  std::vector<const ChartHypothesis*>::iterator iter;
-  for (iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
-    const ChartHypothesis &prevHypo = **iter;
-    const ScoreComponentCollection &scoreBreakdown = prevHypo.GetScoreBreakdown();
-
-    m_scoreBreakdown.PlusEquals(scoreBreakdown);
-  }
-
-  // scores from current translation rule. eg. translation models & word penalty
-  const ScoreComponentCollection &scoreBreakdown = GetTranslationOption().GetScores();
-  m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
   // compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
   const std::vector<const StatelessFeatureFunction*>& sfs =
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  for (unsigned i = 0; i < sfs.size(); ++i) {
-    if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) {
-      sfs[i]->EvaluateWhenApplied(*this,&m_scoreBreakdown);
+  for (unsigned i = 0; i < sfs.size(); ++i) 
+  {
+    if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) 
+    {
+      sfs[i]->EvaluateWhenApplied(*this,&m_currScoreBreakdown);
     }
   }
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  for (unsigned i = 0; i < ffs.size(); ++i) {
-    if (! staticData.IsFeatureFunctionIgnored( *ffs[i] )) {
-      m_ffStates[i] = ffs[i]->EvaluateWhenApplied(*this,i,&m_scoreBreakdown);
+  for (unsigned i = 0; i < ffs.size(); ++i) 
+  {
+    if (! staticData.IsFeatureFunctionIgnored( *ffs[i] )) 
+    {
+      m_ffStates[i] = ffs[i]->EvaluateWhenApplied(*this,i,&m_currScoreBreakdown);
     }
   }
 
-  m_totalScore	= m_scoreBreakdown.GetWeightedScore();
+  // total score from current translation rule
+  m_totalScore = GetTranslationOption().GetScores().GetWeightedScore();
+  m_totalScore += m_currScoreBreakdown.GetWeightedScore();
+ 
+  // total scores from prev hypos
+  for (std::vector<const ChartHypothesis*>::const_iterator iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
+    const ChartHypothesis &prevHypo = **iter;
+    m_totalScore += prevHypo.GetTotalScore();
+  }
 }
 
 void ChartHypothesis::AddArc(ChartHypothesis *loserHypo)
 {
-  if (!m_arcList) {
-    if (loserHypo->m_arcList) { // we don't have an arcList, but loser does
+  if (!m_arcList) 
+  {
+    if (loserHypo->m_arcList) 
+    { // we don't have an arcList, but loser does
       this->m_arcList = loserHypo->m_arcList;  // take ownership, we'll delete
       loserHypo->m_arcList = 0;                // prevent a double deletion
-    } else {
+    } 
+    else 
+    {
       this->m_arcList = new ChartArcList();
     }
-  } else {
-    if (loserHypo->m_arcList) {  // both have an arc list: merge. delete loser
+  } 
+  else 
+  {
+    if (loserHypo->m_arcList) 
+    {  // both have an arc list: merge. delete loser
       size_t my_size = m_arcList->size();
       size_t add_size = loserHypo->m_arcList->size();
       this->m_arcList->resize(my_size + add_size, 0);
       std::memcpy(&(*m_arcList)[0] + my_size, &(*loserHypo->m_arcList)[0], add_size * sizeof(ChartHypothesis *));
       delete loserHypo->m_arcList;
       loserHypo->m_arcList = 0;
-    } else { // loserHypo doesn't have any arcs
+    } 
+    else 
+    { // loserHypo doesn't have any arcs
       // DO NOTHING
     }
   }
@@ -274,8 +299,10 @@ void ChartHypothesis::AddArc(ChartHypothesis *loserHypo)
 }
 
 // sorting helper
-struct CompareChartChartHypothesisTotalScore {
-  bool operator()(const ChartHypothesis* hypo1, const ChartHypothesis* hypo2) const {
+struct CompareChartHypothesisTotalScore 
+{
+  bool operator()(const ChartHypothesis* hypo1, const ChartHypothesis* hypo2) const 
+  {
     return hypo1->GetTotalScore() > hypo2->GetTotalScore();
   }
 };
@@ -295,16 +322,18 @@ void ChartHypothesis::CleanupArcList()
   size_t nBestSize = staticData.GetNBestSize();
   bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph() || staticData.GetOutputSearchGraphHypergraph();
 
-  if (!distinctNBest && m_arcList->size() > nBestSize) {
+  if (!distinctNBest && m_arcList->size() > nBestSize) 
+  {
     // prune arc list only if there too many arcs
     NTH_ELEMENT4(m_arcList->begin()
                  , m_arcList->begin() + nBestSize - 1
                  , m_arcList->end()
-                 , CompareChartChartHypothesisTotalScore());
+                 , CompareChartHypothesisTotalScore());
 
     // delete bad ones
     ChartArcList::iterator iter;
-    for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) {
+    for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) 
+    {
       ChartHypothesis *arc = *iter;
       ChartHypothesis::Delete(arc);
     }
@@ -314,7 +343,8 @@ void ChartHypothesis::CleanupArcList()
 
   // set all arc's main hypo variable to this hypo
   ChartArcList::iterator iter = m_arcList->begin();
-  for (; iter != m_arcList->end() ; ++iter) {
+  for (; iter != m_arcList->end() ; ++iter) 
+  {
     ChartHypothesis *arc = *iter;
     arc->SetWinningHypo(this);
   }
@@ -337,11 +367,13 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 
   // recombination
   if (hypo.GetWinningHypothesis() != NULL &&
-      hypo.GetWinningHypothesis() != &hypo) {
+      hypo.GetWinningHypothesis() != &hypo) 
+  {
     out << "->" << hypo.GetWinningHypothesis()->GetId();
   }
 
-  if (StaticData::Instance().GetIncludeLHSInSearchGraph()) {
+  if (StaticData::Instance().GetIncludeLHSInSearchGraph()) 
+  {
     out << " " << hypo.GetTargetLHS() << "=>";
   }
   out << " " << hypo.GetCurrTargetPhrase()
@@ -349,7 +381,8 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
       << " " << hypo.GetCurrSourceRange();
 
   HypoList::const_iterator iter;
-  for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter) {
+  for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter) 
+  {
     const ChartHypothesis &prevHypo = **iter;
     out << " " << prevHypo.GetId();
   }

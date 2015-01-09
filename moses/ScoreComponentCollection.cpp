@@ -309,8 +309,7 @@ void ScoreComponentCollection::OutputAllFeatureScores(std::ostream &out) const
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ ) {
     const StatefulFeatureFunction *ff = sff[i];
-    if (ff->GetScoreProducerDescription() != "BleuScoreFeature"
-        && ff->IsTuneable()) {
+    if (ff->IsTuneable()) {
       OutputFeatureScores( out, ff, lastName );
     }
   }

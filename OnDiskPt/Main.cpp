@@ -26,7 +26,6 @@
 #include <cassert>
 #include "moses/InputFileStream.h"
 #include "moses/Util.h"
-#include "moses/UserMessage.h"
 #include "OnDiskWrapper.h"
 #include "SourcePhrase.h"
 #include "TargetPhrase.h"

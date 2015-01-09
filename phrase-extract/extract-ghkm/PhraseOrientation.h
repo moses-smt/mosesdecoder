@@ -21,6 +21,7 @@
 #pragma once
 
 #include "Alignment.h"
+#include "moses/AlignmentInfo.h"
 
 #include <map>
 #include <set>
@@ -50,6 +51,11 @@ public:
                     int targetSize,
                     const Alignment &alignment);
 
+  PhraseOrientation(int sourceSize,
+                    int targetSize,
+                    const AlignmentInfo &alignTerm,
+                    const AlignmentInfo &alignNonTerm);
+
   REO_CLASS GetOrientationInfo(int startF, int endF, REO_DIR direction) const;
   REO_CLASS GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const;
   const std::string GetOrientationInfoString(int startF, int endF, REO_DIR direction=REO_DIR_BIDIR) const;
@@ -62,6 +68,11 @@ public:
   bool TargetSpanIsAligned(int index1, int index2) const;
 
 private:
+
+  void Init(int sourceSize, int targetSize,
+            const std::vector<std::vector<int> > &alignedToT,
+            const std::vector<std::vector<int> > &alignedToS,
+            const std::vector<int> &alignedCountS);
 
   void InsertVertex( HSentenceVertices & corners, int x, int y );
 

@@ -66,6 +66,10 @@ void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
   std::string line;
   m_sourceLabels.clear();
   m_sourceLabelsByIndex.clear();
+  m_sourceLabelsByIndex_RHS_1.clear();
+  m_sourceLabelsByIndex_RHS_0.clear();
+  m_sourceLabelsByIndex_LHS_1.clear();
+  m_sourceLabelsByIndex_LHS_0.clear();
   m_sourceLabelIndexesByFactor.clear();
   while (getline(inFile, line)) {
     std::istringstream tokenizer(line);
@@ -83,8 +87,16 @@ void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
     
     if (index >= m_sourceLabelsByIndex.size()) { 
       m_sourceLabelsByIndex.resize(index+1);
+      m_sourceLabelsByIndex_RHS_1.resize(index+1);
+      m_sourceLabelsByIndex_RHS_0.resize(index+1);
+      m_sourceLabelsByIndex_LHS_1.resize(index+1);
+      m_sourceLabelsByIndex_LHS_0.resize(index+1);
     }
     m_sourceLabelsByIndex[index] = label;
+    m_sourceLabelsByIndex_RHS_1[index] = "RHS_1_" + label;
+    m_sourceLabelsByIndex_RHS_0[index] = "RHS_0_" + label;
+    m_sourceLabelsByIndex_LHS_1[index] = "LHS_1_" + label;
+    m_sourceLabelsByIndex_LHS_0[index] = "LHS_0_" + label;
     const Factor* sourceLabelFactor = factorCollection.AddFactor(label,true);
     m_sourceLabelIndexesByFactor[sourceLabelFactor] = index;
   }
@@ -237,12 +249,6 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       FEATUREVERBOSE(2, "stackVec[ " << i << " ] : " << ntRange.GetStartPos() << " - " << ntRange.GetEndPos() << std::endl);
     }
 
-    for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignTerm().begin();
-         it!=targetPhrase.GetAlignTerm().end(); ++it) 
-    {
-      FEATUREVERBOSE(2, "alignTerm " << it->first << " " << it->second << std::endl);
-    }
-
     for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
          it!=targetPhrase.GetAlignNonTerm().end(); ++it) 
     {
@@ -379,8 +385,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
             // (only if no match has been scored for this tree input label and rule non-terminal with a previous sourceLabelItem)
               float score_RHS_1 = (float)1/treeInputLabelsRHS[nonTerminalNumber].size();
               scoreBreakdown.PlusEquals(this,
-                                      std::string("RHS_1_" + m_sourceLabelsByIndex[*sourceLabelsRHSIt]),
-                                      score_RHS_1); 
+                                        m_sourceLabelsByIndex_RHS_1[*sourceLabelsRHSIt],
+                                        score_RHS_1); 
               sparseScoredTreeInputLabelsRHS[nonTerminalNumber].insert(*sourceLabelsRHSIt);
             }
           }
@@ -414,8 +420,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
             // (only if no match has been scored for this tree input label and rule non-terminal with a previous sourceLabelItem)
               float score_LHS_1 = (float)1/treeInputLabelsLHS.size();
               scoreBreakdown.PlusEquals(this,
-                                      std::string("LHS_1_" + m_sourceLabelsByIndex[sourceLabelsLHSIt->first]),
-                                      score_LHS_1); 
+                                        m_sourceLabelsByIndex_LHS_1[sourceLabelsLHSIt->first],
+                                        score_LHS_1); 
               sparseScoredTreeInputLabelsLHS.insert(sourceLabelsLHSIt->first);
             }
           }
@@ -482,8 +488,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
             if (sparseScoredTreeInputLabelsRHS[nonTerminalNumber].find(*treeInputLabelsRHSIt) == sparseScoredTreeInputLabelsRHS[nonTerminalNumber].end()) {
               // score sparse features: RHS mismatch
               scoreBreakdown.PlusEquals(this,
-                                      std::string("RHS_0_" + m_sourceLabelsByIndex[*treeInputLabelsRHSIt]),
-                                      score_RHS_0);
+                                        m_sourceLabelsByIndex_RHS_0[*treeInputLabelsRHSIt],
+                                        score_RHS_0);
             }
           }
         }
@@ -501,8 +507,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
           if (sparseScoredTreeInputLabelsLHS.find(*treeInputLabelsLHSIt) == sparseScoredTreeInputLabelsLHS.end()) {
             // score sparse features: RHS mismatch
             scoreBreakdown.PlusEquals(this,
-                                    std::string("LHS_0_" + m_sourceLabelsByIndex[*treeInputLabelsLHSIt]),
-                                    score_LHS_0);
+                                      m_sourceLabelsByIndex_LHS_0[*treeInputLabelsLHSIt],
+                                      score_LHS_0);
           }
         }
       }

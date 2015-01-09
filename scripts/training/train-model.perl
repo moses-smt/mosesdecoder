@@ -175,6 +175,10 @@ if (defined($IGNORE)) {
   print STDERR "WARNING: Do not specify -bin-dir or -scripts-root-dir anymore. These variable are ignored and will be deleted soon";
 }
 
+if (defined($_HIERARCHICAL) && defined($_REORDERING)) {
+  die("ERROR: You cannot specify a lexicalized reordering model (-reordering) when building an hierarchical model (-hierarchical)");
+}
+
 # convert all paths to absolute paths
 $_ROOT_DIR = File::Spec->rel2abs($_ROOT_DIR) if defined($_ROOT_DIR);
 $_EXTERNAL_BINDIR = File::Spec->rel2abs($_EXTERNAL_BINDIR) if defined($_EXTERNAL_BINDIR);
@@ -1120,7 +1124,6 @@ sub run_single_giza {
 	 m2 => 0 , 
 	 m3 => 3 , 
 	 m4 => 3 , 
-	 hmmiterations => 0 ,
 	 o => "giza" ,
 	 nodumps => 1 ,
 	 onlyaldumps => 1 ,
@@ -1142,6 +1145,7 @@ sub run_single_giza {
     if ($_HMM_ALIGN) {
        $GizaDefaultOptions{m3} = 0;
        $GizaDefaultOptions{m4} = 0;
+       $GizaDefaultOptions{hmmiterations} = 5;
        $GizaDefaultOptions{hmmdumpfrequency} = 5;
        $GizaDefaultOptions{nodumps} = 0;
     }

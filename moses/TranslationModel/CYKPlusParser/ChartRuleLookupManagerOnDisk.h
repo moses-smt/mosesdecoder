@@ -45,7 +45,7 @@ public:
 
   ~ChartRuleLookupManagerOnDisk();
 
-  virtual void GetChartRuleCollection(const WordsRange &range,
+  virtual void GetChartRuleCollection(const InputPath &inputPath,
                                       size_t last,
                                       ChartParserCallback &outColl);
 
