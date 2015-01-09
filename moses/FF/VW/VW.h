@@ -47,8 +47,7 @@ struct VWTargetSentence {
 typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::ClassifierFactory &> TLSClassifier;
 typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
 
-class VW : public StatelessFeatureFunction
-           , public TLSTargetSentence
+class VW : public StatelessFeatureFunction, public TLSTargetSentence
 {
 public:
   VW(const std::string &line)
