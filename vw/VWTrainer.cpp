@@ -19,6 +19,7 @@ VWTrainer::VWTrainer(const std::string &outputFile)
 
 VWTrainer::~VWTrainer()
 {
+  m_bfos << "\n";
   close(m_bfos);
 }
 
@@ -62,7 +63,6 @@ void VWTrainer::Train(const StringPiece &label, float loss)
   m_isFirstSource = true;
   m_isFirstTarget = true;
   WriteBuffer();
-  m_bfos << "\n";
 }
 
 float VWTrainer::Predict(const StringPiece &label)
