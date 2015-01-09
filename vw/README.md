@@ -7,7 +7,8 @@ function.
 Implemented classifier features
 -------------------------------
 
-* VWFeatureSourceBagOfWords: 
+* VWFeatureSourceBagOfWords: This create a feature of form bow^token for every
+source sentence token.
 * VWFeatureSourceExternalFeatures:
 * VWFeatureSourcePhraseInternal:
 * VWFeatureSourceWindow:
@@ -24,7 +25,7 @@ To use the classifier edit your moses.ini
     VW path=/home/username/vw/classifier1.vw
     VWFeatureSourceBagOfWords
     VWFeatureTargetIndicator
-    VWFeatureTargetIndicator
+    VWFeatureSourceIndicator
     ...
      
     [weights]
@@ -40,7 +41,7 @@ features which classifier they belong to:
     VW name=bart path=/home/username/vw/classifier1.vw 
     VWFeatureSourceBagOfWords used-by=bart
     VWFeatureTargetIndicator used-by=bart
-    VWFeatureTargetIndicator used-by=bart
+    VWFeatureSourceIndicator used-by=bart
     ...
     
     [weights]
