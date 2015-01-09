@@ -12,7 +12,7 @@ source sentence token.
 * `VWFeatureSourceExternalFeatures column=0`: when used with -inputtype 5 (`TabbedSentence`) this can be used to supply additional feature to VW. The input is a tab-separated file, the first column is the usual input sentence, all other columns can be used for meta-data. Parameter column=0 counts beginning with the first column that is not the input sentence.  
 * `VWFeatureSourceIndicator`: Ass a feature for the whole source phrase.
 * `VWFeatureSourcePhraseInternal`: Adds a separate feature for every word of the source phrase.
-* `VWFeatureSourceWindow size=3`: Adds source words in a window of size 3 before and after the source phrase as features. These does not overlap with `VWFeatureSourcePhraseInternal`.
+* `VWFeatureSourceWindow size=3`: Adds source words in a window of size 3 before and after the source phrase as features. These do not overlap with `VWFeatureSourcePhraseInternal`.
 * `VWFeatureTargetIndicator`: Adds a feature for the whole target phrase.
 * `VWFeatureTargetPhraseInternal`: Adds a separate feature for every word of the target phrase.
 
