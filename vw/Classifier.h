@@ -93,7 +93,7 @@ class VWTrainer : public Classifier
 {
 public:
   VWTrainer(const std::string &outputFile);
-  ~VWTrainer();
+  virtual ~VWTrainer();
 
   virtual void AddLabelIndependentFeature(const StringPiece &name, float value);
   virtual void AddLabelDependentFeature(const StringPiece &name, float value);
@@ -120,7 +120,7 @@ class VWPredictor : public Classifier, private boost::noncopyable
 {
 public:
   VWPredictor(const std::string &modelFile, const std::string &vwOptions);
-  ~VWPredictor();
+  virtual ~VWPredictor();
 
   virtual void AddLabelIndependentFeature(const StringPiece &name, float value);
   virtual void AddLabelDependentFeature(const StringPiece &name, float value);
@@ -162,6 +162,8 @@ public:
 
   // return VWPredictor or VWTrainer instance depending on whether we're in training mode
   Classifier *operator()();
+
+  ~ClassifierFactory();
 
 private:
   std::string m_vwOptions;

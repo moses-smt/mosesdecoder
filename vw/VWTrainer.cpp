@@ -19,22 +19,20 @@ VWTrainer::VWTrainer(const std::string &outputFile)
 
 VWTrainer::~VWTrainer()
 {
-  WriteBuffer();
-  m_bfos << "\n";
   close(m_bfos);
 }
 
 void VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
 {
-  if (m_isFirstExample) {
-    m_isFirstExample = false;
-  } else {
-    // finish previous example
-    WriteBuffer();
-    m_bfos << "\n";
-  }
-
   if (m_isFirstSource) {
+    if (m_isFirstExample) {
+      m_isFirstExample = false;
+    } else {
+      // finish previous example
+      WriteBuffer();
+      m_bfos << "\n";
+    }
+
     m_isFirstSource = false;
     if (! m_outputBuffer.empty())
       WriteBuffer();
@@ -63,6 +61,8 @@ void VWTrainer::Train(const StringPiece &label, float loss)
   m_outputBuffer.push_front(label.as_string() + ":" + SPrint(loss));
   m_isFirstSource = true;
   m_isFirstTarget = true;
+  WriteBuffer();
+  m_bfos << "\n";
 }
 
 float VWTrainer::Predict(const StringPiece &label)

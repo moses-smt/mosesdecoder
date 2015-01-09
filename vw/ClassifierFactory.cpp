@@ -24,6 +24,12 @@ ClassifierFactory::ClassifierFactory(const std::string &modelFilePrefix)
   }
 }
 
+ClassifierFactory::~ClassifierFactory() 
+{
+  if (! m_train)
+    VW::finish(*m_VWInstance);
+}
+
 Classifier *ClassifierFactory::operator()() 
 {
   if (m_train) {
