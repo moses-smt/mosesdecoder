@@ -7,13 +7,14 @@ function.
 Implemented classifier features
 -------------------------------
 
-* VWFeatureSourceBagOfWords: This create a feature of form bow^token for every
+* VWFeatureSourceBagOfWords: This creates a feature of form bow^token for every
 source sentence token.
-* VWFeatureSourceExternalFeatures:
-* VWFeatureSourcePhraseInternal:
-* VWFeatureSourceWindow:
-* VWFeatureTargetIndicator:
-* VWFeatureTargetPhraseInternal:
+* VWFeatureSourceExternalFeatures: (not quite finished yet) when used with -inputtype 5 this can be used to supply additional feature to VW. The input is a tab-separated file, the first column is usual input sentence, all other columns can be used for meta-data. By default the second column is read in and features are split on whitespace. 
+* VWFeatureSourceIndicator: Ass a feature for the whole source phrase.
+* VWFeatureSourcePhraseInternal: Adds a separate feature for every word of the source phrase.
+* VWFeatureSourceWindow: Adds source words in a window before and after the source phrase as features. These does not overlap with VWFeatureSourcePhraseInternal.
+* VWFeatureTargetIndicator: Adds a feature for the whole target phrase.
+* VWFeatureTargetPhraseInternal: Adds a separate feature for every word of the target phrase.
 
 Configuration
 -------------
