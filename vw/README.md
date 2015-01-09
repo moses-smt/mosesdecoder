@@ -68,7 +68,21 @@ You can also use multiple classifiers:
     VW0= 0.2
     VW1= 0.2
     ...
-
+    
 Training the classifier
 -----------------------
-TODO
+
+To train a classifier, run `vwtrainer` (a limited version of the `moses` binary). Configure your features in the `moses.ini` file (see above) and set the `train` flag:
+
+     [features]
+     ... 
+     VW name=bart path=/home/username/vw/features.txt train=1
+     ...
+
+The `path` variable points to the file (prefix) where features will be written. Currently, threads write to separate files (maybe subject to change sooner or later): `features.txt.1`, `features.txt.2` etc.
+
+Currently, classification is implemented using VW's `csoaa_ldf` scheme with quadratic features which take the product of the source namespace (`s`, contains label-independent features) and the target namespace (`t`,  contains label-dependent features).
+
+To train VW in this setting, use the command:
+
+    cat features.txt.* | vw --hash all --noconstant -b 26 -q st --csoaa_ldf mc -f classifier1.vw
