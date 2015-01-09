@@ -635,7 +635,7 @@ void StaticData::LoadDecodeGraphs()
 
 void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const vector<size_t> &maxChartSpans)
 {
-  const vector<PhraseDictionary*>& pts = PhraseDictionary::GetCollExclOOVPt();
+  const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
   const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
   const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();

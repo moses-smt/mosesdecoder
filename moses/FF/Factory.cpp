@@ -9,7 +9,6 @@
 #include "moses/TranslationModel/PhraseDictionaryScope3.h"
 #include "moses/TranslationModel/PhraseDictionaryTransliteration.h"
 #include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
-#include "moses/TranslationModel/OOVPT.h"
 
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
@@ -184,7 +183,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
   MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
-  MOSES_FNAME(OOVPT);
 
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original

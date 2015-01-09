@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/DecodeGraph.h"
 #include "moses/InputPath.h"
 #include "util/exception.hh"
-#include "OOVPT.h"
 
 using namespace std;
 
@@ -43,22 +42,6 @@ CacheColl::~CacheColl()
 		const TargetPhraseCollection *tps = key.first;
 		delete tps;
 	}
-}
-
-std::vector<PhraseDictionary*> PhraseDictionary::GetCollExclOOVPt()
-{
-	std::vector<PhraseDictionary*> ret = GetColl();
-	std::vector<PhraseDictionary*>::iterator iter;
-
-	for (iter = ret.begin(); iter != ret.end(); ++iter) {
-		PhraseDictionary *pt = *iter;
-		if (typeid(*pt) == typeid(OOVPT&)) {
-			ret.erase(iter);
-			break;
-		}
-	}
-
-	return ret;
 }
 
 PhraseDictionary::PhraseDictionary(const std::string &line)
