@@ -40,7 +40,6 @@ PhraseOrientation::PhraseOrientation(int sourceSize,
   : m_countF(sourceSize)
   , m_countE(targetSize)
 {
-
   // prepare data structures for alignments
   std::vector<std::vector<int> > alignedToS;
   for(int i=0; i<m_countF; ++i) {
@@ -54,11 +53,60 @@ PhraseOrientation::PhraseOrientation(int sourceSize,
   std::vector<int> alignedCountS(m_countF,0);
 
   for (Alignment::const_iterator a=alignment.begin(); a!=alignment.end(); ++a) {
-    m_alignedToT[a->second].push_back(a->first);
-    alignedCountS[a->first]++;
     alignedToS[a->first].push_back(a->second);
+    alignedCountS[a->first]++;
+    m_alignedToT[a->second].push_back(a->first);
   }
 
+  Init(sourceSize, targetSize, m_alignedToT, alignedToS, alignedCountS);
+}
+
+
+PhraseOrientation::PhraseOrientation(int sourceSize,
+                                     int targetSize,
+                                     const Moses::AlignmentInfo &alignTerm,
+                                     const Moses::AlignmentInfo &alignNonTerm)
+  : m_countF(sourceSize)
+  , m_countE(targetSize)
+{
+  // prepare data structures for alignments
+  std::vector<std::vector<int> > alignedToS;
+  for(int i=0; i<m_countF; ++i) {
+    std::vector< int > dummy;
+    alignedToS.push_back(dummy);
+  }
+  for(int i=0; i<m_countE; ++i) {
+    std::vector< int > dummy;
+    m_alignedToT.push_back(dummy);
+  }
+  std::vector<int> alignedCountS(m_countF,0);
+
+  for (Moses::AlignmentInfo::const_iterator it=alignTerm.begin();
+       it!=alignTerm.end(); ++it) 
+  {
+    alignedToS[it->first].push_back(it->second);
+    alignedCountS[it->first]++;
+    m_alignedToT[it->second].push_back(it->first);
+  }
+
+  for (Moses::AlignmentInfo::const_iterator it=alignNonTerm.begin();
+       it!=alignNonTerm.end(); ++it) 
+  {
+    alignedToS[it->first].push_back(it->second);
+    alignedCountS[it->first]++;
+    m_alignedToT[it->second].push_back(it->first);
+  }
+
+  Init(sourceSize, targetSize, m_alignedToT, alignedToS, alignedCountS);
+}
+
+
+void PhraseOrientation::Init(int sourceSize,
+                             int targetSize,
+                             const std::vector<std::vector<int> > &alignedToT,
+                             const std::vector<std::vector<int> > &alignedToS,
+                             const std::vector<int> &alignedCountS)
+{
   for (int startF=0; startF<m_countF; ++startF) {
     for (int endF=startF; endF<m_countF; ++endF) {
 
@@ -89,8 +137,8 @@ PhraseOrientation::PhraseOrientation(int sourceSize,
       int maxF = -1;
       std::vector< int > usedF = alignedCountS;
       for (int ei=startE; ei<=endE; ++ei) {
-        for (size_t i=0; i<m_alignedToT[ei].size(); ++i) {
-          int fi = m_alignedToT[ei][i];
+        for (size_t i=0; i<alignedToT[ei].size(); ++i) {
+          int fi = alignedToT[ei][i];
           if (fi<minF) {
             minF = fi;
           }
