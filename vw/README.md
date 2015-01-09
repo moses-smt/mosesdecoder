@@ -81,6 +81,8 @@ To train a classifier, run `vwtrainer` (a limited version of the `moses` binary)
 
 The `path` variable points to the file (prefix) where features will be written. Currently, threads write to separate files (maybe subject to change sooner or later): `features.txt.1`, `features.txt.2` etc.
 
+`vwtrainer` creates the translation option collection for each input sentence but does not run decoding. Therefore, you probably want to disable expensive feature functions such as the language model (LM score is not used by VW features at the moment).
+
 Currently, classification is implemented using VW's `csoaa_ldf` scheme with quadratic features which take the product of the source namespace (`s`, contains label-independent features) and the target namespace (`t`,  contains label-dependent features).
 
 To train VW in this setting, use the command:
