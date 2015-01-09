@@ -69,27 +69,27 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 //  const Factor* targetLHS = currTarPhr.GetTargetLHS()[0];
 //  bool isGlueGrammarRule = false;
 
-  FEATUREVERBOSE(2, *currSrcPhr << std::endl); 
-  FEATUREVERBOSE(2, currTarPhr << std::endl); 
-
-  Moses::GHKM::Alignment alignment; // TODO: Efficiency! It's not necessary to fill a Moses::GHKM::Alignment object and then touch everything again in Moses::GHKM::PhraseOrientation's constructor
-
-  for (AlignmentInfo::const_iterator it=currTarPhr.GetAlignTerm().begin();
-       it!=currTarPhr.GetAlignTerm().end(); ++it) 
+  IFFEATUREVERBOSE(2) 
   {
-    alignment.push_back(std::make_pair(it->first, it->second));
-    FEATUREVERBOSE(2, "alignTerm " << it->first << " " << it->second << std::endl);
-  }
+    FEATUREVERBOSE(2, *currSrcPhr << std::endl); 
+    FEATUREVERBOSE(2, currTarPhr << std::endl); 
 
-  for (AlignmentInfo::const_iterator it=currTarPhr.GetAlignNonTerm().begin();
-       it!=currTarPhr.GetAlignNonTerm().end(); ++it) 
-  {
-    alignment.push_back(std::make_pair(it->first, it->second));
-    FEATUREVERBOSE(2, "alignNonTerm " << it->first << " " << it->second << std::endl);
+    for (AlignmentInfo::const_iterator it=currTarPhr.GetAlignTerm().begin();
+         it!=currTarPhr.GetAlignTerm().end(); ++it) 
+    {
+      FEATUREVERBOSE(2, "alignTerm " << it->first << " " << it->second << std::endl);
+    }
+
+    for (AlignmentInfo::const_iterator it=currTarPhr.GetAlignNonTerm().begin();
+         it!=currTarPhr.GetAlignNonTerm().end(); ++it) 
+    {
+      FEATUREVERBOSE(2, "alignNonTerm " << it->first << " " << it->second << std::endl);
+    }
   }
 
   // Initialize phrase orientation scoring object
-  Moses::GHKM::PhraseOrientation phraseOrientation(currSrcPhr->GetSize(), currTarPhr.GetSize(), alignment); // TODO: Efficiency! This should be precomputed.
+  Moses::GHKM::PhraseOrientation phraseOrientation(currSrcPhr->GetSize(), currTarPhr.GetSize(), 
+                                                   currTarPhr.GetAlignTerm(), currTarPhr.GetAlignNonTerm());
  
   // Get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
