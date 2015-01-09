@@ -14,8 +14,10 @@ namespace Moses
 
 template <class Value>
 struct DefaultFactory {
-  Value* operator()() {
-    return new Value();
+  typedef boost::shared_ptr<Value> ValuePtr;
+  
+  ValuePtr operator()() {
+    return ValuePtr(new Value());
   }
 };
 
@@ -24,22 +26,15 @@ class ThreadLocalByFeatureStorage
 {
   public:
 
-    typedef std::map<std::string, Value*> NameValueMap;
+    typedef boost::shared_ptr<Value> ValuePtr;
+    typedef std::map<std::string, ValuePtr> NameValueMap;
     typedef boost::thread_specific_ptr<NameValueMap> TSNameValueMap;
     
     ThreadLocalByFeatureStorage(FeatureFunction* ff,
                                 Factory factory = Factory())
     : m_ff(ff), m_factory(factory) {}
     
-    ~ThreadLocalByFeatureStorage() {
-      if(m_nameMap.get()) {
-        for(typename NameValueMap::iterator it = m_nameMap->begin();
-            it != m_nameMap->end(); it++)
-          delete it->second;
-      }
-    }
-    
-    virtual Value* GetStored() {
+    virtual ValuePtr GetStored() {
       if(!m_nameMap.get())
         m_nameMap.reset(new NameValueMap());
         
@@ -58,7 +53,7 @@ class ThreadLocalByFeatureStorage
       }
     }
     
-    virtual const Value* GetStored() const {
+    virtual const ValuePtr GetStored() const {
       UTIL_THROW_IF2(!m_nameMap.get(),
                      "No thread local storage has been created for: "
                      << m_ff->GetScoreProducerDescription());

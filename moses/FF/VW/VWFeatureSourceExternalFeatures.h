@@ -55,7 +55,6 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource
     }
     
   private:
-
     typedef std::vector<std::string> Features;
     typedef ThreadLocalByFeatureStorage<Features> TLSFeatures;
 
