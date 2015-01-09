@@ -7,6 +7,10 @@ function.
 Compatible with this frozen version of VW:
 
     https://github.com/moses-smt/vowpal_wabbit
+    
+To enable VW, you need to provide a path where VW was installed (using `make install`) to bjam:
+
+    ./bjam --with-vw=<path/to/vw/installation>
 
 Implemented classifier features
 -------------------------------
