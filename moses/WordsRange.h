@@ -41,6 +41,7 @@ class WordsRange
 {
   friend std::ostream& operator << (std::ostream& out, const WordsRange& range);
 
+  // m_endPos is inclusive
   size_t m_startPos, m_endPos;
 public:
   inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}

@@ -45,6 +45,10 @@ public:
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
+  
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+                , const TranslationOptionList &translationOptionList) const
+  {}
 
   void ComputeFeatures(const Phrase &source,
                        const TargetPhrase& targetPhrase,

@@ -46,6 +46,9 @@ public:
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+              , const TranslationOptionList &translationOptionList) const
+  {}
   void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase

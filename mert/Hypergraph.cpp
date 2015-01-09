@@ -235,7 +235,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
   map<size_t,size_t> oldIdToNew;
   size_t vi = 0;
   for (set<size_t>::const_iterator i = retainedVertices.begin(); i != retainedVertices.end(); ++i, ++vi) {
-    //cerr << *i << " New: " << vi << endl;
+ //   cerr << *i << " New: " << vi << endl;
     oldIdToNew[*i] = vi;
     Vertex* vertex = newGraph.NewVertex();
     vertex->SetSourceCovered(vertices_[*i].SourceCovered()); 
@@ -255,6 +255,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
     newHead.AddEdge(newEdge);
   }
 
+  
   /*
   cerr << "New graph" << endl;
   for (size_t vi = 0; vi < newGraph.VertexSize(); ++vi) {
@@ -274,8 +275,8 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
     }
     cerr << endl;
   }
-  */
-
+  
+*/
 
 }
 

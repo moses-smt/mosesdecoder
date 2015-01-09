@@ -37,6 +37,10 @@ void SkeletonStatefulFF::EvaluateWithSourceContext(const InputType &input
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {}
 
+void SkeletonStatefulFF::EvaluateTranslationOptionListWithSourceContext(const InputType &input
+                                  , const TranslationOptionList &translationOptionList) const
+{}
+
 FFState* SkeletonStatefulFF::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,

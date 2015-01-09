@@ -51,6 +51,7 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
+  // XXX should this really be InputFactorOrder???
   CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
                    // staticData.GetFactorDelimiter(), // eliminated [UG]
                    NULL);
@@ -157,6 +158,13 @@ void TargetPhrase::EvaluateWithSourceContext(const InputType &input, const Input
   float weightedScore = m_scoreBreakdown.GetWeightedScore();
   m_futureScore += futureScoreBreakdown.GetWeightedScore();
   m_fullScore = weightedScore + m_futureScore;
+}
+
+void TargetPhrase::UpdateScore(ScoreComponentCollection* futureScoreBreakdown) {
+  float weightedScore = m_scoreBreakdown.GetWeightedScore();
+  if(futureScoreBreakdown)
+    m_futureScore += futureScoreBreakdown->GetWeightedScore();
+  m_fullScore = weightedScore + m_futureScore;  
 }
 
 void TargetPhrase::SetXMLScore(float score)

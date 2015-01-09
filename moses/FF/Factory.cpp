@@ -57,10 +57,22 @@
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
+#include "moses/FF/SkeletonTranslationOptionListFeature.h"
 #include "moses/LM/BilingualLM.h"
 #include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
 #include "moses/Syntax/RuleTableFF.h"
+
+#ifdef HAVE_VW
+#include "moses/FF/VW/VW.h"
+#include "moses/FF/VW/VWFeatureSourceBagOfWords.h"
+#include "moses/FF/VW/VWFeatureSourceIndicator.h"
+#include "moses/FF/VW/VWFeatureSourcePhraseInternal.h"
+#include "moses/FF/VW/VWFeatureSourceWindow.h"
+#include "moses/FF/VW/VWFeatureTargetIndicator.h"
+#include "moses/FF/VW/VWFeatureSourceExternalFeatures.h"
+#include "moses/FF/VW/VWFeatureTargetPhraseInternal.h"
+#endif
 
 #ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
@@ -228,7 +240,19 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonLM);
   MOSES_FNAME(SkeletonChangeInput);
+  MOSES_FNAME(SkeletonTranslationOptionListFeature);
   MOSES_FNAME(SkeletonPT);
+  
+#ifdef HAVE_VW
+  MOSES_FNAME(VW);
+  MOSES_FNAME(VWFeatureSourceBagOfWords);
+  MOSES_FNAME(VWFeatureSourceIndicator);
+  MOSES_FNAME(VWFeatureSourcePhraseInternal);
+  MOSES_FNAME(VWFeatureSourceWindow);
+  MOSES_FNAME(VWFeatureTargetPhraseInternal);
+  MOSES_FNAME(VWFeatureTargetIndicator);
+  MOSES_FNAME(VWFeatureSourceExternalFeatures);
+#endif
 
 #ifdef HAVE_CMPH
   MOSES_FNAME(PhraseDictionaryCompact);

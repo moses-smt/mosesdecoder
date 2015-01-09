@@ -44,6 +44,11 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+                , const TranslationOptionList &translationOptionList) const
+  {}
+
+                
   void EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     ScoreComponentCollection* accumulator) const
@@ -63,6 +68,10 @@ private:
 
   boost::unordered_map<std::string,size_t> m_sourceLabels;
   std::vector<std::string> m_sourceLabelsByIndex;
+  std::vector<std::string> m_sourceLabelsByIndex_RHS_1;
+  std::vector<std::string> m_sourceLabelsByIndex_RHS_0;
+  std::vector<std::string> m_sourceLabelsByIndex_LHS_1;
+  std::vector<std::string> m_sourceLabelsByIndex_LHS_0;
   boost::unordered_set<size_t> m_coreSourceLabels;
   boost::unordered_map<const Factor*,size_t> m_sourceLabelIndexesByFactor;
   size_t m_GlueTopLabel;

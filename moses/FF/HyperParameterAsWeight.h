@@ -32,6 +32,10 @@ public:
                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+              , const TranslationOptionList &translationOptionList) const
+  {}
+  
   virtual void EvaluateWhenApplied(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const
   {}

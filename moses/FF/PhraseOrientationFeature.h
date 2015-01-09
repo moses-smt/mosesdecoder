@@ -42,7 +42,7 @@ public:
   void SetLeftBoundaryL2R(const std::vector<float> &scores,
                           size_t heuristicScoreIndex,
                           std::bitset<3> &possibleFutureOrientations,
-                          size_t nonTerminalIndex)
+                          const PhraseOrientationFeatureState* prevState)
   {
     for (size_t i=0; i<3; ++i) 
     {
@@ -50,14 +50,14 @@ public:
       m_leftBoundaryNonTerminalL2RPossibleFutureOrientations[i] = possibleFutureOrientations[i];
     }
     m_leftBoundaryNonTerminalL2RHeuristicScoreIndex = heuristicScoreIndex;
-    m_leftBoundaryNonTerminalIndex = nonTerminalIndex;
+    m_leftBoundaryPrevState = prevState;
     m_leftBoundaryIsSet = true;
   }
 
   void SetRightBoundaryR2L(const std::vector<float> &scores,
                            size_t heuristicScoreIndex,
                            std::bitset<3> &possibleFutureOrientations,
-                           size_t nonTerminalIndex)
+                           const PhraseOrientationFeatureState* prevState)
   {
     for (size_t i=0; i<3; ++i) 
     {
@@ -65,7 +65,7 @@ public:
       m_rightBoundaryNonTerminalR2LPossibleFutureOrientations[i] = possibleFutureOrientations[i];
     }
     m_rightBoundaryNonTerminalR2LHeuristicScoreIndex = heuristicScoreIndex;
-    m_rightBoundaryNonTerminalIndex = nonTerminalIndex;
+    m_rightBoundaryPrevState = prevState;
     m_rightBoundaryIsSet = true;
   }
 
@@ -102,14 +102,179 @@ public:
   }
 
 
-  int Compare(const FFState& other) const 
+  int Compare(const FFState& other) const
   {
+    const PhraseOrientationFeatureState &otherState = static_cast<const PhraseOrientationFeatureState&>(other);
+
+    if (!m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet &&
+        !m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) 
+    {
+      return 0;
+    }
+    if (m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet)
+    {
+      return 1;
+    }
+    if (!m_leftBoundaryIsSet && otherState.m_leftBoundaryIsSet)
+    {
+      return -1;
+    }
+    if (m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) 
+    {
+      return 1;
+    }
+    if (!m_rightBoundaryIsSet && otherState.m_rightBoundaryIsSet) 
+    {
+      return -1;
+    }
+
+    if (m_leftBoundaryIsSet) 
+    {
+      int compareLeft = CompareLeftBoundaryRecursive(*this, otherState);
+      if (compareLeft != 0)
+      {
+        return compareLeft;
+      }
+    }
+    if (m_rightBoundaryIsSet) 
+    {
+      int compareRight = CompareRightBoundaryRecursive(*this, otherState);
+      if (compareRight != 0)
+      {
+        return compareRight;
+      }
+    }
+
     return 0; 
   };
 
 private:
 
-  template<std::size_t N> bool Smaller(const std::bitset<N>& x, const std::bitset<N>& y) const
+  static int CompareLeftBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState)
+  {
+    if (!state.m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet)
+    {
+      return 0;
+    }
+    if (state.m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet)
+    {
+      return 1;
+    }
+    if (!state.m_leftBoundaryIsSet && otherState.m_leftBoundaryIsSet)
+    {
+      return -1;
+    }
+
+    if ( otherState.m_leftBoundaryNonTerminalL2RHeuristicScoreIndex < state.m_leftBoundaryNonTerminalL2RHeuristicScoreIndex )
+    {
+      return 1;
+    }
+    if ( state.m_leftBoundaryNonTerminalL2RHeuristicScoreIndex < otherState.m_leftBoundaryNonTerminalL2RHeuristicScoreIndex )
+    {
+      return -1;
+    }
+    if ( Smaller(otherState.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations, state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations) )
+    {
+      return 1;
+    }
+    if ( Smaller(state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations, otherState.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations) )
+    {
+      return -1;
+    }
+    for (size_t i=0; i<state.m_leftBoundaryNonTerminalL2RScores.size(); ++i)
+    {
+      if (state.m_leftBoundaryNonTerminalL2RScores[i] > otherState.m_leftBoundaryNonTerminalL2RScores[i])
+      {
+        return 1;
+      }
+      if (state.m_leftBoundaryNonTerminalL2RScores[i] < otherState.m_leftBoundaryNonTerminalL2RScores[i])
+      {
+        return -1;
+      }
+    }
+
+    if (state.m_leftBoundaryRecursionGuard && otherState.m_leftBoundaryRecursionGuard)
+    {
+      return 0;
+    }
+    if (state.m_leftBoundaryRecursionGuard && !otherState.m_leftBoundaryRecursionGuard)
+    {
+      return 1;
+    }
+    if (!state.m_leftBoundaryRecursionGuard && otherState.m_leftBoundaryRecursionGuard)
+    {
+      return -1;
+    }
+
+    const PhraseOrientationFeatureState *prevState = state.m_leftBoundaryPrevState;
+    const PhraseOrientationFeatureState *otherPrevState = otherState.m_leftBoundaryPrevState;
+
+    return CompareLeftBoundaryRecursive(*prevState, *otherPrevState);
+  };
+
+  static int CompareRightBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState)
+  {
+    if (!state.m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet)
+    {
+      return 0;
+    }
+    if (state.m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet)
+    {
+      return 1;
+    }
+    if (!state.m_rightBoundaryIsSet && otherState.m_rightBoundaryIsSet)
+    {
+      return -1;
+    }
+
+    if ( otherState.m_rightBoundaryNonTerminalR2LHeuristicScoreIndex < state.m_rightBoundaryNonTerminalR2LHeuristicScoreIndex )
+    {
+      return 1;
+    }
+    if ( state.m_rightBoundaryNonTerminalR2LHeuristicScoreIndex < otherState.m_rightBoundaryNonTerminalR2LHeuristicScoreIndex )
+    {
+      return -1;
+    }
+    if ( Smaller(otherState.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations, state.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations) )
+    {
+      return 1;
+    }
+    if ( Smaller(state.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations, otherState.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations) )
+    {
+      return -1;
+    }
+    for (size_t i=0; i<state.m_rightBoundaryNonTerminalR2LScores.size(); ++i)
+    {
+      if (state.m_rightBoundaryNonTerminalR2LScores[i] > otherState.m_rightBoundaryNonTerminalR2LScores[i])
+      {
+        return 1;
+      }
+      if (state.m_rightBoundaryNonTerminalR2LScores[i] < otherState.m_rightBoundaryNonTerminalR2LScores[i])
+      {
+        return -1;
+      }
+    }
+
+    if (state.m_rightBoundaryRecursionGuard && otherState.m_rightBoundaryRecursionGuard)
+    {
+      return 0;
+    }
+    if (state.m_rightBoundaryRecursionGuard && !otherState.m_rightBoundaryRecursionGuard)
+    {
+      return 1;
+    }
+    if (!state.m_rightBoundaryRecursionGuard && otherState.m_rightBoundaryRecursionGuard)
+    {
+      return -1;
+    }
+
+    const PhraseOrientationFeatureState *prevState = state.m_rightBoundaryPrevState;
+    const PhraseOrientationFeatureState *otherPrevState = otherState.m_rightBoundaryPrevState;
+
+    return CompareRightBoundaryRecursive(*prevState, *otherPrevState);
+  };
+
+  template<std::size_t N> static bool Smaller(const std::bitset<N>& x, const std::bitset<N>& y)
   {
     for (size_t i=0; i<N; ++i) 
     {
@@ -128,12 +293,12 @@ private:
   std::bitset<3> m_leftBoundaryNonTerminalL2RPossibleFutureOrientations;
   std::bitset<3> m_rightBoundaryNonTerminalR2LPossibleFutureOrientations;
 
-  size_t m_leftBoundaryNonTerminalIndex;
-  size_t m_rightBoundaryNonTerminalIndex;
   bool m_leftBoundaryRecursionGuard;
   bool m_rightBoundaryRecursionGuard;
   bool m_leftBoundaryIsSet;
   bool m_rightBoundaryIsSet;
+  const PhraseOrientationFeatureState* m_leftBoundaryPrevState;
+  const PhraseOrientationFeatureState* m_rightBoundaryPrevState;
 };
 
 
@@ -173,6 +338,9 @@ public:
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {};
 
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+              , const TranslationOptionList &translationOptionList) const
+  {}
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
@@ -189,13 +357,11 @@ public:
 protected:
 
   void LeftBoundaryL2RScoreRecursive(int featureID,
-                                     const ChartHypothesis *hypo, 
                                      const PhraseOrientationFeatureState *state, 
                                      const std::bitset<3> orientation,
                                      std::vector<float>& newScores) const;
 
   void RightBoundaryR2LScoreRecursive(int featureID,
-                                      const ChartHypothesis *hypo, 
                                       const PhraseOrientationFeatureState *state, 
                                       const std::bitset<3> orientation, 
                                       std::vector<float>& newScores) const;

@@ -331,6 +331,20 @@ std::string Join(const std::string& delimiter, const std::vector<T>& items)
   return outstr.str();
 }
 
+/*
+ * Convert any container to string
+ */
+template<typename It>
+std::string Join(const std::string &delim, It begin, It end)
+{
+  std::ostringstream outstr;
+  if (begin != end)
+    outstr << *begin++;
+  for ( ; begin != end; ++begin)
+    outstr << delim << *begin;
+  return outstr.str();
+}
+
 //! transform prob to natural log score
 inline float TransformScore(float prob)
 {
@@ -482,6 +496,15 @@ T log_sum (T log_a, T log_b)
   }
   return ( v );
 }
+
+/**
+ * Compare floats for equality with some tolerance.
+ */
+inline bool Equals(float a, float b)
+{
+  return fabs(a - b) < FLOAT_EPSILON;
+}
+
 
 /** Enforce rounding */
 inline void FixPrecision(std::ostream& stream, size_t size = 3)

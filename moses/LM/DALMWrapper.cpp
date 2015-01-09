@@ -341,7 +341,7 @@ FFState *LanguageModelDALM::EvaluateWhenApplied(const Hypothesis &hypo, const FF
 
 FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const{
   // TODO: original authors of this feature function, please check TODOs in this method to reactivate
-  UTIL_THROW(util::Exception, "DALM has been temporarily deactivated in the chart decoder, cf. http://thread.gmane.org/gmane.comp.nlp.moses.user/12146");
+  UTIL_THROW2("DALM has been temporarily deactivated in the chart decoder, cf. http://thread.gmane.org/gmane.comp.nlp.moses.user/12146");
   // initialize language model context state
  	DALMChartState *newState = new DALMChartState();
 	DALM::State &state = newState->GetRightContext();

@@ -41,8 +41,12 @@ void SkeletonStatelessFF::EvaluateWithSourceContext(const InputType &input
 		  newScores[0] = - std::numeric_limits<float>::infinity();
 		  scoreBreakdown.PlusEquals(this, newScores);
 	}
-
 }
+
+void SkeletonStatelessFF::EvaluateTranslationOptionListWithSourceContext(const InputType &input
+
+                , const TranslationOptionList &translationOptionList) const
+{}
 
 void SkeletonStatelessFF::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const

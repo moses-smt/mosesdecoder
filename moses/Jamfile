@@ -17,7 +17,12 @@ if $(with-oxlm) {
   oxlm = ;
 }
 
-alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(oxlm) ; 
+local classifier = ;
+if [ option.get "with-vw" ] {
+  classifier += ..//vw//classifier ;
+}
+
+alias headers : ../util//kenutil $(classifier) : : : $(max-factors) $(dlib) $(oxlm) ; 
 alias ThreadPool : ThreadPool.cpp ;
 alias Util : Util.cpp Timer.cpp ;
 
@@ -60,6 +65,13 @@ if [ option.get "with-mm" : no : yes ] = yes
   alias mmlib ;
 }
 
+local with-vw = [ option.get "with-vw" ] ;
+if $(with-vw) {
+  alias vwfiles : [ glob FF/VW/*.cpp ] ;
+} else {
+  alias vwfiles ;
+}
+
 lib moses :
 [ glob 
   *.cpp
@@ -85,7 +97,7 @@ lib moses :
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
-]
+] vwfiles 
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
 
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
