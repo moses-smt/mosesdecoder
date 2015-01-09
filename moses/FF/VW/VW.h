@@ -232,7 +232,8 @@ private:
     size_t startAt = targetSentOffset - toptOffset;
     bool matches = true;
     for (size_t i = 0; i < tphrase.GetSize(); i++) {
-      if (tphrase.GetWord(i) != targetSentence.m_sentence->GetWord(startAt + i)) {
+      if (startAt + i >= targetSentence.m_sentence->GetSize()
+          || tphrase.GetWord(i) != targetSentence.m_sentence->GetWord(startAt + i)) {
         matches = false;
         break;
       }
