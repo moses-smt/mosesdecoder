@@ -30,7 +30,7 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource
     {
       const Features& features = *m_tls.GetStored();
       for (size_t i = 0; i < features.size(); i++) {
-        classifier.AddLabelIndependentFeature(features[i]);
+        classifier.AddLabelIndependentFeature("srcext^" + features[i]);
       }
     }
     
