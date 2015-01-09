@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/DynamicCacheBasedLanguageModel.h"
 #include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
+#include "moses/TranslationModel/OOVPT.h"
 
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -729,6 +730,25 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
 		decodeGraph.SetBackoff(Scan<size_t>(backoffVector->at(i)));
 	}
   }
+
+  // add oov pt
+  const std::vector<OOVPT*> &oovPtColl = OOVPT::GetColl();
+
+  if (oovPtColl.size() == 0) {
+      m_registry.Construct("UnknownWordPenalty", "UnknownWordPenalty");
+  }
+
+  UTIL_THROW_IF2(oovPtColl.size() != 1, "You must specify 1, and only 1, OOV penalty");
+
+  featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+
+  DecodeStep *decodeStep = new DecodeStepTranslation(oovPtColl[0], NULL, *featuresRemaining);
+  DecodeGraph *decodeGraph = new DecodeGraph(m_decodeGraphs.size());
+  decodeGraph->Add(decodeStep);
+  decodeGraph->SetBackoff(1);
+
+  m_decodeGraphs.push_back(decodeGraph);
+
 }
 
 void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans)

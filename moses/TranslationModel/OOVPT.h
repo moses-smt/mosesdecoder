@@ -14,6 +14,10 @@ class OOVPT : public PhraseDictionary
   friend std::ostream& operator<<(std::ostream&, const OOVPT&);
 
 public:
+  static const std::vector<OOVPT*>& GetColl() {
+    return s_staticColl;
+  }
+
   OOVPT(const std::string &line);
 
   void Load();
@@ -33,6 +37,7 @@ public:
   TargetPhrase *CreateTargetPhrase(const Word &sourceWord) const;
 
 protected:
+  static std::vector<OOVPT*> s_staticColl;
 };
 
 }  // namespace Moses

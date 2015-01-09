@@ -52,7 +52,7 @@ std::vector<PhraseDictionary*> PhraseDictionary::GetCollExclOOVPt()
 
 	for (iter = ret.begin(); iter != ret.end(); ++iter) {
 		PhraseDictionary *pt = *iter;
-		if (typeid(*pt) == typeid(OOVPT&)) {
+		if (dynamic_cast<OOVPT*>(pt)) {
 			ret.erase(iter);
 			break;
 		}

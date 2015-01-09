@@ -7,9 +7,12 @@ using namespace std;
 
 namespace Moses
 {
+std::vector<OOVPT*> OOVPT::s_staticColl;
+
 OOVPT::OOVPT(const std::string &line)
   : PhraseDictionary(1, line)
 {
+  s_staticColl.push_back(this);
   m_tuneable = false;
   ReadParameters();
 }
@@ -38,16 +41,9 @@ void OOVPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) 
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
 
-    // backoff
-    if (!SatisfyBackoff(inputPath)) {
-      continue;
-    }
-
     if (inputPath.GetWordsRange().GetNumWordsCovered() != 1) {
     	continue;
     }
-
-    cerr << "inputPath=" << inputPath << endl;
 
     const Phrase &sourcePhrase = inputPath.GetPhrase();
     const Word &sourceWord = sourcePhrase.GetWord(0);
