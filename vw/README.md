@@ -76,11 +76,22 @@ You can also use multiple classifiers:
     VW0= 0.2
     VW1= 0.2
     ...
+
+Features can use any combination of factors. Provide a comma-delimited list of factors in the `source-factors` or `target-factors` variables to override the default setting (`0`, i.e. the first factor).
     
 Training the classifier
 -----------------------
 
-To train a classifier, run `vwtrainer` (a limited version of the `moses` binary). Configure your features in the `moses.ini` file (see above) and set the `train` flag:
+Training uses `vwtrainer` which is a limited version of the `moses` binary. To train, provide your training data as input in the following format:
+
+    source tokens<tab>target tokens<tab>word alignment
+
+Use Moses format for the word alignment (`0-0 1-0` etc.). Set the input type to 5 (`TabbedSentence`, see above):
+
+    [inputtype]
+    5
+
+Configure your features in the `moses.ini` file (see above) and set the `train` flag:
 
      [features]
      ... 
