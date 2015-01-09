@@ -26,7 +26,6 @@ template<class Value, class Factory = DefaultFactory<Value> >
 class ThreadLocalByFeatureStorage
 {
   public:
-
     typedef boost::shared_ptr<Value> ValuePtr;
     typedef std::map<std::string, ValuePtr> NameValueMap;
     typedef boost::thread_specific_ptr<NameValueMap> TSNameValueMap;
@@ -34,6 +33,8 @@ class ThreadLocalByFeatureStorage
     ThreadLocalByFeatureStorage(FeatureFunction* ff,
                                 Factory factory = Factory())
     : m_ff(ff), m_factory(factory) {}
+
+    virtual ~ThreadLocalByFeatureStorage() {} // provide empty virtual dtor
     
     virtual ValuePtr GetStored() {
       if(!m_nameMap.get())

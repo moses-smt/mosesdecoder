@@ -95,7 +95,7 @@ public:
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
                 , const TranslationOptionList &translationOptionList) const
   {
-    Discriminative::Classifier *classifier = m_tlsClassifier->GetStored();
+    Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
     
     if (translationOptionList.size() == 0)
       return; // nothing to do
@@ -124,10 +124,10 @@ public:
         (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
 
       if (! m_train) {
-        *iterLoss = classifier->Predict(MakeTargetLabel(targetPhrase));
+        *iterLoss = classifier.Predict(MakeTargetLabel(targetPhrase));
       } else {
         float loss = IsCorrectTranslationOption(**iterTransOpt) ? 0.0 : 1.0;
-        classifier->Train(MakeTargetLabel(targetPhrase), loss);
+        classifier.Train(MakeTargetLabel(targetPhrase), loss);
       }
     }
 

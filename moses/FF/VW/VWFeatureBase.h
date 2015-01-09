@@ -83,7 +83,7 @@ class VWFeatureBase : public StatelessFeatureFunction
     virtual void operator()(const InputType &input
                             , const InputPath &inputPath
                             , const WordsRange &sourceRange
-                            , Discriminative::Classifier *classifier) const = 0;
+                            , Discriminative::Classifier &classifier) const = 0;
     
     // Overload to process target-dependent features, create features once for
     // every target phrase. One source word range will have at leat one target
@@ -91,7 +91,7 @@ class VWFeatureBase : public StatelessFeatureFunction
     virtual void operator()(const InputType &input
                             , const InputPath &inputPath
                             , const TargetPhrase &targetPhrase
-                            , Discriminative::Classifier *classifier) const = 0;
+                            , Discriminative::Classifier &classifier) const = 0;
     
   protected:
     std::vector<FactorType> m_sourceFactors, m_targetFactors;

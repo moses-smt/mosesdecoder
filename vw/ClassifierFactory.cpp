@@ -30,13 +30,15 @@ ClassifierFactory::~ClassifierFactory()
     VW::finish(*m_VWInstance);
 }
 
-Classifier *ClassifierFactory::operator()() 
+ClassifierFactory::ClassifierPtr ClassifierFactory::operator()() 
 {
   if (m_train) {
     boost::unique_lock<boost::mutex> lock(m_mutex); // avoid possible race for m_lastId
-    return new VWTrainer(m_modelFilePrefix + "." + Moses::SPrint(m_lastId++) + (m_gzip ? ".gz" : ""));
+    return ClassifierFactory::ClassifierPtr(
+        new VWTrainer(m_modelFilePrefix + "." + Moses::SPrint(m_lastId++) + (m_gzip ? ".gz" : "")));
   } else {
-    return new VWPredictor(m_VWInstance, VW_DEFAULT_PARSER_OPTIONS + m_vwOptions);  
+    return ClassifierFactory::ClassifierPtr(
+        new VWPredictor(m_VWInstance, VW_DEFAULT_PARSER_OPTIONS + m_vwOptions));
   }    
 }
 

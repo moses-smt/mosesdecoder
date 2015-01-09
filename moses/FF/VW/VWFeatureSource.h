@@ -27,7 +27,7 @@ class VWFeatureSource : public VWFeatureBase
     virtual void operator()(const InputType &input
                             , const InputPath &inputPath
                             , const TargetPhrase &targetPhrase
-                            , Discriminative::Classifier *classifier) const
+                            , Discriminative::Classifier &classifier) const
     {}
     
     virtual void SetParameter(const std::string& key, const std::string& value) {

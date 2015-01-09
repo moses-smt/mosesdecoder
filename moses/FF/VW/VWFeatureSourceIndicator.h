@@ -23,7 +23,7 @@ class VWFeatureSourceIndicator : public VWFeatureSource
     void operator()(const InputType &input
                   , const InputPath &inputPath
                   , const WordsRange &sourceRange
-                  , Discriminative::Classifier *classifier) const
+                  , Discriminative::Classifier &classifier) const
     {
       size_t begin = sourceRange.GetStartPos();
       size_t end   = sourceRange.GetEndPos() + 1;
@@ -33,7 +33,7 @@ class VWFeatureSourceIndicator : public VWFeatureSource
       for (size_t i = 0; i < end - begin; i++)
         words[i] = GetWord(input, begin + i);
 
-      classifier->AddLabelIndependentFeature("sind^" + Join(" ", words));
+      classifier.AddLabelIndependentFeature("sind^" + Join(" ", words));
     }
     
     virtual void SetParameter(const std::string& key, const std::string& value) {

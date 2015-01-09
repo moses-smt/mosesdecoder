@@ -30,7 +30,6 @@ void VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
       m_isFirstExample = false;
     } else {
       // finish previous example
-      WriteBuffer();
       m_bfos << "\n";
     }
 

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <deque>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include <boost/noncopyable.hpp>
 #include <boost/thread/condition_variable.hpp>
@@ -152,6 +153,8 @@ private:
 class ClassifierFactory : private boost::noncopyable
 {
 public:
+  typedef boost::shared_ptr<Classifier> ClassifierPtr;
+
   /**
    * Creates VWPredictor instances to be used by individual threads.
    */
@@ -163,7 +166,7 @@ public:
   ClassifierFactory(const std::string &modelFilePrefix);
 
   // return VWPredictor or VWTrainer instance depending on whether we're in training mode
-  Classifier *operator()();
+  ClassifierPtr operator()();
 
   ~ClassifierFactory();
 

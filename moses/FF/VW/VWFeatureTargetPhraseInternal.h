@@ -20,10 +20,10 @@ class VWFeatureTargetPhraseInternal : public VWFeatureTarget
     void operator()(const InputType &input
                             , const InputPath &inputPath
                             , const TargetPhrase &targetPhrase
-                            , Discriminative::Classifier *classifier) const
+                            , Discriminative::Classifier &classifier) const
     {
       for (size_t i = 0; i < targetPhrase.GetSize(); i++) {
-        classifier->AddLabelDependentFeature("tin^" + GetWord(targetPhrase, i));
+        classifier.AddLabelDependentFeature("tin^" + GetWord(targetPhrase, i));
       }
     }
 

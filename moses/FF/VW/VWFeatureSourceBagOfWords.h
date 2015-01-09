@@ -21,10 +21,10 @@ class VWFeatureSourceBagOfWords : public VWFeatureSource
     void operator()(const InputType &input
                   , const InputPath &inputPath
                   , const WordsRange &sourceRange
-                  , Discriminative::Classifier *classifier) const
+                  , Discriminative::Classifier &classifier) const
     {
       for (size_t i = 0; i < input.GetSize(); i++) {
-        classifier->AddLabelIndependentFeature("bow^" + GetWord(input, i));
+        classifier.AddLabelIndependentFeature("bow^" + GetWord(input, i));
       }
     }
     

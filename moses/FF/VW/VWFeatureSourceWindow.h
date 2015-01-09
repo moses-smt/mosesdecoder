@@ -23,18 +23,18 @@ class VWFeatureSourceWindow : public VWFeatureSource
     void operator()(const InputType &input
                   , const InputPath &inputPath
                   , const WordsRange &sourceRange
-                  , Discriminative::Classifier *classifier) const
+                  , Discriminative::Classifier &classifier) const
     {
       int begin = sourceRange.GetStartPos();
       int end   = sourceRange.GetEndPos() + 1;
       int inputLen = input.GetSize();
 
       for (int i = std::max(0, begin - m_size); i < begin; i++) {
-        classifier->AddLabelIndependentFeature("c^" + SPrint(i - begin) + "^" + GetWord(input, i));
+        classifier.AddLabelIndependentFeature("c^" + SPrint(i - begin) + "^" + GetWord(input, i));
       }
 
       for (int i = end; i < std::min(end + m_size, inputLen); i++) {
-        classifier->AddLabelIndependentFeature("c^" + SPrint(i - end + 1) + "^" + GetWord(input, i));
+        classifier.AddLabelIndependentFeature("c^" + SPrint(i - end + 1) + "^" + GetWord(input, i));
       }
     }
     
