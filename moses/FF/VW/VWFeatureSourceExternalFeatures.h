@@ -10,18 +10,12 @@
 namespace Moses
 {
 
-typedef std::vector<std::string> Features;
-typedef ThreadLocalByFeatureStorage<Features> TLSFeatures;
-
 // Assuming a given column of TabbedSentence contains space separated source features
-class VWFeatureSourceExternalFeatures : public VWFeatureSource,
-                                        public TLSFeatures
+class VWFeatureSourceExternalFeatures : public VWFeatureSource
 {
   public:
     VWFeatureSourceExternalFeatures(const std::string &line)
-      : VWFeatureSource(line),
-        TLSFeatures(this),
-        m_column(0)
+      : VWFeatureSource(line), m_tls(this), m_column(0)
     {
       ReadParameters();
       
@@ -34,7 +28,7 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource,
                   , const WordsRange &sourceRange
                   , Discriminative::Classifier *classifier) const
     {
-      const Features& features = *GetStored();
+      const Features& features = *m_tls.GetStored();
       for (size_t i = 0; i < features.size(); i++) {
         classifier->AddLabelIndependentFeature(features[i]);
       }
@@ -47,22 +41,25 @@ class VWFeatureSourceExternalFeatures : public VWFeatureSource,
         VWFeatureSource::SetParameter(key, value);
     }
     
-    virtual void InitializeForInput(InputType const& source) {
-      TLSFeatures::InitializeForInput(source);
-      
+    virtual void InitializeForInput(InputType const& source) {      
       UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
                      "This feature function requires the TabbedSentence input type");
       
       const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
       const std::string &column = tabbedSentence.GetColumn(m_column);
       
-      Features& features = *GetStored();
+      Features& features = *m_tls.GetStored();
       features.clear();
       
       Tokenize(features, column, " ");
     }
     
   private:
+
+    typedef std::vector<std::string> Features;
+    typedef ThreadLocalByFeatureStorage<Features> TLSFeatures;
+
+    TLSFeatures m_tls;    
     size_t m_column;
 };
 

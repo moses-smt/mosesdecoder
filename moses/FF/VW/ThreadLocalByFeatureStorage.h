@@ -32,12 +32,17 @@ class ThreadLocalByFeatureStorage
     : m_ff(ff), m_factory(factory) {}
     
     ~ThreadLocalByFeatureStorage() {
-      for(typename NameValueMap::iterator it = m_nameMap->begin();
-          it != m_nameMap->end(); it++)
-        delete it->second;
+      if(m_nameMap.get()) {
+        for(typename NameValueMap::iterator it = m_nameMap->begin();
+            it != m_nameMap->end(); it++)
+          delete it->second;
+      }
     }
     
     virtual Value* GetStored() {
+      if(!m_nameMap.get())
+        m_nameMap.reset(new NameValueMap());
+        
       typename NameValueMap::iterator it
         = m_nameMap->find(m_ff->GetScoreProducerDescription());
       
@@ -54,6 +59,10 @@ class ThreadLocalByFeatureStorage
     }
     
     virtual const Value* GetStored() const {
+      UTIL_THROW_IF2(!m_nameMap.get(),
+                     "No thread local storage has been created for: "
+                     << m_ff->GetScoreProducerDescription());
+      
       typename NameValueMap::const_iterator it
         = m_nameMap->find(m_ff->GetScoreProducerDescription());
       
@@ -62,11 +71,6 @@ class ThreadLocalByFeatureStorage
                      << m_ff->GetScoreProducerDescription());
       
       return it->second;
-    }
-    
-    virtual void InitializeForInput(InputType const& source) {
-      if(!m_nameMap.get())
-        m_nameMap.reset(new NameValueMap());
     }
     
   private:
