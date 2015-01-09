@@ -27,6 +27,14 @@ VWPredictor::VWPredictor(vw *instance, const string &vwOptions)
   m_isFirstSource = m_isFirstTarget = true;
 }
 
+VWPredictor::~VWPredictor()
+{
+  delete m_ex;
+  VW::finish(*m_VWParser);
+  if (!m_sharedVwInstance)
+    VW::finish(*m_VWInstance);
+}
+
 void VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float value)
 {
   // label-independent features are kept in a different feature namespace ('s' = source)
@@ -77,21 +85,6 @@ void VWPredictor::AddFeature(const StringPiece &name, float value)
 {
   if (DEBUG) std::cerr << "VW :: Adding feature: " << EscapeSpecialChars(name.as_string()) << ":" << value << "\n";
   m_ex->addf(EscapeSpecialChars(name.as_string()), value);
-}
-
-void VWPredictor::Finish()
-{
-  if (m_sharedVwInstance)
-    m_VWInstance = NULL;
-  else
-    VW::finish(*m_VWInstance);
-}
-
-VWPredictor::~VWPredictor()
-{
-  delete m_ex;
-  if (!m_sharedVwInstance)
-    VW::finish(*m_VWInstance);
 }
 
 } // namespace Discriminative

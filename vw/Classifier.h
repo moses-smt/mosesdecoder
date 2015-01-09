@@ -93,6 +93,7 @@ class VWTrainer : public Classifier
 {
 public:
   VWTrainer(const std::string &outputFile);
+  ~VWTrainer();
 
   virtual void AddLabelIndependentFeature(const StringPiece &name, float value);
   virtual void AddLabelDependentFeature(const StringPiece &name, float value);
@@ -101,7 +102,6 @@ public:
 
 protected:
   void AddFeature(const StringPiece &name, float value);
-  void Finish();
 
   bool m_isFirstSource, m_isFirstTarget, m_isFirstExample;
 
@@ -120,6 +120,7 @@ class VWPredictor : public Classifier, private boost::noncopyable
 {
 public:
   VWPredictor(const std::string &modelFile, const std::string &vwOptions);
+  ~VWPredictor();
 
   virtual void AddLabelIndependentFeature(const StringPiece &name, float value);
   virtual void AddLabelDependentFeature(const StringPiece &name, float value);
@@ -130,7 +131,6 @@ public:
 
 protected:
   void AddFeature(const StringPiece &name, float values);
-  void Finish();
 
   ::vw *m_VWInstance, *m_VWParser;
   ::ezexample *m_ex;
@@ -138,8 +138,6 @@ protected:
   // deleted at end; if false, then we own the VW instance and must clean up after it.
   bool m_sharedVwInstance;
   bool m_isFirstSource, m_isFirstTarget;
-
-  ~VWPredictor();
 
 private:
   // instantiation by classifier factory

@@ -17,6 +17,13 @@ VWTrainer::VWTrainer(const std::string &outputFile)
   m_isFirstSource = m_isFirstTarget = m_isFirstExample = true;
 }
 
+VWTrainer::~VWTrainer()
+{
+  WriteBuffer();
+  m_bfos << "\n";
+  close(m_bfos);
+}
+
 void VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
 {
   if (m_isFirstExample) {
@@ -66,13 +73,6 @@ float VWTrainer::Predict(const StringPiece &label)
 void VWTrainer::AddFeature(const StringPiece &name, float value)
 {
   m_outputBuffer.push_back(EscapeSpecialChars(name.as_string()) + ":" + SPrint(value));
-}
-
-void VWTrainer::Finish()
-{
-  WriteBuffer();
-  m_bfos << "\n";
-  close(m_bfos);
 }
 
 void VWTrainer::WriteBuffer()
