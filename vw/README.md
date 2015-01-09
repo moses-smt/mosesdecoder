@@ -4,6 +4,10 @@ Vowpal Wabbit for Moses
 This is an attempt to integrate Vowpal Wabbit with Moses as a stateless feature
 function.
 
+Compatible with this frozen version of VW:
+
+    https://github.com/moses-smt/vowpal_wabbit
+
 Implemented classifier features
 -------------------------------
 
