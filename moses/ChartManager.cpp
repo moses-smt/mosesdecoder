@@ -688,23 +688,6 @@ void ChartManager::ReconstructApplicationContext(const ChartHypothesis &hypo,
   }
 }
 
-void ChartManager::OutputUnknowns(OutputCollector *collector) const
-{
-  if (collector) {
-	  long translationId = m_source.GetTranslationId();
-	  const std::vector<Phrase*> &oovs = GetParser().GetUnknownSources();
-
-	  std::ostringstream out;
-	  for (std::vector<Phrase*>::const_iterator p = oovs.begin();
-		   p != oovs.end(); ++p) {
-		out << *p;
-	  }
-	  out << std::endl;
-	  collector->Write(translationId, out.str());
-  }
-
-}
-
 void ChartManager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
 {
   const ChartHypothesis *hypo = GetBestHypothesis();

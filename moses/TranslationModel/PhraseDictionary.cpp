@@ -70,6 +70,15 @@ PhraseDictionary::PhraseDictionary(const std::string &line)
 	s_staticColl.push_back(this);
 }
 
+PhraseDictionary::PhraseDictionary(size_t numScoreComponents, const std::string &line)
+  :DecodeFeature(numScoreComponents, line)
+  ,m_tableLimit(20) // default
+  ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
+{
+	m_id = s_staticColl.size();
+	s_staticColl.push_back(this);
+}
+
 bool
 PhraseDictionary::
 ProvidesPrefixCheck() const

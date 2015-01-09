@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/Factory.h"
 #include "TypeDef.h"
 #include "moses/FF/WordPenaltyProducer.h"
-#include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/DynamicCacheBasedLanguageModel.h"
 #include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
@@ -758,10 +757,10 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
 	      FeatureFunction &ff = FeatureFunction::FindFeatureFunction(token[1]);
 
   	      DecodeStep* decodeStep = NULL;
-	      if (typeid(ff) == typeid(PhraseDictionary)) {
+	      if (dynamic_cast<PhraseDictionary*>(&ff)) {
 		      decodeStep = new DecodeStepTranslation(&static_cast<PhraseDictionary&>(ff), prev, *featuresRemaining);
 	      }
-	      else if (typeid(ff) == typeid(GenerationDictionary)) {
+	      else if (dynamic_cast<GenerationDictionary*>(&ff)) {
 		      decodeStep = new DecodeStepGeneration(&static_cast<GenerationDictionary&>(ff), prev, *featuresRemaining);
 	      }
 	      else {

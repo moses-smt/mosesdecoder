@@ -22,7 +22,6 @@
 #include "moses/FF/SourceWordDeletionFeature.h"
 #include "moses/FF/GlobalLexicalModel.h"
 #include "moses/FF/GlobalLexicalModelUnlimited.h"
-#include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/WordTranslationFeature.h"
 #include "moses/FF/TargetBigramFeature.h"
 #include "moses/FF/TargetNgramFeature.h"
@@ -184,7 +183,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
   MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
-  MOSES_FNAME(OOVPT);
+  MOSES_FNAME2("UnknownWordPenalty", OOVPT);
 
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
@@ -204,7 +203,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(InputFeature);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
-  MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);

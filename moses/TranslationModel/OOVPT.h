@@ -20,6 +20,8 @@ public:
 
   void InitializeForInput(InputType const& source);
 
+  std::vector<float> DefaultWeights() const;
+
   // for phrase-based model
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 

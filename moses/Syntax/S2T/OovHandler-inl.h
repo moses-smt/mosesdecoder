@@ -1,6 +1,5 @@
 #pragma once
 
-#include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/StaticData.h"
 
 namespace Moses
@@ -67,6 +66,9 @@ TargetPhrase *OovHandler<RuleTrie>::SynthesizeTargetPhrase(
 {
   const StaticData &staticData = StaticData::Instance();
 
+  assert(false);
+  return NULL;
+/*
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer =
       UnknownWordPenaltyProducer::Instance();
 
@@ -89,6 +91,7 @@ TargetPhrase *OovHandler<RuleTrie>::SynthesizeTargetPhrase(
   }
 
   return targetPhrase;
+*/
 }
 
 template<typename RuleTrie>

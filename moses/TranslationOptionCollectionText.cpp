@@ -61,15 +61,6 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
   }
 }
 
-/* forcibly create translation option for a particular source word.
-	* For text, this function is easy, just call the base class' ProcessOneUnknownWord()
-*/
-void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos)
-{
-  const InputPath &inputPath = GetInputPath(sourcePos, sourcePos);
-  ProcessOneUnknownWord(inputPath,sourcePos);
-}
-
 /**
  * Check the source sentence for coverage data
  */
@@ -164,7 +155,7 @@ void TranslationOptionCollectionText::CreateTranslationOptions()
 }
 
 /** create translation options that exactly cover a specific input span.
- * Called by CreateTranslationOptions() and ProcessUnknownWord()
+ * Called by CreateTranslationOptions()
  * \param decodeGraph list of decoding steps
  * \param factorCollection input sentence with all factors
  * \param startPos first position in input sentence

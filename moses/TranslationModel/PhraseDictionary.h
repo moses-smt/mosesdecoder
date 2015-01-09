@@ -80,6 +80,7 @@ public:
   static std::vector<PhraseDictionary*> GetCollExclOOVPt();
 
   PhraseDictionary(const std::string &line);
+  PhraseDictionary(size_t numScoreComponents, const std::string &line);
 
   virtual ~PhraseDictionary() {
   }

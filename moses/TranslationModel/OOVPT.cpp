@@ -8,8 +8,9 @@ using namespace std;
 namespace Moses
 {
 OOVPT::OOVPT(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(1, line)
 {
+  m_tuneable = false;
   ReadParameters();
 }
 
@@ -23,6 +24,12 @@ void OOVPT::InitializeForInput(InputType const& source)
   ReduceCache();
 }
 
+std::vector<float> OOVPT::DefaultWeights() const
+{
+  vector<float> ret(m_numScoreComponents, 1);
+  return ret;
+}
+
 void OOVPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   CacheColl &cache = GetCache();
@@ -30,11 +37,24 @@ void OOVPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) 
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
+
+    // backoff
+    if (!SatisfyBackoff(inputPath)) {
+      continue;
+    }
+
+    if (inputPath.GetWordsRange().GetNumWordsCovered() != 1) {
+    	continue;
+    }
+
+    cerr << "inputPath=" << inputPath << endl;
+
     const Phrase &sourcePhrase = inputPath.GetPhrase();
     const Word &sourceWord = sourcePhrase.GetWord(0);
 
     TargetPhrase *tp = CreateTargetPhrase(sourceWord);
     tp->EvaluateInIsolation(sourcePhrase);
+    cerr << "tp=" << *tp << endl;
 
     TargetPhraseCollection *tpColl = new TargetPhraseCollection();
     tpColl->Add(tp);
@@ -45,6 +65,7 @@ void OOVPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) 
     cache[hash] = value;
 
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
+    cerr << "inputPath=" << inputPath << endl;
   }
 }
 

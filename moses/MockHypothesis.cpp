@@ -39,7 +39,6 @@ MockHypothesisGuard::MockHypothesisGuard(
   : m_initialTransOpt(),
     m_sentence(),
     m_wp("WordPenalty"),
-    m_uwp("UnknownWordPenalty"),
     m_dist("Distortion"),
     m_manager(m_sentence)
 {

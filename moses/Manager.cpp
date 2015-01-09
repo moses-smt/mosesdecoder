@@ -1886,21 +1886,6 @@ void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
 
 }
 
-void Manager::OutputUnknowns(OutputCollector *collector) const
-{
-  if (collector) {
-	long translationId = m_source.GetTranslationId();
-	const vector<const Phrase*>& unknowns = m_transOptColl->GetUnknownSources();
-	ostringstream out;
-	for (size_t i = 0; i < unknowns.size(); ++i) {
-	  out << *(unknowns[i]);
-	}
-	out << endl;
-	collector->Write(translationId, out.str());
-  }
-
-}
-
 void Manager::OutputWordGraph(OutputCollector *collector) const
 {
   if (collector) {

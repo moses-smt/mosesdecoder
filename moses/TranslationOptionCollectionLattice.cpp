@@ -152,10 +152,6 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
     		Add(transOpt);
     	}
     }
-    else if (path.GetPhrase().GetSize() == 1) {
-    	// unknown word processing
-    	ProcessOneUnknownWord(path, path.GetWordsRange().GetStartPos(),  path.GetWordsRange().GetNumWordsCovered() , path.GetInputScore());
-    }
   }
 
   // Prune
@@ -169,11 +165,6 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
   // Cached lex reodering costs
   CacheLexReordering();
 
-}
-
-void TranslationOptionCollectionLattice::ProcessUnknownWord(size_t sourcePos)
-{
-	UTIL_THROW(util::Exception, "ProcessUnknownWord() not implemented for lattice");
 }
 
 void TranslationOptionCollectionLattice::CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList

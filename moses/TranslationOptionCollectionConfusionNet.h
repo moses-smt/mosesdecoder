@@ -37,7 +37,6 @@ protected:
 public:
   TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
-  void ProcessUnknownWord(size_t sourcePos);
   void CreateTranslationOptions();
   void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
                                         , size_t startPosition

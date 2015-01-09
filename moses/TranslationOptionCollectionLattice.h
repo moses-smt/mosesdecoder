@@ -15,11 +15,6 @@ class WordLattice;
 class TranslationOptionCollectionLattice : public TranslationOptionCollection
 {
 protected:
-  /* forcibly create translation option for a 1 word.
-  	* call the base class' ProcessOneUnknownWord() for each possible word in the confusion network
-  	* at a particular source position
-  */
-  void ProcessUnknownWord(size_t sourcePos); // do not implement
 
 public:
   TranslationOptionCollectionLattice(const WordLattice &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);

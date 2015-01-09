@@ -203,7 +203,8 @@ public:
   void OutputAlignment(OutputCollector *collector) const;
   void OutputLatticeSamples(OutputCollector *collector) const;
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
-  void OutputUnknowns(OutputCollector *collector) const;
+  void OutputUnknowns(OutputCollector *collector) const
+  {}
   void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
   {}
   void OutputWordGraph(OutputCollector *collector) const;
