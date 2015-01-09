@@ -102,6 +102,10 @@ The `path` variable points to the file (prefix) where features will be written. 
 
 `vwtrainer` creates the translation option collection for each input sentence but does not run decoding. Therefore, you probably want to disable expensive feature functions such as the language model (LM score is not used by VW features at the moment).
 
+Run `vwtrainer`:
+
+    vwtrainer -f moses.trainvw.ini < tab-separated-training-data.tsv
+
 Currently, classification is implemented using VW's `csoaa_ldf` scheme with quadratic features which take the product of the source namespace (`s`, contains label-independent features) and the target namespace (`t`,  contains label-dependent features).
 
 To train VW in this setting, use the command:
