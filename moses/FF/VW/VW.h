@@ -68,6 +68,12 @@ public:
     }
   }
 
+  virtual ~VW()
+  {
+    delete m_tlsClassifier;  
+    delete m_normalizer;
+  }
+
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
