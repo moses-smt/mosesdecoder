@@ -126,7 +126,7 @@ public:
   virtual void Train(const StringPiece &label, float loss);
   virtual float Predict(const StringPiece &label);
 
-  friend class VWPredictorFactory;
+  friend class ClassifierFactory;
 
 protected:
   void AddFeature(const StringPiece &name, float values);
@@ -137,45 +137,42 @@ protected:
   // if true, then the VW instance is owned by an external party and should NOT be
   // deleted at end; if false, then we own the VW instance and must clean up after it.
   bool m_sharedVwInstance;
-  int m_index;
   bool m_isFirstSource, m_isFirstTarget;
 
   ~VWPredictor();
 
 private:
-  // instantiation by VWPredictorFactory
-  VWPredictor(vw * instance, int index, const std::string &vwOption); 
+  // instantiation by classifier factory
+  VWPredictor(vw * instance, const std::string &vwOption); 
 };
-  
+
 /**
-  * Object pool of VWPredictors.
-  */
-class VWPredictorFactory : private boost::noncopyable
+ * Provider for classifier instances to be used by individual threads.
+ */
+class ClassifierFactory : private boost::noncopyable
 {
 public:
-  VWPredictorFactory(const std::string &modelFile, const std::string &vwOptions, const int poolSize = DEFAULT_POOL_SIZE);
+  /**
+   * Creates VWPredictor instances to be used by individual threads.
+   */
+  ClassifierFactory(const std::string &modelFile, const std::string &vwOptions);   
 
   /**
-  * Get an instance of VWPredictor from the pool.
-  */
-  VWPredictor * Acquire();
+   * Creates VWTrainer instances (which write features to a file).
+   */
+  ClassifierFactory(const std::string &modelFilePrefix);
 
-  /**
-  * Release a VWPredictor instance.
-  */
-  void Release(VWPredictor *vwpred);
-
-  ~VWPredictorFactory();
+  // return VWPredictor or VWTrainer instance depending on whether we're in training mode
+  Classifier *operator()();
 
 private:
+  std::string m_vwOptions;
   ::vw *m_VWInstance;
-  int m_firstFree;
-  std::vector<int> m_nextFree;
-  std::vector<VWPredictor *> m_predictors;
+  int m_lastId;
+  std::string m_modelFilePrefix;
+  bool m_gzip;
   boost::mutex m_mutex;
-  boost::condition_variable m_cond;
-
-  const static int DEFAULT_POOL_SIZE = 128;
+  const bool m_train;
 };
 
 } // namespace Discriminative

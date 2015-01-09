@@ -2,7 +2,6 @@
 
 #include <string>
 #include <map>
-#include <boost/thread/tss.hpp>
 
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TranslationOptionList.h"
@@ -17,35 +16,52 @@
 #include "Classifier.h"
 #include "VWFeatureBase.h"
 #include "TabbedSentence.h"
+#include "ThreadLocalByFeatureStorage.h"
 
 namespace Moses
 {
 
 const std::string VW_DUMMY_LABEL = "1111"; // VW does not use the actual label, other classifiers might
 
+/** 
+ * VW thread-specific data about target sentence.
+ */
 struct VWTargetSentence {
-  VWTargetSentence(const Phrase &sentence, const AlignmentInfo &alignment) 
-    : m_sentence(sentence), m_alignment(alignment)
-  {}
+  VWTargetSentence() : m_sentence(NULL), m_alignment(NULL) {}
 
-  Phrase m_sentence;
-  AlignmentInfo m_alignment;
+  void Clear()
+  {
+    if (m_sentence) delete m_sentence;
+    if (m_alignment) delete m_alignment;
+  }
+
+  ~VWTargetSentence() 
+  {
+    Clear();
+  }
+
+  Phrase *m_sentence;
+  AlignmentInfo *m_alignment;
 };
 
-typedef std::map<std::string, VWTargetSentence> VWTargetSentenceMap;
+typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::ClassifierFactory &> TLSClassifier;
+typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
 
 class VW : public StatelessFeatureFunction
+           , public TLSTargetSentence
 {
 public:
   VW(const std::string &line)
-    :StatelessFeatureFunction(1, line), m_train(false)
+    : StatelessFeatureFunction(1, line)
+      , TLSTargetSentence(this)
+      , m_train(false)
   {
     ReadParameters();
-    if (m_train) {
-      m_trainer = new Discriminative::VWTrainer(m_modelPath);
-    } else {
-      m_predictorFactory = new Discriminative::VWPredictorFactory(m_modelPath, m_vwOptions);
-    }
+    Discriminative::ClassifierFactory *classifierFactory = m_train 
+      ? new Discriminative::ClassifierFactory(m_modelPath)
+      : new Discriminative::ClassifierFactory(m_modelPath, m_vwOptions);
+
+    m_tlsClassifier = new TLSClassifier(this, *classifierFactory);
 
     if (! m_normalizer) {
       VERBOSE(1, "VW :: No loss function specified, assuming logistic loss.\n");
@@ -74,9 +90,7 @@ public:
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
                 , const TranslationOptionList &translationOptionList) const
   {
-    Discriminative::Classifier *classifier = m_train 
-      ? m_trainer 
-      : (Discriminative::Classifier *)m_predictorFactory->Acquire();
+    Discriminative::Classifier *classifier = m_tlsClassifier->GetStored();
     
     if (translationOptionList.size() == 0)
       return; // nothing to do
@@ -111,9 +125,6 @@ public:
         classifier->Train(MakeTargetLabel(targetPhrase), loss);
       }
     }
-
-    if (!m_train)
-      m_predictorFactory->Release(static_cast<Discriminative::VWPredictor *>(classifier));
 
     (*m_normalizer)(losses);
 
@@ -167,23 +178,23 @@ public:
     const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
     UTIL_THROW_IF2(tabbedSentence.GetColumns().size() < 2, "TabbedSentence must contain target<tab>alignment");
 
-    if (! m_targetSentenceMap.get())
-      m_targetSentenceMap.reset(new VWTargetSentenceMap());
-
     // target sentence represented as a phrase
-    Phrase target;
-    target.CreateFromString(
-        Output,
-        StaticData::Instance().GetOutputFactorOrder(),
-        tabbedSentence.GetColumns()[0],
-        NULL);
+    Phrase *target = new Phrase();
+    target->CreateFromString(
+        Output
+        , StaticData::Instance().GetOutputFactorOrder()
+        , tabbedSentence.GetColumns()[0]
+        , NULL);
 
     // word alignment between source and target sentence
     // we don't store alignment info in AlignmentInfoCollection because we keep alignments of whole 
     // sentences, not phrases
-    AlignmentInfo alignment(tabbedSentence.GetColumns()[1]);
+    AlignmentInfo *alignment = new AlignmentInfo(tabbedSentence.GetColumns()[1]);
 
-    (*m_targetSentenceMap).insert(std::make_pair(GetScoreProducerDescription(), VWTargetSentence(target, alignment)));
+    VWTargetSentence &targetSent = *GetStored();
+    targetSent.Clear();
+    targetSent.m_sentence = target;
+    targetSent.m_alignment = alignment;
   }
 
 
@@ -195,11 +206,11 @@ private:
 
   bool IsCorrectTranslationOption(const TranslationOption &topt) const {
     size_t sourceStart = topt.GetSourceWordsRange().GetStartPos();
-    const VWTargetSentence &targetSentence = m_targetSentenceMap->find(GetScoreProducerDescription())->second;
+    const VWTargetSentence &targetSentence = *GetStored();
     
     // get the left-most alignment point withitn sourceRange
     std::set<size_t> aligned;
-    while ((aligned = targetSentence.m_alignment.GetAlignmentsForSource(sourceStart)).empty())
+    while ((aligned = targetSentence.m_alignment->GetAlignmentsForSource(sourceStart)).empty())
       sourceStart++;
 
     size_t targetSentOffset = *aligned.begin(); // index of first aligned target word covered in source span
@@ -216,7 +227,7 @@ private:
     size_t startAt = targetSentOffset - toptOffset;
     bool matches = true;
     for (size_t i = 0; i < tphrase.GetSize(); i++) {
-      if (tphrase.GetWord(i) != targetSentence.m_sentence.GetWord(startAt + i)) {
+      if (tphrase.GetWord(i) != targetSentence.m_sentence->GetWord(startAt + i)) {
         matches = false;
         break;
       }
@@ -229,10 +240,7 @@ private:
   std::string m_modelPath;
   std::string m_vwOptions;
   Discriminative::Normalizer *m_normalizer = NULL;
-  Discriminative::Classifier *m_trainer = NULL;
-  Discriminative::VWPredictorFactory *m_predictorFactory = NULL;
-
-  static boost::thread_specific_ptr<VWTargetSentenceMap> m_targetSentenceMap;
+  TLSClassifier *m_tlsClassifier;
 };
 
 }

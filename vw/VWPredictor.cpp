@@ -18,13 +18,12 @@ VWPredictor::VWPredictor(const string &modelFile, const string &vwOptions)
   m_isFirstSource = m_isFirstTarget = true;
 }
 
-VWPredictor::VWPredictor(vw *instance, int index, const string &vwOptions)
+VWPredictor::VWPredictor(vw *instance, const string &vwOptions)
 {
   m_VWInstance = instance;
   m_VWParser = VW::initialize(vwOptions + " --noop");
   m_sharedVwInstance = true;
   m_ex = new ::ezexample(m_VWInstance, false, m_VWParser);
-  m_index = index;
   m_isFirstSource = m_isFirstTarget = true;
 }
 
