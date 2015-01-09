@@ -27,11 +27,13 @@ class ThreadLocalByFeatureStorage
     typedef std::map<std::string, Value*> NameValueMap;
     typedef boost::thread_specific_ptr<NameValueMap> TSNameValueMap;
     
-    ThreadLocalByFeatureStorage(FeatureFunction* ff, Factory factory = Factory())
+    ThreadLocalByFeatureStorage(FeatureFunction* ff,
+                                Factory factory = Factory())
     : m_ff(ff), m_factory(factory) {}
     
     ~ThreadLocalByFeatureStorage() {
-      for(typename NameValueMap::iterator it = m_nameMap->begin(); it != m_nameMap->end(); it++)
+      for(typename NameValueMap::iterator it = m_nameMap->begin();
+          it != m_nameMap->end(); it++)
         delete it->second;
     }
     
@@ -56,7 +58,8 @@ class ThreadLocalByFeatureStorage
         = m_nameMap->find(m_ff->GetScoreProducerDescription());
       
       UTIL_THROW_IF2(it == m_nameMap->end(),
-                   "No features stored for: " << m_ff->GetScoreProducerDescription());
+                     "No features stored for: "
+                     << m_ff->GetScoreProducerDescription());
       
       return it->second;
     }
