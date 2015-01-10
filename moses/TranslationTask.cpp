@@ -126,6 +126,8 @@ void TranslationTask::Run()
   //list of unknown words
   manager->OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
 
+  manager->OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
+
   // report additional statistics
   manager->CalcDecoderStatistics();
   VERBOSE(1, "Line " << translationId << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
