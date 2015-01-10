@@ -134,7 +134,7 @@ bool Vocab::Load(FileHandler* vcbin, const FactorDirection& direction,
     if (id == 0 && word != GetkOOVWord())
       id = m_ids2words.size() + 1;	// assign ids sequentially starting from 1
     UTIL_THROW_IF2(m_ids2words.count(id) != 0 || m_words2ids.count(word) != 0,
-    		"Error");
+                   "Error");
 
     m_ids2words[id] = word;
     m_words2ids[word] = id;

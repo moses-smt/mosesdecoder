@@ -13,7 +13,7 @@ namespace Moses
 WordLattice::WordLattice()
 {
   UTIL_THROW_IF2(&InputFeature::Instance() == NULL,
-		  "Input feature must be specified");
+                 "Input feature must be specified");
 }
 
 size_t WordLattice::GetColumnIncrement(size_t i, size_t j) const
@@ -49,11 +49,11 @@ void WordLattice::Print(std::ostream& out) const
   out<<"\n\n";
 }
 
-int 
+int
 WordLattice::
 InitializeFromPCNDataType
-(const PCN::CN& cn, 
- const std::vector<FactorType>& factorOrder, 
+(const PCN::CN& cn,
+ const std::vector<FactorType>& factorOrder,
  const std::string& debug_line)
 {
   // const StaticData &staticData = StaticData::Instance();
@@ -78,20 +78,20 @@ InitializeFromPCNDataType
 
       //check for correct number of link parameters
       if (alt.m_denseFeatures.size() != numInputScores) {
-        TRACE_ERR("ERROR: need " << numInputScores 
-		  << " link parameters, found " 
-		  << alt.m_denseFeatures.size() 
-		  << " while reading column " << i 
-		  << " from " << debug_line << "\n");
+        TRACE_ERR("ERROR: need " << numInputScores
+                  << " link parameters, found "
+                  << alt.m_denseFeatures.size()
+                  << " while reading column " << i
+                  << " from " << debug_line << "\n");
         return false;
       }
 
       //check each element for bounds
       std::vector<float>::const_iterator probsIterator;
       data[i][j].second = std::vector<float>(0);
-      for(probsIterator = alt.m_denseFeatures.begin(); 
-	  probsIterator < alt.m_denseFeatures.end(); 
-	  probsIterator++) {
+      for(probsIterator = alt.m_denseFeatures.begin();
+          probsIterator < alt.m_denseFeatures.end();
+          probsIterator++) {
         IFVERBOSE(1) {
           if (*probsIterator < 0.0f) {
             TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n");
@@ -229,9 +229,8 @@ WordLattice::CreateTranslationOptionCollection() const
 
   if (StaticData::Instance().GetUseLegacyPT()) {
     rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
-  }
-  else {
-	rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  } else {
+    rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
   }
 
   assert(rv);

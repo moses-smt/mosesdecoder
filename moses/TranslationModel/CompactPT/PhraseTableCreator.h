@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/InputFileStream.h"
 #include "moses/ThreadPool.h"
-#include "moses/UserMessage.h"
 #include "moses/Util.h"
 
 #include "BlockHashIndex.h"
@@ -143,7 +142,7 @@ public:
       return data;
     else {
       typename std::vector<DataType>::iterator it
-      = std::lower_bound(m_bestVec.begin(), m_bestVec.end(), data);
+        = std::lower_bound(m_bestVec.begin(), m_bestVec.end(), data);
       if(it != m_bestVec.end())
         return *it;
       else

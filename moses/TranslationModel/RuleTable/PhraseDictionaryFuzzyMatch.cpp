@@ -40,7 +40,6 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
@@ -52,7 +51,8 @@ using namespace std;
 #if defined __MINGW32__ && !defined mkdtemp
 #include <windows.h>
 #include <errno.h>
-char *mkdtemp(char *tempbuf) {
+char *mkdtemp(char *tempbuf)
+{
   int rand_value = 0;
   char* tempbase = NULL;
   char tempbasebuf[MAX_PATH] = "";
@@ -111,20 +111,20 @@ PhraseDictionaryFuzzyMatch::
 SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source") {
-	  m_config[0] = value;
+    m_config[0] = value;
   } else if (key == "target") {
-	  m_config[1] = value;
+    m_config[1] = value;
   } else if (key == "alignment") {
-	  m_config[2] = value;
+    m_config[2] = value;
   } else {
-	PhraseDictionary::SetParameter(key, value);
+    PhraseDictionary::SetParameter(key, value);
   }
 }
 
 int removedirectoryrecursively(const char *dirname)
 {
 #if defined __MINGW32__
-    //TODO(jie): replace this function with boost implementation
+  //TODO(jie): replace this function with boost implementation
 #else
   DIR *dir;
   struct dirent *entry;
@@ -184,7 +184,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
 #endif // defined
   char *temp = mkdtemp(dirName);
   UTIL_THROW_IF2(temp == NULL,
-		  "Couldn't create temporary directory " << dirName);
+                 "Couldn't create temporary directory " << dirName);
 
   string dirNameStr(dirName);
 
@@ -251,11 +251,11 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     const size_t numScoreComponents = GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
-            << numScoreComponents << ") of score components on line " << count);
+                  << numScoreComponents << ") of score components on line " << count);
     }
 
     UTIL_THROW_IF2(scoreVector.size() != numScoreComponents,
-    		"Number of scores incorrectly specified");
+                   "Number of scores incorrectly specified");
 
     // parse source & find pt node
 
@@ -331,9 +331,9 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       const Word &sourceNonTerm = word;
 
       UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
-    		  "No alignment for non-term at position " << pos);
+                     "No alignment for non-term at position " << pos);
       UTIL_THROW_IF2(iterAlign->first != pos,
-    		  "Alignment info incorrect at position " << pos);
+                     "Alignment info incorrect at position " << pos);
 
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
@@ -349,7 +349,7 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
     }
 
     UTIL_THROW_IF2(currNode == NULL,
-    		"Node not found at position " << pos);
+                   "Node not found at position " << pos);
 
   }
 
@@ -375,7 +375,7 @@ const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(long t
 {
   std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(translationId);
   UTIL_THROW_IF2(iter == m_collection.end(),
-		  "Couldn't find root node for input: " << translationId);
+                 "Couldn't find root node for input: " << translationId);
   return iter->second;
 }
 PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source)
@@ -383,7 +383,7 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputT
   long transId = source.GetTranslationId();
   std::map<long, PhraseDictionaryNodeMemory>::iterator iter = m_collection.find(transId);
   UTIL_THROW_IF2(iter == m_collection.end(),
-		  "Couldn't find root node for input: " << transId);
+                 "Couldn't find root node for input: " << transId);
   return iter->second;
 }
 

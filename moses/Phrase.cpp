@@ -210,8 +210,8 @@ void Phrase::CreateFromString(FactorDirection direction
 
       size_t nextPos = annotatedWord.find('[', 1);
       UTIL_THROW_IF2(nextPos == string::npos,
-    		  "Incorrect formatting of non-terminal. Should have 2 non-terms, eg. [X][X]. "
-    		  << "Current string: " << annotatedWord);
+                     "Incorrect formatting of non-terminal. Should have 2 non-terms, eg. [X][X]. "
+                     << "Current string: " << annotatedWord);
 
       if (direction == Input)
         annotatedWord = annotatedWord.substr(1, nextPos - 2);
@@ -381,7 +381,7 @@ void Phrase::InitStartEndWord()
 size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
 {
   if (GetSize() < sought.GetSize()) {
-	// sought phrase too big
+    // sought phrase too big
     return NOT_FOUND;
   }
 

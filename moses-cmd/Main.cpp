@@ -36,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/IOWrapper.h"
 #include "moses/Hypothesis.h"
-#include "moses/HypergraphOutput.h"
 #include "moses/Manager.h"
 #include "moses/StaticData.h"
 #include "moses/TypeDef.h"
@@ -49,6 +48,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
+#endif
+
+#ifdef PT_UG
+#include <boost/foreach.hpp>
+#include "moses/TranslationModel/UG/mmsapt.h"
+#include "moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.h"
 #endif
 
 using namespace std;
@@ -84,8 +89,8 @@ int main(int argc, char** argv)
     }
 
     // set number of significant decimals in output
-    IOWrapper::FixPrecision(cout);
-    IOWrapper::FixPrecision(cerr);
+    FixPrecision(cout);
+    FixPrecision(cerr);
 
     // load all the settings into the Parameter class
     // (stores them as strings, or array of strings)
@@ -115,8 +120,12 @@ int main(int argc, char** argv)
     srand(time(NULL));
 
     // set up read/writing class
-    IOWrapper* ioWrapper = IOWrapper::GetIOWrapper(staticData);
-    if (!ioWrapper) {
+    IFVERBOSE(1) {
+    	PrintUserTime("Created input-output object");
+    }
+
+    IOWrapper* ioWrapper = new IOWrapper();
+    if (ioWrapper == NULL) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);
     }
@@ -127,18 +136,6 @@ int main(int argc, char** argv)
       TRACE_ERR("The global weight vector looks like this: ");
       TRACE_ERR(weights);
       TRACE_ERR("\n");
-    }
-
-    boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput; 
-    boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutputChart;
-
-    if (staticData.GetOutputSearchGraphHypergraph()) {
-    	if (staticData.IsChart()) {
-    		hypergraphOutputChart.reset(new HypergraphOutput<ChartManager>(PRECISION));
-    	}
-    	else {
-    		hypergraphOutput.reset(new HypergraphOutput<Manager>(PRECISION));
-    	}
     }
 
 #ifdef WITH_THREADS
@@ -157,20 +154,34 @@ int main(int argc, char** argv)
       FeatureFunction::CallChangeSource(source);
 
       // set up task of translating one sentence
-      TranslationTask* task;
-      if (staticData.IsChart()) {
-    	  // scfg
-          task = new TranslationTask(source, *ioWrapper, hypergraphOutputChart);
-      }
-      else {
-    	  // pb
-		  task = new TranslationTask(source, *ioWrapper,
-								staticData.GetOutputSearchGraphSLF(),
-								hypergraphOutput);
-      }
+      TranslationTask* task = new TranslationTask(source, *ioWrapper);
 
       // execute task
 #ifdef WITH_THREADS
+#ifdef PT_UG
+      bool spe = params.isParamSpecified("spe-src");
+      if (spe) {
+    	// simulated post-editing: always run single-threaded!
+        task->Run();
+        delete task;
+        string src,trg,aln;
+        UTIL_THROW_IF2(!getline(*ioWrapper->spe_src,src), "[" << HERE << "] "
+                       << "missing update data for simulated post-editing.");
+        UTIL_THROW_IF2(!getline(*ioWrapper->spe_trg,trg), "[" << HERE << "] "
+		       << "missing update data for simulated post-editing.");
+        UTIL_THROW_IF2(!getline(*ioWrapper->spe_aln,aln), "[" << HERE << "] "
+		       << "missing update data for simulated post-editing.");
+		BOOST_FOREACH (PhraseDictionary* pd, PhraseDictionary::GetColl())
+		  {
+			Mmsapt* sapt = dynamic_cast<Mmsapt*>(pd);
+			if (sapt) sapt->add(src,trg,aln);
+			VERBOSE(1,"[" << HERE << " added src] " << src << endl);
+			VERBOSE(1,"[" << HERE << " added trg] " << trg << endl);
+			VERBOSE(1,"[" << HERE << " added aln] " << aln << endl);
+		  }
+      }
+      else
+#endif
       pool.Submit(task);
 #else
       task->Run();

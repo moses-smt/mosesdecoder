@@ -20,11 +20,11 @@ namespace Moses
 
 /** constructor; just initialize the base class */
 TranslationOptionCollectionConfusionNet::
-TranslationOptionCollectionConfusionNet(const ConfusionNet &input, 
-					size_t maxNoTransOptPerCoverage, 
-					float translationOptionThreshold)
-  : TranslationOptionCollection(input, maxNoTransOptPerCoverage, 
-				translationOptionThreshold)
+TranslationOptionCollectionConfusionNet(const ConfusionNet &input,
+                                        size_t maxNoTransOptPerCoverage,
+                                        float translationOptionThreshold)
+  : TranslationOptionCollection(input, maxNoTransOptPerCoverage,
+                                translationOptionThreshold)
 {
   // Prefix checkers are phrase dictionaries that provide a prefix check
   // to indicate that a phrase table entry with a given prefix exists.
@@ -32,8 +32,8 @@ TranslationOptionCollectionConfusionNet(const ConfusionNet &input,
   // expanding it further.
   vector<PhraseDictionary*> prefixCheckers;
   BOOST_FOREACH(PhraseDictionary* pd, PhraseDictionary::GetColl())
-    if (pd->ProvidesPrefixCheck()) prefixCheckers.push_back(pd);
-  
+  if (pd->ProvidesPrefixCheck()) prefixCheckers.push_back(pd);
+
   const InputFeature &inputFeature = InputFeature::Instance();
   UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
 
@@ -93,7 +93,7 @@ TranslationOptionCollectionConfusionNet(const ConfusionNet &input,
         const Phrase &prevPhrase = prevPath.GetPhrase();
         const ScorePair *prevInputScore = prevPath.GetInputScore();
         UTIL_THROW_IF2(prevInputScore == NULL,
-        		"No input score for path: " << prevPath);
+                       "No input score for path: " << prevPath);
 
         // loop thru every word at this position
         const ConfusionNet::Column &col = input.GetColumn(endPos);
@@ -103,10 +103,10 @@ TranslationOptionCollectionConfusionNet(const ConfusionNet &input,
           Phrase subphrase(prevPhrase);
           subphrase.AddWord(word);
 
-	  bool OK = prefixCheckers.size() == 0;
-	  for (size_t k = 0; !OK && k < prefixCheckers.size(); ++k)
-	    OK = prefixCheckers[k]->PrefixExists(subphrase);
-	  if (!OK) continue;
+          bool OK = prefixCheckers.size() == 0;
+          for (size_t k = 0; !OK && k < prefixCheckers.size(); ++k)
+            OK = prefixCheckers[k]->PrefixExists(subphrase);
+          if (!OK) continue;
 
           const ScorePair &scores = col[i].second;
           ScorePair *inputScore = new ScorePair(*prevInputScore);
@@ -122,8 +122,8 @@ TranslationOptionCollectionConfusionNet(const ConfusionNet &input,
       } // for (iterPath = prevPaths.begin(); iterPath != prevPaths.end(); ++iterPath) {
     }
   }
-  // cerr << "HAVE " << m_inputPathQueue.size() 
-  // << " input paths of max. length " 
+  // cerr << "HAVE " << m_inputPathQueue.size()
+  // << " input paths of max. length "
   // << maxSizePhrase << "." << endl;
 }
 
@@ -249,9 +249,9 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLE
       // go thru each intermediate trans opt just created
       const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
       vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-      for (iterPartialTranslOpt  = partTransOptList.begin(); 
-	   iterPartialTranslOpt != partTransOptList.end(); 
-	   ++iterPartialTranslOpt) {
+      for (iterPartialTranslOpt  = partTransOptList.begin();
+           iterPartialTranslOpt != partTransOptList.end();
+           ++iterPartialTranslOpt) {
         TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 
         if (transStep) {

@@ -340,6 +340,8 @@ FFState *LanguageModelDALM::EvaluateWhenApplied(const Hypothesis &hypo, const FF
 }
 
 FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const{
+  // TODO: original authors of this feature function, please check TODOs in this method to reactivate
+  UTIL_THROW2("DALM has been temporarily deactivated in the chart decoder, cf. http://thread.gmane.org/gmane.comp.nlp.moses.user/12146");
   // initialize language model context state
  	DALMChartState *newState = new DALMChartState();
 	DALM::State &state = newState->GetRightContext();
@@ -381,7 +383,7 @@ FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int
 			hypoSizeAll = hypoSize+prevState->GetHypoSize()-1;
 
       // get hypoScore
-			hypoScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+            // hypoScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]); // TODO: Check whether this (and the below) modification is sufficient to fix the method to conform with feature score deltas in the chart decoder: https://github.com/moses-smt/mosesdecoder/commit/465b47566424efb707bdc063d0bff52b0650eb0a . It's likely that you'll also have to adapt EvaluateNonTerminal() and/or EvaluateTerminal()
 
 			phrasePos++;
 		}
@@ -423,7 +425,8 @@ FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int
   }
 
   // assign combined score to score breakdown
-  out->Assign(this, TransformLMScore(hypoScore));
+  // out->Assign(this, TransformLMScore(hypoScore));
+  out->PlusEquals(this, TransformLMScore(hypoScore)); // TODO: Check whether this (and the above) modification is sufficient to fix the method to conform with feature score deltas in the chart decoder: https://github.com/moses-smt/mosesdecoder/commit/465b47566424efb707bdc063d0bff52b0650eb0a . It's likely that you'll also have to adapt EvaluateNonTerminal() and/or EvaluateTerminal()
 
   return newState;
 }

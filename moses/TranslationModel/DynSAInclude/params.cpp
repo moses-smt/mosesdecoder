@@ -65,10 +65,10 @@ bool Parameters::loadParams(int argc, char ** argv)
     if( getValueType(param) == kBoolValue ) {
       jumpBy = 1;
       UTIL_THROW_IF2(!setParamValue(param, kTrueValue),
-    		  "Couldn't set parameter " << param);
+                     "Couldn't set parameter " << param);
     } else { //not of type bool so must have corresponding value
       UTIL_THROW_IF2(i+1 >= argc,
-    		  "Out of bound error: " << i+1);
+                     "Out of bound error: " << i+1);
 
       jumpBy = 2;
       std::string val = argv[i+1];

@@ -14,7 +14,7 @@ update-if-changed $(ORDER-LOG) $(max-order) ;
 max-order += <dependency>$(ORDER-LOG) ;
 
 wrappers = ;
-local with-nplm = [ option.get "with-nplm" ] ;
+local with-nplm = [ option.get "with-nplm-0.1" ] ;
 if $(with-nplm) {
   lib neuralLM : : <search>$(with-nplm)/src ;
   obj nplm.o : wrappers/nplm.cc : <include>.. <include>$(with-nplm)/src <cxxflags>-fopenmp ;

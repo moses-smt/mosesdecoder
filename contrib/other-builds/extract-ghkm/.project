@@ -26,6 +26,16 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Alignment.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/Alignment.cpp</locationURI>
+		</link>
+		<link>
+			<name>Alignment.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/Alignment.h</locationURI>
+		</link>
+		<link>
 			<name>Hole.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/Hole.h</locationURI>
@@ -59,6 +69,16 @@
 			<name>OutputFileStream.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/OutputFileStream.h</locationURI>
+		</link>
+		<link>
+			<name>PhraseOrientation.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.cpp</locationURI>
+		</link>
+		<link>
+			<name>PhraseOrientation.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
 		</link>
 		<link>
 			<name>SentenceAlignment.cpp</name>

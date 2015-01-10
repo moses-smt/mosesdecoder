@@ -194,34 +194,5 @@ void ScfgRule::UpdateSourceLabelCoocCounts(std::map< std::string, std::map<std::
   }
 }
 
-int ScfgRule::Scope() const
-{
-  int scope = 0;
-  bool predIsNonTerm = false;
-  if (m_sourceRHS[0].GetType() == NonTerminal) {
-    ++scope;
-    predIsNonTerm = true;
-  }
-  for (size_t i = 1; i < m_sourceRHS.size(); ++i) {
-    bool isNonTerm = m_sourceRHS[i].GetType() == NonTerminal;
-    if (isNonTerm && predIsNonTerm) {
-      ++scope;
-    }
-    predIsNonTerm = isNonTerm;
-  }
-  if (predIsNonTerm) {
-    ++scope;
-  }
-  return scope;
-}
-
-bool ScfgRule::PartitionOrderComp(const Node *a, const Node *b)
-{
-  const Span &aSpan = a->GetSpan();
-  const Span &bSpan = b->GetSpan();
-  assert(!aSpan.empty() && !bSpan.empty());
-  return *(aSpan.begin()) < *(bSpan.begin());
-}
-
 }  // namespace GHKM
 }  // namespace Moses

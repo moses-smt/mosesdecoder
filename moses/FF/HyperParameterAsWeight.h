@@ -14,8 +14,9 @@ class HyperParameterAsWeight : public StatelessFeatureFunction
 public:
   HyperParameterAsWeight(const std::string &line);
 
-  virtual bool IsUseable(const FactorMask &mask) const
-  { return true; }
+  virtual bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 
   virtual void EvaluateInIsolation(const Phrase &source
                         , const TargetPhrase &targetPhrase
@@ -31,6 +32,10 @@ public:
                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+              , const TranslationOptionList &translationOptionList) const
+  {}
+  
   virtual void EvaluateWhenApplied(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const
   {}

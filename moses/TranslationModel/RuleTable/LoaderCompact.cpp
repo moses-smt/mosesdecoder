@@ -21,7 +21,6 @@
 
 #include "moses/AlignmentInfoCollection.h"
 #include "moses/InputFileStream.h"
-#include "moses/UserMessage.h"
 #include "moses/Util.h"
 #include "moses/Word.h"
 #include "Trie.h"
@@ -46,9 +45,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
   // Read and check version number.
   reader.ReadLine();
   if (reader.m_line != "1") {
-    std::stringstream msg;
-    msg << "Unexpected compact rule table format: " << reader.m_line;
-    UserMessage::Add(msg.str());
+	std::cerr << "Unexpected compact rule table format: " << reader.m_line;
     return false;
   }
 
@@ -211,11 +208,9 @@ bool RuleTableLoaderCompact::LoadRuleSection(
       scoreVector[j] = FloorScore(TransformScore(score));
     }
     if (reader.m_line[tokenPositions[3+numScoreComponents]] != ':') {
-      std::stringstream msg;
-      msg << "Size of scoreVector != number ("
+    	std::cerr << "Size of scoreVector != number ("
           << scoreVector.size() << "!=" << numScoreComponents
           << ") of score components on line " << reader.m_lineNum;
-      UserMessage::Add(msg.str());
       return false;
     }
 

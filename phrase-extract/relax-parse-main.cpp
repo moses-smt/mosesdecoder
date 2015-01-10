@@ -77,7 +77,7 @@ void init(int argc, char* argv[])
 
   if (argc < 2) {
     cerr << "syntax: relax-parse < in-parse > out-parse ["
-         << " --LeftBinarize | ---RightBinarize |"
+         << " --LeftBinarize | --RightBinarize |"
          << " --SAMT 1-4 ]" << endl;
     exit(1);
   }
@@ -131,7 +131,7 @@ void LeftBinarize( SyntaxTree &tree, ParentNodes &parents )
     const SplitPoints &point = *p;
     if (point.size() > 3) {
       const vector< SyntaxNode* >& topNodes
-      = tree.GetNodes( point[0], point[point.size()-1]-1);
+        = tree.GetNodes( point[0], point[point.size()-1]-1);
       string topLabel = topNodes[0]->GetLabel();
 
       for(size_t i=2; i<point.size()-1; i++) {
@@ -149,7 +149,7 @@ void RightBinarize( SyntaxTree &tree, ParentNodes &parents )
     if (point.size() > 3) {
       int endPoint = point[point.size()-1]-1;
       const vector< SyntaxNode* >& topNodes
-      = tree.GetNodes( point[0], endPoint);
+        = tree.GetNodes( point[0], endPoint);
       string topLabel = topNodes[0]->GetLabel();
 
       for(size_t i=1; i<point.size()-2; i++) {

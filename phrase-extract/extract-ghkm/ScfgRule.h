@@ -22,6 +22,7 @@
 #define EXTRACT_GHKM_SCFG_RULE_H_
 
 #include "Alignment.h"
+#include "Rule.h"
 #include "SyntaxTree.h"
 
 #include <string>
@@ -38,25 +39,7 @@ namespace GHKM
 class Node;
 class Subgraph;
 
-enum SymbolType { Terminal, NonTerminal };
-
-class Symbol {
-public:
-  Symbol(const std::string &v, SymbolType t) : m_value(v) , m_type(t) {}
-
-  const std::string &GetValue() const {
-    return m_value;
-  }
-  SymbolType GetType() const {
-    return m_type;
-  }
-
-private:
-  std::string m_value;
-  SymbolType m_type;
-};
-
-class ScfgRule
+class ScfgRule : public Rule
 {
 public:
   ScfgRule(const Subgraph &fragment, 
@@ -74,9 +57,6 @@ public:
   const std::vector<Symbol> &GetTargetRHS() const {
     return m_targetRHS;
   }
-  const Alignment &GetAlignment() const {
-    return m_alignment;
-  }
   float GetPcfgScore() const {
     return m_pcfgScore;
   }
@@ -92,11 +72,11 @@ public:
   void UpdateSourceLabelCoocCounts(std::map< std::string, std::map<std::string,float>* > &coocCounts,
                                    float count) const;
 
-  int Scope() const;
+  int Scope() const {
+    return Rule::Scope(m_sourceRHS);
+  }
 
 private:
-  static bool PartitionOrderComp(const Node *, const Node *);
-
   void PushSourceLabel(const MosesTraining::SyntaxTree *sourceSyntaxTree,
                        const Node *node,
                        const std::string &nonMatchingLabel);
@@ -105,7 +85,6 @@ private:
   Symbol m_targetLHS;
   std::vector<Symbol> m_sourceRHS;
   std::vector<Symbol> m_targetRHS;
-  Alignment m_alignment;
   float m_pcfgScore;
   bool m_hasSourceLabels;
   std::vector<std::string> m_sourceLabels;

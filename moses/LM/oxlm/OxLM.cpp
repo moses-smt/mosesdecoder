@@ -16,7 +16,9 @@ namespace Moses
 
 template<class Model>
 OxLM<Model>::OxLM(const string &line)
-    : LanguageModelSingleFactor(line), normalized(true) {
+    : LanguageModelSingleFactor(line), normalized(true),
+      posBackOff(false), posFactorType(1),
+      persistentCache(false) {
   ReadParameters();
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -35,6 +37,11 @@ OxLM<Model>::OxLM(const string &line)
 template<class Model>
 OxLM<Model>::~OxLM() {
   if (persistentCache) {
+    if (cache.get()) {
+      string cache_file = m_filePath + ".phrases.cache.bin";
+      savePersistentCache(cache_file);
+    }
+
     double cache_hit_ratio = 100.0 * cacheHits / totalHits;
     cerr << "Cache hit ratio: " << cache_hit_ratio << endl;
   }
@@ -43,10 +50,16 @@ OxLM<Model>::~OxLM() {
 
 template<class Model>
 void OxLM<Model>::SetParameter(const string& key, const string& value) {
-  if (key == "persistent-cache") {
+  if (key == "normalized") {
+    normalized = Scan<bool>(value);
+  } else if (key == "persistent-cache") {
     persistentCache = Scan<bool>(value);
   } else if (key == "normalized") {
     normalized = Scan<bool>(value);
+  } else if (key == "pos-back-off") {
+    posBackOff = Scan<bool>(value);
+  } else if (key == "pos-factor-type") {
+    posFactorType = Scan<FactorType>(value);
   } else {
     LanguageModelSingleFactor::SetParameter(key, value);
   }
@@ -56,8 +69,8 @@ template<class Model>
 void OxLM<Model>::Load() {
   model.load(m_filePath);
 
-  boost::shared_ptr<oxlm::Vocabulary> vocab = model.getVocab();
-  mapper = boost::make_shared<OxLMMapper>(vocab);
+  boost::shared_ptr<Vocabulary> vocab = model.getVocab();
+  mapper = boost::make_shared<OxLMMapper>(vocab, posBackOff, posFactorType);
 
   kSTART = vocab->convert("<s>");
   kSTOP = vocab->convert("</s>");
@@ -83,6 +96,8 @@ LMResult OxLM<Model>::GetValue(
     const vector<const Word*> &contextFactor, State* finalState) const {
   if (!cache.get()) {
     cache.reset(new QueryCache());
+    string cache_file = m_filePath + ".phrases.cache.bin";
+    loadPersistentCache(cache_file);
   }
 
   vector<int> context;
@@ -90,13 +105,11 @@ LMResult OxLM<Model>::GetValue(
   mapper->convert(contextFactor, context, word);
 
   size_t context_width = m_nGramOrder - 1;
-
   if (!context.empty() && context.back() == kSTART) {
     context.resize(context_width, kSTART);
   } else {
     context.resize(context_width, kUNKNOWN);
   }
-
 
   double score;
   if (persistentCache) {
@@ -131,6 +144,30 @@ LMResult OxLM<Model>::GetValue(
 }
 
 template<class Model>
+void OxLM<Model>::loadPersistentCache(const string& cache_file) const {
+  if (boost::filesystem::exists(cache_file)) {
+    ifstream f(cache_file);
+    boost::archive::binary_iarchive iar(f);
+    cerr << "Loading n-gram probability cache from " << cache_file << endl;
+    iar >> *cache;
+    cerr << "Done loading " << cache->size()
+         << " n-gram probabilities..." << endl;
+  } else {
+    cerr << "Cache file not found" << endl;
+  }
+}
+
+template<class Model>
+void OxLM<Model>::savePersistentCache(const string& cache_file) const {
+  ofstream f(cache_file);
+  boost::archive::binary_oarchive oar(f);
+  cerr << "Saving persistent cache to " << cache_file << endl;
+  oar << *cache;
+  cerr << "Done saving " << cache->size()
+       << " n-gram probabilities..." << endl;
+}
+
+template<class Model>
 void OxLM<Model>::InitializeForInput(const InputType& source) {
   LanguageModelSingleFactor::InitializeForInput(source);
 
@@ -140,33 +177,20 @@ void OxLM<Model>::InitializeForInput(const InputType& source) {
     }
 
     int sentence_id = source.GetTranslationId();
-    string cacheFile = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
-    if (boost::filesystem::exists(cacheFile)) {
-      ifstream f(cacheFile);
-      boost::archive::binary_iarchive iar(f);
-      cerr << "Loading n-gram probability cache from " << cacheFile << endl;
-      iar >> *cache;
-      cerr << "Done loading " << cache->size()
-           << " n-gram probabilities..." << endl;
-    } else {
-      cerr << "Cache file not found" << endl;
-    }
+    string cache_file = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
+    loadPersistentCache(cache_file);
   }
 }
 
 template<class Model>
 void OxLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
+  // Thread safe: the model cache is thread specific.
   model.clearCache();
 
   if (persistentCache) {
     int sentence_id = source.GetTranslationId();
-    string cacheFile = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
-    ofstream f(cacheFile);
-    boost::archive::binary_oarchive oar(f);
-    cerr << "Saving persistent cache to " << cacheFile << endl;
-    oar << *cache;
-    cerr << "Done saving " << cache->size()
-         << " n-gram probabilities..." << endl;
+    string cache_file = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
+    savePersistentCache(cache_file);
 
     cache->clear();
   }
@@ -177,6 +201,7 @@ void OxLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
 template class OxLM<LM>;
 template class OxLM<FactoredLM>;
 template class OxLM<FactoredMaxentLM>;
+template class OxLM<FactoredTreeLM>;
 
 }
 

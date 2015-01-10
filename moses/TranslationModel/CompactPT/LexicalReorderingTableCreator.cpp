@@ -206,7 +206,7 @@ std::string LexicalReorderingTableCreator::EncodeLine(std::vector<std::string>& 
   if(m_numScoreComponent != scores.size()) {
     std::stringstream strme;
     strme << "Error: Wrong number of scores detected ("
-              << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
+          << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
     strme << "Line: " << tokens[0] << " ||| ... ||| " << scoresString << std::endl;
     UTIL_THROW2(strme.str());
   }
@@ -430,7 +430,7 @@ void CompressionTaskReordering::operator()()
   while(scoresNum < m_encodedScores.size()) {
     std::string scores = m_encodedScores[scoresNum];
     std::string compressedScores
-    = m_creator.CompressEncodedScores(scores);
+      = m_creator.CompressEncodedScores(scores);
 
     std::string dummy;
     PackedItem packedItem(scoresNum, dummy, compressedScores, 0);

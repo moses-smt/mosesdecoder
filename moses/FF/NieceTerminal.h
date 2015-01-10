@@ -29,6 +29,11 @@ public:
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+  
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+              , const TranslationOptionList &translationOptionList) const
+  {}
+  
   void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
@@ -40,8 +45,8 @@ public:
 protected:
   bool m_hardConstraint;
   bool ContainTerm(const InputType &input,
-		  	  	  const WordsRange &ntRange,
-		  	  	  const std::set<Word> &terms) const;
+                   const WordsRange &ntRange,
+                   const std::set<Word> &terms) const;
 };
 
 }

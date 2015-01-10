@@ -47,7 +47,11 @@ template<class M>
 HypergraphOutput<M>::HypergraphOutput(size_t precision) :
   m_precision(precision) {
   const StaticData& staticData = StaticData::Instance();
-  vector<string> hypergraphParameters = staticData.GetParam("output-search-graph-hypergraph");
+  vector<string> hypergraphParameters;
+  const PARAM_VEC *params = staticData.GetParameter().GetParam("output-search-graph-hypergraph");
+  if (params) {
+	  hypergraphParameters = *params;
+  }
 
   if (hypergraphParameters.size() > 0 && hypergraphParameters[0] == "true") {
     m_appendSuffix = true;

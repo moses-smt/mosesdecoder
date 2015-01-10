@@ -19,11 +19,11 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <queue>
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/StaticData.h"
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
-#include "moses/UserMessage.h"
 #include "moses/DecodeStep.h"
 #include "moses/DecodeGraph.h"
 #include "moses/InputPath.h"

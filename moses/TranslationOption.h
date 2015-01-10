@@ -137,6 +137,10 @@ public:
 
   void EvaluateWithSourceContext(const InputType &input);
 
+  void UpdateScore(ScoreComponentCollection *futureScoreBreakdown = NULL) {
+    m_targetPhrase.UpdateScore(futureScoreBreakdown);
+  }
+  
   /** returns cached scores */
   inline const Scores *GetLexReorderingScores(const LexicalReordering *scoreProducer) const {
     _ScoreCacheMap::const_iterator it = m_lexReorderingScores.find(scoreProducer);

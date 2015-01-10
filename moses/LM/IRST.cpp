@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "n_gram.h"
 #include "lmContainer.h"
 
+using namespace irstlm;
+
 #include "IRST.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
@@ -33,14 +35,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Phrase.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/UserMessage.h"
 
 using namespace std;
 
 namespace Moses
 {
+
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor(line)
+  ,m_lmtb_dub(0)
 {
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();

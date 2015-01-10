@@ -42,7 +42,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/Incremental.h"
-#include "moses/UserMessage.h"
 #include "moses/Syntax/SVertex.h"
 
 using namespace std;
@@ -329,8 +328,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       // Non-terminal is first so we can copy instead of rescoring.
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
-      ruleScore.BeginNonTerminal(prevState, prob);
+      ruleScore.BeginNonTerminal(prevState);
       phrasePos++;
     }
   }
@@ -340,8 +338,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
     if (word.IsNonTerminal()) {
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
-      ruleScore.NonTerminal(prevState, prob);
+      ruleScore.NonTerminal(prevState);
     } else {
       ruleScore.Terminal(TranslateID(word));
     }
@@ -349,62 +346,64 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
 
   float score = ruleScore.Finish();
   score = TransformLMScore(score);
+  score -= hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0];
+
   if (OOVFeatureEnabled()) {
     std::vector<float> scores(2);
     scores[0] = score;
     scores[1] = 0.0;
-    accumulator->Assign(this, scores);
+    accumulator->PlusEquals(this, scores);
   }
   else {
-    accumulator->Assign(this, score);
+    accumulator->PlusEquals(this, score);
   }
   return newState;
 }
 
-template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const
-{
-  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
-  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
-  const TargetPhrase &target = *hyperedge.translation;
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-    target.GetAlignNonTerm().GetNonTermIndexMap2();
-
-  const size_t size = target.GetSize();
-  size_t phrasePos = 0;
-  // Special cases for first word.
-  if (size) {
-    const Word &word = target.GetWord(0);
-    if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
-      // Begin of sentence
-      ruleScore.BeginSentence();
-      phrasePos++;
-    } else if (word.IsNonTerminal()) {
-      // Non-terminal is first so we can copy instead of rescoring.
-      const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
-      float prob = UntransformLMScore(pred->best->scoreBreakdown.GetScoresForProducer(this)[0]);
-      ruleScore.BeginNonTerminal(prevState, prob);
-      phrasePos++;
-    }
-  }
-
-  for (; phrasePos < size; phrasePos++) {
-    const Word &word = target.GetWord(phrasePos);
-    if (word.IsNonTerminal()) {
-      const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
-      float prob = UntransformLMScore(pred->best->scoreBreakdown.GetScoresForProducer(this)[0]);
-      ruleScore.NonTerminal(prevState, prob);
-    } else {
-      ruleScore.Terminal(TranslateID(word));
-    }
-  }
-
-  float score = ruleScore.Finish();
-  score = TransformLMScore(score);
-  accumulator->Assign(this, score);
-  return newState;
-}
+//template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const
+//{
+//  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
+//  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
+//  const TargetPhrase &target = *hyperedge.translation;
+//  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+//    target.GetAlignNonTerm().GetNonTermIndexMap2();
+//
+//  const size_t size = target.GetSize();
+//  size_t phrasePos = 0;
+//  // Special cases for first word.
+//  if (size) {
+//    const Word &word = target.GetWord(0);
+//    if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
+//      // Begin of sentence
+//      ruleScore.BeginSentence();
+//      phrasePos++;
+//    } else if (word.IsNonTerminal()) {
+//      // Non-terminal is first so we can copy instead of rescoring.
+//      const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
+//      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
+//      float prob = UntransformLMScore(pred->best->scoreBreakdown.GetScoresForProducer(this)[0]);
+//      ruleScore.BeginNonTerminal(prevState, prob);
+//      phrasePos++;
+//    }
+//  }
+//
+//  for (; phrasePos < size; phrasePos++) {
+//    const Word &word = target.GetWord(phrasePos);
+//    if (word.IsNonTerminal()) {
+//      const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
+//      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
+//      float prob = UntransformLMScore(pred->best->scoreBreakdown.GetScoresForProducer(this)[0]);
+//      ruleScore.NonTerminal(prevState, prob);
+//    } else {
+//      ruleScore.Terminal(TranslateID(word));
+//    }
+//  }
+//
+//  float score = ruleScore.Finish();
+//  score = TransformLMScore(score);
+//  accumulator->Assign(this, score);
+//  return newState;
+//}
 
 template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Incremental::Manager &manager) const
 {
@@ -450,7 +449,7 @@ LanguageModel *ConstructKenLM(const std::string &line)
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
     UTIL_THROW_IF2(args.size() != 2,
-    		"Incorrect format of KenLM property: " << toks[i]);
+                   "Incorrect format of KenLM property: " << toks[i]);
 
     if (args[0] == "factor") {
       factorType = Scan<FactorType>(args[1]);
@@ -470,28 +469,28 @@ LanguageModel *ConstructKenLM(const std::string &line)
 
 LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
 {
-    lm::ngram::ModelType model_type;
-    if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+  lm::ngram::ModelType model_type;
+  if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
 
-      switch(model_type) {
-      case lm::ngram::PROBING:
-        return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
-      case lm::ngram::REST_PROBING:
-        return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
-      case lm::ngram::TRIE:
-        return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
-      case lm::ngram::QUANT_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
-      case lm::ngram::ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
-      case lm::ngram::QUANT_ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
-      default:
-    	UTIL_THROW2("Unrecognized kenlm model type " << model_type);
-      }
-    } else {
+    switch(model_type) {
+    case lm::ngram::PROBING:
       return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+    case lm::ngram::REST_PROBING:
+      return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
+    case lm::ngram::TRIE:
+      return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
+    case lm::ngram::QUANT_TRIE:
+      return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
+    case lm::ngram::ARRAY_TRIE:
+      return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
+    case lm::ngram::QUANT_ARRAY_TRIE:
+      return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
+    default:
+      UTIL_THROW2("Unrecognized kenlm model type " << model_type);
     }
+  } else {
+    return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+  }
 }
 
 }

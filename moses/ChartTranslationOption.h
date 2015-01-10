@@ -29,6 +29,7 @@ public:
   const InputPath *GetInputPath() const {
     return m_inputPath;
   }
+
   void SetInputPath(const InputPath *inputPath) {
     m_inputPath = inputPath;
   }

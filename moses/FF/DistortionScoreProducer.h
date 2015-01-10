@@ -16,7 +16,14 @@ class WordsRange;
  */
 class DistortionScoreProducer : public StatefulFeatureFunction
 {
+protected:
+  static std::vector<const DistortionScoreProducer*> s_staticColl;
+
 public:
+  static const std::vector<const DistortionScoreProducer*>& GetDistortionFeatureFunctions() {
+    return s_staticColl;
+  }
+
   DistortionScoreProducer(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
@@ -47,12 +54,16 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
+  
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+              , const TranslationOptionList &translationOptionList) const
+  {}
+  
   void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
-
 };
 }
 

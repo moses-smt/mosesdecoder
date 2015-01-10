@@ -26,7 +26,6 @@
 #include <cassert>
 #include "moses/InputFileStream.h"
 #include "moses/Util.h"
-#include "moses/UserMessage.h"
 #include "OnDiskWrapper.h"
 #include "SourcePhrase.h"
 #include "TargetPhrase.h"
@@ -219,7 +218,7 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
         phrase.AddWord(word);
 
         if (retSourceTarget == 1) {
-            out = word;
+          out = word;
         }
       }
 
@@ -230,7 +229,7 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
         phrase.AddWord(word);
 
         if (retSourceTarget == 2) {
-            out = word;
+          out = word;
         }
       }
 

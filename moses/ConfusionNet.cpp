@@ -8,7 +8,6 @@
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "StaticData.h"
 #include "Sentence.h"
-#include "UserMessage.h"
 #include "moses/FF/InputFeature.h"
 #include "util/exception.hh"
 
@@ -102,10 +101,8 @@ namespace Moses
     case 1:
       return ReadFormat1(in,factorOrder);
     default:
-      std::stringstream strme;
-      strme << "ERROR: unknown format '"<<format
+      std::cerr << "ERROR: unknown format '"<<format
 	    <<"' in ConfusionNet::Read";
-      UserMessage::Add(strme.str());
     }
     return false;
   }

@@ -38,7 +38,7 @@ DecodeFeature::DecodeFeature(const std::string &line)
 }
 
 DecodeFeature::DecodeFeature(size_t numScoreComponents
-                               , const std::string &line)
+                             , const std::string &line)
   : StatelessFeatureFunction(numScoreComponents, line)
   , m_container(NULL)
 {

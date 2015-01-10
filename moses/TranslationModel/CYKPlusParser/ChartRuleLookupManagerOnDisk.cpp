@@ -47,7 +47,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_outputFactorsVec(outputFactorsVec)
 {
   UTIL_THROW_IF2(m_expandableDottedRuleListVec.size() != 0,
-		  "Dotted rule collection not correctly initialized");
+                 "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
@@ -75,12 +75,13 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 }
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
-  const WordsRange &range,
+		const InputPath &inputPath,
   size_t lastPos,
   ChartParserCallback &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
   const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal();
+  const WordsRange &range = inputPath.GetWordsRange();
 
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
@@ -246,12 +247,12 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
             std::vector<float> weightT = staticData.GetWeights(&m_dictionary);
             targetPhraseCollection
-            = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
-                                               ,m_outputFactorsVec
-                                               ,m_dictionary
-                                               ,weightT
-                                               ,m_dbWrapper.GetVocab()
-                                               ,true);
+              = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
+                                                 ,m_outputFactorsVec
+                                                 ,m_dictionary
+                                                 ,weightT
+                                                 ,m_dbWrapper.GetVocab()
+                                                 ,true);
 
             delete tpcollBerkeleyDb;
             m_cache[tpCollFilePos] = targetPhraseCollection;

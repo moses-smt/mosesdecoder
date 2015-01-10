@@ -45,9 +45,9 @@ public:
   typedef MapType::iterator iterator;
 
   ChartCellLabelSet(const WordsRange &coverage)
-  : m_coverage(coverage)
-  , m_map(FactorCollection::Instance().GetNumNonTerminals(), NULL)
-  , m_size(0) { }
+    : m_coverage(coverage)
+    , m_map(FactorCollection::Instance().GetNumNonTerminals(), NULL)
+    , m_size(0) { }
 
   ~ChartCellLabelSet() {
     RemoveAllInColl(m_map);
@@ -84,8 +84,7 @@ public:
     if (ChartCellExists(idx)) {
       ChartCellLabel::Stack & s = m_map[idx]->MutableStack();
       s.cube = stack;
-    }
-    else {
+    } else {
       ChartCellLabel::Stack s;
       s.cube = stack;
       m_size++;
@@ -99,8 +98,7 @@ public:
       if (m_map.at(idx) != NULL) {
         return true;
       }
-    }
-    catch (const std::out_of_range& oor) {
+    } catch (const std::out_of_range& oor) {
       m_map.resize(FactorCollection::Instance().GetNumNonTerminals(), NULL);
     }
     return false;
@@ -118,8 +116,7 @@ public:
     size_t idx = w[0]->GetId();
     try {
       return m_map.at(idx);
-    }
-    catch (const std::out_of_range& oor) {
+    } catch (const std::out_of_range& oor) {
       return NULL;
     }
   }

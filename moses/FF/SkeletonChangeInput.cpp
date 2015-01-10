@@ -47,6 +47,10 @@ void SkeletonChangeInput::EvaluateWithSourceContext(const InputType &input
 
 }
 
+void SkeletonChangeInput::EvaluateTranslationOptionListWithSourceContext(const InputType &input
+								  , const TranslationOptionList &translationOptionList) const
+{}
+
 void SkeletonChangeInput::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}

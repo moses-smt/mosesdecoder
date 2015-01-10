@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"
+#include "moses/TabbedSentence.h"
 #include "moses/FactorTypeSet.h"
 #include "moses/FactorCollection.h"
 #include "moses/Hypothesis.h"
@@ -73,22 +74,18 @@ class IOWrapper
 {
 protected:
 
-  const std::vector<Moses::FactorType>	&m_inputFactorOrder;
-  const std::vector<Moses::FactorType>	&m_outputFactorOrder;
-  const Moses::FactorMask							&m_inputFactorUsed;
-  std::string										m_inputFilePath;
-  Moses::InputFileStream				*m_inputFile;
-  std::istream									*m_inputStream;
+  const std::vector<Moses::FactorType>	*m_inputFactorOrder;
+  std::string m_inputFilePath;
+  Moses::InputFileStream *m_inputFile;
+  std::istream *m_inputStream;
   std::ostream *m_nBestStream;
   std::ostream *m_outputWordGraphStream;
+  std::ostream *m_outputSearchGraphStream;
   std::ostream *m_detailedTranslationReportingStream;
-  std::ofstream *m_alignmentInfoStream;
-  std::ostream  *m_unknownsStream;
-  std::ostream  *m_outputSearchGraphStream;
-  std::ofstream *m_latticeSamplesStream;
+  std::ostream *m_unknownsStream;
   std::ostream *m_detailedTreeFragmentsTranslationReportingStream;
-
-  bool m_surpressSingleBestOutput;
+  std::ofstream *m_alignmentInfoStream;
+  std::ofstream *m_latticeSamplesStream;
 
   Moses::OutputCollector *m_singleBestOutputCollector;
   Moses::OutputCollector *m_nBestOutputCollector;
@@ -100,80 +97,15 @@ protected:
   Moses::OutputCollector *m_latticeSamplesCollector;
   Moses::OutputCollector *m_detailTreeFragmentsOutputCollector;
 
-  // CHART
-  typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
-  typedef std::set< std::pair<size_t, size_t>  > Alignments;
+  bool m_surpressSingleBestOutput;
 
-  void Backtrack(const ChartHypothesis *hypo);
-  void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
-  void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
-  void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
-  void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
-
-  void ReconstructApplicationContext(const Moses::ChartHypothesis &hypo,
-                                     const Moses::Sentence &sentence,
-                                     ApplicationContext &context);
-  void ReconstructApplicationContext(const search::Applied *applied,
-                                     const Moses::Sentence &sentence,
-                                     ApplicationContext &context);
-  void WriteApplicationContext(std::ostream &out,
-                               const ApplicationContext &context);
-  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
-		  	  	  	  	  	  ApplicationContext &applicationContext,
-		  	  	  	  	  	  const Moses::ChartHypothesis *hypo,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
-  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
-		  	  	  	  	  	  ApplicationContext &applicationContext,
-		  	  	  	  	  	  const search::Applied *applied,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
-
-  void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors);
-  void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                     char reportSegmentation, bool reportAllFactors);
-
-  size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
-  size_t OutputAlignmentNBest(Alignments &retAlign,
-		  	  	  	  	  	  const Moses::ChartKBestExtractor::Derivation &derivation,
-		  	  	  	  	  	  size_t startTarget);
-  std::size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::Syntax::KBestExtractor::Derivation &derivation, std::size_t startTarget);
-
-  size_t CalcSourceSize(const Moses::ChartHypothesis *hypo);
-  size_t CalcSourceSize(const Syntax::KBestExtractor::Derivation &d) const;
-
-  template <class T>
-  void ShiftOffsets(std::vector<T> &offsets, T shift)
-  {
-    T currPos = shift;
-    for (size_t i = 0; i < offsets.size(); ++i) {
-      if (offsets[i] == 0) {
-        offsets[i] = currPos;
-        ++currPos;
-      } else {
-        currPos += offsets[i];
-      }
-    }
-  }
 
 public:
-  static IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
-  static void FixPrecision(std::ostream &, size_t size=3);
-
-  IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
-            , const std::vector<Moses::FactorType>	&outputFactorOrder
-            , const Moses::FactorMask							&inputFactorUsed
-            , size_t												nBestSize
-            , const std::string							&nBestFilePath
-            , const std::string                                                     &inputFilePath = "");
+  IOWrapper();
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
   bool ReadInput(Moses::InputTypeEnum inputType, Moses::InputType*& source);
-
-  void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, char reportSegmentation, bool reportAllFactors);
-  void OutputLatticeMBRNBestList(const std::vector<LatticeMBRSolution>& solutions,long translationId);
-  void Backtrack(const Moses::Hypothesis *hypo);
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector;
@@ -207,66 +139,12 @@ public:
     return m_latticeSamplesCollector;
   }
 
-  // CHART
-  void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
-  void OutputBestHypo(search::Applied applied, long translationId);
-  void OutputBestHypo(const Moses::Syntax::SHyperedge *, long translationId);
+  Moses::OutputCollector *GetDetailTreeFragmentsOutputCollector() {
+    return m_detailTreeFragmentsOutputCollector;
+  }
 
-  void OutputBestNone(long translationId);
-
-  void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
-  void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
-  void OutputNBestList(const Moses::Syntax::KBestExtractor::KBestVec &nBestList, long translationId);
-
-  void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
-  void OutputDetailedTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
-  void OutputDetailedTranslationReport(const Moses::Syntax::SHyperedge *, long translationId);
-
-  void OutputDetailedAllTranslationReport(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
-
-  void OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo);
-  void OutputUnknowns(const std::vector<Moses::Phrase*> &, long);
-  void OutputUnknowns(const std::set<Moses::Word> &, long);
-
-  void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
-  void OutputDetailedTreeFragmentsTranslationReport(const search::Applied *applied,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
-
-  // phrase-based
-  void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors);
-  void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
-  void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
-                      char reportSegmentation, bool reportAllFactors, std::ostream& out);
-  void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,char reportSegmentation, bool reportAllFactors, std::ostream &out);
-  void OutputInput(std::ostream& os, const Moses::Hypothesis* hypo);
-  void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
-
-  void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo, const Moses::Hypothesis *hypo);
-  void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
-  void OutputAlignment(OutputCollector* collector, size_t lineNo , const std::vector<const Hypothesis *> &edges);
-
-  static void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo);
-  static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
-  static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
-
-  void OutputNBest(std::ostream& out
-                   , const Moses::TrellisPathList &nBestList
-                   , const std::vector<Moses::FactorType>& outputFactorOrder
-                   , long translationId
-                   , char reportSegmentation);
-
-  static void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
-                              , std::ostream &out);
-  static void OutputFeatureScores( std::ostream& out
-                            , const Moses::ScoreComponentCollection &features
-                            , const Moses::FeatureFunction *ff
-                            , std::string &lastName );
-
-  // creates a map of TARGET positions which should be replaced by word using placeholder
-  std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor);
+  // post editing
+  std::ifstream *spe_src, *spe_trg, *spe_aln;
 
 };
 

@@ -12,6 +12,7 @@ namespace Moses
 
 class Phrase;
 class TargetPhrase;
+class TranslationOptionList;
 class TranslationOption;
 class Hypothesis;
 class ChartHypothesis;
@@ -22,6 +23,7 @@ class WordsRange;
 class FactorMask;
 class InputPath;
 class StackVec;
+class DistortionScoreProducer;
 
 /** base class for all feature functions.
  */
@@ -34,6 +36,7 @@ protected:
   std::string m_description, m_argLine;
   std::vector<std::vector<std::string> > m_args;
   bool m_tuneable;
+  size_t m_verbosity;
   size_t m_numScoreComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
@@ -45,6 +48,7 @@ public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
     return s_staticColl;
   }
+
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 
@@ -128,6 +132,16 @@ public:
                         , const StackVec *stackVec
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
+  
+  // This method is called once all the translation options are retrieved from the phrase table, and
+  // just before search.
+  // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
+  // 'stackVec' is a vector of chart cells that the RHS non-terms cover.
+  // It is guaranteed to be in the same order as the non-terms in the source phrase.
+  // For pb models, stackvec is NULL.
+  // No FF should set estimatedFutureScore in both overloads!
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+                        , const TranslationOptionList &translationOptionList) const = 0;
 
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();

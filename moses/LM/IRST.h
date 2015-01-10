@@ -29,9 +29,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Util.h"
 #include "SingleFactor.h"
 
+//this is required because:
+//- IRSTLM package uses the namespace irstlm
+//- the compilation of "IRST.cpp" requires "using namespace irstlm", which is defined in any file of the IRSTLM package
+//  but conflicts with these foward declaration of class lmContainer
+//- for files in moses/LM the IRSTLM include directory is set
+//  but not for the rest of files
+#ifdef LM_IRST
 class lmContainer;  // irst lm container for any lm type
 class ngram;
 class dictionary;
+#endif
+
 
 namespace Moses
 {

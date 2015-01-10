@@ -168,8 +168,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
         // The rightmost bestindex is the one with the highest slope.
 
         // They should be equal but there might be.
-    	UTIL_THROW_IF(abs(leftmost->first-gradient.rbegin()->first) >= 0.0001,
-    			  util::Exception, "Error");
+        UTIL_THROW_IF(abs(leftmost->first-gradient.rbegin()->first) >= 0.0001,
+                      util::Exception, "Error");
         // A small difference due to rounding error
         break;
       }
@@ -191,8 +191,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
         if (tit == previnserted) {
           // The threshold is the same as before can happen if 2 candidates are the same for example.
           UTIL_THROW_IF(previnserted->second.back().first != newd.first,
-        		  util::Exception,
-        		  "Error");
+                        util::Exception,
+                        "Error");
           previnserted->second.back()=newd; // just replace the 1 best for sentence S
           // previnsert doesn't change
         } else {
@@ -207,8 +207,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
             // We append the diffs in previnsert to tit before destroying previnsert.
             tit->second.insert(tit->second.end(),previnserted->second.begin(),previnserted->second.end());
             UTIL_THROW_IF(tit->second.back().first != newd.first,
-            		util::Exception,
-            		"Error");
+                          util::Exception,
+                          "Error");
             tit->second.back()=newd;    // change diff for sentence S
             thresholdmap.erase(previnserted); // erase old previnsert
             previnserted = tit;  // point previnsert to the new threshold
@@ -216,8 +216,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
         }
 
         UTIL_THROW_IF(previnserted == thresholdmap.end(),
-        		util::Exception,
-        		"Error");
+                      util::Exception,
+                      "Error");
       } else { //normal insertion process
         previnserted = AddThreshold(thresholdmap, leftmostx, newd);
       }
@@ -254,8 +254,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
 
   // We skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best.
   UTIL_THROW_IF(scores.size() != thresholdmap.size(),
-		  util::Exception,
-		  "Error");
+                util::Exception,
+                "Error");
   for (unsigned int sc = 0; sc != scores.size(); sc++) {
     //cerr << "x=" << thrit->first << " => " << scores[sc] << endl;
 

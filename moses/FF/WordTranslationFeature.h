@@ -68,6 +68,11 @@ public:
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
+  
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+                , const TranslationOptionList &translationOptionList) const
+  {}
+
 
 };
 

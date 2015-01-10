@@ -49,11 +49,11 @@ int main(int argc, char **argv)
 
   Parameter *parameter = new Parameter();
   // const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
-  // UG: I assume "||dummy_string||" means: I'm not using factored data; 
+  // UG: I assume "||dummy_string||" means: I'm not using factored data;
   // This is now expressed by setting the factor delimiter to the empty string
-  const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("verbose")).resize(1, "0");
+  const_cast<std::vector<std::string>&>(*parameter->GetParam("factor-delimiter")).resize(1, "");
+  const_cast<std::vector<std::string>&>(*parameter->GetParam("input-factors")).resize(1, "0");
+  const_cast<std::vector<std::string>&>(*parameter->GetParam("verbose")).resize(1, "0");
   //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
   //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     sourcePhrase.CreateFromString(Input, input, line, NULL);
 
     TargetPhraseVectorPtr decodedPhraseColl
-    = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
+      = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
 
     if(decodedPhraseColl != NULL) {
       if(reportCounts)

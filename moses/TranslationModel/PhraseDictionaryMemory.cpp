@@ -30,7 +30,6 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
 #include "moses/TranslationModel/RuleTable/LoaderFactory.h"
 #include "moses/TranslationModel/RuleTable/Loader.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.h"
@@ -98,9 +97,9 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       const Word &sourceNonTerm = word;
 
       UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
-    		  "No alignment for non-term at position " << pos);
+                     "No alignment for non-term at position " << pos);
       UTIL_THROW_IF2(iterAlign->first != pos,
-    		  "Alignment info incorrect at position " << pos);
+                     "Alignment info incorrect at position " << pos);
 
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
@@ -115,7 +114,7 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
     }
 
     UTIL_THROW_IF2(currNode == NULL,
-    		"Node not found at position " << pos);
+                   "Node not found at position " << pos);
   }
 
   // finally, the source LHS
@@ -161,7 +160,7 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 
     // backoff
     if (!SatisfyBackoff(inputPath)) {
-    	continue;
+      continue;
     }
 
     if (prevPtNode) {
@@ -173,7 +172,7 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
         const TargetPhraseCollection &targetPhrases = ptNode->GetTargetPhraseCollection();
         inputPath.SetTargetPhrases(*this, &targetPhrases, ptNode);
       } else {
-    	  inputPath.SetTargetPhrases(*this, NULL, NULL);
+        inputPath.SetTargetPhrases(*this, NULL, NULL);
       }
     }
   }

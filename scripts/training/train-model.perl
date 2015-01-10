@@ -175,6 +175,10 @@ if (defined($IGNORE)) {
   print STDERR "WARNING: Do not specify -bin-dir or -scripts-root-dir anymore. These variable are ignored and will be deleted soon";
 }
 
+if (defined($_HIERARCHICAL) && defined($_REORDERING)) {
+  die("ERROR: You cannot specify a lexicalized reordering model (-reordering) when building an hierarchical model (-hierarchical)");
+}
+
 # convert all paths to absolute paths
 $_ROOT_DIR = File::Spec->rel2abs($_ROOT_DIR) if defined($_ROOT_DIR);
 $_EXTERNAL_BINDIR = File::Spec->rel2abs($_EXTERNAL_BINDIR) if defined($_EXTERNAL_BINDIR);
@@ -1559,6 +1563,7 @@ sub score_phrase_phrase_extract {
       $UNALIGNED_FW_F = $1;
       $UNALIGNED_FW_E = $2;
     }
+    my $MIN_SCORE = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /MinScore *(\S+)/) ? $1 : undef;
     my $GOOD_TURING = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /GoodTuring/);
     my $KNESER_NEY = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /KneserNey/);
     my $LOG_PROB = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LogProb/);
@@ -1669,6 +1674,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
     $cmd .= " --CountBinFeature $COUNT_BIN" if $COUNT_BIN;
     $cmd .= " --SparseCountBinFeature $SPARSE_COUNT_BIN" if $SPARSE_COUNT_BIN;
+    $cmd .= " --MinScore $MIN_SCORE" if $MIN_SCORE;
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
@@ -2113,12 +2119,16 @@ sub create_ini {
       my $path = `pwd`; chop($path);
       $fn = $path."/".$fn;
     }
-    $type = 0 unless $type;
-    my $type_name = "UnknownLM";
-    $type_name = "SRILM" if $type == 0;
-    $type_name = "IRSTLM" if $type == 1;
-    $type_name = "KENLM lazyken=0" if $type == 8;
-    $type_name = "KENLM lazyken=1" if $type == 9;
+    $type = "KENLM" unless defined $type; # default to KENLM if no type given
+
+    if ($type =~ /^\d+$/) {
+      # backwards compatibility if the type is given not as string but as a number
+      $type = "SRILM" if $type == 0;
+      $type = "IRSTLM" if $type == 1;
+      $type = "KENLM lazyken=0" if $type == 8;
+      $type = "KENLM lazyken=1" if $type == 9;
+      die "Unknown numeric LM type given: $type" if $type =~ /^\d+$/;
+    }
 	
     my $lm_oov_prob = 0.1;
 	
@@ -2127,7 +2137,7 @@ sub create_ini {
 	$_LMODEL_OOV_FEATURE = "yes";
     } 	   
  
-    $feature_spec .= "$type_name name=LM$i factor=$f path=$fn order=$o\n";
+    $feature_spec .= "$type name=LM$i factor=$f path=$fn order=$o\n";
     $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
   }

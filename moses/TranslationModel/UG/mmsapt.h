@@ -50,6 +50,8 @@ namespace Moses
   {
     friend class Alignment;
     map<string,string> param;
+    vector<float> bias;
+    string m_name;
   public:    
     typedef L2R_Token<SimpleWordId> Token;
     typedef mmBitext<Token> mmbitext;
@@ -61,7 +63,7 @@ namespace Moses
     // vector<sptr<bitext> > shards;
     mmbitext btfix; 
     sptr<imbitext> btdyn; 
-    string bname,extra_data;
+    string bname,extra_data,bias_file;
     string L1;
     string L2;
     float  m_lbop_conf; // confidence level for lbop smoothing
@@ -133,7 +135,7 @@ namespace Moses
     {
     public:
       size_t   const revision; // time stamp from dynamic bitext
-      uint64_t const      key; // phrase key
+      ::uint64_t const      key; // phrase key
       uint32_t       refCount; // reference count
 #if defined(timespec)
       timespec         tstamp; // last use
@@ -141,7 +143,7 @@ namespace Moses
       timeval          tstamp; // last use
 #endif
       int                 idx; // position in history heap
-      TargetPhraseCollectionWrapper(size_t r, uint64_t const k);
+      TargetPhraseCollectionWrapper(size_t r, ::uint64_t const k);
       ~TargetPhraseCollectionWrapper();
     };
 
@@ -155,7 +157,7 @@ namespace Moses
     void
     decache(TargetPhraseCollectionWrapper* ptr) const;
 
-    typedef map<uint64_t, TargetPhraseCollectionWrapper*> tpc_cache_t;
+    typedef map<typename ::uint64_t, TargetPhraseCollectionWrapper*> tpc_cache_t;
     mutable tpc_cache_t m_cache;
     mutable vector<TargetPhraseCollectionWrapper*> m_history;
     // phrase table feature weights for alignment:
@@ -188,7 +190,7 @@ namespace Moses
     void
     process_pstats
     (Phrase   const& src,
-     uint64_t const  pid1, 
+     ::uint64_t const  pid1, 
      pstats   const& stats, 
      Bitext<Token> const & bt, 
      TargetPhraseCollection* tpcoll
@@ -197,10 +199,10 @@ namespace Moses
     bool
     pool_pstats
     (Phrase   const& src,
-     uint64_t const  pid1a, 
+     ::uint64_t const  pid1a, 
      pstats        * statsa, 
      Bitext<Token> const & bta,
-     uint64_t const  pid1b, 
+     ::uint64_t const  pid1b, 
      pstats   const* statsb, 
      Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll
@@ -209,10 +211,10 @@ namespace Moses
     bool
     combine_pstats
     (Phrase   const& src,
-     uint64_t const  pid1a, 
+     ::uint64_t const  pid1a, 
      pstats   * statsa, 
      Bitext<Token> const & bta,
-     uint64_t const  pid1b, 
+     ::uint64_t const  pid1b, 
      pstats   const* statsb, 
      Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll
@@ -221,15 +223,25 @@ namespace Moses
     void
     load_extra_data(string bname, bool locking);
 
+    void
+    load_bias(string bname);
+
     mutable size_t m_tpc_ctr;
   public:
     // Mmsapt(string const& description, string const& line);
     Mmsapt(string const& line);
+
     void
     Load();
+
+    void
+    Load(bool with_checks);
     
     // returns the prior table limit
     size_t SetTableLimit(size_t limit);
+
+    string const&
+    GetName() const;
 
 #ifndef NO_MOSES
     TargetPhraseCollection const* 

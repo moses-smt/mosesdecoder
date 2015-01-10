@@ -19,7 +19,7 @@ if $(with-irstlm) {
   dependencies += irst ;
   lmmacros += LM_IRST ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking with the IRSTLM library; be sure the release is >= 5.70.02 !!!" ;
+  echo "!!! You are linking with the IRSTLM library; be sure the release is >= 5.80.06 !!!" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
 }
 
@@ -87,10 +87,11 @@ if $(with-ldhtlm) {
 #NPLM
 local with-nplm = [ option.get "with-nplm" ] ;
 if $(with-nplm) {
-  lib neuralLM : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
-  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
-  alias nplm : NeuralLMWrapper.o neuralLM : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
-  dependencies += nplm ;
+  lib nplm : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
+  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
+  obj BiLM_NPLM.o : bilingual-lm/BiLM_NPLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
+  alias neural : NeuralLMWrapper.o BiLM_NPLM.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
+  dependencies += neural ;
   lmmacros += LM_NEURAL ;
 }
 
@@ -100,8 +101,10 @@ if $(with-oxlm) {
   lib lbl : : <search>$(with-oxlm)/lib <search>$(with-oxlm)/lib64 ;
   lib murmurhash : : <search>$(with-oxlm)/lib <search>$(with-oxlm)/lib64 ;
   obj OxLM.o : oxlm/OxLM.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  obj SourceOxLM.o : oxlm/SourceOxLM.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
   obj OxLMMapper.o : oxlm/OxLMMapper.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
-  alias oxlm : OxLM.o OxLMMapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_OXLM ;
+  obj OxLMParallelMapper.o : oxlm/OxLMParallelMapper.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  alias oxlm : OxLM.o SourceOxLM.o OxLMMapper.o OxLMParallelMapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_OXLM ;
   dependencies += oxlm ;
   lmmacros += LM_OXLM ;
 }
@@ -130,7 +133,7 @@ obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : 
 
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
-alias LM : Backward.cpp BackwardLMState.cpp Base.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp ORLM.o
+alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp ORLM.o
   ../../lm//kenlm ..//headers $(dependencies) ;
 
 alias macros : : : : <define>$(lmmacros) ;

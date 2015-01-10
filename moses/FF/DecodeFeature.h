@@ -43,12 +43,12 @@ public:
   DecodeFeature(const std::string &line);
 
   DecodeFeature(size_t numScoreComponents
-                  , const std::string &line);
+                , const std::string &line);
 
   DecodeFeature(size_t numScoreComponents
-                  , const std::vector<FactorType> &input
-                  , const std::vector<FactorType> &output
-                  , const std::string &line);
+                , const std::vector<FactorType> &input
+                , const std::vector<FactorType> &output
+                , const std::string &line);
 
   //! returns output factor types as specified by the ini file
   const FactorMask& GetOutputFactorMask() const;
@@ -78,14 +78,19 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+                , const TranslationOptionList &translationOptionList) const
+  {}
+  
   void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
-  void SetContainer(const DecodeStep *container)
-  { m_container = container; }
+  void SetContainer(const DecodeStep *container) {
+    m_container = container;
+  }
 
   const DecodeGraph &GetDecodeGraph() const;
 

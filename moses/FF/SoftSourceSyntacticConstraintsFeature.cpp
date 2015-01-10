@@ -35,8 +35,6 @@ void SoftSourceSyntacticConstraintsFeature::SetParameter(const std::string& key,
     m_coreSourceLabelSetFile = value;
   } else if (key == "targetSourceLeftHandSideJointCountFile") {
     m_targetSourceLHSJointCountFile = value;
-  } else if (key == "tuneable") {
-    m_tuneable = Scan<bool>(value);
   } else if (key == "featureVariant") {
     m_featureVariant = Scan<size_t>(value); // 0: only dense features, 1: no mismatches (also set weights 1 0 0 and tuneable=false), 2: with sparse features, 3: with sparse features for core labels only
   } else {
@@ -68,6 +66,10 @@ void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
   std::string line;
   m_sourceLabels.clear();
   m_sourceLabelsByIndex.clear();
+  m_sourceLabelsByIndex_RHS_1.clear();
+  m_sourceLabelsByIndex_RHS_0.clear();
+  m_sourceLabelsByIndex_LHS_1.clear();
+  m_sourceLabelsByIndex_LHS_0.clear();
   m_sourceLabelIndexesByFactor.clear();
   while (getline(inFile, line)) {
     std::istringstream tokenizer(line);
@@ -85,8 +87,16 @@ void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
     
     if (index >= m_sourceLabelsByIndex.size()) { 
       m_sourceLabelsByIndex.resize(index+1);
+      m_sourceLabelsByIndex_RHS_1.resize(index+1);
+      m_sourceLabelsByIndex_RHS_0.resize(index+1);
+      m_sourceLabelsByIndex_LHS_1.resize(index+1);
+      m_sourceLabelsByIndex_LHS_0.resize(index+1);
     }
     m_sourceLabelsByIndex[index] = label;
+    m_sourceLabelsByIndex_RHS_1[index] = "RHS_1_" + label;
+    m_sourceLabelsByIndex_RHS_0[index] = "RHS_0_" + label;
+    m_sourceLabelsByIndex_LHS_1[index] = "LHS_1_" + label;
+    m_sourceLabelsByIndex_LHS_0[index] = "LHS_0_" + label;
     const Factor* sourceLabelFactor = factorCollection.AddFactor(label,true);
     m_sourceLabelIndexesByFactor[sourceLabelFactor] = index;
   }
@@ -219,14 +229,36 @@ void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCou
 }
 
 
-void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
-  const ChartHypothesis& hypo,
-  ScoreComponentCollection* accumulator) const
+void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const InputType &input
+                                   , const InputPath &inputPath
+                                   , const TargetPhrase &targetPhrase
+                                   , const StackVec *stackVec
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection *estimatedFutureScore) const
 {
+  assert(stackVec);
+
+  IFFEATUREVERBOSE(2)
+  {
+    FEATUREVERBOSE(2, targetPhrase << std::endl); 
+    FEATUREVERBOSE(2, inputPath << std::endl); 
+    for (size_t i = 0; i < stackVec->size(); ++i) 
+    {
+      const ChartCellLabel &cell = *stackVec->at(i);
+      const WordsRange &ntRange = cell.GetCoverage();
+      FEATUREVERBOSE(2, "stackVec[ " << i << " ] : " << ntRange.GetStartPos() << " - " << ntRange.GetEndPos() << std::endl);
+    }
+
+    for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
+         it!=targetPhrase.GetAlignNonTerm().end(); ++it) 
+    {
+      FEATUREVERBOSE(2, "alignNonTerm " << it->first << " " << it->second << std::endl);
+    }
+  }
+
   // dense scores
   std::vector<float> newScores(m_numScoreComponents,0); // m_numScoreComponents == 3
 
-  const InputType& input = hypo.GetManager().GetSource();
   const TreeInput& treeInput = static_cast<const TreeInput&>(input);
   const StaticData& staticData = StaticData::Instance();
   const Word& outputDefaultNonTerminal = staticData.GetOutputDefaultNonTerminal();
@@ -240,12 +272,11 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
   float ruleLabelledProbability = 1;
 
   // read SourceLabels property
-  const TargetPhrase &currTarPhr = hypo.GetCurrTargetPhrase();
-  const Factor* targetLHS = currTarPhr.GetTargetLHS()[0];
+  const Factor* targetLHS = targetPhrase.GetTargetLHS()[0];
   bool isGlueGrammarRule = false;
   bool isUnkRule = false;
 
-  if (const PhraseProperty *property = currTarPhr.GetProperty("SourceLabels")) {
+  if (const PhraseProperty *property = targetPhrase.GetProperty("SourceLabels")) {
 
     const SourceLabelsPhraseProperty *sourceLabelsPhraseProperty = static_cast<const SourceLabelsPhraseProperty*>(property); 
 
@@ -258,33 +289,36 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
 
     // get index map for underlying hypotheses
     const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-      currTarPhr.GetAlignNonTerm().GetNonTermIndexMap();
+      targetPhrase.GetAlignNonTerm().GetNonTermIndexMap();
 
     std::vector<const Factor*> targetLabelsRHS;
     if (nNTs > 1) { // rule has right-hand side non-terminals, i.e. it's a hierarchical rule
       size_t nonTerminalNumber = 0;
   
-      for (size_t phrasePos=0; phrasePos<currTarPhr.GetSize(); ++phrasePos) {
+      for (size_t phrasePos=0; phrasePos<targetPhrase.GetSize(); ++phrasePos) {
         // consult rule for either word or non-terminal
-        const Word &word = currTarPhr.GetWord(phrasePos);
+        const Word &word = targetPhrase.GetWord(phrasePos);
         if ( word.IsNonTerminal() ) {
           // non-terminal: consult subderivation
           size_t nonTermIndex = nonTermIndexMap[phrasePos];
-          const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
-          targetLabelsRHS.push_back( prevHypo->GetTargetLHS()[0] );
+          targetLabelsRHS.push_back( word[0] );
 
           // retrieve information that is required for input tree label matching (RHS)
-          const WordsRange& prevWordsRange = prevHypo->GetCurrSourceRange();
+          const ChartCellLabel &cell = *stackVec->at(nonTermIndex);
+          const WordsRange& prevWordsRange = cell.GetCoverage();
           size_t prevStartPos = prevWordsRange.GetStartPos();
           size_t prevEndPos = prevWordsRange.GetEndPos();
           const NonTerminalSet& prevTreeInputLabels = treeInput.GetLabelSet(prevStartPos,prevEndPos);
 
           for (NonTerminalSet::const_iterator prevTreeInputLabelsIt = prevTreeInputLabels.begin();
-               prevTreeInputLabelsIt != prevTreeInputLabels.end(); ++prevTreeInputLabelsIt) {
-            if (*prevTreeInputLabelsIt != outputDefaultNonTerminal) {
+               prevTreeInputLabelsIt != prevTreeInputLabels.end(); ++prevTreeInputLabelsIt) 
+          {
+            if (*prevTreeInputLabelsIt != outputDefaultNonTerminal) 
+            {
               boost::unordered_map<const Factor*,size_t>::const_iterator foundPrevTreeInputLabel 
                 = m_sourceLabelIndexesByFactor.find((*prevTreeInputLabelsIt)[0]);
-              if (foundPrevTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
+              if (foundPrevTreeInputLabel != m_sourceLabelIndexesByFactor.end()) 
+              {
                 size_t prevTreeInputLabelIndex = foundPrevTreeInputLabel->second;
                 treeInputLabelsRHS[nonTerminalNumber].insert(prevTreeInputLabelIndex);
               }
@@ -297,7 +331,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
     }
 
     // retrieve information that is required for input tree label matching (LHS)
-    const WordsRange& wordsRange = hypo.GetCurrSourceRange();
+    const WordsRange& wordsRange = inputPath.GetWordsRange();
     size_t startPos = wordsRange.GetStartPos();
     size_t endPos = wordsRange.GetEndPos();
     const NonTerminalSet& treeInputLabels = treeInput.GetLabelSet(startPos,endPos);
@@ -350,9 +384,9 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
             if (sparseScoredTreeInputLabelsRHS[nonTerminalNumber].find(*sourceLabelsRHSIt) == sparseScoredTreeInputLabelsRHS[nonTerminalNumber].end()) {
             // (only if no match has been scored for this tree input label and rule non-terminal with a previous sourceLabelItem)
               float score_RHS_1 = (float)1/treeInputLabelsRHS[nonTerminalNumber].size();
-              accumulator->PlusEquals(this,
-                                      std::string("RHS_1_" + m_sourceLabelsByIndex[*sourceLabelsRHSIt]),
-                                      score_RHS_1); 
+              scoreBreakdown.PlusEquals(this,
+                                        m_sourceLabelsByIndex_RHS_1[*sourceLabelsRHSIt],
+                                        score_RHS_1); 
               sparseScoredTreeInputLabelsRHS[nonTerminalNumber].insert(*sourceLabelsRHSIt);
             }
           }
@@ -385,9 +419,9 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
             if (sparseScoredTreeInputLabelsLHS.find(sourceLabelsLHSIt->first) == sparseScoredTreeInputLabelsLHS.end()) {
             // (only if no match has been scored for this tree input label and rule non-terminal with a previous sourceLabelItem)
               float score_LHS_1 = (float)1/treeInputLabelsLHS.size();
-              accumulator->PlusEquals(this,
-                                      std::string("LHS_1_" + m_sourceLabelsByIndex[sourceLabelsLHSIt->first]),
-                                      score_LHS_1); 
+              scoreBreakdown.PlusEquals(this,
+                                        m_sourceLabelsByIndex_LHS_1[sourceLabelsLHSIt->first],
+                                        score_LHS_1); 
               sparseScoredTreeInputLabelsLHS.insert(sourceLabelsLHSIt->first);
             }
           }
@@ -453,9 +487,9 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
 
             if (sparseScoredTreeInputLabelsRHS[nonTerminalNumber].find(*treeInputLabelsRHSIt) == sparseScoredTreeInputLabelsRHS[nonTerminalNumber].end()) {
               // score sparse features: RHS mismatch
-              accumulator->PlusEquals(this,
-                                      std::string("RHS_0_" + m_sourceLabelsByIndex[*treeInputLabelsRHSIt]),
-                                      score_RHS_0);
+              scoreBreakdown.PlusEquals(this,
+                                        m_sourceLabelsByIndex_RHS_0[*treeInputLabelsRHSIt],
+                                        score_RHS_0);
             }
           }
         }
@@ -472,9 +506,9 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
 
           if (sparseScoredTreeInputLabelsLHS.find(*treeInputLabelsLHSIt) == sparseScoredTreeInputLabelsLHS.end()) {
             // score sparse features: RHS mismatch
-            accumulator->PlusEquals(this,
-                                    std::string("LHS_0_" + m_sourceLabelsByIndex[*treeInputLabelsLHSIt]),
-                                    score_LHS_0);
+            scoreBreakdown.PlusEquals(this,
+                                      m_sourceLabelsByIndex_LHS_0[*treeInputLabelsLHSIt],
+                                      score_LHS_0);
           }
         }
       }
@@ -484,7 +518,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
   } else {
 
     // abort with error message if the phrase does not translate an unknown word
-    UTIL_THROW_IF2(!currTarPhr.GetWord(0).IsOOV(), GetScoreProducerDescription()
+    UTIL_THROW_IF2(!targetPhrase.GetWord(0).IsOOV(), GetScoreProducerDescription()
                    << ": Missing SourceLabels property. "
                    << "Please check phrase table and glue rules.");
 
@@ -515,7 +549,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
 //  newScores[4] = hasCompleteTreeInputMatch ? std::log(s2tLabelsProb) : 0;
 //  newScores[3] = hasCompleteTreeInputMatch ? std::log(ruleLabelledProbability) : 0;
 
-  accumulator->PlusEquals(this, newScores);
+  scoreBreakdown.PlusEquals(this, newScores);
 }
 
  

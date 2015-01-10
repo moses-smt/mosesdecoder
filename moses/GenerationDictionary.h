@@ -55,7 +55,7 @@ protected:
 
 public:
   static const std::vector<GenerationDictionary*>& GetColl() {
-	return s_staticColl;
+    return s_staticColl;
   }
 
   GenerationDictionary(const std::string &line);

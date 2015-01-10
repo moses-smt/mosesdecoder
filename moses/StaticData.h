@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <utility>
 #include <fstream>
 #include <string>
-#include "UserMessage.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -50,6 +49,9 @@ namespace Moses
 class InputType;
 class DecodeGraph;
 class DecodeStep;
+
+class DynamicCacheBasedLanguageModel;
+class PhraseDictionaryDynamicCacheBased;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -97,14 +99,15 @@ protected:
   , m_maxNoPartTransOpt
   , m_maxPhraseLength;
 
-  std::string									m_nBestFilePath, m_latticeSamplesFilePath;
-  bool                        m_labeledNBestList,m_nBestIncludesSegmentation;
+  std::string		m_nBestFilePath, m_latticeSamplesFilePath;
+  bool                  m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
   bool m_wordDeletionEnabled;
 
   bool m_disableDiscarding;
   bool m_printAllDerivations;
+  bool m_printTranslationOptions;
 
   bool m_sourceStartPosMattersForRecombination;
   bool m_recoverPath;
@@ -129,6 +132,10 @@ protected:
   bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
+
+  bool m_PrintID;
+  bool m_PrintPassthroughInformation;
+  bool m_PrintPassthroughInformationInNBest;
 
   std::string m_alignmentOutputFile;
 
@@ -211,11 +218,10 @@ protected:
   void LoadChartDecodingParameters();
   void LoadNonTerminals();
 
-  //! helper fn to set bool param from ini file/command line
-  void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
-
   //! load decoding steps
-  bool LoadDecodeGraphs();
+  void LoadDecodeGraphs();
+  void LoadDecodeGraphsOld(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans);
+  void LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans);
 
   void NoCache();
 
@@ -264,8 +270,8 @@ public:
   bool LoadData(Parameter *parameter);
   void ClearData();
 
-  const PARAM_VEC &GetParam(const std::string &paramName) const {
-    return m_parameter->GetParam(paramName);
+  const Parameter &GetParameter() const {
+    return *m_parameter;
   }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
@@ -316,6 +322,15 @@ public:
   }
   size_t IsPathRecoveryEnabled() const {
     return m_recoverPath;
+  }
+  bool IsIDEnabled() const {
+    return m_PrintID;
+  }
+  bool IsPassthroughEnabled() const {
+    return m_PrintPassthroughInformation;
+  }
+  bool IsPassthroughInNBestEnabled() const {
+    return m_PrintPassthroughInformationInNBest;
   }
   int GetMaxDistortion() const {
     return m_maxDistortion;
@@ -385,10 +400,6 @@ public:
     return m_minlexrMemory;
   }
 
-  const std::vector<std::string> &GetDescription() const {
-    return m_parameter->GetParam("description");
-  }
-
   // for mert
   size_t GetNBestSize() const {
     return m_nBestSize;
@@ -426,7 +437,7 @@ public:
     return m_searchAlgorithm;
   }
   bool IsChart() const {
-    return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
+    return m_searchAlgorithm == CYKPlus || m_searchAlgorithm == ChartIncremental;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
@@ -565,6 +576,10 @@ public:
     return m_xmlBrackets;
   }
 
+  bool PrintTranslationOptions() const {
+    return m_printTranslationOptions;
+  }
+
   bool PrintAllDerivations() const {
     return m_printAllDerivations;
   }
@@ -598,7 +613,6 @@ public:
     return m_continuePartialTranslation;
   }
 
-  void ReLoadParameter();
   void ReLoadBleuScoreFeatureParameter(float weight);
 
   Parameter* GetParameter() {
@@ -648,7 +662,7 @@ public:
       return false;
     }
     std::map< std::string, std::set< std::string > >::const_iterator lookupIgnoreFF
-    =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
+      =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
     if (lookupIgnoreFF == m_weightSettingIgnoreFF.end()) {
       return false;
     }
@@ -666,7 +680,7 @@ public:
       return false;
     }
     std::map< std::string, std::set< size_t > >::const_iterator lookupIgnoreDP
-    =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
+      =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
     if (lookupIgnoreDP == m_weightSettingIgnoreDP.end()) {
       return false;
     }
@@ -685,7 +699,7 @@ public:
 
     // model must support alternate weight settings
     if (!GetHasAlternateWeightSettings()) {
-      UserMessage::Add("Warning: Input specifies weight setting, but model does not support alternate weight settings.");
+      std::cerr << "Warning: Input specifies weight setting, but model does not support alternate weight settings.";
       return;
     }
 
@@ -696,10 +710,8 @@ public:
 
     // if not found, resort to default
     if (i == m_weightSetting.end()) {
-      std::stringstream strme;
-      strme << "Warning: Specified weight setting " << settingName
+      std::cerr << "Warning: Specified weight setting " << settingName
             << " does not exist in model, using default weight setting instead";
-      UserMessage::Add(strme.str());
       i = m_weightSetting.find( "default" );
       m_currentWeightSetting = "default";
     }
@@ -709,7 +721,6 @@ public:
   }
 
   float GetWeightWordPenalty() const;
-  float GetWeightUnknownWordPenalty() const;
 
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;
@@ -732,11 +743,13 @@ public:
     return m_placeHolderFactor;
   }
 
-  const FeatureRegistry &GetFeatureRegistry() const
-  { return m_registry; }
+  const FeatureRegistry &GetFeatureRegistry() const {
+    return m_registry;
+  }
 
-  const PhrasePropertyFactory &GetPhrasePropertyFactory() const
-  { return m_phrasePropertyFactory; }
+  const PhrasePropertyFactory &GetPhrasePropertyFactory() const {
+    return m_phrasePropertyFactory;
+  }
 
   /** check whether we should be using the old code to support binary phrase-table.
   ** eventually, we'll stop support the binary phrase-table and delete this legacy code
@@ -754,16 +767,15 @@ public:
     return m_softMatchesMap;
   }
 
-
   void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
 
   // need global access for output of tree structure
   const StatefulFeatureFunction* GetTreeStructure() const {
-      return m_treeStructure;
+    return m_treeStructure;
   }
 
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
-      m_treeStructure = treeStructure;
+    m_treeStructure = treeStructure;
   }
 
   bool GetDefaultNonTermOnlyForEmptyRange() const

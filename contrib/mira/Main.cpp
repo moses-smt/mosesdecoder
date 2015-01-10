@@ -1236,15 +1236,15 @@ int main(int argc, char** argv)
             cerr << "Rank " << rank << ", epoch " << epoch << ", model score hope: " << modelScoresHope[0][0] << endl;
             cerr << "Rank " << rank << ", epoch " << epoch << ", model score fear: " << modelScoresFear[0][0] << endl;
             update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(
-                                weightUpdate, featureValuesHope[0][0], featureValuesFear[0][0],
-                                bleuScoresHope[0][0], bleuScoresFear[0][0], modelScoresHope[0][0],
-                                modelScoresFear[0][0], learning_rate, rank, epoch);
+                              weightUpdate, featureValuesHope[0][0], featureValuesFear[0][0],
+                              bleuScoresHope[0][0], bleuScoresFear[0][0], modelScoresHope[0][0],
+                              modelScoresFear[0][0], learning_rate, rank, epoch);
           } else {
             cerr << "Rank " << rank << ", epoch " << epoch << ", model score hope: " << modelScoresHope[0][0] << endl;
             cerr << "Rank " << rank << ", epoch " << epoch << ", model score fear: " << modelScoresFear[0][0] << endl;
             update_status = optimiser->updateWeightsHopeFear(weightUpdate, featureValuesHope,
-                              featureValuesFear, bleuScoresHope, bleuScoresFear, modelScoresHope,
-                              modelScoresFear, learning_rate, rank, epoch);
+                            featureValuesFear, bleuScoresHope, bleuScoresFear, modelScoresHope,
+                            modelScoresFear, learning_rate, rank, epoch);
           }
         } else {
           // model_hope_fear

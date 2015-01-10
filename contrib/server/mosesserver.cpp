@@ -268,9 +268,11 @@ public:
 
     const StaticData &staticData = StaticData::Instance();
 
-    if (addGraphInfo) {
+    //Make sure alternative paths are retained, if necessary
+    if (addGraphInfo || nbest_size>0) {
       (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
     }
+
 
     stringstream out, graphInfo, transCollOpts;
 
@@ -281,7 +283,7 @@ public:
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
         ChartManager manager(tinput);
-        manager.ProcessSentence();
+        manager.Decode();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
         if (addGraphInfo) {
@@ -299,8 +301,8 @@ public:
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence, staticData.GetSearchAlgorithm());
-	      manager.ProcessSentence();
+        Manager manager(sentence);
+	      manager.Decode();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
         vector<xmlrpc_c::value> alignInfo;
@@ -310,7 +312,7 @@ public:
         }
         if (addWordAlignInfo) {
           stringstream wordAlignment;
-          IOWrapper::OutputAlignment(wordAlignment, hypo);
+          hypo->OutputAlignment(wordAlignment);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -325,7 +327,6 @@ public:
 
         if (addGraphInfo) {
           insertGraphInfo(manager,m_retData);
-            (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
         }
         if (addTopts) {
           insertTranslationOptions(manager,m_retData);
@@ -334,6 +335,8 @@ public:
           outputNBest(manager, m_retData, nbest_size, nbest_distinct, 
 		      reportAllFactors, addAlignInfo, addScoreBreakdown);
         }
+        (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
+
     }
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
@@ -472,7 +475,8 @@ public:
 
         if ((int)edges.size() > 0) {
           stringstream wordAlignment;
-          IOWrapper::OutputAlignment(wordAlignment, edges[0]);
+					const Hypothesis *edge = edges[0];
+          edge->OutputAlignment(wordAlignment);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -490,7 +494,7 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  IOWrapper::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
+	  path.GetScoreBreakdown().OutputAllFeatureScores(buf);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 

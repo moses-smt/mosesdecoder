@@ -40,7 +40,7 @@ SearchNormalBatch::~SearchNormalBatch()
  * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
  */
-void SearchNormalBatch::ProcessSentence()
+void SearchNormalBatch::Decode()
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
@@ -140,7 +140,7 @@ ExpandHypothesis(const Hypothesis &hypothesis,
     }
     m_partial_hypos.push_back(newHypo);
   } else {
-	UTIL_THROW2("can't use early discarding with batch decoding!");
+    UTIL_THROW2("can't use early discarding with batch decoding!");
   }
 }
 

@@ -62,7 +62,7 @@ class CacheColl : public boost::unordered_map<size_t, std::pair<const TargetPhra
 // 3rd = time of last access
 
 public:
-	~CacheColl();
+  ~CacheColl();
 };
 
 /**
@@ -74,7 +74,7 @@ public:
   virtual bool ProvidesPrefixCheck() const;
 
   static const std::vector<PhraseDictionary*>& GetColl() {
-	return s_staticColl;
+    return s_staticColl;
   }
 
   PhraseDictionary(const std::string &line);
@@ -95,7 +95,7 @@ public:
   void
   Release(TargetPhraseCollection const* tpc) const;
 
-  /// return true if phrase table entries starting with /phrase/ 
+  /// return true if phrase table entries starting with /phrase/
   //  exist in the table.
   virtual
   bool

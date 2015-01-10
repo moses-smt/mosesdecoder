@@ -39,8 +39,26 @@ QueryEngine::QueryEngine(const char * filepath) : decoder(filepath){
     //Read config file
     std::string line;
     std::ifstream config ((basepath + "/config").c_str());
+    //Check API version:
     getline(config, line);
-    int tablesize = atoi(line.c_str()); //Get tablesize.
+    if (atoi(line.c_str()) != API_VERSION) {
+        std::cerr << "The ProbingPT API has changed, please rebinarize your phrase tables." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    //Get tablesize.
+    getline(config, line);
+    int tablesize = atoi(line.c_str());
+    //Number of scores
+    getline(config, line);
+    num_scores = atoi(line.c_str());
+    //do we have a reordering table
+    getline(config, line);
+    std::transform(line.begin(), line.end(), line.begin(), ::tolower); //Get the boolean in lowercase
+    is_reordering = false;
+    if (line == "true") {
+        is_reordering = true;
+        std::cerr << "WARNING. REORDERING TABLES NOT SUPPORTED YET." << std::endl;
+    }
     config.close();
 
     //Mmap binary table
@@ -73,7 +91,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(std::vector<uint64
     //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
     uint64_t key = 0;
     for (int i = 0; i < source_phrase.size(); i++){
-        key += source_phrase[i];
+        key += (source_phrase[i] << i);
     }
 
 
@@ -94,7 +112,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(std::vector<uint64
         }
 
         //Get only the translation entries necessary
-        translation_entries = decoder.full_decode_line(encoded_text);
+        translation_entries = decoder.full_decode_line(encoded_text, num_scores);
 
     }
 
@@ -114,7 +132,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(StringPiece source
     //uint64_t key = util::MurmurHashNative(&source_phrase_vid[0], source_phrase_vid.size());
     uint64_t key = 0;
     for (int i = 0; i < source_phrase_vid.size(); i++){
-        key += source_phrase_vid[i];
+        key += (source_phrase_vid[i] << i);
     }
 
     found = table.Find(key, entry);
@@ -137,7 +155,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(StringPiece source
         }
 
         //Get only the translation entries necessary
-        translation_entries = decoder.full_decode_line(encoded_text);
+        translation_entries = decoder.full_decode_line(encoded_text, num_scores);
 
     }
 

@@ -69,7 +69,7 @@ public:
   void addParam(gridkey key, const string& arg, float defaultValue) {
     m_args[arg] = key;
     UTIL_THROW_IF2(m_grid.find(key) != m_grid.end(),
-    		  "Couldn't find value for key " << (int) key);
+                   "Couldn't find value for key " << (int) key);
     m_grid[key].push_back(defaultValue);
   }
 
@@ -158,8 +158,8 @@ int main(int argc, char* argv[])
 
   StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
   staticData.SetUseLatticeMBR(true);
-  IOWrapper* ioWrapper = IOWrapper::GetIOWrapper(staticData);
 
+  IOWrapper* ioWrapper = new IOWrapper();
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }
@@ -181,8 +181,8 @@ int main(int argc, char* argv[])
     ++lineCount;
     source->SetTranslationId(lineCount);
 
-    Manager manager(*source, staticData.GetSearchAlgorithm());
-    manager.ProcessSentence();
+    Manager manager(*source);
+    manager.Decode();
     TrellisPathList nBestList;
     manager.CalcNBest(nBestSize, nBestList,true);
     //grid search
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
             staticData.SetMBRScale(scale);
             cout << lineCount << " ||| " << p << " " << r << " " << prune << " " << scale << " ||| ";
             vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-            ioWrapper->OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
+            manager.OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
                            staticData.GetReportAllFactors(),cout);
           }
         }

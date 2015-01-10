@@ -7,6 +7,7 @@
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
 #include "moses/Util.h"
+#include "moses/FF/DistortionScoreProducer.h"
 
 using namespace std;
 
@@ -45,6 +46,7 @@ void FeatureFunction::CallChangeSource(InputType *&input)
 FeatureFunction::
 FeatureFunction(const std::string& line)
   : m_tuneable(true)
+  , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(1)
 {
   Initialize(line);
@@ -54,6 +56,7 @@ FeatureFunction::
 FeatureFunction(size_t numScoreComponents,
                 const std::string& line)
   : m_tuneable(true)
+  , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(numScoreComponents)
 {
   Initialize(line);
@@ -83,7 +86,7 @@ void FeatureFunction::ParseLine(const std::string &line)
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = TokenizeFirstOnly(toks[i], "=");
     UTIL_THROW_IF2(args.size() != 2,
-    		"Incorrect format for feature function arg: " << toks[i]);
+                   "Incorrect format for feature function arg: " << toks[i]);
 
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
     UTIL_THROW_IF2(!ret.second, "Duplicate key in line " << line);
@@ -115,6 +118,8 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
 {
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
+  } else if (key == "verbosity") {
+    m_verbosity = Scan<size_t>(value);
   } else if (key == "filterable") { //ignore
   } else {
     UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);

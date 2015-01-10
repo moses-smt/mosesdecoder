@@ -2,7 +2,6 @@
 #include "SearchCubePruning.h"
 #include "SearchNormal.h"
 #include "SearchNormalBatch.h"
-#include "UserMessage.h"
 #include "util/exception.hh"
 
 namespace Moses
@@ -25,12 +24,10 @@ Search *Search::CreateSearch(Manager& manager, const InputType &source,
     return new SearchNormal(manager,source, transOptColl);
   case CubePruning:
     return new SearchCubePruning(manager, source, transOptColl);
-  case CubeGrowing:
-    return NULL;
   case NormalBatch:
     return new SearchNormalBatch(manager, source, transOptColl);
   default:
-	UTIL_THROW2("ERROR: search. Aborting\n");
+    UTIL_THROW2("ERROR: search. Aborting\n");
     return NULL;
   }
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <sstream>
+
 #include "moses/DecodeGraph.h"
 #include "moses/StaticData.h"
 #include "moses/Syntax/BoundedPriorityContainer.h"
@@ -13,6 +16,7 @@
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
 
+#include "DerivationWriter.h"
 #include "OovHandler.h"
 #include "PChart.h"
 #include "RuleTrie.h"
@@ -27,7 +31,7 @@ namespace S2T
 
 template<typename Parser>
 Manager<Parser>::Manager(const InputType &source)
-    : m_source(source)
+    : Syntax::Manager(source)
     , m_pchart(source.GetSize(), Parser::RequiresCompressedChart())
     , m_schart(source.GetSize())
 {
@@ -41,7 +45,7 @@ void Manager<Parser>::InitializeCharts()
     const Word &terminal = m_source.GetWord(i);
 
     // PVertex
-    PVertex tmp(WordsRange(i,i), m_source.GetWord(i));
+    PVertex tmp(WordsRange(i,i), terminal);
     PVertex &pvertex = m_pchart.AddVertex(tmp);
 
     // SVertex
@@ -259,6 +263,7 @@ const SHyperedge *Manager<Parser>::GetBestSHyperedge() const
   }
   assert(stacks.Size() == 1);
   const std::vector<boost::shared_ptr<SVertex> > &stack = stacks.Begin()->second;
+  // TODO Throw exception if stack is empty?  Or return 0?
   return stack[0]->best;
 }
 
@@ -281,6 +286,7 @@ void Manager<Parser>::ExtractKBest(
   }
   assert(stacks.Size() == 1);
   const std::vector<boost::shared_ptr<SVertex> > &stack = stacks.Begin()->second;
+  // TODO Throw exception if stack is empty?  Or return 0?
 
   KBestExtractor extractor;
 
@@ -380,6 +386,20 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
 
   // Step 3: Sort the vertices in the stack.
   std::sort(stack.begin(), stack.end(), SVertexStackContentOrderer());
+}
+
+template<typename Parser>
+void Manager<Parser>::OutputDetailedTranslationReport(
+    OutputCollector *collector) const
+{
+  const SHyperedge *best = GetBestSHyperedge();
+  if (best == NULL || collector == NULL) {
+    return;
+  }
+  long translationId = m_source.GetTranslationId();
+  std::ostringstream out;
+  DerivationWriter::Write(*best, translationId, out);
+  collector->Write(translationId, out.str());
 }
 
 }  // S2T

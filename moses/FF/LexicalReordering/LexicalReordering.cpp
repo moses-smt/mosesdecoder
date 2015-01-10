@@ -87,11 +87,13 @@ FFState* LexicalReordering::EvaluateWhenApplied(const Hypothesis& hypo,
                                      const FFState* prev_state,
                                      ScoreComponentCollection* out) const
 {
+  VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) START" << std::endl);
   Scores score(GetNumScoreComponents(), 0);
   const LexicalReorderingState *prev = dynamic_cast<const LexicalReorderingState *>(prev_state);
   LexicalReorderingState *next_state = prev->Expand(hypo.GetTranslationOption(), hypo.GetInput(), out);
 
   out->PlusEquals(this, score);
+  VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) END" << std::endl);
 
   return next_state;
 }

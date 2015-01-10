@@ -74,13 +74,13 @@ namespace ugdiss
     readSid(char const* p, char const* q, id_type& sid) const;
     
     char const* 
-    readSid(char const* p, char const* q, uint64_t& sid) const;
+    readSid(char const* p, char const* q, ::uint64_t& sid) const;
 
     char const* 
     readOffset(char const* p, char const* q, uint16_t& offset) const;
 
     char const* 
-    readOffset(char const* p, char const* q, uint64_t& offset) const;
+    readOffset(char const* p, char const* q, ::uint64_t& offset) const;
     
     void 
     sanityCheck() const;
@@ -267,7 +267,7 @@ namespace ugdiss
   template<typename TOKEN>
   char const*
   imTSA<TOKEN>::
-  readSid(char const* p, char const* q, uint64_t& sid) const
+  readSid(char const* p, char const* q, ::uint64_t& sid) const
   {
     assert(reinterpret_cast<cpos const*>(p) >= &(this->sufa.front()));
     assert(reinterpret_cast<cpos const*>(p) <= &(this->sufa.back()));
@@ -289,7 +289,7 @@ namespace ugdiss
   template<typename TOKEN>
   char const*
   imTSA<TOKEN>::
-  readOffset(char const* p, char const* q, uint64_t& offset) const
+  readOffset(char const* p, char const* q, ::uint64_t& offset) const
   {
     assert(reinterpret_cast<cpos const*>(p) >= &(this->sufa.front()));
     assert(reinterpret_cast<cpos const*>(p) <= &(this->sufa.back()));

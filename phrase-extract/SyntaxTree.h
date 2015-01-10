@@ -96,9 +96,10 @@ protected:
   friend std::ostream& operator<<(std::ostream&, const SyntaxTree&);
 
 public:
-  SyntaxTree() {
-    m_top = 0;  // m_top doesn't get set unless ConnectNodes is called.
-  }
+  SyntaxTree()
+      : m_top(0)  // m_top doesn't get set unless ConnectNodes is called.
+      , m_size(0) {}
+
   ~SyntaxTree();
 
   SyntaxNode *AddNode( int startPos, int endPos, std::string label );

@@ -366,10 +366,10 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
 
     if(lastKey > temp) {
       if(source->nkeys != 2 || temp != "###DUMMY_KEY###") {
-    	std::stringstream strme;
-    	strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
-    	strme << "1: " << lastKey << std::endl;
-    	strme << "2: " << temp << std::endl;
+        std::stringstream strme;
+        strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
+        strme << "1: " << lastKey << std::endl;
+        strme << "2: " << temp << std::endl;
         UTIL_THROW2(strme.str());
       }
     }

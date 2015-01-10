@@ -35,8 +35,8 @@ public:
 
   DomainFeature(const std::string& domainFile);
 
-  void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
-                                 float count, 
+  void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+                                 float count,
                                  int sentenceId) const;
 
   void add(const ScoreFeatureContext& context,
