@@ -59,7 +59,7 @@ public:
 
   virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
 
-//  virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const;
+  virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const;
 
   virtual void IncrementalCallback(Incremental::Manager &manager) const;
   virtual void ReportHistoryOrder(std::ostream &out,const Phrase &phrase) const;
