@@ -110,4 +110,4 @@ Currently, classification is implemented using VW's `csoaa_ldf` scheme with quad
 
 To train VW in this setting, use the command:
 
-    cat features.txt.* | vw --hash all --noconstant -b 26 -q st --csoaa_ldf mc -f classifier1.vw
+    cat features.txt.* | vw --hash all --loss_function logistic --noconstant -b 26 -q st --csoaa_ldf mc -f classifier1.vw
