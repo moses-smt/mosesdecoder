@@ -1,8 +1,8 @@
-exe processPhraseTable : GenerateTuples.cpp  processPhraseTable.cpp ..//boost_filesystem ../moses//moses ;
+#exe processPhraseTable : GenerateTuples.cpp  processPhraseTable.cpp ..//boost_filesystem ../moses//moses ;
 
 exe processLexicalTable : processLexicalTable.cpp ..//boost_filesystem ../moses//moses ;
 
-exe queryPhraseTable : queryPhraseTable.cpp ..//boost_filesystem ../moses//moses ;
+#exe queryPhraseTable : queryPhraseTable.cpp ..//boost_filesystem ../moses//moses ;
 
 exe queryLexicalTable : queryLexicalTable.cpp ..//boost_filesystem ../moses//moses ;
 
@@ -46,4 +46,6 @@ $(TOP)//boost_iostreams
 $(TOP)//boost_program_options 
 ; 
 
-alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin programsProbing merge-sorted prunePhraseTable  ;
+alias programs : 1-1-Extraction TMining generateSequences processLexicalTable queryLexicalTable programsMin programsProbing merge-sorted prunePhraseTable  ;
+#processPhraseTable queryPhraseTable
+
