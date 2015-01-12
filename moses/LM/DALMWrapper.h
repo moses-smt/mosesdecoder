@@ -95,7 +95,6 @@ private:
     unsigned char &prefixLength,
     const DALMChartState *prevState,
     size_t prevTargetPhraseLength
-    //float prevHypoScore
   ) const;
 };
 
