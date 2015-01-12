@@ -44,11 +44,8 @@ toy-data = $moses-script-dir/ems/example/data
 # moses decoder
 decoder = $moses-bin-dir/moses
 
-# conversion of phrase table into binary on-disk format
-ttable-binarizer = $moses-bin-dir/processPhraseTable
-
 # conversion of rule table into binary on-disk format
-#ttable-binarizer = "$moses-bin-dir/CreateOnDiskPt 1 1 4 100 2"
+ttable-binarizer = "$moses-bin-dir/CreateOnDiskPt 1 1 4 100 2"
 
 # tokenizers - comment out if all your data is already tokenized
 input-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $input-extension"
