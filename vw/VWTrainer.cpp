@@ -80,13 +80,4 @@ void VWTrainer::WriteBuffer()
   m_outputBuffer.clear();
 }
 
-std::string VWTrainer::EscapeSpecialChars(const std::string &str)
-{
-  string out;
-  out = Replace(str, "|", "_PIPE_");
-  out = Replace(out, ":", "_COLON_");
-  out = Replace(out, " ", "_");
-  return out;
-}
-
 } // namespace Discriminative

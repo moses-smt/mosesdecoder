@@ -211,12 +211,21 @@ private:
 
   bool IsCorrectTranslationOption(const TranslationOption &topt) const {
     size_t sourceStart = topt.GetSourceWordsRange().GetStartPos();
+    size_t sourceEnd   = topt.GetSourceWordsRange().GetEndPos() + 1;
+
     const VWTargetSentence &targetSentence = *GetStored();
     
     // get the left-most alignment point withitn sourceRange
     std::set<size_t> aligned;
-    while ((aligned = targetSentence.m_alignment->GetAlignmentsForSource(sourceStart)).empty())
+    while ((aligned = targetSentence.m_alignment->GetAlignmentsForSource(sourceStart)).empty()) {
       sourceStart++;
+      
+      if (sourceStart >= sourceEnd) {
+        // no alignment point between source and target sentence within current source span;
+        // return immediately
+        return false;
+      }
+    }
 
     size_t targetSentOffset = *aligned.begin(); // index of first aligned target word covered in source span
 
