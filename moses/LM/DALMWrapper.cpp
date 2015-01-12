@@ -341,7 +341,7 @@ FFState *LanguageModelDALM::EvaluateWhenApplied(const Hypothesis &hypo, const FF
 
 FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const{
   // TODO: original authors of this feature function, please check TODOs in this method to reactivate
-  UTIL_THROW2("DALM has been temporarily deactivated in the chart decoder, cf. http://thread.gmane.org/gmane.comp.nlp.moses.user/12146");
+  //UTIL_THROW2("DALM has been temporarily deactivated in the chart decoder, cf. http://thread.gmane.org/gmane.comp.nlp.moses.user/12146");
   // initialize language model context state
  	DALMChartState *newState = new DALMChartState();
 	DALM::State &state = newState->GetRightContext();
@@ -351,7 +351,7 @@ FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int
 	size_t &hypoSizeAll = newState->GetHypoSize();
 
   // initial language model scores
-  float hypoScore = 0.0;      // total hypothesis score.
+  float hypoScore = 0.0;      // diffs of scores.
 
 	const TargetPhrase &targetPhrase = hypo.GetCurrTargetPhrase();
 	size_t hypoSize = targetPhrase.GetSize();
@@ -412,14 +412,14 @@ FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int
   		const DALMChartState* prevState =
     		static_cast<const DALMChartState*>(prevHypo->GetFFState(featureID));
 			size_t prevTargetPhraseLength = prevHypo->GetCurrTargetPhrase().GetSize();
-			float prevHypoScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+			//float prevHypoScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
 			hypoSizeAll += prevState->GetHypoSize()-1;
 
 			EvaluateNonTerminal(
 				word, hypoScore, 
 				newState, state, 
 				prefixFragments, prefixLength, 
-				prevState, prevTargetPhraseLength, prevHypoScore
+				prevState, prevTargetPhraseLength //, prevHypoScore
 				);
     }
   }
@@ -524,13 +524,13 @@ void LanguageModelDALM::EvaluateNonTerminal(
   DALM::Fragment *prefixFragments,
   unsigned char &prefixLength,
 	const DALMChartState *prevState,
-	size_t prevTargetPhraseLength,
-	float prevHypoScore
+	size_t prevTargetPhraseLength
+	//float prevHypoScore
 	) const{
 
   const unsigned char prevPrefixLength = prevState->GetPrefixLength();
 	const DALM::Fragment *prevPrefixFragments = prevState->GetPrefixFragments();
-	hypoScore += prevHypoScore;
+	//hypoScore += prevHypoScore;
 
 	if(prevPrefixLength == 0){
 		newState->SetAsLarge();
