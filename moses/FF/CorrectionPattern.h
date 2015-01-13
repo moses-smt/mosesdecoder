@@ -18,9 +18,9 @@ typedef std::vector<std::string> Tokens;
 class CorrectionPattern : public StatelessFeatureFunction
 {
 private:
-  boost::unordered_set<std::string> m_vocab;
+  //boost::unordered_set<std::string> m_vocab;
   FactorType m_factorType;
-  bool m_unrestricted;
+  //bool m_unrestricted;
   std::string m_filename;
   size_t m_top;
 
@@ -62,12 +62,13 @@ public:
   
   void SetParameter(const std::string& key, const std::string& value);
   
-  std::vector<std::string> CreatePattern(const Tokens &s1,
+  static std::vector<std::string> CreatePattern(const Tokens &s1,
                                          const Tokens &s2,
                                          const InputType &input,
-                                         const InputPath &inputPath) const;
+                                         const InputPath &inputPath,
+                                         const std::vector<FactorType> &factors);
   
-  std::string CreateSinglePattern(const Tokens &s1, const Tokens &s2) const;
+  static std::string CreateSinglePattern(const Tokens &s1, const Tokens &s2);
 
 };
 

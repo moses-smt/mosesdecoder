@@ -127,32 +127,30 @@ std::string GeneralizePair(const std::string &s1, const std::string &s2) {
   return out.str();
 }
 
-std::string CorrectionPattern::CreateSinglePattern(const Tokens &s1, const Tokens &s2) const {
-  typedef typename Tokens::value_type Item;
-  
+std::string CorrectionPattern::CreateSinglePattern(const Tokens &s1, const Tokens &s2) {
   std::stringstream out;
   if(s1.empty()) {
     out << "ins(«" << boost::join(s2, "·") << "»)";
-    if(m_unrestricted || m_vocab.count(out.str()))
+    //if(m_unrestricted || m_vocab.count(out.str()))
       return out.str();
-    else
-      return "ins(OTHER)";
+    //else
+    //  return "ins(OTHER)";
   }
   else if(s2.empty()) {
     out << "del(«" << boost::join(s1, "·") << "»)";
-    if(m_unrestricted || m_vocab.count(out.str()))
+    //if(m_unrestricted || m_vocab.count(out.str()))
       return out.str();
-    else
-      return "del(OTHER)";
+    //else
+    //  return "del(OTHER)";
   }
   else {
     typename Tokens::value_type v1 = boost::join(s1, "+");
     typename Tokens::value_type v2 = boost::join(s2, "+");
     out << GeneralizePair(v1, v2);
-    if(m_unrestricted || m_vocab.count(out.str()))
+    //if(m_unrestricted || m_vocab.count(out.str()))
       return out.str();
-    else
-      return "sub(OTHER1,OTHER2)";
+    //else
+    //  return "sub(OTHER1,OTHER2)";
   }
 }
 
@@ -191,7 +189,8 @@ std::vector<std::string>
 CorrectionPattern::CreatePattern(const Tokens &s1,
                                  const Tokens &s2,
                                  const InputType &input,
-                                 const InputPath &inputPath) const {
+                                 const InputPath &inputPath,
+                                 const std::vector<FactorType> &factorTypes) {
     
   Diffs diffs = CreateDiff(s1, s2);
   size_t i = 0, j = 0;
@@ -201,16 +200,16 @@ CorrectionPattern::CreatePattern(const Tokens &s1,
   BOOST_FOREACH(Diff type, diffs) {
     if(type == 'm') {
       if(lastType != 'm') {
-        std::string leftContext =  GetContext(i, source.size(), 1, input, inputPath, m_factorType, false);
-        std::string rightContext = GetContext(i, source.size(), 1, input, inputPath, m_factorType, true);
+        //std::string leftContext =  GetContext(i, source.size(), 1, input, inputPath, factorTypes, false);
+        //std::string rightContext = GetContext(i, source.size(), 1, input, inputPath, factorTypes, true);
         
         std::string pattern = CreateSinglePattern(source, target);
         //pattern = leftContext + pattern + rightContext; 
         
         patternList.push_back(pattern);
-        patternList.push_back(pattern + rightContext);
-        patternList.push_back(leftContext + pattern);
-        patternList.push_back(leftContext + pattern + rightContext);
+        //patternList.push_back(pattern + rightContext);
+        //patternList.push_back(leftContext + pattern);
+        //patternList.push_back(leftContext + pattern + rightContext);
       }
       source.clear();
       target.clear();
@@ -232,16 +231,16 @@ CorrectionPattern::CreatePattern(const Tokens &s1,
     lastType = type;
   }
   if(lastType != 'm') {
-    std::string leftContext =  GetContext(i, source.size(), 1, input, inputPath, m_factorType, false);
-    std::string rightContext = GetContext(i, source.size(), 1, input, inputPath, m_factorType, true);
+    //std::string leftContext =  GetContext(i, source.size(), 1, input, inputPath, factorTypes, false);
+    //std::string rightContext = GetContext(i, source.size(), 1, input, inputPath, factorTypes, true);
     
     std::string pattern = CreateSinglePattern(source, target);
     //pattern = leftContext + pattern + rightContext; 
     
     patternList.push_back(pattern);
-    patternList.push_back(pattern + rightContext);
-    patternList.push_back(leftContext + pattern);
-    patternList.push_back(leftContext + pattern + rightContext);
+    //patternList.push_back(pattern + rightContext);
+    //patternList.push_back(leftContext + pattern);
+    //patternList.push_back(leftContext + pattern + rightContext);
   }
   
   return patternList;
@@ -249,7 +248,7 @@ CorrectionPattern::CreatePattern(const Tokens &s1,
 
 CorrectionPattern::CorrectionPattern(const std::string &line)
   :StatelessFeatureFunction(0, line),
-   m_unrestricted(true), m_top(0)
+   /*m_unrestricted(true),*/ m_top(0)
 {
   std::cerr << "Initializing correction pattern feature.." << std::endl;
   ReadParameters();
@@ -273,6 +272,7 @@ void CorrectionPattern::Load()
   if (m_filename.empty())
     return;
 
+  /*
   cerr << "loading pattern list from " << m_filename << endl;
   ifstream inFile(m_filename.c_str());
   UTIL_THROW_IF2(!inFile, "could not open file " << m_filename);
@@ -287,6 +287,7 @@ void CorrectionPattern::Load()
   inFile.close();
 
   m_unrestricted = false;
+  */
 }
 
 void CorrectionPattern::EvaluateWithSourceContext(const InputType &input
@@ -306,16 +307,19 @@ void CorrectionPattern::ComputeFeatures(
     ScoreComponentCollection* accumulator) const
 {
   const Phrase &source = inputPath.GetPhrase();
-
+  
+  std::vector<FactorType> factors;
+  factors.push_back(m_factorType);
+  
   std::vector<std::string> sourceTokens;
   for(size_t i = 0; i < source.GetSize(); ++i)
-    sourceTokens.push_back(source.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
+    sourceTokens.push_back(source.GetWord(i).GetString(factors, false));
   
   std::vector<std::string> targetTokens;
   for(size_t i = 0; i < target.GetSize(); ++i)
-    targetTokens.push_back(target.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
+    targetTokens.push_back(target.GetWord(i).GetString(factors, false));
   
-  std::vector<std::string> patternList = CreatePattern(sourceTokens, targetTokens, input, inputPath);
+  std::vector<std::string> patternList = CreatePattern(sourceTokens, targetTokens, input, inputPath, factors);
   for(size_t i = 0; i < patternList.size(); ++i)
     accumulator->PlusEquals(this, patternList[i], 1);
   
