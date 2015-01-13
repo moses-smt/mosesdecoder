@@ -741,7 +741,6 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
 	  for(size_t i=0; i<mappingVector.size(); i++) {
 	    vector<string>	token		= Tokenize(mappingVector[i]);
 	    size_t decodeGraphInd;
-	    size_t index;
 
 	      decodeGraphInd = Scan<size_t>(token[0]);
 	      //the vectorList index can only increment by one

@@ -106,14 +106,10 @@ RuleTrieCYKPlus::Node &RuleTrieCYKPlus::GetOrCreateNode(
     const Word& word = source.GetWord(pos);
 
     if (word.IsNonTerminal()) {
-      // indexed by source label 1st
-      const Word &sourceNonTerm = word;
-
       UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
     		  "No alignment for non-term at position " << pos);
       UTIL_THROW_IF2(iterAlign->first != pos,
     		  "Alignment info incorrect at position " << pos);
-
       std::size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
@@ -122,12 +118,8 @@ RuleTrieCYKPlus::Node &RuleTrieCYKPlus::GetOrCreateNode(
       currNode = currNode->GetOrCreateChild(word);
     }
 
-    UTIL_THROW_IF2(currNode == NULL,
-    		"Node not found at position " << pos);
+    UTIL_THROW_IF2(currNode == NULL, "Node not found at position " << pos);
   }
-
-  // finally, the source LHS
-  //currNode = currNode->GetOrCreateChild(sourceLHS);
 
   return *currNode;
 }

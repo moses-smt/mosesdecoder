@@ -80,8 +80,6 @@ const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
 
 void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   ReduceCache();
 
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
