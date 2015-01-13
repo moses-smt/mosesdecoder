@@ -28,7 +28,7 @@ public:
   {
     StaticData::Instance().InitializeForInput(*m_source);
     
-    std::cerr << *m_source << std::endl;
+    //std::cerr << *m_source << std::endl;
     
     TranslationOptionCollection *transOptColl = m_source->CreateTranslationOptionCollection();
     transOptColl->CreateTranslationOptions();
