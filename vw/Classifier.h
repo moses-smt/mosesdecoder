@@ -73,7 +73,7 @@ protected:
   static std::string EscapeSpecialChars(const std::string &str)
   {
     std::string out;
-    out = Moses::Replace(str, "\\", "\\\\");
+    out = Moses::Replace(str, "\\", "_/_");
     out = Moses::Replace(out, "|", "\\/");
     out = Moses::Replace(out, ":", "\\;");
     out = Moses::Replace(out, " ", "\\_");
@@ -113,7 +113,6 @@ private:
   std::deque<std::string> m_outputBuffer;
 
   void WriteBuffer();
-  std::string EscapeSpecialChars(const std::string &str);
 };
 
 /**

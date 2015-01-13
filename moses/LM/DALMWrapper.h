@@ -94,8 +94,7 @@ private:
     DALM::Fragment *prefixFragments,
     unsigned char &prefixLength,
     const DALMChartState *prevState,
-    size_t prevTargetPhraseLength,
-    float prevHypoScore
+    size_t prevTargetPhraseLength
   ) const;
 };
 

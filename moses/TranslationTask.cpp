@@ -123,6 +123,8 @@ void TranslationTask::Run()
   // detailed translation reporting
   manager->OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
 
+  manager->OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
+
   //list of unknown words
   manager->OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
 
