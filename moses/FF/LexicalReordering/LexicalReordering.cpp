@@ -15,7 +15,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
   std::cerr << "Initializing LexicalReordering.." << std::endl;
 
   map<string,string> sparseArgs;
-  m_haveDefaultScores = false;    
+  m_haveDefaultScores = false;
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
@@ -36,7 +36,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
       for(size_t i=0; i<tokens.size(); i++) {
         m_defaultScores.push_back( TransformScore( Scan<float>(tokens[i]) ) );
       }
-      m_haveDefaultScores = true; 
+      m_haveDefaultScores = true;
     } else {
       UTIL_THROW(util::Exception,"Unknown argument " + args[0]);
     }
@@ -84,8 +84,8 @@ Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
 }
 
 FFState* LexicalReordering::EvaluateWhenApplied(const Hypothesis& hypo,
-                                     const FFState* prev_state,
-                                     ScoreComponentCollection* out) const
+    const FFState* prev_state,
+    ScoreComponentCollection* out) const
 {
   VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) START" << std::endl);
   Scores score(GetNumScoreComponents(), 0);

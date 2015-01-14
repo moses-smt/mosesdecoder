@@ -42,7 +42,7 @@ class Subgraph;
 class ScfgRule : public Rule
 {
 public:
-  ScfgRule(const Subgraph &fragment, 
+  ScfgRule(const Subgraph &fragment,
            const MosesTraining::SyntaxTree *sourceSyntaxTree = 0);
 
   const Symbol &GetSourceLHS() const {
@@ -66,7 +66,7 @@ public:
   void PrintSourceLabels(std::ostream &out) const {
     for (std::vector<std::string>::const_iterator it = m_sourceLabels.begin();
          it != m_sourceLabels.end(); ++it) {
-        out << " " << (*it);
+      out << " " << (*it);
     }
   }
   void UpdateSourceLabelCoocCounts(std::map< std::string, std::map<std::string,float>* > &coocCounts,

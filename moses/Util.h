@@ -145,7 +145,7 @@ inline XmlInputType Scan<XmlInputType>(const std::string &input)
   else if (input=="ignore") ret = XmlIgnore;
   else if (input=="pass-through") ret = XmlPassThrough;
   else {
-	  UTIL_THROW2("Unknown XML input type");
+    UTIL_THROW2("Unknown XML input type");
   }
 
   return ret;

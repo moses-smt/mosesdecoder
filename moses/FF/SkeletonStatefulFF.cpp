@@ -24,21 +24,21 @@ SkeletonStatefulFF::SkeletonStatefulFF(const std::string &line)
 }
 
 void SkeletonStatefulFF::EvaluateInIsolation(const Phrase &source
-                                  , const TargetPhrase &targetPhrase
-                                  , ScoreComponentCollection &scoreBreakdown
-                                  , ScoreComponentCollection &estimatedFutureScore) const
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedFutureScore) const
 {}
 
 void SkeletonStatefulFF::EvaluateWithSourceContext(const InputType &input
-                                  , const InputPath &inputPath
-                                  , const TargetPhrase &targetPhrase
-                                  , const StackVec *stackVec
-                                  , ScoreComponentCollection &scoreBreakdown
-                                  , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedFutureScore) const
 {}
 
 void SkeletonStatefulFF::EvaluateTranslationOptionListWithSourceContext(const InputType &input
-                                  , const TranslationOptionList &translationOptionList) const
+    , const TranslationOptionList &translationOptionList) const
 {}
 
 FFState* SkeletonStatefulFF::EvaluateWhenApplied(

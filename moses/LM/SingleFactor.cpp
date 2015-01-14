@@ -89,13 +89,13 @@ void LanguageModelSingleFactor::SetParameter(const std::string& key, const std::
 
 std::string LanguageModelSingleFactor::DebugContextFactor(const std::vector<const Word*> &contextFactor) const
 {
-	std::string ret;
-	for (size_t i = 0; i < contextFactor.size(); ++i) {
-		const Word &word = *contextFactor[i];
-		ret += word.ToString();
-	}
+  std::string ret;
+  for (size_t i = 0; i < contextFactor.size(); ++i) {
+    const Word &word = *contextFactor[i];
+    ret += word.ToString();
+  }
 
-	return ret;
+  return ret;
 }
 
 }

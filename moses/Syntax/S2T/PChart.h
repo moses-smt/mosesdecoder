@@ -19,11 +19,10 @@ namespace S2T
 
 class PChart
 {
- public:
-  struct Cell
-  {
+public:
+  struct Cell {
     typedef boost::unordered_map<Word, PVertex, SymbolHasher,
-                                 SymbolEqualityPred> TMap;
+            SymbolEqualityPred> TMap;
     typedef NonTerminalMap<PVertex> NMap;
     // Collection of terminal vertices (keyed by terminal symbol).
     TMap terminalVertices;
@@ -42,7 +41,9 @@ class PChart
 
   ~PChart();
 
-  std::size_t GetWidth() const { return m_cells.size(); }
+  std::size_t GetWidth() const {
+    return m_cells.size();
+  }
 
   const Cell &GetCell(std::size_t start, std::size_t end) const {
     return m_cells[start][end];
@@ -57,13 +58,13 @@ class PChart
     if (!v.symbol.IsNonTerminal()) {
       Cell::TMap::value_type x(v.symbol, v);
       std::pair<Cell::TMap::iterator, bool> ret =
-          cell.terminalVertices.insert(x);
+        cell.terminalVertices.insert(x);
       return ret.first->second;
     }
     // If v is a non-terminal vertex add it to the cell's nonTerminalVertices
     // map and update the compressed chart (if enabled).
     std::pair<Cell::NMap::Iterator, bool> result =
-        cell.nonTerminalVertices.Insert(v.symbol, v);
+      cell.nonTerminalVertices.Insert(v.symbol, v);
     if (result.second && m_compressedChart) {
       CompressedItem item;
       item.end = end;
@@ -77,7 +78,7 @@ class PChart
     return (*m_compressedChart)[start];
   }
 
- private:
+private:
   typedef std::vector<CompressedMatrix> CompressedChart;
 
   std::vector<std::vector<Cell> > m_cells;

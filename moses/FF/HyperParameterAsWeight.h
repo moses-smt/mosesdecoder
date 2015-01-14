@@ -19,33 +19,33 @@ public:
   }
 
   virtual void EvaluateInIsolation(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                                   , const TargetPhrase &targetPhrase
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 
   virtual void EvaluateWithSourceContext(const InputType &input
-                        , const InputPath &inputPath
-                        , const TargetPhrase &targetPhrase
-                        , const StackVec *stackVec
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
+                                         , const InputPath &inputPath
+                                         , const TargetPhrase &targetPhrase
+                                         , const StackVec *stackVec
+                                         , ScoreComponentCollection &scoreBreakdown
+                                         , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
 
   virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-              , const TranslationOptionList &translationOptionList) const
-  {}
-  
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
   virtual void EvaluateWhenApplied(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const
-  {}
+                                   ScoreComponentCollection* accumulator) const {
+  }
 
   /**
     * Same for chart-based features.
     **/
   virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
-                             ScoreComponentCollection* accumulator) const
-  {}
+                                   ScoreComponentCollection* accumulator) const {
+  }
 
 };
 

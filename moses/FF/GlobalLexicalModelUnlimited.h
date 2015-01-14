@@ -82,31 +82,31 @@ public:
   //TODO: This implements the old interface, but cannot be updated because
   //it appears to be stateful
   void EvaluateWhenApplied(const Hypothesis& cur_hypo,
-                ScoreComponentCollection* accumulator) const;
+                           ScoreComponentCollection* accumulator) const;
 
   void EvaluateWhenApplied(const ChartHypothesis& /* cur_hypo */,
-                     int /* featureID */,
-                     ScoreComponentCollection* ) const {
+                           int /* featureID */,
+                           ScoreComponentCollection* ) const {
     throw std::logic_error("GlobalLexicalModelUnlimited not supported in chart decoder, yet");
   }
 
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
+
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-              , const TranslationOptionList &translationOptionList) const
-  {}
-  
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 
   void AddFeature(ScoreComponentCollection* accumulator,
                   StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,

@@ -16,11 +16,11 @@ namespace Moses
 
 SparseHieroReorderingFeature::SparseHieroReorderingFeature(const std::string &line)
   :StatelessFeatureFunction(0, line),
-  m_type(SourceCombined),
-  m_sourceFactor(0),
-  m_targetFactor(0),
-  m_sourceVocabFile(""),
-  m_targetVocabFile("")
+   m_type(SourceCombined),
+   m_sourceFactor(0),
+   m_targetFactor(0),
+   m_sourceVocabFile(""),
+   m_targetVocabFile("")
 {
 
   /*
@@ -39,7 +39,8 @@ SparseHieroReorderingFeature::SparseHieroReorderingFeature(const std::string &li
   LoadVocabulary(m_targetVocabFile, m_targetVocab);
 }
 
-void SparseHieroReorderingFeature::SetParameter(const std::string& key, const std::string& value) {
+void SparseHieroReorderingFeature::SetParameter(const std::string& key, const std::string& value)
+{
   if (key == "input-factor") {
     m_sourceFactor = Scan<FactorType>(value);
   } else if (key == "output-factor") {
@@ -70,12 +71,13 @@ void SparseHieroReorderingFeature::LoadVocabulary(const std::string& filename, V
   UTIL_THROW_IF(!in, util::Exception, "Unable to open vocab file: " << filename);
   string line;
   while(getline(in,line)) {
-    vocab.insert(FactorCollection::Instance().AddFactor(line)); 
+    vocab.insert(FactorCollection::Instance().AddFactor(line));
   }
   in.close();
 }
 
-const Factor* SparseHieroReorderingFeature::GetFactor(const Word& word, const Vocab& vocab, FactorType factorType) const {
+const Factor* SparseHieroReorderingFeature::GetFactor(const Word& word, const Vocab& vocab, FactorType factorType) const
+{
   const Factor* factor = word.GetFactor(factorType);
   if (vocab.size() && vocab.find(factor) == vocab.end()) return m_otherFactor;
   return factor;
@@ -88,21 +90,21 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
   // get index map for underlying hypotheses
   //const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
   //  cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap();
-  
+
   //The Huck features. For a rule with source side:
   //   abXcdXef
   //We first have to split into blocks:
   // ab X cd X ef
   //Then we extract features based in the boundary words of the neighbouring blocks
-  //For the block pair, we use the right word of the left block, and the left 
+  //For the block pair, we use the right word of the left block, and the left
   //word of the right block.
 
-  //Need to get blocks, and their alignment. Each block has a word range (on the 
+  //Need to get blocks, and their alignment. Each block has a word range (on the
   // on the source), a non-terminal flag, and  a set of alignment points in the target phrase
 
   //We need to be able to map source word position to target word position, as
   //much as possible (don't need interior of non-terminals). The alignment info
-  //objects just give us the mappings between *rule* positions. So if we can 
+  //objects just give us the mappings between *rule* positions. So if we can
   //map source word position to source rule position, and target rule position
   //to target word position, then we can map right through.
 
@@ -114,16 +116,16 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
     sourceNTSpans.push_back(cur_hypo.GetPrevHypo(prevHypoId)->GetCurrSourceRange());
   }
   //put in source order. Is this necessary?
-  sort(sourceNTSpans.begin(), sourceNTSpans.end()); 
+  sort(sourceNTSpans.begin(), sourceNTSpans.end());
   //cerr << "Source NTs: ";
   //for (size_t i = 0; i < sourceNTSpans.size(); ++i) cerr << sourceNTSpans[i] << " ";
   //cerr << endl;
 
   typedef pair<WordsRange,bool> Block;//flag indicates NT
-  vector<Block> sourceBlocks; 
+  vector<Block> sourceBlocks;
   sourceBlocks.push_back(Block(cur_hypo.GetCurrSourceRange(),false));
-  for (vector<WordsRange>::const_iterator i = sourceNTSpans.begin(); 
-      i != sourceNTSpans.end(); ++i) {
+  for (vector<WordsRange>::const_iterator i = sourceNTSpans.begin();
+       i != sourceNTSpans.end(); ++i) {
     const WordsRange& prevHypoRange = *i;
     Block lastBlock = sourceBlocks.back();
     sourceBlocks.pop_back();
@@ -155,12 +157,12 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
   //vector<size_t> alignMapTerm = cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm()
   size_t sourceRulePos = 0;
   //cerr << "SW->RP ";
-  for (vector<Block>::const_iterator sourceBlockIt = sourceBlocks.begin(); 
-    sourceBlockIt != sourceBlocks.end(); ++sourceBlockIt) {
+  for (vector<Block>::const_iterator sourceBlockIt = sourceBlocks.begin();
+       sourceBlockIt != sourceBlocks.end(); ++sourceBlockIt) {
     for (size_t sourceWordPos = sourceBlockIt->first.GetStartPos();
-      sourceWordPos <= sourceBlockIt->first.GetEndPos(); ++sourceWordPos) {
+         sourceWordPos <= sourceBlockIt->first.GetEndPos(); ++sourceWordPos) {
       sourceWordToTargetRulePos[sourceWordPos - sourceStart] = alignMap[sourceRulePos];
-   //   cerr << sourceWordPos - sourceStart << "-" << alignMap[sourceRulePos] << " ";
+      //   cerr << sourceWordPos - sourceStart << "-" << alignMap[sourceRulePos] << " ";
       if (! sourceBlockIt->second) {
         //T
         ++sourceRulePos;
@@ -174,7 +176,7 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
   //cerr << endl;
 
   //Iterate through block pairs
-  const Sentence& sentence = 
+  const Sentence& sentence =
     dynamic_cast<const Sentence&>(cur_hypo.GetManager().GetSource());
   //const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
   for (size_t i = 0; i < sourceBlocks.size()-1; ++i) {
@@ -186,19 +188,18 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
     const Word& sourceRightBoundaryWord = sentence.GetWord(sourceRightBoundaryPos);
     sourceLeftBoundaryPos -= sourceStart;
     sourceRightBoundaryPos -= sourceStart;
-    
+
     // Need to figure out where these map to on the target.
-    size_t targetLeftRulePos = 
+    size_t targetLeftRulePos =
       sourceWordToTargetRulePos[sourceLeftBoundaryPos];
-    size_t targetRightRulePos = 
+    size_t targetRightRulePos =
       sourceWordToTargetRulePos[sourceRightBoundaryPos];
 
     bool isMonotone = true;
     if ((sourceLeftBoundaryPos < sourceRightBoundaryPos  &&
-          targetLeftRulePos > targetRightRulePos) ||
-      ((sourceLeftBoundaryPos > sourceRightBoundaryPos  &&
-          targetLeftRulePos < targetRightRulePos)))
-    {
+         targetLeftRulePos > targetRightRulePos) ||
+        ((sourceLeftBoundaryPos > sourceRightBoundaryPos  &&
+          targetLeftRulePos < targetRightRulePos))) {
       isMonotone = false;
     }
     stringstream buf;
@@ -208,7 +209,7 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
       buf << "_";
     }
     if (m_type == SourceRight || m_type == SourceCombined) {
-    buf << GetFactor(sourceRightBoundaryWord,m_sourceVocab,m_sourceFactor)->GetString();
+      buf << GetFactor(sourceRightBoundaryWord,m_sourceVocab,m_sourceFactor)->GetString();
       buf << "_";
     }
     buf << (isMonotone ? "M" : "S");

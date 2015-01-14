@@ -14,25 +14,25 @@ namespace FilterRuleTable
 {
 
 TreeBasedFilter::TreeBasedFilter(
-    const std::vector<boost::shared_ptr<StringTree> > &sentences)
+  const std::vector<boost::shared_ptr<StringTree> > &sentences)
 {
   // Convert each StringTree to an IdTree.
   m_sentences.reserve(sentences.size());
   for (std::vector<boost::shared_ptr<StringTree> >::const_iterator p =
-       sentences.begin(); p != sentences.end(); ++p) {
+         sentences.begin(); p != sentences.end(); ++p) {
     m_sentences.push_back(boost::shared_ptr<IdTree>(StringTreeToIdTree(**p)));
   }
 
   m_labelToTree.resize(m_testVocab.Size());
   // Construct a map from root labels to IdTree nodes.
   for (std::vector<boost::shared_ptr<IdTree> >::const_iterator p =
-       m_sentences.begin(); p != m_sentences.end(); ++p) {
+         m_sentences.begin(); p != m_sentences.end(); ++p) {
     AddNodesToMap(**p);
   }
 }
 
 TreeBasedFilter::IdTree *TreeBasedFilter::StringTreeToIdTree(
-    const StringTree &s)
+  const StringTree &s)
 {
   IdTree *t = new IdTree(m_testVocab.Insert(s.value()));
   const std::vector<StringTree*> &sChildren = s.children();
@@ -164,8 +164,8 @@ bool TreeBasedFilter::MatchFragment(const IdTree &fragment,
 }
 
 TreeBasedFilter::IdTree *TreeBasedFilter::BuildTree(
-    const std::vector<TreeFragmentToken> &tokens, int &i,
-    std::vector<IdTree *> &leaves)
+  const std::vector<TreeFragmentToken> &tokens, int &i,
+  std::vector<IdTree *> &leaves)
 {
   // The subtree starting at tokens[i] is either:
   // 1. a single non-variable symbol (like NP or dog), or
@@ -175,8 +175,8 @@ TreeBasedFilter::IdTree *TreeBasedFilter::BuildTree(
   // First check for case 1.
   if (tokens[i].type == TreeFragmentToken_WORD) {
     Vocabulary::IdType id = m_testVocab.Lookup(tokens[i++].value,
-                                               StringPieceCompatibleHash(),
-                                               StringPieceCompatibleEquals());
+                            StringPieceCompatibleHash(),
+                            StringPieceCompatibleEquals());
     if (id == Vocabulary::NullId()) {
       return 0;
     }
@@ -193,8 +193,8 @@ TreeBasedFilter::IdTree *TreeBasedFilter::BuildTree(
 
   // Read the root symbol of the subtree.
   Vocabulary::IdType id = m_testVocab.Lookup(tokens[i++].value,
-                                             StringPieceCompatibleHash(),
-                                             StringPieceCompatibleEquals());
+                          StringPieceCompatibleHash(),
+                          StringPieceCompatibleEquals());
   if (id == Vocabulary::NullId()) {
     return 0;
   }

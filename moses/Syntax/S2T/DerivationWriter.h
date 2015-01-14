@@ -21,14 +21,14 @@ namespace S2T
 // TODO should be revisited when other the decoders are implemented.
 class DerivationWriter
 {
- public:
+public:
   // 1-best version.
   static void Write(const SHyperedge&, std::size_t, std::ostream &);
 
   // k-best version.
   static void Write(const KBestExtractor::Derivation &, std::size_t,
                     std::ostream &);
- private:
+private:
   static void WriteLine(const SHyperedge &, std::size_t, std::ostream &);
   static void WriteSymbol(const Word &, std::ostream &);
 };

@@ -295,10 +295,10 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
     if (sentence.create( englishString.c_str(),
-    					foreignString.c_str(),
-    					alignmentString.c_str(),
-    					weightString.c_str(),
-    					i, false)) {
+                         foreignString.c_str(),
+                         alignmentString.c_str(),
+                         weightString.c_str(),
+                         i, false)) {
       if (options.placeholders.size()) {
         sentence.invertAlignment();
       }

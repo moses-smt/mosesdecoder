@@ -86,12 +86,16 @@ public:
   }
 
   static const PhraseDictionaryDynamicCacheBased* Instance(const std::string& name) {
-    if (s_instance_map.find(name) == s_instance_map.end()){ return NULL; }
+    if (s_instance_map.find(name) == s_instance_map.end()) {
+      return NULL;
+    }
     return s_instance_map[name];
   }
 
   static PhraseDictionaryDynamicCacheBased* InstanceNonConst(const std::string& name) {
-    if (s_instance_map.find(name) == s_instance_map.end()){ return NULL; }
+    if (s_instance_map.find(name) == s_instance_map.end()) {
+      return NULL;
+    }
     return s_instance_map[name];
   }
 

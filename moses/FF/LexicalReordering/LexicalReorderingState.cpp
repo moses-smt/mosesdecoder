@@ -39,7 +39,7 @@ size_t LexicalReorderingConfiguration::GetNumScoreComponents() const
 }
 
 void LexicalReorderingConfiguration::ConfigureSparse
-  (const std::map<std::string,std::string>& sparseArgs, const LexicalReordering* producer) 
+(const std::map<std::string,std::string>& sparseArgs, const LexicalReordering* producer)
 {
   if (sparseArgs.size()) {
     m_sparse.reset(new SparseReordering(sparseArgs, producer));
@@ -95,7 +95,7 @@ LexicalReorderingConfiguration::LexicalReorderingConfiguration(const std::string
   }
 
   if (m_modelType == None) {
-	std::cerr << "You need to specify the type of the reordering model (msd, monotonicity,...)" << std::endl;
+    std::cerr << "You need to specify the type of the reordering model (msd, monotonicity,...)" << std::endl;
     exit(1);
   }
 }
@@ -134,7 +134,7 @@ void LexicalReorderingState::CopyScores(ScoreComponentCollection*  accum, const 
 {
   // don't call this on a bidirectional object
   UTIL_THROW_IF2(m_direction != LexicalReorderingConfiguration::Backward && m_direction != LexicalReorderingConfiguration::Forward,
-		  "Unknown direction: " << m_direction);
+                 "Unknown direction: " << m_direction);
   const TranslationOption* relevantOpt = &topt;
   if (m_direction != LexicalReorderingConfiguration::Backward) relevantOpt = m_prevOption;
   const Scores *cachedScores = relevantOpt->GetLexReorderingScores(m_configuration.GetScoreProducer());
@@ -146,8 +146,7 @@ void LexicalReorderingState::CopyScores(ScoreComponentCollection*  accum, const 
     const Scores &scoreSet = *cachedScores;
     if(m_configuration.CollapseScores()) {
       scores[m_offset] = scoreSet[m_offset + reoType];
-    }
-    else {
+    } else {
       std::fill(scores.begin() + m_offset, scores.begin() + m_offset + m_configuration.GetNumberOfTypes(), 0);
       scores[m_offset + reoType] = scoreSet[m_offset + reoType];
     }
@@ -158,8 +157,7 @@ void LexicalReorderingState::CopyScores(ScoreComponentCollection*  accum, const 
     Scores scores(m_configuration.GetScoreProducer()->GetNumScoreComponents(),0);
     if(m_configuration.CollapseScores()) {
       scores[m_offset] = m_configuration.GetScoreProducer()->GetDefaultScore(m_offset + reoType);
-    }
-    else {
+    } else {
       scores[m_offset + reoType] = m_configuration.GetScoreProducer()->GetDefaultScore(m_offset + reoType);
     }
     accum->PlusEquals(m_configuration.GetScoreProducer(), scores);

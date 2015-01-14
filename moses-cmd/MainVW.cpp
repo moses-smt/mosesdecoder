@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 #ifdef HAVE_PROTOBUF
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
-    
+
     // echo command line, if verbose
     IFVERBOSE(1) {
       TRACE_ERR("command: ");
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 
     // set up read/writing class
     IFVERBOSE(1) {
-    	PrintUserTime("Created input-output object");
+      PrintUserTime("Created input-output object");
     }
 
     IOWrapper* ioWrapper = new IOWrapper();

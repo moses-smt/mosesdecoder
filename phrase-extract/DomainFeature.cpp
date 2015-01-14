@@ -14,7 +14,7 @@ void Domain::load( const std::string &domainFileName )
   Moses::InputFileStream fileS( domainFileName );
   istream *fileP = &fileS;
 
-	string line;
+  string line;
   while(getline(*fileP, line)) {
     // read
     vector< string > domainSpecLine = tokenize( line.c_str() );

@@ -71,10 +71,9 @@ void ChartTranslationOptions::EvaluateWithSourceContext(const InputType &input, 
     ChartTranslationOption *transOpt = m_collection[i].get();
 
     if (transOpt->GetScores().GetWeightedScore() == - std::numeric_limits<float>::infinity()) {
-    	++numDiscard;
-    }
-    else if (numDiscard) {
-    	m_collection[i - numDiscard] = m_collection[i];
+      ++numDiscard;
+    } else if (numDiscard) {
+      m_collection[i - numDiscard] = m_collection[i];
     }
   }
 
@@ -135,12 +134,12 @@ void ChartTranslationOptions::CreateSourceRuleFromInputPath()
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptions &obj)
 {
-	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
-		const ChartTranslationOption &transOpt = *obj.m_collection[i];
-		out << transOpt << endl;
-	}
+  for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+    const ChartTranslationOption &transOpt = *obj.m_collection[i];
+    out << transOpt << endl;
+  }
 
-	return out;
+  return out;
 }
 
 }

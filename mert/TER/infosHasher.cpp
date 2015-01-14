@@ -5,7 +5,7 @@ Copyright 2010-2013, Christophe Servan, LIUM, University of Le Mans, France
 Contact: christophe.servan@lium.univ-lemans.fr
 
 The tercpp tool and library are free software: you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License as published by 
+under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the licence, or
 (at your option) any later version.
 
@@ -27,35 +27,35 @@ using namespace Tools;
 
 namespace HashMapSpace
 {
-    infosHasher::infosHasher (long cle,string cleTxt, vector<int> valueVecInt )
-    {
-        m_hashKey=cle;
-        m_key=cleTxt;
-        m_value=valueVecInt;
-    }
+infosHasher::infosHasher (long cle,string cleTxt, vector<int> valueVecInt )
+{
+  m_hashKey=cle;
+  m_key=cleTxt;
+  m_value=valueVecInt;
+}
 //     infosHasher::~infosHasher(){};*/
-    long  infosHasher::getHashKey()
-    {
-        return m_hashKey;
-    }
-    string  infosHasher::getKey()
-    {
-        return m_key;
-    }
-    vector<int> infosHasher::getValue()
-    {
-        return m_value;
-    }
-    void infosHasher::setValue ( vector<int>   value )
-    {
-        m_value=value;
-    }
-    string infosHasher::toString()
-    {
-	stringstream to_return;
-	to_return << m_hashKey << "\t" << m_key << "\t" << vectorToString(m_value,"\t") << endl;
-	return to_return.str();
-    }
+long  infosHasher::getHashKey()
+{
+  return m_hashKey;
+}
+string  infosHasher::getKey()
+{
+  return m_key;
+}
+vector<int> infosHasher::getValue()
+{
+  return m_value;
+}
+void infosHasher::setValue ( vector<int>   value )
+{
+  m_value=value;
+}
+string infosHasher::toString()
+{
+  stringstream to_return;
+  to_return << m_hashKey << "\t" << m_key << "\t" << vectorToString(m_value,"\t") << endl;
+  return to_return.str();
+}
 
 
 // typedef stdext::hash_map<std::string,string, stringhasher> HASH_S_S;

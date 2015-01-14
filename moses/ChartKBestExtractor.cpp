@@ -125,7 +125,7 @@ Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
 }
 
 // Generate the score breakdown of the derivation d.
-boost::shared_ptr<ScoreComponentCollection> 
+boost::shared_ptr<ScoreComponentCollection>
 ChartKBestExtractor::GetOutputScoreBreakdown(const Derivation &d)
 {
   const ChartHypothesis &hypo = d.edge.head->hypothesis;
@@ -169,8 +169,7 @@ TreePointer ChartKBestExtractor::GetOutputTree(const Derivation &d)
 
     mytree->Combine(previous_trees);
     return mytree;
-  }
-  else {
+  } else {
     UTIL_THROW2("Error: TreeStructureFeature active, but no internal tree structure found");
   }
 }

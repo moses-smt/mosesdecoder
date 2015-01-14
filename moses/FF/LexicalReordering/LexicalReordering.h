@@ -46,33 +46,37 @@ public:
   Scores GetProb(const Phrase& f, const Phrase& e) const;
 
   virtual FFState* EvaluateWhenApplied(const Hypothesis& cur_hypo,
-                            const FFState* prev_state,
-                            ScoreComponentCollection* accumulator) const;
+                                       const FFState* prev_state,
+                                       ScoreComponentCollection* accumulator) const;
 
   virtual FFState* EvaluateWhenApplied(const ChartHypothesis&,
-                                 int /* featureID */,
-                                 ScoreComponentCollection*) const {
+                                       int /* featureID */,
+                                       ScoreComponentCollection*) const {
     UTIL_THROW(util::Exception, "LexicalReordering is not valid for chart decoder");
   }
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
+
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-              , const TranslationOptionList &translationOptionList) const
-  {}
-  
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
-  bool GetHaveDefaultScores() { return m_haveDefaultScores; }
-  float GetDefaultScore( size_t i ) { return m_defaultScores[i]; }
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
+  }
+  bool GetHaveDefaultScores() {
+    return m_haveDefaultScores;
+  }
+  float GetDefaultScore( size_t i ) {
+    return m_defaultScores[i];
+  }
 
 private:
   bool DecodeCondition(std::string s);

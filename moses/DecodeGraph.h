@@ -49,8 +49,8 @@ public:
   DecodeGraph(size_t id)
     : m_id(id)
     , m_maxChartSpan(NOT_FOUND)
-    , m_backoff(0)
-  {}
+    , m_backoff(0) {
+  }
 
   // for chart decoding
   DecodeGraph(size_t id, size_t maxChartSpan)

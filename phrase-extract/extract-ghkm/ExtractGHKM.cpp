@@ -69,9 +69,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
   // input files are switched prior to extraction and then the source and
   // target of the extracted rules are switched on output.
   std::string effectiveTargetFile = options.t2s ? options.sourceFile
-                                                : options.targetFile;
+                                    : options.targetFile;
   std::string effectiveSourceFile = options.t2s ? options.targetFile
-                                                : options.sourceFile;
+                                    : options.sourceFile;
   InputFileStream targetStream(effectiveTargetFile);
   InputFileStream sourceStream(effectiveSourceFile);
   InputFileStream alignmentStream(options.alignmentFile);
@@ -675,16 +675,16 @@ void ExtractGHKM::WriteGlueGrammar(
   if (options.sourceLabels) {
     out << " {{SourceLabels 2 1 " << sourceLabelGlueTop << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
-    if (options.phraseOrientation) {
-      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
-    }
+  if (options.phraseOrientation) {
+    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+  }
   out << std::endl;
 
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
     out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
-    if (options.treeFragments) { 
+    if (options.treeFragments) {
       out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
     }
     if (options.sourceLabels) {
@@ -700,11 +700,11 @@ void ExtractGHKM::WriteGlueGrammar(
   for(std::set<std::string>::const_iterator i = labelSet.begin();
       i != labelSet.end(); i++ ) {
     out << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| |||";
-    if (options.treeFragments) { 
+    if (options.treeFragments) {
       out << " {{Tree [" << topLabel << " ["<< topLabel << "] [" << *i << "]]}}";
     }
     if (options.sourceLabels) {
-      out << " {{SourceLabels 3 2.718 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 2.718 1 " << sourceLabelGlueTop << " 2.718}}"; 
+      out << " {{SourceLabels 3 2.718 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 2.718 1 " << sourceLabelGlueTop << " 2.718}}";
     }
     if (options.phraseOrientation) {
       out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
@@ -827,8 +827,8 @@ void ExtractGHKM::WriteUnknownWordSoftMatches(
   std::ostream &out)
 {
   for (std::set<std::string>::const_iterator p = labelSet.begin(); p != labelSet.end(); ++p) {
-      std::string label = *p;
-      out << "UNK " << label << std::endl;
+    std::string label = *p;
+    out << "UNK " << label << std::endl;
   }
 }
 

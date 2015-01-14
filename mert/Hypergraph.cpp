@@ -31,18 +31,22 @@ using namespace std;
 static const string kBOS = "<s>";
 static const string kEOS = "</s>";
 
-namespace MosesTuning {
+namespace MosesTuning
+{
 
-StringPiece NextLine(util::FilePiece& from) {
+StringPiece NextLine(util::FilePiece& from)
+{
   StringPiece line;
   while ((line = from.ReadLine()).starts_with("#"));
   return line;
 }
 
-Vocab::Vocab() :  eos_( FindOrAdd(kEOS)), bos_(FindOrAdd(kBOS)){
+Vocab::Vocab() :  eos_( FindOrAdd(kEOS)), bos_(FindOrAdd(kBOS))
+{
 }
 
-const Vocab::Entry &Vocab::FindOrAdd(const StringPiece &str) {
+const Vocab::Entry &Vocab::FindOrAdd(const StringPiece &str)
+{
 #if BOOST_VERSION >= 104200
   Map::const_iterator i= map_.find(str, Hash(), Equals());
 #else
@@ -62,7 +66,8 @@ double_conversion::StringToDoubleConverter converter(double_conversion::StringTo
 /**
  * Reads an incoming edge. Returns edge and source words covered.
 **/
-static pair<Edge*,size_t> ReadEdge(util::FilePiece &from, Graph &graph) {
+static pair<Edge*,size_t> ReadEdge(util::FilePiece &from, Graph &graph)
+{
   Edge* edge = graph.NewEdge();
   StringPiece line = from.ReadLine(); //Don't allow comments within edge lists
   util::TokenIter<util::MultiCharacter> pipes(line, util::MultiCharacter(" ||| "));
@@ -82,7 +87,7 @@ static pair<Edge*,size_t> ReadEdge(util::FilePiece &from, Graph &graph) {
       edge->AddWord(&found);
     }
   }
- 
+
   //Features
   ++pipes;
   for (util::TokenIter<util::SingleCharacter, true> i(*pipes, util::SingleCharacter(' ')); i; ++i) {
@@ -100,17 +105,18 @@ static pair<Edge*,size_t> ReadEdge(util::FilePiece &from, Graph &graph) {
   //Covered words
   ++pipes;
   size_t sourceCovered = boost::lexical_cast<size_t>(*pipes);
-  return pair<Edge*,size_t>(edge,sourceCovered); 
+  return pair<Edge*,size_t>(edge,sourceCovered);
 }
 
-void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeCount) const {
+void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeCount) const
+{
 
   Graph& newGraph = *pNewGraph;
   //TODO: Optimise case where no pruning required
 
   //For debug
-  
-  
+
+
   /*
   map<const Edge*, string> edgeIds;
   for (size_t i = 0; i < edges_.Size(); ++i) {
@@ -136,7 +142,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
 
   //Compute backward scores
   for (size_t vi = 0; vi < vertices_.Size(); ++vi) {
-   // cerr << "Vertex " << vi << endl;
+    // cerr << "Vertex " << vi << endl;
     const Vertex& vertex = vertices_[vi];
     const vector<const Edge*>& incoming = vertex.GetIncoming();
     if (!incoming.size()) {
@@ -150,7 +156,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
           //cerr << "\tChild " << incoming[ei]->Children()[i] << endl;
           size_t childId = incoming[ei]->Children()[i];
           UTIL_THROW_IF(vertexBackwardScores[childId] == kMinScore,
-            HypergraphException, "Graph was not topologically sorted. curr=" << vi << " prev=" << childId);
+                        HypergraphException, "Graph was not topologically sorted. curr=" << vi << " prev=" << childId);
           outgoing[childId].push_back(incoming[ei]);
           incomingScore += vertexBackwardScores[childId];
         }
@@ -172,7 +178,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
     } else {
       for (size_t ei = 0; ei < outgoing[vi].size(); ++ei) {
         //cerr << "Edge " << edgeIds[outgoing[vi][ei]] << endl;
-        FeatureStatsType outgoingScore = 0; 
+        FeatureStatsType outgoingScore = 0;
         //add score of head
         outgoingScore += vertexForwardScores[edgeHeads[outgoing[vi][ei]]];
         //cerr << "Forward score " << outgoingScore << endl;
@@ -204,11 +210,11 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
     }
     FeatureStatsType score = edgeForwardScores[edge] + edgeBackwardScores[edge];
     edgeScores.insert(pair<FeatureStatsType, const Edge*>(score,edge));
-  //  cerr << edgeIds[edge] << " " << score << endl;
+    //  cerr << edgeIds[edge] << " " << score << endl;
   }
 
 
-  
+
   multimap<FeatureStatsType, const Edge*>::const_reverse_iterator ei = edgeScores.rbegin();
   size_t edgeCount = 1;
   while(edgeCount < minEdgeCount && ei != edgeScores.rend()) {
@@ -235,10 +241,10 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
   map<size_t,size_t> oldIdToNew;
   size_t vi = 0;
   for (set<size_t>::const_iterator i = retainedVertices.begin(); i != retainedVertices.end(); ++i, ++vi) {
- //   cerr << *i << " New: " << vi << endl;
+//   cerr << *i << " New: " << vi << endl;
     oldIdToNew[*i] = vi;
     Vertex* vertex = newGraph.NewVertex();
-    vertex->SetSourceCovered(vertices_[*i].SourceCovered()); 
+    vertex->SetSourceCovered(vertices_[*i].SourceCovered());
   }
 
   for (set<const Edge*>::const_iterator i = retainedEdges.begin(); i != retainedEdges.end(); ++i) {
@@ -255,7 +261,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
     newHead.AddEdge(newEdge);
   }
 
-  
+
   /*
   cerr << "New graph" << endl;
   for (size_t vi = 0; vi < newGraph.VertexSize(); ++vi) {
@@ -275,21 +281,22 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
     }
     cerr << endl;
   }
-  
-*/
+
+  */
 
 }
 
 /**
   * Read from "Kenneth's hypergraph" aka cdec target_graph format (with comments)
 **/
-void ReadGraph(util::FilePiece &from, Graph &graph) {
+void ReadGraph(util::FilePiece &from, Graph &graph)
+{
 
   //First line should contain field names
   StringPiece line = from.ReadLine();
   UTIL_THROW_IF(line.compare("# target ||| features ||| source-covered") != 0, HypergraphException, "Incorrect format spec on first line: '" << line << "'");
   line = NextLine(from);
-  
+
   //Then expect numbers of vertices
   util::TokenIter<util::SingleCharacter, false> i(line, util::SingleCharacter(' '));
   unsigned long int vertices = boost::lexical_cast<unsigned long int>(*i);
@@ -304,9 +311,11 @@ void ReadGraph(util::FilePiece &from, Graph &graph) {
     for (unsigned long int e = 0; e < edge_count; ++e) {
       pair<Edge*,size_t> edge = ReadEdge(from, graph);
       vertex->AddEdge(edge.first);
-      //Note: the file format attaches this to the edge, but it's really a property 
+      //Note: the file format attaches this to the edge, but it's really a property
       //of the vertex.
-      if (!e) {vertex->SetSourceCovered(edge.second);}
+      if (!e) {
+        vertex->SetSourceCovered(edge.second);
+      }
     }
   }
 }

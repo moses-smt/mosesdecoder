@@ -51,16 +51,15 @@ protected:
 };
 
 // struct that caches cellLabel, its end position and score for quicker lookup
-struct ChartCellCache
-{
-    ChartCellCache(size_t endPos, const ChartCellLabel* cellLabel, float score)
+struct ChartCellCache {
+  ChartCellCache(size_t endPos, const ChartCellLabel* cellLabel, float score)
     : endPos(endPos)
     , cellLabel(cellLabel)
     , score(score) {}
 
-    size_t endPos;
-    const ChartCellLabel* cellLabel;
-    float score;
+  size_t endPos;
+  const ChartCellLabel* cellLabel;
+  float score;
 };
 
 }  // namespace Moses

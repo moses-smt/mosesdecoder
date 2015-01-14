@@ -242,7 +242,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonChangeInput);
   MOSES_FNAME(SkeletonTranslationOptionListFeature);
   MOSES_FNAME(SkeletonPT);
-  
+
 #ifdef HAVE_VW
   MOSES_FNAME(VW);
   MOSES_FNAME(VWFeatureSourceBagOfWords);
@@ -322,22 +322,22 @@ void FeatureRegistry::Construct(const std::string &name, const std::string &line
 
 void FeatureRegistry::PrintFF() const
 {
-	vector<string> ffs;
-	std::cerr << "Available feature functions:" << std::endl;
-	Map::const_iterator iter;
-	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
-		const string &ffName = iter->first;
-		ffs.push_back(ffName);
-	}
+  vector<string> ffs;
+  std::cerr << "Available feature functions:" << std::endl;
+  Map::const_iterator iter;
+  for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
+    const string &ffName = iter->first;
+    ffs.push_back(ffName);
+  }
 
-	vector<string>::const_iterator iterVec;
-	std::sort(ffs.begin(), ffs.end());
-	for (iterVec = ffs.begin(); iterVec != ffs.end(); ++iterVec) {
-		const string &ffName = *iterVec;
-		std::cerr << ffName << " ";
-	}
+  vector<string>::const_iterator iterVec;
+  std::sort(ffs.begin(), ffs.end());
+  for (iterVec = ffs.begin(); iterVec != ffs.end(); ++iterVec) {
+    const string &ffName = *iterVec;
+    std::cerr << ffName << " ";
+  }
 
-	std::cerr << std::endl;
+  std::cerr << std::endl;
 }
 
 } // namespace Moses

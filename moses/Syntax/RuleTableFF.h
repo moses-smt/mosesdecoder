@@ -21,7 +21,7 @@ class RuleTable;
 // anything except provide somewhere to store the weights and parameter values.
 class RuleTableFF : public PhraseDictionary
 {
- public:
+public:
   RuleTableFF(const std::string &);
 
   // FIXME Delete m_table?
@@ -29,18 +29,21 @@ class RuleTableFF : public PhraseDictionary
 
   void Load();
 
-  const RuleTable *GetTable() const { return m_table; }
+  const RuleTable *GetTable() const {
+    return m_table;
+  }
 
-  static const std::vector<RuleTableFF*> &Instances() { return s_instances; }
+  static const std::vector<RuleTableFF*> &Instances() {
+    return s_instances;
+  }
 
   ChartRuleLookupManager *CreateRuleLookupManager(
-    const ChartParser &, const ChartCellCollectionBase &, std::size_t)
-  {
+    const ChartParser &, const ChartCellCollectionBase &, std::size_t) {
     assert(false);
     return 0;
   }
 
- private:
+private:
   static std::vector<RuleTableFF*> s_instances;
 
   const RuleTable *m_table;

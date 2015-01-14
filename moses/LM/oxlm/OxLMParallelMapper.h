@@ -2,18 +2,20 @@
 
 #include "moses/LM/oxlm/OxLMMapper.h"
 
-namespace Moses {
+namespace Moses
+{
 
-class OxLMParallelMapper : public OxLMMapper {
- public:
+class OxLMParallelMapper : public OxLMMapper
+{
+public:
   OxLMParallelMapper(
-      const boost::shared_ptr<oxlm::Vocabulary>& vocab,
-      bool pos_back_off,
-      const FactorType& pos_factor_type);
+    const boost::shared_ptr<oxlm::Vocabulary>& vocab,
+    bool pos_back_off,
+    const FactorType& pos_factor_type);
 
   int convertSource(const Word& word) const;
 
- private:
+private:
   Coll moses2SourceOxlm;
   int kSOURCE_UNKNOWN;
 };

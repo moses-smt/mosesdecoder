@@ -24,8 +24,8 @@ void SoftMatchingFeature::SetParameter(const std::string& key, const std::string
     m_tuneable = Scan<bool>(value);
   } else if (key == "filterable") { //ignore
   } else if (key == "path") {
-      const std::string filePath = value;
-      Load(filePath);
+    const std::string filePath = value;
+    Load(filePath);
   } else {
     UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
   }
@@ -35,34 +35,34 @@ void SoftMatchingFeature::SetParameter(const std::string& key, const std::string
 bool SoftMatchingFeature::Load(const std::string& filePath)
 {
 
-    StaticData &staticData = StaticData::InstanceNonConst();
+  StaticData &staticData = StaticData::InstanceNonConst();
 
-    InputFileStream inStream(filePath);
-    std::string line;
-    while(getline(inStream, line)) {
-      std::vector<std::string> tokens = Tokenize(line);
-      UTIL_THROW_IF2(tokens.size() != 2, "Error: wrong format of SoftMatching file: must have two nonterminals per line");
+  InputFileStream inStream(filePath);
+  std::string line;
+  while(getline(inStream, line)) {
+    std::vector<std::string> tokens = Tokenize(line);
+    UTIL_THROW_IF2(tokens.size() != 2, "Error: wrong format of SoftMatching file: must have two nonterminals per line");
 
-      // no soft matching necessary if LHS and RHS are the same
-      if (tokens[0] == tokens[1]) {
-          continue;
-      }
-
-      Word LHS, RHS;
-      LHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), tokens[0], true);
-      RHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), tokens[1], true);
-
-      m_softMatches[RHS[0]->GetId()].push_back(LHS);
-      GetOrSetFeatureName(RHS, LHS);
+    // no soft matching necessary if LHS and RHS are the same
+    if (tokens[0] == tokens[1]) {
+      continue;
     }
 
-    staticData.SetSoftMatches(m_softMatches);
+    Word LHS, RHS;
+    LHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), tokens[0], true);
+    RHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), tokens[1], true);
 
-   return true;
+    m_softMatches[RHS[0]->GetId()].push_back(LHS);
+    GetOrSetFeatureName(RHS, LHS);
+  }
+
+  staticData.SetSoftMatches(m_softMatches);
+
+  return true;
 }
 
 void SoftMatchingFeature::EvaluateWhenApplied(const ChartHypothesis& hypo,
-                             ScoreComponentCollection* accumulator) const
+    ScoreComponentCollection* accumulator) const
 {
 
   const TargetPhrase& target = hypo.GetCurrTargetPhrase();
@@ -87,7 +87,8 @@ void SoftMatchingFeature::EvaluateWhenApplied(const ChartHypothesis& hypo,
 }
 
 // when loading, or when we notice that non-terminals have been added after loading, we resize vectors
-void SoftMatchingFeature::ResizeCache() const {
+void SoftMatchingFeature::ResizeCache() const
+{
   FactorCollection& fc = FactorCollection::Instance();
   size_t numNonTerminals = fc.GetNumNonTerminals();
 
@@ -98,7 +99,8 @@ void SoftMatchingFeature::ResizeCache() const {
 }
 
 
-const std::string& SoftMatchingFeature::GetOrSetFeatureName(const Word& RHS, const Word& LHS) const {
+const std::string& SoftMatchingFeature::GetOrSetFeatureName(const Word& RHS, const Word& LHS) const
+{
   try {
 #ifdef WITH_THREADS //try read-only lock
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
@@ -107,23 +109,22 @@ const std::string& SoftMatchingFeature::GetOrSetFeatureName(const Word& RHS, con
     if (!name.empty()) {
       return name;
     }
-  }
-  catch (const std::out_of_range& oor) {
+  } catch (const std::out_of_range& oor) {
 #ifdef WITH_THREADS //need to resize cache; write lock
     boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
     ResizeCache();
   }
 #ifdef WITH_THREADS //need to update cache; write lock
-    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+  boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
-    std::string &name = m_nameCache[RHS[0]->GetId()][LHS[0]->GetId()];
-    const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-    std::string LHS_string = LHS.GetString(outputFactorOrder, false);
-    std::string RHS_string = RHS.GetString(outputFactorOrder, false);
-    name = LHS_string + "->" + RHS_string;
-    return name;
-  }
+  std::string &name = m_nameCache[RHS[0]->GetId()][LHS[0]->GetId()];
+  const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+  std::string LHS_string = LHS.GetString(outputFactorOrder, false);
+  std::string RHS_string = RHS.GetString(outputFactorOrder, false);
+  name = LHS_string + "->" + RHS_string;
+  return name;
+}
 
 }
 

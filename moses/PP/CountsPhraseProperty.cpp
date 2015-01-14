@@ -27,11 +27,11 @@ void CountsPhraseProperty::ProcessValue(const std::string &value)
 
 std::ostream& operator<<(std::ostream &out, const CountsPhraseProperty &obj)
 {
-	out << "Count property="
-			<< obj.GetTargetMarginal() << " "
-			<< obj.GetSourceMarginal() << " "
-			<< obj.GetJointCount();
-	return out;
+  out << "Count property="
+      << obj.GetTargetMarginal() << " "
+      << obj.GetSourceMarginal() << " "
+      << obj.GetJointCount();
+  return out;
 }
 
 } // namespace Moses

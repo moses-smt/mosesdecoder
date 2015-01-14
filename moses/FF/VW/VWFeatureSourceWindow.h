@@ -7,49 +7,47 @@
 
 namespace Moses
 {
-  
+
 class VWFeatureSourceWindow : public VWFeatureSource
 {
-  public:
-    VWFeatureSourceWindow(const std::string &line)
-      : VWFeatureSource(line), m_size(DEFAULT_WINDOW_SIZE)
-    {
-      ReadParameters();
-      
-      // Call this last
-      VWFeatureBase::UpdateRegister();
-    }
+public:
+  VWFeatureSourceWindow(const std::string &line)
+    : VWFeatureSource(line), m_size(DEFAULT_WINDOW_SIZE) {
+    ReadParameters();
 
-    void operator()(const InputType &input
+    // Call this last
+    VWFeatureBase::UpdateRegister();
+  }
+
+  void operator()(const InputType &input
                   , const InputPath &inputPath
                   , const WordsRange &sourceRange
-                  , Discriminative::Classifier &classifier) const
-    {
-      int begin = sourceRange.GetStartPos();
-      int end   = sourceRange.GetEndPos() + 1;
-      int inputLen = input.GetSize();
+                  , Discriminative::Classifier &classifier) const {
+    int begin = sourceRange.GetStartPos();
+    int end   = sourceRange.GetEndPos() + 1;
+    int inputLen = input.GetSize();
 
-      for (int i = std::max(0, begin - m_size); i < begin; i++) {
-        classifier.AddLabelIndependentFeature("c^" + SPrint(i - begin) + "^" + GetWord(input, i));
-      }
-
-      for (int i = end; i < std::min(end + m_size, inputLen); i++) {
-        classifier.AddLabelIndependentFeature("c^" + SPrint(i - end + 1) + "^" + GetWord(input, i));
-      }
-    }
-    
-    virtual void SetParameter(const std::string& key, const std::string& value) {
-      if (key == "size") {
-        m_size = Scan<size_t>(value);
-      } else {
-        VWFeatureSource::SetParameter(key, value);
-      }
+    for (int i = std::max(0, begin - m_size); i < begin; i++) {
+      classifier.AddLabelIndependentFeature("c^" + SPrint(i - begin) + "^" + GetWord(input, i));
     }
 
-  private:
-    static const int DEFAULT_WINDOW_SIZE = 3;
+    for (int i = end; i < std::min(end + m_size, inputLen); i++) {
+      classifier.AddLabelIndependentFeature("c^" + SPrint(i - end + 1) + "^" + GetWord(input, i));
+    }
+  }
 
-    int m_size;
+  virtual void SetParameter(const std::string& key, const std::string& value) {
+    if (key == "size") {
+      m_size = Scan<size_t>(value);
+    } else {
+      VWFeatureSource::SetParameter(key, value);
+    }
+  }
+
+private:
+  static const int DEFAULT_WINDOW_SIZE = 3;
+
+  int m_size;
 };
 
 }

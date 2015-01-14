@@ -17,23 +17,22 @@ class TrainingTask : public Moses::Task
 public:
 
   TrainingTask(Moses::InputType* source, Moses::IOWrapper &ioWrapper)
-  : m_source(source)
-    , m_ioWrapper(ioWrapper)
-  {}
+    : m_source(source)
+    , m_ioWrapper(ioWrapper) {
+  }
 
-  ~TrainingTask()
-  {}
+  ~TrainingTask() {
+  }
 
-  void Run()
-  {
+  void Run() {
     StaticData::Instance().InitializeForInput(*m_source);
-    
+
     std::cerr << *m_source << std::endl;
-    
+
     TranslationOptionCollection *transOptColl = m_source->CreateTranslationOptionCollection();
     transOptColl->CreateTranslationOptions();
     delete transOptColl;
-    
+
     StaticData::Instance().CleanUpAfterSentenceProcessing(*m_source);
   }
 

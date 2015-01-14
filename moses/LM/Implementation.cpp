@@ -341,8 +341,7 @@ FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis&
     // scores[1] = out->GetScoresForProducer(this)[1];
     scores[1] = 0;
     out->PlusEquals(this, scores);
-  }
-  else {
+  } else {
     out->PlusEquals(this, prefixScore + finalizedScore - hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0]);
   }
 

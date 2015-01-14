@@ -78,14 +78,14 @@ void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
     try {
       tokenizer >> label >> index;
     } catch (const std::exception &e) {
-      UTIL_THROW2(GetScoreProducerDescription() 
+      UTIL_THROW2(GetScoreProducerDescription()
                   << ": Error reading source label set file " << m_sourceLabelSetFile << " .");
     }
     std::pair< boost::unordered_map<std::string,size_t>::iterator, bool > inserted = m_sourceLabels.insert( std::pair<std::string,size_t>(label,index) );
     UTIL_THROW_IF2(!inserted.second, GetScoreProducerDescription()
                    << ": Source label set file " << m_sourceLabelSetFile << " should contain each syntactic label only once.");
-    
-    if (index >= m_sourceLabelsByIndex.size()) { 
+
+    if (index >= m_sourceLabelsByIndex.size()) {
       m_sourceLabelsByIndex.resize(index+1);
       m_sourceLabelsByIndex_RHS_1.resize(index+1);
       m_sourceLabelsByIndex_RHS_0.resize(index+1);
@@ -184,11 +184,11 @@ void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCou
     const Factor* targetLabelFactor = factorCollection.AddFactor(targetLabel,true);
 
     sourceLHSCounts[foundSourceLabelIndex->second] += count;
-    std::pair< boost::unordered_map<const Factor*,float >::iterator, bool > insertedTargetLHSCount = 
+    std::pair< boost::unordered_map<const Factor*,float >::iterator, bool > insertedTargetLHSCount =
       targetLHSCounts.insert( std::pair<const Factor*,float>(targetLabelFactor,count) );
     if (!insertedTargetLHSCount.second) {
       (insertedTargetLHSCount.first)->second += count;
-      boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::iterator jointCountIt = 
+      boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::iterator jointCountIt =
         m_labelPairProbabilities.find( targetLabelFactor );
       assert(jointCountIt != m_labelPairProbabilities.end());
       (jointCountIt->second)->at(foundSourceLabelIndex->second).first += count;
@@ -197,7 +197,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCou
       std::pair<float,float> init(0.0,0.0);
       std::vector< std::pair<float,float> >* sourceVector = new std::vector< std::pair<float,float> >(m_sourceLabels.size(),init);
       sourceVector->at(foundSourceLabelIndex->second) = std::pair<float,float>(count,count);
-      std::pair< boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::iterator, bool > insertedJointCount = 
+      std::pair< boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::iterator, bool > insertedJointCount =
         m_labelPairProbabilities.insert( std::pair<const Factor*, std::vector< std::pair<float,float> >* >(targetLabelFactor,sourceVector) );
       assert(insertedJointCount.second);
     }
@@ -230,28 +230,25 @@ void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCou
 
 
 void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const InputType &input
-                                   , const InputPath &inputPath
-                                   , const TargetPhrase &targetPhrase
-                                   , const StackVec *stackVec
-                                   , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedFutureScore) const
 {
   assert(stackVec);
 
-  IFFEATUREVERBOSE(2)
-  {
-    FEATUREVERBOSE(2, targetPhrase << std::endl); 
-    FEATUREVERBOSE(2, inputPath << std::endl); 
-    for (size_t i = 0; i < stackVec->size(); ++i) 
-    {
+  IFFEATUREVERBOSE(2) {
+    FEATUREVERBOSE(2, targetPhrase << std::endl);
+    FEATUREVERBOSE(2, inputPath << std::endl);
+    for (size_t i = 0; i < stackVec->size(); ++i) {
       const ChartCellLabel &cell = *stackVec->at(i);
       const WordsRange &ntRange = cell.GetCoverage();
       FEATUREVERBOSE(2, "stackVec[ " << i << " ] : " << ntRange.GetStartPos() << " - " << ntRange.GetEndPos() << std::endl);
     }
 
     for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
-         it!=targetPhrase.GetAlignNonTerm().end(); ++it) 
-    {
+         it!=targetPhrase.GetAlignNonTerm().end(); ++it) {
       FEATUREVERBOSE(2, "alignNonTerm " << it->first << " " << it->second << std::endl);
     }
   }
@@ -278,11 +275,11 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 
   if (const PhraseProperty *property = targetPhrase.GetProperty("SourceLabels")) {
 
-    const SourceLabelsPhraseProperty *sourceLabelsPhraseProperty = static_cast<const SourceLabelsPhraseProperty*>(property); 
+    const SourceLabelsPhraseProperty *sourceLabelsPhraseProperty = static_cast<const SourceLabelsPhraseProperty*>(property);
 
-    nNTs = sourceLabelsPhraseProperty->GetNumberOfNonTerminals(); 
+    nNTs = sourceLabelsPhraseProperty->GetNumberOfNonTerminals();
     float totalCount = sourceLabelsPhraseProperty->GetTotalCount();
-  
+
     // prepare for input tree label matching
     std::vector< boost::unordered_set<size_t> > treeInputLabelsRHS(nNTs-1);
     boost::unordered_set<size_t> treeInputLabelsLHS;
@@ -294,7 +291,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     std::vector<const Factor*> targetLabelsRHS;
     if (nNTs > 1) { // rule has right-hand side non-terminals, i.e. it's a hierarchical rule
       size_t nonTerminalNumber = 0;
-  
+
       for (size_t phrasePos=0; phrasePos<targetPhrase.GetSize(); ++phrasePos) {
         // consult rule for either word or non-terminal
         const Word &word = targetPhrase.GetWord(phrasePos);
@@ -311,20 +308,17 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
           const NonTerminalSet& prevTreeInputLabels = treeInput.GetLabelSet(prevStartPos,prevEndPos);
 
           for (NonTerminalSet::const_iterator prevTreeInputLabelsIt = prevTreeInputLabels.begin();
-               prevTreeInputLabelsIt != prevTreeInputLabels.end(); ++prevTreeInputLabelsIt) 
-          {
-            if (*prevTreeInputLabelsIt != outputDefaultNonTerminal) 
-            {
-              boost::unordered_map<const Factor*,size_t>::const_iterator foundPrevTreeInputLabel 
+               prevTreeInputLabelsIt != prevTreeInputLabels.end(); ++prevTreeInputLabelsIt) {
+            if (*prevTreeInputLabelsIt != outputDefaultNonTerminal) {
+              boost::unordered_map<const Factor*,size_t>::const_iterator foundPrevTreeInputLabel
                 = m_sourceLabelIndexesByFactor.find((*prevTreeInputLabelsIt)[0]);
-              if (foundPrevTreeInputLabel != m_sourceLabelIndexesByFactor.end()) 
-              {
+              if (foundPrevTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
                 size_t prevTreeInputLabelIndex = foundPrevTreeInputLabel->second;
                 treeInputLabelsRHS[nonTerminalNumber].insert(prevTreeInputLabelIndex);
               }
             }
           }
-    
+
           ++nonTerminalNumber;
         }
       }
@@ -339,7 +333,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     for (NonTerminalSet::const_iterator treeInputLabelsIt = treeInputLabels.begin();
          treeInputLabelsIt != treeInputLabels.end(); ++treeInputLabelsIt) {
       if (*treeInputLabelsIt != outputDefaultNonTerminal) {
-        boost::unordered_map<const Factor*,size_t>::const_iterator foundTreeInputLabel 
+        boost::unordered_map<const Factor*,size_t>::const_iterator foundTreeInputLabel
           = m_sourceLabelIndexesByFactor.find((*treeInputLabelsIt)[0]);
         if (foundTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
           size_t treeInputLabelIndex = foundTreeInputLabel->second;
@@ -348,7 +342,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       }
     }
 
-  
+
     // inspect source-labelled rule items
 
     std::vector< boost::unordered_set<size_t> > sparseScoredTreeInputLabelsRHS(nNTs-1);
@@ -378,15 +372,15 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 
           treeInputMatchRHSCountByNonTerminal[nonTerminalNumber] = true;
 
-          if ( m_featureVariant == 2 || 
+          if ( m_featureVariant == 2 ||
                (m_featureVariant == 3 && m_coreSourceLabels.find(*sourceLabelsRHSIt) != m_coreSourceLabels.end()) ) {
             // score sparse features: RHS match
             if (sparseScoredTreeInputLabelsRHS[nonTerminalNumber].find(*sourceLabelsRHSIt) == sparseScoredTreeInputLabelsRHS[nonTerminalNumber].end()) {
-            // (only if no match has been scored for this tree input label and rule non-terminal with a previous sourceLabelItem)
+              // (only if no match has been scored for this tree input label and rule non-terminal with a previous sourceLabelItem)
               float score_RHS_1 = (float)1/treeInputLabelsRHS[nonTerminalNumber].size();
               scoreBreakdown.PlusEquals(this,
                                         m_sourceLabelsByIndex_RHS_1[*sourceLabelsRHSIt],
-                                        score_RHS_1); 
+                                        score_RHS_1);
               sparseScoredTreeInputLabelsRHS[nonTerminalNumber].insert(*sourceLabelsRHSIt);
             }
           }
@@ -413,15 +407,15 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 
           currentSourceLabelItemHasLHSTreeInputMatch = true;
 
-          if ( m_featureVariant == 2 || 
+          if ( m_featureVariant == 2 ||
                (m_featureVariant == 3 && m_coreSourceLabels.find(sourceLabelsLHSIt->first) != m_coreSourceLabels.end()) ) {
             // score sparse features: LHS match
             if (sparseScoredTreeInputLabelsLHS.find(sourceLabelsLHSIt->first) == sparseScoredTreeInputLabelsLHS.end()) {
-            // (only if no match has been scored for this tree input label and rule non-terminal with a previous sourceLabelItem)
+              // (only if no match has been scored for this tree input label and rule non-terminal with a previous sourceLabelItem)
               float score_LHS_1 = (float)1/treeInputLabelsLHS.size();
               scoreBreakdown.PlusEquals(this,
                                         m_sourceLabelsByIndex_LHS_1[sourceLabelsLHSIt->first],
-                                        score_LHS_1); 
+                                        score_LHS_1);
               sparseScoredTreeInputLabelsLHS.insert(sourceLabelsLHSIt->first);
             }
           }
@@ -476,13 +470,13 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       // RHS
 
       for (size_t nonTerminalNumber = 0; nonTerminalNumber < nNTs-1; ++nonTerminalNumber) {
-      // nNTs-1 because nNTs also counts the left-hand side non-terminal
+        // nNTs-1 because nNTs also counts the left-hand side non-terminal
 
         float score_RHS_0 = (float)1/treeInputLabelsRHS[nonTerminalNumber].size();
         for (boost::unordered_set<size_t>::const_iterator treeInputLabelsRHSIt = treeInputLabelsRHS[nonTerminalNumber].begin();
              treeInputLabelsRHSIt != treeInputLabelsRHS[nonTerminalNumber].end(); ++treeInputLabelsRHSIt) {
 
-          if ( m_featureVariant == 2 || 
+          if ( m_featureVariant == 2 ||
                (m_featureVariant == 3 && m_coreSourceLabels.find(*treeInputLabelsRHSIt) != m_coreSourceLabels.end()) ) {
 
             if (sparseScoredTreeInputLabelsRHS[nonTerminalNumber].find(*treeInputLabelsRHSIt) == sparseScoredTreeInputLabelsRHS[nonTerminalNumber].end()) {
@@ -501,7 +495,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       for (boost::unordered_set<size_t>::const_iterator treeInputLabelsLHSIt = treeInputLabelsLHS.begin();
            treeInputLabelsLHSIt != treeInputLabelsLHS.end(); ++treeInputLabelsLHSIt) {
 
-        if ( m_featureVariant == 2 || 
+        if ( m_featureVariant == 2 ||
              (m_featureVariant == 3 && m_coreSourceLabels.find(*treeInputLabelsLHSIt) != m_coreSourceLabels.end()) ) {
 
           if (sparseScoredTreeInputLabelsLHS.find(*treeInputLabelsLHSIt) == sparseScoredTreeInputLabelsLHS.end()) {
@@ -514,7 +508,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       }
 
     }
-      
+
   } else {
 
     // abort with error message if the phrase does not translate an unknown word
@@ -532,16 +526,16 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
   // input tree matching
   switch (m_featureVariant) {
 
-    case 0:
-      newScores[0] = hasCompleteTreeInputMatch;
-      break;
+  case 0:
+    newScores[0] = hasCompleteTreeInputMatch;
+    break;
 
-    case 1:
-      newScores[0] = ( (hasCompleteTreeInputMatch || isGlueGrammarRule || isUnkRule) ? 0 : std::numeric_limits<float>::min() );
-      break;
+  case 1:
+    newScores[0] = ( (hasCompleteTreeInputMatch || isGlueGrammarRule || isUnkRule) ? 0 : std::numeric_limits<float>::min() );
+    break;
 
-    default:
-      newScores[0] = hasCompleteTreeInputMatch;
+  default:
+    newScores[0] = hasCompleteTreeInputMatch;
   }
   newScores[1] = treeInputMismatchLHSBinary;
   newScores[2] = treeInputMismatchRHSCount;
@@ -552,12 +546,12 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
   scoreBreakdown.PlusEquals(this, newScores);
 }
 
- 
+
 std::pair<float,float> SoftSourceSyntacticConstraintsFeature::GetLabelPairProbabilities(
-  const Factor* target, 
+  const Factor* target,
   const size_t source) const
 {
-  boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::const_iterator found = 
+  boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::const_iterator found =
     m_labelPairProbabilities.find(target);
   if ( found == m_labelPairProbabilities.end() ) {
     return std::pair<float,float>(0,0);
@@ -565,6 +559,6 @@ std::pair<float,float> SoftSourceSyntacticConstraintsFeature::GetLabelPairProbab
   return found->second->at(source);
 }
 
- 
+
 }
 

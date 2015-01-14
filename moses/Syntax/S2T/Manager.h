@@ -29,7 +29,7 @@ namespace S2T
 template<typename Parser>
 class Manager : public Syntax::Manager
 {
- public:
+public:
   Manager(const InputType &);
 
   void Decode();
@@ -38,13 +38,13 @@ class Manager : public Syntax::Manager
   const SHyperedge *GetBestSHyperedge() const;
 
   void ExtractKBest(
-      std::size_t k,
-      std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
-      bool onlyDistinct=false) const;
+    std::size_t k,
+    std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
+    bool onlyDistinct=false) const;
 
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
 
- private:
+private:
   void FindOovs(const PChart &, std::set<Word> &, std::size_t);
 
   void InitializeCharts();

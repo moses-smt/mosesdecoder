@@ -155,8 +155,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
         if (startPos == endPos) {
           TRACE_ERR("WARNING: tag " << tagName << " span is empty. Ignoring: " << line << endl);
           continue;
-        }
-        else if (startPos > endPos) {
+        } else if (startPos > endPos) {
           TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
           return false;
         }

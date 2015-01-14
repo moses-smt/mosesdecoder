@@ -24,20 +24,30 @@ namespace Syntax
 template<typename T>
 class BoundedPriorityContainer
 {
- public:
+public:
   typedef typename std::vector<T>::iterator Iterator;
   typedef typename std::vector<T>::const_iterator ConstIterator;
 
   BoundedPriorityContainer(std::size_t);
 
-  Iterator Begin() { return m_elements.begin(); }
-  Iterator End() { return m_elements.begin()+m_size; }
+  Iterator Begin() {
+    return m_elements.begin();
+  }
+  Iterator End() {
+    return m_elements.begin()+m_size;
+  }
 
-  ConstIterator Begin() const { return m_elements.begin(); }
-  ConstIterator End() const { return m_elements.begin()+m_size; }
+  ConstIterator Begin() const {
+    return m_elements.begin();
+  }
+  ConstIterator End() const {
+    return m_elements.begin()+m_size;
+  }
 
   // Return the number of elements currently held.
-  std::size_t Size() const { return m_size; }
+  std::size_t Size() const {
+    return m_size;
+  }
 
   // 'Lazily' clear the container by setting the size to 0 (allowing elements
   // to be overwritten).
@@ -46,7 +56,12 @@ class BoundedPriorityContainer
   // TODO Alternative, is to clear m_queue by assigning an empty queue value
   // TODO but that might incur an alloc-related overhead when the new underlying
   // TODO has to be regrown.
-  void LazyClear() { m_size = 0; while (!m_queue.empty()) { m_queue.pop(); } }
+  void LazyClear() {
+    m_size = 0;
+    while (!m_queue.empty()) {
+      m_queue.pop();
+    }
+  }
 
   // Insert the given object iff
   //   i) the container is not full yet, or
@@ -67,17 +82,16 @@ class BoundedPriorityContainer
 
   // Determine if an object with the given priority would be accepted for
   // insertion based on the current contents of the container.
-  bool WouldAccept(float priority)
-  {
+  bool WouldAccept(float priority) {
     return m_size < m_limit || priority > m_queue.top().first;
   }
 
- private:
+private:
   typedef std::pair<float, int> PriorityIndexPair;
 
   class PriorityIndexPairOrderer
   {
-   public:
+  public:
     bool operator()(const PriorityIndexPair &p,
                     const PriorityIndexPair &q) const {
       return p.first > q.first;
@@ -87,8 +101,8 @@ class BoundedPriorityContainer
   // Min-priority queue.  The queue stores the indices of the elements, not
   // the elements themselves to keep down the costs of heap maintenance.
   typedef std::priority_queue<PriorityIndexPair,
-                              std::vector<PriorityIndexPair>,
-                              PriorityIndexPairOrderer> Queue;
+          std::vector<PriorityIndexPair>,
+          PriorityIndexPairOrderer> Queue;
 
   // The elements are stored in a vector.  Note that the size of this vector
   // can be greater than m_size (after a call to LazyClear).

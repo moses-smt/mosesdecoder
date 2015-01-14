@@ -137,11 +137,11 @@ void WordTranslationFeature::Load()
 }
 
 void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
-              , const InputPath &inputPath
-              , const TargetPhrase &targetPhrase
-              , const StackVec *stackVec
-              , ScoreComponentCollection &scoreBreakdown
-              , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedFutureScore) const
 {
   const Sentence& sentence = static_cast<const Sentence&>(input);
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();

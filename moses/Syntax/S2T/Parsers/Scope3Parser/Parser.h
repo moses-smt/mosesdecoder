@@ -33,7 +33,9 @@ public:
   typedef RuleTrieScope3 RuleTrie;
 
   // TODO Make this configurable?
-  static bool RequiresCompressedChart() { return false; }
+  static bool RequiresCompressedChart() {
+    return false;
+  }
 
   Scope3Parser(PChart &, const RuleTrie &, std::size_t);
 
@@ -60,7 +62,7 @@ private:
   /* m_patSpans[i][j] records the set of all PAT nodes for span [i,i+j]
      i.e. j is the width of the span */
   std::vector<std::vector<
-    std::vector<const PatternApplicationTrie *> > > m_patSpans;
+  std::vector<const PatternApplicationTrie *> > > m_patSpans;
 };
 
 }  // namespace S2T

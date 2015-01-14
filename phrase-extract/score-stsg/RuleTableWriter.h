@@ -19,8 +19,8 @@ class RuleTableWriter
 {
 public:
   RuleTableWriter(const Options &options, Moses::OutputFileStream &out)
-      : m_options(options)
-      , m_out(out) {}
+    : m_options(options)
+    , m_out(out) {}
 
   void WriteLine(const TokenizedRuleHalf &, const TokenizedRuleHalf &,
                  const std::string &, double, double, int, int, int);

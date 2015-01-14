@@ -41,12 +41,12 @@ namespace Moses
  *
  * In theory a column can contain anything, even text-serialized parse trees or
  * classifier features as long it can be represented as text and does not contain
- * tab characters. 
- * 
+ * tab characters.
+ *
  */
 
 typedef std::vector<std::string> TabbedColumns;
- 
+
 class TabbedSentence : public Sentence
 {
 
@@ -61,25 +61,25 @@ public:
   // Splits off the first tab-separated column and passes it to
   // Sentence::CreateFromString(...), the remaining columns are stored in
   // m_columns .
-  
+
   virtual void CreateFromString(const std::vector<FactorType> &factorOrder
-                        , const std::string &tabbedString);
-  
+                                , const std::string &tabbedString);
+
   virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 
   const TabbedColumns& GetColumns() const {
     return m_columns;
   }
-  
+
   const std::string& GetColumn(size_t i) const {
     UTIL_THROW_IF2(m_columns.size() <= i,
-                  "There is no column with index " << i);
+                   "There is no column with index " << i);
     return m_columns[i];
   }
 
 private:
   TabbedColumns m_columns;
-  
+
 };
 
 

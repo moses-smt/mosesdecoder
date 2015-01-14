@@ -5,7 +5,8 @@
 #include "ezexample.h"
 #include "../moses/Util.h"
 
-namespace Discriminative {
+namespace Discriminative
+{
 
 using namespace std;
 

@@ -7,16 +7,17 @@
 namespace Discriminative
 {
 
-class Normalizer {
+class Normalizer
+{
 public:
   virtual void operator()(std::vector<float> &losses) const = 0;
   virtual ~Normalizer() {}
 };
 
-class SquaredLossNormalizer : public Normalizer {
+class SquaredLossNormalizer : public Normalizer
+{
 public:
-  virtual void operator()(std::vector<float> &losses) const
-  {
+  virtual void operator()(std::vector<float> &losses) const {
     // This is (?) a good choice for sqrt loss (default loss function in VW)
 
     float sum = 0;
@@ -44,10 +45,10 @@ public:
   virtual ~SquaredLossNormalizer() {}
 };
 
-class LogisticLossNormalizer : public Normalizer {
+class LogisticLossNormalizer : public Normalizer
+{
 public:
-  virtual void operator()(std::vector<float> &losses) const
-  {
+  virtual void operator()(std::vector<float> &losses) const {
     float sum = 0;
     std::vector<float>::iterator it;
     for (it = losses.begin(); it != losses.end(); it++) {

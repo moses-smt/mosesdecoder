@@ -153,19 +153,19 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
         break;
       }
       case 4: {
-      	// store only the 3rd one (rule count)
-      	float val = Moses::Scan<float>(tok);
-      	misc[0] = val;
-          break;
+        // store only the 3rd one (rule count)
+        float val = Moses::Scan<float>(tok);
+        misc[0] = val;
+        break;
       }
       case 5: {
-      	// sparse features
-      	sparseFeatures << tok << " ";
+        // sparse features
+        sparseFeatures << tok << " ";
         break;
       }
       case 6: {
-	    property << tok << " ";
-	    break;
+        property << tok << " ";
+        break;
       }
       default:
         cerr << "ERROR in line " << line << endl;

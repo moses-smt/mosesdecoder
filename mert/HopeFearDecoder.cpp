@@ -34,11 +34,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 namespace fs = boost::filesystem;
 
-namespace MosesTuning {
+namespace MosesTuning
+{
 
 static const ValType BLEU_RATIO = 5;
 
-ValType HopeFearDecoder::Evaluate(const AvgWeightVector& wv) {
+ValType HopeFearDecoder::Evaluate(const AvgWeightVector& wv)
+{
   vector<ValType> stats(scorer_->NumberOfScores(),0);
   for(reset(); !finished(); next()) {
     vector<ValType> sent;
@@ -51,13 +53,14 @@ ValType HopeFearDecoder::Evaluate(const AvgWeightVector& wv) {
 }
 
 NbestHopeFearDecoder::NbestHopeFearDecoder(
-      const vector<string>& featureFiles,
-      const vector<string>&  scoreFiles,
-      bool streaming,
-      bool  no_shuffle,
-      bool safe_hope,
-      Scorer* scorer
-      ) : safe_hope_(safe_hope) {
+  const vector<string>& featureFiles,
+  const vector<string>&  scoreFiles,
+  bool streaming,
+  bool  no_shuffle,
+  bool safe_hope,
+  Scorer* scorer
+) : safe_hope_(safe_hope)
+{
   scorer_ = scorer;
   if (streaming) {
     train_.reset(new StreamingHypPackEnumerator(featureFiles, scoreFiles));
@@ -67,25 +70,29 @@ NbestHopeFearDecoder::NbestHopeFearDecoder(
 }
 
 
-void NbestHopeFearDecoder::next() {
+void NbestHopeFearDecoder::next()
+{
   train_->next();
 }
 
-bool NbestHopeFearDecoder::finished() {
+bool NbestHopeFearDecoder::finished()
+{
   return train_->finished();
 }
 
-void NbestHopeFearDecoder::reset() {
+void NbestHopeFearDecoder::reset()
+{
   train_->reset();
 }
 
 void NbestHopeFearDecoder::HopeFear(
-              const std::vector<ValType>& backgroundBleu,
-              const MiraWeightVector& wv,
-              HopeFearData* hopeFear
-              ) {
+  const std::vector<ValType>& backgroundBleu,
+  const MiraWeightVector& wv,
+  HopeFearData* hopeFear
+)
+{
 
-  
+
   // Hope / fear decode
   ValType hope_scale = 1.0;
   size_t hope_index=0, fear_index=0, model_index=0;
@@ -134,7 +141,8 @@ void NbestHopeFearDecoder::HopeFear(
   hopeFear->hopeFearEqual = (hope_index == fear_index);
 }
 
-void NbestHopeFearDecoder::MaxModel(const AvgWeightVector& wv, std::vector<ValType>* stats) {
+void NbestHopeFearDecoder::MaxModel(const AvgWeightVector& wv, std::vector<ValType>* stats)
+{
   // Find max model
   size_t max_index=0;
   ValType max_score=0;
@@ -152,18 +160,19 @@ void NbestHopeFearDecoder::MaxModel(const AvgWeightVector& wv, std::vector<ValTy
 
 
 HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
-                          (
-                            const string& hypergraphDir,
-                            const vector<string>& referenceFiles,
-                            size_t num_dense,
-                            bool streaming,
-                            bool no_shuffle,
-                            bool safe_hope,
-                            size_t hg_pruning,
-                            const MiraWeightVector& wv,
-                            Scorer* scorer
-                          ) :
-                          num_dense_(num_dense) {
+(
+  const string& hypergraphDir,
+  const vector<string>& referenceFiles,
+  size_t num_dense,
+  bool streaming,
+  bool no_shuffle,
+  bool safe_hope,
+  size_t hg_pruning,
+  const MiraWeightVector& wv,
+  Scorer* scorer
+) :
+  num_dense_(num_dense)
+{
 
   UTIL_THROW_IF(streaming, util::Exception, "Streaming not currently supported for hypergraphs");
   UTIL_THROW_IF(!fs::exists(hypergraphDir), HypergraphException, "Directory '" << hypergraphDir << "' does not exist");
@@ -177,17 +186,17 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
   static const string kWeights = "weights";
   fs::directory_iterator dend;
   size_t fileCount = 0;
-  
+
   cerr << "Reading  hypergraphs" << endl;
   for (fs::directory_iterator di(hypergraphDir); di != dend; ++di) {
     const fs::path& hgpath = di->path();
     if (hgpath.filename() == kWeights) continue;
-  //  cerr << "Reading " << hgpath.filename() << endl;
+    //  cerr << "Reading " << hgpath.filename() << endl;
     Graph graph(vocab_);
     size_t id = boost::lexical_cast<size_t>(hgpath.stem().string());
     util::scoped_fd fd(util::OpenReadOrThrow(hgpath.string().c_str()));
     //util::FilePiece file(di->path().string().c_str());
-    util::FilePiece file(fd.release()); 
+    util::FilePiece file(fd.release());
     ReadGraph(file,graph);
 
     //cerr << "ref length " << references_.Length(id) << endl;
@@ -196,7 +205,7 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
     prunedGraph.reset(new Graph(vocab_));
     graph.Prune(prunedGraph.get(), weights, edgeCount);
     graphs_[id] = prunedGraph;
-   // cerr << "Pruning to v=" << graphs_[id]->VertexSize() << " e=" << graphs_[id]->EdgeSize()  << endl;
+    // cerr << "Pruning to v=" << graphs_[id]->VertexSize() << " e=" << graphs_[id]->EdgeSize()  << endl;
     ++fileCount;
     if (fileCount % 10 == 0) cerr << ".";
     if (fileCount % 400 ==  0) cerr << " [count=" << fileCount << "]\n";
@@ -211,23 +220,27 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
 
 }
 
-void HypergraphHopeFearDecoder::reset() {
+void HypergraphHopeFearDecoder::reset()
+{
   sentenceIdIter_ = sentenceIds_.begin();
 }
 
-void HypergraphHopeFearDecoder::next() {
+void HypergraphHopeFearDecoder::next()
+{
   sentenceIdIter_++;
 }
 
-bool HypergraphHopeFearDecoder::finished() {
+bool HypergraphHopeFearDecoder::finished()
+{
   return sentenceIdIter_ == sentenceIds_.end();
 }
 
 void HypergraphHopeFearDecoder::HopeFear(
-            const vector<ValType>& backgroundBleu,
-            const MiraWeightVector& wv,
-            HopeFearData* hopeFear
-            ) {
+  const vector<ValType>& backgroundBleu,
+  const MiraWeightVector& wv,
+  HopeFearData* hopeFear
+)
+{
   size_t sentenceId = *sentenceIdIter_;
   SparseVector weights;
   wv.ToSparse(&weights);
@@ -247,12 +260,12 @@ void HypergraphHopeFearDecoder::HopeFear(
     Viterbi(graph, weights, 0, references_, sentenceId, backgroundBleu, &modelHypo);
 
 
-  // Outer loop rescales the contribution of model score to 'hope' in antagonistic cases
+    // Outer loop rescales the contribution of model score to 'hope' in antagonistic cases
     // where model score is having far more influence than BLEU
-  //  hope_bleu *= BLEU_RATIO; // We only care about cases where model has MUCH more influence than BLEU
-  //  if(safe_hope_ && safe_loop==0 && abs(hope_model)>1e-8 && abs(hope_bleu)/abs(hope_model)<hope_scale)
-  //    hope_scale = abs(hope_bleu) / abs(hope_model);
-  //  else break;
+    //  hope_bleu *= BLEU_RATIO; // We only care about cases where model has MUCH more influence than BLEU
+    //  if(safe_hope_ && safe_loop==0 && abs(hope_model)>1e-8 && abs(hope_bleu)/abs(hope_model)<hope_scale)
+    //    hope_scale = abs(hope_bleu) / abs(hope_model);
+    //  else break;
     //TODO: Don't currently get model and bleu so commented this out for now.
     break;
   }
@@ -311,15 +324,16 @@ void HypergraphHopeFearDecoder::HopeFear(
   if (hopeFear->hopeFearEqual) {
     for (size_t i = 0; i < fearStats.size(); ++i) {
       if (fearStats[i] != hopeFear->hopeStats[i]) {
-         hopeFear->hopeFearEqual = false;
-         break;
+        hopeFear->hopeFearEqual = false;
+        break;
       }
     }
   }
   hopeFear->hopeFearEqual = hopeFear->hopeFearEqual && (hopeFear->fearFeatures == hopeFear->hopeFeatures);
 }
 
-void HypergraphHopeFearDecoder::MaxModel(const AvgWeightVector& wv, vector<ValType>* stats) {
+void HypergraphHopeFearDecoder::MaxModel(const AvgWeightVector& wv, vector<ValType>* stats)
+{
   assert(!finished());
   HgHypothesis bestHypo;
   size_t sentenceId = *sentenceIdIter_;

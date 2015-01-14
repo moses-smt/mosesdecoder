@@ -9,7 +9,8 @@ namespace MosesTuning
 {
 
 
-void MiraFeatureVector::InitSparse(const SparseVector& sparse, size_t ignoreLimit) {
+void MiraFeatureVector::InitSparse(const SparseVector& sparse, size_t ignoreLimit)
+{
   vector<size_t> sparseFeats = sparse.feats();
   bool bFirst = true;
   size_t lastFeat = 0;
@@ -40,7 +41,8 @@ MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
   InitSparse(vec.sparse);
 }
 
-MiraFeatureVector::MiraFeatureVector(const SparseVector& sparse, size_t num_dense) {
+MiraFeatureVector::MiraFeatureVector(const SparseVector& sparse, size_t num_dense)
+{
   m_dense.resize(num_dense);
   //Assume that features with id [0,num_dense) are the dense features
   for (size_t id = 0; id < num_dense; ++id) {
@@ -162,7 +164,8 @@ MiraFeatureVector operator-(const MiraFeatureVector& a, const MiraFeatureVector&
   return MiraFeatureVector(dense,sparseFeats,sparseVals);
 }
 
-bool operator==(const MiraFeatureVector& a,const MiraFeatureVector& b) {
+bool operator==(const MiraFeatureVector& a,const MiraFeatureVector& b)
+{
   ValType eps = 1e-8;
   //dense features
   if (a.m_dense.size() != b.m_dense.size()) return false;

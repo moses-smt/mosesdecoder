@@ -426,7 +426,7 @@ void PhraseTableCreator::AddTargetSymbolId(std::string& symbol)
 unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 {
   boost::unordered_map<std::string, unsigned>::iterator it
-  = m_sourceSymbolsMap.find(symbol);
+    = m_sourceSymbolsMap.find(symbol);
 
   if(it != m_sourceSymbolsMap.end())
     return it->second;
@@ -437,7 +437,7 @@ unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 unsigned PhraseTableCreator::GetTargetSymbolId(std::string& symbol)
 {
   boost::unordered_map<std::string, unsigned>::iterator it
-  = m_targetSymbolsMap.find(symbol);
+    = m_targetSymbolsMap.find(symbol);
 
   if(it != m_targetSymbolsMap.end())
     return it->second;
@@ -451,7 +451,7 @@ unsigned PhraseTableCreator::GetOrAddTargetSymbolId(std::string& symbol)
   boost::mutex::scoped_lock lock(m_mutex);
 #endif
   boost::unordered_map<std::string, unsigned>::iterator it
-  = m_targetSymbolsMap.find(symbol);
+    = m_targetSymbolsMap.find(symbol);
 
   if(it != m_targetSymbolsMap.end())
     return it->second;
@@ -714,10 +714,10 @@ std::string PhraseTableCreator::EncodeLine(std::vector<std::string>& tokens, siz
   std::vector<float> scores = Tokenize<float>(scoresStr);
 
   if(scores.size() != m_numScoreComponent) {
-	std::stringstream strme;
-	strme << "Error: Wrong number of scores detected ("
-              << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
-	strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[2] << " ..." << std::endl;
+    std::stringstream strme;
+    strme << "Error: Wrong number of scores detected ("
+          << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
+    strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[2] << " ..." << std::endl;
     UTIL_THROW2(strme.str());
   }
 
@@ -1040,30 +1040,30 @@ void RankingTask::operator()()
         *it = Moses::Trim(*it);
 
       if(tokens.size() < 4) {
-    	std::stringstream strme;
-    	strme << "Error: It seems the following line has a wrong format:" << std::endl;
-    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        std::stringstream strme;
+        strme << "Error: It seems the following line has a wrong format:" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
       if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
-    	std::stringstream strme;
-    	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
-    	strme << "but you are using ";
-    	strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
-    	strme << " encoding which makes use of alignment data. " << std::endl;
-    	strme << "Use -encoding None" << std::endl;
-    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        std::stringstream strme;
+        strme << "Error: It seems the following line contains no alignment information, " << std::endl;
+        strme << "but you are using ";
+        strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+        strme << " encoding which makes use of alignment data. " << std::endl;
+        strme << "Use -encoding None" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
       std::vector<float> scores = Tokenize<float>(tokens[2]);
       if(scores.size() != m_creator.m_numScoreComponent) {
-      	std::stringstream strme;
-      	strme << "Error: It seems the following line has a wrong number of scores ("
-                  << scores.size() << " != " << m_creator.m_numScoreComponent << ") :" << std::endl;
-      	strme << "Line " << i << ": " << lines[i] << std::endl;
-      	UTIL_THROW2(strme.str());
+        std::stringstream strme;
+        strme << "Error: It seems the following line has a wrong number of scores ("
+              << scores.size() << " != " << m_creator.m_numScoreComponent << ") :" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
+        UTIL_THROW2(strme.str());
       }
 
       float sortScore = scores[m_creator.m_sortScoreIndex];
@@ -1140,20 +1140,20 @@ void EncodingTask::operator()()
         *it = Moses::Trim(*it);
 
       if(tokens.size() < 3) {
-    	std::stringstream strme;
-    	strme << "Error: It seems the following line has a wrong format:" << std::endl;
-    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        std::stringstream strme;
+        strme << "Error: It seems the following line has a wrong format:" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
       if(tokens.size() > 3 && tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
-    	std::stringstream strme;
-      	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
-      	strme << "but you are using ";
-      	strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
-      	strme << " encoding which makes use of alignment data. " << std::endl;
-      	strme << "Use -encoding None" << std::endl;
-      	strme << "Line " << i << ": " << lines[i] << std::endl;
+        std::stringstream strme;
+        strme << "Error: It seems the following line contains no alignment information, " << std::endl;
+        strme << "but you are using ";
+        strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+        strme << " encoding which makes use of alignment data. " << std::endl;
+        strme << "Use -encoding None" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
@@ -1218,7 +1218,7 @@ void CompressionTask::operator()()
   while(collectionNum < m_encodedCollections.size()) {
     std::string collection = m_encodedCollections[collectionNum];
     std::string compressedCollection
-    = m_creator.CompressEncodedCollection(collection);
+      = m_creator.CompressEncodedCollection(collection);
 
     std::string dummy;
     PackedItem packedItem(collectionNum, dummy, compressedCollection, 0);

@@ -85,7 +85,7 @@ void ChartCell::PruneToSize()
  * \param allChartCells entire chart - needed to look up underlying hypotheses
  */
 void ChartCell::Decode(const ChartTranslationOptionList &transOptList
-                                , const ChartCellCollection &allChartCells)
+                       , const ChartCellCollection &allChartCells)
 {
   const StaticData &staticData = StaticData::Instance();
 

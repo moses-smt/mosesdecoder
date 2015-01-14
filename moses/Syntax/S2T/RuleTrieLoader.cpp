@@ -90,7 +90,7 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
     const size_t numScoreComponents = ff.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
-    		  	  << numScoreComponents << ") of score components on line " << count);
+                  << numScoreComponents << ") of score components on line " << count);
     }
 
     // parse source & find pt node
@@ -126,7 +126,7 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
     targetPhrase->EvaluateInIsolation(sourcePhrase, ff.GetFeaturesToApply());
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(
-        trie, sourcePhrase, *targetPhrase, sourceLHS);
+                                           trie, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now

@@ -5,7 +5,7 @@ Copyright 2010-2013, Christophe Servan, LIUM, University of Le Mans, France
 Contact: christophe.servan@lium.univ-lemans.fr
 
 The tercpp tool and library are free software: you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License as published by 
+under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the licence, or
 (at your option) any later version.
 
@@ -28,22 +28,22 @@ using namespace std;
 namespace HashMapSpace
 {
 
-    class stringHasher
-    {
-        private:
-            long m_hashKey;
-            string m_key;
-            string m_value;
+class stringHasher
+{
+private:
+  long m_hashKey;
+  string m_key;
+  string m_value;
 
-        public:
-            stringHasher ( long cle, string cleTxt, string valueTxt );
-            long getHashKey();
-            string getKey();
-            string getValue();
-            void setValue ( string value );
+public:
+  stringHasher ( long cle, string cleTxt, string valueTxt );
+  long getHashKey();
+  string getKey();
+  string getValue();
+  void setValue ( string value );
 
 
-    };
+};
 
 
 }

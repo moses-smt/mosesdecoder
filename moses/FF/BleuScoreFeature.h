@@ -116,27 +116,27 @@ public:
                                        size_t skip = 0) const;
 
   FFState* EvaluateWhenApplied( const Hypothesis& cur_hypo,
-                     const FFState* prev_state,
-                     ScoreComponentCollection* accumulator) const;
+                                const FFState* prev_state,
+                                ScoreComponentCollection* accumulator) const;
   FFState* EvaluateWhenApplied(const ChartHypothesis& cur_hypo,
-                         int featureID,
-                         ScoreComponentCollection* accumulator) const;
+                               int featureID,
+                               ScoreComponentCollection* accumulator) const;
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-              , const TranslationOptionList &translationOptionList) const
-  {}
+      , const TranslationOptionList &translationOptionList) const {
+  }
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 
   bool Enabled() const {
     return m_enabled;

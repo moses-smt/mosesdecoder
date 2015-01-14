@@ -12,8 +12,8 @@ class SkeletonState : public FFState
   int m_targetLen;
 public:
   SkeletonState(int targetLen)
-    :m_targetLen(targetLen)
-  {}
+    :m_targetLen(targetLen) {
+  }
 
   int Compare(const FFState& other) const;
 };
@@ -31,19 +31,19 @@ public:
   }
 
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const;
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const;
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
-  
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-                , const TranslationOptionList &translationOptionList) const;
-  
+      , const TranslationOptionList &translationOptionList) const;
+
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

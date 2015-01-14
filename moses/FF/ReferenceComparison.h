@@ -10,39 +10,41 @@ namespace Moses
 class ReferenceComparison : public StatelessFeatureFunction
 {
 public:
-	ReferenceComparison(const std::string &line);
+  ReferenceComparison(const std::string &line);
 
-	  virtual bool IsUseable(const FactorMask &mask) const
-	  { return true; }
+  virtual bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 
-	  virtual void EvaluateInIsolation(const Phrase &source
-							, const TargetPhrase &targetPhrase
-							, ScoreComponentCollection &scoreBreakdown
-							, ScoreComponentCollection &estimatedFutureScore) const
-	  {}
+  virtual void EvaluateInIsolation(const Phrase &source
+                                   , const TargetPhrase &targetPhrase
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 
-	  virtual void EvaluateWithSourceContext(const InputType &input
-	                         , const InputPath &inputPath
-	                         , const TargetPhrase &targetPhrase
-	                         , const StackVec *stackVec
-	                         , ScoreComponentCollection &scoreBreakdown
-	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
-	  {}
+  virtual void EvaluateWithSourceContext(const InputType &input
+                                         , const InputPath &inputPath
+                                         , const TargetPhrase &targetPhrase
+                                         , const StackVec *stackVec
+                                         , ScoreComponentCollection &scoreBreakdown
+                                         , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
 
-    void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-          , const TranslationOptionList &translationOptionList) const
-    {}
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
 
-	  virtual void EvaluateWhenApplied(const Hypothesis& hypo,
-	                        ScoreComponentCollection* accumulator) const
-	  {}
+  virtual void EvaluateWhenApplied(const Hypothesis& hypo,
+                                   ScoreComponentCollection* accumulator) const {
+  }
 
-	  virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
-	                             ScoreComponentCollection* accumulator) const
-	  {}
+  virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
+                                   ScoreComponentCollection* accumulator) const {
+  }
 
-	  std::vector<float> DefaultWeights() const
-	  { return std::vector<float>(); }
+  std::vector<float> DefaultWeights() const {
+    return std::vector<float>();
+  }
 
 protected:
 

@@ -166,10 +166,10 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
   size_t propSize = m_property.size();
 
   size_t memNeeded = sizeof(UINT64) // file pos (phrase id)
-  	  	  	  	  + sizeof(UINT64) + 2 * sizeof(UINT64) * numAlign // align
-  	  	  	  	  + sizeof(float) * numScores // scores
-  	  	  	  	  + sizeof(UINT64) + sparseFeatureSize // sparse features string
-  	  	  	  	  + sizeof(UINT64) + propSize; // property string
+                     + sizeof(UINT64) + 2 * sizeof(UINT64) * numAlign // align
+                     + sizeof(float) * numScores // scores
+                     + sizeof(UINT64) + sparseFeatureSize // sparse features string
+                     + sizeof(UINT64) + propSize; // property string
 
   char *mem = (char*) malloc(memNeeded);
   //memset(mem, 0, memNeeded);
@@ -350,13 +350,13 @@ UINT64 TargetPhrase::ReadStringFromFile(std::fstream &fileTPColl, std::string &o
   bytesRead += sizeof(UINT64);
 
   if (strSize) {
-	  char *mem = (char*) malloc(strSize + 1);
-	  mem[strSize] = '\0';
-	  fileTPColl.read(mem, strSize);
-	  outStr = string(mem);
-	  free(mem);
+    char *mem = (char*) malloc(strSize + 1);
+    mem[strSize] = '\0';
+    fileTPColl.read(mem, strSize);
+    outStr = string(mem);
+    free(mem);
 
-	  bytesRead += strSize;
+    bytesRead += strSize;
   }
 
   return bytesRead;

@@ -114,15 +114,13 @@ public:
   void Save(const std::string path);
 
   template<typename T>
-  void SetParameter(T &var, const std::string &name, const T &defaultValue) const
-  {
-	const PARAM_VEC *params = GetParam(name);
-	if (params && params->size()) {
-		var = Scan<T>( params->at(0));
-	}
-	else {
-		var = defaultValue;
-	}
+  void SetParameter(T &var, const std::string &name, const T &defaultValue) const {
+    const PARAM_VEC *params = GetParam(name);
+    if (params && params->size()) {
+      var = Scan<T>( params->at(0));
+    } else {
+      var = defaultValue;
+    }
   }
 
 };

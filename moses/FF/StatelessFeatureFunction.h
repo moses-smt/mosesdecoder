@@ -27,16 +27,18 @@ public:
     * This should be implemented for features that apply to phrase-based models.
     **/
   virtual void EvaluateWhenApplied(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const = 0;
+                                   ScoreComponentCollection* accumulator) const = 0;
 
   /**
     * Same for chart-based features.
     **/
   virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
-                             ScoreComponentCollection* accumulator) const = 0;
+                                   ScoreComponentCollection* accumulator) const = 0;
 
   virtual void EvaluateWhenApplied(const Syntax::SHyperedge &,
-                             ScoreComponentCollection*) const { assert(false); }
+                                   ScoreComponentCollection*) const {
+    assert(false);
+  }
 
   virtual bool IsStateless() const {
     return true;

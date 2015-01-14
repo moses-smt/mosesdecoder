@@ -65,7 +65,7 @@ public:
    *  \param outColl return argument
    */
   virtual void GetChartRuleCollection(
-	const InputPath &inputPath,
+    const InputPath &inputPath,
     size_t lastPos,  // last position to consider if using lookahead
     ChartParserCallback &outColl) = 0;
 

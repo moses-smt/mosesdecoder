@@ -37,81 +37,88 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FeatureStats.h"
 
-namespace MosesTuning {
+namespace MosesTuning
+{
 
 typedef unsigned int WordIndex;
 const WordIndex kMaxWordIndex = UINT_MAX;
 const FeatureStatsType kMinScore = -1e10;
 
-template <class T> class FixedAllocator : boost::noncopyable {
-  public:
-    FixedAllocator() : current_(NULL), end_(NULL) {}
+template <class T> class FixedAllocator : boost::noncopyable
+{
+public:
+  FixedAllocator() : current_(NULL), end_(NULL) {}
 
-    void Init(std::size_t count) {
-      assert(!current_);
-      array_.reset(new T[count]);
-      current_ = array_.get();
-      end_ = current_ + count;
-    }
+  void Init(std::size_t count) {
+    assert(!current_);
+    array_.reset(new T[count]);
+    current_ = array_.get();
+    end_ = current_ + count;
+  }
 
-    T &operator[](std::size_t idx) {
-      return array_.get()[idx];
-    }
-    const T &operator[](std::size_t idx) const {
-      return array_.get()[idx];
-    }
+  T &operator[](std::size_t idx) {
+    return array_.get()[idx];
+  }
+  const T &operator[](std::size_t idx) const {
+    return array_.get()[idx];
+  }
 
-    T *New() {
-      T *ret = current_++;
-      UTIL_THROW_IF(ret >= end_, util::Exception, "Allocating past end");
-      return ret;
-    }
+  T *New() {
+    T *ret = current_++;
+    UTIL_THROW_IF(ret >= end_, util::Exception, "Allocating past end");
+    return ret;
+  }
 
-    std::size_t Capacity() const {
-      return end_ - array_.get();
-    }
+  std::size_t Capacity() const {
+    return end_ - array_.get();
+  }
 
-    std::size_t Size() const {
-      return current_ - array_.get();
-    }
+  std::size_t Size() const {
+    return current_ - array_.get();
+  }
 
-  private:
-    boost::scoped_array<T> array_;
-    T *current_, *end_;
+private:
+  boost::scoped_array<T> array_;
+  T *current_, *end_;
 };
 
 
-class Vocab {
-  public:
-    Vocab();
+class Vocab
+{
+public:
+  Vocab();
 
-    typedef std::pair<const char *const, WordIndex> Entry;
+  typedef std::pair<const char *const, WordIndex> Entry;
 
-    const Entry &FindOrAdd(const StringPiece &str);
+  const Entry &FindOrAdd(const StringPiece &str);
 
-    const Entry& Bos() const {return bos_;}
+  const Entry& Bos() const {
+    return bos_;
+  }
 
-    const Entry& Eos() const {return eos_;}
+  const Entry& Eos() const {
+    return eos_;
+  }
 
-  private:
-    util::Pool piece_backing_;
+private:
+  util::Pool piece_backing_;
 
-    struct Hash : public std::unary_function<const char *, std::size_t> {
-      std::size_t operator()(StringPiece str) const {
-        return util::MurmurHashNative(str.data(), str.size());
-      }
-    };
+  struct Hash : public std::unary_function<const char *, std::size_t> {
+    std::size_t operator()(StringPiece str) const {
+      return util::MurmurHashNative(str.data(), str.size());
+    }
+  };
 
-    struct Equals : public std::binary_function<const char *, const char *, bool> {
-      bool operator()(StringPiece first, StringPiece second) const {
-        return first == second;
-      }
-    };
+  struct Equals : public std::binary_function<const char *, const char *, bool> {
+    bool operator()(StringPiece first, StringPiece second) const {
+      return first == second;
+    }
+  };
 
-    typedef boost::unordered_map<const char *, WordIndex, Hash, Equals> Map;
-    Map map_;
-    Entry eos_;
-    Entry bos_;
+  typedef boost::unordered_map<const char *, WordIndex, Hash, Equals> Map;
+  Map map_;
+  Entry eos_;
+  Entry bos_;
 
 };
 
@@ -125,121 +132,141 @@ typedef boost::shared_ptr<SparseVector> FeaturePtr;
 /**
  * An edge has 1 head vertex, 0..n child (tail) vertices, a list of words and a feature vector.
 **/
-class Edge {
-  public:
-    Edge() {features_.reset(new SparseVector());}
+class Edge
+{
+public:
+  Edge() {
+    features_.reset(new SparseVector());
+  }
 
-    void AddWord(const Vocab::Entry *word) {
-      words_.push_back(word);
-    }
+  void AddWord(const Vocab::Entry *word) {
+    words_.push_back(word);
+  }
 
-    void AddChild(size_t child) {
-      children_.push_back(child);
-    }
+  void AddChild(size_t child) {
+    children_.push_back(child);
+  }
 
-    void AddFeature(const StringPiece& name, FeatureStatsType value) {
-      //TODO StringPiece interface
-      features_->set(name.as_string(),value);
-    }
+  void AddFeature(const StringPiece& name, FeatureStatsType value) {
+    //TODO StringPiece interface
+    features_->set(name.as_string(),value);
+  }
 
 
-    const WordVec &Words() const {
-      return words_;
-    }
-    
-    const FeaturePtr& Features() const {
-      return features_;
-    }
+  const WordVec &Words() const {
+    return words_;
+  }
 
-    void SetFeatures(const FeaturePtr& features) {
-      features_ = features;
-    }
+  const FeaturePtr& Features() const {
+    return features_;
+  }
 
-    const std::vector<size_t>& Children() const {
-      return children_;
-    }
+  void SetFeatures(const FeaturePtr& features) {
+    features_ = features;
+  }
 
-    FeatureStatsType GetScore(const SparseVector& weights) const {
-      return inner_product(*(features_.get()), weights);
-    }
+  const std::vector<size_t>& Children() const {
+    return children_;
+  }
 
-  private:
-    // NULL for non-terminals.  
-    std::vector<const Vocab::Entry*> words_;
-    std::vector<size_t> children_;
-    boost::shared_ptr<SparseVector> features_;
+  FeatureStatsType GetScore(const SparseVector& weights) const {
+    return inner_product(*(features_.get()), weights);
+  }
+
+private:
+  // NULL for non-terminals.
+  std::vector<const Vocab::Entry*> words_;
+  std::vector<size_t> children_;
+  boost::shared_ptr<SparseVector> features_;
 };
 
 /*
  * A vertex has 0..n incoming edges
  **/
-class Vertex {
-  public:
-    Vertex() : sourceCovered_(0) {}
+class Vertex
+{
+public:
+  Vertex() : sourceCovered_(0) {}
 
-    void AddEdge(const Edge* edge) {incoming_.push_back(edge);}
+  void AddEdge(const Edge* edge) {
+    incoming_.push_back(edge);
+  }
 
-    void SetSourceCovered(size_t sourceCovered) {sourceCovered_ = sourceCovered;}
+  void SetSourceCovered(size_t sourceCovered) {
+    sourceCovered_ = sourceCovered;
+  }
 
-    const std::vector<const Edge*>& GetIncoming() const {return incoming_;}
+  const std::vector<const Edge*>& GetIncoming() const {
+    return incoming_;
+  }
 
-    size_t SourceCovered() const {return sourceCovered_;}
+  size_t SourceCovered() const {
+    return sourceCovered_;
+  }
 
-  private:
-    std::vector<const Edge*> incoming_;
-    size_t sourceCovered_;
+private:
+  std::vector<const Edge*> incoming_;
+  size_t sourceCovered_;
 };
 
 
-class Graph : boost::noncopyable {
-  public:
-    Graph(Vocab& vocab) : vocab_(vocab) {}
+class Graph : boost::noncopyable
+{
+public:
+  Graph(Vocab& vocab) : vocab_(vocab) {}
 
-    void SetCounts(std::size_t vertices, std::size_t edges) {
-      vertices_.Init(vertices);
-      edges_.Init(edges);
-    }
+  void SetCounts(std::size_t vertices, std::size_t edges) {
+    vertices_.Init(vertices);
+    edges_.Init(edges);
+  }
 
-    Vocab &MutableVocab() { return vocab_; }
+  Vocab &MutableVocab() {
+    return vocab_;
+  }
 
-    Edge *NewEdge() {      
-      return edges_.New();
-    }
+  Edge *NewEdge() {
+    return edges_.New();
+  }
 
-    Vertex *NewVertex() {
-      return vertices_.New();
-    }
+  Vertex *NewVertex() {
+    return vertices_.New();
+  }
 
-    const Vertex &GetVertex(std::size_t index) const {
-      return vertices_[index];
-    }
+  const Vertex &GetVertex(std::size_t index) const {
+    return vertices_[index];
+  }
 
-    Edge &GetEdge(std::size_t index) {
-      return edges_[index];
-    }
+  Edge &GetEdge(std::size_t index) {
+    return edges_[index];
+  }
 
-    /* Created a pruned copy of this graph with minEdgeCount edges. Uses
-    the scores in the max-product semiring to rank edges, as suggested by
-    Colin Cherry */
-    void Prune(Graph* newGraph, const SparseVector& weights, size_t minEdgeCount) const;
+  /* Created a pruned copy of this graph with minEdgeCount edges. Uses
+  the scores in the max-product semiring to rank edges, as suggested by
+  Colin Cherry */
+  void Prune(Graph* newGraph, const SparseVector& weights, size_t minEdgeCount) const;
 
-    std::size_t VertexSize() const { return vertices_.Size(); }
-    std::size_t EdgeSize() const { return edges_.Size(); }
+  std::size_t VertexSize() const {
+    return vertices_.Size();
+  }
+  std::size_t EdgeSize() const {
+    return edges_.Size();
+  }
 
-    bool IsBoundary(const Vocab::Entry* word) const {
-      return word->second == vocab_.Bos().second || word->second == vocab_.Eos().second;
-    }
+  bool IsBoundary(const Vocab::Entry* word) const {
+    return word->second == vocab_.Bos().second || word->second == vocab_.Eos().second;
+  }
 
-  private:
-    FixedAllocator<Edge> edges_;    
-    FixedAllocator<Vertex> vertices_;
-    Vocab& vocab_;
+private:
+  FixedAllocator<Edge> edges_;
+  FixedAllocator<Vertex> vertices_;
+  Vocab& vocab_;
 };
 
-class HypergraphException : public util::Exception {
-  public:
-    HypergraphException() {}
-    ~HypergraphException() throw() {}
+class HypergraphException : public util::Exception
+{
+public:
+  HypergraphException() {}
+  ~HypergraphException() throw() {}
 };
 
 

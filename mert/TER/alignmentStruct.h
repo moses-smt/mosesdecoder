@@ -5,7 +5,7 @@ Copyright 2010-2013, Christophe Servan, LIUM, University of Le Mans, France
 Contact: christophe.servan@lium.univ-lemans.fr
 
 The tercpp tool and library are free software: you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License as published by 
+under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the licence, or
 (at your option) any later version.
 
@@ -34,10 +34,10 @@ using namespace Tools;
 
 namespace TERCpp
 {
-    class alignmentStruct
-    {
-        private:
-        public:
+class alignmentStruct
+{
+private:
+public:
 
 // 	alignmentStruct();
 // 	alignmentStruct (int _start, int _end, int _moveto, int _newloc);
@@ -53,14 +53,14 @@ namespace TERCpp
 //   int end;
 //   int moveto;
 //   int newloc;
-            vector<string> nwords; // The words we shifted
-            vector<char> alignment ; // for pra_more output
-            vector<vecInt> aftershift; // for pra_more output
-            // This is used to store the cost of a shift, so we don't have to
-            // calculate it multiple times.
-            double cost;
-	    string toString();
-    };
+  vector<string> nwords; // The words we shifted
+  vector<char> alignment ; // for pra_more output
+  vector<vecInt> aftershift; // for pra_more output
+  // This is used to store the cost of a shift, so we don't have to
+  // calculate it multiple times.
+  double cost;
+  string toString();
+};
 
 }
 #endif

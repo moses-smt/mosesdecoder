@@ -14,7 +14,7 @@ namespace Syntax
 {
 
 Cube::Cube(const SHyperedgeBundle &bundle)
-    : m_bundle(bundle)
+  : m_bundle(bundle)
 {
   // Create the SHyperedge for the 'corner' of the cube.
   std::vector<int> coordinates(bundle.stacks.size()+1, 0);
@@ -94,7 +94,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
   head->best = hyperedge;
   head->pvertex = 0;  // FIXME???
   head->state.resize(
-      StatefulFeatureFunction::GetStatefulFeatureFunctions().size());
+    StatefulFeatureFunction::GetStatefulFeatureFunctions().size());
   hyperedge->head = head;
 
   hyperedge->tail.resize(coordinates.size()-1);

@@ -70,8 +70,8 @@ private:
     size_t endPos);
 
   void UpdateCompressedMatrix(size_t startPos,
-    size_t endPos,
-    size_t lastPos);
+                              size_t endPos,
+                              size_t lastPos);
 
   const PhraseDictionaryMemory &m_ruleTable;
 
