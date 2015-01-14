@@ -211,7 +211,7 @@ void PhraseOrientation::InsertPhraseVertices(HSentenceVertices & topLeft,
 const std::string PhraseOrientation::GetOrientationInfoString(int startF, int endF, REO_DIR direction) const
 {
   boost::unordered_map< std::pair<int,int> , std::pair<int,int> >::const_iterator foundMinMax
-    = m_minAndMaxAlignedToSourceSpan.find( std::pair<int,int>(startF,endF) );
+  = m_minAndMaxAlignedToSourceSpan.find( std::pair<int,int>(startF,endF) );
 
   if ( foundMinMax != m_minAndMaxAlignedToSourceSpan.end() ) {
     int startE = (foundMinMax->second).first;
@@ -261,7 +261,7 @@ const std::string PhraseOrientation::GetOrientationInfoString(int startF, int st
 PhraseOrientation::REO_CLASS PhraseOrientation::GetOrientationInfo(int startF, int endF, REO_DIR direction) const
 {
   boost::unordered_map< std::pair<int,int> , std::pair<int,int> >::const_iterator foundMinMax
-    = m_minAndMaxAlignedToSourceSpan.find( std::pair<int,int>(startF,endF) );
+  = m_minAndMaxAlignedToSourceSpan.find( std::pair<int,int>(startF,endF) );
 
   if ( foundMinMax != m_minAndMaxAlignedToSourceSpan.end() ) {
     int startE = (foundMinMax->second).first;

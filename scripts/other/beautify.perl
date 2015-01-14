@@ -11,8 +11,8 @@ my $version = `astyle --version 2> /dev/stdout`;
 chomp($version);
 print STDERR "version=$version";
 
-if ($version ne "Artistic Style Version 2.03") {
-    print STDERR "\nMust be astyle version 2.03. Quitting\n";
+if ($version ne "Artistic Style Version 2.01") {
+    print STDERR "\nMust be astyle version 2.01. Quitting\n";
     exit(1);
 }
 

@@ -311,7 +311,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
                prevTreeInputLabelsIt != prevTreeInputLabels.end(); ++prevTreeInputLabelsIt) {
             if (*prevTreeInputLabelsIt != outputDefaultNonTerminal) {
               boost::unordered_map<const Factor*,size_t>::const_iterator foundPrevTreeInputLabel
-                = m_sourceLabelIndexesByFactor.find((*prevTreeInputLabelsIt)[0]);
+              = m_sourceLabelIndexesByFactor.find((*prevTreeInputLabelsIt)[0]);
               if (foundPrevTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
                 size_t prevTreeInputLabelIndex = foundPrevTreeInputLabel->second;
                 treeInputLabelsRHS[nonTerminalNumber].insert(prevTreeInputLabelIndex);
@@ -334,7 +334,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
          treeInputLabelsIt != treeInputLabels.end(); ++treeInputLabelsIt) {
       if (*treeInputLabelsIt != outputDefaultNonTerminal) {
         boost::unordered_map<const Factor*,size_t>::const_iterator foundTreeInputLabel
-          = m_sourceLabelIndexesByFactor.find((*treeInputLabelsIt)[0]);
+        = m_sourceLabelIndexesByFactor.find((*treeInputLabelsIt)[0]);
         if (foundTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
           size_t treeInputLabelIndex = foundTreeInputLabel->second;
           treeInputLabelsLHS.insert(treeInputLabelIndex);

@@ -142,7 +142,7 @@ public:
       return data;
     else {
       typename std::vector<DataType>::iterator it
-        = std::lower_bound(m_bestVec.begin(), m_bestVec.end(), data);
+      = std::lower_bound(m_bestVec.begin(), m_bestVec.end(), data);
       if(it != m_bestVec.end())
         return *it;
       else

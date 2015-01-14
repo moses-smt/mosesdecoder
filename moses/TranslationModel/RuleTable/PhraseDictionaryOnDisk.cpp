@@ -201,7 +201,7 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionN
 
   const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
   TargetPhraseCollection *targetPhrases
-    = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+  = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
 
   delete targetPhrasesOnDisk;
 
