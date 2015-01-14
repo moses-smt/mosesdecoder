@@ -138,7 +138,7 @@ public:
       TranslationOption &transOpt = **iterTransOpt;
       
       std::vector<float> newScores(m_numScoreComponents);
-      newScores[0] = TransformScore(FloorScore(*iterLoss));
+      newScores[0] = FloorScore(TransformScore(*iterLoss));
     
       ScoreComponentCollection &scoreBreakDown = transOpt.GetScoreBreakdown();
       scoreBreakDown.PlusEquals(this, newScores);
