@@ -13,7 +13,7 @@ namespace Syntax
 // Common base class for Moses::Syntax managers.
 class Manager : public BaseManager
 {
- public:
+public:
   Manager(const InputType &);
 
   // Virtual functions from Moses::BaseManager that are implemented the same
@@ -26,7 +26,7 @@ class Manager : public BaseManager
   // managers.
   void OutputAlignment(OutputCollector *collector) const {}
   void OutputDetailedTreeFragmentsTranslationReport(
-      OutputCollector *collector) const {}
+    OutputCollector *collector) const {}
   void OutputLatticeSamples(OutputCollector *collector) const {}
   void OutputSearchGraph(OutputCollector *collector) const {}
   void OutputSearchGraphHypergraph() const {}
@@ -38,15 +38,15 @@ class Manager : public BaseManager
 
   // Syntax-specific virtual functions that derived classes must implement.
   virtual void ExtractKBest(
-      std::size_t k,
-      std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
-      bool onlyDistinct=false) const = 0;
+    std::size_t k,
+    std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
+    bool onlyDistinct=false) const = 0;
   virtual const SHyperedge *GetBestSHyperedge() const = 0;
 
- protected:
+protected:
   std::set<Word> m_oovs;
 
- private:
+private:
   // Syntax-specific helper functions used to implement OutputNBest.
   void OutputNBestList(OutputCollector *collector,
                        const KBestExtractor::KBestVec &nBestList,

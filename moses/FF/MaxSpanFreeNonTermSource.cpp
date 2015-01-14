@@ -14,10 +14,10 @@ using namespace std;
 namespace Moses
 {
 MaxSpanFreeNonTermSource::MaxSpanFreeNonTermSource(const std::string &line)
-:StatelessFeatureFunction(1, line)
-,m_maxSpan(2)
-,m_glueTargetLHSStr("S")
-,m_glueTargetLHS(true)
+  :StatelessFeatureFunction(1, line)
+  ,m_maxSpan(2)
+  ,m_glueTargetLHSStr("S")
+  ,m_glueTargetLHS(true)
 {
   m_tuneable = false;
   ReadParameters();
@@ -28,25 +28,25 @@ MaxSpanFreeNonTermSource::MaxSpanFreeNonTermSource(const std::string &line)
 }
 
 void MaxSpanFreeNonTermSource::EvaluateInIsolation(const Phrase &source
-						, const TargetPhrase &targetPhrase
-						, ScoreComponentCollection &scoreBreakdown
-						, ScoreComponentCollection &estimatedFutureScore) const
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedFutureScore) const
 {
   targetPhrase.SetRuleSource(source);
 }
 
 void MaxSpanFreeNonTermSource::EvaluateWithSourceContext(const InputType &input
-                       , const InputPath &inputPath
-                       , const TargetPhrase &targetPhrase
-                       , const StackVec *stackVec
-                       , ScoreComponentCollection &scoreBreakdown
-                       , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedFutureScore) const
 {
   const Word &targetLHS = targetPhrase.GetTargetLHS();
 
   if (targetLHS == m_glueTargetLHS) {
-	  // don't delete glue rules
-	  return;
+    // don't delete glue rules
+    return;
   }
 
   const Phrase *source = targetPhrase.GetRuleSource();
@@ -54,17 +54,17 @@ void MaxSpanFreeNonTermSource::EvaluateWithSourceContext(const InputType &input
   float score = 0;
 
   if (source->Front().IsNonTerminal()) {
-	  const ChartCellLabel &cell = *stackVec->front();
-	  if (cell.GetCoverage().GetNumWordsCovered() > m_maxSpan) {
-		  score = - std::numeric_limits<float>::infinity();
-	  }
+    const ChartCellLabel &cell = *stackVec->front();
+    if (cell.GetCoverage().GetNumWordsCovered() > m_maxSpan) {
+      score = - std::numeric_limits<float>::infinity();
+    }
   }
 
   if (source->Back().IsNonTerminal()) {
-	  const ChartCellLabel &cell = *stackVec->back();
-	  if (cell.GetCoverage().GetNumWordsCovered() > m_maxSpan) {
-		  score = - std::numeric_limits<float>::infinity();
-	  }
+    const ChartCellLabel &cell = *stackVec->back();
+    if (cell.GetCoverage().GetNumWordsCovered() > m_maxSpan) {
+      score = - std::numeric_limits<float>::infinity();
+    }
   }
 
 
@@ -76,7 +76,7 @@ void MaxSpanFreeNonTermSource::EvaluateWithSourceContext(const InputType &input
 void MaxSpanFreeNonTermSource::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "max-span") {
-	  m_maxSpan = Scan<int>(value);
+    m_maxSpan = Scan<int>(value);
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
@@ -84,8 +84,8 @@ void MaxSpanFreeNonTermSource::SetParameter(const std::string& key, const std::s
 
 std::vector<float> MaxSpanFreeNonTermSource::DefaultWeights() const
 {
-	std::vector<float> ret(1, 1);
-	return ret;
+  std::vector<float> ret(1, 1);
+  return ret;
 }
 
 }

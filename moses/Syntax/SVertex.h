@@ -17,8 +17,7 @@ struct SHyperedge;
 //
 // Important: a SVertex owns its incoming SHyperedge objects and its FFState
 // objects and will delete them on destruction.
-struct SVertex
-{
+struct SVertex {
   ~SVertex();
 
   SHyperedge *best;

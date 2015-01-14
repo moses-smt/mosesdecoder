@@ -19,31 +19,35 @@ namespace Syntax
 // best-first order.
 class Cube
 {
- public:
+public:
   Cube(const SHyperedgeBundle &);
   ~Cube();
 
   SHyperedge *Pop();
 
-  SHyperedge *Top() const { return m_queue.top().first; }
+  SHyperedge *Top() const {
+    return m_queue.top().first;
+  }
 
-  bool IsEmpty() const { return m_queue.empty(); }
+  bool IsEmpty() const {
+    return m_queue.empty();
+  }
 
- private:
+private:
   typedef boost::unordered_set<std::vector<int> > CoordinateSet;
 
   typedef std::pair<SHyperedge *, const std::vector<int> *> QueueItem;
 
   class QueueItemOrderer
   {
-   public:
+  public:
     bool operator()(const QueueItem &p, const QueueItem &q) const {
       return p.first->score < q.first->score;
     }
   };
 
   typedef std::priority_queue<QueueItem, std::vector<QueueItem>,
-                              QueueItemOrderer> Queue;
+          QueueItemOrderer> Queue;
 
   SHyperedge *CreateHyperedge(const std::vector<int> &);
   void CreateNeighbour(const std::vector<int> &);

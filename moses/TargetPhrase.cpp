@@ -160,11 +160,12 @@ void TargetPhrase::EvaluateWithSourceContext(const InputType &input, const Input
   m_fullScore = weightedScore + m_futureScore;
 }
 
-void TargetPhrase::UpdateScore(ScoreComponentCollection* futureScoreBreakdown) {
+void TargetPhrase::UpdateScore(ScoreComponentCollection* futureScoreBreakdown)
+{
   float weightedScore = m_scoreBreakdown.GetWeightedScore();
   if(futureScoreBreakdown)
     m_futureScore += futureScoreBreakdown->GetWeightedScore();
-  m_fullScore = weightedScore + m_futureScore;  
+  m_fullScore = weightedScore + m_futureScore;
 }
 
 void TargetPhrase::SetXMLScore(float score)
@@ -301,23 +302,23 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   os << ": nonterm=" << tp.GetAlignNonTerm() << flush;
   os << ": c=" << tp.m_fullScore << flush;
   os << " " << tp.m_scoreBreakdown << flush;
-  
+
   const Phrase *sourcePhrase = tp.GetRuleSource();
   if (sourcePhrase) {
     os << " sourcePhrase=" << *sourcePhrase << flush;
   }
 
   if (tp.m_properties.size()) {
-	os << " properties: " << flush;
+    os << " properties: " << flush;
 
-	TargetPhrase::Properties::const_iterator iter;
-	for (iter = tp.m_properties.begin(); iter != tp.m_properties.end(); ++iter) {
-		const string &key = iter->first;
-		const PhraseProperty *prop = iter->second.get();
-		assert(prop);
+    TargetPhrase::Properties::const_iterator iter;
+    for (iter = tp.m_properties.begin(); iter != tp.m_properties.end(); ++iter) {
+      const string &key = iter->first;
+      const PhraseProperty *prop = iter->second.get();
+      assert(prop);
 
-		os << key << "=" << *prop << " ";
-	}
+      os << key << "=" << *prop << " ";
+    }
   }
 
   return os;

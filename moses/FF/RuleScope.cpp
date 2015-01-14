@@ -5,8 +5,8 @@
 namespace Moses
 {
 RuleScope::RuleScope(const std::string &line)
-:StatelessFeatureFunction(1, line)
-,m_sourceSyntax(true)
+  :StatelessFeatureFunction(1, line)
+  ,m_sourceSyntax(true)
 {
 }
 
@@ -17,9 +17,9 @@ bool IsAmbiguous(const Word &word, bool sourceSyntax)
 }
 
 void RuleScope::EvaluateInIsolation(const Phrase &source
-						, const TargetPhrase &targetPhrase
-						, ScoreComponentCollection &scoreBreakdown
-						, ScoreComponentCollection &estimatedFutureScore) const
+                                    , const TargetPhrase &targetPhrase
+                                    , ScoreComponentCollection &scoreBreakdown
+                                    , ScoreComponentCollection &estimatedFutureScore) const
 {
   // adjacent non-term count as 1 ammbiguity, rather than 2 as in rule scope
   // source can't be empty, right?
@@ -27,23 +27,22 @@ void RuleScope::EvaluateInIsolation(const Phrase &source
 
   int count = 0;
   for (size_t i = 0; i < source.GetSize() - 0; ++i) {
-	const Word &word = source.GetWord(i);
-	bool ambiguous = IsAmbiguous(word, m_sourceSyntax);
-	if (ambiguous) {
-		++count;
-	}
-	else {
-		if (count > 0) {
-			score += count;
-		}
-		count = -1;
-	}
+    const Word &word = source.GetWord(i);
+    bool ambiguous = IsAmbiguous(word, m_sourceSyntax);
+    if (ambiguous) {
+      ++count;
+    } else {
+      if (count > 0) {
+        score += count;
+      }
+      count = -1;
+    }
   }
 
   // 1st & last always adjacent to ambiguity
   ++count;
   if (count > 0) {
-	score += count;
+    score += count;
   }
 
   scoreBreakdown.PlusEquals(this, score);
@@ -52,7 +51,7 @@ void RuleScope::EvaluateInIsolation(const Phrase &source
 void RuleScope::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source-syntax") {
-	  m_sourceSyntax = Scan<bool>(value);
+    m_sourceSyntax = Scan<bool>(value);
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }

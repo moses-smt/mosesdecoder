@@ -18,8 +18,8 @@ protected:
 public:
   ExternalFeatureState(int stateSize)
     :m_stateSize(stateSize)
-    ,m_data(NULL)
-  {}
+    ,m_data(NULL) {
+  }
   ExternalFeatureState(int stateSize, void *data);
 
   ~ExternalFeatureState() {
@@ -52,22 +52,22 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
 
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
+  }
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
+
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-              , const TranslationOptionList &translationOptionList) const
-  {}
-  
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

@@ -111,13 +111,13 @@ public:
   // may have more factors than actually need, but not guaranteed.
   // For SCFG decoding, the source contains non-terminals, NOT the raw source from the input sentence
   virtual void EvaluateInIsolation(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const = 0;
+                                   , const TargetPhrase &targetPhrase
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection &estimatedFutureScore) const = 0;
 
   // override this method if you want to change the input before decoding
-  virtual void ChangeSource(InputType *&input) const
-  {}
+  virtual void ChangeSource(InputType *&input) const {
+  }
 
   // This method is called once all the translation options are retrieved from the phrase table, and
   // just before search.
@@ -127,12 +127,12 @@ public:
   // For pb models, stackvec is NULL.
   // No FF should set estimatedFutureScore in both overloads!
   virtual void EvaluateWithSourceContext(const InputType &input
-                        , const InputPath &inputPath
-                        , const TargetPhrase &targetPhrase
-                        , const StackVec *stackVec
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
-  
+                                         , const InputPath &inputPath
+                                         , const TargetPhrase &targetPhrase
+                                         , const StackVec *stackVec
+                                         , ScoreComponentCollection &scoreBreakdown
+                                         , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
+
   // This method is called once all the translation options are retrieved from the phrase table, and
   // just before search.
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
@@ -141,7 +141,7 @@ public:
   // For pb models, stackvec is NULL.
   // No FF should set estimatedFutureScore in both overloads!
   virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-                        , const TranslationOptionList &translationOptionList) const = 0;
+      , const TranslationOptionList &translationOptionList) const = 0;
 
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();

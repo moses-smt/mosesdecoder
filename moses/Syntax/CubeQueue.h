@@ -14,7 +14,7 @@ namespace Syntax
 
 class CubeQueue
 {
- public:
+public:
   template<typename InputIterator>
   CubeQueue(InputIterator, InputIterator);
 
@@ -22,12 +22,14 @@ class CubeQueue
 
   SHyperedge *Pop();
 
-  bool IsEmpty() const { return m_queue.empty(); }
+  bool IsEmpty() const {
+    return m_queue.empty();
+  }
 
- private:
+private:
   class CubeOrderer
   {
-   public:
+  public:
     bool operator()(const Cube *p, const Cube *q) const {
       return p->Top()->score < q->Top()->score;
     }

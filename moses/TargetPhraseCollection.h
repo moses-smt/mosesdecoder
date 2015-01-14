@@ -44,11 +44,10 @@ public:
   typedef CollType::iterator iterator;
   typedef CollType::const_iterator const_iterator;
 
-  TargetPhrase const* 
-  operator[](size_t const i) const
-  {
+  TargetPhrase const*
+  operator[](size_t const i) const {
     return m_collection.at(i);
-  }  
+  }
 
   iterator begin() {
     return m_collection.begin();
@@ -63,8 +62,8 @@ public:
     return m_collection.end();
   }
 
-  TargetPhraseCollection()
-  {}
+  TargetPhraseCollection() {
+  }
 
   TargetPhraseCollection(const TargetPhraseCollection &copy);
 

@@ -30,7 +30,7 @@ namespace Moses
 namespace GHKM
 {
 
-ScfgRule::ScfgRule(const Subgraph &fragment, 
+ScfgRule::ScfgRule(const Subgraph &fragment,
                    const MosesTraining::SyntaxTree *sourceSyntaxTree)
   : m_sourceLHS("X", NonTerminal)
   , m_targetLHS(fragment.GetRoot()->GetLabel(), NonTerminal)
@@ -124,26 +124,26 @@ ScfgRule::ScfgRule(const Subgraph &fragment,
   }
 
   if (sourceSyntaxTree) {
-      // Source syntax label for root node (if sourceSyntaxTree available)
-      PushSourceLabel(sourceSyntaxTree,fragment.GetRoot(),"XLHS");
-      // All non-terminal spans (including the LHS) should have obtained a label
-      // (a source-side syntactic constituent label if the span matches, "XLHS" otherwise)
-      assert(m_sourceLabels.size() == m_numberOfNonTerminals+1);
+    // Source syntax label for root node (if sourceSyntaxTree available)
+    PushSourceLabel(sourceSyntaxTree,fragment.GetRoot(),"XLHS");
+    // All non-terminal spans (including the LHS) should have obtained a label
+    // (a source-side syntactic constituent label if the span matches, "XLHS" otherwise)
+    assert(m_sourceLabels.size() == m_numberOfNonTerminals+1);
   }
 }
 
 void ScfgRule::PushSourceLabel(const MosesTraining::SyntaxTree *sourceSyntaxTree,
                                const Node *node,
-                               const std::string &nonMatchingLabel) 
+                               const std::string &nonMatchingLabel)
 {
   ContiguousSpan span = Closure(node->GetSpan());
   if (sourceSyntaxTree->HasNode(span.first,span.second)) { // does a source constituent match the span?
-      std::vector<MosesTraining::SyntaxNode*> sourceLabels = 
-          sourceSyntaxTree->GetNodes(span.first,span.second);
-      if (!sourceLabels.empty()) {
-        // store the topmost matching label from the source syntax tree
-        m_sourceLabels.push_back(sourceLabels.back()->GetLabel());
-      }
+    std::vector<MosesTraining::SyntaxNode*> sourceLabels =
+      sourceSyntaxTree->GetNodes(span.first,span.second);
+    if (!sourceLabels.empty()) {
+      // store the topmost matching label from the source syntax tree
+      m_sourceLabels.push_back(sourceLabels.back()->GetLabel());
+    }
   } else {
     // no matching source-side syntactic constituent: store nonMatchingLabel
     m_sourceLabels.push_back(nonMatchingLabel);
@@ -178,7 +178,7 @@ void ScfgRule::UpdateSourceLabelCoocCounts(std::map< std::string, std::map<std::
       std::map< std::string, std::map<std::string,float>* >::iterator iter = coocCounts.find(sourceLabel);
       if ( iter == coocCounts.end() ) {
         std::map<std::string,float> *newCountMap = new std::map<std::string,float>();
-        std::pair< std::map< std::string, std::map<std::string,float>* >::iterator, bool > inserted = 
+        std::pair< std::map< std::string, std::map<std::string,float>* >::iterator, bool > inserted =
           coocCounts.insert( std::pair< std::string, std::map<std::string,float>* >(sourceLabel, newCountMap) );
         assert(inserted.second);
         countMap = (inserted.first)->second;

@@ -45,7 +45,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
   // Read and check version number.
   reader.ReadLine();
   if (reader.m_line != "1") {
-	std::cerr << "Unexpected compact rule table format: " << reader.m_line;
+    std::cerr << "Unexpected compact rule table format: " << reader.m_line;
     return false;
   }
 
@@ -208,9 +208,9 @@ bool RuleTableLoaderCompact::LoadRuleSection(
       scoreVector[j] = FloorScore(TransformScore(score));
     }
     if (reader.m_line[tokenPositions[3+numScoreComponents]] != ':') {
-    	std::cerr << "Size of scoreVector != number ("
-          << scoreVector.size() << "!=" << numScoreComponents
-          << ") of score components on line " << reader.m_lineNum;
+      std::cerr << "Size of scoreVector != number ("
+                << scoreVector.size() << "!=" << numScoreComponents
+                << ") of score components on line " << reader.m_lineNum;
       return false;
     }
 

@@ -31,9 +31,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-namespace MosesTuning {
+namespace MosesTuning
+{
 
-std::ostream& operator<<(std::ostream& out, const WordVec& wordVec) {
+std::ostream& operator<<(std::ostream& out, const WordVec& wordVec)
+{
   out << "[";
   for (size_t i = 0; i < wordVec.size(); ++i) {
     out << wordVec[i]->first;
@@ -44,7 +46,8 @@ std::ostream& operator<<(std::ostream& out, const WordVec& wordVec) {
 }
 
 
-void ReferenceSet::Load(const vector<string>& files, Vocab& vocab) {
+void ReferenceSet::Load(const vector<string>& files, Vocab& vocab)
+{
   for (size_t i = 0; i < files.size(); ++i) {
     util::FilePiece fh(files[i].c_str());
     size_t sentenceId = 0;
@@ -55,14 +58,15 @@ void ReferenceSet::Load(const vector<string>& files, Vocab& vocab) {
       } catch (util::EndOfFileException &e) {
         break;
       }
-     AddLine(sentenceId, line, vocab);
-     ++sentenceId;
+      AddLine(sentenceId, line, vocab);
+      ++sentenceId;
     }
   }
 
 }
 
-void ReferenceSet::AddLine(size_t sentenceId, const StringPiece& line, Vocab& vocab) {
+void ReferenceSet::AddLine(size_t sentenceId, const StringPiece& line, Vocab& vocab)
+{
   //cerr << line << endl;
   NgramCounter ngramCounts;
   list<WordVec> openNgrams;
@@ -74,14 +78,14 @@ void ReferenceSet::AddLine(size_t sentenceId, const StringPiece& line, Vocab& vo
     openNgrams.push_front(WordVec());
     for (list<WordVec>::iterator k = openNgrams.begin(); k != openNgrams.end();  ++k) {
       k->push_back(nextTok);
-      ++ngramCounts[*k]; 
+      ++ngramCounts[*k];
     }
     if (openNgrams.size() >=  kBleuNgramOrder) openNgrams.pop_back();
   }
 
   //merge into overall ngram map
   for (NgramCounter::const_iterator ni = ngramCounts.begin();
-    ni != ngramCounts.end(); ++ni) {
+       ni != ngramCounts.end(); ++ni) {
     size_t count = ni->second;
     //cerr << *ni << " " << count <<  endl;
     if (ngramCounts_.size() <= sentenceId) ngramCounts_.resize(sentenceId+1);
@@ -104,8 +108,9 @@ void ReferenceSet::AddLine(size_t sentenceId, const StringPiece& line, Vocab& vo
   //cerr << endl;
 
 }
-  
-size_t ReferenceSet::NgramMatches(size_t sentenceId, const WordVec& ngram, bool clip) const  {
+
+size_t ReferenceSet::NgramMatches(size_t sentenceId, const WordVec& ngram, bool clip) const
+{
   const NgramMap& ngramCounts = ngramCounts_.at(sentenceId);
   NgramMap::const_iterator ngi = ngramCounts.find(ngram);
   if (ngi == ngramCounts.end()) return 0;
@@ -114,7 +119,8 @@ size_t ReferenceSet::NgramMatches(size_t sentenceId, const WordVec& ngram, bool 
 
 VertexState::VertexState(): bleuStats(kBleuNgramOrder), targetLength(0) {}
 
-void HgBleuScorer::UpdateMatches(const NgramCounter& counts, vector<FeatureStatsType>& bleuStats ) const {
+void HgBleuScorer::UpdateMatches(const NgramCounter& counts, vector<FeatureStatsType>& bleuStats ) const
+{
   for (NgramCounter::const_iterator ngi = counts.begin(); ngi != counts.end(); ++ngi) {
     //cerr << "Checking: " << *ngi << " matches " << references_.NgramMatches(sentenceId_,*ngi,false) <<  endl;
     size_t order = ngi->first.size();
@@ -124,7 +130,8 @@ void HgBleuScorer::UpdateMatches(const NgramCounter& counts, vector<FeatureStats
   }
 }
 
-size_t HgBleuScorer::GetTargetLength(const Edge& edge) const {
+size_t HgBleuScorer::GetTargetLength(const Edge& edge) const
+{
   size_t targetLength = 0;
   for (size_t i = 0; i < edge.Words().size(); ++i) {
     const Vocab::Entry* word = edge.Words()[i];
@@ -137,7 +144,8 @@ size_t HgBleuScorer::GetTargetLength(const Edge& edge) const {
   return targetLength;
 }
 
-FeatureStatsType HgBleuScorer::Score(const Edge& edge, const Vertex& head, vector<FeatureStatsType>& bleuStats) {
+FeatureStatsType HgBleuScorer::Score(const Edge& edge, const Vertex& head, vector<FeatureStatsType>& bleuStats)
+{
   NgramCounter ngramCounts;
   size_t childId = 0;
   size_t wordId = 0;
@@ -147,7 +155,7 @@ FeatureStatsType HgBleuScorer::Score(const Edge& edge, const Vertex& head, vecto
   bool inRightContext = false;
   list<WordVec> openNgrams;
   const Vocab::Entry* currentWord = NULL;
-  while (wordId < edge.Words().size()) { 
+  while (wordId < edge.Words().size()) {
     currentWord = edge.Words()[wordId];
     if (currentWord != NULL) {
       ++wordId;
@@ -214,7 +222,7 @@ FeatureStatsType HgBleuScorer::Score(const Edge& edge, const Vertex& head, vecto
     }
     if (openNgrams.size() >=  kBleuNgramOrder) openNgrams.pop_back();
   }
-  
+
   //Collect matches
   //This edge
   //cerr << "edge ngrams" << endl;
@@ -227,26 +235,27 @@ FeatureStatsType HgBleuScorer::Score(const Edge& edge, const Vertex& head, vecto
       bleuStats[j] += vertexStates_[edge.Children()[i]].bleuStats[j];
     }
   }
-  
+
 
   FeatureStatsType sourceLength = head.SourceCovered();
   size_t referenceLength = references_.Length(sentenceId_);
-  FeatureStatsType effectiveReferenceLength = 
+  FeatureStatsType effectiveReferenceLength =
     sourceLength / totalSourceLength_ * referenceLength;
 
   bleuStats[bleuStats.size()-1] = effectiveReferenceLength;
-  //backgroundBleu_[backgroundBleu_.size()-1] = 
+  //backgroundBleu_[backgroundBleu_.size()-1] =
   //  backgroundRefLength_ * sourceLength / totalSourceLength_;
   FeatureStatsType bleu = sentenceLevelBackgroundBleu(bleuStats, backgroundBleu_);
 
   return bleu;
 }
 
-void HgBleuScorer::UpdateState(const Edge& winnerEdge, size_t vertexId, const vector<FeatureStatsType>& bleuStats) {
+void HgBleuScorer::UpdateState(const Edge& winnerEdge, size_t vertexId, const vector<FeatureStatsType>& bleuStats)
+{
   //TODO: Maybe more efficient to absorb into the Score() method
   VertexState& vertexState = vertexStates_[vertexId];
   //cerr << "Updating state for " << vertexId << endl;
-  
+
   //leftContext
   int wi = 0;
   const VertexState* childState = NULL;
@@ -263,9 +272,9 @@ void HgBleuScorer::UpdateState(const Edge& winnerEdge, size_t vertexId, const ve
         //start of child state
         childState = &(vertexStates_[winnerEdge.Children()[childi++]]);
         contexti = 0;
-      } 
+      }
       if ((size_t)contexti < childState->leftContext.size()) {
-        vertexState.leftContext.push_back(childState->leftContext[contexti++]); 
+        vertexState.leftContext.push_back(childState->leftContext[contexti++]);
       } else {
         //end of child context
         childState = NULL;
@@ -314,7 +323,8 @@ typedef pair<const Edge*,FeatureStatsType> BackPointer;
  * Recurse through back pointers
  **/
 static void GetBestHypothesis(size_t vertexId, const Graph& graph, const vector<BackPointer>& bps,
-     HgHypothesis* bestHypo) {
+                              HgHypothesis* bestHypo)
+{
   //cerr << "Expanding " << vertexId << " Score: " << bps[vertexId].second << endl;
   //UTIL_THROW_IF(bps[vertexId].second == kMinScore+1, HypergraphException, "Landed at vertex " << vertexId << " which is a dead end");
   if (!bps[vertexId].first) return;
@@ -334,7 +344,7 @@ static void GetBestHypothesis(size_t vertexId, const Graph& graph, const vector<
   }
 }
 
-void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, const ReferenceSet& references , size_t sentenceId, const std::vector<FeatureStatsType>& backgroundBleu,  HgHypothesis* bestHypo) 
+void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, const ReferenceSet& references , size_t sentenceId, const std::vector<FeatureStatsType>& backgroundBleu,  HgHypothesis* bestHypo)
 {
   BackPointer init(NULL,kMinScore);
   vector<BackPointer> backPointers(graph.VertexSize(),init);
@@ -349,7 +359,7 @@ void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, 
       //UTIL_THROW(HypergraphException, "Vertex " << vi << " has no incoming edges");
       //If no incoming edges, vertex is a dead end
       backPointers[vi].first = NULL;
-      backPointers[vi].second = kMinScore;  
+      backPointers[vi].second = kMinScore;
     } else {
       //cerr << "\nVertex: " << vi << endl;
       for (size_t ei = 0; ei < incoming.size(); ++ei) {
@@ -362,10 +372,10 @@ void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, 
           incomingScore = max(incomingScore + backPointers[childId].second, kMinScore);
         }
         vector<FeatureStatsType> bleuStats(kBleuNgramOrder*2+1);
-       // cerr << "Score: " << incomingScore << " Bleu: ";
-       // if (incomingScore > nonbleuscore) {nonbleuscore = incomingScore; nonbleuid = ei;}
+        // cerr << "Score: " << incomingScore << " Bleu: ";
+        // if (incomingScore > nonbleuscore) {nonbleuscore = incomingScore; nonbleuid = ei;}
         FeatureStatsType totalScore = incomingScore;
-        if (bleuWeight) { 
+        if (bleuWeight) {
           FeatureStatsType bleuScore = bleuScorer.Score(*(incoming[ei]), vertex, bleuStats);
           if (isnan(bleuScore)) {
             cerr << "WARN: bleu score undefined" << endl;
@@ -379,7 +389,7 @@ void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, 
           }
           //UTIL_THROW_IF(isnan(bleuScore), util::Exception, "Bleu score undefined, smoothing problem?");
           totalScore += bleuWeight * bleuScore;
-        //  cerr << bleuScore << " Total: " << incomingScore << endl << endl;
+          //  cerr << bleuScore << " Total: " << incomingScore << endl << endl;
           //cerr << "is " << incomingScore << " bs " << bleuScore << endl;
         }
         if (totalScore >= winnerScore) {

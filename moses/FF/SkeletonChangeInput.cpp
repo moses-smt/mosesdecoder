@@ -17,9 +17,9 @@ SkeletonChangeInput::SkeletonChangeInput(const std::string &line)
 }
 
 void SkeletonChangeInput::EvaluateInIsolation(const Phrase &source
-                                   , const TargetPhrase &targetPhrase
-                                   , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection &estimatedFutureScore) const
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedFutureScore) const
 {
   // dense scores
   vector<float> newScores(m_numScoreComponents);
@@ -33,30 +33,30 @@ void SkeletonChangeInput::EvaluateInIsolation(const Phrase &source
 }
 
 void SkeletonChangeInput::EvaluateWithSourceContext(const InputType &input
-                                   , const InputPath &inputPath
-                                   , const TargetPhrase &targetPhrase
-                                   , const StackVec *stackVec
-                                   , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedFutureScore) const
 {
-	if (targetPhrase.GetNumNonTerminals()) {
-		  vector<float> newScores(m_numScoreComponents);
-		  newScores[0] = - std::numeric_limits<float>::infinity();
-		  scoreBreakdown.PlusEquals(this, newScores);
-	}
+  if (targetPhrase.GetNumNonTerminals()) {
+    vector<float> newScores(m_numScoreComponents);
+    newScores[0] = - std::numeric_limits<float>::infinity();
+    scoreBreakdown.PlusEquals(this, newScores);
+  }
 
 }
 
 void SkeletonChangeInput::EvaluateTranslationOptionListWithSourceContext(const InputType &input
-								  , const TranslationOptionList &translationOptionList) const
+    , const TranslationOptionList &translationOptionList) const
 {}
 
 void SkeletonChangeInput::EvaluateWhenApplied(const Hypothesis& hypo,
-                                   ScoreComponentCollection* accumulator) const
+    ScoreComponentCollection* accumulator) const
 {}
 
 void SkeletonChangeInput::EvaluateWhenApplied(const ChartHypothesis &hypo,
-                                        ScoreComponentCollection* accumulator) const
+    ScoreComponentCollection* accumulator) const
 {}
 
 void SkeletonChangeInput::ChangeSource(InputType *&input) const
@@ -70,16 +70,16 @@ void SkeletonChangeInput::ChangeSource(InputType *&input) const
 
   size_t size = sentence->GetSize();
   for (size_t i = 0; i < size; ++i) {
-	  Word &word = sentence->Phrase::GetWord(i);
-	  const Factor *factor0 = word[0];
+    Word &word = sentence->Phrase::GetWord(i);
+    const Factor *factor0 = word[0];
 
-	  std::string str = factor0->GetString().as_string();
-	  if (str.length() > 4) {
-  	    str = str.substr(0, 4);
-	  }
+    std::string str = factor0->GetString().as_string();
+    if (str.length() > 4) {
+      str = str.substr(0, 4);
+    }
 
-	  const Factor *factor1 = fc.AddFactor(str);
-	  word.SetFactor(1, factor1);
+    const Factor *factor1 = fc.AddFactor(str);
+    word.SetFactor(1, factor1);
   }
 }
 

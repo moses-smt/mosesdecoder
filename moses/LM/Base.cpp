@@ -70,9 +70,9 @@ void LanguageModel::ReportHistoryOrder(std::ostream &out,const Phrase &phrase) c
 }
 
 void LanguageModel::EvaluateInIsolation(const Phrase &source
-                             , const TargetPhrase &targetPhrase
-                             , ScoreComponentCollection &scoreBreakdown
-                             , ScoreComponentCollection &estimatedFutureScore) const
+                                        , const TargetPhrase &targetPhrase
+                                        , ScoreComponentCollection &scoreBreakdown
+                                        , ScoreComponentCollection &estimatedFutureScore) const
 {
   // contains factors used by this LM
   float fullScore, nGramScore;

@@ -103,10 +103,9 @@ IOWrapper::IOWrapper()
 
   staticData.GetParameter().SetParameter<string>(m_inputFilePath, "input-file", "");
   if (m_inputFilePath.empty()) {
-	m_inputFile = NULL;
-	m_inputStream = &cin;
-  }
-  else {
+    m_inputFile = NULL;
+    m_inputStream = &cin;
+  } else {
     VERBOSE(2,"IO from File" << endl);
     m_inputFile = new InputFileStream(m_inputFilePath);
     m_inputStream = m_inputFile;
@@ -131,10 +130,9 @@ IOWrapper::IOWrapper()
   if (staticData.GetOutputSearchGraph()) {
     string fileName;
     if (staticData.GetOutputSearchGraphExtended()) {
-    	staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph-extended", "");
-    }
-    else {
-    	staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph", "");
+      staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph-extended", "");
+    } else {
+      staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph", "");
     }
     std::ofstream *file = new std::ofstream;
     m_outputSearchGraphStream = file;
@@ -146,19 +144,19 @@ IOWrapper::IOWrapper()
     m_unknownsCollector = new Moses::OutputCollector(m_unknownsStream);
     UTIL_THROW_IF2(!m_unknownsStream->good(),
                    "File for unknowns words could not be opened: " <<
-                     staticData.GetOutputUnknownsFile());
+                   staticData.GetOutputUnknownsFile());
   }
 
   if (!staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
     m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
     UTIL_THROW_IF2(!m_alignmentInfoStream->good(),
-    		"File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
+                   "File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
   }
 
   if (staticData.GetOutputSearchGraph()) {
     string fileName;
-	staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph", "");
+    staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph", "");
 
     std::ofstream *file = new std::ofstream;
     m_outputSearchGraphStream = file;
@@ -182,7 +180,7 @@ IOWrapper::IOWrapper()
   // wordgraph output
   if (staticData.GetOutputWordGraph()) {
     string fileName;
-	staticData.GetParameter().SetParameter<string>(fileName, "output-word-graph", "");
+    staticData.GetParameter().SetParameter<string>(fileName, "output-word-graph", "");
 
     std::ofstream *file = new std::ofstream;
     m_outputWordGraphStream  = file;
@@ -211,7 +209,7 @@ IOWrapper::IOWrapper()
   }
 
   if (staticData.GetParameter().GetParam("spe-src")) {
-	spe_src = new ifstream(staticData.GetParameter().GetParam("spe-src")->at(0).c_str());
+    spe_src = new ifstream(staticData.GetParameter().GetParam("spe-src")->at(0).c_str());
     spe_trg = new ifstream(staticData.GetParameter().GetParam("spe-trg")->at(0).c_str());
     spe_aln = new ifstream(staticData.GetParameter().GetParam("spe-aln")->at(0).c_str());
   }

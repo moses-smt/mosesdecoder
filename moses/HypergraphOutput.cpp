@@ -41,16 +41,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
 template<class M>
 HypergraphOutput<M>::HypergraphOutput(size_t precision) :
-  m_precision(precision) {
+  m_precision(precision)
+{
   const StaticData& staticData = StaticData::Instance();
   vector<string> hypergraphParameters;
   const PARAM_VEC *params = staticData.GetParameter().GetParam("output-search-graph-hypergraph");
   if (params) {
-	  hypergraphParameters = *params;
+    hypergraphParameters = *params;
   }
 
   if (hypergraphParameters.size() > 0 && hypergraphParameters[0] == "true") {
@@ -66,7 +68,7 @@ HypergraphOutput<M>::HypergraphOutput(size_t precision) :
     m_compression = "txt";
   }
   UTIL_THROW_IF(m_compression != "txt" && m_compression != "gz" && m_compression != "bz2",
-    util::Exception, "Unknown compression type: " << m_compression);
+                util::Exception, "Unknown compression type: " << m_compression);
 
   if ( hypergraphParameters.size() > 2 ) {
     m_hypergraphDir = hypergraphParameters[2];
@@ -109,7 +111,7 @@ HypergraphOutput<M>::HypergraphOutput(size_t precision) :
   }
 
   UTIL_THROW_IF(!boost::filesystem::is_directory(m_hypergraphDir),
-    util::Exception, "Cannot output hypergraphs to " << m_hypergraphDir << " because that path exists, but is not a directory");
+                util::Exception, "Cannot output hypergraphs to " << m_hypergraphDir << " because that path exists, but is not a directory");
 
 
   ofstream weightsOut;
@@ -125,7 +127,8 @@ HypergraphOutput<M>::HypergraphOutput(size_t precision) :
 }
 
 template<class M>
-void HypergraphOutput<M>::Write(const M& manager) const {
+void HypergraphOutput<M>::Write(const M& manager) const
+{
 
   stringstream fileName;
   fileName << m_hypergraphDir << "/" << manager.GetSource().GetTranslationId();
@@ -138,7 +141,7 @@ void HypergraphOutput<M>::Write(const M& manager) const {
     file.push( boost::iostreams::gzip_compressor() );
   } else if ( m_compression == "bz2" ) {
     file.push( boost::iostreams::bzip2_compressor() );
-  } 
+  }
 
   file.push( boost::iostreams::file_sink(fileName.str(), ios_base::out) );
 
@@ -149,9 +152,9 @@ void HypergraphOutput<M>::Write(const M& manager) const {
     file.flush();
   } else {
     TRACE_ERR("Cannot output hypergraph for line " << manager.GetSource().GetTranslationId()
-  << " because the output file " << fileName.str() 
-  << " is not open or not ready for writing" 
-  << std::endl);
+              << " because the output file " << fileName.str()
+              << " is not open or not ready for writing"
+              << std::endl);
   }
   file.pop();
 }
@@ -161,7 +164,8 @@ template class HypergraphOutput<ChartManager>;
 
 
 void ChartSearchGraphWriterMoses::WriteHypos
-  (const ChartHypothesisCollection& hypos, const map<unsigned, bool> &reachable) const {
+(const ChartHypothesisCollection& hypos, const map<unsigned, bool> &reachable) const
+{
 
   ChartHypothesisCollection::const_iterator iter;
   for (iter = hypos.begin() ; iter != hypos.end() ; ++iter) {
@@ -184,7 +188,8 @@ void ChartSearchGraphWriterMoses::WriteHypos
   }
 
 }
-void ChartSearchGraphWriterHypergraph::WriteHeader(size_t winners, size_t losers) const {
+void ChartSearchGraphWriterHypergraph::WriteHeader(size_t winners, size_t losers) const
+{
 
   (*m_out) << "# target ||| features ||| source-covered" << endl;
   (*m_out) << winners <<  " " << (winners+losers) << endl;
@@ -192,13 +197,14 @@ void ChartSearchGraphWriterHypergraph::WriteHeader(size_t winners, size_t losers
 }
 
 void ChartSearchGraphWriterHypergraph::WriteHypos(const ChartHypothesisCollection& hypos,
-       const map<unsigned, bool> &reachable) const {
-  
+    const map<unsigned, bool> &reachable) const
+{
+
   ChartHypothesisCollection::const_iterator iter;
   for (iter = hypos.begin() ; iter != hypos.end() ; ++iter) {
     const ChartHypothesis* mainHypo = *iter;
-    if (!StaticData::Instance().GetUnprunedSearchGraph() && 
-      reachable.find(mainHypo->GetId()) == reachable.end()) {
+    if (!StaticData::Instance().GetUnprunedSearchGraph() &&
+        reachable.find(mainHypo->GetId()) == reachable.end()) {
       //Ignore non reachable nodes
       continue;
     }
@@ -246,7 +252,7 @@ void ChartSearchGraphWriterHypergraph::WriteHypos(const ChartHypothesisCollectio
     }
   }
 }
- 
+
 
 } //namespace Moses
 

@@ -78,8 +78,8 @@ public:
 class ScoresComp
 {
 public:
-  ScoresComp(const vector<float>& weights)
-  {}
+  ScoresComp(const vector<float>& weights) {
+  }
   bool operator()(const Scores& s1, const Scores& s2) const {
     return s1[0] < s2[0]; // just p(e|f) as approximation
     // float score1(0), score2(0);

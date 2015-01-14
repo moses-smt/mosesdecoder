@@ -53,13 +53,15 @@ using namespace std;
 namespace po = boost::program_options;
 typedef multimap<float,string> Lines;
 
-static void usage(const po::options_description& desc, char** argv) {
-    cerr << "Usage: " + string(argv[0]) +  " [options] input-file output-file" << endl;
-    cerr << desc << endl;
+static void usage(const po::options_description& desc, char** argv)
+{
+  cerr << "Usage: " + string(argv[0]) +  " [options] input-file output-file" << endl;
+  cerr << desc << endl;
 }
 
 //Find top n translations of source, and send them to output
-static void outputTopN(Lines lines, size_t maxPhrases, ostream& out) {
+static void outputTopN(Lines lines, size_t maxPhrases, ostream& out)
+{
   size_t count = 0;
   for (Lines::const_reverse_iterator i = lines.rbegin(); i != lines.rend(); ++i) {
     out << i->second << endl;
@@ -92,7 +94,7 @@ static void outputTopN(const Phrase& sourcePhrase, const multimap<float,const Ta
       out << endl;
     }
 }*/
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
   bool help;
   string input_file;
@@ -112,7 +114,7 @@ int main(int argc, char** argv)
   cmdline_options.add(desc);
   po::variables_map vm;
   po::parsed_options parsed = po::command_line_parser(argc,argv).
-            options(cmdline_options).run();
+                              options(cmdline_options).run();
   po::store(parsed, vm);
   po::notify(vm);
   if (help) {
@@ -135,7 +137,7 @@ int main(int argc, char** argv)
   mosesargs.push_back("-f");
   mosesargs.push_back(config_file);
 
-  boost::scoped_ptr<Parameter> params(new Parameter());  
+  boost::scoped_ptr<Parameter> params(new Parameter());
   char** mosesargv = new char*[mosesargs.size()];
   for (size_t i = 0; i < mosesargs.size(); ++i) {
     mosesargv[i] = new char[mosesargs[i].length() + 1];

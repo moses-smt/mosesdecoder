@@ -17,7 +17,7 @@ namespace S2T
 template<typename Callback>
 class TailLatticeSearcher
 {
- public:
+public:
   TailLatticeSearcher(const TailLattice &lattice,
                       const PatternApplicationKey &key,
                       const std::vector<SymbolRange> &ranges)
@@ -35,7 +35,7 @@ class TailLatticeSearcher
     SearchInner(0, 0, 0);
   }
 
- private:
+private:
   void SearchInner(int offset, std::size_t i, std::size_t nonTermIndex) {
     assert(m_hyperedge.tail.size() == i);
 
@@ -61,7 +61,7 @@ class TailLatticeSearcher
     const int maxWidth = range.maxEnd - absStart + 1;
 
     const std::vector<std::vector<const PVertex *> > &innerVec =
-        m_lattice[offset][nonTermIndex+1];
+      m_lattice[offset][nonTermIndex+1];
 
     std::size_t labelIndex = (*m_labels)[nonTermIndex];
 

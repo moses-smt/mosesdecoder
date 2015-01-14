@@ -21,7 +21,7 @@ namespace S2T
 template<typename RuleTrie>
 class OovHandler : public RuleTrieCreator
 {
- public:
+public:
   OovHandler(const RuleTableFF &ff) : m_ruleTableFF(ff) {}
 
   // Synthesize a RuleTrie given a sequence of OOV words.  The sequence is
@@ -30,7 +30,7 @@ class OovHandler : public RuleTrieCreator
   template<typename InputIterator>
   boost::shared_ptr<RuleTrie> SynthesizeRuleTrie(InputIterator, InputIterator);
 
- private:
+private:
   const RuleTableFF &m_ruleTableFF;
 
   bool ShouldDrop(const Word &);

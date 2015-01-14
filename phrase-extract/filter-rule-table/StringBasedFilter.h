@@ -12,8 +12,9 @@ namespace Syntax
 namespace FilterRuleTable
 {
 
-class StringBasedFilter {
- public:
+class StringBasedFilter
+{
+public:
   StringBasedFilter(const std::vector<std::vector<std::string> > &);
 
   void Filter(std::istream &, std::ostream &);

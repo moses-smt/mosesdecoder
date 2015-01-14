@@ -711,7 +711,7 @@ public:
     // if not found, resort to default
     if (i == m_weightSetting.end()) {
       std::cerr << "Warning: Specified weight setting " << settingName
-            << " does not exist in model, using default weight setting instead";
+                << " does not exist in model, using default weight setting instead";
       i = m_weightSetting.find( "default" );
       m_currentWeightSetting = "default";
     }
@@ -778,8 +778,9 @@ public:
     m_treeStructure = treeStructure;
   }
 
-  bool GetDefaultNonTermOnlyForEmptyRange() const
-  { return m_defaultNonTermOnlyForEmptyRange; }
+  bool GetDefaultNonTermOnlyForEmptyRange() const {
+    return m_defaultNonTermOnlyForEmptyRange;
+  }
 
   bool UseS2TDecoder() const {
     return m_useS2TDecoder;

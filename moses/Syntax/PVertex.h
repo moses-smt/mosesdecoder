@@ -8,9 +8,8 @@ namespace Moses
 namespace Syntax
 {
 
-struct PVertex
-{
- public:
+struct PVertex {
+public:
   PVertex(const WordsRange &wr, const Word &w) : span(wr), symbol(w) {}
 
   WordsRange span;

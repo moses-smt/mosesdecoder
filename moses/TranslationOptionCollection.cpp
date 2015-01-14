@@ -555,7 +555,7 @@ void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, Part
 void TranslationOptionCollection::EvaluateWithSourceContext()
 {
   const size_t size = m_source.GetSize();
-        
+
   for (size_t startPos = 0 ; startPos < size ; ++startPos) {
     size_t maxSize = m_source.GetSize() - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
@@ -569,15 +569,16 @@ void TranslationOptionCollection::EvaluateWithSourceContext()
         TranslationOption &transOpt = **iterTransOpt;
         transOpt.EvaluateWithSourceContext(m_source);
       }
-      
+
       EvaluateTranslatonOptionListWithSourceContext(transOptList);
     }
   }
 }
 
 void TranslationOptionCollection::EvaluateTranslatonOptionListWithSourceContext(
-  TranslationOptionList &translationOptionList) {
-  
+  TranslationOptionList &translationOptionList)
+{
+
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   const StaticData &staticData = StaticData::Instance();
   for (size_t i = 0; i < ffs.size(); ++i) {
@@ -586,7 +587,7 @@ void TranslationOptionCollection::EvaluateTranslatonOptionListWithSourceContext(
       ff.EvaluateTranslationOptionListWithSourceContext(m_source, translationOptionList);
     }
   }
-  
+
 }
 
 void TranslationOptionCollection::Sort()

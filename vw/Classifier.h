@@ -13,12 +13,12 @@
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/iostreams/filtering_stream.hpp> 
+#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include "../util/string_piece.hh"
 #include "../moses/Util.h"
 
-// forward declarations to avoid dependency on VW 
+// forward declarations to avoid dependency on VW
 struct vw;
 class ezexample;
 
@@ -46,7 +46,7 @@ public:
    * Throws away current label-dependent features (so that features for another label/class can now be set).
    */
   virtual void Train(const StringPiece &label, float loss) = 0;
-  
+
   /**
    * Predict the loss (inverse of score) of current example.
    * Throws away current label-dependent features (so that features for another label/class can now be set).
@@ -54,13 +54,11 @@ public:
   virtual float Predict(const StringPiece &label) = 0;
 
   // helper methods for indicator features
-  void AddLabelIndependentFeature(const StringPiece &name)
-  {
+  void AddLabelIndependentFeature(const StringPiece &name) {
     AddLabelIndependentFeature(name, 1.0);
   }
 
-  void AddLabelDependentFeature(const StringPiece &name)
-  {
+  void AddLabelDependentFeature(const StringPiece &name) {
     AddLabelDependentFeature(name, 1.0);
   }
 
@@ -70,8 +68,7 @@ protected:
   /**
    * Escape special characters in a unified way.
    */
-  static std::string EscapeSpecialChars(const std::string &str)
-  {
+  static std::string EscapeSpecialChars(const std::string &str) {
     std::string out;
     out = Moses::Replace(str, "\\", "_/_");
     out = Moses::Replace(out, "|", "\\/");
@@ -89,7 +86,7 @@ protected:
 const std::string VW_DEFAULT_OPTIONS = " --hash all --noconstant -q st -t --ldf_override s ";
 const std::string VW_DEFAULT_PARSER_OPTIONS = " --quiet --hash all --noconstant -q st -t --csoaa_ldf s ";
 
-/** 
+/**
  * Produce VW training file (does not use the VW library!)
  */
 class VWTrainer : public Classifier
@@ -143,7 +140,7 @@ protected:
 
 private:
   // instantiation by classifier factory
-  VWPredictor(vw * instance, const std::string &vwOption); 
+  VWPredictor(vw * instance, const std::string &vwOption);
 };
 
 /**
@@ -157,7 +154,7 @@ public:
   /**
    * Creates VWPredictor instances to be used by individual threads.
    */
-  ClassifierFactory(const std::string &modelFile, const std::string &vwOptions);   
+  ClassifierFactory(const std::string &modelFile, const std::string &vwOptions);
 
   /**
    * Creates VWTrainer instances (which write features to a file).

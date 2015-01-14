@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
             cout << lineCount << " ||| " << p << " " << r << " " << prune << " " << scale << " ||| ";
             vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
             manager.OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
-                           staticData.GetReportAllFactors(),cout);
+                                   staticData.GetReportAllFactors(),cout);
           }
         }
 

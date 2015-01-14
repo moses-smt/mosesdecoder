@@ -3,17 +3,20 @@
 #include <utility> //make_pair
 #include <fstream> //Read vocabulary files
 
-namespace nplm {
-  class neuralLM;
+namespace nplm
+{
+class neuralLM;
 }
 
-namespace Moses {
+namespace Moses
+{
 
-class BilingualLM_NPLM : public BilingualLM {
- public:
+class BilingualLM_NPLM : public BilingualLM
+{
+public:
   BilingualLM_NPLM(const std::string &line);
 
- private:
+private:
   float Score(std::vector<int>& source_words, std::vector<int>& target_words) const;
 
   int getNeuralLMId(const Word& word, bool is_source_word) const;

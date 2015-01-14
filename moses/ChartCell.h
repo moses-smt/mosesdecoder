@@ -97,7 +97,7 @@ public:
   ~ChartCell();
 
   void Decode(const ChartTranslationOptionList &transOptList
-                       ,const ChartCellCollection &allChartCells);
+              ,const ChartCellCollection &allChartCells);
 
   //! Get all hypotheses in the cell that have the specified constituent label
   const HypoList *GetSortedHypotheses(const Word &constituentLabel) const {

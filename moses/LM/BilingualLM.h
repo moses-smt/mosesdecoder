@@ -21,13 +21,13 @@ class BilingualLMState : public FFState
   std::vector<int> neuralLM_ids; //Carry the neuralLMids of the previous target phrase to avoid calling GetWholePhrase. Hiero only.
 public:
   BilingualLMState(size_t hash)
-    :m_hash(hash)
-  {}
+    :m_hash(hash) {
+  }
   BilingualLMState(size_t hash, std::vector<int>& word_alignments_vec, std::vector<int>& neural_ids)
     :m_hash(hash)
     , word_alignments(word_alignments_vec)
-    , neuralLM_ids(neural_ids)
-  {}
+    , neuralLM_ids(neural_ids) {
+  }
 
   const std::vector<int>& GetWordAlignmentVector() const {
     return word_alignments;
@@ -40,8 +40,9 @@ public:
   int Compare(const FFState& other) const;
 };
 
-class BilingualLM : public StatefulFeatureFunction {
- private:
+class BilingualLM : public StatefulFeatureFunction
+{
+private:
   virtual float Score(std::vector<int>& source_words, std::vector<int>& target_words) const = 0;
 
   virtual int getNeuralLMId(const Word& word, bool is_source_word) const = 0;
@@ -53,19 +54,19 @@ class BilingualLM : public StatefulFeatureFunction {
   size_t selectMiddleAlignment(const std::set<size_t>& alignment_links) const;
 
   void getSourceWords(
-      const TargetPhrase &targetPhrase,
-      int targetWordIdx,
-      const Sentence &source_sent,
-      const WordsRange &sourceWordRange,
-      std::vector<int> &words) const;
+    const TargetPhrase &targetPhrase,
+    int targetWordIdx,
+    const Sentence &source_sent,
+    const WordsRange &sourceWordRange,
+    std::vector<int> &words) const;
 
   void appendSourceWordsToVector(const Sentence &source_sent, std::vector<int> &words, int source_word_mid_idx) const;
 
   void getTargetWords(
-      const Hypothesis &cur_hypo,
-      const TargetPhrase &targetPhrase,
-      int current_word_index,
-      std::vector<int> &words) const;
+    const Hypothesis &cur_hypo,
+    const TargetPhrase &targetPhrase,
+    int current_word_index,
+    std::vector<int> &words) const;
 
   size_t getState(const Hypothesis &cur_hypo) const;
 
@@ -112,31 +113,31 @@ public:
   void Load();
 
   void EvaluateInIsolation(
-      const Phrase &source,
-      const TargetPhrase &targetPhrase,
-      ScoreComponentCollection &scoreBreakdown,
-      ScoreComponentCollection &estimatedFutureScore) const;
+    const Phrase &source,
+    const TargetPhrase &targetPhrase,
+    ScoreComponentCollection &scoreBreakdown,
+    ScoreComponentCollection &estimatedFutureScore) const;
 
   void EvaluateWithSourceContext(
-      const InputType &input,
-      const InputPath &inputPath,
-      const TargetPhrase &targetPhrase,
-      const StackVec *stackVec,
-      ScoreComponentCollection &scoreBreakdown,
-      ScoreComponentCollection *estimatedFutureScore = NULL) const;
+    const InputType &input,
+    const InputPath &inputPath,
+    const TargetPhrase &targetPhrase,
+    const StackVec *stackVec,
+    ScoreComponentCollection &scoreBreakdown,
+    ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-              , const TranslationOptionList &translationOptionList) const {};
+      , const TranslationOptionList &translationOptionList) const {};
 
   FFState* EvaluateWhenApplied(
-      const Hypothesis& cur_hypo,
-      const FFState* prev_state,
-      ScoreComponentCollection* accumulator) const;
+    const Hypothesis& cur_hypo,
+    const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const;
 
   FFState* EvaluateWhenApplied(
-      const ChartHypothesis& cur_hypo ,
-      int featureID, /* - used to index the state in the previous hypotheses */
-      ScoreComponentCollection* accumulator) const;
+    const ChartHypothesis& cur_hypo ,
+    int featureID, /* - used to index the state in the previous hypotheses */
+    ScoreComponentCollection* accumulator) const;
 
   void SetParameter(const std::string& key, const std::string& value);
 };

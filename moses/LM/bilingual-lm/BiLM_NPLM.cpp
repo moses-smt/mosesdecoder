@@ -2,31 +2,36 @@
 #include "neuralLM.h"
 #include "vocabulary.h"
 
-namespace Moses {
+namespace Moses
+{
 
 BilingualLM_NPLM::BilingualLM_NPLM(const std::string &line)
-      : BilingualLM(line),
-        premultiply(true),
-        factored(false),
-        neuralLM_cache(1000000) {
-          
-          NULL_string = "<null>"; //Default null value for nplm
-          FactorCollection& factorFactory = FactorCollection::Instance(); // To add null word.
-          const Factor* NULL_factor = factorFactory.AddFactor(NULL_string);
-          NULL_word.SetFactor(0, NULL_factor);
-        }
+  : BilingualLM(line),
+    premultiply(true),
+    factored(false),
+    neuralLM_cache(1000000)
+{
 
-float BilingualLM_NPLM::Score(std::vector<int>& source_words, std::vector<int>& target_words) const {
+  NULL_string = "<null>"; //Default null value for nplm
+  FactorCollection& factorFactory = FactorCollection::Instance(); // To add null word.
+  const Factor* NULL_factor = factorFactory.AddFactor(NULL_string);
+  NULL_word.SetFactor(0, NULL_factor);
+}
+
+float BilingualLM_NPLM::Score(std::vector<int>& source_words, std::vector<int>& target_words) const
+{
   source_words.reserve(source_ngrams+target_ngrams+1);
   source_words.insert( source_words.end(), target_words.begin(), target_words.end() );
   return FloorScore(m_neuralLM->lookup_ngram(source_words));
 }
 
-const Word& BilingualLM_NPLM::getNullWord() const {
+const Word& BilingualLM_NPLM::getNullWord() const
+{
   return NULL_word;
 }
 
-int BilingualLM_NPLM::getNeuralLMId(const Word& word, bool is_source_word) const {
+int BilingualLM_NPLM::getNeuralLMId(const Word& word, bool is_source_word) const
+{
   initSharedPointer();
 
   //Decide if we are doing source or target side first.
@@ -45,30 +50,32 @@ int BilingualLM_NPLM::getNeuralLMId(const Word& word, bool is_source_word) const
 
   it = neuralLMids->find(factor);
   //If we know the word return immediately
-  if (it != neuralLMids->end()){
+  if (it != neuralLMids->end()) {
     return it->second;
   }
   //If we don't know the word and we aren't factored, return the word.
   if (!factored) {
-      return unknown_word_id;
-  } 
+    return unknown_word_id;
+  }
   //Else try to get a pos_factor
   const Factor* pos_factor = word.GetFactor(pos_factortype);
   it = neuralLMids->find(pos_factor);
-  if (it != neuralLMids->end()){
+  if (it != neuralLMids->end()) {
     return it->second;
   } else {
     return unknown_word_id;
   }
 }
 
-void BilingualLM_NPLM::initSharedPointer() const {
+void BilingualLM_NPLM::initSharedPointer() const
+{
   if (!m_neuralLM.get()) {
     m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
   }
 }
 
-void BilingualLM_NPLM::SetParameter(const std::string& key, const std::string& value) {
+void BilingualLM_NPLM::SetParameter(const std::string& key, const std::string& value)
+{
   if (key == "order") {
     target_ngrams = Scan<int>(value)-1;
   } else if (key == "source_window") {
@@ -94,7 +101,8 @@ void BilingualLM_NPLM::SetParameter(const std::string& key, const std::string& v
   }
 }
 
-void BilingualLM_NPLM::loadModel() {
+void BilingualLM_NPLM::loadModel()
+{
   m_neuralLM_shared = new nplm::neuralLM();
   m_neuralLM_shared->read(m_filePath);
   if (premultiply) {
@@ -103,9 +111,9 @@ void BilingualLM_NPLM::loadModel() {
 
   int ngram_order = target_ngrams + source_ngrams + 1;
   UTIL_THROW_IF2(
-      ngram_order != m_neuralLM_shared->get_order(),
-      "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() <<
-      ", but Moses expects " << ngram_order);
+    ngram_order != m_neuralLM_shared->get_order(),
+    "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() <<
+    ", but Moses expects " << ngram_order);
 
   m_neuralLM_shared->set_cache(neuralLM_cache); //Default 1000000
 

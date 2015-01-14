@@ -38,17 +38,27 @@ public:
   typedef std::vector<DistinctRule>::const_iterator ConstIterator;
 
   // Begin and End iterators for iterating over the group's distinct rules.
-  ConstIterator Begin() const { return m_distinctRules.begin(); }
-  ConstIterator End() const { return m_distinctRules.end(); }
+  ConstIterator Begin() const {
+    return m_distinctRules.begin();
+  }
+  ConstIterator End() const {
+    return m_distinctRules.end();
+  }
 
   // Get the current source-side value.
-  const std::string &GetSource() const { return m_source; }
+  const std::string &GetSource() const {
+    return m_source;
+  }
 
   // Get the number of distinct rules.
-  int GetSize() const { return m_distinctRules.size(); }
+  int GetSize() const {
+    return m_distinctRules.size();
+  }
 
   // Get the total count.
-  int GetTotalCount() const { return m_totalCount; }
+  int GetTotalCount() const {
+    return m_totalCount;
+  }
 
   // Clear the rule group and set a new source-side value.  This must be
   // done once for every new source-side value, prior to the first call to

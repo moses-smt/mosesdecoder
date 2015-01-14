@@ -56,49 +56,49 @@ private:
   ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
 
   /* auxilliary functions for SearchGraphs */
-  void FindReachableHypotheses( 
-    const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable , size_t* winners, size_t* losers) const; 
+  void FindReachableHypotheses(
+    const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable , size_t* winners, size_t* losers) const;
   void WriteSearchGraph(const ChartSearchGraphWriter& writer) const;
 
   // output
   void OutputNBestList(OutputCollector *collector,
-		  	  	  	  const ChartKBestExtractor::KBestVec &nBestList,
-                      long translationId) const;
+                       const ChartKBestExtractor::KBestVec &nBestList,
+                       long translationId) const;
   size_t CalcSourceSize(const Moses::ChartHypothesis *hypo) const;
   size_t OutputAlignmentNBest(Alignments &retAlign,
-		  	  	  	  	  	  const Moses::ChartKBestExtractor::Derivation &derivation,
-		  	  	  	  	  	  size_t startTarget) const;
+                              const Moses::ChartKBestExtractor::Derivation &derivation,
+                              size_t startTarget) const;
   size_t OutputAlignment(Alignments &retAlign,
-		  	  	  	  	  const Moses::ChartHypothesis *hypo,
-		  	  	  	  	  size_t startTarget) const;
+                         const Moses::ChartHypothesis *hypo,
+                         size_t startTarget) const;
   void OutputDetailedTranslationReport(
-		  	  	  	  	  	OutputCollector *collector,
-							const ChartHypothesis *hypo,
-							const Sentence &sentence,
-							long translationId) const;
+    OutputCollector *collector,
+    const ChartHypothesis *hypo,
+    const Sentence &sentence,
+    long translationId) const;
   void OutputTranslationOptions(std::ostream &out,
-		  	  	  	  	  ApplicationContext &applicationContext,
-		  	  	  	  	  const ChartHypothesis *hypo,
-		  	  	  	  	  const Sentence &sentence,
-		  	  	  	  	  long translationId) const;
+                                ApplicationContext &applicationContext,
+                                const ChartHypothesis *hypo,
+                                const Sentence &sentence,
+                                long translationId) const;
   void OutputTranslationOption(std::ostream &out,
-  			ApplicationContext &applicationContext,
-  			const ChartHypothesis *hypo,
-  			const Sentence &sentence,
-  			long translationId) const;
+                               ApplicationContext &applicationContext,
+                               const ChartHypothesis *hypo,
+                               const Sentence &sentence,
+                               long translationId) const;
   void ReconstructApplicationContext(const ChartHypothesis &hypo,
-      const Sentence &sentence,
-      ApplicationContext &context) const;
+                                     const Sentence &sentence,
+                                     ApplicationContext &context) const;
   void OutputTreeFragmentsTranslationOptions(std::ostream &out,
-		  ApplicationContext &applicationContext,
-		  const ChartHypothesis *hypo,
-		  const Sentence &sentence,
-		  long translationId) const;
+      ApplicationContext &applicationContext,
+      const ChartHypothesis *hypo,
+      const Sentence &sentence,
+      long translationId) const;
   void OutputDetailedAllTranslationReport(
-		  OutputCollector *collector,
-		  const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList,
-		  const Sentence &sentence,
-		  long translationId) const;
+    OutputCollector *collector,
+    const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList,
+    const Sentence &sentence,
+    long translationId) const;
   void OutputBestHypo(OutputCollector *collector, const ChartHypothesis *hypo, long translationId) const;
   void Backtrack(const ChartHypothesis *hypo) const;
 
@@ -126,8 +126,8 @@ public:
     return m_hypoStackColl;
   }
 
-  void CalcDecoderStatistics() const
-  {}
+  void CalcDecoderStatistics() const {
+  }
 
   void ResetSentenceStats(const InputType& source) {
     m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
@@ -138,22 +138,24 @@ public:
     return m_hypothesisId++;
   }
 
-  const ChartParser &GetParser() const { return m_parser; }
+  const ChartParser &GetParser() const {
+    return m_parser;
+  }
 
   // outputs
   void OutputBest(OutputCollector *collector) const;
   void OutputNBest(OutputCollector *collector) const;
-  void OutputLatticeSamples(OutputCollector *collector) const
-  {}
+  void OutputLatticeSamples(OutputCollector *collector) const {
+  }
   void OutputAlignment(OutputCollector *collector) const;
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
   void OutputUnknowns(OutputCollector *collector) const;
   void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const;
-  void OutputWordGraph(OutputCollector *collector) const
-  {}
+  void OutputWordGraph(OutputCollector *collector) const {
+  }
   void OutputSearchGraph(OutputCollector *collector) const;
-  void OutputSearchGraphSLF() const
-  {}
+  void OutputSearchGraphSLF() const {
+  }
   void OutputSearchGraphHypergraph() const;
 
 };

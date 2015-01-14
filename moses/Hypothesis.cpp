@@ -207,7 +207,7 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
 }
 
 void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff,
-                              int state_idx)
+                                     int state_idx)
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( sfff )) {
@@ -255,8 +255,8 @@ void Hypothesis::EvaluateWhenApplied(const SquareMatrix &futureScore)
     const StaticData &staticData = StaticData::Instance();
     if (! staticData.IsFeatureFunctionIgnored(ff)) {
       m_ffStates[i] = ff.EvaluateWhenApplied(*this,
-                                  m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                                  &m_currScoreBreakdown);
+                                             m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
+                                             &m_currScoreBreakdown);
     }
   }
 
@@ -337,10 +337,10 @@ void Hypothesis::CleanupArcList()
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
-	NTH_ELEMENT4(m_arcList->begin()
-                , m_arcList->begin() + nBestSize - 1
-                , m_arcList->end()
-                , CompareHypothesisTotalScore());
+    NTH_ELEMENT4(m_arcList->begin()
+                 , m_arcList->begin() + nBestSize - 1
+                 , m_arcList->end()
+                 , CompareHypothesisTotalScore());
 
     // delete bad ones
     ArcList::iterator iter;
@@ -491,7 +491,7 @@ void Hypothesis::OutputInput(std::ostream& os) const
 }
 
 void Hypothesis::OutputBestSurface(std::ostream &out, const std::vector<FactorType> &outputFactorOrder,
-                       char reportSegmentation, bool reportAllFactors) const
+                                   char reportSegmentation, bool reportAllFactors) const
 {
   if (m_prevHypo) {
     // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
@@ -505,10 +505,10 @@ void Hypothesis::OutputBestSurface(std::ostream &out, const std::vector<FactorTy
  * print surface factor only for the given phrase
  */
 void Hypothesis::OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                   char reportSegmentation, bool reportAllFactors) const
+                               char reportSegmentation, bool reportAllFactors) const
 {
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
-		  "Must specific at least 1 output factor");
+                 "Must specific at least 1 output factor");
   const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
   bool markUnknown = StaticData::Instance().GetMarkUnknown();
   if (reportAllFactors == true) {
@@ -535,7 +535,7 @@ void Hypothesis::OutputSurface(std::ostream &out, const Hypothesis &edge, const 
       }
 
       UTIL_THROW_IF2(factor == NULL,
-    		  "No factor 0 at position " << pos);
+                     "No factor 0 at position " << pos);
 
       //preface surface form with UNK if marking unknowns
       const Word &word = phrase.GetWord(pos);
@@ -548,7 +548,7 @@ void Hypothesis::OutputSurface(std::ostream &out, const Hypothesis &edge, const 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
         UTIL_THROW_IF2(factor == NULL,
-      		  "No factor " << i << " at position " << pos);
+                       "No factor " << i << " at position " << pos);
 
         out << "|" << *factor;
       }
@@ -589,7 +589,7 @@ std::map<size_t, const Factor*> Hypothesis::GetPlaceholders(const Hypothesis &hy
     if (factor) {
       std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
       UTIL_THROW_IF2(targetPos.size() != 1,
-    		  "Placeholder should be aligned to 1, and only 1, word");
+                     "Placeholder should be aligned to 1, and only 1, word");
       ret[*targetPos.begin()] = factor;
     }
   }

@@ -39,7 +39,7 @@ namespace Moses
 {
 
 void Scope3Parser::GetChartRuleCollection(
-		const InputPath &inputPath,
+  const InputPath &inputPath,
   size_t last,
   ChartParserCallback &outColl)
 {

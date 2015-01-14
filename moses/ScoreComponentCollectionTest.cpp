@@ -37,21 +37,21 @@ public:
   void EvaluateWhenApplied(const Hypothesis&, ScoreComponentCollection*) const {}
   void EvaluateWhenApplied(const ChartHypothesis&, ScoreComponentCollection*) const {}
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore) const
-  {}
-  
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore) const {
+  }
+
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-              , const TranslationOptionList &translationOptionList) const
-  {}
+      , const TranslationOptionList &translationOptionList) const {
+  }
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 
 };
 

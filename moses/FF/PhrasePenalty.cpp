@@ -9,41 +9,39 @@ using namespace std;
 namespace Moses
 {
 PhrasePenalty::PhrasePenalty(const std::string &line)
-: StatelessFeatureFunction(1, line)
-, m_perPhraseTable(false)
+  : StatelessFeatureFunction(1, line)
+  , m_perPhraseTable(false)
 {
   ReadParameters();
 }
 
 void PhrasePenalty::EvaluateInIsolation(const Phrase &source
-                             , const TargetPhrase &targetPhrase
-                             , ScoreComponentCollection &scoreBreakdown
-                             , ScoreComponentCollection &estimatedFutureScore) const
+                                        , const TargetPhrase &targetPhrase
+                                        , ScoreComponentCollection &scoreBreakdown
+                                        , ScoreComponentCollection &estimatedFutureScore) const
 {
   if (m_perPhraseTable) {
-	  const PhraseDictionary *pt = targetPhrase.GetContainer();
-	  if (pt) {
-		  size_t ptId = pt->GetId();
-		  UTIL_THROW_IF2(ptId >= m_numScoreComponents, "Wrong number of scores");
+    const PhraseDictionary *pt = targetPhrase.GetContainer();
+    if (pt) {
+      size_t ptId = pt->GetId();
+      UTIL_THROW_IF2(ptId >= m_numScoreComponents, "Wrong number of scores");
 
-		  vector<float> scores(m_numScoreComponents, 0);
-		  scores[ptId] = 1.0f;
+      vector<float> scores(m_numScoreComponents, 0);
+      scores[ptId] = 1.0f;
 
-		  scoreBreakdown.Assign(this, scores);
-	  }
+      scoreBreakdown.Assign(this, scores);
+    }
 
-  }
-  else {
-	  scoreBreakdown.Assign(this, 1.0f);
+  } else {
+    scoreBreakdown.Assign(this, 1.0f);
   }
 }
 
 void PhrasePenalty::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "per-phrase-table") {
-	  m_perPhraseTable =Scan<bool>(value);
-  }
-  else {
+    m_perPhraseTable =Scan<bool>(value);
+  } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
 }

@@ -81,7 +81,7 @@ protected:
   void ProcessUnknownWord();
   //! special handling of ONE unknown words.
   virtual void ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos, size_t length = 1, const ScorePair *inputScores = NULL);
-  
+
   //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
   void Prune();
 
@@ -99,7 +99,7 @@ protected:
   void EvaluateWithSourceContext();
 
   void EvaluateTranslatonOptionListWithSourceContext(TranslationOptionList&);
-  
+
   void CacheLexReordering();
 
   void GetTargetPhraseCollectionBatch();

@@ -353,8 +353,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
     scores[0] = score;
     scores[1] = 0.0;
     accumulator->PlusEquals(this, scores);
-  }
-  else {
+  } else {
     accumulator->PlusEquals(this, score);
   }
   return newState;

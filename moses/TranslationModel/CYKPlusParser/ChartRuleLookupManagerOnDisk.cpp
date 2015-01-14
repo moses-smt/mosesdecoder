@@ -75,7 +75,7 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 }
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
-		const InputPath &inputPath,
+  const InputPath &inputPath,
   size_t lastPos,
   ChartParserCallback &outColl)
 {
@@ -175,14 +175,14 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
         bool doSearch = true;
         if (m_dictionary.m_maxSpanDefault != NOT_FOUND) {
-            // for Hieu's source syntax
+          // for Hieu's source syntax
 
-			bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
-		    size_t nonTermNumWordsCovered = endPos - startPos + 1;
+          bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
+          size_t nonTermNumWordsCovered = endPos - startPos + 1;
 
-			doSearch = isSourceSyntaxNonTerm ?
-					nonTermNumWordsCovered <=  m_dictionary.m_maxSpanLabelled :
-					nonTermNumWordsCovered <= m_dictionary.m_maxSpanDefault;
+          doSearch = isSourceSyntaxNonTerm ?
+                     nonTermNumWordsCovered <=  m_dictionary.m_maxSpanLabelled :
+                     nonTermNumWordsCovered <= m_dictionary.m_maxSpanDefault;
 
         }
 

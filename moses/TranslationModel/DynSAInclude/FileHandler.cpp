@@ -72,12 +72,12 @@ bool FileHandler::setStreamBuffer(bool checkExists)
   // redirect stdin or stdout if necesary
   if (path_ == FileHandler::kStdInDescriptor) {
     UTIL_THROW_IF2((flags_ & std::ios::in) == 0,
-		   "Incorrect flags: " << flags_);
+                   "Incorrect flags: " << flags_);
     std::streambuf* sb = std::cin.rdbuf();
     buffer_ = sb;
   } else if (path_ == FileHandler::kStdOutDescriptor) {
     UTIL_THROW_IF2((flags_ & std::ios::out) == 0,
-		   "Incorrect flags: " << flags_);
+                   "Incorrect flags: " << flags_);
     std::streambuf* sb = std::cout.rdbuf();
     buffer_ = sb;
   } else {

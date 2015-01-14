@@ -77,7 +77,7 @@ int main(int argc, char** argv)
   bool model_bg = false; // Use model for background corpus
   bool verbose = false; // Verbose updates
   bool safe_hope = false; // Model score cannot have more than BLEU_RATIO times more influence than BLEU
-  size_t hgPruning = 50; //prune hypergraphs to have this many edges per reference word 
+  size_t hgPruning = 50; //prune hypergraphs to have this many edges per reference word
 
   // Command-line processing follows pro.cpp
   po::options_description desc("Allowed options");
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
       do {
         size_t equals = buffer.find_last_of("=");
         UTIL_THROW_IF(equals == buffer.npos, util::Exception, "Incorrect format in dense feature file: '"
-          << buffer << "'");
+                      << buffer << "'");
         string name = buffer.substr(0,equals);
         names.push_back(name);
         initParams.push_back(boost::lexical_cast<ValType>(buffer.substr(equals+2)));
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
       //Make sure that SparseVector encodes dense feature names as 0..n-1.
       for (size_t i = 0; i < names.size(); ++i) {
         size_t id = SparseVector::encode(names[i]);
-        assert(id == i);     
+        assert(id == i);
         if (verbose) cerr << names[i] << " " << initParams[i] << endl;
       }
 
@@ -246,12 +246,12 @@ int main(int argc, char** argv)
     int iNumUpdates = 0;
     ValType totalLoss = 0.0;
     size_t sentenceIndex = 0;
-    for(decoder->reset();!decoder->finished(); decoder->next()) {
+    for(decoder->reset(); !decoder->finished(); decoder->next()) {
       HopeFearData hfd;
       decoder->HopeFear(bg,wv,&hfd);
-    
+
       // Update weights
-      if (!hfd.hopeFearEqual && hfd.hopeBleu  > hfd.fearBleu) { 
+      if (!hfd.hopeFearEqual && hfd.hopeBleu  > hfd.fearBleu) {
         // Vector difference
         MiraFeatureVector diff = hfd.hopeFeatures - hfd.fearFeatures;
         // Bleu difference

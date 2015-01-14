@@ -11,8 +11,8 @@ namespace Moses
 class ConstrainedDecodingState : public FFState
 {
 public:
-  ConstrainedDecodingState()
-  {}
+  ConstrainedDecodingState() {
+  }
 
   ConstrainedDecodingState(const Hypothesis &hypo);
   ConstrainedDecodingState(const ChartHypothesis &hypo);
@@ -42,23 +42,23 @@ public:
   }
 
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
-  
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
+  }
+
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
+
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-              , const TranslationOptionList &translationOptionList) const
-  {}
-  
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

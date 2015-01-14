@@ -9,28 +9,25 @@
 namespace Moses
 {
 
-// Note that we require label tokens (strings) in the corresponding property values of phrase table entries 
+// Note that we require label tokens (strings) in the corresponding property values of phrase table entries
 // to be replaced beforehand by indices (size_t) of a label vocabulary. (TODO: change that?)
 
 class SourceLabelsPhrasePropertyItem
 {
-friend class SourceLabelsPhraseProperty;
+  friend class SourceLabelsPhraseProperty;
 
 public:
   SourceLabelsPhrasePropertyItem() {};
 
-  float GetSourceLabelsRHSCount() const
-  {
+  float GetSourceLabelsRHSCount() const {
     return m_sourceLabelsRHSCount;
   };
 
-  const std::list<size_t> &GetSourceLabelsRHS() const
-  {
+  const std::list<size_t> &GetSourceLabelsRHS() const {
     return m_sourceLabelsRHS;
   };
 
-  const std::list< std::pair<size_t,float> > &GetSourceLabelsLHSList() const
-  {
+  const std::list< std::pair<size_t,float> > &GetSourceLabelsLHSList() const {
     return m_sourceLabelsLHSList;
   };
 
@@ -60,9 +57,9 @@ public:
     return m_sourceLabelItems;
   };
 
-  virtual const std::string *GetValueString() const { 
+  virtual const std::string *GetValueString() const {
     UTIL_THROW2("SourceLabelsPhraseProperty: value string not available in this phrase property");
-    return NULL; 
+    return NULL;
   };
 
 protected:

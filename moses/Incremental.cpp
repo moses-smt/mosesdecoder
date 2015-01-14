@@ -288,10 +288,9 @@ void Manager::OutputBest(OutputCollector *collector) const
   const long translationId = m_source.GetTranslationId();
   const std::vector<search::Applied> &nbest = GetNBest();
   if (!nbest.empty()) {
-	OutputBestHypo(collector, nbest[0], translationId);
-  }
-  else {
-	OutputBestNone(collector, translationId);
+    OutputBestHypo(collector, nbest[0], translationId);
+  } else {
+    OutputBestNone(collector, translationId);
   }
 
 }
@@ -300,7 +299,7 @@ void Manager::OutputBest(OutputCollector *collector) const
 void Manager::OutputNBest(OutputCollector *collector)  const
 {
   if (collector == NULL) {
-	  return;
+    return;
   }
 
   OutputNBestList(collector, *completed_nbest_, m_source.GetTranslationId());
@@ -322,7 +321,7 @@ void Manager::OutputNBestList(OutputCollector *collector, const std::vector<sear
     Incremental::PhraseAndFeatures(*i, outputPhrase, features);
     // <s> and </s>
     UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
-  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+                   "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
 
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
@@ -339,13 +338,13 @@ void Manager::OutputNBestList(OutputCollector *collector, const std::vector<sear
 
 void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
 {
-	if (collector && !completed_nbest_->empty()) {
-		const search::Applied &applied = completed_nbest_->at(0);
-		OutputDetailedTranslationReport(collector,
-										&applied,
-										static_cast<const Sentence&>(m_source),
-										m_source.GetTranslationId());
-	}
+  if (collector && !completed_nbest_->empty()) {
+    const search::Applied &applied = completed_nbest_->at(0);
+    OutputDetailedTranslationReport(collector,
+                                    &applied,
+                                    static_cast<const Sentence&>(m_source),
+                                    m_source.GetTranslationId());
+  }
 
 }
 
@@ -366,9 +365,9 @@ void Manager::OutputDetailedTranslationReport(
 }
 
 void Manager::OutputTranslationOptions(std::ostream &out,
-		ApplicationContext &applicationContext,
-		const search::Applied *applied,
-		const Sentence &sentence, long translationId) const
+                                       ApplicationContext &applicationContext,
+                                       const search::Applied *applied,
+                                       const Sentence &sentence, long translationId) const
 {
   if (applied != NULL) {
     OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
@@ -378,15 +377,15 @@ void Manager::OutputTranslationOptions(std::ostream &out,
   // recursive
   const search::Applied *child = applied->Children();
   for (size_t i = 0; i < applied->GetArity(); i++) {
-      OutputTranslationOptions(out, applicationContext, child++, sentence, translationId);
+    OutputTranslationOptions(out, applicationContext, child++, sentence, translationId);
   }
 }
 
 void Manager::OutputTranslationOption(std::ostream &out,
-		ApplicationContext &applicationContext,
-		const search::Applied *applied,
-		const Sentence &sentence,
-		long translationId) const
+                                      ApplicationContext &applicationContext,
+                                      const search::Applied *applied,
+                                      const Sentence &sentence,
+                                      long translationId) const
 {
   ReconstructApplicationContext(applied, sentence, applicationContext);
   const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
@@ -432,7 +431,7 @@ void Manager::ReconstructApplicationContext(const search::Applied *applied,
 void Manager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
 {
   if (collector == NULL || Completed().empty()) {
-	  return;
+    return;
   }
 
   const search::Applied *applied = &Completed()[0];
@@ -452,10 +451,10 @@ void Manager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *coll
 }
 
 void Manager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
-		ApplicationContext &applicationContext,
-		const search::Applied *applied,
-		const Sentence &sentence,
-		long translationId) const
+    ApplicationContext &applicationContext,
+    const search::Applied *applied,
+    const Sentence &sentence,
+    long translationId) const
 {
 
   if (applied != NULL) {
@@ -475,7 +474,7 @@ void Manager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
   // recursive
   const search::Applied *child = applied->Children();
   for (size_t i = 0; i < applied->GetArity(); i++) {
-      OutputTreeFragmentsTranslationOptions(out, applicationContext, child++, sentence, translationId);
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, child++, sentence, translationId);
   }
 }
 
@@ -491,7 +490,7 @@ void Manager::OutputBestHypo(OutputCollector *collector, search::Applied applied
   Incremental::ToPhrase(applied, outPhrase);
   // delete 1st & last
   UTIL_THROW_IF2(outPhrase.GetSize() < 2,
-		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+                 "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
   outPhrase.RemoveWord(0);
   outPhrase.RemoveWord(outPhrase.GetSize() - 1);
   out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
@@ -505,9 +504,9 @@ void Manager::OutputBestNone(OutputCollector *collector, long translationId) con
 {
   if (collector == NULL) return;
   if (StaticData::Instance().GetOutputHypoScore()) {
-	  collector->Write(translationId, "0 \n");
+    collector->Write(translationId, "0 \n");
   } else {
-	  collector->Write(translationId, "\n");
+    collector->Write(translationId, "\n");
   }
 }
 

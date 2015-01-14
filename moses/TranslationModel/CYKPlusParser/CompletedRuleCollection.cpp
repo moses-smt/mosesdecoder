@@ -85,25 +85,25 @@ void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
 
 // copies some functionality (pruning) from ChartTranslationOptionList::Add
 void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
-           const StackVec &stackVec,
-           const std::vector<float> &stackScores,
-           const ChartParserCallback &outColl)
+                                  const StackVec &stackVec,
+                                  const std::vector<float> &stackScores,
+                                  const ChartParserCallback &outColl)
 {
-    if (tpc.IsEmpty()) {
-      return;
-    }
+  if (tpc.IsEmpty()) {
+    return;
+  }
 
-    const TargetPhrase &targetPhrase = **(tpc.begin());
-    float score = std::accumulate(stackScores.begin(), stackScores.end(), targetPhrase.GetFutureScore());
+  const TargetPhrase &targetPhrase = **(tpc.begin());
+  float score = std::accumulate(stackScores.begin(), stackScores.end(), targetPhrase.GetFutureScore());
 
-    // If the rule limit has already been reached then don't add the option
-    // unless it is better than at least one existing option.
-    if (m_collection.size() > m_ruleLimit && score < m_scoreThreshold) {
-      return;
-    }
+  // If the rule limit has already been reached then don't add the option
+  // unless it is better than at least one existing option.
+  if (m_collection.size() > m_ruleLimit && score < m_scoreThreshold) {
+    return;
+  }
 
-    CompletedRule *completedRule = new CompletedRule(tpc, stackVec, score);
-    m_collection.push_back(completedRule);
+  CompletedRule *completedRule = new CompletedRule(tpc, stackVec, score);
+  m_collection.push_back(completedRule);
 
   // If the rule limit hasn't been exceeded then update the threshold.
   if (m_collection.size() <= m_ruleLimit) {
@@ -112,10 +112,10 @@ void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
 
   // Prune if bursting
   if (m_collection.size() == m_ruleLimit * 2) {
-        NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin() + m_ruleLimit - 1,
-                     m_collection.end(),
-                     CompletedRuleOrdered());
+    NTH_ELEMENT4(m_collection.begin(),
+                 m_collection.begin() + m_ruleLimit - 1,
+                 m_collection.end(),
+                 CompletedRuleOrdered());
     m_scoreThreshold = m_collection[m_ruleLimit-1]->GetScoreEstimate();
     for (size_t i = 0 + m_ruleLimit; i < m_collection.size(); i++) {
       delete m_collection[i];

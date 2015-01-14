@@ -55,7 +55,7 @@ void RuleTrieScope3::Node::Sort(std::size_t tableLimit)
 }
 
 RuleTrieScope3::Node *RuleTrieScope3::Node::GetOrCreateTerminalChild(
-    const Word &sourceTerm)
+  const Word &sourceTerm)
 {
   assert(!sourceTerm.IsNonTerminal());
   std::pair<TerminalMap::iterator, bool> result;
@@ -66,7 +66,7 @@ RuleTrieScope3::Node *RuleTrieScope3::Node::GetOrCreateTerminalChild(
 }
 
 RuleTrieScope3::Node *RuleTrieScope3::Node::GetOrCreateNonTerminalChild(
-    const Word &targetNonTerm)
+  const Word &targetNonTerm)
 {
   assert(targetNonTerm.IsNonTerminal());
   if (m_gapNode == NULL) {
@@ -77,7 +77,7 @@ RuleTrieScope3::Node *RuleTrieScope3::Node::GetOrCreateNonTerminalChild(
 
 TargetPhraseCollection &
 RuleTrieScope3::Node::GetOrCreateTargetPhraseCollection(
-    const TargetPhrase &target)
+  const TargetPhrase &target)
 {
   const AlignmentInfo &alignmentInfo = target.GetAlignNonTerm();
   const std::size_t rank = alignmentInfo.GetSize();
@@ -99,14 +99,14 @@ RuleTrieScope3::Node::GetOrCreateTargetPhraseCollection(
 }
 
 TargetPhraseCollection &RuleTrieScope3::GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target, const Word *sourceLHS)
+  const Phrase &source, const TargetPhrase &target, const Word *sourceLHS)
 {
   Node &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection(target);
 }
 
 RuleTrieScope3::Node &RuleTrieScope3::GetOrCreateNode(
-    const Phrase &source, const TargetPhrase &target, const Word */*sourceLHS*/)
+  const Phrase &source, const TargetPhrase &target, const Word */*sourceLHS*/)
 {
   const std::size_t size = source.GetSize();
 

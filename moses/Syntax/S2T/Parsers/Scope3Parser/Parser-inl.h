@@ -23,10 +23,10 @@ namespace S2T
 template<typename Callback>
 Scope3Parser<Callback>::Scope3Parser(PChart &chart, const RuleTrie &trie,
                                      std::size_t maxChartSpan)
-    : Parser<Callback>(chart)
-    , m_ruleTable(trie)
-    , m_maxChartSpan(maxChartSpan)
-    , m_latticeBuilder(chart)
+  : Parser<Callback>(chart)
+  , m_ruleTable(trie)
+  , m_maxChartSpan(maxChartSpan)
+  , m_latticeBuilder(chart)
 {
   Init();
 }
@@ -39,7 +39,7 @@ Scope3Parser<Callback>::~Scope3Parser()
 
 template<typename Callback>
 void Scope3Parser<Callback>::EnumerateHyperedges(const WordsRange &range,
-                                                 Callback &callback)
+    Callback &callback)
 {
   const std::size_t start = range.GetStartPos();
   const std::size_t end = range.GetEndPos();
@@ -65,7 +65,7 @@ void Scope3Parser<Callback>::EnumerateHyperedges(const WordsRange &range,
     // Ask the grammar for the mapping from label sequences to target phrase
     // collections for this pattern.
     const RuleTrie::Node::LabelMap &labelMap =
-        patNode->m_node->GetLabelMap();
+      patNode->m_node->GetLabelMap();
 
     // For each label sequence, search the lattice for the set of PHyperedge
     // tails.
@@ -146,7 +146,7 @@ void Scope3Parser<Callback>::FillSentenceMap(SentenceMap &sentMap)
 
 template<typename Callback>
 void Scope3Parser<Callback>::RecordPatternApplicationSpans(
-    const PatternApplicationTrie &patNode)
+  const PatternApplicationTrie &patNode)
 {
   if (patNode.m_node->HasRules()) {
     int s1 = -1;
@@ -175,7 +175,7 @@ void Scope3Parser<Callback>::RecordPatternApplicationSpans(
   }
 
   for (std::vector<PatternApplicationTrie*>::const_iterator p =
-        patNode.m_children.begin(); p != patNode.m_children.end(); ++p) {
+         patNode.m_children.begin(); p != patNode.m_children.end(); ++p) {
     RecordPatternApplicationSpans(**p);
   }
 }

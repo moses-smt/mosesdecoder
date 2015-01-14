@@ -12,7 +12,7 @@ namespace GHKM
 {
 
 StsgRule::StsgRule(const Subgraph &fragment)
-    : m_targetSide(fragment, true)
+  : m_targetSide(fragment, true)
 {
   // Source side
 
@@ -77,7 +77,7 @@ StsgRule::StsgRule(const Subgraph &fragment)
       continue;
     }
     std::map<const Node *, std::vector<int> >::iterator p =
-        sinkToSourceIndices.find(leaf);
+      sinkToSourceIndices.find(leaf);
     assert(p != sinkToSourceIndices.end());
     std::vector<int> &sourceNodes = p->second;
     for (std::vector<int>::iterator r = sourceNodes.begin();

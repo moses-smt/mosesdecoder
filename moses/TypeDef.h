@@ -61,7 +61,7 @@ const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 5000;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 //#ifdef PT_UG
-// setting to std::numeric_limits<size_t>::max() makes the regression test for (deprecated) PhraseDictionaryDynamicSuffixArray fail. 
+// setting to std::numeric_limits<size_t>::max() makes the regression test for (deprecated) PhraseDictionaryDynamicSuffixArray fail.
 // const size_t DEFAULT_MAX_PHRASE_LENGTH = 100000;
 //#else
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
@@ -123,7 +123,7 @@ enum InputTypeEnum {
                                 ,WordLatticeInput				= 2
                                     ,TreeInputType					= 3
                                         ,WordLatticeInput2			= 4
-                                        , TabbedSentenceInput = 5
+                                            , TabbedSentenceInput = 5
 
 };
 
@@ -142,11 +142,11 @@ enum DictionaryFind {
 
 enum SearchAlgorithm {
   Normal				= 0
-  ,CubePruning	= 1
-  //,CubeGrowing	= 2
-  ,CYKPlus = 3
-  ,NormalBatch  = 4
-  ,ChartIncremental = 5
+                  ,CubePruning	= 1
+                                  //,CubeGrowing	= 2
+                                  ,CYKPlus = 3
+                                      ,NormalBatch  = 4
+                                          ,ChartIncremental = 5
 };
 
 enum SourceLabelOverlap {

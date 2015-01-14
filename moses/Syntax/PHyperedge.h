@@ -11,8 +11,7 @@ namespace Syntax
 
 struct PVertex;
 
-struct PHyperedge
-{
+struct PHyperedge {
   PVertex *head;
   std::vector<PVertex*> tail;
   const TargetPhraseCollection *translations;

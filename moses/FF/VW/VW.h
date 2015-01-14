@@ -23,20 +23,18 @@ namespace Moses
 
 const std::string VW_DUMMY_LABEL = "1111"; // VW does not use the actual label, other classifiers might
 
-/** 
+/**
  * VW thread-specific data about target sentence.
  */
 struct VWTargetSentence {
   VWTargetSentence() : m_sentence(NULL), m_alignment(NULL) {}
 
-  void Clear()
-  {
+  void Clear() {
     if (m_sentence) delete m_sentence;
     if (m_alignment) delete m_alignment;
   }
 
-  ~VWTargetSentence() 
-  {
+  ~VWTargetSentence() {
     Clear();
   }
 
@@ -52,13 +50,12 @@ class VW : public StatelessFeatureFunction, public TLSTargetSentence
 public:
   VW(const std::string &line)
     : StatelessFeatureFunction(1, line)
-      , TLSTargetSentence(this)
-      , m_train(false)
-  {
+    , TLSTargetSentence(this)
+    , m_train(false) {
     ReadParameters();
-    Discriminative::ClassifierFactory *classifierFactory = m_train 
-      ? new Discriminative::ClassifierFactory(m_modelPath)
-      : new Discriminative::ClassifierFactory(m_modelPath, m_vwOptions);
+    Discriminative::ClassifierFactory *classifierFactory = m_train
+        ? new Discriminative::ClassifierFactory(m_modelPath)
+        : new Discriminative::ClassifierFactory(m_modelPath, m_vwOptions);
 
     m_tlsClassifier = new TLSClassifier(this, *classifierFactory);
 
@@ -68,9 +65,8 @@ public:
     }
   }
 
-  virtual ~VW()
-  {
-    delete m_tlsClassifier;  
+  virtual ~VW() {
+    delete m_tlsClassifier;
     delete m_normalizer;
   }
 
@@ -79,36 +75,35 @@ public:
   }
 
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
-  
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
+  }
+
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-                , const TranslationOptionList &translationOptionList) const
-  {
+      , const TranslationOptionList &translationOptionList) const {
     Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
-    
+
     if (translationOptionList.size() == 0)
       return; // nothing to do
 
     VERBOSE(2, "VW :: Evaluating translation options\n");
-    
+
     const std::vector<VWFeatureBase*>& sourceFeatures = VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
-    
+
     const WordsRange &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
     const InputPath  &inputPath   = translationOptionList.Get(0)->GetInputPath();
-    
-    for(size_t i = 0; i < sourceFeatures.size(); ++i) 
-        (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
+
+    for(size_t i = 0; i < sourceFeatures.size(); ++i)
+      (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
 
     const std::vector<VWFeatureBase*>& targetFeatures = VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
@@ -118,7 +113,7 @@ public:
     TranslationOptionList::const_iterator iterTransOpt;
     for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
-     
+
       const TargetPhrase &targetPhrase = (*iterTransOpt)->GetTargetPhrase();
       for(size_t i = 0; i < targetFeatures.size(); ++i)
         (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
@@ -136,28 +131,27 @@ public:
     for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
       TranslationOption &transOpt = **iterTransOpt;
-      
+
       std::vector<float> newScores(m_numScoreComponents);
-      newScores[0] = TransformScore(*iterLoss);
-    
+      newScores[0] = FloorScore(TransformScore(*iterLoss));
+
       ScoreComponentCollection &scoreBreakDown = transOpt.GetScoreBreakdown();
       scoreBreakDown.PlusEquals(this, newScores);
-      
+
       transOpt.UpdateScore();
     }
   }
 
   void EvaluateWhenApplied(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const
-  {}
-  
+                           ScoreComponentCollection* accumulator) const {
+  }
+
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
-                     ScoreComponentCollection* accumulator) const
-  {}
+                           ScoreComponentCollection* accumulator) const {
+  }
 
 
-  void SetParameter(const std::string& key, const std::string& value)
-  {
+  void SetParameter(const std::string& key, const std::string& value) {
     if (key == "train") {
       m_train = Scan<bool>(value);
     } else if (key == "path") {
@@ -166,8 +160,8 @@ public:
       m_vwOptions = value;
     } else if (key == "loss") {
       m_normalizer = value == "logistic"
-          ? (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer()
-          : (Discriminative::Normalizer *) new Discriminative::SquaredLossNormalizer();
+                     ? (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer()
+                     : (Discriminative::Normalizer *) new Discriminative::SquaredLossNormalizer();
     } else {
       StatelessFeatureFunction::SetParameter(key, value);
     }
@@ -186,13 +180,13 @@ public:
     // target sentence represented as a phrase
     Phrase *target = new Phrase();
     target->CreateFromString(
-        Output
-        , StaticData::Instance().GetOutputFactorOrder()
-        , tabbedSentence.GetColumns()[0]
-        , NULL);
+      Output
+      , StaticData::Instance().GetOutputFactorOrder()
+      , tabbedSentence.GetColumns()[0]
+      , NULL);
 
     // word alignment between source and target sentence
-    // we don't store alignment info in AlignmentInfoCollection because we keep alignments of whole 
+    // we don't store alignment info in AlignmentInfoCollection because we keep alignments of whole
     // sentences, not phrases
     AlignmentInfo *alignment = new AlignmentInfo(tabbedSentence.GetColumns()[1]);
 
@@ -204,8 +198,7 @@ public:
 
 
 private:
-  std::string MakeTargetLabel(const TargetPhrase &targetPhrase) const
-  {
+  std::string MakeTargetLabel(const TargetPhrase &targetPhrase) const {
     return VW_DUMMY_LABEL;
   }
 
@@ -214,12 +207,12 @@ private:
     size_t sourceEnd   = topt.GetSourceWordsRange().GetEndPos() + 1;
 
     const VWTargetSentence &targetSentence = *GetStored();
-    
+
     // get the left-most alignment point withitn sourceRange
     std::set<size_t> aligned;
     while ((aligned = targetSentence.m_alignment->GetAlignmentsForSource(sourceStart)).empty()) {
       sourceStart++;
-      
+
       if (sourceStart >= sourceEnd) {
         // no alignment point between source and target sentence within current source span;
         // return immediately

@@ -15,8 +15,9 @@ namespace S2T
 
 // Given a PHyperedge object and SChart produces a SHyperedgeBundle object.
 inline void PHyperedgeToSHyperedgeBundle(const PHyperedge &hyperedge,
-                                  const SChart &schart,
-                                  SHyperedgeBundle &bundle) {
+    const SChart &schart,
+    SHyperedgeBundle &bundle)
+{
   bundle.translations = hyperedge.translations;
   bundle.stacks.clear();
   for (std::vector<PVertex*>::const_iterator p = hyperedge.tail.begin();
@@ -31,7 +32,7 @@ inline void PHyperedgeToSHyperedgeBundle(const PHyperedge &hyperedge,
       stack = cell.nonTerminalStacks.Find(symbol);
     } else {
       const SChart::Cell::TMap::const_iterator q =
-          cell.terminalStacks.find(symbol);
+        cell.terminalStacks.find(symbol);
       assert(q != cell.terminalStacks.end());
       stack = &(q->second);
     }

@@ -83,17 +83,23 @@ private:
                             int startF, int startE, int endF, int endE);
 
   REO_CLASS GetOrientHierModel(REO_MODEL_TYPE modelType,
-                             int startF, int endF, int startE, int endE, int countF, int zeroF, int zeroE, int unit,
-                             bool (*ge)(int, int), bool (*lt)(int, int),
-                             const HSentenceVertices & bottomRight, const HSentenceVertices & bottomLeft) const;
+                               int startF, int endF, int startE, int endE, int countF, int zeroF, int zeroE, int unit,
+                               bool (*ge)(int, int), bool (*lt)(int, int),
+                               const HSentenceVertices & bottomRight, const HSentenceVertices & bottomLeft) const;
 
   bool SpanIsAligned(int index1, int index2, const boost::unordered_map< std::pair<int,int> , std::pair<int,int> > &minAndMaxAligned) const;
 
   bool IsAligned(int fi, int ei) const;
 
-  static bool ge(int first, int second) { return first >= second; };
-  static bool le(int first, int second) { return first <= second; };
-  static bool lt(int first, int second) { return first < second; };
+  static bool ge(int first, int second) {
+    return first >= second;
+  };
+  static bool le(int first, int second) {
+    return first <= second;
+  };
+  static bool lt(int first, int second) {
+    return first < second;
+  };
 
   const int m_countF;
   const int m_countE;

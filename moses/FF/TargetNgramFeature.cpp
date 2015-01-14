@@ -96,8 +96,8 @@ const FFState* TargetNgramFeature::EmptyHypothesisState(const InputType &/*input
 }
 
 FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
-                                      const FFState* prev_state,
-                                      ScoreComponentCollection* accumulator) const
+    const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const
 {
   const TargetNgramState* tnState = static_cast<const TargetNgramState*>(prev_state);
   assert(tnState);

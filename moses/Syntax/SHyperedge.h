@@ -13,8 +13,7 @@ namespace Syntax
 
 struct SVertex;
 
-struct SHyperedge
-{
+struct SHyperedge {
   SVertex *head;
   std::vector<SVertex*> tail;
   float score;

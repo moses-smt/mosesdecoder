@@ -46,8 +46,8 @@ public:
   }
 
   void EvaluateWithSourceContext(const InputType &input,
-		  const InputPath &inputPath,
-		  const StackVec &stackVec);
+                                 const InputPath &inputPath,
+                                 const StackVec &stackVec);
 };
 
 }
