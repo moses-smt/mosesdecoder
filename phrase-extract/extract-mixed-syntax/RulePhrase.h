@@ -21,12 +21,12 @@ public:
   typedef std::vector<const RuleSymbol*> Coll;
   Coll m_coll;
 
-  size_t GetSize() const
-  { return m_coll.size(); }
+  size_t GetSize() const {
+    return m_coll.size();
+  }
 
-  void Add(const RuleSymbol *symbol)
-  {
-	  m_coll.push_back(symbol);
+  void Add(const RuleSymbol *symbol) {
+    m_coll.push_back(symbol);
   }
 
   const RuleSymbol* operator[](size_t index) const {
