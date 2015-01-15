@@ -17,6 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <algorithm>
 #include <cmath>
 #include <iterator>
 
@@ -185,19 +186,15 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
   static const string kWeights = "weights";
   fs::directory_iterator dend;
   size_t fileCount = 0;
-<<<<<<< HEAD
-  cerr << "Reading hypergraphs" << endl;
-=======
 
   cerr << "Reading  hypergraphs" << endl;
->>>>>>> master
   for (fs::directory_iterator di(hypergraphDir); di != dend; ++di) {
     const fs::path& hgpath = di->path();
     if (hgpath.filename() == kWeights) continue;
     //  cerr << "Reading " << hgpath.filename() << endl;
     Graph graph(vocab_);
-    size_t id = boost::lexical_cast<size_t>(di->path().stem().string());
-    util::scoped_fd fd(util::OpenReadOrThrow(di->path().string().c_str()));
+    size_t id = boost::lexical_cast<size_t>(hgpath.stem().string());
+    util::scoped_fd fd(util::OpenReadOrThrow(hgpath.string().c_str()));
     //util::FilePiece file(di->path().string().c_str());
     util::FilePiece file(fd.release());
     ReadGraph(file,graph);
@@ -215,6 +212,11 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
   }
   cerr << endl << "Done" << endl;
 
+  sentenceIds_.resize(graphs_.size());
+  for (size_t i = 0; i < graphs_.size(); ++i) sentenceIds_[i] = i;
+  if (!no_shuffle) {
+    random_shuffle(sentenceIds_.begin(), sentenceIds_.end());
+  }
 
 }
 
@@ -242,7 +244,7 @@ void HypergraphHopeFearDecoder::HopeFear(
   size_t sentenceId = *sentenceIdIter_;
   SparseVector weights;
   wv.ToSparse(&weights);
-  const Graph& graph = *(graphIter_->second);
+  const Graph& graph = *(graphs_[sentenceId]);
 
   ValType hope_scale = 1.0;
   HgHypothesis hopeHypo, fearHypo, modelHypo;
@@ -334,7 +336,7 @@ void HypergraphHopeFearDecoder::MaxModel(const AvgWeightVector& wv, vector<ValTy
 {
   assert(!finished());
   HgHypothesis bestHypo;
-  size_t sentenceId = graphIter_->first;
+  size_t sentenceId = *sentenceIdIter_;
   SparseVector weights;
   wv.ToSparse(&weights);
   vector<ValType> bg(scorer_->NumberOfScores());
