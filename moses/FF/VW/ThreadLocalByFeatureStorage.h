@@ -41,7 +41,7 @@ public:
       m_nameMap.reset(new NameValueMap());
 
     typename NameValueMap::iterator it
-      = m_nameMap->find(m_ff->GetScoreProducerDescription());
+    = m_nameMap->find(m_ff->GetScoreProducerDescription());
 
     if(it == m_nameMap->end()) {
       std::pair<typename NameValueMap::iterator, bool> ret;
@@ -60,7 +60,7 @@ public:
                    << m_ff->GetScoreProducerDescription());
 
     typename NameValueMap::const_iterator it
-      = m_nameMap->find(m_ff->GetScoreProducerDescription());
+    = m_nameMap->find(m_ff->GetScoreProducerDescription());
 
     UTIL_THROW_IF2(it == m_nameMap->end(),
                    "No features stored for: "

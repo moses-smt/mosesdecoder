@@ -430,7 +430,7 @@ void CompressionTaskReordering::operator()()
   while(scoresNum < m_encodedScores.size()) {
     std::string scores = m_encodedScores[scoresNum];
     std::string compressedScores
-      = m_creator.CompressEncodedScores(scores);
+    = m_creator.CompressEncodedScores(scores);
 
     std::string dummy;
     PackedItem packedItem(scoresNum, dummy, compressedScores, 0);

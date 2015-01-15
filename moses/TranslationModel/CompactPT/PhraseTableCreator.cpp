@@ -426,7 +426,7 @@ void PhraseTableCreator::AddTargetSymbolId(std::string& symbol)
 unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 {
   boost::unordered_map<std::string, unsigned>::iterator it
-    = m_sourceSymbolsMap.find(symbol);
+  = m_sourceSymbolsMap.find(symbol);
 
   if(it != m_sourceSymbolsMap.end())
     return it->second;
@@ -437,7 +437,7 @@ unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 unsigned PhraseTableCreator::GetTargetSymbolId(std::string& symbol)
 {
   boost::unordered_map<std::string, unsigned>::iterator it
-    = m_targetSymbolsMap.find(symbol);
+  = m_targetSymbolsMap.find(symbol);
 
   if(it != m_targetSymbolsMap.end())
     return it->second;
@@ -451,7 +451,7 @@ unsigned PhraseTableCreator::GetOrAddTargetSymbolId(std::string& symbol)
   boost::mutex::scoped_lock lock(m_mutex);
 #endif
   boost::unordered_map<std::string, unsigned>::iterator it
-    = m_targetSymbolsMap.find(symbol);
+  = m_targetSymbolsMap.find(symbol);
 
   if(it != m_targetSymbolsMap.end())
     return it->second;
@@ -1218,7 +1218,7 @@ void CompressionTask::operator()()
   while(collectionNum < m_encodedCollections.size()) {
     std::string collection = m_encodedCollections[collectionNum];
     std::string compressedCollection
-      = m_creator.CompressEncodedCollection(collection);
+    = m_creator.CompressEncodedCollection(collection);
 
     std::string dummy;
     PackedItem packedItem(collectionNum, dummy, compressedCollection, 0);

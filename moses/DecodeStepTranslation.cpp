@@ -237,7 +237,7 @@ void DecodeStepTranslation::ProcessLEGACY(const TranslationOption &inputPartialT
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const TargetPhraseCollectionWithSourcePhrase *phraseColl
-    = phraseDictionary->GetTargetPhraseCollectionLEGACY(toc->GetSource(),sourceWordsRange);
+  = phraseDictionary->GetTargetPhraseCollectionLEGACY(toc->GetSource(),sourceWordsRange);
 
 
   if (phraseColl != NULL) {

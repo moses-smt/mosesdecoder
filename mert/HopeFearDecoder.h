@@ -77,7 +77,7 @@ public:
 
   /** Max score decoding */
   virtual void MaxModel(const AvgWeightVector& wv, std::vector<ValType>* stats)
-    = 0;
+  = 0;
 
   /** Calculate bleu on training set */
   ValType Evaluate(const AvgWeightVector& wv);

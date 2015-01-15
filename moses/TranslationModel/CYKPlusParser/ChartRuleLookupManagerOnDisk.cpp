@@ -247,12 +247,12 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
             std::vector<float> weightT = staticData.GetWeights(&m_dictionary);
             targetPhraseCollection
-              = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
-                                                 ,m_outputFactorsVec
-                                                 ,m_dictionary
-                                                 ,weightT
-                                                 ,m_dbWrapper.GetVocab()
-                                                 ,true);
+            = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
+                                               ,m_outputFactorsVec
+                                               ,m_dictionary
+                                               ,weightT
+                                               ,m_dbWrapper.GetVocab()
+                                               ,true);
 
             delete tpcollBerkeleyDb;
             m_cache[tpCollFilePos] = targetPhraseCollection;

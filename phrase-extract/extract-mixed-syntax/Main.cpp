@@ -44,7 +44,8 @@ int main(int argc, char** argv)
   ("MaxScope", po::value<int>()->default_value(params.maxScope), "maximum scope (see Hopkins and Langmead (2010)). Default is HIGH")
   ("MinScope", po::value<int>()->default_value(params.minScope), "min scope.")
 
-  ("SpanLength", "Property - span length of RHS each non-term")
+  ("SpanLength", "Property - span length of each LHS non-term")
+  ("RuleLength", "Property - length of entire rule. Only for rules with NTs")
 
   ("NonTermContext", "Property - (source) left and right, inside and outside words of each non-term ")
   ("NonTermContextTarget", "Property - (target) left and right, inside and outside words of each non-term")
@@ -103,6 +104,7 @@ int main(int argc, char** argv)
 
   // properties
   if (vm.count("SpanLength")) params.spanLength = true;
+  if (vm.count("RuleLength")) params.ruleLength = true;
   if (vm.count("NonTermContext")) params.nonTermContext = true;
   if (vm.count("NonTermContextTarget")) params.nonTermContextTarget = true;
   if (vm.count("NonTermContextFactor")) params.nonTermContextFactor = vm["NonTermContextFactor"].as<int>();

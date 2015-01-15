@@ -35,6 +35,10 @@ struct CompareRules {
       return a->GetLHS().GetString() < b->GetLHS().GetString();
     }
 
+    if (a->GetProperties() != b->GetProperties()) {
+      return a->GetProperties() < b->GetProperties();
+    }
+
     return false;
   }
 };

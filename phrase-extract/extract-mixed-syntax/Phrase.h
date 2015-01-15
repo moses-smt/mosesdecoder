@@ -7,12 +7,12 @@
 class Phrase : public std::vector<Word*>
 {
 public:
-  Phrase() {
-  }
+  Phrase()
+  {}
 
   Phrase(size_t size)
-    :std::vector<Word*>(size) {
-  }
+    :std::vector<Word*>(size)
+  {}
 
   std::string Debug() const;
 

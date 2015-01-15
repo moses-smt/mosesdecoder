@@ -50,7 +50,7 @@ void Rules::CreateRule(const NonTerm &nonTerm,
 
   rule->Prevalidate(params);
   rule->CreateTarget(params);
-
+  rule->CreateProperties(params);
 
   if (rule->CanRecurse()) {
     Extend(*rule, params);
@@ -121,6 +121,7 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter
     Rule *newRule = new Rule(rule, nonTerm);
     newRule->Prevalidate(params);
     newRule->CreateTarget(params);
+    newRule->CreateProperties(params);
 
     if (newRule->CanRecurse()) {
       // recursively extend
@@ -154,7 +155,7 @@ void Rules::Output(std::ostream &out, bool forward, const Parameter &params) con
   std::set<Rule*, CompareRules>::const_iterator iter;
   for (iter = m_mergeRules.begin(); iter != m_mergeRules.end(); ++iter) {
     const Rule &rule = **iter;
-    rule.Output(out, forward, params);
+    rule.Output(out, forward);
     out << endl;
   }
 }

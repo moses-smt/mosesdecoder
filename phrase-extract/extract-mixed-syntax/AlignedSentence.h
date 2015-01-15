@@ -18,8 +18,8 @@ class AlignedSentence
 {
 public:
   AlignedSentence(int lineNum)
-    :m_lineNum(lineNum) {
-  }
+    :m_lineNum(lineNum)
+  {}
 
   AlignedSentence(int lineNum,
                   const std::string &source,

@@ -179,7 +179,7 @@ void SparseReordering::AddFeatures(
   for (size_t id = 0; id < clusterMaps->size(); ++id) {
     const ClusterMap& clusterMap = (*clusterMaps)[id];
     boost::unordered_map<const Factor*, const Factor*>::const_iterator clusterIter
-      = clusterMap.second.find(wordFactor);
+    = clusterMap.second.find(wordFactor);
     if (clusterIter != clusterMap.second.end()) {
       SparseReorderingFeatureKey key(id, type, clusterIter->second, true, position, side, reoType);
       FeatureMap::const_iterator fmi = m_featureMap.find(key);

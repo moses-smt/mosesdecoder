@@ -122,7 +122,7 @@ std::string Rule::Debug() const
   return out.str();
 }
 
-void Rule::Output(std::ostream &out, bool forward, const Parameter &params) const
+void Rule::Output(std::ostream &out, bool forward) const
 {
   if (forward) {
     // source
@@ -168,47 +168,12 @@ void Rule::Output(std::ostream &out, bool forward, const Parameter &params) cons
   out << " ||| ";
 
   // properties
-
-  // span length
-  if (forward && params.spanLength && m_nonterms.size()) {
-    out << "{{SpanLength ";
-
-    for (size_t i = 0; i < m_nonterms.size(); ++i) {
-      const NonTerm &nonTerm = *m_nonterms[i];
-      const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
-      out << i << "," << cp.GetWidth(Moses::Input) << "," << cp.GetWidth(Moses::Output) << " ";
+  if (forward) {
+    for (size_t i = 0; i < m_properties.size(); ++i) {
+      const Property &prop = m_properties[i];
+      out << prop << " ";
     }
-    out << "}} ";
   }
-
-  // non-term context (source)
-  if (forward && params.nonTermContext && m_nonterms.size()) {
-    out << "{{NonTermContext ";
-
-    int factor = params.nonTermContextFactor;
-
-    for (size_t i = 0; i < m_nonterms.size(); ++i) {
-      const NonTerm &nonTerm = *m_nonterms[i];
-      const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
-      NonTermContext(1, factor, i, cp, out);
-    }
-    out << "}} ";
-  }
-
-  // non-term context (target)
-  if (forward && params.nonTermContextTarget && m_nonterms.size()) {
-    out << "{{NonTermContextTarget ";
-
-    int factor = params.nonTermContextFactor;
-
-    for (size_t i = 0; i < m_nonterms.size(); ++i) {
-      const NonTerm &nonTerm = *m_nonterms[i];
-      const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
-      NonTermContext(2, factor, i, cp, out);
-    }
-    out << "}} ";
-  }
-
 }
 
 void Rule::NonTermContextFactor(int factor, const Word &word, std::ostream &out) const
@@ -649,4 +614,71 @@ void Rule::CreateAlignments(int sourcePos, const RuleSymbol *targetSought)
 
   throw "not found";
 }
+
+void Rule::CreateProperties(const Parameter &params)
+{
+  //cerr << Debug() << " " << m_nonterms.size() << endl;
+
+  // span length
+  if (params.spanLength && m_nonterms.size()) {
+    stringstream strme;
+    strme << "{{SpanLength ";
+
+    for (size_t i = 0; i < m_nonterms.size(); ++i) {
+      const NonTerm &nonTerm = *m_nonterms[i];
+      const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
+      strme << i << "," << cp.GetWidth(Moses::Input) << "," << cp.GetWidth(Moses::Output) << " ";
+    }
+    strme << "}}";
+
+    m_properties.push_back(strme.str());
+  }
+
+  if (params.ruleLength && m_nonterms.size()) {
+    const ConsistentPhrase &cp = m_lhs.GetConsistentPhrase();
+
+    stringstream strme;
+    strme << "{{RuleLength ";
+    strme << cp.GetWidth(Moses::Input);
+    strme << "}}";
+
+    m_properties.push_back(strme.str());
+  }
+
+  // non-term context (source)
+  if (params.nonTermContext && m_nonterms.size()) {
+    stringstream strme;
+    strme << "{{NonTermContext ";
+
+    int factor = params.nonTermContextFactor;
+
+    for (size_t i = 0; i < m_nonterms.size(); ++i) {
+      const NonTerm &nonTerm = *m_nonterms[i];
+      const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
+      NonTermContext(1, factor, i, cp, strme);
+    }
+    strme << "}}";
+
+    m_properties.push_back(strme.str());
+  }
+
+  // non-term context (target)
+  if (params.nonTermContextTarget && m_nonterms.size()) {
+    stringstream strme;
+    strme << "{{NonTermContextTarget ";
+
+    int factor = params.nonTermContextFactor;
+
+    for (size_t i = 0; i < m_nonterms.size(); ++i) {
+      const NonTerm &nonTerm = *m_nonterms[i];
+      const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
+      NonTermContext(2, factor, i, cp, strme);
+    }
+    strme << "}}";
+
+    m_properties.push_back(strme.str());
+  }
+
+}
+
 

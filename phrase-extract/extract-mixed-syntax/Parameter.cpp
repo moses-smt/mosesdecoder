@@ -39,6 +39,7 @@ Parameter::Parameter()
   ,minScope(0)
 
   ,spanLength(false)
+  ,ruleLength(false)
   ,nonTermContext(false)
   ,nonTermContextTarget(false)
   ,nonTermContextFactor(0)
