@@ -3,11 +3,14 @@
 use strict;
 
 my $language = "en";
+my $PENN = 0;
+
 while (@ARGV) {
     $_ = shift;
     /^-b$/ && ($| = 1, next); # not buffered (flush each line)
     /^-l$/ && ($language = shift, next);
     /^[^\-]/ && ($language = $_, next);
+  	/^-penn$/ && ($PENN = 1, next);
 }
 
 while(<STDIN>) {
@@ -22,8 +25,11 @@ while(<STDIN>) {
     s/ :/:/g;
     s/ ;/;/g;
     # normalize unicode punctuation
-    s/\`/\'/g;
-    s/\'\'/ \" /g;
+    if ($PENN == 0) {
+      s/\`/\'/g;
+      s/\'\'/ \" /g;
+    }
+
     s/„/\"/g;
     s/“/\"/g;
     s/”/\"/g;
