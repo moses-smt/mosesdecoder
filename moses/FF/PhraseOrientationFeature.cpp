@@ -26,6 +26,7 @@ namespace Moses
 PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   : StatefulFeatureFunction(6, line)
   , m_glueTargetLHSStr("Q")
+  , m_distinguishStates(true)
   , m_glueTargetLHS(true)
   , m_offsetR2LScores(0)
 {
@@ -42,6 +43,8 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
 {
   if (key == "glueTargetLHS") {
     m_glueTargetLHSStr = value;
+  } else if (key == "distinguishStates") {
+    m_distinguishStates = Scan<bool>(value);
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
@@ -56,8 +59,8 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
   // Dense scores
   std::vector<float> newScores(m_numScoreComponents,0);
 
-  // State: ignored wrt. recombination; used to propagate orientation probabilities in case of boundary non-terminals
-  PhraseOrientationFeatureState *state = new PhraseOrientationFeatureState();
+  // State: used to propagate orientation probabilities in case of boundary non-terminals
+  PhraseOrientationFeatureState *state = new PhraseOrientationFeatureState(m_distinguishStates);
 
   // Read Orientation property
   const TargetPhrase &currTarPhr = hypo.GetCurrTargetPhrase();
@@ -184,9 +187,9 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           std::vector<float> weightsVector = StaticData::Instance().GetAllWeights().GetScoresForProducer(this);
           std::vector<float> scoresL2R;
-          scoresL2R.push_back( std::log(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );
-          scoresL2R.push_back( std::log(orientationPhraseProperty->GetLeftToRightProbabilitySwap()) );
-          scoresL2R.push_back( std::log(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous()) );
+          scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );
+          scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap()) );
+          scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous()) );
           std::vector<float> weightedScoresL2R;
           for ( size_t i=0; i<3; ++i ) {
             weightedScoresL2R.push_back( weightsVector[i] * scoresL2R[i] );
@@ -236,32 +239,32 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
       if (!delayedScoringL2R) {
         switch (l2rOrientation) {
         case Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT:
-          newScores[0] += std::log(orientationPhraseProperty->GetLeftToRightProbabilityMono());
+          newScores[0] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x1, newScores);
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT:
-          newScores[1] += std::log(orientationPhraseProperty->GetLeftToRightProbabilitySwap());
+          newScores[1] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x2, newScores);
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT:
-          newScores[2] += std::log(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
+          newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT:
-          newScores[2] += std::log(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
+          newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN:
           // modelType == Moses::GHKM::PhraseOrientation::REO_MSLR
-          newScores[2] += std::log(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
+          newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
@@ -337,9 +340,9 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           std::vector<float> weightsVector = StaticData::Instance().GetAllWeights().GetScoresForProducer(this);
           std::vector<float> scoresR2L;
-          scoresR2L.push_back( std::log(orientationPhraseProperty->GetRightToLeftProbabilityMono()) );
-          scoresR2L.push_back( std::log(orientationPhraseProperty->GetRightToLeftProbabilitySwap()) );
-          scoresR2L.push_back( std::log(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous()) );
+          scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono()) );
+          scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap()) );
+          scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous()) );
           std::vector<float> weightedScoresR2L;
           for ( size_t i=0; i<3; ++i ) {
             weightedScoresR2L.push_back( weightsVector[m_offsetR2LScores+i] * scoresR2L[i] );
@@ -389,32 +392,32 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
       if (!delayedScoringR2L) {
         switch (r2lOrientation) {
         case Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT:
-          newScores[m_offsetR2LScores+0] += std::log(orientationPhraseProperty->GetRightToLeftProbabilityMono());
+          newScores[m_offsetR2LScores+0] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x1, newScores);
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT:
-          newScores[m_offsetR2LScores+1] += std::log(orientationPhraseProperty->GetRightToLeftProbabilitySwap());
+          newScores[m_offsetR2LScores+1] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x2, newScores);
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT:
-          newScores[m_offsetR2LScores+2] += std::log(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
+          newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT:
-          newScores[m_offsetR2LScores+2] += std::log(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
+          newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN:
           // modelType == Moses::GHKM::PhraseOrientation::REO_MSLR
-          newScores[m_offsetR2LScores+2] += std::log(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
+          newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);

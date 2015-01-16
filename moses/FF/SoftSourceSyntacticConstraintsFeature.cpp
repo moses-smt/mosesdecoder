@@ -314,7 +314,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
               = m_sourceLabelIndexesByFactor.find((*prevTreeInputLabelsIt)[0]);
               if (foundPrevTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
                 size_t prevTreeInputLabelIndex = foundPrevTreeInputLabel->second;
-                treeInputLabelsRHS[nonTerminalNumber].insert(prevTreeInputLabelIndex);
+                treeInputLabelsRHS[nonTermIndex].insert(prevTreeInputLabelIndex);
               }
             }
           }
