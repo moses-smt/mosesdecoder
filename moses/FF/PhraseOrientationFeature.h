@@ -28,7 +28,7 @@ public:
 
   friend class PhraseOrientationFeature;
 
-  PhraseOrientationFeatureState()
+  PhraseOrientationFeatureState(bool distinguishStates)
     : m_leftBoundaryNonTerminalL2RScores(3,0)
     , m_rightBoundaryNonTerminalR2LScores(3,0)
     , m_leftBoundaryNonTerminalL2RPossibleFutureOrientations(0x7)
@@ -36,8 +36,9 @@ public:
     , m_leftBoundaryRecursionGuard(false)
     , m_rightBoundaryRecursionGuard(false)
     , m_leftBoundaryIsSet(false)
-    , m_rightBoundaryIsSet(false) {
-  }
+    , m_rightBoundaryIsSet(false)
+    , m_distinguishStates(distinguishStates)
+  {}
 
   void SetLeftBoundaryL2R(const std::vector<float> &scores,
                           size_t heuristicScoreIndex,
@@ -93,6 +94,10 @@ public:
 
 
   int Compare(const FFState& other) const {
+    if (!m_distinguishStates) {
+      return 0;
+    }
+
     const PhraseOrientationFeatureState &otherState = static_cast<const PhraseOrientationFeatureState&>(other);
 
     if (!m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet &&
@@ -249,6 +254,7 @@ private:
   bool m_rightBoundaryIsSet;
   const PhraseOrientationFeatureState* m_leftBoundaryPrevState;
   const PhraseOrientationFeatureState* m_rightBoundaryPrevState;
+  bool m_distinguishStates;
 };
 
 
@@ -267,7 +273,7 @@ public:
   }
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
-    return new PhraseOrientationFeatureState();
+    return new PhraseOrientationFeatureState(m_distinguishStates);
   }
 
   void SetParameter(const std::string& key, const std::string& value);
@@ -284,17 +290,20 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
-  };
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  {};
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
+      , const TranslationOptionList &translationOptionList) const
+  {}
+
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const {
-    return new PhraseOrientationFeatureState();
+    UTIL_THROW2(GetScoreProducerDescription()
+                << ": EvaluateWhenApplied(const Hypothesis&, ...) not implemented");
+    return new PhraseOrientationFeatureState(m_distinguishStates);
   };
 
   FFState* EvaluateWhenApplied(
@@ -316,6 +325,7 @@ protected:
 
   std::string m_glueTargetLHSStr;
   Word m_glueTargetLHS;
+  bool m_distinguishStates;
   size_t m_offsetR2LScores;
 
 };
