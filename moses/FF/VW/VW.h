@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <limits>
 
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TranslationOptionList.h"
@@ -24,6 +25,39 @@ namespace Moses
 const std::string VW_DUMMY_LABEL = "1111"; // VW does not use the actual label, other classifiers might
 
 /**
+ * Helper class for storing alignment constraints.
+ */
+class Constraint {
+public:
+  Constraint() : m_min(std::numeric_limits<int>::max()), m_max(-1) {}
+
+  Constraint(int min, int max) : m_min(min), m_max(max) {}
+
+  /**
+   * We are aligned to point => our min cannot be larger, our max cannot be smaller.
+   */
+  void Update(int point) {
+    if (m_min > point) m_min = point;
+    if (m_max < point) m_max = point;
+  }
+
+  bool IsSet() const {
+    return m_max != -1;
+  }
+
+  int GetMin() const {
+    return m_min;
+  }
+
+  int GetMax() const {
+    return m_max;
+  }
+
+private:
+  int m_min, m_max;
+};
+
+/**
  * VW thread-specific data about target sentence.
  */
 struct VWTargetSentence {
@@ -38,8 +72,25 @@ struct VWTargetSentence {
     Clear();
   }
 
+  void SetConstraints(size_t sourceSize) {
+    // initialize to unconstrained
+    m_sourceConstraints.assign(sourceSize, Constraint());
+    m_targetConstraints.assign(m_sentence->GetSize(), Constraint());
+
+    // set constraints according to alignment points
+    AlignmentInfo::const_iterator it;
+    for (it = m_alignment->begin(); it != m_alignment->end(); it++) {
+      int src = it->first;
+      int tgt = it->second;
+
+      m_sourceConstraints[src].Update(tgt);
+      m_targetConstraints[tgt].Update(src);
+    }
+  }
+
   Phrase *m_sentence;
   AlignmentInfo *m_alignment;
+  std::vector<Constraint> m_sourceConstraints, m_targetConstraints;
 };
 
 typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::ClassifierFactory &> TLSClassifier;
@@ -194,6 +245,9 @@ public:
     targetSent.Clear();
     targetSent.m_sentence = target;
     targetSent.m_alignment = alignment;
+
+    // pre-compute max- and min- aligned points for faster translation option checking
+    targetSent.SetConstraints(source.GetSize());
   }
 
 
@@ -203,45 +257,59 @@ private:
   }
 
   bool IsCorrectTranslationOption(const TranslationOption &topt) const {
-    size_t sourceStart = topt.GetSourceWordsRange().GetStartPos();
-    size_t sourceEnd   = topt.GetSourceWordsRange().GetEndPos() + 1;
+    int sourceStart = topt.GetSourceWordsRange().GetStartPos();
+    int sourceEnd   = topt.GetSourceWordsRange().GetEndPos() + 1;
 
     const VWTargetSentence &targetSentence = *GetStored();
 
-    // get the left-most alignment point withitn sourceRange
-    std::set<size_t> aligned;
-    while ((aligned = targetSentence.m_alignment->GetAlignmentsForSource(sourceStart)).empty()) {
-      sourceStart++;
-
-      if (sourceStart >= sourceEnd) {
-        // no alignment point between source and target sentence within current source span;
-        // return immediately
-        return false;
-      }
+    // get the left-mose alignment point within source span
+    int idx = sourceStart;
+    while (! targetSentence.m_sourceConstraints[idx].IsSet()) {
+      if (idx++ >= sourceEnd)
+        return false; // no word within source span is aligned, discard topt
     }
-
-    size_t targetSentOffset = *aligned.begin(); // index of first aligned target word covered in source span
+    // index of first aligned target word covered in source span
+    size_t targetSentOffset = targetSentence.m_sourceConstraints[idx].GetMin();
 
     const TargetPhrase &tphrase = topt.GetTargetPhrase();
 
     // get the left-most alignment point within topt
-    size_t targetStart = 0;
-    while ((aligned = tphrase.GetAlignTerm().GetAlignmentsForSource(targetStart)).empty())
-      targetStart++;
+    idx = 0;
+    std::set<size_t> aligned;
+    while ((aligned = tphrase.GetAlignTerm().GetAlignmentsForSource(idx)).empty())
+      idx++;
 
     size_t toptOffset = *aligned.begin(); // index of first aligned target word in the translation option
 
-    size_t startAt = targetSentOffset - toptOffset;
-    bool matches = true;
-    for (size_t i = 0; i < tphrase.GetSize(); i++) {
-      if (startAt + i >= targetSentence.m_sentence->GetSize()
-          || tphrase.GetWord(i) != targetSentence.m_sentence->GetWord(startAt + i)) {
-        matches = false;
-        break;
-      }
+    int targetStart = targetSentOffset - toptOffset;
+    int targetEnd   = targetStart + tphrase.GetSize();
+
+    // target phrase is too long, return immediately
+    if (targetEnd > (int)targetSentence.m_sentence->GetSize())
+      return false;
+
+    // check that all source-span tokens align only within [targetStart, targetEnd)
+    for (int i = sourceStart; i < sourceEnd; i++) {
+      const Constraint &constraint = targetSentence.m_sourceConstraints[i];
+      if (constraint.GetMin() < targetStart || constraint.GetMax() >= targetEnd)
+        return false;
     }
 
-    return matches;
+    // check that all target-span tokens align only within [sourceStart, sourceEnd)
+    for (int i = targetStart; i < targetEnd; i++) {
+      const Constraint &constraint = targetSentence.m_targetConstraints[i];
+      if (constraint.GetMin() < sourceStart || constraint.GetMax() >= sourceEnd)
+        return false;
+    }
+
+    // OK, we cover exactly what we're supposed to in the target sentence.
+    // Now, does our translation match the target side?
+    for (size_t i = 0; i < tphrase.GetSize(); i++) {
+      if (tphrase.GetWord(i) != targetSentence.m_sentence->GetWord(targetStart + i))
+        return false;
+    }
+
+    return true;
   }
 
   bool m_train; // false means predict
