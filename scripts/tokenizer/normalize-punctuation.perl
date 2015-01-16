@@ -22,6 +22,8 @@ while(<STDIN>) {
     s/ :/:/g;
     s/ ;/;/g;
     # normalize unicode punctuation
+    s/\`/\'/g;
+    s/\'\'/ \" /g;
     s/„/\"/g;
     s/“/\"/g;
     s/”/\"/g;
