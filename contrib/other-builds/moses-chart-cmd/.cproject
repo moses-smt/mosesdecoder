@@ -38,6 +38,7 @@
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.debugging.gprof.781429826" name="Generate gprof information (-pg)" superClass="gnu.cpp.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1402496521" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.827478809" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -51,7 +52,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../nplm/lib&quot;"/>
 									<listOptionValue builtIn="false" value="/System/Library/Frameworks/JavaVM.framework"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../probingPT/helpers&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../DALM/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../cmph/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib&quot;"/>
@@ -86,6 +86,7 @@
 									<listOptionValue builtIn="false" value="bz2"/>
 									<listOptionValue builtIn="false" value="dl"/>
 								</option>
+								<option id="gnu.cpp.link.option.debugging.gprof.469533519" name="Generate gprof information (-pg)" superClass="gnu.cpp.link.option.debugging.gprof" value="true" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.128214028" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

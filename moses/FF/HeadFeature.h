@@ -10,6 +10,8 @@
 #include "CreateJavaVM.h"
 #include "moses/Util.h"
 #include <boost/thread/tss.hpp>
+#include "moses/LM/Ken.h"
+#include "lm/model.hh"
 
 namespace Moses
 {
@@ -332,6 +334,7 @@ public:
   std::string CallStanfordDep(std::string parsedSentence) const;
   void ProcessDepString(std::string depRelString, std::vector< SyntaxTreePtr > previousTrees,ScoreComponentCollection* accumulator) const;
   void CleanUpAfterSentenceProcessing(const InputType& source);
+  float GetWBScore(std::vector< std::string >& depRel) const;
 
  StringHashMap &GetCache() const {
 
@@ -400,11 +403,13 @@ public:
 protected:
   boost::shared_ptr< std::map<std::string, std::vector <std::string> > > m_headRules;
   boost::shared_ptr< std::map<std::string, float> > m_probArg;
+  boost::shared_ptr<lm::ngram::Model> m_WBmodel;
   boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap;
   boost::shared_ptr< std::map<std::string, bool> > m_allowedNT;
 
 	std::string m_headFile;
 	std::string m_probArgFile;
+	std::string m_modelFileARPA;
 	std::string m_lemmaFile;
 	std::string m_jarPath;
 	//should do the initialization only once when the wrapper is loaded

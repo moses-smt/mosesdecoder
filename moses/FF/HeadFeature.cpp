@@ -628,8 +628,13 @@ void HeadFeature::SetParameter(const std::string& key, const std::string& value)
 	  			if(key=="jarPath"){
 	  				m_jarPath=value;
 	  			}
-	  			else
-	  				StatefulFeatureFunction::SetParameter(key, value);
+	  			else{
+	  				if(key=="modelFileARPA"){
+	  					m_modelFileARPA = value;
+	  				}
+	  				else
+	  					StatefulFeatureFunction::SetParameter(key, value);
+	  			}
 	  		}
 	  	}
 	  }
@@ -643,6 +648,8 @@ void HeadFeature::Load() {
   ReadHeadRules();
   ReadProbArg();
   ReadLemmaMap();
+
+  boost::shared_ptr<lm::ngram::Model> (new lm::ngram::Model(m_modelFileARPA.c_str())).swap(m_WBmodel);
 
   //made CreateJavaVM a singleton class
   javaWrapper = CreateJavaVM::Instance(m_jarPath);
@@ -812,11 +819,72 @@ void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
 	m_cacheDepRelHits =0;
 }
 
+
+float HeadFeature::GetWBScore(vector<string>& depRel) const{
+	using namespace lm::ngram;
+	//Model model("//Users//mnadejde//Documents//workspace//Subcat//DepRelStats.en.100K.ARPA");
+	//Model model(m_modelFileARPA.c_str());
+	  State stateSentence(m_WBmodel->BeginSentenceState()),state(m_WBmodel->NullContextState()), out_state, out_state0;
+	  const Vocabulary &vocab = m_WBmodel->GetVocabulary();
+	  lm::WordIndex *context = new lm::WordIndex[3];
+	  context[0]=vocab.Index(depRel[1]);
+	  context[1]=vocab.Index(depRel[0]);
+	  context[2]=vocab.Index("<unk>");
+	  lm::WordIndex arg = vocab.Index(depRel[2]);
+	  float score;
+	  score = m_WBmodel->FullScoreForgotState(context,context+2,arg,out_state0).prob;
+	  //cout<<depRel[0]<<" "<<depRel[1]<<" "<<depRel[2]<<" "<<score<<endl;
+
+	  return score;
+
+/*
+	  context[0]=vocab.Index("abandon");
+	  context[1]=vocab.Index("dobj");
+	  context[2]=vocab.Index("<unk>");
+	  lm::WordIndex arg = vocab.Index("position");
+
+	  //it is returning the probability of P(position|abandon) if I don't add the <unk>?? -> it would normally expect <s> ??
+	  //the definistion of the function said to give pointers to [start,end), here end points to <unk> so that might be ignored since the interval was marked with ) which means exclusive
+	  //with unk return like below. don't know which would be faster in this case. comments in model.hh say the later
+
+	  float score;
+	  cout<<endl;
+	  score = model.FullScoreForgotState(context,context+2,arg,out_state0).prob;
+	  cout<<"P(position|dobj,abandon)= "<<score<<endl;
+
+	  arg = vocab.Index("matter");
+	  score = model.FullScoreForgotState(context,context+2,arg,out_state0).prob;
+	  cout<<"P(matter|dobj,abandon)= "<<score<<endl;
+
+	  arg = vocab.Index("blaaa");
+	  score = model.FullScoreForgotState(context,context+2,arg,out_state0).prob;
+	  cout<<"P(blaa|dobj,abandon)= "<<score<<endl;
+
+	  context[0]=vocab.Index("blaa");
+	  context[1]=vocab.Index("blaa");
+	  score = model.FullScoreForgotState(context,context+2,arg,out_state0).prob;
+	  cout<<"P(blaa|blaa,blaa)= "<<score<<endl;
+
+	  //test scoring "dobj abandon position"
+
+	    std::cout << model.Score(state, vocab.Index("dobj"), out_state) << '\n';
+	    state = out_state;
+	    std::cout << model.Score(state, vocab.Index("abandon"), out_state) << '\n';
+	    state = out_state;
+	    std::cout << model.Score(state, vocab.Index("position"), out_state) << '\n';
+	    state = out_state;
+	    std::cout<<"DONE"<<endl;
+
+
+	   */
+}
+
 FFState* HeadFeature::EvaluateWhenApplied(
   const ChartHypothesis&  cur_hypo,
   int  featureID /*- used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
+
 	if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
 
 			//basically at the start of a new sentence reset counter
@@ -926,6 +994,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        			else{//unseen depRel pair ->score
 	        				; //TODO
 	        			}
+	        			//why did I put this?
 	        			if(it.first!=localCacheDepRel.end())
 	        				(*m_cache)[parsedSentence]=it.first;
 	        			//save in TreeString - DepRel cache
@@ -953,8 +1022,17 @@ FFState* HeadFeature::EvaluateWhenApplied(
 									vector<string> rel;
 									Tokenize(rel,*it);
 									//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
+									//should take out this compare and get my models straight
 									if(rel.size()==3 && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
+										float scoreWB = GetWBScore(rel);
+										vector<float> scores;
+										//before it was natural log now from the model file it comes as log10 ??which one shoudl it be?
+										scores.push_back(scoreWB);
+										scores.push_back(1.0);
+										accumulator->PlusEquals(this,scores);
+								/*
 										std::map<string,float>::iterator itModel;
+										//probably memory leak?
 										itModel = m_probArg->find(rel[1]+" "+rel[2]);
 										if(itModel!=m_probArg->end()){
 											//cout<<"Have value: "<<itModel->first <<" "<<itModel->second<<endl;
@@ -964,16 +1042,12 @@ FFState* HeadFeature::EvaluateWhenApplied(
 											//accumulator->PlusEquals(this,log(it->second+0.001));
 											accumulator->PlusEquals(this,scores);
 										}
+									*/
 									}
 								}
 								//ProcessDepString(depRel,previousTrees,accumulator);
 							}
-							//problem when there is no dep rel ? returns '\0' or NULL
-							// FUCK THIS FUCKING ERRORS IT FAILS EVEN WITH: extended rule: (VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))
-							//javaWrapper->GetDep(parsedSentence);
-							//this fails here but not in Load()!!!
-							//javaWrapper = new CreateJavaVM();
-							//javaWrapper->TestRuntime();
+
 	//        	}
 	        }
 	        //std::cout<< "dep rel: "<< stanfordDep<<std::endl;
