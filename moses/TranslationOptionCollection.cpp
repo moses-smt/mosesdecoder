@@ -402,7 +402,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
 //        VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptions() endPos:" << endPos << endl);
         if (graphInd > 0 && // only skip subsequent graphs
             backoff != 0 && // use of backoff specified
-            (endPos-startPos+1 <= backoff || // size exceeds backoff limit or ...
+            (endPos-startPos+1 > backoff || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options
@@ -555,6 +555,7 @@ void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, Part
 void TranslationOptionCollection::EvaluateWithSourceContext()
 {
   const size_t size = m_source.GetSize();
+
   for (size_t startPos = 0 ; startPos < size ; ++startPos) {
     size_t maxSize = m_source.GetSize() - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
@@ -568,8 +569,25 @@ void TranslationOptionCollection::EvaluateWithSourceContext()
         TranslationOption &transOpt = **iterTransOpt;
         transOpt.EvaluateWithSourceContext(m_source);
       }
+
+      EvaluateTranslatonOptionListWithSourceContext(transOptList);
     }
   }
+}
+
+void TranslationOptionCollection::EvaluateTranslatonOptionListWithSourceContext(
+  TranslationOptionList &translationOptionList)
+{
+
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction &ff = *ffs[i];
+    if (! staticData.IsFeatureFunctionIgnored(ff)) {
+      ff.EvaluateTranslationOptionListWithSourceContext(m_source, translationOptionList);
+    }
+  }
+
 }
 
 void TranslationOptionCollection::Sort()

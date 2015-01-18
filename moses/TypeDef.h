@@ -61,7 +61,7 @@ const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 5000;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 //#ifdef PT_UG
-// setting to std::numeric_limits<size_t>::max() makes the regression test for (deprecated) PhraseDictionaryDynamicSuffixArray fail. 
+// setting to std::numeric_limits<size_t>::max() makes the regression test for (deprecated) PhraseDictionaryDynamicSuffixArray fail.
 // const size_t DEFAULT_MAX_PHRASE_LENGTH = 100000;
 //#else
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
@@ -76,6 +76,9 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
 // output floats with five significant digits
 static const size_t PRECISION = 3;
+
+// tolerance for equality in floating point comparisons
+const float FLOAT_EPSILON = 0.0001;
 
 // enums.
 // must be 0, 1, 2, ..., unless otherwise stated
@@ -116,10 +119,11 @@ enum DistortionOrientationOptions {
 
 enum InputTypeEnum {
   SentenceInput						= 0
-                            ,ConfusionNetworkInput	= 1
-                                ,WordLatticeInput				= 2
-                                    ,TreeInputType					= 3
-                                        ,WordLatticeInput2			= 4
+  ,ConfusionNetworkInput	= 1
+  ,WordLatticeInput				= 2
+  ,TreeInputType					= 3
+  ,WordLatticeInput2			= 4
+  , TabbedSentenceInput = 5
 
 };
 
@@ -133,7 +137,7 @@ enum XmlInputType {
 
 enum DictionaryFind {
   Best		= 0
-            ,All		= 1
+  ,All		= 1
 };
 
 enum SearchAlgorithm {
@@ -147,13 +151,13 @@ enum SearchAlgorithm {
 
 enum SourceLabelOverlap {
   SourceLabelOverlapAdd = 0
-                          ,SourceLabelOverlapReplace = 1
-                              ,SourceLabelOverlapDiscard = 2
+  ,SourceLabelOverlapReplace = 1
+  ,SourceLabelOverlapDiscard = 2
 };
 
 enum WordAlignmentSort {
   NoSort = 0
-           ,TargetOrder = 1
+  ,TargetOrder = 1
 };
 
 enum FormatType {

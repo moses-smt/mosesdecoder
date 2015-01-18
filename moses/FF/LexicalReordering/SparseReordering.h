@@ -23,7 +23,7 @@
 
 /**
  Configuration of sparse reordering:
-  
+
   The sparse reordering feature is configured using sparse-* configs in the lexical reordering line.
   sparse-words-(source|target)-<id>=<filename>  -- Features which fire for the words in the list
   sparse-clusters-(source|target)-<id>=<filename> -- Features which fire for clusters in the list. Format
@@ -38,7 +38,7 @@
 namespace Moses
 {
 
-/** 
+/**
  * Used to store pre-calculated feature names.
 **/
 struct SparseReorderingFeatureKey {
@@ -51,17 +51,17 @@ struct SparseReorderingFeatureKey {
   LexicalReorderingState::ReorderingType reoType;
 
   SparseReorderingFeatureKey(size_t id_, Type type_, const Factor* word_, bool isCluster_,
-   Position position_, Side side_, LexicalReorderingState::ReorderingType reoType_) 
+                             Position position_, Side side_, LexicalReorderingState::ReorderingType reoType_)
     : id(id_), type(type_), word(word_), isCluster(isCluster_),
-       position(position_), side(side_), reoType(reoType_)     
-  {}
+      position(position_), side(side_), reoType(reoType_) {
+  }
 
-  const std::string& Name(const std::string& wordListId) ; 
+  const std::string& Name(const std::string& wordListId) ;
 };
 
 struct HashSparseReorderingFeatureKey : public std::unary_function<SparseReorderingFeatureKey, std::size_t> {
   std::size_t operator()(const SparseReorderingFeatureKey& key) const {
-    //TODO: can we just hash the memory? 
+    //TODO: can we just hash the memory?
     //not sure, there could be random padding
     std::size_t seed = 0;
     seed = util::MurmurHashNative(&key.id, sizeof(key.id), seed);
@@ -76,7 +76,7 @@ struct HashSparseReorderingFeatureKey : public std::unary_function<SparseReorder
 };
 
 struct EqualsSparseReorderingFeatureKey :
-   public std::binary_function<SparseReorderingFeatureKey, SparseReorderingFeatureKey, bool> {
+  public std::binary_function<SparseReorderingFeatureKey, SparseReorderingFeatureKey, bool> {
   bool operator()(const SparseReorderingFeatureKey& left, const SparseReorderingFeatureKey& right) const {
     //TODO: Can we just compare the memory?
     return left.id == right.id &&  left.type == right.type && left.word == right.word &&
@@ -89,14 +89,14 @@ class SparseReordering
 {
 public:
   SparseReordering(const std::map<std::string,std::string>& config, const LexicalReordering* producer);
-  
+
   //If direction is backward the options will be different, for forward they will be the same
   void CopyScores(const TranslationOption& currentOpt,
                   const TranslationOption* previousOpt,
                   const InputType& input,
-                 LexicalReorderingState::ReorderingType reoType,
-                 LexicalReorderingConfiguration::Direction direction,
-                 ScoreComponentCollection* scores) const ;
+                  LexicalReorderingState::ReorderingType reoType,
+                  LexicalReorderingConfiguration::Direction direction,
+                  ScoreComponentCollection* scores) const ;
 
 private:
   const LexicalReordering* m_producer;
@@ -113,14 +113,14 @@ private:
   FeatureMap m_featureMap;
 
   void ReadWordList(const std::string& filename, const std::string& id,
-       SparseReorderingFeatureKey::Side side, std::vector<WordList>* pWordLists);
+                    SparseReorderingFeatureKey::Side side, std::vector<WordList>* pWordLists);
   void ReadClusterMap(const std::string& filename, const std::string& id, SparseReorderingFeatureKey::Side side, std::vector<ClusterMap>* pClusterMaps);
   void PreCalculateFeatureNames(size_t index, const std::string& id, SparseReorderingFeatureKey::Side side, const Factor* factor, bool isCluster);
 
   void AddFeatures(
     SparseReorderingFeatureKey::Type type, SparseReorderingFeatureKey::Side side,
-     const Word& word, SparseReorderingFeatureKey::Position position,
-     LexicalReorderingState::ReorderingType reoType,
+    const Word& word, SparseReorderingFeatureKey::Position position,
+    LexicalReorderingState::ReorderingType reoType,
     ScoreComponentCollection* scores) const;
 
 };

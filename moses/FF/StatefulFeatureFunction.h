@@ -44,7 +44,10 @@ public:
   virtual FFState* EvaluateWhenApplied(
     const Syntax::SHyperedge& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
-    ScoreComponentCollection* accumulator) const { assert(false); return 0; /* FIXME */ }
+    ScoreComponentCollection* accumulator) const {
+    assert(false);
+    return 0; /* FIXME */
+  }
 
   //! return the state associated with the empty hypothesis for a given sentence
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;

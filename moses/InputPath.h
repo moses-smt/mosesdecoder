@@ -54,8 +54,8 @@ public:
     : m_prevPath(NULL)
     , m_range(NOT_FOUND, NOT_FOUND)
     , m_inputScore(NULL)
-    , m_nextNode(NOT_FOUND)
-  {}
+    , m_nextNode(NOT_FOUND) {
+  }
 
   InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
             ,const ScorePair *inputScore);

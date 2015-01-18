@@ -80,8 +80,6 @@ const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
 
 void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   ReduceCache();
 
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
@@ -203,7 +201,7 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionN
 
   const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
   TargetPhraseCollection *targetPhrases
-    = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+  = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
 
   delete targetPhrasesOnDisk;
 
@@ -214,11 +212,9 @@ void PhraseDictionaryOnDisk::SetParameter(const std::string& key, const std::str
 {
   if (key == "max-span-default") {
     m_maxSpanDefault = Scan<size_t>(value);
-  }
-  else if (key == "max-span-labelled") {
+  } else if (key == "max-span-labelled") {
     m_maxSpanLabelled = Scan<size_t>(value);
-  }
-  else {
+  } else {
     PhraseDictionary::SetParameter(key, value);
   }
 }

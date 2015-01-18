@@ -57,12 +57,12 @@ public:
   }
 
   Subgraph(const Subgraph &other, bool targetOnly=false)
-      : m_root(other.m_root)
-      , m_leaves(other.m_leaves)
-      , m_depth(other.m_depth)
-      , m_size(other.m_size)
-      , m_nodeCount(other.m_nodeCount)
-      , m_pcfgScore(other.m_pcfgScore) {
+    : m_root(other.m_root)
+    , m_leaves(other.m_leaves)
+    , m_depth(other.m_depth)
+    , m_size(other.m_size)
+    , m_nodeCount(other.m_nodeCount)
+    , m_pcfgScore(other.m_pcfgScore) {
     if (targetOnly && m_root->GetType() != SOURCE) {
       // Replace any source-word sink nodes with their parents (except for
       // the special case where the parent is a non-word tree node -- see

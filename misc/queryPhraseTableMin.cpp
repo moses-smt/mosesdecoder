@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     sourcePhrase.CreateFromString(Input, input, line, NULL);
 
     TargetPhraseVectorPtr decodedPhraseColl
-      = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
+    = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
 
     if(decodedPhraseColl != NULL) {
       if(reportCounts)

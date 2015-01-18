@@ -280,10 +280,10 @@ sub tokenize
     #$text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
 	      
     # turn `into '
-    $text =~ s/\`/\'/g;
+    #$text =~ s/\`/\'/g;
 	
     #turn '' into "
-    $text =~ s/\'\'/ \" /g;
+    #$text =~ s/\'\'/ \" /g;
 
     if ($language eq "en") 
     {

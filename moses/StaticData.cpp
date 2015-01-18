@@ -1,5 +1,5 @@
 // $Id$
-// vim:tabstop=2  
+// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -130,14 +130,14 @@ bool StaticData::LoadData(Parameter *parameter)
 
   m_parameter->SetParameter(m_recoverPath, "recover-input-path", false);
   if (m_recoverPath && m_inputType == SentenceInput) {
-      TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
-      m_recoverPath = false;
-    }
+    TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
+    m_recoverPath = false;
+  }
 
   // factor delimiter
   m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
   if (m_factorDelimiter == "none") {
-      m_factorDelimiter = "";
+    m_factorDelimiter = "";
   }
 
   m_parameter->SetParameter( m_continuePartialTranslation, "continue-partial-translation", false );
@@ -170,15 +170,14 @@ bool StaticData::LoadData(Parameter *parameter)
   // n-best
   params = m_parameter->GetParam("n-best-list");
   if (params) {
-	  if (params->size() >= 2) {
-		m_nBestFilePath = params->at(0);
-		m_nBestSize = Scan<size_t>( params->at(1) );
-		m_onlyDistinctNBest=(params->size()>2 && params->at(2)=="distinct");
-	  }
-	  else {
-		  std::cerr << "wrong format for switch -n-best-list file size [disinct]";
-		  return false;
-	  }
+    if (params->size() >= 2) {
+      m_nBestFilePath = params->at(0);
+      m_nBestSize = Scan<size_t>( params->at(1) );
+      m_onlyDistinctNBest=(params->size()>2 && params->at(2)=="distinct");
+    } else {
+      std::cerr << "wrong format for switch -n-best-list file size [disinct]";
+      return false;
+    }
   } else {
     m_nBestSize = 0;
   }
@@ -188,40 +187,38 @@ bool StaticData::LoadData(Parameter *parameter)
   //lattice samples
   params = m_parameter->GetParam("lattice-samples");
   if (params) {
-	  if (params->size() ==2 ) {
-		m_latticeSamplesFilePath = params->at(0);
-		m_latticeSamplesSize = Scan<size_t>(params->at(1));
-	  }
-	  else {
-		  std::cerr <<"wrong format for switch -lattice-samples file size";
-		return false;
-	  }
-  }
-  else {
+    if (params->size() ==2 ) {
+      m_latticeSamplesFilePath = params->at(0);
+      m_latticeSamplesSize = Scan<size_t>(params->at(1));
+    } else {
+      std::cerr <<"wrong format for switch -lattice-samples file size";
+      return false;
+    }
+  } else {
     m_latticeSamplesSize = 0;
   }
 
   // word graph
   params = m_parameter->GetParam("output-word-graph");
   if (params && params->size() == 2)
-	m_outputWordGraph = true;
+    m_outputWordGraph = true;
   else
-	m_outputWordGraph = false;
+    m_outputWordGraph = false;
 
   // search graph
   params = m_parameter->GetParam("output-search-graph");
   if (params && params->size()) {
     if (params->size() != 1) {
-    	std::cerr << "ERROR: wrong format for switch -output-search-graph file";
+      std::cerr << "ERROR: wrong format for switch -output-search-graph file";
       return false;
     }
     m_outputSearchGraph = true;
   }
   // ... in extended format
   else if (m_parameter->GetParam("output-search-graph-extended") &&
-		  m_parameter->GetParam("output-search-graph-extended")->size()) {
+           m_parameter->GetParam("output-search-graph-extended")->size()) {
     if (m_parameter->GetParam("output-search-graph-extended")->size() != 1) {
-    	std::cerr << "ERROR: wrong format for switch -output-search-graph-extended file";
+      std::cerr << "ERROR: wrong format for switch -output-search-graph-extended file";
       return false;
     }
     m_outputSearchGraph = true;
@@ -280,16 +277,16 @@ bool StaticData::LoadData(Parameter *parameter)
   //input factors
   params = m_parameter->GetParam("input-factors");
   if (params) {
-	m_inputFactorOrder = Scan<FactorType>(*params);
+    m_inputFactorOrder = Scan<FactorType>(*params);
   }
   if(m_inputFactorOrder.empty()) {
-	m_inputFactorOrder.push_back(0);
+    m_inputFactorOrder.push_back(0);
   }
 
   //output factors
   params = m_parameter->GetParam("output-factors");
   if (params) {
-	  m_outputFactorOrder = Scan<FactorType>(*params);
+    m_outputFactorOrder = Scan<FactorType>(*params);
   }
   if(m_outputFactorOrder.empty()) {
     // default. output factor 0
@@ -327,11 +324,11 @@ bool StaticData::LoadData(Parameter *parameter)
   params = m_parameter->GetParam("stack-diversity");
   if (params && params->size()) {
     if (m_maxDistortion > 15) {
-    	std::cerr << "stack diversity > 0 is not allowed for distortion limits larger than 15";
+      std::cerr << "stack diversity > 0 is not allowed for distortion limits larger than 15";
       return false;
     }
     if (m_inputType == WordLatticeInput) {
-    	std::cerr << "stack diversity > 0 is not allowed for lattice input";
+      std::cerr << "stack diversity > 0 is not allowed for lattice input";
       return false;
     }
     m_minHypoStackDiversity = Scan<size_t>(params->at(0));
@@ -389,7 +386,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
   params = m_parameter->GetParam("lmbr-thetas");
   if (params) {
-	  m_lmbrThetas = Scan<float>(*params);
+    m_lmbrThetas = Scan<float>(*params);
   }
 
   //consensus decoding
@@ -423,7 +420,7 @@ bool StaticData::LoadData(Parameter *parameter)
 #ifdef WITH_THREADS
       m_threadCount = boost::thread::hardware_concurrency();
       if (!m_threadCount) {
-    	  std::cerr << "-threads all specified but Boost doesn't know how many cores there are";
+        std::cerr << "-threads all specified but Boost doesn't know how many cores there are";
         return false;
       }
 #else
@@ -433,12 +430,12 @@ bool StaticData::LoadData(Parameter *parameter)
     } else {
       m_threadCount = Scan<int>(params->at(0));
       if (m_threadCount < 1) {
-    	  std::cerr << "Specify at least one thread.";
+        std::cerr << "Specify at least one thread.";
         return false;
       }
 #ifndef WITH_THREADS
       if (m_threadCount > 1) {
-    	  std::cerr << "Error: Thread count of " << params->at(0) << " but moses not built with thread support";
+        std::cerr << "Error: Thread count of " << params->at(0) << " but moses not built with thread support";
         return false;
       }
 #endif
@@ -460,8 +457,8 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     m_xmlBrackets.first= brackets[0];
     m_xmlBrackets.second=brackets[1];
-    VERBOSE(1,"XML tags opening and closing brackets for XML input are: " 
-	    << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
+    VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
+            << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
   }
 
   m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor", NOT_FOUND);
@@ -516,7 +513,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!weightFile.empty()) {
     ScoreComponentCollection extraWeights;
     if (!extraWeights.Load(weightFile)) {
-    	std::cerr << "Unable to load weights from " << weightFile;
+      std::cerr << "Unable to load weights from " << weightFile;
       return false;
     }
     m_allWeights.PlusEquals(extraWeights);
@@ -578,7 +575,7 @@ void StaticData::LoadNonTerminals()
                      "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
-      // const Factor *targetFactor = 
+      // const Factor *targetFactor =
       factorCollection.AddFactor(Output, 0, tokens[0], true);
     }
 
@@ -605,37 +602,34 @@ void StaticData::LoadDecodeGraphs()
 
   params = m_parameter->GetParam("mapping");
   if (params && params->size()) {
-	  mappingVector = *params;
+    mappingVector = *params;
   }
 
   params = m_parameter->GetParam("max-chart-span");
   if (params && params->size()) {
-	  maxChartSpans = Scan<size_t>(*params);
+    maxChartSpans = Scan<size_t>(*params);
   }
 
   vector<string> toks = Tokenize(mappingVector[0]);
   if (toks.size() == 3) {
-	  // eg 0 T 0
-	  LoadDecodeGraphsOld(mappingVector, maxChartSpans);
-  }
-  else if (toks.size() == 2) {
-	  if (toks[0] == "T" || toks[0] == "G") {
-		  // eg. T 0
-		  LoadDecodeGraphsOld(mappingVector, maxChartSpans);
-	  }
-	  else {
-		  // eg. 0 TM1
-		  LoadDecodeGraphsNew(mappingVector, maxChartSpans);
-	  }
-  }
-  else {
-	  UTIL_THROW(util::Exception, "Malformed mapping");
+    // eg 0 T 0
+    LoadDecodeGraphsOld(mappingVector, maxChartSpans);
+  } else if (toks.size() == 2) {
+    if (toks[0] == "T" || toks[0] == "G") {
+      // eg. T 0
+      LoadDecodeGraphsOld(mappingVector, maxChartSpans);
+    } else {
+      // eg. 0 TM1
+      LoadDecodeGraphsNew(mappingVector, maxChartSpans);
+    }
+  } else {
+    UTIL_THROW(util::Exception, "Malformed mapping");
   }
 }
 
 void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const vector<size_t> &maxChartSpans)
 {
-  const vector<PhraseDictionary*>& pts = PhraseDictionary::GetCollExclOOVPt();
+  const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
   const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
   const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
@@ -653,7 +647,7 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
       decodeType = token[0] == "T" ? Translate : Generate;
       index = Scan<size_t>(token[1]);
     } else if (token.size() == 3) {
-        // eg. 0 T 0
+      // eg. 0 T 0
       // For specifying multiple translation model
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
@@ -724,82 +718,79 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
   // if specified, record maxmimum unseen n-gram size
   const vector<string> *backoffVector = m_parameter->GetParam("decoding-graph-backoff");
   for(size_t i=0; i<m_decodeGraphs.size() && backoffVector && i<backoffVector->size(); i++) {
-	DecodeGraph &decodeGraph = *m_decodeGraphs[i];
+    DecodeGraph &decodeGraph = *m_decodeGraphs[i];
 
-	if (i < backoffVector->size()) {
-		decodeGraph.SetBackoff(Scan<size_t>(backoffVector->at(i)));
-	}
+    if (i < backoffVector->size()) {
+      decodeGraph.SetBackoff(Scan<size_t>(backoffVector->at(i)));
+    }
   }
 }
 
 void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans)
 {
-	  const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
-	  DecodeStep *prev = 0;
-	  size_t prevDecodeGraphInd = 0;
+  const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+  DecodeStep *prev = 0;
+  size_t prevDecodeGraphInd = 0;
 
-	  for(size_t i=0; i<mappingVector.size(); i++) {
-	    vector<string>	token		= Tokenize(mappingVector[i]);
-	    size_t decodeGraphInd;
-	    size_t index;
+  for(size_t i=0; i<mappingVector.size(); i++) {
+    vector<string>	token		= Tokenize(mappingVector[i]);
+    size_t decodeGraphInd;
 
-	      decodeGraphInd = Scan<size_t>(token[0]);
-	      //the vectorList index can only increment by one
-	      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
-	                     "Malformed mapping");
-	      if (decodeGraphInd > prevDecodeGraphInd) {
-	        prev = NULL;
-	      }
+    decodeGraphInd = Scan<size_t>(token[0]);
+    //the vectorList index can only increment by one
+    UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
+                   "Malformed mapping");
+    if (decodeGraphInd > prevDecodeGraphInd) {
+      prev = NULL;
+    }
 
-	      if (prevDecodeGraphInd < decodeGraphInd) {
-	        featuresRemaining = &FeatureFunction::GetFeatureFunctions();
-	      }
+    if (prevDecodeGraphInd < decodeGraphInd) {
+      featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+    }
 
-	      FeatureFunction &ff = FeatureFunction::FindFeatureFunction(token[1]);
+    FeatureFunction &ff = FeatureFunction::FindFeatureFunction(token[1]);
 
-  	      DecodeStep* decodeStep = NULL;
-	      if (typeid(ff) == typeid(PhraseDictionary)) {
-		      decodeStep = new DecodeStepTranslation(&static_cast<PhraseDictionary&>(ff), prev, *featuresRemaining);
-	      }
-	      else if (typeid(ff) == typeid(GenerationDictionary)) {
-		      decodeStep = new DecodeStepGeneration(&static_cast<GenerationDictionary&>(ff), prev, *featuresRemaining);
-	      }
-	      else {
-		      UTIL_THROW(util::Exception, "Unknown decode step");
-	      }
+    DecodeStep* decodeStep = NULL;
+    if (typeid(ff) == typeid(PhraseDictionary)) {
+      decodeStep = new DecodeStepTranslation(&static_cast<PhraseDictionary&>(ff), prev, *featuresRemaining);
+    } else if (typeid(ff) == typeid(GenerationDictionary)) {
+      decodeStep = new DecodeStepGeneration(&static_cast<GenerationDictionary&>(ff), prev, *featuresRemaining);
+    } else {
+      UTIL_THROW(util::Exception, "Unknown decode step");
+    }
 
-	    featuresRemaining = &decodeStep->GetFeaturesRemaining();
+    featuresRemaining = &decodeStep->GetFeaturesRemaining();
 
-	    UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
-	    if (m_decodeGraphs.size() < decodeGraphInd + 1) {
-	      DecodeGraph *decodeGraph;
-	      if (IsChart()) {
-	        size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
-	        VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
-	        decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
-	      } else {
-	        decodeGraph = new DecodeGraph(m_decodeGraphs.size());
-	      }
+    UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
+    if (m_decodeGraphs.size() < decodeGraphInd + 1) {
+      DecodeGraph *decodeGraph;
+      if (IsChart()) {
+        size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
+        VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
+        decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
+      } else {
+        decodeGraph = new DecodeGraph(m_decodeGraphs.size());
+      }
 
-	      m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
-	    }
+      m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
+    }
 
-	    m_decodeGraphs[decodeGraphInd]->Add(decodeStep);
-	    prev = decodeStep;
-	    prevDecodeGraphInd = decodeGraphInd;
-	  }
+    m_decodeGraphs[decodeGraphInd]->Add(decodeStep);
+    prev = decodeStep;
+    prevDecodeGraphInd = decodeGraphInd;
+  }
 
-	  // set maximum n-gram size for backoff approach to decoding paths
-	  // default is always use subsequent paths (value = 0)
-	  // if specified, record maxmimum unseen n-gram size
-	  const vector<string> *backoffVector = m_parameter->GetParam("decoding-graph-backoff");
-	  for(size_t i=0; i<m_decodeGraphs.size() && backoffVector && i<backoffVector->size(); i++) {
-		DecodeGraph &decodeGraph = *m_decodeGraphs[i];
+  // set maximum n-gram size for backoff approach to decoding paths
+  // default is always use subsequent paths (value = 0)
+  // if specified, record maxmimum unseen n-gram size
+  const vector<string> *backoffVector = m_parameter->GetParam("decoding-graph-backoff");
+  for(size_t i=0; i<m_decodeGraphs.size() && backoffVector && i<backoffVector->size(); i++) {
+    DecodeGraph &decodeGraph = *m_decodeGraphs[i];
 
-		if (i < backoffVector->size()) {
-			decodeGraph.SetBackoff(Scan<size_t>(backoffVector->at(i)));
-		}
-	  }
+    if (i < backoffVector->size()) {
+      decodeGraph.SetBackoff(Scan<size_t>(backoffVector->at(i)));
+    }
+  }
 
 }
 
@@ -808,7 +799,7 @@ void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
   //loop over ScoreProducers to update weights of BleuScoreFeature
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
-	FeatureFunction *ff = producers[i];
+    FeatureFunction *ff = producers[i];
     std::string ffName = ff->GetScoreProducerDescription();
 
     if (ffName == "BleuScoreFeature") {
@@ -988,7 +979,7 @@ bool StaticData::LoadAlternateWeightSettings()
   vector<string> weightSpecification;
   const PARAM_VEC *params = m_parameter->GetParam("alternate-weight-setting");
   if (params && params->size()) {
-	  weightSpecification = *params;
+    weightSpecification = *params;
   }
 
   // get mapping from feature names to feature functions
@@ -1022,12 +1013,12 @@ bool StaticData::LoadAlternateWeightSettings()
         // sparse weights
         if (args[0] == "weight-file") {
           if (args.size() != 2) {
-        	  std::cerr << "One argument should be supplied for weight-file";
+            std::cerr << "One argument should be supplied for weight-file";
             return false;
           }
           ScoreComponentCollection extraWeights;
           if (!extraWeights.Load(args[1])) {
-        	  std::cerr << "Unable to load weights from " << args[1];
+            std::cerr << "Unable to load weights from " << args[1];
             return false;
           }
           m_weightSetting[ currentId ]->PlusEquals(extraWeights);

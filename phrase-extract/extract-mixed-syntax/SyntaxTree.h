@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <vector>
 #include <map>
@@ -19,7 +19,7 @@ public:
   const Labels &Find(int startPos, int endPos) const;
 
   void SetHieroLabel(const std::string &label) {
-	  m_defaultLabels.push_back(label);
+    m_defaultLabels.push_back(label);
   }
 
 

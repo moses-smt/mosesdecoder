@@ -198,11 +198,11 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
 
     const Word *wordIP = NULL;
     for (size_t i = 0; i < phraseFromIP.GetSize(); ++i) {
-    	const Word &tempWord =  phraseFromIP.GetWord(i);
-    	if (!tempWord.IsEpsilon()) {
-    		wordIP = &tempWord;
-    		break;
-    	}
+      const Word &tempWord =  phraseFromIP.GetWord(i);
+      if (!tempWord.IsEpsilon()) {
+        wordIP = &tempWord;
+        break;
+      }
     }
 
     // const WordsRange &range = inputPath.GetWordsRange();

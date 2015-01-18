@@ -223,13 +223,12 @@ Parameter::~Parameter()
 
 const PARAM_VEC *Parameter::GetParam(const std::string &paramName) const
 {
-	PARAM_MAP::const_iterator iter = m_setting.find( paramName );
-	if (iter == m_setting.end()) {
-		return NULL;
-	}
-	else {
-		return &iter->second;
-	}
+  PARAM_MAP::const_iterator iter = m_setting.find( paramName );
+  if (iter == m_setting.end()) {
+    return NULL;
+  } else {
+    return &iter->second;
+  }
 
 }
 
@@ -343,8 +342,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
   // don't mix old and new format
   if ((GetParam("feature") || GetParam("weight"))
       && (GetParam("weight-slm") || GetParam("weight-bl") || GetParam("weight-d") ||
-    	  GetParam("weight-dlm") || GetParam("weight-lrl") || GetParam("weight-generation") ||
-    	  GetParam("weight-i") || GetParam("weight-l") || GetParam("weight-lex") ||
+          GetParam("weight-dlm") || GetParam("weight-lrl") || GetParam("weight-generation") ||
+          GetParam("weight-i") || GetParam("weight-l") || GetParam("weight-lex") ||
           GetParam("weight-glm") || GetParam("weight-wt") || GetParam("weight-pp") ||
           GetParam("weight-pb") || GetParam("weight-t") || GetParam("weight-w") ||
           GetParam("weight-p") ||
@@ -374,7 +373,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
       string paramSwitch = (string) argv[i];
       string paramName = paramSwitch.substr(1);
       if (m_valid.find(paramName) == m_valid.end()) {
-    	std::cerr << "illegal switch: " << paramSwitch;
+        std::cerr << "illegal switch: " << paramSwitch;
         noErrorFlag = false;
       }
     }
@@ -390,13 +389,13 @@ void Parameter::AddFeaturesCmd()
 {
   const PARAM_VEC *params = GetParam("feature-add");
   if (params) {
-	  PARAM_VEC::const_iterator iter;
-	  for (iter = params->begin(); iter != params->end(); ++iter) {
-		const string &line = *iter;
-		AddFeature(line);
-	  }
+    PARAM_VEC::const_iterator iter;
+    for (iter = params->begin(); iter != params->end(); ++iter) {
+      const string &line = *iter;
+      AddFeature(line);
+    }
 
-	  m_setting.erase("feature-add");
+    m_setting.erase("feature-add");
   }
 }
 
@@ -516,7 +515,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
     vector<size_t>  maxTargetPhrase;
     params = GetParam("ttable-limit");
     if (params) {
-    	maxTargetPhrase = Scan<size_t>(*params);
+      maxTargetPhrase = Scan<size_t>(*params);
     }
 
     if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
@@ -538,7 +537,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       vector<string> token = Tokenize(translationVector[currDict]);
 
       if(currDict == 0 && token.size() == 4) {
-    	std::cerr << "Phrase table specification in old 4-field format. No longer supported";
+        std::cerr << "Phrase table specification in old 4-field format. No longer supported";
         return;
       }
       UTIL_THROW_IF2(token.size() < 5, "Phrase table must have at least 5 scores");
@@ -655,7 +654,7 @@ void Parameter::ConvertWeightArgsDistortion()
   const PARAM_VEC *oldWeights = GetParam(oldWeightName);
 
   if (oldWeights) {
-	const PARAM_VEC *searchAlgo = GetParam("search-algorithm");
+    const PARAM_VEC *searchAlgo = GetParam("search-algorithm");
     if (searchAlgo == NULL ||
         (searchAlgo->size() > 0
          && (Trim(searchAlgo->at(0)) == "0" || Trim(searchAlgo->at(0)) == "1")
@@ -679,8 +678,8 @@ void Parameter::ConvertWeightArgsDistortion()
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-    	UTIL_THROW_IF2(oldWeights && currOldInd >= oldWeights->size(),
-    			  "Errors converting old distortion weights to new weights");
+        UTIL_THROW_IF2(oldWeights && currOldInd >= oldWeights->size(),
+                       "Errors converting old distortion weights to new weights");
         float weight = Scan<float>(oldWeights->at(currOldInd));
         weights[currFF] = weight;
 
@@ -883,8 +882,8 @@ void Parameter::ConvertPhrasePenalty()
   string oldWeightName = "weight-p";
   const PARAM_VEC *params = GetParam(oldWeightName);
   if (params) {
-	UTIL_THROW_IF2(params->size() != 1,
-			"There should be only 1 phrase-penalty weight");
+    UTIL_THROW_IF2(params->size() != 1,
+                   "There should be only 1 phrase-penalty weight");
     float weight = Scan<float>(params->at(0));
     AddFeature("PhrasePenalty");
     SetWeight("PhrasePenalty", 0, weight);
@@ -1017,11 +1016,11 @@ bool Parameter::Validate()
   if (m_setting["lmodel-dub"].size() > 0) {
     if (m_setting["lmodel-file"].size() != m_setting["lmodel-dub"].size()) {
       std::cerr << "Config and parameters specify "
-               << static_cast<int>(m_setting["lmodel-file"].size())
-               << " language model files (lmodel-file), but "
-               << static_cast<int>(m_setting["lmodel-dub"].size())
-               << " LM upperbounds (lmodel-dub)"
-               << endl;
+                << static_cast<int>(m_setting["lmodel-file"].size())
+                << " language model files (lmodel-file), but "
+                << static_cast<int>(m_setting["lmodel-dub"].size())
+                << " LM upperbounds (lmodel-dub)"
+                << endl;
       noErrorFlag = false;
     }
   }
@@ -1032,7 +1031,7 @@ bool Parameter::Validate()
   if (noErrorFlag && m_setting["input-file"].size() == 1) {
     noErrorFlag = FileExists(m_setting["input-file"][0]);
     if (!noErrorFlag) {
-    	std::cerr << endl << "Input file " << m_setting["input-file"][0] << " does not exist";
+      std::cerr << endl << "Input file " << m_setting["input-file"][0] << " does not exist";
     }
   }
   // generation tables
@@ -1080,9 +1079,9 @@ bool Parameter::FilesExist(const string &paramName, int fieldNo, std::vector<std
       tokenizeIndex = static_cast<size_t>(fieldNo);
 
     if (tokenizeIndex >= vec.size()) {
-    	std::cerr << "Expected at least " << (tokenizeIndex+1) << " tokens per entry in '"
-               << paramName << "', but only found "
-               << vec.size();
+      std::cerr << "Expected at least " << (tokenizeIndex+1) << " tokens per entry in '"
+                << paramName << "', but only found "
+                << vec.size();
       return false;
     }
     const string &pathStr = vec[tokenizeIndex];
@@ -1109,7 +1108,7 @@ string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
       if (i+1 < argc) {
         return argv[i+1];
       } else {
-    	  std::cerr << "Option " << paramSwitch << " requires a parameter!";
+        std::cerr << "Option " << paramSwitch << " requires a parameter!";
         // TODO return some sort of error, not the empty string
       }
     }

@@ -51,6 +51,7 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
+  // XXX should this really be InputFactorOrder???
   CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
                    // staticData.GetFactorDelimiter(), // eliminated [UG]
                    NULL);
@@ -156,6 +157,14 @@ void TargetPhrase::EvaluateWithSourceContext(const InputType &input, const Input
   }
   float weightedScore = m_scoreBreakdown.GetWeightedScore();
   m_futureScore += futureScoreBreakdown.GetWeightedScore();
+  m_fullScore = weightedScore + m_futureScore;
+}
+
+void TargetPhrase::UpdateScore(ScoreComponentCollection* futureScoreBreakdown)
+{
+  float weightedScore = m_scoreBreakdown.GetWeightedScore();
+  if(futureScoreBreakdown)
+    m_futureScore += futureScoreBreakdown->GetWeightedScore();
   m_fullScore = weightedScore + m_futureScore;
 }
 
@@ -293,23 +302,23 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   os << ": nonterm=" << tp.GetAlignNonTerm() << flush;
   os << ": c=" << tp.m_fullScore << flush;
   os << " " << tp.m_scoreBreakdown << flush;
-  
+
   const Phrase *sourcePhrase = tp.GetRuleSource();
   if (sourcePhrase) {
     os << " sourcePhrase=" << *sourcePhrase << flush;
   }
 
   if (tp.m_properties.size()) {
-	os << " properties: " << flush;
+    os << " properties: " << flush;
 
-	TargetPhrase::Properties::const_iterator iter;
-	for (iter = tp.m_properties.begin(); iter != tp.m_properties.end(); ++iter) {
-		const string &key = iter->first;
-		const PhraseProperty *prop = iter->second.get();
-		assert(prop);
+    TargetPhrase::Properties::const_iterator iter;
+    for (iter = tp.m_properties.begin(); iter != tp.m_properties.end(); ++iter) {
+      const string &key = iter->first;
+      const PhraseProperty *prop = iter->second.get();
+      assert(prop);
 
-		os << key << "=" << *prop << " ";
-	}
+      os << key << "=" << *prop << " ";
+    }
   }
 
   return os;

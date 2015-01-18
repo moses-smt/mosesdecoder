@@ -17,23 +17,22 @@ protected:
   const InputType &m_source; /**< source sentence to be translated */
 
   BaseManager(const InputType &source)
-  :m_source(source)
-  {}
+    :m_source(source) {
+  }
 
   // output
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
 
   void OutputSurface(std::ostream &out,
-		  	  	  	  const Phrase &phrase,
-		  	  	  	  const std::vector<FactorType> &outputFactorOrder,
-		  	  	  	  bool reportAllFactors) const;
+                     const Phrase &phrase,
+                     const std::vector<FactorType> &outputFactorOrder,
+                     bool reportAllFactors) const;
   void WriteApplicationContext(std::ostream &out,
-		  const ApplicationContext &context) const;
+                               const ApplicationContext &context) const;
 
   template <class T>
-  void ShiftOffsets(std::vector<T> &offsets, T shift) const
-  {
+  void ShiftOffsets(std::vector<T> &offsets, T shift) const {
     T currPos = shift;
     for (size_t i = 0; i < offsets.size(); ++i) {
       if (offsets[i] == 0) {
@@ -46,8 +45,8 @@ protected:
   }
 
 public:
-  virtual ~BaseManager()
-  {}
+  virtual ~BaseManager() {
+  }
 
   //! the input sentence being decoded
   const InputType& GetSource() const {

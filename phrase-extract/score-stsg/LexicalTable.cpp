@@ -13,8 +13,8 @@ namespace ScoreStsg
 {
 
 LexicalTable::LexicalTable(Vocabulary &srcVocab, Vocabulary &tgtVocab)
-    : m_srcVocab(srcVocab)
-    , m_tgtVocab(tgtVocab)
+  : m_srcVocab(srcVocab)
+  , m_tgtVocab(tgtVocab)
 {
 }
 

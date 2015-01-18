@@ -45,11 +45,11 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 }
 
 void InputFeature::EvaluateWithSourceContext(const InputType &input
-                            , const InputPath &inputPath
-                            , const TargetPhrase &targetPhrase
-                            , const StackVec *stackVec
-                            , ScoreComponentCollection &scoreBreakdown
-                            , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedFutureScore) const
 {
   if (m_legacy) {
     //binary phrase-table does input feature itself

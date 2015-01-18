@@ -7,23 +7,25 @@
 #include "moses/Factor.h"
 #include "moses/Phrase.h"
 
-namespace Moses {
+namespace Moses
+{
 
-class OxLMMapper {
- public:
+class OxLMMapper
+{
+public:
   OxLMMapper(
-      const boost::shared_ptr<oxlm::Vocabulary>& vocab,
-      bool pos_back_off,
-      const FactorType& pos_factor_type);
+    const boost::shared_ptr<oxlm::Vocabulary>& vocab,
+    bool pos_back_off,
+    const FactorType& pos_factor_type);
 
   int convert(const Word& word) const;
 
   void convert(
-      const std::vector<const Word*> &contextFactor,
-      std::vector<int> &ids,
-      int &word) const;
+    const std::vector<const Word*> &contextFactor,
+    std::vector<int> &ids,
+    int &word) const;
 
- protected:
+protected:
   bool posBackOff;
   FactorType posFactorType;
 

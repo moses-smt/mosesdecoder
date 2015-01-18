@@ -186,8 +186,8 @@ void ScoreComponentCollection::Save(ostream& out, bool multiline) const
   string sep = " ";
   string linesep = "\n";
   if (!multiline) {
-     sep = "=";
-     linesep = " ";
+    sep = "=";
+    linesep = " ";
   }
   ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
   for (; iter != s_scoreIndexes.end(); ++iter ) {
@@ -323,8 +323,8 @@ void ScoreComponentCollection::OutputAllFeatureScores(std::ostream &out) const
 }
 
 void ScoreComponentCollection::OutputFeatureScores( std::ostream& out
-                          , const FeatureFunction *ff
-                          , std::string &lastName ) const
+    , const FeatureFunction *ff
+    , std::string &lastName ) const
 {
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();

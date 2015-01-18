@@ -9,11 +9,9 @@ namespace Moses
 namespace Syntax
 {
 
-struct SVertexRecombinationOrderer
-{
- public:
-  bool operator()(const SVertex &x, const SVertex &y) const
-  {
+struct SVertexRecombinationOrderer {
+public:
+  bool operator()(const SVertex &x, const SVertex &y) const {
     int comp = 0;
     for (std::size_t i = 0; i < x.state.size(); ++i) {
       if (x.state[i] == NULL || y.state[i] == NULL) {
@@ -28,8 +26,7 @@ struct SVertexRecombinationOrderer
     return false;
   }
 
-  bool operator()(const SVertex *x, const SVertex *y) const
-  {
+  bool operator()(const SVertex *x, const SVertex *y) const {
     return operator()(*x, *y);
   }
 };

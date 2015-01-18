@@ -7,7 +7,8 @@ size_t lookup( string );
 vector<string> tokenize( const char input[] );
 SuffixArray suffixArray;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
   // handle parameters
   string query;
   string fileNameSuffix;
@@ -95,14 +96,14 @@ int main(int argc, char* argv[]) {
       }
       cout << lookup( query ) << endl;
     }
-  } 
-  else if (queryFlag) {
+  } else if (queryFlag) {
     cout << lookup( query ) << endl;
   }
   return 0;
 }
 
-size_t lookup( string query ) {
+size_t lookup( string query )
+{
   cerr << "query is " << query << endl;
   vector< string > queryString = tokenize( query.c_str() );
   return suffixArray.Count( queryString );

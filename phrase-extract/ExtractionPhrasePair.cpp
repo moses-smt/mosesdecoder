@@ -324,10 +324,10 @@ std::string ExtractionPhrasePair::CollectAllPropertyValues(const std::string &ke
 
 
 std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::string& propertyKey,
-                                                                    std::set<std::string>& labelSet,
-                                                                    boost::unordered_map<std::string,float>& countsLabelsLHS, 
-                                                                    boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& jointCountsRulesTargetLHSAndLabelsLHS, 
-                                                                    Vocabulary &vcbT) const
+    std::set<std::string>& labelSet,
+    boost::unordered_map<std::string,float>& countsLabelsLHS,
+    boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& jointCountsRulesTargetLHSAndLabelsLHS,
+    Vocabulary &vcbT) const
 {
   const PROPERTY_VALUES *allPropertyValues = GetProperty( propertyKey );
 
@@ -340,7 +340,7 @@ std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::s
   std::list< std::pair<std::string,float> > lhsGivenCurrentRhsCounts;
 
   std::ostringstream oss;
-  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin(); 
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin();
        iter!=allPropertyValues->end(); ++iter) {
 
     size_t space = (iter->first).find_last_of(' ');
@@ -379,28 +379,28 @@ std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::s
             ruleTargetLhs.erase(ruleTargetLhs.begin());  // strip square brackets
             ruleTargetLhs.erase(ruleTargetLhs.size()-1);
 
-            std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedCountsLabelsLHS = 
-                countsLabelsLHS.insert(std::pair<std::string,float>(iter2->first,iter2->second));
+            std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedCountsLabelsLHS =
+              countsLabelsLHS.insert(std::pair<std::string,float>(iter2->first,iter2->second));
             if (!insertedCountsLabelsLHS.second) {
               (insertedCountsLabelsLHS.first)->second += iter2->second;
             }
 
-            boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::iterator jointCountsRulesTargetLHSAndLabelsLHSIter = 
-                jointCountsRulesTargetLHSAndLabelsLHS.find(ruleTargetLhs);
+            boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::iterator jointCountsRulesTargetLHSAndLabelsLHSIter =
+              jointCountsRulesTargetLHSAndLabelsLHS.find(ruleTargetLhs);
             if ( jointCountsRulesTargetLHSAndLabelsLHSIter == jointCountsRulesTargetLHSAndLabelsLHS.end() ) {
               boost::unordered_map<std::string,float>* jointCounts = new boost::unordered_map<std::string,float>;
               jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
               jointCountsRulesTargetLHSAndLabelsLHS.insert(std::pair<std::string,boost::unordered_map<std::string,float>* >(ruleTargetLhs,jointCounts));
             } else {
               boost::unordered_map<std::string,float>* jointCounts = jointCountsRulesTargetLHSAndLabelsLHSIter->second;
-              std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedJointCounts = 
-                  jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+              std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedJointCounts =
+                jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
               if (!insertedJointCounts.second) {
                 (insertedJointCounts.first)->second += iter2->second;
               }
             }
 
-          } 
+          }
         }
 
         lhsGivenCurrentRhsCounts.clear();
@@ -410,7 +410,7 @@ std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::s
       currentRhs = rhs;
     }
 
-    currentRhsCount += iter->second; 
+    currentRhsCount += iter->second;
     lhsGivenCurrentRhsCounts.push_back( std::pair<std::string,float>(lhs,iter->second) );
   }
 
@@ -436,28 +436,28 @@ std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::s
       ruleTargetLhs.erase(ruleTargetLhs.begin());  // strip square brackets
       ruleTargetLhs.erase(ruleTargetLhs.size()-1);
 
-      std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedCountsLabelsLHS = 
-          countsLabelsLHS.insert(std::pair<std::string,float>(iter2->first,iter2->second));
+      std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedCountsLabelsLHS =
+        countsLabelsLHS.insert(std::pair<std::string,float>(iter2->first,iter2->second));
       if (!insertedCountsLabelsLHS.second) {
         (insertedCountsLabelsLHS.first)->second += iter2->second;
       }
 
-      boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::iterator jointCountsRulesTargetLHSAndLabelsLHSIter = 
-          jointCountsRulesTargetLHSAndLabelsLHS.find(ruleTargetLhs);
+      boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::iterator jointCountsRulesTargetLHSAndLabelsLHSIter =
+        jointCountsRulesTargetLHSAndLabelsLHS.find(ruleTargetLhs);
       if ( jointCountsRulesTargetLHSAndLabelsLHSIter == jointCountsRulesTargetLHSAndLabelsLHS.end() ) {
         boost::unordered_map<std::string,float>* jointCounts = new boost::unordered_map<std::string,float>;
         jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
         jointCountsRulesTargetLHSAndLabelsLHS.insert(std::pair<std::string,boost::unordered_map<std::string,float>* >(ruleTargetLhs,jointCounts));
       } else {
         boost::unordered_map<std::string,float>* jointCounts = jointCountsRulesTargetLHSAndLabelsLHSIter->second;
-        std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedJointCounts = 
-            jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+        std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedJointCounts =
+          jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
         if (!insertedJointCounts.second) {
           (insertedJointCounts.first)->second += iter2->second;
         }
       }
 
-    } 
+    }
   }
 
   std::string allPropertyValuesString(oss.str());
@@ -465,11 +465,11 @@ std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::s
 }
 
 
-void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key, 
-                                                        const std::vector<float> &orientationClassPriorsL2R, 
-                                                        const std::vector<float> &orientationClassPriorsR2L,
-                                                        double smoothingFactor, 
-                                                        std::ostream &out) const
+void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
+    const std::vector<float> &orientationClassPriorsL2R,
+    const std::vector<float> &orientationClassPriorsR2L,
+    double smoothingFactor,
+    std::ostream &out) const
 {
   assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dleft dright
 
@@ -479,12 +479,12 @@ void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
     return;
   }
 
-  // bidirectional MSLR phrase orientation with 2x4 orientation classes: 
+  // bidirectional MSLR phrase orientation with 2x4 orientation classes:
   // mono swap dright dleft
   std::vector<float> orientationClassCountSumL2R(4,0);
   std::vector<float> orientationClassCountSumR2L(4,0);
 
-  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin(); 
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin();
        iter!=allPropertyValues->end(); ++iter) {
     std::string l2rOrientationClass, r2lOrientationClass;
     try {
@@ -492,12 +492,12 @@ void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
       tokenizer >> l2rOrientationClass;
       tokenizer >> r2lOrientationClass;
       if ( tokenizer.peek() != EOF ) {
-        UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+        UTIL_THROW(util::Exception, "ExtractionPhrasePair"
                    << ": Collecting phrase orientations failed. "
                    << "Too many tokens?");
       }
     } catch (const std::exception &e) {
-      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair"
                  << ": Collecting phrase orientations failed. "
                  << "Flawed property value in extract file?");
     }
@@ -516,7 +516,7 @@ void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
       l2rOrientationClassId = 3;
     }
     if (l2rOrientationClassId == -1) {
-      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair"
                  << ": Collecting phrase orientations failed. "
                  << "Unknown orientation class \"" << l2rOrientationClass << "\"." );
     }
@@ -534,7 +534,7 @@ void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
       r2lOrientationClassId = 3;
     }
     if (r2lOrientationClassId == -1) {
-      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair"
                  << ": Collecting phrase orientations failed. "
                  << "Unknown orientation class \"" << r2lOrientationClass << "\"." );
     }

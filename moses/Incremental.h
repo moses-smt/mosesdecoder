@@ -44,19 +44,19 @@ public:
   void OutputNBest(OutputCollector *collector) const;
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
   void OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const;
-  void OutputLatticeSamples(OutputCollector *collector) const
-  {}
-  void OutputAlignment(OutputCollector *collector) const
-  {}
+  void OutputLatticeSamples(OutputCollector *collector) const {
+  }
+  void OutputAlignment(OutputCollector *collector) const {
+  }
   void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const;
-  void OutputWordGraph(OutputCollector *collector) const
-  {}
-  void OutputSearchGraph(OutputCollector *collector) const
-  {}
-  void OutputSearchGraphSLF() const
-  {}
-  void OutputSearchGraphHypergraph() const
-  {}
+  void OutputWordGraph(OutputCollector *collector) const {
+  }
+  void OutputSearchGraph(OutputCollector *collector) const {
+  }
+  void OutputSearchGraphSLF() const {
+  }
+  void OutputSearchGraphHypergraph() const {
+  }
 
 
 private:
@@ -77,35 +77,35 @@ private:
 
   // outputs
   void OutputDetailedTranslationReport(
-      OutputCollector *collector,
+    OutputCollector *collector,
+    const search::Applied *applied,
+    const Sentence &sentence,
+    long translationId) const;
+  void OutputTranslationOptions(std::ostream &out,
+                                ApplicationContext &applicationContext,
+                                const search::Applied *applied,
+                                const Sentence &sentence,
+                                long translationId) const;
+  void OutputTranslationOption(std::ostream &out,
+                               ApplicationContext &applicationContext,
+                               const search::Applied *applied,
+                               const Sentence &sentence,
+                               long translationId) const;
+  void ReconstructApplicationContext(const search::Applied *applied,
+                                     const Sentence &sentence,
+                                     ApplicationContext &context) const;
+  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
+      ApplicationContext &applicationContext,
       const search::Applied *applied,
       const Sentence &sentence,
       long translationId) const;
-    void OutputTranslationOptions(std::ostream &out,
-  		  ApplicationContext &applicationContext,
-  		  const search::Applied *applied,
-  		  const Sentence &sentence,
-  		  long translationId) const;
-    void OutputTranslationOption(std::ostream &out,
-    		ApplicationContext &applicationContext,
-    		const search::Applied *applied,
-    		const Sentence &sentence,
-    		long translationId) const;
-    void ReconstructApplicationContext(const search::Applied *applied,
-        const Sentence &sentence,
-        ApplicationContext &context) const;
-    void OutputTreeFragmentsTranslationOptions(std::ostream &out,
-    		ApplicationContext &applicationContext,
-    		const search::Applied *applied,
-    		const Sentence &sentence,
-    		long translationId) const;
-    void OutputBestHypo(OutputCollector *collector, search::Applied applied, long translationId) const;
-    void OutputBestNone(OutputCollector *collector, long translationId) const;
+  void OutputBestHypo(OutputCollector *collector, search::Applied applied, long translationId) const;
+  void OutputBestNone(OutputCollector *collector, long translationId) const;
 
-    void OutputUnknowns(OutputCollector *collector) const
-    {}
-    void CalcDecoderStatistics() const
-    {}
+  void OutputUnknowns(OutputCollector *collector) const {
+  }
+  void CalcDecoderStatistics() const {
+  }
 
 };
 

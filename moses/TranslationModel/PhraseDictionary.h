@@ -77,8 +77,6 @@ public:
     return s_staticColl;
   }
 
-  static std::vector<PhraseDictionary*> GetCollExclOOVPt();
-
   PhraseDictionary(const std::string &line);
 
   virtual ~PhraseDictionary() {
@@ -90,8 +88,9 @@ public:
   }
 
   //! continguous id for each pt, starting from 0
-  size_t GetId() const
-  { return m_id; }
+  size_t GetId() const {
+    return m_id;
+  }
 
   virtual
   void

@@ -31,9 +31,9 @@ namespace S2T
 
 template<typename Parser>
 Manager<Parser>::Manager(const InputType &source)
-    : Syntax::Manager(source)
-    , m_pchart(source.GetSize(), Parser::RequiresCompressedChart())
-    , m_schart(source.GetSize())
+  : Syntax::Manager(source)
+  , m_pchart(source.GetSize(), Parser::RequiresCompressedChart())
+  , m_schart(source.GetSize())
 {
 }
 
@@ -100,7 +100,7 @@ void Manager<Parser>::InitializeParsers(PChart &pchart,
     m_oovRuleTrie = oovHandler.SynthesizeRuleTrie(m_oovs.begin(), m_oovs.end());
     // Create a parser for the OOV rule trie.
     boost::shared_ptr<Parser> parser(
-        new Parser(pchart, *m_oovRuleTrie, maxOovWidth));
+      new Parser(pchart, *m_oovRuleTrie, maxOovWidth));
     m_parsers.push_back(parser);
   }
 }
@@ -197,14 +197,14 @@ void Manager<Parser>::Decode()
 
       // Retrieve the (pruned) set of SHyperedgeBundles from the callback.
       const BoundedPriorityContainer<SHyperedgeBundle> &bundles =
-          callback.GetContainer();
+        callback.GetContainer();
 
       // Use cube pruning to extract SHyperedges from SHyperedgeBundles.
       // Collect the SHyperedges into buffers, one for each category.
       CubeQueue cubeQueue(bundles.Begin(), bundles.End());
       std::size_t count = 0;
       typedef boost::unordered_map<Word, std::vector<SHyperedge*>,
-                                   SymbolHasher, SymbolEqualityPred > BufferMap;
+              SymbolHasher, SymbolEqualityPred > BufferMap;
       BufferMap buffers;
       while (count < popLimit && !cubeQueue.IsEmpty()) {
         SHyperedge *hyperedge = cubeQueue.Pop();
@@ -228,7 +228,7 @@ void Manager<Parser>::Decode()
         const Word &category = p->first;
         const std::vector<SHyperedge*> &buffer = p->second;
         std::pair<SChart::Cell::NMap::Iterator, bool> ret =
-            scell.nonTerminalStacks.Insert(category, SVertexStack());
+          scell.nonTerminalStacks.Insert(category, SVertexStack());
         assert(ret.second);
         SVertexStack &stack = ret.first->second;
         RecombineAndSort(buffer, stack);
@@ -269,9 +269,9 @@ const SHyperedge *Manager<Parser>::GetBestSHyperedge() const
 
 template<typename Parser>
 void Manager<Parser>::ExtractKBest(
-    std::size_t k,
-    std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
-    bool onlyDistinct) const
+  std::size_t k,
+  std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
+  bool onlyDistinct) const
 {
   kBestList.clear();
   if (k == 0 || m_source.GetSize() == 0) {
@@ -326,18 +326,18 @@ template<typename Parser>
 void Manager<Parser>::PrunePChart(const SChart::Cell &scell,
                                   PChart::Cell &pcell)
 {
-/* FIXME
-  PChart::Cell::VertexMap::iterator p = pcell.vertices.begin();
-  while (p != pcell.vertices.end()) {
-    const Word &category = p->first;
-    if (scell.stacks.find(category) == scell.stacks.end()) {
-      PChart::Cell::VertexMap::iterator q = p++;
-      pcell.vertices.erase(q);
-    } else {
-      ++p;
+  /* FIXME
+    PChart::Cell::VertexMap::iterator p = pcell.vertices.begin();
+    while (p != pcell.vertices.end()) {
+      const Word &category = p->first;
+      if (scell.stacks.find(category) == scell.stacks.end()) {
+        PChart::Cell::VertexMap::iterator q = p++;
+        pcell.vertices.erase(q);
+      } else {
+        ++p;
+      }
     }
-  }
-*/
+  */
 }
 
 template<typename Parser>
@@ -390,7 +390,7 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
 
 template<typename Parser>
 void Manager<Parser>::OutputDetailedTranslationReport(
-    OutputCollector *collector) const
+  OutputCollector *collector) const
 {
   const SHyperedge *best = GetBestSHyperedge();
   if (best == NULL || collector == NULL) {

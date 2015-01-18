@@ -48,6 +48,7 @@ public:
 
   // properties
   bool spanLength;
+  bool ruleLength;
   bool nonTermContext;
   bool nonTermContextTarget;
   int nonTermContextFactor;

@@ -128,15 +128,15 @@ public:
   std::string CollectAllPropertyValues(const std::string &key) const;
 
   std::string CollectAllLabelsSeparateLHSAndRHS(const std::string& propertyKey,
-                                                std::set<std::string>& sourceLabelSet,
-                                                boost::unordered_map<std::string,float>& sourceLHSCounts,
-                                                boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& sourceRHSAndLHSJointCounts, 
-                                                Vocabulary &vcbT) const;
+      std::set<std::string>& sourceLabelSet,
+      boost::unordered_map<std::string,float>& sourceLHSCounts,
+      boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& sourceRHSAndLHSJointCounts,
+      Vocabulary &vcbT) const;
 
-  void CollectAllPhraseOrientations(const std::string &key, 
-                                    const std::vector<float> &orientationClassPriorsL2R, 
-                                    const std::vector<float> &orientationClassPriorsR2L, 
-                                    double smoothingFactor, 
+  void CollectAllPhraseOrientations(const std::string &key,
+                                    const std::vector<float> &orientationClassPriorsL2R,
+                                    const std::vector<float> &orientationClassPriorsR2L,
+                                    double smoothingFactor,
                                     std::ostream &out) const;
 
   void AddProperties( const std::string &str, float count );

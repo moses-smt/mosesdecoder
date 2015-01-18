@@ -30,29 +30,33 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
 
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
     targetPhrase.SetRuleSource(source);
   };
 
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
 
   void EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
-    ScoreComponentCollection* accumulator) const
-  {};
+    ScoreComponentCollection* accumulator) const {
+  };
 
   void EvaluateWhenApplied(
     const ChartHypothesis& cur_hypo,
-    ScoreComponentCollection* accumulator) const
-  {};
+    ScoreComponentCollection* accumulator) const {
+  };
 
 private:
   std::string m_sourceLabelSetFile;
@@ -63,6 +67,10 @@ private:
 
   boost::unordered_map<std::string,size_t> m_sourceLabels;
   std::vector<std::string> m_sourceLabelsByIndex;
+  std::vector<std::string> m_sourceLabelsByIndex_RHS_1;
+  std::vector<std::string> m_sourceLabelsByIndex_RHS_0;
+  std::vector<std::string> m_sourceLabelsByIndex_LHS_1;
+  std::vector<std::string> m_sourceLabelsByIndex_LHS_0;
   boost::unordered_set<size_t> m_coreSourceLabels;
   boost::unordered_map<const Factor*,size_t> m_sourceLabelIndexesByFactor;
   size_t m_GlueTopLabel;
@@ -79,8 +87,8 @@ private:
   void LoadCoreSourceLabelSet();
   void LoadTargetSourceLeftHandSideJointCountFile();
 
-  std::pair<float,float> GetLabelPairProbabilities(const Factor* target, 
-                                                   const size_t source) const;
+  std::pair<float,float> GetLabelPairProbabilities(const Factor* target,
+      const size_t source) const;
 
 };
 

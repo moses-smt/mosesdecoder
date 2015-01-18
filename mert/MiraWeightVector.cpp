@@ -93,7 +93,8 @@ void MiraWeightVector::update(size_t index, ValType delta)
   m_lastUpdated[index] = m_numUpdates;
 }
 
-void MiraWeightVector::ToSparse(SparseVector* sparse) const {
+void MiraWeightVector::ToSparse(SparseVector* sparse) const
+{
   for (size_t i = 0; i < m_weights.size(); ++i) {
     if(abs(m_weights[i])>1e-8) {
       sparse->set(i,m_weights[i]);
@@ -171,7 +172,8 @@ size_t AvgWeightVector::size() const
   return m_wv.m_weights.size();
 }
 
-void AvgWeightVector::ToSparse(SparseVector* sparse) const {
+void AvgWeightVector::ToSparse(SparseVector* sparse) const
+{
   for (size_t i = 0; i < size(); ++i) {
     ValType w = weight(i);
     if(abs(w)>1e-8) {

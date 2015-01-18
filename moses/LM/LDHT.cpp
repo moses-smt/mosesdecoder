@@ -98,8 +98,8 @@ public:
                     const FFState* input_state,
                     ScoreComponentCollection* score_output) const;
   FFState* EvaluateWhenApplied(const ChartHypothesis& hypo,
-                         int featureID,
-                         ScoreComponentCollection* accumulator) const;
+                               int featureID,
+                               ScoreComponentCollection* accumulator) const;
 
   virtual void IssueRequestsFor(Hypothesis& hypo,
                                 const FFState* input_state);

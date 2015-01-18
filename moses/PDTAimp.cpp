@@ -8,7 +8,8 @@ PDTAimp::PDTAimp(PhraseDictionaryTreeAdaptor *p)
     m_obj(p),
     useCache(1),
     totalE(0),
-    distinctE(0) {
+    distinctE(0)
+{
   m_numInputScores = 0;
   m_inputFeature = &InputFeature::Instance();
 
@@ -20,7 +21,8 @@ PDTAimp::PDTAimp(PhraseDictionaryTreeAdaptor *p)
   }
 }
 
-PDTAimp::~PDTAimp() {
+PDTAimp::~PDTAimp()
+{
   CleanUp();
   delete m_dict;
 
@@ -57,7 +59,8 @@ PDTAimp::~PDTAimp() {
 
 }
 
-void PDTAimp::CleanUp() {
+void PDTAimp::CleanUp()
+{
   assert(m_dict);
   m_dict->FreeMemory();
   for(size_t i=0; i<m_tgtColls.size(); ++i) delete m_tgtColls[i];
@@ -68,9 +71,10 @@ void PDTAimp::CleanUp() {
 }
 
 TargetPhraseCollectionWithSourcePhrase const*
-PDTAimp::GetTargetPhraseCollection(Phrase const &src) const {
+PDTAimp::GetTargetPhraseCollection(Phrase const &src) const
+{
 
-	assert(m_dict);
+  assert(m_dict);
   if(src.GetSize()==0) return 0;
 
   std::pair<MapSrc2Tgt::iterator,bool> piter;
@@ -150,10 +154,11 @@ PDTAimp::GetTargetPhraseCollection(Phrase const &src) const {
 }
 
 void PDTAimp::Create(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , const std::vector<float> &weight
-           ) {
+                     , const std::vector<FactorType> &output
+                     , const std::string &filePath
+                     , const std::vector<float> &weight
+                    )
+{
 
   // set my members
   m_dict=new PhraseDictionaryTree();
@@ -174,14 +179,15 @@ void PDTAimp::Create(const std::vector<FactorType> &input
 //		m_dict->Read(filePath);
   bool res=m_dict->Read(filePath);
   if (!res) {
-	std::cerr << "bin ttable was read in a wrong way\n";
+    std::cerr << "bin ttable was read in a wrong way\n";
     exit(1);
   }
 }
 
 
-void PDTAimp::CacheSource(ConfusionNet const& src) {
-	assert(m_dict);
+void PDTAimp::CacheSource(ConfusionNet const& src)
+{
+  assert(m_dict);
   const size_t srcSize=src.GetSize();
 
   std::vector<size_t> exploredPaths(srcSize+1,0);
@@ -243,7 +249,7 @@ void PDTAimp::CacheSource(ConfusionNet const& src) {
 
       //assert that we have the right number of link params in this CN option
       UTIL_THROW_IF2(currCol[colidx].second.denseScores.size() < m_numInputScores,
-      		"Incorrect number of input scores");
+                     "Incorrect number of input scores");
 
       // do not start with epsilon (except at first position)
       if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue;
@@ -298,7 +304,7 @@ void PDTAimp::CacheSource(ConfusionNet const& src) {
             //put input scores in first - already logged, just drop in directly
             std::vector<float> transcores(m_obj->GetNumScoreComponents());
             UTIL_THROW_IF2(transcores.size() != weightTrans.size(),
-          		  "Incorrect number of translation scores");
+                           "Incorrect number of translation scores");
 
             //put in phrase table scores, logging as we insert
             std::transform(tcands[i].scores.begin()
@@ -395,11 +401,12 @@ void PDTAimp::CacheSource(ConfusionNet const& src) {
 }
 
 void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
-                        StringTgtCand::Tokens const& factorStrings,
-                        Scores const& transVector,
-                        Scores const& inputVector,
-                        const std::string *alignmentString,
-                        Phrase const* srcPtr) const {
+                                 StringTgtCand::Tokens const& factorStrings,
+                                 Scores const& transVector,
+                                 Scores const& inputVector,
+                                 const std::string *alignmentString,
+                                 Phrase const* srcPtr) const
+{
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   for(size_t k=0; k<factorStrings.size(); ++k) {
@@ -425,10 +432,11 @@ void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
 TargetPhraseCollectionWithSourcePhrase* PDTAimp::PruneTargetCandidates
 (const std::vector<TargetPhrase> & tCands,
  std::vector<std::pair<float,size_t> >& costs,
- const std::vector<Phrase> &sourcePhrases) const {
+ const std::vector<Phrase> &sourcePhrases) const
+{
   // convert into TargetPhraseCollection
   UTIL_THROW_IF2(tCands.size() != sourcePhrases.size(),
-  		"Number of target phrases must equal number of source phrases");
+                 "Number of target phrases must equal number of source phrases");
 
   TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
 

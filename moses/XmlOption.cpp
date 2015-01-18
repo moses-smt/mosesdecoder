@@ -321,32 +321,32 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
         // update: add new aligned sentence pair to Mmsapt identified by name
         else if (tagName == "update") {
 #if PT_UG
-            // get model name and aligned sentence pair
-            string pdName = ParseXmlTagAttribute(tagContent,"name");
-            string source = ParseXmlTagAttribute(tagContent,"source");
-            string target = ParseXmlTagAttribute(tagContent,"target");
-            string alignment = ParseXmlTagAttribute(tagContent,"alignment");
-            // find PhraseDictionary by name
-            const vector<PhraseDictionary*> &pds = PhraseDictionary::GetColl();
-            PhraseDictionary* pd = NULL;
-            for (vector<PhraseDictionary*>::const_iterator i = pds.begin(); i != pds.end(); ++i) {
-                PhraseDictionary* curPd = *i;
-                if (curPd->GetScoreProducerDescription() == pdName) {
-                    pd = curPd;
-                    break;
-                }
+          // get model name and aligned sentence pair
+          string pdName = ParseXmlTagAttribute(tagContent,"name");
+          string source = ParseXmlTagAttribute(tagContent,"source");
+          string target = ParseXmlTagAttribute(tagContent,"target");
+          string alignment = ParseXmlTagAttribute(tagContent,"alignment");
+          // find PhraseDictionary by name
+          const vector<PhraseDictionary*> &pds = PhraseDictionary::GetColl();
+          PhraseDictionary* pd = NULL;
+          for (vector<PhraseDictionary*>::const_iterator i = pds.begin(); i != pds.end(); ++i) {
+            PhraseDictionary* curPd = *i;
+            if (curPd->GetScoreProducerDescription() == pdName) {
+              pd = curPd;
+              break;
             }
-            if (pd == NULL) {
-                TRACE_ERR("ERROR: No PhraseDictionary with name " << pdName << ", no update" << endl);
-                return false;
-            }
-            // update model
-            VERBOSE(3,"Updating " << pdName << " ||| " << source << " ||| " << target << " ||| " << alignment << endl);
-            Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(pd);
-            pdsa->add(source, target, alignment);
-#else
-            TRACE_ERR("ERROR: recompile with --with-mm to update PhraseDictionary at runtime" << endl);
+          }
+          if (pd == NULL) {
+            TRACE_ERR("ERROR: No PhraseDictionary with name " << pdName << ", no update" << endl);
             return false;
+          }
+          // update model
+          VERBOSE(3,"Updating " << pdName << " ||| " << source << " ||| " << target << " ||| " << alignment << endl);
+          Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(pd);
+          pdsa->add(source, target, alignment);
+#else
+          TRACE_ERR("ERROR: recompile with --with-mm to update PhraseDictionary at runtime" << endl);
+          return false;
 #endif
         }
 
@@ -356,44 +356,44 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
         // for PhraseDictionaryBitextSampling (Mmsapt) models:
         // <update name="TranslationModelName" source=" " target=" " alignment=" " />
         else if (tagName == "weight-overwrite") {
-            
-            // is a name->ff map stored anywhere so we don't have to build it every time?
-            const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-            boost::unordered_map<string, FeatureFunction*> map;
-            BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
-                map[ff->GetScoreProducerDescription()] = ff;
-            }
 
-            // update each weight listed
-            ScoreComponentCollection allWeights = StaticData::Instance().GetAllWeights();
-            boost::unordered_map<string, FeatureFunction*>::iterator ffi;
-            string ffName("");
-            vector<float> ffWeights;
-            vector<string> toks = Tokenize(ParseXmlTagAttribute(tagContent,"weights"));
-            BOOST_FOREACH(string const& tok, toks) {
-                if (tok.substr(tok.size() - 1, 1) == "=") {
-                    // start new feature
-                    if (ffName != "") {
-                        // set previous feature weights
-                        if (ffi != map.end()) {
-                            allWeights.Assign(ffi->second, ffWeights);
-                        }
-                        ffWeights.clear();
-                    }
-                    ffName = tok.substr(0, tok.size() - 1);
-                    ffi = map.find(ffName);
-                    if (ffi == map.end()) {
-                        TRACE_ERR("ERROR: No FeatureFunction with name " << ffName << ", no weight update" << endl);
-                    }
-                } else {
-                    // weight for current feature
-                    ffWeights.push_back(Scan<float>(tok));
+          // is a name->ff map stored anywhere so we don't have to build it every time?
+          const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+          boost::unordered_map<string, FeatureFunction*> map;
+          BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
+            map[ff->GetScoreProducerDescription()] = ff;
+          }
+
+          // update each weight listed
+          ScoreComponentCollection allWeights = StaticData::Instance().GetAllWeights();
+          boost::unordered_map<string, FeatureFunction*>::iterator ffi;
+          string ffName("");
+          vector<float> ffWeights;
+          vector<string> toks = Tokenize(ParseXmlTagAttribute(tagContent,"weights"));
+          BOOST_FOREACH(string const& tok, toks) {
+            if (tok.substr(tok.size() - 1, 1) == "=") {
+              // start new feature
+              if (ffName != "") {
+                // set previous feature weights
+                if (ffi != map.end()) {
+                  allWeights.Assign(ffi->second, ffWeights);
                 }
+                ffWeights.clear();
+              }
+              ffName = tok.substr(0, tok.size() - 1);
+              ffi = map.find(ffName);
+              if (ffi == map.end()) {
+                TRACE_ERR("ERROR: No FeatureFunction with name " << ffName << ", no weight update" << endl);
+              }
+            } else {
+              // weight for current feature
+              ffWeights.push_back(Scan<float>(tok));
             }
-            if (ffi != map.end()) {
-                allWeights.Assign(ffi->second, ffWeights);
-            }
-            StaticData::InstanceNonConst().SetAllWeights(allWeights);
+          }
+          if (ffi != map.end()) {
+            allWeights.Assign(ffi->second, ffWeights);
+          }
+          StaticData::InstanceNonConst().SetAllWeights(allWeights);
         }
 
         // default: opening tag that specifies translation options
@@ -401,8 +401,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
           if (startPos > endPos) {
             TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
             return false;
-          }
-          else if (startPos == endPos) {
+          } else if (startPos == endPos) {
             TRACE_ERR("WARNING: tag " << tagName << " 0 span: " << line << endl);
             continue;
           }

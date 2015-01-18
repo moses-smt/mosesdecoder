@@ -44,7 +44,7 @@ public:
 
   void Write(const ScfgRule &rule, bool printEndl=true);
 
-  void Write(const ScfgRule &rule, const Subgraph &g, bool printEndl=true); 
+  void Write(const ScfgRule &rule, const Subgraph &g, bool printEndl=true);
 
 private:
   // Disallow copying

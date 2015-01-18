@@ -20,8 +20,7 @@ namespace ScoreStsg
 // that 'tokens' and 'frontierSymbols' use StringPiece objects that depend on
 // the original string.  Therefore changing the value of 'string' invalidates
 // both 'tokens' and 'frontierSymbols'.
-struct TokenizedRuleHalf
-{
+struct TokenizedRuleHalf {
   bool IsFullyLexical() const;
   bool IsString() const;
   bool IsTree() const;

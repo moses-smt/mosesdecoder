@@ -32,24 +32,24 @@ Phrase GetOneBestTargetYield(const SHyperedge &h)
       }
       assert(false);
       // FIXME Modify this chunk of code to work for SHyperedge.
-/*
-      std::set<std::size_t> sourcePosSet =
-        h.translation->GetAlignTerm().GetAlignmentsForTarget(pos);
-      if (sourcePosSet.size() == 1) {
-        const std::vector<const Word*> *ruleSourceFromInputPath =
-          hypo.GetTranslationOption().GetSourceRuleFromInputPath();
-        UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
-                       "Source Words in of the rules hasn't been filled out");
-        std::size_t sourcePos = *sourcePosSet.begin();
-        const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
-        UTIL_THROW_IF2(sourceWord == NULL,
-                       "Null source word at position " << sourcePos);
-        const Factor *factor = sourceWord->GetFactor(placeholderFactor);
-        if (factor) {
-          ret.Back()[0] = factor;
-        }
-      }
-*/
+      /*
+            std::set<std::size_t> sourcePosSet =
+              h.translation->GetAlignTerm().GetAlignmentsForTarget(pos);
+            if (sourcePosSet.size() == 1) {
+              const std::vector<const Word*> *ruleSourceFromInputPath =
+                hypo.GetTranslationOption().GetSourceRuleFromInputPath();
+              UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
+                             "Source Words in of the rules hasn't been filled out");
+              std::size_t sourcePos = *sourcePosSet.begin();
+              const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
+              UTIL_THROW_IF2(sourceWord == NULL,
+                             "Null source word at position " << sourcePos);
+              const Factor *factor = sourceWord->GetFactor(placeholderFactor);
+              if (factor) {
+                ret.Back()[0] = factor;
+              }
+            }
+      */
     }
   }
   return ret;

@@ -32,6 +32,15 @@ my $glueFile;
 my $phraseOrientation = 0;
 my $phraseOrientationPriorsFile;
 
+my $GZIP_EXEC; # = which("pigz"); 
+if(-f "/usr/bin/pigz") {
+  $GZIP_EXEC = 'pigz';
+}
+else {
+  $GZIP_EXEC = 'gzip';
+}
+print STDERR "using $GZIP_EXEC \n";
+
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
   $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
@@ -178,11 +187,11 @@ if (defined($baselineExtract)) {
 		$catOCmd .= "$baselineExtract.o$sorted.gz ";
 }
 
-$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.sorted.gz 2>> /dev/stderr \n";
-$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
-$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
-$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
-$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
+$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP_EXEC -c > $extract.sorted.gz 2>> /dev/stderr \n";
+$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP_EXEC -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
+$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP_EXEC -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
+$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | $GZIP_EXEC -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
+$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | $GZIP_EXEC -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
 
 
 @children = ();

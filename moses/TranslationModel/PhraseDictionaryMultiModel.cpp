@@ -33,19 +33,19 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
   if (m_mode == "interpolate") {
     size_t numWeights = m_numScoreComponents;
     UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
-	    m_pdStr.size()*numWeights != m_multimodelweights.size(),
-        "Number of scores and weights are not equal");
+                   m_pdStr.size()*numWeights != m_multimodelweights.size(),
+                   "Number of scores and weights are not equal");
   } else if (m_mode == "all" || m_mode == "all-restrict") {
     size_t componentWeights = 0;
     for(size_t i = 0; i < m_numModels; ++i) {
       const string &ptName = m_pdStr[i];
       PhraseDictionary *pt = FindPhraseDictionary(ptName);
       UTIL_THROW_IF2(pt == NULL,
-          "Could not find component phrase table " << ptName);
+                     "Could not find component phrase table " << ptName);
       componentWeights += pt->GetNumScoreComponents();
     }
     UTIL_THROW_IF2(componentWeights != m_numScoreComponents,
-        "Total number of component model scores is unequal to specified number of scores");
+                   "Total number of component model scores is unequal to specified number of scores");
   } else {
     ostringstream msg;
     msg << "combination mode unknown: " << m_mode;
@@ -57,10 +57,10 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(int type, const std::stri
   :PhraseDictionary(line)
 {
   if (type == 1) {
-	// PhraseDictionaryMultiModelCounts
+    // PhraseDictionaryMultiModelCounts
     UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
-    		m_pdStr.size()*4 != m_multimodelweights.size(),
-  		  "Number of scores and weights are not equal");
+                   m_pdStr.size()*4 != m_multimodelweights.size(),
+                   "Number of scores and weights are not equal");
   }
 }
 
@@ -91,7 +91,7 @@ void PhraseDictionaryMultiModel::Load()
 
     PhraseDictionary *pt = FindPhraseDictionary(ptName);
     UTIL_THROW_IF2(pt == NULL,
-    		"Could not find component phrase table " << ptName);
+                   "Could not find component phrase table " << ptName);
     m_pd.push_back(pt);
   }
 }
@@ -122,7 +122,7 @@ const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollect
 
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
   const_cast<PhraseDictionaryMultiModel*>(this)->CacheForCleanup(ret);
-  
+
   return ret;
 }
 
@@ -303,7 +303,7 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
     weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   } else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
     //TODO: can we pass error message to client if weights are malformed?
-	std::cerr << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ". Reverting to weights in config";
+    std::cerr << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ". Reverting to weights in config";
     weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   }
 

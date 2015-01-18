@@ -97,8 +97,8 @@ protected:
 
 public:
   SyntaxTree()
-      : m_top(0)  // m_top doesn't get set unless ConnectNodes is called.
-      , m_size(0) {}
+    : m_top(0)  // m_top doesn't get set unless ConnectNodes is called.
+    , m_size(0) {}
 
   ~SyntaxTree();
 

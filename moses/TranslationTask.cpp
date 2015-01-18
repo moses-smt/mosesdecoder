@@ -21,11 +21,12 @@ namespace Moses
 {
 
 TranslationTask::TranslationTask(InputType* source, Moses::IOWrapper &ioWrapper)
-: m_source(source)
-, m_ioWrapper(ioWrapper)
+  : m_source(source)
+  , m_ioWrapper(ioWrapper)
 {}
 
-TranslationTask::~TranslationTask() {
+TranslationTask::~TranslationTask()
+{
   delete m_source;
 }
 
@@ -57,38 +58,30 @@ void TranslationTask::Run()
   // which manager
   BaseManager *manager;
 
-	switch (staticData.IsChart())
-	{
-	case false:
-		// phrase-based
-		manager = new Manager(*m_source);
-		break;
-	case true:
-	    if (staticData.UseS2TDecoder()) {
-	      // various syntax models by Phul Williams
-	      S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
-	      if (algorithm == RecursiveCYKPlus) {
-	        typedef Syntax::S2T::EagerParserCallback Callback;
-	        typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
-	        manager = new Syntax::S2T::Manager<Parser>(*m_source);
-	      } else if (algorithm == Scope3) {
-	        typedef Syntax::S2T::StandardParserCallback Callback;
-	        typedef Syntax::S2T::Scope3Parser<Callback> Parser;
-	        manager = new Syntax::S2T::Manager<Parser>(*m_source);
-	      } else {
-	        UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
-	      }
-	    }
-	    else if (staticData.GetSearchAlgorithm() == ChartIncremental) {
-	    	// Ken's incremental decoding
-			manager = new Incremental::Manager(*m_source);
-		}
-		else {
-			// original SCFG manager
-			manager = new ChartManager(*m_source);
-		}
-		break;
-	}
+  if (!staticData.IsChart()) {
+    // phrase-based
+    manager = new Manager(*m_source);
+  } else if (staticData.UseS2TDecoder()) {
+    // new-style string-to-tree decoding (ask Phil Williams)
+    S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+    if (algorithm == RecursiveCYKPlus) {
+      typedef Syntax::S2T::EagerParserCallback Callback;
+      typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
+      manager = new Syntax::S2T::Manager<Parser>(*m_source);
+    } else if (algorithm == Scope3) {
+      typedef Syntax::S2T::StandardParserCallback Callback;
+      typedef Syntax::S2T::Scope3Parser<Callback> Parser;
+      manager = new Syntax::S2T::Manager<Parser>(*m_source);
+    } else {
+      UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
+    }
+  } else if (staticData.GetSearchAlgorithm() == ChartIncremental) {
+    // Ken's incremental decoding
+    manager = new Incremental::Manager(*m_source);
+  } else {
+    // original SCFG manager
+    manager = new ChartManager(*m_source);
+  }
 
   VERBOSE(1, "Line " << translationId << ": Initialize search took " << initTime << " seconds total" << endl);
   manager->Decode();
@@ -123,8 +116,12 @@ void TranslationTask::Run()
   // detailed translation reporting
   manager->OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
 
+  manager->OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
+
   //list of unknown words
   manager->OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
+
+  manager->OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
 
   // report additional statistics
   manager->CalcDecoderStatistics();

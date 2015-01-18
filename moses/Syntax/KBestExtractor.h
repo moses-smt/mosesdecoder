@@ -28,7 +28,7 @@ namespace Syntax
 //
 class KBestExtractor
 {
- public:
+public:
   struct KVertex;
 
   struct KHyperedge {
@@ -61,8 +61,8 @@ class KBestExtractor
 
   struct KVertex {
     typedef std::priority_queue<boost::weak_ptr<Derivation>,
-                                std::vector<boost::weak_ptr<Derivation> >,
-                                DerivationOrderer> DerivationQueue;
+            std::vector<boost::weak_ptr<Derivation> >,
+            DerivationOrderer> DerivationQueue;
 
     KVertex(const SVertex &v) : svertex(v), visited(false) {}
 
@@ -82,9 +82,9 @@ class KBestExtractor
   static Phrase GetOutputPhrase(const Derivation &);
   static TreePointer GetOutputTree(const Derivation &);
 
- private:
+private:
   typedef boost::unordered_map<const SVertex *,
-                               boost::shared_ptr<KVertex> > VertexMap;
+          boost::shared_ptr<KVertex> > VertexMap;
 
   struct DerivationHasher {
     std::size_t operator()(const boost::shared_ptr<Derivation> &d) const {
@@ -104,7 +104,7 @@ class KBestExtractor
   };
 
   typedef boost::unordered_set<boost::shared_ptr<Derivation>, DerivationHasher,
-                               DerivationEqualityPred> DerivationSet;
+          DerivationEqualityPred> DerivationSet;
 
   boost::shared_ptr<KVertex> FindOrCreateVertex(const SVertex &);
   void GetCandidates(boost::shared_ptr<KVertex>, std::size_t);

@@ -18,7 +18,7 @@ void SymbolRangeCalculator::Calc(const PatternApplicationKey &key,
 
 // Fill in ranges for terminals and set ranges to -1 for non-terminals.
 void SymbolRangeCalculator::FillInTerminalRanges(
-    const PatternApplicationKey &key, std::vector<SymbolRange> &ranges)
+  const PatternApplicationKey &key, std::vector<SymbolRange> &ranges)
 {
   ranges.resize(key.size());
   for (std::size_t i = 0; i < key.size(); ++i) {
@@ -34,7 +34,7 @@ void SymbolRangeCalculator::FillInTerminalRanges(
 }
 
 void SymbolRangeCalculator::FillInAuxSymbolInfo(
-    const std::vector<SymbolRange> &ranges)
+  const std::vector<SymbolRange> &ranges)
 {
   m_auxSymbolInfo.resize(ranges.size());
 
@@ -81,8 +81,8 @@ void SymbolRangeCalculator::FillInAuxSymbolInfo(
 }
 
 void SymbolRangeCalculator::FillInGapRanges(const PatternApplicationKey &key,
-                                            int spanStart, int spanEnd,
-                                            std::vector<SymbolRange> &ranges)
+    int spanStart, int spanEnd,
+    std::vector<SymbolRange> &ranges)
 {
   for (std::size_t i = 0; i < key.size(); ++i) {
     const PatternApplicationTrie *patNode = key[i];

@@ -761,6 +761,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TabbedSentence.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TabbedSentence.cpp</locationURI>
+		</link>
+		<link>
+			<name>TabbedSentence.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TabbedSentence.h</locationURI>
+		</link>
+		<link>
 			<name>TargetPhrase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetPhrase.cpp</locationURI>
@@ -1986,16 +1996,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSuffixArray.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/OOVPT.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/OOVPT.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/OOVPT.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/OOVPT.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/PhraseDictionary.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionary.cpp</locationURI>
@@ -2454,16 +2454,6 @@
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOOVPT.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOOVPT.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOOVPT.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOOVPT.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp</name>

@@ -25,18 +25,22 @@
 
 #include "rule_collection.h"
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
 
 class PcfgTree;
 
 // Extracts PCFG rules from syntax trees and adds them to a RuleCollection.
-class RuleExtractor {
- public:
+class RuleExtractor
+{
+public:
   RuleExtractor(Vocabulary &);
   void Extract(const PcfgTree &, RuleCollection &) const;
- private:
+private:
   Vocabulary &non_term_vocab_;
 };
 

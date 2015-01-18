@@ -35,10 +35,10 @@ namespace ScoreStsg
 const int ScoreStsg::kCountOfCountsMax = 10;
 
 ScoreStsg::ScoreStsg()
-    : m_name("score-stsg")
-    , m_lexTable(m_srcVocab, m_tgtVocab)
-    , m_countOfCounts(kCountOfCountsMax, 0)
-    , m_totalDistinct(0)
+  : m_name("score-stsg")
+  , m_lexTable(m_srcVocab, m_tgtVocab)
+  , m_countOfCounts(kCountOfCountsMax, 0)
+  , m_totalDistinct(0)
 {
 }
 
@@ -278,8 +278,8 @@ double ScoreStsg::ComputeLexProb(const std::vector<RuleSymbol> &sourceFrontier,
       continue;
     }
     Vocabulary::IdType tgtId = m_tgtVocab.Lookup(targetFrontier[i].value,
-                                                 StringPieceCompatibleHash(),
-                                                 StringPieceCompatibleEquals());
+                               StringPieceCompatibleHash(),
+                               StringPieceCompatibleEquals());
     const std::set<std::size_t> &srcIndices = tgtToSrc[i];
     if (srcIndices.empty()) {
       // Explain unaligned word by NULL.
@@ -289,9 +289,9 @@ double ScoreStsg::ComputeLexProb(const std::vector<RuleSymbol> &sourceFrontier,
       for (std::set<std::size_t>::const_iterator p = srcIndices.begin();
            p != srcIndices.end(); ++p) {
         Vocabulary::IdType srcId =
-            m_srcVocab.Lookup(sourceFrontier[*p].value,
-                              StringPieceCompatibleHash(),
-                              StringPieceCompatibleEquals());
+          m_srcVocab.Lookup(sourceFrontier[*p].value,
+                            StringPieceCompatibleHash(),
+                            StringPieceCompatibleEquals());
         thisWordScore += m_lexTable.PermissiveLookup(srcId, tgtId);
       }
       lexScore *= thisWordScore / static_cast<double>(srcIndices.size());
@@ -343,8 +343,8 @@ void ScoreStsg::ProcessOptions(int argc, char *argv[], Options &options) const
    "output log probabilities")
   ("MinCountHierarchical",
    po::value(&options.minCountHierarchical)->
-      default_value(options.minCountHierarchical),
-      "filter out rules with frequency < arg (except fully lexical rules)")
+   default_value(options.minCountHierarchical),
+   "filter out rules with frequency < arg (except fully lexical rules)")
   ("NegLogProb",
    "output negative log probabilities")
   ("NoLex",

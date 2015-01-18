@@ -31,7 +31,7 @@
 namespace MosesTraining
 {
 
-void PropertiesConsolidator::ActivateSourceLabelsProcessing(const std::string &sourceLabelSetFile) 
+void PropertiesConsolidator::ActivateSourceLabelsProcessing(const std::string &sourceLabelSetFile)
 {
   Moses::InputFileStream inFile(sourceLabelSetFile);
 
@@ -57,7 +57,7 @@ void PropertiesConsolidator::ActivateSourceLabelsProcessing(const std::string &s
 }
 
 
-std::string PropertiesConsolidator::ProcessPropertiesString(const std::string &propertiesString) const 
+std::string PropertiesConsolidator::ProcessPropertiesString(const std::string &propertiesString) const
 {
   if ( propertiesString.empty() ) {
     return propertiesString;
@@ -89,14 +89,14 @@ std::string PropertiesConsolidator::ProcessPropertiesString(const std::string &p
         double totalCount;
 
         if (! (tokenizer >> nNTs)) { // first token: number of non-terminals (incl. left-hand side)
-          UTIL_THROW2("Not able to read number of non-terminals from SourceLabels property. " 
+          UTIL_THROW2("Not able to read number of non-terminals from SourceLabels property. "
                       << "Flawed SourceLabels property?");
         }
         assert( nNTs > 0 );
         out << " " << nNTs;
 
         if (! (tokenizer >> totalCount)) { // second token: overall rule count
-          UTIL_THROW2("Not able to read overall rule count from SourceLabels property. " 
+          UTIL_THROW2("Not able to read overall rule count from SourceLabels property. "
                       << "Flawed SourceLabels property?");
         }
         assert( totalCount > 0.0 );

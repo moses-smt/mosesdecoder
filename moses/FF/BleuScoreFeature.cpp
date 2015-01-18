@@ -502,8 +502,8 @@ void BleuScoreFeature::GetClippedNgramMatchesAndCounts(Phrase& phrase,
  * phrase translated.
  */
 FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
-                                    const FFState* prev_state,
-                                    ScoreComponentCollection* accumulator) const
+    const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const
 {
   if (!m_enabled) return new BleuScoreState();
 

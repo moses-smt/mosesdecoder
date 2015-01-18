@@ -58,8 +58,8 @@ protected:
   WordsRange					m_currSourceWordsRange;
   std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   /*! sum of scores of this hypothesis, and previous hypotheses. Lazily initialised.  */
-  mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown; 
-  mutable boost::scoped_ptr<ScoreComponentCollection> m_deltaScoreBreakdown; 
+  mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown;
+  mutable boost::scoped_ptr<ScoreComponentCollection> m_deltaScoreBreakdown;
   ScoreComponentCollection m_currScoreBreakdown /*! scores for this hypothesis only */
   ,m_lmNGram
   ,m_lmPrefix;
@@ -82,21 +82,18 @@ protected:
 
 public:
 #ifdef USE_HYPO_POOL
-  void *operator new(size_t /* num_bytes */) 
-  {
+  void *operator new(size_t /* num_bytes */) {
     void *ptr = s_objectPool.getPtr();
     return ptr;
   }
 
   //! delete \param hypo. Works with object pool too
-  static void Delete(ChartHypothesis *hypo) 
-  {
+  static void Delete(ChartHypothesis *hypo) {
     s_objectPool.freeObject(hypo);
   }
 #else
   //! delete \param hypo. Works with object pool too
-  static void Delete(ChartHypothesis *hypo) 
-  {
+  static void Delete(ChartHypothesis *hypo) {
     delete hypo;
   }
 #endif
@@ -109,43 +106,36 @@ public:
 
   ~ChartHypothesis();
 
-  unsigned GetId() const 
-  {
+  unsigned GetId() const {
     return m_id;
   }
 
-  const ChartTranslationOption &GetTranslationOption() const 
-  {
+  const ChartTranslationOption &GetTranslationOption() const {
     return *m_transOpt;
   }
 
   //! Get the rule that created this hypothesis
-  const TargetPhrase &GetCurrTargetPhrase() const 
-  {
+  const TargetPhrase &GetCurrTargetPhrase() const {
     return m_transOpt->GetPhrase();
   }
 
   //! the source range that this hypothesis spans
-  const WordsRange &GetCurrSourceRange() const 
-  {
+  const WordsRange &GetCurrSourceRange() const {
     return m_currSourceWordsRange;
   }
 
   //! the arc list when creating n-best lists
-  inline const ChartArcList* GetArcList() const 
-  {
+  inline const ChartArcList* GetArcList() const {
     return m_arcList;
   }
 
   //! the feature function states for a particular feature \param featureID
-  inline const FFState* GetFFState( size_t featureID ) const 
-  {
+  inline const FFState* GetFFState( size_t featureID ) const {
     return m_ffStates[ featureID ];
   }
 
   //! reference back to the manager
-  inline const ChartManager& GetManager() const 
-  {
+  inline const ChartManager& GetManager() const {
     return m_manager;
   }
 
@@ -165,21 +155,17 @@ public:
   void SetWinningHypo(const ChartHypothesis *hypo);
 
   //! get the unweighted score for each feature function
-  const ScoreComponentCollection &GetScoreBreakdown() const 
-  {
+  const ScoreComponentCollection &GetScoreBreakdown() const {
     // Note: never call this method before m_currScoreBreakdown is fully computed
-    if (!m_scoreBreakdown.get()) 
-    {
+    if (!m_scoreBreakdown.get()) {
       m_scoreBreakdown.reset(new ScoreComponentCollection());
       // score breakdown from current translation rule
-      if (m_transOpt)
-      {
+      if (m_transOpt) {
         m_scoreBreakdown->PlusEquals(GetTranslationOption().GetScores());
       }
       m_scoreBreakdown->PlusEquals(m_currScoreBreakdown);
       // score breakdowns from prev hypos
-      for (std::vector<const ChartHypothesis*>::const_iterator iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) 
-      {
+      for (std::vector<const ChartHypothesis*>::const_iterator iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
         const ChartHypothesis &prevHypo = **iter;
         m_scoreBreakdown->PlusEquals(prevHypo.GetScoreBreakdown());
       }
@@ -188,15 +174,12 @@ public:
   }
 
   //! get the unweighted score delta for each feature function
-  const ScoreComponentCollection &GetDeltaScoreBreakdown() const 
-  {
+  const ScoreComponentCollection &GetDeltaScoreBreakdown() const {
     // Note: never call this method before m_currScoreBreakdown is fully computed
-    if (!m_deltaScoreBreakdown.get()) 
-    {
+    if (!m_deltaScoreBreakdown.get()) {
       m_deltaScoreBreakdown.reset(new ScoreComponentCollection());
       // score breakdown from current translation rule
-      if (m_transOpt)
-      {
+      if (m_transOpt) {
         m_deltaScoreBreakdown->PlusEquals(GetTranslationOption().GetScores());
       }
       m_deltaScoreBreakdown->PlusEquals(m_currScoreBreakdown);
@@ -206,33 +189,28 @@ public:
   }
 
   //! Get the weighted total score
-  float GetTotalScore() const 
-  {
+  float GetTotalScore() const {
     // scores from current translation rule. eg. translation models & word penalty
     return m_totalScore;
   }
 
   //! vector of previous hypotheses this hypo is built on
-  const std::vector<const ChartHypothesis*> &GetPrevHypos() const 
-  {
+  const std::vector<const ChartHypothesis*> &GetPrevHypos() const {
     return m_prevHypos;
   }
 
   //! get a particular previous hypos
-  const ChartHypothesis* GetPrevHypo(size_t pos) const 
-  {
+  const ChartHypothesis* GetPrevHypo(size_t pos) const {
     return m_prevHypos[pos];
   }
 
   //! get the constituency label that covers this hypo
-  const Word &GetTargetLHS() const 
-  {
+  const Word &GetTargetLHS() const {
     return GetCurrTargetPhrase().GetTargetLHS();
   }
 
   //! get the best hypo in the arc list when doing n-best list creation. It's either this hypothesis, or the best hypo is this hypo is in the arc list
-  const ChartHypothesis* GetWinningHypothesis() const 
-  {
+  const ChartHypothesis* GetWinningHypothesis() const {
     return m_winningHypo;
   }
 

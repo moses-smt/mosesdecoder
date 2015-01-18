@@ -183,7 +183,7 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
   }
 }
 
-void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g, bool printEndl) 
+void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g, bool printEndl)
 {
   Write(rule,false);
   m_fwd << " {{Tree ";

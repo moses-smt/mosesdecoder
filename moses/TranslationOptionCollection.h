@@ -98,6 +98,8 @@ protected:
 
   void EvaluateWithSourceContext();
 
+  void EvaluateTranslatonOptionListWithSourceContext(TranslationOptionList&);
+
   void CacheLexReordering();
 
   void GetTargetPhraseCollectionBatch();
