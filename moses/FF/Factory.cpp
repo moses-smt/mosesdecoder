@@ -76,6 +76,7 @@
 #include "moses/FF/VW/VWFeatureSourceExternalFeatures.h"
 #include "moses/FF/VW/VWFeatureTargetPhraseInternal.h"
 #include "moses/FF/VW/VWFeatureTargetPattern.h"
+#include "moses/FF/VW/VWFeatureTargetPhraseScores.h"
 #endif
 
 #ifdef HAVE_CMPH
@@ -257,6 +258,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(VWFeatureTargetIndicator);
   MOSES_FNAME(VWFeatureSourceExternalFeatures);
   MOSES_FNAME(VWFeatureTargetPattern);
+  MOSES_FNAME(VWFeatureTargetPhraseScores);
 #endif
 
   MOSES_FNAME(CorrectionPattern);

@@ -26,6 +26,9 @@ public:
 
   void Run() {
     StaticData::Instance().InitializeForInput(*m_source);
+    if(m_source->GetTranslationId() % 1000 == 0)
+      std::cerr << "[" << m_source->GetTranslationId() << "]" << std::endl;
+
     TranslationOptionCollection *transOptColl = m_source->CreateTranslationOptionCollection();
     transOptColl->CreateTranslationOptions();
     delete transOptColl;
