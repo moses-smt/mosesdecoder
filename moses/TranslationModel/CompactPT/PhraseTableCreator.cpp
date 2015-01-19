@@ -112,9 +112,9 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
 
   if(tempfilePath.size()) {
     MmapAllocator<unsigned char> allocEncoded(util::FMakeTemp(tempfilePath));
-    m_encodedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
+    m_encodedTargetPhrases = new StringVectorTemp<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
   } else {
-    m_encodedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+    m_encodedTargetPhrases = new StringVectorTemp<unsigned char, unsigned long, MmapAllocator>();
   }
   EncodeTargetPhrases();
 
@@ -1210,7 +1210,7 @@ size_t CompressionTask::m_collectionNum = 0;
 boost::mutex CompressionTask::m_mutex;
 #endif
 
-CompressionTask::CompressionTask(StringVector<unsigned char, unsigned long,
+CompressionTask::CompressionTask(StringVectorTemp<unsigned char, unsigned long,
                                  MmapAllocator>& encodedCollections,
                                  PhraseTableCreator& creator)
   : m_encodedCollections(encodedCollections), m_creator(creator) {}
