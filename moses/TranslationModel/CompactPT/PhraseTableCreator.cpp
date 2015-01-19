@@ -409,6 +409,10 @@ void PhraseTableCreator::CalcHuffmanCodes()
 
 void PhraseTableCreator::AddSourceSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
+
   if(m_sourceSymbolsMap.count(symbol) == 0) {
     unsigned value = m_sourceSymbolsMap.size();
     m_sourceSymbolsMap[symbol] = value;
@@ -417,6 +421,9 @@ void PhraseTableCreator::AddSourceSymbolId(std::string& symbol)
 
 void PhraseTableCreator::AddTargetSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   if(m_targetSymbolsMap.count(symbol) == 0) {
     unsigned value = m_targetSymbolsMap.size();
     m_targetSymbolsMap[symbol] = value;
@@ -425,6 +432,9 @@ void PhraseTableCreator::AddTargetSymbolId(std::string& symbol)
 
 unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   boost::unordered_map<std::string, unsigned>::iterator it
   = m_sourceSymbolsMap.find(symbol);
 
@@ -436,13 +446,14 @@ unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 
 unsigned PhraseTableCreator::GetTargetSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   boost::unordered_map<std::string, unsigned>::iterator it
   = m_targetSymbolsMap.find(symbol);
 
-  if(it != m_targetSymbolsMap.end())
-    return it->second;
-  else
-    return m_targetSymbolsMap.size();
+  UTIL_THROW_IF2(it == m_targetSymbolsMap.end(), "No id found for target symbol: " << symbol);
+  return it->second;
 }
 
 unsigned PhraseTableCreator::GetOrAddTargetSymbolId(std::string& symbol)
