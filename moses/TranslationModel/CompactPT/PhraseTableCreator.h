@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "BlockHashIndex.h"
 #include "StringVector.h"
+#include "StringVectorTemp.h"
 #include "CanonicalHuffman.h"
 
 namespace Moses
@@ -237,7 +238,7 @@ private:
   std::vector<size_t> m_lexicalTableIndex;
   std::vector<SrcTrg> m_lexicalTable;
 
-  StringVector<unsigned char, unsigned long, MmapAllocator>*
+  StringVectorTemp<unsigned char, unsigned long, MmapAllocator>*
   m_encodedTargetPhrases;
 
   StringVector<unsigned char, unsigned long, MmapAllocator>*
@@ -396,12 +397,12 @@ private:
   static boost::mutex m_mutex;
 #endif
   static size_t m_collectionNum;
-  StringVector<unsigned char, unsigned long, MmapAllocator>&
+  StringVectorTemp<unsigned char, unsigned long, MmapAllocator>&
   m_encodedCollections;
   PhraseTableCreator& m_creator;
 
 public:
-  CompressionTask(StringVector<unsigned char, unsigned long, MmapAllocator>&
+  CompressionTask(StringVectorTemp<unsigned char, unsigned long, MmapAllocator>&
                   encodedCollections, PhraseTableCreator& creator);
   void operator()();
 };
