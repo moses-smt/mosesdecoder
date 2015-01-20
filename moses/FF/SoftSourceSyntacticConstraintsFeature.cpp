@@ -531,7 +531,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     break;
 
   case 1:
-    newScores[0] = ( (hasCompleteTreeInputMatch || isGlueGrammarRule || isUnkRule) ? 0 : std::numeric_limits<float>::min() );
+    newScores[0] = ( (hasCompleteTreeInputMatch || isGlueGrammarRule || isUnkRule) ? 0 : -std::numeric_limits<float>::infinity() );
     break;
 
   default:
