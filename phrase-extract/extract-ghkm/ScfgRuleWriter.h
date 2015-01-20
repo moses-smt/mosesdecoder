@@ -42,9 +42,9 @@ public:
     , m_inv(inv)
     , m_options(options) {}
 
-  void Write(const ScfgRule &rule, bool printEndl=true);
+  void Write(const ScfgRule &rule, size_t lineNum, bool printEndl=true);
 
-  void Write(const ScfgRule &rule, const Subgraph &g, bool printEndl=true);
+  void Write(const ScfgRule &rule, const Subgraph &g, size_t lineNum, bool printEndl=true);
 
 private:
   // Disallow copying

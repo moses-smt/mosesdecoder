@@ -534,7 +534,7 @@ void processLine( std::string line,
   if (item + (includeSentenceIdFlag?-1:0) == 3) {
     count = 1.0;
   }
-  if (item < 3 || item > 6) {
+  if (item < 3 || item > (includeSentenceIdFlag?7:6)) {
     std::cerr << "ERROR: faulty line " << lineID << ": " << line << endl;
   }
 

@@ -294,9 +294,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
         // TODO Can scope pruning be done earlier?
         if (r->Scope() <= options.maxScope) {
           if (!options.treeFragments) {
-            scfgWriter.Write(*r,false);
+            scfgWriter.Write(*r,lineNum,false);
           } else {
-            scfgWriter.Write(*r,**q,false);
+            scfgWriter.Write(*r,**q,lineNum,false);
           }
           if (options.phraseOrientation) {
             fwdExtractStream << " {{Orientation ";
@@ -443,6 +443,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "write glue grammar to named file")
   ("GZOutput",
    "write gzipped extract files")
+  ("IncludeSentenceId",
+   "include sentence ID")
   ("MaxNodes",
    po::value(&options.maxNodes)->default_value(options.maxNodes),
    "set maximum number of tree nodes for composed rules")
@@ -563,6 +565,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("GZOutput")) {
     options.gzOutput = true;
   }
+  if (vm.count("IncludeSentenceId")) {
+    options.includeSentenceId = true;
+  }
   if (vm.count("Minimal")) {
     options.minimal = true;
   }
@@ -652,8 +657,8 @@ void ExtractGHKM::WriteGlueGrammar(
     }
   }
 
-  size_t sourceLabelGlueTop = 0;
-  size_t sourceLabelGlueX = 1;
+  const size_t sourceLabelGlueTop = 0;
+  const size_t sourceLabelGlueX = 1;
 
   // basic rules
   out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
