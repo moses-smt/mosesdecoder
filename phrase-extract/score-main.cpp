@@ -84,8 +84,8 @@ std::set<std::string> targetPreferenceLabelSet;
 std::map<std::string,size_t> targetPreferenceLabels;
 std::vector<std::string> targetPreferenceLabelsByIndex;
 
-std::vector<float> orientationClassPriorsL2R(4,0); // mono swap dright dleft
-std::vector<float> orientationClassPriorsR2L(4,0); // mono swap dright dleft
+std::vector<float> orientationClassPriorsL2R(4,0); // mono swap dleft dright
+std::vector<float> orientationClassPriorsR2L(4,0); // mono swap dleft dright
 
 Vocabulary vcbT;
 Vocabulary vcbS;
@@ -882,7 +882,7 @@ void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors,
                            std::vector<float> &orientationClassPriorsL2R,
                            std::vector<float> &orientationClassPriorsR2L)
 {
-  assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dright dleft
+  assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dleft dright
 
   std::cerr << "Loading phrase orientation priors from " << fileNamePhraseOrientationPriors;
   ifstream inFile;
@@ -921,10 +921,10 @@ void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors,
     if (!key.compare("swap")) {
       orientationClassId = 1;
     }
-    if (!key.compare("dright")) {
+    if (!key.compare("dleft")) {
       orientationClassId = 2;
     }
-    if (!key.compare("dleft")) {
+    if (!key.compare("dright")) {
       orientationClassId = 3;
     }
     if (orientationClassId == -1) {
