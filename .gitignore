@@ -24,6 +24,7 @@ mert/extractor
 mert/mert
 mert/megam_i686.opt
 mert/pro
+mert/proM2
 mert/kbmira
 misc/processLexicalTable
 misc/processPhraseTable
