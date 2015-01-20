@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace irstlm;
 
 #include "IRST.h"
-#include "moses/LM/PointerState.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/FactorCollection.h"
@@ -42,28 +41,9 @@ using namespace std;
 namespace Moses
 {
 
-class IRSTLMState : public PointerState
-{
-public:
-  IRSTLMState():PointerState(NULL)  {}
-  IRSTLMState(const void* lms):PointerState(lms)  {}
-  IRSTLMState(const IRSTLMState& copy_from):PointerState(copy_from.lmstate)  {}
-
-  IRSTLMState& operator=( const IRSTLMState& rhs )
-  {
-    lmstate = rhs.lmstate;
-    return *this;
-  }
-  
-  const void* GetState() const
-  {
-    return lmstate;
-  }
-};
-
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor(line)
-  ,m_lmtb_dub(0), m_lmtb_size(0)
+  ,m_lmtb_dub(0)
 {
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
@@ -73,10 +53,6 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
 
   ReadParameters();
 
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" << m_filePath << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" << m_factorType << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -93,15 +69,17 @@ LanguageModelIRST::~LanguageModelIRST()
 
 void LanguageModelIRST::Load()
 {
+  cerr << "In LanguageModelIRST::Load: nGramOrder = " << m_nGramOrder << "\n";
+
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_lmtb = m_lmtb->CreateLanguageModel(m_filePath);
-  if (m_lmtb_size > 0) m_lmtb->setMaxLoadedLevel(m_lmtb_size);
+  m_lmtb->setMaxLoadedLevel(1000);
   m_lmtb->load(m_filePath);
   d=m_lmtb->getDict();
   d->incflag(1);
 
-  m_nGramOrder = m_lmtb_size = m_lmtb->maxlevel();
+  m_lmtb_size=m_lmtb->maxlevel();
 
   // LM can be ok, just outputs warnings
   // Mauro: in the original, the following two instructions are wrongly switched:
@@ -110,7 +88,7 @@ void LanguageModelIRST::Load()
 
   CreateFactors(factorCollection);
 
-  VERBOSE(1, GetScoreProducerDescription() << "  LanguageModelIRST::Load() m_unknownId=" << m_unknownId << std::endl);
+  VERBOSE(1, "IRST: m_unknownId=" << m_unknownId << std::endl);
 
   //install caches to save time (only if PS_CACHE_ENABLE is defined through compilation flags)
   m_lmtb->init_caches(m_lmtb_size>2?m_lmtb_size-1:2);
@@ -138,8 +116,6 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
   factorId = m_sentenceStart->GetId();
-  const std::string bs = BOS_;
-  const std::string es = EOS_;
   m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceStartWord[m_factorType] = m_sentenceStart;
@@ -165,11 +141,6 @@ int LanguageModelIRST::GetLmID( const std::string &str ) const
   return d->encode( str.c_str() ); // at the level of micro tags
 }
 
-int LanguageModelIRST::GetLmID( const Word &word ) const
-{
-  return GetLmID( word.GetFactor(m_factorType) );
-}
-
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
   size_t factorId = factor->GetId();
@@ -185,7 +156,7 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
       ///di cui non sia stato ancora calcolato il suo codice target abbia
       ///comunque un factorID noto (e quindi minore di m_lmIdLookup.size())
       ///E' necessario dunque identificare questi casi di indeterminatezza
-      ///del codice target. Attualmente, questo controllo e' stato implementato
+      ///del codice target. Attualamente, questo controllo e' stato implementato
       ///impostando a    m_empty     tutti i termini che non hanno ancora
       //ricevuto un codice target effettivo
       ///////////
@@ -226,102 +197,6 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
   }
 }
 
-void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
-{
-  fullScore = 0;
-  ngramScore = 0;
-  oovCount = 0;
-
-  if ( !phrase.GetSize() ) return;
-
-  if ( m_lmtb_size > (int) phrase.GetSize()) return;
-
-  int codes[m_lmtb_size];
-  int idx = 0;
-  int position = 0;
-
-  for (; position < m_lmtb_size; ++position)
-  {
-    codes[idx] = GetLmID(phrase.GetWord(position));
-    if (codes[idx] == m_unknownId) ++oovCount;
-    ++idx; 
-  }
-
-  char* msp = NULL;
-
-  ngramScore = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
-  int end_loop = (int) phrase.GetSize();
-
-  for (; position < end_loop; ++position) {
-    for (idx = 1; idx < m_lmtb_size; ++idx)
-    {
-      codes[idx-1] = codes[idx];
-    }
-    codes[idx-1] = GetLmID(phrase.GetWord(position));
-    if (codes[idx-1] == m_unknownId) ++oovCount;
-    ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
-  }
-  ngramScore = TransformLMScore(ngramScore);
-  fullScore = ngramScore;
-}
-
-FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
-{
-  if (!hypo.GetCurrTargetLength()) {
-    std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
-    return ret.release();
-  }
-
-  const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
-  //[begin, end) in STL-like fashion.
-  const std::size_t end = hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
-  const std::size_t adjust_end = std::min(end, begin + m_lmtb_size - 1);
-
-  // set up context
-  int codes[m_lmtb_size];
-  int idx=m_lmtb_size-1;
-  int position = adjust_end-1;
-
-  //fill the farthest positions with at most ONE sentenceEnd symbol and at most ONE sentenceEnd symbol, if "empty" positions are available
-  //so that the vector looks like = "</s> <s> context_word context_word" for a two-word context and a LM of order 5
-  while (position >= (const int) begin) {
-    codes[idx] =  GetLmID(hypo.GetWord(position));
-    --idx;
-    --position;
-  } 
-  if (idx == 1){
-    codes[1] = m_lmtb_sentenceStart;
-    codes[0] = m_lmtb_sentenceStart;
-  }
-  else if (idx == 0)
-  {
-    codes[0] = m_lmtb_sentenceEnd;
-  }
-
-  char* msp = NULL;
-  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
-  score = TransformLMScore(score);
-  out->PlusEquals(this, score);
-
-  if (adjust_end < end)
-  {
-    idx=m_lmtb_size-1;
-    position = end-1;
-
-    while (idx>=0)
-    {
-      codes[idx] =  GetLmID(hypo.GetWord(position));
-      --idx;
-      --position;
-    }
-    msp = (char *) m_lmtb->cmaxsuffptr(codes,m_lmtb_size);
-  }
-
-  std::auto_ptr<IRSTLMState> ret(new IRSTLMState(msp));
-
-  return ret.release();
-}
-
 LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
   FactorType factorType = GetFactorType();
@@ -343,16 +218,14 @@ LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, S
   if (count < (size_t) m_lmtb_size) codes[idx++] = m_lmtb_sentenceStart;
 
   for (size_t i = 0 ; i < count ; i++) {
-    //codes[idx] =  GetLmID((*contextFactor[i])[factorType]);
-    codes[idx] =  GetLmID(*contextFactor[i]);
-    ++idx;
+    codes[idx++] =  GetLmID((*contextFactor[i])[factorType]);
   }
-
   LMResult result;
   result.unknown = (codes[idx - 1] == m_unknownId);
 
   char* msp = NULL;
-  result.score = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+  unsigned int ilen;
+  result.score = m_lmtb->clprob(codes,idx,NULL,NULL,&msp,&ilen);
 
   if (finalState) *finalState=(State *) msp;
 
@@ -361,7 +234,7 @@ LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, S
 }
 
 
-bool LMCacheCleanup(const int sentences_done, const size_t m_lmcache_cleanup_threshold)
+bool LMCacheCleanup(size_t sentences_done, size_t m_lmcache_cleanup_threshold)
 {
   if (sentences_done==-1) return true;
   if (m_lmcache_cleanup_threshold)
@@ -390,16 +263,6 @@ void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
     TRACE_ERR( "reset caches\n");
     m_lmtb->reset_caches();
   }
-}
-
-void LanguageModelIRST::SetParameter(const std::string& key, const std::string& value)
-{
- if (key == "dub") {
-    m_lmtb_dub = Scan<unsigned int>(value);
-  } else {
-    LanguageModelSingleFactor::SetParameter(key, value);
-  }
-  m_lmtb_size = m_nGramOrder;
 }
 
 }
