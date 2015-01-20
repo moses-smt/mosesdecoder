@@ -63,6 +63,15 @@ public:
   virtual ~LogisticLossNormalizer() {}
 };
 
+class DummyNormalizer : public Normalizer
+{
+public:
+  virtual void operator()(std::vector<float> &losses) const {
+  }
+
+  virtual ~DummyNormalizer() {}
+};
+
 } // namespace Discriminative
 
 #endif // moses_Normalizer_h

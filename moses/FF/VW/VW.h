@@ -210,9 +210,14 @@ public:
     } else if (key == "vw-options") {
       m_vwOptions = value;
     } else if (key == "loss") {
-      m_normalizer = value == "logistic"
-                     ? (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer()
-                     : (Discriminative::Normalizer *) new Discriminative::SquaredLossNormalizer();
+
+      if(value == "squared")
+        m_normalizer = (Discriminative::Normalizer *) new Discriminative::SquaredLossNormalizer();
+      else if(value == "dummy")
+        m_normalizer = (Discriminative::Normalizer *) new Discriminative::DummyNormalizer();
+      else
+        m_normalizer = (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer();
+
     } else {
       StatelessFeatureFunction::SetParameter(key, value);
     }
