@@ -261,7 +261,7 @@ public:
   SyntaxNodePtr FromString(std::string internalTree, boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap);
 
   std::string ToString();
-  std::string ToStringLevel(int maxLevel);
+  std::string ToStringLevel(std::string &tree,int maxLevel);
   std::string ToStringNodeCount(int maxNodes);
   std::string ToStringHead();
   void ToString(SyntaxNodePtr newNode, std::stringstream &tree);

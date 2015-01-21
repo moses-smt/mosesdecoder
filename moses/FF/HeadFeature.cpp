@@ -365,8 +365,8 @@ std::string SyntaxTree::ToString(){
 //using this might also solve the problem of scoring dep rel twice
 //ex: VP1 -VP NP -> rel_obj  ; S -> NP VP1 -> rel_subj rel_obj
 //if instead of the VP1 subtree we put only the head there should be no rel_obj extracted at the S node
-std::string SyntaxTree::ToStringLevel(int maxLevel){
-	std::string tree("");
+std::string SyntaxTree::ToStringLevel(std::string &tree,int maxLevel){
+	//std::string tree("");
 	ToStringLevel(m_top,tree,1,maxLevel);
 	return tree;
 }
@@ -824,17 +824,19 @@ float HeadFeature::GetWBScore(vector<string>& depRel) const{
 	using namespace lm::ngram;
 	//Model model("//Users//mnadejde//Documents//workspace//Subcat//DepRelStats.en.100K.ARPA");
 	//Model model(m_modelFileARPA.c_str());
-	  State stateSentence(m_WBmodel->BeginSentenceState()),state(m_WBmodel->NullContextState()), out_state, out_state0;
+	  //State stateSentence(m_WBmodel->BeginSentenceState()),state(m_WBmodel->NullContextState());
+	  State out_state0;
 	  const Vocabulary &vocab = m_WBmodel->GetVocabulary();
-	  lm::WordIndex *context = new lm::WordIndex[3];
+	  lm::WordIndex context[3];// = new lm::WordIndex[3];
 	  context[0]=vocab.Index(depRel[1]);
 	  context[1]=vocab.Index(depRel[0]);
 	  context[2]=vocab.Index("<unk>");
 	  lm::WordIndex arg = vocab.Index(depRel[2]);
 	  float score;
 	  score = m_WBmodel->FullScoreForgotState(context,context+2,arg,out_state0).prob;
-	  //cout<<depRel[0]<<" "<<depRel[1]<<" "<<depRel[2]<<" "<<score<<endl;
+	  cout<<depRel[0]<<" "<<depRel[1]<<" "<<depRel[2]<<" "<<score<<endl;
 
+	  //delete[] context;
 	  return score;
 
 /*
@@ -884,6 +886,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
   int  featureID /*- used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
+	//first check LHS is S,VP... then to GetProperty to string and all the rest? -> but I need to reconstruct trees anyway?
 
 	if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
 
@@ -964,7 +967,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        //might consider adding Q in allowedNT -> we transform it to S in ToStringLevel
 	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 	        	//std::string parsedSentence  = syntaxTree->ToString();
-	        	std::string parsedSentence  = syntaxTree->ToStringLevel(4);
+	        	std::string parsedSentence = "";
+	        	syntaxTree->ToStringLevel(parsedSentence,4);
 
 	        	//!!!!!! do this if not replacing Q nodes in ToStringLevel
 	  //      	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
@@ -980,7 +984,9 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        			//cerr<<"dep rel: "<<depRel<<endl;
 	        		}
 	        		else{
-	        			depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+	        			//commented the call to StanfordDep to debug memory leak
+	        			//"nsubj hate I\tdobj hate you";
+	        			depRel = "nsubj hate PRN\tdobj hate you"; //CallStanfordDep(parsedSentence); //(parsedSentence);
 	        			float score = 1.0;
 	        			DepRelMap &localCacheDepRel = GetCacheDepRel();
 	        			//if key already returns return iterator to key position
@@ -1023,7 +1029,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 									Tokenize(rel,*it);
 									//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
 									//should take out this compare and get my models straight
-									if(rel.size()==3 && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
+									//if i allow the prep relations should I add PP as allowed NT?
+									if(rel.size()==3 ){ //control this from java -> && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
 										float scoreWB = GetWBScore(rel);
 										vector<float> scores;
 										//before it was natural log now from the model file it comes as log10 ??which one shoudl it be?
