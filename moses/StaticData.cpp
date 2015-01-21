@@ -66,6 +66,7 @@ StaticData::StaticData()
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
   ,m_useS2TDecoder(false)
+  ,m_requireSortingAfterSourceContext(false)
   ,m_treeStructure(NULL)
 {
   m_xmlBrackets.first="<";
@@ -877,6 +878,10 @@ void StaticData::LoadFeatureFunctions()
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     FeatureFunction *ff = *iter;
     bool doLoad = true;
+
+    if (ff->RequireSortingAfterSourceContext()) {
+      m_requireSortingAfterSourceContext = true;
+    }
 
     // if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
     if (dynamic_cast<PhraseDictionary*>(ff)) {
