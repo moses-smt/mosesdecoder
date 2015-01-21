@@ -1,0 +1,2 @@
+external-lib re2 ;
+exe tokenizer : tokenizer.cpp tokenizer_main.cpp re2 : <cflags>-std=c++11 ;
