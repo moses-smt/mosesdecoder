@@ -51,15 +51,13 @@ class PruneNGramStream {
     PruneNGramStream &operator++() {
       assert(block_);
       
-      if (current_.Order() > 1) {
-        if(currentCount_ > 0) {
-          if(dest_.Base() < current_.Base()) {
-            memcpy(dest_.Base(), current_.Base(), current_.TotalSize());
-          }
-          dest_.NextInMemory();
+      if(current_.Order() == 1 && *current_.begin() <= 2)
+        dest_.NextInMemory();
+      else if(currentCount_ > 0) {
+        if(dest_.Base() < current_.Base()) {
+          memcpy(dest_.Base(), current_.Base(), current_.TotalSize());
         }
-      } else {
-        dest_.NextInMemory();          
+        dest_.NextInMemory();
       }
       
       current_.NextInMemory();
@@ -78,7 +76,7 @@ class PruneNGramStream {
       
       return *this;
     }
-
+    
   private:
     void StartBlock() {
       for (; ; ++block_) {
@@ -215,14 +213,33 @@ class MergeRight {
       PruneNGramStream grams(primary);
 
       // Without interpolation, the interpolation weight goes to <unk>.
-      if (grams->Order() == 1 && !interpolate_unigrams_) {
+      if (grams->Order() == 1) {
         BufferEntry sums(*static_cast<const BufferEntry*>(summed.Get()));
+        // Special case for <unk>
         assert(*grams->begin() == kUNK);
-        grams->Value().uninterp.prob = sums.gamma;
+        float gamma_assign;
+        if (interpolate_unigrams_) {
+          // Default: treat <unk> like a zeroton.
+          gamma_assign = sums.gamma;
+          grams->Value().uninterp.prob = 0.0;
+        } else {
+          // SRI: give all the interpolation mass to <unk>
+          gamma_assign = 0.0;
+          grams->Value().uninterp.prob = sums.gamma;
+        }
+        grams->Value().uninterp.gamma = gamma_assign;
+        ++grams;
+
+        // Special case for <s>: probability 1.0.  This allows <s> to be
+        // explicitly scores as part of the sentence without impacting
+        // probability and computes q correctly as b(<s>).
+        assert(*grams->begin() == kBOS);
+        grams->Value().uninterp.prob = 1.0;
         grams->Value().uninterp.gamma = 0.0;
+
         while (++grams) {
           grams->Value().uninterp.prob = discount_.Apply(grams->Count()) / sums.denominator;
-          grams->Value().uninterp.gamma = 0.0;
+          grams->Value().uninterp.gamma = gamma_assign;
         }
         ++summed;
         return;
@@ -256,10 +273,11 @@ void InitialProbabilities(
     util::stream::Chains &primary,
     util::stream::Chains &second_in,
     util::stream::Chains &gamma_out,
-    const std::vector<uint64_t> &prune_thresholds) {
+    const std::vector<uint64_t> &prune_thresholds,
+    bool prune_vocab) {
   for (size_t i = 0; i < primary.size(); ++i) {
     util::stream::ChainConfig gamma_config = config.adder_out;
-    if(prune_thresholds[i] > 0)
+    if(prune_vocab || prune_thresholds[i] > 0)
       gamma_config.entry_size = sizeof(HashBufferEntry);
     else
       gamma_config.entry_size = sizeof(BufferEntry);
@@ -267,12 +285,12 @@ void InitialProbabilities(
     util::stream::ChainPosition second(second_in[i].Add());
     second_in[i] >> util::stream::kRecycle;
     gamma_out.push_back(gamma_config);
-    gamma_out[i] >> AddRight(discounts[i], second, prune_thresholds[i] > 0);
+    gamma_out[i] >> AddRight(discounts[i], second, prune_vocab || prune_thresholds[i] > 0);
 
     primary[i] >> MergeRight(config.interpolate_unigrams, gamma_out[i].Add(), discounts[i]);
-
+    
     // Don't bother with the OnlyGamma thread for something to discard.
-    if (i) gamma_out[i] >> OnlyGamma(prune_thresholds[i] > 0);
+    if (i) gamma_out[i] >> OnlyGamma(prune_vocab || prune_thresholds[i] > 0);
   }
 }
 
