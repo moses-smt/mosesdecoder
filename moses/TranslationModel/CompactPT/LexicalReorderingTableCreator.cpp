@@ -258,8 +258,10 @@ void LexicalReorderingTableCreator::FlushEncodedQueue(bool force)
   if(force) {
     m_lastFlushedLine = -1;
 
-    m_hash.AddRange(m_lastRange);
-    m_lastRange.clear();
+    if(!m_lastRange.empty()) {
+      m_hash.AddRange(m_lastRange);
+      m_lastRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_hash.WaitAll();
@@ -377,7 +379,6 @@ void EncodingTaskReordering::operator()()
                             encodedLine, i);
       result.push_back(packedItem);
     }
-    lines.clear();
 
     {
 #ifdef WITH_THREADS
@@ -388,6 +389,7 @@ void EncodingTaskReordering::operator()()
       m_creator.FlushEncodedQueue();
     }
 
+    lines.clear();
     result.clear();
     lines.reserve(max_lines);
     result.reserve(max_lines);
