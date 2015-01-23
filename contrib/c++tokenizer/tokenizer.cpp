@@ -1,9 +1,12 @@
 #include "tokenizer.h"
+#include <re2/stringpiece.h>
 #include <sstream>
 #include <iterator>
 #include <memory>
 #include <vector>
 #include <algorithm>
+#include <cstring>
+#include <glib.h>
 
 namespace {
 
@@ -61,6 +64,30 @@ RE2 endnum_x("[-\'\"]"); //
 
 // anything rarely used will just be given as a string and compiled on demand by RE2 
 
+const char *SPC_BYTE = " ";
+//const char *URL_VALID_SYM_CHARS = "-._~:/?#[]@!$&'()*+,;=";
+
+inline bool
+class_follows_p(gunichar *s, gunichar *e, GUnicodeType gclass) {
+    while (s < e) {
+        GUnicodeType tclass = g_unichar_type(*s);
+        if (tclass == gclass)
+            return true;
+        switch (tclass) {
+        case G_UNICODE_SPACING_MARK:
+        case G_UNICODE_LINE_SEPARATOR:
+        case G_UNICODE_PARAGRAPH_SEPARATOR:
+        case G_UNICODE_SPACE_SEPARATOR:
+            ++s;
+            continue;
+            break;
+        default:
+            return false;
+        }
+    }
+    return false;
+}
+
 }; // end anonymous namespace
 
 
@@ -90,6 +117,10 @@ Tokenizer::Tokenizer(const std::string& _lang_iso,
                      bool _skip_alltags_p,
                      bool _non_escape_p,
                      bool _aggressive_hyphen_p,
+                     bool _supersub_p,
+                     bool _url_p,
+                     bool _downcase_p,
+                     bool _normalize_p,
                      bool _penn_p,
                      bool _verbose_p)
         : lang_iso(_lang_iso)
@@ -99,6 +130,10 @@ Tokenizer::Tokenizer(const std::string& _lang_iso,
         , skip_alltags_p(_skip_alltags_p)
         , non_escape_p(_non_escape_p)
         , aggressive_hyphen_p(_aggressive_hyphen_p)
+        , supersub_p(_supersub_p)
+        , url_p(_url_p)
+        , downcase_p(_downcase_p)
+        , normalize_p(_normalize_p)
         , penn_p(_penn_p)
         , verbose_p(_verbose_p)
 {
@@ -131,13 +166,19 @@ Tokenizer::load_prefixes(std::ifstream& ifs)
     int nnum = 0;
 
     while (std::getline(ifs,line)) {
-        if (!line.empty() && line.at(0) != '#') {
+        if (!line.empty() && line[0] != '#') {
             std::string prefix;
             if (RE2::PartialMatch(line,numonly,&prefix)) {
                 nbpre_num_set.insert(prefix);
+                gunichar * x=g_utf8_to_ucs4_fast((const gchar *)prefix.c_str(),prefix.size(),0);
+                nbpre_num_ucs4.insert(std::wstring((wchar_t *)x));
+                g_free(x);
                 nnum++;
             } else {
                 nbpre_gen_set.insert(line);
+                gunichar * x=g_utf8_to_ucs4_fast((const gchar *)line.c_str(),line.size(),0);
+                nbpre_gen_ucs4.insert(std::wstring((wchar_t *)x));
+                g_free(x);
                 nnon++;
             }
         }
@@ -223,117 +264,158 @@ Tokenizer::init() {
 
 //
 // apply ctor-selected tokenization to a string, in-place, no newlines allowed,
-// assumes protections are applied already, some invariants are in place
+// assumes protections are applied already, some invariants are in place, 
+// e.g. that successive chars <= ' ' have been normalized to a single ' '
 //
 void
 Tokenizer::protected_tokenize(std::string& text) {
-    std::vector<std::string> words;
-    size_t pos = 0;
-    if (text.at(pos) == ' ')
+    std::vector<re2::StringPiece> words;
+    re2::StringPiece textpc(text);
+    int pos = 0;
+    if (textpc[pos] == ' ')
         ++pos;
     size_t next = text.find(' ',pos);
     while (next != std::string::npos) {
         if (next - pos)
-            words.push_back(text.substr(pos,next-pos));
+            words.push_back(textpc.substr(pos,next-pos));
         pos = next + 1;
-        while (pos < text.size() && text.at(pos) == ' ')
+        while (pos < textpc.size() && textpc[pos] == ' ')
             ++pos;
-        next = text.find(' ',pos);
+        next = textpc.find(' ',pos);
     }
-    if (pos < text.size() && text.at(pos) != ' ')
-        words.push_back(text.substr(pos,text.size()-pos));
+    if (pos < textpc.size() && textpc[pos] != ' ')
+        words.push_back(textpc.substr(pos,textpc.size()-pos));
     
-    text.clear();
-
-    // regurgitate words with look-ahead handling for tokens with final .
-    for (size_t ii = 0; ii < words.size(); ++ii) {
+    // regurgitate words with look-ahead handling for tokens with final mumble
+    std::string outs;
+    std::size_t nwords(words.size());
+    for (size_t ii = 0; ii < nwords; ++ii) {
+        bool more_p = ii < nwords - 1;
         size_t len = words[ii].size();
+        bool sentence_break_p = len > 1 && words[ii][len-1] == '.';
 
-        if (len > 1 && words[ii].at(len-1) == '.') {
-            std::string prefix(words[ii].substr(0,len-1));
-            bool gen_prefix_p = nbpre_gen_set.find(prefix) != nbpre_gen_set.end();
-            bool embeds_p = prefix.find('.') != std::string::npos;
-            bool letter_p = RE2::PartialMatch(prefix.c_str(),letter_x);
-            bool more_p = ii < words.size() - 1;
-            bool nlower_p = more_p && RE2::PartialMatch(words[ii+1].c_str(),lower_x);
-            bool num_prefix_p = (!gen_prefix_p) && nbpre_num_set.find(prefix) != nbpre_num_set.end();
-            bool nint_p = more_p && RE2::PartialMatch(words[ii+1].c_str(),sinteger_x);
-            bool isolate_p = true;
-            if (gen_prefix_p) {
-                isolate_p = false;
-            } else if (num_prefix_p && nint_p) {
-                isolate_p = false;
-            } else if (embeds_p && letter_p) {
-                isolate_p = false;
-            } else if (nlower_p) {
-                isolate_p = false;
-            }
-            if (isolate_p) {
-                words[ii].assign(prefix);
-                words[ii].append(" .");
+        // suppress break if it is an non-breaking prefix
+        if (sentence_break_p) {
+            re2::StringPiece pfx(words[ii].substr(0,len-1));
+            std::string pfxs(pfx.as_string());
+            if (nbpre_gen_set.find(pfxs) != nbpre_gen_set.end()) {
+                // general non-breaking prefix
+                sentence_break_p = false;
+            } else if (more_p && nbpre_num_set.find(pfxs) != nbpre_num_set.end() && RE2::PartialMatch(words[ii+1],sinteger_x)) {
+                // non-breaking before numeric
+                sentence_break_p = false;
+            } else if (pfxs.find('.') != std::string::npos && RE2::PartialMatch(pfx,letter_x)) {
+                // terminal isolated letter does not break
+                sentence_break_p = false;
+            } else if (more_p && RE2::PartialMatch(words[ii+1],lower_x)) {
+                // lower-case look-ahead does not break
+                sentence_break_p = false;
             }
         } 
 
-        text.append(words[ii]);
-        if (ii < words.size() - 1)
-            text.append(" ");
+        outs.append(words[ii].data(),len);
+        if (sentence_break_p)
+            outs.append(" .");
+        if (more_p)
+            outs.append(SPC_BYTE,1);
     }
+    text.assign(outs.begin(),outs.end());
 }
 
 
 bool
 Tokenizer::escape(std::string& text) {
-    static const char escaping[] = "&|<>'\"[]";
+    bool mod_p = false;
+    std::string outs;
+
     static const char *replacements[] = {
-        "&amp;",
-        "&#124;",
-        "&lt;",
-        "&gt;",
-        "&apos;",
-        "&quot;",
-        "&#91;",
-        "&#93;"
+        "&#124;", // | 0
+        "&#91;", // [ 1
+        "&#93;",  // ] 2
+        "&amp;", // & 3
+        "&lt;", // < 4
+        "&gt;", // > 5
+        "&apos;", // ' 6
+        "&quot;", // " 7
     };
-    bool modified = false;
-    const char *next = escaping;
     
-    for (int ii = 0; *next; ++ii, ++next) {
-        size_t pos = 0;
-        for (pos = text.find(*next,pos); pos != std::string::npos; 
-             pos = (++pos < text.size() ? text.find(*next,pos) : std::string::npos)) {
-            std::string replacement(replacements[ii]);
-            if (*next != '\'') {
-                if (pos > 0 && text.at(pos-1) == ' ' && pos < text.size()-1 && text.at(pos+1) != ' ') 
-                    replacement.append(" ");
+    const char *pp = text.c_str(); // from pp to pt is uncopied
+    const char *ep = pp + text.size();
+    const  char *pt = pp;
+
+    while (pt < ep) {
+        if (*pt & 0x80) {
+            const char *mk = (const char *)g_utf8_find_next_char((const gchar *)pt,(const gchar *)ep);
+            if (!mk) {
+                if (mod_p)
+                    outs.append(pp,pt-pp+1);
+            } else {
+                if (mod_p) 
+                    outs.append(pp,mk-pp);
+                pt = --mk;
             }
-            text.replace(pos,1,replacement);
-            modified = true;
+            pp = ++pt;
+            continue;
+        }
+
+        const char *sequence_p = 0;
+        if (*pt < '?') {
+            if (*pt == '&') {
+                sequence_p = replacements[3];
+            } else if (*pt == '\'') {
+                sequence_p = replacements[6];
+            } else if (*pt == '"') {
+                sequence_p = replacements[7];
+            }
+        } else if (*pt > ']') {
+            if (*pt =='|') { // 7c
+                sequence_p = replacements[0];
+            } 
+        } else if (*pt > 'Z') {
+            if (*pt == '<') { // 3e
+                sequence_p = replacements[4];
+            } else if (*pt == '>') { // 3c
+                sequence_p = replacements[5];
+            } else if (*pt == '[') { // 5b
+                sequence_p = replacements[1];
+            } else if (*pt == ']') { // 5d
+                sequence_p = replacements[2];
+            } 
+        }
+
+        if (sequence_p) {
+            if (pt > pp) 
+                outs.append(pp,pt-pp);
+            outs.append(sequence_p);
+            mod_p = true;
+            pp = ++pt;
+        } else {
+            ++pt;
         }
     }
     
-    return modified;
+    if (mod_p) {
+        if (pp < pt) {
+            outs.append(pp,pt-pp);
+        }
+        text.assign(outs.begin(),outs.end());
+    }
+
+    return mod_p;
 }
 
 
 std::string
 Tokenizer::tokenize(const std::string& buf)
 {
-    static const char *apos_refs = "\\1 ' \\2";
-    static const char *right_refs = "\\1 '\\2";
-    static const char *left_refs = "\\1' \\2";
     static const char *comma_refs = "\\1 , \\2";
     static const char *isolate_ref = " \\1 ";
     static const char *special_refs = "\\1 @\\2@ \\3";
 
-    std::string outs;
     std::string text(buf);
-
-    if (skip_alltags_p) {
-        RE2::GlobalReplace(&text,genl_tags_x," ");
-    }
-
-    RE2::GlobalReplace(&text,genl_spc_x," ");
-    RE2::GlobalReplace(&text,ctrls_x,"");
+    std::string outs;
+    if (skip_alltags_p) 
+        RE2::GlobalReplace(&text,genl_tags_x,SPC_BYTE);
 
     size_t pos;
     int num = 0;
@@ -344,6 +426,7 @@ Tokenizer::tokenize(const std::string& buf)
         // push all the prefixes matching protected patterns
         std::vector<std::string> prot_stack;
         std::string match;
+
         for (auto& pat : prot_pat_vec) {
             pos = 0;
             while (RE2::PartialMatch(text.substr(pos),*pat,&match)) {
@@ -363,75 +446,446 @@ Tokenizer::tokenize(const std::string& buf)
             }
         }
         
-        // collapse spaces
-        RE2::GlobalReplace(&text,mult_spc_x," ");
+        const char *pt(text.c_str());
+        const char *ep(pt + text.size());
+        while (pt < ep && *pt >= 0 && *pt <= ' ')
+            ++pt;
+        glong ulen(0);
+        gunichar *usrc(g_utf8_to_ucs4_fast((const gchar *)pt,ep - pt, &ulen)); // g_free
+        gunichar *ucs4(usrc);
+        gunichar *lim4(ucs4 + ulen);
 
-        // strip leading space
-        if (text.at(0) == ' ')
-            text = text.substr(1);
+        gunichar *nxt4 = ucs4;
+        gunichar *ubuf(g_new0(gunichar,ulen*6+1)); // g_free
+        gunichar *uptr(ubuf);
 
-        // strip trailing space
-        if (text.at(text.size()-1) == ' ')
-            text = text.substr(0,text.size()-1);
+        gunichar prev_uch(0L);
+        gunichar next_uch(*ucs4);
+        gunichar curr_uch(0L);
 
-        // isolate hyphens, if non-default option is set
-        if (aggressive_hyphen_p) 
-            RE2::GlobalReplace(&text,hyphen_x,special_refs);
+        GUnicodeType curr_type(G_UNICODE_UNASSIGNED);
+        GUnicodeType next_type((ucs4 && *ucs4) ? g_unichar_type(*ucs4) : G_UNICODE_UNASSIGNED);
+        GUnicodeType prev_type(G_UNICODE_UNASSIGNED);
 
-        // find successive dots, protect them
-        pos = text.find("..");
-        while (pos != std::string::npos && pos < text.size()) {
-            char subst[12];
-            size_t lim = pos + 2;
-            while (lim < text.size() && text.at(lim) == '.') ++lim;
-            snprintf(subst,sizeof(subst),"MANYDOTS%.3d",lim-pos);
-            text.replace(pos,lim-pos,subst,11);
-            pos = text.find("..",pos+11);
+        bool post_break_p = false;
+        bool in_num = next_uch <= gunichar('9') && next_uch >= gunichar('0');
+        bool in_url_p = false;
+        bool final_p = false;
+        int since_start = 0;
+        int alpha_prefix = 0;
+
+        while (ucs4 < lim4) {
+            prev_uch = curr_uch;
+            prev_type = curr_type;
+            curr_uch = next_uch;
+            curr_type = next_type;
+
+            final_p = ++nxt4 >= lim4;
+
+            if (final_p) {
+                next_uch = gunichar(0L);
+                next_type = G_UNICODE_UNASSIGNED;
+            } else {
+                next_uch = *nxt4;
+                next_type = g_unichar_type(next_uch);
+            }
+
+            bool is_basic = *ucs4 < 0x80L;
+
+            if (url_p) {
+                if (!in_url_p) {
+                    if (!since_start) {
+                        if (is_basic && std::isalpha(char(*ucs4)))
+                            alpha_prefix++;
+                    } else if (alpha_prefix == since_start && is_basic && char(*ucs4) == ':' && next_type != G_UNICODE_SPACE_SEPARATOR) {
+                        in_url_p = true;
+                    }
+                }
+            }
+
+            bool break_p = false;
+            const wchar_t *substitute_p = 0;
+
+            if (post_break_p) {
+                *uptr++ = gunichar(' ');
+                since_start = 0;
+                in_url_p = in_num = post_break_p = false;
+            }
+
+            switch (curr_type) {
+            case G_UNICODE_MODIFIER_LETTER:
+            case G_UNICODE_OTHER_LETTER:
+            case G_UNICODE_TITLECASE_LETTER:
+                if (in_url_p || in_num)
+                    break_p = true;
+                // fallthough
+            case G_UNICODE_UPPERCASE_LETTER:
+            case G_UNICODE_LOWERCASE_LETTER:
+                if (downcase_p && curr_type == G_UNICODE_UPPERCASE_LETTER) 
+                    curr_uch = g_unichar_tolower(*ucs4);
+                break;
+            case G_UNICODE_SPACING_MARK:
+                break_p = true;
+                in_num = false;
+                curr_uch = gunichar(0L);
+                break;
+            case G_UNICODE_DECIMAL_NUMBER:
+            case G_UNICODE_LETTER_NUMBER:
+            case G_UNICODE_OTHER_NUMBER:
+                if (!in_num && !in_url_p) {
+                    switch (prev_type) {
+                    case G_UNICODE_DASH_PUNCTUATION:
+                    case G_UNICODE_FORMAT:
+                    case G_UNICODE_OTHER_PUNCTUATION:
+                    case G_UNICODE_UPPERCASE_LETTER:
+                    case G_UNICODE_LOWERCASE_LETTER:
+                    case G_UNICODE_DECIMAL_NUMBER:
+                        break;
+                    default:
+                        break_p = true;
+                    }
+                }
+                in_num = true;
+                break;
+            case G_UNICODE_CONNECT_PUNCTUATION:
+                if (curr_uch != gunichar(L'_')) {
+                    if (in_url_p) {
+                        in_url_p = false;
+                        post_break_p = break_p = true;
+                    }
+                }
+                if (in_num) {
+                    post_break_p = break_p = true;
+                } else {
+                    switch (next_type) {
+                    case G_UNICODE_LOWERCASE_LETTER:
+                    case G_UNICODE_MODIFIER_LETTER:
+                    case G_UNICODE_OTHER_LETTER:
+                    case G_UNICODE_TITLECASE_LETTER:
+                        break;
+                    default:
+                        post_break_p = break_p = true;
+                    }
+                    switch (prev_type) {
+                    case G_UNICODE_LOWERCASE_LETTER:
+                    case G_UNICODE_MODIFIER_LETTER:
+                    case G_UNICODE_OTHER_LETTER:
+                    case G_UNICODE_TITLECASE_LETTER:
+                        break;
+                    default:
+                        post_break_p = break_p = true;
+                    }
+                }
+                break;
+            case G_UNICODE_DASH_PUNCTUATION:
+            case G_UNICODE_FORMAT:
+                if (aggressive_hyphen_p) {
+                    substitute_p = L"@-@";
+                    break_p = post_break_p = !in_url_p;
+                } else if (next_type == G_UNICODE_SPACE_SEPARATOR) {
+                } else if (prev_type == curr_type) {
+                    if (next_type != curr_type) {
+                        post_break_p = !in_url_p;
+                    }
+                } else if (next_type == curr_type) {
+                    break_p = !in_url_p;
+                } else if ((prev_type == G_UNICODE_UPPERCASE_LETTER ||
+                            prev_type == G_UNICODE_LOWERCASE_LETTER) &&
+                           next_type == G_UNICODE_DECIMAL_NUMBER) {
+                    in_num = false;
+                } else if (in_num || since_start == 0) {
+                    switch (next_type) {
+                    case G_UNICODE_UPPERCASE_LETTER:
+                    case G_UNICODE_LOWERCASE_LETTER:
+                    case G_UNICODE_MODIFIER_LETTER:
+                    case G_UNICODE_OTHER_LETTER:
+                    case G_UNICODE_TITLECASE_LETTER:
+                    case G_UNICODE_DECIMAL_NUMBER:
+                    case G_UNICODE_LETTER_NUMBER:
+                    case G_UNICODE_OTHER_NUMBER:
+                    case G_UNICODE_SPACE_SEPARATOR:
+                        break;
+                    default:
+                        post_break_p = break_p = prev_uch != curr_uch;
+                    }
+                } else if (in_url_p) {
+                    break_p = curr_uch != gunichar('-');
+                } else {
+                    switch (prev_type) {
+                    case G_UNICODE_UPPERCASE_LETTER:
+                    case G_UNICODE_LOWERCASE_LETTER:
+                    case G_UNICODE_MODIFIER_LETTER:
+                    case G_UNICODE_OTHER_LETTER:
+                    case G_UNICODE_TITLECASE_LETTER:
+                    case G_UNICODE_DECIMAL_NUMBER:
+                    case G_UNICODE_LETTER_NUMBER:
+                    case G_UNICODE_OTHER_NUMBER:
+                    case G_UNICODE_OTHER_PUNCTUATION:
+                        switch (next_type) {
+                        case G_UNICODE_UPPERCASE_LETTER:
+                        case G_UNICODE_LOWERCASE_LETTER:
+                        case G_UNICODE_MODIFIER_LETTER:
+                        case G_UNICODE_OTHER_LETTER:
+                        case G_UNICODE_TITLECASE_LETTER:
+                        case G_UNICODE_DECIMAL_NUMBER:
+                        case G_UNICODE_LETTER_NUMBER:
+                        case G_UNICODE_OTHER_NUMBER:
+                            break;
+                        default:
+                            post_break_p = break_p = prev_uch != curr_uch;
+                        }
+                        break;
+                    default:
+                        post_break_p = break_p = prev_uch != curr_uch;
+                        break;
+                    } 
+                }
+                break;
+            case G_UNICODE_OTHER_PUNCTUATION:
+                switch (curr_uch) {
+                case gunichar('!'):
+                case gunichar('#'):
+                case gunichar('/'):
+                case gunichar(':'):
+                case gunichar(';'):
+                case gunichar('?'):
+                case gunichar('@'):
+                    post_break_p = break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
+                    break;
+                case gunichar('+'):
+                    post_break_p = break_p = !in_num && since_start > 0;
+                    in_num = in_num || since_start == 0;
+                    break;
+                case gunichar('&'):
+                    post_break_p = break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
+                    if (!non_escape_p) 
+                        substitute_p = L"&amp;";
+                    break;
+                case gunichar('\''):
+                    if (english_p) {
+                        if (!in_url_p) {
+                            break_p = true;
+                            post_break_p = since_start == 0 || 
+                                (next_type != G_UNICODE_LOWERCASE_LETTER && next_type != G_UNICODE_UPPERCASE_LETTER && next_type != G_UNICODE_DECIMAL_NUMBER);
+                        }
+                    } else if (latin_p) {
+                        post_break_p = !in_url_p;
+                        break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
+                    } else {
+                        post_break_p = break_p = !in_url_p;
+                    }
+                    if (!non_escape_p) 
+                        substitute_p = L"&apos;";
+                    break;
+                case gunichar('"'):
+                    post_break_p = break_p = true;
+                    if (!non_escape_p) 
+                        substitute_p = L"&quot;";
+                    break;
+                case gunichar(','):
+                    break_p = !in_num || next_type != G_UNICODE_DECIMAL_NUMBER;
+                    break;
+                case gunichar('.'):
+                    if (prev_uch != '.') {
+                        if (!in_num) {
+                            switch (next_type) {
+                            case G_UNICODE_DECIMAL_NUMBER:
+                            case G_UNICODE_LOWERCASE_LETTER:
+                            case G_UNICODE_UPPERCASE_LETTER:
+                                break;
+                            default:
+                                if (since_start > 0) {
+                                    switch (prev_type) {
+                                    case G_UNICODE_LOWERCASE_LETTER:
+                                    case G_UNICODE_UPPERCASE_LETTER: {
+                                        std::wstring k((wchar_t *)(uptr-since_start),since_start);
+                                        if (nbpre_gen_ucs4.find(k) != nbpre_gen_ucs4.end()) {
+                                            // general non-breaking prefix
+                                        } else if (nbpre_num_ucs4.find(k) != nbpre_num_ucs4.end() && class_follows_p(nxt4,lim4,G_UNICODE_DECIMAL_NUMBER)) {
+                                            // non-breaking before numeric
+                                        } else if (k.find(curr_uch) != std::wstring::npos) {
+                                            if (since_start > 1) {
+                                                GUnicodeType tclass = g_unichar_type(*(uptr-2));
+                                                switch (tclass) {
+                                                case G_UNICODE_UPPERCASE_LETTER:
+                                                case G_UNICODE_LOWERCASE_LETTER:
+                                                    break_p = true;
+                                                    break;
+                                                default:
+                                                    break;
+                                                }
+                                            }
+                                            // terminal isolated letter does not break
+                                        } else if (class_follows_p(nxt4,lim4,G_UNICODE_LOWERCASE_LETTER) || 
+                                                   g_unichar_type(*nxt4) == G_UNICODE_DASH_PUNCTUATION) {
+                                            // lower-case look-ahead does not break
+                                        } else {
+                                            break_p = true;
+                                        }
+                                        break;
+                                    }
+                                    default:
+                                        break_p = true;
+                                        break;
+                                    }
+                                } 
+                                break;
+                            }
+                        } else {
+                            switch (next_type) {
+                            case G_UNICODE_DECIMAL_NUMBER:
+                            case G_UNICODE_LOWERCASE_LETTER:
+                                break;
+                            default:
+                                break_p = true;
+                            }
+                        }
+                    } else if (next_uch != '.') {
+                        post_break_p = true;
+                    }
+                    break;
+                default:
+                    post_break_p = break_p = true;
+                    break;
+                }
+                break;
+            case G_UNICODE_CLOSE_PUNCTUATION:
+            case G_UNICODE_FINAL_PUNCTUATION:
+            case G_UNICODE_INITIAL_PUNCTUATION:
+            case G_UNICODE_OPEN_PUNCTUATION:
+                switch (curr_uch) {
+                case gunichar('('):
+                case gunichar(')'):
+                    break;
+                case gunichar('['):
+                    if (!non_escape_p) 
+                        substitute_p = L"&#91;";
+                    break;
+                case gunichar(']'):
+                    if (!non_escape_p) 
+                        substitute_p = L"&#93;";
+                    break;
+                default:
+                    in_url_p = false;
+                }
+                post_break_p = break_p = !in_url_p;
+                break;
+            case G_UNICODE_CURRENCY_SYMBOL:
+                post_break_p = in_num; // was in number, so break it
+                break_p = !in_num;
+                in_num = in_num || next_type == G_UNICODE_DECIMAL_NUMBER || next_uch == gunichar('.') || next_uch == gunichar(',');
+                if (curr_uch != gunichar('$'))
+                    in_url_p = false;
+                break;
+            case G_UNICODE_MODIFIER_SYMBOL:
+            case G_UNICODE_MATH_SYMBOL:
+                switch (curr_uch) {
+                case gunichar('`'):
+                    if (english_p) {
+                        if (!in_url_p) {
+                            break_p = true;
+                            post_break_p = since_start == 0 || 
+                                (next_type != G_UNICODE_LOWERCASE_LETTER && next_type != G_UNICODE_UPPERCASE_LETTER && next_type != G_UNICODE_DECIMAL_NUMBER);
+                        }
+                    } else if (latin_p) {
+                        post_break_p = !in_url_p;
+                        break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
+                    } else {
+                        post_break_p = break_p = !in_url_p;
+                    }
+                    if (!non_escape_p) 
+                        substitute_p = L"&apos;";
+                    else 
+                        curr_uch = gunichar('\'');
+                    break;
+                case gunichar('|'):
+                    if (!non_escape_p) 
+                        substitute_p = L"&#124;";
+                    post_break_p = break_p = true;
+                    break;
+                case gunichar('<'):
+                    if (!non_escape_p) 
+                        substitute_p = L"&lt;";
+                    post_break_p = break_p = true;
+                    break;
+                case gunichar('>'):
+                    if (!non_escape_p) 
+                        substitute_p = L"&gt;";
+                    post_break_p = break_p = true;
+                    break;
+                case gunichar('%'):
+                    post_break_p = in_num;
+                    break_p = !in_num && !in_url_p;
+                    in_num = false;
+                    break;
+                case gunichar('='):
+                case gunichar('~'):
+                    in_num = false;
+                    post_break_p = break_p = !in_url_p; 
+                    break;
+                case gunichar('+'):
+                    in_num = in_num || since_start == 0;
+                    post_break_p = break_p = !in_url_p; 
+                    break;
+                default:
+                    post_break_p = break_p = true;
+                    break;
+                }
+                break;
+            case G_UNICODE_OTHER_SYMBOL:
+                post_break_p = break_p = true;
+                break;
+            case G_UNICODE_LINE_SEPARATOR:
+                curr_uch = gunichar(' ');
+                in_url_p = in_num = false;
+                break;
+            case G_UNICODE_SPACE_SEPARATOR:
+                curr_uch = gunichar(' ');
+                in_url_p = in_num = false;
+                break;
+            default:
+                curr_uch = 0;
+                in_url_p = in_num = false;
+                break;
+            }
             
+            if ((break_p || curr_uch == gunichar(' '))) {
+                if (since_start) {
+                    *uptr++ = gunichar(' ');
+                    in_url_p = false;
+                    in_num = in_num && !post_break_p;
+                    since_start = 0;
+                }
+                if (curr_uch == gunichar(' '))
+                    curr_uch = gunichar(0L);
+            } 
+            
+            if (substitute_p) {
+                for (gunichar *sptr = (gunichar *)substitute_p; *sptr; ++sptr) {
+                    *uptr++ = *sptr;
+                    since_start++;
+                }
+                in_url_p = in_num = false;
+            } else if (curr_uch) {
+                *uptr++ = curr_uch;
+                since_start++;
+            }
+
+            ucs4 = nxt4;
         }
+
+        glong nbytes = 0;
+        gchar *utf8 = g_ucs4_to_utf8(ubuf,uptr-ubuf,0,&nbytes,0); // g_free
+        if (utf8[nbytes-1] == ' ') 
+            --nbytes;
+        text.assign((const char *)utf8,(const char *)(utf8 + nbytes));
+        g_free(utf8);
+        g_free(usrc);
+        g_free(ubuf);
 
         // terminate token at superscript or subscript sequence when followed by lower-case
-        RE2::GlobalReplace(&text,numscript_x,"\\1\\2 \\3");
-
-        // isolate commas after non-digits
-        RE2::GlobalReplace(&text,postncomma_x,"\\1 , ");
-
-        // isolate commas before non-digits
-        RE2::GlobalReplace(&text,prencomma_x," , \\1");
-
-        // replace backtick with single-quote
-        pos = text.find("`");
-        while (pos != std::string::npos) {
-            text.replace(pos,1,"'",1);
-            pos = text.find("`");
-        }
-
-        // replace doubled single-quotes with double-quotes
-        pos = text.find("''");
-        while (pos != std::string::npos) {
-            text.replace(pos,2,"\"",1);
-            pos = text.find("''",pos+1);
-        }
-
-        // isolate special characters
-        RE2::GlobalReplace(&text,specials_x,isolate_ref);
-
-        if (english_p) {
-            // english contractions to the right
-            RE2::GlobalReplace(&text,nanaapos_x,apos_refs);
-            RE2::GlobalReplace(&text,nxpaapos_x,apos_refs);
-            RE2::GlobalReplace(&text,panaapos_x,apos_refs);
-            RE2::GlobalReplace(&text,papaapos_x,right_refs);
-            RE2::GlobalReplace(&text,pnsapos_x,"\\1 's");
-        } else if (latin_p) {
-            // italian,french contractions to the left 
-            RE2::GlobalReplace(&text,nanaapos_x,apos_refs);
-            RE2::GlobalReplace(&text,napaapos_x,apos_refs);
-            RE2::GlobalReplace(&text,panaapos_x,apos_refs);
-            RE2::GlobalReplace(&text,papaapos_x,left_refs);
-        }
-
-        protected_tokenize(text);
+        if (supersub_p)
+            RE2::GlobalReplace(&text,numscript_x,"\\1\\2 \\3");
 
         // restore prefix-protected strings
         num = 0;
@@ -440,35 +894,10 @@ Tokenizer::tokenize(const std::string& buf)
             snprintf(subst,sizeof(subst),"THISISPROTECTED%.3d",num++);
             size_t loc = text.find(subst);
             while (loc != std::string::npos) {
-                text.replace(loc,18,prot);
+                text.replace(loc,18,prot.data(),prot.size());
                 loc = text.find(subst,loc+18);
             }
         }
-
-        // restore dot-sequences with correct length
-        std::string numstr;
-        pos = 0;
-        while (RE2::PartialMatch(text,dotskey_x,&numstr)) {
-            int count = std::strtoul(numstr.c_str(),0,0);
-            int loc = text.find("MANYDOTS",pos);
-            std::ostringstream fss;
-            fss << text.substr(0,loc);
-            if (loc > 0 && text.at(loc-1) != ' ')
-                fss << ' ';
-            for (int ii = 0; ii < count; ++ii) 
-                fss << '.';
-            int sublen = 8 + numstr.size();
-            pos = loc + sublen;
-            if (pos < text.size() && text.at(pos) != ' ')
-                fss << ' ';
-            fss << text.substr(pos);
-            pos = loc;
-            text.assign(fss.str());
-        }
-        
-        // escape moses mark-up
-        if (!non_escape_p) 
-            escape(text);
 
         // return value
         outs.assign(text);
@@ -480,9 +909,9 @@ Tokenizer::tokenize(const std::string& buf)
         size_t len = text.size();
         if (len > 2 && text.substr(0,2) == "``") 
             text.replace(0,2,"`` ",3); 
-        else if (text.at(0) == '"')
+        else if (text[0] == '"')
             text.replace(0,1,"`` ",3);
-        else if (text.at(0) == '`' || text.at(0) == '\'')
+        else if (text[0] == '`' || text[0] == '\'')
             text.replace(0,1,"` ",2);
         static char one_gg[] = "\\1 ``";
         RE2::GlobalReplace(&text,x1_v_d,one_gg);
@@ -528,11 +957,11 @@ Tokenizer::tokenize(const std::string& buf)
         // insure leading and trailing space on line, to simplify exprs
         // also make sure final . has one space on each side
         len = text.size();
-        while (len > 1 && text.at(len-1) == ' ') --len;
+        while (len > 1 && text[len-1] == ' ') --len;
         if (len < text.size())
             text.assign(text.substr(0,len));
-        if (len > 2 && text.at(len-1) == '.') {
-            if (text.at(len-2) != ' ') {
+        if (len > 2 && text[len-1] == '.') {
+            if (text[len-2] != ' ') {
                 text.assign(text.substr(0,len-1));
                 text.append(" . ");
             } else {
@@ -540,9 +969,9 @@ Tokenizer::tokenize(const std::string& buf)
                 text.append(". ");
             }
         } else {
-            text.append(" ");
+            text.append(SPC_BYTE,1);
         }
-        std::string ntext(" ");
+        std::string ntext(SPC_BYTE);
         ntext.append(text);
         
         // convert double quote to paired single-quotes
@@ -577,7 +1006,7 @@ Tokenizer::tokenize(const std::string& buf)
         RE2::GlobalReplace(&ntext,"MANYELIPSIS","...");
 
         // collapse spaces
-        RE2::GlobalReplace(&ntext,mult_spc_x," ");
+        RE2::GlobalReplace(&ntext,mult_spc_x,SPC_BYTE);
 
         // escape moses meta-characters
         if (!non_escape_p)
@@ -601,11 +1030,11 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
         line_no ++;
         if (istr.empty()) 
             continue;
-        if (skip_xml_p && RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x)) {
+        if (skip_xml_p && (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) {
             os << istr << std::endl;
         } else {
-            std::string bstr(" ");
-            bstr.append(istr).append(" ");
+            std::string bstr(SPC_BYTE);
+            bstr.append(istr).append(SPC_BYTE);
             os << tokenize(bstr) << std::endl;
         }
         if (verbose_p && ((line_no % 1000) == 0)) {
@@ -652,7 +1081,7 @@ Tokenizer::detokenize(const std::string& buf)
     
     std::size_t squotes = 0;
     std::size_t dquotes = 0;
-    std::string prepends(" ");
+    std::string prepends(SPC_BYTE);
 
     std::ostringstream oss;
     
@@ -665,10 +1094,10 @@ Tokenizer::detokenize(const std::string& buf)
             prepends.clear();
         } else if (RE2::FullMatch(word,left_x)) {
             oss << word;
-            prepends = " ";
+            prepends = SPC_BYTE;
         } else if (english_p && iword && RE2::FullMatch(word,curr_en_x) && RE2::FullMatch(words[iword-1],pre_en_x)) {
             oss << word;
-            prepends = " ";
+            prepends = SPC_BYTE;
         } else if (latin_p && iword < nwords - 2 && RE2::FullMatch(word,curr_fr_x) && RE2::FullMatch(words[iword+1],post_fr_x)) {
             oss << prepends << word;
             prepends.clear();
@@ -677,7 +1106,7 @@ Tokenizer::detokenize(const std::string& buf)
                 (word.at(0) == '"' && ((dquotes % 2) == 0))) {
                 if (english_p && iword && word.at(0) == '\'' && words[iword-1].at(words[iword-1].size()-1) == 's') {
                     oss << word;
-                    prepends = " ";
+                    prepends = SPC_BYTE;
 				} else {
                     oss << prepends << word;
                     prepends.clear();
@@ -688,7 +1117,7 @@ Tokenizer::detokenize(const std::string& buf)
                 }
 			} else {
                 oss << word;
-                prepends = " ";
+                prepends = SPC_BYTE;
                 if (word.at(0) == '\'')
                     squotes++;
                 else if (word.at(0) == '"') 
@@ -703,7 +1132,7 @@ Tokenizer::detokenize(const std::string& buf)
 	
     
     std::string text(oss.str());
-    RE2::GlobalReplace(&text," +"," ");
+    RE2::GlobalReplace(&text," +",SPC_BYTE);
     RE2::GlobalReplace(&text,"\n ","\n");
     RE2::GlobalReplace(&text," \n","\n");
     return trim(text);
@@ -720,7 +1149,7 @@ Tokenizer::detokenize(std::istream& is, std::ostream& os)
         line_no ++;
         if (istr.empty()) 
             continue;
-        if (skip_xml_p && RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x)) {
+        if (skip_xml_p && (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) {
             os << istr << std::endl;
         } else {
             os << detokenize(istr) << std::endl;
