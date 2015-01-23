@@ -28,7 +28,7 @@ public:
       std::string fname = features[i]->GetScoreProducerDescription();
       if(!m_fnames.empty() && m_fnames.count(fname) == 0)
         continue;
-      
+
       std::vector<float> scores = targetPhrase.GetScoreBreakdown().GetScoresForProducer(features[i]);
       for(size_t j = 0; j < scores.size(); ++j)
         classifier.AddLabelDependentFeature(fname + "^" + boost::lexical_cast<std::string>(j), scores[j]);
@@ -40,11 +40,10 @@ public:
       std::vector<std::string> names;
       Tokenize(names, value, ",");
       m_fnames.insert(names.begin(), names.end());
-    }
-    else
+    } else
       VWFeatureTarget::SetParameter(key, value);
   }
-  
+
 private:
   std::set<std::string> m_fnames;
 
