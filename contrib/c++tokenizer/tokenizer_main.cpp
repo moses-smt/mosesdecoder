@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <cctype>
+#include <cstring>
 
 #ifdef TOKENIZER_NAMESPACE
 using namespace TOKENIZER_NAMESPACE ;
@@ -11,16 +12,19 @@ using namespace TOKENIZER_NAMESPACE ;
 void 
 usage(const char *path) 
 {
-    std::cerr << "Usage: " << path << "[-{v|x|p|a|e|]* [LL] [-{c|o} PATH]* INFILE*" << std::endl;
+    std::cerr << "Usage: " << path << "[-{v|x|p|a|e|s|u]* [LL] [-{c|o} PATH]* INFILE*" << std::endl;
+    std::cerr << " -a -- aggressive hyphenization" << std::endl;
+    std::cerr << " -e -- escape entities" << std::endl;
+    std::cerr << " -c DIR -- config (pattern) file directory" << std::endl;
+    std::cerr << " -d -- downcase" << std::endl;
+    std::cerr << " -o OUT -- output file path" << std::endl;
+    std::cerr << " -p -- penn treebank style" << std::endl;
+    std::cerr << " -s -- super- and sub-script conjoining" << std::endl;
+    std::cerr << " -u -- disable url handling" << std::endl;
     std::cerr << " -v -- verbose" << std::endl;
     std::cerr << " -w -- word filter" << std::endl;
     std::cerr << " -x -- skip xml tag lines" << std::endl;
     std::cerr << " -y -- skip all xml tags" << std::endl;
-    std::cerr << " -e -- escape entities" << std::endl;
-    std::cerr << " -a -- aggressive hyphenization" << std::endl;
-    std::cerr << " -p -- treebank-3 style" << std::endl;
-    std::cerr << " -c DIR -- config (pattern) file directory" << std::endl;
-    std::cerr << " -o OUT -- output file path" << std::endl;
     std::cerr << "Default is -c ., stdin, stdout." << std::endl;
     std::cerr << "LL in en,fr,it affect contraction." << std::endl;
 }
@@ -58,7 +62,7 @@ std::string token_word(const std::string& in) {
             }
         }
     }
-    if (last_quirk == pos || digits_prefixed > 0 && nalpha == 0)
+    if (last_quirk == pos || (digits_prefixed > 0 && nalpha == 0))
         cv.clear(); // invalid word
     return std::string(cv.begin(),cv.end());
 }
@@ -93,7 +97,7 @@ int main(int ac, char **av)
     std::string lang_iso;
     std::vector<std::string> args;
     std::string out_path;
-    char *cfg_path = 0;
+    const char *cfg_path = 0;
     bool next_cfg_p = false;
     bool next_output_p = false;
     bool verbose_p = false;
@@ -101,27 +105,46 @@ int main(int ac, char **av)
     bool alltag_p = false;
     bool escape_p = true;
     bool aggro_p = false;
+    bool supersub_p = false;
+    bool url_p = true;
+    bool downcase_p = false;
     bool penn_p = false;
     bool words_p = false;
 
     const char *prog = av[0];
+
     while (++av,--ac) { 
         if (**av == '-') {
             switch (av[0][1]) {
+            case 'a':
+                aggro_p = true;
+                break;
             case 'h':
                 usage(prog);
                 exit(0);
             case 'c':
                 next_cfg_p = true;
                 break;
-            case 'o':
-                next_output_p = true;
-                break;
-            case 'v':
-                verbose_p = true;
+            case 'd':
+                downcase_p = true;
                 break;
             case 'e':
                 escape_p = false;
+                break;
+            case 'o':
+                next_output_p = true;
+                break;
+            case 'p':
+                penn_p = true;
+                break;
+            case 's':
+                supersub_p = true;
+                break;
+            case 'u':
+                url_p = false;
+                break;
+            case 'v':
+                verbose_p = true;
                 break;
             case 'w':
                 words_p = true;
@@ -132,14 +155,8 @@ int main(int ac, char **av)
             case 'y':
                 alltag_p = true;
                 break;
-            case 'a':
-                aggro_p = true;
-                break;
             case 'l':
                 // ignored
-                break;
-            case 'p':
-                penn_p = true;
                 break;
             default:
                 std::cerr << "Unknown option: " << *av << std::endl;
@@ -147,8 +164,6 @@ int main(int ac, char **av)
             }
         } else if (lang_iso.empty() && strlen(*av) == 2) {
             lang_iso = *av;
-        } else if (**av == '-') {
-            ++*av;
         } else if (next_output_p) {
             next_output_p = false;
             out_path = *av;
@@ -163,7 +178,43 @@ int main(int ac, char **av)
     if (!cfg_path) {
         cfg_path = getenv("TOKENIZER_SHARED_DIR");
     }
+    if (!cfg_path) {
+        if (!::access("../shared/.",X_OK)) {
+            if (!::access("../shared/moses/.",X_OK)) {
+                cfg_path = "../shared/moses";
+            } else {
+                cfg_path = "../shared";
+            }
+        } else if (!::access("./shared/.",X_OK)) {
+            if (!::access("./shared/moses/.",X_OK)) {
+                cfg_path = "./shared/moses";
+            } else {
+                cfg_path = "./shared";
+            }
+        } else if (!::access("./nonbreaking_prefix.en",R_OK)) {
+            cfg_path = ".";
+        } else {
+            const char *slash = std::strrchr(prog,'/');
+            if (slash) {
+                std::string cfg_dir_str(prog,slash-prog);
+                std::string cfg_shr_str(cfg_dir_str);
+                cfg_shr_str.append("/shared");
+                std::string cfg_mos_str(cfg_shr_str);
+                cfg_mos_str.append("/moses");
+                if (!::access(cfg_mos_str.c_str(),X_OK)) {
+                    cfg_path = strdup(cfg_mos_str.c_str());
+                } else if (!::access(cfg_shr_str.c_str(),X_OK)) { 
+                    cfg_path = strdup(cfg_shr_str.c_str());
+                } else if (!::access(cfg_dir_str.c_str(),X_OK)) {
+                    cfg_path = strdup(cfg_dir_str.c_str());
+                }
+            }
+        }
+    }
     if (cfg_path) {
+        if (verbose_p) {
+            std::cerr << "config path: " << cfg_path << std::endl;
+        }
         Tokenizer::set_config_dir(std::string(cfg_path));
     } 
 
@@ -173,7 +224,7 @@ int main(int ac, char **av)
     }
     std::ostream& ofs(pofs ? *pofs : std::cout);
 
-    Tokenizer tize(lang_iso,detag_p,alltag_p,!escape_p,aggro_p,penn_p,verbose_p);
+    Tokenizer tize(lang_iso,detag_p,alltag_p,!escape_p,aggro_p,supersub_p,url_p,downcase_p,penn_p,verbose_p);
     tize.init();
     size_t nlines = 0;
 

@@ -28,6 +28,8 @@ private:
 
     std::set<std::string> nbpre_num_set;
     std::set<std::string> nbpre_gen_set;
+    std::set<std::wstring> nbpre_num_ucs4;
+    std::set<std::wstring> nbpre_gen_ucs4;
     std::vector<re2::RE2 *> prot_pat_vec;
 
 protected:
@@ -40,6 +42,10 @@ protected:
     bool skip_alltags_p;
     bool non_escape_p;
     bool aggressive_hyphen_p;
+    bool supersub_p;
+    bool url_p;
+    bool downcase_p;
+    bool normalize_p;
     bool penn_p;
     bool verbose_p;
 
@@ -62,6 +68,10 @@ public:
               bool _skip_alltags_p = true, // skip all xml style tags
               bool _non_escape_p = false, // default is to call escape method before return
               bool _aggressive_hyphen_p = false, // hyphens become tokens when true
+              bool _supersub_p = false, // handle super/subscript numerics
+              bool _url_p = true,
+              bool _downcase_p = false,
+              bool _normalize_p = true,
               bool _penn_p = false,  // Treebank-3 compatible tokenization when true
               bool _verbose_p = false);
 

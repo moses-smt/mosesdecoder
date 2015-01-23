@@ -1,2 +1,4 @@
 external-lib re2 ;
-exe tokenizer : tokenizer.cpp tokenizer_main.cpp re2 : <cflags>-std=c++11 ;
+external-lib glib-2.0 ;
+glib-cflags = [ _shell "pkg-config --cflags glib-2.0" ] ;
+exe tokenizer : tokenizer.cpp tokenizer_main.cpp re2 glib-2.0 : <cflags>-std=c++11 <cflags>$(glib-cflags) ;
