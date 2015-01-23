@@ -282,7 +282,7 @@ if (-e $cocPath)
 # merge source label files
 if (!$inverse && defined($sourceLabelsFile)) 
 {
-  my $cmd = "(echo \"GlueTop 0\"; echo \"GlueX 1\"; cat $TMPDIR/phrase-table.half.*.gz.syntaxLabels.src | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+1]}/\") > $sourceLabelsFile";
+  my $cmd = "(echo \"GlueTop 0\"; echo \"GlueX 1\"; echo \"SSTART 2\"; echo \"SEND 3\"; cat $TMPDIR/phrase-table.half.*.gz.syntaxLabels.src | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+3]}/\") > $sourceLabelsFile";
   print STDERR "Merging source label files: $cmd \n";
   `$cmd`;
 }

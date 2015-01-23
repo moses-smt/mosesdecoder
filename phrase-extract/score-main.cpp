@@ -826,7 +826,8 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
                           vcbT);
       if ( !sourceLabelCounts.empty() ) {
         phraseTableFile << " {{SourceLabels "
-                        << nNTs // for convenience: number of non-terminal symbols in this rule (incl. left hand side NT)
+//                        << nNTs // for convenience: number of non-terminal symbols in this rule (incl. left hand side NT)
+                        << phraseSource->size() // for convenience: number of symbols in this rule (incl. left hand side NT)
                         << " "
                         << count // rule count
                         << sourceLabelCounts

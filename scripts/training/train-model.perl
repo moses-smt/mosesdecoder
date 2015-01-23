@@ -2213,7 +2213,7 @@ sub create_ini {
   print INI "UnknownWordPenalty0= 1\n";
   print INI "WordPenalty0= -1\n";
   print INI "PhrasePenalty0= 0.2\n";
-  print INI "SoftSourceSyntacticConstraintsFeature0= 0.3 -0.3 -0.3\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+  print INI "SoftSourceSyntacticConstraintsFeature0= -0.2 -0.2 -0.2 0.1 0.1 0.1\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
   print INI $weight_spec;
   close(INI);
 }
