@@ -1,4 +1,5 @@
 #include "tokenizer.h"
+#include "Parameters.h"
 #include <memory>
 #include <vector>
 #include <cctype>
@@ -94,22 +95,7 @@ copy_words(Tokenizer& tize, std::istream& ifs, std::ostream& ofs) {
 int main(int ac, char **av) 
 {
     int rc = 0;
-    std::string lang_iso;
-    std::vector<std::string> args;
-    std::string out_path;
-    const char *cfg_path = 0;
-    bool next_cfg_p = false;
-    bool next_output_p = false;
-    bool verbose_p = false;
-    bool detag_p = false;
-    bool alltag_p = false;
-    bool escape_p = true;
-    bool aggro_p = false;
-    bool supersub_p = false;
-    bool url_p = true;
-    bool downcase_p = false;
-    bool penn_p = false;
-    bool words_p = false;
+		Parameters params;
 
     const char *prog = av[0];
 
@@ -117,43 +103,43 @@ int main(int ac, char **av)
         if (**av == '-') {
             switch (av[0][1]) {
             case 'a':
-                aggro_p = true;
+                params.aggro_p = true;
                 break;
             case 'h':
                 usage(prog);
                 exit(0);
             case 'c':
-                next_cfg_p = true;
+                params.next_cfg_p = true;
                 break;
             case 'd':
-                downcase_p = true;
+                params.downcase_p = true;
                 break;
             case 'e':
-                escape_p = false;
+                params.escape_p = false;
                 break;
             case 'o':
-                next_output_p = true;
+                params.next_output_p = true;
                 break;
             case 'p':
-                penn_p = true;
+                params.penn_p = true;
                 break;
             case 's':
-                supersub_p = true;
+                params.supersub_p = true;
                 break;
             case 'u':
-                url_p = false;
+                params.url_p = false;
                 break;
             case 'v':
-                verbose_p = true;
+                params.verbose_p = true;
                 break;
             case 'w':
-                words_p = true;
+                params.words_p = true;
                 break;
             case 'x':
-                detag_p = true;
+                params.detag_p = true;
                 break;
             case 'y':
-                alltag_p = true;
+                params.alltag_p = true;
                 break;
             case 'l':
                 // ignored
@@ -162,37 +148,37 @@ int main(int ac, char **av)
                 std::cerr << "Unknown option: " << *av << std::endl;
                 ::exit(1);
             }
-        } else if (lang_iso.empty() && strlen(*av) == 2) {
-            lang_iso = *av;
-        } else if (next_output_p) {
-            next_output_p = false;
-            out_path = *av;
-        } else if (next_cfg_p) {
-            next_cfg_p = false;
-            cfg_path = *av;
+        } else if (params.lang_iso.empty() && strlen(*av) == 2) {
+            params.lang_iso = *av;
+        } else if (params.next_output_p) {
+            params.next_output_p = false;
+            params.out_path = *av;
+        } else if (params.next_cfg_p) {
+            params.next_cfg_p = false;
+            params.cfg_path = *av;
         } else {
-            args.push_back(std::string(*av));
+            params.args.push_back(std::string(*av));
         }
     }
 
-    if (!cfg_path) {
-        cfg_path = getenv("TOKENIZER_SHARED_DIR");
+    if (!params.cfg_path) {
+        params.cfg_path = getenv("TOKENIZER_SHARED_DIR");
     }
-    if (!cfg_path) {
+    if (!params.cfg_path) {
         if (!::access("../shared/.",X_OK)) {
             if (!::access("../shared/moses/.",X_OK)) {
-                cfg_path = "../shared/moses";
+                params.cfg_path = "../shared/moses";
             } else {
-                cfg_path = "../shared";
+                params.cfg_path = "../shared";
             }
         } else if (!::access("./shared/.",X_OK)) {
             if (!::access("./shared/moses/.",X_OK)) {
-                cfg_path = "./shared/moses";
+                params.cfg_path = "./shared/moses";
             } else {
-                cfg_path = "./shared";
+                params.cfg_path = "./shared";
             }
         } else if (!::access("./nonbreaking_prefix.en",R_OK)) {
-            cfg_path = ".";
+            params.cfg_path = ".";
         } else {
             const char *slash = std::strrchr(prog,'/');
             if (slash) {
@@ -202,37 +188,37 @@ int main(int ac, char **av)
                 std::string cfg_mos_str(cfg_shr_str);
                 cfg_mos_str.append("/moses");
                 if (!::access(cfg_mos_str.c_str(),X_OK)) {
-                    cfg_path = strdup(cfg_mos_str.c_str());
+                    params.cfg_path = strdup(cfg_mos_str.c_str());
                 } else if (!::access(cfg_shr_str.c_str(),X_OK)) { 
-                    cfg_path = strdup(cfg_shr_str.c_str());
+                    params.cfg_path = strdup(cfg_shr_str.c_str());
                 } else if (!::access(cfg_dir_str.c_str(),X_OK)) {
-                    cfg_path = strdup(cfg_dir_str.c_str());
+                    params.cfg_path = strdup(cfg_dir_str.c_str());
                 }
             }
         }
     }
-    if (cfg_path) {
-        if (verbose_p) {
-            std::cerr << "config path: " << cfg_path << std::endl;
+    if (params.cfg_path) {
+        if (params.verbose_p) {
+            std::cerr << "config path: " << params.cfg_path << std::endl;
         }
-        Tokenizer::set_config_dir(std::string(cfg_path));
+        Tokenizer::set_config_dir(std::string(params.cfg_path));
     } 
 
     std::unique_ptr<std::ofstream> pofs = 0;
-    if (!out_path.empty()) {
-        pofs.reset(new std::ofstream(out_path.c_str()));
+    if (!params.out_path.empty()) {
+        pofs.reset(new std::ofstream(params.out_path.c_str()));
     }
     std::ostream& ofs(pofs ? *pofs : std::cout);
 
-    Tokenizer tize(lang_iso,detag_p,alltag_p,!escape_p,aggro_p,supersub_p,url_p,downcase_p,penn_p,verbose_p);
+    Tokenizer tize(params.lang_iso,params.detag_p,params.alltag_p,!params.escape_p,params.aggro_p,params.supersub_p,params.url_p,params.downcase_p,params.penn_p,params.verbose_p);
     tize.init();
     size_t nlines = 0;
 
-    if (words_p) {
-        if (args.empty()) {
+    if (params.words_p) {
+        if (params.args.empty()) {
             nlines += copy_words(tize,std::cin,ofs);
         } else {
-            for (std::string& arg : args) {
+            for (std::string& arg : params.args) {
                 try {
                     std::ifstream ifs(arg.c_str());
                     nlines += copy_words(tize,ifs,ofs);
@@ -241,10 +227,10 @@ int main(int ac, char **av)
                 }
             }
         }
-    } else if (args.empty()) {
+    } else if (params.args.empty()) {
         nlines = tize.tokenize(std::cin,ofs);
     } else {
-        for (std::string& arg : args) {
+        for (std::string& arg : params.args) {
             try {
                 std::ifstream ifs(arg.c_str());
                 nlines = tize.tokenize(ifs,ofs);
@@ -254,7 +240,7 @@ int main(int ac, char **av)
         }
     }
 
-    if (verbose_p)
+    if (params.verbose_p)
         std::cerr << "%%% tokenized lines: " << nlines << std::endl;
     
     return rc;
