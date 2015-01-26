@@ -716,7 +716,12 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 
 		//how to make sure the memory gets released on the Java side?
 		env->ReleaseStringUTFChars(jStanfordDep, stanfordDep);
+		//should I do
+		//env->DeleteLocalRef(jStanfordDep);
 		env->DeleteGlobalRef(workingStanforDepObj);
+		//memory leaks before?
+		env->DeleteLocalRef(jSentence);
+
 		env->ExceptionDescribe();
 		javaWrapper->GetVM()->DetachCurrentThread();
 		return dependencies;
@@ -732,6 +737,12 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 			env->DeleteGlobalRef(workingStanforDepObj);
 			env->ExceptionDescribe();
 		}
+		//this would be deleted anyway once the thread detaches?
+		if(jSentence!=NULL){
+			env->DeleteLocalRef(jSentence);
+			env->ExceptionDescribe();
+		}
+
 		javaWrapper->GetVM()->DetachCurrentThread(); //-> when jStanfordDep in null it already crashed?
 
 		return "null";
@@ -802,12 +813,13 @@ void HeadFeature::ProcessDepString(std::string depRelString, std::vector< Syntax
 }
 
 void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
-	StringHashMap &localCache = GetCache();
-	DepRelMap &localCacheDepRel = GetCacheDepRel();
-	Counters &localCounters = GetCounters();
-	localCache = ResetCache();
-	localCacheDepRel = ResetCacheDepRel();
-	localCounters = ResetCounters();
+	StringHashMap &localCache = ResetCache();//GetCache();
+	DepRelMap &localCacheDepRel = ResetCacheDepRel();//GetCacheDepRel();
+	Counters &localCounters = ResetCounters();//GetCounters();
+	//should I do localCache.clear() ?
+	//localCache = ResetCache();
+	//localCacheDepRel = ResetCacheDepRel();
+	//localCounters = ResetCounters();
 
 	std::cerr<<"Reset cache: "<<localCache.size()<<endl;
 	std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
@@ -985,8 +997,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        		}
 	        		else{
 	        			//commented the call to StanfordDep to debug memory leak
-	        			//"nsubj hate I\tdobj hate you";
-	        			depRel = "nsubj hate PRN\tdobj hate you"; //CallStanfordDep(parsedSentence); //(parsedSentence);
+	        			//depRel = "nsubj hate PRN\tdobj hate you";
+	        			depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
 	        			float score = 1.0;
 	        			DepRelMap &localCacheDepRel = GetCacheDepRel();
 	        			//if key already returns return iterator to key position

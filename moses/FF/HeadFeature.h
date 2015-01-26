@@ -352,8 +352,8 @@ public:
 
    	StringHashMap *cache;
    	cache = new StringHashMap;
-   	m_cache.reset(cache);
    	assert(cache);
+   	m_cache.reset(cache);
    	return *cache;
    }
 
@@ -373,8 +373,8 @@ public:
 
 	 DepRelMap *cache;
    	cache = new DepRelMap;
-   	m_cacheDepRel.reset(cache);
    	assert(cache);
+   	m_cacheDepRel.reset(cache);
    	return *cache;
    }
 
@@ -394,8 +394,8 @@ public:
 
 	 Counters *counters;
 	 	 counters = new Counters;
+	 	 assert(counters);
     	m_counters.reset(counters);
-    	assert(counters);
     	return *counters;
     }
 

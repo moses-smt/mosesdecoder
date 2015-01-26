@@ -159,6 +159,7 @@ IOWrapper::~IOWrapper()
   delete m_alignmentInfoStream;
   delete m_unknownsStream;
   delete m_detailOutputCollector;
+  delete m_depRelOutputCollector;
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
