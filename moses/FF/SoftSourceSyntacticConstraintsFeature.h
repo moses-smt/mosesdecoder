@@ -44,19 +44,18 @@ public:
                                  , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
-
+      , const TranslationOptionList &translationOptionList) const
+  {}
 
   void EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
-    ScoreComponentCollection* accumulator) const {
-  };
+    ScoreComponentCollection* accumulator) const
+  {};
 
   void EvaluateWhenApplied(
     const ChartHypothesis& cur_hypo,
-    ScoreComponentCollection* accumulator) const {
-  };
+    ScoreComponentCollection* accumulator) const
+  {};
 
 private:
   std::string m_sourceLabelSetFile;
@@ -86,6 +85,8 @@ private:
   void LoadSourceLabelSet();
   void LoadCoreSourceLabelSet();
   void LoadTargetSourceLeftHandSideJointCountFile();
+
+  void LoadLabelSet(std::string &filename, boost::unordered_set<size_t> &labelSet);
 
   std::pair<float,float> GetLabelPairProbabilities(const Factor* target,
       const size_t source) const;

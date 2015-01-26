@@ -1,0 +1,13 @@
+
+with-re2 = [ option.get "with-re2" ] ;
+if $(with-re2) {
+  lib re2 : : <search>$(with-re2)/lib ;
+	external-lib glib-2.0 ;
+	glib-cflags = [ _shell "pkg-config --cflags glib-2.0" ] ;
+  includes += <include>$(with-re2)/include ;
+	exe tokenizer : tokenizer.cpp tokenizer_main.cpp Parameters.cpp re2 glib-2.0 : <cflags>-std=c++11 <cflags>$(glib-cflags) $(includes) ;
+}
+else {
+  alias tokenizer ;
+}
+

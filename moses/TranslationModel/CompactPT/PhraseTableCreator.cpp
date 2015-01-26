@@ -112,9 +112,9 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
 
   if(tempfilePath.size()) {
     MmapAllocator<unsigned char> allocEncoded(util::FMakeTemp(tempfilePath));
-    m_encodedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
+    m_encodedTargetPhrases = new StringVectorTemp<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
   } else {
-    m_encodedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+    m_encodedTargetPhrases = new StringVectorTemp<unsigned char, unsigned long, MmapAllocator>();
   }
   EncodeTargetPhrases();
 
@@ -409,6 +409,10 @@ void PhraseTableCreator::CalcHuffmanCodes()
 
 void PhraseTableCreator::AddSourceSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
+
   if(m_sourceSymbolsMap.count(symbol) == 0) {
     unsigned value = m_sourceSymbolsMap.size();
     m_sourceSymbolsMap[symbol] = value;
@@ -417,6 +421,9 @@ void PhraseTableCreator::AddSourceSymbolId(std::string& symbol)
 
 void PhraseTableCreator::AddTargetSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   if(m_targetSymbolsMap.count(symbol) == 0) {
     unsigned value = m_targetSymbolsMap.size();
     m_targetSymbolsMap[symbol] = value;
@@ -425,6 +432,9 @@ void PhraseTableCreator::AddTargetSymbolId(std::string& symbol)
 
 unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   boost::unordered_map<std::string, unsigned>::iterator it
   = m_sourceSymbolsMap.find(symbol);
 
@@ -436,13 +446,14 @@ unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 
 unsigned PhraseTableCreator::GetTargetSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   boost::unordered_map<std::string, unsigned>::iterator it
   = m_targetSymbolsMap.find(symbol);
 
-  if(it != m_targetSymbolsMap.end())
-    return it->second;
-  else
-    return m_targetSymbolsMap.size();
+  UTIL_THROW_IF2(it == m_targetSymbolsMap.end(), "No id found for target symbol: " << symbol);
+  return it->second;
 }
 
 unsigned PhraseTableCreator::GetOrAddTargetSymbolId(std::string& symbol)
@@ -867,8 +878,10 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
   }
 
   if(force) {
-    m_rnkHash.AddRange(m_lastSourceRange);
-    m_lastSourceRange.clear();
+    if(!m_lastSourceRange.empty()) {
+      m_rnkHash.AddRange(m_lastSourceRange);
+      m_lastSourceRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_rnkHash.WaitAll();
@@ -952,8 +965,10 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
       m_lastCollection.clear();
     }
 
-    m_srcHash.AddRange(m_lastSourceRange);
-    m_lastSourceRange.clear();
+    if(!m_lastSourceRange.empty()) {
+      m_srcHash.AddRange(m_lastSourceRange);
+      m_lastSourceRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_srcHash.WaitAll();
@@ -1199,7 +1214,7 @@ size_t CompressionTask::m_collectionNum = 0;
 boost::mutex CompressionTask::m_mutex;
 #endif
 
-CompressionTask::CompressionTask(StringVector<unsigned char, unsigned long,
+CompressionTask::CompressionTask(StringVectorTemp<unsigned char, unsigned long,
                                  MmapAllocator>& encodedCollections,
                                  PhraseTableCreator& creator)
   : m_encodedCollections(encodedCollections), m_creator(creator) {}
