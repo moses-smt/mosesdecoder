@@ -846,7 +846,7 @@ float HeadFeature::GetWBScore(vector<string>& depRel) const{
 	  lm::WordIndex arg = vocab.Index(depRel[2]);
 	  float score;
 	  score = m_WBmodel->FullScoreForgotState(context,context+2,arg,out_state0).prob;
-	  cout<<depRel[0]<<" "<<depRel[1]<<" "<<depRel[2]<<" "<<score<<endl;
+	  //cout<<depRel[0]<<" "<<depRel[1]<<" "<<depRel[2]<<" "<<score<<endl;
 
 	  //delete[] context;
 	  return score;

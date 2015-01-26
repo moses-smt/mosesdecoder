@@ -21,15 +21,16 @@ CreateJavaVM* CreateJavaVM::Instance(std::string jarPath){
 }
 
 CreateJavaVM::CreateJavaVM(std::string jarPath){
-	int nArgs=5;
+	int nArgs=4;
 	JavaVMOption args[nArgs]; //* args = new JavaVMOption[nArgs];
 	args[0].optionString = "-verbose:gc,class,jni";
 
 	string path = "-Djava.class.path="+jarPath;
 	args[1].optionString= const_cast<char*>(path.c_str());//"-Djava.class.path=/Users/mnadejde/Documents/workspace/stanford-parser-full-2014-08-27/stanford-parser-3.4.1-models.jar:/Users/mnadejde/Documents/workspace/stanford-parser-full-2014-08-27/stanford-parser.jar:/Users/mnadejde/Documents/workspace/stanford-parser-full-2014-08-27/commons-lang3-3.3.2.jar:/Users/mnadejde/Documents/workspace/moses_010914/mosesdecoder/Relations.jar";
-	args[2].optionString= "-Xcheck:jni";
+	args[2].optionString= "-d64";
 	args[3].optionString= "-Xmx500m";
-	args[4].optionString= "-d64";
+	//add this when debuging the java calls (otherwise it makes stuff slower)
+	//args[4].optionString= "-Xcheck:jni";
 
 	JavaVMInitArgs vm_args;
 	vm_args.version = JNI_VERSION_1_6;
