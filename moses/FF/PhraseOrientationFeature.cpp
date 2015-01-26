@@ -16,7 +16,6 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
 #include "moses/FactorCollection.h"
-#include "moses/PP/OrientationPhraseProperty.h"
 #include "phrase-extract/extract-ghkm/Alignment.h"
 
 
@@ -26,16 +25,16 @@ namespace Moses
 PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   : StatefulFeatureFunction(6, line)
   , m_glueTargetLHSStr("Q")
-  , m_distinguishStates(true)
   , m_glueTargetLHS(true)
-  , m_offsetR2LScores(0)
+  , m_distinguishStates(true)
+  , m_offsetR2LScores(m_numScoreComponents/2)
+  , m_weightsVector(StaticData::Instance().GetAllWeights().GetScoresForProducer(this))
 {
   VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
   FactorCollection &fc = FactorCollection::Instance();
   const Factor *factor = fc.AddFactor(m_glueTargetLHSStr, true);
   m_glueTargetLHS.SetFactor(0, factor);
-  m_offsetR2LScores = m_numScoreComponents / 2;
   VERBOSE(1, " Done." << std::endl);
 }
 
@@ -50,6 +49,58 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
   }
 }
 
+void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source, 
+                                                   const TargetPhrase &targetPhrase, 
+                                                   ScoreComponentCollection &scoreBreakdown, 
+                                                   ScoreComponentCollection &estimatedFutureScore) const 
+{
+  targetPhrase.SetRuleSource(source);
+
+  if (const PhraseProperty *property = targetPhrase.GetProperty("Orientation")) {
+    const OrientationPhraseProperty *orientationPhraseProperty = static_cast<const OrientationPhraseProperty*>(property);
+    LookaheadScore(orientationPhraseProperty, scoreBreakdown);
+  } else {
+    // abort with error message if the phrase does not translate an unknown word
+    UTIL_THROW_IF2(!targetPhrase.GetWord(0).IsOOV(), GetScoreProducerDescription()
+                   << ": Missing Orientation property. "
+                   << "Please check phrase table and glue rules.");
+  }
+}
+
+void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty, 
+                                              ScoreComponentCollection &scoreBreakdown, 
+                                              bool subtract) const 
+{
+  size_t ffScoreIndex = scoreBreakdown.GetIndexes(this).first;
+
+  std::vector<float> scoresL2R;
+  scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );
+  scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap()) );
+  scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous()) );
+  size_t heuristicScoreIndexL2R = GetHeuristicScoreIndex(scoresL2R, 0);
+
+  if (subtract) {
+    scoreBreakdown.PlusEquals(ffScoreIndex+heuristicScoreIndexL2R, 
+                              -scoresL2R[heuristicScoreIndexL2R]);
+  } else {
+    scoreBreakdown.PlusEquals(ffScoreIndex+heuristicScoreIndexL2R, 
+                              scoresL2R[heuristicScoreIndexL2R]);
+  }
+
+  std::vector<float> scoresR2L;
+  scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono()) );
+  scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap()) );
+  scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous()) );
+  size_t heuristicScoreIndexR2L = GetHeuristicScoreIndex(scoresR2L, m_offsetR2LScores);
+
+  if (subtract) {
+    scoreBreakdown.PlusEquals(ffScoreIndex+m_offsetR2LScores+heuristicScoreIndexR2L, 
+                              -scoresR2L[heuristicScoreIndexR2L]);
+  } else {
+    scoreBreakdown.PlusEquals(ffScoreIndex+m_offsetR2LScores+heuristicScoreIndexR2L, 
+                              scoresR2L[heuristicScoreIndexR2L]);
+  }
+}
 
 FFState* PhraseOrientationFeature::EvaluateWhenApplied(
   const ChartHypothesis& hypo,
@@ -119,6 +170,8 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
                      << " R2L_Dright " << orientationPhraseProperty->GetRightToLeftProbabilityDright()
                      << " R2L_Dleft "  << orientationPhraseProperty->GetRightToLeftProbabilityDleft()
                      << std::endl);
+    
+      LookaheadScore(orientationPhraseProperty, *accumulator, true);
 
       const PhraseOrientationFeatureState* prevState =
         static_cast<const PhraseOrientationFeatureState*>(prevHypo->GetFFState(featureID));
@@ -185,44 +238,15 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           // add heuristic scores
 
-          std::vector<float> weightsVector = StaticData::Instance().GetAllWeights().GetScoresForProducer(this);
           std::vector<float> scoresL2R;
           scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );
           scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap()) );
           scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous()) );
-          std::vector<float> weightedScoresL2R;
-          for ( size_t i=0; i<3; ++i ) {
-            weightedScoresL2R.push_back( weightsVector[i] * scoresL2R[i] );
-          }
 
-          size_t heuristicScoreIndex = 0;
-          for (size_t i=1; i<3; ++i) {
-            if (possibleFutureOrientationsL2R[i]) {
-              if (weightedScoresL2R[i] > weightedScoresL2R[heuristicScoreIndex]) {
-                heuristicScoreIndex = i;
-              }
-            }
-          }
+          size_t heuristicScoreIndexL2R = GetHeuristicScoreIndex(scoresL2R, 0, possibleFutureOrientationsL2R);
 
-          IFFEATUREVERBOSE(5) {
-            FEATUREVERBOSE(5, "Heuristic score computation (L2R): "
-                           << "heuristicScoreIndex= " << heuristicScoreIndex);
-            for (size_t i=0; i<3; ++i)
-              FEATUREVERBOSE2(5, " weightsVector[" << i << "]= " << weightsVector[i]);
-            for (size_t i=0; i<3; ++i)
-              FEATUREVERBOSE2(5, " scoresL2R[" << i << "]= " << scoresL2R[i]);
-            for (size_t i=0; i<3; ++i)
-              FEATUREVERBOSE2(5, " weightedScoresL2R[" << i << "]= " << weightedScoresL2R[i]);
-            for (size_t i=0; i<3; ++i)
-              FEATUREVERBOSE2(5, " possibleFutureOrientationsL2R[" << i << "]= " << possibleFutureOrientationsL2R[i]);
-            if ( possibleFutureOrientationsL2R == 0x7 ) {
-              FEATUREVERBOSE2(5, " (all orientations possible)");
-            }
-            FEATUREVERBOSE2(5, std::endl);
-          }
-
-          newScores[heuristicScoreIndex] += scoresL2R[heuristicScoreIndex];
-          state->SetLeftBoundaryL2R(scoresL2R, heuristicScoreIndex, possibleFutureOrientationsL2R, prevState);
+          newScores[heuristicScoreIndexL2R] += scoresL2R[heuristicScoreIndexL2R];
+          state->SetLeftBoundaryL2R(scoresL2R, heuristicScoreIndexL2R, possibleFutureOrientationsL2R, prevState);
 
           if ( (possibleFutureOrientationsL2R & prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations) == 0x4 ) {
             // recursive: discontinuous orientation
@@ -338,44 +362,15 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           // add heuristic scores
 
-          std::vector<float> weightsVector = StaticData::Instance().GetAllWeights().GetScoresForProducer(this);
           std::vector<float> scoresR2L;
           scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono()) );
           scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap()) );
           scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous()) );
-          std::vector<float> weightedScoresR2L;
-          for ( size_t i=0; i<3; ++i ) {
-            weightedScoresR2L.push_back( weightsVector[m_offsetR2LScores+i] * scoresR2L[i] );
-          }
 
-          size_t heuristicScoreIndex = 0;
-          for (size_t i=1; i<3; ++i) {
-            if (possibleFutureOrientationsR2L[i]) {
-              if (weightedScoresR2L[i] > weightedScoresR2L[heuristicScoreIndex]) {
-                heuristicScoreIndex = i;
-              }
-            }
-          }
+          size_t heuristicScoreIndexR2L = GetHeuristicScoreIndex(scoresR2L, m_offsetR2LScores, possibleFutureOrientationsR2L);
 
-          IFFEATUREVERBOSE(5) {
-            FEATUREVERBOSE(5, "Heuristic score computation (R2L): "
-                           << "heuristicScoreIndex= " << heuristicScoreIndex);
-            for (size_t i=0; i<3; ++i)
-              FEATUREVERBOSE2(5, " weightsVector[" << m_offsetR2LScores+i << "]= " << weightsVector[m_offsetR2LScores+i]);
-            for (size_t i=0; i<3; ++i)
-              FEATUREVERBOSE2(5, " scoresR2L[" << i << "]= " << scoresR2L[i]);
-            for (size_t i=0; i<3; ++i)
-              FEATUREVERBOSE2(5, " weightedScoresR2L[" << i << "]= " << weightedScoresR2L[i]);
-            for (size_t i=0; i<3; ++i)
-              FEATUREVERBOSE2(5, " possibleFutureOrientationsR2L[" << i << "]= " << possibleFutureOrientationsR2L[i]);
-            if ( possibleFutureOrientationsR2L == 0x7 ) {
-              FEATUREVERBOSE2(5, " (all orientations possible)");
-            }
-            FEATUREVERBOSE2(5, std::endl);
-          }
-
-          newScores[m_offsetR2LScores+heuristicScoreIndex] += scoresR2L[heuristicScoreIndex];
-          state->SetRightBoundaryR2L(scoresR2L, heuristicScoreIndex, possibleFutureOrientationsR2L, prevState);
+          newScores[m_offsetR2LScores+heuristicScoreIndexR2L] += scoresR2L[heuristicScoreIndexR2L];
+          state->SetRightBoundaryR2L(scoresR2L, heuristicScoreIndexR2L, possibleFutureOrientationsR2L, prevState);
 
           if ( (possibleFutureOrientationsR2L & prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations) == 0x4 ) {
             // recursive: discontinuous orientation
@@ -439,6 +434,44 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
   accumulator->PlusEquals(this, newScores);
 
   return state;
+}
+
+size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>& scores,
+                                                        size_t weightsVectorOffset, 
+                                                        const std::bitset<3> possibleFutureOrientations) const
+{
+  std::vector<float> weightedScores;
+  for ( size_t i=0; i<3; ++i ) {
+    weightedScores.push_back( m_weightsVector[weightsVectorOffset+i] * scores[i] );
+  }
+
+  size_t heuristicScoreIndex = 0;
+  for (size_t i=1; i<3; ++i) {
+    if (possibleFutureOrientations[i]) {
+      if (weightedScores[i] > weightedScores[heuristicScoreIndex]) {
+        heuristicScoreIndex = i;
+      }
+    }
+  }
+
+  IFFEATUREVERBOSE(5) {
+    FEATUREVERBOSE(5, "Heuristic score computation: "
+                   << "heuristicScoreIndex= " << heuristicScoreIndex);
+    for (size_t i=0; i<3; ++i)
+      FEATUREVERBOSE2(5, " m_weightsVector[" << weightsVectorOffset+i << "]= " << m_weightsVector[weightsVectorOffset+i]);
+    for (size_t i=0; i<3; ++i)
+      FEATUREVERBOSE2(5, " scores[" << i << "]= " << scores[i]);
+    for (size_t i=0; i<3; ++i)
+      FEATUREVERBOSE2(5, " weightedScores[" << i << "]= " << weightedScores[i]);
+    for (size_t i=0; i<3; ++i)
+      FEATUREVERBOSE2(5, " possibleFutureOrientations[" << i << "]= " << possibleFutureOrientations[i]);
+    if ( possibleFutureOrientations == 0x7 ) {
+      FEATUREVERBOSE2(5, " (all orientations possible)");
+    }
+    FEATUREVERBOSE2(5, std::endl);
+  }
+
+  return heuristicScoreIndex;
 }
 
 void PhraseOrientationFeature::LeftBoundaryL2RScoreRecursive(int featureID,

@@ -17,6 +17,7 @@
 #include "FFState.h"
 #include "moses/Factor.h"
 #include "phrase-extract/extract-ghkm/PhraseOrientation.h"
+#include "moses/PP/OrientationPhraseProperty.h"
 
 
 namespace Moses
@@ -159,11 +160,15 @@ private:
       return -1;
     }
     for (size_t i=0; i<state.m_leftBoundaryNonTerminalL2RScores.size(); ++i) {
-      if (state.m_leftBoundaryNonTerminalL2RScores[i] > otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
-        return 1;
-      }
-      if (state.m_leftBoundaryNonTerminalL2RScores[i] < otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
-        return -1;
+      // compare only for possible future orientations
+      // (possible future orientations of state and otherState are the same at this point due to the previous two conditional blocks)
+      if ( state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations[i]) { 
+        if (state.m_leftBoundaryNonTerminalL2RScores[i] > otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
+          return 1;
+        }
+        if (state.m_leftBoundaryNonTerminalL2RScores[i] < otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
+          return -1;
+        }
       }
     }
 
@@ -207,11 +212,15 @@ private:
       return -1;
     }
     for (size_t i=0; i<state.m_rightBoundaryNonTerminalR2LScores.size(); ++i) {
-      if (state.m_rightBoundaryNonTerminalR2LScores[i] > otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
-        return 1;
-      }
-      if (state.m_rightBoundaryNonTerminalR2LScores[i] < otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
-        return -1;
+      // compare only for possible future orientations
+      // (possible future orientations of state and otherState are the same at this point due to the previous two conditional blocks)
+      if ( state.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations[i]) { 
+        if (state.m_rightBoundaryNonTerminalR2LScores[i] > otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
+          return 1;
+        }
+        if (state.m_rightBoundaryNonTerminalR2LScores[i] < otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
+          return -1;
+        }
       }
     }
 
@@ -281,9 +290,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
-    targetPhrase.SetRuleSource(source);
-  };
+                           , ScoreComponentCollection &estimatedFutureScore) const;
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
@@ -313,6 +320,14 @@ public:
 
 protected:
 
+  void LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty, 
+                      ScoreComponentCollection &scoreBreakdown, 
+                      bool subtract=false) const;
+
+  size_t GetHeuristicScoreIndex(const std::vector<float>& scores,
+                                size_t weightsVectorOffset, 
+                                const std::bitset<3> possibleFutureOrientations = 0x7) const;
+
   void LeftBoundaryL2RScoreRecursive(int featureID,
                                      const PhraseOrientationFeatureState *state,
                                      const std::bitset<3> orientation,
@@ -327,6 +342,7 @@ protected:
   Word m_glueTargetLHS;
   bool m_distinguishStates;
   size_t m_offsetR2LScores;
+  const std::vector<float> m_weightsVector;
 
 };
 
