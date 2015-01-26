@@ -91,6 +91,12 @@ LanguageModelIRST::~LanguageModelIRST()
 }
 
 
+bool LanguageModelIRST::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[m_factorType];
+  return ret;
+}
+
 void LanguageModelIRST::Load()
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -226,31 +232,57 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
   }
 }
 
+const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/) const
+{
+  std::auto_ptr<IRSTLMState> ret(new IRSTLMState());
+
+  return ret.release();
+}
+
 void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
+//  std::cerr << "LanguageModelIRST::CalcScore phrase:|" << phrase << "|" << std::endl;
   fullScore = 0;
   ngramScore = 0;
   oovCount = 0;
 
   if ( !phrase.GetSize() ) return;
 
-  if ( m_lmtb_size > (int) phrase.GetSize()) return;
+//  if ( m_lmtb_size > (int) phrase.GetSize()) return;
+
+  int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
+
+//  std::cerr << "LanguageModelIRST::CalcScore _min:" << _min << std::endl;
+//  std::cerr << "LanguageModelIRST::CalcScore m_lmtb_sentenceStart:" << m_lmtb_sentenceStart << std::endl;
 
   int codes[m_lmtb_size];
   int idx = 0;
+  codes[idx] = m_lmtb_sentenceStart;
+//  std::cerr << "LanguageModelIRST::CalcScore idx:" << idx << " codes[idx]:" << codes[idx] << std::endl;
+  ++idx;
   int position = 0;
 
-  for (; position < m_lmtb_size; ++position)
+  char* msp = NULL;
+  float before_boundary = 0.0;
+//  for (; position < m_lmtb_size-1; ++position)
+  for (; position < _min; ++position)
   {
+//    std::cerr << "LanguageModelIRST::CalcScore position:" << position << " word:" << phrase.GetWord(position) << std::endl;
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
+//    std::cerr << "LanguageModelIRST::CalcScore idx:" << idx << " codes[idx]:" << codes[idx] << std::endl;
+    before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
+//    std::cerr << "LanguageModelIRST::CalcScore before_boundary:" << before_boundary << std::endl;
     ++idx; 
   }
 
-  char* msp = NULL;
-
-  ngramScore = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+  ngramScore = 0.0;
+//  std::cerr << "LanguageModelIRST::CalcScore ngramscore:" << ngramScore << std::endl;
   int end_loop = (int) phrase.GetSize();
+//  std::cerr << "LanguageModelIRST::CalcScore end_loop:" << end_loop << std::endl;
+//  ngramScore = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+//  std::cerr << "LanguageModelIRST::CalcScore ngramscore:" << ngramScore << std::endl;
+//  int end_loop = (int) phrase.GetSize();
 
   for (; position < end_loop; ++position) {
     for (idx = 1; idx < m_lmtb_size; ++idx)
@@ -258,64 +290,119 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
       codes[idx-1] = codes[idx];
     }
     codes[idx-1] = GetLmID(phrase.GetWord(position));
+//    std::cerr << "LanguageModelIRST::CalcScore position:" << position << " word:" << phrase.GetWord(position) << std::endl;
+//    std::cerr << "LanguageModelIRST::CalcScore idx:" << (idx-1) << " codes[idx]:" << codes[idx-1] << std::endl;
     if (codes[idx-1] == m_unknownId) ++oovCount;
     ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+//    std::cerr << "LanguageModelIRST::CalcScore ngramscore:" << ngramScore << std::endl;
   }
+//  std::cerr << "LanguageModelIRST::CalcScore before_boundary:" << before_boundary << std::endl;
+//  std::cerr << "LanguageModelIRST::CalcScore ngramScore:" << ngramScore << std::endl;
+  before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
-  fullScore = ngramScore;
+//  std::cerr << "LanguageModelIRST::CalcScore before_boundary transformed:" << before_boundary << std::endl;
+//  std::cerr << "LanguageModelIRST::CalcScore ngramScore transformed:" << ngramScore << std::endl;
+  fullScore = ngramScore + before_boundary;
+//  std::cerr << "LanguageModelIRST::CalcScore fullScore transformed:" << fullScore << std::endl;
 }
 
 FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
+//  std::cerr << "LanguageModelIRST::EvaluateWhenApplied" << std::endl;
+//  std::cerr << "LanguageModelIRST::EvaluateWhenApplied hypo:|" << hypo <<  "|" << std::endl;
   if (!hypo.GetCurrTargetLength()) {
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
     return ret.release();
   }
 
-  const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
   //[begin, end) in STL-like fashion.
-  const std::size_t end = hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
-  const std::size_t adjust_end = std::min(end, begin + m_lmtb_size - 1);
+  const int begin = (const int) hypo.GetCurrTargetWordsRange().GetStartPos();
+  const int end = (const int) hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
+  const int adjust_end = (const int) std::min(end, begin + m_lmtb_size - 1);
+
+//  std::cerr << "LanguageModelIRST::EvaluateWhenApplied begin:" << begin << std::endl;
+//  std::cerr << "LanguageModelIRST::EvaluateWhenApplied end:" << end << std::endl;
+//  std::cerr << "LanguageModelIRST::EvaluateWhenApplied adjust_end:" << adjust_end << std::endl;
 
   // set up context
+  //fill the farthest positions with sentenceStart symbols, if "empty" positions are available
+  //so that the vector looks like = "<s> <s> context_word context_word" for a two-word context and a LM of order 5
   int codes[m_lmtb_size];
   int idx=m_lmtb_size-1;
-  int position = adjust_end-1;
-
-  //fill the farthest positions with at most ONE sentenceEnd symbol and at most ONE sentenceEnd symbol, if "empty" positions are available
-  //so that the vector looks like = "</s> <s> context_word context_word" for a two-word context and a LM of order 5
-  while (position >= (const int) begin) {
+  int position = (const int) begin;  
+  while (position >= 0) {
     codes[idx] =  GetLmID(hypo.GetWord(position));
     --idx;
     --position;
-  } 
-  if (idx == 1){
-    codes[1] = m_lmtb_sentenceStart;
-    codes[0] = m_lmtb_sentenceStart;
   }
-  else if (idx == 0)
-  {
-    codes[0] = m_lmtb_sentenceEnd;
+  while (idx>=0){
+    codes[idx] = m_lmtb_sentenceStart;
+    --idx;
   }
 
+//  for (int j=0;j<m_lmtb_size;j++){  std::cerr << "LanguageModelIRST::EvaluateWhenApplied j:" << j << " codes[j]:" << codes[j] << std::endl; }
+ 
   char* msp = NULL;
   float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
-  score = TransformLMScore(score);
-  out->PlusEquals(this, score);
+//  position = (const int) begin;
+//  std::cerr << "LanguageModelIRST::EvaluateWhenApplied position:" << position << " score:" << score << std::endl;
 
-  if (adjust_end < end)
-  {
+  position = (const int) begin+1;
+  while (position < adjust_end){
+   for (idx=1; idx<m_lmtb_size; idx++){
+     codes[idx-1] = codes[idx];
+   }
+   codes[idx-1] =  GetLmID(hypo.GetWord(position));
+//   for (int j=0;j<m_lmtb_size;j++){  std::cerr << "LanguageModelIRST::EvaluateWhenApplied j:" << j << " codes[j]:" << codes[j] << std::endl; }
+   float newscore = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+//   std::cerr << "LanguageModelIRST::EvaluateWhenApplied position:" << position << " newscore:" << newscore << std::endl;
+   score += newscore;
+//   score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+//   std::cerr << "LanguageModelIRST::EvaluateWhenApplied position:" << position << " score:" << score << std::endl;
+   ++position;
+  }
+
+  //adding probability of having sentenceEnd symbol, after this phrase;
+  //this could happen only when all source words are covered
+  if (hypo.IsSourceCompleted()) {
     idx=m_lmtb_size-1;
-    position = end-1;
-
-    while (idx>=0)
-    {
+    codes[idx] = m_lmtb_sentenceEnd;
+    --idx;
+    position = (const int) end - 1;
+    while (position >= 0 && idx >= 0) {
       codes[idx] =  GetLmID(hypo.GetWord(position));
       --idx;
       --position;
     }
-    msp = (char *) m_lmtb->cmaxsuffptr(codes,m_lmtb_size);
+    while (idx>=0){
+      codes[idx] = m_lmtb_sentenceStart;
+      --idx;
+    }
+//    for (int j=0;j<m_lmtb_size;j++){  std::cerr << "LanguageModelIRST::EvaluateWhenApplied j:" << j << " codes[j]:" << codes[j] << std::endl; }
+    float newscore = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+    score += newscore;
+//    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+//    std::cerr << "LanguageModelIRST::EvaluateWhenApplied SourceCompleted -- position:" << end << " newscore:" << newscore << std::endl;
+//    std::cerr << "LanguageModelIRST::EvaluateWhenApplied SourceCompleted -- position:" << end << " score:" << score << std::endl;
+    // set the LMstate to null to make all hypotheses recombinable
+//    msp = NULL;
+  }else{
+    // need to set the LM state
+
+    if (adjust_end < end)   { //the LMstate of this target phrase refers to the last m_lmtb_size-1 words
+      position = (const int) end - 1;
+      for (idx=m_lmtb_size-1; idx>0; --idx){
+        codes[idx] =  GetLmID(hypo.GetWord(position));
+      }
+      codes[idx] = m_lmtb_sentenceStart;
+      msp = (char *) m_lmtb->cmaxsuffptr(codes,m_lmtb_size);
+    }
   }
+
+//  std::cerr << "LanguageModelIRST::EvaluateWhenApplied before plusEqual -- score:" << score << std::endl;
+  score = TransformLMScore(score);
+  out->PlusEquals(this, score);
+//  std::cerr << "LanguageModelIRST::EvaluateWhenApplied after plusEqual -- score:" << score << std::endl;
 
   std::auto_ptr<IRSTLMState> ret(new IRSTLMState(msp));
 
@@ -324,8 +411,6 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
 
 LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
-  FactorType factorType = GetFactorType();
-
   // set up context
   size_t count = contextFactor.size();
   if (count < 0) {
@@ -343,7 +428,6 @@ LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, S
   if (count < (size_t) m_lmtb_size) codes[idx++] = m_lmtb_sentenceStart;
 
   for (size_t i = 0 ; i < count ; i++) {
-    //codes[idx] =  GetLmID((*contextFactor[i])[factorType]);
     codes[idx] =  GetLmID(*contextFactor[i]);
     ++idx;
   }
@@ -354,12 +438,14 @@ LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, S
   char* msp = NULL;
   result.score = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
 
+//  std::cerr << "LMResult LanguageModelIRST::GetValue result.score:" << result.score << std::endl;
+
   if (finalState) *finalState=(State *) msp;
 
   result.score = TransformLMScore(result.score);
+//  std::cerr << "LMResult LanguageModelIRST::GetValue result.score transformed:" << result.score << std::endl;
   return result;
 }
-
 
 bool LMCacheCleanup(const int sentences_done, const size_t m_lmcache_cleanup_threshold)
 {
