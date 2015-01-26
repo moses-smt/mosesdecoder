@@ -37,8 +37,12 @@ sub compare_results {
       $fail++;
       next;
     }
-    my $truthv = $truth->{$k} || '';
-    my $testv = delete $test->{$k} || '';
+    my $truthv = (defined($truth->{$k}))?$truth->{$k}:'';
+    my $testv = '';
+    if (defined($test->{$k})){
+      $testv = $test->{$k};
+      delete $test->{$k};
+    }
     if ($ct1->{$k} eq '=') {
       if ($truthv eq $testv) {
         $report .= "pass\n";
@@ -48,6 +52,8 @@ sub compare_results {
         $fail++;
       }
     } else { # numeric difference
+
+
       my $diff = $testv - $truthv;
       if ($diff == 0) { $report .= "identical\n"; next; }
       $report .= "BASELINE=$truthv, TEST=$testv\t  DELTA=$diff";
