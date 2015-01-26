@@ -20,8 +20,9 @@ SourceWordDeletionFeature::SourceWordDeletionFeature(const std::string &line)
   :StatelessFeatureFunction(0, line),
    m_unrestricted(true)
 {
-  std::cerr << "Initializing source word deletion feature.." << std::endl;
+  VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
+  VERBOSE(1, " Done." << std::endl);
 }
 
 void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::string& value)

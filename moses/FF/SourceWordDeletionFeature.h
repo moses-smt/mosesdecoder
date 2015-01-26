@@ -1,5 +1,4 @@
-#ifndef moses_SourceWordDeletionFeature_h
-#define moses_SourceWordDeletionFeature_h
+#pragma once
 
 #include <string>
 #include <boost/unordered_set.hpp>
@@ -62,4 +61,3 @@ public:
 
 }
 
-#endif // moses_SourceWordDeletionFeature_h
