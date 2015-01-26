@@ -39,7 +39,7 @@ void TargetWordInsertionFeature::Load()
   if (m_filename.empty())
     return;
 
-  cerr << "loading target word insertion word list from " << m_filename << endl;
+  FEATUREVERBOSE(1, "Loading target word insertion word list from " << m_filename << std::endl);
   ifstream inFile(m_filename.c_str());
   UTIL_THROW_IF2(!inFile, "could not open file " << m_filename);
 

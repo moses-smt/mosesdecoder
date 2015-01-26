@@ -42,8 +42,7 @@ void SourceWordDeletionFeature::Load()
     return;
   }
 
-  cerr << "loading source word deletion word list from " << m_filename << endl;
-
+  FEATUREVERBOSE(1, "Loading source word deletion word list from " << m_filename << std::endl);
   ifstream inFile(m_filename.c_str());
   UTIL_THROW_IF2(!inFile, "Can't open file " << m_filename);
 
