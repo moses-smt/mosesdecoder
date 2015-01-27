@@ -62,7 +62,10 @@ private:
   std::string m_coreSourceLabelSetFile;
   std::string m_targetSourceLHSJointCountFile;
   std::string m_unknownLeftHandSideFile;
-  size_t m_featureVariant;
+  bool m_useCoreSourceLabels;
+  bool m_useLogprobs;
+  bool m_useSparse;
+  bool m_noMismatches;
 
   boost::unordered_map<std::string,size_t> m_sourceLabels;
   std::vector<std::string> m_sourceLabelsByIndex;
