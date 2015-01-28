@@ -22,21 +22,26 @@
 namespace Moses
 {
 
+
 PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   : StatefulFeatureFunction(6, line)
   , m_glueTargetLHSStr("Q")
   , m_glueTargetLHS(true)
   , m_distinguishStates(true)
+  , m_useSparse(false)
   , m_offsetR2LScores(m_numScoreComponents/2)
   , m_weightsVector(StaticData::Instance().GetAllWeights().GetScoresForProducer(this))
+  , m_useTargetWordList(false)
+  , m_useSourceWordList(false)
 {
   VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
-  FactorCollection &fc = FactorCollection::Instance();
-  const Factor *factor = fc.AddFactor(m_glueTargetLHSStr, true);
+  FactorCollection &factorCollection = FactorCollection::Instance();
+  const Factor *factor = factorCollection.AddFactor(m_glueTargetLHSStr, true);
   m_glueTargetLHS.SetFactor(0, factor);
   VERBOSE(1, " Done." << std::endl);
 }
+
 
 void PhraseOrientationFeature::SetParameter(const std::string& key, const std::string& value)
 {
@@ -44,10 +49,48 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
     m_glueTargetLHSStr = value;
   } else if (key == "distinguishStates") {
     m_distinguishStates = Scan<bool>(value);
+  } else if (key == "sparse") {
+    m_useSparse = Scan<bool>(value); 
+  } else if (key == "targetWordList") {
+    m_filenameTargetWordList = value; 
+  } else if (key == "sourceWordList") {
+    m_filenameSourceWordList = value; 
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
+
+
+void PhraseOrientationFeature::Load()
+{
+  if ( !m_filenameTargetWordList.empty() ) {
+    LoadWordList(m_filenameTargetWordList,m_targetWordList);
+    m_useTargetWordList = true;
+  }
+  if ( !m_filenameSourceWordList.empty() ) {
+    LoadWordList(m_filenameSourceWordList,m_sourceWordList);
+    m_useSourceWordList = true;
+  }
+}
+
+
+void PhraseOrientationFeature::LoadWordList(const std::string& filename,
+                                            boost::unordered_set<const Factor*>& list)
+{
+  FEATUREVERBOSE(2, "Loading word list from file " << filename << std::endl);
+  FactorCollection &factorCollection = FactorCollection::Instance();
+  list.clear();
+  std::string line;
+  InputFileStream inFile(filename);
+
+  while (getline(inFile, line)) {
+    const Factor *factor = factorCollection.AddFactor(line, false);
+    list.insert(factor);
+  }
+
+  inFile.Close();
+}
+
 
 void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source, 
                                                    const TargetPhrase &targetPhrase, 
@@ -66,6 +109,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
                    << "Please check phrase table and glue rules.");
   }
 }
+
 
 void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty, 
                                               ScoreComponentCollection &scoreBreakdown, 
@@ -101,6 +145,7 @@ void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *o
                               scoresR2L[heuristicScoreIndexR2L]);
   }
 }
+
 
 FFState* PhraseOrientationFeature::EvaluateWhenApplied(
   const ChartHypothesis& hypo,
@@ -267,24 +312,40 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x1, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseL2RScore(prevHypo,accumulator,"M");
+          }
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT:
           newScores[1] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x2, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseL2RScore(prevHypo,accumulator,"S");
+          }
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT:
           newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseL2RScore(prevHypo,accumulator,"D");
+          }
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT:
           newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseL2RScore(prevHypo,accumulator,"D");
+          }
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN:
           // modelType == Moses::GHKM::PhraseOrientation::REO_MSLR
@@ -292,6 +353,10 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseL2RScore(prevHypo,accumulator,"D");
+          }
           break;
         default:
           UTIL_THROW2(GetScoreProducerDescription()
@@ -391,24 +456,40 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x1, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseR2LScore(prevHypo,accumulator,"M");
+          }
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT:
           newScores[m_offsetR2LScores+1] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x2, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseR2LScore(prevHypo,accumulator,"S");
+          }
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT:
           newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseR2LScore(prevHypo,accumulator,"D");
+          }
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT:
           newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseR2LScore(prevHypo,accumulator,"D");
+          }
           break;
         case Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN:
           // modelType == Moses::GHKM::PhraseOrientation::REO_MSLR
@@ -416,6 +497,10 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
+          // sparse scores
+          if ( m_useSparse ) {
+            SparseR2LScore(prevHypo,accumulator,"D");
+          }
           break;
         default:
           UTIL_THROW2(GetScoreProducerDescription()
@@ -435,6 +520,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
   return state;
 }
+
 
 size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>& scores,
                                                         size_t weightsVectorOffset, 
@@ -473,6 +559,7 @@ size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>
 
   return heuristicScoreIndex;
 }
+
 
 void PhraseOrientationFeature::LeftBoundaryL2RScoreRecursive(int featureID,
     const PhraseOrientationFeatureState *state,
@@ -521,6 +608,7 @@ void PhraseOrientationFeature::LeftBoundaryL2RScoreRecursive(int featureID,
   }
 }
 
+
 void PhraseOrientationFeature::RightBoundaryR2LScoreRecursive(int featureID,
     const PhraseOrientationFeatureState *state,
     const std::bitset<3> orientation,
@@ -564,6 +652,124 @@ void PhraseOrientationFeature::RightBoundaryR2LScoreRecursive(int featureID,
       RightBoundaryR2LScoreRecursive(featureID, prevState, recursiveOrientation, newScores);
     } else {
       FEATUREVERBOSE(6, "m_rightBoundaryRecursionGuard" << std::endl);
+    }
+  }
+}
+
+
+void PhraseOrientationFeature::SparseL2RScore(const ChartHypothesis* hypo,
+                                              ScoreComponentCollection* scoreBreakdown,
+                                              const std::string& o) const
+{
+  // target word
+
+  const ChartHypothesis* currHypo = hypo;
+  const TargetPhrase* targetPhrase = &currHypo->GetCurrTargetPhrase();
+  const Word* targetWord = &targetPhrase->GetWord(0);
+
+  // TODO: boundary words in the feature state?
+  while ( targetWord->IsNonTerminal() ) {
+    const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+      targetPhrase->GetAlignNonTerm().GetNonTermIndexMap();
+    size_t nonTermIndex = nonTermIndexMap[0];
+    currHypo = currHypo->GetPrevHypo(nonTermIndex);
+    targetPhrase = &currHypo->GetCurrTargetPhrase();
+    targetWord = &targetPhrase->GetWord(0);
+  }
+
+  const std::string& targetWordString = (*targetWord)[0]->GetString().as_string();
+  if (targetWordString != "<s>" && targetWordString != "</s>") {
+    if ( !m_useTargetWordList || m_targetWordList.find((*targetWord)[0]) != m_targetWordList.end() ) {
+      scoreBreakdown->PlusEquals(this,
+                                 "L2R"+o+"_tw_"+targetWordString,
+                                 1);
+      FEATUREVERBOSE(3, "Sparse: L2R"+o+"_tw_"+targetWordString << std::endl);
+    } else {
+      scoreBreakdown->PlusEquals(this,
+                                 "L2R"+o+"_tw_OTHER",
+                                 1);
+      FEATUREVERBOSE(3, "Sparse: L2R"+o+"_tw_OTHER" << std::endl);
+    }
+  }
+
+  // source word
+  
+  WordsRange sourceSpan = hypo->GetCurrSourceRange();
+  const InputType& input = hypo->GetManager().GetSource();
+  const Sentence& sourceSentence = static_cast<const Sentence&>(input);
+  const Word& sourceWord = sourceSentence.GetWord(sourceSpan.GetStartPos());
+
+  const std::string& sourceWordString = sourceWord[0]->GetString().as_string();
+  if (sourceWordString != "<s>" && sourceWordString != "</s>") {
+    if ( !m_useSourceWordList || m_sourceWordList.find(sourceWord[0]) != m_sourceWordList.end() ) {
+      scoreBreakdown->PlusEquals(this,
+                                 "L2R"+o+"_sw_"+sourceWordString,
+                                 1);
+      FEATUREVERBOSE(3, "Sparse: L2R"+o+"_sw_"+sourceWordString << std::endl);
+    } else {
+      scoreBreakdown->PlusEquals(this,
+                                 "L2R"+o+"_sw_OTHER",
+                                 1);
+      FEATUREVERBOSE(3, "Sparse: L2R"+o+"_sw_OTHER" << std::endl);
+    }
+  }
+}
+
+
+void PhraseOrientationFeature::SparseR2LScore(const ChartHypothesis* hypo,
+                                              ScoreComponentCollection* scoreBreakdown,
+                                              const std::string& o) const
+{
+  // target word
+
+  const ChartHypothesis* currHypo = hypo;
+  const TargetPhrase* targetPhrase = &currHypo->GetCurrTargetPhrase();
+  const Word* targetWord = &targetPhrase->GetWord(targetPhrase->GetSize()-1);
+
+  // TODO: boundary words in the feature state?
+  while ( targetWord->IsNonTerminal() ) {
+    const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+      targetPhrase->GetAlignNonTerm().GetNonTermIndexMap();
+    size_t nonTermIndex = nonTermIndexMap[targetPhrase->GetSize()-1];
+    currHypo = currHypo->GetPrevHypo(nonTermIndex);
+    targetPhrase = &currHypo->GetCurrTargetPhrase();
+    targetWord = &targetPhrase->GetWord(targetPhrase->GetSize()-1);
+  }
+
+  const std::string& targetWordString = (*targetWord)[0]->GetString().as_string();
+  if (targetWordString != "<s>" && targetWordString != "</s>") {
+    if ( !m_useTargetWordList || m_targetWordList.find((*targetWord)[0]) != m_targetWordList.end() ) {
+      scoreBreakdown->PlusEquals(this,
+                                 "R2L"+o+"_tw_"+targetWordString,
+                                 1);
+      FEATUREVERBOSE(3, "Sparse: R2L"+o+"_tw_"+targetWordString << std::endl);
+    } else {
+      scoreBreakdown->PlusEquals(this,
+                                 "R2L"+o+"_tw_OTHER",
+                                 1);
+      FEATUREVERBOSE(3, "Sparse: R2L"+o+"_tw_OTHER" << std::endl);
+    }
+  }
+
+  // source word
+  
+  WordsRange sourceSpan = hypo->GetCurrSourceRange();
+  const InputType& input = hypo->GetManager().GetSource();
+  const Sentence& sourceSentence = static_cast<const Sentence&>(input);
+  const Word& sourceWord = sourceSentence.GetWord(sourceSpan.GetEndPos());
+
+  const std::string& sourceWordString = sourceWord[0]->GetString().as_string();
+  if (sourceWordString != "<s>" && sourceWordString != "</s>") {
+    if ( !m_useSourceWordList || m_sourceWordList.find(sourceWord[0]) != m_sourceWordList.end() ) {
+      scoreBreakdown->PlusEquals(this,
+                                 "R2L"+o+"_sw_"+sourceWordString,
+                                 1);
+      FEATUREVERBOSE(3, "Sparse: R2L"+o+"_sw_"+sourceWordString << std::endl);
+    } else {
+      scoreBreakdown->PlusEquals(this,
+                                 "R2L"+o+"_sw_OTHER",
+                                 1);
+      FEATUREVERBOSE(3, "Sparse: R2L"+o+"_sw_OTHER" << std::endl);
     }
   }
 }

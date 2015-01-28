@@ -18,6 +18,7 @@
 #include "moses/Factor.h"
 #include "phrase-extract/extract-ghkm/PhraseOrientation.h"
 #include "moses/PP/OrientationPhraseProperty.h"
+#include <boost/unordered_set.hpp>
 
 
 namespace Moses
@@ -134,7 +135,7 @@ public:
     return 0;
   };
 
-private:
+protected:
 
   static int CompareLeftBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState) {
     if (!state.m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet) {
@@ -286,6 +287,8 @@ public:
   }
 
   void SetParameter(const std::string& key, const std::string& value);
+  
+  void Load();
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
@@ -320,6 +323,9 @@ public:
 
 protected:
 
+  void LoadWordList(const std::string& filename,
+                    boost::unordered_set<const Factor*>& list);
+
   void LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty, 
                       ScoreComponentCollection &scoreBreakdown, 
                       bool subtract=false) const;
@@ -338,11 +344,26 @@ protected:
                                       const std::bitset<3> orientation,
                                       std::vector<float>& newScores) const;
 
+  void SparseL2RScore(const ChartHypothesis* hypo,
+                      ScoreComponentCollection* scoreBreakdown,
+                      const std::string& o) const;
+
+  void SparseR2LScore(const ChartHypothesis* hypo,
+                      ScoreComponentCollection* scoreBreakdown,
+                      const std::string& o) const;
+
   std::string m_glueTargetLHSStr;
   Word m_glueTargetLHS;
   bool m_distinguishStates;
+  bool m_useSparse;
   size_t m_offsetR2LScores;
   const std::vector<float> m_weightsVector;
+  std::string m_filenameTargetWordList;
+  boost::unordered_set<const Factor*> m_targetWordList;
+  bool m_useTargetWordList;
+  std::string m_filenameSourceWordList;
+  boost::unordered_set<const Factor*> m_sourceWordList;
+  bool m_useSourceWordList;
 
 };
 
