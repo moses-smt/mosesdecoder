@@ -15,7 +15,6 @@
 #include "moses/Hypothesis.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
-#include "moses/FactorCollection.h"
 #include "phrase-extract/extract-ghkm/Alignment.h"
 
 
@@ -23,12 +22,17 @@ namespace Moses
 {
 
 
+const std::string PhraseOrientationFeature::MORIENT("M");
+const std::string PhraseOrientationFeature::SORIENT("S");
+const std::string PhraseOrientationFeature::DORIENT("D");
+
+
 PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   : StatefulFeatureFunction(6, line)
   , m_glueTargetLHSStr("Q")
-  , m_glueTargetLHS(true)
   , m_distinguishStates(true)
-  , m_useSparse(false)
+  , m_useSparseWord(false)
+  , m_useSparseNT(false)
   , m_offsetR2LScores(m_numScoreComponents/2)
   , m_weightsVector(StaticData::Instance().GetAllWeights().GetScoresForProducer(this))
   , m_useTargetWordList(false)
@@ -37,8 +41,7 @@ PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
   FactorCollection &factorCollection = FactorCollection::Instance();
-  const Factor *factor = factorCollection.AddFactor(m_glueTargetLHSStr, true);
-  m_glueTargetLHS.SetFactor(0, factor);
+  m_glueTargetLHS = factorCollection.AddFactor(m_glueTargetLHSStr, true);
   VERBOSE(1, " Done." << std::endl);
 }
 
@@ -49,8 +52,10 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
     m_glueTargetLHSStr = value;
   } else if (key == "distinguishStates") {
     m_distinguishStates = Scan<bool>(value);
-  } else if (key == "sparse") {
-    m_useSparse = Scan<bool>(value); 
+  } else if (key == "sparseWord") {
+    m_useSparseWord = Scan<bool>(value); 
+  } else if (key == "sparseNT") {
+    m_useSparseNT = Scan<bool>(value); 
   } else if (key == "targetWordList") {
     m_filenameTargetWordList = value; 
   } else if (key == "sourceWordList") {
@@ -155,15 +160,15 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
   // Dense scores
   std::vector<float> newScores(m_numScoreComponents,0);
 
-  // State: used to propagate orientation probabilities in case of boundary non-terminals
-  PhraseOrientationFeatureState *state = new PhraseOrientationFeatureState(m_distinguishStates);
-
   // Read Orientation property
   const TargetPhrase &currTarPhr = hypo.GetCurrTargetPhrase();
-  const Word &currTarPhrLHS = currTarPhr.GetTargetLHS();
+  const Factor* currTarPhrLHS = currTarPhr.GetTargetLHS()[0];
   const Phrase *currSrcPhr = currTarPhr.GetRuleSource();
 //  const Factor* targetLHS = currTarPhr.GetTargetLHS()[0];
 //  bool isGlueGrammarRule = false;
+
+  // State: used to propagate orientation probabilities in case of boundary non-terminals
+  PhraseOrientationFeatureState *state = new PhraseOrientationFeatureState(m_distinguishStates,m_useSparseWord,m_useSparseNT);
 
   IFFEATUREVERBOSE(2) {
     FEATUREVERBOSE(2, *currSrcPhr << std::endl);
@@ -201,6 +206,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
     // consult subderivation
     const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
     const TargetPhrase &prevTarPhr = prevHypo->GetCurrTargetPhrase();
+    const Factor* prevTarPhrLHS = prevTarPhr.GetTargetLHS()[0];
 
     if (const PhraseProperty *property = prevTarPhr.GetProperty("Orientation")) {
       const OrientationPhraseProperty *orientationPhraseProperty = static_cast<const OrientationPhraseProperty*>(property);
@@ -291,7 +297,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
           size_t heuristicScoreIndexL2R = GetHeuristicScoreIndex(scoresL2R, 0, possibleFutureOrientationsL2R);
 
           newScores[heuristicScoreIndexL2R] += scoresL2R[heuristicScoreIndexL2R];
-          state->SetLeftBoundaryL2R(scoresL2R, heuristicScoreIndexL2R, possibleFutureOrientationsL2R, prevState);
+          state->SetLeftBoundaryL2R(scoresL2R, heuristicScoreIndexL2R, possibleFutureOrientationsL2R, prevTarPhrLHS, prevState);
 
           if ( (possibleFutureOrientationsL2R & prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations) == 0x4 ) {
             // recursive: discontinuous orientation
@@ -299,69 +305,49 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
                            << possibleFutureOrientationsL2R << " & " << prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations
                            << " = " << (possibleFutureOrientationsL2R & prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations)
                            << std::endl);
-            LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
+            LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
             state->m_leftBoundaryRecursionGuard = true; // prevent subderivation from being scored recursively multiple times
           }
         }
       }
 
       if (!delayedScoringL2R) {
-        switch (l2rOrientation) {
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT:
+
+        if ( l2rOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT ) {
+
           newScores[0] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
-          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x1, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseL2RScore(prevHypo,accumulator,"M");
-          }
-          break;
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT:
+          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x1, newScores, accumulator);
+
+        } else if ( l2rOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT ) {
+
           newScores[1] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
-          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x2, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseL2RScore(prevHypo,accumulator,"S");
-          }
-          break;
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT:
+          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x2, newScores, accumulator);
+
+        } else if ( ( l2rOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT ) ||
+                    ( l2rOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT ) ||
+                    ( l2rOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
+
           newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
-          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseL2RScore(prevHypo,accumulator,"D");
-          }
-          break;
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT:
-          newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
-          // if sub-derivation has left-boundary non-terminal:
-          // add recursive actual score of boundary non-terminal from subderivation
-          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseL2RScore(prevHypo,accumulator,"D");
-          }
-          break;
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN:
-          // modelType == Moses::GHKM::PhraseOrientation::REO_MSLR
-          newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
-          // if sub-derivation has left-boundary non-terminal:
-          // add recursive actual score of boundary non-terminal from subderivation
-          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseL2RScore(prevHypo,accumulator,"D");
-          }
-          break;
-        default:
+          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
+
+        } else {
+
           UTIL_THROW2(GetScoreProducerDescription()
                       << ": Unsupported orientation type.");
-          break;
+        }
+
+        // sparse scores
+        if ( m_useSparseWord ) {
+          SparseWordL2RScore(prevHypo,accumulator,ToString(l2rOrientation));
+        }
+        if ( m_useSparseNT ) {
+          SparseNonTerminalL2RScore(prevTarPhrLHS,accumulator,ToString(l2rOrientation));
         }
       }
 
@@ -435,7 +421,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
           size_t heuristicScoreIndexR2L = GetHeuristicScoreIndex(scoresR2L, m_offsetR2LScores, possibleFutureOrientationsR2L);
 
           newScores[m_offsetR2LScores+heuristicScoreIndexR2L] += scoresR2L[heuristicScoreIndexR2L];
-          state->SetRightBoundaryR2L(scoresR2L, heuristicScoreIndexR2L, possibleFutureOrientationsR2L, prevState);
+          state->SetRightBoundaryR2L(scoresR2L, heuristicScoreIndexR2L, possibleFutureOrientationsR2L, prevTarPhrLHS, prevState);
 
           if ( (possibleFutureOrientationsR2L & prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations) == 0x4 ) {
             // recursive: discontinuous orientation
@@ -443,71 +429,52 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
                            << possibleFutureOrientationsR2L << " & " << prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations
                            << " = " << (possibleFutureOrientationsR2L & prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations)
                            << std::endl);
-            RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
+            RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
             state->m_rightBoundaryRecursionGuard = true; // prevent subderivation from being scored recursively multiple times
           }
         }
       }
 
       if (!delayedScoringR2L) {
-        switch (r2lOrientation) {
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT:
+
+        if ( r2lOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT ) {
+
           newScores[m_offsetR2LScores+0] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
-          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x1, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseR2LScore(prevHypo,accumulator,"M");
-          }
-          break;
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT:
+          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x1, newScores, accumulator);
+
+        } else if ( r2lOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT ) {
+
           newScores[m_offsetR2LScores+1] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
-          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x2, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseR2LScore(prevHypo,accumulator,"S");
-          }
-          break;
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT:
+          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x2, newScores, accumulator);
+
+        } else if ( ( r2lOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT ) ||
+                    ( r2lOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT ) ||
+                    ( r2lOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
+
           newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
-          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseR2LScore(prevHypo,accumulator,"D");
-          }
-          break;
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT:
-          newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
-          // if sub-derivation has right-boundary non-terminal:
-          // add recursive actual score of boundary non-terminal from subderivation
-          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseR2LScore(prevHypo,accumulator,"D");
-          }
-          break;
-        case Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN:
-          // modelType == Moses::GHKM::PhraseOrientation::REO_MSLR
-          newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
-          // if sub-derivation has right-boundary non-terminal:
-          // add recursive actual score of boundary non-terminal from subderivation
-          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores);
-          // sparse scores
-          if ( m_useSparse ) {
-            SparseR2LScore(prevHypo,accumulator,"D");
-          }
-          break;
-        default:
+          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
+
+        } else {
+
           UTIL_THROW2(GetScoreProducerDescription()
                       << ": Unsupported orientation type.");
-          break;
+        }
+
+        // sparse scores
+        if ( m_useSparseWord ) {
+          SparseWordR2LScore(prevHypo,accumulator,ToString(r2lOrientation));
+        }
+        if ( m_useSparseNT ) {
+          SparseNonTerminalR2LScore(prevTarPhrLHS,accumulator,ToString(r2lOrientation));
         }
       }
+
     } else {
       // abort with error message if the phrase does not translate an unknown word
       UTIL_THROW_IF2(!prevTarPhr.GetWord(0).IsOOV(), GetScoreProducerDescription()
@@ -564,9 +531,13 @@ size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>
 void PhraseOrientationFeature::LeftBoundaryL2RScoreRecursive(int featureID,
     const PhraseOrientationFeatureState *state,
     const std::bitset<3> orientation,
-    std::vector<float>& newScores) const
+    std::vector<float>& newScores,
+    ScoreComponentCollection* scoreBreakdown) const 
+    // TODO: passing both newScores and scoreBreakdown seems redundant (scoreBreakdown needed for sparse scores)
 {
   if (state->m_leftBoundaryIsSet) {
+    const std::string* recursiveOrientationString;
+
     // subtract heuristic score from subderivation
     newScores[state->m_leftBoundaryNonTerminalL2RHeuristicScoreIndex] -= state->m_leftBoundaryNonTerminalL2RScores[state->m_leftBoundaryNonTerminalL2RHeuristicScoreIndex];
 
@@ -574,25 +545,34 @@ void PhraseOrientationFeature::LeftBoundaryL2RScoreRecursive(int featureID,
     std::bitset<3> recursiveOrientation = orientation;
     if ( (orientation == 0x4) || (orientation == 0x0) ) {
       // discontinuous
+      recursiveOrientationString = &DORIENT;
       newScores[2] += state->GetLeftBoundaryL2RScoreDiscontinuous();
     } else {
       recursiveOrientation &= state->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations;
       if ( recursiveOrientation == 0x1 ) {
         // monotone
+        recursiveOrientationString = &MORIENT;
         newScores[0] += state->GetLeftBoundaryL2RScoreMono();
       } else if ( recursiveOrientation == 0x2 ) {
         // swap
+        recursiveOrientationString = &SORIENT;
         newScores[1] += state->GetLeftBoundaryL2RScoreSwap();
       } else if ( recursiveOrientation == 0x4 ) {
         // discontinuous
+        recursiveOrientationString = &DORIENT;
         newScores[2] += state->GetLeftBoundaryL2RScoreDiscontinuous();
       } else if ( recursiveOrientation == 0x0 ) {
         // discontinuous
+        recursiveOrientationString = &DORIENT;
         newScores[2] += state->GetLeftBoundaryL2RScoreDiscontinuous();
       } else {
         UTIL_THROW2(GetScoreProducerDescription()
                     << ": Error in recursive scoring.");
       }
+    }
+
+    if ( m_useSparseNT ) {
+      SparseNonTerminalL2RScore(state->m_leftBoundaryNonTerminalSymbol,scoreBreakdown,recursiveOrientationString);
     }
 
     FEATUREVERBOSE(6, "Left boundary recursion: " << orientation << " & " << state->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations << " = " << recursiveOrientation
@@ -601,7 +581,7 @@ void PhraseOrientationFeature::LeftBoundaryL2RScoreRecursive(int featureID,
     if (!state->m_leftBoundaryRecursionGuard) {
       // recursive call
       const PhraseOrientationFeatureState* prevState = state->m_leftBoundaryPrevState;
-      LeftBoundaryL2RScoreRecursive(featureID, prevState, recursiveOrientation, newScores);
+      LeftBoundaryL2RScoreRecursive(featureID, prevState, recursiveOrientation, newScores, scoreBreakdown);
     } else {
       FEATUREVERBOSE(6, "m_leftBoundaryRecursionGuard" << std::endl);
     }
@@ -612,9 +592,13 @@ void PhraseOrientationFeature::LeftBoundaryL2RScoreRecursive(int featureID,
 void PhraseOrientationFeature::RightBoundaryR2LScoreRecursive(int featureID,
     const PhraseOrientationFeatureState *state,
     const std::bitset<3> orientation,
-    std::vector<float>& newScores) const
+    std::vector<float>& newScores,
+    ScoreComponentCollection* scoreBreakdown) const 
+    // TODO: passing both newScores and scoreBreakdown seems redundant (scoreBreakdown needed for sparse scores)
 {
   if (state->m_rightBoundaryIsSet) {
+    const std::string* recursiveOrientationString;
+
     // subtract heuristic score from subderivation
     newScores[m_offsetR2LScores+state->m_rightBoundaryNonTerminalR2LHeuristicScoreIndex] -= state->m_rightBoundaryNonTerminalR2LScores[state->m_rightBoundaryNonTerminalR2LHeuristicScoreIndex];
 
@@ -622,25 +606,34 @@ void PhraseOrientationFeature::RightBoundaryR2LScoreRecursive(int featureID,
     std::bitset<3> recursiveOrientation = orientation;
     if ( (orientation == 0x4) || (orientation == 0x0) ) {
       // discontinuous
+      recursiveOrientationString = &DORIENT;
       newScores[m_offsetR2LScores+2] += state->GetRightBoundaryR2LScoreDiscontinuous();
     } else {
       recursiveOrientation &= state->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations;
       if ( recursiveOrientation == 0x1 ) {
         // monotone
+        recursiveOrientationString = &MORIENT;
         newScores[m_offsetR2LScores+0] += state->GetRightBoundaryR2LScoreMono();
       } else if ( recursiveOrientation == 0x2 ) {
         // swap
+        recursiveOrientationString = &SORIENT;
         newScores[m_offsetR2LScores+1] += state->GetRightBoundaryR2LScoreSwap();
       } else if ( recursiveOrientation == 0x4 ) {
         // discontinuous
+        recursiveOrientationString = &DORIENT;
         newScores[m_offsetR2LScores+2] += state->GetRightBoundaryR2LScoreDiscontinuous();
       } else if ( recursiveOrientation == 0x0 ) {
         // discontinuous
+        recursiveOrientationString = &DORIENT;
         newScores[m_offsetR2LScores+2] += state->GetRightBoundaryR2LScoreDiscontinuous();
       } else {
         UTIL_THROW2(GetScoreProducerDescription()
                     << ": Error in recursive scoring.");
       }
+    }
+
+    if ( m_useSparseNT ) {
+      SparseNonTerminalR2LScore(state->m_rightBoundaryNonTerminalSymbol,scoreBreakdown,recursiveOrientationString);
     }
 
     FEATUREVERBOSE(6, "Right boundary recursion: " << orientation << " & " << state->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations << " = " << recursiveOrientation
@@ -649,7 +642,7 @@ void PhraseOrientationFeature::RightBoundaryR2LScoreRecursive(int featureID,
     if (!state->m_rightBoundaryRecursionGuard) {
       // recursive call
       const PhraseOrientationFeatureState* prevState = state->m_rightBoundaryPrevState;
-      RightBoundaryR2LScoreRecursive(featureID, prevState, recursiveOrientation, newScores);
+      RightBoundaryR2LScoreRecursive(featureID, prevState, recursiveOrientation, newScores, scoreBreakdown);
     } else {
       FEATUREVERBOSE(6, "m_rightBoundaryRecursionGuard" << std::endl);
     }
@@ -657,9 +650,9 @@ void PhraseOrientationFeature::RightBoundaryR2LScoreRecursive(int featureID,
 }
 
 
-void PhraseOrientationFeature::SparseL2RScore(const ChartHypothesis* hypo,
-                                              ScoreComponentCollection* scoreBreakdown,
-                                              const std::string& o) const
+void PhraseOrientationFeature::SparseWordL2RScore(const ChartHypothesis* hypo,
+                                                  ScoreComponentCollection* scoreBreakdown,
+                                                  const std::string* o) const
 {
   // target word
 
@@ -681,14 +674,14 @@ void PhraseOrientationFeature::SparseL2RScore(const ChartHypothesis* hypo,
   if (targetWordString != "<s>" && targetWordString != "</s>") {
     if ( !m_useTargetWordList || m_targetWordList.find((*targetWord)[0]) != m_targetWordList.end() ) {
       scoreBreakdown->PlusEquals(this,
-                                 "L2R"+o+"_tw_"+targetWordString,
+                                 "L2R"+*o+"_tw_"+targetWordString,
                                  1);
-      FEATUREVERBOSE(3, "Sparse: L2R"+o+"_tw_"+targetWordString << std::endl);
+      FEATUREVERBOSE(3, "Sparse: L2R"+*o+"_tw_"+targetWordString << std::endl);
     } else {
       scoreBreakdown->PlusEquals(this,
-                                 "L2R"+o+"_tw_OTHER",
+                                 "L2R"+*o+"_tw_OTHER",
                                  1);
-      FEATUREVERBOSE(3, "Sparse: L2R"+o+"_tw_OTHER" << std::endl);
+      FEATUREVERBOSE(3, "Sparse: L2R"+*o+"_tw_OTHER" << std::endl);
     }
   }
 
@@ -703,22 +696,22 @@ void PhraseOrientationFeature::SparseL2RScore(const ChartHypothesis* hypo,
   if (sourceWordString != "<s>" && sourceWordString != "</s>") {
     if ( !m_useSourceWordList || m_sourceWordList.find(sourceWord[0]) != m_sourceWordList.end() ) {
       scoreBreakdown->PlusEquals(this,
-                                 "L2R"+o+"_sw_"+sourceWordString,
+                                 "L2R"+*o+"_sw_"+sourceWordString,
                                  1);
-      FEATUREVERBOSE(3, "Sparse: L2R"+o+"_sw_"+sourceWordString << std::endl);
+      FEATUREVERBOSE(3, "Sparse: L2R"+*o+"_sw_"+sourceWordString << std::endl);
     } else {
       scoreBreakdown->PlusEquals(this,
-                                 "L2R"+o+"_sw_OTHER",
+                                 "L2R"+*o+"_sw_OTHER",
                                  1);
-      FEATUREVERBOSE(3, "Sparse: L2R"+o+"_sw_OTHER" << std::endl);
+      FEATUREVERBOSE(3, "Sparse: L2R"+*o+"_sw_OTHER" << std::endl);
     }
   }
 }
 
 
-void PhraseOrientationFeature::SparseR2LScore(const ChartHypothesis* hypo,
-                                              ScoreComponentCollection* scoreBreakdown,
-                                              const std::string& o) const
+void PhraseOrientationFeature::SparseWordR2LScore(const ChartHypothesis* hypo,
+                                                  ScoreComponentCollection* scoreBreakdown,
+                                                  const std::string* o) const
 {
   // target word
 
@@ -740,14 +733,14 @@ void PhraseOrientationFeature::SparseR2LScore(const ChartHypothesis* hypo,
   if (targetWordString != "<s>" && targetWordString != "</s>") {
     if ( !m_useTargetWordList || m_targetWordList.find((*targetWord)[0]) != m_targetWordList.end() ) {
       scoreBreakdown->PlusEquals(this,
-                                 "R2L"+o+"_tw_"+targetWordString,
+                                 "R2L"+*o+"_tw_"+targetWordString,
                                  1);
-      FEATUREVERBOSE(3, "Sparse: R2L"+o+"_tw_"+targetWordString << std::endl);
+      FEATUREVERBOSE(3, "Sparse: R2L"+*o+"_tw_"+targetWordString << std::endl);
     } else {
       scoreBreakdown->PlusEquals(this,
-                                 "R2L"+o+"_tw_OTHER",
+                                 "R2L"+*o+"_tw_OTHER",
                                  1);
-      FEATUREVERBOSE(3, "Sparse: R2L"+o+"_tw_OTHER" << std::endl);
+      FEATUREVERBOSE(3, "Sparse: R2L"+*o+"_tw_OTHER" << std::endl);
     }
   }
 
@@ -762,16 +755,65 @@ void PhraseOrientationFeature::SparseR2LScore(const ChartHypothesis* hypo,
   if (sourceWordString != "<s>" && sourceWordString != "</s>") {
     if ( !m_useSourceWordList || m_sourceWordList.find(sourceWord[0]) != m_sourceWordList.end() ) {
       scoreBreakdown->PlusEquals(this,
-                                 "R2L"+o+"_sw_"+sourceWordString,
+                                 "R2L"+*o+"_sw_"+sourceWordString,
                                  1);
-      FEATUREVERBOSE(3, "Sparse: R2L"+o+"_sw_"+sourceWordString << std::endl);
+      FEATUREVERBOSE(3, "Sparse: R2L"+*o+"_sw_"+sourceWordString << std::endl);
     } else {
       scoreBreakdown->PlusEquals(this,
-                                 "R2L"+o+"_sw_OTHER",
+                                 "R2L"+*o+"_sw_OTHER",
                                  1);
-      FEATUREVERBOSE(3, "Sparse: R2L"+o+"_sw_OTHER" << std::endl);
+      FEATUREVERBOSE(3, "Sparse: R2L"+*o+"_sw_OTHER" << std::endl);
     }
   }
+}
+
+
+void PhraseOrientationFeature::SparseNonTerminalL2RScore(const Factor* nonTerminalSymbol,
+                                                         ScoreComponentCollection* scoreBreakdown,
+                                                         const std::string* o) const
+{
+  if ( nonTerminalSymbol != m_glueTargetLHS ) {
+    const std::string& nonTerminalString = nonTerminalSymbol->GetString().as_string();
+    scoreBreakdown->PlusEquals(this,
+                               "L2R"+*o+"_n_"+nonTerminalString,
+                               1);
+    FEATUREVERBOSE(3, "Sparse: L2R"+*o+"_n_"+nonTerminalString << std::endl);
+  }
+}
+
+
+void PhraseOrientationFeature::SparseNonTerminalR2LScore(const Factor* nonTerminalSymbol,
+                                                         ScoreComponentCollection* scoreBreakdown,
+                                                         const std::string* o) const
+{
+  if ( nonTerminalSymbol != m_glueTargetLHS ) {
+    const std::string& nonTerminalString = nonTerminalSymbol->GetString().as_string();
+    scoreBreakdown->PlusEquals(this,
+                               "R2L"+*o+"_n_"+nonTerminalString,
+                               1);
+    FEATUREVERBOSE(3, "Sparse: R2L"+*o+"_n_"+nonTerminalString << std::endl);
+  }
+}
+
+
+const std::string* PhraseOrientationFeature::ToString(const Moses::GHKM::PhraseOrientation::REO_CLASS o) const
+{
+  if ( o == Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT ) {
+    return &MORIENT;
+
+  } else if ( o == Moses::GHKM::PhraseOrientation::REO_CLASS_RIGHT ) {
+    return &SORIENT;
+
+  } else if ( ( o == Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT ) ||
+              ( o == Moses::GHKM::PhraseOrientation::REO_CLASS_DRIGHT ) ||
+              ( o == Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
+    return &DORIENT;
+
+  } else {
+    UTIL_THROW2(GetScoreProducerDescription()
+                << ": Unsupported orientation type.");
+  }
+  return NULL;
 }
 
 
