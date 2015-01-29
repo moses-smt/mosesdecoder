@@ -395,7 +395,7 @@ private:
       float discount = IsCorrectTranslationOption(**iterTransOpt) ? ONE : 0.0;
       float target = property->GetTargetMarginal() - discount;
       float joint  = property->GetJointCount() - discount;
-      if (discount != 0.0) VERBOSE(2, "VW :: leaving one out!");
+      if (discount != 0.0) VERBOSE(2, "VW :: leaving one out!\n");
 
       if (joint > 0) {
         // topt survived leaving one out, update its scores
@@ -411,6 +411,7 @@ private:
         keepOpt.push_back(true);
       } else {
         // they only occurred together once, discard topt
+        VERBOSE(2, "VW :: discared topt when leaving one out\n");
         keepOpt.push_back(false);
       }
     }
