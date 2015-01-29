@@ -1,5 +1,5 @@
-#!/bin/env perl
-use warnings;
+#!/usr/bin/perl -w
+
 # Sample Tokenizer
 ### Version 1.1
 # written by Pidong Wang, based on the code written by Josh Schroeder and Philipp Koehn
