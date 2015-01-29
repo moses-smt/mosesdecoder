@@ -18,6 +18,7 @@ using namespace std;
 namespace Moses
 {
 
+
 SoftSourceSyntacticConstraintsFeature::SoftSourceSyntacticConstraintsFeature(const std::string &line)
   : StatelessFeatureFunction(6, line)
   , m_useCoreSourceLabels(false)
@@ -35,6 +36,7 @@ SoftSourceSyntacticConstraintsFeature::SoftSourceSyntacticConstraintsFeature(con
   VERBOSE(1, " No mismatches");     if ( m_noMismatches )        { VERBOSE(1, " active."); } else { VERBOSE(1, " inactive."); }
   VERBOSE(1, std::endl);
 }
+
 
 void SoftSourceSyntacticConstraintsFeature::SetParameter(const std::string& key, const std::string& value)
 {
@@ -56,7 +58,6 @@ void SoftSourceSyntacticConstraintsFeature::SetParameter(const std::string& key,
   }
 }
 
-
 void SoftSourceSyntacticConstraintsFeature::Load()
 {
   // don't change the loading order!
@@ -71,7 +72,7 @@ void SoftSourceSyntacticConstraintsFeature::Load()
 
 void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
 {
-  VERBOSE(2, GetScoreProducerDescription() << ": Loading source label set from file " << m_sourceLabelSetFile << std::endl);
+  FEATUREVERBOSE(2, "Loading source label set from file " << m_sourceLabelSetFile << std::endl);
   InputFileStream inFile(m_sourceLabelSetFile);
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -137,9 +138,10 @@ void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
   }
 }
 
+
 void SoftSourceSyntacticConstraintsFeature::LoadCoreSourceLabelSet()
 {
-  VERBOSE(2, GetScoreProducerDescription() << ": Loading core source label set from file " << m_coreSourceLabelSetFile << std::endl);
+  FEATUREVERBOSE(2, "Loading core source label set from file " << m_coreSourceLabelSetFile << std::endl);
   // read core source label set
   LoadLabelSet(m_coreSourceLabelSetFile, m_coreSourceLabels);
 }
@@ -147,7 +149,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadCoreSourceLabelSet()
 void SoftSourceSyntacticConstraintsFeature::LoadLabelSet(std::string &filename, 
                                                          boost::unordered_set<size_t> &labelSet)
 {
-  VERBOSE(2, GetScoreProducerDescription() << ": Loading core source label set from file " << m_coreSourceLabelSetFile << std::endl);
+  FEATUREVERBOSE(2, "Loading core source label set from file " << m_coreSourceLabelSetFile << std::endl);
   InputFileStream inFile(filename);
   std::string line;
   labelSet.clear();
@@ -159,19 +161,19 @@ void SoftSourceSyntacticConstraintsFeature::LoadLabelSet(std::string &filename,
     if ( foundSourceLabelIndex != m_sourceLabels.end() ) {
       labelSet.insert(foundSourceLabelIndex->second);
     } else {
-      VERBOSE(2, GetScoreProducerDescription()
-              << ": Ignoring unknown source label \"" << label << "\" "
-              << "from core source label set file " << filename << "."
-              << std::endl);
+      FEATUREVERBOSE(2, "Ignoring unknown source label \"" << label << "\" "
+                     << "from core source label set file " << filename << "."
+                     << std::endl);
     }
   }
   inFile.Close();
 }
 
+
 void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCountFile()
 {
 
-  VERBOSE(2, GetScoreProducerDescription() << ": Loading target/source label joint counts from file " << m_targetSourceLHSJointCountFile << std::endl);
+  FEATUREVERBOSE(2, "Loading target/source label joint counts from file " << m_targetSourceLHSJointCountFile << std::endl);
   InputFileStream inFile(m_targetSourceLHSJointCountFile);
 
   for (boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::iterator iter=m_labelPairProbabilities.begin();
