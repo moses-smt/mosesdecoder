@@ -180,8 +180,10 @@ public:
       }
 
       // do not train if there are no positive examples
-      if (! seenCorrect)
+      if (! seenCorrect) {
+        VERBOSE(2, "VW :: skipping topt collection, no correct translation for span\n");
         return;
+      }
     }
 
     std::vector<bool>::const_iterator iterKeep;
@@ -411,7 +413,7 @@ private:
         keepOpt.push_back(true);
       } else {
         // they only occurred together once, discard topt
-        VERBOSE(2, "VW :: discared topt when leaving one out\n");
+        VERBOSE(2, "VW :: discarded topt when leaving one out\n");
         keepOpt.push_back(false);
       }
     }
