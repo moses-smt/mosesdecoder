@@ -134,7 +134,7 @@ void RecursiveCYKPlusParser<Callback>::AddAndExtend(
   // Add target phrase collection (except if rule is empty or unary).
   const TargetPhraseCollection &tpc = node.GetTargetPhraseCollection();
   if (!tpc.IsEmpty() && !IsNonLexicalUnary(m_hyperedge)) {
-    m_hyperedge.translations = &tpc;
+    m_hyperedge.label.translations = &tpc;
     (*m_callback)(m_hyperedge, end);
   }
 

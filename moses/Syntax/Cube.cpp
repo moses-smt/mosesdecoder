@@ -102,11 +102,16 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
     boost::shared_ptr<SVertex> pred = (*m_bundle.stacks[i])[coordinates[i]];
     hyperedge->tail[i] = pred.get();
     if (pred->best) {
-      hyperedge->scoreBreakdown.PlusEquals(pred->best->scoreBreakdown);
+      hyperedge->label.scoreBreakdown.PlusEquals(
+          pred->best->label.scoreBreakdown);
     }
   }
-  hyperedge->translation = *(m_bundle.translations->begin()+coordinates.back());
-  hyperedge->scoreBreakdown.PlusEquals(hyperedge->translation->GetScoreBreakdown());
+
+  hyperedge->label.translation =
+      *(m_bundle.translations->begin()+coordinates.back());
+
+  hyperedge->label.scoreBreakdown.PlusEquals(
+      hyperedge->label.translation->GetScoreBreakdown());
 
   const StaticData &staticData = StaticData::Instance();
 
@@ -116,7 +121,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (!staticData.IsFeatureFunctionIgnored(*sfs[i])) {
-      sfs[i]->EvaluateWhenApplied(*hyperedge, &hyperedge->scoreBreakdown);
+      sfs[i]->EvaluateWhenApplied(*hyperedge, &hyperedge->label.scoreBreakdown);
     }
   }
 
@@ -125,11 +130,12 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
   for (unsigned i = 0; i < ffs.size(); ++i) {
     if (!staticData.IsFeatureFunctionIgnored(*ffs[i])) {
       head->state[i] =
-        ffs[i]->EvaluateWhenApplied(*hyperedge, i, &hyperedge->scoreBreakdown);
+        ffs[i]->EvaluateWhenApplied(*hyperedge, i,
+                                    &hyperedge->label.scoreBreakdown);
     }
   }
 
-  hyperedge->score = hyperedge->scoreBreakdown.GetWeightedScore();
+  hyperedge->label.score = hyperedge->label.scoreBreakdown.GetWeightedScore();
 
   return hyperedge;
 }

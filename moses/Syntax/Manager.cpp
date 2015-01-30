@@ -32,7 +32,7 @@ void Manager::OutputBest(OutputCollector *collector) const
     }
   } else {
     if (StaticData::Instance().GetOutputHypoScore()) {
-      out << best->score << " ";
+      out << best->label.score << " ";
     }
     Phrase yield = GetOneBestTargetYield(*best);
     // delete 1st & last
@@ -148,7 +148,7 @@ std::size_t Manager::OutputAlignmentNBest(
   std::size_t totalTargetSize = 0;
   std::size_t startSource = shyperedge.head->pvertex->span.GetStartPos();
 
-  const TargetPhrase &tp = *(shyperedge.translation);
+  const TargetPhrase &tp = *(shyperedge.label.translation);
 
   std::size_t thisSourceSize = CalcSourceSize(derivation);
 
@@ -157,7 +157,8 @@ std::size_t Manager::OutputAlignmentNBest(
   std::vector<std::size_t> sourceOffsets(thisSourceSize, 0);
   std::vector<std::size_t> targetOffsets(tp.GetSize(), 0);
 
-  const AlignmentInfo &aiNonTerm = shyperedge.translation->GetAlignNonTerm();
+  const AlignmentInfo &aiNonTerm =
+      shyperedge.label.translation->GetAlignNonTerm();
   std::vector<std::size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
   const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd =
     aiNonTerm.GetNonTermIndexMap();
@@ -200,7 +201,7 @@ std::size_t Manager::OutputAlignmentNBest(
   ShiftOffsets(targetOffsets, startTarget);
 
   // get alignments from this hypo
-  const AlignmentInfo &aiTerm = shyperedge.translation->GetAlignTerm();
+  const AlignmentInfo &aiTerm = shyperedge.label.translation->GetAlignTerm();
 
   // add to output arg, offsetting by source & target
   AlignmentInfo::const_iterator iter;
