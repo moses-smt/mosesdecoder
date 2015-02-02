@@ -24,12 +24,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <memory>
 #include <stdlib.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
 #include "lm/left.hh"
 #include "lm/model.hh"
 #include "util/exception.hh"
+#include "util/tokenize_piece.hh"
 
 #include "Ken.h"
 #include "Base.h"
@@ -439,29 +441,30 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-
 LanguageModel *ConstructKenLM(const std::string &line)
 {
   FactorType factorType = 0;
   string filePath;
   bool lazy = false;
 
-  vector<string> toks = Tokenize(line);
-  for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
-    UTIL_THROW_IF2(args.size() != 2,
-                   "Incorrect format of KenLM property: " << toks[i]);
-
-    if (args[0] == "factor") {
-      factorType = Scan<FactorType>(args[1]);
-    } else if (args[0] == "order") {
-      //nGramOrder = Scan<size_t>(args[1]);
-    } else if (args[0] == "path") {
-      filePath = args[1];
-    } else if (args[0] == "lazyken") {
-      lazy = Scan<bool>(args[1]);
-    } else if (args[0] == "name") {
+  for (util::TokenIter<util::SingleCharacter, true> argument(line, ' '); argument; ++argument) {
+    const char *equals = std::find(argument->data(), argument->data() + argument->size(), '=');
+    UTIL_THROW_IF2(equals == argument->data() + argument->size(),
+                   "Expected = in KenLM argument " << *argument);
+    StringPiece name(argument->data(), equals - argument->data());
+    StringPiece value(equals + 1, argument->data() + argument->size() - equals - 1);
+    if (name == "factor") {
+      factorType = boost::lexical_cast<FactorType>(value);
+    } else if (name == "order") {
+      // Ignored
+    } else if (name == "path") {
+      filePath.assign(value.data(), value.size());
+    } else if (name == "lazyken") {
+      lazy = boost::lexical_cast<bool>(value);
+    } else if (name == "name") {
       // that's ok. do nothing, passes onto LM constructor
+    } else {
+      UTIL_THROW2("Unknown KenLM argument " << name);
     }
   }
 
@@ -472,7 +475,6 @@ LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, 
 {
   lm::ngram::ModelType model_type;
   if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
-
     switch(model_type) {
     case lm::ngram::PROBING:
       return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
@@ -495,4 +497,3 @@ LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, 
 }
 
 }
-
