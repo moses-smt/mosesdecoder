@@ -69,9 +69,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
   // input files are switched prior to extraction and then the source and
   // target of the extracted rules are switched on output.
   std::string effectiveTargetFile = options.t2s ? options.sourceFile
-                                                : options.targetFile;
+                                    : options.targetFile;
   std::string effectiveSourceFile = options.t2s ? options.targetFile
-                                                : options.sourceFile;
+                                    : options.sourceFile;
   InputFileStream targetStream(effectiveTargetFile);
   InputFileStream sourceStream(effectiveSourceFile);
   InputFileStream alignmentStream(options.alignmentFile);
@@ -294,9 +294,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
         // TODO Can scope pruning be done earlier?
         if (r->Scope() <= options.maxScope) {
           if (!options.treeFragments) {
-            scfgWriter.Write(*r,false);
+            scfgWriter.Write(*r,lineNum,false);
           } else {
-            scfgWriter.Write(*r,**q,false);
+            scfgWriter.Write(*r,**q,lineNum,false);
           }
           if (options.phraseOrientation) {
             fwdExtractStream << " {{Orientation ";
@@ -443,6 +443,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "write glue grammar to named file")
   ("GZOutput",
    "write gzipped extract files")
+  ("IncludeSentenceId",
+   "include sentence ID")
   ("MaxNodes",
    po::value(&options.maxNodes)->default_value(options.maxNodes),
    "set maximum number of tree nodes for composed rules")
@@ -563,6 +565,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("GZOutput")) {
     options.gzOutput = true;
   }
+  if (vm.count("IncludeSentenceId")) {
+    options.includeSentenceId = true;
+  }
   if (vm.count("Minimal")) {
     options.minimal = true;
   }
@@ -652,8 +657,10 @@ void ExtractGHKM::WriteGlueGrammar(
     }
   }
 
-  size_t sourceLabelGlueTop = 0;
-  size_t sourceLabelGlueX = 1;
+  const size_t sourceLabelGlueTop = 0;
+  const size_t sourceLabelGlueX = 1;
+  const size_t sourceLabelSentenceStart = 2;
+  const size_t sourceLabelSentenceEnd = 3;
 
   // basic rules
   out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
@@ -661,7 +668,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " [SSTART <s>]]}}";
   }
   if (options.sourceLabels) {
-    out << " {{SourceLabels 1 1 " << sourceLabelGlueTop << " 1}}";
+    out << " {{SourceLabels 2 1 " << sourceLabelSentenceStart << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
   if (options.phraseOrientation) {
     out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
@@ -673,22 +680,22 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [SEND </s>]]}}";
   }
   if (options.sourceLabels) {
-    out << " {{SourceLabels 2 1 " << sourceLabelGlueTop << " 1 1 " << sourceLabelGlueTop << " 1}}";
+    out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueTop << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
-    if (options.phraseOrientation) {
-      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
-    }
+  if (options.phraseOrientation) {
+    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+  }
   out << std::endl;
 
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
     out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
-    if (options.treeFragments) { 
+    if (options.treeFragments) {
       out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
     }
     if (options.sourceLabels) {
-      out << " {{SourceLabels 2 1 " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
+      out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueX << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
     }
     if (options.phraseOrientation) {
       out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
@@ -700,11 +707,11 @@ void ExtractGHKM::WriteGlueGrammar(
   for(std::set<std::string>::const_iterator i = labelSet.begin();
       i != labelSet.end(); i++ ) {
     out << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| |||";
-    if (options.treeFragments) { 
+    if (options.treeFragments) {
       out << " {{Tree [" << topLabel << " ["<< topLabel << "] [" << *i << "]]}}";
     }
     if (options.sourceLabels) {
-      out << " {{SourceLabels 3 2.718 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 2.718 1 " << sourceLabelGlueTop << " 2.718}}"; 
+      out << " {{SourceLabels 3 1 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
     }
     if (options.phraseOrientation) {
       out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
@@ -827,8 +834,8 @@ void ExtractGHKM::WriteUnknownWordSoftMatches(
   std::ostream &out)
 {
   for (std::set<std::string>::const_iterator p = labelSet.begin(); p != labelSet.end(); ++p) {
-      std::string label = *p;
-      out << "UNK " << label << std::endl;
+    std::string label = *p;
+    out << "UNK " << label << std::endl;
   }
 }
 

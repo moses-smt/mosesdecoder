@@ -57,7 +57,7 @@ int main(int argc, char **argv)
   std::string tempfilePath;
   PhraseTableCreator::Coding coding = PhraseTableCreator::PREnc;
 
-  size_t numScoreComponent = 5;
+  size_t numScoreComponent = 4;
   size_t orderBits = 10;
   size_t fingerprintBits = 16;
   bool useAlignmentInfo = true;
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     }
   }
 
-  if(!sortScoreIndexSet && numScoreComponent != 5 && coding == PhraseTableCreator::PREnc) {
+  if(!sortScoreIndexSet && numScoreComponent != 4 && coding == PhraseTableCreator::PREnc) {
     std::cerr << "WARNING: You are using a nonstandard number of scores ("
               << numScoreComponent << ") with PREnc. Set the index of P(t|s) "
               "with  -rankscore int  if it is not "

@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
 #include "moses/ThreadPool.h"
 #include "util/exception.hh"
 
@@ -123,7 +122,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
 
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
-    = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, true);
+  = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, true);
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));

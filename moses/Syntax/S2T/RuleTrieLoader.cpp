@@ -16,7 +16,6 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "moses/Syntax/RuleTableFF.h"
@@ -44,7 +43,6 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
   PrintUserTime(std::string("Start loading text phrase table. Moses format"));
 
   const StaticData &staticData = StaticData::Instance();
-  const std::string &factorDelimiter = staticData.GetFactorDelimiter();
 
   std::size_t count = 0;
 
@@ -76,10 +74,6 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
       alignString = temp;
     }
 
-    if (++pipes) {
-      StringPiece str(*pipes); //counts
-    }
-
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == std::string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
       TRACE_ERR( ff.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
@@ -96,7 +90,7 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
     const size_t numScoreComponents = ff.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
-    		  	  << numScoreComponents << ") of score components on line " << count);
+                  << numScoreComponents << ") of score components on line " << count);
     }
 
     // parse source & find pt node
@@ -107,18 +101,16 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase(&ff);
-    // targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
     targetPhrase->CreateFromString(Output, output, targetPhraseString, &targetLHS);
     // source
     Phrase sourcePhrase;
-    // sourcePhrase.CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
     sourcePhrase.CreateFromString(Input, input, sourcePhraseString, &sourceLHS);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
     targetPhrase->SetTargetLHS(targetLHS);
 
-    //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
+    ++pipes;  // skip over counts field.
 
     if (++pipes) {
       StringPiece sparseString(*pipes);
@@ -134,7 +126,7 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
     targetPhrase->EvaluateInIsolation(sourcePhrase, ff.GetFeaturesToApply());
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(
-        trie, sourcePhrase, *targetPhrase, sourceLHS);
+                                           trie, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now

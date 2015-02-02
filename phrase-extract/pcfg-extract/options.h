@@ -23,9 +23,12 @@
 
 #include <string>
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
 
 struct Options {
   std::string corpus_file;

@@ -12,7 +12,6 @@
 #include <sstream>
 #include <vector>
 #include "util/exception.hh"
-#include "UserMessage.h"
 #include "TypeDef.h"
 #include "Util.h"
 
@@ -160,8 +159,7 @@ inline FILE* fOpen(const char* fn,const char* m)
   if(FILE* f=fopen(fn,m))
     return f;
   else {
-    UserMessage::Add(std::string("ERROR: could not open file ") + fn + " with mode " + m + "\n");
-    UTIL_THROW(util::Exception, "Couldn't open file " << fn);
+    UTIL_THROW(util::Exception, "ERROR: could not open file " << fn << " with mode " << m);
     return NULL;
   }
 }

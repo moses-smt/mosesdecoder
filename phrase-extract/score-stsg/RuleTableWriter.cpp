@@ -28,8 +28,8 @@ namespace ScoreStsg
 void RuleTableWriter::WriteLine(const TokenizedRuleHalf &source,
                                 const TokenizedRuleHalf &target,
                                 const std::string &bestAlignment,
-                                double lexScore, int count, int totalCount,
-                                int distinctCount)
+                                double lexScore, double treeScore, int count,
+                                int totalCount, int distinctCount)
 {
   if (m_options.inverse) {
     WriteRuleHalf(target);
@@ -47,7 +47,9 @@ void RuleTableWriter::WriteLine(const TokenizedRuleHalf &source,
     m_out << MaybeLog(lexScore);
   }
 
-  // TODO PCFG
+  if (m_options.treeScore && !m_options.inverse) {
+    m_out << " " << MaybeLog(treeScore);
+  }
 
   m_out << " ||| " << totalCount << " " << count;
   if (m_options.kneserNey) {

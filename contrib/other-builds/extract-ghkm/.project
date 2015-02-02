@@ -3,6 +3,7 @@
 	<name>extract-ghkm</name>
 	<comment></comment>
 	<projects>
+		<project>moses</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

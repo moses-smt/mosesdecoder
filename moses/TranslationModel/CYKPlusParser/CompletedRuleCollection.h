@@ -75,6 +75,7 @@ struct CompletedRuleCollection {
 public:
 
   CompletedRuleCollection();
+  ~CompletedRuleCollection();
 
   CompletedRuleCollection(const CompletedRuleCollection &old)
     : m_collection(old.m_collection)

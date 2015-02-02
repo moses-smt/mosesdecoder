@@ -33,7 +33,6 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "util/file_piece.hh"
@@ -191,10 +190,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
       alignString = temp;
     }
 
-    if (++pipes) {
-      StringPiece str(*pipes); //counts
-    }
-
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
       TRACE_ERR( ruleTable.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
@@ -231,7 +226,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->SetAlignmentInfo(alignString);
     targetPhrase->SetTargetLHS(targetLHS);
 
-    //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
+    ++pipes;  // skip over counts field
 
     if (++pipes) {
       StringPiece sparseString(*pipes);

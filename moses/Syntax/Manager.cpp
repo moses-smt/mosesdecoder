@@ -13,8 +13,37 @@ namespace Syntax
 {
 
 Manager::Manager(const InputType &source)
-    : Moses::BaseManager(source)
+  : Moses::BaseManager(source)
 {
+}
+
+void Manager::OutputBest(OutputCollector *collector) const
+{
+  if (!collector) {
+    return;
+  }
+  std::ostringstream out;
+  FixPrecision(out);
+  const SHyperedge *best = GetBestSHyperedge();
+  if (best == NULL) {
+    VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      out << "0 ";
+    }
+  } else {
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      out << best->label.score << " ";
+    }
+    Phrase yield = GetOneBestTargetYield(*best);
+    // delete 1st & last
+    UTIL_THROW_IF2(yield.GetSize() < 2,
+                   "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+    yield.RemoveWord(0);
+    yield.RemoveWord(yield.GetSize()-1);
+    out << yield.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
+    out << '\n';
+  }
+  collector->Write(m_source.GetTranslationId(), out.str());
 }
 
 void Manager::OutputNBest(OutputCollector *collector) const
@@ -37,7 +66,7 @@ void Manager::OutputUnknowns(OutputCollector *collector) const
 
     std::ostringstream out;
     for (std::set<Moses::Word>::const_iterator p = m_oovs.begin();
-        p != m_oovs.end(); ++p) {
+         p != m_oovs.end(); ++p) {
       out << *p;
     }
     out << std::endl;
@@ -66,7 +95,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
   bool PrintNBestTrees = staticData.PrintNBestTrees();
 
   for (KBestExtractor::KBestVec::const_iterator p = nBestList.begin();
-      p != nBestList.end(); ++p) {
+       p != nBestList.end(); ++p) {
     const KBestExtractor::Derivation &derivation = **p;
 
     // get the derivation's target-side yield
@@ -74,7 +103,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
 
     // delete <s> and </s>
     UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
-        "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+                   "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
 
@@ -82,7 +111,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, outputFactorOrder, false);
     out << " ||| ";
-    OutputAllFeatureScores(derivation.scoreBreakdown, out);
+    derivation.scoreBreakdown.OutputAllFeatureScores(out);
     out << " ||| " << derivation.score;
 
     // optionally, print word alignments
@@ -91,7 +120,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
       Alignments align;
       OutputAlignmentNBest(align, derivation, 0);
       for (Alignments::const_iterator q = align.begin(); q != align.end();
-          ++q) {
+           ++q) {
         out << q->first << "-" << q->second << " ";
       }
     }
@@ -110,16 +139,16 @@ void Manager::OutputNBestList(OutputCollector *collector,
 }
 
 std::size_t Manager::OutputAlignmentNBest(
-    Alignments &retAlign,
-    const KBestExtractor::Derivation &derivation,
-    std::size_t startTarget) const
+  Alignments &retAlign,
+  const KBestExtractor::Derivation &derivation,
+  std::size_t startTarget) const
 {
   const SHyperedge &shyperedge = derivation.edge->shyperedge;
 
   std::size_t totalTargetSize = 0;
   std::size_t startSource = shyperedge.head->pvertex->span.GetStartPos();
 
-  const TargetPhrase &tp = *(shyperedge.translation);
+  const TargetPhrase &tp = *(shyperedge.label.translation);
 
   std::size_t thisSourceSize = CalcSourceSize(derivation);
 
@@ -128,13 +157,14 @@ std::size_t Manager::OutputAlignmentNBest(
   std::vector<std::size_t> sourceOffsets(thisSourceSize, 0);
   std::vector<std::size_t> targetOffsets(tp.GetSize(), 0);
 
-  const AlignmentInfo &aiNonTerm = shyperedge.translation->GetAlignNonTerm();
+  const AlignmentInfo &aiNonTerm =
+      shyperedge.label.translation->GetAlignNonTerm();
   std::vector<std::size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
   const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd =
-      aiNonTerm.GetNonTermIndexMap();
+    aiNonTerm.GetNonTermIndexMap();
 
   UTIL_THROW_IF2(sourceInd2pos.size() != derivation.subderivations.size(),
-      "Error");
+                 "Error");
 
   std::size_t targetInd = 0;
   for (std::size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
@@ -155,7 +185,7 @@ std::size_t Manager::OutputAlignmentNBest(
       // Recursively look thru child hypos
       std::size_t currStartTarget = startTarget + totalTargetSize;
       std::size_t targetSize = OutputAlignmentNBest(retAlign, subderivation,
-          currStartTarget);
+                               currStartTarget);
       targetOffsets[targetPos] = targetSize;
 
       totalTargetSize += targetSize;
@@ -171,7 +201,7 @@ std::size_t Manager::OutputAlignmentNBest(
   ShiftOffsets(targetOffsets, startTarget);
 
   // get alignments from this hypo
-  const AlignmentInfo &aiTerm = shyperedge.translation->GetAlignTerm();
+  const AlignmentInfo &aiTerm = shyperedge.label.translation->GetAlignTerm();
 
   // add to output arg, offsetting by source & target
   AlignmentInfo::const_iterator iter;
@@ -196,7 +226,7 @@ std::size_t Manager::CalcSourceSize(const KBestExtractor::Derivation &d) const
   std::size_t ret = shyperedge.head->pvertex->span.GetNumWordsCovered();
   for (std::size_t i = 0; i < shyperedge.tail.size(); ++i) {
     std::size_t childSize =
-        shyperedge.tail[i]->pvertex->span.GetNumWordsCovered();
+      shyperedge.tail[i]->pvertex->span.GetNumWordsCovered();
     ret -= (childSize - 1);
   }
   return ret;

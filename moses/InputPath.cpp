@@ -86,7 +86,7 @@ size_t InputPath::GetTotalRuleSize() const
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
   for (iter = m_targetPhrases.begin(); iter != m_targetPhrases.end(); ++iter) {
     // const PhraseDictionary *pt = iter->first;
-	const TargetPhraseCollection *tpColl = iter->second.first;
+    const TargetPhraseCollection *tpColl = iter->second.first;
 
     if (tpColl) {
       ret += tpColl->GetSize();

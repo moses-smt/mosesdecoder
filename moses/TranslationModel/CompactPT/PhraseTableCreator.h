@@ -31,11 +31,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/InputFileStream.h"
 #include "moses/ThreadPool.h"
-#include "moses/UserMessage.h"
 #include "moses/Util.h"
 
 #include "BlockHashIndex.h"
 #include "StringVector.h"
+#include "StringVectorTemp.h"
 #include "CanonicalHuffman.h"
 
 namespace Moses
@@ -143,7 +143,7 @@ public:
       return data;
     else {
       typename std::vector<DataType>::iterator it
-        = std::lower_bound(m_bestVec.begin(), m_bestVec.end(), data);
+      = std::lower_bound(m_bestVec.begin(), m_bestVec.end(), data);
       if(it != m_bestVec.end())
         return *it;
       else
@@ -238,7 +238,7 @@ private:
   std::vector<size_t> m_lexicalTableIndex;
   std::vector<SrcTrg> m_lexicalTable;
 
-  StringVector<unsigned char, unsigned long, MmapAllocator>*
+  StringVectorTemp<unsigned char, unsigned long, MmapAllocator>*
   m_encodedTargetPhrases;
 
   StringVector<unsigned char, unsigned long, MmapAllocator>*
@@ -397,12 +397,12 @@ private:
   static boost::mutex m_mutex;
 #endif
   static size_t m_collectionNum;
-  StringVector<unsigned char, unsigned long, MmapAllocator>&
+  StringVectorTemp<unsigned char, unsigned long, MmapAllocator>&
   m_encodedCollections;
   PhraseTableCreator& m_creator;
 
 public:
-  CompressionTask(StringVector<unsigned char, unsigned long, MmapAllocator>&
+  CompressionTask(StringVectorTemp<unsigned char, unsigned long, MmapAllocator>&
                   encodedCollections, PhraseTableCreator& creator);
   void operator()();
 };

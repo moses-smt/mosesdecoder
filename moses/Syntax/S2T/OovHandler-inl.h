@@ -13,7 +13,7 @@ namespace S2T
 template<typename RuleTrie>
 template<typename InputIterator>
 boost::shared_ptr<RuleTrie> OovHandler<RuleTrie>::SynthesizeRuleTrie(
-    InputIterator first, InputIterator last)
+  InputIterator first, InputIterator last)
 {
   const UnknownLHSList &lhsList = StaticData::Instance().GetUnknownLHS();
 
@@ -33,7 +33,7 @@ boost::shared_ptr<RuleTrie> OovHandler<RuleTrie>::SynthesizeRuleTrie(
       Word *tgtLHS = SynthesizeTargetLhs(targetLhsStr);
       TargetPhrase *tp = SynthesizeTargetPhrase(oov, *srcPhrase, *tgtLHS, prob);
       TargetPhraseCollection &tpc = GetOrCreateTargetPhraseCollection(
-          *trie, *srcPhrase, *tp, NULL);  // TODO Check NULL is valid argument
+                                      *trie, *srcPhrase, *tp, NULL);  // TODO Check NULL is valid argument
       tpc.Add(tp);
     }
   }
@@ -63,12 +63,12 @@ Word *OovHandler<RuleTrie>::SynthesizeTargetLhs(const std::string &lhsStr)
 
 template<typename RuleTrie>
 TargetPhrase *OovHandler<RuleTrie>::SynthesizeTargetPhrase(
-    const Word &oov, const Phrase &srcPhrase, const Word &targetLhs, float prob)
+  const Word &oov, const Phrase &srcPhrase, const Word &targetLhs, float prob)
 {
   const StaticData &staticData = StaticData::Instance();
 
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer =
-      UnknownWordPenaltyProducer::Instance();
+    UnknownWordPenaltyProducer::Instance();
 
   TargetPhrase *targetPhrase = new TargetPhrase();
   Word &targetWord = targetPhrase->AddWord();

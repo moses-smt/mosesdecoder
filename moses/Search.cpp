@@ -2,7 +2,6 @@
 #include "SearchCubePruning.h"
 #include "SearchNormal.h"
 #include "SearchNormalBatch.h"
-#include "UserMessage.h"
 #include "util/exception.hh"
 
 namespace Moses

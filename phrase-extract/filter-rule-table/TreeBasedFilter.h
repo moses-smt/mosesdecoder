@@ -22,8 +22,9 @@ namespace FilterRuleTable
 
 // Filters a rule table (currently assumed to be tree-to-string, STSG),
 // discarding rules that cannot be applied to a given set of test sentences.
-class TreeBasedFilter {
- public:
+class TreeBasedFilter
+{
+public:
   // Initialize the filter for a given set of test sentences.
   TreeBasedFilter(const std::vector<boost::shared_ptr<StringTree> > &);
 
@@ -46,7 +47,7 @@ class TreeBasedFilter {
   //
   void Filter(std::istream &in, std::ostream &out);
 
- private:
+private:
   // Maps source-side symbols (terminals and non-terminals) from strings to
   // integers.
   typedef NumberedSet<std::string, std::size_t> Vocabulary;

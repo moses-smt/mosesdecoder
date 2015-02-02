@@ -15,7 +15,8 @@ void RuleGroup::SetNewSource(const StringPiece &source)
 }
 
 void RuleGroup::AddRule(const StringPiece &target, const StringPiece &ntAlign,
-                        const StringPiece &fullAlign, int count)
+                        const StringPiece &fullAlign, int count,
+                        double treeScore)
 {
   if (m_distinctRules.empty() ||
       ntAlign != m_distinctRules.back().ntAlign ||
@@ -27,6 +28,7 @@ void RuleGroup::AddRule(const StringPiece &target, const StringPiece &ntAlign,
     fullAlign.CopyToString(&r.alignments.back().first);
     r.alignments.back().second = count;
     r.count = count;
+    r.treeScore = treeScore;
     m_distinctRules.push_back(r);
   } else {
     DistinctRule &r = m_distinctRules.back();

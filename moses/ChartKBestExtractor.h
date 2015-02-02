@@ -26,6 +26,7 @@
 
 #include <boost/unordered_set.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <queue>
 #include <vector>
@@ -56,7 +57,6 @@ public:
     UnweightedHyperarc edge;
     std::vector<std::size_t> backPointers;
     std::vector<boost::shared_ptr<Derivation> > subderivations;
-    ScoreComponentCollection scoreBreakdown;
     float score;
   };
 
@@ -90,6 +90,7 @@ public:
                std::size_t k, KBestVec &);
 
   static Phrase GetOutputPhrase(const Derivation &);
+  static boost::shared_ptr<ScoreComponentCollection> GetOutputScoreBreakdown(const Derivation &);
   static TreePointer GetOutputTree(const Derivation &);
 
 private:

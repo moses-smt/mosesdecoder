@@ -49,11 +49,11 @@ struct ScorePair {
   std::vector<float> denseScores;
   std::map<StringPiece, float> sparseScores;
 
-  ScorePair()
-  {}
+  ScorePair() {
+  }
   ScorePair(const std::vector<float> &other)
-    :denseScores(other)
-  {}
+    :denseScores(other) {
+  }
 
   void PlusEquals(const ScorePair &other);
   void PlusEquals(const StringPiece &key, float value);
@@ -198,6 +198,11 @@ public:
   // add only sparse features
   void SparsePlusEquals(const ScoreComponentCollection& rhs) {
     m_scores.sparsePlusEquals(rhs.m_scores);
+  }
+
+  // add only core features
+  void CorePlusEquals(const ScoreComponentCollection& rhs) {
+    m_scores.corePlusEquals(rhs.m_scores);
   }
 
   void PlusEquals(const FVector& scores) {
@@ -428,6 +433,11 @@ public:
   void Merge(const ScoreComponentCollection &other) {
     m_scores.merge(other.m_scores);
   }
+
+  void OutputAllFeatureScores(std::ostream &out) const;
+  void OutputFeatureScores( std::ostream& out
+                            , const Moses::FeatureFunction *ff
+                            , std::string &lastName ) const;
 
 #ifdef MPI_ENABLE
 public:

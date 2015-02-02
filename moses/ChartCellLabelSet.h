@@ -124,8 +124,7 @@ public:
   const ChartCellLabel *Find(size_t idx) const {
     try {
       return m_map.at(idx);
-    }
-    catch (const std::out_of_range& oor) {
+    } catch (const std::out_of_range& oor) {
       return NULL;
     }
   }

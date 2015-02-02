@@ -96,8 +96,8 @@ public:
   ChartCell(size_t startPos, size_t endPos, ChartManager &manager);
   ~ChartCell();
 
-  void ProcessSentence(const ChartTranslationOptionList &transOptList
-                       ,const ChartCellCollection &allChartCells);
+  void Decode(const ChartTranslationOptionList &transOptList
+              ,const ChartCellCollection &allChartCells);
 
   //! Get all hypotheses in the cell that have the specified constituent label
   const HypoList *GetSortedHypotheses(const Word &constituentLabel) const {

@@ -35,10 +35,10 @@ namespace ScoreStsg
 const int ScoreStsg::kCountOfCountsMax = 10;
 
 ScoreStsg::ScoreStsg()
-    : m_name("score-stsg")
-    , m_lexTable(m_srcVocab, m_tgtVocab)
-    , m_countOfCounts(kCountOfCountsMax, 0)
-    , m_totalDistinct(0)
+  : m_name("score-stsg")
+  , m_lexTable(m_srcVocab, m_tgtVocab)
+  , m_countOfCounts(kCountOfCountsMax, 0)
+  , m_totalDistinct(0)
 {
 }
 
@@ -83,6 +83,12 @@ int ScoreStsg::Main(int argc, char *argv[])
     StringPiece fullAlign = *it++;
     it->CopyToString(&tmp);
     int count = std::atoi(tmp.c_str());
+    double treeScore = 0.0f;
+    if (m_options.treeScore && !m_options.inverse) {
+      ++it;
+      it->CopyToString(&tmp);
+      treeScore = std::atof(tmp.c_str());
+    }
 
     // If this is the first line or if source has changed since the last
     // line then process the current rule group and start a new one.
@@ -95,7 +101,7 @@ int ScoreStsg::Main(int argc, char *argv[])
     }
 
     // Add the rule to the current rule group.
-    ruleGroup.AddRule(target, ntAlign, fullAlign, count);
+    ruleGroup.AddRule(target, ntAlign, fullAlign, count, treeScore);
   }
 
   // Process the final rule group.
@@ -223,11 +229,9 @@ void ScoreStsg::ProcessRuleGroup(const RuleGroup &group,
     double lexProb = ComputeLexProb(m_sourceHalf.frontierSymbols,
                                     m_targetHalf.frontierSymbols, m_tgtToSrc);
 
-    // TODO PCFG score
-
     // Write a line to the rule table.
     writer.WriteLine(m_sourceHalf, m_targetHalf, bestAlignment, lexProb,
-                     p->count, totalCount, distinctCount);
+                     rule.treeScore, p->count, totalCount, distinctCount);
   }
 }
 
@@ -274,8 +278,8 @@ double ScoreStsg::ComputeLexProb(const std::vector<RuleSymbol> &sourceFrontier,
       continue;
     }
     Vocabulary::IdType tgtId = m_tgtVocab.Lookup(targetFrontier[i].value,
-                                                 StringPieceCompatibleHash(),
-                                                 StringPieceCompatibleEquals());
+                               StringPieceCompatibleHash(),
+                               StringPieceCompatibleEquals());
     const std::set<std::size_t> &srcIndices = tgtToSrc[i];
     if (srcIndices.empty()) {
       // Explain unaligned word by NULL.
@@ -285,9 +289,9 @@ double ScoreStsg::ComputeLexProb(const std::vector<RuleSymbol> &sourceFrontier,
       for (std::set<std::size_t>::const_iterator p = srcIndices.begin();
            p != srcIndices.end(); ++p) {
         Vocabulary::IdType srcId =
-            m_srcVocab.Lookup(sourceFrontier[*p].value,
-                              StringPieceCompatibleHash(),
-                              StringPieceCompatibleEquals());
+          m_srcVocab.Lookup(sourceFrontier[*p].value,
+                            StringPieceCompatibleHash(),
+                            StringPieceCompatibleEquals());
         thisWordScore += m_lexTable.PermissiveLookup(srcId, tgtId);
       }
       lexScore *= thisWordScore / static_cast<double>(srcIndices.size());
@@ -339,8 +343,8 @@ void ScoreStsg::ProcessOptions(int argc, char *argv[], Options &options) const
    "output log probabilities")
   ("MinCountHierarchical",
    po::value(&options.minCountHierarchical)->
-      default_value(options.minCountHierarchical),
-      "filter out rules with frequency < arg (except fully lexical rules)")
+   default_value(options.minCountHierarchical),
+   "filter out rules with frequency < arg (except fully lexical rules)")
   ("NegLogProb",
    "output negative log probabilities")
   ("NoLex",
@@ -348,7 +352,9 @@ void ScoreStsg::ProcessOptions(int argc, char *argv[], Options &options) const
   ("NoWordAlignment",
    "do not output word alignments")
   ("PCFG",
-   "include pre-computed PCFG score from extract")
+   "synonym for TreeScore (included for compatibility with score)")
+  ("TreeScore",
+   "include pre-computed tree score from extract")
   ("UnpairedExtractFormat",
    "ignored (included for compatibility with score)")
   ;
@@ -429,8 +435,8 @@ void ScoreStsg::ProcessOptions(int argc, char *argv[], Options &options) const
   if (vm.count("NoWordAlignment")) {
     options.noWordAlignment = true;
   }
-  if (vm.count("PCFG")) {
-    options.pcfg = true;
+  if (vm.count("TreeScore") || vm.count("PCFG")) {
+    options.treeScore = true;
   }
 }
 

@@ -14,8 +14,7 @@ namespace Syntax
 
 struct PVertex;
 
-struct SHyperedgeBundle
-{
+struct SHyperedgeBundle {
   std::vector<const SVertexStack*> stacks;
   const TargetPhraseCollection *translations;
 

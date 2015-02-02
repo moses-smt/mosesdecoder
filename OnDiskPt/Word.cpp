@@ -105,18 +105,17 @@ void Word::ConvertToMoses(
   overwrite = Moses::Word(m_isNonTerminal);
 
   if (m_isNonTerminal) {
-	    const std::string &tok = vocab.GetString(m_vocabId);
-		overwrite.SetFactor(0, factorColl.AddFactor(tok, m_isNonTerminal));
-  }
-  else {
-	  // TODO: this conversion should have been done at load time.
-	  util::TokenIter<util::SingleCharacter> tok(vocab.GetString(m_vocabId), '|');
+    const std::string &tok = vocab.GetString(m_vocabId);
+    overwrite.SetFactor(0, factorColl.AddFactor(tok, m_isNonTerminal));
+  } else {
+    // TODO: this conversion should have been done at load time.
+    util::TokenIter<util::SingleCharacter> tok(vocab.GetString(m_vocabId), '|');
 
-	  for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
-		UTIL_THROW_IF2(!tok, "Too few factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
-		overwrite.SetFactor(*t, factorColl.AddFactor(*tok, m_isNonTerminal));
-	  }
-	  UTIL_THROW_IF2(tok, "Too many factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
+    for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
+      UTIL_THROW_IF2(!tok, "Too few factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
+      overwrite.SetFactor(*t, factorColl.AddFactor(*tok, m_isNonTerminal));
+    }
+    UTIL_THROW_IF2(tok, "Too many factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
   }
 }
 

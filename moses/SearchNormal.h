@@ -36,7 +36,7 @@ public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
   ~SearchNormal();
 
-  void ProcessSentence();
+  void Decode();
 
   void OutputHypoStackSize();
   void OutputHypoStack();

@@ -72,7 +72,8 @@ const Factor *FactorCollection::GetFactor(const StringPiece &factorString, bool 
   to_find.in.m_string = factorString;
   to_find.in.m_id = (isNonTerminal) ? m_factorIdNonTerminal : m_factorId;
   Set & set = (isNonTerminal) ? m_set : m_setNonTerminal;
-  { // read=lock scope
+  {
+    // read=lock scope
 #ifdef WITH_THREADS
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
 #endif // WITH_THREADS

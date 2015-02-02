@@ -18,7 +18,7 @@ using namespace Moses;
 
 int main(int argc, char **argv)
 {
-  int nscores = 5;
+  int nscores = 4;
   std::string ttable = "";
   bool useAlignments = false;
   bool reportCounts = false;
@@ -47,18 +47,6 @@ int main(int argc, char **argv)
   std::vector<FactorType> output(1, 0);
   std::vector<float> weight(nscores, 0);
 
-  Parameter *parameter = new Parameter();
-  // const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
-  // UG: I assume "||dummy_string||" means: I'm not using factored data;
-  // This is now expressed by setting the factor delimiter to the empty string
-  const_cast<std::vector<std::string>&>(*parameter->GetParam("factor-delimiter")).resize(1, "");
-  const_cast<std::vector<std::string>&>(*parameter->GetParam("input-factors")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(*parameter->GetParam("verbose")).resize(1, "0");
-  //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
-  //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
-
-  StaticData::InstanceNonConst().LoadData(parameter);
-
   std::stringstream ss;
   ss << nscores;
   PhraseDictionaryCompact pdc("PhraseDictionaryCompact input-factor=0 output-factor=0 num-features=" + ss.str() + " path=" + ttable);
@@ -71,7 +59,7 @@ int main(int argc, char **argv)
     sourcePhrase.CreateFromString(Input, input, line, NULL);
 
     TargetPhraseVectorPtr decodedPhraseColl
-      = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
+    = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
 
     if(decodedPhraseColl != NULL) {
       if(reportCounts)

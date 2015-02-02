@@ -362,8 +362,7 @@ void ShowWeights()
     const StatefulFeatureFunction *ff = sff[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
-    }
-    else {
+    } else {
       cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
     }
   }
@@ -371,8 +370,7 @@ void ShowWeights()
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
-    }
-    else {
+    } else {
       cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
     }
   }

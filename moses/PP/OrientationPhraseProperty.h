@@ -58,9 +58,9 @@ public:
   };
 
 
-  virtual const std::string *GetValueString() const { 
+  virtual const std::string *GetValueString() const {
     UTIL_THROW2("OrientationPhraseProperty: value string not available in this phrase property");
-    return NULL; 
+    return NULL;
   };
 
 protected:

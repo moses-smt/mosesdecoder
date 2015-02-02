@@ -761,6 +761,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TabbedSentence.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TabbedSentence.cpp</locationURI>
+		</link>
+		<link>
+			<name>TabbedSentence.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TabbedSentence.h</locationURI>
+		</link>
+		<link>
 			<name>TargetPhrase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetPhrase.cpp</locationURI>
@@ -934,16 +944,6 @@
 			<name>UniqueObject.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/UniqueObject.h</locationURI>
-		</link>
-		<link>
-			<name>UserMessage.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/UserMessage.cpp</locationURI>
-		</link>
-		<link>
-			<name>UserMessage.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/UserMessage.h</locationURI>
 		</link>
 		<link>
 			<name>Util.cpp</name>

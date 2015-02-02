@@ -21,6 +21,7 @@
 #pragma once
 
 #include "Alignment.h"
+#include "moses/AlignmentInfo.h"
 
 #include <map>
 #include <set>
@@ -50,6 +51,11 @@ public:
                     int targetSize,
                     const Alignment &alignment);
 
+  PhraseOrientation(int sourceSize,
+                    int targetSize,
+                    const AlignmentInfo &alignTerm,
+                    const AlignmentInfo &alignNonTerm);
+
   REO_CLASS GetOrientationInfo(int startF, int endF, REO_DIR direction) const;
   REO_CLASS GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const;
   const std::string GetOrientationInfoString(int startF, int endF, REO_DIR direction=REO_DIR_BIDIR) const;
@@ -63,6 +69,11 @@ public:
 
 private:
 
+  void Init(int sourceSize, int targetSize,
+            const std::vector<std::vector<int> > &alignedToT,
+            const std::vector<std::vector<int> > &alignedToS,
+            const std::vector<int> &alignedCountS);
+
   void InsertVertex( HSentenceVertices & corners, int x, int y );
 
   void InsertPhraseVertices(HSentenceVertices & topLeft,
@@ -72,17 +83,23 @@ private:
                             int startF, int startE, int endF, int endE);
 
   REO_CLASS GetOrientHierModel(REO_MODEL_TYPE modelType,
-                             int startF, int endF, int startE, int endE, int countF, int zeroF, int zeroE, int unit,
-                             bool (*ge)(int, int), bool (*lt)(int, int),
-                             const HSentenceVertices & bottomRight, const HSentenceVertices & bottomLeft) const;
+                               int startF, int endF, int startE, int endE, int countF, int zeroF, int zeroE, int unit,
+                               bool (*ge)(int, int), bool (*lt)(int, int),
+                               const HSentenceVertices & bottomRight, const HSentenceVertices & bottomLeft) const;
 
   bool SpanIsAligned(int index1, int index2, const boost::unordered_map< std::pair<int,int> , std::pair<int,int> > &minAndMaxAligned) const;
 
   bool IsAligned(int fi, int ei) const;
 
-  static bool ge(int first, int second) { return first >= second; };
-  static bool le(int first, int second) { return first <= second; };
-  static bool lt(int first, int second) { return first < second; };
+  static bool ge(int first, int second) {
+    return first >= second;
+  };
+  static bool le(int first, int second) {
+    return first <= second;
+  };
+  static bool lt(int first, int second) {
+    return first < second;
+  };
 
   const int m_countF;
   const int m_countE;

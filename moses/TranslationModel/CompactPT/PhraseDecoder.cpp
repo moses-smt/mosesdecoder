@@ -61,7 +61,7 @@ PhraseDecoder::~PhraseDecoder()
 inline unsigned PhraseDecoder::GetSourceSymbolId(std::string& symbol)
 {
   boost::unordered_map<std::string, unsigned>::iterator it
-    = m_sourceSymbolsMap.find(symbol);
+  = m_sourceSymbolsMap.find(symbol);
   if(it != m_sourceSymbolsMap.end())
     return it->second;
 
@@ -200,7 +200,7 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(const Phrase &
 
   if(m_coding == PREnc) {
     std::pair<TargetPhraseVectorPtr, size_t> cachedPhraseColl
-      = m_decodingCache.Retrieve(sourcePhrase);
+    = m_decodingCache.Retrieve(sourcePhrase);
 
     // Has been cached and is complete or does not need to be completed
     if(cachedPhraseColl.first != NULL && (!topLevel || cachedPhraseColl.second == 0))
@@ -255,7 +255,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
   if(m_coding == REnc) {
     for(size_t i = 0; i < sourcePhrase.GetSize(); i++) {
       std::string sourceWord
-        = sourcePhrase.GetWord(i).GetString(*m_input, false);
+      = sourcePhrase.GetWord(i).GetString(*m_input, false);
       unsigned idx = GetSourceSymbolId(sourceWord);
       sourceWords.push_back(idx);
     }

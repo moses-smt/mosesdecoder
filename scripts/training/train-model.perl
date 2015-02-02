@@ -175,6 +175,10 @@ if (defined($IGNORE)) {
   print STDERR "WARNING: Do not specify -bin-dir or -scripts-root-dir anymore. These variable are ignored and will be deleted soon";
 }
 
+if (defined($_HIERARCHICAL) && defined($_REORDERING)) {
+  die("ERROR: You cannot specify a lexicalized reordering model (-reordering) when building an hierarchical model (-hierarchical)");
+}
+
 # convert all paths to absolute paths
 $_ROOT_DIR = File::Spec->rel2abs($_ROOT_DIR) if defined($_ROOT_DIR);
 $_EXTERNAL_BINDIR = File::Spec->rel2abs($_EXTERNAL_BINDIR) if defined($_EXTERNAL_BINDIR);
@@ -302,6 +306,15 @@ else {
   $SORT_EXEC = 'sort';
 }
 
+my $GZIP_EXEC; # = which("pigz"); 
+if(-f "/usr/bin/pigz") {
+  $GZIP_EXEC = 'pigz';
+}
+else {
+  $GZIP_EXEC = 'gzip';
+}
+print STDERR "using $GZIP_EXEC \n";
+
 my $__SORT_BUFFER_SIZE = "";
 $__SORT_BUFFER_SIZE = "-S $_SORT_BUFFER_SIZE" if $_SORT_BUFFER_SIZE;
 
@@ -349,7 +362,7 @@ my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
 my $FLEX_SCORER = "$SCRIPTS_ROOTDIR/training/flexibility_score.py";
 
 # utilities
-my $ZCAT = "gzip -cd";
+my $ZCAT = "$GZIP_EXEC -cd";
 my $BZCAT = "bzcat";
 
 # do a sanity check to make sure we can find the necessary binaries since
@@ -1120,7 +1133,6 @@ sub run_single_giza {
 	 m2 => 0 , 
 	 m3 => 3 , 
 	 m4 => 3 , 
-	 hmmiterations => 0 ,
 	 o => "giza" ,
 	 nodumps => 1 ,
 	 onlyaldumps => 1 ,
@@ -1142,6 +1154,7 @@ sub run_single_giza {
     if ($_HMM_ALIGN) {
        $GizaDefaultOptions{m3} = 0;
        $GizaDefaultOptions{m4} = 0;
+       $GizaDefaultOptions{hmmiterations} = 5;
        $GizaDefaultOptions{hmmdumpfrequency} = 5;
        $GizaDefaultOptions{nodumps} = 0;
     }
@@ -1205,7 +1218,7 @@ sub run_single_giza {
     die "ERROR: Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
       if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
     safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
-    safesystem("gzip $dir/$f-$e.$___GIZA_EXTENSION") or die;
+    safesystem("$GZIP_EXEC $dir/$f-$e.$___GIZA_EXTENSION") or die;
 }
 
 sub run_single_snt2cooc {
@@ -1482,9 +1495,9 @@ sub extract_phrase {
 
     if (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) {
       print STDERR "merging with baseline extract from $_BASELINE_EXTRACT\n";
-      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | gzip > $extract_file.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | gzip > $extract_file.inv.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | gzip > $extract_file.o.gz")
+      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | $GZIP_EXEC > $extract_file.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | $GZIP_EXEC > $extract_file.inv.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | $GZIP_EXEC > $extract_file.o.gz")
 	if -e "$extract_file$suffix.o.gz";
       safesystem("rm $extract_file$suffix.gz");
       safesystem("rm $extract_file$suffix.inv.gz");
@@ -1677,7 +1690,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
     
-    $cmd .= " | gzip -c > $ttable_file.gz";
+    $cmd .= " | $GZIP_EXEC -c > $ttable_file.gz";
     
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
@@ -1694,7 +1707,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | $GZIP_EXEC >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1859,7 +1872,7 @@ sub get_generation {
     }
     close(GEN);
     safesystem("rm -f $file.gz") or die("ERROR");
-    safesystem("gzip $file") or die("ERROR");
+    safesystem("$GZIP_EXEC $file") or die("ERROR");
 }
 
 ### (9) CREATE CONFIGURATION FILE
@@ -2200,7 +2213,7 @@ sub create_ini {
   print INI "UnknownWordPenalty0= 1\n";
   print INI "WordPenalty0= -1\n";
   print INI "PhrasePenalty0= 0.2\n";
-  print INI "SoftSourceSyntacticConstraintsFeature0= 0.3 -0.3 -0.3\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+  print INI "SoftSourceSyntacticConstraintsFeature0= -0.2 -0.2 -0.2 0.1 0.1 0.1\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
   print INI $weight_spec;
   close(INI);
 }

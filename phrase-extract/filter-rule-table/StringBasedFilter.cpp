@@ -8,7 +8,7 @@ namespace FilterRuleTable
 {
 
 StringBasedFilter::StringBasedFilter(
-    const std::vector<std::vector<std::string> > &sentences)
+  const std::vector<std::vector<std::string> > &sentences)
 {
 }
 

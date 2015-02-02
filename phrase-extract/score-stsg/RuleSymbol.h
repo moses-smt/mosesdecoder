@@ -9,8 +9,7 @@ namespace Syntax
 namespace ScoreStsg
 {
 
-struct RuleSymbol
-{
+struct RuleSymbol {
   StringPiece value;
   bool isNonTerminal;
 };

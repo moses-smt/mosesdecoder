@@ -38,14 +38,15 @@ void FeatureFunction::Destroy()
 void FeatureFunction::CallChangeSource(InputType *&input)
 {
   for (size_t i = 0; i < s_staticColl.size(); ++i) {
-	  const FeatureFunction &ff = *s_staticColl[i];
-	  ff.ChangeSource(input);
+    const FeatureFunction &ff = *s_staticColl[i];
+    ff.ChangeSource(input);
   }
 }
 
 FeatureFunction::
 FeatureFunction(const std::string& line)
   : m_tuneable(true)
+  , m_requireSortingAfterSourceContext(false)
   , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(1)
 {
@@ -56,6 +57,7 @@ FeatureFunction::
 FeatureFunction(size_t numScoreComponents,
                 const std::string& line)
   : m_tuneable(true)
+  , m_requireSortingAfterSourceContext(false)
   , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(numScoreComponents)
 {
@@ -118,6 +120,8 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
 {
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
+  } else if (key == "require-sorting-after-source-context") {
+    m_requireSortingAfterSourceContext = Scan<bool>(value);
   } else if (key == "verbosity") {
     m_verbosity = Scan<size_t>(value);
   } else if (key == "filterable") { //ignore

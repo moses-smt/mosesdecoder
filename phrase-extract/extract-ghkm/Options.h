@@ -34,6 +34,7 @@ public:
     : allowUnary(false)
     , conditionOnTargetLhs(false)
     , gzOutput(false)
+    , includeSentenceId(false)
     , maxNodes(15)
     , maxRuleDepth(3)
     , maxRuleSize(3)
@@ -61,6 +62,7 @@ public:
   bool conditionOnTargetLhs;
   std::string glueGrammarFile;
   bool gzOutput;
+  bool includeSentenceId;
   int maxNodes;
   int maxRuleDepth;
   int maxRuleSize;
