@@ -119,7 +119,7 @@ Parameter::Parameter()
   AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
   AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
-  AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 3=chart (with cube pruning), 4=stack with batched lm requests, 5=chart (with incremental search), 6=string-to-tree (default = 0)");
+  AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 3=chart (with cube pruning), 4=stack with batched lm requests, 5=chart (with incremental search), 6=string-to-tree, 7=tree-to-string, 8=tree-to-string (SCFG-based), 9=forest-to-string (default = 0)");
   AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
   AddParam("description", "Source language, target language, description");
 

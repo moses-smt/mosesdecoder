@@ -148,6 +148,9 @@ enum SearchAlgorithm {
   ,NormalBatch  = 4
   ,ChartIncremental = 5
   ,SyntaxS2T = 6
+  ,SyntaxT2S = 7
+  ,SyntaxT2S_SCFG = 8
+  ,SyntaxF2S = 9
 };
 
 enum SourceLabelOverlap {
