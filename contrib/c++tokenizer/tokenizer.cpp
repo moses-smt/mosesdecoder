@@ -1034,6 +1034,8 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
         std::getline(is,istr);
         line_no ++;
         if (istr.empty()) {
+            if (is.eof())
+                break;
             os << std::endl;
         } else if (skip_xml_p && 
                    (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) {
