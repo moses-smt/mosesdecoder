@@ -193,10 +193,15 @@ Tokenizer::load_prefixes(std::ifstream& ifs)
 //
 void
 Tokenizer::init() {
-    std::string nbpre_path(cfg_dir);
+    std::string dir_path(cfg_dir);
+    dir_path.append("/nonbreaking_prefixes");
+    if (::access(dir_path.c_str(),X_OK)) {
+        dir_path = cfg_dir;
+    }
+    std::string nbpre_path(dir_path);
     nbpre_path.append("/nonbreaking_prefix.").append(lang_iso);
     // default to generic version
-    if (::access(nbpre_path.c_str(),R_OK)) 
+    if (::access(nbpre_path.c_str(),R_OK))
         nbpre_path = nbpre_path.substr(0,nbpre_path.size()-lang_iso.size()-1);
 
     if (::access(nbpre_path.c_str(),R_OK) == 0) {
@@ -1028,10 +1033,11 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
         std::string istr;
         std::getline(is,istr);
         line_no ++;
-        if (istr.empty()) 
-            continue;
-        if (skip_xml_p && (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) {
-            os << istr << std::endl;
+        if (istr.empty()) {
+            os << std::endl;
+        } else if (skip_xml_p && 
+                   (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) {
+            os << std::endl;
         } else {
             std::string bstr(SPC_BYTE);
             bstr.append(istr).append(SPC_BYTE);
