@@ -207,7 +207,6 @@ protected:
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
-  bool m_useS2TDecoder;
   S2TParsingAlgorithm m_s2tParsingAlgorithm;
   bool m_printNBestTrees;
 
@@ -783,9 +782,6 @@ public:
     return m_defaultNonTermOnlyForEmptyRange;
   }
 
-  bool UseS2TDecoder() const {
-    return m_useS2TDecoder;
-  }
   S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
     return m_s2tParsingAlgorithm;
   }

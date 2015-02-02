@@ -61,7 +61,7 @@ void TranslationTask::Run()
   if (!staticData.IsChart()) {
     // phrase-based
     manager = new Manager(*m_source);
-  } else if (staticData.UseS2TDecoder()) {
+  } else if (staticData.GetSearchAlgorithm() == SyntaxS2T) {
     // new-style string-to-tree decoding (ask Phil Williams)
     S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
     if (algorithm == RecursiveCYKPlus) {

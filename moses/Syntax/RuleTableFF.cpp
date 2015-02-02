@@ -27,8 +27,8 @@ void RuleTableFF::Load()
   SetFeaturesToApply();
 
   const StaticData &staticData = StaticData::Instance();
-  if (!staticData.UseS2TDecoder()) {
-    UTIL_THROW2("ERROR: RuleTableFF currently only supports S2T decoder");
+  if (!staticData.GetSearchAlgorithm() == SyntaxS2T) {
+    UTIL_THROW2("ERROR: RuleTableFF currently only supports the S2T search algorithm");
   } else {
     S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
     if (algorithm == RecursiveCYKPlus) {

@@ -65,7 +65,6 @@ StaticData::StaticData()
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
-  ,m_useS2TDecoder(false)
   ,m_requireSortingAfterSourceContext(false)
   ,m_treeStructure(NULL)
 {
@@ -402,7 +401,6 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter(m_printNBestTrees, "n-best-trees", false );
 
   // S2T decoder
-  m_parameter->SetParameter(m_useS2TDecoder, "s2t", false );
   m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm", RecursiveCYKPlus);
 
   // Compact phrase table and reordering model
@@ -1112,7 +1110,7 @@ std::map<std::string, std::string> StaticData::OverrideFeatureNames()
     }
   }
 
-  if (m_useS2TDecoder) {
+  if (m_searchAlgorithm == SyntaxS2T) {
     // Automatically override PhraseDictionary{Memory,Scope3}.  This will
     // have to change if the FF parameters diverge too much in the future,
     // but for now it makes switching between the old and new decoders much

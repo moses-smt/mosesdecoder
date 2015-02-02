@@ -147,6 +147,7 @@ enum SearchAlgorithm {
   ,CYKPlus = 3
   ,NormalBatch  = 4
   ,ChartIncremental = 5
+  ,SyntaxS2T = 6
 };
 
 enum SourceLabelOverlap {
