@@ -1110,7 +1110,10 @@ std::map<std::string, std::string> StaticData::OverrideFeatureNames()
     }
   }
 
-  if (m_searchAlgorithm == SyntaxS2T) {
+  // FIXME Does this make sense for F2S?  Perhaps it should be changed once
+  // FIXME the pipeline uses RuleTable consistently.
+  if (m_searchAlgorithm == SyntaxS2T || m_searchAlgorithm == SyntaxT2S ||
+      m_searchAlgorithm == SyntaxT2S_SCFG || m_searchAlgorithm == SyntaxF2S) {
     // Automatically override PhraseDictionary{Memory,Scope3}.  This will
     // have to change if the FF parameters diverge too much in the future,
     // but for now it makes switching between the old and new decoders much
