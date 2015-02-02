@@ -447,7 +447,10 @@ LanguageModel *ConstructKenLM(const std::string &line)
   string filePath;
   bool lazy = false;
 
-  for (util::TokenIter<util::SingleCharacter, true> argument(line, ' '); argument; ++argument) {
+  util::TokenIter<util::SingleCharacter, true> argument(line, ' ');
+  ++argument; // KENLM 
+
+  for (; argument; ++argument) {
     const char *equals = std::find(argument->data(), argument->data() + argument->size(), '=');
     UTIL_THROW_IF2(equals == argument->data() + argument->size(),
                    "Expected = in KenLM argument " << *argument);
