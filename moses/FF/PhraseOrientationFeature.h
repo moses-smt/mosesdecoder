@@ -17,6 +17,8 @@
 #include "FFState.h"
 #include "moses/Factor.h"
 #include "phrase-extract/extract-ghkm/PhraseOrientation.h"
+#include "moses/PP/OrientationPhraseProperty.h"
+#include <boost/unordered_set.hpp>
 
 
 namespace Moses
@@ -28,7 +30,7 @@ public:
 
   friend class PhraseOrientationFeature;
 
-  PhraseOrientationFeatureState(bool distinguishStates)
+  PhraseOrientationFeatureState(bool distinguishStates, bool useSparseWord, bool useSparseNT)
     : m_leftBoundaryNonTerminalL2RScores(3,0)
     , m_rightBoundaryNonTerminalR2LScores(3,0)
     , m_leftBoundaryNonTerminalL2RPossibleFutureOrientations(0x7)
@@ -38,17 +40,21 @@ public:
     , m_leftBoundaryIsSet(false)
     , m_rightBoundaryIsSet(false)
     , m_distinguishStates(distinguishStates)
+    , m_useSparseWord(useSparseWord)
+    , m_useSparseNT(useSparseNT)
   {}
 
   void SetLeftBoundaryL2R(const std::vector<float> &scores,
                           size_t heuristicScoreIndex,
                           std::bitset<3> &possibleFutureOrientations,
+                          const Factor* leftBoundaryNonTerminalSymbol,
                           const PhraseOrientationFeatureState* prevState) {
     for (size_t i=0; i<3; ++i) {
       m_leftBoundaryNonTerminalL2RScores[i] = scores[i];
       m_leftBoundaryNonTerminalL2RPossibleFutureOrientations[i] = possibleFutureOrientations[i];
     }
     m_leftBoundaryNonTerminalL2RHeuristicScoreIndex = heuristicScoreIndex;
+    m_leftBoundaryNonTerminalSymbol = leftBoundaryNonTerminalSymbol;
     m_leftBoundaryPrevState = prevState;
     m_leftBoundaryIsSet = true;
   }
@@ -56,16 +62,17 @@ public:
   void SetRightBoundaryR2L(const std::vector<float> &scores,
                            size_t heuristicScoreIndex,
                            std::bitset<3> &possibleFutureOrientations,
+                          const Factor* rightBoundaryNonTerminalSymbol,
                            const PhraseOrientationFeatureState* prevState) {
     for (size_t i=0; i<3; ++i) {
       m_rightBoundaryNonTerminalR2LScores[i] = scores[i];
       m_rightBoundaryNonTerminalR2LPossibleFutureOrientations[i] = possibleFutureOrientations[i];
     }
     m_rightBoundaryNonTerminalR2LHeuristicScoreIndex = heuristicScoreIndex;
+    m_rightBoundaryNonTerminalSymbol = rightBoundaryNonTerminalSymbol;
     m_rightBoundaryPrevState = prevState;
     m_rightBoundaryIsSet = true;
   }
-
 
   float GetLeftBoundaryL2RScoreMono() const {
     return m_leftBoundaryNonTerminalL2RScores[0];
@@ -118,13 +125,13 @@ public:
     }
 
     if (m_leftBoundaryIsSet) {
-      int compareLeft = CompareLeftBoundaryRecursive(*this, otherState);
+      int compareLeft = CompareLeftBoundaryRecursive(*this, otherState, m_useSparseNT);
       if (compareLeft != 0) {
         return compareLeft;
       }
     }
     if (m_rightBoundaryIsSet) {
-      int compareRight = CompareRightBoundaryRecursive(*this, otherState);
+      int compareRight = CompareRightBoundaryRecursive(*this, otherState, m_useSparseNT);
       if (compareRight != 0) {
         return compareRight;
       }
@@ -133,9 +140,9 @@ public:
     return 0;
   };
 
-private:
+protected:
 
-  static int CompareLeftBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState) {
+  static int CompareLeftBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState, bool useSparseNT) {
     if (!state.m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet) {
       return 0;
     }
@@ -144,6 +151,15 @@ private:
     }
     if (!state.m_leftBoundaryIsSet && otherState.m_leftBoundaryIsSet) {
       return -1;
+    }
+
+    if (useSparseNT) {
+      if ( otherState.m_leftBoundaryNonTerminalSymbol < state.m_leftBoundaryNonTerminalSymbol ) {
+        return 1;
+      }
+      if ( state.m_leftBoundaryNonTerminalSymbol < otherState.m_leftBoundaryNonTerminalSymbol ) {
+        return -1;
+      }
     }
 
     if ( otherState.m_leftBoundaryNonTerminalL2RHeuristicScoreIndex < state.m_leftBoundaryNonTerminalL2RHeuristicScoreIndex ) {
@@ -159,11 +175,15 @@ private:
       return -1;
     }
     for (size_t i=0; i<state.m_leftBoundaryNonTerminalL2RScores.size(); ++i) {
-      if (state.m_leftBoundaryNonTerminalL2RScores[i] > otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
-        return 1;
-      }
-      if (state.m_leftBoundaryNonTerminalL2RScores[i] < otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
-        return -1;
+      // compare only for possible future orientations
+      // (possible future orientations of state and otherState are the same at this point due to the previous two conditional blocks)
+      if (state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations[i]) { 
+        if (state.m_leftBoundaryNonTerminalL2RScores[i] > otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
+          return 1;
+        }
+        if (state.m_leftBoundaryNonTerminalL2RScores[i] < otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
+          return -1;
+        }
       }
     }
 
@@ -180,10 +200,10 @@ private:
     const PhraseOrientationFeatureState *prevState = state.m_leftBoundaryPrevState;
     const PhraseOrientationFeatureState *otherPrevState = otherState.m_leftBoundaryPrevState;
 
-    return CompareLeftBoundaryRecursive(*prevState, *otherPrevState);
+    return CompareLeftBoundaryRecursive(*prevState, *otherPrevState, useSparseNT);
   };
 
-  static int CompareRightBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState) {
+  static int CompareRightBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState, bool useSparseNT) {
     if (!state.m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) {
       return 0;
     }
@@ -192,6 +212,15 @@ private:
     }
     if (!state.m_rightBoundaryIsSet && otherState.m_rightBoundaryIsSet) {
       return -1;
+    }
+
+    if (useSparseNT) {
+      if ( otherState.m_rightBoundaryNonTerminalSymbol < state.m_rightBoundaryNonTerminalSymbol ) {
+        return 1;
+      }
+      if ( state.m_rightBoundaryNonTerminalSymbol < otherState.m_rightBoundaryNonTerminalSymbol ) {
+        return -1;
+      }
     }
 
     if ( otherState.m_rightBoundaryNonTerminalR2LHeuristicScoreIndex < state.m_rightBoundaryNonTerminalR2LHeuristicScoreIndex ) {
@@ -207,11 +236,15 @@ private:
       return -1;
     }
     for (size_t i=0; i<state.m_rightBoundaryNonTerminalR2LScores.size(); ++i) {
-      if (state.m_rightBoundaryNonTerminalR2LScores[i] > otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
-        return 1;
-      }
-      if (state.m_rightBoundaryNonTerminalR2LScores[i] < otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
-        return -1;
+      // compare only for possible future orientations
+      // (possible future orientations of state and otherState are the same at this point due to the previous two conditional blocks)
+      if ( state.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations[i]) { 
+        if (state.m_rightBoundaryNonTerminalR2LScores[i] > otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
+          return 1;
+        }
+        if (state.m_rightBoundaryNonTerminalR2LScores[i] < otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
+          return -1;
+        }
       }
     }
 
@@ -228,7 +261,7 @@ private:
     const PhraseOrientationFeatureState *prevState = state.m_rightBoundaryPrevState;
     const PhraseOrientationFeatureState *otherPrevState = otherState.m_rightBoundaryPrevState;
 
-    return CompareRightBoundaryRecursive(*prevState, *otherPrevState);
+    return CompareRightBoundaryRecursive(*prevState, *otherPrevState, useSparseNT);
   };
 
   template<std::size_t N> static bool Smaller(const std::bitset<N>& x, const std::bitset<N>& y) {
@@ -254,7 +287,11 @@ private:
   bool m_rightBoundaryIsSet;
   const PhraseOrientationFeatureState* m_leftBoundaryPrevState;
   const PhraseOrientationFeatureState* m_rightBoundaryPrevState;
-  bool m_distinguishStates;
+  const bool m_distinguishStates;
+  const bool m_useSparseWord;
+  const bool m_useSparseNT;
+  const Factor* m_leftBoundaryNonTerminalSymbol;
+  const Factor* m_rightBoundaryNonTerminalSymbol;
 };
 
 
@@ -273,17 +310,17 @@ public:
   }
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
-    return new PhraseOrientationFeatureState(m_distinguishStates);
+    return new PhraseOrientationFeatureState(m_distinguishStates,m_useSparseWord,m_useSparseNT);
   }
 
   void SetParameter(const std::string& key, const std::string& value);
+  
+  void Load();
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
-    targetPhrase.SetRuleSource(source);
-  };
+                           , ScoreComponentCollection &estimatedFutureScore) const;
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
@@ -303,7 +340,7 @@ public:
     ScoreComponentCollection* accumulator) const {
     UTIL_THROW2(GetScoreProducerDescription()
                 << ": EvaluateWhenApplied(const Hypothesis&, ...) not implemented");
-    return new PhraseOrientationFeatureState(m_distinguishStates);
+    return new PhraseOrientationFeatureState(m_distinguishStates,m_useSparseWord,m_useSparseNT);
   };
 
   FFState* EvaluateWhenApplied(
@@ -313,20 +350,64 @@ public:
 
 protected:
 
+  void LoadWordList(const std::string& filename,
+                    boost::unordered_set<const Factor*>& list);
+
+  void LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty, 
+                      ScoreComponentCollection &scoreBreakdown, 
+                      bool subtract=false) const;
+
+  size_t GetHeuristicScoreIndex(const std::vector<float>& scores,
+                                size_t weightsVectorOffset, 
+                                const std::bitset<3> possibleFutureOrientations = 0x7) const;
+
   void LeftBoundaryL2RScoreRecursive(int featureID,
                                      const PhraseOrientationFeatureState *state,
                                      const std::bitset<3> orientation,
-                                     std::vector<float>& newScores) const;
+                                     std::vector<float>& newScores,
+                                     ScoreComponentCollection* scoreBreakdown) const;
 
   void RightBoundaryR2LScoreRecursive(int featureID,
                                       const PhraseOrientationFeatureState *state,
                                       const std::bitset<3> orientation,
-                                      std::vector<float>& newScores) const;
+                                      std::vector<float>& newScores,
+                                      ScoreComponentCollection* scoreBreakdown) const;
+
+  void SparseWordL2RScore(const ChartHypothesis* hypo,
+                          ScoreComponentCollection* scoreBreakdown,
+                          const std::string* o) const;
+
+  void SparseWordR2LScore(const ChartHypothesis* hypo,
+                          ScoreComponentCollection* scoreBreakdown,
+                          const std::string* o) const;
+
+  void SparseNonTerminalL2RScore(const Factor* nonTerminalSymbol,
+                                 ScoreComponentCollection* scoreBreakdown,
+                                 const std::string* o) const;
+
+  void SparseNonTerminalR2LScore(const Factor* nonTerminalSymbol,
+                                 ScoreComponentCollection* scoreBreakdown,
+                                 const std::string* o) const;
+
+  const std::string* ToString(const Moses::GHKM::PhraseOrientation::REO_CLASS o) const;
+
+  static const std::string MORIENT;
+  static const std::string SORIENT;
+  static const std::string DORIENT;
 
   std::string m_glueTargetLHSStr;
-  Word m_glueTargetLHS;
+  const Factor* m_glueTargetLHS;
   bool m_distinguishStates;
+  bool m_useSparseWord;
+  bool m_useSparseNT;
   size_t m_offsetR2LScores;
+  const std::vector<float> m_weightsVector;
+  std::string m_filenameTargetWordList;
+  boost::unordered_set<const Factor*> m_targetWordList;
+  bool m_useTargetWordList;
+  std::string m_filenameSourceWordList;
+  boost::unordered_set<const Factor*> m_sourceWordList;
+  bool m_useSourceWordList;
 
 };
 

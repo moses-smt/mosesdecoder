@@ -26,6 +26,7 @@ def main():
   parser.add_option("-g", "--log-file", dest="log_file")
   parser.add_option("-v", "--validation-ngrams", dest="validation_file")
   parser.add_option("-a", "--activation-function", dest="activation_fn")
+  parser.add_option("-z", "--learning-rate", dest="learning_rate")
 
   parser.set_defaults(
     working_dir = "working"
@@ -45,6 +46,7 @@ def main():
     ,log_file = "log"
     ,validation_file = None
     ,activation_fn = "rectifier"
+    ,learning_rate = "1"
   )
 
   options,args = parser.parse_args(sys.argv)
@@ -79,7 +81,7 @@ def main():
   model_prefix = options.output_dir + "/" + options.output_model + ".model.nplm"
   train_args = [options.nplm_home + "/src/trainNeuralNetwork", "--train_file", in_file, "--num_epochs", str(options.epochs),
                 "--model_prefix",
-                model_prefix, "--learning_rate", "1", "--minibatch_size", str(options.minibatch_size),
+                model_prefix, "--learning_rate", options.learning_rate, "--minibatch_size", str(options.minibatch_size),
                 "--num_noise_samples", str(options.noise), "--num_hidden", str(options.hidden), "--input_embedding_dimension",
                 str(options.input_embedding), "--output_embedding_dimension", str(options.output_embedding), "--num_threads",
                 str(options.threads), "--activation_function", options.activation_fn] + validations_command

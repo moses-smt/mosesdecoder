@@ -13,7 +13,9 @@ namespace Moses
 
 class SoftSourceSyntacticConstraintsFeature : public StatelessFeatureFunction
 {
+
 public:
+
   SoftSourceSyntacticConstraintsFeature(const std::string &line);
 
   ~SoftSourceSyntacticConstraintsFeature() {
@@ -28,6 +30,8 @@ public:
   }
 
   void SetParameter(const std::string& key, const std::string& value);
+  
+  void Load();
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
@@ -44,26 +48,30 @@ public:
                                  , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
-
+      , const TranslationOptionList &translationOptionList) const
+  {}
 
   void EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
-    ScoreComponentCollection* accumulator) const {
-  };
+    ScoreComponentCollection* accumulator) const
+  {};
 
   void EvaluateWhenApplied(
     const ChartHypothesis& cur_hypo,
-    ScoreComponentCollection* accumulator) const {
-  };
+    ScoreComponentCollection* accumulator) const
+  {};
 
-private:
+
+protected:
+
   std::string m_sourceLabelSetFile;
   std::string m_coreSourceLabelSetFile;
   std::string m_targetSourceLHSJointCountFile;
   std::string m_unknownLeftHandSideFile;
-  size_t m_featureVariant;
+  bool m_useCoreSourceLabels;
+  bool m_useLogprobs;
+  bool m_useSparse;
+  bool m_noMismatches;
 
   boost::unordered_map<std::string,size_t> m_sourceLabels;
   std::vector<std::string> m_sourceLabelsByIndex;
@@ -82,10 +90,11 @@ private:
   float m_smoothingWeight;
   float m_unseenLHSSmoothingFactorForUnknowns;
 
-  void Load();
   void LoadSourceLabelSet();
   void LoadCoreSourceLabelSet();
   void LoadTargetSourceLeftHandSideJointCountFile();
+
+  void LoadLabelSet(std::string &filename, boost::unordered_set<size_t> &labelSet);
 
   std::pair<float,float> GetLabelPairProbabilities(const Factor* target,
       const size_t source) const;

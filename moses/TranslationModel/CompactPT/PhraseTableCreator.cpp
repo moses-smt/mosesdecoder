@@ -878,8 +878,10 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
   }
 
   if(force) {
-    m_rnkHash.AddRange(m_lastSourceRange);
-    m_lastSourceRange.clear();
+    if(!m_lastSourceRange.empty()) {
+      m_rnkHash.AddRange(m_lastSourceRange);
+      m_lastSourceRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_rnkHash.WaitAll();
@@ -963,8 +965,10 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
       m_lastCollection.clear();
     }
 
-    m_srcHash.AddRange(m_lastSourceRange);
-    m_lastSourceRange.clear();
+    if(!m_lastSourceRange.empty()) {
+      m_srcHash.AddRange(m_lastSourceRange);
+      m_lastSourceRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_srcHash.WaitAll();

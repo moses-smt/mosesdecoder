@@ -1,5 +1,4 @@
-#ifndef moses_TargetWordInsertionFeature_h
-#define moses_TargetWordInsertionFeature_h
+#pragma once
 
 #include <string>
 #include <boost/unordered_set.hpp>
@@ -60,4 +59,3 @@ public:
 
 }
 
-#endif // moses_TargetWordInsertionFeature_h

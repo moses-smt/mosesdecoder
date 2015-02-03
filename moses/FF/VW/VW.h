@@ -5,6 +5,7 @@
 #include <limits>
 
 #include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/PP/CountsPhraseProperty.h"
 #include "moses/TranslationOptionList.h"
 #include "moses/TranslationOption.h"
 #include "moses/Util.h"
@@ -27,7 +28,8 @@ const std::string VW_DUMMY_LABEL = "1111"; // VW does not use the actual label, 
 /**
  * Helper class for storing alignment constraints.
  */
-class Constraint {
+class Constraint
+{
 public:
   Constraint() : m_min(std::numeric_limits<int>::max()), m_max(-1) {}
 
@@ -158,12 +160,38 @@ public:
 
     const std::vector<VWFeatureBase*>& targetFeatures = VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
-    std::vector<float> losses(translationOptionList.size());
+    // optionally update translation options using leave-one-out
+    std::vector<bool> keep = (m_leaveOneOut.size() > 0)
+      ? LeaveOneOut(translationOptionList)
+      : std::vector<bool>(translationOptionList.size(), true);
 
+    std::vector<float> losses(translationOptionList.size());
     std::vector<float>::iterator iterLoss;
     TranslationOptionList::const_iterator iterTransOpt;
-    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
+
+    if (m_train) {
+      // check which translation options are correct in advance
+      bool seenCorrect = false;
+      for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ; 
+          iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
+        bool isCorrect = IsCorrectTranslationOption(**iterTransOpt);
+        *iterLoss = isCorrect ? 0.0 : 1.0;
+        if (isCorrect) seenCorrect = true;
+      }
+
+      // do not train if there are no positive examples
+      if (! seenCorrect) {
+        VERBOSE(2, "VW :: skipping topt collection, no correct translation for span\n");
+        return;
+      }
+    }
+
+    std::vector<bool>::const_iterator iterKeep;
+    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ; 
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
+
+      if (! *iterKeep)
+        continue;
 
       const TargetPhrase &targetPhrase = (*iterTransOpt)->GetTargetPhrase();
       for(size_t i = 0; i < targetFeatures.size(); ++i)
@@ -172,15 +200,17 @@ public:
       if (! m_train) {
         *iterLoss = classifier.Predict(MakeTargetLabel(targetPhrase));
       } else {
-        float loss = IsCorrectTranslationOption(**iterTransOpt) ? 0.0 : 1.0;
-        classifier.Train(MakeTargetLabel(targetPhrase), loss);
+        classifier.Train(MakeTargetLabel(targetPhrase), *iterLoss);
       }
     }
 
     (*m_normalizer)(losses);
 
-    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
+    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
+      if (! *iterKeep)
+        continue;
+
       TranslationOption &transOpt = **iterTransOpt;
 
       std::vector<float> newScores(m_numScoreComponents);
@@ -209,6 +239,8 @@ public:
       m_modelPath = value;
     } else if (key == "vw-options") {
       m_vwOptions = value;
+    } else if (key == "leave-one-out-from") {
+      m_leaveOneOut = value;
     } else if (key == "loss") {
 
       if(value == "squared")
@@ -232,8 +264,8 @@ public:
 
     const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
     UTIL_THROW_IF2(tabbedSentence.GetColumns().size() < 2, "TabbedSentence must contain target<tab>alignment");
-    
-    
+
+
     // target sentence represented as a phrase
     Phrase *target = new Phrase();
     target->CreateFromString(
@@ -241,7 +273,7 @@ public:
       , StaticData::Instance().GetOutputFactorOrder()
       , tabbedSentence.GetColumns()[0]
       , NULL);
-      
+
     // word alignment between source and target sentence
     // we don't store alignment info in AlignmentInfoCollection because we keep alignments of whole
     // sentences, not phrases
@@ -256,7 +288,7 @@ public:
     //std::cerr << *target << std::endl;
     //std::cerr << *alignment << std::endl;
 
-    
+
     // pre-compute max- and min- aligned points for faster translation option checking
     targetSent.SetConstraints(source.GetSize());
   }
@@ -268,9 +300,9 @@ private:
   }
 
   bool IsCorrectTranslationOption(const TranslationOption &topt) const {
-    
+
     //std::cerr << topt.GetSourceWordsRange() << std::endl;
-    
+
     int sourceStart = topt.GetSourceWordsRange().GetStartPos();
     int sourceEnd   = topt.GetSourceWordsRange().GetEndPos();
 
@@ -279,7 +311,7 @@ private:
     // [targetStart, targetEnd] spans aligned target words
     int targetStart = targetSentence.m_sentence->GetSize();
     int targetEnd   = -1;
-    
+
     // get the left-most and right-most alignment point within source span
     for(int i = sourceStart; i <= sourceEnd; ++i) {
       if(targetSentence.m_sourceConstraints[i].IsSet()) {
@@ -292,23 +324,23 @@ private:
     // there was no alignment
     if(targetEnd == -1)
       return false;
-    
+
     //std::cerr << "Shorter: " << targetStart << " " << targetEnd << std::endl;
-    
+
     // [targetStart2, targetEnd2] spans unaligned words left and right of [targetStart, targetEnd]
     int targetStart2 = targetStart;
     for(int i = targetStart2; i >= 0 && !targetSentence.m_targetConstraints[i].IsSet(); --i)
       targetStart2 = i;
-    
+
     int targetEnd2   = targetEnd;
     for(int i = targetEnd2; i < targetSentence.m_sentence->GetSize() && !targetSentence.m_targetConstraints[i].IsSet(); ++i)
       targetEnd2 = i;
-    
+
     //std::cerr << "Longer: " << targetStart2 << " " << targetEnd2 << std::endl;
 
     const TargetPhrase &tphrase = topt.GetTargetPhrase();
     //std::cerr << tphrase << std::endl;
-  
+
     // if target phrase is shorter than inner span return false
     if(tphrase.GetSize() < targetEnd - targetStart + 1)
       return false;
@@ -316,7 +348,7 @@ private:
     // if target phrase is longer than outer span return false
     if(tphrase.GetSize() > targetEnd2 - targetStart2 + 1)
       return false;
-    
+
     // for each possible starting point
     for(int tempStart = targetStart2; tempStart <= targetStart; tempStart++) {
       bool found = true;
@@ -333,13 +365,74 @@ private:
         return true;
       }
     }
-    
+
     return false;
+  }
+
+  std::vector<bool> LeaveOneOut(const TranslationOptionList &topts) const {
+    UTIL_THROW_IF2(m_leaveOneOut.size() == 0 || ! m_train, "LeaveOneOut called in wrong setting!");
+
+    float sourceRawCount = 0.0;
+    const float ONE = 1.0001; // I don't understand floating point numbers
+    
+    std::vector<bool> keepOpt;
+
+    TranslationOptionList::const_iterator iterTransOpt;
+    for(iterTransOpt = topts.begin(); iterTransOpt != topts.end(); ++iterTransOpt) {
+      const TargetPhrase &targetPhrase = (*iterTransOpt)->GetTargetPhrase();
+
+      // extract raw counts from phrase-table property
+      const CountsPhraseProperty *property = static_cast<const CountsPhraseProperty *>(targetPhrase.GetProperty("Counts"));
+      if (! property) {
+        VERBOSE(1, "VW :: Counts not found for topt! Is this an OOV?\n");
+        // keep all translation opts without updating, this is either OOV or bad usage...
+        keepOpt.assign(topts.size(), true);
+        return keepOpt;
+      }
+
+      if (sourceRawCount == 0.0) {
+        sourceRawCount = property->GetSourceMarginal() - ONE; // discount one occurrence of the source phrase
+        if (sourceRawCount <= 0) {
+          // no translation options survived, source phrase was a singleton
+          keepOpt.assign(topts.size(), false);
+          return keepOpt;
+        }
+      }
+
+      float discount = IsCorrectTranslationOption(**iterTransOpt) ? ONE : 0.0;
+      float target = property->GetTargetMarginal() - discount;
+      float joint  = property->GetJointCount() - discount;
+      if (discount != 0.0) VERBOSE(2, "VW :: leaving one out!\n");
+
+      if (joint > 0) {
+        // topt survived leaving one out, update its scores
+        const FeatureFunction *feature = &FindFeatureFunction(m_leaveOneOut);
+        std::vector<float> scores = targetPhrase.GetScoreBreakdown().GetScoresForProducer(feature);
+        UTIL_THROW_IF2(scores.size() != 4, "Unexpected number of scores in feature " << m_leaveOneOut);
+        scores[0] = TransformScore(joint / target); // P(f|e)
+        scores[2] = TransformScore(joint / sourceRawCount); // P(e|f)
+
+        ScoreComponentCollection &scoreBreakDown = (*iterTransOpt)->GetScoreBreakdown();
+        scoreBreakDown.Assign(feature, scores);
+        (*iterTransOpt)->UpdateScore();
+        keepOpt.push_back(true);
+      } else {
+        // they only occurred together once, discard topt
+        VERBOSE(2, "VW :: discarded topt when leaving one out\n");
+        keepOpt.push_back(false);
+      }
+    }
+
+    return keepOpt;
   }
 
   bool m_train; // false means predict
   std::string m_modelPath;
   std::string m_vwOptions;
+
+  // optionally contains feature name of a phrase table where we recompute scores with leaving one out
+  std::string m_leaveOneOut; 
+
   Discriminative::Normalizer *m_normalizer = NULL;
   TLSClassifier *m_tlsClassifier;
 };

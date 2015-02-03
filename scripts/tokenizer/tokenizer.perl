@@ -1,4 +1,5 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+use warnings;
 
 # Sample Tokenizer
 ### Version 1.1

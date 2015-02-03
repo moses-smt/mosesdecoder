@@ -31,7 +31,7 @@ public:
     m_matchCB = &callback;
     m_hyperedge.head = 0;
     m_hyperedge.tail.clear();
-    m_hyperedge.translations = &tpc;
+    m_hyperedge.label.translations = &tpc;
     SearchInner(0, 0, 0);
   }
 

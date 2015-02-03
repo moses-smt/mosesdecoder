@@ -35,7 +35,7 @@ namespace Moses
 namespace GHKM
 {
 
-void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
+void ScfgRuleWriter::Write(const ScfgRule &rule, size_t lineNum, bool printEndl)
 {
   std::ostringstream sourceSS;
   std::ostringstream targetSS;
@@ -66,6 +66,14 @@ void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
     } else {
       m_fwd << " " << p->first << "-" << p->second;
       m_inv << " " << p->second << "-" << p->first;
+    }
+  }
+
+  if (m_options.includeSentenceId) {
+    if (m_options.t2s) {
+      m_inv << " ||| " << lineNum;
+    } else {
+      m_fwd << " ||| " << lineNum;
     }
   }
 
@@ -183,9 +191,9 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
   }
 }
 
-void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g, bool printEndl)
+void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g, size_t lineNum, bool printEndl)
 {
-  Write(rule,false);
+  Write(rule,lineNum,false);
   m_fwd << " {{Tree ";
   g.PrintTree(m_fwd);
   m_fwd << "}}";

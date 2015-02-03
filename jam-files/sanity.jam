@@ -184,7 +184,7 @@ rule boost ( min-version ) {
   boost-lib system SYSTEM_DYN_LINK ;
   boost-lib thread THREAD_DYN_DLL : boost_system ;
   boost-lib program_options PROGRAM_OPTIONS_DYN_LINK ;
-  boost-lib unit_test_framework TEST_DYN_LINK ;
+  boost-lib unit_test_framework DELETE_ME_TEST_DYN_LINK ;
   boost-lib iostreams IOSTREAMS_DYN_LINK ;
   boost-lib filesystem FILE_SYSTEM_DYN_LINK ;
 #  if $(BOOST-VERSION) >= 104800 {

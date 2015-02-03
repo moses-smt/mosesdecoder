@@ -25,30 +25,30 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
   ,m_ignorePunctuation(false)
   ,m_domainTrigger(false)
 {
-  std::cerr << "Initializing word translation feature.. " << endl;
+  VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
 
-  if (m_simple == 1) std::cerr << "using simple word translations.. ";
-  if (m_sourceContext == 1) std::cerr << "using source context.. ";
-  if (m_targetContext == 1) std::cerr << "using target context.. ";
-  if (m_domainTrigger == 1) std::cerr << "using domain triggers.. ";
+  if (m_simple == 1) VERBOSE(1, " Using simple word translations.");
+  if (m_sourceContext == 1) VERBOSE(1, " Using source context.");
+  if (m_targetContext == 1) VERBOSE(1, " Using target context.");
+  if (m_domainTrigger == 1) VERBOSE(1, " Using domain triggers.");
 
   // compile a list of punctuation characters
   if (m_ignorePunctuation) {
-    std::cerr << "ignoring punctuation for triggers.. ";
+    VERBOSE(1, " Ignoring punctuation for triggers.");
     char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
     for (size_t i=0; i < sizeof(punctuation)-1; ++i) {
       m_punctuationHash[punctuation[i]] = 1;
     }
   }
 
-  std::cerr << "done." << std::endl;
+  VERBOSE(1, " Done." << std::endl);
 
   // TODO not sure about this
   /*
   if (weight[0] != 1) {
     AddSparseProducer(wordTranslationFeature);
-    cerr << "wt sparse producer weight: " << weight[0] << endl;
+    VERBOSE(1, "wt sparse producer weight: " << weight[0] << std::endl);
     if (m_mira)
       m_metaFeatureProducer = new MetaFeatureProducer("wt");
   }
@@ -94,7 +94,7 @@ void WordTranslationFeature::Load()
     return;
   } //else if (tokens.size() == 8) {
 
-  cerr << "loading word translation word lists from " << m_filePathSource << " and " << m_filePathTarget << endl;
+  FEATUREVERBOSE(1, "Loading word translation word lists from " << m_filePathSource << " and " << m_filePathTarget << std::endl);
   if (m_domainTrigger) {
     // domain trigger terms for each input document
     ifstream inFileSource(m_filePathSource.c_str());

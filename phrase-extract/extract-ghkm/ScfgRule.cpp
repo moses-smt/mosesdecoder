@@ -68,10 +68,6 @@ ScfgRule::ScfgRule(const Subgraph &fragment,
       m_sourceRHS.push_back(Symbol("X", NonTerminal));
       sourceOrder[&sinkNode].push_back(srcIndex);
       ++m_numberOfNonTerminals;
-      if (sourceSyntaxTree) {
-        // Source syntax label
-        PushSourceLabel(sourceSyntaxTree,&sinkNode,"XRHS");
-      }
     } else {
       assert(sinkNode.GetType() == SOURCE);
       m_sourceRHS.push_back(Symbol(sinkNode.GetLabel(), Terminal));
@@ -83,6 +79,10 @@ ScfgRule::ScfgRule(const Subgraph &fragment,
           sourceOrder[*q].push_back(srcIndex);
         }
       }
+    }
+    if (sourceSyntaxTree) {
+      // Source syntax label
+      PushSourceLabel(sourceSyntaxTree,&sinkNode,"XRHS");
     }
   }
 
@@ -128,7 +128,7 @@ ScfgRule::ScfgRule(const Subgraph &fragment,
     PushSourceLabel(sourceSyntaxTree,fragment.GetRoot(),"XLHS");
     // All non-terminal spans (including the LHS) should have obtained a label
     // (a source-side syntactic constituent label if the span matches, "XLHS" otherwise)
-    assert(m_sourceLabels.size() == m_numberOfNonTerminals+1);
+//    assert(m_sourceLabels.size() == m_numberOfNonTerminals+1);
   }
 }
 

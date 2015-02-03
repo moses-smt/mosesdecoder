@@ -24,12 +24,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <memory>
 #include <stdlib.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
 #include "lm/left.hh"
 #include "lm/model.hh"
 #include "util/exception.hh"
+#include "util/tokenize_piece.hh"
 
 #include "Ken.h"
 #include "Base.h"
@@ -363,7 +365,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
 {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
-  const TargetPhrase &target = *hyperedge.translation;
+  const TargetPhrase &target = *hyperedge.label.translation;
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     target.GetAlignNonTerm().GetNonTermIndexMap2();
 
@@ -380,7 +382,8 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       // Non-terminal is first so we can copy instead of rescoring.
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
-      float prob = UntransformLMScore(pred->best->scoreBreakdown.GetScoresForProducer(this)[0]);
+      float prob = UntransformLMScore(
+          pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.BeginNonTerminal(prevState, prob);
       phrasePos++;
     }
@@ -391,7 +394,8 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
     if (word.IsNonTerminal()) {
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
-      float prob = UntransformLMScore(pred->best->scoreBreakdown.GetScoresForProducer(this)[0]);
+      float prob = UntransformLMScore(
+          pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.NonTerminal(prevState, prob);
     } else {
       ruleScore.Terminal(TranslateID(word));
@@ -437,29 +441,33 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-
 LanguageModel *ConstructKenLM(const std::string &line)
 {
   FactorType factorType = 0;
   string filePath;
   bool lazy = false;
 
-  vector<string> toks = Tokenize(line);
-  for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
-    UTIL_THROW_IF2(args.size() != 2,
-                   "Incorrect format of KenLM property: " << toks[i]);
+  util::TokenIter<util::SingleCharacter, true> argument(line, ' ');
+  ++argument; // KENLM 
 
-    if (args[0] == "factor") {
-      factorType = Scan<FactorType>(args[1]);
-    } else if (args[0] == "order") {
-      //nGramOrder = Scan<size_t>(args[1]);
-    } else if (args[0] == "path") {
-      filePath = args[1];
-    } else if (args[0] == "lazyken") {
-      lazy = Scan<bool>(args[1]);
-    } else if (args[0] == "name") {
+  for (; argument; ++argument) {
+    const char *equals = std::find(argument->data(), argument->data() + argument->size(), '=');
+    UTIL_THROW_IF2(equals == argument->data() + argument->size(),
+                   "Expected = in KenLM argument " << *argument);
+    StringPiece name(argument->data(), equals - argument->data());
+    StringPiece value(equals + 1, argument->data() + argument->size() - equals - 1);
+    if (name == "factor") {
+      factorType = boost::lexical_cast<FactorType>(value);
+    } else if (name == "order") {
+      // Ignored
+    } else if (name == "path") {
+      filePath.assign(value.data(), value.size());
+    } else if (name == "lazyken") {
+      lazy = boost::lexical_cast<bool>(value);
+    } else if (name == "name") {
       // that's ok. do nothing, passes onto LM constructor
+    } else {
+      UTIL_THROW2("Unknown KenLM argument " << name);
     }
   }
 
@@ -470,7 +478,6 @@ LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, 
 {
   lm::ngram::ModelType model_type;
   if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
-
     switch(model_type) {
     case lm::ngram::PROBING:
       return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
@@ -493,4 +500,3 @@ LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, 
 }
 
 }
-

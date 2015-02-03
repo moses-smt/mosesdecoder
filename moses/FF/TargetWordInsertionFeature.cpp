@@ -18,8 +18,9 @@ TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
   :StatelessFeatureFunction(0, line),
    m_unrestricted(true)
 {
-  std::cerr << "Initializing target word insertion feature.." << std::endl;
+  VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
+  VERBOSE(1, " Done." << std::endl);
 }
 
 void TargetWordInsertionFeature::SetParameter(const std::string& key, const std::string& value)
@@ -38,7 +39,7 @@ void TargetWordInsertionFeature::Load()
   if (m_filename.empty())
     return;
 
-  cerr << "loading target word insertion word list from " << m_filename << endl;
+  FEATUREVERBOSE(1, "Loading target word insertion word list from " << m_filename << std::endl);
   ifstream inFile(m_filename.c_str());
   UTIL_THROW_IF2(!inFile, "could not open file " << m_filename);
 

@@ -76,10 +76,12 @@ lib moses :
 [ glob 
   *.cpp
   Syntax/*.cpp
+  Syntax/F2S/*.cpp
   Syntax/S2T/*.cpp
   Syntax/S2T/Parsers/*.cpp
   Syntax/S2T/Parsers/RecursiveCYKPlusParser/*.cpp
   Syntax/S2T/Parsers/Scope3Parser/*.cpp
+  Syntax/T2S/*.cpp
   TranslationModel/*.cpp
   TranslationModel/fuzzy-match/*.cpp
   TranslationModel/DynSAInclude/*.cpp

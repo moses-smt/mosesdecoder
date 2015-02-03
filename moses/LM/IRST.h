@@ -86,7 +86,10 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  bool IsUseable(const FactorMask &mask) const;
+
   void Load();
+  const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
   

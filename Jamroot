@@ -237,6 +237,7 @@ biconcor
 contrib/server//mosesserver 
 mm
 rephraser
+contrib/c++tokenizer//tokenizer
 ;
 
 

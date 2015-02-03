@@ -124,7 +124,7 @@ enum InputTypeEnum {
   ,TreeInputType					= 3
   ,WordLatticeInput2			= 4
   , TabbedSentenceInput = 5
-
+  ,ForestInputType        = 6
 };
 
 enum XmlInputType {
@@ -147,6 +147,10 @@ enum SearchAlgorithm {
   ,CYKPlus = 3
   ,NormalBatch  = 4
   ,ChartIncremental = 5
+  ,SyntaxS2T = 6
+  ,SyntaxT2S = 7
+  ,SyntaxT2S_SCFG = 8
+  ,SyntaxF2S = 9
 };
 
 enum SourceLabelOverlap {

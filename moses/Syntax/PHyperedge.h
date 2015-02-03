@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "moses/TargetPhraseCollection.h"
+#include "PLabel.h"
 
 namespace Moses
 {
@@ -14,7 +14,7 @@ struct PVertex;
 struct PHyperedge {
   PVertex *head;
   std::vector<PVertex*> tail;
-  const TargetPhraseCollection *translations;
+  PLabel label;
 };
 
 }  // Syntax

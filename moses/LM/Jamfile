@@ -18,9 +18,9 @@ if $(with-irstlm) {
   alias irst : IRST.o irstlm : : : <define>LM_IRST ;
   dependencies += irst ;
   lmmacros += LM_IRST ;
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking with the IRSTLM library; be sure the release is >= 5.80.06 !!!" ;
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking with the IRSTLM library; be sure the release is >= 5.80.07 !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
 }
 
 #SRILM

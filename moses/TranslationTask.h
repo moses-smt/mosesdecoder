@@ -8,7 +8,9 @@
 #include "moses/Manager.h"
 #include "moses/ChartManager.h"
 
+#include "moses/Syntax/F2S/Manager.h"
 #include "moses/Syntax/S2T/Manager.h"
+#include "moses/Syntax/T2S/Manager.h"
 
 namespace Moses
 {

@@ -18,7 +18,7 @@ struct SVertexStackContentOrderer {
 public:
   bool operator()(const boost::shared_ptr<SVertex> &x,
                   const boost::shared_ptr<SVertex> &y) {
-    return x->best->score > y->best->score;
+    return x->best->label.score > y->best->label.score;
   }
 };
 

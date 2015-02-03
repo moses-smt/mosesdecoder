@@ -112,6 +112,7 @@ protected:
   bool m_sourceStartPosMattersForRecombination;
   bool m_recoverPath;
   bool m_outputHypoScore;
+  bool m_requireSortingAfterSourceContext;
 
   SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
@@ -206,7 +207,6 @@ protected:
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
-  bool m_useS2TDecoder;
   S2TParsingAlgorithm m_s2tParsingAlgorithm;
   bool m_printNBestTrees;
 
@@ -782,15 +782,16 @@ public:
     return m_defaultNonTermOnlyForEmptyRange;
   }
 
-  bool UseS2TDecoder() const {
-    return m_useS2TDecoder;
-  }
   S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
     return m_s2tParsingAlgorithm;
   }
 
   bool PrintNBestTrees() const {
     return m_printNBestTrees;
+  }
+
+  bool RequireSortingAfterSourceContext() const {
+    return m_requireSortingAfterSourceContext;
   }
 
 };
