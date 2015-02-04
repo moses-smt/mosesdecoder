@@ -464,10 +464,9 @@ LanguageModel *ConstructKenLM(const std::string &line)
       filePath.assign(value.data(), value.size());
     } else if (name == "lazyken") {
       lazy = boost::lexical_cast<bool>(value);
-    } else if (name == "name") {
-      // that's ok. do nothing, passes onto LM constructor
     } else {
-      UTIL_THROW2("Unknown KenLM argument " << name);
+      // that's ok. do nothing, passes onto LM constructor
+      //UTIL_THROW2("Unknown KenLM argument " << name);
     }
   }
 
