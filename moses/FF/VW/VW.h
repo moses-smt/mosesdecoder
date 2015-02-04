@@ -155,11 +155,6 @@ public:
     const WordsRange &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
     const InputPath  &inputPath   = translationOptionList.Get(0)->GetInputPath();
 
-    for(size_t i = 0; i < sourceFeatures.size(); ++i)
-      (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
-
-    const std::vector<VWFeatureBase*>& targetFeatures = VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
-
     // optionally update translation options using leave-one-out
     std::vector<bool> keep = (m_leaveOneOut.size() > 0)
       ? LeaveOneOut(translationOptionList)
@@ -185,6 +180,11 @@ public:
         return;
       }
     }
+
+    for(size_t i = 0; i < sourceFeatures.size(); ++i)
+      (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
+
+    const std::vector<VWFeatureBase*>& targetFeatures = VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
     std::vector<bool>::const_iterator iterKeep;
     for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ; 
