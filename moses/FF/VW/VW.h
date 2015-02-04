@@ -163,15 +163,16 @@ public:
     std::vector<float> losses(translationOptionList.size());
     std::vector<float>::iterator iterLoss;
     TranslationOptionList::const_iterator iterTransOpt;
+    std::vector<bool>::const_iterator iterKeep;
 
     if (m_train) {
       // check which translation options are correct in advance
       bool seenCorrect = false;
-      for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ; 
-          iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
+      for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ;
+          iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss, ++iterKeep) {
         bool isCorrect = IsCorrectTranslationOption(**iterTransOpt);
         *iterLoss = isCorrect ? 0.0 : 1.0;
-        if (isCorrect) seenCorrect = true;
+        if (isCorrect && *iterKeep) seenCorrect = true;
       }
 
       // do not train if there are no positive examples
@@ -186,7 +187,6 @@ public:
 
     const std::vector<VWFeatureBase*>& targetFeatures = VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
-    std::vector<bool>::const_iterator iterKeep;
     for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ; 
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
 
