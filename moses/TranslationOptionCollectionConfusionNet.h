@@ -39,12 +39,12 @@ public:
 
   void ProcessUnknownWord(size_t sourcePos);
   void CreateTranslationOptions();
-  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-                                        , size_t startPosition
-                                        , size_t endPosition
-                                        , bool adhereTableLimit
-                                        , size_t graphInd);
 
+  bool 
+  CreateTranslationOptionsForRange
+  (const DecodeGraph &decodeStepList, size_t spos, size_t epos,
+   bool adhereTableLimit, size_t graphInd);
+  
 protected:
 
 };
