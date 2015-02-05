@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -88,9 +89,17 @@ protected:
   //! sort all trans opt in each list for cube pruning */
   void Sort();
 
+public:
+  // is there any good reason not to make these public? UG
+
   //! list of trans opt for a particular span
-  TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
-  const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
+  TranslationOptionList*
+  GetTranslationOptionList(size_t startPos, size_t endPos);
+
+  TranslationOptionList const* 
+  GetTranslationOptionList(size_t startPos, size_t endPos) const;
+
+protected:
   void Add(TranslationOption *translationOption);
 
   //! implemented by inherited class, called by this class
@@ -102,7 +111,7 @@ protected:
 
   void GetTargetPhraseCollectionBatch();
 
-  void CreateTranslationOptionsForRange(
+  bool CreateTranslationOptionsForRange(
     const DecodeGraph &decodeGraph
     , size_t startPos
     , size_t endPos
@@ -127,15 +136,20 @@ public:
 
   //! Create all possible translations from the phrase tables
   virtual void CreateTranslationOptions();
-  //! Create translation options that exactly cover a specific input span.
-  virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-      , size_t startPosition
-      , size_t endPosition
-      , bool adhereTableLimit
-      , size_t graphInd) = 0;
 
+  //! Create translation options that exactly cover a specific input span.
+  virtual 
+  bool 
+  CreateTranslationOptionsForRange
+  (const DecodeGraph &decodeStepList,
+   size_t startPosition, size_t endPosition,
+   bool adhereTableLimit, size_t graphInd) = 0;
+  
   //!Check if this range has XML options
-  virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
+  virtual 
+  bool 
+  HasXmlOptionsOverlappingRange(size_t startPosition, 
+				size_t endPosition) const;
 
   //! Check if a subsumed XML option constraint is satisfied
   virtual bool ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const;
@@ -150,7 +164,9 @@ public:
   }
 
   //! list of trans opt for a particular span
-  const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const {
+  TranslationOptionList const*
+  GetTranslationOptionList(const WordsRange &coverage) const 
+  {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 
