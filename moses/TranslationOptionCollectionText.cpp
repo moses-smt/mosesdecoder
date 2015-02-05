@@ -171,21 +171,18 @@ void TranslationOptionCollectionText::CreateTranslationOptions()
  * \param lastPos last position in input sentence
  * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
-void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
-  const DecodeGraph &decodeGraph
-  , size_t startPos
-  , size_t endPos
-  , bool adhereTableLimit
-  , size_t graphInd)
+bool
+TranslationOptionCollectionText::
+CreateTranslationOptionsForRange
+(const DecodeGraph &decodeGraph, size_t startPos, size_t endPos,
+ bool adhereTableLimit, size_t graphInd)
 {
   InputPath &inputPath = GetInputPath(startPos, endPos);
-
-  TranslationOptionCollection::CreateTranslationOptionsForRange(decodeGraph
-      , startPos
-      , endPos
-      , adhereTableLimit
-      , graphInd
-      , inputPath);
+  
+  return 
+    TranslationOptionCollection::
+    CreateTranslationOptionsForRange
+    (decodeGraph, startPos, endPos, adhereTableLimit, graphInd, inputPath);
 }
 
 
