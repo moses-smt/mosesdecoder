@@ -28,6 +28,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/unordered_map.hpp>
 
 #include "ScoreFeature.h"
@@ -38,6 +39,7 @@
 #include "OutputFileStream.h"
 
 using namespace std;
+using namespace boost::algorithm;
 using namespace MosesTraining;
 
 namespace MosesTraining
@@ -904,10 +906,10 @@ void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors,
 
     bool l2rFlag = false;
     bool r2lFlag = false;
-    if (!key.substr(0,4).compare("L2R_")) {
+    if (starts_with(key, "L2R_")) {
       l2rFlag = true;
     }
-    if (!key.substr(0,4).compare("R2L_")) {
+    if (starts_with(key, "R2L_")) {
       r2lFlag = true;
     }
     if (!l2rFlag && !r2lFlag) {

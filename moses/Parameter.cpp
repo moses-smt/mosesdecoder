@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <boost/algorithm/string/predicate.hpp>
 #include "Parameter.h"
 #include "Util.h"
 #include "InputFileStream.h"
@@ -32,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/exception.hh"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -270,8 +272,9 @@ bool Parameter::isOption(const char* token)
   if (! token) return false;
   std::string tokenString(token);
   size_t length = tokenString.size();
-  if (length > 0 && tokenString.substr(0,1) != "-") return false;
-  if (length > 1 && tokenString.substr(1,1).find_first_not_of("0123456789") == 0) return true;
+  if (length <= 1) return false;
+  if (!starts_with(tokenString, "-")) return false;
+  if (tokenString.substr(1,1).find_first_not_of("0123456789") == 0) return true;
   return false;
 }
 
@@ -975,7 +978,7 @@ void Parameter::WeightOverwrite()
   for (size_t i = 0; i < toks.size(); ++i) {
     const string &tok = toks[i];
 
-    if (tok.substr(tok.size() - 1, 1) == "=") {
+    if (starts_with(tok, "=")) {
       // start of new feature
 
       if (name != "") {

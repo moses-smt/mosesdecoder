@@ -1,4 +1,5 @@
 #include <sstream>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "moses/FF/FFState.h"
 #include "LexicalReordering.h"
@@ -6,6 +7,7 @@
 #include "moses/StaticData.h"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -29,7 +31,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
       m_factorsE =Tokenize<FactorType>(args[1]);
     } else if (args[0] == "path") {
       m_filePath = args[1];
-    } else if (args[0].substr(0,7) == "sparse-") {
+    } else if (starts_with(args[0], "sparse-")) {
       sparseArgs[args[0].substr(7)] = args[1];
     } else if (args[0] == "default-scores") {
       vector<string> tokens = Tokenize(args[1],",");

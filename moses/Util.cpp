@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <iomanip>
+#include <boost/algorithm/string/predicate.hpp>
 #include "TypeDef.h"
 #include "Util.h"
 #include "Timer.h"
@@ -42,6 +43,7 @@
 #include "moses/StaticData.h"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -54,7 +56,7 @@ string GetTempFolder()
 #ifdef _WIN32
   char *tmpPath = getenv("TMP");
   string str(tmpPath);
-  if (str.substr(str.size() - 1, 1) != "\\")
+  if (!ends_with(str, "\\"))
     str += "\\";
   return str;
 #else

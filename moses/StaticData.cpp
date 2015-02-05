@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <string>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "moses/FF/Factory.h"
 #include "TypeDef.h"
@@ -50,6 +51,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -1176,7 +1178,7 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
   for (size_t i = 0; i < toks.size(); ++i) {
     const string &tok = toks[i];
 
-    if (tok.substr(tok.size() - 1, 1) == "=") {
+    if (ends_with(tok, "=")) {
       // start of new feature
 
       if (name != "") {

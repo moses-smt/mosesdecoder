@@ -1,5 +1,6 @@
 // $Id$
 #include <vector>
+#include <boost/algorithm/string/predicate.hpp>
 #include "util/exception.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
@@ -7,6 +8,7 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -87,7 +89,7 @@ void ScoreComponentCollection::MultiplyEquals(const FeatureFunction* sp, float s
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
     std::stringstream name;
     name << i->first;
-    if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
+    if (starts_with(name.str(), prefix))
       m_scores[i->first] = i->second * scalar;
   }
 }
@@ -100,7 +102,7 @@ size_t ScoreComponentCollection::GetNumberWeights(const FeatureFunction* sp)
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
     std::stringstream name;
     name << i->first;
-    if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
+    if (starts_with(name.str(), prefix))
       weights++;
   }
   return weights;
@@ -285,7 +287,7 @@ FVector ScoreComponentCollection::GetVectorForProducer(const FeatureFunction* sp
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
     std::stringstream name;
     name << i->first;
-    if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
+    if (starts_with(name.str(), prefix))
       fv[i->first] = i->second;
   }
   return fv;
