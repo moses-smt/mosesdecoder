@@ -470,7 +470,7 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
     } else if (name == "lazyken") {
       lazy = boost::lexical_cast<bool>(value);
     } else {
-      // pass to bases class to interpret
+      // pass to base class to interpret
       line << " " << name << "=" << value;
     }
   }
