@@ -23,7 +23,9 @@
 
 #include <string>
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace PCFG
 {
@@ -33,6 +35,7 @@ struct Options {
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

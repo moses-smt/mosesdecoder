@@ -12,8 +12,10 @@
 #include "util/file_piece.hh"
 #include "util/file.hh"
 #include "vocabid.hh"
+#define API_VERSION 3
 
-void createProbingPT(const char * phrasetable_path, const char * target_path);
+void createProbingPT(const char * phrasetable_path, const char * target_path,
+    const char * num_scores, const char * is_reordering);
 
 class BinaryFileWriter {
     std::vector<unsigned char> binfile;

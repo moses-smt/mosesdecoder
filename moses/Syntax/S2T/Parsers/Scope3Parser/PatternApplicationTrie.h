@@ -19,7 +19,7 @@ struct PatternApplicationTrie;
 typedef std::vector<const PatternApplicationTrie*> PatternApplicationKey;
 
 struct PatternApplicationTrie {
- public:
+public:
   PatternApplicationTrie(int start, int end, const RuleTrieScope3::Node &node,
                          const PVertex *pvertex, PatternApplicationTrie *parent)
     : m_start(start)
@@ -36,8 +36,12 @@ struct PatternApplicationTrie {
 
   int Depth() const;
 
-  bool IsGapNode() const { return m_end == -1; }
-  bool IsTerminalNode() const { return m_end != -1; }
+  bool IsGapNode() const {
+    return m_end == -1;
+  }
+  bool IsTerminalNode() const {
+    return m_end != -1;
+  }
 
   const PatternApplicationTrie *GetHighestTerminalNode() const;
   const PatternApplicationTrie *GetLowestTerminalNode() const;

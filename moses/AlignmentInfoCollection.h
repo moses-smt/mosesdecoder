@@ -46,14 +46,13 @@ public:
     * contains such an object then returns a pointer to it; otherwise a new
     * one is inserted.
    */
- private:
+private:
   const AlignmentInfo* Add(AlignmentInfo const& ainfo);
 
- public:
+public:
   template<typename ALNREP>
-  AlignmentInfo const * 
-  Add(ALNREP const & aln)
-  {
+  AlignmentInfo const *
+  Add(ALNREP const & aln) {
     return this->Add(AlignmentInfo(aln));
   }
 

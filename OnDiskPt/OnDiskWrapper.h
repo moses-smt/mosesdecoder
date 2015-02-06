@@ -61,10 +61,12 @@ public:
                  , int numSourceFactors, int	numTargetFactors, int numScores);
   void EndSave();
 
-  Vocab &GetVocab()
-  { return m_vocab; }
-  const Vocab &GetVocab() const
-  { return m_vocab; }
+  Vocab &GetVocab() {
+    return m_vocab;
+  }
+  const Vocab &GetVocab() const {
+    return m_vocab;
+  }
 
   size_t GetSourceWordSize() const;
   size_t GetTargetWordSize() const;

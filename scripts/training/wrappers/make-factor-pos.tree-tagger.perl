@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 
 use strict;
 
@@ -22,7 +22,7 @@ my $MODEL = undef;
 $MODEL = "english" if $LANGUAGE eq "en";
 $MODEL = "french-utf8" if $LANGUAGE eq "fr";
 $MODEL = "spanish" if $LANGUAGE eq "es";
-$MODEL = "german" if $LANGUAGE eq "de";
+$MODEL = "german-utf8" if $LANGUAGE eq "de";
 $MODEL = "italian-utf8" if $LANGUAGE eq "it";
 $MODEL = "dutch" if $LANGUAGE eq "nl";
 $MODEL = "bulgarian-utf8" if $LANGUAGE eq "bg";

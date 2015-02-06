@@ -56,19 +56,15 @@ public:
     m_transOptRange(transOptRange) {
     m_totalWeightDistortion = 0;
     const StaticData &staticData = StaticData::Instance();
-    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-    std::vector<FeatureFunction*>::const_iterator iter;
-    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-      const FeatureFunction *ff = *iter;
 
-      const DistortionScoreProducer *model = dynamic_cast<const DistortionScoreProducer*>(ff);
-      if (model) {
-        float weight =staticData.GetAllWeights().GetScoreForProducer(model);
-        m_totalWeightDistortion += weight;
-      }
+    const std::vector<const DistortionScoreProducer*> &ffs = DistortionScoreProducer::GetDistortionFeatureFunctions();
+    std::vector<const DistortionScoreProducer*>::const_iterator iter;
+    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+      const DistortionScoreProducer *ff = *iter;
+
+      float weight =staticData.GetAllWeights().GetScoreForProducer(ff);
+      m_totalWeightDistortion += weight;
     }
-  
-      
   }
 
   const WordsRange* m_transOptRange;
@@ -166,16 +162,16 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 
   if (m_translations.size() > 1) {
     UTIL_THROW_IF2(m_translations.Get(0)->GetFutureScore() < m_translations.Get(1)->GetFutureScore(),
-		   "Non-monotonic future score: " 
-		   << m_translations.Get(0)->GetFutureScore() << " vs. " 
-		   << m_translations.Get(1)->GetFutureScore());
+                   "Non-monotonic future score: "
+                   << m_translations.Get(0)->GetFutureScore() << " vs. "
+                   << m_translations.Get(1)->GetFutureScore());
   }
 
   if (m_hypotheses.size() > 1) {
     UTIL_THROW_IF2(m_hypotheses[0]->GetTotalScore() < m_hypotheses[1]->GetTotalScore(),
-		   "Non-monotonic total score" 
-		   << m_hypotheses[0]->GetTotalScore() << " vs. "
-		   << m_hypotheses[1]->GetTotalScore());
+                   "Non-monotonic total score"
+                   << m_hypotheses[0]->GetTotalScore() << " vs. "
+                   << m_hypotheses[1]->GetTotalScore());
   }
 
   HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
@@ -223,7 +219,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 bool
 BackwardsEdge::SeenPosition(const size_t x, const size_t y)
 {
-  std::set< int >::iterator iter = m_seenPosition.find((x<<16) + y);
+  boost::unordered_set< int >::iterator iter = m_seenPosition.find((x<<16) + y);
   return (iter != m_seenPosition.end());
 }
 
@@ -450,9 +446,9 @@ BitmapContainer::ProcessBestHypothesis()
   if (!Empty()) {
     HypothesisQueueItem *check = Dequeue(true);
     UTIL_THROW_IF2(item->GetHypothesis()->GetTotalScore() < check->GetHypothesis()->GetTotalScore(),
-		   "Non-monotonic total score: "
-		   << item->GetHypothesis()->GetTotalScore() << " vs. "
-		   << check->GetHypothesis()->GetTotalScore());
+                   "Non-monotonic total score: "
+                   << item->GetHypothesis()->GetTotalScore() << " vs. "
+                   << check->GetHypothesis()->GetTotalScore());
   }
 
   // Logging for the criminally insane

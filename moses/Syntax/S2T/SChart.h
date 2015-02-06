@@ -19,11 +19,10 @@ namespace S2T
 
 class SChart
 {
- public:
-  struct Cell
-  {
+public:
+  struct Cell {
     typedef boost::unordered_map<Word, SVertexStack, SymbolHasher,
-                                 SymbolEqualityPred> TMap;
+            SymbolEqualityPred> TMap;
     typedef NonTerminalMap<SVertexStack> NMap;
     TMap terminalStacks;
     NMap nonTerminalStacks;
@@ -31,7 +30,9 @@ class SChart
 
   SChart(std::size_t width);
 
-  std::size_t GetWidth() const { return m_cells.size(); }
+  std::size_t GetWidth() const {
+    return m_cells.size();
+  }
 
   const Cell &GetCell(std::size_t start, std::size_t end) const {
     return m_cells[start][end];
@@ -41,7 +42,7 @@ class SChart
     return m_cells[start][end];
   }
 
- private:
+private:
   std::vector<std::vector<Cell> > m_cells;
 };
 

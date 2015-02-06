@@ -21,7 +21,8 @@
 
 #include <cassert>
 
-namespace Moses {
+namespace MosesTraining {
+namespace Syntax {
 namespace PCFG {
 
 TreeScorer::TreeScorer(const Pcfg &pcfg, const Vocabulary &non_term_vocab)
@@ -65,4 +66,5 @@ bool TreeScorer::Score(PcfgTree &root) const {
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

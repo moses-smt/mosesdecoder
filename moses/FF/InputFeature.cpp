@@ -18,14 +18,14 @@ InputFeature::InputFeature(const std::string &line)
 {
   m_numInputScores = this->m_numScoreComponents;
   ReadParameters();
-  
+
   UTIL_THROW_IF2(s_instance, "Can only have 1 input feature");
   s_instance = this;
 }
 
 void InputFeature::Load()
 {
-  
+
   const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];
   const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
 
@@ -45,11 +45,11 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 }
 
 void InputFeature::EvaluateWithSourceContext(const InputType &input
-                            , const InputPath &inputPath
-                            , const TargetPhrase &targetPhrase
-                            , const StackVec *stackVec
-                            , ScoreComponentCollection &scoreBreakdown
-                            , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedFutureScore) const
 {
   if (m_legacy) {
     //binary phrase-table does input feature itself

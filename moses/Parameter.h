@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include "TypeDef.h"
+#include "Util.h"
 
 namespace Moses
 {
@@ -73,6 +74,7 @@ protected:
   void ConvertWeightArgsLM();
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsPhrasePenalty();
   void ConvertWeightArgsWordPenalty();
   void ConvertPhrasePenalty();
   void CreateWeightsMap();
@@ -90,33 +92,18 @@ public:
   void Explain();
 
   /** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */
-  const PARAM_VEC &GetParam(const std::string &paramName);
+  const PARAM_VEC *GetParam(const std::string &paramName) const;
 
   /** check if parameter is defined (either in moses.ini or as switch) */
   bool isParamSpecified(const std::string &paramName) const {
     return  m_setting.find( paramName ) != m_setting.end();
   }
 
-  const std::string GetFullName(std::string abbr) {
-    return m_fullname[abbr];
-  }
-
-  const std::string GetAbbreviation(std::string full) {
-    return m_abbreviation[full];
-  }
-  const PARAM_VEC &GetParamShortName(const std::string &paramName) {
-    return GetParam(GetFullName(paramName));
-  }
-
   void OverwriteParam(const std::string &paramName, PARAM_VEC values);
-
-  void OverwriteParamShortName(const std::string &paramShortName, PARAM_VEC values) {
-    OverwriteParam(GetFullName(paramShortName),values);
-  }
 
   std::vector<float> GetWeights(const std::string &name);
   std::map<std::string, std::vector<float> > GetAllWeights() const {
-      return m_weights;
+    return m_weights;
   }
   std::set<std::string> GetWeightNames() const;
 
@@ -125,7 +112,21 @@ public:
   }
 
   void Save(const std::string path);
+
+  template<typename T>
+  void SetParameter(T &var, const std::string &name, const T &defaultValue) const {
+    const PARAM_VEC *params = GetParam(name);
+    if (params && params->size()) {
+      var = Scan<T>( params->at(0));
+    } else {
+      var = defaultValue;
+    }
+  }
+
 };
+
+template<>
+void Parameter::SetParameter<bool>(bool &var, const std::string &name, const bool &defaultValue) const;
 
 }
 

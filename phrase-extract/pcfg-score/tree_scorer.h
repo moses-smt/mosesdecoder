@@ -25,7 +25,9 @@
 #include "pcfg-common/pcfg_tree.h"
 #include "pcfg-common/typedef.h"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace PCFG
 {
@@ -45,6 +47,7 @@ private:
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

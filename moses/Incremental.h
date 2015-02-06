@@ -7,6 +7,8 @@
 #include "moses/ChartCellCollection.h"
 #include "moses/ChartParser.h"
 
+#include "BaseManager.h"
+
 #include <vector>
 #include <string>
 
@@ -19,7 +21,7 @@ class LanguageModel;
 namespace Incremental
 {
 
-class Manager
+class Manager : public BaseManager
 {
 public:
   Manager(const InputType &source);
@@ -28,17 +30,38 @@ public:
 
   template <class Model> void LMCallback(const Model &model, const std::vector<lm::WordIndex> &words);
 
-  const std::vector<search::Applied> &ProcessSentence();
+  void Decode();
+
+  const std::vector<search::Applied> &GetNBest() const;
 
   // Call to get the same value as ProcessSentence returned.
   const std::vector<search::Applied> &Completed() const {
     return *completed_nbest_;
   }
 
+  // output
+  void OutputBest(OutputCollector *collector) const;
+  void OutputNBest(OutputCollector *collector) const;
+  void OutputDetailedTranslationReport(OutputCollector *collector) const;
+  void OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const;
+  void OutputLatticeSamples(OutputCollector *collector) const {
+  }
+  void OutputAlignment(OutputCollector *collector) const {
+  }
+  void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const;
+  void OutputWordGraph(OutputCollector *collector) const {
+  }
+  void OutputSearchGraph(OutputCollector *collector) const {
+  }
+  void OutputSearchGraphSLF() const {
+  }
+  void OutputSearchGraphHypergraph() const {
+  }
+
+
 private:
   template <class Model, class Best> search::History PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out);
 
-  const InputType &source_;
   ChartCellCollectionBase cells_;
   ChartParser parser_;
 
@@ -51,6 +74,39 @@ private:
   search::NBest n_best_;
 
   const std::vector<search::Applied> *completed_nbest_;
+
+  // outputs
+  void OutputDetailedTranslationReport(
+    OutputCollector *collector,
+    const search::Applied *applied,
+    const Sentence &sentence,
+    long translationId) const;
+  void OutputTranslationOptions(std::ostream &out,
+                                ApplicationContext &applicationContext,
+                                const search::Applied *applied,
+                                const Sentence &sentence,
+                                long translationId) const;
+  void OutputTranslationOption(std::ostream &out,
+                               ApplicationContext &applicationContext,
+                               const search::Applied *applied,
+                               const Sentence &sentence,
+                               long translationId) const;
+  void ReconstructApplicationContext(const search::Applied *applied,
+                                     const Sentence &sentence,
+                                     ApplicationContext &context) const;
+  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
+      ApplicationContext &applicationContext,
+      const search::Applied *applied,
+      const Sentence &sentence,
+      long translationId) const;
+  void OutputBestHypo(OutputCollector *collector, search::Applied applied, long translationId) const;
+  void OutputBestNone(OutputCollector *collector, long translationId) const;
+
+  void OutputUnknowns(OutputCollector *collector) const {
+  }
+  void CalcDecoderStatistics() const {
+  }
+
 };
 
 // Just get the phrase.

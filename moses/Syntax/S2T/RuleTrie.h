@@ -20,12 +20,12 @@ namespace S2T
 // Base class for parser-specific trie types.
 class RuleTrie : public RuleTable
 {
- public:
+public:
   RuleTrie(const RuleTableFF *ff) : RuleTable(ff) {}
 
   virtual bool HasPreterminalRule(const Word &) const = 0;
 
- private:
+private:
   friend class RuleTrieCreator;
 
   virtual TargetPhraseCollection &GetOrCreateTargetPhraseCollection(

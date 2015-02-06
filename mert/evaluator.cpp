@@ -43,7 +43,8 @@ private:
 };
 
 // load hypothesis from candidate output
-vector<ScoreStats> EvaluatorUtil::loadCand(const string& candFile) {
+vector<ScoreStats> EvaluatorUtil::loadCand(const string& candFile)
+{
 
   ifstream cand(candFile.c_str());
   if (!cand.good()) throw runtime_error("Error opening candidate file");
@@ -61,7 +62,8 @@ vector<ScoreStats> EvaluatorUtil::loadCand(const string& candFile) {
 }
 
 // load 1-best hypothesis from n-best file (useful if relying on alignment/tree information)
-vector<ScoreStats> EvaluatorUtil::loadNBest(const string& nBestFile) {
+vector<ScoreStats> EvaluatorUtil::loadNBest(const string& nBestFile)
+{
   vector<ScoreStats> entries;
 
   Data data(g_scorer);
@@ -81,8 +83,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap, bool nbest_i
 
   if (nbest_input) {
     entries = loadNBest(candFile);
-  }
-  else {
+  } else {
     entries = loadCand(candFile);
   }
 

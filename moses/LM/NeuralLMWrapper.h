@@ -4,8 +4,9 @@
 
 #include <boost/thread/tss.hpp>
 
-namespace nplm {
-  class neuralLM;
+namespace nplm
+{
+class neuralLM;
 }
 
 namespace Moses

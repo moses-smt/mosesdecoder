@@ -439,7 +439,7 @@ extract-settings = "--MinHoleSource 1 --NonTermConsecSource"
 
 ### settings for rule scoring
 #
-score-settings = "--GoodTuring"
+score-settings = "--GoodTuring --MinScore 2:0.0001"
 
 ### include word alignment in phrase table
 #

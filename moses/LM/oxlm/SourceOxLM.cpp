@@ -7,17 +7,20 @@
 using namespace std;
 using namespace oxlm;
 
-namespace Moses {
+namespace Moses
+{
 
 SourceOxLM::SourceOxLM(const string &line)
-    : BilingualLM(line), posBackOff(false), posFactorType(1),
-      persistentCache(false), cacheHits(0), totalHits(0) {
-        FactorCollection& factorFactory = FactorCollection::Instance(); // To add null word.
-        const Factor* NULL_factor = factorFactory.AddFactor("<unk>");
-        NULL_word.SetFactor(0, NULL_factor);
-      }
+  : BilingualLM(line), posBackOff(false), posFactorType(1),
+    persistentCache(false), cacheHits(0), totalHits(0)
+{
+  FactorCollection& factorFactory = FactorCollection::Instance(); // To add null word.
+  const Factor* NULL_factor = factorFactory.AddFactor("<unk>");
+  NULL_word.SetFactor(0, NULL_factor);
+}
 
-SourceOxLM::~SourceOxLM() {
+SourceOxLM::~SourceOxLM()
+{
   if (persistentCache) {
     double cache_hit_ratio = 100.0 * cacheHits / totalHits;
     cerr << "Cache hit ratio: " << cache_hit_ratio << endl;
@@ -25,8 +28,9 @@ SourceOxLM::~SourceOxLM() {
 }
 
 float SourceOxLM::Score(
-    vector<int>& source_words,
-    vector<int>& target_words) const {
+  vector<int>& source_words,
+  vector<int>& target_words) const
+{
   // OxLM expects the context in the following format:
   // [t_{n-1}, t_{n-2}, ..., t_{n-m}, s_{a_n-sm}, s_{a_n-sm+1}, ..., s_{a_n+sm}]
   // where n is the index for the current target word, m is the target order,
@@ -61,15 +65,18 @@ float SourceOxLM::Score(
   return score;
 }
 
-int SourceOxLM::getNeuralLMId(const Word& word, bool is_source_word) const {
+int SourceOxLM::getNeuralLMId(const Word& word, bool is_source_word) const
+{
   return is_source_word ? mapper->convertSource(word) : mapper->convert(word);
 }
 
-const Word& SourceOxLM::getNullWord() const {
+const Word& SourceOxLM::getNullWord() const
+{
   return NULL_word;
 }
 
-void SourceOxLM::loadModel() {
+void SourceOxLM::loadModel()
+{
   model.load(m_filePath);
 
   boost::shared_ptr<ModelData> config = model.getConfig();
@@ -78,10 +85,11 @@ void SourceOxLM::loadModel() {
 
   boost::shared_ptr<Vocabulary> vocab = model.getVocab();
   mapper = boost::make_shared<OxLMParallelMapper>(
-      vocab, posBackOff, posFactorType);
+             vocab, posBackOff, posFactorType);
 }
 
-void SourceOxLM::SetParameter(const string& key, const string& value) {
+void SourceOxLM::SetParameter(const string& key, const string& value)
+{
   if (key == "persistent-cache") {
     persistentCache = Scan<bool>(value);
   } else if (key == "pos-back-off") {
@@ -93,7 +101,8 @@ void SourceOxLM::SetParameter(const string& key, const string& value) {
   }
 }
 
-void SourceOxLM::InitializeForInput(const InputType& source) {
+void SourceOxLM::InitializeForInput(const InputType& source)
+{
   BilingualLM::InitializeForInput(source);
 
   if (persistentCache) {
@@ -116,7 +125,8 @@ void SourceOxLM::InitializeForInput(const InputType& source) {
   }
 }
 
-void SourceOxLM::CleanUpAfterSentenceProcessing(const InputType& source) {
+void SourceOxLM::CleanUpAfterSentenceProcessing(const InputType& source)
+{
   // Thread safe: the model cache is thread specific.
   model.clearCache();
 

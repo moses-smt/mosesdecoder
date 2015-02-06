@@ -64,8 +64,4 @@ namespace Moses
     size_t SelectNBest(size_t const N);
     size_t PruneByThreshold(float const th);
 
-    TO_STRING();
-    
-  };
-  
 }

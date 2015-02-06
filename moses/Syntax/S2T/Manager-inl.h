@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <sstream>
+
 #include "moses/DecodeGraph.h"
 #include "moses/StaticData.h"
 #include "moses/Syntax/BoundedPriorityContainer.h"
@@ -13,6 +16,7 @@
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
 
+#include "DerivationWriter.h"
 #include "OovHandler.h"
 #include "PChart.h"
 #include "RuleTrie.h"
@@ -27,9 +31,9 @@ namespace S2T
 
 template<typename Parser>
 Manager<Parser>::Manager(const InputType &source)
-    : m_source(source)
-    , m_pchart(source.GetSize(), Parser::RequiresCompressedChart())
-    , m_schart(source.GetSize())
+  : Syntax::Manager(source)
+  , m_pchart(source.GetSize(), Parser::RequiresCompressedChart())
+  , m_schart(source.GetSize())
 {
 }
 
@@ -41,7 +45,7 @@ void Manager<Parser>::InitializeCharts()
     const Word &terminal = m_source.GetWord(i);
 
     // PVertex
-    PVertex tmp(WordsRange(i,i), m_source.GetWord(i));
+    PVertex tmp(WordsRange(i,i), terminal);
     PVertex &pvertex = m_pchart.AddVertex(tmp);
 
     // SVertex
@@ -96,7 +100,7 @@ void Manager<Parser>::InitializeParsers(PChart &pchart,
     m_oovRuleTrie = oovHandler.SynthesizeRuleTrie(m_oovs.begin(), m_oovs.end());
     // Create a parser for the OOV rule trie.
     boost::shared_ptr<Parser> parser(
-        new Parser(pchart, *m_oovRuleTrie, maxOovWidth));
+      new Parser(pchart, *m_oovRuleTrie, maxOovWidth));
     m_parsers.push_back(parser);
   }
 }
@@ -193,14 +197,14 @@ void Manager<Parser>::Decode()
 
       // Retrieve the (pruned) set of SHyperedgeBundles from the callback.
       const BoundedPriorityContainer<SHyperedgeBundle> &bundles =
-          callback.GetContainer();
+        callback.GetContainer();
 
       // Use cube pruning to extract SHyperedges from SHyperedgeBundles.
       // Collect the SHyperedges into buffers, one for each category.
       CubeQueue cubeQueue(bundles.Begin(), bundles.End());
       std::size_t count = 0;
       typedef boost::unordered_map<Word, std::vector<SHyperedge*>,
-                                   SymbolHasher, SymbolEqualityPred > BufferMap;
+              SymbolHasher, SymbolEqualityPred > BufferMap;
       BufferMap buffers;
       while (count < popLimit && !cubeQueue.IsEmpty()) {
         SHyperedge *hyperedge = cubeQueue.Pop();
@@ -211,7 +215,7 @@ void Manager<Parser>::Decode()
         // happens during cube pruning).  The cube pruning code doesn't (and
         // shouldn't) know about the contents of PChart and so creation of
         // the PVertex is deferred until this point.
-        const Word &lhs = hyperedge->translation->GetTargetLHS();
+        const Word &lhs = hyperedge->label.translation->GetTargetLHS();
         hyperedge->head->pvertex = &m_pchart.AddVertex(PVertex(range, lhs));
         // END{HACK}
         buffers[lhs].push_back(hyperedge);
@@ -224,7 +228,7 @@ void Manager<Parser>::Decode()
         const Word &category = p->first;
         const std::vector<SHyperedge*> &buffer = p->second;
         std::pair<SChart::Cell::NMap::Iterator, bool> ret =
-            scell.nonTerminalStacks.Insert(category, SVertexStack());
+          scell.nonTerminalStacks.Insert(category, SVertexStack());
         assert(ret.second);
         SVertexStack &stack = ret.first->second;
         RecombineAndSort(buffer, stack);
@@ -259,14 +263,15 @@ const SHyperedge *Manager<Parser>::GetBestSHyperedge() const
   }
   assert(stacks.Size() == 1);
   const std::vector<boost::shared_ptr<SVertex> > &stack = stacks.Begin()->second;
+  // TODO Throw exception if stack is empty?  Or return 0?
   return stack[0]->best;
 }
 
 template<typename Parser>
 void Manager<Parser>::ExtractKBest(
-    std::size_t k,
-    std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
-    bool onlyDistinct) const
+  std::size_t k,
+  std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
+  bool onlyDistinct) const
 {
   kBestList.clear();
   if (k == 0 || m_source.GetSize() == 0) {
@@ -281,6 +286,7 @@ void Manager<Parser>::ExtractKBest(
   }
   assert(stacks.Size() == 1);
   const std::vector<boost::shared_ptr<SVertex> > &stack = stacks.Begin()->second;
+  // TODO Throw exception if stack is empty?  Or return 0?
 
   KBestExtractor extractor;
 
@@ -320,18 +326,18 @@ template<typename Parser>
 void Manager<Parser>::PrunePChart(const SChart::Cell &scell,
                                   PChart::Cell &pcell)
 {
-/* FIXME
-  PChart::Cell::VertexMap::iterator p = pcell.vertices.begin();
-  while (p != pcell.vertices.end()) {
-    const Word &category = p->first;
-    if (scell.stacks.find(category) == scell.stacks.end()) {
-      PChart::Cell::VertexMap::iterator q = p++;
-      pcell.vertices.erase(q);
-    } else {
-      ++p;
+  /* FIXME
+    PChart::Cell::VertexMap::iterator p = pcell.vertices.begin();
+    while (p != pcell.vertices.end()) {
+      const Word &category = p->first;
+      if (scell.stacks.find(category) == scell.stacks.end()) {
+        PChart::Cell::VertexMap::iterator q = p++;
+        pcell.vertices.erase(q);
+      } else {
+        ++p;
+      }
     }
-  }
-*/
+  */
 }
 
 template<typename Parser>
@@ -359,7 +365,7 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
     // Compare the score of h against the score of the best incoming hyperedge
     // for the stored vertex.
     SVertex *storedVertex = result.first->second;
-    if (h->score > storedVertex->best->score) {
+    if (h->label.score > storedVertex->best->label.score) {
       // h's score is better.
       storedVertex->recombined.push_back(storedVertex->best);
       storedVertex->best = h;
@@ -380,6 +386,20 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
 
   // Step 3: Sort the vertices in the stack.
   std::sort(stack.begin(), stack.end(), SVertexStackContentOrderer());
+}
+
+template<typename Parser>
+void Manager<Parser>::OutputDetailedTranslationReport(
+  OutputCollector *collector) const
+{
+  const SHyperedge *best = GetBestSHyperedge();
+  if (best == NULL || collector == NULL) {
+    return;
+  }
+  long translationId = m_source.GetTranslationId();
+  std::ostringstream out;
+  DerivationWriter::Write(*best, translationId, out);
+  collector->Write(translationId, out.str());
 }
 
 }  // S2T

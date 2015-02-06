@@ -35,7 +35,7 @@ PreProcessFilter::PreProcessFilter(const string& filterCommand)
     m_fromFilter(NULL)
 {
 #if defined __MINGW32__
-    //TODO(jie): replace this function with boost implementation
+  //TODO(jie): replace this function with boost implementation
 #else
   // Child error signal install
   // sigaction is the replacement for the traditional signal() method

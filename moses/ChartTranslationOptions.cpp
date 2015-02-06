@@ -51,6 +51,18 @@ ChartTranslationOptions::~ChartTranslationOptions()
 
 }
 
+//! functor to compare (chart) hypotheses by (descending) score
+class ChartTranslationOptionScoreOrderer
+{
+public:
+  bool operator()(const boost::shared_ptr<ChartTranslationOption> &transOptA
+                  , const boost::shared_ptr<ChartTranslationOption> &transOptB) const {
+    const ScoreComponentCollection &scoresA = transOptA->GetScores();
+    const ScoreComponentCollection &scoresB = transOptB->GetScores();
+    return scoresA.GetWeightedScore() > scoresB.GetWeightedScore();
+  }
+};
+
 void ChartTranslationOptions::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
   SetInputPath(&inputPath);
@@ -71,15 +83,23 @@ void ChartTranslationOptions::EvaluateWithSourceContext(const InputType &input, 
     ChartTranslationOption *transOpt = m_collection[i].get();
 
     if (transOpt->GetScores().GetWeightedScore() == - std::numeric_limits<float>::infinity()) {
-    	++numDiscard;
-    }
-    else if (numDiscard) {
-    	m_collection[i - numDiscard] = m_collection[i];
+      ++numDiscard;
+    } else if (numDiscard) {
+      m_collection[i - numDiscard] = m_collection[i];
     }
   }
 
   size_t newSize = m_collection.size() - numDiscard;
   m_collection.resize(newSize);
+
+  // sort if necessary
+  const StaticData &staticData = StaticData::Instance();
+  if (staticData.RequireSortingAfterSourceContext()) {
+    std::sort(m_collection.begin()
+              , m_collection.begin() + newSize
+              , ChartTranslationOptionScoreOrderer());
+  }
+
 }
 
 void ChartTranslationOptions::SetInputPath(const InputPath *inputPath)
@@ -135,12 +155,12 @@ void ChartTranslationOptions::CreateSourceRuleFromInputPath()
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptions &obj)
 {
-	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
-		const ChartTranslationOption &transOpt = *obj.m_collection[i];
-		out << transOpt << endl;
-	}
+  for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+    const ChartTranslationOption &transOpt = *obj.m_collection[i];
+    out << transOpt << endl;
+  }
 
-	return out;
+  return out;
 }
 
 }

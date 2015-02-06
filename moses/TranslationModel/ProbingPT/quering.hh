@@ -5,6 +5,8 @@
 #include "hash.hh" //Includes line splitter
 #include <sys/stat.h> //For finding size of file
 #include "vocabid.hh"
+#include <algorithm> //toLower
+#define API_VERSION 3
 
 
 char * read_binary_file(char * filename);
@@ -21,6 +23,8 @@ class QueryEngine {
 
     size_t binary_filesize;
     size_t table_filesize;
+    int num_scores;
+    bool is_reordering;
     public:
         QueryEngine (const char *);
         ~QueryEngine();

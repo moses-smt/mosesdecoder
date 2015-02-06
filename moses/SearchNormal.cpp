@@ -49,7 +49,7 @@ SearchNormal::~SearchNormal()
  * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
  */
-void SearchNormal::ProcessSentence()
+void SearchNormal::Decode()
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
@@ -397,13 +397,13 @@ void SearchNormal::OutputHypoStackSize()
 
 void SearchNormal::OutputHypoStack()
 {
-    // all stacks
-    int i = 0;
-    vector < HypothesisStack* >::iterator iterStack;
-    for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
-      HypothesisStackNormal &hypoColl = *static_cast<HypothesisStackNormal*>(*iterStack);
-      TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
-    }
+  // all stacks
+  int i = 0;
+  vector < HypothesisStack* >::iterator iterStack;
+  for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
+    HypothesisStackNormal &hypoColl = *static_cast<HypothesisStackNormal*>(*iterStack);
+    TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
+  }
 }
 
 }

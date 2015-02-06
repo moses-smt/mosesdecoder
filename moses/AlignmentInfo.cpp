@@ -21,6 +21,7 @@
 #include "AlignmentInfo.h"
 #include "TypeDef.h"
 #include "StaticData.h"
+#include "Util.h"
 #include "util/exception.hh"
 
 namespace Moses
@@ -38,6 +39,17 @@ AlignmentInfo::AlignmentInfo(const std::vector<unsigned char> &aln)
   for (size_t i = 0; i < aln.size(); i+= 2)
     m_collection.insert(std::make_pair(size_t(aln[i]),size_t(aln[i+1])));
   BuildNonTermIndexMaps();
+}
+
+AlignmentInfo::AlignmentInfo(const std::string &str)
+{
+  std::vector<std::string> points = Tokenize(str, " ");
+  std::vector<std::string>::const_iterator iter;
+  for (iter = points.begin(); iter != points.end(); iter++) {
+    std::vector<size_t> point = Tokenize<size_t>(*iter, "-");
+    UTIL_THROW_IF2(point.size() != 2, "Bad format of word alignment point: " << *iter);
+    Add(point[0], point[1]);
+  }
 }
 
 void AlignmentInfo::BuildNonTermIndexMaps()

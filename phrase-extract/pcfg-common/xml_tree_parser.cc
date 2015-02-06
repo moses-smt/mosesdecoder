@@ -19,25 +19,23 @@
 
 #include "xml_tree_parser.h"
 
-#include "exception.h"
+#include <cassert>
+#include <vector>
+
 #include "tables-core.h"
 #include "XmlException.h"
 #include "XmlTree.h"
 
-#include <cassert>
-#include <vector>
+#include "syntax-common/exception.h"
 
-using namespace MosesTraining;
-
-namespace Moses {
+namespace MosesTraining {
+namespace Syntax {
 namespace PCFG {
 
-XmlTreeParser::XmlTreeParser()
-{
+XmlTreeParser::XmlTreeParser() {
 }
 
-std::auto_ptr<PcfgTree> XmlTreeParser::Parse(const std::string &line)
-{
+std::auto_ptr<PcfgTree> XmlTreeParser::Parse(const std::string &line) {
   m_line = line;
   m_tree.Clear();
   try {
@@ -60,8 +58,7 @@ std::auto_ptr<PcfgTree> XmlTreeParser::Parse(const std::string &line)
 // Converts a SyntaxNode tree to a Moses::PCFG::PcfgTree.
 std::auto_ptr<PcfgTree> XmlTreeParser::ConvertTree(
     const SyntaxNode &tree,
-    const std::vector<std::string> &words)
-{
+    const std::vector<std::string> &words) {
   std::auto_ptr<PcfgTree> root(new PcfgTree(tree.GetLabel()));
   const std::vector<SyntaxNode*> &children = tree.GetChildren();
   if (children.empty()) {
@@ -87,4 +84,5 @@ std::auto_ptr<PcfgTree> XmlTreeParser::ConvertTree(
 }
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

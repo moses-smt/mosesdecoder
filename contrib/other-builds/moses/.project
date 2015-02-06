@@ -61,6 +61,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/AlignmentInfoTest.cpp</locationURI>
 		</link>
 		<link>
+			<name>BaseManager.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.cpp</locationURI>
+		</link>
+		<link>
+			<name>BaseManager.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.h</locationURI>
+		</link>
+		<link>
 			<name>BitmapContainer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.cpp</locationURI>
@@ -326,6 +336,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FloydWarshall.h</locationURI>
 		</link>
 		<link>
+			<name>ForestInput.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ForestInput.cpp</locationURI>
+		</link>
+		<link>
+			<name>ForestInput.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ForestInput.h</locationURI>
+		</link>
+		<link>
 			<name>GenerationDictionary.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/GenerationDictionary.cpp</locationURI>
@@ -571,16 +591,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Phrase.h</locationURI>
 		</link>
 		<link>
-			<name>PhraseOrientation.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseOrientation.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
-		</link>
-		<link>
 			<name>PrefixTree.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PrefixTree.h</locationURI>
@@ -761,6 +771,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TabbedSentence.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TabbedSentence.cpp</locationURI>
+		</link>
+		<link>
+			<name>TabbedSentence.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TabbedSentence.h</locationURI>
+		</link>
+		<link>
 			<name>TargetPhrase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetPhrase.cpp</locationURI>
@@ -936,16 +956,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/UniqueObject.h</locationURI>
 		</link>
 		<link>
-			<name>UserMessage.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/UserMessage.cpp</locationURI>
-		</link>
-		<link>
-			<name>UserMessage.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/UserMessage.h</locationURI>
-		</link>
-		<link>
 			<name>Util.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Util.cpp</locationURI>
@@ -1007,6 +1017,11 @@
 		</link>
 		<link>
 			<name>bin</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>extract-ghkm</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1104,6 +1119,16 @@
 			<name>FF/DistortionScoreProducer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.h</locationURI>
+		</link>
+		<link>
+			<name>FF/DynamicCacheBasedLanguageModel.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DynamicCacheBasedLanguageModel.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/DynamicCacheBasedLanguageModel.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DynamicCacheBasedLanguageModel.h</locationURI>
 		</link>
 		<link>
 			<name>FF/ExternalFeature.cpp</name>
@@ -1469,6 +1494,16 @@
 			<name>FF/TreeStructureFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TreeStructureFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/UnalignedWordCountFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/UnalignedWordCountFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/UnalignedWordCountFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/UnalignedWordCountFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/UnknownWordPenaltyProducer.cpp</name>
@@ -1841,6 +1876,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/CubeQueue.h</locationURI>
 		</link>
 		<link>
+			<name>Syntax/F2S</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>Syntax/KBestExtractor.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/KBestExtractor.cpp</locationURI>
@@ -1849,6 +1889,16 @@
 			<name>Syntax/KBestExtractor.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/KBestExtractor.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/Manager.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/Manager.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/Manager.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/Manager.h</locationURI>
 		</link>
 		<link>
 			<name>Syntax/NonTerminalMap.h</name>
@@ -1936,6 +1986,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SymbolHasher.h</locationURI>
 		</link>
 		<link>
+			<name>Syntax/T2S</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/BilingualDynSuffixArray.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.cpp</locationURI>
@@ -1994,6 +2049,16 @@
 			<name>TranslationModel/PhraseDictionaryDynSuffixArray.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryDynamicCacheBased.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynamicCacheBased.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryDynamicCacheBased.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/PhraseDictionaryMemory.cpp</name>
@@ -2136,6 +2201,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/lm.log</locationURI>
 		</link>
 		<link>
+			<name>extract-ghkm/PhraseOrientation.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.cpp</locationURI>
+		</link>
+		<link>
+			<name>extract-ghkm/PhraseOrientation.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
+		</link>
+		<link>
 			<name>FF/LexicalReordering/LexicalReordering.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReordering.cpp</locationURI>
@@ -2276,6 +2351,141 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/SourceOxLM.h</locationURI>
 		</link>
 		<link>
+			<name>Syntax/F2S/DerivationWriter.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/DerivationWriter.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/DerivationWriter.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/DerivationWriter.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/Forest.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/Forest.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/Forest.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/Forest.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/GlueRuleSynthesizer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/GlueRuleSynthesizer.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/GlueRuleSynthesizer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/GlueRuleSynthesizer.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperPath.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperPath.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperPath.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperPath.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperPathLoader.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperPathLoader.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperPathLoader.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperPathLoader.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperTree.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperTree.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperTree.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperTreeCreator.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperTreeCreator.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperTreeLoader.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperTreeLoader.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/HyperTreeLoader.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/HyperTreeLoader.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/Manager-inl.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/Manager-inl.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/Manager.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/Manager.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/PHyperedgeToSHyperedgeBundle.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/PHyperedgeToSHyperedgeBundle.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/PVertexToStackMap.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/PVertexToStackMap.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/RuleMatcher.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/RuleMatcher.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/RuleMatcherCallback.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/RuleMatcherCallback.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/RuleMatcherHyperTree-inl.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/RuleMatcherHyperTree-inl.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/RuleMatcherHyperTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/RuleMatcherHyperTree.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/TopologicalSorter.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/TopologicalSorter.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/TopologicalSorter.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/TopologicalSorter.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/TreeFragmentTokenizer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/TreeFragmentTokenizer.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/F2S/TreeFragmentTokenizer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/F2S/TreeFragmentTokenizer.h</locationURI>
+		</link>
+		<link>
 			<name>Syntax/S2T/DerivationWriter.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/DerivationWriter.cpp</locationURI>
@@ -2379,6 +2589,96 @@
 			<name>Syntax/S2T/SChart.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/SChart.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/GlueRuleSynthesizer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/GlueRuleSynthesizer.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/GlueRuleSynthesizer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/GlueRuleSynthesizer.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/HyperTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/HyperTree.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/InputTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/InputTree.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/InputTreeBuilder.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/InputTreeBuilder.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/InputTreeBuilder.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/InputTreeBuilder.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/InputTreeToForest.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/InputTreeToForest.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/InputTreeToForest.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/InputTreeToForest.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/Manager-inl.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/Manager-inl.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/Manager.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/Manager.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/RuleMatcher.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/RuleMatcher.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/RuleMatcherSCFG-inl.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/RuleMatcherSCFG-inl.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/RuleMatcherSCFG.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/RuleMatcherSCFG.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/RuleTrie.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/RuleTrie.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/RuleTrie.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/RuleTrie.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/RuleTrieCreator.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/RuleTrieCreator.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/RuleTrieLoader.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/RuleTrieLoader.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/T2S/RuleTrieLoader.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/T2S/RuleTrieLoader.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>

@@ -14,8 +14,8 @@ namespace Syntax
 
 // Extract the k-best list from the search graph.
 void KBestExtractor::Extract(
-    const std::vector<boost::shared_ptr<SVertex> > &topLevelVertices,
-    std::size_t k, KBestVec &kBestList)
+  const std::vector<boost::shared_ptr<SVertex> > &topLevelVertices,
+  std::size_t k, KBestVec &kBestList)
 {
   kBestList.clear();
   if (topLevelVertices.empty()) {
@@ -25,31 +25,32 @@ void KBestExtractor::Extract(
   // Create a new SVertex, supremeVertex, that has the best top-level SVertex as
   // its predecessor and has the same score.
   std::vector<boost::shared_ptr<SVertex> >::const_iterator p =
-      topLevelVertices.begin();
+    topLevelVertices.begin();
   SVertex &bestTopLevelVertex = **p;
   boost::scoped_ptr<SVertex> supremeVertex(new SVertex());
   supremeVertex->pvertex = 0;
   supremeVertex->best = new SHyperedge();
   supremeVertex->best->head = supremeVertex.get();
   supremeVertex->best->tail.push_back(&bestTopLevelVertex);
-  supremeVertex->best->score = bestTopLevelVertex.best->score;
-  supremeVertex->best->scoreBreakdown = bestTopLevelVertex.best->scoreBreakdown;
-  supremeVertex->best->translation = 0;
+  supremeVertex->best->label.score = bestTopLevelVertex.best->label.score;
+  supremeVertex->best->label.scoreBreakdown =
+      bestTopLevelVertex.best->label.scoreBreakdown;
+  supremeVertex->best->label.translation = 0;
 
   // For each alternative top-level SVertex, add a new incoming hyperedge to
   // supremeVertex.
   for (++p; p != topLevelVertices.end(); ++p) {
     // Check that the first item in topLevelVertices really was the best.
-    UTIL_THROW_IF2((*p)->best->score > bestTopLevelVertex.best->score,
+    UTIL_THROW_IF2((*p)->best->label.score > bestTopLevelVertex.best->label.score,
                    "top-level SVertices are not correctly sorted");
     // Note: there's no need for a smart pointer here: supremeVertex will take
     // ownership of altEdge.
     SHyperedge *altEdge = new SHyperedge();
     altEdge->head = supremeVertex.get();
     altEdge->tail.push_back((*p).get());
-    altEdge->score = (*p)->best->score;
-    altEdge->scoreBreakdown = (*p)->best->scoreBreakdown;
-    altEdge->translation = 0;
+    altEdge->label.score = (*p)->best->label.score;
+    altEdge->label.scoreBreakdown = (*p)->best->label.scoreBreakdown;
+    altEdge->label.translation = 0;
     supremeVertex->recombined.push_back(altEdge);
   }
 
@@ -61,8 +62,8 @@ void KBestExtractor::Extract(
   // each derivation.
   kBestList.reserve(targetVertex->kBestList.size());
   for (std::vector<boost::weak_ptr<Derivation> >::const_iterator
-        q = targetVertex->kBestList.begin();
-        q != targetVertex->kBestList.end(); ++q) {
+       q = targetVertex->kBestList.begin();
+       q != targetVertex->kBestList.end(); ++q) {
     const boost::shared_ptr<Derivation> d(*q);
     assert(d);
     assert(d->subderivations.size() == 1);
@@ -77,7 +78,7 @@ Phrase KBestExtractor::GetOutputPhrase(const Derivation &d)
 
   Phrase ret(ARRAY_SIZE_INCR);
 
-  const TargetPhrase &phrase = *(d.edge->shyperedge.translation);
+  const TargetPhrase &phrase = *(d.edge->shyperedge.label.translation);
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     phrase.GetAlignNonTerm().GetNonTermIndexMap();
   for (std::size_t pos = 0; pos < phrase.GetSize(); ++pos) {
@@ -94,24 +95,24 @@ Phrase KBestExtractor::GetOutputPhrase(const Derivation &d)
       }
       // FIXME
       UTIL_THROW2("placeholders are not currently supported by the S2T decoder");
-/*
-      std::set<std::size_t> sourcePosSet =
-        phrase.GetAlignTerm().GetAlignmentsForTarget(pos);
-      if (sourcePosSet.size() == 1) {
-        const std::vector<const Word*> *ruleSourceFromInputPath =
-          hypo.GetTranslationOption().GetSourceRuleFromInputPath();
-        UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
-                       "Source Words in of the rules hasn't been filled out");
-        std::size_t sourcePos = *sourcePosSet.begin();
-        const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
-        UTIL_THROW_IF2(sourceWord == NULL,
-                       "Null source word at position " << sourcePos);
-        const Factor *factor = sourceWord->GetFactor(placeholderFactor);
-        if (factor) {
-          ret.Back()[0] = factor;
-        }
-      }
-*/
+      /*
+            std::set<std::size_t> sourcePosSet =
+              phrase.GetAlignTerm().GetAlignmentsForTarget(pos);
+            if (sourcePosSet.size() == 1) {
+              const std::vector<const Word*> *ruleSourceFromInputPath =
+                hypo.GetTranslationOption().GetSourceRuleFromInputPath();
+              UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
+                             "Source Words in of the rules hasn't been filled out");
+              std::size_t sourcePos = *sourcePosSet.begin();
+              const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
+              UTIL_THROW_IF2(sourceWord == NULL,
+                             "Null source word at position " << sourcePos);
+              const Factor *factor = sourceWord->GetFactor(placeholderFactor);
+              if (factor) {
+                ret.Back()[0] = factor;
+              }
+            }
+      */
     }
   }
 
@@ -121,7 +122,7 @@ Phrase KBestExtractor::GetOutputPhrase(const Derivation &d)
 // Generate the target tree of the derivation d.
 TreePointer KBestExtractor::GetOutputTree(const Derivation &d)
 {
-  const TargetPhrase &phrase = *(d.edge->shyperedge.translation);
+  const TargetPhrase &phrase = *(d.edge->shyperedge.label.translation);
   if (const PhraseProperty *property = phrase.GetProperty("Tree")) {
     const std::string *tree = property->GetValueString();
     TreePointer mytree (boost::make_shared<InternalTree>(*tree));
@@ -140,8 +141,7 @@ TreePointer KBestExtractor::GetOutputTree(const Derivation &d)
 
     mytree->Combine(previous_trees);
     return mytree;
-  }
-  else {
+  } else {
     UTIL_THROW2("Error: TreeStructureFeature active, but no internal tree structure found");
   }
 }
@@ -180,7 +180,7 @@ KBestExtractor::FindOrCreateVertex(const SVertex &v)
   }
   boost::shared_ptr<Derivation> bestDerivation(new Derivation(bestEdge));
 #ifndef NDEBUG
-  std::pair<DerivationSet::iterator, bool> q = 
+  std::pair<DerivationSet::iterator, bool> q =
 #endif
     m_derivations.insert(bestDerivation);
   assert(q.second);
@@ -291,8 +291,8 @@ KBestExtractor::Derivation::Derivation(const boost::shared_ptr<KHyperedge> &e)
     boost::shared_ptr<Derivation> sub(pred.kBestList[0]);
     subderivations.push_back(sub);
   }
-  score = edge->shyperedge.score;
-  scoreBreakdown = edge->shyperedge.scoreBreakdown;
+  score = edge->shyperedge.label.score;
+  scoreBreakdown = edge->shyperedge.label.scoreBreakdown;
 }
 
 // Construct a Derivation that neighbours an existing Derivation.

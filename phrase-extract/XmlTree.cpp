@@ -356,8 +356,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
         if (startPos > endPos) {
           cerr << "ERROR: tag " << tagName << " startPos is bigger than endPos (" << startPos << "-" << endPos << "): " << line << endl;
           return false;
-        }
-        else if (startPos == endPos) {
+        } else if (startPos == endPos) {
           cerr << "WARNING: tag " << tagName << ". Ignoring 0 span (" << startPos << "-" << endPos << "): " << line << endl;
           continue;
         }

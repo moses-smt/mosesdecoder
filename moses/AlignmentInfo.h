@@ -41,6 +41,7 @@ class AlignmentInfo
   friend struct AlignmentInfoOrderer;
   friend struct AlignmentInfoHasher;
   friend class AlignmentInfoCollection;
+  friend class VW;
 
 public:
   typedef std::set<std::pair<size_t,size_t> > CollType;
@@ -95,6 +96,10 @@ private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection
   explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs);
   explicit AlignmentInfo(const std::vector<unsigned char> &aln);
+
+  // used only by VW to load word alignment between sentences
+  explicit AlignmentInfo(const std::string &str);
+
   void BuildNonTermIndexMaps();
 
   CollType m_collection;

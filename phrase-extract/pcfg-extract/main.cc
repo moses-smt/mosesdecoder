@@ -20,6 +20,6 @@
 #include "pcfg_extract.h"
 
 int main(int argc, char *argv[]) {
-  Moses::PCFG::PcfgExtract tool;
+  MosesTraining::Syntax::PCFG::PcfgExtract tool;
   return tool.Main(argc, argv);
 }

@@ -22,9 +22,12 @@ struct DistortionState_traditional : public FFState {
   }
 };
 
+std::vector<const DistortionScoreProducer*> DistortionScoreProducer::s_staticColl;
+
 DistortionScoreProducer::DistortionScoreProducer(const std::string &line)
   : StatefulFeatureFunction(1, line)
 {
+  s_staticColl.push_back(this);
   ReadParameters();
 }
 

@@ -13,7 +13,6 @@
 #include "moses/StaticData.h"
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
-#include "moses/UserMessage.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -53,7 +52,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
   if(m_numScoreComponents!=weight.size()) {
     std::stringstream strme;
     UTIL_THROW2("ERROR: mismatch of number of scaling factors: " << weight.size()
-    			<< " " << m_numScoreComponents);
+                << " " << m_numScoreComponents);
   }
 
   obj->Create(m_input, m_output, m_filePath, weight);

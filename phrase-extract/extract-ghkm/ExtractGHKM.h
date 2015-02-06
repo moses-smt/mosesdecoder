@@ -62,7 +62,7 @@ private:
                              std::ostream &,
                              bool writeCounts=false);
   void WriteUnknownWordSoftMatches(const std::set<std::string> &,
-                             std::ostream &);
+                                   std::ostream &);
   void WriteGlueGrammar(const std::set<std::string> &,
                         const std::map<std::string, int> &,
                         const std::map<std::string,size_t> &,

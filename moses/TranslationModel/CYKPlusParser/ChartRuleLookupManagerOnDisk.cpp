@@ -47,7 +47,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_outputFactorsVec(outputFactorsVec)
 {
   UTIL_THROW_IF2(m_expandableDottedRuleListVec.size() != 0,
-		  "Dotted rule collection not correctly initialized");
+                 "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
@@ -75,12 +75,13 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 }
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
-  const WordsRange &range,
+  const InputPath &inputPath,
   size_t lastPos,
   ChartParserCallback &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
   const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal();
+  const WordsRange &range = inputPath.GetWordsRange();
 
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
@@ -174,14 +175,14 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
         bool doSearch = true;
         if (m_dictionary.m_maxSpanDefault != NOT_FOUND) {
-            // for Hieu's source syntax
+          // for Hieu's source syntax
 
-			bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
-		    size_t nonTermNumWordsCovered = endPos - startPos + 1;
+          bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
+          size_t nonTermNumWordsCovered = endPos - startPos + 1;
 
-			doSearch = isSourceSyntaxNonTerm ?
-					nonTermNumWordsCovered <=  m_dictionary.m_maxSpanLabelled :
-					nonTermNumWordsCovered <= m_dictionary.m_maxSpanDefault;
+          doSearch = isSourceSyntaxNonTerm ?
+                     nonTermNumWordsCovered <=  m_dictionary.m_maxSpanLabelled :
+                     nonTermNumWordsCovered <= m_dictionary.m_maxSpanDefault;
 
         }
 

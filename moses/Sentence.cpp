@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Sentence.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
+#include "moses/FF/DynamicCacheBasedLanguageModel.h"
+#include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
 #include "ChartTranslationOptions.h"
 #include "Util.h"
 #include "XmlOption.h"
@@ -126,8 +128,41 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     this->SetSpecifiesWeightSetting(false);
   }
 
+  std::vector< std::map<std::string, std::string> > dlt_meta = ProcessAndStripDLT(line);
+
+  PhraseDictionaryDynamicCacheBased* cbtm = NULL;
+  DynamicCacheBasedLanguageModel* cblm = NULL;
+  std::vector< std::map<std::string, std::string> >::iterator dlt_meta_it = dlt_meta.begin();
+  for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it) {
+
+    if ((*dlt_meta_it).find("type") != (*dlt_meta_it).end()) {
+      if ((*dlt_meta_it)["type"] == "cbtm") {
+        std::string id = "default";
+        if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
+          id = (*dlt_meta_it)["id"];
+        }
+        cbtm = PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
+        if (cbtm) cbtm->ExecuteDlt(*dlt_meta_it);
+      }
+      if ((*dlt_meta_it)["type"] == "cblm") {
+        std::string id = "default";
+        if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
+          id = (*dlt_meta_it)["id"];
+        }
+        cblm = DynamicCacheBasedLanguageModel::InstanceNonConst(id);
+        if (cblm) cblm->ExecuteDlt(*dlt_meta_it);
+      }
+    }
+  }
+
+  // if sentences is specified as "<passthrough tag1=""/>"
+  if (staticData.IsPassthroughEnabled() || staticData.IsPassthroughInNBestEnabled()) {
+    std::string passthrough = PassthroughSGML(line,"passthrough");
+    this->SetPassthroughInformation(passthrough);
+  }
+
+
   // parse XML markup in translation line
-  //const StaticData &staticData = StaticData::Instance();
   std::vector< size_t > xmlWalls;
   std::vector< std::pair<size_t, std::string> > placeholders;
 
@@ -312,10 +347,10 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
   return ret;
 }
 
-void 
+void
 Sentence::
-CreateFromString(const std::vector<FactorType> &factorOrder, 
-		 const std::string &phraseString)
+CreateFromString(const std::vector<FactorType> &factorOrder,
+                 const std::string &phraseString)
 // , const std::string &factorDelimiter)
 {
   // Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter, NULL);

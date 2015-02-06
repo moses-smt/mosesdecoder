@@ -62,7 +62,7 @@ Load(
   LoadCorpus(Output, targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
 
   UTIL_THROW_IF2(m_srcSntBreaks.size() != m_trgSntBreaks.size(),
-		  "Source and target arrays aren't the same size");
+                 "Source and target arrays aren't the same size");
 
   // build suffix arrays and auxilliary arrays
   cerr << "Building Source Suffix Array...\n";
@@ -130,7 +130,7 @@ LoadRawAlignments(string& align)
   vector<int> vtmp;
   Utils::splitToInt(align, vtmp, "- ");
   UTIL_THROW_IF2(vtmp.size() % 2 != 0,
-		  "Alignment format is incorrect: " << align);
+                 "Alignment format is incorrect: " << align);
   vector<short> vAlgn;  // store as short ints for memory
   for (vector<int>::const_iterator itr = vtmp.begin();
        itr != vtmp.end(); ++itr) {
@@ -380,7 +380,7 @@ GetMosesFactorIDs(const SAPhrase& phrase, const Phrase& sourcePhrase, const Phra
   for(size_t i=0; i < phrase.words.size(); ++i) { // look up trg words
     Word& word = m_trgVocab->GetWord( phrase.words[i]);
     UTIL_THROW_IF2(word == m_trgVocab->GetkOOVWord(),
-    		"Unknown word at position " << i);
+                   "Unknown word at position " << i);
     targetPhrase->AddWord(word);
   }
   // scoring

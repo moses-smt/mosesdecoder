@@ -1,4 +1,5 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+use warnings;
 
 # Sample Tokenizer
 ### Version 1.1
@@ -280,10 +281,10 @@ sub tokenize
     #$text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
 	      
     # turn `into '
-    $text =~ s/\`/\'/g;
+    #$text =~ s/\`/\'/g;
 	
     #turn '' into "
-    $text =~ s/\'\'/ \" /g;
+    #$text =~ s/\'\'/ \" /g;
 
     if ($language eq "en") 
     {

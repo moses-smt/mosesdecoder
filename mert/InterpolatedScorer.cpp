@@ -174,19 +174,19 @@ float InterpolatedScorer::calculateScore(const std::vector<ScoreStatsType>& tota
 
 float InterpolatedScorer::getReferenceLength(const std::vector<ScoreStatsType>& totals) const
 {
-    size_t scorerNum = 0;
-    size_t last = 0;
-    float refLen = 0;
-    for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
-         itsc != m_scorers.end(); ++itsc) {
-      int numScoresScorer = (*itsc)->NumberOfScores();
-      std::vector<ScoreStatsType> totals_scorer(totals.begin()+last, totals.begin()+last+numScoresScorer);
-      refLen += (*itsc)->getReferenceLength(totals_scorer) * m_scorer_weights[scorerNum];
-      last += numScoresScorer;
-      scorerNum++;
-    }
-    return refLen;
+  size_t scorerNum = 0;
+  size_t last = 0;
+  float refLen = 0;
+  for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
+    int numScoresScorer = (*itsc)->NumberOfScores();
+    std::vector<ScoreStatsType> totals_scorer(totals.begin()+last, totals.begin()+last+numScoresScorer);
+    refLen += (*itsc)->getReferenceLength(totals_scorer) * m_scorer_weights[scorerNum];
+    last += numScoresScorer;
+    scorerNum++;
   }
+  return refLen;
+}
 
 void InterpolatedScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {

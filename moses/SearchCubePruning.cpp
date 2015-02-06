@@ -64,7 +64,7 @@ SearchCubePruning::~SearchCubePruning()
  * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
  */
-void SearchCubePruning::ProcessSentence()
+void SearchCubePruning::Decode()
 {
   const StaticData &staticData = StaticData::Instance();
 

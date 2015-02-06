@@ -151,6 +151,10 @@ if [ option.get "with-probing-pt" : : "yes" ]
   requirements += <library>boost_serialization ;
 }
 
+if [ option.get "with-vw" ] {
+  requirements += <define>HAVE_VW ;
+}
+
 project : default-build
   <threading>multi
   <warnings>on
@@ -173,7 +177,8 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-projects lm util phrase-extract search moses moses/LM mert moses-cmd mira scripts regression-testing  ;
+build-projects lm util phrase-extract phrase-extract/syntax-common search moses moses/LM mert moses-cmd scripts regression-testing ;
+# contrib/mira
 
 if [ option.get "with-mm" : : "yes" ]
 {
@@ -225,11 +230,14 @@ phrase-extract//extract-ghkm
 phrase-extract//pcfg-extract 
 phrase-extract//pcfg-score 
 phrase-extract//extract-mixed-syntax 
+phrase-extract//score-stsg
+phrase-extract//filter-rule-table
 biconcor 
-mira//mira 
+#contrib/mira//mira 
 contrib/server//mosesserver 
 mm
 rephraser
+contrib/c++tokenizer//tokenizer
 ;
 
 
@@ -249,6 +257,7 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
   echo ;
 }
 
+#local temp = [ _shell "bash source ./s.sh" ] ;
 local temp = [ _shell "mkdir bin" ] ;
 local temp = [ _shell "rm bin/moses_chart" ] ;
 local temp = [ _shell "cd bin && ln -s moses moses_chart" ] ;

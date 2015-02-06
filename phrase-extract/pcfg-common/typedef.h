@@ -21,19 +21,19 @@
 #ifndef PCFG_TYPEDEF_H_
 #define PCFG_TYPEDEF_H_
 
-#include "numbered_set.h"
-#include "syntax_tree.h"
-
 #include <string>
 
-namespace Moses
-{
-namespace PCFG
-{
+#include "syntax-common/numbered_set.h"
+#include "syntax_tree.h"
+
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
 
 typedef NumberedSet<std::string> Vocabulary;
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

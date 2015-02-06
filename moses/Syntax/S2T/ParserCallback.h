@@ -15,14 +15,15 @@ namespace Syntax
 namespace S2T
 {
 
-class StandardParserCallback {
- private:
+class StandardParserCallback
+{
+private:
   typedef BoundedPriorityContainer<SHyperedgeBundle> Container;
 
- public:
+public:
   StandardParserCallback(const SChart &schart, std::size_t ruleLimit)
-      : m_schart(schart)
-      , m_container(ruleLimit) {}
+    : m_schart(schart)
+    , m_container(ruleLimit) {}
 
   void operator()(const PHyperedge &hyperedge) {
     PHyperedgeToSHyperedgeBundle(hyperedge, m_schart, m_tmpBundle);
@@ -30,25 +31,30 @@ class StandardParserCallback {
     m_container.SwapIn(m_tmpBundle, score);
   }
 
-  void InitForRange(const WordsRange &range) { m_container.LazyClear(); }
+  void InitForRange(const WordsRange &range) {
+    m_container.LazyClear();
+  }
 
-  const Container &GetContainer() { return m_container; }
+  const Container &GetContainer() {
+    return m_container;
+  }
 
- private:
+private:
   const SChart &m_schart;
   SHyperedgeBundle m_tmpBundle;
   BoundedPriorityContainer<SHyperedgeBundle> m_container;
 };
 
-class EagerParserCallback {
- private:
+class EagerParserCallback
+{
+private:
   typedef BoundedPriorityContainer<SHyperedgeBundle> Container;
 
- public:
+public:
   EagerParserCallback(const SChart &schart, std::size_t ruleLimit)
-      : m_schart(schart)
-      , m_containers(schart.GetWidth(), Container(ruleLimit))
-      , m_prevStart(std::numeric_limits<std::size_t>::max()) {}
+    : m_schart(schart)
+    , m_containers(schart.GetWidth(), Container(ruleLimit))
+    , m_prevStart(std::numeric_limits<std::size_t>::max()) {}
 
   void operator()(const PHyperedge &hyperedge, std::size_t end) {
     PHyperedgeToSHyperedgeBundle(hyperedge, m_schart, m_tmpBundle);
@@ -68,9 +74,11 @@ class EagerParserCallback {
     }
   }
 
-  const Container &GetContainer() { return m_containers[m_end]; }
+  const Container &GetContainer() {
+    return m_containers[m_end];
+  }
 
- private:
+private:
   const SChart &m_schart;
   SHyperedgeBundle m_tmpBundle;
   std::vector<Container> m_containers;

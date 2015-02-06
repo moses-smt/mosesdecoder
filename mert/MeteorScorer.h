@@ -20,7 +20,7 @@ class ifdstream;
 class ScoreStats;
 
 /**
- * Meteor scoring 
+ * Meteor scoring
  *
  * https://github.com/mjdenkowski/meteor
  * http://statmt.org/wmt11/pdf/WMT07.pdf

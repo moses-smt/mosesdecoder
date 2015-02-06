@@ -107,6 +107,8 @@ protected:
 
   void EvaluateWithSourceContext();
 
+  void EvaluateTranslatonOptionListWithSourceContext(TranslationOptionList&);
+
   void CacheLexReordering();
 
   void GetTargetPhraseCollectionBatch();
@@ -170,8 +172,9 @@ public:
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 
-  const InputPathList &GetInputPaths() const
-  { return m_inputPathQueue; }
+  const InputPathList &GetInputPaths() const {
+    return m_inputPathQueue;
+  }
 
 
   TO_STRING();

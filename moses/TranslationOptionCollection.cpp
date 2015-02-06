@@ -93,7 +93,7 @@ Prune()
 
   if (m_maxNoTransOptPerCoverage == 0 && m_translationOptionThreshold == no_th)
     return;
-  
+
   // bookkeeping for how many options used, pruned
   size_t total = 0;
   size_t totalPruned = 0;
@@ -468,7 +468,6 @@ CreateTranslationOptionsForRange
 	TranslationOption *transOpt = *iterColl;
 	if (StaticData::Instance().GetXmlInputType() != XmlConstraint || !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
         Add(transOpt);
-	}
       }
       
     lastPartialTranslOptColl.DetachAll();

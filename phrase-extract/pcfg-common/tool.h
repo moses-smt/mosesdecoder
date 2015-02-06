@@ -21,30 +21,26 @@
 #ifndef PCFG_TOOL_H_
 #define PCFG_TOOL_H_
 
-#include <boost/program_options/cmdline.hpp>
-
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 
-namespace Moses
-{
-namespace PCFG
-{
+#include <boost/program_options/cmdline.hpp>
 
-class Tool
-{
-public:
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
+
+class Tool {
+ public:
   virtual ~Tool() {}
 
-  const std::string &name() const {
-    return name_;
-  }
+  const std::string &name() const { return name_; }
 
   virtual int Main(int argc, char *argv[]) = 0;
 
-protected:
+ protected:
   Tool(const std::string &name) : name_(name) {}
 
   // Returns the boost::program_options style that should be used by all tools.
@@ -82,7 +78,7 @@ protected:
   // the file cannot be opened for writing.
   void OpenNamedOutputOrDie(const std::string &, std::ofstream &);
 
-private:
+ private:
   std::string name_;
   std::istream *input_ptr_;
   std::ifstream input_file_stream_;
@@ -91,6 +87,7 @@ private:
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

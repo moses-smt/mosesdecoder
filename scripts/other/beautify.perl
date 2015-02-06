@@ -30,6 +30,7 @@ sub Beautify($)
 		 next if ($name eq ".");
 		 next if ($name eq "..");
 		 next if ($name eq "boost");
+		 next if ($name eq "xmlrpc-c");
 		 next if ($name eq "contrib");
 		 next if ($name eq "jam-files");
 		 next if ($name eq ".git");
@@ -40,6 +41,8 @@ sub Beautify($)
 		 next if ($name eq "srilm");
 		 next if ($name eq "irstlm");
 		 next if ($name eq "UG");
+		 next if ($name eq "pcfg-common");
+		 next if ($name eq "syntax-common");
 
 		 $name = $path ."/" .$name;
 		 if (-d $name) {

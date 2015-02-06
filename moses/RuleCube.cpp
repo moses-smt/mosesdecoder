@@ -103,7 +103,7 @@ void RuleCube::CreateNeighbor(const RuleCubeItem &item, int dimensionIndex,
 
 std::ostream& operator<<(std::ostream &out, const RuleCube &obj)
 {
-	out << obj.GetItemSetSize();
-	return out;
+  out << obj.GetItemSetSize();
+  return out;
 }
 }

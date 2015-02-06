@@ -14,7 +14,7 @@ namespace Syntax
 // *not* work in moses_chart unless this is changed (among other things).
 class SymbolHasher
 {
- public:
+public:
   std::size_t operator()(const Word &s) const {
     const Factor *f = s[0];
     return hash_value(*f);
