@@ -122,7 +122,7 @@ enum InputTypeEnum {
   ,ConfusionNetworkInput	= 1
   ,WordLatticeInput				= 2
   ,TreeInputType					= 3
-  ,WordLatticeInput2			= 4
+  //,WordLatticeInput2			= 4
   , TabbedSentenceInput = 5
   ,ForestInputType        = 6
 };
