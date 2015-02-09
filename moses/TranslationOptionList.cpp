@@ -42,7 +42,7 @@ namespace Moses
   TranslationOptionList::
   SelectNBest(size_t const N)
   {
-    if (N == 0 || N <= m_coll.size()) return 0;
+    if (N == 0 || N >= m_coll.size()) return 0;
     static TranslationOption::Better cmp;
     NTH_ELEMENT4(m_coll.begin(), m_coll.begin() + N, m_coll.end(), cmp);
     // delete the rest
