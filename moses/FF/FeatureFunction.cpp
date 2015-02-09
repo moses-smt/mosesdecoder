@@ -50,6 +50,7 @@ FeatureFunction(const std::string& line)
   , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(1)
 {
+  m_numTuneableComponents = m_numScoreComponents;
   Initialize(line);
 }
 
@@ -61,6 +62,7 @@ FeatureFunction(size_t numScoreComponents,
   , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(numScoreComponents)
 {
+  m_numTuneableComponents = m_numScoreComponents;
   Initialize(line);
 }
 
@@ -95,6 +97,7 @@ void FeatureFunction::ParseLine(const std::string &line)
 
     if (args[0] == "num-features") {
       m_numScoreComponents = Scan<size_t>(args[1]);
+      m_numTuneableComponents = m_numScoreComponents;
     } else if (args[0] == "name") {
       m_description = args[1];
     } else {
@@ -120,13 +123,17 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
 {
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
+  } else if (key == "tuneable-components") {
+    UTIL_THROW_IF2(!m_tuneable, GetScoreProducerDescription() 
+                   << ": tuneable-components cannot be set if tuneable=false");
+    SetTuneableComponents(value);
   } else if (key == "require-sorting-after-source-context") {
     m_requireSortingAfterSourceContext = Scan<bool>(value);
   } else if (key == "verbosity") {
     m_verbosity = Scan<size_t>(value);
   } else if (key == "filterable") { //ignore
   } else {
-    UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
+    UTIL_THROW2(GetScoreProducerDescription() << ": Unknown argument " << key << "=" << value);
   }
 }
 
@@ -142,7 +149,27 @@ void FeatureFunction::ReadParameters()
 
 std::vector<float> FeatureFunction::DefaultWeights() const
 {
-  UTIL_THROW(util::Exception, "No default weights");
+  UTIL_THROW2(GetScoreProducerDescription() << ": No default weights");
+}
+
+void FeatureFunction::SetTuneableComponents(const std::string& value)
+{
+  std::vector<std::string> toks = Tokenize(value,",");
+  UTIL_THROW_IF2(toks.empty(), GetScoreProducerDescription()
+                 << ": Empty tuneable-components");
+  UTIL_THROW_IF2(toks.size()!=m_numScoreComponents, GetScoreProducerDescription()
+                 << ": tuneable-components value has to be a comma-separated list of " 
+                 << m_numScoreComponents << " boolean values");
+
+  m_tuneableComponents.resize(m_numScoreComponents);
+  m_numTuneableComponents = m_numScoreComponents;
+
+  for (size_t i = 0; i < toks.size(); ++i) {
+    m_tuneableComponents[i] = Scan<bool>(toks[i]);
+    if (!m_tuneableComponents[i]) {
+      --m_numTuneableComponents;
+    }
+  }
 }
 
 }

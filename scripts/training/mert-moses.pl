@@ -576,8 +576,9 @@ if ($___FILTER_PHRASE_TABLE) {
 my $featlist = get_featlist_from_moses($___CONFIG);
 $featlist = insert_ranges_to_featlist($featlist, $___RANGES);
 
-# Mark which features are disabled:
+# Mark which features are disabled 
 if (defined $___ACTIVATE_FEATURES) {
+  $featlist->{"enabled"}    = undef;
   my %enabled = map { ($_, 1) } split /[, ]+/, $___ACTIVATE_FEATURES;
   my %cnt;
   for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
@@ -1145,6 +1146,8 @@ if($___RETURN_BEST_DEV) {
   }
   my $best_featlist = get_featlist_from_file("run$bestit.dense");
   $best_featlist->{"untuneables"} = $featlist->{"untuneables"};
+  $best_featlist->{"allcomponentsuntuneable"} = $featlist->{"allcomponentsuntuneable"};
+  $best_featlist->{"skippeduntuneablecomponents"} = $featlist->{"skippeduntuneablecomponents"};
   create_config($___CONFIG_ORIG, "./moses.ini", $best_featlist,
                 $bestit, $bestbleu, $best_sparse_file);
 }
@@ -1235,10 +1238,26 @@ sub run_decoder {
     }
     # moses now does not seem accept "-tm X -tm Y" but needs "-tm X Y"
     my %model_weights;
+    my $valcnt = 0;
+    my $offset = 0;
     for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
       my $name = $featlist->{"names"}->[$i];
-      $model_weights{$name} = "$name=" if !defined $model_weights{$name};
+      if (!defined $model_weights{$name}) {
+        $model_weights{$name} = "$name=";
+        $valcnt = 0;
+        while (defined $featlist->{"skippeduntuneablecomponents"}->{$name}{$valcnt+$offset}) {
+          #$model_weights{$name} .= sprintf " %.6f", $oldvalues{$name}{$valcnt+$offset};
+          $model_weights{$name} .= sprintf " x";
+          $offset++;
+        }
+      }
       $model_weights{$name} .= sprintf " %.6f", $vals[$i];
+      $valcnt++;
+      while (defined $featlist->{"skippeduntuneablecomponents"}->{$name}{$valcnt+$offset}) {
+        #$model_weights{$name} .= sprintf " %.6f", $oldvalues{$name}{$valcnt+$offset};
+        $model_weights{$name} .= sprintf " x";
+        $offset++;
+      }
     }
     my $decoder_config = "";
     $decoder_config = "-weight-overwrite '" . join(" ", values %model_weights) ."'" unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
@@ -1362,8 +1381,11 @@ sub get_featlist_from_file {
   my @names = ();
   my @startvalues = ();
   my @untuneables = ();
+  my @allcomponentsuntuneable = ();
+  my %skippeduntuneablecomponents = ();
   open my $fh, '<', $featlistfn or die "Can't read $featlistfn : $!";
   my $nr = 0;
+  my $i = 0;
   my @errs = ();
   while (<$fh>) {
     $nr++;
@@ -1373,11 +1395,25 @@ sub get_featlist_from_file {
       next if (!defined($valuesStr));
     
       my @values = split(/ /, $valuesStr);
-		  foreach my $value (@values) {
-			  push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
-				  if $value !~ /^[+-]?[0-9.\-e]+$/;
-			  push @names, $longname;
-			  push @startvalues, $value;
+      my $valcnt = 0;
+      my $hastuneablecomponent = 0;
+      foreach my $value (@values) {
+        if ($value =~ /^UNTUNEABLECOMPONENT$/) {
+          $skippeduntuneablecomponents{$longname}{$valcnt} = 1;
+          $i++;
+          $valcnt++;
+        } elsif ($value =~ /^[+-]?[0-9.\-e]+$/) {
+          push @names, $longname;
+          push @startvalues, $value;
+          $i++;
+          $valcnt++;
+          $hastuneablecomponent = 1;
+        } else {
+          push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
+        }
+      }
+      if (!$hastuneablecomponent) {
+        push @allcomponentsuntuneable, $longname;
       }
     }
     elsif (/^(\S+) UNTUNEABLE$/) {
@@ -1391,7 +1427,7 @@ sub get_featlist_from_file {
     warn join("", @errs);
     exit 1;
   }
-  return {"names"=>\@names, "values"=>\@startvalues, "untuneables"=>\@untuneables};
+  return {"names"=>\@names, "values"=>\@startvalues, "untuneables"=>\@untuneables, "allcomponentsuntuneable"=>\@allcomponentsuntuneable, "skippeduntuneablecomponents"=>\%skippeduntuneablecomponents};
 }
 
 
@@ -1487,6 +1523,8 @@ sub create_config {
   print $out "# We were before running iteration $iteration\n";
   print $out "# finished ".`date`;
 
+  my %oldvalues = ();
+
   my $line = <$ini_fh>;
   while(1) {
     last unless $line;
@@ -1501,34 +1539,51 @@ sub create_config {
     # parameter name
     my $parameter = $1;
 
-		if ($parameter eq "weight") {
-			# leave weights 'til last. We're changing it
-			while ($line = <$ini_fh>) {
-			  last if $line =~ /^\[/;
-			  if ($line =~ /^([^_=\s]+)/) {
-			    for( @{$featlist->{"untuneables"}} ){
-			      if ($1 eq $_ ) {# if weight is untuneable, copy it into new config
-			        push @keep_weights, $line;
-			      }
-			    }
-			  }
-			}
-		}
-	  elsif (defined($P{$parameter})) {
-			# found a param (thread, verbose etc) that we're overriding. Leave to the end
-			while ($line = <$ini_fh>) {
-			  last if $line =~ /^\[/;
-			}
-	  }
-		else {
-			# unchanged parameter, write old
-			print $out "[$parameter]\n";
-			while ($line = <$ini_fh>) {
-				last if $line =~ /^\[/;
-				print $out $line;
-			}
-		}
-	}
+    if ($parameter eq "weight") {
+      # leave weights 'til last. We're changing it
+      while ($line = <$ini_fh>) {
+        last if $line =~ /^\[/;
+        if ($line =~ /^(\S+)= (.+)$/) {
+          for( @{$featlist->{"untuneables"}} ){
+            if ($1 eq $_ ) {# if weight is untuneable, copy it into new config
+              push @keep_weights, $line;
+            }
+          }
+          for( @{$featlist->{"allcomponentsuntuneable"}} ){
+            if ($1 eq $_ ) {# if all dense weights are untuneable, copy it into new config
+              push @keep_weights, $line;
+            }
+          }
+
+          my ($longname, $valuesStr) = ($1, $2);
+          next if (!defined($valuesStr));
+          print $valuesStr;
+          my @values = split(/ /, $valuesStr);
+          my $valcnt = 0;
+          foreach my $value (@values) {
+            if ($value =~ /^[+-]?[0-9.\-e]+$/) {
+              $oldvalues{$longname}{$valcnt} = $value;
+            }
+            $valcnt++;
+          }
+        }
+      }
+    }
+    elsif (defined($P{$parameter})) {
+      # found a param (thread, verbose etc) that we're overriding. Leave to the end
+      while ($line = <$ini_fh>) {
+        last if $line =~ /^\[/;
+      }
+    }
+    else {
+      # unchanged parameter, write old
+      print $out "[$parameter]\n";
+      while ($line = <$ini_fh>) {
+        last if $line =~ /^\[/;
+        print $out $line;
+      }
+    }
+  }
 
   # write all additional parameters
   foreach my $parameter (keys %P) {
@@ -1543,20 +1598,30 @@ sub create_config {
   
   my $prevName = "";
   my $outStr = "";
+  my $valcnt = 0;
+  my $offset = 0;
   for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
     my $name = $featlist->{"names"}->[$i];
     my $val = $featlist->{"values"}->[$i];
     
-    if ($prevName eq $name) {
-      $outStr .= " $val";
+    if ($prevName ne $name) {
+      print $out "$outStr\n";
+      $valcnt = 0;
+      $outStr = "$name=";
+      $prevName = $name;
+      while (defined $featlist->{"skippeduntuneablecomponents"}->{$name}{$valcnt+$offset}) {
+        $outStr .= " $oldvalues{$name}{$valcnt+$offset}";
+        $offset++;
+      }
     }
-    else {
-  		print $out "$outStr\n";
-  		$outStr = "$name= $val";
-  		$prevName = $name;
+    $outStr .= " $val";
+    $valcnt++;
+    while (defined $featlist->{"skippeduntuneablecomponents"}->{$name}{$valcnt+$offset}) {
+      $outStr .= " $oldvalues{$name}{$valcnt+$offset}";
+      $offset++;
     }
   }
-	print $out "$outStr\n";
+  print $out "$outStr\n";
 
   for (@keep_weights) {
      print $out $_;
