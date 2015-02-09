@@ -58,10 +58,14 @@ namespace Moses
       m_coll.erase( m_coll.begin()+ind );
     }
     void Add(TranslationOption *transOpt) {
+      UTIL_THROW_IF2(!transOpt, "Not a valid translation option!");
       m_coll.push_back(transOpt);
     }
     
+    TO_STRING();
+
     size_t SelectNBest(size_t const N);
     size_t PruneByThreshold(float const th);
 
+  };
 }
