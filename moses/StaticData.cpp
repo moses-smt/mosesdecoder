@@ -60,15 +60,15 @@ bool g_mosesDebug = false;
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  :m_sourceStartPosMattersForRecombination(false)
-  ,m_inputType(SentenceInput)
-  ,m_onlyDistinctNBest(false)
-  ,m_needAlignmentInfo(false)
-  ,m_lmEnableOOVFeature(false)
-  ,m_isAlwaysCreateDirectTranslationOption(false)
-  ,m_currentWeightSetting("default")
-  ,m_requireSortingAfterSourceContext(false)
-  ,m_treeStructure(NULL)
+  : m_sourceStartPosMattersForRecombination(false)
+  , m_requireSortingAfterSourceContext(false)
+  , m_inputType(SentenceInput)
+  , m_onlyDistinctNBest(false)
+  , m_needAlignmentInfo(false)
+  , m_lmEnableOOVFeature(false)
+  , m_isAlwaysCreateDirectTranslationOption(false)
+  , m_currentWeightSetting("default")
+  , m_treeStructure(NULL)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
