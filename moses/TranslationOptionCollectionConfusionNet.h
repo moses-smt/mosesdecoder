@@ -22,13 +22,13 @@ protected:
   InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
 
   InputPathList &GetInputPathList(size_t startPos, size_t endPos);
-  void CreateTranslationOptionsForRangeNew(const DecodeGraph &decodeStepList
+  bool CreateTranslationOptionsForRangeNew(const DecodeGraph &decodeStepList
       , size_t startPosition
       , size_t endPosition
       , bool adhereTableLimit
       , size_t graphInd);
 
-  void CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeStepList
+  bool CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeStepList
       , size_t startPosition
       , size_t endPosition
       , bool adhereTableLimit
