@@ -112,9 +112,9 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
 
   if(tempfilePath.size()) {
     MmapAllocator<unsigned char> allocEncoded(util::FMakeTemp(tempfilePath));
-    m_encodedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
+    m_encodedTargetPhrases = new StringVectorTemp<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
   } else {
-    m_encodedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+    m_encodedTargetPhrases = new StringVectorTemp<unsigned char, unsigned long, MmapAllocator>();
   }
   EncodeTargetPhrases();
 
@@ -409,6 +409,10 @@ void PhraseTableCreator::CalcHuffmanCodes()
 
 void PhraseTableCreator::AddSourceSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
+
   if(m_sourceSymbolsMap.count(symbol) == 0) {
     unsigned value = m_sourceSymbolsMap.size();
     m_sourceSymbolsMap[symbol] = value;
@@ -417,6 +421,9 @@ void PhraseTableCreator::AddSourceSymbolId(std::string& symbol)
 
 void PhraseTableCreator::AddTargetSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   if(m_targetSymbolsMap.count(symbol) == 0) {
     unsigned value = m_targetSymbolsMap.size();
     m_targetSymbolsMap[symbol] = value;
@@ -425,6 +432,9 @@ void PhraseTableCreator::AddTargetSymbolId(std::string& symbol)
 
 unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   boost::unordered_map<std::string, unsigned>::iterator it
   = m_sourceSymbolsMap.find(symbol);
 
@@ -436,13 +446,14 @@ unsigned PhraseTableCreator::GetSourceSymbolId(std::string& symbol)
 
 unsigned PhraseTableCreator::GetTargetSymbolId(std::string& symbol)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   boost::unordered_map<std::string, unsigned>::iterator it
   = m_targetSymbolsMap.find(symbol);
 
-  if(it != m_targetSymbolsMap.end())
-    return it->second;
-  else
-    return m_targetSymbolsMap.size();
+  UTIL_THROW_IF2(it == m_targetSymbolsMap.end(), "No id found for target symbol: " << symbol);
+  return it->second;
 }
 
 unsigned PhraseTableCreator::GetOrAddTargetSymbolId(std::string& symbol)
@@ -714,10 +725,10 @@ std::string PhraseTableCreator::EncodeLine(std::vector<std::string>& tokens, siz
   std::vector<float> scores = Tokenize<float>(scoresStr);
 
   if(scores.size() != m_numScoreComponent) {
-	std::stringstream strme;
-	strme << "Error: Wrong number of scores detected ("
-              << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
-	strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[3] << " ..." << std::endl;
+    std::stringstream strme;
+    strme << "Error: Wrong number of scores detected ("
+          << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
+    strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[2] << " ..." << std::endl;
     UTIL_THROW2(strme.str());
   }
 
@@ -867,8 +878,10 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
   }
 
   if(force) {
-    m_rnkHash.AddRange(m_lastSourceRange);
-    m_lastSourceRange.clear();
+    if(!m_lastSourceRange.empty()) {
+      m_rnkHash.AddRange(m_lastSourceRange);
+      m_lastSourceRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_rnkHash.WaitAll();
@@ -952,8 +965,10 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
       m_lastCollection.clear();
     }
 
-    m_srcHash.AddRange(m_lastSourceRange);
-    m_lastSourceRange.clear();
+    if(!m_lastSourceRange.empty()) {
+      m_srcHash.AddRange(m_lastSourceRange);
+      m_lastSourceRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_srcHash.WaitAll();
@@ -1040,30 +1055,30 @@ void RankingTask::operator()()
         *it = Moses::Trim(*it);
 
       if(tokens.size() < 4) {
-    	std::stringstream strme;
-    	strme << "Error: It seems the following line has a wrong format:" << std::endl;
-    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        std::stringstream strme;
+        strme << "Error: It seems the following line has a wrong format:" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
       if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
-    	std::stringstream strme;
-    	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
-    	strme << "but you are using ";
-    	strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
-    	strme << " encoding which makes use of alignment data. " << std::endl;
-    	strme << "Use -encoding None" << std::endl;
-    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        std::stringstream strme;
+        strme << "Error: It seems the following line contains no alignment information, " << std::endl;
+        strme << "but you are using ";
+        strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+        strme << " encoding which makes use of alignment data. " << std::endl;
+        strme << "Use -encoding None" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
       std::vector<float> scores = Tokenize<float>(tokens[2]);
       if(scores.size() != m_creator.m_numScoreComponent) {
-      	std::stringstream strme;
-      	strme << "Error: It seems the following line has a wrong number of scores ("
-                  << scores.size() << " != " << m_creator.m_numScoreComponent << ") :" << std::endl;
-      	strme << "Line " << i << ": " << lines[i] << std::endl;
-      	UTIL_THROW2(strme.str());
+        std::stringstream strme;
+        strme << "Error: It seems the following line has a wrong number of scores ("
+              << scores.size() << " != " << m_creator.m_numScoreComponent << ") :" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
+        UTIL_THROW2(strme.str());
       }
 
       float sortScore = scores[m_creator.m_sortScoreIndex];
@@ -1140,20 +1155,20 @@ void EncodingTask::operator()()
         *it = Moses::Trim(*it);
 
       if(tokens.size() < 3) {
-    	std::stringstream strme;
-    	strme << "Error: It seems the following line has a wrong format:" << std::endl;
-    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        std::stringstream strme;
+        strme << "Error: It seems the following line has a wrong format:" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
-      if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
-    	std::stringstream strme;
-      	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
-      	strme << "but you are using ";
-      	strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
-      	strme << " encoding which makes use of alignment data. " << std::endl;
-      	strme << "Use -encoding None" << std::endl;
-      	strme << "Line " << i << ": " << lines[i] << std::endl;
+      if(tokens.size() > 3 && tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
+        std::stringstream strme;
+        strme << "Error: It seems the following line contains no alignment information, " << std::endl;
+        strme << "but you are using ";
+        strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+        strme << " encoding which makes use of alignment data. " << std::endl;
+        strme << "Use -encoding None" << std::endl;
+        strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
@@ -1199,7 +1214,7 @@ size_t CompressionTask::m_collectionNum = 0;
 boost::mutex CompressionTask::m_mutex;
 #endif
 
-CompressionTask::CompressionTask(StringVector<unsigned char, unsigned long,
+CompressionTask::CompressionTask(StringVectorTemp<unsigned char, unsigned long,
                                  MmapAllocator>& encodedCollections,
                                  PhraseTableCreator& creator)
   : m_encodedCollections(encodedCollections), m_creator(creator) {}

@@ -206,7 +206,7 @@ std::string LexicalReorderingTableCreator::EncodeLine(std::vector<std::string>& 
   if(m_numScoreComponent != scores.size()) {
     std::stringstream strme;
     strme << "Error: Wrong number of scores detected ("
-              << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
+          << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
     strme << "Line: " << tokens[0] << " ||| ... ||| " << scoresString << std::endl;
     UTIL_THROW2(strme.str());
   }
@@ -258,8 +258,10 @@ void LexicalReorderingTableCreator::FlushEncodedQueue(bool force)
   if(force) {
     m_lastFlushedLine = -1;
 
-    m_hash.AddRange(m_lastRange);
-    m_lastRange.clear();
+    if(!m_lastRange.empty()) {
+      m_hash.AddRange(m_lastRange);
+      m_lastRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_hash.WaitAll();
@@ -377,7 +379,6 @@ void EncodingTaskReordering::operator()()
                             encodedLine, i);
       result.push_back(packedItem);
     }
-    lines.clear();
 
     {
 #ifdef WITH_THREADS
@@ -388,6 +389,7 @@ void EncodingTaskReordering::operator()()
       m_creator.FlushEncodedQueue();
     }
 
+    lines.clear();
     result.clear();
     lines.reserve(max_lines);
     result.reserve(max_lines);
