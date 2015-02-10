@@ -78,9 +78,8 @@ void PrintStatistics(const Ladder& ladder) {
   }
   std::cerr << std::endl;
  
-  std::cerr << "Quality: " << scoreSum/nonZero << std::endl;
-  std::cerr << "Quality including unaligned rungs: " << scoreSum/ladder.size()
-            << std::endl;
+  std::cerr << "Quality (aligned): " << scoreSum/nonZero << std::endl;
+  std::cerr << "Quality (total): " << scoreSum/(ladder.size()-1) << std::endl;
   std::cerr << std::endl;  
 }
 

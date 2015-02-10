@@ -117,14 +117,14 @@ class Corpus {
       
       size_t j = 0;
       for(size_t i = 0; i < sentenceStarts.size() - 1; i++) {
-        size_t start = sentenceStarts[i];
+        size_t start  = sentenceStarts[i];
         size_t length = sentenceStarts[i + 1] - start - 1;
         
         if(sentenceStarts[i] == sentenceStarts[i + 1])
           length = 0;
         
         size_t tokens = 0;
-        while(tokenStarts[j + tokens] < start + length) {
+        while(j + tokens < tokenStarts.size() && tokenStarts[j + tokens] < start + length) {
           size_t tStart =  tokenStarts[j + tokens];
           size_t tLength = tokenStarts[j + tokens + 1] - tStart - 1;
           m_tokens.push_back(StringPiece(m_corpus.c_str() + tStart, tLength));

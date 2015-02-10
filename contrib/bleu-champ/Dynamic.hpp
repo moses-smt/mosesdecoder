@@ -65,8 +65,8 @@ struct Search {
     
     virtual float Penalty(const Bead& bead) const {
       // TODO: EVIL!!! Satan did this!
-      if(bead[0] == 0 || bead[1] == 0)
-        return -0.1;
+      //if(bead[0] == 0 || bead[1] == 0)
+      //  return -0.01;
       return 0.0;
     }
   
