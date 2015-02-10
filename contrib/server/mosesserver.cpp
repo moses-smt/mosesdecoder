@@ -505,39 +505,41 @@ public:
     retData.insert(pair<string, xmlrpc_c::value>("nbest", xmlrpc_c::value_array(nBestXml)));
   }
 
-  void insertTranslationOptions(Manager& manager, map<string, xmlrpc_c::value>& retData) {
+  void 
+  insertTranslationOptions(Manager& manager, map<string, xmlrpc_c::value>& retData) 
+  {
     const TranslationOptionCollection* toptsColl = manager.getSntTranslationOptions();
     vector<xmlrpc_c::value> toptsXml;
-    for (size_t startPos = 0 ; startPos < toptsColl->GetSource().GetSize() ; ++startPos) {
-      size_t maxSize = toptsColl->GetSource().GetSize() - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = std::min(maxSize, maxSizePhrase);
-
-      for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos) {
-        WordsRange range(startPos,endPos);
-        const TranslationOptionList& fullList = toptsColl->GetTranslationOptionList(range);
-        for (size_t i = 0; i < fullList.size(); i++) {
-          const TranslationOption* topt = fullList.Get(i);
-          map<string, xmlrpc_c::value> toptXml;
-          toptXml["phrase"] = xmlrpc_c::value_string(topt->GetTargetPhrase().
-                              GetStringRep(StaticData::Instance().GetOutputFactorOrder()));
-          toptXml["fscore"] = xmlrpc_c::value_double(topt->GetFutureScore());
-          toptXml["start"] =  xmlrpc_c::value_int(startPos);
-          toptXml["end"] =  xmlrpc_c::value_int(endPos);
-          vector<xmlrpc_c::value> scoresXml;
-          const std::valarray<FValue> &scores = topt->GetScoreBreakdown().getCoreFeatures();
-          for (size_t j = 0; j < scores.size(); ++j) {
-            scoresXml.push_back(xmlrpc_c::value_double(scores[j]));
-          }
-          toptXml["scores"] = xmlrpc_c::value_array(scoresXml);
-          toptsXml.push_back(xmlrpc_c::value_struct(toptXml));
-        }
-      }
+    size_t const stop = toptsColl->GetSource().GetSize();
+    TranslationOptionList const* tol;
+    for (size_t s = 0 ; s < stop ; ++s) 
+      {
+	for (size_t e = s; (tol = toptsColl->GetTranslationOptionList(s,e)) != NULL; ++e)
+	{
+	  BOOST_FOREACH(TranslationOption const* topt, *tol)
+	    {
+	      map<string, xmlrpc_c::value> toptXml;
+	      TargetPhrase const& tp = topt->GetTargetPhrase();
+	      StaticData const& GLOBAL = StaticData::Instance();
+	      string tphrase = tp.GetStringRep(GLOBAL.GetOutputFactorOrder());
+	      toptXml["phrase"] = xmlrpc_c::value_string(tphrase);
+	      toptXml["fscore"] = xmlrpc_c::value_double(topt->GetFutureScore());
+	      toptXml["start"]  = xmlrpc_c::value_int(s);
+	      toptXml["end"]    = xmlrpc_c::value_int(e);
+	      vector<xmlrpc_c::value> scoresXml;
+	      const std::valarray<FValue> &scores 
+		= topt->GetScoreBreakdown().getCoreFeatures();
+	      for (size_t j = 0; j < scores.size(); ++j) 
+		scoresXml.push_back(xmlrpc_c::value_double(scores[j]));
+	      
+	      toptXml["scores"] = xmlrpc_c::value_array(scoresXml);
+	      toptsXml.push_back(xmlrpc_c::value_struct(toptXml));
+	    }
+	}
     }
     retData.insert(pair<string, xmlrpc_c::value>("topt", xmlrpc_c::value_array(toptsXml)));
-
   }
-
+  
 private:
   xmlrpc_c::paramList const& m_paramList;
   map<string, xmlrpc_c::value> m_retData;
