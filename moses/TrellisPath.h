@@ -54,7 +54,7 @@ protected:
   float m_totalScore;
 
   //Used by Manager::LatticeSample()
-  TrellisPath(const std::vector<const Hypothesis*> edges);
+  explicit TrellisPath(const std::vector<const Hypothesis*> edges);
 
   void InitScore();
 

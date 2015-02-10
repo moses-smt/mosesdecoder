@@ -30,7 +30,7 @@ public:
   virtual const Hypothesis *GetBestHypothesis() const = 0;
 
   //! Decode the sentence according to the specified search algorithm.
-  virtual void ProcessSentence() = 0;
+  virtual void Decode() = 0;
 
   explicit Search(Manager& manager);
   virtual ~Search() {}

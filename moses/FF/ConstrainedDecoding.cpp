@@ -43,7 +43,7 @@ ConstrainedDecoding::ConstrainedDecoding(const std::string &line)
 void ConstrainedDecoding::Load()
 {
   const StaticData &staticData = StaticData::Instance();
-  bool addBeginEndWord = (staticData.GetSearchAlgorithm() == ChartDecoding) || (staticData.GetSearchAlgorithm() == ChartIncremental);
+  bool addBeginEndWord = (staticData.GetSearchAlgorithm() == CYKPlus) || (staticData.GetSearchAlgorithm() == ChartIncremental);
 
   for(size_t i = 0; i < m_paths.size(); ++i) {
     InputFileStream constraintFile(m_paths[i]);
@@ -51,7 +51,7 @@ void ConstrainedDecoding::Load()
     long sentenceID = staticData.GetStartTranslationId() - 1;
     while (getline(constraintFile, line)) {
       vector<string> vecStr = Tokenize(line, "\t");
-  
+
       Phrase phrase(0);
       if (vecStr.size() == 1) {
         sentenceID++;
@@ -64,7 +64,7 @@ void ConstrainedDecoding::Load()
       } else {
         UTIL_THROW(util::Exception, "Reference file not loaded");
       }
-  
+
       if (addBeginEndWord) {
         phrase.InitStartEndWord();
       }
@@ -76,7 +76,7 @@ void ConstrainedDecoding::Load()
 std::vector<float> ConstrainedDecoding::DefaultWeights() const
 {
   UTIL_THROW_IF2(m_numScoreComponents != 1,
-          "ConstrainedDecoding must only have 1 score");
+                 "ConstrainedDecoding must only have 1 score");
   vector<float> ret(1, 1);
   return ret;
 }
@@ -109,7 +109,7 @@ FFState* ConstrainedDecoding::EvaluateWhenApplied(
   assert(ref);
 
   ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
-  const Phrase &outputPhrase = ret->GetPhrase(); 
+  const Phrase &outputPhrase = ret->GetPhrase();
 
   size_t searchPos = NOT_FOUND;
   size_t i = 0;
@@ -125,16 +125,14 @@ FFState* ConstrainedDecoding::EvaluateWhenApplied(
     // translated entire sentence.
     bool match = (searchPos == 0) && (size == outputPhrase.GetSize());
     if (!m_negate) {
-        score = match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
-    }
-    else {
-        score = !match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
+      score = match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
+    } else {
+      score = !match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
     }
   } else if (m_negate) {
     // keep all derivations
     score = 0;
-  }
-  else {
+  } else {
     score = (searchPos != NOT_FOUND) ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
   }
 
@@ -165,7 +163,7 @@ FFState* ConstrainedDecoding::EvaluateWhenApplied(
     size = (*ref)[i].GetSize();
     i++;
   }
-  
+
   float score;
   if (hypo.GetCurrSourceRange().GetStartPos() == 0 &&
       hypo.GetCurrSourceRange().GetEndPos() == source.GetSize() - 1) {
@@ -173,10 +171,9 @@ FFState* ConstrainedDecoding::EvaluateWhenApplied(
     bool match = (searchPos == 0) && (size == outputPhrase.GetSize());
 
     if (!m_negate) {
-        score = match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
-    }
-    else {
-        score = !match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
+      score = match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
+    } else {
+      score = !match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
     }
   } else if (m_negate) {
     // keep all derivations

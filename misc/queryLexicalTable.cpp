@@ -91,7 +91,7 @@ int main(int argc, char** argv)
   // f.CreateFromString(Input, f_mask, query_f, "|", NULL);
   // c.CreateFromString(Input, c_mask,  query_c,"|", NULL);
   // Phrase.CreateFromString() calls Word.CreateFromSting(), which gets
-  // the factor delimiter from StaticData, so it should not be hardcoded 
+  // the factor delimiter from StaticData, so it should not be hardcoded
   // here. [UG], thus:
   e.CreateFromString(Output, e_mask, query_e, NULL);
   f.CreateFromString(Input, f_mask, query_f, NULL);

@@ -35,10 +35,10 @@ ModelScore* ModelScore::createModelScore(const string& modeltype)
   } else if (modeltype.compare("leftright") == 0) {
     return new ModelScoreLR();
   } else {
-    cerr << "Illegal model type given for lexical reordering model scoring: " 
-	 << modeltype 
-	 << ". The allowed types are: mslr, msd, monotonicity, leftright" 
-	 << endl;
+    cerr << "Illegal model type given for lexical reordering model scoring: "
+         << modeltype
+         << ". The allowed types are: mslr, msd, monotonicity, leftright"
+         << endl;
     exit(1);
   }
 }

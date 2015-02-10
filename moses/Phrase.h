@@ -140,8 +140,9 @@ public:
   }
 
   size_t GetNumTerminals() const;
-  size_t GetNumNonTerminals() const
-  { return GetSize() - GetNumTerminals(); }
+  size_t GetNumNonTerminals() const {
+    return GetSize() - GetNumTerminals();
+  }
 
   //! whether the 2D vector is a substring of this phrase
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
@@ -165,8 +166,8 @@ public:
   }
 
   void RemoveWord(size_t pos) {
-	UTIL_THROW_IF2(pos >= m_words.size(),
-			"Referencing position " << pos << " out of bound");
+    UTIL_THROW_IF2(pos >= m_words.size(),
+                   "Referencing position " << pos << " out of bound");
     m_words.erase(m_words.begin() + pos);
   }
 

@@ -17,12 +17,14 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <boost/algorithm/string/predicate.hpp>
 #include "ScoreFeature.h"
 #include "DomainFeature.h"
 #include "InternalStructFeature.h"
 #include "TimeFeature.h"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace MosesTraining
 {
@@ -42,7 +44,7 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i] == "--IgnoreSentenceId") {
       m_includeSentenceId = true;
-    } else if (args[i].substr(0,8) == "--Domain") {
+    } else if (starts_with(args[i], "--Domain")) {
       string type = args[i].substr(8);
       ++i;
       UTIL_THROW_IF(i == args.size(), ScoreFeatureArgumentException, "Missing domain file");
@@ -60,7 +62,7 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
       }
       domainAdded = true;
       m_includeSentenceId = true;
-    } else if (args[i].substr(0,14) == "--SparseDomain") {
+    } else if (starts_with(args[i], "--SparseDomain")) {
       string type = args[i].substr(14);
       ++i;
       UTIL_THROW_IF(i == args.size(), ScoreFeatureArgumentException, "Missing domain file");
@@ -99,9 +101,9 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
 
 }
 
-void ScoreFeatureManager::addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
-                                                    float count, 
-                                                    int sentenceId) const
+void ScoreFeatureManager::addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+    float count,
+    int sentenceId) const
 {
   for (size_t i = 0; i < m_features.size(); ++i) {
     m_features[i]->addPropertiesToPhrasePair(phrasePair, count, sentenceId);

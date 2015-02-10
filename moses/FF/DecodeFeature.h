@@ -43,12 +43,12 @@ public:
   DecodeFeature(const std::string &line);
 
   DecodeFeature(size_t numScoreComponents
-                  , const std::string &line);
+                , const std::string &line);
 
   DecodeFeature(size_t numScoreComponents
-                  , const std::vector<FactorType> &input
-                  , const std::vector<FactorType> &output
-                  , const std::string &line);
+                , const std::vector<FactorType> &input
+                , const std::vector<FactorType> &output
+                , const std::string &line);
 
   //! returns output factor types as specified by the ini file
   const FactorMask& GetOutputFactorMask() const;
@@ -63,26 +63,34 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
 
   void EvaluateWhenApplied(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const
-  {}
+                           ScoreComponentCollection* accumulator) const {
+  }
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
-                     ScoreComponentCollection* accumulator) const
-  {}
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWhenApplied(const Syntax::SHyperedge &hyperedge,
+                           ScoreComponentCollection* accumulator) const {
+  }
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+  }
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
 
-  void SetContainer(const DecodeStep *container)
-  { m_container = container; }
+  void EvaluateInIsolation(const Phrase &source
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {
+  }
+
+  void SetContainer(const DecodeStep *container) {
+    m_container = container;
+  }
 
   const DecodeGraph &GetDecodeGraph() const;
 

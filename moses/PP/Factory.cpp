@@ -87,13 +87,13 @@ boost::shared_ptr<PhraseProperty> PhrasePropertyFactory::ProduceProperty(const s
 
 void PhrasePropertyFactory::PrintPP() const
 {
-	std::cerr << "Registered phrase properties:" << std::endl;
-	Registry::const_iterator iter;
-	for (iter = m_registry.begin(); iter != m_registry.end(); ++iter) {
-		const std::string &ppName = iter->first;
-		std::cerr << ppName << " ";
-	}
-	std::cerr << std::endl;
+  std::cerr << "Registered phrase properties:" << std::endl;
+  Registry::const_iterator iter;
+  for (iter = m_registry.begin(); iter != m_registry.end(); ++iter) {
+    const std::string &ppName = iter->first;
+    std::cerr << ppName << " ";
+  }
+  std::cerr << std::endl;
 }
 
 } // namespace Moses

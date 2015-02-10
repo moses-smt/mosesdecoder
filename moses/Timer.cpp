@@ -2,6 +2,7 @@
 #include <iomanip>
 #include "Util.h"
 #include "Timer.h"
+#include "StaticData.h"
 
 #include "util/usage.hh"
 
@@ -10,7 +11,7 @@ namespace Moses
 
 /***
  * Return the total wall time that the timer has been in the "running"
- * state since it was first "started".  
+ * state since it was first "started".
  */
 double Timer::get_elapsed_time() const
 {
@@ -30,7 +31,7 @@ double Timer::get_elapsed_time() const
 void Timer::start(const char* msg)
 {
   // Print an optional message, something like "Starting timer t";
-  if (msg) TRACE_ERR( msg << std::endl);
+  if (msg) VERBOSE(1, msg << std::endl);
 
   // Return immediately if the timer is already running
   if (running && !stopped) return;
@@ -39,8 +40,7 @@ void Timer::start(const char* msg)
   if (stopped) {
     start_time = util::WallTime() - (stop_time - start_time);
     stopped = false;
-  }
-  else {
+  } else {
     start_time = util::WallTime();
     running = true;
   }
@@ -53,7 +53,7 @@ void Timer::start(const char* msg)
 void Timer::stop(const char* msg)
 {
   // Print an optional message, something like "Stopping timer t";
-  if (msg) TRACE_ERR( msg << std::endl);
+  if (msg) VERBOSE(1, msg << std::endl);
 
   // Return immediately if the timer is not running
   if (stopped || !running) return;
@@ -71,10 +71,10 @@ void Timer::stop(const char* msg)
 void Timer::check(const char* msg)
 {
   // Print an optional message, something like "Checking timer t";
-  if (msg) TRACE_ERR( msg << " : ");
+  if (msg) VERBOSE(1, msg << " : ");
 
-//  TRACE_ERR( "[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");
-  TRACE_ERR( "[" << (running ? get_elapsed_time() : 0) << "] seconds\n");
+//  VERBOSE(1, "[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");
+  VERBOSE(1, "[" << (running ? get_elapsed_time() : 0) << "] seconds\n");
 }
 
 /***

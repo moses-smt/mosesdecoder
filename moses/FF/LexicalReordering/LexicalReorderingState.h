@@ -124,7 +124,7 @@ protected:
   int ComparePrevScores(const TranslationOption *other) const;
 
   //constants for the different type of reorderings (corresponding to indexes in the table file)
-  public:
+public:
   static const ReorderingType M = 0;  // monotonic
   static const ReorderingType NM = 1; // non-monotonic
   static const ReorderingType S = 1;  // swap

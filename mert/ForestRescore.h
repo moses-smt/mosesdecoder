@@ -27,7 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "BleuScorer.h"
 #include "Hypergraph.h"
 
-namespace MosesTuning {
+namespace MosesTuning
+{
 
 std::ostream& operator<<(std::ostream& out, const WordVec& wordVec);
 
@@ -47,18 +48,21 @@ struct NgramEquals : public std::binary_function<const WordVec&, const WordVec&,
 typedef boost::unordered_map<WordVec, size_t, NgramHash, NgramEquals> NgramCounter;
 
 
-class ReferenceSet {
+class ReferenceSet
+{
 
 
 public:
-  
+
   void AddLine(size_t sentenceId, const StringPiece& line, Vocab& vocab);
 
   void Load(const std::vector<std::string>& files, Vocab& vocab);
 
   size_t NgramMatches(size_t sentenceId, const WordVec&, bool clip) const;
 
-  size_t Length(size_t sentenceId) const {return lengths_[sentenceId];}
+  size_t Length(size_t sentenceId) const {
+    return lengths_[sentenceId];
+  }
 
 private:
   //ngrams to (clipped,unclipped) counts
@@ -80,31 +84,32 @@ struct VertexState {
 /**
   * Used to score an rule (ie edge) when we are applying it.
 **/
-class HgBleuScorer {
-  public:
-    HgBleuScorer(const ReferenceSet& references, const Graph& graph, size_t sentenceId, const std::vector<FeatureStatsType>& backgroundBleu):
+class HgBleuScorer
+{
+public:
+  HgBleuScorer(const ReferenceSet& references, const Graph& graph, size_t sentenceId, const std::vector<FeatureStatsType>& backgroundBleu):
     references_(references), sentenceId_(sentenceId), graph_(graph), backgroundBleu_(backgroundBleu),
-      backgroundRefLength_(backgroundBleu[kBleuNgramOrder*2]) {
-      vertexStates_.resize(graph.VertexSize());
-      totalSourceLength_ = graph.GetVertex(graph.VertexSize()-1).SourceCovered();
-    }
+    backgroundRefLength_(backgroundBleu[kBleuNgramOrder*2]) {
+    vertexStates_.resize(graph.VertexSize());
+    totalSourceLength_ = graph.GetVertex(graph.VertexSize()-1).SourceCovered();
+  }
 
-    FeatureStatsType Score(const Edge& edge, const Vertex& head, std::vector<FeatureStatsType>& bleuStats) ;
+  FeatureStatsType Score(const Edge& edge, const Vertex& head, std::vector<FeatureStatsType>& bleuStats) ;
 
-    void UpdateState(const Edge& winnerEdge, size_t vertexId, const std::vector<FeatureStatsType>& bleuStats);
+  void UpdateState(const Edge& winnerEdge, size_t vertexId, const std::vector<FeatureStatsType>& bleuStats);
 
 
-  private:
-    const ReferenceSet& references_;
-    std::vector<VertexState> vertexStates_;
-    size_t sentenceId_;
-    size_t totalSourceLength_;
-    const Graph& graph_;
-    std::vector<FeatureStatsType> backgroundBleu_;
-    FeatureStatsType backgroundRefLength_;
+private:
+  const ReferenceSet& references_;
+  std::vector<VertexState> vertexStates_;
+  size_t sentenceId_;
+  size_t totalSourceLength_;
+  const Graph& graph_;
+  std::vector<FeatureStatsType> backgroundBleu_;
+  FeatureStatsType backgroundRefLength_;
 
-    void UpdateMatches(const NgramCounter& counter, std::vector<FeatureStatsType>& bleuStats) const;
-    size_t GetTargetLength(const Edge& edge) const;
+  void UpdateMatches(const NgramCounter& counter, std::vector<FeatureStatsType>& bleuStats) const;
+  size_t GetTargetLength(const Edge& edge) const;
 };
 
 struct HgHypothesis {

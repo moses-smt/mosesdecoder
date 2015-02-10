@@ -186,6 +186,9 @@ namespace Moses
     
     poolCounts = true;
     
+    if ((m = param.find("bias")) != param.end()) 
+	bias_file = m->second;
+
     if ((m = param.find("extra")) != param.end()) 
       extra_data = m->second;
 
@@ -194,6 +197,8 @@ namespace Moses
 
     dflt = pair<string,string>("feature-sets","standard");
     m_feature_set_names = Tokenize(param.insert(dflt).first->second.c_str(), ",");
+    m = param.find("name");
+    if (m != param.end()) m_name = m->second;
 
     // check for unknown parameters
     vector<string> known_parameters; known_parameters.reserve(50);
@@ -202,6 +207,7 @@ namespace Moses
     known_parameters.push_back("Mmsapt");
     known_parameters.push_back("PhraseDictionaryBitextSampling"); // alias for Mmsapt
     known_parameters.push_back("base"); // alias for path
+    known_parameters.push_back("bias");
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
@@ -225,6 +231,7 @@ namespace Moses
     known_parameters.push_back("tuneable");
     known_parameters.push_back("unal");
     known_parameters.push_back("workers");
+    sort(known_parameters.begin(),known_parameters.end());
     for (map<string,string>::iterator m = param.begin(); m != param.end(); ++m)
       {
 	UTIL_THROW_IF2(!binary_search(known_parameters.begin(),
@@ -232,6 +239,19 @@ namespace Moses
 		       HERE << ": Unknown parameter specification for Mmsapt: " 
 		       << m->first);
       }
+  }
+
+  void 
+  Mmsapt::
+  load_bias(string const fname)
+  {
+    ifstream in(fname.c_str());
+    bias.reserve(btfix.T1->size());
+    float v;
+    while (in>>v) bias.push_back(v);
+    UTIL_THROW_IF2(bias.size() != btfix.T1->size(),
+		   "Mismatch between bias vector size and corpus size at "
+		   << HERE);
   }
 
   void
@@ -258,7 +278,7 @@ namespace Moses
     if (locking) guard.reset(new boost::lock_guard<boost::mutex>(this->lock));
     btdyn = btdyn->add(text1,text2,symal);
     assert(btdyn);
-    // cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
+    cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
   }
 
   template<typename fftype>
@@ -325,56 +345,65 @@ namespace Moses
   Mmsapt::
   Load()
   {
+    Load(true);
+  }
+
+  void
+  Mmsapt::
+  Load(bool with_checks)
+  {
     boost::lock_guard<boost::mutex> guard(this->lock);
 
     // can load only once
     // UTIL_THROW_IF2(shards.size(),"Mmsapt is already loaded at " << HERE);
-
+    
     // load feature sets
     BOOST_FOREACH(string const& fsname, m_feature_set_names)
       {
-    // standard (default) feature set
-    if (fsname == "standard")
-      {
-    // lexical scores 
-    string lexfile = bname + L1 + "-" + L2 + ".lex";
-    sptr<PScoreLex1<Token> > ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
-    register_ff(ff,m_active_ff_common);
-
-    // these are always computed on pooled data
-    check_ff<PScoreRareness<Token> > ("rare", &m_active_ff_common);
-    check_ff<PScoreUnaligned<Token> >("unal", &m_active_ff_common);
-    check_ff<PScoreCoherence<Token> >("coh",  &m_active_ff_common);
-    
-    // for these ones either way is possible (specification ends with '+' 
-    // if corpus-specific 
-    check_ff<PScorePfwd<Token> >("pfwd", m_lbop_conf);
-    check_ff<PScorePbwd<Token> >("pbwd", m_lbop_conf);
-    check_ff<PScoreLogCnt<Token> >("logcnt");
-
-    // These are always corpus-specific
-    check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_fix);
-    check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_dyn);
-      }
-
-    // data source features (copies of phrase and word count specific to
-    // this translation model)
-    else if (fsname == "datasource")
-      {
-    sptr<PScorePC<Token> > ffpcnt(new PScorePC<Token>("pcnt"));
-    register_ff(ffpcnt,m_active_ff_common);
-    sptr<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
-    register_ff(ffwcnt,m_active_ff_common);
-      }
+	// standard (default) feature set
+	if (fsname == "standard")
+	  {
+	    // lexical scores 
+	    string lexfile = bname + L1 + "-" + L2 + ".lex";
+	    sptr<PScoreLex1<Token> > ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
+	    register_ff(ff,m_active_ff_common);
+	    
+	    // these are always computed on pooled data
+	    check_ff<PScoreRareness<Token> > ("rare", &m_active_ff_common);
+	    check_ff<PScoreUnaligned<Token> >("unal", &m_active_ff_common);
+	    check_ff<PScoreCoherence<Token> >("coh",  &m_active_ff_common);
+	    
+	    // for these ones either way is possible (specification ends with '+' 
+	    // if corpus-specific 
+	    check_ff<PScorePfwd<Token> >("pfwd", m_lbop_conf);
+	    check_ff<PScorePbwd<Token> >("pbwd", m_lbop_conf);
+	    check_ff<PScoreLogCnt<Token> >("logcnt");
+	    
+	    // These are always corpus-specific
+	    check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_fix);
+	    check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_dyn);
+	  }
+	
+	// data source features (copies of phrase and word count specific to
+	// this translation model)
+	else if (fsname == "datasource")
+	  {
+	    sptr<PScorePC<Token> > ffpcnt(new PScorePC<Token>("pcnt"));
+	    register_ff(ffpcnt,m_active_ff_common);
+	    sptr<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
+	    register_ff(ffwcnt,m_active_ff_common);
+	  }
       }
     // cerr << "Features: " << Join("|",m_feature_names) << endl;
-
-    UTIL_THROW_IF2(this->m_feature_names.size() != this->m_numScoreComponents,
-		   "At " << HERE << ": number of feature values provided by "
-		   << "Phrase table (" << this->m_feature_names.size()
-		   << ") does not match number specified in Moses config file ("
-		   << this->m_numScoreComponents << ")!\n";);
-
+    
+    if (with_checks)
+      {
+	UTIL_THROW_IF2(this->m_feature_names.size() != this->m_numScoreComponents,
+		       "At " << HERE << ": number of feature values provided by "
+		       << "Phrase table (" << this->m_feature_names.size()
+		       << ") does not match number specified in Moses config file ("
+		       << this->m_numScoreComponents << ")!\n";);
+      }
     // Load corpora. For the time being, we can have one memory-mapped static
     // corpus and one in-memory dynamic corpus
     // sptr<mmbitext> btfix(new mmbitext());
@@ -385,6 +414,9 @@ namespace Moses
     
     btdyn.reset(new imbitext(btfix.V1, btfix.V2, m_default_sample_size));
     btdyn->num_workers = this->m_workers;
+    if (bias_file.size())
+      load_bias(bias_file);
+    
     if (extra_data.size()) 
       load_extra_data(extra_data,false);
     
@@ -398,7 +430,8 @@ namespace Moses
 	wlex21[c->id].push_back(r);
     COOCraw.open(bname + L1 + "-" + L2 + ".coc");
 #endif
-    
+    assert(btdyn);
+    // cerr << "LOADED " << HERE << endl;
   }
 
   void
@@ -483,7 +516,7 @@ namespace Moses
 
   Mmsapt::
   TargetPhraseCollectionWrapper::
-  TargetPhraseCollectionWrapper(size_t r, uint64_t k)
+  TargetPhraseCollectionWrapper(size_t r, ::uint64_t k)
     : revision(r), key(k), refCount(0), idx(-1)
   { }
 
@@ -510,6 +543,7 @@ namespace Moses
     sptr<imBitext<Token> > dyn;
     { // braces are needed for scoping mutex lock guard!
       boost::lock_guard<boost::mutex> guard(this->lock);
+      assert(btdyn);
       dyn = btdyn;
     }
     assert(dyn);
@@ -531,7 +565,7 @@ namespace Moses
       return NULL; // phrase not found in either bitext
 
     // cache lookup:
-    uint64_t phrasekey = (mfix.size() == sphrase.size() ? (mfix.getPid()<<1) 
+    ::uint64_t phrasekey = (mfix.size() == sphrase.size() ? (mfix.getPid()<<1) 
 			  : (mdyn.getPid()<<1)+1);
     size_t revision = dyn->revision();
     {
@@ -555,7 +589,8 @@ namespace Moses
     // no need to expand pstats at every single lookup again, especially 
     // for btfix.
     sptr<pstats> sfix,sdyn;
-    if (mfix.size() == sphrase.size()) sfix = btfix.lookup(mfix);
+    if (mfix.size() == sphrase.size()) 
+      sfix = btfix.lookup(mfix);
     if (mdyn.size() == sphrase.size()) sdyn = dyn->lookup(mdyn);
 
     vector<PhrasePair<Token> > ppfix,ppdyn;
@@ -832,6 +867,13 @@ namespace Moses
   ProvidesPrefixCheck() const
   {
     return true;
+  }
+
+  string const&
+  Mmsapt::
+  GetName() const 
+  { 
+    return m_name; 
   }
 
 }

@@ -55,7 +55,8 @@ void HwcmScorer::setReferenceFiles(const vector<string>& referenceFiles)
 
 }
 
-void HwcmScorer::extractHeadWordChain(TreePointer tree, vector<string> & history, vector<map<string, int> > & hwc) {
+void HwcmScorer::extractHeadWordChain(TreePointer tree, vector<string> & history, vector<map<string, int> > & hwc)
+{
 
   if (tree->GetLength() > 0) {
     string head = getHead(tree);
@@ -64,8 +65,7 @@ void HwcmScorer::extractHeadWordChain(TreePointer tree, vector<string> & history
       for (std::vector<TreePointer>::const_iterator it = tree->GetChildren().begin(); it != tree->GetChildren().end(); ++it) {
         extractHeadWordChain(*it, history, hwc);
       }
-    }
-    else {
+    } else {
       vector<string> new_history(kHwcmOrder);
       new_history[0] = head;
       hwc[0][head]++;
@@ -85,11 +85,11 @@ void HwcmScorer::extractHeadWordChain(TreePointer tree, vector<string> & history
   }
 }
 
-string HwcmScorer::getHead(TreePointer tree) {
+string HwcmScorer::getHead(TreePointer tree)
+{
   // assumption (only true for dependency parse: each constituent has a preterminal label, and corresponding terminal is head)
   // if constituent has multiple preterminals, first one is picked; if it has no preterminals, empty string is returned
-  for (std::vector<TreePointer>::const_iterator it = tree->GetChildren().begin(); it != tree->GetChildren().end(); ++it)
-  {
+  for (std::vector<TreePointer>::const_iterator it = tree->GetChildren().begin(); it != tree->GetChildren().end(); ++it) {
     TreePointer child = *it;
 
     if (child->GetLength() == 1 && child->GetChildren()[0]->IsTerminal()) {

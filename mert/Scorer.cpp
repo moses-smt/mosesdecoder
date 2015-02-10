@@ -25,9 +25,9 @@ const int kUnknownToken = -1;
 Scorer::Scorer(const string& name, const string& config)
   : m_name(name),
     m_vocab(mert::VocabularyFactory::GetVocabulary()),
-    #if defined(__GLIBCXX__) || defined(__GLIBCPP__)
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
     m_filter(NULL),
-    #endif
+#endif
     m_score_data(NULL),
     m_enable_preserve_case(true)
 {

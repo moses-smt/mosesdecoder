@@ -62,9 +62,9 @@ public:
     address_mask_ = full_mask_ >> first_bit_;
   }
   Filter(FileHandler* fin, bool loaddata = true) : data_(NULL) {
-	assert(loadHeader(fin));
+    assert(loadHeader(fin));
     if (loaddata)
-    	assert(loadData(fin));
+      assert(loadData(fin));
   }
   virtual ~Filter() {
     delete[] data_;
@@ -80,7 +80,7 @@ public:
   }
   // read / write functions
   inline bool read(uint64_t address, T* value) {
-	assert(address <= addresses_);
+    assert(address <= addresses_);
     // copy address to 'value'
     uint64_t data_bit = address * width_;
     uint32_t data_cell = (data_bit >> log_cell_width_); // % cells_;
@@ -102,7 +102,7 @@ public:
     return true;
   }
   inline T read(uint64_t address) {
-	assert(address <= addresses_);
+    assert(address <= addresses_);
     // return value at address
     T value = 0;
     uint64_t data_bit = address * width_;
@@ -124,7 +124,7 @@ public:
     return value;
   }
   inline bool write(uint64_t address, T value) {
-	assert(address <= addresses_);
+    assert(address <= addresses_);
     assert(log2(value) <= width_);
     // write 'value' to address
     uint64_t data_bit = address * width_;

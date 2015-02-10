@@ -67,6 +67,7 @@ private:
 
 public:
   TargetPhrase(const PhraseDictionary *pt = NULL);
+  TargetPhrase(std::string out_string, const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
   ~TargetPhrase();
@@ -80,6 +81,8 @@ public:
 
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
   void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
+
+  void UpdateScore(ScoreComponentCollection *futureScoreBreakdown = NULL);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
@@ -107,6 +110,15 @@ public:
     return m_scoreBreakdown;
   }
 
+  /*
+    //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
+    void SetSourcePhrase(const Phrase&  p) {
+      m_sourcePhrase=p;
+    }
+    const Phrase& GetSourcePhrase() const {
+      return m_sourcePhrase;
+    }
+  */
   void SetTargetLHS(const Word *lhs) {
     m_lhsTarget = lhs;
   }
@@ -122,21 +134,19 @@ public:
     m_alignNonTerm = alignNonTerm;
   }
 
-  // ALNREP = alignment representation, 
+  // ALNREP = alignment representation,
   // see AlignmentInfo constructors for supported representations
   template<typename ALNREP>
-  void 
-  SetAlignTerm(const ALNREP &coll)
-  {
+  void
+  SetAlignTerm(const ALNREP &coll) {
     m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
   }
 
-  // ALNREP = alignment representation, 
+  // ALNREP = alignment representation,
   // see AlignmentInfo constructors for supported representations
-  template<typename ALNREP> 
-  void 
-  SetAlignNonTerm(const ALNREP &coll)
-  {
+  template<typename ALNREP>
+  void
+  SetAlignNonTerm(const ALNREP &coll) {
     m_alignNonTerm = AlignmentInfoCollection::Instance().Add(coll);
   }
 
@@ -152,8 +162,9 @@ public:
     return m_ruleSource;
   }
 
-  const PhraseDictionary *GetContainer() const
-  { return m_container; }
+  const PhraseDictionary *GetContainer() const {
+    return m_container;
+  }
 
   // To be set by the FF that needs it, by default the rule source = NULL
   // make a copy of the source side of the rule

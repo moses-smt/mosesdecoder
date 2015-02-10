@@ -235,6 +235,7 @@ public:
   void capMin(FValue minValue);
 
   void sparsePlusEquals(const FVector& rhs);
+  void corePlusEquals(const FVector& rhs);
   void coreAssign(const FVector& rhs);
 
   void incrementSparseHopeFeatures();

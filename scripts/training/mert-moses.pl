@@ -432,7 +432,7 @@ $proargs = "" unless $proargs;
 
 my $mert_mert_args = "$mertargs $mertmertargs";
 $mert_mert_args =~ s/\-+(binary|b)\b//;
-$mert_mert_args .= " $scconfig";
+$mert_mert_args .= "$sctype $scconfig";
 if ($___ACTIVATE_FEATURES) {
   $mert_mert_args .= " -o \"$___ACTIVATE_FEATURES\"";
 }

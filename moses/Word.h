@@ -152,7 +152,7 @@ public:
                         , const std::vector<FactorType> &factorOrder
                         , const StringPiece &str
                         , bool isNonTerminal
-                        , bool strict = true); 
+                        , bool strict = true);
 
   void CreateUnknownWord(const Word &sourceWord);
 

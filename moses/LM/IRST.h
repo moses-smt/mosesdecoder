@@ -24,17 +24,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <vector>
-#include "moses/Factor.h"
-#include "moses/TypeDef.h"
-#include "moses/Util.h"
-#include "SingleFactor.h"
 
+#include "moses/Factor.h"
+#include "moses/LM/SingleFactor.h"
+#include "moses/Hypothesis.h"
+#include "moses/TypeDef.h"
+
+#include "moses/Util.h"
+
+//this is required because:
+//- IRSTLM package uses the namespace irstlm
+//- the compilation of "IRST.cpp" requires "using namespace irstlm", which is defined in any file of the IRSTLM package
+//  but conflicts with these foward declaration of class lmContainer
+//- for files in moses/LM the IRSTLM include directory is set
+//  but not for the rest of files
+#ifdef LM_IRST
 class lmContainer;  // irst lm container for any lm type
 class ngram;
 class dictionary;
+#endif
+
 
 namespace Moses
 {
+
+//class LanguageModel;
+class FFState;
 class Phrase;
 
 /** Implementation of single factor LM using IRST's code.
@@ -50,31 +65,50 @@ protected:
   int m_empty;  //code of an empty position
   int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
   int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with
-  int m_lmtb_size;          //max ngram stored in the table
   int m_lmtb_dub;           //dictionary upperboud
+  int m_lmtb_size;          //max ngram stored in the table
+
+  dictionary* d;
 
   std::string m_mapFilePath;
 
   void CreateFactors(FactorCollection &factorCollection);
+
+  int GetLmID( const Word &word ) const;
   int GetLmID( const std::string &str ) const;
   int GetLmID( const Factor *factor ) const;
 
-  dictionary* d;
 
 public:
   LanguageModelIRST(const std::string &line);
 
   ~LanguageModelIRST();
+
+  void SetParameter(const std::string& key, const std::string& value);
+
+  bool IsUseable(const FactorMask &mask) const;
+
   void Load();
+  const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
+  
+  virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+
+  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+
+/*
+  virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+
+  virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const;
+*/
+
 
   void InitializeForInput(InputType const& source);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
   void set_dictionary_upperbound(int dub) {
     m_lmtb_size=dub ;
-//m_lmtb->set_dictionary_upperbound(dub);
   };
 };
 

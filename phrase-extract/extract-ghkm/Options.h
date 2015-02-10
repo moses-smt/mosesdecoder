@@ -34,6 +34,7 @@ public:
     : allowUnary(false)
     , conditionOnTargetLhs(false)
     , gzOutput(false)
+    , includeSentenceId(false)
     , maxNodes(15)
     , maxRuleDepth(3)
     , maxRuleSize(3)
@@ -41,12 +42,14 @@ public:
     , minimal(false)
     , pcfg(false)
     , phraseOrientation(false)
-    , treeFragments(false)
-    , sourceLabels(false)
     , sentenceOffset(0)
-    , unpairedExtractFormat(false)
+    , sourceLabels(false)
+    , stsg(false)
+    , t2s(false)
+    , treeFragments(false)
     , unknownWordMinRelFreq(0.03f)
-    , unknownWordUniform(false) {}
+    , unknownWordUniform(false)
+    , unpairedExtractFormat(false) {}
 
   // Positional options
   std::string targetFile;
@@ -59,6 +62,7 @@ public:
   bool conditionOnTargetLhs;
   std::string glueGrammarFile;
   bool gzOutput;
+  bool includeSentenceId;
   int maxNodes;
   int maxRuleDepth;
   int maxRuleSize;
@@ -66,16 +70,18 @@ public:
   bool minimal;
   bool pcfg;
   bool phraseOrientation;
-  bool treeFragments;
+  int sentenceOffset;
   bool sourceLabels;
   std::string sourceLabelSetFile;
-  int sentenceOffset;
-  bool unpairedExtractFormat;
-  std::string targetUnknownWordFile;
   std::string sourceUnknownWordFile;
-  std::string unknownWordSoftMatchesFile;
+  bool stsg;
+  bool t2s;
+  std::string targetUnknownWordFile;
+  bool treeFragments;
   float unknownWordMinRelFreq;
+  std::string unknownWordSoftMatchesFile;
   bool unknownWordUniform;
+  bool unpairedExtractFormat;
 };
 
 }  // namespace GHKM

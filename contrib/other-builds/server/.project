@@ -31,16 +31,6 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>IOWrapper.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/IOWrapper.cpp</locationURI>
-		</link>
-		<link>
-			<name>IOWrapper.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/IOWrapper.h</locationURI>
-		</link>
-		<link>
 			<name>mosesserver.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/server/mosesserver.cpp</locationURI>

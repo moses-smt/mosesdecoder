@@ -5,7 +5,7 @@ Copyright 2010-2013, Christophe Servan, LIUM, University of Le Mans, France
 Contact: christophe.servan@lium.univ-lemans.fr
 
 The tercpp tool and library are free software: you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License as published by 
+under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the licence, or
 (at your option) any later version.
 
@@ -34,41 +34,41 @@ using namespace std;
 namespace TERCpp
 {
 
-    class terAlignment
-    {
-        private:
-        public:
+class terAlignment
+{
+private:
+public:
 
-            terAlignment();
-            string toString();
-	    void scoreDetails(); 
+  terAlignment();
+  string toString();
+  void scoreDetails();
 
-            vector<string> ref;
-            vector<string> hyp;
-            vector<string> aftershift;
-            vector<terShift> allshifts;
-	    vector<int> hyp_int;
-	    vector<int> aftershift_int;
+  vector<string> ref;
+  vector<string> hyp;
+  vector<string> aftershift;
+  vector<terShift> allshifts;
+  vector<int> hyp_int;
+  vector<int> aftershift_int;
 
-            double numEdits;
-            double numWords;
-	    double averageWords;
-            vector<char> alignment;
-            string bestRef;
+  double numEdits;
+  double numWords;
+  double averageWords;
+  vector<char> alignment;
+  string bestRef;
 
-            int numIns;
-            int numDel;
-            int numSub;
-            int numSft;
-            int numWsf;
+  int numIns;
+  int numDel;
+  int numSub;
+  int numSft;
+  int numWsf;
 
 
-            string join ( string delim, vector<string> arr );
-            double score();
-            double scoreAv();
-	    string printAlignments();
-	    string printAllShifts();
-    };
+  string join ( string delim, vector<string> arr );
+  double score();
+  double scoreAv();
+  string printAlignments();
+  string printAllShifts();
+};
 
 }
 #endif

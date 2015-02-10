@@ -90,14 +90,14 @@
   <ItemGroup>
     <ClCompile Include="AlignmentPhrase.cpp" />
     <ClCompile Include="InputFileStream.cpp" />
-    <ClCompile Include="PhraseAlignment.cpp" />
+    <ClCompile Include="ExtractionPhrasePair.cpp" />
     <ClCompile Include="score.cpp" />
     <ClCompile Include="tables-core.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AlignmentPhrase.h" />
     <ClInclude Include="InputFileStream.h" />
-    <ClInclude Include="PhraseAlignment.h" />
+    <ClInclude Include="ExtractionPhrasePair.h" />
     <ClInclude Include="tables-core.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

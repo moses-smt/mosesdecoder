@@ -93,11 +93,11 @@ namespace Moses {
 
     template<typename sid_t, typename off_t, typename len_t>
     void 
-    parse_pid(uint64_t const pid, sid_t & sid, 
+    parse_pid(::uint64_t const pid, sid_t & sid, 
 	      off_t & off, len_t& len)
     {
-      static uint64_t two32 = uint64_t(1)<<32;
-      static uint64_t two16 = uint64_t(1)<<16;
+      static ::uint64_t two32 = ::uint64_t(1)<<32;
+      static ::uint64_t two16 = ::uint64_t(1)<<16;
       len = pid%two16;
       off = (pid%two32)>>16;
       sid = pid>>32;
@@ -152,8 +152,8 @@ namespace Moses {
 
       uint32_t ofwd[po_other+1], obwd[po_other+1];
 
-      // typedef typename boost::unordered_map<uint64_t, jstats> trg_map_t;
-      typedef std::map<uint64_t, jstats> trg_map_t;
+      // typedef typename boost::unordered_map<typename ::uint64_t, jstats> trg_map_t;
+      typedef std::map<typename ::uint64_t, jstats> trg_map_t;
       trg_map_t trg;
       pstats();
       ~pstats();
@@ -162,7 +162,7 @@ namespace Moses {
       size_t count_workers() { return in_progress; } 
 
       bool 
-      add(uint64_t const pid, 
+      add(::uint64_t const pid, 
 	  float    const w, 
 	  vector<uchar> const& a, 
 	  uint32_t      const cnt2,
@@ -195,7 +195,7 @@ namespace Moses {
       Token const* start2;
       uint32_t len1;
       uint32_t len2;
-      uint64_t p1, p2;
+      ::uint64_t p1, p2;
       uint32_t raw1,raw2,sample1,sample2,good1,good2,joint;
       vector<float> fvals;
       float dfwd[po_other+1]; // distortion counts // counts or probs?
@@ -214,26 +214,26 @@ namespace Moses {
       bool operator>=(PhrasePair const& other) const;
 
       void init();
-      void init(uint64_t const pid1, bool is_inverse, 
+      void init(::uint64_t const pid1, bool is_inverse, 
 		Token const* x,   uint32_t const len,
 		pstats const* ps = NULL, size_t const numfeats=0);
       
-      // void init(uint64_t const pid1, pstats const& ps,  size_t const numfeats);
-      // void init(uint64_t const pid1, pstats const& ps1, pstats const& ps2, 
+      // void init(::uint64_t const pid1, pstats const& ps,  size_t const numfeats);
+      // void init(::uint64_t const pid1, pstats const& ps1, pstats const& ps2, 
       // size_t const numfeats);
 
       // PhrasePair const&
-      // update(uint64_t const pid2, size_t r2 = 0);
+      // update(::uint64_t const pid2, size_t r2 = 0);
 
       PhrasePair const& 
-      update(uint64_t const pid2, Token const* x, 
+      update(::uint64_t const pid2, Token const* x, 
 	     uint32_t const len, jstats const& js);
       
       // PhrasePair const& 
-      // update(uint64_t const pid2, jstats   const& js1, jstats   const& js2);
+      // update(::uint64_t const pid2, jstats   const& js1, jstats   const& js2);
 
       // PhrasePair const& 
-      // update(uint64_t const pid2, size_t const raw2extra, jstats const& js);
+      // update(::uint64_t const pid2, size_t const raw2extra, jstats const& js);
 
       // float 
       // eval(vector<float> const& w);
@@ -249,7 +249,7 @@ namespace Moses {
     template<typename Token>
     void
     PhrasePair<Token>::
-    init(uint64_t const pid1, bool is_inverse, Token const* x, uint32_t const len, 
+    init(::uint64_t const pid1, bool is_inverse, Token const* x, uint32_t const len, 
 	 pstats const* ps, size_t const numfeats)
     {
       inverse = is_inverse;
@@ -273,7 +273,7 @@ namespace Moses {
     template<typename Token>
     PhrasePair<Token> const&
     PhrasePair<Token>::
-    update(uint64_t const pid2, 
+    update(::uint64_t const pid2, 
 	   Token const* x, uint32_t const len, jstats const& js)   
     {
       p2    = pid2;
@@ -454,14 +454,14 @@ namespace Moses {
        bool const flip) const;
       
 #if 1
-      typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
+      typedef boost::unordered_map<typename ::uint64_t,sptr<pstats> > pcache_t;
 #else
-      typedef map<uint64_t,sptr<pstats> > pcache_t;
+      typedef map<typename ::uint64_t,sptr<pstats> > pcache_t;
 #endif
       mutable pcache_t cache1,cache2;
     protected:
       typedef typename 
-      lru_cache::LRU_Cache<uint64_t, vector<PhrasePair<Token> > >  
+      lru_cache::LRU_Cache<typename ::uint64_t, vector<PhrasePair<Token> > >  
       pplist_cache_t;
 
       size_t default_sample_size;
@@ -496,7 +496,7 @@ namespace Moses {
       void
       lookup(vector<Token> const& snt, TSA<Token>& idx, 
 	     vector<vector<sptr<vector<PhrasePair<Token> > > > >& dest,
-	     vector<vector<uint64_t> >* pidmap = NULL,
+	     vector<vector<typename ::uint64_t> >* pidmap = NULL,
 	     typename PhrasePair<Token>::Scorer* scorer=NULL, 
 	     vector<float> const* const bias=NULL,
 	     bool multithread=true) const;
@@ -506,7 +506,7 @@ namespace Moses {
       void   setDefaultSampleSize(size_t const max_samples);
       size_t getDefaultSampleSize() const;
 
-      string toString(uint64_t pid, int isL2) const;
+      string toString(::uint64_t pid, int isL2) const;
 
       virtual size_t revision() const { return 0; }
     };
@@ -514,7 +514,7 @@ namespace Moses {
     template<typename Token>
     string
     Bitext<Token>::
-    toString(uint64_t pid, int isL2) const
+    toString(::uint64_t pid, int isL2) const
     {
       ostringstream buf;
       uint32_t sid,off,len; parse_pid(pid,sid,off,len);
@@ -607,8 +607,8 @@ namespace Moses {
 	bool               fwd; // if true, source phrase is L1 
 	sptr<pstats>     stats; // stores statistics collected during sampling
 	vector<float> const* bias; // sentence-level bias for sampling
-
-	bool step(uint64_t & sid, uint64_t & offset); // select another occurrence
+	float bias_total;
+	bool step(::uint64_t & sid, ::uint64_t & offset); // select another occurrence
 	bool done() const;
 	job(typename TSA<Token>::tree_iterator const& m, 
 	    sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd, 
@@ -648,7 +648,7 @@ namespace Moses {
     Bitext<Token>::
     agenda::
     job::
-    step(uint64_t & sid, uint64_t & offset)
+    step(::uint64_t & sid, ::uint64_t & offset)
     {
       boost::lock_guard<boost::mutex> jguard(lock);
       bool ret = (max_samples == 0) && (next < stop);
@@ -674,8 +674,9 @@ namespace Moses {
 		if (stats->raw_cnt == ctr) ++stats->raw_cnt;
 		size_t scalefac = (stats->raw_cnt - ctr++);
 		size_t rnum = scalefac * (rnd()/(rnd.max()+1.));
-		size_t th = (bias == NULL ? max_samples
-			     : bias->at(sid) * bias->size() * max_samples);
+		size_t th = (bias_total 
+			     ? bias->at(sid)/bias_total * bias->size() * max_samples
+			     : max_samples);
 #if 0
 		cerr << rnum << "/" << scalefac << " vs. " 
 		     << max_samples - stats->good << " ("
@@ -750,7 +751,7 @@ namespace Moses {
       // This way, we can reduce the number of lock / unlock operations we need to do during 
       // sampling. 
       size_t s1=0, s2=0, e1=0, e2=0;
-      uint64_t sid=0, offset=0; // of the source phrase
+      ::uint64_t sid=0, offset=0; // of the source phrase
       while(sptr<job> j = ag.get_job())
 	{
 	  j->stats->register_worker();
@@ -783,7 +784,7 @@ namespace Moses {
 	      Token const* o = (j->fwd ? ag.bt.T2 : ag.bt.T1)->sntStart(sid);
 	      float sample_weight = 1./((s2-s1+1)*(e2-e1+1));
 
-	      vector<uint64_t> seen; 
+	      vector<typename ::uint64_t> seen; 
 	      seen.reserve(100);
 	      // It is possible that the phrase extraction extracts the same
 	      // phrase twice, e.g., when word a co-occurs with sequence b b b
@@ -800,7 +801,7 @@ namespace Moses {
 		  // assert(b);
 		  for (size_t i = e1; i <= e2; ++i)
 		    {
-		      uint64_t tpid = b->getPid();
+		      ::uint64_t tpid = b->getPid();
 		      size_t s = 0;
 		      while (s < seen.size() && seen[s] != tpid) ++s;
 		      if (s < seen.size())
@@ -897,6 +898,17 @@ namespace Moses {
     {
       stats.reset(new pstats());
       stats->raw_cnt = m.approxOccurrenceCount();
+      bias_total = 0; // needed for renormalization
+      if (bias)
+	{
+	  for (char const* x = m.lower_bound(-1); x < stop;)
+	    {
+	      uint32_t sid; ushort offset;
+	      next = root->readSid(next,stop,sid);
+	      next = root->readOffset(next,stop,offset);
+	      bias_total += bias->at(sid);
+	    }
+	}
 #if UG_BITEXT_TRACK_ACTIVE_THREADS
       // if (++active%5 == 0) 
       ++active;
@@ -1382,7 +1394,7 @@ namespace Moses {
 	  // is caching here the cause of the apparent memory leak in 
 	  // confusion network decoding ???? No, it isn't. 
 	  // That was because of naive, brute-force input path generation.
-	  uint64_t pid = phrase.getPid();
+	  ::uint64_t pid = phrase.getPid();
 	  pcache_t & cache(phrase.root == &(*this->I1) ? cache1 : cache2);
 	  pcache_t::value_type entry(pid,sptr<pstats>());
 	  pair<pcache_t::iterator,bool> foo;
@@ -1417,7 +1429,7 @@ namespace Moses {
       PhrasePair<Token> m_pp;
       Token const* m_token;
       size_t m_len;
-      uint64_t m_pid1;
+      ::uint64_t m_pid1;
       bool m_is_inverse;
     public:
 
@@ -1474,11 +1486,11 @@ namespace Moses {
     Bitext<Token>::
     lookup(vector<Token> const& snt, TSA<Token>& idx, 
 	   vector<vector<sptr<vector<PhrasePair<Token> > > > >& dest,
-	   vector<vector<uint64_t> >* pidmap,
+	   vector<vector<typename ::uint64_t> >* pidmap,
 	   typename PhrasePair<Token>::Scorer* scorer,
 	   vector<float> const* const bias, bool multithread) const
     {
-      typedef vector<vector<sptr<vector<PhrasePair<Token> > > > > ret_t;
+      // typedef vector<vector<sptr<vector<PhrasePair<Token> > > > > ret_t;
       
       dest.clear(); 
       dest.resize(snt.size());
@@ -1496,7 +1508,7 @@ namespace Moses {
 	  typename TSA<Token>::tree_iterator m(&idx);
 	  for (size_t k = i; k < snt.size() && m.extend(snt[k].id()); ++k)
 	    {
-	      uint64_t key = m.getPid();
+	      ::uint64_t key = m.getPid();
 	      if (pidmap) (*pidmap)[i].push_back(key);
 	      sptr<vector<PhrasePair<Token> > > pp = C.get(key);
 	      if (pp) 

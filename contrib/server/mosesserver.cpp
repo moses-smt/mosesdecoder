@@ -17,7 +17,7 @@
 #endif
 #include "moses/TreeInput.h"
 #include "moses/LM/ORLM.h"
-#include "moses-cmd/IOWrapper.h"
+#include "moses/IOWrapper.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -28,7 +28,6 @@
 #include <xmlrpc-c/server_abyss.hpp>
 
 using namespace Moses;
-using namespace MosesCmd;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
@@ -269,9 +268,11 @@ public:
 
     const StaticData &staticData = StaticData::Instance();
 
-    if (addGraphInfo) {
+    //Make sure alternative paths are retained, if necessary
+    if (addGraphInfo || nbest_size>0) {
       (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
     }
+
 
     stringstream out, graphInfo, transCollOpts;
 
@@ -281,8 +282,8 @@ public:
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
-        ChartManager manager(0,tinput);
-        manager.ProcessSentence();
+        ChartManager manager(tinput);
+        manager.Decode();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
         if (addGraphInfo) {
@@ -292,14 +293,16 @@ public:
           m_retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
         }
     } else {
+        size_t lineNumber = 0; // TODO: Include sentence request number here?
         Sentence sentence;
+        sentence.SetTranslationId(lineNumber);
+
         const vector<FactorType> &
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-	      size_t lineNumber = 0; // TODO: Include sentence request number here?
-        Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm());
-	      manager.ProcessSentence();
+        Manager manager(sentence);
+	      manager.Decode();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
         vector<xmlrpc_c::value> alignInfo;
@@ -309,7 +312,7 @@ public:
         }
         if (addWordAlignInfo) {
           stringstream wordAlignment;
-          OutputAlignment(wordAlignment, hypo);
+          hypo->OutputAlignment(wordAlignment);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -324,7 +327,6 @@ public:
 
         if (addGraphInfo) {
           insertGraphInfo(manager,m_retData);
-            (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
         }
         if (addTopts) {
           insertTranslationOptions(manager,m_retData);
@@ -333,6 +335,8 @@ public:
           outputNBest(manager, m_retData, nbest_size, nbest_distinct, 
 		      reportAllFactors, addAlignInfo, addScoreBreakdown);
         }
+        (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
+
     }
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
@@ -471,7 +475,8 @@ public:
 
         if ((int)edges.size() > 0) {
           stringstream wordAlignment;
-          OutputAlignment(wordAlignment, edges[0]);
+					const Hypothesis *edge = edges[0];
+          edge->OutputAlignment(wordAlignment);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -489,7 +494,7 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  MosesCmd::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
+	  path.GetScoreBreakdown().OutputAllFeatureScores(buf);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 

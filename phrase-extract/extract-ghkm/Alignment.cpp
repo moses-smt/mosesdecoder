@@ -21,6 +21,7 @@
 
 #include "Exception.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 
@@ -58,6 +59,13 @@ void ReadAlignment(const std::string &s, Alignment &a)
       a.push_back(std::make_pair(src, tgt));
     }
     begin = end+1;
+  }
+}
+
+void FlipAlignment(Alignment &a)
+{
+  for (Alignment::iterator p = a.begin(); p != a.end(); ++p) {
+    std::swap(p->first, p->second);
   }
 }
 

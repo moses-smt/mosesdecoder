@@ -7,9 +7,10 @@
 
 #include <iostream>
 
-namespace Moses {
-	class Hypothesis;
-	class ChartHypothesis;
+namespace Moses
+{
+class Hypothesis;
+class ChartHypothesis;
 }
 
 namespace TranslationAnalysis

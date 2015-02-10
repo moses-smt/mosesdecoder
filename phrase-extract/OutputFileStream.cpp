@@ -19,11 +19,13 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include "OutputFileStream.h"
 #include "gzfilebuf.h"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -51,7 +53,7 @@ bool OutputFileStream::Open(const std::string &filePath)
     return false;
   }
 
-  if (filePath.size() > 3 && filePath.substr(filePath.size() - 3, 3) == ".gz") {
+  if (ends_with(filePath, ".gz")) {
     this->push(boost::iostreams::gzip_compressor());
   }
   this->push(*m_outFile);

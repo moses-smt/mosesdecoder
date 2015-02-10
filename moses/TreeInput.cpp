@@ -155,8 +155,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
         if (startPos == endPos) {
           TRACE_ERR("WARNING: tag " << tagName << " span is empty. Ignoring: " << line << endl);
           continue;
-        }
-        else if (startPos > endPos) {
+        } else if (startPos > endPos) {
           TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
           return false;
         }
@@ -196,7 +195,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             Word *targetLHS = new Word(true);
             targetLHS->CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
             UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL,
-            		"Null factor left-hand-side");
+                           "Null factor left-hand-side");
             targetPhrase.SetTargetLHS(targetLHS);
 
             // not tested
@@ -248,8 +247,8 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // remove extra spaces
   //line = Trim(line);
 
-  std::vector<XMLParseOutput> sourceLabels;
-  ProcessAndStripXMLTags(line, sourceLabels, m_xmlOptions);
+  m_labelledSpans.clear();
+  ProcessAndStripXMLTags(line, m_labelledSpans, m_xmlOptions);
 
   // do words 1st - hack
   stringstream strme;
@@ -267,7 +266,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   // do source labels
   vector<XMLParseOutput>::const_iterator iterLabel;
-  for (iterLabel = sourceLabels.begin(); iterLabel != sourceLabels.end(); ++iterLabel) {
+  for (iterLabel = m_labelledSpans.begin(); iterLabel != m_labelledSpans.end(); ++iterLabel) {
     const XMLParseOutput &labelItem = *iterLabel;
     const WordsRange &range = labelItem.m_range;
     const string &label = labelItem.m_label;
@@ -304,7 +303,7 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
                               , const std::vector<FactorType>& /* factorOrder */)
 {
   UTIL_THROW_IF2(!label.IsNonTerminal(),
-		  "Label must be a non-terminal");
+                 "Label must be a non-terminal");
 
   SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
   NonTerminalSet &list = GetLabelSet(startPos, endPos);
@@ -346,7 +345,7 @@ std::ostream& operator<<(std::ostream &out, const TreeInput &input)
       for (iter = labelSet.begin(); iter != labelSet.end(); ++iter) {
         const Word &word = *iter;
         UTIL_THROW_IF2(!word.IsNonTerminal(),
-      		  "Word must be a non-terminal");
+                       "Word must be a non-terminal");
         out << "[" << startPos <<"," << endPos << "]="
             << word << "(" << word.IsNonTerminal() << ") ";
       }

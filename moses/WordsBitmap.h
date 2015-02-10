@@ -224,7 +224,7 @@ public:
 
   //! converts bitmap into an integer ID, with an additional span covered
   WordsBitmapID GetIDPlus( size_t startPos, size_t endPos ) const {
-	  assert(m_size < (1<<16));
+    assert(m_size < (1<<16));
 
     size_t start = GetFirstGapPos();
     if (start == NOT_FOUND) start = m_size; // nothing left

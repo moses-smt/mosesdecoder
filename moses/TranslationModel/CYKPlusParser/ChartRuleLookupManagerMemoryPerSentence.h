@@ -44,13 +44,13 @@ public:
   typedef std::vector<CompressedColumn> CompressedMatrix;
 
   ChartRuleLookupManagerMemoryPerSentence(const ChartParser &parser,
-                               const ChartCellCollectionBase &cellColl,
-                               const PhraseDictionaryFuzzyMatch &ruleTable);
+                                          const ChartCellCollectionBase &cellColl,
+                                          const PhraseDictionaryFuzzyMatch &ruleTable);
 
   ~ChartRuleLookupManagerMemoryPerSentence() {};
 
   virtual void GetChartRuleCollection(
-    const WordsRange &range,
+    const InputPath &inputPath,
     size_t lastPos, // last position to consider if using lookahead
     ChartParserCallback &outColl);
 
@@ -69,8 +69,8 @@ private:
     size_t endPos);
 
   void UpdateCompressedMatrix(size_t startPos,
-    size_t endPos,
-    size_t lastPos);
+                              size_t endPos,
+                              size_t lastPos);
 
   const PhraseDictionaryFuzzyMatch &m_ruleTable;
 

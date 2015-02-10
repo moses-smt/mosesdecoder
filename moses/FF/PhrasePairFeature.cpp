@@ -107,11 +107,11 @@ void PhrasePairFeature::Load()
 }
 
 void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
-              , const InputPath &inputPath
-              , const TargetPhrase &targetPhrase
-              , const StackVec *stackVec
-              , ScoreComponentCollection &scoreBreakdown
-              , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedFutureScore) const
 {
   const Phrase& source = inputPath.GetPhrase();
   if (m_simple) {

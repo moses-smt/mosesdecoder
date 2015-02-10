@@ -80,28 +80,26 @@ const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
 
 void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   ReduceCache();
 
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
   obj->BeginLoad(m_filePath);
 
   UTIL_THROW_IF2(obj->GetMisc("Version") != OnDiskPt::OnDiskWrapper::VERSION_NUM,
-		  "On-disk phrase table is version " <<  obj->GetMisc("Version")
-		  << ". It is not compatible with version " << OnDiskPt::OnDiskWrapper::VERSION_NUM);
+                 "On-disk phrase table is version " <<  obj->GetMisc("Version")
+                 << ". It is not compatible with version " << OnDiskPt::OnDiskWrapper::VERSION_NUM);
 
   UTIL_THROW_IF2(obj->GetMisc("NumSourceFactors") != m_input.size(),
-		  "On-disk phrase table has " <<  obj->GetMisc("NumSourceFactors") << " source factors."
-		  		  << ". The ini file specified " << m_input.size() << " source factors");
+                 "On-disk phrase table has " <<  obj->GetMisc("NumSourceFactors") << " source factors."
+                 << ". The ini file specified " << m_input.size() << " source factors");
 
   UTIL_THROW_IF2(obj->GetMisc("NumTargetFactors") != m_output.size(),
-		  "On-disk phrase table has " <<  obj->GetMisc("NumTargetFactors") << " target factors."
-		  		  << ". The ini file specified " << m_output.size() << " target factors");
+                 "On-disk phrase table has " <<  obj->GetMisc("NumTargetFactors") << " target factors."
+                 << ". The ini file specified " << m_output.size() << " target factors");
 
   UTIL_THROW_IF2(obj->GetMisc("NumScores") != m_numScoreComponents,
-		  "On-disk phrase table has " <<  obj->GetMisc("NumScores") << " scores."
-		  		  << ". The ini file specified " << m_numScoreComponents << " scores");
+                 "On-disk phrase table has " <<  obj->GetMisc("NumScores") << " scores."
+                 << ". The ini file specified " << m_numScoreComponents << " scores");
 
   m_implementation.reset(obj);
 }
@@ -141,7 +139,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
 
   // backoff
   if (!SatisfyBackoff(inputPath)) {
-  	return;
+    return;
   }
 
   if (prevPtNode) {
@@ -214,11 +212,9 @@ void PhraseDictionaryOnDisk::SetParameter(const std::string& key, const std::str
 {
   if (key == "max-span-default") {
     m_maxSpanDefault = Scan<size_t>(value);
-  }
-  else if (key == "max-span-labelled") {
+  } else if (key == "max-span-labelled") {
     m_maxSpanLabelled = Scan<size_t>(value);
-  }
-  else {
+  } else {
     PhraseDictionary::SetParameter(key, value);
   }
 }

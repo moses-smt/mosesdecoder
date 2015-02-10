@@ -21,21 +21,19 @@
 #ifndef PCFG_PCFG_H_
 #define PCFG_PCFG_H_
 
-#include "typedef.h"
-
 #include <istream>
 #include <map>
 #include <ostream>
 #include <vector>
 
-namespace Moses
-{
-namespace PCFG
-{
+#include "typedef.h"
 
-class Pcfg
-{
-public:
+namespace MosesTraining {
+namespace Syntax {
+namespace PCFG {
+
+class Pcfg {
+ public:
   typedef std::vector<std::size_t> Key;
   typedef std::map<Key, double> Map;
   typedef Map::iterator iterator;
@@ -43,30 +41,23 @@ public:
 
   Pcfg() {}
 
-  iterator begin() {
-    return rules_.begin();
-  }
-  const_iterator begin() const {
-    return rules_.begin();
-  }
+  iterator begin() { return rules_.begin(); }
+  const_iterator begin() const { return rules_.begin(); }
 
-  iterator end() {
-    return rules_.end();
-  }
-  const_iterator end() const {
-    return rules_.end();
-  }
+  iterator end() { return rules_.end(); }
+  const_iterator end() const { return rules_.end(); }
 
   void Add(const Key &, double);
   bool Lookup(const Key &, double &) const;
   void Read(std::istream &, Vocabulary &);
   void Write(const Vocabulary &, std::ostream &) const;
 
-private:
+ private:
   Map rules_;
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

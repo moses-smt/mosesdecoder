@@ -745,37 +745,15 @@ sub hierarchical_segmentation {
     open(OUTPUT_TREE,">$dir/output-tree") or die "Cannot open: $!";
     open(NODE,">$dir/node") or die "Cannot open: $!";
     while(<TRACE>) {
-	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): pC=[\d\.\-e]+, c=/ ||
-	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>\S+  \-\> (.+) :([\(\),\d\- ]*): c=/ || die("cannot scan line $_");
-	my ($sentence,$start,$end,$spans,$rule_lhs,$rule_rhs,$alignment) = ($1,$2,$3,$4,$5,$6,$7);
-	if ($last_sentence >= 0 && $sentence != $last_sentence) {
-	    &hs_process($last_sentence,\@DERIVATION,\%STATS);
-	    @DERIVATION = ();
-	}
-	my %ITEM;
-	$ITEM{'start'} = $start;
-	$ITEM{'end'} = $end;
-	$ITEM{'rule_lhs'} = $rule_lhs;
-	
-	$rule_rhs =~ s/</&lt;/g;
-	$rule_rhs =~ s/>/&gt;/g;
-	@{$ITEM{'rule_rhs'}} = split(/ /,$rule_rhs);
-	
-	foreach (split(/ /,$alignment)) {
-		/(\d+)[\-,](\d+)/ || die("funny alignment: $_\n");
-		$ITEM{'alignment'}{$2} = $1; # target non-terminal to source span
-		$ITEM{'alignedSpan'}{$1} = 1;
-	}
-
-	@{$ITEM{'spans'}} = ();
-	foreach my $span (reverse split(/\s+/,$spans)) {
-		$span =~ /\[(\d+)\.\.(\d+)\]=(\S+)$/ || die("funny span: $span\n");
-		my %SPAN = ( 'from' => $1, 'to' => $2, 'word' => $3 );
-		push @{$ITEM{'spans'}}, \%SPAN;
-	}
-
-	push @DERIVATION,\%ITEM;
-	$last_sentence = $sentence;
+        my $sentence;
+        my %ITEM;
+        &hs_scan_line($_, \$sentence, \%ITEM) || die("cannot scan line $_");
+        if ($last_sentence >= 0 && $sentence != $last_sentence) {
+            &hs_process($last_sentence,\@DERIVATION,\%STATS);
+            @DERIVATION = ();
+        }
+        push @DERIVATION,\%ITEM;
+        $last_sentence = $sentence;
     }
     &hs_process($last_sentence,\@DERIVATION,\%STATS);
     close(TRACE);
@@ -791,6 +769,84 @@ sub hierarchical_segmentation {
 	print SUMMARY "rule\t$_\t".$STATS{'rule-type'}{$_}."\n";
     }
     close(SUMMARY);
+}
+
+# scan a single line of the trace file
+sub hs_scan_line {
+    my ($line,$ref_sentence,$ref_item) = @_;
+
+    if ($line =~ /^Trans Opt/) {
+        # Old format
+        $line =~ /^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): pC=[\d\.\-e]+, c=/ ||
+        $line =~ /^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>\S+  \-\> (.+) :([\(\),\d\- ]*): c=/ || return 0;
+        my ($sentence,$start,$end,$spans,$rule_lhs,$rule_rhs,$alignment) = ($1,$2,$3,$4,$5,$6,$7);
+
+        ${$ref_sentence} = $sentence;
+
+        $ref_item->{'start'} = $start;
+        $ref_item->{'end'} = $end;
+        $ref_item->{'rule_lhs'} = $rule_lhs;
+
+        $rule_rhs =~ s/</&lt;/g;
+        $rule_rhs =~ s/>/&gt;/g;
+        @{$ref_item->{'rule_rhs'}} = split(/ /,$rule_rhs);
+
+        foreach (split(/ /,$alignment)) {
+            /(\d+)[\-,](\d+)/ || die("funny alignment: $_\n");
+            $ref_item->{'alignment'}{$2} = $1; # target non-terminal to source span
+            $ref_item->{'alignedSpan'}{$1} = 1;
+        }
+
+        @{$ref_item->{'spans'}} = ();
+        foreach my $span (reverse split(/\s+/,$spans)) {
+            $span =~ /\[(\d+)\.\.(\d+)\]=(\S+)$/ || die("funny span: $span\n");
+            my %SPAN = ( 'from' => $1, 'to' => $2, 'word' => $3 );
+            push @{$ref_item->{'spans'}}, \%SPAN;
+        }
+    } else {
+        # New format
+        $line =~ /^(\d+) \|\|\| \[\S+\] -> (.+) \|\|\| \[(\S+)\] -> (.+) \|\|\| (.*)\|\|\| (.*)/ || return 0;
+        my ($sentence,$source_rhs,$target_lhs,$target_rhs,$alignment,$source_spans) = ($1,$2,$3,$4,$5,$6);
+
+        ${$ref_sentence} = $sentence;
+
+        @{$ref_item->{'spans'}} = ();
+        foreach (split(/ /,$source_rhs)) {
+            /^\[?([^\]]+)\]?$/;
+            my %SPAN = ( 'word' => $1 );
+            push @{$ref_item->{'spans'}}, \%SPAN;
+        }
+
+        my $i = 0;
+        foreach my $span (split(/ /,$source_spans)) {
+            $span =~ /(\d+)\.\.(\d+)/ || die("funny span: $span\n");
+            $ref_item->{'spans'}[$i]{'from'} = $1;
+            $ref_item->{'spans'}[$i]{'to'} = $2;
+            if ($i == 0) {
+                $ref_item->{'start'} = $1;
+            }
+            $ref_item->{'end'} = $2;
+            $i++;
+        }
+
+        $ref_item->{'rule_lhs'} = $target_lhs;
+
+        $target_rhs =~ s/</&lt;/g;
+        $target_rhs =~ s/>/&gt;/g;
+        @{$ref_item->{'rule_rhs'}} = ();
+        foreach (split(/ /,$target_rhs)) {
+            /^\[?([^\]]+)\]?$/;
+            push @{$ref_item->{'rule_rhs'}}, $1;
+        }
+
+        foreach (split(/ /,$alignment)) {
+            /(\d+)[\-,](\d+)/ || die("funny alignment: $_\n");
+            $ref_item->{'alignment'}{$2} = $1; # target non-terminal to source span
+            $ref_item->{'alignedSpan'}{$1} = 1;
+        }
+    }
+
+    return 1;
 }
 
 # process a single sentence for hierarchical segmentation

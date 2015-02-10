@@ -19,15 +19,16 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
   ReadParameters();
 }
 
-OpSequenceModel::~OpSequenceModel() {
-  delete OSM;    
+OpSequenceModel::~OpSequenceModel()
+{
+  delete OSM;
 }
 
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
   string unkOp = "_TRANS_SLF_";
   OSM = ConstructOSMLM(m_lmPath);
-  
+
   State startState = OSM->NullContextState();
   State endState;
   unkOpProb = OSM->Score(startState,unkOp,endState);
@@ -42,9 +43,9 @@ void OpSequenceModel::Load()
 
 
 void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
-                                , const TargetPhrase &targetPhrase
-                                , ScoreComponentCollection &scoreBreakdown
-                                , ScoreComponentCollection &estimatedFutureScore) const
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedFutureScore) const
 {
 
   osmHypothesis obj;
@@ -198,7 +199,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-	UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
+  UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
 
 }
 

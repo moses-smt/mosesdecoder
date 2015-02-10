@@ -59,28 +59,28 @@ bool OnDiskWrapper::OpenForLoad(const std::string &filePath)
 {
   m_fileSource.open((filePath + "/Source.dat").c_str(), ios::in | ios::binary);
   UTIL_THROW_IF(!m_fileSource.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/Source.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/Source.dat");
 
   m_fileTargetInd.open((filePath + "/TargetInd.dat").c_str(), ios::in | ios::binary);
   UTIL_THROW_IF(!m_fileTargetInd.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/TargetInd.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/TargetInd.dat");
 
   m_fileTargetColl.open((filePath + "/TargetColl.dat").c_str(), ios::in | ios::binary);
   UTIL_THROW_IF(!m_fileTargetColl.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/TargetColl.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/TargetColl.dat");
 
   m_fileVocab.open((filePath + "/Vocab.dat").c_str(), ios::in);
   UTIL_THROW_IF(!m_fileVocab.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/Vocab.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/Vocab.dat");
 
   m_fileMisc.open((filePath + "/Misc.dat").c_str(), ios::in);
   UTIL_THROW_IF(!m_fileMisc.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/Misc.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/Misc.dat");
 
   // set up root node
   LoadMisc();
@@ -124,46 +124,46 @@ void OnDiskWrapper::BeginSave(const std::string &filePath
 
   m_fileSource.open((filePath + "/Source.dat").c_str(), ios::out | ios::in | ios::binary | ios::ate | ios::trunc);
   UTIL_THROW_IF(!m_fileSource.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/Source.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/Source.dat");
 
   m_fileTargetInd.open((filePath + "/TargetInd.dat").c_str(), ios::out | ios::binary | ios::ate | ios::trunc);
   UTIL_THROW_IF(!m_fileTargetInd.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/TargetInd.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/TargetInd.dat");
 
   m_fileTargetColl.open((filePath + "/TargetColl.dat").c_str(), ios::out | ios::binary | ios::ate | ios::trunc);
   UTIL_THROW_IF(!m_fileTargetColl.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/TargetColl.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/TargetColl.dat");
 
   m_fileVocab.open((filePath + "/Vocab.dat").c_str(), ios::out | ios::ate | ios::trunc);
   UTIL_THROW_IF(!m_fileVocab.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/Vocab.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/Vocab.dat");
 
   m_fileMisc.open((filePath + "/Misc.dat").c_str(), ios::out | ios::ate | ios::trunc);
   UTIL_THROW_IF(!m_fileMisc.is_open(),
-		  util::FileOpenException,
-		  "Couldn't open file " << filePath << "/Misc.dat");
+                util::FileOpenException,
+                "Couldn't open file " << filePath << "/Misc.dat");
 
   // offset by 1. 0 offset is reserved
   char c = 0xff;
   m_fileSource.write(&c, 1);
   UTIL_THROW_IF2(1 != m_fileSource.tellp(),
-	"Couldn't write to stream m_fileSource");
+                 "Couldn't write to stream m_fileSource");
 
   m_fileTargetInd.write(&c, 1);
   UTIL_THROW_IF2(1 != m_fileTargetInd.tellp(),
-	  	"Couldn't write to stream m_fileTargetInd");
+                 "Couldn't write to stream m_fileTargetInd");
 
   m_fileTargetColl.write(&c, 1);
   UTIL_THROW_IF2(1 != m_fileTargetColl.tellp(),
-		  	"Couldn't write to stream m_fileTargetColl");
+                 "Couldn't write to stream m_fileTargetColl");
 
   // set up root node
   UTIL_THROW_IF2(GetNumCounts() != 1,
-	  	"Not sure what this is...");
+                 "Not sure what this is...");
 
   vector<float> counts(GetNumCounts());
   counts[0] = DEFAULT_COUNT;
@@ -212,8 +212,8 @@ UINT64 OnDiskWrapper::GetMisc(const std::string &key) const
   std::map<std::string, UINT64>::const_iterator iter;
   iter = m_miscInfo.find(key);
   UTIL_THROW_IF2(iter == m_miscInfo.end()
-		  	  , "Couldn't find value for key " << key
-  	  	  	  );
+                 , "Couldn't find value for key " << key
+                );
 
   return iter->second;
 }
@@ -238,7 +238,7 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
       break;
     }
     UTIL_THROW_IF2(factor == NULL,
-    		"Expecting factor " << factorType << " at position " << ind);
+                   "Expecting factor " << factorType << " at position " << ind);
     strme << "|" << factor->GetString();
   } // for (size_t factorType
 

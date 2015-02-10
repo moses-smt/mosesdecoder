@@ -87,7 +87,7 @@ namespace ugdiss
     ushort getOffset(int p) const;
     size_t sntCnt(int p=-1) const;
     size_t rawCnt(int p=-1) const;
-    uint64_t getPid(int p=-1) const; // get phrase id
+    ::uint64_t getPid(int p=-1) const; // get phrase id
 
     virtual bool extend(Token const& id);
     virtual bool extend(id_type id);
@@ -104,25 +104,25 @@ namespace ugdiss
 
     // fillBitSet: deprecated; use markSentences() instead
     count_type 
-    fillBitSet(boost::dynamic_bitset<uint64_t>& bitset) const;
+    fillBitSet(boost::dynamic_bitset<typename ::uint64_t>& bitset) const;
     
     count_type 
     markEndOfSequence(Token const*  start, Token const*  stop,
-		      boost::dynamic_bitset<uint64_t>& dest) const;
+		      boost::dynamic_bitset<typename ::uint64_t>& dest) const;
     count_type 
     markSequence(Token const* start, Token const* stop, bitvector& dest) const;
     
     count_type 
-    markSentences(boost::dynamic_bitset<uint64_t>& bitset) const;
+    markSentences(boost::dynamic_bitset<typename ::uint64_t>& bitset) const;
     
     count_type 
-    markOccurrences(boost::dynamic_bitset<uint64_t>& bitset,
+    markOccurrences(boost::dynamic_bitset<typename ::uint64_t>& bitset,
 		    bool markOnlyStartPosition=false) const;
     
     count_type 
     markOccurrences(vector<ushort>& dest) const;
     
-    uint64_t 
+    ::uint64_t 
     getSequenceId() const;
     
     // equivalent but more efficient than 
@@ -515,7 +515,7 @@ namespace ugdiss
   // ---------------------------------------------------------------------------
 
   template<typename Token>
-  uint64_t
+  ::uint64_t
   TSA_tree_iterator<Token>::
   getPid(int p) const 
   { 
@@ -523,9 +523,9 @@ namespace ugdiss
     if (p < 0) p += upper.size();
     char const* lb = lower_bound(p);
     char const* ub = upper_bound(p);
-    uint64_t sid,off;
+    ::uint64_t sid,off;
     root->readOffset(root->readSid(lb,ub,sid),ub,off);
-    uint64_t ret = (sid<<32) + (off<<16) + uint64_t(p+1);
+    ::uint64_t ret = (sid<<32) + (off<<16) + ::uint64_t(p+1);
     return ret;
   }
   
@@ -613,7 +613,7 @@ namespace ugdiss
   template<typename Token>
   count_type 
   TSA_tree_iterator<Token>::
-  fillBitSet(boost::dynamic_bitset<uint64_t>& bitset) const
+  fillBitSet(boost::dynamic_bitset<typename ::uint64_t>& bitset) const
   {
     return markSentences(bitset);
   }
@@ -623,7 +623,7 @@ namespace ugdiss
   template<typename Token>
   count_type 
   TSA_tree_iterator<Token>::
-  markSentences(boost::dynamic_bitset<uint64_t>& bitset) const
+  markSentences(boost::dynamic_bitset<typename ::uint64_t>& bitset) const
   {
     assert(root && root->corpus);
     bitset.resize(root->corpus->size());
@@ -650,7 +650,7 @@ namespace ugdiss
   template<typename Token>
   count_type 
   TSA_tree_iterator<Token>::
-  markOccurrences(boost::dynamic_bitset<uint64_t>& bitset, bool markOnlyStartPosition) const
+  markOccurrences(boost::dynamic_bitset<typename ::uint64_t>& bitset, bool markOnlyStartPosition) const
   {
     assert(root && root->corpus);
     if (bitset.size() != root->corpus->numTokens())
@@ -697,7 +697,7 @@ namespace ugdiss
   count_type 
   TSA_tree_iterator<Token>::
   markEndOfSequence(Token const*  start, Token const*  stop,
-                    boost::dynamic_bitset<uint64_t>& dest) const
+                    boost::dynamic_bitset<typename ::uint64_t>& dest) const
   {
     count_type matchCount=0;
     Token const* a = getToken(0);
@@ -754,7 +754,7 @@ namespace ugdiss
   //---------------------------------------------------------------------------
 
   template<typename Token>
-  uint64_t
+  ::uint64_t
   TSA_tree_iterator<Token>::
   getSequenceId() const
   {
@@ -762,7 +762,7 @@ namespace ugdiss
     char const* p = this->lower_bound(-1);
     typename Token::ArrayEntry I;
     root->readEntry(p,I);
-    return (uint64_t(I.sid)<<32)+(I.offset<<16)+this->size();
+    return (::uint64_t(I.sid)<<32)+(I.offset<<16)+this->size();
   }
 
   template<typename Token>

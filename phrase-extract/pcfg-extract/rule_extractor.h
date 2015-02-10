@@ -21,11 +21,13 @@
 #ifndef PCFG_EXTRACT_RULE_EXTRACTOR_H_
 #define PCFG_EXTRACT_RULE_EXTRACTOR_H_
 
-#include "rule_collection.h"
-
 #include "pcfg-common/typedef.h"
 
-namespace Moses
+#include "rule_collection.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace PCFG
 {
@@ -43,6 +45,7 @@ private:
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

@@ -32,7 +32,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT, $_TRANSLITERATION_PHRASE_TABLE,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_GHKM_SOURCE_LABELS,$_GHKM_SOURCE_LABELS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_GHKM_SOURCE_LABELS,$_GHKM_SOURCE_LABELS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,$_S2T,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2, $_UNKNOWN_WORD_SOFT_MATCHES_FILE,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
@@ -105,6 +105,7 @@ $_HELP = 1
 		       'generation-type=s' => \@_GENERATION_TYPE,
 		       'continue' => \$_CONTINUE,
 		       'hierarchical' => \$_HIERARCHICAL,
+		       's2t' => \$_S2T,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
@@ -172,6 +173,10 @@ For more, please check manual or contact koehn\@inf.ed.ac.uk\n";
 
 if (defined($IGNORE)) {
   print STDERR "WARNING: Do not specify -bin-dir or -scripts-root-dir anymore. These variable are ignored and will be deleted soon";
+}
+
+if (defined($_HIERARCHICAL) && defined($_REORDERING)) {
+  die("ERROR: You cannot specify a lexicalized reordering model (-reordering) when building an hierarchical model (-hierarchical)");
 }
 
 # convert all paths to absolute paths
@@ -302,6 +307,15 @@ else {
   $SORT_EXEC = 'sort';
 }
 
+my $GZIP_EXEC; # = which("pigz"); 
+if(-f "/usr/bin/pigz") {
+  $GZIP_EXEC = 'pigz';
+}
+else {
+  $GZIP_EXEC = 'gzip';
+}
+print STDERR "using $GZIP_EXEC \n";
+
 my $__SORT_BUFFER_SIZE = "";
 $__SORT_BUFFER_SIZE = "-S $_SORT_BUFFER_SIZE" if $_SORT_BUFFER_SIZE;
 
@@ -348,16 +362,7 @@ $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EX
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
 my $FLEX_SCORER = "$SCRIPTS_ROOTDIR/training/flexibility_score.py";
 
-# gzip binary;
-my $GZIP = "gzip";
-
-# use pigz --- parallel gzip
-if (`which pigz` =~ /pigz/) {
-    $GZIP = "pigz";
-}
-
-# utilities
-my $ZCAT = "$GZIP -cd";
+my $ZCAT = "$GZIP_EXEC -cd";
 my $BZCAT = "bzcat";
 
 # do a sanity check to make sure we can find the necessary binaries since
@@ -1213,7 +1218,7 @@ sub run_single_giza {
     die "ERROR: Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
       if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
     safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
-    safesystem("$GZIP $dir/$f-$e.$___GIZA_EXTENSION") or die;
+    safesystem("$GZIP_EXEC $dir/$f-$e.$___GIZA_EXTENSION") or die;
 }
 
 sub run_single_snt2cooc {
@@ -1490,9 +1495,9 @@ sub extract_phrase {
 
     if (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) {
       print STDERR "merging with baseline extract from $_BASELINE_EXTRACT\n";
-      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | $GZIP > $extract_file.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | $GZIP > $extract_file.inv.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | $GZIP > $extract_file.o.gz")
+      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | $GZIP_EXEC > $extract_file.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | $GZIP_EXEC > $extract_file.inv.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | $GZIP_EXEC > $extract_file.o.gz")
 	if -e "$extract_file$suffix.o.gz";
       safesystem("rm $extract_file$suffix.gz");
       safesystem("rm $extract_file$suffix.inv.gz");
@@ -1574,6 +1579,7 @@ sub score_phrase_phrase_extract {
       $UNALIGNED_FW_F = $1;
       $UNALIGNED_FW_E = $2;
     }
+    my $MIN_SCORE = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /MinScore *(\S+)/) ? $1 : undef;
     my $GOOD_TURING = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /GoodTuring/);
     my $KNESER_NEY = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /KneserNey/);
     my $LOG_PROB = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LogProb/);
@@ -1685,11 +1691,12 @@ sub score_phrase_phrase_extract {
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
     $cmd .= " --CountBinFeature $COUNT_BIN" if $COUNT_BIN;
     $cmd .= " --SparseCountBinFeature $SPARSE_COUNT_BIN" if $SPARSE_COUNT_BIN;
+    $cmd .= " --MinScore $MIN_SCORE" if $MIN_SCORE;
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
     
-    $cmd .= " | $GZIP -c > $ttable_file.gz";
+    $cmd .= " | $GZIP_EXEC -c > $ttable_file.gz";
     
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
@@ -1706,7 +1713,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | $GZIP >$ttable_file.gz";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | $GZIP_EXEC >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1871,7 +1878,7 @@ sub get_generation {
     }
     close(GEN);
     safesystem("rm -f $file.gz") or die("ERROR");
-    safesystem("$GZIP $file") or die("ERROR");
+    safesystem("$GZIP_EXEC $file") or die("ERROR");
 }
 
 ### (9) CREATE CONFIGURATION FILE
@@ -1995,6 +2002,10 @@ sub create_ini {
      $phrase_table_impl_name = "PhraseDictionaryBitextSampling" if $phrase_table_impl==11;
      $file .= "/" if $phrase_table_impl==11 && $file !~ /\/$/;
 
+     if ($_S2T) {
+       $phrase_table_impl_name = "RuleTable";
+     }
+
      # table limit (maximum number of translation options per input phrase)
      my $table_limit = 0;
      if ($i == 0) {
@@ -2026,7 +2037,11 @@ sub create_ini {
    # glue grammar
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
-     $feature_spec .= "PhraseDictionaryMemory name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
+     my $feature_name = "PhraseDictionaryMemory";
+     if ($_S2T) {
+       $feature_name = "RuleTable";
+     }
+     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
      $weight_spec .= "TranslationModel$i= 1.0\n";
    }
 
@@ -2121,12 +2136,16 @@ sub create_ini {
       my $path = `pwd`; chop($path);
       $fn = $path."/".$fn;
     }
-    $type = 0 unless $type;
-    my $type_name = "UnknownLM";
-    $type_name = "SRILM" if $type == 0;
-    $type_name = "IRSTLM" if $type == 1;
-    $type_name = "KENLM lazyken=0" if $type == 8;
-    $type_name = "KENLM lazyken=1" if $type == 9;
+    $type = "KENLM" unless defined $type; # default to KENLM if no type given
+
+    if ($type =~ /^\d+$/) {
+      # backwards compatibility if the type is given not as string but as a number
+      $type = "SRILM" if $type == 0;
+      $type = "IRSTLM" if $type == 1;
+      $type = "KENLM lazyken=0" if $type == 8;
+      $type = "KENLM lazyken=1" if $type == 9;
+      die "Unknown numeric LM type given: $type" if $type =~ /^\d+$/;
+    }
 	
     my $lm_oov_prob = 0.1;
 	
@@ -2135,7 +2154,7 @@ sub create_ini {
 	$_LMODEL_OOV_FEATURE = "yes";
     } 	   
  
-    $feature_spec .= "$type_name name=LM$i factor=$f path=$fn order=$o\n";
+    $feature_spec .= "$type name=LM$i factor=$f path=$fn order=$o\n";
     $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
   }
@@ -2200,7 +2219,7 @@ sub create_ini {
   print INI "UnknownWordPenalty0= 1\n";
   print INI "WordPenalty0= -1\n";
   print INI "PhrasePenalty0= 0.2\n";
-  print INI "SoftSourceSyntacticConstraintsFeature0= 0.3 -0.3 -0.3\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+  print INI "SoftSourceSyntacticConstraintsFeature0= -0.2 -0.2 -0.2 0.1 0.1 0.1\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
   print INI $weight_spec;
   close(INI);
 }

@@ -113,14 +113,12 @@ public:
 
   virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
-  void SetProperty(const std::string &value)
-  {
-	  m_property = value;
+  void SetProperty(const std::string &value) {
+    m_property = value;
   }
 
-  void SetSparseFeatures(const std::string &value)
-  {
-	  m_sparseFeatures = value;
+  void SetSparseFeatures(const std::string &value) {
+    m_sparseFeatures = value;
   }
 };
 

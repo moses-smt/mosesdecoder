@@ -15,7 +15,7 @@ namespace ugdiss
 {
   /// Utility method placed here for lack of a better place
   /// @return the size of file fname.
-  uint64_t getFileSize(const std::string& fname);
+  ::uint64_t getFileSize(const std::string& fname);
 
   /** 
    * The following functions write and read data in a compact binary 

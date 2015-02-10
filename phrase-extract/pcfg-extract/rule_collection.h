@@ -21,13 +21,15 @@
 #ifndef PCFG_EXTRACT_RULE_COLLECTION_H_
 #define PCFG_EXTRACT_RULE_COLLECTION_H_
 
-#include "pcfg-common/pcfg.h"
+#include <vector>
 
 #include <boost/unordered_map.hpp>
 
-#include <vector>
+#include "pcfg-common/pcfg.h"
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace PCFG
 {
@@ -65,6 +67,7 @@ private:
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Synatx
+}  // namespace MosesTraining
 
 #endif

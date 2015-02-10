@@ -186,13 +186,12 @@ bool getLine( istream &fileP, vector< string > &item )
 {
   if (fileP.eof())
     return false;
-  
+
   string line;
   if (getline(fileP, line)) {
     item = splitLine(line.c_str());
     return false;
-  }
-  else {
+  } else {
     return false;
   }
 }

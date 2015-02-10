@@ -200,7 +200,7 @@ Phrase TrellisPath::GetSurfacePhrase() const
       FactorType factorType = outputFactor[i];
       const Factor *factor = targetPhrase.GetFactor(pos, factorType);
       UTIL_THROW_IF2(factor == NULL,
-    		  "No factor " << factorType << " at position " << pos);
+                     "No factor " << factorType << " at position " << pos);
       newWord[factorType] = factor;
     }
   }

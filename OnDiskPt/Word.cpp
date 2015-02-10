@@ -18,6 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <boost/algorithm/string/predicate.hpp>
 #include "moses/FactorCollection.h"
 #include "moses/Util.h"
 #include "moses/Word.h"
@@ -27,6 +28,7 @@
 #include "util/exception.hh"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace OnDiskPt
 {
@@ -41,7 +43,7 @@ Word::~Word()
 
 void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 {
-  if (inString.substr(0, 1) == "[" && inString.substr(inString.size() - 1, 1) == "]") {
+  if (starts_with(inString, "[") && ends_with(inString, "]")) {
     // non-term
     m_isNonTerminal = true;
     string str = inString.substr(1, inString.size() - 2);
@@ -105,18 +107,17 @@ void Word::ConvertToMoses(
   overwrite = Moses::Word(m_isNonTerminal);
 
   if (m_isNonTerminal) {
-	    const std::string &tok = vocab.GetString(m_vocabId);
-		overwrite.SetFactor(0, factorColl.AddFactor(tok, m_isNonTerminal));
-  }
-  else {
-	  // TODO: this conversion should have been done at load time.
-	  util::TokenIter<util::SingleCharacter> tok(vocab.GetString(m_vocabId), '|');
+    const std::string &tok = vocab.GetString(m_vocabId);
+    overwrite.SetFactor(0, factorColl.AddFactor(tok, m_isNonTerminal));
+  } else {
+    // TODO: this conversion should have been done at load time.
+    util::TokenIter<util::SingleCharacter> tok(vocab.GetString(m_vocabId), '|');
 
-	  for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
-		UTIL_THROW_IF2(!tok, "Too few factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
-		overwrite.SetFactor(*t, factorColl.AddFactor(*tok, m_isNonTerminal));
-	  }
-	  UTIL_THROW_IF2(tok, "Too many factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
+    for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
+      UTIL_THROW_IF2(!tok, "Too few factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
+      overwrite.SetFactor(*t, factorColl.AddFactor(*tok, m_isNonTerminal));
+    }
+    UTIL_THROW_IF2(tok, "Too many factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
   }
 }
 

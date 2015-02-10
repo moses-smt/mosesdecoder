@@ -35,7 +35,7 @@ public:
   SearchNormalBatch(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
   ~SearchNormalBatch();
 
-  void ProcessSentence();
+  void Decode();
 
 };
 

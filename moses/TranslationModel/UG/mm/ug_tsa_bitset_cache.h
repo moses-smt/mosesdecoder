@@ -24,7 +24,7 @@ namespace ugdiss
   BitSetCache
   {
   public:
-    typedef boost::dynamic_bitset<uint64_t>         BitSet;
+    typedef boost::dynamic_bitset<typename ::uint64_t>         BitSet;
     typedef boost::shared_ptr<BitSet>                bsptr;
     typedef map<pair<char const*,ushort>,bsptr> myMap;
     typedef myMap::iterator                      myMapIter;

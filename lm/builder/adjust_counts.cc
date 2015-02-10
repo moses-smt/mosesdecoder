@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <limits>
 
 namespace lm { namespace builder {
 
@@ -108,9 +109,10 @@ class StatCollector {
 // order but we don't care because the data is going to be sorted again.
 class CollapseStream {
   public:
-    CollapseStream(const util::stream::ChainPosition &position, uint64_t prune_threshold) :
+    CollapseStream(const util::stream::ChainPosition &position, uint64_t prune_threshold, const std::vector<bool>& prune_words) :
       current_(NULL, NGram::OrderFromSize(position.GetChain().EntrySize())),
       prune_threshold_(prune_threshold),
+      prune_words_(prune_words),
       block_(position) { 
       StartBlock();
     }
@@ -132,6 +134,15 @@ class CollapseStream {
           current_.Mark(); 
         }
         
+        if(!prune_words_.empty()) {
+          for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
+            if(prune_words_[*i]) {
+              current_.Mark(); 
+              break;
+            }
+          }
+        }
+        
       }
     
       current_.NextInMemory();
@@ -145,6 +156,15 @@ class CollapseStream {
       // Mark highest order n-grams for later pruning
       if(current_.Count() <= prune_threshold_) {
         current_.Mark(); 
+      }
+
+      if(!prune_words_.empty()) {
+        for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
+          if(prune_words_[*i]) {
+            current_.Mark(); 
+            break;
+          }
+        }
       }
       
       return *this;
@@ -164,6 +184,15 @@ class CollapseStream {
       if(current_.Count() <= prune_threshold_) {
         current_.Mark(); 
       }
+
+      if(!prune_words_.empty()) {
+        for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
+          if(prune_words_[*i]) {
+            current_.Mark(); 
+            break;
+          }
+        }
+      }
       
     }
 
@@ -179,6 +208,7 @@ class CollapseStream {
     // Goes backwards in the block
     uint8_t *copy_from_;
     uint64_t prune_threshold_;
+    const std::vector<bool>& prune_words_;
     util::stream::Link block_;
 };
 
@@ -192,8 +222,19 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
   if (order == 1) {
 
     // Only unigrams.  Just collect stats.  
-    for (NGramStream full(positions[0]); full; ++full) 
-      stats.AddFull(full->Count());
+    for (NGramStream full(positions[0]); full; ++full) {
+      
+      // Do not prune <s> </s> <unk>
+      if(*full->begin() > 2) {
+        if(full->Count() <= prune_thresholds_[0])
+          full->Mark();
+      
+        if(!prune_words_.empty() && prune_words_[*full->begin()])
+          full->Mark();
+      }
+      
+      stats.AddFull(full->UnmarkedCount(), full->IsMarked());
+    }
 
     stats.CalculateDiscounts(discount_config_);
     return;
@@ -202,7 +243,7 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
   NGramStreams streams;
   streams.Init(positions, positions.size() - 1);
   
-  CollapseStream full(positions[positions.size() - 1], prune_thresholds_.back());
+  CollapseStream full(positions[positions.size() - 1], prune_thresholds_.back(), prune_words_);
 
   // Initialization: <unk> has count 0 and so does <s>.
   NGramStream *lower_valid = streams.begin();
@@ -216,7 +257,9 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
 
   // This keeps track of actual counts for lower orders.  It is not output
   // (only adjusted counts are), but used to determine pruning.
-  std::vector<uint64_t> lower_counts(positions.size(), 0);
+  std::vector<uint64_t> actual_counts(positions.size(), 0);
+  // Something of a hack: don't prune <s>.
+  actual_counts[0] = std::numeric_limits<uint64_t>::max();
   
   // Iterate over full (the stream of the highest order ngrams)
   for (; full; ++full) {
@@ -225,17 +268,27 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
 
     // STEP 1: Output all the n-grams that changed.
     for (; lower_valid >= &streams[same]; --lower_valid) {
-      uint64_t lower_order_minus_1 = lower_valid - streams_begin;
-      if(lower_counts[lower_order_minus_1] <= prune_thresholds_[lower_order_minus_1] && lower_order_minus_1)
-        (*lower_valid)->Mark(); 
-      stats.Add(lower_order_minus_1, (*lower_valid)->UnmarkedCount(), (*lower_valid)->IsMarked());
+      uint64_t order_minus_1 = lower_valid - streams_begin;
+      if(actual_counts[order_minus_1] <= prune_thresholds_[order_minus_1])
+        (*lower_valid)->Mark();
+      
+      if(!prune_words_.empty()) {
+        for(WordIndex* i = (*lower_valid)->begin(); i != (*lower_valid)->end(); i++) {
+          if(prune_words_[*i]) {
+            (*lower_valid)->Mark(); 
+            break;
+          }
+        }
+      }
+        
+      stats.Add(order_minus_1, (*lower_valid)->UnmarkedCount(), (*lower_valid)->IsMarked());
       ++*lower_valid;
     }
 
     // STEP 2: Update n-grams that still match.
     // n-grams that match get count from the full entry.
     for (std::size_t i = 0; i < same; ++i) {
-      lower_counts[i] += full->UnmarkedCount();
+      actual_counts[i] += full->UnmarkedCount();
     }
     // Increment the number of unique extensions for the longest match.
     if (same) ++streams[same - 1]->Count();
@@ -250,16 +303,17 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
       NGramStream &to = *++lower_valid;
       std::copy(bos, full_end, to->begin());
       to->Count() = 1;
-      lower_counts[lower_valid - streams_begin] = full->UnmarkedCount();
+      actual_counts[lower_valid - streams_begin] = full->UnmarkedCount();
     }
     // Now bos indicates where <s> is or is the 0th word of full.
     if (bos != full->begin()) {
       // There is an <s> beyond the 0th word.
       NGramStream &to = *++lower_valid;
       std::copy(bos, full_end, to->begin());
+
       // Anything that begins with <s> has full non adjusted count.
       to->Count() = full->UnmarkedCount();
-      lower_counts[lower_valid - streams_begin] = full->UnmarkedCount();
+      actual_counts[lower_valid - streams_begin] = full->UnmarkedCount();
     } else {
       stats.AddFull(full->UnmarkedCount(), full->IsMarked());
     }
@@ -269,9 +323,19 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
   // The above loop outputs n-grams when it observes changes.  This outputs
   // the last n-grams.
   for (NGramStream *s = streams.begin(); s <= lower_valid; ++s) {
-    uint64_t lower_count = lower_counts[(*s)->Order() - 1];
+    uint64_t lower_count = actual_counts[(*s)->Order() - 1];
     if(lower_count <= prune_thresholds_[(*s)->Order() - 1])
       (*s)->Mark();
+      
+    if(!prune_words_.empty()) {
+      for(WordIndex* i = (*s)->begin(); i != (*s)->end(); i++) {
+        if(prune_words_[*i]) {
+          (*s)->Mark(); 
+          break;
+        }
+      }
+    }
+      
     stats.Add(s - streams.begin(), lower_count, (*s)->IsMarked());
     ++*s;
   }

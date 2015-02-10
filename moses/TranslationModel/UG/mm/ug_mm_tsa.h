@@ -60,13 +60,13 @@ namespace ugdiss
     readSid(char const* p, char const* q, id_type& sid) const;
 
     char const* 
-    readSid(char const* p, char const* q, uint64_t& sid) const;
+    readSid(char const* p, char const* q, ::uint64_t& sid) const;
 
     char const* 
     readOffset(char const* p, char const* q, uint16_t& offset) const;
 
     char const* 
-    readOffset(char const* p, char const* q, uint64_t& offset) const;
+    readOffset(char const* p, char const* q, ::uint64_t& offset) const;
 
     void sanityCheck() const;
 
@@ -188,7 +188,7 @@ namespace ugdiss
   template<typename TOKEN>
   char const*
   mmTSA<TOKEN>::
-  readSid(char const* p, char const* q, uint64_t& sid) const
+  readSid(char const* p, char const* q, ::uint64_t& sid) const
   {
     return tightread(p,q,sid);
   }
@@ -210,7 +210,7 @@ namespace ugdiss
   inline
   char const*
   mmTSA<TOKEN>::
-  readOffset(char const* p, char const* q, uint64_t& offset) const
+  readOffset(char const* p, char const* q, ::uint64_t& offset) const
   {
     return tightread(p,q,offset);
   }
@@ -243,7 +243,7 @@ namespace ugdiss
   {
     raw = 0;
     id_type sid; uint16_t off;
-    boost::dynamic_bitset<uint64_t> check(this->corpus->size());
+    boost::dynamic_bitset<typename ::uint64_t> check(this->corpus->size());
     while (p < q)
       {
 	p = tightread(p,q,sid);

@@ -53,17 +53,17 @@ BOOST_AUTO_TEST_CASE(manager_configure_domain_except)
   //Check that configure rejects illegal domain arg combinations
   ScoreFeatureManager manager;
   BOOST_CHECK_THROW(
-      manager.configure(boost::assign::list_of("--DomainRatio")("/dev/null")("--DomainIndicator")("/dev/null")),
-      ScoreFeatureArgumentException);
+    manager.configure(boost::assign::list_of("--DomainRatio")("/dev/null")("--DomainIndicator")("/dev/null")),
+    ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-      manager.configure(boost::assign::list_of("--SparseDomainSubset")("/dev/null")("--SparseDomainRatio")("/dev/null")),
-      ScoreFeatureArgumentException);
+    manager.configure(boost::assign::list_of("--SparseDomainSubset")("/dev/null")("--SparseDomainRatio")("/dev/null")),
+    ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-      manager.configure(boost::assign::list_of("--SparseDomainBlah")("/dev/null")),
-      ScoreFeatureArgumentException);
+    manager.configure(boost::assign::list_of("--SparseDomainBlah")("/dev/null")),
+    ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-      manager.configure(boost::assign::list_of("--DomainSubset")),
-      ScoreFeatureArgumentException);
+    manager.configure(boost::assign::list_of("--DomainSubset")),
+    ScoreFeatureArgumentException);
 }
 
 template <class Expected>

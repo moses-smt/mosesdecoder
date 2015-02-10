@@ -25,7 +25,7 @@ if $(with-regtest) {
     $(TOP)/regression-testing/run-single-test.perl --decoder=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
   }
   reg_test phrase : [ glob $(test-dir)/phrase.* ] : ../moses-cmd//moses : @reg_test_decode ;
-  reg_test chart : [ glob $(test-dir)/chart.* ] : ../moses-chart-cmd//moses_chart : @reg_test_decode ;
+  reg_test chart : [ glob $(test-dir)/chart.* ] : ../moses-cmd//moses : @reg_test_decode ;
   
   actions reg_test_score {
     $(TOP)/regression-testing/run-test-scorer.perl --scorer=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)

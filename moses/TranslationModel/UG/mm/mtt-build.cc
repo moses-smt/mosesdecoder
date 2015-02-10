@@ -4,6 +4,7 @@
 // recognized based on the number of fields per line) into memory-mapped
 // format. (c) 2007-2013 Ulrich Germann
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -32,6 +33,7 @@ using namespace std;
 using namespace ugdiss;
 using namespace Moses;
 using namespace boost;
+using namespace boost::algorithm;
 namespace po=boost::program_options;
 
 int with_pfas;
@@ -200,7 +202,7 @@ process_tagged_input(ostream& out,
       vector<string> w; string f; istringstream buf(line);
       while (buf>>f) w.push_back(f);
 
-      if (w.size() == 0 || (w[0].size() >= 4 && w[0].substr(0,4) == "SID="))
+      if (w.size() == 0 || starts_with(w[0], "SID="))
         new_sent = true;
 
       else if (w.size() == 1 && w[0] == "<P>") 
