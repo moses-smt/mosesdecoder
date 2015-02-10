@@ -9,6 +9,7 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 
 #include "util/string_piece.hh"
@@ -22,6 +23,7 @@
 
 #include "ForestTsgFilter.h"
 #include "Options.h"
+#include "StringCfgFilter.h"
 #include "StringForest.h"
 #include "StringForestParser.h"
 #include "TreeTsgFilter.h"
@@ -77,8 +79,11 @@ int FilterRuleTable::Main(int argc, char *argv[])
 
   // Read the test sentences then set up and run the filter.
   if (testSentenceFormat == kString) {
-    // TODO Implement ReadTestSet for strings and StringCfgFilter
-    Error("string-based filtering not supported yet");
+    assert(sourceSideRuleFormat == kCfg);
+    std::vector<boost::shared_ptr<std::string> > testStrings;
+    ReadTestSet(testStream, testStrings);
+    StringCfgFilter filter(testStrings);
+    filter.Filter(std::cin, std::cout);
   } else if (testSentenceFormat == kTree) {
     std::vector<boost::shared_ptr<StringTree> > testTrees;
     ReadTestSet(testStream, testTrees);
@@ -106,8 +111,24 @@ void FilterRuleTable::ReadTestSet(
     std::istream &input,
     std::vector<boost::shared_ptr<std::string> > &sentences)
 {
-  // TODO
-  assert(false);
+  const util::AnyCharacter symbolDelimiter(" \t");
+  int lineNum = 0;
+  std::string line;
+  while (std::getline(input, line)) {
+    ++lineNum;
+    if (line.empty()) {
+      std::cerr << "skipping blank test sentence at line " << lineNum
+                << std::endl;
+      continue;
+    }
+    std::ostringstream tmp;
+    tmp << " ";
+    for (util::TokenIter<util::AnyCharacter, true> p(line, symbolDelimiter);
+         p; ++p) {
+      tmp << *p << " ";
+    }
+    sentences.push_back(boost::make_shared<std::string>(tmp.str()));
+  }
 }
 
 void FilterRuleTable::ReadTestSet(
