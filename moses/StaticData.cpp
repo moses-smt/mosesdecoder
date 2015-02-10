@@ -159,7 +159,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
-  SetBooleanParameter( &m_WipoNBest, "wipo-n-best", false );
+  m_parameter->SetParameter( m_WipoNBest, "wipo-n-best", false );
   if (m_WipoNBest) {
     m_WipoNBest = true;
   }
