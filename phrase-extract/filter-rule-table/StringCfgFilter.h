@@ -49,7 +49,7 @@ class StringCfgFilter : public CfgFilter {
   // Max NGram length.
   static const std::size_t kMaxNGramLength;
 
-  // Maps symbols (terminals and non-terminals) from strings to integers.
+  // Maps words from strings to integers.
   typedef NumberedSet<std::string, std::size_t> Vocabulary;
 
   // A NGram is a sequence of words.
@@ -83,13 +83,6 @@ class StringCfgFilter : public CfgFilter {
   // A range of start positions.
   typedef std::pair<int, int> Range;
 
-  // A SentenceTrellis holds the positions at which each of a pattern's
-  // subpatterns occur in a single sentence.
-  struct SentenceTrellis
-  {
-    std::vector<const PositionSeq *> columns;
-  };
-
   // A CoordinateTable records the set of sentences in which a single
   // n-gram occurs and for each of those sentences, the start positions
   struct CoordinateTable {
@@ -118,7 +111,6 @@ class StringCfgFilter : public CfgFilter {
   // do not occur in the test sentence vocabulary.
   bool GeneratePattern(const std::vector<StringPiece> &, Pattern &) const;
 
-
   // Calculate the minimum width of the pattern suffix starting
   // at subpattern i.
   int MinWidth(const Pattern &p, int i) const;
@@ -128,10 +120,10 @@ class StringCfgFilter : public CfgFilter {
   // Try to match the pattern p against any sentence in the test set.
   bool MatchPattern(const Pattern &p) const;
 
-  // Try to match the pattern p against the SentenceTrellis t of a single
-  // sentence.
-  bool MatchPattern(const SentenceTrellis &t, int sentenceLength,
-                    const Pattern &p) const;
+  // Try to match the pattern p against the sentence with the given ID.
+  bool MatchPattern(const Pattern &p,
+                    std::vector<const CoordinateTable *> &tables,
+                    int id) const;
 
   // The main search structure constructed from the test set sentences.
   NGramCoordinateMap m_ngramCoordinateMap;

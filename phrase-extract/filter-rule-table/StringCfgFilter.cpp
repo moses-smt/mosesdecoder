@@ -89,6 +89,9 @@ void StringCfgFilter::Filter(std::istream &in, std::ostream &out)
          p; ++p) {
       symbols.push_back(*p);
     }
+
+    // Generate a pattern (fails if any source-side terminal is not in the
+    // test set vocabulary) and attempt to match it against the test sentences.
     keep = GeneratePattern(symbols, pattern) && MatchPattern(pattern);
     if (keep) {
       out << line << std::endl;
@@ -221,39 +224,27 @@ bool StringCfgFilter::MatchPattern(const Pattern &pattern) const
     intersection.swap(tmp);
   }
 
-  // Step 3: For each sentence in the intersection, construct a trellis
-  //         with a column of intra-sentence positions for each subpattern.
-  //         If there is a consistent path of position values through the
-  //         trellis then there is a match ('consistent' here means that the
-  //         subpatterns occur in the right order and are separated by at
-  //         least the minimum widths required by the pattern's gaps).
+  // Step 3: For each sentence in the intersection, try to find a consistent
+  //         sequence of intra-sentence positions (one for each subpattern).
+  //         'Consistent' here means that the subpatterns occur in the right
+  //         order and are separated by at least the minimum widths required
+  //         by the pattern's gaps).
   for (std::vector<int>::const_iterator p = intersection.begin();
        p != intersection.end(); ++p) {
-    const int sentenceId = *p;
-    const int sentenceLength = m_sentenceLengths[sentenceId];
-    SentenceTrellis trellis;
-    // For each subpattern's CoordinateTable:
-    for (std::vector<const CoordinateTable *>::const_iterator
-         q = tables.begin(); q != tables.end(); ++q) {
-      const CoordinateTable &table = **q;
-      // Add the intra-sentence position sequence as a column of the trellis.
-      boost::unordered_map<int, PositionSeq>::const_iterator r =
-        table.intraSentencePositions.find(sentenceId);
-      assert(r != table.intraSentencePositions.end());
-      trellis.columns.push_back(&(r->second));
-    }
-    // Search the trellis for a consistent sequence of position values.
-    if (MatchPattern(trellis, sentenceLength, pattern)) {
+    if (MatchPattern(pattern, tables, *p)) {
       return true;
     }
   }
   return false;
 }
 
-bool StringCfgFilter::MatchPattern(const SentenceTrellis &trellis,
-                                   int sentenceLength,
-                                   const Pattern &pattern) const
+bool StringCfgFilter::MatchPattern(
+    const Pattern &pattern,
+    std::vector<const CoordinateTable *> &tables,
+    int sentenceId) const
 {
+  const int sentenceLength = m_sentenceLengths[sentenceId];
+
   // In the for loop below, we need to know the set of start position ranges
   // where subpattern i is allowed to occur (rangeSet) and we are generating
   // the ranges for subpattern i+1 (nextRangeSet).
@@ -268,11 +259,16 @@ bool StringCfgFilter::MatchPattern(const SentenceTrellis &trellis,
 
   // Attempt to match subpatterns.
   for (int i = 0; i < pattern.subpatterns.size(); ++i) {
-    const PositionSeq &col = *trellis.columns[i];
+    // Look-up the intra-sentence position sequence.
+    boost::unordered_map<int, PositionSeq>::const_iterator r =
+        tables[i]->intraSentencePositions.find(sentenceId);
+    assert(r != tables[i]->intraSentencePositions.end());
+    const PositionSeq &col = r->second;
     for (PositionSeq::const_iterator p = col.begin(); p != col.end(); ++p) {
       bool inRange = false;
       for (std::vector<Range>::const_iterator q = rangeSet.begin();
            q != rangeSet.end(); ++q) {
+        // TODO Use the fact that the ranges are ordered to break early.
         if (*p >= q->first && *p <= q->second) {
           inRange = true;
           break;

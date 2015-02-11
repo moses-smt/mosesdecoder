@@ -12,10 +12,6 @@
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 
-#include "util/string_piece.hh"
-#include "util/string_piece_hash.hh"
-#include "util/tokenize_piece.hh"
-
 #include "syntax-common/exception.h"
 #include "syntax-common/xml_tree_parser.h"
 
@@ -111,7 +107,6 @@ void FilterRuleTable::ReadTestSet(
     std::istream &input,
     std::vector<boost::shared_ptr<std::string> > &sentences)
 {
-  const util::AnyCharacter symbolDelimiter(" \t");
   int lineNum = 0;
   std::string line;
   while (std::getline(input, line)) {
@@ -121,13 +116,7 @@ void FilterRuleTable::ReadTestSet(
                 << std::endl;
       continue;
     }
-    std::ostringstream tmp;
-    tmp << " ";
-    for (util::TokenIter<util::AnyCharacter, true> p(line, symbolDelimiter);
-         p; ++p) {
-      tmp << *p << " ";
-    }
-    sentences.push_back(boost::make_shared<std::string>(tmp.str()));
+    sentences.push_back(boost::make_shared<std::string>(line));
   }
 }
 
