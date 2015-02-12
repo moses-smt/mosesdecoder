@@ -76,7 +76,7 @@ int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 	//should not look at terminals -> eg [NP Ich]
 	// There is a problem [VP [VBP] [NP]] takes head from NP -> why?? check comparison and Head_rules
 	//even with VP 1 VB VBP... NP I still get the head from the NP -> why?
-	if(headRule[0].compare("1")==0){
+	if(headRule[0].compare("1")==0){ //leftdist
 		if(headRule[1].compare("**")==0){
 			if(m_children.size()>0)
 				return 0; //return first child
@@ -110,7 +110,7 @@ int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 	//have to figure out what this 0 means -> VP 0 .. looks wrong
 	//!!! left and right is for the direction of the children not the rule table ->
 	//!!! corect the HEAD_RULES files
-	if(headRule[0].compare("0")==0){
+	if(headRule[0].compare("0")==0){ //rightdist
 		if(headRule[1].compare("**")==0)
 		 return m_children.size()-1; //return last child
 		for(i=m_children.size()-1; i>=1;i--){
@@ -120,6 +120,33 @@ int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 				}
 		}
 	}
+
+	if(headRule[0].compare("2")==0){ //right
+			if(headRule[1].compare("**")==0)
+			 return m_children.size()-1; //return last child
+			for(j=1; j<headRule.size();j++){
+				for(i=m_children.size()-1; i>=1;i--)
+					if(m_children[i]->m_label.compare(headRule[j])==0){
+						return i;
+					}
+			}
+		}
+
+	if(headRule[0].compare("3")==0){ //left
+			if(headRule[1].compare("**")==0){
+				if(m_children.size()>0)
+					return 0; //return first child
+				else
+					return -1; //no children for this node -> should be treated elsewhere
+			}
+			for(j=1; j<headRule.size();j++){ //first item is direction
+				for(i=0; i<m_children.size();i++)
+					if(m_children[i]->m_label.compare(headRule[j])==0){
+						return i;
+					}
+			}
+	}
+
 	return -1;
 }
 
@@ -679,7 +706,9 @@ void HeadFeature::Load() {
 
 std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 
-	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
+	JNIEnv *env; // =  javaWrapper->GetAttachedJniEnvPointer();
+	JniEnvPointer &jniEnvPointer = GetJniEnvPointer();// m_JniEnvPointer.get();
+	env = jniEnvPointer.GetEnv();
 	env->ExceptionDescribe();
 
 	jobject rel = env->NewObject(javaWrapper->GetRelationsJClass(), javaWrapper->GetDepParsingInitJId());
@@ -723,7 +752,7 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 		env->DeleteLocalRef(jSentence);
 
 		env->ExceptionDescribe();
-		javaWrapper->GetVM()->DetachCurrentThread();
+		//javaWrapper->GetVM()->DetachCurrentThread();
 		return dependencies;
 		}
 		//Something goes wrong in ProcessParsedSentence when trying to extract the relations and everythig crashes
@@ -743,11 +772,11 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 			env->ExceptionDescribe();
 		}
 
-		javaWrapper->GetVM()->DetachCurrentThread(); //-> when jStanfordDep in null it already crashed?
+		//javaWrapper->GetVM()->DetachCurrentThread(); //-> when jStanfordDep in null it already crashed?
 
 		return "null";
 	}
-	javaWrapper->GetVM()->DetachCurrentThread();
+	//javaWrapper->GetVM()->DetachCurrentThread();
 
 
 	return "exception";
@@ -829,6 +858,12 @@ void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
 	m_counterDepRel=0;
 	m_cacheHits=0;
 	m_cacheDepRelHits =0;
+
+	JniEnvPointer &jniEnvPointer = GetJniEnvPointer();
+	//assert(jniEnvPointer);
+
+	//this makes things crash -> which object doesn't exist anymore?
+	//jniEnvPointer.Detach(javaWrapper);
 }
 
 
