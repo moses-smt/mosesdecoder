@@ -34,26 +34,6 @@ public:
 	virtual ~StringHashMap() {}
 };
 
-class JniEnvPointer{
-public:
-	JniEnvPointer(CreateJavaVM *javaWrapper){
-	this->env = javaWrapper->GetAttachedJniEnvPointer();
-	this->javaWrapper = javaWrapper;
-	}
-	~JniEnvPointer(){
-		javaWrapper->GetVM()->DetachCurrentThread();
-	}
-	JNIEnv* GetEnv(){
-		return this->env;
-	}
-	void Detach(CreateJavaVM *javaWrapper){
-		javaWrapper->GetVM()->DetachCurrentThread();
-	}
-private:
-	JNIEnv *env;
-	CreateJavaVM *javaWrapper;
-};
-
 class Counters {
 
 public:
@@ -419,16 +399,6 @@ public:
     	return *counters;
     }
 
- 	JniEnvPointer &GetJniEnvPointer() const{
- 		JniEnvPointer *jniEnvPointer;
- 		jniEnvPointer = m_JniEnvPointer.get();
- 		if(jniEnvPointer==NULL){
- 			jniEnvPointer = new JniEnvPointer(javaWrapper);
- 			m_JniEnvPointer.reset(jniEnvPointer);
- 		}
- 		assert(jniEnvPointer);
- 		return *jniEnvPointer;
- 	}
 
 protected:
   boost::shared_ptr< std::map<std::string, std::vector <std::string> > > m_headRules;
@@ -452,7 +422,6 @@ protected:
 	mutable boost::thread_specific_ptr<StringHashMap> m_cache;
 	mutable boost::thread_specific_ptr<DepRelMap> m_cacheDepRel;
 	mutable boost::thread_specific_ptr<Counters> m_counters;
-	mutable boost::thread_specific_ptr<JniEnvPointer> m_JniEnvPointer;
 	//have to take care with this -> one Feature instance per decoder which works multithreaded
 	jobject workingStanforDepObj;
 
