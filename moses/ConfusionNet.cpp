@@ -67,7 +67,7 @@ ConfusionNet()
   stats.createOne();
 
   const StaticData& staticData = StaticData::Instance();
-  if (staticData.IsChart()) {
+  if (staticData.IsSyntax()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
   UTIL_THROW_IF2(&InputFeature::Instance() == NULL, "Input feature must be specified");
