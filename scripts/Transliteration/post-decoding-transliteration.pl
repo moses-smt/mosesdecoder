@@ -135,7 +135,7 @@ sub run_transliteration
 
 	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table -config $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini -lm 0:3:$TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini:8`;
 
-	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $TRANSLIT_MODEL/evaluation/$eval_file.filtered $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini $TRANSLIT_MODEL/evaluation/$eval_file  -Binarizer "$MOSES_SRC/bin/processPhraseTable"`;
+	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $TRANSLIT_MODEL/evaluation/$eval_file.filtered $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini $TRANSLIT_MODEL/evaluation/$eval_file  -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
 
 	`rm  $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini`;
 
@@ -296,7 +296,7 @@ sub run_decoder
 
 	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -lmodel-oov-feature "yes" -post-decoding-translit "yes" -phrase-translation-table $corpus_dir/model/phrase-table -config $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini -lm 0:3:$corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini:8`;
 
-	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $corpus_dir/evaluation/filtered $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini $INPUT_FILE  -Binarizer "$MOSES_SRC/bin/processPhraseTable"`;
+	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $corpus_dir/evaluation/filtered $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini $INPUT_FILE  -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
 
 	`rm $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini`;
 

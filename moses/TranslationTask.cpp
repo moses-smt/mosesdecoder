@@ -61,7 +61,7 @@ void TranslationTask::Run()
   // which manager
   BaseManager *manager;
 
-  if (!staticData.IsChart()) {
+  if (!staticData.IsSyntax()) {
     // phrase-based
     manager = new Manager(*m_source);
   } else if (staticData.GetSearchAlgorithm() == SyntaxF2S ||

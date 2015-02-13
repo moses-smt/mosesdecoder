@@ -140,6 +140,9 @@ enum DictionaryFind {
   ,All		= 1
 };
 
+// Note: StaticData uses SearchAlgorithm to determine whether the translation
+// model is phrase-based or syntax-based.  If you add a syntax-based search
+// algorithm here then you should also update StaticData::IsSyntax().
 enum SearchAlgorithm {
   Normal				= 0
   ,CubePruning	= 1
