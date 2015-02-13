@@ -2134,11 +2134,17 @@ sub create_ini {
 
     if ($type =~ /^\d+$/) {
       # backwards compatibility if the type is given not as string but as a number
-      $type = "SRILM" if $type == 0;
-      $type = "IRSTLM" if $type == 1;
-      $type = "KENLM lazyken=0" if $type == 8;
-      $type = "KENLM lazyken=1" if $type == 9;
-      die "Unknown numeric LM type given: $type" if $type =~ /^\d+$/;
+      if ($type == 0) {
+        $type = "SRILM";
+      } elsif ($type == 1) {
+        $type = "IRSTLM";
+      } elsif ($type == 8) {
+        $type = "KENLM lazyken=0";
+      } elsif ($type == 9) {
+        $type = "KENLM lazyken=1";
+      } else {
+        die "Unknown numeric LM type given: $type";
+      }
     }
 	
     my $lm_oov_prob = 0.1;
