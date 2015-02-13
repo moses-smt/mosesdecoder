@@ -276,7 +276,7 @@ public:
 
     stringstream out, graphInfo, transCollOpts;
 
-    if (staticData.IsChart()) {
+    if (staticData.IsSyntax()) {
        TreeInput tinput;
         const vector<FactorType>& 
 	      inputFactorOrder = staticData.GetInputFactorOrder();

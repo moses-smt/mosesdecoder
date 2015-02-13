@@ -261,6 +261,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/DecodeStepTranslation.h</locationURI>
 		</link>
 		<link>
+			<name>ExportInterface.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ExportInterface.cpp</locationURI>
+		</link>
+		<link>
+			<name>ExportInterface.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ExportInterface.h</locationURI>
+		</link>
+		<link>
 			<name>FF</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>

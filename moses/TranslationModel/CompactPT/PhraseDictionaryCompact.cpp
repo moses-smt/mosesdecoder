@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <queue>
 #include <algorithm>
 #include <sys/stat.h>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "PhraseDictionaryCompact.h"
 #include "moses/FactorCollection.h"
@@ -37,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/exception.hh"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -63,18 +65,9 @@ void PhraseDictionaryCompact::Load()
   std::string tFilePath = m_filePath;
 
   std::string suffix = ".minphr";
-  if(tFilePath.substr(tFilePath.length() - suffix.length(), suffix.length()) == suffix) {
-    if(!FileExists(tFilePath)) {
-      throw runtime_error("Error: File " + tFilePath + " does not exit.");
-      exit(1);
-    }
-  } else {
-    if(FileExists(tFilePath + suffix)) {
-      tFilePath += suffix;
-    } else {
-      throw runtime_error("Error: File " + tFilePath + ".minphr does not exit.");
-    }
-  }
+  if (!ends_with(tFilePath, suffix)) tFilePath += suffix;
+  if (!FileExists(tFilePath))
+    throw runtime_error("Error: File " + tFilePath + " does not exist.");
 
   m_phraseDecoder = new PhraseDecoder(*this, &m_input, &m_output,
                                       m_numScoreComponents, &m_weight);

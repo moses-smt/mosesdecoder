@@ -52,15 +52,15 @@ void InputFeature::EvaluateWithSourceContext(const InputType &input
     , ScoreComponentCollection *estimatedFutureScore) const
 {
   if (m_legacy) {
-    //binary phrase-table does input feature itself
-    return;
+	//binary phrase-table does input feature itself
+	return;
   }
-  /*
-  const ScorePair *scores = inputPath.GetInputScore();
-  if (scores) {
-  	  scoreBreakdown.PlusEquals(this, *scores);
+  else if (input.GetType() == WordLatticeInput){
+	const ScorePair *scores = inputPath.GetInputScore();
+	if (scores) {
+	  scoreBreakdown.PlusEquals(this, *scores);
+	}
   }
-  */
 }
 
 } // namespace

@@ -978,7 +978,7 @@ void Parameter::WeightOverwrite()
   for (size_t i = 0; i < toks.size(); ++i) {
     const string &tok = toks[i];
 
-    if (starts_with(tok, "=")) {
+    if (ends_with(tok, "=")) {
       // start of new feature
 
       if (name != "") {
