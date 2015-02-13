@@ -146,6 +146,8 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   :LanguageModel(line)
   ,m_factorType(factorType)
 {
+  ReadParameters();
+
   lm::ngram::Config config;
   IFVERBOSE(1) {
     config.messages = &std::cerr;
@@ -441,14 +443,17 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-LanguageModel *ConstructKenLM(const std::string &line)
+LanguageModel *ConstructKenLM(const std::string &lineOrig)
 {
   FactorType factorType = 0;
   string filePath;
   bool lazy = false;
 
-  util::TokenIter<util::SingleCharacter, true> argument(line, ' ');
+  util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
   ++argument; // KENLM 
+
+  stringstream line;
+  line << "KENLM";
 
   for (; argument; ++argument) {
     const char *equals = std::find(argument->data(), argument->data() + argument->size(), '=');
@@ -465,12 +470,12 @@ LanguageModel *ConstructKenLM(const std::string &line)
     } else if (name == "lazyken") {
       lazy = boost::lexical_cast<bool>(value);
     } else {
-      // that's ok. do nothing, passes onto LM constructor
-      //UTIL_THROW2("Unknown KenLM argument " << name);
+      // pass to base class to interpret
+      line << " " << name << "=" << value;
     }
   }
 
-  return ConstructKenLM(line, filePath, factorType, lazy);
+  return ConstructKenLM(line.str(), filePath, factorType, lazy);
 }
 
 LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)

@@ -43,7 +43,7 @@ Sentence::Sentence()
   , InputType()
 {
   const StaticData& staticData = StaticData::Instance();
-  if (staticData.IsChart()) {
+  if (staticData.IsSyntax()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
 }
@@ -168,7 +168,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   if (staticData.GetXmlInputType() != XmlPassThrough) {
     int offset = 0;
-    if (staticData.IsChart()) {
+    if (staticData.IsSyntax()) {
       offset = 1;
     }
 
@@ -188,7 +188,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // placeholders
   ProcessPlaceholders(placeholders);
 
-  if (staticData.IsChart()) {
+  if (staticData.IsSyntax()) {
     InitStartEndWord();
   }
 
