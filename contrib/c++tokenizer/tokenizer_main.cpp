@@ -165,18 +165,14 @@ int main(int ac, char **av)
         params.cfg_path = getenv("TOKENIZER_SHARED_DIR");
     }
     if (!params.cfg_path) {
-        if (!::access("../shared/.",X_OK)) {
-            if (!::access("../shared/moses/.",X_OK)) {
-                params.cfg_path = "../shared/moses";
+        if (!::access("../share/.",X_OK)) {
+            if (!::access("../share/moses/.",X_OK)) {
+                params.cfg_path = "../share/moses";
             } else {
-                params.cfg_path = "../shared";
+                params.cfg_path = "../share";
             }
-        } else if (!::access("./shared/.",X_OK)) {
-            if (!::access("./shared/moses/.",X_OK)) {
-                params.cfg_path = "./shared/moses";
-            } else {
-                params.cfg_path = "./shared";
-            }
+        } else if (!::access("./scripts/share/.",X_OK)) {
+            params.cfg_path = "./scripts/share";
         } else if (!::access("./nonbreaking_prefix.en",R_OK)) {
             params.cfg_path = ".";
         } else {

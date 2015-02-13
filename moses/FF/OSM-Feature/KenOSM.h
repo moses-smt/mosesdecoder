@@ -10,6 +10,8 @@ namespace Moses
 class KenOSMBase
 {
 public:
+  virtual ~KenOSMBase() {}
+
   virtual float Score(const lm::ngram::State&, const std::string&,
                       lm::ngram::State&) const = 0;
 

@@ -7,6 +7,8 @@
 
 #include "syntax-common/string_tree.h"
 
+#include "StringForest.h"
+
 namespace MosesTraining
 {
 namespace Syntax
@@ -38,7 +40,18 @@ private:
 
   void ProcessOptions(int, char *[], Options &) const;
 
-  void ReadTokens(const std::string &, std::vector<std::string> &);
+  // Read test set (string version)
+  void ReadTestSet(std::istream &,
+                   std::vector<boost::shared_ptr<std::string> > &);
+
+  // Read test set (tree version)
+  void ReadTestSet(std::istream &,
+                   std::vector<boost::shared_ptr<StringTree> > &);
+
+  // Read test set (forest version)
+  void ReadTestSet(std::istream &,
+                   std::vector<boost::shared_ptr<StringForest> > &);
+
 
   std::string m_name;
 };

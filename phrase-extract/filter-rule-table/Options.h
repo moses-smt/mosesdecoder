@@ -14,6 +14,7 @@ public:
   Options() {}
 
   // Positional options
+  std::string model;
   std::string testSetFile;
 };
 

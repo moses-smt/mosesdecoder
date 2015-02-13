@@ -37,9 +37,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <boost/algorithm/string.hpp>
 
 #include "moses/Syntax/KBestExtractor.h"
+#include "moses/Syntax/PVertex.h"
 #include "moses/Syntax/SHyperedge.h"
 #include "moses/Syntax/S2T/DerivationWriter.h"
-#include "moses/Syntax/PVertex.h"
 #include "moses/Syntax/SVertex.h"
 
 #include "moses/TypeDef.h"
@@ -53,6 +53,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TreeInput.h"
+#include "moses/ForestInput.h"
 #include "moses/ConfusionNet.h"
 #include "moses/WordLattice.h"
 #include "moses/Incremental.h"
@@ -272,6 +273,9 @@ bool IOWrapper::ReadInput(InputTypeEnum inputType, InputType*& source)
     break;
   case TabbedSentenceInput:
     source = GetInput(new TabbedSentence);
+    break;
+  case ForestInputType:
+    source = GetInput(new ForestInput);
     break;
   default:
     TRACE_ERR("Unknown input type: " << inputType << "\n");

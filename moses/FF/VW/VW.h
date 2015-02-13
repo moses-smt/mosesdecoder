@@ -5,6 +5,7 @@
 #include <limits>
 
 #include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/PP/CountsPhraseProperty.h"
 #include "moses/TranslationOptionList.h"
 #include "moses/TranslationOption.h"
 #include "moses/Util.h"
@@ -154,17 +155,43 @@ public:
     const WordsRange &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
     const InputPath  &inputPath   = translationOptionList.Get(0)->GetInputPath();
 
+    // optionally update translation options using leave-one-out
+    std::vector<bool> keep = (m_leaveOneOut.size() > 0)
+      ? LeaveOneOut(translationOptionList)
+      : std::vector<bool>(translationOptionList.size(), true);
+
+    std::vector<float> losses(translationOptionList.size());
+    std::vector<float>::iterator iterLoss;
+    TranslationOptionList::const_iterator iterTransOpt;
+    std::vector<bool>::const_iterator iterKeep;
+
+    if (m_train) {
+      // check which translation options are correct in advance
+      bool seenCorrect = false;
+      for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ;
+          iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss, ++iterKeep) {
+        bool isCorrect = IsCorrectTranslationOption(**iterTransOpt);
+        *iterLoss = isCorrect ? 0.0 : 1.0;
+        if (isCorrect && *iterKeep) seenCorrect = true;
+      }
+
+      // do not train if there are no positive examples
+      if (! seenCorrect) {
+        VERBOSE(2, "VW :: skipping topt collection, no correct translation for span\n");
+        return;
+      }
+    }
+
     for(size_t i = 0; i < sourceFeatures.size(); ++i)
       (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
 
     const std::vector<VWFeatureBase*>& targetFeatures = VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
-    std::vector<float> losses(translationOptionList.size());
-
-    std::vector<float>::iterator iterLoss;
-    TranslationOptionList::const_iterator iterTransOpt;
-    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
+    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ; 
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
+
+      if (! *iterKeep)
+        continue;
 
       const TargetPhrase &targetPhrase = (*iterTransOpt)->GetTargetPhrase();
       for(size_t i = 0; i < targetFeatures.size(); ++i)
@@ -173,15 +200,17 @@ public:
       if (! m_train) {
         *iterLoss = classifier.Predict(MakeTargetLabel(targetPhrase));
       } else {
-        float loss = IsCorrectTranslationOption(**iterTransOpt) ? 0.0 : 1.0;
-        classifier.Train(MakeTargetLabel(targetPhrase), loss);
+        classifier.Train(MakeTargetLabel(targetPhrase), *iterLoss);
       }
     }
 
     (*m_normalizer)(losses);
 
-    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin() ;
+    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
+      if (! *iterKeep)
+        continue;
+
       TranslationOption &transOpt = **iterTransOpt;
 
       std::vector<float> newScores(m_numScoreComponents);
@@ -210,6 +239,8 @@ public:
       m_modelPath = value;
     } else if (key == "vw-options") {
       m_vwOptions = value;
+    } else if (key == "leave-one-out-from") {
+      m_leaveOneOut = value;
     } else if (key == "loss") {
       m_normalizer = value == "logistic"
                      ? (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer()
@@ -333,9 +364,70 @@ private:
     return false;
   }
 
+  std::vector<bool> LeaveOneOut(const TranslationOptionList &topts) const {
+    UTIL_THROW_IF2(m_leaveOneOut.size() == 0 || ! m_train, "LeaveOneOut called in wrong setting!");
+
+    float sourceRawCount = 0.0;
+    const float ONE = 1.0001; // I don't understand floating point numbers
+    
+    std::vector<bool> keepOpt;
+
+    TranslationOptionList::const_iterator iterTransOpt;
+    for(iterTransOpt = topts.begin(); iterTransOpt != topts.end(); ++iterTransOpt) {
+      const TargetPhrase &targetPhrase = (*iterTransOpt)->GetTargetPhrase();
+
+      // extract raw counts from phrase-table property
+      const CountsPhraseProperty *property = static_cast<const CountsPhraseProperty *>(targetPhrase.GetProperty("Counts"));
+      if (! property) {
+        VERBOSE(1, "VW :: Counts not found for topt! Is this an OOV?\n");
+        // keep all translation opts without updating, this is either OOV or bad usage...
+        keepOpt.assign(topts.size(), true);
+        return keepOpt;
+      }
+
+      if (sourceRawCount == 0.0) {
+        sourceRawCount = property->GetSourceMarginal() - ONE; // discount one occurrence of the source phrase
+        if (sourceRawCount <= 0) {
+          // no translation options survived, source phrase was a singleton
+          keepOpt.assign(topts.size(), false);
+          return keepOpt;
+        }
+      }
+
+      float discount = IsCorrectTranslationOption(**iterTransOpt) ? ONE : 0.0;
+      float target = property->GetTargetMarginal() - discount;
+      float joint  = property->GetJointCount() - discount;
+      if (discount != 0.0) VERBOSE(2, "VW :: leaving one out!\n");
+
+      if (joint > 0) {
+        // topt survived leaving one out, update its scores
+        const FeatureFunction *feature = &FindFeatureFunction(m_leaveOneOut);
+        std::vector<float> scores = targetPhrase.GetScoreBreakdown().GetScoresForProducer(feature);
+        UTIL_THROW_IF2(scores.size() != 4, "Unexpected number of scores in feature " << m_leaveOneOut);
+        scores[0] = TransformScore(joint / target); // P(f|e)
+        scores[2] = TransformScore(joint / sourceRawCount); // P(e|f)
+
+        ScoreComponentCollection &scoreBreakDown = (*iterTransOpt)->GetScoreBreakdown();
+        scoreBreakDown.Assign(feature, scores);
+        (*iterTransOpt)->UpdateScore();
+        keepOpt.push_back(true);
+      } else {
+        // they only occurred together once, discard topt
+        VERBOSE(2, "VW :: discarded topt when leaving one out\n");
+        keepOpt.push_back(false);
+      }
+    }
+
+    return keepOpt;
+  }
+
   bool m_train; // false means predict
   std::string m_modelPath;
   std::string m_vwOptions;
+
+  // optionally contains feature name of a phrase table where we recompute scores with leaving one out
+  std::string m_leaveOneOut; 
+
   Discriminative::Normalizer *m_normalizer = NULL;
   TLSClassifier *m_tlsClassifier;
 };

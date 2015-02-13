@@ -18,6 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <boost/algorithm/string/predicate.hpp>
 #include "moses/FactorCollection.h"
 #include "moses/Util.h"
 #include "moses/Word.h"
@@ -27,6 +28,7 @@
 #include "util/exception.hh"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace OnDiskPt
 {
@@ -41,7 +43,7 @@ Word::~Word()
 
 void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 {
-  if (inString.substr(0, 1) == "[" && inString.substr(inString.size() - 1, 1) == "]") {
+  if (starts_with(inString, "[") && ends_with(inString, "]")) {
     // non-term
     m_isNonTerminal = true;
     string str = inString.substr(1, inString.size() - 2);

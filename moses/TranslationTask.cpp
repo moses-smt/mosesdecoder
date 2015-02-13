@@ -10,8 +10,11 @@
 #include "moses/Incremental.h"
 #include "mbr.h"
 
+#include "moses/Syntax/F2S/RuleMatcherCallback.h"
+#include "moses/Syntax/F2S/RuleMatcherHyperTree.h"
 #include "moses/Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser.h"
 #include "moses/Syntax/S2T/Parsers/Scope3Parser/Parser.h"
+#include "moses/Syntax/T2S/RuleMatcherSCFG.h"
 
 #include "util/exception.hh"
 
@@ -58,10 +61,16 @@ void TranslationTask::Run()
   // which manager
   BaseManager *manager;
 
-  if (!staticData.IsChart()) {
+  if (!staticData.IsSyntax()) {
     // phrase-based
     manager = new Manager(*m_source);
-  } else if (staticData.UseS2TDecoder()) {
+  } else if (staticData.GetSearchAlgorithm() == SyntaxF2S ||
+             staticData.GetSearchAlgorithm() == SyntaxT2S) {
+    // STSG-based tree-to-string / forest-to-string decoding (ask Phil Williams)
+    typedef Syntax::F2S::RuleMatcherCallback Callback;
+    typedef Syntax::F2S::RuleMatcherHyperTree<Callback> RuleMatcher;
+    manager = new Syntax::F2S::Manager<RuleMatcher>(*m_source);
+  } else if (staticData.GetSearchAlgorithm() == SyntaxS2T) {
     // new-style string-to-tree decoding (ask Phil Williams)
     S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
     if (algorithm == RecursiveCYKPlus) {
@@ -75,6 +84,12 @@ void TranslationTask::Run()
     } else {
       UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
     }
+  } else if (staticData.GetSearchAlgorithm() == SyntaxT2S_SCFG) {
+    // SCFG-based tree-to-string decoding (ask Phil Williams)
+    typedef Syntax::F2S::RuleMatcherCallback Callback;
+    typedef Syntax::T2S::RuleMatcherSCFG<Callback> RuleMatcher;
+    const TreeInput *tree = NULL;
+    manager = new Syntax::T2S::Manager<RuleMatcher>(*tree);
   } else if (staticData.GetSearchAlgorithm() == ChartIncremental) {
     // Ken's incremental decoding
     manager = new Incremental::Manager(*m_source);

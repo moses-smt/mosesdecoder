@@ -215,7 +215,7 @@ void Manager<Parser>::Decode()
         // happens during cube pruning).  The cube pruning code doesn't (and
         // shouldn't) know about the contents of PChart and so creation of
         // the PVertex is deferred until this point.
-        const Word &lhs = hyperedge->translation->GetTargetLHS();
+        const Word &lhs = hyperedge->label.translation->GetTargetLHS();
         hyperedge->head->pvertex = &m_pchart.AddVertex(PVertex(range, lhs));
         // END{HACK}
         buffers[lhs].push_back(hyperedge);
@@ -365,7 +365,7 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
     // Compare the score of h against the score of the best incoming hyperedge
     // for the stored vertex.
     SVertex *storedVertex = result.first->second;
-    if (h->score > storedVertex->best->score) {
+    if (h->label.score > storedVertex->best->label.score) {
       // h's score is better.
       storedVertex->recombined.push_back(storedVertex->best);
       storedVertex->best = h;

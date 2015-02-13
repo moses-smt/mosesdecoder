@@ -16,7 +16,7 @@ public:
            bundle.stacks.begin(); p != bundle.stacks.end(); ++p) {
       const SVertexStack *stack = *p;
       if (stack->front()->best) {
-        score += stack->front()->best->score;
+        score += stack->front()->best->label.score;
       }
     }
     return score;

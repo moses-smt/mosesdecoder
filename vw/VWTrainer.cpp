@@ -1,8 +1,10 @@
 #include "Util.h"
 #include "Classifier.h"
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/iostreams/device/file.hpp>
 
 using namespace std;
+using namespace boost::algorithm;
 using namespace Moses;
 
 namespace Discriminative
@@ -10,7 +12,7 @@ namespace Discriminative
 
 VWTrainer::VWTrainer(const std::string &outputFile)
 {
-  if (outputFile.size() > 3 && outputFile.substr(outputFile.size() - 3, 3) == ".gz") {
+  if (ends_with(outputFile, ".gz")) {
     m_bfos.push(boost::iostreams::gzip_compressor());
   }
   m_bfos.push(boost::iostreams::file_sink(outputFile));

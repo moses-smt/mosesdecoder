@@ -207,7 +207,6 @@ protected:
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
-  bool m_useS2TDecoder;
   S2TParsingAlgorithm m_s2tParsingAlgorithm;
   bool m_printNBestTrees;
 
@@ -437,8 +436,13 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  bool IsChart() const {
-    return m_searchAlgorithm == CYKPlus || m_searchAlgorithm == ChartIncremental;
+  bool IsSyntax() const {
+    return m_searchAlgorithm == CYKPlus ||
+           m_searchAlgorithm == ChartIncremental ||
+           m_searchAlgorithm == SyntaxS2T ||
+           m_searchAlgorithm == SyntaxT2S ||
+           m_searchAlgorithm == SyntaxT2S_SCFG ||
+           m_searchAlgorithm == SyntaxF2S;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
@@ -783,9 +787,6 @@ public:
     return m_defaultNonTermOnlyForEmptyRange;
   }
 
-  bool UseS2TDecoder() const {
-    return m_useS2TDecoder;
-  }
   S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
     return m_s2tParsingAlgorithm;
   }

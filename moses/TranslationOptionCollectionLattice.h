@@ -26,11 +26,10 @@ public:
 
   void CreateTranslationOptions();
 
-  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-                                        , size_t startPosition
-                                        , size_t endPosition
-                                        , bool adhereTableLimit
-                                        , size_t graphInd); // do not implement
+  bool 
+  CreateTranslationOptionsForRange
+  (const DecodeGraph &decodeStepList, size_t startPosition, size_t endPosition,
+   bool adhereTableLimit, size_t graphInd); // do not implement
 
 protected:
   void Extend(const InputPath &prevPath, const WordLattice &input);

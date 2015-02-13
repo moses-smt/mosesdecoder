@@ -26,6 +26,7 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <boost/algorithm/string/predicate.hpp>
 #include "Trie.h"
 #include "moses/FactorCollection.h"
 #include "moses/Word.h"
@@ -42,6 +43,7 @@
 #include "util/exception.hh"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -67,8 +69,7 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
 
   for (size_t i = 0; i < toks.size(); ++i) {
     string &tok = toks[i];
-    size_t tokLen = tok.size();
-    if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]") {
+    if (starts_with(tok, "[") && ends_with(tok, "]")) {
       // no-term
       vector<string> split = Tokenize(tok, ",");
       UTIL_THROW_IF2(split.size() != 2,

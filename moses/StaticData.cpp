@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <string>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "moses/FF/Factory.h"
 #include "TypeDef.h"
@@ -50,6 +51,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -58,16 +60,15 @@ bool g_mosesDebug = false;
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  :m_sourceStartPosMattersForRecombination(false)
-  ,m_inputType(SentenceInput)
-  ,m_onlyDistinctNBest(false)
-  ,m_needAlignmentInfo(false)
-  ,m_lmEnableOOVFeature(false)
-  ,m_isAlwaysCreateDirectTranslationOption(false)
-  ,m_currentWeightSetting("default")
-  ,m_useS2TDecoder(false)
-  ,m_requireSortingAfterSourceContext(false)
-  ,m_treeStructure(NULL)
+  : m_sourceStartPosMattersForRecombination(false)
+  , m_requireSortingAfterSourceContext(false)
+  , m_inputType(SentenceInput)
+  , m_onlyDistinctNBest(false)
+  , m_needAlignmentInfo(false)
+  , m_lmEnableOOVFeature(false)
+  , m_isAlwaysCreateDirectTranslationOption(false)
+  , m_currentWeightSetting("default")
+  , m_treeStructure(NULL)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -111,7 +112,7 @@ bool StaticData::LoadData(Parameter *parameter)
   // to cube or not to cube
   m_parameter->SetParameter(m_searchAlgorithm, "search-algorithm", Normal);
 
-  if (IsChart())
+  if (IsSyntax())
     LoadChartDecodingParameters();
 
   // input type has to be specified BEFORE loading the phrase tables!
@@ -402,7 +403,6 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter(m_printNBestTrees, "n-best-trees", false );
 
   // S2T decoder
-  m_parameter->SetParameter(m_useS2TDecoder, "s2t", false );
   m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm", RecursiveCYKPlus);
 
   // Compact phrase table and reordering model
@@ -698,7 +698,7 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsChart()) {
+      if (IsSyntax()) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -765,7 +765,7 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsChart()) {
+      if (IsSyntax()) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -1112,7 +1112,10 @@ std::map<std::string, std::string> StaticData::OverrideFeatureNames()
     }
   }
 
-  if (m_useS2TDecoder) {
+  // FIXME Does this make sense for F2S?  Perhaps it should be changed once
+  // FIXME the pipeline uses RuleTable consistently.
+  if (m_searchAlgorithm == SyntaxS2T || m_searchAlgorithm == SyntaxT2S ||
+      m_searchAlgorithm == SyntaxT2S_SCFG || m_searchAlgorithm == SyntaxF2S) {
     // Automatically override PhraseDictionary{Memory,Scope3}.  This will
     // have to change if the FF parameters diverge too much in the future,
     // but for now it makes switching between the old and new decoders much
@@ -1175,7 +1178,7 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
   for (size_t i = 0; i < toks.size(); ++i) {
     const string &tok = toks[i];
 
-    if (tok.substr(tok.size() - 1, 1) == "=") {
+    if (ends_with(tok, "=")) {
       // start of new feature
 
       if (name != "") {

@@ -16,10 +16,10 @@ Phrase GetOneBestTargetYield(const SHyperedge &h)
   Phrase ret(ARRAY_SIZE_INCR);
 
   const AlignmentInfo::NonTermIndexMap &targetToSourceMap =
-    h.translation->GetAlignNonTerm().GetNonTermIndexMap2();
+    h.label.translation->GetAlignNonTerm().GetNonTermIndexMap2();
 
-  for (std::size_t pos = 0; pos < h.translation->GetSize(); ++pos) {
-    const Word &word = h.translation->GetWord(pos);
+  for (std::size_t pos = 0; pos < h.label.translation->GetSize(); ++pos) {
+    const Word &word = h.label.translation->GetWord(pos);
     if (word.IsNonTerminal()) {
       std::size_t sourceIndex = targetToSourceMap[pos];
       const SHyperedge &incoming = *h.tail[sourceIndex]->best;

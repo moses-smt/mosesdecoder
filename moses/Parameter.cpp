@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <boost/algorithm/string/predicate.hpp>
 #include "Parameter.h"
 #include "Util.h"
 #include "InputFileStream.h"
@@ -32,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/exception.hh"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -111,7 +113,6 @@ Parameter::Parameter()
 #endif
   AddParam("cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
   AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
-  AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
   AddParam("description", "Source language, target language, description");
   AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
   AddParam("non-terminals", "list of non-term symbols, space separated");
@@ -120,7 +121,7 @@ Parameter::Parameter()
   AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
   AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
-  AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing, 4=stack with batched lm requests (default = 0)");
+  AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 3=chart (with cube pruning), 4=stack with batched lm requests, 5=chart (with incremental search), 6=string-to-tree, 7=tree-to-string, 8=tree-to-string (SCFG-based), 9=forest-to-string (default = 0)");
   AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
   AddParam("description", "Source language, target language, description");
 
@@ -209,7 +210,6 @@ Parameter::Parameter()
   AddParam("placeholder-factor", "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
   AddParam("no-cache", "Disable all phrase-table caching. Default = false (ie. enable caching)");
   AddParam("default-non-term-for-empty-range-only", "Don't add [X] to all ranges, just ranges where there isn't a source non-term. Default = false (ie. add [X] everywhere)");
-  AddParam("s2t", "Use specialized string-to-tree decoder.");
   AddParam("s2t-parsing-algorithm", "Which S2T parsing algorithm to use. 0=recursive CYK+, 1=scope-3 (default = 0)");
 
   AddParam("spe-src", "Simulated post-editing. Source filename");
@@ -272,8 +272,9 @@ bool Parameter::isOption(const char* token)
   if (! token) return false;
   std::string tokenString(token);
   size_t length = tokenString.size();
-  if (length > 0 && tokenString.substr(0,1) != "-") return false;
-  if (length > 1 && tokenString.substr(1,1).find_first_not_of("0123456789") == 0) return true;
+  if (length <= 1) return false;
+  if (!starts_with(tokenString, "-")) return false;
+  if (tokenString.substr(1,1).find_first_not_of("0123456789") == 0) return true;
   return false;
 }
 
@@ -977,7 +978,7 @@ void Parameter::WeightOverwrite()
   for (size_t i = 0; i < toks.size(); ++i) {
     const string &tok = toks[i];
 
-    if (tok.substr(tok.size() - 1, 1) == "=") {
+    if (ends_with(tok, "=")) {
       // start of new feature
 
       if (name != "") {
