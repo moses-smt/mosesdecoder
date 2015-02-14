@@ -443,6 +443,20 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
+
+/* Instantiate LanguageModelKen here.  Tells the compiler to generate code
+ * for the instantiations' non-inline member functions in this file.
+ * Otherwise, depending on the compiler, those functions may not be present
+ * at link time.
+ */
+template class LanguageModelKen<lm::ngram::ProbingModel>;
+template class LanguageModelKen<lm::ngram::RestProbingModel>;
+template class LanguageModelKen<lm::ngram::TrieModel>;
+template class LanguageModelKen<lm::ngram::ArrayTrieModel>;
+template class LanguageModelKen<lm::ngram::QuantTrieModel>;
+template class LanguageModelKen<lm::ngram::QuantArrayTrieModel>;
+
+
 LanguageModel *ConstructKenLM(const std::string &lineOrig)
 {
   FactorType factorType = 0;
