@@ -18,6 +18,7 @@ usage(const char *path)
     std::cerr << " -b -- drop bad bytes" << std::endl;
     std::cerr << " -c DIR -- config (pattern) file directory" << std::endl;
     std::cerr << " -d -- downcase" << std::endl;
+    std::cerr << " -D -- detokenize" << std::endl;
     std::cerr << " -e -- do not escape entities during tokenization" << std::endl;
     std::cerr << " -k -- narrow kana" << std::endl;
     std::cerr << " -n -- narrow latin" << std::endl;
@@ -27,7 +28,7 @@ usage(const char *path)
     std::cerr << " -r -- refined contraction and quantity conjoining" << std::endl;
     std::cerr << " -s -- super- and sub-script conjoining" << std::endl;
     std::cerr << " -u -- disable url handling" << std::endl;
-    std::cerr << " -U -- unescape entities before tokenization" << std::endl;
+    std::cerr << " -U -- unescape entities before tokenization, after detokenization" << std::endl;
     std::cerr << " -v -- verbose" << std::endl;
     std::cerr << " -w -- word filter" << std::endl;
     std::cerr << " -x -- skip xml tag lines" << std::endl;
@@ -108,7 +109,8 @@ int main(int ac, char **av)
     const char *prog = av[0];
     bool next_cfg_p = false;
     bool next_output_p = false;
-
+    bool detokenize_p = std::strstr(av[0],"detokenize") != 0;
+    
     while (++av,--ac) { 
         if (**av == '-') {
             switch (av[0][1]) {
@@ -123,6 +125,9 @@ int main(int ac, char **av)
                 break;
             case 'd':
                 params.downcase_p = true;
+                break;
+            case 'D':
+                detokenize_p = true;
                 break;
             case 'e':
                 params.escape_p = false;
@@ -234,6 +239,9 @@ int main(int ac, char **av)
     }
     std::ostream& ofs(pofs ? *pofs : std::cout);
 
+    if (params.lang_iso.empty())
+        params.lang_iso = "en";
+
     Tokenizer tize(params);
     tize.init();
     size_t nlines = 0;
@@ -252,12 +260,20 @@ int main(int ac, char **av)
             }
         }
     } else if (params.args.empty()) {
-        nlines = tize.tokenize(std::cin,ofs);
+        if (detokenize_p) {
+            nlines = tize.detokenize(std::cin,ofs);
+        } else {
+            nlines = tize.tokenize(std::cin,ofs);
+        }
     } else {
         for (std::string& arg : params.args) {
             try {
                 std::ifstream ifs(arg.c_str());
-                nlines = tize.tokenize(ifs,ofs);
+                if (detokenize_p) {
+                    nlines = tize.detokenize(ifs,ofs);
+                } else {
+                    nlines = tize.tokenize(ifs,ofs);
+                }
             } catch (...) {
                 std::cerr << "Exception tokenizing from path " << arg << std::endl;
             }
@@ -265,7 +281,7 @@ int main(int ac, char **av)
     }
 
     if (params.verbose_p)
-        std::cerr << "%%% tokenized lines: " << nlines << std::endl;
+        std::cerr << "%%% " << nlines << " lines." << std::endl;
     
     return rc;
 }
