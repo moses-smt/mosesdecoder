@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- c++ -*- 
 #include <vector>
 #include <string>
 
@@ -6,6 +6,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/WordsRange.h"
 #include "moses/TranslationOption.h"
+#include "moses/Util.h"
 
 #include "LexicalReordering.h"
 #include "LexicalReorderingState.h"
@@ -13,13 +14,10 @@
 
 namespace Moses
 {
-
-  typedef LexicalReorderingConfiguration LexReoConf;
-
   bool
   IsMonotonicStep(WordsRange  const& prev, // words range of last source phrase
-		  WordsRange  const& cur,  // words range of current source phrase
-		  WordsBitmap const& cov)  // coverage bitmap
+                  WordsRange  const& cur,  // words range of current source phrase
+                  WordsBitmap const& cov)  // coverage bitmap
   {
     size_t e = prev.GetEndPos() + 1;
     size_t s = cur.GetStartPos();
@@ -35,39 +33,95 @@ namespace Moses
   }
 
   size_t 
-  LexicalReorderingConfiguration::
+  LRModel::
   GetNumberOfTypes() const
   {
-    return ((m_modelType == LexReoConf::MSD)  ? 3 :
-	    (m_modelType == LexReoConf::MSLR) ? 4 : 2);
+    return ((m_modelType == MSD)  ? 3 :
+            (m_modelType == MSLR) ? 4 : 2);
   }
   
   size_t 
-  LexicalReorderingConfiguration::
+  LRModel::
   GetNumScoreComponents() const
   {
     size_t score_per_dir = m_collapseScores ? 1 : GetNumberOfTypes();
     return ((m_direction == Bidirectional) 
-	    ? 2 * score_per_dir + m_additionalScoreComponents
-	    : score_per_dir + m_additionalScoreComponents);
-  }
-  
-  void 
-  LexicalReorderingConfiguration::
-  ConfigureSparse(std::map<std::string,std::string> const& sparseArgs, 
-		  const LexicalReordering* producer)
-  {
-    if (sparseArgs.size()) 
-      m_sparse.reset(new SparseReordering(sparseArgs, producer));
+            ? 2 * score_per_dir + m_additionalScoreComponents
+            : score_per_dir + m_additionalScoreComponents);
   }
 
-  void LexicalReorderingConfiguration::SetAdditionalScoreComponents(size_t number)
+  void 
+  LRModel::
+  ConfigureSparse(const std::map<std::string,std::string>& sparseArgs, 
+                  const LexicalReordering* producer)
+  {
+    if (sparseArgs.size()) {
+      m_sparse.reset(new SparseReordering(sparseArgs, producer));
+    }
+  }
+
+  void 
+  LRModel::
+  SetAdditionalScoreComponents(size_t number)
   {
     m_additionalScoreComponents = number;
   }
 
-  LexicalReorderingConfiguration::
-  LexicalReorderingConfiguration(const std::string &modelType)
+  /// return orientation for the first phrase
+  LRModel::ReorderingType
+  LRModel::
+  GetOrientation(WordsRange const& cur) const
+  {
+    UTIL_THROW_IF2(m_modelType == None, "Reordering Model Type is None");
+    return ((m_modelType == LeftRight) ? R :
+            (cur.GetStartPos() == 0) ? M  :
+            (m_modelType == MSD)     ? D  : 
+            (m_modelType == MSLR)    ? DR : NM);
+  }
+  
+  LRModel::ReorderingType
+  LRModel::
+  GetOrientation(WordsRange const& prev, WordsRange const& cur) const
+  {
+    UTIL_THROW_IF2(m_modelType == None, "No reordering model type specified");
+    return ((m_modelType == LeftRight) 
+            ? prev.GetEndPos() <= cur.GetStartPos() ? R : L
+            : (cur.GetStartPos() == prev.GetEndPos() + 1) ? M
+            : (m_modelType == Monotonic) ? NM
+            : (prev.GetStartPos() ==  cur.GetEndPos() + 1) ? S
+            : (m_modelType == MSD) ? D
+            : (cur.GetStartPos() > prev.GetEndPos()) ? DR : DL);
+  }
+
+  LRModel::ReorderingType
+  LRModel::
+  GetOrientation(int const reoDistance) const
+  { // this one is for HierarchicalReorderingBackwardState
+    return ((m_modelType == LeftRight)
+            ? (reoDistance >= 1) ? R : L
+            : (reoDistance == 1) ? M
+            : (m_modelType == Monotonic) ? NM
+            : (reoDistance == -1)  ? S
+            : (m_modelType == MSD) ? D
+            : (reoDistance  >  1) ? DR : DL);
+  }
+  
+  LRModel::ReorderingType
+  LRModel::
+  GetOrientation(WordsRange const& prev, WordsRange const& cur, 
+                 WordsBitmap const& cov) const
+  {
+    return ((m_modelType == LeftRight) 
+            ? cur.GetStartPos() > prev.GetEndPos() ? R : L
+            : IsMonotonicStep(prev,cur,cov) ? M
+            : (m_modelType == Monotonic) ? NM
+            : IsSwap(prev,cur,cov) ? S 
+            : (m_modelType == MSD) ? D
+            : cur.GetStartPos() > prev.GetEndPos() ? DR : DL);
+  }
+
+  LRModel::
+  LRModel(const std::string &modelType)
     : m_modelString(modelType)
     , m_scoreProducer(NULL)
     , m_modelType(None)
@@ -91,10 +145,9 @@ namespace Moses
         else if (config[i] == "monotonicity") {	m_modelType = Monotonic; } 
         else if (config[i] == "leftright")    { m_modelType = LeftRight; } 
 
-        else if (config[i] == "backward")  { m_direction = Backward; } 
-
-	// note: unidirectional is deprecated, use backward instead
+        // unidirectional is deprecated, use backward instead
         else if (config[i] == "unidirectional") { m_direction = Backward; } 
+        else if (config[i] == "backward")       { m_direction = Backward; } 
         else if (config[i] == "forward")        { m_direction = Forward; } 
         else if (config[i] == "bidirectional")  { m_direction = Bidirectional; } 
 
@@ -121,66 +174,74 @@ namespace Moses
       }
   }
   
-  LexicalReorderingState *
-  LexicalReorderingConfiguration::
-  CreateLexicalReorderingState(const InputType &input) const
+  LRState *
+  LRModel::
+  CreateLRState(const InputType &input) const
   {
-    LexicalReorderingState *bwd = NULL, *fwd = NULL;
+    LRState *bwd = NULL, *fwd = NULL;
     size_t offset = 0;
     
     switch(m_direction) 
       {
       case Backward:
       case Bidirectional:
-        bwd = (m_phraseBased 
-               ? new PhraseBasedReorderingState(*this, Backward, offset);
-               : new HierarchicalReorderingBackwardState(*this, offset));
+        if (m_phraseBased)
+          bwd = new PhraseBasedReorderingState(*this, Backward, offset);
+        else 
+          bwd = new HReorderingBackwardState(*this, offset);
         offset += m_collapseScores ? 1 : GetNumberOfTypes();
         if (m_direction == Backward) return bwd; // else fall through
       case Forward:
-        fwd = (m_phraseBased 
-               ? new PhraseBasedReorderingState(*this, Forward, offset)
-               : new HierarchicalReorderingForwardState(*this, input.GetSize(), 
-                                                        offset));
+        if (m_phraseBased)
+          fwd = new PhraseBasedReorderingState(*this, Forward, offset);
+        else
+          fwd = new HReorderingForwardState(*this, input.GetSize(), offset);
         offset += m_collapseScores ? 1 : GetNumberOfTypes();
         if (m_direction == Forward) return fwd;
       }
     return new BidirectionalReorderingState(*this, bwd, fwd, 0);
   }
 
+
   void 
-  LexicalReorderingState::
+  LRState::
   CopyScores(ScoreComponentCollection*  accum, 
              const TranslationOption &topt, 
              const InputType& input,  
              ReorderingType reoType) const
   {
     // don't call this on a bidirectional object
-    UTIL_THROW_IF2(m_direction != Backward && m_direction != Forward,
-		   "Unknown direction: " << m_direction);
-
-    TranslationOption const* 
-      relevantOpt = (m_direction == Backward) ? &topt :  m_prevOption;
+    UTIL_THROW_IF2(m_direction != LRModel::Backward && 
+                   m_direction != LRModel::Forward,
+                   "Unknown direction: " << m_direction);
     
-    LexicalReordering* reotable = m_configuration.GetScoreProducer();
-    Scores const* cachedScores  = relevantOpt->GetLexReorderingScores(reotable);
+    TranslationOption const* relevantOpt = ((m_direction == LRModel::Backward)
+                                            ? &topt : m_prevOption);
+    
+    LexicalReordering* producer = m_configuration.GetScoreProducer();
+    Scores const* cached = relevantOpt->GetLexReorderingScores(producer);
 
+    // The approach here is bizarre! Why create a whole vector and do
+    // vector addition (acumm->PlusEquals) to update a single value? - UG
     size_t off_remote = m_offset + reoType;
-    size_t off_local = m_configuration.CollapseScores() ? m_offset : off_remote;
+    size_t off_local  = m_configuration.CollapseScores() ? m_offset : off_remote;
 
+    UTIL_THROW_IF2(off_remote >= producer->GetNumScoreComponents(),
+                   "offset out of vector bounds!");
+    
     // look up applicable score from vectore of scores
-    if(cachedScores) 
+    if(cached) 
       {
-        Scores scores(reotable->GetNumScoreComponents(),0);
-        socres[off_local ] (*cachedScores)[off_remote];
-        accum->PlusEquals(reotable, scores);
+        Scores scores(producer->GetNumScoreComponents(),0);
+        scores[off_local ] = (*cached)[off_remote];
+        accum->PlusEquals(producer, scores);
       }
-
+    
     // else: use default scores (if specified)
-    else if (reotable->GetHaveDefaultScores()) 
+    else if (producer->GetHaveDefaultScores()) 
       {
-        Scores scores(reotable->GetNumScoreComponents(),0);
-        scores[off_local] = reotable->GetDefaultScore(off_remote);
+        Scores scores(producer->GetNumScoreComponents(),0);
+        scores[off_local] = producer->GetDefaultScore(off_remote);
         accum->PlusEquals(m_configuration.GetScoreProducer(), scores);
       }
     // note: if no default score, no cost
@@ -190,55 +251,65 @@ namespace Moses
                                    m_direction, accum);
   }
   
-
+  
   int 
-  LexicalReorderingState::
+  LRState::
   ComparePrevScores(const TranslationOption *other) const
   {
-    LexicalReordering* reotable = m_configuration.GetScoreProducer();
-    const Scores* myPrevScores = m_prevOption->GetLexReorderingScores(reotable);
-    const Scores* otherPrevScores = other->GetLexReorderingScores(reotable);
+    LexicalReordering* producer = m_configuration.GetScoreProducer();
+    const Scores* myScores = m_prevOption->GetLexReorderingScores(producer);
+    const Scores* yrScores = other->GetLexReorderingScores(producer);
 
-    if(myPrevScores == otherPrevScores)
-      return 0;
+    if(myScores == yrScores) return 0;
 
     // The pointers are NULL if a phrase pair isn't found in the reordering table.
-    if(otherPrevScores == NULL)
-      return -1;
-    if(myPrevScores == NULL)
-      return 1;
-
-    for(size_t i = m_offset; i < m_offset + m_configuration.GetNumberOfTypes(); i++)
-      if((*myPrevScores)[i] < (*otherPrevScores)[i])
-	return -1;
-      else if((*myPrevScores)[i] > (*otherPrevScores)[i])
-	return 1;
-
+    if(yrScores == NULL) return -1;
+    if(myScores == NULL) return  1;
+    
+    size_t stop = m_offset + m_configuration.GetNumberOfTypes();
+    for(size_t i = m_offset; i < stop; i++)
+      {
+        if((*myScores)[i] < (*yrScores)[i]) return -1;
+        if((*myScores)[i] > (*yrScores)[i]) return  1;
+      }
     return 0;
   }
 
+  // ===========================================================================
+  // PHRASE BASED REORDERING STATE
+  // ===========================================================================
   bool PhraseBasedReorderingState::m_useFirstBackwardScore = true;
 
-  PhraseBasedReorderingState::PhraseBasedReorderingState(const PhraseBasedReorderingState *prev, const TranslationOption &topt)
-    : LexicalReorderingState(prev, topt), m_prevRange(topt.GetSourceWordsRange()), m_first(false) {}
+  PhraseBasedReorderingState::
+  PhraseBasedReorderingState(const PhraseBasedReorderingState *prev, 
+                             const TranslationOption &topt)
+    : LRState(prev, topt)
+    , m_prevRange(topt.GetSourceWordsRange())
+    , m_first(false) 
+  { }
 
 
-  PhraseBasedReorderingState::PhraseBasedReorderingState(const LexReoConf &config,
-							 LexReoConf::Direction dir, size_t offset)
-    : LexicalReorderingState(config, dir, offset), m_prevRange(NOT_FOUND,NOT_FOUND), m_first(true) {}
+  PhraseBasedReorderingState::
+  PhraseBasedReorderingState(const LRModel &config,
+                             LRModel::Direction dir, size_t offset)
+    : LRState(config, dir, offset)
+    , m_prevRange(NOT_FOUND,NOT_FOUND)
+    , m_first(true) 
+  { }
 
 
-  int PhraseBasedReorderingState::Compare(const FFState& o) const
+  int 
+  PhraseBasedReorderingState::
+  Compare(const FFState& o) const
   {
-    if (&o == this)
-      return 0;
+    if (&o == this) return 0;
 
     const PhraseBasedReorderingState* other = static_cast<const PhraseBasedReorderingState*>(&o);
     if (m_prevRange == other->m_prevRange) {
-      if (m_direction == LexReoConf::Forward) {
-	return ComparePrevScores(other->m_prevOption);
+      if (m_direction == LRModel::Forward) {
+        return ComparePrevScores(other->m_prevOption);
       } else {
-	return 0;
+        return 0;
       }
     } else if (m_prevRange < other->m_prevRange) {
       return -1;
@@ -246,218 +317,129 @@ namespace Moses
     return 1;
   }
 
-  LexicalReorderingState* PhraseBasedReorderingState::Expand(const TranslationOption& topt, const InputType& input,ScoreComponentCollection* scores) const
+  LRState* 
+  PhraseBasedReorderingState::
+  Expand(const TranslationOption& topt, const InputType& input, 
+         ScoreComponentCollection* scores) const
   {
-    ReorderingType reoType;
-    const WordsRange currWordsRange = topt.GetSourceWordsRange();
-    const LexReoConf::ModelType modelType = m_configuration.GetModelType();
-
-    if ((m_direction != LexReoConf::Forward && m_useFirstBackwardScore)  || !m_first) {
-      if (modelType == LexReoConf::MSD) {
-	reoType = GetOrientationTypeMSD(currWordsRange);
-      } else if (modelType == LexReoConf::MSLR) {
-	reoType = GetOrientationTypeMSLR(currWordsRange);
-      } else if (modelType == LexReoConf::Monotonic) {
-	reoType = GetOrientationTypeMonotonic(currWordsRange);
-      } else {
-	reoType = GetOrientationTypeLeftRight(currWordsRange);
+    // const LRModel::ModelType modelType = m_configuration.GetModelType();
+    
+    if ((m_direction != LRModel::Forward && m_useFirstBackwardScore) || !m_first) 
+      {
+        LRModel const& lrmodel = m_configuration;
+        WordsRange const cur = topt.GetSourceWordsRange();
+        ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur) 
+                                  : lrmodel.GetOrientation(m_prevRange,cur));
+        CopyScores(scores, topt, input, reoType);
       }
-      CopyScores(scores, topt, input, reoType);
-    }
-
     return new PhraseBasedReorderingState(this, topt);
   }
 
-  LexicalReorderingState::ReorderingType PhraseBasedReorderingState::GetOrientationTypeMSD(WordsRange currRange) const
-  {
-    if (m_first) {
-      if (currRange.GetStartPos() == 0) {
-	return M;
-      } else {
-	return D;
-      }
-    }
-    if (m_prevRange.GetEndPos() == currRange.GetStartPos()-1) {
-      return M;
-    } else if (m_prevRange.GetStartPos() == currRange.GetEndPos()+1) {
-      return S;
-    }
-    return D;
-  }
-
-  LexicalReorderingState::ReorderingType PhraseBasedReorderingState::GetOrientationTypeMSLR(WordsRange currRange) const
-  {
-    if (m_first) {
-      if (currRange.GetStartPos() == 0) {
-	return M;
-      } else {
-	return DR;
-      }
-    }
-    if (m_prevRange.GetEndPos() == currRange.GetStartPos()-1) {
-      return M;
-    } else if (m_prevRange.GetStartPos() == currRange.GetEndPos()+1) {
-      return S;
-    } else if (m_prevRange.GetEndPos() < currRange.GetStartPos()) {
-      return DR;
-    }
-    return DL;
-  }
-
-
-  LexicalReorderingState::ReorderingType PhraseBasedReorderingState::GetOrientationTypeMonotonic(WordsRange currRange) const
-  {
-    if ((m_first && currRange.GetStartPos() == 0) ||
-	(m_prevRange.GetEndPos() == currRange.GetStartPos()-1)) {
-      return M;
-    }
-    return NM;
-  }
-
-  LexicalReorderingState::ReorderingType PhraseBasedReorderingState::GetOrientationTypeLeftRight(WordsRange currRange) const
-  {
-    if (m_first ||
-	(m_prevRange.GetEndPos() <= currRange.GetStartPos())) {
-      return R;
-    }
-    return L;
-  }
 
   ///////////////////////////
   //BidirectionalReorderingState
 
-  int BidirectionalReorderingState::Compare(const FFState& o) const
+  int 
+  BidirectionalReorderingState::
+  Compare(FFState const& o) const
   {
-    if (&o == this)
-      return 0;
+    if (&o == this) return 0;
+    
+    BidirectionalReorderingState const &other 
+      = static_cast<BidirectionalReorderingState const&>(o);
 
-    const BidirectionalReorderingState &other = static_cast<const BidirectionalReorderingState &>(o);
-    if(m_backward->Compare(*other.m_backward) < 0)
-      return -1;
-    else if(m_backward->Compare(*other.m_backward) > 0)
-      return 1;
-    else
-      return m_forward->Compare(*other.m_forward);
+    int cmp = m_backward->Compare(*other.m_backward);
+    return (cmp < 0) ? -1 : cmp ? 1 : m_forward->Compare(*other.m_forward);
   }
 
-  LexicalReorderingState* BidirectionalReorderingState::Expand(const TranslationOption& topt, const InputType& input, ScoreComponentCollection* scores) const
+  LRState* 
+  BidirectionalReorderingState::
+  Expand(const TranslationOption& topt, const InputType& input, 
+         ScoreComponentCollection* scores) const
   {
-    LexicalReorderingState *newbwd = m_backward->Expand(topt,input, scores);
-    LexicalReorderingState *newfwd = m_forward->Expand(topt, input, scores);
+    LRState *newbwd = m_backward->Expand(topt,input, scores);
+    LRState *newfwd = m_forward->Expand(topt, input, scores);
     return new BidirectionalReorderingState(m_configuration, newbwd, newfwd, m_offset);
   }
 
   ///////////////////////////
   //HierarchicalReorderingBackwardState
 
-  HierarchicalReorderingBackwardState::HierarchicalReorderingBackwardState(const HierarchicalReorderingBackwardState *prev,
-									   const TranslationOption &topt, ReorderingStack reoStack)
-    : LexicalReorderingState(prev, topt),  m_reoStack(reoStack) {}
+  HReorderingBackwardState::
+  HReorderingBackwardState(const HReorderingBackwardState *prev,
+                           const TranslationOption &topt, 
+                           ReorderingStack reoStack)
+    : LRState(prev, topt),  m_reoStack(reoStack) 
+  { }
+  
+  HReorderingBackwardState::
+  HReorderingBackwardState(const LRModel &config, size_t offset)
+    : LRState(config, LRModel::Backward, offset) 
+  { }
 
-  HierarchicalReorderingBackwardState::HierarchicalReorderingBackwardState(const LexReoConf &config, size_t offset)
-    : LexicalReorderingState(config, LexReoConf::Backward, offset) {}
 
-
-  int HierarchicalReorderingBackwardState::Compare(const FFState& o) const
+  int 
+  HReorderingBackwardState::
+  Compare(const FFState& o) const
   {
-    const HierarchicalReorderingBackwardState& other = static_cast<const HierarchicalReorderingBackwardState&>(o);
+    const HReorderingBackwardState& other 
+      = static_cast<const HReorderingBackwardState&>(o);
     return m_reoStack.Compare(other.m_reoStack);
   }
-
-  LexicalReorderingState* HierarchicalReorderingBackwardState::Expand(const TranslationOption& topt, const InputType& input,ScoreComponentCollection*  scores) const
+  
+  LRState* 
+  HReorderingBackwardState::
+  Expand(const TranslationOption& topt, const InputType& input,
+         ScoreComponentCollection*  scores) const
   {
-
-    HierarchicalReorderingBackwardState* nextState = new HierarchicalReorderingBackwardState(this, topt, m_reoStack);
-    ReorderingType reoType;
-    const LexReoConf::ModelType modelType = m_configuration.GetModelType();
-
-    int reoDistance = nextState->m_reoStack.ShiftReduce(topt.GetSourceWordsRange());
-
-    if (modelType == LexReoConf::MSD) {
-      reoType = GetOrientationTypeMSD(reoDistance);
-    } else if (modelType == LexReoConf::MSLR) {
-      reoType = GetOrientationTypeMSLR(reoDistance);
-    } else if (modelType == LexReoConf::LeftRight) {
-      reoType = GetOrientationTypeLeftRight(reoDistance);
-    } else {
-      reoType = GetOrientationTypeMonotonic(reoDistance);
-    }
-
+    HReorderingBackwardState* nextState; 
+    nextState = new HReorderingBackwardState(this, topt, m_reoStack);
+    WordsRange swrange = topt.GetSourceWordsRange();
+    int reoDistance = nextState->m_reoStack.ShiftReduce(swrange);
+    ReorderingType reoType = m_configuration.GetOrientation(reoDistance);
     CopyScores(scores, topt, input, reoType);
     return nextState;
   }
 
-  LexicalReorderingState::ReorderingType HierarchicalReorderingBackwardState::GetOrientationTypeMSD(int reoDistance) const
-  {
-    if (reoDistance == 1) {
-      return M;
-    } else if (reoDistance == -1) {
-      return S;
-    }
-    return D;
-  }
-
-  LexicalReorderingState::ReorderingType HierarchicalReorderingBackwardState::GetOrientationTypeMSLR(int reoDistance) const
-  {
-    if (reoDistance == 1) {
-      return M;
-    } else if (reoDistance == -1) {
-      return S;
-    } else if (reoDistance > 1) {
-      return DR;
-    }
-    return DL;
-  }
-
-  LexicalReorderingState::ReorderingType HierarchicalReorderingBackwardState::GetOrientationTypeMonotonic(int reoDistance) const
-  {
-    if (reoDistance == 1) {
-      return M;
-    }
-    return NM;
-  }
-
-  LexicalReorderingState::ReorderingType HierarchicalReorderingBackwardState::GetOrientationTypeLeftRight(int reoDistance) const
-  {
-    if (reoDistance >= 1) {
-      return R;
-    }
-    return L;
-  }
-
-
-
-
   ///////////////////////////
-  //HierarchicalReorderingForwardState
+  //HReorderingForwardState
 
-  HierarchicalReorderingForwardState::
-  HierarchicalReorderingForwardState(const LexReoConf &config, size_t size, size_t offset)
-    : LexicalReorderingState(config, LexReoConf::Forward, offset), m_first(true), m_prevRange(NOT_FOUND,NOT_FOUND), m_coverage(size) {}
+  HReorderingForwardState::
+  HReorderingForwardState(const LRModel &config, 
+                size_t size, size_t offset)
+    : LRState(config, LRModel::Forward, offset)
+    , m_first(true)
+    , m_prevRange(NOT_FOUND,NOT_FOUND)
+    , m_coverage(size) 
+  { }
 
-  HierarchicalReorderingForwardState::HierarchicalReorderingForwardState(const HierarchicalReorderingForwardState *prev, const TranslationOption &topt)
-    : LexicalReorderingState(prev, topt), m_first(false), m_prevRange(topt.GetSourceWordsRange()), m_coverage(prev->m_coverage)
+  HReorderingForwardState::
+  HReorderingForwardState(const HReorderingForwardState *prev, 
+                const TranslationOption &topt)
+    : LRState(prev, topt)
+    , m_first(false)
+    , m_prevRange(topt.GetSourceWordsRange())
+    , m_coverage(prev->m_coverage)
   {
-    const WordsRange currWordsRange = topt.GetSourceWordsRange();
-    m_coverage.SetValue(currWordsRange.GetStartPos(), currWordsRange.GetEndPos(), true);
+    m_coverage.SetValue(topt.GetSourceWordsRange(), true);
   }
 
-  int HierarchicalReorderingForwardState::Compare(const FFState& o) const
+  int 
+  HReorderingForwardState::
+  Compare(const FFState& o) const
   {
-    if (&o == this)
-      return 0;
+    if (&o == this) return 0;
 
-    const HierarchicalReorderingForwardState* other = static_cast<const HierarchicalReorderingForwardState*>(&o);
-
-    if (m_prevRange == other->m_prevRange) {
-      return ComparePrevScores(other->m_prevOption);
-    } else if (m_prevRange < other->m_prevRange) {
-      return -1;
-    }
-    return 1;
+    HReorderingForwardState const& other 
+      = static_cast<HReorderingForwardState const&>(o);
+    
+    return ((m_prevRange == other.m_prevRange) 
+            ? ComparePrevScores(other.m_prevOption) 
+            : (m_prevRange < other.m_prevRange) ? -1 : 1);
   }
 
-  // For compatibility with the phrase-based reordering model, scoring is one step delayed.
+  // For compatibility with the phrase-based reordering model, scoring is one 
+  // step delayed.
   // The forward model takes determines orientations heuristically as follows:
   //  mono:   if the next phrase comes after the conditioning phrase and
   //          - there is a gap to the right of the conditioning phrase, or
@@ -465,70 +447,27 @@ namespace Moses
   //  swap:   if the next phrase goes before the conditioning phrase and
   //          - there is a gap to the left of the conditioning phrase, or
   //          - the next phrase immediately precedes it
-  //  dright: if the next phrase follows the cond. phr. 
-  //          and other stuff comes in between
-  //  dleft:  if the next phrase precedes the conditioning phrase 
-  //          and other stuff comes in between
-
-  LexicalReorderingState* 
-  HierarchicalReorderingForwardState::
-  Expand(const TranslationOption& topt, const InputType& input, 
-	 ScoreComponentCollection* scores) const
+  //  dright: if the next phrase follows the conditioning phrase and other 
+  //          stuff comes in between
+  //  dleft:  if the next phrase precedes the conditioning phrase and other 
+  //          stuff comes in between
+  
+  LRState* 
+  HReorderingForwardState::
+  Expand(TranslationOption const& topt, InputType const& input,
+         ScoreComponentCollection* scores) const
   {
-    LexReoConf::ModelType const modelType = m_configuration.GetModelType();
-    WordsRange const& currRange = topt.GetSourceWordsRange();
-
-    // keep track of the current cov. ourselves so we don't need the hypothesis
-    WordsBitmap cov = m_coverage;
-    cov.SetValue(currRange.GetStartPos(), currRange.GetEndPos(), true);
-
-
-    if (!m_first) 
+    const WordsRange cur = topt.GetSourceWordsRange();
+    // keep track of the current coverage ourselves so we don't need the hypothesis
+    WordsBitmap cov = m_coverage; 
+    cov.SetValue(cur, true);
+    if (!m_first)
       {
-	ReorderingType reoType
-	  = ((modelType == LexReoConf::MSD) 
-	     ? GetOrientationTypeMSD(currWordsRange, coverage)
-	     : (modelType == LexReoConf::MSLR) 
-	     ? GetOrientationTypeMSLR(currWordsRange, coverage)
-	     : (modelType == LexReoConf::Monotonic) 
-	     ? GetOrientationTypeMonotonic(currWordsRange, coverage);
-	     : GetOrientationTypeLeftRight(currWordsRange, coverage));
-	CopyScores(scores, topt, input, reoType);
+        LRModel::ReorderingType reoType;
+        reoType = m_configuration.GetOrientation(m_prevRange,cur,cov);
+        CopyScores(scores, topt, input, reoType);
       }
-    
-    return new HierarchicalReorderingForwardState(this, topt);
+    return new HReorderingForwardState(this, topt);
   }
-
-  LexicalReorderingState::ReorderingType 
-  HierarchicalReorderingForwardState::
-  GetOrientationTypeMSD(WordsRange currRange, WordsBitmap coverage) const
-  {
-    return (IsMonotonicStep(m_prevRange,currRange,coverage) ? M 
-	    : IsSwap(m_prevRange, currRange, coverage)      ? S : D);
-  }
-
-  LexicalReorderingState::ReorderingType 
-  HierarchicalReorderingForwardState::
-  GetOrientationTypeMSLR(WordsRange currRange, WordsBitmap coverage) const
-  {
-    return (IsMonotonicStep(m_prevRange,currRange,coverage) ? M 
-	    : IsSwap(m_prevRange, currRange, coverage) 	    ? S 
-	    : (currRange.GetStartPos() > m_prevRange.GetEndPos()) ? DR : DL);
-  }
-
-  LexicalReorderingState::ReorderingType 
-  HierarchicalReorderingForwardState::
-  GetOrientationTypeMonotonic(WordsRange currRange, WordsBitmap coverage) const
-  {
-    return IsMonotonicStep(m_prevRange, currRange, coverage) ? M : NM;
-  }
-
-  LexicalReorderingState::ReorderingType 
-  HierarchicalReorderingForwardState::
-  GetOrientationTypeLeftRight(WordsRange currRange, WordsBitmap coverage) const
-  {
-    return currRange.GetStartPos() > m_prevRange.GetEndPos() ? R : L;
-  }
-
-
 }
+
