@@ -582,6 +582,12 @@ Tokenizer::tokenize(const std::string& buf)
                 if (aggressive_hyphen_p && !in_url_p) {
                     substitute_p = L"@-@";
                     post_break_p = pre_break_p = true;
+                } else if ( ( curr_uch > gunichar(L'\u002D') && curr_uch < gunichar(L'\u2010') ) ||
+                            ( curr_uch > gunichar(L'\u2011') 
+                              && curr_uch != gunichar(L'\u30A0') 
+                              && curr_uch < gunichar(L'\uFE63') ) ) {
+                    // dash, not a hyphen
+                    post_break_p = pre_break_p = true;
                 } else if (next_type == G_UNICODE_SPACE_SEPARATOR) {
                 } else {
                     if (prev_type == curr_type) {
