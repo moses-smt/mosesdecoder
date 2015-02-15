@@ -112,30 +112,25 @@ Tokenizer::set_config_dir(const std::string& dir) {
 }
 
 
-Tokenizer::Tokenizer(const std::string& _lang_iso,
-                     bool _skip_xml_p,
-                     bool _skip_alltags_p,
-                     bool _non_escape_p,
-                     bool _aggressive_hyphen_p,
-                     bool _supersub_p,
-                     bool _url_p,
-                     bool _downcase_p,
-                     bool _normalize_p,
-                     bool _penn_p,
-                     bool _verbose_p)
-        : lang_iso(_lang_iso)
-        , english_p(_lang_iso.compare("en")==0)
-        , latin_p((!english_p) && (_lang_iso.compare("fr")==0 || _lang_iso.compare("it")==0))
-        , skip_xml_p(_skip_xml_p)
-        , skip_alltags_p(_skip_alltags_p)
-        , non_escape_p(_non_escape_p)
-        , aggressive_hyphen_p(_aggressive_hyphen_p)
-        , supersub_p(_supersub_p)
-        , url_p(_url_p)
-        , downcase_p(_downcase_p)
-        , normalize_p(_normalize_p)
-        , penn_p(_penn_p)
-        , verbose_p(_verbose_p)
+Tokenizer::Tokenizer(const Parameters& _)
+        : lang_iso(_.lang_iso)
+        , english_p(_.lang_iso.compare("en")==0)
+        , latin_p((!english_p) && (_.lang_iso.compare("fr")==0 || _.lang_iso.compare("it")==0))
+        , skip_xml_p(_.detag_p)
+        , skip_alltags_p(_.alltag_p)
+        , escape_p(_.escape_p)
+        , unescape_p(_.unescape_p)
+        , aggressive_hyphen_p(_.aggro_p)
+        , supersub_p(_.supersub_p)
+        , url_p(_.url_p)
+        , downcase_p(_.downcase_p)
+        , normalize_p(_.normalize_p)
+        , penn_p(_.penn_p)
+        , narrow_latin_p(_.narrow_latin_p)
+        , narrow_kana_p(_.narrow_kana_p)
+        , refined_p(_.refined_p)
+        , drop_bad_p(_.drop_bad_p)
+        , verbose_p(_.verbose_p)
 {
 }
 
@@ -464,20 +459,20 @@ Tokenizer::tokenize(const std::string& buf)
         gunichar *ubuf(g_new0(gunichar,ulen*6+1)); // g_free
         gunichar *uptr(ubuf);
 
-        gunichar prev_uch(0L);
+        gunichar prev_uch(0);
         gunichar next_uch(*ucs4);
-        gunichar curr_uch(0L);
+        gunichar curr_uch(0);
 
         GUnicodeType curr_type(G_UNICODE_UNASSIGNED);
         GUnicodeType next_type((ucs4 && *ucs4) ? g_unichar_type(*ucs4) : G_UNICODE_UNASSIGNED);
         GUnicodeType prev_type(G_UNICODE_UNASSIGNED);
 
         bool post_break_p = false;
-        bool in_num = next_uch <= gunichar('9') && next_uch >= gunichar('0');
+        bool in_num_p = next_uch <= gunichar(L'9') && next_uch >= gunichar(L'0');
         bool in_url_p = false;
-        bool final_p = false;
         int since_start = 0;
         int alpha_prefix = 0;
+        int bad_length = 0;
 
         while (ucs4 < lim4) {
             prev_uch = curr_uch;
@@ -485,44 +480,42 @@ Tokenizer::tokenize(const std::string& buf)
             curr_uch = next_uch;
             curr_type = next_type;
 
-            final_p = ++nxt4 >= lim4;
-
-            if (final_p) {
-                next_uch = gunichar(0L);
+            if (++nxt4 >= lim4) {
+                next_uch = 0;
                 next_type = G_UNICODE_UNASSIGNED;
             } else {
                 next_uch = *nxt4;
                 next_type = g_unichar_type(next_uch);
             }
 
-            bool is_basic = *ucs4 < 0x80L;
-
             if (url_p) {
-                if (!in_url_p) {
+                if (!in_url_p && *ucs4 < 0x80L) { // url chars must be in the basic plane
                     if (!since_start) {
-                        if (is_basic && std::isalpha(char(*ucs4)))
+                        if (std::isalpha(char(*ucs4)))
                             alpha_prefix++;
-                    } else if (alpha_prefix == since_start && is_basic && char(*ucs4) == ':' && next_type != G_UNICODE_SPACE_SEPARATOR) {
+                    } else if (alpha_prefix == since_start 
+                               && char(*ucs4) == ':' 
+                               && next_type != G_UNICODE_SPACE_SEPARATOR) {
                         in_url_p = true;
                     }
                 }
             }
 
-            bool break_p = false;
+            bool pre_break_p = false;
             const wchar_t *substitute_p = 0;
 
             if (post_break_p) {
-                *uptr++ = gunichar(' ');
-                since_start = 0;
-                in_url_p = in_num = post_break_p = false;
+                *uptr++ = gunichar(L' ');
+                since_start = bad_length = 0;
+                in_url_p = in_num_p = post_break_p = false;
             }
 
             switch (curr_type) {
             case G_UNICODE_MODIFIER_LETTER:
             case G_UNICODE_OTHER_LETTER:
             case G_UNICODE_TITLECASE_LETTER:
-                if (in_url_p || in_num)
-                    break_p = true;
+                if (in_url_p || in_num_p)
+                    pre_break_p = true;
                 // fallthough
             case G_UNICODE_UPPERCASE_LETTER:
             case G_UNICODE_LOWERCASE_LETTER:
@@ -530,14 +523,14 @@ Tokenizer::tokenize(const std::string& buf)
                     curr_uch = g_unichar_tolower(*ucs4);
                 break;
             case G_UNICODE_SPACING_MARK:
-                break_p = true;
-                in_num = false;
-                curr_uch = gunichar(0L);
+                pre_break_p = true;
+                in_num_p = false;
+                curr_uch = 0;
                 break;
             case G_UNICODE_DECIMAL_NUMBER:
             case G_UNICODE_LETTER_NUMBER:
             case G_UNICODE_OTHER_NUMBER:
-                if (!in_num && !in_url_p) {
+                if (!in_num_p && !in_url_p) {
                     switch (prev_type) {
                     case G_UNICODE_DASH_PUNCTUATION:
                     case G_UNICODE_FORMAT:
@@ -547,20 +540,20 @@ Tokenizer::tokenize(const std::string& buf)
                     case G_UNICODE_DECIMAL_NUMBER:
                         break;
                     default:
-                        break_p = true;
+                        pre_break_p = true;
                     }
                 }
-                in_num = true;
+                in_num_p = true;
                 break;
             case G_UNICODE_CONNECT_PUNCTUATION:
                 if (curr_uch != gunichar(L'_')) {
                     if (in_url_p) {
                         in_url_p = false;
-                        post_break_p = break_p = true;
+                        post_break_p = pre_break_p = true;
                     }
                 }
-                if (in_num) {
-                    post_break_p = break_p = true;
+                if (in_num_p) {
+                    post_break_p = pre_break_p = true;
                 } else {
                     switch (next_type) {
                     case G_UNICODE_LOWERCASE_LETTER:
@@ -569,7 +562,7 @@ Tokenizer::tokenize(const std::string& buf)
                     case G_UNICODE_TITLECASE_LETTER:
                         break;
                     default:
-                        post_break_p = break_p = true;
+                        post_break_p = pre_break_p = true;
                     }
                     switch (prev_type) {
                     case G_UNICODE_LOWERCASE_LETTER:
@@ -578,55 +571,51 @@ Tokenizer::tokenize(const std::string& buf)
                     case G_UNICODE_TITLECASE_LETTER:
                         break;
                     default:
-                        post_break_p = break_p = true;
+                        post_break_p = pre_break_p = true;
                     }
                 }
                 break;
-            case G_UNICODE_DASH_PUNCTUATION:
             case G_UNICODE_FORMAT:
-                if (aggressive_hyphen_p) {
+                in_url_p = in_num_p = false;
+                break;
+            case G_UNICODE_DASH_PUNCTUATION:
+                if (aggressive_hyphen_p && !in_url_p) {
                     substitute_p = L"@-@";
-                    break_p = post_break_p = !in_url_p;
+                    post_break_p = pre_break_p = true;
                 } else if (next_type == G_UNICODE_SPACE_SEPARATOR) {
-                } else if (prev_type == curr_type) {
-                    if (next_type != curr_type) {
-                        post_break_p = !in_url_p;
-                    }
-                } else if (next_type == curr_type) {
-                    break_p = !in_url_p;
-                } else if ((prev_type == G_UNICODE_UPPERCASE_LETTER ||
-                            prev_type == G_UNICODE_LOWERCASE_LETTER) &&
-                           next_type == G_UNICODE_DECIMAL_NUMBER) {
-                    in_num = false;
-                } else if (in_num || since_start == 0) {
-                    switch (next_type) {
-                    case G_UNICODE_UPPERCASE_LETTER:
-                    case G_UNICODE_LOWERCASE_LETTER:
-                    case G_UNICODE_MODIFIER_LETTER:
-                    case G_UNICODE_OTHER_LETTER:
-                    case G_UNICODE_TITLECASE_LETTER:
-                    case G_UNICODE_DECIMAL_NUMBER:
-                    case G_UNICODE_LETTER_NUMBER:
-                    case G_UNICODE_OTHER_NUMBER:
-                    case G_UNICODE_SPACE_SEPARATOR:
-                        break;
-                    default:
-                        post_break_p = break_p = prev_uch != curr_uch;
-                    }
-                } else if (in_url_p) {
-                    break_p = curr_uch != gunichar('-');
                 } else {
-                    switch (prev_type) {
-                    case G_UNICODE_UPPERCASE_LETTER:
-                    case G_UNICODE_LOWERCASE_LETTER:
-                    case G_UNICODE_MODIFIER_LETTER:
-                    case G_UNICODE_OTHER_LETTER:
-                    case G_UNICODE_TITLECASE_LETTER:
-                    case G_UNICODE_DECIMAL_NUMBER:
-                    case G_UNICODE_LETTER_NUMBER:
-                    case G_UNICODE_OTHER_NUMBER:
-                    case G_UNICODE_OTHER_PUNCTUATION:
+                    if (prev_type == curr_type) {
+                        if (next_type != curr_type) {
+                            post_break_p = !in_url_p;
+                        }
+                    } else if (next_type == curr_type) {
+                        pre_break_p = !in_url_p;
+                    } else if ((prev_type == G_UNICODE_UPPERCASE_LETTER ||
+                                prev_type == G_UNICODE_LOWERCASE_LETTER) &&
+                               next_type == G_UNICODE_DECIMAL_NUMBER) {
+                        in_num_p = false;
+                    } else if (in_num_p || since_start == 0) {
                         switch (next_type) {
+                        case G_UNICODE_UPPERCASE_LETTER:
+                        case G_UNICODE_LOWERCASE_LETTER:
+                        case G_UNICODE_MODIFIER_LETTER:
+                        case G_UNICODE_OTHER_LETTER:
+                        case G_UNICODE_TITLECASE_LETTER:
+                        case G_UNICODE_SPACE_SEPARATOR:
+                            in_num_p = false;
+                            break;
+                        case G_UNICODE_DECIMAL_NUMBER:
+                        case G_UNICODE_LETTER_NUMBER:
+                        case G_UNICODE_OTHER_NUMBER:
+                            break;
+                        default:
+                            post_break_p = true;
+                            pre_break_p = prev_uch != curr_uch;
+                        }
+                    } else if (in_url_p) {
+                        pre_break_p = curr_uch != gunichar(L'-');
+                    } else {
+                        switch (prev_type) {
                         case G_UNICODE_UPPERCASE_LETTER:
                         case G_UNICODE_LOWERCASE_LETTER:
                         case G_UNICODE_MODIFIER_LETTER:
@@ -635,64 +624,76 @@ Tokenizer::tokenize(const std::string& buf)
                         case G_UNICODE_DECIMAL_NUMBER:
                         case G_UNICODE_LETTER_NUMBER:
                         case G_UNICODE_OTHER_NUMBER:
+                        case G_UNICODE_OTHER_PUNCTUATION:
+                            switch (next_type) {
+                            case G_UNICODE_UPPERCASE_LETTER:
+                            case G_UNICODE_LOWERCASE_LETTER:
+                            case G_UNICODE_MODIFIER_LETTER:
+                            case G_UNICODE_OTHER_LETTER:
+                            case G_UNICODE_TITLECASE_LETTER:
+                            case G_UNICODE_DECIMAL_NUMBER:
+                            case G_UNICODE_LETTER_NUMBER:
+                            case G_UNICODE_OTHER_NUMBER:
+                                break;
+                            default:
+                                post_break_p = pre_break_p = prev_uch != curr_uch;
+                            }
                             break;
                         default:
-                            post_break_p = break_p = prev_uch != curr_uch;
-                        }
-                        break;
-                    default:
-                        post_break_p = break_p = prev_uch != curr_uch;
-                        break;
-                    } 
+                            post_break_p = pre_break_p = prev_uch != curr_uch;
+                            break;
+                        } 
+                    }
                 }
                 break;
             case G_UNICODE_OTHER_PUNCTUATION:
                 switch (curr_uch) {
-                case gunichar('!'):
-                case gunichar('#'):
-                case gunichar('/'):
-                case gunichar(':'):
-                case gunichar(';'):
-                case gunichar('?'):
-                case gunichar('@'):
-                    post_break_p = break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
+                case gunichar(L'!'):
+                case gunichar(L'#'):
+                case gunichar(L'/'):
+                case gunichar(L':'):
+                case gunichar(L';'):
+                case gunichar(L'?'):
+                case gunichar(L'@'):
+                    post_break_p = pre_break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
                     break;
-                case gunichar('+'):
-                    post_break_p = break_p = !in_num && since_start > 0;
-                    in_num = in_num || since_start == 0;
+                case gunichar(L'+'):
+                    post_break_p = pre_break_p = !in_num_p && since_start > 0;
+                    in_num_p = in_num_p || since_start == 0;
                     break;
-                case gunichar('&'):
-                    post_break_p = break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
-                    if (!non_escape_p) 
+                case gunichar(L'&'):
+                    post_break_p = pre_break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
+                    if (escape_p) 
                         substitute_p = L"&amp;";
                     break;
-                case gunichar('\''):
+                case gunichar(L'\''):
                     if (english_p) {
                         if (!in_url_p) {
-                            break_p = true;
+                            pre_break_p = true;
                             post_break_p = since_start == 0 || 
                                 (next_type != G_UNICODE_LOWERCASE_LETTER && next_type != G_UNICODE_UPPERCASE_LETTER && next_type != G_UNICODE_DECIMAL_NUMBER);
                         }
                     } else if (latin_p) {
                         post_break_p = !in_url_p;
-                        break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
+                        pre_break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
                     } else {
-                        post_break_p = break_p = !in_url_p;
+                        post_break_p = pre_break_p = !in_url_p;
                     }
-                    if (!non_escape_p) 
+                    if (escape_p) 
                         substitute_p = L"&apos;";
                     break;
-                case gunichar('"'):
-                    post_break_p = break_p = true;
-                    if (!non_escape_p) 
+                case gunichar(L'"'):
+                    post_break_p = pre_break_p = true;
+                    if (escape_p) 
                         substitute_p = L"&quot;";
                     break;
-                case gunichar(','):
-                    break_p = !in_num || next_type != G_UNICODE_DECIMAL_NUMBER;
+                case gunichar(L','):
+                    pre_break_p = !in_num_p || next_type != G_UNICODE_DECIMAL_NUMBER;
+                    post_break_p = !in_num_p && next_type != G_UNICODE_DECIMAL_NUMBER;
                     break;
-                case gunichar('.'):
+                case gunichar(L'.'):
                     if (prev_uch != '.') {
-                        if (!in_num) {
+                        if (!in_num_p) {
                             switch (next_type) {
                             case G_UNICODE_DECIMAL_NUMBER:
                             case G_UNICODE_LOWERCASE_LETTER:
@@ -714,7 +715,7 @@ Tokenizer::tokenize(const std::string& buf)
                                                 switch (tclass) {
                                                 case G_UNICODE_UPPERCASE_LETTER:
                                                 case G_UNICODE_LOWERCASE_LETTER:
-                                                    break_p = true;
+                                                    pre_break_p = true;
                                                     break;
                                                 default:
                                                     break;
@@ -725,12 +726,12 @@ Tokenizer::tokenize(const std::string& buf)
                                                    g_unichar_type(*nxt4) == G_UNICODE_DASH_PUNCTUATION) {
                                             // lower-case look-ahead does not break
                                         } else {
-                                            break_p = true;
+                                            pre_break_p = true;
                                         }
                                         break;
                                     }
                                     default:
-                                        break_p = true;
+                                        pre_break_p = true;
                                         break;
                                     }
                                 } 
@@ -742,7 +743,7 @@ Tokenizer::tokenize(const std::string& buf)
                             case G_UNICODE_LOWERCASE_LETTER:
                                 break;
                             default:
-                                break_p = true;
+                                pre_break_p = true;
                             }
                         }
                     } else if (next_uch != '.') {
@@ -750,7 +751,7 @@ Tokenizer::tokenize(const std::string& buf)
                     }
                     break;
                 default:
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
                 }
                 break;
@@ -759,110 +760,154 @@ Tokenizer::tokenize(const std::string& buf)
             case G_UNICODE_INITIAL_PUNCTUATION:
             case G_UNICODE_OPEN_PUNCTUATION:
                 switch (curr_uch) {
-                case gunichar('('):
-                case gunichar(')'):
+                case gunichar(L'('):
+                case gunichar(L')'):
                     break;
-                case gunichar('['):
-                    if (!non_escape_p) 
+                case gunichar(L'['):
+                    if (escape_p) 
                         substitute_p = L"&#91;";
                     break;
-                case gunichar(']'):
-                    if (!non_escape_p) 
+                case gunichar(L']'):
+                    if (escape_p) 
                         substitute_p = L"&#93;";
                     break;
                 default:
                     in_url_p = false;
                 }
-                post_break_p = break_p = !in_url_p;
+                post_break_p = pre_break_p = !in_url_p;
                 break;
             case G_UNICODE_CURRENCY_SYMBOL:
-                post_break_p = in_num; // was in number, so break it
-                break_p = !in_num;
-                in_num = in_num || next_type == G_UNICODE_DECIMAL_NUMBER || next_uch == gunichar('.') || next_uch == gunichar(',');
-                if (curr_uch != gunichar('$'))
+                if (refined_p) {
+                    post_break_p = in_num_p; // was in number, so break it
+                    pre_break_p = !in_num_p;
+                    in_num_p = in_num_p || next_type == G_UNICODE_DECIMAL_NUMBER || next_uch == gunichar(L'.') || next_uch == gunichar(L',');
+                } else {
+                    post_break_p = pre_break_p = true;
+                    in_num_p = false;
+                }
+                if (curr_uch != gunichar(L'$'))
                     in_url_p = false;
                 break;
             case G_UNICODE_MODIFIER_SYMBOL:
             case G_UNICODE_MATH_SYMBOL:
                 switch (curr_uch) {
-                case gunichar('`'):
+                case gunichar(L'`'):
                     if (english_p) {
                         if (!in_url_p) {
-                            break_p = true;
+                            pre_break_p = true;
                             post_break_p = since_start == 0 || 
                                 (next_type != G_UNICODE_LOWERCASE_LETTER && next_type != G_UNICODE_UPPERCASE_LETTER && next_type != G_UNICODE_DECIMAL_NUMBER);
                         }
                     } else if (latin_p) {
                         post_break_p = !in_url_p;
-                        break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
+                        pre_break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
                     } else {
-                        post_break_p = break_p = !in_url_p;
+                        post_break_p = pre_break_p = !in_url_p;
                     }
-                    if (!non_escape_p) 
+                    if (escape_p) 
                         substitute_p = L"&apos;";
                     else 
-                        curr_uch = gunichar('\'');
+                        curr_uch = gunichar(L'\'');
                     break;
-                case gunichar('|'):
-                    if (!non_escape_p) 
+                case gunichar(L'|'):
+                    if (escape_p) 
                         substitute_p = L"&#124;";
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
-                case gunichar('<'):
-                    if (!non_escape_p) 
+                case gunichar(L'<'):
+                    if (escape_p) 
                         substitute_p = L"&lt;";
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
-                case gunichar('>'):
-                    if (!non_escape_p) 
+                case gunichar(L'>'):
+                    if (escape_p) 
                         substitute_p = L"&gt;";
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
-                case gunichar('%'):
-                    post_break_p = in_num;
-                    break_p = !in_num && !in_url_p;
-                    in_num = false;
+                case gunichar(L'%'):
+                    post_break_p = in_num_p;
+                    pre_break_p = !in_num_p && !in_url_p;
+                    in_num_p = false;
                     break;
-                case gunichar('='):
-                case gunichar('~'):
-                    in_num = false;
-                    post_break_p = break_p = !in_url_p; 
+                case gunichar(L'='):
+                case gunichar(L'~'):
+                    in_num_p = false;
+                    post_break_p = pre_break_p = !in_url_p; 
                     break;
-                case gunichar('+'):
-                    in_num = in_num || since_start == 0;
-                    post_break_p = break_p = !in_url_p; 
+                case gunichar(L'+'):
+                    in_num_p = in_num_p || since_start == 0;
+                    post_break_p = pre_break_p = !in_url_p; 
                     break;
                 default:
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
                 }
                 break;
             case G_UNICODE_OTHER_SYMBOL:
-                post_break_p = break_p = true;
+                post_break_p = pre_break_p = true;
+                break;
+            case G_UNICODE_CONTROL:
+                if (drop_bad_p) {
+                    curr_uch = gunichar(L' ');
+                } else if (curr_uch < gunichar(L' ')) {
+                    curr_uch = gunichar(L' ');
+                } else if (curr_uch == gunichar(L'\u0092') && 
+                    (next_type == G_UNICODE_LOWERCASE_LETTER || next_type == G_UNICODE_UPPERCASE_LETTER)) {
+                    // observed corpus corruption case
+                    if (english_p) {
+                        pre_break_p = true;
+                        post_break_p = since_start == 0 || 
+                            (next_type != G_UNICODE_LOWERCASE_LETTER && next_type != G_UNICODE_UPPERCASE_LETTER && next_type != G_UNICODE_DECIMAL_NUMBER);
+                    } else if (latin_p) {
+                        post_break_p = true;
+                        pre_break_p = prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
+                    } else {
+                        post_break_p = pre_break_p = true;
+                    }
+                    if (escape_p) 
+                        substitute_p = L"&apos;";
+                    else 
+                        curr_uch = gunichar(L'\'');
+                } else {
+                    post_break_p = pre_break_p = true;
+                }
+                in_url_p = in_num_p = false;
                 break;
             case G_UNICODE_LINE_SEPARATOR:
-                curr_uch = gunichar(' ');
-                in_url_p = in_num = false;
-                break;
             case G_UNICODE_SPACE_SEPARATOR:
-                curr_uch = gunichar(' ');
-                in_url_p = in_num = false;
+                curr_uch = gunichar(L' ');
+                in_url_p = in_num_p = false;
                 break;
+            case G_UNICODE_ENCLOSING_MARK:
+                in_url_p = false;
+                break;
+            case G_UNICODE_NON_SPACING_MARK:
+            case G_UNICODE_PRIVATE_USE:
+            case G_UNICODE_SURROGATE:
+                in_url_p = in_num_p = false;
+                break;
+            case G_UNICODE_UNASSIGNED:
             default:
-                curr_uch = 0;
-                in_url_p = in_num = false;
+                // malformed bytes are dropped (invalid utf8 unicode)
+                if (drop_bad_p) {
+                    curr_uch = 0;
+                } else {
+                    pre_break_p = since_start > 0 && bad_length == 0;
+                    curr_type = G_UNICODE_UNASSIGNED;
+                }
+                in_url_p = in_num_p = false;
                 break;
             }
             
-            if ((break_p || curr_uch == gunichar(' '))) {
+            if (pre_break_p || curr_uch == gunichar(L' ') || (bad_length && curr_type != G_UNICODE_UNASSIGNED)) {
                 if (since_start) {
-                    *uptr++ = gunichar(' ');
-                    in_url_p = false;
-                    in_num = in_num && !post_break_p;
-                    since_start = 0;
+                    // non-empty token emitted previously, so pre-break must emit token separator
+                    *uptr++ = gunichar(L' ');
+                    since_start = bad_length = 0;
                 }
-                if (curr_uch == gunichar(' '))
-                    curr_uch = gunichar(0L);
+                if (curr_uch == gunichar(L' '))
+                    // suppress emission below, fall-through to substitute logic
+                    curr_uch = 0;
             } 
             
             if (substitute_p) {
@@ -870,10 +915,12 @@ Tokenizer::tokenize(const std::string& buf)
                     *uptr++ = *sptr;
                     since_start++;
                 }
-                in_url_p = in_num = false;
+                in_url_p = in_num_p = false;
             } else if (curr_uch) {
                 *uptr++ = curr_uch;
                 since_start++;
+                if (curr_type == G_UNICODE_UNASSIGNED)
+                    bad_length++;
             }
 
             ucs4 = nxt4;
@@ -1014,7 +1061,7 @@ Tokenizer::tokenize(const std::string& buf)
         RE2::GlobalReplace(&ntext,mult_spc_x,SPC_BYTE);
 
         // escape moses meta-characters
-        if (!non_escape_p)
+        if (escape_p)
             escape(ntext);
 
         // strip out wrapping spaces from line in result string

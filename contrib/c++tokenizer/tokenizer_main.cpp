@@ -13,21 +13,29 @@ using namespace TOKENIZER_NAMESPACE ;
 void 
 usage(const char *path) 
 {
-    std::cerr << "Usage: " << path << "[-{v|x|p|a|e|s|u]* [LL] [-{c|o} PATH]* INFILE*" << std::endl;
+    std::cerr << "Usage: " << path << "[-{v|x|p|a|e|s|u|n|N]* [LL] [-{c|o} PATH]* INFILE*" << std::endl;
     std::cerr << " -a -- aggressive hyphenization" << std::endl;
-    std::cerr << " -e -- escape entities" << std::endl;
+    std::cerr << " -b -- drop bad bytes" << std::endl;
     std::cerr << " -c DIR -- config (pattern) file directory" << std::endl;
     std::cerr << " -d -- downcase" << std::endl;
+    std::cerr << " -e -- do not escape entities during tokenization" << std::endl;
+    std::cerr << " -k -- narrow kana" << std::endl;
+    std::cerr << " -n -- narrow latin" << std::endl;
+    std::cerr << " -N -- normalize" << std::endl;
     std::cerr << " -o OUT -- output file path" << std::endl;
     std::cerr << " -p -- penn treebank style" << std::endl;
+    std::cerr << " -r -- refined contraction and quantity conjoining" << std::endl;
     std::cerr << " -s -- super- and sub-script conjoining" << std::endl;
     std::cerr << " -u -- disable url handling" << std::endl;
+    std::cerr << " -U -- unescape entities before tokenization" << std::endl;
     std::cerr << " -v -- verbose" << std::endl;
     std::cerr << " -w -- word filter" << std::endl;
     std::cerr << " -x -- skip xml tag lines" << std::endl;
     std::cerr << " -y -- skip all xml tags" << std::endl;
     std::cerr << "Default is -c ., stdin, stdout." << std::endl;
-    std::cerr << "LL in en,fr,it affect contraction." << std::endl;
+    std::cerr << "LL in en,fr,it affect contraction.  LL selects nonbreaking prefix file" << std::endl;
+    std::cerr << "nonbreaking_prefix.LL is sought in getenv('TOKENIZER_SHARED_DIR')." << std::endl;
+    return;
 }
 
 
@@ -98,6 +106,8 @@ int main(int ac, char **av)
 		Parameters params;
 
     const char *prog = av[0];
+    bool next_cfg_p = false;
+    bool next_output_p = false;
 
     while (++av,--ac) { 
         if (**av == '-') {
@@ -105,11 +115,11 @@ int main(int ac, char **av)
             case 'a':
                 params.aggro_p = true;
                 break;
-            case 'h':
-                usage(prog);
-                exit(0);
+            case 'b':
+                params.drop_bad_p = true;
+                break;
             case 'c':
-                params.next_cfg_p = true;
+                next_cfg_p = true;
                 break;
             case 'd':
                 params.downcase_p = true;
@@ -117,14 +127,32 @@ int main(int ac, char **av)
             case 'e':
                 params.escape_p = false;
                 break;
+            case 'h':
+                usage(prog);
+                exit(0);
+            case 'k':
+                params.narrow_kana_p = true;
+                break;
+            case 'n':
+                params.narrow_latin_p = true;
+                break;
+            case 'N':
+                params.normalize_p = true;
+                break;
             case 'o':
-                params.next_output_p = true;
+                next_output_p = true;
                 break;
             case 'p':
                 params.penn_p = true;
                 break;
+            case 'r':
+                params.refined_p = true;
+                break;
             case 's':
                 params.supersub_p = true;
+                break;
+            case 'U':
+                params.unescape_p = true;
                 break;
             case 'u':
                 params.url_p = false;
@@ -150,11 +178,11 @@ int main(int ac, char **av)
             }
         } else if (params.lang_iso.empty() && strlen(*av) == 2) {
             params.lang_iso = *av;
-        } else if (params.next_output_p) {
-            params.next_output_p = false;
+        } else if (next_output_p) {
+            next_output_p = false;
             params.out_path = *av;
-        } else if (params.next_cfg_p) {
-            params.next_cfg_p = false;
+        } else if (next_cfg_p) {
+            next_cfg_p = false;
             params.cfg_path = *av;
         } else {
             params.args.push_back(std::string(*av));
@@ -206,7 +234,7 @@ int main(int ac, char **av)
     }
     std::ostream& ofs(pofs ? *pofs : std::cout);
 
-    Tokenizer tize(params.lang_iso,params.detag_p,params.alltag_p,!params.escape_p,params.aggro_p,params.supersub_p,params.url_p,params.downcase_p,params.penn_p,params.verbose_p);
+    Tokenizer tize(params);
     tize.init();
     size_t nlines = 0;
 

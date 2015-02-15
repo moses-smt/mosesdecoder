@@ -12,6 +12,8 @@
 #include <re2/re2.h>
 #include <unistd.h>
 
+#include "Parameters.h"
+
 #ifdef TOKENIZER_NAMESPACE
 namespace TOKENIZER_NAMESPACE {
 #endif
@@ -40,13 +42,18 @@ protected:
     bool latin_p; // is lang_iso "fr" or "it"
     bool skip_xml_p;
     bool skip_alltags_p;
-    bool non_escape_p;
+    bool escape_p;
+    bool unescape_p;
     bool aggressive_hyphen_p;
     bool supersub_p;
     bool url_p;
     bool downcase_p;
     bool normalize_p;
     bool penn_p;
+    bool narrow_latin_p;
+    bool narrow_kana_p;
+    bool refined_p;
+    bool drop_bad_p;
     bool verbose_p;
 
     std::pair<int,int> load_prefixes(std::ifstream& ifs); // used by init(), parameterized by lang_iso
@@ -62,18 +69,10 @@ public:
     // cfg_dir is assumed shared by all languages
     static void set_config_dir(const std::string& _cfg_dir);
 
+    Tokenizer(); // UNIMPL
+
     // no throw
-    Tokenizer(const std::string& _lang_iso = "en",
-              bool _skip_xml_p = true, // skips isolated (linewise) tags in any case
-              bool _skip_alltags_p = true, // skip all xml style tags
-              bool _non_escape_p = false, // default is to call escape method before return
-              bool _aggressive_hyphen_p = false, // hyphens become tokens when true
-              bool _supersub_p = false, // handle super/subscript numerics
-              bool _url_p = true,
-              bool _downcase_p = false,
-              bool _normalize_p = true,
-              bool _penn_p = false,  // Treebank-3 compatible tokenization when true
-              bool _verbose_p = false);
+    Tokenizer(const Parameters& _params);
 
     // frees dynamically compiled expressions
     ~Tokenizer();
