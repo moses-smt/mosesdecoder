@@ -94,6 +94,9 @@ private:
 //! Abstract class for lexical reordering model states
 class LexicalReorderingState : public FFState
 {
+  typedef LexicalReorderingConfiguration::Forward Forward;
+  typedef LexicalReorderingConfiguration::Backward Backward;
+  
 public:
   virtual int Compare(const FFState& o) const = 0;
   virtual LexicalReorderingState* Expand(const TranslationOption& hypo, const InputType& input, ScoreComponentCollection* scores) const = 0;

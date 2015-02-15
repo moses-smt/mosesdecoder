@@ -418,7 +418,8 @@ namespace Moses
 	    if(d == InvalidOffT) d = fTell(ot);
 	    else 
 	      {
-		TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '" << line << "\n");
+		TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" 
+			  << lnc << "): '" << line << "\n");
 		return false;
 	      }
 	  }
@@ -448,7 +449,8 @@ namespace Moses
 	if(d == InvalidOffT) d = fTell(ot);
 	else 
 	  {
-	    TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '" << line << "\n");
+	    TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" 
+		      << lnc << "): '" << line << "\n");
 	    return false;
 	  }
 	}
@@ -602,7 +604,8 @@ namespace Moses
 	    auxCacheForSrcPhrase(f);
 	  }
       }
-    std::cerr << "Cached " << m_Cache.size() - prev_cache_size << " new primary reordering table keys\n";
+    std::cerr << "Cached " << m_Cache.size() - prev_cache_size 
+	      << " new primary reordering table keys\n";
   }
 }
 
