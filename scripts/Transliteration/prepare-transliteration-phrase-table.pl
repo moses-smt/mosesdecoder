@@ -101,7 +101,7 @@ sub run_transliteration
 
 	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table -reordering-table $TRANSLIT_MODEL/model/reordering-table -config $eval_file.moses.table.ini -lm 0:3:$eval_file.moses.table.ini:8`;
 	
-	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $eval_file.filtered $eval_file.moses.table.ini $eval_file  -Binarizer "$MOSES_SRC/bin/processPhraseTable"`;
+	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $eval_file.filtered $eval_file.moses.table.ini $eval_file  -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
 
 	`rm  $eval_file.moses.table.ini`;
 

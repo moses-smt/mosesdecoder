@@ -38,5 +38,5 @@ POSSIBILITY OF SUCH DAMAGE.
 
 class IOWrapper;
 
-int main(int argc, char* argv[]);
+int decoder_main(int argc, char* argv[]);
 

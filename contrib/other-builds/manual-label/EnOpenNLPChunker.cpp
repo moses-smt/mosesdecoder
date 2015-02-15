@@ -8,10 +8,12 @@
 #include <stdio.h>
 #include <algorithm>
 #include <fstream>
+#include <boost/algorithm/string/predicate.hpp>
 #include "EnOpenNLPChunker.h"
 #include "moses/Util.h"
 
 using namespace std;
+using namespace boost::algorithm;
 
 EnOpenNLPChunker::EnOpenNLPChunker(const std::string &openNLPPath)
 :m_openNLPPath(openNLPPath)
@@ -85,7 +87,7 @@ void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out, cons
 				inLabel = true;
 			}
 		}
-		else if (tok.substr(tok.size()-1, 1) == "]") {
+		else if (ends_with(tok, "]")) {
 			// end of chunk
 			if (tok.size() > 1) {
 				if (tok.substr(1,1) == "_") {

@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -74,6 +75,16 @@ protected:
   _ScoreCacheMap m_lexReorderingScores;
 
 public:
+  struct Better
+  {
+    bool operator()(TranslationOption const& a, TranslationOption const& b) const
+    { return a.GetFutureScore() > b.GetFutureScore(); }
+    
+    bool operator()(TranslationOption const* a, TranslationOption const* b) const
+    { return a->GetFutureScore() > b->GetFutureScore(); }
+  };
+    
+
   explicit TranslationOption(); // For initial hypo that does translate nothing
 
   /** constructor. Used by initial translation step */

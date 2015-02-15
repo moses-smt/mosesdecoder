@@ -2,6 +2,9 @@
 #include "vw.h"
 #include "../moses/Util.h"
 #include <iostream>
+#include <boost/algorithm/string/predicate.hpp>
+
+using namespace boost::algorithm;
 
 namespace Discriminative
 {
@@ -15,7 +18,7 @@ ClassifierFactory::ClassifierFactory(const std::string &modelFile, const std::st
 ClassifierFactory::ClassifierFactory(const std::string &modelFilePrefix)
   : m_lastId(0), m_train(true)
 {
-  if (modelFilePrefix.size() > 3 && modelFilePrefix.substr(modelFilePrefix.size() - 3, 3) == ".gz") {
+  if (ends_with(modelFilePrefix, ".gz")) {
     m_modelFilePrefix = modelFilePrefix.substr(0, modelFilePrefix.size() - 3);
     m_gzip = true;
   } else {

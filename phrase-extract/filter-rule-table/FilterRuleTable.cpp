@@ -9,20 +9,20 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
-
-#include "util/string_piece.hh"
-#include "util/string_piece_hash.hh"
-#include "util/tokenize_piece.hh"
 
 #include "syntax-common/exception.h"
 #include "syntax-common/xml_tree_parser.h"
 
 #include "InputFileStream.h"
 
+#include "ForestTsgFilter.h"
 #include "Options.h"
-#include "StringBasedFilter.h"
-#include "TreeBasedFilter.h"
+#include "StringCfgFilter.h"
+#include "StringForest.h"
+#include "StringForestParser.h"
+#include "TreeTsgFilter.h"
 
 namespace MosesTraining
 {
@@ -33,6 +33,19 @@ namespace FilterRuleTable
 
 int FilterRuleTable::Main(int argc, char *argv[])
 {
+  enum TestSentenceFormat {
+    kUnknownTestSentenceFormat,
+    kString,
+    kTree,
+    kForest
+  };
+
+  enum SourceSideRuleFormat {
+    kUnknownSourceSideRuleFormat,
+    kCfg,
+    kTsg
+  };
+
   // Process command-line options.
   Options options;
   ProcessOptions(argc, argv, options);
@@ -40,48 +53,105 @@ int FilterRuleTable::Main(int argc, char *argv[])
   // Open input file.
   Moses::InputFileStream testStream(options.testSetFile);
 
-  // Read the first test sentence and determine if it is a parse tree or a
-  // string.
-  std::string line;
-  if (!std::getline(testStream, line)) {
-    // TODO Error?
-    return 0;
-  }
-  if (line.find_first_of('<') == std::string::npos) {
-    // Test sentences are strings.
-    std::vector<std::vector<std::string> > sentences;
-    do {
-      sentences.resize(sentences.size()+1);
-      ReadTokens(line, sentences.back());
-    } while (std::getline(testStream, line));
-    StringBasedFilter filter(sentences);
-    filter.Filter(std::cin, std::cout);
+  // Determine the expected test sentence format and source-side rule format
+  // based on the argument to the options.model parameter.
+  TestSentenceFormat testSentenceFormat = kUnknownTestSentenceFormat;
+  SourceSideRuleFormat sourceSideRuleFormat = kUnknownSourceSideRuleFormat;
+  if (options.model == "hierarchical" || options.model == "s2t") {
+    testSentenceFormat = kString;
+    sourceSideRuleFormat = kCfg;
+  } else if (options.model == "t2s") {
+    testSentenceFormat = kTree;
+    sourceSideRuleFormat = kTsg;
+  } else if (options.model == "t2s-scfg") {
+    testSentenceFormat = kTree;
+    sourceSideRuleFormat = kCfg;
+  } else if (options.model == "f2s") {
+    testSentenceFormat = kForest;
+    sourceSideRuleFormat = kTsg;
   } else {
-    // Test sentences are XML parse trees.
-    XmlTreeParser parser;
-    std::vector<boost::shared_ptr<StringTree> > sentences;
-    int lineNum = 1;
-    do {
-      if (line.size() == 0) {
-        std::cerr << "skipping blank test sentence at line " << lineNum
-                  << std::endl;
-        continue;
-      }
-      sentences.push_back(boost::shared_ptr<StringTree>(parser.Parse(line)));
-      ++lineNum;
-    } while (std::getline(testStream, line));
-    TreeBasedFilter filter(sentences);
+    Error(std::string("unsupported model type: ") + options.model);
+  }
+
+  // Read the test sentences then set up and run the filter.
+  if (testSentenceFormat == kString) {
+    assert(sourceSideRuleFormat == kCfg);
+    std::vector<boost::shared_ptr<std::string> > testStrings;
+    ReadTestSet(testStream, testStrings);
+    StringCfgFilter filter(testStrings);
+    filter.Filter(std::cin, std::cout);
+  } else if (testSentenceFormat == kTree) {
+    std::vector<boost::shared_ptr<StringTree> > testTrees;
+    ReadTestSet(testStream, testTrees);
+    if (sourceSideRuleFormat == kCfg) {
+      // TODO Implement TreeCfgFilter
+      Error("tree/cfg filtering algorithm not supported yet");
+    } else if (sourceSideRuleFormat == kTsg) {
+      TreeTsgFilter filter(testTrees);
+      filter.Filter(std::cin, std::cout);
+    } else {
+      assert(false);
+    }
+  } else if (testSentenceFormat == kForest) {
+    std::vector<boost::shared_ptr<StringForest> > testForests;
+    ReadTestSet(testStream, testForests);
+    assert(sourceSideRuleFormat == kTsg);
+    ForestTsgFilter filter(testForests);
     filter.Filter(std::cin, std::cout);
   }
 
   return 0;
 }
 
-void FilterRuleTable::ReadTokens(const std::string &s,
-                                 std::vector<std::string> &tokens)
+void FilterRuleTable::ReadTestSet(
+    std::istream &input,
+    std::vector<boost::shared_ptr<std::string> > &sentences)
 {
-  tokens.clear();
-// TODO
+  int lineNum = 0;
+  std::string line;
+  while (std::getline(input, line)) {
+    ++lineNum;
+    if (line.empty()) {
+      std::cerr << "skipping blank test sentence at line " << lineNum
+                << std::endl;
+      continue;
+    }
+    sentences.push_back(boost::make_shared<std::string>(line));
+  }
+}
+
+void FilterRuleTable::ReadTestSet(
+    std::istream &input, std::vector<boost::shared_ptr<StringTree> > &sentences)
+{
+  XmlTreeParser parser;
+  int lineNum = 0;
+  std::string line;
+  while (std::getline(input, line)) {
+    ++lineNum;
+    if (line.empty()) {
+      std::cerr << "skipping blank test sentence at line " << lineNum
+                << std::endl;
+      continue;
+    }
+    sentences.push_back(boost::shared_ptr<StringTree>(parser.Parse(line)));
+  }
+}
+
+void FilterRuleTable::ReadTestSet(
+    std::istream &input,
+    std::vector<boost::shared_ptr<StringForest> > &sentences)
+{
+  StringForestParser end;
+  int sentNum = 0;
+  for (StringForestParser p(input); p != end; ++p) {
+    ++sentNum;
+    if (p->forest->vertices.empty()) {
+      std::cerr << "skipping sentence " << sentNum << ": forest is empty"
+                << std::endl;
+      continue;
+    }
+    sentences.push_back(p->forest);
+  }
 }
 
 void FilterRuleTable::ProcessOptions(int argc, char *argv[],
@@ -94,13 +164,14 @@ void FilterRuleTable::ProcessOptions(int argc, char *argv[],
   // options list.
   std::ostringstream usageTop;
   usageTop << "Usage: " << GetName()
-           << " [OPTION]... TEST\n\n"
-           << "Given a SCFG/STSG rule table (on standard input) and a set of test sentences,\nfilter out the rules that cannot be applied to any of the test sentences and\nwrite the filtered table to standard output.\n\n"
+           << " [OPTION]... MODEL TEST\n\n"
+           << "Filter for SCFG/STSG rule tables.\n\n"
            << "Options";
 
   // Construct the 'bottom' of the usage message.
   std::ostringstream usageBottom;
-  usageBottom << "TODO";
+  usageBottom << "\nGiven a rule table on standard input and a set of test sentences, filters out\nthe rules that cannot be applied to any of the test sentences and writes the\nfiltered table to standard output.  MODEL specifies the type of syntax model.\nThe following values are supported:\n\n"
+              << "  hierarchical, s2t, t2s, t2s-scfg, f2s\n";
 
   // Declare the command line options that are visible to the user.
   po::options_description visible(usageTop.str());
@@ -109,6 +180,9 @@ void FilterRuleTable::ProcessOptions(int argc, char *argv[],
   // (these are used as positional options).
   po::options_description hidden("Hidden options");
   hidden.add_options()
+  ("Model",
+   po::value(&options.model),
+   "one of: hierarchical, s2t, t2s, t2s-scfg, f2s")
   ("TestSetFile",
    po::value(&options.testSetFile),
    "test set file")
@@ -120,6 +194,7 @@ void FilterRuleTable::ProcessOptions(int argc, char *argv[],
 
   // Register the positional options.
   po::positional_options_description p;
+  p.add("Model", 1);
   p.add("TestSetFile", 1);
 
   // Process the command-line.

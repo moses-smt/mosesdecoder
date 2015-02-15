@@ -214,47 +214,49 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
   }
 }
 
-void SearchCubePruning::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer)
+void 
+SearchCubePruning::
+CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range, 
+		   BitmapContainer& bitmapContainer)
 {
   WordsBitmap newBitmap = bitmap;
   newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
-
+  
   size_t numCovered = newBitmap.GetNumWordsCovered();
-  const TranslationOptionList &transOptList = m_transOptColl.GetTranslationOptionList(range);
+  const TranslationOptionList* transOptList;
+  transOptList = m_transOptColl.GetTranslationOptionList(range);
   const SquareMatrix &futureScore = m_transOptColl.GetFutureScore();
 
-  if (transOptList.size() > 0) {
-    HypothesisStackCubePruning &newStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
-    newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
+  if (transOptList && transOptList->size() > 0) {
+    HypothesisStackCubePruning& newStack 
+      = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
+    newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, 
+			       futureScore, *transOptList);
   }
 }
-
-bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
+  
+bool 
+SearchCubePruning::
+CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
   int maxDistortion = StaticData::Instance().GetMaxDistortion();
-
+  if (maxDistortion < 0) return true;
+  
   // if there are reordering limits, make sure it is not violated
   // the coverage bitmap is handy here (and the position of the first gap)
-  const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
-                                  , startPos				= range.GetStartPos()
-                                      , endPos					= range.GetEndPos();
+  size_t const startPos = range.GetStartPos();
+  size_t const endPos = range.GetEndPos();
 
-  // if reordering constraints are used (--monotone-at-punctuation or xml), check if passes all
-  if (! m_source.GetReorderingConstraint().Check( hypoBitmap, startPos, endPos ) ) {
+  // if reordering constraints are used (--monotone-at-punctuation or xml), 
+  // check if passes all
+  if (!m_source.GetReorderingConstraint().Check(hypoBitmap, startPos, endPos)) 
     return false;
-  }
-
-  // no limit of reordering: no problem
-  if (maxDistortion < 0) {
-    return true;
-  }
-
-  bool leftMostEdge = (hypoFirstGapPos == startPos);
+  
+  size_t const hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
   // any length extension is okay if starting at left-most edge
-  if (leftMostEdge) {
-    return true;
-  }
+  if (hypoFirstGapPos == startPos) return true;
+
   // starting somewhere other than left-most edge, use caution
   // the basic idea is this: we would like to translate a phrase starting
   // from a position further right than the left-most open gap. The
@@ -264,20 +266,17 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
   // hypothesis starting at the left-most edge).  If this vlaue is than
   // the distortion limit, we don't allow this extension to be made.
   WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
-  int required_distortion =
-    m_source.ComputeDistortionDistance(range, bestNextExtension);
-
-  if (required_distortion > maxDistortion) {
-    return false;
-  }
-  return true;
+  return (m_source.ComputeDistortionDistance(range, bestNextExtension)
+	  <= maxDistortion);
 }
 
 /**
  * Find best hypothesis on the last stack.
  * This is the end point of the best translation, which can be traced back from here
  */
-const Hypothesis *SearchCubePruning::GetBestHypothesis() const
+Hypothesis const*
+SearchCubePruning::
+GetBestHypothesis() const
 {
   //	const HypothesisStackCubePruning &hypoColl = m_hypoStackColl.back();
   const HypothesisStack &hypoColl = *m_hypoStackColl.back();
@@ -287,7 +286,9 @@ const Hypothesis *SearchCubePruning::GetBestHypothesis() const
 /**
  * Logging of hypothesis stack sizes
  */
-void SearchCubePruning::OutputHypoStackSize()
+void 
+SearchCubePruning::
+OutputHypoStackSize()
 {
   std::vector < HypothesisStack* >::const_iterator iterStack = m_hypoStackColl.begin();
   TRACE_ERR( "Stack sizes: " << (int)(*iterStack)->size());

@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
 #include <boost/unordered_map.hpp>
 #include "Util.h"
@@ -40,6 +41,7 @@
 namespace Moses
 {
 using namespace std;
+using namespace boost::algorithm;
 
 string ParseXmlTagAttribute(const string& tag,const string& attributeName)
 {
@@ -73,7 +75,7 @@ string TrimXml(const string& str, const std::string& lbrackStr, const std::strin
   if (str.size() < lbrackStr.length()+rbrackStr.length() ) return str;
 
   // strip first and last character
-  if (str.substr(0,lbrackStr.length()) == lbrackStr  &&  str.substr(str.size()-rbrackStr.length()) == rbrackStr) {
+  if (starts_with(str, lbrackStr) && ends_with(str, rbrackStr)) {
     return str.substr(lbrackStr.length(), str.size()-lbrackStr.length()-rbrackStr.length());
   }
   // not an xml token -> do nothing
@@ -371,7 +373,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
           vector<float> ffWeights;
           vector<string> toks = Tokenize(ParseXmlTagAttribute(tagContent,"weights"));
           BOOST_FOREACH(string const& tok, toks) {
-            if (tok.substr(tok.size() - 1, 1) == "=") {
+            if (ends_with(tok, "=")) {
               // start new feature
               if (ffName != "") {
                 // set previous feature weights

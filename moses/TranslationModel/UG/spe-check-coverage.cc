@@ -1,6 +1,7 @@
 #include "mmsapt.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.h"
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
@@ -12,6 +13,7 @@ using namespace Moses;
 using namespace bitext;
 using namespace std;
 using namespace boost;
+using namespace boost::algorithm;
 
 vector<FactorType> fo(1,FactorType(0));
 
@@ -111,7 +113,7 @@ int main(int argc, char* argv[])
       int dynprovidx = -1;
       for (size_t i = 0; i < fname.size(); ++i)
 	{
-	  if (fname[i].substr(0,7) == "prov-1.") 
+	  if (starts_with(fname[i], "prov-1."))
 	    dynprovidx = i;
 	}
       cout << endl;
@@ -189,8 +191,8 @@ int main(int argc, char* argv[])
 		      size_t j = x-idx.first;
 		      float f = (mmsapt && mmsapt->isLogVal(j)) ? exp(scores[x]) : scores[x];
 		      string fmt = (mmsapt && mmsapt->isInteger(j)) ? "%10d" : "%10.8f";
-		      if (fname[j].substr(0,3) == "lex") fmt = "%10.3e";
-		      if (fname[j].substr(0,7) == "prov-1.") 
+		      if (starts_with(fname[j], "lex")) fmt = "%10.3e";
+		      else if (starts_with(fname[j], "prov-1."))
 			{
 			  f = round(f/(1-f));
 			  fmt = "%10d";
