@@ -18,45 +18,49 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#include "stringInfosHasher.h"
-// The following class defines a hash function for strings
-
+#include "bestShiftStruct.h"
 
 using namespace std;
-using namespace Tools;
 
-namespace HashMapSpace
+namespace TERCpp
 {
-    stringInfosHasher::stringInfosHasher ( long cle, string cleTxt, vector<string> valueVecInt )
+    bestShiftStruct::bestShiftStruct()
     {
-        m_hashKey=cle;
-        m_key=cleTxt;
-        m_value=valueVecInt;
+	  m_best_shift=new terShift();
+	  m_best_align=new terAlignment();
+	  m_empty=new bool(false);
     }
-//     stringInfosHasher::~stringInfosHasher(){};*/
-    long  stringInfosHasher::getHashKey()
+    bestShiftStruct::~bestShiftStruct()
     {
-        return m_hashKey;
+	  delete(m_best_align);
+	  delete(m_best_shift);
     }
-    string  stringInfosHasher::getKey()
+    void bestShiftStruct::setEmpty(bool b)
     {
-        return m_key;
+          m_empty=new bool(b);
     }
-    vector<string> stringInfosHasher::getValue()
+    void bestShiftStruct::setBestShift(terShift * l_terShift)
     {
-        return m_value;
+          m_best_shift->set(l_terShift);
     }
-    void stringInfosHasher::setValue ( vector<string>   value )
+    void bestShiftStruct::setBestAlign(terAlignment * l_terAlignment)
     {
-        m_value=value;
+          m_best_align->set(l_terAlignment);
     }
-    string stringInfosHasher::toString()
+    string bestShiftStruct::toString()
     {
-	stringstream to_return;
-	to_return << m_hashKey << "\t" << m_key << "\t" << vectorToString(m_value,"\t") << endl;
-	return to_return.str();
+	  stringstream s;
+	  s << m_best_shift->toString() << endl;
+	  s << m_best_align->toString() << endl;
+//	    s << (*m_empty) << endl;
+    }
+    bool bestShiftStruct::getEmpty()
+    {
+	return (*(m_empty));
     }
 
 
-// typedef stdext::hash_map<string, string, stringhasher> HASH_S_S;
+
+  
+  
 }
