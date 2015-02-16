@@ -5,7 +5,7 @@ Copyright 2010-2013, Christophe Servan, LIUM, University of Le Mans, France
 Contact: christophe.servan@lium.univ-lemans.fr
 
 The tercpp tool and library are free software: you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License as published by
+under the terms of the GNU Lesser General Public License as published by 
 the Free Software Foundation, either version 3 of the licence, or
 (at your option) any later version.
 
@@ -18,8 +18,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#ifndef __BESTSHIFTSTRUCT_H_
-#define __BESTSHIFTSTRUCT_H_
+#ifndef __BESTSHIFTSTRUCT_H__
+#define __BESTSHIFTSTRUCT_H__
 
 
 #include <vector>
@@ -32,14 +32,14 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
 using namespace std;
-using namespace Tools;
+using namespace TERCPPNS_Tools;
 
-namespace TERCpp
+namespace TERCPPNS_TERCpp
 {
-class bestShiftStruct
-{
-private:
-public:
+    class bestShiftStruct
+    {
+        private:
+        public:
 
 // 	alignmentStruct();
 // 	alignmentStruct (int _start, int _end, int _moveto, int _newloc);
@@ -55,16 +55,36 @@ public:
 //   int end;
 //   int moveto;
 //   int newloc;
-  terShift m_best_shift;
-  terAlignment m_best_align;
-  bool m_empty;
+            terShift * m_best_shift;
+            terAlignment * m_best_align;
+            bool * m_empty;
+	    bestShiftStruct();
+	    ~bestShiftStruct();
+	    inline void set(bestShiftStruct l_bestShiftStruct)
+	    {
+	      m_best_shift->set(l_bestShiftStruct.m_best_shift);
+	      m_best_align->set(l_bestShiftStruct.m_best_align);
+	      setEmpty(l_bestShiftStruct.getEmpty());
+	    }
+            inline void set(bestShiftStruct * l_bestShiftStruct)
+            {
+              m_best_shift->set(l_bestShiftStruct->m_best_shift);
+              m_best_align->set(l_bestShiftStruct->m_best_align);
+              setEmpty(l_bestShiftStruct->getEmpty());
+            }
+    	    void setEmpty(bool b);
+            void setBestShift(terShift * l_terShift);
+            void setBestAlign(terAlignment * l_terAlignment);
+            string toString();
+	    bool getEmpty();
+	    
 //   vector<string> nwords; // The words we shifted
 //   char* alignment ; // for pra_more output
 //   vector<vecInt> aftershift; // for pra_more output
-  // This is used to store the cost of a shift, so we don't have to
-  // calculate it multiple times.
+            // This is used to store the cost of a shift, so we don't have to
+            // calculate it multiple times.
 //   double cost;
-};
+    };
 
 }
 #endif

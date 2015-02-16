@@ -18,37 +18,49 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#ifndef __INFOSHASHER_H__
-#define __INFOSHASHER_H__
-#include <string>
-// #include <ext/hash_map>
-#include <stdio.h>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include "tools.h"
+#include "bestShiftStruct.h"
 
 using namespace std;
-namespace TERCPPNS_HashMapSpace
+
+namespace TERCPPNS_TERCpp
 {
-    class infosHasher
+    bestShiftStruct::bestShiftStruct()
     {
-        private:
-            long m_hashKey;
-            string m_key;
-            vector<int> m_value;
+	  m_best_shift=new terShift();
+	  m_best_align=new terAlignment();
+	  m_empty=new bool(false);
+    }
+    bestShiftStruct::~bestShiftStruct()
+    {
+	  delete(m_best_align);
+	  delete(m_best_shift);
+    }
+    void bestShiftStruct::setEmpty(bool b)
+    {
+          m_empty=new bool(b);
+    }
+    void bestShiftStruct::setBestShift(terShift * l_terShift)
+    {
+          m_best_shift->set(l_terShift);
+    }
+    void bestShiftStruct::setBestAlign(terAlignment * l_terAlignment)
+    {
+          m_best_align->set(l_terAlignment);
+    }
+    string bestShiftStruct::toString()
+    {
+	  stringstream s;
+	  s << m_best_shift->toString() << endl;
+	  s << m_best_align->toString() << endl;
+//	    s << (*m_empty) << endl;
+    }
+    bool bestShiftStruct::getEmpty()
+    {
+	return (*(m_empty));
+    }
 
-        public:
-            infosHasher ( long cle, string cleTxt, vector<int> valueVecInt );
-            long getHashKey();
-            string getKey();
-            vector<int> getValue();
-            void setValue ( vector<int> value );
-	  string toString();
 
 
-    };
-
-
+  
+  
 }
-#endif

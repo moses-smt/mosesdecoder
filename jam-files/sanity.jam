@@ -137,24 +137,15 @@ rule boost-lib ( name macro : deps * ) {
     main = "BOOST_AUTO_TEST_CASE(foo) {}" ;
     flags += " -DBOOST_TEST_MODULE=CompileTest $(I-boost-include) -include boost/test/unit_test.hpp" ;
   }
-  if $(boost-auto-shared) = "<link>shared" {
-    flags += " -DBOOST_$(macro)" ;
+  local default-linkage ;
+  if [ test_flags " -Wl,-Bstatic $(flags) -Wl,-Bdynamic " : $(main) ] {
+    default-linkage = "<link>static" ;
   } else {
-    flags = " -Wl,-Bstatic $(flags) -Wl,-Bdynamic " ;
-  }
-  if [ test_flags $(flags) : $(main) ] {
-    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name)$(boost-lib-version) : <link>static : <library>$(deps) ;
-    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)$(boost-lib-version) : <link>static : <library>$(deps) ;
-  } else {
-    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name)$(boost-lib-version) : : <library>$(deps) ;
-  }
-
-  if $(boost-auto-shared) = "<link>shared" {
-    alias boost_$(name) : inner_boost_$(name) : <link>shared ;
+    default-linkage = "<link>shared" ;
     requirements += <define>BOOST_$(macro) ;
-  } else {
-    alias boost_$(name) : inner_boost_$(name) : <link>static ;
   }
+  lib boost_$(name) : $(deps) : <link>static $(boost-search) <name>boost_$(name)$(boost-lib-version) : $(default-linkage) ;
+  lib boost_$(name) : $(deps) : <link>shared $(boost-search) <name>boost_$(name)$(boost-lib-version) <define>BOOST_$(macro) : $(default-linkage) : <define>BOOST_$(macro) ;
 }
 
 #Argument is e.g. 103600
@@ -177,14 +168,11 @@ rule boost ( min-version ) {
     boost-lib-version = "" ;
   }
 
-  #Are we linking static binaries against shared boost?
-  boost-auto-shared = [ auto-shared "boost_program_options"$(boost-lib-version) : $(L-boost-search) ] ;
-
   #See tools/build/v2/contrib/boost.jam in a boost distribution for a table of macros to define.   
   boost-lib system SYSTEM_DYN_LINK ;
   boost-lib thread THREAD_DYN_DLL : boost_system ;
   boost-lib program_options PROGRAM_OPTIONS_DYN_LINK ;
-  boost-lib unit_test_framework DELETE_ME_TEST_DYN_LINK ;
+  boost-lib unit_test_framework TEST_DYN_LINK ;
   boost-lib iostreams IOSTREAMS_DYN_LINK ;
   boost-lib filesystem FILE_SYSTEM_DYN_LINK ;
 #  if $(BOOST-VERSION) >= 104800 {
