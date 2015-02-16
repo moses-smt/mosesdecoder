@@ -525,9 +525,24 @@ namespace Moses
 	    typedef TranslationOptionList::const_iterator to_iter;
 	    for(to_iter i = tol.begin() ; i != tol.end() ; ++i) 
 	      (*i)->EvaluateWithSourceContext(m_source);
+      EvaluateTranslationOptionListWithSourceContext(tol);
 	  }
       }
   }
+
+void TranslationOptionCollection::EvaluateTranslationOptionListWithSourceContext(
+  TranslationOptionList &translationOptionList) {
+  
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction &ff = *ffs[i];
+    if (! staticData.IsFeatureFunctionIgnored(ff)) {
+      ff.EvaluateTranslationOptionListWithSourceContext(m_source, translationOptionList);
+    }
+  }
+  
+}
   
   void 
   TranslationOptionCollection::

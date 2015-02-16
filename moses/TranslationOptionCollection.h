@@ -107,7 +107,7 @@ protected:
 
   void EvaluateWithSourceContext();
 
-  void EvaluateTranslatonOptionListWithSourceContext(TranslationOptionList&);
+  void EvaluateTranslationOptionListWithSourceContext(TranslationOptionList&);
 
   void CacheLexReordering();
 
