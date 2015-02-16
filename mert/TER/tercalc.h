@@ -98,9 +98,9 @@ namespace TERCPPNS_TERCpp
             terAlignment TER ( vector<string>& hyp, vector<string>& ref , float avRefLength );
             terAlignment TER ( vector<string>& hyp, vector<string>& ref );
             terAlignment TER ( vector<int>& hyp, vector<int>& ref );
-            bestShiftStruct * findBestShift ( vector< string >& cur, vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCpp::terAlignment& med_align );
+            bestShiftStruct * findBestShift ( vector< string >& cur, vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCPPNS_TERCpp::terAlignment& med_align );
             void calculateTerAlignment ( terAlignment& align, vector<bool>* herr, vector<bool>* rerr, vector<int>* ralign );
-            vector<vecTerShift> * calculerPermutations ( vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCpp::terAlignment& align, vector<bool>* herr, vector<bool>* rerr, vector<int>* ralign );
+            vector<vecTerShift> * calculerPermutations ( vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCPPNS_TERCpp::terAlignment& align, vector<bool>* herr, vector<bool>* rerr, vector<int>* ralign );
             alignmentStruct permuter ( vector<string>& words, terShift& s );
             alignmentStruct permuter ( vector<string>& words, terShift* s );
             alignmentStruct permuter ( vector<string>& words, int start, int end, int newloc );

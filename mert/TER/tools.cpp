@@ -21,7 +21,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "tools.h"
 
 using namespace std;
-using namespace TERCPPNS_boost::xpressive;
+using namespace boost::xpressive;
 namespace TERCPPNS_Tools
 {
 

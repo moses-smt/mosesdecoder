@@ -892,7 +892,7 @@ namespace TERCPPNS_TERCpp
         }
     }
 
-    vector<vecTerShift> * terCalc::calculerPermutations ( vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCpp::terAlignment& align, vector<bool>* herr, vector<bool>* rerr, vector<int>* ralign )
+    vector<vecTerShift> * terCalc::calculerPermutations ( vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCPPNS_TERCpp::terAlignment& align, vector<bool>* herr, vector<bool>* rerr, vector<int>* ralign )
     {
         vector<vecTerShift> * allshifts = new vector<vecTerShift>(0);
 // 	to_return.clear();
@@ -1072,11 +1072,11 @@ namespace TERCPPNS_TERCpp
     }
 
 
-    alignmentStruct terCalc::permuter ( vector< string >& words, TERCpp::terShift& s )
+    alignmentStruct terCalc::permuter ( vector< string >& words, TERCPPNS_TERCpp::terShift& s )
     {
         return permuter ( words, s.start, s.end, s.newloc );
     }
-    alignmentStruct terCalc::permuter ( vector< string >& words, TERCpp::terShift* s )
+    alignmentStruct terCalc::permuter ( vector< string >& words, TERCPPNS_TERCpp::terShift* s )
     {
         return permuter ( words, s->start, s->end, s->newloc );
     }
