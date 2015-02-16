@@ -323,7 +323,10 @@ public:
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;
 
-
+  void EvaluateAfterPop(
+      const ChartHypothesis& /* cur_hypo */,
+      int /* featureID - used to index the state in the previous hypotheses */,
+      ScoreComponentCollection* accumulator) const;
 
   void Load();
 
@@ -412,6 +415,7 @@ protected:
 	std::string m_modelFileARPA;
 	std::string m_lemmaFile;
 	std::string m_jarPath;
+	bool m_afterPop;
 	//should do the initialization only once when the wrapper is loaded
 	//could make it a singleton class
 	mutable CreateJavaVM *javaWrapper;

@@ -29,6 +29,8 @@ public:
   /**
     * Same for chart-based features.
     **/
+  virtual void EvaluateAfterPop(const ChartHypothesis &hypo,
+                               ScoreComponentCollection* accumulator) const {};
   virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
                              ScoreComponentCollection* accumulator) const = 0;
 

@@ -209,6 +209,32 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
   return 0;
 }
 
+void ChartHypothesis::EvaluateAfterPop(){
+
+	const StaticData &staticData = StaticData::Instance();
+	// compute values of stateless feature functions that were not
+	  // cached in the translation option-- there is no principled distinction
+	  const std::vector<const StatelessFeatureFunction*>& sfs =
+	    StatelessFeatureFunction::GetStatelessFeatureFunctions();
+	  for (unsigned i = 0; i < sfs.size(); ++i) {
+	    if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) {
+	      sfs[i]->EvaluateAfterPop(*this,&m_scoreBreakdown);
+	    }
+	  }
+
+	  const std::vector<const StatefulFeatureFunction*>& ffs =
+	    StatefulFeatureFunction::GetStatefulFeatureFunctions();
+	  for (unsigned i = 0; i < ffs.size(); ++i) {
+	    if (! staticData.IsFeatureFunctionIgnored( *ffs[i] )) {
+	      //m_ffStates[i] = ffs[i]->EvaluateAfterPop(*this,i,&m_scoreBreakdown);
+	    	ffs[i]->EvaluateAfterPop(*this,i,&m_scoreBreakdown);
+	    }
+	  }
+	  m_totalScore	= m_scoreBreakdown.GetWeightedScore();
+
+}
+
+
 /** calculate total score
   * @todo this should be in ScoreBreakdown
  */

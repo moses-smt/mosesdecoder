@@ -103,6 +103,9 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   const size_t popLimit = staticData.GetCubePruningPopLimit();
   for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) {
     ChartHypothesis *hypo = queue.Pop();
+    //MARIA
+    hypo->EvaluateAfterPop();
+    //END MARIA
     AddHypothesis(hypo);
   }
 }

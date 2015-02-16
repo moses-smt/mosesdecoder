@@ -660,8 +660,16 @@ void HeadFeature::SetParameter(const std::string& key, const std::string& value)
 	  				if(key=="modelFileARPA"){
 	  					m_modelFileARPA = value;
 	  				}
-	  				else
-	  					StatefulFeatureFunction::SetParameter(key, value);
+	  				else{
+	  					if(key=="afterPop"){
+	  						if(value.compare("true")==0)
+	   							m_afterPop = true;
+	   						else
+	   							m_afterPop = false;
+	  					}
+	  					else
+	  						StatefulFeatureFunction::SetParameter(key, value);
+	  				}
 	  			}
 	  		}
 	  	}
@@ -921,6 +929,104 @@ float HeadFeature::GetWBScore(vector<string>& depRel) const{
 	   */
 }
 
+void HeadFeature::EvaluateAfterPop(
+  const ChartHypothesis&  cur_hypo,
+  int  featureID /*- used to index the state in the previous hypotheses */,
+  ScoreComponentCollection* accumulator) const
+{
+	if(m_afterPop==false)
+		return;
+	const SyntaxTreeState* cur_state = dynamic_cast<const SyntaxTreeState*>(cur_hypo.GetFFState(featureID));
+	SyntaxTreePtr syntaxTree = cur_state->GetTree();
+
+/*	std::string parsedSentence = "";
+	syntaxTree->ToStringLevel(parsedSentence,4);
+	cout<<"Feature "<<featureID<<" toString4: "<<parsedSentence<<endl;
+*/
+	std::string depRel ="";
+	//should only call toString if the LHS passes these criteria
+	//might consider adding Q in allowedNT -> we transform it to S in ToStringLevel
+	if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
+		//std::string parsedSentence  = syntaxTree->ToString();
+		std::string parsedSentence = "";
+		syntaxTree->ToStringLevel(parsedSentence,4);
+		cout<<"After pop "<<featureID<<" toString4: "<<parsedSentence<<endl;
+
+	//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
+			StringHashMap &localCache = GetCache();
+			Counters &localCounters = GetCounters();
+			if(localCache.find(parsedSentence)!=localCache.end()){
+				depRel=localCache[parsedSentence]->first;
+				localCounters.subtreeCacheHits++;
+				m_cacheHits++;
+				//cerr<<"cache Hit: "<<parsedSentence <<endl;
+				//cerr<<"dep rel: "<<depRel<<endl;
+			}
+			else{
+				//commented the call to StanfordDep to debug memory leak
+				//depRel = "nsubj hate PRN\tdobj hate you";
+				depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+				float score = 1.0;
+				DepRelMap &localCacheDepRel = GetCacheDepRel();
+				//if key already returns return iterator to key position
+				pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, float> (depRel,score));
+
+				//!!!!! only score dep rel pairs that haven't been seen before in this path -> use ProcessDepString and use state to keep track of the map of seen depRel
+				if(it.second==false){ //no insert took place
+					m_cacheDepRelHits++;
+					localCounters.depRelCacheHits++;
+				}
+				else{//unseen depRel pair ->score
+					; //TODO
+				}
+				//why did I put this?
+				if(it.first!=localCacheDepRel.end())
+					(*m_cache)[parsedSentence]=it.first;
+				//save in TreeString - DepRel cache
+				//parsedSentence should be produced with generic words since the rel doesn't depend on the words
+				//therefore we can cache only repeating trees ignoring the words and avoid more computation
+				//FALSE some words matter -> copula verb, timeregex etc. Nouns probably don't matter, finite verbs, adj etc
+				//we need the preposition to make prep_to rep rels or substitute in post_processing
+				//I could also precompute the relations for the most common trees of up to some size that I've seen in the corpus
+				//especially if I put a treshold level on the hight
+				//!!! might want to hald the size of the cache from time to time
+				//-> do like the phrasse chache: memorize the time and delete older ones (lower in the chart)
+				//instead of time I could also just save the span length -> if the number of leavs are different so will the tree
+				//(*m_cache)[parsedSentence]=depRel;
+
+				//std::cerr<<"Cache Miss: "<<parsedSentence<<endl;
+				//std::cerr<< "dep rel: "<<depRel<<endl;
+			}
+			if(depRel!=" "){
+				//std::cerr<<parsedSentence<< " dep rel: "<<depRel<<endl;
+				m_counter++;
+				vector<string> tokens;
+				Tokenize(tokens,depRel,"\t");
+				m_counterDepRel+=tokens.size();
+				for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
+					vector<string> rel;
+					Tokenize(rel,*it);
+					//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
+					//should take out this compare and get my models straight
+					//if i allow the prep relations should I add PP as allowed NT?
+					if(rel.size()==3 ){ //control this from java -> && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
+						float scoreWB = GetWBScore(rel);
+						//DEBUG
+						cout<<"After pop score: "<<*it<<" "<<scoreWB<<endl;
+
+						vector<float> scores;
+						//before it was natural log now from the model file it comes as log10 ??which one shoudl it be?
+						scores.push_back(scoreWB);
+						scores.push_back(1.0);
+						accumulator->PlusEquals(this,scores);
+					}
+				}
+			}
+	}
+
+
+}
+
 FFState* HeadFeature::EvaluateWhenApplied(
   const ChartHypothesis&  cur_hypo,
   int  featureID /*- used to index the state in the previous hypotheses */,
@@ -930,33 +1036,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
 
-			//basically at the start of a new sentence reset counter
-		//use this just for testing with one thread
-			if(cur_hypo.GetId()==0){
-	/*			std::cerr<<"Current counter: "<<m_counter<<endl;
-				std::cerr<<"Current counterDepRel: "<<m_counterDepRel<<endl;
-				std::cerr<<"Current cacheHits: "<<m_cacheHits<<endl;
-				std::cerr<<"Current cacheDepRelHits: "<<m_cacheDepRelHits<<endl;
-
-				StringHashMap &localCache = GetCache();
-				DepRelMap &localCacheDepRel = GetCacheDepRel();
-				//nr of S or VP trees = cache.size + cache.hits
-				std::cerr<<"Current cache size: "<<localCache.size()<<endl;
-				// Counter = cacheDepRel.size + cacheDepRel.hits
-				std::cerr<<"Current cacheDepRel size: "<<localCacheDepRel.size()<<endl;
-				localCache = ResetCache();
-				localCacheDepRel = ResetCacheDepRel();
-				std::cerr<<"Reset cache: "<<localCache.size()<<endl;
-				std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
-				m_counter=0;
-				m_counterDepRel=0;
-				m_cacheHits=0;
-				m_cacheDepRelHits =0;
-*/
-			}
-
-
 	    const std::string *tree = property->GetValueString();
+
 
 	    SyntaxTreePtr syntaxTree (new SyntaxTree());
 	    //should have new SyntaxTree(pointer to headRules)
@@ -964,186 +1045,124 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	    //std::cout<<*tree<<std::endl;
 
 	    //get subtrees (in target order)
-	        std::vector< SyntaxTreePtr > previousTrees;
-	        for (size_t pos = 0; pos < cur_hypo.GetCurrTargetPhrase().GetSize(); ++pos) {
-	          const Word &word = cur_hypo.GetCurrTargetPhrase().GetWord(pos);
-	          if (word.IsNonTerminal()) {
-	            size_t nonTermInd = cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
-	            /*
-	              * Notes: When evaluating the value of this feature function, you should avoid
-	              * calling hypo.GetPrevHypo().  If you need something from the "previous"
-	              * hypothesis, you should store it in an FFState object which will be passed
-	              * in as prev_state.  If you don't do this, you will get in trouble.
-	             */
-	            const ChartHypothesis *prevHypo = cur_hypo.GetPrevHypo(nonTermInd);
-	            //trebuie cumva pt prev hypothesis sa am si un container the <node*,node*> pt dep pairs already scored/seen
-	            const SyntaxTreeState* prev = dynamic_cast<const SyntaxTreeState*>(prevHypo->GetFFState(featureID));
-	            //SyntaxTree* prev_tree = prev->GetTree();
-	            previousTrees.push_back(prev->GetTree());
-	            //here add previousScoredPairs -> the FFstate should have a pointer to the container
-	          }
-	        }
+			std::vector< SyntaxTreePtr > previousTrees;
+			for (size_t pos = 0; pos < cur_hypo.GetCurrTargetPhrase().GetSize(); ++pos) {
+				const Word &word = cur_hypo.GetCurrTargetPhrase().GetWord(pos);
+				if (word.IsNonTerminal()) {
+					size_t nonTermInd = cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
+					/*
+						* Notes: When evaluating the value of this feature function, you should avoid
+						* calling hypo.GetPrevHypo().  If you need something from the "previous"
+						* hypothesis, you should store it in an FFState object which will be passed
+						* in as prev_state.  If you don't do this, you will get in trouble.
+					 */
+					const ChartHypothesis *prevHypo = cur_hypo.GetPrevHypo(nonTermInd);
+					//trebuie cumva pt prev hypothesis sa am si un container the <node*,node*> pt dep pairs already scored/seen
+					const SyntaxTreeState* prev = dynamic_cast<const SyntaxTreeState*>(prevHypo->GetFFState(featureID));
+					//SyntaxTree* prev_tree = prev->GetTree();
+					previousTrees.push_back(prev->GetTree());
+					//here add previousScoredPairs -> the FFstate should have a pointer to the container
+				}
+			}
 
-	        syntaxTree->SetHeadOpenNodes(previousTrees);
-	        syntaxTree->FindHeads(syntaxTree->GetTop(), *m_headRules);
+			syntaxTree->SetHeadOpenNodes(previousTrees);
+			syntaxTree->FindHeads(syntaxTree->GetTop(), *m_headRules);
 
-	        /*
-	        std::cout<<*tree<<std::endl;
-	        std::cout<< "rule: "<< syntaxTree->ToString()<<std::endl;
-	        std::cout<< "rule maxLevel: "<< syntaxTree->ToStringLevel(4)<<std::endl;
-     	    std::cout<< "rule maxNodes: "<< syntaxTree->ToStringNodeCount(3)<<std::endl;
-					*/
+			//skip evaluation if we're doing it after CubePruning pop
+			if(m_afterPop==true){
+				vector<float> scores;
+				scores.push_back(0.0);
+				scores.push_back(0.0);
+				accumulator->PlusEquals(this,scores);
+				return new SyntaxTreeState(syntaxTree,GetCache(),GetCacheDepRel(),GetCounters());
+			}
 
-	        /*
-	        std::stringstream *subtree = new stringstream("");
-	        syntaxTree->ToStringDynamic(syntaxTree->GetTop(),&previousTrees,subtree);
-	        std::string parsedSentence = subtree->str();
-	        syntaxTree->SetRootedTree(parsedSentence);
-	        delete subtree;
-					*/
 
-	        std::string depRel ="";
-	        //should only call toString if the LHS passes these criteria
-	        //might consider adding Q in allowedNT -> we transform it to S in ToStringLevel
-	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
-	        	//std::string parsedSentence  = syntaxTree->ToString();
-	        	std::string parsedSentence = "";
-	        	syntaxTree->ToStringLevel(parsedSentence,4);
+			std::string depRel ="";
+			//should only call toString if the LHS passes these criteria
+			//might consider adding Q in allowedNT -> we transform it to S in ToStringLevel
+			if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
+				//std::string parsedSentence  = syntaxTree->ToString();
+				std::string parsedSentence = "";
+				syntaxTree->ToStringLevel(parsedSentence,4);
+				cout<<"When applied "<<featureID<<" toString4: "<<parsedSentence<<endl;
 
-	        	//!!!!!! do this if not replacing Q nodes in ToStringLevel
-	  //      	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
+			//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
+					StringHashMap &localCache = GetCache();
+					Counters &localCounters = GetCounters();
+					if(localCache.find(parsedSentence)!=localCache.end()){
+						depRel=localCache[parsedSentence]->first;
+						localCounters.subtreeCacheHits++;
+						m_cacheHits++;
+						//cerr<<"cache Hit: "<<parsedSentence <<endl;
+						//cerr<<"dep rel: "<<depRel<<endl;
+					}
+					else{
+						//commented the call to StanfordDep to debug memory leak
+						//depRel = "nsubj hate PRN\tdobj hate you";
+						depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+						float score = 1.0;
+						DepRelMap &localCacheDepRel = GetCacheDepRel();
+						//if key already returns return iterator to key position
+						pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, float> (depRel,score));
 
-	        	//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
-	        		StringHashMap &localCache = GetCache();
-	        		Counters &localCounters = GetCounters();
-	        		if(localCache.find(parsedSentence)!=localCache.end()){
-	        			depRel=localCache[parsedSentence]->first;
-	        			localCounters.subtreeCacheHits++;
-	        			m_cacheHits++;
-	        			//cerr<<"cache Hit: "<<parsedSentence <<endl;
-	        			//cerr<<"dep rel: "<<depRel<<endl;
-	        		}
-	        		else{
-	        			//commented the call to StanfordDep to debug memory leak
-	        			//depRel = "nsubj hate PRN\tdobj hate you";
-	        			depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
-	        			float score = 1.0;
-	        			DepRelMap &localCacheDepRel = GetCacheDepRel();
-	        			//if key already returns return iterator to key position
-	        			pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, float> (depRel,score));
-
-	        			//!!!!! only score dep rel pairs that haven't been seen before in this path -> use ProcessDepString and use state to keep track of the map of seen depRel
-	        			if(it.second==false){ //no insert took place
-	        				m_cacheDepRelHits++;
-	        				localCounters.depRelCacheHits++;
-	        			}
-	        			else{//unseen depRel pair ->score
-	        				; //TODO
-	        			}
-	        			//why did I put this?
-	        			if(it.first!=localCacheDepRel.end())
-	        				(*m_cache)[parsedSentence]=it.first;
-	        			//save in TreeString - DepRel cache
-	        			//parsedSentence should be produced with generic words since the rel doesn't depend on the words
-	        			//therefore we can cache only repeating trees ignoring the words and avoid more computation
-	        			//FALSE some words matter -> copula verb, timeregex etc. Nouns probably don't matter, finite verbs, adj etc
-	        			//we need the preposition to make prep_to rep rels or substitute in post_processing
-	        			//I could also precompute the relations for the most common trees of up to some size that I've seen in the corpus
-	        			//especially if I put a treshold level on the hight
-	        			//!!! might want to hald the size of the cache from time to time
-	        			//-> do like the phrasse chache: memorize the time and delete older ones (lower in the chart)
-	        			//instead of time I could also just save the span length -> if the number of leavs are different so will the tree
-	        			//(*m_cache)[parsedSentence]=depRel;
-
-	        			//std::cerr<<"Cache Miss: "<<parsedSentence<<endl;
-	        			//std::cerr<< "dep rel: "<<depRel<<endl;
-	        		}
-							if(depRel!=" "){
-								//std::cerr<<parsedSentence<< " dep rel: "<<depRel<<endl;
-								m_counter++;
-								vector<string> tokens;
-								Tokenize(tokens,depRel,"\t");
-								m_counterDepRel+=tokens.size();
-								for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
-									vector<string> rel;
-									Tokenize(rel,*it);
-									//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
-									//should take out this compare and get my models straight
-									//if i allow the prep relations should I add PP as allowed NT?
-									if(rel.size()==3 ){ //control this from java -> && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
-										float scoreWB = GetWBScore(rel);
-										vector<float> scores;
-										//before it was natural log now from the model file it comes as log10 ??which one shoudl it be?
-										scores.push_back(scoreWB);
-										scores.push_back(1.0);
-										accumulator->PlusEquals(this,scores);
-								/*
-										std::map<string,float>::iterator itModel;
-										//probably memory leak?
-										itModel = m_probArg->find(rel[1]+" "+rel[2]);
-										if(itModel!=m_probArg->end()){
-											//cout<<"Have value: "<<itModel->first <<" "<<itModel->second<<endl;
-											vector<float> scores;
-											scores.push_back(log(itModel->second+0.001));
-											scores.push_back(1.0);
-											//accumulator->PlusEquals(this,log(it->second+0.001));
-											accumulator->PlusEquals(this,scores);
-										}
-									*/
-									}
-								}
-								//ProcessDepString(depRel,previousTrees,accumulator);
-							}
-
-	//        	}
-	        }
-	        //std::cout<< "dep rel: "<< stanfordDep<<std::endl;
-
-	     /*
-
-	        string *predArgPair = syntaxTree->FindObj();
-	        std::map<string,float>::iterator it;
-	        //!!! SOULD TRY TO CACHE IT -> THEN I NEED SYNC FOR MULTITHREAD !!!
-	        //I should only search if predArgPair is not empty
-	        if(*predArgPair!=""){
-	        	//cout<<"Found pair: "<<*predArgPair<<endl;
-	        	it = m_probArg->find(*predArgPair);
-						if(it!=m_probArg->end()){
-							//cout<<"Have value: "<<it->second<<endl;
-							vector<float> scores;
-							scores.push_back(log(it->second+0.001));
-							scores.push_back(1.0);
-							//accumulator->PlusEquals(this,log(it->second+0.001));
-							accumulator->PlusEquals(this,scores);
+						//!!!!! only score dep rel pairs that haven't been seen before in this path -> use ProcessDepString and use state to keep track of the map of seen depRel
+						if(it.second==false){ //no insert took place
+							m_cacheDepRelHits++;
+							localCounters.depRelCacheHits++;
 						}
+						else{//unseen depRel pair ->score
+							; //TODO
+						}
+						//why did I put this?
+						if(it.first!=localCacheDepRel.end())
+							(*m_cache)[parsedSentence]=it.first;
+						//save in TreeString - DepRel cache
+						//parsedSentence should be produced with generic words since the rel doesn't depend on the words
+						//therefore we can cache only repeating trees ignoring the words and avoid more computation
+						//FALSE some words matter -> copula verb, timeregex etc. Nouns probably don't matter, finite verbs, adj etc
+						//we need the preposition to make prep_to rep rels or substitute in post_processing
+						//I could also precompute the relations for the most common trees of up to some size that I've seen in the corpus
+						//especially if I put a treshold level on the hight
+						//!!! might want to hald the size of the cache from time to time
+						//-> do like the phrasse chache: memorize the time and delete older ones (lower in the chart)
+						//instead of time I could also just save the span length -> if the number of leavs are different so will the tree
+						//(*m_cache)[parsedSentence]=depRel;
 
-						//else !! I should do smoothing based on the verb
-					 //	accumulator->PlusEquals(this,-1);
-					//maybe I should just train a bigram lm over pred-arg pairs and query it here that takes care of smoothing -> dep lm for obj
-						//probability of vb having n arguments and which types -> when I reach the VP I should already have all the arguments covered
-						//prob of vb with argument X given X is aligned to source word attached to verb Y
-	        }
-
-	        delete predArgPair;
-	        predArgPair = 0;
-	     */
-/*
-	        string *predSubjPair = syntaxTree->FindSubj();
-	        	        if(*predSubjPair!=""){
-	        	        		cout<<"Found pair: "<<*predSubjPair<<endl;
-	        	        }
-*/
-	        //std::cout<< syntaxTree->ToStringHead()<<std::endl;
-
-	        return new SyntaxTreeState(syntaxTree,GetCache(),GetCacheDepRel(),GetCounters());
-
-
-
+						//std::cerr<<"Cache Miss: "<<parsedSentence<<endl;
+						//std::cerr<< "dep rel: "<<depRel<<endl;
+					}
+					if(depRel!=" "){
+						//std::cerr<<parsedSentence<< " dep rel: "<<depRel<<endl;
+						m_counter++;
+						vector<string> tokens;
+						Tokenize(tokens,depRel,"\t");
+						m_counterDepRel+=tokens.size();
+						for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
+							vector<string> rel;
+							Tokenize(rel,*it);
+							//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
+							//should take out this compare and get my models straight
+							//if i allow the prep relations should I add PP as allowed NT?
+							if(rel.size()==3 ){ //control this from java -> && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
+								float scoreWB = GetWBScore(rel);
+								cout<<"When applied score: "<<*it<<" "<<scoreWB<<endl;
+								vector<float> scores;
+								//before it was natural log now from the model file it comes as log10 ??which one shoudl it be?
+								scores.push_back(scoreWB);
+								scores.push_back(1.0);
+								accumulator->PlusEquals(this,scores);
+							}
+						}
+					}
+			}
+			return new SyntaxTreeState(syntaxTree,GetCache(),GetCacheDepRel(),GetCounters());
 	}
 	vector<float> scores;
 	scores.push_back(1000.0);
 	scores.push_back(0.0);
 	accumulator->PlusEquals(this,scores);
+	return NULL;
 }
 
 

@@ -130,6 +130,8 @@ public:
     return m_ffStates[ featureID ];
   }
 
+
+
   //! reference back to the manager
   inline const ChartManager& GetManager() const {
     return m_manager;
@@ -144,6 +146,7 @@ public:
 
   int RecombineCompare(const ChartHypothesis &compare) const;
 
+  void EvaluateAfterPop();
   void EvaluateWhenApplied();
 
   void AddArc(ChartHypothesis *loserHypo);

@@ -39,6 +39,12 @@ public:
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const = 0;
 
+  virtual void EvaluateAfterPop(
+      const ChartHypothesis& /* cur_hypo */,
+      int /* featureID - used to index the state in the previous hypotheses */,
+      ScoreComponentCollection* accumulator) const {};
+
+
   //! return the state associated with the empty hypothesis for a given sentence
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
