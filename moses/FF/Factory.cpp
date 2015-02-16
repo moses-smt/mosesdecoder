@@ -67,6 +67,7 @@
 #ifdef HAVE_VW
 #include "moses/FF/VW/VW.h"
 #include "moses/FF/VW/VWFeatureSourceBagOfWords.h"
+#include "moses/FF/VW/VWFeatureSourceBigram.h"
 #include "moses/FF/VW/VWFeatureSourceIndicator.h"
 #include "moses/FF/VW/VWFeatureSourcePhraseInternal.h"
 #include "moses/FF/VW/VWFeatureSourceWindow.h"
@@ -249,6 +250,7 @@ FeatureRegistry::FeatureRegistry()
 #ifdef HAVE_VW
   MOSES_FNAME(VW);
   MOSES_FNAME(VWFeatureSourceBagOfWords);
+  MOSES_FNAME(VWFeatureSourceBigram);
   MOSES_FNAME(VWFeatureSourceIndicator);
   MOSES_FNAME(VWFeatureSourcePhraseInternal);
   MOSES_FNAME(VWFeatureSourceWindow);
