@@ -950,7 +950,7 @@ void HeadFeature::EvaluateAfterPop(
 		//std::string parsedSentence  = syntaxTree->ToString();
 		std::string parsedSentence = "";
 		syntaxTree->ToStringLevel(parsedSentence,4);
-		cout<<"After pop "<<featureID<<" toString4: "<<parsedSentence<<endl;
+		//cout<<"After pop "<<featureID<<" toString4: "<<parsedSentence<<endl;
 
 	//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 			StringHashMap &localCache = GetCache();
@@ -1012,7 +1012,7 @@ void HeadFeature::EvaluateAfterPop(
 					if(rel.size()==3 ){ //control this from java -> && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
 						float scoreWB = GetWBScore(rel);
 						//DEBUG
-						cout<<"After pop score: "<<*it<<" "<<scoreWB<<endl;
+						//cout<<"After pop score: "<<*it<<" "<<scoreWB<<endl;
 
 						vector<float> scores;
 						//before it was natural log now from the model file it comes as log10 ??which one shoudl it be?
