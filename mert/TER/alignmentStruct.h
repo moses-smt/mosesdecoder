@@ -30,9 +30,9 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
 using namespace std;
-using namespace Tools;
+using namespace TERCPPNS_Tools;
 
-namespace TERCpp
+namespace TERCPPNS_TERCpp
 {
     class alignmentStruct
     {

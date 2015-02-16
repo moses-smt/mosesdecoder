@@ -35,9 +35,9 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "bestShiftStruct.h"
 
 using namespace std;
-using namespace Tools;
-using namespace HashMapSpace;
-namespace TERCpp
+using namespace TERCPPNS_Tools;
+using namespace TERCPPNS_HashMapSpace;
+namespace TERCPPNS_TERCpp
 {
 // typedef size_t WERelement[2];
 // Vecteur d'alignement contenant le hash du mot et son evaluation (0=ok, 1=sub, 2=ins, 3=del)

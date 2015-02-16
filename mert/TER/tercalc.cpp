@@ -31,8 +31,8 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 #include "tercalc.h"
 using namespace std;
-using namespace Tools;
-namespace TERCpp
+using namespace TERCPPNS_Tools;
+namespace TERCPPNS_TERCpp
 {
 
     terCalc::terCalc()
