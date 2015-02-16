@@ -6,10 +6,10 @@
 namespace Moses
 {
 
-class VWFeatureSourceBagOfWords : public VWFeatureSource
+class VWFeatureSourceBigrams : public VWFeatureSource
 {
 public:
-  VWFeatureSourceBagOfWords(const std::string &line)
+  VWFeatureSourceBigrams(const std::string &line)
     : VWFeatureSource(line) {
     ReadParameters();
 
