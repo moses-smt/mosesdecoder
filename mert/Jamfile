@@ -46,6 +46,7 @@ TER/infosHasher.cpp
 TER/stringInfosHasher.cpp
 TER/tercalc.cpp
 TER/tools.cpp
+TER/bestShiftStruct.cpp
 TerScorer.cpp
 CderScorer.cpp
 MeteorScorer.cpp
