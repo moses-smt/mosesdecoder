@@ -75,7 +75,6 @@ while(<STDIN>) {
 	s/(\.+)\"(\s*[^<])/\"$1$2/g; # don't fix period at end of sentence
     }
 
-    print STDERR $_ if /﻿/;
 
     if ($language eq "de" || $language eq "es" || $language eq "cz" || $language eq "cs" || $language eq "fr") {
 	s/(\d) (\d)/$1,$2/g;

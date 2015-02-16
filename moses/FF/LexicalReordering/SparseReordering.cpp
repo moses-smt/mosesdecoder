@@ -100,7 +100,7 @@ void SparseReordering::PreCalculateFeatureNames(size_t index, const string& id, 
        type <= SparseReorderingFeatureKey::Between; ++type) {
     for (size_t position = SparseReorderingFeatureKey::First;
          position <= SparseReorderingFeatureKey::Last; ++position) {
-      for (int reoType = 0; reoType <= LexicalReorderingState::MAX; ++reoType) {
+      for (int reoType = 0; reoType <= LRModel::MAX; ++reoType) {
         SparseReorderingFeatureKey key(
           index, static_cast<SparseReorderingFeatureKey::Type>(type), factor, isCluster,
           static_cast<SparseReorderingFeatureKey::Position>(position), side, reoType);
@@ -152,7 +152,7 @@ void SparseReordering::ReadClusterMap(const string& filename, const string& id, 
 void SparseReordering::AddFeatures(
   SparseReorderingFeatureKey::Type type, SparseReorderingFeatureKey::Side side,
   const Word& word, SparseReorderingFeatureKey::Position position,
-  LexicalReorderingState::ReorderingType reoType,
+  LRModel::ReorderingType reoType,
   ScoreComponentCollection* scores) const
 {
 
@@ -194,13 +194,12 @@ void SparseReordering::CopyScores(
   const TranslationOption& currentOpt,
   const TranslationOption* previousOpt,
   const InputType& input,
-  LexicalReorderingState::ReorderingType reoType,
-  LexicalReorderingConfiguration::Direction direction,
+  LRModel::ReorderingType reoType,
+  LRModel::Direction direction,
   ScoreComponentCollection* scores) const
 {
-  if (m_useBetween && direction == LexicalReorderingConfiguration::Backward &&
-      (reoType == LexicalReorderingState::D || reoType == LexicalReorderingState::DL ||
-       reoType == LexicalReorderingState::DR)) {
+  if (m_useBetween && direction == LRModel::Backward &&
+      (reoType == LRModel::D || reoType == LRModel::DL || reoType == LRModel::DR)){
     size_t gapStart, gapEnd;
     //NB: Using a static cast for speed, but could be nasty if
     //using non-sentence input
@@ -231,10 +230,10 @@ void SparseReordering::CopyScores(
   //phrase (backward)
   //stack (forward)
   SparseReorderingFeatureKey::Type type;
-  if (direction == LexicalReorderingConfiguration::Forward) {
+  if (direction == LRModel::Forward) {
     if (!m_useStack) return;
     type = SparseReorderingFeatureKey::Stack;
-  } else if (direction == LexicalReorderingConfiguration::Backward) {
+  } else if (direction == LRModel::Backward) {
     if (!m_usePhrase) return;
     type = SparseReorderingFeatureKey::Phrase;
   } else {

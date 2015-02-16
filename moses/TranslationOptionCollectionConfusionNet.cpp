@@ -177,52 +177,51 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptions()
  * \param startPos first position in input sentence
  * \param lastPos last position in input sentence
  * \param adhereTableLimit whether phrase & generation table limits are adhered to
+ * \return true if there is at least one path for the range has matches 
+ *         in the source side of the parallel data, i.e., the phrase prefix exists
+ *         (abortion condition for trie-based lookup if false)
  */
-void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRange(
-  const DecodeGraph &decodeGraph
-  , size_t startPos
-  , size_t endPos
-  , bool adhereTableLimit
-  , size_t graphInd)
+bool
+TranslationOptionCollectionConfusionNet::
+CreateTranslationOptionsForRange(const DecodeGraph &decodeGraph,
+				 size_t startPos, size_t endPos,
+				 bool adhereTableLimit, size_t graphInd)
 {
   if (StaticData::Instance().GetUseLegacyPT()) {
-    CreateTranslationOptionsForRangeLEGACY(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
+    return CreateTranslationOptionsForRangeLEGACY(decodeGraph, startPos, endPos, 
+						  adhereTableLimit, graphInd);
   } else {
-    CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
+    return CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, 
+					       adhereTableLimit, graphInd);
   }
 }
 
-void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeNew(
-  const DecodeGraph &decodeGraph
-  , size_t startPos
-  , size_t endPos
-  , bool adhereTableLimit
-  , size_t graphInd)
+bool
+TranslationOptionCollectionConfusionNet::
+CreateTranslationOptionsForRangeNew(const DecodeGraph &decodeGraph, size_t startPos, 
+				    size_t endPos, bool adhereTableLimit, size_t graphInd)
 {
   InputPathList &inputPathList = GetInputPathList(startPos, endPos);
+  if (inputPathList.size() == 0) return false; // no input path matches!
   InputPathList::iterator iter;
   for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
     InputPath &inputPath = **iter;
-    TranslationOptionCollection::CreateTranslationOptionsForRange(decodeGraph
-        , startPos
-        , endPos
-        , adhereTableLimit
-        , graphInd
-        , inputPath);
-
+    TranslationOptionCollection::CreateTranslationOptionsForRange
+      (decodeGraph, startPos, endPos, adhereTableLimit, graphInd, inputPath);
   }
+  return true;
 }
 
-void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLEGACY(
-  const DecodeGraph &decodeGraph
-  , size_t startPos
-  , size_t endPos
-  , bool adhereTableLimit
-  , size_t graphInd)
+bool
+TranslationOptionCollectionConfusionNet::
+CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph, size_t startPos,
+				       size_t endPos, bool adhereTableLimit, size_t graphInd)
 {
-  if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
+  bool retval = true;
+  XmlInputType intype = StaticData::Instance().GetXmlInputType();
+  if ((intype != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     InputPathList &inputPathList = GetInputPathList(startPos, endPos);
-
+    
     // partial trans opt stored in here
     PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
     size_t totalEarlyPruned = 0;
@@ -232,8 +231,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLE
     const DecodeStep &decodeStep = **iterStep;
 
     static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslationLEGACY
-    (m_source, *oldPtoc
-     , startPos, endPos, adhereTableLimit, inputPathList );
+    (m_source, *oldPtoc, startPos, endPos, adhereTableLimit, inputPathList);
 
     // do rest of decode steps
     int indexStep = 0;
@@ -292,11 +290,14 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLE
     delete oldPtoc;
     // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
 
-  } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
-
-  if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
+  } // if ((intype != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
+  
+  
+  if (graphInd == 0 && intype != XmlPassThrough && 
+      HasXmlOptionsOverlappingRange(startPos,endPos)) {
     CreateXmlOptionsForRange(startPos, endPos);
   }
+  return retval;
 }
 
 

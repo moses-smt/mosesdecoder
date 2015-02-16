@@ -66,14 +66,14 @@ void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
     alignments.push_back(iter->second);
   }
 
-  for (int i = 0; i < targetPhrase.GetSize(); i++) {
+  for (size_t i = 0; i < targetPhrase.GetSize(); i++) {
     if (targetPhrase.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
     else
       myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(tFactor)->GetString().as_string());
   }
 
-  for (int i = 0; i < source.GetSize(); i++) {
+  for (size_t i = 0; i < source.GetSize(); i++) {
     mySourcePhrase.push_back(source.GetWord(i).GetFactor(sFactor)->GetString().as_string());
   }
 
@@ -97,7 +97,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   WordsBitmap myBitmap = bitmap;
   const Manager &manager = cur_hypo.GetManager();
   const InputType &source = manager.GetSource();
-  const Sentence &sourceSentence = static_cast<const Sentence&>(source);
+  // const Sentence &sourceSentence = static_cast<const Sentence&>(source);
   osmHypothesis obj;
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
@@ -124,7 +124,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   int startIndex  = sourceRange.GetStartPos();
   int endIndex = sourceRange.GetEndPos();
   const AlignmentInfo &align = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();
-  osmState * statePtr;
+  // osmState * statePtr;
 
   vector <int> alignments;
 
@@ -149,7 +149,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
     // cerr<<mySourcePhrase[i]<<endl;
   }
 
-  for (int i = 0; i < target.GetSize(); i++) {
+  for (size_t i = 0; i < target.GetSize(); i++) {
 
     if (target.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");

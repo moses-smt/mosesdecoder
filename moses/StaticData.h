@@ -436,8 +436,13 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  bool IsChart() const {
-    return m_searchAlgorithm == CYKPlus || m_searchAlgorithm == ChartIncremental;
+  bool IsSyntax() const {
+    return m_searchAlgorithm == CYKPlus ||
+           m_searchAlgorithm == ChartIncremental ||
+           m_searchAlgorithm == SyntaxS2T ||
+           m_searchAlgorithm == SyntaxT2S ||
+           m_searchAlgorithm == SyntaxT2S_SCFG ||
+           m_searchAlgorithm == SyntaxF2S;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
