@@ -35,9 +35,9 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "bestShiftStruct.h"
 
 using namespace std;
-using namespace Tools;
-using namespace HashMapSpace;
-namespace TERCpp
+using namespace TERCPPNS_Tools;
+using namespace TERCPPNS_HashMapSpace;
+namespace TERCPPNS_TERCpp
 {
 // typedef size_t WERelement[2];
 // Vecteur d'alignement contenant le hash du mot et son evaluation (0=ok, 1=sub, 2=ins, 3=del)
@@ -98,9 +98,9 @@ namespace TERCpp
             terAlignment TER ( vector<string>& hyp, vector<string>& ref , float avRefLength );
             terAlignment TER ( vector<string>& hyp, vector<string>& ref );
             terAlignment TER ( vector<int>& hyp, vector<int>& ref );
-            bestShiftStruct * findBestShift ( vector< string >& cur, vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCpp::terAlignment& med_align );
+            bestShiftStruct * findBestShift ( vector< string >& cur, vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCPPNS_TERCpp::terAlignment& med_align );
             void calculateTerAlignment ( terAlignment& align, vector<bool>* herr, vector<bool>* rerr, vector<int>* ralign );
-            vector<vecTerShift> * calculerPermutations ( vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCpp::terAlignment& align, vector<bool>* herr, vector<bool>* rerr, vector<int>* ralign );
+            vector<vecTerShift> * calculerPermutations ( vector< string >& hyp, vector< string >& ref, hashMapInfos& rloc, TERCPPNS_TERCpp::terAlignment& align, vector<bool>* herr, vector<bool>* rerr, vector<int>* ralign );
             alignmentStruct permuter ( vector<string>& words, terShift& s );
             alignmentStruct permuter ( vector<string>& words, terShift* s );
             alignmentStruct permuter ( vector<string>& words, int start, int end, int newloc );

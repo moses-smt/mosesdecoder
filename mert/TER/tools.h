@@ -33,7 +33,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 using namespace std;
 
-namespace Tools
+namespace TERCPPNS_Tools
 {
     typedef vector<double> vecDouble;
     typedef vector<char> vecChar;

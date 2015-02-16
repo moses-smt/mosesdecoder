@@ -22,7 +22,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 using namespace std;
 using namespace boost::xpressive;
-namespace Tools
+namespace TERCPPNS_Tools
 {
 
     string vectorToString ( vector<string> vec )
