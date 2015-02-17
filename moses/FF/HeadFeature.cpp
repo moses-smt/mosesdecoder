@@ -936,6 +936,11 @@ void HeadFeature::EvaluateAfterPop(
 {
 	if(m_afterPop==false)
 		return;
+
+	//move this after if if you don't need to count how many times this function is called
+	Counters &localCounters = GetCounters();
+	localCounters.afterPopQueries++;
+
 	const SyntaxTreeState* cur_state = dynamic_cast<const SyntaxTreeState*>(cur_hypo.GetFFState(featureID));
 	SyntaxTreePtr syntaxTree = cur_state->GetTree();
 
@@ -954,7 +959,10 @@ void HeadFeature::EvaluateAfterPop(
 
 	//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 			StringHashMap &localCache = GetCache();
-			Counters &localCounters = GetCounters();
+
+			//uncomment and delete above -> if I don't need the feature call counter
+			//Counters &localCounters = GetCounters();
+
 			if(localCache.find(parsedSentence)!=localCache.end()){
 				depRel=localCache[parsedSentence]->first;
 				localCounters.subtreeCacheHits++;
@@ -1036,6 +1044,10 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
 
+		//move this after if if you don't need to count how many times this function is called
+			Counters &localCounters = GetCounters();
+			localCounters.whenAppliedQueries++;
+
 	    const std::string *tree = property->GetValueString();
 
 
@@ -1089,7 +1101,10 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 			//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 					StringHashMap &localCache = GetCache();
-					Counters &localCounters = GetCounters();
+
+					//uncomment and delete above -> if I don't need the feature call counter
+					//Counters &localCounters = GetCounters();
+
 					if(localCache.find(parsedSentence)!=localCache.end()){
 						depRel=localCache[parsedSentence]->first;
 						localCounters.subtreeCacheHits++;

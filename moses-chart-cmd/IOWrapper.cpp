@@ -541,6 +541,8 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
           outDepRel<<"SubtreeCacheHits:\t"<<counters.subtreeCacheHits<<"\n";
           outDepRel<<"DepRelCacheSize:\t"<<depRelCache.size()<<"\n";
           outDepRel<<"DepRelCacheHits:\t"<<counters.depRelCacheHits<<"\n";
+          outDepRel<<"whenAppliedQueries:\t"<<counters.whenAppliedQueries<<"\n";
+          outDepRel<<"afterPopQueries:\t"<<counters.afterPopQueries<<"\n";
           for(DepRelMap::iterator it=depRelCache.begin(); it!=depRelCache.end();it++){
           	outDepRel<<it->first<<"\n";
           }

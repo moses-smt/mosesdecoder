@@ -39,7 +39,9 @@ class Counters {
 public:
 	int subtreeCacheHits;
 	int depRelCacheHits;
-	Counters():subtreeCacheHits(0),depRelCacheHits(0){}
+	int whenAppliedQueries;
+	int afterPopQueries;
+	Counters():subtreeCacheHits(0),depRelCacheHits(0),whenAppliedQueries(0),afterPopQueries(0){}
 	virtual ~Counters() {}
 };
 //typedef boost::unordered_map<std::string,std::string> StringHashMap;
