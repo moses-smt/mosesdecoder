@@ -17,7 +17,7 @@ namespace Moses
   LexicalReordering(const std::string &line) 
     : StatefulFeatureFunction(line)
   {
-    std::cerr << "Initializing Lexical Reordering Feature.." << std::endl;
+    VERBOSE(1, "Initializing Lexical Reordering Feature.." << std::endl);
       
     map<string,string> sparseArgs;
     m_haveDefaultScores = false;
