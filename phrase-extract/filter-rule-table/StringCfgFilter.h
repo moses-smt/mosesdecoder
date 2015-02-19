@@ -23,14 +23,15 @@ namespace FilterRuleTable
 // Filters a rule table, discarding rules that cannot be applied to a given
 // test set.  The rule table must have a CFG source-side and the test sentences
 // must be strings.
-class StringCfgFilter : public CfgFilter {
- public:
+class StringCfgFilter : public CfgFilter
+{
+public:
   // Initialize the filter for a given set of test sentences.
   StringCfgFilter(const std::vector<boost::shared_ptr<std::string> > &);
 
   void Filter(std::istream &in, std::ostream &out);
 
- private:
+private:
   // Filtering works by converting the source LHSs of translation rules to
   // patterns containing variable length gaps and then pattern matching
   // against the test set.
@@ -71,8 +72,7 @@ class StringCfgFilter : public CfgFilter {
   //
   // where the gaps have minimum widths of 1, 0, 2, and 0.
   //
-  struct Pattern
-  {
+  struct Pattern {
     std::vector<NGram> subpatterns;
     std::vector<int> minGapWidths;
   };

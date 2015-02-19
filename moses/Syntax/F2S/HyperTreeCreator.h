@@ -13,7 +13,7 @@ namespace F2S
 // GlueRuleSynthesizer).  HyperTreeCreator is a friend of HyperTree.
 class HyperTreeCreator
 {
- protected:
+protected:
   // Provide access to HyperTree's private SortAndPrune function.
   void SortAndPrune(HyperTree &trie, std::size_t limit) {
     trie.SortAndPrune(limit);
@@ -22,7 +22,7 @@ class HyperTreeCreator
   // Provide access to HyperTree's private GetOrCreateTargetPhraseCollection
   // function.
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      HyperTree &trie, const HyperPath &fragment) {
+    HyperTree &trie, const HyperPath &fragment) {
     return trie.GetOrCreateTargetPhraseCollection(fragment);
   }
 };

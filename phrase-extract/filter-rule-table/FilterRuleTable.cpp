@@ -104,8 +104,8 @@ int FilterRuleTable::Main(int argc, char *argv[])
 }
 
 void FilterRuleTable::ReadTestSet(
-    std::istream &input,
-    std::vector<boost::shared_ptr<std::string> > &sentences)
+  std::istream &input,
+  std::vector<boost::shared_ptr<std::string> > &sentences)
 {
   int lineNum = 0;
   std::string line;
@@ -121,7 +121,7 @@ void FilterRuleTable::ReadTestSet(
 }
 
 void FilterRuleTable::ReadTestSet(
-    std::istream &input, std::vector<boost::shared_ptr<StringTree> > &sentences)
+  std::istream &input, std::vector<boost::shared_ptr<StringTree> > &sentences)
 {
   XmlTreeParser parser;
   int lineNum = 0;
@@ -138,8 +138,8 @@ void FilterRuleTable::ReadTestSet(
 }
 
 void FilterRuleTable::ReadTestSet(
-    std::istream &input,
-    std::vector<boost::shared_ptr<StringForest> > &sentences)
+  std::istream &input,
+  std::vector<boost::shared_ptr<StringForest> > &sentences)
 {
   StringForestParser end;
   int sentNum = 0;

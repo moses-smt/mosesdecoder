@@ -28,12 +28,13 @@ namespace FilterRuleTable
 // Filters a rule table, discarding rules that cannot be applied to a given
 // test set.  The rule table must have a TSG source-side and the test sentences
 // must be parse forests.
-class ForestTsgFilter : public TsgFilter {
- public:
+class ForestTsgFilter : public TsgFilter
+{
+public:
   // Initialize the filter for a given set of test forests.
   ForestTsgFilter(const std::vector<boost::shared_ptr<StringForest> > &);
 
- private:
+private:
   struct IdForestValue {
     Vocabulary::IdType id;
     std::size_t start;
@@ -46,7 +47,7 @@ class ForestTsgFilter : public TsgFilter {
   typedef Forest<IdForestValue> IdForest;
 
   typedef boost::unordered_map<std::size_t,
-                               std::vector<const IdForest::Vertex*> > InnerMap;
+          std::vector<const IdForest::Vertex*> > InnerMap;
 
   typedef std::vector<InnerMap> IdToSentenceMap;
 

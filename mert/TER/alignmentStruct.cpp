@@ -5,7 +5,7 @@ Copyright 2010-2013, Christophe Servan, LIUM, University of Le Mans, France
 Contact: christophe.servan@lium.univ-lemans.fr
 
 The tercpp tool and library are free software: you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License as published by 
+under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the licence, or
 (at your option) any later version.
 
@@ -23,24 +23,24 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 using namespace std;
 namespace TERCPPNS_TERCpp
 {
-    string alignmentStruct::toString()
-    {
-        stringstream s;
+string alignmentStruct::toString()
+{
+  stringstream s;
 // 	s << "nword : " << vectorToString(nwords)<<endl;
 // 	s << "alignment" << vectorToString(alignment)<<endl;
 // 	s << "afterShift" << vectorToString(alignment)<<endl;
-        s << "Nothing to be printed" <<endl;
-        return s.str();
-    }
-    void alignmentStruct::set(alignmentStruct l_alignmentStruct)
-    {
-	nwords=l_alignmentStruct.nwords; // The words we shifted
-        alignment=l_alignmentStruct.alignment ; // for pra_more output
-        aftershift=l_alignmentStruct.aftershift; // for pra_more output
-        cost=l_alignmentStruct.cost;
-    }
+  s << "Nothing to be printed" <<endl;
+  return s.str();
+}
+void alignmentStruct::set(alignmentStruct l_alignmentStruct)
+{
+  nwords=l_alignmentStruct.nwords; // The words we shifted
+  alignment=l_alignmentStruct.alignment ; // for pra_more output
+  aftershift=l_alignmentStruct.aftershift; // for pra_more output
+  cost=l_alignmentStruct.cost;
+}
 
-    
+
 
 // 	alignmentStruct::alignmentStruct()
 // 	{
@@ -108,7 +108,7 @@ namespace TERCPPNS_TERCpp
 // 		return s.str();
 // 	}
 
-    /* The distance of the shift. */
+/* The distance of the shift. */
 // 	int alignmentStruct::distance()
 // 	{
 // 		if (moveto < start)

@@ -27,15 +27,19 @@ namespace T2S
 
 class HyperTree: public RuleTable
 {
- public:
+public:
   class Node
   {
-   public:
+  public:
     typedef boost::unordered_map<std::vector<Factor*>, Node> Map;
 
-    bool IsLeaf() const { return m_map.empty(); }
+    bool IsLeaf() const {
+      return m_map.empty();
+    }
 
-    bool HasRules() const { return !m_targetPhraseCollection.IsEmpty(); }
+    bool HasRules() const {
+      return !m_targetPhraseCollection.IsEmpty();
+    }
 
     void Prune(std::size_t tableLimit);
     void Sort(std::size_t tableLimit);
@@ -45,35 +49,41 @@ class HyperTree: public RuleTable
     const Node *GetChild(const HyperPath::NodeSeq &) const;
 
     const TargetPhraseCollection &GetTargetPhraseCollection() const
-      return m_targetPhraseCollection;
-    }
+    return m_targetPhraseCollection;
+  }
 
-    TargetPhraseCollection &GetTargetPhraseCollection()
-      return m_targetPhraseCollection;
-    }
+  TargetPhraseCollection &GetTargetPhraseCollection()
+  return m_targetPhraseCollection;
+}
 
-    const Map &GetMap() const { return m_map; }
+const Map &GetMap() const
+{
+  return m_map;
+}
 
-   private:
-    Map m_map;
-    TargetPhraseCollection m_targetPhraseCollection;
-  };
+private:
+Map m_map;
+TargetPhraseCollection m_targetPhraseCollection;
+};
 
-  HyperTree(const RuleTableFF *ff) : RuleTable(ff) {}
+HyperTree(const RuleTableFF *ff) : RuleTable(ff) {}
 
-  const Node &GetRootNode() const { return m_root; }
+const Node &GetRootNode() const
+{
+  return m_root;
+}
 
- private:
-  friend class RuleTrieCreator;
+private:
+friend class RuleTrieCreator;
 
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Word &sourceLHS, const Phrase &sourceRHS);
+TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
+  const Word &sourceLHS, const Phrase &sourceRHS);
 
-  Node &GetOrCreateNode(const Phrase &sourceRHS);
+Node &GetOrCreateNode(const Phrase &sourceRHS);
 
-  void SortAndPrune(std::size_t);
+void SortAndPrune(std::size_t);
 
-  Node m_root;
+Node m_root;
 };
 
 }  // namespace T2S

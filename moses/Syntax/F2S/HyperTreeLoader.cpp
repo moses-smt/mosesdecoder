@@ -100,7 +100,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
     const std::size_t numScoreComponents = ff.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
-    		  	  << numScoreComponents << ") of score components on line " << count);
+                  << numScoreComponents << ") of score components on line " << count);
     }
 
     // Source-side
@@ -130,7 +130,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
 
     // Add rule to trie.
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(
-        trie, sourceFragment);
+                                           trie, sourceFragment);
     phraseColl.Add(targetPhrase);
 
     count++;

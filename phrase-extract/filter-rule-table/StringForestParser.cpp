@@ -17,15 +17,18 @@ namespace FilterRuleTable
 {
 
 StringForestParser::StringForestParser()
-    : m_input(0) {
+  : m_input(0)
+{
 }
 
 StringForestParser::StringForestParser(std::istream &input)
-    : m_input(&input) {
+  : m_input(&input)
+{
   ++(*this);
 }
 
-StringForestParser &StringForestParser::operator++() {
+StringForestParser &StringForestParser::operator++()
+{
   if (!m_input) {
     return *this;
   }
@@ -55,7 +58,7 @@ StringForestParser &StringForestParser::operator++() {
 }
 
 StringForest::Vertex *StringForestParser::AddOrDeleteVertex(
-    StringForest::Vertex *v)
+  StringForest::Vertex *v)
 {
   std::pair<VertexSet::iterator, bool> ret = m_vertexSet.insert(v);
   if (ret.second) {
@@ -67,7 +70,7 @@ StringForest::Vertex *StringForestParser::AddOrDeleteVertex(
 }
 
 void StringForestParser::ParseSentenceNumLine(const std::string &line,
-                                              std::size_t &sentNum)
+    std::size_t &sentNum)
 {
   const util::AnyCharacter delimiter(" \t");
   util::TokenIter<util::AnyCharacter, true> p(line, delimiter);
@@ -82,7 +85,7 @@ void StringForestParser::ParseSentenceNumLine(const std::string &line,
 }
 
 void StringForestParser::ParseHyperedgeLine(const std::string &line,
-                                            StringForest &forest)
+    StringForest &forest)
 {
   const util::AnyCharacter delimiter(" \t");
   util::TokenIter<util::AnyCharacter, true> p(line, delimiter);
@@ -132,12 +135,14 @@ StringForest::Vertex *StringForestParser::ParseVertex(const StringPiece &s)
   return v;
 }
 
-bool operator==(const StringForestParser &lhs, const StringForestParser &rhs) {
+bool operator==(const StringForestParser &lhs, const StringForestParser &rhs)
+{
   // TODO Is this right?  Compare values of istreams if non-zero?
   return lhs.m_input == rhs.m_input;
 }
 
-bool operator!=(const StringForestParser &lhs, const StringForestParser &rhs) {
+bool operator!=(const StringForestParser &lhs, const StringForestParser &rhs)
+{
   return !(lhs == rhs);
 }
 

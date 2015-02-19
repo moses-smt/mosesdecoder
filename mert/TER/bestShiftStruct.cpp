@@ -5,7 +5,7 @@ Copyright 2010-2013, Christophe Servan, LIUM, University of Le Mans, France
 Contact: christophe.servan@lium.univ-lemans.fr
 
 The tercpp tool and library are free software: you can redistribute it and/or modify it
-under the terms of the GNU Lesser General Public License as published by 
+under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the licence, or
 (at your option) any later version.
 
@@ -24,43 +24,43 @@ using namespace std;
 
 namespace TERCPPNS_TERCpp
 {
-    bestShiftStruct::bestShiftStruct()
-    {
-	  m_best_shift=new terShift();
-	  m_best_align=new terAlignment();
-	  m_empty=new bool(false);
-    }
-    bestShiftStruct::~bestShiftStruct()
-    {
-	  delete(m_best_align);
-	  delete(m_best_shift);
-    }
-    void bestShiftStruct::setEmpty(bool b)
-    {
-          m_empty=new bool(b);
-    }
-    void bestShiftStruct::setBestShift(terShift * l_terShift)
-    {
-          m_best_shift->set(l_terShift);
-    }
-    void bestShiftStruct::setBestAlign(terAlignment * l_terAlignment)
-    {
-          m_best_align->set(l_terAlignment);
-    }
-    string bestShiftStruct::toString()
-    {
-	  stringstream s;
-	  s << m_best_shift->toString() << endl;
-	  s << m_best_align->toString() << endl;
+bestShiftStruct::bestShiftStruct()
+{
+  m_best_shift=new terShift();
+  m_best_align=new terAlignment();
+  m_empty=new bool(false);
+}
+bestShiftStruct::~bestShiftStruct()
+{
+  delete(m_best_align);
+  delete(m_best_shift);
+}
+void bestShiftStruct::setEmpty(bool b)
+{
+  m_empty=new bool(b);
+}
+void bestShiftStruct::setBestShift(terShift * l_terShift)
+{
+  m_best_shift->set(l_terShift);
+}
+void bestShiftStruct::setBestAlign(terAlignment * l_terAlignment)
+{
+  m_best_align->set(l_terAlignment);
+}
+string bestShiftStruct::toString()
+{
+  stringstream s;
+  s << m_best_shift->toString() << endl;
+  s << m_best_align->toString() << endl;
 //	    s << (*m_empty) << endl;
-    }
-    bool bestShiftStruct::getEmpty()
-    {
-	return (*(m_empty));
-    }
+}
+bool bestShiftStruct::getEmpty()
+{
+  return (*(m_empty));
+}
 
 
 
-  
-  
+
+
 }

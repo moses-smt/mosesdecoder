@@ -107,8 +107,8 @@ void TsgFilter::Filter(std::istream &in, std::ostream &out)
 }
 
 TsgFilter::IdTree *TsgFilter::BuildTree(
-    const std::vector<TreeFragmentToken> &tokens, int &i,
-    std::vector<IdTree *> &leaves)
+  const std::vector<TreeFragmentToken> &tokens, int &i,
+  std::vector<IdTree *> &leaves)
 {
   // The subtree starting at tokens[i] is either:
   // 1. a single non-variable symbol (like NP or dog), or
@@ -118,8 +118,8 @@ TsgFilter::IdTree *TsgFilter::BuildTree(
   // First check for case 1.
   if (tokens[i].type == TreeFragmentToken_WORD) {
     Vocabulary::IdType id = m_testVocab.Lookup(tokens[i++].value,
-                                               StringPieceCompatibleHash(),
-                                               StringPieceCompatibleEquals());
+                            StringPieceCompatibleHash(),
+                            StringPieceCompatibleEquals());
     if (id == Vocabulary::NullId()) {
       return 0;
     }
@@ -136,8 +136,8 @@ TsgFilter::IdTree *TsgFilter::BuildTree(
 
   // Read the root symbol of the subtree.
   Vocabulary::IdType id = m_testVocab.Lookup(tokens[i++].value,
-                                             StringPieceCompatibleHash(),
-                                             StringPieceCompatibleEquals());
+                          StringPieceCompatibleHash(),
+                          StringPieceCompatibleEquals());
   if (id == Vocabulary::NullId()) {
     return 0;
   }

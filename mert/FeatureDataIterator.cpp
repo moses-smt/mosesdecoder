@@ -87,7 +87,7 @@ void FeatureDataIterator::readNext()
     if (marker != StringPiece(FEATURES_TXT_BEGIN)) {
       throw FileFormatException(m_in->FileName(), marker.as_string());
     }
-    // size_t sentenceId = 
+    // size_t sentenceId =
     m_in->ReadULong();
     size_t count = m_in->ReadULong();
     size_t length = m_in->ReadULong();

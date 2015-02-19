@@ -15,8 +15,9 @@ namespace F2S
 
 // Given a PHyperedge object and SStackSet produces a SHyperedgeBundle object.
 inline void PHyperedgeToSHyperedgeBundle(const PHyperedge &hyperedge,
-                                         const PVertexToStackMap &stackMap,
-                                         SHyperedgeBundle &bundle) {
+    const PVertexToStackMap &stackMap,
+    SHyperedgeBundle &bundle)
+{
   bundle.translations = hyperedge.label.translations;
   bundle.stacks.clear();
   for (std::vector<PVertex*>::const_iterator p = hyperedge.tail.begin();

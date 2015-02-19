@@ -157,8 +157,8 @@ public:
 
     // optionally update translation options using leave-one-out
     std::vector<bool> keep = (m_leaveOneOut.size() > 0)
-      ? LeaveOneOut(translationOptionList)
-      : std::vector<bool>(translationOptionList.size(), true);
+                             ? LeaveOneOut(translationOptionList)
+                             : std::vector<bool>(translationOptionList.size(), true);
 
     std::vector<float> losses(translationOptionList.size());
     std::vector<float>::iterator iterLoss;
@@ -187,7 +187,7 @@ public:
 
     const std::vector<VWFeatureBase*>& targetFeatures = VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
-    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ; 
+    for(iterTransOpt = translationOptionList.begin(), iterLoss = losses.begin(), iterKeep = keep.begin() ;
         iterTransOpt != translationOptionList.end() ; ++iterTransOpt, ++iterLoss) {
 
       if (! *iterKeep)
@@ -369,7 +369,7 @@ private:
 
     float sourceRawCount = 0.0;
     const float ONE = 1.0001; // I don't understand floating point numbers
-    
+
     std::vector<bool> keepOpt;
 
     TranslationOptionList::const_iterator iterTransOpt;
@@ -426,7 +426,7 @@ private:
   std::string m_vwOptions;
 
   // optionally contains feature name of a phrase table where we recompute scores with leaving one out
-  std::string m_leaveOneOut; 
+  std::string m_leaveOneOut;
 
   Discriminative::Normalizer *m_normalizer = NULL;
   TLSClassifier *m_tlsClassifier;

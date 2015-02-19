@@ -28,8 +28,8 @@ namespace T2S
 
 template<typename RuleMatcher>
 Manager<RuleMatcher>::Manager(const TreeInput &source)
-    : Syntax::Manager(source)
-    , m_treeSource(source)
+  : Syntax::Manager(source)
+  , m_treeSource(source)
 {
 }
 
@@ -68,7 +68,7 @@ void Manager<RuleMatcher>::InitializeStacks()
   assert(!m_inputTree.nodes.empty());
 
   for (std::vector<InputTree::Node>::const_iterator p =
-       m_inputTree.nodes.begin(); p != m_inputTree.nodes.end(); ++p) {
+         m_inputTree.nodes.begin(); p != m_inputTree.nodes.end(); ++p) {
     const InputTree::Node &node = *p;
 
     // Create an empty stack.
@@ -112,7 +112,7 @@ void Manager<RuleMatcher>::Decode()
 
   // Visit each node of the input tree in post-order.
   for (std::vector<InputTree::Node>::const_iterator p =
-       m_inputTree.nodes.begin(); p != m_inputTree.nodes.end(); ++p) {
+         m_inputTree.nodes.begin(); p != m_inputTree.nodes.end(); ++p) {
 
     const InputTree::Node &node = *p;
 
@@ -133,7 +133,7 @@ void Manager<RuleMatcher>::Decode()
 
     // Retrieve the (pruned) set of SHyperedgeBundles from the callback.
     const BoundedPriorityContainer<SHyperedgeBundle> &bundles =
-        callback.GetContainer();
+      callback.GetContainer();
 
     // Check if any rules were matched.  If not then synthesize a glue rule
     // that is guaranteed to match.
@@ -182,9 +182,9 @@ const SHyperedge *Manager<RuleMatcher>::GetBestSHyperedge() const
 
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::ExtractKBest(
-    std::size_t k,
-    std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
-    bool onlyDistinct) const
+  std::size_t k,
+  std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
+  bool onlyDistinct) const
 {
   kBestList.clear();
   if (k == 0 || m_source.GetSize() == 0) {
@@ -236,7 +236,7 @@ void Manager<RuleMatcher>::ExtractKBest(
 // TODO share with S2T
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::RecombineAndSort(
-    const std::vector<SHyperedge*> &buffer, SVertexStack &stack)
+  const std::vector<SHyperedge*> &buffer, SVertexStack &stack)
 {
   // Step 1: Create a map containing a single instance of each distinct vertex
   // (where distinctness is defined by the state value).  The hyperedges'
@@ -284,7 +284,7 @@ void Manager<RuleMatcher>::RecombineAndSort(
 
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::OutputDetailedTranslationReport(
-    OutputCollector *collector) const
+  OutputCollector *collector) const
 {
   const SHyperedge *best = GetBestSHyperedge();
   if (best == NULL || collector == NULL) {

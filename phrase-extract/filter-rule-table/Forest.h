@@ -30,7 +30,7 @@ struct Forest {
 
   std::vector<Vertex *> vertices;
 
- private:
+private:
   // Copying is not allowed.
   Forest(const Forest &);
   Forest &operator=(const Forest &);

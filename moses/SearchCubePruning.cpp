@@ -214,45 +214,45 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
   }
 }
 
-void 
+void
 SearchCubePruning::
-CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range, 
-		   BitmapContainer& bitmapContainer)
+CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range,
+                   BitmapContainer& bitmapContainer)
 {
   WordsBitmap newBitmap = bitmap;
   newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
-  
+
   size_t numCovered = newBitmap.GetNumWordsCovered();
   const TranslationOptionList* transOptList;
   transOptList = m_transOptColl.GetTranslationOptionList(range);
   const SquareMatrix &futureScore = m_transOptColl.GetFutureScore();
 
   if (transOptList && transOptList->size() > 0) {
-    HypothesisStackCubePruning& newStack 
-      = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
-    newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, 
-			       futureScore, *transOptList);
+    HypothesisStackCubePruning& newStack
+    = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
+    newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer,
+                               futureScore, *transOptList);
   }
 }
-  
-bool 
+
+bool
 SearchCubePruning::
 CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
   int maxDistortion = StaticData::Instance().GetMaxDistortion();
   if (maxDistortion < 0) return true;
-  
+
   // if there are reordering limits, make sure it is not violated
   // the coverage bitmap is handy here (and the position of the first gap)
   size_t const startPos = range.GetStartPos();
   size_t const endPos = range.GetEndPos();
 
-  // if reordering constraints are used (--monotone-at-punctuation or xml), 
+  // if reordering constraints are used (--monotone-at-punctuation or xml),
   // check if passes all
-  if (!m_source.GetReorderingConstraint().Check(hypoBitmap, startPos, endPos)) 
+  if (!m_source.GetReorderingConstraint().Check(hypoBitmap, startPos, endPos))
     return false;
-  
+
   size_t const hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
   // any length extension is okay if starting at left-most edge
   if (hypoFirstGapPos == startPos) return true;
@@ -267,7 +267,7 @@ CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
   // the distortion limit, we don't allow this extension to be made.
   WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
   return (m_source.ComputeDistortionDistance(range, bestNextExtension)
-	  <= maxDistortion);
+          <= maxDistortion);
 }
 
 /**
@@ -286,7 +286,7 @@ GetBestHypothesis() const
 /**
  * Logging of hypothesis stack sizes
  */
-void 
+void
 SearchCubePruning::
 OutputHypoStackSize()
 {
