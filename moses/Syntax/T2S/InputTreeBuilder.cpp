@@ -124,7 +124,7 @@ void InputTreeBuilder::ConnectNodes(InputTree &out)
 }
 
 void InputTreeBuilder::SortXmlNodesIntoPostOrder(
-    std::vector<XMLParseOutput> &nodes)
+  std::vector<XMLParseOutput> &nodes)
 {
   // Sorting is based on both the value of a node and its original position,
   // so for each node construct a pair containing both pieces of information.

@@ -199,7 +199,7 @@ void SparseReordering::CopyScores(
   ScoreComponentCollection* scores) const
 {
   if (m_useBetween && direction == LRModel::Backward &&
-      (reoType == LRModel::D || reoType == LRModel::DL || reoType == LRModel::DR)){
+      (reoType == LRModel::D || reoType == LRModel::DL || reoType == LRModel::DR)) {
     size_t gapStart, gapEnd;
     //NB: Using a static cast for speed, but could be nasty if
     //using non-sentence input

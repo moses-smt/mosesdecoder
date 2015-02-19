@@ -178,8 +178,8 @@ CreateTranslationOptionsForRange
  bool adhereTableLimit, size_t graphInd)
 {
   InputPath &inputPath = GetInputPath(startPos, endPos);
-  
-  return 
+
+  return
     TranslationOptionCollection::
     CreateTranslationOptionsForRange
     (decodeGraph, startPos, endPos, adhereTableLimit, graphInd, inputPath);

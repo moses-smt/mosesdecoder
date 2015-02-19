@@ -53,13 +53,13 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
   } else if (key == "distinguishStates") {
     m_distinguishStates = Scan<bool>(value);
   } else if (key == "sparseWord") {
-    m_useSparseWord = Scan<bool>(value); 
+    m_useSparseWord = Scan<bool>(value);
   } else if (key == "sparseNT") {
-    m_useSparseNT = Scan<bool>(value); 
+    m_useSparseNT = Scan<bool>(value);
   } else if (key == "targetWordList") {
-    m_filenameTargetWordList = value; 
+    m_filenameTargetWordList = value;
   } else if (key == "sourceWordList") {
-    m_filenameSourceWordList = value; 
+    m_filenameSourceWordList = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
@@ -80,7 +80,7 @@ void PhraseOrientationFeature::Load()
 
 
 void PhraseOrientationFeature::LoadWordList(const std::string& filename,
-                                            boost::unordered_set<const Factor*>& list)
+    boost::unordered_set<const Factor*>& list)
 {
   FEATUREVERBOSE(2, "Loading word list from file " << filename << std::endl);
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -97,10 +97,10 @@ void PhraseOrientationFeature::LoadWordList(const std::string& filename,
 }
 
 
-void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source, 
-                                                   const TargetPhrase &targetPhrase, 
-                                                   ScoreComponentCollection &scoreBreakdown, 
-                                                   ScoreComponentCollection &estimatedFutureScore) const 
+void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
+    const TargetPhrase &targetPhrase,
+    ScoreComponentCollection &scoreBreakdown,
+    ScoreComponentCollection &estimatedFutureScore) const
 {
   targetPhrase.SetRuleSource(source);
 
@@ -116,9 +116,9 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
 }
 
 
-void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty, 
-                                              ScoreComponentCollection &scoreBreakdown, 
-                                              bool subtract) const 
+void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty,
+    ScoreComponentCollection &scoreBreakdown,
+    bool subtract) const
 {
   size_t ffScoreIndex = scoreBreakdown.GetIndexes(this).first;
 
@@ -129,10 +129,10 @@ void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *o
   size_t heuristicScoreIndexL2R = GetHeuristicScoreIndex(scoresL2R, 0);
 
   if (subtract) {
-    scoreBreakdown.PlusEquals(ffScoreIndex+heuristicScoreIndexL2R, 
+    scoreBreakdown.PlusEquals(ffScoreIndex+heuristicScoreIndexL2R,
                               -scoresL2R[heuristicScoreIndexL2R]);
   } else {
-    scoreBreakdown.PlusEquals(ffScoreIndex+heuristicScoreIndexL2R, 
+    scoreBreakdown.PlusEquals(ffScoreIndex+heuristicScoreIndexL2R,
                               scoresL2R[heuristicScoreIndexL2R]);
   }
 
@@ -143,10 +143,10 @@ void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *o
   size_t heuristicScoreIndexR2L = GetHeuristicScoreIndex(scoresR2L, m_offsetR2LScores);
 
   if (subtract) {
-    scoreBreakdown.PlusEquals(ffScoreIndex+m_offsetR2LScores+heuristicScoreIndexR2L, 
+    scoreBreakdown.PlusEquals(ffScoreIndex+m_offsetR2LScores+heuristicScoreIndexR2L,
                               -scoresR2L[heuristicScoreIndexR2L]);
   } else {
-    scoreBreakdown.PlusEquals(ffScoreIndex+m_offsetR2LScores+heuristicScoreIndexR2L, 
+    scoreBreakdown.PlusEquals(ffScoreIndex+m_offsetR2LScores+heuristicScoreIndexR2L,
                               scoresR2L[heuristicScoreIndexR2L]);
   }
 }
@@ -221,7 +221,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
                      << " R2L_Dright " << orientationPhraseProperty->GetRightToLeftProbabilityDright()
                      << " R2L_Dleft "  << orientationPhraseProperty->GetRightToLeftProbabilityDleft()
                      << std::endl);
-    
+
       LookaheadScore(orientationPhraseProperty, *accumulator, true);
 
       const PhraseOrientationFeatureState* prevState =
@@ -490,8 +490,8 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
 
 size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>& scores,
-                                                        size_t weightsVectorOffset, 
-                                                        const std::bitset<3> possibleFutureOrientations) const
+    size_t weightsVectorOffset,
+    const std::bitset<3> possibleFutureOrientations) const
 {
   std::vector<float> weightedScores;
   for ( size_t i=0; i<3; ++i ) {
@@ -532,8 +532,8 @@ void PhraseOrientationFeature::LeftBoundaryL2RScoreRecursive(int featureID,
     const PhraseOrientationFeatureState *state,
     const std::bitset<3> orientation,
     std::vector<float>& newScores,
-    ScoreComponentCollection* scoreBreakdown) const 
-    // TODO: passing both newScores and scoreBreakdown seems redundant (scoreBreakdown needed for sparse scores)
+    ScoreComponentCollection* scoreBreakdown) const
+// TODO: passing both newScores and scoreBreakdown seems redundant (scoreBreakdown needed for sparse scores)
 {
   if (state->m_leftBoundaryIsSet) {
     const std::string* recursiveOrientationString;
@@ -593,8 +593,8 @@ void PhraseOrientationFeature::RightBoundaryR2LScoreRecursive(int featureID,
     const PhraseOrientationFeatureState *state,
     const std::bitset<3> orientation,
     std::vector<float>& newScores,
-    ScoreComponentCollection* scoreBreakdown) const 
-    // TODO: passing both newScores and scoreBreakdown seems redundant (scoreBreakdown needed for sparse scores)
+    ScoreComponentCollection* scoreBreakdown) const
+// TODO: passing both newScores and scoreBreakdown seems redundant (scoreBreakdown needed for sparse scores)
 {
   if (state->m_rightBoundaryIsSet) {
     const std::string* recursiveOrientationString;
@@ -651,8 +651,8 @@ void PhraseOrientationFeature::RightBoundaryR2LScoreRecursive(int featureID,
 
 
 void PhraseOrientationFeature::SparseWordL2RScore(const ChartHypothesis* hypo,
-                                                  ScoreComponentCollection* scoreBreakdown,
-                                                  const std::string* o) const
+    ScoreComponentCollection* scoreBreakdown,
+    const std::string* o) const
 {
   // target word
 
@@ -686,7 +686,7 @@ void PhraseOrientationFeature::SparseWordL2RScore(const ChartHypothesis* hypo,
   }
 
   // source word
-  
+
   WordsRange sourceSpan = hypo->GetCurrSourceRange();
   const InputType& input = hypo->GetManager().GetSource();
   const Sentence& sourceSentence = static_cast<const Sentence&>(input);
@@ -710,8 +710,8 @@ void PhraseOrientationFeature::SparseWordL2RScore(const ChartHypothesis* hypo,
 
 
 void PhraseOrientationFeature::SparseWordR2LScore(const ChartHypothesis* hypo,
-                                                  ScoreComponentCollection* scoreBreakdown,
-                                                  const std::string* o) const
+    ScoreComponentCollection* scoreBreakdown,
+    const std::string* o) const
 {
   // target word
 
@@ -745,7 +745,7 @@ void PhraseOrientationFeature::SparseWordR2LScore(const ChartHypothesis* hypo,
   }
 
   // source word
-  
+
   WordsRange sourceSpan = hypo->GetCurrSourceRange();
   const InputType& input = hypo->GetManager().GetSource();
   const Sentence& sourceSentence = static_cast<const Sentence&>(input);
@@ -769,8 +769,8 @@ void PhraseOrientationFeature::SparseWordR2LScore(const ChartHypothesis* hypo,
 
 
 void PhraseOrientationFeature::SparseNonTerminalL2RScore(const Factor* nonTerminalSymbol,
-                                                         ScoreComponentCollection* scoreBreakdown,
-                                                         const std::string* o) const
+    ScoreComponentCollection* scoreBreakdown,
+    const std::string* o) const
 {
   if ( nonTerminalSymbol != m_glueTargetLHS ) {
     const std::string& nonTerminalString = nonTerminalSymbol->GetString().as_string();
@@ -783,8 +783,8 @@ void PhraseOrientationFeature::SparseNonTerminalL2RScore(const Factor* nonTermin
 
 
 void PhraseOrientationFeature::SparseNonTerminalR2LScore(const Factor* nonTerminalSymbol,
-                                                         ScoreComponentCollection* scoreBreakdown,
-                                                         const std::string* o) const
+    ScoreComponentCollection* scoreBreakdown,
+    const std::string* o) const
 {
   if ( nonTerminalSymbol != m_glueTargetLHS ) {
     const std::string& nonTerminalString = nonTerminalSymbol->GetString().as_string();

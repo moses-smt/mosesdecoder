@@ -13,7 +13,7 @@ namespace T2S
 // OovHandler).  RuleTrieCreator is a friend of RuleTrie.
 class RuleTrieCreator
 {
- protected:
+protected:
   // Provide access to RuleTrie's private SortAndPrune function.
   void SortAndPrune(RuleTrie &trie, std::size_t limit) {
     trie.SortAndPrune(limit);
@@ -22,7 +22,7 @@ class RuleTrieCreator
   // Provide access to RuleTrie's private
   // GetOrCreateTargetPhraseCollection function.
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      RuleTrie &trie, const Word &sourceLHS, const Phrase &sourceRHS) {
+    RuleTrie &trie, const Word &sourceLHS, const Phrase &sourceRHS) {
     return trie.GetOrCreateTargetPhraseCollection(sourceLHS, sourceRHS);
   }
 };

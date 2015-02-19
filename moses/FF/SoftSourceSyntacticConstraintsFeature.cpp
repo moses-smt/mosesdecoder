@@ -30,10 +30,30 @@ SoftSourceSyntacticConstraintsFeature::SoftSourceSyntacticConstraintsFeature(con
   ReadParameters();
   VERBOSE(1, " Done.");
   VERBOSE(1, " Config:");
-  VERBOSE(1, " Log probabilities"); if ( m_useLogprobs )         { VERBOSE(1, " active."); } else { VERBOSE(1, " inactive."); }
-  VERBOSE(1, " Sparse scores");     if ( m_useSparse )           { VERBOSE(1, " active."); } else { VERBOSE(1, " inactive."); }
-  VERBOSE(1, " Core labels");       if ( m_useCoreSourceLabels ) { VERBOSE(1, " active."); } else { VERBOSE(1, " inactive."); }
-  VERBOSE(1, " No mismatches");     if ( m_noMismatches )        { VERBOSE(1, " active."); } else { VERBOSE(1, " inactive."); }
+  VERBOSE(1, " Log probabilities");
+  if ( m_useLogprobs )         {
+    VERBOSE(1, " active.");
+  } else {
+    VERBOSE(1, " inactive.");
+  }
+  VERBOSE(1, " Sparse scores");
+  if ( m_useSparse )           {
+    VERBOSE(1, " active.");
+  } else {
+    VERBOSE(1, " inactive.");
+  }
+  VERBOSE(1, " Core labels");
+  if ( m_useCoreSourceLabels ) {
+    VERBOSE(1, " active.");
+  } else {
+    VERBOSE(1, " inactive.");
+  }
+  VERBOSE(1, " No mismatches");
+  if ( m_noMismatches )        {
+    VERBOSE(1, " active.");
+  } else {
+    VERBOSE(1, " inactive.");
+  }
   VERBOSE(1, std::endl);
 }
 
@@ -50,9 +70,9 @@ void SoftSourceSyntacticConstraintsFeature::SetParameter(const std::string& key,
   } else if (key == "noMismatches") {
     m_noMismatches = Scan<bool>(value); // for a hard constraint, allow no mismatches (also set: weights 1 0 0 0 0 0, tuneable=false)
   } else if (key == "logProbabilities") {
-    m_useLogprobs = Scan<bool>(value); 
+    m_useLogprobs = Scan<bool>(value);
   } else if (key == "sparse") {
-    m_useSparse = Scan<bool>(value); 
+    m_useSparse = Scan<bool>(value);
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
@@ -146,8 +166,8 @@ void SoftSourceSyntacticConstraintsFeature::LoadCoreSourceLabelSet()
   LoadLabelSet(m_coreSourceLabelSetFile, m_coreSourceLabels);
 }
 
-void SoftSourceSyntacticConstraintsFeature::LoadLabelSet(std::string &filename, 
-                                                         boost::unordered_set<size_t> &labelSet)
+void SoftSourceSyntacticConstraintsFeature::LoadLabelSet(std::string &filename,
+    boost::unordered_set<size_t> &labelSet)
 {
   FEATUREVERBOSE(2, "Loading core source label set from file " << m_coreSourceLabelSetFile << std::endl);
   InputFileStream inFile(filename);

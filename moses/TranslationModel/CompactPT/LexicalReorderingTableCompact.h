@@ -36,53 +36,53 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-  class LexicalReorderingTableCompact:
-    public LexicalReorderingTable
-  {
-  private:
-    bool m_inMemory;
-    
-    size_t m_numScoreComponent;
-    bool m_multipleScoreTrees;
-    
-    BlockHashIndex m_hash;
+class LexicalReorderingTableCompact:
+  public LexicalReorderingTable
+{
+private:
+  bool m_inMemory;
 
-    typedef CanonicalHuffman<float> ScoreTree;
-    std::vector<ScoreTree*> m_scoreTrees;
+  size_t m_numScoreComponent;
+  bool m_multipleScoreTrees;
 
-    StringVector<unsigned char, unsigned long, MmapAllocator>  m_scoresMapped;
-    StringVector<unsigned char, unsigned long, std::allocator> m_scoresMemory;
+  BlockHashIndex m_hash;
 
-    std::string MakeKey(const Phrase& f, const Phrase& e, const Phrase& c) const;
-    std::string MakeKey(const std::string& f, const std::string& e, const std::string& c) const;
+  typedef CanonicalHuffman<float> ScoreTree;
+  std::vector<ScoreTree*> m_scoreTrees;
 
-  public:
-    LexicalReorderingTableCompact(const std::string& filePath,
-				  const std::vector<FactorType>& f_factors,
-				  const std::vector<FactorType>& e_factors,
-				  const std::vector<FactorType>& c_factors);
-    
-    LexicalReorderingTableCompact(const std::vector<FactorType>& f_factors,
-				  const std::vector<FactorType>& e_factors,
-				  const std::vector<FactorType>& c_factors);
+  StringVector<unsigned char, unsigned long, MmapAllocator>  m_scoresMapped;
+  StringVector<unsigned char, unsigned long, std::allocator> m_scoresMemory;
 
-    virtual 
-    ~LexicalReorderingTableCompact();
+  std::string MakeKey(const Phrase& f, const Phrase& e, const Phrase& c) const;
+  std::string MakeKey(const std::string& f, const std::string& e, const std::string& c) const;
 
-    virtual 
-    std::vector<float> 
-    GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
+public:
+  LexicalReorderingTableCompact(const std::string& filePath,
+                                const std::vector<FactorType>& f_factors,
+                                const std::vector<FactorType>& e_factors,
+                                const std::vector<FactorType>& c_factors);
 
-    static 
-    LexicalReorderingTable*
-    CheckAndLoad(const std::string& filePath,
-		 const std::vector<FactorType>& f_factors,
-		 const std::vector<FactorType>& e_factors,
-		 const std::vector<FactorType>& c_factors);
-    
-    void 
-    Load(std::string filePath);
-  };
+  LexicalReorderingTableCompact(const std::vector<FactorType>& f_factors,
+                                const std::vector<FactorType>& e_factors,
+                                const std::vector<FactorType>& c_factors);
+
+  virtual
+  ~LexicalReorderingTableCompact();
+
+  virtual
+  std::vector<float>
+  GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
+
+  static
+  LexicalReorderingTable*
+  CheckAndLoad(const std::string& filePath,
+               const std::vector<FactorType>& f_factors,
+               const std::vector<FactorType>& e_factors,
+               const std::vector<FactorType>& c_factors);
+
+  void
+  Load(std::string filePath);
+};
 
 }
 

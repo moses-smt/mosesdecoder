@@ -22,8 +22,9 @@ private:
 public:
   WordLattice();
 
-  InputTypeEnum GetType() const
-  { return WordLatticeInput; }
+  InputTypeEnum GetType() const {
+    return WordLatticeInput;
+  }
 
   size_t GetColumnIncrement(size_t ic, size_t j) const;
   void Print(std::ostream&) const;

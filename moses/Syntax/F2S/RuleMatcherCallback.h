@@ -16,14 +16,15 @@ namespace Syntax
 namespace F2S
 {
 
-class RuleMatcherCallback {
- private:
+class RuleMatcherCallback
+{
+private:
   typedef BoundedPriorityContainer<SHyperedgeBundle> Container;
 
- public:
+public:
   RuleMatcherCallback(const PVertexToStackMap &stackMap, std::size_t ruleLimit)
-      : m_stackMap(stackMap)
-      , m_container(ruleLimit) {}
+    : m_stackMap(stackMap)
+    , m_container(ruleLimit) {}
 
   void operator()(const PHyperedge &hyperedge) {
     PHyperedgeToSHyperedgeBundle(hyperedge, m_stackMap, m_tmpBundle);
@@ -31,11 +32,15 @@ class RuleMatcherCallback {
     m_container.SwapIn(m_tmpBundle, score);
   }
 
-  void ClearContainer() { m_container.LazyClear(); }
+  void ClearContainer() {
+    m_container.LazyClear();
+  }
 
-  const Container &GetContainer() { return m_container; }
+  const Container &GetContainer() {
+    return m_container;
+  }
 
- private:
+private:
   const PVertexToStackMap &m_stackMap;
   SHyperedgeBundle m_tmpBundle;
   BoundedPriorityContainer<SHyperedgeBundle> m_container;

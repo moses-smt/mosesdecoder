@@ -17,7 +17,7 @@ namespace Moses
 
 class ForestInput : public Sentence
 {
- public:
+public:
   friend std::ostream &operator<<(std::ostream&, const ForestInput &);
 
   ForestInput() : m_rootVertex(NULL) {}
@@ -36,17 +36,15 @@ class ForestInput : public Sentence
   virtual TranslationOptionCollection*
   CreateTranslationOptionCollection() const;
 
-  boost::shared_ptr<const Syntax::F2S::Forest> GetForest() const
-  {
+  boost::shared_ptr<const Syntax::F2S::Forest> GetForest() const {
     return m_forest;
   }
 
-  const Syntax::F2S::Forest::Vertex *GetRootVertex() const
-  {
+  const Syntax::F2S::Forest::Vertex *GetRootVertex() const {
     return m_rootVertex;
   }
 
- private:
+private:
   typedef Syntax::F2S::Forest Forest;
 
   struct VertexSetHash {
@@ -66,7 +64,7 @@ class ForestInput : public Sentence
   };
 
   typedef boost::unordered_set<Forest::Vertex *, VertexSetHash,
-                               VertexSetPred> VertexSet;
+          VertexSetPred> VertexSet;
 
   Forest::Vertex *AddOrDeleteVertex(Forest::Vertex *);
 

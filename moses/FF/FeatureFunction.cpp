@@ -124,7 +124,7 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
   } else if (key == "tuneable-components") {
-    UTIL_THROW_IF2(!m_tuneable, GetScoreProducerDescription() 
+    UTIL_THROW_IF2(!m_tuneable, GetScoreProducerDescription()
                    << ": tuneable-components cannot be set if tuneable=false");
     SetTuneableComponents(value);
   } else if (key == "require-sorting-after-source-context") {
@@ -158,7 +158,7 @@ void FeatureFunction::SetTuneableComponents(const std::string& value)
   UTIL_THROW_IF2(toks.empty(), GetScoreProducerDescription()
                  << ": Empty tuneable-components");
   UTIL_THROW_IF2(toks.size()!=m_numScoreComponents, GetScoreProducerDescription()
-                 << ": tuneable-components value has to be a comma-separated list of " 
+                 << ": tuneable-components value has to be a comma-separated list of "
                  << m_numScoreComponents << " boolean values");
 
   m_tuneableComponents.resize(m_numScoreComponents);

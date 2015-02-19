@@ -103,15 +103,15 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
     hyperedge->tail[i] = pred.get();
     if (pred->best) {
       hyperedge->label.scoreBreakdown.PlusEquals(
-          pred->best->label.scoreBreakdown);
+        pred->best->label.scoreBreakdown);
     }
   }
 
   hyperedge->label.translation =
-      *(m_bundle.translations->begin()+coordinates.back());
+    *(m_bundle.translations->begin()+coordinates.back());
 
   hyperedge->label.scoreBreakdown.PlusEquals(
-      hyperedge->label.translation->GetScoreBreakdown());
+    hyperedge->label.translation->GetScoreBreakdown());
 
   const StaticData &staticData = StaticData::Instance();
 

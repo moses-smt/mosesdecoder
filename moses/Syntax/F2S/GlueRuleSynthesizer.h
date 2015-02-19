@@ -16,14 +16,14 @@ namespace F2S
 
 class GlueRuleSynthesizer : public HyperTreeCreator
 {
- public:
+public:
   GlueRuleSynthesizer(HyperTree &);
 
   // Synthesize the minimal, monotone rule that can be applied to the given
   // hyperedge and add it to the rule trie.
   void SynthesizeRule(const Forest::Hyperedge &);
 
- private:
+private:
   void SynthesizeHyperPath(const Forest::Hyperedge &, HyperPath &);
 
   TargetPhrase *SynthesizeTargetPhrase(const Forest::Hyperedge &);

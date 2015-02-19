@@ -33,7 +33,7 @@ namespace F2S
 
 template<typename RuleMatcher>
 Manager<RuleMatcher>::Manager(const InputType &source)
-    : Syntax::Manager(source)
+  : Syntax::Manager(source)
 {
   if (const ForestInput *p = dynamic_cast<const ForestInput*>(&source)) {
     m_forest = p->GetForest();
@@ -97,13 +97,13 @@ void Manager<RuleMatcher>::Decode()
 
     // Retrieve the (pruned) set of SHyperedgeBundles from the callback.
     const BoundedPriorityContainer<SHyperedgeBundle> &bundles =
-        callback.GetContainer();
+      callback.GetContainer();
 
     // Check if any rules were matched.  If not then for each incoming
     // hyperedge, synthesize a glue rule that is guaranteed to match.
     if (bundles.Size() == 0) {
       for (std::vector<Forest::Hyperedge *>::const_iterator p =
-           vertex.incoming.begin(); p != vertex.incoming.end(); ++p) {
+             vertex.incoming.begin(); p != vertex.incoming.end(); ++p) {
         glueRuleSynthesizer.SynthesizeRule(**p);
       }
       m_glueRuleMatcher->EnumerateHyperedges(vertex, callback);
@@ -161,7 +161,7 @@ void Manager<RuleMatcher>::InitializeRuleMatchers()
   // FIXME Add a hidden RuleTableFF for the glue rule trie(?)
   m_glueRuleTrie.reset(new HyperTree(ffs[0]));
   m_glueRuleMatcher = boost::shared_ptr<RuleMatcher>(
-    new RuleMatcher(*m_glueRuleTrie));
+                        new RuleMatcher(*m_glueRuleTrie));
 }
 
 template<typename RuleMatcher>
@@ -200,9 +200,9 @@ const SHyperedge *Manager<RuleMatcher>::GetBestSHyperedge() const
 
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::ExtractKBest(
-    std::size_t k,
-    std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
-    bool onlyDistinct) const
+  std::size_t k,
+  std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
+  bool onlyDistinct) const
 {
   kBestList.clear();
   if (k == 0 || m_source.GetSize() == 0) {
@@ -253,7 +253,7 @@ void Manager<RuleMatcher>::ExtractKBest(
 // TODO share with S2T
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::RecombineAndSort(
-    const std::vector<SHyperedge*> &buffer, SVertexStack &stack)
+  const std::vector<SHyperedge*> &buffer, SVertexStack &stack)
 {
   // Step 1: Create a map containing a single instance of each distinct vertex
   // (where distinctness is defined by the state value).  The hyperedges'
@@ -301,7 +301,7 @@ void Manager<RuleMatcher>::RecombineAndSort(
 
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::OutputDetailedTranslationReport(
-    OutputCollector *collector) const
+  OutputCollector *collector) const
 {
   const SHyperedge *best = GetBestSHyperedge();
   if (best == NULL || collector == NULL) {

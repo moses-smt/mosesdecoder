@@ -65,8 +65,7 @@ public:
   }
 
   //! Get the XMLParseOutput objects in the order they were created.
-  const std::vector<XMLParseOutput> &GetLabelledSpans() const
-  {
+  const std::vector<XMLParseOutput> &GetLabelledSpans() const {
     return m_labelledSpans;
   }
 };

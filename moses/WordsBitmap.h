@@ -143,16 +143,16 @@ public:
     m_bitmap[pos] = value;
   }
   //! set value between 2 positions, inclusive
-  void 
-  SetValue( size_t startPos, size_t endPos, bool value ) 
-  {
-    for(size_t pos = startPos ; pos <= endPos ; pos++) 
+  void
+  SetValue( size_t startPos, size_t endPos, bool value ) {
+    for(size_t pos = startPos ; pos <= endPos ; pos++)
       m_bitmap[pos] = value;
   }
 
-  void 
-  SetValue(WordsRange const& range, bool val)
-  { SetValue(range.GetStartPos(), range.GetEndPos(), val); }
+  void
+  SetValue(WordsRange const& range, bool val) {
+    SetValue(range.GetStartPos(), range.GetEndPos(), val);
+  }
 
   //! whether every word has been translated
   bool IsComplete() const {

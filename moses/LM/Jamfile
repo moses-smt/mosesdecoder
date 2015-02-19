@@ -133,7 +133,7 @@ obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : 
 
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
-alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp ORLM.o
+alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp ORLM.o
   ../../lm//kenlm ..//headers $(dependencies) ;
 
 alias macros : : : : <define>$(lmmacros) ;

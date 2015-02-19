@@ -13,10 +13,10 @@ namespace F2S
 {
 
 GlueRuleSynthesizer::GlueRuleSynthesizer(HyperTree &trie)
-    : m_hyperTree(trie)
+  : m_hyperTree(trie)
 {
   const std::vector<FactorType> &inputFactorOrder =
-      StaticData::Instance().GetInputFactorOrder();
+    StaticData::Instance().GetInputFactorOrder();
   Word *lhs = NULL;
   m_dummySourcePhrase.CreateFromString(Input, inputFactorOrder, "hello", &lhs);
   delete lhs;
@@ -28,12 +28,12 @@ void GlueRuleSynthesizer::SynthesizeRule(const Forest::Hyperedge &e)
   SynthesizeHyperPath(e, source);
   TargetPhrase *tp = SynthesizeTargetPhrase(e);
   TargetPhraseCollection &tpc = GetOrCreateTargetPhraseCollection(m_hyperTree,
-                                                                  source);
+                                source);
   tpc.Add(tp);
 }
 
 void GlueRuleSynthesizer::SynthesizeHyperPath(const Forest::Hyperedge &e,
-                                              HyperPath &path)
+    HyperPath &path)
 {
   path.nodeSeqs.clear();
   path.nodeSeqs.resize(2);
@@ -46,12 +46,12 @@ void GlueRuleSynthesizer::SynthesizeHyperPath(const Forest::Hyperedge &e,
 }
 
 TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
-    const Forest::Hyperedge &e)
+  const Forest::Hyperedge &e)
 {
   const StaticData &staticData = StaticData::Instance();
 
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer =
-      UnknownWordPenaltyProducer::Instance();
+    UnknownWordPenaltyProducer::Instance();
 
   TargetPhrase *targetPhrase = new TargetPhrase();
 

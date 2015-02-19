@@ -25,12 +25,13 @@ namespace FilterRuleTable
 // Filters a rule table, discarding rules that cannot be applied to a given
 // test set.  The rule table must have a TSG source-side and the test sentences
 // must be parse trees.
-class TreeTsgFilter : public TsgFilter {
- public:
+class TreeTsgFilter : public TsgFilter
+{
+public:
   // Initialize the filter for a given set of test sentences.
   TreeTsgFilter(const std::vector<boost::shared_ptr<StringTree> > &);
 
- private:
+private:
   // Add an entry to m_labelToTree for every subtree of the given tree.
   void AddNodesToMap(const IdTree &);
 

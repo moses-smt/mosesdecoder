@@ -385,7 +385,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
       float prob = UntransformLMScore(
-          pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
+                     pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.BeginNonTerminal(prevState, prob);
       phrasePos++;
     }
@@ -397,7 +397,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
       float prob = UntransformLMScore(
-          pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
+                     pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.NonTerminal(prevState, prob);
     } else {
       ruleScore.Terminal(TranslateID(word));
@@ -464,7 +464,7 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
   bool lazy = false;
 
   util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
-  ++argument; // KENLM 
+  ++argument; // KENLM
 
   stringstream line;
   line << "KENLM";

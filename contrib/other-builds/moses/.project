@@ -1631,16 +1631,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Jamfile</locationURI>
 		</link>
 		<link>
-			<name>LM/Joint.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Joint.cpp</locationURI>
-		</link>
-		<link>
-			<name>LM/Joint.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Joint.h</locationURI>
-		</link>
-		<link>
 			<name>LM/Ken.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Ken.cpp</locationURI>

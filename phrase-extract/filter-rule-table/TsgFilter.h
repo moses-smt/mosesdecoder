@@ -18,14 +18,15 @@ namespace FilterRuleTable
 
 // Base class for TreeTsgFilter and ForestTsgFilter, both of which filter rule
 // tables where the source-side is TSG.
-class TsgFilter {
- public:
+class TsgFilter
+{
+public:
   virtual ~TsgFilter() {}
 
   // Read a rule table from 'in' and filter it according to the test sentences.
   void Filter(std::istream &in, std::ostream &out);
 
- protected:
+protected:
   // Maps symbols (terminals and non-terminals) from strings to integers.
   typedef NumberedSet<std::string, std::size_t> Vocabulary;
 
