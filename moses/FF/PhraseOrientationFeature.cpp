@@ -363,7 +363,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
         }
       }
 
-      if ( reoClassData->firstNonTerminalIsBoundary ) {
+      if ( (nNT == 0) && reoClassData->firstNonTerminalIsBoundary ) {
         // delay left-to-right scoring
 
         FEATUREVERBOSE(3, "Delaying left-to-right scoring" << std::endl);
@@ -465,7 +465,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
         }
       }
 
-      if ( reoClassData->lastNonTerminalIsBoundary ) {
+      if ( (nNT == currTarPhr.GetAlignNonTerm().GetSize()-1) && reoClassData->lastNonTerminalIsBoundary ) {
         // delay right-to-left scoring
         
         FEATUREVERBOSE(3, "Delaying right-to-left scoring" << std::endl);
