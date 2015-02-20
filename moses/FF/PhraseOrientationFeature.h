@@ -300,6 +300,18 @@ class PhraseOrientationFeature : public StatefulFeatureFunction
 {
 public:
 
+  struct ReoClassData {
+    public:
+      std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
+      std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
+      bool firstNonTerminalIsBoundary;
+      bool firstNonTerminalPreviousSourceSpanIsAligned;
+      bool firstNonTerminalFollowingSourceSpanIsAligned;
+      bool lastNonTerminalIsBoundary;
+      bool lastNonTerminalPreviousSourceSpanIsAligned;
+      bool lastNonTerminalFollowingSourceSpanIsAligned;
+  };
+
   PhraseOrientationFeature(const std::string &line);
 
   ~PhraseOrientationFeature() {
@@ -401,7 +413,7 @@ protected:
   bool m_useSparseWord;
   bool m_useSparseNT;
   size_t m_offsetR2LScores;
-  const std::vector<float> m_weightsVector;
+  mutable std::vector<float> m_weightsVector;
   std::string m_filenameTargetWordList;
   boost::unordered_set<const Factor*> m_targetWordList;
   bool m_useTargetWordList;

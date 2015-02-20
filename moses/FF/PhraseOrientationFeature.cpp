@@ -16,6 +16,7 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
 #include "phrase-extract/extract-ghkm/Alignment.h"
+#include <boost/shared_ptr.hpp>
 
 
 namespace Moses
@@ -34,7 +35,6 @@ PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   , m_useSparseWord(false)
   , m_useSparseNT(false)
   , m_offsetR2LScores(m_numScoreComponents/2)
-  , m_weightsVector(StaticData::Instance().GetAllWeights().GetScoresForProducer(this))
   , m_useTargetWordList(false)
   , m_useSourceWordList(false)
 {
@@ -113,6 +113,107 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
                    << ": Missing Orientation property. "
                    << "Please check phrase table and glue rules.");
   }
+
+  IFFEATUREVERBOSE(2) {
+    FEATUREVERBOSE(2, "BEGIN========EvaluateInIsolation========" << std::endl);
+    FEATUREVERBOSE(2, source << std::endl);
+    FEATUREVERBOSE(2, targetPhrase << std::endl);
+
+    for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignTerm().begin();
+         it!=targetPhrase.GetAlignTerm().end(); ++it) {
+      FEATUREVERBOSE(2, "alignTerm " << it->first << " " << it->second << std::endl);
+    }
+
+    for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
+         it!=targetPhrase.GetAlignNonTerm().end(); ++it) {
+      FEATUREVERBOSE(2, "alignNonTerm " << it->first << " " << it->second << std::endl);
+    }
+  }
+
+
+  if (targetPhrase.GetAlignNonTerm().GetSize() != 0) {
+
+    // Initialize phrase orientation scoring object
+    Moses::GHKM::PhraseOrientation phraseOrientation(source.GetSize(), targetPhrase.GetSize(),
+        targetPhrase.GetAlignTerm(), targetPhrase.GetAlignNonTerm());
+
+    PhraseOrientationFeature::ReoClassData* reoClassData = new PhraseOrientationFeature::ReoClassData();
+
+    // Determine orientation classes of non-terminals
+
+    const Factor* targetPhraseLHS = targetPhrase.GetTargetLHS()[0];
+
+    for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
+         it!=targetPhrase.GetAlignNonTerm().end(); ++it) {
+      size_t sourceIndex = it->first;
+      size_t targetIndex = it->second;
+
+      // LEFT-TO-RIGHT DIRECTION
+
+      Moses::GHKM::PhraseOrientation::REO_CLASS l2rOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,Moses::GHKM::PhraseOrientation::REO_DIR_L2R);
+
+      if ( ((targetIndex == 0) || !phraseOrientation.TargetSpanIsAligned(0,targetIndex)) // boundary non-terminal in rule-initial position (left boundary)
+           && (targetPhraseLHS != m_glueTargetLHS) ) { // and not glue rule
+
+        FEATUREVERBOSE(3, "Left boundary: targetIndex== " << targetIndex);
+        if (targetIndex != 0) {
+          FEATUREVERBOSE2(3, " (!=0)");
+        }
+        FEATUREVERBOSE2(3, std::endl);
+
+        reoClassData->firstNonTerminalPreviousSourceSpanIsAligned = ( (sourceIndex > 0) && phraseOrientation.SourceSpanIsAligned(0,sourceIndex-1) );
+        reoClassData->firstNonTerminalFollowingSourceSpanIsAligned = ( (sourceIndex < source.GetSize()-1) && phraseOrientation.SourceSpanIsAligned(sourceIndex,source.GetSize()-1) );
+
+        FEATUREVERBOSE(4, "firstNonTerminalPreviousSourceSpanIsAligned== " << reoClassData->firstNonTerminalPreviousSourceSpanIsAligned << std::endl);
+        FEATUREVERBOSE(4, "firstNonTerminalFollowingSourceSpanIsAligned== " << reoClassData->firstNonTerminalFollowingSourceSpanIsAligned << std::endl;);
+
+        if (reoClassData->firstNonTerminalPreviousSourceSpanIsAligned &&
+            reoClassData->firstNonTerminalFollowingSourceSpanIsAligned) {
+          // discontinuous
+          l2rOrientation = Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT;
+        } else {
+          reoClassData->firstNonTerminalIsBoundary = true;
+        }
+      }
+
+      reoClassData->nonTerminalReoClassL2R.push_back(l2rOrientation);
+
+      // RIGHT-TO-LEFT DIRECTION
+
+      Moses::GHKM::PhraseOrientation::REO_CLASS r2lOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,Moses::GHKM::PhraseOrientation::REO_DIR_R2L);
+
+      if ( ((targetIndex == targetPhrase.GetSize()-1) || !phraseOrientation.TargetSpanIsAligned(targetIndex,targetPhrase.GetSize()-1)) // boundary non-terminal in rule-final position (right boundary)
+           && (targetPhraseLHS != m_glueTargetLHS) ) { // and not glue rule
+
+        FEATUREVERBOSE(3, "Right boundary: targetIndex== " << targetIndex);
+        if (targetIndex != targetPhrase.GetSize()-1) {
+          FEATUREVERBOSE2(3, " (!=targetPhrase.GetSize()-1)");
+        }
+        FEATUREVERBOSE2(3, std::endl);
+
+        reoClassData->lastNonTerminalPreviousSourceSpanIsAligned = ( (sourceIndex > 0) && phraseOrientation.SourceSpanIsAligned(0,sourceIndex-1) );
+        reoClassData->lastNonTerminalFollowingSourceSpanIsAligned = ( (sourceIndex < source.GetSize()-1) && phraseOrientation.SourceSpanIsAligned(sourceIndex,source.GetSize()-1) );
+
+        FEATUREVERBOSE(4, "lastNonTerminalPreviousSourceSpanIsAligned== " << reoClassData->lastNonTerminalPreviousSourceSpanIsAligned << std::endl);
+        FEATUREVERBOSE(4, "lastNonTerminalFollowingSourceSpanIsAligned== " << reoClassData->lastNonTerminalFollowingSourceSpanIsAligned << std::endl;);
+
+        if (reoClassData->lastNonTerminalPreviousSourceSpanIsAligned && 
+            reoClassData->lastNonTerminalFollowingSourceSpanIsAligned) {
+          // discontinuous
+          r2lOrientation = Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT;
+        } else {
+          reoClassData->lastNonTerminalIsBoundary = true;
+        }
+      }
+
+      reoClassData->nonTerminalReoClassR2L.push_back(r2lOrientation);
+    }
+
+    bool inserted = targetPhrase.SetData("Orientation", boost::shared_ptr<void>(reoClassData));
+    UTIL_THROW_IF2(!inserted, GetScoreProducerDescription()
+                   << ": Insertion of orientation data attempted repeatedly. ");
+  }
+  FEATUREVERBOSE(2, "END========EvaluateInIsolation========" << std::endl);
 }
 
 
@@ -162,10 +263,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
   // Read Orientation property
   const TargetPhrase &currTarPhr = hypo.GetCurrTargetPhrase();
-  const Factor* currTarPhrLHS = currTarPhr.GetTargetLHS()[0];
   const Phrase *currSrcPhr = currTarPhr.GetRuleSource();
-//  const Factor* targetLHS = currTarPhr.GetTargetLHS()[0];
-//  bool isGlueGrammarRule = false;
 
   // State: used to propagate orientation probabilities in case of boundary non-terminals
   PhraseOrientationFeatureState *state = new PhraseOrientationFeatureState(m_distinguishStates,m_useSparseWord,m_useSparseNT);
@@ -185,15 +283,22 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
     }
   }
 
-  // Initialize phrase orientation scoring object
-  Moses::GHKM::PhraseOrientation phraseOrientation(currSrcPhr->GetSize(), currTarPhr.GetSize(),
-      currTarPhr.GetAlignTerm(), currTarPhr.GetAlignNonTerm());
+  // Retrieve phrase orientation scoring object
+  const PhraseOrientationFeature::ReoClassData *reoClassData = NULL;
+  if (currTarPhr.GetAlignNonTerm().GetSize() != 0) {
+    const boost::shared_ptr<void> data = currTarPhr.GetData("Orientation");
+    UTIL_THROW_IF2(!data, GetScoreProducerDescription()
+                 << ": Orientation data not set in target phrase. ");
+    reoClassData = static_cast<const PhraseOrientationFeature::ReoClassData*>( data.get() );
+  }
 
   // Get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     currTarPhr.GetAlignNonTerm().GetNonTermIndexMap();
 
-  // Determine & score orientations
+  // Retrieve non-terminals orientation classes & score orientations
+
+  size_t nNT = 0;
 
   for (AlignmentInfo::const_iterator it=currTarPhr.GetAlignNonTerm().begin();
        it!=currTarPhr.GetAlignNonTerm().end(); ++it) {
@@ -201,7 +306,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
     size_t targetIndex = it->second;
     size_t nonTermIndex = nonTermIndexMap[targetIndex];
 
-    FEATUREVERBOSE(2, "Scoring nonTermIndex= " << nonTermIndex << " targetIndex= " << targetIndex << " sourceIndex= " << sourceIndex << std::endl);
+    FEATUREVERBOSE(2, "Scoring nonTermIndex== " << nonTermIndex << " targetIndex== " << targetIndex << " sourceIndex== " << sourceIndex << std::endl);
 
     // consult subderivation
     const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
@@ -230,7 +335,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
       // LEFT-TO-RIGHT DIRECTION
 
-      Moses::GHKM::PhraseOrientation::REO_CLASS l2rOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,Moses::GHKM::PhraseOrientation::REO_DIR_L2R);
+      Moses::GHKM::PhraseOrientation::REO_CLASS l2rOrientation = reoClassData->nonTerminalReoClassL2R[nNT];
 
       IFFEATUREVERBOSE(2) {
         FEATUREVERBOSE(2, "l2rOrientation ");
@@ -258,60 +363,38 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
         }
       }
 
-      bool delayedScoringL2R = false;
-
-      if ( ((targetIndex == 0) || !phraseOrientation.TargetSpanIsAligned(0,targetIndex)) // boundary non-terminal in rule-initial position (left boundary)
-           && (currTarPhrLHS != m_glueTargetLHS) ) { // and not glue rule
+      if ( reoClassData->firstNonTerminalIsBoundary ) {
         // delay left-to-right scoring
 
-        FEATUREVERBOSE(3, "Left boundary");
-        if (targetIndex != 0) {
-          FEATUREVERBOSE2(3, " (with targetIndex!=0)");
+        FEATUREVERBOSE(3, "Delaying left-to-right scoring" << std::endl);
+
+        std::bitset<3> possibleFutureOrientationsL2R(0x7);
+        possibleFutureOrientationsL2R[0] = !reoClassData->firstNonTerminalPreviousSourceSpanIsAligned;
+        possibleFutureOrientationsL2R[1] = !reoClassData->firstNonTerminalFollowingSourceSpanIsAligned;
+
+        // add heuristic scores
+
+        std::vector<float> scoresL2R;
+        scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );
+        scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap()) );
+        scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous()) );
+
+        size_t heuristicScoreIndexL2R = GetHeuristicScoreIndex(scoresL2R, 0, possibleFutureOrientationsL2R);
+
+        newScores[heuristicScoreIndexL2R] += scoresL2R[heuristicScoreIndexL2R];
+        state->SetLeftBoundaryL2R(scoresL2R, heuristicScoreIndexL2R, possibleFutureOrientationsL2R, prevTarPhrLHS, prevState);
+
+        if ( (possibleFutureOrientationsL2R & prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations) == 0x4 ) {
+          // recursive: discontinuous orientation
+          FEATUREVERBOSE(5, "previous state: L2R discontinuous orientation "
+                         << possibleFutureOrientationsL2R << " & " << prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations
+                         << " = " << (possibleFutureOrientationsL2R & prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations)
+                         << std::endl);
+          LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
+          state->m_leftBoundaryRecursionGuard = true; // prevent subderivation from being scored recursively multiple times
         }
-        FEATUREVERBOSE2(3, std::endl);
 
-        bool previousSourceSpanIsAligned  = ( (sourceIndex > 0) && phraseOrientation.SourceSpanIsAligned(0,sourceIndex-1) );
-        bool followingSourceSpanIsAligned = ( (sourceIndex < currSrcPhr->GetSize()-1) && phraseOrientation.SourceSpanIsAligned(sourceIndex,currSrcPhr->GetSize()-1) );
-
-        FEATUREVERBOSE(4, "previousSourceSpanIsAligned = " << previousSourceSpanIsAligned << std::endl);
-        FEATUREVERBOSE(4, "followingSourceSpanIsAligned = " << followingSourceSpanIsAligned << std::endl;);
-
-        if (previousSourceSpanIsAligned && followingSourceSpanIsAligned) {
-          // discontinuous
-          l2rOrientation = Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT;
-        } else {
-          FEATUREVERBOSE(3, "Delaying left-to-right scoring" << std::endl);
-
-          delayedScoringL2R = true;
-          std::bitset<3> possibleFutureOrientationsL2R(0x7);
-          possibleFutureOrientationsL2R[0] = !previousSourceSpanIsAligned;
-          possibleFutureOrientationsL2R[1] = !followingSourceSpanIsAligned;
-
-          // add heuristic scores
-
-          std::vector<float> scoresL2R;
-          scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );
-          scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap()) );
-          scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous()) );
-
-          size_t heuristicScoreIndexL2R = GetHeuristicScoreIndex(scoresL2R, 0, possibleFutureOrientationsL2R);
-
-          newScores[heuristicScoreIndexL2R] += scoresL2R[heuristicScoreIndexL2R];
-          state->SetLeftBoundaryL2R(scoresL2R, heuristicScoreIndexL2R, possibleFutureOrientationsL2R, prevTarPhrLHS, prevState);
-
-          if ( (possibleFutureOrientationsL2R & prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations) == 0x4 ) {
-            // recursive: discontinuous orientation
-            FEATUREVERBOSE(5, "previous state: L2R discontinuous orientation "
-                           << possibleFutureOrientationsL2R << " & " << prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations
-                           << " = " << (possibleFutureOrientationsL2R & prevState->m_leftBoundaryNonTerminalL2RPossibleFutureOrientations)
-                           << std::endl);
-            LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
-            state->m_leftBoundaryRecursionGuard = true; // prevent subderivation from being scored recursively multiple times
-          }
-        }
-      }
-
-      if (!delayedScoringL2R) {
+      } else {
 
         if ( l2rOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT ) {
 
@@ -354,7 +437,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
       // RIGHT-TO-LEFT DIRECTION
 
-      Moses::GHKM::PhraseOrientation::REO_CLASS r2lOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,Moses::GHKM::PhraseOrientation::REO_DIR_R2L);
+      Moses::GHKM::PhraseOrientation::REO_CLASS r2lOrientation = reoClassData->nonTerminalReoClassR2L[nNT];
 
       IFFEATUREVERBOSE(2) {
         FEATUREVERBOSE(2, "r2lOrientation ");
@@ -382,60 +465,38 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
         }
       }
 
-      bool delayedScoringR2L = false;
-
-      if ( ((targetIndex == currTarPhr.GetSize()-1) || !phraseOrientation.TargetSpanIsAligned(targetIndex,currTarPhr.GetSize()-1)) // boundary non-terminal in rule-final position (right boundary)
-           && (currTarPhrLHS != m_glueTargetLHS) ) { // and not glue rule
+      if ( reoClassData->lastNonTerminalIsBoundary ) {
         // delay right-to-left scoring
+        
+        FEATUREVERBOSE(3, "Delaying right-to-left scoring" << std::endl);
 
-        FEATUREVERBOSE(3, "Right boundary");
-        if (targetIndex != currTarPhr.GetSize()-1) {
-          FEATUREVERBOSE2(3, " (with targetIndex!=currTarPhr.GetSize()-1)");
+        std::bitset<3> possibleFutureOrientationsR2L(0x7);
+        possibleFutureOrientationsR2L[0] = !reoClassData->lastNonTerminalFollowingSourceSpanIsAligned;
+        possibleFutureOrientationsR2L[1] = !reoClassData->lastNonTerminalPreviousSourceSpanIsAligned;
+
+        // add heuristic scores
+
+        std::vector<float> scoresR2L;
+        scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono()) );
+        scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap()) );
+        scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous()) );
+
+        size_t heuristicScoreIndexR2L = GetHeuristicScoreIndex(scoresR2L, m_offsetR2LScores, possibleFutureOrientationsR2L);
+
+        newScores[m_offsetR2LScores+heuristicScoreIndexR2L] += scoresR2L[heuristicScoreIndexR2L];
+        state->SetRightBoundaryR2L(scoresR2L, heuristicScoreIndexR2L, possibleFutureOrientationsR2L, prevTarPhrLHS, prevState);
+
+        if ( (possibleFutureOrientationsR2L & prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations) == 0x4 ) {
+          // recursive: discontinuous orientation
+          FEATUREVERBOSE(5, "previous state: R2L discontinuous orientation "
+                         << possibleFutureOrientationsR2L << " & " << prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations
+                         << " = " << (possibleFutureOrientationsR2L & prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations)
+                         << std::endl);
+          RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
+          state->m_rightBoundaryRecursionGuard = true; // prevent subderivation from being scored recursively multiple times
         }
-        FEATUREVERBOSE2(3, std::endl);
 
-        bool previousSourceSpanIsAligned  = ( (sourceIndex > 0) && phraseOrientation.SourceSpanIsAligned(0,sourceIndex-1) );
-        bool followingSourceSpanIsAligned = ( (sourceIndex < currSrcPhr->GetSize()-1) && phraseOrientation.SourceSpanIsAligned(sourceIndex,currSrcPhr->GetSize()-1) );
-
-        FEATUREVERBOSE(4, "previousSourceSpanIsAligned = " << previousSourceSpanIsAligned << std::endl);
-        FEATUREVERBOSE(4, "followingSourceSpanIsAligned = " << followingSourceSpanIsAligned << std::endl;);
-
-        if (previousSourceSpanIsAligned && followingSourceSpanIsAligned) {
-          // discontinuous
-          r2lOrientation = Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT;
-        } else {
-          FEATUREVERBOSE(3, "Delaying right-to-left scoring" << std::endl);
-
-          delayedScoringR2L = true;
-          std::bitset<3> possibleFutureOrientationsR2L(0x7);
-          possibleFutureOrientationsR2L[0] = !followingSourceSpanIsAligned;
-          possibleFutureOrientationsR2L[1] = !previousSourceSpanIsAligned;
-
-          // add heuristic scores
-
-          std::vector<float> scoresR2L;
-          scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono()) );
-          scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap()) );
-          scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous()) );
-
-          size_t heuristicScoreIndexR2L = GetHeuristicScoreIndex(scoresR2L, m_offsetR2LScores, possibleFutureOrientationsR2L);
-
-          newScores[m_offsetR2LScores+heuristicScoreIndexR2L] += scoresR2L[heuristicScoreIndexR2L];
-          state->SetRightBoundaryR2L(scoresR2L, heuristicScoreIndexR2L, possibleFutureOrientationsR2L, prevTarPhrLHS, prevState);
-
-          if ( (possibleFutureOrientationsR2L & prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations) == 0x4 ) {
-            // recursive: discontinuous orientation
-            FEATUREVERBOSE(5, "previous state: R2L discontinuous orientation "
-                           << possibleFutureOrientationsR2L << " & " << prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations
-                           << " = " << (possibleFutureOrientationsR2L & prevState->m_rightBoundaryNonTerminalR2LPossibleFutureOrientations)
-                           << std::endl);
-            RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
-            state->m_rightBoundaryRecursionGuard = true; // prevent subderivation from being scored recursively multiple times
-          }
-        }
-      }
-
-      if (!delayedScoringR2L) {
+      } else {
 
         if ( r2lOrientation == Moses::GHKM::PhraseOrientation::REO_CLASS_LEFT ) {
 
@@ -481,6 +542,8 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
                      << ": Missing Orientation property. "
                      << "Please check phrase table and glue rules.");
     }
+
+    ++nNT;
   }
 
   accumulator->PlusEquals(this, newScores);
@@ -493,6 +556,9 @@ size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>
     size_t weightsVectorOffset,
     const std::bitset<3> possibleFutureOrientations) const
 {
+  if (m_weightsVector.empty()) {
+    m_weightsVector = StaticData::Instance().GetAllWeights().GetScoresForProducer(this);
+  }
   std::vector<float> weightedScores;
   for ( size_t i=0; i<3; ++i ) {
     weightedScores.push_back( m_weightsVector[weightsVectorOffset+i] * scores[i] );
@@ -509,15 +575,15 @@ size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>
 
   IFFEATUREVERBOSE(5) {
     FEATUREVERBOSE(5, "Heuristic score computation: "
-                   << "heuristicScoreIndex= " << heuristicScoreIndex);
+                   << "heuristicScoreIndex== " << heuristicScoreIndex);
     for (size_t i=0; i<3; ++i)
-      FEATUREVERBOSE2(5, " m_weightsVector[" << weightsVectorOffset+i << "]= " << m_weightsVector[weightsVectorOffset+i]);
+      FEATUREVERBOSE2(5, " m_weightsVector[" << weightsVectorOffset+i << "]== " << m_weightsVector[weightsVectorOffset+i]);
     for (size_t i=0; i<3; ++i)
-      FEATUREVERBOSE2(5, " scores[" << i << "]= " << scores[i]);
+      FEATUREVERBOSE2(5, " scores[" << i << "]== " << scores[i]);
     for (size_t i=0; i<3; ++i)
-      FEATUREVERBOSE2(5, " weightedScores[" << i << "]= " << weightedScores[i]);
+      FEATUREVERBOSE2(5, " weightedScores[" << i << "]== " << weightedScores[i]);
     for (size_t i=0; i<3; ++i)
-      FEATUREVERBOSE2(5, " possibleFutureOrientations[" << i << "]= " << possibleFutureOrientations[i]);
+      FEATUREVERBOSE2(5, " possibleFutureOrientations[" << i << "]== " << possibleFutureOrientations[i]);
     if ( possibleFutureOrientations == 0x7 ) {
       FEATUREVERBOSE2(5, " (all orientations possible)");
     }
