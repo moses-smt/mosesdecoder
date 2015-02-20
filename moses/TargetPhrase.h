@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/string_piece.hh"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 #ifdef HAVE_PROTOBUF
 #include "rule.pb.h"
@@ -64,6 +65,8 @@ private:
   Properties m_properties;
 
   const PhraseDictionary *m_container;
+
+  mutable boost::unordered_map<const std::string, boost::shared_ptr<void> > m_data;
 
 public:
   TargetPhrase(const PhraseDictionary *pt = NULL);
@@ -164,6 +167,23 @@ public:
 
   const PhraseDictionary *GetContainer() const {
     return m_container;
+  }
+
+  bool SetData(const std::string& key, boost::shared_ptr<void> value) const {
+    std::pair< boost::unordered_map<const std::string, boost::shared_ptr<void> >::iterator, bool > inserted =
+      m_data.insert( std::pair<const std::string, boost::shared_ptr<void> >(key,value) );
+    if (!inserted.second) {
+      return false;
+    }
+    return true;
+  }
+
+  boost::shared_ptr<void> GetData(const std::string& key) const {
+    boost::unordered_map<const std::string, boost::shared_ptr<void> >::const_iterator found = m_data.find(key);
+    if (found == m_data.end()) {
+      return boost::shared_ptr<void>();
+    }
+    return found->second;
   }
 
   // To be set by the FF that needs it, by default the rule source = NULL
