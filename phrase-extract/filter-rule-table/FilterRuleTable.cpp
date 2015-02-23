@@ -22,6 +22,7 @@
 #include "StringCfgFilter.h"
 #include "StringForest.h"
 #include "StringForestParser.h"
+#include "TreeCfgFilter.h"
 #include "TreeTsgFilter.h"
 
 namespace MosesTraining
@@ -85,7 +86,9 @@ int FilterRuleTable::Main(int argc, char *argv[])
     ReadTestSet(testStream, testTrees);
     if (sourceSideRuleFormat == kCfg) {
       // TODO Implement TreeCfgFilter
-      Error("tree/cfg filtering algorithm not supported yet");
+      Warn("tree/cfg filtering algorithm not implemented: input will be copied unchanged to output");
+      TreeCfgFilter filter(testTrees);
+      filter.Filter(std::cin, std::cout);
     } else if (sourceSideRuleFormat == kTsg) {
       TreeTsgFilter filter(testTrees);
       filter.Filter(std::cin, std::cout);
@@ -227,8 +230,13 @@ void FilterRuleTable::ProcessOptions(int argc, char *argv[],
 
 void FilterRuleTable::Error(const std::string &msg) const
 {
-  std::cerr << GetName() << ": " << msg << std::endl;
+  std::cerr << GetName() << ": error: " << msg << std::endl;
   std::exit(1);
+}
+
+void FilterRuleTable::Warn(const std::string &msg) const
+{
+  std::cerr << GetName() << ": warning: " << msg << std::endl;
 }
 
 }  // namespace FilterRuleTable
