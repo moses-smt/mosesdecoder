@@ -45,6 +45,8 @@ Manager<RuleMatcher>::Manager(const InputType &source)
     boost::shared_ptr<Forest> forest = boost::make_shared<Forest>();
     m_rootVertex = T2S::InputTreeToForest(tmpTree, *forest);
     m_forest = forest;
+  } else {
+    UTIL_THROW2("ERROR: F2S::Manager requires input to be a tree or forest");
   }
 }
 

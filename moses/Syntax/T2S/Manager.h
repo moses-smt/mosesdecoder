@@ -30,7 +30,7 @@ template<typename RuleMatcher>
 class Manager : public Syntax::Manager
 {
 public:
-  Manager(const TreeInput &);
+  Manager(const InputType &);
 
   void Decode();
 
@@ -51,7 +51,6 @@ private:
 
   void RecombineAndSort(const std::vector<SHyperedge*> &, SVertexStack &);
 
-  const TreeInput &m_treeSource;
   InputTree m_inputTree;
   F2S::PVertexToStackMap m_stackMap;
   boost::shared_ptr<RuleTrie> m_glueRuleTrie;
