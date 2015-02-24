@@ -27,10 +27,16 @@ namespace T2S
 {
 
 template<typename RuleMatcher>
-Manager<RuleMatcher>::Manager(const TreeInput &source)
+Manager<RuleMatcher>::Manager(const InputType &source)
   : Syntax::Manager(source)
-  , m_treeSource(source)
 {
+  if (const TreeInput *p = dynamic_cast<const TreeInput*>(&source)) {
+    // Construct the InputTree.
+    InputTreeBuilder builder;
+    builder.Build(*p, "Q", m_inputTree);
+  } else {
+    UTIL_THROW2("ERROR: T2S::Manager requires input to be a tree");
+  }
 }
 
 template<typename RuleMatcher>
@@ -93,10 +99,6 @@ void Manager<RuleMatcher>::Decode()
   const std::size_t popLimit = staticData.GetCubePruningPopLimit();
   const std::size_t ruleLimit = staticData.GetRuleLimit();
   const std::size_t stackLimit = staticData.GetMaxHypoStackSize();
-
-  // Construct the InputTree.
-  InputTreeBuilder builder;
-  builder.Build(m_treeSource, "Q", m_inputTree);
 
   // Initialize the stacks.
   InitializeStacks();

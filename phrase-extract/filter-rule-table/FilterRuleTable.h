@@ -52,6 +52,7 @@ private:
   void ReadTestSet(std::istream &,
                    std::vector<boost::shared_ptr<StringForest> > &);
 
+  void Warn(const std::string &) const;
 
   std::string m_name;
 };
