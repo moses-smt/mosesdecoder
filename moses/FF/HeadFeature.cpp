@@ -572,7 +572,7 @@ int SyntaxTreeState::Compare(const FFState& other) const
 
 ////////////////////////////////////////////////////////////////
 HeadFeature::HeadFeature(const std::string &line)
-  :StatefulFeatureFunction(2, line) //should modify 0 to the number of scores my feature generates
+  :StatefulFeatureFunction(4, line) //should modify 0 to the number of scores my feature generates
 	,m_headRules(new std::map<std::string, std::vector <std::string> > ())
 	, m_probArg (new std::map<std::string, float> ())
 	, m_MIModel (new std::map<std::string, std::vector<float> > ())
