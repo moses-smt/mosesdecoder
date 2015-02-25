@@ -163,11 +163,11 @@ rule boost ( min-version ) {
 
   #Crazy amount of testing to make sure that BOOST_TEST_DYN_LINK is defined properly.
   lib boost_unit_test_framework_static_test : : $(boost-search) <name>boost_unit_test_framework$(boost-lib-version) <link>static ;
-  obj empty_test_static.o : jam-files/empty_test_main.cc boost_unit_test_framework_static_test ;
+  obj empty_test_static.o : jam-files/empty_test_main.cc boost_unit_test_framework_static_test : $(boost-include) ;
   exe empty_test_static : empty_test_static.o boost_unit_test_framework_static_test ;
 
   lib boost_unit_test_framework_shared_test : : $(boost-search) <name>boost_unit_test_framework$(boost-lib-version) <link>shared : : <define>BOOST_TEST_DYN_LINK ;
-  obj empty_test_shared.o : jam-files/empty_test_main.cc boost_unit_test_framework_shared_test ;
+  obj empty_test_shared.o : jam-files/empty_test_main.cc boost_unit_test_framework_shared_test : $(boost-include) ;
   exe empty_test_shared : empty_test_shared.o boost_unit_test_framework_shared_test ;
 
   explicit empty_test_static.o empty_test_static empty_test_shared.o empty_test_shared ;
