@@ -71,6 +71,19 @@ void Model1Vocabulary::Load(const std::string& fileName)
   std::string line;
 
   unsigned i = 0;
+  if ( getline(inFile, line) ) // first line of MGIZA vocabulary files seems to be special : "1       UNK     0"  -- skip if it's this
+  {
+    ++i;
+    std::vector<std::string> tokens = Tokenize(line);
+    UTIL_THROW_IF2(tokens.size()!=3, "Line " << i << " in " << fileName << " has wrong number of tokens.");
+    unsigned id = Scan<unsigned>(tokens[0]);
+    if (! ( (id == 1) && (tokens[1] == "UNK") ))
+    {
+      const Factor* factor = factorCollection.AddFactor(tokens[1],false); // TODO: can we assume that the vocabulary is know and filter the model on loading?
+      bool stored = Store(factor, id);
+      UTIL_THROW_IF2(!stored, "Line " << i << " in " << fileName << " overwrites existing vocabulary entry.");
+    }
+  }
   while ( getline(inFile, line) ) 
   {
     ++i;
@@ -79,7 +92,7 @@ void Model1Vocabulary::Load(const std::string& fileName)
     unsigned id = Scan<unsigned>(tokens[0]);
     const Factor* factor = factorCollection.AddFactor(tokens[1],false); // TODO: can we assume that the vocabulary is know and filter the model on loading?
     bool stored = Store(factor, id);
-    UTIL_THROW_IF2(!stored && (tokens[1] != "UNK"), "Line " << i << " in " << fileName << " overwrites existing vocabulary entry.");
+    UTIL_THROW_IF2(!stored, "Line " << i << " in " << fileName << " overwrites existing vocabulary entry.");
   }
   inFile.Close();
 }
