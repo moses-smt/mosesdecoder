@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <queue>
 #include <vector>
 #include <set>
-#include <boost/unordered_map.hpp>
+#include <map>
 
 #include "moses/InputFileStream.h"
 #include "moses/ThreadPool.h"
@@ -47,7 +47,7 @@ template <typename DataType>
 class Counter
 {
 public:
-  typedef boost::unordered_map<DataType, size_t> FreqMap;
+  typedef std::map<DataType, size_t> FreqMap;
   typedef typename FreqMap::iterator iterator;
   typedef typename FreqMap::mapped_type mapped_type;
   typedef typename FreqMap::value_type value_type;
@@ -58,7 +58,7 @@ private:
 #endif
   FreqMap m_freqMap;
   size_t m_maxSize;
-  std::vector<DataType> m_bestVec;
+  std::map<DataType, DataType> m_quantBounds;
 
   struct FreqSorter {
     bool operator()(const value_type& a, const value_type& b) const {
@@ -114,20 +114,34 @@ public:
     m_maxSize = maxSize;
     std::vector<std::pair<DataType, mapped_type> > freqVec;
     freqVec.insert(freqVec.begin(), m_freqMap.begin(), m_freqMap.end());
-    std::sort(freqVec.begin(), freqVec.end(), FreqSorter());
+    std::sort(freqVec.begin(), freqVec.end());
 
-    for(size_t i = 0; i < freqVec.size() && i < m_maxSize; i++)
-      m_bestVec.push_back(freqVec[i].first);
-
-    std::sort(m_bestVec.begin(), m_bestVec.end());
-
+    typename std::vector<std::pair<DataType, mapped_type> >::iterator start, finish;
+    start = freqVec.begin();
+    
     FreqMap t_freqMap;
-    for(typename std::vector<std::pair<DataType, mapped_type> >::iterator it
-        = freqVec.begin(); it != freqVec.end(); it++) {
-      DataType closest = LowerBound(it->first);
-      t_freqMap[closest] += it->second;
+    while(start != freqVec.end()) {
+      size_t dist = std::distance(start, freqVec.end());
+      finish = start + std::min(dist, maxSize);
+      
+      float sumScores = 0;
+      float numScores = 0;
+      float totalFreq = 0;
+      
+      float last = start->first;
+      while(start != finish) {
+        last = start->first;
+        sumScores += start->first; // * start->second
+        totalFreq += start->second;
+        numScores++; // += start->second;
+        start++;
+      }
+      
+      float center = sumScores/numScores;
+      t_freqMap[center] = totalFreq;
+      
+      m_quantBounds[last] = center;
     }
-
     m_freqMap.swap(t_freqMap);
   }
 
@@ -139,16 +153,15 @@ public:
   }
 
   DataType LowerBound(DataType data) {
-    if(m_maxSize == 0 || m_bestVec.size() == 0)
-      return data;
-    else {
-      typename std::vector<DataType>::iterator it
-      = std::lower_bound(m_bestVec.begin(), m_bestVec.end(), data);
-      if(it != m_bestVec.end())
-        return *it;
-      else
-        return m_bestVec.back();
-    }
+    if(m_quantBounds.empty())
+      return 0;
+    
+    typename std::map<DataType, DataType>::const_iterator it
+      = m_quantBounds.lower_bound(data);
+    
+    if(it == m_quantBounds.end())
+      it--;  
+    return it->second;
   }
 };
 
