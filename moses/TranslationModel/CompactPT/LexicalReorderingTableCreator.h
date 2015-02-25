@@ -42,7 +42,7 @@ private:
   size_t m_numScoreComponent;
 
   bool m_multipleScoreTrees;
-  bool m_quantize;
+  size_t m_quantize;
 
   std::string m_separator;
 
