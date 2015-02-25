@@ -334,6 +334,7 @@ public:
 
   void ReadHeadRules();
   void ReadProbArg();
+  void ReadMIModel();
   void ReadLemmaMap();
 
   std::string CallStanfordDep(std::string parsedSentence) const;
@@ -408,12 +409,14 @@ public:
 protected:
   boost::shared_ptr< std::map<std::string, std::vector <std::string> > > m_headRules;
   boost::shared_ptr< std::map<std::string, float> > m_probArg;
+  boost::shared_ptr< std::map<std::string, std::vector<float> > > m_MIModel;
   boost::shared_ptr<lm::ngram::Model> m_WBmodel;
   boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap;
   boost::shared_ptr< std::map<std::string, bool> > m_allowedNT;
 
 	std::string m_headFile;
 	std::string m_probArgFile;
+	std::string m_MIModelFile;
 	std::string m_modelFileARPA;
 	std::string m_lemmaFile;
 	std::string m_jarPath;

@@ -575,6 +575,7 @@ HeadFeature::HeadFeature(const std::string &line)
   :StatefulFeatureFunction(2, line) //should modify 0 to the number of scores my feature generates
 	,m_headRules(new std::map<std::string, std::vector <std::string> > ())
 	, m_probArg (new std::map<std::string, float> ())
+	, m_MIModel (new std::map<std::string, std::vector<float> > ())
 	, m_lemmaMap (new std::map<std::string, std::string>())
 	, m_allowedNT (new std::map<std::string, bool>())
 	, m_counter(0)
@@ -624,6 +625,26 @@ void HeadFeature::ReadProbArg(){
 	}
 }
 
+void HeadFeature::ReadMIModel(){
+	std::ifstream file(m_MIModelFile.c_str()); // (fileName);
+	string line;
+	string subcat="";
+	std::vector<std::string> tokens;
+	std::vector<float> scores;
+	if(file.is_open()){
+		while(getline(file,line)){
+			// !!!! SPLIT doesn't work as it should -> problem with delimitors
+			split(line," \t",tokens);
+			subcat = tokens[0]+" "+tokens[1]+" "+tokens[2];
+			scores.push_back(std::atof(tokens[3].c_str()));
+			scores.push_back(std::atof(tokens[4].c_str()));
+			m_MIModel->insert(std::pair<std::string, vector<float> > (subcat,scores));
+			tokens.clear();
+			scores.clear();
+		}
+	}
+}
+
 void HeadFeature::ReadLemmaMap(){
 	std::ifstream file(m_lemmaFile.c_str()); // (fileName);
 	string line,word,lemma;
@@ -667,8 +688,13 @@ void HeadFeature::SetParameter(const std::string& key, const std::string& value)
 	   						else
 	   							m_afterPop = false;
 	  					}
-	  					else
-	  						StatefulFeatureFunction::SetParameter(key, value);
+	  					else{
+	  						if(key=="MIModelFile"){
+	  							m_MIModelFile = value;
+	  						}
+	  						else
+	  							StatefulFeatureFunction::SetParameter(key, value);
+	  					}
 	  				}
 	  			}
 	  		}
@@ -684,6 +710,7 @@ void HeadFeature::Load() {
   ReadHeadRules();
   ReadProbArg();
   ReadLemmaMap();
+  ReadMIModel();
 
   boost::shared_ptr<lm::ngram::Model> (new lm::ngram::Model(m_modelFileARPA.c_str())).swap(m_WBmodel);
 
@@ -876,6 +903,7 @@ float HeadFeature::GetWBScore(vector<string>& depRel) const{
 	  State out_state0;
 	  const Vocabulary &vocab = m_WBmodel->GetVocabulary();
 	  lm::WordIndex context[3];// = new lm::WordIndex[3];
+	  //depRel = rel gov dep -> rel verb arg
 	  context[0]=vocab.Index(depRel[1]);
 	  context[1]=vocab.Index(depRel[0]);
 	  context[2]=vocab.Index("<unk>");
@@ -1097,7 +1125,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 				//std::string parsedSentence  = syntaxTree->ToString();
 				std::string parsedSentence = "";
 				syntaxTree->ToStringLevel(parsedSentence,4);
-				cout<<"When applied "<<featureID<<" toString4: "<<parsedSentence<<endl;
+				//cout<<"When applied "<<featureID<<" toString4: "<<parsedSentence<<endl;
 
 			//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 					StringHashMap &localCache = GetCache();
@@ -1161,11 +1189,23 @@ FFState* HeadFeature::EvaluateWhenApplied(
 							//if i allow the prep relations should I add PP as allowed NT?
 							if(rel.size()==3 ){ //control this from java -> && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
 								float scoreWB = GetWBScore(rel);
-								cout<<"When applied score: "<<*it<<" "<<scoreWB<<endl;
+								//cout<<"When applied score: "<<*it<<" "<<scoreWB<<endl;
 								vector<float> scores;
 								//before it was natural log now from the model file it comes as log10 ??which one shoudl it be?
 								scores.push_back(scoreWB);
 								scores.push_back(1.0);
+
+								std::map< std::string,std::vector<float> >::iterator it_MI;
+								it_MI = m_MIModel->find(Trim(*it));
+								if(it_MI!=m_MIModel->end()){
+									scores.push_back(it_MI->second[0]);
+									scores.push_back(it_MI->second[1]);
+								}
+								else{
+									scores.push_back(0.0);
+									scores.push_back(0.0);
+								}
+
 								accumulator->PlusEquals(this,scores);
 							}
 						}
