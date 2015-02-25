@@ -1124,7 +1124,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 			if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 				//std::string parsedSentence  = syntaxTree->ToString();
 				std::string parsedSentence = "";
-				syntaxTree->ToStringLevel(parsedSentence,4);
+				syntaxTree->ToStringLevel(parsedSentence,3);
 				//cout<<"When applied "<<featureID<<" toString4: "<<parsedSentence<<endl;
 
 			//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
