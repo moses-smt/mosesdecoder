@@ -57,7 +57,6 @@ private:
   boost::mutex m_mutex;
 #endif
   FreqMap m_freqMap;
-  size_t m_maxSize;
   std::map<DataType, DataType> m_quantBounds;
 
   struct FreqSorter {
@@ -72,7 +71,7 @@ private:
   };
 
 public:
-  Counter() : m_maxSize(0) {}
+  Counter() {}
 
   iterator Begin() {
     return m_freqMap.begin();
@@ -111,10 +110,11 @@ public:
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);
 #endif
-    m_maxSize = maxSize;
     std::vector<std::pair<DataType, mapped_type> > freqVec;
     freqVec.insert(freqVec.begin(), m_freqMap.begin(), m_freqMap.end());
     std::sort(freqVec.begin(), freqVec.end());
+
+    size_t binSize = ceil(freqVec.size()/(float)(1ULL << maxSize));
 
     typename std::vector<std::pair<DataType, mapped_type> >::iterator start, finish;
     start = freqVec.begin();
@@ -122,7 +122,7 @@ public:
     FreqMap t_freqMap;
     while(start != freqVec.end()) {
       size_t dist = std::distance(start, freqVec.end());
-      finish = start + std::min(dist, maxSize);
+      finish = start + std::min(dist, binSize);
       
       float sumScores = 0;
       float numScores = 0;
@@ -131,9 +131,9 @@ public:
       float last = start->first;
       while(start != finish) {
         last = start->first;
-        sumScores += start->first; // * start->second
+        sumScores += start->first * start->second;
         totalFreq += start->second;
-        numScores++; // += start->second;
+        numScores += start->second;
         start++;
       }
       
