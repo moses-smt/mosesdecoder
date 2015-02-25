@@ -21,6 +21,7 @@
 #include "moses/FF/SourceWordDeletionFeature.h"
 #include "moses/FF/GlobalLexicalModel.h"
 #include "moses/FF/GlobalLexicalModelUnlimited.h"
+#include "moses/FF/Model1Feature.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/WordTranslationFeature.h"
 #include "moses/FF/TargetBigramFeature.h"
@@ -202,6 +203,7 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
+  MOSES_FNAME(Model1Feature);
   MOSES_FNAME(SourceWordDeletionFeature);
   MOSES_FNAME(TargetWordInsertionFeature);
   MOSES_FNAME(PhraseBoundaryFeature);
