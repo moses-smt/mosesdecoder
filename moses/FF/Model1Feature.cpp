@@ -199,18 +199,65 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
     if ( !wordT.IsNonTerminal() ) 
     {
       float thisWordProb = m_model1.GetProbability(m_emptyWord,wordT[0]); // probability conditioned on empty word
-      for (size_t posS=1; posS<sentence.GetSize()-1; ++posS) // ignore <s> and </s>
+
+      // cache lookup
+      bool foundInCache = false;
       {
-        const Word &wordS = sentence.GetWord(posS);
-        float modelProb = m_model1.GetProbability(wordS[0],wordT[0]);
-        FEATUREVERBOSE(3, "p( " << wordT << " | " << wordS << " ) = " << modelProb << std::endl);
-        thisWordProb += modelProb;
+        #ifdef WITH_THREADS //try read-only lock
+        boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+        #endif
+        boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> >::const_iterator sentenceCache = m_cache.find(&input);
+        if (sentenceCache != m_cache.end())
+        {
+          boost::unordered_map<const Factor*, float>::const_iterator cacheHit = sentenceCache->second.find(wordT[0]);
+          if (cacheHit != sentenceCache->second.end())
+          {
+            foundInCache = true;
+            score += cacheHit->second;
+            FEATUREVERBOSE(3, "Cached score( " << wordT << " ) = " << cacheHit->second << std::endl);
+          }
+        }
       }
-      score += TransformScore(thisWordProb) - norm;
+
+      if (!foundInCache)
+      {
+        for (size_t posS=1; posS<sentence.GetSize()-1; ++posS) // ignore <s> and </s>
+        {
+          const Word &wordS = sentence.GetWord(posS);
+          float modelProb = m_model1.GetProbability(wordS[0],wordT[0]);
+          FEATUREVERBOSE(4, "p( " << wordT << " | " << wordS << " ) = " << modelProb << std::endl);
+          thisWordProb += modelProb;
+        }
+        float thisWordScore = TransformScore(thisWordProb) - norm;
+        FEATUREVERBOSE(3, "score( " << wordT << " ) = " << thisWordScore << std::endl);
+        {
+          #ifdef WITH_THREADS 
+          // need to update cache; write lock
+          boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+          #endif
+          m_cache[&input][wordT[0]] = thisWordScore;
+        }
+        score += thisWordScore;
+      }
     }
   } 
 
   scoreBreakdown.PlusEquals(this, score);
+}
+  
+void Model1Feature::CleanUpAfterSentenceProcessing(const InputType& source) 
+{
+  #ifdef WITH_THREADS 
+  // need to update cache; write lock
+  boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+  #endif
+  // clear cache
+  boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> >::iterator sentenceCache = m_cache.find(&source);
+  if (sentenceCache != m_cache.end())
+  {
+    sentenceCache->second.clear();
+    m_cache.erase(sentenceCache);
+  }
 }
 
 }

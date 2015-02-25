@@ -86,6 +86,8 @@ public:
     ScoreComponentCollection* accumulator) const
   {}
 
+  void CleanUpAfterSentenceProcessing(const InputType& source);
+
 private:
   std::string m_fileNameVcbS;
   std::string m_fileNameVcbT;
@@ -94,6 +96,13 @@ private:
   const Factor* m_emptyWord;
 
   void Load();
+  
+  // cache
+  mutable boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> > m_cache;
+  #ifdef WITH_THREADS
+  // reader-writer lock
+  mutable boost::shared_mutex m_accessLock;
+  #endif
 };
 
 
