@@ -1,12 +1,7 @@
-#include <assert.h>
-#include "util/exception.hh"
 #include "Model1Feature.h"
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
 #include "moses/ScoreComponentCollection.h"
-#include "moses/Hypothesis.h"
-#include "moses/ChartHypothesis.h"
-#include "moses/ChartManager.h"
 #include "moses/FactorCollection.h"
 
 
@@ -84,7 +79,7 @@ void Model1Vocabulary::Load(const std::string& fileName)
     unsigned id = Scan<unsigned>(tokens[0]);
     const Factor* factor = factorCollection.AddFactor(tokens[1],false); // TODO: can we assume that the vocabulary is know and filter the model on loading?
     bool stored = Store(factor, id);
-    UTIL_THROW_IF2(!stored, "Line " << i << " in " << fileName << " overwrites existing vocabulary entry.");
+    UTIL_THROW_IF2(!stored && (tokens[1] != "UNK"), "Line " << i << " in " << fileName << " overwrites existing vocabulary entry.");
   }
   inFile.Close();
 }

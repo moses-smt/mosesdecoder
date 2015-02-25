@@ -4,7 +4,6 @@
 #include <limits>
 #include <boost/unordered_map.hpp>
 #include "StatelessFeatureFunction.h"
-#include "FFState.h"
 #include "moses/Factor.h"
 
 namespace Moses
