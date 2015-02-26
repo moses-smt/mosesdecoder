@@ -395,7 +395,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
           ##my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] && rm $mid_file.sorted";
-          my $cmd = "$binarizer -in <($catcmd $mid_file | LC_ALL=C sort -T $tempdir) -out $new_file -nscores $TABLE_WEIGHTS[$i]";
+          my $cmd = "$binarizer -in <($catcmd $mid_file | LC_ALL=C sort -T $tempdir) -out $new_file -nscores $TABLE_WEIGHTS[$i] -encoding None";
           safesystem($cmd) or die "Can't binarize";
         } elsif ($binarizer =~ /CreateOnDiskPt/) {
       	  my $cmd = "$binarizer $mid_file $new_file.bin";
