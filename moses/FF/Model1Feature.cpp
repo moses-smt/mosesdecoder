@@ -203,7 +203,7 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
       // cache lookup
       bool foundInCache = false;
       {
-        #ifdef WITH_THREADS //try read-only lock
+        #ifdef WITH_THREADS
         boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
         #endif
         boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> >::const_iterator sentenceCache = m_cache.find(&input);

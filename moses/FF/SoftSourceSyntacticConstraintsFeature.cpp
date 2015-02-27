@@ -102,7 +102,7 @@ void SoftSourceSyntacticConstraintsFeature::Load()
 
 void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
 {
-  FEATUREVERBOSE(2, "Loading source label set from file " << m_sourceLabelSetFile << std::endl);
+  FEATUREVERBOSE(2, "Loading source label set from file " << m_sourceLabelSetFile << " ...");
   InputFileStream inFile(m_sourceLabelSetFile);
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -166,20 +166,21 @@ void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
 //      m_XLHSLabel = found->second;
     }
   }
+  FEATUREVERBOSE2(2, " Done." << std::endl);
 }
 
 
 void SoftSourceSyntacticConstraintsFeature::LoadCoreSourceLabelSet()
 {
-  FEATUREVERBOSE(2, "Loading core source label set from file " << m_coreSourceLabelSetFile << std::endl);
+  FEATUREVERBOSE(2, "Loading core source label set from file " << m_coreSourceLabelSetFile << " ...");
   // read core source label set
   LoadLabelSet(m_coreSourceLabelSetFile, m_coreSourceLabels);
+  FEATUREVERBOSE2(2, " Done." << std::endl);
 }
 
 void SoftSourceSyntacticConstraintsFeature::LoadLabelSet(std::string &filename,
     boost::unordered_set<size_t> &labelSet)
 {
-  FEATUREVERBOSE(2, "Loading core source label set from file " << m_coreSourceLabelSetFile << std::endl);
   InputFileStream inFile(filename);
   std::string line;
   labelSet.clear();
@@ -203,7 +204,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadLabelSet(std::string &filename,
 void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCountFile()
 {
 
-  FEATUREVERBOSE(2, "Loading target/source label joint counts from file " << m_targetSourceLHSJointCountFile << std::endl);
+  FEATUREVERBOSE(2, "Loading target/source label joint counts from file " << m_targetSourceLHSJointCountFile << " ...");
   InputFileStream inFile(m_targetSourceLHSJointCountFile);
 
   for (boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::iterator iter=m_labelPairProbabilities.begin();
@@ -251,7 +252,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCou
       std::pair< boost::unordered_map<const Factor*, std::vector< std::pair<float,float> >* >::iterator, bool > insertedJointCount =
         m_labelPairProbabilities.insert( std::pair<const Factor*, std::vector< std::pair<float,float> >* >(targetLabelFactor,sourceVector) );
       UTIL_THROW_IF2(!insertedJointCount.second, GetScoreProducerDescription()
-                     << ": Reading target/source label joint counts from file " << m_targetSourceLHSJointCountFile << " failed.");
+                     << ": Loading target/source label joint counts from file " << m_targetSourceLHSJointCountFile << " failed.");
     }
   }
 
@@ -278,6 +279,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCou
   }
 
   inFile.Close();
+  FEATUREVERBOSE2(2, " Done." << std::endl);
 }
 
 
@@ -290,18 +292,18 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 {
   assert(stackVec);
 
-  IFFEATUREVERBOSE(2) {
-    FEATUREVERBOSE(2, targetPhrase << std::endl);
-    FEATUREVERBOSE(2, inputPath << std::endl);
+  IFFEATUREVERBOSE(3) {
+    FEATUREVERBOSE(3, targetPhrase << std::endl);
+    FEATUREVERBOSE(3, inputPath << std::endl);
     for (size_t i = 0; i < stackVec->size(); ++i) {
       const ChartCellLabel &cell = *stackVec->at(i);
       const WordsRange &ntRange = cell.GetCoverage();
-      FEATUREVERBOSE(2, "stackVec[ " << i << " ] : " << ntRange.GetStartPos() << " - " << ntRange.GetEndPos() << std::endl);
+      FEATUREVERBOSE(3, "stackVec[ " << i << " ] : " << ntRange.GetStartPos() << " - " << ntRange.GetEndPos() << std::endl);
     }
 
     for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
          it!=targetPhrase.GetAlignNonTerm().end(); ++it) {
-      FEATUREVERBOSE(2, "alignNonTerm " << it->first << " " << it->second << std::endl);
+      FEATUREVERBOSE(3, "alignNonTerm " << it->first << " " << it->second << std::endl);
     }
   }
 
@@ -546,7 +548,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 
     }
 
-    if ( m_useSparseLabelPairs ) {
+    if ( m_useSparseLabelPairs && !isGlueGrammarRule ) {
 
       // left-hand side label pairs (target NT, source NT)
       float t2sLabelsScore = 0.0;
@@ -634,7 +636,11 @@ std::pair<float,float> SoftSourceSyntacticConstraintsFeature::GetLabelPairProbab
   if ( found == m_labelPairProbabilities.end() ) {
     return std::pair<float,float>(m_floor,m_floor); // floor values
   }
-  return found->second->at(source);
+  std::pair<float,float> ret = found->second->at(source);
+  if ( ret == std::pair<float,float>(0,0) ) {
+    return std::pair<float,float>(m_floor,m_floor); // floor values
+  }
+  return ret;
 }
 
 

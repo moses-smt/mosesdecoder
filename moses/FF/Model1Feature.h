@@ -6,6 +6,10 @@
 #include "StatelessFeatureFunction.h"
 #include "moses/Factor.h"
 
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#endif
+
 namespace Moses
 {
 
