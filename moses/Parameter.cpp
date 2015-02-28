@@ -970,11 +970,13 @@ void Parameter::WeightOverwrite()
 
   // should only be on 1 line
   UTIL_THROW_IF2(vec.size() != 1,
-                 "Weight override should only be on 1 line");
+                 "weight-overwrite should only be on 1 line");
 
   string name("");
   vector<float> weights;
   vector<string> toks = Tokenize(vec[0]);
+  size_t cnt = 0;
+  const std::vector<float>* oldWeights = NULL;
   for (size_t i = 0; i < toks.size(); ++i) {
     const string &tok = toks[i];
 
@@ -988,14 +990,30 @@ void Parameter::WeightOverwrite()
       }
 
       name = tok.substr(0, tok.size() - 1);
+      std::map<std::string, std::vector<float> >::const_iterator found = m_weights.find(name);
+      if (found!=m_weights.end()) {
+        oldWeights = &(found->second);
+      } else {
+        oldWeights = NULL;
+      }
+      cnt = 0;
     } else {
       // a weight for curr ff
-      float weight = Scan<float>(toks[i]);
-      weights.push_back(weight);
+      if (toks[i] == "x") {
+        UTIL_THROW_IF2(!oldWeights || cnt>=oldWeights->size(),
+                       "Keeping previous weight failed in weight-overwrite");
+        weights.push_back(oldWeights->at(cnt));
+      } else {
+        float weight = Scan<float>(toks[i]);
+        weights.push_back(weight);
+      }
+      ++cnt;
     }
   }
 
-  m_weights[name] = weights;
+  if (name != "") {
+    m_weights[name] = weights;
+  }
 
 }
 

@@ -18,8 +18,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#ifndef MERT_TER_TOOLS_H_
-#define MERT_TER_TOOLS_H_
+#ifndef __TERCPPTOOLS_H__
+#define __TERCPPTOOLS_H__
 
 
 #include <vector>
@@ -33,7 +33,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 using namespace std;
 
-namespace Tools
+namespace TERCPPNS_Tools
 {
 typedef vector<double> vecDouble;
 typedef vector<char> vecChar;
@@ -56,6 +56,8 @@ struct param {
   bool normalize;
   bool tercomLike;
   bool sgmlInputs;
+  bool verbose;
+  bool count_verbose;
   bool noTxtIds;
   bool printAlignments;
   bool WER;
@@ -77,6 +79,9 @@ string vectorToString ( vector<bool> vec, string s );
 string vectorToString ( char* vec, string s, int taille );
 string vectorToString ( int* vec, string s , int taille );
 string vectorToString ( bool* vec, string s , int taille );
+string vectorToString ( vector<char>* vec, string s, int taille );
+string vectorToString ( vector<int>* vec, string s , int taille );
+string vectorToString ( vector<bool>* vec, string s , int taille );
 vector<string> subVector ( vector<string> vec, int start, int end );
 vector<int> subVector ( vector<int> vec, int start, int end );
 vector<float> subVector ( vector<float> vec, int start, int end );

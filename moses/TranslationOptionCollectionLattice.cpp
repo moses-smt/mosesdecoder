@@ -170,7 +170,7 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
 
 }
 
-void 
+void
 TranslationOptionCollectionLattice::
 ProcessUnknownWord(size_t sourcePos)
 {
@@ -178,14 +178,14 @@ ProcessUnknownWord(size_t sourcePos)
   // why??? UG
 }
 
-bool 
+bool
 TranslationOptionCollectionLattice::
 CreateTranslationOptionsForRange
-(const DecodeGraph &decodeStepList, size_t startPosition, size_t endPosition, 
+(const DecodeGraph &decodeStepList, size_t startPosition, size_t endPosition,
  bool adhereTableLimit, size_t graphInd)
 {
-  UTIL_THROW(util::Exception, 
-	     "CreateTranslationOptionsForRange() not implemented for lattice");
+  UTIL_THROW(util::Exception,
+             "CreateTranslationOptionsForRange() not implemented for lattice");
 }
 
 } // namespace

@@ -88,8 +88,7 @@ void TranslationTask::Run()
     // SCFG-based tree-to-string decoding (ask Phil Williams)
     typedef Syntax::F2S::RuleMatcherCallback Callback;
     typedef Syntax::T2S::RuleMatcherSCFG<Callback> RuleMatcher;
-    const TreeInput *tree = NULL;
-    manager = new Syntax::T2S::Manager<RuleMatcher>(*tree);
+    manager = new Syntax::T2S::Manager<RuleMatcher>(*m_source);
   } else if (staticData.GetSearchAlgorithm() == ChartIncremental) {
     // Ken's incremental decoding
     manager = new Incremental::Manager(*m_source);

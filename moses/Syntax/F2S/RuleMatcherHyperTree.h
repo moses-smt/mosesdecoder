@@ -23,14 +23,14 @@ namespace F2S
 template<typename Callback>
 class RuleMatcherHyperTree : public RuleMatcher<Callback>
 {
- public:
+public:
   RuleMatcherHyperTree(const HyperTree &);
 
   ~RuleMatcherHyperTree() {}
 
   void EnumerateHyperedges(const Forest::Vertex &, Callback &);
 
- private:
+private:
   // Frontier node sequence.
   typedef std::vector<const Forest::Vertex *> FNS;
 

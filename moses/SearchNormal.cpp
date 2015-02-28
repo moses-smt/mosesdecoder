@@ -106,7 +106,7 @@ void SearchNormal::Decode()
  * violation of reordering limits.
  * \param hypothesis hypothesis to be expanded upon
  */
-void 
+void
 SearchNormal::
 ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
@@ -118,128 +118,124 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
   const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
   size_t const sourceSize = m_source.GetSize();
 
-  ReorderingConstraint const& 
-    ReoConstraint = m_source.GetReorderingConstraint();
+  ReorderingConstraint const&
+  ReoConstraint = m_source.GetReorderingConstraint();
 
   // no limit of reordering: only check for overlap
   if (maxDistortion < 0) {
 
-    for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) 
-      {
-	TranslationOptionList const* tol;
-	size_t endPos = startPos;
-	for (tol = m_transOptColl.GetTranslationOptionList(startPos, endPos);
-	     tol && endPos < sourceSize;
-	     tol = m_transOptColl.GetTranslationOptionList(startPos, ++endPos))
-	  {
-	    if (tol->size() == 0 
-		|| hypoBitmap.Overlap(WordsRange(startPos, endPos)) 
-		|| !ReoConstraint.Check(hypoBitmap, startPos, endPos)) 
-	      { continue; }
+    for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) {
+      TranslationOptionList const* tol;
+      size_t endPos = startPos;
+      for (tol = m_transOptColl.GetTranslationOptionList(startPos, endPos);
+           tol && endPos < sourceSize;
+           tol = m_transOptColl.GetTranslationOptionList(startPos, ++endPos)) {
+        if (tol->size() == 0
+            || hypoBitmap.Overlap(WordsRange(startPos, endPos))
+            || !ReoConstraint.Check(hypoBitmap, startPos, endPos)) {
+          continue;
+        }
 
-	    //TODO: does this method include incompatible WordLattice hypotheses?
-	    ExpandAllHypotheses(hypothesis, startPos, endPos);
-	  }
+        //TODO: does this method include incompatible WordLattice hypotheses?
+        ExpandAllHypotheses(hypothesis, startPos, endPos);
       }
+    }
     return; // done with special case (no reordering limit)
   }
 
   // There are reordering limits. Make sure they are not violated.
 
   WordsRange prevRange = hypothesis.GetCurrSourceWordsRange();
-  for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) 
-    {
-      
-      // don't bother expanding phrases if the first position is already taken
-      if(hypoBitmap.GetValue(startPos)) continue;
+  for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) {
 
-      size_t maxSize = sourceSize - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
-      size_t closestLeft = hypoBitmap.GetEdgeToTheLeftOf(startPos);
+    // don't bother expanding phrases if the first position is already taken
+    if(hypoBitmap.GetValue(startPos)) continue;
 
-      if (isWordLattice) 
-	{
-	  // first question: is there a path from the closest translated word to the left
-	  // of the hypothesized extension to the start of the hypothesized extension?
-	  // long version: 
-	  // - is there anything to our left? 
-	  // - is it farther left than where we're starting anyway? 
-	  // - can we get to it?
+    size_t maxSize = sourceSize - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
+    size_t closestLeft = hypoBitmap.GetEdgeToTheLeftOf(startPos);
 
-	  // closestLeft is exclusive: a value of 3 means 2 is covered, our
-	  // arc is currently ENDING at 3 and can start at 3 implicitly
-	  if (closestLeft != 0 && closestLeft != startPos 
-	      && !m_source.CanIGetFromAToB(closestLeft, startPos)) 
-	    continue;
-      
-	  if (prevRange.GetStartPos() != NOT_FOUND &&
-	      prevRange.GetStartPos() > startPos && 
-	      !m_source.CanIGetFromAToB(startPos, prevRange.GetStartPos())) 
-	    continue;
-	}
+    if (isWordLattice) {
+      // first question: is there a path from the closest translated word to the left
+      // of the hypothesized extension to the start of the hypothesized extension?
+      // long version:
+      // - is there anything to our left?
+      // - is it farther left than where we're starting anyway?
+      // - can we get to it?
 
-      WordsRange currentStartRange(startPos, startPos);
-      if(m_source.ComputeDistortionDistance(prevRange, currentStartRange) 
-	 > maxDistortion)
-	continue;
+      // closestLeft is exclusive: a value of 3 means 2 is covered, our
+      // arc is currently ENDING at 3 and can start at 3 implicitly
+      if (closestLeft != 0 && closestLeft != startPos
+          && !m_source.CanIGetFromAToB(closestLeft, startPos))
+        continue;
 
-      TranslationOptionList const* tol;
-      size_t endPos = startPos;
-      for (tol = m_transOptColl.GetTranslationOptionList(startPos, endPos);
-	   tol && endPos < sourceSize;
-	   tol = m_transOptColl.GetTranslationOptionList(startPos, ++endPos))
-	{
-	  WordsRange extRange(startPos, endPos);
-	  if (tol->size() == 0 
-	      || hypoBitmap.Overlap(extRange) 
-	      || !ReoConstraint.Check(hypoBitmap, startPos, endPos)  
-	      || (isWordLattice && !m_source.IsCoveragePossible(extRange)))
-	    { continue; }
-	  
-	  // ask second question here: we already know we can get to our
-	  // starting point from the closest thing to the left. We now ask the
-	  // follow up: can we get from our end to the closest thing on the
-	  // right?  
-	  // 
-	  // long version: is anything to our right? is it farther
-	  // right than our (inclusive) end? can our end reach it?
-	  bool isLeftMostEdge = (hypoFirstGapPos == startPos);
-
-	  size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);
-	  if (isWordLattice) {
-	    if (closestRight != endPos 
-		&& ((closestRight + 1) < sourceSize) 
-		&& !m_source.CanIGetFromAToB(endPos + 1, closestRight + 1)) 
-	      { continue; }
-	  }
-
-	  if (isLeftMostEdge) 
-	    { // any length extension is okay if starting at left-most edge
-	      ExpandAllHypotheses(hypothesis, startPos, endPos);
-	    }
-	  else // starting somewhere other than left-most edge, use caution 
-	    { 
-	      // the basic idea is this: we would like to translate a phrase
-	      // starting from a position further right than the left-most
-	      // open gap. The distortion penalty for the following phrase
-	      // will be computed relative to the ending position of the
-	      // current extension, so we ask now what its maximum value will
-	      // be (which will always be the value of the hypothesis starting
-	      // at the left-most edge).  If this value is less than the
-	      // distortion limit, we don't allow this extension to be made.
-	      WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
-	      
-	      if (m_source.ComputeDistortionDistance(extRange, bestNextExtension)
-		  > maxDistortion) continue;
-
-	      // everything is fine, we're good to go
-	      ExpandAllHypotheses(hypothesis, startPos, endPos);
-	    }
-	}
+      if (prevRange.GetStartPos() != NOT_FOUND &&
+          prevRange.GetStartPos() > startPos &&
+          !m_source.CanIGetFromAToB(startPos, prevRange.GetStartPos()))
+        continue;
     }
+
+    WordsRange currentStartRange(startPos, startPos);
+    if(m_source.ComputeDistortionDistance(prevRange, currentStartRange)
+        > maxDistortion)
+      continue;
+
+    TranslationOptionList const* tol;
+    size_t endPos = startPos;
+    for (tol = m_transOptColl.GetTranslationOptionList(startPos, endPos);
+         tol && endPos < sourceSize;
+         tol = m_transOptColl.GetTranslationOptionList(startPos, ++endPos)) {
+      WordsRange extRange(startPos, endPos);
+      if (tol->size() == 0
+          || hypoBitmap.Overlap(extRange)
+          || !ReoConstraint.Check(hypoBitmap, startPos, endPos)
+          || (isWordLattice && !m_source.IsCoveragePossible(extRange))) {
+        continue;
+      }
+
+      // ask second question here: we already know we can get to our
+      // starting point from the closest thing to the left. We now ask the
+      // follow up: can we get from our end to the closest thing on the
+      // right?
+      //
+      // long version: is anything to our right? is it farther
+      // right than our (inclusive) end? can our end reach it?
+      bool isLeftMostEdge = (hypoFirstGapPos == startPos);
+
+      size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);
+      if (isWordLattice) {
+        if (closestRight != endPos
+            && ((closestRight + 1) < sourceSize)
+            && !m_source.CanIGetFromAToB(endPos + 1, closestRight + 1)) {
+          continue;
+        }
+      }
+
+      if (isLeftMostEdge) {
+        // any length extension is okay if starting at left-most edge
+        ExpandAllHypotheses(hypothesis, startPos, endPos);
+      } else { // starting somewhere other than left-most edge, use caution
+        // the basic idea is this: we would like to translate a phrase
+        // starting from a position further right than the left-most
+        // open gap. The distortion penalty for the following phrase
+        // will be computed relative to the ending position of the
+        // current extension, so we ask now what its maximum value will
+        // be (which will always be the value of the hypothesis starting
+        // at the left-most edge).  If this value is less than the
+        // distortion limit, we don't allow this extension to be made.
+        WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+
+        if (m_source.ComputeDistortionDistance(extRange, bestNextExtension)
+            > maxDistortion) continue;
+
+        // everything is fine, we're good to go
+        ExpandAllHypotheses(hypothesis, startPos, endPos);
+      }
+    }
+  }
 }
-  
+
 
 /**
  * Expand a hypothesis given a list of translation options
@@ -248,7 +244,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
  * \param endPos last word position of span covered
  */
 
-void 
+void
 SearchNormal::
 ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos)
 {
@@ -258,17 +254,17 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   if (StaticData::Instance().UseEarlyDiscarding()) {
     // expected score is based on score of current hypothesis
     expectedScore = hypothesis.GetScore();
-    
+
     // add new future score estimate
-    expectedScore += 
+    expectedScore +=
       m_transOptColl.GetFutureScore()
       .CalcFutureScore(hypothesis.GetWordsBitmap(), startPos, endPos);
   }
-  
+
   // loop through all translation options
-  const TranslationOptionList* tol 
-    = m_transOptColl.GetTranslationOptionList(startPos, endPos);
-  if (!tol) return; 
+  const TranslationOptionList* tol
+  = m_transOptColl.GetTranslationOptionList(startPos, endPos);
+  if (!tol) return;
   TranslationOptionList::const_iterator iter;
   for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
     ExpandHypothesis(hypothesis, **iter, expectedScore);

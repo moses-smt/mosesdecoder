@@ -18,8 +18,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#ifndef MERT_TER_TERSHIFT_H_
-#define MERT_TER_TERSHIFT_H_
+#ifndef __TERCPPTERSHIFT_H__
+#define __TERCPPTERSHIFT_H__
 
 
 #include <vector>
@@ -30,9 +30,9 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
 using namespace std;
-using namespace Tools;
+using namespace TERCPPNS_Tools;
 
-namespace TERCpp
+namespace TERCPPNS_TERCpp
 {
 class terShift
 {
@@ -59,6 +59,9 @@ public:
   // This is used to store the cost of a shift, so we don't have to
   // calculate it multiple times.
   double cost;
+  void set(terShift l_terShift);
+  void set(terShift *l_terShift);
+  void erase();
 };
 
 }

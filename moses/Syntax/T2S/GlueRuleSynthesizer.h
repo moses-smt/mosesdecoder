@@ -16,14 +16,14 @@ namespace T2S
 
 class GlueRuleSynthesizer : public RuleTrieCreator
 {
- public:
+public:
   GlueRuleSynthesizer(RuleTrie &trie) : m_ruleTrie(trie) {}
 
   // Synthesize the minimal, montone rule that can be applied to the given node
   // and add it to the rule trie.
   void SynthesizeRule(const InputTree::Node &);
 
- private:
+private:
   Phrase *SynthesizeSourcePhrase(const InputTree::Node &);
   TargetPhrase *SynthesizeTargetPhrase(const InputTree::Node &, const Phrase &);
 

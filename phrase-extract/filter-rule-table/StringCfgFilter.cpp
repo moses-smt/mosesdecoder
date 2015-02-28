@@ -14,8 +14,8 @@ namespace FilterRuleTable
 const std::size_t StringCfgFilter::kMaxNGramLength = 5;
 
 StringCfgFilter::StringCfgFilter(
-    const std::vector<boost::shared_ptr<std::string> > &sentences)
-    : m_maxSentenceLength(-1)
+  const std::vector<boost::shared_ptr<std::string> > &sentences)
+  : m_maxSentenceLength(-1)
 {
   // Populate m_ngramCoordinateMap (except for the CoordinateTable's
   // sentence vectors) and record the sentence lengths.
@@ -104,7 +104,7 @@ void StringCfgFilter::Filter(std::istream &in, std::ostream &out)
 }
 
 void StringCfgFilter::AddSentenceNGrams(
-    const std::vector<Vocabulary::IdType> &s, std::size_t sentNum)
+  const std::vector<Vocabulary::IdType> &s, std::size_t sentNum)
 {
   const std::size_t len = s.size();
 
@@ -139,8 +139,8 @@ bool StringCfgFilter::GeneratePattern(const std::vector<StringPiece> &symbols,
     pattern.minGapWidths.push_back(0);
     // Add the symbol to the first n-gram.
     Vocabulary::IdType vocabId =
-        m_testVocab.Lookup(symbols[0], StringPieceCompatibleHash(),
-                           StringPieceCompatibleEquals());
+      m_testVocab.Lookup(symbols[0], StringPieceCompatibleHash(),
+                         StringPieceCompatibleEquals());
     if (vocabId == Vocabulary::NullId()) {
       return false;
     }
@@ -159,15 +159,15 @@ bool StringCfgFilter::GeneratePattern(const std::vector<StringPiece> &symbols,
       pattern.minGapWidths.push_back(gapWidth);
       gapWidth = 0;
       pattern.subpatterns.resize(pattern.subpatterns.size()+1);
-    // Is the current n-gram full?
+      // Is the current n-gram full?
     } else if (pattern.subpatterns.back().size() == kMaxNGramLength) {
       pattern.minGapWidths.push_back(0);
       pattern.subpatterns.resize(pattern.subpatterns.size()+1);
     }
     // Add the symbol to the current n-gram.
     Vocabulary::IdType vocabId =
-        m_testVocab.Lookup(symbols[i], StringPieceCompatibleHash(),
-                           StringPieceCompatibleEquals());
+      m_testVocab.Lookup(symbols[i], StringPieceCompatibleHash(),
+                         StringPieceCompatibleEquals());
     if (vocabId == Vocabulary::NullId()) {
       return false;
     }
@@ -215,8 +215,8 @@ bool StringCfgFilter::MatchPattern(const Pattern &pattern) const
   std::vector<int> tmp(intersection.size());
   for (std::size_t i = 1; i < tables.size(); ++i) {
     std::vector<int>::iterator p = std::set_intersection(
-        intersection.begin(), intersection.end(), tables[i]->sentences.begin(),
-        tables[i]->sentences.end(), tmp.begin());
+                                     intersection.begin(), intersection.end(), tables[i]->sentences.begin(),
+                                     tables[i]->sentences.end(), tmp.begin());
     tmp.resize(p-tmp.begin());
     if (tmp.empty()) {
       return false;
@@ -239,9 +239,9 @@ bool StringCfgFilter::MatchPattern(const Pattern &pattern) const
 }
 
 bool StringCfgFilter::MatchPattern(
-    const Pattern &pattern,
-    std::vector<const CoordinateTable *> &tables,
-    int sentenceId) const
+  const Pattern &pattern,
+  std::vector<const CoordinateTable *> &tables,
+  int sentenceId) const
 {
   const int sentenceLength = m_sentenceLengths[sentenceId];
 
@@ -261,7 +261,7 @@ bool StringCfgFilter::MatchPattern(
   for (int i = 0; i < pattern.subpatterns.size(); ++i) {
     // Look-up the intra-sentence position sequence.
     boost::unordered_map<int, PositionSeq>::const_iterator r =
-        tables[i]->intraSentencePositions.find(sentenceId);
+      tables[i]->intraSentencePositions.find(sentenceId);
     assert(r != tables[i]->intraSentencePositions.end());
     const PositionSeq &col = r->second;
     for (PositionSeq::const_iterator p = col.begin(); p != col.end(); ++p) {
@@ -293,7 +293,7 @@ bool StringCfgFilter::MatchPattern(
 }
 
 StringCfgFilter::Range StringCfgFilter::CalcNextRange(
-    const Pattern &pattern, int i, int x, int sentenceLength) const
+  const Pattern &pattern, int i, int x, int sentenceLength) const
 {
   assert(i+1 < pattern.subpatterns.size());
   Range range;

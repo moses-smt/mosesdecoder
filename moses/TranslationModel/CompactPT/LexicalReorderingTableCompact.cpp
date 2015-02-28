@@ -1,5 +1,6 @@
-// $Id$
+// -*- c++ -*-
 // vim:tabstop=2
+// $Id$
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -24,38 +25,43 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-LexicalReorderingTableCompact::LexicalReorderingTableCompact(
-  const std::string& filePath,
-  const std::vector<FactorType>& f_factors,
-  const std::vector<FactorType>& e_factors,
-  const std::vector<FactorType>& c_factors)
-  : LexicalReorderingTable(f_factors, e_factors, c_factors),
-    m_inMemory(StaticData::Instance().UseMinlexrInMemory()),
-    m_numScoreComponent(6), m_multipleScoreTrees(true),
-    m_hash(10, 16), m_scoreTrees(1)
+LexicalReorderingTableCompact::
+LexicalReorderingTableCompact(const std::string& filePath,
+                              const std::vector<FactorType>& f_factors,
+                              const std::vector<FactorType>& e_factors,
+                              const std::vector<FactorType>& c_factors)
+  : LexicalReorderingTable(f_factors, e_factors, c_factors)
+  , m_inMemory(StaticData::Instance().UseMinlexrInMemory())
+  , m_numScoreComponent(6)
+  , m_multipleScoreTrees(true)
+  , m_hash(10, 16)
+  , m_scoreTrees(1)
 {
   Load(filePath);
 }
 
-LexicalReorderingTableCompact::LexicalReorderingTableCompact(
-  const std::vector<FactorType>& f_factors,
-  const std::vector<FactorType>& e_factors,
-  const std::vector<FactorType>& c_factors)
-  : LexicalReorderingTable(f_factors, e_factors, c_factors),
-    m_inMemory(StaticData::Instance().UseMinlexrInMemory()),
-    m_numScoreComponent(6), m_multipleScoreTrees(true),
-    m_hash(10, 16), m_scoreTrees(1)
+LexicalReorderingTableCompact::
+LexicalReorderingTableCompact(const std::vector<FactorType>& f_factors,
+                              const std::vector<FactorType>& e_factors,
+                              const std::vector<FactorType>& c_factors)
+  : LexicalReorderingTable(f_factors, e_factors, c_factors)
+  , m_inMemory(StaticData::Instance().UseMinlexrInMemory())
+  , m_numScoreComponent(6)
+  , m_multipleScoreTrees(true)
+  , m_hash(10, 16)
+  , m_scoreTrees(1)
 { }
 
-LexicalReorderingTableCompact::~LexicalReorderingTableCompact()
+LexicalReorderingTableCompact::
+~LexicalReorderingTableCompact()
 {
   for(size_t i = 0; i < m_scoreTrees.size(); i++)
     delete m_scoreTrees[i];
 }
 
-std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase& f,
-    const Phrase& e,
-    const Phrase& c)
+std::vector<float>
+LexicalReorderingTableCompact::
+GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
 {
   std::string key;
   Scores scores;
@@ -86,44 +92,44 @@ std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase& f,
   return Scores();
 }
 
-std::string  LexicalReorderingTableCompact::MakeKey(const Phrase& f,
-    const Phrase& e,
-    const Phrase& c) const
+std::string
+LexicalReorderingTableCompact::
+MakeKey(const Phrase& f,
+        const Phrase& e,
+        const Phrase& c) const
 {
   return MakeKey(Trim(f.GetStringRep(m_FactorsF)),
                  Trim(e.GetStringRep(m_FactorsE)),
                  Trim(c.GetStringRep(m_FactorsC)));
 }
 
-std::string  LexicalReorderingTableCompact::MakeKey(const std::string& f,
-    const std::string& e,
-    const std::string& c) const
+std::string
+LexicalReorderingTableCompact::
+MakeKey(const std::string& f,
+        const std::string& e,
+        const std::string& c) const
 {
   std::string key;
-  if(!f.empty()) {
-    key += f;
-  }
+  if(!f.empty()) key += f;
   if(!m_FactorsE.empty()) {
-    if(!key.empty()) {
-      key += " ||| ";
-    }
+    if(!key.empty()) key += " ||| ";
     key += e;
   }
   if(!m_FactorsC.empty()) {
-    if(!key.empty()) {
-      key += " ||| ";
-    }
+    if(!key.empty()) key += " ||| ";
     key += c;
   }
   key += " ||| ";
   return key;
 }
 
-LexicalReorderingTable* LexicalReorderingTableCompact::CheckAndLoad(
-  const std::string& filePath,
-  const std::vector<FactorType>& f_factors,
-  const std::vector<FactorType>& e_factors,
-  const std::vector<FactorType>& c_factors)
+LexicalReorderingTable*
+LexicalReorderingTableCompact::
+CheckAndLoad
+(const std::string& filePath,
+ const std::vector<FactorType>& f_factors,
+ const std::vector<FactorType>& e_factors,
+ const std::vector<FactorType>& c_factors)
 {
 #ifdef HAVE_CMPH
   std::string minlexr = ".minlexr";
@@ -144,7 +150,9 @@ LexicalReorderingTable* LexicalReorderingTableCompact::CheckAndLoad(
   return 0;
 }
 
-void LexicalReorderingTableCompact::Load(std::string filePath)
+void
+LexicalReorderingTableCompact::
+Load(std::string filePath)
 {
   std::FILE* pFile = std::fopen(filePath.c_str(), "r");
   if(m_inMemory)
@@ -154,7 +162,8 @@ void LexicalReorderingTableCompact::Load(std::string filePath)
 
   size_t read = 0;
   read += std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, pFile);
-  read += std::fread(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, pFile);
+  read += std::fread(&m_multipleScoreTrees,
+                     sizeof(m_multipleScoreTrees), 1, pFile);
 
   if(m_multipleScoreTrees) {
     m_scoreTrees.resize(m_numScoreComponent);

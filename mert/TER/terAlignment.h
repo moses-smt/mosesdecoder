@@ -18,8 +18,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#ifndef MERT_TER_TERALIGNMENT_H_
-#define MERT_TER_TERALIGNMENT_H_
+#ifndef __TERCPPTERALIGNMENT_H__
+#define __TERCPPTERALIGNMENT_H__
 
 
 #include <vector>
@@ -30,18 +30,14 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
 using namespace std;
-// using namespace HashMapSpace;
-namespace TERCpp
+// using namespace TERCPPNS_HashMapSpace;
+namespace TERCPPNS_TERCpp
 {
 
 class terAlignment
 {
 private:
 public:
-
-  terAlignment();
-  string toString();
-  void scoreDetails();
 
   vector<string> ref;
   vector<string> hyp;
@@ -63,11 +59,18 @@ public:
   int numWsf;
 
 
+  terAlignment();
+  string toString();
+  void scoreDetails();
+
+
   string join ( string delim, vector<string> arr );
   double score();
   double scoreAv();
   string printAlignments();
   string printAllShifts();
+  void set(terAlignment& l_terAlignment);
+  void set(terAlignment* l_terAlignment);
 };
 
 }

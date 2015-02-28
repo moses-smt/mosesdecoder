@@ -13,8 +13,6 @@ struct Parameters
     std::vector<std::string> args;
     std::string out_path;
     const char *cfg_path;
-    bool next_cfg_p;
-    bool next_output_p;
     bool verbose_p;
     bool detag_p;
     bool alltag_p;
@@ -23,10 +21,19 @@ struct Parameters
     bool supersub_p;
     bool url_p;
     bool downcase_p;
+    bool normalize_p;
     bool penn_p;
     bool words_p;
+    bool denumber_p;
+    bool narrow_latin_p;
+    bool narrow_kana_p;
+    bool refined_p;
+    bool unescape_p;
+    bool drop_bad_p;
 
 	Parameters();
+
+    Parameters(const Parameters& _);
 };
 
 

@@ -40,12 +40,14 @@ my $min_score = undef;
 my $opt_min_non_initial_rule_count = undef;
 my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
 my $opt_filter = 1; # enables skipping of filtering - useful for conf net or lattice
+my $tempdir = undef;
 
 GetOptions(
     "gzip!" => \$opt_gzip,
     "filter!" => \$opt_filter,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
+    "tempdir=s" => \$tempdir,
     "MinScore=s" => \$min_score,
     "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count
 ) or exit(1);
@@ -60,6 +62,8 @@ if (!defined $dir || !defined $config || !defined $input) {
   exit 1;
 }
 $dir = ensure_full_path($dir);
+
+$tempdir = $dir if !defined $tempdir; # use the working directory as temp by def.
 
 # decode min-score definitions
 my %MIN_SCORE;
@@ -96,8 +100,8 @@ safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
 my $inputStrippedXML = "$dir/input.$$";
 my $cmd = "$RealBin/../generic/strip-xml.perl < $input > $inputStrippedXML";
-print STDERR "Stripping XML: $cmd \n";
-print `$cmd`;
+print STDERR "Stripping XML...\n";
+safesystem($cmd) or die "Can't strip XML";
 $input = $inputStrippedXML;
 
 # get tables to be filtered (and modify config file)
@@ -313,8 +317,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       }
       $mid_file .= ".gz" if $file =~ /\.gz$/;
       $cmd = "ln -s $file $mid_file";
-      print STDERR "Executing: $cmd\n";
-      safesystem($cmd);
+      safesystem($cmd) or die "Failed to make symlink";
     } else {
 
       $mid_file .= ".gz"
@@ -380,29 +383,26 @@ for(my $i=0;$i<=$#TABLE;$i++) {
 
     my $catcmd = ($mid_file =~ /\.gz$/ ? "$ZCAT" : "cat");
     if(defined($binarizer)) {
-      print STDERR "binarizing...";
+      print STDERR "binarizing...\n";
       # translation model
       if ($KNOWN_TTABLE{$i}) {
         # ... hierarchical translation model
         if ($opt_hierarchical) {
           my $cmd = "$binarizer $mid_file $new_file.bin";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
+          safesystem($cmd) or die "Can't binarize";
         }
         # ... phrase translation model
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
-          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir > $mid_file.sorted; $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $mid_file.sorted";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
+          ##my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] && rm $mid_file.sorted";
+          my $cmd = "$binarizer -in <($catcmd $mid_file | LC_ALL=C sort -T $tempdir) -out $new_file -nscores $TABLE_WEIGHTS[$i] -encoding None";
+          safesystem($cmd) or die "Can't binarize";
         } elsif ($binarizer =~ /CreateOnDiskPt/) {
       	  my $cmd = "$binarizer $mid_file $new_file.bin";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
+          safesystem($cmd) or die "Can't binarize";
         } else { 
-          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+          safesystem($cmd) or die "Can't binarize";
         }
       }
       # reordering model
@@ -416,13 +416,12 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
-          $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir > $mid_file.sorted;  $lexbin -in $mid_file.sorted -out $new_file; rm $mid_file.sorted";
+          $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $lexbin -in $mid_file.sorted -out $new_file && rm $mid_file.sorted";
         } else {
           $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
           $cmd = "$lexbin -in $mid_file -out $new_file";
         }
-        print STDERR $cmd."\n";
-        print STDERR `$cmd`;
+        safesystem($cmd) or die "Can't binarize";
       }
     }
 }
@@ -460,7 +459,7 @@ sub mk_open_string {
 
 sub safesystem {
   print STDERR "Executing: @_\n";
-  system(@_);
+  system("bash", "-c", @_);
   if ($? == -1) {
       print STDERR "Failed to execute: @_\n  $!\n";
       exit(1);

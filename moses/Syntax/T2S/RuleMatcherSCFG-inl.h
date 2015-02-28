@@ -9,15 +9,15 @@ namespace T2S
 
 template<typename Callback>
 RuleMatcherSCFG<Callback>::RuleMatcherSCFG(const InputTree &inputTree,
-                                           const RuleTrie &ruleTrie)
-    : m_inputTree(inputTree)
-    , m_ruleTrie(ruleTrie)
+    const RuleTrie &ruleTrie)
+  : m_inputTree(inputTree)
+  , m_ruleTrie(ruleTrie)
 {
 }
 
 template<typename Callback>
 void RuleMatcherSCFG<Callback>::EnumerateHyperedges(const InputTree::Node &node,
-                                                    Callback &callback)
+    Callback &callback)
 {
   const int start = static_cast<int>(node.pvertex.span.GetStartPos());
   m_hyperedge.head = const_cast<PVertex*>(&node.pvertex);
@@ -50,7 +50,7 @@ void RuleMatcherSCFG<Callback>::Match(const InputTree::Node &inNode,
     }
     // Test if the current rule prefix can be extended by candidate's symbol.
     RuleTrie::Node::SymbolMap::const_iterator q =
-        map->find(candidate.pvertex.symbol);
+      map->find(candidate.pvertex.symbol);
     if (q == map->end()) {
       continue;
     }
@@ -62,7 +62,7 @@ void RuleMatcherSCFG<Callback>::Match(const InputTree::Node &inNode,
       // Check if the trie node has any rules with a LHS that match inNode.
       const Word &lhs = inNode.pvertex.symbol;
       const TargetPhraseCollection *tpc =
-          newTrieNode.GetTargetPhraseCollection(lhs);
+        newTrieNode.GetTargetPhraseCollection(lhs);
       if (tpc) {
         m_hyperedge.label.translations = tpc;
         callback(m_hyperedge);
@@ -79,7 +79,7 @@ void RuleMatcherSCFG<Callback>::Match(const InputTree::Node &inNode,
 // Return true iff x is a descendent of y; false otherwise.
 template<typename Callback>
 bool RuleMatcherSCFG<Callback>::IsDescendent(const InputTree::Node &x,
-                                             const InputTree::Node &y)
+    const InputTree::Node &y)
 {
   const std::size_t xStart = x.pvertex.span.GetStartPos();
   const std::size_t yStart = y.pvertex.span.GetStartPos();

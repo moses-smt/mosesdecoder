@@ -96,7 +96,7 @@ public:
   TranslationOptionList*
   GetTranslationOptionList(size_t startPos, size_t endPos);
 
-  TranslationOptionList const* 
+  TranslationOptionList const*
   GetTranslationOptionList(size_t startPos, size_t endPos) const;
 
 protected:
@@ -107,7 +107,7 @@ protected:
 
   void EvaluateWithSourceContext();
 
-  void EvaluateTranslatonOptionListWithSourceContext(TranslationOptionList&);
+  void EvaluateTranslationOptionListWithSourceContext(TranslationOptionList&);
 
   void CacheLexReordering();
 
@@ -140,18 +140,18 @@ public:
   virtual void CreateTranslationOptions();
 
   //! Create translation options that exactly cover a specific input span.
-  virtual 
-  bool 
+  virtual
+  bool
   CreateTranslationOptionsForRange
   (const DecodeGraph &decodeStepList,
    size_t startPosition, size_t endPosition,
    bool adhereTableLimit, size_t graphInd) = 0;
-  
+
   //!Check if this range has XML options
-  virtual 
-  bool 
-  HasXmlOptionsOverlappingRange(size_t startPosition, 
-				size_t endPosition) const;
+  virtual
+  bool
+  HasXmlOptionsOverlappingRange(size_t startPosition,
+                                size_t endPosition) const;
 
   //! Check if a subsumed XML option constraint is satisfied
   virtual bool ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const;
@@ -167,8 +167,7 @@ public:
 
   //! list of trans opt for a particular span
   TranslationOptionList const*
-  GetTranslationOptionList(const WordsRange &coverage) const 
-  {
+  GetTranslationOptionList(const WordsRange &coverage) const {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 

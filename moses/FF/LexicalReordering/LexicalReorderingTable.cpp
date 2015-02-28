@@ -1,7 +1,7 @@
+// -*- c++ -*-
+
 #include "LexicalReorderingTable.h"
 #include "moses/InputFileStream.h"
-//#include "LVoc.h" //need IPhrase
-
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/GenerationDictionary.h"
@@ -14,9 +14,7 @@
 
 namespace Moses
 {
-/*
- * local helper functions
- */
+
 //cleans str of leading and tailing spaces
 std::string auxClearString(const std::string& str)
 {
@@ -45,48 +43,48 @@ void auxAppend(IPhrase& head, const IPhrase& tail)
     head.push_back(tail[i]);
   }
 }
-/*
- * functions for LexicalReorderingTable
- */
 
-LexicalReorderingTable* LexicalReorderingTable::LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors)
+LexicalReorderingTable*
+LexicalReorderingTable::
+LoadAvailable(const std::string& filePath,
+              const FactorList& f_factors,
+              const FactorList& e_factors,
+              const FactorList& c_factors)
 {
   //decide use Compact or Tree or Memory table
-  LexicalReorderingTable *compactLexr = NULL;
 #ifdef HAVE_CMPH
+  LexicalReorderingTable *compactLexr = NULL;
   compactLexr = LexicalReorderingTableCompact::CheckAndLoad(filePath + ".minlexr", f_factors, e_factors, c_factors);
-#endif
   if(compactLexr)
     return compactLexr;
-  if(FileExists(filePath+".binlexr.idx")) {
-    //there exists a binary version use that
-    return new LexicalReorderingTableTree(filePath, f_factors, e_factors, c_factors);
-  } else {
-    //use plain memory
-    return new LexicalReorderingTableMemory(filePath, f_factors, e_factors, c_factors);
-  }
+#endif
+  LexicalReorderingTable* ret;
+  if (FileExists(filePath+".binlexr.idx") )
+    ret = new LexicalReorderingTableTree(filePath, f_factors,
+                                         e_factors, c_factors);
+  else
+    ret = new LexicalReorderingTableMemory(filePath, f_factors,
+                                           e_factors, c_factors);
+  return ret;
 }
 
-/*
- * functions for LexicalReorderingTableMemory
- */
-LexicalReorderingTableMemory::LexicalReorderingTableMemory(
-  const std::string& filePath,
-  const std::vector<FactorType>& f_factors,
-  const std::vector<FactorType>& e_factors,
-  const std::vector<FactorType>& c_factors)
+LexicalReorderingTableMemory::
+LexicalReorderingTableMemory(const std::string& filePath,
+                             const std::vector<FactorType>& f_factors,
+                             const std::vector<FactorType>& e_factors,
+                             const std::vector<FactorType>& c_factors)
   : LexicalReorderingTable(f_factors, e_factors, c_factors)
 {
   LoadFromFile(filePath);
 }
 
-LexicalReorderingTableMemory::~LexicalReorderingTableMemory()
-{
-}
+LexicalReorderingTableMemory::
+~LexicalReorderingTableMemory() { }
 
-std::vector<float>  LexicalReorderingTableMemory::GetScore(const Phrase& f,
-    const Phrase& e,
-    const Phrase& c)
+std::vector<float>
+LexicalReorderingTableMemory::GetScore(const Phrase& f,
+                                       const Phrase& e,
+                                       const Phrase& c)
 {
   //rather complicated because of const can't use []... as [] might enter new things into std::map
   //also can't have to be careful with words range if c is empty can't use c.GetSize()-1 will underflow and be large
@@ -112,48 +110,38 @@ std::vector<float>  LexicalReorderingTableMemory::GetScore(const Phrase& f,
   return Scores();
 }
 
-void LexicalReorderingTableMemory::DbgDump(std::ostream* out) const
+void
+LexicalReorderingTableMemory::
+DbgDump(std::ostream* out) const
 {
   TableType::const_iterator i;
   for(i = m_Table.begin(); i != m_Table.end(); ++i) {
     *out << " key: '" << i->first << "' score: ";
     *out << "(num scores: " << (i->second).size() << ")";
-    for(size_t j = 0; j < (i->second).size(); ++j) {
+    for(size_t j = 0; j < (i->second).size(); ++j)
       *out << (i->second)[j] << " ";
-    }
+
     *out << "\n";
   }
 };
 
-std::string  LexicalReorderingTableMemory::MakeKey(const Phrase& f,
-    const Phrase& e,
-    const Phrase& c) const
+std::string
+LexicalReorderingTableMemory::MakeKey(const Phrase& f,
+                                      const Phrase& e,
+                                      const Phrase& c) const
 {
-  /*
-  std::string key;
-  if(!m_FactorsF.empty()){
-    key += f.GetStringRep(m_FactorsF);
-  }
-  if(!m_FactorsE.empty()){
-    if(!key.empty()){
-      key += " ||| ";
-    }
-    key += e.GetStringRep(m_FactorsE);
-  }
-  */
   return MakeKey(auxClearString(f.GetStringRep(m_FactorsF)),
                  auxClearString(e.GetStringRep(m_FactorsE)),
                  auxClearString(c.GetStringRep(m_FactorsC)));
 }
 
-std::string  LexicalReorderingTableMemory::MakeKey(const std::string& f,
-    const std::string& e,
-    const std::string& c) const
+std::string
+LexicalReorderingTableMemory::MakeKey(const std::string& f,
+                                      const std::string& e,
+                                      const std::string& c) const
 {
   std::string key;
-  if(!f.empty()) {
-    key += f;
-  }
+  if(!f.empty()) key += f;
   if(!m_FactorsE.empty()) {
     if(!key.empty()) {
       key += "|||";
@@ -169,12 +157,14 @@ std::string  LexicalReorderingTableMemory::MakeKey(const std::string& f,
   return key;
 }
 
-void  LexicalReorderingTableMemory::LoadFromFile(const std::string& filePath)
+void
+LexicalReorderingTableMemory::
+LoadFromFile(const std::string& filePath)
 {
   std::string fileName = filePath;
-  if(!FileExists(fileName) && FileExists(fileName+".gz")) {
+  if(!FileExists(fileName) && FileExists(fileName+".gz"))
     fileName += ".gz";
-  }
+
   InputFileStream file(fileName);
   std::string line(""), key("");
   int numScores = -1;
@@ -206,7 +196,8 @@ void  LexicalReorderingTableMemory::LoadFromFile(const std::string& filePath)
       numScores = (int)p.size(); //set in first line
     }
     if((int)p.size() != numScores) {
-      TRACE_ERR( "found inconsistent number of probabilities... found " << p.size() << " expected " << numScores << std::endl);
+      TRACE_ERR( "found inconsistent number of probabilities... found "
+                 << p.size() << " expected " << numScores << std::endl);
       exit(0);
     }
     std::transform(p.begin(),p.end(),p.begin(),TransformScore);
@@ -217,84 +208,71 @@ void  LexicalReorderingTableMemory::LoadFromFile(const std::string& filePath)
   std::cerr << "done.\n";
 }
 
-/*
- * functions for LexicalReorderingTableTree
- */
-LexicalReorderingTableTree::LexicalReorderingTableTree(
-  const std::string& filePath,
-  const std::vector<FactorType>& f_factors,
-  const std::vector<FactorType>& e_factors,
-  const std::vector<FactorType>& c_factors)
-  : LexicalReorderingTable(f_factors, e_factors, c_factors), m_UseCache(false), m_FilePath(filePath)
+LexicalReorderingTableTree::
+LexicalReorderingTableTree(const std::string& filePath,
+                           const std::vector<FactorType>& f_factors,
+                           const std::vector<FactorType>& e_factors,
+                           const std::vector<FactorType>& c_factors)
+  : LexicalReorderingTable(f_factors, e_factors, c_factors)
+  , m_UseCache(false)
+  , m_FilePath(filePath)
 {
   m_Table.reset(new PrefixTreeMap());
   m_Table->Read(m_FilePath+".binlexr");
 }
 
-LexicalReorderingTableTree::~LexicalReorderingTableTree()
-{
-}
+LexicalReorderingTableTree::
+~LexicalReorderingTableTree()
+{ }
 
-Scores LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
+Scores
+LexicalReorderingTableTree::
+GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
 {
-  if(   (!m_FactorsF.empty() && 0 == f.GetSize())
-        || (!m_FactorsE.empty() && 0 == e.GetSize())) {
+  if((!m_FactorsF.empty() && 0 == f.GetSize())
+      || (!m_FactorsE.empty() && 0 == e.GetSize())) {
     //NOTE: no check for c as c might be empty, e.g. start of sentence
     //not a proper key
     // phi: commented out, since e may be empty (drop-unknown)
     //std::cerr << "Not a proper key!\n";
     return Scores();
   }
-  CacheType::iterator i;;
+
+  CacheType::iterator i;
+
   if(m_UseCache) {
-    std::pair<CacheType::iterator, bool> r = m_Cache.insert(std::make_pair(MakeCacheKey(f,e),Candidates()));
-    if(!r.second) {
-      return auxFindScoreForContext((r.first)->second, c);
-    }
+    std::pair<CacheType::iterator, bool> r;
+    r = m_Cache.insert(std::make_pair(MakeCacheKey(f,e),Candidates()));
+    if(!r.second) return auxFindScoreForContext((r.first)->second, c);
     i = r.first;
-  } else if(!m_Cache.empty()) {
-    //although we might not be caching now, cache might be none empty!
-    i = m_Cache.find(MakeCacheKey(f,e));
-    if(i != m_Cache.end()) {
-      return auxFindScoreForContext(i->second, c);
-    }
-  }
-  //not in cache go to file...
-  Scores      score;
+  } else if((i = m_Cache.find(MakeCacheKey(f,e))) != m_Cache.end())
+    // although we might not be caching now, cache might be none empty!
+    return auxFindScoreForContext(i->second, c);
+
+  // not in cache => go to file...
   Candidates cands;
   m_Table->GetCandidates(MakeTableKey(f,e), &cands);
-  if(cands.empty()) {
-    return Scores();
-  }
+  if(cands.empty()) return Scores();
+  if(m_UseCache) i->second = cands;
 
   if(m_FactorsC.empty()) {
     UTIL_THROW_IF2(1 != cands.size(), "Error");
     return cands[0].GetScore(0);
-  } else {
-    score = auxFindScoreForContext(cands, c);
-  }
-  //cache for future use
-  if(m_UseCache) {
-    i->second = cands;
-  }
-  return score;
+  } else return auxFindScoreForContext(cands, c);
 };
 
-Scores LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cands, const Phrase& context)
+Scores
+LexicalReorderingTableTree::
+auxFindScoreForContext(const Candidates& cands, const Phrase& context)
 {
   if(m_FactorsC.empty()) {
     UTIL_THROW_IF2(cands.size() > 1, "Error");
-
-    return (1 == cands.size())?(cands[0].GetScore(0)):(Scores());
+    return (cands.size() == 1) ? cands[0].GetScore(0) : Scores();
   } else {
     std::vector<std::string> cvec;
-    for(size_t i = 0; i < context.GetSize(); ++i) {
-      /* old code
-        std::string s = context.GetWord(i).ToString(m_FactorsC);
-      cvec.push_back(s.substr(0,s.size()-1));
-        */
+    for(size_t i = 0; i < context.GetSize(); ++i)
       cvec.push_back(context.GetWord(i).GetString(m_FactorsC, false));
-    }
+
     IPhrase c = m_Table->ConvertPhrase(cvec,TargetVocId);
     IPhrase sub_c;
     IPhrase::iterator start = c.begin();
@@ -302,21 +280,22 @@ Scores LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cand
       sub_c.assign(start, c.end());
       for(size_t cand = 0; cand < cands.size(); ++cand) {
         IPhrase p = cands[cand].GetPhrase(0);
-        if(cands[cand].GetPhrase(0) == sub_c) {
+        if(cands[cand].GetPhrase(0) == sub_c)
           return cands[cand].GetScore(0);
-        }
       }
     }
     return Scores();
   }
 }
 
-void LexicalReorderingTableTree::InitializeForInput(const InputType& input)
+void
+LexicalReorderingTableTree::
+InitializeForInput(const InputType& input)
 {
   ClearCache();
   if(ConfusionNet const* cn = dynamic_cast<ConfusionNet const*>(&input)) {
     Cache(*cn);
-  } else if(Sentence const* s = dynamic_cast<Sentence const*>(&input)) {
+  } else if (dynamic_cast<Sentence const*>(&input)) {
     // Cache(*s); ... this just takes up too much memory, we cache elsewhere
     DisableCache();
   }
@@ -327,25 +306,23 @@ void LexicalReorderingTableTree::InitializeForInput(const InputType& input)
   }
 };
 
-bool LexicalReorderingTableTree::Create(std::istream& inFile,
-                                        const std::string& outFileName)
+bool
+LexicalReorderingTableTree::
+Create(std::istream& inFile, const std::string& outFileName)
 {
-  std::string line;
-  //TRACE_ERR("Entering Create...\n");
-  std::string
-  ofn(outFileName+".binlexr.srctree"),
-      oft(outFileName+".binlexr.tgtdata"),
-      ofi(outFileName+".binlexr.idx"),
-      ofsv(outFileName+".binlexr.voc0"),
-      oftv(outFileName+".binlexr.voc1");
+  typedef PrefixTreeSA<LabelId,OFF_T> PSA;
 
+  std::string
+  line,
+  ofn(outFileName+".binlexr.srctree"),
+  oft(outFileName+".binlexr.tgtdata"),
+  ofi(outFileName+".binlexr.idx"),
+  ofsv(outFileName+".binlexr.voc0"),
+  oftv(outFileName+".binlexr.voc1");
 
   FILE *os = fOpen(ofn.c_str(),"wb");
   FILE *ot = fOpen(oft.c_str(),"wb");
 
-  //TRACE_ERR("opend files....\n");
-
-  typedef PrefixTreeSA<LabelId,OFF_T> PSA;
   PSA *psa = new PSA;
   PSA::setDefault(InvalidOffT);
   WordVoc* voc[3];
@@ -360,22 +337,22 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
   size_t numKeyTokens = 0;
   while(getline(inFile, line)) {
     ++lnc;
-    if(0 == lnc % 10000) {
-      TRACE_ERR(".");
-    }
+    if(0 == lnc % 10000) TRACE_ERR(".");
     IPhrase key;
-    Scores   score;
+    Scores  score;
 
     std::vector<std::string> tokens = TokenizeMultiCharSeparator(line, "|||");
     std::string w;
     if(1 == lnc) {
       //do some init stuff in the first line
       numTokens = tokens.size();
-      if(tokens.size() == 2) { //f ||| score
+      if(tokens.size() == 2) {
+        // f ||| score
         numKeyTokens = 1;
         voc[0] = new WordVoc();
         voc[1] = 0;
-      } else if(3 == tokens.size() || 4 == tokens.size()) { //either f ||| e ||| score or f ||| e ||| c ||| score
+      } else if(3 == tokens.size() || 4 == tokens.size()) {
+        //either f ||| e ||| score or f ||| e ||| c ||| score
         numKeyTokens = 2;
         voc[0] = new WordVoc(); //f voc
         voc[1] = new WordVoc(); //e voc
@@ -389,28 +366,23 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
     size_t phrase = 0;
     for(; phrase < numKeyTokens; ++phrase) {
       //conditioned on more than just f... need |||
-      if(phrase >=1) {
-        key.push_back(PrefixTreeMap::MagicWord);
-      }
+      if(phrase >=1) key.push_back(PrefixTreeMap::MagicWord);
       std::istringstream is(tokens[phrase]);
-      while(is >> w) {
-        key.push_back(voc[phrase]->add(w));
-      }
+      while(is >> w) key.push_back(voc[phrase]->add(w));
     }
+
     //collect all non key phrases, i.e. c
     std::vector<IPhrase> tgt_phrases;
     tgt_phrases.resize(numTokens - numKeyTokens - 1);
     for(size_t j = 0; j < tgt_phrases.size(); ++j, ++phrase) {
       std::istringstream is(tokens[numKeyTokens + j]);
-      while(is >> w) {
-        tgt_phrases[j].push_back(voc[phrase]->add(w));
-      }
+      while(is >> w) tgt_phrases[j].push_back(voc[phrase]->add(w));
     }
+
     //last token is score
     std::istringstream is(tokens[numTokens-1]);
-    while(is >> w) {
-      score.push_back(atof(w.c_str()));
-    }
+    while(is >> w) score.push_back(atof(w.c_str()));
+
     //transform score now...
     std::transform(score.begin(),score.end(),score.begin(),TransformScore);
     std::transform(score.begin(),score.end(),score.begin(),FloorScore);
@@ -421,22 +393,22 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
       TRACE_ERR("WARNING: empty source phrase in line '"<<line<<"'\n");
       continue;
     }
+
     //first time inits
-    if(currFirstWord == InvalidLabelId) {
-      currFirstWord = key[0];
-    }
+    if(currFirstWord == InvalidLabelId) currFirstWord = key[0];
     if(currKey.empty()) {
       currKey = key;
       //insert key into tree
       UTIL_THROW_IF2(psa == NULL, "Object not yet created");
       PSA::Data& d = psa->insert(key);
-      if(d == InvalidOffT) {
-        d = fTell(ot);
-      } else {
-        TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '" << line << "\n");
+      if(d == InvalidOffT) d = fTell(ot);
+      else {
+        TRACE_ERR("ERROR: source phrase already inserted (A)!\nline("
+                  << lnc << "): '" << line << "\n");
         return false;
       }
     }
+
     if(currKey != key) {
       //ok new key
       currKey = key;
@@ -447,23 +419,22 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
       if(key[0] != currFirstWord) {
         // write key prefix tree to file and clear
         PTF pf;
-        if(currFirstWord >= vo.size()) {
+        if(currFirstWord >= vo.size())
           vo.resize(currFirstWord+1,InvalidOffT);
-        }
         vo[currFirstWord] = fTell(os);
         pf.create(*psa, os);
-        // clear
         delete psa;
         psa = new PSA;
         currFirstWord = key[0];
       }
-      //c) insert key into tree
+
+      // c) insert key into tree
       UTIL_THROW_IF2(psa == NULL, "Object not yet created");
       PSA::Data& d = psa->insert(key);
-      if(d == InvalidOffT) {
-        d = fTell(ot);
-      } else {
-        TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '" << line << "\n");
+      if(d == InvalidOffT) d = fTell(ot);
+      else {
+        TRACE_ERR("ERROR: source phrase already inserted (A)!\nline("
+                  << lnc << "): '" << line << "\n");
         return false;
       }
     }
@@ -473,14 +444,12 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
     TRACE_ERR("ERROR: empty lexicalised reordering file\n" << std::endl);
     return false;
   }
-  //flush remainders
   cands.writeBin(ot);
   cands.clear();
-  //process last currFirstWord
+
   PTF pf;
-  if(currFirstWord >= vo.size()) {
+  if(currFirstWord >= vo.size())
     vo.resize(currFirstWord+1,InvalidOffT);
-  }
   vo[currFirstWord] = fTell(os);
   pf.create(*psa,os);
   delete psa;
@@ -488,20 +457,6 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
 
   fClose(os);
   fClose(ot);
-  /*
-  std::vector<size_t> inv;
-  for(size_t i = 0; i < vo.size(); ++i){
-    if(vo[i] == InvalidOffT){
-      inv.push_back(i);
-    }
-  }
-  if(inv.size()) {
-    TRACE_ERR("WARNING: there are src voc entries with no phrase "
-        "translation: count "<<inv.size()<<"\n"
-        "There exists phrase translations for "<<vo.size()-inv.size()
-        <<" entries\n");
-  }
-  */
   FILE *oi = fOpen(ofi.c_str(),"wb");
   fWriteVector(oi,vo);
   fClose(oi);
@@ -517,13 +472,14 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
   return true;
 }
 
-std::string LexicalReorderingTableTree::MakeCacheKey(const Phrase& f,
-    const Phrase& e) const
+std::string
+LexicalReorderingTableTree::
+MakeCacheKey(const Phrase& f, const Phrase& e) const
 {
   std::string key;
-  if(!m_FactorsF.empty()) {
+  if(!m_FactorsF.empty())
     key += auxClearString(f.GetStringRep(m_FactorsF));
-  }
+
   if(!m_FactorsE.empty()) {
     if(!key.empty()) {
       key += "|||";
@@ -533,48 +489,39 @@ std::string LexicalReorderingTableTree::MakeCacheKey(const Phrase& f,
   return key;
 };
 
-IPhrase LexicalReorderingTableTree::MakeTableKey(const Phrase& f,
-    const Phrase& e) const
+IPhrase
+LexicalReorderingTableTree::
+MakeTableKey(const Phrase& f, const Phrase& e) const
 {
   IPhrase key;
   std::vector<std::string> keyPart;
   if(!m_FactorsF.empty()) {
-    for(size_t i = 0; i < f.GetSize(); ++i) {
-      /* old code
-        std::string s = f.GetWord(i).ToString(m_FactorsF);
-        keyPart.push_back(s.substr(0,s.size()-1));
-        */
+    for(size_t i = 0; i < f.GetSize(); ++i)
       keyPart.push_back(f.GetWord(i).GetString(m_FactorsF, false));
-    }
     auxAppend(key, m_Table->ConvertPhrase(keyPart, SourceVocId));
     keyPart.clear();
   }
   if(!m_FactorsE.empty()) {
-    if(!key.empty()) {
-      key.push_back(PrefixTreeMap::MagicWord);
-    }
-    for(size_t i = 0; i < e.GetSize(); ++i) {
-      /* old code
-        std::string s = e.GetWord(i).ToString(m_FactorsE);
-        keyPart.push_back(s.substr(0,s.size()-1));
-        */
+    if(!key.empty()) key.push_back(PrefixTreeMap::MagicWord);
+    for(size_t i = 0; i < e.GetSize(); ++i)
       keyPart.push_back(e.GetWord(i).GetString(m_FactorsE, false));
-    }
     auxAppend(key, m_Table->ConvertPhrase(keyPart,TargetVocId));
-    //keyPart.clear();
   }
   return key;
 };
 
 
 struct State {
-  State(PPimp* t, const std::string& p) : pos(t), path(p) {
-  }
+  State(PPimp* t, const std::string& p)
+    : pos(t), path(p) { }
+
   PPimp*      pos;
   std::string path;
 };
 
-void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f)
+void
+LexicalReorderingTableTree::
+auxCacheForSrcPhrase(const Phrase& f)
 {
   if(m_FactorsE.empty()) {
     //f is all of key...
@@ -582,21 +529,19 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f)
     m_Table->GetCandidates(MakeTableKey(f,Phrase(ARRAY_SIZE_INCR)),&cands);
     m_Cache[MakeCacheKey(f,Phrase(ARRAY_SIZE_INCR))] = cands;
   } else {
-    ObjectPool<PPimp>     pool;
+    ObjectPool<PPimp> pool;
     PPimp* pPos  = m_Table->GetRoot();
-    //1) goto subtree for f
-    for(size_t i = 0; i < f.GetSize() && 0 != pPos && pPos->isValid(); ++i) {
-      /* old code
-      pPos = m_Table.Extend(pPos, auxClearString(f.GetWord(i).ToString(m_FactorsF)), SourceVocId);
-      */
+
+    // 1) goto subtree for f
+    for(size_t i = 0; i < f.GetSize() && 0 != pPos && pPos->isValid(); ++i)
       pPos = m_Table->Extend(pPos, f.GetWord(i).GetString(m_FactorsF, false), SourceVocId);
-    }
-    if(0 != pPos && pPos->isValid()) {
+
+    if(pPos && pPos->isValid())
       pPos = m_Table->Extend(pPos, PrefixTreeMap::MagicWord);
-    }
-    if(0 == pPos || !pPos->isValid()) {
+
+    if(!pPos || !pPos->isValid())
       return;
-    }
+
     //2) explore whole subtree depth first & cache
     std::string cache_key = auxClearString(f.GetStringRep(m_FactorsF)) + "|||";
 
@@ -609,26 +554,26 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f)
         std::string next_path = stack.back().path + " " + m_Table->ConvertWord(w,TargetVocId);
         //cache this
         m_Table->GetCandidates(*stack.back().pos,&cands);
-        if(!cands.empty()) {
-          m_Cache[cache_key + auxClearString(next_path)] = cands;
-        }
+        if(!cands.empty()) m_Cache[cache_key + auxClearString(next_path)] = cands;
         cands.clear();
         PPimp* next_pos = pool.get(PPimp(stack.back().pos->ptr()->getPtr(stack.back().pos->idx),0,0));
         ++stack.back().pos->idx;
         stack.push_back(State(next_pos,next_path));
-      } else {
-        stack.pop_back();
-      }
+      } else stack.pop_back();
     }
   }
 }
 
-void LexicalReorderingTableTree::Cache(const ConfusionNet& /*input*/)
+void
+LexicalReorderingTableTree::
+Cache(const ConfusionNet& /*input*/)
 {
   return;
 }
 
-void LexicalReorderingTableTree::Cache(const Sentence& input)
+void
+LexicalReorderingTableTree::
+Cache(const Sentence& input)
 {
   //only works with sentences...
   size_t prev_cache_size = m_Cache.size();
@@ -639,76 +584,8 @@ void LexicalReorderingTableTree::Cache(const Sentence& input)
       auxCacheForSrcPhrase(f);
     }
   }
-  std::cerr << "Cached " << m_Cache.size() - prev_cache_size << " new primary reordering table keys\n";
+  std::cerr << "Cached " << m_Cache.size() - prev_cache_size
+            << " new primary reordering table keys\n";
 }
-/*
-Pre fetching implementation using Phrase and Generation Dictionaries
-*//*
-void LexicalReorderingTableTree::Cache(const ConfusionNet& input){
-  typedef TargetPhraseCollection::iterator Iter;
-  typedef TargetPhraseCollection::const_iterator ConstIter;
-  //not implemented for confusion networks...
-  Sentence const* s = dynamic_cast<Sentence const*>(&input);
-  if(!s){
-	return;
-  }
-  int max_phrase_length = input.GetSize();
-
-  std::vector<PhraseDictionaryBase*> PhraseTables = StaticData::Instance()->GetPhraseDictionaries();
-  //new code:
-  //std::vector<PhraseDictionary*> PhraseTables = StaticData::Instance()->GetPhraseDictionaries();
-  std::vector<GenerationDictionary*> GenTables = StaticData::Instance()->GetGenerationDictionaries();
-  for(size_t len = 1; len <= max_phrase_length; ++len){
-	for(size_t start = 0; start+len <= input.GetSize(); ++start){
-	  Phrase f = s->GetSubString(WordsRange(start, start+len));
-	  //find all translations of f
-	  TargetPhraseCollection list;
-
-	  for(size_t t = 0; t < PhraseTables.size(); ++t){
-		//if(doIntersect(PhraseTables[t]->GetOutputFactorMask(),FactorMask(m_FactorsE))){
-		  //this table gives us something we need
-
-		  const TargetPhraseCollection* new_list = PhraseTables[t]->GetTargetPhraseCollection(f);
-		  TargetPhraseCollection curr_list;
-		  for(ConstIter i = new_list->begin(); i != new_list->end(); ++i){
-			for(Iter j = list.begin(); j != list.end(); ++j){
-			  curr_list.Add((*j)->MergeNext(*(*i)));
-			}
-		  }
-		  if(list.IsEmpty()){
-			list = *new_list;
-		  } else {
-			list = curr_list;
-		  }
-		  //}
-	  }
-	  for(size_t g = 0; g < GenTables.size(); ++g){
-		//if(doIntersect(GenTables[g]->GetOutputFactorMask(),FactorMask(m_FactorsE))){
-		  TargetPhraseCollection curr_list;
-		  for(Iter j = list.begin(); j != list.end(); ++j){
-			for(size_t w = 0; w < (*j)->GetSize(); ++w){
-			  const OutputWordCollection* words = GenTables[g]->FindWord((*j)->GetWord(w));
-			  for(OutputWordCollection::const_iterator i = words->begin(); i != words->end(); ++i){
-				TargetPhrase* p = new TargetPhrase(*(*j));
-				Word& pw = p->GetWord(w);
-				pw.Merge(i->first);
-				curr_list.Add(p);
-			  }
-			}
-		  }
-		  list = curr_list;
-		  //}
-	  }
-	  //cache for each translation
-	  for(Iter e = list.begin(); e < list.end(); ++e){
-		Candidates cands;
-		m_Table.GetCandidates(MakeTableKey(f,*(*e)), &cands);
-		m_Cache.insert(std::make_pair(MakeCacheKey(f,*(*e)),cands));
-	  }
-	}
-  }
-};
-*/
-
 }
 

@@ -21,8 +21,8 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 /*
  * Generic hashmap manipulation functions
  */
-#ifndef __HASHMAPINFOS_H_
-#define __HASHMAPINFOS_H_
+#ifndef __HASHMAPINFOS_H__
+#define __HASHMAPINFOS_H__
 #include <boost/functional/hash.hpp>
 #include "infosHasher.h"
 #include <vector>
@@ -32,7 +32,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 using namespace std;
 
-namespace HashMapSpace
+namespace TERCPPNS_HashMapSpace
 {
 class hashMapInfos
 {

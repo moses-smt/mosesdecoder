@@ -19,6 +19,8 @@
 #include "moses/LM/ORLM.h"
 #include "moses/IOWrapper.h"
 
+#include <boost/foreach.hpp>
+
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #endif

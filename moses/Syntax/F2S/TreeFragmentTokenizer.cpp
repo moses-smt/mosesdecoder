@@ -11,25 +11,29 @@ namespace F2S
 
 TreeFragmentToken::TreeFragmentToken(TreeFragmentTokenType t,
                                      StringPiece v, std::size_t p)
-    : type(t)
-    , value(v)
-    , pos(p) {
+  : type(t)
+  , value(v)
+  , pos(p)
+{
 }
 
 TreeFragmentTokenizer::TreeFragmentTokenizer()
-    : value_(TreeFragmentToken_EOS, "", -1) {
+  : value_(TreeFragmentToken_EOS, "", -1)
+{
 }
 
 TreeFragmentTokenizer::TreeFragmentTokenizer(const StringPiece &s)
-    : str_(s)
-    , value_(TreeFragmentToken_EOS, "", -1)
-    , iter_(s.begin())
-    , end_(s.end())
-    , pos_(0) {
+  : str_(s)
+  , value_(TreeFragmentToken_EOS, "", -1)
+  , iter_(s.begin())
+  , end_(s.end())
+  , pos_(0)
+{
   ++(*this);
 }
 
-TreeFragmentTokenizer &TreeFragmentTokenizer::operator++() {
+TreeFragmentTokenizer &TreeFragmentTokenizer::operator++()
+{
   while (iter_ != end_ && (*iter_ == ' ' || *iter_ == '\t')) {
     ++iter_;
     ++pos_;
@@ -67,14 +71,16 @@ TreeFragmentTokenizer &TreeFragmentTokenizer::operator++() {
   return *this;
 }
 
-TreeFragmentTokenizer TreeFragmentTokenizer::operator++(int) {
+TreeFragmentTokenizer TreeFragmentTokenizer::operator++(int)
+{
   TreeFragmentTokenizer tmp(*this);
   ++*this;
   return tmp;
 }
 
 bool operator==(const TreeFragmentTokenizer &lhs,
-                const TreeFragmentTokenizer &rhs) {
+                const TreeFragmentTokenizer &rhs)
+{
   if (lhs.value_.type == TreeFragmentToken_EOS ||
       rhs.value_.type == TreeFragmentToken_EOS) {
     return lhs.value_.type == TreeFragmentToken_EOS &&
@@ -84,7 +90,8 @@ bool operator==(const TreeFragmentTokenizer &lhs,
 }
 
 bool operator!=(const TreeFragmentTokenizer &lhs,
-                const TreeFragmentTokenizer &rhs) {
+                const TreeFragmentTokenizer &rhs)
+{
   return !(lhs == rhs);
 }
 

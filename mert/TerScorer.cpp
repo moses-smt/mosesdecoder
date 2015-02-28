@@ -10,7 +10,7 @@
 #include "Util.h"
 
 using namespace std;
-using namespace TERCpp;
+using namespace TERCPPNS_TERCpp;
 
 namespace MosesTuning
 {

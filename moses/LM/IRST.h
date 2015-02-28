@@ -92,16 +92,16 @@ public:
   const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
-  
+
   virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
-/*
-  virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+  /*
+    virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
 
-  virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const;
-*/
+    virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const;
+  */
 
 
   void InitializeForInput(InputType const& source);

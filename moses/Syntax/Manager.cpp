@@ -158,7 +158,7 @@ std::size_t Manager::OutputAlignmentNBest(
   std::vector<std::size_t> targetOffsets(tp.GetSize(), 0);
 
   const AlignmentInfo &aiNonTerm =
-      shyperedge.label.translation->GetAlignNonTerm();
+    shyperedge.label.translation->GetAlignNonTerm();
   std::vector<std::size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
   const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd =
     aiNonTerm.GetNonTermIndexMap();

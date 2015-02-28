@@ -40,11 +40,11 @@ public:
   void ProcessUnknownWord(size_t sourcePos);
   void CreateTranslationOptions();
 
-  bool 
+  bool
   CreateTranslationOptionsForRange
   (const DecodeGraph &decodeStepList, size_t spos, size_t epos,
    bool adhereTableLimit, size_t graphInd);
-  
+
 protected:
 
 };

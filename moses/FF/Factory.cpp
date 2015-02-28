@@ -21,6 +21,7 @@
 #include "moses/FF/SourceWordDeletionFeature.h"
 #include "moses/FF/GlobalLexicalModel.h"
 #include "moses/FF/GlobalLexicalModelUnlimited.h"
+#include "moses/FF/Model1Feature.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/WordTranslationFeature.h"
 #include "moses/FF/TargetBigramFeature.h"
@@ -67,9 +68,11 @@
 #ifdef HAVE_VW
 #include "moses/FF/VW/VW.h"
 #include "moses/FF/VW/VWFeatureSourceBagOfWords.h"
+#include "moses/FF/VW/VWFeatureSourceBigrams.h"
 #include "moses/FF/VW/VWFeatureSourceIndicator.h"
 #include "moses/FF/VW/VWFeatureSourcePhraseInternal.h"
 #include "moses/FF/VW/VWFeatureSourceWindow.h"
+#include "moses/FF/VW/VWFeatureTargetBigrams.h"
 #include "moses/FF/VW/VWFeatureTargetIndicator.h"
 #include "moses/FF/VW/VWFeatureSourceExternalFeatures.h"
 #include "moses/FF/VW/VWFeatureTargetPhraseInternal.h"
@@ -200,6 +203,7 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
+  MOSES_FNAME(Model1Feature);
   MOSES_FNAME(SourceWordDeletionFeature);
   MOSES_FNAME(TargetWordInsertionFeature);
   MOSES_FNAME(PhraseBoundaryFeature);
@@ -249,9 +253,11 @@ FeatureRegistry::FeatureRegistry()
 #ifdef HAVE_VW
   MOSES_FNAME(VW);
   MOSES_FNAME(VWFeatureSourceBagOfWords);
+  MOSES_FNAME(VWFeatureSourceBigrams);
   MOSES_FNAME(VWFeatureSourceIndicator);
   MOSES_FNAME(VWFeatureSourcePhraseInternal);
   MOSES_FNAME(VWFeatureSourceWindow);
+  MOSES_FNAME(VWFeatureTargetBigrams);
   MOSES_FNAME(VWFeatureTargetPhraseInternal);
   MOSES_FNAME(VWFeatureTargetIndicator);
   MOSES_FNAME(VWFeatureSourceExternalFeatures);

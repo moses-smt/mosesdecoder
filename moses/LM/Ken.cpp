@@ -385,7 +385,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
       float prob = UntransformLMScore(
-          pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
+                     pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.BeginNonTerminal(prevState, prob);
       phrasePos++;
     }
@@ -397,7 +397,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
       float prob = UntransformLMScore(
-          pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
+                     pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.NonTerminal(prevState, prob);
     } else {
       ruleScore.Terminal(TranslateID(word));
@@ -443,6 +443,20 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
+
+/* Instantiate LanguageModelKen here.  Tells the compiler to generate code
+ * for the instantiations' non-inline member functions in this file.
+ * Otherwise, depending on the compiler, those functions may not be present
+ * at link time.
+ */
+template class LanguageModelKen<lm::ngram::ProbingModel>;
+template class LanguageModelKen<lm::ngram::RestProbingModel>;
+template class LanguageModelKen<lm::ngram::TrieModel>;
+template class LanguageModelKen<lm::ngram::ArrayTrieModel>;
+template class LanguageModelKen<lm::ngram::QuantTrieModel>;
+template class LanguageModelKen<lm::ngram::QuantArrayTrieModel>;
+
+
 LanguageModel *ConstructKenLM(const std::string &lineOrig)
 {
   FactorType factorType = 0;
@@ -450,7 +464,7 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
   bool lazy = false;
 
   util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
-  ++argument; // KENLM 
+  ++argument; // KENLM
 
   stringstream line;
   line << "KENLM";
