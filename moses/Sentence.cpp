@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <stdexcept>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 
 #include "Sentence.h"
 #include "TranslationOptionCollectionText.h"
@@ -38,202 +39,230 @@ using namespace std;
 namespace Moses
 {
 
-Sentence::Sentence()
+Sentence::
+Sentence()
   : Phrase(0)
   , InputType()
 {
-  const StaticData& staticData = StaticData::Instance();
-  if (staticData.IsSyntax()) {
-    m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
-  }
+  const StaticData& SD = StaticData::Instance();
+  if (SD.IsSyntax()) 
+    m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
 }
 
-Sentence::~Sentence()
+Sentence::
+~Sentence()
 {
   RemoveAllInColl(m_xmlOptions);
 }
 
-int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+void
+Sentence::
+aux_init_partial_translation(string& line)
 {
-  // const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-  std::string line;
-  std::map<std::string, std::string> meta;
+  string sourceCompletedStr;
+  int loc1 = line.find( "|||", 0 );
+  int loc2 = line.find( "|||", loc1 + 3 );
+  if (loc1 > -1 && loc2 > -1) 
+    {
+      m_initialTargetPhrase = Trim(line.substr(0, loc1));
+      string scov = Trim(line.substr(loc1 + 3, loc2 - loc1 - 3));
+      line = line.substr(loc2 + 3);
 
-  if (getline(in, line, '\n').eof())
-    return 0;
+      m_sourceCompleted.resize(scov.size());
+      int contiguous = 1;
+      for (size_t i = 0; i < scov.size(); ++i) 
+	{
+	  if (sourceCompletedStr.at(i) == '1') 
+	    {
+	      m_sourceCompleted[i] = true;
+	      if (contiguous) m_frontSpanCoveredLength++;
+	    } 
+	  else 
+	    {
+	      m_sourceCompleted[i] = false;
+	      contiguous = 0;
+	    }
+	}
+    }
+}
 
-  //get covered words - if continual-partial-translation is switched on, parse input
-  const StaticData &staticData = StaticData::Instance();
+void
+Sentence::
+aux_interpret_sgml_markup(string& line)
+{
+  // if sentences is specified as "<seg id=1> ... </seg>", extract id
+  typedef std::map<std::string, std::string> metamap;
+  metamap meta = ProcessAndStripSGML(line);
+  metamap::const_iterator i;
+  if ((i = meta.find("id")) != meta.end()) 
+    this->SetTranslationId(atol(i->second.c_str()));
+  if ((i = meta.find("docid")) != meta.end()) 
+    {
+      this->SetDocumentId(atol(i->second.c_str()));
+      this->SetUseTopicId(false);
+      this->SetUseTopicIdAndProb(false);
+    }
+  if ((i = meta.find("topic")) != meta.end()) 
+    {
+      vector<string> topic_params;
+      boost::split(topic_params, i->second, boost::is_any_of("\t "));
+      if (topic_params.size() == 1) 
+	{
+	  this->SetTopicId(atol(topic_params[0].c_str()));
+	  this->SetUseTopicId(true);
+	  this->SetUseTopicIdAndProb(false);
+	} 
+      else 
+	{
+	  this->SetTopicIdAndProb(topic_params);
+	  this->SetUseTopicId(false);
+	  this->SetUseTopicIdAndProb(true);
+	}
+    }
+  if ((i = meta.find("weight-setting")) != meta.end()) 
+    {
+      this->SetWeightSetting(i->second);
+      this->SetSpecifiesWeightSetting(true);
+      StaticData::Instance().SetWeightSetting(i->second); 
+      // oh this is so horrible! Why does this have to be propagated globally?
+      // --- UG
+    } 
+  else this->SetSpecifiesWeightSetting(false);
+}
+
+void 
+Sentence::
+aux_interpret_dlt(string& line) // whatever DLT means ... --- UG
+{
+  using namespace std;
+  typedef map<string, string> str2str_map; 
+  vector<str2str_map> meta = ProcessAndStripDLT(line);
+  BOOST_FOREACH(str2str_map const& M, meta)
+    {
+      str2str_map::const_iterator i,j;
+      if ((i = M.find("type")) != M.end())
+	{
+	  j = M.find("id");
+	  string id = j == M.end() ? "default" : j->second;
+	  if (i->second == "cbtm")
+	    {
+	      PhraseDictionaryDynamicCacheBased* cbtm;
+	      cbtm = PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
+	      if (cbtm) cbtm->ExecuteDlt(M);
+	    }
+	  if (i->second == "cblm") 
+	    {
+	      DynamicCacheBasedLanguageModel* cblm;
+	      cblm = DynamicCacheBasedLanguageModel::InstanceNonConst(id);
+	      if (cblm) cblm->ExecuteDlt(M);
+	    }
+	}
+    }
+}
+
+void
+Sentence::
+aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
+		  std::vector<std::pair<size_t, std::string> >& placeholders)
+{ // parse XML markup in translation line
+
+  const StaticData &SD = StaticData::Instance();
+
+  using namespace std;
+  if (SD.GetXmlInputType() != XmlPassThrough) 
+    {
+      int offset = SD.IsSyntax() ? 1 : 0;
+      bool OK = ProcessAndStripXMLTags(line, m_xmlOptions, 
+				       m_reorderingConstraint, 
+				       xmlWalls, placeholders, offset,
+				       SD.GetXmlBrackets().first,
+				       SD.GetXmlBrackets().second);
+      UTIL_THROW_IF2(!OK, "Unable to parse XML in line: " << line);
+    }
+}
+
+void 
+Sentence::
+init(string line, std::vector<FactorType> const& factorOrder)
+{
+  using namespace std;
+  const StaticData &SD = StaticData::Instance();
+
   m_frontSpanCoveredLength = 0;
   m_sourceCompleted.resize(0);
-  if (staticData.ContinuePartialTranslation()) {
-    string initialTargetPhrase;
-    string sourceCompletedStr;
-    int loc1 = line.find( "|||", 0 );
-    int loc2 = line.find( "|||", loc1 + 3 );
-    if (loc1 > -1 && loc2 > -1) {
-      initialTargetPhrase = line.substr(0, loc1);
-      sourceCompletedStr = line.substr(loc1 + 3, loc2 - loc1 - 3);
-      line = line.substr(loc2 + 3);
-      sourceCompletedStr = Trim(sourceCompletedStr);
-      initialTargetPhrase = Trim(initialTargetPhrase);
-      m_initialTargetPhrase = initialTargetPhrase;
-      int len = sourceCompletedStr.size();
-      m_sourceCompleted.resize(len);
-      int contiguous = 1;
-      for (int i = 0; i < len; ++i) {
-        if (sourceCompletedStr.at(i) == '1') {
-          m_sourceCompleted[i] = true;
-          if (contiguous)
-            m_frontSpanCoveredLength ++;
-        } else {
-          m_sourceCompleted[i] = false;
-          contiguous = 0;
-        }
-      }
-    }
-  }
 
-  // remove extra spaces
+  if (SD.ContinuePartialTranslation()) 
+    aux_init_partial_translation(line);
+
   line = Trim(line);
-
-  // if sentences is specified as "<seg id=1> ... </seg>", extract id
-  meta = ProcessAndStripSGML(line);
-  if (meta.find("id") != meta.end()) {
-    this->SetTranslationId(atol(meta["id"].c_str()));
-  }
-  if (meta.find("docid") != meta.end()) {
-    this->SetDocumentId(atol(meta["docid"].c_str()));
-    this->SetUseTopicId(false);
-    this->SetUseTopicIdAndProb(false);
-  }
-  if (meta.find("topic") != meta.end()) {
-    vector<string> topic_params;
-    boost::split(topic_params, meta["topic"], boost::is_any_of("\t "));
-    if (topic_params.size() == 1) {
-      this->SetTopicId(atol(topic_params[0].c_str()));
-      this->SetUseTopicId(true);
-      this->SetUseTopicIdAndProb(false);
-    } else {
-      this->SetTopicIdAndProb(topic_params);
-      this->SetUseTopicId(false);
-      this->SetUseTopicIdAndProb(true);
-    }
-  }
-  if (meta.find("weight-setting") != meta.end()) {
-    this->SetWeightSetting(meta["weight-setting"]);
-    this->SetSpecifiesWeightSetting(true);
-    staticData.SetWeightSetting(meta["weight-setting"]);
-  } else {
-    this->SetSpecifiesWeightSetting(false);
-  }
-
-  std::vector< std::map<std::string, std::string> > dlt_meta = ProcessAndStripDLT(line);
-
-  PhraseDictionaryDynamicCacheBased* cbtm = NULL;
-  DynamicCacheBasedLanguageModel* cblm = NULL;
-  std::vector< std::map<std::string, std::string> >::iterator dlt_meta_it = dlt_meta.begin();
-  for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it) {
-
-    if ((*dlt_meta_it).find("type") != (*dlt_meta_it).end()) {
-      if ((*dlt_meta_it)["type"] == "cbtm") {
-        std::string id = "default";
-        if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
-          id = (*dlt_meta_it)["id"];
-        }
-        cbtm = PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
-        if (cbtm) cbtm->ExecuteDlt(*dlt_meta_it);
-      }
-      if ((*dlt_meta_it)["type"] == "cblm") {
-        std::string id = "default";
-        if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
-          id = (*dlt_meta_it)["id"];
-        }
-        cblm = DynamicCacheBasedLanguageModel::InstanceNonConst(id);
-        if (cblm) cblm->ExecuteDlt(*dlt_meta_it);
-      }
-    }
-  }
-
+  aux_interpret_sgml_markup(line); // for "<seg id=..." markup
+  aux_interpret_dlt(line); // some poorly documented cache-based stuff
+  
   // if sentences is specified as "<passthrough tag1=""/>"
-  if (staticData.IsPassthroughEnabled() || staticData.IsPassthroughInNBestEnabled()) {
-    std::string passthrough = PassthroughSGML(line,"passthrough");
-    this->SetPassthroughInformation(passthrough);
-  }
-
-
-  // parse XML markup in translation line
-  std::vector< size_t > xmlWalls;
-  std::vector< std::pair<size_t, std::string> > placeholders;
-
-  if (staticData.GetXmlInputType() != XmlPassThrough) {
-    int offset = 0;
-    if (staticData.IsSyntax()) {
-      offset = 1;
+  if (SD.IsPassthroughEnabled() || SD.IsPassthroughInNBestEnabled()) 
+    {
+      string pthru = PassthroughSGML(line,"passthrough");
+      this->SetPassthroughInformation(pthru);
     }
 
-    if (!ProcessAndStripXMLTags(line, m_xmlOptions, m_reorderingConstraint, xmlWalls, placeholders,
-                                offset,
-                                staticData.GetXmlBrackets().first,
-                                staticData.GetXmlBrackets().second)) {
-      const string msg("Unable to parse XML in line: " + line);
-      TRACE_ERR(msg << endl);
-      throw runtime_error(msg);
-    }
-  }
+  vector<size_t> xmlWalls;
+  vector<pair<size_t, string> >placeholders;
+  aux_interpret_xml(line, xmlWalls, placeholders);
 
-  // Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter, NULL);
   Phrase::CreateFromString(Input, factorOrder, line, NULL);
 
-  // placeholders
   ProcessPlaceholders(placeholders);
 
-  if (staticData.IsSyntax()) {
-    InitStartEndWord();
-  }
+  if (SD.IsSyntax()) InitStartEndWord();
+  
+  // now that we have final word positions in phrase (from
+  // CreateFromString), we can make input phrase objects to go with
+  // our XmlOptions and create TranslationOptions
 
-  //now that we have final word positions in phrase (from CreateFromString),
-  //we can make input phrase objects to go with our XmlOptions and create TranslationOptions
-
-  //only fill the vector if we are parsing XML
-  if (staticData.GetXmlInputType() != XmlPassThrough ) {
-    for (size_t i=0; i<GetSize(); i++) {
-      m_xmlCoverageMap.push_back(false);
+  // only fill the vector if we are parsing XML
+  if (SD.GetXmlInputType() != XmlPassThrough) 
+    {
+      m_xmlCoverageMap.assign(GetSize(), false);
+      BOOST_FOREACH(XmlOption* o, m_xmlOptions)
+	{
+	  WordsRange const& r = o->range;
+	  for(size_t j = r.GetStartPos(); j <= r.GetEndPos(); ++j) 
+	    m_xmlCoverageMap[j]=true;
+	}
     }
-
-    //iterXMLOpts will be empty for XmlIgnore
-    //look at each column
-    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = m_xmlOptions.begin();
-        iterXmlOpts != m_xmlOptions.end(); iterXmlOpts++) {
-
-      const XmlOption *xmlOption = *iterXmlOpts;
-      const WordsRange &range = xmlOption->range;
-
-      for(size_t j=range.GetStartPos(); j<=range.GetEndPos(); j++) {
-        m_xmlCoverageMap[j]=true;
-      }
-    }
-
-  }
 
   // reordering walls and zones
-  m_reorderingConstraint.InitializeWalls( GetSize() );
+  m_reorderingConstraint.InitializeWalls(GetSize());
 
   // set reordering walls, if "-monotone-at-punction" is set
-  if (staticData.UseReorderingConstraint() && GetSize()>0) {
-    m_reorderingConstraint.SetMonotoneAtPunctuation( GetSubString( WordsRange(0,GetSize()-1 ) ) );
-  }
+  if (SD.UseReorderingConstraint() && GetSize()) 
+    {
+      WordsRange r(0, GetSize()-1);
+      m_reorderingConstraint.SetMonotoneAtPunctuation(GetSubString(r));
+    }
 
   // set walls obtained from xml
   for(size_t i=0; i<xmlWalls.size(); i++)
-    if( xmlWalls[i] < GetSize() ) // no buggy walls, please
-      m_reorderingConstraint.SetWall( xmlWalls[i], true );
+    if(xmlWalls[i] < GetSize()) // no buggy walls, please
+      m_reorderingConstraint.SetWall(xmlWalls[i], true);
   m_reorderingConstraint.FinalizeWalls();
+  
+}
 
+int 
+Sentence::
+Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+{
+  std::string line;
+  if (getline(in, line, '\n').eof())
+    return 0;
+  init(line, factorOrder);
   return 1;
 }
 
-void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
+void 
+Sentence::
+ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
   FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
   if (placeholderFactor == NOT_FOUND) {
@@ -349,15 +378,18 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
 
 void
 Sentence::
-CreateFromString(const std::vector<FactorType> &factorOrder,
-                 const std::string &phraseString)
-// , const std::string &factorDelimiter)
+CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 {
-  // Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter, NULL);
-  Phrase::CreateFromString(Input, factorOrder, phraseString, NULL);
+  Phrase::CreateFromString(Input, FOrder, phraseString, NULL);
 }
 
-
+Sentence::
+Sentence(size_t const transId, string const& stext)
+{
+  this->SetTranslationId(transId);
+  vector<FactorType> const& IFO = StaticData::Instance().GetInputFactorOrder();
+  init(stext, IFO);
+}
 
 }
 

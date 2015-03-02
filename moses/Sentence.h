@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -31,80 +32,106 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class WordsRange;
-class PhraseDictionary;
-class TranslationOption;
-class TranslationOptionCollection;
-class ChartTranslationOptions;
-struct XmlOption;
+  class WordsRange;
+  class PhraseDictionary;
+  class TranslationOption;
+  class TranslationOptionCollection;
+  class ChartTranslationOptions;
+  struct XmlOption;
 
-
-/**
- * A Phrase class with an ID. Used specifically as source input so contains functionality to read
- *	from IODevice and create trans opt
- */
-class Sentence : public Phrase, public InputType
-{
-
-protected:
 
   /**
-   * Utility method that takes in a string representing an XML tag and the name of the attribute,
-   * and returns the value of that tag if present, empty string otherwise
+   * A Phrase class with an ID. Used specifically as source input so contains functionality to read
+   *	from IODevice and create trans opt
    */
-  std::vector<XmlOption*> m_xmlOptions;
-  std::vector <bool> m_xmlCoverageMap;
+  class Sentence : public Phrase, public InputType
+  {
+  protected:
 
-  NonTerminalSet m_defaultLabelSet;
+    /**
+     * Utility method that takes in a string representing an XML tag and the name of the attribute,
+     * and returns the value of that tag if present, empty string otherwise
+     */
+    std::vector<XmlOption*> m_xmlOptions;
+    std::vector <bool> m_xmlCoverageMap;
 
-  void ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders);
+    NonTerminalSet m_defaultLabelSet;
+
+    void ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders);
 
 
-public:
-  Sentence();
-  ~Sentence();
+  public:
+    Sentence();
+    Sentence(size_t const transId, std::string const& stext);
+    ~Sentence();
 
-  InputTypeEnum GetType() const {
-    return SentenceInput;
-  }
+    InputTypeEnum GetType() const {
+      return SentenceInput;
+    }
 
-  //! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
-  Phrase GetSubString(const WordsRange& r) const {
-    return Phrase::GetSubString(r);
-  }
+    //! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
+    Phrase GetSubString(const WordsRange& r) const {
+      return Phrase::GetSubString(r);
+    }
 
-  //! Calls Phrase::GetWord(). Implements abstract InputType::GetWord()
-  const Word& GetWord(size_t pos) const {
-    return Phrase::GetWord(pos);
-  }
+    //! Calls Phrase::GetWord(). Implements abstract InputType::GetWord()
+    const Word& GetWord(size_t pos) const {
+      return Phrase::GetWord(pos);
+    }
 
-  //! Calls Phrase::GetSize(). Implements abstract InputType::GetSize()
-  size_t GetSize() const {
-    return Phrase::GetSize();
-  }
+    //! Calls Phrase::GetSize(). Implements abstract InputType::GetSize()
+    size_t GetSize() const {
+      return Phrase::GetSize();
+    }
 
-  //! Returns true if there were any XML tags parsed that at least partially covered the range passed
-  bool XmlOverlap(size_t startPos, size_t endPos) const;
+    //! Returns true if there were any XML tags parsed that at least partially covered the range passed
+    bool XmlOverlap(size_t startPos, size_t endPos) const;
 
-  //! populates vector argument with XML force translation options for the specific range passed
-  void GetXmlTranslationOptions(std::vector <TranslationOption*> &list) const;
-  void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
-  std::vector <ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
+    //! populates vector argument with XML force translation options for the specific range passed
+    void GetXmlTranslationOptions(std::vector<TranslationOption*> &list) const;
+    void GetXmlTranslationOptions(std::vector<TranslationOption*> &list, size_t startPos, size_t endPos) const;
+    std::vector<ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
-  void Print(std::ostream& out) const;
+    virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+    void Print(std::ostream& out) const;
 
-  TranslationOptionCollection* CreateTranslationOptionCollection() const;
+    TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
-  virtual void CreateFromString(const std::vector<FactorType> &factorOrder
-                                , const std::string &phraseString);  // , const std::string &factorDelimiter);
+    virtual void 
+    CreateFromString(std::vector<FactorType> const &factorOrder, 
+		     std::string const& phraseString);  
 
-  const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
-    return m_defaultLabelSet;
-  }
+    const NonTerminalSet&
+    GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const 
+    { return m_defaultLabelSet; }
 
-};
 
+    void 
+    init(std::string line, std::vector<FactorType> const& factorOrder);
+
+  private:
+    // auxliliary functions for Sentence initialization
+    // void aux_interpret_sgml_markup(std::string& line);
+    // void aux_interpret_dlt(std::string& line);
+    // void aux_interpret_xml (std::string& line, std::vector<size_t> & xmlWalls,
+    // 			    std::vector<std::pair<size_t, std::string> >& placeholders);
+
+    void 
+    aux_interpret_sgml_markup(std::string& line);
+
+    void 
+    aux_interpret_dlt(std::string& line);
+
+    void 
+    aux_interpret_xml
+    (std::string& line, std::vector<size_t> & xmlWalls,
+     std::vector<std::pair<size_t, std::string> >& placeholders);
+
+    void
+    aux_init_partial_translation(std::string& line);
+
+  };
+  
 
 }
 
