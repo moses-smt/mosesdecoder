@@ -51,7 +51,7 @@ def main():
     sys.exit(1)
 
   tvocab, offset = read_vocab(options.working_dir + "/vocab.target")
-  svocab, offset = read_vocab(options.working_dir + "/vocab.source", offset)
+  svocab, offset = read_vocab(options.working_dir + "/vocab.source", offset+1)
 
   file_stem = os.path.basename(options.corpus_stem)
   ofh = open(options.working_dir + "/" + file_stem + ".ngrams", "w")
