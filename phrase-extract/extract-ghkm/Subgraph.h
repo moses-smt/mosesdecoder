@@ -116,8 +116,8 @@ public:
   }
 
   void GetTargetLeaves(std::vector<const Node *> &) const;
-
   void PrintTree(std::ostream &out) const;
+  void PrintPartsOfSpeech(std::ostream &out) const;
 
 private:
   void GetTargetLeaves(const Node *, std::vector<const Node *> &) const;
@@ -126,6 +126,7 @@ private:
   float CalcPcfgScore() const;
   int CountNodes(const Node *) const;
   void RecursivelyPrintTree(const Node *n, std::ostream &out) const;
+  void RecursivelyPrintPartsOfSpeech(const Node *n, std::ostream &out) const;
 
   const Node *m_root;
   std::set<const Node *> m_leaves;

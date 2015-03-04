@@ -293,10 +293,16 @@ int ExtractGHKM::Main(int argc, char *argv[])
         }
         // TODO Can scope pruning be done earlier?
         if (r->Scope() <= options.maxScope) {
-          if (!options.treeFragments) {
-            scfgWriter.Write(*r,lineNum,false);
-          } else {
-            scfgWriter.Write(*r,**q,lineNum,false);
+          scfgWriter.Write(*r,lineNum,false);
+          if (options.treeFragments) {
+            fwdExtractStream << " {{Tree ";
+            (*q)->PrintTree(fwdExtractStream);
+            fwdExtractStream << "}}";
+          }
+          if (options.partsOfSpeech) {
+            fwdExtractStream << " {{POS";
+            (*q)->PrintPartsOfSpeech(fwdExtractStream);
+            fwdExtractStream << "}}";
           }
           if (options.phraseOrientation) {
             fwdExtractStream << " {{Orientation ";
@@ -459,6 +465,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "set maximum allowed scope")
   ("Minimal",
    "extract minimal rules only")
+  ("PartsOfSpeech",
+   "output parts-of-speech information (preterminals from the parse tree)")
   ("PCFG",
    "include score based on PCFG scores in target corpus")
   ("PhraseOrientation",
@@ -571,6 +579,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("Minimal")) {
     options.minimal = true;
   }
+  if (vm.count("PartsOfSpeech")) {
+    options.partsOfSpeech = true;
+  }
   if (vm.count("PCFG")) {
     options.pcfg = true;
   }
@@ -667,6 +678,9 @@ void ExtractGHKM::WriteGlueGrammar(
   if (options.treeFragments) {
     out << " {{Tree [" << topLabel << " [SSTART <s>]]}}";
   }
+  if (options.partsOfSpeech) {
+    out << " {{POS SSTART}}";
+  }
   if (options.sourceLabels) {
     out << " {{SourceLabels 2 1 " << sourceLabelSentenceStart << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
@@ -678,6 +692,9 @@ void ExtractGHKM::WriteGlueGrammar(
   out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
   if (options.treeFragments) {
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [SEND </s>]]}}";
+  }
+  if (options.partsOfSpeech) {
+    out << " {{POS SEND}}";
   }
   if (options.sourceLabels) {
     out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueTop << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
@@ -693,6 +710,9 @@ void ExtractGHKM::WriteGlueGrammar(
     out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
     if (options.treeFragments) {
       out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
+    }
+    if (options.partsOfSpeech) {
+      out << " {{POS SSTART SEND}}";
     }
     if (options.sourceLabels) {
       out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueX << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";

@@ -2240,6 +2240,14 @@ sub define_training_extract_phrases {
 
       if (&get("TRAINING:ghkm-source-labels")) {
         $cmd .= "-ghkm-source-labels ";
+        my $source_labels_file = &versionize(&long_file_name("source-labels","model",""));
+        $cmd .= "-ghkm-source-labels-file $source_labels_file ";
+      }
+
+      if (&get("TRAINING:ghkm-parts-of-speech")) {
+        $cmd .= "-ghkm-parts-of-speech ";
+        my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
+        $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
       }
     }
 
@@ -2270,18 +2278,27 @@ sub define_training_build_ttable {
     $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
 
     if (&get("TRAINING:hierarchical-rule-set")) {
+
       if (&get("TRAINING:ghkm-tree-fragments")) {
         $cmd .= "-ghkm-tree-fragments ";
       }
+
       if (&get("TRAINING:ghkm-phrase-orientation")) {
         $cmd .= "-ghkm-phrase-orientation ";
         my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
         $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
       }
+
       if (&get("TRAINING:ghkm-source-labels")) {
         $cmd .= "-ghkm-source-labels ";
         my $source_labels_file = &versionize(&long_file_name("source-labels","model",""));
         $cmd .= "-ghkm-source-labels-file $source_labels_file ";
+      }
+
+      if (&get("TRAINING:ghkm-parts-of-speech")) {
+        $cmd .= "-ghkm-parts-of-speech ";
+        my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
+        $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
       }
     }
     
@@ -2474,6 +2491,12 @@ sub define_training_create_config {
       $cmd .= "-ghkm-source-labels ";
       my $source_labels_file = &versionize(&long_file_name("source-labels","model",""));
       $cmd .= "-ghkm-source-labels-file $source_labels_file ";
+    }
+
+    if (&get("TRAINING:ghkm-parts-of-speech")) {
+      $cmd .= "-ghkm-parts-of-speech ";
+      my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
+      $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
     }
 
     # sparse lexical features provide additional content for config file

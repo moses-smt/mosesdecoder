@@ -50,8 +50,8 @@ bool hierarchicalFlag = false;
 bool pcfgFlag = false;
 bool phraseOrientationFlag = false;
 bool treeFragmentsFlag = false;
+bool partsOfSpeechFlag = false;
 bool sourceSyntaxLabelsFlag = false;
-bool sourceSyntaxLabelSetFlag = false;
 bool sourceSyntaxLabelCountsLHSFlag = false;
 bool targetPreferenceLabelsFlag = false;
 bool unpairedExtractFormatFlag = false;
@@ -79,6 +79,8 @@ boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > tar
 std::set<std::string> sourceLabelSet;
 std::map<std::string,size_t> sourceLabels;
 std::vector<std::string> sourceLabelsByIndex;
+
+std::set<std::string> partsOfSpeechSet;
 
 boost::unordered_map<std::string,float> targetPreferenceLHSCounts;
 boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > ruleTargetLHSAndTargetPreferenceLHSJointCounts;
@@ -129,7 +131,7 @@ int main(int argc, char* argv[])
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--SourceLabels] [--SourceLabelSet] [--SourceLabelCountsLHS] [--TargetPreferenceLabels] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] [--TargetPreferenceLabels] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }
@@ -137,6 +139,7 @@ int main(int argc, char* argv[])
   std::string fileNameLex = argv[2];
   std::string fileNamePhraseTable = argv[3];
   std::string fileNameSourceLabelSet;
+  std::string fileNamePartsOfSpeechSet;
   std::string fileNameCountOfCounts;
   std::string fileNameFunctionWords;
   std::string fileNameLeftHandSideSourceLabelCounts;
@@ -163,11 +166,14 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--TreeFragments") == 0) {
       treeFragmentsFlag = true;
       std::cerr << "including tree fragment information from syntactic parse" << std::endl;
+    } else if (strcmp(argv[i],"--PartsOfSpeech") == 0) {
+      partsOfSpeechFlag = true;
+      std::cerr << "including parts-of-speech information from syntactic parse" << std::endl;
+      fileNamePartsOfSpeechSet = std::string(fileNamePhraseTable) + ".partsOfSpeech";
+      std::cerr << "writing parts-of-speech set to file " << fileNamePartsOfSpeechSet << std::endl;
     } else if (strcmp(argv[i],"--SourceLabels") == 0) {
       sourceSyntaxLabelsFlag = true;
       std::cerr << "including source label information" << std::endl;
-    } else if (strcmp(argv[i],"--SourceLabelSet") == 0) {
-      sourceSyntaxLabelSetFlag = true;
       fileNameSourceLabelSet = std::string(fileNamePhraseTable) + ".syntaxLabels.src";
       std::cerr << "writing source syntax label set to file " << fileNameSourceLabelSet << std::endl;
     } else if (strcmp(argv[i],"--SourceLabelCountsLHS") == 0) {
@@ -452,7 +458,7 @@ int main(int argc, char* argv[])
   }
 
   // source syntax labels
-  if (sourceSyntaxLabelsFlag && sourceSyntaxLabelSetFlag && !inverseFlag) {
+  if (sourceSyntaxLabelsFlag && !inverseFlag) {
     writeLabelSet( sourceLabelSet, fileNameSourceLabelSet );
   }
   if (sourceSyntaxLabelsFlag && sourceSyntaxLabelCountsLHSFlag && !inverseFlag) {
@@ -460,6 +466,11 @@ int main(int argc, char* argv[])
                                   targetLHSAndSourceLHSJointCounts,
                                   fileNameLeftHandSideSourceLabelCounts,
                                   fileNameLeftHandSideTargetSourceLabelCounts );
+  }
+
+  // parts-of-speech
+  if (partsOfSpeechFlag && !inverseFlag) {
+    writeLabelSet( partsOfSpeechSet, fileNamePartsOfSpeechSet );
   }
 
   // target preference labels
@@ -615,8 +626,8 @@ void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fi
   Moses::OutputFileStream out;
   bool success = out.Open(fileName.c_str());
   if (!success) {
-    std::cerr << "ERROR: could not open label set file "
-              << fileName << std::endl;
+    std::cerr << "ERROR: could not open file "
+              << fileName << " for writing" << std::endl;
     return;
   }
 
@@ -808,6 +819,15 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     const std::string *bestTreeFragment = phrasePair.FindBestPropertyValue("Tree");
     if (bestTreeFragment) {
       phraseTableFile << " {{Tree " << *bestTreeFragment << "}}";
+    }
+  }
+
+  // parts-of-speech
+  if (partsOfSpeechFlag && !inverseFlag) {
+    phrasePair.UpdateVocabularyFromValueTokens("POS", partsOfSpeechSet);
+    const std::string *bestPartOfSpeech = phrasePair.FindBestPropertyValue("POS");
+    if (bestPartOfSpeech) {
+      phraseTableFile << " {{POS " << *bestPartOfSpeech << "}}";
     }
   }
 
