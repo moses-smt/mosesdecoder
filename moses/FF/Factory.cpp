@@ -28,6 +28,7 @@
 #include "moses/FF/TargetNgramFeature.h"
 #include "moses/FF/PhraseBoundaryFeature.h"
 #include "moses/FF/PhrasePairFeature.h"
+#include "moses/FF/RulePairUnlexicalizedSource.h"
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/FF/SparseHieroReorderingFeature.h"
@@ -212,6 +213,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(TargetBigramFeature);
   MOSES_FNAME(TargetNgramFeature);
   MOSES_FNAME(PhrasePairFeature);
+  MOSES_FNAME(RulePairUnlexicalizedSource);
   MOSES_FNAME(LexicalReordering);
   MOSES_FNAME2("Generation", GenerationDictionary);
   MOSES_FNAME(BleuScoreFeature);

@@ -2206,10 +2206,13 @@ sub define_training_extract_phrases {
     $cmd .= "-corpus $corpus ";
     
     if (&get("TRAINING:hierarchical-rule-set")) {
-      my $glue_grammar_file = &get("TRAINING:glue-grammar");
-      $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model","")) 
-        unless $glue_grammar_file;
-      $cmd .= "-glue-grammar-file $glue_grammar_file ";
+      my $no_glue_grammar = &get("TRAINING:no-glue-grammar");
+      if (!defined($no_glue_grammar) || $no_glue_grammar eq "false") {
+        my $glue_grammar_file = &get("TRAINING:glue-grammar");
+        $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""))
+          unless $glue_grammar_file;
+        $cmd .= "-glue-grammar-file $glue_grammar_file ";
+      }
 
       if (&get("GENERAL:output-parser") && (&get("TRAINING:use-unknown-word-labels") || &get("TRAINING:use-unknown-word-soft-matches"))) {
         my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
@@ -2418,10 +2421,13 @@ sub get_config_tables {
     if (&get("TRAINING:hierarchical-rule-set")) {
       $extract_version = $RE_USE[$STEP_LOOKUP{"TRAINING:extract-phrases"}] 
 	  if defined($STEP_LOOKUP{"TRAINING:extract-phrases"});
-      my $glue_grammar_file = &get("TRAINING:glue-grammar");
-      $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
-        unless $glue_grammar_file;
-      $cmd .= "-glue-grammar-file $glue_grammar_file ";
+      my $no_glue_grammar = &get("TRAINING:no-glue-grammar");
+      if (!defined($no_glue_grammar) || $no_glue_grammar eq "false") {
+        my $glue_grammar_file = &get("TRAINING:glue-grammar");
+        $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version)
+          unless $glue_grammar_file;
+        $cmd .= "-glue-grammar-file $glue_grammar_file ";
+      }
     }
 
     # additional settings for syntax models
@@ -2721,6 +2727,7 @@ sub get_training_setting {
     my $parallel = &get("TRAINING:parallel");
     my $pcfg = &get("TRAINING:use-pcfg-feature");
     my $baseline_alignment = &get("TRAINING:baseline-alignment-model");
+    my $no_glue_grammar = &get("TRAINING:no-glue-grammar");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2740,7 +2747,7 @@ sub get_training_setting {
     $cmd .= "-xml " if $xml;
     $cmd .= "-target-syntax " if $target_syntax;
     $cmd .= "-source-syntax " if $source_syntax;
-    $cmd .= "-glue-grammar " if $hierarchical;
+    $cmd .= "-glue-grammar " if $hierarchical && (!defined($no_glue_grammar) || $no_glue_grammar eq "false");
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
     $cmd .= "-parallel " if $parallel;
     $cmd .= "-pcfg " if $pcfg;
