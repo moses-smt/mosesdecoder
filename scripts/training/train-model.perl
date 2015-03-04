@@ -2035,8 +2035,13 @@ sub create_ini {
      if ($_S2T) {
        $feature_name = "RuleTable";
      }
+     my $glue_weight = 1.0;
+     if ($_SOURCE_SYNTAX || $_TARGET_SYNTAX) {
+       $glue_weight = -100.0;
+     }
+
      $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
-     $weight_spec .= "TranslationModel$i= 1.0\n";
+     $weight_spec .= "TranslationModel$i= $glue_weight\n";
    }
 
    # generation model
