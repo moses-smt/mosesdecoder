@@ -3,6 +3,8 @@
 #include <string>
 #include <map>
 #include <limits>
+#include <set>
+#include <cmath>
 
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/PP/CountsPhraseProperty.h"
@@ -86,8 +88,44 @@ class TrainingLossBLEU : public TrainingLoss
 {
 public:
   virtual float operator()(const TargetPhrase &candidate, const TargetPhrase &correct, bool isCorrect) const {
-    return isCorrect ? 0.0 : 1.0;
+    std::multiset<std::string> refNgrams;
+    float precision = 1.0;
+
+    for (size_t size = 1; size <= BLEU_N; size++) {
+      for (int pos = 0; pos <= (int)correct.GetSize() - (int)size; pos++) {
+        refNgrams.insert(MakeNGram(correct, pos, pos + size));
+      }
+
+      int confirmed = 1; // we're BLEU+1
+      int total = 1;
+      for (int pos = 0; pos <= (int)candidate.GetSize() - (int)size; pos++) {
+        total++;
+        std::string ngram = MakeNGram(candidate, pos, pos + size);
+        std::multiset<std::string>::iterator it;
+        if ((it = refNgrams.find(ngram)) != refNgrams.end()) {
+          confirmed++;
+          refNgrams.erase(it);
+        }
+      }
+      precision *= (float)confirmed / total;
+    }
+
+    float brevityPenalty = exp((float)(1.0 - correct.GetSize()) / candidate.GetSize());
+
+    return 1.0 - brevityPenalty * pow(precision, (float)1.0 / BLEU_N);
   }
+
+private:
+  std::string MakeNGram(const TargetPhrase &phrase, size_t start, size_t end) const {
+    std::vector<std::string> words;
+    while (start != end) {
+      words.push_back(phrase.GetWord(start).GetString(StaticData::Instance().GetOutputFactorOrder(), false));
+      start++;
+    }
+    return Join(" ", words);
+  }
+
+  static const size_t BLEU_N = 2;
 };
 
 /**
@@ -150,6 +188,7 @@ public:
     }
 
     if (! m_trainingLoss) {
+      VERBOSE(1, "VW :: Using basic 1/0 loss calculation in training.\n");
       m_trainingLoss = (TrainingLoss *) new TrainingLossBasic();
     }
   }
