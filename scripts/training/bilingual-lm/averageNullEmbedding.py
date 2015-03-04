@@ -31,8 +31,8 @@ if __name__ == "__main__":
 
     model = load_model(options.input_model)
     if options.null_idx == -1:
-       options.null_index = model.word_to_index_input['<null>']
-    sys.stderr.write('index of <null>: {0}\n'.format(options.null_index))
+       options.null_idx = model.word_to_index_input['<null>']
+    sys.stderr.write('index of <null>: {0}\n'.format(options.null_idx))
     weights = numpy.array(get_weights(options.training_ngrams, len(model.input_embeddings)))
     model.input_embeddings[options.null_idx] = numpy.average(numpy.array(model.input_embeddings), weights=weights, axis=0)
     model.to_file(open(options.output_model,'w'))
