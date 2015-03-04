@@ -60,7 +60,10 @@ public:
       precision *= (float)confirmed / total;
     }
 
-    float brevityPenalty = exp((float)(1.0 - correct.GetSize()) / candidate.GetSize());
+    int c = candidate.GetSize();
+    int r = correct.GetSize();
+
+    float brevityPenalty = c < r ? exp((float)(1.0 - r) / c) : 1.0;
 
     return 1.0 - brevityPenalty * pow(precision, (float)1.0 / BLEU_N);
   }
