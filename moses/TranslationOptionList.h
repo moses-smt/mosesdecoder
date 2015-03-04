@@ -52,6 +52,7 @@ public:
   const TranslationOption *Get(size_t ind) const {
     return m_coll.at(ind);
   }
+
   void Remove( size_t ind ) {
     UTIL_THROW_IF2(ind >= m_coll.size(),
                    "Out of bound index " << ind);

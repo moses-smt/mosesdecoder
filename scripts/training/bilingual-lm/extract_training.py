@@ -147,19 +147,7 @@ def main():
 
   #Numberize the file
   for line in ngrams_file_handle:
-    line = line.split()
-    source_words = line[:(2*options.m + 1)]
-    target_words = line[-options.n:]
-
-    numberized_line = ""
-    for item in source_words:
-      numberized_line = numberized_line + str(svocab_idmap[item]) + " "
-
-    for item in target_words:
-      numberized_line = numberized_line + str(tvocab_idmap[item]) + " "  
-
-    #Write to file replacing the last space with new line
-    numberized_file_handle.write(numberized_line[:-1] + "\n")
+    numberized_file_handle.write(extract.numberize(line, m, n, tvocab_idmap, tvocab_idmap))
   numberized_file_handle.close()
   ngrams_file_handle.close()
 

@@ -12,11 +12,11 @@ import sys
 
 import extract
 
-def read_vocab(filename):
-  vocab = set()
-  for line in open(filename):
-    vocab.add(line[:-1])
-  return vocab
+def read_vocab(filename, offset=0):
+  vocab = {}
+  for i, line in enumerate(open(filename)):
+    vocab[line.strip()] = i+offset
+  return vocab, i+offset
 
 def main():
   logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
@@ -50,8 +50,8 @@ def main():
     LOG.error("info file is incomplete")
     sys.exit(1)
 
-  svocab = read_vocab(options.working_dir + "/vocab.source")
-  tvocab = read_vocab(options.working_dir + "/vocab.target") 
+  tvocab, offset = read_vocab(options.working_dir + "/vocab.target")
+  svocab, offset = read_vocab(options.working_dir + "/vocab.source", offset+1)
 
   file_stem = os.path.basename(options.corpus_stem)
   ofh = open(options.working_dir + "/" + file_stem + ".ngrams", "w")
@@ -66,6 +66,16 @@ def main():
                      n,
                      ofh)
 
+  numberized_file = options.working_dir + "/" + file_stem + ".numberized"
+  ngrams_file_handle = open(options.working_dir + "/" + file_stem + ".ngrams", 'r')
+  numberized_file_handle = open(numberized_file, 'w')
+
+  #Numberize the file
+  for line in ngrams_file_handle:
+    numberized_file_handle.write(extract.numberize(line, m, n, svocab, tvocab))
+
+  numberized_file_handle.close()
+  ngrams_file_handle.close()
 
 
 
