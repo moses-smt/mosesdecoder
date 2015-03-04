@@ -1,0 +1,8 @@
+if $(build-moses-server) = true
+{
+  fakelib mserver : [ glob *.cpp ] ;
+}
+else
+{
+  fakelib mserver ;
+}

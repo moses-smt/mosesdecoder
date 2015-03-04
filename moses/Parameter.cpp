@@ -215,6 +215,11 @@ Parameter::Parameter()
   AddParam("spe-src", "Simulated post-editing. Source filename");
   AddParam("spe-trg", "Simulated post-editing. Target filename");
   AddParam("spe-aln", "Simulated post-editing. Alignment filename");
+
+  AddParam("server", "Run moses as a translation server.");
+  AddParam("server-port", "Port for moses server");
+  AddParam("server-log", "Log destination for moses server");
+  AddParam("serial", "Run server in serial mode, processing only one request at a time.");
 }
 
 Parameter::~Parameter()

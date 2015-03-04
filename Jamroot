@@ -78,6 +78,10 @@ import path ;
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
 
+# check if we have xmlrpc-c's abyss server available
+# if yes, include server capabilities in the moses executable
+include $(TOP)/jam-files/server.jam ;
+
 boost 104400 ;
 external-lib z ;
 
@@ -175,6 +179,7 @@ project : requirements
   $(requirements)
   <include>.
   ;
+
 
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-projects lm util phrase-extract phrase-extract/syntax-common search moses moses/LM mert moses-cmd scripts regression-testing ;

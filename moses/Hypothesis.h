@@ -39,6 +39,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "ObjectPool.h"
 
+#ifdef HAVE_XMLRPC_C
+#include <xmlrpc-c/base.hpp>
+#endif 
+
 namespace Moses
 {
 
@@ -284,6 +288,13 @@ public:
   // creates a map of TARGET positions which should be replaced by word using placeholder
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
 
+#ifdef HAVE_XMLRPC_C
+  void OutputWordAlignment(vector<xmlrpc_c::value>& out) const;
+  void OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const;
+#endif 
+
+
+  
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
