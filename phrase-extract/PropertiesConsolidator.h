@@ -34,6 +34,7 @@ public:
   PropertiesConsolidator() : m_sourceLabelsFlag(false) {};
 
   void ActivateSourceLabelsProcessing(const std::string &sourceLabelSetFile);
+  void ActivatePartsOfSpeechProcessing(const std::string &partsOfSpeechFile);
 
   std::string ProcessPropertiesString(const std::string &propertiesString) const;
 
@@ -41,6 +42,8 @@ private:
 
   bool m_sourceLabelsFlag;
   std::map<std::string,size_t> m_sourceLabels;
+  bool m_partsOfSpeechFlag;
+  std::map<std::string,size_t> m_partsOfSpeechVocabulary;
 
 };
 

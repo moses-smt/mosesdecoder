@@ -672,6 +672,8 @@ void ExtractGHKM::WriteGlueGrammar(
   const size_t sourceLabelGlueX = 1;
   const size_t sourceLabelSentenceStart = 2;
   const size_t sourceLabelSentenceEnd = 3;
+  const size_t partOfSpeechSentenceStart = 0;
+  const size_t partOfSpeechSentenceEnd = 1;
 
   // basic rules
   out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
@@ -679,7 +681,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " [SSTART <s>]]}}";
   }
   if (options.partsOfSpeech) {
-    out << " {{POS SSTART}}";
+    out << " {{POS " << partOfSpeechSentenceStart << "}}";
   }
   if (options.sourceLabels) {
     out << " {{SourceLabels 2 1 " << sourceLabelSentenceStart << " 1 1 " << sourceLabelGlueTop << " 1}}";
@@ -694,7 +696,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [SEND </s>]]}}";
   }
   if (options.partsOfSpeech) {
-    out << " {{POS SEND}}";
+    out << " {{POS " << partOfSpeechSentenceEnd << "}}";
   }
   if (options.sourceLabels) {
     out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueTop << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
@@ -712,7 +714,7 @@ void ExtractGHKM::WriteGlueGrammar(
       out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
     }
     if (options.partsOfSpeech) {
-      out << " {{POS SSTART SEND}}";
+      out << " {{POS " << partOfSpeechSentenceStart << " " << partOfSpeechSentenceEnd << "}}";
     }
     if (options.sourceLabels) {
       out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueX << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";

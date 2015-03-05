@@ -57,6 +57,32 @@ void PropertiesConsolidator::ActivateSourceLabelsProcessing(const std::string &s
 }
 
 
+void PropertiesConsolidator::ActivatePartsOfSpeechProcessing(const std::string &partsOfSpeechFile)
+{
+  Moses::InputFileStream inFile(partsOfSpeechFile);
+
+  // read parts-of-speech vocabulary
+  m_partsOfSpeechVocabulary.clear();
+  std::string line;
+  while (getline(inFile, line)) {
+    std::istringstream tokenizer(line);
+    std::string label;
+    size_t index;
+    try {
+      tokenizer >> label >> index;
+    } catch (const std::exception &e) {
+      UTIL_THROW2("Error reading part-of-speech vocabulary file " << partsOfSpeechFile << " .");
+    }
+    std::pair< std::map<std::string,size_t>::iterator, bool > inserted = m_partsOfSpeechVocabulary.insert( std::pair<std::string,size_t>(label,index) );
+    UTIL_THROW_IF2(!inserted.second,"Part-of-speech vocabulary file " << partsOfSpeechFile << " should contain each POS tag only once.");
+  }
+
+  inFile.Close();
+
+  m_partsOfSpeechFlag = true;
+}
+
+
 std::string PropertiesConsolidator::ProcessPropertiesString(const std::string &propertiesString) const
 {
   if ( propertiesString.empty() ) {
@@ -76,11 +102,12 @@ std::string PropertiesConsolidator::ProcessPropertiesString(const std::string &p
     std::vector<std::string> keyValue = Moses::TokenizeFirstOnly(tok, " ");
     assert(keyValue.size() == 2);
 
+    // TODO: individual methods for different properties
     if ( !keyValue[0].compare("SourceLabels") ) {
 
       if ( m_sourceLabelsFlag ) {
 
-        // SourceLabels additional property: replace strings with vocabulary indices
+        // SourceLabels property: replace strings with vocabulary indices
         out << " {{" << keyValue[0];
 
         std::istringstream tokenizer(keyValue[1]);
@@ -141,13 +168,33 @@ std::string PropertiesConsolidator::ProcessPropertiesString(const std::string &p
 
         out << "}}";
 
-      } else { // don't process source labels additional property
+      } else { // don't process source labels property
+        out << " {{" << keyValue[0] << " " << keyValue[1] << "}}";
+      }
+
+    } else if ( !keyValue[0].compare("POS") ) {
+
+      if ( m_partsOfSpeechFlag ) {
+
+        // POS property: replace strings with vocabulary indices
+        out << " {{" << keyValue[0];
+        std::istringstream tokenizer(keyValue[1]);
+        while (tokenizer.peek() != EOF) {
+          std::string token;
+          tokenizer >> token;
+          std::map<std::string,size_t>::const_iterator found = m_partsOfSpeechVocabulary.find(token);
+          UTIL_THROW_IF2(found == m_partsOfSpeechVocabulary.end() ,"Part-of-speech \"" << token << "\" from the phrase table not found in given part-of-speech vocabulary.");
+          out << " " << found->second;
+        }
+        out << "}}";
+
+      } else { // don't process parts-of-speech property
         out << " {{" << keyValue[0] << " " << keyValue[1] << "}}";
       }
 
     } else {
 
-      // output other additional property
+      // output other propertyi
       out << " {{" << keyValue[0] << " " << keyValue[1] << "}}";
     }
   }
