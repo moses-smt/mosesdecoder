@@ -83,13 +83,12 @@ void PropertiesConsolidator::ActivatePartsOfSpeechProcessing(const std::string &
 }
 
 
-std::string PropertiesConsolidator::ProcessPropertiesString(const std::string &propertiesString) const
+void PropertiesConsolidator::ProcessPropertiesString(const std::string &propertiesString, Moses::OutputFileStream& out) const
 {
   if ( propertiesString.empty() ) {
-    return propertiesString;
+    return;
   }
 
-  std::ostringstream out;
   std::vector<std::string> toks;
   Moses::TokenizeMultiCharSeparator(toks, propertiesString, "{{");
   for (size_t i = 1; i < toks.size(); ++i) {
@@ -102,105 +101,150 @@ std::string PropertiesConsolidator::ProcessPropertiesString(const std::string &p
     std::vector<std::string> keyValue = Moses::TokenizeFirstOnly(tok, " ");
     assert(keyValue.size() == 2);
 
-    // TODO: individual methods for different properties
     if ( !keyValue[0].compare("SourceLabels") ) {
 
       if ( m_sourceLabelsFlag ) {
 
         // SourceLabels property: replace strings with vocabulary indices
         out << " {{" << keyValue[0];
-
-        std::istringstream tokenizer(keyValue[1]);
-
-        size_t nNTs;
-        double totalCount;
-
-        if (! (tokenizer >> nNTs)) { // first token: number of non-terminals (incl. left-hand side)
-          UTIL_THROW2("Not able to read number of non-terminals from SourceLabels property. "
-                      << "Flawed SourceLabels property?");
-        }
-        assert( nNTs > 0 );
-        out << " " << nNTs;
-
-        if (! (tokenizer >> totalCount)) { // second token: overall rule count
-          UTIL_THROW2("Not able to read overall rule count from SourceLabels property. "
-                      << "Flawed SourceLabels property?");
-        }
-        assert( totalCount > 0.0 );
-        out << " " << totalCount;
-
-        while (tokenizer.peek() != EOF) {
-          try {
-
-            size_t numberOfLHSsGivenRHS = std::numeric_limits<std::size_t>::max();
-
-            std::string token;
-
-            if (nNTs > 1) { // rule has right-hand side non-terminals, i.e. it's a hierarchical rule
-              for (size_t i=0; i<nNTs-1; ++i) { // RHS source non-terminal labels
-                tokenizer >> token; // RHS source non-terminal label
-                std::map<std::string,size_t>::const_iterator found = m_sourceLabels.find(token);
-                UTIL_THROW_IF2(found == m_sourceLabels.end(), "Label \"" << token << "\" from the phrase table not found in given label set.");
-                out << " " << found->second;
-              }
-
-              tokenizer >> token; // sourceLabelsRHSCount
-              out << " " << token;
-
-              tokenizer >> numberOfLHSsGivenRHS;
-              out << " " << numberOfLHSsGivenRHS;
-            }
-
-            for (size_t i=0; i<numberOfLHSsGivenRHS && tokenizer.peek()!=EOF; ++i) { // LHS source non-terminal labels seen with this RHS
-              tokenizer >> token; // LHS source non-terminal label
-              std::map<std::string,size_t>::const_iterator found = m_sourceLabels.find(token);
-              UTIL_THROW_IF2(found == m_sourceLabels.end() ,"Label \"" << token << "\" from the phrase table not found in given label set.");
-              out << " " << found->second;
-
-              tokenizer >> token; // ruleSourceLabelledCount
-              out << " " << token;
-            }
-
-          } catch (const std::exception &e) {
-            UTIL_THROW2("Flawed item in SourceLabels property?");
-          }
-        }
-
+        ProcessSourceLabelsPropertyValue(keyValue[1], out);
         out << "}}";
 
-      } else { // don't process source labels property
+      } else { // don't process SourceLabels property
         out << " {{" << keyValue[0] << " " << keyValue[1] << "}}";
       }
 
     } else if ( !keyValue[0].compare("POS") ) {
 
+/* DO NOTHING (property is not registered in the decoder at the moment)
       if ( m_partsOfSpeechFlag ) {
 
         // POS property: replace strings with vocabulary indices
         out << " {{" << keyValue[0];
-        std::istringstream tokenizer(keyValue[1]);
-        while (tokenizer.peek() != EOF) {
-          std::string token;
-          tokenizer >> token;
-          std::map<std::string,size_t>::const_iterator found = m_partsOfSpeechVocabulary.find(token);
-          UTIL_THROW_IF2(found == m_partsOfSpeechVocabulary.end() ,"Part-of-speech \"" << token << "\" from the phrase table not found in given part-of-speech vocabulary.");
-          out << " " << found->second;
-        }
+        ProcessPOSPropertyValue(keyValue[1], out);
         out << "}}";
 
-      } else { // don't process parts-of-speech property
+      } else { // don't process POS property
         out << " {{" << keyValue[0] << " " << keyValue[1] << "}}";
       }
+*/
 
     } else {
 
-      // output other propertyi
+      // output other property
       out << " {{" << keyValue[0] << " " << keyValue[1] << "}}";
     }
   }
-
-  return out.str();
 }
+
+
+void PropertiesConsolidator::ProcessSourceLabelsPropertyValue(const std::string &value, Moses::OutputFileStream& out) const
+{
+  // SourceLabels property: replace strings with vocabulary indices
+  std::istringstream tokenizer(value);
+
+  size_t nNTs;
+  double totalCount;
+
+  if (! (tokenizer >> nNTs)) { // first token: number of non-terminals (incl. left-hand side)
+    UTIL_THROW2("Not able to read number of non-terminals from SourceLabels property. "
+                << "Flawed SourceLabels property?");
+  }
+  assert( nNTs > 0 );
+  out << " " << nNTs;
+
+  if (! (tokenizer >> totalCount)) { // second token: overall rule count
+    UTIL_THROW2("Not able to read overall rule count from SourceLabels property. "
+                << "Flawed SourceLabels property?");
+  }
+  assert( totalCount > 0.0 );
+  out << " " << totalCount;
+
+  while (tokenizer.peek() != EOF) {
+    try {
+
+      size_t numberOfLHSsGivenRHS = std::numeric_limits<std::size_t>::max();
+
+      std::string token;
+
+      if (nNTs > 1) { // rule has right-hand side non-terminals, i.e. it's a hierarchical rule
+        for (size_t i=0; i<nNTs-1; ++i) { // RHS source non-terminal labels
+          tokenizer >> token; // RHS source non-terminal label
+          std::map<std::string,size_t>::const_iterator found = m_sourceLabels.find(token);
+          UTIL_THROW_IF2(found == m_sourceLabels.end(), "Label \"" << token << "\" from the phrase table not found in given label set.");
+          out << " " << found->second;
+        }
+
+        tokenizer >> token; // sourceLabelsRHSCount
+        out << " " << token;
+
+        tokenizer >> numberOfLHSsGivenRHS;
+        out << " " << numberOfLHSsGivenRHS;
+      }
+
+      for (size_t i=0; i<numberOfLHSsGivenRHS && tokenizer.peek()!=EOF; ++i) { // LHS source non-terminal labels seen with this RHS
+        tokenizer >> token; // LHS source non-terminal label
+        std::map<std::string,size_t>::const_iterator found = m_sourceLabels.find(token);
+        UTIL_THROW_IF2(found == m_sourceLabels.end() ,"Label \"" << token << "\" from the phrase table not found in given label set.");
+        out << " " << found->second;
+
+        tokenizer >> token; // ruleSourceLabelledCount
+        out << " " << token;
+      }
+
+    } catch (const std::exception &e) {
+      UTIL_THROW2("Flawed item in SourceLabels property?");
+    }
+  }
+}
+
+
+void PropertiesConsolidator::ProcessPOSPropertyValue(const std::string &value, Moses::OutputFileStream& out) const
+{
+  std::istringstream tokenizer(value);
+  while (tokenizer.peek() != EOF) {
+    std::string token;
+    tokenizer >> token;
+    std::map<std::string,size_t>::const_iterator found = m_partsOfSpeechVocabulary.find(token);
+    UTIL_THROW_IF2(found == m_partsOfSpeechVocabulary.end() ,"Part-of-speech \"" << token << "\" from the phrase table not found in given part-of-speech vocabulary.");
+    out << " " << found->second;
+  }
+}
+
+
+bool PropertiesConsolidator::GetPOSPropertyValueFromPropertiesString(const std::string &propertiesString, std::vector<std::string>& out) const
+{
+  out.clear();
+  if ( propertiesString.empty() ) {
+    return false;
+  }
+
+  std::vector<std::string> toks;
+  Moses::TokenizeMultiCharSeparator(toks, propertiesString, "{{");
+  for (size_t i = 1; i < toks.size(); ++i) {
+    std::string &tok = toks[i];
+    if (tok.empty()) {
+      continue;
+    }
+    size_t endPos = tok.rfind("}");
+    tok = tok.substr(0, endPos - 1);
+    std::vector<std::string> keyValue = Moses::TokenizeFirstOnly(tok, " ");
+    assert(keyValue.size() == 2);
+
+    if ( !keyValue[0].compare("POS") ) {
+      std::istringstream tokenizer(keyValue[1]);
+      while (tokenizer.peek() != EOF) {
+        std::string token;
+        tokenizer >> token;
+        out.push_back(token);
+      }
+      return true;
+    }
+  }
+
+  return false;
+}
+
 
 }  // namespace MosesTraining
 

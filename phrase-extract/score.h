@@ -18,7 +18,7 @@
  ***********************************************************************/
 
 #include <string>
-#include <vector>
+#include <map>
 
 namespace MosesTraining
 {
