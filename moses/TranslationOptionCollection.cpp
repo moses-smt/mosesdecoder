@@ -378,9 +378,9 @@ CreateTranslationOptions()
       }
     }
   }
-  VERBOSE(3,"Translation Option Collection\n " << *this << endl);
   ProcessUnknownWord();
   EvaluateWithSourceContext();
+  VERBOSE(3,"Translation Option Collection\n " << *this << endl);
   Prune();
   Sort();
   CalcFutureScore(); // future score matrix
