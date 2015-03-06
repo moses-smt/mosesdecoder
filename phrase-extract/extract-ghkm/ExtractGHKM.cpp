@@ -674,15 +674,17 @@ void ExtractGHKM::WriteGlueGrammar(
   const size_t sourceLabelSentenceEnd = 3;
   const size_t partOfSpeechSentenceStart = 0;
   const size_t partOfSpeechSentenceEnd = 1;
-  std::string sentenceStart = "<s>";
-  std::string sentenceEnd = "</s>";
+  std::string sentenceStartSource = "<s>";
+  std::string sentenceEndSource = "</s>";
+  std::string sentenceStartTarget = "<s>";
+  std::string sentenceEndTarget = "</s>";
   if (options.partsOfSpeech) {
-    sentenceStart = sentenceStart + "|" + sentenceStart;
-    sentenceEnd = sentenceEnd + "|" + sentenceEnd;
+    sentenceStartTarget = sentenceStartTarget + "|" + sentenceStartTarget;
+    sentenceEndTarget = sentenceEndTarget + "|" + sentenceEndTarget;
   }
 
   // basic rules
-  out << sentenceStart << " [X] ||| " << sentenceStart << " [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
+  out << sentenceStartSource << " [X] ||| " << sentenceStartTarget << " [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
   if (options.treeFragments) {
     out << " {{Tree [" << topLabel << " [SSTART <s>]]}}";
   }
@@ -697,7 +699,7 @@ void ExtractGHKM::WriteGlueGrammar(
   }
   out << std::endl;
 
-  out << "[X][" << topLabel << "] " << sentenceEnd << " [X] ||| [X][" << topLabel << "] " << sentenceEnd << " [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
+  out << "[X][" << topLabel << "] " << sentenceEndSource << " [X] ||| [X][" << topLabel << "] " << sentenceEndTarget << " [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
   if (options.treeFragments) {
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [SEND </s>]]}}";
   }
@@ -715,7 +717,7 @@ void ExtractGHKM::WriteGlueGrammar(
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << sentenceStart << " [X][" << i->first << "] " << sentenceEnd << " [X] ||| " << sentenceStart << " [X][" << i->first << "] " << sentenceEnd << " [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
+    out << sentenceStartSource << " [X][" << i->first << "] " << sentenceEndSource << " [X] ||| " << sentenceStartTarget << " [X][" << i->first << "] " << sentenceEndTarget << " [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
     if (options.treeFragments) {
       out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
     }
