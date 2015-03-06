@@ -480,7 +480,12 @@ FFState* BilingualLM::EvaluateWhenApplied(
   }
   size_t new_state = getStateChart(neuralLMids);
 
-  accumulator->PlusEquals(this, -accumulator->GetScoreForProducer(this));
+  // we're rescoring the full hypothesis, so we need to detract scores from previous hypos
+  for (std::vector<const ChartHypothesis*>::const_iterator iter = cur_hypo.GetPrevHypos().begin(); iter != cur_hypo.GetPrevHypos().end(); ++iter) {
+    const ChartHypothesis &prevHypo = **iter;
+    value -= (prevHypo.GetScoreBreakdown().GetScoreForProducer(this));
+  }
+
   accumulator->PlusEquals(this, value);
 
   return new BilingualLMState(new_state, alignments, neuralLMids);
