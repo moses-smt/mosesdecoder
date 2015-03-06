@@ -1331,6 +1331,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.h</locationURI>
 		</link>
 		<link>
+			<name>FF/RulePairUnlexicalizedSource.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RulePairUnlexicalizedSource.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/RulePairUnlexicalizedSource.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RulePairUnlexicalizedSource.h</locationURI>
+		</link>
+		<link>
 			<name>FF/RuleScope.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleScope.cpp</locationURI>

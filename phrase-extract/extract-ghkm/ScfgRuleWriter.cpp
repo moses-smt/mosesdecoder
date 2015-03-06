@@ -191,18 +191,5 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
   }
 }
 
-void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g, size_t lineNum, bool printEndl)
-{
-  Write(rule,lineNum,false);
-  m_fwd << " {{Tree ";
-  g.PrintTree(m_fwd);
-  m_fwd << "}}";
-
-  if (printEndl) {
-    m_fwd << std::endl;
-    m_inv << std::endl;
-  }
-}
-
 }  // namespace GHKM
 }  // namespace Moses

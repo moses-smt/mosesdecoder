@@ -40,6 +40,7 @@ public:
     , maxRuleSize(3)
     , maxScope(3)
     , minimal(false)
+    , partsOfSpeech(false)
     , pcfg(false)
     , phraseOrientation(false)
     , sentenceOffset(0)
@@ -68,6 +69,7 @@ public:
   int maxRuleSize;
   int maxScope;
   bool minimal;
+  bool partsOfSpeech;
   bool pcfg;
   bool phraseOrientation;
   int sentenceOffset;

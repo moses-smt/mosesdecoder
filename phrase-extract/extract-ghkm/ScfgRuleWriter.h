@@ -44,8 +44,6 @@ public:
 
   void Write(const ScfgRule &rule, size_t lineNum, bool printEndl=true);
 
-  void Write(const ScfgRule &rule, const Subgraph &g, size_t lineNum, bool printEndl=true);
-
 private:
   // Disallow copying
   ScfgRuleWriter(const ScfgRuleWriter &);

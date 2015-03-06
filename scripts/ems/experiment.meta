@@ -20,7 +20,7 @@ clean
 	out: clean-stem
 	default-name: corpus/clean
 	ignore-if: cleaner
-	rerun-on-change: max-sentence-length $moses-script-dir/training/clean-corpus-n.perl clean-options
+	rerun-on-change: max-sentence-length $moses-script-dir/training/clean-corpus-n.perl
 	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length OUT.lines-retained
 	error: there is a blank factor
 	error: is too long! at
@@ -28,7 +28,7 @@ custom-clean
 	in: tokenized-stem
 	out: clean-stem
 	default-name: corpus/clean
-	pass-unless: cleaner
+	ignore-unless: cleaner
 	rerun-on-change: max-sentence-length cleaner
 	template: $cleaner IN $input-extension $output-extension OUT 1 $max-sentence-length OUT.lines-retained
 	error: there is a blank factor

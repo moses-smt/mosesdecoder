@@ -293,10 +293,16 @@ int ExtractGHKM::Main(int argc, char *argv[])
         }
         // TODO Can scope pruning be done earlier?
         if (r->Scope() <= options.maxScope) {
-          if (!options.treeFragments) {
-            scfgWriter.Write(*r,lineNum,false);
-          } else {
-            scfgWriter.Write(*r,**q,lineNum,false);
+          scfgWriter.Write(*r,lineNum,false);
+          if (options.treeFragments) {
+            fwdExtractStream << " {{Tree ";
+            (*q)->PrintTree(fwdExtractStream);
+            fwdExtractStream << "}}";
+          }
+          if (options.partsOfSpeech) {
+            fwdExtractStream << " {{POS";
+            (*q)->PrintPartsOfSpeech(fwdExtractStream);
+            fwdExtractStream << "}}";
           }
           if (options.phraseOrientation) {
             fwdExtractStream << " {{Orientation ";
@@ -459,6 +465,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "set maximum allowed scope")
   ("Minimal",
    "extract minimal rules only")
+  ("PartsOfSpeech",
+   "output parts-of-speech information (preterminals from the parse tree)")
   ("PCFG",
    "include score based on PCFG scores in target corpus")
   ("PhraseOrientation",
@@ -571,6 +579,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("Minimal")) {
     options.minimal = true;
   }
+  if (vm.count("PartsOfSpeech")) {
+    options.partsOfSpeech = true;
+  }
   if (vm.count("PCFG")) {
     options.pcfg = true;
   }
@@ -661,12 +672,23 @@ void ExtractGHKM::WriteGlueGrammar(
   const size_t sourceLabelGlueX = 1;
   const size_t sourceLabelSentenceStart = 2;
   const size_t sourceLabelSentenceEnd = 3;
+  const size_t partOfSpeechSentenceStart = 0;
+  const size_t partOfSpeechSentenceEnd = 1;
+  std::string sentenceStart = "<s>";
+  std::string sentenceEnd = "</s>";
+  if (options.partsOfSpeech) {
+    sentenceStart = sentenceStart + "|" + sentenceStart;
+    sentenceEnd = sentenceEnd + "|" + sentenceEnd;
+  }
 
   // basic rules
-  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
+  out << sentenceStart << " [X] ||| " << sentenceStart << " [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
   if (options.treeFragments) {
     out << " {{Tree [" << topLabel << " [SSTART <s>]]}}";
   }
+//  if (options.partsOfSpeech) {
+//    out << " {{POS " << partOfSpeechSentenceStart << "}}";
+//  }
   if (options.sourceLabels) {
     out << " {{SourceLabels 2 1 " << sourceLabelSentenceStart << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
@@ -675,10 +697,13 @@ void ExtractGHKM::WriteGlueGrammar(
   }
   out << std::endl;
 
-  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
+  out << "[X][" << topLabel << "] " << sentenceEnd << " [X] ||| [X][" << topLabel << "] " << sentenceEnd << " [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
   if (options.treeFragments) {
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [SEND </s>]]}}";
   }
+//  if (options.partsOfSpeech) {
+//    out << " {{POS " << partOfSpeechSentenceEnd << "}}";
+//  }
   if (options.sourceLabels) {
     out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueTop << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
@@ -690,10 +715,13 @@ void ExtractGHKM::WriteGlueGrammar(
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
+    out << sentenceStart << " [X][" << i->first << "] " << sentenceEnd << " [X] ||| " << sentenceStart << " [X][" << i->first << "] " << sentenceEnd << " [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
     if (options.treeFragments) {
       out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
     }
+//    if (options.partsOfSpeech) {
+//      out << " {{POS " << partOfSpeechSentenceStart << " " << partOfSpeechSentenceEnd << "}}";
+//    }
     if (options.sourceLabels) {
       out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueX << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
     }
