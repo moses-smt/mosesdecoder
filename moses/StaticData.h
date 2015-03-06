@@ -365,6 +365,16 @@ public:
     if (m_reportSegmentationEnriched) return 2;
     return 0;
   }
+  void SetReportSegmentation(const int &val) {
+    if (val == 0)
+      m_reportSegmentation = m_reportSegmentationEnriched = false;
+    else if (val == 1)
+      m_reportSegmentation = true;
+    else if (val == 2)
+      m_reportSegmentationEnriched = true;
+    else
+      std::cerr << "Warning: Invalid value for reportSegmentation (0 - 2)!  Ignoring";
+  }
   bool GetReportAllFactors() const {
     return m_reportAllFactors;
   }
