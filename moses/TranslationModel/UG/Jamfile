@@ -9,6 +9,17 @@ $(TOP)/moses/TranslationModel/UG//mmsapt
 $(TOP)/util//kenutil 
 ; 
 
+exe filterpt-ug : 
+filter-pt.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
 exe try-align2 : 
 try-align2.cc 
 $(TOP)/moses//moses
