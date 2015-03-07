@@ -175,7 +175,7 @@ void PhraseTableCreator::PrintInfo()
   std::cerr << "\tSingle Huffman code set for score components: " << (m_multipleScoreTrees ? "no" : "yes") << std::endl;
   std::cerr << "\tUsing score quantization: ";
   if(m_quantize)
-    std::cerr << m_quantize << " best" << std::endl;
+    std::cerr << "2^" << m_quantize << " = " << (1ULL << m_quantize) << " bins" << std::endl;
   else
     std::cerr << "no" << std::endl;
   std::cerr << "\tExplicitly included alignment information: " << (m_useAlignmentInfo ? "yes" : "no") << std::endl;
