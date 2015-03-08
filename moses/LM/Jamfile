@@ -52,12 +52,12 @@ if $(with-srilm) {
   if $(with-maxent-srilm) {
   	lib lbfgs : : $(sri-lib) ;
   	obj MaxEntSRI.o : MaxEntSRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/lm/src <include>$(with-srilm)/include/srilm <warnings>off ;
-  	alias sri : SRI.o MaxEntSRI.o ParallelBackoff.o lbfgs sri-libs : : : <define>LM_SRI <define>LM_MAXENT_SRI ;
+  	alias sri : SRI.o MaxEntSRI.o ParallelBackoff.o lbfgs sri-libs : : : <define>LM_SRI <define>LM_MAXENT_SRI <linkflags>-fopenmp ;
   	dependencies += sri ;
   	lmmacros += LM_SRI ;
   	lmmacros += LM_MAXENT_SRI ;  	
   } else {
-  	alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
+  	alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI <linkflags>-fopenmp ;
   	dependencies += sri ;
   	lmmacros += LM_SRI ;
   }
