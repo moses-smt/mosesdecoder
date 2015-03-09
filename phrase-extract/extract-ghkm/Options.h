@@ -18,8 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_OPTIONS_H_
-#define EXTRACT_GHKM_OPTIONS_H_
 
 #include <string>
 
@@ -41,6 +39,7 @@ public:
     , maxScope(3)
     , minimal(false)
     , partsOfSpeech(false)
+    , partsOfSpeechFactor(false)
     , pcfg(false)
     , phraseOrientation(false)
     , sentenceOffset(0)
@@ -70,6 +69,7 @@ public:
   int maxScope;
   bool minimal;
   bool partsOfSpeech;
+  bool partsOfSpeechFactor;
   bool pcfg;
   bool phraseOrientation;
   int sentenceOffset;
@@ -89,4 +89,3 @@ public:
 }  // namespace GHKM
 }  // namespace Moses
 
-#endif

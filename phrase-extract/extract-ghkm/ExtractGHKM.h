@@ -18,8 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_EXTRACT_GHKM_H_
-#define EXTRACT_GHKM_EXTRACT_GHKM_H_
 
 #include <map>
 #include <ostream>
@@ -81,4 +79,3 @@ private:
 }  // namespace GHKM
 }  // namespace Moses
 
-#endif

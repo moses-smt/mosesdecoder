@@ -18,8 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_RULE_WRITER_H_
-#define EXTRACT_GHKM_RULE_WRITER_H_
 
 #include "Subgraph.h"
 
@@ -61,4 +59,3 @@ private:
 }  // namespace GHKM
 }  // namespace Moses
 
-#endif

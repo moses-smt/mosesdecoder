@@ -18,8 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_SCFG_RULE_H_
-#define EXTRACT_GHKM_SCFG_RULE_H_
 
 #include "Alignment.h"
 #include "Rule.h"
@@ -45,6 +43,9 @@ public:
   ScfgRule(const Subgraph &fragment,
            const MosesTraining::SyntaxTree *sourceSyntaxTree = 0);
 
+  const Subgraph &GetGraphFragment() const {
+    return m_graphFragment;
+  }
   const Symbol &GetSourceLHS() const {
     return m_sourceLHS;
   }
@@ -81,6 +82,7 @@ private:
                        const Node *node,
                        const std::string &nonMatchingLabel);
 
+  const Subgraph& m_graphFragment;
   Symbol m_sourceLHS;
   Symbol m_targetLHS;
   std::vector<Symbol> m_sourceRHS;
@@ -94,4 +96,3 @@ private:
 }  // namespace GHKM
 }  // namespace Moses
 
-#endif

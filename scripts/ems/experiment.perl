@@ -2249,6 +2249,10 @@ sub define_training_extract_phrases {
         my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
         $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
       }
+
+      if (&get("TRAINING:ghkm-parts-of-speech-factor")) {
+        $cmd .= "-ghkm-parts-of-speech-factor ";
+      }
     }
 
     my $extract_settings = &get("TRAINING:extract-settings");

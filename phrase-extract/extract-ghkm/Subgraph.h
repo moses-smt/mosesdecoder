@@ -18,8 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_SUBGRAPH_H_
-#define EXTRACT_GHKM_SUBGRAPH_H_
 
 #include "Node.h"
 
@@ -118,6 +116,7 @@ public:
   void GetTargetLeaves(std::vector<const Node *> &) const;
   void PrintTree(std::ostream &out) const;
   void PrintPartsOfSpeech(std::ostream &out) const;
+  void GetPartsOfSpeech(std::vector<std::string> &out) const;
 
 private:
   void GetTargetLeaves(const Node *, std::vector<const Node *> &) const;
@@ -127,6 +126,7 @@ private:
   int CountNodes(const Node *) const;
   void RecursivelyPrintTree(const Node *n, std::ostream &out) const;
   void RecursivelyPrintPartsOfSpeech(const Node *n, std::ostream &out) const;
+  void RecursivelyGetPartsOfSpeech(const Node *n, std::vector<std::string> &out) const;
 
   const Node *m_root;
   std::set<const Node *> m_leaves;
@@ -139,4 +139,3 @@ private:
 }  // namespace GHKM
 }  // namespace Moses
 
-#endif
