@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WIN32
 #include <hash_set>
 #else
-#include <ext/hash_set>
+// #include <ext/hash_set>
 #endif
 
 #include <algorithm>
