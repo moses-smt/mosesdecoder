@@ -674,15 +674,23 @@ void ExtractGHKM::WriteGlueGrammar(
   const size_t sourceLabelSentenceEnd = 3;
   const size_t partOfSpeechSentenceStart = 0;
   const size_t partOfSpeechSentenceEnd = 1;
+  std::string sentenceStartSource = "<s>";
+  std::string sentenceEndSource = "</s>";
+  std::string sentenceStartTarget = "<s>";
+  std::string sentenceEndTarget = "</s>";
+  if (options.partsOfSpeech) {
+    sentenceStartTarget = sentenceStartTarget + "|" + sentenceStartTarget;
+    sentenceEndTarget = sentenceEndTarget + "|" + sentenceEndTarget;
+  }
 
   // basic rules
-  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
+  out << sentenceStartSource << " [X] ||| " << sentenceStartTarget << " [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
   if (options.treeFragments) {
     out << " {{Tree [" << topLabel << " [SSTART <s>]]}}";
   }
-  if (options.partsOfSpeech) {
-    out << " {{POS " << partOfSpeechSentenceStart << "}}";
-  }
+//  if (options.partsOfSpeech) {
+//    out << " {{POS " << partOfSpeechSentenceStart << "}}";
+//  }
   if (options.sourceLabels) {
     out << " {{SourceLabels 2 1 " << sourceLabelSentenceStart << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
@@ -691,13 +699,13 @@ void ExtractGHKM::WriteGlueGrammar(
   }
   out << std::endl;
 
-  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
+  out << "[X][" << topLabel << "] " << sentenceEndSource << " [X] ||| [X][" << topLabel << "] " << sentenceEndTarget << " [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
   if (options.treeFragments) {
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [SEND </s>]]}}";
   }
-  if (options.partsOfSpeech) {
-    out << " {{POS " << partOfSpeechSentenceEnd << "}}";
-  }
+//  if (options.partsOfSpeech) {
+//    out << " {{POS " << partOfSpeechSentenceEnd << "}}";
+//  }
   if (options.sourceLabels) {
     out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueTop << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
@@ -709,13 +717,13 @@ void ExtractGHKM::WriteGlueGrammar(
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
+    out << sentenceStartSource << " [X][" << i->first << "] " << sentenceEndSource << " [X] ||| " << sentenceStartTarget << " [X][" << i->first << "] " << sentenceEndTarget << " [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
     if (options.treeFragments) {
       out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
     }
-    if (options.partsOfSpeech) {
-      out << " {{POS " << partOfSpeechSentenceStart << " " << partOfSpeechSentenceEnd << "}}";
-    }
+//    if (options.partsOfSpeech) {
+//      out << " {{POS " << partOfSpeechSentenceStart << " " << partOfSpeechSentenceEnd << "}}";
+//    }
     if (options.sourceLabels) {
       out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueX << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
     }

@@ -27,9 +27,9 @@ if $(with-irstlm) {
 local with-srilm = [ option.get "with-srilm" ] ;
 local with-maxent-srilm = [ option.get "with-maxent-srilm" ] ;
 if $(with-srilm) {
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking with the SRILM library; Do NOT use version >= 1.7.1 !!!" ;
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  #echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  #echo "!!! You are linking with the SRILM library; Do NOT use version >= 1.7.1 !!!" ;
+  #echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
 
   if [ option.get "with-srilm-dynamic" : no : yes ] = yes {
     lib srilm ;
@@ -52,12 +52,12 @@ if $(with-srilm) {
   if $(with-maxent-srilm) {
   	lib lbfgs : : $(sri-lib) ;
   	obj MaxEntSRI.o : MaxEntSRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/lm/src <include>$(with-srilm)/include/srilm <warnings>off ;
-  	alias sri : SRI.o MaxEntSRI.o ParallelBackoff.o lbfgs sri-libs : : : <define>LM_SRI <define>LM_MAXENT_SRI ;
+  	alias sri : SRI.o MaxEntSRI.o ParallelBackoff.o lbfgs sri-libs : : : <define>LM_SRI <define>LM_MAXENT_SRI <linkflags>-fopenmp ;
   	dependencies += sri ;
   	lmmacros += LM_SRI ;
   	lmmacros += LM_MAXENT_SRI ;  	
   } else {
-  	alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
+  	alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI <linkflags>-fopenmp ;
   	dependencies += sri ;
   	lmmacros += LM_SRI ;
   }

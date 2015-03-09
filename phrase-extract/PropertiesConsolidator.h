@@ -22,6 +22,9 @@
 
 #include <string>
 #include <map>
+#include <vector>
+
+#include "OutputFileStream.h"
 
 
 namespace MosesTraining
@@ -36,9 +39,14 @@ public:
   void ActivateSourceLabelsProcessing(const std::string &sourceLabelSetFile);
   void ActivatePartsOfSpeechProcessing(const std::string &partsOfSpeechFile);
 
-  std::string ProcessPropertiesString(const std::string &propertiesString) const;
+  bool GetPOSPropertyValueFromPropertiesString(const std::string &propertiesString, std::vector<std::string>& out) const;
 
-private:
+  void ProcessPropertiesString(const std::string &propertiesString, Moses::OutputFileStream& out) const;
+
+protected:
+
+  void ProcessSourceLabelsPropertyValue(const std::string &value, Moses::OutputFileStream& out) const;
+  void ProcessPOSPropertyValue(const std::string &value, Moses::OutputFileStream& out) const;
 
   bool m_sourceLabelsFlag;
   std::map<std::string,size_t> m_sourceLabels;

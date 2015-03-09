@@ -25,7 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "tables-core.h"
+#include "moses/Util.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 #include "PropertiesConsolidator.h"
@@ -41,12 +41,18 @@ bool kneserNeyFlag = false;
 bool sourceLabelsFlag = false;
 bool partsOfSpeechFlag = false;
 bool logProbFlag = false;
+bool countsProperty = false;
 float minScore0 = 0;
 float minScore2 = 0;
 
 inline float maybeLogProb( float a )
 {
-  return logProbFlag ? log(a) : a;
+  return logProbFlag ? std::log(a) : a;
+}
+
+inline bool isNonTerminal( const std::string &word )
+{
+  return (word.length()>=3 && word[0] == '[' && word[word.length()-1] == ']');
 }
 
 void processFiles( char*, char*, char*, char*, char*, char* );
@@ -122,6 +128,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
+    } else if (strcmp(argv[i],"--Counts") == 0) {
+      countsProperty = true;
+      cerr << "output counts as a property\n";
     } else if (strcmp(argv[i],"--SourceLabels") == 0) {
       sourceLabelsFlag = true;
       if (i+1==argc) {
@@ -294,8 +303,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     breakdownCoreAndSparse( itemDirect[3], directScores, directSparseScores );
     breakdownCoreAndSparse( itemIndirect[3], indirectScores, indirectSparseScores );
 
-    vector<string> directCounts = tokenize(itemDirect[4].c_str());
-    vector<string> indirectCounts = tokenize(itemIndirect[4].c_str());
+    vector<string> directCounts = Moses::Tokenize(itemDirect[4]);
+    vector<string> indirectCounts = Moses::Tokenize(itemIndirect[4]);
     float countF = atof(directCounts[0].c_str());
     float countE = atof(indirectCounts[0].c_str());
     float countEF = atof(indirectCounts[1].c_str());
@@ -334,8 +343,32 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
       continue;
     }
 
-    // output hierarchical phrase pair (with separated labels)
-    fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " |||";
+    // output phrase pair
+    fileConsolidated << itemDirect[0] << " ||| ";
+
+    if (partsOfSpeechFlag) {
+      // write POS factor from property
+      std::vector<std::string> targetTokens = Moses::Tokenize(itemDirect[1]);
+      std::vector<std::string> propertyValuePOS;
+      propertiesConsolidator.GetPOSPropertyValueFromPropertiesString(itemDirect[5], propertyValuePOS);
+      size_t targetTerminalIndex = 0;
+      for (std::vector<std::string>::const_iterator targetTokensIt=targetTokens.begin();
+           targetTokensIt!=targetTokens.end(); ++targetTokensIt) {
+        fileConsolidated << *targetTokensIt;
+        if (!isNonTerminal(*targetTokensIt)) {
+          assert(propertyValuePOS.size() > targetTerminalIndex);
+          fileConsolidated << "|" << propertyValuePOS[targetTerminalIndex];
+          ++targetTerminalIndex;
+        }
+        fileConsolidated << " ";
+      }
+      fileConsolidated << "|||";
+
+    } else {
+
+      fileConsolidated << itemDirect[1] << " |||";
+    }
+
 
     // prob indirect
     if (!onlyDirectFlag) {
@@ -354,7 +387,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 
     // low count feature
     if (lowCountFlag) {
-      fileConsolidated << " " << maybeLogProb(exp(-1.0/countEF));
+      fileConsolidated << " " << maybeLogProb(std::exp(-1.0/countEF));
     }
 
     // count bin feature (as a core feature)
@@ -405,8 +438,13 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // arbitrary key-value pairs
     fileConsolidated << " |||";
     if (itemDirect.size() >= 6) {
+      propertiesConsolidator.ProcessPropertiesString(itemDirect[5], fileConsolidated);
+    }
+
+    if (countsProperty) {
+      fileConsolidated << " {{Counts " << countE << " " << countF << " " << countEF << "}}";
       //if (sourceLabelsFlag) {
-      fileConsolidated << propertiesConsolidator.ProcessPropertiesString(itemDirect[5]);
+      propertiesConsolidator.ProcessPropertiesString(itemDirect[5], fileConsolidated);
       //} else {
       //  fileConsolidated << itemDirect[5];
       //}
@@ -423,7 +461,7 @@ void breakdownCoreAndSparse( string combined, string &core, string &sparse )
 {
   core = "";
   sparse = "";
-  vector<string> score = tokenize( combined.c_str() );
+  vector<string> score = Moses::Tokenize( combined );
   for(size_t i=0; i<score.size(); i++) {
     if ((score[i][0] >= '0' && score[i][0] <= '9') || i+1 == score.size())
       core += " " + score[i];
