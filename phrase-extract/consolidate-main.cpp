@@ -443,11 +443,6 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 
     if (countsProperty) {
       fileConsolidated << " {{Counts " << countE << " " << countF << " " << countEF << "}}";
-      //if (sourceLabelsFlag) {
-      propertiesConsolidator.ProcessPropertiesString(itemDirect[5], fileConsolidated);
-      //} else {
-      //  fileConsolidated << itemDirect[5];
-      //}
     }
 
     fileConsolidated << endl;
