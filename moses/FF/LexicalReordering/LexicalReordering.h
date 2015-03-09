@@ -9,6 +9,7 @@
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/WordsRange.h"
+#include "moses/TranslationOption.h"
 
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "util/exception.hh"
@@ -94,6 +95,14 @@ public:
   GetDefaultScore( size_t i ) {
     return m_defaultScores[i];
   }
+
+  virtual
+  void
+  SetCache(TranslationOption& to) const;
+
+  virtual
+  void
+  SetCache(TranslationOptionList& tol) const;
 
 private:
   bool DecodeCondition(std::string s);

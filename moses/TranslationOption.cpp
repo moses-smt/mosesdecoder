@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "StaticData.h"
 #include "InputType.h"
+#include "moses/FF/LexicalReordering/LexicalReordering.h"
 
 using namespace std;
 
@@ -35,8 +36,7 @@ TranslationOption::TranslationOption()
   :m_targetPhrase(NULL)
   ,m_inputPath(NULL)
   ,m_sourceWordsRange(NOT_FOUND, NOT_FOUND)
-{
-}
+{ }
 
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange
@@ -66,9 +66,14 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
   return bitmap.Overlap(GetSourceWordsRange());
 }
 
-void TranslationOption::CacheLexReorderingScores(const LexicalReordering &producer, const Scores &score)
+void 
+TranslationOption::
+CacheLexReorderingScores(const LexicalReordering &producer, const Scores &score)
 {
-  m_lexReorderingScores[&producer] = score;
+  if (score.empty()) return;
+  boost::shared_ptr<Scores> stored(new Scores(score));
+  m_targetPhrase.SetExtraScores(&producer,stored);
+  // m_lexReorderingScores[&producer] = score;
 }
 
 void TranslationOption::EvaluateWithSourceContext(const InputType &input)
@@ -104,6 +109,19 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
   return out;
 }
 
+  /** returns cached scores */
+const Scores*
+TranslationOption::
+GetLexReorderingScores(LexicalReordering const* scoreProducer) const 
+{
+  return m_targetPhrase.GetExtraScores(scoreProducer);
+  // _ScoreCacheMap::const_iterator it;
+  // it = m_lexReorderingScores.find(scoreProducer);
+  // if(it == m_lexReorderingScores.end())
+  //   return NULL;
+  // else
+  //   return &(it->second);
+}
 
 }
 

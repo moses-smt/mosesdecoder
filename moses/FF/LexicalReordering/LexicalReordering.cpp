@@ -3,10 +3,12 @@
 #include <boost/foreach.hpp>
 
 #include "moses/FF/FFState.h"
+#include "moses/TranslationOptionList.h"
 #include "LexicalReordering.h"
 #include "LexicalReorderingState.h"
 #include "moses/StaticData.h"
 #include "moses/Util.h"
+#include "moses/InputPath.h"
 
 using namespace std;
 using namespace boost::algorithm;
@@ -124,5 +126,25 @@ IsUseable(const FactorMask &mask) const
   }
   return true;
 }
+
+
+void
+LexicalReordering::
+SetCache(TranslationOption& to) const
+{
+  Phrase const& sphrase = to.GetInputPath().GetPhrase();
+  Phrase const& tphrase = to.GetTargetPhrase();
+  to.CacheLexReorderingScores(*this, this->GetProb(sphrase,tphrase));
+}
+
+void
+LexicalReordering::
+SetCache(TranslationOptionList& tol) const
+{
+  BOOST_FOREACH(TranslationOption* to, tol) 
+    this->SetCache(*to);
+}
+
+
 }
 

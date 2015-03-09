@@ -33,6 +33,7 @@
 #include "AlignmentInfoCollection.h"
 #include "InputPath.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include <boost/foreach.hpp>
 
 using namespace std;
 
@@ -83,6 +84,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
 
 TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   : Phrase(copy)
+  , m_cached_scores(copy.m_cached_scores)
   , m_fullScore(copy.m_fullScore)
   , m_futureScore(copy.m_futureScore)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
@@ -221,13 +223,65 @@ void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProduce
   m_scoreBreakdown.Assign(translationScoreProducer, sparseString.as_string());
 }
 
-void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec)
+boost::shared_ptr<Scores> 
+mergescores(boost::shared_ptr<Scores> const& a, 
+	    boost::shared_ptr<Scores> const& b)
+{
+  boost::shared_ptr<Scores> ret;
+  if (!a) return b ? b : ret;
+  if (!b) return a;
+  if (a->size() != b->size()) return ret;
+  ret.reset(new Scores(*a));
+  for (size_t i = 0; i < a->size(); ++i)
+    {
+      if ((*a)[i] == 0) (*a)[i] = (*b)[i];
+      else if ((*b)[i])
+	{
+	  UTIL_THROW_IF2((*a)[i] != (*b)[i], "can't merge feature vectors");
+	}
+    }
+  return ret;
+}
+
+void 
+TargetPhrase::
+Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec)
 {
   Phrase::MergeFactors(copy, factorVec);
   m_scoreBreakdown.Merge(copy.GetScoreBreakdown());
   m_futureScore += copy.m_futureScore;
   m_fullScore += copy.m_fullScore;
+  typedef ScoreCache_t::iterator iter;
+  typedef ScoreCache_t::value_type item;
+  BOOST_FOREACH(item const& s, copy.m_cached_scores)
+    {
+      pair<iter,bool> foo = m_cached_scores.insert(s);
+      if (foo.second == false) 
+	foo.first->second = mergescores(foo.first->second, s.second);
+    }
 }
+
+TargetPhrase::ScoreCache_t const&
+TargetPhrase::
+GetExtraScores() const
+{
+  return m_cached_scores;
+}
+
+Scores const*
+TargetPhrase::
+GetExtraScores(FeatureFunction const* ff) const
+{
+  ScoreCache_t::const_iterator m = m_cached_scores.find(ff);
+  return m != m_cached_scores.end() ? m->second.get() : NULL;
+}
+
+void
+TargetPhrase::
+SetExtraScores(FeatureFunction const* ff, 
+	       boost::shared_ptr<Scores> const& s) 
+{ m_cached_scores[ff] = s; }
+
 
 void TargetPhrase::SetProperties(const StringPiece &str)
 {
@@ -287,6 +341,7 @@ void swap(TargetPhrase &first, TargetPhrase &second)
   std::swap(first.m_alignTerm, second.m_alignTerm);
   std::swap(first.m_alignNonTerm, second.m_alignNonTerm);
   std::swap(first.m_lhsTarget, second.m_lhsTarget);
+  std::swap(first.m_cached_scores, second.m_cached_scores);
 }
 
 TO_STRING_BODY(TargetPhrase);
@@ -324,6 +379,8 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 
   return os;
 }
+
+
 
 }
 
