@@ -41,6 +41,7 @@ bool kneserNeyFlag = false;
 bool sourceLabelsFlag = false;
 bool partsOfSpeechFlag = false;
 bool logProbFlag = false;
+bool countsProperty = false;
 float minScore0 = 0;
 float minScore2 = 0;
 
@@ -127,6 +128,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
+    } else if (strcmp(argv[i],"--Counts") == 0) {
+      countsProperty = true;
+      cerr << "output counts as a property\n";
     } else if (strcmp(argv[i],"--SourceLabels") == 0) {
       sourceLabelsFlag = true;
       if (i+1==argc) {
@@ -435,6 +439,15 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     fileConsolidated << " |||";
     if (itemDirect.size() >= 6) {
       propertiesConsolidator.ProcessPropertiesString(itemDirect[5], fileConsolidated);
+    }
+
+    if (countsProperty) {
+      fileConsolidated << " {{Counts " << countE << " " << countF << " " << countEF << "}}";
+      //if (sourceLabelsFlag) {
+      propertiesConsolidator.ProcessPropertiesString(itemDirect[5], fileConsolidated);
+      //} else {
+      //  fileConsolidated << itemDirect[5];
+      //}
     }
 
     fileConsolidated << endl;
