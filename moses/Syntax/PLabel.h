@@ -8,6 +8,7 @@ namespace Syntax
 {
 
 struct PLabel {
+  float inputWeight;
   const TargetPhraseCollection *translations;
 };
 

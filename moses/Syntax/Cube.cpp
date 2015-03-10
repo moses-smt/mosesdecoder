@@ -107,6 +107,8 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
     }
   }
 
+  hyperedge->label.inputWeight = m_bundle.inputWeight;
+
   hyperedge->label.translation =
     *(m_bundle.translations->begin()+coordinates.back());
 

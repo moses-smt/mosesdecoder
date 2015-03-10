@@ -37,13 +37,23 @@ void RuleMatcherHyperTree<Callback>::EnumerateHyperedges(
     m_queue.pop();
     if (item.trieNode->HasRules()) {
       const FNS &fns = item.annotatedFNS.fns;
+      // Set the output hyperedge's tail.
       m_hyperedge.tail.clear();
       for (FNS::const_iterator p = fns.begin(); p != fns.end(); ++p) {
         const Forest::Vertex *v = *p;
         m_hyperedge.tail.push_back(const_cast<PVertex *>(&(v->pvertex)));
       }
+      // Set the output hyperedge label's input weight.
+      m_hyperedge.label.inputWeight = 0.0f;
+      for (std::vector<const Forest::Hyperedge *>::const_iterator
+           p = item.annotatedFNS.fragment.begin();
+           p != item.annotatedFNS.fragment.end(); ++p) {
+        m_hyperedge.label.inputWeight += (*p)->weight;
+      }
+      // Set the output hyperedge label's translation set pointer.
       m_hyperedge.label.translations =
         &(item.trieNode->GetTargetPhraseCollection());
+      // Pass the output hyperedge to the callback.
       callback(m_hyperedge);
     }
     PropagateNextLexel(item);
