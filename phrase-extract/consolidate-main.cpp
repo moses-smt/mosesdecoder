@@ -17,141 +17,132 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include <cstdio>
-#include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
-#include <cstdlib>
-#include <cstring>
 
+#include "util/exception.hh"
 #include "moses/Util.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 #include "PropertiesConsolidator.h"
 
-using namespace std;
 
-bool hierarchicalFlag = false;
-bool onlyDirectFlag = false;
-bool phraseCountFlag = false;
-bool lowCountFlag = false;
-bool goodTuringFlag = false;
-bool kneserNeyFlag = false;
-bool sourceLabelsFlag = false;
-bool partsOfSpeechFlag = false;
-bool logProbFlag = false;
 bool countsProperty = false;
+bool goodTuringFlag = false;
+bool hierarchicalFlag = false;
+bool kneserNeyFlag = false;
+bool logProbFlag = false;
+bool lowCountFlag = false;
+bool onlyDirectFlag = false;
+bool partsOfSpeechFlag = false;
+bool phraseCountFlag = false;
+bool sourceLabelsFlag = false;
+bool sparseCountBinFeatureFlag = false;
+
+std::vector< int > countBin;
 float minScore0 = 0;
 float minScore2 = 0;
+
+std::vector< float > countOfCounts;
+std::vector< float > goodTuringDiscount;
+float kneserNey_D1, kneserNey_D2, kneserNey_D3, totalCount = -1;
+
+
+void processFiles( const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, const std::string& );
+void loadCountOfCounts( const std::string& );
+void breakdownCoreAndSparse( const std::string &combined, std::string &core, std::string &sparse );
+bool getLine( Moses::InputFileStream &file, std::vector< std::string > &item );
+
 
 inline float maybeLogProb( float a )
 {
   return logProbFlag ? std::log(a) : a;
 }
 
+
 inline bool isNonTerminal( const std::string &word )
 {
   return (word.length()>=3 && word[0] == '[' && word[word.length()-1] == ']');
 }
 
-void processFiles( char*, char*, char*, char*, char*, char* );
-void loadCountOfCounts( char* );
-void breakdownCoreAndSparse( string combined, string &core, string &sparse );
-bool getLine( istream &fileP, vector< string > &item );
-vector< string > splitLine(const char *line);
-vector< int > countBin;
-bool sparseCountBinFeatureFlag = false;
 
 int main(int argc, char* argv[])
 {
-  cerr << "Consolidate v2.0 written by Philipp Koehn\n"
-       << "consolidating direct and indirect rule tables\n";
+  std::cerr << "Consolidate v2.0 written by Philipp Koehn" << std::endl
+            << "consolidating direct and indirect rule tables" << std::endl;
 
   if (argc < 4) {
-    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] [--PhraseCount] [--GoodTuring counts-of-counts-file] [--KneserNey counts-of-counts-file] [--LowCountFeature] [--SourceLabels source-labels-file]  [--PartsOfSpeech parts-of-speech-file] [--MinScore id:threshold[,id:threshold]*]\n";
+    std::cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] [--PhraseCount] [--GoodTuring counts-of-counts-file] [--KneserNey counts-of-counts-file] [--LowCountFeature] [--SourceLabels source-labels-file] [--PartsOfSpeech parts-of-speech-file] [--MinScore id:threshold[,id:threshold]*]" << std::endl;
     exit(1);
   }
-  char* &fileNameDirect = argv[1];
-  char* &fileNameIndirect = argv[2];
-  char* &fileNameConsolidated = argv[3];
-  char* fileNameCountOfCounts = 0;
-  char* fileNameSourceLabelSet = 0;
-  char* fileNamePartsOfSpeechVocabulary = 0;
+  const std::string fileNameDirect = argv[1];
+  const std::string fileNameIndirect = argv[2];
+  const std::string fileNameConsolidated = argv[3];
+  std::string fileNameCountOfCounts;
+  std::string fileNameSourceLabelSet;
+  std::string fileNamePartsOfSpeechVocabulary;
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"--Hierarchical") == 0) {
       hierarchicalFlag = true;
-      cerr << "processing hierarchical rules\n";
+      std::cerr << "processing hierarchical rules" << std::endl;
     } else if (strcmp(argv[i],"--OnlyDirect") == 0) {
       onlyDirectFlag = true;
-      cerr << "only including direct translation scores p(e|f)\n";
+      std::cerr << "only including direct translation scores p(e|f)" << std::endl;
     } else if (strcmp(argv[i],"--PhraseCount") == 0) {
       phraseCountFlag = true;
-      cerr << "including the phrase count feature\n";
+      std::cerr << "including the phrase count feature" << std::endl;
     } else if (strcmp(argv[i],"--GoodTuring") == 0) {
       goodTuringFlag = true;
-      if (i+1==argc) {
-        cerr << "ERROR: specify count of count files for Good Turing discounting!\n";
-        exit(1);
-      }
+      UTIL_THROW_IF2(i+1==argc, "specify count of count files for Good Turing discounting!");
       fileNameCountOfCounts = argv[++i];
-      cerr << "adjusting phrase translation probabilities with Good Turing discounting\n";
+      std::cerr << "adjusting phrase translation probabilities with Good Turing discounting" << std::endl;
     } else if (strcmp(argv[i],"--KneserNey") == 0) {
       kneserNeyFlag = true;
-      if (i+1==argc) {
-        cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
-        exit(1);
-      }
+      UTIL_THROW_IF2(i+1==argc, "specify count of count files for Kneser Ney discounting!");
       fileNameCountOfCounts = argv[++i];
-      cerr << "adjusting phrase translation probabilities with Kneser Ney discounting\n";
+      std::cerr << "adjusting phrase translation probabilities with Kneser Ney discounting" << std::endl;
     } else if (strcmp(argv[i],"--LowCountFeature") == 0) {
       lowCountFlag = true;
-      cerr << "including the low count feature\n";
+      std::cerr << "including the low count feature" << std::endl;
     } else if (strcmp(argv[i],"--CountBinFeature") == 0 ||
                strcmp(argv[i],"--SparseCountBinFeature") == 0) {
       if (strcmp(argv[i],"--SparseCountBinFeature") == 0)
         sparseCountBinFeatureFlag = true;
-      cerr << "include "<< (sparseCountBinFeatureFlag ? "sparse " : "") << "count bin feature:";
+      std::cerr << "include "<< (sparseCountBinFeatureFlag ? "sparse " : "") << "count bin feature:";
       int prev = 0;
       while(i+1<argc && argv[i+1][0]>='0' && argv[i+1][0]<='9') {
-        int binCount = atoi(argv[++i]);
+        int binCount = Moses::Scan<int>(argv[++i]);
         countBin.push_back( binCount );
         if (prev+1 == binCount) {
-          cerr << " " << binCount;
+          std::cerr << " " << binCount;
         } else {
-          cerr << " " << (prev+1) << "-" << binCount;
+          std::cerr << " " << (prev+1) << "-" << binCount;
         }
         prev = binCount;
       }
-      cerr << " " << (prev+1) << "+\n";
+      std::cerr << " " << (prev+1) << "+" << std::endl;
     } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
-      cerr << "using log-probabilities\n";
+      std::cerr << "using log-probabilities" << std::endl;
     } else if (strcmp(argv[i],"--Counts") == 0) {
       countsProperty = true;
-      cerr << "output counts as a property\n";
+      std::cerr << "output counts as a property" << std::endl;;
     } else if (strcmp(argv[i],"--SourceLabels") == 0) {
       sourceLabelsFlag = true;
-      if (i+1==argc) {
-        cerr << "ERROR: specify source label set file!\n";
-        exit(1);
-      }
+      UTIL_THROW_IF2(i+1==argc, "specify source label set file!");
       fileNameSourceLabelSet = argv[++i];
-      cerr << "processing source labels property\n";
+      std::cerr << "processing source labels property" << std::endl;
     } else if (strcmp(argv[i],"--PartsOfSpeech") == 0) {
       partsOfSpeechFlag = true;
-      if (i+1==argc) {
-        cerr << "ERROR: specify parts-of-speech file!\n";
-        exit(1);
-      }
+      UTIL_THROW_IF2(i+1==argc, "specify parts-of-speech file!");
       fileNamePartsOfSpeechVocabulary = argv[++i];
-      cerr << "processing parts-of-speech property\n";
+      std::cerr << "processing parts-of-speech property" << std::endl;
     } else if (strcmp(argv[i],"--MinScore") == 0) {
-      string setting = argv[++i];
+      std::string setting = argv[++i];
       bool done = false;
       while (!done) {
-        string single_setting;
+        std::string single_setting;
         size_t pos;
         if ((pos = setting.find(",")) != std::string::npos) {
           single_setting = setting.substr(0, pos);
@@ -160,52 +151,42 @@ int main(int argc, char* argv[])
           single_setting = setting;
           done = true;
         }
-        if ((pos = single_setting.find(":")) == std::string::npos) {
-          cerr << "ERROR: faulty MinScore setting '" << single_setting << "' in '" << argv[i] << "'" << endl;
-          exit(1);
-        }
-        unsigned int field = atoi( single_setting.substr(0,pos).c_str() );
-        float threshold = atof( single_setting.substr(pos+1).c_str() );
+        pos = single_setting.find(":");
+        UTIL_THROW_IF2(pos == std::string::npos, "faulty MinScore setting '" << single_setting << "' in '" << argv[i] << "'");
+        unsigned int field = Moses::Scan<unsigned int>( single_setting.substr(0,pos) );
+        float threshold = Moses::Scan<float>( single_setting.substr(pos+1) );
         if (field == 0) {
           minScore0 = threshold;
-          cerr << "setting minScore0 to " << threshold << endl;
+          std::cerr << "setting minScore0 to " << threshold << std::endl;
         } else if (field == 2) {
           minScore2 = threshold;
-          cerr << "setting minScore2 to " << threshold << endl;
+          std::cerr << "setting minScore2 to " << threshold << std::endl;
         } else {
-          cerr << "ERROR: MinScore currently only supported for indirect (0) and direct (2) phrase translation probabilities" << endl;
-          exit(1);
+          UTIL_THROW2("MinScore currently only supported for indirect (0) and direct (2) phrase translation probabilities");
         }
       }
     } else {
-      cerr << "ERROR: unknown option " << argv[i] << endl;
-      exit(1);
+      UTIL_THROW2("unknown option " << argv[i]);
     }
   }
 
   processFiles( fileNameDirect, fileNameIndirect, fileNameConsolidated, fileNameCountOfCounts, fileNameSourceLabelSet, fileNamePartsOfSpeechVocabulary );
 }
 
-vector< float > countOfCounts;
-vector< float > goodTuringDiscount;
-float kneserNey_D1, kneserNey_D2, kneserNey_D3, totalCount = -1;
-void loadCountOfCounts( char* fileNameCountOfCounts )
+
+void loadCountOfCounts( const std::string& fileNameCountOfCounts )
 {
   Moses::InputFileStream fileCountOfCounts(fileNameCountOfCounts);
-  if (fileCountOfCounts.fail()) {
-    cerr << "ERROR: could not open count of counts file " << fileNameCountOfCounts << endl;
-    exit(1);
-  }
-  istream &fileP = fileCountOfCounts;
+  UTIL_THROW_IF2(fileCountOfCounts.fail(), "could not open count of counts file " << fileNameCountOfCounts);
 
   countOfCounts.push_back(0.0);
 
-  string line;
-  while (getline(fileP, line)) {
+  std::string line;
+  while (getline(fileCountOfCounts, line)) {
     if (totalCount < 0)
-      totalCount = atof(line.c_str()); // total number of distinct phrase pairs
+      totalCount = Moses::Scan<float>(line); // total number of distinct phrase pairs
     else
-      countOfCounts.push_back( atof(line.c_str()) );
+      countOfCounts.push_back( Moses::Scan<float>(line) );
   }
   fileCountOfCounts.Close();
 
@@ -232,34 +213,27 @@ void loadCountOfCounts( char* fileNameCountOfCounts )
   if (kneserNey_D3 > 2.9) kneserNey_D3 = 2.9;
 }
 
-void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameConsolidated, char* fileNameCountOfCounts, char* fileNameSourceLabelSet, char* fileNamePartsOfSpeechVocabulary )
+
+void processFiles( const std::string& fileNameDirect, 
+                   const std::string& fileNameIndirect, 
+                   const std::string& fileNameConsolidated, 
+                   const std::string& fileNameCountOfCounts, 
+                   const std::string& fileNameSourceLabelSet, 
+                   const std::string& fileNamePartsOfSpeechVocabulary )
 {
   if (goodTuringFlag || kneserNeyFlag)
     loadCountOfCounts( fileNameCountOfCounts );
 
   // open input files
   Moses::InputFileStream fileDirect(fileNameDirect);
+  UTIL_THROW_IF2(fileDirect.fail(), "could not open phrase table file " << fileNameDirect);
   Moses::InputFileStream fileIndirect(fileNameIndirect);
-
-  if (fileDirect.fail()) {
-    cerr << "ERROR: could not open phrase table file " << fileNameDirect << endl;
-    exit(1);
-  }
-  istream &fileDirectP = fileDirect;
-
-  if (fileIndirect.fail()) {
-    cerr << "ERROR: could not open phrase table file " << fileNameIndirect << endl;
-    exit(1);
-  }
-  istream &fileIndirectP = fileIndirect;
+  UTIL_THROW_IF2(fileIndirect.fail(), "could not open phrase table file " << fileNameIndirect);
 
   // open output file: consolidated phrase table
   Moses::OutputFileStream fileConsolidated;
   bool success = fileConsolidated.Open(fileNameConsolidated);
-  if (!success) {
-    cerr << "ERROR: could not open output file " << fileNameConsolidated << endl;
-    exit(1);
-  }
+  UTIL_THROW_IF2(!success, "could not open output file " << fileNameConsolidated);
 
   // create properties consolidator
   // (in case any additional phrase property requires further processing)
@@ -275,43 +249,38 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   int i=0;
   while(true) {
     i++;
-    if (i%100000 == 0) cerr << "." << flush;
+    if (i%100000 == 0) std::cerr << "." << std::flush;
 
-    vector< string > itemDirect, itemIndirect;
-    if (! getLine(fileIndirectP,itemIndirect) ||
-        ! getLine(fileDirectP,  itemDirect  ))
+    std::vector< std::string > itemDirect, itemIndirect;
+    if (! getLine(fileIndirect, itemIndirect) ||
+        ! getLine(fileDirect, itemDirect))
       break;
 
     // direct: target source alignment probabilities
     // indirect: source target probabilities
 
     // consistency checks
-    if (itemDirect[0].compare( itemIndirect[0] ) != 0) {
-      cerr << "ERROR: target phrase does not match in line " << i << ": '"
-           << itemDirect[0] << "' != '" << itemIndirect[0] << "'" << endl;
-      exit(1);
-    }
-
-    if (itemDirect[1].compare( itemIndirect[1] ) != 0) {
-      cerr << "ERROR: source phrase does not match in line " << i << ": '"
-           << itemDirect[1] << "' != '" << itemIndirect[1] << "'" << endl;
-      exit(1);
-    }
+    UTIL_THROW_IF2(itemDirect[0].compare( itemIndirect[0] ) != 0, 
+                   "target phrase does not match in line " << i << ": '" << itemDirect[0] << "' != '" << itemIndirect[0] << "'");
+    UTIL_THROW_IF2(itemDirect[1].compare( itemIndirect[1] ) != 0, 
+                   "source phrase does not match in line " << i << ": '" << itemDirect[1] << "' != '" << itemIndirect[1] << "'");
 
     // SCORES ...
-    string directScores, directSparseScores, indirectScores, indirectSparseScores;
+    std::string directScores, directSparseScores, indirectScores, indirectSparseScores;
     breakdownCoreAndSparse( itemDirect[3], directScores, directSparseScores );
     breakdownCoreAndSparse( itemIndirect[3], indirectScores, indirectSparseScores );
 
-    vector<string> directCounts = Moses::Tokenize(itemDirect[4]);
-    vector<string> indirectCounts = Moses::Tokenize(itemIndirect[4]);
-    float countF = atof(directCounts[0].c_str());
-    float countE = atof(indirectCounts[0].c_str());
-    float countEF = atof(indirectCounts[1].c_str());
+    std::vector<std::string> directCounts;
+    Moses::Tokenize( directCounts, itemDirect[4] );
+    std::vector<std::string> indirectCounts;
+    Moses::Tokenize( indirectCounts, itemIndirect[4] );
+    float countF = Moses::Scan<float>(directCounts[0]);
+    float countE = Moses::Scan<float>(indirectCounts[0]);
+    float countEF = Moses::Scan<float>(indirectCounts[1]);
     float n1_F, n1_E;
     if (kneserNeyFlag) {
-      n1_F = atof(directCounts[2].c_str());
-      n1_E = atof(indirectCounts[2].c_str());
+      n1_F = Moses::Scan<float>(directCounts[2]);
+      n1_E = Moses::Scan<float>(indirectCounts[2]);
     }
 
     // Good Turing discounting
@@ -348,7 +317,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 
     if (partsOfSpeechFlag) {
       // write POS factor from property
-      std::vector<std::string> targetTokens = Moses::Tokenize(itemDirect[1]);
+      std::vector<std::string> targetTokens;
+      Moses::Tokenize( targetTokens, itemDirect[1] );
       std::vector<std::string> propertyValuePOS;
       propertiesConsolidator.GetPOSPropertyValueFromPropertiesString(itemDirect[5], propertyValuePOS);
       size_t targetTerminalIndex = 0;
@@ -405,10 +375,13 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     }
 
     // alignment
-    fileConsolidated << " ||| " << itemDirect[2];
+    fileConsolidated << " |||";
+    if (!itemDirect[2].empty()) {
+      fileConsolidated << " " << itemDirect[2];;
+    }
 
     // counts, for debugging
-    fileConsolidated << "||| " << countE << " " << countF << " " << countEF;
+    fileConsolidated << " ||| " << countE << " " << countF << " " << countEF;
 
     // sparse features
     fileConsolidated << " |||";
@@ -416,6 +389,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
       fileConsolidated << " " << directSparseScores;
     if (indirectSparseScores.compare("") != 0)
       fileConsolidated << " " << indirectSparseScores;
+
     // count bin feature (as a sparse feature)
     if (sparseCountBinFeatureFlag) {
       bool foundBin = false;
@@ -443,25 +417,23 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 
     if (countsProperty) {
       fileConsolidated << " {{Counts " << countE << " " << countF << " " << countEF << "}}";
-      //if (sourceLabelsFlag) {
-      propertiesConsolidator.ProcessPropertiesString(itemDirect[5], fileConsolidated);
-      //} else {
-      //  fileConsolidated << itemDirect[5];
-      //}
     }
 
-    fileConsolidated << endl;
+    fileConsolidated << std::endl;
   }
+
   fileDirect.Close();
   fileIndirect.Close();
   fileConsolidated.Close();
 }
 
-void breakdownCoreAndSparse( string combined, string &core, string &sparse )
+
+void breakdownCoreAndSparse( const std::string &combined, std::string &core, std::string &sparse )
 {
   core = "";
   sparse = "";
-  vector<string> score = Moses::Tokenize( combined );
+  std::vector<std::string> score;
+  Moses::Tokenize( score, combined );
   for(size_t i=0; i<score.size(); i++) {
     if ((score[i][0] >= '0' && score[i][0] <= '9') || i+1 == score.size())
       core += " " + score[i];
@@ -474,38 +446,18 @@ void breakdownCoreAndSparse( string combined, string &core, string &sparse )
   if (sparse.size() > 0 ) sparse = sparse.substr(1);
 }
 
-bool getLine( istream &fileP, vector< string > &item )
+
+bool getLine( Moses::InputFileStream &file, std::vector< std::string > &item )
 {
-  if (fileP.eof())
+  if (file.eof())
     return false;
 
-  string line;
-  if (!getline(fileP, line))
+  std::string line;
+  if (!getline(file, line))
     return false;
 
-  item = splitLine(line.c_str());
+  Moses::TokenizeMultiCharSeparator(item, line, " ||| ");
 
   return true;
 }
 
-vector< string > splitLine(const char *line)
-{
-  vector< string > item;
-  int start=0;
-  int i=0;
-  for(; line[i] != '\0'; i++) {
-    if (line[i] == ' ' &&
-        line[i+1] == '|' &&
-        line[i+2] == '|' &&
-        line[i+3] == '|' &&
-        line[i+4] == ' ') {
-      if (start > i) start = i; // empty item
-      item.push_back( string( line+start, i-start ) );
-      start = i+5;
-      i += 3;
-    }
-  }
-  item.push_back( string( line+start, i-start ) );
-
-  return item;
-}

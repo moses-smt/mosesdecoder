@@ -121,6 +121,13 @@ void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule,
     }
   }
 
+  // If parts-of-speech as a factor requested: retrieve preterminals from graph fragment
+  std::vector<std::string> partsOfSpeech;
+  if (m_options.partsOfSpeechFactor) {
+    const Subgraph &graphFragment = rule.GetGraphFragment();
+    graphFragment.GetPartsOfSpeech(partsOfSpeech);
+  }
+
   // Write the source side of the rule to sourceSS.
   int i = 0;
   for (std::vector<Symbol>::const_iterator p(sourceRHS.begin());
@@ -140,6 +147,7 @@ void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule,
 
   // Write the target side of the rule to targetSS.
   i = 0;
+  int targetTerminalIndex = 0;
   for (std::vector<Symbol>::const_iterator p(targetRHS.begin());
        p != targetRHS.end(); ++p, ++i) {
     if (p->GetType() == NonTerminal) {
@@ -147,6 +155,12 @@ void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule,
       WriteSymbol(sourceRHS[sourceIndex], targetSS);
     }
     WriteSymbol(*p, targetSS);
+    // If parts-of-speech as a factor requested: write part-of-speech
+    if (m_options.partsOfSpeechFactor && (p->GetType() != NonTerminal)) {
+      assert(targetTerminalIndex<partsOfSpeech.size());
+      targetSS << "|" << partsOfSpeech[targetTerminalIndex];
+      ++targetTerminalIndex;
+    }
     targetSS << " ";
   }
   WriteSymbol(rule.GetTargetLHS(), targetSS);
@@ -159,10 +173,16 @@ void ScfgRuleWriter::WriteUnpairedFormat(const ScfgRule &rule,
   const std::vector<Symbol> &sourceRHS = rule.GetSourceRHS();
   const std::vector<Symbol> &targetRHS = rule.GetTargetRHS();
 
+  // If parts-of-speech as a factor requested: retrieve preterminals from graph fragment
+  std::vector<std::string> partsOfSpeech;
+  if (m_options.partsOfSpeechFactor) {
+    const Subgraph &graphFragment = rule.GetGraphFragment();
+    graphFragment.GetPartsOfSpeech(partsOfSpeech);
+  }
+
   // Write the source side of the rule to sourceSS.
-  int i = 0;
   for (std::vector<Symbol>::const_iterator p(sourceRHS.begin());
-       p != sourceRHS.end(); ++p, ++i) {
+       p != sourceRHS.end(); ++p) {
     WriteSymbol(*p, sourceSS);
     sourceSS << " ";
   }
@@ -173,10 +193,16 @@ void ScfgRuleWriter::WriteUnpairedFormat(const ScfgRule &rule,
   }
 
   // Write the target side of the rule to targetSS.
-  i = 0;
+  int targetTerminalIndex = 0;
   for (std::vector<Symbol>::const_iterator p(targetRHS.begin());
-       p != targetRHS.end(); ++p, ++i) {
+       p != targetRHS.end(); ++p) {
     WriteSymbol(*p, targetSS);
+    // If parts-of-speech as a factor requested: write part-of-speech
+    if (m_options.partsOfSpeechFactor && (p->GetType() != NonTerminal)) {
+      assert(targetTerminalIndex<partsOfSpeech.size());
+      targetSS << "|" << partsOfSpeech[targetTerminalIndex];
+      ++targetTerminalIndex;
+    }
     targetSS << " ";
   }
   WriteSymbol(rule.GetTargetLHS(), targetSS);

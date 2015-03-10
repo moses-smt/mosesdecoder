@@ -17,8 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_TypeDef_h
-#define moses_TypeDef_h
+#pragma once
 
 #include <list>
 #include <limits>
@@ -188,4 +187,4 @@ typedef std::vector<FactorType> FactorList;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
 
 }
-#endif
+

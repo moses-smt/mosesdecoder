@@ -466,7 +466,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   ("Minimal",
    "extract minimal rules only")
   ("PartsOfSpeech",
-   "output parts-of-speech information (preterminals from the parse tree)")
+   "output parts-of-speech as property (preterminals from the parse tree)")
+  ("PartsOfSpeechFactor",
+   "output parts-of-speech as factor (preterminals from the parse tree)")
   ("PCFG",
    "include score based on PCFG scores in target corpus")
   ("PhraseOrientation",
@@ -582,6 +584,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("PartsOfSpeech")) {
     options.partsOfSpeech = true;
   }
+  if (vm.count("PartsOfSpeechFactor")) {
+    options.partsOfSpeechFactor = true;
+  }
   if (vm.count("PCFG")) {
     options.pcfg = true;
   }
@@ -672,15 +677,27 @@ void ExtractGHKM::WriteGlueGrammar(
   const size_t sourceLabelGlueX = 1;
   const size_t sourceLabelSentenceStart = 2;
   const size_t sourceLabelSentenceEnd = 3;
-  const size_t partOfSpeechSentenceStart = 0;
-  const size_t partOfSpeechSentenceEnd = 1;
-  std::string sentenceStartSource = "<s>";
-  std::string sentenceEndSource = "</s>";
-  std::string sentenceStartTarget = "<s>";
-  std::string sentenceEndTarget = "</s>";
+//  const size_t partOfSpeechSentenceStart = 0;
+//  const size_t partOfSpeechSentenceEnd = 1;
+
+  #ifndef BOS_
+  #define BOS_ "<s>" //Beginning of sentence symbol
+  #endif
+  #ifndef EOS_
+  #define EOS_ "</s>" //End of sentence symbol
+  #endif
+
+  std::string sentenceStartSource = BOS_;
+  std::string sentenceEndSource   = EOS_;
+  std::string sentenceStartTarget = BOS_;
+  std::string sentenceEndTarget   = EOS_;
   if (options.partsOfSpeech) {
-    sentenceStartTarget = sentenceStartTarget + "|" + sentenceStartTarget;
-    sentenceEndTarget = sentenceEndTarget + "|" + sentenceEndTarget;
+    sentenceStartTarget = sentenceStartTarget + "|" + BOS_;
+    sentenceEndTarget   = sentenceEndTarget   + "|" + EOS_;
+  }
+  if (options.partsOfSpeechFactor) {
+    sentenceStartTarget = sentenceStartTarget + "|" + BOS_;
+    sentenceEndTarget   = sentenceEndTarget   + "|" + EOS_;
   }
 
   // basic rules
