@@ -126,7 +126,8 @@ my($_EXTERNAL_BINDIR,
    	$_NUM_LATTICE_FEATURES, 
    	$IGNORE, 
    	$_FLEXIBILITY_SCORE, 
-   	$_EXTRACT_COMMAND);
+   	$_EXTRACT_COMMAND,
+   	$_SCORE_COMMAND);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -241,6 +242,7 @@ $_HELP = 1
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
 		       'extract-command=s' => \$_EXTRACT_COMMAND,
+		       'score-command=s' => \$_SCORE_COMMAND,
                );
 
 if ($_HELP) {
@@ -445,7 +447,12 @@ my $EPPEX = "$SCRIPTS_ROOTDIR/../bin/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/../bin/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/giza2bal.pl";
 
-my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
+my $PHRASE_SCORE;
+if (defined($_SCORE_COMMAND)) {
+  $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/$_SCORE_COMMAND";
+} else {
+  $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
+}
 $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_SCORE";
 
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
