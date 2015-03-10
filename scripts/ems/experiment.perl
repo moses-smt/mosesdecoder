@@ -2449,6 +2449,9 @@ sub get_config_tables {
           unless $glue_grammar_file;
         $cmd .= "-glue-grammar-file $glue_grammar_file ";
       }
+      if (&get("TRAINING:dont-tune-glue-grammar")) {
+        $cmd .= "-dont-tune-glue-grammar ";
+      }
     }
 
     # additional settings for syntax models
