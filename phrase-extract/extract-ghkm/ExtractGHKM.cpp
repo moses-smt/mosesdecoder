@@ -931,11 +931,18 @@ void ExtractGHKM::StripBitParLabels(
   }
   for (std::map<std::string,int>::const_iterator it=topLabelSet.begin();
        it!=topLabelSet.end(); ++it) {
-    std::map<std::string, int>::iterator found=outTopLabelSet.find(it->first);
+    size_t pos = it->first.find('-');
+    std::string stripped;
+    if (pos == std::string::npos) {
+      stripped = it->first;
+    } else {
+      stripped = it->first.substr(0,pos);
+    }
+    std::map<std::string, int>::iterator found=outTopLabelSet.find(stripped);
     if (found != outTopLabelSet.end()) {
       found->second += it->second;
     } else {
-      outTopLabelSet.insert(std::pair<std::string,int>(it->first,it->second));
+      outTopLabelSet.insert(std::pair<std::string,int>(stripped,it->second));
     }
   }
 }
