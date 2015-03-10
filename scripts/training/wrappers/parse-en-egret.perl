@@ -137,6 +137,7 @@ $pipeline .= " |";
 unless ($FOREST) {
   $pipeline .= 'sed \'s/^()$/(())/\' |';  # Berkeley-style parse failures
   $pipeline .= "$RealBin/berkeleyparsed2mosesxml.perl |";
+  $pipeline .= 'sed \'s/^<tree label="TOP"/<tree label="ROOT"/\' |';
 }
 
 # Run the parsing / post-processing pipeline.
