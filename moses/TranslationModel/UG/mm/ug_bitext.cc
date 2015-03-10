@@ -23,8 +23,8 @@ namespace Moses
       , sum_pairs   (0)
       , in_progress (0)
     {
-      ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = ofwd[5] = ofwd[6] = 0;
-      obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = obwd[5] = obwd[6] = 0;
+      ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = 0;
+      obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = 0;
     }
 
     pstats::
@@ -89,7 +89,7 @@ namespace Moses
       my_rcnt = other.rcnt();
       my_wcnt = other.wcnt();
       my_aln  = other.aln();
-      for (int i = po_first; i <= po_other; i++)
+      for (size_t i = 0; i <= po_other; i++)
 	{
 	  ofwd[i] = other.ofwd[i];
 	  obwd[i] = other.obwd[i];
@@ -410,63 +410,5 @@ namespace Moses
       cout  << string(90,'-') << endl;
     }
 
-    PhraseOrientation 
-    find_po_fwd(vector<vector<ushort> >& a1,
-		vector<vector<ushort> >& a2,
-		size_t b1, size_t e1,
-		size_t b2, size_t e2)
-    {
-      size_t n2 = e2;
-      while (n2 < a2.size() && a2[n2].size() == 0) ++n2;
-
-      if (n2 == a2.size()) 
-	return po_last;
-      
-      ushort ns1,ne1,ne2;
-      if (!expand_phrase_pair(a1,a2,n2,b1,e1,ns1,ne1,ne2))
-	return po_other;
-
-      if (ns1 >= e1)
-	{
-	  for (ushort j = e1; j < ns1; ++j)
-	    if (a1[j].size()) 
-	      return po_jfwd;
-	  return po_mono;
-	}
-      else
-	{
-	  for (ushort j = ne1; j < b1; ++j)
-	    if (a1[j].size()) return po_jbwd;
-	  return po_swap;
-	}
-    }
-
-
-    PhraseOrientation 
-    find_po_bwd(vector<vector<ushort> >& a1,
-		vector<vector<ushort> >& a2,
-		size_t b1, size_t e1,
-		size_t b2, size_t e2)
-    {
-      int p2 = b2-1;
-      while (p2 >= 0 && !a2[p2].size()) --p2;
-      if (p2 < 0) return po_first;
-      ushort ps1,pe1,pe2;
-      if (!expand_phrase_pair(a1,a2,p2,b1,e1,ps1,pe1,pe2))
-	return po_other;
-      
-      if (pe1 < b1)
-	{
-	  for (ushort j = pe1; j < b1; ++j)
-	    if (a1[j].size()) return po_jfwd;
-	  return po_mono;
-	}
-      else
-	{
-	  for (ushort j = e1; j < ps1; ++j)
-	    if (a1[j].size()) return po_jbwd;
-	  return po_swap;
-	}
-    }
   }
 }
