@@ -134,7 +134,6 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string alignmentLine;
   Alignment alignment;
   XmlTreeParser targetXmlTreeParser(targetLabelSet, targetTopLabelSet);
-//  XmlTreeParser sourceXmlTreeParser(sourceLabelSet, sourceTopLabelSet);
   ScfgRuleWriter scfgWriter(fwdExtractStream, invExtractStream, options);
   StsgRuleWriter stsgWriter(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
@@ -343,8 +342,19 @@ int ExtractGHKM::Main(int argc, char *argv[])
     WriteSourceLabelSet(sourceLabels, sourceLabelSetStream);
   }
 
+  std::set<std::string> strippedTargetLabelSet;
+  std::map<std::string, int> strippedTargetTopLabelSet;
+  if (options.stripBitParLabels && 
+      (!options.glueGrammarFile.empty() || !options.unknownWordSoftMatchesFile.empty())) {
+    StripBitParLabels(targetLabelSet, targetTopLabelSet, strippedTargetLabelSet, strippedTargetTopLabelSet);
+  }
+
   if (!options.glueGrammarFile.empty()) {
-    WriteGlueGrammar(targetLabelSet, targetTopLabelSet, sourceLabels, options, glueGrammarStream);
+    if (options.stripBitParLabels) {
+      WriteGlueGrammar(strippedTargetLabelSet, strippedTargetTopLabelSet, sourceLabels, options, glueGrammarStream);
+    } else {
+      WriteGlueGrammar(targetLabelSet, targetTopLabelSet, sourceLabels, options, glueGrammarStream);
+    }
   }
 
   if (!options.targetUnknownWordFile.empty()) {
@@ -356,7 +366,11 @@ int ExtractGHKM::Main(int argc, char *argv[])
   }
 
   if (!options.unknownWordSoftMatchesFile.empty()) {
-    WriteUnknownWordSoftMatches(targetLabelSet, unknownWordSoftMatchesStream);
+    if (options.stripBitParLabels) {
+      WriteUnknownWordSoftMatches(strippedTargetLabelSet, unknownWordSoftMatchesStream);
+    } else {
+      WriteUnknownWordSoftMatches(targetLabelSet, unknownWordSoftMatchesStream);
+    }
   }
 
   return 0;
@@ -473,6 +487,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "include score based on PCFG scores in target corpus")
   ("PhraseOrientation",
    "output phrase orientation information")
+  ("StripBitParLabels",
+   "strip suffix starting with a hyphen symbol (\"-\") from non-terminal labels")
   ("STSG",
    "output STSG rules (default is SCFG)")
   ("T2S",
@@ -593,6 +609,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("PhraseOrientation")) {
     options.phraseOrientation = true;
   }
+  if (vm.count("StripBitParLabels")) {
+    options.stripBitParLabels = true;
+  }
   if (vm.count("STSG")) {
     options.stsg = true;
   }
@@ -662,7 +681,7 @@ void ExtractGHKM::WriteGlueGrammar(
   const std::map<std::string, int> &topLabelSet,
   const std::map<std::string,size_t> &sourceLabels,
   const Options &options,
-  std::ostream &out)
+  std::ostream &out) const
 {
   // choose a top label that is not already a label
   std::string topLabel = "QQQQQQ";
@@ -782,7 +801,7 @@ void ExtractGHKM::WriteGlueGrammar(
 
 void ExtractGHKM::WriteSourceLabelSet(
   const std::map<std::string,size_t> &sourceLabels,
-  std::ostream &out)
+  std::ostream &out) const
 {
   out << sourceLabels.size() << std::endl;
   for (std::map<std::string,size_t>::const_iterator iter=sourceLabels.begin();
@@ -839,7 +858,7 @@ void ExtractGHKM::WriteUnknownWordLabel(
   const std::map<std::string, std::string> &wordLabel,
   const Options &options,
   std::ostream &out,
-  bool writeCounts)
+  bool writeCounts) const
 {
   if (!options.unknownWordSoftMatchesFile.empty()) {
     out << "UNK 1" << std::endl;
@@ -855,7 +874,16 @@ void ExtractGHKM::WriteUnknownWordLabel(
       std::map<std::string, std::string>::const_iterator q =
         wordLabel.find(p->first);
       assert(q != wordLabel.end());
-      ++labelCount[q->second];
+      if (options.stripBitParLabels) {
+        size_t pos = q->second.find('-');
+        if (pos == std::string::npos) {
+          ++labelCount[q->second];
+        } else {
+          ++labelCount[q->second.substr(0,pos)];
+        }
+      } else {
+        ++labelCount[q->second];
+      }
       ++total;
     }
   }
@@ -878,11 +906,37 @@ void ExtractGHKM::WriteUnknownWordLabel(
 
 void ExtractGHKM::WriteUnknownWordSoftMatches(
   const std::set<std::string> &labelSet,
-  std::ostream &out)
+  std::ostream &out) const
 {
   for (std::set<std::string>::const_iterator p = labelSet.begin(); p != labelSet.end(); ++p) {
     std::string label = *p;
     out << "UNK " << label << std::endl;
+  }
+}
+
+void ExtractGHKM::StripBitParLabels(
+  const std::set<std::string> &labelSet,
+  const std::map<std::string, int> &topLabelSet,
+  std::set<std::string> &outLabelSet,
+  std::map<std::string, int> &outTopLabelSet) const
+{
+  for (std::set<std::string>::const_iterator it=labelSet.begin();
+       it!=labelSet.end(); ++it) {
+    size_t pos = it->find('-');
+    if (pos == std::string::npos) {
+      outLabelSet.insert(*it);
+    } else {
+      outLabelSet.insert(it->substr(0,pos));
+    }
+  }
+  for (std::map<std::string,int>::const_iterator it=topLabelSet.begin();
+       it!=topLabelSet.end(); ++it) {
+    std::map<std::string, int>::iterator found=outTopLabelSet.find(it->first);
+    if (found != outTopLabelSet.end()) {
+      found->second += it->second;
+    } else {
+      outTopLabelSet.insert(std::pair<std::string,int>(it->first,it->second));
+    }
   }
 }
 

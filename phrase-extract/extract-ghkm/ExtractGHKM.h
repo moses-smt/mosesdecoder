@@ -39,12 +39,15 @@ class ParseTree;
 class ExtractGHKM
 {
 public:
+
   ExtractGHKM() : m_name("extract-ghkm") {}
   const std::string &GetName() const {
     return m_name;
   }
   int Main(int argc, char *argv[]);
+
 private:
+
   void Error(const std::string &) const;
   void OpenInputFileOrDie(const std::string &, std::ifstream &);
   void OpenOutputFileOrDie(const std::string &, std::ofstream &);
@@ -58,16 +61,21 @@ private:
                              const std::map<std::string, std::string> &,
                              const Options &,
                              std::ostream &,
-                             bool writeCounts=false);
+                             bool writeCounts=false) const;
   void WriteUnknownWordSoftMatches(const std::set<std::string> &,
-                                   std::ostream &);
+                                   std::ostream &) const;
   void WriteGlueGrammar(const std::set<std::string> &,
                         const std::map<std::string, int> &,
                         const std::map<std::string,size_t> &,
                         const Options &,
-                        std::ostream &);
+                        std::ostream &) const;
   void WriteSourceLabelSet(const std::map<std::string,size_t> &,
-                           std::ostream &);
+                           std::ostream &) const;
+  void StripBitParLabels(const std::set<std::string> &labelSet,
+                         const std::map<std::string, int> &topLabelSet,
+                         std::set<std::string> &outLabelSet,
+                         std::map<std::string, int> &outTopLabelSet) const;
+
   std::vector<std::string> ReadTokens(const std::string &) const;
   std::vector<std::string> ReadTokens(const ParseTree &root) const;
 

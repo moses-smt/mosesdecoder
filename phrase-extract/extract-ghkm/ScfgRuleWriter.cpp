@@ -211,7 +211,18 @@ void ScfgRuleWriter::WriteUnpairedFormat(const ScfgRule &rule,
 void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
 {
   if (symbol.GetType() == NonTerminal) {
-    out << "[" << symbol.GetValue() << "]";
+    out << "[";
+    if (m_options.stripBitParLabels) {
+      size_t pos = symbol.GetValue().find('-');
+      if (pos == std::string::npos) {
+        out << symbol.GetValue();
+      } else {
+        out << symbol.GetValue().substr(0,pos);
+      }
+    } else {
+      out << symbol.GetValue();
+    }
+    out << "]";
   } else {
     out << symbol.GetValue();
   }

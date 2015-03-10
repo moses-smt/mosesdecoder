@@ -44,6 +44,7 @@ public:
     , phraseOrientation(false)
     , sentenceOffset(0)
     , sourceLabels(false)
+    , stripBitParLabels(false)
     , stsg(false)
     , t2s(false)
     , treeFragments(false)
@@ -76,6 +77,7 @@ public:
   bool sourceLabels;
   std::string sourceLabelSetFile;
   std::string sourceUnknownWordFile;
+  bool stripBitParLabels;
   bool stsg;
   bool t2s;
   std::string targetUnknownWordFile;

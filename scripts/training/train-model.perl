@@ -98,6 +98,7 @@ my($_EXTERNAL_BINDIR,
    	$_GHKM_PARTS_OF_SPEECH,
    	$_GHKM_PARTS_OF_SPEECH_FILE,
    	$_GHKM_PARTS_OF_SPEECH_FACTOR,
+    $_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS,
    	$_PCFG,
    	@_EXTRACT_OPTIONS,
    	@_SCORE_OPTIONS,
@@ -210,6 +211,7 @@ $_HELP = 1
                'ghkm-parts-of-speech' => \$_GHKM_PARTS_OF_SPEECH,
                'ghkm-parts-of-speech-file=s' => \$_GHKM_PARTS_OF_SPEECH_FILE,
                'ghkm-parts-of-speech-factor' => \$_GHKM_PARTS_OF_SPEECH_FACTOR,
+               'ghkm-strip-bitpar-nonterminal-labels' => \$_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS,
 		       'pcfg' => \$_PCFG,
 		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
 		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
@@ -1557,6 +1559,7 @@ sub extract_phrase {
           $cmd .= " --SourceLabels" if $_GHKM_SOURCE_LABELS;
           $cmd .= " --PartsOfSpeech" if $_GHKM_PARTS_OF_SPEECH;
           $cmd .= " --PartsOfSpeechFactor" if $_GHKM_PARTS_OF_SPEECH_FACTOR;
+          $cmd .= " --StripBitParLabels" if $_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS;
         }
         else
         {

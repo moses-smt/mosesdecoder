@@ -2253,6 +2253,10 @@ sub define_training_extract_phrases {
       if (&get("TRAINING:ghkm-parts-of-speech-factor")) {
         $cmd .= "-ghkm-parts-of-speech-factor ";
       }
+
+      if (&get("TRAINING:ghkm-strip-bitpar-nonterminal-labels")) {
+        $cmd .= "-ghkm-strip-bitpar-nonterminal-labels ";
+      }
     }
 
     my $extract_settings = &get("TRAINING:extract-settings");
