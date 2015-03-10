@@ -87,6 +87,7 @@ my($_EXTERNAL_BINDIR,
    	$_TARGET_SYNTAX,
    	$_GLUE_GRAMMAR,
    	$_GLUE_GRAMMAR_FILE,
+   	$_DONT_TUNE_GLUE_GRAMMAR,
    	$_UNKNOWN_WORD_LABEL_FILE,
    	$_GHKM,
    	$_GHKM_TREE_FRAGMENTS,
@@ -196,6 +197,7 @@ $_HELP = 1
 		       's2t' => \$_S2T,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
+		       'dont-tune-glue-grammar' => \$_DONT_TUNE_GLUE_GRAMMAR,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'unknown-word-soft-matches-file=s' => \$_UNKNOWN_WORD_SOFT_MATCHES_FILE, # give dummy label to unknown word, and allow soft matches to all other labels (with cost determined by sparse features)
 		       'ghkm' => \$_GHKM,
@@ -2130,6 +2132,7 @@ sub create_ini {
    # glue grammar
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
+     my $tuneable = defined($_DONT_TUNE_GLUE_GRAMMAR) ? "false" : "true";
      my $feature_name = "PhraseDictionaryMemory";
      if ($_S2T) {
        $feature_name = "RuleTable";
@@ -2139,7 +2142,7 @@ sub create_ini {
        $glue_weight = -100.0;
      }
 
-     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
+     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0 tuneable=$tuneable\n";
      $weight_spec .= "TranslationModel$i= $glue_weight\n";
    }
 
