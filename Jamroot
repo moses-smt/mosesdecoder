@@ -238,6 +238,7 @@ phrase-extract//pcfg-score
 phrase-extract//extract-mixed-syntax 
 phrase-extract//score-stsg
 phrase-extract//filter-rule-table
+phrase-extract//postprocess-egret-forests
 biconcor 
 #contrib/mira//mira 
 contrib/server//mosesserver 
