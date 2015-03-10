@@ -64,7 +64,9 @@ bool unalignedFlag = false;
 bool unalignedFWFlag = false;
 bool crossedNonTerm = false;
 bool spanLength = false;
+bool ruleLength = false;
 bool nonTermContext = false;
+bool nonTermContextTarget = false;
 
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
@@ -118,6 +120,7 @@ int calcCrossedNonTerm( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTa
 void printSourcePhrase( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *targetToSourceAlignment, std::ostream &out );
 void printTargetPhrase( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *targetToSourceAlignment, std::ostream &out );
 void invertAlignment( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *inTargetToSourceAlignment, ALIGNMENT *outSourceToTargetAlignment );
+size_t NumNonTerminal(const PHRASE *phraseSource);
 
 
 int main(int argc, char* argv[])
@@ -241,9 +244,15 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--SpanLength") == 0) {
       spanLength = true;
       std::cerr << "span length feature" << std::endl;
+    } else if (strcmp(argv[i],"--RuleLength") == 0) {
+      ruleLength = true;
+      std::cerr << "rule length feature" << std::endl;
     } else if (strcmp(argv[i],"--NonTermContext") == 0) {
       nonTermContext = true;
       std::cerr << "non-term context" << std::endl;
+    } else if (strcmp(argv[i],"--NonTermContextTarget") == 0) {
+      nonTermContextTarget = true;
+      std::cerr << "non-term context (target)" << std::endl;
     } else {
       featureArgs.push_back(argv[i]);
       ++i;
@@ -883,17 +892,41 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     }
   }
 
-  if (nonTermContext && !inverseFlag) {
-    std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContext");
+  if (ruleLength && !inverseFlag) {
+    std::string propValue = phrasePair.CollectAllPropertyValues("RuleLength");
     if (!propValue.empty()) {
-      phraseTableFile << " {{NonTermContext " << propValue << "}}";
+      phraseTableFile << " {{RuleLength " << propValue << "}}";
+    }
+  }
+
+  if (nonTermContext && !inverseFlag) {
+	std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContext");
+    if (!propValue.empty() && propValue.size() < 50000) {
+      size_t nNTs = NumNonTerminal(phraseSource);
+      phraseTableFile << " {{NonTermContext " << nNTs << " " << propValue << "}}";
+    }
+  }
+
+  if (nonTermContextTarget && !inverseFlag) {
+	std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContextTarget");
+    if (!propValue.empty() && propValue.size() < 50000) {
+      size_t nNTs = NumNonTerminal(phraseSource);
+      phraseTableFile << " {{NonTermContextTarget " << nNTs << " " << propValue << "}}";
     }
   }
 
   phraseTableFile << std::endl;
 }
 
-
+size_t NumNonTerminal(const PHRASE *phraseSource)
+{
+  size_t nNTs = 0;
+  for(size_t j=0; j<phraseSource->size()-1; ++j) {
+    if (isNonTerminal(vcbS.getWord( phraseSource->at(j) )))
+      ++nNTs;
+  }
+  return nNTs;
+}
 
 void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors,
                            std::vector<float> &orientationClassPriorsL2R,
