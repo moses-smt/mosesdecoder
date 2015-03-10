@@ -2452,6 +2452,9 @@ sub get_config_tables {
       if (&get("TRAINING:dont-tune-glue-grammar")) {
         $cmd .= "-dont-tune-glue-grammar ";
       }
+      if (&get("TRAINING:use-syntax-input-weight-feature")) {
+        $cmd .= "-use-syntax-input-weight-feature";
+      }
     }
 
     # additional settings for syntax models
