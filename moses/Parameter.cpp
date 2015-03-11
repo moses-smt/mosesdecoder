@@ -422,8 +422,18 @@ LoadParam(const string &filePath)
 /** load all parameters from the configuration file and the command line switches */
 bool 
 Parameter::
-LoadParam(int argc, char* argv[])
+LoadParam(int argc, char* xargv[])
 {
+  // legacy parameter handling: all parameters are expected 
+  // to start with a single dash
+  char* argv[argc+1];
+  for (int i = 0; i < argc; ++i)
+    {
+      argv[i] = xargv[i];
+      if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
+	++argv[i];
+    }
+  
   // config file (-f) arg mandatory
   string configPath;
   if ( (configPath = FindParam("-f", argc, argv)) == ""
