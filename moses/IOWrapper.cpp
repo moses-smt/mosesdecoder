@@ -79,16 +79,6 @@ IOWrapper::IOWrapper()
   ,m_alignmentInfoStream(NULL)
   ,m_latticeSamplesStream(NULL)
 
-  ,m_singleBestOutputCollector(NULL)
-  ,m_nBestOutputCollector(NULL)
-  ,m_unknownsCollector(NULL)
-  ,m_alignmentInfoCollector(NULL)
-  ,m_searchGraphOutputCollector(NULL)
-  ,m_detailedTranslationCollector(NULL)
-  ,m_wordGraphCollector(NULL)
-  ,m_latticeSamplesCollector(NULL)
-  ,m_detailTreeFragmentsOutputCollector(NULL)
-
   ,m_surpressSingleBestOutput(false)
 
   ,spe_src(NULL)
@@ -115,14 +105,14 @@ IOWrapper::IOWrapper()
   if (nBestSize > 0) {
     if (nBestFilePath == "-" || nBestFilePath == "/dev/stdout") {
       m_nBestStream = &std::cout;
-      m_nBestOutputCollector = new Moses::OutputCollector(&std::cout);
+      m_nBestOutputCollector.reset(new Moses::OutputCollector(&std::cout));
       m_surpressSingleBestOutput = true;
     } else {
       std::ofstream *file = new std::ofstream;
       file->open(nBestFilePath.c_str());
       m_nBestStream = file;
 
-      m_nBestOutputCollector = new Moses::OutputCollector(file);
+      m_nBestOutputCollector.reset(new Moses::OutputCollector(file));
       //m_nBestOutputCollector->HoldOutputStream();
     }
   }
@@ -142,7 +132,7 @@ IOWrapper::IOWrapper()
 
   if (!staticData.GetOutputUnknownsFile().empty()) {
     m_unknownsStream = new std::ofstream(staticData.GetOutputUnknownsFile().c_str());
-    m_unknownsCollector = new Moses::OutputCollector(m_unknownsStream);
+    m_unknownsCollector.reset(new Moses::OutputCollector(m_unknownsStream));
     UTIL_THROW_IF2(!m_unknownsStream->good(),
                    "File for unknowns words could not be opened: " <<
                    staticData.GetOutputUnknownsFile());
@@ -150,7 +140,7 @@ IOWrapper::IOWrapper()
 
   if (!staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
-    m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
+    m_alignmentInfoCollector.reset(new Moses::OutputCollector(m_alignmentInfoStream));
     UTIL_THROW_IF2(!m_alignmentInfoStream->good(),
                    "File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
   }
@@ -162,20 +152,20 @@ IOWrapper::IOWrapper()
     std::ofstream *file = new std::ofstream;
     m_outputSearchGraphStream = file;
     file->open(fileName.c_str());
-    m_searchGraphOutputCollector = new Moses::OutputCollector(m_outputSearchGraphStream);
+    m_searchGraphOutputCollector.reset(new Moses::OutputCollector(m_outputSearchGraphStream));
   }
 
   // detailed translation reporting
   if (staticData.IsDetailedTranslationReportingEnabled()) {
     const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
-    m_detailedTranslationCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
+    m_detailedTranslationCollector.reset(new Moses::OutputCollector(m_detailedTranslationReportingStream));
   }
 
   if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
     const std::string &path = staticData.GetDetailedTreeFragmentsTranslationReportingFilePath();
     m_detailedTreeFragmentsTranslationReportingStream = new std::ofstream(path.c_str());
-    m_detailTreeFragmentsOutputCollector = new Moses::OutputCollector(m_detailedTreeFragmentsTranslationReportingStream);
+    m_detailTreeFragmentsOutputCollector.reset(new Moses::OutputCollector(m_detailedTreeFragmentsTranslationReportingStream));
   }
 
   // wordgraph output
@@ -186,14 +176,14 @@ IOWrapper::IOWrapper()
     std::ofstream *file = new std::ofstream;
     m_outputWordGraphStream  = file;
     file->open(fileName.c_str());
-    m_wordGraphCollector = new OutputCollector(m_outputWordGraphStream);
+    m_wordGraphCollector.reset(new OutputCollector(m_outputWordGraphStream));
   }
 
   size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
   string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
   if (latticeSamplesSize) {
     if (latticeSamplesFile == "-" || latticeSamplesFile == "/dev/stdout") {
-      m_latticeSamplesCollector = new OutputCollector();
+      m_latticeSamplesCollector.reset(new OutputCollector());
       m_surpressSingleBestOutput = true;
     } else {
       m_latticeSamplesStream = new ofstream(latticeSamplesFile.c_str());
@@ -201,12 +191,12 @@ IOWrapper::IOWrapper()
         TRACE_ERR("ERROR: Failed to open " << latticeSamplesFile << " for lattice samples" << endl);
         exit(1);
       }
-      m_latticeSamplesCollector = new OutputCollector(m_latticeSamplesStream);
+      m_latticeSamplesCollector.reset(new OutputCollector(m_latticeSamplesStream));
     }
   }
 
   if (!m_surpressSingleBestOutput) {
-    m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
+    m_singleBestOutputCollector.reset(new Moses::OutputCollector(&std::cout));
   }
 
   if (staticData.GetParameter().GetParam("spe-src")) {
@@ -231,16 +221,6 @@ IOWrapper::~IOWrapper()
   delete m_outputSearchGraphStream;
   delete m_outputWordGraphStream;
   delete m_latticeSamplesStream;
-
-  delete m_singleBestOutputCollector;
-  delete m_nBestOutputCollector;
-  delete m_alignmentInfoCollector;
-  delete m_searchGraphOutputCollector;
-  delete m_detailedTranslationCollector;
-  delete m_wordGraphCollector;
-  delete m_latticeSamplesCollector;
-  delete m_detailTreeFragmentsOutputCollector;
-
 }
 
 InputType*

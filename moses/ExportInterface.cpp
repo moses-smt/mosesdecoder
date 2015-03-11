@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //#include <vld.h>
 #endif
 
-#include "IOWrapper.h"
+
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "StaticData.h"
@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FF/StatefulFeatureFunction.h"
 #include "FF/StatelessFeatureFunction.h"
 #include "TranslationTask.h"
+#include "ExportInterface.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -56,6 +57,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationModel/UG/generic/program_options/ug_splice_arglist.h"
 #endif
 
+#include "ExportInterface.h"
 #ifdef HAVE_XMLRPC_C
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/registry.hpp>
@@ -70,15 +72,76 @@ using namespace Moses;
 
 namespace Moses
 {
-  void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
-  {
-    outputSearchGraphStream.setf(std::ios::fixed);
-    outputSearchGraphStream.precision(6);
-    StaticData::Instance().GetAllWeights().Save(outputSearchGraphStream);
+void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
+{
+  outputSearchGraphStream.setf(std::ios::fixed);
+  outputSearchGraphStream.precision(6);
+  StaticData::Instance().GetAllWeights().Save(outputSearchGraphStream);
+}
+} //namespace Moses
+
+SimpleTranslationInterface::SimpleTranslationInterface(const string &mosesIni): m_staticData(StaticData::Instance())
+{
+    if (!m_params.LoadParam(mosesIni)) {
+      cerr << "Error; Cannot load parameters at " << mosesIni<<endl;
+      exit(1);
+    }
+    if (!StaticData::LoadDataStatic(&m_params, mosesIni.c_str())) {
+      cerr << "Error; Cannot load static data in file " << mosesIni<<endl;
+      exit(1);
+    }
+
+    srand(time(NULL));
+
+}
+
+SimpleTranslationInterface::~SimpleTranslationInterface()
+{}
+
+//the simplified version of string input/output translation
+string SimpleTranslationInterface::translate(const string &inputString)
+{
+  Moses::IOWrapper ioWrapper;
+  long lineCount = Moses::StaticData::Instance().GetStartTranslationId();
+  // main loop over set of input sentences
+  InputType* source = NULL;
+  size_t sentEnd = inputString.rfind('\n'); //find the last \n, the input stream has to be appended with \n to be translated
+  const string &newString = sentEnd != string::npos ? inputString : inputString + '\n';
+
+  istringstream inputStream(newString);  //create the stream for the interface
+  ioWrapper.SetInputStreamFromString(inputStream);
+  ostringstream outputStream;
+  ioWrapper.SetOutputStream2SingleBestOutputCollector(&outputStream);
+  ioWrapper.ReadInput(SimpleTranslationInterface::m_staticData.GetInputType(),source);
+  if (source)
+    source->SetTranslationId(lineCount);
+  else
+    return "Error: Source==null!!!";
+  IFVERBOSE(1) {
+    ResetUserTime();
   }
 
+  FeatureFunction::CallChangeSource(source);
 
-} //namespace
+  // set up task of translating one sentence
+  TranslationTask task = TranslationTask(source, ioWrapper);
+   task.Run();
+
+   string output = outputStream.str();
+   //now trim the end whitespace
+   const string whitespace = " \t\f\v\n\r";
+   size_t end = output.find_last_not_of(whitespace);
+  return output.erase(end + 1);
+}
+
+Moses::StaticData& SimpleTranslationInterface::getStaticData()
+{
+  return StaticData::InstanceNonConst();
+}
+void SimpleTranslationInterface::DestroyFeatureFunctionStatic()
+{
+  FeatureFunction::Destroy();
+}
 
 
 Parameter params;

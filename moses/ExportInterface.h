@@ -33,10 +33,24 @@ POSSIBILITY OF SUCH DAMAGE.
 
 // example file on how to use moses library
 
+#include "StaticData.h"
+#include "IOWrapper.h"
+#include "TypeDef.h"
 
-#include "moses/StaticData.h"
-
-class IOWrapper;
+class SimpleTranslationInterface
+{
+public:
+  static void DestroyFeatureFunctionStatic();
+  SimpleTranslationInterface(const std::string &mosesIni);
+  ~SimpleTranslationInterface();
+  std::string translate(const std::string &input);
+  Moses::StaticData& getStaticData();
+  Moses::Parameter& getParameters(){ return m_params; }
+private:
+  SimpleTranslationInterface();
+  Moses::Parameter m_params;
+  const Moses::StaticData& m_staticData;
+};
 
 int decoder_main(int argc, char* argv[]);
 

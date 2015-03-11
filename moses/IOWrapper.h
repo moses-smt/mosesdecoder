@@ -87,15 +87,15 @@ protected:
   std::ofstream *m_alignmentInfoStream;
   std::ofstream *m_latticeSamplesStream;
 
-  Moses::OutputCollector *m_singleBestOutputCollector;
-  Moses::OutputCollector *m_nBestOutputCollector;
-  Moses::OutputCollector *m_unknownsCollector;
-  Moses::OutputCollector *m_alignmentInfoCollector;
-  Moses::OutputCollector *m_searchGraphOutputCollector;
-  Moses::OutputCollector *m_detailedTranslationCollector;
-  Moses::OutputCollector *m_wordGraphCollector;
-  Moses::OutputCollector *m_latticeSamplesCollector;
-  Moses::OutputCollector *m_detailTreeFragmentsOutputCollector;
+  std::auto_ptr<Moses::OutputCollector> m_singleBestOutputCollector;
+  std::auto_ptr<Moses::OutputCollector> m_nBestOutputCollector;
+  std::auto_ptr<Moses::OutputCollector> m_unknownsCollector;
+  std::auto_ptr<Moses::OutputCollector> m_alignmentInfoCollector;
+  std::auto_ptr<Moses::OutputCollector> m_searchGraphOutputCollector;
+  std::auto_ptr<Moses::OutputCollector> m_detailedTranslationCollector;
+  std::auto_ptr<Moses::OutputCollector> m_wordGraphCollector;
+  std::auto_ptr<Moses::OutputCollector> m_latticeSamplesCollector;
+  std::auto_ptr<Moses::OutputCollector> m_detailTreeFragmentsOutputCollector;
 
   bool m_surpressSingleBestOutput;
 
@@ -108,39 +108,50 @@ public:
   bool ReadInput(Moses::InputTypeEnum inputType, Moses::InputType*& source);
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
-    return m_singleBestOutputCollector;
+    return m_singleBestOutputCollector.get();
+  }
+
+  void SetOutputStream2SingleBestOutputCollector(std::ostream* outStream) {
+    if (m_singleBestOutputCollector.get())
+      m_singleBestOutputCollector->SetOutputStream(outStream);
+    else
+      m_singleBestOutputCollector.reset(new Moses::OutputCollector(outStream));
   }
 
   Moses::OutputCollector *GetNBestOutputCollector() {
-    return m_nBestOutputCollector;
+    return m_nBestOutputCollector.get();
   }
 
   Moses::OutputCollector *GetUnknownsCollector() {
-    return m_unknownsCollector;
+    return m_unknownsCollector.get();
   }
 
   Moses::OutputCollector *GetAlignmentInfoCollector() {
-    return m_alignmentInfoCollector;
+    return m_alignmentInfoCollector.get();
   }
 
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
-    return m_searchGraphOutputCollector;
+    return m_searchGraphOutputCollector.get();
   }
 
   Moses::OutputCollector *GetDetailedTranslationCollector() {
-    return m_detailedTranslationCollector;
+    return m_detailedTranslationCollector.get();
   }
 
   Moses::OutputCollector *GetWordGraphCollector() {
-    return m_wordGraphCollector;
+    return m_wordGraphCollector.get();
   }
 
   Moses::OutputCollector *GetLatticeSamplesCollector() {
-    return m_latticeSamplesCollector;
+    return m_latticeSamplesCollector.get();
   }
 
   Moses::OutputCollector *GetDetailTreeFragmentsOutputCollector() {
-    return m_detailTreeFragmentsOutputCollector;
+    return m_detailTreeFragmentsOutputCollector.get();
+  }
+
+  void SetInputStreamFromString(std::istringstream &input){
+    m_inputStream = &input;
   }
 
   // post editing
