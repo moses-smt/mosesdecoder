@@ -56,6 +56,10 @@ input-truecaser = $moses-script-dir/recaser/truecase.perl
 output-truecaser = $moses-script-dir/recaser/truecase.perl
 detruecaser = $moses-script-dir/recaser/detruecase.perl
 
+# lowercaser - comment out if you use truecasing
+#input-lowercaser = $moses-script-dir/tokenizer/lowercase.perl
+#output-lowercaser = $moses-script-dir/tokenizer/lowercase.perl
+
 ### generic parallelizer for cluster and multi-core machines
 # you may specify a script that allows the parallel execution
 # parallizable steps (see meta file). you also need specify 
