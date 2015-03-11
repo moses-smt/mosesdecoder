@@ -44,7 +44,10 @@ sub convert {
   my ($text,$alignment,$is_inverse) = @_;
   chop($text);
   chop($alignment);
-  $text =~ s/\s+$//;
+  $text =~ s/\<[^\>]+\>/ /g;
+  $text =~ s/\s+/ /;
+  $text =~ s/ $//;
+  $text =~ s/^ //;
   $alignment =~ s/\s+$//;
   my @TEXT = split(/\s+/,$text);
   print OUT scalar(@TEXT)." ".$text." #";

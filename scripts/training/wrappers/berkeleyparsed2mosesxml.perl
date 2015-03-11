@@ -9,6 +9,7 @@ while(<STDIN>) {
   }
 
   # prep
+  s/^\( \( (.+) \)$/\(TOP $1/; # remove double wrapped parenthesis
   s/^\( /\(TOP /;
 
   # escape words
