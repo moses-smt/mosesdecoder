@@ -27,7 +27,7 @@ int BleuScoreState::Compare(const FFState& o) const
   if (&o == this)
     return 0;
 
-  if (StaticData::Instance().IsChart())
+  if (StaticData::Instance().IsSyntax())
     return 0;
 
   const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);

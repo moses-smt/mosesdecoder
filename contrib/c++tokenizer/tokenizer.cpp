@@ -52,13 +52,14 @@ RE2 ndndcomma_x("([^\\p{N}]),([^\\p{N}])"); // non-digit,non-digit
 RE2 pdndcomma_x("([\\p{N}]),([^\\p{N}])"); // digit,non-digit
 RE2 ndpdcomma_x("([^\\p{N}]),([\\p{N}])"); // non-digit,digit
 RE2 symbol_x("([;:@\\#\\$%&\\p{Sc}\\p{So}])"); // usable punctuation mark not a quote or a brace
-RE2 contract_x("'([sSmMdD]) "); // english single letter contraction forms
-RE2 right_x("[\\p{Sc}({¿¡]+"); //
-RE2 left_x("[,.?!:;\\%})]+"); // 
-RE2 curr_en_x("^[\'][\\p{L}]"); //
-RE2 pre_en_x("[\\p{L}\\p{N}]$"); //
-RE2 curr_fr_x("[\\p{L}\\p{N}][\']$"); //
-RE2 post_fr_x("^[\\p{L}\\p{N}]"); // 
+RE2 contract_x("'([sSmMdD]) "); // english single letter contraction forms, as embedded
+RE2 contract_t_x("'([sSmMdD])$"); // english single letter contraction forms, as terminal
+RE2 right_x("[({¿¡]+"); // symbols which conjoin to the right
+RE2 left_x("[,.?!:;\\%\\p{Sc}})]+"); // symbols conjoin to the left
+RE2 curr_en_x("^[Nn]?[\'][\\p{L}]"); // english contraction suffixes conjoin to the left
+RE2 pre_en_x(".*[\\p{L}\\p{N}]+$"); // valid english contraction prefixes
+RE2 curr_fr_x(".*[\\p{L}\\p{N}]+[\']"); // french/italian contraction prefixes conjoin to the right
+RE2 post_fr_x("^[\\p{L}\\p{N}]*"); // valid french/italian contraction suffixes
 RE2 quotes_x("^[\'\"]+$"); //
 RE2 endnum_x("[-\'\"]"); //
 
@@ -88,6 +89,334 @@ class_follows_p(gunichar *s, gunichar *e, GUnicodeType gclass) {
     return false;
 }
 
+std::map<std::wstring,gunichar> entity_map;
+
+void init_entity_map() {
+    entity_map.insert(std::make_pair(std::wstring(L"&quot;"),L'"'));
+    entity_map.insert(std::make_pair(std::wstring(L"&amp;"),L'&'));
+    entity_map.insert(std::make_pair(std::wstring(L"&apos;"),L'\''));
+    entity_map.insert(std::make_pair(std::wstring(L"&lt;"),L'<'));
+    entity_map.insert(std::make_pair(std::wstring(L"&gt;"),L'>'));
+    entity_map.insert(std::make_pair(std::wstring(L"&nbsp;"),L'\u00A0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&iexcl;"),L'\u00A1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&cent;"),L'\u00A2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&pound;"),L'\u00A3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&curren;"),L'\u00A4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&yen;"),L'\u00A5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&brvbar;"),L'\u00A6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sect;"),L'\u00A7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&uml;"),L'\u00A8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&copy;"),L'\u00A9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ordf;"),L'\u00AA'));
+    entity_map.insert(std::make_pair(std::wstring(L"&laquo;"),L'\u00AB'));
+    entity_map.insert(std::make_pair(std::wstring(L"&not;"),L'\u00AC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&shy;"),L'\u00AD'));
+    entity_map.insert(std::make_pair(std::wstring(L"&reg;"),L'\u00AE'));
+    entity_map.insert(std::make_pair(std::wstring(L"&macr;"),L'\u00AF'));
+    entity_map.insert(std::make_pair(std::wstring(L"&deg;"),L'\u00B0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&plusmn;"),L'\u00B1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sup2;"),L'\u00B2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sup3;"),L'\u00B3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&acute;"),L'\u00B4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&micro;"),L'\u00B5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&para;"),L'\u00B6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&middot;"),L'\u00B7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&cedil;"),L'\u00B8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sup1;"),L'\u00B9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ordm;"),L'\u00BA'));
+    entity_map.insert(std::make_pair(std::wstring(L"&raquo;"),L'\u00BB'));
+    entity_map.insert(std::make_pair(std::wstring(L"&frac14;"),L'\u00BC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&frac12;"),L'\u00BD'));
+    entity_map.insert(std::make_pair(std::wstring(L"&frac34;"),L'\u00BE'));
+    entity_map.insert(std::make_pair(std::wstring(L"&iquest;"),L'\u00BF'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Agrave;"),L'\u00C0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Aacute;"),L'\u00C1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Acirc;"),L'\u00C2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Atilde;"),L'\u00C3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Auml;"),L'\u00C4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Aring;"),L'\u00C5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&AElig;"),L'\u00C6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Ccedil;"),L'\u00C7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Egrave;"),L'\u00C8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Eacute;"),L'\u00C9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Ecirc;"),L'\u00CA'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Euml;"),L'\u00CB'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Igrave;"),L'\u00CC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Iacute;"),L'\u00CD'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Icirc;"),L'\u00CE'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Iuml;"),L'\u00CF'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ETH;"),L'\u00D0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Ntilde;"),L'\u00D1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Ograve;"),L'\u00D2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Oacute;"),L'\u00D3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Ocirc;"),L'\u00D4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Otilde;"),L'\u00D5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Ouml;"),L'\u00D6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&times;"),L'\u00D7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Oslash;"),L'\u00D8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Ugrave;"),L'\u00D9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Uacute;"),L'\u00DA'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Ucirc;"),L'\u00DB'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Uuml;"),L'\u00DC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Yacute;"),L'\u00DD'));
+    entity_map.insert(std::make_pair(std::wstring(L"&THORN;"),L'\u00DE'));
+    entity_map.insert(std::make_pair(std::wstring(L"&szlig;"),L'\u00DF'));
+    entity_map.insert(std::make_pair(std::wstring(L"&agrave;"),L'\u00E0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&aacute;"),L'\u00E1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&acirc;"),L'\u00E2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&atilde;"),L'\u00E3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&auml;"),L'\u00E4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&aring;"),L'\u00E5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&aelig;"),L'\u00E6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ccedil;"),L'\u00E7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&egrave;"),L'\u00E8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&eacute;"),L'\u00E9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ecirc;"),L'\u00EA'));
+    entity_map.insert(std::make_pair(std::wstring(L"&euml;"),L'\u00EB'));
+    entity_map.insert(std::make_pair(std::wstring(L"&igrave;"),L'\u00EC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&iacute;"),L'\u00ED'));
+    entity_map.insert(std::make_pair(std::wstring(L"&icirc;"),L'\u00EE'));
+    entity_map.insert(std::make_pair(std::wstring(L"&iuml;"),L'\u00EF'));
+    entity_map.insert(std::make_pair(std::wstring(L"&eth;"),L'\u00F0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ntilde;"),L'\u00F1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ograve;"),L'\u00F2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&oacute;"),L'\u00F3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ocirc;"),L'\u00F4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&otilde;"),L'\u00F5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ouml;"),L'\u00F6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&divide;"),L'\u00F7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&oslash;"),L'\u00F8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ugrave;"),L'\u00F9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&uacute;"),L'\u00FA'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ucirc;"),L'\u00FB'));
+    entity_map.insert(std::make_pair(std::wstring(L"&uuml;"),L'\u00FC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&yacute;"),L'\u00FD'));
+    entity_map.insert(std::make_pair(std::wstring(L"&thorn;"),L'\u00FE'));
+    entity_map.insert(std::make_pair(std::wstring(L"&yuml;"),L'\u00FF'));
+    entity_map.insert(std::make_pair(std::wstring(L"&OElig;"),L'\u0152'));
+    entity_map.insert(std::make_pair(std::wstring(L"&oelig;"),L'\u0153'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Scaron;"),L'\u0160'));
+    entity_map.insert(std::make_pair(std::wstring(L"&scaron;"),L'\u0161'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Yuml;"),L'\u0178'));
+    entity_map.insert(std::make_pair(std::wstring(L"&fnof;"),L'\u0192'));
+    entity_map.insert(std::make_pair(std::wstring(L"&circ;"),L'\u02C6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&tilde;"),L'\u02DC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Alpha;"),L'\u0391'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Beta;"),L'\u0392'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Gamma;"),L'\u0393'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Delta;"),L'\u0394'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Epsilon;"),L'\u0395'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Zeta;"),L'\u0396'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Eta;"),L'\u0397'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Theta;"),L'\u0398'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Iota;"),L'\u0399'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Kappa;"),L'\u039A'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Lambda;"),L'\u039B'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Mu;"),L'\u039C'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Nu;"),L'\u039D'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Xi;"),L'\u039E'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Omicron;"),L'\u039F'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Pi;"),L'\u03A0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Rho;"),L'\u03A1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Sigma;"),L'\u03A3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Tau;"),L'\u03A4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Upsilon;"),L'\u03A5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Phi;"),L'\u03A6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Chi;"),L'\u03A7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Psi;"),L'\u03A8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Omega;"),L'\u03A9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&alpha;"),L'\u03B1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&beta;"),L'\u03B2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&gamma;"),L'\u03B3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&delta;"),L'\u03B4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&epsilon;"),L'\u03B5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&zeta;"),L'\u03B6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&eta;"),L'\u03B7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&theta;"),L'\u03B8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&iota;"),L'\u03B9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&kappa;"),L'\u03BA'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lambda;"),L'\u03BB'));
+    entity_map.insert(std::make_pair(std::wstring(L"&mu;"),L'\u03BC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&nu;"),L'\u03BD'));
+    entity_map.insert(std::make_pair(std::wstring(L"&xi;"),L'\u03BE'));
+    entity_map.insert(std::make_pair(std::wstring(L"&omicron;"),L'\u03BF'));
+    entity_map.insert(std::make_pair(std::wstring(L"&pi;"),L'\u03C0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rho;"),L'\u03C1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sigmaf;"),L'\u03C2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sigma;"),L'\u03C3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&tau;"),L'\u03C4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&upsilon;"),L'\u03C5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&phi;"),L'\u03C6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&chi;"),L'\u03C7'));
+    entity_map.insert(std::make_pair(std::wstring(L"&psi;"),L'\u03C8'));
+    entity_map.insert(std::make_pair(std::wstring(L"&omega;"),L'\u03C9'));
+    entity_map.insert(std::make_pair(std::wstring(L"&thetasym;"),L'\u03D1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&upsih;"),L'\u03D2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&piv;"),L'\u03D6'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ensp;"),L'\u2002'));
+    entity_map.insert(std::make_pair(std::wstring(L"&emsp;"),L'\u2003'));
+    entity_map.insert(std::make_pair(std::wstring(L"&thinsp;"),L'\u2009'));
+    entity_map.insert(std::make_pair(std::wstring(L"&zwnj;"),L'\u200C'));
+    entity_map.insert(std::make_pair(std::wstring(L"&zwj;"),L'\u200D'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lrm;"),L'\u200E'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rlm;"),L'\u200F'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ndash;"),L'\u2013'));
+    entity_map.insert(std::make_pair(std::wstring(L"&mdash;"),L'\u2014'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lsquo;"),L'\u2018'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rsquo;"),L'\u2019'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sbquo;"),L'\u201A'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ldquo;"),L'\u201C'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rdquo;"),L'\u201D'));
+    entity_map.insert(std::make_pair(std::wstring(L"&bdquo;"),L'\u201E'));
+    entity_map.insert(std::make_pair(std::wstring(L"&dagger;"),L'\u2020'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Dagger;"),L'\u2021'));
+    entity_map.insert(std::make_pair(std::wstring(L"&bull;"),L'\u2022'));
+    entity_map.insert(std::make_pair(std::wstring(L"&hellip;"),L'\u2026'));
+    entity_map.insert(std::make_pair(std::wstring(L"&permil;"),L'\u2030'));
+    entity_map.insert(std::make_pair(std::wstring(L"&prime;"),L'\u2032'));
+    entity_map.insert(std::make_pair(std::wstring(L"&Prime;"),L'\u2033'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lsaquo;"),L'\u2039'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rsaquo;"),L'\u203A'));
+    entity_map.insert(std::make_pair(std::wstring(L"&oline;"),L'\u203E'));
+    entity_map.insert(std::make_pair(std::wstring(L"&frasl;"),L'\u2044'));
+    entity_map.insert(std::make_pair(std::wstring(L"&euro;"),L'\u20AC'));
+    entity_map.insert(std::make_pair(std::wstring(L"&image;"),L'\u2111'));
+    entity_map.insert(std::make_pair(std::wstring(L"&weierp;"),L'\u2118'));
+    entity_map.insert(std::make_pair(std::wstring(L"&real;"),L'\u211C'));
+    entity_map.insert(std::make_pair(std::wstring(L"&trade;"),L'\u2122'));
+    entity_map.insert(std::make_pair(std::wstring(L"&alefsym;"),L'\u2135'));
+    entity_map.insert(std::make_pair(std::wstring(L"&larr;"),L'\u2190'));
+    entity_map.insert(std::make_pair(std::wstring(L"&uarr;"),L'\u2191'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rarr;"),L'\u2192'));
+    entity_map.insert(std::make_pair(std::wstring(L"&darr;"),L'\u2193'));
+    entity_map.insert(std::make_pair(std::wstring(L"&harr;"),L'\u2194'));
+    entity_map.insert(std::make_pair(std::wstring(L"&crarr;"),L'\u21B5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lArr;"),L'\u21D0'));
+    entity_map.insert(std::make_pair(std::wstring(L"&uArr;"),L'\u21D1'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rArr;"),L'\u21D2'));
+    entity_map.insert(std::make_pair(std::wstring(L"&dArr;"),L'\u21D3'));
+    entity_map.insert(std::make_pair(std::wstring(L"&hArr;"),L'\u21D4'));
+    entity_map.insert(std::make_pair(std::wstring(L"&forall;"),L'\u2200'));
+    entity_map.insert(std::make_pair(std::wstring(L"&part;"),L'\u2202'));
+    entity_map.insert(std::make_pair(std::wstring(L"&exist;"),L'\u2203'));
+    entity_map.insert(std::make_pair(std::wstring(L"&empty;"),L'\u2205'));
+    entity_map.insert(std::make_pair(std::wstring(L"&nabla;"),L'\u2207'));
+    entity_map.insert(std::make_pair(std::wstring(L"&isin;"),L'\u2208'));
+    entity_map.insert(std::make_pair(std::wstring(L"&notin;"),L'\u2209'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ni;"),L'\u220B'));
+    entity_map.insert(std::make_pair(std::wstring(L"&prod;"),L'\u220F'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sum;"),L'\u2211'));
+    entity_map.insert(std::make_pair(std::wstring(L"&minus;"),L'\u2212'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lowast;"),L'\u2217'));
+    entity_map.insert(std::make_pair(std::wstring(L"&radic;"),L'\u221A'));
+    entity_map.insert(std::make_pair(std::wstring(L"&prop;"),L'\u221D'));
+    entity_map.insert(std::make_pair(std::wstring(L"&infin;"),L'\u221E'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ang;"),L'\u2220'));
+    entity_map.insert(std::make_pair(std::wstring(L"&and;"),L'\u2227'));
+    entity_map.insert(std::make_pair(std::wstring(L"&or;"),L'\u2228'));
+    entity_map.insert(std::make_pair(std::wstring(L"&cap;"),L'\u2229'));
+    entity_map.insert(std::make_pair(std::wstring(L"&cup;"),L'\u222A'));
+    entity_map.insert(std::make_pair(std::wstring(L"&int;"),L'\u222B'));
+    entity_map.insert(std::make_pair(std::wstring(L"&there4;"),L'\u2234'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sim;"),L'\u223C'));
+    entity_map.insert(std::make_pair(std::wstring(L"&cong;"),L'\u2245'));
+    entity_map.insert(std::make_pair(std::wstring(L"&asymp;"),L'\u2248'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ne;"),L'\u2260'));
+    entity_map.insert(std::make_pair(std::wstring(L"&equiv;"),L'\u2261'));
+    entity_map.insert(std::make_pair(std::wstring(L"&le;"),L'\u2264'));
+    entity_map.insert(std::make_pair(std::wstring(L"&ge;"),L'\u2265'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sub;"),L'\u2282'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sup;"),L'\u2283'));
+    entity_map.insert(std::make_pair(std::wstring(L"&nsub;"),L'\u2284'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sube;"),L'\u2286'));
+    entity_map.insert(std::make_pair(std::wstring(L"&supe;"),L'\u2287'));
+    entity_map.insert(std::make_pair(std::wstring(L"&oplus;"),L'\u2295'));
+    entity_map.insert(std::make_pair(std::wstring(L"&otimes;"),L'\u2297'));
+    entity_map.insert(std::make_pair(std::wstring(L"&perp;"),L'\u22A5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&sdot;"),L'\u22C5'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lceil;"),L'\u2308'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rceil;"),L'\u2309'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lfloor;"),L'\u230A'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rfloor;"),L'\u230B'));
+    entity_map.insert(std::make_pair(std::wstring(L"&lang;"),L'\u2329'));
+    entity_map.insert(std::make_pair(std::wstring(L"&rang;"),L'\u232A'));
+    entity_map.insert(std::make_pair(std::wstring(L"&loz;"),L'\u25CA'));
+    entity_map.insert(std::make_pair(std::wstring(L"&spades;"),L'\u2660'));
+    entity_map.insert(std::make_pair(std::wstring(L"&clubs;"),L'\u2663'));
+    entity_map.insert(std::make_pair(std::wstring(L"&hearts;"),L'\u2665'));
+    entity_map.insert(std::make_pair(std::wstring(L"&diams;"),L'\u2666'));
+}
+
+inline gunichar get_entity(gunichar *ptr, size_t len) {
+    // try hex, decimal entity first
+    gunichar ech(0);
+    if (ptr[1] == gunichar(L'#') && len > 3) {
+        std::wstringstream wss;
+        int wch = 0;
+        try {
+            wss << std::hex << std::wstring((wchar_t *)(ptr+2),len-3);
+            wss >> wch;
+            ech = gunichar(wch);
+        } catch (...) {
+            ech = 0;
+        }
+    } else if (g_unichar_type(ptr[1]) == G_UNICODE_DECIMAL_NUMBER) {
+        std::wstringstream wss;
+        int wch = 0;
+        try {
+            wss << std::dec << std::wstring((wchar_t *)(ptr+1),len-2);
+            wss >> wch;
+            ech = gunichar(wch);
+        } catch (...) {
+            ech = 0;
+        }
+    }
+    if (ech) 
+        return ech;
+
+    // otherwise require well-known name map
+    if (entity_map.empty()) {
+        init_entity_map();
+    }
+    std::map<std::wstring,gunichar>::iterator it = entity_map.find(std::wstring((wchar_t *)(ptr),len));
+    return it != entity_map.end() ? it->second : gunichar(0);
+}
+
+
+bool unescape(std::string& word) {
+    std::ostringstream oss;
+    std::size_t was = 0; // last processed
+    std::size_t pos = 0; // last unprocessed
+    std::size_t len = 0; // processed length
+    bool hit = false;
+    for (std::size_t endp=0; 
+         (pos = word.find('&',was)) != std::string::npos && (endp = word.find(';',pos)) != std::string::npos; 
+         was = endp == std::string::npos ? pos : 1+endp) {
+        len = endp - pos + 1;
+        glong ulen(0);
+        gunichar *gtmp = g_utf8_to_ucs4_fast((const gchar *)word.c_str()+pos, len, &ulen);
+        gunichar gbuf[2] = { 0 };
+        if ((gbuf[0] = get_entity(gtmp,ulen)) != gunichar(0)) {
+            gchar *gstr = g_ucs4_to_utf8(gbuf,ulen,0,0,0);
+            if (was < pos)
+                oss << word.substr(was,pos-was);
+            oss << gstr;
+            g_free(gstr);
+            was += ulen;
+            hit = true;
+        } else {
+            oss << word.substr(was,1+endp-was);
+        }
+        g_free(gtmp);
+    }
+    if (was < word.size()) 
+        oss << word.substr(was);
+    if (hit)
+        word = oss.str();
+    return hit;
+}
+
+
 }; // end anonymous namespace
 
 
@@ -112,30 +441,25 @@ Tokenizer::set_config_dir(const std::string& dir) {
 }
 
 
-Tokenizer::Tokenizer(const std::string& _lang_iso,
-                     bool _skip_xml_p,
-                     bool _skip_alltags_p,
-                     bool _non_escape_p,
-                     bool _aggressive_hyphen_p,
-                     bool _supersub_p,
-                     bool _url_p,
-                     bool _downcase_p,
-                     bool _normalize_p,
-                     bool _penn_p,
-                     bool _verbose_p)
-        : lang_iso(_lang_iso)
-        , english_p(_lang_iso.compare("en")==0)
-        , latin_p((!english_p) && (_lang_iso.compare("fr")==0 || _lang_iso.compare("it")==0))
-        , skip_xml_p(_skip_xml_p)
-        , skip_alltags_p(_skip_alltags_p)
-        , non_escape_p(_non_escape_p)
-        , aggressive_hyphen_p(_aggressive_hyphen_p)
-        , supersub_p(_supersub_p)
-        , url_p(_url_p)
-        , downcase_p(_downcase_p)
-        , normalize_p(_normalize_p)
-        , penn_p(_penn_p)
-        , verbose_p(_verbose_p)
+Tokenizer::Tokenizer(const Parameters& _)
+        : lang_iso(_.lang_iso)
+        , english_p(_.lang_iso.compare("en")==0)
+        , latin_p((!english_p) && (_.lang_iso.compare("fr")==0 || _.lang_iso.compare("it")==0))
+        , skip_xml_p(_.detag_p)
+        , skip_alltags_p(_.alltag_p)
+        , escape_p(_.escape_p)
+        , unescape_p(_.unescape_p)
+        , aggressive_hyphen_p(_.aggro_p)
+        , supersub_p(_.supersub_p)
+        , url_p(_.url_p)
+        , downcase_p(_.downcase_p)
+        , normalize_p(_.normalize_p)
+        , penn_p(_.penn_p)
+        , narrow_latin_p(_.narrow_latin_p)
+        , narrow_kana_p(_.narrow_kana_p)
+        , refined_p(_.refined_p)
+        , drop_bad_p(_.drop_bad_p)
+        , verbose_p(_.verbose_p)
 {
 }
 
@@ -464,20 +788,20 @@ Tokenizer::tokenize(const std::string& buf)
         gunichar *ubuf(g_new0(gunichar,ulen*6+1)); // g_free
         gunichar *uptr(ubuf);
 
-        gunichar prev_uch(0L);
+        gunichar prev_uch(0);
         gunichar next_uch(*ucs4);
-        gunichar curr_uch(0L);
+        gunichar curr_uch(0);
 
         GUnicodeType curr_type(G_UNICODE_UNASSIGNED);
         GUnicodeType next_type((ucs4 && *ucs4) ? g_unichar_type(*ucs4) : G_UNICODE_UNASSIGNED);
         GUnicodeType prev_type(G_UNICODE_UNASSIGNED);
 
         bool post_break_p = false;
-        bool in_num = next_uch <= gunichar('9') && next_uch >= gunichar('0');
+        bool in_num_p = next_uch <= gunichar(L'9') && next_uch >= gunichar(L'0');
         bool in_url_p = false;
-        bool final_p = false;
         int since_start = 0;
         int alpha_prefix = 0;
+        int bad_length = 0;
 
         while (ucs4 < lim4) {
             prev_uch = curr_uch;
@@ -485,44 +809,44 @@ Tokenizer::tokenize(const std::string& buf)
             curr_uch = next_uch;
             curr_type = next_type;
 
-            final_p = ++nxt4 >= lim4;
-
-            if (final_p) {
-                next_uch = gunichar(0L);
+            if (++nxt4 >= lim4) {
+                next_uch = 0;
                 next_type = G_UNICODE_UNASSIGNED;
             } else {
                 next_uch = *nxt4;
                 next_type = g_unichar_type(next_uch);
             }
 
-            bool is_basic = *ucs4 < 0x80L;
-
             if (url_p) {
-                if (!in_url_p) {
+                if (!in_url_p && *ucs4 < 0x80L) { // url chars must be in the basic plane
                     if (!since_start) {
-                        if (is_basic && std::isalpha(char(*ucs4)))
+                        if (std::isalpha(char(*ucs4)))
                             alpha_prefix++;
-                    } else if (alpha_prefix == since_start && is_basic && char(*ucs4) == ':' && next_type != G_UNICODE_SPACE_SEPARATOR) {
+                    } else if (alpha_prefix == since_start 
+                               && char(*ucs4) == ':' 
+                               && next_type != G_UNICODE_SPACE_SEPARATOR) {
                         in_url_p = true;
                     }
                 }
             }
 
-            bool break_p = false;
+            bool pre_break_p = false;
             const wchar_t *substitute_p = 0;
 
             if (post_break_p) {
-                *uptr++ = gunichar(' ');
-                since_start = 0;
-                in_url_p = in_num = post_break_p = false;
+                *uptr++ = gunichar(L' ');
+                since_start = bad_length = 0;
+                in_url_p = in_num_p = post_break_p = false;
             }
+
+        retry:
 
             switch (curr_type) {
             case G_UNICODE_MODIFIER_LETTER:
             case G_UNICODE_OTHER_LETTER:
             case G_UNICODE_TITLECASE_LETTER:
-                if (in_url_p || in_num)
-                    break_p = true;
+                if (in_url_p || in_num_p)
+                    pre_break_p = true;
                 // fallthough
             case G_UNICODE_UPPERCASE_LETTER:
             case G_UNICODE_LOWERCASE_LETTER:
@@ -530,14 +854,14 @@ Tokenizer::tokenize(const std::string& buf)
                     curr_uch = g_unichar_tolower(*ucs4);
                 break;
             case G_UNICODE_SPACING_MARK:
-                break_p = true;
-                in_num = false;
-                curr_uch = gunichar(0L);
+                pre_break_p = true;
+                in_num_p = false;
+                curr_uch = 0;
                 break;
             case G_UNICODE_DECIMAL_NUMBER:
             case G_UNICODE_LETTER_NUMBER:
             case G_UNICODE_OTHER_NUMBER:
-                if (!in_num && !in_url_p) {
+                if (!in_num_p && !in_url_p) {
                     switch (prev_type) {
                     case G_UNICODE_DASH_PUNCTUATION:
                     case G_UNICODE_FORMAT:
@@ -547,20 +871,20 @@ Tokenizer::tokenize(const std::string& buf)
                     case G_UNICODE_DECIMAL_NUMBER:
                         break;
                     default:
-                        break_p = true;
+                        pre_break_p = true;
                     }
                 }
-                in_num = true;
+                in_num_p = true;
                 break;
             case G_UNICODE_CONNECT_PUNCTUATION:
                 if (curr_uch != gunichar(L'_')) {
                     if (in_url_p) {
                         in_url_p = false;
-                        post_break_p = break_p = true;
+                        post_break_p = pre_break_p = true;
                     }
                 }
-                if (in_num) {
-                    post_break_p = break_p = true;
+                if (in_num_p) {
+                    post_break_p = pre_break_p = true;
                 } else {
                     switch (next_type) {
                     case G_UNICODE_LOWERCASE_LETTER:
@@ -569,7 +893,7 @@ Tokenizer::tokenize(const std::string& buf)
                     case G_UNICODE_TITLECASE_LETTER:
                         break;
                     default:
-                        post_break_p = break_p = true;
+                        post_break_p = pre_break_p = true;
                     }
                     switch (prev_type) {
                     case G_UNICODE_LOWERCASE_LETTER:
@@ -578,55 +902,57 @@ Tokenizer::tokenize(const std::string& buf)
                     case G_UNICODE_TITLECASE_LETTER:
                         break;
                     default:
-                        post_break_p = break_p = true;
+                        post_break_p = pre_break_p = true;
                     }
                 }
                 break;
-            case G_UNICODE_DASH_PUNCTUATION:
             case G_UNICODE_FORMAT:
-                if (aggressive_hyphen_p) {
+                in_url_p = in_num_p = false;
+                break;
+            case G_UNICODE_DASH_PUNCTUATION:
+                if (aggressive_hyphen_p && !in_url_p) {
                     substitute_p = L"@-@";
-                    break_p = post_break_p = !in_url_p;
+                    post_break_p = pre_break_p = true;
+                } else if ( ( curr_uch > gunichar(L'\u002D') && curr_uch < gunichar(L'\u2010') ) ||
+                            ( curr_uch > gunichar(L'\u2011') 
+                              && curr_uch != gunichar(L'\u30A0') 
+                              && curr_uch < gunichar(L'\uFE63') ) ) {
+                    // dash, not a hyphen
+                    post_break_p = pre_break_p = true;
                 } else if (next_type == G_UNICODE_SPACE_SEPARATOR) {
-                } else if (prev_type == curr_type) {
-                    if (next_type != curr_type) {
-                        post_break_p = !in_url_p;
-                    }
-                } else if (next_type == curr_type) {
-                    break_p = !in_url_p;
-                } else if ((prev_type == G_UNICODE_UPPERCASE_LETTER ||
-                            prev_type == G_UNICODE_LOWERCASE_LETTER) &&
-                           next_type == G_UNICODE_DECIMAL_NUMBER) {
-                    in_num = false;
-                } else if (in_num || since_start == 0) {
-                    switch (next_type) {
-                    case G_UNICODE_UPPERCASE_LETTER:
-                    case G_UNICODE_LOWERCASE_LETTER:
-                    case G_UNICODE_MODIFIER_LETTER:
-                    case G_UNICODE_OTHER_LETTER:
-                    case G_UNICODE_TITLECASE_LETTER:
-                    case G_UNICODE_DECIMAL_NUMBER:
-                    case G_UNICODE_LETTER_NUMBER:
-                    case G_UNICODE_OTHER_NUMBER:
-                    case G_UNICODE_SPACE_SEPARATOR:
-                        break;
-                    default:
-                        post_break_p = break_p = prev_uch != curr_uch;
-                    }
-                } else if (in_url_p) {
-                    break_p = curr_uch != gunichar('-');
                 } else {
-                    switch (prev_type) {
-                    case G_UNICODE_UPPERCASE_LETTER:
-                    case G_UNICODE_LOWERCASE_LETTER:
-                    case G_UNICODE_MODIFIER_LETTER:
-                    case G_UNICODE_OTHER_LETTER:
-                    case G_UNICODE_TITLECASE_LETTER:
-                    case G_UNICODE_DECIMAL_NUMBER:
-                    case G_UNICODE_LETTER_NUMBER:
-                    case G_UNICODE_OTHER_NUMBER:
-                    case G_UNICODE_OTHER_PUNCTUATION:
+                    if (prev_type == curr_type) {
+                        if (next_type != curr_type) {
+                            post_break_p = !in_url_p;
+                        }
+                    } else if (next_type == curr_type) {
+                        pre_break_p = !in_url_p;
+                    } else if ((prev_type == G_UNICODE_UPPERCASE_LETTER ||
+                                prev_type == G_UNICODE_LOWERCASE_LETTER) &&
+                               next_type == G_UNICODE_DECIMAL_NUMBER) {
+                        in_num_p = false;
+                    } else if (in_num_p || since_start == 0) {
                         switch (next_type) {
+                        case G_UNICODE_UPPERCASE_LETTER:
+                        case G_UNICODE_LOWERCASE_LETTER:
+                        case G_UNICODE_MODIFIER_LETTER:
+                        case G_UNICODE_OTHER_LETTER:
+                        case G_UNICODE_TITLECASE_LETTER:
+                        case G_UNICODE_SPACE_SEPARATOR:
+                            in_num_p = false;
+                            break;
+                        case G_UNICODE_DECIMAL_NUMBER:
+                        case G_UNICODE_LETTER_NUMBER:
+                        case G_UNICODE_OTHER_NUMBER:
+                            break;
+                        default:
+                            post_break_p = true;
+                            pre_break_p = prev_uch != curr_uch;
+                        }
+                    } else if (in_url_p) {
+                        pre_break_p = curr_uch != gunichar(L'-');
+                    } else {
+                        switch (prev_type) {
                         case G_UNICODE_UPPERCASE_LETTER:
                         case G_UNICODE_LOWERCASE_LETTER:
                         case G_UNICODE_MODIFIER_LETTER:
@@ -635,64 +961,124 @@ Tokenizer::tokenize(const std::string& buf)
                         case G_UNICODE_DECIMAL_NUMBER:
                         case G_UNICODE_LETTER_NUMBER:
                         case G_UNICODE_OTHER_NUMBER:
+                        case G_UNICODE_OTHER_PUNCTUATION:
+                            switch (next_type) {
+                            case G_UNICODE_UPPERCASE_LETTER:
+                            case G_UNICODE_LOWERCASE_LETTER:
+                            case G_UNICODE_MODIFIER_LETTER:
+                            case G_UNICODE_OTHER_LETTER:
+                            case G_UNICODE_TITLECASE_LETTER:
+                            case G_UNICODE_DECIMAL_NUMBER:
+                            case G_UNICODE_LETTER_NUMBER:
+                            case G_UNICODE_OTHER_NUMBER:
+                                break;
+                            default:
+                                post_break_p = pre_break_p = prev_uch != curr_uch;
+                            }
                             break;
                         default:
-                            post_break_p = break_p = prev_uch != curr_uch;
-                        }
-                        break;
-                    default:
-                        post_break_p = break_p = prev_uch != curr_uch;
-                        break;
-                    } 
+                            post_break_p = pre_break_p = prev_uch != curr_uch;
+                            break;
+                        } 
+                    }
                 }
                 break;
             case G_UNICODE_OTHER_PUNCTUATION:
                 switch (curr_uch) {
-                case gunichar('!'):
-                case gunichar('#'):
-                case gunichar('/'):
-                case gunichar(':'):
-                case gunichar(';'):
-                case gunichar('?'):
-                case gunichar('@'):
-                    post_break_p = break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
+                case gunichar(L':'):
+                case gunichar(L'/'):
+                    if (refined_p && !in_url_p 
+                        && prev_type == G_UNICODE_DECIMAL_NUMBER 
+                        && next_type == G_UNICODE_DECIMAL_NUMBER) {
+                        break;
+                    }
+                    // fall-through
+                case gunichar(L'!'):
+                case gunichar(L'#'):
+                case gunichar(L';'):
+                case gunichar(L'?'):
+                case gunichar(L'@'):
+                    post_break_p = pre_break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
                     break;
-                case gunichar('+'):
-                    post_break_p = break_p = !in_num && since_start > 0;
-                    in_num = in_num || since_start == 0;
+                case gunichar(L'+'):
+                    post_break_p = pre_break_p = !in_num_p && since_start > 0;
+                    in_num_p = in_num_p || since_start == 0;
                     break;
-                case gunichar('&'):
-                    post_break_p = break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
-                    if (!non_escape_p) 
+                case gunichar(L'&'):
+                    if (unescape_p) {
+                        if (next_type == G_UNICODE_LOWERCASE_LETTER || next_type == G_UNICODE_UPPERCASE_LETTER 
+                            || next_type == G_UNICODE_DECIMAL_NUMBER || next_uch == gunichar(L'#')) {
+                            gunichar *eptr = nxt4;
+                            GUnicodeType eptr_type(G_UNICODE_UNASSIGNED);
+                            for (++eptr; eptr < lim4 && *eptr != gunichar(L';'); ++eptr) {
+                                eptr_type = g_unichar_type(*eptr);
+                                if (eptr_type != G_UNICODE_LOWERCASE_LETTER
+                                    && eptr_type != G_UNICODE_UPPERCASE_LETTER
+                                    && eptr_type != G_UNICODE_DECIMAL_NUMBER)
+                                    break;
+                            }
+                            gunichar ech(0);
+                            if (*eptr == gunichar(L';') && (ech = get_entity(ucs4,eptr-ucs4+1))) {
+                                curr_uch = ech;
+                                curr_type = g_unichar_type(ech);
+                                ucs4 = eptr;
+                                nxt4 = ++eptr;
+                                next_uch = *nxt4;
+                                next_type = nxt4 < lim4 ? g_unichar_type(*nxt4) : G_UNICODE_UNASSIGNED;
+                                goto retry;
+                            }
+                        }
+                    }
+                    post_break_p = pre_break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
+                    if (escape_p) 
                         substitute_p = L"&amp;";
                     break;
-                case gunichar('\''):
+                case gunichar(L'\''):
                     if (english_p) {
                         if (!in_url_p) {
-                            break_p = true;
-                            post_break_p = since_start == 0 || 
-                                (next_type != G_UNICODE_LOWERCASE_LETTER && next_type != G_UNICODE_UPPERCASE_LETTER && next_type != G_UNICODE_DECIMAL_NUMBER);
+                            bool next_letter_p = next_type == G_UNICODE_LOWERCASE_LETTER 
+                                || next_type == G_UNICODE_UPPERCASE_LETTER;
+                            pre_break_p = true;
+                            if (next_letter_p && refined_p) {
+                                // break sha n't instead of shan 't:
+                                if (prev_uch == gunichar(L'n') || prev_uch == gunichar(L'N')) {
+                                    *(uptr - 1) = gunichar(L' ');
+                                    *(uptr++) = prev_uch;
+                                    pre_break_p = false;
+                                } 
+                            }
+                            post_break_p = since_start == 0 
+                                || (!next_letter_p && next_type != G_UNICODE_DECIMAL_NUMBER);
                         }
                     } else if (latin_p) {
                         post_break_p = !in_url_p;
-                        break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
+                        pre_break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
                     } else {
-                        post_break_p = break_p = !in_url_p;
+                        post_break_p = pre_break_p = !in_url_p;
                     }
-                    if (!non_escape_p) 
+                    if (escape_p) 
                         substitute_p = L"&apos;";
                     break;
-                case gunichar('"'):
-                    post_break_p = break_p = true;
-                    if (!non_escape_p) 
+                case gunichar(L'"'):
+                    post_break_p = pre_break_p = true;
+                    if (escape_p) 
                         substitute_p = L"&quot;";
                     break;
-                case gunichar(','):
-                    break_p = !in_num || next_type != G_UNICODE_DECIMAL_NUMBER;
+                case gunichar(L','):
+                    pre_break_p = !in_num_p || next_type != G_UNICODE_DECIMAL_NUMBER;
+                    post_break_p = !in_num_p && next_type != G_UNICODE_DECIMAL_NUMBER;
                     break;
-                case gunichar('.'):
+                case gunichar(L'%'):
+                    if (refined_p) {
+                        pre_break_p = !in_num_p;
+                        post_break_p = !in_num_p && next_type != G_UNICODE_DECIMAL_NUMBER;
+                    } else {
+                        post_break_p = pre_break_p = true;
+                    }
+                    break;
+                case gunichar(L'.'):
                     if (prev_uch != '.') {
-                        if (!in_num) {
+                        if (!in_num_p) {
                             switch (next_type) {
                             case G_UNICODE_DECIMAL_NUMBER:
                             case G_UNICODE_LOWERCASE_LETTER:
@@ -714,7 +1100,7 @@ Tokenizer::tokenize(const std::string& buf)
                                                 switch (tclass) {
                                                 case G_UNICODE_UPPERCASE_LETTER:
                                                 case G_UNICODE_LOWERCASE_LETTER:
-                                                    break_p = true;
+                                                    pre_break_p = true;
                                                     break;
                                                 default:
                                                     break;
@@ -725,12 +1111,12 @@ Tokenizer::tokenize(const std::string& buf)
                                                    g_unichar_type(*nxt4) == G_UNICODE_DASH_PUNCTUATION) {
                                             // lower-case look-ahead does not break
                                         } else {
-                                            break_p = true;
+                                            pre_break_p = true;
                                         }
                                         break;
                                     }
                                     default:
-                                        break_p = true;
+                                        pre_break_p = true;
                                         break;
                                     }
                                 } 
@@ -742,7 +1128,7 @@ Tokenizer::tokenize(const std::string& buf)
                             case G_UNICODE_LOWERCASE_LETTER:
                                 break;
                             default:
-                                break_p = true;
+                                pre_break_p = true;
                             }
                         }
                     } else if (next_uch != '.') {
@@ -750,7 +1136,7 @@ Tokenizer::tokenize(const std::string& buf)
                     }
                     break;
                 default:
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
                 }
                 break;
@@ -759,110 +1145,165 @@ Tokenizer::tokenize(const std::string& buf)
             case G_UNICODE_INITIAL_PUNCTUATION:
             case G_UNICODE_OPEN_PUNCTUATION:
                 switch (curr_uch) {
-                case gunichar('('):
-                case gunichar(')'):
+                case gunichar(L'('):
+                case gunichar(L')'):
                     break;
-                case gunichar('['):
-                    if (!non_escape_p) 
+                case gunichar(L'['):
+                    if (escape_p) 
                         substitute_p = L"&#91;";
                     break;
-                case gunichar(']'):
-                    if (!non_escape_p) 
+                case gunichar(L']'):
+                    if (escape_p) 
                         substitute_p = L"&#93;";
                     break;
                 default:
                     in_url_p = false;
                 }
-                post_break_p = break_p = !in_url_p;
+                post_break_p = pre_break_p = !in_url_p;
                 break;
             case G_UNICODE_CURRENCY_SYMBOL:
-                post_break_p = in_num; // was in number, so break it
-                break_p = !in_num;
-                in_num = in_num || next_type == G_UNICODE_DECIMAL_NUMBER || next_uch == gunichar('.') || next_uch == gunichar(',');
-                if (curr_uch != gunichar('$'))
+                if (refined_p) {
+                    post_break_p = in_num_p; // was in number, so break it
+                    pre_break_p = !in_num_p;
+                    in_num_p = in_num_p || next_type == G_UNICODE_DECIMAL_NUMBER || next_uch == gunichar(L'.') || next_uch == gunichar(L',');
+                } else {
+                    post_break_p = pre_break_p = true;
+                    in_num_p = false;
+                }
+                if (curr_uch != gunichar(L'$'))
                     in_url_p = false;
                 break;
             case G_UNICODE_MODIFIER_SYMBOL:
             case G_UNICODE_MATH_SYMBOL:
                 switch (curr_uch) {
-                case gunichar('`'):
+                case gunichar(L'`'):
                     if (english_p) {
                         if (!in_url_p) {
-                            break_p = true;
+                            pre_break_p = true;
                             post_break_p = since_start == 0 || 
                                 (next_type != G_UNICODE_LOWERCASE_LETTER && next_type != G_UNICODE_UPPERCASE_LETTER && next_type != G_UNICODE_DECIMAL_NUMBER);
                         }
                     } else if (latin_p) {
                         post_break_p = !in_url_p;
-                        break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
+                        pre_break_p = !in_url_p && prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
                     } else {
-                        post_break_p = break_p = !in_url_p;
+                        post_break_p = pre_break_p = !in_url_p;
                     }
-                    if (!non_escape_p) 
+                    if (escape_p) 
                         substitute_p = L"&apos;";
                     else 
-                        curr_uch = gunichar('\'');
+                        curr_uch = gunichar(L'\'');
                     break;
-                case gunichar('|'):
-                    if (!non_escape_p) 
+                case gunichar(L'|'):
+                    if (escape_p) 
                         substitute_p = L"&#124;";
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
-                case gunichar('<'):
-                    if (!non_escape_p) 
+                case gunichar(L'<'):
+                    if (escape_p) 
                         substitute_p = L"&lt;";
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
-                case gunichar('>'):
-                    if (!non_escape_p) 
+                case gunichar(L'>'):
+                    if (escape_p) 
                         substitute_p = L"&gt;";
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
-                case gunichar('%'):
-                    post_break_p = in_num;
-                    break_p = !in_num && !in_url_p;
-                    in_num = false;
+                case gunichar(L'%'):
+                    post_break_p = in_num_p;
+                    pre_break_p = !in_num_p && !in_url_p;
+                    in_num_p = false;
                     break;
-                case gunichar('='):
-                case gunichar('~'):
-                    in_num = false;
-                    post_break_p = break_p = !in_url_p; 
+                case gunichar(L'='):
+                case gunichar(L'~'):
+                    in_num_p = false;
+                    post_break_p = pre_break_p = !in_url_p; 
                     break;
-                case gunichar('+'):
-                    in_num = in_num || since_start == 0;
-                    post_break_p = break_p = !in_url_p; 
+                case gunichar(L'+'):
+                    post_break_p = pre_break_p = !in_url_p;
+                    if (in_url_p) {
+                        in_num_p = false;
+                    } else if (refined_p) {
+                        // handle floating point as e.g. 1.2e+3.4
+                        bool next_digit_p = next_type == G_UNICODE_DECIMAL_NUMBER ||
+                            next_uch == gunichar(L'.');
+                        pre_break_p = !in_num_p;
+                        in_num_p = next_digit_p && prev_type != G_UNICODE_DECIMAL_NUMBER;
+                        post_break_p = !in_num_p;
+                    } else {
+                        in_num_p = in_num_p || since_start == 0;
+                    }
                     break;
                 default:
-                    post_break_p = break_p = true;
+                    post_break_p = pre_break_p = true;
                     break;
                 }
                 break;
             case G_UNICODE_OTHER_SYMBOL:
-                post_break_p = break_p = true;
+                post_break_p = pre_break_p = true;
+                break;
+            case G_UNICODE_CONTROL:
+                if (drop_bad_p) {
+                    curr_uch = gunichar(L' ');
+                } else if (curr_uch < gunichar(L' ')) {
+                    curr_uch = gunichar(L' ');
+                } else if (curr_uch == gunichar(L'\u0092') && 
+                    (next_type == G_UNICODE_LOWERCASE_LETTER || next_type == G_UNICODE_UPPERCASE_LETTER)) {
+                    // observed corpus corruption case
+                    if (english_p) {
+                        pre_break_p = true;
+                        post_break_p = since_start == 0 || 
+                            (next_type != G_UNICODE_LOWERCASE_LETTER && next_type != G_UNICODE_UPPERCASE_LETTER && next_type != G_UNICODE_DECIMAL_NUMBER);
+                    } else if (latin_p) {
+                        post_break_p = true;
+                        pre_break_p = prev_type != G_UNICODE_LOWERCASE_LETTER && prev_type != G_UNICODE_UPPERCASE_LETTER;
+                    } else {
+                        post_break_p = pre_break_p = true;
+                    }
+                    if (escape_p) 
+                        substitute_p = L"&apos;";
+                    else 
+                        curr_uch = gunichar(L'\'');
+                } else {
+                    post_break_p = pre_break_p = true;
+                }
+                in_url_p = in_num_p = false;
                 break;
             case G_UNICODE_LINE_SEPARATOR:
-                curr_uch = gunichar(' ');
-                in_url_p = in_num = false;
-                break;
             case G_UNICODE_SPACE_SEPARATOR:
-                curr_uch = gunichar(' ');
-                in_url_p = in_num = false;
+                curr_uch = gunichar(L' ');
+                in_url_p = in_num_p = false;
                 break;
+            case G_UNICODE_ENCLOSING_MARK:
+                in_url_p = false;
+                break;
+            case G_UNICODE_NON_SPACING_MARK:
+            case G_UNICODE_PRIVATE_USE:
+            case G_UNICODE_SURROGATE:
+                in_url_p = in_num_p = false;
+                break;
+            case G_UNICODE_UNASSIGNED:
             default:
-                curr_uch = 0;
-                in_url_p = in_num = false;
+                // malformed bytes are dropped (invalid utf8 unicode)
+                if (drop_bad_p) {
+                    curr_uch = 0;
+                } else {
+                    pre_break_p = since_start > 0 && bad_length == 0;
+                    curr_type = G_UNICODE_UNASSIGNED;
+                }
+                in_url_p = in_num_p = false;
                 break;
             }
             
-            if ((break_p || curr_uch == gunichar(' '))) {
+            if (pre_break_p || curr_uch == gunichar(L' ') || (bad_length && curr_type != G_UNICODE_UNASSIGNED)) {
                 if (since_start) {
-                    *uptr++ = gunichar(' ');
-                    in_url_p = false;
-                    in_num = in_num && !post_break_p;
-                    since_start = 0;
+                    // non-empty token emitted previously, so pre-break must emit token separator
+                    *uptr++ = gunichar(L' ');
+                    since_start = bad_length = 0;
                 }
-                if (curr_uch == gunichar(' '))
-                    curr_uch = gunichar(0L);
+                if (curr_uch == gunichar(L' '))
+                    // suppress emission below, fall-through to substitute logic
+                    curr_uch = 0;
             } 
             
             if (substitute_p) {
@@ -870,10 +1311,12 @@ Tokenizer::tokenize(const std::string& buf)
                     *uptr++ = *sptr;
                     since_start++;
                 }
-                in_url_p = in_num = false;
+                in_url_p = in_num_p = false;
             } else if (curr_uch) {
                 *uptr++ = curr_uch;
                 since_start++;
+                if (curr_type == G_UNICODE_UNASSIGNED)
+                    bad_length++;
             }
 
             ucs4 = nxt4;
@@ -1014,7 +1457,7 @@ Tokenizer::tokenize(const std::string& buf)
         RE2::GlobalReplace(&ntext,mult_spc_x,SPC_BYTE);
 
         // escape moses meta-characters
-        if (!non_escape_p)
+        if (escape_p)
             escape(ntext);
 
         // strip out wrapping spaces from line in result string
@@ -1089,30 +1532,40 @@ Tokenizer::detokenize(const std::string& buf)
     
     std::size_t squotes = 0;
     std::size_t dquotes = 0;
-    std::string prepends(SPC_BYTE);
+    std::string prepends("");
 
     std::ostringstream oss;
     
     std::size_t nwords = words.size();
     std::size_t iword = 0;
 
-    for (auto word: words) {
+    if (unescape_p) for (auto &word: words) unescape(word);
+
+    for (auto &word: words) {
         if (RE2::FullMatch(word,right_x)) {
-            oss << prepends << word;
+            if (iword)
+                oss << SPC_BYTE;
+            oss << word;
             prepends.clear();
         } else if (RE2::FullMatch(word,left_x)) {
             oss << word;
             prepends = SPC_BYTE;
-        } else if (english_p && iword && RE2::FullMatch(word,curr_en_x) && RE2::FullMatch(words[iword-1],pre_en_x)) {
+        } else if (english_p && iword 
+                   && RE2::FullMatch(word,curr_en_x) 
+                   && RE2::FullMatch(words[iword-1],pre_en_x)) {
             oss << word;
             prepends = SPC_BYTE;
-        } else if (latin_p && iword < nwords - 2 && RE2::FullMatch(word,curr_fr_x) && RE2::FullMatch(words[iword+1],post_fr_x)) {
+        } else if (latin_p && iword < nwords - 2 
+                   && RE2::FullMatch(word,curr_fr_x) 
+                   && RE2::FullMatch(words[iword+1],post_fr_x)) {
             oss << prepends << word;
             prepends.clear();
         } else if (word.size() == 1) {
             if ((word.at(0) == '\'' && ((squotes % 2) == 0 )) ||
                 (word.at(0) == '"' && ((dquotes % 2) == 0))) {
-                if (english_p && iword && word.at(0) == '\'' && words[iword-1].at(words[iword-1].size()-1) == 's') {
+                if (english_p && iword
+                    && word.at(0) == '\'' 
+                    && std::tolower(words[iword-1].at(words[iword-1].size()-1)) == 's') {
                     oss << word;
                     prepends = SPC_BYTE;
 				} else {
@@ -1124,6 +1577,8 @@ Tokenizer::detokenize(const std::string& buf)
                         dquotes++;
                 }
 			} else {
+                if (std::isalnum(word.at(0)))
+                    oss << prepends;
                 oss << word;
                 prepends = SPC_BYTE;
                 if (word.at(0) == '\'')
@@ -1133,7 +1588,7 @@ Tokenizer::detokenize(const std::string& buf)
 			}
 		} else {
             oss << prepends << word;
-            prepends.clear();
+            prepends = SPC_BYTE;
 		}
         iword++;
 	}

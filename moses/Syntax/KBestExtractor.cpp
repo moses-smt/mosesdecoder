@@ -34,7 +34,7 @@ void KBestExtractor::Extract(
   supremeVertex->best->tail.push_back(&bestTopLevelVertex);
   supremeVertex->best->label.score = bestTopLevelVertex.best->label.score;
   supremeVertex->best->label.scoreBreakdown =
-      bestTopLevelVertex.best->label.scoreBreakdown;
+    bestTopLevelVertex.best->label.scoreBreakdown;
   supremeVertex->best->label.translation = 0;
 
   // For each alternative top-level SVertex, add a new incoming hyperedge to

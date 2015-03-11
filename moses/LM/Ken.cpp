@@ -146,6 +146,8 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   :LanguageModel(line)
   ,m_factorType(factorType)
 {
+  ReadParameters();
+
   lm::ngram::Config config;
   IFVERBOSE(1) {
     config.messages = &std::cerr;
@@ -383,7 +385,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
       float prob = UntransformLMScore(
-          pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
+                     pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.BeginNonTerminal(prevState, prob);
       phrasePos++;
     }
@@ -395,7 +397,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
       float prob = UntransformLMScore(
-          pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
+                     pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.NonTerminal(prevState, prob);
     } else {
       ruleScore.Terminal(TranslateID(word));
@@ -441,14 +443,31 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-LanguageModel *ConstructKenLM(const std::string &line)
+
+/* Instantiate LanguageModelKen here.  Tells the compiler to generate code
+ * for the instantiations' non-inline member functions in this file.
+ * Otherwise, depending on the compiler, those functions may not be present
+ * at link time.
+ */
+template class LanguageModelKen<lm::ngram::ProbingModel>;
+template class LanguageModelKen<lm::ngram::RestProbingModel>;
+template class LanguageModelKen<lm::ngram::TrieModel>;
+template class LanguageModelKen<lm::ngram::ArrayTrieModel>;
+template class LanguageModelKen<lm::ngram::QuantTrieModel>;
+template class LanguageModelKen<lm::ngram::QuantArrayTrieModel>;
+
+
+LanguageModel *ConstructKenLM(const std::string &lineOrig)
 {
   FactorType factorType = 0;
   string filePath;
   bool lazy = false;
 
-  util::TokenIter<util::SingleCharacter, true> argument(line, ' ');
-  ++argument; // KENLM 
+  util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
+  ++argument; // KENLM
+
+  stringstream line;
+  line << "KENLM";
 
   for (; argument; ++argument) {
     const char *equals = std::find(argument->data(), argument->data() + argument->size(), '=');
@@ -465,12 +484,12 @@ LanguageModel *ConstructKenLM(const std::string &line)
     } else if (name == "lazyken") {
       lazy = boost::lexical_cast<bool>(value);
     } else {
-      // that's ok. do nothing, passes onto LM constructor
-      //UTIL_THROW2("Unknown KenLM argument " << name);
+      // pass to base class to interpret
+      line << " " << name << "=" << value;
     }
   }
 
-  return ConstructKenLM(line, filePath, factorType, lazy);
+  return ConstructKenLM(line.str(), filePath, factorType, lazy);
 }
 
 LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)

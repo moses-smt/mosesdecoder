@@ -8,19 +8,19 @@ namespace FilterRuleTable
 {
 
 TreeTsgFilter::TreeTsgFilter(
-    const std::vector<boost::shared_ptr<StringTree> > &sentences)
+  const std::vector<boost::shared_ptr<StringTree> > &sentences)
 {
   // Convert each StringTree to an IdTree.
   m_sentences.reserve(sentences.size());
   for (std::vector<boost::shared_ptr<StringTree> >::const_iterator p =
-       sentences.begin(); p != sentences.end(); ++p) {
+         sentences.begin(); p != sentences.end(); ++p) {
     m_sentences.push_back(boost::shared_ptr<IdTree>(StringTreeToIdTree(**p)));
   }
 
   m_labelToTree.resize(m_testVocab.Size());
   // Construct a map from vocabulary Ids to IdTree nodes.
   for (std::vector<boost::shared_ptr<IdTree> >::const_iterator p =
-       m_sentences.begin(); p != m_sentences.end(); ++p) {
+         m_sentences.begin(); p != m_sentences.end(); ++p) {
     AddNodesToMap(**p);
   }
 }

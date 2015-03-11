@@ -46,6 +46,11 @@ s/(\$\w+)/$1/eeg;
 $extractorArgs = $_;
 
 my $cmdMain = "$extractorExe $extractorArgs \n";
+
+open  CMD, ">$results_dir/cmd_line";
+print CMD "$cmdMain";
+close CMD;
+
 `$cmdMain`;
 
 my $truthPath = "$test_dir/$test_name/truth/";
@@ -53,7 +58,7 @@ my $truthPath = "$test_dir/$test_name/truth/";
 
 if (-e $outPath)
 {
-  my $cmd = "diff --exclude=.DS_Store --exclude=._* $outPath/ $truthPath/ | wc -l";
+  my $cmd = "diff --exclude=.DS_Store --exclude=._* --exclude=cmd_line $outPath/ $truthPath/ | wc -l";
   my $numDiff = `$cmd`;
 
   if ($numDiff == 0)

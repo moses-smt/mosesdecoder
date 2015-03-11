@@ -246,7 +246,7 @@ void HypergraphHopeFearDecoder::HopeFear(
   wv.ToSparse(&weights);
   const Graph& graph = *(graphs_[sentenceId]);
 
-  ValType hope_scale = 1.0;
+  // ValType hope_scale = 1.0;
   HgHypothesis hopeHypo, fearHypo, modelHypo;
   for(size_t safe_loop=0; safe_loop<2; safe_loop++) {
 

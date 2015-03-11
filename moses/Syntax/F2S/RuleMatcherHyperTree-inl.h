@@ -9,13 +9,13 @@ namespace F2S
 
 template<typename Callback>
 RuleMatcherHyperTree<Callback>::RuleMatcherHyperTree(const HyperTree &ruleTrie)
-    : m_ruleTrie(ruleTrie)
+  : m_ruleTrie(ruleTrie)
 {
 }
 
 template<typename Callback>
 void RuleMatcherHyperTree<Callback>::EnumerateHyperedges(
-    const Forest::Vertex &v, Callback &callback)
+  const Forest::Vertex &v, Callback &callback)
 {
   const HyperTree::Node &root = m_ruleTrie.GetRootNode();
   HyperPath::NodeSeq nodeSeq(1, v.pvertex.symbol[0]->GetId());
@@ -37,13 +37,23 @@ void RuleMatcherHyperTree<Callback>::EnumerateHyperedges(
     m_queue.pop();
     if (item.trieNode->HasRules()) {
       const FNS &fns = item.annotatedFNS.fns;
+      // Set the output hyperedge's tail.
       m_hyperedge.tail.clear();
       for (FNS::const_iterator p = fns.begin(); p != fns.end(); ++p) {
         const Forest::Vertex *v = *p;
         m_hyperedge.tail.push_back(const_cast<PVertex *>(&(v->pvertex)));
       }
+      // Set the output hyperedge label's input weight.
+      m_hyperedge.label.inputWeight = 0.0f;
+      for (std::vector<const Forest::Hyperedge *>::const_iterator
+           p = item.annotatedFNS.fragment.begin();
+           p != item.annotatedFNS.fragment.end(); ++p) {
+        m_hyperedge.label.inputWeight += (*p)->weight;
+      }
+      // Set the output hyperedge label's translation set pointer.
       m_hyperedge.label.translations =
-          &(item.trieNode->GetTargetPhraseCollection());
+        &(item.trieNode->GetTargetPhraseCollection());
+      // Pass the output hyperedge to the callback.
       callback(m_hyperedge);
     }
     PropagateNextLexel(item);
@@ -80,7 +90,7 @@ void RuleMatcherHyperTree<Callback>::PropagateNextLexel(const MatchItem &item)
         const int subSeqLength = SubSeqLength(edgeLabel, pos);
         const std::vector<Forest::Hyperedge*> &incoming = fns[i]->incoming;
         for (std::vector<Forest::Hyperedge *>::const_iterator q =
-             incoming.begin(); q != incoming.end(); ++q) {
+               incoming.begin(); q != incoming.end(); ++q) {
           const Forest::Hyperedge &edge = **q;
           if (MatchChildren(edge.tail, edgeLabel, pos, subSeqLength)) {
             tfns.resize(tfns.size()+1);
@@ -117,9 +127,9 @@ void RuleMatcherHyperTree<Callback>::PropagateNextLexel(const MatchItem &item)
 
 template<typename Callback>
 void RuleMatcherHyperTree<Callback>::CartesianProduct(
-    const std::vector<AnnotatedFNS> &x,
-    const std::vector<AnnotatedFNS> &y,
-    std::vector<AnnotatedFNS> &z)
+  const std::vector<AnnotatedFNS> &x,
+  const std::vector<AnnotatedFNS> &y,
+  std::vector<AnnotatedFNS> &z)
 {
   z.clear();
   z.reserve(x.size() * y.size());
@@ -146,10 +156,10 @@ void RuleMatcherHyperTree<Callback>::CartesianProduct(
 
 template<typename Callback>
 bool RuleMatcherHyperTree<Callback>::MatchChildren(
-    const std::vector<Forest::Vertex *> &children,
-    const HyperPath::NodeSeq &edgeLabel,
-    std::size_t pos,
-    std::size_t subSeqSize)
+  const std::vector<Forest::Vertex *> &children,
+  const HyperPath::NodeSeq &edgeLabel,
+  std::size_t pos,
+  std::size_t subSeqSize)
 {
   if (children.size() != subSeqSize) {
     return false;
@@ -177,7 +187,7 @@ int RuleMatcherHyperTree<Callback>::CountCommas(const HyperPath::NodeSeq &seq)
 
 template<typename Callback>
 int RuleMatcherHyperTree<Callback>::SubSeqLength(const HyperPath::NodeSeq &seq,
-                                                 int pos)
+    int pos)
 {
   int length = 0;
   while (pos != seq.size() && seq[pos] != HyperPath::kComma) {

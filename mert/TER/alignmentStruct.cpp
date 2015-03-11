@@ -21,7 +21,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "alignmentStruct.h"
 
 using namespace std;
-namespace TERCpp
+namespace TERCPPNS_TERCpp
 {
 string alignmentStruct::toString()
 {
@@ -32,6 +32,15 @@ string alignmentStruct::toString()
   s << "Nothing to be printed" <<endl;
   return s.str();
 }
+void alignmentStruct::set(alignmentStruct l_alignmentStruct)
+{
+  nwords=l_alignmentStruct.nwords; // The words we shifted
+  alignment=l_alignmentStruct.alignment ; // for pra_more output
+  aftershift=l_alignmentStruct.aftershift; // for pra_more output
+  cost=l_alignmentStruct.cost;
+}
+
+
 
 // 	alignmentStruct::alignmentStruct()
 // 	{

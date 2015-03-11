@@ -32,7 +32,8 @@ namespace GHKM
 
 ScfgRule::ScfgRule(const Subgraph &fragment,
                    const MosesTraining::SyntaxTree *sourceSyntaxTree)
-  : m_sourceLHS("X", NonTerminal)
+  : m_graphFragment(fragment)
+  , m_sourceLHS("X", NonTerminal)
   , m_targetLHS(fragment.GetRoot()->GetLabel(), NonTerminal)
   , m_pcfgScore(fragment.GetPcfgScore())
   , m_hasSourceLabels(sourceSyntaxTree)

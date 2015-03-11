@@ -18,8 +18,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#ifndef __STRINGINFOSHASHER_H_
-#define __STRINGINFOSHASHER_H_
+#ifndef __STRINGINFOSHASHER_H__
+#define __STRINGINFOSHASHER_H__
 #include <string>
 // #include <ext/hash_map>
 #include <iostream>
@@ -27,7 +27,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "tools.h"
 
 using namespace std;
-namespace HashMapSpace
+namespace TERCPPNS_HashMapSpace
 {
 class stringInfosHasher
 {

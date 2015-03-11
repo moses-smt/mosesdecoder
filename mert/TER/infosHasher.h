@@ -18,8 +18,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#ifndef __INFOSHASHER_H_
-#define __INFOSHASHER_H_
+#ifndef __INFOSHASHER_H__
+#define __INFOSHASHER_H__
 #include <string>
 // #include <ext/hash_map>
 #include <stdio.h>
@@ -29,7 +29,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "tools.h"
 
 using namespace std;
-namespace HashMapSpace
+namespace TERCPPNS_HashMapSpace
 {
 class infosHasher
 {

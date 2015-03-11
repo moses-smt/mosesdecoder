@@ -18,7 +18,7 @@ void GlueRuleSynthesizer::SynthesizeRule(const InputTree::Node &node)
   boost::scoped_ptr<Phrase> sourceRhs(SynthesizeSourcePhrase(node));
   TargetPhrase *tp = SynthesizeTargetPhrase(node, *sourceRhs);
   TargetPhraseCollection &tpc = GetOrCreateTargetPhraseCollection(
-      m_ruleTrie, sourceLhs, *sourceRhs);
+                                  m_ruleTrie, sourceLhs, *sourceRhs);
   tpc.Add(tp);
 }
 
@@ -29,21 +29,21 @@ Phrase *GlueRuleSynthesizer::SynthesizeSourcePhrase(const InputTree::Node &node)
        p != node.children.end(); ++p) {
     phrase->AddWord((*p)->pvertex.symbol);
   }
-/*
-TODO What counts as an OOV?
-  phrase->AddWord() = sourceWord;
-  phrase->GetWord(0).SetIsOOV(true);
-*/
+  /*
+  TODO What counts as an OOV?
+    phrase->AddWord() = sourceWord;
+    phrase->GetWord(0).SetIsOOV(true);
+  */
   return phrase;
 }
 
 TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
-    const InputTree::Node &node, const Phrase &sourceRhs)
+  const InputTree::Node &node, const Phrase &sourceRhs)
 {
   const StaticData &staticData = StaticData::Instance();
 
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer =
-      UnknownWordPenaltyProducer::Instance();
+    UnknownWordPenaltyProducer::Instance();
 
   TargetPhrase *targetPhrase = new TargetPhrase();
 

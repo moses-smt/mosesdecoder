@@ -18,8 +18,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **********************************/
-#ifndef MERT_TER_ALIGNMENTSTRUCT_H_
-#define MERT_TER_ALIGNMENTSTRUCT_H_
+#ifndef __TERCPPALIGNMENTSTRUCT_H__
+#define __TERCPPALIGNMENTSTRUCT_H__
 
 
 #include <vector>
@@ -30,9 +30,9 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
 using namespace std;
-using namespace Tools;
+using namespace TERCPPNS_Tools;
 
-namespace TERCpp
+namespace TERCPPNS_TERCpp
 {
 class alignmentStruct
 {
@@ -60,6 +60,7 @@ public:
   // calculate it multiple times.
   double cost;
   string toString();
+  void set(alignmentStruct l_alignmentStruct);
 };
 
 }

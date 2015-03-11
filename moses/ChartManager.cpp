@@ -699,7 +699,7 @@ void ChartManager::OutputUnknowns(OutputCollector *collector) const
     std::ostringstream out;
     for (std::vector<Phrase*>::const_iterator p = oovs.begin();
          p != oovs.end(); ++p) {
-      out << *p;
+      out << **p;
     }
     out << std::endl;
     collector->Write(translationId, out.str());

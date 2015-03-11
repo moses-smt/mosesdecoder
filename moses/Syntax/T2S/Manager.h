@@ -29,8 +29,8 @@ namespace T2S
 template<typename RuleMatcher>
 class Manager : public Syntax::Manager
 {
- public:
-  Manager(const TreeInput &);
+public:
+  Manager(const InputType &);
 
   void Decode();
 
@@ -38,20 +38,19 @@ class Manager : public Syntax::Manager
   const SHyperedge *GetBestSHyperedge() const;
 
   void ExtractKBest(
-      std::size_t k,
-      std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
-      bool onlyDistinct=false) const;
+    std::size_t k,
+    std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
+    bool onlyDistinct=false) const;
 
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
 
- private:
+private:
   void InitializeRuleMatchers();
 
   void InitializeStacks();
 
   void RecombineAndSort(const std::vector<SHyperedge*> &, SVertexStack &);
 
-  const TreeInput &m_treeSource;
   InputTree m_inputTree;
   F2S::PVertexToStackMap m_stackMap;
   boost::shared_ptr<RuleTrie> m_glueRuleTrie;

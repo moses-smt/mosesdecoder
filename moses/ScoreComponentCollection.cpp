@@ -332,14 +332,16 @@ void ScoreComponentCollection::OutputFeatureScores( std::ostream& out
   bool labeledOutput = staticData.IsLabeledNBestList();
 
   // regular features (not sparse)
-  if (ff->GetNumScoreComponents() != 0) {
+  if (ff->HasTuneableComponents()) {
     if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
       lastName = ff->GetScoreProducerDescription();
       out << " " << lastName << "=";
     }
     vector<float> scores = GetScoresForProducer( ff );
     for (size_t j = 0; j<scores.size(); ++j) {
-      out << " " << scores[j];
+      if (ff->IsTuneableComponent(j)) {
+        out << " " << scores[j];
+      }
     }
   }
 

@@ -13,7 +13,7 @@ namespace T2S
 template<typename Callback>
 class RuleMatcher
 {
- public:
+public:
   virtual ~RuleMatcher() {}
 
   virtual void EnumerateHyperedges(const InputTree::Node &, Callback &) = 0;

@@ -29,18 +29,18 @@ namespace F2S
 //
 class HyperPathLoader
 {
- public:
+public:
   HyperPathLoader(FactorDirection, const std::vector<FactorType> &);
 
   void Load(const StringPiece &, HyperPath &);
 
- private:
+private:
   struct NodeTuple {
     int index;          // Preorder index of the node.
     int parent;         // Preorder index of the node's parent.
     int depth;          // Depth of the node.
     std::size_t symbol; // Either the factor ID of a tree terminal/non-terminal
-                        // or for virtual nodes, HyperPath::kEpsilon.
+    // or for virtual nodes, HyperPath::kEpsilon.
   };
 
   // Determine the height of the current tree fragment (stored in m_tokenSeq).

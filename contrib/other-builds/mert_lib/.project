@@ -647,6 +647,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/mert/TER/alignmentStruct.h</locationURI>
 		</link>
 		<link>
+			<name>TER/bestShiftStruct.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/TER/bestShiftStruct.cpp</locationURI>
+		</link>
+		<link>
 			<name>TER/bestShiftStruct.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/mert/TER/bestShiftStruct.h</locationURI>

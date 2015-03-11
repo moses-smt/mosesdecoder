@@ -21,12 +21,14 @@
 #include "moses/FF/SourceWordDeletionFeature.h"
 #include "moses/FF/GlobalLexicalModel.h"
 #include "moses/FF/GlobalLexicalModelUnlimited.h"
+#include "moses/FF/Model1Feature.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/WordTranslationFeature.h"
 #include "moses/FF/TargetBigramFeature.h"
 #include "moses/FF/TargetNgramFeature.h"
 #include "moses/FF/PhraseBoundaryFeature.h"
 #include "moses/FF/PhrasePairFeature.h"
+#include "moses/FF/RulePairUnlexicalizedSource.h"
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/FF/SparseHieroReorderingFeature.h"
@@ -62,14 +64,17 @@
 #include "moses/LM/BilingualLM.h"
 #include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
+#include "moses/Syntax/InputWeightFF.h"
 #include "moses/Syntax/RuleTableFF.h"
 
 #ifdef HAVE_VW
 #include "moses/FF/VW/VW.h"
 #include "moses/FF/VW/VWFeatureSourceBagOfWords.h"
+#include "moses/FF/VW/VWFeatureSourceBigrams.h"
 #include "moses/FF/VW/VWFeatureSourceIndicator.h"
 #include "moses/FF/VW/VWFeatureSourcePhraseInternal.h"
 #include "moses/FF/VW/VWFeatureSourceWindow.h"
+#include "moses/FF/VW/VWFeatureTargetBigrams.h"
 #include "moses/FF/VW/VWFeatureTargetIndicator.h"
 #include "moses/FF/VW/VWFeatureSourceExternalFeatures.h"
 #include "moses/FF/VW/VWFeatureTargetPhraseInternal.h"
@@ -197,9 +202,11 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
   MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
+  MOSES_FNAME2("SyntaxInputWeight", Syntax::InputWeightFF);
 
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
+  MOSES_FNAME(Model1Feature);
   MOSES_FNAME(SourceWordDeletionFeature);
   MOSES_FNAME(TargetWordInsertionFeature);
   MOSES_FNAME(PhraseBoundaryFeature);
@@ -208,6 +215,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(TargetBigramFeature);
   MOSES_FNAME(TargetNgramFeature);
   MOSES_FNAME(PhrasePairFeature);
+  MOSES_FNAME(RulePairUnlexicalizedSource);
   MOSES_FNAME(LexicalReordering);
   MOSES_FNAME2("Generation", GenerationDictionary);
   MOSES_FNAME(BleuScoreFeature);
@@ -249,9 +257,11 @@ FeatureRegistry::FeatureRegistry()
 #ifdef HAVE_VW
   MOSES_FNAME(VW);
   MOSES_FNAME(VWFeatureSourceBagOfWords);
+  MOSES_FNAME(VWFeatureSourceBigrams);
   MOSES_FNAME(VWFeatureSourceIndicator);
   MOSES_FNAME(VWFeatureSourcePhraseInternal);
   MOSES_FNAME(VWFeatureSourceWindow);
+  MOSES_FNAME(VWFeatureTargetBigrams);
   MOSES_FNAME(VWFeatureTargetPhraseInternal);
   MOSES_FNAME(VWFeatureTargetIndicator);
   MOSES_FNAME(VWFeatureSourceExternalFeatures);

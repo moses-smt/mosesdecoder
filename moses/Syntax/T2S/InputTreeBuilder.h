@@ -16,14 +16,14 @@ namespace T2S
 
 class InputTreeBuilder
 {
- public:
+public:
   InputTreeBuilder();
 
   // Constructs a Moses::T2S::InputTree given a Moses::TreeInput and a label
   // for the top-level node (which covers <s> and </s>).
   void Build(const TreeInput &, const std::string &, InputTree &);
 
- private:
+private:
   static bool PostOrderComp(const std::pair<XMLParseOutput *, int> &,
                             const std::pair<XMLParseOutput *, int> &);
 

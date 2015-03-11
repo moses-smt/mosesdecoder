@@ -38,6 +38,11 @@ unless (defined $results_dir)
 use File::Basename qw/dirname/;
 my $dir = dirname ($0);
 my $cmdMain = "perl -I $dir $test_dir/$test_name/run.perl -moses-root $mosesRoot -moses-bin $mosesBin -test $test_name -data-dir $data_dir -test-dir $test_dir  -results-dir $results_dir\n";
+
+open CMD, ">$results_dir/cmd_line";
+print CMD $cmdMain;
+close CMD;
+
 `$cmdMain`;
 
 my $outPath = "$results_dir/out";
@@ -47,7 +52,7 @@ print STDERR "outPath=$outPath \n truthPath=$truthPath \n";
 
 if (-e $outPath)
 {
-  my $cmd = "diff $outPath $truthPath | wc -l";
+  my $cmd = "diff --exclude=cmd_line $outPath $truthPath | wc -l";
 
   my $numDiff = `$cmd`;
 

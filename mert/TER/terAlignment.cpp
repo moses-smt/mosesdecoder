@@ -21,7 +21,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "terAlignment.h"
 using namespace std;
-namespace TERCpp
+namespace TERCPPNS_TERCpp
 {
 
 terAlignment::terAlignment()
@@ -34,14 +34,65 @@ terAlignment::terAlignment()
 
   numEdits=0;
   numWords=0;
-  bestRef="";
+//         bestRef="";
 
   numIns=0;
   numDel=0;
   numSub=0;
   numSft=0;
   numWsf=0;
+  averageWords=0;
+
 }
+void terAlignment::set(terAlignment& l_terAlignment)
+{
+  numEdits=l_terAlignment.numEdits;
+  numWords=l_terAlignment.numWords;
+  bestRef=l_terAlignment.bestRef;
+  numIns=l_terAlignment.numIns;
+  numDel=l_terAlignment.numDel;
+  numSub=l_terAlignment.numSub;
+  numSft=l_terAlignment.numSft;
+  numWsf=l_terAlignment.numWsf;
+  averageWords=l_terAlignment.averageWords;
+  ref=l_terAlignment.ref;
+  hyp=l_terAlignment.hyp;
+  aftershift=l_terAlignment.aftershift;
+// 	allshifts=l_terAlignment.allshifts;
+  hyp_int=l_terAlignment.hyp_int;
+  aftershift_int=l_terAlignment.aftershift_int;
+  alignment=l_terAlignment.alignment;
+  allshifts=(*(new vector<terShift>((int)l_terAlignment.allshifts.size())));
+  for (int l_i=0; l_i< (int)l_terAlignment.allshifts.size(); l_i++) {
+    allshifts.at(l_i).set(l_terAlignment.allshifts.at(l_i));
+  }
+
+}
+void terAlignment::set(terAlignment* l_terAlignment)
+{
+  numEdits=l_terAlignment->numEdits;
+  numWords=l_terAlignment->numWords;
+  bestRef=l_terAlignment->bestRef;
+  numIns=l_terAlignment->numIns;
+  numDel=l_terAlignment->numDel;
+  numSub=l_terAlignment->numSub;
+  numSft=l_terAlignment->numSft;
+  numWsf=l_terAlignment->numWsf;
+  averageWords=l_terAlignment->averageWords;
+  ref=l_terAlignment->ref;
+  hyp=l_terAlignment->hyp;
+  aftershift=l_terAlignment->aftershift;
+// 	allshifts=l_terAlignment->allshifts;
+  hyp_int=l_terAlignment->hyp_int;
+  aftershift_int=l_terAlignment->aftershift_int;
+  alignment=l_terAlignment->alignment;
+  allshifts=(*(new vector<terShift>((int)l_terAlignment->allshifts.size())));
+  for (int l_i=0; l_i< (int)l_terAlignment->allshifts.size(); l_i++) {
+    allshifts.at(l_i).set(l_terAlignment->allshifts.at(l_i));
+  }
+
+}
+
 string terAlignment::toString()
 {
   stringstream s;

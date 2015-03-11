@@ -26,15 +26,19 @@ namespace F2S
 //
 class HyperTree : public RuleTable
 {
- public:
+public:
   class Node
   {
-   public:
+  public:
     typedef boost::unordered_map<HyperPath::NodeSeq, Node> Map;
 
-    bool IsLeaf() const { return m_map.empty(); }
+    bool IsLeaf() const {
+      return m_map.empty();
+    }
 
-    bool HasRules() const { return !m_targetPhraseCollection.IsEmpty(); }
+    bool HasRules() const {
+      return !m_targetPhraseCollection.IsEmpty();
+    }
 
     void Prune(std::size_t tableLimit);
     void Sort(std::size_t tableLimit);
@@ -51,18 +55,22 @@ class HyperTree : public RuleTable
       return m_targetPhraseCollection;
     }
 
-    const Map &GetMap() const { return m_map; }
+    const Map &GetMap() const {
+      return m_map;
+    }
 
-   private:
+  private:
     Map m_map;
     TargetPhraseCollection m_targetPhraseCollection;
   };
 
   HyperTree(const RuleTableFF *ff) : RuleTable(ff) {}
 
-  const Node &GetRootNode() const { return m_root; }
+  const Node &GetRootNode() const {
+    return m_root;
+  }
 
- private:
+private:
   friend class HyperTreeCreator;
 
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const HyperPath &);

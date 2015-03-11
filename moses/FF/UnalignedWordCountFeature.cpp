@@ -32,8 +32,7 @@ void UnalignedWordCountFeature::EvaluateInIsolation(const Phrase &source
   std::vector<bool> alignedSource(sourceLength, false);
   std::vector<bool> alignedTarget(targetLength, false);
 
-  for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); ++alignmentPoint) 
-  {
+  for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); ++alignmentPoint) {
     alignedSource[ alignmentPoint->first ] = true;
     alignedTarget[ alignmentPoint->second ] = true;
   }

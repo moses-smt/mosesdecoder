@@ -78,6 +78,10 @@ import path ;
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
 
+# check if we have xmlrpc-c's abyss server available
+# if yes, include server capabilities in the moses executable
+include $(TOP)/jam-files/server.jam ;
+
 boost 104400 ;
 external-lib z ;
 
@@ -171,10 +175,12 @@ project : requirements
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
   <library>boost_system
+  <library>boost_program_options
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(requirements)
   <include>.
   ;
+
 
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-projects lm util phrase-extract phrase-extract/syntax-common search moses moses/LM mert moses-cmd scripts regression-testing ;
@@ -232,6 +238,7 @@ phrase-extract//pcfg-score
 phrase-extract//extract-mixed-syntax 
 phrase-extract//score-stsg
 phrase-extract//filter-rule-table
+phrase-extract//postprocess-egret-forests
 biconcor 
 #contrib/mira//mira 
 contrib/server//mosesserver 
@@ -258,9 +265,9 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
 }
 
 #local temp = [ _shell "bash source ./s.sh" ] ;
-local temp = [ _shell "mkdir bin" ] ;
-local temp = [ _shell "rm bin/moses_chart" ] ;
-local temp = [ _shell "cd bin && ln -s moses moses_chart" ] ;
+local temp = [ _shell "mkdir -p $(TOP)/bin" ] ;
+local temp = [ _shell "rm $(TOP)/bin/moses_chart" ] ;
+local temp = [ _shell "cd $(TOP)/bin && ln -s moses moses_chart" ] ;
 
 
 

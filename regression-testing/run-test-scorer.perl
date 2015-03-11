@@ -46,6 +46,11 @@ s/(\$\w+)/$1/eeg;
 $scorerArgs = $_;
 
 my $cmdMain = "$scoreExe $scorerArgs \n";
+
+open  CMD, ">$results_dir/cmd_line";
+print CMD "$cmdMain";
+close CMD;
+
 `$cmdMain`;
 
 my $truthPath = "$test_dir/$test_name/truth/results.txt";

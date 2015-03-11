@@ -36,18 +36,24 @@ my $ZCAT = "gzip -cd";
 # get optional parameters
 my $opt_hierarchical = 0;
 my $binarizer = undef;
+my $syntax_filter_cmd = "$SCRIPTS_ROOTDIR/../bin/filter-rule-table hierarchical";
 my $min_score = undef;
 my $opt_min_non_initial_rule_count = undef;
 my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
 my $opt_filter = 1; # enables skipping of filtering - useful for conf net or lattice
+my $opt_strip_xml = 1; # disabling XML stripping is required for STSG models where the input is a tree or forest
+my $tempdir = undef;
 
 GetOptions(
     "gzip!" => \$opt_gzip,
     "filter!" => \$opt_filter,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
+    "StripXml!" => \$opt_strip_xml,
+    "SyntaxFilterCmd=s" => \$syntax_filter_cmd,
+    "tempdir=s" => \$tempdir,
     "MinScore=s" => \$min_score,
-    "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count
+    "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count,  # DEPRECATED
 ) or exit(1);
 
 # get command line parameters
@@ -56,10 +62,17 @@ my $config = shift;
 my $input = shift;
 
 if (!defined $dir || !defined $config || !defined $input) {
-  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text [-Binarizer binarizer] [-Hierarchical] [-MinScore id:threshold[,id:threshold]*]\n";
+  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text [-Binarizer binarizer] [-Hierarchical] [-MinScore id:threshold[,id:threshold]*] [-SyntaxFilterCmd cmd]\n";
   exit 1;
 }
 $dir = ensure_full_path($dir);
+
+# Warn if deprecated -MinNonInitialRuleCount option is used
+if (defined($opt_min_non_initial_rule_count)) {
+  print STDERR "WARNING: -MinNonInitialRuleCount is deprecated; use score's -MinCountHierarchical option or set -SyntaxFilterCmd to \"$SCRIPTS_ROOTDIR/training/filter-rule-table.py --min-non-initial-rule=$opt_min_non_initial_rule_count\"\n";
+}
+
+$tempdir = $dir if !defined $tempdir; # use the working directory as temp by def.
 
 # decode min-score definitions
 my %MIN_SCORE;
@@ -94,11 +107,14 @@ if (-d $dir) {
 # filter the translation and distortion tables
 safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
-my $inputStrippedXML = "$dir/input.$$";
-my $cmd = "$RealBin/../generic/strip-xml.perl < $input > $inputStrippedXML";
-print STDERR "Stripping XML: $cmd \n";
-print `$cmd`;
-$input = $inputStrippedXML;
+my $cmd;
+if ($opt_strip_xml) {
+    my $inputStrippedXML = "$dir/input.$$";
+    $cmd = "$RealBin/../generic/strip-xml.perl < $input > $inputStrippedXML";
+    print STDERR "Stripping XML...\n";
+    safesystem($cmd) or die "Can't strip XML";
+    $input = $inputStrippedXML;
+}
 
 # get tables to be filtered (and modify config file)
 my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%KNOWN_TTABLE,@TABLE_WEIGHTS,%TABLE_NUMBER);
@@ -249,52 +265,54 @@ close(INI_OUT);
 my %TMP_INPUT_FILENAME;
 
 if ($opt_hierarchical) {
-	# Write a separate, temporary input file for each combination of source
-	# factors
-	foreach my $key (keys %CONSIDER_FACTORS) {
-		my $filename = "$dir/input-$key";
-		open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
-		$TMP_INPUT_FILENAME{$key} = $filename;
-		my @FACTOR = split(/,/, $key);
-		my $cmd = "$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |";
-		print STDERR "Executing: $cmd\n";
-		open(PIPE,$cmd);
-		while (my $line = <PIPE>) {
-			print FILEHANDLE $line
-		}
-		close(FILEHANDLE);
-	} # foreach my $key (keys %CONSIDER_FACTORS) {
-} #if ($opt_hierarchical) {
+  if (!$opt_strip_xml) {
+    print STDERR "WARNING: source factor reduction is disabled due to use of -noStripXML option\n";
+  } else {
+    # Write a separate, temporary input file for each combination of source
+    # factors
+    foreach my $key (keys %CONSIDER_FACTORS) {
+      my $filename = "$dir/input-$key";
+      open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
+      $TMP_INPUT_FILENAME{$key} = $filename;
+      my @FACTOR = split(/,/, $key);
+      my $cmd = "$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |";
+      print STDERR "Executing: $cmd\n";
+      open(PIPE,$cmd);
+      while (my $line = <PIPE>) {
+        print FILEHANDLE $line
+      }
+      close(FILEHANDLE);
+    }
+  }
+}
 
 my %PHRASE_USED;
-if ($opt_filter) {
-  if (!$opt_hierarchical) {
-      # get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
-      open(INPUT,mk_open_string($input)) or die "Can't read $input";
-      while(my $line = <INPUT>) {
-          chomp($line);
-          my @WORD = split(/ +/,$line);
-          for(my $i=0;$i<=$#WORD;$i++) {
-              for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
-                  foreach (keys %CONSIDER_FACTORS) {
-                      my @FACTOR = split(/,/);
-                      my $phrase = "";
-                      for(my $k=$i;$k<=$i+$j;$k++) {
-                          my @WORD_FACTOR = split(/\|/,$WORD[$k]);
-                          for(my $f=0;$f<=$#FACTOR;$f++) {
-                              $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
-                          }
-                          chop($phrase);
-                          $phrase .= " ";
-                      }
-                      chop($phrase);
-                      $PHRASE_USED{$_}{$phrase}++;
-                  }
-              }
-          }
-      }
-      close(INPUT);
-  }
+if ($opt_filter && !$opt_hierarchical) {
+    # get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
+    open(INPUT,mk_open_string($input)) or die "Can't read $input";
+    while(my $line = <INPUT>) {
+        chomp($line);
+        my @WORD = split(/ +/,$line);
+        for(my $i=0;$i<=$#WORD;$i++) {
+            for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
+                foreach (keys %CONSIDER_FACTORS) {
+                    my @FACTOR = split(/,/);
+                    my $phrase = "";
+                    for(my $k=$i;$k<=$i+$j;$k++) {
+                        my @WORD_FACTOR = split(/\|/,$WORD[$k]);
+                        for(my $f=0;$f<=$#FACTOR;$f++) {
+                            $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
+                        }
+                        chop($phrase);
+                        $phrase .= " ";
+                    }
+                    chop($phrase);
+                    $PHRASE_USED{$_}{$phrase}++;
+                }
+            }
+        }
+    }
+    close(INPUT);
 }
 
 # filter files
@@ -313,8 +331,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       }
       $mid_file .= ".gz" if $file =~ /\.gz$/;
       $cmd = "ln -s $file $mid_file";
-      print STDERR "Executing: $cmd\n";
-      safesystem($cmd);
+      safesystem($cmd) or die "Failed to make symlink";
     } else {
 
       $mid_file .= ".gz"
@@ -334,13 +351,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       open(FILE_OUT,$mid_openstring) or die "Can't write to $mid_openstring";
 
       if ($opt_hierarchical) {
-          my $tmp_input = $TMP_INPUT_FILENAME{$factors};
-          my $options = "";
-          $options .= "--min-non-initial-rule-count=$opt_min_non_initial_rule_count" if defined($opt_min_non_initial_rule_count);
-
-          $cmd = "$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $options $tmp_input |";
+          my $input_file = $opt_strip_xml ? $TMP_INPUT_FILENAME{$factors} : $input;
+          $cmd = "$openstring $syntax_filter_cmd $input_file |";
           print STDERR "Executing: $cmd\n";
-
           open(PIPE,$cmd);
           while (my $line = <PIPE>) {
               print FILE_OUT $line
@@ -380,29 +393,26 @@ for(my $i=0;$i<=$#TABLE;$i++) {
 
     my $catcmd = ($mid_file =~ /\.gz$/ ? "$ZCAT" : "cat");
     if(defined($binarizer)) {
-      print STDERR "binarizing...";
+      print STDERR "binarizing...\n";
       # translation model
       if ($KNOWN_TTABLE{$i}) {
         # ... hierarchical translation model
         if ($opt_hierarchical) {
           my $cmd = "$binarizer $mid_file $new_file.bin";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
+          safesystem($cmd) or die "Can't binarize";
         }
         # ... phrase translation model
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
-          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir > $mid_file.sorted; $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $mid_file.sorted";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
+          ##my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] && rm $mid_file.sorted";
+          my $cmd = "$binarizer -in <($catcmd $mid_file | LC_ALL=C sort -T $tempdir) -out $new_file -nscores $TABLE_WEIGHTS[$i] -encoding None";
+          safesystem($cmd) or die "Can't binarize";
         } elsif ($binarizer =~ /CreateOnDiskPt/) {
       	  my $cmd = "$binarizer $mid_file $new_file.bin";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
+          safesystem($cmd) or die "Can't binarize";
         } else { 
-          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+          safesystem($cmd) or die "Can't binarize";
         }
       }
       # reordering model
@@ -416,22 +426,18 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
-          $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir > $mid_file.sorted;  $lexbin -in $mid_file.sorted -out $new_file; rm $mid_file.sorted";
+          $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $lexbin -in $mid_file.sorted -out $new_file && rm $mid_file.sorted";
         } else {
           $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
           $cmd = "$lexbin -in $mid_file -out $new_file";
         }
-        print STDERR $cmd."\n";
-        print STDERR `$cmd`;
+        safesystem($cmd) or die "Can't binarize";
       }
     }
 }
 
-if ($opt_hierarchical)
-{
-    # Remove the temporary input files
-    unlink values %TMP_INPUT_FILENAME;
-}
+# Remove any temporary input files
+unlink values %TMP_INPUT_FILENAME;
 
 open(INFO,">$dir/info");
 print INFO "$config\n$input\n";
@@ -460,7 +466,7 @@ sub mk_open_string {
 
 sub safesystem {
   print STDERR "Executing: @_\n";
-  system(@_);
+  system("bash", "-c", @_);
   if ($? == -1) {
       print STDERR "Failed to execute: @_\n  $!\n";
       exit(1);

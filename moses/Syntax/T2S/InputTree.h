@@ -11,13 +11,12 @@ namespace Syntax
 namespace T2S
 {
 
-struct InputTree
-{
- public:
+struct InputTree {
+public:
   struct Node {
     Node(const PVertex &v, const std::vector<Node*> &c)
-        : pvertex(v)
-        , children(c) {}
+      : pvertex(v)
+      , children(c) {}
 
     Node(const PVertex &v) : pvertex(v) {}
 

@@ -59,6 +59,10 @@ input-truecaser = $moses-script-dir/recaser/truecase.perl
 output-truecaser = $moses-script-dir/recaser/truecase.perl
 detruecaser = $moses-script-dir/recaser/detruecase.perl
 
+# lowercaser - comment out if you use truecasing
+#input-lowercaser = $moses-script-dir/tokenizer/lowercase.perl
+#output-lowercaser = $moses-script-dir/tokenizer/lowercase.perl
+
 # syntactic parsers
 collins = /home/pkoehn/bin/COLLINS-PARSER
 output-parser = "$moses-script-dir/training/wrappers/parse-en-collins.perl"
@@ -532,9 +536,7 @@ decoder-settings = ""
 #########################################################
 ## RECASER: restore case, this part only trains the model
 
-[RECASING]
-
-#decoder = $moses-bin-dir/moses
+[RECASING] IGNORE
 
 ### training data
 # raw input needs to be still tokenized,
@@ -542,9 +544,14 @@ decoder-settings = ""
 #
 #tokenized = [LM:europarl:tokenized-corpus]
 
-# recase-config = 
-
+### additinal settings
+#
+recasing-settings = ""
 #lm-training = $srilm-dir/ngram-count
+decoder = $moses-bin-dir/moses
+
+# already a trained recaser? point to config file
+#recase-config = 
 
 #######################################################
 ## TRUECASER: train model to truecase corpora and input

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id$
+# $Id: clean-corpus-n.perl 3633 2010-10-21 09:49:27Z phkoehn $
 use strict;
 use Getopt::Long;
 my $help;
@@ -12,18 +12,20 @@ my $enc = "utf8"; # encoding of the input and output files
 my $max_word_length = 1000; # any segment with a word (or factor) exceeding this length in chars
     # is discarded; motivated by symal.cpp, which has its own such parameter (hardcoded to 1000)
     # and crashes if it encounters a word that exceeds it
+my $ratio = 9;
 
 GetOptions(
   "help" => \$help,
   "lowercase|lc" => \$lc,
   "encoding=s" => \$enc,
+  "ratio=f" => \$ratio,
   "ignore-ratio" => \$ignore_ratio,
   "ignore-xml" => \$ignore_xml,
   "max-word-length|mwl=s" => \$max_word_length
 ) or exit(1);
 
 if (scalar(@ARGV) < 6 || $help) {
-    print "syntax: clean-corpus-n.perl corpus l1 l2 clean-corpus min max [lines retained file]\n";
+    print "syntax: clean-corpus-n.perl [-ratio n] corpus l1 l2 clean-corpus min max [lines retained file]\n";
     exit;
 }
 
@@ -40,14 +42,14 @@ if (scalar(@ARGV) > 6) {
 	open(LINES_RETAINED,">$linesRetainedFile") or die "Can't write $linesRetainedFile";
 }
 
-print STDERR "clean-corpus.perl: processing $corpus.$l1 & .$l2 to $out, cutoff $min-$max\n";
+print STDERR "clean-corpus.perl: processing $corpus.$l1 & .$l2 to $out, cutoff $min-$max, ratio $ratio\n";
 
 my $opn = undef;
 my $l1input = "$corpus.$l1";
 if (-e $l1input) {
   $opn = $l1input;
 } elsif (-e $l1input.".gz") {
-  $opn = "gunzip -c $l1input.gz |";
+  $opn = "zcat $l1input.gz |";
 } else {
     die "Error: $l1input does not exist";
 }
@@ -57,7 +59,7 @@ my $l2input = "$corpus.$l2";
 if (-e $l2input) {
   $opn = $l2input;
 } elsif (-e $l2input.".gz") {
-  $opn = "gunzip -c $l2input.gz |";
+  $opn = "zcat $l2input.gz |";
 } else  {
  die "Error: $l2input does not exist";
 }
@@ -117,8 +119,8 @@ while(my $f = <F>) {
   next if $fc > $max;
   next if $ec < $min;
   next if $fc < $min;
-  next if !$ignore_ratio && $ec/$fc > 9;
-  next if !$ignore_ratio && $fc/$ec > 9;
+  next if !$ignore_ratio && $ec/$fc > $ratio;
+  next if !$ignore_ratio && $fc/$ec > $ratio;
   # Skip this segment if any factor is longer than $max_word_length
   my $max_word_length_plus_one = $max_word_length + 1;
   next if $e =~ /[^\s\|]{$max_word_length_plus_one}/;
@@ -160,4 +162,3 @@ sub word_count {
   my @w = split(/ /,$line);
   return scalar @w;
 }
-

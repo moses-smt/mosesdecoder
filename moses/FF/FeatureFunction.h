@@ -39,6 +39,8 @@ protected:
   bool m_requireSortingAfterSourceContext;
   size_t m_verbosity;
   size_t m_numScoreComponents;
+  std::vector<bool> m_tuneableComponents;
+  size_t m_numTuneableComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
@@ -88,6 +90,17 @@ public:
   // use with care
   virtual bool IsTuneable() const {
     return m_tuneable;
+  }
+
+  virtual bool HasTuneableComponents() const {
+    return m_numTuneableComponents;
+  }
+
+  virtual bool IsTuneableComponent(size_t i) const {
+    if (m_numTuneableComponents == m_numScoreComponents) {
+      return true;
+    }
+    return m_tuneableComponents[i];
   }
 
   virtual bool RequireSortingAfterSourceContext() const {
@@ -151,6 +164,7 @@ public:
 
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();
+  virtual void SetTuneableComponents(const std::string& value);
 };
 
 }

@@ -36,6 +36,7 @@
 #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
 #include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
+#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
 #include "moses/Util.h"
 #include "moses/StaticData.h"
 
@@ -53,6 +54,7 @@
 #include "ug_lexical_phrase_scorer2.h"
 #include "ug_phrasepair.h"
 #include "ug_lru_cache.h"
+#include "ug_lexical_reordering.h"
 
 #define PSTATS_CACHE_THRESHOLD 50
 
@@ -62,34 +64,12 @@ namespace Moses {
   class Mmsapt;
   namespace bitext
   {
+
     template<typename TKN> class Bitext;
     template<typename TKN> class PhrasePair;
     using namespace ugdiss;
 
     template<typename TKN> class Bitext;
-
-    enum PhraseOrientation 
-    {
-      po_first,
-      po_mono,
-      po_jfwd,
-      po_swap,
-      po_jbwd,
-      po_last,
-      po_other
-    };
-
-    PhraseOrientation 
-    find_po_fwd(vector<vector<ushort> >& a1,
-		vector<vector<ushort> >& a2,
-		size_t b1, size_t e1,
-		size_t b2, size_t e2);
-
-    PhraseOrientation 
-    find_po_bwd(vector<vector<ushort> >& a1,
-		vector<vector<ushort> >& a2,
-		size_t b1, size_t e1,
-		size_t b2, size_t e2);
 
     template<typename sid_t, typename off_t, typename len_t>
     void 
@@ -142,7 +122,8 @@ namespace Moses {
       static ThreadSafeCounter active;
 #endif
       boost::mutex lock;               // for parallel gathering of stats
-      boost::condition_variable ready; // consumers can wait for this data structure to be ready.
+      boost::condition_variable ready; /* consumers can wait for this
+					* data structure to be ready. */
       
       size_t raw_cnt;    // (approximate) raw occurrence count 
       size_t sample_cnt; // number of instances selected during sampling
@@ -150,8 +131,9 @@ namespace Moses {
       size_t sum_pairs;
       size_t in_progress; // keeps track of how many threads are currently working on this
 
-      uint32_t ofwd[po_other+1], obwd[po_other+1];
-
+      // size_t Moses::LRModel::ReorderingType 
+      uint32_t ofwd[Moses::LRModel::MAX+1], obwd[Moses::LRModel::MAX+1];
+      
       // typedef typename boost::unordered_map<typename ::uint64_t, jstats> trg_map_t;
       typedef std::map<typename ::uint64_t, jstats> trg_map_t;
       trg_map_t trg;
@@ -198,8 +180,8 @@ namespace Moses {
       ::uint64_t p1, p2;
       uint32_t raw1,raw2,sample1,sample2,good1,good2,joint;
       vector<float> fvals;
-      float dfwd[po_other+1]; // distortion counts // counts or probs?
-      float dbwd[po_other+1]; // distortion counts
+      float dfwd[Moses::LRModel::MAX+1]; // distortion counts // counts or probs?
+      float dbwd[Moses::LRModel::MAX+1]; // distortion counts
       vector<uchar> aln;
       float score;
       bool inverse;
@@ -284,7 +266,7 @@ namespace Moses {
       if (js.aln().size()) 
 	aln = js.aln()[0].second;
       float total_fwd = 0, total_bwd = 0;
-      for (int i = po_first; i <= po_other; i++)
+      for (int i = 0; i <= Moses::LRModel::MAX; i++)
 	{
 	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
 	  total_fwd += js.dcnt_fwd(po)+1;
@@ -292,13 +274,13 @@ namespace Moses {
 	}
 
       // should we do that here or leave the raw counts?
-      for (int i = po_first; i <= po_other; i++)
+      for (int i = 0; i <= Moses::LRModel::MAX; i++)
 	{
 	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
 	  dfwd[i] = float(js.dcnt_fwd(po)+1)/total_fwd;
 	  dbwd[i] = float(js.dcnt_bwd(po)+1)/total_bwd;
 	}
-
+      
       return *this;
     }
 

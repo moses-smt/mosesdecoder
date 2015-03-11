@@ -240,8 +240,9 @@ void ExtractionPhrasePair::AddProperties( const std::string &propertiesString, f
     tok = tok.substr(0, endPos - 1);
 
     vector<std::string> keyValue = Moses::TokenizeFirstOnly(tok, " ");
-    assert(keyValue.size() == 2);
-    AddProperty(keyValue[0], keyValue[1], count);
+    if (keyValue.size() == 2) {
+      AddProperty(keyValue[0], keyValue[1], count);
+    } 
   }
 }
 
@@ -551,6 +552,27 @@ void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
   }
   for (size_t i=0; i<4; ++i) {
     out << " " << (float)( (smoothingFactor*orientationClassPriorsR2L[i] + orientationClassCountSumR2L[i]) / (smoothingFactor + m_count) );
+  }
+}
+
+
+void ExtractionPhrasePair::UpdateVocabularyFromValueTokens(const std::string& propertyKey,
+    std::set<std::string>& vocabulary) const
+{
+  const PROPERTY_VALUES *allPropertyValues = GetProperty( propertyKey );
+
+  if ( allPropertyValues == NULL ) {
+    return;
+  }
+
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin();
+       iter!=allPropertyValues->end(); ++iter) {
+
+    std::vector<std::string> tokens = Moses::Tokenize(iter->first);
+    for (std::vector<std::string>::const_iterator tokenIt=tokens.begin();
+         tokenIt!=tokens.end(); ++tokenIt) {
+      vocabulary.insert(*tokenIt);
+    }
   }
 }
 

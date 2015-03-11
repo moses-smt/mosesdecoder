@@ -348,7 +348,11 @@ void PrintFeatureWeight(const FeatureFunction* ff)
   size_t numScoreComps = ff->GetNumScoreComponents();
   vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
   for (size_t i = 0; i < numScoreComps; ++i) {
-    cout << " " << values[i];
+    if (ff->IsTuneableComponent(i)) {
+      cout << " " << values[i];
+    } else {
+      cout << " UNTUNEABLECOMPONENT";
+    }
   }
   cout << endl;
 

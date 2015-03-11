@@ -22,7 +22,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 using namespace std;
 using namespace boost::xpressive;
-namespace Tools
+namespace TERCPPNS_Tools
 {
 
 string vectorToString ( vector<string> vec )
@@ -56,6 +56,19 @@ string vectorToString ( vector<int> vec )
   retour.str("");
   for ( vector<int>::iterator vecIter = vec.begin(); vecIter != vec.end(); vecIter++ ) {
     if ( vecIter == vec.begin() ) {
+      retour << ( *vecIter );
+    } else {
+      retour << "\t" << ( *vecIter );
+    }
+  }
+  return retour.str();
+}
+string vectorToString ( vector<int> * vec )
+{
+  stringstream retour;
+  retour.str("");
+  for ( vector<int>::iterator vecIter = vec->begin(); vecIter != vec->end(); vecIter++ ) {
+    if ( vecIter == vec->begin() ) {
       retour << ( *vecIter );
     } else {
       retour << "\t" << ( *vecIter );
@@ -169,6 +182,40 @@ string vectorToString ( bool* vec, string s , int taille)
   return retour.str();
 
 }
+
+string vectorToString ( vector<bool>* vec, string s , int taille)
+{
+  stringstream retour;
+  retour.str("");
+  int l_i;
+  for ( l_i=0; l_i < taille ; l_i++) {
+    if ( l_i == 0 ) {
+      retour << vec->at(l_i);
+    } else {
+      retour << s << vec->at(l_i);
+    }
+  }
+  return retour.str();
+
+}
+
+string vectorToString ( vector<int>* vec, string s , int taille)
+{
+  stringstream retour;
+  retour.str("");
+  int l_i;
+  for ( l_i=0; l_i < taille ; l_i++) {
+    if ( l_i == 0 ) {
+      retour << vec->at(l_i);
+    } else {
+      retour << s << vec->at(l_i);
+    }
+  }
+  return retour.str();
+
+}
+
+
 
 vector<string> subVector ( vector<string> vec, int start, int end )
 {
@@ -654,6 +701,8 @@ param copyParam ( param p )
   to_return.referenceFile = p.referenceFile;
   to_return.normalize = p.normalize;
   to_return.noTxtIds = p.noTxtIds;
+  to_return.verbose = p.verbose;
+  to_return.count_verbose = p.count_verbose;
   to_return.outputFileExtension = p.outputFileExtension;
   to_return.outputFileName = p.outputFileName;
   to_return.sgmlInputs = p.sgmlInputs;
@@ -677,6 +726,8 @@ string printParams ( param p )
   s << "outputFileName = " << p.outputFileName << endl;
   s << "sgmlInputs = " << p.sgmlInputs << endl;
   s << "tercomLike = " << p.tercomLike << endl;
+  s << "verbose = " << p.verbose << endl;
+  s << "count_verbose = " << p.count_verbose << endl;
   return s.str();
 
 }

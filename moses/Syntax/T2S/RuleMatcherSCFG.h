@@ -17,14 +17,14 @@ namespace T2S
 template<typename Callback>
 class RuleMatcherSCFG : public RuleMatcher<Callback>
 {
- public:
+public:
   RuleMatcherSCFG(const InputTree &, const RuleTrie &);
 
   ~RuleMatcherSCFG() {}
 
   void EnumerateHyperedges(const InputTree::Node &, Callback &);
 
- private:
+private:
   bool IsDescendent(const InputTree::Node &, const InputTree::Node &);
 
   void Match(const InputTree::Node &, const RuleTrie::Node &, int, Callback &);

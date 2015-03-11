@@ -30,7 +30,7 @@ public:
   }
 
   void SetParameter(const std::string& key, const std::string& value);
-  
+
   void Load();
 
   void EvaluateInIsolation(const Phrase &source
@@ -71,7 +71,9 @@ protected:
   bool m_useCoreSourceLabels;
   bool m_useLogprobs;
   bool m_useSparse;
+  bool m_useSparseLabelPairs;
   bool m_noMismatches;
+  float m_floor;
 
   boost::unordered_map<std::string,size_t> m_sourceLabels;
   std::vector<std::string> m_sourceLabelsByIndex;

@@ -48,6 +48,11 @@ namespace Moses
  * when compiling for a gui front-end so that running gui won't generate
  * output on command line
  * */
+
+// TRACE_ERR might have been defined by IRSTLM
+#ifdef TRACE_ERR
+#undef TRACE_ERR
+#endif
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) do { std::cerr << str; } while (false)
 #else
@@ -57,7 +62,16 @@ namespace Moses
 /** verbose macros
  * */
 
+// VERBOSE might have been defined by IRSTLM
+#ifdef VERBOSE
+#undef VERBOSE
+#endif
 #define VERBOSE(level,str) { IFVERBOSE(level) { TRACE_ERR(str); } }
+
+// VERBOSE might have been defined by IRSTLM
+#ifdef IFVERBOSE
+#undef IFVERBOSE
+#endif
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
 #define XVERBOSE(level,str) VERBOSE(level, "[" << HERE << "] " << str)
 #define HERE __FILE__ << ":" << __LINE__

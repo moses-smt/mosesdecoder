@@ -19,9 +19,8 @@ namespace F2S
 //   Translation"
 //  In proceedings of EMNLP 2009
 //
-struct HyperPath
-{
- public:
+struct HyperPath {
+public:
   typedef std::vector<std::size_t> NodeSeq;
 
   static const std::size_t kEpsilon;

@@ -56,7 +56,7 @@ public:
 
   void CreateTranslationOptions();
 
-  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
+  bool CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
                                         , size_t startPosition
                                         , size_t endPosition
                                         , bool adhereTableLimit

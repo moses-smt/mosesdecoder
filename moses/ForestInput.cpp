@@ -171,7 +171,7 @@ void ForestInput::FindTopVertices(Forest &forest,
 }
 
 void ForestInput::ParseHyperedgeLine(
-    const std::string &line, const std::vector<FactorType>& factorOrder)
+  const std::string &line, const std::vector<FactorType>& factorOrder)
 {
   using Syntax::F2S::Forest;
 
@@ -202,7 +202,7 @@ void ForestInput::ParseHyperedgeLine(
 }
 
 Syntax::F2S::Forest::Vertex *ForestInput::ParseVertex(
-    const StringPiece &s, const std::vector<FactorType>& factorOrder)
+  const StringPiece &s, const std::vector<FactorType>& factorOrder)
 {
   using Syntax::F2S::Forest;
 

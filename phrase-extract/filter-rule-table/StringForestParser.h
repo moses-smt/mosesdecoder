@@ -19,8 +19,9 @@ namespace Syntax
 namespace FilterRuleTable
 {
 
-class StringForestParser {
- public:
+class StringForestParser
+{
+public:
   struct Entry {
     std::size_t sentNum;
     std::string sentence;
@@ -30,8 +31,12 @@ class StringForestParser {
   StringForestParser();
   StringForestParser(std::istream &);
 
-  Entry &operator*() { return m_entry; }
-  Entry *operator->() { return &m_entry; }
+  Entry &operator*() {
+    return m_entry;
+  }
+  Entry *operator->() {
+    return &m_entry;
+  }
 
   StringForestParser &operator++();
 
@@ -40,7 +45,7 @@ class StringForestParser {
   friend bool operator!=(const StringForestParser &,
                          const StringForestParser &);
 
- private:
+private:
   struct VertexSetHash {
     std::size_t operator()(const StringForest::Vertex *v) const {
       std::size_t seed = 0;
@@ -61,7 +66,7 @@ class StringForestParser {
   };
 
   typedef boost::unordered_set<StringForest::Vertex *, VertexSetHash,
-                               VertexSetPred> VertexSet;
+          VertexSetPred> VertexSet;
 
   // Copying is not allowed
   StringForestParser(const StringForestParser &);

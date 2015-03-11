@@ -59,7 +59,7 @@ void RuleTrie::Node::Sort(std::size_t tableLimit)
 }
 
 RuleTrie::Node *RuleTrie::Node::GetOrCreateChild(
-    const Word &sourceTerm)
+  const Word &sourceTerm)
 {
   return &m_sourceTermMap[sourceTerm];
 }
@@ -67,41 +67,41 @@ RuleTrie::Node *RuleTrie::Node::GetOrCreateChild(
 RuleTrie::Node *RuleTrie::Node::GetOrCreateNonTerminalChild(const Word &targetNonTerm)
 {
   UTIL_THROW_IF2(!targetNonTerm.IsNonTerminal(),
-                  "Not a non-terminal: " << targetNonTerm);
+                 "Not a non-terminal: " << targetNonTerm);
 
   return &m_nonTermMap[targetNonTerm];
 }
 
 TargetPhraseCollection &RuleTrie::Node::GetOrCreateTargetPhraseCollection(
-    const Word &sourceLHS)
+  const Word &sourceLHS)
 {
   UTIL_THROW_IF2(!sourceLHS.IsNonTerminal(),
-                  "Not a non-terminal: " << sourceLHS);
+                 "Not a non-terminal: " << sourceLHS);
   return m_targetPhraseCollections[sourceLHS];
 }
 
 const RuleTrie::Node *RuleTrie::Node::GetChild(
-    const Word &sourceTerm) const
+  const Word &sourceTerm) const
 {
   UTIL_THROW_IF2(sourceTerm.IsNonTerminal(),
-		  "Not a terminal: " << sourceTerm);
+                 "Not a terminal: " << sourceTerm);
 
   SymbolMap::const_iterator p = m_sourceTermMap.find(sourceTerm);
   return (p == m_sourceTermMap.end()) ? NULL : &p->second;
 }
 
 const RuleTrie::Node *RuleTrie::Node::GetNonTerminalChild(
-    const Word &targetNonTerm) const
+  const Word &targetNonTerm) const
 {
   UTIL_THROW_IF2(!targetNonTerm.IsNonTerminal(),
-                  "Not a non-terminal: " << targetNonTerm);
+                 "Not a non-terminal: " << targetNonTerm);
 
   SymbolMap::const_iterator p = m_nonTermMap.find(targetNonTerm);
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
 TargetPhraseCollection &RuleTrie::GetOrCreateTargetPhraseCollection(
-    const Word &sourceLHS, const Phrase &sourceRHS)
+  const Word &sourceLHS, const Phrase &sourceRHS)
 {
   Node &currNode = GetOrCreateNode(sourceRHS);
   return currNode.GetOrCreateTargetPhraseCollection(sourceLHS);

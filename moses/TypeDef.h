@@ -17,8 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_TypeDef_h
-#define moses_TypeDef_h
+#pragma once
 
 #include <list>
 #include <limits>
@@ -66,7 +65,7 @@ const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 //#else
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
 //#endif
-const size_t DEFAULT_MAX_CHART_SPAN			= 10;
+const size_t DEFAULT_MAX_CHART_SPAN			= 20;
 const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_WIDTH				= 0.00001f;
@@ -122,7 +121,7 @@ enum InputTypeEnum {
   ,ConfusionNetworkInput	= 1
   ,WordLatticeInput				= 2
   ,TreeInputType					= 3
-  ,WordLatticeInput2			= 4
+  //,WordLatticeInput2			= 4
   , TabbedSentenceInput = 5
   ,ForestInputType        = 6
 };
@@ -140,6 +139,9 @@ enum DictionaryFind {
   ,All		= 1
 };
 
+// Note: StaticData uses SearchAlgorithm to determine whether the translation
+// model is phrase-based or syntax-based.  If you add a syntax-based search
+// algorithm here then you should also update StaticData::IsSyntax().
 enum SearchAlgorithm {
   Normal				= 0
   ,CubePruning	= 1
@@ -185,4 +187,4 @@ typedef std::vector<FactorType> FactorList;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
 
 }
-#endif
+

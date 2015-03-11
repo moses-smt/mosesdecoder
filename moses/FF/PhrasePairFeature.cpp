@@ -49,7 +49,7 @@ void PhrasePairFeature::SetParameter(const std::string& key, const std::string& 
     m_domainTrigger = Scan<bool>(value);
   } else if (key == "ignore-punctuation") {
     m_ignorePunctuation = Scan<bool>(value);
-  } else if (key == "ignore-punctuation") {
+  } else if (key == "path") {
     m_filePathSource = value;
   } else {
     StatelessFeatureFunction::SetParameter(key, value);

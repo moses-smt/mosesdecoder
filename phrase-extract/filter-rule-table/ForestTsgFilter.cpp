@@ -17,12 +17,12 @@ namespace FilterRuleTable
 const std::size_t ForestTsgFilter::kMatchLimit = 10000;
 
 ForestTsgFilter::ForestTsgFilter(
-    const std::vector<boost::shared_ptr<StringForest> > &sentences)
+  const std::vector<boost::shared_ptr<StringForest> > &sentences)
 {
   // Convert each StringForest to an IdForest.
   m_sentences.reserve(sentences.size());
   for (std::vector<boost::shared_ptr<StringForest> >::const_iterator p =
-       sentences.begin(); p != sentences.end(); ++p) {
+         sentences.begin(); p != sentences.end(); ++p) {
     m_sentences.push_back(StringForestToIdForest(**p));
   }
 

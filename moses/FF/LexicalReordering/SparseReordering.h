@@ -48,10 +48,10 @@ struct SparseReorderingFeatureKey {
   bool isCluster;
   enum Position {First, Last} position;
   enum Side {Source, Target} side;
-  LexicalReorderingState::ReorderingType reoType;
+  LRState::ReorderingType reoType;
 
   SparseReorderingFeatureKey(size_t id_, Type type_, const Factor* word_, bool isCluster_,
-                             Position position_, Side side_, LexicalReorderingState::ReorderingType reoType_)
+                             Position position_, Side side_, LRState::ReorderingType reoType_)
     : id(id_), type(type_), word(word_), isCluster(isCluster_),
       position(position_), side(side_), reoType(reoType_) {
   }
@@ -94,8 +94,8 @@ public:
   void CopyScores(const TranslationOption& currentOpt,
                   const TranslationOption* previousOpt,
                   const InputType& input,
-                  LexicalReorderingState::ReorderingType reoType,
-                  LexicalReorderingConfiguration::Direction direction,
+                  LRState::ReorderingType reoType,
+                  LRModel::Direction direction,
                   ScoreComponentCollection* scores) const ;
 
 private:
@@ -120,7 +120,7 @@ private:
   void AddFeatures(
     SparseReorderingFeatureKey::Type type, SparseReorderingFeatureKey::Side side,
     const Word& word, SparseReorderingFeatureKey::Position position,
-    LexicalReorderingState::ReorderingType reoType,
+    LRState::ReorderingType reoType,
     ScoreComponentCollection* scores) const;
 
 };

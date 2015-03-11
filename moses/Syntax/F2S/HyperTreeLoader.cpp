@@ -1,8 +1,9 @@
 #include "HyperTreeLoader.h"
 
 #include <sys/stat.h>
-#include <stdlib.h>
 
+#include <cmath>
+#include <stdlib.h>
 #include <fstream>
 #include <string>
 #include <iterator>
@@ -93,13 +94,13 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
     for (util::TokenIter<util::AnyCharacter, true> s(scoreString, " \t"); s; ++s) {
       int processed;
       float score = converter.StringToFloat(s->data(), s->length(), &processed);
-      UTIL_THROW_IF2(isnan(score), "Bad score " << *s << " on line " << count);
+      UTIL_THROW_IF2(std::isnan(score), "Bad score " << *s << " on line " << count);
       scoreVector.push_back(FloorScore(TransformScore(score)));
     }
     const std::size_t numScoreComponents = ff.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
-    		  	  << numScoreComponents << ") of score components on line " << count);
+                  << numScoreComponents << ") of score components on line " << count);
     }
 
     // Source-side
@@ -129,7 +130,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
 
     // Add rule to trie.
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(
-        trie, sourceFragment);
+                                           trie, sourceFragment);
     phraseColl.Add(targetPhrase);
 
     count++;

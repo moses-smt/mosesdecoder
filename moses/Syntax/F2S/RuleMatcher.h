@@ -13,7 +13,7 @@ namespace F2S
 template<typename Callback>
 class RuleMatcher
 {
- public:
+public:
   virtual ~RuleMatcher() {}
 
   virtual void EnumerateHyperedges(const Forest::Vertex &, Callback &) = 0;

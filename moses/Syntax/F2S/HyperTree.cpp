@@ -28,20 +28,20 @@ void HyperTree::Node::Sort(std::size_t tableLimit)
 }
 
 HyperTree::Node *HyperTree::Node::GetOrCreateChild(
-    const HyperPath::NodeSeq &nodeSeq)
+  const HyperPath::NodeSeq &nodeSeq)
 {
   return &m_map[nodeSeq];
 }
 
 const HyperTree::Node *HyperTree::Node::GetChild(
-    const HyperPath::NodeSeq &nodeSeq) const
+  const HyperPath::NodeSeq &nodeSeq) const
 {
   Map::const_iterator p = m_map.find(nodeSeq);
   return (p == m_map.end()) ? NULL : &p->second;
 }
 
 TargetPhraseCollection &HyperTree::GetOrCreateTargetPhraseCollection(
-    const HyperPath &hyperPath)
+  const HyperPath &hyperPath)
 {
   Node &node = GetOrCreateNode(hyperPath);
   return node.GetTargetPhraseCollection();

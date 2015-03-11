@@ -10,7 +10,7 @@ namespace T2S
 {
 
 const F2S::Forest::Vertex *InputTreeToForest(const InputTree &tree,
-                                             F2S::Forest &forest)
+    F2S::Forest &forest)
 {
   forest.Clear();
 

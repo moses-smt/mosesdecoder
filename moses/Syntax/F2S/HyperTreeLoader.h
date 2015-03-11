@@ -18,7 +18,7 @@ namespace F2S
 
 class HyperTreeLoader : public HyperTreeCreator
 {
- public:
+public:
   bool Load(const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,

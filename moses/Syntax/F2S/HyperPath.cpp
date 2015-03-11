@@ -10,10 +10,10 @@ namespace F2S
 {
 
 const std::size_t HyperPath::kEpsilon =
-    std::numeric_limits<std::size_t>::max()-1;
+  std::numeric_limits<std::size_t>::max()-1;
 
 const std::size_t HyperPath::kComma =
-    std::numeric_limits<std::size_t>::max()-2;
+  std::numeric_limits<std::size_t>::max()-2;
 
 }  // namespace F2S
 }  // namespace Syntax

@@ -11,8 +11,8 @@ namespace F2S
 
 HyperPathLoader::HyperPathLoader(FactorDirection direction,
                                  const std::vector<FactorType> &factorOrder)
-    : m_direction(direction)
-    , m_factorOrder(factorOrder)
+  : m_direction(direction)
+  , m_factorOrder(factorOrder)
 {
 }
 

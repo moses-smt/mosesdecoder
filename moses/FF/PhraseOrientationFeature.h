@@ -62,7 +62,7 @@ public:
   void SetRightBoundaryR2L(const std::vector<float> &scores,
                            size_t heuristicScoreIndex,
                            std::bitset<3> &possibleFutureOrientations,
-                          const Factor* rightBoundaryNonTerminalSymbol,
+                           const Factor* rightBoundaryNonTerminalSymbol,
                            const PhraseOrientationFeatureState* prevState) {
     for (size_t i=0; i<3; ++i) {
       m_rightBoundaryNonTerminalR2LScores[i] = scores[i];
@@ -177,7 +177,7 @@ protected:
     for (size_t i=0; i<state.m_leftBoundaryNonTerminalL2RScores.size(); ++i) {
       // compare only for possible future orientations
       // (possible future orientations of state and otherState are the same at this point due to the previous two conditional blocks)
-      if (state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations[i]) { 
+      if (state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations[i]) {
         if (state.m_leftBoundaryNonTerminalL2RScores[i] > otherState.m_leftBoundaryNonTerminalL2RScores[i]) {
           return 1;
         }
@@ -238,7 +238,7 @@ protected:
     for (size_t i=0; i<state.m_rightBoundaryNonTerminalR2LScores.size(); ++i) {
       // compare only for possible future orientations
       // (possible future orientations of state and otherState are the same at this point due to the previous two conditional blocks)
-      if ( state.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations[i]) { 
+      if ( state.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations[i]) {
         if (state.m_rightBoundaryNonTerminalR2LScores[i] > otherState.m_rightBoundaryNonTerminalR2LScores[i]) {
           return 1;
         }
@@ -300,6 +300,18 @@ class PhraseOrientationFeature : public StatefulFeatureFunction
 {
 public:
 
+  struct ReoClassData {
+    public:
+      std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
+      std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
+      bool firstNonTerminalIsBoundary;
+      bool firstNonTerminalPreviousSourceSpanIsAligned;
+      bool firstNonTerminalFollowingSourceSpanIsAligned;
+      bool lastNonTerminalIsBoundary;
+      bool lastNonTerminalPreviousSourceSpanIsAligned;
+      bool lastNonTerminalFollowingSourceSpanIsAligned;
+  };
+
   PhraseOrientationFeature(const std::string &line);
 
   ~PhraseOrientationFeature() {
@@ -314,7 +326,7 @@ public:
   }
 
   void SetParameter(const std::string& key, const std::string& value);
-  
+
   void Load();
 
   void EvaluateInIsolation(const Phrase &source
@@ -353,12 +365,12 @@ protected:
   void LoadWordList(const std::string& filename,
                     boost::unordered_set<const Factor*>& list);
 
-  void LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty, 
-                      ScoreComponentCollection &scoreBreakdown, 
+  void LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty,
+                      ScoreComponentCollection &scoreBreakdown,
                       bool subtract=false) const;
 
   size_t GetHeuristicScoreIndex(const std::vector<float>& scores,
-                                size_t weightsVectorOffset, 
+                                size_t weightsVectorOffset,
                                 const std::bitset<3> possibleFutureOrientations = 0x7) const;
 
   void LeftBoundaryL2RScoreRecursive(int featureID,
@@ -401,7 +413,7 @@ protected:
   bool m_useSparseWord;
   bool m_useSparseNT;
   size_t m_offsetR2LScores;
-  const std::vector<float> m_weightsVector;
+  mutable std::vector<float> m_weightsVector;
   std::string m_filenameTargetWordList;
   boost::unordered_set<const Factor*> m_targetWordList;
   bool m_useTargetWordList;

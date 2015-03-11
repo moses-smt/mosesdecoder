@@ -17,7 +17,7 @@ enum TreeFragmentTokenType {
 };
 
 struct TreeFragmentToken {
- public:
+public:
   TreeFragmentToken(TreeFragmentTokenType, StringPiece, std::size_t);
   TreeFragmentTokenType type;
   StringPiece value;
@@ -43,13 +43,18 @@ struct TreeFragmentToken {
 //    13  RSB   "]"
 //    14  EOS   undefined
 //
-class TreeFragmentTokenizer {
- public:
+class TreeFragmentTokenizer
+{
+public:
   TreeFragmentTokenizer();
   TreeFragmentTokenizer(const StringPiece &);
 
-  const TreeFragmentToken &operator*() const { return value_; }
-  const TreeFragmentToken *operator->() const { return &value_; }
+  const TreeFragmentToken &operator*() const {
+    return value_;
+  }
+  const TreeFragmentToken *operator->() const {
+    return &value_;
+  }
 
   TreeFragmentTokenizer &operator++();
   TreeFragmentTokenizer operator++(int);
@@ -60,7 +65,7 @@ class TreeFragmentTokenizer {
   friend bool operator!=(const TreeFragmentTokenizer &,
                          const TreeFragmentTokenizer &);
 
- private:
+private:
   StringPiece str_;
   TreeFragmentToken value_;
   StringPiece::const_iterator iter_;
