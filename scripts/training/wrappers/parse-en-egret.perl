@@ -135,7 +135,10 @@ $pipeline .= " $TREE_CONVERTER_OPTIONS" if defined($TREE_CONVERTER_OPTIONS);
 $pipeline .= " |";
 
 unless ($FOREST) {
-  $pipeline .= 'sed \'s/^()$/(())/\' |';  # Berkeley-style parse failures
+  $pipeline .= 'sed \'s/^()$//\' |';    # Remove empty trees (failed parses)
+  $pipeline .= 'sed \'s/^(/( (/\' |';   # Add Berkeley-style opening ( + blank
+  $pipeline .= 'sed \'s/)$/))/\' |';    # Add Berkeley-style closing )
+  $pipeline .= 'sed \'s/^$/(())/\' |';  # Restore empty trees (Berkeley-style)
   $pipeline .= "$RealBin/berkeleyparsed2mosesxml.perl |";
   $pipeline .= 'sed \'s/^<tree label="TOP"/<tree label="ROOT"/\' |';
 }
