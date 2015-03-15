@@ -23,8 +23,8 @@ namespace Moses
       , sum_pairs   (0)
       , in_progress (0)
     {
-      ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = 0;
-      obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = 0;
+      for (int i = 0; i <= po_other; ++i) 
+	ofwd[i] = obwd[i] = 0;
     }
 
     pstats::
@@ -78,8 +78,8 @@ namespace Moses
     jstats()
       : my_rcnt(0), my_wcnt(0), my_cnt2(0)
     { 
-      ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = ofwd[5] = ofwd[6] = 0;
-      obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = obwd[5] = obwd[6] = 0;
+      for (int i = 0; i <= po_other; ++i) 
+	ofwd[i] = obwd[i] = 0;
       my_aln.reserve(1); 
     }
 
@@ -89,7 +89,7 @@ namespace Moses
       my_rcnt = other.rcnt();
       my_wcnt = other.wcnt();
       my_aln  = other.aln();
-      for (size_t i = 0; i <= po_other; i++)
+      for (int i = 0; i <= po_other; i++)
 	{
 	  ofwd[i] = other.ofwd[i];
 	  obwd[i] = other.obwd[i];

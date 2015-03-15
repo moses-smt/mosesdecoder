@@ -43,7 +43,7 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
   PrintUserTime(std::string("Start loading text phrase table. Moses format"));
 
   const StaticData &staticData = StaticData::Instance();
-  const std::string &factorDelimiter = staticData.GetFactorDelimiter();
+  // const std::string &factorDelimiter = staticData.GetFactorDelimiter();
 
   std::size_t count = 0;
 

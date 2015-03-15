@@ -106,9 +106,10 @@ void TargetPhraseCollection::Save(OnDiskWrapper &onDiskWrapper)
 
   free(mem);
 
+#ifndef NDEBUG
   UINT64 endPos = file.tellp();
   assert(startPos + memUsed == endPos);
-
+#endif
   m_filePos = startPos;
 
 }

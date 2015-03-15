@@ -100,12 +100,12 @@ namespace Moses
 	return Moses::LRModel::S;
       while (e2 < a2.size() && a2[e2].size() == 0) ++e2;
       if (e2 == a2.size()) // should never happen, actually
-	return Moses::LRModel::MAX;
+	return po_other;
       if (a2[e2].back() < s1)
 	return Moses::LRModel::DL;
       if (a2[e2].front() >= e1)
 	return Moses::LRModel::DR;
-      return Moses::LRModel::MAX;
+      return po_other;
     }
 
 
@@ -126,10 +126,10 @@ namespace Moses
       if (expand_block(a1,a2,x,y,T,L,B,R) >= 0)
 	return Moses::LRModel::S;
       while (s2 && a2[s2].size() == 0) --s2;
-      if (a2[s2].size() == 0) return Moses::LRModel::MAX;
+      if (a2[s2].size() == 0) return po_other;
       if (a2[s2].back() < s1) return Moses::LRModel::DR;
       if (a2[s2].front() >= e1) return Moses::LRModel::DL;
-      return Moses::LRModel::MAX;
+      return po_other;
     }
 
   } // namespace bitext
