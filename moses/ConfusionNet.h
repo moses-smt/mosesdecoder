@@ -16,6 +16,7 @@ namespace Moses
 class FactorCollection;
 class TranslationOptionCollection;
 class Sentence;
+class TranslationTask;
 
 /** An input to the decoder where each position can be 1 of a number of words,
  *  each with an associated probability. Compared with a sentence, where each position is a word
@@ -34,7 +35,7 @@ protected:
   void String2Word(const std::string& s,Word& w,const std::vector<FactorType>& factorOrder);
 
 public:
-  ConfusionNet();
+  ConfusionNet(TranslationTask const* ttask);
   virtual ~ConfusionNet();
 
   ConfusionNet(Sentence const& s);

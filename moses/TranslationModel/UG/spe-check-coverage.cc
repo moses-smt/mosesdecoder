@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
       cout << string(80,'-') << "\n" << srcline << "\n" << trgline << "\n" << endl;
 
       // cout << srcline << " " << HERE << endl;
-      Sentence snt;
+      Sentence snt(NULL);
       istringstream buf(srcline+"\n");
       if (!snt.Read(buf,ifo)) break;
       // cout << Phrase(snt) << endl;

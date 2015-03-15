@@ -40,9 +40,9 @@ namespace Moses
 {
 
 Sentence::
-Sentence()
+Sentence(TranslationTask const* ttask)
   : Phrase(0)
-  , InputType()
+  , InputType(ttask)
 {
   const StaticData& SD = StaticData::Instance();
   if (SD.IsSyntax()) 
@@ -279,7 +279,8 @@ ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeho
 }
 
 TranslationOptionCollection*
-Sentence::CreateTranslationOptionCollection() const
+Sentence::
+CreateTranslationOptionCollection() const
 {
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
@@ -384,9 +385,10 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(size_t const transId, string const& stext)
+Sentence(TranslationTask const* ttask,size_t const transId, string const& stext)
+  : InputType(ttask, transId)
 {
-  this->SetTranslationId(transId);
+  // this->SetTranslationId(transId);
   vector<FactorType> const& IFO = StaticData::Instance().GetInputFactorOrder();
   init(stext, IFO);
 }

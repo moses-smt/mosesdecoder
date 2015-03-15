@@ -37,6 +37,7 @@ namespace Moses
   class TranslationOption;
   class TranslationOptionCollection;
   class ChartTranslationOptions;
+  class TranslationTask;
   struct XmlOption;
 
 
@@ -61,8 +62,9 @@ namespace Moses
 
 
   public:
-    Sentence();
-    Sentence(size_t const transId, std::string const& stext);
+    Sentence(TranslationTask const* ttask);
+    Sentence(TranslationTask const* ttask, size_t const transId, 
+	     std::string const& stext);
     ~Sentence();
 
     InputTypeEnum GetType() const {

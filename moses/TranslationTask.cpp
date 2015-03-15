@@ -40,7 +40,7 @@ void TranslationTask::Run()
   const size_t translationId = m_source->GetTranslationId();
 
   // input sentence
-  Sentence sentence;
+  Sentence sentence(this);
 
   // report wall time spent on translation
   Timer translationTime;

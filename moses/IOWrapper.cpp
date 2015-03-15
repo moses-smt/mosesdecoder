@@ -235,27 +235,31 @@ GetInput(InputType* inputType)
   }
 }
 
-bool IOWrapper::ReadInput(InputTypeEnum inputType, InputType*& source)
+bool 
+IOWrapper
+::ReadInput(InputTypeEnum inputType, 
+	    InputType*& source, 
+	    TranslationTask const* ttask)
 {
   delete source;
   switch(inputType) {
   case SentenceInput:
-    source = GetInput(new Sentence);
+    source = GetInput(new Sentence(ttask));
     break;
   case ConfusionNetworkInput:
-    source = GetInput(new ConfusionNet);
+    source = GetInput(new ConfusionNet(ttask));
     break;
   case WordLatticeInput:
-    source = GetInput(new WordLattice);
+    source = GetInput(new WordLattice(ttask));
     break;
   case TreeInputType:
-    source = GetInput(new TreeInput);
+    source = GetInput(new TreeInput(ttask));
     break;
   case TabbedSentenceInput:
-    source = GetInput(new TabbedSentence);
+    source = GetInput(new TabbedSentence(ttask));
     break;
   case ForestInputType:
-    source = GetInput(new ForestInput);
+    source = GetInput(new ForestInput(ttask));
     break;
   default:
     TRACE_ERR("Unknown input type: " << inputType << "\n");

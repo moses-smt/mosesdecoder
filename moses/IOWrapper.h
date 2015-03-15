@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -62,7 +63,7 @@ class ScoreComponentCollection;
 class Hypothesis;
 class ChartHypothesis;
 class Factor;
-
+class TranslationTask;
 namespace Syntax
 {
 struct SHyperedge;
@@ -105,7 +106,8 @@ public:
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
-  bool ReadInput(Moses::InputTypeEnum inputType, Moses::InputType*& source);
+  bool ReadInput(Moses::InputTypeEnum inputType, 
+		 Moses::InputType*& source, TranslationTask const* ttask=NULL);
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector.get();

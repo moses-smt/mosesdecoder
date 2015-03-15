@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -47,11 +48,12 @@ namespace Moses
 
 typedef std::vector<std::string> TabbedColumns;
 
+class TranslationTask;
 class TabbedSentence : public Sentence
 {
 
 public:
-  TabbedSentence() {}
+  TabbedSentence(TranslationTask const* ttask) : Sentence(ttask) {}
   ~TabbedSentence() {}
 
   InputTypeEnum GetType() const {

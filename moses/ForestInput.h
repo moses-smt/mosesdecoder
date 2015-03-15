@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #ifndef moses_ForestInput_h
 #define moses_ForestInput_h
 
@@ -14,13 +15,14 @@
 
 namespace Moses
 {
-
+class TranslationTask;
 class ForestInput : public Sentence
 {
 public:
   friend std::ostream &operator<<(std::ostream&, const ForestInput &);
 
-  ForestInput() : m_rootVertex(NULL) {}
+  ForestInput(TranslationTask const* ttask) 
+  : Sentence(ttask), m_rootVertex(NULL) {}
 
   InputTypeEnum GetType() const {
     return ForestInputType;

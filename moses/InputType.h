@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 // vim:tabstop=2
 
@@ -37,7 +38,7 @@ class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
 class ChartTranslationOptions;
-
+class TranslationTask;
 /** base class for all types of inputs to the decoder,
  *  eg. sentences, confusion networks, lattices and tree
  */
@@ -57,6 +58,7 @@ protected:
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   std::string m_textType;
   std::string m_passthrough;
+  TranslationTask const* m_ttask; // Translation task that "owns" this instance
 
 public:
 
@@ -66,10 +68,13 @@ public:
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
-  InputType(long translationId = 0);
+  InputType(TranslationTask const* ttask, long translationId = 0);
   virtual ~InputType();
 
   virtual InputTypeEnum GetType() const = 0;
+
+  TranslationTask const* 
+  GetTranslationTask() const { return m_ttask; }
 
   long GetTranslationId() const {
     return m_translationId;
@@ -179,7 +184,8 @@ public:
   virtual void Print(std::ostream&) const =0;
 
   //! create trans options specific to this InputType
-  virtual TranslationOptionCollection* CreateTranslationOptionCollection() const=0;
+  virtual TranslationOptionCollection* 
+  CreateTranslationOptionCollection() const=0;
 
   //! return substring. Only valid for Sentence class. TODO - get rid of this fn
   virtual Phrase GetSubString(const WordsRange&) const =0;

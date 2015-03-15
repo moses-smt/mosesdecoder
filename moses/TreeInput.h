@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #ifndef moses_TreeInput_h
 #define moses_TreeInput_h
 
@@ -7,6 +8,7 @@
 
 namespace Moses
 {
+  class TranslationTask;
 //! @todo what is this?
 class XMLParseOutput
 {
@@ -44,8 +46,7 @@ protected:
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
 
 public:
-  TreeInput() {
-  }
+  TreeInput(TranslationTask const* ttask) : Sentence(ttask) { }
 
   InputTypeEnum GetType() const {
     return TreeInputType;
