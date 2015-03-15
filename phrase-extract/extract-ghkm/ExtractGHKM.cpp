@@ -32,6 +32,9 @@
 #include "Span.h"
 #include "XmlTreeParser.h"
 
+//FB : to print information about subgraphs
+#include "Subgraph.h"
+
 #include <boost/program_options.hpp>
 
 #include <cassert>
@@ -42,6 +45,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <deque>
 
 namespace Moses
 {
@@ -62,10 +66,13 @@ int ExtractGHKM::Main(int argc, char *argv[])
   // Open output files.
   OutputFileStream fwdExtractStream;
   OutputFileStream invExtractStream;
+  std::ofstream psdAnnotStream; //for source context annotation
   std::ofstream glueGrammarStream;
   std::ofstream unknownWordStream;
   std::string fwdFileName = options.extractFile;
   std::string invFileName = options.extractFile + std::string(".inv");
+  std::string psdFileName = options.psdAnnotFile; //for source context annotation
+
   if (options.gzOutput) {
     fwdFileName += ".gz";
     invFileName += ".gz";
@@ -78,6 +85,11 @@ int ExtractGHKM::Main(int argc, char *argv[])
   if (!options.unknownWordFile.empty()) {
     OpenOutputFileOrDie(options.unknownWordFile, unknownWordStream);
   }
+
+  //Open file with psd annotations
+  if (!options.psdAnnotFile.empty()) {
+      OpenOutputFileOrDie(options.psdAnnotFile, psdAnnotStream);
+    }
 
   // Target label sets for producing glue grammar.
   std::set<std::string> labelSet;
@@ -93,6 +105,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   XmlTreeParser xmlTreeParser(labelSet, topLabelSet);
   ScfgRuleWriter writer(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
+
   while (true) {
     std::getline(targetStream, targetLine);
     std::getline(sourceStream, sourceLine);
@@ -166,12 +179,36 @@ int ExtractGHKM::Main(int argc, char *argv[])
     for (std::vector<Node *>::const_iterator p = targetNodes.begin();
          p != targetNodes.end(); ++p) {
       const std::vector<const Subgraph *> &rules = (*p)->GetRules();
+      std::set<int> spans = (*p)->GetSpan();
+      std::set<int>::iterator itr_spans;
+
+      //Get the start and end of the span in the source sentence where each rule has been extracted
+      //FB : looks like the spans in the set are ordered. Put them in a vector to take first and last elements. To be improved.
+      std::vector<int> spanVector;
+
+      //std::cout << "Processing Node : " << (*p)->GetLabel() << std::endl;
+      //std::cout << "With Span : ";
+      for(itr_spans = spans.begin(); itr_spans != spans.end(); itr_spans++)
+      {
+    	  	spanVector.push_back(*itr_spans);
+    	  	//std::cout << *itr_spans << std::endl;
+      }
+
+      int spanStart = spanVector.front();
+      int spanEnd = spanVector.back();
+      spanVector.clear();
+
+      //Get and print span here !!!
+      //put get span here!
       for (std::vector<const Subgraph *>::const_iterator q = rules.begin();
            q != rules.end(); ++q) {
+
         ScfgRule r(**q);
         // TODO Can scope pruning be done earlier?
         if (r.Scope() <= options.maxScope) {
           writer.Write(r);
+          if(!options.psdAnnotFile.empty()) {
+        	   WritePsdAnnot(lineNum,spanStart,spanEnd,r,psdAnnotStream);}
         }
       }
     }
@@ -305,6 +342,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "write uniform weights to unknown word label file")
   ("UnpairedExtractFormat",
    "do not pair non-terminals in extract files")
+   ("PsdAnnot",
+    po::value(&options.psdAnnotFile),
+    "write psd annotations to named file")
   ;
 
   // Declare the command line options that are hidden from the user
@@ -511,6 +551,7 @@ void ExtractGHKM::WriteUnknownWordLabel(
       ++total;
     }
   }
+
   for (std::map<std::string, int>::const_iterator p = labelCount.begin();
        p != labelCount.end(); ++p) {
     double ratio = static_cast<double>(p->second) / static_cast<double>(total);
@@ -521,5 +562,172 @@ void ExtractGHKM::WriteUnknownWordLabel(
   }
 }
 
+void ExtractGHKM::WritePsdAnnot(
+		int sentId,
+		int startSpan,
+		int endSpan,
+		ScfgRule &r,
+		std::ostream &out)
+{
+
+	//Create a file with of the form
+		//(sentence id) \t (span in source) \t (span in target) \t (source RHS) (source LHS) \t (target RHS) (target LHS)
+		// where target RHS contains explicit alignment of non-terminals
+
+	 //Get info you need from rule
+	 Symbol sourceLHS = r.GetSourceLHS();
+	 Symbol targetLHS = r.GetTargetLHS();
+	 std::vector<Symbol> sourceRHS = r.GetSourceRHS();
+	 std::vector<Symbol> targetRHS = r.GetTargetRHS();
+	 Alignment align = r.GetAlignment();
+
+	  //transform start and end span to string
+	  std::string startString;
+	  std::string endString;
+
+	  std::stringstream startS;
+	  std::stringstream endS;
+	  startS << startSpan;
+	  endS << endSpan;
+	  startString = startS.str();
+	  endString = endS.str();
+
+	  //create source and target rule strings
+	  std::string ruleSource = "";
+	  std::string ruleTarget = "";
+
+	  //create alignment between non-terminals
+	  std::vector<int> sourceNonTermPos; //store positions of source non-terminals
+	  Alignment nonTermAlignIndex; //store source index (starting at 0) for target non-terminals
+
+	  //find non-terminals in sourceRHS and targetRHS and store alignment between non-terminals
+	  //store positions in the source RHS where the symbols are nonterminals
+
+	  std::cout << "Source side of rule : " << std::endl;
+	  for(size_t k=0;k<sourceRHS.size();k++)
+	  {
+		  if(sourceRHS[k].GetType()==NonTerminal)
+		  {
+			  sourceNonTermPos.push_back(k);
+		  }
+		  std::cout << sourceRHS[k].GetValue() << " ";
+	  }
+	  std::cout << std::endl;
+
+	  //sort source non-term pos
+	  //the index of each slot is what we want to assign to target non-terms
+	  std::sort(sourceNonTermPos.begin(),sourceNonTermPos.end());
+
+	  for(size_t i=0;i<sourceNonTermPos.size();i++) //iterate only over source non-term positions
+	  {
+		  for(size_t k=0; k<align.size(); k++)
+		  {
+			  if(sourceNonTermPos[i] == align[k].first)
+			  {
+				  std::pair<size_t,size_t> sourceIndex = std::make_pair(align[k].second,i);
+				  nonTermAlignIndex.push_back(sourceIndex);
+			  }
+		  }
+	  }
+	  int ntCounter = 0;
+	  //create source side of rule
+	  for(size_t i=0;i<sourceRHS.size();i++)
+	  {
+		  if(sourceRHS[i].GetType() == NonTerminal)
+		  {
+			  //find target index for source NT
+			  int targetIndex = 0;
+			  bool foundIndex = 0; //make sure that the index has been found
+
+			  for(int k=0;k<align.size();k++)
+			  {
+				  if(align[k].first == i)
+				  {
+					  targetIndex = align[k].second;
+					  foundIndex = 1;
+				  }
+			  }
+
+			  assert(foundIndex==1);
+
+			  //find alignment where align.first == i and take align.second
+			  ruleSource+="["+sourceRHS[i].GetValue()+"]";
+			  ruleSource+="["+targetRHS[targetIndex].GetValue()+"]";
+			  ruleSource+= " ";
+			  ntCounter++;
+		  }
+		  else
+		  {
+			  ruleSource+=sourceRHS[i].GetValue();
+			  ruleSource+= " ";
+		  }
+	  }
+
+	  //add source LHS at end of rule
+	  ruleSource+="["+sourceLHS.GetValue()+"]";
+
+	  //create target side of rule
+	  std::cout << "target side of rule : " << std::endl;
+	 	  for(size_t i=0;i<targetRHS.size();i++)
+	 	  {
+	 		 std::cout << targetRHS[i].GetValue() << " ";
+	 		  if(targetRHS[i].GetType() == NonTerminal)
+	 		  {
+	 			 //find source index for target NT
+	 			 int sourceIndex = 0;
+	 			 bool foundIndex = 0; //make sure that the index has been found
+
+	 			 for(size_t k=0;k<align.size();k++)
+	 			 {
+	 			 	if(align[k].second == i)
+	 			 	{
+	 			 		sourceIndex = align[k].first;
+	 			 		foundIndex = 1;
+	 			 	}
+	 			 }
+	 			 assert(foundIndex==1);
+
+	 			  ruleTarget+="["+sourceRHS[sourceIndex].GetValue()+"]";
+	 			  ruleTarget+="["+targetRHS[i].GetValue()+"]";
+
+	 			  //find source index for this alignment
+	 			  //nonterm
+	 			  bool foundAlignment = 0; //make sure an index has been found for this non-terminal
+	 			  for(size_t k=0;k<nonTermAlignIndex.size();k++)
+	 			  {
+	 				  std::cout << "Alignment index : " << nonTermAlignIndex[k].first << " " << nonTermAlignIndex[k].second << std::endl;
+	 				  std::cout << "Looking for : " << i << std::endl;
+	 				  if(nonTermAlignIndex[k].first == i) //there is an error here
+	 				  {
+	 					  std::stringstream indexS;
+	 					  indexS << nonTermAlignIndex[k].second;
+	 					  ruleTarget+=indexS.str();
+	 					  std::cout << "Indexed target : " << ruleTarget << std::endl;
+	 					  foundAlignment = 1;
+	 				  }
+	 			  }
+	 			 assert(foundAlignment==1);
+	 			 ruleTarget+= " ";
+	 		  }
+	 		  else
+	 		  {
+	 			  ruleTarget+=targetRHS[i].GetValue();
+	 			  ruleTarget+= " ";
+	 		  }
+	 	  }
+	 	 std::cout << std::endl;
+
+	 	 //add target LHS at end of rule
+	 	 ruleTarget+="["+targetLHS.GetValue()+"]";
+
+	  //We have all strings we need, write into annot file
+	  out << sentId << "\t"
+	      << startSpan << "\t"
+	      << endSpan << "\t"
+	      << "-1" << "\t"
+	      << "-1" << "\t"
+	      << ruleSource << "\t"
+	      << ruleTarget << std::endl;
+	}
 }  // namespace GHKM
 }  // namespace Moses

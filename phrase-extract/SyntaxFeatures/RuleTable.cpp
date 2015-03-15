@@ -192,7 +192,6 @@ PSD::AlignmentType RuleTable::GetTermAlignment(const std::string &alignStr, cons
     return out;
 }
 
-//TODO : ASSUMPTION THAT NON TERMS ARE FIRST IS NOT TRUE ANYMORE : REIMPLEMENT...
 PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, const std::string &targetStr, const std::string &sourceStr)
 {
   AlignmentType out;
