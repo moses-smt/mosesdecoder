@@ -50,7 +50,7 @@ namespace Moses
   {
     friend class Alignment;
     map<string,string> param;
-    vector<float> bias;
+    sptr<SamplingBias> m_bias;
     string m_name;
   public:    
     typedef L2R_Token<SimpleWordId> Token;
@@ -74,6 +74,9 @@ namespace Moses
     size_t m_workers;  // number of worker threads for sampling the bitexts
     vector<string> m_feature_set_names; // one or more of: standard, datasource
  
+    
+    
+
     // // deprecated!
     // char m_pfwd_denom; // denominator for computation of fwd phrase score:
     // // 'r' - divide by raw count
@@ -199,32 +202,22 @@ namespace Moses
     bool
     pool_pstats
     (Phrase   const& src,
-     ::uint64_t const  pid1a, 
-     pstats        * statsa, 
-     Bitext<Token> const & bta,
-     ::uint64_t const  pid1b, 
-     pstats   const* statsb, 
-     Bitext<Token> const & btb,
-     TargetPhraseCollection* tpcoll
-     ) const;
+     ::uint64_t const  pid1a, pstats * statsa, Bitext<Token> const & bta,
+     ::uint64_t const  pid1b, pstats const* statsb, Bitext<Token> const & btb,
+     TargetPhraseCollection* tpcoll) const;
      
     bool
     combine_pstats
-    (Phrase   const& src,
-     ::uint64_t const  pid1a, 
-     pstats   * statsa, 
-     Bitext<Token> const & bta,
-     ::uint64_t const  pid1b, 
-     pstats   const* statsb, 
-     Bitext<Token> const & btb,
-     TargetPhraseCollection* tpcoll
-     ) const;
+    (Phrase   const& src, 
+     ::uint64_t const  pid1a, pstats* statsa, Bitext<Token> const & bta,
+     ::uint64_t const  pid1b, pstats const* statsb, Bitext<Token> const & btb, 
+     TargetPhraseCollection* tpcoll) const;
 
     void
     load_extra_data(string bname, bool locking);
 
     void
-    load_bias(string bname);
+    load_bias(string bname); 
 
     mutable size_t m_tpc_ctr;
   public:
@@ -277,7 +270,7 @@ namespace Moses
     
     /// return true if prefix /phrase/ exists
     bool
-    PrefixExists(Phrase const& phrase, vector<float> const* const bias) const;
+    PrefixExists(Phrase const& phrase, SamplingBias const* const bias) const;
 
     bool
     PrefixExists(Phrase const& phrase) const;
@@ -294,6 +287,8 @@ namespace Moses
     bool
     isInteger(int i) const;
 
+    sptr<DocumentBias>
+    setupDocumentBias(map<string,float> const& bias) const;
   private:
   };
 } // end namespace
