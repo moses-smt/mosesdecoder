@@ -2463,7 +2463,7 @@ sub get_config_tables {
         $cmd .= "-dont-tune-glue-grammar ";
       }
       if (&get("TRAINING:use-syntax-input-weight-feature")) {
-        $cmd .= "-use-syntax-input-weight-feature";
+        $cmd .= "-use-syntax-input-weight-feature ";
       }
     }
 

@@ -527,7 +527,7 @@ decoder-settings = ""
 # and also point to a configuration file that contains
 # pointers to all relevant model files
 #
-#config = 
+#config-with-reused-weights = 
 
 #########################################################
 ## RECASER: restore case, this part only trains the model
