@@ -43,7 +43,7 @@ public:
     , sentenceOffset(0)
     , unpairedExtractFormat(false)
     , unknownWordMinRelFreq(0.03f)
-    , unknownWordUniform(false) {}
+    , unknownWordUniform(false){}
 
   // Positional options
   std::string targetFile;
@@ -67,6 +67,7 @@ public:
   std::string unknownWordFile;
   float unknownWordMinRelFreq;
   bool unknownWordUniform;
+  std::string psdAnnotFile;  // Annotated extract file for source side features
 };
 
 }  // namespace GHKM

@@ -25,6 +25,7 @@
 #include "ParseTree.h"
 #include "Subgraph.h"
 
+#include <iostream>
 #include <algorithm>
 #include <cassert>
 #include <memory>
@@ -143,6 +144,15 @@ void AlignmentGraph::ExtractMinimalRules(const Options &options)
     // FIXME Does this exclude non-lexical unary rules?
     if (root->GetType() == TREE && !root->GetSpan().empty()) {
       root->AddRule(new Subgraph(fragment));
+      //std::cout << "ROOT NODE : " << root->GetLabel() << std::endl;
+      //std::set<int>  spans = root->GetSpan();
+      //std::set<int>::iterator itr_spans;
+      /*std::cout << "SPANS : ";
+      for(itr_spans=spans.begin();itr_spans!=spans.end();itr_spans++)
+      {
+    	  std::cout << *itr_spans << std::endl;
+      }
+      std::cout << std::endl;*/
     }
   }
 }

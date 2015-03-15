@@ -37,6 +37,8 @@ namespace GHKM
 
 struct Options;
 class ParseTree;
+class Symbol;
+class ScfgRule;
 
 class ExtractGHKM
 {
@@ -63,6 +65,7 @@ private:
   void WriteGlueGrammar(const std::set<std::string> &,
                         const std::map<std::string, int> &,
                         std::ostream &);
+  void WritePsdAnnot(int, int, int, ScfgRule &, std::ostream &);
   std::vector<std::string> ReadTokens(const std::string &);
 
   void ProcessOptions(int, char *[], Options &) const;
