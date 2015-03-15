@@ -23,6 +23,9 @@ RuleTable::RuleTable(const string &fileName)
     vector<string> columns = TokenizeMultiCharSeparator(line, " ||| ");
     //std::cerr << "In rule table, adding rule pair : X" << columns[0] << "X : X" << columns[1] << "X" << std::endl;
     AddRulePair(columns[0], columns[1], GetScores(columns[2]), GetTermAlignment(columns[3],columns[1]), GetNonTermAlignment(columns[3],columns[1],columns[0]));
+    //Load rules with counts for simulating pruning of negative instances (Cui 2010)
+    //AddRulePairWithCount(columns[0], columns[1], GetScores(columns[2]), GetTermAlignment(columns[3],columns[1]), GetNonTermAlignment(columns[3],columns[1],columns[0]),
+    	//	GetRuleCount(columns[4]));
   }
 }
 
@@ -62,6 +65,34 @@ const vector<ChartTranslation> &RuleTable::GetTranslations(const string &srcPhra
   return it->second;
 }
 
+vector<ChartTranslation> &RuleTable::GetPrunedTranslations(const string &srcPhrase)
+{
+
+  vector<ChartTranslation> prunedTranslations;
+  DictionaryType::const_iterator it = m_ttable.find(srcPhrase);
+  if (it == m_ttable.end())
+    throw logic_error("error: unknown source phrase " + srcPhrase);
+  //prune out translation with low counts (< 5)
+  else
+  {
+	  vector<ChartTranslation>::const_iterator itr_translations;
+	  vector<ChartTranslation> nonPrunedTranslations = it->second;
+
+	  for(itr_translations = nonPrunedTranslations.begin(); itr_translations != nonPrunedTranslations.end(); itr_translations++)
+	  {
+		  int ruleCount = itr_translations->m_ruleCount;
+		  if(ruleCount == 0)
+			  throw logic_error("error: rule count should be at least 1 ");
+		  else
+		  {
+			  if(ruleCount > 5)
+				  prunedTranslations.push_back(*itr_translations);
+		  }
+	  }
+  }
+  return prunedTranslations;
+}
+
 //
 // private methods
 //
@@ -79,12 +110,37 @@ void RuleTable::AddRulePair(const std::string &src, const std::string &tgt,
   t.m_termAlignment = termAlign;
   t.m_nonTermAlignment = nonTermAlign;
   t.m_scores = scores;
+  t.m_ruleCount = 0;
+  translations.push_back(t);
+}
+
+void RuleTable::AddRulePairWithCount(const std::string &src, const std::string &tgt,
+    const std::vector<long double> &scores, const PSD::AlignmentType &termAlign, const PSD::AlignmentType &nonTermAlign,
+    const int &ruleCount)
+{
+
+  //std::cerr << "Adding rule pair "<< src << " : "<< tgt << std::endl;
+  pair<DictionaryType::iterator, bool> ret = m_ttable.insert(make_pair(src, vector<ChartTranslation>()));
+  vector<ChartTranslation> &translations = ret.first->second;
+  size_t tgtID = AddTargetPhrase(tgt);
+
+  ChartTranslation t;
+  t.m_index = tgtID;
+  t.m_termAlignment = termAlign;
+  t.m_nonTermAlignment = nonTermAlign;
+  t.m_scores = scores;
+  t.m_ruleCount = ruleCount;
   translations.push_back(t);
 }
 
 std::vector<long double> RuleTable::GetScores(const std::string &scoreStr)
 {
   return Scan<long double>(Tokenize(scoreStr, " "));
+}
+
+const int RuleTable::GetRuleCount(const std::string &countStr)
+{
+	return Scan<int>(Tokenize(countStr, " ")).front();
 }
 
 PSD::AlignmentType RuleTable::GetTermAlignment(const std::string &alignStr, const std::string &targetStr)

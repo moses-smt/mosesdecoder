@@ -30,6 +30,7 @@ void ExampleProducer::operator () ()
 	string srcPhrase = psdLine.GetSrcPhrase();
 	int span = (psdLine.GetSrcEnd() - psdLine.GetSrcStart()) + 1;
 	size_t sentId = psdLine.GetSentID();
+	size_t spanStart = psdLine.GetSrcStart();
 
 	//read psd lines and put into queue
 	while (getline(*m_input, rawPSDLine))
@@ -42,7 +43,9 @@ void ExampleProducer::operator () ()
 	    int currentSpan = (psdLine.GetSrcEnd() - psdLine.GetSrcStart()) + 1;
 
 	    //if we have a new source side, enqueue line already read
-	    if (psdLine.GetSrcPhrase() != srcPhrase || currentSpan != span || psdLine.GetSentID() != sentId) {
+	    if (psdLine.GetSrcPhrase() != srcPhrase || currentSpan != span || psdLine.GetSentID() != sentId
+	    		|| spanStart != psdLine.GetSrcStart())
+	    {
 	    	//put a COPY of the queue into shared queue
 	    	m_queue->Enqueue(sourcePhrases);
 	    	//std::cerr << "LINES : " << sourcePhrases.size() << "FLUSHED" << std::endl;
@@ -51,12 +54,16 @@ void ExampleProducer::operator () ()
 	    //enque next line and set new source phrase
 	    sourcePhrases.push_back(psdLine);
 	    //std::cerr << "LINE IN sourcePhrases" << std::endl;
-	    //std::cerr << "PRODUCED PSD LINE : " << psdLine.GetSentID() << " " << psdLine.GetSrcPhrase() << " " << psdLine.GetTgtPhrase() << std::endl;
+
+	    //std::cerr << "PRODUCED PSD LINE : " << psdLine.GetSentID() << " " << psdLine.GetSrcPhrase() << " " << psdLine.GetTgtPhrase()
+	    	//	  << " SPAN " << span << " " << currentSpan
+	    	//	  << " START " << spanStart << " " << psdLine.GetSrcStart() << std::endl;
 
 	    //restore source phrase, span and sentenceId
 	    srcPhrase = psdLine.GetSrcPhrase();
 	    span = (psdLine.GetSrcEnd() - psdLine.GetSrcStart()) + 1;
 	    sentId = psdLine.GetSentID();
+	    spanStart = psdLine.GetSrcStart();
 	}
 	//enqueue last lines
 	m_queue->Enqueue(sourcePhrases);

@@ -84,7 +84,7 @@ public:
     , sourceSyntax(false)
     , targetSyntax(false)
     , duplicateRules(true)
-    , fractionalCounting(true)
+    , fractionalCounting(false)
     , pcfgScore(false)
     , gzOutput(false)
     , unpairedExtractFormat(false)

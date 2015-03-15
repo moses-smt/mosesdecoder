@@ -105,6 +105,7 @@ public:
   AlignmentType m_termAlignment;
   AlignmentType m_nonTermAlignment;
   std::vector<long double> m_scores;
+  int m_ruleCount;
 };
 
 // index of possible target spans

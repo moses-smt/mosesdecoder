@@ -50,7 +50,11 @@ void ExampleConsumer::operator () ()
 
 		ContextType context;
 		vector<float> losses;
+		//Uncomment below when working with pruning
+		//vector<float> prunedLosses;
 		vector<string> syntFeats;
+		//Uncomment below when working with pruning
+		//vector<ChartTranslation> prunedTranslations;
 		vector<ChartTranslation> translations;
 		vector<SyntaxLabel> syntLabels;
 		SyntaxLabel parentLabel("NOTAG",true);
@@ -90,6 +94,10 @@ void ExampleConsumer::operator () ()
 				if(current.GetSentID() != sentID || current.GetSrcPhrase() != sourceSide || current.GetSrcStart() != spanStart || current.GetSrcEnd() != spanEnd)
 				{
 					std::cerr << "ERROR : Instances in same training example should have same source side information" << std::endl;
+					std::cerr << "ERROR in sentence " << current.GetSentID() << std::endl;
+					std::cerr << "DETAILS : source : " << current.GetSrcPhrase() << " = " << sourceSide
+							<< " span start : " << current.GetSrcStart() << " = " << spanStart
+							<< " span end : " << current.GetSrcEnd() <<  " = " << spanEnd << std::endl;
 					abort();
 				}
 				rightTargets.push_back(current.GetTgtPhrase());
@@ -115,10 +123,16 @@ void ExampleConsumer::operator () ()
 				 // set new source phrase, context, translations and losses
 				  context = ReadFactoredLine(corpusLine, m_config->GetFactors().size());
 				  translations = m_ruleTable->GetTranslations(sourceSide);
+				  //Comment in if working with pruned examples
+				  //translations = m_ruleTable->GetPrunedTranslations(sourceSide);
 				  losses.clear();
 				  syntFeats.clear();
 				  parentLabel.clear();
 				  losses.resize(translations.size(), 1);
+
+				  //say that we should prune
+
+
 				  srcTotal++;
 
 				  // after extraction, set translation to false again
@@ -195,7 +209,20 @@ void ExampleConsumer::operator () ()
 									//std::cerr << "TRANSLATION FOUND : " << translations[i] << std::endl;
 									losses[i] = 0;
 									hasTranslation = true;
-									tgtSurvived++;}
+									tgtSurvived++;
+
+									//uncomment lines below to simulate pruning (Cui 2010)
+									//prunedTranslations.push_back(translations[i]);
+									//prunedLosses.push_back(losses[i]);
+								}
+								/*else
+								{
+									if(translations[i].m_ruleCount > 5)
+									{
+										prunedTranslations.push_back(translations[i]);
+										prunedLosses.push_back(losses[i]);
+									}
+								}*/
 							}
 						}
 					}
