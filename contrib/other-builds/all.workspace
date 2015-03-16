@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="all" Database="all.tags">
+  <Project Name="manual-label" Path="manual-label/manual-label.project" Active="No"/>
+  <Project Name="extract" Path="extract/extract.project" Active="No"/>
+  <Project Name="util" Path="util/util.project" Active="No"/>
+  <Project Name="extract-mixed-syntax" Path="extract-mixed-syntax/extract-mixed-syntax.project" Active="Yes"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Project Name="manual-label" ConfigName="Debug"/>
+      <Project Name="extract" ConfigName="Debug"/>
+      <Project Name="util" ConfigName="Debug"/>
+      <Project Name="extract-mixed-syntax" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Project Name="manual-label" ConfigName="Release"/>
+      <Project Name="extract" ConfigName="Release"/>
+      <Project Name="util" ConfigName="Release"/>
+      <Project Name="extract-mixed-syntax" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>
