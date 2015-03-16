@@ -565,9 +565,37 @@ string* SyntaxTree::FindSubj() const{
 //!!!!! WHAT IS THIS ? - HOW DO I SPLIT THE STATES BASED ON THE INTERNAL STRUCTURE?? //
 int SyntaxTreeState::Compare(const FFState& other) const
 {
+
   const SyntaxTreeState &otherState = static_cast<const SyntaxTreeState&>(other);
+  std::set<std::string>::iterator it;
+  //int ret=0;
+  if(m_depRelInHyp->size() < otherState.m_depRelInHyp->size())
+  	return -1;
+  if(m_depRelInHyp->size() > otherState.m_depRelInHyp->size())
+    return 1;
+
+  return  (1 - std::equal(m_depRelInHyp->begin(), m_depRelInHyp->end(),otherState.m_depRelInHyp->begin()) );
+
+  /*
+  if(m_depRelInHyp->empty()){
+  	return 0;
+  }
+
+  cout<<"Current: "<<m_depRelInHyp->size()<<" ";
+  //m_depRelInHyp.get()
+  for(it=m_depRelInHyp->begin(); it!=m_depRelInHyp->end();it++)
+  	cout<<*it<<" ";
+  cout<<endl;
+  cout<<"Other: "<<otherState.m_depRelInHyp->size()<<" ";
+  for(it=otherState.m_depRelInHyp->begin(); it!=otherState.m_depRelInHyp->end();it++)
+  	cout<<*it<<" ";
+  cout<<endl;
+
+  cout<<"states equal: "<<ret<<endl;
 
   return 0;
+  */
+
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1076,6 +1104,9 @@ FFState* HeadFeature::EvaluateWhenApplied(
 			Counters &localCounters = GetCounters();
 			localCounters.whenAppliedQueries++;
 
+			//set<string> depRelInHyp();
+			boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr(new set<string>()); //(depRelInHyp);
+
 	    const std::string *tree = property->GetValueString();
 
 
@@ -1114,7 +1145,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 				scores.push_back(0.0);
 				scores.push_back(0.0);
 				accumulator->PlusEquals(this,scores);
-				return new SyntaxTreeState(syntaxTree,GetCache(),GetCacheDepRel(),GetCounters());
+				return new SyntaxTreeState(syntaxTree,depRelInHyp_ptr,GetCache(),GetCacheDepRel(),GetCounters());
 			}
 
 
@@ -1176,12 +1207,12 @@ FFState* HeadFeature::EvaluateWhenApplied(
 						//std::cerr<< "dep rel: "<<depRel<<endl;
 					}
 					if(depRel!=" "){
-						//std::cerr<<parsedSentence<< " dep rel: "<<depRel<<endl;
 						m_counter++;
 						vector<string> tokens;
 						Tokenize(tokens,depRel,"\t");
 						m_counterDepRel+=tokens.size();
 						for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
+							depRelInHyp_ptr->insert(*it);
 							vector<string> rel;
 							Tokenize(rel,*it);
 							//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
@@ -1209,9 +1240,12 @@ FFState* HeadFeature::EvaluateWhenApplied(
 								accumulator->PlusEquals(this,scores);
 							}
 						}
+
 					}
 			}
-			return new SyntaxTreeState(syntaxTree,GetCache(),GetCacheDepRel(),GetCounters());
+
+
+			return new SyntaxTreeState(syntaxTree,depRelInHyp_ptr,GetCache(),GetCacheDepRel(),GetCounters());
 	}
 	vector<float> scores;
 	scores.push_back(1000.0);

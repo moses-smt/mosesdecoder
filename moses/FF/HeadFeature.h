@@ -55,17 +55,23 @@ class SyntaxTreeState : public FFState
 	//hash scored pairs make it static -> one per class but updated with each hypothesis
 	//could make the key a string -> will slow things down head-id-dep-id
 
+	//!!! I used this here because I don't know how else to print the cache in IOWrapper
+	//perhaps I could prin in CleanUpAfterSentenceProcessing so that I don't have these extra references to the caches
 	StringHashMap  &m_subtreeCache;
 	DepRelMap &m_depRelCache;
 	Counters &m_counters;
 
+	//used to Compare to hypothesis based on this feature
+	boost::shared_ptr< std::set<std::string> > m_depRelInHyp;
+
 public:
-  SyntaxTreeState(SyntaxTreePtr tree, StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
+  SyntaxTreeState(SyntaxTreePtr tree, boost::shared_ptr< std::set<std::string> > depRelInHyp,StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
     :m_tree(tree)
 		,m_subtreeCache(subtreeCache)
 		,m_depRelCache(depRelCache)
 		,m_counters(counters)
-  {}
+		,m_depRelInHyp(depRelInHyp)
+  {}//std::cout<<"new state "<<m_depRelInHyp->size()<<std::endl;
 
   SyntaxTreePtr GetTree() const {
       return m_tree;
@@ -301,7 +307,9 @@ public:
   //I don't understand this
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
 	  SyntaxTreePtr startTree(new SyntaxTree());
-	  return new SyntaxTreeState(startTree,GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
+	  //std::set<std::string> depRelInHyp();
+	  boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr (new std::set<std::string>()); //(depRelInHyp);
+	  return new SyntaxTreeState(startTree, depRelInHyp_ptr, GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
   }
 
 
