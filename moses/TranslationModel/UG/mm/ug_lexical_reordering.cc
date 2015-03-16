@@ -5,6 +5,7 @@ namespace Moses
   {
     using namespace std;
 
+    Moses::LRModel::ReorderingType po_other = Moses::LRModel::NONE;
     // check if min and max in the aligmnet vector v are within the
     // bounds LFT and RGT and update the actual bounds L and R; update
     // the total count of alignment links in the underlying phrase
@@ -100,12 +101,12 @@ namespace Moses
 	return Moses::LRModel::S;
       while (e2 < a2.size() && a2[e2].size() == 0) ++e2;
       if (e2 == a2.size()) // should never happen, actually
-	return po_other;
+	return Moses::LRModel::NONE;
       if (a2[e2].back() < s1)
 	return Moses::LRModel::DL;
       if (a2[e2].front() >= e1)
 	return Moses::LRModel::DR;
-      return po_other;
+      return Moses::LRModel::NONE;
     }
 
 

@@ -94,7 +94,7 @@ public:
   void CopyScores(const TranslationOption& currentOpt,
                   const TranslationOption* previousOpt,
                   const InputType& input,
-                  LRState::ReorderingType reoType,
+                  LRModel::ReorderingType reoType,
                   LRModel::Direction direction,
                   ScoreComponentCollection* scores) const ;
 
@@ -120,7 +120,7 @@ private:
   void AddFeatures(
     SparseReorderingFeatureKey::Type type, SparseReorderingFeatureKey::Side side,
     const Word& word, SparseReorderingFeatureKey::Position position,
-    LRState::ReorderingType reoType,
+    LRModel::ReorderingType reoType,
     ScoreComponentCollection* scores) const;
 
 };

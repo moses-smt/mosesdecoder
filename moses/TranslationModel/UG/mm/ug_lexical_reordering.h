@@ -6,7 +6,6 @@
 namespace Moses { namespace bitext {
 
 typedef Moses::LRModel::ReorderingType PhraseOrientation;
-static int const po_other = Moses::LRModel::MAX+1;
 
 PhraseOrientation 
 find_po_fwd(std::vector<std::vector<ushort> >& a1,

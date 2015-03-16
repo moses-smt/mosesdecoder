@@ -14,6 +14,7 @@
 
 namespace Moses
 {
+
 bool
 IsMonotonicStep(WordsRange  const& prev, // words range of last source phrase
                 WordsRange  const& cur,  // words range of current source phrase
@@ -340,8 +341,8 @@ Expand(const TranslationOption& topt, const InputType& input,
   if ((m_direction != LRModel::Forward && m_useFirstBackwardScore) || !m_first) {
     LRModel const& lrmodel = m_configuration;
     WordsRange const cur = topt.GetSourceWordsRange();
-    ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
-                              : lrmodel.GetOrientation(m_prevRange,cur));
+    LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
+				       : lrmodel.GetOrientation(m_prevRange,cur));
     CopyScores(scores, topt, input, reoType);
   }
   return new PhraseBasedReorderingState(this, topt);
