@@ -1,47 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="extract-mixed-syntax" InternalType="Console">
+<CodeLite_Project Name="moses-cmd" InternalType="Console">
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src"/>
-  <VirtualDirectory Name="extract-mixed-syntax">
-    <File Name="../../../phrase-extract/extract-mixed-syntax/AlignedSentence.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/AlignedSentence.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/AlignedSentenceSyntax.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/AlignedSentenceSyntax.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/ConsistentPhrase.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/ConsistentPhrase.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/ConsistentPhrases.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/ConsistentPhrases.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/gzfilebuf.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/InputFileStream.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/InputFileStream.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Main.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Main.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/NonTerm.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/NonTerm.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Parameter.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Parameter.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Phrase.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Phrase.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Property.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Property.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/pugiconfig.hpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/pugixml.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/pugixml.hpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Rule.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Rule.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/RulePhrase.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/RulePhrase.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Rules.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Rules.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/RuleSymbol.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/RuleSymbol.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/SyntaxTree.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/SyntaxTree.h"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Word.cpp"/>
-    <File Name="../../../phrase-extract/extract-mixed-syntax/Word.h"/>
-    <File Name="../../../phrase-extract/OutputFileStream.cpp"/>
-    <File Name="../../../phrase-extract/OutputFileStream.h"/>
+  <VirtualDirectory Name="moses-cmd">
+    <File Name="../../../moses-cmd/LatticeMBRGrid.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses-cmd/Main.cpp"/>
+    <File Name="../../../moses-cmd/MainVW.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses-cmd/MainVW.h" ExcludeProjConfig="Debug"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -59,14 +25,32 @@
         <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder"/>
         <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder/phrase-extract"/>
         <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder/boost/include"/>
+        <Preprocessor Value="MAX_NUM_FACTORS=4"/>
+        <Preprocessor Value="KENLM_MAX_ORDER=7"/>
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/boost/lib64"/>
+        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/lm/Debug"/>
+        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/moses/Debug"/>
+        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/OnDiskPt/Debug"/>
+        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/search/Debug"/>
         <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/util/Debug"/>
         <Library Value="util"/>
+        <Library Value="moses"/>
+        <Library Value="search"/>
+        <Library Value="OnDiskPt"/>
+        <Library Value="lm"/>
         <Library Value="boost_iostreams"/>
+        <Library Value="boost_serialization"/>
+        <Library Value="boost_system"/>
+        <Library Value="boost_thread"/>
+        <Library Value="boost_filesystem"/>
         <Library Value="boost_program_options"/>
+        <Library Value="pthread"/>
         <Library Value="z"/>
+        <Library Value="bz2"/>
+        <Library Value="dl"/>
+        <Library Value="rt"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
