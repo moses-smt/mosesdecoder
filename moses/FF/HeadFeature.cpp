@@ -567,9 +567,7 @@ int SyntaxTreeState::Compare(const FFState& other) const
 {
 
   const SyntaxTreeState &otherState = static_cast<const SyntaxTreeState&>(other);
-  std::set<std::string>::iterator it;
-  //int ret=0;
-  if(m_depRelInHyp->size() < otherState.m_depRelInHyp->size())
+   if(m_depRelInHyp->size() < otherState.m_depRelInHyp->size())
   	return -1;
   if(m_depRelInHyp->size() > otherState.m_depRelInHyp->size())
     return 1;
@@ -577,6 +575,9 @@ int SyntaxTreeState::Compare(const FFState& other) const
   return  (1 - std::equal(m_depRelInHyp->begin(), m_depRelInHyp->end(),otherState.m_depRelInHyp->begin()) );
 
   /*
+  std::set<std::string>::iterator it;
+  int ret=0;
+
   if(m_depRelInHyp->empty()){
   	return 0;
   }
@@ -610,6 +611,7 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_counterDepRel(0)
 	, m_cacheHits(0)
 	, m_cacheDepRelHits(0)
+	, m_afterPop(false)
 {
   ReadParameters();
   //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
