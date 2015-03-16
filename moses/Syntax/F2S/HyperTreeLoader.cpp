@@ -44,8 +44,8 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
 {
   PrintUserTime(std::string("Start loading HyperTree"));
 
-  const StaticData &staticData = StaticData::Instance();
-  const std::string &factorDelimiter = staticData.GetFactorDelimiter();
+  // const StaticData &staticData = StaticData::Instance();
+  // const std::string &factorDelimiter = staticData.GetFactorDelimiter();
 
   std::size_t count = 0;
 

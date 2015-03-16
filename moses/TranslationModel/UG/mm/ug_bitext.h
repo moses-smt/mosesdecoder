@@ -96,7 +96,7 @@ namespace Moses {
       float    my_wcnt; // weighted count 
       uint32_t my_cnt2;
       vector<pair<size_t, vector<uchar> > > my_aln; 
-      uint32_t ofwd[7], obwd[7];
+      uint32_t ofwd[Moses::LRModel::NONE+1], obwd[Moses::LRModel::NONE+1];
     public:
       jstats();
       jstats(jstats const& other);
@@ -132,7 +132,7 @@ namespace Moses {
       size_t in_progress; // keeps track of how many threads are currently working on this
 
       // size_t Moses::LRModel::ReorderingType 
-      uint32_t ofwd[Moses::LRModel::MAX+1], obwd[Moses::LRModel::MAX+1];
+      uint32_t ofwd[Moses::LRModel::NONE+1], obwd[Moses::LRModel::NONE+1];
       
       // typedef typename boost::unordered_map<typename ::uint64_t, jstats> trg_map_t;
       typedef std::map<typename ::uint64_t, jstats> trg_map_t;
@@ -180,8 +180,8 @@ namespace Moses {
       ::uint64_t p1, p2;
       uint32_t raw1,raw2,sample1,sample2,good1,good2,joint;
       vector<float> fvals;
-      float dfwd[Moses::LRModel::MAX+1]; // distortion counts // counts or probs?
-      float dbwd[Moses::LRModel::MAX+1]; // distortion counts
+      float dfwd[Moses::LRModel::NONE+1]; // distortion counts // counts or probs?
+      float dbwd[Moses::LRModel::NONE+1]; // distortion counts
       vector<uchar> aln;
       float score;
       bool inverse;
@@ -266,7 +266,7 @@ namespace Moses {
       if (js.aln().size()) 
 	aln = js.aln()[0].second;
       float total_fwd = 0, total_bwd = 0;
-      for (int i = 0; i <= Moses::LRModel::MAX; i++)
+      for (int i = 0; i <= Moses::LRModel::NONE; i++)
 	{
 	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
 	  total_fwd += js.dcnt_fwd(po)+1;
@@ -274,7 +274,7 @@ namespace Moses {
 	}
 
       // should we do that here or leave the raw counts?
-      for (int i = 0; i <= Moses::LRModel::MAX; i++)
+      for (int i = 0; i <= Moses::LRModel::NONE; i++)
 	{
 	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
 	  dfwd[i] = float(js.dcnt_fwd(po)+1)/total_fwd;
@@ -344,7 +344,7 @@ namespace Moses {
       , score(o.score)
       , inverse(o.inverse)
     {
-      for (size_t i = 0; i <= po_other; ++i)
+      for (int i = 0; i <= Moses::LRModel::NONE; ++i)
 	{
 	  dfwd[i] = o.dfwd[i];
 	  dbwd[i] = o.dbwd[i];
@@ -581,6 +581,7 @@ namespace Moses {
       UTIL_THROW_IF2(i != T1->size(),
 		     "Mismatch between bias vector size and corpus size at "
 		     << HERE);
+      return ret;
     }
 
     template<typename Token>
@@ -845,7 +846,7 @@ namespace Moses {
 	  while (j->step(sid,offset))
 	    {
 	      aln.clear();
-	      int po_fwd=po_other,po_bwd=po_other;
+	      int po_fwd=Moses::LRModel::NONE,po_bwd=Moses::LRModel::NONE;
 	      if (j->fwd)
 		{
 		  if (!ag.bt.find_trg_phr_bounds

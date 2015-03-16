@@ -150,8 +150,10 @@ void TargetPhrase::Save(OnDiskWrapper &onDiskWrapper)
   file.seekp(0, ios::end);
   file.write(mem, memUsed);
 
+#ifndef NDEBUG
   UINT64 endPos = file.tellp();
   assert(startPos + memUsed == endPos);
+#endif
 
   m_filePos = startPos;
   free(mem);
@@ -271,7 +273,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   }
 
   // alignments
-  int index = 0;
+  // int index = 0;
   Moses::AlignmentInfo::CollType alignTerm, alignNonTerm;
   std::set<std::pair<size_t, size_t> > alignmentInfo;
   const PhrasePtr sp = GetSourcePhrase();

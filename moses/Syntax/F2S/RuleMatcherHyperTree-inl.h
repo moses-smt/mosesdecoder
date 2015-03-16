@@ -164,7 +164,7 @@ bool RuleMatcherHyperTree<Callback>::MatchChildren(
   if (children.size() != subSeqSize) {
     return false;
   }
-  for (int i = 0; i < subSeqSize; ++i) {
+  for (size_t i = 0; i < subSeqSize; ++i) {
     if (edgeLabel[pos+i] != children[i]->pvertex.symbol[0]->GetId()) {
       return false;
     }
