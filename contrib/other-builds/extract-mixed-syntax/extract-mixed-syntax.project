@@ -141,6 +141,8 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
+  <Dependencies Name="Debug">
+    <Project Name="util"/>
+  </Dependencies>
 </CodeLite_Project>

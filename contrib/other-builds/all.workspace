@@ -8,9 +8,9 @@
   <Project Name="OnDiskPt" Path="OnDiskPt/OnDiskPt.project" Active="No"/>
   <Project Name="search" Path="search/search.project" Active="No"/>
   <Project Name="moses" Path="moses/moses.project" Active="No"/>
-  <Project Name="moses-cmd" Path="moses-cmd/moses-cmd.project" Active="No"/>
+  <Project Name="moses-cmd" Path="moses-cmd/moses-cmd.project" Active="Yes"/>
   <Project Name="score" Path="score/score.project" Active="No"/>
-  <Project Name="consolidate" Path="consolidate/consolidate.project" Active="Yes"/>
+  <Project Name="consolidate" Path="consolidate/consolidate.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="manual-label" ConfigName="Debug"/>

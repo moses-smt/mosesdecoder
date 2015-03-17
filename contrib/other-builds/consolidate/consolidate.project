@@ -26,17 +26,17 @@
     <Configuration Name="Debug" CompilerType="clang( based on LLVM 3.5svn )" DebuggerType="LLDB Debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
-        <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder"/>
-        <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder/phrase-extract"/>
-        <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder/boost/include"/>
+        <IncludePath Value="../../.."/>
+        <IncludePath Value="../../../phrase-extract"/>
+        <IncludePath Value="../../../boost/include"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/boost/lib64"/>
-        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/lm/Debug"/>
-        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/moses/Debug"/>
-        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/OnDiskPt/Debug"/>
-        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/search/Debug"/>
-        <LibraryPath Value="/Users/hieu/workspace/github/mosesdecoder/contrib/other-builds/util/Debug"/>
+        <LibraryPath Value="../../../boost/lib64"/>
+        <LibraryPath Value="../../../contrib/other-builds/lm/Debug"/>
+        <LibraryPath Value="../../../contrib/other-builds/moses/Debug"/>
+        <LibraryPath Value="../../../contrib/other-builds/OnDiskPt/Debug"/>
+        <LibraryPath Value="../../../contrib/other-builds/search/Debug"/>
+        <LibraryPath Value="../../../contrib/other-builds/util/Debug"/>
         <Library Value="moses"/>
         <Library Value="search"/>
         <Library Value="OnDiskPt"/>
@@ -127,4 +127,11 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="moses"/>
+    <Project Name="util"/>
+    <Project Name="lm"/>
+    <Project Name="search"/>
+    <Project Name="OnDiskPt"/>
+  </Dependencies>
 </CodeLite_Project>

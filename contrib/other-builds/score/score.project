@@ -133,4 +133,8 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="util"/>
+    <Project Name="moses"/>
+  </Dependencies>
 </CodeLite_Project>

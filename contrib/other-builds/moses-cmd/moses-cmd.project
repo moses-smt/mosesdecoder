@@ -125,6 +125,12 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
+  <Dependencies Name="Debug">
+    <Project Name="OnDiskPt"/>
+    <Project Name="lm"/>
+    <Project Name="moses"/>
+    <Project Name="search"/>
+    <Project Name="util"/>
+  </Dependencies>
 </CodeLite_Project>
