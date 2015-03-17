@@ -7,6 +7,7 @@ namespace Moses
 RuleScope::RuleScope(const std::string &line)
   :StatelessFeatureFunction(1, line)
   ,m_sourceSyntax(true)
+  ,m_futureCostOnly(false)
 {
 }
 
@@ -45,14 +46,23 @@ void RuleScope::EvaluateInIsolation(const Phrase &source
     score += count;
   }
 
-  scoreBreakdown.PlusEquals(this, score);
+  if (m_futureCostOnly) {
+	estimatedFutureScore.PlusEquals(this, score);	  
+  }
+  else {
+	scoreBreakdown.PlusEquals(this, score);
+  }
 }
 
 void RuleScope::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source-syntax") {
     m_sourceSyntax = Scan<bool>(value);
-  } else {
+  }
+  else if ("future-cost-only") {
+	m_futureCostOnly = Scan<bool>(value);
+  }
+  else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
 }

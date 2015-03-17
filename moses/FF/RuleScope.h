@@ -45,6 +45,7 @@ public:
 
 protected:
   bool m_sourceSyntax;
+  bool m_futureCostOnly;
 };
 
 }
