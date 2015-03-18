@@ -1,4 +1,21 @@
+import modules ;
+import option ;
+import os ;
+import path ;
+import project ;
+import build-system ;
+import version ;
+
 # Is the XMLRPC-C server available?
+
+build-moses-server = false ;
+rule shell_or_die ( cmd ) {
+  local ret = [ _shell $(cmd) : exit-status ] ;
+  if $(ret[2]) != 0 {
+    exit "Failed to run $(cmd)" : 1 ;
+  }
+  return $(ret[1]) ;
+}
 
 with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
 
@@ -15,6 +32,9 @@ if $(with-xmlrpc-c)
   {
     exit Could not find $(xmlrpc-command) : 1 ;
   }
+
+
+
 }
 else 
 {
@@ -32,5 +52,7 @@ else
   }
   xmlrpc-command = "xmlrpc-c-config" ;
 }
+
+
 
 
