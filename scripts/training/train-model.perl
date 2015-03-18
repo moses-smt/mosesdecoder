@@ -2153,8 +2153,8 @@ sub create_ini {
 
    # SyntaxInputWeight FF
    if ($_USE_SYNTAX_INPUT_WEIGHT_FEATURE) {
-     $feature_spec .= "SyntaxInputWeight name=SyntaxInputWeight$i\n";
-     $weight_spec .= "SyntaxInputWeight$i= 0.1\n";
+     $feature_spec .= "SyntaxInputWeight name=SyntaxInputWeight0\n";
+     $weight_spec .= "SyntaxInputWeight0= 0.1\n";
    }
 
    # generation model

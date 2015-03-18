@@ -34,9 +34,11 @@ class TreeStructureFeature : public StatefulFeatureFunction
 {
   SyntaxConstraints* m_constraints;
   LabelSet* m_labelset;
+  bool m_binarized;
 public:
   TreeStructureFeature(const std::string &line)
-    :StatefulFeatureFunction(0, line) {
+    :StatefulFeatureFunction(0, line)
+    , m_binarized(false) {
     ReadParameters();
   }
   ~TreeStructureFeature() {
@@ -52,6 +54,8 @@ public:
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
+
+  void SetParameter(const std::string& key, const std::string& value);
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
