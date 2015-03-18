@@ -1,11 +1,17 @@
 // -*- c++ -*-
 #pragma once
-#include "MosesServer.h"
 
-namespace Moses
+#include <xmlrpc-c/base.hpp>
+#include <xmlrpc-c/registry.hpp>
+#include <xmlrpc-c/server_abyss.hpp>
+#include "moses/ThreadPool.h"
+#ifndef WITH_THREADS
+#pragma message("COMPILING WITHOUT THREADS!")
+#endif
+namespace MosesServer
 {
   class 
-  MosesServer::
+  // MosesServer::
   Translator : public xmlrpc_c::method
   {
   public:

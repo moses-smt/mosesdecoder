@@ -1,4 +1,5 @@
 #include "Optimizer.h"
+#include <iostream>
 
 namespace MosesServer
 {
@@ -64,7 +65,7 @@ namespace MosesServer
 #else
     string errmsg = "Error: Perplexity minimization requires dlib ";
     errmsg += "(compilation option --with-dlib)";
-    cerr << errmsg << endl;
+    std::cerr << errmsg << std::endl;
     *retvalP = xmlrpc_c::value_string(errmsg);
 #endif
   }

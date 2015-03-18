@@ -151,17 +151,17 @@ int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
-  int port; params->SetParameter(port, "server-port", 8080);
-  bool isSerial; params->SetParameter(isSerial, "serial", false);
-  string logfile; params->SetParameter(logfile, "server-log", string(""));
-  size_t num_threads; params->SetParameter(num_threads, "threads", 10);
+  int port; params.SetParameter(port, "server-port", 8080);
+  bool isSerial; params.SetParameter(isSerial, "serial", false);
+  string logfile; params.SetParameter(logfile, "server-log", string(""));
+  size_t num_threads; params.SetParameter(num_threads, "threads", size_t(10));
   if (isSerial) VERBOSE(1,"Running server in serial mode." << endl);
   
   xmlrpc_c::registry myRegistry;
   
-  xmlrpc_c::methodPtr const translator(new Translator(numThreads));
-  xmlrpc_c::methodPtr const updater(new Updater);
-  xmlrpc_c::methodPtr const optimizer(new Optimizer);
+  xmlrpc_c::methodPtr const translator(new MosesServer::Translator(num_threads));
+  xmlrpc_c::methodPtr const updater(new MosesServer::Updater);
+  xmlrpc_c::methodPtr const optimizer(new MosesServer::Optimizer);
   
   myRegistry.addMethod("translate", translator);
   myRegistry.addMethod("updater", updater);
@@ -174,7 +174,9 @@ run_as_server()
   else myAbyssServer.run();
 
   std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
+#pragma message("BUILDING MOSES WIT SERVER SUPPORT") 
 #else
+#pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT") 
   std::cerr << "Moses was compiled without server support." << endl;   
 #endif
   return 1;

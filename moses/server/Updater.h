@@ -17,11 +17,15 @@
 #include <xmlrpc-c/server_abyss.hpp>
 
 
-namespace MoseServer
+namespace MosesServer
 {
   class 
   Updater: public xmlrpc_c::method
   {
+
+    typedef std::map<std::string, xmlrpc_c::value> params_t;
+
+
     std::string m_src, m_trg, m_aln;
     bool m_bounded, m_add2ORLM;
 

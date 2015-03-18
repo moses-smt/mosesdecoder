@@ -1,22 +1,23 @@
 #include "TranslationTask.h"
+#include <boost/foreach.hpp>
 
 namespace MosesServer
 {
   using namespace Moses;
   using namespace std;
 
-  virtual void 
+  void 
   TranslationTask::
   Run() 
   {
-    parse_request();
+    parse_request(m_paramList.getStruct(0));
       
-    StaticData cosnt& SD = StaticData::Instance();
+    StaticData const& SD = Moses::StaticData::Instance();
       
     //Make sure alternative paths are retained, if necessary
     if (m_withGraphInfo || m_nbestSize>0) 
       // why on earth is this a global variable? Is this even thread-safe???? UG
-      (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
+      (const_cast<Moses::StaticData&>(SD)).SetOutputSearchGraph(true);
       
     std::stringstream out, graphInfo, transCollOpts;
       
@@ -37,17 +38,17 @@ namespace MosesServer
   /// add phrase alignment information from a Hypothesis
   void 
   TranslationTask::
-  add_phrase_aln_info(Hypothesis const& h, vector<xmlrpc_c::value>& aInfo)
+  add_phrase_aln_info(Hypothesis const& h, vector<xmlrpc_c::value>& aInfo) const
   {
-    if (!m_oopt.withPhraseAlignment) return;
+    if (!m_withAlignInfo) return;
     WordsRange const& trg = h.GetCurrTargetWordsRange();
     WordsRange const& src = h.GetCurrSourceWordsRange();
     
     std::map<std::string, xmlrpc_c::value> pAlnInfo;
     pAlnInfo["tgt-start"] = xmlrpc_c::value_int(trg.GetStartPos());
-    pAlgInfo["src-start"] = xmlrpc_c::value_int(src.GetStartPos());
+    pAlnInfo["src-start"] = xmlrpc_c::value_int(src.GetStartPos());
     pAlnInfo["src-end"]   = xmlrpc_c::value_int(src.GetEndPos());
-    aInfo.push_back(xmlrpc_c::value_struct(phraseAlignInfo));
+    aInfo.push_back(xmlrpc_c::value_struct(pAlnInfo));
   }
   
   void 
@@ -67,7 +68,8 @@ namespace MosesServer
 
   bool 
   TranslationTask::
-  compareSearchGraphNode(const SearchGraphNode& a, const SearchGraphNode b) 
+  compareSearchGraphNode(const Moses::SearchGraphNode& a, 
+			 const Moses::SearchGraphNode& b) 
   { return a.hypo->GetId() < b.hypo->GetId(); }
 
   void 
@@ -82,7 +84,7 @@ namespace MosesServer
     vector<SearchGraphNode> searchGraph;
     manager.GetSearchGraph(searchGraph);
     std::sort(searchGraph.begin(), searchGraph.end());
-    BOOST_FOREACH(SearchGraphNode const& n, searchGraph)
+    BOOST_FOREACH(Moses::SearchGraphNode const& n, searchGraph)
       {
 	map<string, xmlrpc_c::value> x; // search graph xml node
 	x["forward"] = value_double(n.forward);
@@ -104,12 +106,12 @@ namespace MosesServer
 	  }
 	searchGraphXml.push_back(value_struct(x));
       }
-    retData["sg"] = value_array(searchGraphXml);
+    retData["sg"] = xmlrpc_c::value_array(searchGraphXml);
   }
 
   void 
   TranslationTask::
-  output_phrase(ostream& out, Phrase const& phrase)
+  output_phrase(ostream& out, Phrase const& phrase) const
   {
     if (!m_reportAllFactors) 
       {
@@ -127,9 +129,9 @@ namespace MosesServer
     vector<xmlrpc_c::value> nBestXml;
     manager.CalcNBest(m_nbestSize, nBestList, m_nbestDistinct);
     
-    BOOST_FOREACH(TrellisPath const& path, nBestList)
+    BOOST_FOREACH(Moses::TrellisPath const* path, nBestList)
       {
-	vector<const Hypothesis *> const& E = path.GetEdges();
+	vector<const Hypothesis *> const& E = path->GetEdges();
 	if (!E.size()) continue;
 	std::map<std::string, xmlrpc_c::value> nBestXmlItem;
 	pack_hypothesis(E, "hyp", nBestXmlItem);
@@ -137,21 +139,21 @@ namespace MosesServer
 	  {
 	    // should the score breakdown be reported in a more structured manner?
 	    ostringstream buf;
-	    path.GetScoreBreakdown().OutputAllFeatureScores(buf);
-	    nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
+	    path->GetScoreBreakdown().OutputAllFeatureScores(buf);
+	    nBestXmlItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	  }
 	
 	// weighted score
-	nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetTotalScore());
-	nBestXml.push_back(xmlrpc_c::value_struct(nBestXMLItem));
+	nBestXmlItem["totalScore"] = xmlrpc_c::value_double(path->GetTotalScore());
+	nBestXml.push_back(xmlrpc_c::value_struct(nBestXmlItem));
       }
     retData["nbest"] = xmlrpc_c::value_array(nBestXml);
   }
   
   void 
   TranslationTask::
-  insertTranslationOptions(Manager& manager, 
-			   map<string, xmlrpc_c::value>& retData) 
+  insertTranslationOptions(Moses::Manager& manager, 
+			   std::map<std::string, xmlrpc_c::value>& retData) 
   {
     const TranslationOptionCollection* toptsColl 
       = manager.getSntTranslationOptions();
@@ -187,33 +189,40 @@ namespace MosesServer
       }
     retData["topt"] = xmlrpc_c::value_array(toptsXml);
   }
+
+  bool 
+  check(std::map<std::string, xmlrpc_c::value> const& params, std::string const key)
+  {
+    std::map<std::string, xmlrpc_c::value>::const_iterator m;
+    return (params.find(key) != params.end());
+  }
   
   TranslationTask::
   TranslationTask(xmlrpc_c::paramList const& paramList,
 		  boost::condition_variable& cond, boost::mutex& mut)
-    : m_paramList(paramList), m_cond(cond), m_mutex(mutex), m_done(false)
+    : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
   { }
 
   void
   TranslationTask::
-  parse_request(std::map<std::string, xmlrpc_c::value> const& req)
+  parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   { // parse XMLRPC request
     // params_t const params = m_paramList.getStruct(0);
     m_paramList.verifyEnd(1); // ??? UG
     
     // source text must be given, or we don't know what to translate
+    typedef std::map<std::string, xmlrpc_c::value> params_t;
     params_t::const_iterator si = params.find("text");
     if (si == params.end()) 
       throw xmlrpc_c::fault("Missing source text", xmlrpc_c::fault::CODE_PARSE);
     m_source = xmlrpc_c::value_string(si->second);
-    XVERBOSE(1,"Input: " << source << endl);
+    XVERBOSE(1,"Input: " << m_source << endl);
     
-    m_oopt.init(req);
-    m_withPhraseAlignment = check(params, "align");
-    m_withWordAlignment   = check(params, "word-align");
-    m_withSearchGraph     = check(params, "sg");
-    m_withTransOpts       = check(params, "topt");
-    m_outputAllFactors    = check(params, "report-all-factors");
+    m_withAlignInfo       = check(params, "align");
+    m_withWordAlignInfo   = check(params, "word-align");
+    m_withGraphInfo       = check(params, "sg");
+    m_withTopts           = check(params, "topt");
+    m_reportAllFactors    = check(params, "report-all-factors");
     m_nbestDistinct       = check(params, "nbest-distinct");
     m_withScoreBreakdown  = check(params, "add-score-breakdown");
     
@@ -229,21 +238,22 @@ namespace MosesServer
 	if (w.size() && (si = params.find("model_name")) != params.end())
 	  {
 	    string const model_name = xmlrpc_c::value_string(si->second);
-	    // PhraseDictionaryMultiModel* pdmm 
-	    // = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
-	    PhraseDictionaryMultiModel* pdmm = FindPhraseDictionary(model_name);
+	    PhraseDictionaryMultiModel* pdmm 
+	    = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+	    // Moses::PhraseDictionaryMultiModel* pdmm 
+	    // = FindPhraseDictionary(model_name);
 	    pdmm->SetTemporaryMultiModelWeightsVector(w);
 	  }
       }
     
-    // biased sampling for suffix-array-based sampling phrase table?
-    if ((si = params.find("bias")) != params.end())
-      { 
-	std::vector<xmlrpc_c::value> tmp 
-	  = xmlrpc_c::value_array(si->second).cvalue();
-	for (size_t i = 1; i < tmp.size(); i += 2)
-	  m_bias[xmlrpc_c::value_int(tmp[i-1])] = xmlrpc_c::value_double(tmp[i]);
-      }
+    // // biased sampling for suffix-array-based sampling phrase table?
+    // if ((si = params.find("bias")) != params.end())
+    //   { 
+    // 	std::vector<xmlrpc_c::value> tmp 
+    // 	  = xmlrpc_c::value_array(si->second).cvalue();
+    // 	for (size_t i = 1; i < tmp.size(); i += 2)
+    // 	  m_bias[xmlrpc_c::value_int(tmp[i-1])] = xmlrpc_c::value_double(tmp[i]);
+    //   }
   } // end of Translationtask::parse_request()
 
 
@@ -251,21 +261,21 @@ namespace MosesServer
   TranslationTask::
   run_chart_decoder()
   {
-    TreeInput tinput; 
-    tinput.Read(stringstream(m_source + "\n"), 
-		StaticData::Instance().GetInputFactorOrder());
+    Moses::TreeInput tinput(NULL); 
+    istringstream buf(m_source + "\n");
+    tinput.Read(buf, StaticData::Instance().GetInputFactorOrder());
     
-    ChartManager manager(tinput);
+    Moses::ChartManager manager(tinput);
     manager.Decode();
     
-    const ChartHypothesis *hypo = manager.GetBestHypothesis();
+    const Moses::ChartHypothesis *hypo = manager.GetBestHypothesis();
     ostringstream out;
     outputChartHypo(out,hypo);
     
     m_target = out.str();
     m_retData["text"] = xmlrpc_c::value_string(m_target);
     
-    if (m_addGraphInfo) 
+    if (m_withGraphInfo) 
       {
 	std::ostringstream sgstream;
 	manager.OutputSearchGraphMoses(sgstream);
@@ -284,7 +294,7 @@ namespace MosesServer
       output_phrase(target, e->GetCurrTargetPhrase());
     dest[key] = xmlrpc_c::value_string(target.str());
   
-    if (m_addAlignmentInfo)
+    if (m_withAlignInfo)
       { // phrase alignment, if requested
 
 	vector<xmlrpc_c::value> p_aln;
@@ -293,11 +303,11 @@ namespace MosesServer
 	dest["align"] = xmlrpc_c::value_array(p_aln);
       }
 
-    if (m_addWordAlignmentInfo)
+    if (m_withWordAlignInfo)
       { // word alignment, if requested
 	vector<xmlrpc_c::value> w_aln;
 	BOOST_FOREACH(Hypothesis const* e, edges)
-	  e->OutputLocalWordAligment(w_aln);
+	  e->OutputLocalWordAlignment(w_aln);
 	dest["word-align"] = xmlrpc_c::value_array(w_aln);
       }
   }
@@ -319,17 +329,18 @@ namespace MosesServer
   TranslationTask::
   run_phrase_decoder()
   {
-    Manager manager(Sentence(0, m_source));
+    Manager manager(Sentence(NULL,0, m_source));
     // if (m_bias.size()) manager.SetBias(&m_bias);
     manager.Decode();
     
-    pack_hypothesis(manager.GetBestHypothesis(), m_retData);
+    pack_hypothesis(manager.GetBestHypothesis(), "text", m_retData);
     
-    if (m_addGraphInfo) insertGraphInfo(manager,m_retData);
-    if (m_addTopts) insertTranslationOptions(manager,m_retData);
+    if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
+    if (m_withTopts) insertTranslationOptions(manager,m_retData);
     if (m_nbestSize) outputNBest(manager, m_retData);
     
-    (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false); 
+    (const_cast<StaticData&>(Moses::StaticData::Instance()))
+      .SetOutputSearchGraph(false); 
     // WTF? one more reason not to have this as global variable! --- UG
     
   }
