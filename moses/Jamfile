@@ -7,7 +7,7 @@ include $(TOP)/jam-files/server.jam ;
  
 if ( $(build-moses-server) )
 {
-  alias mserverlib : $(TOP)/moses/server//mserver ;
+  alias mserverlib : [ glob server/*.cpp ] ;
   echo "BUILDING MOSES SERVER" ;
 } 
 else 
@@ -15,6 +15,7 @@ else
   echo "NOT BUILDING MOSES SERVER" ;
   alias mserverlib ;
 }
+
 
 with-dlib = [ option.get "with-dlib" ] ;
 if $(with-dlib) {

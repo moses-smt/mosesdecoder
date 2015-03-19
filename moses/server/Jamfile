@@ -1,1 +1,0 @@
-fakelib mserver : [ glob *.cpp ] : : <define>WITH_THREADS ;

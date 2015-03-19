@@ -132,13 +132,13 @@ if ( $(build-moses-server) )
   requirements += <define>HAVE_XMLRPC_C ;
   requirements += <linkflags>$(xmlrpc-linkflags) ;
   requirements += <cxxflags>$(xmlrpc-cxxflags) ; 
-  alias mserverlib : $(TOP)/moses/server//mserver ;
+  # alias mserverlib : $(TOP)/moses/server//mserver ;
   echo "BUILDING MOSES SERVER" ;
 } 
 else 
 {
   echo "NOT BUILDING MOSES SERVER" ;
-  alias mserverlib ;
+  # alias mserverlib ;
 }
 
 if [ option.get "with-oxlm" ] {
