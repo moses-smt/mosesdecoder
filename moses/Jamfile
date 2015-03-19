@@ -5,7 +5,7 @@ max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
 
 include $(TOP)/jam-files/server.jam ;
  
-if ( $(build-moses-server) )
+if ( $(build-moses-server) = true )
 {
   alias mserverlib : [ glob server/*.cpp ] ;
   echo "BUILDING MOSES SERVER" ;

@@ -26,14 +26,15 @@ if $(with-xmlrpc-c)
   echo "!!! You are linking the XMLRPC-C library; Do NOT use v.1.25.29 !!!" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
   
-  build-moses-server = true ;
   xmlrpc-command = $(with-xmlrpc-c)/bin/xmlrpc-c-config ;
   if ! [ path.exists $(xmlrpc-command) ] 
   {
     exit Could not find $(xmlrpc-command) : 1 ;
   }
-
-
+  else
+  { 
+    build-moses-server = true ;
+  }
 
 }
 else 

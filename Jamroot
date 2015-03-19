@@ -124,7 +124,7 @@ requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
 requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
-if ( $(build-moses-server) )
+if ( $(build-moses-server) = true )
 {
   xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --libs" ] ;
   xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --cflags" ] ;
