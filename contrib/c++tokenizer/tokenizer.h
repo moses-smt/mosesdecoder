@@ -28,11 +28,21 @@ private:
 
     static std::string cfg_dir;
 
+    // non-breaking prefixes (numeric) utf8
     std::set<std::string> nbpre_num_set;
+    // non-breaking prefixes (other) utf8
     std::set<std::string> nbpre_gen_set;
+
+    // non-breaking prefixes (numeric) ucs4
     std::set<std::wstring> nbpre_num_ucs4;
+    // non-breaking prefixes (other) ucs4
     std::set<std::wstring> nbpre_gen_ucs4;
+
+    // compiled protected patterns 
     std::vector<re2::RE2 *> prot_pat_vec;
+
+    // sentence starts embedded in last line of input
+    std::vector<std::size_t> starts_vec;
 
 protected:
 
@@ -42,6 +52,7 @@ protected:
     bool latin_p; // is lang_iso "fr" or "it"
     bool skip_xml_p;
     bool skip_alltags_p;
+    bool entities_p;
     bool escape_p;
     bool unescape_p;
     bool aggressive_hyphen_p;
@@ -54,6 +65,7 @@ protected:
     bool narrow_kana_p;
     bool refined_p;
     bool drop_bad_p;
+    bool splits_p;
     bool verbose_p;
 
     std::pair<int,int> load_prefixes(std::ifstream& ifs); // used by init(), parameterized by lang_iso
@@ -79,6 +91,11 @@ public:
 
     // required before other methods, may throw
     void init();
+
+    // required after processing a contiguous sequence of lines when sentence splitting is on
+    void reset();
+
+    bool splitting() const { return splits_p; }
 
     // streaming tokenizer reads from is, writes to os, preserving line breaks
     std::size_t tokenize(std::istream& is, std::ostream& os);
@@ -116,6 +133,11 @@ public:
         std::copy(inv.begin(), inv.end(), std::ostream_iterator<std::string>(oss," "));
         return detokenize(oss.str());
     }
+
+    std::string splitter(const std::string &istr);
+
+    // split sentences from lines of input
+    std::size_t splitter(std::istream& is, std::ostream& os);
 
 }; // end class Tokenizer
 

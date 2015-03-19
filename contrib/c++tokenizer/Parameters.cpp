@@ -9,6 +9,7 @@ Parameters::Parameters()
 , verbose_p(false)
 , detag_p(false)
 , alltag_p(false)
+, entities_p(false)
 , escape_p(true)
 , aggro_p(false)
 , supersub_p(false)
@@ -23,6 +24,8 @@ Parameters::Parameters()
 , refined_p(false)
 , unescape_p(false)
 , drop_bad_p(false)
+, split_p(false)
+, notokenization_p(false)
 {
 }
 

@@ -62,7 +62,8 @@ RE2 curr_fr_x(".*[\\p{L}\\p{N}]+[\']"); // french/italian contraction prefixes c
 RE2 post_fr_x("^[\\p{L}\\p{N}]*"); // valid french/italian contraction suffixes
 RE2 quotes_x("^[\'\"]+$"); //
 RE2 endnum_x("[-\'\"]"); //
-
+RE2 split_word("([\\p{L}\\p{N}\\.\\-]*)([\\'\\\"\\)\\]\\%\\p{Pf}]*)(\\.+)$"); // 
+RE2 split_word2("^([ ]*[\\'\\\"\\(\\[¿¡\\p{Pi}]*[ ]*[\\p{Lu}\\p{N}])");
 // anything rarely used will just be given as a string and compiled on demand by RE2 
 
 const char *SPC_BYTE = " ";
@@ -447,6 +448,7 @@ Tokenizer::Tokenizer(const Parameters& _)
         , latin_p((!english_p) && (_.lang_iso.compare("fr")==0 || _.lang_iso.compare("it")==0))
         , skip_xml_p(_.detag_p)
         , skip_alltags_p(_.alltag_p)
+        , entities_p(_.entities_p)
         , escape_p(_.escape_p)
         , unescape_p(_.unescape_p)
         , aggressive_hyphen_p(_.aggro_p)
@@ -459,6 +461,7 @@ Tokenizer::Tokenizer(const Parameters& _)
         , narrow_kana_p(_.narrow_kana_p)
         , refined_p(_.refined_p)
         , drop_bad_p(_.drop_bad_p)
+        , splits_p(_.split_p)
         , verbose_p(_.verbose_p)
 {
 }
@@ -588,6 +591,12 @@ Tokenizer::init() {
     } else if (verbose_p) {
         std::cerr << "no protected file found: " << protpat_path << std::endl;
     }
+}
+
+
+void
+Tokenizer::reset() {
+    starts_vec.clear();
 }
 
 
@@ -1024,10 +1033,34 @@ Tokenizer::tokenize(const std::string& buf)
                                 ucs4 = eptr;
                                 nxt4 = ++eptr;
                                 next_uch = *nxt4;
-                                next_type = nxt4 < lim4 ? g_unichar_type(*nxt4) : G_UNICODE_UNASSIGNED;
+                                next_type = nxt4 < lim4 ? g_unichar_type(next_uch) : G_UNICODE_UNASSIGNED;
                                 goto retry;
                             }
                         }
+                    }
+                    if (entities_p && !in_url_p) {
+                        gunichar *cur4 = nxt4;
+                        if (*cur4 == gunichar('#')) ++cur4;
+                        while (g_unichar_isalnum(*cur4)) ++cur4;
+                        if (cur4 > nxt4 && *cur4 == gunichar(';')) {
+                            if (since_start) {
+                                *uptr++ = gunichar(L' ');
+                                since_start = 0;
+                            }
+                            ++cur4;
+                            memcpy(uptr,ucs4,cur4-ucs4);
+                            uptr += cur4-ucs4;
+                            ucs4 = cur4;
+                            *uptr++ = gunichar(L' ');
+                            pre_break_p = post_break_p = false;
+                            curr_uch = *ucs4;
+                            curr_type = ucs4 < lim4 ? g_unichar_type(curr_uch) : G_UNICODE_UNASSIGNED;
+                            nxt4 = ++cur4;
+                            next_uch = *nxt4;
+                            next_type = nxt4 < lim4 ? g_unichar_type(next_uch) : G_UNICODE_UNASSIGNED;
+                            goto retry;
+                        }
+                        
                     }
                     post_break_p = pre_break_p = !in_url_p || next_type != G_UNICODE_SPACE_SEPARATOR;
                     if (escape_p) 
@@ -1472,11 +1505,32 @@ std::size_t
 Tokenizer::tokenize(std::istream& is, std::ostream& os)
 {
     size_t line_no = 0;
+    size_t sent_no = 0;
+    size_t nbreaks = 0;
     while (is.good() && os.good()) {
         std::string istr;
         std::getline(is,istr);
         line_no ++;
-        if (istr.empty()) {
+        if (splitting()) {
+            if (istr.empty()) {
+                if (is.eof()) 
+                    break;
+                if (nbreaks)
+                    os << std::endl;
+                nbreaks++;
+                reset();
+                continue;
+            } 
+            if (skip_xml_p && 
+                   (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) {
+                os << std::endl;
+                nbreaks++;
+                reset();
+                continue;
+            } else {
+                // XXX
+            }
+        } else if (istr.empty()) {
             if (is.eof())
                 break;
             os << std::endl;
@@ -1493,7 +1547,7 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
             std::cerr.flush();
         }
     }
-    return line_no;
+    return splitting() ? sent_no : line_no;
 }
 
 
@@ -1616,6 +1670,224 @@ Tokenizer::detokenize(std::istream& is, std::ostream& os)
             os << istr << std::endl;
         } else {
             os << detokenize(istr) << std::endl;
+        }
+    }
+    return line_no;
+}
+
+
+std::string
+Tokenizer::splitter(const std::string &istr) {
+    std::ostringstream ostr0;
+    gchar *ccur = (gchar *)istr.c_str();
+    gchar *cend = ccur + istr.size();
+    glong ncp = 0;
+    gunichar *ucs4 = g_utf8_to_ucs4_fast(ccur,cend-ccur,&ncp);
+    size_t n_nongraph1 = 0;
+    size_t n_nongraph2 = 0;
+    bool beginning = true;
+    const glong invalid = 1L;
+    glong term_start = invalid;
+    glong term_end = invalid;
+    glong term_post = invalid;
+    glong term_more = invalid;
+
+    for (glong icp = 0; icp <= ncp; ++icp) {
+        if (term_post != invalid) {
+            gchar * pre = g_ucs4_to_utf8(ucs4+term_start,term_end - term_start,0,0,0);
+            ostr0 << pre;
+            g_free(pre);
+            ostr0 << std::endl;
+            gchar *post = g_ucs4_to_utf8(ucs4+term_post,icp-term_post,0,0,0);
+            ostr0 << post;
+            g_free(post);
+            term_start = term_end = term_post = term_more = invalid;
+            n_nongraph1 = n_nongraph2 = 0;
+        }
+
+        if (icp == ncp)
+            break;
+
+        if (!g_unichar_isgraph(ucs4[icp])) {
+            if (term_start != invalid && term_end == invalid) {
+                term_end = icp;
+            }
+            if (ucs4[icp] == L'\n') {
+                beginning = true;
+                n_nongraph2 = n_nongraph1 = 0;
+                term_start = term_end = term_post = term_more = invalid;
+            } else if (!beginning) {
+                if (term_more)
+                    n_nongraph2++;
+                else
+                    n_nongraph1++;
+            }
+            continue;
+        } 
+        beginning = false;
+        GUnicodeType icp_type = g_unichar_type(ucs4[icp]);
+        
+        if (g_unichar_ispunct(ucs4[icp])) {
+            switch (ucs4[icp]) {
+            case L'?': 
+            case L'!':
+            case L'.':
+                if (term_start == invalid) {
+                    term_start = icp;
+                    continue;
+                }
+                break;
+            case L'\'':
+            case L'\"':
+            case L'(':
+            case L'[':
+            case L'¿':
+            case L'¡':
+                if (term_end != invalid && n_nongraph1 && !n_nongraph2) {
+                    term_more = term_post = icp;
+                    continue;
+                }
+                break;
+            }
+        } 
+
+        switch (icp_type) {
+        case G_UNICODE_INITIAL_PUNCTUATION:
+            if (term_end != invalid && n_nongraph1 && !n_nongraph2) {
+                term_post = icp;
+                term_more = invalid;
+                continue;
+            } 
+            break;
+        case G_UNICODE_FINAL_PUNCTUATION:
+            if (term_end != invalid && n_nongraph1 && !n_nongraph2) {
+                if (!n_nongraph2) {
+                    term_more = term_post = icp;
+                }
+                continue;
+            } 
+            break;
+        case G_UNICODE_UPPERCASE_LETTER:
+        case G_UNICODE_TITLECASE_LETTER:
+            if (term_end != invalid && n_nongraph1) {
+                term_post = icp;
+                continue;
+            }
+            break;
+        default:
+            break;
+        } 
+        term_start = term_end = term_post = term_more = invalid;
+        n_nongraph1 = n_nongraph2 = 0;
+    }
+
+    std::vector<std::string> tokens = split(ostr0.str());
+    size_t ntok = tokens.size();
+    std::ostringstream ostr1;
+    for (size_t itok = 0; itok < ntok - 1; ++itok) {
+        std::string& word(tokens[itok]);
+        if (RE2::FullMatch(word,split_word)) {        
+            size_t nchar = word.size();
+            size_t ndot = 0;
+            size_t ntrail = 0;
+            gunichar gu = 0;
+            gchar *base = (gchar *)word.c_str();
+            gchar *prev = 0;
+
+            while (nchar && word.at(nchar-1) == '.') {
+                ++ndot;
+                --nchar;
+            }
+            while (nchar) {
+                switch (word.at(nchar-1)) {
+                    case '\'':
+                    case '"':
+                    case ')':
+                    case ']':
+                    case '%':
+                        ++ntrail;
+                        --nchar;
+                        continue;
+                default:
+                    prev = g_utf8_find_prev_char(base,base+nchar);
+                    gu = prev ? g_utf8_get_char(prev) : 0;
+                    if (gu && g_unichar_type(gu) == G_UNICODE_FINAL_PUNCTUATION) {
+                        ++ntrail;
+                        --nchar;
+                        continue;
+                    }
+                }
+                break;
+            }
+            
+            bool non_break_p = false;
+            if (nchar && !ntrail && nbpre_gen_set.find(word.substr(0,nchar)) != nbpre_gen_set.end()) {
+                non_break_p = true;
+            }  else {
+                nchar = word.size();
+                ndot = 0;
+                size_t nupper = 0;
+                size_t nlead = 0;
+                size_t ichar = 0;
+                for (; ichar < nchar; ++ichar) {
+                    char &byte(word.at(ichar));
+                    if (byte < 0x7f) {
+                        if ((byte <= 'Z' && byte >= 'A') || byte == '-') {
+                            nupper++;
+                            continue;
+                        }
+                        if (byte == '.') {
+                            ndot++;
+                            if (!nupper)
+                                nlead++;
+                            continue;
+                        }
+                    } else {
+                        gu = g_utf8_get_char(base+ichar);
+                        if (gu && g_unichar_type(gu) == G_UNICODE_UPPERCASE_LETTER) {
+                            nupper++;
+                            continue;
+                        }
+                    }
+                    break;
+                }
+                non_break_p = ichar == nchar && nlead && nupper && ndot > nlead;
+            }
+            if (!non_break_p && RE2::FullMatch(tokens[itok+1],split_word2)) {
+                if (nchar && nbpre_num_set.find(word.substr(0,nchar)) != nbpre_num_set.end()
+                    && std::isdigit(tokens[itok+1].at(0))) {
+                    non_break_p = true;
+                }
+            }
+            ostr1 << word;
+            if (!non_break_p) {
+                ostr1 << std::endl;
+            } else {
+                ostr1 << ' ';
+            }
+		} else {
+            ostr1 << word << ' ';
+        }
+	}
+	ostr1 << tokens[ntok-1] << std::endl;
+    return ostr1.str();
+}
+
+
+std::size_t
+Tokenizer::splitter(std::istream& is, std::ostream& os) 
+{
+    size_t line_no = 0;
+    while (is.good() && os.good()) {
+        std::string istr;
+        std::getline(is,istr);
+        line_no ++;
+        if (istr.empty()) 
+            continue;
+        if (skip_xml_p && (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) {
+            os << istr << std::endl;
+        } else {
+            os << splitter(istr) << std::endl;
         }
     }
     return line_no;

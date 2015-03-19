@@ -20,6 +20,7 @@ usage(const char *path)
     std::cerr << " -d -- downcase" << std::endl;
     std::cerr << " -D -- detokenize" << std::endl;
     std::cerr << " -e -- do not escape entities during tokenization" << std::endl;
+    std::cerr << " -E -- preserve entities during tokenization" << std::endl;
     std::cerr << " -k -- narrow kana" << std::endl;
     std::cerr << " -n -- narrow latin" << std::endl;
     std::cerr << " -N -- normalize" << std::endl;
@@ -27,12 +28,15 @@ usage(const char *path)
     std::cerr << " -p -- penn treebank style" << std::endl;
     std::cerr << " -r -- refined contraction and quantity conjoining" << std::endl;
     std::cerr << " -s -- super- and sub-script conjoining" << std::endl;
+    std::cerr << " -S -- buffer and sentence-split lines" << std::endl;
+    std::cerr << " -t -- do not tokenize (for use as splitter)." << std::endl;
     std::cerr << " -u -- disable url handling" << std::endl;
     std::cerr << " -U -- unescape entities before tokenization, after detokenization" << std::endl;
     std::cerr << " -v -- verbose" << std::endl;
     std::cerr << " -w -- word filter" << std::endl;
     std::cerr << " -x -- skip xml tag lines" << std::endl;
     std::cerr << " -y -- skip all xml tags" << std::endl;
+    std::cerr << " -X -- split only" << std::endl;
     std::cerr << "Default is -c ., stdin, stdout." << std::endl;
     std::cerr << "LL in en,fr,it affect contraction.  LL selects nonbreaking prefix file" << std::endl;
     std::cerr << "nonbreaking_prefix.LL is sought in getenv('TOKENIZER_SHARED_DIR')." << std::endl;
@@ -83,15 +87,35 @@ copy_words(Tokenizer& tize, std::istream& ifs, std::ostream& ofs) {
     int nlines = 0;
     std::string line;
     while (ifs.good() && std::getline(ifs,line)) {
-        if (line.empty()) continue;
+        if (line.empty()) 
+            continue;
         std::vector<std::string> tokens(tize.tokens(line));
         int count = 0;
+        bool was_break = false;
+
         for (auto& token: tokens) {
+            if (token.empty()) {
+                if (count || was_break) {
+                    ofs << std::endl;
+                    count = 0;
+                    nlines++;
+                    was_break = true;
+                    continue;
+                }
+            }
+            was_break = false;
+
             std::string word(token_word(token));
-            if (word.empty()) continue;
-            ofs << word << ' ';
-            count++;
+            if (word.empty()) {
+                continue;
+            }
+
+            if (count++) {
+                ofs << ' ';
+            }
+            ofs << word;
         }
+
         if (count) {
             ofs << std::endl;
             nlines++;
@@ -110,7 +134,9 @@ int main(int ac, char **av)
     bool next_cfg_p = false;
     bool next_output_p = false;
     bool detokenize_p = std::strstr(av[0],"detokenize") != 0;
-    
+    if (!detokenize_p)
+        params.split_p = std::strstr(av[0],"splitter") != 0;
+
     while (++av,--ac) { 
         if (**av == '-') {
             switch (av[0][1]) {
@@ -127,10 +153,13 @@ int main(int ac, char **av)
                 params.downcase_p = true;
                 break;
             case 'D':
-                detokenize_p = true;
+                detokenize_p = !detokenize_p;
                 break;
             case 'e':
                 params.escape_p = false;
+                break;
+            case 'E':
+                params.entities_p = true;
                 break;
             case 'h':
                 usage(prog);
@@ -156,6 +185,12 @@ int main(int ac, char **av)
             case 's':
                 params.supersub_p = true;
                 break;
+            case 'S':
+                params.split_p = !params.split_p;
+                break;
+            case 'T':
+                params.notokenization_p = true;
+                break;
             case 'U':
                 params.unescape_p = true;
                 break;
@@ -170,6 +205,9 @@ int main(int ac, char **av)
                 break;
             case 'x':
                 params.detag_p = true;
+                break;
+            case 'X':
+                params.notokenization_p = true;
                 break;
             case 'y':
                 params.alltag_p = true;
@@ -262,6 +300,8 @@ int main(int ac, char **av)
     } else if (params.args.empty()) {
         if (detokenize_p) {
             nlines = tize.detokenize(std::cin,ofs);
+        } else if (params.notokenization_p) {
+            nlines = tize.splitter(std::cin,ofs);
         } else {
             nlines = tize.tokenize(std::cin,ofs);
         }
@@ -271,6 +311,8 @@ int main(int ac, char **av)
                 std::ifstream ifs(arg.c_str());
                 if (detokenize_p) {
                     nlines = tize.detokenize(ifs,ofs);
+                } else if (params.notokenization_p) {
+                    nlines = tize.splitter(ifs,ofs);
                 } else {
                     nlines = tize.tokenize(ifs,ofs);
                 }

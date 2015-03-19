@@ -16,6 +16,7 @@ struct Parameters
     bool verbose_p;
     bool detag_p;
     bool alltag_p;
+    bool entities_p;
     bool escape_p;
     bool aggro_p;
     bool supersub_p;
@@ -30,6 +31,8 @@ struct Parameters
     bool refined_p;
     bool unescape_p;
     bool drop_bad_p;
+    bool split_p;
+    bool notokenization_p;
 
 	Parameters();
 
