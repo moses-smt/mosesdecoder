@@ -940,19 +940,34 @@ truecase-reference-devtest
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
 split-reference
 	in: truecased-reference SPLITTER:splitter-model
-	out: reference
+	out: split-ref
 	default-name: tuning/reference.split
 	pass-unless: output-splitter
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 split-reference-devtest
 	in: truecased-reference-devtest SPLITTER:splitter-model
-	out: reference-devtest
+	out: split-ref-devtest
 	default-name: tuning/reference.devtest.split
 	pass-unless: output-splitter
 	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
+reduce-reference
+	in: split-ref
+	out: reference
+	default-name: tuning/reference.reduced
+	pass-unless: mock-output-parser-references
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $moses-script-dir/training/reduce-factors.perl --factor 0 --xml 1 --corpus IN --reduced-corpus OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
+reduce-reference-devtest
+	in: split-ref-devtest
+	out: reference
+	default-name: tuning/reference.devtest.reduced
+	pass-unless: mock-output-parser-references
+	ignore-unless: use-mira
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $moses-script-dir/training/reduce-factors.perl --factor 0 --xml 1 --corpus IN --reduced-corpus OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
 filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir
@@ -1203,12 +1218,19 @@ mock-parse-reference
 	template: $mock-output-parser-references < IN > OUT
 lowercase-reference
 	in: mock-parsed-reference
-	out: reference
-	default-name: evaluation/reference
+	out: lowercased-reference
+	default-name: evaluation/reference.lowercased
 	pass-unless: output-lowercaser
-  pass-if: recaser
+	pass-if: recaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
+reduce-reference
+	in: lowercased-reference
+	out: reference
+	default-name: evaluation/reference
+	pass-unless: mock-output-parser-references
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $moses-script-dir/training/reduce-factors.perl --factor 0 --xml 1 --corpus IN --reduced-corpus OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
 wade
 	in: filtered-dir truecased-input tokenized-reference alignment system-output
 	out: wade-analysis
