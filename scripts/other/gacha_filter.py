@@ -68,9 +68,8 @@ if __name__ == '__main__':
         usage_msg = err_msg('Usage: python %s srcfile trgfile (threshold)\n'
                             % sys.argv[0])
         
-        example_msg = err_msg('Example: gacha_cleaning.py ~/Europarl.de-en.de '
-                            '~/Europarl.de-en.en 0.4\n'
-                            % sys.argv[0])
+        example_msg = err_msg('Example: python %s ~/Europarl.de-en.de '
+                              '~/Europarl.de-en.en 0.4\n' % sys.argv[0])
         sys.stderr.write(usage_msg)
         sys.stderr.write(example_msg)
         sys.exit(1)
