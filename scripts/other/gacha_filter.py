@@ -22,6 +22,23 @@ where:
  - s2 = global variance, i.e. d ((l1 - l2)^2) / d (l1)
 
 (For details on Gale-Church, see http://www.aclweb.org/anthology/J93-1004.pdf)
+
+USAGE:
+
+    $ python gacha_filter.py train.en train.de
+
+Outputs to STDOUT a separated lines of the source and target sentence pairs. 
+You can simply cut the file after that. 
+
+    $ python gacha_filter.py train.en train.de > train.en-de
+    $ cut -f1 train.en-de > train.clean.en
+    $ cut -f2 train.en-de > train.clean.de
+
+You can also allow lower threshold to yield more lines:
+
+    $ python gacha_filter.py train.en train.de 0.05
+    
+Default threshold is set to 0.2.
 """
 
 import io, subprocess
