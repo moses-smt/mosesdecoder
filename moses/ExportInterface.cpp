@@ -174,7 +174,7 @@ run_as_server()
   else myAbyssServer.run();
 
   std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
-#pragma message("BUILDING MOSES WIT SERVER SUPPORT") 
+#pragma message("BUILDING MOSES WITH SERVER SUPPORT") 
 #else
 #pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT") 
   std::cerr << "Moses was compiled without server support." << endl;   
