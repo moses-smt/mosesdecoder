@@ -77,11 +77,31 @@ import modules ;
 import path ;
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
-
-# check if we have xmlrpc-c's abyss server available
-# if yes, include server capabilities in the moses executable
 include $(TOP)/jam-files/server.jam ;
 
+# exit :  0 ; 
+
+if [ build_server ] != no 
+{
+  echo "XMLRPC-C: BUILDING MOSES WITH XMLRPC_C LIBRARY VERSION $(xmlrpc-c-version)" ;
+
+  xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --cflags" ] ;
+  requirements += <define>HAVE_XMLRPC_C ;
+  requirements += <cxxflags>$(xmlrpc-cxxflags) ;
+  xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --libs" ] ;
+  for local i in [ SPLIT_BY_CHARACTERS $(xmlrpc-linkflags) : " " ] 
+  { 
+    libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
+    if $(libname) 
+    {   
+      external-lib $(libname) 
+      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+      requirements += <library>$(libname) ;
+    }
+  } 
+}
+# echo $(requirements) ; 
+# exit 0 ; 
 boost 104400 ;
 external-lib z ;
 
@@ -100,6 +120,18 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
   }
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
+}
+
+if [ option.get "filter-warnings" : : "yes" ] {
+  # given the low coding standards in Moses, we may want to filter out
+  # warnings about poor coding practice that no-one is ever going to fix 
+  # anyway ...
+  requirements += <cxxflags>-Wno-deprecated ;
+  requirements += <cxxflags>-Wno-reorder ;
+  requirements += <cxxflags>-Wno-sign-compare ;
+  requirements += <cxxflags>-Wno-unused-but-set-variable ;
+  requirements += <cxxflags>-Wno-unused-result ;
+  requirements += <cxxflags>-Wno-unused-variable ;
 }
 
 if [ option.get "debug-build" : : "yes" ] {
@@ -123,23 +155,6 @@ requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
 requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
 requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
-
-if ( $(build-moses-server) = true )
-{
-  xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --libs" ] ;
-  xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --cflags" ] ;
-
-  requirements += <define>HAVE_XMLRPC_C ;
-  requirements += <linkflags>$(xmlrpc-linkflags) ;
-  requirements += <cxxflags>$(xmlrpc-cxxflags) ; 
-  # alias mserverlib : $(TOP)/moses/server//mserver ;
-  echo "BUILDING MOSES SERVER" ;
-} 
-else 
-{
-  echo "NOT BUILDING MOSES SERVER" ;
-  # alias mserverlib ;
-}
 
 if [ option.get "with-oxlm" ] {
   external-lib boost_serialization ;

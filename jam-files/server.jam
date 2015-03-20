@@ -1,14 +1,8 @@
-import modules ;
-import option ;
-import os ;
-import path ;
-import project ;
-import build-system ;
-import version ;
+# import path ;
 
+import option ; 
 # Is the XMLRPC-C server available?
 
-build-moses-server = false ;
 rule shell_or_die ( cmd ) {
   local ret = [ _shell $(cmd) : exit-status ] ;
   if $(ret[2]) != 0 {
@@ -17,43 +11,76 @@ rule shell_or_die ( cmd ) {
   return $(ret[1]) ;
 }
 
-with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
+build-server = [ option.get "no-xmlrpc-c" : "yes" : "no" ] ;
 
-if $(with-xmlrpc-c) 
+if $(build-server) = yes
 {
-  # this should be migrated to a proper version check 
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking the XMLRPC-C library; Do NOT use v.1.25.29 !!!" ;
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  
-  xmlrpc-command = $(with-xmlrpc-c)/bin/xmlrpc-c-config ;
-  if ! [ path.exists $(xmlrpc-command) ] 
-  {
-    exit Could not find $(xmlrpc-command) : 1 ;
-  }
-  else
+  # by default, we try to build server capabilities into the server
+  xmlrpc-c-path   = [ option.get "with-xmlrpc-c" ] ;
+  if $(xmlrpc-c-path) = "" 
   { 
-    build-moses-server = true ;
+    xmlrpc-c-config-cmd = "xmlrpc-c-config" ; 
+  }
+  else 
+  { 
+    xmlrpc-c-config-cmd = "$(xmlrpc-c-path)/bin/xmlrpc-c-config" ; 
   }
 
-}
-else 
-{
-  xmlrpc-check = [ _shell "xmlrpc-c-config --features 2>/dev/null" : exit-status ] ;
+  # check if xmlrpc-config is available
+  xmlrpc-check = [ _shell "$(xmlrpc-c-config-cmd) --features 2>/dev/null" : exit-status ] ; 
   if $(xmlrpc-check[2]) = 0 
-  {
+  { 
+    # xmlrpc-c-config was found. Now check if abyss server is available
     if [ MATCH "(abyss-server)" : $(xmlrpc-check[1]) ] 
     {
-      build-moses-server = true ;
-    } 
-    else 
-    {
-      echo "Found xmlrpc-c but it does not have abyss-server.  Skipping mosesserver." ;
-    } 
-  }
-  xmlrpc-command = "xmlrpc-c-config" ;
+      # Yes, abyss server is available. Is it the right xmlrpc-c version 
+      # Version 1.25.29 does not work. 
+      xmlrpc-check = [ _shell "$(xmlrpc-c-config-cmd) --version 2>/dev/null" : exit-status ] ; 
+      xmlrpc-c-version = $(xmlrpc-check[1]) ; 
+      if [ MATCH "(1.25.29)" : $(xmlrpc-c-version) ] 
+      {
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+	echo "XMLRPC-C: Moses is not compatible with xmlrpc-c version $(xmlrpc-c-version). " ; 
+	echo "XMLRPC-C: Use another one or compile without server functionality (--no-xmlrpc-c)." ; 
+	echo "XMLRPC-C: Build aborted." ; 
+	exit : 1 ;
+      }
+      else 
+      { 
+        # echo "XMLRPC-C: Found abyss server." ;
+      }
+   }
+   else 
+   {
+     echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+     echo "XMLRPC-C: Found xmlrpc-c but it does not provide the abyss server." ;
+     echo "XMLRPC-C: Use another xmlrpc-c installation that provides one " ; 
+     echo "XMLRPC-C: or compile without server functionality (--no-xmlrpc-c)." ; 
+     exit : 1 ;
+   }
+ }
+ else if [ option.get "with-xmlrpc-c" ] 
+ {
+   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+   echo "XMLRPC-C: Could not find $(xmlrpc-c-config-cmd). Build aborted. " ;
+   exit : 1 ;
+ }
+ else
+ {
+   build-server = no ; 
+   rule build_server { return no ; }
+ }
 }
 
-
+if $(build-server) = yes
+{
+  xmlrpc-path = [ _shell "$(xmlrpc-c-config-cmd) --prefix 2>/dev/null" : exit-status ] ; 
+  rule build_server { return $(xmlrpc-c-config-cmd) ; }
+  rule xmlrpc_path { return $(xmlrpc-path[1]) ; }
+}
+else
+{
+   rule build_server { return no ; }
+} 
 
 
