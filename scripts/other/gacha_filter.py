@@ -1,4 +1,4 @@
-#!/usr/bin/env python -*- coding: utf-8 -*-
+#!/usr/bin/env python3 -*- coding: utf-8 -*-
 
 """
 The Gacha filter cleans out sentence pairs that have global character mean
@@ -25,18 +25,18 @@ where:
 
 USAGE:
 
-    $ python gacha_filter.py train.en train.de
+    $ python3 gacha_filter.py train.en train.de
 
 Outputs to STDOUT a separated lines of the source and target sentence pairs. 
 You can simply cut the file after that. 
 
-    $ python gacha_filter.py train.en train.de > train.en-de
+    $ python3 gacha_filter.py train.en train.de > train.en-de
     $ cut -f1 train.en-de > train.clean.en
     $ cut -f2 train.en-de > train.clean.de
 
 You can also allow lower threshold to yield more lines:
 
-    $ python gacha_filter.py train.en train.de 0.05
+    $ python3 gacha_filter.py train.en train.de 0.05
     
 Default threshold is set to 0.2.
 """
@@ -77,15 +77,15 @@ def main(sourcefile, targetfile, threshold=0.2):
     io.open(targetfile, 'r', encoding='utf8') as trgfin:
         for s, t in zip(srcfin, trgfin):
             if lowerbound < len(s) / float(len(t)) < upperbound:
-                print(u"{}\t{}\n".format(s.strip(),t.strip()))
+                print(u"{}\t{}".format(s.strip(),t.strip()))
 
 if __name__ == '__main__':
     import sys
     if len(sys.argv) not in range(3,5):
-        usage_msg = err_msg('Usage: python %s srcfile trgfile (threshold)\n'
+        usage_msg = err_msg('Usage: python3 %s srcfile trgfile (threshold)\n'
                             % sys.argv[0])
         
-        example_msg = err_msg('Example: python %s ~/Europarl.de-en.de '
+        example_msg = err_msg('Example: python3 %s ~/Europarl.de-en.de '
                               '~/Europarl.de-en.en 0.4\n' % sys.argv[0])
         sys.stderr.write(usage_msg)
         sys.stderr.write(example_msg)
