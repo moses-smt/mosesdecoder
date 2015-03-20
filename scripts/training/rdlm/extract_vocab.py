@@ -7,16 +7,19 @@
 from __future__ import print_function, unicode_literals, division
 import sys
 import codecs
-import io
 import argparse
 from collections import Counter
+
+# hack for python2/3 compatibility
+from io import open
+argparse.open = open
 
 try:
     from lxml import etree as ET
 except ImportError:
     from xml.etree import cElementTree as ET
 
-def parse_arguments():
+def create_parser():
 
     help_text =  "generate 5 vocabulary files from parsed corpus in moses XML format\n"
     help_text += "  [PREFIX].special: around 40 symbols reserved for RDLM\n";
@@ -34,9 +37,7 @@ def parse_arguments():
     parser.add_argument('--ptkvz', action="store_true",
                     help='special rule for German dependency trees: attach separable verb prefixes to verb')
 
-    args = parser.parse_args()
-
-    return args
+    return parser
 
 def escape_text(s):
 
@@ -48,7 +49,7 @@ def escape_text(s):
     return s
 
 # deterministic heuristic to get head of subtree
-def get_head(xml):
+def get_head(xml, args):
     head = None
     preterminal = None
     for child in xml:
@@ -70,11 +71,11 @@ def get_head(xml):
 
     return head, preterminal
 
-def get_vocab(xml):
+def get_vocab(xml, args):
 
     if len(xml):
 
-        head, preterminal = get_head(xml)
+        head, preterminal = get_head(xml, args)
         if not head:
             head = '<null>'
             preterminal = '<null>'
@@ -89,18 +90,13 @@ def get_vocab(xml):
         for child in xml:
             if not len(child):
                 continue
-            get_vocab(child)
+            get_vocab(child, args)
 
+def main(args):
 
-
-if __name__ == '__main__':
-
-    if sys.version_info < (3, 0):
-        sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
-        sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
-        sys.stdin = codecs.getreader('UTF-8')(sys.stdin)
-
-    args = parse_arguments()
+    global heads
+    global preterminals
+    global nonterminals
 
     heads = Counter()
     preterminals = Counter()
@@ -115,11 +111,8 @@ if __name__ == '__main__':
         if line == '\n':
             continue
 
-        # hack for older moses versions with inconsistent encoding of "|"
-        line = line.replace('&bar;', '&#124;')
-
         xml = ET.fromstring(line)
-        get_vocab(xml)
+        get_vocab(xml, args)
         i += 1
 
     special_tokens = ['<unk>', '<null>', '<null_label>', '<null_head>', '<head_label>', '<root_label>', '<start_label>', '<stop_label>', '<head_head>', '<root_head>', '<start_head>', '<dummy_head>', '<stop_head>']
@@ -127,27 +120,27 @@ if __name__ == '__main__':
     for i in range(30):
       special_tokens.append('<null_{0}>'.format(i))
 
-    f = io.open(args.output + '.special', 'w', encoding='UTF-8')
+    f = open(args.output + '.special', 'w', encoding='UTF-8')
     for item in special_tokens:
         f.write(item + '\n')
     f.close()
 
-    f = io.open(args.output + '.preterminals', 'w', encoding='UTF-8')
+    f = open(args.output + '.preterminals', 'w', encoding='UTF-8')
     for item in sorted(preterminals, key=preterminals.get, reverse=True):
         f.write(item + '\n')
     f.close()
 
-    f = io.open(args.output + '.nonterminals', 'w', encoding='UTF-8')
+    f = open(args.output + '.nonterminals', 'w', encoding='UTF-8')
     for item in sorted(nonterminals, key=nonterminals.get, reverse=True):
         f.write(item + '\n')
     f.close()
 
-    f = io.open(args.output + '.terminals', 'w', encoding='UTF-8')
+    f = open(args.output + '.terminals', 'w', encoding='UTF-8')
     for item in sorted(heads, key=heads.get, reverse=True):
         f.write(item + '\n')
     f.close()
 
-    f = io.open(args.output + '.all', 'w', encoding='UTF-8')
+    f = open(args.output + '.all', 'w', encoding='UTF-8')
     special_tokens_set = set(special_tokens)
     for item in sorted(nonterminals, key=nonterminals.get, reverse=True):
         if item not in special_tokens:
@@ -167,3 +160,16 @@ if __name__ == '__main__':
         i += 1
         f.write(item + '\n')
     f.close()
+
+
+
+if __name__ == '__main__':
+
+    if sys.version_info < (3, 0):
+        sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
+        sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
+        sys.stdin = codecs.getreader('UTF-8')(sys.stdin)
+
+    parser = create_parser()
+    args = parser.parse_args()
+    main(args)
