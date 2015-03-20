@@ -83,20 +83,27 @@ include $(TOP)/jam-files/server.jam ;
 
 if [ build_server ] != no 
 {
-  echo "XMLRPC-C: BUILDING MOSES WITH XMLRPC_C LIBRARY VERSION $(xmlrpc-c-version)" ;
+  xmlrpc-c-prefix = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --prefix" ] ;
+  echo "XMLRPC-C: BUILDING MOSES WITH XMLRPC_C LIBRARY VERSION $(xmlrpc-c-version) FROM $(xmlrpc-c-prefix)" ;
 
   xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --cflags" ] ;
   requirements += <define>HAVE_XMLRPC_C ;
   requirements += <cxxflags>$(xmlrpc-cxxflags) ;
+
   xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --libs" ] ;
   for local i in [ SPLIT_BY_CHARACTERS $(xmlrpc-linkflags) : " " ] 
   { 
-    libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
+    local libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
     if $(libname) 
     {   
       external-lib $(libname) 
       : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
       requirements += <library>$(libname) ;
+    }
+    local pathname = [ MATCH "-L(.*)" : $(i) ] ; 
+    if $(pathname)
+    {
+      requirements += <library-path>$(pathname) ; 
     }
   } 
 }

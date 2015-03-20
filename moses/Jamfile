@@ -58,8 +58,8 @@ obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <depen
 # if yes, include server capabilities in the moses executable
 # include $(TOP)/jam-files/server.jam ;
 
-xmlrpc-c-config-cmd = [ build_server ] ;
-if $(xmlrpc-c-config-cmd) = no  
+xmlrpc-c-config = [ build_server ] ;
+if $(xmlrpc-c-config) = no  
 {
   echo "NOT BUILDING MOSES SERVER!" ;
   alias mserver ;
@@ -67,8 +67,8 @@ if $(xmlrpc-c-config-cmd) = no
 }
 else 
 {
-  xmlprc-version  = [ shell_or_die "$(xmlrpc-c-config-cmd) --version" ] ;
-  xmlprc-linkflags = [ shell_or_die "$(xmlrpc-c-config-cmd) --version" ] ;
+  xmlprc-version  = [ shell_or_die "$(xmlrpc-c-config) --version" ] ;
+  # xmlprc-linkflags = [ shell_or_die "$(xmlrpc-c-config) --version" ] ;
   echo "building moses server with xmlrpc-c version $(xmlrpc-c-version)" ;
   alias mserver : [ glob server/*.cpp ] ;
 } 
