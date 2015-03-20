@@ -9,17 +9,24 @@
 from __future__ import print_function, unicode_literals, division
 import sys
 import codecs
-import io
 import argparse
+
+# hack for python2/3 compatibility
+from io import open
+argparse.open = open
 
 try:
     from lxml import etree as ET
 except ImportError:
     from xml.etree import cElementTree as ET
 
-def parse_arguments():
+def create_parser():
     parser = argparse.ArgumentParser(description="extract syntactic n-grams from parsed corpus in Moses XML format for training RDLM")
 
+    parser.add_argument('--input', '-i', type=argparse.FileType('r'), default=sys.stdin, metavar='PATH',
+                        help='input file (default: standard input).')
+    parser.add_argument('--output', '-o', type=argparse.FileType('w'), default=sys.stdout, metavar='PATH',
+                        help='output file (default: standard output).')
     parser.add_argument('--mode', type=str, help='predict terminals (head) or dependency labels (label)',
                         choices=['label', 'head'], required=True)
     parser.add_argument('--vocab', metavar='PATH', type=str, required=True,
@@ -40,7 +47,7 @@ def parse_arguments():
                         help='sentence end symbol. Will be skipped during extraction (default: %(default)s)')
     parser.add_argument('--ptkvz', action='store_true',
                         help='special rule for German dependency trees: concatenate separable verb prefix and verb')
-    return parser.parse_args()
+    return parser
 
 def escape_text(s):
 
@@ -203,7 +210,7 @@ def get_syntactic_ngrams(xml, options, vocab, output_vocab, parent_heads=None, p
                 int_list.append(vocab.get(labels[i], 0))
                 int_list.append(output_vocab.get(heads[i], output_vocab.get(preterminals[i], 0)))
 
-            sys.stdout.write(' '.join(map(str, int_list)) + '\n')
+            options.output.write(' '.join(map(str, int_list)) + '\n')
 
             parent_heads.append(vocab.get(heads[i], vocab.get(preterminals[i], 0)))
             parent_labels.append(vocab.get(labels[i], 0))
@@ -216,18 +223,11 @@ def get_syntactic_ngrams(xml, options, vocab, output_vocab, parent_heads=None, p
 
 def load_vocab(path):
     v = {}
-    for i,line in enumerate(io.open(path, encoding="UTF-8")):
+    for i,line in enumerate(open(path, encoding="UTF-8")):
         v[line.strip()] = i
     return v
 
-if __name__ == '__main__':
-
-    if sys.version_info < (3, 0):
-        sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
-        sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
-
-    options = parse_arguments()
-
+def main(options):
     vocab = load_vocab(options.vocab)
 
     if options.output_vocab is None:
@@ -236,13 +236,17 @@ if __name__ == '__main__':
     else:
         output_vocab = load_vocab(options.output_vocab)
 
+    global start_head_idx
+    global start_label_idx
+    global stop_head_idx
+    global stop_label_idx
     start_head_idx = vocab.get("<start_head>", 0)
     start_label_idx = vocab.get("<start_label>", 0)
     stop_head_idx = vocab.get("<stop_head>", 0)
     stop_label_idx = vocab.get("<stop_label>", 0)
 
     i = 0
-    for line in sys.stdin:
+    for line in options.input:
         if i and not i % 50000:
             sys.stderr.write('.')
         if i and not i % 1000000:
@@ -260,3 +264,14 @@ if __name__ == '__main__':
         xml = ET.fromstring(line)
         get_syntactic_ngrams(xml, options, vocab, output_vocab)
         i += 1
+
+if __name__ == '__main__':
+
+    if sys.version_info < (3, 0):
+        sys.stderr = codecs.getwriter('UTF-8')(sys.stderr)
+        sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
+
+    parser = create_parser()
+    options = parser.parse_args()
+
+    main(options)
