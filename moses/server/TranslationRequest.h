@@ -5,9 +5,6 @@
 #include <map>
 #include <vector>
 
-#include <xmlrpc-c/base.hpp>
-
-
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #endif
@@ -20,11 +17,14 @@
 #include "moses/ThreadPool.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TreeInput.h"
+#include "moses/TranslationTask.h"
+#include <boost/shared_ptr.hpp>
 
+#include <xmlrpc-c/base.hpp>
 namespace MosesServer
 {
   class 
-  TranslationTask : public virtual Moses::Task
+  TranslationRequest : public virtual Moses::TranslationTask
   {
     boost::condition_variable& m_cond;
     boost::mutex& m_mutex;
@@ -34,7 +34,7 @@ namespace MosesServer
     std::map<std::string, xmlrpc_c::value> m_retData;
     std::map<uint32_t,float> m_bias; // for biased sampling
     
-    std::string m_source, m_target;
+    std::string m_source_string, m_target_string;
     bool m_withAlignInfo;
     bool m_withWordAlignInfo;
     bool m_withGraphInfo;
@@ -90,12 +90,19 @@ namespace MosesServer
     void 
     insertTranslationOptions(Moses::Manager& manager, 
 			     std::map<std::string, xmlrpc_c::value>& retData);
-    
-  public:
-    
-    TranslationTask(xmlrpc_c::paramList const& paramList, 
+  protected:
+    TranslationRequest(xmlrpc_c::paramList const& paramList, 
 		    boost::condition_variable& cond, 
 		    boost::mutex& mut);
+
+  public:
+
+    static
+    boost::shared_ptr<TranslationRequest>
+    create(xmlrpc_c::paramList const& paramList, 
+	   boost::condition_variable& cond, 
+	   boost::mutex& mut);
+    
     
     virtual bool 
     DeleteAfterExecution() { return false; }
