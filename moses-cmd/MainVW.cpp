@@ -124,7 +124,7 @@ int main(int argc, char** argv)
       PrintUserTime("Created input-output object");
     }
 
-    IOWrapper* ioWrapper = new IOWrapper();
+    boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper());
     if (ioWrapper == NULL) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);
@@ -143,37 +143,32 @@ int main(int argc, char** argv)
 #endif
 
     // main loop over set of input sentences
-    InputType* source = NULL;
-    size_t lineCount = staticData.GetStartTranslationId();
-    while(ioWrapper->ReadInput(staticData.GetInputType(),source)) {
-      source->SetTranslationId(lineCount);
-      IFVERBOSE(1) {
-        ResetUserTime();
-      }
+    
+    boost::shared_ptr<InputType> source;
+    while ((source = ioWrapper->ReadInput()) != NULL)
+      {
+	IFVERBOSE(1) { ResetUserTime(); }
 
-      FeatureFunction::CallChangeSource(source);
+	InputType* foo = source.get();
+	FeatureFunction::CallChangeSource(foo);
 
-      // set up task of training one sentence
-      TrainingTask* task = new TrainingTask(source, *ioWrapper);
+	// set up task of training one sentence
+	boost::shared_ptr<TrainingTask> 
+	  task(new TrainingTask(source.get(), *ioWrapper));
 
-      // execute task
+	// execute task
 #ifdef WITH_THREADS
-      pool.Submit(task);
+	pool.Submit(task);
 #else
-      task->Run();
-      delete task;
+	task->Run();
 #endif
-
-      source = NULL; //make sure it doesn't get deleted
-      ++lineCount;
-    }
+      }
 
     // we are done, finishing up
 #ifdef WITH_THREADS
     pool.Stop(true); //flush remaining jobs
 #endif
 
-    delete ioWrapper;
     FeatureFunction::Destroy();
 
   } catch (const std::exception &e) {

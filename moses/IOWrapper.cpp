@@ -87,6 +87,9 @@ IOWrapper::IOWrapper()
 {
   const StaticData &staticData = StaticData::Instance();
 
+  m_inputType = staticData.GetInputType(); 
+  m_currentLine = staticData.GetStartTranslationId();
+
   m_inputFactorOrder = &staticData.GetInputFactorOrder();
 
   size_t nBestSize = staticData.GetNBestSize();
@@ -223,48 +226,52 @@ IOWrapper::~IOWrapper()
   delete m_latticeSamplesStream;
 }
 
-InputType*
-IOWrapper::
-GetInput(InputType* inputType)
-{
-  if(inputType->Read(*m_inputStream, *m_inputFactorOrder)) {
-    return inputType;
-  } else {
-    delete inputType;
-    return NULL;
-  }
-}
+// InputType*
+// IOWrapper::
+// GetInput(InputType* inputType)
+// {
+//   if(inputType->Read(*m_inputStream, *m_inputFactorOrder)) {
+//     return inputType;
+//   } else {
+//     delete inputType;
+//     return NULL;
+//   }
+// }
 
-bool 
-IOWrapper
-::ReadInput(InputTypeEnum inputType, 
-	    InputType*& source, 
-	    TranslationTask const* ttask)
+boost::shared_ptr<InputType>
+IOWrapper::ReadInput()
 {
-  delete source;
-  switch(inputType) {
+  boost::shared_ptr<InputType> source;
+  switch(m_inputType) {
   case SentenceInput:
-    source = GetInput(new Sentence(ttask));
+    source.reset(new Sentence);
     break;
   case ConfusionNetworkInput:
-    source = GetInput(new ConfusionNet(ttask));
+    source.reset(new ConfusionNet);
     break;
   case WordLatticeInput:
-    source = GetInput(new WordLattice(ttask));
+    source.reset(new WordLattice);
     break;
   case TreeInputType:
-    source = GetInput(new TreeInput(ttask));
+    source.reset(new TreeInput);
     break;
   case TabbedSentenceInput:
-    source = GetInput(new TabbedSentence(ttask));
+    source.reset(new TabbedSentence);
     break;
   case ForestInputType:
-    source = GetInput(new ForestInput(ttask));
+    source.reset(new ForestInput);
     break;
   default:
-    TRACE_ERR("Unknown input type: " << inputType << "\n");
+    TRACE_ERR("Unknown input type: " << m_inputType << "\n");
   }
-  return (source ? true : false);
+#ifdef WITH_THREADS
+  boost::lock_guard<boost::mutex> lock(m_lock);
+#endif
+  if (source->Read(*m_inputStream, *m_inputFactorOrder))
+    source->SetTranslationId(m_currentLine++);
+  else 
+    source.reset();
+  return source;
 }
 
 } // namespace

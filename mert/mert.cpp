@@ -451,7 +451,7 @@ int main(int argc, char **argv)
     startingPoints.back().Randomize();
   }
 
-  vector<vector<OptimizationTask*> > allTasks(1);
+  vector<vector<boost::shared_ptr<OptimizationTask> > > allTasks(1);
 
   //optional sharding
   vector<Data> shards;
@@ -466,13 +466,14 @@ int main(int argc, char **argv)
     if (option.shard_count)
       data_ref = shards[i]; //use the sharded data if it exists
 
-    vector<OptimizationTask*>& tasks = allTasks[i];
+    vector<boost::shared_ptr<OptimizationTask> >& tasks = allTasks[i];
     Optimizer *optimizer = OptimizerFactory::BuildOptimizer(option.pdim, to_optimize, positive, start_list[0], option.optimize_type, option.nrandom);
     optimizer->SetScorer(data_ref.getScorer());
     optimizer->SetFeatureData(data_ref.getFeatureData());
     // A task for each start point
     for (size_t j = 0; j < startingPoints.size(); ++j) {
-      OptimizationTask* task = new OptimizationTask(optimizer, startingPoints[j]);
+      boost::shared_ptr<OptimizationTask>
+	task(new OptimizationTask(optimizer, startingPoints[j]));
       tasks.push_back(task);
 #ifdef WITH_THREADS
       pool.Submit(task);
@@ -538,9 +539,6 @@ int main(int argc, char **argv)
 
   for (size_t i = 0; i < allTasks.size(); ++i) {
     allTasks[i][0]->resetOptimizer();
-    for (size_t j = 0; j < allTasks[i].size(); ++j) {
-      delete allTasks[i][j];
-    }
   }
 
   PrintUserTime("Stopping...");
