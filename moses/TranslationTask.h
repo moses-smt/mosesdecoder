@@ -61,6 +61,10 @@ public:
 
   virtual
   boost::shared_ptr<TranslationTask>  
+  self() { return m_self.lock(); }
+
+  virtual
+  boost::shared_ptr<TranslationTask const>  
   self() const { return m_self.lock(); }
 
   // creator functions

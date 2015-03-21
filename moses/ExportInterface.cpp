@@ -220,6 +220,11 @@ batch_run()
       boost::shared_ptr<TranslationTask>
 	task = TranslationTask::create(source, ioWrapper);
 
+      // Allow for (sentence-)context-specific processing prior to 
+      // decoding. This can be used, for example, for context-sensitive
+      // phrase lookup.
+      FeatureFunction::SetupAll(*task);
+
       // execute task
 #ifdef WITH_THREADS
 #ifdef PT_UG

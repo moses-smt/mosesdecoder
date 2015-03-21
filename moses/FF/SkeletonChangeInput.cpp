@@ -59,7 +59,7 @@ void SkeletonChangeInput::EvaluateWhenApplied(const ChartHypothesis &hypo,
     ScoreComponentCollection* accumulator) const
 {}
 
-void SkeletonChangeInput::ChangeSource(InputType *&input) const
+void SkeletonChangeInput::ChangeSource(InputType* const& input) const
 {
   // add factor[1] to each word. Created from first 4 letter of factor[0]
 
