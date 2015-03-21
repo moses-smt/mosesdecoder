@@ -62,9 +62,8 @@ namespace Moses
 
 
   public:
-    Sentence(TranslationTask const* ttask);
-    Sentence(TranslationTask const* ttask, size_t const transId, 
-	     std::string const& stext);
+    Sentence();
+    Sentence(size_t const transId, std::string const& stext);
     ~Sentence();
 
     InputTypeEnum GetType() const {

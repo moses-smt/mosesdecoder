@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
   string line;
   while (true)
     {
-      Sentence phrase(NULL);
+      Sentence phrase;
       if (!phrase.Read(cin,ifo)) break;
       if (pdta) 
 	{

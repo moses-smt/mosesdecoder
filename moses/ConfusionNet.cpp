@@ -61,8 +61,7 @@ GetColumnIncrement(size_t i, size_t j) const
 }
 
 ConfusionNet::
-ConfusionNet(TranslationTask const* ttask)
-  : InputType(ttask)
+ConfusionNet() : InputType()
 {
   stats.createOne();
 
@@ -80,8 +79,7 @@ ConfusionNet::
 }
 
 ConfusionNet::
-ConfusionNet(Sentence const& s)
-  : InputType(s.GetTranslationTask())
+ConfusionNet(Sentence const& s) : InputType()
 {
   data.resize(s.GetSize());
   for(size_t i=0; i<s.GetSize(); ++i) {

@@ -22,7 +22,7 @@ private:
   std::vector<std::vector<int> > distances;
 
 public:
-  WordLattice(TranslationTask const* ttask);
+  WordLattice();
 
   InputTypeEnum GetType() const {
     return WordLatticeInput;

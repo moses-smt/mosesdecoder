@@ -58,7 +58,6 @@ protected:
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   std::string m_textType;
   std::string m_passthrough;
-  TranslationTask const* m_ttask; // Translation task that "owns" this instance
 
 public:
 
@@ -68,13 +67,10 @@ public:
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
-  InputType(TranslationTask const* ttask, long translationId = 0);
+  InputType(long translationId = 0);
   virtual ~InputType();
 
   virtual InputTypeEnum GetType() const = 0;
-
-  TranslationTask const* 
-  GetTranslationTask() const { return m_ttask; }
 
   long GetTranslationId() const {
     return m_translationId;

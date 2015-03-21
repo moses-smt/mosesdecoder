@@ -10,8 +10,7 @@
 
 namespace Moses
 {
-WordLattice::WordLattice(TranslationTask const* ttask)
-  : ConfusionNet(ttask)
+WordLattice::WordLattice()  : ConfusionNet()
 {
   UTIL_THROW_IF2(&InputFeature::Instance() == NULL,
                  "Input feature must be specified");
