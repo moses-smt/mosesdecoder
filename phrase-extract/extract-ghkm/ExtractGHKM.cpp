@@ -76,6 +76,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   if (options.gzOutput) {
     fwdFileName += ".gz";
     invFileName += ".gz";
+    psdFileName += ".gz";
   }
   OpenOutputFileOrDie(fwdFileName, fwdExtractStream);
   OpenOutputFileOrDie(invFileName, invExtractStream);
@@ -88,7 +89,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
   //Open file with psd annotations
   if (!options.psdAnnotFile.empty()) {
-      OpenOutputFileOrDie(options.psdAnnotFile, psdAnnotStream);
+      OpenOutputFileOrDie(psdFileName, psdAnnotStream);
     }
 
   // Target label sets for producing glue grammar.
@@ -603,16 +604,16 @@ void ExtractGHKM::WritePsdAnnot(
 	  //find non-terminals in sourceRHS and targetRHS and store alignment between non-terminals
 	  //store positions in the source RHS where the symbols are nonterminals
 
-	  std::cout << "Source side of rule : " << std::endl;
+	  //std::cout << "Source side of rule : " << std::endl;
 	  for(size_t k=0;k<sourceRHS.size();k++)
 	  {
 		  if(sourceRHS[k].GetType()==NonTerminal)
 		  {
 			  sourceNonTermPos.push_back(k);
 		  }
-		  std::cout << sourceRHS[k].GetValue() << " ";
+		  //std::cout << sourceRHS[k].GetValue() << " ";
 	  }
-	  std::cout << std::endl;
+	  //std::cout << std::endl;
 
 	  //sort source non-term pos
 	  //the index of each slot is what we want to assign to target non-terms
@@ -667,10 +668,10 @@ void ExtractGHKM::WritePsdAnnot(
 	  ruleSource+="["+sourceLHS.GetValue()+"]";
 
 	  //create target side of rule
-	  std::cout << "target side of rule : " << std::endl;
+	  //std::cout << "target side of rule : " << std::endl;
 	 	  for(size_t i=0;i<targetRHS.size();i++)
 	 	  {
-	 		 std::cout << targetRHS[i].GetValue() << " ";
+	 		 //std::cout << targetRHS[i].GetValue() << " ";
 	 		  if(targetRHS[i].GetType() == NonTerminal)
 	 		  {
 	 			 //find source index for target NT
@@ -695,14 +696,14 @@ void ExtractGHKM::WritePsdAnnot(
 	 			  bool foundAlignment = 0; //make sure an index has been found for this non-terminal
 	 			  for(size_t k=0;k<nonTermAlignIndex.size();k++)
 	 			  {
-	 				  std::cout << "Alignment index : " << nonTermAlignIndex[k].first << " " << nonTermAlignIndex[k].second << std::endl;
-	 				  std::cout << "Looking for : " << i << std::endl;
+	 				  //std::cout << "Alignment index : " << nonTermAlignIndex[k].first << " " << nonTermAlignIndex[k].second << std::endl;
+	 				  //std::cout << "Looking for : " << i << std::endl;
 	 				  if(nonTermAlignIndex[k].first == i) //there is an error here
 	 				  {
 	 					  std::stringstream indexS;
 	 					  indexS << nonTermAlignIndex[k].second;
 	 					  ruleTarget+=indexS.str();
-	 					  std::cout << "Indexed target : " << ruleTarget << std::endl;
+	 					  //std::cout << "Indexed target : " << ruleTarget << std::endl;
 	 					  foundAlignment = 1;
 	 				  }
 	 			  }

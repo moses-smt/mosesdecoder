@@ -12,5 +12,5 @@ obj ExampleConsumer.o : ExampleConsumer.cpp header_paths ;
 
 obj ExampleWriter.o : ExampleWriter.cpp header_paths ;
 
-exe extract-syntax-features : extract-syntax-features.cpp ..//..//psd//psd InputFileStream.cpp OutputFileStream.cpp tables-core.cpp RuleTable.o InputTreeRep.o ..//XmlTree.o ..//SyntaxTree.o header_paths ..//..//boost_iostreams ../..//z ;
-exe extract-syntax-features-threaded : extract-syntax-features-threaded.cpp ..//..//psd//psd InputFileStream.cpp OutputFileStream.cpp tables-core.cpp ExampleWriter.o ExampleProducer.o ExampleConsumer.o RuleTable.o CorpusLine.o InputTreeRep.o ..//XmlTree.o ..//SyntaxTree.o header_paths ..//..//boost_iostreams ../..//z ;
+exe extract-syntax-features : extract-syntax-features.cpp ..//..//psd//psd InputFileStream.cpp OutputFileStream.cpp tables-core.cpp RuleTable.o InputTreeRep.o ..//XmlTree.o ..//SyntaxTree.o header_paths ..//..//boost_iostreams ..//..//boost_regex ../..//z ;
+exe extract-syntax-features-threaded : extract-syntax-features-threaded.cpp ..//..//psd//psd InputFileStream.cpp OutputFileStream.cpp tables-core.cpp ExampleWriter.o ExampleProducer.o ExampleConsumer.o RuleTable.o CorpusLine.o InputTreeRep.o ..//XmlTree.o ..//SyntaxTree.o header_paths ..//..//boost_iostreams ..//..//boost_regex ../..//z ;

@@ -24,7 +24,7 @@ sub FindSourceNonTerminals
 
  	foreach(@f)
 	{
-		if($_ eq "[X][X]")
+		if($_ =~ /\[X\]\[\w+\]/) #for hard-coded hiero put $_ eq "[X][X]" inside of if
 		{
 		    push(@sourceNonTermPos,$index);
 		}
@@ -72,11 +72,12 @@ sub CreateAlignedTarget()
 
 	foreach(@e)
 	{
-		if($_ eq "[X][X]")
+		if($_ =~ /(\[X\]\[\w+\])/) #for hard-coded hiero put $_ eq "[X][X]" inside of if
 		{
 			#print "GETTING AT COUNTER : ".$sourceNonTermCounter."\n";
+			my $nonTerm = $1;
 			my $targetIndex = shift(@targetIndexes);
-			my $NonTermAlign = "[X][X]".$targetIndex;
+			my $NonTermAlign = $nonTerm.$targetIndex;
 			push(@newEn,$NonTermAlign);
 		}
 		else

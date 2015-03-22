@@ -7,6 +7,7 @@
 #include <string>
 #include <stdexcept>
 #include <exception>
+#include <boost/regex.hpp>
 
 using namespace std;
 using namespace Moses;
@@ -98,7 +99,9 @@ PSD::AlignmentType RuleTable::GetTermAlignment(const std::string &alignStr, cons
     vector<string> targetToken = Tokenize(targetStr, " ");
     //look for non-terminals in target side
     vector<string> :: iterator itr_targets;
-    std::string nonTermString = "[X][X]";
+    //std::string nonTermString = "[X][X]";
+    boost::regex nonTermRegex ("\\[X\\]\\[[\\w .]+\\]");
+
 
     //cerr << "TARGET STRING : " << targetStr << endl;
 
@@ -106,11 +109,12 @@ PSD::AlignmentType RuleTable::GetTermAlignment(const std::string &alignStr, cons
     {
         //cerr << "TARGET TOKEN : " << *itr_targets << endl;
 
-        size_t found = (*itr_targets).find(nonTermString);
-        if(found != string::npos)
+        //size_t found = (*itr_targets).find(nonTermString); //was for hiero
+        //if(found != string::npos) was for hiero
+        if(regex_search (*itr_targets,nonTermRegex))
         {
             CHECK((*itr_targets).size() > 1);
-            string indexString = (*itr_targets).substr(6,1);
+            string indexString = (*itr_targets).substr(6,1); //this is also the last element of the string
             //cerr << "INDEX STRING" << indexString << endl;
             targetAligns.push_back(indexString);
         }
@@ -153,7 +157,9 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
     //look for non-terminals in target side
     vector<string> :: iterator itr_targets;
     vector<string> :: iterator itr_source;
-    std::string nonTermString = "[X][X]";
+
+    boost::regex nonTermRegex ("\\[X\\]\\[[\\w .]+\\]");
+    //std::string nonTermString = "[X][X]"; //was for hiero
 
     size_t sourceCounter = 0;
     size_t targetCounter = 0;
@@ -163,8 +169,9 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
     //For targets, alignment with source is encoded in target
     for(itr_targets = targetToken.begin();itr_targets != targetToken.end(); itr_targets++)
     {
-        size_t found = (*itr_targets).find(nonTermString);
-        if(found != string::npos)
+        //size_t found = (*itr_targets).find(nonTermString); //was for hiero
+        //if(found != string::npos) //if found was for hiero
+    	if(regex_search (*itr_targets,nonTermRegex))
         {
             targetAligns.insert(make_pair(targetCounter,targetNonTermCounter));
             //std::cerr << "TARGET ALIGN : " << targetCounter << " : " << targetNonTermCounter << std::endl;
@@ -175,8 +182,9 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
 
      for(itr_source = sourceToken.begin();itr_source != sourceToken.end(); itr_source++)
     {
-        size_t found = (*itr_source).find(nonTermString);
-        if(found != string::npos)
+        //size_t found = (*itr_source).find(nonTermString); //was for hiero
+        //if(found != string::npos) //was for hiero
+    	if(regex_search (*itr_source,nonTermRegex))
         {
             sourceAligns.insert(make_pair(sourceCounter,sourceNonTermCounter));
             //std::cerr << "SOURCE ALIGN : " << sourceCounter << " : " << sourceNonTermCounter << std::endl;
