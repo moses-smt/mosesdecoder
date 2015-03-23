@@ -134,10 +134,15 @@ void file_dirscan_( file_info_t * const d, scanback func, void * closure )
 
 int file_mkdir( char const * const path )
 {
+#if defined(__MINGW32__)
+    /* MinGW's mkdir() takes only one argument: the path. */
+    mkdir(path);
+#else
     /* Explicit cast to remove const modifiers and avoid related compiler
      * warnings displayed when using the intel compiler.
      */
     return mkdir( (char *)path, 0777 );
+#endif
 }
 
 
