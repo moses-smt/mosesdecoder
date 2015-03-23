@@ -41,6 +41,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <time.h>
 #endif
 
+#include <boost/shared_ptr.hpp>
+
 namespace Moses
 {
 
@@ -159,7 +161,9 @@ public:
     }
 
 #ifdef WITH_THREADS
-    HashTask<Keys>* ht = new HashTask<Keys>(current, *this, keys);
+    
+    boost::shared_ptr<HashTask<Keys> > 
+      ht(new HashTask<Keys>(current, *this, keys));
     m_threadPool.Submit(ht);
 #else
     CalcHash(current, keys);

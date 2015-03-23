@@ -307,7 +307,7 @@ public:
     stringstream out, graphInfo, transCollOpts;
 
     if (staticData.IsSyntax()) {
-      TreeInput tinput(NULL);
+      TreeInput tinput;
         const vector<FactorType>& 
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
@@ -324,7 +324,7 @@ public:
         }
     } else {
         size_t lineNumber = 0; // TODO: Include sentence request number here?
-        Sentence sentence(NULL);
+        Sentence sentence;
         sentence.SetTranslationId(lineNumber);
 
         const vector<FactorType> &
@@ -594,13 +594,14 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     boost::condition_variable cond;
     boost::mutex mut;
-    ::TranslationTask task(paramList,cond,mut);
-    m_threadPool.Submit(&task);
+    typedef ::TranslationTask TTask;
+    boost::shared_ptr<TTask> task(new TTask(paramList,cond,mut));
+    m_threadPool.Submit(task);
     boost::unique_lock<boost::mutex> lock(mut);
-    while (!task.IsDone()) {
+    while (!task->IsDone()) {
       cond.wait(lock);
     }
-    *retvalP = xmlrpc_c::value_struct(task.GetRetData());
+    *retvalP = xmlrpc_c::value_struct(task->GetRetData());
   }
 private:
   Moses::ThreadPool m_threadPool;

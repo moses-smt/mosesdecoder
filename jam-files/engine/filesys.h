@@ -38,7 +38,6 @@ typedef void (*scanback)( void * closure, OBJECT * path, int found,
     timestamp const * const );
 
 
-void file_archscan( char const * arch, scanback func, void * closure );
 void file_build1( PATHNAME * const f, string * file ) ;
 void file_dirscan( OBJECT * dir, scanback func, void * closure );
 file_info_t * file_info( OBJECT * const path, int * found );

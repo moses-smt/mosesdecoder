@@ -35,6 +35,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#ifdef WITH_THREADS
+#include <boost/thread.hpp>
+#endif
+
 #include <cassert>
 #include <fstream>
 #include <ostream>
@@ -74,7 +78,6 @@ struct SHyperedge;
 class IOWrapper
 {
 protected:
-
   const std::vector<Moses::FactorType>	*m_inputFactorOrder;
   std::string m_inputFilePath;
   Moses::InputFileStream *m_inputFile;
@@ -100,14 +103,20 @@ protected:
 
   bool m_surpressSingleBestOutput;
 
+#ifdef WITH_THREADS
+  boost::mutex m_lock;
+#endif
+  size_t m_currentLine; /* line counter, initialized from static data at construction
+			 * incremented with every call to ReadInput */
+
+  InputTypeEnum m_inputType; // initialized from StaticData at construction
 
 public:
   IOWrapper();
   ~IOWrapper();
 
-  Moses::InputType* GetInput(Moses::InputType *inputType);
-  bool ReadInput(Moses::InputTypeEnum inputType, 
-		 Moses::InputType*& source, TranslationTask const* ttask=NULL);
+  // Moses::InputType* GetInput(Moses::InputType *inputType);
+  boost::shared_ptr<InputType> ReadInput();
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector.get();

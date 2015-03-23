@@ -40,9 +40,7 @@ namespace Moses
 {
 
 Sentence::
-Sentence(TranslationTask const* ttask)
-  : Phrase(0)
-  , InputType(ttask)
+Sentence() : Phrase(0) , InputType()
 {
   const StaticData& SD = StaticData::Instance();
   if (SD.IsSyntax()) 
@@ -385,10 +383,8 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(TranslationTask const* ttask,size_t const transId, string const& stext)
-  : InputType(ttask, transId)
+Sentence(size_t const transId, string const& stext) : InputType(transId)
 {
-  // this->SetTranslationId(transId);
   vector<FactorType> const& IFO = StaticData::Instance().GetInputFactorOrder();
   init(stext, IFO);
 }

@@ -37,7 +37,6 @@ MockHypothesisGuard::MockHypothesisGuard(
   const vector<Alignment>& alignments,
   const vector<string>& targetSegments)
   : m_initialTransOpt(),
-    m_sentence(NULL),
     m_wp("WordPenalty"),
     m_uwp("UnknownWordPenalty"),
     m_dist("Distortion"),

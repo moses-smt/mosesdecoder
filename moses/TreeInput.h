@@ -46,7 +46,7 @@ protected:
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
 
 public:
-  TreeInput(TranslationTask const* ttask) : Sentence(ttask) { }
+  TreeInput() : Sentence() { }
 
   InputTypeEnum GetType() const {
     return TreeInputType;

@@ -3,20 +3,6 @@ path-constant FACTOR-LOG : bin/factor.log ;
 update-if-changed $(FACTOR-LOG) $(max-factors) ;
 max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
 
-include $(TOP)/jam-files/server.jam ;
- 
-if ( $(build-moses-server) = true )
-{
-  alias mserverlib : [ glob server/*.cpp ] ;
-  echo "BUILDING MOSES SERVER" ;
-} 
-else 
-{
-  echo "NOT BUILDING MOSES SERVER" ;
-  alias mserverlib ;
-}
-
-
 with-dlib = [ option.get "with-dlib" ] ;
 if $(with-dlib) {
   dlib = <define>WITH_DLIB <include>$(with-dlib) ;
@@ -68,6 +54,28 @@ update-if-changed $(LM-LOG) $(current) ;
 
 obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <dependency>$(LM-LOG) ;
 
+# check if we have xmlrpc-c's abyss server available
+# if yes, include server capabilities in the moses executable
+# include $(TOP)/jam-files/server.jam ;
+
+xmlrpc-c-config = [ build_server ] ;
+if $(xmlrpc-c-config) = no  
+{
+  echo "NOT BUILDING MOSES SERVER!" ;
+  alias mserver ;
+  alias xmlrpc-linkflags ;
+}
+else 
+{
+  xmlprc-version  = [ shell_or_die "$(xmlrpc-c-config) --version" ] ;
+  # xmlprc-linkflags = [ shell_or_die "$(xmlrpc-c-config) --version" ] ;
+  echo "building moses server with xmlrpc-c version $(xmlrpc-c-version)" ;
+  alias mserver : [ glob server/*.cpp ] ;
+} 
+
+
+
+
 if [ option.get "with-mm" : no : yes ] = yes
 {
   alias mmlib : 
@@ -113,11 +121,19 @@ lib moses :
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
-] vwfiles 
-headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
-
-..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-$(TOP)//boost_filesystem $(TOP)//boost_iostreams mmlib mserverlib
+] 
+vwfiles synlm mmlib mserver headers 
+FF_Factory.o 
+LM//LM 
+TranslationModel/CompactPT//CompactPT 
+TranslationModel/ProbingPT//ProbingPT 
+ThreadPool
+..//search 
+../util/double-conversion//double-conversion 
+..//z 
+../OnDiskPt//OnDiskPt 
+$(TOP)//boost_filesystem 
+$(TOP)//boost_iostreams 
 :
 <threading>single:<source>../util//rt
 ;

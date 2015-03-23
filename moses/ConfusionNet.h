@@ -35,7 +35,7 @@ protected:
   void String2Word(const std::string& s,Word& w,const std::vector<FactorType>& factorOrder);
 
 public:
-  ConfusionNet(TranslationTask const* ttask);
+  ConfusionNet();
   virtual ~ConfusionNet();
 
   ConfusionNet(Sentence const& s);
