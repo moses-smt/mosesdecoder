@@ -51,7 +51,7 @@ void OnDiskWrapper::BeginLoad(const std::string &filePath)
   if (!m_vocab.Load(*this))
     UTIL_THROW(util::FileOpenException, "Couldn't load vocab");
 
-  UINT64 rootFilePos = GetMisc("RootNodeOffset");
+  uint64_t rootFilePos = GetMisc("RootNodeOffset");
   m_rootSourceNode = new PhraseNode(rootFilePos, *this);
 }
 
@@ -102,7 +102,7 @@ bool OnDiskWrapper::LoadMisc()
 
 
     const string &key = tokens[0];
-    m_miscInfo[key] =  Moses::Scan<UINT64>(tokens[1]);
+    m_miscInfo[key] =  Moses::Scan<uint64_t>(tokens[1]);
   }
 
   return true;
@@ -199,17 +199,17 @@ void OnDiskWrapper::SaveMisc()
 
 size_t OnDiskWrapper::GetSourceWordSize() const
 {
-  return sizeof(UINT64) + sizeof(char);
+  return sizeof(uint64_t) + sizeof(char);
 }
 
 size_t OnDiskWrapper::GetTargetWordSize() const
 {
-  return sizeof(UINT64) + sizeof(char);
+  return sizeof(uint64_t) + sizeof(char);
 }
 
-UINT64 OnDiskWrapper::GetMisc(const std::string &key) const
+uint64_t OnDiskWrapper::GetMisc(const std::string &key) const
 {
-  std::map<std::string, UINT64>::const_iterator iter;
+  std::map<std::string, uint64_t>::const_iterator iter;
   iter = m_miscInfo.find(key);
   UTIL_THROW_IF2(iter == m_miscInfo.end()
                  , "Couldn't find value for key " << key
@@ -243,7 +243,7 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
   } // for (size_t factorType
 
   bool found;
-  UINT64 vocabId = m_vocab.GetVocabId(strme.str(), found);
+  uint64_t vocabId = m_vocab.GetVocabId(strme.str(), found);
   if (!found) {
     // factor not in phrase table -> phrse definately not in. exit
     delete newWord;
