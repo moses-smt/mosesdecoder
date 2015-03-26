@@ -49,7 +49,7 @@ public:
   virtual ~BaseManager() { }
 
   //! the input sentence being decoded
-  virtual const InputType& GetSource() const;
+  const InputType& GetSource() const;
 
   virtual void Decode() = 0;
   // outputs

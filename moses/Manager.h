@@ -182,7 +182,7 @@ public:
   void OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const;
   void GetSearchGraph(std::vector<SearchGraphNode>& searchGraph) const;
 
-  virtual const InputType& GetSource() const;
+  const InputType& GetSource() const;
 
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
