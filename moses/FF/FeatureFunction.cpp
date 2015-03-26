@@ -195,7 +195,7 @@ FeatureFunction
 void 
 FeatureFunction
 ::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) 
-{ CleanupAfterSentenceProcessing(*(ttask->GetSource().get())); }
+{ CleanUpAfterSentenceProcessing(*(ttask->GetSource().get())); }
 
 }
 

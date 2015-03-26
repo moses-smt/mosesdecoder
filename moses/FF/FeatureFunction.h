@@ -119,7 +119,7 @@ protected:
   virtual void
   InitializeForInput(InputType const& source) { }
   virtual void
-  CleanupAfterSentenceProcessing(InputType const& source) { }
+  CleanUpAfterSentenceProcessing(InputType const& source) { }
 
 public:
   //! Called before search and collecting of translation options
