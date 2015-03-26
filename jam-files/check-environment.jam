@@ -35,7 +35,7 @@ if $(regtest) = yes
     if [ path.exists $(where) ] 
     {
       echo "Using $(where) from environment variable MOSES_REGTEST_ROOT."
-      option.set "with-moses-regtest" : $(where) ; 
+      option.set "with-regtest" : $(where) ; 
     }
   }
 }
