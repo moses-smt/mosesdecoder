@@ -1,3 +1,4 @@
+# -*- jam -*-
 max-factors = [ option.get "max-factors" : 4 : 4 ] ;
 path-constant FACTOR-LOG : bin/factor.log ;
 update-if-changed $(FACTOR-LOG) $(max-factors) ;
@@ -58,23 +59,16 @@ obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <depen
 # if yes, include server capabilities in the moses executable
 # include $(TOP)/jam-files/server.jam ;
 
-xmlrpc-c-config = [ build_server ] ;
-if $(xmlrpc-c-config) = no  
+if [ xmlrpc ] 
 {
-  echo "NOT BUILDING MOSES SERVER!" ;
-  alias mserver ;
-  alias xmlrpc-linkflags ;
+  echo "BUILDING MOSES SERVER!" ;
+  alias mserver : [ glob server/*.cpp ] ;
 }
 else 
 {
-  xmlprc-version  = [ shell_or_die "$(xmlrpc-c-config) --version" ] ;
-  # xmlprc-linkflags = [ shell_or_die "$(xmlrpc-c-config) --version" ] ;
-  echo "building moses server with xmlrpc-c version $(xmlrpc-c-version)" ;
-  alias mserver : [ glob server/*.cpp ] ;
-} 
-
-
-
+  echo "NOT BUILDING MOSES SERVER!" ;
+  alias mserver ;
+}
 
 if [ option.get "with-mm" : no : yes ] = yes
 {

@@ -72,47 +72,38 @@
 #--clean to clean
 #--debug-build to build with Og. Only available with gcc 4.8+
 
+import os ;
 import option ;
 import modules ;
 import path ;
 path-constant TOP : . ;
+
 include $(TOP)/jam-files/sanity.jam ;
-include $(TOP)/jam-files/server.jam ;
 
-# exit :  0 ; 
+home = [ os.environ "HOME" ] ;
+if [ path.exists $(home)/moses-environment.jam ] 
+{ include $(home)/moses-environment.jam ; }
+include $(TOP)/jam-files/check-environment.jam ; # get resource locations 
+                                                 # from environment variables
+include $(TOP)/jam-files/xmlrpc-c.jam ; # xmlrpc-c stuff for the server
+include $(TOP)/jam-files/curlpp.jam ;   # curlpp stuff for bias lookup (MMT only)
 
-if [ build_server ] != no 
+
+max-order = [ option.get "max-kenlm-order" : 6 : 6 ] ;
+if ! [ option.get "max-kenlm-order" ] 
 {
-  xmlrpc-c-prefix = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --prefix" ] ;
-  echo "XMLRPC-C: BUILDING MOSES WITH XMLRPC_C LIBRARY VERSION $(xmlrpc-c-version) FROM $(xmlrpc-c-prefix)" ;
-
-  xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --cflags" ] ;
-  requirements += <define>HAVE_XMLRPC_C ;
-  requirements += <cxxflags>$(xmlrpc-cxxflags) ;
-
-  xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --libs" ] ;
-  for local i in [ SPLIT_BY_CHARACTERS $(xmlrpc-linkflags) : " " ] 
-  { 
-    local libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
-    if $(libname) 
-    {   
-      external-lib $(libname) 
-      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-      requirements += <library>$(libname) ;
-    }
-    local pathname = [ MATCH "-L(.*)" : $(i) ] ; 
-    if $(pathname)
-    {
-      requirements += <library-path>$(pathname) ; 
-    }
-  } 
+  # some classes in Moses pull in header files from KenLM, so this needs to be 
+  # defined here, not in moses/lm/Jamfile 
+  option.set "max-kenlm-order" : 6 ;
+  requirements += <define>KENLM_MAX_ORDER=$(max-order) ;
 }
-# echo $(requirements) ; 
-# exit 0 ; 
+# exit "all done" : 0 ; 
+
 boost 104400 ;
 external-lib z ;
 
 lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+# lib dl : : <link>static ;
 requirements += <library>dl ;
 
 
@@ -139,6 +130,7 @@ if [ option.get "filter-warnings" : : "yes" ] {
   requirements += <cxxflags>-Wno-unused-but-set-variable ;
   requirements += <cxxflags>-Wno-unused-result ;
   requirements += <cxxflags>-Wno-unused-variable ;
+  requirements += <cxxflags>-Wcomment ;
 }
 
 if [ option.get "debug-build" : : "yes" ] {
@@ -307,6 +299,3 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
 local temp = [ _shell "mkdir -p $(TOP)/bin" ] ;
 local temp = [ _shell "rm $(TOP)/bin/moses_chart" ] ;
 local temp = [ _shell "cd $(TOP)/bin && ln -s moses moses_chart" ] ;
-
-
-
