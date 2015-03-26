@@ -12,10 +12,9 @@ namespace Moses
 namespace Syntax
 {
 
-Manager::Manager(const InputType &source)
-  : Moses::BaseManager(source)
-{
-}
+Manager::Manager(ttasksptr const& ttask)
+  : Moses::BaseManager(ttask)
+{ }
 
 void Manager::OutputBest(OutputCollector *collector) const
 {

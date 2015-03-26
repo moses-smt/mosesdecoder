@@ -14,7 +14,7 @@ namespace Syntax
 class Manager : public BaseManager
 {
 public:
-  Manager(const InputType &);
+  Manager(ttasksptr const& ttask);
 
   // Virtual functions from Moses::BaseManager that are implemented the same
   // way for all Syntax managers.

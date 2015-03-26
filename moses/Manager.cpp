@@ -59,27 +59,33 @@ using namespace std;
 
 namespace Moses
 {
-Manager::Manager(InputType const& source)
-  :BaseManager(source)
-  ,m_transOptColl(source.CreateTranslationOptionCollection())
-  ,interrupted_flag(0)
-  ,m_hypoId(0)
+
+Manager::Manager(ttasksptr const& ttask)
+  : BaseManager(ttask)
+  , interrupted_flag(0)
+  , m_hypoId(0)
 {
+  boost::shared_ptr<InputType> source = ttask->GetSource();
+  m_transOptColl = source->CreateTranslationOptionCollection();
+
   const StaticData &staticData = StaticData::Instance();
   SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
-  m_search = Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl);
+  m_search = Search::CreateSearch(*this, *source, searchAlgorithm, 
+				  *m_transOptColl);
 
-  StaticData::Instance().InitializeForInput(m_source);
+  StaticData::Instance().InitializeForInput(ttask);
 }
 
 Manager::~Manager()
 {
   delete m_transOptColl;
   delete m_search;
-  // this is a comment ...
-
-  StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
+  StaticData::Instance().CleanUpAfterSentenceProcessing(m_ttask.lock());
 }
+
+const InputType& 
+Manager::GetSource() const 
+{ return m_source) ; }
 
 /**
  * Main decoder loop that translates a sentence by expanding
@@ -121,7 +127,8 @@ void Manager::Decode()
   Timer searchTime;
   searchTime.start();
   m_search->Decode();
-  VERBOSE(1, "Line " << m_source.GetTranslationId() << ": Search took " << searchTime << " seconds" << endl);
+  VERBOSE(1, "Line " << m_source.GetTranslationId() 
+	  << ": Search took " << searchTime << " seconds" << endl);
   IFVERBOSE(2) {
     GetSentenceStats().StopTimeTotal();
     TRACE_ERR(GetSentenceStats());

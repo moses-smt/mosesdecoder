@@ -30,17 +30,16 @@ template<typename RuleMatcher>
 class Manager : public Syntax::Manager
 {
 public:
-  Manager(const InputType &);
+  Manager(ttasksptr const& ttask);
 
   void Decode();
 
   // Get the SHyperedge for the 1-best derivation.
   const SHyperedge *GetBestSHyperedge() const;
 
-  void ExtractKBest(
-    std::size_t k,
-    std::vector<boost::shared_ptr<KBestExtractor::Derivation> > &kBestList,
-    bool onlyDistinct=false) const;
+  typedef std::vector<boost::shared_ptr<KBestExtractor::Derivation> > kBestList_t;
+  void ExtractKBest(std::size_t k, kBestList_t& kBestList, 
+		    bool onlyDistinct=false) const;
 
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
 
