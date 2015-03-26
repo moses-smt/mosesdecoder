@@ -383,10 +383,12 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(size_t const transId, string const& stext) : InputType(transId)
+Sentence(size_t const transId, string const& stext, 
+	 vector<FactorType> const* IFO) 
+  : InputType(transId)
 {
-  vector<FactorType> const& IFO = StaticData::Instance().GetInputFactorOrder();
-  init(stext, IFO);
+  if (IFO) init(stext, *IFO);
+  else init(stext, StaticData::Instance().GetInputFactorOrder());
 }
 
 }

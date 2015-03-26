@@ -21,7 +21,7 @@ else
     if $(where) 
     { 
       option.set "with-curlpp" : $(where) ; 
-      local msg = "setting --with-curlpp=$(where) via environment " ;
+      local msg = "CURLPP:   setting --with-curlpp=$(where) via environment" ;
       echo "$(msg) variable CURLPP_ROOT" ;
     }
     curlpp = [ option.get "with-curlpp" ] ; 

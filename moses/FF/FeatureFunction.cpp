@@ -6,6 +6,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
+#include "moses/TranslationTask.h"
 #include "moses/Util.h"
 #include "moses/FF/DistortionScoreProducer.h"
 
@@ -185,6 +186,16 @@ void FeatureFunction::SetTuneableComponents(const std::string& value)
     }
   }
 }
+
+void 
+FeatureFunction
+::InitializeForInput(ttasksptr const& ttask)
+{ InitializeForInput(*(ttask->GetSource().get())); }
+
+void 
+FeatureFunction
+::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) 
+{ CleanupAfterSentenceProcessing(*(ttask->GetSource().get())); }
 
 }
 

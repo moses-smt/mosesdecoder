@@ -17,13 +17,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-
-
 #include "MockHypothesis.h"
+#include "TranslationOption.h"
+#include "TranslationTask.h"
 
 #include <boost/test/unit_test.hpp>
 
-#include "TranslationOption.h"
 
 using namespace Moses;
 using namespace std;
@@ -31,29 +30,23 @@ using namespace std;
 namespace MosesTest
 {
 
-
-MockHypothesisGuard::MockHypothesisGuard(
-  const string& sourceSentence,
+MockHypothesisGuard
+::MockHypothesisGuard
+( const string& sourceSentence, 
   const vector<Alignment>& alignments,
   const vector<string>& targetSegments)
-  : m_initialTransOpt(),
-    m_wp("WordPenalty"),
-    m_uwp("UnknownWordPenalty"),
-    m_dist("Distortion"),
-    m_manager(m_sentence)
+  : m_initialTransOpt(), m_wp("WordPenalty"), 
+    m_uwp("UnknownWordPenalty"), m_dist("Distortion")
 {
   BOOST_CHECK_EQUAL(alignments.size(), targetSegments.size());
-
-  std::vector<Moses::FactorType> factors;
-  factors.push_back(0);
-
-  stringstream in(sourceSentence + "\n");
-  m_sentence.Read(in,factors);
-
+  std::vector<Moses::FactorType> factors(1,0);
+  m_sentence.reset(new Sentence(0, sourceSentence, &factors));
+  m_ttask = TranslationTask::create(m_sentence);
+  m_manager.reset(new Manager(m_ttask));
 
   //Initial empty hypothesis
-  m_manager.ResetSentenceStats(m_sentence);
-  m_hypothesis = Hypothesis::Create(m_manager, m_sentence, m_initialTransOpt);
+  m_manager->ResetSentenceStats(*m_sentence);
+  m_hypothesis = Hypothesis::Create(*m_manager, *m_sentence, m_initialTransOpt);
 
   //create the chain
   vector<Alignment>::const_iterator ai = alignments.begin();

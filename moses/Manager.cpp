@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/LM/Base.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationAnalysis.h"
+#include "moses/TranslationTask.h"
 #include "moses/HypergraphOutput.h"
 #include "moses/mbr.h"
 #include "moses/LatticeMBR.h"
@@ -85,7 +86,7 @@ Manager::~Manager()
 
 const InputType& 
 Manager::GetSource() const 
-{ return m_source) ; }
+{ return m_source ; }
 
 /**
  * Main decoder loop that translates a sentence by expanding

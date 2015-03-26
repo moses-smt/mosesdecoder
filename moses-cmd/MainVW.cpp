@@ -153,8 +153,8 @@ int main(int argc, char** argv)
 	FeatureFunction::CallChangeSource(foo);
 
 	// set up task of training one sentence
-	boost::shared_ptr<TrainingTask> 
-	  task(new TrainingTask(source.get(), *ioWrapper));
+	boost::shared_ptr<TrainingTask> task;
+	task = TrainingTask::create(source, ioWrapper);
 
 	// execute task
 #ifdef WITH_THREADS

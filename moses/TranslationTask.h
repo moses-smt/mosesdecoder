@@ -70,7 +70,12 @@ public:
   // creator functions
   static boost::shared_ptr<TranslationTask> create(); 
 
-  static boost::shared_ptr<TranslationTask> 
+  static
+  boost::shared_ptr<TranslationTask> 
+  create(boost::shared_ptr<Moses::InputType> const& source);
+
+  static
+  boost::shared_ptr<TranslationTask> 
   create(boost::shared_ptr<Moses::InputType> const& source, 
 	 boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
   
@@ -78,8 +83,15 @@ public:
   /** Translate one sentence
    * gets called by main function implemented at end of this source file */
   virtual void Run();
+  
+  boost::shared_ptr<Moses::InputType>
+  GetSource() const { return m_source; }
 
-private:
+  boost::shared_ptr<BaseManager>
+  SetupManager(SearchAlgorithm algo = DefaultSearchAlgorithm);
+
+  
+protected:
   boost::shared_ptr<Moses::InputType> m_source; 
   boost::shared_ptr<Moses::IOWrapper> m_ioWrapper;
 

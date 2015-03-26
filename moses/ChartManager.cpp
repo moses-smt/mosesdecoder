@@ -39,21 +39,21 @@ using namespace std;
 
 namespace Moses
 {
+
 extern bool g_mosesDebug;
 
 /* constructor. Initialize everything prior to decoding a particular sentence.
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.
  */
-ChartManager::ChartManager(InputType const& source)
-  :BaseManager(source)
-  ,m_hypoStackColl(source, *this)
-  ,m_start(clock())
-  ,m_hypothesisId(0)
-  ,m_parser(source, m_hypoStackColl)
-  ,m_translationOptionList(StaticData::Instance().GetRuleLimit(), source)
-{
-}
+ChartManager::ChartManager(ttasksptr const& ttask)
+  : BaseManager(ttask)
+  , m_hypoStackColl(m_source, *this)
+  , m_start(clock())
+  , m_hypothesisId(0)
+  , m_parser(ttask, m_hypoStackColl)
+  , m_translationOptionList(StaticData::Instance().GetRuleLimit(), m_source)
+{ }
 
 ChartManager::~ChartManager()
 {
@@ -67,6 +67,7 @@ ChartManager::~ChartManager()
 //! decode the sentence. This contains the main laps. Basically, the CKY++ algorithm
 void ChartManager::Decode()
 {
+  
   VERBOSE(1,"Translating: " << m_source << endl);
 
   ResetSentenceStats(m_source);

@@ -63,7 +63,9 @@ namespace Moses
 
   public:
     Sentence();
-    Sentence(size_t const transId, std::string const& stext);
+    Sentence(size_t const transId, std::string const& stext, 
+	     std::vector<FactorType> const* IFO = NULL);
+    // Sentence(size_t const transId, std::string const& stext);
     ~Sentence();
 
     InputTypeEnum GetType() const {

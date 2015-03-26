@@ -252,7 +252,7 @@ namespace MosesServer
     m_reportAllFactors    = check(params, "report-all-factors");
     m_nbestDistinct       = check(params, "nbest-distinct");
     m_withScoreBreakdown  = check(params, "add-score-breakdown");
-    
+    m_source.reset(new Sentence(0,m_source_string)); 
     si = params.find("lambda");
     if (si != params.end()) 
       {
@@ -292,7 +292,7 @@ namespace MosesServer
     istringstream buf(m_source_string + "\n");
     tinput.Read(buf, StaticData::Instance().GetInputFactorOrder());
     
-    Moses::ChartManager manager(tinput);
+    Moses::ChartManager manager(this->self());
     manager.Decode();
     
     const Moses::ChartHypothesis *hypo = manager.GetBestHypothesis();
@@ -356,7 +356,7 @@ namespace MosesServer
   TranslationRequest::
   run_phrase_decoder()
   {
-    Manager manager(Sentence(0, m_source_string));
+    Manager manager(this->self());
     // if (m_bias.size()) manager.SetBias(&m_bias);
     manager.Decode();
     
