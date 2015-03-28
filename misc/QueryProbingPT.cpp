@@ -10,7 +10,7 @@
 
 #include "moses/TranslationModel/ProbingPT/quering.hh"
 
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h>
 #include <sys/stat.h>
 
