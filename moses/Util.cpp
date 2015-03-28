@@ -29,7 +29,7 @@
 #include <cstring>
 #include <cctype>
 #include <algorithm>
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 #include <iomanip>
 #include <boost/algorithm/string/predicate.hpp>

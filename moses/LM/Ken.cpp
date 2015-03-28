@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstring>
 #include <iostream>
 #include <memory>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 

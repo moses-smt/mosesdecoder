@@ -1,6 +1,6 @@
 #include "moses/PP/CountsPhraseProperty.h"
 #include <sstream>
-#include <assert.h>
+#include <cassert>
 
 namespace Moses
 {

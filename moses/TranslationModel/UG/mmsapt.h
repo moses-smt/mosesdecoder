@@ -3,7 +3,7 @@
 // Design and code by Ulrich Germann.
 #pragma once
 
-#include <time.h>
+#include <ctime>
 #include <boost/thread.hpp>
 #include <boost/scoped_ptr.hpp>
 

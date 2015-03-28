@@ -1,14 +1,14 @@
 #include "RuleTrieLoader.h"
 
 #include <sys/stat.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <fstream>
 #include <string>
 #include <iterator>
 #include <algorithm>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 #include "moses/FactorCollection.h"
 #include "moses/Word.h"

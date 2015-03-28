@@ -19,10 +19,10 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -50,7 +50,7 @@ using namespace std;
 
 #if defined __MINGW32__ && !defined mkdtemp
 #include <windows.h>
-#include <errno.h>
+#include <cerrno>
 char *mkdtemp(char *tempbuf)
 {
   int rand_value = 0;

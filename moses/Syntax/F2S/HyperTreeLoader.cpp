@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
 #include <fstream>
 #include <string>
 #include <iterator>
