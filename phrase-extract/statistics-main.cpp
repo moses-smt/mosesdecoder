@@ -7,9 +7,9 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <stdlib.h>
-#include <assert.h>
-#include <time.h>
+#include <cstdlib>
+#include <cassert>
+#include <ctime>
 
 #include "AlignmentPhrase.h"
 #include "tables-core.h"
