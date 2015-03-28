@@ -13,8 +13,8 @@
 #ifndef LOSSYCOUNTER_H
 #define	LOSSYCOUNTER_H
 
-#include <stddef.h>
-#include <math.h>
+#include <cstddef>
+#include <cmath>
 #ifdef USE_UNORDERED_MAP
 #include <tr1/unordered_map>
 #else
