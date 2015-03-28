@@ -4,10 +4,10 @@
 #include <vector>
 #include <algorithm>
 #include <getopt.h>
-#include <math.h>
+#include <cmath>
 
 #if defined __MINGW32__
-#include <time.h>
+#include <ctime>
 #endif // defined
 
 #include "Scorer.h"

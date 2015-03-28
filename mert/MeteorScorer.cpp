@@ -6,7 +6,7 @@
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <vector>
 
