@@ -12,7 +12,8 @@
 #include "moses/TargetPhrase.h"
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
-#endif
+
+#include <map>
 
 namespace Moses
 {
@@ -20,21 +21,22 @@ namespace Moses
   // todo: replace this with thread lock-free containers, if a stable library can 
   //       be found somewhere
 
-  template<typename KEY, typename VAL, typename CONTAINER=map>
+  template<typename KEY, typename VAL, class CONTAINER = std::map<KEY,VAL> >
+  class
   ThreadSafeContainer
   {
   protected:
     mutable boost::shared_mutex m_lock;
-    CONTAINER<KEY,VAL> m_container;
-    typedef CONTAINER<KEY,VAL>::iterator iter_t;
-    typedef CONTAINER<KEY,VAL>::const_iterator const_iter_t;
-    typedef CONTAINER<KEY,VAL>::value_type entry_t;
+    CONTAINER m_container;
+    typedef typename CONTAINER::iterator iter_t;
+    typedef typename CONTAINER::const_iterator const_iter_t;
+    typedef typename CONTAINER::value_type entry_t;
   public:
 
     class locking_iterator
     {
-      boost::unique_lock<boost::shared_mutes> m_lock;
-      CONTAINER<KEY,VAL> const* m_container;
+      boost::unique_lock<boost::shared_mutex> m_lock;
+      CONTAINER const* m_container;
       const_iter_t m_iter;
 
       locking_iterator(locking_iterator const& other); // no copies!
@@ -42,8 +44,8 @@ namespace Moses
       locking_iterator() : m_container(NULL) { }
 
       locking_iterator(boost::shared_mutex& lock, 
-		       CONTAINER<KEY,VAL> const* container, 
-		       const_iter_ const& iter)
+		       CONTAINER const* container, 
+		       const_iter_t const& iter)
 	: m_lock(lock), m_container(container), m_iter(iter)
       { }
 
@@ -64,7 +66,7 @@ namespace Moses
       }
 
       bool
-      operator==(const_itert_t const& other)
+      operator==(const_iter_t const& other)
       {
 	return m_iter == other;
       }
@@ -80,7 +82,7 @@ namespace Moses
       operator++(int);  
     };
 
-    CONTAINER<KEY,VAL>::const_iterator const& end() const
+    const_iter_t const& end() const
     { return m_container.end(); }
 
     locking_iterator begin() const
@@ -91,28 +93,29 @@ namespace Moses
     VAL const& set(KEY const& key, VAL const& val)
     {
       boost::unique_lock< boost::shared_mutex > lock(m_lock);
-      CONTAINER<KEY,VAL>::value_type entry(key,val);
-      iter foo = m_container.insert(entry).first;
-      return (foo->second = val);
+      entry_t entry(key,val);
+      iter_t foo = m_container.insert(entry).first;
+      foo->second = val;
+      return foo->second;
     }
 
     VAL const* get(KEY const& key, VAL const& default_val)
     {
       boost::shared_lock< boost::shared_mutex > lock(m_lock);
-      CONTAINER<KEY,VAL>::value_type entry(key,val);
-      pair<iter,bool> foo = m_container.insert(entry);
+      entry_t entry(key, default_val);
+      iter_t foo = m_container.insert(entry).first;
       return &(foo->second);
     }
 
     VAL const* get(KEY const& key) const
     {
       boost::shared_lock< boost::shared_mutex > lock(m_lock);
-      CONTAINER<KEY,VAL>::const_iterator m = m_container.find(key);
+      const_iter_t m = m_container.find(key);
       if (m == m_container.end()) return NULL;
       return &m->second;
     }
 
-    size_t erase(Key const& key) 
+    size_t erase(KEY const& key) 
     {
       boost::unique_lock< boost::shared_mutex > lock(m_lock);
       return m_container.erase(key);
