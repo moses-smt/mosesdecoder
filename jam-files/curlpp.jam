@@ -55,7 +55,8 @@ else
       if $(incpath) 
       { 
 	# echo "CURLPP: $(i)" ; 
-	requirements += <include>$(incpath) ; 
+	requirements += <cxxflags>"-isystem $(incpath)" ;
+	# requirements += <include>$(incpath) ; 
       }
     }
     local cpp-libs = [ shell_or_die "$(config) --libs" ] ;
