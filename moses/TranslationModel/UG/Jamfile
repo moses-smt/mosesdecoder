@@ -108,4 +108,4 @@ $(TOP)/util//kenutil
 ; 
 install $(PREFIX)/bin : try-align try-align2 ; 
 
-fakelib mmsapt : [ glob *.cpp mmsapt*.cc sapt*.cc ] ;
+fakelib mmsapt : [ glob *.cpp TargetPhrase*.cc mmsapt*.cc sapt*.cc ] ;
