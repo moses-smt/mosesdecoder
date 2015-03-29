@@ -169,9 +169,9 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageM
   :LanguageModel(copy_from.GetArgLine()),
    m_ngram(copy_from.m_ngram),
 // TODO: don't copy this.
-   m_lmIdLookup(copy_from.m_lmIdLookup),
+   m_beginSentenceFactor(copy_from.m_beginSentenceFactor),
    m_factorType(copy_from.m_factorType),
-   m_beginSentenceFactor(copy_from.m_beginSentenceFactor)
+   m_lmIdLookup(copy_from.m_lmIdLookup)
 {
 }
 

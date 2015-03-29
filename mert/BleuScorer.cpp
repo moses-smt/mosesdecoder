@@ -191,7 +191,7 @@ statscore_t BleuScorer::calculateScore(const vector<ScoreStatsType>& comps) cons
   UTIL_THROW_IF(comps.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
-  for (int i = 0; i < kBleuNgramOrder; ++i) {
+  for (std::size_t i = 0; i < kBleuNgramOrder; ++i) {
     if (comps[2*i] == 0) {
       return 0.0;
     }
@@ -249,7 +249,7 @@ float smoothedSentenceBleu
   UTIL_THROW_IF(stats.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
-  for (int j = 0; j < kBleuNgramOrder; j++) {
+  for (std::size_t j = 0; j < kBleuNgramOrder; j++) {
     logbleu += log(stats[2 * j] + smoothing) - log(stats[2 * j + 1] + smoothing);
   }
   logbleu /= kBleuNgramOrder;
@@ -275,7 +275,7 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
 
   // Calculate BLEU
   float logbleu = 0.0;
-  for (int j = 0; j < kBleuNgramOrder; j++) {
+  for (std::size_t j = 0; j < kBleuNgramOrder; j++) {
     logbleu += log(stats[2 * j]) - log(stats[2 * j + 1]);
   }
   logbleu /= kBleuNgramOrder;

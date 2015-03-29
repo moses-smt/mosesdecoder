@@ -56,7 +56,7 @@ void Cube::CreateNeighbours(const std::vector<int> &coordinates)
 
   // Create each neighbour along the vertex stack dimensions.
   for (std::size_t i = 0; i < coordinates.size()-1; ++i) {
-    int x = coordinates[i];
+    const std::size_t x = coordinates[i];
     if (m_bundle.stacks[i]->size() > x+1) {
       ++tmpCoordinates[i];
       CreateNeighbour(tmpCoordinates);
@@ -64,7 +64,7 @@ void Cube::CreateNeighbours(const std::vector<int> &coordinates)
     }
   }
   // Create the neighbour along the translation dimension.
-  int x = coordinates.back();
+  const std::size_t x = coordinates.back();
   if (m_bundle.translations->GetSize() > x+1) {
     ++tmpCoordinates.back();
     CreateNeighbour(tmpCoordinates);

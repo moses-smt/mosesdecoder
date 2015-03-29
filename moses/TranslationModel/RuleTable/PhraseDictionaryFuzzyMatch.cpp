@@ -392,10 +392,10 @@ TO_STRING_BODY(PhraseDictionaryFuzzyMatch);
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionaryFuzzyMatch& phraseDict)
 {
+  /*
   typedef PhraseDictionaryNodeMemory::TerminalMap TermMap;
   typedef PhraseDictionaryNodeMemory::NonTerminalMap NonTermMap;
 
-  /*
   const PhraseDictionaryNodeMemory &coll = phraseDict.m_collection;
   for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p) {
     const Word &sourceNonTerm = p->first.first;
