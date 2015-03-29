@@ -8,6 +8,7 @@
 #include "moses/IOWrapper.h"
 #include "moses/Manager.h"
 #include "moses/ChartManager.h"
+#include "moses/ContextScope.h"
 
 #include "moses/Syntax/F2S/Manager.h"
 #include "moses/Syntax/S2T/Manager.h"
@@ -16,6 +17,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/make_shared.hpp>
+
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
+#endif
 
 namespace Moses
 {
@@ -38,7 +44,8 @@ class TranslationTask : public Moses::Task
 
 protected:
   boost::weak_ptr<TranslationTask> m_self; // weak ptr to myself
-
+  boost::shared_ptr<ContextScope> m_scope; // sores local info
+  // pointer to ContextScope, which stores context-specific information
   TranslationTask() { } ;
   TranslationTask(boost::shared_ptr<Moses::InputType> const& source, 
 		  boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
@@ -56,10 +63,9 @@ protected:
   // function can determine (via a check on the weak pointer) if the
   // task is still live or not, or maintain a shared_ptr to ensure the
   // task stays alive till it's done with it.
-
+  
 public:
-
-  virtual
+  
   boost::shared_ptr<TranslationTask>  
   self() { return m_self.lock(); }
 
@@ -90,7 +96,14 @@ public:
   boost::shared_ptr<BaseManager>
   SetupManager(SearchAlgorithm algo = DefaultSearchAlgorithm);
 
-  
+
+  boost::shared_ptr<ContextScope> const&
+  GetScope() const
+  {
+    UTIL_THROW_IF2(m_scope == NULL, "No context scope!");
+    return m_scope;
+  }
+
 protected:
   boost::shared_ptr<Moses::InputType> m_source; 
   boost::shared_ptr<Moses::IOWrapper> m_ioWrapper;

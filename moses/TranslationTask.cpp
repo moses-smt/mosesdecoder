@@ -30,6 +30,7 @@ TranslationTask
   boost::shared_ptr<IOWrapper> nix;
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, nix));
   ret->m_self = ret;
+  ret->m_scope.reset(new ContextScope);
   return ret;
 }
 
@@ -40,6 +41,7 @@ TranslationTask
 {
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
   ret->m_self = ret;
+  ret->m_scope.reset(new ContextScope);
   return ret;
 }
 
