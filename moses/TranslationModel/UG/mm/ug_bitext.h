@@ -1072,7 +1072,7 @@ namespace Moses {
 	      this->m_docname2docid[docname] = docid;
 	      line >> b;
 	      cerr << "DOCUMENT MAP " << docname 
-		   << " " << a << "-" << b << endl;
+		   << " " << a << "-" << b+a << endl;
 	      for (b += a; a < b; ++a)
 		(*this->m_sid2docid)[a] = docid;
 	    }
@@ -1099,7 +1099,7 @@ namespace Moses {
       i2.open(base+L2+".sfa", this->T2);
       assert(this->T1->size() == this->T2->size());
 
-      string docmapfile = base+".dmp";
+      string docmapfile = base+"dmp";
       if (!access(docmapfile.c_str(),F_OK))
 	load_document_map(docmapfile);
     }
