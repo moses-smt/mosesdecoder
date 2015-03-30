@@ -98,7 +98,8 @@ namespace Moses
     virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
     void Print(std::ostream& out) const;
 
-    TranslationOptionCollection* CreateTranslationOptionCollection() const;
+    TranslationOptionCollection* 
+    CreateTranslationOptionCollection(ttasksptr const& ttask) const;
 
     virtual void 
     CreateFromString(std::vector<FactorType> const &factorOrder, 

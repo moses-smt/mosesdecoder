@@ -278,11 +278,13 @@ ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeho
 
 TranslationOptionCollection*
 Sentence::
-CreateTranslationOptionCollection() const
+CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-  TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
+  TranslationOptionCollection *rv 
+    = new TranslationOptionCollectionText(ttask, *this, maxNoTransOptPerCoverage, 
+					  transOptThreshold);
   assert(rv);
   return rv;
 }

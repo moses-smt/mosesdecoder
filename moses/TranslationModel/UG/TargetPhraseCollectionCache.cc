@@ -2,7 +2,8 @@
 
 namespace Moses
 {
-  
+  using std::vector;
+
 #if defined(timespec)
   bool operator<(timespec const& a, timespec const& b)
   {
@@ -53,9 +54,15 @@ namespace Moses
       }
   }
 
+  TPCollCache
+  ::TPCollCache(size_t capacity)
+  {
+    m_history.reserve(capacity);
+  }
+
   TPCollWrapper*
   TPCollCache
-  ::encache(TPCollWrapper* const ptr) 
+  ::encache(TPCollWrapper* const& ptr) 
   {
     using namespace boost;
     // update time stamp:
@@ -84,7 +91,7 @@ namespace Moses
 	else // someone else needs to go 
 	  {
 	    v[0]->idx = -1;
-	    decache(v[0]);
+	    release(v[0]);
 	    v[0] = ptr;
 	    bubble_down(v,0);
 	  }
@@ -94,42 +101,46 @@ namespace Moses
   
   TPCollWrapper* 
   TPCollCache
-  ::get(uint64_t key, size_t revision) const
+  ::get(uint64_t key, size_t revision) 
   {
     using namespace boost;
+    cache_t::iterator m;
     { 
       shared_lock<shared_mutex> lock(m_cache_lock);
-      cache_t::iterator m = m_cache.find(key);
-      if (m == m_cache.end() || m_cache->second->revision != revision) 
+      m = m_cache.find(key);
+      if (m == m_cache.end() || m->second->revision != revision) 
 	return NULL;
       ++m->second->refCount;
     }
-    encache(m->second,lock);
+    
+    encache(m->second);
     return NULL;
   } // TPCollCache::get(...)
     
   void
   TPCollCache
-  ::add(uint64_t key, TPCollWrapper* ptr) const
+  ::add(uint64_t key, TPCollWrapper* ptr) 
   {
     {
       boost::unique_lock<boost::shared_mutex> lock(m_cache_lock);
       m_cache[key] = ptr;
       ++ptr->refCount;
-      ++m_tpc_ctr;
+      // ++m_tpc_ctr;
     }
-    encache(ptr,lock);
+    encache(ptr);
   } // TPCollCache::add(...)
   
   void
   TPCollCache
-  ::release(TargetPhraseCollection const*& tpc)
+  ::release(TPCollWrapper*& ptr)
   {
-    if (!tpc) return;
-    TPCollWrapper* ptr = (reinterpret_cast<TPCollWrapper*>
-			  (const_cast<TargetPhraseCollection*>(tpc)));
+    if (!ptr) return;
 
-    if (--ptr->refCount || ptr->idx >= 0) return; // tpc is still in use
+    if (--ptr->refCount || ptr->idx >= 0) // tpc is still in use
+      {	
+	ptr = NULL; 
+	return; 
+      }
     
 #if 0
     timespec t; clock_gettime(CLOCK_MONOTONIC,&t);
@@ -147,10 +158,22 @@ namespace Moses
 	// for the same phrase already, so we need to check 
 	// if the pointer we cound is the one we want to get rid of,
 	// hence the second check
-	boost::upgrade_to_unique_lock<boost::shared_mutex>(lock);
+	boost::upgrade_to_unique_lock<boost::shared_mutex> xlock(lock);
 	m_cache.erase(m);
       }
     delete ptr;
     ptr = NULL;
   } // TPCollCache::release(...) 
+
+  TPCollWrapper::
+  TPCollWrapper(size_t r, uint64_t k)
+    : revision(r), key(k), refCount(0), idx(-1)
+  { }
+
+  TPCollWrapper::
+  ~TPCollWrapper()
+  {
+    assert(this->refCount == 0);
+  }
+  
 } // namespace

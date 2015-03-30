@@ -151,7 +151,7 @@ Release(TargetPhraseCollection const* tpc) const
 
 bool
 PhraseDictionary::
-PrefixExists(Phrase const& phrase) const
+PrefixExists(ttasksptr const& ttask, Phrase const& phrase) const
 {
   return true;
 }

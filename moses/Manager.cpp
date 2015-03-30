@@ -67,7 +67,7 @@ Manager::Manager(ttasksptr const& ttask)
   , m_hypoId(0)
 {
   boost::shared_ptr<InputType> source = ttask->GetSource();
-  m_transOptColl = source->CreateTranslationOptionCollection();
+  m_transOptColl = source->CreateTranslationOptionCollection(ttask);
 
   const StaticData &staticData = StaticData::Instance();
   SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();

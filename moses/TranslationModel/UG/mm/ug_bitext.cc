@@ -206,7 +206,7 @@ namespace Moses
 
       sptr<imBitext<TKN> > ret;
       {
-	boost::lock_guard<boost::mutex> guard(this->lock);
+	boost::unique_lock<boost::shared_mutex> guard(m_lock);
 	ret.reset(new imBitext<TKN>(*this));
       }
       

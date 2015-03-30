@@ -18,10 +18,12 @@ namespace Moses
 {
 
 /** constructor; just initialize the base class */
-TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
-  const WordLattice &input
-  , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
+TranslationOptionCollectionLattice
+::TranslationOptionCollectionLattice
+( ttasksptr const& ttask,   const WordLattice &input, 
+  size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(ttask, input, maxNoTransOptPerCoverage, 
+				translationOptionThreshold)
 {
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
                  "Not for models using the legqacy binary phrase table");

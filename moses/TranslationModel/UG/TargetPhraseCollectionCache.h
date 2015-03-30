@@ -31,10 +31,10 @@ namespace Moses
     typedef boost::unordered_map<uint64_t, TPCollWrapper*> cache_t;
     typedef std::vector<TPCollWrapper*> history_t;
     cache_t   m_cache;   // maps from phrase ids to target phrase collections
-    history_t m_history; // heap of live items, least recently used one on top
+    mutable history_t m_history; // heap of live items, least recently used one on top
     
-    boost::shared_mutex m_cache_lock;   // locks m_cache
-    boost::shared_mutex m_history_lock; // locks m_history
+    mutable boost::shared_mutex m_cache_lock;   // locks m_cache
+    mutable boost::shared_mutex m_history_lock; // locks m_history
 
 #if 0
     // mutable size_t m_tpc_ctr; 
@@ -42,20 +42,20 @@ namespace Moses
     // to track memory leaks
 #endif
 
-    TPCollWrapper* encache(TPCollWrapper* const ptr);
+    TPCollWrapper* encache(TPCollWrapper* const& ptr);
     // updates time stamp and position in least-recently-used heap m_history
 
   public:
-    // TPCollCache() : m_tpc_ctr(0) { }
+    TPCollCache(size_t capacity=1000);
     
     TPCollWrapper* 
-    get(uint64_t key, size_t revision) const;
+    get(uint64_t key, size_t revision);
 
     void 
     add(uint64_t key, TPCollWrapper* ptr);
 
     void 
-    release(TargetPhraseCollection const*& tpc);
+    release(TPCollWrapper*& tpc);
   };
 
 

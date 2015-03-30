@@ -53,7 +53,7 @@ public:
     std::cerr << *m_source << std::endl;
 
     TranslationOptionCollection *transOptColl 
-      = m_source->CreateTranslationOptionCollection();
+      = m_source->CreateTranslationOptionCollection(this->self());
     transOptColl->CreateTranslationOptions();
     delete transOptColl;
 
