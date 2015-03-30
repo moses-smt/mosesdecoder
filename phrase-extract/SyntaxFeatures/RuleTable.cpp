@@ -158,22 +158,19 @@ PSD::AlignmentType RuleTable::GetTermAlignment(const std::string &alignStr, cons
     //std::string nonTermString = "[X][X]";
     boost::regex nonTermRegex ("\\[X\\]\\[[\\w .]+\\]");
 
-
-    //cerr << "TARGET STRING : " << targetStr << endl;
-
+    size_t tokenCounter = 0;
     for(itr_targets = targetToken.begin();itr_targets != targetToken.end(); itr_targets++)
     {
-        //cerr << "TARGET TOKEN : " << *itr_targets << endl;
-
         //size_t found = (*itr_targets).find(nonTermString); //was for hiero
         //if(found != string::npos) was for hiero
         if(regex_search (*itr_targets,nonTermRegex))
         {
-            CHECK((*itr_targets).size() > 1);
-            string indexString = (*itr_targets).substr(6,1); //this is also the last element of the string
-            //cerr << "INDEX STRING" << indexString << endl;
-            targetAligns.push_back(indexString);
+        	stringstream tokString;
+        	tokString << tokenCounter;
+        	string targetAlign = tokString.str();
+            targetAligns.push_back(targetAlign);
         }
+        tokenCounter++;
      }
       vector<string>::const_iterator alignIt;
       for (alignIt = points.begin(); alignIt != points.end(); alignIt++) {
