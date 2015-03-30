@@ -63,7 +63,6 @@ int main(int argc, char* argv[])
        << "src_phrase ||| trg_phrase || freq(src_phrase, trg_phrase) freq(src_phrase) length(src_phrase) length(trg_phrase)\n"
        << "if (inverse)\n"
        << "src_phrase ||| trg_phrase || freq(src_phrase, trg_phrase) freq(trg_phrase) length(src_phrase) length(trg_phrase)\n";
-  time_t starttime = time(NULL);
 
   if (argc != 4 && argc != 5) {
     cerr << "syntax: statistics extract lex phrase-table [inverse]\n";
@@ -102,7 +101,6 @@ int main(int argc, char* argv[])
   int lastForeign = -1;
   vector< PhraseAlignment > phrasePairsWithSameF;
   int i=0;
-  int fileCount = 0;
 
   string line;
   while(getline(extractFileP, line)) {
