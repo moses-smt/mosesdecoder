@@ -162,7 +162,7 @@ int main(int ac, char **av)
                 detokenize_p = !detokenize_p;
                 break;
             case 'e':
-                params.escape_p = false;
+                params.escape_p = !params.escape_p;
                 break;
             case 'E':
                 params.entities_p = true;

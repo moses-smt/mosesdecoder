@@ -74,6 +74,30 @@ class_follows_p(gunichar *s, gunichar *e, GUnicodeType gclass) {
     return false;
 }
 
+
+const char *ESCAPE_MOSES[] = {
+        "&#124;", // | 0
+        "&#91;", // [ 1
+        "&#93;",  // ] 2
+        "&amp;", // & 3 (26)
+        "&lt;", // < 4 (3c)
+        "&gt;", // > 5 (3e)
+        "&apos;", // ' 6 (27)
+        "&quot;", // " 7 (22)
+};
+    
+const std::set<std::string> 
+ESCAPE_SET = {
+    std::string(ESCAPE_MOSES[0]),
+    std::string(ESCAPE_MOSES[1]),
+    std::string(ESCAPE_MOSES[2]),
+    std::string(ESCAPE_MOSES[3]),
+    std::string(ESCAPE_MOSES[4]),
+    std::string(ESCAPE_MOSES[5]),
+    std::string(ESCAPE_MOSES[6]),
+    std::string(ESCAPE_MOSES[7]),
+};
+
 const std::map<std::wstring,gunichar> 
 ENTITY_MAP = {
     { std::wstring(L"&quot;"), L'"' },
@@ -375,41 +399,6 @@ get_entity(char *ptr, size_t len) {
 }
 
 
-bool 
-unescape(std::string& word) {
-    std::ostringstream oss;
-    std::size_t was = 0; // last processed
-    std::size_t pos = 0; // last unprocessed
-    std::size_t len = 0; // processed length
-    bool hit = false;
-    for (std::size_t endp=0; 
-         (pos = word.find('&',was)) != std::string::npos && (endp = word.find(';',pos)) != std::string::npos; 
-         was = endp == std::string::npos ? pos : 1+endp) {
-        len = endp - pos + 1;
-        glong ulen(0);
-        gunichar *gtmp = g_utf8_to_ucs4_fast((const gchar *)word.c_str()+pos, len, &ulen);
-        gunichar gbuf[2] = { 0 };
-        if ((gbuf[0] = get_entity(gtmp,ulen)) != gunichar(0)) {
-            gchar *gstr = g_ucs4_to_utf8(gbuf,ulen,0,0,0);
-            if (was < pos)
-                oss << word.substr(was,pos-was);
-            oss << gstr;
-            g_free(gstr);
-            was += ulen;
-            hit = true;
-        } else {
-            oss << word.substr(was,1+endp-was);
-        }
-        g_free(gtmp);
-    }
-    if (was < word.size()) 
-        oss << word.substr(was);
-    if (hit)
-        word = oss.str();
-    return hit;
-}
-
-
 inline std::string 
 trim(const std::string& in)
 {
@@ -682,22 +671,51 @@ Tokenizer::protected_tokenize(std::string& text) {
 }
 
 
+bool 
+Tokenizer::unescape(std::string& word) {
+    std::ostringstream oss;
+    std::size_t was = 0; // last processed
+    std::size_t pos = 0; // last unprocessed
+    std::size_t len = 0; // processed length
+    bool hit = false;
+    for (std::size_t endp=0; 
+         (pos = word.find('&',was)) != std::string::npos && (endp = word.find(';',pos)) != std::string::npos; 
+         was = endp == std::string::npos ? pos : 1+endp) {
+        len = endp - pos + 1;
+        glong ulen(0);
+        gunichar *gtmp = g_utf8_to_ucs4_fast((const gchar *)word.c_str()+pos, len, &ulen);
+        gunichar gbuf[2] = { 0 };
+        if ((gbuf[0] = get_entity(gtmp,ulen)) != gunichar(0)) {
+            gchar *gstr = g_ucs4_to_utf8(gbuf,ulen,0,0,0);
+            if (escape_p && ESCAPE_SET.find(std::string(gstr)) != ESCAPE_SET.end()) {
+                // do not unescape moses escapes when escape flag is turned on
+                oss << word.substr(was,1+endp-was);
+            } else {
+                if (was < pos)
+                    oss << word.substr(was,pos-was);
+                oss << gstr;
+                was += ulen;
+                hit = true;
+            }
+            g_free(gstr);
+        } else {
+            oss << word.substr(was,1+endp-was);
+        }
+        g_free(gtmp);
+    }
+    if (was < word.size()) 
+        oss << word.substr(was);
+    if (hit)
+        word = oss.str();
+    return hit;
+}
+
+
 bool
 Tokenizer::escape(std::string& text) {
     bool mod_p = false;
     std::string outs;
 
-    static const char *replacements[] = {
-        "&#124;", // | 0
-        "&#91;", // [ 1
-        "&#93;",  // ] 2
-        "&amp;", // & 3
-        "&lt;", // < 4
-        "&gt;", // > 5
-        "&apos;", // ' 6
-        "&quot;", // " 7
-    };
-    
     const char *pp = text.c_str(); // from pp to pt is uncopied
     const char *ep = pp + text.size();
     const  char *pt = pp;
@@ -720,25 +738,29 @@ Tokenizer::escape(std::string& text) {
         const char *sequence_p = 0;
         if (*pt < '?') {
             if (*pt == '&') {
-                sequence_p = replacements[3];
+                // check for a pre-existing escape
+                const char *sc = strchr(pt,';');
+                if (!sc || sc-pt < 2 || sc-pt > 9) {
+                    sequence_p = ESCAPE_MOSES[3];
+                }
             } else if (*pt == '\'') {
-                sequence_p = replacements[6];
+                sequence_p = ESCAPE_MOSES[6];
             } else if (*pt == '"') {
-                sequence_p = replacements[7];
+                sequence_p = ESCAPE_MOSES[7];
             }
         } else if (*pt > ']') {
             if (*pt =='|') { // 7c
-                sequence_p = replacements[0];
+                sequence_p = ESCAPE_MOSES[0];
             } 
         } else if (*pt > 'Z') {
             if (*pt == '<') { // 3e
-                sequence_p = replacements[4];
+                sequence_p = ESCAPE_MOSES[4];
             } else if (*pt == '>') { // 3c
-                sequence_p = replacements[5];
+                sequence_p = ESCAPE_MOSES[5];
             } else if (*pt == '[') { // 5b
-                sequence_p = replacements[1];
+                sequence_p = ESCAPE_MOSES[1];
             } else if (*pt == ']') { // 5d
-                sequence_p = replacements[2];
+                sequence_p = ESCAPE_MOSES[2];
             } 
         }
 
@@ -1056,7 +1078,7 @@ Tokenizer::quik_tokenize(const std::string& buf)
             in_url_p = in_num_p = false;
             break;
         case G_UNICODE_DASH_PUNCTUATION:
-            if (aggressive_hyphen_p && !in_url_p) {
+            if (aggressive_hyphen_p && !in_url_p && curr_uch != next_uch && prev_uch != curr_uch && (!(prev_uch == L' ' || !prev_uch) && !(next_uch == L' ' || !next_uch))) {
                 substitute_p = L"@-@";
                 post_break_p = pre_break_p = true;
             } else if ( ( curr_uch > gunichar(L'\u002D') && curr_uch < gunichar(L'\u2010') ) ||
@@ -1090,6 +1112,7 @@ Tokenizer::quik_tokenize(const std::string& buf)
                     case G_UNICODE_DECIMAL_NUMBER:
                     case G_UNICODE_LETTER_NUMBER:
                     case G_UNICODE_OTHER_NUMBER:
+                    case G_UNICODE_OTHER_PUNCTUATION:
                         break;
                     default:
                         post_break_p = true;
@@ -1118,6 +1141,9 @@ Tokenizer::quik_tokenize(const std::string& buf)
                         case G_UNICODE_LETTER_NUMBER:
                         case G_UNICODE_OTHER_NUMBER:
                             break;
+                        case G_UNICODE_OTHER_PUNCTUATION:
+                            if (prev_type != next_type)
+                                break;
                         default:
                             post_break_p = pre_break_p = prev_uch != curr_uch;
                         }
@@ -1516,6 +1542,10 @@ Tokenizer::quik_tokenize(const std::string& buf)
             loc = text.find(subst,loc+18);
         }
     }
+
+    // escape moses meta-characters
+    if (escape_p)
+        escape(text);
 
     return text;
 }

@@ -85,14 +85,13 @@ protected:
     bool para_marks_p;
     bool split_breaks_p;
 
+    // return counts of general and numeric prefixes loaded
     std::pair<int,int> load_prefixes(std::ifstream& ifs); // used by init(), parameterized by lang_iso
-
-    // escapes specials into entities from the set &|"'[] (after tokenization, when enabled)
-    bool escape(std::string& inplace);
 
     // in-place 1 line tokenizer, replaces input string, depends on wrapper to set-up invariants
     void protected_tokenize(std::string& inplace);
 
+    // used for boost::thread
     struct VectorTokenizerCallable {
         Tokenizer *tokenizer;
         std::vector<std::string>& in;
@@ -120,8 +119,6 @@ protected:
 
 public:
 
-    void set_config_dir(const std::string& _cfg_dir);
-
     Tokenizer(); // UNIMPL
 
     // no throw
@@ -133,10 +130,21 @@ public:
     // required before other methods, may throw
     void init(const char *cfg_dir_path = 0);
 
+    void set_config_dir(const std::string& _cfg_dir);
+
     // required after processing a contiguous sequence of lines when sentence splitting is on
     void reset();
 
+    // simultaneous sentence splitting not yet implemented
     bool splitting() const { return splits_p; }
+
+    // escapes chars the set &|"'<> after tokenization (moses special characters)
+    bool escape(std::string& inplace);
+
+    // used in detokenizer, converts entities into characters
+    // if escape_p is set, does not unescape moses special tokens, thus
+    // escape_p and unescape_p can be used together usefully
+    bool unescape(std::string& inplace);
 
     // streaming select-tokenizer reads from is, writes to os, preserving line breaks (unless splitting)
     std::size_t tokenize(std::istream& is, std::ostream& os);
@@ -144,7 +152,7 @@ public:
     // quik-tokenize padded line buffer to return string
     std::string quik_tokenize(const std::string& buf);
 
-    // penn-tokenize padded line buffer to return string
+    // penn-tokenize padded line buffer to return string // untested
     std::string penn_tokenize(const std::string& buf);
 
     // select-tokenize padded line buffer to return string
@@ -184,9 +192,10 @@ public:
         return detokenize(oss.str());
     }
 
+    // split a string on sentence boundaries (approximately)
     std::vector<std::string> splitter(const std::string &istr,bool *continuation_p = 0);
 
-    // split sentences from lines of input
+    // split sentences from input stream and write one per line on output stream
     std::pair<std::size_t,std::size_t> splitter(std::istream& is, std::ostream& os);
 
 }; // end class Tokenizer
