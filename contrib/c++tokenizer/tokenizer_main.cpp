@@ -208,6 +208,7 @@ int main(int ac, char **av)
                 break;
             case 'X':
                 params.notokenization_p = true;
+                params.para_marks_p = true;
                 break;
             case 'y':
                 params.alltag_p = true;
@@ -282,16 +283,16 @@ int main(int ac, char **av)
 
     Tokenizer tize(params);
     tize.init();
-    size_t nlines = 0;
+    std::pair<std::size_t,std::size_t> plines = { 0, 0 };
 
     if (params.words_p) {
         if (params.args.empty()) {
-            nlines += copy_words(tize,std::cin,ofs);
+            plines.first += copy_words(tize,std::cin,ofs);
         } else {
             for (std::string& arg : params.args) {
                 try {
                     std::ifstream ifs(arg.c_str());
-                    nlines += copy_words(tize,ifs,ofs);
+                    plines.first += copy_words(tize,ifs,ofs);
                 } catch (...) {
                     std::cerr << "Exception extracting words from path " << arg << std::endl;
                 }
@@ -299,22 +300,22 @@ int main(int ac, char **av)
         }
     } else if (params.args.empty()) {
         if (detokenize_p) {
-            nlines = tize.detokenize(std::cin,ofs);
+            plines.first = tize.detokenize(std::cin,ofs);
         } else if (params.notokenization_p) {
-            nlines = tize.splitter(std::cin,ofs);
+            plines = tize.splitter(std::cin,ofs);
         } else {
-            nlines = tize.tokenize(std::cin,ofs);
+            plines.first = tize.tokenize(std::cin,ofs);
         }
     } else {
         for (std::string& arg : params.args) {
             try {
                 std::ifstream ifs(arg.c_str());
                 if (detokenize_p) {
-                    nlines = tize.detokenize(ifs,ofs);
+                    plines.first = tize.detokenize(ifs,ofs);
                 } else if (params.notokenization_p) {
-                    nlines = tize.splitter(ifs,ofs);
+                    plines = tize.splitter(ifs,ofs);
                 } else {
-                    nlines = tize.tokenize(ifs,ofs);
+                    plines.first = tize.tokenize(ifs,ofs);
                 }
             } catch (...) {
                 std::cerr << "Exception tokenizing from path " << arg << std::endl;
@@ -322,9 +323,12 @@ int main(int ac, char **av)
         }
     }
 
-    if (params.verbose_p)
-        std::cerr << "%%% " << nlines << " lines." << std::endl;
-    
+    if (params.verbose_p) {
+        std::cerr << "%%% " << plines.first << " lines." << std::endl;
+        if (plines.second) {
+            std::cerr << "%%% " << plines.second << " sentences." << std::endl;
+        }
+    }    
     return rc;
 }
 

@@ -26,6 +26,7 @@ Parameters::Parameters()
 , drop_bad_p(false)
 , split_p(false)
 , notokenization_p(false)
+, para_marks_p(false)
 {
 }
 

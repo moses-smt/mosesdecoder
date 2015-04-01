@@ -26,6 +26,22 @@ class Tokenizer {
 
 private:
 
+    typedef enum { 
+        empty = 0,
+        blank,
+        upper, // upper case
+        letta, // extended word class (includes number, hyphen)
+        numba,
+        hyphn,
+        stops, // blank to stops are "extended word class" variants
+        quote, // init & fini = {',"}
+        pinit, // init (includes INVERT_*)
+        pfini, // fini
+        pfpct, // fini + pct
+        marks,
+        limit
+    } charclass_t;
+
     static std::string cfg_dir;
 
     // non-breaking prefixes (numeric) utf8
@@ -67,6 +83,7 @@ protected:
     bool drop_bad_p;
     bool splits_p;
     bool verbose_p;
+    bool para_marks_p;
 
     std::pair<int,int> load_prefixes(std::ifstream& ifs); // used by init(), parameterized by lang_iso
 
@@ -134,10 +151,10 @@ public:
         return detokenize(oss.str());
     }
 
-    std::string splitter(const std::string &istr);
+    std::vector<std::string> splitter(const std::string &istr,bool *continuation_p = 0);
 
     // split sentences from lines of input
-    std::size_t splitter(std::istream& is, std::ostream& os);
+    std::pair<std::size_t,std::size_t> splitter(std::istream& is, std::ostream& os);
 
 }; // end class Tokenizer
 

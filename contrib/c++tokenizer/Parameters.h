@@ -33,6 +33,7 @@ struct Parameters
     bool drop_bad_p;
     bool split_p;
     bool notokenization_p;
+    bool para_marks_p;
 
 	Parameters();
 

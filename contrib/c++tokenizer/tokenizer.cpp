@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
+#include <unordered_set>
 #include <glib.h>
 
 namespace {
@@ -463,6 +464,7 @@ Tokenizer::Tokenizer(const Parameters& _)
         , drop_bad_p(_.drop_bad_p)
         , splits_p(_.split_p)
         , verbose_p(_.verbose_p)
+        , para_marks_p(_.para_marks_p)
 {
 }
 
@@ -1676,221 +1678,486 @@ Tokenizer::detokenize(std::istream& is, std::ostream& os)
 }
 
 
-std::string
-Tokenizer::splitter(const std::string &istr) {
-    std::ostringstream ostr0;
-    gchar *ccur = (gchar *)istr.c_str();
-    gchar *cend = ccur + istr.size();
+std::vector<std::string>
+Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
+    std::vector<std::string> parts;
     glong ncp = 0;
-    gunichar *ucs4 = g_utf8_to_ucs4_fast(ccur,cend-ccur,&ncp);
-    size_t n_nongraph1 = 0;
-    size_t n_nongraph2 = 0;
-    bool beginning = true;
-    const glong invalid = 1L;
-    glong term_start = invalid;
-    glong term_end = invalid;
-    glong term_post = invalid;
-    glong term_more = invalid;
+    glong ocp = 0;
+    glong icp = 0;
+    gunichar *ucs4 = g_utf8_to_ucs4_fast((gchar *)istr.c_str(),istr.size(),&ncp);
+    if (ncp == 0) {
+        g_free(ucs4);
+        return parts;
+    }
+    gunichar *uout = (gunichar *)g_malloc0(2*ncp*sizeof(gunichar));
+    
+    const wchar_t GENL_HYPH = L'\u2010';
+    const wchar_t IDEO_STOP = L'\u3002';
+    const wchar_t KANA_MDOT = L'\u30FB';
+    const wchar_t WAVE_DASH = L'\u301C';
+    //const wchar_t WAVY_DASH = L'\u3030';
+    const wchar_t KANA_DHYP = L'\u30A0';
+    const wchar_t SMAL_HYPH = L'\uFE63';
+    const wchar_t WIDE_EXCL = L'\uFF01';
+    const wchar_t WIDE_PCTS = L'\uFF05';
+    //const wchar_t WIDE_HYPH = L'\uFF0D';
+    const wchar_t WIDE_STOP = L'\uFF0E';
+    const wchar_t WIDE_QUES = L'\uFF1F';
+    const wchar_t INVERT_QM = L'\u00BF';
+    const wchar_t INVERT_EX = L'\u00A1';
 
-    for (glong icp = 0; icp <= ncp; ++icp) {
-        if (term_post != invalid) {
-            gchar * pre = g_ucs4_to_utf8(ucs4+term_start,term_end - term_start,0,0,0);
-            ostr0 << pre;
-            g_free(pre);
-            ostr0 << std::endl;
-            gchar *post = g_ucs4_to_utf8(ucs4+term_post,icp-term_post,0,0,0);
-            ostr0 << post;
-            g_free(post);
-            term_start = term_end = term_post = term_more = invalid;
-            n_nongraph1 = n_nongraph2 = 0;
-        }
+    wchar_t currwc = 0;
 
-        if (icp == ncp)
-            break;
+    std::size_t init_word = 0;
+    std::size_t fini_word = 0;
+    std::size_t finilen = 0;
+    std::size_t dotslen = 0;
 
-        if (!g_unichar_isgraph(ucs4[icp])) {
-            if (term_start != invalid && term_end == invalid) {
-                term_end = icp;
-            }
-            if (ucs4[icp] == L'\n') {
-                beginning = true;
-                n_nongraph2 = n_nongraph1 = 0;
-                term_start = term_end = term_post = term_more = invalid;
-            } else if (!beginning) {
-                if (term_more)
-                    n_nongraph2++;
-                else
-                    n_nongraph1++;
-            }
-            continue;
-        } 
-        beginning = false;
-        GUnicodeType icp_type = g_unichar_type(ucs4[icp]);
-        
-        if (g_unichar_ispunct(ucs4[icp])) {
-            switch (ucs4[icp]) {
-            case L'?': 
-            case L'!':
-            case L'.':
-                if (term_start == invalid) {
-                    term_start = icp;
-                    continue;
-                }
-                break;
-            case L'\'':
-            case L'\"':
-            case L'(':
-            case L'[':
-            case L'¿':
-            case L'¡':
-                if (term_end != invalid && n_nongraph1 && !n_nongraph2) {
-                    term_more = term_post = icp;
-                    continue;
-                }
-                break;
-            }
-        } 
+    static std::size_t SEQ_LIM = 6;
 
-        switch (icp_type) {
-        case G_UNICODE_INITIAL_PUNCTUATION:
-            if (term_end != invalid && n_nongraph1 && !n_nongraph2) {
-                term_post = icp;
-                term_more = invalid;
-                continue;
-            } 
-            break;
-        case G_UNICODE_FINAL_PUNCTUATION:
-            if (term_end != invalid && n_nongraph1 && !n_nongraph2) {
-                if (!n_nongraph2) {
-                    term_more = term_post = icp;
-                }
-                continue;
-            } 
+    charclass_t prev_class = empty;
+    charclass_t curr_class = empty;
+    charclass_t seq[SEQ_LIM] = { empty };
+    std::size_t pos[SEQ_LIM] = { 0 };
+    std::size_t seqpos = 0;
+
+    GUnicodeType curr_type = G_UNICODE_UNASSIGNED;
+    //bool prev_word_p = false;
+    bool curr_word_p = false;
+
+    std::vector<std::size_t> breaks;
+    std::unordered_set<std::size_t> suppress;
+    
+    for (; icp <= ncp; ++icp) {
+        currwc = wchar_t(ucs4[icp]);
+        curr_type = g_unichar_type(currwc);
+        prev_class = curr_class;
+        //prev_word_p = curr_word_p;
+
+        switch (curr_type) {
+        case G_UNICODE_DECIMAL_NUMBER:
+        case G_UNICODE_OTHER_NUMBER:
+        case G_UNICODE_LOWERCASE_LETTER:
+            curr_class = numba;
+            curr_word_p = true;
+            break; 
+        case G_UNICODE_MODIFIER_LETTER:
+        case G_UNICODE_OTHER_LETTER:
+            curr_class = letta;
+            curr_word_p = true;
             break;
         case G_UNICODE_UPPERCASE_LETTER:
         case G_UNICODE_TITLECASE_LETTER:
-            if (term_end != invalid && n_nongraph1) {
-                term_post = icp;
-                continue;
+            curr_class = upper;
+            curr_word_p = true;
+            break;
+        case G_UNICODE_OPEN_PUNCTUATION:
+        case G_UNICODE_INITIAL_PUNCTUATION:
+            curr_class = pinit;
+            curr_word_p = false;
+            break;
+        case G_UNICODE_DASH_PUNCTUATION:
+            curr_class = hyphn;
+            if (currwc <= GENL_HYPH) {
+                curr_word_p = true;
+            } else if (currwc >= SMAL_HYPH) {
+                curr_word_p = true;
+            } else {
+                curr_word_p = currwc >= WAVE_DASH && curr_word_p <= KANA_DHYP; 
+            }
+            break;
+        case G_UNICODE_CLOSE_PUNCTUATION:
+        case G_UNICODE_FINAL_PUNCTUATION:
+            curr_class = pfini;
+            curr_word_p = false;
+            break;
+        case G_UNICODE_OTHER_PUNCTUATION:
+            if (currwc == L'\'' || currwc == L'"') {
+                curr_class = quote;
+                curr_word_p = false;
+            } else if (currwc == L'.' || currwc == IDEO_STOP || currwc == WIDE_STOP || currwc == KANA_MDOT) {
+                curr_class = stops;
+                curr_word_p = true;
+            } else if (currwc == L'?' || currwc == '!' || currwc == WIDE_EXCL || currwc == WIDE_QUES) {
+                curr_class = marks;
+                curr_word_p = false;
+            } else if (currwc == INVERT_QM || currwc == INVERT_EX) {
+                curr_class = pinit;
+                curr_word_p = false;
+            } else if ( currwc == L'%' || currwc == WIDE_PCTS) {
+                curr_class = pfpct;
+                curr_word_p = true;
+            } else {
+                curr_class = empty;
+                curr_word_p = false;
             }
             break;
         default:
-            break;
-        } 
-        term_start = term_end = term_post = term_more = invalid;
-        n_nongraph1 = n_nongraph2 = 0;
-    }
-
-    std::vector<std::string> tokens = split(ostr0.str());
-    size_t ntok = tokens.size();
-    std::ostringstream ostr1;
-    for (size_t itok = 0; itok < ntok - 1; ++itok) {
-        std::string& word(tokens[itok]);
-        if (RE2::FullMatch(word,split_word)) {        
-            size_t nchar = word.size();
-            size_t ndot = 0;
-            size_t ntrail = 0;
-            gunichar gu = 0;
-            gchar *base = (gchar *)word.c_str();
-            gchar *prev = 0;
-
-            while (nchar && word.at(nchar-1) == '.') {
-                ++ndot;
-                --nchar;
+            if (!g_unichar_isgraph(currwc)) {
+                curr_class = blank;
+            } else {
+                curr_class = empty;
             }
-            while (nchar) {
-                switch (word.at(nchar-1)) {
-                    case '\'':
-                    case '"':
-                    case ')':
-                    case ']':
-                    case '%':
-                        ++ntrail;
-                        --nchar;
-                        continue;
-                default:
-                    prev = g_utf8_find_prev_char(base,base+nchar);
-                    gu = prev ? g_utf8_get_char(prev) : 0;
-                    if (gu && g_unichar_type(gu) == G_UNICODE_FINAL_PUNCTUATION) {
-                        ++ntrail;
-                        --nchar;
-                        continue;
+            curr_word_p = false;
+            break;
+        }
+        
+        //  # condition for prefix test
+        //  $words[$i] =~ /([\p{IsAlnum}\.\-]*)([\'\"\)\]\%\p{IsPf}]*)(\.+)$/
+        //  $words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/
+
+        bool check_abbr_p = false;
+        if (curr_class == stops) {
+            if (prev_class != stops) {
+                dotslen = 1;
+            } else {
+                dotslen++;
+            }
+        } else if (curr_word_p) {
+            if (!fini_word) {
+                init_word = ocp;
+            } 
+            fini_word = ocp+1;
+            dotslen = finilen = 0;
+        } else if (curr_class >= quote && curr_class <= pfpct && curr_class != pinit) {
+            finilen++;
+            dotslen = 0;
+        } else if (dotslen) {
+            check_abbr_p = fini_word > init_word;
+            dotslen = 0;
+        } else {
+            init_word = fini_word = 0;
+        }
+        
+        if (check_abbr_p) {
+            // not a valid word character or post-word punctuation character:  check word
+            std::wstring k((wchar_t *)uout+init_word,fini_word-init_word);
+            if (finilen == 0 && nbpre_gen_ucs4.find(k) != nbpre_gen_ucs4.end()) {
+                suppress.insert(std::size_t(ocp));
+                seqpos = 0;
+            } else {
+                bool acro_p = false;
+                bool found_upper_p = false;
+                for (glong ii = init_word; ii < ocp; ++ii) {
+                    if (uout[ii] == L'.') {
+                        acro_p = true;
+                    } else if (acro_p) {
+                        if (uout[ii] != L'.' && uout[ii] != L'-') {
+                            GUnicodeType i_type = g_unichar_type(uout[ii]);
+                            if (i_type != G_UNICODE_UPPERCASE_LETTER) {
+                                acro_p = false;
+                            } else {
+                                found_upper_p = true;
+                            }
+                        }
                     }
                 }
-                break;
+                if (acro_p && found_upper_p) {
+                    suppress.insert(std::size_t(ocp));
+                    seqpos = 0;
+                } else {
+                    // check forward:
+                    // $words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/
+                    int fcp = icp;
+                    int state = (curr_class == pinit || curr_class == quote) ? 1 : 0;
+                    bool num_p = true;
+                    while (fcp < ncp) {
+                        GUnicodeType f_type = g_unichar_type(ucs4[fcp]);
+                        bool f_white = g_unichar_isgraph(ucs4[fcp]);
+                        switch (state) {
+                        case 0:
+                            if (!f_white) {
+                                ++fcp;
+                                continue;
+                            } else if (f_type == G_UNICODE_INITIAL_PUNCTUATION || f_type == G_UNICODE_OPEN_PUNCTUATION ||
+                                       ucs4[fcp] == L'"'|| ucs4[fcp] == '\'' || ucs4[fcp] == INVERT_QM || ucs4[fcp] == INVERT_EX) {
+                                num_p = false;
+                                state = 1;
+                                ++fcp;
+                                continue;
+                            } else if (f_type == G_UNICODE_UPPERCASE_LETTER || f_type == G_UNICODE_DECIMAL_NUMBER) {
+                                if (num_p)
+                                    num_p = f_type == G_UNICODE_DECIMAL_NUMBER;
+                                state = 3;
+                                ++fcp;
+                            }
+                            break;
+                        case 1:
+                            if (!f_white) {
+                                ++fcp;
+                                state = 2;
+                                continue;
+                            } else if (f_type == G_UNICODE_INITIAL_PUNCTUATION || f_type == G_UNICODE_OPEN_PUNCTUATION ||
+                                       ucs4[fcp] == L'"'|| ucs4[fcp] == '\'' || ucs4[fcp] == INVERT_QM || ucs4[fcp] == INVERT_EX) {
+                                ++fcp;
+                                continue;
+                            } else if (f_type == G_UNICODE_UPPERCASE_LETTER || f_type == G_UNICODE_DECIMAL_NUMBER) {
+                                if (num_p)
+                                    num_p = f_type == G_UNICODE_DECIMAL_NUMBER;
+                                state = 3;
+                                ++fcp;
+                            }
+                            break;
+                        case 2:
+                            if (!f_white) {
+                                ++fcp;
+                                continue;
+                            } else if (f_type == G_UNICODE_UPPERCASE_LETTER || f_type == G_UNICODE_DECIMAL_NUMBER) {
+                                if (num_p)
+                                    num_p = f_type == G_UNICODE_DECIMAL_NUMBER;
+                                state = 3;
+                                ++fcp;
+                                break;
+                            }
+                            break;
+                        }
+                        break;
+                    }
+                    if (num_p && state == 3 && nbpre_num_ucs4.find(k) != nbpre_num_ucs4.end()) {
+                        suppress.insert(std::size_t(ocp));
+                        seqpos = 0;
+                    }
+                }
             }
+            init_word = fini_word = 0;
+        }
+ 
+        if (seqpos >= SEQ_LIM) {
+            seqpos = 0;
+        }
+
+        if (curr_class == stops || curr_class == marks) {
+            if (!seqpos) {
+                seq[seqpos] = curr_class;
+                pos[seqpos] = ocp;
+                seqpos++;
+                uout[ocp++] = gunichar(currwc);
+                continue;
+            } else if (seq[seqpos] != curr_class || (seqpos > 0 && curr_class == marks)) {
+                seqpos = 0;
+            } else {
+                uout[ocp++] = gunichar(currwc);
+                continue;
+            }
+        }
+        
+        if (!seqpos) {
+            if (curr_class != blank) {
+                uout[ocp++] = gunichar(currwc);
+            } else if (curr_class != prev_class) {
+                uout[ocp++] = L' ';
+            }
+            continue;
+        }
             
-            bool non_break_p = false;
-            if (nchar && !ntrail && nbpre_gen_set.find(word.substr(0,nchar)) != nbpre_gen_set.end()) {
-                non_break_p = true;
-            }  else {
-                nchar = word.size();
-                ndot = 0;
-                size_t nupper = 0;
-                size_t nlead = 0;
-                size_t ichar = 0;
-                for (; ichar < nchar; ++ichar) {
-                    char &byte(word.at(ichar));
-                    if (byte < 0x7f) {
-                        if ((byte <= 'Z' && byte >= 'A') || byte == '-') {
-                            nupper++;
-                            continue;
+        if (curr_class == blank) {
+            if (prev_class != blank) {
+                seq[seqpos] = blank;
+                pos[seqpos] = ocp;
+                seqpos++;
+                uout[ocp++] = L' ';
+            }
+            if (icp < ncp)
+                continue;
+        } 
+
+        if (curr_class >= quote && curr_class <= pfini) {
+            if (prev_class < quote || prev_class > pfini) {
+                seq[seqpos] = curr_class;
+                pos[seqpos] = ocp;
+                seqpos++;
+            } else if (curr_class == quote && prev_class != curr_class) {
+                curr_class = prev_class;
+            } else if (prev_class == quote) {
+                seq[seqpos] = prev_class = curr_class;
+            }
+            uout[ocp++] = gunichar(currwc);
+            continue;
+        }
+
+        //	$text =~ s/([?!]) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
+        //	#multi-dots followed by sentence starters 2
+        //  $text =~ s/(\.[\.]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
+        //  # add breaks for sentences that end with some sort of punctuation inside a quote or parenthetical and are followed by a possible sentence starter punctuation and upper case 4
+        //  $text =~ s/([?!\.][\ ]*[\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[\p{IsUpper}])/$1\n$2/g;
+        //  # add breaks for sentences that end with some sort of punctuation are followed by a sentence starter punctuation and upper case 8
+        //  $text =~ s/([?!\.]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[\p{IsUpper}])/$1\n$2/g;
+
+        std::size_t iblank = 0;
+        if (curr_class == upper || icp == ncp) {
+            if (seqpos && (seq[0] == stops || seq[0] == marks)) {
+                switch (seqpos) {
+                case 2:
+                    if (seq[1] == blank)
+                        iblank = 1;
+                    break;
+                case 3:
+                    switch (seq[1]) {
+                    case blank:
+                        if (seq[2] == quote || seq[2] == pinit)
+                            iblank = 1;
+                        break;
+                    case quote:
+                    case pfini:
+                        if (seq[2] == blank)
+                            iblank = 2;
+                        break;
+                    default:
+                        break;
+                    }
+                    break;
+                case 4:
+                    switch (seq[1]) {
+                    case blank:
+                        iblank = 1;
+                        switch (seq[2]) {
+                        case quote:
+                            switch (seq[3]) {
+                            case quote:
+                            case pinit:
+                                break;
+                            case blank:
+                                iblank = 3;
+                                break;
+                            default:
+                                iblank = 0; // invalid
+                                break;
+                            }
+                            break;
+                        case pinit:
+                            if (seq[3] != blank)
+                                iblank = 0; // invalid
+                            break;
+                        default:
+                            iblank = 0; // invalid
+                            break;
                         }
-                        if (byte == '.') {
-                            ndot++;
-                            if (!nupper)
-                                nlead++;
-                            continue;
-                        }
+                        break;
+                    case quote:
+                    case pfini:
+                        iblank = (seq[2] == blank && (seq[3] == quote || seq[3] == pinit)) ? 2 : 0;
+                        break;
+                    default:
+                        iblank = 0; // invalid
+                        break;
+                    }
+                    break;
+                case 5:
+                    iblank = (seq[1] == blank) ? 2 : 1;
+                    if (seq[iblank] == quote || seq[iblank] == pfini)
+                        iblank++;
+                    if (seq[iblank] != blank) {
+                        iblank = 0; // invalid
                     } else {
-                        gu = g_utf8_get_char(base+ichar);
-                        if (gu && g_unichar_type(gu) == G_UNICODE_UPPERCASE_LETTER) {
-                            nupper++;
-                            continue;
+                        if (seq[iblank+1] != quote && seq[iblank+1] != pinit) {
+                            iblank = 0; // invalid
+                        } else if (iblank+2 < seqpos) {
+                            if (seq[iblank+2] != blank)
+                                iblank = 0; // invalid
                         }
                     }
                     break;
                 }
-                non_break_p = ichar == nchar && nlead && nupper && ndot > nlead;
             }
-            if (!non_break_p && RE2::FullMatch(tokens[itok+1],split_word2)) {
-                if (nchar && nbpre_num_set.find(word.substr(0,nchar)) != nbpre_num_set.end()
-                    && std::isdigit(tokens[itok+1].at(0))) {
-                    non_break_p = true;
-                }
+            if (iblank && suppress.find(pos[iblank]) == suppress.end()) {
+                breaks.push_back(pos[iblank]);
+                suppress.insert(pos[iblank]);
             }
-            ostr1 << word;
-            if (!non_break_p) {
-                ostr1 << std::endl;
-            } else {
-                ostr1 << ' ';
-            }
-		} else {
-            ostr1 << word << ' ';
         }
-	}
-	ostr1 << tokens[ntok-1] << std::endl;
-    return ostr1.str();
+
+        uout[ocp++] = gunichar(currwc);
+        seqpos = 0;
+    }
+
+    std::vector<std::size_t>::iterator it = breaks.begin();
+    glong iop = 0;
+    while (iop < ocp) {
+        glong endpos = it == breaks.end() ? ocp : *it++;
+        glong nextpos = endpos + 1;
+        while (endpos > iop) {
+            std::size_t chkpos = endpos-1;
+            if (uout[chkpos] == L'\n' || uout[chkpos] == L' ') {
+                endpos = chkpos;
+                continue;
+            } 
+            if (g_unichar_isgraph(uout[chkpos])) 
+                break;
+            endpos = chkpos;
+        }
+        if (endpos > iop) {
+            gchar *pre = g_ucs4_to_utf8(uout+iop,endpos-iop,0,0,0);
+            parts.push_back(std::string(pre));
+            g_free(pre);
+        }
+        if (continuation_ptr)
+            *continuation_ptr = endpos > iop;
+        iop = nextpos;
+    } 
+            
+    g_free(uout);
+    g_free(ucs4);
+    
+    return parts;
 }
 
 
-std::size_t
+std::pair<std::size_t,std::size_t>
 Tokenizer::splitter(std::istream& is, std::ostream& os) 
 {
-    size_t line_no = 0;
+    std::pair<std::size_t,std::size_t> counts = { 0, 0 };
+    bool continuation_p = false;
+    bool pending_gap = false;
+    bool paragraph_p = false;
+
     while (is.good() && os.good()) {
         std::string istr;
+
         std::getline(is,istr);
-        line_no ++;
-        if (istr.empty()) 
+        counts.first++;
+
+        if (istr.empty() && (is.eof() ||!para_marks_p))
             continue;
-        if (skip_xml_p && (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) {
-            os << istr << std::endl;
+
+        if (skip_xml_p && (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) 
+            continue;
+
+        std::vector<std::string> sentences(splitter(istr,&continuation_p));
+        if (sentences.empty()) {
+            if (!paragraph_p) {
+                if (pending_gap)
+                    os << std::endl;
+                pending_gap = false;
+                if (para_marks_p)
+                    os << "<P>" << std::endl;
+                paragraph_p = true;
+            }
+            continue;
+        }
+
+        paragraph_p = false;
+        std::size_t nsents = sentences.size();
+        counts.second += nsents;
+
+        if (pending_gap) {
+            os << " ";
+            pending_gap = false;
+        }
+        
+        for (std::size_t ii = 0; ii < nsents-1; ++ii) 
+            os << sentences[ii] << std::endl;
+        
+        os << sentences[nsents-1];
+        if (continuation_p) {
+            pending_gap = true;
         } else {
-            os << splitter(istr) << std::endl;
+            os << std::endl;
         }
     }
-    return line_no;
+
+    if (pending_gap)
+        os << std::endl;
+
+    return counts;
 }
 
 
