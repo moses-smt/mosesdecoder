@@ -1322,6 +1322,7 @@ Tokenizer::quik_tokenize(const std::string& buf)
                         switch (next_type) {
                         case G_UNICODE_DECIMAL_NUMBER:
                         case G_UNICODE_LOWERCASE_LETTER:
+                        case G_UNICODE_UPPERCASE_LETTER:
                             break;
                         default:
                             pre_break_p = true;
