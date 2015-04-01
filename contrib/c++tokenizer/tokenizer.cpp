@@ -1823,8 +1823,14 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
         } else if (curr_class >= quote && curr_class <= pfpct && curr_class != pinit) {
             finilen++;
             dotslen = 0;
+            init_word = fini_word = 0;
         } else if (dotslen) {
-            check_abbr_p = fini_word > init_word;
+            if (fini_word > init_word) {
+                if (prev_class!=stops || seqpos<1 || (ocp-pos[seqpos-1])<2)
+                    check_abbr_p = false;
+                else
+                    check_abbr_p = dotslen < 2;
+            }
             dotslen = 0;
         } else {
             init_word = fini_word = 0;
@@ -1934,7 +1940,17 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
                 seqpos++;
                 uout[ocp++] = gunichar(currwc);
                 continue;
-            } else if (seq[seqpos] != curr_class || (seqpos > 0 && curr_class == marks)) {
+            } else if (seqpos>1 && (seq[seqpos-1]==blank || seq[seqpos-1]==quote || seq[seqpos-1]==pfini)) {
+                // handle "[?!.] ..." which is common in some corpora
+                if (seq[seqpos-2] == curr_class || seq[seqpos-2] == marks) {
+                    seqpos--;
+                    uout[ocp++] = gunichar(currwc);
+                    continue;
+                }
+                seqpos = 0;
+            } else if (seq[seqpos-1] != curr_class) {
+                seqpos = 0;
+            } else if (curr_class == marks) {
                 seqpos = 0;
             } else {
                 uout[ocp++] = gunichar(currwc);
@@ -2028,6 +2044,10 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
                         case pinit:
                             if (seq[3] != blank)
                                 iblank = 0; // invalid
+                            break;
+                        case pfini:
+                            if (seq[3] == blank)
+                                iblank = 3;
                             break;
                         default:
                             iblank = 0; // invalid
