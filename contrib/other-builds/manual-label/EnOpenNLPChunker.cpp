@@ -4,8 +4,8 @@
  *  Created on: 28 Feb 2014
  *      Author: hieu
  */
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <algorithm>
 #include <fstream>
 #include <boost/algorithm/string/predicate.hpp>

@@ -1,5 +1,5 @@
 #include "FileHandler.h"
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef WIN32
 #define popen(A, B) _popen(A, B)

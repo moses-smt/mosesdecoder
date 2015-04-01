@@ -20,6 +20,14 @@ while(my $source = <SOURCE>) {
   chop($source);
   chop($target);
 
+  # remove markup
+  foreach my $line (\$source,\$target) {
+    $$line =~ s/\<[^\>]+\>//g;
+    $$line =~ s/\s+/ /g;
+    $$line =~ s/^ //;
+    $$line =~ s/ $//;
+  }
+
   # no factors
   if (!defined($alignment_factors)) {
     print "$source ||| $target\n";

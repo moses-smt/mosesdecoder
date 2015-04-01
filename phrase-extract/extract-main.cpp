@@ -11,8 +11,8 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <stdlib.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cassert>
 #include <cstring>
 #include <sstream>
 #include <map>

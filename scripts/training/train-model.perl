@@ -87,6 +87,7 @@ my($_EXTERNAL_BINDIR,
    	$_TARGET_SYNTAX,
    	$_GLUE_GRAMMAR,
    	$_GLUE_GRAMMAR_FILE,
+   	$_DONT_TUNE_GLUE_GRAMMAR,
    	$_UNKNOWN_WORD_LABEL_FILE,
    	$_GHKM,
    	$_GHKM_TREE_FRAGMENTS,
@@ -96,6 +97,8 @@ my($_EXTERNAL_BINDIR,
    	$_GHKM_SOURCE_LABELS_FILE,
    	$_GHKM_PARTS_OF_SPEECH,
    	$_GHKM_PARTS_OF_SPEECH_FILE,
+   	$_GHKM_PARTS_OF_SPEECH_FACTOR,
+    $_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS,
    	$_PCFG,
    	@_EXTRACT_OPTIONS,
    	@_SCORE_OPTIONS,
@@ -103,6 +106,7 @@ my($_EXTERNAL_BINDIR,
    	$_ALT_DIRECT_RULE_SCORE_1, 
    	$_ALT_DIRECT_RULE_SCORE_2, 
    	$_UNKNOWN_WORD_SOFT_MATCHES_FILE,
+   	$_USE_SYNTAX_INPUT_WEIGHT_FEATURE,
    	$_OMIT_WORD_ALIGNMENT,
    	$_FORCE_FACTORED_FILENAMES,
    	$_MEMSCORE, 
@@ -125,7 +129,8 @@ my($_EXTERNAL_BINDIR,
    	$_NUM_LATTICE_FEATURES, 
    	$IGNORE, 
    	$_FLEXIBILITY_SCORE, 
-   	$_EXTRACT_COMMAND);
+   	$_EXTRACT_COMMAND,
+   	$_SCORE_COMMAND);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -194,6 +199,7 @@ $_HELP = 1
 		       's2t' => \$_S2T,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
+		       'dont-tune-glue-grammar' => \$_DONT_TUNE_GLUE_GRAMMAR,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'unknown-word-soft-matches-file=s' => \$_UNKNOWN_WORD_SOFT_MATCHES_FILE, # give dummy label to unknown word, and allow soft matches to all other labels (with cost determined by sparse features)
 		       'ghkm' => \$_GHKM,
@@ -204,6 +210,8 @@ $_HELP = 1
                'ghkm-source-labels-file=s' => \$_GHKM_SOURCE_LABELS_FILE,
                'ghkm-parts-of-speech' => \$_GHKM_PARTS_OF_SPEECH,
                'ghkm-parts-of-speech-file=s' => \$_GHKM_PARTS_OF_SPEECH_FILE,
+               'ghkm-parts-of-speech-factor' => \$_GHKM_PARTS_OF_SPEECH_FACTOR,
+               'ghkm-strip-bitpar-nonterminal-labels' => \$_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS,
 		       'pcfg' => \$_PCFG,
 		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
 		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
@@ -211,6 +219,7 @@ $_HELP = 1
 		       'score-options=s' => \@_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
+		       'use-syntax-input-weight-feature' => \$_USE_SYNTAX_INPUT_WEIGHT_FEATURE,
 		       'xml' => \$_XML,
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
@@ -239,6 +248,7 @@ $_HELP = 1
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
 		       'extract-command=s' => \$_EXTRACT_COMMAND,
+		       'score-command=s' => \$_SCORE_COMMAND,
                );
 
 if ($_HELP) {
@@ -443,7 +453,12 @@ my $EPPEX = "$SCRIPTS_ROOTDIR/../bin/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/../bin/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/giza2bal.pl";
 
-my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
+my $PHRASE_SCORE;
+if (defined($_SCORE_COMMAND)) {
+  $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/$_SCORE_COMMAND";
+} else {
+  $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
+}
 $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_SCORE";
 
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
@@ -1543,6 +1558,8 @@ sub extract_phrase {
           $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if defined($_PHRASE_ORIENTATION_PRIORS_FILE);
           $cmd .= " --SourceLabels" if $_GHKM_SOURCE_LABELS;
           $cmd .= " --PartsOfSpeech" if $_GHKM_PARTS_OF_SPEECH;
+          $cmd .= " --PartsOfSpeechFactor" if $_GHKM_PARTS_OF_SPEECH_FACTOR;
+          $cmd .= " --StripBitParLabels" if $_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS;
         }
         else
         {
@@ -2120,6 +2137,7 @@ sub create_ini {
    # glue grammar
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
+     my $tuneable = defined($_DONT_TUNE_GLUE_GRAMMAR) ? "false" : "true";
      my $feature_name = "PhraseDictionaryMemory";
      if ($_S2T) {
        $feature_name = "RuleTable";
@@ -2129,8 +2147,14 @@ sub create_ini {
        $glue_weight = -100.0;
      }
 
-     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
+     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0 tuneable=$tuneable\n";
      $weight_spec .= "TranslationModel$i= $glue_weight\n";
+   }
+
+   # SyntaxInputWeight FF
+   if ($_USE_SYNTAX_INPUT_WEIGHT_FEATURE) {
+     $feature_spec .= "SyntaxInputWeight name=SyntaxInputWeight0\n";
+     $weight_spec .= "SyntaxInputWeight0= 0.1\n";
    }
 
    # generation model

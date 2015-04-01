@@ -36,7 +36,7 @@ class Phrase;
 namespace OnDiskPt
 {
 
-typedef std::pair<UINT64, UINT64>  AlignPair;
+typedef std::pair<uint64_t, uint64_t>  AlignPair;
 typedef std::vector<AlignPair> AlignType;
 
 class Vocab;
@@ -53,15 +53,15 @@ protected:
   std::string m_sparseFeatures, m_property;
 
   std::vector<float> m_scores;
-  UINT64 m_filePos;
+  uint64_t m_filePos;
 
   size_t WriteAlignToMemory(char *mem) const;
   size_t WriteScoresToMemory(char *mem) const;
   size_t WriteStringToMemory(char *mem, const std::string &str) const;
 
-  UINT64 ReadAlignFromFile(std::fstream &fileTPColl);
-  UINT64 ReadScoresFromFile(std::fstream &fileTPColl);
-  UINT64 ReadStringFromFile(std::fstream &fileTPColl, std::string &outStr);
+  uint64_t ReadAlignFromFile(std::fstream &fileTPColl);
+  uint64_t ReadScoresFromFile(std::fstream &fileTPColl);
+  uint64_t ReadStringFromFile(std::fstream &fileTPColl, std::string &outStr);
 
 public:
   TargetPhrase() {
@@ -95,7 +95,7 @@ public:
   char *WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed) const;
   void Save(OnDiskWrapper &onDiskWrapper);
 
-  UINT64 GetFilePos() const {
+  uint64_t GetFilePos() const {
     return m_filePos;
   }
   float GetScore(size_t ind) const {
@@ -108,8 +108,8 @@ public:
                                       , const Moses::PhraseDictionary &phraseDict
                                       , const std::vector<float> &weightT
                                       , bool isSyntax) const;
-  UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
-  UINT64 ReadFromFile(std::fstream &fileTP);
+  uint64_t ReadOtherInfoFromFile(uint64_t filePos, std::fstream &fileTPColl);
+  uint64_t ReadFromFile(std::fstream &fileTP);
 
   virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 

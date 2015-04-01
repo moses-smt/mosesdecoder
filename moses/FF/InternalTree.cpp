@@ -115,6 +115,44 @@ void InternalTree::Combine(const std::vector<TreePointer> &previous)
   }
 }
 
+//take tree with virtual nodes (created with relax-parse --RightBinarize or --LeftBinarize) and reconstruct original tree.
+void InternalTree::Unbinarize()
+{
+
+  // nodes with virtual label cannot be unbinarized
+  if (m_value.empty() || m_value[0] == '^') {
+    return;
+  }
+
+  //if node has child that is virtual node, get unbinarized list of children
+  for (std::vector<TreePointer>::iterator it = m_children.begin(); it != m_children.end(); ++it) {
+    if (!(*it)->IsTerminal() && (*it)->GetLabel()[0] == '^') {
+      std::vector<TreePointer> new_children;
+      GetUnbinarizedChildren(new_children);
+      m_children = new_children;
+      break;
+    }
+  }
+
+  //recursion
+  for (std::vector<TreePointer>::iterator it = m_children.begin(); it != m_children.end(); ++it) {
+    (*it)->Unbinarize();
+  }
+}
+
+//get the children of a node in a binarized tree; if a child is virtual, (transitively) replace it with its children
+void InternalTree::GetUnbinarizedChildren(std::vector<TreePointer> &ret) const
+{
+  for (std::vector<TreePointer>::const_iterator itx = m_children.begin(); itx != m_children.end(); ++itx) {
+    const std::string &label = (*itx)->GetLabel();
+    if (!label.empty() && label[0] == '^') {
+      (*itx)->GetUnbinarizedChildren(ret);
+    }
+    else {
+      ret.push_back(*itx);
+    }
+  }
+}
 
 bool InternalTree::FlatSearch(const std::string & label, std::vector<TreePointer>::const_iterator & it) const
 {

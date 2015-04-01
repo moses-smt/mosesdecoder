@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
-
 namespace Moses
 {
 
@@ -71,8 +70,11 @@ protected:
   const WordsRange	m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float             m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
-  typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
-  _ScoreCacheMap m_lexReorderingScores;
+  // typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
+  // _ScoreCacheMap m_lexReorderingScores; 
+  // m_lexReorderingScores was moved to TargetPhrase.h so that phrase tables 
+  // can add information (such as lexical reordering scores) to target phrases
+  // during lookup.
 
 public:
   struct Better {
@@ -154,15 +156,15 @@ public:
   }
 
   /** returns cached scores */
-  inline const Scores *GetLexReorderingScores(const LexicalReordering *scoreProducer) const {
-    _ScoreCacheMap::const_iterator it = m_lexReorderingScores.find(scoreProducer);
-    if(it == m_lexReorderingScores.end())
-      return NULL;
-    else
-      return &(it->second);
-  }
+  // inline 
+  const Scores*
+  GetLexReorderingScores(const LexicalReordering *scoreProducer) const;
+  // {
+  //   return m_targetPhrase.GetExtraScores(scoreProducer);
+  // }
 
-  void CacheLexReorderingScores(const LexicalReordering &scoreProducer, const Scores &score);
+  void CacheLexReorderingScores(const LexicalReordering &scoreProducer, 
+				const Scores &score);
 
   TO_STRING();
 

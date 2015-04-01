@@ -43,7 +43,7 @@ class Word
 
 private:
   bool m_isNonTerminal;
-  UINT64 m_vocabId;
+  uint64_t m_vocabId;
 
 public:
   explicit Word() {
@@ -67,7 +67,7 @@ public:
   size_t ReadFromMemory(const char *mem);
   size_t ReadFromFile(std::fstream &file);
 
-  void SetVocabId(UINT32 vocabId) {
+  void SetVocabId(uint32_t vocabId) {
     m_vocabId = vocabId;
   }
 

@@ -622,25 +622,16 @@ void
 TranslationOptionCollection::
 CacheLexReordering()
 {
-  typedef StatefulFeatureFunction sfFF;
-  std::vector<const sfFF*> const& all_sfff
-  = sfFF::GetStatefulFeatureFunctions();
   size_t const stop = m_source.GetSize();
-
-  BOOST_FOREACH(sfFF const* ff, all_sfff) {
-    if (typeid(*ff) != typeid(LexicalReordering)) continue;
-    LexicalReordering const& lr = static_cast<const LexicalReordering&>(*ff);
-    for (size_t s = 0 ; s < stop ; s++) {
-      BOOST_FOREACH(TranslationOptionList const& tol, m_collection[s]) {
-        BOOST_FOREACH(TranslationOption* to, tol) {
-          Phrase const& sphrase = to->GetInputPath().GetPhrase();
-          Phrase const& tphrase = to->GetTargetPhrase();
-          Scores score = lr.GetProb(sphrase,tphrase);
-          if (!score.empty()) to->CacheLexReorderingScores(lr, score);
-        }
-      }
+  typedef StatefulFeatureFunction sfFF;
+  BOOST_FOREACH(sfFF const* ff, sfFF::GetStatefulFeatureFunctions()) 
+    {
+      if (typeid(*ff) != typeid(LexicalReordering)) continue;
+      LexicalReordering const& lr = static_cast<const LexicalReordering&>(*ff);
+      for (size_t s = 0 ; s < stop ; s++) 
+	BOOST_FOREACH(TranslationOptionList& tol, m_collection[s]) 
+	  lr.SetCache(tol);
     }
-  }
 }
 
 //! list of trans opt for a particular span

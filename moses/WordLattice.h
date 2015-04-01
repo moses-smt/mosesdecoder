@@ -9,6 +9,8 @@
 namespace Moses
 {
 
+class TranslationTask; 
+
 /** An input to the decoder that represent a word lattice.
  *  @todo why is this inherited from confusion net?
  */

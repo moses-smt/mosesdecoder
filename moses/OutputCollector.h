@@ -95,6 +95,8 @@ public:
       m_debugs[sourceId] = debug;
     }
   }
+
+
 private:
   std::map<int,std::string> m_outputs;
   std::map<int,std::string> m_debugs;
@@ -106,6 +108,12 @@ private:
 #ifdef WITH_THREADS
   boost::mutex m_mutex;
 #endif
+
+public:
+  void SetOutputStream(std::ostream* outStream){
+    m_outStream = outStream;
+  }
+
 };
 
 }  // namespace Moses

@@ -45,12 +45,12 @@ namespace MosesServer
       throw xmlrpc_c::fault("Missing target sentence", 
 			    xmlrpc_c::fault::CODE_PARSE);
     m_trg = xmlrpc_c::value_string(si->second);
-    XVERBOSE(1,"target = " << m_trg_ << endl);
+    XVERBOSE(1,"target = " << m_trg << endl);
     if((si = params.find("alignment")) == params.end())
       throw xmlrpc_c::fault("Missing alignment", xmlrpc_c::fault::CODE_PARSE);
     m_aln = xmlrpc_c::value_string(si->second);
     XVERBOSE(1,"alignment = " << m_aln << endl);
-    bounded_ = ((si = params.find("bounded")) != params.end());
+    m_bounded  = ((si = params.find("bounded")) != params.end());
     m_add2ORLM = ((si = params.find("updateORLM")) != params.end());
   };
   

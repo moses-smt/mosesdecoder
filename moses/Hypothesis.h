@@ -289,8 +289,8 @@ public:
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
 
 #ifdef HAVE_XMLRPC_C
-  void OutputWordAlignment(vector<xmlrpc_c::value>& out) const;
-  void OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const;
+  void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
+  void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
 #endif 
 
 

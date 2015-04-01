@@ -10,8 +10,7 @@
 #include <cstddef>
 #include <queue>
 #include <vector>
-
-#include <assert.h>
+#include <cassert>
 
 namespace search {
 

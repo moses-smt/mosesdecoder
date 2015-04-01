@@ -27,9 +27,9 @@ Rule::Rule(const NonTerm &lhsNonTerm, const AlignedSentence &alignedSentence)
 Rule::Rule(const Rule &copy, const NonTerm &nonTerm)
   :m_lhs(copy.m_lhs)
   ,m_alignedSentence(copy.m_alignedSentence)
+  ,m_nonterms(copy.m_nonterms)
   ,m_isValid(true)
   ,m_canRecurse(true)
-  ,m_nonterms(copy.m_nonterms)
 {
   m_nonterms.push_back(&nonTerm);
   CreateSource();
@@ -225,8 +225,6 @@ void Rule::NonTermContext(int sourceTarget, int factor, size_t ntInd, const Cons
 
 void Rule::Prevalidate(const Parameter &params)
 {
-  const ConsistentPhrase &cp = m_lhs.GetConsistentPhrase();
-
   // check number of source symbols in rule
   if (m_source.GetSize() > params.maxSymbolsSource) {
     m_isValid = false;
@@ -432,7 +430,7 @@ void Rule::Prevalidate(const Parameter &params)
 
   // min/max span per scope
   if (params.scopeSpan.size()) {
-    int scope = GetScope(params);
+    size_t scope = GetScope(params);
     if (scope >= params.scopeSpan.size()) {
       // no constraint on it. It's ok
     } else {
@@ -574,9 +572,6 @@ void Rule::CreateTarget(const Parameter &params)
 
 void Rule::CreateAlignments()
 {
-  int sourceStart = GetConsistentPhrase().corners[0];
-  int targetStart = GetConsistentPhrase().corners[2];
-
   for (size_t sourcePos = 0; sourcePos < m_source.GetSize(); ++sourcePos) {
     const RuleSymbol *symbol = m_source[sourcePos];
     if (!symbol->IsNonTerm()) {

@@ -37,6 +37,7 @@ namespace Moses
   class TranslationOption;
   class TranslationOptionCollection;
   class ChartTranslationOptions;
+  class TranslationTask;
   struct XmlOption;
 
 

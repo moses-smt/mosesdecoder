@@ -1,5 +1,7 @@
 // vim:tabstop=2
-#include <stdlib.h>
+#include <cstdlib>
+#include <boost/filesystem.hpp>
+
 #include "PhraseDictionaryTransliteration.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "moses/DecodeGraph.h"
@@ -104,9 +106,7 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
 
     // clean up temporary files
     remove(inFile.c_str());
-
-    cmd = "rm -rf " + outDir;
-    system(cmd.c_str());
+    boost::filesystem::remove_all(outDir);
   }
 }
 

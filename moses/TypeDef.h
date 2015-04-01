@@ -17,24 +17,16 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_TypeDef_h
-#define moses_TypeDef_h
+#pragma once
 
 #include <list>
 #include <limits>
 #include <vector>
 #include <string>
+#include <stdint.h>
 
 //! all the typedefs and enums goes here
 
-#ifdef WIN32
-#include <BaseTsd.h>
-#else
-#include <stdint.h>
-
-typedef uint32_t UINT32;
-typedef uint64_t UINT64;
-#endif
 
 namespace Moses
 {
@@ -188,4 +180,4 @@ typedef std::vector<FactorType> FactorList;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
 
 }
-#endif
+

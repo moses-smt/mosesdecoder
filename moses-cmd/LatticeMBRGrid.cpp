@@ -52,6 +52,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/StaticData.h"
 #include "util/exception.hh"
 
+#include <boost/foreach.hpp>
 
 using namespace std;
 using namespace Moses;
@@ -156,59 +157,55 @@ int main(int argc, char* argv[])
     exit(1);
   }
 
-  StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
-  staticData.SetUseLatticeMBR(true);
+  StaticData& SD = const_cast<StaticData&>(StaticData::Instance());
+  SD.SetUseLatticeMBR(true);
 
-  IOWrapper* ioWrapper = new IOWrapper();
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }
-  size_t nBestSize = staticData.GetMBRSize();
+  size_t nBestSize = SD.GetMBRSize();
 
   if (nBestSize <= 0) {
     throw new runtime_error("Non-positive size specified for n-best list");
   }
-
-  size_t lineCount = 0;
-  InputType* source = NULL;
 
   const vector<float>& pgrid = grid.getGrid(lmbr_p);
   const vector<float>& rgrid = grid.getGrid(lmbr_r);
   const vector<float>& prune_grid = grid.getGrid(lmbr_prune);
   const vector<float>& scale_grid = grid.getGrid(lmbr_scale);
 
-  while(ioWrapper->ReadInput(staticData.GetInputType(),source)) {
-    ++lineCount;
-    source->SetTranslationId(lineCount);
-
-    Manager manager(*source);
-    manager.Decode();
-    TrellisPathList nBestList;
-    manager.CalcNBest(nBestSize, nBestList,true);
-    //grid search
-    for (vector<float>::const_iterator pi = pgrid.begin(); pi != pgrid.end(); ++pi) {
-      float p = *pi;
-      staticData.SetLatticeMBRPrecision(p);
-      for (vector<float>::const_iterator ri = rgrid.begin(); ri != rgrid.end(); ++ri) {
-        float r = *ri;
-        staticData.SetLatticeMBRPRatio(r);
-        for (vector<float>::const_iterator prune_i = prune_grid.begin(); prune_i != prune_grid.end(); ++prune_i) {
-          size_t prune = (size_t)(*prune_i);
-          staticData.SetLatticeMBRPruningFactor(prune);
-          for (vector<float>::const_iterator scale_i = scale_grid.begin(); scale_i != scale_grid.end(); ++scale_i) {
-            float scale = *scale_i;
-            staticData.SetMBRScale(scale);
-            cout << lineCount << " ||| " << p << " " << r << " " << prune << " " << scale << " ||| ";
-            vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-            manager.OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
-                                   staticData.GetReportAllFactors(),cout);
-          }
-        }
-
-      }
+  for (boost::shared_ptr<InputType> source = ioWrapper->ReadInput();
+       source != NULL; source = ioWrapper->ReadInput()) 
+    {
+      Manager manager(*source);
+      manager.Decode();
+      TrellisPathList nBestList;
+      manager.CalcNBest(nBestSize, nBestList,true);
+      //grid search
+      BOOST_FOREACH(float const& p, pgrid)
+	{
+	  SD.SetLatticeMBRPrecision(p);
+	  BOOST_FOREACH(float const& r, rgrid)
+	    {
+	      SD.SetLatticeMBRPRatio(r);
+	      BOOST_FOREACH(size_t const prune_i, prune_grid)
+		{
+		  SD.SetLatticeMBRPruningFactor(size_t(prune_i));
+		  BOOST_FOREACH(float const& scale_i, scale_grid)
+		    {
+		      SD.SetMBRScale(scale_i);
+		      size_t lineCount = source->GetTranslationId();
+		      cout << lineCount << " ||| " << p << " " 
+			   << r << " " << size_t(prune_i) << " " << scale_i
+			   << " ||| ";
+		      vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
+		      manager.OutputBestHypo(mbrBestHypo, lineCount, 
+					     SD.GetReportSegmentation(),
+					     SD.GetReportAllFactors(),cout);
+		    }
+		}
+	    }
+	}
     }
-
-
-  }
-
 }

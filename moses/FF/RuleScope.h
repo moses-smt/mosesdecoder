@@ -45,6 +45,11 @@ public:
 
 protected:
   bool m_sourceSyntax;
+  bool m_perScope;
+  bool m_futureCostOnly;
+
+  bool IsGlueRule(const Phrase &source) const;
+
 };
 
 }

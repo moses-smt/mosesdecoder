@@ -835,7 +835,7 @@ sub delete_output {
   foreach (`ls $dir`) {
     chop;
     next unless substr($_,0,length($f)) eq $f;
-    if (-e $_) {
+    if (-e "$dir/$_") {
       print "\tdelete file $dir/$_\n";
       `rm $dir/$_` if $EXECUTE;
     }
@@ -2105,10 +2105,11 @@ sub define_training_symmetrize_giza {
     my ($aligned, $giza,$giza_inv) = &get_output_and_input($step_id);
     my $method = &check_and_get("TRAINING:alignment-symmetrization-method");
     my $cmd = &get_training_setting(3);
+    my $alignment_stem = &versionize(&long_file_name("aligned","model",""));
     
     $cmd .= "-giza-e2f $giza -giza-f2e $giza_inv ";
     $cmd .= "-alignment-file $aligned ";
-    $cmd .= "-alignment-stem ".&versionize(&long_file_name("aligned","model",""))." ";
+    $cmd .= "-alignment-stem $alignment_stem ";
     $cmd .= "-alignment $method ";
 
     &create_step($step_id,$cmd);
@@ -2151,11 +2152,13 @@ sub define_training_build_lex_trans {
     my ($lex, $aligned,$corpus) = &get_output_and_input($step_id);
     my $baseline_alignment = &get("TRAINING:baseline-alignment");
     my $baseline_corpus = &get("TRAINING:baseline-corpus");
+    my $alignment_stem = &versionize(&long_file_name("aligned","model",""));
+    $alignment_stem = $CONFIG{"TRAINING:word-alignment"}[0] if defined($CONFIG{"TRAINING:word-alignment"});
 
     my $cmd = &get_training_setting(4);
     $cmd .= "-lexical-file $lex ";
     $cmd .= "-alignment-file $aligned ";
-    $cmd .= "-alignment-stem ".&versionize(&long_file_name("aligned","model",""))." ";
+    $cmd .= "-alignment-stem $alignment_stem ";
     $cmd .= "-corpus $corpus ";
     $cmd .= "-baseline-corpus $baseline_corpus " if defined($baseline_corpus) && defined($baseline_alignment);
     $cmd .= "-baseline-alignment $baseline_alignment " if defined($baseline_corpus) && defined($baseline_alignment);
@@ -2200,8 +2203,11 @@ sub define_training_extract_phrases {
 
     my ($extract, $aligned,$corpus) = &get_output_and_input($step_id);
     my $cmd = &get_training_setting(5);
+    my $alignment_stem = &versionize(&long_file_name("aligned","model",""));
+    $alignment_stem = $CONFIG{"TRAINING:word-alignment"}[0] if defined($CONFIG{"TRAINING:word-alignment"});
+
     $cmd .= "-alignment-file $aligned ";
-    $cmd .= "-alignment-stem ".&versionize(&long_file_name("aligned","model",""))." ";
+    $cmd .= "-alignment-stem $alignment_stem ";
     $cmd .= "-extract-file $extract ";
     $cmd .= "-corpus $corpus ";
     
@@ -2248,6 +2254,14 @@ sub define_training_extract_phrases {
         $cmd .= "-ghkm-parts-of-speech ";
         my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
         $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
+      }
+
+      if (&get("TRAINING:ghkm-parts-of-speech-factor")) {
+        $cmd .= "-ghkm-parts-of-speech-factor ";
+      }
+
+      if (&get("TRAINING:ghkm-strip-bitpar-nonterminal-labels")) {
+        $cmd .= "-ghkm-strip-bitpar-nonterminal-labels ";
       }
     }
 
@@ -2444,6 +2458,12 @@ sub get_config_tables {
         $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version)
           unless $glue_grammar_file;
         $cmd .= "-glue-grammar-file $glue_grammar_file ";
+      }
+      if (&get("TRAINING:dont-tune-glue-grammar")) {
+        $cmd .= "-dont-tune-glue-grammar ";
+      }
+      if (&get("TRAINING:use-syntax-input-weight-feature")) {
+        $cmd .= "-use-syntax-input-weight-feature ";
       }
     }
 
@@ -3261,7 +3281,7 @@ sub get_output_and_input {
 
 	# get the actual file name
 	push @INPUT,&get_specified_or_default_file(&deconstruct_name($in_file),
-						   &deconstruct_name($prev_step));
+  						   &deconstruct_name($prev_step));
     }
   }
   return ($output,@INPUT);
@@ -3506,28 +3526,35 @@ sub get_tmp_file {
 
 sub get_default_file {
     my ($default_module,  $default_set,  $default_step) = @_;
-#    print "\tget_default_file($default_module,  $default_set,  $default_step)\n";
+    #print "\tget_default_file($default_module,  $default_set,  $default_step)\n";
 
     # get step name
     my $step = &construct_name($default_module,$default_set,$default_step);
-#    print "\t\tstep is $step\n";
+    #print "\t\tstep is $step\n";
 
     # earlier step, if this step is passed
     my $i = $STEP_LOOKUP{$step};
-#    print "\t\tcan't lookup $step -> $i!\n" unless $i;
+    #print "\t\tcan't lookup $step -> $i!\n" unless $i;
     while (defined($PASS{$i})) {
 	if (scalar @{$DEPENDENCY[$i]} == 0) {
-#	    print "\t\tpassing to given\n";
+	    #print "\t\tpassing to given\n";
 	    my $out = $STEP_IN{&defined_step($step)}[0];
 	    my ($module,$set) = &deconstruct_name($step);
-#	    print "\t\t$out -> ".&construct_name($module,$set,$out)."\n";
-	    my $name = &construct_name($module,$set,$out);
-	    return &check_backoff_and_get($name);
+            foreach my $out_option (split(/=OR=/,$out)) {
+	      #print "\t\t$out_option -> ".&construct_name($module,$set,$out_option)."\n";
+	      my $name = &construct_name($module,$set,$out);
+              return &get($name) if &get($name);
+            }
+            foreach my $out_option (split(/=OR=/,$out)) {
+	      my $name = &construct_name($module,$set,$out_option);
+              return &backoff_and_get($name) if &backoff_and_get($name);
+            }
+            die("something is wrong with $out\n");
 	}
-#	print "\t\tpassing $step\n";
+	#print "\t\tpassing $step\n";
 	$i = $DEPENDENCY[$i][0];
 	$step = $DO_STEP[$i];
-#	print "\t\tbacking off to $step\n";
+	#print "\t\tbacking off to $step\n";
         ($default_module,$default_set,$default_step) = &deconstruct_name($step);
     }
 

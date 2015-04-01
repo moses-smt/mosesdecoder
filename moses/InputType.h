@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 // vim:tabstop=2
 
@@ -37,7 +38,7 @@ class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
 class ChartTranslationOptions;
-
+class TranslationTask;
 /** base class for all types of inputs to the decoder,
  *  eg. sentences, confusion networks, lattices and tree
  */
@@ -179,7 +180,8 @@ public:
   virtual void Print(std::ostream&) const =0;
 
   //! create trans options specific to this InputType
-  virtual TranslationOptionCollection* CreateTranslationOptionCollection() const=0;
+  virtual TranslationOptionCollection* 
+  CreateTranslationOptionCollection() const=0;
 
   //! return substring. Only valid for Sentence class. TODO - get rid of this fn
   virtual Phrase GetSubString(const WordsRange&) const =0;

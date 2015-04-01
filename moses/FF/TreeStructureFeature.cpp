@@ -70,11 +70,29 @@ FFState* TreeStructureFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hy
     }
     mytree->Combine(previous_trees);
 
+    bool full_sentence = (mytree->GetChildren().back()->GetLabel() == "</s>" || (mytree->GetChildren().back()->GetLabel() == "SEND" && mytree->GetChildren().back()->GetChildren().back()->GetLabel() == "</s>"));
+    if (m_binarized && full_sentence) {
+        mytree->Unbinarize();
+    }
+
     return new TreeState(mytree);
   } else {
     UTIL_THROW2("Error: TreeStructureFeature active, but no internal tree structure found");
   }
 
+}
+
+void TreeStructureFeature::SetParameter(const std::string& key, const std::string& value)
+{
+  std::cerr << "setting: " << this->GetScoreProducerDescription() << " - " << key << "\n";
+  if (key == "tuneable") {
+    m_tuneable = Scan<bool>(value);
+  } else if (key == "filterable") { //ignore
+  } else if (key == "binarized") { // if trees have been binarized before learning translation model; output unbinarized trees
+    m_binarized = true;
+  } else {
+    UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
+  }
 }
 
 }

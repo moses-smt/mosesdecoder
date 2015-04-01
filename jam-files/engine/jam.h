@@ -74,7 +74,7 @@
  * Windows MingW32
  */
 
-#ifdef MINGW
+#ifdef __MINGW32__
 
 #include <fcntl.h>
 #include <stdlib.h>

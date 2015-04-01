@@ -46,7 +46,7 @@ class TargetPhraseCollection
 protected:
   typedef std::vector<TargetPhrase*> CollType;
   CollType m_coll;
-  UINT64 m_filePos;
+  uint64_t m_filePos;
   std::string m_debugStr;
 
 public:
@@ -67,7 +67,7 @@ public:
 
   const TargetPhrase &GetTargetPhrase(size_t ind) const;
 
-  UINT64 GetFilePos() const;
+  uint64_t GetFilePos() const;
 
   Moses::TargetPhraseCollection *ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
       , const std::vector<Moses::FactorType> &outputFactors
@@ -75,7 +75,7 @@ public:
       , const std::vector<float> &weightT
       , Vocab &vocab
       , bool isSyntax) const;
-  void ReadFromFile(size_t tableLimit, UINT64 filePos, OnDiskWrapper &onDiskWrapper);
+  void ReadFromFile(size_t tableLimit, uint64_t filePos, OnDiskWrapper &onDiskWrapper);
 
   const std::string GetDebugStr() const;
   void SetDebugStr(const std::string &str);

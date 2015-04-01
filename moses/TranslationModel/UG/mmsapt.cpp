@@ -245,13 +245,7 @@ namespace Moses
   Mmsapt::
   load_bias(string const fname)
   {
-    ifstream in(fname.c_str());
-    bias.reserve(btfix.T1->size());
-    float v;
-    while (in>>v) bias.push_back(v);
-    UTIL_THROW_IF2(bias.size() != btfix.T1->size(),
-		   "Mismatch between bias vector size and corpus size at "
-		   << HERE);
+    m_bias = btfix.loadSentenceBias(fname);
   }
 
   void
@@ -811,7 +805,7 @@ namespace Moses
 
   bool
   Mmsapt::
-  PrefixExists(Moses::Phrase const& phrase, vector<float> const* const bias) const
+  PrefixExists(Moses::Phrase const& phrase, SamplingBias const* const bias) const
   {
     if (phrase.GetSize() == 0) return false;
     vector<id_type> myphrase; 
@@ -865,15 +859,18 @@ namespace Moses
   bool
   Mmsapt::
   ProvidesPrefixCheck() const
-  {
-    return true;
-  }
+  { return true; }
 
   string const&
   Mmsapt::
   GetName() const 
-  { 
-    return m_name; 
+  { return m_name; }
+
+  sptr<DocumentBias>
+  Mmsapt::
+  setupDocumentBias(map<string,float> const& bias) const
+  {
+    return btfix.setupDocumentBias(bias);
   }
 
 }

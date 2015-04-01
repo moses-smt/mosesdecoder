@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <iostream>
 #include <sys/stat.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/algorithm/string/predicate.hpp>
 #include "Trie.h"
 #include "moses/FactorCollection.h"
