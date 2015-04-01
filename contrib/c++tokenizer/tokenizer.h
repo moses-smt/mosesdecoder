@@ -42,7 +42,9 @@ private:
         limit
     } charclass_t;
 
-    static std::string cfg_dir;
+    std::size_t nthreads;
+    std::size_t chunksize;
+    std::string cfg_dir;
 
     // non-breaking prefixes (numeric) utf8
     std::set<std::string> nbpre_num_set;
@@ -56,9 +58,6 @@ private:
 
     // compiled protected patterns 
     std::vector<re2::RE2 *> prot_pat_vec;
-
-    // sentence starts embedded in last line of input
-    std::vector<std::size_t> starts_vec;
 
 protected:
 
@@ -94,10 +93,34 @@ protected:
     // in-place 1 line tokenizer, replaces input string, depends on wrapper to set-up invariants
     void protected_tokenize(std::string& inplace);
 
+    struct VectorTokenizerCallable {
+        Tokenizer *tokenizer;
+        std::vector<std::string>& in;
+        std::vector<std::string>& out;
+        
+        VectorTokenizerCallable(Tokenizer *_tokenizer, 
+                                std::vector<std::string>& _in, 
+                                std::vector<std::string>& _out) 
+        : tokenizer(_tokenizer)
+        , in(_in)
+        , out(_out) {
+        };
+
+        void operator()() {
+            out.resize(in.size());
+            for (std::size_t ii = 0; ii < in.size(); ++ii) 
+                if (in[ii].empty())
+                    out[ii] = in[ii];
+                else if (tokenizer->penn_p) 
+                    out[ii] = tokenizer->penn_tokenize(in[ii]);
+                else
+                    out[ii] = tokenizer->quik_tokenize(in[ii]);
+        };
+    };
+
 public:
 
-    // cfg_dir is assumed shared by all languages
-    static void set_config_dir(const std::string& _cfg_dir);
+    void set_config_dir(const std::string& _cfg_dir);
 
     Tokenizer(); // UNIMPL
 
@@ -108,26 +131,35 @@ public:
     ~Tokenizer();
 
     // required before other methods, may throw
-    void init();
+    void init(const char *cfg_dir_path = 0);
 
     // required after processing a contiguous sequence of lines when sentence splitting is on
     void reset();
 
     bool splitting() const { return splits_p; }
 
-    // streaming tokenizer reads from is, writes to os, preserving line breaks
+    // streaming select-tokenizer reads from is, writes to os, preserving line breaks (unless splitting)
     std::size_t tokenize(std::istream& is, std::ostream& os);
 
-    // tokenize padded line buffer to return string
-    std::string tokenize(const std::string& buf);
+    // quik-tokenize padded line buffer to return string
+    std::string quik_tokenize(const std::string& buf);
 
+    // penn-tokenize padded line buffer to return string
+    std::string penn_tokenize(const std::string& buf);
+
+    // select-tokenize padded line buffer to return string
+    std::string tokenize(const std::string& buf) {
+        return penn_p ? penn_tokenize(buf) : quik_tokenize(buf);
+    }
+
+    // tokenize with output argument
     void tokenize(const std::string& buf, std::string& outs) {
         outs = tokenize(buf);
     }
 
     // tokenize to a vector
     std::vector<std::string> tokens(const std::string& in) {
-        std::istringstream tokss(tokenize(in));
+        std::istringstream tokss(penn_p ? penn_tokenize(in) : tokenize(in));
         std::vector<std::string> outv;
         std::copy(std::istream_iterator<std::string>(tokss),
                   std::istream_iterator<std::string>(),

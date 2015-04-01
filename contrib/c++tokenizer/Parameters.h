@@ -12,6 +12,8 @@ struct Parameters
     std::string lang_iso;
     std::vector<std::string> args;
     std::string out_path;
+    int nthreads;
+    int chunksize;
     const char *cfg_path;
     bool verbose_p;
     bool detag_p;

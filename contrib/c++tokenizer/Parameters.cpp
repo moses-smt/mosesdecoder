@@ -5,7 +5,9 @@ namespace TOKENIZER_NAMESPACE {
 #endif
 
 Parameters::Parameters()
-: cfg_path(0)
+: nthreads(0)
+, chunksize(2000)
+, cfg_path(0)
 , verbose_p(false)
 , detag_p(false)
 , alltag_p(false)

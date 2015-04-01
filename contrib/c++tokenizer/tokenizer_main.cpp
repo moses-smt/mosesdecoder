@@ -31,6 +31,7 @@ usage(const char *path)
     std::cerr << " -s -- super- and sub-script conjoining" << std::endl;
     std::cerr << " -S -- buffer and sentence-split lines" << std::endl;
     std::cerr << " -T -- do not tokenize, just split, no <P> marks" << std::endl;
+    std::cerr << " -t N[,C] -- use N threads (1), chunksize C lines" << std::endl;
     std::cerr << " -u -- disable url handling" << std::endl;
     std::cerr << " -U -- unescape entities before tokenization, after detokenization" << std::endl;
     std::cerr << " -v -- verbose" << std::endl;
@@ -129,11 +130,12 @@ copy_words(Tokenizer& tize, std::istream& ifs, std::ostream& ofs) {
 int main(int ac, char **av) 
 {
     int rc = 0;
-		Parameters params;
+    Parameters params;
 
     const char *prog = av[0];
     bool next_cfg_p = false;
     bool next_output_p = false;
+    bool next_threads_p = false;
     bool detokenize_p = std::strstr(av[0],"detokenize") != 0;
     if (!detokenize_p)
         params.split_p = std::strstr(av[0],"splitter") != 0;
@@ -196,6 +198,9 @@ int main(int ac, char **av)
                 params.notokenization_p = true;
                 params.para_marks_p = false;
                 break;
+            case 't':
+                next_threads_p = true;
+                break;
             case 'U':
                 params.unescape_p = true;
                 break;
@@ -225,7 +230,7 @@ int main(int ac, char **av)
                 std::cerr << "Unknown option: " << *av << std::endl;
                 ::exit(1);
             }
-        } else if (params.lang_iso.empty() && strlen(*av) == 2) {
+        } else if (params.lang_iso.empty() && strlen(*av) == 2 && !isdigit(**av)) {
             params.lang_iso = *av;
         } else if (next_output_p) {
             next_output_p = false;
@@ -233,6 +238,14 @@ int main(int ac, char **av)
         } else if (next_cfg_p) {
             next_cfg_p = false;
             params.cfg_path = *av;
+        } else if (next_threads_p) {
+            next_threads_p = false;
+            char *comma = strchr(*av,',');
+            if (comma) {
+                *comma++ = 0;
+                params.chunksize = std::strtoul(comma,0,0);
+            } 
+            params.nthreads = std::strtoul(*av,0,0);
         } else {
             params.args.push_back(std::string(*av));
         }
@@ -274,7 +287,6 @@ int main(int ac, char **av)
         if (params.verbose_p) {
             std::cerr << "config path: " << params.cfg_path << std::endl;
         }
-        Tokenizer::set_config_dir(std::string(params.cfg_path));
     } 
 
     std::unique_ptr<std::ofstream> pofs = 0;
