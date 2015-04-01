@@ -34,6 +34,7 @@ struct Parameters
     bool split_p;
     bool notokenization_p;
     bool para_marks_p;
+    bool split_breaks_p;
 
 	Parameters();
 

@@ -84,6 +84,7 @@ protected:
     bool splits_p;
     bool verbose_p;
     bool para_marks_p;
+    bool split_breaks_p;
 
     std::pair<int,int> load_prefixes(std::ifstream& ifs); // used by init(), parameterized by lang_iso
 

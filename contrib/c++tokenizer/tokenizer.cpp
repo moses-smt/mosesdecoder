@@ -465,6 +465,7 @@ Tokenizer::Tokenizer(const Parameters& _)
         , splits_p(_.split_p)
         , verbose_p(_.verbose_p)
         , para_marks_p(_.para_marks_p)
+        , split_breaks_p(_.split_breaks_p)
 {
 }
 
@@ -2147,11 +2148,11 @@ Tokenizer::splitter(std::istream& is, std::ostream& os)
             os << sentences[ii] << std::endl;
         
         os << sentences[nsents-1];
-        if (continuation_p) {
-            pending_gap = true;
-        } else {
+
+        if (continuation_p) 
+            pending_gap = !split_breaks_p;
+        if (!pending_gap)
             os << std::endl;
-        }
     }
 
     if (pending_gap)

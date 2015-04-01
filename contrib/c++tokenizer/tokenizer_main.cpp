@@ -16,6 +16,7 @@ usage(const char *path)
     std::cerr << "Usage: " << path << "[-{v|x|p|a|e|s|u|n|N]* [LL] [-{c|o} PATH]* INFILE*" << std::endl;
     std::cerr << " -a -- aggressive hyphenization" << std::endl;
     std::cerr << " -b -- drop bad bytes" << std::endl;
+    std::cerr << " -B -- splitter will split on linebreak" << std::endl;
     std::cerr << " -c DIR -- config (pattern) file directory" << std::endl;
     std::cerr << " -d -- downcase" << std::endl;
     std::cerr << " -D -- detokenize" << std::endl;
@@ -29,14 +30,14 @@ usage(const char *path)
     std::cerr << " -r -- refined contraction and quantity conjoining" << std::endl;
     std::cerr << " -s -- super- and sub-script conjoining" << std::endl;
     std::cerr << " -S -- buffer and sentence-split lines" << std::endl;
-    std::cerr << " -t -- do not tokenize (for use as splitter)." << std::endl;
+    std::cerr << " -T -- do not tokenize, just split, no <P> marks" << std::endl;
     std::cerr << " -u -- disable url handling" << std::endl;
     std::cerr << " -U -- unescape entities before tokenization, after detokenization" << std::endl;
     std::cerr << " -v -- verbose" << std::endl;
     std::cerr << " -w -- word filter" << std::endl;
     std::cerr << " -x -- skip xml tag lines" << std::endl;
     std::cerr << " -y -- skip all xml tags" << std::endl;
-    std::cerr << " -X -- split only" << std::endl;
+    std::cerr << " -X -- split only, with <P> marks" << std::endl;
     std::cerr << "Default is -c ., stdin, stdout." << std::endl;
     std::cerr << "LL in en,fr,it affect contraction.  LL selects nonbreaking prefix file" << std::endl;
     std::cerr << "nonbreaking_prefix.LL is sought in getenv('TOKENIZER_SHARED_DIR')." << std::endl;
@@ -146,6 +147,9 @@ int main(int ac, char **av)
             case 'b':
                 params.drop_bad_p = true;
                 break;
+            case 'B':
+                params.split_breaks_p = true;
+                break;
             case 'c':
                 next_cfg_p = true;
                 break;
@@ -190,6 +194,7 @@ int main(int ac, char **av)
                 break;
             case 'T':
                 params.notokenization_p = true;
+                params.para_marks_p = false;
                 break;
             case 'U':
                 params.unescape_p = true;
