@@ -27,8 +27,7 @@ my ($CONFIG_FILE,
 		$VERBOSE,
 		$IGNORE_TIME,
 		$DELETE_CRASHED,
-		$DELETE_VERSION,
-		$MASTER_PATH
+		$DELETE_VERSION
 		);
 		
 my $SLEEP = 2;
@@ -60,8 +59,7 @@ die("experiment.perl -config config-file [-exec] [-no-graph]")
 			'verbose' => \$VERBOSE,
 			'sleep=i' => \$SLEEP,
 			'max-active=i' => \$MAX_ACTIVE,
-			'no-graph' => \$NO_GRAPH,
-			'master-path=s' => \$MASTER_PATH);
+			'no-graph' => \$NO_GRAPH);
 if (! -e "steps") { `mkdir -p steps`; }
 
 die("error: could not find config file") 
@@ -3455,14 +3453,7 @@ sub create_step {
     $subdir = "lm" if $subdir eq "interpolated-lm";
     open(STEP,">$file") or die "Cannot open: $!";
     print STEP "#!/bin/bash\n\n";
-    
-    if (defined($MASTER_PATH)) {
-      print STEP "PATH=\"$MASTER_PATH\"\n";
-		}
-		else {
-      print STEP "PATH=\"".$ENV{"PATH"}."\"\n";
-  	}
-  	
+    print STEP "PATH=\"".$ENV{"PATH"}."\"\n";  	
     print STEP "cd $dir\n";
     print STEP "echo 'starting at '`date`' on '`hostname`\n";
     print STEP "mkdir -p $dir/$subdir\n\n";
