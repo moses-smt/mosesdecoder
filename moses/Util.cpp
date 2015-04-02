@@ -361,19 +361,10 @@ void PrintFeatureWeight(const FeatureFunction* ff)
 void ShowWeights()
 {
   FixPrecision(cout,6);
-  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const vector<FeatureFunction*>& ffs = StatelessFeatureFunction::GetFeatureFunctions();
 
-  for (size_t i = 0; i < sff.size(); ++i) {
-    const StatefulFeatureFunction *ff = sff[i];
-    if (ff->IsTuneable()) {
-      PrintFeatureWeight(ff);
-    } else {
-      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
-    }
-  }
-  for (size_t i = 0; i < slf.size(); ++i) {
-    const StatelessFeatureFunction *ff = slf[i];
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction *ff = ffs[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
     } else {
