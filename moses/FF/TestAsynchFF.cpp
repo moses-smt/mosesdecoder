@@ -23,6 +23,10 @@ void TestAsynchFF::EvaluateNbest(const InputType &input, const TrellisPathList &
 }
 
 
+void TestAsynchFF::EvaluateSearchGraph(const InputType &input,
+				       const std::vector < HypothesisStack* > &hypoStackColl ) const
+{}
+
 void TestAsynchFF::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown

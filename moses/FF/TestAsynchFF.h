@@ -22,7 +22,8 @@ public:
   void EvaluateNbest(const InputType &input, const TrellisPathList &Nbest) const;
 
 
-
+   void EvaluateSearchGraph(const InputType &input,
+		   	    const std::vector < HypothesisStack* > &hypoStackColl ) const;
 
 
   void EvaluateInIsolation(const Phrase &source

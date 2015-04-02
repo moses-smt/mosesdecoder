@@ -361,7 +361,7 @@ void PrintFeatureWeight(const FeatureFunction* ff)
 void ShowWeights()
 {
   FixPrecision(cout,6);
-  const vector<FeatureFunction*>& ffs = StatelessFeatureFunction::GetFeatureFunctions();
+  const vector<FeatureFunction*>& ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction *ff = ffs[i];

@@ -18,6 +18,10 @@ void SkeletonAsynchFF::EvaluateNbest(const InputType &input,
 		                     const TrellisPathList &Nbest) const 
 {}
 
+void SkeletonAsynchFF::EvaluateSearchGraph(const InputType &input,
+	       				   const std::vector < HypothesisStack* > &hypoStackColl) const
+{}
+
 void SkeletonAsynchFF::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown

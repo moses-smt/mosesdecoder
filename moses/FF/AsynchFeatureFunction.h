@@ -32,11 +32,13 @@ public:
  virtual void EvaluateNbest(const InputType &input,
 		 		    const TrellisPathList &Nbest) const = 0;
 
+
   /*
    * This should be implemented for Asynch features applied to Search Graph (a.k.a stacks used to store partial translations )
    */
-// virtual void EvaluateSearchGraph(const InputType &input,
-//				  const std::vector < HypothesisStack* > &hypoStackColl );
+ virtual void EvaluateSearchGraph(const InputType &input,
+				  const std::vector < HypothesisStack* > &hypoStackColl ) const = 0;
+
 
   virtual bool IsStateless() const {
     return true;
