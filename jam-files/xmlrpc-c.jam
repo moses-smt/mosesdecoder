@@ -76,8 +76,8 @@ else
     local libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
     if $(libname) 
     {   
-      external-lib $(libname) 
-      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+      external-lib $(libname) : $(prefix)/lib ;
+      #      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
       requirements += <library>$(libname) ;
     }
     local pathname = [ MATCH "-L(.*)" : $(i) ] ; 

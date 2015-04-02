@@ -76,9 +76,10 @@ else
 	# }
 	# else
 	# {
-	  external-lib $(libname) ; 
+	  external-lib $(libname) : $(cpp-prefix)/lib ; 
 	# }
-        requirements += <library>$(libname)/<link>shared ; 
+	requirements += <library>$(libname)/<link>shared ; 
+	# requirements += <library>$(libname) ; 
       }
       else
       {
