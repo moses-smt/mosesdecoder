@@ -1589,19 +1589,19 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
                         results[ithread].resize(line_pos);
                         break;
                     }
-                    //lines[ithread][line_pos].clear(); TODO clang error
+                    lines[ithread][line_pos].clear(); 
                 } else if (skip_xml_p && 
                            (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) { 
-                    //lines[ithread][line_pos].clear(); TODO clang error
+                    lines[ithread][line_pos].clear(); 
                 } else {
-                    //lines[ithread][line_pos] = 
-                    //    std::string(SPC_BYTE).append(istr).append(SPC_BYTE); TODO clang error
+                    lines[ithread][line_pos] = 
+                        std::string(SPC_BYTE).append(istr).append(SPC_BYTE); 
                 }
             } 
 
             if (line_pos) {
-                //workers[ithread] = 
-                //    boost::thread(VectorTokenizerCallable(this,lines[ithread],results[ithread])); TODO clang error
+                workers[ithread] = 
+                    boost::thread(VectorTokenizerCallable(this,lines[ithread],results[ithread])); 
             }
         } // end for loop starting threads
 
@@ -1772,7 +1772,7 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
     std::size_t finilen = 0;
     std::size_t dotslen = 0;
 
-#define SEQ_LIM 6
+	  const std::size_t SEQ_LIM = 6;
 
     charclass_t prev_class = empty;
     charclass_t curr_class = empty;
