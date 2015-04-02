@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # Compatible with sri LM-creating script, eg.
 #    ngram-count -order 5 -interpolate -wbdiscount -unk -text corpus.txt -lm lm.txt

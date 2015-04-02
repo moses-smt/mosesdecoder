@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # Experiment Management System
 # Documentation at http://www.statmt.org/moses/?n=FactoredTraining.EMS

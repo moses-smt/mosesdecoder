@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/env perl 
 # A very simple script that converts fsa format (openfst lattices) to the same
 # thing represented one sentence per line. It uses '|||' to delimit columns and
 # ' ' to delimit nodes (i.e. original lines).

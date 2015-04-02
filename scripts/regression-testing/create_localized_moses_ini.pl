@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#!/usr/bin/env perl 
 
 use strict;
 my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir = dirname(abs_path($0)); push @INC, $script_dir; }

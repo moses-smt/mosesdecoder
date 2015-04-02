@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id: clean-corpus-n.perl 3633 2010-10-21 09:49:27Z phkoehn $
 use strict;

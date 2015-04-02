@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
 # $Id$
 # given a moses.ini file, creates a fresh version of it

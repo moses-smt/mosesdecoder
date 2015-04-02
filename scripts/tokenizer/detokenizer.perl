@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id: detokenizer.perl 4134 2011-08-08 15:30:54Z bgottesman $
 # Sample De-Tokenizer

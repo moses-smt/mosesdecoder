@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#!/usr/bin/env perl 
 
 # example
 # ~/giza-parallel.perl 10 split ~/workspace/sourceforge/trunk/scripts/training/train-model.perl ar en train align
