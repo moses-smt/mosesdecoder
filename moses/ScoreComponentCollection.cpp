@@ -6,6 +6,7 @@
 #include "StaticData.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/AsynchFeatureFunction.h"
 
 using namespace std;
 using namespace boost::algorithm;
@@ -322,6 +323,16 @@ void ScoreComponentCollection::OutputAllFeatureScores(std::ostream &out) const
       OutputFeatureScores( out, ff, lastName );
     }
   }
+// fethi 
+
+  const vector<const AsynchFeatureFunction*>& Asynchff = AsynchFeatureFunction::GetAsynchFeatureFunctions();
+  for(size_t i=0;i< Asynchff.size();i++) {
+	const AsynchFeatureFunction *ff = Asynchff[i];
+	if (ff->IsTuneable()) {
+    	  OutputFeatureScores(out,ff,lastName);
+	}
+  }
+
 }
 
 void ScoreComponentCollection::OutputFeatureScores( std::ostream& out
