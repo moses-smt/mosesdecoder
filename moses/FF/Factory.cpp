@@ -58,6 +58,11 @@
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
+
+// fethi Bougares - LIUM
+#include "moses/FF/SkeletonAsynchFF.h"
+#include "moses/FF/TestAsynchFF.h"  
+
 #include "moses/LM/SkeletonLM.h"
 #include "moses/FF/SkeletonTranslationOptionListFeature.h"
 #include "moses/LM/BilingualLM.h"
@@ -248,6 +253,8 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
+  MOSES_FNAME(SkeletonAsynchFF); /*fethi -LIUM*/
+  MOSES_FNAME(TestAsynchFF);
   MOSES_FNAME(SkeletonLM);
   MOSES_FNAME(SkeletonChangeInput);
   MOSES_FNAME(SkeletonTranslationOptionListFeature);
