@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # Based on Preprocessor written by Philipp Koehn
 

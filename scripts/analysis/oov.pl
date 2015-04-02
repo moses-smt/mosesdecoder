@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 # Display OOV rate of a test set against a training corpus or a phrase table.
 # Ondrej Bojar
 

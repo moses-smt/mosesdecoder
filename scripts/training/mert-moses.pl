@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/env perl 
 # $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>

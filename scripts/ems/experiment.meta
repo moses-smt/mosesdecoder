@@ -185,7 +185,7 @@ lowercase
 	default-name: lm/lowercased
 	pass-unless: output-lowercaser
 	ignore-if: output-truecaser
-	only-factor-0: yes
+	#only-factor-0: yes
 	template: $output-lowercaser < IN > OUT
 	parallelizable: yes
 truecase

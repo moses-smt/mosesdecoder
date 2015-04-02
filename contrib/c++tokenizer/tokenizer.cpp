@@ -1589,20 +1589,20 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
                         results[ithread].resize(line_pos);
                         break;
                     }
-                    lines[ithread][line_pos].clear();
+                    //lines[ithread][line_pos].clear(); TODO clang error
                 } else if (skip_xml_p && 
                            (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) { 
-                    lines[ithread][line_pos].clear();
+                    //lines[ithread][line_pos].clear(); TODO clang error
                 } else {
-                    lines[ithread][line_pos] = 
-                        std::string(SPC_BYTE).append(istr).append(SPC_BYTE);
+                    //lines[ithread][line_pos] = 
+                    //    std::string(SPC_BYTE).append(istr).append(SPC_BYTE); TODO clang error
                 }
             } 
 
-            if (line_pos)
-                workers[ithread] = 
-                    boost::thread(VectorTokenizerCallable(this,lines[ithread],results[ithread]));
-
+            if (line_pos) {
+                //workers[ithread] = 
+                //    boost::thread(VectorTokenizerCallable(this,lines[ithread],results[ithread])); TODO clang error
+            }
         } // end for loop starting threads
 
         for (std::size_t ithread = 0; ithread < nthreads; ++ithread) {
@@ -1776,8 +1776,8 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
 
     charclass_t prev_class = empty;
     charclass_t curr_class = empty;
-    charclass_t seq[SEQ_LIM] = { empty };
-    std::size_t pos[SEQ_LIM] = { 0 };
+    std::vector<charclass_t> seq(SEQ_LIM, empty);
+    std::vector<std::size_t> pos(SEQ_LIM, 0);
     std::size_t seqpos = 0;
 
     GUnicodeType curr_type = G_UNICODE_UNASSIGNED;

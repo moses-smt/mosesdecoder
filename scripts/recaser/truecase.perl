@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id: train-recaser.perl 1326 2007-03-26 05:44:27Z bojar $
 use strict;

@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w 
+#!/usr/bin/env perl 
 
 # example
 #  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation --GZOutput

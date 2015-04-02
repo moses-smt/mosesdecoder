@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
 # $Id$
 # given a moses.ini file, checks the translation and generation tables and reports
