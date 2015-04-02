@@ -18,7 +18,11 @@ binmode(STDOUT, ":utf8");
 use FindBin qw($RealBin);
 use strict;
 use Time::HiRes;
-use Thread;
+
+if  (eval {require Thread;1;}) {
+  #module loaded
+  Thread->import();
+}
 
 my $mydir = "$RealBin/../share/nonbreaking_prefixes";
 
