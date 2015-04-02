@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
-#include <unordered_set>
+#include <set>
 #include <glib.h>
 #include <stdexcept>
 #include <boost/thread.hpp>
@@ -1557,9 +1557,9 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
 {
     std::size_t line_no = 0;
     std::size_t perchunk = chunksize ? chunksize : 2000;
-    std::vector< std::string > lines[nthreads];
-    std::vector< std::string > results[nthreads];
-    boost::thread workers[nthreads];
+    std::vector< std::vector< std::string > > lines(nthreads);
+    std::vector< std::vector< std::string > > results(nthreads);
+    std::vector< boost::thread > workers(nthreads);
     bool done_p = !(is.good() && os.good());
     
 
@@ -1772,7 +1772,7 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
     std::size_t finilen = 0;
     std::size_t dotslen = 0;
 
-    static std::size_t SEQ_LIM = 6;
+#define SEQ_LIM 6
 
     charclass_t prev_class = empty;
     charclass_t curr_class = empty;
@@ -1785,7 +1785,7 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
     bool curr_word_p = false;
 
     std::vector<std::size_t> breaks;
-    std::unordered_set<std::size_t> suppress;
+    std::set<std::size_t> suppress;
     
     for (; icp <= ncp; ++icp) {
         currwc = wchar_t(ucs4[icp]);
@@ -1822,7 +1822,7 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
             } else if (currwc >= SMAL_HYPH) {
                 curr_word_p = true;
             } else {
-                curr_word_p = currwc >= WAVE_DASH && curr_word_p <= KANA_DHYP; 
+                curr_word_p = (currwc >= WAVE_DASH) && (currwc <= KANA_DHYP); 
             }
             break;
         case G_UNICODE_CLOSE_PUNCTUATION:
