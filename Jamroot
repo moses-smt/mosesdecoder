@@ -112,8 +112,8 @@ if [ build_server ] != no
 boost 104400 ;
 external-lib z ;
 
-lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-requirements += <library>dl ;
+#lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+#requirements += <library>dl ;
 
 
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
