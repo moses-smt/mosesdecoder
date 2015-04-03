@@ -41,12 +41,14 @@ namespace Moses
       
       DocumentBias(std::vector<id_type> const& sid2doc,
 		   std::map<std::string,id_type> const& docname2docid,
-		   std::string const& server_url, std::string const& text);
+		   std::string const& server_url, std::string const& text,
+		   std::ostream* log);
 
       void 
       init_from_json 
       ( std::string const& json, 
-	std::map<std::string,id_type> const& docname2docid );
+	std::map<std::string,id_type> const& docname2docid,
+	std::ostream* log );
       
       void 
       init

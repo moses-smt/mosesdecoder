@@ -419,7 +419,7 @@ namespace Moses {
     SortDescendingByJointCount::
     cmp(PhrasePair const& a, PhrasePair const& b) const
     {
-      size_t i = 0;
+      // size_t i = 0;
       if (a.joint == b.joint) return 0;
       return a.joint > b.joint ? -1 : 1;
     }
@@ -556,7 +556,8 @@ namespace Moses {
       loadSentenceBias(string const& fname) const;
 
       sptr<DocumentBias>
-      SetupDocumentBias(string const& bserver, string const& text) const;
+      SetupDocumentBias(string const& bserver, string const& text, 
+			ostream* log) const;
 
     };
 
@@ -1522,10 +1523,12 @@ namespace Moses {
     template<typename Token>
     sptr<DocumentBias>
     Bitext<Token>::
-    SetupDocumentBias(string const& bserver, string const& text) const
+    SetupDocumentBias
+    ( string const& bserver, string const& text, ostream* log ) const
     {
       sptr<DocumentBias> ret;
-      ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid, bserver, text));
+      ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid, 
+				 bserver, text, log));
       return ret;
     }
 

@@ -32,18 +32,20 @@ namespace Moses
     ::DocumentBias
     ( std::vector<id_type> const& sid2doc, 
       std::map<std::string,id_type> const& docname2docid,
-      std::string const& server_url, std::string const& text)
+      std::string const& server_url, std::string const& text,
+      std::ostream* log)
       : m_sid2docid(sid2doc)
       , m_bias(docname2docid.size(), 0)
     {
       std::string json = query_bias_server(server_url, text);
-      init_from_json(json, docname2docid);
+      init_from_json(json, docname2docid, log);
     }
 
     void 
     DocumentBias
     ::init_from_json
-    ( std::string const& json, std::map<std::string,id_type> const& docname2docid )
+    ( std::string const& json, std::map<std::string,id_type> const& docname2docid,
+      std::ostream* log)
     { // poor man's special purpose json parser for responses from the 
       // MMT bias server
 	
@@ -63,10 +65,18 @@ namespace Moses
       
       typedef std::pair<std::string const,float> item;
       if (total) { BOOST_FOREACH(item& x, bias) { x.second /= total; } } 
-      BOOST_FOREACH(item& x, bias) 
-	std::cerr << "CONTEXT SERVER RESPONSE " 
-	     << x.first << " " << x.second << std::endl; 
-      
+      if (log)
+	{
+	  BOOST_FOREACH(item& x, bias) 
+	    {
+	      std::map<std::string,id_type>::const_iterator m;
+	      m = docname2docid.find(x.first);
+	      int docid = m != docname2docid.end() ? m->second : -1;
+	      *log << "CONTEXT SERVER RESPONSE " 
+		   << "[" << docid << "] "
+		   << x.first << " " << x.second << std::endl; 
+	    }
+	}
       init(bias, docname2docid);
       
       // using xmlrpc_parse_json didn't always work (parser errors)
