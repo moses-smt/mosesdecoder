@@ -341,7 +341,7 @@ public:
       } 
     else 
       {
-        size_t lineNumber = 0; // TODO: Include sentence request number here?
+        // size_t lineNumber = 0; // TODO: Include sentence request number here?
 	boost::shared_ptr<Sentence> sentence(new Sentence(0,source));
 	ttasksptr task = Moses::TranslationTask::create(sentence);
         Manager manager(task);
