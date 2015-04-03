@@ -93,11 +93,17 @@ void MiraWeightVector::update(size_t index, ValType delta)
   m_lastUpdated[index] = m_numUpdates;
 }
 
-void MiraWeightVector::ToSparse(SparseVector* sparse) const
+void MiraWeightVector::ToSparse(SparseVector* sparse, size_t denseSize) const
 {
   for (size_t i = 0; i < m_weights.size(); ++i) {
     if(abs(m_weights[i])>1e-8) {
-      sparse->set(i,m_weights[i]);
+      if (i < denseSize) {
+        sparse->set(i,m_weights[i]);
+      } else {
+        //The ids in MiraFeatureVector/MiraWeightVector for sparse features
+        //need to be translated when converting back to SparseVector.
+        sparse->set(i-denseSize, m_weights[i]);
+      }
     }
   }
 }
@@ -172,12 +178,18 @@ size_t AvgWeightVector::size() const
   return m_wv.m_weights.size();
 }
 
-void AvgWeightVector::ToSparse(SparseVector* sparse) const
+void AvgWeightVector::ToSparse(SparseVector* sparse, size_t denseSize) const
 {
   for (size_t i = 0; i < size(); ++i) {
     ValType w = weight(i);
     if(abs(w)>1e-8) {
-      sparse->set(i,w);
+      if (i < denseSize) {
+        sparse->set(i,w);
+      } else {
+        //The ids in MiraFeatureVector/MiraWeightVector for sparse features
+        //need to be translated when converting back to SparseVector.
+        sparse->set(i-denseSize, w);
+      }
     }
   }
 }
