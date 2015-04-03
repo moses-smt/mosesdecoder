@@ -54,7 +54,7 @@ namespace Moses
 #if 0
   Mmsapt::
   Mmsapt(string const& description, string const& line)
-    : PhraseDictionary(description,line), ofactor(1,0)
+    : PhraseDictionary(description,line), ofactor(1,0), m_bias_log(NULL)
   {
     this->init(line);
   }
@@ -72,8 +72,9 @@ namespace Moses
     : PhraseDictionary(line)
     , ofactor(1,0)
       // , m_tpc_ctr(0)
-    , m_context_key(((char*)this)+1)
-    , m_cache_key(((char*)this)+2)
+    , context_key(((char*)this)+1)
+    , cache_key(((char*)this)+2)
+    , m_bias_log(NULL)
   { 
     this->init(line); 
   }
@@ -193,6 +194,20 @@ namespace Moses
     if ((m = param.find("bias-server")) != param.end()) 
 	m_bias_server = m->second;
 
+    if ((m = param.find("bias-logfile")) != param.end()) 
+      {
+	m_bias_logfile = m->second;
+	if (m_bias_logfile == "/dev/stderr")
+	  m_bias_log = &std::cerr;
+	else if (m_bias_logfile == "/dev/stdout")
+	  m_bias_log = &std::cout;
+	else
+	  {
+	    m_bias_logger.reset(new ofstream(m_bias_logfile.c_str()));
+	    m_bias_log = m_bias_logger.get();
+	  }
+      }
+
     if ((m = param.find("extra")) != param.end()) 
       m_extra_data = m->second;
 
@@ -214,6 +229,7 @@ namespace Moses
     known_parameters.push_back("base"); // alias for path
     known_parameters.push_back("bias");
     known_parameters.push_back("bias-server");
+    known_parameters.push_back("bias-logfile");
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
@@ -258,6 +274,7 @@ namespace Moses
   Mmsapt::
   load_extra_data(string bname, bool locking = true)
   {
+    using namespace boost;
     // TO DO: ADD CHECKS FOR ROBUSTNESS
     // - file existence?
     // - same number of lines?
@@ -274,8 +291,8 @@ namespace Moses
     while(getline(in2,line)) text2.push_back(line);
     while(getline(ina,line)) symal.push_back(line);
 
-    boost::scoped_ptr<boost::unique_lock<boost::shared_mutex> > guard;
-    if (locking) guard.reset(new boost::unique_lock<boost::shared_mutex>(m_lock));
+    scoped_ptr<unique_lock<shared_mutex> > guard;
+    if (locking) guard.reset(new unique_lock<shared_mutex>(m_lock));
     btdyn = btdyn->add(text1,text2,symal);
     assert(btdyn);
     cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
@@ -310,7 +327,8 @@ namespace Moses
   template<typename fftype>
   void
   Mmsapt::
-  check_ff(string const ffname, float const xtra, vector<sptr<pscorer> >* registry)
+  check_ff(string const ffname, float const xtra, 
+	   vector<sptr<pscorer> >* registry)
   {
     string const& spec = param[ffname];
     if (spec == "" || spec == "0") return;
@@ -585,7 +603,7 @@ namespace Moses
 
     // get context-specific cache of items previously looked up
     sptr<ContextScope> const& scope = ttask->GetScope();
-    sptr<TPCollCache> cache = scope->get<TPCollCache>(m_cache_key);
+    sptr<TPCollCache> cache = scope->get<TPCollCache>(cache_key);
     TPCollWrapper* ret = cache->get(phrasekey, dyn->revision());
     // TO DO: we should revise the revision mechanism: we take the length
     // of the dynamic bitext (in sentences) at the time the PT entry
@@ -612,12 +630,12 @@ namespace Moses
     PhrasePair<Token>::SortByTargetIdSeq sort_by_tgt_id;
     if (sfix) 
       {
-	expand(mfix, btfix, *sfix, ppfix);
+	expand(mfix, btfix, *sfix, ppfix, m_bias_log);
 	sort(ppfix.begin(), ppfix.end(),sort_by_tgt_id);
       }
     if (sdyn)
       {
-	expand(mdyn, *dyn, *sdyn, ppdyn);
+	expand(mdyn, *dyn, *sdyn, ppdyn, m_bias_log);
 	sort(ppdyn.begin(), ppdyn.end(),sort_by_tgt_id);
       }
 
@@ -699,24 +717,34 @@ namespace Moses
   InitializeForInput(ttasksptr const& ttask)
   {
     sptr<ContextScope> const& scope = ttask->GetScope();
-    sptr<ContextForQuery> context = scope->get<ContextForQuery>(m_context_key, true);
+    sptr<ContextForQuery> context 
+      = scope->get<ContextForQuery>(&btfix, true);
     if (m_bias_server.size() && context->bias == NULL) 
       { // we need to create the bias
 	boost::unique_lock<boost::shared_mutex> lock(context->lock);
-	string line = ttask->GetSource()->ToString();
-	cerr << HERE << endl;
-	cerr << "BIAS LOOKUP CONTEXT: " << line << endl; 
-	context->bias = btfix.SetupDocumentBias(m_bias_server, line);
+	string const& context_words = ttask->GetContextString();
+	if (context_words.size())
+	  {
+	    if (m_bias_log)
+	      {
+		*m_bias_log << HERE << endl
+			    << "BIAS LOOKUP CONTEXT: " 
+			    << context_words << endl; 
+		context->bias_log = m_bias_log;
+	      }
+	    context->bias 
+	      = btfix.SetupDocumentBias(m_bias_server, context_words);
+	  }
 	if (!context->cache1) context->cache1.reset(new pstats::cache_t);
 	if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       }      
     boost::unique_lock<boost::shared_mutex> mylock(m_lock);
-    sptr<TPCollCache> localcache = scope->get<TPCollCache>(m_cache_key);
+    sptr<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
     if (!localcache)
       {
 	if (context->bias) localcache.reset(new TPCollCache(m_cache_size));
 	else localcache = m_cache;
-	scope->set<TPCollCache>(m_cache_key, localcache);
+	scope->set<TPCollCache>(cache_key, localcache);
       }
   }
 
@@ -764,7 +792,7 @@ namespace Moses
   Mmsapt
   ::Release(ttasksptr const& ttask, TargetPhraseCollection*& tpc) const
   {
-    sptr<TPCollCache> cache = ttask->GetScope()->get<TPCollCache>(m_cache_key);
+    sptr<TPCollCache> cache = ttask->GetScope()->get<TPCollCache>(cache_key);
     TPCollWrapper* foo = static_cast<TPCollWrapper*>(tpc);
     if (cache) cache->release(foo);
     tpc = NULL;

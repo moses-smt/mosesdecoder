@@ -73,9 +73,13 @@ namespace Moses
     size_t m_default_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
     std::vector<std::string> m_feature_set_names; // one or more of: standard, datasource
- 
-    void* const  m_cache_key;   // for getting cache from ttask
-    void* const  m_context_key; // for context scope from ttask
+    std::string m_bias_logfile;
+    boost::scoped_ptr<ofstream> m_bias_logger; // for logging to a file
+    ostream* m_bias_log; 
+  public:
+    void* const  cache_key;   // for getting cache from ttask
+    void* const  context_key; // for context scope from ttask
+  private:
     boost::shared_ptr<SamplingBias> m_bias; // for global default bias
     boost::shared_ptr<TPCollCache> m_cache; // for global default bias
     size_t m_cache_size;  //

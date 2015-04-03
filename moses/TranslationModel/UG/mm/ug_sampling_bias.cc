@@ -118,7 +118,8 @@ namespace Moses
     DocumentBias
     ::operator[](id_type const idx) const 
     { 
-      UTIL_THROW_IF2(idx >= m_sid2docid.size(), "Out of bounds");
+      UTIL_THROW_IF2(idx >= m_sid2docid.size(), 
+		     "Out of bounds: " << idx << "/" << m_sid2docid.size());
       return m_bias[m_sid2docid[idx]];
     }
 

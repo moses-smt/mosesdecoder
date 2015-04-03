@@ -207,6 +207,9 @@ batch_run()
   ThreadPool pool(staticData.ThreadCount());
 #endif
 
+  std::string context_string;
+  params.SetParameter(context_string,"context-string",string(""));
+
   // main loop over set of input sentences
 
   boost::shared_ptr<InputType> source;
@@ -219,6 +222,7 @@ batch_run()
       // set up task of translating one sentence
       boost::shared_ptr<TranslationTask>
 	task = TranslationTask::create(source, ioWrapper);
+      task->SetContextString(context_string);
 
       // Allow for (sentence-)context-specific processing prior to 
       // decoding. This can be used, for example, for context-sensitive

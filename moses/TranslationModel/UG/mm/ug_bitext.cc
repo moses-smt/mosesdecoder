@@ -57,20 +57,27 @@ namespace Moses
 
     bool
     pstats::
-    add(::uint64_t pid, float const w, 
+    add(uint64_t pid, float const w, 
 	vector<uchar> const& a, 
 	uint32_t const cnt2, 
 	uint32_t fwd_o, 
-	uint32_t bwd_o)
+	uint32_t bwd_o, int const docid)
     {
       boost::lock_guard<boost::mutex> guard(this->lock);
       jstats& entry = this->trg[pid];
-      entry.add(w,a,cnt2,fwd_o,bwd_o);
+      entry.add(w,a,cnt2,fwd_o,bwd_o,docid);
       if (this->good < entry.rcnt())
 	{
 	  UTIL_THROW(util::Exception, "more joint counts than good counts:" 
 		     << entry.rcnt() << "/" << this->good << "!");
 	}
+
+      if (docid >= 0)
+	{
+	  while (int(indoc.size()) <= docid) indoc.push_back(0);
+	  ++indoc[docid];
+	}
+
       return true;
     }
 
@@ -80,7 +87,7 @@ namespace Moses
     { 
       for (int i = 0; i <= Moses::LRModel::NONE; ++i) 
 	ofwd[i] = obwd[i] = 0;
-      my_aln.reserve(1); 
+      my_aln.reserve(1);
     }
 
     jstats::
@@ -89,6 +96,7 @@ namespace Moses
       my_rcnt = other.rcnt();
       my_wcnt = other.wcnt();
       my_aln  = other.aln();
+      indoc = other.indoc;
       for (int i = 0; i <= Moses::LRModel::NONE; i++)
 	{
 	  ofwd[i] = other.ofwd[i];
@@ -115,7 +123,7 @@ namespace Moses
     void 
     jstats::
     add(float w, vector<uchar> const& a, uint32_t const cnt2,
-	uint32_t fwd_orient, uint32_t bwd_orient)
+	uint32_t fwd_orient, uint32_t bwd_orient, int const docid)
     {
       boost::lock_guard<boost::mutex> lk(this->lock);
       my_rcnt += 1;
@@ -135,6 +143,14 @@ namespace Moses
 	}
       ++ofwd[fwd_orient];
       ++obwd[bwd_orient];
+      if (docid >= 0)
+	{
+	  while (int(indoc.size()) <= docid) indoc.push_back(0);
+	  ++indoc[docid];
+
+	  // cout << docid << " => " << indoc[docid] << " " << HERE << endl;
+
+	}
     }
     
     uint32_t 

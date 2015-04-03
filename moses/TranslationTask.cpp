@@ -23,6 +23,22 @@ using namespace std;
 namespace Moses
 {
 
+std::string const&
+TranslationTask
+::GetContextString() const
+{
+  return m_context_string;
+}
+
+void 
+TranslationTask
+::SetContextString(std::string const& context) 
+{
+  m_context_string = context;
+}
+
+
+
 boost::shared_ptr<TranslationTask> 
 TranslationTask
 ::create(boost::shared_ptr<InputType> const& source)

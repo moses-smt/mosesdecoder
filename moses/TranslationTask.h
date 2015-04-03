@@ -63,7 +63,8 @@ protected:
   // function can determine (via a check on the weak pointer) if the
   // task is still live or not, or maintain a shared_ptr to ensure the
   // task stays alive till it's done with it.
-  
+
+  std::string m_context_string;  
 public:
   
   boost::shared_ptr<TranslationTask>  
@@ -104,6 +105,9 @@ public:
     return m_scope;
   }
 
+  std::string const& GetContextString() const;
+  void SetContextString(std::string const& context);
+  
 protected:
   boost::shared_ptr<Moses::InputType> m_source; 
   boost::shared_ptr<Moses::IOWrapper> m_ioWrapper;
