@@ -1851,7 +1851,7 @@ namespace Moses {
 		   << p.joint << " [";
 	      for (size_t i = 0; i < p.indoc.size(); ++i)
 		{ 
-		  if (i) cout << " "; 
+		  if (i) *log << " "; 
 		  *log << p.indoc[i]; 
 		}
 	      *log << "]" << endl;
