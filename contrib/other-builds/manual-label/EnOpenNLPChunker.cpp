@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <fstream>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
 #include "EnOpenNLPChunker.h"
 #include "moses/Util.h"
 
@@ -28,10 +29,11 @@ EnOpenNLPChunker::~EnOpenNLPChunker() {
 
 void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out, const vector<string> &filterList)
 {
+        const boost::filesystem::path
+            inPath = boost::filesystem::unique_path(),
+            outPath = boost::filesystem::unique_path();
 	// read all input to a temp file
-	char *ptr = tmpnam(NULL);
-	string inStr(ptr);
-	ofstream inFile(ptr);
+	ofstream inFile(inPath.c_str());
 
 	string line;
 	while (getline(in, line)) {
@@ -40,21 +42,18 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out, const vector
 	}
 	inFile.close();
 
-	ptr = tmpnam(NULL);
-	string outStr(ptr);
-
 	// execute chunker
-	string cmd = "cat " + inStr + " | "
+	string cmd = "cat " + inPath.native() + " | "
 			+ m_openNLPPath + "/bin/opennlp POSTagger "
 				+ m_openNLPPath + "/models/en-pos-maxent.bin | "
 			+ m_openNLPPath + "/bin/opennlp ChunkerME "
 				+ m_openNLPPath + "/models/en-chunker.bin > "
-			+ outStr;
+			+ outPath.native();
 	//g << "Executing:" << cmd << endl;
 	int ret = system(cmd.c_str());
 
 	// read result of chunker and output as Moses xml trees
-	ifstream outFile(outStr.c_str());
+	ifstream outFile(outPath.c_str());
 
 	size_t lineNum = 0;
 	while (getline(outFile, line)) {
@@ -66,8 +65,8 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out, const vector
 	outFile.close();
 
 	// clean up temporary files
-	remove(inStr.c_str());
-	remove(outStr.c_str());
+	remove(inPath.c_str());
+	remove(outPath.c_str());
 }
 
 void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out, const vector<string> &filterList)

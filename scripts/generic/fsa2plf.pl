@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 # Converts AT&T FSA format to 'python lattice format'.
 # Note that the input FSA needs to be epsilon-free and topologically sorted.
 # This script checks for topological sortedness.

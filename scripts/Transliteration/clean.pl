@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
 #input hindi word urdu word, delete all those entries that have number on any side
 use utf8;

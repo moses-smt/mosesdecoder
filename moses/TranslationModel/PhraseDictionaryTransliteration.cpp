@@ -70,10 +70,9 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
   } else {
     // TRANSLITERATE
-    char *ptr = tmpnam(NULL);
-    string inFile(ptr);
-    ptr = tmpnam(NULL);
-    string outDir(ptr);
+    const boost::filesystem::path
+        inFile = boost::filesystem::unique_path(),
+        outDir = boost::filesystem::unique_path();
 
     ofstream inStream(inFile.c_str());
     inStream << sourcePhrase.ToString() << endl;
@@ -85,14 +84,14 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
                  " --external-bin-dir " + m_externalDir +
                  " --input-extension " + m_inputLang +
                  " --output-extension " + m_outputLang +
-                 " --oov-file " + inFile +
-                 " --out-dir " + outDir;
+                 " --oov-file " + inFile.native() +
+                 " --out-dir " + outDir.native();
 
     int ret = system(cmd.c_str());
     UTIL_THROW_IF2(ret != 0, "Transliteration script error");
 
     TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-    vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir);
+    vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir.native());
     vector<TargetPhrase*>::const_iterator iter;
     for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
       TargetPhrase *tp = *iter;

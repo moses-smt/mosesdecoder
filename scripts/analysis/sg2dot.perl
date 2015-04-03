@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 # 
 # Author : Loic BARRAULT
 # Script to convert MOSES searchgraph to DOT format
