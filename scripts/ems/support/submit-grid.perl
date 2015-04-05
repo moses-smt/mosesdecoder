@@ -19,7 +19,7 @@ GetOptions("continue=i"  => \$continue,
 
 # create temp run file
 my $runPath = "/tmp/run.$$";
-#print STDERR "runPath=$runPath\n";
+print STDERR "runPath=$runPath\n";
 
 open (my $runFile, ">", $runPath);
 
