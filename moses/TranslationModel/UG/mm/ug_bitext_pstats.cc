@@ -56,8 +56,11 @@ namespace Moses
       sum_pairs += num_pairs;
       ++ofwd[po_fwd];
       ++obwd[po_bwd];
-      while (int(indoc.size()) <= docid) indoc.push_back(0);
-      ++indoc[docid];
+      if (docid >= 0)
+	{
+	  while (int(indoc.size()) <= docid) indoc.push_back(0);
+	  ++indoc[docid];
+	}
     }
 
     bool
