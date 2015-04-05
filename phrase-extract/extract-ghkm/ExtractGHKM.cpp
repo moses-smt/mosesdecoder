@@ -66,7 +66,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   // Open output files.
   OutputFileStream fwdExtractStream;
   OutputFileStream invExtractStream;
-  std::ofstream psdAnnotStream; //for source context annotation
+  OutputFileStream psdAnnotStream; //for source context annotation
   std::ofstream glueGrammarStream;
   std::ofstream unknownWordStream;
   std::string fwdFileName = options.extractFile;
@@ -185,19 +185,22 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
       //Get the start and end of the span in the source sentence where each rule has been extracted
       //FB : looks like the spans in the set are ordered. Put them in a vector to take first and last elements. To be improved.
-      std::vector<int> spanVector;
+      int spanStart = -1;
+      int spanEnd = -1;
 
-      //std::cout << "Processing Node : " << (*p)->GetLabel() << std::endl;
-      //std::cout << "With Span : ";
-      for(itr_spans = spans.begin(); itr_spans != spans.end(); itr_spans++)
+      if(rules.size() != 0) //only do that for nodes that carry rules
       {
-    	  	spanVector.push_back(*itr_spans);
-    	  	//std::cout << *itr_spans << std::endl;
-      }
+    	  std::vector<int> spanVector;
 
-      int spanStart = spanVector.front();
-      int spanEnd = spanVector.back();
-      spanVector.clear();
+    	  for(itr_spans = spans.begin(); itr_spans != spans.end(); itr_spans++)
+    	  {
+    		  spanVector.push_back(*itr_spans);
+    	  }
+
+    	  spanStart = spanVector.front();
+    	  spanEnd = spanVector.back();
+    	  spanVector.clear();
+      }
 
       //Get and print span here !!!
       //put get span here!
@@ -716,7 +719,7 @@ void ExtractGHKM::WritePsdAnnot(
 	 			  ruleTarget+= " ";
 	 		  }
 	 	  }
-	 	 std::cout << std::endl;
+	 	 //std::cout << std::endl;
 
 	 	 //add target LHS at end of rule
 	 	 ruleTarget+="["+targetLHS.GetValue()+"]";
