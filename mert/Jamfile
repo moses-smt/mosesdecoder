@@ -77,6 +77,7 @@ unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_f
 unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test forest_rescore_test : ForestRescoreTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test hypergraph_test : HypergraphTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test mira_feature_vector_test : MiraFeatureVectorTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test ngram_test : NgramTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test optimizer_factory_test : OptimizerFactoryTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test point_test : PointTest.cpp mert_lib ..//boost_unit_test_framework ;

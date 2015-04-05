@@ -180,7 +180,7 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
   references_.Load(referenceFiles, vocab_);
 
   SparseVector weights;
-  wv.ToSparse(&weights);
+  wv.ToSparse(&weights,num_dense_);
   scorer_ = scorer;
 
   static const string kWeights = "weights";
@@ -243,7 +243,7 @@ void HypergraphHopeFearDecoder::HopeFear(
 {
   size_t sentenceId = *sentenceIdIter_;
   SparseVector weights;
-  wv.ToSparse(&weights);
+  wv.ToSparse(&weights, num_dense_);
   const Graph& graph = *(graphs_[sentenceId]);
 
   // ValType hope_scale = 1.0;
@@ -338,7 +338,7 @@ void HypergraphHopeFearDecoder::MaxModel(const AvgWeightVector& wv, vector<ValTy
   HgHypothesis bestHypo;
   size_t sentenceId = *sentenceIdIter_;
   SparseVector weights;
-  wv.ToSparse(&weights);
+  wv.ToSparse(&weights, num_dense_);
   vector<ValType> bg(scorer_->NumberOfScores());
   //cerr << "Calculating bleu on " << sentenceId << endl;
   Viterbi(*(graphs_[sentenceId]), weights, 0, references_, sentenceId, bg, &bestHypo);

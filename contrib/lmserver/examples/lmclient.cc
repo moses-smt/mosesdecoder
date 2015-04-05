@@ -5,13 +5,13 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <string.h>
+#include <cstring>
 #include <map>
 
 struct Cache {

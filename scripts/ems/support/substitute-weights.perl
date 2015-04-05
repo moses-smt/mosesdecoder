@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/env perl 
 
 # experiment.perl support script
 # get filtered rule and reordering tables and place them into a configuration file

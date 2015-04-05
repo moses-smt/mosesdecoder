@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id$
 #show-phrases-used: display all source and target phrases for each sentence in a corpus, and give average phrase length used

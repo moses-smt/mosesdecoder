@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id$
 # Given a moses.ini file and an input text prepare minimized translation

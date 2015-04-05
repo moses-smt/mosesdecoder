@@ -3,7 +3,7 @@
 //Huffman encodes a line and also produces the vocabulary ids
 #include "hash.hh"
 #include "line_splitter.hh"
-#include <stdio.h>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>

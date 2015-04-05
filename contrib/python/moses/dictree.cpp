@@ -20,7 +20,7 @@
     #error Cython requires Python 2.4+.
 #else
 #define CYTHON_ABI "0_20_1post0"
-#include <stddef.h> /* For offsetof */
+#include <cstddef> /* For offsetof */
 #ifndef offsetof
 #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
 #endif
@@ -343,7 +343,7 @@ void __Pyx_call_destructor(T* x) {
 #if defined(WIN32) || defined(MS_WINDOWS)
 #define _USE_MATH_DEFINES
 #endif
-#include <math.h>
+#include <cmath>
 #define __PYX_HAVE__moses__dictree
 #define __PYX_HAVE_API__moses__dictree
 #include "string.h"
@@ -1131,7 +1131,7 @@ bad:
 
 static CYTHON_INLINE int __Pyx_PyObject_Append(PyObject* L, PyObject* x); /*proto*/
 
-#include <string.h>
+#include <cstring>
 
 static int __Pyx_SetVtable(PyObject *dict, void *vtable); /*proto*/
 

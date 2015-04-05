@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # Experiment Management System
 # Documentation at http://www.statmt.org/moses/?n=FactoredTraining.EMS
@@ -18,7 +18,18 @@ sub trim($)
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
-my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$FINAL_STEP,$FINAL_OUT,$VERBOSE,$IGNORE_TIME,$DELETE_CRASHED,$DELETE_VERSION);
+my ($CONFIG_FILE,
+		$EXECUTE,
+		$NO_GRAPH,
+		$CONTINUE,
+		$FINAL_STEP,
+		$FINAL_OUT,
+		$VERBOSE,
+		$IGNORE_TIME,
+		$DELETE_CRASHED,
+		$DELETE_VERSION
+		);
+		
 my $SLEEP = 2;
 my $META = "$RealBin/experiment.meta";
 
@@ -3442,7 +3453,7 @@ sub create_step {
     $subdir = "lm" if $subdir eq "interpolated-lm";
     open(STEP,">$file") or die "Cannot open: $!";
     print STEP "#!/bin/bash\n\n";
-    print STEP "PATH=\"".$ENV{"PATH"}."\"\n";
+    print STEP "PATH=\"".$ENV{"PATH"}."\"\n";  	
     print STEP "cd $dir\n";
     print STEP "echo 'starting at '`date`' on '`hostname`\n";
     print STEP "mkdir -p $dir/$subdir\n\n";
