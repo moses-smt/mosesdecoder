@@ -45,15 +45,16 @@ void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
   string sentence = trimStr(this->preprocessSentence(text));
   
-  if(seen_.count(sentence) != 0) {
-    entry.set(seen_[sentence]);
+  std::pair<size_t, string> sidSent(sid, sentence);
+  if(seen_.count(sidSent) != 0) {
+    entry.set(seen_[sidSent]);
     return;
   }
   
   std::vector<ScoreStatsType> stats;
   
   boost::python::object list = m2_.attr("sufstats")(sentence, sid);
-  
+
   ScoreStatsType correct = extract<int>(list[0]);
   ScoreStatsType proposed = extract<int>(list[1]);
   ScoreStatsType gold = extract<int>(list[2]);
@@ -63,8 +64,8 @@ void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   stats.push_back(proposed);
   stats.push_back(gold);
   stats.push_back(input_length);
-  
-  seen_[sentence] = stats;
+
+  seen_[sidSent] = stats;
   entry.set(stats);
 }
 
@@ -188,8 +189,8 @@ const char* M2Scorer::code() {
     "    stat_proposed = 0.0\n"
     "    stat_gold = 0.0\n"
     "\n"
-    "    candidate_tok = candidate.lower().split()\n"
-    "    source_tok = source.lower().split()\n"
+    "    candidate_tok = candidate.split()\n"
+    "    source_tok = source.split()\n"
     "\n"
     // Prevent losing time on stupid candidates that have more than 10 spurious tokens
     "    if len(candidate_tok) > len(source_tok) + 10:\n"
@@ -817,13 +818,14 @@ const char* M2Scorer::code() {
     "        self.source_sentences, self.gold_edits = load_annotation(m2_path)\n"
     "\n"
     "    def sufstats(self, cand_str, i):\n"
-    "        stat_correct, stat_proposed, stat_gold = f1_suffstats(cand_str,\n"
+    "        stat_correct, stat_proposed, stat_gold = f1_suffstats(cand_str.decode('utf8'),\n"
     "                                                self.source_sentences[i],\n"
     "                                                self.gold_edits[i],\n"
     "                                                self.max_unchanged_words,\n"
     "                                                self.beta,\n"
     "                                                self.ignore_whitespace_casing)\n"
     "\n"
+//    "        return [int(stat_correct), int(stat_proposed), int(stat_gold), int(i)]\n"
     "        return [int(stat_correct), int(stat_proposed), int(stat_gold), int(len(self.source_sentences[i].split()))]\n"
   ;
 }

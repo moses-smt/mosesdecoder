@@ -39,7 +39,7 @@ private:
   int max_unchanged_words_;
   bool ignore_whitespace_casing_;
 
-  std::map<std::string, std::vector<ScoreStatsType> > seen_;
+  std::map<std::pair<size_t, std::string>, std::vector<ScoreStatsType> > seen_;
   
   const char* code();
   
