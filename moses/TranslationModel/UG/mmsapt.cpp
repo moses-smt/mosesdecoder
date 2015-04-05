@@ -55,6 +55,7 @@ namespace Moses
   Mmsapt::
   Mmsapt(string const& description, string const& line)
     : PhraseDictionary(description,line), ofactor(1,0), m_bias_log(NULL)
+    , m_bias_loglevel(0)
   {
     this->init(line);
   }
@@ -70,11 +71,12 @@ namespace Moses
   Mmsapt::
   Mmsapt(string const& line)
     : PhraseDictionary(line)
-    , ofactor(1,0)
-      // , m_tpc_ctr(0)
-    , context_key(((char*)this)+1)
-    , cache_key(((char*)this)+2)
     , m_bias_log(NULL)
+    , m_bias_loglevel(0)
+    , cache_key(((char*)this)+2)
+    , context_key(((char*)this)+1)
+      // , m_tpc_ctr(0)
+    , ofactor(1,0)
   { 
     this->init(line); 
   }
@@ -165,6 +167,8 @@ namespace Moses
     m_workers = atoi(param.insert(dflt).first->second.c_str());
     m_workers = min(m_workers,24UL);
 
+    dflt = pair<string,string>("bias-loglevel","0");
+    m_bias_loglevel = atoi(param.insert(dflt).first->second.c_str());
     
     dflt = pair<string,string>("table-limit","20");
     m_tableLimit = atoi(param.insert(dflt).first->second.c_str());
@@ -230,6 +234,7 @@ namespace Moses
     known_parameters.push_back("bias");
     known_parameters.push_back("bias-server");
     known_parameters.push_back("bias-logfile");
+    known_parameters.push_back("bias-loglevel");
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
@@ -734,6 +739,8 @@ namespace Moses
 	      }
 	    context->bias 
 	      = btfix.SetupDocumentBias(m_bias_server, context_words, m_bias_log);
+	    context->bias->loglevel = m_bias_loglevel;
+	    context->bias->log = m_bias_log;
 	  }
 	if (!context->cache1) context->cache1.reset(new pstats::cache_t);
 	if (!context->cache2) context->cache2.reset(new pstats::cache_t);
