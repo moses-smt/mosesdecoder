@@ -76,6 +76,7 @@ namespace Moses
     std::string m_bias_logfile;
     boost::scoped_ptr<ofstream> m_bias_logger; // for logging to a file
     ostream* m_bias_log; 
+    int m_bias_loglevel;
   public:
     void* const  cache_key;   // for getting cache from ttask
     void* const  context_key; // for context scope from ttask

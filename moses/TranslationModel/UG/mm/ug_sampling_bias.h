@@ -4,9 +4,9 @@
 #include <map>
 #include<vector>
 #include <string>
+#include <iostream>
 #include "moses/Util.h"
 #include "ug_typedefs.h"
-
 namespace Moses
 {
   namespace bitext
@@ -18,7 +18,8 @@ namespace Moses
     class SamplingBias 
     {
     public:
-      
+      int loglevel;
+      std::ostream* log;
       virtual float 
       operator[](id_type const ID) const = 0;
       // returns (unnormalized bias) for the class of item ID
