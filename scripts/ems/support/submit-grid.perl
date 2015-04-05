@@ -18,7 +18,10 @@ GetOptions("continue=i"  => \$continue,
 #print STDERR "args=$args\n";
 
 # create temp run file
-my $runPath = "/tmp/run.$$";
+my $gridDir = cwd() ."/grid";
+mkdir $gridDir;
+
+my $runPath = "$gridDir/run.$$";
 print STDERR "runPath=$runPath\n";
 
 open (my $runFile, ">", $runPath);
@@ -45,13 +48,14 @@ else {
   print $runFile "nice ionice -c 3 $emsDir/experiment.perl -exec -config=$config \n\n";
 }
 
-print $runFile "rm $runPath\n\n";
-
 close $runFile;
 
 
 my $cmd = "qsub $args $runPath";
 `$cmd`;
+
+unlink $runFile;
+
 
 
 
