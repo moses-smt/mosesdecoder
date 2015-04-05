@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
-#include <unordered_set>
+#include <set>
 #include <glib.h>
 #include <stdexcept>
 #include <boost/thread.hpp>
@@ -1557,9 +1557,9 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
 {
     std::size_t line_no = 0;
     std::size_t perchunk = chunksize ? chunksize : 2000;
-    std::vector< std::string > lines[nthreads];
-    std::vector< std::string > results[nthreads];
-    boost::thread workers[nthreads];
+    std::vector< std::vector< std::string > > lines(nthreads);
+    std::vector< std::vector< std::string > > results(nthreads);
+    std::vector< boost::thread > workers(nthreads);
     bool done_p = !(is.good() && os.good());
     
 
@@ -1589,20 +1589,20 @@ Tokenizer::tokenize(std::istream& is, std::ostream& os)
                         results[ithread].resize(line_pos);
                         break;
                     }
-                    lines[ithread][line_pos].clear();
+                    lines[ithread][line_pos].clear(); 
                 } else if (skip_xml_p && 
                            (RE2::FullMatch(istr,tag_line_x) || RE2::FullMatch(istr,white_line_x))) { 
-                    lines[ithread][line_pos].clear();
+                    lines[ithread][line_pos].clear(); 
                 } else {
                     lines[ithread][line_pos] = 
-                        std::string(SPC_BYTE).append(istr).append(SPC_BYTE);
+                        std::string(SPC_BYTE).append(istr).append(SPC_BYTE); 
                 }
             } 
 
-            if (line_pos)
+            if (line_pos) {
                 workers[ithread] = 
-                    boost::thread(VectorTokenizerCallable(this,lines[ithread],results[ithread]));
-
+                    boost::thread(VectorTokenizerCallable(this,lines[ithread],results[ithread])); 
+            }
         } // end for loop starting threads
 
         for (std::size_t ithread = 0; ithread < nthreads; ++ithread) {
@@ -1772,12 +1772,12 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
     std::size_t finilen = 0;
     std::size_t dotslen = 0;
 
-    static std::size_t SEQ_LIM = 6;
+	  const std::size_t SEQ_LIM = 6;
 
     charclass_t prev_class = empty;
     charclass_t curr_class = empty;
-    charclass_t seq[SEQ_LIM] = { empty };
-    std::size_t pos[SEQ_LIM] = { 0 };
+    std::vector<charclass_t> seq(SEQ_LIM, empty);
+    std::vector<std::size_t> pos(SEQ_LIM, 0);
     std::size_t seqpos = 0;
 
     GUnicodeType curr_type = G_UNICODE_UNASSIGNED;
@@ -1785,7 +1785,7 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
     bool curr_word_p = false;
 
     std::vector<std::size_t> breaks;
-    std::unordered_set<std::size_t> suppress;
+    std::set<std::size_t> suppress;
     
     for (; icp <= ncp; ++icp) {
         currwc = wchar_t(ucs4[icp]);
@@ -1822,7 +1822,7 @@ Tokenizer::splitter(const std::string &istr, bool *continuation_ptr) {
             } else if (currwc >= SMAL_HYPH) {
                 curr_word_p = true;
             } else {
-                curr_word_p = currwc >= WAVE_DASH && curr_word_p <= KANA_DHYP; 
+                curr_word_p = (currwc >= WAVE_DASH) && (currwc <= KANA_DHYP); 
             }
             break;
         case G_UNICODE_CLOSE_PUNCTUATION:
