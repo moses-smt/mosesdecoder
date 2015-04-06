@@ -13,8 +13,8 @@ sub GetSourcePhrase($);
 sub NumStr($);
 sub CutContextFile($$$);
 
-my $GZIP_EXEC; # = which("pigz"); 
-if(-f "/usr/bin/pigz") {
+my $GZIP_EXEC;
+if(`which pigz`) {
   $GZIP_EXEC = 'pigz';
 }
 else {

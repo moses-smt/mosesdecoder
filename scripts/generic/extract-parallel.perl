@@ -32,8 +32,8 @@ my $glueFile;
 my $phraseOrientation = 0;
 my $phraseOrientationPriorsFile;
 
-my $GZIP_EXEC; # = which("pigz"); 
-if(-f "/usr/bin/pigz") {
+my $GZIP_EXEC;
+if(`which pigz`) {
   $GZIP_EXEC = 'pigz';
 }
 else {
