@@ -36,7 +36,7 @@ if ($HELP) {
 	exit;
 }
 
-if ($language !~ /^(cs|en|fr|it)$/) {
+if ($language !~ /^(cs|en|fr|it|fi)$/) {
   print STDERR "Warning: No built-in rules for language $language.\n"
 }
 
