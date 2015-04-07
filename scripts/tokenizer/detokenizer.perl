@@ -176,6 +176,10 @@ sub detokenize {
 
 			}
 			
+        } elsif (($language eq "fi") && ($words[$i-1] =~ /:$/) && ($words[$i] =~ /^(N|n|ssa|ssä|a|ä|lla|llä|lta|ltä|lle|ksi|kse)(ni|si|mme|nne|nsa)?(ko|kö|han|hän|pa|pä|kaan|kään|kin)?$/)) {
+            # Finnish : without intervening space if followed by case suffix
+            $text=$text.$words[$i];
+            $prependSpace = " ";
 		} else {
 			$text=$text.$prependSpace.$words[$i];
 			$prependSpace = " ";
