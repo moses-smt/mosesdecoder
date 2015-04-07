@@ -130,10 +130,6 @@ int removedirectoryrecursively(const char *dirname)
   struct dirent *entry;
   char path[PATH_MAX];
 
-  if (path == NULL) {
-    fprintf(stderr, "Out of memory error\n");
-    return 0;
-  }
   dir = opendir(dirname);
   if (dir == NULL) {
     perror("Error opendir()");
