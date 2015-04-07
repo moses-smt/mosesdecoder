@@ -176,7 +176,7 @@ sub detokenize {
 
 			}
 			
-        } elsif (($language eq "fi") && ($words[$i-1] =~ /:$/) && ($words[$i] =~ /^(N|n|ssa|ssä|a|ä|lla|llä|lta|ltä|lle|ksi|kse)(ni|si|mme|nne|nsa)?(ko|kö|han|hän|pa|pä|kaan|kään|kin)?$/)) {
+        } elsif (($language eq "fi") && ($words[$i-1] =~ /:$/) && ($words[$i] =~ /^(N|n|A|a|Ä|ä|ssa|Ssa|ssä|Ssä|sta|stä|Sta|Stä|hun|Hun|hyn|Hyn|han|Han|hän|Hän|hön|Hön|un|Un|yn|Yn|an|An|än|Än|ön|Ön|seen|Seen|lla|Lla|llä|Llä|lta|Lta|ltä|Ltä|lle|Lle|ksi|Ksi|kse|Kse|tta|Tta|ine|Ine)(ni|si|mme|nne|nsa)?(ko|kö|han|hän|pa|pä|kaan|kään|kin)?$/)) {
             # Finnish : without intervening space if followed by case suffix
             $text=$text. lc $words[$i];
             $prependSpace = " ";
