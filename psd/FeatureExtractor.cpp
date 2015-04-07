@@ -364,7 +364,7 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
 
 void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, FeatureConsumer *fc)
 {
-  boost::regex parentRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+   boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
   //string parent = "[X]"; //was for hiero
   string indicString = "";
 
@@ -378,14 +378,13 @@ void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Feat
         indicString += span[i];
     }
   }
-  fc->AddFeature("p^" + indicString);
 }
 
 void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span, FeatureConsumer *fc,AlignmentType nonTermAlign)
 {
   //string parent = "[X]"; //was for hiero
   //string nonTerm = "[X][X]"; //was for hiero
-  boost::regex parentRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+  boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
   boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
   boost::smatch matchedNonTerm;
   string indicString = "";
@@ -427,7 +426,7 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
 void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
 {
   //string parent = "[X]"; //was for hiero
-  boost::regex parentRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+  boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
   vector<string>::const_iterator it;
   for (it = span.begin(); it != span.end(); it++) {
     //if(  (*it).compare(parent) ) //was for hiero
@@ -440,7 +439,7 @@ void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &span,
 {
   //string parent = "[X]"; //was for hiero
   //string nonTerm = "[X][X]"; //was for hiero
-  boost::regex parentRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+  boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
   boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
   boost::smatch matchedNonTerm;
   size_t nonTermCounter = 0;
@@ -468,6 +467,8 @@ void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &span,
         else{
         fc->AddFeature("w^" + *it);}
     }
+    //else{
+    //std::cout << "MATCH : " << *it<< std::endl;}
   }
 }
 
@@ -519,7 +520,7 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
   set<size_t> srcAligned;
   set<size_t> tgtAligned;
 
-  boost::regex parentRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+  boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
   boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
   boost::smatch matchedNonTermSource;
   boost::smatch matchedNonTermTarget;
