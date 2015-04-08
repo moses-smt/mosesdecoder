@@ -200,7 +200,7 @@ class M2 {
         //std::cout << m2.size() << std::endl;
     }
     
-    int LevenshteinMatrix(const Sentence &s1, const Sentence &s2, Matrix &d, TrackMatrix &bt) {
+    size_t LevenshteinMatrix(const Sentence &s1, const Sentence &s2, Matrix &d, TrackMatrix &bt) {
         size_t n = s1.size();
         size_t m = s2.size();
           
@@ -433,7 +433,7 @@ class M2 {
         
         Unit &unit = m_m2[i];
                 
-        int distance = LevenshteinMatrix(unit.first, s, d, bt);
+        size_t distance = LevenshteinMatrix(unit.first, s, d, bt);
         if(distance > unit.first.size()) {
             std::cerr << "Levenshtein distance is greater than source size." << std::endl;
             stats[0] =  0;

@@ -54,7 +54,7 @@ TerScorer.cpp
 CderScorer.cpp
 M2Scorer.cpp
 M2.cpp
-M2ScorerMER.cpp
+#M2ScorerMER.cpp
 MeteorScorer.cpp
 Vocabulary.cpp
 PreProcessFilter.cpp

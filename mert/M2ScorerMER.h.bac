@@ -5,8 +5,6 @@
 #include <vector>
 #include <functional>
 
-#include <boost/python.hpp>
-
 #include "Types.h"
 #include "Util.h"
 #include "StatisticsBasedScorer.h"
