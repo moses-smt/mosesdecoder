@@ -5,10 +5,11 @@
 #include <vector>
 #include <functional>
 
+#include <boost/python.hpp>
+
 #include "Types.h"
 #include "Util.h"
 #include "StatisticsBasedScorer.h"
-#include "M2.h"
 
 namespace MosesTuning
 {
@@ -32,13 +33,16 @@ public:
   virtual float getReferenceLength(const std::vector<ScoreStatsType>& comps) const;
 
 private:  
+  boost::python::object main_namespace_;
+  boost::python::object m2_;
   float beta_; 
   int max_unchanged_words_;
-  bool truecase_;
-  M2::M2 m2_;
-  
+  bool ignore_whitespace_casing_;
+
   std::map<std::pair<size_t, std::string>, std::vector<ScoreStatsType> > seen_;
-    
+  
+  const char* code();
+  
   // no copying allowed
   M2Scorer(const M2Scorer&);
   M2Scorer& operator=(const M2Scorer&);

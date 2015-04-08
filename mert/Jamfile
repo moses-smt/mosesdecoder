@@ -53,6 +53,7 @@ TER/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
 M2Scorer.cpp
+M2.cpp
 M2ScorerMER.cpp
 MeteorScorer.cpp
 Vocabulary.cpp
@@ -63,8 +64,6 @@ PermutationScorer.cpp
 StatisticsBasedScorer.cpp
 ../util//kenutil m ..//z 
 ../moses//ThreadPool
-ssl/<link>shared boost_python/<link>shared python2.7/<link>shared
-: <include>/usr/include/python2.7
 ;
 
 exe mert : mert.cpp mert_lib ;
@@ -77,9 +76,9 @@ exe sentence-bleu : sentence-bleu.cpp mert_lib ;
 
 exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
-exe proM2 : proM2.cpp mert_lib ..//boost_program_options : <include>/usr/include/python2.7 ;
+exe proM2 : proM2.cpp mert_lib ..//boost_program_options ;
 
-exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ..//boost_filesystem : <include>/usr/include/python2.7 ;
+exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ..//boost_filesystem ;
 
 alias programs : mert extractor evaluator pro proM2 kbmira sentence-bleu ;
 
