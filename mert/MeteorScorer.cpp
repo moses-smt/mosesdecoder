@@ -18,6 +18,7 @@
 
 #include "ScoreStats.h"
 #include "Util.h"
+#include "util/unistd.hh"
 
 using namespace std;
 
@@ -25,7 +26,7 @@ namespace MosesTuning
 {
 
 // Meteor supported
-#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
+#if (defined(__GLIBCXX__) || defined(__GLIBCPP__)) && !defined(_WIN32)
 
 // for clarity
 #define CHILD_STDIN_READ pipefds_input[0]
