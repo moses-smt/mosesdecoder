@@ -92,17 +92,15 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap, bool nbest_i
   if (bootstrap) {
     vector<float> scores;
     for (int i = 0; i < bootstrap; ++i) {
-      // TODO: Use smart pointer for exceptional-safety.
-      ScoreData* scoredata = new ScoreData(g_scorer);
+      ScoreData scoredata(g_scorer);
       for (int j = 0; j < n; ++j) {
         int randomIndex = random() % n;
-        scoredata->add(entries[randomIndex], j);
+        scoredata.add(entries[randomIndex], j);
       }
-      g_scorer->setScoreData(scoredata);
+      g_scorer->setScoreData(&scoredata);
       candidates_t candidates(n, 0);
       float score = g_scorer->score(candidates);
       scores.push_back(score);
-      delete scoredata;
     }
 
     float avg = average(scores);
@@ -122,15 +120,13 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap, bool nbest_i
     cout.precision(4);
     cout << avg << "\t[" << lb << "," << rb << "]" << endl;
   } else {
-    // TODO: Use smart pointer for exceptional-safety.
-    ScoreData* scoredata = new ScoreData(g_scorer);
+    ScoreData scoredata(g_scorer);
     for (int sid = 0; sid < n; ++sid) {
-      scoredata->add(entries[sid], sid);
+      scoredata.add(entries[sid], sid);
     }
-    g_scorer->setScoreData(scoredata);
+    g_scorer->setScoreData(&scoredata);
     candidates_t candidates(n, 0);
     float score = g_scorer->score(candidates);
-    delete scoredata;
 
     if (g_has_more_files) cout << candFile << "\t";
     if (g_has_more_scorers) cout << g_scorer->getName() << "\t";
