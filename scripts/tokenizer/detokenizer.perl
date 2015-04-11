@@ -36,7 +36,7 @@ if ($HELP) {
 	exit;
 }
 
-if ($language !~ /^(cs|en|fr|it)$/) {
+if ($language !~ /^(cs|en|fr|it|fi)$/) {
   print STDERR "Warning: No built-in rules for language $language.\n"
 }
 
@@ -176,6 +176,11 @@ sub detokenize {
 
 			}
 			
+        } elsif (($language eq "fi") && ($words[$i-1] =~ /:$/) && ($words[$i] =~ /^(N|n|A|a|Ä|ä|ssa|Ssa|ssä|Ssä|sta|stä|Sta|Stä|hun|Hun|hyn|Hyn|han|Han|hän|Hän|hön|Hön|un|Un|yn|Yn|an|An|än|Än|ön|Ön|seen|Seen|lla|Lla|llä|Llä|lta|Lta|ltä|Ltä|lle|Lle|ksi|Ksi|kse|Kse|tta|Tta|ine|Ine)(ni|si|mme|nne|nsa)?(ko|kö|han|hän|pa|pä|kaan|kään|kin)?$/)) {
+            # Finnish : without intervening space if followed by case suffix
+            # EU:N EU:n EU:ssa EU:sta EU:hun EU:iin ...
+            $text=$text. lc $words[$i];
+            $prependSpace = " ";
 		} else {
 			$text=$text.$prependSpace.$words[$i];
 			$prependSpace = " ";
