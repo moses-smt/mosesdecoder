@@ -474,8 +474,6 @@
     <File Name="../../../moses/FF/DistortionScoreProducer.h"/>
     <File Name="../../../moses/FF/DynamicCacheBasedLanguageModel.cpp"/>
     <File Name="../../../moses/FF/DynamicCacheBasedLanguageModel.h"/>
-    <File Name="../../../moses/FF/ExternalFeature.cpp"/>
-    <File Name="../../../moses/FF/ExternalFeature.h"/>
     <File Name="../../../moses/FF/Factory.cpp"/>
     <File Name="../../../moses/FF/Factory.h"/>
     <File Name="../../../moses/FF/FeatureFunction.cpp"/>
