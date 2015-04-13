@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 die("ERROR: syntax: run-command-on-multiple-refsets.perl cmd in out") 

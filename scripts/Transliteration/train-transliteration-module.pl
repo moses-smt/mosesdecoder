@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use utf8;
 use strict;
 use Getopt::Long "GetOptions";

@@ -5,7 +5,9 @@
 #usage: show-phrases-used DECODER_OUTFILE > output.html
 #  where DECODER_OUTFILE is the output of moses with the -T (show alignments) option
 
+use warnings;
 use strict;
+
 BEGIN
 {
     my $wd= `pawd 2>/dev/null`;

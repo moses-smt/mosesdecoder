@@ -6,6 +6,7 @@
 #factor indices start at 0
 #factor indices too large ought to be ignored
 
+use warnings;
 use strict;
 
 my ($filename, @factors) = @ARGV;

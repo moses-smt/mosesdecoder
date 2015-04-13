@@ -4,6 +4,7 @@
 # Binarize a Moses model
 #
 
+use warnings;
 use strict;
 
 use Getopt::Long "GetOptions";

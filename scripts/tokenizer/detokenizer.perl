@@ -7,6 +7,8 @@
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
+
+use warnings;
 use strict;
 use utf8; # tell perl this script file is in UTF-8 (see all funny punct below)
 

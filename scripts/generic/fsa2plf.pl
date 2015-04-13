@@ -8,6 +8,7 @@
 # Note that the output format may not contain any spaces.
 # Ondrej Bojar, bojar@ufal.mff.cuni.cz
 
+use warnings;
 use strict;
 use Getopt::Long;
 

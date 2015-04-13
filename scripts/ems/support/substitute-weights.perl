@@ -1,5 +1,7 @@
 #!/usr/bin/env perl 
 
+use warnings;
+
 # experiment.perl support script
 # get filtered rule and reordering tables and place them into a configuration file
 

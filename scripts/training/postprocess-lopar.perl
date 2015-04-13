@@ -2,6 +2,7 @@
 
 # $Id$
 
+use warnings;
 use strict;
 
 use utf8;
