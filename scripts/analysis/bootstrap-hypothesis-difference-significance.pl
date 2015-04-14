@@ -14,6 +14,7 @@ use utf8;
 # 23.01.2010: added NIST p-value and interval computation
 ###############################################
 
+use warnings;
 use strict;
 
 #constants

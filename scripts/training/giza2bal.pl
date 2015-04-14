@@ -7,6 +7,8 @@
 
 #Copyright Marcello Federico, November 2004
 
+use warnings;
+
 ($cnt,$dir,$inv)=();
 
 while ($w=shift @ARGV){

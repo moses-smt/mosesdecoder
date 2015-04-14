@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 my ($lowercase, $cluster_file,$in,$out,$tmp) = @ARGV;

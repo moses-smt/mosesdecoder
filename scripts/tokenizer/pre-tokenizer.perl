@@ -4,6 +4,7 @@
 # Start by Ulrich Germann, after noticing systematic preprocessing errors
 # in some of the English Europarl data.
 
+use warnings;
 use strict;
 use Getopt::Std;
 

@@ -6,6 +6,8 @@
 #
 # Ondrej Bojar.
 
+use warnings;
+
 my $ini = shift;
 die "usage: absolutize_moses_model.pl path-to-moses.ini > moses.abs.ini"
   if !defined $ini;

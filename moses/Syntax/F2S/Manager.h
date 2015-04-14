@@ -51,10 +51,13 @@ private:
 
   void InitializeStacks();
 
+  bool IsUnknownSourceWord(const Word &) const;
+
   void RecombineAndSort(const std::vector<SHyperedge*> &, SVertexStack &);
 
   boost::shared_ptr<const Forest> m_forest;
   const Forest::Vertex *m_rootVertex;
+  std::size_t m_sentenceLength;  // Includes <s> and </s>
   PVertexToStackMap m_stackMap;
   boost::shared_ptr<HyperTree> m_glueRuleTrie;
   std::vector<boost::shared_ptr<RuleMatcher> > m_mainRuleMatchers;

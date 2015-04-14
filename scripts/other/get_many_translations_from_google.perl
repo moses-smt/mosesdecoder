@@ -6,6 +6,7 @@
 #
 # Ondrej Bojar, bojar@ufal.mff.cuni.cz
 
+use warnings;
 use strict;
 use Getopt::Long;
 use CGI;

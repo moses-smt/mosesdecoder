@@ -1,6 +1,7 @@
 #!/usr/bin/env perl 
 
 # $Id$
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 

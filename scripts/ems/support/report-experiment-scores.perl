@@ -2,6 +2,7 @@
 
 # $Id: report-experiment-scores.perl 407 2008-11-10 14:43:31Z philipp $
 
+use warnings;
 use strict;
 
 my $email;
