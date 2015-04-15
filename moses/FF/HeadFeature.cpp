@@ -16,6 +16,7 @@
 #include <math.h>
 #include <locale>
 #include <boost/regex.hpp>
+#include <functional>
 
 //#include </System/Library/Frameworks/JavaVM.framework/Headers/jni.h>
 
@@ -562,41 +563,44 @@ string* SyntaxTree::FindSubj() const{
 
 // END MARIA //
 
-//!!!!! WHAT IS THIS ? - HOW DO I SPLIT THE STATES BASED ON THE INTERNAL STRUCTURE?? //
+//!!!!! PROBLEM !!!!
+// I might have to return -1 so instead of std::equal go back to memcmp
+// there is a weird thing in ChartHypothesisRecombinationOrderer
+//     int ret = hypoA->RecombineCompare(*hypoB);
+// if (ret != 0)
+//  return (ret < 0);
+// my return will be 1 if the set has as many elements but they are different
+//-> then return will false above which makes things crash in  moses/ChartHypothesisCollection.cpp:112 in bool Moses::ChartHypothesisCollection::AddHypothesis
+
+
 int SyntaxTreeState::Compare(const FFState& other) const
 {
+	//!! initially I used Equal and the compare was not distinguishing a<b and a>b which gave the error in ChartHypothesisCollection line 118 when trying to add an existing hypo
 
   const SyntaxTreeState &otherState = static_cast<const SyntaxTreeState&>(other);
+
+  if(m_depRelInHypHash < otherState.m_depRelInHypHash)
+  	return -1;
+  if(m_depRelInHypHash > otherState.m_depRelInHypHash)
+    	return 1;
+  if(m_depRelInHypHash == otherState.m_depRelInHypHash)
+    	return 0;
+  /*
    if(m_depRelInHyp->size() < otherState.m_depRelInHyp->size())
   	return -1;
   if(m_depRelInHyp->size() > otherState.m_depRelInHyp->size())
     return 1;
-
-  return  (1 - std::equal(m_depRelInHyp->begin(), m_depRelInHyp->end(),otherState.m_depRelInHyp->begin()) );
-
-  /*
-  std::set<std::string>::iterator it;
-  int ret=0;
-
-  if(m_depRelInHyp->empty()){
-  	return 0;
-  }
-
-  cout<<"Current: "<<m_depRelInHyp->size()<<" ";
-  //m_depRelInHyp.get()
-  for(it=m_depRelInHyp->begin(); it!=m_depRelInHyp->end();it++)
-  	cout<<*it<<" ";
-  cout<<endl;
-  cout<<"Other: "<<otherState.m_depRelInHyp->size()<<" ";
-  for(it=otherState.m_depRelInHyp->begin(); it!=otherState.m_depRelInHyp->end();it++)
-  	cout<<*it<<" ";
-  cout<<endl;
-
-  cout<<"states equal: "<<ret<<endl;
-
-  return 0;
-  */
-
+		if(m_depRelInHyp->size()==0)
+			return 0;
+	if(m_depRelInHyp < otherState.m_depRelInHyp)
+		return -1;
+	else{
+		if(m_depRelInHyp == otherState.m_depRelInHyp)
+			return 0;
+		else
+			return 1;
+	}
+	*/
 }
 
 ////////////////////////////////////////////////////////////////
@@ -612,6 +616,8 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_cacheHits(0)
 	, m_cacheDepRelHits(0)
 	, m_afterPop(false)
+	, m_MIModelFile("")
+	, m_modelFileARPA("")
 {
   ReadParameters();
   //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
@@ -1106,8 +1112,9 @@ FFState* HeadFeature::EvaluateWhenApplied(
 			Counters &localCounters = GetCounters();
 			localCounters.whenAppliedQueries++;
 
-			//set<string> depRelInHyp();
-			boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr(new set<string>()); //(depRelInHyp);
+
+			//boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr(new set<string>()); //(depRelInHyp);
+			size_t depRelInHypHash=0;
 
 	    const std::string *tree = property->GetValueString();
 
@@ -1147,7 +1154,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 				scores.push_back(0.0);
 				scores.push_back(0.0);
 				accumulator->PlusEquals(this,scores);
-				return new SyntaxTreeState(syntaxTree,depRelInHyp_ptr,GetCache(),GetCacheDepRel(),GetCounters());
+				return new SyntaxTreeState(syntaxTree,depRelInHypHash,GetCache(),GetCacheDepRel(),GetCounters());
 			}
 
 
@@ -1168,86 +1175,110 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 					if(localCache.find(parsedSentence)!=localCache.end()){
 						depRel=localCache[parsedSentence]->first;
+						vector<float> score = localCache[parsedSentence]->second;
+						accumulator->PlusEquals(this,score); //score should be a vector with scores -> change the cache
+
+						//update counters
 						localCounters.subtreeCacheHits++;
 						m_cacheHits++;
 						//cerr<<"cache Hit: "<<parsedSentence <<endl;
 						//cerr<<"dep rel: "<<depRel<<endl;
 					}
 					else{
+						DepRelMap &localCacheDepRel = GetCacheDepRel();
+
 						//commented the call to StanfordDep to debug memory leak
 						//depRel = "nsubj hate PRN\tdobj hate you";
 						depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
 						float score = 1.0;
-						DepRelMap &localCacheDepRel = GetCacheDepRel();
-						//if key already returns return iterator to key position
-						pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, float> (depRel,score));
 
-						//!!!!! only score dep rel pairs that haven't been seen before in this path -> use ProcessDepString and use state to keep track of the map of seen depRel
-						if(it.second==false){ //no insert took place
+						//chunk depRel string into tuples
+
+						DepRelMap::iterator it = localCacheDepRel.find(depRel);
+						if(it!=localCacheDepRel.end()){
+							//dependency relations already seen for this sentence
+							//add to tree cache
+							(*m_cache)[parsedSentence]=it;
+							vector<float> scores = it->second;
 							m_cacheDepRelHits++;
 							localCounters.depRelCacheHits++;
+							accumulator->PlusEquals(this,scores); //score should be a vector with scores -> change the cache
 						}
-						else{//unseen depRel pair ->score
-							; //TODO
-						}
-						//why did I put this?
-						if(it.first!=localCacheDepRel.end())
-							(*m_cache)[parsedSentence]=it.first;
-						//save in TreeString - DepRel cache
-						//parsedSentence should be produced with generic words since the rel doesn't depend on the words
-						//therefore we can cache only repeating trees ignoring the words and avoid more computation
-						//FALSE some words matter -> copula verb, timeregex etc. Nouns probably don't matter, finite verbs, adj etc
-						//we need the preposition to make prep_to rep rels or substitute in post_processing
-						//I could also precompute the relations for the most common trees of up to some size that I've seen in the corpus
-						//especially if I put a treshold level on the hight
-						//!!! might want to hald the size of the cache from time to time
-						//-> do like the phrasse chache: memorize the time and delete older ones (lower in the chart)
-						//instead of time I could also just save the span length -> if the number of leavs are different so will the tree
-						//(*m_cache)[parsedSentence]=depRel;
+						else{
+							//new dependency relations -> compute score and insert
+							if(depRel!=" "){
+								m_counter++;
+								vector<string> tokens;
+								Tokenize(tokens,depRel,"\t");
+								m_counterDepRel+=tokens.size();
+								size_t numFeatures = this->m_numScoreComponents;
+								vector<float> finalScores;
+								finalScores.assign(numFeatures,0.0);
+								vector< vector<float> > cumulateScores;
+								for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
+									//depRelInHyp_ptr->insert(*it);
+									vector<string> rel;
+									Tokenize(rel,*it);
+									//if i allow the prep relations should I add PP as allowed NT?
+									if(rel.size()==3 ){ //control this from java -> && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
+										vector<float> scores;
+										if(m_modelFileARPA!=""){
+											float scoreWB = GetWBScore(rel);
+											//before it was natural log now from the model file it comes as log10 ??which one should it be?
+											scores.push_back(scoreWB);
+											scores.push_back(1.0);
+										}
 
-						//std::cerr<<"Cache Miss: "<<parsedSentence<<endl;
-						//std::cerr<< "dep rel: "<<depRel<<endl;
-					}
-					if(depRel!=" "){
-						m_counter++;
-						vector<string> tokens;
-						Tokenize(tokens,depRel,"\t");
-						m_counterDepRel+=tokens.size();
-						for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
-							depRelInHyp_ptr->insert(*it);
-							vector<string> rel;
-							Tokenize(rel,*it);
-							//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
-							//should take out this compare and get my models straight
-							//if i allow the prep relations should I add PP as allowed NT?
-							if(rel.size()==3 ){ //control this from java -> && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
-								float scoreWB = GetWBScore(rel);
-								//cout<<"When applied score: "<<*it<<" "<<scoreWB<<endl;
-								vector<float> scores;
-								//before it was natural log now from the model file it comes as log10 ??which one shoudl it be?
-								scores.push_back(scoreWB);
-								scores.push_back(1.0);
-
-								std::map< std::string,std::vector<float> >::iterator it_MI;
-								it_MI = m_MIModel->find(Trim(*it));
-								if(it_MI!=m_MIModel->end()){
-									scores.push_back(it_MI->second[0]);
-									scores.push_back(it_MI->second[1]);
+										if(m_MIModelFile!=""){
+											std::map< std::string,std::vector<float> >::iterator it_MI;
+											it_MI = m_MIModel->find(Trim(*it));
+											if(it_MI!=m_MIModel->end()){
+												scores.push_back(it_MI->second[0]);
+												scores.push_back(it_MI->second[1]);
+											}
+											else{
+												scores.push_back(0.0);
+												scores.push_back(0.0);
+											}
+										}
+										if(scores.size()==numFeatures)
+											for(size_t i = 0; i<numFeatures; i++)
+												finalScores.at(i) = finalScores.at(i) + scores.at(i);
+										cumulateScores.push_back(scores);
+									}
+									//else
+									//	cout<<depRel<<endl;
 								}
-								else{
-									scores.push_back(0.0);
-									scores.push_back(0.0);
+								/*
+								size_t numFeatures = this->m_numScoreComponents;
+								if(!cumulateScores.empty()){
+									size_t numFeatures = cumulateScores.begin()->size();
+									//TEST numFeatures == feature size declared in ini
+									vector<float> finalScores;
+									finalScores.assign(numFeatures,0.0);
+									for(vector< vector <float> >::iterator it=cumulateScores.begin(); it!= cumulateScores.end();it++){
+										if(it->size()!=numFeatures)
+											continue;
+										for(size_t i = 0; i<numFeatures; i++)
+											finalScores.at(i) = finalScores.at(i) + it->at(i);
+									}
+									*/
+									accumulator->PlusEquals(this,finalScores);
+									pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, vector<float> > (depRel,finalScores));
+									if(it.second==false)
+										UTIL_THROW2("error inserting score vector in localCacheDepRel cache");
+									boost::unordered_map<std::string, std::vector<float> >::hasher hashFn = localCacheDepRel.hash_function();
+									depRelInHypHash = hashFn(depRel);
+
 								}
 
-								accumulator->PlusEquals(this,scores);
 							}
 						}
 
-					}
 			}
 
 
-			return new SyntaxTreeState(syntaxTree,depRelInHyp_ptr,GetCache(),GetCacheDepRel(),GetCounters());
+			return new SyntaxTreeState(syntaxTree,depRelInHypHash,GetCache(),GetCacheDepRel(),GetCounters());
 	}
 	vector<float> scores;
 	scores.push_back(1000.0);

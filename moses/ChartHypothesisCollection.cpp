@@ -26,9 +26,12 @@
 #include "ChartManager.h"
 #include "HypergraphOutput.h"
 #include "util/exception.hh"
+#include "moses/FF/HeadFeature.h"
+#include "moses/FF/TreeStructureFeature.h"
 
 using namespace std;
 using namespace Moses;
+
 
 namespace Moses
 {
@@ -62,6 +65,9 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
  */
 bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManager &manager)
 {
+	int hypoId=0;
+	hypoId=hypo->GetId();
+
   if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
     manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, -inf score" << std::endl);
@@ -106,10 +112,10 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
       Remove(iterExisting);
     }
 
-    bool added = Add(hypo, manager).second;
+    std::pair<HCType::iterator, bool> addRetAgain =  Add(hypo, manager);
+    bool added = addRetAgain.second;
     if (!added) {
-      iterExisting = m_hypos.find(hypo);
-      UTIL_THROW2("Offending hypo = " << **iterExisting);
+      UTIL_THROW2("Offending hypo = " << **iterExisting); //is this ok if we called Remove on it?
     }
     return false;
   } else {

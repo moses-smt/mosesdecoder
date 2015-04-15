@@ -24,7 +24,7 @@ typedef boost::shared_ptr<SyntaxTree> SyntaxTreePtr;
 typedef boost::shared_ptr<SyntaxNode> SyntaxNodePtr;
 
 //map the dep rel string to it's score or to some other structure holding the information
-class DepRelMap : public  boost::unordered_map<std::string,float>{
+class DepRelMap : public  boost::unordered_map<std::string, std::vector<float> >{
 public:
 	virtual ~DepRelMap() {}
 };
@@ -61,16 +61,20 @@ class SyntaxTreeState : public FFState
 	DepRelMap &m_depRelCache;
 	Counters &m_counters;
 
-	//used to Compare to hypothesis based on this feature
-	boost::shared_ptr< std::set<std::string> > m_depRelInHyp;
+
 
 public:
-  SyntaxTreeState(SyntaxTreePtr tree, boost::shared_ptr< std::set<std::string> > depRelInHyp,StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
+	//used to Compare to hypothesis based on this feature
+		//boost::shared_ptr< std::set<std::string> > m_depRelInHyp;
+		size_t m_depRelInHypHash;
+
+  SyntaxTreeState(SyntaxTreePtr tree, size_t depRelInHypHash,StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
     :m_tree(tree)
 		,m_subtreeCache(subtreeCache)
 		,m_depRelCache(depRelCache)
 		,m_counters(counters)
-		,m_depRelInHyp(depRelInHyp)
+		//,m_depRelInHyp(depRelInHyp)
+		,m_depRelInHypHash(depRelInHypHash)
   {}//std::cout<<"new state "<<m_depRelInHyp->size()<<std::endl;
 
   SyntaxTreePtr GetTree() const {
@@ -308,8 +312,9 @@ public:
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
 	  SyntaxTreePtr startTree(new SyntaxTree());
 	  //std::set<std::string> depRelInHyp();
-	  boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr (new std::set<std::string>()); //(depRelInHyp);
-	  return new SyntaxTreeState(startTree, depRelInHyp_ptr, GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
+	  //boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr (new std::set<std::string>()); //(depRelInHyp);
+	  size_t hashValue=0;
+	  return new SyntaxTreeState(startTree, hashValue, GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
   }
 
 
