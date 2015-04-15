@@ -425,8 +425,6 @@ int main(int argc, char** argv)
 
   istream *inp = &std::cin;
   ostream *out = &std::cout;
-  //fstream inp(input,ios::in);
-  //fstream out(output,ios::out);
 
   if (input) {
   	fstream *fin = new fstream(input,ios::in);
@@ -434,7 +432,7 @@ int main(int argc, char** argv)
       cerr << "cannot open " << input << "\n";
       exit(1);
     }
-    //inp = *fin;
+    inp = fin;
   }
 
   if (output) {
@@ -443,7 +441,7 @@ int main(int argc, char** argv)
       cerr << "cannot open " << output << "\n";
       exit(1);
     }
-    //out = *fout;
+    out = fout;
   }
 
   int a[MAX_M],b[MAX_N],m,n;
@@ -508,5 +506,12 @@ int main(int argc, char** argv)
   for (int i=1; i<=MAX_N; i++) delete [] A[i];
   delete [] A;
 
+	if (inp != &std::cin) {
+		delete inp;
+	}
+	if (out != &std::cout) {
+		delete inp;
+	}
+	
   exit(0);
 }
