@@ -46,7 +46,7 @@ struct LMClient {
     }
 
     memset(&server, '\0', sizeof(server));
-    bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
+    memcpy((char *)&server.sin_addr, hp->h_addr, hp->h_length);
     server.sin_family = hp->h_addrtype;
     server.sin_port = htons(port);
 
