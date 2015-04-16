@@ -211,8 +211,14 @@ split
 	default-name: lm/split
 	pass-unless: output-splitter
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
+strip
+        in: split-corpus
+        out: stripped-corpus
+        default-name: lm/stripped
+        pass-unless: mock-output-parser-lm
+        template: $moses-script-dir/training/strip-xml.perl < IN > OUT
 train
-	in: split-corpus
+	in: stripped-corpus
 	out: lm
 	default-name: lm/lm
 	ignore-if: rlm-training
@@ -227,7 +233,7 @@ randomize
 	pass-unless: lm-randomizer
 	ignore-if: rlm-training
 train-randomized
-	in: split-corpus
+	in: stripped-corpus
 	out: rlm
 	default-name: lm/rlm
 	ignore-unless: rlm-training
@@ -960,21 +966,21 @@ split-reference-devtest
 	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
-reduce-reference
+strip-reference
 	in: split-ref
 	out: reference
-	default-name: tuning/reference.reduced
+	default-name: tuning/reference.stripped
 	pass-unless: mock-output-parser-references
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
-	template: $moses-script-dir/training/reduce-factors.perl --factor 0 --xml 1 --corpus IN --reduced-corpus OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
-reduce-reference-devtest
+	template: $moses-script-dir/training/strip-xml.perl < IN > OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
+strip-reference-devtest
 	in: split-ref-devtest
 	out: reference
-	default-name: tuning/reference.devtest.reduced
+	default-name: tuning/reference.devtest.stripped
 	pass-unless: mock-output-parser-references
 	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
-	template: $moses-script-dir/training/reduce-factors.perl --factor 0 --xml 1 --corpus IN --reduced-corpus OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
+	template: $moses-script-dir/training/strip-xml.perl < IN > OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
 filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir
@@ -1231,13 +1237,13 @@ lowercase-reference
 	pass-if: recaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
-reduce-reference
+strip-reference
 	in: lowercased-reference
 	out: reference
 	default-name: evaluation/reference
 	pass-unless: mock-output-parser-references
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
-	template: $moses-script-dir/training/reduce-factors.perl --factor 0 --xml 1 --corpus IN --reduced-corpus OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
+	template: $moses-script-dir/training/strip-xml.perl < IN > OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
 wade
 	in: filtered-dir truecased-input tokenized-reference alignment system-output
 	out: wade-analysis
