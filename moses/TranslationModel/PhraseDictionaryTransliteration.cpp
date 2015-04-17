@@ -1,11 +1,11 @@
 // vim:tabstop=2
 #include <cstdlib>
-#include <boost/filesystem.hpp>
 
 #include "PhraseDictionaryTransliteration.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "moses/DecodeGraph.h"
 #include "moses/DecodeStep.h"
+#include "util/tempfile.hh"
 
 using namespace std;
 
@@ -70,11 +70,10 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
   } else {
     // TRANSLITERATE
-    const boost::filesystem::path
-        inFile = boost::filesystem::unique_path(),
-        outDir = boost::filesystem::unique_path();
+    const util::temp_file inFile;
+    const util::temp_dir outDir;
 
-    ofstream inStream(inFile.c_str());
+    ofstream inStream(inFile.path().c_str());
     inStream << sourcePhrase.ToString() << endl;
     inStream.close();
 
@@ -84,14 +83,14 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
                  " --external-bin-dir " + m_externalDir +
                  " --input-extension " + m_inputLang +
                  " --output-extension " + m_outputLang +
-                 " --oov-file " + inFile.native() +
-                 " --out-dir " + outDir.native();
+                 " --oov-file " + inFile.path() +
+                 " --out-dir " + outDir.path();
 
     int ret = system(cmd.c_str());
     UTIL_THROW_IF2(ret != 0, "Transliteration script error");
 
     TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-    vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir.native());
+    vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir.path());
     vector<TargetPhrase*>::const_iterator iter;
     for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
       TargetPhrase *tp = *iter;
@@ -102,10 +101,6 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
     cache[hash] = value;
 
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
-
-    // clean up temporary files
-    remove(inFile.c_str());
-    boost::filesystem::remove_all(outDir);
   }
 }
 
