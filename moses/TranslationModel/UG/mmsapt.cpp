@@ -66,7 +66,7 @@ namespace Moses
   Mmsapt::
   Mmsapt(string const& line)
     : PhraseDictionary(line)
-    , ofactor(1,0)
+      // , ofactor(1,0)
     , m_tpc_ctr(0)
   {
     this->init(line);
@@ -151,6 +151,10 @@ namespace Moses
     pair<string,string> dflt("input-factor","0");
     input_factor = atoi(param.insert(dflt).first->second.c_str());
     // shouldn't that be a string?
+    
+    pair<string,string> dflt("output-factor","0");
+    output_factor = atoi(param.insert(dflt).first->second.c_str());
+    ofactor.assign(1,output_factor);
     
     dflt = pair<string,string> ("smooth",".01");
     m_lbop_conf = atof(param.insert(dflt).first->second.c_str());
