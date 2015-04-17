@@ -17,6 +17,7 @@
 #include <locale>
 #include <boost/regex.hpp>
 #include <functional>
+#include <boost/functional/hash.hpp>
 
 //#include </System/Library/Frameworks/JavaVM.framework/Headers/jni.h>
 
@@ -1268,7 +1269,9 @@ FFState* HeadFeature::EvaluateWhenApplied(
 									if(it.second==false)
 										UTIL_THROW2("error inserting score vector in localCacheDepRel cache");
 									boost::unordered_map<std::string, std::vector<float> >::hasher hashFn = localCacheDepRel.hash_function();
-									depRelInHypHash = hashFn(depRel);
+									boost::hash<std::string> string_hash;
+									depRelInHypHash = string_hash(*tree);
+									//depRelInHypHash = hashFn(depRel);
 
 								}
 
