@@ -24,13 +24,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <limits>
 #include <iostream>
-#include <sys/mman.h>
 #include <cstdio>
 #include <unistd.h>
 
-#ifndef __MMAN_PAGE_SIZE__
-#define __MMAN_PAGE_SIZE__ sysconf(_SC_PAGE_SIZE)
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#include <io.h>
+#else
+#include <sys/mman.h>
 #endif
+
+#include "util/mmap.hh"
 
 namespace Moses
 {
@@ -60,25 +64,25 @@ public:
 
   MmapAllocator() throw()
     : m_file_ptr(std::tmpfile()), m_file_desc(fileno(m_file_ptr)),
-      m_page_size(__MMAN_PAGE_SIZE__), m_map_size(0), m_data_ptr(0),
+      m_page_size(util::SizePage()), m_map_size(0), m_data_ptr(0),
       m_data_offset(0), m_fixed(false), m_count(new size_t(0)) {
   }
 
   MmapAllocator(std::FILE* f_ptr) throw()
     : m_file_ptr(f_ptr), m_file_desc(fileno(m_file_ptr)),
-      m_page_size(__MMAN_PAGE_SIZE__), m_map_size(0), m_data_ptr(0),
+      m_page_size(util::SizePage()), m_map_size(0), m_data_ptr(0),
       m_data_offset(0), m_fixed(false), m_count(new size_t(0)) {
   }
 
   MmapAllocator(std::FILE* f_ptr, size_t data_offset) throw()
     : m_file_ptr(f_ptr), m_file_desc(fileno(m_file_ptr)),
-      m_page_size(__MMAN_PAGE_SIZE__), m_map_size(0), m_data_ptr(0),
+      m_page_size(util::SizePage()), m_map_size(0), m_data_ptr(0),
       m_data_offset(data_offset), m_fixed(true), m_count(new size_t(0)) {
   }
 
   MmapAllocator(std::string fileName) throw()
     : m_file_ptr(std::fopen(fileName.c_str(), "wb+")), m_file_desc(fileno(m_file_ptr)),
-      m_page_size(__MMAN_PAGE_SIZE__), m_map_size(0), m_data_ptr(0),
+      m_page_size(util::SizePage()), m_map_size(0), m_data_ptr(0),
       m_data_offset(0), m_fixed(false), m_count(new size_t(0)) {
   }
 
@@ -92,7 +96,7 @@ public:
 
   ~MmapAllocator() throw() {
     if(m_data_ptr && *m_count == 0) {
-      munmap(m_data_ptr, m_map_size);
+      util::UnmapOrThrow(m_data_ptr, m_map_size);
       if(!m_fixed && std::ftell(m_file_ptr) != -1)
         std::fclose(m_file_ptr);
     }
@@ -119,13 +123,17 @@ public:
   pointer allocate (size_type num, const void* = 0) {
     m_map_size = num * sizeof(T);
 
+#if defined(_WIN32) || defined(_WIN64)
+    // On Windows, MAP_SHARED is not defined and MapOrThrow ignores the flags.
+    const int map_shared = 0;
+#else
+    const int map_shared = MAP_SHARED;
+#endif
     if(!m_fixed) {
       size_t read = 0;
       read += ftruncate(m_file_desc, m_map_size);
-      m_data_ptr = (char*)mmap(0, m_map_size, PROT_READ|PROT_WRITE, MAP_SHARED,
-                               m_file_desc, 0);
-      if(m_data_ptr == MAP_FAILED)
-        std::cerr << "Error: mmapping" << std::endl;
+      m_data_ptr = (char *)util::MapOrThrow(
+        m_map_size, true, map_shared, false, m_file_desc, 0);
       return (pointer)m_data_ptr;
     } else {
       size_t map_offset = (m_data_offset / m_page_size) * m_page_size;
@@ -133,8 +141,8 @@ public:
 
       size_t map_size = m_map_size + relative_offset;
 
-      m_data_ptr = (char*)mmap(0, map_size, PROT_READ, MAP_SHARED,
-                               m_file_desc, map_offset);
+      m_data_ptr = (char *)util::MapOrThrow(
+        m_map_size, false, map_shared, false, m_file_desc, map_offset);
 
       return (pointer)(m_data_ptr + relative_offset);
     }
@@ -142,11 +150,11 @@ public:
 
   void deallocate (pointer p, size_type num) {
     if(!m_fixed) {
-      munmap(p, num * sizeof(T));
+      util::UnmapOrThrow(p, num * sizeof(T));
     } else {
       size_t map_offset = (m_data_offset / m_page_size) * m_page_size;
       size_t relative_offset = m_data_offset - map_offset;
-      munmap((pointer)((char*)p - relative_offset), num * sizeof(T));
+      util::UnmapOrThrow((pointer)((char*)p - relative_offset), num * sizeof(T));
     }
 
   }
