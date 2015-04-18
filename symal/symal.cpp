@@ -67,7 +67,7 @@ int verbose=0;
 
 int lc = 0;
 
-int getals(fstream& inp,int& m, int *a,int& n, int *b)
+int getals(istream& inp,int& m, int *a,int& n, int *b)
 {
   char w[MAX_WORD], dummy[10];
   int i,j,freq;
@@ -121,7 +121,7 @@ int getals(fstream& inp,int& m, int *a,int& n, int *b)
 
 
 //compute union alignment
-int prunionalignment(fstream& out,int m,int *a,int n,int* b)
+int prunionalignment(ostream& out,int m,int *a,int n,int* b)
 {
 
   ostringstream sout;
@@ -150,7 +150,7 @@ int prunionalignment(fstream& out,int m,int *a,int n,int* b)
 
 //Compute intersection alignment
 
-int printersect(fstream& out,int m,int *a,int n,int* b)
+int printersect(ostream& out,int m,int *a,int n,int* b)
 {
 
   ostringstream sout;
@@ -174,7 +174,7 @@ int printersect(fstream& out,int m,int *a,int n,int* b)
 
 //Compute target-to-source alignment
 
-int printtgttosrc(fstream& out,int m,int *a,int n,int* b)
+int printtgttosrc(ostream& out,int m,int *a,int n,int* b)
 {
 
   ostringstream sout;
@@ -198,7 +198,7 @@ int printtgttosrc(fstream& out,int m,int *a,int n,int* b)
 
 //Compute source-to-target alignment
 
-int printsrctotgt(fstream& out,int m,int *a,int n,int* b)
+int printsrctotgt(ostream& out,int m,int *a,int n,int* b)
 {
 
   ostringstream sout;
@@ -226,7 +226,7 @@ int printsrctotgt(fstream& out,int m,int *a,int n,int* b)
 //to represent the grow alignment as the unionalignment of a
 //directed and inverted alignment
 
-int printgrow(fstream& out,int m,int *a,int n,int* b, bool diagonal=false,bool final=false,bool bothuncovered=false)
+int printgrow(ostream& out,int m,int *a,int n,int* b, bool diagonal=false,bool final=false,bool bothuncovered=false)
 {
 
   ostringstream sout;
@@ -392,8 +392,8 @@ int main(int argc, char** argv)
 {
 
   int alignment=0;
-  char* input=(char*)"/dev/stdin";
-  char* output=(char*)"/dev/stdout";
+  char* input= NULL;
+  char* output= NULL;
   int diagonal=false;
   int final=false;
   int bothuncovered=false;
@@ -421,22 +421,28 @@ int main(int argc, char** argv)
          << "Input file or std must be in .bal format (see script giza2bal.pl).\n";
 
     exit(1);
-
   }
 
-  fstream inp(input,ios::in);
-  fstream out(output,ios::out);
+  istream *inp = &std::cin;
+  ostream *out = &std::cout;
 
-  if (!inp.is_open()) {
-    cerr << "cannot open " << input << "\n";
-    exit(1);
+  if (input) {
+  	fstream *fin = new fstream(input,ios::in);
+    if (!fin->is_open()) {
+      cerr << "cannot open " << input << "\n";
+      exit(1);
+    }
+    inp = fin;
   }
 
-  if (!out.is_open()) {
-    cerr << "cannot open " << output << "\n";
-    exit(1);
+  if (output) {
+  	fstream *fout = new fstream(output,ios::out);
+    if (!fout->is_open()) {
+      cerr << "cannot open " << output << "\n";
+      exit(1);
+    }
+    out = fout;
   }
-
 
   int a[MAX_M],b[MAX_N],m,n;
   fa=new int[MAX_M+1];
@@ -450,16 +456,16 @@ int main(int argc, char** argv)
   switch (alignment) {
   case UNION:
     cerr << "symal: computing union alignment\n";
-    while(getals(inp,m,a,n,b)) {
-      prunionalignment(out,m,a,n,b);
+    while(getals(*inp,m,a,n,b)) {
+      prunionalignment(*out,m,a,n,b);
       sents++;
     }
     cerr << "Sents: " << sents << endl;
     break;
   case INTERSECT:
     cerr << "symal: computing intersect alignment\n";
-    while(getals(inp,m,a,n,b)) {
-      printersect(out,m,a,n,b);
+    while(getals(*inp,m,a,n,b)) {
+      printersect(*out,m,a,n,b);
       sents++;
     }
     cerr << "Sents: " << sents << endl;
@@ -469,15 +475,15 @@ int main(int argc, char** argv)
          << diagonal << ") final ("<< final << ")"
          <<  "both-uncovered (" << bothuncovered <<")\n";
 
-    while(getals(inp,m,a,n,b))
-      printgrow(out,m,a,n,b,diagonal,final,bothuncovered);
+    while(getals(*inp,m,a,n,b))
+      printgrow(*out,m,a,n,b,diagonal,final,bothuncovered);
 
     break;
   case TGTTOSRC:
     cerr << "symal: computing target-to-source alignment\n";
 
-    while(getals(inp,m,a,n,b)) {
-      printtgttosrc(out,m,a,n,b);
+    while(getals(*inp,m,a,n,b)) {
+      printtgttosrc(*out,m,a,n,b);
       sents++;
     }
     cerr << "Sents: " << sents << endl;
@@ -485,8 +491,8 @@ int main(int argc, char** argv)
   case SRCTOTGT:
     cerr << "symal: computing source-to-target alignment\n";
 
-    while(getals(inp,m,a,n,b)) {
-      printsrctotgt(out,m,a,n,b);
+    while(getals(*inp,m,a,n,b)) {
+      printsrctotgt(*out,m,a,n,b);
       sents++;
     }
     cerr << "Sents: " << sents << endl;
@@ -500,5 +506,12 @@ int main(int argc, char** argv)
   for (int i=1; i<=MAX_N; i++) delete [] A[i];
   delete [] A;
 
+	if (inp != &std::cin) {
+		delete inp;
+	}
+	if (out != &std::cout) {
+		delete inp;
+	}
+	
   exit(0);
 }

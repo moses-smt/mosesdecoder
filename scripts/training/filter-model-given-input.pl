@@ -8,6 +8,7 @@
 # changes by Ondrej Bojar
 # adapted for hierarchical models by Phil Williams
 
+use warnings;
 use strict;
 
 use FindBin qw($RealBin);

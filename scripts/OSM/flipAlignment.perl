@@ -1,5 +1,7 @@
 #!/usr/bin/env perl 
-  use strict;
+
+use warnings;
+use strict;
 
   my $file = shift(@ARGV);
   open(MYFILE, $file);

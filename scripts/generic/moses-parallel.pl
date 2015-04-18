@@ -15,6 +15,7 @@
 #             added checks for existence of decoder and configuration file
 # 26 Jul 2006 fix a bug related to the use of absolute path for srcfile and nbestfile
 
+use warnings;
 use strict;
 
 #######################

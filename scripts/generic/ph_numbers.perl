@@ -7,6 +7,7 @@ package ph_numbers;
 #
 # (c) 2013 TAUS
 
+use warnings;
 use strict;
 
 run() unless caller();

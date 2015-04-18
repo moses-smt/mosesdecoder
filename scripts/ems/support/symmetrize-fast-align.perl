@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 die("ERROR: syntax is fastalign2bal.perl direct-alignment inverse-alignment source-file target-file out-stem symmetrization-method symal\n") unless scalar(@ARGV) == 7;

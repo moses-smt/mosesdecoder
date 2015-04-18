@@ -1261,8 +1261,8 @@ function input_annotation($sentence,$input,$segmentation,$filter) {
 		for($j=$from;$j<=$to;$j++) {
 		  if ($j>$from) { $phrase .= " "; }
 		  $phrase .= $word[$j];
-                  $highlightwords .= " document.getElementById('inputword-$i-$j').style.backgroundColor='#ffff80';";
-                  $lowlightwords .= " document.getElementById('inputword-$i-$j').style.backgroundColor='".coverage_color($coverage[$j][$j])."';";
+                  $highlightwords .= " document.getElementById('inputword-$sentence-$j').style.backgroundColor='#ffff80';";
+                  $lowlightwords .= " document.getElementById('inputword-$sentence-$j').style.backgroundColor='".coverage_color($coverage[$j][$j])."';";
 		}
 	        print "<td colspan=$size><div style=\"background-color: $color; height:3px;\" onmouseover=\"show_word_info($sentence,".$coverage[$from][$to]["corpus_count"].",".$coverage[$from][$to]["ttable_count"].",".$coverage[$from][$to]["ttable_entropy"]."); this.style.backgroundColor='#ffff80';$highlightwords\" onmouseout=\"hide_word_info($sentence); this.style.backgroundColor='$color';$lowlightwords;\"".($biconcor?" onclick=\"show_biconcor($sentence,'".base64_encode($phrase)."');\"":"").">";
             }
@@ -1443,10 +1443,10 @@ function biconcor($query) {
     $sentence = $_GET['sentence'];
     $biconcor = get_biconcor_version($dir,$set,$id);
     print "<center>
-<form method=get id=\"BiconcorForm\">
+<form method=\"get\" id=\"BiconcorForm\" onsubmit=\"return false;\">
 <img src=\"close.gif\" width=17 height=17 onClick=\"close_biconcor($sentence);\">
 <input width=20 id=\"BiconcorQuery\" value=\"$query\">
-<input type=submit onclick=\"show_biconcor($sentence,encodeBase64(document.getElementById('BiconcorQuery').value));\" value=\"look up\">
+<input type=submit onclick=\"show_biconcor($sentence,Base64.encode(document.getElementById('BiconcorQuery').value));\" value=\"look up\">
 </form>
 <div class=\"biconcor-content\">";
     $cmd = "./biconcor -html -l $dir/model/biconcor.$biconcor -Q ".base64_encode($query)." 2>/dev/null";

@@ -40,12 +40,12 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
                            const std::vector<FactorType> &output,
                            const std::string &inFile,
                            const RuleTableFF &ff,
-                           HyperTree &trie)
+                           HyperTree &trie,
+                           boost::unordered_set<std::size_t> &sourceTermSet)
 {
   PrintUserTime(std::string("Start loading HyperTree"));
 
-  // const StaticData &staticData = StaticData::Instance();
-  // const std::string &factorDelimiter = staticData.GetFactorDelimiter();
+  sourceTermSet.clear();
 
   std::size_t count = 0;
 
@@ -106,6 +106,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
     // Source-side
     HyperPath sourceFragment;
     hyperPathLoader.Load(sourceString, sourceFragment);
+    ExtractSourceTerminalSetFromHyperPath(sourceFragment, sourceTermSet);
 
     // Target-side
     TargetPhrase *targetPhrase = new TargetPhrase(&ff);
@@ -142,6 +143,23 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
   }
 
   return true;
+}
+
+void HyperTreeLoader::ExtractSourceTerminalSetFromHyperPath(
+    const HyperPath &hp, boost::unordered_set<std::size_t> &sourceTerminalSet)
+{
+  for (std::vector<HyperPath::NodeSeq>::const_iterator p = hp.nodeSeqs.begin();
+       p != hp.nodeSeqs.end(); ++p) {
+    for (std::vector<std::size_t>::const_iterator q = p->begin();
+         q != p->end(); ++q) {
+      const std::size_t factorId = *q;
+      if (factorId >= moses_MaxNumNonterminals &&
+          factorId != HyperPath::kComma &&
+          factorId != HyperPath::kEpsilon) {
+        sourceTerminalSet.insert(factorId);
+      }
+    }
+  }
 }
 
 }  // namespace F2S

@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 my ($source_file,$target_file,$alignment_factors) = @ARGV;

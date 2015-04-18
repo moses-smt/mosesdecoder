@@ -3,6 +3,7 @@
 # Experiment Management System
 # Documentation at http://www.statmt.org/moses/?n=FactoredTraining.EMS
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);

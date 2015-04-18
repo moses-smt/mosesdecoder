@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 my ($language,$src,$system) = @ARGV;

@@ -9,6 +9,7 @@
 # It should point to the binary file
 #    lmplz = /home/waziz/workspace/github/moses/bin/lmplz
 
+use warnings;
 use strict;
 use FindBin qw($RealBin);
 use Getopt::Long qw/GetOptionsFromArray/;

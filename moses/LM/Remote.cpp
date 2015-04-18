@@ -1,13 +1,14 @@
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include "Remote.h"
 #include "moses/Factor.h"
+
+#if !defined(_WIN32) && !defined(_WIN64)
+#include <arpa/inet.h>
+#endif
 
 namespace Moses
 {
@@ -41,12 +42,16 @@ bool LanguageModelRemote::start(const std::string& host, int port)
   sock = socket(AF_INET, SOCK_STREAM, 0);
   hp = gethostbyname(host.c_str());
   if (hp==NULL) {
+#if defined(_WIN32) || defined(_WIN64)
+    fprintf(stderr, "gethostbyname failed\n");
+#else
     herror("gethostbyname failed");
+#endif
     exit(1);
   }
 
-  bzero((char *)&server, sizeof(server));
-  bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
+  memset(&server, '\0', sizeof(server));
+  memcpy((char *)&server.sin_addr, hp->h_addr, hp->h_length);
   server.sin_family = hp->h_addrtype;
   server.sin_port = htons(port);
 

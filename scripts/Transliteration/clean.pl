@@ -1,6 +1,7 @@
 #!/usr/bin/env perl 
 
 #input hindi word urdu word, delete all those entries that have number on any side
+use warnings;
 use utf8;
 
 use Getopt::Std;

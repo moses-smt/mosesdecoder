@@ -147,7 +147,7 @@ def main():
 
   #Numberize the file
   for line in ngrams_file_handle:
-    numberized_file_handle.write(extract.numberize(line, m, n, tvocab_idmap, tvocab_idmap))
+    numberized_file_handle.write(extract.numberize(line, options.m, options.n, svocab_idmap, tvocab_idmap))
   numberized_file_handle.close()
   ngrams_file_handle.close()
 

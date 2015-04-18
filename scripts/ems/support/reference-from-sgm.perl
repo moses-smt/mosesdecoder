@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 die("ERROR syntax: reference-from-sgm.perl ref src out") 
