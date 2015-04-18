@@ -152,7 +152,7 @@ namespace Moses
     input_factor = atoi(param.insert(dflt).first->second.c_str());
     // shouldn't that be a string?
     
-    pair<string,string> dflt("output-factor","0");
+    dflt = pair<string,string> ("output-factor","0");
     output_factor = atoi(param.insert(dflt).first->second.c_str());
     ofactor.assign(1,output_factor);
     
