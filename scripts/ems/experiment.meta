@@ -7,8 +7,15 @@ get-corpus
 	default-name: corpus/txt
 	rerun-on-change: input-extension output-extension
 	template: IN OUT $input-extension $output-extension
+pre-tok-clean
+        in: raw-stem
+        out: pre-tok-cleaned
+        default-name: corpus/pre-tok-cleaned
+        pass-unless: pre-tok-clean
+        template: $pre-tok-clean IN $input-extension $output-extension OUT OUT.lines-retained
+        parallelizable: yes
 tokenize
-	in: raw-stem
+	in: pre-tok-cleaned
 	out: tokenized-stem
 	default-name: corpus/tok
 	pass-unless: input-tokenizer output-tokenizer
