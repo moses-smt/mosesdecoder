@@ -7,7 +7,7 @@
 
 #Copyright Marcello Federico, November 2004
 
-use warnings;
+#use warnings;
 
 ($cnt,$dir,$inv)=();
 
@@ -19,7 +19,7 @@ while ($w=shift @ARGV){
 
 my $lc = 0;
 
-if (!$dir || !inv){
+if (!$dir || !$inv){
  print  "usage: giza2bal.pl [-c <count-file>] -d <dir-align-file> -i <inv-align-file>\n"; 
  print  "input files can be also commands, e.g. -d \"gunzip -c file.gz\"\n";
  exit(0);
