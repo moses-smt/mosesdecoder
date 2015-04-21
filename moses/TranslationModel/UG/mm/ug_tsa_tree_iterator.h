@@ -73,9 +73,9 @@ namespace ugdiss
 		      Token const* kstart, 
 		      Token const* kend, 
 		      bool full_match_only=true);
-    // TSA_tree_iterator(TSA<Token> const* s, 
-    // 		      TokenIndex const& V, 
-    // 		      string const& key);
+    TSA_tree_iterator(TSA<Token> const* s, 
+    		      TokenIndex const& V, 
+     		      string const& key);
 
     char const* lower_bound(int p) const;
     char const* upper_bound(int p) const;
@@ -353,7 +353,7 @@ namespace ugdiss
 
   // ---------------------------------------------------------------------------
 
-#if 0
+#if 1
   template<typename Token>
   TSA_tree_iterator<Token>::
   TSA_tree_iterator(TSA<Token> const* s, 
@@ -374,7 +374,9 @@ namespace ugdiss
 	  }
       }
   };
-  
+#endif
+
+#if 0  
   // ---------------------------------------------------------------------------
 
   template<typename Token>
