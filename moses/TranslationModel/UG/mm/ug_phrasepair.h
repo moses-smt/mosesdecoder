@@ -3,7 +3,9 @@
 #include <vector>
 #include "ug_typedefs.h"
 #include "ug_bitext_pstats.h"
-
+#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
+#include "boost/format.hpp"
+#include "tpt_tokenindex.h"
 namespace Moses
 {
   namespace bitext
@@ -45,7 +47,15 @@ namespace Moses
       PhrasePair const& 
       update(uint64_t const pid2, Token const* x, 
 	     uint32_t const len, jstats const& js);
-      
+
+      void
+      fill_lr_vec(LRModel::Direction const& dir, 
+		  LRModel::ModelType const& mdl, 
+		  vector<float>& v) const;
+      void
+      print(ostream& out, TokenIndex const& V1, TokenIndex const& V2, 
+	    LRModel const& LR) const;
+
       class SortByTargetIdSeq
       {
       public:
@@ -98,20 +108,20 @@ namespace Moses
       assert(js.aln().size());
       if (js.aln().size()) 
 	aln = js.aln()[0].second;
-      float total_fwd = 0, total_bwd = 0;
-      for (int i = 0; i <= Moses::LRModel::NONE; i++)
-	{
-	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
-	  total_fwd += js.dcnt_fwd(po)+1;
-	  total_bwd += js.dcnt_bwd(po)+1;
-	}
+      // float total_fwd = 0, total_bwd = 0;
+      // for (int i = 0; i <= Moses::LRModel::NONE; i++)
+      // 	{
+      // 	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
+      // 	  total_fwd += js.dcnt_fwd(po)+1;
+      // 	  total_bwd += js.dcnt_bwd(po)+1;
+      // 	}
 
       // should we do that here or leave the raw counts?
       for (int i = 0; i <= Moses::LRModel::NONE; i++)
 	{
 	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
-	  dfwd[i] = float(js.dcnt_fwd(po)+1)/total_fwd;
-	  dbwd[i] = float(js.dcnt_bwd(po)+1)/total_bwd;
+	  dfwd[i] = js.dcnt_fwd(po);
+	  dbwd[i] = js.dcnt_bwd(po);
 	}
       
       indoc = js.indoc;
@@ -162,6 +172,7 @@ namespace Moses
       joint   += o.joint;
       sample1 += o.sample1;
       sample2 += o.sample2;
+      // todo: add distortion counts
       return *this;
     }
 
@@ -226,7 +237,8 @@ namespace Moses
     }
 
     template<typename Token>
-    bool PhrasePair<Token>
+    bool 
+    PhrasePair<Token>
     ::SortDescendingByJointCount
     ::operator()(PhrasePair const& a, PhrasePair const& b) const
     {
@@ -234,7 +246,8 @@ namespace Moses
     }
     
     template<typename Token>
-    void PhrasePair<Token>
+    void 
+    PhrasePair<Token>
     ::init()
     {
       inverse = false;
@@ -242,5 +255,81 @@ namespace Moses
       start1 = start2 = NULL;
       p1 = p2 = 0;
     }
-  }
-}
+
+
+    void 
+    fill_lr_vec2(LRModel::ModelType mdl, float const* const cnt, 
+		float const total, float* v);
+    
+    template<typename Token>
+    void
+    PhrasePair<Token>
+    ::fill_lr_vec(LRModel::Direction const& dir, 
+		  LRModel::ModelType const& mdl, 
+		  vector<float>& v) const
+    {
+      // how many distinct scores do we have?
+      size_t num_scores = (mdl == LRModel::MSLR ? 4 : mdl == LRModel::MSD  ? 3 : 2);
+      size_t offset;
+      if (dir == LRModel::Bidirectional) 
+	{
+	  offset = num_scores;
+	  num_scores *= 2;
+	}
+      else offset = 0;
+
+      v.resize(num_scores);
+
+      // determine the denominator
+      float total = 0; 
+      for (size_t i = 0; i <= LRModel::NONE; ++i) 
+	total += dfwd[i];
+
+      if (dir != LRModel::Forward) // i.e., Backward or Bidirectional
+	fill_lr_vec2(mdl, dbwd, total, &v[0]);
+      if (dir != LRModel::Backward) // i.e., Forward or Bidirectional
+	fill_lr_vec2(mdl, dfwd, total, &v[offset]);
+    }      
+    
+
+    template<typename Token>
+    void
+    PhrasePair<Token>
+    ::print(ostream& out, TokenIndex const& V1, TokenIndex const& V2, 
+	  LRModel const& LR) const
+    {
+      out << toString (V1, this->start1, this->len1) << " ::: " 
+	  << toString (V2, this->start2, this->len2) << " " 
+	  << this->joint << " [";
+      for (size_t i = 0; i < this->indoc.size(); ++i)
+	{ 
+	  if (i) out << " "; 
+	  out << this->indoc[i]; 
+	}
+      out << "] ["; 
+      vector<float> lrscores;
+      this->fill_lr_vec(LR.GetDirection(), LR.GetModelType(), lrscores);
+      for (size_t i = 0; i < lrscores.size(); ++i)
+	{
+	  if (i) out << " ";
+	  out << boost::format("%.2f") % exp(lrscores[i]);
+	}
+      out << "]" << endl;
+#if 0
+      for (int i = 0; i <= Moses::LRModel::NONE; i++)
+	{
+	  // PhraseOrientation po = static_cast<PhraseOrientation>(i);
+	  if (i) *log << " ";
+	  *log << p.dfwd[i];
+	}
+      *log << "] ["; 
+      for (int i = 0; i <= Moses::LRModel::NONE; i++)
+	{
+	  // PhraseOrientation po = static_cast<PhraseOrientation>(i);
+	  if (i) *log << " ";
+	  *log << p.dbwd[i];
+	}
+#endif
+    }
+  } // namespace bitext
+} // namespace Moses

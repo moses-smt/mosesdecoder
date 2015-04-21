@@ -43,6 +43,9 @@ namespace Moses
       bool valid();
       uint32_t dcnt_fwd(PhraseOrientation const idx) const;
       uint32_t dcnt_bwd(PhraseOrientation const idx) const;
+      void fill_lr_vec(Moses::LRModel::Direction const& dir, 
+		       Moses::LRModel::ModelType const& mdl, 
+		       vector<float>& v);
     };
   }
 }

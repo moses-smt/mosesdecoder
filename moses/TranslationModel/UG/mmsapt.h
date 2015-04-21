@@ -22,6 +22,8 @@
 
 #include "moses/TranslationModel/UG/TargetPhraseCollectionCache.h"
 
+#include "moses/FF/LexicalReordering/LexicalReordering.h"
+
 #include "moses/InputFileStream.h"
 #include "moses/FactorTypeSet.h"
 #include "moses/TargetPhrase.h"
@@ -77,6 +79,8 @@ namespace Moses
     boost::scoped_ptr<ofstream> m_bias_logger; // for logging to a file
     ostream* m_bias_log; 
     int m_bias_loglevel;
+    LexicalReordering* m_lr_func; // associated lexical reordering function
+    string m_lr_func_name; // name of associated lexical reordering function
   public:
     void* const  cache_key;   // for getting cache from ttask
     void* const  context_key; // for context scope from ttask

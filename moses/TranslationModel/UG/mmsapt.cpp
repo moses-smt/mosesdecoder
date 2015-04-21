@@ -73,6 +73,7 @@ namespace Moses
     : PhraseDictionary(line)
     , m_bias_log(NULL)
     , m_bias_loglevel(0)
+    , m_lr_func(NULL)
     , cache_key(((char*)this)+2)
     , context_key(((char*)this)+1)
       // , m_tpc_ctr(0)
@@ -212,6 +213,9 @@ namespace Moses
 	  }
       }
 
+    if ((m = param.find("lr-func")) != param.end()) 
+      m_lr_func_name = m->second;
+
     if ((m = param.find("extra")) != param.end()) 
       m_extra_data = m->second;
 
@@ -244,6 +248,7 @@ namespace Moses
     known_parameters.push_back("lexalpha");
     // known_parameters.push_back("limit"); // replaced by "table-limit"
     known_parameters.push_back("logcnt");
+    known_parameters.push_back("lr-func"); // associated lexical reordering function
     known_parameters.push_back("name");
     known_parameters.push_back("num-features");
     known_parameters.push_back("output-factor");
@@ -533,6 +538,16 @@ namespace Moses
     tp->SetAlignTerm(pool.aln);
     tp->GetScoreBreakdown().Assign(this, fvals);
     tp->EvaluateInIsolation(src);
+
+    if (m_lr_func)
+      {
+	LRModel::ModelType mdl = m_lr_func->GetModel().GetModelType();
+	LRModel::Direction dir = m_lr_func->GetModel().GetDirection();
+	sptr<Scores> scores(new Scores());
+	pool.fill_lr_vec(dir, mdl, *scores);
+	tp->SetExtraScores(m_lr_func, scores);
+      }
+
     return tp;
   }
 
@@ -643,7 +658,6 @@ namespace Moses
 	expand(mdyn, *dyn, *sdyn, ppdyn, m_bias_log);
 	sort(ppdyn.begin(), ppdyn.end(),sort_by_tgt_id);
       }
-
     // now we have two lists of Phrase Pairs, let's merge them
     ret = new TPCollWrapper(dyn->revision(), phrasekey);
     PhrasePair<Token>::SortByTargetIdSeq sorter;
@@ -659,6 +673,20 @@ namespace Moses
     while (k < ppdyn.size()) ret->Add(mkTPhrase(src,NULL,&ppdyn[k++],dyn));
     if (m_tableLimit) ret->Prune(true, m_tableLimit);
     else ret->Prune(true,ret->GetSize());
+
+#if 1
+    if (m_bias_log && m_lr_func)
+      {
+	typename PhrasePair<Token>::SortDescendingByJointCount sorter;
+	sort(ppfix.begin(), ppfix.end(),sorter);
+	BOOST_FOREACH(PhrasePair<Token> const& pp, ppfix)
+	  {
+	    if (&pp != &ppfix.front() && pp.joint <= 1) break;
+	    pp.print(*m_bias_log,*btfix.V1, *btfix.V2, m_lr_func->GetModel());
+	  }
+      }
+#endif
+
 
 #if 0
     if (combine_pstats(src, 
@@ -752,6 +780,15 @@ namespace Moses
 	if (context->bias) localcache.reset(new TPCollCache(m_cache_size));
 	else localcache = m_cache;
 	scope->set<TPCollCache>(cache_key, localcache);
+      }
+    
+    if (m_lr_func_name.size() && m_lr_func == NULL)
+      {
+	FeatureFunction* lr = &FeatureFunction::FindFeatureFunction(m_lr_func_name);
+	m_lr_func = dynamic_cast<LexicalReordering*>(lr);
+	UTIL_THROW_IF2(lr == NULL, "FF " << m_lr_func_name 
+		       << " does not seem to be a lexical reordering function!");
+	// todo: verify that lr_func implements a hierarchical reordering model
       }
   }
 
