@@ -86,6 +86,5 @@ namespace Moses
     aln() const 
     { return my_aln; }
 
-  
-  }
-}
+  } // namespace bitext
+} // namespace Moses
