@@ -23,7 +23,7 @@ while(my $source = <SOURCE>) {
 
   # remove markup
   foreach my $line (\$source,\$target) {
-    $$line =~ s/\<[^\>]+\>//g;
+    $$line =~ s/\<[^\>]+\>/ /g;
     $$line =~ s/\s+/ /g;
     $$line =~ s/^ //;
     $$line =~ s/ $//;
