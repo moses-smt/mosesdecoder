@@ -43,6 +43,7 @@ namespace Moses
 	  if (docname.size() && docname[0] == '#') continue; // comment
 	  size_t docid = this->m_docname2docid.size();
 	  this->m_docname2docid[docname] = docid;
+	  this->m_docname.push_back(docname);
 	  line >> b;
 	  VERBOSE(1, "DOCUMENT MAP " << docname 
 		  << " " << a << "-" << b+a << endl);
