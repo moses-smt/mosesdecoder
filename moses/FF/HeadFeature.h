@@ -61,20 +61,23 @@ class SyntaxTreeState : public FFState
 	DepRelMap &m_depRelCache;
 	Counters &m_counters;
 
-
-
 public:
 	//used to Compare to hypothesis based on this feature
 		//boost::shared_ptr< std::set<std::string> > m_depRelInHyp;
 		size_t m_depRelInHypHash;
+		static long long equal;
+		static long long not_equal;
+		static long long distinct;
+		std::string m_depRel;
 
-  SyntaxTreeState(SyntaxTreePtr tree, size_t depRelInHypHash,StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
+  SyntaxTreeState(SyntaxTreePtr tree, size_t depRelInHypHash,std::string depRel,StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
     :m_tree(tree)
 		,m_subtreeCache(subtreeCache)
 		,m_depRelCache(depRelCache)
 		,m_counters(counters)
 		//,m_depRelInHyp(depRelInHyp)
 		,m_depRelInHypHash(depRelInHypHash)
+		,m_depRel(depRel)
   {}//std::cout<<"new state "<<m_depRelInHyp->size()<<std::endl;
 
   SyntaxTreePtr GetTree() const {
@@ -314,7 +317,7 @@ public:
 	  //std::set<std::string> depRelInHyp();
 	  //boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr (new std::set<std::string>()); //(depRelInHyp);
 	  size_t hashValue=0;
-	  return new SyntaxTreeState(startTree, hashValue, GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
+	  return new SyntaxTreeState(startTree, hashValue,"", GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
   }
 
 

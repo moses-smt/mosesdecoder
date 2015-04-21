@@ -577,15 +577,41 @@ string* SyntaxTree::FindSubj() const{
 int SyntaxTreeState::Compare(const FFState& other) const
 {
 	//!! initially I used Equal and the compare was not distinguishing a<b and a>b which gave the error in ChartHypothesisCollection line 118 when trying to add an existing hypo
-
   const SyntaxTreeState &otherState = static_cast<const SyntaxTreeState&>(other);
+  int res=0;
+  res = m_depRel.compare(otherState.m_depRel);
+  if(res!=0)
+  	SyntaxTreeState::distinct++;
+  if(res==0)
+  	SyntaxTreeState::equal++;
+  return res;
 
-  if(m_depRelInHypHash < otherState.m_depRelInHypHash)
+  /*
+  if(m_depRelInHypHash < otherState.m_depRelInHypHash){
+  	SyntaxTreeState::distinct++;
   	return -1;
-  if(m_depRelInHypHash > otherState.m_depRelInHypHash)
-    	return 1;
-  if(m_depRelInHypHash == otherState.m_depRelInHypHash)
+  }
+  if(m_depRelInHypHash > otherState.m_depRelInHypHash){
+  	SyntaxTreeState::distinct++;
+  	return 1;
+  }
+
+  if(m_depRelInHypHash == otherState.m_depRelInHypHash){
+  	std::string parsedSentence1 = "";
+  	this->GetTree()->ToStringLevel(parsedSentence1,3);
+  	std::string parsedSentence2 = "";
+  	otherState.GetTree()->ToStringLevel(parsedSentence2,3);
+  	if(parsedSentence1.compare(parsedSentence2)==0)
+  		SyntaxTreeState::equal++;
+  	else
+  		SyntaxTreeState::not_equal++;
+  	//cout<<"1: "<<parsedSentence1<<endl;
+  	//cout<<"2: "<<parsedSentence2<<endl;
     	return 0;
+  }
+
+  */
+
   /*
    if(m_depRelInHyp->size() < otherState.m_depRelInHyp->size())
   	return -1;
@@ -604,6 +630,10 @@ int SyntaxTreeState::Compare(const FFState& other) const
 	*/
 }
 
+long long SyntaxTreeState::equal =0;
+long long SyntaxTreeState::not_equal =0;
+long long SyntaxTreeState::distinct =0;
+
 ////////////////////////////////////////////////////////////////
 HeadFeature::HeadFeature(const std::string &line)
   :StatefulFeatureFunction(4, line) //should modify 0 to the number of scores my feature generates
@@ -620,6 +650,7 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_MIModelFile("")
 	, m_modelFileARPA("")
 {
+
   ReadParameters();
   //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
   const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","VP"};//"PP", ??
@@ -924,7 +955,7 @@ void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
 	std::cerr<<"Reset cache: "<<localCache.size()<<endl;
 	std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
 	std::cerr<<"Reset counters: "<<localCounters.depRelCacheHits <<" "<<localCounters.subtreeCacheHits<<endl;
-
+	std:cerr<<SyntaxTreeState::equal<<" "<<SyntaxTreeState::not_equal<<" "<<SyntaxTreeState::distinct<<endl;
 	m_counter=0;
 	m_counterDepRel=0;
 	m_cacheHits=0;
@@ -1116,7 +1147,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 			//boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr(new set<string>()); //(depRelInHyp);
 			size_t depRelInHypHash=0;
-
+			std::string parsedSentence = "";
 	    const std::string *tree = property->GetValueString();
 
 
@@ -1155,7 +1186,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 				scores.push_back(0.0);
 				scores.push_back(0.0);
 				accumulator->PlusEquals(this,scores);
-				return new SyntaxTreeState(syntaxTree,depRelInHypHash,GetCache(),GetCacheDepRel(),GetCounters());
+				return new SyntaxTreeState(syntaxTree,depRelInHypHash,parsedSentence,GetCache(),GetCacheDepRel(),GetCounters());
 			}
 
 
@@ -1164,7 +1195,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 			//might consider adding Q in allowedNT -> we transform it to S in ToStringLevel
 			if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 				//std::string parsedSentence  = syntaxTree->ToString();
-				std::string parsedSentence = "";
+				//std::string parsedSentence = "";
 				syntaxTree->ToStringLevel(parsedSentence,3);
 				//cout<<"When applied "<<featureID<<" toString4: "<<parsedSentence<<endl;
 
@@ -1270,7 +1301,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 										UTIL_THROW2("error inserting score vector in localCacheDepRel cache");
 									boost::unordered_map<std::string, std::vector<float> >::hasher hashFn = localCacheDepRel.hash_function();
 									boost::hash<std::string> string_hash;
-									depRelInHypHash = string_hash(*tree);
+									depRelInHypHash = string_hash(parsedSentence);
+									//depRelInHypHash = string_hash(*tree);
 									//depRelInHypHash = hashFn(depRel);
 
 								}
@@ -1281,7 +1313,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 			}
 
 
-			return new SyntaxTreeState(syntaxTree,depRelInHypHash,GetCache(),GetCacheDepRel(),GetCounters());
+			return new SyntaxTreeState(syntaxTree,depRelInHypHash,depRel,GetCache(),GetCacheDepRel(),GetCounters());
 	}
 	vector<float> scores;
 	scores.push_back(1000.0);
