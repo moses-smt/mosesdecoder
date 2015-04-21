@@ -157,28 +157,28 @@ if (-e "$TMPDIR/extract.$numStr.o.gz")
 
 my @psd_lines;
 if ($outputPSD) {
-    # need to renumber sentence ids in PSD output, (mis)use the parent process to do this...
+  # need to renumber sentence ids in PSD output, (mis)use the parent process to do this...
 
-    open(OUTPSD, "| gzip -c > $extract.psd.unsorted.gz") or die "failed to open $extract.psd.unsorted.gz output pipe";
-    my $lineOffset = 0;
-    for (my $i = 0; $i < $numParallel; ++$i)
+  open(OUTPSD, "| gzip -c > $extract.psd.unsorted.gz") or die "failed to open $extract.psd.unsorted.gz output pipe";
+  my $lineOffset = 0;
+  for (my $i = 0; $i < $numParallel; ++$i)
     {
-	my $numStr = NumStr($i);
-	print STDERR "opening extract.$numStr.psd.gz pipe";
-	open(INPSD, "gzip -dc $TMPDIR/extract.$numStr.psd.gz |") or die "failed to open extract.$numStr.psd.gz input pipe";
-	while (<INPSD>) {
-	    chomp;
-	    my ($SNo, $rest) = split("\t", $_, 2);
-	    die unless defined($rest);
-	    $SNo += $lineOffset;
-	    print OUTPSD $SNo, "\t", $rest, "\n";
-	}
-	close(INPSD);
+      my $numStr = NumStr($i);
+      print STDERR "opening extract.$numStr.psd.gz pipe";
+      open(INPSD, "gzip -dc $TMPDIR/extract.$numStr.psd.gz |") or die "failed to open extract.$numStr.psd.gz input pipe";
+      while (<INPSD>) {
+        chomp;
+        my ($SNo, $rest) = split("\t", $_, 2);
+        die unless defined($rest);
+        $SNo += $lineOffset;
+        print OUTPSD $SNo, "\t", $rest, "\n";
+      }
+      close(INPSD);
 
-	$lineOffset += `cat $TMPDIR/source.$numStr | wc -l`;
+      $lineOffset += `cat $TMPDIR/source.$numStr | wc -l`;
     }
-    print STDERR "closing $extract.psd.unsorted.gz pipe";
-    close(OUTPSD) or die "failed to close $extract.psd.unsorted.gz output pipe";
+  print STDERR "closing $extract.psd.unsorted.gz pipe";
+  close(OUTPSD) or die "failed to close $extract.psd.unsorted.gz output pipe";
 }
 
 # wait for all sorting to finish

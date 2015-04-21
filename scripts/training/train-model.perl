@@ -139,10 +139,10 @@ $_HELP = 1
                  'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
                  'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
                  'flexibility-score' => \$_FLEXIBILITY_SCORE,
-		 'extract-psd-anot' => \$_EXTRACT_PSD,
-           	 'psd-index=s' => \$_PSD_INDEX,
-           	 'psd-model=s' => \$_PSD_MODEL,
-           	 'psd-config=s' => \$_PSD_CONFIG,
+                 'extract-psd-anot' => \$_EXTRACT_PSD,
+                 'psd-index=s' => \$_PSD_INDEX,
+                 'psd-model=s' => \$_PSD_MODEL,
+                 'psd-config=s' => \$_PSD_CONFIG,
                );
 
 if ($_HELP) {

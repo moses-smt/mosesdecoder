@@ -16,203 +16,140 @@ my @targetNonTermAlign;
 my @sourceNonTermAlignAll;
 my @sourceNonTermAlign;
 
-sub FindSourceNonTerminals
-{
-    my @f = @{ $_[0] };
-    my $index = 0;
-    my @sourceNonTermPos = ();
 
- 	foreach(@f)
-	{
-		if($_ =~ /\[X\]\[\w+\]/) #for hard-coded hiero put $_ eq "[X][X]" inside of if
-		{
-		    push(@sourceNonTermPos,$index);
+sub FindSourceNonTerminals {
+  my @f = @{ $_[0] };
+  my $index = 0;
+  my @sourceNonTermPos = ();
+
+ 	for (my $i=0; $i<=$#f; $i++) {
+		if($f[$i] =~ /(\[X\]\[[^\s\]]+\])/) { # NIN: rewrite expression so it matches ".$" and other stuff
+      push(@sourceNonTermPos,$i);
 		}
-		$index++;
 	}
-	return @sourceNonTermPos;  
+	return @sourceNonTermPos;
 }
 
-sub ReplaceValueWithIndex()
-{	
-	#take the minimal value of the alignment between target non-terminals and replace by 0, the second one by 1 etc. 
-	my @targetNonTermAlignment  = @{ $_[0] };
 
-	my $targetIndex = 0;
-	my $minIndexPos = 0;
-	# FB : inefficient O(n^2) can be done in n(log(n)) but alignment vector is usually small
-	for(my $j = 0; $j < scalar(@targetNonTermAlignment); $j++)
-	{
-		my $min = 1000;
-		my $indexPos = 0;
-		foreach(@targetNonTermAlignment)
-		{
-			if( ($_ <  $min) && ($_ > ($targetIndex-1) ) )
-			{	
-				$min =  $_;
-				$minIndexPos = $indexPos;
-			}
-			$indexPos++;
-		}
-		splice(@targetNonTermAlignment,$minIndexPos,1,$targetIndex);
-		$targetIndex++;	
-	}
-	
-	return (\@targetNonTermAlignment);
-
-}	
-
-# Corresponding non-terminal indexes can be attached directly to non-terminals
-sub CreateAlignedTarget()
-{
+# Take the alignment point of target nt and replace the corresponding nt-pair in e with the index given by alignment-array
+sub ReplaceValueWithIndex() {
 	my @e = @{ $_[0] };
-	my @targetIndexes = @{ $_[1] }; 
+	my @targetNonTermAlignment = @{ $_[1] };
 
-	my @newEn;
-
-	foreach(@e)
-	{
-		if($_ =~ /(\[X\]\[\w+\])/) #for hard-coded hiero put $_ eq "[X][X]" inside of if
-		{
-			#print "GETTING AT COUNTER : ".$sourceNonTermCounter."\n";
-			my $nonTerm = $1;
-			my $targetIndex = shift(@targetIndexes);
-			my $NonTermAlign = $nonTerm.$targetIndex;
-			push(@newEn,$NonTermAlign);
-		}
-		else
-		{push(@newEn,$_)}
-	}
-	return @newEn;
+  for (my $i=0; $i<=$#targetNonTermAlignment; $i++) {
+    my $offset = $targetNonTermAlignment[$i];
+    my $nt = $e[$targetNonTermAlignment[$i]];
+    my $newnt = $nt . $i;
+    splice(@e,$offset,1,$newnt);
+  }
+	return (\@e);
 }
 
-while(<STDIN>){	
 
+### MAIN
+while(<STDIN>){
 	@e = ();
 	@a = ();
 	@f = ();
 	@s = ();
 	@r = ();
-	# all target sides of alignments
+
+  # all target sides of alignments
 	my @sourceAlignAll = ();
 	my @targetAlignAll = ();
-	my $stage = 0;
 
-    #print "New line : $_ \n";
-    chomp;
-    # This does not work for hiero because we can have empty alignments	 
-    # my ($f,$e,$s,$a) = split(/ \|\|\| /);
-    my @token = split('\s', $_);
+  my $stage = 0;
+  chomp;
+  #print "New line : $_ \n";
 
-	foreach(@token)
-	{
+  # This does not work for hiero because we can have empty alignments	 
+  # my ($f,$e,$s,$a) = split(/ \|\|\| /);
+  my @token = split('\s', $_);
+
+	foreach (@token) {
 		#print "Obtained Token : $_ \n";
 
-		if ($_ eq "|||")
-		{
+		if ($_ eq "|||") {
 			++$stage;
 		}
-		if($stage == 0)
-		{
-		   if($_ ne "|||")
-		   {	
-			#print "FRENCH PART : $_ \n";
-			push(@f,$_);
-		   }
+		if($stage == 0) {
+      if($_ ne "|||") {
+        #print "FRENCH PART : $_ \n";
+        push(@f,$_);
+      }
 		}
-		if($stage == 1)
-		{
-		   if($_ ne "|||")
-		   {	
-			push(@e,$_);
-		   }
+		if($stage == 1) {
+      if($_ ne "|||") {
+        push(@e,$_);
+      }
 		}
-		if($stage == 3)
-		{
-		   if($_ ne "|||")
-		   {	
-			push(@a,$_);
-			# split alignment and put into separate arrays
-			my @align = split("-",$_);
-			push(@sourceAlignAll,shift(@align));
-			push(@targetAlignAll,pop(@align));	
-		   }
+		if($stage == 3) {
+      if($_ ne "|||") {
+        push(@a,$_);
+        # split alignment and put into separate arrays
+        my @align = split("-",$_);
+        push(@sourceAlignAll, $align[0]);
+        push(@targetAlignAll, $align[1]);
+      }
 		}
-		if($stage == 2)
-		{
-		   if($_ ne "|||")
-		   {	
-			push(@s,$_);
-		   }
+		if($stage == 2) {
+      if($_ ne "|||") {
+        push(@s,$_);
+      }
 		}
-		if($stage == 4)
-		{
-		   if($_ ne "|||")
-		   {	
-			push(@r,$_);
-		   }
+		if($stage == 4) {
+      if($_ ne "|||") {
+        push(@r,$_);
+      }
 		}
 	}
 
-    # count non-terminals in frencg (source) side of rule
-    my @sourceNonTerms = &FindSourceNonTerminals(\@f);
-	
-   my @newEn = ();
-	
-   #if there are no nonterminals just take as is
-   if(scalar(@sourceNonTerms) == 0)
-   {
-	my $f = join(" ",@f);	
+  # count non-terminals in french (source) side of rule
+  my @sourceNonTerms = &FindSourceNonTerminals(\@f);
+
+  #if there are no nonterminals just take as is
+  if(scalar(@sourceNonTerms) == 0) {
+    my $f = join(" ",@f);
    	my $e = join(" ",@e);
-    	my $a = join(" ",@a);
+    my $a = join(" ",@a);
    	my $s = join(" ",@s);
-    	my $r = join(" ",@r);
+    my $r = join(" ",@r);
 
-    	print "$f ||| $e ||| $s ||| $a ||| $r \n"
+    print "$f ||| $e ||| $s ||| $a ||| $r \n"
+  }
+  else {
+    my @targetNonTerms = ();
 
-   }
-   else		
-   {	
-	my @targetNonTerms = ();
-		
-	#TODO : this should be implemented in a more efficient way
-	#Find the index of source non-terminals to find target non-terminals
-	foreach(@sourceNonTerms)
-	{
-		my $nonTermToFind = $_;
-		my $index = 0;
-		foreach(@sourceAlignAll)
-		{
-			#find index of source non-terminal
-			#get target at this index
-			if($_ eq $nonTermToFind)
-			{
-				my $targetToInsert = $targetAlignAll[$index];
-				push(@targetNonTerms,$targetToInsert);	
-			}
-			$index++;
-		}
-		
-	}	
-	
-   	my ($targetNonTermIndexRef) = &ReplaceValueWithIndex(\@targetNonTerms);
-   	my @targetNonTermIndex = @$targetNonTermIndexRef;
-   	
-	@newEn = &CreateAlignedTarget(\@e,\@targetNonTermIndex);
+    #TODO : this should be implemented in a more efficient way
+    #Find the index of source non-terminals to find target non-terminals
+    foreach (@sourceNonTerms) {
+      my $nonTermToFind = $_;
+      for ( my $i=0; $i<=$#sourceAlignAll; $i++ ) {
+        #find index of source non-terminal
+        #get target at this index
+        if ($sourceAlignAll[$i] eq $nonTermToFind) {
+          my $targetToInsert = $targetAlignAll[$i];
+          push(@targetNonTerms,$targetToInsert);
+        }
+      }
+    }
 
-    my $f = join(" ",@f);	
-    my $e = join(" ",@newEn);
+   	my ($eref) = &ReplaceValueWithIndex(\@e, \@targetNonTerms);
+   	my @mode = @$eref;
+
+    my $f = join(" ",@f);
+    my $e = join(" ",@mode);
     my $a = join(" ",@a);
     my $s = join(" ",@s);
     my $r = join(" ",@r);
 
     print "$f ||| $e ||| $s ||| $a ||| $r \n"
+  }
+
+  #For hiero : add alignments to target phrases
+  #$frPhrases{$f}++;
+  #print "Align augmented line \n"; 
+  #print $e;
+  #print "\n";
+  #$enPhrases{$e}++;
 }
-    #For hiero : add alignments to target phrases
-    #$frPhrases{$f}++;
-    #print "Align augmented line \n"; 
-    #print $e;
-    #print "\n";   
-   
-    #$enPhrases{$e}++;
-}	

@@ -364,28 +364,36 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
 
 void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, FeatureConsumer *fc)
 {
-   boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
   //string parent = "[X]"; //was for hiero
+  //boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
+  // NIN: new regex
+  boost::regex parentRegex ("\\[[^\\[\\]]+\\]");
   string indicString = "";
 
   size_t sizeOfSpan = span.size();
   for (int i=0; i < sizeOfSpan; i++) {
     //if( span[i].compare(parent)) was for hiero
-	if(!regex_match (span[i],parentRegex))
-    {
+    if(!regex_match (span[i],parentRegex))
+      {
         if (indicString.size()>0)
-            indicString += "_";
+          indicString += "_";
         indicString += span[i];
-    }
+      }
   }
+  fc->AddFeature("p^" + indicString);
+  
 }
 
 void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span, FeatureConsumer *fc,AlignmentType nonTermAlign)
 {
   //string parent = "[X]"; //was for hiero
   //string nonTerm = "[X][X]"; //was for hiero
-  boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
-  boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+  //boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
+  //boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+  // NIN: new regex
+  boost::regex parentRegex ("\\[[^\\[\\]]+\\]");
+  // NIN: simply use regex that finds the alignment to source from psd-format-sorted rule-table
+  boost::regex nonTermDigitRegex ("\\[(X)\\]\\[([^\\]]+)\\](\\d+)");
   boost::smatch matchedNonTerm;
   string indicString = "";
   size_t nonTermCounter = 0;
@@ -398,19 +406,20 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
     {
         //found = span[i].find(nonTerm); was for hiero
         //if(found != string::npos)
-    	if(regex_search(span[i],matchedNonTerm,nonTermRegex))
+    	if(regex_search(span[i],matchedNonTerm,nonTermDigitRegex))
         {
             string matchString = string(matchedNonTerm[0]);
 
-            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
-            ostringstream s1;
-            s1 << newTerm;
-            string sourceAlign =s1.str();
+            // NIN: not used anymore
+            //size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            //ostringstream s1;
+            //s1 << newTerm;
+            //string sourceAlign =s1.str();
 
             if (indicString.size()>0)
              {indicString += "_";}
             indicString += matchString;
-            indicString += sourceAlign;
+            //indicString += sourceAlign;
             nonTermCounter++;
         }
         else{
@@ -426,7 +435,9 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
 void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
 {
   //string parent = "[X]"; //was for hiero
-  boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
+  //boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
+  // NIN: new regex
+  boost::regex parentRegex ("\\[[^\\[\\]]+\\]");
   vector<string>::const_iterator it;
   for (it = span.begin(); it != span.end(); it++) {
     //if(  (*it).compare(parent) ) //was for hiero
@@ -439,8 +450,12 @@ void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &span,
 {
   //string parent = "[X]"; //was for hiero
   //string nonTerm = "[X][X]"; //was for hiero
-  boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
-  boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+  //boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
+  //boost::regex nonTermRegex ("\\[X\\]\\[(\\w|\\.|\\$|\\\\|\\\\$|\\,)+\\]");
+  // NIN: new regex
+  boost::regex parentRegex ("\\[[^\\[\\]]+\\]");
+  // NIN: simply use regex that finds the alignment to source from psd-format-sorted rule-table
+  boost::regex nonTermDigitRegex ("\\[X\\]\\[[^\\]]+\\]\\d+");
   boost::smatch matchedNonTerm;
   size_t nonTermCounter = 0;
 
@@ -452,16 +467,18 @@ void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &span,
     if(!regex_match (*it,parentRegex))
     {
         //if(found != string::npos) was for hiero
-    	if(regex_search(*it,matchedNonTerm,nonTermRegex))
+    	if(regex_search(*it,matchedNonTerm,nonTermDigitRegex))
         {
     		string matchString = string(matchedNonTerm[0]);
 
-            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
-            ostringstream s1;
-            s1 << newTerm;
-            string sourceAlign =s1.str();
+        // NIN: not used anymore
+        //size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+        //   ostringstream s1;
+        //   s1 << newTerm;
+        //   string sourceAlign =s1.str();
 
-            fc->AddFeature("w^" + matchString + sourceAlign);
+        //fc->AddFeature("w^" + matchString + sourceAlign);
+        fc->AddFeature("w^" + matchString);
             nonTermCounter++;
         }
         else{
@@ -520,8 +537,10 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
   set<size_t> srcAligned;
   set<size_t> tgtAligned;
 
-  boost::regex parentRegex ("\\[[\\w|\\.|\\,|\\$]+\\]");
-  boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+  //boost::regex parentRegex ("\\[[\\w\\.\\,\\$]+\\]");
+  // NIN: new regex
+  boost::regex parentRegex ("\\[[^\\[\\]]+\\]");
+  boost::regex nonTermRegex ("\\[(X)\\]\\[([^\\]]+)\\]");
   boost::smatch matchedNonTermSource;
   boost::smatch matchedNonTermTarget;
   size_t nonTermCounter = 0;
@@ -532,57 +551,76 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
   //string parent = "[X]"; //was for hiero
   //string nonTerm = "[X][X]"; //was for hiero
 
+  /* FABIS CODE
   //find non-terminals
   for(size_t i = 0; i < srcPhrase.size(); i++)
   {
 	  //store non-terminals in vector for nt pairs
 	   if(regex_search (srcPhrase[i],matchedNonTermSource,nonTermRegex))
 	   {
-	   	//std::cout << string(matchedNonTermSource[0]) << std::endl;
-	   	sourceNonTerms.push_back(string(matchedNonTermSource[0]));
+        sourceNonTerms.push_back(string(matchedNonTermSource[0]));
 	   }
   }
+  */
 
-  //find non-terminals
+  // NINS code
+  //find non-terminals source
+  for(size_t i = 0; i < srcPhrase.size(); i++)
+    {
+      //store non-terminals in vector for nt pairs
+      if(regex_search (srcPhrase[i],matchedNonTermSource,nonTermRegex))
+          sourceNonTerms.push_back(string(matchedNonTermSource[1]));
+    }
+
+  /* FABIS CODE
+  //find non-terminals target
   for(size_t i = 0; i < tgtPhrase.size(); i++)
   {
 	  //store non-terminals in vector for nt pairs
 	   if(regex_search (tgtPhrase[i],matchedNonTermTarget,nonTermRegex))
 	   {
-	   	//std::cout << string(matchedNonTermTarget[0]) << std::endl;
+       std::cout << string(matchedNonTermTarget[0]) << std::endl;
+       std::cout << string(matchedNonTermTarget[1]) << std::endl;
+       std::cout << string(matchedNonTermTarget[2]) << std::endl;
 	   	targetNonTerms.push_back(string(matchedNonTermTarget[0]));
 	   }
-  }
+     }
+  */
 
+  // NINS CODE
+  //find non-terminals target
+  for(size_t i = 0; i < tgtPhrase.size(); i++)
+    {
+      //store non-terminals in vector for nt pairs
+      if(regex_search (tgtPhrase[i],matchedNonTermTarget,nonTermRegex))
+          targetNonTerms.push_back(string(matchedNonTermTarget[2]));
+    }
+  
   for (it = alignTerm.begin(); it != alignTerm.end(); it++)
   {
-    //cerr << "Alignment : " << it->first << " : " << it->second << endl;
     CHECK(it->first < srcPhrase.size());
     CHECK(it->second < tgtPhrase.size());
 
     if(!regex_search (srcPhrase[it->first],nonTermRegex))
-    //if(srcPhrase[it->first].compare(nonTerm)) //was for hiero
-    {fc->AddFeature("tpair^" + srcPhrase[it->first] + "^" + tgtPhrase[it->second]);
-    srcAligned.insert(it->first);
-    tgtAligned.insert(it->second);}
+      //if(srcPhrase[it->first].compare(nonTerm)) //was for hiero
+      {fc->AddFeature("tpair^" + srcPhrase[it->first] + "^" + tgtPhrase[it->second]);
+        srcAligned.insert(it->first);
+        tgtAligned.insert(it->second);}
   }
-    	//cerr << "Source : ";
-      for (size_t i = 0; i < srcPhrase.size(); i++) {
-    	  //cerr << srcPhrase[i] << " ";
-        //size_t found = srcPhrase[i].find(nonTerm); //was for hiero
-        //if (srcAligned.count(i) == 0 && srcPhrase[i].compare(parent) &&  !(found!=string::npos) ) //was for hiero
-    	  if (srcAligned.count(i) == 0 && !regex_match(srcPhrase[i],parentRegex) && !regex_search(srcPhrase[i],nonTermRegex) ) //was for hiero
-    	  fc->AddFeature("tpair^" + srcPhrase[i] + "^NULL");
-      }
-      //cerr << std::endl;
+  for (size_t i = 0; i < srcPhrase.size(); i++) {
+    //size_t found = srcPhrase[i].find(nonTerm); //was for hiero
+    //if (srcAligned.count(i) == 0 && srcPhrase[i].compare(parent) &&  !(found!=string::npos) ) //was for hiero
+    if (srcAligned.count(i) == 0 && !regex_match(srcPhrase[i],parentRegex) && !regex_search(srcPhrase[i],nonTermRegex) ) { //was for hiero
+      fc->AddFeature("tpair^" + srcPhrase[i] + "^NULL");}
+  }
 
-      for (size_t i = 0; i < tgtPhrase.size(); i++) {
-        //size_t found = tgtPhrase[i].find(nonTerm); //was for hiero
-        //if (tgtAligned.count(i) == 0 && tgtPhrase[i].compare(parent) &&  !(found!=string::npos) ) //was for hiero
-    	  if (tgtAligned.count(i) == 0 && !regex_match(tgtPhrase[i],parentRegex) &&  !regex_search(tgtPhrase[i],nonTermRegex) ) //was for hiero
-          fc->AddFeature("tpair^NULL^" + tgtPhrase[i]);
-      }
-
+  for (size_t i = 0; i < tgtPhrase.size(); i++) {
+    //size_t found = tgtPhrase[i].find(nonTerm); //was for hiero
+    //if (tgtAligned.count(i) == 0 && tgtPhrase[i].compare(parent) &&  !(found!=string::npos) ) //was for hiero
+    if (tgtAligned.count(i) == 0 && !regex_match(tgtPhrase[i],parentRegex) &&  !regex_search(tgtPhrase[i],nonTermRegex) ){ //was for hiero
+      fc->AddFeature("tpair^NULL^" + tgtPhrase[i]);}
+  }
+  
   size_t nonTermVecCounter = 0;
   for (it = alignNonTerm.begin(); it != alignNonTerm.end(); it++)
   {
@@ -594,8 +632,9 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
      s2 << it->second;
      string targetAlign =s2.str();
 
-    //cerr << "Alignment : " << it->first << " : " << it->second << endl;
-    fc->AddFeature("ntpair^" + sourceNonTerms[nonTermVecCounter] + sourceAlign + "^" + targetNonTerms[nonTermVecCounter] + targetAlign);
+     // NIN: fixed output for ntpair
+    //fc->AddFeature("ntpair^" + sourceNonTerms[nonTermVecCounter] + sourceAlign + "^" + targetNonTerms[nonTermVecCounter] + targetAlign);
+    fc->AddFeature("ntpair^" + sourceNonTerms[it->first] + sourceAlign + "^" + targetNonTerms[it->second] + targetAlign);
     nonTermVecCounter++;
   }
 }
@@ -706,7 +745,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
 		const vector<string> &syntaxLabel, const string parent, const string span)
 {
 
-  //std::cerr << "Generating source and target indicator features..." << std::endl;
+  std::cerr << "Generating source and target indicator features..." << std::endl;
   //std::cerr << "Size of source span : " << sourceSpan.size() << std::endl;
   //std::cerr << "Size of target span : " << targetSpan.size() << std::endl;
 

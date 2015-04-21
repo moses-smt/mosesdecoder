@@ -156,7 +156,8 @@ PSD::AlignmentType RuleTable::GetTermAlignment(const std::string &alignStr, cons
     //look for non-terminals in target side
     vector<string> :: iterator itr_targets;
     //std::string nonTermString = "[X][X]";
-    boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+    //boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
+    boost::regex nonTermRegex ("\\[X\\]\\[[^\\]]+\\]");
 
     size_t tokenCounter = 0;
     for(itr_targets = targetToken.begin();itr_targets != targetToken.end(); itr_targets++)
@@ -211,8 +212,8 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
     vector<string> :: iterator itr_targets;
     vector<string> :: iterator itr_source;
 
-    boost::regex nonTermRegex ("\[X\]\[(\w|\.|\$|\\|\\\$|\,)+\]");
     //std::string nonTermString = "[X][X]"; //was for hiero
+    boost::regex nonTermRegex ("\\[X\\]\\[[^\\]]+\\]");
 
     size_t sourceCounter = 0;
     size_t targetCounter = 0;

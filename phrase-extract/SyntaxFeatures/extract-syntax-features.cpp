@@ -144,7 +144,7 @@ int main(int argc, char**argv)
   while (getline(psd, rawPSDLine)) {
     tgtTotal++;
     PSDLine psdLine(rawPSDLine); // parse one line in PSD file
-    //std::cerr << "Found PSD line : " << rawPSDLine << std::endl;
+    std::cerr << "Found PSD line : " << rawPSDLine << std::endl;
 
     // get to the current sentence in annotated corpus
     while (psdLine.GetSentID() > sentID) {
@@ -153,7 +153,7 @@ int main(int argc, char**argv)
       sentID++;
     }
 
-   //std::cerr << "Looking for PSD line : " << psdLine.GetSrcPhrase()<< " : " << psdLine.GetTgtPhrase() << std::endl;
+    //std::cerr << "Looking for PSD line : " << psdLine.GetSrcPhrase()<< " : " << psdLine.GetTgtPhrase() << std::endl;
 
     if (! rtable.SrcExists(psdLine.GetSrcPhrase())) {
       //std::cout << "Source not found, continue" << std::endl;
@@ -163,7 +163,7 @@ int main(int argc, char**argv)
     if (psdLine.GetSrcPhrase() != srcPhrase) {
       // generate features
       if (hasTranslation) { //ignore first round
-    	//cerr << "EXTRACTING FEATURES FOR : " << srcPhrase << std::endl;
+        //cerr << "EXTRACTING FEATURES FOR : " << srcPhrase << std::endl;
         srcSurvived++;
         extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);}
         //Fabienne Braune: Uncomment for debugging : pEgivenF is passed with losses to check numbers
