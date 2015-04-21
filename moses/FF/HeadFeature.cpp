@@ -580,10 +580,11 @@ int SyntaxTreeState::Compare(const FFState& other) const
   const SyntaxTreeState &otherState = static_cast<const SyntaxTreeState&>(other);
   int res=0;
   res = m_depRel.compare(otherState.m_depRel);
-  if(res!=0)
+/*  if(res!=0)
   	SyntaxTreeState::distinct++;
   if(res==0)
   	SyntaxTreeState::equal++;
+*/
   return res;
 
   /*
@@ -780,7 +781,8 @@ void HeadFeature::Load() {
   ReadLemmaMap();
   ReadMIModel();
 
-  boost::shared_ptr<lm::ngram::Model> (new lm::ngram::Model(m_modelFileARPA.c_str())).swap(m_WBmodel);
+  if(m_modelFileARPA!="")
+  	boost::shared_ptr<lm::ngram::Model> (new lm::ngram::Model(m_modelFileARPA.c_str())).swap(m_WBmodel);
 
   //made CreateJavaVM a singleton class
   javaWrapper = CreateJavaVM::Instance(m_jarPath);
@@ -955,7 +957,7 @@ void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
 	std::cerr<<"Reset cache: "<<localCache.size()<<endl;
 	std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
 	std::cerr<<"Reset counters: "<<localCounters.depRelCacheHits <<" "<<localCounters.subtreeCacheHits<<endl;
-	std:cerr<<SyntaxTreeState::equal<<" "<<SyntaxTreeState::not_equal<<" "<<SyntaxTreeState::distinct<<endl;
+	//std:cerr<<SyntaxTreeState::equal<<" "<<SyntaxTreeState::not_equal<<" "<<SyntaxTreeState::distinct<<endl;
 	m_counter=0;
 	m_counterDepRel=0;
 	m_cacheHits=0;
