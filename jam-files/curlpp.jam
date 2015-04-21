@@ -93,6 +93,11 @@ else
       #   requirements += <library>$(xtra) ; 
       # }
     }
+    # for local e in idn rtmp ssl crypto ldap rt  
+    # {
+    #   external-lib $(e) ; # : /usr/lib/x86_64-linux-gnu /usr/lib32 ; 
+    #   requirements += <library>$(e) ;
+    # }
   
     # the rule curlpp provides access to all the variables defined in this file
     # if none argument is given, it returns $(version), which should only be 
