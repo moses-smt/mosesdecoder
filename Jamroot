@@ -223,6 +223,7 @@ build-projects lm util phrase-extract phrase-extract/syntax-common search moses 
 if [ option.get "with-mm" : : "yes" ]
 {
  alias mm :  
+  moses/TranslationModel/UG//bitext-find 
   moses/TranslationModel/UG//ptable-describe-features 
   moses/TranslationModel/UG//count-ptable-features 
   moses/TranslationModel/UG//ptable-lookup 
