@@ -466,6 +466,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   std::map<std::string, std::string> featureNameOverride = OverrideFeatureNames();
 
+
+  // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   // all features
   map<string, int> featureIndexMap;
 
@@ -1101,7 +1103,9 @@ void StaticData::NoCache()
   }
 }
 
-std::map<std::string, std::string> StaticData::OverrideFeatureNames()
+std::map<std::string, std::string> 
+StaticData
+::OverrideFeatureNames()
 {
   std::map<std::string, std::string> ret;
 
