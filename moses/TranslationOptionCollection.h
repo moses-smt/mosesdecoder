@@ -177,7 +177,10 @@ public:
     return m_inputPathQueue;
   }
 
-
+  ttasksptr GetTranslationTask() const
+  {
+    return m_ttask.lock();
+  }
   TO_STRING();
 };
 
