@@ -162,5 +162,16 @@ namespace Moses
 	}
       cout  << string(90,'-') << endl;
     }
+
+    void 
+    write_bitvector(bitvector const& v, ostream& out)
+    {
+      for (size_t i = v.find_first(); i < v.size();)
+	{
+	  out << i;
+	  if ((i = v.find_next(i)) < v.size()) out << ",";
+	}
+    }
+
   }
 }

@@ -37,7 +37,7 @@
 #include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
 #include "moses/FF/LexicalReordering/LexicalReorderingState.h"
 #include "moses/Util.h"
-#include "moses/StaticData.h"
+// #include "moses/StaticData.h"
 #include "moses/thread_safe_container.h"
 #include "moses/ContextScope.h"
 #include "moses/TranslationTask.h"
@@ -68,6 +68,7 @@ namespace Moses {
     using namespace ugdiss;
 
     float lbop(size_t const tries, size_t const succ, float const confidence);
+    void write_bitvector(bitvector const& v, ostream& out);
 
     struct 
     ContextForQuery
@@ -91,7 +92,7 @@ namespace Moses {
       typedef typename TSA<Token>::tree_iterator   iter;
       typedef typename std::vector<PhrasePair<Token> > vec_ppair;
       typedef typename lru_cache::LRU_Cache<uint64_t, vec_ppair> pplist_cache_t;
-
+      typedef TSA<Token> tsa;
       friend class Moses::Mmsapt;
     protected:
       mutable boost::shared_mutex m_lock; // for thread-safe operation
@@ -104,6 +105,7 @@ namespace Moses {
       size_t m_pstats_cache_threshold; // threshold for caching sampling results
       sptr<pstats::cache_t> m_cache1, m_cache2; // caches for sampling results
       
+      vector<string> m_docname;
       map<string,id_type>  m_docname2docid; // maps from doc names to ids
       sptr<std::vector<id_type> >   m_sid2docid; // maps from sentences to docs (ids)
 
@@ -172,6 +174,13 @@ namespace Moses {
       sptr<DocumentBias>
       SetupDocumentBias(string const& bserver, string const& text, ostream* log) const;
 
+
+      void
+      mark_match(Token const* start, Token const* end, iter const& m, 
+		 bitvector& check) const;
+      void
+      write_yawat_alignment
+      ( id_type const sid, iter const* m1, iter const* m2, ostream& out ) const;
 #if 0
       // needs to be adapted to the new API
       void
@@ -182,10 +191,22 @@ namespace Moses {
 	     sptr<SamplingBias const> const bias,
 	     bool multithread=true) const;
 #endif
+      string docname(id_type const sid) const;
 
     };
 
 #include "ug_bitext_agenda.h"
+
+    template<typename Token>
+    string
+    Bitext<Token>::
+    docname(id_type const sid) const
+    {
+      if (sid < m_sid2docid->size() && (*m_sid2docid)[sid] < m_docname.size())
+	return m_docname[(*m_sid2docid)[sid]];
+      else
+	return "";
+    }
 
     template<typename Token>
     sptr<SentenceBias>
@@ -603,6 +624,109 @@ namespace Moses {
       return ret;
     }
 
+    template<typename Token>
+    void
+    Bitext<Token>
+    ::mark_match(Token const* start, Token const* end,
+		 iter const& m, bitvector& check) const
+    {
+      check.resize(end-start);
+      check.reset();
+      Token const* x = m.getToken(0);
+      for (Token const* s = start; s < end; ++s)
+	{
+	  if (s->id() != x->id()) continue;
+	  Token const* a = x;
+	  Token const* b = s;
+	  size_t i = 0;
+	  while (a && b && a->id() == b->id() && i < m.size()) 
+	    {
+	      ++i;
+	      a = a->next();
+	      b = b->next();
+	    }
+	  if (i == m.size())
+	    {
+	      b = s;
+	      while (i-- > 0) { check.set(b-start); b = b->next(); }
+	    }
+	}
+    }
+
+    template<typename Token>
+    void
+    Bitext<Token>::
+    write_yawat_alignment
+    ( id_type const sid, iter const* m1, iter const* m2, ostream& out ) const
+    {
+      vector<int> a1(T1->sntLen(sid),-1), a2(T2->sntLen(sid),-1);
+      bitvector f1(a1.size()), f2(a2.size());
+      if (m1) mark_match(T1->sntStart(sid), T1->sntEnd(sid), *m1, f1);
+      if (m2) mark_match(T2->sntStart(sid), T2->sntEnd(sid), *m2, f2);
+
+      vector<pair<bitvector,bitvector> > agroups;
+      vector<string> grouplabel;
+      pair<bitvector,bitvector> ag;
+      ag.first.resize(a1.size());
+      ag.second.resize(a2.size());
+      char const* x = Tx->sntStart(sid); 
+      size_t a, b;
+      while (x < Tx->sntEnd(sid))
+	{
+	  x = binread(x,a);
+	  x = binread(x,b);
+	  if (a1.at(a) < 0 && a2.at(b) < 0)
+	    {
+	      a1[a] = a2[b] = agroups.size(); 
+	      ag.first.reset(); 
+	      ag.second.reset(); 
+	      ag.first.set(a); 
+	      ag.second.set(b); 
+	      agroups.push_back(ag);
+	      grouplabel.push_back(f1[a] || f2[b] ? "infocusbi" : "unspec");
+	    }
+	  else if (a1.at(a) < 0)
+	    {
+	      a1[a] = a2[b];
+	      agroups[a2[b]].first.set(a);
+	      if (f1[a] || f2[b]) grouplabel[a1[a]] = "infocusbi";
+	    }
+	  else if (a2.at(b) < 0)
+	    {
+	      a2[b] = a1[a];
+	      agroups[a1[a]].second.set(b);
+	      if (f1[a] || f2[b]) grouplabel[a1[a]] = "infocusbi";
+	    }
+	  else 
+	    {
+	      agroups[a1[a]].first  |= agroups[a2[b]].first;
+	      agroups[a1[a]].second |= agroups[a2[b]].second;
+	      a2[b] = a1[a];
+	      if (f1[a] || f2[b]) grouplabel[a1[a]] = "infocusbi";
+	    }
+	}
+		   
+      for (a = 0; a < a1.size(); ++a)
+	{
+	  if (a1[a] < 0) 
+	    {
+	      if (f1[a]) out << a << "::" << "infocusmono ";
+	      continue;
+	    }
+	  bitvector const& A = agroups[a1[a]].first;
+	  bitvector const& B = agroups[a1[a]].second;
+	  if (A.find_first() < a) continue;
+	  write_bitvector(A,out); out << ":";
+	  write_bitvector(B,out); out << ":";
+	  out << grouplabel[a1[a]] << " ";
+	}
+      for (b = 0; b < a2.size(); ++b)
+	{
+	  if (a2[b] < 0 && f2[b])
+	    out <<  "::" << "infocusmono ";
+	}
+    }
+
 #if 0
     template<typename Token>
     sptr<pstats> 
@@ -623,7 +747,7 @@ namespace Moses {
       return ret;
     }
 #endif
-    
+  
     template<typename Token>
     void 
     expand(typename Bitext<Token>::iter const& m, 
@@ -645,28 +769,6 @@ namespace Moses {
 		    len, a->second);
 	  dest.push_back(pp);
 	}
-#if 1
-      if (log)
-	{
-	  // typename PhrasePair<Token>::SortByTargetIdSeq sorter;
-	  typename PhrasePair<Token>::SortDescendingByJointCount sorter;
-	  sort(dest.begin(), dest.end(),sorter);
-	  for (size_t i = 0; i < dest.size(); ++i)
-	    {
-	      PhrasePair<Token> const& p = dest[i];
-	      if (i && p.joint <= 1) break;
-	      *log << toString (*(fwd ? bt.V1 : bt.V2),p.start1,p.len1) << " ::: " 
-		   << toString (*(fwd ? bt.V2 : bt.V1),p.start2,p.len2) << " " 
-		   << p.joint << " [";
-	      for (size_t i = 0; i < p.indoc.size(); ++i)
-		{ 
-		  if (i) *log << " "; 
-		  *log << p.indoc[i]; 
-		}
-	      *log << "]" << endl;
-	    }
-	}
-#endif
     }
 
 #if 0
