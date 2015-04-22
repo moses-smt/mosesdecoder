@@ -17,6 +17,7 @@
 #include "util/exception.hh"
 
 #include "util/file_piece.hh"
+#include "util/random.hh"
 #include "util/tokenize_piece.hh"
 #include "util/string_piece.hh"
 #include "FeatureDataIterator.h"
@@ -286,7 +287,7 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     } else {
       //create shards by randomly sampling
       for (size_t i = 0; i < floor(shard_size+0.5); ++i) {
-        shard_contents.push_back(rand() % data_size);
+        shard_contents.push_back(util::rand_int() % data_size);
       }
     }
 

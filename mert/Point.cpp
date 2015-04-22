@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "util/exception.hh"
+#include "util/random.hh"
 #include "FeatureStats.h"
 #include "Optimizer.h"
 
@@ -58,8 +59,8 @@ void Point::Randomize()
   UTIL_THROW_IF(m_max.size() != Point::m_dim, util::Exception, "Error");
 
   for (unsigned int i = 0; i < size(); i++) {
-    operator[](i) = m_min[i] +
-                    static_cast<float>(random()) / static_cast<float>(RAND_MAX) * (m_max[i] - m_min[i]);
+    const float scale = (m_max[i] - m_min[i]) / float(RAND_MAX);
+    operator[](i) = m_min[i] + util::rand_int() * scale;
   }
 }
 
