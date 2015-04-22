@@ -169,7 +169,7 @@ use-parallel-corpus
   in: parallel-corpus-stem
   out: tokenized-corpus
 	default-name: lm/tok
-	pass-unless: parallel-corpus-stem
+	ignore-unless: parallel-corpus-stem
 	template: ln -s IN.$output-extension  OUT	
 tokenize
 	in: raw-corpus
