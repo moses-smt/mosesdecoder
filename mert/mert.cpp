@@ -24,6 +24,7 @@
 #include "Types.h"
 #include "Timer.h"
 #include "Util.h"
+#include "util/random.hh"
 
 #include "moses/ThreadPool.h"
 
@@ -289,10 +290,10 @@ int main(int argc, char **argv)
 
   if (option.has_seed) {
     cerr << "Seeding random numbers with " << option.seed << endl;
-    srandom(option.seed);
+    util::rand_int_init(option.seed);
   } else {
     cerr << "Seeding random numbers with system clock " << endl;
-    srandom(time(NULL));
+    util::rand_int_init();
   }
 
   if (option.sparse_weights_file.size()) ++option.pdim;
