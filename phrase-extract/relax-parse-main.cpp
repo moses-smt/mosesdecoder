@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     map< string, int > topLabelCollection; // count of top labels, not used
     SyntaxTree tree;
     ProcessAndStripXMLTags( inBufferString, tree, labelCollection, topLabelCollection, false );
-    const vector< string > inWords = util::tokenize( inBufferString.c_str() );
+    const vector< string > inWords = util::tokenize( inBufferString );
 
     // output tree
     // cerr << "BEFORE:" << endl << tree;

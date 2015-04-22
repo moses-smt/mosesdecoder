@@ -85,7 +85,7 @@ void DTable::load( const string& fileName )
       abort();
     }
 
-    const vector<string> token = util::tokenize(line.c_str());
+    const vector<string> token = util::tokenize(line);
     if (token.size() < 2) {
       cerr << "line " << i << " in " << fileName << " too short, skipping\n";
       continue;

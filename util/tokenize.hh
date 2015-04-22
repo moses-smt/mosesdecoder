@@ -37,6 +37,15 @@ inline std::vector<std::string> tokenize(const char input[])
   return token;
 }
 
+/** Split input string into a series of tokens.
+ *
+ * Like tokenize(const char[]), but takes a std::string.
+ */
+inline std::vector<std::string> tokenize(const std::string &input)
+{
+  return tokenize(input.c_str());
+}
+
 } // namespace util
 
 #endif

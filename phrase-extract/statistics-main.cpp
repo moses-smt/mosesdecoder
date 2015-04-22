@@ -322,7 +322,7 @@ void LexicalTable::load( const string &filePath )
     i++;
     if (i%100000 == 0) cerr << "." << flush;
 
-    const vector<string> token = util::tokenize( line.c_str() );
+    const vector<string> token = util::tokenize( line );
     if (token.size() != 3) {
       cerr << "line " << i << " in " << filePath << " has wrong number of tokens, skipping:\n" <<
            token.size() << " " << token[0] << " " << line << endl;

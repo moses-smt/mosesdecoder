@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
     if (! getLine(fileDirectP,  itemDirect  ))
       break;
 
-    const vector< string > count = util::tokenize( itemDirect[4].c_str() );
+    const vector< string > count = util::tokenize( itemDirect[4] );
     float countEF = atof(count[0].c_str());
     float countF = atof(count[1].c_str());
     float prob = countF/countEF;

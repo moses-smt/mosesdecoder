@@ -18,7 +18,7 @@ void Domain::load( const std::string &domainFileName )
   string line;
   while(getline(*fileP, line)) {
     // read
-    const vector< string > domainSpecLine = util::tokenize( line.c_str() );
+    const vector< string > domainSpecLine = util::tokenize( line );
     int lineNumber;
     if (domainSpecLine.size() != 2 ||
         ! sscanf(domainSpecLine[0].c_str(), "%d", &lineNumber)) {

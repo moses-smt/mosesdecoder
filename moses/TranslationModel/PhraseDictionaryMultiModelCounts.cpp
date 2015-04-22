@@ -442,7 +442,7 @@ void PhraseDictionaryMultiModelCounts::LoadLexicalTable( string &fileName, lexic
     i++;
     if (i%100000 == 0) cerr << "." << flush;
 
-    const vector<string> token = util::tokenize( line.c_str() );
+    const vector<string> token = util::tokenize( line );
     if (token.size() != 4) {
       cerr << "line " << i << " in " << fileName
            << " has wrong number of tokens, skipping:\n"

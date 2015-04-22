@@ -166,8 +166,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     fileConsolidated << " ||| " << reverseAlignment(itemDirect[3]);
 
     // counts, for debugging
-    const vector<string> directCounts = util::tokenize(itemDirect[4].c_str());
-    const vector<string> indirectCounts = util::tokenize(itemIndirect[4].c_str());
+    const vector<string> directCounts = util::tokenize(itemDirect[4]);
+    const vector<string> indirectCounts = util::tokenize(itemIndirect[4]);
     fileConsolidated << "||| " << directCounts[0] << " " << indirectCounts[0];
     // output rule count if present in either file
     if (indirectCounts.size() > 1) {
@@ -223,7 +223,7 @@ string reverseAlignment(const string &alignments)
 {
   stringstream ret("");
 
-  const vector<string> alignToks = util::tokenize(alignments.c_str());
+  const vector<string> alignToks = util::tokenize(alignments);
 
   for (size_t i = 0; i < alignToks.size(); ++i) {
     const string &alignPair = alignToks[i];

@@ -52,7 +52,7 @@ std::auto_ptr<PcfgTree> XmlTreeParser::Parse(const std::string &line) {
     // There is no XML tree.
     return std::auto_ptr<PcfgTree>();
   }
-  m_words = util::tokenize(m_line.c_str());
+  m_words = util::tokenize(m_line);
   return ConvertTree(*root, m_words);
 }
 
