@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/env perl 
 # $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
@@ -47,6 +47,7 @@
 # 13 Oct 2004 Use alternative decoders (DWC)
 # Original version by Philipp Koehn
 
+use warnings;
 use strict;
 use FindBin qw($RealBin);
 use File::Basename;

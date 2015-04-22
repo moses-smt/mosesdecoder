@@ -98,6 +98,7 @@ HypergraphOutput<M>::HypergraphOutput(size_t precision) :
       // If this line gives you compile errors,
       //   contact Lane Schwartz on the Moses mailing list
       m_hypergraphDir = nbestPath.parent_path().string();
+      if (m_hypergraphDir.empty()) m_hypergraphDir=".";
 
     } else {
       stringstream hypergraphDirName;

@@ -25,6 +25,7 @@
 #include "tables-core.h"
 #include "XmlException.h"
 #include "XmlTree.h"
+#include "util/tokenize.hh"
 
 #include "syntax-common/exception.h"
 
@@ -51,7 +52,7 @@ std::auto_ptr<PcfgTree> XmlTreeParser::Parse(const std::string &line) {
     // There is no XML tree.
     return std::auto_ptr<PcfgTree>();
   }
-  m_words = tokenize(m_line.c_str());
+  m_words = util::tokenize(m_line);
   return ConvertTree(*root, m_words);
 }
 

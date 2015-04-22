@@ -36,6 +36,7 @@
 #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
 #include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
+#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
 #include "moses/Util.h"
 #include "moses/StaticData.h"
 
@@ -53,6 +54,7 @@
 #include "ug_lexical_phrase_scorer2.h"
 #include "ug_phrasepair.h"
 #include "ug_lru_cache.h"
+#include "ug_lexical_reordering.h"
 
 #define PSTATS_CACHE_THRESHOLD 50
 
@@ -62,34 +64,12 @@ namespace Moses {
   class Mmsapt;
   namespace bitext
   {
+
     template<typename TKN> class Bitext;
     template<typename TKN> class PhrasePair;
     using namespace ugdiss;
 
     template<typename TKN> class Bitext;
-
-    enum PhraseOrientation 
-    {
-      po_first,
-      po_mono,
-      po_jfwd,
-      po_swap,
-      po_jbwd,
-      po_last,
-      po_other
-    };
-
-    PhraseOrientation 
-    find_po_fwd(vector<vector<ushort> >& a1,
-		vector<vector<ushort> >& a2,
-		size_t b1, size_t e1,
-		size_t b2, size_t e2);
-
-    PhraseOrientation 
-    find_po_bwd(vector<vector<ushort> >& a1,
-		vector<vector<ushort> >& a2,
-		size_t b1, size_t e1,
-		size_t b2, size_t e2);
 
     template<typename sid_t, typename off_t, typename len_t>
     void 
@@ -116,7 +96,7 @@ namespace Moses {
       float    my_wcnt; // weighted count 
       uint32_t my_cnt2;
       vector<pair<size_t, vector<uchar> > > my_aln; 
-      uint32_t ofwd[7], obwd[7];
+      uint32_t ofwd[Moses::LRModel::NONE+1], obwd[Moses::LRModel::NONE+1];
     public:
       jstats();
       jstats(jstats const& other);
@@ -142,7 +122,8 @@ namespace Moses {
       static ThreadSafeCounter active;
 #endif
       boost::mutex lock;               // for parallel gathering of stats
-      boost::condition_variable ready; // consumers can wait for this data structure to be ready.
+      boost::condition_variable ready; /* consumers can wait for this
+					* data structure to be ready. */
       
       size_t raw_cnt;    // (approximate) raw occurrence count 
       size_t sample_cnt; // number of instances selected during sampling
@@ -150,8 +131,9 @@ namespace Moses {
       size_t sum_pairs;
       size_t in_progress; // keeps track of how many threads are currently working on this
 
-      uint32_t ofwd[po_other+1], obwd[po_other+1];
-
+      // size_t Moses::LRModel::ReorderingType 
+      uint32_t ofwd[Moses::LRModel::NONE+1], obwd[Moses::LRModel::NONE+1];
+      
       // typedef typename boost::unordered_map<typename ::uint64_t, jstats> trg_map_t;
       typedef std::map<typename ::uint64_t, jstats> trg_map_t;
       trg_map_t trg;
@@ -198,8 +180,8 @@ namespace Moses {
       ::uint64_t p1, p2;
       uint32_t raw1,raw2,sample1,sample2,good1,good2,joint;
       vector<float> fvals;
-      float dfwd[po_other+1]; // distortion counts // counts or probs?
-      float dbwd[po_other+1]; // distortion counts
+      float dfwd[Moses::LRModel::NONE+1]; // distortion counts // counts or probs?
+      float dbwd[Moses::LRModel::NONE+1]; // distortion counts
       vector<uchar> aln;
       float score;
       bool inverse;
@@ -284,7 +266,7 @@ namespace Moses {
       if (js.aln().size()) 
 	aln = js.aln()[0].second;
       float total_fwd = 0, total_bwd = 0;
-      for (int i = po_first; i <= po_other; i++)
+      for (int i = 0; i <= Moses::LRModel::NONE; i++)
 	{
 	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
 	  total_fwd += js.dcnt_fwd(po)+1;
@@ -292,13 +274,13 @@ namespace Moses {
 	}
 
       // should we do that here or leave the raw counts?
-      for (int i = po_first; i <= po_other; i++)
+      for (int i = 0; i <= Moses::LRModel::NONE; i++)
 	{
 	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
 	  dfwd[i] = float(js.dcnt_fwd(po)+1)/total_fwd;
 	  dbwd[i] = float(js.dcnt_bwd(po)+1)/total_bwd;
 	}
-
+      
       return *this;
     }
 
@@ -362,7 +344,7 @@ namespace Moses {
       , score(o.score)
       , inverse(o.inverse)
     {
-      for (size_t i = 0; i <= po_other; ++i)
+      for (int i = 0; i <= Moses::LRModel::NONE; ++i)
 	{
 	  dfwd[i] = o.dfwd[i];
 	  dbwd[i] = o.dbwd[i];
@@ -410,6 +392,73 @@ namespace Moses {
       p1 = p2 = 0;
     }
 
+    class 
+    SamplingBias 
+    {
+    public:
+      virtual float operator[](size_t const ID) const = 0;
+      virtual size_t size() const = 0;
+    };
+
+    class
+    DocumentBias : public SamplingBias
+    {
+      sptr<vector<id_type> const> const m_sid2docid;
+      vector<float> m_bias;
+		   
+    public:
+
+      DocumentBias(sptr<vector<id_type> const> const& sid2doc,
+		   map<string,id_type> const& docname2docid,
+		   map<string,float> const& biasmap)
+	: m_sid2docid(sid2doc)
+      {
+	m_bias.assign(docname2docid.size(),0);
+	map<string, id_type>::const_iterator m;
+	typedef pair<string,float> item;
+	BOOST_FOREACH(item const& x, biasmap)
+	  {
+	    m = docname2docid.find(x.first);
+	    UTIL_THROW_IF2(m == docname2docid.end(),
+			   "Do not know document '" << x.first << "'");
+	    m_bias[m->second] = x.second;
+	  }
+	
+      }
+
+      float 
+      operator[](size_t const idx) const 
+      { 
+	UTIL_THROW_IF2(idx >= m_sid2docid->size(), "Out of bounds");
+	return m_bias[(*m_sid2docid)[idx]];
+      }
+      size_t size() const { return m_sid2docid->size(); }
+    };
+
+    class
+    SentenceBias : public SamplingBias
+    {
+      vector<float> m_bias;
+    public:
+      SentenceBias(vector<float> const& bias) : m_bias(bias) { }
+      SentenceBias(size_t const s) : m_bias(s) { }
+
+      float& operator[](size_t const idx) 
+      {
+	UTIL_THROW_IF2(idx >= m_bias.size(), "Out of bounds");
+	return m_bias[idx];
+      }
+
+      float operator[](size_t const idx) const 
+      { 
+	UTIL_THROW_IF2(idx >= m_bias.size(), "Out of bounds");
+	return m_bias[idx];
+      }
+      size_t size() const { return m_bias.size(); }
+      
+    };
+      
+
     template<typename TKN>
     class Bitext 
     {
@@ -438,6 +487,9 @@ namespace Moses {
       sptr<TokenIndex>     V2; // vocab
       sptr<TSA<Token> >    I1; // indices
       sptr<TSA<Token> >    I2; // indices
+
+      map<string,id_type>  m_docname2docid;
+      sptr<vector<id_type> > m_sid2docid;
       
       /// given the source phrase sid[start:stop]
       //  find the possible start (s1 .. s2) and end (e1 .. e2) 
@@ -471,7 +523,7 @@ namespace Moses {
     private:
       sptr<pstats> 
       prep2(iter const& phrase, size_t const max_sample,
-	    vector<float> const* const bias) const;
+	    SamplingBias const* const bias) const;
     public:
       Bitext(size_t const max_sample =1000, 
 	     size_t const xnum_workers =16);
@@ -489,19 +541,19 @@ namespace Moses {
       virtual void open(string const base, string const L1, string const L2) = 0;
       
       // sptr<pstats> lookup(Phrase const& phrase, size_t factor) const;
-      sptr<pstats> lookup(iter const& phrase,vector<float> const* const bias=NULL) const;
+      sptr<pstats> lookup(iter const& phrase, SamplingBias const* const bias=NULL) const;
       sptr<pstats> lookup(iter const& phrase, size_t const max_sample,
-			  vector<float> const* const bias) const;
+			  SamplingBias const* const bias) const;
 
       void
       lookup(vector<Token> const& snt, TSA<Token>& idx, 
 	     vector<vector<sptr<vector<PhrasePair<Token> > > > >& dest,
 	     vector<vector<typename ::uint64_t> >* pidmap = NULL,
 	     typename PhrasePair<Token>::Scorer* scorer=NULL, 
-	     vector<float> const* const bias=NULL,
+	     SamplingBias const* const bias=NULL,
 	     bool multithread=true) const;
 
-      void prep(iter const& phrase, vector<float> const* const bias) const;
+      void prep(iter const& phrase, SamplingBias const* const bias) const;
 
       void   setDefaultSampleSize(size_t const max_samples);
       size_t getDefaultSampleSize() const;
@@ -509,7 +561,39 @@ namespace Moses {
       string toString(::uint64_t pid, int isL2) const;
 
       virtual size_t revision() const { return 0; }
+      
+      sptr<DocumentBias>
+      setupDocumentBias(map<string,float> const& bias) const;
+      
+      sptr<SentenceBias>
+      loadSentenceBias(string const& fname) const;
     };
+
+    template<typename Token>
+    sptr<SentenceBias>
+    Bitext<Token>::
+    loadSentenceBias(string const& fname) const
+    {
+      sptr<SentenceBias> ret(new SentenceBias(T1->size()));
+      ifstream in(fname.c_str());
+      size_t i = 0;
+      float v; while (in>>v) (*ret)[i++] = v;
+      UTIL_THROW_IF2(i != T1->size(),
+		     "Mismatch between bias vector size and corpus size at "
+		     << HERE);
+      return ret;
+    }
+
+    template<typename Token>
+    sptr<DocumentBias>
+    Bitext<Token>::
+    setupDocumentBias(map<string,float> const& bias) const
+    {
+      sptr<DocumentBias> ret(new DocumentBias(m_sid2docid, m_docname2docid,bias));
+      return ret;
+    }
+
+
 
     template<typename Token>
     string
@@ -606,13 +690,13 @@ namespace Moses {
 	size_t             len; // phrase length
 	bool               fwd; // if true, source phrase is L1 
 	sptr<pstats>     stats; // stores statistics collected during sampling
-	vector<float> const* bias; // sentence-level bias for sampling
+	SamplingBias const* m_bias; // sentence-level bias for sampling
 	float bias_total;
 	bool step(::uint64_t & sid, ::uint64_t & offset); // select another occurrence
 	bool done() const;
 	job(typename TSA<Token>::tree_iterator const& m, 
 	    sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd, 
-	    vector<float> const* const bias);
+	    SamplingBias const* const bias);
 	~job();
       };
     public:      
@@ -638,7 +722,7 @@ namespace Moses {
       sptr<pstats> 
       add_job(typename TSA<Token>::tree_iterator const& phrase, 
 	      size_t const max_samples, 
-	      vector<float> const* const bias);
+	      SamplingBias const* const bias);
 
       sptr<job> get_job();
     };
@@ -658,7 +742,7 @@ namespace Moses {
 	  next = root->readOffset(next,stop,offset);
 	  boost::lock_guard<boost::mutex> sguard(stats->lock);
 	  if (stats->raw_cnt == ctr) ++stats->raw_cnt;
-	  if (bias && bias->at(sid) == 0)
+	  if (m_bias && (*m_bias)[sid] == 0)
 	    return false;
 	  stats->sample_cnt++;
 	}
@@ -669,22 +753,24 @@ namespace Moses {
 	    {
 	      next = root->readSid(next,stop,sid);
 	      next = root->readOffset(next,stop,offset);
-	      { // brackets required for lock scoping; see sguard immediately below
+	      { // brackets required for lock scoping; 
+		// see sguard immediately below
 		boost::lock_guard<boost::mutex> sguard(stats->lock); 
 		if (stats->raw_cnt == ctr) ++stats->raw_cnt;
 		size_t scalefac = (stats->raw_cnt - ctr++);
 		size_t rnum = scalefac * (rnd()/(rnd.max()+1.));
 		size_t th = (bias_total 
-			     ? bias->at(sid)/bias_total * bias->size() * max_samples
+			     ? ((*m_bias)[sid]/bias_total * m_bias->size() 
+				* max_samples)
 			     : max_samples);
 #if 0
 		cerr << rnum << "/" << scalefac << " vs. " 
 		     << max_samples - stats->good << " ("
 		     << max_samples << " - " << stats->good << ")" 
 		     << " th=" << th;
-		if (bias) 
-		  cerr << " with bias " << bias->at(sid) 
-		       << " => " << bias->at(sid) * bias->size();
+		if (m_bias) 
+		  cerr << " with bias " << (*m_bias)[sid] 
+		       << " => " << (*m_bias)[sid] * m_bias->size();
 		else cerr << " without bias";
 		cerr << endl;
 #endif
@@ -760,7 +846,7 @@ namespace Moses {
 	  while (j->step(sid,offset))
 	    {
 	      aln.clear();
-	      int po_fwd=po_other,po_bwd=po_other;
+	      int po_fwd=Moses::LRModel::NONE,po_bwd=Moses::LRModel::NONE;
 	      if (j->fwd)
 		{
 		  if (!ag.bt.find_trg_phr_bounds
@@ -882,7 +968,7 @@ namespace Moses {
     job::
     job(typename TSA<Token>::tree_iterator const& m, 
 	sptr<TSA<Token> > const& r, size_t maxsmpl, 
-	bool isfwd, vector<float> const* const sntbias)
+	bool isfwd, SamplingBias const* const sntbias)
       : rnd(0)
       , rnddenom(rnd.max() + 1.)
       , min_diverse(10)
@@ -894,24 +980,27 @@ namespace Moses {
       , ctr(0)
       , len(m.size())
       , fwd(isfwd)
-      , bias(sntbias)
+      , m_bias(sntbias)
     {
       stats.reset(new pstats());
       stats->raw_cnt = m.approxOccurrenceCount();
-      bias_total = 0; // needed for renormalization
-      if (bias)
+      bias_total = 0; 
+      // we need to renormalize on the fly, as the summ of all sentence probs over 
+      // all candidates (not all sentences in the corpus) needs to add to 1.
+      // Profiling question: how much does that cost us?
+      if (m_bias)
 	{
 	  for (char const* x = m.lower_bound(-1); x < stop;)
 	    {
 	      uint32_t sid; ushort offset;
 	      next = root->readSid(next,stop,sid);
 	      next = root->readOffset(next,stop,offset);
-	      bias_total += bias->at(sid);
+	      bias_total += (*m_bias)[sid];
 	    }
 	}
 #if UG_BITEXT_TRACK_ACTIVE_THREADS
-      // if (++active%5 == 0) 
       ++active;
+      // if (active%5 == 0) 
       // cerr << size_t(active) << " active jobs at " << __FILE__ << ":" << __LINE__ << endl;
 #endif
     }
@@ -921,7 +1010,7 @@ namespace Moses {
     Bitext<Token>::
     agenda::
     add_job(typename TSA<Token>::tree_iterator const& phrase, 
-	    size_t const max_samples, vector<float> const* const bias)
+	    size_t const max_samples, SamplingBias const* const bias)
     {
       boost::unique_lock<boost::mutex> lk(this->lock);
       static boost::posix_time::time_duration nodelay(0,0,0,0); 
@@ -995,6 +1084,7 @@ namespace Moses {
     template<typename TKN>
     class mmBitext : public Bitext<TKN>
     {
+      void load_document_map(string const& fname);
     public:
       void open(string const base, string const L1, string L2);
       mmBitext();
@@ -1015,6 +1105,35 @@ namespace Moses {
     template<typename TKN>
     void
     mmBitext<TKN>::
+    load_document_map(string const& fname)
+    {
+	  ifstream docmap(fname.c_str());
+	  // the docmap file should list the documents in the corpus 
+	  // in the order in which they appear with one line per document:
+	  // <docname> <number of lines / sentences>
+	  //
+	  // in the future, we might also allow listing documents with
+	  // sentence ranges.
+	  string buffer,docname; size_t a=0,b;
+	  this->m_sid2docid.reset(new vector<id_type>(this->T1->size()));
+	  while(getline(docmap,buffer))
+	    {
+	      istringstream line(buffer); 
+	      if (!(line>>docname)) continue; // empty line
+	      if (docname.size() && docname[0] == '#') continue; // comment
+	      size_t docid = this->m_docname2docid.size();
+	      this->m_docname2docid[docname] = docid;
+	      line >> b;
+	      for (b += a; a < b; ++a)
+		(*this->m_sid2docid)[a] = docid;
+	    }
+	  UTIL_THROW_IF2(b != this->T1->size(), 
+			 "Document map doesn't match corpus!");
+    }
+
+    template<typename TKN>
+    void
+    mmBitext<TKN>::
     open(string const base, string const L1, string L2)
     {
       mmTtrack<TKN>& t1 = *reinterpret_cast<mmTtrack<TKN>*>(this->T1.get());
@@ -1030,6 +1149,10 @@ namespace Moses {
       i1.open(base+L1+".sfa", this->T1);
       i2.open(base+L2+".sfa", this->T2);
       assert(this->T1->size() == this->T2->size());
+
+      string docmapfile = base+".dmp";
+      if (!access(docmapfile.c_str(),F_OK))
+	load_document_map(docmapfile);
     }
 
    
@@ -1365,7 +1488,7 @@ namespace Moses {
     template<typename Token>
     void
     Bitext<Token>::
-    prep(iter const& phrase, vector<float> const* const bias) const
+    prep(iter const& phrase, SamplingBias const* const bias) const
     {
       prep2(phrase, this->default_sample_size,bias);
     }
@@ -1374,7 +1497,7 @@ namespace Moses {
     sptr<pstats> 
     Bitext<Token>::
     prep2(iter const& phrase, size_t const max_sample, 
-	  vector<float> const* const bias) const
+	  SamplingBias const* const bias) const
     {
       boost::lock_guard<boost::mutex> guard(this->lock);
       if (!ag) 
@@ -1386,6 +1509,8 @@ namespace Moses {
       sptr<pstats> ret;
 #if 1
       // use pcache only for plain sentence input
+      // in the long run, we should create a PT clone for every bias 
+      // as part of a document-specific decoder
       if (StaticData::Instance().GetInputType() == SentenceInput && 
 	  max_sample == this->default_sample_size && bias == NULL && 
 	  phrase.approxOccurrenceCount() > m_pstats_cache_threshold)
@@ -1488,7 +1613,7 @@ namespace Moses {
 	   vector<vector<sptr<vector<PhrasePair<Token> > > > >& dest,
 	   vector<vector<typename ::uint64_t> >* pidmap,
 	   typename PhrasePair<Token>::Scorer* scorer,
-	   vector<float> const* const bias, bool multithread) const
+	   SamplingBias const* const bias, bool multithread) const
     {
       // typedef vector<vector<sptr<vector<PhrasePair<Token> > > > > ret_t;
       
@@ -1539,7 +1664,7 @@ namespace Moses {
     template<typename Token>
     sptr<pstats> 
     Bitext<Token>::
-    lookup(iter const& phrase, vector<float> const* const bias) const
+    lookup(iter const& phrase, SamplingBias const* const bias) const
     {
       sptr<pstats> ret = prep2(phrase, this->default_sample_size, bias);
       assert(ret);
@@ -1559,7 +1684,7 @@ namespace Moses {
     sptr<pstats> 
     Bitext<Token>::
     lookup(iter const& phrase, size_t const max_sample,
-	   vector<float> const* const bias) const
+	   SamplingBias const* const bias) const
     {
       sptr<pstats> ret = prep2(phrase, max_sample);
       boost::lock_guard<boost::mutex> guard(this->lock);

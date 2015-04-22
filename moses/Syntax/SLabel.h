@@ -9,6 +9,7 @@ namespace Syntax
 {
 
 struct SLabel {
+  float inputWeight;
   float score;
   ScoreComponentCollection scoreBreakdown;
   const TargetPhrase *translation;

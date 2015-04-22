@@ -28,6 +28,7 @@
 #include "moses/FF/TargetNgramFeature.h"
 #include "moses/FF/PhraseBoundaryFeature.h"
 #include "moses/FF/PhrasePairFeature.h"
+#include "moses/FF/RulePairUnlexicalizedSource.h"
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/FF/SparseHieroReorderingFeature.h"
@@ -36,7 +37,6 @@
 #include "moses/FF/PhrasePenalty.h"
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
-#include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/SoftSourceSyntacticConstraintsFeature.h"
 #include "moses/FF/CoveredReferenceFeature.h"
@@ -63,6 +63,7 @@
 #include "moses/LM/BilingualLM.h"
 #include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
+#include "moses/Syntax/InputWeightFF.h"
 #include "moses/Syntax/RuleTableFF.h"
 
 #ifdef HAVE_VW
@@ -112,6 +113,7 @@
 
 #ifdef LM_NEURAL
 #include "moses/LM/NeuralLMWrapper.h"
+#include "moses/LM/RDLM.h"
 #include "moses/LM/bilingual-lm/BiLM_NPLM.h"
 #endif
 
@@ -200,6 +202,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
   MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
+  MOSES_FNAME2("SyntaxInputWeight", Syntax::InputWeightFF);
 
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
@@ -212,6 +215,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(TargetBigramFeature);
   MOSES_FNAME(TargetNgramFeature);
   MOSES_FNAME(PhrasePairFeature);
+  MOSES_FNAME(RulePairUnlexicalizedSource);
   MOSES_FNAME(LexicalReordering);
   MOSES_FNAME2("Generation", GenerationDictionary);
   MOSES_FNAME(BleuScoreFeature);
@@ -224,7 +228,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ControlRecombination);
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
-  MOSES_FNAME(ExternalFeature);
   MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
   MOSES_FNAME(SoftSourceSyntacticConstraintsFeature);
   MOSES_FNAME(TreeStructureFeature);
@@ -292,6 +295,7 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_NEURAL
   MOSES_FNAME2("NeuralLM", NeuralLMWrapper);
+  MOSES_FNAME(RDLM);
   MOSES_FNAME2("BilingualNPLM", BilingualLM_NPLM);
 #endif
 #ifdef LM_DALM

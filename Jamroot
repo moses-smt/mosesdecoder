@@ -77,12 +77,43 @@ import modules ;
 import path ;
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
+include $(TOP)/jam-files/server.jam ;
 
+# exit :  0 ; 
+
+if [ build_server ] != no 
+{
+  xmlrpc-c-prefix = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --prefix" ] ;
+  echo "XMLRPC-C: BUILDING MOSES WITH XMLRPC_C LIBRARY VERSION $(xmlrpc-c-version) FROM $(xmlrpc-c-prefix)" ;
+
+  xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --cflags" ] ;
+  requirements += <define>HAVE_XMLRPC_C ;
+  requirements += <cxxflags>$(xmlrpc-cxxflags) ;
+
+  xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --libs" ] ;
+  for local i in [ SPLIT_BY_CHARACTERS $(xmlrpc-linkflags) : " " ] 
+  { 
+    local libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
+    if $(libname) 
+    {   
+      external-lib $(libname) 
+      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+      requirements += <library>$(libname) ;
+    }
+    local pathname = [ MATCH "-L(.*)" : $(i) ] ; 
+    if $(pathname)
+    {
+      requirements += <library-path>$(pathname) ; 
+    }
+  } 
+}
+# echo $(requirements) ; 
+# exit 0 ; 
 boost 104400 ;
 external-lib z ;
 
-lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-requirements += <library>dl ;
+#lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+#requirements += <library>dl ;
 
 
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
@@ -96,6 +127,18 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
   }
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
+}
+
+if [ option.get "filter-warnings" : : "yes" ] {
+  # given the low coding standards in Moses, we may want to filter out
+  # warnings about poor coding practice that no-one is ever going to fix 
+  # anyway ...
+  requirements += <cxxflags>-Wno-deprecated ;
+  requirements += <cxxflags>-Wno-reorder ;
+  requirements += <cxxflags>-Wno-sign-compare ;
+  requirements += <cxxflags>-Wno-unused-but-set-variable ;
+  requirements += <cxxflags>-Wno-unused-result ;
+  requirements += <cxxflags>-Wno-unused-variable ;
 }
 
 if [ option.get "debug-build" : : "yes" ] {
@@ -171,10 +214,12 @@ project : requirements
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
   <library>boost_system
+  <library>boost_program_options
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(requirements)
   <include>.
   ;
+
 
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-projects lm util phrase-extract phrase-extract/syntax-common search moses moses/LM mert moses-cmd scripts regression-testing ;
@@ -232,6 +277,7 @@ phrase-extract//pcfg-score
 phrase-extract//extract-mixed-syntax 
 phrase-extract//score-stsg
 phrase-extract//filter-rule-table
+phrase-extract//postprocess-egret-forests
 biconcor 
 #contrib/mira//mira 
 contrib/server//mosesserver 

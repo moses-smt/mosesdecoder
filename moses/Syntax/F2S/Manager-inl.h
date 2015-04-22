@@ -38,6 +38,7 @@ Manager<RuleMatcher>::Manager(const InputType &source)
   if (const ForestInput *p = dynamic_cast<const ForestInput*>(&source)) {
     m_forest = p->GetForest();
     m_rootVertex = p->GetRootVertex();
+    m_sentenceLength = p->GetSize();
   } else if (const TreeInput *p = dynamic_cast<const TreeInput*>(&source)) {
     T2S::InputTreeBuilder builder;
     T2S::InputTree tmpTree;
@@ -45,6 +46,7 @@ Manager<RuleMatcher>::Manager(const InputType &source)
     boost::shared_ptr<Forest> forest = boost::make_shared<Forest>();
     m_rootVertex = T2S::InputTreeToForest(tmpTree, *forest);
     m_forest = forest;
+    m_sentenceLength = p->GetSize();
   } else {
     UTIL_THROW2("ERROR: F2S::Manager requires input to be a tree or forest");
   }
@@ -82,8 +84,13 @@ void Manager<RuleMatcher>::Decode()
        p = sortedVertices.begin(); p != sortedVertices.end(); ++p) {
     const Forest::Vertex &vertex = **p;
 
-    // Skip terminal vertices.
+    // Skip terminal vertices (after checking if they are OOVs).
     if (vertex.incoming.empty()) {
+      if (vertex.pvertex.span.GetStartPos() > 0 &&
+          vertex.pvertex.span.GetEndPos() < m_sentenceLength-1 &&
+          IsUnknownSourceWord(vertex.pvertex.symbol)) {
+        m_oovs.insert(vertex.pvertex.symbol);
+      }
       continue;
     }
 
@@ -189,6 +196,21 @@ void Manager<RuleMatcher>::InitializeStacks()
   }
 }
 
+template<typename RuleMatcher>
+bool Manager<RuleMatcher>::IsUnknownSourceWord(const Word &w) const
+{
+  const std::size_t factorId = w[0]->GetId();
+  const std::vector<RuleTableFF*> &ffs = RuleTableFF::Instances();
+  for (std::size_t i = 0; i < ffs.size(); ++i) {
+    RuleTableFF *ff = ffs[i];
+    const boost::unordered_set<std::size_t> &sourceTerms =
+      ff->GetSourceTerminalSet();
+    if (sourceTerms.find(factorId) != sourceTerms.end()) {
+      return false;
+    }
+  }
+  return true;
+}
 
 template<typename RuleMatcher>
 const SHyperedge *Manager<RuleMatcher>::GetBestSHyperedge() const

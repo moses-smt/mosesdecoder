@@ -25,7 +25,6 @@ class SparseReordering;
 class LRModel
 {
 public:
-  typedef int ReorderingType;
   friend class LexicalReordering;
   enum ModelType { Monotonic, MSD, MSLR, LeftRight, None };
   enum Direction { Forward, Backward, Bidirectional };
@@ -33,6 +32,8 @@ public:
 
   // constants for the different types of reordering
   // (correspond to indices in the respective table)
+#if 0
+  typedef int ReorderingType;
   static const ReorderingType M   = 0; // monotonic
   static const ReorderingType NM  = 1; // non-monotonic
   static const ReorderingType S   = 1; // swap
@@ -42,7 +43,21 @@ public:
   static const ReorderingType R   = 0; // right
   static const ReorderingType L   = 1; // left
   static const ReorderingType MAX = 3; // largest possible
-
+#else
+  enum ReorderingType 
+    {
+      M    = 0, // monotonic
+      NM   = 1, // non-monotonic
+      S    = 1, // swap
+      D    = 2, // discontinuous
+      DL   = 2, // discontinuous, left
+      DR   = 3, // discontinuous, right
+      R    = 0, // right
+      L    = 1, // left
+      MAX  = 3, // largest possible
+      NONE = 4  // largest possible
+    };
+#endif
   // determine orientation, depending on model:
 
 
@@ -129,7 +144,7 @@ class LRState : public FFState
 {
 public:
 
-  typedef int ReorderingType;
+  typedef LRModel::ReorderingType ReorderingType;
 
   virtual
   int

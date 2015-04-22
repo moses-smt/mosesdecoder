@@ -13,14 +13,14 @@ void GenericCandidate::readBin(FILE* f)
 {
   m_PhraseList.clear();
   m_ScoreList.clear();
-  UINT32 num_phrases;  // on older compilers, <stdint.h> may need to be included
+  uint32_t num_phrases;  // on older compilers, <stdint.h> may need to be included
   fRead(f, num_phrases);
   for(unsigned int i = 0; i < num_phrases; ++i) {
     IPhrase phrase;
     fReadVector(f, phrase);
     m_PhraseList.push_back(phrase);
   };
-  UINT32 num_scores;
+  uint32_t num_scores;
   fRead(f, num_scores);
   for(unsigned int j = 0; j < num_scores; ++j) {
     std::vector<float> score;
@@ -32,11 +32,11 @@ void GenericCandidate::readBin(FILE* f)
 void GenericCandidate::writeBin(FILE* f) const
 {
   // cast is necessary to ensure compatibility between 32- and 64-bit platforms
-  fWrite(f, static_cast<UINT32>(m_PhraseList.size()));
+  fWrite(f, static_cast<uint32_t>(m_PhraseList.size()));
   for(size_t i = 0; i < m_PhraseList.size(); ++i) {
     fWriteVector(f, m_PhraseList[i]);
   }
-  fWrite(f, static_cast<UINT32>(m_ScoreList.size()));
+  fWrite(f, static_cast<uint32_t>(m_ScoreList.size()));
   for(size_t j = 0; j < m_ScoreList.size(); ++j) {
     fWriteVector(f, m_ScoreList[j]);
   }
@@ -45,7 +45,7 @@ void GenericCandidate::writeBin(FILE* f) const
 
 void Candidates::writeBin(FILE* f) const
 {
-  UINT32 s = this->size();
+  uint32_t s = this->size();
   fWrite(f,s);
   for(size_t i = 0; i < s; ++i) {
     MyBase::operator[](i).writeBin(f);
@@ -54,7 +54,7 @@ void Candidates::writeBin(FILE* f) const
 
 void Candidates::readBin(FILE* f)
 {
-  UINT32 s;
+  uint32_t s;
   fRead(f,s);
   this->resize(s);
   for(size_t i = 0; i<s; ++i) {

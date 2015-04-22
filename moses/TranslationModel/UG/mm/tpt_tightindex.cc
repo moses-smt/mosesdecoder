@@ -17,7 +17,7 @@
 //
 
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include "tpt_tightindex.h"
 
 namespace ugdiss

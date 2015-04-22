@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <queue>
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+ 
 #ifdef WITH_THREADS
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -74,7 +76,7 @@ public:
   /**
    * Add a job to the threadpool.
    **/
-  void Submit(Task* task);
+  void Submit(boost::shared_ptr<Task> task);
 
   /**
    * Wait until all queued jobs have completed, and shut down
@@ -95,7 +97,7 @@ private:
    **/
   void Execute();
 
-  std::queue<Task*> m_tasks;
+  std::queue<boost::shared_ptr<Task> > m_tasks;
   boost::thread_group m_threads;
   boost::mutex m_mutex;
   boost::condition_variable m_threadNeeded;

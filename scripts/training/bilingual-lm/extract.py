@@ -29,6 +29,17 @@ def replace_unks(tokens,vocab):
       tokens[i] = UNK
 
 
+def numberize(line, m, n, svocab, tvocab):
+    line = line.split()
+    source_words = line[:2*m + 1]
+    target_words = line[-n:]
+
+    line = ' '.join([str(svocab[item]) for item in source_words]) + ' '
+    line += ' '.join([str(tvocab[item]) for item in target_words]) + '\n'
+
+    return line
+
+
 def get_ngrams(corpus_stem, align_file, tagged_stem, svocab, tvocab, slang,tlang, m, n, ofh):
     """
       m - source context

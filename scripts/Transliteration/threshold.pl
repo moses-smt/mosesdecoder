@@ -1,5 +1,6 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
+use warnings;
 use utf8;
 require Encode;
 use IO::Handle;

@@ -1,12 +1,19 @@
-#If you get compilation errors here, make sure you have xmlrpc-c installed properly, including the abyss server option.  
+# If you get compilation errors here, make sure you have xmlrpc-c
+# installed properly, including the abyss server option.
 
 import option ;
 import path ;
-
+if [ option.get "no-xmlrpc-c" : : "yes" ] 
+{
+  echo "Not building mosesserver." ;
+}
+else
+{
 with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
 if $(with-xmlrpc-c) {
+  echo Bulding mosesserver. ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking the XMLRPC-C library; Do NOT use v.1.25.29 !!!" ;
+  echo "!!! You are linking the XMLRPC-C library; Do NOT use v.1.25.29            !!!" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
 
   build-moses-server = true ;
@@ -25,6 +32,7 @@ if $(with-xmlrpc-c) {
   }
   xmlrpc-command = "xmlrpc-c-config" ;
 }
+}
 
 rule shell_or_die ( cmd ) {
   local ret = [ _shell $(cmd) : exit-status ] ;
@@ -34,12 +42,21 @@ rule shell_or_die ( cmd ) {
   return $(ret[1]) ;
 }
 
+
 if $(build-moses-server) = true
 {
   xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --libs" ] ;
   xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --cflags" ] ;
 
-  exe mosesserver : mosesserver.cpp ../../moses//moses ../../OnDiskPt//OnDiskPt ../..//boost_filesystem  : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
-} else {
+  exe mosesserver :
+  mosesserver.cpp 
+  ../../moses//moses 
+  ../../OnDiskPt//OnDiskPt 
+  ../..//boost_filesystem  
+  : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
+
+} 
+else 
+{
   alias mosesserver ;
 }

@@ -1,6 +1,5 @@
 <?php
 
-date_default_timezone_set('Europe/London');
 
 function setup() {
   $setup = file("setup");
@@ -13,7 +12,7 @@ function setup() {
     print "<TR><TD><A HREF=\"?setup=$dir[0]\">$dir[0]</A></TD><TD>$dir[1]</TD><TD>$dir[2]</TD><TD>$dir[3]</TD></TR>\n";
   }
   print "</TABLE>\n";
-  print "<P>To add experiment, edit /fs/thor4/html/experiment/setup";
+  print "<p>To add experiment, edit the \"setup\" file.</p>";
 }
 
 function overview() {
@@ -26,7 +25,7 @@ function overview() {
 
   head("Task: $task ($user)");
   print "<a href=\"http://www.statmt.org/wiki/?n=Experiment.$setup\">Wiki Notes</a>";
-  print " &nbsp; &nbsp; | &nbsp; &nbsp; <a href=\"/\">Overview of experiments</a> &nbsp; &nbsp; | &nbsp; &nbsp; <code>$dir</code><p>";
+  print " &nbsp; &nbsp; | &nbsp; &nbsp; <a href=\"?\">Overview of experiments</a> &nbsp; &nbsp; | &nbsp; &nbsp; <code>$dir</code><p>";
   reset($experiment);
 
   print "<form action=\"\" method=get>\n";

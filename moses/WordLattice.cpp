@@ -10,7 +10,7 @@
 
 namespace Moses
 {
-WordLattice::WordLattice()
+WordLattice::WordLattice()  : ConfusionNet()
 {
   UTIL_THROW_IF2(&InputFeature::Instance() == NULL,
                  "Input feature must be specified");

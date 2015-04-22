@@ -1,5 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 while(<STDIN>) {
@@ -9,6 +10,7 @@ while(<STDIN>) {
   }
 
   # prep
+  s/^\( \( (.+) \)$/\(TOP $1/; # remove double wrapped parenthesis
   s/^\( /\(TOP /;
 
   # escape words

@@ -28,10 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "TypeDef.h"
 #include "Util.h"
+#include <boost/program_options.hpp>
 
 namespace Moses
 {
-
 typedef std::vector<std::string>            PARAM_VEC;
 typedef std::map<std::string, PARAM_VEC >   PARAM_MAP;
 typedef std::map<std::string, bool>         PARAM_BOOL;
@@ -43,12 +43,17 @@ typedef std::map<std::string, std::string > PARAM_STRING;
  */
 class Parameter
 {
+  typedef boost::program_options::options_description options_description;
+  typedef boost::program_options::value_semantic value_semantic;
 protected:
   PARAM_MAP m_setting;
   PARAM_BOOL m_valid;
   PARAM_STRING m_abbreviation;
   PARAM_STRING m_description;
   PARAM_STRING m_fullname;
+  // std::map<char,std::set<std::string> > m_confusable; 
+  // stores long parameter names that start with a letter that is also a short option. 
+  options_description m_options;
 
   std::map<std::string, std::vector<float> >  m_weights;
 
@@ -59,9 +64,30 @@ protected:
   bool isOption(const char* token);
   bool Validate();
 
-  void AddParam(const std::string &paramName, const std::string &description);
-  void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
+  void 
+  AddParam(options_description& optgroup,
+	   value_semantic const* optvalue,
+	   std::string const& paramName, 
+	   std::string const& description);
 
+  void 
+  AddParam(options_description& optgroup,
+	   std::string const &paramName, 
+	   std::string const &description);
+
+  void 
+  AddParam(options_description& optgroup,
+	   value_semantic const* optvalue,
+	   std::string const& paramName,
+	   std::string const& abbrevName, 
+	   std::string const& description);
+
+  void 
+  AddParam(options_description& optgroup,
+	   std::string const& paramName,
+	   std::string const& abbrevName, 
+	   std::string const& description);
+  
   void PrintCredit();
   void PrintFF() const;
 

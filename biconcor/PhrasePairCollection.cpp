@@ -1,6 +1,6 @@
 #include "PhrasePairCollection.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <cstring>
 #include <algorithm>
 

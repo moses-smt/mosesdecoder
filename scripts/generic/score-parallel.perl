@@ -1,9 +1,10 @@
-#! /usr/bin/perl -w 
+#!/usr/bin/env perl 
 
 # example
 # ./score-parallel.perl 8 "gsort --batch-size=253" ./score ./extract.2.sorted.gz ./lex.2.f2e ./phrase-table.2.half.f2e  --GoodTuring ./phrase-table.2.coc 0
 # ./score-parallel.perl 8 "gsort --batch-size=253" ./score ./extract.2.inv.sorted.gz ./lex.2.e2f ./phrase-table.2.half.e2f  --Inverse 1
 
+use warnings;
 use strict;
 use File::Basename;
 
@@ -13,8 +14,8 @@ sub GetSourcePhrase($);
 sub NumStr($);
 sub CutContextFile($$$);
 
-my $GZIP_EXEC; # = which("pigz"); 
-if(-f "/usr/bin/pigz") {
+my $GZIP_EXEC;
+if(`which pigz`) {
   $GZIP_EXEC = 'pigz';
 }
 else {
@@ -38,13 +39,19 @@ my $lexFile 		= $ARGV[4];
 my $ptHalf 			= $ARGV[5]; # output
 my $inverse = 0;
 my $sourceLabelsFile;
+my $partsOfSpeechFile;
 
 my $otherExtractArgs= "";
 for (my $i = 6; $i < $#ARGV; ++$i)
 {
   if ($ARGV[$i] eq '--SourceLabels') {
     $sourceLabelsFile = $ARGV[++$i];
-    $otherExtractArgs .= "--SourceLabels --SourceLabelCountsLHS --SourceLabelSet ";
+    $otherExtractArgs .= "--SourceLabels --SourceLabelCountsLHS ";
+    next;
+  }
+  if ($ARGV[$i] eq '--PartsOfSpeech') {
+    $partsOfSpeechFile = $ARGV[++$i];
+    $otherExtractArgs .= "--PartsOfSpeech ";
     next;
   }
   if ($ARGV[$i] eq '--Inverse') {
@@ -286,6 +293,15 @@ if (!$inverse && defined($sourceLabelsFile))
   print STDERR "Merging source label files: $cmd \n";
   `$cmd`;
 }
+
+# merge parts-of-speech files
+if (!$inverse && defined($partsOfSpeechFile)) 
+{
+  my $cmd = "(echo \"SSTART 0\"; echo \"SEND 1\"; cat $TMPDIR/phrase-table.half.*.gz.partsOfSpeech | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+1]}/\") > $partsOfSpeechFile";
+  print STDERR "Merging parts-of-speech files: $cmd \n";
+  `$cmd`;
+}
+
 
 $cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;

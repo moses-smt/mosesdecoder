@@ -22,8 +22,8 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
   ,m_simple(true)
   ,m_sourceContext(false)
   ,m_targetContext(false)
-  ,m_ignorePunctuation(false)
   ,m_domainTrigger(false)
+  ,m_ignorePunctuation(false)
 {
   VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();

@@ -38,6 +38,8 @@ public:
 
   std::string GetString(bool start = true) const;
   void Combine(const std::vector<TreePointer> &previous);
+  void Unbinarize();
+  void GetUnbinarizedChildren(std::vector<TreePointer> &children) const;
   const std::string & GetLabel() const {
     return m_value;
   }
@@ -93,6 +95,68 @@ public:
   // if found, 'it' is iterator to first tree node that matches search string, and 'parent' to its parent node
   bool RecursiveSearch(const std::vector<NTLabel> & labels, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const;
 
+  // Python-like generator that yields next nonterminal leaf on every call
+  $generator(leafNT)
+  {
+    std::vector<TreePointer>::iterator it;
+    InternalTree* tree;
+    leafNT(InternalTree* root = 0): tree(root) {}
+    $emit(std::vector<TreePointer>::iterator)
+    for (it = tree->GetChildren().begin(); it !=tree->GetChildren().end(); ++it) {
+      if (!(*it)->IsTerminal() && (*it)->GetLength() == 0) {
+        $yield(it);
+      } else if ((*it)->GetLength() > 0) {
+        if ((*it).get()) { // normal pointer to same object that TreePointer points to
+          $restart(tree = (*it).get());
+        }
+      }
+    }
+    $stop;
+  };
+
+
+  // Python-like generator that yields the parent of the next nonterminal leaf on every call
+  $generator(leafNTParent)
+  {
+    std::vector<TreePointer>::iterator it;
+    InternalTree* tree;
+    leafNTParent(InternalTree* root = 0): tree(root) {}
+    $emit(InternalTree*)
+    for (it = tree->GetChildren().begin(); it !=tree->GetChildren().end(); ++it) {
+      if (!(*it)->IsTerminal() && (*it)->GetLength() == 0) {
+        $yield(tree);
+      } else if ((*it)->GetLength() > 0) {
+        if ((*it).get()) {
+          $restart(tree = (*it).get());
+        }
+      }
+    }
+    $stop;
+  };
+
+  // Python-like generator that yields the next nonterminal leaf on every call, and also stores the path from the root of the tree to the nonterminal
+  $generator(leafNTPath)
+  {
+    std::vector<TreePointer>::iterator it;
+    InternalTree* tree;
+    std::vector<InternalTree*> * path;
+    leafNTPath(InternalTree* root = NULL, std::vector<InternalTree*> * orig = NULL): tree(root), path(orig) {}
+    $emit(std::vector<TreePointer>::iterator)
+    path->push_back(tree);
+    for (it = tree->GetChildren().begin(); it !=tree->GetChildren().end(); ++it) {
+      if (!(*it)->IsTerminal() && (*it)->GetLength() == 0) {
+        path->push_back((*it).get());
+        $yield(it);
+        path->pop_back();
+      } else if ((*it)->GetLength() > 0) {
+        if ((*it).get()) {
+          $restart(tree = (*it).get());
+        }
+      }
+    }
+    path->pop_back();
+    $stop;
+  };
 
 };
 
@@ -112,69 +176,5 @@ public:
     return 0;
   };
 };
-
-// Python-like generator that yields next nonterminal leaf on every call
-$generator(leafNT)
-{
-  std::vector<TreePointer>::iterator it;
-  InternalTree* tree;
-  leafNT(InternalTree* root = 0): tree(root) {}
-  $emit(std::vector<TreePointer>::iterator)
-  for (it = tree->GetChildren().begin(); it !=tree->GetChildren().end(); ++it) {
-    if (!(*it)->IsTerminal() && (*it)->GetLength() == 0) {
-      $yield(it);
-    } else if ((*it)->GetLength() > 0) {
-      if ((*it).get()) { // normal pointer to same object that TreePointer points to
-        $restart(tree = (*it).get());
-      }
-    }
-  }
-  $stop;
-};
-
-
-// Python-like generator that yields the parent of the next nonterminal leaf on every call
-$generator(leafNTParent)
-{
-  std::vector<TreePointer>::iterator it;
-  InternalTree* tree;
-  leafNTParent(InternalTree* root = 0): tree(root) {}
-  $emit(InternalTree*)
-  for (it = tree->GetChildren().begin(); it !=tree->GetChildren().end(); ++it) {
-    if (!(*it)->IsTerminal() && (*it)->GetLength() == 0) {
-      $yield(tree);
-    } else if ((*it)->GetLength() > 0) {
-      if ((*it).get()) {
-        $restart(tree = (*it).get());
-      }
-    }
-  }
-  $stop;
-};
-
-// Python-like generator that yields the next nonterminal leaf on every call, and also stores the path from the root of the tree to the nonterminal
-$generator(leafNTPath)
-{
-  std::vector<TreePointer>::iterator it;
-  InternalTree* tree;
-  std::vector<InternalTree*> * path;
-  leafNTPath(InternalTree* root = NULL, std::vector<InternalTree*> * orig = NULL): tree(root), path(orig) {}
-  $emit(std::vector<TreePointer>::iterator)
-  path->push_back(tree);
-  for (it = tree->GetChildren().begin(); it !=tree->GetChildren().end(); ++it) {
-    if (!(*it)->IsTerminal() && (*it)->GetLength() == 0) {
-      path->push_back((*it).get());
-      $yield(it);
-      path->pop_back();
-    } else if ((*it)->GetLength() > 0) {
-      if ((*it).get()) {
-        $restart(tree = (*it).get());
-      }
-    }
-  }
-  path->pop_back();
-  $stop;
-};
-
 
 }

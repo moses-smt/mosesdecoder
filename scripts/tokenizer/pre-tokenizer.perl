@@ -1,8 +1,10 @@
-#!/usr/bin/perl -W
+#!/usr/bin/env perl 
+
 # script for preprocessing language data prior to tokenization
 # Start by Ulrich Germann, after noticing systematic preprocessing errors
 # in some of the English Europarl data.
 
+use warnings;
 use strict;
 use Getopt::Std;
 

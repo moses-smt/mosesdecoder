@@ -36,7 +36,7 @@ class PhraseNode
 {
   friend std::ostream& operator<<(std::ostream&, const PhraseNode&);
 protected:
-  UINT64 m_filePos, m_value;
+  uint64_t m_filePos, m_value;
 
   typedef std::map<Word, PhraseNode> ChildColl;
   ChildColl m_children;
@@ -48,35 +48,35 @@ protected:
   TargetPhraseCollection m_targetPhraseColl;
 
   char *m_memLoad, *m_memLoadLast;
-  UINT64 m_numChildrenLoad;
+  uint64_t m_numChildrenLoad;
 
   void AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
                        , TargetPhrase *targetPhrase, OnDiskWrapper &onDiskWrapper
                        , size_t tableLimit, const std::vector<float> &counts, OnDiskPt::PhrasePtr spShort);
-  size_t ReadChild(Word &wordFound, UINT64 &childFilePos, const char *mem) const;
-  void GetChild(Word &wordFound, UINT64 &childFilePos, size_t ind, OnDiskWrapper &onDiskWrapper) const;
+  size_t ReadChild(Word &wordFound, uint64_t &childFilePos, const char *mem) const;
+  void GetChild(Word &wordFound, uint64_t &childFilePos, size_t ind, OnDiskWrapper &onDiskWrapper) const;
 
 public:
   static size_t GetNodeSize(size_t numChildren, size_t wordSize, size_t countSize);
 
   PhraseNode(); // unsaved node
-  PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper); // load saved node
+  PhraseNode(uint64_t filePos, OnDiskWrapper &onDiskWrapper); // load saved node
   ~PhraseNode();
 
-  void Add(const Word &word, UINT64 nextFilePos, size_t wordSize);
+  void Add(const Word &word, uint64_t nextFilePos, size_t wordSize);
   void Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimit);
 
   void AddTargetPhrase(const SourcePhrase &sourcePhrase, TargetPhrase *targetPhrase
                        , OnDiskWrapper &onDiskWrapper, size_t tableLimit
                        , const std::vector<float> &counts, OnDiskPt::PhrasePtr spShort);
 
-  UINT64 GetFilePos() const {
+  uint64_t GetFilePos() const {
     return m_filePos;
   }
-  UINT64 GetValue() const {
+  uint64_t GetValue() const {
     return m_value;
   }
-  void SetValue(UINT64 value) {
+  void SetValue(uint64_t value) {
     m_value = value;
   }
   size_t GetSize() const {

@@ -2,6 +2,7 @@
 #include "ExtractionPhrasePair.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
+#include "util/tokenize.hh"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ void Domain::load( const std::string &domainFileName )
   string line;
   while(getline(*fileP, line)) {
     // read
-    vector< string > domainSpecLine = tokenize( line.c_str() );
+    const vector< string > domainSpecLine = util::tokenize( line );
     int lineNumber;
     if (domainSpecLine.size() != 2 ||
         ! sscanf(domainSpecLine[0].c_str(), "%d", &lineNumber)) {
@@ -25,7 +26,7 @@ void Domain::load( const std::string &domainFileName )
       exit(1);
     }
     // store
-    string &name = domainSpecLine[1];
+    const string &name = domainSpecLine[1];
     spec.push_back( make_pair( lineNumber, name ));
     if (name2id.find( name ) == name2id.end()) {
       name2id[ name ] = list.size();

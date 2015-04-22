@@ -1,5 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
@@ -21,25 +22,116 @@ if ($SCRIPTS_ROOTDIR eq '') {
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 #$SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_SORT_BATCH_SIZE,  $_SORT_COMPRESS, $_SORT_PARALLEL, $_CORPUS,
-   $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH, $_DISTORTION_LIMIT,
-   $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_LEXICAL_COUNTS, $_VERBOSE, $_ALIGNMENT,
-   $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
-   $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
-   $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
-   $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
-   $_DECODING_GRAPH_BACKOFF,
-   $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
-   @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT, $_TRANSLITERATION_PHRASE_TABLE,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_GHKM_SOURCE_LABELS,$_GHKM_SOURCE_LABELS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,$_S2T,
-   $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2, $_UNKNOWN_WORD_SOFT_MATCHES_FILE,
-   $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
-   $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_LEXICAL_REORDERING_DEFAULT_SCORES,$_DO_STEPS,
-   @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,$_MMSAPT,
-   @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE, $_EXTRACT_COMMAND);
+my($_EXTERNAL_BINDIR, 
+	$_ROOT_DIR, 
+	$_CORPUS_DIR, 
+	$_GIZA_E2F, 
+	$_GIZA_F2E, 
+	$_MODEL_DIR, 
+	$_TEMP_DIR, 
+	$_SORT_BUFFER_SIZE, 
+	$_SORT_BATCH_SIZE,  
+	$_SORT_COMPRESS, 
+	$_SORT_PARALLEL, 
+	$_CORPUS,
+   	$_CORPUS_COMPRESSION, 
+   	$_FIRST_STEP, 
+   	$_LAST_STEP, 
+   	$_F, 
+   	$_E, 
+   	$_MAX_PHRASE_LENGTH, 
+   	$_DISTORTION_LIMIT,
+   	$_LEXICAL_FILE, 
+   	$_NO_LEXICAL_WEIGHTING, 
+   	$_LEXICAL_COUNTS, 
+   	$_VERBOSE, 
+   	$_ALIGNMENT,
+   	$_ALIGNMENT_FILE, 
+   	$_ALIGNMENT_STEM, 
+   	@_LM, 
+   	$_EXTRACT_FILE, 
+   	$_GIZA_OPTION, 
+   	$_HELP, 
+   	$_PARTS,
+   	$_DIRECTION, 
+   	$_ONLY_PRINT_GIZA, 
+   	$_GIZA_EXTENSION, 
+   	$_REORDERING,
+   	$_REORDERING_SMOOTH, 
+   	$_INPUT_FACTOR_MAX, 
+   	$_ALIGNMENT_FACTORS,
+   	$_TRANSLATION_FACTORS, 
+   	$_REORDERING_FACTORS, 
+   	$_GENERATION_FACTORS,
+   	$_DECODING_GRAPH_BACKOFF,
+   	$_DECODING_STEPS, 
+   	$_PARALLEL, 
+   	$_FACTOR_DELIMITER, 
+   	@_PHRASE_TABLE,
+   	@_REORDERING_TABLE, 
+   	@_GENERATION_TABLE, 
+   	@_GENERATION_TYPE, 
+   	$_GENERATION_CORPUS,
+   	$_DONT_ZIP,  
+   	$_MGIZA, 
+   	$_MGIZA_CPUS, 
+   	$_SNT2COOC, 
+   	$_HMM_ALIGN, 
+   	$_CONFIG, 
+   	$_OSM, 
+   	$_OSM_FACTORS, 
+   	$_POST_DECODING_TRANSLIT, 
+   	$_TRANSLITERATION_PHRASE_TABLE,
+   	$_HIERARCHICAL,
+   	$_XML,
+   	$_SOURCE_SYNTAX,
+   	$_TARGET_SYNTAX,
+   	$_GLUE_GRAMMAR,
+   	$_GLUE_GRAMMAR_FILE,
+   	$_DONT_TUNE_GLUE_GRAMMAR,
+   	$_UNKNOWN_WORD_LABEL_FILE,
+   	$_GHKM,
+   	$_GHKM_TREE_FRAGMENTS,
+   	$_GHKM_PHRASE_ORIENTATION,
+   	$_PHRASE_ORIENTATION_PRIORS_FILE,
+   	$_GHKM_SOURCE_LABELS,
+   	$_GHKM_SOURCE_LABELS_FILE,
+   	$_GHKM_PARTS_OF_SPEECH,
+   	$_GHKM_PARTS_OF_SPEECH_FILE,
+   	$_GHKM_PARTS_OF_SPEECH_FACTOR,
+    $_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS,
+   	$_PCFG,
+   	@_EXTRACT_OPTIONS,
+   	@_SCORE_OPTIONS,
+   	$_S2T,
+   	$_ALT_DIRECT_RULE_SCORE_1, 
+   	$_ALT_DIRECT_RULE_SCORE_2, 
+   	$_UNKNOWN_WORD_SOFT_MATCHES_FILE,
+   	$_USE_SYNTAX_INPUT_WEIGHT_FEATURE,
+   	$_OMIT_WORD_ALIGNMENT,
+   	$_FORCE_FACTORED_FILENAMES,
+   	$_MEMSCORE, 
+   	$_FINAL_ALIGNMENT_MODEL,
+   	$_CONTINUE,
+   	$_MAX_LEXICAL_REORDERING,
+   	$_LEXICAL_REORDERING_DEFAULT_SCORES,
+   	$_DO_STEPS,
+   	@_ADDITIONAL_INI,
+   	$_ADDITIONAL_INI_FILE,
+   	$_MMSAPT,
+   	@_BASELINE_ALIGNMENT_MODEL, 
+   	$_BASELINE_EXTRACT, 
+   	$_BASELINE_ALIGNMENT,
+   	$_DICTIONARY, 
+   	$_SPARSE_PHRASE_FEATURES, 
+   	$_EPPEX, 
+   	$_INSTANCE_WEIGHTS_FILE, 
+   	$_LMODEL_OOV_FEATURE, 
+   	$_NUM_LATTICE_FEATURES, 
+   	$IGNORE, 
+   	$_FLEXIBILITY_SCORE, 
+   	$_EXTRACT_COMMAND,
+   	$_SCORE_COMMAND);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -108,6 +200,7 @@ $_HELP = 1
 		       's2t' => \$_S2T,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
+		       'dont-tune-glue-grammar' => \$_DONT_TUNE_GLUE_GRAMMAR,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'unknown-word-soft-matches-file=s' => \$_UNKNOWN_WORD_SOFT_MATCHES_FILE, # give dummy label to unknown word, and allow soft matches to all other labels (with cost determined by sparse features)
 		       'ghkm' => \$_GHKM,
@@ -116,6 +209,10 @@ $_HELP = 1
 		       'phrase-orientation-priors-file=s' => \$_PHRASE_ORIENTATION_PRIORS_FILE, # currently relevant for GHKM extraction only; phrase orientation for PBT has different implementation
                'ghkm-source-labels' => \$_GHKM_SOURCE_LABELS,
                'ghkm-source-labels-file=s' => \$_GHKM_SOURCE_LABELS_FILE,
+               'ghkm-parts-of-speech' => \$_GHKM_PARTS_OF_SPEECH,
+               'ghkm-parts-of-speech-file=s' => \$_GHKM_PARTS_OF_SPEECH_FILE,
+               'ghkm-parts-of-speech-factor' => \$_GHKM_PARTS_OF_SPEECH_FACTOR,
+               'ghkm-strip-bitpar-nonterminal-labels' => \$_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS,
 		       'pcfg' => \$_PCFG,
 		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
 		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
@@ -123,6 +220,7 @@ $_HELP = 1
 		       'score-options=s' => \@_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
+		       'use-syntax-input-weight-feature' => \$_USE_SYNTAX_INPUT_WEIGHT_FEATURE,
 		       'xml' => \$_XML,
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
@@ -151,6 +249,7 @@ $_HELP = 1
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
 		       'extract-command=s' => \$_EXTRACT_COMMAND,
+		       'score-command=s' => \$_SCORE_COMMAND,
                );
 
 if ($_HELP) {
@@ -306,8 +405,8 @@ else {
   $SORT_EXEC = 'sort';
 }
 
-my $GZIP_EXEC; # = which("pigz"); 
-if(-f "/usr/bin/pigz") {
+my $GZIP_EXEC;
+if(`which pigz`) {
   $GZIP_EXEC = 'pigz';
 }
 else {
@@ -355,7 +454,12 @@ my $EPPEX = "$SCRIPTS_ROOTDIR/../bin/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/../bin/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/giza2bal.pl";
 
-my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
+my $PHRASE_SCORE;
+if (defined($_SCORE_COMMAND)) {
+  $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/$_SCORE_COMMAND";
+} else {
+  $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
+}
 $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_SCORE";
 
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
@@ -1454,6 +1558,9 @@ sub extract_phrase {
           $cmd .= " --PhraseOrientation" if $_GHKM_PHRASE_ORIENTATION;
           $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if defined($_PHRASE_ORIENTATION_PRIORS_FILE);
           $cmd .= " --SourceLabels" if $_GHKM_SOURCE_LABELS;
+          $cmd .= " --PartsOfSpeech" if $_GHKM_PARTS_OF_SPEECH;
+          $cmd .= " --PartsOfSpeechFactor" if $_GHKM_PARTS_OF_SPEECH_FACTOR;
+          $cmd .= " --StripBitParLabels" if $_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS;
         }
         else
         {
@@ -1583,7 +1690,6 @@ sub score_phrase_phrase_extract {
     my $MIN_COUNT_HIERARCHICAL = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /MinCountHierarchical ([\d\.]+)/) ? $1 : undef;
     my $SOURCE_LABELS = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SourceLabels/);
     my $SOURCE_LABEL_COUNTS_LHS = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SourceLabelCountsLHS/);
-    my $SOURCE_LABEL_SET = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SourceLabelSet/);
     my $SPAN_LENGTH = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SpanLength/);
     my $CORE_SCORE_OPTIONS = "";
     $CORE_SCORE_OPTIONS .= " --LogProb" if $LOG_PROB;
@@ -1593,7 +1699,6 @@ sub score_phrase_phrase_extract {
 	$CORE_SCORE_OPTIONS .= " --CrossedNonTerm" if $CROSSEDNONTERM;
     $CORE_SCORE_OPTIONS .= " --SourceLabels" if $SOURCE_LABELS;
     $CORE_SCORE_OPTIONS .= " --SourceLabelCountsLHS " if $SOURCE_LABEL_COUNTS_LHS;
-    $CORE_SCORE_OPTIONS .= " --SourceLabelSet " if $SOURCE_LABEL_SET;
 
     my $substep = 1;
     my $isParent = 1;
@@ -1637,6 +1742,7 @@ sub score_phrase_phrase_extract {
         $cmd .= " --PhraseOrientation" if $_GHKM_PHRASE_ORIENTATION;
         $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if $_GHKM_PHRASE_ORIENTATION && defined($_PHRASE_ORIENTATION_PRIORS_FILE);
         $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+        $cmd .= " --PartsOfSpeech $_GHKM_PARTS_OF_SPEECH_FILE" if $_GHKM_PARTS_OF_SPEECH && defined($_GHKM_PARTS_OF_SPEECH_FILE);
         $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
         $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
@@ -1689,6 +1795,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+    $cmd .= " --PartsOfSpeech $_GHKM_PARTS_OF_SPEECH_FILE" if $_GHKM_PARTS_OF_SPEECH && defined($_GHKM_PARTS_OF_SPEECH_FILE);
     
     $cmd .= " | $GZIP_EXEC -c > $ttable_file.gz";
     
@@ -2031,12 +2138,24 @@ sub create_ini {
    # glue grammar
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
+     my $tuneable = defined($_DONT_TUNE_GLUE_GRAMMAR) ? "false" : "true";
      my $feature_name = "PhraseDictionaryMemory";
      if ($_S2T) {
        $feature_name = "RuleTable";
      }
-     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
-     $weight_spec .= "TranslationModel$i= 1.0\n";
+     my $glue_weight = 1.0;
+     if ($_SOURCE_SYNTAX || $_TARGET_SYNTAX) {
+       $glue_weight = -100.0;
+     }
+
+     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0 tuneable=$tuneable\n";
+     $weight_spec .= "TranslationModel$i= $glue_weight\n";
+   }
+
+   # SyntaxInputWeight FF
+   if ($_USE_SYNTAX_INPUT_WEIGHT_FEATURE) {
+     $feature_spec .= "SyntaxInputWeight name=SyntaxInputWeight0\n";
+     $weight_spec .= "SyntaxInputWeight0= 0.1\n";
    }
 
    # generation model

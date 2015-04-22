@@ -1,6 +1,6 @@
 #include "moses/PP/NonTermContextProperty.h"
 #include <string>
-#include <assert.h>
+#include <cassert>
 #include "moses/Util.h"
 #include "moses/FactorCollection.h"
 

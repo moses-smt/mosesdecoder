@@ -18,8 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_OPTIONS_H_
-#define EXTRACT_GHKM_OPTIONS_H_
 
 #include <string>
 
@@ -40,10 +38,13 @@ public:
     , maxRuleSize(3)
     , maxScope(3)
     , minimal(false)
+    , partsOfSpeech(false)
+    , partsOfSpeechFactor(false)
     , pcfg(false)
     , phraseOrientation(false)
     , sentenceOffset(0)
     , sourceLabels(false)
+    , stripBitParLabels(false)
     , stsg(false)
     , t2s(false)
     , treeFragments(false)
@@ -68,12 +69,15 @@ public:
   int maxRuleSize;
   int maxScope;
   bool minimal;
+  bool partsOfSpeech;
+  bool partsOfSpeechFactor;
   bool pcfg;
   bool phraseOrientation;
   int sentenceOffset;
   bool sourceLabels;
   std::string sourceLabelSetFile;
   std::string sourceUnknownWordFile;
+  bool stripBitParLabels;
   bool stsg;
   bool t2s;
   std::string targetUnknownWordFile;
@@ -87,4 +91,3 @@ public:
 }  // namespace GHKM
 }  // namespace Moses
 
-#endif

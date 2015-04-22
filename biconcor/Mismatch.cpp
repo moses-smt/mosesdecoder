@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "SuffixArray.h"
 #include "TargetCorpus.h"

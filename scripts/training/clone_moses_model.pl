@@ -1,10 +1,11 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
 # $Id$
 # given a moses.ini file, creates a fresh version of it
 # in the current directory
 # All relevant files are hardlinked or copied to the directory, too.
 
+use warnings;
 use strict;
 use Getopt::Long;
 

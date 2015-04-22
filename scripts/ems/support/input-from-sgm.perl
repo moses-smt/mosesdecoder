@@ -1,5 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 die("ERROR syntax: input-from-sgm.perl < in.sgm > in.txt") 

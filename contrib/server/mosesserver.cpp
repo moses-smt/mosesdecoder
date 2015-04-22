@@ -1,3 +1,30 @@
+#if 0
+#include "moses/ExportInterface.h"
+// The separate moses server executable is being phased out.
+// Since there were problems with the migration into the main
+// executable, this separate program is still included in the
+// distribution for legacy reasons. Contributors are encouraged 
+// to add their contributions to moses/server rather than 
+// contrib/server. This recommendation does not apply to wrapper
+// scripts. 
+// The future is this:
+
+/** main function of the command line version of the decoder **/
+int main(int argc, char** argv)
+{
+  // Map double-dash long options back to single-dash long options
+  // as used in legacy moses.
+  for (int i = 1; i < argc; ++i)
+    {
+      char* a = argv[i];
+      if (a[0] == '-' && a[1] == '-')
+	for (size_t k = 1; (a[k] = a[k+1]); ++k);
+    }
+
+  return decoder_main(argc, argv);
+}
+#else
+
 #include <stdexcept>
 #include <iostream>
 #include <vector>
@@ -29,7 +56,8 @@
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>
 
-using namespace Moses;
+// using namespace Moses;
+using Moses::TreeInput;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
@@ -279,7 +307,7 @@ public:
     stringstream out, graphInfo, transCollOpts;
 
     if (staticData.IsSyntax()) {
-       TreeInput tinput;
+      TreeInput tinput;
         const vector<FactorType>& 
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
@@ -566,13 +594,14 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     boost::condition_variable cond;
     boost::mutex mut;
-    TranslationTask task(paramList,cond,mut);
-    m_threadPool.Submit(&task);
+    typedef ::TranslationTask TTask;
+    boost::shared_ptr<TTask> task(new TTask(paramList,cond,mut));
+    m_threadPool.Submit(task);
     boost::unique_lock<boost::mutex> lock(mut);
-    while (!task.IsDone()) {
+    while (!task->IsDone()) {
       cond.wait(lock);
     }
-    *retvalP = xmlrpc_c::value_struct(task.GetRetData());
+    *retvalP = xmlrpc_c::value_struct(task->GetRetData());
   }
 private:
   Moses::ThreadPool m_threadPool;
@@ -723,3 +752,5 @@ int main(int argc, char** argv)
   std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
   return 1;
 }
+
+#endif
