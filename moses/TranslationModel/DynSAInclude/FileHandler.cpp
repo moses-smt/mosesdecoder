@@ -1,7 +1,9 @@
 #include "FileHandler.h"
 #include <cstdio>
 
-#ifdef WIN32
+// Workaround: plain Windows does not have popen()/pclose().
+// (MinGW already #define's them, so skip the workaround there.)
+#if defined(WIN32) && !defined(__MINGW32__)
 #define popen(A, B) _popen(A, B)
 #define pclose(A) _pclose(A)
 #endif
