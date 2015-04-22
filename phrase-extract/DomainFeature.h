@@ -14,8 +14,6 @@
 
 #include "ScoreFeature.h"
 
-extern std::vector<std::string> tokenize( const char*);
-
 namespace MosesTraining
 {
 
