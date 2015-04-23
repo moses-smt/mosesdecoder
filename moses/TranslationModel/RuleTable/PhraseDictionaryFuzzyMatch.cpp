@@ -64,7 +64,7 @@ char *mkdtemp(char *tempbuf)
   }
 
   util::rand_init();
-  rand_value = rand_excl(1e6);
+  rand_value = util::rand_excl(1e6);
   tempbase = strrchr(tempbuf, '/');
   tempbase = tempbase ? tempbase+1 : tempbuf;
   strcpy(tempbasebuf, tempbase);
