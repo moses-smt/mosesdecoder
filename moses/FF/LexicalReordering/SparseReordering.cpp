@@ -13,8 +13,11 @@
 #include "LexicalReordering.h"
 #include "SparseReordering.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -57,6 +60,7 @@ const std::string& SparseReorderingFeatureKey::Name (const string& wordListId)
 
 SparseReordering::SparseReordering(const map<string,string>& config, const LexicalReordering* producer)
   : m_producer(producer)
+  , m_useWeightMap(false)
 {
   static const string kSource= "source";
   static const string kTarget = "target";
@@ -79,6 +83,14 @@ SparseReordering::SparseReordering(const map<string,string>& config, const Lexic
         ReadClusterMap(i->second,fields[2],SparseReorderingFeatureKey::Target, &m_targetClusterMaps);
       } else {
         UTIL_THROW(util::Exception, "Sparse reordering requires source or target, not " << fields[1]);
+      }
+    } else if (fields[0] == "weights") {
+      ReadWeightMap(i->second);
+      m_useWeightMap = true;
+      for (int reoType=0; reoType<=LRModel::MAX; ++reoType) {
+        ostringstream buf;
+        buf << reoType;
+        m_featureMap2.push_back(m_producer->GetFeatureName(buf.str()));
       }
 
     } else if (fields[0] == "phrase") {
@@ -175,7 +187,18 @@ void SparseReordering::AddFeatures(
     SparseReorderingFeatureKey key(id, type, wordFactor, false, position, side, reoType);
     FeatureMap::const_iterator fmi = m_featureMap.find(key);
     assert(fmi != m_featureMap.end());
-    scores->SparsePlusEquals(fmi->second, 1.0);
+    if (m_useWeightMap) {
+// std::cerr << "fmi->second.name()= " << fmi->second.name() << std::endl;
+      WeightMap::const_iterator wmi = m_weightMap.find(fmi->second.name());
+      if (wmi != m_weightMap.end()) {
+// std::cerr << "scoring: " << buf.str() << " " << wmi->second << std::endl;
+        if (wmi->second != 0) {
+          scores->SparsePlusEquals(m_featureMap2[reoType], wmi->second);
+        }
+      }
+    } else {
+      scores->SparsePlusEquals(fmi->second, 1.0);
+    }
   }
 
   for (size_t id = 0; id < clusterMaps->size(); ++id) {
@@ -186,7 +209,18 @@ void SparseReordering::AddFeatures(
       SparseReorderingFeatureKey key(id, type, clusterIter->second, true, position, side, reoType);
       FeatureMap::const_iterator fmi = m_featureMap.find(key);
       assert(fmi != m_featureMap.end());
-      scores->SparsePlusEquals(fmi->second, 1.0);
+      if (m_useWeightMap) {
+// std::cerr << "fmi->second.name()= " << fmi->second.name() << std::endl;
+        WeightMap::const_iterator wmi = m_weightMap.find(fmi->second.name());
+        if (wmi != m_weightMap.end()) {
+// std::cerr << "scoring: " << buf.str() << " " << wmi->second << std::endl;
+          if (wmi->second != 0) {
+            scores->SparsePlusEquals(m_featureMap2[reoType], wmi->second);
+          }
+        }
+      } else {
+        scores->SparsePlusEquals(fmi->second, 1.0);
+      }
     }
   }
 
@@ -255,6 +289,97 @@ void SparseReordering::CopyScores(
 
 
 }
+
+
+void SparseReordering::ReadWeightMap(const string& filename)
+{
+  util::FilePiece file(filename.c_str());
+  StringPiece line;
+  while (true) {
+    try {
+      line = file.ReadLine();
+    } catch (const util::EndOfFileException &e) {
+      break;
+    }
+    util::TokenIter<util::SingleCharacter, true> lineIter(line,util::SingleCharacter(' '));
+    UTIL_THROW_IF2(!lineIter, "Malformed weight line: '" << line << "'");
+    const std::string& name = lineIter->as_string();
+    ++lineIter;
+    UTIL_THROW_IF2(!lineIter, "Malformed weight line: '" << line << "'");
+    float weight = Moses::Scan<float>(lineIter->as_string());
+
+    std::pair< WeightMap::iterator, bool> inserted = m_weightMap.insert( std::make_pair(name, weight) );
+    UTIL_THROW_IF2(!inserted.second, "Duplicate weight: '" << name << "'");
+  }
+}
+
+/*
+const SparseReorderingFeatureKey SparseReordering::FeatureKeyFromString(std::string& name) const
+{
+  std::vector<std::string> tokens;
+  std::vector<std::string> tokens = Tokenize(name, "-");
+
+  SparseReorderingFeatureKey key;
+
+  UTIL_THROW_IF2(tokens.size() != 6, 
+                 "Flawed sparse reordering feature key");
+
+  // type
+  if ( tokens[0] == "phr" ) {
+    key.type = Phrase;
+  } else if ( tokens[0] == "stk" ) {
+    key.type = Stack;
+  } else if ( tokens[0] == "btn" ) {
+    key.type = Between;
+  } else {
+    UTIL_THROW2("Flawed sparse reordering feature key");
+  }
+
+  // side
+  if ( tokens[1] == "src" ) {
+    key.side = Source;
+  } else if ( tokens[1] == "tgt" ) {
+    key.side = Target;
+  } else {
+    UTIL_THROW2("Flawed sparse reordering feature key");
+  }
+
+  // position
+  if ( tokens[2] == "first" ) {
+    key.position = First;
+  } else if ( tokens[2] == "last" ) {
+    key.position = Last;
+  } else {
+    UTIL_THROW2("Flawed sparse reordering feature key");
+  }
+
+  // wordListId 
+  std::string& wordListId = tokens[3];
+
+  // cluster/word
+  if (starts_with(tokens[4], "cluster_")) {
+    key.isCluster = true;
+  } else {
+    key.isCluster = false;
+  }
+
+
+
+
+buf << kSep;
+
+  if (isCluster) buf << "cluster_";
+  buf << word->GetString();
+
+buf << kSep;
+
+  buf << reoType;
+
+
+  name = buf.str();
+  return name;
+}
+*/
 
 } //namespace
 
