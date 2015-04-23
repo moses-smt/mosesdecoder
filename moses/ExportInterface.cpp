@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include <vector>
 
+#include "util/random.hh"
 #include "util/usage.hh"
 
 #ifdef WIN32
@@ -91,7 +92,7 @@ SimpleTranslationInterface::SimpleTranslationInterface(const string &mosesIni): 
       exit(1);
     }
 
-    srand(time(NULL));
+    util::rand_init();
 
 }
 
@@ -185,7 +186,7 @@ batch_run()
   const StaticData& staticData = StaticData::Instance();
 
   //initialise random numbers
-  srand(time(NULL));
+  util::rand_init();
 
   IFVERBOSE(1) PrintUserTime("Created input-output object");
     

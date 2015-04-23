@@ -40,6 +40,7 @@ de recherches du Canada
 #include <boost/scoped_ptr.hpp>
 
 #include "util/exception.hh"
+#include "util/random.hh"
 
 #include "BleuScorer.h"
 #include "HopeFearDecoder.h"
@@ -122,10 +123,10 @@ int main(int argc, char** argv)
 
   if (vm.count("random-seed")) {
     cerr << "Initialising random seed to " << seed << endl;
-    srand(seed);
+    util::rand_init(seed);
   } else {
     cerr << "Initialising random seed from system clock" << endl;
-    srand(time(NULL));
+    util::rand_init();
   }
 
   // Initialize weights

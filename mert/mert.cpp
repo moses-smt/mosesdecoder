@@ -290,10 +290,10 @@ int main(int argc, char **argv)
 
   if (option.has_seed) {
     cerr << "Seeding random numbers with " << option.seed << endl;
-    util::rand_int_init(option.seed);
+    util::rand_init(option.seed);
   } else {
     cerr << "Seeding random numbers with system clock " << endl;
-    util::rand_int_init();
+    util::rand_init();
   }
 
   if (option.sparse_weights_file.size()) ++option.pdim;

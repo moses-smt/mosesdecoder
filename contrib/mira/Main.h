@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Word.h"
 #include "moses/FF/FeatureFunction.h"
 #include "Decoder.h"
+#include "util/random.hh"
 
 typedef std::map<const Moses::FeatureFunction*, std::vector< float > > ProducerWeightMap;
 typedef std::pair<const Moses::FeatureFunction*, std::vector< float > > ProducerWeightPair;
@@ -37,8 +38,11 @@ template <class T> bool from_string(T& t, const std::string& s, std::ios_base& (
 
 struct RandomIndex {
   ptrdiff_t operator()(ptrdiff_t max) {
-    srand(time(0));  // Initialize random number generator with current time.
-    return static_cast<ptrdiff_t> (rand() % max);
+    // TODO: Don't seed the randomizer here.  If this function gets called
+    // multiple times in the same second, it will return the same value on
+    // each of those calls.
+    util::rand_init();
+    return util::rand_excl(max);
   }
 };
 
