@@ -1637,7 +1637,7 @@ void Manager::OutputNBest(std::ostream& out
     out << " |||";
 
     // print scores with feature names
-    path.GetScoreBreakdown().OutputAllFeatureScores(out );
+    path.GetScoreBreakdown()->OutputAllFeatureScores(out);
 
     // total
     out << " ||| " << path.GetTotalScore();

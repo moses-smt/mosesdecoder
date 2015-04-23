@@ -19,14 +19,14 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_TrellisPath_h
-#define moses_TrellisPath_h
+#pragma once
 
 #include <iostream>
 #include <vector>
 #include <limits>
 #include "Hypothesis.h"
 #include "TypeDef.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
@@ -50,13 +50,13 @@ protected:
 																	, or NOT_FOUND if this path is the best trans so consist of only hypos
 															 */
 
-  ScoreComponentCollection	m_scoreBreakdown;
   float m_totalScore;
+  mutable boost::shared_ptr<ScoreComponentCollection> m_scoreBreakdown;
 
   //Used by Manager::LatticeSample()
   explicit TrellisPath(const std::vector<const Hypothesis*> edges);
 
-  void InitScore();
+  void InitTotalScore();
 
 public:
   TrellisPath(); // not implemented
@@ -91,9 +91,7 @@ public:
   //! create a list of next best paths by wiggling 1 of the node at a time.
   void CreateDeviantPaths(TrellisPathList &pathColl) const;
 
-  inline const ScoreComponentCollection &GetScoreBreakdown() const {
-    return m_scoreBreakdown;
-  }
+  const boost::shared_ptr<ScoreComponentCollection> GetScoreBreakdown() const;
 
   //! get target words range of the hypo within n-best trellis. not necessarily the same as hypo.GetCurrTargetWordsRange()
   WordsRange GetTargetWordsRange(const Hypothesis &hypo) const;
@@ -123,4 +121,4 @@ inline std::ostream& operator<<(std::ostream& out, const TrellisPath& path)
 }
 
 }
-#endif
+
