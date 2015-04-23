@@ -122,7 +122,6 @@ private:
   void ReadClusterMap(const std::string& filename, const std::string& id, SparseReorderingFeatureKey::Side side, std::vector<ClusterMap>* pClusterMaps);
   void PreCalculateFeatureNames(size_t index, const std::string& id, SparseReorderingFeatureKey::Side side, const Factor* factor, bool isCluster);
   void ReadWeightMap(const std::string& filename);
-//  const SparseReorderingFeatureKey FeatureKeyFromString(std::string& name) const;
 
   void AddFeatures(
     SparseReorderingFeatureKey::Type type, SparseReorderingFeatureKey::Side side,

@@ -188,10 +188,8 @@ void SparseReordering::AddFeatures(
     FeatureMap::const_iterator fmi = m_featureMap.find(key);
     assert(fmi != m_featureMap.end());
     if (m_useWeightMap) {
-// std::cerr << "fmi->second.name()= " << fmi->second.name() << std::endl;
       WeightMap::const_iterator wmi = m_weightMap.find(fmi->second.name());
       if (wmi != m_weightMap.end()) {
-// std::cerr << "scoring: " << buf.str() << " " << wmi->second << std::endl;
         if (wmi->second != 0) {
           scores->SparsePlusEquals(m_featureMap2[reoType], wmi->second);
         }
@@ -210,10 +208,8 @@ void SparseReordering::AddFeatures(
       FeatureMap::const_iterator fmi = m_featureMap.find(key);
       assert(fmi != m_featureMap.end());
       if (m_useWeightMap) {
-// std::cerr << "fmi->second.name()= " << fmi->second.name() << std::endl;
         WeightMap::const_iterator wmi = m_weightMap.find(fmi->second.name());
         if (wmi != m_weightMap.end()) {
-// std::cerr << "scoring: " << buf.str() << " " << wmi->second << std::endl;
           if (wmi->second != 0) {
             scores->SparsePlusEquals(m_featureMap2[reoType], wmi->second);
           }
@@ -313,73 +309,6 @@ void SparseReordering::ReadWeightMap(const string& filename)
   }
 }
 
-/*
-const SparseReorderingFeatureKey SparseReordering::FeatureKeyFromString(std::string& name) const
-{
-  std::vector<std::string> tokens;
-  std::vector<std::string> tokens = Tokenize(name, "-");
-
-  SparseReorderingFeatureKey key;
-
-  UTIL_THROW_IF2(tokens.size() != 6, 
-                 "Flawed sparse reordering feature key");
-
-  // type
-  if ( tokens[0] == "phr" ) {
-    key.type = Phrase;
-  } else if ( tokens[0] == "stk" ) {
-    key.type = Stack;
-  } else if ( tokens[0] == "btn" ) {
-    key.type = Between;
-  } else {
-    UTIL_THROW2("Flawed sparse reordering feature key");
-  }
-
-  // side
-  if ( tokens[1] == "src" ) {
-    key.side = Source;
-  } else if ( tokens[1] == "tgt" ) {
-    key.side = Target;
-  } else {
-    UTIL_THROW2("Flawed sparse reordering feature key");
-  }
-
-  // position
-  if ( tokens[2] == "first" ) {
-    key.position = First;
-  } else if ( tokens[2] == "last" ) {
-    key.position = Last;
-  } else {
-    UTIL_THROW2("Flawed sparse reordering feature key");
-  }
-
-  // wordListId 
-  std::string& wordListId = tokens[3];
-
-  // cluster/word
-  if (starts_with(tokens[4], "cluster_")) {
-    key.isCluster = true;
-  } else {
-    key.isCluster = false;
-  }
-
-
-
-
-buf << kSep;
-
-  if (isCluster) buf << "cluster_";
-  buf << word->GetString();
-
-buf << kSep;
-
-  buf << reoType;
-
-
-  name = buf.str();
-  return name;
-}
-*/
 
 } //namespace
 
