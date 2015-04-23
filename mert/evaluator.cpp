@@ -95,7 +95,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap, bool nbest_i
     for (int i = 0; i < bootstrap; ++i) {
       ScoreData scoredata(g_scorer);
       for (int j = 0; j < n; ++j) {
-        int randomIndex = util::rand_int() % n;
+        const int randomIndex = util::rand_excl(n);
         scoredata.add(entries[randomIndex], j);
       }
       g_scorer->setScoreData(&scoredata);
@@ -285,10 +285,10 @@ void InitSeed(const ProgramOption *opt)
 {
   if (opt->has_seed) {
     cerr << "Seeding random numbers with " << opt->seed << endl;
-    util::rand_int_init(opt->seed);
+    util::rand_init(opt->seed);
   } else {
     cerr << "Seeding random numbers with system clock " << endl;
-    util::rand_int_init();
+    util::rand_init();
   }
 }
 

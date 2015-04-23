@@ -54,6 +54,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "util/exception.hh"
+#include "util/random.hh"
 
 using namespace std;
 
@@ -418,7 +419,7 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
       //cerr << endl;
 
       //draw the sample
-      float frandom = log((float)rand()/RAND_MAX);
+      const float frandom = log(util::rand_incl(0.0f, 1.0f));
       size_t position = 1;
       float sum = candidateScores[0];
       for (; position < candidateScores.size() && sum < frandom; ++position) {

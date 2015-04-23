@@ -345,7 +345,7 @@
 // 	{
 // 	  boost::lock_guard<boost::mutex> lock(stats->lock);
 // 	  if (stats->raw_cnt == ctr) ++stats->raw_cnt;
-// 	  size_t rnum = randInt(stats->raw_cnt - ctr++);
+// 	  size_t rnum = util::rand_excl(stats->raw_cnt - ctr++);
 // 	  // cout << stats->raw_cnt << " " << ctr-1 << " " 
 // 	  // << rnum << " " << max_samples - stats->good << endl;
 // 	  if (rnum < max_samples - stats->good)
