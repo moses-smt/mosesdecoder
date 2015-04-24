@@ -36,7 +36,7 @@ my $ZCAT = "gzip -cd";
 # get optional parameters
 my $opt_hierarchical = 0;
 my $binarizer = undef;
-my $threads = undef; # Default is single-thread, i.e. $threads=1
+my $threads = 1; # Default is single-thread, i.e. $threads=1
 my $syntax_filter_cmd = "$SCRIPTS_ROOTDIR/../bin/filter-rule-table hierarchical";
 my $min_score = undef;
 my $opt_min_non_initial_rule_count = undef;
@@ -54,7 +54,7 @@ GetOptions(
     "SyntaxFilterCmd=s" => \$syntax_filter_cmd,
     "tempdir=s" => \$tempdir,
     "MinScore=s" => \$min_score,
-    "threads" => \$threads,
+    "threads=i" => \$threads,
     "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count,  # DEPRECATED
 ) or exit(1);
 
@@ -407,9 +407,6 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
           ##my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads && rm $mid_file.sorted";
-          if(!defined($threads)) {
-          	$threads = 1
-          }
           my $cmd = "$binarizer -in <($catcmd $mid_file | LC_ALL=C sort -T $tempdir) -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads -encoding None";
           safesystem($cmd) or die "Can't binarize";
         } elsif ($binarizer =~ /CreateOnDiskPt/) {
@@ -431,9 +428,6 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
-          if(!defined($threads)) {
-          	$threads = 1
-          }
           $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $lexbin -in $mid_file.sorted -out $new_file -threads $threads && rm $mid_file.sorted";
         } else {
           $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
