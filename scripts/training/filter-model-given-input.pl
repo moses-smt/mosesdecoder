@@ -408,7 +408,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
           #compact phrase table
           ##my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads && rm $mid_file.sorted";
           if(!defined($threads)) {
-          	$thread = 1
+          	$threads = 1
           }
           my $cmd = "$binarizer -in <($catcmd $mid_file | LC_ALL=C sort -T $tempdir) -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads -encoding None";
           safesystem($cmd) or die "Can't binarize";
@@ -432,7 +432,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
           if(!defined($threads)) {
-          	$thread = 1
+          	$threads = 1
           }
           $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $lexbin -in $mid_file.sorted -out $new_file -threads $threads && rm $mid_file.sorted";
         } else {
