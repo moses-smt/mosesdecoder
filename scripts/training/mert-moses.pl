@@ -1754,6 +1754,7 @@ sub setup_reference_length_type {
 }
 
 sub setup_case_config {
+  return "";
   if ($___NOCASE) {
     return " case:false";
   } else {

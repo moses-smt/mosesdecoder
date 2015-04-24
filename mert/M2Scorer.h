@@ -35,6 +35,7 @@ private:
   float beta_; 
   int max_unchanged_words_;
   bool truecase_;
+  bool verbose_;
   M2::M2 m2_;
   
   std::map<std::pair<size_t, std::string>, std::vector<ScoreStatsType> > seen_;

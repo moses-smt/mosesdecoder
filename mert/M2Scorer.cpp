@@ -4,6 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
+#include <cstdlib>
 
 #include <boost/lexical_cast.hpp>
 
@@ -15,9 +16,14 @@ namespace MosesTuning
 
 M2Scorer::M2Scorer(const string& config)
   : StatisticsBasedScorer("M2Scorer", config),
-    beta_(Scan<float>(getConfig("beta", "0.5"))),
+    /*beta_(Scan<float>(getConfig("beta", "0.5"))),
     max_unchanged_words_(Scan<int>(getConfig("max_unchanged_words", "2"))),
-    truecase_(Scan<bool>(getConfig("case", "false"))),
+    truecase_(false),
+    verbose_(Scan<bool>(getConfig("verbose", "false"))),*/
+    beta_(0.5),
+    max_unchanged_words_(2),
+    truecase_(false),
+    verbose_(false),
     m2_(max_unchanged_words_, beta_, truecase_)
 {}
 
@@ -49,13 +55,13 @@ void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 
 float M2Scorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
+
   if (comps.size() != NumberOfScores()) {
     throw runtime_error("Size of stat vector for M2Scorer is not " + NumberOfScores());
   }
   
   float beta = beta_;
   
-  //std::cerr << comps[0] << " " << comps[1] << " " << comps[2] << std::endl;
   
   float p = 0.0;
   float r = 0.0;
@@ -76,6 +82,12 @@ float M2Scorer::calculateScore(const vector<ScoreStatsType>& comps) const
     f = (1.0 + beta * beta) * p * r / denom;
   else
     f = 0.0;
+
+  if(verbose_) 
+    std::cerr << comps[0] << " " << comps[1] << " " << comps[2] << std::endl;
+
+  if(verbose_) 
+    std::cerr << p << " " << r << " " << f << std::endl;
   
   return f;
 }
@@ -84,21 +96,44 @@ float M2Scorer::getReferenceLength(const vector<ScoreStatsType>& comps) const {
   return comps[3];
 }
 
+std::vector<ScoreStatsType> randomStats(float decay, int max) {
+  int gold = rand() % max;
+  int prop = rand() % max;
+  int corr = 0.0;
+  
+  if(std::min(prop, gold) > 0)
+    corr = rand() % std::min(prop, gold);
+  
+  //std::cerr << corr << " " << prop << " " << gold << std::endl;
+  
+  std::vector<ScoreStatsType> stats(3, 0.0);
+  stats[0] = corr * decay;
+  stats[1] = prop * decay;
+  stats[2] = gold * decay;
+  
+  return stats;
+}
+
 float sentenceM2(const std::vector<ScoreStatsType>& stats)
 {
   float beta = 0.5;
+  
+  std::vector<ScoreStatsType> smoothStats(3, 0.0); // = randomStats(0.001, 5);
+  smoothStats[0] += stats[0]; 
+  smoothStats[1] += stats[1]; 
+  smoothStats[2] += stats[2]; 
   
   float p = 0.0;
   float r = 0.0;
   float f = 0.0;
     
-  if(stats[1] != 0)
-    p = stats[0] / stats[1];
+  if(smoothStats[1] != 0)
+    p = smoothStats[0] / smoothStats[1];
   else
     p = 1.0;
     
-  if(stats[2] != 0)
-    r = stats[0] / stats[2];
+  if(smoothStats[2] != 0)
+    r = smoothStats[0] / smoothStats[2];
   else
     r = 1.0;
   

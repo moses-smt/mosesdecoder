@@ -216,20 +216,28 @@ int main(int argc, char** argv)
     opt.close();
   }
 
-  MiraWeightVector wv(initParams);
 
   // Initialize scorer
   if(sctype != "BLEU" && type == "hypergraph") {
     UTIL_THROW(util::Exception, "hypergraph mira only supports BLEU");
   }
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer(sctype, scconfig));
-
+  
+  
+  ValType initialBleu = 0;
+  ValType bestBleu = 0;
+  
+  do {
+  
+  MiraWeightVector wv(initParams);
+  
   // Initialize background corpus
   vector<ValType> bg(scorer->NumberOfScores(), 1);
 
   boost::scoped_ptr<HopeFearDecoder> decoder;
   if (type == "nbest") {
-    decoder.reset(new NbestHopeFearDecoder(featureFiles, scoreFiles, streaming, no_shuffle, safe_hope, scorer.get()));
+    decoder.reset
+    (new NbestHopeFearDecoder(featureFiles, scoreFiles, streaming, no_shuffle, safe_hope, scorer.get()));
   } else if (type == "hypergraph") {
     decoder.reset(new HypergraphHopeFearDecoder(hgDir, referenceFiles, initDenseSize, streaming, no_shuffle, safe_hope, hgPruning, wv, scorer.get()));
   } else {
@@ -237,9 +245,12 @@ int main(int argc, char** argv)
   }
 
   // Training loop
-  if (!streaming_out)
-    cerr << "Initial BLEU = " << decoder->Evaluate(wv.avg()) << endl;
-  ValType bestBleu = 0;
+  if (!streaming_out) {
+    initialBleu = decoder->Evaluate(wv.avg());
+    cerr << "Initial BLEU = " << initialBleu << endl;
+  }
+  
+  
   for(int j=0; j<n_iters; j++) {
     // MIRA train for one epoch
     int iNumExamples = 0;
@@ -332,6 +343,9 @@ int main(int argc, char** argv)
     }
   }
   cerr << "Best BLEU = " << bestBleu << endl;
+  c *= 0.9;
+  } while(bestBleu/initialBleu < 0.9);
+  
 }
 // --Emacs trickery--
 // Local Variables:

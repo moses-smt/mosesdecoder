@@ -18,18 +18,15 @@ typedef std::vector<std::string> Tokens;
 class CorrectionPattern : public StatelessFeatureFunction
 {
 private:
-  //boost::unordered_set<std::string> m_vocab;
-  FactorType m_factorType;
-  //bool m_unrestricted;
-  std::string m_filename;
-  size_t m_top;
+  std::vector<FactorType> m_factors;
+  bool m_general;
+  size_t m_context;
+  std::vector<FactorType> m_contextFactors;
 
 public:
   CorrectionPattern(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const;
-
-  void Load();
 
   void EvaluateInIsolation(const Phrase &source
                         , const TargetPhrase &targetPhrase
@@ -62,13 +59,12 @@ public:
   
   void SetParameter(const std::string& key, const std::string& value);
   
-  static std::vector<std::string> CreatePattern(const Tokens &s1,
+  std::vector<std::string> CreatePattern(const Tokens &s1,
                                          const Tokens &s2,
                                          const InputType &input,
-                                         const InputPath &inputPath,
-                                         const std::vector<FactorType> &factors);
+                                         const InputPath &inputPath) const;
   
-  static std::string CreateSinglePattern(const Tokens &s1, const Tokens &s2);
+  std::string CreateSinglePattern(const Tokens &s1, const Tokens &s2) const;
 
 };
 
