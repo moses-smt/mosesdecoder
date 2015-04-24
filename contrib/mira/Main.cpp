@@ -46,6 +46,7 @@ namespace mpi = boost::mpi;
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/LM/Base.h"
+#include "util/random.hh"
 
 using namespace Mira;
 using namespace std;
@@ -54,6 +55,7 @@ namespace po = boost::program_options;
 
 int main(int argc, char** argv)
 {
+  util::rand_init();
   size_t rank = 0;
   size_t size = 1;
 #ifdef MPI_ENABLE

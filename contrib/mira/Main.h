@@ -38,10 +38,6 @@ template <class T> bool from_string(T& t, const std::string& s, std::ios_base& (
 
 struct RandomIndex {
   ptrdiff_t operator()(ptrdiff_t max) {
-    // TODO: Don't seed the randomizer here.  If this function gets called
-    // multiple times in the same second, it will return the same value on
-    // each of those calls.
-    util::rand_init();
     return util::rand_excl(max);
   }
 };
