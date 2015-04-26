@@ -34,7 +34,7 @@ else
   }
   else # is curlpp-config in the path ? 
   {
-    local curlpp-check = [ _shell "curlpp-config >/dev/null" : exit-status ] ; 
+    local curlpp-check = [ _shell "curlpp-config 2>/dev/null" : exit-status ] ; 
     if $(curlpp-check[2]) = 0 { config = curlpp-config ; }
   }
   

@@ -4,7 +4,7 @@
 
 if [ option.get "no-xmlrpc-c" ] 
 {
-  rule xmlrpc-c ( what ? ) { } # never return anything
+  rule xmlrpc ( what ? ) { } # never return anything
 }
 else
 {
@@ -23,8 +23,10 @@ else
   local config ; 
   if ! $(xmlrpc) { config = "xmlrpc-c-config" ; }
   else { config = "$(xmlrpc)/bin/xmlrpc-c-config" ; }
+
   # check if xmlrpc-config can be executed
   xmlrpc-check = [ _shell "$(config) --features 2>/dev/null" : exit-status ] ; 
+
   if $(xmlrpc-check[2]) = 0 # yes it can
   { 
     # is the abyss server is available ?
@@ -51,8 +53,35 @@ else
       echo "XMLRPC-C: or compile without server functionality (--no-xmlrpc-c)." ; 
       exit : 1 ;
     }
+    local prefix  = [ shell_or_die "$(config) --prefix" ] ;
+    local version = [ shell_or_die "$(config) --version" ] ;
+    echo "XMLRPC-C: USING VERSION $(version) FROM $(prefix)" ;
+    
+    # now add stuff to the requirements
+    local cflags = [ shell_or_die "$(config) c++2 abyss-server --cflags" ] ;
+    requirements += <define>HAVE_XMLRPC_C ;
+    requirements += <cxxflags>$(xmlrpc-cxxflags) ;
+    
+    local libs = [ shell_or_die "$(config) c++2 abyss-server --libs" ] ;
+    for local i in [ SPLIT_BY_CHARACTERS $(libs) : " " ] 
+    { 
+      local libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
+      if $(libname) 
+      {   
+	external-lib $(libname) : $(prefix)/lib ;
+	#      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+	requirements += <library>$(libname) ;
+      }
+      local pathname = [ MATCH "-L(.*)" : $(i) ] ; 
+      if $(pathname)
+      {
+	requirements += <library-path>$(pathname) ; 
+      }
+    }
+  
+    rule xmlrpc { return yes ; }
   }
- else if [ option.get "with-xmlrpc-c" ] 
+  else if [ option.get "with-xmlrpc-c" ] 
   {
     echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
     echo "XMLRPC-C: Could not find $(config). " ;
@@ -60,34 +89,11 @@ else
     echo "Use --no-xmlrpc-c to compile moses without server functionality. " ; 
     exit : 1 ;
   }
-  
-  local prefix  = [ shell_or_die "$(config) --prefix" ] ;
-  local version = [ shell_or_die "$(config) --version" ] ;
-  echo "XMLRPC-C: USING VERSION $(version) FROM $(prefix)" ;
-    
-  # now add stuff to the requirements
-  local cflags = [ shell_or_die "$(config) c++2 abyss-server --cflags" ] ;
-  requirements += <define>HAVE_XMLRPC_C ;
-  requirements += <cxxflags>$(xmlrpc-cxxflags) ;
-    
-  local libs = [ shell_or_die "$(config) c++2 abyss-server --libs" ] ;
-  for local i in [ SPLIT_BY_CHARACTERS $(libs) : " " ] 
-  { 
-    local libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
-    if $(libname) 
-    {   
-      external-lib $(libname) : $(prefix)/lib ;
-      #      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-      requirements += <library>$(libname) ;
-    }
-    local pathname = [ MATCH "-L(.*)" : $(i) ] ; 
-    if $(pathname)
-    {
-      requirements += <library-path>$(pathname) ; 
-    }
+  else
+  {
+    rule xmlrpc ( what ? ) { } # never return anything
   }
   
-  rule xmlrpc { return yes ; }
 }
 
 
