@@ -58,7 +58,7 @@ else
     echo "XMLRPC-C: USING VERSION $(version) FROM $(prefix)" ;
     
     # now add stuff to the requirements
-    local cflags = [ shell_or_die "$(config) c++2 abyss-server --cflags" ] ;
+    local xmlrpc-cxxflags = [ shell_or_die "$(config) c++2 abyss-server --cflags" ] ;
     requirements += <define>HAVE_XMLRPC_C ;
     requirements += <cxxflags>$(xmlrpc-cxxflags) ;
     
