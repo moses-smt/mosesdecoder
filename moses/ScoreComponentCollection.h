@@ -95,24 +95,24 @@ private:
   FVector m_scores;
 
 public:
-  typedef std::pair<size_t,size_t> IndexPair;
+  // typedef std::pair<size_t,size_t> IndexPair;
 private:
-  typedef std::map<const FeatureFunction*,IndexPair> ScoreIndexMap;
-  static  ScoreIndexMap s_scoreIndexes;
+  // typedef std::map<const FeatureFunction*,IndexPair> ScoreIndexMap;
+  // static  ScoreIndexMap s_scoreIndexes;
   static size_t s_denseVectorSize;
 public:
-  static IndexPair GetIndexes(const FeatureFunction* sp) {
-    ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
-    if (indexIter == s_scoreIndexes.end()) {
-      std::stringstream strme;
-      strme << "ERROR: FeatureFunction: " << sp->GetScoreProducerDescription() <<
-            " not registered with ScoreIndexMap" << std::endl;
-      strme << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
-            " for every FeatureFunction" << std::endl;
-      UTIL_THROW2(strme.str());
-    }
-    return indexIter->second;
-  }
+  // static IndexPair GetIndexes(const FeatureFunction* sp) {
+  //   ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
+  //   if (indexIter == s_scoreIndexes.end()) {
+  //     std::stringstream strme;
+  //     strme << "ERROR: FeatureFunction: " << sp->GetScoreProducerDescription() <<
+  //           " not registered with ScoreIndexMap" << std::endl;
+  //     strme << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
+  //           " for every FeatureFunction" << std::endl;
+  //     UTIL_THROW2(strme.str());
+  //   }
+  //   return indexIter->second;
+  // }
 
 public:
   static void ResetCounter() {
@@ -136,7 +136,7 @@ public:
     * Register a ScoreProducer with a fixed number of scores, so that it can
     * be allocated space in the dense part of the feature vector.
     **/
-  static void RegisterScoreProducer(const FeatureFunction* scoreProducer);
+  static void RegisterScoreProducer(FeatureFunction* scoreProducer);
 
   /** Load from file */
   bool Load(const std::string& filename) {
@@ -229,22 +229,23 @@ public:
   //! Add scores from a single ScoreProducer only
   //! The length of scores must be equal to the number of score components
   //! produced by sp
-  void PlusEquals(const FeatureFunction* sp, const ScoreComponentCollection& scores) {
-    IndexPair indexes = GetIndexes(sp);
-    for (size_t i = indexes.first; i < indexes.second; ++i) {
-      m_scores[i] += scores.m_scores[i];
-    }
+  void 
+  PlusEquals(const FeatureFunction* sp, 
+	     const ScoreComponentCollection& scores) {
+    size_t i = sp->GetIndex();
+    size_t stop = i + sp->GetNumScoreComponents();
+    for (;i < stop; ++i) m_scores[i] += scores.m_scores[i];
   }
 
   //! Add scores from a single FeatureFunction only
   //! The length of scores must be equal to the number of score components
   //! produced by sp
   void PlusEquals(const FeatureFunction* sp, const std::vector<float>& scores) {
-    IndexPair indexes = GetIndexes(sp);
-    UTIL_THROW_IF2(scores.size() != indexes.second - indexes.first,
+    UTIL_THROW_IF2(scores.size() != sp->GetNumScoreComponents(),
                    "Number of scores is incorrect");
+    size_t offset = sp->GetIndex();
     for (size_t i = 0; i < scores.size(); ++i) {
-      m_scores[i + indexes.first] += scores[i];
+      m_scores[i + offset] += scores[i];
     }
   }
 
@@ -252,10 +253,9 @@ public:
   //! to add the score from a single ScoreProducer that produces
   //! a single value
   void PlusEquals(const FeatureFunction* sp, float score) {
-    IndexPair indexes = GetIndexes(sp);
-    UTIL_THROW_IF2(1 != indexes.second - indexes.first,
+    UTIL_THROW_IF2(sp->GetNumScoreComponents() != 1,
                    "Number of scores is incorrect");
-    m_scores[indexes.first] += score;
+    m_scores[sp->GetIndex()] += score;
   }
 
   //For features which have an unbounded number of components
@@ -287,10 +287,10 @@ public:
   //! to add the score from a single ScoreProducer that produces
   //! a single value
   void Assign(const FeatureFunction* sp, float score) {
-    IndexPair indexes = GetIndexes(sp);
-    UTIL_THROW_IF2(1 != indexes.second - indexes.first,
+    
+    UTIL_THROW_IF2(sp->GetNumScoreComponents() != 1,
                    "Feature function must must only contain 1 score");
-    m_scores[indexes.first] = score;
+    m_scores[sp->GetIndex()] = score;
   }
 
   // Assign score by index
@@ -329,9 +329,9 @@ public:
     size_t components = sp->GetNumScoreComponents();
 
     std::vector<float> res(components);
-    IndexPair indexes = GetIndexes(sp);
+    size_t offset = sp->GetIndex();
     for (size_t i = 0; i < res.size(); ++i) {
-      res[i] = m_scores[i + indexes.first];
+      res[i] = m_scores[i + offset];
     }
     return res;
   }
@@ -364,18 +364,17 @@ public:
     m_scores.capMin(minValue);
   }
 
-  std::pair<size_t,size_t> GetIndexesForProducer(const FeatureFunction* sp) const {
-    IndexPair indexPair = GetIndexes(sp);
-    return indexPair;
-  }
+  // std::pair<size_t,size_t> GetIndexesForProducer(const FeatureFunction* sp) const {
+  //   IndexPair indexPair = GetIndexes(sp);
+  //   return indexPair;
+  // }
 
   //! if a FeatureFunction produces a single score (for example, a language model score)
   //! this will return it.  If not, this method will throw
   float GetScoreForProducer(const FeatureFunction* sp) const {
-    IndexPair indexes = GetIndexes(sp);
-    UTIL_THROW_IF2(indexes.second - indexes.first != 1,
+    UTIL_THROW_IF2(sp->GetNumScoreComponents() != 1,
                    "Feature function must must only contain 1 score");
-    return m_scores[indexes.first];
+    return m_scores[sp->GetIndex()];
   }
 
   //For features which have an unbounded number of components

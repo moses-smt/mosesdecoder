@@ -43,6 +43,7 @@ protected:
   bool m_requireSortingAfterSourceContext;
   size_t m_verbosity;
   size_t m_numScoreComponents;
+  size_t m_index; // index into vector covering ALL feature function values
   std::vector<bool> m_tuneableComponents;
   size_t m_numTuneableComponents;
   //In case there's multiple producers with the same description
@@ -114,6 +115,8 @@ public:
 
   virtual std::vector<float> DefaultWeights() const;
 
+  size_t GetIndex() const;
+  size_t SetIndex(size_t const idx);
 
 protected:
   virtual void
