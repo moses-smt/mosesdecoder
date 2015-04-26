@@ -109,14 +109,17 @@ size_t lookup( string query )
   return suffixArray.Count( queryString );
 }
 
-vector<string> tokenize( const char input[] )
+// Duplicate of definition in util/tokenize.hh.
+// TODO: Can we de-duplicate this?  At the time of writing biconcor does not
+// use util at all.
+vector<string> tokenize(const char input[])
 {
   vector< string > token;
   bool betweenWords = true;
   int start=0;
-  int i=0;
-  for(; input[i] != '\0'; i++) {
-    bool isSpace = (input[i] == ' ' || input[i] == '\t');
+  int i;
+  for(i = 0; input[i] != '\0'; i++) {
+    const bool isSpace = (input[i] == ' ' || input[i] == '\t');
 
     if (!isSpace && betweenWords) {
       start = i;

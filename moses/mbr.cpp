@@ -105,13 +105,13 @@ const TrellisPath doMBR(const TrellisPathList& nBestList)
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
     float score = StaticData::Instance().GetMBRScale()
-                  * path.GetScoreBreakdown().GetWeightedScore();
+                  * path.GetScoreBreakdown()->GetWeightedScore();
     if (maxScore < score) maxScore = score;
   }
 
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
-    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().GetWeightedScore() - maxScore);
+    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown()->GetWeightedScore() - maxScore);
     marginal += joint_prob;
     joint_prob_vec.push_back(joint_prob);
 

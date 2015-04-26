@@ -9,6 +9,7 @@
 #include <iostream>
 #include "util/exception.hh"
 #include "moses/Util.h"
+#include "util/random.hh"
 //#include <cassert>
 
 // #include "ug_bv_iter.h"
@@ -896,13 +897,6 @@ namespace ugdiss
     return bv;
   }
 
-  inline
-  size_t 
-  randInt(size_t N)
-  {
-    return size_t(N*(rand()/(RAND_MAX+1.)));
-  }
-
   /// randomly select up to N occurrences of the sequence
   template<typename Token>
   sptr<vector<typename ttrack::Position> >
@@ -924,8 +918,8 @@ namespace ugdiss
         root->readEntry(I.next,I);
         
         // t: expected number of remaining samples
-        double t = (stop - I.pos)/root->aveIndexEntrySize();
-        double r = t*rand()/(RAND_MAX+1.);
+        const double t = (stop - I.pos)/root->aveIndexEntrySize();
+        const double r = util::rand_excl(t);
         if (r < N-m)
           {
             ret->at(m).offset = I.offset;

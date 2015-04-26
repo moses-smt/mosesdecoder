@@ -4,6 +4,8 @@
 #lopar2pos: extract POSs from LOPAR output
 #usage: lopar2pos.pl CORPUS.lopar > CORPUS.pos
 
+use warnings;
+
 my $infilename = shift @ARGV;
 open(INFILE, "<$infilename") or die "couldn't open '$infilename' for read: $!\n";
 while(my $line = <INFILE>)

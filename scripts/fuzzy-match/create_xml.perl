@@ -3,6 +3,7 @@
 binmode( STDIN,  ":utf8" );
 binmode( STDOUT, ":utf8" );
 
+use warnings;
 use strict;
 use FindBin qw($RealBin);
 use File::Basename;

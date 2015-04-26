@@ -5,6 +5,7 @@
 # Some rudimentary sanity checks are done on the fly.
 # Ondrej Bojar, bojar@ufal.mff.cuni.cz
 
+use warnings;
 use strict;
 
 my $errs = 0;

@@ -3,6 +3,7 @@
 #include "tables-core.h"
 #include "XmlException.h"
 #include "XmlTree.h"
+#include "util/tokenize.hh"
 
 #include <cassert>
 #include <vector>
@@ -24,7 +25,7 @@ StringTree *XmlTreeParser::Parse(const std::string &line) {
   tree_.ConnectNodes();
   SyntaxNode *root = tree_.GetTop();
   assert(root);
-  words_ = tokenize(line_.c_str());
+  words_ = util::tokenize(line_);
   return ConvertTree(*root, words_);
 }
 

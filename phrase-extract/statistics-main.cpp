@@ -14,6 +14,7 @@
 #include "AlignmentPhrase.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
+#include "util/tokenize.hh"
 
 using namespace std;
 using namespace MosesTraining;
@@ -237,7 +238,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair )
 
 bool PhraseAlignment::create(const char line[], int lineID )
 {
-  vector< string > token = tokenize( line );
+  const vector< string > token = util::tokenize( line );
   int item = 1;
   PHRASE phraseF, phraseE;
   for (size_t j=0; j<token.size(); j++) {
@@ -321,7 +322,7 @@ void LexicalTable::load( const string &filePath )
     i++;
     if (i%100000 == 0) cerr << "." << flush;
 
-    vector<string> token = tokenize( line.c_str() );
+    const vector<string> token = util::tokenize( line );
     if (token.size() != 3) {
       cerr << "line " << i << " in " << filePath << " has wrong number of tokens, skipping:\n" <<
            token.size() << " " << token[0] << " " << line << endl;

@@ -16,6 +16,7 @@ use warnings;
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
+use warnings;
 use FindBin qw($RealBin);
 use strict;
 use Time::HiRes;

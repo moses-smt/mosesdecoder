@@ -536,7 +536,7 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  path.GetScoreBreakdown().OutputAllFeatureScores(buf);
+	  path.GetScoreBreakdown()->OutputAllFeatureScores(buf);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 

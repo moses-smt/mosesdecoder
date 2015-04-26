@@ -166,7 +166,7 @@ namespace MosesServer
 	  {
 	    // should the score breakdown be reported in a more structured manner?
 	    ostringstream buf;
-	    path->GetScoreBreakdown().OutputAllFeatureScores(buf);
+	    path->GetScoreBreakdown()->OutputAllFeatureScores(buf);
 	    nBestXmlItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	  }
 	

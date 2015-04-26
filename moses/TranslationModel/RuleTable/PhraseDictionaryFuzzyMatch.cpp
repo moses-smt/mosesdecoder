@@ -45,6 +45,7 @@
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
 #include "util/file.hh"
 #include "util/exception.hh"
+#include "util/random.hh"
 
 using namespace std;
 
@@ -62,8 +63,8 @@ char *mkdtemp(char *tempbuf)
     return NULL;
   }
 
-  srand((unsigned)time(0));
-  rand_value = (int)((rand() / ((double)RAND_MAX+1.0)) * 1e6);
+  util::rand_init();
+  rand_value = util::rand_excl(1e6);
   tempbase = strrchr(tempbuf, '/');
   tempbase = tempbase ? tempbase+1 : tempbuf;
   strcpy(tempbasebuf, tempbase);
@@ -130,10 +131,6 @@ int removedirectoryrecursively(const char *dirname)
   struct dirent *entry;
   char path[PATH_MAX];
 
-  if (path == NULL) {
-    fprintf(stderr, "Out of memory error\n");
-    return 0;
-  }
   dir = opendir(dirname);
   if (dir == NULL) {
     perror("Error opendir()");

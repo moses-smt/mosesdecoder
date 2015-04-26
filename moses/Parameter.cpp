@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "util/exception.hh"
+#include "util/random.hh"
 #include <boost/program_options.hpp>
 
 
@@ -1393,7 +1394,7 @@ struct Credit {
     this->contact							= contact						;
     this->currentPursuits			= currentPursuits		;
     this->areaResponsibility	= areaResponsibility;
-    this->sortId							= rand() % 1000;
+    this->sortId							= util::rand_excl(1000);
   }
 
   bool operator<(const Credit &other) const {

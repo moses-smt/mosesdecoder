@@ -1,6 +1,9 @@
 #include <iostream>
 
+#include "util/tokenize_piece.hh"
+
 #include "ForestRescore.h"
+#include "MiraFeatureVector.h"
 
 #define BOOST_TEST_MODULE MertForestRescore
 #include <boost/test/unit_test.hpp>
@@ -10,8 +13,7 @@
 using namespace std;
 using namespace MosesTuning;
 
-BOOST_AUTO_TEST_CASE(viterbi_simple_lattice)
-{
+BOOST_AUTO_TEST_CASE(viterbi_simple_lattice) {
   Vocab vocab;
   WordVec words;
   string wordStrings[] =
@@ -242,5 +244,101 @@ BOOST_AUTO_TEST_CASE(viterbi_3branch_lattice)
   BOOST_CHECK_EQUAL(6, hopeHypo.bleuStats[8]);
 }
 
+BOOST_AUTO_TEST_CASE(viterbi_full_hypergraph) {
+  Vocab vocab;
+  //References
+  ReferenceSet references;
+  references.AddLine(0,"in addition to EU support for businesses , also the administration of national business support will be concentrated in four Centres for Economic Development , Transport and Environment ( ELY Centres ) , starting from mid @-@ September .",vocab); 
+  //Load the hypergraph
+  Graph graph(vocab);
+  util::scoped_fd fd(util::OpenReadOrThrow("mert/hgtest/0.gz"));
+  util::FilePiece file(fd.release());
+  ReadGraph(file,graph);
+
+  //prune
+  SparseVector weights;
+  weights.set("OpSequenceModel0_1",0.011187);
+  weights.set("OpSequenceModel0_2",-0.002797);
+  weights.set("OpSequenceModel0_3",0.002797);
+  weights.set("OpSequenceModel0_4",-0.000140);
+  weights.set("OpSequenceModel0_5",0.004195);
+  weights.set("Distortion0",0.041952);
+  weights.set("PhrasePenalty0",0.027968);
+  weights.set("WordPenalty0",-0.139841);
+  weights.set("UnknownWordPenalty0",1.000000);
+  weights.set("LM0",0.069920);
+  weights.set("LexicalReordering0_1",0.041952);
+  weights.set("LexicalReordering0_2",0.041952);
+  weights.set("LexicalReordering0_3",0.041952);
+  weights.set("LexicalReordering0_4",0.041952);
+  weights.set("LexicalReordering0_5",0.041952);
+  weights.set("LexicalReordering0_6",0.041952);
+  weights.set("LexicalReordering0_7",0.041952);
+  weights.set("LexicalReordering0_8",0.041952);
+  weights.set("TranslationModel0_1",0.027968);
+  weights.set("TranslationModel0_2",0.027968);
+  weights.set("TranslationModel0_3",0.027968);
+  weights.set("TranslationModel0_4",0.027968);
+  weights.set("TranslationModel0_5",0.027968);
+  weights.set("TranslationModel0_6",0.027968);
+  weights.set("TranslationModel0_7",0.027968);
+  weights.set("TranslationModel0_8",0.027968);
+  weights.set("TranslationModel0_9",0.027968);
+  weights.set("TranslationModel0_10",0.027968);
+  weights.set("TranslationModel0_11",0.027968);
+  weights.set("TranslationModel0_12",0.027968);
+  weights.set("TranslationModel0_13",0.027968);
+  size_t edgeCount = 500;
+  boost::shared_ptr<Graph> prunedGraph;
+  prunedGraph.reset(new Graph(vocab));
+  graph.Prune(prunedGraph.get(), weights, edgeCount);
+
+  vector<ValType> bg(9);
+  HgHypothesis bestHypo;
+  //best hypothesis
+  Viterbi(*prunedGraph, weights, 0, references, 0, bg, &bestHypo);
+  //check output as expected
+  string expectedStr = "<s> the EU matters , but also the national matters management focus since mid @-@ September four ely @-@ centre . </s>";
+  util::TokenIter<util::SingleCharacter, true> expected(expectedStr, util::SingleCharacter(' '));
+  for (size_t i = 0; i < bestHypo.text.size(); ++i) {
+    //cerr << bestHypo.text[i]->first << " ";
+    BOOST_CHECK_EQUAL(*expected,bestHypo.text[i]->first);
+    ++expected;
+  }
+  BOOST_CHECK(!expected);
+  //cerr << endl;
+  //check scores
+  BOOST_CHECK_CLOSE(-80.062,bestHypo.featureVector.get("OpSequenceModel0_1"), 0.001);
+  BOOST_CHECK_CLOSE(2,bestHypo.featureVector.get("OpSequenceModel0_2"), 0.001);
+  BOOST_CHECK_CLOSE(2,bestHypo.featureVector.get("OpSequenceModel0_3"), 0.001);
+  BOOST_CHECK_CLOSE(3,bestHypo.featureVector.get("OpSequenceModel0_4"), 0.001);
+  BOOST_CHECK_CLOSE(0,bestHypo.featureVector.get("OpSequenceModel0_5"), 0.001);
+  BOOST_CHECK_CLOSE(-6,bestHypo.featureVector.get("Distortion0"), 0.001);
+  BOOST_CHECK_CLOSE(14,bestHypo.featureVector.get("PhrasePenalty0"), 0.001);
+  BOOST_CHECK_CLOSE(-20,bestHypo.featureVector.get("WordPenalty0"), 0.001);
+  BOOST_CHECK_CLOSE(-100,bestHypo.featureVector.get("UnknownWordPenalty0"), 0.001);
+  BOOST_CHECK_CLOSE(-126.616,bestHypo.featureVector.get("LM0"), 0.001);
+  BOOST_CHECK_CLOSE(-5.2238,bestHypo.featureVector.get("LexicalReordering0_1"), 0.001);
+  BOOST_CHECK_CLOSE(-0.29515,bestHypo.featureVector.get("LexicalReordering0_2"), 0.001);
+  BOOST_CHECK_CLOSE(0,bestHypo.featureVector.get("LexicalReordering0_3"), 0.001);
+  BOOST_CHECK_CLOSE(-0.470004,bestHypo.featureVector.get("LexicalReordering0_4"), 0.001);
+  BOOST_CHECK_CLOSE(-9.28267,bestHypo.featureVector.get("LexicalReordering0_5"), 0.001);
+  BOOST_CHECK_CLOSE(-0.470004,bestHypo.featureVector.get("LexicalReordering0_6"), 0.001);
+  BOOST_CHECK_CLOSE(0,bestHypo.featureVector.get("LexicalReordering0_7"), 0.001);
+  BOOST_CHECK_CLOSE(-0.402678,bestHypo.featureVector.get("LexicalReordering0_8"), 0.001);
+  BOOST_CHECK_CLOSE(-54.3119,bestHypo.featureVector.get("TranslationModel0_1"), 0.001);
+  BOOST_CHECK_CLOSE(-62.2619,bestHypo.featureVector.get("TranslationModel0_2"), 0.001);
+  BOOST_CHECK_CLOSE(-23.8782,bestHypo.featureVector.get("TranslationModel0_3"), 0.001);
+  BOOST_CHECK_CLOSE(-25.1626,bestHypo.featureVector.get("TranslationModel0_4"), 0.001);
+  BOOST_CHECK_CLOSE(12.9986,bestHypo.featureVector.get("TranslationModel0_5"), 0.001);
+  BOOST_CHECK_CLOSE(3.99959,bestHypo.featureVector.get("TranslationModel0_6"), 0.001);
+  BOOST_CHECK_CLOSE(1.99979,bestHypo.featureVector.get("TranslationModel0_7"), 0.001);
+  BOOST_CHECK_CLOSE(1.99979,bestHypo.featureVector.get("TranslationModel0_8"), 0.001);
+  BOOST_CHECK_CLOSE(0,bestHypo.featureVector.get("TranslationModel0_9"), 0.001);
+  BOOST_CHECK_CLOSE(0,bestHypo.featureVector.get("TranslationModel0_10"), 0.001);
+  BOOST_CHECK_CLOSE(0,bestHypo.featureVector.get("TranslationModel0_11"), 0.001);
+  BOOST_CHECK_CLOSE(0.999896,bestHypo.featureVector.get("TranslationModel0_12"), 0.001);
+  BOOST_CHECK_CLOSE(7.99917,bestHypo.featureVector.get("TranslationModel0_13"), 0.001);
+}
 
 

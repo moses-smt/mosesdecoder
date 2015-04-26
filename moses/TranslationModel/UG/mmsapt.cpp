@@ -16,7 +16,7 @@ namespace Moses
 {
   using namespace bitext;
   using namespace std;
-  // using namespace boost;
+  using namespace boost;
 
   void 
   fillIdSeq(Phrase const& mophrase, size_t const ifactor,
@@ -154,6 +154,10 @@ namespace Moses
     pair<string,string> dflt("input-factor","0");
     input_factor = atoi(param.insert(dflt).first->second.c_str());
     // shouldn't that be a string?
+    
+    dflt = pair<string,string> ("output-factor","0");
+    output_factor = atoi(param.insert(dflt).first->second.c_str());
+    ofactor.assign(1,output_factor);
     
     dflt = pair<string,string> ("smooth",".01");
     m_lbop_conf = atof(param.insert(dflt).first->second.c_str());

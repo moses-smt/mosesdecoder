@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "FileHandler.h"
 #include "util/exception.hh"
+#include "util/random.hh"
 
 using namespace Moses;
 typedef uint64_t P;   // largest input range is 2^64
@@ -162,7 +163,7 @@ void Hash_shiftAddXOR<T>::initSeeds()
 {
   v_ = new T[this->H_];
   for(count_t i=0; i < this->H_; i++)
-    v_[i] = Utils::rand<T>() + 1;
+    v_[i] = util::wide_rand<T>() + 1;
 }
 template <typename T>
 T Hash_shiftAddXOR<T>::hash(const char* s, count_t h)
@@ -187,9 +188,8 @@ void UnivHash_tableXOR<T>::initSeeds()
   // fill with random values
   for(count_t j=0; j < this->H_; j++) {
     table_[j] = new T[tblLen_];
-    for(count_t i=0; i < tblLen_; i++) {
-      table_[j][i] = Utils::rand<T>(this->m_-1);
-    }
+    for(count_t i=0; i < tblLen_; i++)
+      table_[j][i] = util::wide_rand_excl(this->m_-1);
   }
 }
 template <typename T>
@@ -218,7 +218,7 @@ void UnivHash_noPrimes<T>::initSeeds()
 {
   a_ = new P[this->H_];
   for(T i=0; i < this->H_; i++) {
-    a_[i] = Utils::rand<P>();
+    a_[i] = util::wide_rand<P>();
     if(a_[i] % 2 == 0) a_[i]++;  // a must be odd
   }
 }
@@ -284,8 +284,8 @@ void UnivHash_linear<T>::initSeeds()
     a_[i] = new T[MAX_NGRAM_ORDER];
     b_[i] = new T[MAX_NGRAM_ORDER];
     for(count_t j=0; j < MAX_NGRAM_ORDER; j++) {
-      a_[i][j] = 1 + Utils::rand<T>();
-      b_[i][j] = Utils::rand<T>();
+      a_[i][j] = 1 + util::wide_rand<T>();
+      b_[i][j] = util::wide_rand<T>();
     }
   }
 }

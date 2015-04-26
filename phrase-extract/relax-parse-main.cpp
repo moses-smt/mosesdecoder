@@ -21,6 +21,7 @@
 
 #include "relax-parse.h"
 #include "tables-core.h"
+#include "util/tokenize.hh"
 
 using namespace std;
 using namespace MosesTraining;
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
     map< string, int > topLabelCollection; // count of top labels, not used
     SyntaxTree tree;
     ProcessAndStripXMLTags( inBufferString, tree, labelCollection, topLabelCollection, false );
-    vector< string > inWords = tokenize( inBufferString.c_str() );
+    const vector< string > inWords = util::tokenize( inBufferString );
 
     // output tree
     // cerr << "BEFORE:" << endl << tree;
@@ -104,7 +105,7 @@ void init(int argc, char* argv[])
   }
 }
 
-void store( SyntaxTree &tree, vector< string > &words )
+void store( SyntaxTree &tree, const vector< string > &words )
 {
   // output words
   for( size_t i=0; i<words.size(); i++ ) {

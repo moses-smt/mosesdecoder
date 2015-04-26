@@ -47,6 +47,7 @@
 # 13 Oct 2004 Use alternative decoders (DWC)
 # Original version by Philipp Koehn
 
+use warnings;
 use strict;
 use FindBin qw($RealBin);
 use File::Basename;

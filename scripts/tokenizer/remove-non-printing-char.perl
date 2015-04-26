@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use utf8; 
 
 binmode(STDIN, ":utf8");

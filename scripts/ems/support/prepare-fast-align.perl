@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 my ($source_file,$target_file,$alignment_factors) = @ARGV;
@@ -22,7 +23,7 @@ while(my $source = <SOURCE>) {
 
   # remove markup
   foreach my $line (\$source,\$target) {
-    $$line =~ s/\<[^\>]+\>//g;
+    $$line =~ s/\<[^\>]+\>/ /g;
     $$line =~ s/\s+/ /g;
     $$line =~ s/^ //;
     $$line =~ s/ $//;

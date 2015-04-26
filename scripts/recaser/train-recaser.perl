@@ -1,6 +1,7 @@
 #!/usr/bin/env perl 
 
 # $Id$
+use warnings;
 use strict;
 use FindBin qw($Bin);
 use Getopt::Long "GetOptions";

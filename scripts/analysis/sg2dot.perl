@@ -4,6 +4,7 @@
 # Script to convert MOSES searchgraph to DOT format
 #
 
+use warnings;
 use strict;
 use File::Path;
 use File::Basename;

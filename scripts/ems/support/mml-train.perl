@@ -1,5 +1,6 @@
 #!/usr/bin/env perl 
 
+use warnings;
 use strict;
 
 my ($indomain_source,,$indomain_target,$outdomain_source,$outdomain_target,$lm_training,$lm_binarizer,$order,$lm_settings,$line_count,$model);

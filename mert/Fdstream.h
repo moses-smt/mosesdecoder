@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 
+#include "util/unistd.hh"
+
 #if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 #include <ext/stdio_filebuf.h>
 

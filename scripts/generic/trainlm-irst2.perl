@@ -10,6 +10,7 @@
 #    irst-dir = /Users/hieu/workspace/irstlm/trunk/bin
 # Set smoothing method in settings, if different from modified Kneser-Ney 
 
+use warnings;
 use strict;
 use FindBin qw($RealBin);
 use Getopt::Long;

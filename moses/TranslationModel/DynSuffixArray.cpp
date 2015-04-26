@@ -1,4 +1,6 @@
 #include "DynSuffixArray.h"
+#include "util/random.hh"
+
 #include <iostream>
 #include <boost/foreach.hpp>
 
@@ -315,33 +317,31 @@ int DynSuffixArray::Compare(int pos1, int pos2, int max)
   return 0;
 }
 
+namespace
+{
+/// Helper: swap two entries in an int array.
+inline void swap_ints(int array[], int one, int other)
+{
+  const int tmp = array[one];
+  array[one] = array[other];
+  array[other] = tmp;
+}
+}
+
 void DynSuffixArray::Qsort(int* array, int begin, int end)
 {
   if(end > begin) {
-    int index;
+    int index = util::rand_incl(begin, end);
     {
-      index = begin + (rand() % (end - begin + 1));
-      int pivot = array[index];
-      {
-        int tmp = array[index];
-        array[index] = array[end];
-        array[end] = tmp;
-      }
+      const int pivot = array[index];
+      swap_ints(array, index, end);
       for(int i=index=begin; i < end; ++i) {
         if (Compare(array[i], pivot, 20) <= 0) {
-          {
-            int tmp = array[index];
-            array[index] = array[i];
-            array[i] = tmp;
-            index++;
-          }
+          swap_ints(array, index, i);
+          index++;
         }
       }
-      {
-        int tmp = array[index];
-        array[index] = array[end];
-        array[end] = tmp;
-      }
+      swap_ints(array, index, end);
     }
     Qsort(array, begin, index - 1);
     Qsort(array, index + 1,  end);
