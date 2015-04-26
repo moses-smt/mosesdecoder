@@ -43,10 +43,17 @@ public:
     return 0;
   }
 
+  // Get the source terminal vocabulary for this table's grammar (as a set of
+  // factor IDs)
+  const boost::unordered_set<std::size_t> &GetSourceTerminalSet() const {
+    return m_sourceTerminalSet;
+  }
+
 private:
   static std::vector<RuleTableFF*> s_instances;
 
   const RuleTable *m_table;
+  boost::unordered_set<std::size_t> m_sourceTerminalSet;
 };
 
 }  // Syntax

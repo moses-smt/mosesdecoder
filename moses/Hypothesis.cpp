@@ -484,9 +484,7 @@ namespace Moses
       
       targetOffset += tp.GetSize();
     }
-    // Removing std::endl here breaks -alignment-output-file, so stop doing that, please :)
-    // Or fix it somewhere else.
-    out << std::endl;
+    // Used by --print-alignment-info, so no endl
   }
 
   void 

@@ -1,108 +1,193 @@
-var END_OF_INPUT = -1;
+/*
+ * $Id: base64.js,v 2.15 2014/04/05 12:58:57 dankogai Exp dankogai $
+ *
+ *  Licensed under the MIT license.
+ *    http://opensource.org/licenses/mit-license
+ *
+ *  References:
+ *    http://en.wikipedia.org/wiki/Base64
+ */
 
-var base64Chars = new Array(
-    'A','B','C','D','E','F','G','H',
-    'I','J','K','L','M','N','O','P',
-    'Q','R','S','T','U','V','W','X',
-    'Y','Z','a','b','c','d','e','f',
-    'g','h','i','j','k','l','m','n',
-    'o','p','q','r','s','t','u','v',
-    'w','x','y','z','0','1','2','3',
-    '4','5','6','7','8','9','+','/'
-);
-
-var reverseBase64Chars = new Array();
-for (var i=0; i < base64Chars.length; i++){
-    reverseBase64Chars[base64Chars[i]] = i;
-}
-
-var base64Str;
-var base64Count;
-function setBase64Str(str){
-    base64Str = str;
-    base64Count = 0;
-}
-function readBase64(){    
-    if (!base64Str) return END_OF_INPUT;
-    if (base64Count >= base64Str.length) return END_OF_INPUT;
-    var c = base64Str.charCodeAt(base64Count) & 0xff;
-    base64Count++;
-    return c;
-}
-function encodeBase64(str){
-    setBase64Str(str);
-    var result = '';
-    var inBuffer = new Array(3);
-    var lineCount = 0;
-    var done = false;
-    while (!done && (inBuffer[0] = readBase64()) != END_OF_INPUT){
-        inBuffer[1] = readBase64();
-        inBuffer[2] = readBase64();
-        result += (base64Chars[ inBuffer[0] >> 2 ]);
-        if (inBuffer[1] != END_OF_INPUT){
-            result += (base64Chars [(( inBuffer[0] << 4 ) & 0x30) | (inBuffer[1] >> 4) ]);
-            if (inBuffer[2] != END_OF_INPUT){
-                result += (base64Chars [((inBuffer[1] << 2) & 0x3c) | (inBuffer[2] >> 6) ]);
-                result += (base64Chars [inBuffer[2] & 0x3F]);
-            } else {
-                result += (base64Chars [((inBuffer[1] << 2) & 0x3c)]);
-                result += ('=');
-                done = true;
-            }
+(function(global) {
+    'use strict';
+    // existing version for noConflict()
+    var _Base64 = global.Base64;
+    var version = "2.1.7";
+    // if node.js, we use Buffer
+    var buffer;
+    if (typeof module !== 'undefined' && module.exports) {
+        buffer = require('buffer').Buffer;
+    }
+    // constants
+    var b64chars
+        = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    var b64tab = function(bin) {
+        var t = {};
+        for (var i = 0, l = bin.length; i < l; i++) t[bin.charAt(i)] = i;
+        return t;
+    }(b64chars);
+    var fromCharCode = String.fromCharCode;
+    // encoder stuff
+    var cb_utob = function(c) {
+        if (c.length < 2) {
+            var cc = c.charCodeAt(0);
+            return cc < 0x80 ? c
+                : cc < 0x800 ? (fromCharCode(0xc0 | (cc >>> 6))
+                                + fromCharCode(0x80 | (cc & 0x3f)))
+                : (fromCharCode(0xe0 | ((cc >>> 12) & 0x0f))
+                   + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
+                   + fromCharCode(0x80 | ( cc         & 0x3f)));
         } else {
-            result += (base64Chars [(( inBuffer[0] << 4 ) & 0x30)]);
-            result += ('=');
-            result += ('=');
-            done = true;
+            var cc = 0x10000
+                + (c.charCodeAt(0) - 0xD800) * 0x400
+                + (c.charCodeAt(1) - 0xDC00);
+            return (fromCharCode(0xf0 | ((cc >>> 18) & 0x07))
+                    + fromCharCode(0x80 | ((cc >>> 12) & 0x3f))
+                    + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
+                    + fromCharCode(0x80 | ( cc         & 0x3f)));
         }
-        lineCount += 4;
-        if (lineCount >= 76){
-            result += ('\n');
-            lineCount = 0;
-        }
+    };
+    var re_utob = /[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g;
+    var utob = function(u) {
+        return u.replace(re_utob, cb_utob);
+    };
+    var cb_encode = function(ccc) {
+        var padlen = [0, 2, 1][ccc.length % 3],
+        ord = ccc.charCodeAt(0) << 16
+            | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
+            | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0)),
+        chars = [
+            b64chars.charAt( ord >>> 18),
+            b64chars.charAt((ord >>> 12) & 63),
+            padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
+            padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
+        ];
+        return chars.join('');
+    };
+    var btoa = global.btoa ? function(b) {
+        return global.btoa(b);
+    } : function(b) {
+        return b.replace(/[\s\S]{1,3}/g, cb_encode);
+    };
+    var _encode = buffer ? function (u) {
+        return (u.constructor === buffer.constructor ? u : new buffer(u))
+        .toString('base64')
     }
-    return result;
-}
-function readReverseBase64(){   
-    if (!base64Str) return END_OF_INPUT;
-    while (true){      
-        if (base64Count >= base64Str.length) return END_OF_INPUT;
-        var nextCharacter = base64Str.charAt(base64Count);
-        base64Count++;
-        if (reverseBase64Chars[nextCharacter]){
-            return reverseBase64Chars[nextCharacter];
+    : function (u) { return btoa(utob(u)) }
+    ;
+    var encode = function(u, urisafe) {
+        return !urisafe
+            ? _encode(String(u))
+            : _encode(String(u)).replace(/[+\/]/g, function(m0) {
+                return m0 == '+' ? '-' : '_';
+            }).replace(/=/g, '');
+    };
+    var encodeURI = function(u) { return encode(u, true) };
+    // decoder stuff
+    var re_btou = new RegExp([
+        '[\xC0-\xDF][\x80-\xBF]',
+        '[\xE0-\xEF][\x80-\xBF]{2}',
+        '[\xF0-\xF7][\x80-\xBF]{3}'
+    ].join('|'), 'g');
+    var cb_btou = function(cccc) {
+        switch(cccc.length) {
+        case 4:
+            var cp = ((0x07 & cccc.charCodeAt(0)) << 18)
+                |    ((0x3f & cccc.charCodeAt(1)) << 12)
+                |    ((0x3f & cccc.charCodeAt(2)) <<  6)
+                |     (0x3f & cccc.charCodeAt(3)),
+            offset = cp - 0x10000;
+            return (fromCharCode((offset  >>> 10) + 0xD800)
+                    + fromCharCode((offset & 0x3FF) + 0xDC00));
+        case 3:
+            return fromCharCode(
+                ((0x0f & cccc.charCodeAt(0)) << 12)
+                    | ((0x3f & cccc.charCodeAt(1)) << 6)
+                    |  (0x3f & cccc.charCodeAt(2))
+            );
+        default:
+            return  fromCharCode(
+                ((0x1f & cccc.charCodeAt(0)) << 6)
+                    |  (0x3f & cccc.charCodeAt(1))
+            );
         }
-        if (nextCharacter == 'A') return 0;
+    };
+    var btou = function(b) {
+        return b.replace(re_btou, cb_btou);
+    };
+    var cb_decode = function(cccc) {
+        var len = cccc.length,
+        padlen = len % 4,
+        n = (len > 0 ? b64tab[cccc.charAt(0)] << 18 : 0)
+            | (len > 1 ? b64tab[cccc.charAt(1)] << 12 : 0)
+            | (len > 2 ? b64tab[cccc.charAt(2)] <<  6 : 0)
+            | (len > 3 ? b64tab[cccc.charAt(3)]       : 0),
+        chars = [
+            fromCharCode( n >>> 16),
+            fromCharCode((n >>>  8) & 0xff),
+            fromCharCode( n         & 0xff)
+        ];
+        chars.length -= [0, 0, 2, 1][padlen];
+        return chars.join('');
+    };
+    var atob = global.atob ? function(a) {
+        return global.atob(a);
+    } : function(a){
+        return a.replace(/[\s\S]{1,4}/g, cb_decode);
+    };
+    var _decode = buffer ? function(a) {
+        return (a.constructor === buffer.constructor
+                ? a : new buffer(a, 'base64')).toString();
     }
-    return END_OF_INPUT;
-}
-function ntos(n){
-    n=n.toString(16);
-    if (n.length == 1) n="0"+n;
-    n="%"+n;
-    return unescape(n);
-}
+    : function(a) { return btou(atob(a)) };
+    var decode = function(a){
+        return _decode(
+            String(a).replace(/[-_]/g, function(m0) { return m0 == '-' ? '+' : '/' })
+                .replace(/[^A-Za-z0-9\+\/]/g, '')
+        );
+    };
+    var noConflict = function() {
+        var Base64 = global.Base64;
+        global.Base64 = _Base64;
+        return Base64;
+    };
+    // export Base64
+    global.Base64 = {
+        VERSION: version,
+        atob: atob,
+        btoa: btoa,
+        fromBase64: decode,
+        toBase64: encode,
+        utob: utob,
+        encode: encode,
+        encodeURI: encodeURI,
+        btou: btou,
+        decode: decode,
+        noConflict: noConflict
+    };
+    // if ES5 is available, make Base64.extendString() available
+    if (typeof Object.defineProperty === 'function') {
+        var noEnum = function(v){
+            return {value:v,enumerable:false,writable:true,configurable:true};
+        };
+        global.Base64.extendString = function () {
+            Object.defineProperty(
+                String.prototype, 'fromBase64', noEnum(function () {
+                    return decode(this)
+                }));
+            Object.defineProperty(
+                String.prototype, 'toBase64', noEnum(function (urisafe) {
+                    return encode(this, urisafe)
+                }));
+            Object.defineProperty(
+                String.prototype, 'toBase64URI', noEnum(function () {
+                    return encode(this, true)
+                }));
+        };
+    }
+    // that's it!
+})(this);
 
-function decodeBase64(str){
-    setBase64Str(str);
-    var result = "";
-    var inBuffer = new Array(4);
-    var done = false;
-    while (!done && (inBuffer[0] = readReverseBase64()) != END_OF_INPUT
-        && (inBuffer[1] = readReverseBase64()) != END_OF_INPUT){
-        inBuffer[2] = readReverseBase64();
-        inBuffer[3] = readReverseBase64();
-        result += ntos((((inBuffer[0] << 2) & 0xff)| inBuffer[1] >> 4));
-        if (inBuffer[2] != END_OF_INPUT){
-            result +=  ntos((((inBuffer[1] << 4) & 0xff)| inBuffer[2] >> 2));
-            if (inBuffer[3] != END_OF_INPUT){
-                result +=  ntos((((inBuffer[2] << 6)  & 0xff) | inBuffer[3]));
-            } else {
-                done = true;
-            }
-        } else {
-            done = true;
-        }
-    }
-    return result;
+if (this['Meteor']) {
+    Base64 = global.Base64; // for normal export in Meteor.js
 }

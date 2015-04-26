@@ -6,8 +6,7 @@
 
 #include <algorithm>
 #include <functional>
-
-#include <assert.h>
+#include <cassert>
 
 namespace search {
 

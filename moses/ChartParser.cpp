@@ -28,6 +28,7 @@
 #include "DecodeGraph.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 using namespace Moses;
@@ -35,7 +36,10 @@ using namespace Moses;
 namespace Moses
 {
 
-ChartParserUnknown::ChartParserUnknown() {}
+ChartParserUnknown
+::ChartParserUnknown(ttasksptr const& ttask) 
+  : m_ttask(ttask)
+{ }
 
 ChartParserUnknown::~ChartParserUnknown()
 {
@@ -136,13 +140,16 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   }
 }
 
-ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells) :
-  m_decodeGraphList(StaticData::Instance().GetDecodeGraphs()),
-  m_source(source)
+ChartParser
+::ChartParser(ttasksptr const& ttask, ChartCellCollectionBase &cells) 
+  : m_ttask(ttask)
+  , m_unknown(ttask)
+  , m_decodeGraphList(StaticData::Instance().GetDecodeGraphs())
+  , m_source(*(ttask->GetSource().get()))
 {
   const StaticData &staticData = StaticData::Instance();
 
-  staticData.InitializeForInput(source);
+  staticData.InitializeForInput(ttask);
   CreateInputPaths(m_source);
 
   const std::vector<PhraseDictionary*> &dictionaries = PhraseDictionary::GetColl();
@@ -161,7 +168,7 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
 ChartParser::~ChartParser()
 {
   RemoveAllInColl(m_ruleLookupManagers);
-  StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
+  StaticData::Instance().CleanUpAfterSentenceProcessing(m_ttask.lock());
 
   InputPathMatrix::const_iterator iterOuter;
   for (iterOuter = m_inputPathMatrix.begin(); iterOuter != m_inputPathMatrix.end(); ++iterOuter) {

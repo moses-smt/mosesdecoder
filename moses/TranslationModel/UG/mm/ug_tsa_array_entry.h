@@ -69,7 +69,7 @@ namespace ugdiss
     //   while (chosen < samplesize && next < stop)
     // 	{
     // 	  root->readEntry(next,*this);
-    // 	  if (randInt(N - sampled++) < samplesize - chosen)
+    // 	  if (util::rand_excl(N - sampled++) < samplesize - chosen)
     // 	    {
     // 	      ++chosen;
     // 	      return true;

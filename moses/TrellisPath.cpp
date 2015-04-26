@@ -31,7 +31,6 @@ namespace Moses
 TrellisPath::TrellisPath(const Hypothesis *hypo)
   :	m_prevEdgeChanged(NOT_FOUND)
 {
-  m_scoreBreakdown					= hypo->GetScoreBreakdown();
   m_totalScore = hypo->GetTotalScore();
 
   // enumerate path using prevHypo
@@ -41,10 +40,9 @@ TrellisPath::TrellisPath(const Hypothesis *hypo)
   }
 }
 
-void TrellisPath::InitScore()
+void TrellisPath::InitTotalScore()
 {
   m_totalScore		= m_path[0]->GetWinningHypo()->GetTotalScore();
-  m_scoreBreakdown= m_path[0]->GetWinningHypo()->GetScoreBreakdown();
 
   //calc score
   size_t sizePath = m_path.size();
@@ -53,12 +51,8 @@ void TrellisPath::InitScore()
     const Hypothesis *winningHypo = hypo->GetWinningHypo();
     if (hypo != winningHypo) {
       m_totalScore = m_totalScore - winningHypo->GetTotalScore() + hypo->GetTotalScore();
-      m_scoreBreakdown.MinusEquals(winningHypo->GetScoreBreakdown());
-      m_scoreBreakdown.PlusEquals(hypo->GetScoreBreakdown());
     }
   }
-
-
 }
 
 TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc)
@@ -80,7 +74,7 @@ TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypoth
     prevHypo = prevHypo->GetPrevHypo();
   }
 
-  InitScore();
+  InitTotalScore();
 }
 
 TrellisPath::TrellisPath(const vector<const Hypothesis*> edges)
@@ -88,9 +82,7 @@ TrellisPath::TrellisPath(const vector<const Hypothesis*> edges)
 {
   m_path.resize(edges.size());
   copy(edges.rbegin(),edges.rend(),m_path.begin());
-  InitScore();
-
-
+  InitTotalScore();
 }
 
 
@@ -170,6 +162,32 @@ void TrellisPath::CreateDeviantPaths(TrellisPathList &pathColl) const
       } // for (iterArc...
     } // for (currEdge = 0 ...
   }
+}
+
+const boost::shared_ptr<ScoreComponentCollection> TrellisPath::GetScoreBreakdown() const
+{
+  if (!m_scoreBreakdown) {
+    float totalScore = m_path[0]->GetWinningHypo()->GetTotalScore(); // calculated for sanity check only
+
+    m_scoreBreakdown = boost::shared_ptr<ScoreComponentCollection>(new ScoreComponentCollection());
+    m_scoreBreakdown->PlusEquals(ScoreComponentCollection(m_path[0]->GetWinningHypo()->GetScoreBreakdown()));
+
+    //calc score
+    size_t sizePath = m_path.size();
+    for (size_t pos = 0 ; pos < sizePath ; pos++) {
+      const Hypothesis *hypo = m_path[pos];
+      const Hypothesis *winningHypo = hypo->GetWinningHypo();
+      if (hypo != winningHypo) {
+        totalScore = totalScore - winningHypo->GetTotalScore() + hypo->GetTotalScore();
+        m_scoreBreakdown->MinusEquals(winningHypo->GetScoreBreakdown());
+        m_scoreBreakdown->PlusEquals(hypo->GetScoreBreakdown());
+      }
+    }
+
+    assert(totalScore == m_totalScore);
+  }
+
+  return m_scoreBreakdown;
 }
 
 Phrase TrellisPath::GetTargetPhrase() const

@@ -4,10 +4,10 @@
 #include <iomanip>
 #include <vector>
 #include <map>
-#include <stdlib.h>
-#include <math.h>
+#include <cstdlib>
+#include <cmath>
 #include <algorithm>
-#include <stdio.h>
+#include <cstdio>
 #include "TrellisPathList.h"
 #include "TrellisPath.h"
 #include "StaticData.h"

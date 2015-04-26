@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #ifndef moses_FeatureFunction_h
 #define moses_FeatureFunction_h
 
@@ -6,6 +7,8 @@
 #include <string>
 #include "moses/FeatureVector.h"
 #include "moses/TypeDef.h"
+
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
@@ -24,6 +27,7 @@ class FactorMask;
 class InputPath;
 class StackVec;
 class DistortionScoreProducer;
+class TranslationTask; 
 
 /** base class for all feature functions.
  */
@@ -55,7 +59,8 @@ public:
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 
-  static void CallChangeSource(InputType *&input);
+  static void CallChangeSource(InputType * const&input);
+  // see my note in FeatureFunction.cpp --- UG
 
   FeatureFunction(const std::string &line);
   FeatureFunction(size_t numScoreComponents, const std::string &line);
@@ -109,34 +114,49 @@ public:
 
   virtual std::vector<float> DefaultWeights() const;
 
+
+protected:
+  virtual void
+  InitializeForInput(InputType const& source) { }
+  virtual void
+  CleanUpAfterSentenceProcessing(InputType const& source) { }
+
+public:
   //! Called before search and collecting of translation options
-  virtual void InitializeForInput(InputType const& source) {
-  }
+  virtual void 
+  InitializeForInput(ttasksptr const& ttask);
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {
-  }
+  virtual void 
+  CleanUpAfterSentenceProcessing(ttasksptr const& ttask); 
 
-  const std::string &GetArgLine() const {
-    return m_argLine;
-  }
+  const std::string &
+  GetArgLine() const { return m_argLine; }
 
   // given a target phrase containing only factors specified in mask
   // return true if the feature function can be evaluated
   virtual bool IsUseable(const FactorMask &mask) const = 0;
 
-  // used by stateless ff and stateful ff. Calculate initial score estimate during loading of phrase table
-  // source phrase is the substring that the phrase table uses to look up the target phrase,
+  // used by stateless ff and stateful ff. Calculate initial score
+  // estimate during loading of phrase table
+  //
+  // source phrase is the substring that the phrase table uses to look
+  // up the target phrase,
+  //
   // may have more factors than actually need, but not guaranteed.
-  // For SCFG decoding, the source contains non-terminals, NOT the raw source from the input sentence
-  virtual void EvaluateInIsolation(const Phrase &source
-                                   , const TargetPhrase &targetPhrase
-                                   , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection &estimatedFutureScore) const = 0;
-
+  // For SCFG decoding, the source contains non-terminals, NOT the raw
+  // source from the input sentence
+  virtual void 
+  EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase,
+		      ScoreComponentCollection& scoreBreakdown,
+		      ScoreComponentCollection& estimatedFutureScore) const = 0;
+  
   // override this method if you want to change the input before decoding
-  virtual void ChangeSource(InputType *&input) const {
-  }
+  virtual void ChangeSource(InputType * const&input) const { }
+
+  // for context-dependent processing
+  static void SetupAll(TranslationTask const& task);
+  virtual void Setup(TranslationTask const& task) const { };
 
   // This method is called once all the translation options are retrieved from the phrase table, and
   // just before search.

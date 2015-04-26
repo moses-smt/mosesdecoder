@@ -190,8 +190,9 @@ int RuleMatcherHyperTree<Callback>::SubSeqLength(const HyperPath::NodeSeq &seq,
     int pos)
 {
   int length = 0;
-  while (pos != seq.size() && seq[pos] != HyperPath::kComma) {
-    ++pos;
+  HyperPath::NodeSeq::size_type curpos = pos;
+  while (curpos != seq.size() && seq[curpos] != HyperPath::kComma) {
+    ++curpos;
     ++length;
   }
   return length;

@@ -1,18 +1,45 @@
-#include "TranslationTask.h"
+#include "TranslationRequest.h"
 #include <boost/foreach.hpp>
 
 namespace MosesServer
 {
-  using namespace Moses;
   using namespace std;
+  using Moses::Hypothesis; 
+  using Moses::StaticData; 
+  using Moses::WordsRange; 
+  using Moses::ChartHypothesis;
+  using Moses::Phrase;
+  using Moses::Manager;
+  using Moses::SearchGraphNode;
+  using Moses::TrellisPathList;
+  using Moses::TranslationOptionCollection;
+  using Moses::TranslationOptionList;
+  using Moses::TranslationOption;
+  using Moses::TargetPhrase;
+  using Moses::FValue;
+  using Moses::PhraseDictionaryMultiModel;
+  using Moses::FindPhraseDictionary;
+  using Moses::Sentence;
+
+  boost::shared_ptr<TranslationRequest>
+  TranslationRequest::
+  create(xmlrpc_c::paramList const& paramList, 
+	 boost::condition_variable& cond, 
+	 boost::mutex& mut)
+  {
+    boost::shared_ptr<TranslationRequest> ret;
+    ret.reset(new TranslationRequest(paramList,cond, mut));
+    ret->m_self = ret;
+    return ret;
+  }
 
   void 
-  TranslationTask::
+  TranslationRequest::
   Run() 
   {
     parse_request(m_paramList.getStruct(0));
       
-    StaticData const& SD = Moses::StaticData::Instance();
+    Moses::StaticData const& SD = Moses::StaticData::Instance();
       
     //Make sure alternative paths are retained, if necessary
     if (m_withGraphInfo || m_nbestSize>0) 
@@ -37,7 +64,7 @@ namespace MosesServer
     
   /// add phrase alignment information from a Hypothesis
   void 
-  TranslationTask::
+  TranslationRequest::
   add_phrase_aln_info(Hypothesis const& h, vector<xmlrpc_c::value>& aInfo) const
   {
     if (!m_withAlignInfo) return;
@@ -52,7 +79,7 @@ namespace MosesServer
   }
   
   void 
-  TranslationTask::
+  TranslationRequest::
   outputChartHypo(ostream& out, const ChartHypothesis* hypo) 
   {
     Phrase outPhrase(20);
@@ -67,13 +94,13 @@ namespace MosesServer
   }
 
   bool 
-  TranslationTask::
+  TranslationRequest::
   compareSearchGraphNode(const Moses::SearchGraphNode& a, 
 			 const Moses::SearchGraphNode& b) 
   { return a.hypo->GetId() < b.hypo->GetId(); }
 
   void 
-  TranslationTask::
+  TranslationRequest::
   insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData) 
   {
     using xmlrpc_c::value_int;
@@ -110,7 +137,7 @@ namespace MosesServer
   }
 
   void 
-  TranslationTask::
+  TranslationRequest::
   output_phrase(ostream& out, Phrase const& phrase) const
   {
     if (!m_reportAllFactors) 
@@ -122,7 +149,7 @@ namespace MosesServer
   }
   
   void 
-  TranslationTask::
+  TranslationRequest::
   outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
   {
     TrellisPathList nBestList;
@@ -139,7 +166,7 @@ namespace MosesServer
 	  {
 	    // should the score breakdown be reported in a more structured manner?
 	    ostringstream buf;
-	    path->GetScoreBreakdown().OutputAllFeatureScores(buf);
+	    path->GetScoreBreakdown()->OutputAllFeatureScores(buf);
 	    nBestXmlItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	  }
 	
@@ -151,7 +178,7 @@ namespace MosesServer
   }
   
   void 
-  TranslationTask::
+  TranslationRequest::
   insertTranslationOptions(Moses::Manager& manager, 
 			   std::map<std::string, xmlrpc_c::value>& retData) 
   {
@@ -197,14 +224,14 @@ namespace MosesServer
     return (params.find(key) != params.end());
   }
   
-  TranslationTask::
-  TranslationTask(xmlrpc_c::paramList const& paramList,
+  TranslationRequest::
+  TranslationRequest(xmlrpc_c::paramList const& paramList,
 		  boost::condition_variable& cond, boost::mutex& mut)
     : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
   { }
 
   void
-  TranslationTask::
+  TranslationRequest::
   parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   { // parse XMLRPC request
     // params_t const params = m_paramList.getStruct(0);
@@ -215,8 +242,8 @@ namespace MosesServer
     params_t::const_iterator si = params.find("text");
     if (si == params.end()) 
       throw xmlrpc_c::fault("Missing source text", xmlrpc_c::fault::CODE_PARSE);
-    m_source = xmlrpc_c::value_string(si->second);
-    XVERBOSE(1,"Input: " << m_source << endl);
+    m_source_string = xmlrpc_c::value_string(si->second);
+    XVERBOSE(1,"Input: " << m_source_string << endl);
     
     m_withAlignInfo       = check(params, "align");
     m_withWordAlignInfo   = check(params, "word-align");
@@ -225,7 +252,7 @@ namespace MosesServer
     m_reportAllFactors    = check(params, "report-all-factors");
     m_nbestDistinct       = check(params, "nbest-distinct");
     m_withScoreBreakdown  = check(params, "add-score-breakdown");
-    
+    m_source.reset(new Sentence(0,m_source_string)); 
     si = params.find("lambda");
     if (si != params.end()) 
       {
@@ -258,22 +285,22 @@ namespace MosesServer
 
 
   void
-  TranslationTask::
+  TranslationRequest::
   run_chart_decoder()
   {
-    Moses::TreeInput tinput(NULL); 
-    istringstream buf(m_source + "\n");
+    Moses::TreeInput tinput; 
+    istringstream buf(m_source_string + "\n");
     tinput.Read(buf, StaticData::Instance().GetInputFactorOrder());
     
-    Moses::ChartManager manager(tinput);
+    Moses::ChartManager manager(this->self());
     manager.Decode();
     
     const Moses::ChartHypothesis *hypo = manager.GetBestHypothesis();
     ostringstream out;
     outputChartHypo(out,hypo);
     
-    m_target = out.str();
-    m_retData["text"] = xmlrpc_c::value_string(m_target);
+    m_target_string = out.str();
+    m_retData["text"] = xmlrpc_c::value_string(m_target_string);
     
     if (m_withGraphInfo) 
       {
@@ -281,10 +308,10 @@ namespace MosesServer
 	manager.OutputSearchGraphMoses(sgstream);
 	m_retData["sg"] =  xmlrpc_c::value_string(sgstream.str());
       }
-  } // end of TranslationTask::run_chart_decoder()
+  } // end of TranslationRequest::run_chart_decoder()
   
   void
-  TranslationTask::
+  TranslationRequest::
   pack_hypothesis(vector<Hypothesis const* > const& edges, string const& key,
 		  map<string, xmlrpc_c::value> & dest) const
   {
@@ -313,7 +340,7 @@ namespace MosesServer
   }
 
   void
-  TranslationTask::
+  TranslationRequest::
   pack_hypothesis(Hypothesis const* h, string const& key,
 		  map<string, xmlrpc_c::value>& dest) const
   {
@@ -326,10 +353,10 @@ namespace MosesServer
 
 
   void
-  TranslationTask::
+  TranslationRequest::
   run_phrase_decoder()
   {
-    Manager manager(Sentence(NULL,0, m_source));
+    Manager manager(this->self());
     // if (m_bias.size()) manager.SetBias(&m_bias);
     manager.Decode();
     

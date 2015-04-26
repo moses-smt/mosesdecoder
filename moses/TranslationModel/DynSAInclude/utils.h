@@ -62,22 +62,6 @@ public:
       str[i] = tolower(str[i]);
     }
   }
-  // TODO: interface with decent PRG
-  template<typename T>
-  static T rand(T mod_bnd = 0) {
-    T random = 0;
-    if(sizeof(T) <= 4) {
-      random = static_cast<T>(std::rand());
-    } else if(sizeof(T) == 8) {
-      random = static_cast<T>(std::rand());
-      random <<= 31;
-      random <<= 1;
-      random |= static_cast<T>(std::rand());
-    }
-    if(mod_bnd != 0)
-      return random % mod_bnd;
-    else return random;
-  }
 };
 
 #endif

@@ -1,7 +1,8 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id$
 
+use warnings;
 use strict;
 
 use utf8;

@@ -4,11 +4,25 @@
 #include "BaseManager.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 
 namespace Moses
 {
+
+BaseManager::BaseManager(ttasksptr const& ttask) 
+  : m_ttask(ttask), m_source(*(ttask->GetSource().get()))
+{ }
+
+const InputType& 
+BaseManager::GetSource() const 
+{ return m_source; }
+
+
+
+
+
 /***
  * print surface factor only for the given phrase
  */

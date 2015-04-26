@@ -28,6 +28,7 @@
 
 #include "tables-core.h"
 #include "InputFileStream.h"
+#include "util/tokenize.hh"
 
 using namespace std;
 
@@ -165,8 +166,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     fileConsolidated << " ||| " << reverseAlignment(itemDirect[3]);
 
     // counts, for debugging
-    vector<string> directCounts = tokenize(itemDirect[4].c_str());
-    vector<string> indirectCounts = tokenize(itemIndirect[4].c_str());
+    const vector<string> directCounts = util::tokenize(itemDirect[4]);
+    const vector<string> indirectCounts = util::tokenize(itemIndirect[4]);
     fileConsolidated << "||| " << directCounts[0] << " " << indirectCounts[0];
     // output rule count if present in either file
     if (indirectCounts.size() > 1) {
@@ -199,7 +200,6 @@ bool getLine( istream &fileP, vector< string > &item )
 vector< string > splitLine(const char *line)
 {
   vector< string > item;
-  bool betweenWords = true;
   int start=0;
   int i=0;
   for(; line[i] != '\0'; i++) {
@@ -223,10 +223,10 @@ string reverseAlignment(const string &alignments)
 {
   stringstream ret("");
 
-  vector<string> alignToks = tokenize(alignments.c_str());
+  const vector<string> alignToks = util::tokenize(alignments);
 
   for (size_t i = 0; i < alignToks.size(); ++i) {
-    string &alignPair = alignToks[i];
+    const string &alignPair = alignToks[i];
     vector<string> alignPoints;
     Tokenize(alignPoints, alignPair, "-");
     assert(alignPoints.size() == 2);

@@ -1,6 +1,6 @@
 #include <vector>
 #include <limits>
-#include <assert.h>
+#include <cassert>
 #include "SoftSourceSyntacticConstraintsFeature.h"
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"

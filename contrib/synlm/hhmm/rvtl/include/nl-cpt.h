@@ -24,7 +24,7 @@
 #ifndef _NL_CPT__
 #define _NL_CPT__
 
-//#include <stdlib.h>
+//#include <cstdlib>
 //#include <vector>
 //#include <string>
 //#include <cassert>

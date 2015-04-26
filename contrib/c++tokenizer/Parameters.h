@@ -12,10 +12,13 @@ struct Parameters
     std::string lang_iso;
     std::vector<std::string> args;
     std::string out_path;
+    int nthreads;
+    int chunksize;
     const char *cfg_path;
     bool verbose_p;
     bool detag_p;
     bool alltag_p;
+    bool entities_p;
     bool escape_p;
     bool aggro_p;
     bool supersub_p;
@@ -30,6 +33,10 @@ struct Parameters
     bool refined_p;
     bool unescape_p;
     bool drop_bad_p;
+    bool split_p;
+    bool notokenization_p;
+    bool para_marks_p;
+    bool split_breaks_p;
 
 	Parameters();
 

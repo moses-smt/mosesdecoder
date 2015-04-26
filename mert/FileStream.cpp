@@ -40,28 +40,3 @@ inputfilestream::~inputfilestream()
 void inputfilestream::close()
 {
 }
-
-outputfilestream::outputfilestream(const std::string &filePath)
-  : std::ostream(0), m_streambuf(0), m_is_good(false)
-{
-  // check if file is readable
-  std::filebuf* fb = new std::filebuf();
-  m_is_good = (fb->open(filePath.c_str(), std::ios::out) != NULL);
-
-  if (IsGzipFile(filePath)) {
-    throw runtime_error("Output to a zipped file not supported!");
-  } else {
-    m_streambuf = fb;
-  }
-  this->init(m_streambuf);
-}
-
-outputfilestream::~outputfilestream()
-{
-  delete m_streambuf;
-  m_streambuf = 0;
-}
-
-void outputfilestream::close()
-{
-}

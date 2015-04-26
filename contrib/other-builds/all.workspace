@@ -7,8 +7,8 @@
   <Project Name="lm" Path="lm/lm.project" Active="No"/>
   <Project Name="OnDiskPt" Path="OnDiskPt/OnDiskPt.project" Active="No"/>
   <Project Name="search" Path="search/search.project" Active="No"/>
-  <Project Name="moses" Path="moses/moses.project" Active="No"/>
-  <Project Name="moses-cmd" Path="moses-cmd/moses-cmd.project" Active="Yes"/>
+  <Project Name="moses" Path="moses/moses.project" Active="Yes"/>
+  <Project Name="moses-cmd" Path="moses-cmd/moses-cmd.project" Active="No"/>
   <Project Name="score" Path="score/score.project" Active="No"/>
   <Project Name="consolidate" Path="consolidate/consolidate.project" Active="No"/>
   <BuildMatrix>

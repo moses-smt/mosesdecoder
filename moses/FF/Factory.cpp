@@ -37,7 +37,6 @@
 #include "moses/FF/PhrasePenalty.h"
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
-#include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/SoftSourceSyntacticConstraintsFeature.h"
 #include "moses/FF/CoveredReferenceFeature.h"
@@ -229,7 +228,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ControlRecombination);
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
-  MOSES_FNAME(ExternalFeature);
   MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
   MOSES_FNAME(SoftSourceSyntacticConstraintsFeature);
   MOSES_FNAME(TreeStructureFeature);

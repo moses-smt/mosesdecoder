@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include <assert.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdlib>
 #include <string>
 #include <queue>
 #include <map>

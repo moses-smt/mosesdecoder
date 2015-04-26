@@ -302,7 +302,8 @@ float OnlineRLM<T>::getProb(const wordID_t* ngram, int len,
     }
     while(num_fnd > 1) { // get lower order count
       //get sub-context of size one less than length found (exluding target)
-      if(((den_val = query(&ngram[len - num_fnd], num_fnd - 1)) > 0) &&
+      den_val = query(&ngram[len - num_fnd], num_fnd - 1);
+      if((den_val > 0) &&
           (den_val >= in[len - num_fnd]) && (in[len - num_fnd] > 0)) {
         break;
       } else --num_fnd; // else backoff to lower ngram order

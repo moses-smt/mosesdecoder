@@ -64,9 +64,9 @@ public:
   AvgWeightVector avg();
 
   /**
-    * Convert to sparse vector, interpreting all features as sparse.
+    * Convert to sparse vector, interpreting all features as sparse. Only used by hgmira.
    **/
-  void ToSparse(SparseVector* sparse) const;
+  void ToSparse(SparseVector* sparse, size_t denseSize) const;
 
   friend class AvgWeightVector;
 
@@ -104,7 +104,7 @@ public:
   ValType score(const MiraFeatureVector& fv) const;
   ValType weight(std::size_t index) const;
   std::size_t size() const;
-  void ToSparse(SparseVector* sparse) const;
+  void ToSparse(SparseVector* sparse, size_t num_dense) const;
 private:
   const MiraWeightVector& m_wv;
 };

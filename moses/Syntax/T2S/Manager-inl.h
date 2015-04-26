@@ -27,10 +27,10 @@ namespace T2S
 {
 
 template<typename RuleMatcher>
-Manager<RuleMatcher>::Manager(const InputType &source)
-  : Syntax::Manager(source)
+Manager<RuleMatcher>::Manager(ttasksptr const& ttask)
+  : Syntax::Manager(ttask)
 {
-  if (const TreeInput *p = dynamic_cast<const TreeInput*>(&source)) {
+  if (const TreeInput *p = dynamic_cast<const TreeInput*>(&m_source)) {
     // Construct the InputTree.
     InputTreeBuilder builder;
     builder.Build(*p, "Q", m_inputTree);

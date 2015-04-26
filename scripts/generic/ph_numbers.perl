@@ -1,4 +1,5 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
+
 package ph_numbers;
 
 # Script to recognize and replace numbers in Moses training corpora
@@ -6,6 +7,7 @@ package ph_numbers;
 #
 # (c) 2013 TAUS
 
+use warnings;
 use strict;
 
 run() unless caller();

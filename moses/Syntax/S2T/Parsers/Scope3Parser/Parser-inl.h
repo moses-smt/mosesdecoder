@@ -163,7 +163,7 @@ void Scope3Parser<Callback>::RecordPatternApplicationSpans(
       for (int j = std::max(e1, i+minSpan-1); j <= e2; ++j) {
         std::size_t span = j-i+1;
         assert(span >= 1);
-        if (span < minSpan) {
+        if (span < std::size_t(minSpan)) {
           continue;
         }
         if (m_maxChartSpan && span > m_maxChartSpan) {

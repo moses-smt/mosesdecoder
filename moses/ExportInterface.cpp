@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include <vector>
 
+#include "util/random.hh"
 #include "util/usage.hh"
 
 #ifdef WIN32
@@ -91,7 +92,7 @@ SimpleTranslationInterface::SimpleTranslationInterface(const string &mosesIni): 
       exit(1);
     }
 
-    srand(time(NULL));
+    util::rand_init();
 
 }
 
@@ -101,36 +102,31 @@ SimpleTranslationInterface::~SimpleTranslationInterface()
 //the simplified version of string input/output translation
 string SimpleTranslationInterface::translate(const string &inputString)
 {
-  Moses::IOWrapper ioWrapper;
-  long lineCount = Moses::StaticData::Instance().GetStartTranslationId();
+  boost::shared_ptr<Moses::IOWrapper> ioWrapper(new IOWrapper);
   // main loop over set of input sentences
-  InputType* source = NULL;
   size_t sentEnd = inputString.rfind('\n'); //find the last \n, the input stream has to be appended with \n to be translated
   const string &newString = sentEnd != string::npos ? inputString : inputString + '\n';
 
   istringstream inputStream(newString);  //create the stream for the interface
-  ioWrapper.SetInputStreamFromString(inputStream);
+  ioWrapper->SetInputStreamFromString(inputStream);
   ostringstream outputStream;
-  ioWrapper.SetOutputStream2SingleBestOutputCollector(&outputStream);
-  ioWrapper.ReadInput(SimpleTranslationInterface::m_staticData.GetInputType(),source);
-  if (source)
-    source->SetTranslationId(lineCount);
-  else
-    return "Error: Source==null!!!";
-  IFVERBOSE(1) {
-    ResetUserTime();
-  }
+  ioWrapper->SetOutputStream2SingleBestOutputCollector(&outputStream);
 
-  FeatureFunction::CallChangeSource(source);
+  boost::shared_ptr<InputType> source = ioWrapper->ReadInput();
+  if (!source) return "Error: Source==null!!!";
+  IFVERBOSE(1) { ResetUserTime(); }
+
+  FeatureFunction::CallChangeSource(&*source);
 
   // set up task of translating one sentence
-  TranslationTask task = TranslationTask(source, ioWrapper);
-   task.Run();
-
-   string output = outputStream.str();
-   //now trim the end whitespace
-   const string whitespace = " \t\f\v\n\r";
-   size_t end = output.find_last_not_of(whitespace);
+  boost::shared_ptr<TranslationTask> task 
+    = TranslationTask::create(source, ioWrapper);
+  task->Run();
+  
+  string output = outputStream.str();
+  //now trim the end whitespace
+  const string whitespace = " \t\f\v\n\r";
+  size_t end = output.find_last_not_of(whitespace);
   return output.erase(end + 1);
 }
 
@@ -174,9 +170,9 @@ run_as_server()
   else myAbyssServer.run();
 
   std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
-#pragma message("BUILDING MOSES WIT SERVER SUPPORT") 
+  // #pragma message("BUILDING MOSES WITH SERVER SUPPORT") 
 #else
-#pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT") 
+  // #pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT") 
   std::cerr << "Moses was compiled without server support." << endl;   
 #endif
   return 1;
@@ -190,11 +186,12 @@ batch_run()
   const StaticData& staticData = StaticData::Instance();
 
   //initialise random numbers
-  srand(time(NULL));
+  util::rand_init();
 
   IFVERBOSE(1) PrintUserTime("Created input-output object");
     
-  IOWrapper* ioWrapper = new IOWrapper(); // set up read/writing class
+  // set up read/writing class:
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper); 
   UTIL_THROW_IF2(ioWrapper == NULL, "Error; Failed to create IO object"
 		 << " [" << HERE << "]");
   
@@ -211,18 +208,27 @@ batch_run()
   ThreadPool pool(staticData.ThreadCount());
 #endif
 
+  std::string context_string;
+  params.SetParameter(context_string,"context-string",string(""));
+
   // main loop over set of input sentences
-  InputType* source = NULL;
-  size_t lineCount = staticData.GetStartTranslationId();
-  while(ioWrapper->ReadInput(staticData.GetInputType(), source)) 
+
+  boost::shared_ptr<InputType> source;
+  while ((source = ioWrapper->ReadInput()) != NULL)
     {
-      source->SetTranslationId(lineCount);
       IFVERBOSE(1) ResetUserTime();
       
-      FeatureFunction::CallChangeSource(source);
+      FeatureFunction::CallChangeSource(source.get());
       
       // set up task of translating one sentence
-      TranslationTask* task = new TranslationTask(source, *ioWrapper);
+      boost::shared_ptr<TranslationTask>
+	task = TranslationTask::create(source, ioWrapper);
+      task->SetContextString(context_string);
+
+      // Allow for (sentence-)context-specific processing prior to 
+      // decoding. This can be used, for example, for context-sensitive
+      // phrase lookup.
+      FeatureFunction::SetupAll(*task);
 
       // execute task
 #ifdef WITH_THREADS
@@ -234,7 +240,6 @@ batch_run()
 	{
 	  // simulated post-editing: always run single-threaded!
 	  task->Run();
-	  delete task;
 	  string src,trg,aln;
 	  UTIL_THROW_IF2(!getline(*ioWrapper->spe_src,src), "[" << HERE << "] "
 			 << "missing update data for simulated post-editing.");
@@ -258,11 +263,7 @@ batch_run()
 #endif
 #else
       task->Run();
-      delete task;
 #endif
-
-      source = NULL; //make sure it doesn't get deleted
-      ++lineCount;
     }
   
   // we are done, finishing up
@@ -270,7 +271,6 @@ batch_run()
   pool.Stop(true); //flush remaining jobs
 #endif
 
-  delete ioWrapper;
   FeatureFunction::Destroy();
 
   IFVERBOSE(1) util::PrintUsage(std::cerr);

@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #pragma once
 
 #include <iostream>
@@ -14,12 +15,12 @@ class OutputCollector;
 class BaseManager
 {
 protected:
-  const InputType &m_source; /**< source sentence to be translated */
+  // const InputType &m_source; /**< source sentence to be translated */
+  ttaskwptr m_ttask;
+  InputType const& m_source; 
 
-  BaseManager(const InputType &source)
-    :m_source(source) {
-  }
-
+  BaseManager(ttasksptr const& ttask); 
+  
   // output
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
@@ -45,13 +46,10 @@ protected:
   }
 
 public:
-  virtual ~BaseManager() {
-  }
+  virtual ~BaseManager() { }
 
   //! the input sentence being decoded
-  const InputType& GetSource() const {
-    return m_source;
-  }
+  const InputType& GetSource() const;
 
   virtual void Decode() = 0;
   // outputs

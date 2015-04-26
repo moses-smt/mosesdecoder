@@ -57,10 +57,10 @@ void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 
 size_t Word::WriteToMemory(char *mem) const
 {
-  UINT64 *vocabMem = (UINT64*) mem;
+  uint64_t *vocabMem = (uint64_t*) mem;
   vocabMem[0] = m_vocabId;
 
-  size_t size = sizeof(UINT64);
+  size_t size = sizeof(uint64_t);
 
   // is non-term
   char bNonTerm = (char) m_isNonTerminal;
@@ -72,10 +72,10 @@ size_t Word::WriteToMemory(char *mem) const
 
 size_t Word::ReadFromMemory(const char *mem)
 {
-  UINT64 *vocabMem = (UINT64*) mem;
+  uint64_t *vocabMem = (uint64_t*) mem;
   m_vocabId = vocabMem[0];
 
-  size_t memUsed = sizeof(UINT64);
+  size_t memUsed = sizeof(uint64_t);
 
   // is non-term
   char bNonTerm;
@@ -88,8 +88,8 @@ size_t Word::ReadFromMemory(const char *mem)
 
 size_t Word::ReadFromFile(std::fstream &file)
 {
-  const size_t memAlloc = sizeof(UINT64) + sizeof(char);
-  char mem[sizeof(UINT64) + sizeof(char)];
+  const size_t memAlloc = sizeof(uint64_t) + sizeof(char);
+  char mem[sizeof(uint64_t) + sizeof(char)];
   file.read(mem, memAlloc);
 
   size_t memUsed = ReadFromMemory(mem);

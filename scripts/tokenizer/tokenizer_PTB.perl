@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # Sample Tokenizer
 ### Version 1.1
@@ -14,6 +14,7 @@
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
+use warnings;
 use FindBin qw($RealBin);
 use strict;
 use Time::HiRes;

@@ -56,10 +56,12 @@ namespace Moses
  * corresponding data structure is initialized here This fn should be
  * called by inherited classe */
 TranslationOptionCollection::
-TranslationOptionCollection(InputType const& src,
+TranslationOptionCollection(ttasksptr const& ttask,
+			    InputType const& src,
                             size_t maxNoTransOptPerCoverage,
                             float translationOptionThreshold)
-  : m_source(src)
+  : m_ttask(ttask)
+  , m_source(src)
   , m_futureScore(src.GetSize())
   , m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
   , m_translationOptionThreshold(translationOptionThreshold)
@@ -667,7 +669,7 @@ GetTargetPhraseCollectionBatch()
       const Tstep* tstep = dynamic_cast<const Tstep *>(*i);
       if (tstep) {
         const PhraseDictionary &pdict = *tstep->GetPhraseDictionaryFeature();
-        pdict.GetTargetPhraseCollectionBatch(m_inputPathQueue);
+        pdict.GetTargetPhraseCollectionBatch(m_ttask.lock(), m_inputPathQueue);
       }
     }
   }

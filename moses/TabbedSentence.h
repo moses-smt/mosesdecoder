@@ -53,7 +53,7 @@ class TabbedSentence : public Sentence
 {
 
 public:
-  TabbedSentence(TranslationTask const* ttask) : Sentence(ttask) {}
+  TabbedSentence() : Sentence() {}
   ~TabbedSentence() {}
 
   InputTypeEnum GetType() const {
