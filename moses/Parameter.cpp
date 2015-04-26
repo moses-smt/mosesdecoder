@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "util/exception.hh"
+#include "util/random.hh"
 #include <boost/program_options.hpp>
 
 
@@ -239,6 +240,7 @@ Parameter::Parameter()
   AddParam(misc_opts,"feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
   AddParam(misc_opts,"feature", "All the feature functions should be here");
+  AddParam(misc_opts,"context-string", "A (tokenized) string containing context words for context-sensitive translation.");
 
   // Compact phrase table and reordering table.
   po::options_description cpt_opts("Options when using compact phrase and reordering tables.");
@@ -1392,7 +1394,7 @@ struct Credit {
     this->contact							= contact						;
     this->currentPursuits			= currentPursuits		;
     this->areaResponsibility	= areaResponsibility;
-    this->sortId							= rand() % 1000;
+    this->sortId							= util::rand_excl(1000);
   }
 
   bool operator<(const Credit &other) const {

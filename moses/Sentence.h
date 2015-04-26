@@ -63,7 +63,9 @@ namespace Moses
 
   public:
     Sentence();
-    Sentence(size_t const transId, std::string const& stext);
+    Sentence(size_t const transId, std::string const& stext, 
+	     std::vector<FactorType> const* IFO = NULL);
+    // Sentence(size_t const transId, std::string const& stext);
     ~Sentence();
 
     InputTypeEnum GetType() const {
@@ -96,7 +98,8 @@ namespace Moses
     virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
     void Print(std::ostream& out) const;
 
-    TranslationOptionCollection* CreateTranslationOptionCollection() const;
+    TranslationOptionCollection* 
+    CreateTranslationOptionCollection(ttasksptr const& ttask) const;
 
     virtual void 
     CreateFromString(std::vector<FactorType> const &factorOrder, 

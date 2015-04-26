@@ -24,6 +24,7 @@
 #include <boost/unordered_set.hpp> 
 
 #include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
+#include "moses/Util.h"
 #include "ug_mm_2d_table.h"
 #include "ug_mm_ttrack.h"
 #include "ug_corpus_token.h"
@@ -241,10 +242,14 @@ processSentence(id_type sid)
       p = binread(p,r);
       p = binread(p,c);
       // cout << sid << " " << r << "-" << c << endl;
-      assert(r < check1.size());
-      assert(c < check2.size());
-      assert(s1+r < e1);
-      assert(s2+c < e2);
+      UTIL_THROW_IF2(r >= check1.size(), "out of bounds at line " << sid);
+      UTIL_THROW_IF2(c >= check2.size(), "out of bounds at line " << sid);
+      // assert(r < check1.size());
+      // assert(c < check2.size());
+      UTIL_THROW_IF2(s1+r >= e1, "out of bounds at line " << sid);
+      UTIL_THROW_IF2(s2+c >= e2, "out of bounds at line " << sid);
+      // assert(s1+r < e1);
+      // assert(s2+c < e2);
       check1.reset(r);
       check2.reset(c);
       id_type id1 = (s1+r)->id();
@@ -265,66 +270,6 @@ processSentence(id_type sid)
        i = check2.find_next(i))
     CNT[wpair(0,(s2+i)->id())].a++;
 }
-
-// void
-// writeTable(string ofname, 
-// 	   vector<vector<uint32_t> >& FREQ,
-// 	   vector<map<id_type,uint32_t> >& RARE)
-// {
-//   ofstream out(ofname.c_str());
-//   filepos_type idxOffset=0;
-
-//   vector<uint32_t> m1; // marginals L1
-//   vector<uint32_t> m2; // marginals L2
-//   m1.resize(max(first_rare_id,V1.getNumTokens()),0);
-//   m2.resize(V2.getNumTokens(),0);
-//   vector<id_type> index(V1.getNumTokens()+1,0);
-//   numwrite(out,idxOffset); // blank for the time being
-//   numwrite(out,id_type(m1.size()));
-//   numwrite(out,id_type(m2.size()));
-
-//   id_type cellCount=0;
-//   id_type stop = min(first_rare_id,id_type(m1.size()));
-//   for (id_type id1 = 0; id1 < stop; ++id1)
-//     {
-//       index[id1]  = cellCount;
-//       vector<uint32_t> const& v = FREQ[id1];
-//       for (id_type id2 = 0; id2 < id_type(v.size()); ++id2)
-//         {
-//           if (!v[id2]) continue;
-//           cellCount++;
-//           numwrite(out,id2);
-//           out.write(reinterpret_cast<char const*>(&v[id2]),sizeof(uint32_t));
-//           m1[id1] += v[id2];
-//           m2[id2] += v[id2];
-//         }
-//     }
-//   for (id_type id1 = stop; id1 < id_type(m1.size()); ++id1)
-//     {
-//       index[id1]  = cellCount;
-//       map<id_type,uint32_t> const& M = RARE[id1];
-//       for (map<id_type,uint32_t>::const_iterator m = M.begin(); m != M.end(); ++m)
-//         {
-//           if (m->second == 0) continue;
-//           cellCount++;
-//           numwrite(out,m->first);
-//           out.write(reinterpret_cast<char const*>(&m->second),sizeof(float));
-//           m1[id1] += m->second;
-//           m2[m->first] += m->second;
-//         }
-//     }
-//   index[m1.size()] = cellCount;
-//   idxOffset    = out.tellp();
-//   for (size_t i = 0; i < index.size(); ++i)
-//     numwrite(out,index[i]);
-//   out.write(reinterpret_cast<char const*>(&m1[0]),m1.size()*sizeof(float));
-//   out.write(reinterpret_cast<char const*>(&m2[0]),m2.size()*sizeof(float));
-  
-//   // re-write the file header
-//   out.seekp(0);
-//   numwrite(out,idxOffset);
-//   out.close();
-// }
 
 int 
 main(int argc, char* argv[])

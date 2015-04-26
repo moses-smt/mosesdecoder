@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # Based on Preprocessor written by Philipp Koehn
 
@@ -6,6 +6,7 @@ binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
+use warnings;
 use FindBin qw($RealBin);
 use strict;
 

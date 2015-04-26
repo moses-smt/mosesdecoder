@@ -1,3 +1,4 @@
+// -*- c++ -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2010 University of Edinburgh
@@ -45,10 +46,11 @@ class MockHypothesisGuard
 public:
   /** Creates a phrase-based hypothesis.
   */
-  MockHypothesisGuard(
-    const std::string& sourceSentence,
+  MockHypothesisGuard
+  ( const std::string& sourceSentence,
     const std::vector<Alignment>& alignments,
     const std::vector<std::string>& targetSegments);
+
   Moses::Hypothesis* operator*() const {
     return m_hypothesis;
   }
@@ -58,11 +60,12 @@ public:
 
 private:
   Moses::TranslationOption m_initialTransOpt;
-  Moses::Sentence m_sentence;
+  boost::shared_ptr<Moses::Sentence> m_sentence;
   Moses::WordPenaltyProducer m_wp;
   Moses::UnknownWordPenaltyProducer m_uwp;
   Moses::DistortionScoreProducer m_dist;
-  Moses::Manager m_manager;
+  boost::shared_ptr<Moses::Manager> m_manager;
+  boost::shared_ptr<Moses::TranslationTask> m_ttask;
   Moses::Hypothesis* m_hypothesis;
   std::vector<Moses::TargetPhrase> m_targetPhrases;
   std::vector<Moses::TranslationOption*> m_toptions;

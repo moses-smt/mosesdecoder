@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
 # $Id$
 # Reads a source and hypothesis file and counts equal tokens. Some of these

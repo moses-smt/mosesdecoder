@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 // vim:tabstop=2
 /***********************************************************************
@@ -42,8 +43,9 @@ class DecodeGraph;
 
 class ChartParserUnknown
 {
+  ttaskwptr m_ttask;
 public:
-  ChartParserUnknown();
+  ChartParserUnknown(ttasksptr const& ttask);
   ~ChartParserUnknown();
 
   void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
@@ -59,8 +61,9 @@ private:
 
 class ChartParser
 {
+  ttaskwptr m_ttask;
 public:
-  ChartParser(const InputType &source, ChartCellCollectionBase &cells);
+  ChartParser(ttasksptr const& ttask, ChartCellCollectionBase &cells);
   ~ChartParser();
 
   void Create(const WordsRange &range, ChartParserCallback &to);

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id$
 # Given a moses.ini file and an input text prepare minimized translation
@@ -8,6 +8,7 @@
 # changes by Ondrej Bojar
 # adapted for hierarchical models by Phil Williams
 
+use warnings;
 use strict;
 
 use FindBin qw($RealBin);

@@ -1,9 +1,10 @@
-#! /usr/bin/perl -w 
+#!/usr/bin/env perl 
 
 # example
 # ./score-parallel.perl 8 "gsort --batch-size=253" ./score ./extract.2.sorted.gz ./lex.2.f2e ./phrase-table.2.half.f2e  --GoodTuring ./phrase-table.2.coc 0
 # ./score-parallel.perl 8 "gsort --batch-size=253" ./score ./extract.2.inv.sorted.gz ./lex.2.e2f ./phrase-table.2.half.e2f  --Inverse 1
 
+use warnings;
 use strict;
 use File::Basename;
 
@@ -13,8 +14,8 @@ sub GetSourcePhrase($);
 sub NumStr($);
 sub CutContextFile($$$);
 
-my $GZIP_EXEC; # = which("pigz"); 
-if(-f "/usr/bin/pigz") {
+my $GZIP_EXEC;
+if(`which pigz`) {
   $GZIP_EXEC = 'pigz';
 }
 else {

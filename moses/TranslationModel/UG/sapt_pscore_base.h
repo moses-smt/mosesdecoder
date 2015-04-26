@@ -3,7 +3,6 @@
 // written by Ulrich Germann 
 #pragma once
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
-#include "moses/TranslationModel/UG/mm/ug_phrasepair.h"
 #include "util/exception.hh"
 #include "boost/format.hpp"
 

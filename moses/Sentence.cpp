@@ -278,11 +278,13 @@ ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeho
 
 TranslationOptionCollection*
 Sentence::
-CreateTranslationOptionCollection() const
+CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-  TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
+  TranslationOptionCollection *rv 
+    = new TranslationOptionCollectionText(ttask, *this, maxNoTransOptPerCoverage, 
+					  transOptThreshold);
   assert(rv);
   return rv;
 }
@@ -383,10 +385,12 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(size_t const transId, string const& stext) : InputType(transId)
+Sentence(size_t const transId, string const& stext, 
+	 vector<FactorType> const* IFO) 
+  : InputType(transId)
 {
-  vector<FactorType> const& IFO = StaticData::Instance().GetInputFactorOrder();
-  init(stext, IFO);
+  if (IFO) init(stext, *IFO);
+  else init(stext, StaticData::Instance().GetInputFactorOrder());
 }
 
 }

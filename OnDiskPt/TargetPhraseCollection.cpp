@@ -71,12 +71,12 @@ void TargetPhraseCollection::Save(OnDiskWrapper &onDiskWrapper)
 {
   std::fstream &file = onDiskWrapper.GetFileTargetColl();
 
-  size_t memUsed = sizeof(UINT64);
+  size_t memUsed = sizeof(uint64_t);
   char *mem = (char*) malloc(memUsed);
 
   // size of coll
-  UINT64 numPhrases = GetSize();
-  ((UINT64*)mem)[0] = numPhrases;
+  uint64_t numPhrases = GetSize();
+  ((uint64_t*)mem)[0] = numPhrases;
 
   // MAIN LOOP
   CollType::iterator iter;
@@ -98,16 +98,16 @@ void TargetPhraseCollection::Save(OnDiskWrapper &onDiskWrapper)
   }
 
   // total number of bytes
-  //((UINT64*)mem)[0] = (UINT64) memUsed;
+  //((uint64_t*)mem)[0] = (uint64_t) memUsed;
 
-  UINT64 startPos = file.tellp();
+  uint64_t startPos = file.tellp();
   file.seekp(0, ios::end);
   file.write((char*) mem, memUsed);
 
   free(mem);
 
 #ifndef NDEBUG
-  UINT64 endPos = file.tellp();
+  uint64_t endPos = file.tellp();
   assert(startPos + memUsed == endPos);
 #endif
   m_filePos = startPos;
@@ -148,7 +148,7 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
 
 }
 
-void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnDiskWrapper &onDiskWrapper)
+void TargetPhraseCollection::ReadFromFile(size_t tableLimit, uint64_t filePos, OnDiskWrapper &onDiskWrapper)
 {
   fstream &fileTPColl = onDiskWrapper.GetFileTargetColl();
   fstream &fileTP = onDiskWrapper.GetFileTargetInd();
@@ -156,23 +156,23 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
   size_t numScores = onDiskWrapper.GetNumScores();
 
 
-  UINT64 numPhrases;
+  uint64_t numPhrases;
 
-  UINT64 currFilePos = filePos;
+  uint64_t currFilePos = filePos;
   fileTPColl.seekg(filePos);
-  fileTPColl.read((char*) &numPhrases, sizeof(UINT64));
+  fileTPColl.read((char*) &numPhrases, sizeof(uint64_t));
 
   // table limit
   if (tableLimit) {
-    numPhrases = std::min(numPhrases, (UINT64) tableLimit);
+    numPhrases = std::min(numPhrases, (uint64_t) tableLimit);
   }
 
-  currFilePos += sizeof(UINT64);
+  currFilePos += sizeof(uint64_t);
 
   for (size_t ind = 0; ind < numPhrases; ++ind) {
     TargetPhrase *tp = new TargetPhrase(numScores);
 
-    UINT64 sizeOtherInfo = tp->ReadOtherInfoFromFile(currFilePos, fileTPColl);
+    uint64_t sizeOtherInfo = tp->ReadOtherInfoFromFile(currFilePos, fileTPColl);
     tp->ReadFromFile(fileTP);
 
     currFilePos += sizeOtherInfo;
@@ -181,7 +181,7 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
   }
 }
 
-UINT64 TargetPhraseCollection::GetFilePos() const
+uint64_t TargetPhraseCollection::GetFilePos() const
 {
   return m_filePos;
 }

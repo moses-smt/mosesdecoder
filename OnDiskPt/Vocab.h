@@ -34,19 +34,19 @@ class OnDiskWrapper;
 class Vocab
 {
 protected:
-  typedef std::map<std::string, UINT64> CollType;
+  typedef std::map<std::string, uint64_t> CollType;
   CollType m_vocabColl;
 
   std::vector<std::string> m_lookup; // opposite of m_vocabColl
-  UINT64 m_nextId; // starts @ 1
+  uint64_t m_nextId; // starts @ 1
 
 public:
   Vocab()
     :m_nextId(1) {
   }
-  UINT64 AddVocabId(const std::string &str);
-  UINT64 GetVocabId(const std::string &str, bool &found) const;
-  const std::string &GetString(UINT64 vocabId) const {
+  uint64_t AddVocabId(const std::string &str);
+  uint64_t GetVocabId(const std::string &str, bool &found) const;
+  const std::string &GetString(uint64_t vocabId) const {
     return m_lookup[vocabId];
   }
 

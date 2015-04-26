@@ -17,6 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include "util/exception.hh"
+#include "util/tokenize.hh"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 
 using namespace std;
@@ -28,29 +29,6 @@ void OutputVec(const vector<T> &vec)
     cerr << vec[i] << " " << flush;
   }
   cerr << endl;
-}
-
-// from phrase-extract/tables-core.cpp
-inline vector<string> tokenize( const char* input )
-{
-  vector< string > token;
-  bool betweenWords = true;
-  int start=0;
-  int i=0;
-  for(; input[i] != '\0'; i++) {
-    bool isSpace = (input[i] == ' ' || input[i] == '\t');
-
-    if (!isSpace && betweenWords) {
-      start = i;
-      betweenWords = false;
-    } else if (isSpace && !betweenWords) {
-      token.push_back( string( input+start, i-start ) );
-      betweenWords = true;
-    }
-  }
-  if (!betweenWords)
-    token.push_back( string( input+start, i-start ) );
-  return token;
 }
 
 namespace Moses
@@ -464,7 +442,7 @@ void PhraseDictionaryMultiModelCounts::LoadLexicalTable( string &fileName, lexic
     i++;
     if (i%100000 == 0) cerr << "." << flush;
 
-    vector<string> token = tokenize( line.c_str() );
+    const vector<string> token = util::tokenize( line );
     if (token.size() != 4) {
       cerr << "line " << i << " in " << fileName
            << " has wrong number of tokens, skipping:\n"

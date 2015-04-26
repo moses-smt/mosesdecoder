@@ -219,7 +219,8 @@ bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
 }
 
 TranslationOptionCollection*
-WordLattice::CreateTranslationOptionCollection() const
+WordLattice
+::CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
@@ -228,9 +229,9 @@ WordLattice::CreateTranslationOptionCollection() const
   //rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
 
   if (StaticData::Instance().GetUseLegacyPT()) {
-    rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+    rv = new TranslationOptionCollectionConfusionNet(ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
   } else {
-    rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+    rv = new TranslationOptionCollectionLattice(ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
   }
 
   assert(rv);

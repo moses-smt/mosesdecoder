@@ -26,10 +26,10 @@
 
 #include "nl-array.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
 using namespace std;

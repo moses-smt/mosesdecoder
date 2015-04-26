@@ -1,10 +1,12 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
 # $Id$
 # given a moses.ini file, prints a copy to stdout but replaces all relative
 # paths with absolute paths.
 #
 # Ondrej Bojar.
+
+use warnings;
 
 my $ini = shift;
 die "usage: absolutize_moses_model.pl path-to-moses.ini > moses.abs.ini"

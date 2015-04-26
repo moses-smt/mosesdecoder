@@ -37,6 +37,7 @@ int main(int argc, char** argv)
 #include "moses/Manager.h"
 #include "moses/StaticData.h"
 #include "moses/ThreadPool.h"
+#include "moses/TranslationTask.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #if PT_UG
@@ -232,8 +233,8 @@ public:
 /**
   * Required so that translations can be sent to a thread pool.
 **/
-class TranslationTask : public virtual Moses::Task {
-public:
+class TranslationTask : public virtual Moses::TranslationTask {
+protected:
   TranslationTask(xmlrpc_c::paramList const& paramList,
     boost::condition_variable& cond, boost::mutex& mut) 
    : m_paramList(paramList),
@@ -242,23 +243,33 @@ public:
      m_done(false)
      {}
 
+public:
+  static boost::shared_ptr<TranslationTask> 
+  create(xmlrpc_c::paramList const& paramList,
+	 boost::condition_variable& cond, boost::mutex& mut)
+  {
+    boost::shared_ptr<TranslationTask> ret(new TranslationTask(paramList, cond, mut));
+    ret->m_self = ret;
+    return ret;
+  }
+  
   virtual bool DeleteAfterExecution() {return false;}
 
   bool IsDone() const {return m_done;}
 
   const map<string, xmlrpc_c::value>& GetRetData() { return m_retData;}
 
-  virtual void Run() {
-
+  virtual void 
+  Run() 
+  {
+    using namespace xmlrpc_c;
     const params_t params = m_paramList.getStruct(0);
     m_paramList.verifyEnd(1);
     params_t::const_iterator si = params.find("text");
     if (si == params.end()) {
-      throw xmlrpc_c::fault(
-        "Missing source text",
-        xmlrpc_c::fault::CODE_PARSE);
+      throw fault("Missing source text", fault::CODE_PARSE);
     }
-    const string source((xmlrpc_c::value_string(si->second)));
+    const string source = value_string(si->second);
 
     XVERBOSE(1,"Input: " << source << endl);
     si = params.find("align");
@@ -272,7 +283,7 @@ public:
     si = params.find("report-all-factors");
     bool reportAllFactors = (si != params.end());
     si = params.find("nbest");
-    int nbest_size = (si == params.end()) ? 0 : int(xmlrpc_c::value_int(si->second));
+    int nbest_size = (si == params.end()) ? 0 : int(value_int(si->second));
     si = params.find("nbest-distinct");
     bool nbest_distinct = (si != params.end());
 
@@ -281,21 +292,25 @@ public:
 
     vector<float> multiModelWeights;
     si = params.find("lambda");
-    if (si != params.end()) {
-        xmlrpc_c::value_array multiModelArray = xmlrpc_c::value_array(si->second);
-        vector<xmlrpc_c::value> multiModelValueVector(multiModelArray.vectorValueValue());
-        for (size_t i=0;i < multiModelValueVector.size();i++) {
-            multiModelWeights.push_back(xmlrpc_c::value_double(multiModelValueVector[i]));
-        }
-    }
+    if (si != params.end()) 
+      {
+        value_array multiModelArray = value_array(si->second);
+        vector<value> multiModelValueVector(multiModelArray.vectorValueValue());
+        for (size_t i=0;i < multiModelValueVector.size();i++) 
+	  {
+            multiModelWeights.push_back(value_double(multiModelValueVector[i]));
+	  }
+      }
 
     si = params.find("model_name");
-    if (si != params.end() && multiModelWeights.size() > 0) {
-        const string model_name = xmlrpc_c::value_string(si->second);
-        PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+    if (si != params.end() && multiModelWeights.size() > 0) 
+      {
+        const string model_name = value_string(si->second);
+        PhraseDictionaryMultiModel* pdmm 
+	  = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
         pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
-    }
-
+      }
+    
     const StaticData &staticData = StaticData::Instance();
 
     //Make sure alternative paths are retained, if necessary
@@ -306,13 +321,14 @@ public:
 
     stringstream out, graphInfo, transCollOpts;
 
-    if (staticData.IsSyntax()) {
-      TreeInput tinput;
-        const vector<FactorType>& 
-	      inputFactorOrder = staticData.GetInputFactorOrder();
-        stringstream in(source + "\n");
-        tinput.Read(in,inputFactorOrder);
-        ChartManager manager(tinput);
+    if (staticData.IsSyntax()) 
+      {
+	boost::shared_ptr<TreeInput> tinput(new TreeInput);
+        const vector<FactorType>& IFO = staticData.GetInputFactorOrder();
+        istringstream in(source + "\n");
+        tinput->Read(in,IFO);
+	ttasksptr task = Moses::TranslationTask::create(tinput);
+        ChartManager manager(task);
         manager.Decode();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
@@ -320,57 +336,50 @@ public:
           // const size_t translationId = tinput.GetTranslationId();
           std::ostringstream sgstream;
           manager.OutputSearchGraphMoses(sgstream);
-          m_retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
+          m_retData["sg"] = value_string(sgstream.str());
         }
-    } else {
-        size_t lineNumber = 0; // TODO: Include sentence request number here?
-        Sentence sentence;
-        sentence.SetTranslationId(lineNumber);
-
-        const vector<FactorType> &
-	      inputFactorOrder = staticData.GetInputFactorOrder();
-        stringstream in(source + "\n");
-        sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence);
-	      manager.Decode();
+      } 
+    else 
+      {
+        // size_t lineNumber = 0; // TODO: Include sentence request number here?
+	boost::shared_ptr<Sentence> sentence(new Sentence(0,source));
+	ttasksptr task = Moses::TranslationTask::create(sentence);
+        Manager manager(task);
+	manager.Decode();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
         vector<xmlrpc_c::value> alignInfo;
         outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
-        if (addAlignInfo) {
-          m_retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
-        }
-        if (addWordAlignInfo) {
-          stringstream wordAlignment;
-          hypo->OutputAlignment(wordAlignment);
-          vector<xmlrpc_c::value> alignments;
-          string alignmentPair;
-          while (wordAlignment >> alignmentPair) {
+        if (addAlignInfo) m_retData["align"] = value_array(alignInfo);
+        if (addWordAlignInfo) 
+	  {
+	    stringstream wordAlignment;
+	    hypo->OutputAlignment(wordAlignment);
+	    vector<xmlrpc_c::value> alignments;
+	    string alignmentPair;
+	    while (wordAlignment >> alignmentPair) 
+	      {
           	int pos = alignmentPair.find('-');
           	map<string, xmlrpc_c::value> wordAlignInfo;
-          	wordAlignInfo["source-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(0, pos).c_str()));
-          	wordAlignInfo["target-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
-          	alignments.push_back(xmlrpc_c::value_struct(wordAlignInfo));
-          }
-          m_retData.insert(pair<string, xmlrpc_c::value_array>("word-align", alignments));
-        }
-
-        if (addGraphInfo) {
-          insertGraphInfo(manager,m_retData);
-        }
-        if (addTopts) {
-          insertTranslationOptions(manager,m_retData);
-        }
-        if (nbest_size>0) {
-          outputNBest(manager, m_retData, nbest_size, nbest_distinct, 
-		      reportAllFactors, addAlignInfo, addScoreBreakdown);
-        }
+          	wordAlignInfo["source-word"] 
+		  = value_int(atoi(alignmentPair.substr(0, pos).c_str()));
+          	wordAlignInfo["target-word"] 
+		  = value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
+          	alignments.push_back(value_struct(wordAlignInfo));
+	      }
+	    m_retData["word-align"] = value_array(alignments);
+	  }
+	
+        if (addGraphInfo) insertGraphInfo(manager,m_retData);
+        if (addTopts) insertTranslationOptions(manager,m_retData);
+        if (nbest_size > 0) 
+	  {
+	    outputNBest(manager, m_retData, nbest_size, nbest_distinct, 
+			reportAllFactors, addAlignInfo, addScoreBreakdown);
+	  }
         (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
-
-    }
-    pair<string, xmlrpc_c::value>
-    text("text", xmlrpc_c::value_string(out.str()));
-    m_retData.insert(text);
+      }
+    m_retData["text"] = value_string(out.str());
     XVERBOSE(1,"Output: " << out.str() << endl);
     {
       boost::lock_guard<boost::mutex> lock(m_mut);
@@ -380,9 +389,12 @@ public:
 
   }
 
-  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, bool reportAllFactors = false) {
+  void outputHypo(ostream& out, const Hypothesis* hypo, 
+		  bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, 
+		  bool reportAllFactors = false) {
     if (hypo->GetPrevHypo() != NULL) {
-      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, reportAllFactors);
+      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, 
+		 alignInfo, reportAllFactors);
       Phrase p = hypo->GetCurrTargetPhrase();
       if(reportAllFactors) {
         out << p << " ";
@@ -524,7 +536,7 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  path.GetScoreBreakdown().OutputAllFeatureScores(buf);
+	  path.GetScoreBreakdown()->OutputAllFeatureScores(buf);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 
@@ -595,7 +607,7 @@ public:
     boost::condition_variable cond;
     boost::mutex mut;
     typedef ::TranslationTask TTask;
-    boost::shared_ptr<TTask> task(new TTask(paramList,cond,mut));
+    boost::shared_ptr<TTask> task = TTask::create(paramList,cond,mut);
     m_threadPool.Submit(task);
     boost::unique_lock<boost::mutex> lock(mut);
     while (!task->IsDone()) {

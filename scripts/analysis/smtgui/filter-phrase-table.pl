@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id$
 #by Philipp Koehn, de-augmented by Evan Herbst
@@ -9,6 +9,7 @@
 #similar function to filter-model-given-input.pl, but only operates
 #on the phrase table and doesn't require that any subdirectories exist
 
+use warnings;
 use strict;
 
 my $MAX_LENGTH = 10;

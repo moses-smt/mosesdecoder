@@ -1,10 +1,12 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
+
 # Uses Google AJAX API to collect many translations, i.e. create a parallel
 # corpus of Google translations.
 # Expects one sentence per line, not tokenized!
 #
 # Ondrej Bojar, bojar@ufal.mff.cuni.cz
 
+use warnings;
 use strict;
 use Getopt::Long;
 use CGI;

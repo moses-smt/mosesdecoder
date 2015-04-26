@@ -466,6 +466,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   std::map<std::string, std::string> featureNameOverride = OverrideFeatureNames();
 
+
+  // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   // all features
   map<string, int> featureIndexMap;
 
@@ -846,27 +848,33 @@ float StaticData::GetWeightWordPenalty() const
   return weightWP;
 }
 
-void StaticData::InitializeForInput(const InputType& source) const
+void 
+StaticData
+::InitializeForInput(ttasksptr const& ttask) const
 {
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers =    FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
       Timer iTime;
       iTime.start();
-      ff.InitializeForInput(source);
-      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " ) = " << iTime << endl);
+      ff.InitializeForInput(ttask);
+      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " )"
+	      << "= " << iTime << endl);
     }
   }
 }
 
-void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
+void 
+StaticData
+::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
 {
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers 
+    = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
-      ff.CleanUpAfterSentenceProcessing(source);
+      ff.CleanUpAfterSentenceProcessing(ttask);
     }
   }
 }
@@ -1095,7 +1103,9 @@ void StaticData::NoCache()
   }
 }
 
-std::map<std::string, std::string> StaticData::OverrideFeatureNames()
+std::map<std::string, std::string> 
+StaticData
+::OverrideFeatureNames()
 {
   std::map<std::string, std::string> ret;
 

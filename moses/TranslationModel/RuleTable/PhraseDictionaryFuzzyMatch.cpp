@@ -19,10 +19,10 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -45,12 +45,13 @@
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
 #include "util/file.hh"
 #include "util/exception.hh"
+#include "util/random.hh"
 
 using namespace std;
 
 #if defined __MINGW32__ && !defined mkdtemp
 #include <windows.h>
-#include <errno.h>
+#include <cerrno>
 char *mkdtemp(char *tempbuf)
 {
   int rand_value = 0;
@@ -62,8 +63,8 @@ char *mkdtemp(char *tempbuf)
     return NULL;
   }
 
-  srand((unsigned)time(0));
-  rand_value = (int)((rand() / ((double)RAND_MAX+1.0)) * 1e6);
+  util::rand_init();
+  rand_value = util::rand_excl(1e6);
   tempbase = strrchr(tempbuf, '/');
   tempbase = tempbase ? tempbase+1 : tempbuf;
   strcpy(tempbasebuf, tempbase);
@@ -130,10 +131,6 @@ int removedirectoryrecursively(const char *dirname)
   struct dirent *entry;
   char path[PATH_MAX];
 
-  if (path == NULL) {
-    fprintf(stderr, "Out of memory error\n");
-    return 0;
-  }
   dir = opendir(dirname);
   if (dir == NULL) {
     perror("Error opendir()");
@@ -392,10 +389,10 @@ TO_STRING_BODY(PhraseDictionaryFuzzyMatch);
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionaryFuzzyMatch& phraseDict)
 {
+  /*
   typedef PhraseDictionaryNodeMemory::TerminalMap TermMap;
   typedef PhraseDictionaryNodeMemory::NonTerminalMap NonTermMap;
 
-  /*
   const PhraseDictionaryNodeMemory &coll = phraseDict.m_collection;
   for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p) {
     const Word &sourceNonTerm = p->first.first;

@@ -126,11 +126,25 @@ namespace Moses
       T = x = e1; B = a1.size()-1;
       if (expand_block(a1,a2,x,y,T,L,B,R) >= 0)
 	return Moses::LRModel::S;
-      while (s2 && a2[s2].size() == 0) --s2;
-      if (a2[s2].size() == 0) return po_other;
-      if (a2[s2].back() < s1) return Moses::LRModel::DR;
-      if (a2[s2].front() >= e1) return Moses::LRModel::DL;
-      return po_other;
+      size_t s2x = s2;
+      while (s2-- && a2[s2].size() == 0);
+      
+      Moses::LRModel::ReorderingType ret;
+      ret = (a2[s2].size()  ==  0 ? po_other :
+	     a2[s2].back()   < s1 ? Moses::LRModel::DR :
+	     a2[s2].front() >= e1 ? Moses::LRModel::DL :
+	     po_other);
+#if 0
+      cout << "s1=" << s1 << endl;
+      cout << "s2=" << s2x << "=>" << s2 << endl;
+      cout << "e1=" << e1 << endl;
+      cout << "e2=" << e2 << endl;
+      cout << "a2[s2].size()=" << a2[s2].size() << endl;
+      cout << "a2[s2].back()=" << a2[s2].back() << endl;
+      cout << "a2[s2].front()=" << a2[s2].front() << endl;
+      cout << "RETURNING " << ret << endl;
+#endif
+      return ret;
     }
 
   } // namespace bitext

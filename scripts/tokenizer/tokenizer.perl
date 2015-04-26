@@ -1,4 +1,5 @@
-#!/usr/bin/env perl
+#!/usr/bin/env perl 
+
 use warnings;
 
 # Sample Tokenizer
@@ -15,10 +16,15 @@ use warnings;
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
+use warnings;
 use FindBin qw($RealBin);
 use strict;
 use Time::HiRes;
-use Thread;
+
+if  (eval {require Thread;1;}) {
+  #module loaded
+  Thread->import();
+}
 
 my $mydir = "$RealBin/../share/nonbreaking_prefixes";
 

@@ -1,4 +1,5 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
+
 # Script implemented by Pranava Swaroop Madhyastha (a student at Charles
 # University, UFAL)
 

@@ -8,8 +8,7 @@
 
 #include <queue>
 #include <vector>
-
-#include <math.h>
+#include <cmath>
 #include <stdint.h>
 
 namespace search {

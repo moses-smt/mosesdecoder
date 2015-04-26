@@ -1,6 +1,6 @@
 #include <map>
 #include <vector>
-#include <assert.h>
+#include <cassert>
 #include "SourceGHKMTreeInputMatchFeature.h"
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"

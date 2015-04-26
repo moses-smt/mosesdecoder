@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TrainingTask.h"
+#include "util/random.hh"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -117,7 +118,7 @@ int main(int argc, char** argv)
 
 
     //initialise random numbers
-    srand(time(NULL));
+    util::rand_init();
 
     // set up read/writing class
     IFVERBOSE(1) {
@@ -153,8 +154,8 @@ int main(int argc, char** argv)
 	FeatureFunction::CallChangeSource(foo);
 
 	// set up task of training one sentence
-	boost::shared_ptr<TrainingTask> 
-	  task(new TrainingTask(source.get(), *ioWrapper));
+	boost::shared_ptr<TrainingTask> task;
+	task = TrainingTask::create(source, ioWrapper);
 
 	// execute task
 #ifdef WITH_THREADS

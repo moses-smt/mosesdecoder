@@ -5,7 +5,7 @@
 #include "search/header.hh"
 #include "util/pool.hh"
 
-#include <math.h>
+#include <cmath>
 
 namespace search {
 

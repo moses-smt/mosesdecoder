@@ -11,176 +11,6 @@ namespace Moses
   namespace bitext 
   {
 
-#if UG_BITEXT_TRACK_ACTIVE_THREADS
-    ThreadSafeCounter pstats::active;
-#endif
-    
-    pstats::
-    pstats()
-      : raw_cnt     (0)
-      , sample_cnt  (0)
-      , good        (0)
-      , sum_pairs   (0)
-      , in_progress (0)
-    {
-      for (int i = 0; i <= Moses::LRModel::NONE; ++i) 
-	ofwd[i] = obwd[i] = 0;
-    }
-
-    pstats::
-    ~pstats()
-    {
-#if UG_BITEXT_TRACK_ACTIVE_THREADS
-      // counter may not exist any more at destruction time, so try ... catch
-      try { --active; } catch (...) {} 
-#endif
-    }
-
-    void
-    pstats::
-    register_worker()
-    {
-      this->lock.lock();
-      ++this->in_progress;
-      this->lock.unlock();
-    }
-  
-    void
-    pstats::
-    release()
-    {
-      this->lock.lock();
-      if (this->in_progress-- == 1) // last one - >we're done
-	this->ready.notify_all();
-      this->lock.unlock();
-    }
-
-    bool
-    pstats::
-    add(::uint64_t pid, float const w, 
-	vector<uchar> const& a, 
-	uint32_t const cnt2, 
-	uint32_t fwd_o, 
-	uint32_t bwd_o)
-    {
-      boost::lock_guard<boost::mutex> guard(this->lock);
-      jstats& entry = this->trg[pid];
-      entry.add(w,a,cnt2,fwd_o,bwd_o);
-      if (this->good < entry.rcnt())
-	{
-	  UTIL_THROW(util::Exception, "more joint counts than good counts:" 
-		     << entry.rcnt() << "/" << this->good << "!");
-	}
-      return true;
-    }
-
-    jstats::
-    jstats()
-      : my_rcnt(0), my_wcnt(0), my_cnt2(0)
-    { 
-      for (int i = 0; i <= Moses::LRModel::NONE; ++i) 
-	ofwd[i] = obwd[i] = 0;
-      my_aln.reserve(1); 
-    }
-
-    jstats::
-    jstats(jstats const& other)
-    {
-      my_rcnt = other.rcnt();
-      my_wcnt = other.wcnt();
-      my_aln  = other.aln();
-      for (int i = 0; i <= Moses::LRModel::NONE; i++)
-	{
-	  ofwd[i] = other.ofwd[i];
-	  obwd[i] = other.obwd[i];
-	}
-    }
-  
-    uint32_t 
-    jstats::
-    dcnt_fwd(PhraseOrientation const idx) const
-    {
-      assert(idx <= Moses::LRModel::NONE);
-      return ofwd[idx];
-    }
-
-    uint32_t 
-    jstats::
-    dcnt_bwd(PhraseOrientation const idx) const
-    {
-      assert(idx <= Moses::LRModel::NONE);
-      return obwd[idx];
-    }
-    
-    void 
-    jstats::
-    add(float w, vector<uchar> const& a, uint32_t const cnt2,
-	uint32_t fwd_orient, uint32_t bwd_orient)
-    {
-      boost::lock_guard<boost::mutex> lk(this->lock);
-      my_rcnt += 1;
-      my_wcnt += w;
-      // my_cnt2 += cnt2; // could I really be that stupid? [UG]
-      my_cnt2 = cnt2;
-      if (a.size())
-	{
-	  size_t i = 0;
-	  while (i < my_aln.size() && my_aln[i].second != a) ++i;
-	  if (i == my_aln.size()) 
-	    my_aln.push_back(pair<size_t,vector<uchar> >(1,a));
-	  else
-	    my_aln[i].first++;
-	  if (my_aln[i].first > my_aln[i/2].first)
-	    push_heap(my_aln.begin(),my_aln.begin()+i+1);
-	}
-      ++ofwd[fwd_orient];
-      ++obwd[bwd_orient];
-    }
-    
-    uint32_t 
-    jstats::
-    rcnt() const 
-    { return my_rcnt; }
-    
-    float
-    jstats::
-    wcnt() const 
-    { return my_wcnt; }
-
-    uint32_t
-    jstats::
-    cnt2() const 
-    { return my_cnt2; }
-   
-    vector<pair<size_t, vector<uchar> > > const&
-    jstats::
-    aln() const 
-    { return my_aln; }
-
-    void 
-    jstats::
-    invalidate()
-    {
-      if (my_wcnt > 0) 
-	my_wcnt *= -1;
-    }
-
-    void 
-    jstats::
-    validate()
-    {
-      if (my_wcnt < 0) 
-	my_wcnt *= -1;
-    }
-
-    bool
-    jstats::
-    valid()
-    {
-      return my_wcnt >= 0;
-    }
-
-    
     float 
     lbop(size_t const tries, size_t const succ, float const confidence)
     {
@@ -190,83 +20,6 @@ namespace Moses
 		 find_lower_bound_on_p(tries, succ, confidence)));
     }
     
-    template<>
-    sptr<imBitext<L2R_Token<SimpleWordId> > > 
-    imBitext<L2R_Token<SimpleWordId> >::
-    add(vector<string> const& s1, 
-	vector<string> const& s2, 
-	vector<string> const& aln) const
-    {
-      typedef L2R_Token<SimpleWordId> TKN;
-      assert(s1.size() == s2.size() && s1.size() == aln.size());
-      
-#ifndef NDEBUG
-      size_t first_new_snt = this->T1 ? this->T1->size() : 0;
-#endif
-
-      sptr<imBitext<TKN> > ret;
-      {
-	boost::lock_guard<boost::mutex> guard(this->lock);
-	ret.reset(new imBitext<TKN>(*this));
-      }
-      
-      // we add the sentences in separate threads (so it's faster)
-      boost::thread thread1(snt_adder<TKN>(s1,*ret->V1,ret->myT1,ret->myI1));
-      // thread1.join(); // for debugging
-      boost::thread thread2(snt_adder<TKN>(s2,*ret->V2,ret->myT2,ret->myI2));
-      BOOST_FOREACH(string const& a, aln)
-	{
-	  istringstream ibuf(a);
-	  ostringstream obuf;
-	  uint32_t row,col; char c;
-	  while (ibuf >> row >> c >> col)
-	    {
-	      UTIL_THROW_IF2(c != '-', "[" << HERE << "] "
-			     << "Error in alignment information:\n" << a);
-	      binwrite(obuf,row);
-	      binwrite(obuf,col);
-	    }
-	  // important: DO NOT replace the two lines below this comment by 
-	  // char const* x = obuf.str().c_str(), as the memory x is pointing 
-	  // to is freed immediately upon deconstruction of the string object.
-	  string foo = obuf.str(); 
-	  char const* x = foo.c_str();
-	  vector<char> v(x,x+foo.size());
-	  ret->myTx = append(ret->myTx, v);
-	}
-
-      thread1.join();
-      thread2.join();
-
-      ret->Tx = ret->myTx;
-      ret->T1 = ret->myT1;
-      ret->T2 = ret->myT2;
-      ret->I1 = ret->myI1;
-      ret->I2 = ret->myI2;
-
-#ifndef NDEBUG
-      // sanity check
-      for (size_t i = first_new_snt; i < ret->T1->size(); ++i)
-	{
-	  size_t slen1  = ret->T1->sntLen(i);
-	  size_t slen2  = ret->T2->sntLen(i);
-	  char const* p = ret->Tx->sntStart(i);
-	  char const* q = ret->Tx->sntEnd(i);
-	  size_t k;
-	  while (p < q)
-	    {
-	      p = binread(p,k);
-	      assert(p);
-	      assert(p < q);
-	      assert(k < slen1);
-	      p = binread(p,k);
-	      assert(p);
-	      assert(k < slen2);
-	    }
-	}
-#endif
-      return ret;
-    }
 
     // template<>
     void
@@ -408,6 +161,16 @@ namespace Moses
 	  cout << endl;
 	}
       cout  << string(90,'-') << endl;
+    }
+
+    void 
+    write_bitvector(bitvector const& v, ostream& out)
+    {
+      for (size_t i = v.find_first(); i < v.size();)
+	{
+	  out << i;
+	  if ((i = v.find_next(i)) < v.size()) out << ",";
+	}
     }
 
   }

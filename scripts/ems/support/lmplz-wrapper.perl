@@ -1,27 +1,26 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 
-my ($TEXT,$ORDER,$PRUNE,$BIN,$LM,$MEMORY,$TMP,$DISCOUNT_FALLBACK);
+Getopt::Long::config("no_auto_abbrev");
+Getopt::Long::config("pass_through");
+
+
+my ($TEXT,$ORDER,$BIN,$LM);
 
 &GetOptions('text=s' => \$TEXT,
 	    'lm=s' => \$LM,
             'bin=s' => \$BIN,
-            'prune=s' => \$PRUNE,
-            'discount_fallback' => \$DISCOUNT_FALLBACK,
-            'T=s' => \$TMP,
-            'S=s' => \$MEMORY,
 	    'order=i' => \$ORDER);
 
-die("ERROR: specify at least --text CORPUS --arpa LM and --order N!")
-  unless defined($TEXT) && defined($LM) && defined($ORDER);
+die("ERROR: specify at least --bin BIN --text CORPUS --lm LM and --order N!")
+  unless defined($BIN) && defined($TEXT) && defined($LM) && defined($ORDER);
 
-my $cmd = "$BIN --text $TEXT --order $ORDER --arpa $LM";
-$cmd .= " --prune $PRUNE" if defined($PRUNE);
-$cmd .= " -S $MEMORY" if defined($MEMORY);
-$cmd .= " -T $TMP" if defined($TMP);
-$cmd .= " --discount_fallback" if defined($DISCOUNT_FALLBACK);
+my $settings = join(' ', @ARGV);
+#print STDERR "settngs=$settings \n";
 
+my $cmd = "$BIN --text $TEXT --order $ORDER --arpa $LM $settings";
 print "exec: $cmd\n";
 `$cmd`;

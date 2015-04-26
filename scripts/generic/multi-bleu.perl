@@ -1,6 +1,7 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id$
+use warnings;
 use strict;
 
 my $lowercase = 0;

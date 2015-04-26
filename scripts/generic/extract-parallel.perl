@@ -1,8 +1,9 @@
-#! /usr/bin/perl -w 
+#!/usr/bin/env perl 
 
 # example
 #  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation --GZOutput
 
+use warnings;
 use strict;
 use File::Basename;
 
@@ -32,8 +33,8 @@ my $glueFile;
 my $phraseOrientation = 0;
 my $phraseOrientationPriorsFile;
 
-my $GZIP_EXEC; # = which("pigz"); 
-if(-f "/usr/bin/pigz") {
+my $GZIP_EXEC;
+if(`which pigz`) {
   $GZIP_EXEC = 'pigz';
 }
 else {

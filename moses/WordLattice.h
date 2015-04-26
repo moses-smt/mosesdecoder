@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #ifndef moses_WordLattice_h
 #define moses_WordLattice_h
 
@@ -53,7 +54,8 @@ public:
     return next_nodes[pos];
   }
 
-  TranslationOptionCollection *CreateTranslationOptionCollection() const;
+  TranslationOptionCollection*
+  CreateTranslationOptionCollection(ttasksptr const& ttask) const;
 };
 
 }

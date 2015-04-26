@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 # runs Moses many times changing the values of one weight, all others fixed
 # nbest lists are always produced to allow for comparison of real and
 # 'projected' BLEU (BLEU estimated from n-best lists collected at a neighouring

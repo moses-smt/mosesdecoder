@@ -291,7 +291,7 @@ std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn)
 
 TranslationOptionCollection*
 ConfusionNet::
-CreateTranslationOptionCollection() const
+CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   size_t maxNoTransOptPerCoverage
   = StaticData::Instance().GetMaxNoTransOptPerCoverage();
@@ -299,7 +299,7 @@ CreateTranslationOptionCollection() const
   = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
   = new TranslationOptionCollectionConfusionNet
-  (*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+    (ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
   assert(rv);
   return rv;
 }
