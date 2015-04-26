@@ -14,6 +14,7 @@ namespace Moses
   {
     using ugdiss::id_type;
 
+#ifdef HAVE_CURLPP
     std::string 
     query_bias_server(std::string const& url, std::string const& text)
     {
@@ -27,7 +28,8 @@ namespace Moses
       myRequest.perform();  // This will output to os
       return os.str();
     }
-    
+#endif
+
     DocumentBias
     ::DocumentBias
     ( std::vector<id_type> const& sid2doc, 
@@ -37,8 +39,10 @@ namespace Moses
       : m_sid2docid(sid2doc)
       , m_bias(docname2docid.size(), 0)
     {
+#ifdef HAVE_CURLPP
       std::string json = query_bias_server(server_url, text);
       init_from_json(json, docname2docid, log);
+#endif
     }
 
     void 
@@ -98,8 +102,7 @@ namespace Moses
       // 	std::cerr << x.first << " " << x.second/total << std::endl; 
       // // delete b;
     }
-    
-    
+
     void 
     DocumentBias
     ::init(std::map<std::string,float> const& biasmap,
