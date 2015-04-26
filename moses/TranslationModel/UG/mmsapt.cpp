@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/thread/locks.hpp>
 #include <algorithm>
 #include "util/exception.hh"
 #include <set>
@@ -305,8 +306,8 @@ namespace Moses
     while(getline(in2,line)) text2.push_back(line);
     while(getline(ina,line)) symal.push_back(line);
 
-    scoped_ptr<unique_lock<shared_mutex> > guard;
-    if (locking) guard.reset(new unique_lock<shared_mutex>(m_lock));
+    scoped_ptr<boost::unique_lock<shared_mutex> > guard;
+    if (locking) guard.reset(new boost::unique_lock<shared_mutex>(m_lock));
     btdyn = btdyn->add(text1,text2,symal);
     assert(btdyn);
     cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
