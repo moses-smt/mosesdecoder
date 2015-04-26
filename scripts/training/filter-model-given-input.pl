@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id$
 # Given a moses.ini file and an input text prepare minimized translation
@@ -8,6 +8,7 @@
 # changes by Ondrej Bojar
 # adapted for hierarchical models by Phil Williams
 
+use warnings;
 use strict;
 
 use FindBin qw($RealBin);
@@ -406,8 +407,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         # ... phrase translation model
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
-          ##my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads && rm $mid_file.sorted";
-          my $cmd = "$binarizer -in <($catcmd $mid_file | LC_ALL=C sort -T $tempdir) -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads -encoding None";
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads && rm $mid_file.sorted";
           safesystem($cmd) or die "Can't binarize";
         } elsif ($binarizer =~ /CreateOnDiskPt/) {
       	  my $cmd = "$binarizer $mid_file $new_file.bin";
