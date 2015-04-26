@@ -112,10 +112,16 @@ private:
   typedef boost::unordered_map<SparseReorderingFeatureKey, FName, HashSparseReorderingFeatureKey, EqualsSparseReorderingFeatureKey> FeatureMap;
   FeatureMap m_featureMap;
 
+  typedef boost::unordered_map<std::string, float> WeightMap;
+  WeightMap m_weightMap;
+  bool m_useWeightMap;
+  std::vector<FName> m_featureMap2; 
+
   void ReadWordList(const std::string& filename, const std::string& id,
                     SparseReorderingFeatureKey::Side side, std::vector<WordList>* pWordLists);
   void ReadClusterMap(const std::string& filename, const std::string& id, SparseReorderingFeatureKey::Side side, std::vector<ClusterMap>* pClusterMaps);
   void PreCalculateFeatureNames(size_t index, const std::string& id, SparseReorderingFeatureKey::Side side, const Factor* factor, bool isCluster);
+  void ReadWeightMap(const std::string& filename);
 
   void AddFeatures(
     SparseReorderingFeatureKey::Type type, SparseReorderingFeatureKey::Side side,

@@ -22,7 +22,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define __INFOSHASHER_H__
 #include <string>
 // #include <ext/hash_map>
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 #include <sstream>
 #include <vector>

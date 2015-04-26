@@ -5,11 +5,14 @@ namespace TOKENIZER_NAMESPACE {
 #endif
 
 Parameters::Parameters()
-: cfg_path(0)
+: nthreads(0)
+, chunksize(2000)
+, cfg_path(0)
 , verbose_p(false)
 , detag_p(false)
 , alltag_p(false)
-, escape_p(true)
+, entities_p(false)
+, escape_p(false)
 , aggro_p(false)
 , supersub_p(false)
 , url_p(true)
@@ -23,6 +26,10 @@ Parameters::Parameters()
 , refined_p(false)
 , unescape_p(false)
 , drop_bad_p(false)
+, split_p(false)
+, notokenization_p(false)
+, para_marks_p(false)
+, split_breaks_p(false)
 {
 }
 

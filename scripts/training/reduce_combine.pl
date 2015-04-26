@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
 # $Id$
 # given a pathname to a factored corpus, a list of (numeric) factors to keep

@@ -1,0 +1,123 @@
+# -*- jam -*-
+# configuration for curlpp
+# I haven't been able to wrap my mind around bjam yet, so chances are 
+# there's a much better way to do things.
+
+module curlppvars { } # this stores the variables we want to keep 
+
+if [ option.get "no-curlpp" : : yes ] 
+{
+  rule curlpp ( what ? ) { } # never return anything
+}
+else
+{
+  local version ; 
+  local prefix ; 
+  # check if a non-standard location for curl is given 
+  local curlpp = [ option.get "with-curlpp" ] ;
+  if ! $(curlpp) # maybe via environment variable CURLPP_ROOT ? 
+  {
+    local where = [ os.environ "CURLPP_ROOT" ] ;
+    if $(where) 
+    { 
+      option.set "with-curlpp" : $(where) ; 
+      local msg = "CURLPP:   setting --with-curlpp=$(where) via environment" ;
+      echo "$(msg) variable CURLPP_ROOT" ;
+    }
+    curlpp = [ option.get "with-curlpp" ] ; 
+  }
+  
+  local config ; 
+  if $(curlpp) 
+  { 
+    config = $(curlpp)/bin/curlpp-config ; 
+  }
+  else # is curlpp-config in the path ? 
+  {
+    local curlpp-check = [ _shell "curlpp-config 2>/dev/null" : exit-status ] ; 
+    if $(curlpp-check[2]) = 0 { config = curlpp-config ; }
+  }
+  
+  if $(config) 
+  {
+    prefix = [ shell_or_die "$(config) --prefix" ] ;
+    version = [ shell_or_die "$(config) --version" ] ;
+    version = [ SPLIT_BY_CHARACTERS $(version) : " " ] ;
+    version = [ trim-nl $(version[2]) ] ; 
+    modules.poke curlppvars : prefix : $(prefix) ; 
+    modules.poke curlppvars : version : $(version) ; 
+
+    requirements += <define>HAVE_CURLPP ; 
+    local cpp-cflags = [ shell_or_die "$(config) --cflags" ] ;
+    for local i in [ SPLIT_BY_CHARACTERS $(cpp-cflags) : " " ]
+    {
+      local incpath = [ MATCH "-I(.*)" : $(i) ] ; 
+      if $(incpath) 
+      { 
+	# echo "CURLPP: $(i)" ; 
+	requirements += <cxxflags>"-isystem $(incpath)" ;
+	# requirements += <include>$(incpath) ; 
+      }
+    }
+    local cpp-libs = [ shell_or_die "$(config) --libs" ] ;
+    local cpp-prefix = [ shell_or_die "$(config) --prefix" ] ;
+    for local i in [ SPLIT_BY_CHARACTERS $(cpp-libs) : " " ]
+    {
+      local libpath = [ MATCH "^-L(.*)" : $(i) ] ; 
+      if $(libpath) { requirements += <library-path>$(libpath) ; }
+      local libname = [ MATCH "^-l(.*)" : $(i) ] ; 
+      if $(libname) 
+      { 
+	# local curl = [ MATCH "^-l(.*pp)" : $(i) ] ;
+	# if [ path.exists $(cpp-prefix)/lib/lib$(libname).a ]
+	# {
+	#   echo "CURLPP:   STATIC LINKING FOR LIBRARY: $(libname)" ;
+	#   lib $(libname) : : <link>static ;
+	# }
+	# else
+	# {
+	  external-lib $(libname) : $(cpp-prefix)/lib ; 
+	# }
+	requirements += <library>$(libname)/<link>shared ; 
+	# requirements += <library>$(libname) ; 
+      }
+      else
+      {
+	requirements += <linkflags>$(i) ;
+      }
+
+      # requirements += <library-path>/usr/lib/x86_64-linux-gnu ; 
+      # for local xtra in idn rtmp ssl crypto ssl crypto ldap rt 
+      # {
+      # 	external-lib $(xtra) : /usr/lib/x86_64-linux-gnu ; 
+      #   requirements += <library>$(xtra) ; 
+      # }
+    }
+    # for local e in idn rtmp ssl crypto ldap rt  
+    # {
+    #   external-lib $(e) ; # : /usr/lib/x86_64-linux-gnu /usr/lib32 ; 
+    #   requirements += <library>$(e) ;
+    # }
+  
+    # the rule curlpp provides access to all the variables defined in this file
+    # if none argument is given, it returns $(version), which should only be 
+    # defined if curl is available
+    rule curlpp ( what ? )
+    {
+      if $(what) 
+      {
+	  retval = [ modules.peek curlppvars : $(what) ] ; 
+	  if $(retval) { return $(retval) ; }
+      }
+      else { return "yes" ; }
+    }
+  }
+  else { rule curlpp { } } 
+}
+
+if [ curlpp ] 
+{
+   local prefix  = [ curlpp prefix ] ; 
+   local version = [ curlpp version ] ;
+   echo "CULRPP:   USING VERSION $(version)  FROM $(prefix)" ; 
+}

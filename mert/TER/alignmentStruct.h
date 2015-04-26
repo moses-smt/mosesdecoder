@@ -23,7 +23,7 @@ Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <sstream>
 #include "tools.h"

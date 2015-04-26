@@ -1,5 +1,5 @@
 #include "Translator.h"
-#include "TranslationTask.h"
+#include "TranslationRequest.h"
 
 namespace MosesServer
 {
@@ -25,12 +25,13 @@ namespace MosesServer
   {
     boost::condition_variable cond;
     boost::mutex mut;
-    TranslationTask task(paramList,cond,mut);
-    m_threadPool.Submit(&task);
+    boost::shared_ptr<TranslationRequest> task 
+      = TranslationRequest::create(paramList,cond,mut);
+    m_threadPool.Submit(task);
     boost::unique_lock<boost::mutex> lock(mut);
-    while (!task.IsDone()) 
+    while (!task->IsDone()) 
       cond.wait(lock);
-    *retvalP = xmlrpc_c::value_struct(task.GetRetData());
+    *retvalP = xmlrpc_c::value_struct(task->GetRetData());
   }
   
 }

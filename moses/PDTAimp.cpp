@@ -222,7 +222,6 @@ void PDTAimp::CacheSource(ConfusionNet const& src)
     TRACE_ERR("\n");
   }
 
-  typedef StringTgtCand::Tokens sPhrase;
   typedef std::map<StringTgtCand::Tokens,TScores> E2Costs;
 
   std::map<Range,E2Costs> cov2cand;

@@ -16,17 +16,17 @@
 
 #include "pugixml.hpp"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <wchar.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <cassert>
+#include <cwchar>
 
 #ifndef PUGIXML_NO_XPATH
-#	include <math.h>
+#	include <cmath>
 #	include <float.h>
 #	ifdef PUGIXML_NO_EXCEPTIONS
-#		include <setjmp.h>
+#		include <csetjmp>
 #	endif
 #endif
 

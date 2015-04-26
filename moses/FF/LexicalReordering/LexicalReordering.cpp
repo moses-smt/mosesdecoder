@@ -83,8 +83,9 @@ LexicalReordering::
 Load()
 {
   typedef LexicalReorderingTable LRTable;
-  m_table.reset(LRTable::LoadAvailable(m_filePath, m_factorsF,
-                                       m_factorsE, std::vector<FactorType>()));
+  if (m_filePath.size())
+    m_table.reset(LRTable::LoadAvailable(m_filePath, m_factorsF,
+					 m_factorsE, std::vector<FactorType>()));
 }
 
 Scores
@@ -132,10 +133,21 @@ void
 LexicalReordering::
 SetCache(TranslationOption& to) const
 {
+  if (to.GetLexReorderingScores(this)) return; 
+  // Scores were were set already (e.g., by sampling phrase table)
+
   Phrase const& sphrase = to.GetInputPath().GetPhrase();
   Phrase const& tphrase = to.GetTargetPhrase();
   to.CacheLexReorderingScores(*this, this->GetProb(sphrase,tphrase));
 }
+
+LRModel const&
+LexicalReordering
+::GetModel() const
+{
+  return *m_configuration;
+}
+
 
 void
 LexicalReordering::

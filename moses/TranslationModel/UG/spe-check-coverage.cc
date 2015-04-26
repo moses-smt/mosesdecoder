@@ -1,3 +1,5 @@
+#if 0
+// temporarily disabled; needs to be adapted to changes in the API
 #include "mmsapt.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.h"
@@ -106,7 +108,7 @@ int main(int argc, char* argv[])
       cout << string(80,'-') << "\n" << srcline << "\n" << trgline << "\n" << endl;
 
       // cout << srcline << " " << HERE << endl;
-      Sentence snt(NULL);
+      Sentence snt;
       istringstream buf(srcline+"\n");
       if (!snt.Read(buf,ifo)) break;
       // cout << Phrase(snt) << endl;
@@ -211,6 +213,6 @@ int main(int argc, char* argv[])
   // }
   exit(0);
 }
-  
+#endif  
   
 

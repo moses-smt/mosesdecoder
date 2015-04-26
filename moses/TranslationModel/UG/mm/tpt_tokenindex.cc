@@ -1,7 +1,7 @@
 // -*- c++ -*-
 // (c) 2007-2013 Ulrich Germann
 #include <sstream>
-#include <string.h>
+#include <cstring>
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>

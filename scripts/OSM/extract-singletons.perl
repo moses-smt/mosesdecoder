@@ -1,5 +1,6 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
+use warnings;
 use Getopt::Std;
 getopts('q');
 

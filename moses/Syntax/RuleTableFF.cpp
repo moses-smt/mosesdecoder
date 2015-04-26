@@ -35,7 +35,8 @@ void RuleTableFF::Load()
       staticData.GetSearchAlgorithm() == SyntaxT2S) {
     F2S::HyperTree *trie = new F2S::HyperTree(this);
     F2S::HyperTreeLoader loader;
-    loader.Load(m_input, m_output, m_filePath, *this, *trie);
+    loader.Load(m_input, m_output, m_filePath, *this, *trie,
+                m_sourceTerminalSet);
     m_table = trie;
   } else if (staticData.GetSearchAlgorithm() == SyntaxS2T) {
     S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();

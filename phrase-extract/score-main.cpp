@@ -687,7 +687,8 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   if (goodTuringFlag || kneserNeyFlag) {
     totalDistinct++;
     int countInt = count + 0.99999;
-    if (countInt <= COC_MAX)
+    if ((countInt <= COC_MAX) &&
+        (countInt > 0))
       countOfCounts[ countInt ]++;
   }
 

@@ -1,5 +1,6 @@
 // $Id$
 //#include "beammain.h"
+#include "util/tokenize.hh"
 #include "tables-core.h"
 
 #define TABLE_LINE_MAX_LENGTH 1000
@@ -7,36 +8,8 @@
 
 using namespace std;
 
-// as in beamdecoder/tables.cpp
-vector<string> tokenize( const char* input )
-{
-  vector< string > token;
-  bool betweenWords = true;
-  int start=0;
-  int i=0;
-  for(; input[i] != '\0'; i++) {
-    bool isSpace = (input[i] == ' ' || input[i] == '\t');
-
-    if (!isSpace && betweenWords) {
-      start = i;
-      betweenWords = false;
-    } else if (isSpace && !betweenWords) {
-      token.push_back( string( input+start, i-start ) );
-      betweenWords = true;
-    }
-  }
-  if (!betweenWords)
-    token.push_back( string( input+start, i-start ) );
-  return token;
-}
-
 namespace MosesTraining
 {
-
-bool isNonTerminal( const WORD &symbol )
-{
-  return symbol.substr(0, 1) == "[" && symbol.substr(symbol.size()-1, 1) == "]";
-}
 
 WORD_ID Vocabulary::storeIfNew( const WORD& word )
 {
@@ -107,7 +80,7 @@ void DTable::load( const string& fileName )
       abort();
     }
 
-    vector<string> token = tokenize(line.c_str());
+    const vector<string> token = util::tokenize(line);
     if (token.size() < 2) {
       cerr << "line " << i << " in " << fileName << " too short, skipping\n";
       continue;

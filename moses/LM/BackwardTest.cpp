@@ -66,7 +66,7 @@ class BackwardLanguageModelTest
 
 public:
   BackwardLanguageModelTest() :
-    dummyInput(new Sentence(NULL)),
+    dummyInput(new Sentence),
     backwardLM(
       static_cast< BackwardLanguageModel<lm::ngram::ProbingModel> * >(
         ConstructBackwardLM(

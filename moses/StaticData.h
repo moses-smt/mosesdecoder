@@ -446,18 +446,28 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  bool IsSyntax() const {
-    return m_searchAlgorithm == CYKPlus ||
-           m_searchAlgorithm == ChartIncremental ||
-           m_searchAlgorithm == SyntaxS2T ||
-           m_searchAlgorithm == SyntaxT2S ||
-           m_searchAlgorithm == SyntaxT2S_SCFG ||
-           m_searchAlgorithm == SyntaxF2S;
-  }
 
-  const ScoreComponentCollection& GetAllWeights() const {
-    return m_allWeights;
+  // bool IsSyntax() const {
+  //   return m_searchAlgorithm == CYKPlus ||
+  //          m_searchAlgorithm == ChartIncremental ||
+  //          m_searchAlgorithm == SyntaxS2T ||
+  //          m_searchAlgorithm == SyntaxT2S ||
+  //          m_searchAlgorithm == SyntaxT2S_SCFG ||
+  //          m_searchAlgorithm == SyntaxF2S;
+  // }
+
+  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const 
+  {
+    if (algo == DefaultSearchAlgorithm) 
+      algo = m_searchAlgorithm;
+    return (algo == CYKPlus   || algo == ChartIncremental ||
+	    algo == SyntaxS2T || algo == SyntaxT2S ||
+	    algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
   }
+  
+  const ScoreComponentCollection& 
+  GetAllWeights() const 
+  { return m_allWeights; }
 
   void SetAllWeights(const ScoreComponentCollection& weights) {
     m_allWeights = weights;
@@ -742,8 +752,9 @@ public:
   }
 
   //sentence (and thread) specific initialisationn and cleanup
-  void InitializeForInput(const InputType& source) const;
-  void CleanUpAfterSentenceProcessing(const InputType& source) const;
+  // void InitializeForInput(const InputType& source, ttaskptr const& ttask) const;
+  void InitializeForInput(ttasksptr const& ttask) const;
+  void CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const;
 
   void LoadFeatureFunctions();
   bool CheckWeights() const;

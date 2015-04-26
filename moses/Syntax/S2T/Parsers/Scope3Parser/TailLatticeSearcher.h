@@ -58,7 +58,7 @@ private:
 
     const int absStart = m_ranges[0].minStart + offset;
     const int minWidth = std::max(1, range.minEnd - absStart + 1);
-    const int maxWidth = range.maxEnd - absStart + 1;
+    const std::size_t maxWidth = range.maxEnd - absStart + 1;
 
     const std::vector<std::vector<const PVertex *> > &innerVec =
       m_lattice[offset][nonTermIndex+1];

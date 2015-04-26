@@ -20,10 +20,11 @@ namespace Moses
 
 /** constructor; just initialize the base class */
 TranslationOptionCollectionConfusionNet::
-TranslationOptionCollectionConfusionNet(const ConfusionNet &input,
+TranslationOptionCollectionConfusionNet(ttasksptr const& ttask, 
+					const ConfusionNet &input,
                                         size_t maxNoTransOptPerCoverage,
                                         float translationOptionThreshold)
-  : TranslationOptionCollection(input, maxNoTransOptPerCoverage,
+  : TranslationOptionCollection(ttask,input, maxNoTransOptPerCoverage,
                                 translationOptionThreshold)
 {
   // Prefix checkers are phrase dictionaries that provide a prefix check
@@ -105,7 +106,7 @@ TranslationOptionCollectionConfusionNet(const ConfusionNet &input,
 
           bool OK = prefixCheckers.size() == 0;
           for (size_t k = 0; !OK && k < prefixCheckers.size(); ++k)
-            OK = prefixCheckers[k]->PrefixExists(subphrase);
+            OK = prefixCheckers[k]->PrefixExists(m_ttask.lock(), subphrase);
           if (!OK) continue;
 
           const ScorePair &scores = col[i].second;
@@ -160,8 +161,10 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
   }
 
 }
-
-void TranslationOptionCollectionConfusionNet::CreateTranslationOptions()
+  
+void 
+TranslationOptionCollectionConfusionNet
+::CreateTranslationOptions()
 {
   if (!StaticData::Instance().GetUseLegacyPT()) {
     GetTargetPhraseCollectionBatch();
@@ -198,8 +201,9 @@ CreateTranslationOptionsForRange(const DecodeGraph &decodeGraph,
 
 bool
 TranslationOptionCollectionConfusionNet::
-CreateTranslationOptionsForRangeNew(const DecodeGraph &decodeGraph, size_t startPos,
-                                    size_t endPos, bool adhereTableLimit, size_t graphInd)
+CreateTranslationOptionsForRangeNew
+( const DecodeGraph &decodeGraph, size_t startPos, size_t endPos, 
+  bool adhereTableLimit, size_t graphInd)
 {
   InputPathList &inputPathList = GetInputPathList(startPos, endPos);
   if (inputPathList.size() == 0) return false; // no input path matches!

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl 
 
 # given a moses.ini, filter the phrase tables to contain
 # only ttable-limit options per source phrase

@@ -48,7 +48,8 @@ class StatCollector {
             // TODO: Specialize error message for j == 3, meaning 3+
             UTIL_THROW_IF(s.n[j] == 0, BadDiscountException, "Could not calculate Kneser-Ney discounts for "
                 << (i+1) << "-grams with adjusted count " << (j+1) << " because we didn't observe any "
-                << (i+1) << "-grams with adjusted count " << j << "; Is this small or artificial data?");
+                << (i+1) << "-grams with adjusted count " << j << "; Is this small or artificial data?\n"
+                << "Try deduplicating the input.  To override this error for e.g. a class-based model, rerun with --discount_fallback\n");
           }
 
           // See equation (26) in Chen and Goodman.
@@ -63,7 +64,7 @@ class StatCollector {
             case THROW_UP:
               throw;
             case COMPLAIN:
-              std::cerr << e.what() << "  Substituting fallback discounts D1=" << config.fallback.amount[1] << " D2=" << config.fallback.amount[2] << " D3+=" << config.fallback.amount[3] << std::endl;
+              std::cerr << "Substituting fallback discounts for order " << i << ": D1=" << config.fallback.amount[1] << " D2=" << config.fallback.amount[2] << " D3+=" << config.fallback.amount[3] << std::endl;
             case SILENT:
               break;
           }

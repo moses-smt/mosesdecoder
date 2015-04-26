@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id: train-recaser.perl 1326 2007-03-26 05:44:27Z bojar $
 
@@ -8,6 +8,7 @@
 # --possiblyUseFirstToken : boolean option; the default behaviour (when this option is not provided) is that the first token of a sentence is ignored, on the basis that the first word of a sentence is always capitalized; if this option is provided then: a) if a sentence-initial token is *not* capitalized, then it is counted, and b) if a capitalized sentence-initial token is the only token of the segment, then it is counted, but with only 10% of the weight of a normal token.
 #
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 

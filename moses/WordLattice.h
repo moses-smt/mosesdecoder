@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #ifndef moses_WordLattice_h
 #define moses_WordLattice_h
 
@@ -22,7 +23,7 @@ private:
   std::vector<std::vector<int> > distances;
 
 public:
-  WordLattice(TranslationTask const* ttask);
+  WordLattice();
 
   InputTypeEnum GetType() const {
     return WordLatticeInput;
@@ -53,7 +54,8 @@ public:
     return next_nodes[pos];
   }
 
-  TranslationOptionCollection *CreateTranslationOptionCollection() const;
+  TranslationOptionCollection*
+  CreateTranslationOptionCollection(ttasksptr const& ttask) const;
 };
 
 }

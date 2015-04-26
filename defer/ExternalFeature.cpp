@@ -1,6 +1,6 @@
 #include "ExternalFeature.h"
 #include <dlfcn.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include "util/exception.hh"
 

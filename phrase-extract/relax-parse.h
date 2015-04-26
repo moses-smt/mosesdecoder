@@ -39,7 +39,7 @@ char SAMTLevel = 0;
 
 // functions
 void init(int argc, char* argv[]);
-void store( MosesTraining::SyntaxTree &tree, std::vector<std::string> &words );
+void store( MosesTraining::SyntaxTree &tree, const std::vector<std::string> &words );
 void LeftBinarize( MosesTraining::SyntaxTree &tree, MosesTraining::ParentNodes &parents );
 void RightBinarize( MosesTraining::SyntaxTree &tree, MosesTraining::ParentNodes &parents );
 void SAMT( MosesTraining::SyntaxTree &tree, MosesTraining::ParentNodes &parents );

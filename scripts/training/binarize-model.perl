@@ -1,9 +1,10 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 #
 # Binarize a Moses model
 #
 
+use warnings;
 use strict;
 
 use Getopt::Long "GetOptions";

@@ -17,6 +17,7 @@
 #include "ug_ttrack_position.h"
 #include "tpt_typedefs.h"
 #include "tpt_tokenindex.h"
+#include "moses/Util.h"
 // #include "ug_vocab.h"
 
 namespace ugdiss
@@ -24,6 +25,33 @@ namespace ugdiss
   using namespace std;
 
   typedef boost::dynamic_bitset<uint64_t> bdBitset;
+
+  template<typename sid_t, typename off_t, typename len_t>
+  void 
+  parse_pid(uint64_t const pid, sid_t & sid, 
+	    off_t & off, len_t& len)
+  {
+    static uint64_t two32 = uint64_t(1)<<32;
+    static uint64_t two16 = uint64_t(1)<<16;
+    len = pid%two16;
+    off = (pid%two32)>>16;
+    sid = pid>>32;
+  }
+
+  template<typename Token>
+  string 
+  toString(TokenIndex const& V, Token const* x, size_t const len)
+  {
+    if (!len) return "";
+    UTIL_THROW_IF2(!x, HERE << ": Unexpected end of phrase!");
+    ostringstream buf; 
+    buf << V[x->id()];
+    size_t i = 1;
+    for (x = x->next(); x && i < len; ++i, x = x->next())
+      buf << " " << V[x->id()];
+    UTIL_THROW_IF2(i != len, HERE << ": Unexpected end of phrase!");
+    return buf.str();
+  }
 
   template<typename TKN=id_type>
   class Ttrack

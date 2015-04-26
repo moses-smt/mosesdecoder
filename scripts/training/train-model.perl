@@ -1,5 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
@@ -404,8 +405,8 @@ else {
   $SORT_EXEC = 'sort';
 }
 
-my $GZIP_EXEC; # = which("pigz"); 
-if(-f "/usr/bin/pigz") {
+my $GZIP_EXEC;
+if(`which pigz`) {
   $GZIP_EXEC = 'pigz';
 }
 else {

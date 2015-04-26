@@ -23,6 +23,7 @@
 #include "tables-core.h"
 #include "XmlException.h"
 #include "XmlTree.h"
+#include "util/tokenize.hh"
 
 #include <cassert>
 #include <vector>
@@ -56,7 +57,7 @@ std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
   m_tree.ConnectNodes();
   SyntaxNode *root = m_tree.GetTop();
   assert(root);
-  m_words = tokenize(m_line.c_str());
+  m_words = util::tokenize(m_line);
   return ConvertTree(*root, m_words);
 }
 

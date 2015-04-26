@@ -20,7 +20,7 @@
  ***********************************************************************/
 
 #include <algorithm>
-#include <stdlib.h>
+#include <cstdlib>
 #include "util/exception.hh"
 #include "util/tokenize_piece.hh"
 

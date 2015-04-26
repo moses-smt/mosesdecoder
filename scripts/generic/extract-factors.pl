@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl 
 
 # $Id$
 #extract-factors.pl: extract only the desired factors from a factored corpus
@@ -6,6 +6,7 @@
 #factor indices start at 0
 #factor indices too large ought to be ignored
 
+use warnings;
 use strict;
 
 my ($filename, @factors) = @ARGV;

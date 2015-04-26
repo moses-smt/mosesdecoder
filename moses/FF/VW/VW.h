@@ -86,6 +86,10 @@ struct VWTargetSentence {
       int src = it->first;
       int tgt = it->second;
 
+      if (src >= m_sourceConstraints.size() || tgt >= m_targetConstraints.size()) {
+        UTIL_THROW2("VW :: alignment point out of bounds: " << src << "-" << tgt);
+      }
+
       m_sourceConstraints[src].Update(tgt);
       m_targetConstraints[tgt].Update(src);
     }

@@ -45,7 +45,7 @@ public:
 
   void
   InitializeForInput(const InputType& i) {
-    m_table->InitializeForInput(i);
+    if (m_table) m_table->InitializeForInput(i);
   }
 
   Scores
@@ -118,6 +118,8 @@ private:
   std::string m_filePath;
   bool m_haveDefaultScores;
   Scores m_defaultScores;
+public:
+  LRModel const& GetModel() const;
 };
 
 }

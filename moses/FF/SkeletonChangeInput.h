@@ -20,7 +20,7 @@ public:
                            , ScoreComponentCollection &scoreBreakdown
                            , ScoreComponentCollection &estimatedFutureScore) const;
 
-  void ChangeSource(InputType *&input) const;
+  void ChangeSource(InputType* const&input) const;
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
