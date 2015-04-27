@@ -30,6 +30,8 @@
     <File Name="../../../util/string_piece.cc"/>
     <File Name="../../../util/tokenize_piece_test.cc" ExcludeProjConfig="Debug"/>
     <File Name="../../../util/usage.cc"/>
+    <File Name="../../../util/random.cc"/>
+    <File Name="../../../util/random.hh"/>
   </VirtualDirectory>
   <VirtualDirectory Name="double-conversion">
     <File Name="../../../util/double-conversion/bignum-dtoa.cc"/>
