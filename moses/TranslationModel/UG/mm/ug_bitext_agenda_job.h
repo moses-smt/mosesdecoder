@@ -90,7 +90,7 @@ Bitext<Token>::agenda::job
   // Profiling question: how much does that cost us?
   if (m_bias)
     {
-      int ctr = 0;
+      // int ctr = 0;
       stats->raw_cnt = 0;
       for (char const* x = m.lower_bound(-1); x < stop;)
 	{
