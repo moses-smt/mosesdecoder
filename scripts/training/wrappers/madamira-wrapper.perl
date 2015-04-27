@@ -8,20 +8,31 @@ use File::Basename;
 use FindBin qw($RealBin);
 use Cwd 'abs_path';
 
+sub GetFactors;
+
+
 my $TMPDIR = "tmp";
 my $SCHEME = "D2";
 my $KEEP_TMP = 0;
 my $MADA_DIR;
 
+my $FACTORS_STR;
+my @FACTORS;
+
 GetOptions(
   "scheme=s" => \$SCHEME,
   "tmpdir=s" => \$TMPDIR,
   "keep-tmp" => \$KEEP_TMP,
-  "mada-dir=s" => \$MADA_DIR
+  "mada-dir=s" => \$MADA_DIR,
+  "factors=s" => \$FACTORS_STR
     ) or die("ERROR: unknown options");
 
 $TMPDIR = abs_path($TMPDIR);
 print STDERR "TMPDIR=$TMPDIR \n";
+
+if (defined($FACTORS_STR)) {
+    @FACTORS = split(",", $FACTORS_STR);
+}
 
 #binmode(STDIN, ":utf8");
 #binmode(STDOUT, ":utf8");
@@ -75,13 +86,21 @@ while(my $line = <MADA_OUT>) {
 	print "\n";
     }
     elsif (index($line, ";;WORD") == 0) {
-    # word
+        # word
 	my $word = substr($line, 7, length($line) - 8);
-    #print STDERR "FOund $word\n";
+        #print STDERR "FOund $word\n";
+	
+	for (my $i = 0; $i < 4; ++$i) {
+	    $line = <MADA_OUT>;
+	}
+	
+	my $factors = GetFactors($line, \@FACTORS);
+	$word .= $factors;
+
 	print "$word ";
     }
     else {
-    #print STDERR "NADA\n";
+      #print STDERR "NADA\n";
     }
 }
 close (MADA_OUT);
@@ -89,5 +108,35 @@ close (MADA_OUT);
 
 if ($KEEP_TMP == 0) {
 #    `rm -rf $TMPDIR`;
+}
+
+
+###########################
+sub GetFactors
+{
+    my $line = shift;
+    my $factorsRef = shift;
+    my @factors = @{$factorsRef};
+
+    # all factors
+    my %allFactors;
+    my @toks = split(" ", $line);
+    for (my $i = 1; $i < scalar(@toks); ++$i) {
+	#print " tok=" .$toks[$i];
+
+        my ($key, $value) = split(":", $toks[$i]);
+	$allFactors{$key} = $value;
+    }
+
+    my $ret = "";
+    my $factorType;
+    foreach $factorType(@factors) {
+	#print "factorType=$factorType ";
+	my $value = $allFactors{$factorType};
+
+	$ret .= "|$value";
+    }
+    
+    return $ret;
 }
 

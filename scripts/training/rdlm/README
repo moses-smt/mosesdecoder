@@ -31,8 +31,8 @@ RDLM is split into two neural network models, which can be trained with
 
   mkdir working_dir_head
   mkdir working_dir_label
-  ./train_rdlm.py --nplm-home /path/to/nplm --working-dir working_dir_head  --output-dir /path/to/output_directory --output-model rdlm_head  --mode head  --output-vocab-size 500000 --noise-samples 100
-  ./train_rdlm.py --nplm-home /path/to/nplm --working-dir working_dir_label --output-dir /path/to/output_directory --output-model rdlm_label --mode label --output-vocab-size 75 --noise-samples 50
+  ./train_rdlm.py --nplm-home /path/to/nplm --corpus [your_training_corpus] --working-dir working_dir_head  --output-dir /path/to/output_directory --output-model rdlm_head  --mode head  --output-vocab-size 500000 --noise 100
+  ./train_rdlm.py --nplm-home /path/to/nplm --corpus [your_training_corpus] --working-dir working_dir_label --output-dir /path/to/output_directory --output-model rdlm_label --mode label --output-vocab-size 75 --noise 50
 
 for more options, run `train_rdlm.py --help`. Parameters you may want to adjust
 include the vocabulary size of the label model (depending on the number of

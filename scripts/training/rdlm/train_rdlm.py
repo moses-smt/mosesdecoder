@@ -43,7 +43,7 @@ parser.add_argument("--learning-rate", dest="learning_rate", type=float, metavar
 parser.add_argument("--input-words-file", dest="input_words_file", metavar="PATH", help="input vocabulary (default: %(default)s)")
 parser.add_argument("--output-words-file", dest="output_words_file", metavar="PATH", help="output vocabulary (default: %(default)s)")
 parser.add_argument("--input_vocab_size", dest="input_vocab_size", type=int, metavar="INT", help="input vocabulary size (default: %(default)s)")
-parser.add_argument("--output_vocab_size", dest="output_vocab_size", type=int, metavar="INT", help="output vocabulary size (default: %(default)s)")
+parser.add_argument("--output-vocab-size", dest="output_vocab_size", type=int, metavar="INT", help="output vocabulary size (default: %(default)s)")
 
 
 parser.set_defaults(
@@ -95,7 +95,7 @@ def prepare_vocabulary(options):
       filtered_vocab = open(orig).readlines()
       orig = vocab_prefix + '.nonterminals'
       filtered_vocab += open(orig).readlines()
-      filtered_vocab = [word for word in filtered_vocab if not word.startswith(prefix) for prefix in blacklist]
+      filtered_vocab = [word for word in filtered_vocab if not any(word.startswith(prefix) for prefix in blacklist)]
       if options.output_vocab_size:
         filtered_vocab = filtered_vocab[:options.output_vocab_size]
     else:
@@ -127,12 +127,13 @@ def main(options):
   sys.stderr.write('extracting syntactic n-grams\n')
   extract_syntactic_ngrams.main(extract_options)
 
-  if validation_corpus:
-    extract_options.input = options.validation_corpus
-    options.validation_file = os.path.join(options.working_dir, os.path.basename(options.validation_corpus) + '.numberized')
-    extract_options.output = options.validation_file
+  if options.validation_corpus:
+    extract_options.input = open(options.validation_corpus)
+    options.validation_file = os.path.join(options.working_dir, os.path.basename(options.validation_corpus))
+    extract_options.output = open(options.validation_file + '.numberized', 'w')
     sys.stderr.write('extracting syntactic n-grams (validation file)\n')
     extract_syntactic_ngrams.main(extract_options)
+    extract_options.output.close()
 
   sys.stderr.write('training neural network\n')
   train_nplm.main(options)
@@ -141,8 +142,8 @@ def main(options):
   ret = subprocess.call([os.path.join(sys.path[0], 'average_null_embedding.py'),
                    options.nplm_home,
                    os.path.join(options.output_dir, options.output_model + '.model.nplm.' + str(options.epochs)),
-                   os.path.join(options.working_dir, options.corpus_stem + '.numberized'),
-                   os.path.join(options.output_dir, options.output_model + '.model.nplm.')
+                   os.path.join(options.working_dir, os.path.basename(options.corpus_stem) + '.numberized'),
+                   os.path.join(options.output_dir, options.output_model + '.model.nplm')
                    ])
   if ret:
       raise Exception("averaging null words failed")
