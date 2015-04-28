@@ -22,6 +22,7 @@
 #include "ChartCellCollection.h"
 #include "InputType.h"
 #include "WordsRange.h"
+#include "ChartManager.h"
 
 namespace Moses
 {
@@ -51,7 +52,7 @@ private:
  \param manager reference back to the manager
  */
 ChartCellCollection::ChartCellCollection(const InputType &input, ChartManager &manager)
-  :ChartCellCollectionBase(input, CubeCellFactory(manager)) {}
+  :ChartCellCollectionBase(input, CubeCellFactory(manager), manager.GetParser()) {}
 
 } // namespace
 

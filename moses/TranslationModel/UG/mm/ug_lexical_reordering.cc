@@ -126,7 +126,6 @@ namespace Moses
       T = x = e1; B = a1.size()-1;
       if (expand_block(a1,a2,x,y,T,L,B,R) >= 0)
 	return Moses::LRModel::S;
-      size_t s2x = s2;
       while (s2-- && a2[s2].size() == 0);
       
       Moses::LRModel::ReorderingType ret;

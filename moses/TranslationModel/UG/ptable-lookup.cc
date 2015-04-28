@@ -101,12 +101,13 @@ int main(int argc, char* argv[])
       	  Phrase const& phr = static_cast<Phrase const&>(*(*trg)[i]);
       	  cout << setw(3) << ++k << " " << phr << endl;
       	  ScoreComponentCollection const& scc = (*trg)[i]->GetScoreBreakdown();
-      	  ScoreComponentCollection::IndexPair idx = scc.GetIndexes(PT);
+	  size_t start = PT->GetIndex();
+	  size_t stop  = start + PT->GetNumScoreComponents();
       	  FVector const& scores = scc.GetScoresVector();
       	  cout << "   ";
-      	  for (size_t k = idx.first; k < idx.second; ++k)
+      	  for (size_t k = start; k < stop; ++k)
       	    {
-	      size_t j = k-idx.first;
+	      size_t j = k-start;
 	      float f = (mmsapt ? mmsapt->isLogVal(j) ? exp(scores[k]) : scores[k]
 			 : scores[k] < 0 ? exp(scores[k]) : scores[k]);
 	      string fmt = (mmsapt && mmsapt->isInteger(j)) ? "%10d" : "%10.8f";

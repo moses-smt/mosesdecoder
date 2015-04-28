@@ -236,6 +236,26 @@ protected:
   // number of nonterminal labels
 //   size_t m_nonTerminalSize;
 
+
+  void ini_compact_table_options();
+  void ini_consensus_decoding_options();
+  void ini_cube_pruning_options();
+  void ini_distortion_options();
+  void ini_factor_maps();
+  void ini_input_options();
+  void ini_lm_options();
+  void ini_lmbr_options();
+  void ini_mbr_options();
+  void ini_mira_options();
+  bool ini_nbest_options();
+  void ini_oov_options();
+  bool ini_output_options();
+  bool ini_performance_options();
+  void ini_phrase_lookup_options();
+  bool ini_stack_decoding_options();
+  void ini_zombie_options();
+
+  void initialize_features();
 public:
 
   bool IsAlwaysCreateDirectTranslationOption() const {

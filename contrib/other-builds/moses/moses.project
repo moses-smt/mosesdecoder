@@ -778,6 +778,8 @@
     <File Name="../../../moses/PP/SpanLengthPhraseProperty.h"/>
     <File Name="../../../moses/PP/TreeStructurePhraseProperty.h"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -796,6 +798,7 @@
         <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder/boost/include"/>
         <Preprocessor Value="MAX_NUM_FACTORS=4"/>
         <Preprocessor Value="KENLM_MAX_ORDER=7"/>
+        <Preprocessor Value="WITH_THREADS"/>
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
@@ -870,6 +873,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>

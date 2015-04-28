@@ -221,7 +221,7 @@ void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *o
     ScoreComponentCollection &scoreBreakdown,
     bool subtract) const
 {
-  size_t ffScoreIndex = scoreBreakdown.GetIndexes(this).first;
+  size_t ffScoreIndex = m_index;
 
   std::vector<float> scoresL2R;
   scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );

@@ -1,6 +1,8 @@
 // $Id$
 #include <vector>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/foreach.hpp>
+#include <boost/format.hpp>
 #include "util/exception.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
@@ -47,7 +49,7 @@ std::ostream& operator<<(std::ostream& os, const ScorePair& rhs)
   return os;
 }
 
-ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
+//ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
 size_t ScoreComponentCollection::s_denseVectorSize = 0;
 
 ScoreComponentCollection::
@@ -58,15 +60,14 @@ ScoreComponentCollection()
 
 void
 ScoreComponentCollection::
-RegisterScoreProducer(const FeatureFunction* scoreProducer)
+RegisterScoreProducer(FeatureFunction* scoreProducer)
 {
   size_t start = s_denseVectorSize;
-  size_t end = start + scoreProducer->GetNumScoreComponents();
+  s_denseVectorSize = scoreProducer->SetIndex(s_denseVectorSize);
   VERBOSE(1, "FeatureFunction: "
           << scoreProducer->GetScoreProducerDescription()
-          << " start: " << start << " end: " << (end-1) << endl);
-  s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
-  s_denseVectorSize = end;
+          << " start: " << start 
+	  << " end: "   << (s_denseVectorSize-1) << endl);
 }
 
 
@@ -191,21 +192,23 @@ void ScoreComponentCollection::Save(ostream& out, bool multiline) const
     sep = "=";
     linesep = " ";
   }
-  ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
-  for (; iter != s_scoreIndexes.end(); ++iter ) {
-    string name = iter->first->GetScoreProducerDescription();
-    IndexPair ip = iter->second; // feature indices
-    if (ip.second-ip.first == 1) {
-      out << name << sep << m_scores[ip.first] << linesep;
-    } else {
-      for (size_t i=ip.first; i < ip.second; ++i) {
-        ostringstream fullname;
-        fullname << name << "_" << (i + 1 - ip.first);
-        out << fullname.str() << sep << m_scores[i] << linesep;
-      }
-    }
-  }
 
+  std::vector<FeatureFunction*> const& all_ff 
+    = FeatureFunction::GetFeatureFunctions();
+  BOOST_FOREACH(FeatureFunction const* ff, all_ff)
+    {
+      string name = ff->GetScoreProducerDescription();
+      size_t i = ff->GetIndex();
+      if (ff->GetNumScoreComponents() == 1) 
+	out << name << sep << m_scores[i] << linesep;
+      else 
+	{
+	  size_t stop = i + ff->GetNumScoreComponents();
+	  boost::format fmt("%s_%d");
+	  for (size_t k = 1; i < stop; ++i, ++k) 
+	    out << fmt % name % k << sep << m_scores[i] << linesep;
+	}
+    }
   // write sparse features
   m_scores.write(out,sep,linesep);
 }
@@ -242,8 +245,8 @@ void
 ScoreComponentCollection::
 Assign(const FeatureFunction* sp, const std::vector<float>& scores)
 {
-  IndexPair indexes = GetIndexes(sp);
-  size_t numScores = indexes.second - indexes.first;
+  size_t numScores = sp->GetNumScoreComponents();
+  size_t offset = sp->GetIndex();
 
   if (scores.size() != numScores) {
     UTIL_THROW(util::Exception, "Feature function "
@@ -253,7 +256,7 @@ Assign(const FeatureFunction* sp, const std::vector<float>& scores)
   }
 
   for (size_t i = 0; i < scores.size(); ++i) {
-    m_scores[i + indexes.first] = scores[i];
+    m_scores[i + offset] = scores[i];
   }
 }
 

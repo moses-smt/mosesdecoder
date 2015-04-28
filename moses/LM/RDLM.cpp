@@ -790,7 +790,7 @@ FFState* RDLM::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
         prev_approx_label -= prev->GetApproximateScoreLabel();
       }
     }
-    size_t ff_idx = accumulator->GetIndexes(this).first;
+    size_t ff_idx = m_index; // accumulator->GetIndexes(this).first;
 
     accumulator->PlusEquals(ff_idx, prev_approx_head);
     accumulator->PlusEquals(ff_idx+1, prev_approx_label);
