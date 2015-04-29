@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
       if (maxhits != N && r >= maxhits) continue;
       ++k;
 
-      size_t s1,s2,e1,e2; int po_fwd,po_bwd;
+      size_t s1,s2,e1,e2; int po_fwd=-1,po_bwd=-1;
       vector<uchar> caln;
       // cout << sid  << " " << B.docname(sid) << endl;
       if (!B.find_trg_phr_bounds(sid, off, off+m.size(),
