@@ -131,7 +131,6 @@ void TranslationTask::Run()
 
 
   // shorthand for "global data"
-  const StaticData &staticData = StaticData::Instance();
   const size_t translationId = m_source->GetTranslationId();
 
   // report wall time spent on translation

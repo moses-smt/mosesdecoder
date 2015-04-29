@@ -15,6 +15,7 @@ my $TMPDIR = "tmp";
 my $SCHEME = "D2";
 my $KEEP_TMP = 0;
 my $MADA_DIR;
+my $CONFIG;
 
 my $FACTORS_STR;
 my @FACTORS;
@@ -24,8 +25,13 @@ GetOptions(
   "tmpdir=s" => \$TMPDIR,
   "keep-tmp" => \$KEEP_TMP,
   "mada-dir=s" => \$MADA_DIR,
-  "factors=s" => \$FACTORS_STR
+  "factors=s" => \$FACTORS_STR,
+  "config=s" => \$CONFIG
     ) or die("ERROR: unknown options");
+
+if (!defined($CONFIG)) {
+  $CONFIG = "$MADA_DIR/samples/sampleConfigFile.xml";
+}
 
 $TMPDIR = abs_path($TMPDIR);
 print STDERR "TMPDIR=$TMPDIR \n";
@@ -65,7 +71,7 @@ else {
 $cmd = "$SPLIT_EXEC -l 10000 -a 7 -d  $TMPDIR/input $TMPDIR/split/x";
 `$cmd`;
 
-$cmd = "cd $MADA_DIR && parallel --jobs 4 java -Xmx2500m -Xms2500m -XX:NewRatio=3 -jar $MADA_DIR/MADAMIRA.jar -rawinput {} -rawoutdir  $TMPDIR/out -rawconfig $MADA_DIR/samples/sampleConfigFile.xml  ::: $TMPDIR/split/x*";
+$cmd = "cd $MADA_DIR && parallel --jobs 4 java -Xmx2500m -Xms2500m -XX:NewRatio=3 -jar $MADA_DIR/MADAMIRA.jar -rawinput {} -rawoutdir  $TMPDIR/out -rawconfig $CONFIG ::: $TMPDIR/split/x*";
 print STDERR "Executing: $cmd\n";
 `$cmd`;
 
@@ -77,7 +83,7 @@ print STDERR "Executing: $cmd\n";
 open(MADA_OUT,"<$infile.mada");
 #binmode(MADA_OUT, ":utf8");
 while(my $line = <MADA_OUT>) { 
-    chop($line);
+    chomp($line);
   #print STDERR "line=$line \n";
 
     if (index($line, "SENTENCE BREAK") == 0) {
