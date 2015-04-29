@@ -286,9 +286,10 @@ batch_run()
 /** Called by main function of the command line version of the decoder **/
 int decoder_main(int argc, char** argv)
 {
-  try 
+#ifdef NDEBUG
+  try
+#endif
     {
-      
 #ifdef HAVE_PROTOBUF
       GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
@@ -328,10 +329,12 @@ int decoder_main(int argc, char** argv)
 	return batch_run();
     
     } 
+#ifdef NDEBUG
   catch (const std::exception &e) 
     {
       std::cerr << "Exception: " << e.what() << std::endl;
       return EXIT_FAILURE;
     }
+#endif
 }
 
