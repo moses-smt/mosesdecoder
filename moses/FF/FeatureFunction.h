@@ -49,7 +49,9 @@ protected:
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
-  void Initialize(const std::string &line);
+  void Register();
+private:
+  // void Initialize(const std::string &line);
   void ParseLine(const std::string &line);
 
 public:
@@ -63,7 +65,7 @@ public:
   static void CallChangeSource(InputType * const&input);
   // see my note in FeatureFunction.cpp --- UG
 
-  FeatureFunction(const std::string &line);
+  FeatureFunction(const std::string &line, bool initializeNow);
   FeatureFunction(size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();

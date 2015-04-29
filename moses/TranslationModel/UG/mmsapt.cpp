@@ -71,7 +71,7 @@ namespace Moses
 
   Mmsapt::
   Mmsapt(string const& line)
-    : PhraseDictionary(line)
+    : PhraseDictionary(line, false)
     , m_bias_log(NULL)
     , m_bias_loglevel(0)
     , m_lr_func(NULL)
@@ -80,7 +80,9 @@ namespace Moses
       // , m_tpc_ctr(0)
     , ofactor(1,0)
   { 
-    this->init(line); 
+    init(line); 
+    setup_local_feature_functions();
+    Register();
   }
 
   void 
@@ -382,14 +384,10 @@ namespace Moses
   }
 
   void
-  Mmsapt::
-  Load(bool with_checks)
+  Mmsapt
+  ::setup_local_feature_functions()
   {
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
-
-    // can load only once
-    // UTIL_THROW_IF2(shards.size(),"Mmsapt is already loaded at " << HERE);
-    
     // load feature sets
     BOOST_FOREACH(string const& fsname, m_feature_set_names)
       {
@@ -398,7 +396,8 @@ namespace Moses
 	  {
 	    // lexical scores 
 	    string lexfile = m_bname + L1 + "-" + L2 + ".lex";
-	    sptr<PScoreLex1<Token> > ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
+	    sptr<PScoreLex1<Token> > 
+	      ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
 	    register_ff(ff,m_active_ff_common);
 	    
 	    // these are always computed on pooled data
@@ -428,7 +427,19 @@ namespace Moses
 	  }
       }
     // cerr << "Features: " << Join("|",m_feature_names) << endl;
-    
+    this->m_numScoreComponents = this->m_feature_names.size();
+    this->m_numTuneableComponents  = this->m_numScoreComponents;
+  }
+
+  void
+  Mmsapt::
+  Load(bool with_checks)
+  {
+    // load feature functions (i.e., load underlying data bases, if any)
+    BOOST_FOREACH(sptr<pscorer>& ff, m_active_ff_fix) ff->load();
+    BOOST_FOREACH(sptr<pscorer>& ff, m_active_ff_dyn) ff->load();
+    BOOST_FOREACH(sptr<pscorer>& ff, m_active_ff_common) ff->load();
+#if 0
     if (with_checks)
       {
 	UTIL_THROW_IF2(this->m_feature_names.size() != this->m_numScoreComponents,
@@ -437,13 +448,14 @@ namespace Moses
 		       << ") does not match number specified in Moses config file ("
 		       << this->m_numScoreComponents << ")!\n";);
       }
+#endif
     // Load corpora. For the time being, we can have one memory-mapped static
     // corpus and one in-memory dynamic corpus
-    // sptr<mmbitext> btfix(new mmbitext());
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+
     btfix.m_num_workers = this->m_workers;
     btfix.open(m_bname, L1, L2);
     btfix.setDefaultSampleSize(m_default_sample_size);
-    // shards.push_back(btfix);
     
     btdyn.reset(new imbitext(btfix.V1, btfix.V2, m_default_sample_size, m_workers));
     if (m_bias_file.size())
@@ -859,5 +871,10 @@ namespace Moses
   // {
   //   return btfix.SetupDocumentBias(bias);
   // }
+
+  vector<float> 
+  Mmsapt
+  ::DefaultWeights() const
+  { return vector<float>(this->GetNumScoreComponents(), 1.); }
 
 }

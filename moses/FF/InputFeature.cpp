@@ -13,7 +13,7 @@ namespace Moses
 InputFeature *InputFeature::s_instance = NULL;
 
 InputFeature::InputFeature(const std::string &line)
-  : StatelessFeatureFunction(line)
+  : StatelessFeatureFunction(line,true)
   , m_numRealWordCount(0)
 {
   m_numInputScores = this->m_numScoreComponents;

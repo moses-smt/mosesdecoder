@@ -66,6 +66,10 @@ namespace Moses {
       // does this feature function allow pooling of counts if 
       // there are no occurrences in the respective corpus?
       
+      virtual
+      void
+      load() { }
+
     };
 
     // base class for 'families' of phrase scorers that have a single 

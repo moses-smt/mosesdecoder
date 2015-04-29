@@ -11,7 +11,7 @@ using namespace std;
 namespace Moses
 {
 NieceTerminal::NieceTerminal(const std::string &line)
-  :StatelessFeatureFunction(line)
+  :StatelessFeatureFunction(line,true)
   ,m_hardConstraint(false)
 {
   ReadParameters();

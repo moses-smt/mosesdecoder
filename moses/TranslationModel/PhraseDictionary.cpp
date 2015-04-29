@@ -44,10 +44,10 @@ CacheColl::~CacheColl()
   }
 }
 
-PhraseDictionary::PhraseDictionary(const std::string &line)
-  :DecodeFeature(line)
-  ,m_tableLimit(20) // default
-  ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
+PhraseDictionary::PhraseDictionary(const std::string &line, bool registerNow)
+  : DecodeFeature(line, registerNow)
+  , m_tableLimit(20) // default
+  , m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
   m_id = s_staticColl.size();
   s_staticColl.push_back(this);

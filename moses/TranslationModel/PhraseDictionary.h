@@ -80,7 +80,7 @@ public:
     return s_staticColl;
   }
 
-  PhraseDictionary(const std::string &line);
+  PhraseDictionary(const std::string &line, bool registerNow);
 
   virtual ~PhraseDictionary() {
   }

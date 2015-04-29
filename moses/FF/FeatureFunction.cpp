@@ -59,7 +59,7 @@ void FeatureFunction::SetupAll(TranslationTask const& ttask)
 }
 
 FeatureFunction::
-FeatureFunction(const std::string& line)
+FeatureFunction(const std::string& line, bool registerNow)
   : m_tuneable(true)
   , m_requireSortingAfterSourceContext(false)
   , m_verbosity(std::numeric_limits<std::size_t>::max())
@@ -67,7 +67,8 @@ FeatureFunction(const std::string& line)
   , m_index(0)
 {
   m_numTuneableComponents = m_numScoreComponents;
-  Initialize(line);
+  ParseLine(line);
+  if (registerNow) Register();
 }
 
 FeatureFunction::
@@ -80,15 +81,14 @@ FeatureFunction(size_t numScoreComponents,
   , m_index(0)
 {
   m_numTuneableComponents = m_numScoreComponents;
-  Initialize(line);
+  ParseLine(line);
+  Register();
 }
 
 void
 FeatureFunction::
-Initialize(const std::string &line)
+Register()
 {
-  ParseLine(line);
-
   ScoreComponentCollection::RegisterScoreProducer(this);
   s_staticColl.push_back(this);
 }
@@ -166,7 +166,8 @@ void FeatureFunction::ReadParameters()
 
 std::vector<float> FeatureFunction::DefaultWeights() const
 {
-  UTIL_THROW2(GetScoreProducerDescription() << ": No default weights");
+  return std::vector<float>(this->m_numScoreComponents,1.0);
+  // UTIL_THROW2(GetScoreProducerDescription() << ": No default weights");
 }
 
 void FeatureFunction::SetTuneableComponents(const std::string& value)

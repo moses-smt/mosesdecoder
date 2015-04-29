@@ -13,19 +13,26 @@ namespace Moses {
     class
     PScoreLex1 : public PhraseScorer<Token>
     {
-      float m_alpha;
+      float    m_alpha;
+      string m_lexfile;
     public:
       LexicalPhraseScorer2<Token> scorer;
     
-      PScoreLex1(string const& alpaspec, string const& lexfile) 
+      PScoreLex1(string const& alphaspec, string const& lexfile) 
       { 
 	this->m_index = -1;
 	this->m_num_feats = 2; 
 	this->m_feature_names.reserve(2);
 	this->m_feature_names.push_back("lexfwd");
 	this->m_feature_names.push_back("lexbwd");
-	m_alpha = atof(alpaspec.c_str());
-	scorer.open(lexfile); 
+	m_alpha = atof(alphaspec.c_str());
+	m_lexfile = lexfile;
+      }
+
+      void
+      load()
+      { 	
+	scorer.open(m_lexfile); 
       }
     
       void 

@@ -134,6 +134,7 @@ namespace Moses
     bool poolCounts;
     std::vector<FactorType> ofactor;
 
+    void setup_local_feature_functions();
 
   private:
 
@@ -239,6 +240,8 @@ namespace Moses
 
     sptr<DocumentBias>
     setupDocumentBias(std::map<std::string,float> const& bias) const;
+
+    vector<float> DefaultWeights() const;
   };
 } // end namespace
 

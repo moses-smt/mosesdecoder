@@ -8,7 +8,7 @@ using namespace std;
 namespace Moses
 {
 CountNonTerms::CountNonTerms(const std::string &line)
-  :StatelessFeatureFunction(line)
+  :StatelessFeatureFunction(line,true)
   ,m_all(true)
   ,m_sourceSyntax(false)
   ,m_targetSyntax(false)
