@@ -6,6 +6,7 @@
 use warnings;
 use strict;
 use File::Basename;
+use Cwd 'abs_path';
 
 sub RunFork($);
 sub systemCheck($);
@@ -109,20 +110,20 @@ else
 {
   my $numStr = NumStr(0);
 
-  $cmd = "ln -s $target $TMPDIR/target.$numStr";
+  $cmd = "ln -s ".abs_path($target)." $TMPDIR/target.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
-  $cmd = "ln -s $source $TMPDIR/source.$numStr";
+  $cmd = "ln -s ".abs_path($source)." $TMPDIR/source.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
-  $cmd = "ln -s $align $TMPDIR/align.$numStr";
+  $cmd = "ln -s ".abs_path($align)." $TMPDIR/align.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
   if ($weights) {
-    $cmd = "ln -s $weights $TMPDIR/weights.$numStr";
+    $cmd = "ln -s ".abs_path($weights)." $TMPDIR/weights.$numStr";
     print STDERR "Executing: $cmd \n";
     `$cmd`;
   }
