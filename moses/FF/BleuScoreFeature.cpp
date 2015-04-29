@@ -880,6 +880,7 @@ const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) co
 
 bool BleuScoreFeature::IsUseable(const FactorMask &mask) const
 {
+  // TODO: Was this meant to return mask[0]!?
   bool ret = mask[0];
   return 0;
 }

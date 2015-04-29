@@ -716,7 +716,7 @@ void FuzzyMatchWrapper::basic_fuzzy_match( vector< vector< WORD_ID > > source,
     }
     unsigned int best_cost = input_length * (100-min_match) / 100 + 2;
     string best_path = "";
-    int best_match = -1;
+    //int best_match = -1;
 
     // go through all corpus sentences
     for(unsigned int s=0; s<source.size(); s++) {
@@ -739,7 +739,7 @@ void FuzzyMatchWrapper::basic_fuzzy_match( vector< vector< WORD_ID > > source,
       if (cost < best_cost) {
         best_cost = cost;
         best_path = path;
-        best_match = s;
+        //best_match = s;
       }
     }
     //cout << best_cost << " ||| " << best_match << " ||| " << best_path << endl;

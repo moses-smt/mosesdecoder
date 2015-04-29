@@ -128,7 +128,7 @@ void osmHypothesis :: calculateOSMProb(OSMLM& ptrOp)
   State currState = lmState;
   State temp;
 
-  for (int i = 0; i<operations.size(); i++) {
+  for (size_t i = 0; i<operations.size(); i++) {
     temp = currState;
     opProb += ptrOp.Score(temp,operations[i],currState);
   }
@@ -368,7 +368,6 @@ void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageV
   string english;
   string source;
   int j1;
-  int start = 0;
   int targetIndex = 0;
   doneTargetIndexes.clear();
 
@@ -391,7 +390,7 @@ void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageV
   }
 
 
-  for (int i = 0; i < ceptsInPhrase.size(); i++) {
+  for (size_t i = 0; i < ceptsInPhrase.size(); i++) {
     source = "";
     english = "";
 
@@ -462,7 +461,7 @@ void osmHypothesis :: getMeCepts ( set <int> & eSide , set <int> & fSide , map <
   for (iter = eSide.begin(); iter != eSide.end(); iter++) {
     t = tS[*iter];
 
-    for (int i = 0; i < t.size(); i++) {
+    for (size_t i = 0; i < t.size(); i++) {
       fSide.insert(t[i]);
     }
 
@@ -472,7 +471,7 @@ void osmHypothesis :: getMeCepts ( set <int> & eSide , set <int> & fSide , map <
 
     t = sT[*iter];
 
-    for (int i = 0 ; i<t.size(); i++) {
+    for (size_t i = 0 ; i<t.size(); i++) {
       eSide.insert(t[i]);
     }
 
@@ -498,7 +497,7 @@ void osmHypothesis :: constructCepts(vector <int> & align , int startIndex , int
   int tgt;
 
 
-  for (int i = 0;  i < align.size(); i+=2) {
+  for (size_t i = 0;  i < align.size(); i+=2) {
     src = align[i];
     tgt = align[i+1];
     tS[tgt].push_back(src);
