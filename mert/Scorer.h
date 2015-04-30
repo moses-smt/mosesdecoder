@@ -1,5 +1,4 @@
-#ifndef MERT_SCORER_H_
-#define MERT_SCORER_H_
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -236,4 +235,3 @@ inline float score_average(const statscores_t& scores, size_t start, size_t end)
 
 }
 
-#endif // MERT_SCORER_H_

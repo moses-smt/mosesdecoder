@@ -1,22 +1,22 @@
-#ifndef MERT_BLEU_SCORER_H_
-#define MERT_BLEU_SCORER_H_
+#pragma once
 
-#include <ostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
-#include "Types.h"
+#include <boost/shared_ptr.hpp>
+
+#include "Ngram.h"
+#include "Reference.h"
+#include "ScopedVector.h"
 #include "ScoreData.h"
 #include "StatisticsBasedScorer.h"
-#include "ScopedVector.h"
+#include "Types.h"
 
 namespace MosesTuning
 {
 
 const size_t kBleuNgramOrder = 4;
-
-class NgramCounts;
-class Reference;
 
 /**
  * Bleu scoring
@@ -42,9 +42,9 @@ public:
     return 2 * kBleuNgramOrder + 1;
   }
 
-  void CalcBleuStats(const Reference* ref, const std::string& text, ScoreStats& entry) const;
+  void CalcBleuStats(const Reference& ref, const std::string& text, ScoreStats& entry) const;
 
-  int CalcReferenceLength(const Reference* ref, std::size_t length) const;
+  int CalcReferenceLength(const Reference& ref, std::size_t length) const;
 
   ReferenceLengthType GetReferenceLengthType() const {
     return m_ref_length_type;
@@ -65,7 +65,7 @@ public:
   /**
    * Count the ngrams of each type, up to the given length in the input line.
    */
-  std::size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n, bool is_testing=false) const;
+  size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n, bool is_testing=false) const;
 
   void DumpCounts(std::ostream* os, const NgramCounts& counts) const;
 
@@ -73,6 +73,8 @@ public:
   bool OpenReferenceStream(std::istream* is, std::size_t file_id);
 
   void ProcessReferenceLine(const std::string& line, Reference* ref) const;
+
+  bool GetNextReferenceFromStreams(std::vector<boost::shared_ptr<std::ifstream> >& referenceStreams, Reference& ref) const;
 
   //private:
 protected:
@@ -102,4 +104,3 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
 
 }
 
-#endif  // MERT_BLEU_SCORER_H_

@@ -99,9 +99,8 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
     TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
 
     ifstream ifs(referenceFiles[i].c_str());
-    UTIL_THROW_IF2(!ifs, "Cannot open " << referenceFiles[i]);
     if (!OpenReferenceStream(&ifs, i)) {
-      UTIL_THROW2("Unable to open " + referenceFiles[i]);
+      UTIL_THROW2("Cannot open " + referenceFiles[i]);
     }
   }
 }
@@ -152,13 +151,26 @@ void BleuScorer::ProcessReferenceLine(const std::string& line, Reference* ref) c
     ref->push_back(length);
 }
 
+bool BleuScorer::GetNextReferenceFromStreams(std::vector<boost::shared_ptr<std::ifstream> >& referenceStreams, Reference& ref) const
+{
+  for (vector<boost::shared_ptr<ifstream> >::iterator ifs=referenceStreams.begin(); ifs!=referenceStreams.end(); ++ifs)
+  {
+    if (!(*ifs)) return false;
+    string line;
+    if (!getline(**ifs, line)) return false;
+    line = preprocessSentence(line);
+    ProcessReferenceLine(line, &ref);
+  }
+  return true;
+}
+
 void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
   UTIL_THROW_IF2(sid >= m_references.size(), "Sentence id (" << sid << ") not found in reference set");
-  CalcBleuStats(m_references[sid], text, entry);
+  CalcBleuStats(*(m_references[sid]), text, entry);
 }
 
-void BleuScorer::CalcBleuStats(const Reference* ref, const std::string& text, ScoreStats& entry) const
+void BleuScorer::CalcBleuStats(const Reference& ref, const std::string& text, ScoreStats& entry) const
 {
   NgramCounts testcounts;
   // stats for this line
@@ -177,7 +189,7 @@ void BleuScorer::CalcBleuStats(const Reference* ref, const std::string& text, Sc
     NgramCounts::Value correct = 0;
 
     NgramCounts::Value v = 0;
-    if (ref->get_counts()->Lookup(testcounts_it->first, &v)) {
+    if (ref.get_counts()->Lookup(testcounts_it->first, &v)) {
       correct = min(v, guess);
     }
     stats[len * 2 - 2] += correct;
@@ -207,17 +219,17 @@ statscore_t BleuScorer::calculateScore(const vector<ScoreStatsType>& comps) cons
   return exp(logbleu);
 }
 
-int BleuScorer::CalcReferenceLength(const Reference* ref, std::size_t length) const
+int BleuScorer::CalcReferenceLength(const Reference& ref, std::size_t length) const
 {
   switch (m_ref_length_type) {
   case AVERAGE:
-    return ref->CalcAverage();
+    return ref.CalcAverage();
     break;
   case CLOSEST:
-    return ref->CalcClosest(length);
+    return ref.CalcClosest(length);
     break;
   case SHORTEST:
-    return ref->CalcShortest();
+    return ref.CalcShortest();
     break;
   default:
     UTIL_THROW2("Unknown reference types");

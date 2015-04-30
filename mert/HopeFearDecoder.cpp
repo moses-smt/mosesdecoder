@@ -98,7 +98,7 @@ void NbestHopeFearDecoder::HopeFear(
   size_t hope_index=0, fear_index=0, model_index=0;
   ValType hope_score=0, fear_score=0, model_score=0;
   for(size_t safe_loop=0; safe_loop<2; safe_loop++) {
-    ValType hope_bleu, hope_model;
+    ValType hope_bleu=0, hope_model=0;
     for(size_t i=0; i< train_->cur_size(); i++) {
       const MiraFeatureVector& vec=train_->featuresAt(i);
       ValType score = wv.score(vec);
