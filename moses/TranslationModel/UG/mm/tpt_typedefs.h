@@ -12,4 +12,4 @@ namespace ugdiss
   typedef uint64_t filepos_type;
   typedef unsigned char   uchar;
 }
-#endif	 
+#endif

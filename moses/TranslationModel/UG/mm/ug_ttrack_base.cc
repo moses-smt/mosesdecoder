@@ -9,12 +9,12 @@
 namespace ugdiss
 {
   using namespace std;
-  
+
 #if 0
   template<>
   id_type
   Ttrack<id_type>::
-  toID(id_type const& t) 
+  toID(id_type const& t)
   {
     return t;
   }

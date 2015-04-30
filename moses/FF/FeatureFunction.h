@@ -27,7 +27,7 @@ class FactorMask;
 class InputPath;
 class StackVec;
 class DistortionScoreProducer;
-class TranslationTask; 
+class TranslationTask;
 
 /** base class for all feature functions.
  */
@@ -43,12 +43,15 @@ protected:
   bool m_requireSortingAfterSourceContext;
   size_t m_verbosity;
   size_t m_numScoreComponents;
+  size_t m_index; // index into vector covering ALL feature function values
   std::vector<bool> m_tuneableComponents;
   size_t m_numTuneableComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
-  void Initialize(const std::string &line);
+  void Register();
+private:
+  // void Initialize(const std::string &line);
   void ParseLine(const std::string &line);
 
 public:
@@ -62,7 +65,7 @@ public:
   static void CallChangeSource(InputType * const&input);
   // see my note in FeatureFunction.cpp --- UG
 
-  FeatureFunction(const std::string &line);
+  FeatureFunction(const std::string &line, bool initializeNow);
   FeatureFunction(size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
@@ -114,30 +117,44 @@ public:
 
   virtual std::vector<float> DefaultWeights() const;
 
+  size_t GetIndex() const;
+  size_t SetIndex(size_t const idx);
+
+protected:
+  virtual void
+  InitializeForInput(InputType const& source) { }
+  virtual void
+  CleanUpAfterSentenceProcessing(InputType const& source) { }
+
+public:
   //! Called before search and collecting of translation options
-  virtual void InitializeForInput(InputType const& source) {
-  }
+  virtual void
+  InitializeForInput(ttasksptr const& ttask);
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {
-  }
+  virtual void
+  CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
 
-  const std::string &GetArgLine() const {
-    return m_argLine;
-  }
+  const std::string &
+  GetArgLine() const { return m_argLine; }
 
   // given a target phrase containing only factors specified in mask
   // return true if the feature function can be evaluated
   virtual bool IsUseable(const FactorMask &mask) const = 0;
 
-  // used by stateless ff and stateful ff. Calculate initial score estimate during loading of phrase table
-  // source phrase is the substring that the phrase table uses to look up the target phrase,
+  // used by stateless ff and stateful ff. Calculate initial score
+  // estimate during loading of phrase table
+  //
+  // source phrase is the substring that the phrase table uses to look
+  // up the target phrase,
+  //
   // may have more factors than actually need, but not guaranteed.
-  // For SCFG decoding, the source contains non-terminals, NOT the raw source from the input sentence
-  virtual void EvaluateInIsolation(const Phrase &source
-                                   , const TargetPhrase &targetPhrase
-                                   , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection &estimatedFutureScore) const = 0;
+  // For SCFG decoding, the source contains non-terminals, NOT the raw
+  // source from the input sentence
+  virtual void
+  EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase,
+		      ScoreComponentCollection& scoreBreakdown,
+		      ScoreComponentCollection& estimatedFutureScore) const = 0;
 
   // override this method if you want to change the input before decoding
   virtual void ChangeSource(InputType * const&input) const { }

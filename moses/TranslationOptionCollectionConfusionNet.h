@@ -35,7 +35,7 @@ protected:
       , size_t graphInd);
 
 public:
-  TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+  TranslationOptionCollectionConfusionNet(ttasksptr const& ttask, const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   void ProcessUnknownWord(size_t sourcePos);
   void CreateTranslationOptions();

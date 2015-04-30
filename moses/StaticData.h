@@ -236,6 +236,26 @@ protected:
   // number of nonterminal labels
 //   size_t m_nonTerminalSize;
 
+
+  void ini_compact_table_options();
+  void ini_consensus_decoding_options();
+  void ini_cube_pruning_options();
+  void ini_distortion_options();
+  void ini_factor_maps();
+  void ini_input_options();
+  void ini_lm_options();
+  void ini_lmbr_options();
+  void ini_mbr_options();
+  void ini_mira_options();
+  bool ini_nbest_options();
+  void ini_oov_options();
+  bool ini_output_options();
+  bool ini_performance_options();
+  void ini_phrase_lookup_options();
+  bool ini_stack_decoding_options();
+  void ini_zombie_options();
+
+  void initialize_features();
 public:
 
   bool IsAlwaysCreateDirectTranslationOption() const {
@@ -446,18 +466,28 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  bool IsSyntax() const {
-    return m_searchAlgorithm == CYKPlus ||
-           m_searchAlgorithm == ChartIncremental ||
-           m_searchAlgorithm == SyntaxS2T ||
-           m_searchAlgorithm == SyntaxT2S ||
-           m_searchAlgorithm == SyntaxT2S_SCFG ||
-           m_searchAlgorithm == SyntaxF2S;
+
+  // bool IsSyntax() const {
+  //   return m_searchAlgorithm == CYKPlus ||
+  //          m_searchAlgorithm == ChartIncremental ||
+  //          m_searchAlgorithm == SyntaxS2T ||
+  //          m_searchAlgorithm == SyntaxT2S ||
+  //          m_searchAlgorithm == SyntaxT2S_SCFG ||
+  //          m_searchAlgorithm == SyntaxF2S;
+  // }
+
+  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const
+  {
+    if (algo == DefaultSearchAlgorithm)
+      algo = m_searchAlgorithm;
+    return (algo == CYKPlus   || algo == ChartIncremental ||
+	    algo == SyntaxS2T || algo == SyntaxT2S ||
+	    algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
   }
 
-  const ScoreComponentCollection& GetAllWeights() const {
-    return m_allWeights;
-  }
+  const ScoreComponentCollection&
+  GetAllWeights() const
+  { return m_allWeights; }
 
   void SetAllWeights(const ScoreComponentCollection& weights) {
     m_allWeights = weights;
@@ -742,8 +772,9 @@ public:
   }
 
   //sentence (and thread) specific initialisationn and cleanup
-  void InitializeForInput(const InputType& source) const;
-  void CleanUpAfterSentenceProcessing(const InputType& source) const;
+  // void InitializeForInput(const InputType& source, ttaskptr const& ttask) const;
+  void InitializeForInput(ttasksptr const& ttask) const;
+  void CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const;
 
   void LoadFeatureFunctions();
   bool CheckWeights() const;

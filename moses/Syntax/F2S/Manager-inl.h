@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #pragma once
 
 #include "moses/DecodeGraph.h"
@@ -32,14 +33,14 @@ namespace F2S
 {
 
 template<typename RuleMatcher>
-Manager<RuleMatcher>::Manager(const InputType &source)
-  : Syntax::Manager(source)
+Manager<RuleMatcher>::Manager(ttasksptr const& ttask)
+  : Syntax::Manager(ttask)
 {
-  if (const ForestInput *p = dynamic_cast<const ForestInput*>(&source)) {
+  if (const ForestInput *p = dynamic_cast<const ForestInput*>(&m_source)) {
     m_forest = p->GetForest();
     m_rootVertex = p->GetRootVertex();
-    m_sentenceLength = p->GetSize();
-  } else if (const TreeInput *p = dynamic_cast<const TreeInput*>(&source)) {
+	m_sentenceLength = p->GetSize();
+  } else if (const TreeInput *p = dynamic_cast<const TreeInput*>(&m_source)) {
     T2S::InputTreeBuilder builder;
     T2S::InputTree tmpTree;
     builder.Build(*p, "Q", tmpTree);

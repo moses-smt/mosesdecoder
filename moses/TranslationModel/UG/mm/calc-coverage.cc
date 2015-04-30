@@ -16,7 +16,7 @@ using namespace ugdiss;
 typedef L2R_Token<SimpleWordId> Token;
 TokenIndex V;
 sptr<vector<vector<Token> > > C(new vector<vector<Token> >());
-void 
+void
 add_file(string fname)
 {
   filtering_istream in;

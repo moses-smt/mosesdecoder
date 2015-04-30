@@ -45,8 +45,7 @@ void SpanLength::EvaluateWithSourceContext(const InputType &input
 
   const SpanLengthPhraseProperty *slProp = static_cast<const SpanLengthPhraseProperty*>(property);
 
-  const Phrase *ruleSource = targetPhrase.GetRuleSource();
-  assert(ruleSource);
+  assert(targetPhrase.GetRuleSource());
 
   float score = 0;
   for (size_t i = 0; i < stackVec->size(); ++i) {

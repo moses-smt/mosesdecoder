@@ -11,7 +11,7 @@ namespace ugdiss
 {
   using namespace std;
 
-  void 
+  void
   get_options(int ac, char* av[], progopts& o, posopts& a, optsmap& vm,
               char const* cfgFileParam)
   {
@@ -30,17 +30,17 @@ namespace ugdiss
               }
             else
               {
-                cerr << "Error: cannot find config file '" 
+                cerr << "Error: cannot find config file '"
 		     << cfgFile << "'!" << endl;
                 exit(1);
               }
           }
       }
-    
+
     // process positional args, ignoring those set in the config file
     if (a.max_total_count())
       po::store(po::command_line_parser(ac,av)
-                .options(o).positional(a).run(),vm);  
+                .options(o).positional(a).run(),vm);
     po::notify(vm); // IMPORTANT
   }
 }

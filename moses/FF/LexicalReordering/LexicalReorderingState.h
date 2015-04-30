@@ -44,7 +44,7 @@ public:
   static const ReorderingType L   = 1; // left
   static const ReorderingType MAX = 3; // largest possible
 #else
-  enum ReorderingType 
+  enum ReorderingType
     {
       M    = 0, // monotonic
       NM   = 1, // non-monotonic

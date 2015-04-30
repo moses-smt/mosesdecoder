@@ -203,15 +203,15 @@ struct ChartCellBaseFactory {
 
 } // namespace
 
-Manager::Manager(const InputType &source) :
-  BaseManager(source),
-  cells_(source, ChartCellBaseFactory()),
-  parser_(source, cells_),
-  n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
+Manager::Manager(ttasksptr const& ttask)
+  : BaseManager(ttask)
+  , cells_(m_source, ChartCellBaseFactory(), parser_)
+  , parser_(ttask, cells_)
+  , n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize()))
+{ }
 
 Manager::~Manager()
-{
-}
+{ }
 
 template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
 {

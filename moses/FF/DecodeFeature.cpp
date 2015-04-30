@@ -30,8 +30,9 @@ using namespace std;
 
 namespace Moses
 {
-DecodeFeature::DecodeFeature(const std::string &line)
-  : StatelessFeatureFunction(line)
+
+DecodeFeature::DecodeFeature(const std::string &line, bool registerNow)
+  : StatelessFeatureFunction(line, registerNow)
   , m_container(NULL)
 {
   VERBOSE(2,"DecodeFeature:" << std::endl);

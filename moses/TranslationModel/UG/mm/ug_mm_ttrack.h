@@ -26,7 +26,7 @@ namespace ugdiss
 {
   using namespace std;
   namespace bio=boost::iostreams;
-  
+
   template<typename TKN=id_type>
   class mmTtrack : public Ttrack<TKN>
   {
@@ -38,21 +38,21 @@ namespace ugdiss
     id_type numWords;
     bio::mapped_file_source file;
     Token   const* data;  // pointer to first word of first sentence
-    id_type const* index; /* pointer to index (change data type for corpora 
+    id_type const* index; /* pointer to index (change data type for corpora
 			   * of more than four billion words)
 			   */
   public:
     mmTtrack(string fname);
     mmTtrack();
 
-    // return pointer to beginning of sentence 
-    Token const* sntStart(size_t sid) const; 
+    // return pointer to beginning of sentence
+    Token const* sntStart(size_t sid) const;
 
-    // return pointer to end of sentence 
-    Token const* sntEnd(size_t sid) const;    
+    // return pointer to end of sentence
+    Token const* sntEnd(size_t sid) const;
 
     // return size of corpus (in number of sentences)
-    size_t size() const;                     
+    size_t size() const;
 
     // return size of corpus (in number of sentences)
     size_t numTokens() const;
@@ -60,23 +60,23 @@ namespace ugdiss
     // open an mmTtrack file
     void open(string fname);
 
-    //  FUNCTIONS FOR BUILDING CORPUS TRACKS 
-    // write a blank file header at the beginning of a new ttrack file 
+    //  FUNCTIONS FOR BUILDING CORPUS TRACKS
+    // write a blank file header at the beginning of a new ttrack file
     void write_blank_file_header(ostream& out) const;
 
     // write the sentence index /idx/ and fill the file header
-    void write_index_and_finalize(ostream& out, 
+    void write_index_and_finalize(ostream& out,
 				  vector<id_type> const& idx,
 				  count_type tokenCount) const;
 
     // copy a contiguous sequence of sentences to another stream
     // return the number of tokens copied
     id_type copySentences(ostream& trg, id_type start, id_type stop) const;
-    
-    /** find the sentence id of a given token */
-    id_type findSid(TKN const* t) const; 
 
-    id_type findSid(id_type tokenOffset) const; 
+    /** find the sentence id of a given token */
+    id_type findSid(TKN const* t) const;
+
+    id_type findSid(id_type tokenOffset) const;
 
     /// re-assign ids based on the id maps in /f/
     void remap(string const fname, vector<id_type const*> const & f) const;
@@ -88,7 +88,7 @@ namespace ugdiss
   void
   mmTtrack<TKN>::
   remap(string const fname, vector<id_type const*> const & f) const
-  { 
+  {
     bio::mapped_file myfile(fname);
     assert(myfile.is_open());
     Moses::prime(myfile);
@@ -110,7 +110,7 @@ namespace ugdiss
   mmTtrack<TKN>::
   size() const
   {
-    return this->numSent; 
+    return this->numSent;
   }
 
   template<typename TKN>
@@ -118,17 +118,17 @@ namespace ugdiss
   mmTtrack<TKN>::
   numTokens() const
   {
-    return this->numWords; 
+    return this->numWords;
   }
 
   template<typename TKN>
-  TKN const* 
+  TKN const*
   mmTtrack<TKN>::
   sntStart(size_t sid) const // return pointer to beginning of sentence
   {
     if (sid >= this->numSent)
       {
-        cerr << "Fatal error: requested sentence #"<<sid<<" is beyond corpus size (" 
+        cerr << "Fatal error: requested sentence #"<<sid<<" is beyond corpus size ("
              << this->numSent <<")" << endl;
       }
     assert(sid < this->numSent);
@@ -136,14 +136,14 @@ namespace ugdiss
   }
 
   template<typename TKN>
-  TKN const* 
+  TKN const*
   mmTtrack<TKN>::
   sntEnd(size_t sid) const // return pointer to end of sentence
   {
     assert(sid < this->numSent);
     return data+index[sid+1];
   }
-  
+
   template<typename TKN>
   mmTtrack<TKN>::
   mmTtrack()
@@ -161,7 +161,7 @@ namespace ugdiss
   }
 
   template<typename TKN>
-  void 
+  void
   mmTtrack<TKN>::
   open(string fname)
   {
@@ -235,7 +235,7 @@ namespace ugdiss
   }
 
   template<typename TKN>
-  id_type 
+  id_type
   mmTtrack<TKN>::
   copySentences(ostream& trg, id_type start, id_type stop) const
   {

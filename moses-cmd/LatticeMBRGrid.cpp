@@ -53,6 +53,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "util/exception.hh"
 
 #include <boost/foreach.hpp>
+#include "moses/TranslationTask.h"
 
 using namespace std;
 using namespace Moses;
@@ -175,10 +176,13 @@ int main(int argc, char* argv[])
   const vector<float>& prune_grid = grid.getGrid(lmbr_prune);
   const vector<float>& scale_grid = grid.getGrid(lmbr_scale);
 
-  for (boost::shared_ptr<InputType> source = ioWrapper->ReadInput();
-       source != NULL; source = ioWrapper->ReadInput()) 
+  boost::shared_ptr<InputType> source;
+  while((source = ioWrapper->ReadInput()) != NULL)
     {
-      Manager manager(*source);
+      // set up task of translating one sentence
+      boost::shared_ptr<TranslationTask> ttask;
+      ttask = TranslationTask::create(source, ioWrapper);
+      Manager manager(ttask);
       manager.Decode();
       TrellisPathList nBestList;
       manager.CalcNBest(nBestSize, nBestList,true);

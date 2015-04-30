@@ -101,8 +101,8 @@ class Beam {
   void write(FILE *pf){
 /*    for (typename BeamMap::const_iterator i = mkid.begin(); i != mkid.end(); i++){
       i->first.write(pf);
-      fprintf(pf, " %d ", i->second.first); 
-//      i->second.second.write(pf); 
+      fprintf(pf, " %d ", i->second.first);
+//      i->second.second.write(pf);
       fprintf(pf, "\n");
     }
 */

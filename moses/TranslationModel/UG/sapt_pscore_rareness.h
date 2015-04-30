@@ -2,7 +2,7 @@
 // Phrase scorer that rewards the number of phrase pair occurrences in a bitext
 // with the asymptotic function x/(j+x) where x > 0 is a function
 // parameter that determines the steepness of the rewards curve
-// written by Ulrich Germann 
+// written by Ulrich Germann
 
 #include "sapt_pscore_base.h"
 #include <boost/dynamic_bitset.hpp>
@@ -10,25 +10,25 @@
 using namespace std;
 namespace Moses {
   namespace bitext  {
-    
+
     // rareness penalty: x/(n+x)
     template<typename Token>
     class
     PScoreRareness : public SingleRealValuedParameterPhraseScorerFamily<Token>
     {
     public:
-      PScoreRareness(string const spec) 
+      PScoreRareness(string const spec)
       {
 	this->m_tag = "rare";
 	this->init(spec);
       }
 
       bool
-      isLogVal(int i) const { return false; } 
+      isLogVal(int i) const { return false; }
 
-      void 
-      operator()(Bitext<Token> const& bt, 
-		 PhrasePair<Token>& pp, 
+      void
+      operator()(Bitext<Token> const& bt,
+		 PhrasePair<Token>& pp,
 		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;

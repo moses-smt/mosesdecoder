@@ -29,10 +29,6 @@ void SyntaxRHS::EvaluateWithSourceContext(const InputType &input
     , ScoreComponentCollection *estimatedFutureScore) const
 {
   assert(stackVec);
-  for (size_t i = 0; i < stackVec->size(); ++i) {
-    const ChartCellLabel &cell = *stackVec->at(i);
-
-  }
 
   if (targetPhrase.GetNumNonTerminals()) {
     vector<float> newScores(m_numScoreComponents);

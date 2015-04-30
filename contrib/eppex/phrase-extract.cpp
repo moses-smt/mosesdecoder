@@ -32,14 +32,14 @@ typedef std::vector<output_pair_t> output_vector_t;
 class PhraseComp {
     /** @var If true, sort by target phrase first. */
     bool _inverted;
-    
+
     bool compareAlignments(const indexed_phrases_pair_t& a, const indexed_phrases_pair_t& b);
 
     int comparePhrases(const indexed_phrases_pair_t::phrase_t& a, const indexed_phrases_pair_t::phrase_t& b);
-    
+
 public:
     PhraseComp(bool inverted): _inverted(inverted) {}
-    
+
     bool operator()(const output_pair_t& a, const output_pair_t& b);
 };
 
@@ -448,9 +448,9 @@ void extract(SentenceAlignment &sentence) {
                             ((phraseModel)? getOrientString(phrasePrevOrient, phraseType) + " " + getOrientString(phraseNextOrient, phraseType) : "") + " | " +
                             ((hierModel)? getOrientString(hierPrevOrient, hierType) + " " + getOrientString(hierNextOrient, hierType) : "");
             }
-            
+
             addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
-            
+
         } // end of for loop through inbound phrases
 
     } // end if buildExtraStructure
@@ -567,7 +567,7 @@ bool PhraseComp::operator()(const output_pair_t& a, const output_pair_t& b) {
     else {
         return cmp < 0;
     }
-    
+
 }
 
 
@@ -607,7 +607,7 @@ bool PhraseComp::compareAlignments(const indexed_phrases_pair_t& a, const indexe
             return cmp < 0;
         }
     }
-    
+
     // Note: LC_ALL=C GNU sort treats shorter item as lesser than longer one.
     return (cmp == 0) ? (aSize < bSize) : (cmp < 0);
 
@@ -685,7 +685,7 @@ void processSortedOutput(OutputProcessor& processor) {
 
 
 void processUnsortedOutput(OutputProcessor& processor) {
-    
+
     LossyCountersVector::value_type current = NULL, prev = NULL;
 
     for ( size_t i = 1; i < lossyCounters.size(); ++i ) { // Intentionally skip 0.
@@ -759,7 +759,7 @@ void printStats(void) {
         if ( (current == NULL) || ((current != prev) && (prev != NULL)) ) {
             // Time to print.
             to = i-1;
-            
+
             // Increment overall stats.
             outputMass += prev->outputMass;
             outputSize += prev->outputSize;
@@ -787,7 +787,7 @@ void printStats(void) {
 
             from = i;
         }
-        
+
         prev = current;
 
     }

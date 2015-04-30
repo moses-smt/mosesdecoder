@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(viterbi_full_hypergraph) {
   Vocab vocab;
   //References
   ReferenceSet references;
-  references.AddLine(0,"in addition to EU support for businesses , also the administration of national business support will be concentrated in four Centres for Economic Development , Transport and Environment ( ELY Centres ) , starting from mid @-@ September .",vocab); 
+  references.AddLine(0,"in addition to EU support for businesses , also the administration of national business support will be concentrated in four Centres for Economic Development , Transport and Environment ( ELY Centres ) , starting from mid @-@ September .",vocab);
   //Load the hypergraph
   Graph graph(vocab);
   util::scoped_fd fd(util::OpenReadOrThrow("mert/hgtest/0.gz"));

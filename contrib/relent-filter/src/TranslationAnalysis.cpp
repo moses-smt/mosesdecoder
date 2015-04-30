@@ -57,7 +57,7 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
         }
       }
     }
-    
+
     bool epsilon = false;
     if (target == "") {
       target="<EPSILON>";

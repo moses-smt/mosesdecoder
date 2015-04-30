@@ -223,8 +223,8 @@ void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProduce
   m_scoreBreakdown.Assign(translationScoreProducer, sparseString.as_string());
 }
 
-boost::shared_ptr<Scores> 
-mergescores(boost::shared_ptr<Scores> const& a, 
+boost::shared_ptr<Scores>
+mergescores(boost::shared_ptr<Scores> const& a,
 	    boost::shared_ptr<Scores> const& b)
 {
   boost::shared_ptr<Scores> ret;
@@ -243,7 +243,7 @@ mergescores(boost::shared_ptr<Scores> const& a,
   return ret;
 }
 
-void 
+void
 TargetPhrase::
 Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec)
 {
@@ -256,7 +256,7 @@ Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec)
   BOOST_FOREACH(item const& s, copy.m_cached_scores)
     {
       pair<iter,bool> foo = m_cached_scores.insert(s);
-      if (foo.second == false) 
+      if (foo.second == false)
 	foo.first->second = mergescores(foo.first->second, s.second);
     }
 }
@@ -278,8 +278,8 @@ GetExtraScores(FeatureFunction const* ff) const
 
 void
 TargetPhrase::
-SetExtraScores(FeatureFunction const* ff, 
-	       boost::shared_ptr<Scores> const& s) 
+SetExtraScores(FeatureFunction const* ff,
+	       boost::shared_ptr<Scores> const& s)
 { m_cached_scores[ff] = s; }
 
 

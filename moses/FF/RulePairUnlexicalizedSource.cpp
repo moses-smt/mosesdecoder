@@ -10,7 +10,7 @@ using namespace std;
 
 namespace Moses
 {
-  
+
 RulePairUnlexicalizedSource::RulePairUnlexicalizedSource(const std::string &line)
   : StatelessFeatureFunction(0, line)
   , m_glueRules(false)
@@ -51,7 +51,7 @@ void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
     return;
   }
 
-  for (size_t posS=0; posS<source.GetSize(); ++posS) 
+  for (size_t posS=0; posS<source.GetSize(); ++posS)
   {
     const Word &wordS = source.GetWord(posS);
     if ( !wordS.IsNonTerminal() ) {
@@ -61,7 +61,7 @@ void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
 
   ostringstream namestr;
 
-  for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT) 
+  for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT)
   {
     const Word &wordT = targetPhrase.GetWord(posT);
     const Factor* factorT = wordT[0];
@@ -78,7 +78,7 @@ void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
   namestr << targetPhraseLHS->GetString() << "|";
 
   for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
-       it!=targetPhrase.GetAlignNonTerm().end(); ++it) 
+       it!=targetPhrase.GetAlignNonTerm().end(); ++it)
   {
     namestr << "|" << it->first << "-" << it->second;
   }

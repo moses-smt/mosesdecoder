@@ -19,7 +19,7 @@
 
 namespace MosesServer
 {
-  class 
+  class
   Updater: public xmlrpc_c::method
   {
 
@@ -31,14 +31,14 @@ namespace MosesServer
 
   public:
     Updater();
-    
+
     void
     execute(xmlrpc_c::paramList const& paramList,
 	    xmlrpc_c::value * const  retvalP);
 
-    void 
+    void
     breakOutParams(const params_t& params);
-      
+
   };
 
 }

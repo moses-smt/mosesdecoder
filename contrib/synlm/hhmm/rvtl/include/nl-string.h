@@ -68,13 +68,13 @@ class StringInput {
   friend StringInput            operator>> ( StringInput psIn, const char* psDlm ) {
     if (StringInput(NULL)==psIn) return psIn;
     int i;
-    for (i=0; psIn[i]!='\0' && psDlm[i]!='\0'; i++) 
+    for (i=0; psIn[i]!='\0' && psDlm[i]!='\0'; i++)
       if(psIn[i]!=psDlm[i]) return StringInput(NULL); //psIn;
     return (psDlm[i]!='\0') ? StringInput(NULL) : (psIn[i]!='\0') ? psIn+i : SI_EOS;
   }
 
   friend pair<StringInput,int*> operator>> ( StringInput ps,   int& n         ) { return pair<StringInput,int*>(ps,&n); }
-  friend StringInput            operator>> ( pair<StringInput,int*> delimbuff, const char* psDlm ) { 
+  friend StringInput            operator>> ( pair<StringInput,int*> delimbuff, const char* psDlm ) {
     if (StringInput(NULL)==delimbuff.first) return delimbuff.first;
     ///int i; for(i=0;psIn[i]!='\0';i++) if(psIn[i]==psDlm[i]) return psIn; return psIn+i;
     int j=0;
@@ -90,7 +90,7 @@ class StringInput {
   }
 
   friend pair<StringInput,unsigned int*> operator>> ( StringInput ps,   unsigned int& n ) { return pair<StringInput,unsigned int*>(ps,&n); }
-  friend StringInput            operator>> ( pair<StringInput,unsigned int*> delimbuff, const char* psDlm ) { 
+  friend StringInput            operator>> ( pair<StringInput,unsigned int*> delimbuff, const char* psDlm ) {
     if (StringInput(NULL)==delimbuff.first) return delimbuff.first;
     ///int i; for(i=0;psIn[i]!='\0';i++) if(psIn[i]==psDlm[i]) return psIn; return psIn+i;
     int j=0;
@@ -106,7 +106,7 @@ class StringInput {
   }
 
   friend pair<StringInput,double*> operator>> ( StringInput ps,   double& d         ) { return pair<StringInput,double*>(ps,&d); }
-  friend StringInput               operator>> ( pair<StringInput,double*> delimbuff, const char* psDlm ) { 
+  friend StringInput               operator>> ( pair<StringInput,double*> delimbuff, const char* psDlm ) {
     if (StringInput(NULL)==delimbuff.first) return delimbuff.first;
     ///int i; for(i=0;psIn[i]!='\0';i++) if(psIn[i]==psDlm[i]) return psIn; return psIn+i;
     int j=0;
@@ -191,7 +191,7 @@ class String : public Array<char> {
   friend pair<StringInput,String*> operator>> ( const StringInput ps, String& s ) { return pair<StringInput,String*>(ps,&s); }
   friend StringInput operator>> ( pair<StringInput,String*> delimbuff, const char* psDlm ) {
     if (StringInput(NULL)==delimbuff.first) return delimbuff.first;
-    ////assert(*delimbuff.second<domain.getSize()); 
+    ////assert(*delimbuff.second<domain.getSize());
     int j=0;
     StringInput psIn = delimbuff.first;
     if(psDlm[0]=='\0') { *delimbuff.second=String(psIn.c_str()); return psIn+strlen(psIn.c_str()); }

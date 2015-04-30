@@ -9,12 +9,12 @@
 
 namespace search {
 
-// A full hypothesis: a score, arity of the rule, a pointer to the decoder's rule (Note), and pointers to non-terminals that were substituted.  
+// A full hypothesis: a score, arity of the rule, a pointer to the decoder's rule (Note), and pointers to non-terminals that were substituted.
 template <class Below> class GenericApplied : public Header {
   public:
     GenericApplied() {}
 
-    GenericApplied(void *location, PartialEdge partial) 
+    GenericApplied(void *location, PartialEdge partial)
       : Header(location) {
       memcpy(Base(), partial.Base(), kHeaderSize);
       Below *child_out = Children();
@@ -23,7 +23,7 @@ template <class Below> class GenericApplied : public Header {
       for (; part != part_end_loop; ++part, ++child_out)
         *child_out = Below(part->End());
     }
-    
+
     GenericApplied(void *location, Score score, Arity arity, Note note, Moses::WordsRange range) : Header(location, arity) {
       SetScore(score);
       SetNote(note);
@@ -46,7 +46,7 @@ template <class Below> class GenericApplied : public Header {
     }
 };
 
-// Applied rule that references itself.  
+// Applied rule that references itself.
 class Applied : public GenericApplied<Applied> {
   private:
     typedef GenericApplied<Applied> P;
@@ -57,7 +57,7 @@ class Applied : public GenericApplied<Applied> {
     Applied(History from) : P(from) {}
 };
 
-// How to build single-best hypotheses.  
+// How to build single-best hypotheses.
 class SingleBest {
   public:
     typedef PartialEdge Combine;
@@ -68,7 +68,7 @@ class SingleBest {
     }
 
     NBestComplete Complete(PartialEdge partial) {
-      if (!partial.Valid()) 
+      if (!partial.Valid())
         return NBestComplete(NULL, lm::ngram::ChartState(), -INFINITY);
       void *place_final = pool_.Allocate(Applied::Size(partial.GetArity()));
       Applied(place_final, partial);

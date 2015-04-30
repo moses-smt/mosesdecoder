@@ -106,7 +106,7 @@ size_t BilingualLM::selectMiddleAlignment(
 {
 
   set<size_t>::iterator it = alignment_links.begin();
-  for (int i = 0; i < (alignment_links.size() - 1) / 2; ++i) {
+  for (size_t i = 0; i < (alignment_links.size() - 1) / 2; ++i) {
     ++it;
   }
 

@@ -59,10 +59,6 @@ def get_head(xml, args):
             preterminal = child.get('label')
             head = escape_text(child.text.strip())
 
-        # hack for split compounds
-        elif child[-1].get('label') == 'SEGMENT':
-            return escape_text(child[-1].text.strip()), 'SEGMENT'
-
         elif args.ptkvz and head and child.get('label') == 'avz':
             for grandchild in child:
                 if grandchild.get('label') == 'PTKVZ':

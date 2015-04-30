@@ -32,8 +32,8 @@ using namespace std;
 namespace Moses
 {
 /** constructor; just initialize the base class */
-TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const &input, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
+TranslationOptionCollectionText::TranslationOptionCollectionText(ttasksptr const& ttask, Sentence const &input, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(ttask,input, maxNoTransOptPerCoverage, translationOptionThreshold)
 {
   size_t size = input.GetSize();
   m_inputPathMatrix.resize(size);

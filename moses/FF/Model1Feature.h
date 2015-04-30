@@ -37,7 +37,7 @@ protected:
 class Model1LexicalTable
 {
 public:
-  Model1LexicalTable(float floor=1e-7) : m_floor(floor) 
+  Model1LexicalTable(float floor=1e-7) : m_floor(floor)
   {}
 
   void Load(const std::string& fileName, const Model1Vocabulary& vcbS, const Model1Vocabulary& vcbT);
@@ -100,7 +100,7 @@ private:
   const Factor* m_emptyWord;
 
   void Load();
-  
+
   // cache
   mutable boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> > m_cache;
   #ifdef WITH_THREADS

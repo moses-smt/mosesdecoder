@@ -113,13 +113,14 @@ def get_syntactic_ngrams(xml, options, vocab, output_vocab, parent_heads=None, p
             int_list.extend(parent_heads)
             int_list.extend(parent_labels)
 
+            # write root of tree
             if options.mode == 'label':
                 int_list.append(output_vocab.get(label, 0))
-                sys.stdout.write(' '.join(map(str, int_list)) + '\n')
+                options.output.write(' '.join(map(str, int_list)) + '\n')
             elif options.mode == 'head' and not head == '<dummy_head>':
                 int_list.append(vocab.get(label, 0))
                 int_list.append(output_vocab.get(head, output_vocab.get(preterminal, 0)))
-                sys.stdout.write(' '.join(map(str, int_list)) + '\n')
+                options.output.write(' '.join(map(str, int_list)) + '\n')
 
             parent_heads.append(vocab.get(head, 0))
             parent_labels.append(vocab.get(label, 0))

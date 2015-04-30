@@ -28,46 +28,46 @@ extern bool debug;
 namespace ugdiss
 {
   // void tightwritex(iostream& out, size_t data, bool flag);
-  void 
+  void
   tightwrite(std::ostream& out, ::uint64_t data, bool flag);
 
-  filepos_type 
+  filepos_type
   tightread(std::istream& in, std::ios::pos_type stop);
 
   bool
-  tightfind(std::istream& in, 
-	    filepos_type start, 
-	    filepos_type stop, 
+  tightfind(std::istream& in,
+	    filepos_type start,
+	    filepos_type stop,
 	    id_type key,
 	    unsigned char& flags);
 
   bool
-  tightfind_noflags(std::istream& in, 
-                    filepos_type start, 
-                    filepos_type stop, 
+  tightfind_noflags(std::istream& in,
+                    filepos_type start,
+                    filepos_type stop,
                     id_type key);
 
   char const*
-  tightfind(char const* const start, 
+  tightfind(char const* const start,
             char const* const stop,
-            id_type key, 
+            id_type key,
             unsigned char& flags);
 
   char const*
-  tightfind_noflags(char const* const start, 
+  tightfind_noflags(char const* const start,
                     char const* const stop,
                     id_type key);
 
 
 
-  /** move read header in istream /in/ to the first entry after the midpoint of 
-   *  file position range [start,stop) in in a 'tight' index 
+  /** move read header in istream /in/ to the first entry after the midpoint of
+   *  file position range [start,stop) in in a 'tight' index
    *  @param in the data input stream
    *  @param start start of the search range
    *  @param stop  end   of the search range
-   *  @return true if no errors occurred 
-   */ 
-  bool 
+   *  @return true if no errors occurred
+   */
+  bool
   tightfind_midpoint(std::istream& in, filepos_type start, filepos_type stop);
 
   // the bitpattern functions below are for debugging
@@ -115,8 +115,8 @@ namespace ugdiss
 
 #if 0
   template<typename dtype>
-  char const* 
-  tightread(char const* start, 
+  char const*
+  tightread(char const* start,
             char const* stop,
             dtype& dest)
   {

@@ -344,7 +344,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
   std::set<std::string> strippedTargetLabelSet;
   std::map<std::string, int> strippedTargetTopLabelSet;
-  if (options.stripBitParLabels && 
+  if (options.stripBitParLabels &&
       (!options.glueGrammarFile.empty() || !options.unknownWordSoftMatchesFile.empty())) {
     StripBitParLabels(targetLabelSet, targetTopLabelSet, strippedTargetLabelSet, strippedTargetTopLabelSet);
   }

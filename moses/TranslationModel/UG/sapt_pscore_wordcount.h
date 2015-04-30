@@ -1,5 +1,5 @@
 // -*- c++ -*-
-// written by Ulrich Germann 
+// written by Ulrich Germann
 #pragma once
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
 #include "util/exception.hh"
@@ -13,7 +13,7 @@ namespace Moses {
     class
     PScoreWC : public PhraseScorer<Token>
     {
-    public:    
+    public:
       PScoreWC(string const dummy)
       {
     this->m_index = -1;
@@ -21,14 +21,14 @@ namespace Moses {
     this->m_feature_names.push_back(string("wordcount"));
       }
 
-      void 
+      void
       operator()(Bitext<Token> const& bt,
-         PhrasePair<Token>& pp, 
+         PhrasePair<Token>& pp,
 		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
 	(*dest)[this->m_index] = pp.len2;
-      }    
+      }
     };
   }
 }

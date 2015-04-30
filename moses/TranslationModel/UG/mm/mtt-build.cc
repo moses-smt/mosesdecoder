@@ -46,8 +46,8 @@ bool quiet       = false; // no progress reporting
 
 string vocabBase; // base name for existing vocabs that should be used
 string baseName;  // base name for all files
-string tmpFile, mttFile;   /* name of temporary / actual track file 
-			    * (.mtt for Conll format, .mct for plain text) 
+string tmpFile, mttFile;   /* name of temporary / actual track file
+			    * (.mtt for Conll format, .mct for plain text)
 			    */
 string UNK;
 
@@ -60,7 +60,7 @@ void interpret_args(int ac, char* av[]);
 
 inline uchar rangeCheck(int p, int limit) { return p < limit ? p : 1; }
 
-id_type 
+id_type
 get_id(TokenIndex const& T, string const& w)
 {
   id_type ret = T[w];
@@ -73,21 +73,21 @@ get_id(TokenIndex const& T, string const& w)
   return ret;
 }
 
-void 
+void
 open_vocab(TokenIndex& T, string fname)
 {
-  if (!access(fname.c_str(), F_OK)) 
-    { 
-      T.open(fname,UNK); 
-      assert(T[UNK] == 1); 
+  if (!access(fname.c_str(), F_OK))
+    {
+      T.open(fname,UNK);
+      assert(T[UNK] == 1);
     }
   else T.setUnkLabel(UNK);
   if (incremental) T.setDynamic(true);
-  assert(T["NULL"] == 0); 
+  assert(T["NULL"] == 0);
   assert(T[UNK]  == 1);
 }
 
-void 
+void
 ini_cnt_vec(TokenIndex const& T, vector<pair<string,size_t> > & v)
 {
   v.resize(T.totalVocabSize());
@@ -142,7 +142,7 @@ void fill_rec(Conll_Record& rec, vector<string> const& w)
   else if (w.size() >= 8) // CONLL format
     {
       int id  = atoi(w[0].c_str());
-      int gov = atoi(w[6].c_str()); 
+      int gov = atoi(w[6].c_str());
       rec.sform  = get_id(SF, w[1]);
       rec.lemma  = get_id(LM, w[2]);
       rec.majpos = rangeCheck(get_id(PS, w[3]), 256);
@@ -161,12 +161,12 @@ void log_progress(size_t ctr)
     }
   else if (ctr % 10000 == 0)
     {
-      cerr << "."; 
+      cerr << ".";
     }
 }
 
 
-size_t 
+size_t
 process_plain_input(ostream& out, vector<id_type> & s_index)
 {
   id_type totalWords = 0;
@@ -176,7 +176,7 @@ process_plain_input(ostream& out, vector<id_type> & s_index)
       istringstream buf(line);
       if (!quiet) log_progress(s_index.size());
       s_index.push_back(totalWords);
-      while (buf>>w) 
+      while (buf>>w)
 	{
 	  numwrite(out,get_id(SF,w));
 	  ++totalWords;
@@ -186,9 +186,9 @@ process_plain_input(ostream& out, vector<id_type> & s_index)
   return totalWords;
 }
 
-size_t 
-process_tagged_input(ostream& out, 
-		     vector<id_type> & s_index, 
+size_t
+process_tagged_input(ostream& out,
+		     vector<id_type> & s_index,
 		     vector<id_type> & p_index)
 {
   string line;
@@ -196,7 +196,7 @@ process_tagged_input(ostream& out,
   bool new_sent  = true;
   bool new_par   = true;
   id_type totalWords = 0;
-  
+
   while (getline(cin,line))
     {
       vector<string> w; string f; istringstream buf(line);
@@ -205,7 +205,7 @@ process_tagged_input(ostream& out,
       if (w.size() == 0 || starts_with(w[0], "SID="))
         new_sent = true;
 
-      else if (w.size() == 1 && w[0] == "<P>") 
+      else if (w.size() == 1 && w[0] == "<P>")
 	new_par = new_sent = true;
 
       if (w.size() < 3) continue;
@@ -244,7 +244,7 @@ numberize()
       index = &p_index;
     }
 
-  if (!quiet) 
+  if (!quiet)
     cerr << endl << "Writing index ... (" << index->size() << " chunks) ";
 
   startIdx = out.tellp();
@@ -261,7 +261,7 @@ numberize()
 
 vector<id_type> smap,lmap,pmap,dmap;
 
-void 
+void
 invert(vector<id_type> const& from, vector<id_type> & to)
 {
   to.resize(from.size());
@@ -269,11 +269,11 @@ invert(vector<id_type> const& from, vector<id_type> & to)
     to[from[i]] = i;
 }
 
-// sorts new items based on occurrence counts but won't reassign 
+// sorts new items based on occurrence counts but won't reassign
 // existing token ids
-void 
-conservative_sort(TokenIndex     const & V, 
-		  vector<size_t> const & cnt, 
+void
+conservative_sort(TokenIndex     const & V,
+		  vector<size_t> const & cnt,
 		  vector<id_type>      & xmap)
 {
   xmap.resize(V.totalVocabSize());
@@ -344,21 +344,21 @@ void save_vocabs()
   string vbase = baseName;
   if (is_conll)
     {
-      if (SF.totalVocabSize() > SF.knownVocabSize()) 
+      if (SF.totalVocabSize() > SF.knownVocabSize())
 	write_tokenindex(vbase+".tdx.sfo",SF,smap);
-      if (LM.totalVocabSize() > LM.knownVocabSize()) 
+      if (LM.totalVocabSize() > LM.knownVocabSize())
 	write_tokenindex(vbase+".tdx.lem",LM,lmap);
-      if (PS.totalVocabSize() > PS.knownVocabSize()) 
+      if (PS.totalVocabSize() > PS.knownVocabSize())
 	write_tokenindex(vbase+".tdx.pos",PS,pmap);
-      if (DT.totalVocabSize() > DT.knownVocabSize()) 
+      if (DT.totalVocabSize() > DT.knownVocabSize())
 	write_tokenindex(vbase+".tdx.drl",DT,dmap);
     }
-  else if (SF.totalVocabSize() > SF.knownVocabSize()) 
+  else if (SF.totalVocabSize() > SF.knownVocabSize())
     write_tokenindex(vbase+".tdx",SF,smap);
 }
 
 template<typename Token>
-size_t 
+size_t
 build_mmTSA(string infile, string outfile)
 {
   size_t mypid = fork();
@@ -371,14 +371,14 @@ build_mmTSA(string infile, string outfile)
   exit(0);
 }
 
-bool 
+bool
 build_plaintext_tsas()
 {
   typedef L2R_Token<SimpleWordId> L2R;
   typedef R2L_Token<SimpleWordId> R2L;
   size_t c = with_sfas + with_pfas;
-  if (with_sfas) build_mmTSA<L2R>(tmpFile, baseName + ".sfa"); 
-  if (with_pfas) build_mmTSA<R2L>(tmpFile, baseName + ".pfa"); 
+  if (with_sfas) build_mmTSA<L2R>(tmpFile, baseName + ".sfa");
+  if (with_pfas) build_mmTSA<R2L>(tmpFile, baseName + ".pfa");
   while (c--) wait(NULL);
   return true;
 }
@@ -388,27 +388,27 @@ void build_conll_tsas()
   string bn  = baseName;
   string mtt = tmpFile;
   size_t c = 3 * (with_sfas + with_pfas + with_dcas);
-  if (with_sfas) 
+  if (with_sfas)
     {
       build_mmTSA<L2R_Token<Conll_Sform> >(mtt,bn+".sfa-sform");
       build_mmTSA<L2R_Token<Conll_Lemma> >(mtt,bn+".sfa-lemma");
       build_mmTSA<L2R_Token<Conll_MinPos> >(mtt,bn+".sfa-minpos");
     }
 
-  if (with_pfas) 
+  if (with_pfas)
     {
       build_mmTSA<R2L_Token<Conll_Sform> >(mtt,bn+".pfa-sform");
       build_mmTSA<R2L_Token<Conll_Lemma> >(mtt,bn+".pfa-lemma");
       build_mmTSA<R2L_Token<Conll_MinPos> >(mtt,bn+".pfa-minpos");
     }
 
-  if (with_dcas) 
+  if (with_dcas)
     {
-      build_mmTSA<ConllBottomUpToken<Conll_Sform> >(mtt,bn+".dca-sform");  
-      build_mmTSA<ConllBottomUpToken<Conll_Lemma> >(mtt,bn+".dca-lemma");  
+      build_mmTSA<ConllBottomUpToken<Conll_Sform> >(mtt,bn+".dca-sform");
+      build_mmTSA<ConllBottomUpToken<Conll_Lemma> >(mtt,bn+".dca-lemma");
       build_mmTSA<ConllBottomUpToken<Conll_MinPos> >(mtt,bn+".dca-minpos");
     }
-  while (c--) wait(NULL); 
+  while (c--) wait(NULL);
 }
 
 
@@ -430,7 +430,7 @@ int main(int argc, char* argv[])
   rename(tmpFile.c_str(),mttFile.c_str());
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   po::variables_map vm;
@@ -439,10 +439,10 @@ interpret_args(int ac, char* av[])
 
     ("help,h",  "print this message")
 
-    ("quiet,q", po::bool_switch(&quiet), 
+    ("quiet,q", po::bool_switch(&quiet),
      "don't print progress information")
 
-    ("incremental,i", po::bool_switch(&incremental), 
+    ("incremental,i", po::bool_switch(&incremental),
      "incremental mode; rewrites vocab files!")
 
     ("vocab-base,v", po::value<string>(&vocabBase),
@@ -451,15 +451,15 @@ interpret_args(int ac, char* av[])
     ("output,o", po::value<string>(&baseName),
      "base file name of the resulting file(s)")
 
-    ("sfa,s", po::value<int>(&with_sfas)->default_value(1), 
+    ("sfa,s", po::value<int>(&with_sfas)->default_value(1),
      "also build suffix arrays")
 
     ("pfa,p", po::value<int>(&with_pfas)
-     ->default_value(0)->implicit_value(1), 
+     ->default_value(0)->implicit_value(1),
      "also build prefix arrays")
 
     ("dca,d", po::value<int>(&with_dcas)
-     ->default_value(0)->implicit_value(1), 
+     ->default_value(0)->implicit_value(1),
      "also build dependency chain arrays")
 
     ("conll,c", po::bool_switch(&is_conll),
@@ -468,18 +468,18 @@ interpret_args(int ac, char* av[])
     ("unk,u", po::value<string>(&UNK)->default_value("UNK"),
      "label for unknown tokens")
 
-    // ("map,m", po::value<string>(&vmap), 
+    // ("map,m", po::value<string>(&vmap),
     // "map words to word classes for indexing")
-    
+
     ;
-  
+
   po::options_description h("Hidden Options");
   h.add_options()
     ;
   h.add(o);
   po::positional_options_description a;
   a.add("output",1);
-  
+
   po::store(po::command_line_parser(ac,av)
             .options(h)
             .positional(a)
@@ -487,7 +487,7 @@ interpret_args(int ac, char* av[])
   po::notify(vm);
   if (vm.count("help") || !vm.count("output"))
     {
-      cout << "\nusage:\n\t cat <corpus> | " << av[0] 
+      cout << "\nusage:\n\t cat <corpus> | " << av[0]
            << " [options] <output .mtt file>" << endl;
       cout << o << endl;
       exit(0);

@@ -6,11 +6,11 @@
 
 namespace MosesServer
 {
-  class 
+  class
   Optimizer : public xmlrpc_c::method
   {
   public:
-    Optimizer(); 
+    Optimizer();
     void execute(xmlrpc_c::paramList const& paramList,
 		 xmlrpc_c::value *   const  retvalP);
   };

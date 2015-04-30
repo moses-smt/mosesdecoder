@@ -51,8 +51,8 @@ protected:
   PARAM_STRING m_abbreviation;
   PARAM_STRING m_description;
   PARAM_STRING m_fullname;
-  // std::map<char,std::set<std::string> > m_confusable; 
-  // stores long parameter names that start with a letter that is also a short option. 
+  // std::map<char,std::set<std::string> > m_confusable;
+  // stores long parameter names that start with a letter that is also a short option.
   options_description m_options;
 
   std::map<std::string, std::vector<float> >  m_weights;
@@ -64,30 +64,30 @@ protected:
   bool isOption(const char* token);
   bool Validate();
 
-  void 
+  void
   AddParam(options_description& optgroup,
 	   value_semantic const* optvalue,
-	   std::string const& paramName, 
+	   std::string const& paramName,
 	   std::string const& description);
 
-  void 
+  void
   AddParam(options_description& optgroup,
-	   std::string const &paramName, 
+	   std::string const &paramName,
 	   std::string const &description);
 
-  void 
+  void
   AddParam(options_description& optgroup,
 	   value_semantic const* optvalue,
 	   std::string const& paramName,
-	   std::string const& abbrevName, 
+	   std::string const& abbrevName,
 	   std::string const& description);
 
-  void 
+  void
   AddParam(options_description& optgroup,
 	   std::string const& paramName,
-	   std::string const& abbrevName, 
+	   std::string const& abbrevName,
 	   std::string const& description);
-  
+
   void PrintCredit();
   void PrintFF() const;
 

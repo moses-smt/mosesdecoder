@@ -22,7 +22,7 @@ public:
     return m_statefulFFs;
   }
 
-  StatefulFeatureFunction(const std::string &line);
+  StatefulFeatureFunction(const std::string &line, bool registerNow);
   StatefulFeatureFunction(size_t numScoreComponents, const std::string &line);
 
   /**

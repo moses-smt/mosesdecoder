@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     // Init lossy counters.
     std::string lossyCountersParams;
     int paramIdx = 5;
-    
+
     while ( (argc > paramIdx) && (*argv[paramIdx] != '-') ) {
         std::string param = std::string(argv[paramIdx]);
         if ( !parse_lossy_counting_params(param) ) {
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
             usage(argv[0]);
         }
     }
-    
+
     if ( (argc > paramIdx) && (strcmp(argv[paramIdx], "--compact") == 0) ) {
         compactOutputFlag = true;
         ++paramIdx;
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
     readInput(eFile, fFile, aFile);
 
     std::cerr << std::endl; // Leave the progress bar end on previous line.
-    
+
     // close input files
     eFile.close();
     fFile.close();

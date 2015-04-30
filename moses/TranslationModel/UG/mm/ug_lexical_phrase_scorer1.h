@@ -15,14 +15,14 @@ using namespace std;
 namespace ugdiss
 {
 
-  template<typename TKN> 
-  class 
+  template<typename TKN>
+  class
   LexicalPhraseScorer1
   {
     typedef boost::unordered_map<id_type, float> inner_map_t;
     vector<inner_map_t> L1_given_L2;
     vector<inner_map_t> L2_given_L1;
-    void load_lex (string const& fname, TokenIndex & V1, TokenIndex & V2, 
+    void load_lex (string const& fname, TokenIndex & V1, TokenIndex & V2,
 		   vector<inner_map_t> & lex);
   public:
     void open(string const& bname, string const& L1, string const& L2,
@@ -34,14 +34,14 @@ namespace ugdiss
 	       TKN const* snt2, size_t const s2, size_t const e2,
 	       char const* const aln_start, char const* const aln_end,
 	       float & fwd_score, float& bwd_score);
-    float permissive_lookup(vector<inner_map_t> const& lex, 
+    float permissive_lookup(vector<inner_map_t> const& lex,
 			    id_type const s, id_type const t) const;
   };
-  
+
   template<typename TKN>
   void
   LexicalPhraseScorer1<TKN>::
-  load_lex (string const& fname, TokenIndex & V1, TokenIndex & V2, 
+  load_lex (string const& fname, TokenIndex & V1, TokenIndex & V2,
 	    vector<inner_map_t> & lex)
   {
     boost::iostreams::filtering_istream in;
@@ -52,20 +52,20 @@ namespace ugdiss
     while (in >> w1 >> w2 >> p)
       {
 	id_type id1 = V1[w1];
-	while (lex.size() <= id1) 
+	while (lex.size() <= id1)
 	  lex.push_back(inner_map_t());
 	lex[id1][V2[w2]] = p;
       }
   }
-  
+
   template<typename TKN>
   void
   LexicalPhraseScorer1<TKN>::
   open(string const& bname, string const& L1, string const& L2,
        TokenIndex & V1, TokenIndex & V2)
   {
-    string lex1 = bname+L1+"-"+L2+"."+L1+"-given-"+L2+".lex.gz"; 
-    string lex2 = bname+L1+"-"+L2+"."+L2+"-given-"+L1+".lex.gz"; 
+    string lex1 = bname+L1+"-"+L2+"."+L1+"-given-"+L2+".lex.gz";
+    string lex2 = bname+L1+"-"+L2+"."+L2+"-given-"+L1+".lex.gz";
     cout << lex1 << endl;
     cout << lex2 << endl;
     load_lex(lex1,V1,V2,L1_given_L2);
@@ -86,9 +86,9 @@ namespace ugdiss
       {
 	i1 = aln[k]; i2 = aln[++k];
 	if (i1 < s1 || i1 >= e1 || i2 < s2 || i2 >= e2) continue;
-	p1[i1] += permissive_lookup(L2_given_L1, snt2[i2].id(), snt1[i1].id()); 
+	p1[i1] += permissive_lookup(L2_given_L1, snt2[i2].id(), snt1[i1].id());
 	++c1[i1];
-	p2[i2] += permissive_lookup(L1_given_L2, snt1[i1].id(), snt2[i2].id()); 
+	p2[i2] += permissive_lookup(L1_given_L2, snt1[i1].id(), snt2[i2].id());
 	++c2[i2];
       }
     fwd_score = 0;
@@ -110,7 +110,7 @@ namespace ugdiss
   template<typename TKN>
   float
   LexicalPhraseScorer1<TKN>::
-  permissive_lookup(vector<inner_map_t> const& lex, 
+  permissive_lookup(vector<inner_map_t> const& lex,
 		    id_type const s, id_type const t) const
   {
     if (s >= lex.size()) return 1.0;
@@ -135,9 +135,9 @@ namespace ugdiss
 	// assert(snt1[i2].id() < L1_given_L2.size());
 	// assert(snt2[i2].id() < L2_given_L1.size());
 	if (i1 < s1 || i1 >= e1 || i2 < s2 || i2 >= e2) continue;
-	p1[i1] += permissive_lookup(L1_given_L2, snt1[i1].id(), snt2[i2].id()); 
+	p1[i1] += permissive_lookup(L1_given_L2, snt1[i1].id(), snt2[i2].id());
 	++c1[i1];
-	p2[i2] += permissive_lookup(L2_given_L1, snt2[i2].id(), snt1[i1].id()); 
+	p2[i2] += permissive_lookup(L2_given_L1, snt2[i2].id(), snt1[i1].id());
 	++c2[i2];
       }
     fwd_score = 0;

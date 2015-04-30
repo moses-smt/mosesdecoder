@@ -22,7 +22,7 @@ protected:
   void ProcessUnknownWord(size_t sourcePos); // do not implement
 
 public:
-  TranslationOptionCollectionLattice(const WordLattice &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+  TranslationOptionCollectionLattice(ttasksptr const& ttask, const WordLattice &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   void CreateTranslationOptions();
 

@@ -30,7 +30,7 @@
 #include "nl-stream.h"
 
 #include <iostream>
-using namespace std; 
+using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ using namespace std;
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template <int I, class T> 
+template <int I, class T>
 class StaticSafeArray {
  private:
   // Data members...
@@ -84,7 +84,7 @@ class StaticSafeArray {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <int I, char* SD, class T> 
+template <int I, char* SD, class T>
 class DelimitedStaticSafeArray : public StaticSafeArray<I,T> {
  public:
   DelimitedStaticSafeArray ( )                               : StaticSafeArray<I,T>()  { }
@@ -349,7 +349,7 @@ class SafeArray2D {
   // Extraction methods...
   const T& get (const X1& x,const X2& y) const { assert(at!=NULL);
                                                  assert(x.toInt()>=0); assert(x.toInt()<xSize);
-                                                 assert(y.toInt()>=0); 
+                                                 assert(y.toInt()>=0);
 //this assert failed when compile without -DNDEBUG (needed for debugging). Have to figure out why before adding this assert back in
 //assert(y.toInt()<ySize);
                                                  return at[x.toInt()*ySize + y.toInt()];}
@@ -423,7 +423,7 @@ class SafeArray4D {
     { delete[] at; wSize=sat.wSize; xSize=sat.xSize; ySize=sat.ySize;
       zSize=sat.zSize; at=new T[wSize*xSize*ySize*zSize];
       for(int i=0;i<wSize*xSize*ySize*zSize;i++) at[i]=sat.at[i]; return *this; }
-  void init (int w,int x,int y,int z)        
+  void init (int w,int x,int y,int z)
     { delete[] at; wSize=w; xSize=x; ySize=y; zSize=z; at=new T[w*x*y*z]; }
   void init (int w,int x,int y,int z,const T& t)
     { delete[] at; wSize=w; xSize=x; ySize=y; zSize=z; at=new T[w*x*y*z];
@@ -472,7 +472,7 @@ class SafeArray5D {
     { delete[] at; vSize=sat.vSize; wSize=sat.wSize; xSize=sat.xSize;
       ySize=sat.ySize; zSize=sat.zSize; at=new T[vSize*wSize*xSize*ySize*zSize];
       for(int i=0;i<vSize*wSize*xSize*ySize*zSize;i++) at[i]=sat.at[i]; return *this; }
-  void init(int v,int w,int x,int y,int z)        
+  void init(int v,int w,int x,int y,int z)
     { delete[] at; vSize=v; wSize=w; xSize=x; ySize=y; zSize=z; at=new T[v*w*x*y*z]; }
   void init(int v,int w,int x,int y,int z,const T& t)
     { delete[] at; vSize=v; wSize=w; xSize=x; ySize=y; zSize=z; at=new T[v*w*x*y*z];

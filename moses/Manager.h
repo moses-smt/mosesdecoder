@@ -151,7 +151,8 @@ protected:
   void OutputAlignment(std::ostringstream &out, const TrellisPath &path) const;
 
 public:
-  Manager(InputType const& source);
+  // Manager(InputType const& source);
+  Manager(ttasksptr const& ttask);
   ~Manager();
   const  TranslationOptionCollection* getSntTranslationOptions();
 
@@ -180,9 +181,8 @@ public:
   void OutputSearchGraphAsSLF(long translationId, std::ostream &outputSearchGraphStream) const;
   void OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const;
   void GetSearchGraph(std::vector<SearchGraphNode>& searchGraph) const;
-  const InputType& GetSource() const {
-    return m_source;
-  }
+
+  const InputType& GetSource() const;
 
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )

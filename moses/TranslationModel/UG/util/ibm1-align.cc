@@ -1,7 +1,7 @@
 // -*- c++ -*-
 // Parallel text alignment via IBM1 / raw counts of word alignments
 // aiming at high precision (to seed Yawat alignments)
-// This program is tailored for use with Yawat. 
+// This program is tailored for use with Yawat.
 // Written by Ulrich Germann.
 
 #include <string>
@@ -29,20 +29,20 @@ public:
   table_t COOC;
   TokenIndex V1,V2;
 
-  void 
+  void
   align(string const& s1, string const& s2, vector<int>& aln) const;
 
-  void 
-  align(vector<id_type> const& x1, 
-	vector<id_type> const& x2, 
+  void
+  align(vector<id_type> const& x1,
+	vector<id_type> const& x2,
 	vector<int>& aln) const;
-  
-  void 
-  fill_amatrix(vector<id_type> const& x1, 
-	       vector<id_type> const& x2, 
+
+  void
+  fill_amatrix(vector<id_type> const& x1,
+	       vector<id_type> const& x2,
 	       vector<vector<int> >& aln) const;
 
-  void 
+  void
   open(string const base, string const L1, string const L2);
 };
 
@@ -75,10 +75,10 @@ u(StringPiece str, size_t start, size_t stop)
   return ret;
 }
 
-void 
+void
 IBM1::
-fill_amatrix(vector<id_type> const& x1, 
-	     vector<id_type> const& x2, 
+fill_amatrix(vector<id_type> const& x1,
+	     vector<id_type> const& x2,
 	     vector<vector<int> >& aln) const
 {
   aln.assign(x1.size(),vector<int>(x2.size()));
@@ -108,8 +108,8 @@ fill_amatrix(vector<id_type> const& x1,
 
 void
 IBM1::
-align(vector<id_type> const& x1, 
-      vector<id_type> const& x2, 
+align(vector<id_type> const& x1,
+      vector<id_type> const& x2,
       vector<int>& aln) const
 {
   vector<vector<int> > M;
@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
       // cout << line1 << endl;
       // cout << line2 << endl;
       // for (size_t i = 0; i < a.size(); i += 2)
-      // 	cout << ibm1.V1[s1[a[i]]] << " - " 
+      // 	cout << ibm1.V1[s1[a[i]]] << " - "
       // 	     << ibm1.V2[s2[a[i+1]]] << endl;
     }
   // cout << endl;

@@ -72,43 +72,37 @@
 #--clean to clean
 #--debug-build to build with Og. Only available with gcc 4.8+
 
+import os ;
 import option ;
 import modules ;
 import path ;
 path-constant TOP : . ;
+
 include $(TOP)/jam-files/sanity.jam ;
-include $(TOP)/jam-files/server.jam ;
 
-# exit :  0 ; 
-
-if [ build_server ] != no 
-{
-  xmlrpc-c-prefix = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --prefix" ] ;
-  echo "XMLRPC-C: BUILDING MOSES WITH XMLRPC_C LIBRARY VERSION $(xmlrpc-c-version) FROM $(xmlrpc-c-prefix)" ;
-
-  xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --cflags" ] ;
-  requirements += <define>HAVE_XMLRPC_C ;
-  requirements += <cxxflags>$(xmlrpc-cxxflags) ;
-
-  xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-c-config-cmd) c++2 abyss-server --libs" ] ;
-  for local i in [ SPLIT_BY_CHARACTERS $(xmlrpc-linkflags) : " " ] 
-  { 
-    local libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
-    if $(libname) 
-    {   
-      external-lib $(libname) 
-      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-      requirements += <library>$(libname) ;
-    }
-    local pathname = [ MATCH "-L(.*)" : $(i) ] ; 
-    if $(pathname)
-    {
-      requirements += <library-path>$(pathname) ; 
-    }
-  } 
+home = [ os.environ "HOME" ] ;
+if [ path.exists $(home)/moses-environment.jam ] 
+{ 
+  # for those of use who don't like typing in command line bjam options all day long
+  include $(home)/moses-environment.jam ; 
 }
-# echo $(requirements) ; 
-# exit 0 ; 
+include $(TOP)/jam-files/check-environment.jam ; # get resource locations 
+                                                 # from environment variables
+include $(TOP)/jam-files/xmlrpc-c.jam ; # xmlrpc-c stuff for the server
+include $(TOP)/jam-files/curlpp.jam ;   # curlpp stuff for bias lookup (MMT only)
+
+# exit "done" : 0 ;
+
+max-order = [ option.get "max-kenlm-order" : 6 : 6 ] ;
+if ! [ option.get "max-kenlm-order" ] 
+{
+  # some classes in Moses pull in header files from KenLM, so this needs to be 
+  # defined here, not in moses/lm/Jamfile 
+  option.set "max-kenlm-order" : 6 ;
+  requirements += <define>KENLM_MAX_ORDER=$(max-order) ;
+}
+# exit "all done" : 0 ; 
+
 boost 104400 ;
 external-lib z ;
 
@@ -139,6 +133,7 @@ if [ option.get "filter-warnings" : : "yes" ] {
   requirements += <cxxflags>-Wno-unused-but-set-variable ;
   requirements += <cxxflags>-Wno-unused-result ;
   requirements += <cxxflags>-Wno-unused-variable ;
+  requirements += <cxxflags>-Wcomment ;
 }
 
 if [ option.get "debug-build" : : "yes" ] {
@@ -228,10 +223,11 @@ build-projects lm util phrase-extract phrase-extract/syntax-common search moses 
 if [ option.get "with-mm" : : "yes" ]
 {
  alias mm :  
+  moses/TranslationModel/UG//bitext-find 
   moses/TranslationModel/UG//ptable-describe-features 
   moses/TranslationModel/UG//count-ptable-features 
   moses/TranslationModel/UG//ptable-lookup 
-  moses/TranslationModel/UG//spe-check-coverage 
+  # moses/TranslationModel/UG//spe-check-coverage 
   moses/TranslationModel/UG/mm//mtt-demo1 
   moses/TranslationModel/UG/mm//mtt-build 
   moses/TranslationModel/UG/mm//mtt-dump 
@@ -307,6 +303,3 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
 local temp = [ _shell "mkdir -p $(TOP)/bin" ] ;
 local temp = [ _shell "rm $(TOP)/bin/moses_chart" ] ;
 local temp = [ _shell "cd $(TOP)/bin && ln -s moses moses_chart" ] ;
-
-
-

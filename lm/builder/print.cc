@@ -55,7 +55,7 @@ void PrintARPA::Run(const util::stream::ChainPositions &positions) {
       if (order != positions.size())
         out << '\t' << stream->Value().complete.backoff;
       out << '\n';
-    
+
     }
     out << '\n';
   }

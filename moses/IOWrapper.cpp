@@ -87,7 +87,7 @@ IOWrapper::IOWrapper()
 {
   const StaticData &staticData = StaticData::Instance();
 
-  m_inputType = staticData.GetInputType(); 
+  m_inputType = staticData.GetInputType();
   m_currentLine = staticData.GetStartTranslationId();
 
   m_inputFactorOrder = &staticData.GetInputFactorOrder();
@@ -269,7 +269,7 @@ IOWrapper::ReadInput()
 #endif
   if (source->Read(*m_inputStream, *m_inputFactorOrder))
     source->SetTranslationId(m_currentLine++);
-  else 
+  else
     source.reset();
   return source;
 }

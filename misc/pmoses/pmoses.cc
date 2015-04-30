@@ -33,25 +33,25 @@ using namespace Moses;
 //Delete white spaces from the end and the begining of the string
 string trim(string str) {
   string::iterator it;
-  
+
   while ((str.length()>0)&&((*(it=str.begin()))==' ')) {
     str.erase(it);
   }
-           
+
   while ((str.length()>0)&&((*(it=(str.end()-1)))==' ')) {
     str.erase(it);
   }
-                    
+
   for(unsigned i=0; i<str.length(); i++) {
     if ((str[i]==' ') && ((i+1)<str.length()) && (str[i+1]==' ')) {
       str=str.erase(i,1);
       i--;
     }
   }
-                                            
+
   return str;
 }
-                                              
+
 
 int main (int argc, char *argv[]) {
   vector<FactorType> input, output;
@@ -64,12 +64,12 @@ int main (int argc, char *argv[]) {
 
   input.push_back(0);
   output.push_back(0);
-  
+
   weight.push_back(0);
   weight.push_back(0);
   weight.push_back(0);
   weight.push_back(0);
-  weight.push_back(0);				
+  weight.push_back(0);
 
   if (argc<3) {
     cerr<<"Error: Wrong number of parameters."<<endl;
@@ -86,19 +86,19 @@ int main (int argc, char *argv[]) {
   }
 
   cerr<<"numScoreComponent: "<<numScoreComponent<<endl;
-  cerr<<"numInputScores: "<<numInputScores<<endl;  
+  cerr<<"numInputScores: "<<numInputScores<<endl;
 
   PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent, numInputScores);
-				
+
   cerr<<"Table limit: "<<tableLimit<<endl;
   cerr<<"WeightWordPenalty: "<<weightWP<<endl;
   cerr<<"Source phrase: ___"<<source_str<<"___"<<endl;
-  
+
   if (!pd->Load(input, output, filePath, weight, tableLimit, lmList, weightWP)) {
     delete pd;
     return false;
   }
-				
+
   cerr<<"-------------------------------------------------"<<endl;
   FactorDirection direction;
   Phrase phrase(direction);
@@ -106,15 +106,15 @@ int main (int argc, char *argv[]) {
   phrase.CreateFromString(input, source_str, "|");
   TargetPhraseCollection *tpc = (TargetPhraseCollection*) pd->GetTargetPhraseCollection(phrase);
 
-  if (tpc == NULL) 
+  if (tpc == NULL)
     cerr<<"Not found."<<endl;
-  else {				
+  else {
     TargetPhraseCollection::iterator iterTargetPhrase;
     for (iterTargetPhrase = tpc->begin(); iterTargetPhrase != tpc->end();  ++iterTargetPhrase) {
       //cerr<<(*(*iterTargetPhrase))<<endl;
-    
+
       stringstream strs;
-      strs<<static_cast<const Phrase&>(*(*iterTargetPhrase));   
+      strs<<static_cast<const Phrase&>(*(*iterTargetPhrase));
       cerr<<source_str<<" => ___"<<trim(strs.str())<<"___ ";
       ScoreComponentCollection scc = (*iterTargetPhrase)->GetScoreBreakdown();
       cerr<<"Scores: ";
@@ -123,6 +123,6 @@ int main (int argc, char *argv[]) {
       }
       cerr<<endl;
     }
-  }				                                                                        
-  cerr<<"-------------------------------------------------"<<endl;				
+  }
+  cerr<<"-------------------------------------------------"<<endl;
 }

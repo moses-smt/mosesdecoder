@@ -15,7 +15,7 @@ using namespace boost;
 
 vector<FactorType> fo(1,FactorType(0));
 
-ostream& 
+ostream&
 operator<<(ostream& out, Hypothesis const* x)
 {
   vector<const Hypothesis*> H;
@@ -24,7 +24,7 @@ operator<<(ostream& out, Hypothesis const* x)
   for (; H.size(); H.pop_back())
     {
       Phrase const& p = H.back()->GetCurrTargetPhrase();
-      for (size_t pos = 0 ; pos < p.GetSize() ; pos++) 
+      for (size_t pos = 0 ; pos < p.GetSize() ; pos++)
 	out << *p.GetFactor(pos, 0) << (H.size() ? " " : "");
     }
   return out;
@@ -33,19 +33,19 @@ operator<<(ostream& out, Hypothesis const* x)
 vector<FactorType> ifo;
 size_t lineNumber;
 
-string 
+string
 translate(string const& source)
 {
   StaticData const& global = StaticData::Instance();
 
-  Sentence sentence; 
-  istringstream ibuf(source+"\n"); 
+  Sentence sentence;
+  istringstream ibuf(source+"\n");
   sentence.Read(ibuf,ifo);
 
   // Manager manager(lineNumber, sentence, global.GetSearchAlgorithm());
   Manager manager(sentence, global.GetSearchAlgorithm());
   manager.ProcessSentence();
-  
+
   ostringstream obuf;
   const Hypothesis* h = manager.GetBestHypothesis();
   obuf << h;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   Parameter params;
   if (!params.LoadParam(argc,argv) || !StaticData::LoadDataStatic(&params, argv[0]))
     exit(1);
-  
+
   StaticData const& global = StaticData::Instance();
   global.SetVerboseLevel(0);
   ifo = global.GetInputFactorOrder();
@@ -79,6 +79,6 @@ int main(int argc, char* argv[])
     }
   exit(0);
 }
-  
-  
+
+
 

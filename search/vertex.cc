@@ -20,7 +20,7 @@ class DivideLeft {
       : index_(index) {}
 
     uint64_t operator()(const lm::ngram::ChartState &state) const {
-      return (index_ < state.left.length) ? 
+      return (index_ < state.left.length) ?
         state.left.pointers[index_] :
         (kCompleteAdd - state.left.full);
     }
@@ -71,7 +71,7 @@ uint64_t Identify(const lm::ngram::Left &left, unsigned char index) {
 
 template <class Side> class DetermineSame {
   public:
-    DetermineSame(const Side &side, unsigned char guaranteed) 
+    DetermineSame(const Side &side, unsigned char guaranteed)
       : side_(side), guaranteed_(guaranteed), shared_(side.length), complete_(true) {}
 
     void Consider(const Side &other) {

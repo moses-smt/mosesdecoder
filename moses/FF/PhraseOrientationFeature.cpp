@@ -197,7 +197,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
         FEATUREVERBOSE(4, "lastNonTerminalPreviousSourceSpanIsAligned== " << reoClassData->lastNonTerminalPreviousSourceSpanIsAligned << std::endl);
         FEATUREVERBOSE(4, "lastNonTerminalFollowingSourceSpanIsAligned== " << reoClassData->lastNonTerminalFollowingSourceSpanIsAligned << std::endl;);
 
-        if (reoClassData->lastNonTerminalPreviousSourceSpanIsAligned && 
+        if (reoClassData->lastNonTerminalPreviousSourceSpanIsAligned &&
             reoClassData->lastNonTerminalFollowingSourceSpanIsAligned) {
           // discontinuous
           r2lOrientation = Moses::GHKM::PhraseOrientation::REO_CLASS_DLEFT;
@@ -221,7 +221,7 @@ void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *o
     ScoreComponentCollection &scoreBreakdown,
     bool subtract) const
 {
-  size_t ffScoreIndex = scoreBreakdown.GetIndexes(this).first;
+  size_t ffScoreIndex = m_index;
 
   std::vector<float> scoresL2R;
   scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );
@@ -467,7 +467,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
       if ( (nNT == currTarPhr.GetAlignNonTerm().GetSize()-1) && reoClassData->lastNonTerminalIsBoundary ) {
         // delay right-to-left scoring
-        
+
         FEATUREVERBOSE(3, "Delaying right-to-left scoring" << std::endl);
 
         std::bitset<3> possibleFutureOrientationsR2L(0x7);

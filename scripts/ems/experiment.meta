@@ -165,11 +165,18 @@ get-corpus
 	pass-unless: get-corpus-script
 	default-name: lm/txt
 	template: $get-corpus-script > OUT
+use-parallel-corpus
+  in: parallel-corpus-stem
+  out: tokenized-corpus
+	default-name: lm/tok
+	ignore-unless: parallel-corpus-stem
+	template: ln -s IN.$output-extension  OUT	
 tokenize
 	in: raw-corpus
 	out: tokenized-corpus
 	default-name: lm/tok
 	pass-unless: output-tokenizer
+	ignore-if: parallel-corpus-stem
 	template: $output-tokenizer < IN > OUT
 	parallelizable: yes
 mock-parse

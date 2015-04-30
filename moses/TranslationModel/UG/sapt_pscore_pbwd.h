@@ -1,5 +1,5 @@
 //-*- c++ -*-
-// written by Ulrich Germann 
+// written by Ulrich Germann
 #pragma once
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
 #include "util/exception.hh"
@@ -15,12 +15,12 @@ namespace Moses {
     {
       float   conf;
       string denom;
-      
+
     public:
-      PScorePbwd(float const c, string d) 
-      { 
+      PScorePbwd(float const c, string d)
+      {
 	this->m_index = -1;
-	conf  = c; 
+	conf  = c;
 	denom = d;
 	size_t checksum = d.size();
 	BOOST_FOREACH(char const& x, denom)
@@ -36,13 +36,13 @@ namespace Moses {
 		       << d << "' for Pbwd phrase scorer at " << HERE);
       }
 
-      void 
-      operator()(Bitext<Token> const& bt, 
-		 PhrasePair<Token>& pp, 
+      void
+      operator()(Bitext<Token> const& bt,
+		 PhrasePair<Token>& pp,
 		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
-	// we use the denominator specification to scale the raw counts on the 
+	// we use the denominator specification to scale the raw counts on the
 	// target side; the clean way would be to counter-sample
 	size_t i = this->m_index;
 	BOOST_FOREACH(char const& x, denom)

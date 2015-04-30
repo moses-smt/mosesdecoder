@@ -21,15 +21,15 @@ using namespace std;
 //using namespace boost;
 using namespace ugdiss;
 
-namespace stringdist 
+namespace stringdist
 {
-  float 
+  float
   levenshtein(UChar const* a, size_t const lenA,
 	      UChar const* b, size_t const lenB);
 
   UErrorCode strip_accents(UnicodeString & trg);
 
-  float 
+  float
   fillAlignmentMatrix(UChar const* a, size_t const lenA,
 		      UChar const* b, size_t const lenB,
 		      vector<vector<float> > & M);
@@ -37,9 +37,9 @@ namespace stringdist
   class StringDiff
   {
   public:
-    enum MATCHTYPE 
+    enum MATCHTYPE
       {
-	same,        // a and b are identical 
+	same,        // a and b are identical
 	cap,         // a and b differ only in capitalization
 	flip,        // two-letter flip
 	permutation, // a and b have same letters but in different order
@@ -48,7 +48,7 @@ namespace stringdist
 	insertion,   // a is empty
 	deletion,    // b is empty
 	mismatch,    // none of the above
-	noinit       // not initialized 
+	noinit       // not initialized
       };
 
     struct Segment
@@ -59,9 +59,9 @@ namespace stringdist
       MATCHTYPE match;
       float      dist;
       Segment();
-      Segment(size_t const as, size_t const ae, 
+      Segment(size_t const as, size_t const ae,
 	      size_t const bs, size_t const be,
-	      UnicodeString const& a, 
+	      UnicodeString const& a,
 	      UnicodeString const& b);
       char const* label() const;
     };

@@ -129,8 +129,8 @@ class DTree2DModel : public Tree < typename X::ElementType, DecisNode<X,Y,P> > {
   friend StringInput operator>> ( pair<StringInput,DTree2DModel<Y,X,P>*> si_m, const char* psD ) {
     if (StringInput(NULL)==si_m.first) return si_m.first;
     Y y; String xs; StringInput si,si2; si=si_m.first; DTree2DModel<Y,X,P>* pm=si_m.second;
-    while((si2=si>>" ")!=NULL)si=si2; 
-    si=si>>xs>>" "; 
+    while((si2=si>>" ")!=NULL)si=si2;
+    si=si>>xs>>" ";
     while((si2=si>>" ")!=NULL)si=si2;
     // Find appropriate node, creating nodes as necessary...
     for(int i=1; i<int(strlen(xs.c_array()))-1; i++) {
@@ -140,22 +140,22 @@ class DTree2DModel : public Tree < typename X::ElementType, DecisNode<X,Y,P> > {
 
     if ( si!=NULL && si[0]==':' ) {
       si=si>>": ";
-      while((si2=si>>" ")!=NULL)si=si2; 
+      while((si2=si>>" ")!=NULL)si=si2;
       si=si>>y>>" ";
-      while((si2=si>>" ")!=NULL)si=si2; 
+      while((si2=si>>" ")!=NULL)si=si2;
       si=si>>"= ";
-      while((si2=si>>" ")!=NULL)si=si2; 
+      while((si2=si>>" ")!=NULL)si=si2;
       // Specify attribute number (at nonterminal) or probability in distribution (at terminal)...
       return (si!=NULL) ? si>>pm->setProb(y)>>psD : si;
     }
     else if ( si!=NULL && si[0]=='=' ) {
       si=si>>"= "; //cerr<<" in after equals "<<((si==NULL) ? "yes" : "no") << endl;
-      while((si2=si>>" ")!=NULL)si=si2; 
+      while((si2=si>>" ")!=NULL)si=si2;
 
       //m.setA() = atoi(si.c_str());
       int aVar = 0;
-      si=si>>aVar>>psD; 
-      pm->setA()=aVar; 
+      si=si>>aVar>>psD;
+      pm->setA()=aVar;
       ////cerr<<" at end "<<((si==NULL) ? "yes" : "no") << endl;
       ////cerr<<"  m.getA() is "<< m.getA().toInt() << endl;
       return si;
@@ -169,15 +169,15 @@ class DTree2DModel : public Tree < typename X::ElementType, DecisNode<X,Y,P> > {
     si=si_m.first;
     sRt = si.c_str();
     if (sRt.find(':')!=string::npos) {
-      while((si2=si>>" [")!=NULL)si=si2; 
-      si=si>>xs>>"] "; 
-      while((si2=si>>" ")!=NULL)si=si2; 
+      while((si2=si>>" [")!=NULL)si=si2;
+      si=si>>xs>>"] ";
+      while((si2=si>>" ")!=NULL)si=si2;
       si=si>>": ";
-      while((si2=si>>" ")!=NULL)si=si2; 
+      while((si2=si>>" ")!=NULL)si=si2;
       si=si>>y>>" ";
-      while((si2=si>>" ")!=NULL)si=si2; 
+      while((si2=si>>" ")!=NULL)si=si2;
       si=si>>"= ";
-      
+
       // For DTree, must find the node labeled by X
       //Tree<B,DecisNode<X,Y,P> >* ptr = m;
       //assert(ptr);
@@ -189,15 +189,15 @@ class DTree2DModel : public Tree < typename X::ElementType, DecisNode<X,Y,P> > {
       // Specify attribute number (at nonterminal) or probability in distribution (at terminal)...
       return (si!=NULL) ? si>>m.setProb(y)>>psD : si;
     } else {
-      while((si2=si>>" [")!=NULL)si=si2; 
+      while((si2=si>>" [")!=NULL)si=si2;
       si=si>>xs>>"] "; //cerr<<" in bracket "<<((si==NULL) ? "yes" : "no") << endl;
-      while((si2=si>>" ")!=NULL)si=si2; 
+      while((si2=si>>" ")!=NULL)si=si2;
       si=si>>"= "; //cerr<<" in after equals "<<((si==NULL) ? "yes" : "no") << endl;
 
       //m.setA() = atoi(si.c_str());
       int aVar = 0;
-      si=si>>aVar>>psD; 
-      m.setA()=aVar; 
+      si=si>>aVar>>psD;
+      m.setA()=aVar;
       //cerr<<" at end "<<((si==NULL) ? "yes" : "no") << endl;
       //cerr<<"  m.getA() is "<< m.getA().toInt() << endl;
       return si;
@@ -209,7 +209,7 @@ class DTree2DModel : public Tree < typename X::ElementType, DecisNode<X,Y,P> > {
 };
 
 ////////////////////
-template <class Y,class X, class P> 
+template <class Y,class X, class P>
 bool DTree2DModel<Y,X,P>::readFields ( Array<char*>& aps ) {
   if ( /*aps[0]==sId &&*/ (3==aps.size() || 4==aps.size()) ) {
     //fprintf(stderr,"%s,%d\n",aps[3],numFields);
@@ -269,7 +269,7 @@ class DTree3DModel {
 };
 
 ////////////////////
-template <class Y,class X1,class X2, class P> 
+template <class Y,class X1,class X2, class P>
 bool DTree3DModel<Y,X1,X2,P>::readFields ( char* aps[], int numFields ) {
   if ( /*aps[0]==sId &&*/ (4==numFields || 5==numFields) ) {
     //fprintf(stderr,"%s,%d\n",aps[3],numFields);
@@ -307,7 +307,7 @@ bool DTree3DModel<Y,X1,X2,P>::readFields ( char* aps[], int numFields ) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template<class Y, class X, class P>
-class TrainableDTree2DModel : public DTree2DModel<Y,X,P> { 
+class TrainableDTree2DModel : public DTree2DModel<Y,X,P> {
  private:
   // Type members...
   typedef typename X::ElementType B;
@@ -485,7 +485,7 @@ void  TrainableDTree2DModel<Y,X,P>::train ( List<Joint2DRV<X,Y> >& lxy, const De
 ////////////////////////////////////////////////////////////////////////////////
 
 template<class Y, class X1, class X2, class P>
-class TrainableDTree3DModel : public DTree3DModel<Y,X1,X2,P> { 
+class TrainableDTree3DModel : public DTree3DModel<Y,X1,X2,P> {
 
  private:
 

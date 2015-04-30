@@ -17,7 +17,7 @@ namespace Moses
 {
 LexicalReordering::
 LexicalReordering(const std::string &line)
-  : StatefulFeatureFunction(line)
+  : StatefulFeatureFunction(line,false)
 {
   VERBOSE(1, "Initializing Lexical Reordering Feature.." << std::endl);
 
@@ -65,13 +65,17 @@ LexicalReordering(const std::string &line)
   }
 
   // sanity check: number of default scores
-  size_t numScores = m_configuration->GetNumScoreComponents();
+  size_t numScores
+    = m_numScoreComponents
+    = m_numTuneableComponents
+    = m_configuration->GetNumScoreComponents();
   UTIL_THROW_IF2(m_haveDefaultScores && m_defaultScores.size() != numScores,
                  "wrong number of default scores (" << m_defaultScores.size()
                  << ") for lexicalized reordering model (expected "
                  << m_configuration->GetNumScoreComponents() << ")");
 
   m_configuration->ConfigureSparse(sparseArgs, this);
+  this->Register();
 }
 
 LexicalReordering::
@@ -83,8 +87,9 @@ LexicalReordering::
 Load()
 {
   typedef LexicalReorderingTable LRTable;
-  m_table.reset(LRTable::LoadAvailable(m_filePath, m_factorsF,
-                                       m_factorsE, std::vector<FactorType>()));
+  if (m_filePath.size())
+    m_table.reset(LRTable::LoadAvailable(m_filePath, m_factorsF,
+					 m_factorsE, std::vector<FactorType>()));
 }
 
 Scores
@@ -132,16 +137,27 @@ void
 LexicalReordering::
 SetCache(TranslationOption& to) const
 {
+  if (to.GetLexReorderingScores(this)) return;
+  // Scores were were set already (e.g., by sampling phrase table)
+
   Phrase const& sphrase = to.GetInputPath().GetPhrase();
   Phrase const& tphrase = to.GetTargetPhrase();
   to.CacheLexReorderingScores(*this, this->GetProb(sphrase,tphrase));
 }
 
+LRModel const&
+LexicalReordering
+::GetModel() const
+{
+  return *m_configuration;
+}
+
+
 void
 LexicalReordering::
 SetCache(TranslationOptionList& tol) const
 {
-  BOOST_FOREACH(TranslationOption* to, tol) 
+  BOOST_FOREACH(TranslationOption* to, tol)
     this->SetCache(*to);
 }
 

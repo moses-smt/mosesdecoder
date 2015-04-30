@@ -6,7 +6,7 @@ namespace MosesServer
   using namespace std;
 
   Updater::
-  Updater() 
+  Updater()
   {
     // signature and help strings are documentation -- the client
     // can query this information with a system.methodSignature and
@@ -18,7 +18,7 @@ namespace MosesServer
   void
   Updater::
   execute(xmlrpc_c::paramList const& paramList,
-	  xmlrpc_c::value *   const  retvalP) 
+	  xmlrpc_c::value *   const  retvalP)
   {
 #if PT_UG
     const params_t params = paramList.getStruct(0);
@@ -29,20 +29,20 @@ namespace MosesServer
     *retvalP = xmlrpc_c::value_string("Phrase table updated");
 #endif
   };
-  
-  void 
+
+  void
   Updater::
-  breakOutParams(const params_t& params) 
+  breakOutParams(const params_t& params)
   {
     params_t::const_iterator si = params.find("source");
     if(si == params.end())
-      throw xmlrpc_c::fault("Missing source sentence", 
+      throw xmlrpc_c::fault("Missing source sentence",
 			    xmlrpc_c::fault::CODE_PARSE);
     m_src = xmlrpc_c::value_string(si->second);
     XVERBOSE(1,"source = " << m_src << endl);
     si = params.find("target");
     if(si == params.end())
-      throw xmlrpc_c::fault("Missing target sentence", 
+      throw xmlrpc_c::fault("Missing target sentence",
 			    xmlrpc_c::fault::CODE_PARSE);
     m_trg = xmlrpc_c::value_string(si->second);
     XVERBOSE(1,"target = " << m_trg << endl);
@@ -53,5 +53,5 @@ namespace MosesServer
     m_bounded  = ((si = params.find("bounded")) != params.end());
     m_add2ORLM = ((si = params.find("updateORLM")) != params.end());
   };
-  
+
 }

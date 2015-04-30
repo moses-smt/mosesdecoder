@@ -17,40 +17,40 @@
 namespace Moses
 {
   using namespace std;
-  template<typename VAL, 
+  template<typename VAL,
 	   typename COMP = greater<VAL>,
 	   typename IDX_T=size_t>
   class
-  VectorIndexSorter 
+  VectorIndexSorter
     : public binary_function<IDX_T const&, IDX_T const&, bool>
   {
     vector<VAL> const&    m_vecref;
     boost::shared_ptr<COMP> m_comp;
   public:
-    
+
     COMP const& Compare;
     VectorIndexSorter(vector<VAL> const& v, COMP const& comp)
       : m_vecref(v), Compare(comp) {
     }
-    
+
     VectorIndexSorter(vector<VAL> const& v)
       : m_vecref(v), m_comp(new COMP()), Compare(*m_comp) {
     }
-    
+
     bool operator()(IDX_T const & a, IDX_T const & b) const {
       bool fwd = Compare(m_vecref.at(a) ,m_vecref.at(b));
       bool bwd = Compare(m_vecref[b],    m_vecref[a]);
       return (fwd == bwd ? a < b : fwd);
     }
-    
+
     boost::shared_ptr<vector<IDX_T> >
     GetOrder() const;
-    
+
     void
     GetOrder(vector<IDX_T> & order) const;
-    
+
   };
-  
+
   template<typename VAL, typename COMP, typename IDX_T>
   boost::shared_ptr<vector<IDX_T> >
   VectorIndexSorter<VAL,COMP,IDX_T>::
@@ -60,7 +60,7 @@ namespace Moses
     get_order(*ret);
     return ret;
   }
-  
+
   template<typename VAL, typename COMP, typename IDX_T>
   void
   VectorIndexSorter<VAL,COMP,IDX_T>::
@@ -70,6 +70,6 @@ namespace Moses
     for (IDX_T i = 0; i < IDX_T(m_vecref.size()); ++i) order[i] = i;
     sort(order.begin(), order.end(), *this);
   }
-  
+
 }
 #endif

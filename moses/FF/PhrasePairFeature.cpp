@@ -134,9 +134,9 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
     scoreBreakdown.SparsePlusEquals(namestr.str(),1);
   }
   if (m_domainTrigger) {
-    const Sentence& input = static_cast<const Sentence&>(input);
-    const bool use_topicid = input.GetUseTopicId();
-    const bool use_topicid_prob = input.GetUseTopicIdAndProb();
+    const Sentence& isnt = static_cast<const Sentence&>(input);
+    const bool use_topicid = isnt.GetUseTopicId();
+    const bool use_topicid_prob = isnt.GetUseTopicIdAndProb();
 
     // compute pair
     ostringstream pair;
@@ -157,7 +157,7 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
     if (use_topicid || use_topicid_prob) {
       if(use_topicid) {
         // use topicid as trigger
-        const long topicid = input.GetTopicId();
+        const long topicid = isnt.GetTopicId();
         stringstream feature;
         feature << "pp_";
         if (topicid == -1)
@@ -170,7 +170,7 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
         scoreBreakdown.SparsePlusEquals(feature.str(), 1);
       } else {
         // use topic probabilities
-        const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
+        const vector<string> &topicid_prob = *(isnt.GetTopicIdAndProb());
         if (atol(topicid_prob[0].c_str()) == -1) {
           stringstream feature;
           feature << "pp_unk_";
@@ -189,7 +189,7 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
       }
     } else {
       // range over domain trigger words
-      const long docid = input.GetDocumentId();
+      const long docid = isnt.GetDocumentId();
       for (set<string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
         string sourceTrigger = *p;
         ostringstream namestr;
@@ -202,11 +202,11 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
     }
   }
   if (m_sourceContext) {
-    const Sentence& input = static_cast<const Sentence&>(input);
+    const Sentence& isnt = static_cast<const Sentence&>(input);
 
     // range over source words to get context
-    for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
-      StringPiece sourceTrigger = input.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
+    for(size_t contextIndex = 0; contextIndex < isnt.GetSize(); contextIndex++ ) {
+      StringPiece sourceTrigger = isnt.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
       if (m_ignorePunctuation) {
         // check if trigger is punctuation
         char firstChar = sourceTrigger[0];

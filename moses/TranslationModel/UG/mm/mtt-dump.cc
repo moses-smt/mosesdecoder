@@ -25,7 +25,7 @@ bool sform;
 bool have_mtt, have_mct;
 bool with_sids;
 bool with_positions;
-void 
+void
 interpret_args(int ac, char* av[])
 {
   po::variables_map vm;
@@ -36,7 +36,7 @@ interpret_args(int ac, char* av[])
     ("sform,s", po::bool_switch(&sform), "sform only")
     ("with-positions,p", po::bool_switch(&with_positions), "show word positions")
     ;
-  
+
   po::options_description h("Hidden Options");
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
@@ -45,7 +45,7 @@ interpret_args(int ac, char* av[])
   po::positional_options_description a;
   a.add("bname",1);
   a.add("range",-1);
-  
+
   po::store(po::command_line_parser(ac,av)
             .options(h.add(o))
             .positional(a)
@@ -63,11 +63,11 @@ interpret_args(int ac, char* av[])
   mct = bname+".mct";
 }
 
-void 
+void
 printRangeMTT(size_t start, size_t stop)
 {
   for (;start < stop; start++)
-    { 
+    {
       size_t i = 0;
       Token const* s = MTT.sntStart(start);
       Token const* e = MTT.sntEnd(start);
@@ -92,7 +92,7 @@ printRangeMTT(size_t start, size_t stop)
               cout << i+t->parent << " ";
               cout << DT[t->dtype] << endl;
             }
-          else 
+          else
 	    {
 	      if (with_positions) cout << t-s << ":";
 	      cout << SF[t->id()] << " ";
@@ -102,16 +102,16 @@ printRangeMTT(size_t start, size_t stop)
     }
 }
 
-void 
+void
 printRangeMCT(size_t start, size_t stop)
 {
   for (;start < stop; start++)
-    { 
+    {
       SimpleWordId const* s = MCT.sntStart(start);
       SimpleWordId const* t = s;
       SimpleWordId const* e = MCT.sntEnd(start);
       if (with_sids) cout << start << " ";
-      while (t < e) 
+      while (t < e)
 	{
 	  if (with_positions) cout << t-s << ":";
 	  cout << SF[(t++)->id()] << " ";
@@ -120,7 +120,7 @@ printRangeMCT(size_t start, size_t stop)
     }
 }
 
-int 
+int
 main(int argc, char*argv[])
 {
   interpret_args(argc,argv);
@@ -139,14 +139,14 @@ main(int argc, char*argv[])
       DT.open(bname+".tdx.drl"); DT.iniReverseIndex();
       MTT.open(mtt);
     }
-  else 
+  else
     {
       sform = true;
       SF.open(bname+".tdx"); SF.iniReverseIndex();
       MCT.open(mct);
     }
-  
-  if (!range.size()) 
+
+  if (!range.size())
     have_mtt ? printRangeMTT(0, MTT.size()) : printRangeMCT(0, MCT.size());
   else
     {
@@ -157,9 +157,9 @@ main(int argc, char*argv[])
           buf>>first;
           if (buf.peek() == '-') buf>>c>>last;
           else                   last = first;
-	  if (have_mtt && last < MTT.size()) 
+	  if (have_mtt && last < MTT.size())
 	    printRangeMTT(first,last+1);
-	  else if (last < MCT.size())       
+	  else if (last < MCT.size())
 	    printRangeMCT(first,last+1);
 	}
     }

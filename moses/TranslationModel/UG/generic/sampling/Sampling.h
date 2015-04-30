@@ -2,19 +2,16 @@
 #define __sampling_h
 #include <boost/dynamic_bitset.hpp>
 #include <vector>
+
+#include "util/random.hh"
+
 // Utility functions for proper sub-sampling.
 // (c) 2007-2012 Ulrich Germann
 
 
 namespace Moses
 {
-  using namespace std;
-inline
-size_t
-randInt(size_t N)
-{
-  return N*(rand()/(RAND_MAX+1.));
-}
+using namespace std;
 
 // select a random sample of size /s/ without restitution from the range of
 // integers [0,N);
@@ -35,15 +32,15 @@ randomSample(vector<idx_t>& v, size_t s, size_t N)
   if (s*10<N) {
     boost::dynamic_bitset<uint64_t> check(N,0);
     for (size_t i = 0; i < v.size(); i++) {
-      size_t x = randInt(N);
-      while (check[x]) x = randInt(N);
+      size_t x = util::rand_excl(N);
+      while (check[x]) x = util::rand_excl(N);
       check[x]=true;
       v[i] = x;
     }
   } else {
     size_t m=0;
     for (size_t t = 0; m <= s && t < N; t++)
-      if (s==N || randInt(N-t) < s-m) v[m++] = t;
+      if (s==N || util::rand_excl(N-t) < s-m) v[m++] = t;
   }
 }
 

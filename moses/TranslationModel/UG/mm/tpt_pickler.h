@@ -17,30 +17,30 @@ namespace ugdiss
   /// @return the size of file fname.
   ::uint64_t getFileSize(const std::string& fname);
 
-  /** 
-   * The following functions write and read data in a compact binary 
+  /**
+   * The following functions write and read data in a compact binary
    * representation. Write and read errors can be checked directly
    * on the ostream object after the function call, so no return value is
    * necessary.*/
-  void binwrite(std::ostream& out, char               data); 
-  void binwrite(std::ostream& out, unsigned char      data); 
+  void binwrite(std::ostream& out, char               data);
+  void binwrite(std::ostream& out, unsigned char      data);
   void binwrite(std::ostream& out, unsigned short     data);
   void binwrite(std::ostream& out, unsigned int       data);
   void binwrite(std::ostream& out, unsigned long      data);
   void binwrite(std::ostream& out, size_t             data);
   void binwrite(std::ostream& out, unsigned long long data);
   void binwrite(std::ostream& out, std::string const& data);
-  void binwrite(std::ostream& out, float              data); 
+  void binwrite(std::ostream& out, float              data);
 
-  void binread(std::istream& in, char               &data); 
-  void binread(std::istream& in, unsigned char      &data); 
+  void binread(std::istream& in, char               &data);
+  void binread(std::istream& in, unsigned char      &data);
   void binread(std::istream& in, unsigned short     &data);
   void binread(std::istream& in, unsigned int       &data);
   void binread(std::istream& in, unsigned long      &data);
   void binread(std::istream& in, size_t             &data);
   void binread(std::istream& in, unsigned long long &data);
   void binread(std::istream& in, std::string        &data);
-  void binread(std::istream& in, float              &data); 
+  void binread(std::istream& in, float              &data);
 
   char const *binread(char const* p, uint16_t& buf);
   char const *binread(char const* p, uint32_t& buf);
@@ -68,11 +68,11 @@ namespace ugdiss
 
   /*
   template<typename WHATEVER>
-  char const* 
+  char const*
   binread(char const* p, WHATEVER* buf);
 
   template<typename numtype>
-  char const* 
+  char const*
   binread(char const* p, numtype& buf);
   */
 
@@ -113,7 +113,7 @@ namespace ugdiss
       p = binread(p,v[i]);
     return p;
   }
-  
+
   template<typename T>
   T read(std::istream& in)
   {
@@ -132,7 +132,7 @@ namespace ugdiss
 
 
   template<typename T>
-  void 
+  void
   binwrite(std::ostream& out, std::vector<T> const& data)
   {
     binwrite(out,data.size());
@@ -141,7 +141,7 @@ namespace ugdiss
   }
 
   template<typename T>
-  void 
+  void
   binread(std::istream& in, std::vector<T>& data)
   {
     size_t s;
@@ -157,8 +157,8 @@ namespace ugdiss
   {
     size_t s; K k; V v;
     binread(in,s);
-    data.clear(); 
-    // I have no idea why this is necessary, but it is, even when 
+    data.clear();
+    // I have no idea why this is necessary, but it is, even when
     // /data/ is supposed to be empty
     for (size_t i = 0; i < s; i++)
       {
@@ -174,7 +174,7 @@ namespace ugdiss
   binwrite(std::ostream& out, std::map<K,V> const& data)
   {
     binwrite(out,data.size());
-    for (typename std::map<K,V>::const_iterator m = data.begin(); 
+    for (typename std::map<K,V>::const_iterator m = data.begin();
 	 m != data.end(); m++)
       {
 	binwrite(out,m->first);
@@ -200,7 +200,7 @@ namespace ugdiss
 
 
   template<typename WHATEVER>
-  char const* 
+  char const*
   binread(char const* p, WHATEVER* buf)
   {
 #ifdef VERIFY_TIGHT_PACKING
@@ -209,6 +209,6 @@ namespace ugdiss
     return binread(p,*buf);
   }
 
-  
+
 } // end namespace ugdiss
 #endif

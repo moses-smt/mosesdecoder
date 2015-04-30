@@ -9,6 +9,7 @@
 #include <iostream>
 #include "util/exception.hh"
 #include "moses/Util.h"
+#include "util/random.hh"
 //#include <cassert>
 
 // #include "ug_bv_iter.h"
@@ -22,24 +23,24 @@ namespace ugdiss
   template<typename T>
   void display(T const* x, string label)
   {
-    cout << label << ":"; 
-    for (;x;x=next(x)) cout << " " << x->lemma; 
-    cout << endl; 
+    cout << label << ":";
+    for (;x;x=next(x)) cout << " " << x->lemma;
+    cout << endl;
   }
 #endif
 
   template<typename T> class TSA;
 
   // CLASS DEFINITION
-  // The TSA_tree_iterator allows traversal of a Token Sequence Array 
+  // The TSA_tree_iterator allows traversal of a Token Sequence Array
   // as if it was a trie.
   //
   // down(): go to first child
-  // over(): go to next sibling 
+  // over(): go to next sibling
   // up():   go to parent
   // extend(id): go to a specific child node
   // all four functions return true if successful, false otherwise
-  // lower_bound() and upper_bound() give the range of entries in the 
+  // lower_bound() and upper_bound() give the range of entries in the
   // array covered by the "virtual trie node".
   template<typename TKN>
   class
@@ -48,7 +49,7 @@ namespace ugdiss
   protected:
     vector<char const*> lower;
     vector<char const*> upper;
-    
+
     // for debugging ...
     void showBounds(ostream& out) const;
   public:
@@ -56,7 +57,7 @@ namespace ugdiss
 
     virtual ~TSA_tree_iterator() {};
 
-    TSA<Token> const* root; 
+    TSA<Token> const* root;
     // TO BE DONE: make the pointer private and add a const function
     // to return the pointer
 
@@ -65,17 +66,17 @@ namespace ugdiss
     TSA_tree_iterator(TSA<Token> const* s, TSA_tree_iterator<Token> const& other);
     TSA_tree_iterator(TSA<Token> const* r, id_type const* s, size_t const len);
     // TSA_tree_iterator(TSA<Token> const* s, Token const& t);
-    TSA_tree_iterator(TSA<Token> const* s, 
-		      Token const* kstart, 
-		      size_t const len, 
+    TSA_tree_iterator(TSA<Token> const* s,
+		      Token const* kstart,
+		      size_t const len,
 		      bool full_match_only=true);
-    TSA_tree_iterator(TSA<Token> const* s, 
-		      Token const* kstart, 
-		      Token const* kend, 
+    TSA_tree_iterator(TSA<Token> const* s,
+		      Token const* kstart,
+		      Token const* kend,
 		      bool full_match_only=true);
-    // TSA_tree_iterator(TSA<Token> const* s, 
-    // 		      TokenIndex const& V, 
-    // 		      string const& key);
+    TSA_tree_iterator(TSA<Token> const* s,
+    		      TokenIndex const& V,
+     		      string const& key);
 
     char const* lower_bound(int p) const;
     char const* upper_bound(int p) const;
@@ -103,49 +104,49 @@ namespace ugdiss
     bool match(id_type sid) const;
 
     // fillBitSet: deprecated; use markSentences() instead
-    count_type 
+    count_type
     fillBitSet(boost::dynamic_bitset<typename ::uint64_t>& bitset) const;
-    
-    count_type 
+
+    count_type
     markEndOfSequence(Token const*  start, Token const*  stop,
 		      boost::dynamic_bitset<typename ::uint64_t>& dest) const;
-    count_type 
+    count_type
     markSequence(Token const* start, Token const* stop, bitvector& dest) const;
-    
-    count_type 
+
+    count_type
     markSentences(boost::dynamic_bitset<typename ::uint64_t>& bitset) const;
-    
-    count_type 
+
+    count_type
     markOccurrences(boost::dynamic_bitset<typename ::uint64_t>& bitset,
 		    bool markOnlyStartPosition=false) const;
-    
-    count_type 
+
+    count_type
     markOccurrences(vector<ushort>& dest) const;
-    
-    ::uint64_t 
+
+    ::uint64_t
     getSequenceId() const;
-    
-    // equivalent but more efficient than 
+
+    // equivalent but more efficient than
     // bitvector tmp; markSentences(tmp); foo &= tmp;
     bitvector& filterSentences(bitvector& foo) const;
-    
+
     /// a special auxiliary function for finding trees
-    void 
-    tfAndRoot(bitvector const& ref, // reference root positions 
+    void
+    tfAndRoot(bitvector const& ref, // reference root positions
               bitvector const& snt, // relevant sentences
               bitvector& dest) const;
-    
+
     size_t arrayByteSpanSize(int p = -1) const
-    { 
+    {
       if (lower.size()==0) return 0; // or endArray-startArray???
       if (p < 0) p = lower.size()+p;
       assert(p >=0 && p < int(lower.size()));
       return lower.size() ? upper[p]-lower[p] : 0;
     }
-    
+
     struct SortByApproximateCount
     {
-      bool operator()(TSA_tree_iterator const& a, 
+      bool operator()(TSA_tree_iterator const& a,
                       TSA_tree_iterator const& b) const
       {
         if (a.size()==0) return b.size() ? true : false;
@@ -174,7 +175,7 @@ namespace ugdiss
 
     size_t grow(Token const* snt, bitvector const& cov)
     {
-      size_t x = cov.find_first(); 
+      size_t x = cov.find_first();
       while (x < cov.size() && extend(snt[x]))
 	x = cov.find_next(x);
       return this->size();
@@ -182,7 +183,7 @@ namespace ugdiss
 
     sptr<vector<typename ttrack::Position> >
     randomSample(int level, size_t N) const;
-    
+
   };
 
   //---------------------------------------------------------------------------
@@ -204,7 +205,7 @@ namespace ugdiss
         assert(root->corpus->getToken(A));
         assert(lo < root->getUpperBound(root->corpus->getToken(A)->id()));
         lower.push_back(lo);
-        Token const* foo = this->getToken(0); 
+        Token const* foo = this->getToken(0);
         upper.push_back(root->upper_bound(foo,lower.size()));
         return lower.size();
       }
@@ -216,7 +217,7 @@ namespace ugdiss
         Token const* z = next(a);
         for (size_t i = 1; i < size(); ++i) z = next(z);
         if (z < root->corpus->sntStart(A.sid) || z >= root->corpus->sntEnd(A.sid))
-          { 
+          {
             char const* up = upper.back();
             lo = root->find_longer(lo,up,a,lower.size(),0);
             if (!lo) return false;
@@ -243,7 +244,7 @@ namespace ugdiss
   TSA_tree_iterator<Token>::
   over()
   {
-    if (lower.size() == 0) 
+    if (lower.size() == 0)
       return false;
     if (lower.size() == 1)
       {
@@ -253,7 +254,7 @@ namespace ugdiss
         if (upper[0] < hi)
           {
             lower[0] = upper[0];
-            Token const* foo = this->getToken(0); 
+            Token const* foo = this->getToken(0);
             upper.back() = root->upper_bound(foo,lower.size());
           }
         else
@@ -263,11 +264,11 @@ namespace ugdiss
                 char const* lo = root->getLowerBound(wid);
                 if (lo == root->endArray) return false;
                 char const* hi = root->getUpperBound(wid);
-                if (!hi) return false; 
+                if (!hi) return false;
                 if (lo == hi) continue;
                 assert(lo);
                 lower[0] = lo;
-                Token const* foo = this->getToken(0); 
+                Token const* foo = this->getToken(0);
                 upper.back() = root->upper_bound(foo,lower.size());
                 break;
               }
@@ -292,7 +293,7 @@ namespace ugdiss
 
         // display(root->corpus->getToken(U),"L2");
 
-        Token const* foo = this->getToken(0); 
+        Token const* foo = this->getToken(0);
         // display(foo,"F!");
         upper.back() = root->upper_bound(foo,lower.size());
         return true;
@@ -325,17 +326,17 @@ namespace ugdiss
   template<typename Token>
   TSA_tree_iterator<Token>::
   TSA_tree_iterator(TSA<Token> const* s)
-    : root(s) 
+    : root(s)
   {};
 
   template<typename Token>
   TSA_tree_iterator<Token>::
   TSA_tree_iterator(TSA<Token> const* s, TSA_tree_iterator<Token> const& other)
-    : root(s) 
+    : root(s)
   {
     Token const* x = other.getToken(0);
     for (size_t i = 0; i < other.size() && this->extend(x->id()); ++i)
-      x = x->next(); 
+      x = x->next();
   };
 
 
@@ -344,28 +345,28 @@ namespace ugdiss
   TSA_tree_iterator<Token>::
   TSA_tree_iterator
   (TSA<Token> const* r,
-   id_type    const* s, 
+   id_type    const* s,
    size_t     const  len)
-    : root(r) 
+    : root(r)
   {
     for (id_type const* e = s + len; s < e && extend(*s); ++s);
   };
 
   // ---------------------------------------------------------------------------
 
-#if 0
+#if 1
   template<typename Token>
   TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA<Token> const* s, 
-		    TokenIndex const& V, 
+  TSA_tree_iterator(TSA<Token> const* s,
+		    TokenIndex const& V,
 		    string const& key)
     : root(s)
   {
     istringstream buf(key); string w;
     while (buf >> w)
       {
-	if (this->extend(V[w])) 
-	  continue; 
+	if (this->extend(V[w]))
+	  continue;
 	else
 	  {
 	    lower.clear();
@@ -374,7 +375,9 @@ namespace ugdiss
 	  }
       }
   };
-  
+#endif
+
+#if 0
   // ---------------------------------------------------------------------------
 
   template<typename Token>
@@ -391,7 +394,7 @@ namespace ugdiss
   template<typename Token>
   TSA_tree_iterator<Token>::
   TSA_tree_iterator(TSA<Token> const* s, Token const& t)
-    : root(s) 
+    : root(s)
   {
     if (!root) return;
     char const* up = root->getUpperBound(t.id());
@@ -406,33 +409,33 @@ namespace ugdiss
 
   template<typename Token>
   TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, 
+  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart,
 		    size_t const len, bool full_match_only)
-    : root(s) 
+    : root(s)
   {
     if (!root) return;
     size_t i = 0;
     for (; i < len && kstart && extend(*kstart); ++i)
       kstart = kstart->next();
-    if (full_match_only && i != len) 
+    if (full_match_only && i != len)
       {
         lower.clear();
         upper.clear();
       }
   };
 
-  // DEPRECATED: DO NOT USE. Use the one that takes the length 
+  // DEPRECATED: DO NOT USE. Use the one that takes the length
   // instead of kend.
   template<typename Token>
   TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, 
+  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart,
 		    Token const* kend, bool full_match_only)
-    : root(s) 
+    : root(s)
   {
-    for (;kstart != kend; kstart = kstart->next()) 
-      if (!extend(*kstart)) 
+    for (;kstart != kend; kstart = kstart->next())
+      if (!extend(*kstart))
         break;
-    if (full_match_only && kstart != kend) 
+    if (full_match_only && kstart != kend)
       {
         lower.clear();
         upper.clear();
@@ -442,7 +445,7 @@ namespace ugdiss
   // ---------------------------------------------------------------------------
   // EXTEND
   // ---------------------------------------------------------------------------
-  
+
   template<typename Token>
   bool
   TSA_tree_iterator<Token>::
@@ -493,9 +496,9 @@ namespace ugdiss
   template<typename Token>
   size_t
   TSA_tree_iterator<Token>::
-  size() const 
-  { 
-    return lower.size(); 
+  size() const
+  {
+    return lower.size();
   }
 
   // ---------------------------------------------------------------------------
@@ -503,8 +506,8 @@ namespace ugdiss
   template<typename Token>
   id_type
   TSA_tree_iterator<Token>::
-  getSid() const 
-  { 
+  getSid() const
+  {
     char const* p = (lower.size() ? lower.back() : root->startArray);
     char const* q = (upper.size() ? upper.back() : root->endArray);
     id_type sid;
@@ -517,8 +520,8 @@ namespace ugdiss
   template<typename Token>
   ::uint64_t
   TSA_tree_iterator<Token>::
-  getPid(int p) const 
-  { 
+  getPid(int p) const
+  {
     if (this->size() == 0) return 0;
     if (p < 0) p += upper.size();
     char const* lb = lower_bound(p);
@@ -528,7 +531,7 @@ namespace ugdiss
     ::uint64_t ret = (sid<<32) + (off<<16) + ::uint64_t(p+1);
     return ret;
   }
-  
+
   // ---------------------------------------------------------------------------
 
   template<typename Token>
@@ -611,7 +614,7 @@ namespace ugdiss
   //---------------------------------------------------------------------------
 
   template<typename Token>
-  count_type 
+  count_type
   TSA_tree_iterator<Token>::
   fillBitSet(boost::dynamic_bitset<typename ::uint64_t>& bitset) const
   {
@@ -621,7 +624,7 @@ namespace ugdiss
   //---------------------------------------------------------------------------
 
   template<typename Token>
-  count_type 
+  count_type
   TSA_tree_iterator<Token>::
   markSentences(boost::dynamic_bitset<typename ::uint64_t>& bitset) const
   {
@@ -648,7 +651,7 @@ namespace ugdiss
   //---------------------------------------------------------------------------
 
   template<typename Token>
-  count_type 
+  count_type
   TSA_tree_iterator<Token>::
   markOccurrences(boost::dynamic_bitset<typename ::uint64_t>& bitset, bool markOnlyStartPosition) const
   {
@@ -664,7 +667,7 @@ namespace ugdiss
   //---------------------------------------------------------------------------
 
   template<typename Token>
-  count_type 
+  count_type
   TSA_tree_iterator<Token>::
   markOccurrences(vector<ushort>& dest) const
   {
@@ -691,10 +694,10 @@ namespace ugdiss
   }
   //---------------------------------------------------------------------------
 
-  // mark all endpoints of instances of the path represented by this 
+  // mark all endpoints of instances of the path represented by this
   // iterator in the sentence [start,stop)
   template<typename Token>
-  count_type 
+  count_type
   TSA_tree_iterator<Token>::
   markEndOfSequence(Token const*  start, Token const*  stop,
                     boost::dynamic_bitset<typename ::uint64_t>& dest) const
@@ -723,10 +726,10 @@ namespace ugdiss
   }
   //---------------------------------------------------------------------------
 
-  // mark all occurrences of the sequence represented by this 
+  // mark all occurrences of the sequence represented by this
   // iterator in the sentence [start,stop)
   template<typename Token>
-  count_type 
+  count_type
   TSA_tree_iterator<Token>::
   markSequence(Token const*  start,
                Token const*  stop,
@@ -781,7 +784,7 @@ namespace ugdiss
       {
         assert(x);
         buf << (i > start ? " " : "");
-        if (V) buf << (*V)[x->id()]; 
+        if (V) buf << (*V)[x->id()];
         else   buf << x->id();
       }
     return buf.str();
@@ -804,13 +807,13 @@ namespace ugdiss
       {
         assert(x);
         buf << (i > start ? " " : "");
-        buf << V[x->id()].str; 
+        buf << V[x->id()].str;
       }
     return buf.str();
   }
 #endif
 
-  /// @return true if the sentence [start,stop) contains the sequence 
+  /// @return true if the sentence [start,stop) contains the sequence
   template<typename Token>
   bool
   TSA_tree_iterator<Token>::
@@ -820,7 +823,7 @@ namespace ugdiss
     for (Token const* t = start; t < stop; ++t)
       {
         if (*t != *a) continue;
-        Token const* b = a; 
+        Token const* b = a;
         Token const* y = t;
         size_t i;
         for (i = 1; i < lower.size(); ++i)
@@ -835,7 +838,7 @@ namespace ugdiss
     return false;
   }
 
-  /// @return true if the sentence /sid/ contains the sequence 
+  /// @return true if the sentence /sid/ contains the sequence
   template<typename Token>
   bool
   TSA_tree_iterator<Token>::
@@ -848,9 +851,9 @@ namespace ugdiss
   // @param sntcheck: number of roots in the respective sentence
   // @param dest:     bitvector to keep track of the exact root location
   template<typename Token>
-  void 
+  void
   TSA_tree_iterator<Token>::
-  tfAndRoot(bitvector const& ref, // reference root positions 
+  tfAndRoot(bitvector const& ref, // reference root positions
             bitvector const& snt, // relevant sentences
             bitvector& dest) const
   {
@@ -877,12 +880,12 @@ namespace ugdiss
   filterSentences(bitvector& bv) const
   {
     float  aveSntLen    = root->corpus->numTokens()/root->corpus->size();
-    size_t ANDcost      = bv.size()/8; // cost of dest&=ref; 
+    size_t ANDcost      = bv.size()/8; // cost of dest&=ref;
     float  aveEntrySize = ((root->endArray-root->startArray)
                            /root->corpus->numTokens());
     if (arrayByteSpanSize()+ANDcost < aveEntrySize*aveSntLen*bv.count())
       {
-        bitvector tmp(bv.size()); 
+        bitvector tmp(bv.size());
         markSentences(tmp);
         bv &= tmp;
       }
@@ -894,13 +897,6 @@ namespace ugdiss
     return bv;
   }
 
-  inline
-  size_t 
-  randInt(size_t N)
-  {
-    return size_t(N*(rand()/(RAND_MAX+1.)));
-  }
-
   /// randomly select up to N occurrences of the sequence
   template<typename Token>
   sptr<vector<typename ttrack::Position> >
@@ -910,9 +906,9 @@ namespace ugdiss
     if (level < 0) level += lower.size();
     assert(level >=0);
 
-    sptr<vector<typename ttrack::Position> > 
+    sptr<vector<typename ttrack::Position> >
       ret(new vector<typename ttrack::Position>(N));
-    
+
     size_t m=0; // number of samples selected so far
     typename Token::ArrayEntry I(lower.at(level));
 
@@ -920,10 +916,10 @@ namespace ugdiss
     while (m < N && (I.next) < stop)
       {
         root->readEntry(I.next,I);
-        
+
         // t: expected number of remaining samples
-        double t = (stop - I.pos)/root->aveIndexEntrySize();
-        double r = t*rand()/(RAND_MAX+1.);
+        const double t = (stop - I.pos)/root->aveIndexEntrySize();
+        const double r = util::rand_excl(t);
         if (r < N-m)
           {
             ret->at(m).offset = I.offset;
@@ -934,6 +930,6 @@ namespace ugdiss
 
     return ret;
   }
-  
+
 } // end of namespace ugdiss
 #endif

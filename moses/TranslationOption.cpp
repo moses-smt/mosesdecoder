@@ -66,7 +66,7 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
   return bitmap.Overlap(GetSourceWordsRange());
 }
 
-void 
+void
 TranslationOption::
 CacheLexReorderingScores(const LexicalReordering &producer, const Scores &score)
 {
@@ -112,7 +112,7 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
   /** returns cached scores */
 const Scores*
 TranslationOption::
-GetLexReorderingScores(LexicalReordering const* scoreProducer) const 
+GetLexReorderingScores(LexicalReordering const* scoreProducer) const
 {
   return m_targetPhrase.GetExtraScores(scoreProducer);
   // _ScoreCacheMap::const_iterator it;
