@@ -26,11 +26,18 @@ def parse_cmd():
     arguments = parser.parse_args()
     return arguments
 
-def repoinit(testconfig):
-    """Determines revision and sets up the repo."""
+def repoinit(testconfig, profiler=True):
+    """Determines revision and sets up the repo. If given the profiler optional
+    argument, wil init the profiler repo instead of the default one."""
     revision = ''
     #Update the repo
-    os.chdir(testconfig.repo)
+    if profiler:
+        if testconfig.repo_prof is not None:
+            os.chdir(testconfig.repo_prof)
+        else:
+            raise ValueError('Profiling repo is not defined')
+    else:
+        os.chdir(testconfig.repo)
     #Checkout specific branch, else maintain main branch
     if testconfig.branch != 'master':
         subprocess.call(['git', 'checkout', testconfig.branch])
@@ -49,13 +56,14 @@ def repoinit(testconfig):
         rev, _ = subprocess.Popen(['git rev-parse HEAD'], stdout=subprocess.PIPE,\
             stderr=subprocess.PIPE, shell=True).communicate()
         revision = str(rev).replace("\\n'", '').replace("b'", '')
-    
+
     return revision
 
 class Configuration:
     """A simple class to hold all of the configuration constatns"""
-    def __init__(self, repo, drop_caches, tests, testlogs, basebranch, baserev):
+    def __init__(self, repo, drop_caches, tests, testlogs, basebranch, baserev, repo_prof=None):
         self.repo = repo
+        self.repo_prof = repo_prof
         self.drop_caches = drop_caches
         self.tests = tests
         self.testlogs = testlogs
@@ -80,15 +88,16 @@ class Configuration:
 
 class Test:
     """A simple class to contain all information about tests"""
-    def __init__(self, name, command, ldopts, permutations):
+    def __init__(self, name, command, ldopts, permutations, prof_command=None):
         self.name = name
         self.command = command
+        self.prof_command = prof_command
         self.ldopts = ldopts.replace(' ', '').split(',') #Not tested yet
         self.permutations = permutations
 
-def parse_configfile(conffile, testdir, moses_repo):
+def parse_configfile(conffile, testdir, moses_repo, moses_prof_repo=None):
     """Parses the config file"""
-    command, ldopts = '', ''
+    command, ldopts, prof_command = '', '', None
     permutations = []
     fileopen = open(conffile, 'r')
     for line in fileopen:
@@ -99,6 +108,8 @@ def parse_configfile(conffile, testdir, moses_repo):
 
         if opt == 'Command:':
             command = args.replace('\n', '')
+            if moses_prof is not None:  # Get optional command for profiling
+                prof_command = moses_prof_repo + '/bin/' + command
             command = moses_repo + '/bin/' + command
         elif opt == 'LDPRE:':
             ldopts = args.replace('\n', '')
@@ -107,14 +118,14 @@ def parse_configfile(conffile, testdir, moses_repo):
         else:
             raise ValueError('Unrecognized option ' + opt)
     #We use the testdir as the name.
-    testcase = Test(testdir, command, ldopts, permutations)
+    testcase = Test(testdir, command, ldopts, permutations, prof_command)
     fileopen.close()
     return testcase
 
 def parse_testconfig(conffile):
     """Parses the config file for the whole testsuite."""
     repo_path, drop_caches, tests_dir, testlog_dir = '', '', '', ''
-    basebranch, baserev = '', ''
+    basebranch, baserev, repo_prof_path = '', '', None
     fileopen = open(conffile, 'r')
     for line in fileopen:
         line = line.split('#')[0] # Discard comments
@@ -133,10 +144,12 @@ def parse_testconfig(conffile):
             basebranch = args.replace('\n', '')
         elif opt == 'BASEREV:':
             baserev = args.replace('\n', '')
+        elif opt == 'MOSES_PROFILER_PATH:':  # Optional
+            repo_prof_path = args.replace('\n', '')
         else:
             raise ValueError('Unrecognized option ' + opt)
     config = Configuration(repo_path, drop_caches, tests_dir, testlog_dir,\
-    basebranch, baserev)
+    basebranch, baserev, repo_prof_path)
     fileopen.close()
     return config
 
@@ -146,6 +159,8 @@ def get_config():
     config = parse_testconfig(args.configfile)
     config.additional_args(args.singletestdir, args.revision, args.branch)
     revision = repoinit(config)
+    if config.repo_prof is not None:
+        repoinit(config, True)
     config.set_revision(revision)
     return config
 
@@ -221,6 +236,10 @@ def execute_tests(testcase, cur_directory, config):
                 stderr=None, shell=True).communicate()
                 write_log('/tmp/time_moses_tests', testcase.name + '_ldpre_' +opt +'_cached', config)
 
+    #if 'profile' in testcase.permutations:
+        #TODO Separate the above into functions so we can execute them with profiling moses.
+        #Fix the logic in the main
+
 # Go through all the test directories and executes tests
 if __name__ == '__main__':
     CONFIG = get_config()
@@ -260,7 +279,7 @@ if __name__ == '__main__':
         #Create a new configuration for base version tests:
         BASECONFIG = Configuration(CONFIG.repo, CONFIG.drop_caches,\
             CONFIG.tests, CONFIG.testlogs, CONFIG.basebranch,\
-            CONFIG.baserev)
+            CONFIG.baserev, CONFIG.repo_prof)
         BASECONFIG.additional_args(None, CONFIG.baserev, CONFIG.basebranch)
         #Set up the repository and get its revision:
         REVISION = repoinit(BASECONFIG)
@@ -268,6 +287,11 @@ if __name__ == '__main__':
         #Build
         os.chdir(BASECONFIG.repo)
         subprocess.call(['./previous.sh'], shell=True)
+        #If profiler configuration exists also init it
+        if BASECONFIG.repo_prof is not None:
+            repoinit(BASECONFIG, True)
+            os.chdir(BASECONFIG.repo_prof)
+            subprocess.call(['./previous.sh'], shell=True)
 
         #Perform tests
         for directory in FIRSTTIME:
@@ -277,10 +301,15 @@ if __name__ == '__main__':
 
         #Reset back the repository to the normal configuration
         repoinit(CONFIG)
+        if BASECONFIG.repo_prof is not None:
+            repoinit(CONFIG, True)
 
     #Builds moses
     os.chdir(CONFIG.repo)
     subprocess.call(['./previous.sh'], shell=True)
+    if CONFIG.repo_prof is not None:
+        os.chdir(CONFIG.repo_prof)
+        subprocess.call(['./previous.sh'], shell=True)
 
     if CONFIG.singletest:
         TESTCASE = parse_configfile(CONFIG.tests + '/' +\
