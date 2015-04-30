@@ -147,8 +147,8 @@ protected:
   FeatureFactory() {}
 };
 
-template <class F> 
-void 
+template <class F>
+void
 FeatureFactory
 ::DefaultSetup(F *feature)
 {
@@ -156,7 +156,7 @@ FeatureFactory
   const string &featureName = feature->GetScoreProducerDescription();
   std::vector<float> weights = static_data.GetParameter()->GetWeights(featureName);
 
-  
+
   if (feature->GetNumScoreComponents())
     {
       if (weights.size() == 0)
@@ -177,19 +177,19 @@ FeatureFactory
 	}
       UTIL_THROW_IF2(weights.size() != feature->GetNumScoreComponents(),
 		     "FATAL ERROR: Mismatch in number of features and number "
-		     << "of weights for Feature Function " << featureName 
-		     << " (features: " << feature->GetNumScoreComponents() 
+		     << "of weights for Feature Function " << featureName
+		     << " (features: " << feature->GetNumScoreComponents()
 		     << " vs. weights: " << weights.size() << ")");
       static_data.SetWeights(feature, weights);
     }
-  else if (feature->IsTuneable()) 
+  else if (feature->IsTuneable())
     static_data.SetWeights(feature, weights);
 }
 
 namespace
 {
 
-template <class F> 
+template <class F>
 class DefaultFeatureFactory : public FeatureFactory
 {
 public:

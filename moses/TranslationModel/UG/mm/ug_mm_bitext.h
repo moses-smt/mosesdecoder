@@ -3,7 +3,7 @@
 
 namespace Moses
 {
-  namespace bitext 
+  namespace bitext
   {
     template<typename TKN>
     class mmBitext : public Bitext<TKN>
@@ -17,18 +17,18 @@ namespace Moses
     template<typename TKN>
     mmBitext<TKN>::
     mmBitext()
-      : Bitext<TKN>(new mmTtrack<TKN>(), new mmTtrack<TKN>(), new mmTtrack<char>(), 
-		    new TokenIndex(), new TokenIndex(), 
+      : Bitext<TKN>(new mmTtrack<TKN>(), new mmTtrack<TKN>(), new mmTtrack<char>(),
+		    new TokenIndex(), new TokenIndex(),
 		    new mmTSA<TKN>(), new mmTSA<TKN>())
     {};
-    
+
     template<typename TKN>
     void
     mmBitext<TKN>::
     load_document_map(string const& fname)
     {
       ifstream docmap(fname.c_str());
-      // the docmap file should list the documents in the corpus 
+      // the docmap file should list the documents in the corpus
       // in the order in which they appear with one line per document:
       // <docname> <number of lines / sentences>
       //
@@ -38,22 +38,22 @@ namespace Moses
       this->m_sid2docid.reset(new vector<id_type>(this->T1->size()));
       while(getline(docmap,buffer))
 	{
-	  istringstream line(buffer); 
+	  istringstream line(buffer);
 	  if (!(line>>docname)) continue; // empty line
 	  if (docname.size() && docname[0] == '#') continue; // comment
 	  size_t docid = this->m_docname2docid.size();
 	  this->m_docname2docid[docname] = docid;
 	  this->m_docname.push_back(docname);
 	  line >> b;
-	  VERBOSE(1, "DOCUMENT MAP " << docname 
+	  VERBOSE(1, "DOCUMENT MAP " << docname
 		  << " " << a << "-" << b+a << endl);
 	  for (b += a; a < b; ++a)
 	    (*this->m_sid2docid)[a] = docid;
 	}
-      UTIL_THROW_IF2(b != this->T1->size(), 
+      UTIL_THROW_IF2(b != this->T1->size(),
 		     "Document map doesn't match corpus!");
     }
-    
+
     template<typename TKN>
     void
     mmBitext<TKN>::
@@ -77,6 +77,6 @@ namespace Moses
       if (!access(docmapfile.c_str(),F_OK))
 	load_document_map(docmapfile);
     }
-    
+
   }
 }

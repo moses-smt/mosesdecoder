@@ -6,9 +6,9 @@ namespace ugdiss
 {
   id_type const&
   SimpleWordId::
-  id() const 
-  { 
-    return theID; 
+  id() const
+  {
+    return theID;
   }
 
   int

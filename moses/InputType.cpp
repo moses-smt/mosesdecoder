@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-InputType::InputType(long translationId) 
+InputType::InputType(long translationId)
   : m_translationId(translationId)
 {
   m_frontSpanCoveredLength = 0;

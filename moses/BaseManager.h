@@ -17,10 +17,10 @@ class BaseManager
 protected:
   // const InputType &m_source; /**< source sentence to be translated */
   ttaskwptr m_ttask;
-  InputType const& m_source; 
+  InputType const& m_source;
 
-  BaseManager(ttasksptr const& ttask); 
-  
+  BaseManager(ttasksptr const& ttask);
+
   // output
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
   typedef std::set< std::pair<size_t, size_t>  > Alignments;

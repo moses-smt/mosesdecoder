@@ -10,26 +10,26 @@ namespace Moses
     // bounds LFT and RGT and update the actual bounds L and R; update
     // the total count of alignment links in the underlying phrase
     // pair
-    bool 
+    bool
     check(vector<ushort> const& v, // alignment row/column
 	  size_t const LFT, size_t const RGT, // hard limits
 	  ushort& L, ushort& R, size_t& count) // current bounds, count
     {
       if (v.size() == 0) return 0;
-      if (L > v.front() && (L=v.front()) < LFT) return false; 
+      if (L > v.front() && (L=v.front()) < LFT) return false;
       if (R < v.back()  && (R=v.back())  > RGT) return false;
       count += v.size();
       return true;
     }
-    
+
     /// return number of alignment points in box, -1 on failure
-    int 
+    int
     expand_block(vector<vector<ushort> > const& row2col,
 		 vector<vector<ushort> > const& col2row,
 		 size_t       row, size_t       col, // seed coordinates
-		 size_t const TOP, size_t const LFT, // hard limits 
-		 size_t const BOT, size_t const RGT, // hard limits 
-		 ushort* top = NULL, ushort* lft = NULL, 
+		 size_t const TOP, size_t const LFT, // hard limits
+		 size_t const BOT, size_t const RGT, // hard limits
+		 ushort* top = NULL, ushort* lft = NULL,
 		 ushort* bot = NULL, ushort* rgt = NULL) // store results
     {
       if (row < TOP || row > BOT || col < LFT || col > RGT) return -1;
@@ -37,7 +37,7 @@ namespace Moses
       UTIL_THROW_IF2(col >= col2row.size(), "out of bounds");
 
       // ====================================================
-      // tables grow downwards, so TOP is smaller than BOT! 
+      // tables grow downwards, so TOP is smaller than BOT!
       // ====================================================
 
       ushort T, L, B, R; // box dimensions
@@ -45,7 +45,7 @@ namespace Moses
       // if we start on an empty cell, search for the first alignment point
       if (row2col[row].size() == 0 && col2row[col].size() == 0)
 	{
-	  if      (row == TOP) while (row < BOT && !row2col[++row].size()); 
+	  if      (row == TOP) while (row < BOT && !row2col[++row].size());
 	  else if (row == BOT) while (row > TOP && !row2col[--row].size());
 
 	  if      (col == LFT) while (col < RGT && !col2row[++col].size());
@@ -54,7 +54,7 @@ namespace Moses
 	  if (row2col[row].size() == 0 && col2row[col].size() == 0)
 	    return 0;
 	}
-      if (row2col[row].size() == 0) 
+      if (row2col[row].size() == 0)
 	row = col2row[col].front();
       if (col2row[col].size() == 0)
 	col = row2col[row].front();
@@ -65,9 +65,9 @@ namespace Moses
       if ((R = row2col[row].back())  > RGT) return -1;
 
       if (B == T && R == L) return 1;
-      
+
       // start/end of row / column coverage:
-      ushort rs = row, re = row, cs = col, ce = col; 
+      ushort rs = row, re = row, cs = col, ce = col;
       int ret = row2col[row].size();
       for (size_t tmp = 1; tmp; ret += tmp)
 	{
@@ -127,7 +127,7 @@ namespace Moses
       if (expand_block(a1,a2,x,y,T,L,B,R) >= 0)
 	return Moses::LRModel::S;
       while (s2-- && a2[s2].size() == 0);
-      
+
       Moses::LRModel::ReorderingType ret;
       ret = (a2[s2].size()  ==  0 ? po_other :
 	     a2[s2].back()   < s1 ? Moses::LRModel::DR :

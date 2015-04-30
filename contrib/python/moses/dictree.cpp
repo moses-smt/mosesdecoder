@@ -557,7 +557,7 @@ static const char *__pyx_f[] = {
  * ctypedef vector[const_str_pointer] Tokens
  * ctypedef float FValue             # <<<<<<<<<<<<<<
  * ctypedef vector[FValue] Scores
- * 
+ *
  */
 typedef float __pyx_t_5moses_8cdictree_FValue;
 
@@ -582,7 +582,7 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_8_genexpr;
 
 /* "cdictree.pxd":4
  * from libcpp.vector cimport vector
- * 
+ *
  * ctypedef string* str_pointer             # <<<<<<<<<<<<<<
  * ctypedef string* const_str_pointer "const str_pointer"
  * ctypedef vector[const_str_pointer] Tokens
@@ -590,7 +590,7 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_8_genexpr;
 typedef std::string *__pyx_t_5moses_8cdictree_str_pointer;
 
 /* "cdictree.pxd":5
- * 
+ *
  * ctypedef string* str_pointer
  * ctypedef string* const_str_pointer "const str_pointer"             # <<<<<<<<<<<<<<
  * ctypedef vector[const_str_pointer] Tokens
@@ -611,7 +611,7 @@ typedef std::vector<const str_pointer> __pyx_t_5moses_8cdictree_Tokens;
  * ctypedef vector[const_str_pointer] Tokens
  * ctypedef float FValue
  * ctypedef vector[FValue] Scores             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
  */
 typedef std::vector<__pyx_t_5moses_8cdictree_FValue> __pyx_t_5moses_8cdictree_Scores;
@@ -619,7 +619,7 @@ struct __pyx_opt_args_5moses_7dictree_20PhraseDictionaryTree_getTargetProduction
 
 /* "moses/dictree.pyx":252
  *                 and os.path.isfile(stem + ".binphr.tgtvoc")
- * 
+ *
  *     cdef TargetProduction getTargetProduction(self, cdictree.StringTgtCand& cand, wa = None, converter = None):             # <<<<<<<<<<<<<<
  *         """Converts a StringTgtCandidate (c++ object) and possibly a word-alignment info (string) to a TargetProduction (python object)."""
  *         cdef list words = [cand.tokens[i].c_str() for i in xrange(cand.tokens.size())]
@@ -632,7 +632,7 @@ struct __pyx_opt_args_5moses_7dictree_20PhraseDictionaryTree_getTargetProduction
 
 /* "moses/dictree.pyx":23
  *     raise TypeError('Cannot convert %s to string' % type(data))
- * 
+ *
  * cdef class Production(object):             # <<<<<<<<<<<<<<
  *     """
  *     General class that represents a context-free production or a flat contiguous phrase.
@@ -646,7 +646,7 @@ struct __pyx_obj_5moses_7dictree_Production {
 
 /* "moses/dictree.pyx":104
  *             return x >= y
- * 
+ *
  * cdef class Alignment(list):             # <<<<<<<<<<<<<<
  *     """
  *     This represents a list of alignment points (pairs of integers).
@@ -658,7 +658,7 @@ struct __pyx_obj_5moses_7dictree_Alignment {
 
 /* "moses/dictree.pyx":125
  *         return ' '.join('%d-%d' % (s, t) for s, t in self)
- * 
+ *
  * cdef class FValues(list):             # <<<<<<<<<<<<<<
  *     """
  *     This represents a list of feature values (floats).
@@ -670,7 +670,7 @@ struct __pyx_obj_5moses_7dictree_FValues {
 
 /* "moses/dictree.pyx":137
  *         return ' '.join(str(x) for x in self)
- * 
+ *
  * cdef class TargetProduction(Production):             # <<<<<<<<<<<<<<
  *     """This class specializes production making it the target side of a translation rule.
  *     On top of lhs and rhs it comes with alignment information a tuple of real-valued features.
@@ -684,9 +684,9 @@ struct __pyx_obj_5moses_7dictree_TargetProduction {
 
 /* "moses/dictree.pyx":175
  *         return repr((repr(self.rhs), repr(self.lhs), repr(self.scores), repr(self.alignment)))
- * 
+ *
  * cdef class QueryResult(list):             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef readonly Production source
  */
 struct __pyx_obj_5moses_7dictree_QueryResult {
@@ -696,10 +696,10 @@ struct __pyx_obj_5moses_7dictree_QueryResult {
 
 
 /* "moses/dictree.pyx":184
- * 
- * 
+ *
+ *
  * cdef class DictionaryTree(object):             # <<<<<<<<<<<<<<
- * 
+ *
  *     @classmethod
  */
 struct __pyx_obj_5moses_7dictree_DictionaryTree {
@@ -709,7 +709,7 @@ struct __pyx_obj_5moses_7dictree_DictionaryTree {
 
 /* "moses/dictree.pyx":202
  *         raise NotImplementedError
- * 
+ *
  * cdef class PhraseDictionaryTree(DictionaryTree):             # <<<<<<<<<<<<<<
  *     """This class encapsulates a Moses::PhraseDictionaryTree for operations over
  *     binary phrase tables."""
@@ -728,9 +728,9 @@ struct __pyx_obj_5moses_7dictree_PhraseDictionaryTree {
 
 /* "moses/dictree.pyx":290
  *             return results
- * 
+ *
  * cdef class OnDiskWrapper(DictionaryTree):             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef condiskpt.OnDiskWrapper *wrapper
  */
 struct __pyx_obj_5moses_7dictree_OnDiskWrapper {
@@ -745,7 +745,7 @@ struct __pyx_obj_5moses_7dictree_OnDiskWrapper {
 
 /* "moses/dictree.pyx":50
  *             return IndexError, 'Index %s out of range' % str(key)
- * 
+ *
  *     def __iter__(self):             # <<<<<<<<<<<<<<
  *         for x in self.rhs:
  *             yield x
@@ -761,10 +761,10 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct____iter__ {
 
 /* "moses/dictree.pyx":122
  *             ValueError, 'Cannot figure out pairs from: %s' % type(alignment)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return ' '.join('%d-%d' % (s, t) for s, t in self)
- * 
+ *
  */
 struct __pyx_obj_5moses_7dictree___pyx_scope_struct_1___str__ {
   PyObject_HEAD
@@ -773,10 +773,10 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_1___str__ {
 
 
 /* "moses/dictree.pyx":123
- * 
+ *
  *     def __str__(self):
  *         return ' '.join('%d-%d' % (s, t) for s, t in self)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class FValues(list):
  */
 struct __pyx_obj_5moses_7dictree___pyx_scope_struct_2_genexpr {
@@ -792,10 +792,10 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_2_genexpr {
 
 /* "moses/dictree.pyx":134
  *         super(FValues, self).__init__(values)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return ' '.join(str(x) for x in self)
- * 
+ *
  */
 struct __pyx_obj_5moses_7dictree___pyx_scope_struct_3___str__ {
   PyObject_HEAD
@@ -804,10 +804,10 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_3___str__ {
 
 
 /* "moses/dictree.pyx":135
- * 
+ *
  *     def __str__(self):
  *         return ' '.join(str(x) for x in self)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class TargetProduction(Production):
  */
 struct __pyx_obj_5moses_7dictree___pyx_scope_struct_4_genexpr {
@@ -822,7 +822,7 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_4_genexpr {
 
 /* "moses/dictree.pyx":258
  *         return TargetProduction(words, scores, wa)
- * 
+ *
  *     def query(self, line, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -838,7 +838,7 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_5_query {
  *         cdef vector[string]* wa = NULL
  *         cdef Production source = Production(f.c_str() for f in fphrase)             # <<<<<<<<<<<<<<
  *         cdef QueryResult results = QueryResult(source)
- * 
+ *
  */
 struct __pyx_obj_5moses_7dictree___pyx_scope_struct_6_genexpr {
   PyObject_HEAD
@@ -850,7 +850,7 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_6_genexpr {
 
 /* "moses/dictree.pyx":316
  *         return Production(tokens[:-1], tokens[-1])
- * 
+ *
  *     def query(self, line, converter = None, cmp = None, key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -881,7 +881,7 @@ struct __pyx_obj_5moses_7dictree___pyx_scope_struct_8_genexpr {
 
 /* "moses/dictree.pyx":202
  *         raise NotImplementedError
- * 
+ *
  * cdef class PhraseDictionaryTree(DictionaryTree):             # <<<<<<<<<<<<<<
  *     """This class encapsulates a Moses::PhraseDictionaryTree for operations over
  *     binary phrase tables."""
@@ -895,9 +895,9 @@ static struct __pyx_vtabstruct_5moses_7dictree_PhraseDictionaryTree *__pyx_vtabp
 
 /* "moses/dictree.pyx":290
  *             return results
- * 
+ *
  * cdef class OnDiskWrapper(DictionaryTree):             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef condiskpt.OnDiskWrapper *wrapper
  */
 
@@ -1608,7 +1608,7 @@ static PyObject *__pyx_codeobj__13;
 static PyObject *__pyx_codeobj__15;
 
 /* "moses/dictree.pyx":156
- * 
+ *
  *     @staticmethod
  *     def desc(x, y, key = lambda r: r.scores[0]):             # <<<<<<<<<<<<<<
  *         """Returns the sign of key(y) - key(x).
@@ -1662,7 +1662,7 @@ static PyObject *__pyx_lambda_funcdef_5moses_7dictree_lambda1(CYTHON_UNUSED PyOb
 
 /* "moses/dictree.pyx":258
  *         return TargetProduction(words, scores, wa)
- * 
+ *
  *     def query(self, line, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -1832,7 +1832,7 @@ static PyObject *__pyx_lambda_funcdef_5moses_7dictree_lambda3(CYTHON_UNUSED PyOb
 
 /* "moses/dictree.pyx":12
  * from math import log
- * 
+ *
  * cpdef int fsign(float x):             # <<<<<<<<<<<<<<
  *     """Simply returns the sign of float x (zero is assumed +), it's defined here just so one gains a little bit with static typing"""
  *     return 1 if x >= 0 else -1
@@ -1849,7 +1849,7 @@ static int __pyx_f_5moses_7dictree_fsign(float __pyx_v_x, CYTHON_UNUSED int __py
  * cpdef int fsign(float x):
  *     """Simply returns the sign of float x (zero is assumed +), it's defined here just so one gains a little bit with static typing"""
  *     return 1 if x >= 0 else -1             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef bytes as_str(data):
  */
   if (((__pyx_v_x >= 0.0) != 0)) {
@@ -1862,7 +1862,7 @@ static int __pyx_f_5moses_7dictree_fsign(float __pyx_v_x, CYTHON_UNUSED int __py
 
   /* "moses/dictree.pyx":12
  * from math import log
- * 
+ *
  * cpdef int fsign(float x):             # <<<<<<<<<<<<<<
  *     """Simply returns the sign of float x (zero is assumed +), it's defined here just so one gains a little bit with static typing"""
  *     return 1 if x >= 0 else -1
@@ -1929,7 +1929,7 @@ static PyObject *__pyx_pf_5moses_7dictree_fsign(CYTHON_UNUSED PyObject *__pyx_se
 
 /* "moses/dictree.pyx":16
  *     return 1 if x >= 0 else -1
- * 
+ *
  * cdef bytes as_str(data):             # <<<<<<<<<<<<<<
  *     if isinstance(data, bytes):
  *         return data
@@ -1948,13 +1948,13 @@ static PyObject *__pyx_f_5moses_7dictree_as_str(PyObject *__pyx_v_data) {
   __Pyx_RefNannySetupContext("as_str", 0);
 
   /* "moses/dictree.pyx":17
- * 
+ *
  * cdef bytes as_str(data):
  *     if isinstance(data, bytes):             # <<<<<<<<<<<<<<
  *         return data
  *     elif isinstance(data, unicode):
  */
-  __pyx_t_1 = PyBytes_Check(__pyx_v_data); 
+  __pyx_t_1 = PyBytes_Check(__pyx_v_data);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
@@ -1979,7 +1979,7 @@ static PyObject *__pyx_f_5moses_7dictree_as_str(PyObject *__pyx_v_data) {
  *         return data.encode('UTF-8')
  *     raise TypeError('Cannot convert %s to string' % type(data))
  */
-  __pyx_t_2 = PyUnicode_Check(__pyx_v_data); 
+  __pyx_t_2 = PyUnicode_Check(__pyx_v_data);
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
@@ -1988,7 +1988,7 @@ static PyObject *__pyx_f_5moses_7dictree_as_str(PyObject *__pyx_v_data) {
  *     elif isinstance(data, unicode):
  *         return data.encode('UTF-8')             # <<<<<<<<<<<<<<
  *     raise TypeError('Cannot convert %s to string' % type(data))
- * 
+ *
  */
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_data, __pyx_n_s_encode); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2006,7 +2006,7 @@ static PyObject *__pyx_f_5moses_7dictree_as_str(PyObject *__pyx_v_data) {
  *     elif isinstance(data, unicode):
  *         return data.encode('UTF-8')
  *     raise TypeError('Cannot convert %s to string' % type(data))             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class Production(object):
  */
   __pyx_t_4 = __Pyx_PyString_Format(__pyx_kp_s_Cannot_convert_s_to_string, ((PyObject *)Py_TYPE(__pyx_v_data))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2025,7 +2025,7 @@ static PyObject *__pyx_f_5moses_7dictree_as_str(PyObject *__pyx_v_data) {
 
   /* "moses/dictree.pyx":16
  *     return 1 if x >= 0 else -1
- * 
+ *
  * cdef bytes as_str(data):             # <<<<<<<<<<<<<<
  *     if isinstance(data, bytes):
  *         return data
@@ -2045,7 +2045,7 @@ static PyObject *__pyx_f_5moses_7dictree_as_str(PyObject *__pyx_v_data) {
 
 /* "moses/dictree.pyx":33
  *     cdef readonly tuple rhs
- * 
+ *
  *     def __init__(self, rhs, lhs = None):             # <<<<<<<<<<<<<<
  *         """
  *         :rhs right-hand side of the production (or the flat contiguous phrase) - sequence of strings
@@ -2134,7 +2134,7 @@ static int __pyx_pf_5moses_7dictree_10Production___init__(struct __pyx_obj_5mose
  *         """
  *         self.rhs = tuple(rhs)             # <<<<<<<<<<<<<<
  *         self.lhs = lhs
- * 
+ *
  */
   __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 38; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -2154,7 +2154,7 @@ static int __pyx_pf_5moses_7dictree_10Production___init__(struct __pyx_obj_5mose
  *         """
  *         self.rhs = tuple(rhs)
  *         self.lhs = lhs             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __len__(self):
  */
   if (!(likely(PyBytes_CheckExact(__pyx_v_lhs))||((__pyx_v_lhs) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_v_lhs)->tp_name), 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2168,7 +2168,7 @@ static int __pyx_pf_5moses_7dictree_10Production___init__(struct __pyx_obj_5mose
 
   /* "moses/dictree.pyx":33
  *     cdef readonly tuple rhs
- * 
+ *
  *     def __init__(self, rhs, lhs = None):             # <<<<<<<<<<<<<<
  *         """
  *         :rhs right-hand side of the production (or the flat contiguous phrase) - sequence of strings
@@ -2189,10 +2189,10 @@ static int __pyx_pf_5moses_7dictree_10Production___init__(struct __pyx_obj_5mose
 
 /* "moses/dictree.pyx":41
  *         self.lhs = lhs
- * 
+ *
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         return len(self.rhs)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -2219,10 +2219,10 @@ static Py_ssize_t __pyx_pf_5moses_7dictree_10Production_2__len__(struct __pyx_ob
   __Pyx_RefNannySetupContext("__len__", 0);
 
   /* "moses/dictree.pyx":42
- * 
+ *
  *     def __len__(self):
  *         return len(self.rhs)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __getitem__(self, key):
  */
   __pyx_t_1 = __pyx_v_self->rhs;
@@ -2238,10 +2238,10 @@ static Py_ssize_t __pyx_pf_5moses_7dictree_10Production_2__len__(struct __pyx_ob
 
   /* "moses/dictree.pyx":41
  *         self.lhs = lhs
- * 
+ *
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         return len(self.rhs)
- * 
+ *
  */
 
   /* function exit code */
@@ -2256,7 +2256,7 @@ static Py_ssize_t __pyx_pf_5moses_7dictree_10Production_2__len__(struct __pyx_ob
 
 /* "moses/dictree.pyx":44
  *         return len(self.rhs)
- * 
+ *
  *     def __getitem__(self, key):             # <<<<<<<<<<<<<<
  *         if 0 <= key < len(self.rhs):
  *             return self.rhs[key]
@@ -2288,7 +2288,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_4__getitem__(struct __pyx
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
   /* "moses/dictree.pyx":45
- * 
+ *
  *     def __getitem__(self, key):
  *         if 0 <= key < len(self.rhs):             # <<<<<<<<<<<<<<
  *             return self.rhs[key]
@@ -2338,7 +2338,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_4__getitem__(struct __pyx
  *             return self.rhs[key]
  *         else:
  *             return IndexError, 'Index %s out of range' % str(key)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __iter__(self):
  */
     __Pyx_XDECREF(__pyx_r);
@@ -2368,7 +2368,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_4__getitem__(struct __pyx
 
   /* "moses/dictree.pyx":44
  *         return len(self.rhs)
- * 
+ *
  *     def __getitem__(self, key):             # <<<<<<<<<<<<<<
  *         if 0 <= key < len(self.rhs):
  *             return self.rhs[key]
@@ -2389,7 +2389,7 @@ static PyObject *__pyx_gb_5moses_7dictree_10Production_8generator(__pyx_Generato
 
 /* "moses/dictree.pyx":50
  *             return IndexError, 'Index %s out of range' % str(key)
- * 
+ *
  *     def __iter__(self):             # <<<<<<<<<<<<<<
  *         for x in self.rhs:
  *             yield x
@@ -2468,11 +2468,11 @@ static PyObject *__pyx_gb_5moses_7dictree_10Production_8generator(__pyx_Generato
   if (unlikely(!__pyx_sent_value)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "moses/dictree.pyx":51
- * 
+ *
  *     def __iter__(self):
  *         for x in self.rhs:             # <<<<<<<<<<<<<<
  *             yield x
- * 
+ *
  */
   if (unlikely(__pyx_cur_scope->__pyx_v_self->rhs == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
@@ -2495,7 +2495,7 @@ static PyObject *__pyx_gb_5moses_7dictree_10Production_8generator(__pyx_Generato
  *     def __iter__(self):
  *         for x in self.rhs:
  *             yield x             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __contains__(self, item):
  */
     __Pyx_INCREF(__pyx_cur_scope->__pyx_v_x);
@@ -2519,7 +2519,7 @@ static PyObject *__pyx_gb_5moses_7dictree_10Production_8generator(__pyx_Generato
 
   /* "moses/dictree.pyx":50
  *             return IndexError, 'Index %s out of range' % str(key)
- * 
+ *
  *     def __iter__(self):             # <<<<<<<<<<<<<<
  *         for x in self.rhs:
  *             yield x
@@ -2542,10 +2542,10 @@ static PyObject *__pyx_gb_5moses_7dictree_10Production_8generator(__pyx_Generato
 
 /* "moses/dictree.pyx":54
  *             yield x
- * 
+ *
  *     def __contains__(self, item):             # <<<<<<<<<<<<<<
  *         return item in self.rhs
- * 
+ *
  */
 
 /* Python wrapper */
@@ -2571,10 +2571,10 @@ static int __pyx_pf_5moses_7dictree_10Production_9__contains__(struct __pyx_obj_
   __Pyx_RefNannySetupContext("__contains__", 0);
 
   /* "moses/dictree.pyx":55
- * 
+ *
  *     def __contains__(self, item):
  *         return item in self.rhs             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __reversed__(self):
  */
   __pyx_t_1 = (__Pyx_PySequence_Contains(__pyx_v_item, __pyx_v_self->rhs, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2583,10 +2583,10 @@ static int __pyx_pf_5moses_7dictree_10Production_9__contains__(struct __pyx_obj_
 
   /* "moses/dictree.pyx":54
  *             yield x
- * 
+ *
  *     def __contains__(self, item):             # <<<<<<<<<<<<<<
  *         return item in self.rhs
- * 
+ *
  */
 
   /* function exit code */
@@ -2600,10 +2600,10 @@ static int __pyx_pf_5moses_7dictree_10Production_9__contains__(struct __pyx_obj_
 
 /* "moses/dictree.pyx":57
  *         return item in self.rhs
- * 
+ *
  *     def __reversed__(self):             # <<<<<<<<<<<<<<
  *         return reversed(self.rhs)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -2630,10 +2630,10 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_11__reversed__(struct __p
   __Pyx_RefNannySetupContext("__reversed__", 0);
 
   /* "moses/dictree.pyx":58
- * 
+ *
  *     def __reversed__(self):
  *         return reversed(self.rhs)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __hash__(self):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -2651,10 +2651,10 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_11__reversed__(struct __p
 
   /* "moses/dictree.pyx":57
  *         return item in self.rhs
- * 
+ *
  *     def __reversed__(self):             # <<<<<<<<<<<<<<
  *         return reversed(self.rhs)
- * 
+ *
  */
 
   /* function exit code */
@@ -2671,10 +2671,10 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_11__reversed__(struct __p
 
 /* "moses/dictree.pyx":60
  *         return reversed(self.rhs)
- * 
+ *
  *     def __hash__(self):             # <<<<<<<<<<<<<<
  *         return hash(self.rhs)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -2701,10 +2701,10 @@ static Py_hash_t __pyx_pf_5moses_7dictree_10Production_13__hash__(struct __pyx_o
   __Pyx_RefNannySetupContext("__hash__", 0);
 
   /* "moses/dictree.pyx":61
- * 
+ *
  *     def __hash__(self):
  *         return hash(self.rhs)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
  */
   __pyx_t_1 = __pyx_v_self->rhs;
@@ -2716,10 +2716,10 @@ static Py_hash_t __pyx_pf_5moses_7dictree_10Production_13__hash__(struct __pyx_o
 
   /* "moses/dictree.pyx":60
  *         return reversed(self.rhs)
- * 
+ *
  *     def __hash__(self):             # <<<<<<<<<<<<<<
  *         return hash(self.rhs)
- * 
+ *
  */
 
   /* function exit code */
@@ -2735,7 +2735,7 @@ static Py_hash_t __pyx_pf_5moses_7dictree_10Production_13__hash__(struct __pyx_o
 
 /* "moses/dictree.pyx":63
  *         return hash(self.rhs)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         if self.lhs:
  *             return '%s -> %s' % (self.lhs, ' '.join(self.rhs))
@@ -2766,7 +2766,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_15__str__(struct __pyx_ob
   __Pyx_RefNannySetupContext("__str__", 0);
 
   /* "moses/dictree.pyx":64
- * 
+ *
  *     def __str__(self):
  *         if self.lhs:             # <<<<<<<<<<<<<<
  *             return '%s -> %s' % (self.lhs, ' '.join(self.rhs))
@@ -2809,7 +2809,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_15__str__(struct __pyx_ob
  *             return '%s -> %s' % (self.lhs, ' '.join(self.rhs))
  *         else:
  *             return ' '.join(self.rhs)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __repr__(self):
  */
     __Pyx_XDECREF(__pyx_r);
@@ -2825,7 +2825,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_15__str__(struct __pyx_ob
 
   /* "moses/dictree.pyx":63
  *         return hash(self.rhs)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         if self.lhs:
  *             return '%s -> %s' % (self.lhs, ' '.join(self.rhs))
@@ -2845,10 +2845,10 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_15__str__(struct __pyx_ob
 
 /* "moses/dictree.pyx":69
  *             return ' '.join(self.rhs)
- * 
+ *
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return repr(self.as_tuple())
- * 
+ *
  */
 
 /* Python wrapper */
@@ -2875,10 +2875,10 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_17__repr__(struct __pyx_o
   __Pyx_RefNannySetupContext("__repr__", 0);
 
   /* "moses/dictree.pyx":70
- * 
+ *
  *     def __repr__(self):
  *         return repr(self.as_tuple())             # <<<<<<<<<<<<<<
- * 
+ *
  *     def as_tuple(self, lhs_first = False):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -2896,10 +2896,10 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_17__repr__(struct __pyx_o
 
   /* "moses/dictree.pyx":69
  *             return ' '.join(self.rhs)
- * 
+ *
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return repr(self.as_tuple())
- * 
+ *
  */
 
   /* function exit code */
@@ -2916,7 +2916,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_17__repr__(struct __pyx_o
 
 /* "moses/dictree.pyx":72
  *         return repr(self.as_tuple())
- * 
+ *
  *     def as_tuple(self, lhs_first = False):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a tuple (lhs) + rhs or rhs + (lhs) depending on the flag 'lhs_first'.
@@ -3066,7 +3066,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_19as_tuple(struct __pyx_o
  *                 return self.rhs + tuple([self.lhs])
  *         else:
  *             return self.rhs             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __richcmp__(self, other, op):
  */
     __Pyx_XDECREF(__pyx_r);
@@ -3077,7 +3077,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_19as_tuple(struct __pyx_o
 
   /* "moses/dictree.pyx":72
  *         return repr(self.as_tuple())
- * 
+ *
  *     def as_tuple(self, lhs_first = False):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a tuple (lhs) + rhs or rhs + (lhs) depending on the flag 'lhs_first'.
@@ -3097,7 +3097,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_19as_tuple(struct __pyx_o
 
 /* "moses/dictree.pyx":84
  *             return self.rhs
- * 
+ *
  *     def __richcmp__(self, other, op):             # <<<<<<<<<<<<<<
  *         """
  *         The comparison uses 'as_tuple()', therefore in the CFG case, the lhs will be part of the production and it will be placed in the end
@@ -3307,7 +3307,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_21__richcmp__(PyObject *_
  *             return x > y
  *         elif op == 5:             # <<<<<<<<<<<<<<
  *             return x >= y
- * 
+ *
  */
   __pyx_t_1 = PyObject_RichCompare(__pyx_v_op, __pyx_int_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -3318,7 +3318,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_21__richcmp__(PyObject *_
  *             return x > y
  *         elif op == 5:
  *             return x >= y             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class Alignment(list):
  */
     __Pyx_XDECREF(__pyx_r);
@@ -3330,7 +3330,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_21__richcmp__(PyObject *_
 
   /* "moses/dictree.pyx":84
  *             return self.rhs
- * 
+ *
  *     def __richcmp__(self, other, op):             # <<<<<<<<<<<<<<
  *         """
  *         The comparison uses 'as_tuple()', therefore in the CFG case, the lhs will be part of the production and it will be placed in the end
@@ -3354,10 +3354,10 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_21__richcmp__(PyObject *_
 
 /* "moses/dictree.pyx":30
  *     """
- * 
+ *
  *     cdef readonly bytes lhs             # <<<<<<<<<<<<<<
  *     cdef readonly tuple rhs
- * 
+ *
  */
 
 /* Python wrapper */
@@ -3390,10 +3390,10 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_3lhs___get__(struct __pyx
 }
 
 /* "moses/dictree.pyx":31
- * 
+ *
  *     cdef readonly bytes lhs
  *     cdef readonly tuple rhs             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __init__(self, rhs, lhs = None):
  */
 
@@ -3428,7 +3428,7 @@ static PyObject *__pyx_pf_5moses_7dictree_10Production_3rhs___get__(struct __pyx
 
 /* "moses/dictree.pyx":110
  *     """
- * 
+ *
  *     def __init__(self, alignment):             # <<<<<<<<<<<<<<
  *         if type(alignment) is str:
  *             pairs = []
@@ -3511,7 +3511,7 @@ static int __pyx_pf_5moses_7dictree_9Alignment___init__(struct __pyx_obj_5moses_
   __Pyx_RefNannySetupContext("__init__", 0);
 
   /* "moses/dictree.pyx":111
- * 
+ *
  *     def __init__(self, alignment):
  *         if type(alignment) is str:             # <<<<<<<<<<<<<<
  *             pairs = []
@@ -3610,11 +3610,11 @@ static int __pyx_pf_5moses_7dictree_9Alignment___init__(struct __pyx_obj_5moses_
         }
         #if CYTHON_COMPILING_IN_CPYTHON
         if (likely(PyTuple_CheckExact(sequence))) {
-          __pyx_t_4 = PyTuple_GET_ITEM(sequence, 0); 
-          __pyx_t_8 = PyTuple_GET_ITEM(sequence, 1); 
+          __pyx_t_4 = PyTuple_GET_ITEM(sequence, 0);
+          __pyx_t_8 = PyTuple_GET_ITEM(sequence, 1);
         } else {
-          __pyx_t_4 = PyList_GET_ITEM(sequence, 0); 
-          __pyx_t_8 = PyList_GET_ITEM(sequence, 1); 
+          __pyx_t_4 = PyList_GET_ITEM(sequence, 0);
+          __pyx_t_8 = PyList_GET_ITEM(sequence, 1);
         }
         __Pyx_INCREF(__pyx_t_4);
         __Pyx_INCREF(__pyx_t_8);
@@ -3772,7 +3772,7 @@ static int __pyx_pf_5moses_7dictree_9Alignment___init__(struct __pyx_obj_5moses_
  *             super(Alignment, self).__init__(alignment)
  *         else:
  *             ValueError, 'Cannot figure out pairs from: %s' % type(alignment)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
  */
     __pyx_t_3 = __Pyx_PyString_Format(__pyx_kp_s_Cannot_figure_out_pairs_from_s, ((PyObject *)Py_TYPE(__pyx_v_alignment))); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -3791,7 +3791,7 @@ static int __pyx_pf_5moses_7dictree_9Alignment___init__(struct __pyx_obj_5moses_
 
   /* "moses/dictree.pyx":110
  *     """
- * 
+ *
  *     def __init__(self, alignment):             # <<<<<<<<<<<<<<
  *         if type(alignment) is str:
  *             pairs = []
@@ -3819,10 +3819,10 @@ static int __pyx_pf_5moses_7dictree_9Alignment___init__(struct __pyx_obj_5moses_
 
 /* "moses/dictree.pyx":122
  *             ValueError, 'Cannot figure out pairs from: %s' % type(alignment)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return ' '.join('%d-%d' % (s, t) for s, t in self)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -3840,10 +3840,10 @@ static PyObject *__pyx_pw_5moses_7dictree_9Alignment_3__str__(PyObject *__pyx_v_
 static PyObject *__pyx_gb_5moses_7dictree_9Alignment_7__str___2generator1(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
 /* "moses/dictree.pyx":123
- * 
+ *
  *     def __str__(self):
  *         return ' '.join('%d-%d' % (s, t) for s, t in self)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class FValues(list):
  */
 
@@ -3960,11 +3960,11 @@ static PyObject *__pyx_gb_5moses_7dictree_9Alignment_7__str___2generator1(__pyx_
       }
       #if CYTHON_COMPILING_IN_CPYTHON
       if (likely(PyTuple_CheckExact(sequence))) {
-        __pyx_t_5 = PyTuple_GET_ITEM(sequence, 0); 
-        __pyx_t_6 = PyTuple_GET_ITEM(sequence, 1); 
+        __pyx_t_5 = PyTuple_GET_ITEM(sequence, 0);
+        __pyx_t_6 = PyTuple_GET_ITEM(sequence, 1);
       } else {
-        __pyx_t_5 = PyList_GET_ITEM(sequence, 0); 
-        __pyx_t_6 = PyList_GET_ITEM(sequence, 1); 
+        __pyx_t_5 = PyList_GET_ITEM(sequence, 0);
+        __pyx_t_6 = PyList_GET_ITEM(sequence, 1);
       }
       __Pyx_INCREF(__pyx_t_5);
       __Pyx_INCREF(__pyx_t_6);
@@ -4056,10 +4056,10 @@ static PyObject *__pyx_gb_5moses_7dictree_9Alignment_7__str___2generator1(__pyx_
 
 /* "moses/dictree.pyx":122
  *             ValueError, 'Cannot figure out pairs from: %s' % type(alignment)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return ' '.join('%d-%d' % (s, t) for s, t in self)
- * 
+ *
  */
 
 static PyObject *__pyx_pf_5moses_7dictree_9Alignment_2__str__(struct __pyx_obj_5moses_7dictree_Alignment *__pyx_v_self) {
@@ -4083,10 +4083,10 @@ static PyObject *__pyx_pf_5moses_7dictree_9Alignment_2__str__(struct __pyx_obj_5
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
 
   /* "moses/dictree.pyx":123
- * 
+ *
  *     def __str__(self):
  *         return ' '.join('%d-%d' % (s, t) for s, t in self)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class FValues(list):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -4101,10 +4101,10 @@ static PyObject *__pyx_pf_5moses_7dictree_9Alignment_2__str__(struct __pyx_obj_5
 
   /* "moses/dictree.pyx":122
  *             ValueError, 'Cannot figure out pairs from: %s' % type(alignment)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return ' '.join('%d-%d' % (s, t) for s, t in self)
- * 
+ *
  */
 
   /* function exit code */
@@ -4122,10 +4122,10 @@ static PyObject *__pyx_pf_5moses_7dictree_9Alignment_2__str__(struct __pyx_obj_5
 
 /* "moses/dictree.pyx":131
  *     """
- * 
+ *
  *     def __init__(self, values):             # <<<<<<<<<<<<<<
  *         super(FValues, self).__init__(values)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -4192,10 +4192,10 @@ static int __pyx_pf_5moses_7dictree_7FValues___init__(struct __pyx_obj_5moses_7d
   __Pyx_RefNannySetupContext("__init__", 0);
 
   /* "moses/dictree.pyx":132
- * 
+ *
  *     def __init__(self, values):
  *         super(FValues, self).__init__(values)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
  */
   __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4225,10 +4225,10 @@ static int __pyx_pf_5moses_7dictree_7FValues___init__(struct __pyx_obj_5moses_7d
 
   /* "moses/dictree.pyx":131
  *     """
- * 
+ *
  *     def __init__(self, values):             # <<<<<<<<<<<<<<
  *         super(FValues, self).__init__(values)
- * 
+ *
  */
 
   /* function exit code */
@@ -4247,10 +4247,10 @@ static int __pyx_pf_5moses_7dictree_7FValues___init__(struct __pyx_obj_5moses_7d
 
 /* "moses/dictree.pyx":134
  *         super(FValues, self).__init__(values)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return ' '.join(str(x) for x in self)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -4268,10 +4268,10 @@ static PyObject *__pyx_pw_5moses_7dictree_7FValues_3__str__(PyObject *__pyx_v_se
 static PyObject *__pyx_gb_5moses_7dictree_7FValues_7__str___2generator2(__pyx_GeneratorObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
 /* "moses/dictree.pyx":135
- * 
+ *
  *     def __str__(self):
  *         return ' '.join(str(x) for x in self)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class TargetProduction(Production):
  */
 
@@ -4422,10 +4422,10 @@ static PyObject *__pyx_gb_5moses_7dictree_7FValues_7__str___2generator2(__pyx_Ge
 
 /* "moses/dictree.pyx":134
  *         super(FValues, self).__init__(values)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return ' '.join(str(x) for x in self)
- * 
+ *
  */
 
 static PyObject *__pyx_pf_5moses_7dictree_7FValues_2__str__(struct __pyx_obj_5moses_7dictree_FValues *__pyx_v_self) {
@@ -4449,10 +4449,10 @@ static PyObject *__pyx_pf_5moses_7dictree_7FValues_2__str__(struct __pyx_obj_5mo
   __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_v_self);
 
   /* "moses/dictree.pyx":135
- * 
+ *
  *     def __str__(self):
  *         return ' '.join(str(x) for x in self)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class TargetProduction(Production):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -4467,10 +4467,10 @@ static PyObject *__pyx_pf_5moses_7dictree_7FValues_2__str__(struct __pyx_obj_5mo
 
   /* "moses/dictree.pyx":134
  *         super(FValues, self).__init__(values)
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return ' '.join(str(x) for x in self)
- * 
+ *
  */
 
   /* function exit code */
@@ -4488,7 +4488,7 @@ static PyObject *__pyx_pf_5moses_7dictree_7FValues_2__str__(struct __pyx_obj_5mo
 
 /* "moses/dictree.pyx":144
  *     cdef readonly FValues scores
- * 
+ *
  *     def __init__(self, rhs, scores, alignment = [], lhs = None):             # <<<<<<<<<<<<<<
  *         """
  *         :rhs right-hand side tokens (sequence of terminals and nonterminals)
@@ -4632,7 +4632,7 @@ static int __pyx_pf_5moses_7dictree_16TargetProduction___init__(struct __pyx_obj
  *         super(TargetProduction, self).__init__(rhs, lhs)
  *         self.scores = FValues(scores)             # <<<<<<<<<<<<<<
  *         self.alignment = Alignment(alignment)
- * 
+ *
  */
   __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
@@ -4652,7 +4652,7 @@ static int __pyx_pf_5moses_7dictree_16TargetProduction___init__(struct __pyx_obj
  *         super(TargetProduction, self).__init__(rhs, lhs)
  *         self.scores = FValues(scores)
  *         self.alignment = Alignment(alignment)             # <<<<<<<<<<<<<<
- * 
+ *
  *     @staticmethod
  */
   __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 153; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4671,7 +4671,7 @@ static int __pyx_pf_5moses_7dictree_16TargetProduction___init__(struct __pyx_obj
 
   /* "moses/dictree.pyx":144
  *     cdef readonly FValues scores
- * 
+ *
  *     def __init__(self, rhs, scores, alignment = [], lhs = None):             # <<<<<<<<<<<<<<
  *         """
  *         :rhs right-hand side tokens (sequence of terminals and nonterminals)
@@ -4692,7 +4692,7 @@ static int __pyx_pf_5moses_7dictree_16TargetProduction___init__(struct __pyx_obj
 }
 
 /* "moses/dictree.pyx":156
- * 
+ *
  *     @staticmethod
  *     def desc(x, y, key = lambda r: r.scores[0]):             # <<<<<<<<<<<<<<
  *         """Returns the sign of key(y) - key(x).
@@ -4790,7 +4790,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_2desc(PyObject *__p
  *         Can only be used if scores is not an empty vector as
  *         keys defaults to scores[0]"""
  *         return fsign(key(y) - key(x))             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -4823,7 +4823,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_2desc(PyObject *__p
   goto __pyx_L0;
 
   /* "moses/dictree.pyx":156
- * 
+ *
  *     @staticmethod
  *     def desc(x, y, key = lambda r: r.scores[0]):             # <<<<<<<<<<<<<<
  *         """Returns the sign of key(y) - key(x).
@@ -4845,7 +4845,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_2desc(PyObject *__p
 
 /* "moses/dictree.pyx":162
  *         return fsign(key(y) - key(x))
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         """Returns a string such as: <words> ||| <scores> [||| word-alignment info]"""
  *         if self.lhs:
@@ -4955,7 +4955,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_4__str__(struct __p
  *         return ' ||| '.join((' '.join(chain(self.rhs, lhs)),
  *             str(self.scores),             # <<<<<<<<<<<<<<
  *             str(self.alignment)))
- * 
+ *
  */
   __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
@@ -4970,7 +4970,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_4__str__(struct __p
  *         return ' ||| '.join((' '.join(chain(self.rhs, lhs)),
  *             str(self.scores),
  *             str(self.alignment)))             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __repr__(self):
  */
   __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -5009,7 +5009,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_4__str__(struct __p
 
   /* "moses/dictree.pyx":162
  *         return fsign(key(y) - key(x))
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         """Returns a string such as: <words> ||| <scores> [||| word-alignment info]"""
  *         if self.lhs:
@@ -5032,10 +5032,10 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_4__str__(struct __p
 
 /* "moses/dictree.pyx":172
  *             str(self.alignment)))
- * 
+ *
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return repr((repr(self.rhs), repr(self.lhs), repr(self.scores), repr(self.alignment)))
- * 
+ *
  */
 
 /* Python wrapper */
@@ -5065,10 +5065,10 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_6__repr__(struct __
   __Pyx_RefNannySetupContext("__repr__", 0);
 
   /* "moses/dictree.pyx":173
- * 
+ *
  *     def __repr__(self):
  *         return repr((repr(self.rhs), repr(self.lhs), repr(self.scores), repr(self.alignment)))             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class QueryResult(list):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -5115,10 +5115,10 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_6__repr__(struct __
 
   /* "moses/dictree.pyx":172
  *             str(self.alignment)))
- * 
+ *
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return repr((repr(self.rhs), repr(self.lhs), repr(self.scores), repr(self.alignment)))
- * 
+ *
  */
 
   /* function exit code */
@@ -5141,7 +5141,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_6__repr__(struct __
  *     """
  *     cdef readonly Alignment alignment             # <<<<<<<<<<<<<<
  *     cdef readonly FValues scores
- * 
+ *
  */
 
 /* Python wrapper */
@@ -5177,7 +5177,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_9alignment___get__(
  *     """
  *     cdef readonly Alignment alignment
  *     cdef readonly FValues scores             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __init__(self, rhs, scores, alignment = [], lhs = None):
  */
 
@@ -5212,7 +5212,7 @@ static PyObject *__pyx_pf_5moses_7dictree_16TargetProduction_6scores___get__(str
 
 /* "moses/dictree.pyx":179
  *     cdef readonly Production source
- * 
+ *
  *     def __init__(self, source, targets = []):             # <<<<<<<<<<<<<<
  *         super(QueryResult, self).__init__(targets)
  *         self.source = source
@@ -5294,11 +5294,11 @@ static int __pyx_pf_5moses_7dictree_11QueryResult___init__(struct __pyx_obj_5mos
   __Pyx_RefNannySetupContext("__init__", 0);
 
   /* "moses/dictree.pyx":180
- * 
+ *
  *     def __init__(self, source, targets = []):
  *         super(QueryResult, self).__init__(targets)             # <<<<<<<<<<<<<<
  *         self.source = source
- * 
+ *
  */
   __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 180; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -5329,8 +5329,8 @@ static int __pyx_pf_5moses_7dictree_11QueryResult___init__(struct __pyx_obj_5mos
  *     def __init__(self, source, targets = []):
  *         super(QueryResult, self).__init__(targets)
  *         self.source = source             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
  */
   if (!(likely(((__pyx_v_source) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_source, __pyx_ptype_5moses_7dictree_Production))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_3 = __pyx_v_source;
@@ -5343,7 +5343,7 @@ static int __pyx_pf_5moses_7dictree_11QueryResult___init__(struct __pyx_obj_5mos
 
   /* "moses/dictree.pyx":179
  *     cdef readonly Production source
- * 
+ *
  *     def __init__(self, source, targets = []):             # <<<<<<<<<<<<<<
  *         super(QueryResult, self).__init__(targets)
  *         self.source = source
@@ -5365,9 +5365,9 @@ static int __pyx_pf_5moses_7dictree_11QueryResult___init__(struct __pyx_obj_5mos
 
 /* "moses/dictree.pyx":177
  * cdef class QueryResult(list):
- * 
+ *
  *     cdef readonly Production source             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __init__(self, source, targets = []):
  */
 
@@ -5401,7 +5401,7 @@ static PyObject *__pyx_pf_5moses_7dictree_11QueryResult_6source___get__(struct _
 }
 
 /* "moses/dictree.pyx":187
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, path, bint wa = False):             # <<<<<<<<<<<<<<
  *         """Whether or not the path represents a valid table for that class."""
@@ -5488,14 +5488,14 @@ static PyObject *__pyx_pf_5moses_7dictree_14DictionaryTree_canLoad(CYTHON_UNUSED
  *     def canLoad(cls, path, bint wa = False):
  *         """Whether or not the path represents a valid table for that class."""
  *         raise NotImplementedError             # <<<<<<<<<<<<<<
- * 
+ *
  *     def query(self, line, converter = None, cmp = None, key = None):
  */
   __Pyx_Raise(__pyx_builtin_NotImplementedError, 0, 0, 0);
   {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "moses/dictree.pyx":187
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, path, bint wa = False):             # <<<<<<<<<<<<<<
  *         """Whether or not the path represents a valid table for that class."""
@@ -5513,7 +5513,7 @@ static PyObject *__pyx_pf_5moses_7dictree_14DictionaryTree_canLoad(CYTHON_UNUSED
 
 /* "moses/dictree.pyx":191
  *         raise NotImplementedError
- * 
+ *
  *     def query(self, line, converter = None, cmp = None, key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -5616,7 +5616,7 @@ static PyObject *__pyx_pf_5moses_7dictree_14DictionaryTree_2query(CYTHON_UNUSED 
  *         :return QueryResult
  *         """
  *         raise NotImplementedError             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class PhraseDictionaryTree(DictionaryTree):
  */
   __Pyx_Raise(__pyx_builtin_NotImplementedError, 0, 0, 0);
@@ -5624,7 +5624,7 @@ static PyObject *__pyx_pf_5moses_7dictree_14DictionaryTree_2query(CYTHON_UNUSED 
 
   /* "moses/dictree.pyx":191
  *         raise NotImplementedError
- * 
+ *
  *     def query(self, line, converter = None, cmp = None, key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -5641,7 +5641,7 @@ static PyObject *__pyx_pf_5moses_7dictree_14DictionaryTree_2query(CYTHON_UNUSED 
 
 /* "moses/dictree.pyx":213
  *     cdef readonly unsigned tableLimit
- * 
+ *
  *     def __cinit__(self, bytes path, unsigned tableLimit = 20, unsigned nscores = 5, bint wa = False, delimiters = ' \t'):             # <<<<<<<<<<<<<<
  *         """
  *         :path stem of the table, e.g europarl.fr-en is the stem for europar.fr-en.binphr.*
@@ -5771,7 +5771,7 @@ static int __pyx_pf_5moses_7dictree_20PhraseDictionaryTree___cinit__(struct __py
 
   /* "moses/dictree.pyx":221
  *         """
- * 
+ *
  *         if not PhraseDictionaryTree.canLoad(path, wa):             # <<<<<<<<<<<<<<
  *             raise ValueError, "'%s' doesn't seem a valid binary table." % path
  *         self.path = path
@@ -5798,7 +5798,7 @@ static int __pyx_pf_5moses_7dictree_20PhraseDictionaryTree___cinit__(struct __py
   if (__pyx_t_5) {
 
     /* "moses/dictree.pyx":222
- * 
+ *
  *         if not PhraseDictionaryTree.canLoad(path, wa):
  *             raise ValueError, "'%s' doesn't seem a valid binary table." % path             # <<<<<<<<<<<<<<
  *         self.path = path
@@ -5881,7 +5881,7 @@ static int __pyx_pf_5moses_7dictree_20PhraseDictionaryTree___cinit__(struct __py
  *         self.tree = new cdictree.PhraseDictionaryTree()
  *         self.tree.NeedAlignmentInfo(wa)             # <<<<<<<<<<<<<<
  *         self.tree.Read(path)
- * 
+ *
  */
   __pyx_v_self->tree->NeedAlignmentInfo(__pyx_v_wa);
 
@@ -5889,7 +5889,7 @@ static int __pyx_pf_5moses_7dictree_20PhraseDictionaryTree___cinit__(struct __py
  *         self.tree = new cdictree.PhraseDictionaryTree()
  *         self.tree.NeedAlignmentInfo(wa)
  *         self.tree.Read(path)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __dealloc__(self):
  */
   __pyx_t_6 = __pyx_convert_string_from_py_(__pyx_v_path); if (unlikely(PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -5897,7 +5897,7 @@ static int __pyx_pf_5moses_7dictree_20PhraseDictionaryTree___cinit__(struct __py
 
   /* "moses/dictree.pyx":213
  *     cdef readonly unsigned tableLimit
- * 
+ *
  *     def __cinit__(self, bytes path, unsigned tableLimit = 20, unsigned nscores = 5, bint wa = False, delimiters = ' \t'):             # <<<<<<<<<<<<<<
  *         """
  *         :path stem of the table, e.g europarl.fr-en is the stem for europar.fr-en.binphr.*
@@ -5919,10 +5919,10 @@ static int __pyx_pf_5moses_7dictree_20PhraseDictionaryTree___cinit__(struct __py
 
 /* "moses/dictree.pyx":232
  *         self.tree.Read(path)
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         del self.tree
- * 
+ *
  */
 
 /* Python wrapper */
@@ -5941,20 +5941,20 @@ static void __pyx_pf_5moses_7dictree_20PhraseDictionaryTree_2__dealloc__(struct 
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
   /* "moses/dictree.pyx":233
- * 
+ *
  *     def __dealloc__(self):
  *         del self.tree             # <<<<<<<<<<<<<<
- * 
+ *
  *     @classmethod
  */
   delete __pyx_v_self->tree;
 
   /* "moses/dictree.pyx":232
  *         self.tree.Read(path)
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         del self.tree
- * 
+ *
  */
 
   /* function exit code */
@@ -5962,7 +5962,7 @@ static void __pyx_pf_5moses_7dictree_20PhraseDictionaryTree_2__dealloc__(struct 
 }
 
 /* "moses/dictree.pyx":236
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, stem, bint wa = False):             # <<<<<<<<<<<<<<
  *         """This sanity check was added to the constructor, but you can access it from outside this class
@@ -6368,7 +6368,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_4canLoad(CYTHON
  *                 and os.path.isfile(stem + ".binphr.srcvoc") \
  *                 and os.path.isfile(stem + ".binphr.tgtdata") \             # <<<<<<<<<<<<<<
  *                 and os.path.isfile(stem + ".binphr.tgtvoc")
- * 
+ *
  */
           __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_os); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_8);
@@ -6397,7 +6397,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_4canLoad(CYTHON
  *                 and os.path.isfile(stem + ".binphr.srcvoc") \
  *                 and os.path.isfile(stem + ".binphr.tgtdata") \
  *                 and os.path.isfile(stem + ".binphr.tgtvoc")             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef TargetProduction getTargetProduction(self, cdictree.StringTgtCand& cand, wa = None, converter = None):
  */
             __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_os); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 250; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -6449,7 +6449,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_4canLoad(CYTHON
   }
 
   /* "moses/dictree.pyx":236
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, stem, bint wa = False):             # <<<<<<<<<<<<<<
  *         """This sanity check was added to the constructor, but you can access it from outside this class
@@ -6475,7 +6475,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_4canLoad(CYTHON
 
 /* "moses/dictree.pyx":252
  *                 and os.path.isfile(stem + ".binphr.tgtvoc")
- * 
+ *
  *     cdef TargetProduction getTargetProduction(self, cdictree.StringTgtCand& cand, wa = None, converter = None):             # <<<<<<<<<<<<<<
  *         """Converts a StringTgtCandidate (c++ object) and possibly a word-alignment info (string) to a TargetProduction (python object)."""
  *         cdef list words = [cand.tokens[i].c_str() for i in xrange(cand.tokens.size())]
@@ -6538,7 +6538,7 @@ static struct __pyx_obj_5moses_7dictree_TargetProduction *__pyx_f_5moses_7dictre
  *         cdef list words = [cand.tokens[i].c_str() for i in xrange(cand.tokens.size())]
  *         cdef list scores = [score for score in cand.scores] if converter is None else [converter(score) for score in cand.scores]             # <<<<<<<<<<<<<<
  *         return TargetProduction(words, scores, wa)
- * 
+ *
  */
   __pyx_t_5 = (__pyx_v_converter == Py_None);
   if ((__pyx_t_5 != 0)) {
@@ -6592,7 +6592,7 @@ static struct __pyx_obj_5moses_7dictree_TargetProduction *__pyx_f_5moses_7dictre
  *         cdef list words = [cand.tokens[i].c_str() for i in xrange(cand.tokens.size())]
  *         cdef list scores = [score for score in cand.scores] if converter is None else [converter(score) for score in cand.scores]
  *         return TargetProduction(words, scores, wa)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def query(self, line, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
@@ -6616,7 +6616,7 @@ static struct __pyx_obj_5moses_7dictree_TargetProduction *__pyx_f_5moses_7dictre
 
   /* "moses/dictree.pyx":252
  *                 and os.path.isfile(stem + ".binphr.tgtvoc")
- * 
+ *
  *     cdef TargetProduction getTargetProduction(self, cdictree.StringTgtCand& cand, wa = None, converter = None):             # <<<<<<<<<<<<<<
  *         """Converts a StringTgtCandidate (c++ object) and possibly a word-alignment info (string) to a TargetProduction (python object)."""
  *         cdef list words = [cand.tokens[i].c_str() for i in xrange(cand.tokens.size())]
@@ -6641,7 +6641,7 @@ static struct __pyx_obj_5moses_7dictree_TargetProduction *__pyx_f_5moses_7dictre
 
 /* "moses/dictree.pyx":258
  *         return TargetProduction(words, scores, wa)
- * 
+ *
  *     def query(self, line, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -6738,7 +6738,7 @@ static PyObject *__pyx_gb_5moses_7dictree_20PhraseDictionaryTree_5query_2generat
  *         cdef vector[string]* wa = NULL
  *         cdef Production source = Production(f.c_str() for f in fphrase)             # <<<<<<<<<<<<<<
  *         cdef QueryResult results = QueryResult(source)
- * 
+ *
  */
 
 static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_5query_genexpr(PyObject *__pyx_self) {
@@ -6836,7 +6836,7 @@ static PyObject *__pyx_gb_5moses_7dictree_20PhraseDictionaryTree_5query_2generat
 
 /* "moses/dictree.pyx":258
  *         return TargetProduction(words, scores, wa)
- * 
+ *
  *     def query(self, line, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -6930,7 +6930,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_6query(struct _
  *         cdef vector[string]* wa = NULL
  *         cdef Production source = Production(f.c_str() for f in fphrase)             # <<<<<<<<<<<<<<
  *         cdef QueryResult results = QueryResult(source)
- * 
+ *
  */
   __pyx_t_1 = __pyx_pf_5moses_7dictree_20PhraseDictionaryTree_5query_genexpr(((PyObject*)__pyx_cur_scope)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -6949,7 +6949,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_6query(struct _
  *         cdef vector[string]* wa = NULL
  *         cdef Production source = Production(f.c_str() for f in fphrase)
  *         cdef QueryResult results = QueryResult(source)             # <<<<<<<<<<<<<<
- * 
+ *
  *         if not self.wa:
  */
   __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 272; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -6965,7 +6965,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_6query(struct _
 
   /* "moses/dictree.pyx":274
  *         cdef QueryResult results = QueryResult(source)
- * 
+ *
  *         if not self.wa:             # <<<<<<<<<<<<<<
  *             self.tree.GetTargetCandidates(fphrase, rv[0])
  *             results.extend([self.getTargetProduction(candidate, None, converter) for candidate in rv[0]])
@@ -6974,7 +6974,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_6query(struct _
   if (__pyx_t_6) {
 
     /* "moses/dictree.pyx":275
- * 
+ *
  *         if not self.wa:
  *             self.tree.GetTargetCandidates(fphrase, rv[0])             # <<<<<<<<<<<<<<
  *             results.extend([self.getTargetProduction(candidate, None, converter) for candidate in rv[0]])
@@ -7175,7 +7175,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_6query(struct _
  *             return QueryResult(source, results[0:self.tableLimit])
  *         else:
  *             return results             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class OnDiskWrapper(DictionaryTree):
  */
     __Pyx_XDECREF(__pyx_r);
@@ -7186,7 +7186,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_6query(struct _
 
   /* "moses/dictree.pyx":258
  *         return TargetProduction(words, scores, wa)
- * 
+ *
  *     def query(self, line, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -7211,7 +7211,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_6query(struct _
 }
 
 /* "moses/dictree.pyx":207
- * 
+ *
  *     cdef cdictree.PhraseDictionaryTree* tree
  *     cdef readonly bytes path             # <<<<<<<<<<<<<<
  *     cdef readonly unsigned nscores
@@ -7346,7 +7346,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_2wa___get__(str
  *     cdef readonly bint wa
  *     cdef readonly bytes delimiters             # <<<<<<<<<<<<<<
  *     cdef readonly unsigned tableLimit
- * 
+ *
  */
 
 /* Python wrapper */
@@ -7382,7 +7382,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_10delimiters___
  *     cdef readonly bint wa
  *     cdef readonly bytes delimiters
  *     cdef readonly unsigned tableLimit             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __cinit__(self, bytes path, unsigned tableLimit = 20, unsigned nscores = 5, bint wa = False, delimiters = ' \t'):
  */
 
@@ -7427,7 +7427,7 @@ static PyObject *__pyx_pf_5moses_7dictree_20PhraseDictionaryTree_10tableLimit___
 
 /* "moses/dictree.pyx":297
  *     cdef readonly unsigned tableLimit
- * 
+ *
  *     def __cinit__(self, bytes path, unsigned tableLimit = 20, delimiters = ' \t'):             # <<<<<<<<<<<<<<
  *         self.delimiters = delimiters
  *         self.tableLimit = tableLimit
@@ -7527,7 +7527,7 @@ static int __pyx_pf_5moses_7dictree_13OnDiskWrapper___cinit__(struct __pyx_obj_5
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
   /* "moses/dictree.pyx":298
- * 
+ *
  *     def __cinit__(self, bytes path, unsigned tableLimit = 20, delimiters = ' \t'):
  *         self.delimiters = delimiters             # <<<<<<<<<<<<<<
  *         self.tableLimit = tableLimit
@@ -7565,7 +7565,7 @@ static int __pyx_pf_5moses_7dictree_13OnDiskWrapper___cinit__(struct __pyx_obj_5
  *         self.wrapper = new condiskpt.OnDiskWrapper()
  *         self.wrapper.BeginLoad(string(path))             # <<<<<<<<<<<<<<
  *         self.finder = new condiskpt.OnDiskQuery(self.wrapper[0])
- * 
+ *
  */
   __pyx_t_2 = __Pyx_PyObject_AsString(__pyx_v_path); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 301; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   try {
@@ -7580,14 +7580,14 @@ static int __pyx_pf_5moses_7dictree_13OnDiskWrapper___cinit__(struct __pyx_obj_5
  *         self.wrapper = new condiskpt.OnDiskWrapper()
  *         self.wrapper.BeginLoad(string(path))
  *         self.finder = new condiskpt.OnDiskQuery(self.wrapper[0])             # <<<<<<<<<<<<<<
- * 
+ *
  *     @classmethod
  */
   __pyx_v_self->finder = new OnDiskPt::OnDiskQuery((__pyx_v_self->wrapper[0]));
 
   /* "moses/dictree.pyx":297
  *     cdef readonly unsigned tableLimit
- * 
+ *
  *     def __cinit__(self, bytes path, unsigned tableLimit = 20, delimiters = ' \t'):             # <<<<<<<<<<<<<<
  *         self.delimiters = delimiters
  *         self.tableLimit = tableLimit
@@ -7606,7 +7606,7 @@ static int __pyx_pf_5moses_7dictree_13OnDiskWrapper___cinit__(struct __pyx_obj_5
 }
 
 /* "moses/dictree.pyx":305
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, stem, bint wa = False):             # <<<<<<<<<<<<<<
  *         return os.path.isfile(stem + "/Misc.dat") \
@@ -7808,7 +7808,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_2canLoad(CYTHON_UNUSED
  *             and os.path.isfile(stem + "/TargetColl.dat") \
  *             and os.path.isfile(stem + "/TargetInd.dat") \             # <<<<<<<<<<<<<<
  *             and os.path.isfile(stem + "/Vocab.dat")
- * 
+ *
  */
         __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_os); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 309; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_6);
@@ -7837,7 +7837,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_2canLoad(CYTHON_UNUSED
  *             and os.path.isfile(stem + "/TargetColl.dat") \
  *             and os.path.isfile(stem + "/TargetInd.dat") \
  *             and os.path.isfile(stem + "/Vocab.dat")             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef Production getSourceProduction(self, vector[string] ftokens):
  */
           __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_os); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -7888,7 +7888,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_2canLoad(CYTHON_UNUSED
   goto __pyx_L0;
 
   /* "moses/dictree.pyx":305
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, stem, bint wa = False):             # <<<<<<<<<<<<<<
  *         return os.path.isfile(stem + "/Misc.dat") \
@@ -7914,7 +7914,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_2canLoad(CYTHON_UNUSED
 
 /* "moses/dictree.pyx":312
  *             and os.path.isfile(stem + "/Vocab.dat")
- * 
+ *
  *     cdef Production getSourceProduction(self, vector[string] ftokens):             # <<<<<<<<<<<<<<
  *         cdef list tokens = [f.c_str() for f in ftokens]
  *         return Production(tokens[:-1], tokens[-1])
@@ -7936,11 +7936,11 @@ static struct __pyx_obj_5moses_7dictree_Production *__pyx_f_5moses_7dictree_13On
   __Pyx_RefNannySetupContext("getSourceProduction", 0);
 
   /* "moses/dictree.pyx":313
- * 
+ *
  *     cdef Production getSourceProduction(self, vector[string] ftokens):
  *         cdef list tokens = [f.c_str() for f in ftokens]             # <<<<<<<<<<<<<<
  *         return Production(tokens[:-1], tokens[-1])
- * 
+ *
  */
   __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 313; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -7962,7 +7962,7 @@ static struct __pyx_obj_5moses_7dictree_Production *__pyx_f_5moses_7dictree_13On
  *     cdef Production getSourceProduction(self, vector[string] ftokens):
  *         cdef list tokens = [f.c_str() for f in ftokens]
  *         return Production(tokens[:-1], tokens[-1])             # <<<<<<<<<<<<<<
- * 
+ *
  *     def query(self, line, converter = None, cmp = None, key = None):
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
@@ -7987,7 +7987,7 @@ static struct __pyx_obj_5moses_7dictree_Production *__pyx_f_5moses_7dictree_13On
 
   /* "moses/dictree.pyx":312
  *             and os.path.isfile(stem + "/Vocab.dat")
- * 
+ *
  *     cdef Production getSourceProduction(self, vector[string] ftokens):             # <<<<<<<<<<<<<<
  *         cdef list tokens = [f.c_str() for f in ftokens]
  *         return Production(tokens[:-1], tokens[-1])
@@ -8009,7 +8009,7 @@ static struct __pyx_obj_5moses_7dictree_Production *__pyx_f_5moses_7dictree_13On
 
 /* "moses/dictree.pyx":316
  *         return Production(tokens[:-1], tokens[-1])
- * 
+ *
  *     def query(self, line, converter = None, cmp = None, key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -8231,7 +8231,7 @@ static PyObject *__pyx_gb_5moses_7dictree_13OnDiskWrapper_5query_2generator4(__p
 
 /* "moses/dictree.pyx":316
  *         return Production(tokens[:-1], tokens[-1])
- * 
+ *
  *     def query(self, line, converter = None, cmp = None, key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -8549,7 +8549,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_4query(struct __pyx_ob
  *         if cmp:
  *             results.sort(cmp=cmp, key=key)             # <<<<<<<<<<<<<<
  *         return results
- * 
+ *
  */
     __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_results), __pyx_n_s_sort); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
@@ -8570,7 +8570,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_4query(struct __pyx_ob
  *         if cmp:
  *             results.sort(cmp=cmp, key=key)
  *         return results             # <<<<<<<<<<<<<<
- * 
+ *
  * def load(path, nscores, limit):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -8580,7 +8580,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_4query(struct __pyx_ob
 
   /* "moses/dictree.pyx":316
  *         return Production(tokens[:-1], tokens[-1])
- * 
+ *
  *     def query(self, line, converter = None, cmp = None, key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -8611,7 +8611,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_4query(struct __pyx_ob
  *     cdef condiskpt.OnDiskQuery *finder
  *     cdef readonly bytes delimiters             # <<<<<<<<<<<<<<
  *     cdef readonly unsigned tableLimit
- * 
+ *
  */
 
 /* Python wrapper */
@@ -8647,7 +8647,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_10delimiters___get__(s
  *     cdef condiskpt.OnDiskQuery *finder
  *     cdef readonly bytes delimiters
  *     cdef readonly unsigned tableLimit             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __cinit__(self, bytes path, unsigned tableLimit = 20, delimiters = ' \t'):
  */
 
@@ -8692,7 +8692,7 @@ static PyObject *__pyx_pf_5moses_7dictree_13OnDiskWrapper_10tableLimit___get__(s
 
 /* "moses/dictree.pyx":349
  *         return results
- * 
+ *
  * def load(path, nscores, limit):             # <<<<<<<<<<<<<<
  *     """Finds out the correct implementation depending on the content of 'path' and returns the appropriate dictionary tree."""
  *     if PhraseDictionaryTree.canLoad(path, False):
@@ -8953,7 +8953,7 @@ static PyObject *__pyx_pf_5moses_7dictree_2load(CYTHON_UNUSED PyObject *__pyx_se
 
   /* "moses/dictree.pyx":349
  *         return results
- * 
+ *
  * def load(path, nscores, limit):             # <<<<<<<<<<<<<<
  *     """Finds out the correct implementation depending on the content of 'path' and returns the appropriate dictionary tree."""
  *     if PhraseDictionaryTree.canLoad(path, False):
@@ -8973,7 +8973,7 @@ static PyObject *__pyx_pf_5moses_7dictree_2load(CYTHON_UNUSED PyObject *__pyx_se
 }
 
 /* "string.from_py":13
- * 
+ *
  * @cname("__pyx_convert_string_from_py_")
  * cdef string __pyx_convert_string_from_py_(object o) except *:             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t length
@@ -8996,7 +8996,7 @@ static std::string __pyx_convert_string_from_py_(PyObject *__pyx_v_o) {
  *     cdef Py_ssize_t length
  *     cdef char* data = __Pyx_PyObject_AsStringAndSize(o, &length)             # <<<<<<<<<<<<<<
  *     return string(data, length)
- * 
+ *
  */
   __pyx_t_1 = __Pyx_PyObject_AsStringAndSize(__pyx_v_o, (&__pyx_v_length)); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_data = __pyx_t_1;
@@ -9005,14 +9005,14 @@ static std::string __pyx_convert_string_from_py_(PyObject *__pyx_v_o) {
  *     cdef Py_ssize_t length
  *     cdef char* data = __Pyx_PyObject_AsStringAndSize(o, &length)
  *     return string(data, length)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
  */
   __pyx_r = std::string(__pyx_v_data, __pyx_v_length);
   goto __pyx_L0;
 
   /* "string.from_py":13
- * 
+ *
  * @cname("__pyx_convert_string_from_py_")
  * cdef string __pyx_convert_string_from_py_(object o) except *:             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t length
@@ -9028,11 +9028,11 @@ static std::string __pyx_convert_string_from_py_(PyObject *__pyx_v_o) {
 }
 
 /* "vector.to_py":63
- * 
+ *
  * @cname("__pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue")
  * cdef object __pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue(vector[X]& v):             # <<<<<<<<<<<<<<
  *     return [X_to_py(v[i]) for i in range(v.size())]
- * 
+ *
  */
 
 static PyObject *__pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue(const std::vector<__pyx_t_5moses_8cdictree_FValue> &__pyx_v_v) {
@@ -9052,8 +9052,8 @@ static PyObject *__pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue(cons
  * @cname("__pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue")
  * cdef object __pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue(vector[X]& v):
  *     return [X_to_py(v[i]) for i in range(v.size())]             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -9071,11 +9071,11 @@ static PyObject *__pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue(cons
   goto __pyx_L0;
 
   /* "vector.to_py":63
- * 
+ *
  * @cname("__pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue")
  * cdef object __pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue(vector[X]& v):             # <<<<<<<<<<<<<<
  *     return [X_to_py(v[i]) for i in range(v.size())]
- * 
+ *
  */
 
   /* function exit code */
@@ -9091,11 +9091,11 @@ static PyObject *__pyx_convert_vector_to_py___pyx_t_5moses_8cdictree_FValue(cons
 }
 
 /* "pair.to_py":180
- * 
+ *
  * @cname("__pyx_convert_pair_to_py_int____int")
  * cdef object __pyx_convert_pair_to_py_int____int(pair[X,Y]& p):             # <<<<<<<<<<<<<<
  *     return X_to_py(p.first), Y_to_py(p.second)
- * 
+ *
  */
 
 static PyObject *__pyx_convert_pair_to_py_int____int(const std::pair<int,int> &__pyx_v_p) {
@@ -9113,8 +9113,8 @@ static PyObject *__pyx_convert_pair_to_py_int____int(const std::pair<int,int> &_
  * @cname("__pyx_convert_pair_to_py_int____int")
  * cdef object __pyx_convert_pair_to_py_int____int(pair[X,Y]& p):
  *     return X_to_py(p.first), Y_to_py(p.second)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_p.first); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -9134,11 +9134,11 @@ static PyObject *__pyx_convert_pair_to_py_int____int(const std::pair<int,int> &_
   goto __pyx_L0;
 
   /* "pair.to_py":180
- * 
+ *
  * @cname("__pyx_convert_pair_to_py_int____int")
  * cdef object __pyx_convert_pair_to_py_int____int(pair[X,Y]& p):             # <<<<<<<<<<<<<<
  *     return X_to_py(p.first), Y_to_py(p.second)
- * 
+ *
  */
 
   /* function exit code */
@@ -9155,11 +9155,11 @@ static PyObject *__pyx_convert_pair_to_py_int____int(const std::pair<int,int> &_
 }
 
 /* "vector.to_py":63
- * 
+ *
  * @cname("__pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair")
  * cdef object __pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair(vector[X]& v):             # <<<<<<<<<<<<<<
  *     return [X_to_py(v[i]) for i in range(v.size())]
- * 
+ *
  */
 
 static PyObject *__pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair(const std::vector<OnDiskPt::AlignPair> &__pyx_v_v) {
@@ -9179,8 +9179,8 @@ static PyObject *__pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair(const std:
  * @cname("__pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair")
  * cdef object __pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair(vector[X]& v):
  *     return [X_to_py(v[i]) for i in range(v.size())]             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[4]; __pyx_lineno = 64; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -9198,11 +9198,11 @@ static PyObject *__pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair(const std:
   goto __pyx_L0;
 
   /* "vector.to_py":63
- * 
+ *
  * @cname("__pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair")
  * cdef object __pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair(vector[X]& v):             # <<<<<<<<<<<<<<
  *     return [X_to_py(v[i]) for i in range(v.size())]
- * 
+ *
  */
 
   /* function exit code */
@@ -11255,7 +11255,7 @@ static int __Pyx_InitCachedConstants(void) {
  *     elif isinstance(data, unicode):
  *         return data.encode('UTF-8')             # <<<<<<<<<<<<<<
  *     raise TypeError('Cannot convert %s to string' % type(data))
- * 
+ *
  */
   __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_UTF_8); if (unlikely(!__pyx_tuple_)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple_);
@@ -11273,7 +11273,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__4);
 
   /* "moses/dictree.pyx":156
- * 
+ *
  *     @staticmethod
  *     def desc(x, y, key = lambda r: r.scores[0]):             # <<<<<<<<<<<<<<
  *         """Returns the sign of key(y) - key(x).
@@ -11286,7 +11286,7 @@ static int __Pyx_InitCachedConstants(void) {
 
   /* "moses/dictree.pyx":349
  *         return results
- * 
+ *
  * def load(path, nscores, limit):             # <<<<<<<<<<<<<<
  *     """Finds out the correct implementation depending on the content of 'path' and returns the appropriate dictionary tree."""
  *     if PhraseDictionaryTree.canLoad(path, False):
@@ -11539,7 +11539,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
  * cimport cdictree
  * cimport condiskpt
  * from math import log             # <<<<<<<<<<<<<<
- * 
+ *
  * cpdef int fsign(float x):
  */
   __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 10; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -11558,7 +11558,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":144
  *     cdef readonly FValues scores
- * 
+ *
  *     def __init__(self, rhs, scores, alignment = [], lhs = None):             # <<<<<<<<<<<<<<
  *         """
  *         :rhs right-hand side tokens (sequence of terminals and nonterminals)
@@ -11570,7 +11570,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
   __pyx_t_1 = 0;
 
   /* "moses/dictree.pyx":156
- * 
+ *
  *     @staticmethod
  *     def desc(x, y, key = lambda r: r.scores[0]):             # <<<<<<<<<<<<<<
  *         """Returns the sign of key(y) - key(x).
@@ -11584,7 +11584,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":155
  *         self.alignment = Alignment(alignment)
- * 
+ *
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def desc(x, y, key = lambda r: r.scores[0]):
  *         """Returns the sign of key(y) - key(x).
@@ -11604,7 +11604,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
   PyType_Modified(__pyx_ptype_5moses_7dictree_TargetProduction);
 
   /* "moses/dictree.pyx":156
- * 
+ *
  *     @staticmethod
  *     def desc(x, y, key = lambda r: r.scores[0]):             # <<<<<<<<<<<<<<
  *         """Returns the sign of key(y) - key(x).
@@ -11615,7 +11615,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":155
  *         self.alignment = Alignment(alignment)
- * 
+ *
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def desc(x, y, key = lambda r: r.scores[0]):
  *         """Returns the sign of key(y) - key(x).
@@ -11634,7 +11634,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":179
  *     cdef readonly Production source
- * 
+ *
  *     def __init__(self, source, targets = []):             # <<<<<<<<<<<<<<
  *         super(QueryResult, self).__init__(targets)
  *         self.source = source
@@ -11646,7 +11646,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
   __pyx_t_1 = 0;
 
   /* "moses/dictree.pyx":187
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, path, bint wa = False):             # <<<<<<<<<<<<<<
  *         """Whether or not the path represents a valid table for that class."""
@@ -11657,7 +11657,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":186
  * cdef class DictionaryTree(object):
- * 
+ *
  *     @classmethod             # <<<<<<<<<<<<<<
  *     def canLoad(cls, path, bint wa = False):
  *         """Whether or not the path represents a valid table for that class."""
@@ -11670,7 +11670,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
   PyType_Modified(__pyx_ptype_5moses_7dictree_DictionaryTree);
 
   /* "moses/dictree.pyx":236
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, stem, bint wa = False):             # <<<<<<<<<<<<<<
  *         """This sanity check was added to the constructor, but you can access it from outside this class
@@ -11681,7 +11681,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":235
  *         del self.tree
- * 
+ *
  *     @classmethod             # <<<<<<<<<<<<<<
  *     def canLoad(cls, stem, bint wa = False):
  *         """This sanity check was added to the constructor, but you can access it from outside this class
@@ -11695,7 +11695,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":258
  *         return TargetProduction(words, scores, wa)
- * 
+ *
  *     def query(self, line, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):             # <<<<<<<<<<<<<<
  *         """
  *         Returns a list of target productions that translate a given source production
@@ -11712,7 +11712,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
   __pyx_t_1 = 0;
 
   /* "moses/dictree.pyx":305
- * 
+ *
  *     @classmethod
  *     def canLoad(cls, stem, bint wa = False):             # <<<<<<<<<<<<<<
  *         return os.path.isfile(stem + "/Misc.dat") \
@@ -11723,7 +11723,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":304
  *         self.finder = new condiskpt.OnDiskQuery(self.wrapper[0])
- * 
+ *
  *     @classmethod             # <<<<<<<<<<<<<<
  *     def canLoad(cls, stem, bint wa = False):
  *         return os.path.isfile(stem + "/Misc.dat") \
@@ -11737,7 +11737,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":349
  *         return results
- * 
+ *
  * def load(path, nscores, limit):             # <<<<<<<<<<<<<<
  *     """Finds out the correct implementation depending on the content of 'path' and returns the appropriate dictionary tree."""
  *     if PhraseDictionaryTree.canLoad(path, False):
@@ -11749,7 +11749,7 @@ PyMODINIT_FUNC PyInit_dictree(void)
 
   /* "moses/dictree.pyx":1
  * # This module wraps phrase/rule tables             # <<<<<<<<<<<<<<
- * 
+ *
  * from libcpp.string cimport string
  */
   __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -11758,11 +11758,11 @@ PyMODINIT_FUNC PyInit_dictree(void)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "vector.to_py":63
- * 
+ *
  * @cname("__pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair")
  * cdef object __pyx_convert_vector_to_py_OnDiskPt_3a__3a_AlignPair(vector[X]& v):             # <<<<<<<<<<<<<<
  *     return [X_to_py(v[i]) for i in range(v.size())]
- * 
+ *
  */
   goto __pyx_L0;
   __pyx_L1_error:;

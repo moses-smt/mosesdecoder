@@ -37,7 +37,7 @@ namespace Moses
 {
 
 ChartParserUnknown
-::ChartParserUnknown(ttasksptr const& ttask) 
+::ChartParserUnknown(ttasksptr const& ttask)
   : m_ttask(ttask)
 { }
 
@@ -141,7 +141,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 }
 
 ChartParser
-::ChartParser(ttasksptr const& ttask, ChartCellCollectionBase &cells) 
+::ChartParser(ttasksptr const& ttask, ChartCellCollectionBase &cells)
   : m_ttask(ttask)
   , m_unknown(ttask)
   , m_decodeGraphList(StaticData::Instance().GetDecodeGraphs())

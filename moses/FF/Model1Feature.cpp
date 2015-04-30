@@ -19,7 +19,7 @@ Model1Vocabulary::Model1Vocabulary()
   Store(m_NULL,0);
 }
 
-bool Model1Vocabulary::Store(const Factor* word, const unsigned id) 
+bool Model1Vocabulary::Store(const Factor* word, const unsigned id)
 {
   boost::unordered_map<const Factor*, unsigned>::iterator iter = m_lookup.find( word );
   if ( iter != m_lookup.end() ) {
@@ -33,7 +33,7 @@ bool Model1Vocabulary::Store(const Factor* word, const unsigned id)
   return true;
 }
 
-unsigned Model1Vocabulary::StoreIfNew(const Factor* word) 
+unsigned Model1Vocabulary::StoreIfNew(const Factor* word)
 {
   boost::unordered_map<const Factor*, unsigned>::iterator iter = m_lookup.find( word );
 
@@ -47,7 +47,7 @@ unsigned Model1Vocabulary::StoreIfNew(const Factor* word)
   return id;
 }
 
-unsigned Model1Vocabulary::GetWordID(const Factor* word) const 
+unsigned Model1Vocabulary::GetWordID(const Factor* word) const
 {
   boost::unordered_map<const Factor*, unsigned>::const_iterator iter = m_lookup.find( word );
   if ( iter == m_lookup.end() ) {
@@ -56,7 +56,7 @@ unsigned Model1Vocabulary::GetWordID(const Factor* word) const
   return iter->second;
 }
 
-const Factor* Model1Vocabulary::GetWord(unsigned id) const 
+const Factor* Model1Vocabulary::GetWord(unsigned id) const
 {
   if (id >= m_vocab.size()) {
     return NULL;
@@ -64,7 +64,7 @@ const Factor* Model1Vocabulary::GetWord(unsigned id) const
   return m_vocab[ id ];
 }
 
-void Model1Vocabulary::Load(const std::string& fileName) 
+void Model1Vocabulary::Load(const std::string& fileName)
 {
   InputFileStream inFile(fileName);
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -84,7 +84,7 @@ void Model1Vocabulary::Load(const std::string& fileName)
       UTIL_THROW_IF2(!stored, "Line " << i << " in " << fileName << " overwrites existing vocabulary entry.");
     }
   }
-  while ( getline(inFile, line) ) 
+  while ( getline(inFile, line) )
   {
     ++i;
     std::vector<std::string> tokens = Tokenize(line);
@@ -104,7 +104,7 @@ void Model1LexicalTable::Load(const std::string &fileName, const Model1Vocabular
   std::string line;
 
   unsigned i = 0;
-  while ( getline(inFile, line) ) 
+  while ( getline(inFile, line) )
   {
     ++i;
     std::vector<std::string> tokens = Tokenize(line);
@@ -126,8 +126,8 @@ void Model1LexicalTable::Load(const std::string &fileName, const Model1Vocabular
 float Model1LexicalTable::GetProbability(const Factor* wordS, const Factor* wordT) const
 {
   float prob = m_floor;
- 
-  boost::unordered_map< const Factor*, boost::unordered_map< const Factor*, float > >::const_iterator iter1 = m_ltable.find( wordS ); 
+
+  boost::unordered_map< const Factor*, boost::unordered_map< const Factor*, float > >::const_iterator iter1 = m_ltable.find( wordS );
 
   if ( iter1 != m_ltable.end() ) {
     boost::unordered_map< const Factor*, float >::const_iterator iter2 = iter1->second.find( wordT );
@@ -193,10 +193,10 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
   float score = 0.0;
   float norm = TransformScore(1+sentence.GetSize());
 
-  for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT) 
+  for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT)
   {
     const Word &wordT = targetPhrase.GetWord(posT);
-    if ( !wordT.IsNonTerminal() ) 
+    if ( !wordT.IsNonTerminal() )
     {
       float thisWordProb = m_model1.GetProbability(m_emptyWord,wordT[0]); // probability conditioned on empty word
 
@@ -231,7 +231,7 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
         float thisWordScore = TransformScore(thisWordProb) - norm;
         FEATUREVERBOSE(3, "score( " << wordT << " ) = " << thisWordScore << std::endl);
         {
-          #ifdef WITH_THREADS 
+          #ifdef WITH_THREADS
           // need to update cache; write lock
           boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
           #endif
@@ -240,14 +240,14 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
         score += thisWordScore;
       }
     }
-  } 
+  }
 
   scoreBreakdown.PlusEquals(this, score);
 }
-  
-void Model1Feature::CleanUpAfterSentenceProcessing(const InputType& source) 
+
+void Model1Feature::CleanUpAfterSentenceProcessing(const InputType& source)
 {
-  #ifdef WITH_THREADS 
+  #ifdef WITH_THREADS
   // need to update cache; write lock
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
   #endif

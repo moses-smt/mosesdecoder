@@ -15,15 +15,15 @@ namespace ugdiss
 {
 
   TokenIndex::
-  TokenIndex(string unkToken) 
+  TokenIndex(string unkToken)
     : ridx(0),unkLabel(unkToken),unkId(1),numTokens(0)
-  { 
+  {
     lock.reset(new boost::mutex());
   };
-  
+
 #if 0
   TokenIndex::
-  TokenIndex(string fname, string unkToken,bool dyna) 
+  TokenIndex(string fname, string unkToken,bool dyna)
     : ridx(0),unkLabel(unkToken)
   {
     this->open(fname,unkToken,dyna);
@@ -58,8 +58,8 @@ namespace ugdiss
     if (!unkToken.empty())
       {
 	Entry const* bla = lower_bound(startIdx,endIdx,unkToken.c_str(),comp);
-	unkId = ((bla < endIdx && unkToken == comp.base+bla->offset) 
-                 ? bla->id 
+	unkId = ((bla < endIdx && unkToken == comp.base+bla->offset)
+                 ? bla->id
                  : numTokens);
       }
     this->dynamic=dyna;
@@ -69,7 +69,7 @@ namespace ugdiss
         this->newWords.reset(new vector<string>());
       }
   }
-  
+
   void
   TokenIndex::
   close()
@@ -79,9 +79,9 @@ namespace ugdiss
 
   TokenIndex::
   CompFunc::
-  CompFunc() 
+  CompFunc()
   {};
-  
+
   bool
   TokenIndex::
   CompFunc::
@@ -90,7 +90,7 @@ namespace ugdiss
     return strcmp(base+A.offset,w) < 0;
   };
 
-  id_type 
+  id_type
   TokenIndex::
   operator[](char const* p) const
   {
@@ -101,7 +101,7 @@ namespace ugdiss
     if (!dynamic) return unkId;
     boost::lock_guard<boost::mutex> lk(*this->lock);
     // stuff below is new as of 2011-01-30, for dynamic adding of unknown items
-    // IMPORTANT: numTokens is not currently not changed, it is the number of 
+    // IMPORTANT: numTokens is not currently not changed, it is the number of
     // PRE-EXISING TOKENS, not including dynamically added Items
     map<string,id_type>::value_type newItem(p,str2idExtra->size()+numTokens);
     pair<map<string,id_type>::iterator,bool> foo = str2idExtra->insert(newItem);
@@ -110,14 +110,14 @@ namespace ugdiss
     return foo.first->second;
   }
 
-  id_type 
+  id_type
   TokenIndex::
   operator[](string const& w) const
   {
     return (*this)[w.c_str()];
   }
 
-  vector<char const*> 
+  vector<char const*>
   TokenIndex::
   reverseIndex() const
   {
@@ -125,11 +125,11 @@ namespace ugdiss
 
     // cout << "tokenindex has " << numToks << " tokens" << endl;
 
-    vector<char const*> v(numToks,NULL); 
+    vector<char const*> v(numToks,NULL);
     // v.reserve(endIdx-startIdx);
     for (Entry const* x = startIdx; x != endIdx; x++)
       {
-	if (x->id >= v.size()) 
+	if (x->id >= v.size())
 	  v.resize(x->id+1);
 	v[x->id] = comp.base+x->offset;
       }
@@ -141,12 +141,12 @@ namespace ugdiss
   TokenIndex::
   operator[](id_type id) const
   {
-    if (!ridx.size()) 
+    if (!ridx.size())
       {
 	boost::lock_guard<boost::mutex> lk(*this->lock);
 	if (!ridx.size()) ridx = reverseIndex();
       }
-    if (id < ridx.size())  
+    if (id < ridx.size())
       return ridx[id];
     boost::lock_guard<boost::mutex> lk(*this->lock);
     if (dynamic && id < ridx.size()+newWords->size())
@@ -156,26 +156,26 @@ namespace ugdiss
 
   void
   TokenIndex::
-  iniReverseIndex() 
+  iniReverseIndex()
   {
-    if (!ridx.size()) 
+    if (!ridx.size())
       {
 	boost::lock_guard<boost::mutex> lk(*this->lock);
 	if (!ridx.size()) ridx = reverseIndex();
       }
   }
 
-  
+
   char const* const
   TokenIndex::
-  operator[](id_type id) 
+  operator[](id_type id)
   {
-    if (!ridx.size()) 
+    if (!ridx.size())
       {
 	boost::lock_guard<boost::mutex> lk(*this->lock);
 	if (!ridx.size()) ridx = reverseIndex();
       }
-    if (id < ridx.size())  
+    if (id < ridx.size())
       return ridx[id];
     boost::lock_guard<boost::mutex> lk(*this->lock);
     if (dynamic && id < ridx.size()+newWords->size())
@@ -183,11 +183,11 @@ namespace ugdiss
     return unkLabel.c_str();
   }
 
-  string 
+  string
   TokenIndex::
-  toString(vector<id_type> const& v) 
+  toString(vector<id_type> const& v)
   {
-    if (!ridx.size()) 
+    if (!ridx.size())
       {
 	boost::lock_guard<boost::mutex> lk(*this->lock);
 	if (!ridx.size()) ridx = reverseIndex();
@@ -198,11 +198,11 @@ namespace ugdiss
     return buf.str();
   }
 
-  string 
+  string
   TokenIndex::
   toString(vector<id_type> const& v) const
   {
-    if (!ridx.size()) 
+    if (!ridx.size())
       {
 	boost::lock_guard<boost::mutex> lk(*this->lock);
 	if (!ridx.size()) ridx = reverseIndex();
@@ -213,11 +213,11 @@ namespace ugdiss
     return buf.str();
   }
 
-  string 
+  string
   TokenIndex::
-  toString(id_type const* start, id_type const* const stop) 
+  toString(id_type const* start, id_type const* const stop)
   {
-    if (!ridx.size()) 
+    if (!ridx.size())
       {
 	boost::lock_guard<boost::mutex> lk(*this->lock);
 	if (!ridx.size()) ridx = reverseIndex();
@@ -230,11 +230,11 @@ namespace ugdiss
     return buf.str();
   }
 
-  string 
+  string
   TokenIndex::
   toString(id_type const* start, id_type const* const stop) const
   {
-    if (!ridx.size()) 
+    if (!ridx.size())
       {
 	boost::lock_guard<boost::mutex> lk(*this->lock);
 	if (!ridx.size()) ridx = reverseIndex();
@@ -266,7 +266,7 @@ namespace ugdiss
   {
     bool allgood = true; string w;
     v.clear();
-    for (istringstream buf(line); buf>>w;) 
+    for (istringstream buf(line); buf>>w;)
       {
         v.push_back((*this)[w]);
         allgood = allgood && v.back() > 1;
@@ -325,15 +325,15 @@ namespace ugdiss
   }
 
   void
-  write_tokenindex_to_disk(vector<pair<string,uint32_t> > const& tok, 
+  write_tokenindex_to_disk(vector<pair<string,uint32_t> > const& tok,
                            string const& ofile, string const& unkToken)
   {
     typedef pair<uint32_t,id_type> IndexEntry; // offset and id
 
     // Write token strings to a buffer, keep track of offsets
-    vector<IndexEntry> index(tok.size()); 
+    vector<IndexEntry> index(tok.size());
     ostringstream data;
-    id_type unkId = tok.size(); 
+    id_type unkId = tok.size();
     for (size_t i = 0; i < tok.size(); i++)
       {
         if (tok[i].first == unkToken)
@@ -342,7 +342,7 @@ namespace ugdiss
         index[i].second = tok[i].second;  // respective ID
         data<<tok[i].first<<char(0);      // write string to buffer
       }
-    
+
     // Now write the actual file
     ofstream out(ofile.c_str());
     uint32_t vsize = index.size(); // how many vocab items?
@@ -356,26 +356,26 @@ namespace ugdiss
     out<<data.str();
   }
 
-  void 
+  void
   TokenIndex::
   write(string fname)
   {
     typedef pair<string,uint32_t>  Token;      // token and id
-    vector<Token>       tok(totalVocabSize()); 
+    vector<Token>       tok(totalVocabSize());
     for (id_type i = 0; i < tok.size(); ++i)
       tok[i] = Token((*this)[i],i);
     sort(tok.begin(),tok.end());
     write_tokenindex_to_disk(tok,fname,unkLabel);
   }
-  
-  bool 
+
+  bool
   TokenIndex::
-  isDynamic() const 
+  isDynamic() const
   {
     return dynamic;
   }
 
-  bool 
+  bool
   TokenIndex::
   setDynamic(bool on)
   {
@@ -393,7 +393,7 @@ namespace ugdiss
       }
     return ret;
   }
-  
+
   void
   TokenIndex::
   setUnkLabel(string unk)

@@ -2,9 +2,9 @@
 // A class to store "local" information (such as task-specific caches).
 // The idea is for each translation task to have a scope, which stores
 // shared pointers to task-specific objects such as caches and priors.
-// Since these objects are referenced via shared pointers, sopes can 
+// Since these objects are referenced via shared pointers, sopes can
 // share information.
-#pragma once 
+#pragma once
 
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
@@ -50,16 +50,16 @@ namespace Moses
 
     template<typename T>
     boost::shared_ptr<void> const&
-    set(void const* const key, boost::shared_ptr<T> const& val) 
-    { 
+    set(void const* const key, boost::shared_ptr<T> const& val)
+    {
       boost::unique_lock<boost::shared_mutex> lock(m_lock);
       return (m_scratchpad[key] = val);
     }
 
     template<typename T>
     boost::shared_ptr<T> const
-    get(void const* key, bool CreateNewIfNecessary=false) 
-    { 
+    get(void const* key, bool CreateNewIfNecessary=false)
+    {
       using boost::shared_mutex;
       using boost::upgrade_lock;
       // T const* key = reinterpret_cast<T const*>(xkey);
@@ -68,7 +68,7 @@ namespace Moses
       boost::shared_ptr< T > ret;
       if (m != m_scratchpad.end())
 	{
-	  if (m->second == NULL && CreateNewIfNecessary) 
+	  if (m->second == NULL && CreateNewIfNecessary)
 	    {
 	      boost::upgrade_to_unique_lock<shared_mutex> xlock(lock);
 	      m->second.reset(new T);
@@ -85,7 +85,7 @@ namespace Moses
 
     ContextScope() { }
 
-    ContextScope(ContextScope const& other) 
+    ContextScope(ContextScope const& other)
     {
       boost::unique_lock<boost::shared_mutex> lock1(this->m_lock);
       boost::unique_lock<boost::shared_mutex> lock2(other.m_lock);

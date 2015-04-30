@@ -38,13 +38,13 @@
 // TO DO:
 // - make lexical phrase scorer take addition to the "dynamic overlay" into account
 // - switch to pool of sapts, where each sapt has its own provenance feature
-//   RESEARCH QUESTION: is this more effective than having multiple phrase tables, 
+//   RESEARCH QUESTION: is this more effective than having multiple phrase tables,
 //   each with its own set of features?
 
 namespace Moses
 {
   using namespace bitext;
-  class Mmsapt 
+  class Mmsapt
 #ifndef NO_MOSES
     : public PhraseDictionary
 #endif
@@ -54,7 +54,7 @@ namespace Moses
     friend class Alignment;
     std::map<std::string,std::string> param;
     std::string m_name;
-  public:    
+  public:
     typedef L2R_Token<SimpleWordId> Token;
     typedef mmBitext<Token> mmbitext;
     typedef imBitext<Token> imbitext;
@@ -63,21 +63,21 @@ namespace Moses
     typedef PhraseScorer<Token> pscorer;
   private:
     // vector<sptr<bitext> > shards;
-    mmbitext btfix; 
-    sptr<imbitext> btdyn; 
+    mmbitext btfix;
+    sptr<imbitext> btdyn;
     std::string m_bname, m_extra_data, m_bias_file,m_bias_server;
     std::string L1;
     std::string L2;
     float  m_lbop_conf; // confidence level for lbop smoothing
     float  m_lex_alpha; // alpha paramter (j+a)/(m+a) for lexical smoothing
     // alpha parameter for lexical smoothing (joint+alpha)/(marg + alpha)
-    // must be > 0 if dynamic 
+    // must be > 0 if dynamic
     size_t m_default_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
     std::vector<std::string> m_feature_set_names; // one or more of: standard, datasource
     std::string m_bias_logfile;
     boost::scoped_ptr<ofstream> m_bias_logger; // for logging to a file
-    ostream* m_bias_log; 
+    ostream* m_bias_log;
     int m_bias_loglevel;
     LexicalReordering* m_lr_func; // associated lexical reordering function
     string m_lr_func_name; // name of associated lexical reordering function
@@ -88,47 +88,47 @@ namespace Moses
     boost::shared_ptr<SamplingBias> m_bias; // for global default bias
     boost::shared_ptr<TPCollCache> m_cache; // for global default bias
     size_t m_cache_size;  //
-    size_t input_factor;  // 
+    size_t input_factor;  //
     size_t output_factor; // we can actually return entire Tokens!
 
     // for display for human inspection (ttable dumps):
     std::vector<std::string> m_feature_names; // names of features activated
-    std::vector<bool> m_is_logval;  // keeps track of which features are log valued 
-    std::vector<bool> m_is_integer; // keeps track of which features are integer valued 
+    std::vector<bool> m_is_logval;  // keeps track of which features are log valued
+    std::vector<bool> m_is_integer; // keeps track of which features are integer valued
 
     std::vector<sptr<pscorer > > m_active_ff_fix; // activated feature functions (fix)
     std::vector<sptr<pscorer > > m_active_ff_dyn; // activated feature functions (dyn)
-    std::vector<sptr<pscorer > > m_active_ff_common; 
+    std::vector<sptr<pscorer > > m_active_ff_common;
     // activated feature functions (dyn)
 
-    void 
+    void
     register_ff(sptr<pscorer> const& ff, std::vector<sptr<pscorer> > & registry);
 
     template<typename fftype>
-    void 
+    void
     check_ff(std::string const ffname,std::vector<sptr<pscorer> >* registry = NULL);
-    // add feature function if specified 
-    
+    // add feature function if specified
+
     template<typename fftype>
-    void 
-    check_ff(std::string const ffname, float const xtra, 
+    void
+    check_ff(std::string const ffname, float const xtra,
 	     std::vector<sptr<pscorer> >* registry = NULL);
     // add feature function if specified
 
     void
     add_corpus_specific_features(std::vector<sptr<pscorer > >& ffvec);
-    
+
     // built-in feature functions
     // PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
     // PScorePbwd<Token> calc_pbwd_fix, calc_pbwd_dyn;
-    // PScoreLex<Token>  calc_lex; 
+    // PScoreLex<Token>  calc_lex;
     // this one I'd like to see as an external ff eventually
-    // PScorePC<Token>   apply_pp; // apply phrase penalty 
+    // PScorePC<Token>   apply_pp; // apply phrase penalty
     // PScoreLogCounts<Token>   add_logcounts_fix;
     // PScoreLogCounts<Token>   add_logcounts_dyn;
     void init(std::string const& line);
     mutable boost::shared_mutex m_lock;
-    // mutable boost::shared_mutex m_cache_lock; 
+    // mutable boost::shared_mutex m_cache_lock;
     // for more complex operations on the cache
     bool withPbwd;
     bool poolCounts;
@@ -141,25 +141,25 @@ namespace Moses
     void read_config_file(std::string fname, std::map<std::string,std::string>& param);
 
     // phrase table feature weights for alignment:
-    std::vector<float> feature_weights; 
+    std::vector<float> feature_weights;
 
-    std::vector<std::vector<id_type> > wlex21; 
+    std::vector<std::vector<id_type> > wlex21;
     // word translation lexicon (without counts, get these from calc_lex.COOC)
     typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> mm2dtable_t;
     mm2dtable_t COOCraw;
 
-    TargetPhrase* 
-    mkTPhrase(Phrase const& src, 
-	      Moses::bitext::PhrasePair<Token>* fix, 
-	      Moses::bitext::PhrasePair<Token>* dyn, 
+    TargetPhrase*
+    mkTPhrase(Phrase const& src,
+	      Moses::bitext::PhrasePair<Token>* fix,
+	      Moses::bitext::PhrasePair<Token>* dyn,
 	      sptr<Bitext<Token> > const& dynbt) const;
 
     void
     process_pstats
     (Phrase   const& src,
-     uint64_t const  pid1, 
-     pstats   const& stats, 
-     Bitext<Token> const & bt, 
+     uint64_t const  pid1,
+     pstats   const& stats,
+     Bitext<Token> const & bt,
      TargetPhraseCollection* tpcoll
      ) const;
 
@@ -169,16 +169,16 @@ namespace Moses
      uint64_t const  pid1a, pstats * statsa, Bitext<Token> const & bta,
      uint64_t const  pid1b, pstats const* statsb, Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll) const;
-     
+
     bool
     combine_pstats
-    (Phrase   const& src, 
+    (Phrase   const& src,
      uint64_t const  pid1a, pstats* statsa, Bitext<Token> const & bta,
-     uint64_t const  pid1b, pstats const* statsb, Bitext<Token> const & btb, 
+     uint64_t const  pid1b, pstats const* statsb, Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll) const;
 
     void load_extra_data(std::string bname, bool locking);
-    void load_bias(std::string bname); 
+    void load_bias(std::string bname);
 
   public:
     // Mmsapt(std::string const& description, std::string const& line);
@@ -190,22 +190,22 @@ namespace Moses
     std::string const& GetName() const;
 
 #ifndef NO_MOSES
-    TargetPhraseCollection const* 
+    TargetPhraseCollection const*
     GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) const;
 
-    TargetPhraseCollection const* 
+    TargetPhraseCollection const*
     GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
-    void 
+    void
     GetTargetPhraseCollectionBatch(ttasksptr const& ttask,
 				   const InputPathList &inputPathQueue) const;
-    
+
     //! Create a sentence-specific manager for SCFG rule lookup.
     ChartRuleLookupManager*
     CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &);
-    
+
     ChartRuleLookupManager*
-    CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &, 
+    CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &,
 			    std::size_t);
 #endif
 
@@ -222,7 +222,7 @@ namespace Moses
     bool ProvidesPrefixCheck() const; // return true if prefix /phrase/ check exists
     // bool PrefixExists(Phrase const& phrase, SamplingBias const* const bias) const;
     bool PrefixExists(ttasksptr const& ttask, Phrase const& phrase) const;
-    
+
     bool isLogVal(int i) const;
     bool isInteger(int i) const;
 
@@ -232,7 +232,7 @@ namespace Moses
     void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
 
     // align two new sentences
-    sptr<std::vector<int> > 
+    sptr<std::vector<int> >
     align(std::string const& src, std::string const& trg) const;
 
     std::vector<std::string> const&

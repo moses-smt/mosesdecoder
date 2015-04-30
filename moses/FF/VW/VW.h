@@ -165,7 +165,7 @@ public:
     const std::vector<VWFeatureBase*>& sourceFeatures =
       VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
 
-    const std::vector<VWFeatureBase*>& targetFeatures = 
+    const std::vector<VWFeatureBase*>& targetFeatures =
       VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
     const WordsRange &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
@@ -229,7 +229,7 @@ public:
       //
       // predict using a trained classifier, use this in decoding (=at test time)
       //
-      
+
       std::vector<float> losses(translationOptionList.size());
 
       // extract source side features
@@ -296,7 +296,7 @@ public:
       // classifier (squared/logistic/hinge/...), hence the name "loss"
       if (value == "logistic") {
         m_normalizer = (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer();
-      } else if (value == "squared") {      
+      } else if (value == "squared") {
         m_normalizer = (Discriminative::Normalizer *) new Discriminative::SquaredLossNormalizer();
       } else {
         UTIL_THROW2("Unknown loss type:" << value);
@@ -317,7 +317,7 @@ public:
     const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
     UTIL_THROW_IF2(tabbedSentence.GetColumns().size() < 2,
         "TabbedSentence must contain target<tab>alignment");
-    
+
     // target sentence represented as a phrase
     Phrase *target = new Phrase();
     target->CreateFromString(
@@ -431,7 +431,7 @@ private:
       const TargetPhrase &targetPhrase = topt->GetTargetPhrase();
 
       // extract raw counts from phrase-table property
-      const CountsPhraseProperty *property = 
+      const CountsPhraseProperty *property =
         static_cast<const CountsPhraseProperty *>(targetPhrase.GetProperty("Counts"));
 
       if (! property) {

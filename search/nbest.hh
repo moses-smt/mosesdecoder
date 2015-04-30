@@ -19,8 +19,8 @@ class NBestList;
 class NBestList {
   private:
     class RevealedRef {
-      public: 
-        explicit RevealedRef(History history) 
+      public:
+        explicit RevealedRef(History history)
           : in_(static_cast<NBestList*>(history)), index_(0) {}
 
       private:
@@ -29,7 +29,7 @@ class NBestList {
         NBestList *in_;
         std::size_t index_;
     };
-    
+
     typedef GenericApplied<RevealedRef> QueueEntry;
 
   public:

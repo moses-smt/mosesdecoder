@@ -74,7 +74,7 @@ protected:
   std::vector<const Phrase*> m_unksrcs;
   InputPathList m_inputPathQueue;
 
-  TranslationOptionCollection(ttasksptr const& ttask, 
+  TranslationOptionCollection(ttasksptr const& ttask,
 			      InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
 

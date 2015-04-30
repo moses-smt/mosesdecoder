@@ -24,7 +24,7 @@ namespace ugdiss
   typedef vector<vector<short> >   short_2d_table;
   typedef vector<short_2d_table>   short_3d_table;
   typedef vector<short_3d_table>   short_4d_table;
-  
+
   typedef vector<vector<int> >       int_2d_table;
   typedef vector<int_2d_table>       int_3d_table;
   typedef vector<int_3d_table>       int_4d_table;

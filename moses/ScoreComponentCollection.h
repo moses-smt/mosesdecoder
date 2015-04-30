@@ -229,8 +229,8 @@ public:
   //! Add scores from a single ScoreProducer only
   //! The length of scores must be equal to the number of score components
   //! produced by sp
-  void 
-  PlusEquals(const FeatureFunction* sp, 
+  void
+  PlusEquals(const FeatureFunction* sp,
 	     const ScoreComponentCollection& scores) {
     size_t i = sp->GetIndex();
     size_t stop = i + sp->GetNumScoreComponents();
@@ -287,7 +287,7 @@ public:
   //! to add the score from a single ScoreProducer that produces
   //! a single value
   void Assign(const FeatureFunction* sp, float score) {
-    
+
     UTIL_THROW_IF2(sp->GetNumScoreComponents() != 1,
                    "Feature function must must only contain 1 score");
     m_scores[sp->GetIndex()] = score;

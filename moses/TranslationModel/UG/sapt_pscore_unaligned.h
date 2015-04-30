@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // Phrase scorer that counts the number of unaligend words in the phrase
-// written by Ulrich Germann 
+// written by Ulrich Germann
 
 #include "sapt_pscore_base.h"
 #include <boost/dynamic_bitset.hpp>
@@ -14,7 +14,7 @@ namespace Moses {
     {
       typedef boost::dynamic_bitset<typename ::uint64_t> bitvector;
     public:
-      PScoreUnaligned(string const spec) 
+      PScoreUnaligned(string const spec)
       {
 	this->m_index = -1;
 	int f = this->m_num_feats = atoi(spec.c_str());
@@ -28,16 +28,16 @@ namespace Moses {
 	    this->m_feature_names[1] = "unal-t";
 	  }
       }
-    
-      bool
-      isLogVal(int i) const { return false; } 
-      
-      bool
-      isIntegerValued(int i) const { return true; } 
 
-      void 
-      operator()(Bitext<Token> const& bt, 
-		 PhrasePair<Token>& pp, 
+      bool
+      isLogVal(int i) const { return false; }
+
+      bool
+      isIntegerValued(int i) const { return true; }
+
+      void
+      operator()(Bitext<Token> const& bt,
+		 PhrasePair<Token>& pp,
 		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
@@ -46,9 +46,9 @@ namespace Moses {
 	// parse_pid(pp.p2, sid2, off2, len2);
 	bitvector check1(pp.len1),check2(pp.len2);
 	for (size_t i = 0; i < pp.aln.size(); )
-	  { 
-	    check1.set(pp.aln[i++]); 
-	    check2.set(pp.aln.at(i++)); 
+	  {
+	    check1.set(pp.aln[i++]);
+	    check2.set(pp.aln.at(i++));
 	  }
 
 	if (this->m_num_feats == 1)

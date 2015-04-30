@@ -54,7 +54,7 @@ class SimpleHash : public hash_map<X,Y,SimpleHashFn<X>,SimpleHashEqual<X> > /*pu
 //  tr1::unordered_map<X,Y,SimpleHashFn<X>,SimpleHashEqual<X> > mxy;
   static const Y yDummy;
   //static Y yNonconstDummy;
-  
+
  public:
 //  typedef typename OrigHash::const_iterator const_iterator;
 //  typedef typename OrigHash::iterator iterator;

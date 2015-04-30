@@ -476,17 +476,17 @@ public:
   //          m_searchAlgorithm == SyntaxF2S;
   // }
 
-  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const 
+  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const
   {
-    if (algo == DefaultSearchAlgorithm) 
+    if (algo == DefaultSearchAlgorithm)
       algo = m_searchAlgorithm;
     return (algo == CYKPlus   || algo == ChartIncremental ||
 	    algo == SyntaxS2T || algo == SyntaxT2S ||
 	    algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
   }
-  
-  const ScoreComponentCollection& 
-  GetAllWeights() const 
+
+  const ScoreComponentCollection&
+  GetAllWeights() const
   { return m_allWeights; }
 
   void SetAllWeights(const ScoreComponentCollection& weights) {

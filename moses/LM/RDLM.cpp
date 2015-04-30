@@ -50,7 +50,7 @@ void RDLM::Load() {
 
   UTIL_THROW_IF2(size_head != lm_head_base_instance_->get_order(),
                  "Error: order of head LM (" << lm_head_base_instance_->get_order() << ") does not match context size specified (left_context=" << m_context_left << " , right_context=" << m_context_right << " , up_context=" << m_context_up << " for a total order of " << size_head);
-  UTIL_THROW_IF2(size_label != lm_label_base_instance_->get_order(), 
+  UTIL_THROW_IF2(size_label != lm_label_base_instance_->get_order(),
                  "Error: order of label LM (" << lm_label_base_instance_->get_order() << ") does not match context size specified (left_context=" << m_context_left << " , right_context=" << m_context_right << " , up_context=" << m_context_up << " for a total order of " << size_label);
 
   //get int value of commonly used tokens
@@ -96,10 +96,10 @@ void RDLM::Load() {
 //    TreePointer mytree3 (new InternalTree("[ADJA europäische]"));
 //    TreePointer mytree4 (new InternalTree("[pred [det [ART die]] [attr [adv [adv [PTKNEG nicht]] [ADV fast]] [ADJA neue]] [attr [ADJA]] [NN Zeit]]]"));
 //    TreePointer mytree2 (new InternalTree("[vroot [subj [PPER ich]] [VAFIN bin] [pred]]"));
-// 
+//
 //    std::vector<int> ancestor_heads;
 //    std::vector<int> ancestor_labels;
-// 
+//
 //    size_t boundary_hash(0);
 //    boost::array<float, 4> score;
 //    score.fill(0);
@@ -108,48 +108,48 @@ void RDLM::Load() {
 //    TreePointerMap back_pointers = AssociateLeafNTs(mytree3.get(), previous_trees);
 //    Score(mytree3.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    previous_trees.push_back(mytree3);
 //    back_pointers = AssociateLeafNTs(mytree4.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree4->GetString() << std::endl;
 //    Score(mytree4.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    mytree4->Combine(previous_trees);
 //    previous_trees.clear();
 //    previous_trees.push_back(mytree4);
 //    back_pointers = AssociateLeafNTs(mytree2.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree2->GetString() << std::endl;
-// 
+//
 //    score[1] = 0;
 //    score[3] = 0;
 //    Score(mytree2.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    score[0] = 0;
 //    score[1] = 0;
 //    score[2] = 0;
 //    score[3] = 0;
 //    std::cerr << "scoring: " << mytree->GetString() << std::endl;
-//  
+//
 //    Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //   }
 //    UTIL_THROW2("Finished");
-// 
+//
 //   }
-// 
+//
 //   {
 //    std::cerr << "BINARIZED\n\n";
 //    TreePointer mytree (new InternalTree("[vroot [subj [PPER ich]] [^vroot [VAFIN bin] [pred [det [ART die]] [^pred [attr [adv [adv [PTKNEG nicht]] [ADV fast]] [ADJA neue]] [^pred [attr [ADJA europäische]] [NN Zeit]]]]]]"));
 //    TreePointer mytree3 (new InternalTree("[ADJA europäische]"));
 //    TreePointer mytree4 (new InternalTree("[^pred [attr [adv [adv [PTKNEG nicht]] [ADV fast]] [ADJA neue]] [^pred [attr [ADJA]] [NN Zeit]]]"));
 //    TreePointer mytree2 (new InternalTree("[vroot [subj [PPER ich]] [^vroot [VAFIN bin] [pred [det [ART die]] [^pred]]]]"));
-// 
+//
 //    std::vector<int> ancestor_heads;
 //    std::vector<int> ancestor_labels;
-// 
+//
 //    size_t boundary_hash(0);
 //    boost::array<float, 4> score;
 //    score.fill(0);
@@ -158,33 +158,33 @@ void RDLM::Load() {
 //    TreePointerMap back_pointers = AssociateLeafNTs(mytree3.get(), previous_trees);
 //    Score(mytree3.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    previous_trees.push_back(mytree3);
 //    back_pointers = AssociateLeafNTs(mytree4.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree4->GetString() << std::endl;
 //    Score(mytree4.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    mytree4->Combine(previous_trees);
 //    previous_trees.clear();
 //    previous_trees.push_back(mytree4);
 //    back_pointers = AssociateLeafNTs(mytree2.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree2->GetString() << std::endl;
-// 
+//
 //    score[1] = 0;
 //    score[3] = 0;
 //    Score(mytree2.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    score[0] = 0;
 //    score[1] = 0;
 //    score[2] = 0;
 //    score[3] = 0;
 //    std::cerr << "scoring: " << mytree->GetString() << std::endl;
-//  
+//
 //    Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //   }
 //    UTIL_THROW2("Finished");
 

@@ -36,7 +36,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2> 
+template <class Y,class X1,class X2>
 class CRF3DModeledRV : public Y {
 
  private:
@@ -90,7 +90,7 @@ template <class Y,class X1,class X2> SafeArray5D<Id<int>,int,int,int,int,float> 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2> 
+template <class Y,class X1,class X2>
 Prob CRF3DModeledRV<Y,X1,X2>::getProb( const X1& x1, const X2& x2 ) const {
 
   SafeArray2D<int,int,int>    aaCnds  ( cardOff, cardSh ) ;
@@ -131,7 +131,7 @@ Prob CRF3DModeledRV<Y,X1,X2>::getProb( const X1& x1, const X2& x2 ) const {
       for ( int configRghtValSite=0; configRghtValSite<(1<<bitsValSite); configRghtValSite++ )
         for ( int configValOverlap=0; configValOverlap<(1<<(bitsVal-bitsValSite)); configValOverlap++ ) {
           int configRghtVal = (configValOverlap<<bitsValSite)+configRghtValSite;
-          // For each possible preceding trellis node... 
+          // For each possible preceding trellis node...
           for ( int configLeftValSite=0; configLeftValSite<(1<<bitsValSite); configLeftValSite++ ) {
             int configLeftVal = (configLeftValSite<<(bitsVal-bitsValSite))+configValOverlap;
             // Add product of result and previous trellis cell to current trellis cell...
@@ -158,7 +158,7 @@ Prob CRF3DModeledRV<Y,X1,X2>::getProb( const X1& x1, const X2& x2 ) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2> 
+template <class Y,class X1,class X2>
 bool CRF3DModeledRV<Y,X1,X2>::readModelFields ( char* aps[], int numFields ) {
   if ( 7==numFields )
     setPotential ( X1(string(aps[1])),                  // globals
@@ -172,7 +172,7 @@ bool CRF3DModeledRV<Y,X1,X2>::readModelFields ( char* aps[], int numFields ) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2> 
+template <class Y,class X1,class X2>
 void CRF3DModeledRV<Y,X1,X2>::writeObservCliqueConfigs ( FILE* pf, int frame, const char* psMdl,
                                                          const X1& x1, const X2& x2, bool bObsVal ) const {
   fprintf ( pf, "%04d> %s ", frame, psMdl );
@@ -199,7 +199,7 @@ void CRF3DModeledRV<Y,X1,X2>::writeObservCliqueConfigs ( FILE* pf, int frame, co
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2,class X3> 
+template <class Y,class X1,class X2,class X3>
 class CRF4DModeledRV : public Y {
 
  private:
@@ -247,13 +247,13 @@ template <class Y,class X1,class X2,class X3> int  CRF4DModeledRV<Y,X1,X2,X3>::c
 template <class Y,class X1,class X2,class X3> int  CRF4DModeledRV<Y,X1,X2,X3>::cardCnd     = 0;
 template <class Y,class X1,class X2,class X3> int  CRF4DModeledRV<Y,X1,X2,X3>::bitsVal     = 0;
 template <class Y,class X1,class X2,class X3> int  CRF4DModeledRV<Y,X1,X2,X3>::bitsValSite = 0;
-template <class Y,class X1,class X2,class X3> SafeArray5D<Id<int>,int,int,int,int,float> 
+template <class Y,class X1,class X2,class X3> SafeArray5D<Id<int>,int,int,int,int,float>
                CRF4DModeledRV<Y,X1,X2,X3>::aaaaaPotentials;
 /* template <class Y,class X1,class X2> SafeArray3D<int>   CRF4DModeledRV<Y,X1,X2>::aaaCnds; */
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2,class X3> 
+template <class Y,class X1,class X2,class X3>
 Prob CRF4DModeledRV<Y,X1,X2,X3>::getProb( const X1& x1, const X2& x2, const X3& x3 ) const {
 
   SafeArray2D<int,int,int>    aaCnds  ( cardOff, cardSh ) ;
@@ -294,7 +294,7 @@ Prob CRF4DModeledRV<Y,X1,X2,X3>::getProb( const X1& x1, const X2& x2, const X3& 
       for ( int configRghtValSite=0; configRghtValSite<(1<<bitsValSite); configRghtValSite++ )
         for ( int configValOverlap=0; configValOverlap<(1<<(bitsVal-bitsValSite)); configValOverlap++ ) {
           int configRghtVal = (configValOverlap<<bitsValSite)+configRghtValSite;
-          // For each possible preceding trellis node... 
+          // For each possible preceding trellis node...
           for ( int configLeftValSite=0; configLeftValSite<(1<<bitsValSite); configLeftValSite++ ) {
             int configLeftVal = (configLeftValSite<<(bitsVal-bitsValSite))+configValOverlap;
             // Add product of result and previous trellis cell to current trellis cell...
@@ -321,7 +321,7 @@ Prob CRF4DModeledRV<Y,X1,X2,X3>::getProb( const X1& x1, const X2& x2, const X3& 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2,class X3> 
+template <class Y,class X1,class X2,class X3>
 bool CRF4DModeledRV<Y,X1,X2,X3>::readModelFields ( char* aps[], int numFields ) {
   if ( 7==numFields )
     setPotential ( X1(string(aps[1])),                  // globals
@@ -335,9 +335,9 @@ bool CRF4DModeledRV<Y,X1,X2,X3>::readModelFields ( char* aps[], int numFields ) 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2, class X3> 
+template <class Y,class X1,class X2, class X3>
 void CRF4DModeledRV<Y,X1,X2,X3>::writeObservCliqueConfigs ( FILE* pf, int frame, const char* psMdl,
-                                                            const X1& x1, const X2& x2, 
+                                                            const X1& x1, const X2& x2,
                                                             const X3& x3, bool bObsVal ) const {
   fprintf ( pf, "%04d> %s ", frame, psMdl );
   // For each shape (feature slope)...

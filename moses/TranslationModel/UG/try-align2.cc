@@ -29,7 +29,7 @@ float lbop_level = .05;
 namespace stats
 {
   using namespace Moses::bitext;
-  float 
+  float
   pmi(size_t j,size_t m1, size_t m2, size_t N)
   {
 #if smooth
@@ -41,8 +41,8 @@ namespace stats
     return log(j) + log(N) - log(m1) - log(m2);
 #endif
   }
-  
-  float 
+
+  float
   npmi(size_t j,size_t m1, size_t m2, size_t N)
   {
 #if smooth
@@ -52,11 +52,11 @@ namespace stats
     float p12 = lbop(N,j,lbop_level);
     return (log(p12) - log(p1) - log(p2)) / -log(p12);
 #else
-    return pmi(j,m1,m2,N) / (log(N) - log(j)); 
+    return pmi(j,m1,m2,N) / (log(N) - log(j));
 #endif
   }
 
-  float 
+  float
   mi(size_t j,size_t m1, size_t m2, size_t N)
   {
     float ret = 0;
@@ -92,7 +92,7 @@ struct PhrasePair2
     float    mi; // mutual information
     float score;
 
-    void 
+    void
     set(vector<ttrack::Position> const& o1,
 	vector<ttrack::Position> const& o2,
 	size_t const N)
@@ -103,7 +103,7 @@ struct PhrasePair2
 	{
 	  if (i1 && o1[i1].sid == o1[i1-1].sid) { ++i1; continue; }
 	  if (i2 && o2[i2].sid == o2[i2-1].sid) { ++i2; continue; }
-	  
+
 	  if (o1[i1].sid == o2[i2].sid) { ++j; ++i1; ++i2; ++m1; ++m2; }
 	  else if (o1[i1].sid < o2[i2].sid) { ++i1; ++m1; }
 	  else { ++i2; ++m2; }
@@ -127,19 +127,19 @@ struct PhrasePair2
       this->score = npmi; // npmi; // hmean; // /sqrt(z);
     }
   } stats;
-  
+
   PhrasePair2(ushort s1_=0, ushort e1_=0, ushort s2_=0, ushort e2_=0)
     : s1(s1_), e1(e1_), s2(s2_), e2(e2_), parent(-1) { }
 
 
-  bool 
+  bool
   operator<(PhrasePair2 const& other) const
-  { 
-    return (this->stats.score == other.stats.score 
+  {
+    return (this->stats.score == other.stats.score
 	    ? (e1-s1 + e2-s2 > other.e1-other.s1 + other.e2-other.s2)
-	    : (this->stats.score > other.stats.score)); 
+	    : (this->stats.score > other.stats.score));
   }
-  
+
   size_t len1() const { return e1 - s1; }
   size_t len2() const { return e2 - s2; }
   bool includes(PhrasePair2 const& o) const
@@ -155,8 +155,8 @@ PhrasePair2::stats_t::cache_t ppcache;
 
 struct SortByPositionInCorpus
 {
-  bool 
-  operator()(ttrack::Position const& a, 
+  bool
+  operator()(ttrack::Position const& a,
 	     ttrack::Position const& b) const
   {
     return a.sid != b.sid ? a.sid < b.sid : a.offset < b.offset;
@@ -164,8 +164,8 @@ struct SortByPositionInCorpus
 };
 
 
-void 
-getoccs(tsa_t::tree_iterator const& m, 
+void
+getoccs(tsa_t::tree_iterator const& m,
 	vector<ttrack::Position>& occs)
 {
   occs.clear();
@@ -179,9 +179,9 @@ getoccs(tsa_t::tree_iterator const& m,
   sort(occs.begin(),occs.end(),SortByPositionInCorpus());
 }
 
-void 
-lookup_phrases(vector<id_type> const& snt, 
-	       TokenIndex& V, ttrack_t const& T, 
+void
+lookup_phrases(vector<id_type> const& snt,
+	       TokenIndex& V, ttrack_t const& T,
 	       tsa_t const& I, SinglePhrase::cache_t& cache,
 	       vector<vector<sptr<SinglePhrase> > >& dest)
 {
@@ -195,7 +195,7 @@ lookup_phrases(vector<id_type> const& snt,
 	  if (m.approxOccurrenceCount() < 3) break;
 	  // if (k - i > 0) break;
 	  sptr<SinglePhrase>& o = cache[m.getPid()];
-	  if (!o) 
+	  if (!o)
 	    {
 	      o.reset(new SinglePhrase());
 	      o->pid = m.getPid();
@@ -207,7 +207,7 @@ lookup_phrases(vector<id_type> const& snt,
 }
 
 
-struct 
+struct
 RowIndexSorter
 {
   vector<vector<float> > const& M;
@@ -216,14 +216,14 @@ RowIndexSorter
     : M(m), my_col(c) { }
 
   template<typename T>
-  bool 
-  operator()(T const& a, T const& b) const 
-  { 
+  bool
+  operator()(T const& a, T const& b) const
+  {
     return M.at(a).at(my_col) > M.at(b).at(my_col);
   }
 };
 
-struct 
+struct
 ColIndexSorter
 {
   vector<vector<float> > const& M;
@@ -232,9 +232,9 @@ ColIndexSorter
     : M(m), my_row(r) { }
 
   template<typename T>
-  bool 
-  operator()(T const& a, T const& b) const 
-  { 
+  bool
+  operator()(T const& a, T const& b) const
+  {
     return M.at(my_row).at(a) > M[my_row].at(b);
   }
 
@@ -249,7 +249,7 @@ public:
   {
 #if 0
     cout << pp.raw1 << " " << pp.sample1 << " " << pp.good1 << " "
-	 << pp.raw2 << " " << pp.sample2 << " " << pp.good2 << " " 
+	 << pp.raw2 << " " << pp.sample2 << " " << pp.good2 << " "
 	 << pp.joint << " " << __FILE__ << ":" << __LINE__ << endl;
 #endif
     pp.good2 = ceil(pp.raw2 * float(pp.good1)/pp.raw1);
@@ -266,7 +266,7 @@ class Alnhyp
 };
 
 
-size_t 
+size_t
 lcs(string const a, string const b)
 {
   using namespace stringdist;
@@ -279,10 +279,10 @@ lcs(string const a, string const b)
     {
       StringDiff::Segment const& s = diff[i];
       if (s.match != StringDiff::same && s.match != StringDiff::cap)
-	{ 
+	{
 	  if (len > ret) ret = len;
-	  len = 0; 
-	  continue; 
+	  len = 0;
+	  continue;
 	}
       len += s.end_a - s.start_a;
     }
@@ -290,9 +290,9 @@ lcs(string const a, string const b)
   return ret;
 }
 
-size_t 
-mapstring(string const& utf8, 
-	  UnicodeString& U, 
+size_t
+mapstring(string const& utf8,
+	  UnicodeString& U,
 	  vector<int>& c2w,
 	  vector<int>* wlen=NULL)
 {
@@ -338,10 +338,10 @@ align_letters(UnicodeString const& A, vector<int> const& a2p,
   //   }
 }
 
-void 
+void
 map_back(vector<vector<int> > const& W,
 	 vector<vector<int> > & X,
-	 vector<uchar> const & aln) 
+	 vector<uchar> const & aln)
 {
   for (size_t i = 0; i < aln.size(); i += 2)
     {
@@ -354,7 +354,7 @@ map_back(vector<vector<int> > const& W,
 }
 
 
-void trymatch3(vector<PhrasePair<Token> > const& tcands, 
+void trymatch3(vector<PhrasePair<Token> > const& tcands,
 	       UnicodeString const& T, size_t const tlen,
 	       vector<int> const& t2p,
 	       TokenIndex const& V2, vector<vector<int> >&X)
@@ -374,8 +374,8 @@ void trymatch3(vector<PhrasePair<Token> > const& tcands,
       cout << slen << " " << tlen << endl;
       cout << "W: " << W.size() << " rows; " << W[0].size() << " cols" << endl;
       cout << "X: " << X.size() << " rows; " << X[0].size() << " cols" << endl;
-      cout << "aln: "; 
-      for (size_t a = 0; a < pp.aln.size(); a +=2) 
+      cout << "aln: ";
+      for (size_t a = 0; a < pp.aln.size(); a +=2)
 	cout  << int(pp.aln[a]) << "-" << int(pp.aln[a+1]) << " ";
       cout << endl;
 #endif
@@ -383,7 +383,7 @@ void trymatch3(vector<PhrasePair<Token> > const& tcands,
     }
 }
 
-void minmatch_filter(vector<vector<int> > & X, 
+void minmatch_filter(vector<vector<int> > & X,
 		     vector<int> const& len1,
 		     vector<int> const& len2)
 {
@@ -437,20 +437,20 @@ trymatch2(TokenIndex& V1, // source language vocab
 	  TokenIndex& V2, // target language vocab
 	  string const& source, // source phrase
 	  string const& target, // observed target candidate
- 	  vector<PhrasePair<Token> > const* const tcands, 
+ 	  vector<PhrasePair<Token> > const* const tcands,
 	  vector<vector<int> >& X) // destination alignment matrix
 	  // tcands: translations for source
 {
-  UnicodeString S,T; 
+  UnicodeString S,T;
   vector<int> t2p, s2p; // maps from character position in string to word pos.
   vector<int> wlen_t, wlen_s; // individual word lengths
   size_t slen = mapstring(source, S, s2p, &wlen_s);
   size_t tlen = mapstring(target, T, t2p, &wlen_t);
-  
+
   X.assign(slen,vector<int>(tlen,0));
-  if (slen == 1 && tlen ==1 && S == T) 
+  if (slen == 1 && tlen ==1 && S == T)
     X[0][0] = S.length();
-  else 
+  else
     {
       align_letters(S,s2p,T,t2p,X);
       if (tcands) trymatch3(*tcands, T, tlen, t2p, V2, X);
@@ -475,7 +475,7 @@ trymatch2(TokenIndex& V1, // source language vocab
 
 
 // float
-// trymatch(string const a, string const b, 
+// trymatch(string const a, string const b,
 // 	 vector<PhrasePair<Token> > const* atrans,
 // 	 vector<PhrasePair<Token> > const* btrans)
 // {
@@ -501,11 +501,11 @@ trymatch2(TokenIndex& V1, // source language vocab
 // 	  // float bar = float(lcs(foo,b))/min(foo.size(),b.size());
 // 	  float bar = float(lcs(foo,b));
 
-// 	  if (bar > .5) 
+// 	  if (bar > .5)
 // 	    {
 // 	      // score = max(pp.score * bar,score);
 // 	      score = max(bar,score);
-// 	      // cout << "[" << bar << "] " << foo << " ::: " << b 
+// 	      // cout << "[" << bar << "] " << foo << " ::: " << b
 // 	      // << " (" << a << ") " << pp.score << endl;
 // 	    }
 // 	}
@@ -525,10 +525,10 @@ trymatch2(TokenIndex& V1, // source language vocab
 // 	  string foo = toString(*BT.V1,pp.start2,pp.len2);
 // 	  // float bar = float(lcs(a,foo))/min(a.size(),foo.size());
 // 	  float bar = float(lcs(a,foo));
-// 	  if (bar > .5) 
+// 	  if (bar > .5)
 // 	    {
 // 	      score = max(bar,score);
-// 	      // cout << "[" << bar<< "] " << a << " ::: " << foo 
+// 	      // cout << "[" << bar<< "] " << a << " ::: " << foo
 // 	      // << " (" << b << ") " << pp.score << endl;
 // 	    }
 // 	}
@@ -547,8 +547,8 @@ struct ahyp
 struct AlnPoint
 {
   enum status { no = 0, yes = 1, maybe = -1, undef = -7 };
-  float    score; 
-  status   state; 
+  float    score;
+  status   state;
   AlnPoint() : score(0), state(undef) {}
 };
 
@@ -562,14 +562,14 @@ class AlnMatrix
   vector<bitvector> A1,A2;  // final alignment matrix
   vector<bitvector> S1,S2;  // shadow alignment matrix
 public:
-  vector<bitvector*> m1,m2; // margins 
+  vector<bitvector*> m1,m2; // margins
   AlnMatrix(size_t const rows, size_t const cols);
-  bitvector const& 
+  bitvector const&
   operator[](size_t const r) const
   { return A1.at(r); }
 
   bool
-  incorporate(span_t const& rspan, span_t const& cspan, 
+  incorporate(span_t const& rspan, span_t const& cspan,
 	      vector<uchar> const& aln, bool const flip);
 
   size_t size() const { return A1.size(); }
@@ -588,9 +588,9 @@ AlnMatrix(size_t const rows, size_t const cols)
 
 bool
 AlnMatrix::
-incorporate(span_t const& rspan, 
-	    span_t const& cspan, 
-	    vector<uchar> const& aln, 
+incorporate(span_t const& rspan,
+	    span_t const& cspan,
+	    vector<uchar> const& aln,
 	    bool const flip)
 {
   for (size_t r = rspan.first; r < rspan.second; ++r)
@@ -622,7 +622,7 @@ incorporate(span_t const& rspan,
     if (m1[r] && (*m1[r]) != S1[r]) return false;
   for (size_t c = cspan.first; c < cspan.second; ++c)
     if (m2[c] && (*m2[c]) != S2[c]) return false;
-  
+
   // all good, add new points
   for (size_t r = rspan.first; r < rspan.second; ++r)
     if (!m1[r]) { A1[r] = S1[r]; m1[r] = &A1[r]; }
@@ -632,9 +632,9 @@ incorporate(span_t const& rspan,
   return true;
 }
 
-struct alink 
-{ 
-  size_t r,c,m; 
+struct alink
+{
+  size_t r,c,m;
   bool operator<(alink const& o) const { return m < o.m; }
   bool operator>(alink const& o) const { return m > o.m; }
 };
@@ -659,9 +659,9 @@ int main(int argc, char* argv[])
       vector<vector<uint64_t> > pm1,pm2;
       BT.lookup(snt1,*BT.I1,pt1,&pm1,&scorer);
       BT.lookup(snt2,*BT.I2,pt2,&pm2,&scorer);
-      
+
       // build map from phrases to positions
-      typedef boost::unordered_map<uint64_t, vector<span_t> > 
+      typedef boost::unordered_map<uint64_t, vector<span_t> >
 	p2s_map_t;
       typedef p2s_map_t::iterator p2s_iter;
       p2s_map_t p2s1,p2s2;
@@ -684,7 +684,7 @@ int main(int argc, char* argv[])
 	    BOOST_FOREACH(PhrasePair<Token> const& pp, *pt1[i][k])
 	      {
 		if (pp.score < 0) break;
-		if (p2s2.find(pp.p2) != p2s2.end()) 
+		if (p2s2.find(pp.p2) != p2s2.end())
 		  pp_all.push_back(pp);
 	      }
 	  }
@@ -704,10 +704,10 @@ int main(int argc, char* argv[])
 	{
 	  PhrasePair<Token> const& pp = pp_all[p];
 #if 0
-	  cout << (boost::format("%30s ::: %-30s ") 
+	  cout << (boost::format("%30s ::: %-30s ")
 		   % BT.toString(pp.p1,0).c_str()
 		   % BT.toString(pp.p2,1).c_str());
-	  cout << (boost::format("%.4f [%d/%d/%d]") 
+	  cout << (boost::format("%.4f [%d/%d/%d]")
 		   % pp.score % pp.good1 % pp.joint % pp.good2);
 	  for (size_t a = 0; a < pp.aln.size(); a += 2)
 	    cout << " " << int(pp.aln[a]) << "-" << int(pp.aln[a+1]);
@@ -720,7 +720,7 @@ int main(int argc, char* argv[])
 	    for (size_t i = v1[0].first; i < v1[0].second; ++i)
 	      if (a1[i] < 0) a1[i] = p;
 	  if (v2.size() == 1)
-	    for (size_t i = v2[0].first; i < v2[0].second; ++i) 
+	    for (size_t i = v2[0].first; i < v2[0].second; ++i)
 	      if (a2[i] < 0) a2[i] = p;
 
 	  if (v1.size() == 1 && v2.size() == 1)
@@ -740,11 +740,11 @@ int main(int argc, char* argv[])
       vector<PhrasePair<Token> > const* atrans, *btrans;
       ahyp h;
       vector<ahyp> hyps;
-      vector<vector<int> > L(snt1.size(),vector<int>(snt2.size(),0)); 
+      vector<vector<int> > L(snt1.size(),vector<int>(snt2.size(),0));
       // L: matches by letter overlap
 
       for (h.s1 = 0; h.s1 < a1.size(); ++h.s1)
-	{ 
+	{
 	  if (a1[h.s1] >= 0) continue;
 	  ostringstream buf1;
 	  for (h.e1 = h.s1; h.e1 < a1.size() && a1[h.e1] < 0; ++h.e1)
@@ -762,23 +762,23 @@ int main(int argc, char* argv[])
 		  if (a2[h.s2] >= 0) continue;
 		  for (h.e2 = h.s2; h.e2 < a2.size() && a2[h.e2] < 0; ++h.e2)
 		    {
-		      if (h.e2 > h.s2) 
+		      if (h.e2 > h.s2)
 			{
 			  if (pt2[h.s2].size() + h.s2 <= h.e2) break;
 			  buf2 << " ";
 			}
 		      buf2 << (*BT.V2)[snt2[h.e2].id()];
-		      btrans = (pt2[h.s2].size() 
-				? pt2[h.s2].at(h.e2-h.s2).get() 
+		      btrans = (pt2[h.s2].size()
+				? pt2[h.s2].at(h.e2-h.s2).get()
 				: NULL);
 
 		      vector<vector<int> > aln;
-		      trymatch2(*BT.V1, *BT.V2, buf1.str(),buf2.str(), 
+		      trymatch2(*BT.V1, *BT.V2, buf1.str(),buf2.str(),
 				atrans,aln);
 		      for (size_t i = 0; i < aln.size(); ++i)
 			for (size_t k = 0; k < aln[i].size(); ++k)
 			  L[h.s1+i][h.s2+k] = max(L[h.s1+i][h.s2+k],aln[i][k]);
-		      trymatch2(*BT.V2, *BT.V1, buf2.str(),buf1.str(), 
+		      trymatch2(*BT.V2, *BT.V1, buf2.str(),buf1.str(),
 				btrans,aln);
 		      for (size_t i = 0; i < aln[0].size(); ++i)
 			for (size_t k = 0; k < aln.size(); ++k)
@@ -795,7 +795,7 @@ int main(int argc, char* argv[])
       alink x;
       for (x.r = 0; x.r < L.size(); ++x.r)
 	{
-	  
+
 	for (x.c = 0; x.c < L[x.r].size(); ++x.c)
 	  {
 	    x.m = L[x.r][x.c];
@@ -807,22 +807,22 @@ int main(int argc, char* argv[])
 
       BOOST_FOREACH(alink& x, links)
 	{
-	  if (L[x.r][x.c]) 
+	  if (L[x.r][x.c])
 	    {
 	      cout << (*BT.V1)[snt1[x.r].id()] << " ::: "
 		   << (*BT.V2)[snt2[x.c].id()] << " ::: "
 		   << L[x.r][x.c] << endl;
 	    }
-	}	  
+	}
 
       // sort(hyps.begin(),hyps.end(),greater<ahyp>());
       // BOOST_FOREACH(ahyp const& h, hyps)
       // 	{
       // 	  if (h.score < .5) break;
-      // 	  for (size_t i = h.s1; i <= h.e1; ++i) 
+      // 	  for (size_t i = h.s1; i <= h.e1; ++i)
       // 	    cout << i << ":" << (*BT.V1)[snt1[i].id()] << " ";
       // 	  cout << " ::: ";
-      // 	  for (size_t i = h.s2; i <= h.e2; ++i) 
+      // 	  for (size_t i = h.s2; i <= h.e2; ++i)
       // 	    cout << i << ":" << (*BT.V2)[snt2[i].id()] << " ";
       // 	  cout << h.score << endl;
       // 	}
@@ -854,15 +854,15 @@ int main(int argc, char* argv[])
 // #if 0
 // 		  if (match)
 // 		    {
-// 		      if (first) 
+// 		      if (first)
 // 			{
 // 			  cout << BT.toString(pm1[i][k],0) << endl;
 // 			  first = false;
 // 			}
-// 		      cout << boost::format("%.4f") % pt.score << " " 
+// 		      cout << boost::format("%.4f") % pt.score << " "
 // 			   << setw(5) << d1 << " " << (match ? "* " : "  ")
 // 			   << toString(*BT.V2, pt.start2, pt.len2) << " ["
-// 			   << pt.good1 << "/" << pt.joint << "/" 
+// 			   << pt.good1 << "/" << pt.joint << "/"
 // 			   << pt.good2 << "]";
 // 		      for (size_t a = 0; a < pt.aln.size(); a += 2)
 // 			cout << " " << int(pt.aln[a]) << "-" << int(pt.aln[a+1]);
@@ -879,7 +879,7 @@ int main(int argc, char* argv[])
 // 		      pp_all.push_back(pt);
 // 		      // pp_all.back().m1 -= d1;
 // 		    }
-		  
+
 // 		}
 // 	      if (!first) cout << endl;
 // 	    }

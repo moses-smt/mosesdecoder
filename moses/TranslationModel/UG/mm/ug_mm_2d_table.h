@@ -24,12 +24,12 @@ namespace ugdiss
       ID   id;
       VAL val;
 
-      bool 
+      bool
       operator<(ID const otherId) const
       {
         return id < otherId;
       }
-        
+
       bool
       operator<(Cell const& other) const
       {
@@ -60,14 +60,14 @@ namespace ugdiss
     ID numCols;
     boost::shared_ptr<bio::mapped_file_source> file;
 
-    VAL m1(ID key) const 
-    { 
-      return (key < numRows) ? M1[key] : INIT(0); 
+    VAL m1(ID key) const
+    {
+      return (key < numRows) ? M1[key] : INIT(0);
     }
 
     VAL m2(ID key) const
     {
-      return (key < numCols) ? M2[key] : INIT(0); 
+      return (key < numCols) ? M2[key] : INIT(0);
     }
 
 
@@ -106,7 +106,7 @@ namespace ugdiss
     Cell const* c = lower_bound(start,stop,key);
     return (c != stop && c->id == key ? c->val : INIT(0));
   }
-  
+
   template<typename OFFSET, typename ID, typename VAL, typename INIT>
   void
   mm2dTable<OFFSET,ID,VAL,INIT>::
@@ -140,10 +140,10 @@ namespace ugdiss
     // cout << numRows << " rows; " << numCols << " columns " << endl;
     M1 = reinterpret_cast<VAL const*>(index+numRows+1);
     M2 = M1+numRows;
-    //    cout << "Table " << fname << " has " << numRows << " rows and " 
+    //    cout << "Table " << fname << " has " << numRows << " rows and "
     //         << numCols << " columns." << endl;
-    //     cout << "File size is " << file.size()*1024 << " bytes; "; 
-    //     cout << "M2 starts " << (reinterpret_cast<char const*>(M2) - file.data()) 
+    //     cout << "File size is " << file.size()*1024 << " bytes; ";
+    //     cout << "M2 starts " << (reinterpret_cast<char const*>(M2) - file.data())
     //          << " bytes into the file" << endl;
     // cout << M2[0] << endl;
   }
@@ -156,8 +156,8 @@ namespace ugdiss
     typename ICONT   // inner container type
     >
   void
-  write_mm_2d_table(ostream& out, vector<ICONT> const& T, 
-                    vector<VAL> const* m1    = NULL, 
+  write_mm_2d_table(ostream& out, vector<ICONT> const& T,
+                    vector<VAL> const* m1    = NULL,
                     vector<VAL> const* m2    = NULL)
   {
     assert(T.size());
@@ -223,7 +223,7 @@ namespace ugdiss
         OFFSET o = index[i]; // (index[i]-index[0])/sizeof(VAL);
         out.write(reinterpret_cast<char*>(&o),sizeof(OFFSET));
       }
-   
+
     // write marginals
     out.write(reinterpret_cast<char const*>(&(*m1)[0]),m1->size()*sizeof(VAL));
     out.write(reinterpret_cast<char const*>(&(*m2)[0]),m2->size()*sizeof(VAL));

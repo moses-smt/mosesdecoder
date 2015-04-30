@@ -19,10 +19,10 @@ class Part
   string my_lines[2];
   size_t         ctr;
 public:
-  string const& line() const 
-  { 
+  string const& line() const
+  {
     static string empty_line;
-    return f ? my_lines[ctr%2] : empty_line; 
+    return f ? my_lines[ctr%2] : empty_line;
   }
 
   Part(string _fname) : ctr(0)
@@ -32,7 +32,7 @@ public:
     if (!getline(*f, my_lines[0])) f.reset();
   }
 
-  bool next() 
+  bool next()
   {
     if (!f) return false;
     if (!getline(*f, my_lines[++ctr%2]))
@@ -45,16 +45,16 @@ public:
     return true;
   }
 
-  bool operator <(Part const& other) const 
+  bool operator <(Part const& other) const
   { return line() < other.line(); }
 
-  bool operator <=(Part const& other) const 
+  bool operator <=(Part const& other) const
   { return line() <= other.line(); }
 
-  bool operator >(Part const& other) const 
+  bool operator >(Part const& other) const
   { return line() > other.line(); }
 
-  bool operator >=(Part const& other) const 
+  bool operator >=(Part const& other) const
   { return line() >= other.line(); }
 
   bool go(ostream& out)
@@ -66,20 +66,20 @@ public:
         out << fname << "-" << ctr - 1 << "-";
         out << my_lines[(ctr - 1)%2] << endl;
       }
-    do 
+    do
       {
         out << fname << " " << ctr << " ";
         out << line() << "\n";
       }
     while (next() && my_lines[0] == my_lines[1]);
 #else
-    do    { out << line() << "\n"; } 
+    do    { out << line() << "\n"; }
     while (next() && my_lines[0] == my_lines[1]);
     out.flush();
 #endif
     return f != NULL;
   }
-  
+
 };
 
 

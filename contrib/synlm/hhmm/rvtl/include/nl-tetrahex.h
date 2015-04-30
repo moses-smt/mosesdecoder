@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /***********************************************
- * nl-tetrahex.h 
+ * nl-tetrahex.h
  * a little header with some base conversion stuff
  * so that we can represent base 16, 32 or 64 with
  * one character.

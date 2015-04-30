@@ -5,15 +5,15 @@
 
 namespace Moses
 {
-  class TPCollWrapper 
+  class TPCollWrapper
   // wrapper around TargetPhraseCollection that includes reference counts
   // and a time stamp for least-recently-used caching of TargetPhraseCollection-s
     : public TargetPhraseCollection
   {
   public:
-    size_t   const revision; 
+    size_t   const revision;
     // revison; gets changed when the underlying corpus in Mmsapt is updated
-    
+
     uint64_t const      key; // phrase key
     uint32_t       refCount; // reference count
 #if defined(timespec) // timespec is better, but not available everywhere
@@ -32,12 +32,12 @@ namespace Moses
     typedef std::vector<TPCollWrapper*> history_t;
     cache_t   m_cache;   // maps from phrase ids to target phrase collections
     mutable history_t m_history; // heap of live items, least recently used one on top
-    
+
     mutable boost::shared_mutex m_cache_lock;   // locks m_cache
     mutable boost::shared_mutex m_history_lock; // locks m_history
 
 #if 0
-    // mutable size_t m_tpc_ctr; 
+    // mutable size_t m_tpc_ctr;
     // counter of all live item, for debugging. probably obsolete; was used
     // to track memory leaks
 #endif
@@ -47,14 +47,14 @@ namespace Moses
 
   public:
     TPCollCache(size_t capacity=1000);
-    
-    TPCollWrapper* 
+
+    TPCollWrapper*
     get(uint64_t key, size_t revision);
 
-    void 
+    void
     add(uint64_t key, TPCollWrapper* ptr);
 
-    void 
+    void
     release(TPCollWrapper*& tpc);
   };
 

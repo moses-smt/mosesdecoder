@@ -6,18 +6,18 @@
 
 #include <boost/program_options.hpp>
 
-namespace ugdiss 
+namespace ugdiss
 {
   namespace po=boost::program_options;
   typedef po::options_description            progopts;
   typedef po::positional_options_description  posopts;
   typedef po::variables_map                   optsmap;
 
-  void 
-  get_options(int ac, char* av[], 
-	      progopts & o, 
-	      posopts  & a, 
-	      optsmap  & vm, 
+  void
+  get_options(int ac, char* av[],
+	      progopts & o,
+	      posopts  & a,
+	      optsmap  & vm,
               char const* cfgFileParam=NULL);
 
 }

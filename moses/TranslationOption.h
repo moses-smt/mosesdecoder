@@ -71,8 +71,8 @@ protected:
   float             m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
   // typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
-  // _ScoreCacheMap m_lexReorderingScores; 
-  // m_lexReorderingScores was moved to TargetPhrase.h so that phrase tables 
+  // _ScoreCacheMap m_lexReorderingScores;
+  // m_lexReorderingScores was moved to TargetPhrase.h so that phrase tables
   // can add information (such as lexical reordering scores) to target phrases
   // during lookup.
 
@@ -156,14 +156,14 @@ public:
   }
 
   /** returns cached scores */
-  // inline 
+  // inline
   const Scores*
   GetLexReorderingScores(const LexicalReordering *scoreProducer) const;
   // {
   //   return m_targetPhrase.GetExtraScores(scoreProducer);
   // }
 
-  void CacheLexReorderingScores(const LexicalReordering &scoreProducer, 
+  void CacheLexReorderingScores(const LexicalReordering &scoreProducer,
 				const Scores &score);
 
   TO_STRING();

@@ -214,11 +214,11 @@ void loadCountOfCounts( const std::string& fileNameCountOfCounts )
 }
 
 
-void processFiles( const std::string& fileNameDirect, 
-                   const std::string& fileNameIndirect, 
-                   const std::string& fileNameConsolidated, 
-                   const std::string& fileNameCountOfCounts, 
-                   const std::string& fileNameSourceLabelSet, 
+void processFiles( const std::string& fileNameDirect,
+                   const std::string& fileNameIndirect,
+                   const std::string& fileNameConsolidated,
+                   const std::string& fileNameCountOfCounts,
+                   const std::string& fileNameSourceLabelSet,
                    const std::string& fileNamePartsOfSpeechVocabulary )
 {
   if (goodTuringFlag || kneserNeyFlag)
@@ -260,9 +260,9 @@ void processFiles( const std::string& fileNameDirect,
     // indirect: source target probabilities
 
     // consistency checks
-    UTIL_THROW_IF2(itemDirect[0].compare( itemIndirect[0] ) != 0, 
+    UTIL_THROW_IF2(itemDirect[0].compare( itemIndirect[0] ) != 0,
                    "target phrase does not match in line " << i << ": '" << itemDirect[0] << "' != '" << itemIndirect[0] << "'");
-    UTIL_THROW_IF2(itemDirect[1].compare( itemIndirect[1] ) != 0, 
+    UTIL_THROW_IF2(itemDirect[1].compare( itemIndirect[1] ) != 0,
                    "source phrase does not match in line " << i << ": '" << itemDirect[1] << "' != '" << itemIndirect[1] << "'");
 
     // SCORES ...

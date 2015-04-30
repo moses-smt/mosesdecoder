@@ -101,7 +101,7 @@ GetOrientation(int const reoDistance) const
   // this one is for HierarchicalReorderingBackwardState
   return ((m_modelType == LeftRight)
           ? (reoDistance >= 1) ? R : L
-	  : (reoDistance == 1) ? M 
+	  : (reoDistance == 1) ? M
           : (m_modelType == Monotonic) ? NM
           : (reoDistance == -1)  ? S
           : (m_modelType == MSD) ? D

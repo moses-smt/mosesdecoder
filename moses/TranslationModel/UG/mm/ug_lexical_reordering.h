@@ -7,13 +7,13 @@ namespace Moses { namespace bitext {
 
 typedef Moses::LRModel::ReorderingType PhraseOrientation;
 
-PhraseOrientation 
+PhraseOrientation
 find_po_fwd(std::vector<std::vector<ushort> >& a1,
 	    std::vector<std::vector<ushort> >& a2,
 	    size_t b1, size_t e1,
 	    size_t b2, size_t e2);
 
-PhraseOrientation 
+PhraseOrientation
 find_po_bwd(std::vector<std::vector<ushort> >& a1,
 	    std::vector<std::vector<ushort> >& a2,
 	    size_t b1, size_t e1,
@@ -21,5 +21,5 @@ find_po_bwd(std::vector<std::vector<ushort> >& a1,
 
 
 
-      
+
 }} // close namespaces

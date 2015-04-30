@@ -33,7 +33,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template<class Y,class P> 
+template<class Y,class P>
 class Generic1DModel {
  public:
   typedef Y  RVType;
@@ -45,7 +45,7 @@ class Generic1DModel {
 
 ////////////////////////////////////////////////////////////
 
-template<class Y,class X1,class P> 
+template<class Y,class X1,class P>
 class Generic2DModel {
  public:
   typedef Y  RVType;
@@ -60,7 +60,7 @@ class Generic2DModel {
 
 ////////////////////////////////////////////////////////////
 
-template<class Y,class X1,class X2,class P> 
+template<class Y,class X1,class X2,class P>
 class Generic3DModel {
  public:
   typedef Y  RVType;
@@ -76,7 +76,7 @@ class Generic3DModel {
 
 ////////////////////////////////////////////////////////////
 
-template<class Y,class X1,class X2,class X3,class P> 
+template<class Y,class X1,class X2,class X3,class P>
 class Generic4DModel {
  public:
   typedef Y  RVType;
@@ -93,7 +93,7 @@ class Generic4DModel {
 
 ////////////////////////////////////////////////////////////
 
-template<class Y,class X1,class X2,class X3,class X4,class P> 
+template<class Y,class X1,class X2,class X3,class X4,class P>
 class Generic5DModel {
  public:
   typedef Y  RVType;
@@ -111,7 +111,7 @@ class Generic5DModel {
 
 ////////////////////////////////////////////////////////////
 
-template<class Y,class X1,class X2,class X3,class X4,class X5,class P> 
+template<class Y,class X1,class X2,class X3,class X4,class X5,class P>
 class Generic6DModel {
  public:
   typedef Y  RVType;
@@ -130,7 +130,7 @@ class Generic6DModel {
 
 ////////////////////////////////////////////////////////////
 
-template<class Y,class X1,class X2,class X3,class X4,class X5,class X6,class P> 
+template<class Y,class X1,class X2,class X3,class X4,class X5,class X6,class P>
 class Generic7DModel {
  public:
   typedef Y  RVType;
@@ -302,7 +302,7 @@ class Modeled5DRV : public M::RVType {
                                  const typename M::Dep2Type& x2,
                                  const typename M::Dep3Type& x3,
                                  const typename M::Dep4Type& x4 ) const { return m.getProb(*this,x1,x2,x3,x4); }
-  
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -346,7 +346,7 @@ class Modeled6DRV : public M::RVType {
                                  const typename M::Dep3Type& x3,
                                  const typename M::Dep4Type& x4,
                                  const typename M::Dep5Type& x5 ) const { return m.getProb(*this,x1,x2,x3,x4,x5); }
-  
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -395,7 +395,7 @@ class Modeled7DRV : public M::RVType {
                                  const typename M::Dep4Type& x4,
                                  const typename M::Dep5Type& x5,
                                  const typename M::Dep6Type& x6 ) const { return m.getProb(*this,x1,x2,x3,x4,x5,x6); }
-  
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

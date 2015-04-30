@@ -54,7 +54,7 @@ class VertexNode {
 
     void BuildExtend();
 
-    // Should only happen to a root node when the entire vertex is empty.   
+    // Should only happen to a root node when the entire vertex is empty.
     bool Empty() const {
       return hypos_.empty() && extend_.empty();
     }
@@ -74,7 +74,7 @@ class VertexNode {
       return bound_;
     }
 
-    // Will be invalid unless this is a leaf.   
+    // Will be invalid unless this is a leaf.
     const History End() const {
       assert(hypos_.size() == 1);
       return hypos_.front().history;

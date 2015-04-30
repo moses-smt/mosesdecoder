@@ -1,7 +1,7 @@
 #include "ug_sampling_bias.h"
 #include <iostream>
 #include <boost/foreach.hpp>
- 
+
 #ifdef HAVE_CURLPP
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
@@ -15,11 +15,11 @@ namespace Moses
     using ugdiss::id_type;
 
 #ifdef HAVE_CURLPP
-    std::string 
+    std::string
     query_bias_server(std::string const& url, std::string const& text)
     {
       // communicate with the bias server; resuts will be in ...
-      std::ostringstream os;   
+      std::ostringstream os;
       curlpp::Easy myRequest;
       std::string query = url+curlpp::escape(text);
       myRequest.setOpt(new curlpp::options::Url(query));
@@ -32,7 +32,7 @@ namespace Moses
 
     DocumentBias
     ::DocumentBias
-    ( std::vector<id_type> const& sid2doc, 
+    ( std::vector<id_type> const& sid2doc,
       std::map<std::string,id_type> const& docname2docid,
       std::string const& server_url, std::string const& text,
       std::ostream* log)
@@ -45,15 +45,15 @@ namespace Moses
 #endif
     }
 
-    void 
+    void
     DocumentBias
     ::init_from_json
     ( std::string const& json, std::map<std::string,id_type> const& docname2docid,
       std::ostream* log)
-    { // poor man's special purpose json parser for responses from the 
+    { // poor man's special purpose json parser for responses from the
       // MMT bias server
-	
-      std::string d; float total = 0; std::map<std::string,float> bias; 
+
+      std::string d; float total = 0; std::map<std::string,float> bias;
       size_t i = 0; while (i < json.size() && json[i] != '"') ++i;
       while (++i < json.size())
 	{
@@ -61,34 +61,34 @@ namespace Moses
 	  if (i >= json.size())  break;
 	  float& f = bias[json.substr(k,i-k)];
 	  while (++i < json.size() && json[i] != ':');
-	  k = ++i; 
+	  k = ++i;
 	  while (++i < json.size() && json[i] != ',' && json[i] != '}');
 	  total += (f = atof(json.substr(k, i-k).c_str()));
 	  k = ++i; while (i < json.size() && json[i] != '"') ++i;
 	}
-      
+
       typedef std::pair<std::string const,float> item;
-      if (total) { BOOST_FOREACH(item& x, bias) { x.second /= total; } } 
+      if (total) { BOOST_FOREACH(item& x, bias) { x.second /= total; } }
       if (log)
 	{
-	  BOOST_FOREACH(item& x, bias) 
+	  BOOST_FOREACH(item& x, bias)
 	    {
 	      std::map<std::string,id_type>::const_iterator m;
 	      m = docname2docid.find(x.first);
 	      int docid = m != docname2docid.end() ? m->second : -1;
-	      *log << "CONTEXT SERVER RESPONSE " 
+	      *log << "CONTEXT SERVER RESPONSE "
 		   << "[" << docid << "] "
-		   << x.first << " " << x.second << std::endl; 
+		   << x.first << " " << x.second << std::endl;
 	    }
 	}
       init(bias, docname2docid);
-      
+
       // using xmlrpc_parse_json didn't always work (parser errors)
       // xmlrpc_value* b = xmlrpc_parse_json(env ,buf.str().c_str());
-      // std::cerr << "|" << buf.str() << "|" << std::endl; 
-      // // if (b == NULL) std::cerr << "OOpS" << std::endl; 
+      // std::cerr << "|" << buf.str() << "|" << std::endl;
+      // // if (b == NULL) std::cerr << "OOpS" << std::endl;
       // xmlrpc_c::value_struct v(b); //  = *b;
-      // std::map<std::string, xmlrpc_c::value> const 
+      // std::map<std::string, xmlrpc_c::value> const
       // 	bmap = static_cast<map<std::string, xmlrpc_c::value> >(v);
       // std::map<std::string, float> bias;
       // typedef std::map<std::string, xmlrpc_c::value>::value_type item;
@@ -99,11 +99,11 @@ namespace Moses
       // 	}
       // typedef std::map<std::string, float>::value_type fitem;
       // BOOST_FOREACH(fitem const& x, bias)
-      // 	std::cerr << x.first << " " << x.second/total << std::endl; 
+      // 	std::cerr << x.first << " " << x.second/total << std::endl;
       // // delete b;
     }
 
-    void 
+    void
     DocumentBias
     ::init(std::map<std::string,float> const& biasmap,
 	   std::map<std::string,id_type> const& docname2docid)
@@ -119,60 +119,60 @@ namespace Moses
       BOOST_FOREACH(doc_record const& d, docname2docid)
 	std::cerr << "BIAS " << d.first << " " << m_bias[d.second] << std::endl;
     }
-    
-    id_type 
+
+    id_type
     DocumentBias
     ::GetClass(id_type const idx) const
-    {	
-      return m_sid2docid.at(idx); 
+    {
+      return m_sid2docid.at(idx);
     }
-    
-    float 
+
+    float
     DocumentBias
-    ::operator[](id_type const idx) const 
-    { 
-      UTIL_THROW_IF2(idx >= m_sid2docid.size(), 
+    ::operator[](id_type const idx) const
+    {
+      UTIL_THROW_IF2(idx >= m_sid2docid.size(),
 		     "Out of bounds: " << idx << "/" << m_sid2docid.size());
       return m_bias[m_sid2docid[idx]];
     }
 
-    size_t 
+    size_t
     DocumentBias
-    ::size() const 
+    ::size() const
     { return m_sid2docid.size(); }
 
 
 
     SentenceBias
-    ::SentenceBias(std::vector<float> const& bias) 
+    ::SentenceBias(std::vector<float> const& bias)
       : m_bias(bias) { }
 
     SentenceBias
     ::SentenceBias(size_t const s) : m_bias(s) { }
 
-    id_type 
+    id_type
     SentenceBias
     ::GetClass(id_type idx) const { return idx; }
 
-    float& 
+    float&
     SentenceBias
-    ::operator[](id_type const idx) 
+    ::operator[](id_type const idx)
     {
       UTIL_THROW_IF2(idx >= m_bias.size(), "Out of bounds");
       return m_bias[idx];
     }
 
-    float 
+    float
     SentenceBias
-    ::operator[](id_type const idx) const 
-    { 
+    ::operator[](id_type const idx) const
+    {
       UTIL_THROW_IF2(idx >= m_bias.size(), "Out of bounds");
       return m_bias[idx];
     }
-    
-    size_t 
+
+    size_t
     SentenceBias
     ::size() const { return m_bias.size(); }
-    
+
   }
 }

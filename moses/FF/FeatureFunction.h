@@ -27,7 +27,7 @@ class FactorMask;
 class InputPath;
 class StackVec;
 class DistortionScoreProducer;
-class TranslationTask; 
+class TranslationTask;
 
 /** base class for all feature functions.
  */
@@ -128,12 +128,12 @@ protected:
 
 public:
   //! Called before search and collecting of translation options
-  virtual void 
+  virtual void
   InitializeForInput(ttasksptr const& ttask);
 
   // clean up temporary memory, called after processing each sentence
-  virtual void 
-  CleanUpAfterSentenceProcessing(ttasksptr const& ttask); 
+  virtual void
+  CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
 
   const std::string &
   GetArgLine() const { return m_argLine; }
@@ -151,11 +151,11 @@ public:
   // may have more factors than actually need, but not guaranteed.
   // For SCFG decoding, the source contains non-terminals, NOT the raw
   // source from the input sentence
-  virtual void 
+  virtual void
   EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase,
 		      ScoreComponentCollection& scoreBreakdown,
 		      ScoreComponentCollection& estimatedFutureScore) const = 0;
-  
+
   // override this method if you want to change the input before decoding
   virtual void ChangeSource(InputType * const&input) const { }
 

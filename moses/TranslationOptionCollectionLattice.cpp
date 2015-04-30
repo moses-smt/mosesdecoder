@@ -20,9 +20,9 @@ namespace Moses
 /** constructor; just initialize the base class */
 TranslationOptionCollectionLattice
 ::TranslationOptionCollectionLattice
-( ttasksptr const& ttask,   const WordLattice &input, 
+( ttasksptr const& ttask,   const WordLattice &input,
   size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(ttask, input, maxNoTransOptPerCoverage, 
+  : TranslationOptionCollection(ttask, input, maxNoTransOptPerCoverage,
 				translationOptionThreshold)
 {
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),

@@ -8,18 +8,18 @@ using namespace ugdiss;
 using namespace std;
 namespace Moses
 {
-  namespace bitext 
+  namespace bitext
   {
 
-    float 
+    float
     lbop(size_t const tries, size_t const succ, float const confidence)
     {
-      return (confidence == 0 
-	      ? float(succ)/tries 
+      return (confidence == 0
+	      ? float(succ)/tries
 	      : (boost::math::binomial_distribution<>::
 		 find_lower_bound_on_p(tries, succ, confidence)));
     }
-    
+
 
     // template<>
     void
@@ -42,37 +42,37 @@ namespace Moses
       else
 	index.reset(new imTSA<tkn>(track,NULL,NULL));
     }
-    
+
     snt_adder<L2R_Token<SimpleWordId> >::
-    snt_adder(vector<string> const& s, TokenIndex& v, 
-     	      sptr<imTtrack<L2R_Token<SimpleWordId> > >& t, 
+    snt_adder(vector<string> const& s, TokenIndex& v,
+     	      sptr<imTtrack<L2R_Token<SimpleWordId> > >& t,
 	      sptr<imTSA<L2R_Token<SimpleWordId> > >& i)
-      : snt(s), V(v), track(t), index(i) 
+      : snt(s), V(v), track(t), index(i)
     { }
 
-    bool 
+    bool
     expand_phrase_pair
-    (vector<vector<ushort> >& a1, 
+    (vector<vector<ushort> >& a1,
      vector<vector<ushort> >& a2,
      ushort const s2, // next word on in target side
      ushort const L1, ushort const R1, // limits of previous phrase
      ushort & s1, ushort & e1, ushort& e2) // start/end src; end trg
     {
-      if (a2[s2].size() == 0) 
+      if (a2[s2].size() == 0)
 	{
 	  cout << __FILE__ << ":" << __LINE__ << endl;
 	  return false;
 	}
       bitvector done1(a1.size());
       bitvector done2(a2.size());
-      vector <pair<ushort,ushort> > agenda; 
+      vector <pair<ushort,ushort> > agenda;
       // x.first:  side (1 or 2)
       // x.second: word position
       agenda.reserve(a1.size() + a2.size());
       agenda.push_back(pair<ushort,ushort>(2,s2));
       e2 = s2;
       s1 = e1 = a2[s2].front();
-      if (s1 >= L1 && s1 < R1) 
+      if (s1 >= L1 && s1 < R1)
 	{
 	  cout << __FILE__ << ":" << __LINE__ << endl;
 	  return false;
@@ -88,14 +88,14 @@ namespace Moses
 	      done1.set(p);
 	      BOOST_FOREACH(ushort i, a1[p])
 		{
-		  if (i < s2) 
+		  if (i < s2)
 		    {
 		      // cout << __FILE__ << ":" << __LINE__ << endl;
 		      return false;
 		    }
 		  if (done2[i]) continue;
 		  for (;e2 <= i;++e2)
-		    if (!done2[e2]) 
+		    if (!done2[e2])
 		      agenda.push_back(pair<ushort,ushort>(2,e2));
 		}
 	    }
@@ -104,16 +104,16 @@ namespace Moses
 	      done2.set(p);
 	      BOOST_FOREACH(ushort i, a2[p])
 		{
-		  if ((e1 < L1 && i >= L1) || 
-		      (s1 >= R1 && i < R1) || 
+		  if ((e1 < L1 && i >= L1) ||
+		      (s1 >= R1 && i < R1) ||
 		      (i >= L1 && i < R1))
 		    {
-		      // cout << __FILE__ << ":" << __LINE__ << " " 
-		      // << L1 << "-" << R1 << " " << i << " " 
+		      // cout << __FILE__ << ":" << __LINE__ << " "
+		      // << L1 << "-" << R1 << " " << i << " "
 		      // << s1 << "-" << e1<< endl;
 		      return false;
 		    }
-		  
+
 		  if (e1 < i)
 		    {
 		      for (; e1 <= i; ++e1)
@@ -134,7 +134,7 @@ namespace Moses
       return true;
     }
 
-    void 
+    void
     print_amatrix(vector<vector<ushort> > a1, uint32_t len2,
 		  ushort b1, ushort e1, ushort b2, ushort e2)
     {
@@ -163,7 +163,7 @@ namespace Moses
       cout  << string(90,'-') << endl;
     }
 
-    void 
+    void
     write_bitvector(bitvector const& v, ostream& out)
     {
       for (size_t i = v.find_first(); i < v.size();)

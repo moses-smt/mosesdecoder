@@ -65,8 +65,8 @@ LexicalReordering(const std::string &line)
   }
 
   // sanity check: number of default scores
-  size_t numScores 
-    = m_numScoreComponents 
+  size_t numScores
+    = m_numScoreComponents
     = m_numTuneableComponents
     = m_configuration->GetNumScoreComponents();
   UTIL_THROW_IF2(m_haveDefaultScores && m_defaultScores.size() != numScores,
@@ -137,7 +137,7 @@ void
 LexicalReordering::
 SetCache(TranslationOption& to) const
 {
-  if (to.GetLexReorderingScores(this)) return; 
+  if (to.GetLexReorderingScores(this)) return;
   // Scores were were set already (e.g., by sampling phrase table)
 
   Phrase const& sphrase = to.GetInputPath().GetPhrase();
@@ -157,7 +157,7 @@ void
 LexicalReordering::
 SetCache(TranslationOptionList& tol) const
 {
-  BOOST_FOREACH(TranslationOption* to, tol) 
+  BOOST_FOREACH(TranslationOption* to, tol)
     this->SetCache(*to);
 }
 

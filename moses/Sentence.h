@@ -63,7 +63,7 @@ namespace Moses
 
   public:
     Sentence();
-    Sentence(size_t const transId, std::string const& stext, 
+    Sentence(size_t const transId, std::string const& stext,
 	     std::vector<FactorType> const* IFO = NULL);
     // Sentence(size_t const transId, std::string const& stext);
     ~Sentence();
@@ -98,19 +98,19 @@ namespace Moses
     virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
     void Print(std::ostream& out) const;
 
-    TranslationOptionCollection* 
+    TranslationOptionCollection*
     CreateTranslationOptionCollection(ttasksptr const& ttask) const;
 
-    virtual void 
-    CreateFromString(std::vector<FactorType> const &factorOrder, 
-		     std::string const& phraseString);  
+    virtual void
+    CreateFromString(std::vector<FactorType> const &factorOrder,
+		     std::string const& phraseString);
 
     const NonTerminalSet&
-    GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const 
+    GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const
     { return m_defaultLabelSet; }
 
 
-    void 
+    void
     init(std::string line, std::vector<FactorType> const& factorOrder);
 
   private:
@@ -120,13 +120,13 @@ namespace Moses
     // void aux_interpret_xml (std::string& line, std::vector<size_t> & xmlWalls,
     // 			    std::vector<std::pair<size_t, std::string> >& placeholders);
 
-    void 
+    void
     aux_interpret_sgml_markup(std::string& line);
 
-    void 
+    void
     aux_interpret_dlt(std::string& line);
 
-    void 
+    void
     aux_interpret_xml
     (std::string& line, std::vector<size_t> & xmlWalls,
      std::vector<std::pair<size_t, std::string> >& placeholders);
@@ -135,7 +135,7 @@ namespace Moses
     aux_init_partial_translation(std::string& line);
 
   };
-  
+
 
 }
 

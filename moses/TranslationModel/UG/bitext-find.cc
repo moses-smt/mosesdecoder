@@ -30,15 +30,15 @@ write_sentence
     }
 }
 
-bool 
-fill(string const& query, TSA<Token> const& tsa, 
+bool
+fill(string const& query, TSA<Token> const& tsa,
      TokenIndex const& V, bitvector& v)
 {
   v.resize(tsa.getCorpus()->size());
   Bitext<Token>::iter m(&tsa);
-  istringstream buf(query); string w; 
-  while (buf >> w) 
-    if (!m.extend(V[w])) 
+  istringstream buf(query); string w;
+  while (buf >> w)
+    if (!m.extend(V[w]))
       return false;
   m.markSentences(v);
   return true;
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 {
   interpret_args(argc, argv);
   if (Q1.empty() && Q2.empty()) exit(0);
-  
+
   mmbitext B; string w;
   B.open(bname, L1, L2);
 
@@ -64,13 +64,13 @@ int main(int argc, char* argv[])
   bitvector check(B.T1->size());
   if (Q1.size() == 0 || Q2.size() == 0) check.set();
   else (m2.markSentences(check));
-  
+
   Bitext<Token>::iter& m = m1.size() ? m1 : m2;
   char const* x = m.lower_bound(-1);
   char const* stop = m.upper_bound(-1);
   uint64_t sid;
   ushort off;
-  boost::taus88 rnd;  
+  boost::taus88 rnd;
   size_t N = m.approxOccurrenceCount();
   maxhits = min(N, maxhits);
   size_t k = 0; // selected
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
       x = m.root->readOffset(x,stop,off);
 
       if (!check[sid]) continue;
-      size_t r = (N - i) * rnd()/(rnd.max()+1.) + k; 
+      size_t r = (N - i) * rnd()/(rnd.max()+1.) + k;
       if (maxhits != N && r >= maxhits) continue;
       ++k;
 
@@ -94,20 +94,20 @@ int main(int argc, char* argv[])
 	  // cout << "alignment failure" << endl;
 	}
 
-      cout << sid  << " " << B.docname(sid) 
+      cout << sid  << " " << B.docname(sid)
 	   << " dfwd=" << po_fwd << " dbwd=" << po_bwd
 	   << "\n";
       write_sentence(*B.T1, sid, *B.V1, cout); cout << "\n";
       write_sentence(*B.T2, sid, *B.V2, cout); cout << "\n";
-      B.write_yawat_alignment(sid, 
-			      m1.size() ? &m1 : NULL, 
-			      m2.size() ? &m2 : NULL, cout); 
+      B.write_yawat_alignment(sid,
+			      m1.size() ? &m1 : NULL,
+			      m2.size() ? &m2 : NULL, cout);
       cout << endl;
- 
+
     }
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   po::variables_map vm;
@@ -120,7 +120,7 @@ interpret_args(int ac, char* av[])
     ("q1", po::value<string>(&Q1), "query in L1")
     ("q2", po::value<string>(&Q2), "query in L2")
     ;
-  
+
   po::options_description h("Hidden Options");
   h.add_options()
     ("bname", po::value<string>(&bname), "base name of corpus")
@@ -133,7 +133,7 @@ interpret_args(int ac, char* av[])
   a.add("bname",1);
   a.add("L1",1);
   a.add("L2",1);
-  
+
   po::store(po::command_line_parser(ac,av)
             .options(h)
             .positional(a)
@@ -141,7 +141,7 @@ interpret_args(int ac, char* av[])
   po::notify(vm);
   if (vm.count("help"))
     {
-      cout << "\nusage:\n\t" << av[0] 
+      cout << "\nusage:\n\t" << av[0]
            << " [options] [--q1=<L1string>] [--q2=<L2string>]" << endl;
       cout << o << endl;
       exit(0);

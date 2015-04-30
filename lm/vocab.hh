@@ -35,7 +35,7 @@ class WriteWordsWrapper : public EnumerateVocab {
     WriteWordsWrapper(EnumerateVocab *inner);
 
     ~WriteWordsWrapper();
-    
+
     void Add(WordIndex index, const StringPiece &str);
 
     const std::string &Buffer() const { return buffer_; }
@@ -46,7 +46,7 @@ class WriteWordsWrapper : public EnumerateVocab {
     std::string buffer_;
 };
 
-// Vocabulary based on sorted uniform find storing only uint64_t values and using their offsets as indices.  
+// Vocabulary based on sorted uniform find storing only uint64_t values and using their offsets as indices.
 class SortedVocabulary : public base::Vocabulary {
   public:
     SortedVocabulary();
@@ -67,7 +67,7 @@ class SortedVocabulary : public base::Vocabulary {
     // Size for purposes of file writing
     static uint64_t Size(uint64_t entries, const Config &config);
 
-    // Vocab words are [0, Bound())  Only valid after FinishedLoading/LoadedBinary.  
+    // Vocab words are [0, Bound())  Only valid after FinishedLoading/LoadedBinary.
     WordIndex Bound() const { return bound_; }
 
     // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.
@@ -79,7 +79,7 @@ class SortedVocabulary : public base::Vocabulary {
 
     WordIndex Insert(const StringPiece &str);
 
-    // Reorders reorder_vocab so that the IDs are sorted.  
+    // Reorders reorder_vocab so that the IDs are sorted.
     void FinishedLoading(ProbBackoff *reorder_vocab);
 
     // Trie stores the correct counts including <unk> in the header.  If this was previously sized based on a count exluding <unk>, padding with 8 bytes will make it the correct size based on a count including <unk>.
@@ -98,7 +98,7 @@ class SortedVocabulary : public base::Vocabulary {
 
     EnumerateVocab *enumerate_;
 
-    // Actual strings.  Used only when loading from ARPA and enumerate_ != NULL 
+    // Actual strings.  Used only when loading from ARPA and enumerate_ != NULL
     util::Pool string_backing_;
 
     std::vector<StringPiece> strings_to_enumerate_;
@@ -123,7 +123,7 @@ struct ProbingVocabularyEntry {
 };
 #pragma pack(pop)
 
-// Vocabulary storing a map from uint64_t to WordIndex. 
+// Vocabulary storing a map from uint64_t to WordIndex.
 class ProbingVocabulary : public base::Vocabulary {
   public:
     ProbingVocabulary();
@@ -137,7 +137,7 @@ class ProbingVocabulary : public base::Vocabulary {
     // This just unwraps Config to get the probing_multiplier.
     static uint64_t Size(uint64_t entries, const Config &config);
 
-    // Vocab words are [0, Bound()).  
+    // Vocab words are [0, Bound()).
     WordIndex Bound() const { return bound_; }
 
     // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.

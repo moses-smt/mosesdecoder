@@ -1,8 +1,8 @@
 // -*- c++ -*-
 // Program to extract word cooccurrence counts from a memory-mapped
 // word-aligned bitext stores the counts lexicon in the format for
-// mm2dTable<uint32_t> (ug_mm_2d_table.h) 
-// 
+// mm2dTable<uint32_t> (ug_mm_2d_table.h)
+//
 // (c) 2010-2012 Ulrich Germann
 
 // to do: multi-threading
@@ -20,8 +20,8 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 #include <boost/math/distributions/binomial.hpp>
-#include <boost/unordered_map.hpp> 
-#include <boost/unordered_set.hpp> 
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
 #include "moses/Util.h"
@@ -36,7 +36,7 @@ using namespace boost::math;
 typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> LEX_t;
 typedef SimpleWordId Token;
 
-// DECLARATIONS 
+// DECLARATIONS
 void interpret_args(int ac, char* av[]);
 
 mmTtrack<Token> T1,T2;
@@ -52,7 +52,7 @@ struct Count
   Count(uint32_t ax, uint32_t cx) : a(ax), c(cx) {}
 };
 
-bool 
+bool
 operator<(pair<id_type,Count> const& a,
 	  pair<id_type,Count> const& b)
 {
@@ -72,7 +72,7 @@ public:
   countlist_t & LEX;
   size_t  offset;
   size_t    skip;
-  Counter(countlist_t& lex, size_t o, size_t s) 
+  Counter(countlist_t& lex, size_t o, size_t s)
     : LEX(lex), offset(o), skip(s) {}
   void processSentence(id_type sid);
   void operator()();
@@ -83,7 +83,7 @@ int    verbose;
 size_t truncat;
 size_t num_threads;
 
-void 
+void
 Counter::
 operator()()
 {
@@ -105,17 +105,17 @@ struct lexsorter
 {
   vector<countlist_t> const& v;
   id_type wid;
-  lexsorter(vector<countlist_t> const& vx, id_type widx) 
+  lexsorter(vector<countlist_t> const& vx, id_type widx)
     : v(vx),wid(widx) {}
   bool operator()(pair<uint32_t,uint32_t> const& a,
 		  pair<uint32_t,uint32_t> const& b) const
   {
-    return (v.at(a.first).at(wid).at(a.second).first > 
+    return (v.at(a.first).at(wid).at(a.second).first >
 	    v.at(b.first).at(wid).at(b.second).first);
   }
 };
 
-void 
+void
 writeTableHeader(ostream& out)
 {
   filepos_type idxOffset=0;
@@ -159,7 +159,7 @@ void writeTable(ostream* aln_out, ostream* coc_out)
 	    H.pop_back();
 	  else
 	    push_heap(H.begin(),H.end(),sorter);
-	  while (H.size() && 
+	  while (H.size() &&
 		 XLEX[H[0].first][id1].at(H[0].second).first == id2)
 	    {
 	      aln += XLEX[H[0].first][id1][H[0].second].second.a;
@@ -178,7 +178,7 @@ void writeTable(ostream* aln_out, ostream* coc_out)
 	      numwrite(*aln_out,aln);
 	      m1a[id1] += aln;
 	      m2a[id2] += aln;
-	    }	      
+	    }
 	  if (coc_out && coc)
 	    {
 	      ++CellCountC;
@@ -191,7 +191,7 @@ void writeTable(ostream* aln_out, ostream* coc_out)
     }
   idxa.back() = CellCountA;
   idxc.back() = CellCountC;
-  if (aln_out) 
+  if (aln_out)
     {
       filepos_type idxOffsetA = aln_out->tellp();
       BOOST_FOREACH(id_type foo, idxa)
@@ -201,7 +201,7 @@ void writeTable(ostream* aln_out, ostream* coc_out)
       aln_out->seekp(0);
       numwrite(*aln_out,idxOffsetA);
     }
-  if (coc_out) 
+  if (coc_out)
     {
       filepos_type idxOffsetC = coc_out->tellp();
       BOOST_FOREACH(id_type foo, idxc)
@@ -223,9 +223,9 @@ processSentence(id_type sid)
   Token const* e2 = T2.sntEnd(sid);
   vector<ushort> cnt1(V1.ksize(),0);
   vector<ushort> cnt2(V2.ksize(),0);
-  for (Token const* x = s1; x < e1; ++x) 
+  for (Token const* x = s1; x < e1; ++x)
     ++cnt1.at(x->id());
-  for (Token const* x = s2; x < e2; ++x) 
+  for (Token const* x = s2; x < e2; ++x)
     ++cnt2.at(x->id());
 
   boost::unordered_set<wpair> seen;
@@ -257,21 +257,21 @@ processSentence(id_type sid)
       wpair k(id1,id2);
       Count& cnt = CNT[k];
       cnt.a++;
-      if (seen.insert(k).second) 
+      if (seen.insert(k).second)
 	cnt.c += cnt1[id1] * cnt2[id2];
     }
   // count unaliged words
-  for (size_t i = check1.find_first(); 
-       i < check1.size(); 
+  for (size_t i = check1.find_first();
+       i < check1.size();
        i = check1.find_next(i))
     CNT[wpair((s1+i)->id(),0)].a++;
-  for (size_t i = check2.find_first(); 
-       i < check2.size(); 
+  for (size_t i = check2.find_first();
+       i < check2.size();
        i = check2.find_next(i))
     CNT[wpair(0,(s2+i)->id())].a++;
 }
 
-int 
+int
 main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
@@ -299,7 +299,7 @@ main(int argc, char* argv[])
   if (cooc.size())  coc_out.close();
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   namespace po=boost::program_options;
@@ -321,7 +321,7 @@ interpret_args(int ac, char* av[])
     ("truncate,n", po::value<size_t>(&truncat)->default_value(0),
      "truncate corpus to <N> sentences (for debugging)")
     ;
-  
+
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
     ("L1",    po::value<string>(&L1),"L1 tag")

@@ -2,7 +2,7 @@
 namespace ugdiss {
   typedef unsigned char uchar;
 
-  void 
+  void
   numwrite(std::ostream& out, uint16_t const& x)
   {
     char buf[2];
@@ -11,7 +11,7 @@ namespace ugdiss {
     out.write(buf,2);
   }
 
-  void 
+  void
   numwrite(std::ostream& out, uint32_t const& x)
   {
     char buf[4];
@@ -22,7 +22,7 @@ namespace ugdiss {
     out.write(buf,4);
   }
 
-  void 
+  void
   numwrite(std::ostream& out, uint64_t const& x)
   {
     char buf[8];
@@ -37,7 +37,7 @@ namespace ugdiss {
     out.write(buf,8);
   }
 
-  char const* 
+  char const*
   numread(char const* src, uint16_t & x)
   {
     uchar const* d = reinterpret_cast<uchar const*>(src);
@@ -45,28 +45,28 @@ namespace ugdiss {
     return src+2;
   }
 
-  char const* 
+  char const*
   numread(char const* src, uint32_t & x)
   {
     uchar const* d = reinterpret_cast<uchar const*>(src);
-    x = ((uint32_t(d[0])<<0) | 
-	 (uint32_t(d[1])<<8) | 
-	 (uint32_t(d[2])<<16)| 
+    x = ((uint32_t(d[0])<<0) |
+	 (uint32_t(d[1])<<8) |
+	 (uint32_t(d[2])<<16)|
 	 (uint32_t(d[3])<<24));
     return src+4;
   }
 
-  char const* 
+  char const*
   numread(char const* src, uint64_t & x)
   {
     uchar const* d = reinterpret_cast<uchar const*>(src);
-    x = ((uint64_t(d[0])<<0)  | 
-	 (uint64_t(d[1])<<8)  | 
-	 (uint64_t(d[2])<<16) | 
+    x = ((uint64_t(d[0])<<0)  |
+	 (uint64_t(d[1])<<8)  |
+	 (uint64_t(d[2])<<16) |
 	 (uint64_t(d[3])<<24) |
-	 (uint64_t(d[4])<<32) | 
-	 (uint64_t(d[5])<<40) | 
-	 (uint64_t(d[6])<<48) | 
+	 (uint64_t(d[4])<<32) |
+	 (uint64_t(d[5])<<40) |
+	 (uint64_t(d[6])<<48) |
 	 (uint64_t(d[7])<<56));
     return src+8;
   }

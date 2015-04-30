@@ -52,16 +52,16 @@ class PhraseDictionary;
 class TargetPhrase: public Phrase
 {
  public:
-  typedef std::map<FeatureFunction const*, boost::shared_ptr<Scores> > 
+  typedef std::map<FeatureFunction const*, boost::shared_ptr<Scores> >
     ScoreCache_t;
   ScoreCache_t const& GetExtraScores() const;
   Scores const* GetExtraScores(FeatureFunction const* ff) const;
-  void SetExtraScores(FeatureFunction const* ff, 
+  void SetExtraScores(FeatureFunction const* ff,
 		      boost::shared_ptr<Scores> const& scores);
-  
+
  private:
-  ScoreCache_t m_cached_scores; 
-  
+  ScoreCache_t m_cached_scores;
+
 private:
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
   friend void swap(TargetPhrase &first, TargetPhrase &second);
@@ -198,7 +198,7 @@ public:
     return found->second;
   }
 
-  
+
 
   // To be set by the FF that needs it, by default the rule source = NULL
   // make a copy of the source side of the rule

@@ -556,8 +556,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       for (boost::unordered_set<size_t>::const_iterator treeInputLabelsLHSIt = treeInputLabelsLHS.begin();
            treeInputLabelsLHSIt != treeInputLabelsLHS.end(); ++treeInputLabelsLHSIt) {
 
-        scoreBreakdown.PlusEquals(this, 
-                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + m_sourceLabelsByIndex[*treeInputLabelsLHSIt], 
+        scoreBreakdown.PlusEquals(this,
+                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + m_sourceLabelsByIndex[*treeInputLabelsLHSIt],
                                   (float)1/treeInputLabelsLHS.size());
 
         if (!m_targetSourceLHSJointCountFile.empty()) {
@@ -567,8 +567,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
         }
       }
       if ( treeInputLabelsLHS.size() == 0 ) {
-        scoreBreakdown.PlusEquals(this, 
-                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + outputDefaultNonTerminal[0]->GetString().as_string(), 
+        scoreBreakdown.PlusEquals(this,
+                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + outputDefaultNonTerminal[0]->GetString().as_string(),
                                   1);
         if (!m_targetSourceLHSJointCountFile.empty()) {
           t2sLabelsScore = TransformScore(m_floor);

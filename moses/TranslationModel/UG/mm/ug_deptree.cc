@@ -7,14 +7,14 @@ using namespace std;
 namespace ugdiss
 {
 
-  bool 
+  bool
   Conll_Record::
   isDescendentOf(Conll_Record const* other) const
   {
     Conll_Record const* a = this;
-    while (a != other && a->parent) 
+    while (a != other && a->parent)
       a += a->parent;
-    return a==other; 
+    return a==other;
   }
 
   Conll_Record&
@@ -43,7 +43,7 @@ namespace ugdiss
   }
 
   Conll_AllFields::
-  Conll_AllFields() 
+  Conll_AllFields()
   : Conll_Record::Conll_Record()
   {};
 
@@ -64,7 +64,7 @@ namespace ugdiss
   }
 
   Conll_WildCard::
-  Conll_WildCard() 
+  Conll_WildCard()
   : Conll_Record::Conll_Record()
   {};
 
@@ -95,8 +95,8 @@ namespace ugdiss
 
 #if 0
   Conll_Record::
-  Conll_Record(string const& line, 
-               TokenIndex const& SF, TokenIndex const& LM, 
+  Conll_Record(string const& line,
+               TokenIndex const& SF, TokenIndex const& LM,
                TokenIndex const& PS, TokenIndex const& DT)
   {
 
@@ -140,35 +140,35 @@ namespace ugdiss
 #endif
 
   Conll_Sform::
-  Conll_Sform() 
-  : Conll_Record::Conll_Record() 
+  Conll_Sform()
+  : Conll_Record::Conll_Record()
   {};
 
   Conll_MinPos::
-  Conll_MinPos() 
-  : Conll_Record::Conll_Record() 
+  Conll_MinPos()
+  : Conll_Record::Conll_Record()
   {};
- 
+
   Conll_MinPos_Lemma::
-  Conll_MinPos_Lemma() 
-  : Conll_Record::Conll_Record() 
+  Conll_MinPos_Lemma()
+  : Conll_Record::Conll_Record()
   {};
 
   Conll_Lemma::
   Conll_Lemma()
-  : Conll_Record::Conll_Record() 
+  : Conll_Record::Conll_Record()
   {};
 
   Conll_Lemma::
   Conll_Lemma(id_type _id)
-  : Conll_Record::Conll_Record() 
+  : Conll_Record::Conll_Record()
   {
     this->lemma = _id;
   };
 
   Conll_MinPos::
   Conll_MinPos(id_type _id)
-  : Conll_Record::Conll_Record() 
+  : Conll_Record::Conll_Record()
   {
     this->minpos = _id;
   };
@@ -182,7 +182,7 @@ namespace ugdiss
 
   Conll_MajPos::
   Conll_MajPos(id_type _id)
-  : Conll_Record::Conll_Record() 
+  : Conll_Record::Conll_Record()
   {
     this->majpos = _id;
   };
@@ -219,21 +219,21 @@ namespace ugdiss
   Conll_MinPos_Lemma::
   cmp(Conll_Record const& other) const
   {
-    if (this->minpos != 0 && other.minpos != 0 && this->minpos != other.minpos) 
+    if (this->minpos != 0 && other.minpos != 0 && this->minpos != other.minpos)
       return this->minpos < other.minpos ? -1 : 1;
     if (this->lemma != 0 && other.lemma != 0 && this->lemma != other.lemma)
       return this->lemma < other.lemma ? -1 : 1;
     return 0;
   }
 
-  id_type 
+  id_type
   Conll_Lemma::
-  id() const 
-  { 
-    return this->lemma; 
+  id() const
+  {
+    return this->lemma;
   }
 
-  int 
+  int
   Conll_Lemma::
   cmp(Conll_Record const& other) const
   {
@@ -251,16 +251,16 @@ namespace ugdiss
 
   Conll_Sform::
   Conll_Sform(id_type _id)
-  : Conll_Record::Conll_Record() 
+  : Conll_Record::Conll_Record()
   {
     this->sform = _id;
   };
 
-  id_type 
+  id_type
   Conll_Sform
-  ::id() const 
-  { 
-    return this->sform; 
+  ::id() const
+  {
+    return this->sform;
   }
 
   int
@@ -282,7 +282,7 @@ namespace ugdiss
         short p = w[i].rec->parent;
         if (p != 0)
           {
-            if (p > 0) assert(i+p < w.size()); 
+            if (p > 0) assert(i+p < w.size());
             else       assert(i >= size_t(-p));
             w[i].parent  = &(w[i+p]);
             w[i].parent->children.push_back(&(w[i]));
@@ -291,7 +291,7 @@ namespace ugdiss
   }
 #endif
 
-  /** @return true if the linear sequence of /Conll_Record/s is coherent, 
+  /** @return true if the linear sequence of /Conll_Record/s is coherent,
    *  i.e., a proper connected tree structure */
   bool
   isCoherent(Conll_Record const* const start, Conll_Record const* const stop)
@@ -300,16 +300,16 @@ namespace ugdiss
     for (Conll_Record const* x = start; outOfRange <= 1 && x < stop; ++x)
       {
         Conll_Record const* n = x->up();
-        if (!n || n < start || n >= stop) 
+        if (!n || n < start || n >= stop)
           outOfRange++;
       }
     return outOfRange<=1;
   }
-  
+
   // this is for contigous word sequences extracted from longer sequences
   // adjust parent pointers to 0 (no parent) if they point out of the
   // subsequence
-  void 
+  void
   fixParse(Conll_Record* start, Conll_Record* stop)
   {
     int len = stop-start;

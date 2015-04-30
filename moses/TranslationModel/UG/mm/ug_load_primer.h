@@ -1,7 +1,7 @@
 //-*- c++ -*-
 #pragma once
 #include <boost/iostreams/device/mapped_file.hpp>
-// 
+//
 namespace Moses
 {
   class FastLoader
@@ -14,5 +14,5 @@ namespace Moses
 
   void prime(boost::iostreams::mapped_file_source const& f);
 
-    
+
 };

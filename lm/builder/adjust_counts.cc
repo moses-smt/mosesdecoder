@@ -114,7 +114,7 @@ class CollapseStream {
       current_(NULL, NGram::OrderFromSize(position.GetChain().EntrySize())),
       prune_threshold_(prune_threshold),
       prune_words_(prune_words),
-      block_(position) { 
+      block_(position) {
       StartBlock();
     }
 
@@ -125,27 +125,27 @@ class CollapseStream {
 
     CollapseStream &operator++() {
       assert(block_);
-      
+
       if (current_.begin()[1] == kBOS && current_.Base() < copy_from_) {
         memcpy(current_.Base(), copy_from_, current_.TotalSize());
         UpdateCopyFrom();
-        
+
         // Mark highest order n-grams for later pruning
         if(current_.Count() <= prune_threshold_) {
-          current_.Mark(); 
+          current_.Mark();
         }
-        
+
         if(!prune_words_.empty()) {
           for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
             if(prune_words_[*i]) {
-              current_.Mark(); 
+              current_.Mark();
               break;
             }
           }
         }
-        
+
       }
-    
+
       current_.NextInMemory();
       uint8_t *block_base = static_cast<uint8_t*>(block_->Get());
       if (current_.Base() == block_base + block_->ValidSize()) {
@@ -153,21 +153,21 @@ class CollapseStream {
         ++block_;
         StartBlock();
       }
-      
+
       // Mark highest order n-grams for later pruning
       if(current_.Count() <= prune_threshold_) {
-        current_.Mark(); 
+        current_.Mark();
       }
 
       if(!prune_words_.empty()) {
         for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
           if(prune_words_[*i]) {
-            current_.Mark(); 
+            current_.Mark();
             break;
           }
         }
       }
-      
+
       return *this;
     }
 
@@ -180,21 +180,21 @@ class CollapseStream {
       current_.ReBase(block_->Get());
       copy_from_ = static_cast<uint8_t*>(block_->Get()) + block_->ValidSize();
       UpdateCopyFrom();
-      
+
       // Mark highest order n-grams for later pruning
       if(current_.Count() <= prune_threshold_) {
-        current_.Mark(); 
+        current_.Mark();
       }
 
       if(!prune_words_.empty()) {
         for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
           if(prune_words_[*i]) {
-            current_.Mark(); 
+            current_.Mark();
             break;
           }
         }
       }
-      
+
     }
 
     // Find last without bos.
@@ -222,18 +222,18 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
   StatCollector stats(order, counts_, counts_pruned_, discounts_);
   if (order == 1) {
 
-    // Only unigrams.  Just collect stats.  
+    // Only unigrams.  Just collect stats.
     for (NGramStream full(positions[0]); full; ++full) {
-      
+
       // Do not prune <s> </s> <unk>
       if(*full->begin() > 2) {
         if(full->Count() <= prune_thresholds_[0])
           full->Mark();
-      
+
         if(!prune_words_.empty() && prune_words_[*full->begin()])
           full->Mark();
       }
-      
+
       stats.AddFull(full->UnmarkedCount(), full->IsMarked());
     }
 
@@ -243,7 +243,7 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
 
   NGramStreams streams;
   streams.Init(positions, positions.size() - 1);
-  
+
   CollapseStream full(positions[positions.size() - 1], prune_thresholds_.back(), prune_words_);
 
   // Initialization: <unk> has count 0 and so does <s>.
@@ -261,7 +261,7 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
   std::vector<uint64_t> actual_counts(positions.size(), 0);
   // Something of a hack: don't prune <s>.
   actual_counts[0] = std::numeric_limits<uint64_t>::max();
-  
+
   // Iterate over full (the stream of the highest order ngrams)
   for (; full; ++full) {
     const WordIndex *different = FindDifference(*full, **lower_valid);
@@ -272,16 +272,16 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
       uint64_t order_minus_1 = lower_valid - streams_begin;
       if(actual_counts[order_minus_1] <= prune_thresholds_[order_minus_1])
         (*lower_valid)->Mark();
-      
+
       if(!prune_words_.empty()) {
         for(WordIndex* i = (*lower_valid)->begin(); i != (*lower_valid)->end(); i++) {
           if(prune_words_[*i]) {
-            (*lower_valid)->Mark(); 
+            (*lower_valid)->Mark();
             break;
           }
         }
       }
-        
+
       stats.Add(order_minus_1, (*lower_valid)->UnmarkedCount(), (*lower_valid)->IsMarked());
       ++*lower_valid;
     }
@@ -327,16 +327,16 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
     uint64_t lower_count = actual_counts[(*s)->Order() - 1];
     if(lower_count <= prune_thresholds_[(*s)->Order() - 1])
       (*s)->Mark();
-      
+
     if(!prune_words_.empty()) {
       for(WordIndex* i = (*s)->begin(); i != (*s)->end(); i++) {
         if(prune_words_[*i]) {
-          (*s)->Mark(); 
+          (*s)->Mark();
           break;
         }
       }
     }
-      
+
     stats.Add(s - streams.begin(), lower_count, (*s)->IsMarked());
     ++*s;
   }

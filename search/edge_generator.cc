@@ -34,7 +34,7 @@ template <class Model> void FastScore(const Context<Model> &context, Arity victi
       adjustment += lm::ngram::Subsume(context.LanguageModel(), before->left, before->right, after->left, after->right, update_reveal.left.length);
     }
     before->right = after->right;
-    // Shift the others shifted one down, covering after.  
+    // Shift the others shifted one down, covering after.
     for (lm::ngram::ChartState *cover = after; cover < between + incomplete; ++cover) {
       *cover = *(cover + 1);
     }
@@ -55,7 +55,7 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
   Arity victim_completed;
   Arity incomplete;
   unsigned char lowest_niceness = 255;
-  // Select victim or return if complete.   
+  // Select victim or return if complete.
   {
     Arity completed = 0;
     for (Arity i = 0; i != arity; ++i) {
@@ -89,20 +89,20 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
 
     memcpy(alternate.Between(), top.Between(), sizeof(lm::ngram::ChartState) * (incomplete + 1));
 
-    // TODO: dedupe?  
+    // TODO: dedupe?
     generate_.push(alternate);
   }
 
-#ifndef NDEBUG  
+#ifndef NDEBUG
   Score before = top.GetScore();
 #endif
   // top is now the continuation.
   FastScore(context, victim, victim - victim_completed, incomplete, old_value, top);
-  // TODO: dedupe?  
+  // TODO: dedupe?
   generate_.push(top);
   assert(lowest_niceness != 254 || top.GetScore() == before);
 
-  // Invalid indicates no new hypothesis generated.  
+  // Invalid indicates no new hypothesis generated.
   return PartialEdge();
 }
 

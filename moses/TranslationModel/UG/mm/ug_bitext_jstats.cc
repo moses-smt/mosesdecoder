@@ -16,12 +16,12 @@ namespace Moses
     jstats::
     jstats()
       : my_rcnt(0), my_cnt2(0), my_wcnt(0)
-    { 
-      for (int i = 0; i <= Moses::LRModel::NONE; ++i) 
+    {
+      for (int i = 0; i <= Moses::LRModel::NONE; ++i)
 	ofwd[i] = obwd[i] = 0;
       my_aln.reserve(1);
     }
-    
+
     jstats::
     jstats(jstats const& other)
     {
@@ -35,8 +35,8 @@ namespace Moses
 	  obwd[i] = other.obwd[i];
 	}
     }
-  
-    uint32_t 
+
+    uint32_t
     jstats::
     dcnt_fwd(PhraseOrientation const idx) const
     {
@@ -44,15 +44,15 @@ namespace Moses
       return ofwd[idx];
     }
 
-    uint32_t 
+    uint32_t
     jstats::
     dcnt_bwd(PhraseOrientation const idx) const
     {
       assert(idx <= Moses::LRModel::NONE);
       return obwd[idx];
     }
-    
-    void 
+
+    void
     jstats::
     add(float w, vector<uchar> const& a, uint32_t const cnt2,
 	uint32_t fwd_orient, uint32_t bwd_orient, int const docid)
@@ -65,7 +65,7 @@ namespace Moses
 	{
 	  size_t i = 0;
 	  while (i < my_aln.size() && my_aln[i].second != a) ++i;
-	  if (i == my_aln.size()) 
+	  if (i == my_aln.size())
 	    my_aln.push_back(pair<size_t,vector<uchar> >(1,a));
 	  else
 	    my_aln[i].first++;
@@ -83,7 +83,7 @@ namespace Moses
 
     vector<pair<size_t, vector<uchar> > > const&
     jstats::
-    aln() const 
+    aln() const
     { return my_aln; }
 
   } // namespace bitext

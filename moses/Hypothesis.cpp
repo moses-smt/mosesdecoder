@@ -86,7 +86,7 @@ namespace Moses
     , m_sourceInput(prevHypo.m_sourceInput)
     , m_currSourceWordsRange(transOpt.GetSourceWordsRange())
     , m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
-			     prevHypo.m_currTargetWordsRange.GetEndPos() 
+			     prevHypo.m_currTargetWordsRange.GetEndPos()
 			     + transOpt.GetTargetPhrase().GetSize())
     , m_wordDeleted(false)
     , m_totalScore(0.0f)
@@ -127,7 +127,7 @@ namespace Moses
     }
   }
 
-  void 
+  void
   Hypothesis::
   AddArc(Hypothesis *loserHypo)
   {
@@ -156,7 +156,7 @@ namespace Moses
   /***
    * return the subclass of Hypothesis most appropriate to the given translation option
    */
-  Hypothesis* 
+  Hypothesis*
   Hypothesis::
   CreateNext(const TranslationOption &transOpt) const
   {
@@ -166,7 +166,7 @@ namespace Moses
   /***
    * return the subclass of Hypothesis most appropriate to the given translation option
    */
-  Hypothesis* 
+  Hypothesis*
   Hypothesis::
   Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   {
@@ -182,9 +182,9 @@ namespace Moses
    * return the subclass of Hypothesis most appropriate to the given target phrase
    */
 
-  Hypothesis* 
+  Hypothesis*
   Hypothesis::
-  Create(Manager& manager, InputType const& m_source, 
+  Create(Manager& manager, InputType const& m_source,
 	 const TranslationOption &initialTransOpt)
   {
 #ifdef USE_HYPO_POOL
@@ -200,7 +200,7 @@ namespace Moses
       keep an ordered list of hypotheses. This makes recombination
       much quicker.
   */
-  int 
+  int
   Hypothesis::
   RecombineCompare(const Hypothesis &compare) const
   {
@@ -223,22 +223,22 @@ namespace Moses
     return 0;
   }
 
-  void 
+  void
   Hypothesis::
   EvaluateWhenApplied(StatefulFeatureFunction const& sfff,
 		      int state_idx)
   {
     const StaticData &staticData = StaticData::Instance();
-    if (! staticData.IsFeatureFunctionIgnored( sfff )) 
+    if (! staticData.IsFeatureFunctionIgnored( sfff ))
       {
-	m_ffStates[state_idx] 
+	m_ffStates[state_idx]
 	  = sfff.EvaluateWhenApplied
 	  (*this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
 	   &m_currScoreBreakdown);
     }
   }
 
-  void 
+  void
   Hypothesis::
   EvaluateWhenApplied(const StatelessFeatureFunction& slff)
   {
@@ -251,7 +251,7 @@ namespace Moses
   /***
    * calculate the logarithm of our total translation score (sum up components)
    */
-  void 
+  void
   Hypothesis::
   EvaluateWhenApplied(const SquareMatrix &futureScore)
   {
@@ -309,7 +309,7 @@ namespace Moses
   /**
    * print hypothesis information for pharaoh-style logging
    */
-  void 
+  void
   Hypothesis::
   PrintHypothesis() const
   {
@@ -346,7 +346,7 @@ namespace Moses
     //PrintLMScores();
   }
 
-  void 
+  void
   Hypothesis::
   CleanupArcList()
   {
@@ -361,27 +361,27 @@ namespace Moses
      */
     const StaticData &staticData = StaticData::Instance();
     size_t nBestSize = staticData.GetNBestSize();
-    bool distinctNBest = (staticData.GetDistinctNBest() || 
-			  staticData.GetLatticeSamplesSize() ||  
-			  staticData.UseMBR() || 
-			  staticData.GetOutputSearchGraph() || 
-			  staticData.GetOutputSearchGraphSLF() || 
-			  staticData.GetOutputSearchGraphHypergraph() || 
+    bool distinctNBest = (staticData.GetDistinctNBest() ||
+			  staticData.GetLatticeSamplesSize() ||
+			  staticData.UseMBR() ||
+			  staticData.GetOutputSearchGraph() ||
+			  staticData.GetOutputSearchGraphSLF() ||
+			  staticData.GetOutputSearchGraphHypergraph() ||
 			  staticData.UseLatticeMBR());
 
-    if (!distinctNBest && m_arcList->size() > nBestSize * 5) 
+    if (!distinctNBest && m_arcList->size() > nBestSize * 5)
       {
 	// prune arc list only if there too many arcs
 	NTH_ELEMENT4(m_arcList->begin(), m_arcList->begin() + nBestSize - 1,
 		     m_arcList->end(), CompareHypothesisTotalScore());
-	
+
 	// delete bad ones
 	ArcList::iterator iter;
-	for (iter = m_arcList->begin() + nBestSize; iter != m_arcList->end() ; ++iter) 
+	for (iter = m_arcList->begin() + nBestSize; iter != m_arcList->end() ; ++iter)
 	  FREEHYPO(*iter);
 	m_arcList->erase(m_arcList->begin() + nBestSize, m_arcList->end());
       }
-    
+
     // set all arc's main hypo variable to this hypo
     ArcList::iterator iter = m_arcList->begin();
     for (; iter != m_arcList->end() ; ++iter) {
@@ -395,15 +395,15 @@ namespace Moses
   GetCurrTargetPhrase() const
   { return m_transOpt.GetTargetPhrase(); }
 
-  void 
+  void
   Hypothesis::
   GetOutputPhrase(Phrase &out) const
   {
-    if (m_prevHypo != NULL) 
+    if (m_prevHypo != NULL)
       m_prevHypo->GetOutputPhrase(out);
     out.Append(GetCurrTargetPhrase());
   }
-  
+
   TO_STRING_BODY(Hypothesis)
 
   // friend
@@ -424,37 +424,37 @@ namespace Moses
   }
 
 
-  std::string 
+  std::string
   Hypothesis::
   GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const
   { return m_transOpt.GetInputPath().GetPhrase().GetStringRep(factorsToPrint); }
 
-  std::string 
+  std::string
   Hypothesis::
   GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const
   { return (m_prevHypo ? GetCurrTargetPhrase().GetStringRep(factorsToPrint) : ""); }
 
-  std::string 
+  std::string
   Hypothesis::
   GetSourcePhraseStringRep() const
   {
     vector<FactorType> allFactors(MAX_NUM_FACTORS);
-    for(size_t i=0; i < MAX_NUM_FACTORS; i++) 
+    for(size_t i=0; i < MAX_NUM_FACTORS; i++)
       allFactors[i] = i;
     return GetSourcePhraseStringRep(allFactors);
   }
 
-  std::string 
+  std::string
   Hypothesis::
   GetTargetPhraseStringRep() const
   {
     vector<FactorType> allFactors(MAX_NUM_FACTORS);
-    for(size_t i=0; i < MAX_NUM_FACTORS; i++) 
+    for(size_t i=0; i < MAX_NUM_FACTORS; i++)
       allFactors[i] = i;
     return GetTargetPhraseStringRep(allFactors);
   }
 
-  void 
+  void
   Hypothesis::
   OutputAlignment(std::ostream &out) const
   {
@@ -464,32 +464,32 @@ namespace Moses
       edges.push_back(currentHypo);
       currentHypo = currentHypo->GetPrevHypo();
     }
-    
+
     OutputAlignment(out, edges);
-    
+
   }
-  
-  void 
+
+  void
   Hypothesis::
   OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
   {
     size_t targetOffset = 0;
-    
+
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
       const TargetPhrase &tp = edge.GetCurrTargetPhrase();
       size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-      
+
       OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
-      
+
       targetOffset += tp.GetSize();
     }
     // Used by --print-alignment-info, so no endl
   }
 
-  void 
+  void
   Hypothesis::
-  OutputAlignment(ostream &out, const AlignmentInfo &ai, 
+  OutputAlignment(ostream &out, const AlignmentInfo &ai,
 		  size_t sourceOffset, size_t targetOffset)
   {
     typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
@@ -500,20 +500,20 @@ namespace Moses
       const std::pair<size_t,size_t> &alignment = **it;
       out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
     }
-    
+
   }
 
-  void 
+  void
   Hypothesis::
   OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
   {
     if (!hypo->GetPrevHypo()) return;
     OutputInput(map, hypo->GetPrevHypo());
-    map[hypo->GetCurrSourceWordsRange().GetStartPos()] 
+    map[hypo->GetCurrSourceWordsRange().GetStartPos()]
       = &hypo->GetTranslationOption().GetInputPath().GetPhrase();
   }
 
-  void 
+  void
   Hypothesis::
   OutputInput(std::ostream& os) const
   {
@@ -523,13 +523,13 @@ namespace Moses
     for (size_t i=0; i<len; ++i)
       if (inp_phrases[i]) os << *inp_phrases[i];
   }
-  
-  void 
+
+  void
   Hypothesis::
   OutputBestSurface(std::ostream &out, const std::vector<FactorType> &outputFactorOrder,
 		    char reportSegmentation, bool reportAllFactors) const
   {
-    if (m_prevHypo) 
+    if (m_prevHypo)
       { // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
 	m_prevHypo->OutputBestSurface(out, outputFactorOrder, reportSegmentation, reportAllFactors);
       }
@@ -540,9 +540,9 @@ namespace Moses
   /***
    * print surface factor only for the given phrase
    */
-  void 
+  void
   Hypothesis::
-  OutputSurface(std::ostream &out, const Hypothesis &edge, 
+  OutputSurface(std::ostream &out, const Hypothesis &edge,
 		const std::vector<FactorType> &outputFactorOrder,
 		char reportSegmentation, bool reportAllFactors) const
   {
@@ -616,15 +616,15 @@ namespace Moses
     }
   }
 
-  std::map<size_t, const Factor*> 
+  std::map<size_t, const Factor*>
   Hypothesis::
   GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const
   {
     const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
     const Phrase &inputPhrase = inputPath.GetPhrase();
-    
+
     std::map<size_t, const Factor*> ret;
-    
+
     for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
       const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
       if (factor) {
@@ -634,7 +634,7 @@ namespace Moses
 	ret[*targetPos.begin()] = factor;
       }
     }
-    
+
     return ret;
   }
 
@@ -646,8 +646,8 @@ namespace Moses
     using namespace std;
     WordsRange const& src = this->GetCurrSourceWordsRange();
     WordsRange const& trg = this->GetCurrTargetWordsRange();
-    
-    vector<pair<size_t,size_t> const* > a 
+
+    vector<pair<size_t,size_t> const* > a
       = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments();
     typedef pair<size_t,size_t> item;
     map<string, xmlrpc_c::value> M;
@@ -659,7 +659,7 @@ namespace Moses
       }
   }
 
-  void 
+  void
   Hypothesis::
   OutputWordAlignment(vector<xmlrpc_c::value>& out) const
   {
@@ -671,7 +671,7 @@ namespace Moses
   }
 
 #endif
-  
-  
+
+
 }
 

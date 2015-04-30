@@ -17,8 +17,8 @@
 
 namespace Moses
 {
-  
-  // todo: replace this with thread lock-free containers, if a stable library can 
+
+  // todo: replace this with thread lock-free containers, if a stable library can
   //       be found somewhere
 
   template<typename KEY, typename VAL, class CONTAINER = std::map<KEY,VAL> >
@@ -43,22 +43,22 @@ namespace Moses
     public:
       locking_iterator() : m_container(NULL) { }
 
-      locking_iterator(boost::shared_mutex& lock, 
-		       CONTAINER const* container, 
+      locking_iterator(boost::shared_mutex& lock,
+		       CONTAINER const* container,
 		       const_iter_t const& iter)
 	: m_lock(lock), m_container(container), m_iter(iter)
       { }
 
-      entry_t const& operator->() 
-      { 
+      entry_t const& operator->()
+      {
 	UTIL_THROW_IF2(m_container == NULL, "This locking iterator is invalid "
 		       << "or has not been assigned.");
-	return m_iter.operator->(); 
+	return m_iter.operator->();
       }
 
       // locking operators transfer the lock upon assignment and become invalid
       locking_iterator const&
-      operator=(locking_iterator& other) 
+      operator=(locking_iterator& other)
       {
 	m_lock.swap(other.m_lock);
 	m_iter = other.m_iter;
@@ -71,22 +71,22 @@ namespace Moses
 	return m_iter == other;
       }
 
-      locking_iterator const& 
+      locking_iterator const&
       operator++() { ++m_iter; return *this; }
 
-      // DO NOT DEFINE THE POST-INCREMENT OPERATOR! 
-      // locking_operators are non-copyable, 
-      // so we can't simply make a copy before incrementing and return 
+      // DO NOT DEFINE THE POST-INCREMENT OPERATOR!
+      // locking_operators are non-copyable,
+      // so we can't simply make a copy before incrementing and return
       // the copy after incrementing
-      locking_iterator const& 
-      operator++(int);  
+      locking_iterator const&
+      operator++(int);
     };
 
     const_iter_t const& end() const
     { return m_container.end(); }
 
     locking_iterator begin() const
-    { 
+    {
       return locking_iterator(m_lock, this, m_container.begin());
     }
 
@@ -115,7 +115,7 @@ namespace Moses
       return &m->second;
     }
 
-    size_t erase(KEY const& key) 
+    size_t erase(KEY const& key)
     {
       boost::unique_lock< boost::shared_mutex > lock(m_lock);
       return m_container.erase(key);

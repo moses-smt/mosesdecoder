@@ -1,8 +1,8 @@
 // -*- c++ -*-
 // to be included from ug_bitext.h
 
-// The agenda handles parallel sampling. 
-// It maintains a queue of unfinished sampling jobs and 
+// The agenda handles parallel sampling.
+// It maintains a queue of unfinished sampling jobs and
 // assigns them to a pool of workers.
 //
 template<typename Token>
@@ -13,7 +13,7 @@ public:
   class job;
   class worker;
 private:
-  boost::mutex lock; 
+  boost::mutex lock;
   std::list<sptr<job> > joblist;
   std::vector<sptr<boost::thread> > workers;
   bool shutdown;
@@ -27,23 +27,23 @@ public:
   agenda(Bitext<Token> const& bitext);
   ~agenda();
 
-  void 
+  void
   add_workers(int n);
 
-  sptr<pstats> 
+  sptr<pstats>
   add_job(Bitext<Token> const* const theBitext,
-	  typename TSA<Token>::tree_iterator const& phrase, 
+	  typename TSA<Token>::tree_iterator const& phrase,
 	  size_t const max_samples, sptr<SamplingBias const> const& bias);
     // add_job(Bitext<Token> const* const theBitext,
-    // 	  typename TSA<Token>::tree_iterator const& phrase, 
+    // 	  typename TSA<Token>::tree_iterator const& phrase,
     // 	  size_t const max_samples, SamplingBias const* const bias);
 
-  sptr<job> 
+  sptr<job>
   get_job();
 };
-    
+
 template<typename Token>
-class 
+class
 Bitext<Token>::agenda::
 worker
 {
@@ -61,9 +61,9 @@ void Bitext<Token>
 ::agenda
 ::add_workers(int n)
 {
-  static boost::posix_time::time_duration nodelay(0,0,0,0); 
+  static boost::posix_time::time_duration nodelay(0,0,0,0);
   boost::lock_guard<boost::mutex> guard(this->lock);
-  
+
   int target  = max(1, int(n + workers.size() - this->doomed));
   // house keeping: remove all workers that have finished
   for (size_t i = 0; i < workers.size(); )
@@ -79,7 +79,7 @@ void Bitext<Token>
   // cerr << workers.size() << "/" << target << " active" << endl;
   if (int(workers.size()) > target)
     this->doomed = workers.size() - target;
-  else 
+  else
     while (int(workers.size()) < target)
       {
 	sptr<boost::thread> w(new boost::thread(worker(*this)));
@@ -92,16 +92,16 @@ template<typename Token>
 sptr<pstats> Bitext<Token>
 ::agenda
 ::add_job(Bitext<Token> const* const theBitext,
-	  typename TSA<Token>::tree_iterator const& phrase, 
+	  typename TSA<Token>::tree_iterator const& phrase,
 	  size_t const max_samples, sptr<SamplingBias const> const& bias)
 {
   boost::unique_lock<boost::mutex> lk(this->lock);
-  static boost::posix_time::time_duration nodelay(0,0,0,0); 
+  static boost::posix_time::time_duration nodelay(0,0,0,0);
   bool fwd = phrase.root == bt.I1.get();
-  sptr<job> j(new job(theBitext, phrase, fwd ? bt.I1 : bt.I2, 
+  sptr<job> j(new job(theBitext, phrase, fwd ? bt.I1 : bt.I2,
 		      max_samples, fwd, bias));
   j->stats->register_worker();
-  
+
   joblist.push_back(j);
   if (joblist.size() == 1)
     {
@@ -136,7 +136,7 @@ Bitext<Token>
   sptr<job> ret;
   if (this->shutdown) return ret;
   boost::unique_lock<boost::mutex> lock(this->lock);
-  if (this->doomed) 
+  if (this->doomed)
     { // the number of workers has been reduced, tell the redundant once to quit
       --this->doomed;
       return ret;
@@ -145,15 +145,15 @@ Bitext<Token>
   typename list<sptr<job> >::iterator j = joblist.begin();
   while (j != joblist.end())
     {
-      if ((*j)->done()) 
+      if ((*j)->done())
 	{
 	  (*j)->stats->release();
 	  joblist.erase(j++);
-	} 
+	}
       else if ((*j)->workers >= 4) ++j; // no more than 4 workers per job
       else break; // found one
     }
-  if (joblist.size()) 
+  if (joblist.size())
     {
       ret = j == joblist.end() ? joblist.front() : *j;
       // if we've reached the end of the queue (all jobs have 4 workers on them),
@@ -175,12 +175,12 @@ agenda::
   for (size_t i = 0; i < workers.size(); ++i)
     workers[i]->join();
 }
-    
+
 template<typename Token>
 Bitext<Token>::
 agenda::
 agenda(Bitext<Token> const& thebitext)
   : shutdown(false), doomed(0), bt(thebitext)
 { }
-  
+
 

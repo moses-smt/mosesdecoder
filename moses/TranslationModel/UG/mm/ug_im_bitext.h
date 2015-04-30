@@ -4,7 +4,7 @@
 
 namespace Moses
 {
-  namespace bitext 
+  namespace bitext
   {
     template<typename TKN>
     class imBitext : public Bitext<TKN>
@@ -12,7 +12,7 @@ namespace Moses
       sptr<imTtrack<char> > myTx;
       sptr<imTtrack<TKN> >  myT1;
       sptr<imTtrack<TKN> >  myT2;
-      sptr<imTSA<TKN> >     myI1; 
+      sptr<imTSA<TKN> >     myI1;
       sptr<imTSA<TKN> >     myI2;
       static ThreadSafeCounter my_revision;
     public:
@@ -23,26 +23,26 @@ namespace Moses
 	       size_t max_sample = 5000, size_t num_workers=4);
       imBitext(size_t max_sample = 5000, size_t num_workers=4);
       imBitext(imBitext const& other);
-      
-      // sptr<imBitext<TKN> > 
+
+      // sptr<imBitext<TKN> >
       // add(vector<TKN> const& s1, vector<TKN> const& s2, vector<ushort> & a);
 
-      sptr<imBitext<TKN> > 
-      add(vector<string> const& s1, 
-	  vector<string> const& s2, 
+      sptr<imBitext<TKN> >
+      add(vector<string> const& s1,
+	  vector<string> const& s2,
 	  vector<string> const& a) const;
 
     };
 
     template<typename TKN>
-    ThreadSafeCounter 
+    ThreadSafeCounter
     imBitext<TKN>::my_revision;
 
     template<typename TKN>
     imBitext<TKN>::
     imBitext(size_t max_sample, size_t num_workers)
       : Bitext<TKN>(max_sample, num_workers)
-    { 
+    {
       this->m_default_sample_size = max_sample;
       this->V1.reset(new TokenIndex());
       this->V2.reset(new TokenIndex());
@@ -50,14 +50,14 @@ namespace Moses
       this->V2->setDynamic(true);
       ++my_revision;
     }
-    
+
     template<typename TKN>
     imBitext<TKN>::
     imBitext(sptr<TokenIndex> const& v1,
 	     sptr<TokenIndex> const& v2,
 	     size_t max_sample, size_t num_workers)
       : Bitext<TKN>(max_sample, num_workers)
-    { 
+    {
       // this->default_sample_size = max_sample;
       this->V1 = v1;
       this->V2 = v2;
@@ -65,12 +65,12 @@ namespace Moses
       this->V2->setDynamic(true);
       ++my_revision;
     }
-    
+
 
     template<typename TKN>
     imBitext<TKN>::
     imBitext(imBitext<TKN> const& other)
-    { 
+    {
       this->myTx = other.myTx;
       this->myT1 = other.myT1;
       this->myT2 = other.myT2;
@@ -89,17 +89,17 @@ namespace Moses
     }
 
     template<>
-    sptr<imBitext<L2R_Token<SimpleWordId> > > 
+    sptr<imBitext<L2R_Token<SimpleWordId> > >
     imBitext<L2R_Token<SimpleWordId> >::
-    add(vector<string> const& s1, 
-	vector<string> const& s2, 
+    add(vector<string> const& s1,
+	vector<string> const& s2,
 	vector<string> const& aln) const;
 
     template<typename TKN>
-    sptr<imBitext<TKN> > 
+    sptr<imBitext<TKN> >
     imBitext<TKN>::
-    add(vector<string> const& s1, 
-	vector<string> const& s2, 
+    add(vector<string> const& s1,
+	vector<string> const& s2,
 	vector<string> const& aln) const
     {
       throw "Not yet implemented";

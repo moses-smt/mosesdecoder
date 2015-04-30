@@ -1,13 +1,13 @@
 // -*- c++ -*-
 // (c) 2007-2010 Ulrich Germann
 // implementation of stuff related to ArrayEntries
-// this file should only be included via ug_tsa_base.h, 
+// this file should only be included via ug_tsa_base.h,
 // never by itself
 #ifndef __ug_tsa_array_entry_h
 #define __ug_tsa_array_entry_h
 #include "ug_ttrack_position.h"
 
-namespace ugdiss 
+namespace ugdiss
 {
   namespace tsa
   {
@@ -20,7 +20,7 @@ namespace ugdiss
       ArrayEntry();
 
       ArrayEntry(char const* p);
-      
+
       template<typename TSA_TYPE>
       ArrayEntry(TSA_TYPE const* S, char const* p);
 
@@ -34,7 +34,7 @@ namespace ugdiss
     }
 
     // template<typename TSA_TYPE>
-    // class SamplingArrayEntryIterator 
+    // class SamplingArrayEntryIterator
     //   : public tsa::ArrayEntry
     // {
     //   size_t const          N; // (approximate) total number of occurrences
@@ -46,7 +46,7 @@ namespace ugdiss
     // public:
     //   SamplingArrayEntryIterator(TSA_TYPE::tree_iterator const& m, size_t const s);
     //   bool step(); // returns false when at end of range
-    //   bool done(); // 
+    //   bool done(); //
     // };
 
     // template<typename TSA_TYPE>
@@ -60,7 +60,7 @@ namespace ugdiss
     //   , root(m.root)
     //   , stop(m.upper_bound(-1))
     // { }
-    
+
     // template<typename TSA_TYPE>
     // bool
     // SamplingArrayEntryIterator::

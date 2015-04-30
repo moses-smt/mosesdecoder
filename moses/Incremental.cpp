@@ -203,11 +203,11 @@ struct ChartCellBaseFactory {
 
 } // namespace
 
-Manager::Manager(ttasksptr const& ttask) 
+Manager::Manager(ttasksptr const& ttask)
   : BaseManager(ttask)
   , cells_(m_source, ChartCellBaseFactory(), parser_)
   , parser_(ttask, cells_)
-  , n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) 
+  , n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize()))
 { }
 
 Manager::~Manager()

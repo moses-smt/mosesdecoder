@@ -23,7 +23,7 @@ namespace ugdiss
   using namespace std;
   using namespace boost;
   namespace bio=boost::iostreams;
-   
+
   // template<typename TOKEN> class imBitext<TOKEN>;
 
  //-----------------------------------------------------------------------
@@ -35,61 +35,61 @@ namespace ugdiss
   public:
     class tree_iterator;
     friend class tree_iterator;
-    
+
   private:
     vector<cpos>          sufa; // stores the actual array
-    vector<filepos_type> index; /* top-level index into regions in sufa 
+    vector<filepos_type> index; /* top-level index into regions in sufa
                                  * (for faster access) */
   private:
-    char const* 
+    char const*
     index_jump(char const* a, char const* z, float ratio) const;
 
-    char const* 
+    char const*
     getLowerBound(id_type id) const;
 
-    char const* 
+    char const*
     getUpperBound(id_type id) const;
-    
+
   public:
     imTSA();
-    imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, 
-	  bdBitset const* filt, 
+    imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c,
+	  bdBitset const* filt,
 	  ostream* log = NULL);
 
-    imTSA(imTSA<TOKEN> const& prior, 
+    imTSA(imTSA<TOKEN> const& prior,
 	  boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
 	  vector<id_type> const& newsids, size_t const vsize);
 
-    count_type 
-    sntCnt(char const* p, char const * const q) const; 
+    count_type
+    sntCnt(char const* p, char const * const q) const;
 
-    count_type 
+    count_type
     rawCnt(char const* p, char const * const q) const;
-    
-    void 
-    getCounts(char const* p, char const * const q, 
+
+    void
+    getCounts(char const* p, char const * const q,
               count_type& sids, count_type& raw) const;
-    
-    char const* 
+
+    char const*
     readSid(char const* p, char const* q, id_type& sid) const;
-    
-    char const* 
+
+    char const*
     readSid(char const* p, char const* q, ::uint64_t& sid) const;
 
-    char const* 
+    char const*
     readOffset(char const* p, char const* q, uint16_t& offset) const;
 
-    char const* 
+    char const*
     readOffset(char const* p, char const* q, ::uint64_t& offset) const;
-    
-    void 
+
+    void
     sanityCheck() const;
-    
-    void 
+
+    void
     save_as_mm_tsa(string fname) const;
-    
+
     /// add a sentence to the database
-    // shared_ptr<imTSA<TOKEN> > add(vector<TOKEN> const& snt) const; 
+    // shared_ptr<imTSA<TOKEN> > add(vector<TOKEN> const& snt) const;
 
   };
 
@@ -108,12 +108,12 @@ namespace ugdiss
   tree_iterator(imTSA<TOKEN> const* s)
     : TSA<TOKEN>::tree_iterator::tree_iterator(reinterpret_cast<TSA<TOKEN> const*>(s))
   {};
-  
+
   /** jump to the point 1/ratio in a tightly packed index
    *  assumes that keys are flagged with '1', values with '0'
    */
   template<typename TOKEN>
-  char const* 
+  char const*
   imTSA<TOKEN>::
   index_jump(char const* a, char const* z, float ratio) const
   {
@@ -123,10 +123,10 @@ namespace ugdiss
     cpos const* xz = reinterpret_cast<cpos const*>(z);
     return reinterpret_cast<char const*>(xa+int(ratio*(xz-xa)));
   }
-  
+
   template<typename TOKEN>
   imTSA<TOKEN>::
-  imTSA() 
+  imTSA()
   {
     this->indexSize  = 0;
     // this->data       = NULL;
@@ -135,7 +135,7 @@ namespace ugdiss
     this->corpusSize = 0;
     this->BitSetCachingThreshold=4096;
   };
-  
+
   // build an array from all the tokens in the sentences in *c that are
   // specified in filter
   template<typename TOKEN>
@@ -153,12 +153,12 @@ namespace ugdiss
       }
     assert(filter);
     // In the first iteration over the corpus, we obtain word counts.
-    // They allows us to 
+    // They allows us to
     //    a. allocate the exact amount of memory we need
-    //    b. place tokens into the right 'section' in the array, based on 
+    //    b. place tokens into the right 'section' in the array, based on
     //       the ID of the first token in the sequence. We can then sort
     //       each section separately.
-    
+
     if (log) *log << "counting tokens ... ";
     int slimit = 65536;
     // slimit=65536 is the upper bound of what we can fit into a ushort which
@@ -176,7 +176,7 @@ namespace ugdiss
     vector<count_type> tmp(wcnt.size(),0);
     for (size_t i = 1; i < wcnt.size(); ++i)
       tmp[i] = tmp[i-1] + wcnt[i-1];
-    
+
     // Now dump all token positions into the right place in sufa
     this->corpusSize = 0;
     for (id_type sid = filter->find_first();
@@ -204,7 +204,7 @@ namespace ugdiss
     for (size_t i = 0; i < wcnt.size(); i++)
       {
         if (log && wcnt[i] > 5000)
-          *log << "sorting " << wcnt[i] 
+          *log << "sorting " << wcnt[i]
                << " entries starting with id " << i << "." << endl;
         index[i+1] = index[i]+wcnt[i];
         assert(index[i+1]==tmp[i]); // sanity check
@@ -247,7 +247,7 @@ namespace ugdiss
   imTSA<TOKEN>::
   getUpperBound(id_type id) const
   {
-    if (++id >= this->index.size()) 
+    if (++id >= this->index.size())
       return NULL;
     assert(index[id] <= this->sufa.size());
     return reinterpret_cast<char const*>(&(this->sufa.front()) + index[id]);
@@ -263,7 +263,7 @@ namespace ugdiss
     sid = reinterpret_cast<cpos const*>(p)->sid;
     return p;
   }
-  
+
   template<typename TOKEN>
   char const*
   imTSA<TOKEN>::
@@ -306,11 +306,11 @@ namespace ugdiss
     cpos const* xq = reinterpret_cast<cpos const*>(q);
     return xq-xp;
   }
-  
+
   template<typename TOKEN>
-  void 
+  void
   imTSA<TOKEN>::
-  getCounts(char const* p, char const* const q, 
+  getCounts(char const* p, char const* const q,
 	    count_type& sids, count_type& raw) const
   {
     id_type sid; // uint16_t off;
@@ -328,7 +328,7 @@ namespace ugdiss
   }
 
   template<typename TOKEN>
-  void 
+  void
   imTSA<TOKEN>::
   save_as_mm_tsa(string fname) const
   {
@@ -352,34 +352,34 @@ namespace ugdiss
     for (size_t i = 0; i < mmIndex.size(); i++)
       numwrite(out,mmIndex[i]-mmIndex[0]);
     out.seekp(0);
-    numwrite(out,idxStart);  
+    numwrite(out,idxStart);
     out.close();
   }
 
   template<typename TOKEN>
   imTSA<TOKEN>::
-  imTSA(imTSA<TOKEN> const& prior, 
+  imTSA(imTSA<TOKEN> const& prior,
   	boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
   	vector<id_type> const& newsids, size_t const vsize)
   {
     typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(crp.get());
-    
+
     // count how many tokens will be added to the TSA
     // and index the new additions to the corpus
     size_t newToks = 0;
-    BOOST_FOREACH(id_type sid, newsids) 
+    BOOST_FOREACH(id_type sid, newsids)
       newToks += crp->sntLen(sid);
     vector<cpos> nidx(newToks); // new array entries
-    
+
     size_t n = 0;
-    BOOST_FOREACH(id_type sid, newsids) 
+    BOOST_FOREACH(id_type sid, newsids)
       {
 	assert(sid < crp->size());
   	for (size_t o = 0; o < (*crp)[sid].size(); ++o, ++n)
   	  { nidx[n].offset = o; nidx[n].sid  = sid; }
       }
     sort(nidx.begin(),nidx.end(),sorter);
-  
+
     // create the new suffix array
     this->numTokens = newToks + prior.sufa.size();
     this->sufa.resize(this->numTokens);
@@ -388,10 +388,10 @@ namespace ugdiss
     this->corpusSize = crp->size();
     this->corpus     = crp;
     this->index.resize(vsize+1);
-    
+
     size_t i = 0;
     typename vector<cpos>::iterator k = this->sufa.begin();
-    // cerr << newToks << " new items at " 
+    // cerr << newToks << " new items at "
     // << __FILE__ << ":" << __LINE__ << endl;
     for (size_t n = 0; n < nidx.size();)
       {
@@ -402,7 +402,7 @@ namespace ugdiss
   	    this->index[i] = k - this->sufa.begin();
   	    if (++i < prior.index.size() && prior.index[i-1] < prior.index[i])
   	      {
-  		k = copy(prior.sufa.begin() + prior.index[i-1], 
+  		k = copy(prior.sufa.begin() + prior.index[i-1],
   			 prior.sufa.begin() + prior.index[i], k);
   	      }
   	  }
@@ -410,13 +410,13 @@ namespace ugdiss
   	if (++i < prior.index.size() && prior.index[i] > prior.index[i-1])
   	  {
   	    size_t j = prior.index[i-1];
-  	    while (j < prior.index[i] && n < nidx.size() 
+  	    while (j < prior.index[i] && n < nidx.size()
   		   && crp->getToken(nidx[n])->id() < i)
   	      {
   		assert(k < this->sufa.end());
   		if (sorter(prior.sufa[j],nidx[n]))
   		  *k++ = prior.sufa[j++];
-  		else 
+  		else
   		  *k++ = nidx[n++];
   	      }
   	    while (j < prior.index[i])
@@ -436,7 +436,7 @@ namespace ugdiss
     while (++i < this->index.size())
       {
   	if (i < prior.index.size() && prior.index[i-1] < prior.index[i])
-  	  k = copy(prior.sufa.begin() + prior.index[i-1], 
+  	  k = copy(prior.sufa.begin() + prior.index[i-1],
   		   prior.sufa.begin() + prior.index[i], k);
   	this->index[i] = k - this->sufa.begin();
       }
@@ -462,5 +462,5 @@ namespace ugdiss
   }
 
 }
-  
+
 #endif

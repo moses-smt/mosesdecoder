@@ -21,7 +21,7 @@ mmTtrack<char> MAM;
 mmTtrack<Token> T1,T2;
 bool inv;
 vector<string> range;
-void 
+void
 interpret_args(int ac, char* av[])
 {
   po::variables_map vm;
@@ -30,7 +30,7 @@ interpret_args(int ac, char* av[])
     ("help,h",    "print this message")
     ("inv,i", po::bool_switch(&inv), "inverse")
     ;
-  
+
   po::options_description h("Hidden Options");
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
@@ -43,7 +43,7 @@ interpret_args(int ac, char* av[])
   a.add("L1",1);
   a.add("L2",1);
   a.add("range",-1);
-  
+
   po::store(po::command_line_parser(ac,av)
             .options(h.add(o))
             .positional(a)
@@ -87,7 +87,7 @@ check_range(size_t start, size_t stop)
   return noAln;
 }
 
-int 
+int
 main(int argc, char*argv[])
 {
   interpret_args(argc,argv);
@@ -100,7 +100,7 @@ main(int argc, char*argv[])
       exit(1);
     }
   size_t noAln;
-  if (!range.size()) 
+  if (!range.size())
     noAln = check_range(0, MAM.size());
   else
     {
@@ -112,7 +112,7 @@ main(int argc, char*argv[])
           buf>>first;
           if (buf.peek() == '-') buf>>c>>last;
           else                   last = first;
-	  if (last < MAM.size()) 
+	  if (last < MAM.size())
 	    noAln += check_range(first,last+1);
 	}
     }

@@ -35,7 +35,7 @@ class ChartParser;
 class ChartCellCollectionBase
 {
 public:
-  template <class Factory> ChartCellCollectionBase(const InputType &input, 
+  template <class Factory> ChartCellCollectionBase(const InputType &input,
     const Factory &factory,
     const ChartParser &parser)
     :m_cells(input.GetSize()) {

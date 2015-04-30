@@ -6,7 +6,7 @@
 //   using namespace bitext;
 //   using namespace std;
 //   using namespace boost;
-  
+
 //   struct PPgreater
 //   {
 //     bool operator()(PhrasePair const& a, PhrasePair const& b)
@@ -28,7 +28,7 @@
 //     PhrasePair pp;
 //     ushort   s1,e1,s2,e2; // start and end positions
 //     int             prev; // preceding alignment hypothesis
-//     float          score; 
+//     float          score;
 //     bitvector       scov; // source coverage
 //     PhraseAlnHyp(PhrasePair const& ppx, int slen,
 // 		 pair<uint32_t,uint32_t> const& sspan,
@@ -37,7 +37,7 @@
 //     {
 //       s1 = sspan.first; e1 = sspan.second;
 //       s2 = tspan.first; e2 = tspan.second;
-//       for (size_t i = s1; i < e1; ++i) 
+//       for (size_t i = s1; i < e1; ++i)
 // 	scov.set(i);
 //     }
 
@@ -78,13 +78,13 @@
 //       return po_other;
 //     }
 
-//     float 
+//     float
 //     dprob_fwd(PhraseAlnHyp const& next)
 //     {
 //       return pp.dfwd[po_fwd(&next)];
 //     }
 
-//     float 
+//     float
 //     dprob_bwd(PhraseAlnHyp const& prev)
 //     {
 //       return pp.dbwd[po_bwd(&prev)];
@@ -102,15 +102,15 @@
 //     typedef pstats::trg_map_t jStatsTable;
 
 //     Mmsapt const& PT;
-//     vector<id_type> s,t; 
+//     vector<id_type> s,t;
 //     pidmap_t   sspan2pid, tspan2pid; // span -> phrase ID
 //     pid2span_t spid2span,tpid2span;
 //     vector<vector<sptr<pstats> > > spstats;
 
-//     vector<PhrasePair> PP; 
+//     vector<PhrasePair> PP;
 //     // position-independent phrase pair info
 //   public:
-//     vector<PhraseAlnHyp> PAH;  
+//     vector<PhraseAlnHyp> PAH;
 //     vector<vector<int> > tpos2ahyp;
 //     // maps from target start positions to PhraseAlnHyps starting at
 //     // that position
@@ -120,8 +120,8 @@
 //     void fill_sspan_maps();
 //   public:
 //     Alignment(Mmsapt const& pt, string const& src, string const& trg);
-//     void show(ostream& out); 
-//     void show(ostream& out, PhraseAlnHyp const& ah); 
+//     void show(ostream& out);
+//     void show(ostream& out, PhraseAlnHyp const& ah);
 //   };
 
 //   void
@@ -129,11 +129,11 @@
 //   show(ostream& out, PhraseAlnHyp const& ah)
 //   {
 // #if 0
-//     LexicalPhraseScorer2<Token>::table_t const& 
+//     LexicalPhraseScorer2<Token>::table_t const&
 //       COOCjnt = PT.calc_lex.scorer.COOC;
 
 //     out << setw(10) << exp(ah.score) << " "
-// 	<< PT.btfix.T2->pid2str(PT.btfix.V2.get(), ah.pp.p2) 
+// 	<< PT.btfix.T2->pid2str(PT.btfix.V2.get(), ah.pp.p2)
 // 	<< " <=> "
 // 	<< PT.btfix.T1->pid2str(PT.btfix.V1.get(), ah.pp.p1);
 //     vector<uchar> const& a = ah.pp.aln;
@@ -168,7 +168,7 @@
 //     // 	 << "]" << endl;
 // #endif
 //   }
-  
+
 //   void
 //   Alignment::
 //   show(ostream& out)
@@ -192,7 +192,7 @@
 //       return spstats[sspan.first][k];
 //     else return sptr<pstats>();
 //   }
-  
+
 //   void
 //   Alignment::
 //   fill_tspan_maps()
@@ -207,7 +207,7 @@
 // 	    tpid2span[pid].push_back(pair<uint32_t,uint32_t>(i,k+1));
 // 	    tspan2pid[i][k] = pid;
 // 	  }
-//       } 
+//       }
 //   }
 
 //   void
@@ -230,11 +230,11 @@
 // 		int y = p->second[0].second-1;
 // 		spstats[i].push_back(spstats[x][y-x]);
 // 	      }
-// 	    else 
+// 	    else
 // 	      {
 // 		spstats[i].push_back(PT.btfix.lookup(m));
 // 		cout << PT.btfix.T1->pid2str(PT.btfix.V1.get(),pid) << " "
-// 		     << spstats[i].back()->good << "/" << spstats[i].back()->sample_cnt 
+// 		     << spstats[i].back()->good << "/" << spstats[i].back()->sample_cnt
 // 		     << endl;
 // 	      }
 // 	    spid2span[pid].push_back(pair<uint32_t,uint32_t>(i,k+1));
@@ -262,14 +262,14 @@
 //     // 		size_t m2 = COOC.m2(i);
 //     // 		if (j*1000 > m1 && j*1000 > m2)
 //     // 		  cout << " " << (*PT.btfix.V1)[k];
-//     // 	      }	 
+//     // 	      }
 //     // 	  }
 //     // 	cout << endl;
 //     //   }
-    
+
 //     fill_tspan_maps();
 //     fill_sspan_maps();
-//     tpos2ahyp.resize(t.size()); 
+//     tpos2ahyp.resize(t.size());
 //     // now fill the association score table
 //     PAH.reserve(1000000);
 //     typedef pid2span_t::iterator psiter;
@@ -301,12 +301,12 @@
 //       }
 //   }
 
-    
+
 
 //   int
 //   extend(vector<PhraseAlnHyp> & PAH, int edge, int next)
 //   {
-//     if ((PAH[edge].scov & PAH[next].scov).count()) 
+//     if ((PAH[edge].scov & PAH[next].scov).count())
 //       return -1;
 //     int ret = PAH.size();
 //     PAH.push_back(PAH[next]);

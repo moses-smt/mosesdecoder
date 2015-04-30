@@ -67,7 +67,7 @@ ChartManager::~ChartManager()
 //! decode the sentence. This contains the main laps. Basically, the CKY++ algorithm
 void ChartManager::Decode()
 {
-  
+
   VERBOSE(1,"Translating: " << m_source << endl);
 
   ResetSentenceStats(m_source);
