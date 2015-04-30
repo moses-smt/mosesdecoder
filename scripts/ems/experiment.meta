@@ -309,8 +309,14 @@ split-tuning
 	default-name: lm/interpolate-tuning.split
 	pass-unless: output-splitter
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
+strip-tuning
+	in: split-tuning
+	out: stripped-tuning
+	default-name: lm/interpolate-tuning.stripped
+	pass-unless: mock-output-parser-lm
+	template: $moses-script-dir/training/strip-xml.perl < IN > OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
 interpolate
-	in: script split-tuning LM:lm
+	in: script stripped-tuning LM:lm
 	rerun-on-change: srilm-dir group weights
 	out: lm
 	default-name: lm/interpolated-lm
