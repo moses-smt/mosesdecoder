@@ -42,11 +42,14 @@ public:
     return 2 * kBleuNgramOrder + 1;
   }
 
-  int CalcReferenceLength(std::size_t sentence_id, std::size_t length);
+  void CalcBleuStats(const Reference* ref, const std::string& text, ScoreStats& entry) const;
+
+  int CalcReferenceLength(const Reference* ref, std::size_t length) const;
 
   ReferenceLengthType GetReferenceLengthType() const {
     return m_ref_length_type;
   }
+
   void SetReferenceLengthType(ReferenceLengthType type) {
     m_ref_length_type = type;
   }
@@ -62,14 +65,14 @@ public:
   /**
    * Count the ngrams of each type, up to the given length in the input line.
    */
-  std::size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n, bool is_testing=false);
+  std::size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n, bool is_testing=false) const;
 
   void DumpCounts(std::ostream* os, const NgramCounts& counts) const;
 
-  bool OpenReference(const char* filename, std::size_t file_id);
-
   // NOTE: this function is used for unit testing.
-  virtual bool OpenReferenceStream(std::istream* is, std::size_t file_id);
+  bool OpenReferenceStream(std::istream* is, std::size_t file_id);
+
+  void ProcessReferenceLine(const std::string& line, Reference* ref) const;
 
   //private:
 protected:
