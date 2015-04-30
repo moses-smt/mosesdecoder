@@ -6,6 +6,7 @@
 use warnings;
 use strict;
 use File::Basename;
+use Cwd 'abs_path';
 
 sub RunFork($);
 sub systemCheck($);
@@ -109,20 +110,20 @@ else
 {
   my $numStr = NumStr(0);
 
-  $cmd = "ln -s $target $TMPDIR/target.$numStr";
+  $cmd = "ln -s ".abs_path($target)." $TMPDIR/target.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
-  $cmd = "ln -s $source $TMPDIR/source.$numStr";
+  $cmd = "ln -s ".abs_path($source)." $TMPDIR/source.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
-  $cmd = "ln -s $align $TMPDIR/align.$numStr";
+  $cmd = "ln -s ".abs_path($align)." $TMPDIR/align.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
   if ($weights) {
-    $cmd = "ln -s $weights $TMPDIR/weights.$numStr";
+    $cmd = "ln -s ".abs_path($weights)." $TMPDIR/weights.$numStr";
     print STDERR "Executing: $cmd \n";
     `$cmd`;
   }
@@ -149,9 +150,8 @@ for (my $i = 0; $i < $numParallel; ++$i)
     print "glueArg=$glueArg \n";
 
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $glueArg $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
-    print STDERR $cmd;
-    `$cmd`;
 
+    safesystem($cmd) or die;
     exit();
   }
   else
@@ -163,6 +163,10 @@ for (my $i = 0; $i < $numParallel; ++$i)
 # wait for everything is finished
 foreach (@children) {
 	waitpid($_, 0);
+        if($? != 0) {
+                print STDERR "ERROR: Failed to execute: @_\n  $!\n";
+                exit(1);
+        }
 }
 
 # merge
@@ -323,5 +327,24 @@ sub NumStr($)
 	$numStr = $i;
     }
     return $numStr;
+}
+
+sub safesystem {
+  print STDERR "Executing: @_\n";
+  system(@_);
+  if ($? == -1) {
+      print STDERR "ERROR: Failed to execute: @_\n  $!\n";
+      exit(1);
+  }
+  elsif ($? & 127) {
+      printf STDERR "ERROR: Execution of: @_\n  died with signal %d, %s coredump\n",
+          ($? & 127),  ($? & 128) ? 'with' : 'without';
+      exit(1);
+  }
+  else {
+    my $exitcode = $? >> 8;
+    print STDERR "Exit code: $exitcode\n" if $exitcode;
+    return ! $exitcode;
+  }
 }
 
