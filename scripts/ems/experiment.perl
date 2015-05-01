@@ -312,10 +312,10 @@ sub read_meta {
 		$ONLY_FACTOR_0{"$module:$step"}++;
 	    }
 	    elsif ($1 eq "error") {
-		@{$ERROR{"$module:$step"}} = split(/,/,$2);
+		push @{$ERROR{"$module:$step"}}, $2;
 	    }
 	    elsif ($1 eq "not-error") {
-		@{$NOT_ERROR{"$module:$step"}} = split(/,/,$2);
+		push @{$NOT_ERROR{"$module:$step"}}, $2;
 	    }
 	    else {
 		die("META ERROR unknown parameter: $1");
@@ -1282,10 +1282,10 @@ sub execute_steps {
 		&write_info($i);
 
 		# cluster job submission
-		if ($CLUSTER && ! &is_qsub_script($i)) {
+		if ($CLUSTER && (!&is_qsub_script($i) || (&backoff_and_get($DO_STEP[$i].":jobs") && (&backoff_and_get($DO_STEP[$i].":jobs")==1)))) {
 		    $DO{$i}++;
 		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);		    
-		    print "\texecuting $step via qsub ($active active)\n";
+		    print "\texecuting $step via qsub $qsub_args ($active active)\n";
 		    my $qsub_command="qsub $qsub_args -S /bin/bash -e $step.STDERR -o $step.STDOUT $step";
 		    print "\t$qsub_command\n" if $VERBOSE;
 		    `$qsub_command`;
@@ -1338,15 +1338,15 @@ sub execute_steps {
 
 sub get_qsub_args {
     my ($step) = @_;
-    my $qsub_args = &get("$step:qsub-settings");
-    $qsub_args = &get("GENERAL:qsub-settings") unless defined($qsub_args);
+    my $qsub_args = &backoff_and_get("$step:qsub-settings");
     $qsub_args = "" unless defined($qsub_args);
     my $memory = &get("$step:qsub-memory");
     $qsub_args .= " -pe memory $memory" if defined($memory);
     my $hours = &get("$step:qsub-hours");
     $qsub_args .= " -l h_rt=$hours:0:0" if defined($hours);
     my $project = &backoff_and_get("$step:qsub-project");
-    $qsub_args = "-P $project" if defined($project);
+    $qsub_args .= " -P $project" if defined($project);
+    $qsub_args =~ s/^ //;
     print "qsub args: $qsub_args\n" if $VERBOSE;
     return $qsub_args;
 }
@@ -1880,7 +1880,7 @@ sub define_tuning_tune {
 
 	my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
 	$decoder_settings = "" unless $decoder_settings;
-	$decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
+	$decoder_settings .= " -v 0 " unless $CLUSTER && $jobs && $jobs>1;
 	
 	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
 	$tuning_settings = "" unless $tuning_settings;
@@ -1891,9 +1891,9 @@ sub define_tuning_tune {
 	$cmd .= " --skip-decoder" if $skip_decoder;
 	$cmd .= " --inputtype $tune_inputtype" if defined($tune_inputtype);
     
-	my $qsub_args = &get_qsub_args("TUNING");
+	my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
 	$cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
-	$cmd .= " --jobs $jobs" if $CLUSTER && $jobs;
+	$cmd .= " --jobs $jobs" if $CLUSTER && $jobs && $jobs>1;
 	my $tuning_dir = $tuned_config;
 	$tuning_dir =~ s/\/[^\/]+$//;
 	$cmd .= "\nmkdir -p $tuning_dir";
@@ -2576,6 +2576,7 @@ sub define_training_create_config {
 	    my $set = shift @LM_SETS;
       next if defined($INTERPOLATED_AWAY{$set});
 	    my $order = &check_backoff_and_get("LM:$set:order");
+
 	    my $lm_file = "$lm";
 	    my $type = 0; # default: SRILM
 
@@ -2590,6 +2591,13 @@ sub define_training_create_config {
 
       # manually set type 
       $type = &backoff_and_get("LM:$set:type") if (&backoff_and_get("LM:$set:type"));
+
+	    # binarized by INTERPOLATED-LM
+	    if (&get("INTERPOLATED-LM:lm-binarizer")) {
+	      $lm_file =~ s/\.lm/\.binlm/;
+	      $type = 1;
+              $type = &get("INTERPOLATED-LM:type") if &get("INTERPOLATED-LM:type");
+            }	
 
 	    # which factor is the model trained on?
 	    my $factor = 0;
@@ -2696,7 +2704,7 @@ sub define_interpolated_lm_interpolate {
 sub define_interpolated_lm_process {
   my ($step_id) = @_;
 
-  my ($processed_lm, $interpolatd_lm) = &get_output_and_input($step_id);
+  my ($processed_lm, $interpolated_lm) = &get_output_and_input($step_id);
   my ($module,$set,$stepname) = &deconstruct_name($DO_STEP[$step_id]);
   my $tool = &check_backoff_and_get("INTERPOLATED-LM:lm-${stepname}r");
   my $FACTOR = &backoff_and_get_array("TRAINING:output-factors");
@@ -2706,11 +2714,23 @@ sub define_interpolated_lm_process {
   my $cmd = "";
   foreach my $factor (keys %{$ILM_SETS}) {
     foreach my $order (keys %{$$ILM_SETS{$factor}}) {
-      next unless scalar(@{$$ILM_SETS{$factor}{$order}}) > 1;
-      my $suffix = "";
-      $suffix = ".$$FACTOR[$factor]" if $icount > 1 && defined($FACTOR);
-      $suffix .= ".order$order" if $icount > 1;
-      $cmd .= "$tool $interpolatd_lm$suffix $processed_lm$suffix\n"; 
+      my ($name,$name_processed);
+      if (scalar(@{$$ILM_SETS{$factor}{$order}}) == 1) {
+        # not interpolated -> get name from LM version of these steps
+        my($id,$set) = split(/ /,$$ILM_SETS{$factor}{$order}[0]);
+        $name = &get_default_file("LM",$set,"train"); # well... works for now;
+        $name_processed = $STEP_OUTNAME{"LM:$stepname"};
+        $name_processed =~ s/^(.+\/)([^\/]+)$/$1$set.$2/;
+        $name_processed = &versionize(&long_file_name($name_processed,"lm",""));
+      }
+      else {
+        my $suffix = "";
+        $suffix = ".$$FACTOR[$factor]" if $icount > 1 && defined($FACTOR);
+        $suffix .= ".order$order" if $icount > 1;
+        $name = "$interpolated_lm$suffix";
+        $name_processed = "$processed_lm$suffix";
+      }
+      $cmd .= "$tool $name $name_processed\n"; 
     }
   }
 
@@ -3072,7 +3092,7 @@ sub define_evaluation_decode {
     my $nbest_size;
     $nbest_size = $nbest if $nbest;
     $nbest_size =~ s/[^\d]//g if $nbest;
-    if ($jobs && $CLUSTER) {
+    if ($jobs && $jobs>1 && $CLUSTER) {
 	$cmd .= "mkdir -p $dir/evaluation/tmp.$set.$VERSION\n";
 	$cmd .= "cd $dir/evaluation/tmp.$set.$VERSION\n";
 	if (defined $moses_parallel) {
@@ -3496,8 +3516,14 @@ sub check_backoff_and_get_array {
     return $CONFIG{$parameter} if defined($CONFIG{$parameter});
 
     # remove set -> find setting for module
-    $parameter =~ s/:.*:/:/;
+    $parameter =~ s/:[^:]+:/:/;
     return $CONFIG{$parameter} if defined($CONFIG{$parameter});
+
+    # remove step (if exists)
+    if ($parameter =~ /:[^:]+:/) {
+        $parameter =~ s/:[^:]+:/:/;
+        return $CONFIG{$parameter} if defined($CONFIG{$parameter});
+    }
 
     # remove model -> find global setting
     $parameter =~ s/^[^:]+:/GENERAL:/;

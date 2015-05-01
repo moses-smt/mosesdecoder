@@ -76,7 +76,7 @@ my $___N_BEST_LIST_SIZE = 100;
 my $___LATTICE_SAMPLES = 0;
 my $queue_flags = "-hard";  # extra parameters for parallelizer
       # the -l ws0ssmt was relevant only to JHU 2006 workshop
-my $___JOBS = undef; # if parallel, number of jobs to use (undef or 0 -> serial)
+my $___JOBS = undef; # if parallel, number of jobs to use (undef or <= 0 -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
@@ -544,7 +544,7 @@ if ($__PROMIX_TRAINING) {
     my $___FILTER_F  = $___DEV_F;
     $___FILTER_F = $filterfile if (defined $filterfile);
     my $cmd = "$filtercmd ./$filtered_path $filtered_config $___FILTER_F";
-    &submit_or_exec($cmd, "filterphrases_$i.out", "filterphrases_$i.err");
+    &submit_or_exec($cmd, "filterphrases_$i.out", "filterphrases_$i.err", 1);
     push (@_PROMIX_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
   }
 }
@@ -559,7 +559,7 @@ if ($___FILTER_PHRASE_TABLE) {
     my $___FILTER_F  = $___DEV_F;
     $___FILTER_F = $filterfile if (defined $filterfile);
     my $cmd = "$filtercmd ./$outdir $___CONFIG $___FILTER_F";
-    &submit_or_exec($cmd, "filterphrases.out", "filterphrases.err");
+    &submit_or_exec($cmd, "filterphrases.out", "filterphrases.err", 1);
   }
 
   # make a backup copy of startup ini filepath
@@ -829,7 +829,7 @@ while (1) {
     # remove segmentation
     $cmd .= " -l $__REMOVE_SEGMENTATION" if  $__PROMIX_TRAINING;
     $cmd = &create_extractor_script($cmd, $___WORKING_DIR);
-    &submit_or_exec($cmd, "extract.out","extract.err");
+    &submit_or_exec($cmd, "extract.out","extract.err", 1);
   }
 
   # Create the initial weights file for mert: init.opt
@@ -919,11 +919,11 @@ while (1) {
   my $pro_optimizer_cmd = "$pro_optimizer $megam_default_options run$run.pro.data";
   if ($___PAIRWISE_RANKED_OPTIMIZER) {  # pro optimization
     $cmd = "$mert_pro_cmd $proargs $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer_cmd";
-    &submit_or_exec($cmd, $mert_outfile, $mert_logfile);
+    &submit_or_exec($cmd, $mert_outfile, $mert_logfile, 1);
   } elsif ($___PRO_STARTING_POINT) {  # First, run pro, then mert
     # run pro...
     my $pro_cmd = "$mert_pro_cmd $proargs $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
-    &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err");
+    &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err", 1);
     # ... get results ...
     ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights, \@promix_weights);
     # Get the pro outputs ready for mert. Add the weight ranges,
@@ -951,11 +951,11 @@ while (1) {
 
     # ... and run mert
     $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
-    &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
+    &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile, ($__THREADS ? $__THREADS : 1) );
   } elsif ($___BATCH_MIRA) { # batch MIRA optimization
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
-    &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
+    &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile, 1);
   } elsif ($___HG_MIRA) {
     safesystem("echo 'not used' > $weights_out_file") or die;
     $mira_settings .= " --type hypergraph ";
@@ -963,7 +963,7 @@ while (1) {
     $mira_settings .= " --hgdir $hypergraph_dir ";
     #$mira_settings .= "--verbose "; 
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings -o $mert_outfile";
-    &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
+    &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile, 1);
   } elsif ($__PROMIX_TRAINING) {
     # PRO trained  mixture model
     safesystem("echo 'not used' > $weights_out_file") or die;
@@ -972,10 +972,10 @@ while (1) {
     $cmd .= join(" ", map {"-p $_"} @_PROMIX_TABLES_BIN);
     $cmd .= " -i $___DEV_F";
     print "Starting promix optimisation at " . `date`;
-    &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
+    &submit_or_exec($cmd, "$mert_outfile", $mert_logfile, 1);
     print "Finished promix optimisation at " . `date`;
   } else {  # just mert
-    &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
+    &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile, ($__THREADS ? $__THREADS : 1) );
   } 
 
   die "Optimization failed, file $weights_out_file does not exist or is empty"
@@ -1283,7 +1283,7 @@ sub run_decoder {
       $lsamp_cmd = " -lattice-samples $lsamp_filename $___LATTICE_SAMPLES ";
     }
 
-    if (defined $___JOBS && $___JOBS > 0) {
+    if (defined $___JOBS && $___JOBS > 1) {
       die "Hypergraph mira not supported by moses-parallel" if $___HG_MIRA;
       $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG";
       $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE); 
@@ -1378,9 +1378,9 @@ sub get_featlist_from_moses {
     print STDERR "Asking moses for feature names and values from $___CONFIG\n";
     my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn";
     $cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
-    $cmd .= " -show-weights > $featlistfn";
+    $cmd .= " -show-weights";
     print STDERR "Executing: $cmd\n";
-    safesystem($cmd) or die "Failed to run moses with the config $configfn";
+    &submit_or_exec($cmd, $featlistfn, "/dev/null", 1);
   }
   return get_featlist_from_file($featlistfn);
 }
@@ -1706,10 +1706,14 @@ sub ensure_full_path {
 }
 
 sub submit_or_exec {
-  my ($cmd, $stdout, $stderr) = @_;
+  my ($cmd, $stdout, $stderr, $threads) = @_;
   print STDERR "exec: $cmd\n";
-  if (defined $___JOBS && $___JOBS > 0) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=$stdout -stderr=$stderr" )
+  if (defined $___JOBS && $___JOBS > 1) {
+    # request fewer CPU slots, if not needed
+    my $queue_flags_for_this_command = $queue_flags;
+    $threads = 1 unless defined($threads);
+    $queue_flags_for_this_command =~ s/(\-pe smp) \d+/$1 $threads/;
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags_for_this_command\" -stdout=$stdout -stderr=$stderr" )
       or die "ERROR: Failed to submit '$cmd' (via $qsubwrapper)";
   } else {
     safesystem("$cmd > $stdout 2> $stderr") or die "ERROR: Failed to run '$cmd'.";

@@ -233,6 +233,8 @@ train
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
 	error: unrecognised option
+	not-error: BadDiscountException
+	not-error: To override this error
 randomize
 	in: lm
 	out: rlm
@@ -472,14 +474,32 @@ fast-align
 	in: prepared-data-fast-align
 	out: fast-alignment
 	rerun-on-change: fast-align-settings
+	ignore-if: fast-align-max-lines
 	template: $external-bin-dir/fast_align -i IN $fast-align-settings > OUT
 	default-name: fast-align
 fast-align-inverse
 	in: prepared-data-fast-align
 	out: fast-alignment-inverse
 	rerun-on-change: fast-align-settings
+	ignore-if: fast-align-max-lines
 	template: $external-bin-dir/fast_align -i IN -r $fast-align-settings > OUT
 	default-name: fast-align-inverse
+fast-align-in-parts
+	in: prepared-data-fast-align
+	out: fast-alignment
+	rerun-on-change: fast-align-settings fast-align-max-lines
+	ignore-unless: fast-align-max-lines
+	tmp-name: training/tmp.fast-align
+	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' > OUT
+	default-name: fast-align
+fast-align-in-parts-inverse
+	in: prepared-data-fast-align
+	out: fast-alignment-inverse
+	rerun-on-change: fast-align-settings fast-align-max-lines
+	ignore-unless: fast-align-max-lines
+	tmp-name: training/tmp.fast-align-inverse
+	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -r -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' > OUT
+	default-name: fast-align
 symmetrize-fast-align
 	in: fast-alignment fast-alignment-inverse corpus-mml-prefilter=OR=corpus
 	out: word-alignment
