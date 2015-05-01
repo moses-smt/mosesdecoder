@@ -580,11 +580,24 @@ int SyntaxTreeState::Compare(const FFState& other) const
   const SyntaxTreeState &otherState = static_cast<const SyntaxTreeState&>(other);
   int res=0;
   res = m_depRel.compare(otherState.m_depRel);
-/*  if(res!=0)
+  if(res!=0){
   	SyntaxTreeState::distinct++;
-  if(res==0)
+  }
+  if(res==0){
   	SyntaxTreeState::equal++;
-*/
+  	std::string parsedSentence1 = "";
+  	this->GetTree()->ToStringLevel(parsedSentence1,3);
+  	std::string parsedSentence2 = "";
+  	otherState.GetTree()->ToStringLevel(parsedSentence2,3);
+/*  	if(parsedSentence1.compare(parsedSentence2)!=0 && m_depRel!=" "){
+  	cout<<"1: "<<parsedSentence1<<endl;
+  	cout<<"1d: "<<m_depRel<<endl;
+  	cout<<"2: "<<parsedSentence2<<endl;
+  	cout<<"2d: "<<otherState.m_depRel<<endl;
+  	}
+  	*/
+  }
+
   return res;
 
   /*
@@ -957,7 +970,7 @@ void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
 	std::cerr<<"Reset cache: "<<localCache.size()<<endl;
 	std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
 	std::cerr<<"Reset counters: "<<localCounters.depRelCacheHits <<" "<<localCounters.subtreeCacheHits<<endl;
-	//std:cerr<<SyntaxTreeState::equal<<" "<<SyntaxTreeState::not_equal<<" "<<SyntaxTreeState::distinct<<endl;
+	std:cerr<<SyntaxTreeState::equal<<" "<<SyntaxTreeState::not_equal<<" "<<SyntaxTreeState::distinct<<endl;
 	m_counter=0;
 	m_counterDepRel=0;
 	m_cacheHits=0;
@@ -1185,14 +1198,17 @@ FFState* HeadFeature::EvaluateWhenApplied(
 			//skip evaluation if we're doing it after CubePruning pop
 			if(m_afterPop==true){
 				vector<float> scores;
+				std::vector< std::vector<float> > cumulate;
 				scores.push_back(0.0);
 				scores.push_back(0.0);
+				cumulate.push_back(scores);
 				accumulator->PlusEquals(this,scores);
-				return new SyntaxTreeState(syntaxTree,depRelInHypHash,parsedSentence,GetCache(),GetCacheDepRel(),GetCounters());
+				return new SyntaxTreeState(syntaxTree,cumulate,depRelInHypHash,parsedSentence,GetCache(),GetCacheDepRel(),GetCounters());
 			}
 
 
-			std::string depRel ="";
+			std::string depRel =" ";
+			vector< vector<float> > cumulateScores;
 			//should only call toString if the LHS passes these criteria
 			//might consider adding Q in allowedNT -> we transform it to S in ToStringLevel
 			if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
@@ -1248,7 +1264,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 								size_t numFeatures = this->m_numScoreComponents;
 								vector<float> finalScores;
 								finalScores.assign(numFeatures,0.0);
-								vector< vector<float> > cumulateScores;
+
 								for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
 									//depRelInHyp_ptr->insert(*it);
 									vector<string> rel;
@@ -1297,6 +1313,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 											finalScores.at(i) = finalScores.at(i) + it->at(i);
 									}
 									*/
+
 									accumulator->PlusEquals(this,finalScores);
 									pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, vector<float> > (depRel,finalScores));
 									if(it.second==false)
@@ -1313,9 +1330,9 @@ FFState* HeadFeature::EvaluateWhenApplied(
 						}
 
 			}
-
-
-			return new SyntaxTreeState(syntaxTree,depRelInHypHash,depRel,GetCache(),GetCacheDepRel(),GetCounters());
+			//if(cumulateScores.size()!=0)
+				//cout<<"scores: "<<cumulateScores.size()<<endl;
+			return new SyntaxTreeState(syntaxTree,cumulateScores,depRelInHypHash,depRel,GetCache(),GetCacheDepRel(),GetCounters());
 	}
 	vector<float> scores;
 	scores.push_back(1000.0);

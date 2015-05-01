@@ -27,6 +27,8 @@
 
 #include <vector>
 
+#include "moses/FF/HeadFeature.h"
+
 using namespace std;
 
 namespace Moses
@@ -122,6 +124,49 @@ Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
   }
 
   return ret;
+}
+
+//MARIA
+//Find the depRel in the derivation
+void ChartKBestExtractor::GetDepRel(const Derivation &d,std::ostringstream &os){
+	std::string depRel ="";
+	//std::ostream &os();
+	const ChartHypothesis &hypo = d.edge.head->hypothesis;
+	const TargetPhrase &phrase = hypo.GetCurrTargetPhrase();
+	//ScoreComponentCollection score = hypo.GetScoreBreakdown();
+	const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+	const FeatureFunction *ff = sff[1];
+	//const HeadFeature *hf = dynamic_cast<const HeadFeature*>(ff);
+	string lastName = ff->GetScoreProducerDescription();
+	vector<float> scores = hypo.GetScoreBreakdown().GetScoresForProducer(ff);
+	  if (const PhraseProperty *property = phrase.GetProperty("Tree")) {
+	  	const SyntaxTreeState* depTree = dynamic_cast<const SyntaxTreeState*>(hypo.GetFFState(1));
+	  	//os<<static_cast<const Phrase &>(phrase)<<" ## ";
+	  	os<<*property->GetValueString()<<" ## ";
+	  	//cout<<static_cast<const Phrase &>(phrase)<<" ## ";
+	  	os<<depTree->m_depRel; //<<" ## "<<lastName<<" = ";
+/*	  	cout<<depTree->m_fuckingScores.size()<<endl;
+	  	for (size_t j = 0; j<depTree->m_fuckingScores.size(); ++j){
+	  		for (size_t i = 0; i<depTree->m_fuckingScores[j].size(); ++i)
+	  		  	      os << " " << depTree->m_fuckingScores[j][i];
+	  		os << " # ";
+	  	}
+	  	*/
+	  //	for (size_t j = 0; j<scores.size(); ++j)
+	  //	      os << " " << scores[j];
+	  	os<<" ### ";
+	  	//cout<<depTree->m_depRel<<" ## "<<endl;
+	  	 for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+	  	      const Word &word = phrase.GetWord(pos);
+	  	      if (word.IsNonTerminal()) {
+	  	        size_t nonTermInd = phrase.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+	  	        const Derivation &subderivation = *d.subderivations[nonTermInd];
+	  	        GetDepRel(subderivation,os);
+	  	        //cout<<os.str()<<endl;
+	  	      }
+	  	    }
+
+	  }
 }
 
 // Generate the target tree of the derivation d.

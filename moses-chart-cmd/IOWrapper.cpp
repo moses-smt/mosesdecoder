@@ -365,6 +365,11 @@ void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &a
   out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
       << "->" << hypo->GetCurrTargetPhrase()
       << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+
+  //MARIA depRel state
+  const SyntaxTreeState* state = dynamic_cast<const SyntaxTreeState*>(hypo->GetFFState(1));
+  out<<" ||| "<< state->m_depRel<<" ||| ";
+
 }
 
 void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
@@ -531,6 +536,7 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
         if (sff[i] == headStructure) {
         	const SyntaxTreeState* tree = dynamic_cast<const SyntaxTreeState*>(hypo->GetFFState(i));
             out<< "Head Tree "<< translationId << ": " << tree->GetTree()->ToStringHead() << "\n";
+            out<<"DepRel State "<<translationId<<": "<<tree->m_depRel<<"\n";
 
           StringHashMap  &subtreeCache = tree->GetSubtreeCache();
           DepRelMap &depRelCache = tree->GetDepRelCache();
@@ -543,9 +549,11 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
           outDepRel<<"DepRelCacheHits:\t"<<counters.depRelCacheHits<<"\n";
           outDepRel<<"whenAppliedQueries:\t"<<counters.whenAppliedQueries<<"\n";
           outDepRel<<"afterPopQueries:\t"<<counters.afterPopQueries<<"\n";
+        /*
           for(DepRelMap::iterator it=depRelCache.begin(); it!=depRelCache.end();it++){
           	outDepRel<<it->first<<"\n";
           }
+          */
           outDepRel<<"\n";
         }
     }
@@ -783,6 +791,12 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
         if (PrintNBestTrees) {
           TreePointer tree = ChartKBestExtractor::GetOutputTree(derivation);
           out << " ||| " << tree->GetString();
+          //MARIA
+          const ChartHypothesis &hypo = derivation.edge.head->hypothesis;
+          const SyntaxTreeState* depTree = dynamic_cast<const SyntaxTreeState*>(hypo.GetFFState(1));
+     //     out<< " ||| " << depTree->GetTree()->ToStringHead();
+          out<<" ||| ";
+          ChartKBestExtractor::GetDepRel(derivation,out);//depTree->m_depRel;
         }
 
     out << std::endl;

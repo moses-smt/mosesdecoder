@@ -69,8 +69,9 @@ public:
 		static long long not_equal;
 		static long long distinct;
 		std::string m_depRel;
+		std::vector< std::vector<float> > m_fuckingScores;
 
-  SyntaxTreeState(SyntaxTreePtr tree, size_t depRelInHypHash,std::string depRel,StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
+  SyntaxTreeState(SyntaxTreePtr tree, std::vector< std::vector<float> > scores, size_t depRelInHypHash,std::string depRel,StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
     :m_tree(tree)
 		,m_subtreeCache(subtreeCache)
 		,m_depRelCache(depRelCache)
@@ -78,7 +79,9 @@ public:
 		//,m_depRelInHyp(depRelInHyp)
 		,m_depRelInHypHash(depRelInHypHash)
 		,m_depRel(depRel)
-  {}//std::cout<<"new state "<<m_depRelInHyp->size()<<std::endl;
+		,m_fuckingScores(scores)
+  {//if(m_fuckingScores.size()!=0) std::cout<<"new state "<<m_fuckingScores.size()<<std::endl;
+  }
 
   SyntaxTreePtr GetTree() const {
       return m_tree;
@@ -314,10 +317,11 @@ public:
   //I don't understand this
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
 	  SyntaxTreePtr startTree(new SyntaxTree());
+	  std::vector< std::vector<float> > scores;
 	  //std::set<std::string> depRelInHyp();
 	  //boost::shared_ptr< std::set<std::string> > depRelInHyp_ptr (new std::set<std::string>()); //(depRelInHyp);
 	  size_t hashValue=0;
-	  return new SyntaxTreeState(startTree, hashValue,"", GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
+	  return new SyntaxTreeState(startTree, scores,hashValue,"", GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
   }
 
 

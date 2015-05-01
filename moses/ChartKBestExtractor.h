@@ -91,6 +91,7 @@ public:
 
   static Phrase GetOutputPhrase(const Derivation &);
   static TreePointer GetOutputTree(const Derivation &);
+  static void GetDepRel(const Derivation &,std::ostringstream &os);
 
 private:
   typedef boost::unordered_map<const ChartHypothesis *,
