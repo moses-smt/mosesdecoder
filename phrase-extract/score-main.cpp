@@ -315,7 +315,6 @@ int main(int argc, char* argv[])
 
   // loop through all extracted phrase translations
   std::string line, lastLine;
-  lastLine[0] = '\0';
   ExtractionPhrasePair *phrasePair = NULL;
   std::vector< ExtractionPhrasePair* > phrasePairsWithSameSource;
   std::vector< ExtractionPhrasePair* > phrasePairsWithSameSourceAndTarget; // required for hierarchical rules only, as non-terminal alignments might make the phrases incompatible
