@@ -299,7 +299,7 @@ CreateTranslationOptionCollection(ttasksptr const& ttask) const
   = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
   = new TranslationOptionCollectionConfusionNet
-    (ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  (ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
   assert(rv);
   return rv;
 }

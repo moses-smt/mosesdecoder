@@ -21,7 +21,7 @@ namespace Moses
 /** constructor; just initialize the base class */
 TranslationOptionCollectionConfusionNet::
 TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
-					const ConfusionNet &input,
+                                        const ConfusionNet &input,
                                         size_t maxNoTransOptPerCoverage,
                                         float translationOptionThreshold)
   : TranslationOptionCollection(ttask,input, maxNoTransOptPerCoverage,

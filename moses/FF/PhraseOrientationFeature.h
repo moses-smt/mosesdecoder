@@ -301,15 +301,15 @@ class PhraseOrientationFeature : public StatefulFeatureFunction
 public:
 
   struct ReoClassData {
-    public:
-      std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
-      std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
-      bool firstNonTerminalIsBoundary;
-      bool firstNonTerminalPreviousSourceSpanIsAligned;
-      bool firstNonTerminalFollowingSourceSpanIsAligned;
-      bool lastNonTerminalIsBoundary;
-      bool lastNonTerminalPreviousSourceSpanIsAligned;
-      bool lastNonTerminalFollowingSourceSpanIsAligned;
+  public:
+    std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
+    std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
+    bool firstNonTerminalIsBoundary;
+    bool firstNonTerminalPreviousSourceSpanIsAligned;
+    bool firstNonTerminalFollowingSourceSpanIsAligned;
+    bool lastNonTerminalIsBoundary;
+    bool lastNonTerminalPreviousSourceSpanIsAligned;
+    bool lastNonTerminalFollowingSourceSpanIsAligned;
   };
 
   PhraseOrientationFeature(const std::string &line);

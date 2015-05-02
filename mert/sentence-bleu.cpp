@@ -34,8 +34,7 @@ int main(int argc, char **argv)
 
   // initialize reference streams
   vector<boost::shared_ptr<ifstream> > refStreams;
-  for (vector<string>::const_iterator refFile=refFiles.begin(); refFile!=refFiles.end(); ++refFile)
-  {
+  for (vector<string>::const_iterator refFile=refFiles.begin(); refFile!=refFiles.end(); ++refFile) {
     TRACE_ERR("Loading reference from " << *refFile << endl);
     boost::shared_ptr<ifstream> ifs(new ifstream(refFile->c_str()));
     UTIL_THROW_IF2(!ifs, "Cannot open " << *refFile);
@@ -45,8 +44,7 @@ int main(int argc, char **argv)
   // load sentences, preparing statistics, score
   string hypothesisLine;
   size_t sid = 0;
-  while (getline(std::cin, hypothesisLine)) 
-  {
+  while (getline(std::cin, hypothesisLine)) {
     Reference ref;
     if (!scorer.GetNextReferenceFromStreams(refStreams, ref)) {
       UTIL_THROW2("Missing references");

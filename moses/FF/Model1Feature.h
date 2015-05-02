@@ -17,7 +17,7 @@ class Model1Vocabulary
 {
 public:
 
-  #define INVALID_ID std::numeric_limits<unsigned>::max() // UINT_MAX
+#define INVALID_ID std::numeric_limits<unsigned>::max() // UINT_MAX
   static const std::string GIZANULL;
 
   Model1Vocabulary();
@@ -103,10 +103,10 @@ private:
 
   // cache
   mutable boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> > m_cache;
-  #ifdef WITH_THREADS
+#ifdef WITH_THREADS
   // reader-writer lock
   mutable boost::shared_mutex m_accessLock;
-  #endif
+#endif
 };
 
 

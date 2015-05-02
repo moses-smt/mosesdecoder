@@ -699,12 +699,12 @@ void ExtractGHKM::WriteGlueGrammar(
 //  const size_t partOfSpeechSentenceStart = 0;
 //  const size_t partOfSpeechSentenceEnd = 1;
 
-  #ifndef BOS_
-  #define BOS_ "<s>" //Beginning of sentence symbol
-  #endif
-  #ifndef EOS_
-  #define EOS_ "</s>" //End of sentence symbol
-  #endif
+#ifndef BOS_
+#define BOS_ "<s>" //Beginning of sentence symbol
+#endif
+#ifndef EOS_
+#define EOS_ "</s>" //End of sentence symbol
+#endif
 
   std::string sentenceStartSource = BOS_;
   std::string sentenceEndSource   = EOS_;

@@ -15,13 +15,13 @@ namespace PostprocessEgretForests
 
 class ForestWriter
 {
- public:
+public:
   ForestWriter(const Options &options, std::ostream &out)
     : m_options(options), m_out(out) {}
 
   void Write(const std::string &, const Forest &, std::size_t);
 
- private:
+private:
   std::string Escape(const std::string &) const;
   std::string PossiblyEscape(const std::string &) const;
   void WriteHyperedgeLine(const Forest::Hyperedge &);

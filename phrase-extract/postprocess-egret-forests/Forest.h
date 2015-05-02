@@ -15,7 +15,7 @@ namespace PostprocessEgretForests
 
 class Forest
 {
- public:
+public:
   struct Vertex;
 
   struct Hyperedge {
@@ -35,7 +35,7 @@ class Forest
 
   std::vector<boost::shared_ptr<Vertex> > vertices;
 
- private:
+private:
   // Copying is not allowed.
   Forest(const Forest &);
   Forest &operator=(const Forest &);

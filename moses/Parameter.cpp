@@ -203,7 +203,7 @@ Parameter::Parameter()
   AddParam(nbest_opts,"lattice-samples", "generate samples from lattice, in same format as nbest list. Uses the file and size arguments, as in n-best-list");
   AddParam(nbest_opts,"include-segmentation-in-n-best", "include phrasal segmentation in the n-best list. default is false");
   AddParam(nbest_opts,"print-alignment-info-in-n-best",
-	   "Include word-to-word alignment in the n-best list. Word-to-word alignments are taken from the phrase table if any. Default is false");
+           "Include word-to-word alignment in the n-best list. Word-to-word alignments are taken from the phrase table if any. Default is false");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // server options
@@ -215,7 +215,7 @@ Parameter::Parameter()
 
   po::options_description irstlm_opts("IRSTLM Options");
   AddParam(irstlm_opts,"clean-lm-cache",
-	   "clean language model caches after N translations (default N=1)");
+           "clean language model caches after N translations (default N=1)");
 
   po::options_description chart_opts("Chart Decoding Options");
   AddParam(chart_opts,"max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
@@ -346,8 +346,8 @@ const PARAM_VEC *Parameter::GetParam(const std::string &paramName) const
 void
 Parameter::
 AddParam(po::options_description& optgroup,
-	 string const& paramName,
-	 string const& description)
+         string const& paramName,
+         string const& description)
 {
   m_valid[paramName] = true;
   m_description[paramName] = description;
@@ -358,9 +358,9 @@ AddParam(po::options_description& optgroup,
 void
 Parameter::
 AddParam(po::options_description& optgroup,
-	 string const& paramName,
-	 string const& abbrevName,
-	 string const& description)
+         string const& paramName,
+         string const& abbrevName,
+         string const& description)
 {
   m_valid[paramName] = true;
   m_valid[abbrevName] = true;
@@ -368,11 +368,10 @@ AddParam(po::options_description& optgroup,
   m_fullname[abbrevName] = paramName;
   m_description[paramName] = description;
   string optname = paramName;
-  if (abbrevName.size() == 1)
-    {
-      optname += string(",")+abbrevName;
-      // m_confusable[abbrevName[0]].insert(paramName);
-    }
+  if (abbrevName.size() == 1) {
+    optname += string(",")+abbrevName;
+    // m_confusable[abbrevName[0]].insert(paramName);
+  }
   optgroup.add_options()(optname.c_str(),description.c_str());
 }
 
@@ -429,12 +428,11 @@ LoadParam(int argc, char* xargv[])
   // legacy parameter handling: all parameters are expected
   // to start with a single dash
   char* argv[argc+1];
-  for (int i = 0; i < argc; ++i)
-    {
-      argv[i] = xargv[i];
-      if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
-	++argv[i];
-    }
+  for (int i = 0; i < argc; ++i) {
+    argv[i] = xargv[i];
+    if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
+      ++argv[i];
+  }
 
   // config file (-f) arg mandatory
   string configPath;
@@ -1260,7 +1258,7 @@ Validate()
 bool
 Parameter::
 FilesExist(const string &paramName, int fieldNo,
-	   std::vector<std::string> const& extensions)
+           std::vector<std::string> const& extensions)
 {
   typedef std::vector<std::string> StringVec;
   StringVec::const_iterator iter;
@@ -1589,7 +1587,7 @@ template<>
 void
 Parameter::
 SetParameter<bool>(bool &parameter, std::string const& parameterName,
-		   bool const& defaultValue) const
+                   bool const& defaultValue) const
 {
   const PARAM_VEC *params = GetParam(parameterName);
 

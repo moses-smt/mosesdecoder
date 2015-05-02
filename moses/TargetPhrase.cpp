@@ -225,21 +225,19 @@ void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProduce
 
 boost::shared_ptr<Scores>
 mergescores(boost::shared_ptr<Scores> const& a,
-	    boost::shared_ptr<Scores> const& b)
+            boost::shared_ptr<Scores> const& b)
 {
   boost::shared_ptr<Scores> ret;
   if (!a) return b ? b : ret;
   if (!b) return a;
   if (a->size() != b->size()) return ret;
   ret.reset(new Scores(*a));
-  for (size_t i = 0; i < a->size(); ++i)
-    {
-      if ((*a)[i] == 0) (*a)[i] = (*b)[i];
-      else if ((*b)[i])
-	{
-	  UTIL_THROW_IF2((*a)[i] != (*b)[i], "can't merge feature vectors");
-	}
+  for (size_t i = 0; i < a->size(); ++i) {
+    if ((*a)[i] == 0) (*a)[i] = (*b)[i];
+    else if ((*b)[i]) {
+      UTIL_THROW_IF2((*a)[i] != (*b)[i], "can't merge feature vectors");
     }
+  }
   return ret;
 }
 
@@ -253,12 +251,11 @@ Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec)
   m_fullScore += copy.m_fullScore;
   typedef ScoreCache_t::iterator iter;
   typedef ScoreCache_t::value_type item;
-  BOOST_FOREACH(item const& s, copy.m_cached_scores)
-    {
-      pair<iter,bool> foo = m_cached_scores.insert(s);
-      if (foo.second == false)
-	foo.first->second = mergescores(foo.first->second, s.second);
-    }
+  BOOST_FOREACH(item const& s, copy.m_cached_scores) {
+    pair<iter,bool> foo = m_cached_scores.insert(s);
+    if (foo.second == false)
+      foo.first->second = mergescores(foo.first->second, s.second);
+  }
 }
 
 TargetPhrase::ScoreCache_t const&
@@ -279,8 +276,10 @@ GetExtraScores(FeatureFunction const* ff) const
 void
 TargetPhrase::
 SetExtraScores(FeatureFunction const* ff,
-	       boost::shared_ptr<Scores> const& s)
-{ m_cached_scores[ff] = s; }
+               boost::shared_ptr<Scores> const& s)
+{
+  m_cached_scores[ff] = s;
+}
 
 
 void TargetPhrase::SetProperties(const StringPiece &str)

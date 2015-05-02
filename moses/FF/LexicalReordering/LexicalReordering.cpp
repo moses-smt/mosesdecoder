@@ -66,9 +66,9 @@ LexicalReordering(const std::string &line)
 
   // sanity check: number of default scores
   size_t numScores
-    = m_numScoreComponents
+  = m_numScoreComponents
     = m_numTuneableComponents
-    = m_configuration->GetNumScoreComponents();
+      = m_configuration->GetNumScoreComponents();
   UTIL_THROW_IF2(m_haveDefaultScores && m_defaultScores.size() != numScores,
                  "wrong number of default scores (" << m_defaultScores.size()
                  << ") for lexicalized reordering model (expected "
@@ -89,7 +89,7 @@ Load()
   typedef LexicalReorderingTable LRTable;
   if (m_filePath.size())
     m_table.reset(LRTable::LoadAvailable(m_filePath, m_factorsF,
-					 m_factorsE, std::vector<FactorType>()));
+                                         m_factorsE, std::vector<FactorType>()));
 }
 
 Scores
@@ -158,7 +158,7 @@ LexicalReordering::
 SetCache(TranslationOptionList& tol) const
 {
   BOOST_FOREACH(TranslationOption* to, tol)
-    this->SetCache(*to);
+  this->SetCache(*to);
 }
 
 

@@ -900,7 +900,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   }
 
   if (nonTermContext && !inverseFlag) {
-	std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContext");
+    std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContext");
     if (!propValue.empty() && propValue.size() < 50000) {
       size_t nNTs = NumNonTerminal(phraseSource);
       phraseTableFile << " {{NonTermContext " << nNTs << " " << propValue << "}}";
@@ -908,7 +908,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   }
 
   if (nonTermContextTarget && !inverseFlag) {
-	std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContextTarget");
+    std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContextTarget");
     if (!propValue.empty() && propValue.size() < 50000) {
       size_t nNTs = NumNonTerminal(phraseSource);
       phraseTableFile << " {{NonTermContextTarget " << nNTs << " " << propValue << "}}";

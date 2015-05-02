@@ -11,7 +11,8 @@ how many of the features are really "dense". This is because in hg mira
 all features (sparse and dense) are to get rolled in to SparseVector
 */
 
-BOOST_AUTO_TEST_CASE(from_sparse) {
+BOOST_AUTO_TEST_CASE(from_sparse)
+{
   SparseVector sp;
   sp.set("dense0", 0.2);
   sp.set("dense1", 0.3);
