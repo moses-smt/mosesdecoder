@@ -1350,6 +1350,24 @@ multi-bleu-c
 	rerun-on-change: multi-bleu-c
 	template: $multi-bleu-c IN1 < IN > OUT
 	final-model: yes
+
+multi-bleu-detok
+        in: detokenized-output tokenized-reference
+        out: multi-bleu-detok-score
+        default-name: evaluation/multi-bleu-detok
+        ignore-unless: multi-bleu-detok
+        rerun-on-change: multi-bleu-detok
+        template: $multi-bleu-detok IN1 < IN > OUT
+        final-model: yes
+multi-bleu-c-detok
+        in: detokenized-output tokenized-reference
+        out: multi-bleu-c-detok-score
+        default-name: evaluation/multi-bleu-c-detok
+        ignore-unless: multi-bleu-c-detok
+        rerun-on-change: multi-bleu-c-detok
+        template: $multi-bleu-c-detok IN1 < IN > OUT
+        final-model: yes
+
 ter
 	in: wrapped-output reference-sgm
 	out: ter-score
@@ -1397,6 +1415,6 @@ analysis-precision
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:multi-bleu-detok-score EVALUATION:multi-bleu-c-detok-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
 	out: report
 	default-name: evaluation/report
