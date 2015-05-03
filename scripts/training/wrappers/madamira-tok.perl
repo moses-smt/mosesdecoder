@@ -16,6 +16,7 @@ my $KEEP_TMP = 0;
 my $MADA_DIR;
 my $CONFIG;
 my $SCHEME;
+my $USE_PARALLEL = 1;
 
 my $FACTORS_STR;
 my @FACTORS;
@@ -26,7 +27,8 @@ GetOptions(
   "mada-dir=s" => \$MADA_DIR,
   "factors=s" => \$FACTORS_STR,
   "config=s" => \$CONFIG,
-  "scheme=s" => \$SCHEME
+  "scheme=s" => \$SCHEME,
+  "use-parallel=i" => \$USE_PARALLEL
     ) or die("ERROR: unknown options");
 
 die("must have -scheme arg") unless defined($SCHEME);
@@ -61,25 +63,36 @@ close(TMP);
 
 my $cmd;
 
-# split input file
-my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
-if($SPLIT_EXEC) {
+if ($USE_PARALLEL) {
+  # split input file
+  my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
+  if($SPLIT_EXEC) {
     $SPLIT_EXEC = 'gsplit';
+  }
+  else {
+    $SPLIT_EXEC = 'split';
+  }
+
+  $cmd = "$SPLIT_EXEC -l 10000 -a 7 -d  $TMPDIR/input $TMPDIR/split/x";
+  `$cmd`;
+
+  $cmd = "cd $MADA_DIR && parallel --jobs 4 java -Xmx2500m -Xms2500m -XX:NewRatio=3 -jar $MADA_DIR/MADAMIRA.jar -rawinput {} -rawoutdir  $TMPDIR/out -rawconfig $CONFIG ::: $TMPDIR/split/x*";
+  print STDERR "Executing: $cmd\n";
+  `$cmd`;
+
+  $cmd = "cat $TMPDIR/out/x*.$SCHEME.tok > $infile.mada";
+  print STDERR "Executing: $cmd\n";
+  `$cmd`;
 }
 else {
-    $SPLIT_EXEC = 'split';
+  $cmd = "cd $MADA_DIR && java -Xmx2500m -Xms2500m -XX:NewRatio=3 -jar $MADA_DIR/MADAMIRA.jar -rawinput $infile -rawoutdir $TMPDIR/out -rawconfig $CONFIG";
+  print STDERR "Executing: $cmd\n";
+  `$cmd`;
+
+  $cmd = "cat $TMPDIR/out/input.$SCHEME.tok > $infile.mada";
+  print STDERR "Executing: $cmd\n";
+  `$cmd`;
 }
-
-$cmd = "$SPLIT_EXEC -l 10000 -a 7 -d  $TMPDIR/input $TMPDIR/split/x";
-`$cmd`;
-
-$cmd = "cd $MADA_DIR && parallel --jobs 4 java -Xmx2500m -Xms2500m -XX:NewRatio=3 -jar $MADA_DIR/MADAMIRA.jar -rawinput {} -rawoutdir  $TMPDIR/out -rawconfig $CONFIG ::: $TMPDIR/split/x*";
-print STDERR "Executing: $cmd\n";
-`$cmd`;
-
-$cmd = "cat $TMPDIR/out/x*.$SCHEME.tok > $infile.mada";
-print STDERR "Executing: $cmd\n";
-`$cmd`;
 
 # get stuff out of mada output
 open(MADA_OUT,"<$infile.mada");
