@@ -17,7 +17,9 @@ BaseManager::BaseManager(ttasksptr const& ttask)
 
 const InputType&
 BaseManager::GetSource() const
-{ return m_source; }
+{
+  return m_source;
+}
 
 
 

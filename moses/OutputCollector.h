@@ -110,7 +110,7 @@ private:
 #endif
 
 public:
-  void SetOutputStream(std::ostream* outStream){
+  void SetOutputStream(std::ostream* outStream) {
     m_outStream = outStream;
   }
 

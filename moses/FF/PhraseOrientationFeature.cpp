@@ -288,7 +288,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
   if (currTarPhr.GetAlignNonTerm().GetSize() != 0) {
     const boost::shared_ptr<void> data = currTarPhr.GetData("Orientation");
     UTIL_THROW_IF2(!data, GetScoreProducerDescription()
-                 << ": Orientation data not set in target phrase. ");
+                   << ": Orientation data not set in target phrase. ");
     reoClassData = static_cast<const PhraseOrientationFeature::ReoClassData*>( data.get() );
   }
 

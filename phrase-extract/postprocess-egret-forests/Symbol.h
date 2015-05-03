@@ -30,14 +30,14 @@ inline bool operator==(const Symbol &s, const Symbol &t)
 }
 
 struct SymbolHasher {
- public:
+public:
   std::size_t operator()(const Symbol &s) const {
     return hash_value(s);
   }
 };
 
 struct SymbolEqualityPred {
- public:
+public:
   bool operator()(const Symbol &s, const Symbol &t) const {
     return s.value == t.value && s.isNonTerminal == t.isNonTerminal;
   }

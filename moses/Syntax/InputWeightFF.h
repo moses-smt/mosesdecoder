@@ -42,7 +42,7 @@ public:
                                  ScoreComponentCollection *) const {}
 
   void EvaluateTranslationOptionListWithSourceContext(
-      const InputType &, const TranslationOptionList &) const {}
+    const InputType &, const TranslationOptionList &) const {}
 };
 
 }  // Syntax

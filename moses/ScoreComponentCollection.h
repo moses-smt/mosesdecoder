@@ -231,10 +231,10 @@ public:
   //! produced by sp
   void
   PlusEquals(const FeatureFunction* sp,
-	     const ScoreComponentCollection& scores) {
+             const ScoreComponentCollection& scores) {
     size_t i = sp->GetIndex();
     size_t stop = i + sp->GetNumScoreComponents();
-    for (;i < stop; ++i) m_scores[i] += scores.m_scores[i];
+    for (; i < stop; ++i) m_scores[i] += scores.m_scores[i];
   }
 
   //! Add scores from a single FeatureFunction only

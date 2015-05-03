@@ -51,15 +51,15 @@ class PhraseDictionary;
  */
 class TargetPhrase: public Phrase
 {
- public:
+public:
   typedef std::map<FeatureFunction const*, boost::shared_ptr<Scores> >
-    ScoreCache_t;
+  ScoreCache_t;
   ScoreCache_t const& GetExtraScores() const;
   Scores const* GetExtraScores(FeatureFunction const* ff) const;
   void SetExtraScores(FeatureFunction const* ff,
-		      boost::shared_ptr<Scores> const& scores);
+                      boost::shared_ptr<Scores> const& scores);
 
- private:
+private:
   ScoreCache_t m_cached_scores;
 
 private:

@@ -114,10 +114,10 @@ void SparseReordering::PreCalculateFeatureNames(size_t index, const string& id, 
          position <= SparseReorderingFeatureKey::Last; ++position) {
       for (int reoType = 0; reoType <= LRModel::MAX; ++reoType) {
         SparseReorderingFeatureKey
-	  key(index, static_cast<SparseReorderingFeatureKey::Type>(type),
-	      factor, isCluster,
-	      static_cast<SparseReorderingFeatureKey::Position>(position),
-	      side, static_cast<LRModel::ReorderingType>(reoType));
+        key(index, static_cast<SparseReorderingFeatureKey::Type>(type),
+            factor, isCluster,
+            static_cast<SparseReorderingFeatureKey::Position>(position),
+            side, static_cast<LRModel::ReorderingType>(reoType));
         m_featureMap.insert(pair<SparseReorderingFeatureKey, FName>(key,m_producer->GetFeatureName(key.Name(id))));
       }
     }

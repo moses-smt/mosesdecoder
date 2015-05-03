@@ -53,7 +53,7 @@ TranslationTask
 boost::shared_ptr<TranslationTask>
 TranslationTask
 ::create(boost::shared_ptr<InputType> const& source,
-	 boost::shared_ptr<IOWrapper> const& ioWrapper)
+         boost::shared_ptr<IOWrapper> const& ioWrapper)
 {
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
   ret->m_self = ret;
@@ -63,7 +63,7 @@ TranslationTask
 
 TranslationTask
 ::TranslationTask(boost::shared_ptr<InputType> const& source,
-		  boost::shared_ptr<IOWrapper> const& ioWrapper)
+                  boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
 { }
 
@@ -82,37 +82,33 @@ TranslationTask
   if (!staticData.IsSyntax(algo))
     manager.reset(new Manager(this->self())); // phrase-based
 
-  else if (algo == SyntaxF2S || algo == SyntaxT2S)
-    { // STSG-based tree-to-string / forest-to-string decoding (ask Phil Williams)
-      typedef Syntax::F2S::RuleMatcherCallback Callback;
-      typedef Syntax::F2S::RuleMatcherHyperTree<Callback> RuleMatcher;
-      manager.reset(new Syntax::F2S::Manager<RuleMatcher>(this->self()));
-    }
+  else if (algo == SyntaxF2S || algo == SyntaxT2S) {
+    // STSG-based tree-to-string / forest-to-string decoding (ask Phil Williams)
+    typedef Syntax::F2S::RuleMatcherCallback Callback;
+    typedef Syntax::F2S::RuleMatcherHyperTree<Callback> RuleMatcher;
+    manager.reset(new Syntax::F2S::Manager<RuleMatcher>(this->self()));
+  }
 
-  else if (algo == SyntaxS2T)
-    { // new-style string-to-tree decoding (ask Phil Williams)
-      S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
-      if (algorithm == RecursiveCYKPlus)
-	{
-	  typedef Syntax::S2T::EagerParserCallback Callback;
-	  typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
-	  manager.reset(new Syntax::S2T::Manager<Parser>(this->self()));
-	}
-      else if (algorithm == Scope3)
-	{
-	  typedef Syntax::S2T::StandardParserCallback Callback;
-	  typedef Syntax::S2T::Scope3Parser<Callback> Parser;
-	  manager.reset(new Syntax::S2T::Manager<Parser>(this->self()));
-	}
-      else UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
-    }
+  else if (algo == SyntaxS2T) {
+    // new-style string-to-tree decoding (ask Phil Williams)
+    S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+    if (algorithm == RecursiveCYKPlus) {
+      typedef Syntax::S2T::EagerParserCallback Callback;
+      typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
+      manager.reset(new Syntax::S2T::Manager<Parser>(this->self()));
+    } else if (algorithm == Scope3) {
+      typedef Syntax::S2T::StandardParserCallback Callback;
+      typedef Syntax::S2T::Scope3Parser<Callback> Parser;
+      manager.reset(new Syntax::S2T::Manager<Parser>(this->self()));
+    } else UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
+  }
 
-  else if (algo == SyntaxT2S_SCFG)
-    { // SCFG-based tree-to-string decoding (ask Phil Williams)
-      typedef Syntax::F2S::RuleMatcherCallback Callback;
-      typedef Syntax::T2S::RuleMatcherSCFG<Callback> RuleMatcher;
-      manager.reset(new Syntax::T2S::Manager<RuleMatcher>(this->self()));
-    }
+  else if (algo == SyntaxT2S_SCFG) {
+    // SCFG-based tree-to-string decoding (ask Phil Williams)
+    typedef Syntax::F2S::RuleMatcherCallback Callback;
+    typedef Syntax::T2S::RuleMatcherSCFG<Callback> RuleMatcher;
+    manager.reset(new Syntax::T2S::Manager<RuleMatcher>(this->self()));
+  }
 
   else if (algo == ChartIncremental) // Ken's incremental decoding
     manager.reset(new Incremental::Manager(this->self()));
@@ -126,8 +122,8 @@ TranslationTask
 void TranslationTask::Run()
 {
   UTIL_THROW_IF2(!m_source || !m_ioWrapper,
-		 "Base Instances of TranslationTask must be initialized with"
-		 << " input and iowrapper.");
+                 "Base Instances of TranslationTask must be initialized with"
+                 << " input and iowrapper.");
 
 
   // shorthand for "global data"
@@ -152,7 +148,7 @@ void TranslationTask::Run()
   boost::shared_ptr<BaseManager> manager = SetupManager();
 
   VERBOSE(1, "Line " << translationId << ": Initialize search took "
-	  << initTime << " seconds total" << endl);
+          << initTime << " seconds total" << endl);
 
   manager->Decode();
 
@@ -209,9 +205,9 @@ void TranslationTask::Run()
   // report additional statistics
   manager->CalcDecoderStatistics();
   VERBOSE(1, "Line " << translationId << ": Additional reporting took "
-	  << additionalReportingTime << " seconds total" << endl);
+          << additionalReportingTime << " seconds total" << endl);
   VERBOSE(1, "Line " << translationId << ": Translation took "
-	  << translationTime << " seconds total" << endl);
+          << translationTime << " seconds total" << endl);
   IFVERBOSE(2) {
     PrintUserTime("Sentence Decoding Time:");
   }

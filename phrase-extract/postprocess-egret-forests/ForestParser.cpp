@@ -17,15 +17,18 @@ namespace PostprocessEgretForests
 {
 
 ForestParser::ForestParser()
-    : m_input(0) {
+  : m_input(0)
+{
 }
 
 ForestParser::ForestParser(std::istream &input)
-    : m_input(&input) {
+  : m_input(&input)
+{
   ++(*this);
 }
 
-ForestParser &ForestParser::operator++() {
+ForestParser &ForestParser::operator++()
+{
   if (!m_input) {
     return *this;
   }
@@ -106,7 +109,7 @@ void ForestParser::ParseHyperedgeLine(const std::string &line, Forest &forest)
 }
 
 boost::shared_ptr<Forest::Vertex> ForestParser::ParseVertex(
-    const StringPiece &s)
+  const StringPiece &s)
 {
   VertexSP v = boost::make_shared<Forest::Vertex>();
   std::size_t pos = s.rfind('[');
@@ -132,12 +135,14 @@ boost::shared_ptr<Forest::Vertex> ForestParser::ParseVertex(
   return v;
 }
 
-bool operator==(const ForestParser &lhs, const ForestParser &rhs) {
+bool operator==(const ForestParser &lhs, const ForestParser &rhs)
+{
   // TODO Is this right?  Compare values of istreams if non-zero?
   return lhs.m_input == rhs.m_input;
 }
 
-bool operator!=(const ForestParser &lhs, const ForestParser &rhs) {
+bool operator!=(const ForestParser &lhs, const ForestParser &rhs)
+{
   return !(lhs == rhs);
 }
 

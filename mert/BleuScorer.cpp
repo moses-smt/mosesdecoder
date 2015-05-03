@@ -45,14 +45,14 @@ BleuScorer::BleuScorer(const string& config)
   } else if (reflen == REFLEN_CLOSEST) {
     m_ref_length_type = CLOSEST;
   } else {
-    throw runtime_error("Unknown reference length strategy: " + reflen);
+    UTIL_THROW2("Unknown reference length strategy: " + reflen);
   }
 }
 
 BleuScorer::~BleuScorer() {}
 
 size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
-                               unsigned int n, bool is_testing)
+                               unsigned int n, bool is_testing) const
 {
   assert(n > 0);
   vector<int> encoded_tokens;
@@ -97,20 +97,11 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
   for (size_t i = 0; i < referenceFiles.size(); ++i) {
     TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
 
-    if (!OpenReference(referenceFiles[i].c_str(), i)) {
-      throw runtime_error("Unable to open " + referenceFiles[i]);
+    ifstream ifs(referenceFiles[i].c_str());
+    if (!OpenReferenceStream(&ifs, i)) {
+      UTIL_THROW2("Cannot open " + referenceFiles[i]);
     }
   }
-}
-
-bool BleuScorer::OpenReference(const char* filename, size_t file_id)
-{
-  ifstream ifs(filename);
-  if (!ifs) {
-    cerr << "Cannot open " << filename << endl;
-    return false;
-  }
-  return OpenReferenceStream(&ifs, file_id);
 }
 
 bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id)
@@ -120,31 +111,17 @@ bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id)
   string line;
   size_t sid = 0;
   while (getline(*is, line)) {
+    // TODO: rather than loading the whole reference corpus into memory, can we stream it line by line?
+    //  (loading the whole reference corpus can take gigabytes of RAM if done with millions of sentences)
     line = preprocessSentence(line);
     if (file_id == 0) {
       Reference* ref = new Reference;
       m_references.push_back(ref);    // Take ownership of the Reference object.
     }
-    if (m_references.size() <= sid) {
-      cerr << "Reference " << file_id << "has too many sentences." << endl;
-      return false;
-    }
-    NgramCounts counts;
-    size_t length = CountNgrams(line, counts, kBleuNgramOrder);
+    UTIL_THROW_IF2(m_references.size() <= sid, "Reference " << file_id << "has too many sentences.");
 
-    //for any counts larger than those already there, merge them in
-    for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
-      const NgramCounts::Key& ngram = ci->first;
-      const NgramCounts::Value newcount = ci->second;
+    ProcessReferenceLine(line, m_references[sid]);
 
-      NgramCounts::Value oldcount = 0;
-      m_references[sid]->get_counts()->Lookup(ngram, &oldcount);
-      if (newcount > oldcount) {
-        m_references[sid]->get_counts()->operator[](ngram) = newcount;
-      }
-    }
-    //add in the length
-    m_references[sid]->push_back(length);
     if (sid > 0 && sid % 100 == 0) {
       TRACE_ERR(".");
     }
@@ -153,20 +130,53 @@ bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id)
   return true;
 }
 
+void BleuScorer::ProcessReferenceLine(const std::string& line, Reference* ref) const
+{
+  NgramCounts counts;
+  size_t length = CountNgrams(line, counts, kBleuNgramOrder);
+
+  //for any counts larger than those already there, merge them in
+  for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
+    const NgramCounts::Key& ngram = ci->first;
+    const NgramCounts::Value newcount = ci->second;
+
+    NgramCounts::Value oldcount = 0;
+    ref->get_counts()->Lookup(ngram, &oldcount);
+    if (newcount > oldcount) {
+      ref->get_counts()->operator[](ngram) = newcount;
+    }
+  }
+  //add in the length
+  ref->push_back(length);
+}
+
+bool BleuScorer::GetNextReferenceFromStreams(std::vector<boost::shared_ptr<std::ifstream> >& referenceStreams, Reference& ref) const
+{
+  for (vector<boost::shared_ptr<ifstream> >::iterator ifs=referenceStreams.begin(); ifs!=referenceStreams.end(); ++ifs) {
+    if (!(*ifs)) return false;
+    string line;
+    if (!getline(**ifs, line)) return false;
+    line = preprocessSentence(line);
+    ProcessReferenceLine(line, &ref);
+  }
+  return true;
+}
+
 void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
-  if (sid >= m_references.size()) {
-    stringstream msg;
-    msg << "Sentence id (" << sid << ") not found in reference set";
-    throw runtime_error(msg.str());
-  }
+  UTIL_THROW_IF2(sid >= m_references.size(), "Sentence id (" << sid << ") not found in reference set");
+  CalcBleuStats(*(m_references[sid]), text, entry);
+}
+
+void BleuScorer::CalcBleuStats(const Reference& ref, const std::string& text, ScoreStats& entry) const
+{
   NgramCounts testcounts;
   // stats for this line
   vector<ScoreStatsType> stats(kBleuNgramOrder * 2);
   string sentence = preprocessSentence(text);
   const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder, true);
 
-  const int reference_len = CalcReferenceLength(sid, length);
+  const int reference_len = CalcReferenceLength(ref, length);
   stats.push_back(reference_len);
 
   //precision on each ngram type
@@ -177,7 +187,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     NgramCounts::Value correct = 0;
 
     NgramCounts::Value v = 0;
-    if (m_references[sid]->get_counts()->Lookup(testcounts_it->first, &v)) {
+    if (ref.get_counts()->Lookup(testcounts_it->first, &v)) {
       correct = min(v, guess);
     }
     stats[len * 2 - 2] += correct;
@@ -207,21 +217,20 @@ statscore_t BleuScorer::calculateScore(const vector<ScoreStatsType>& comps) cons
   return exp(logbleu);
 }
 
-int BleuScorer::CalcReferenceLength(size_t sentence_id, size_t length)
+int BleuScorer::CalcReferenceLength(const Reference& ref, std::size_t length) const
 {
   switch (m_ref_length_type) {
   case AVERAGE:
-    return m_references[sentence_id]->CalcAverage();
+    return ref.CalcAverage();
     break;
   case CLOSEST:
-    return m_references[sentence_id]->CalcClosest(length);
+    return ref.CalcClosest(length);
     break;
   case SHORTEST:
-    return m_references[sentence_id]->CalcShortest();
+    return ref.CalcShortest();
     break;
   default:
-    cerr << "unknown reference types." << endl;
-    exit(1);
+    UTIL_THROW2("Unknown reference types");
   }
 }
 
@@ -304,23 +313,15 @@ vector<float> BleuScorer::ScoreNbestList(const string& scoreFile, const string& 
   }
 
   vector<pair<size_t,size_t> > hypotheses;
-  if (featureDataIters[0] == FeatureDataIterator::end()) {
-    cerr << "Error: at the end of feature data iterator" << endl;
-    exit(1);
-  }
+  UTIL_THROW_IF2(featureDataIters[0] == FeatureDataIterator::end(),
+                 "At the end of feature data iterator");
   for (size_t i = 0; i < featureFiles.size(); ++i) {
-    if (featureDataIters[i] == FeatureDataIterator::end()) {
-      cerr << "Error: Feature file " << i << " ended prematurely" << endl;
-      exit(1);
-    }
-    if (scoreDataIters[i] == ScoreDataIterator::end()) {
-      cerr << "Error: Score file " << i << " ended prematurely" << endl;
-      exit(1);
-    }
-    if (featureDataIters[i]->size() != scoreDataIters[i]->size()) {
-      cerr << "Error: features and scores have different size" << endl;
-      exit(1);
-    }
+    UTIL_THROW_IF2(featureDataIters[i] == FeatureDataIterator::end(),
+                   "Feature file " << i << " ended prematurely");
+    UTIL_THROW_IF2(scoreDataIters[i] == ScoreDataIterator::end(),
+                   "Score file " << i << " ended prematurely");
+    UTIL_THROW_IF2(featureDataIters[i]->size() != scoreDataIters[i]->size(),
+                   "Features and scores have different size");
     for (size_t j = 0; j < featureDataIters[i]->size(); ++j) {
       hypotheses.push_back(pair<size_t,size_t>(i,j));
     }

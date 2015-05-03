@@ -12,15 +12,17 @@ use strict;
 my ($corpus,$input_extension,$output_extension,$outfile_prefix,$specification) = @ARGV;
 my $ini = "[feature]\n";
 my %ALREADY;
+my %ID;
 
 foreach my $feature_spec (split(/,\s*/,$specification)) {
   my @SPEC = split(/\s+/,$feature_spec);
 
   my $factor = ($SPEC[0] eq 'word-translation') ? "0-0" : "0";
   $factor = $1 if $feature_spec =~ / factor ([\d\-]+)/; 
+  $feature_spec =~ s/ factor ([\d\-]+)//;
 
   if ($SPEC[0] eq 'target-word-insertion') {
-    $ini .= "TargetWordInsertionFeature name=TWI factor=$factor";
+    $ini .= "TargetWordInsertionFeature name=TWI".&get_id($SPEC[0])." factor=$factor";
 
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/) {
       my $file = &create_top_words($output_extension, $SPEC[2]);
@@ -34,7 +36,7 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
     $ini .= "\n";
   }
   elsif ($SPEC[0] eq 'source-word-deletion') {
-    $ini .= "SourceWordDeletionFeature name=SWD factor=$factor";
+    $ini .= "SourceWordDeletionFeature name=SWD".&get_id($SPEC[0])." factor=$factor";
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/) {
       my $file = &create_top_words($input_extension, $SPEC[2]);
       $ini .= " path=$file";
@@ -60,7 +62,7 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
       die("ERROR: Unknown parameter specification in '$SPEC[1]'\n");
     }
     my ($input_factor,$output_factor) = split(/\-/,$factor);
-    $ini .= "WordTranslationFeature name=WT input-factor=$input_factor output-factor=$output_factor simple=1 source-context=0 target-context=0$extra_ini\n";
+    $ini .= "WordTranslationFeature name=WT".&get_id($SPEC[0])." input-factor=$input_factor output-factor=$output_factor simple=1 source-context=0 target-context=0$extra_ini\n";
   }
   elsif ($SPEC[0] eq 'phrase-length') {
     $ini .= "PhraseLengthFeature name=PL\n";
@@ -111,3 +113,11 @@ sub create_top_words {
 
   return $file;
 }
+
+sub get_id {
+  my ($name) = @_;
+  $ID{$name}++;
+  return "" if $ID{$name} == 1;
+  return $ID{$name};
+}
+

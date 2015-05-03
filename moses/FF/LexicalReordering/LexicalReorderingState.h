@@ -44,19 +44,18 @@ public:
   static const ReorderingType L   = 1; // left
   static const ReorderingType MAX = 3; // largest possible
 #else
-  enum ReorderingType
-    {
-      M    = 0, // monotonic
-      NM   = 1, // non-monotonic
-      S    = 1, // swap
-      D    = 2, // discontinuous
-      DL   = 2, // discontinuous, left
-      DR   = 3, // discontinuous, right
-      R    = 0, // right
-      L    = 1, // left
-      MAX  = 3, // largest possible
-      NONE = 4  // largest possible
-    };
+  enum ReorderingType {
+    M    = 0, // monotonic
+    NM   = 1, // non-monotonic
+    S    = 1, // swap
+    D    = 2, // discontinuous
+    DL   = 2, // discontinuous, left
+    DR   = 3, // discontinuous, right
+    R    = 0, // right
+    L    = 1, // left
+    MAX  = 3, // largest possible
+    NONE = 4  // largest possible
+  };
 #endif
   // determine orientation, depending on model:
 

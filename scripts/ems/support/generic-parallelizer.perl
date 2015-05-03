@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 my $jobs = 20;
-my ($infile,$outfile,$cmd,$tmpdir);
+my ($infile,$outfile,$cmd,$tmpdir,$qflags);
 
 use Getopt::Long qw(:config pass_through no_ignore_case);
 GetOptions('jobs=i' => \$jobs,
@@ -12,7 +12,7 @@ GetOptions('jobs=i' => \$jobs,
 	   'in=s' => \$infile,
 	   'out=s' => \$outfile,
 	   'cmd=s' => \$cmd,
-       'queue-flags=s' => \$qflags,
+	   'queue-flags=s' => \$qflags,
 	   ) or exit(1);
 
 die("ERROR: specify infile with -in") unless $infile;

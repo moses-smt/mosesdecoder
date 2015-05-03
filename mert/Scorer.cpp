@@ -64,7 +64,7 @@ void Scorer::InitConfig(const string& config)
   }
 }
 
-void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded)
+void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) const
 {
   for (util::TokenIter<util::AnyCharacter, true> it(line, util::AnyCharacter(" "));
        it; ++it) {
@@ -81,7 +81,7 @@ void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded)
   }
 }
 
-void Scorer::TokenizeAndEncodeTesting(const string& line, vector<int>& encoded)
+void Scorer::TokenizeAndEncodeTesting(const string& line, vector<int>& encoded) const
 {
   for (util::TokenIter<util::AnyCharacter, true> it(line, util::AnyCharacter(" "));
        it; ++it) {

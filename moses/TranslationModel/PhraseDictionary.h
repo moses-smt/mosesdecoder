@@ -117,8 +117,7 @@ public:
 
   virtual
   TargetPhraseCollection const *
-  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src)
-  {
+  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) {
     return GetTargetPhraseCollectionLEGACY(src);
   }
 
@@ -129,8 +128,7 @@ public:
   virtual
   void
   GetTargetPhraseCollectionBatch(ttasksptr const& ttask,
-				 const InputPathList &inputPathQueue) const
-  {
+                                 const InputPathList &inputPathQueue) const {
     GetTargetPhraseCollectionBatch(inputPathQueue);
   }
 

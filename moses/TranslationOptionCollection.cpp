@@ -57,7 +57,7 @@ namespace Moses
  * called by inherited classe */
 TranslationOptionCollection::
 TranslationOptionCollection(ttasksptr const& ttask,
-			    InputType const& src,
+                            InputType const& src,
                             size_t maxNoTransOptPerCoverage,
                             float translationOptionThreshold)
   : m_ttask(ttask)
@@ -626,14 +626,13 @@ CacheLexReordering()
 {
   size_t const stop = m_source.GetSize();
   typedef StatefulFeatureFunction sfFF;
-  BOOST_FOREACH(sfFF const* ff, sfFF::GetStatefulFeatureFunctions())
-    {
-      if (typeid(*ff) != typeid(LexicalReordering)) continue;
-      LexicalReordering const& lr = static_cast<const LexicalReordering&>(*ff);
-      for (size_t s = 0 ; s < stop ; s++)
-	BOOST_FOREACH(TranslationOptionList& tol, m_collection[s])
-	  lr.SetCache(tol);
-    }
+  BOOST_FOREACH(sfFF const* ff, sfFF::GetStatefulFeatureFunctions()) {
+    if (typeid(*ff) != typeid(LexicalReordering)) continue;
+    LexicalReordering const& lr = static_cast<const LexicalReordering&>(*ff);
+    for (size_t s = 0 ; s < stop ; s++)
+      BOOST_FOREACH(TranslationOptionList& tol, m_collection[s])
+      lr.SetCache(tol);
+  }
 }
 
 //! list of trans opt for a particular span
