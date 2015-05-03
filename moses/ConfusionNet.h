@@ -73,7 +73,7 @@ public:
   std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined
   const Word& GetWord(size_t pos) const;
 
-  TranslationOptionCollection* 
+  TranslationOptionCollection*
   CreateTranslationOptionCollection(ttasksptr const& ttask) const;
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {

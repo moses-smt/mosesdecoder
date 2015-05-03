@@ -20,8 +20,9 @@ namespace Syntax
 namespace PostprocessEgretForests
 {
 
-class ForestParser {
- public:
+class ForestParser
+{
+public:
   struct Entry {
     std::size_t sentNum;
     std::string sentence;
@@ -31,15 +32,19 @@ class ForestParser {
   ForestParser();
   ForestParser(std::istream &);
 
-  Entry &operator*() { return m_entry; }
-  Entry *operator->() { return &m_entry; }
+  Entry &operator*() {
+    return m_entry;
+  }
+  Entry *operator->() {
+    return &m_entry;
+  }
 
   ForestParser &operator++();
 
   friend bool operator==(const ForestParser &, const ForestParser &);
   friend bool operator!=(const ForestParser &, const ForestParser &);
 
- private:
+private:
   typedef boost::shared_ptr<Forest::Vertex> VertexSP;
   typedef boost::shared_ptr<Forest::Hyperedge> HyperedgeSP;
 
@@ -60,7 +65,7 @@ class ForestParser {
   };
 
   typedef boost::unordered_set<VertexSP, VertexSetHash,
-                               VertexSetPred> VertexSet;
+          VertexSetPred> VertexSet;
 
   // Copying is not allowed
   ForestParser(const ForestParser &);

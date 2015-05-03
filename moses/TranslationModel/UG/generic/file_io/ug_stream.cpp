@@ -11,7 +11,7 @@ namespace ugdiss
   using namespace boost::algorithm;
   using namespace boost::iostreams;
 
-  filtering_istream* 
+  filtering_istream*
   open_input_stream(string fname)
   {
     filtering_istream* ret = new filtering_istream();
@@ -19,7 +19,7 @@ namespace ugdiss
     return ret;
   }
 
-  filtering_ostream* 
+  filtering_ostream*
   open_output_stream(string fname)
   {
     filtering_ostream* ret = new filtering_ostream();
@@ -27,7 +27,7 @@ namespace ugdiss
     return ret;
   }
 
-  void 
+  void
   open_input_stream(string fname, filtering_istream& in)
   {
     if (ends_with(fname, ".gz"))
@@ -41,7 +41,7 @@ namespace ugdiss
     in.push(file_source(fname.c_str()));
   }
 
-  void 
+  void
   open_output_stream(string fname, filtering_ostream& out)
   {
     if (ends_with(fname, ".gz") || ends_with(fname, ".gz_"))

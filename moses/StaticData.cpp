@@ -99,7 +99,7 @@ bool StaticData::LoadDataStatic(Parameter *parameter, const std::string &execPat
   return s_instance.LoadData(parameter);
 }
 
-void 
+void
 StaticData
 ::initialize_features()
 {
@@ -117,8 +117,8 @@ StaticData
     vector<string> toks = Tokenize(line);
 
     string &feature = toks[0];
-    std::map<std::string, std::string>::const_iterator iter 
-      = featureNameOverride.find(feature);
+    std::map<std::string, std::string>::const_iterator iter
+    = featureNameOverride.find(feature);
     if (iter == featureNameOverride.end()) {
       // feature name not override
       m_registry.Construct(feature, line);
@@ -136,7 +136,7 @@ StaticData
 
 }
 
-void 
+void
 StaticData
 ::ini_input_options()
 {
@@ -145,8 +145,8 @@ StaticData
   // input type has to be specified BEFORE loading the phrase tables!
   m_parameter->SetParameter(m_inputType, "inputtype", SentenceInput);
 
-  m_parameter->SetParameter(m_continuePartialTranslation, 
-			    "continue-partial-translation", false );
+  m_parameter->SetParameter(m_continuePartialTranslation,
+                            "continue-partial-translation", false );
 
   std::string s_it = "text input";
   if (m_inputType == 1) {
@@ -160,7 +160,7 @@ StaticData
   }
   VERBOSE(2,"input type is: "<<s_it<<"\n");
 
-    // use of xml in input
+  // use of xml in input
   m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
 
   // specify XML tags opening and closing brackets for XML option
@@ -177,12 +177,12 @@ StaticData
             << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
   }
 
-  m_parameter->SetParameter(m_defaultNonTermOnlyForEmptyRange, 
-			    "default-non-term-for-empty-range-only", false );
-  
+  m_parameter->SetParameter(m_defaultNonTermOnlyForEmptyRange,
+                            "default-non-term-for-empty-range-only", false );
+
 }
 
-bool 
+bool
 StaticData
 ::ini_output_options()
 {
@@ -346,25 +346,25 @@ StaticData
   m_parameter->SetParameter<size_t>(m_nBestFactor, "n-best-factor", 20);
 
 
-  m_parameter->SetParameter(m_PrintAlignmentInfoNbest, 
-			    "print-alignment-info-in-n-best", false );
+  m_parameter->SetParameter(m_PrintAlignmentInfoNbest,
+                            "print-alignment-info-in-n-best", false );
 
   // include feature names in the n-best list
   m_parameter->SetParameter(m_labeledNBestList, "labeled-n-best-list", true );
-  
+
   // include word alignment in the n-best list
-  m_parameter->SetParameter(m_nBestIncludesSegmentation, 
-			    "include-segmentation-in-n-best", false );
-  
+  m_parameter->SetParameter(m_nBestIncludesSegmentation,
+                            "include-segmentation-in-n-best", false );
+
   // print all factors of output translations
-  m_parameter->SetParameter(m_reportAllFactorsNBest, 
-			    "report-all-factors-in-n-best", false );
-  
+  m_parameter->SetParameter(m_reportAllFactorsNBest,
+                            "report-all-factors-in-n-best", false );
+
   m_parameter->SetParameter(m_printNBestTrees, "n-best-trees", false );
   return true;
 }
 
-void 
+void
 StaticData
 ::ini_compact_table_options()
 {
@@ -381,7 +381,7 @@ StaticData
 }
 
 // threads, timeouts, etc.
-bool 
+bool
 StaticData
 ::ini_performance_options()
 {
@@ -411,8 +411,8 @@ StaticData
       }
 #ifndef WITH_THREADS
       if (m_threadCount > 1) {
-        std::cerr << "Error: Thread count of " << params->at(0) 
-		  << " but moses not built with thread support";
+        std::cerr << "Error: Thread count of " << params->at(0)
+                  << " but moses not built with thread support";
         return false;
       }
 #endif
@@ -425,15 +425,15 @@ void
 StaticData
 ::ini_cube_pruning_options()
 {
-  m_parameter->SetParameter(m_cubePruningPopLimit, "cube-pruning-pop-limit", 
-			    DEFAULT_CUBE_PRUNING_POP_LIMIT);
-  m_parameter->SetParameter(m_cubePruningDiversity, "cube-pruning-diversity", 
-			    DEFAULT_CUBE_PRUNING_DIVERSITY);
-  m_parameter->SetParameter(m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", 
-			    false);
+  m_parameter->SetParameter(m_cubePruningPopLimit, "cube-pruning-pop-limit",
+                            DEFAULT_CUBE_PRUNING_POP_LIMIT);
+  m_parameter->SetParameter(m_cubePruningDiversity, "cube-pruning-diversity",
+                            DEFAULT_CUBE_PRUNING_DIVERSITY);
+  m_parameter->SetParameter(m_cubePruningLazyScoring, "cube-pruning-lazy-scoring",
+                            false);
 }
 
-void 
+void
 StaticData
 ::ini_factor_maps()
 {
@@ -468,7 +468,7 @@ void
 StaticData
 ::ini_oov_options()
 {
-    // unknown word processing
+  // unknown word processing
   m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
   m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
 
@@ -646,8 +646,8 @@ bool StaticData::LoadData(Parameter *parameter)
   ini_mira_options();
 
   // S2T decoder
-  m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm", 
-			    RecursiveCYKPlus);
+  m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",
+                            RecursiveCYKPlus);
 
 
   ini_zombie_options(); // probably dead, or maybe not
@@ -657,14 +657,14 @@ bool StaticData::LoadData(Parameter *parameter)
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   initialize_features();
 
-  if (m_parameter->GetParam("show-weights") == NULL) 
+  if (m_parameter->GetParam("show-weights") == NULL)
     LoadFeatureFunctions();
 
   LoadDecodeGraphs();
 
   // sanity check that there are no weights without an associated FF
   if (!CheckWeights()) return false;
-  
+
   //Load extra feature weights
   string weightFile;
   m_parameter->SetParameter<string>(weightFile, "weight-file", "");
@@ -680,19 +680,19 @@ bool StaticData::LoadData(Parameter *parameter)
   //Load sparse features from config (overrules weight file)
   LoadSparseWeightsFromConfig();
 
-  // load alternate weight settings 
+  // load alternate weight settings
   //
-  // When and where are these used??? [UG] 
-  // 
+  // When and where are these used??? [UG]
+  //
   // Update: Just checked the manual. The config file is NOT the right
   // place to do this. [UG]
-  // 
-  // <TODO> 
+  //
+  // <TODO>
   // * Eliminate alternate-weight-setting. Alternate weight settings should
-  //   be provided with the input, not in the config file. 
+  //   be provided with the input, not in the config file.
   // </TODO>
   params = m_parameter->GetParam("alternate-weight-setting");
-  if (params && params->size() && !LoadAlternateWeightSettings()) 
+  if (params && params->size() && !LoadAlternateWeightSettings())
     return false;
 
   return true;
@@ -1011,12 +1011,12 @@ float StaticData::GetWeightWordPenalty() const
   return weightWP;
 }
 
-void 
+void
 StaticData
 ::InitializeForInput(ttasksptr const& ttask) const
 {
-  const std::vector<FeatureFunction*> &producers 
-    = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers
+  = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
@@ -1024,17 +1024,17 @@ StaticData
       iTime.start();
       ff.InitializeForInput(ttask);
       VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " )"
-	      << "= " << iTime << endl);
+              << "= " << iTime << endl);
     }
   }
 }
 
-void 
+void
 StaticData
 ::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
 {
-  const std::vector<FeatureFunction*> &producers 
-    = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers
+  = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
@@ -1111,14 +1111,14 @@ bool StaticData::CheckWeights() const
 
   if (!weightNames.empty()) {
     cerr << "The following weights have no feature function. "
-	 << "Maybe incorrectly spelt weights: ";
+         << "Maybe incorrectly spelt weights: ";
     set<string>::iterator iter;
     for (iter = weightNames.begin(); iter != weightNames.end(); ++iter) {
       cerr << *iter << ",";
     }
     return false;
   }
-  
+
   return true;
 }
 
@@ -1268,7 +1268,7 @@ void StaticData::NoCache()
   }
 }
 
-std::map<std::string, std::string> 
+std::map<std::string, std::string>
 StaticData
 ::OverrideFeatureNames()
 {

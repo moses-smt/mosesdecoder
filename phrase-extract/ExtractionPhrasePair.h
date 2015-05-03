@@ -146,7 +146,7 @@ public:
 
   void AddProperty(const std::string &key, const std::string &value, float count) {
     std::map<std::string,
-      std::pair< PROPERTY_VALUES*, LAST_PROPERTY_VALUE* > >::iterator iter = m_properties.find(key);
+        std::pair< PROPERTY_VALUES*, LAST_PROPERTY_VALUE* > >::iterator iter = m_properties.find(key);
     if ( iter == m_properties.end() ) {
       // key not found: insert property key and value
       PROPERTY_VALUES *propertyValues = new PROPERTY_VALUES();

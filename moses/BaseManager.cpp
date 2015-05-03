@@ -11,13 +11,15 @@ using namespace std;
 namespace Moses
 {
 
-BaseManager::BaseManager(ttasksptr const& ttask) 
+BaseManager::BaseManager(ttasksptr const& ttask)
   : m_ttask(ttask), m_source(*(ttask->GetSource().get()))
 { }
 
-const InputType& 
-BaseManager::GetSource() const 
-{ return m_source; }
+const InputType&
+BaseManager::GetSource() const
+{
+  return m_source;
+}
 
 
 

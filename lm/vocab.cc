@@ -20,15 +20,15 @@ namespace ngram {
 namespace detail {
 uint64_t HashForVocab(const char *str, std::size_t len) {
   // This proved faster than Boost's hash in speed trials: total load time Murmur 67090000, Boost 72210000
-  // Chose to use 64A instead of native so binary format will be portable across 64 and 32 bit.  
+  // Chose to use 64A instead of native so binary format will be portable across 64 and 32 bit.
   return util::MurmurHash64A(str, len, 0);
 }
 } // namespace detail
 
 namespace {
-// Normally static initialization is a bad idea but MurmurHash is pure arithmetic, so this is ok.  
+// Normally static initialization is a bad idea but MurmurHash is pure arithmetic, so this is ok.
 const uint64_t kUnknownHash = detail::HashForVocab("<unk>", 5);
-// Sadly some LMs have <UNK>.  
+// Sadly some LMs have <UNK>.
 const uint64_t kUnknownCapHash = detail::HashForVocab("<UNK>", 5);
 
 void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint64_t offset) {
@@ -38,7 +38,7 @@ void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint
   util::ReadOrThrow(fd, check_unk, 6);
   UTIL_THROW_IF(
       memcmp(check_unk, "<unk>", 6),
-      FormatLoadException, 
+      FormatLoadException,
       "Vocabulary words are in the wrong place.  This could be because the binary file was built with stale gcc and old kenlm.  Stale gcc, including the gcc distributed with RedHat and OS X, has a bug that ignores pragma pack for template-dependent types.  New kenlm works around this, so you'll save memory but have to rebuild any binary files using the probing data structure.");
   if (!enumerate) return;
   enumerate->Add(0, "<unk>");
@@ -58,7 +58,7 @@ void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint
       util::ReadOrThrow(fd, &next_char, 1);
       buf.push_back(next_char);
     }
-    // Ok now we have null terminated strings.  
+    // Ok now we have null terminated strings.
     for (const char *i = buf.data(); i != buf.data() + buf.size();) {
       std::size_t length = strlen(i);
       enumerate->Add(index++, StringPiece(i, length));
@@ -83,13 +83,13 @@ void WriteWordsWrapper::Add(WordIndex index, const StringPiece &str) {
 SortedVocabulary::SortedVocabulary() : begin_(NULL), end_(NULL), enumerate_(NULL) {}
 
 uint64_t SortedVocabulary::Size(uint64_t entries, const Config &/*config*/) {
-  // Lead with the number of entries.  
+  // Lead with the number of entries.
   return sizeof(uint64_t) + sizeof(uint64_t) * entries;
 }
 
 void SortedVocabulary::SetupMemory(void *start, std::size_t allocated, std::size_t entries, const Config &config) {
   assert(allocated >= Size(entries, config));
-  // Leave space for number of entries.  
+  // Leave space for number of entries.
   begin_ = reinterpret_cast<uint64_t*>(start) + 1;
   end_ = begin_;
   saw_unk_ = false;
@@ -122,7 +122,7 @@ WordIndex SortedVocabulary::Insert(const StringPiece &str) {
     strings_to_enumerate_[end_ - begin_] = StringPiece(static_cast<const char*>(copied), str.size());
   }
   ++end_;
-  // This is 1 + the offset where it was inserted to make room for unk.  
+  // This is 1 + the offset where it was inserted to make room for unk.
   return end_ - begin_;
 }
 
@@ -133,7 +133,7 @@ void SortedVocabulary::FinishedLoading(ProbBackoff *reorder_vocab) {
       util::JointSort(begin_, end_, values);
     }
     for (WordIndex i = 0; i < static_cast<WordIndex>(end_ - begin_); ++i) {
-      // <unk> strikes again: +1 here.  
+      // <unk> strikes again: +1 here.
       enumerate_->Add(i + 1, strings_to_enumerate_[i]);
     }
     strings_to_enumerate_.clear();
@@ -142,7 +142,7 @@ void SortedVocabulary::FinishedLoading(ProbBackoff *reorder_vocab) {
     util::JointSort(begin_, end_, reorder_vocab + 1);
   }
   SetSpecial(Index("<s>"), Index("</s>"), 0);
-  // Save size.  Excludes UNK.  
+  // Save size.  Excludes UNK.
   *(reinterpret_cast<uint64_t*>(begin_) - 1) = end_ - begin_;
   // Includes UNK.
   bound_ = end_ - begin_ + 1;
@@ -161,7 +161,7 @@ const unsigned int kProbingVocabularyVersion = 0;
 
 namespace detail {
 struct ProbingVocabularyHeader {
-  // Lowest unused vocab id.  This is also the number of words, including <unk>.  
+  // Lowest unused vocab id.  This is also the number of words, including <unk>.
   unsigned int version;
   WordIndex bound;
 };
@@ -198,7 +198,7 @@ void ProbingVocabulary::ConfigureEnumerate(EnumerateVocab *to, std::size_t /*max
 
 WordIndex ProbingVocabulary::Insert(const StringPiece &str) {
   uint64_t hashed = detail::HashForVocab(str);
-  // Prevent unknown from going into the table.  
+  // Prevent unknown from going into the table.
   if (hashed == kUnknownHash || hashed == kUnknownCapHash) {
     saw_unk_ = true;
     return 0;

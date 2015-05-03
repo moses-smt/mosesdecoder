@@ -34,7 +34,7 @@ class Matrix : public SafeArray2D<Id<int>,Id<int>,T> {
   Matrix ( )                         : SafeArray2D<Id<int>,Id<int>,T>( )     { }//{ xSize=0; ySize=0;  }
   Matrix (int x, int y)              : SafeArray2D<Id<int>,Id<int>,T>(x,y)   { }//{ xSize=x; ySize=y; }
   Matrix (int x, int y, const T& t)  : SafeArray2D<Id<int>,Id<int>,T>(x,y,t) { }//{ xSize=x; ySize=y; }
-  Matrix (const Matrix& a)           : SafeArray2D<Id<int>,Id<int>,T>(a.xSize(),a.ySize()) { //xSize=a.xSize; ySize=a.ySize; 
+  Matrix (const Matrix& a)           : SafeArray2D<Id<int>,Id<int>,T>(a.xSize(),a.ySize()) { //xSize=a.xSize; ySize=a.ySize;
                                                                                for(int i=0;i<xSize();i++) for(int j=0;j<ySize();j++) this->set(i,j)=a.get(i,j); }
   // Specification methods...
   //Matrix& operator= ( const Matrix<T>& sat )
@@ -195,34 +195,34 @@ class Matrix : public SafeArray2D<Id<int>,Id<int>,T> {
     }
     return false;
   }
-  bool operator== ( const Matrix<T>& a ) const { 
+  bool operator== ( const Matrix<T>& a ) const {
     if (xSize()!=a.xSize() || ySize()!=a.ySize()) return false;
-    for (int i=0;i<a.xSize();i++) 
+    for (int i=0;i<a.xSize();i++)
       for (int j=0;j<a.ySize();j++)
 	if (this->get(Id<int>(i),Id<int>(j))!=a.get(Id<int>(i),Id<int>(j))) return false;
     return true;
   }
 
   // Input/output methods...
-  friend ostream& operator<< ( ostream& os, const Matrix<T>& a ) { 
+  friend ostream& operator<< ( ostream& os, const Matrix<T>& a ) {
     os<<"\n    ";
     for (int i=0;i<a.xSize();i++) {
       for (int j=0;j<a.ySize();j++) {
 	os<<((j==0)?"":",")<<a.get(Id<int>(i),Id<int>(j));
-      } 
+      }
       os<<(i==a.xSize()-1?"\n":"\n    ");
     }
-    return os;  
+    return os;
   }
-  friend String& operator<< ( String& str, const Matrix<T>& a ) { 
+  friend String& operator<< ( String& str, const Matrix<T>& a ) {
     str<<"\n    ";
     for (int i=0;i<a.xSize();i++) {
       for (int j=0;j<a.ySize();j++) {
 	str<<((j==0)?"":",")<<a.get(Id<int>(i),Id<int>(j));
-      } 
+      }
       str<<";";
     }
-    return str;  
+    return str;
   }
   string getString( ) const;
 
@@ -234,7 +234,7 @@ string Matrix<T>::getString() const {
     for (int j=0;j<ySize();j++) {
       str += ((j==0)?"":",");
       str += this->get(Id<int>(i),Id<int>(j));
-    } 
+    }
     str += ";";
   }
   return str;

@@ -161,9 +161,9 @@ public:
     }
 
 #ifdef WITH_THREADS
-    
-    boost::shared_ptr<HashTask<Keys> > 
-      ht(new HashTask<Keys>(current, *this, keys));
+
+    boost::shared_ptr<HashTask<Keys> >
+    ht(new HashTask<Keys>(current, *this, keys));
     m_threadPool.Submit(ht);
 #else
     CalcHash(current, keys);

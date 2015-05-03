@@ -65,7 +65,7 @@ class Numbered : public T {
   friend String&  operator<< ( String& str, const Numbered<SD1,I,SD2,T,SD3>& rv ) { return str<<SD1<<rv.i<<SD2<<rv.getT()<<SD3; }
   friend pair<StringInput,Numbered<SD1,I,SD2,T,SD3>*> operator>> ( StringInput ps, Numbered<SD1,I,SD2,T,SD3>& rv ) { return pair<StringInput,Numbered<SD1,I,SD2,T,SD3>*>(ps,&rv); }
   friend StringInput    operator>> ( pair<StringInput,Numbered<SD1,I,SD2,T,SD3>*> delimbuff, const char* psPostDelim ) {
-    return ( (SD3[0]=='\0') ? delimbuff.first>>SD1>>delimbuff.second->i>>SD2>>delimbuff.second->setT()>>psPostDelim 
+    return ( (SD3[0]=='\0') ? delimbuff.first>>SD1>>delimbuff.second->i>>SD2>>delimbuff.second->setT()>>psPostDelim
                             : delimbuff.first>>SD1>>delimbuff.second->i>>SD2>>delimbuff.second->setT()>>SD3>>psPostDelim );
   }
 };
@@ -106,7 +106,7 @@ template<class V>
 pair<typename V::ElementType,int> ArchetypeSet<V>::getDistanceOfNearest ( const V& v ) const {
   //const Scored<typename V::ElementType,pair<int,SafePtr<const V> > > sipvDummy ( DBL_MAX );
   //MinHeap<Scored<typename V::ElementType,pair<int,SafePtr<const V> > > > hsiv ( MapType::size()+1, sipvDummy );
-  MinHeap<Scored<typename V::ElementType,pair<int,SafePtr<const NV> > > >& hsiv = 
+  MinHeap<Scored<typename V::ElementType,pair<int,SafePtr<const NV> > > >& hsiv =
     const_cast<MinHeap<Scored<typename V::ElementType,pair<int,SafePtr<const NV> > > >&> ( hsivCalc );
   hsiv.clear();
 
@@ -120,7 +120,7 @@ pair<typename V::ElementType,int> ArchetypeSet<V>::getDistanceOfNearest ( const 
     typename V::ElementType d = v.getMarginalDistance ( hsiv.get(iNext).first, hsiv.get(iNext).second.getRef() );
     hsiv.set(iNext).setScore() = d;
     //hsiv.set(iNext).setScore() = v.getMarginalDistance ( hsiv.getMin().first, iUpper->second.second );
-    ////int j = 
+    ////int j =
     hsiv.fixDecr(iNext);
     ////cerr<<"    adding ln"<<&hsiv.get(j).second.getRef()<<" marg-dist="<<d<<" new-score="<<double(hsiv.get(j).getScore())<<" new-pos="<<j<<"\n";
     iNext++;
@@ -140,7 +140,7 @@ pair<typename V::ElementType,int> ArchetypeSet<V>::getDistanceOfNearest ( const 
     typename V::ElementType d = v.getMarginalDistance ( ++hsiv.setMin().first, hsiv.getMin().second.getRef() );
     hsiv.setMin().setScore() += d;
     ////cerr<<" matching ln"<<&hsiv.getMin().second.getRef()<<" i="<<hsiv.setMin().first<<" marg-dist="<<d<<" new-score="<<hsiv.getMin().getScore();
-    ////int j = 
+    ////int j =
     hsiv.fixIncr(0);
     ////cerr<<" new-pos="<<j<<"\n";
     ////if(j!=0) for(int i=0;i<iNext;i++) cerr<<"      "<<i<<": ln"<<hsiv.get(i).second.getRef().lineNum.toInt()<<" new-score="<<double(hsiv.get(i).getScore())<<"\n";
@@ -151,7 +151,7 @@ pair<typename V::ElementType,int> ArchetypeSet<V>::getDistanceOfNearest ( const 
         hsiv.set(iNext).second = SafePtr<const NV> ( iUpper->second );
         typename V::ElementType d = v.getMarginalDistance ( hsiv.get(iNext).first, hsiv.get(iNext).second.getRef() );
         hsiv.set(iNext).setScore() = d;
-        ////int j = 
+        ////int j =
         hsiv.fixDecr(iNext);
         ////cerr<<"    adding ln"<<&hsiv.get(j).second.getRef()<<" marg-dist="<<d<<" new-score="<<double(hsiv.get(j).getScore())<<" new-pos="<<j<<"\n";
         iNext++;
@@ -164,7 +164,7 @@ pair<typename V::ElementType,int> ArchetypeSet<V>::getDistanceOfNearest ( const 
       hsiv.set(iNext).second = SafePtr<const NV> ( iLower->second );
       typename V::ElementType d = v.getMarginalDistance ( hsiv.get(iNext).first, hsiv.get(iNext).second.getRef() );
       hsiv.set(iNext).setScore() = d;
-      ////int j = 
+      ////int j =
       hsiv.fixDecr(iNext);
       ////cerr<<"    adding ln"<<&hsiv.get(j).second.getRef()<<" marg-dist="<<d<<" new-score="<<double(hsiv.get(j).getScore())<<" new-pos="<<j<<"\n";
       iNext++;

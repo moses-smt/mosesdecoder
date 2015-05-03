@@ -8,6 +8,6 @@ namespace sapt
   using namespace Moses;
   using namespace std;
 
-    
+
 
 }

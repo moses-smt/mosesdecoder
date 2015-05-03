@@ -21,7 +21,7 @@
 //     ++this->in_progress;
 //     this->lock.unlock();
 //   }
-  
+
 //   void
 //   pstats::
 //   release()
@@ -52,7 +52,7 @@
 //   mmbitext()
 //     : ag(NULL)
 //   {
-    
+
 //   }
 
 //   bool
@@ -78,13 +78,13 @@
 //       {
 // 	if (flip) { p = binread(p,trg); assert(p<x); p = binread(p,src); }
 // 	else      { p = binread(p,src); assert(p<x); p = binread(p,trg); }
-// 	if (src < start || src >= stop) 
+// 	if (src < start || src >= stop)
 // 	  forbidden.set(trg);
 // 	else
 // 	  {
 // 	    lft = min(lft,trg);
 // 	    rgt = max(rgt,trg);
-// 	    if (core_alignment) 
+// 	    if (core_alignment)
 // 	      {
 // 		if (flip) aln[trg].push_back(src);
 // 		else      aln[src].push_back(trg);
@@ -101,16 +101,16 @@
 //       }
 //     cout << endl;
 // #endif
-    
+
 //     for (size_t i = lft; i <= rgt; ++i)
-//       if (forbidden[i]) 
+//       if (forbidden[i])
 // 	return false;
-    
+
 //     s2 = lft;   for (s1 = s2; s1 && !forbidden[s1-1]; --s1);
 //     e1 = rgt+1; for (e2 = e1; e2 < forbidden.size() && !forbidden[e2]; ++e2);
-    
+
 //     if (lft > rgt) return false;
-//     if (core_alignment) 
+//     if (core_alignment)
 //       {
 // 	core_alignment->clear();
 // 	if (flip)
@@ -147,11 +147,11 @@
 //     prep2(phrase);
 //   }
 
-//   sptr<mmbitext::pstats> 
+//   sptr<mmbitext::pstats>
 //   mmbitext::
 //   prep2(iter const& phrase)
 //   {
-//     if (!ag) 
+//     if (!ag)
 //       {
 // 	ag = new agenda(*this);
 // 	ag->add_workers(20);
@@ -197,11 +197,11 @@
 // 	    continue;
 // 	  }
 
-// 	stats->lock.lock(); 
-// 	stats->good += 1; 
+// 	stats->lock.lock();
+// 	stats->good += 1;
 // 	stats->lock.unlock();
 
-// 	for (size_t k = 0; k < aln.size(); k += 2) 
+// 	for (size_t k = 0; k < aln.size(); k += 2)
 // 	  aln[k] += s2 - s1;
 // 	Token const* o = (fwd ? ag.bitext.T2 : ag.bitext.T1).sntStart(sid);
 // 	float sample_weight = 1./((s2-s1+1)*(e2-e1+1));
@@ -215,14 +215,14 @@
 // 		stats->add(b,sample_weight,aln);
 // 		if (i < e2) assert(b.extend(o[i].id()));
 // 	      }
-// 	    if (fwd && s < s2) 
-// 	      for (size_t k = 0; k < aln.size(); k += 2) 
+// 	    if (fwd && s < s2)
+// 	      for (size_t k = 0; k < aln.size(); k += 2)
 // 		--aln[k];
 // 	  }
 // 	stats->release();
 //       }
 //   }
-  
+
 //   void
 //   mmbitext::
 //   pstats::
@@ -239,7 +239,7 @@
 //   agenda(mmbitext const& thebitext)
 //     : shutdown(false), doomed(0), bitext(thebitext)
 //   {
-    
+
 //   }
 
 //   mmbitext::
@@ -259,13 +259,13 @@
 //   {
 //     if (ag) delete ag;
 //   }
- 
+
 //   sptr<mmbitext::pstats>
 //   mmbitext::
 //   agenda::
 //   add_job(mmbitext::iter const& phrase, size_t const max_samples)
 //   {
-//     static boost::posix_time::time_duration nodelay(0,0,0,0); 
+//     static boost::posix_time::time_duration nodelay(0,0,0,0);
 
 //     job j;
 //     j.stats.reset(new mmbitext::pstats());
@@ -296,11 +296,11 @@
 //   bool
 //   mmbitext::
 //   agenda::
-//   get_task(uint64_t & sid, uint64_t & offset, uint64_t & len, 
+//   get_task(uint64_t & sid, uint64_t & offset, uint64_t & len,
 // 	   bool & fwd, sptr<mmbitext::pstats> & stats)
 //   {
 //     boost::unique_lock<boost::mutex> lock(this->lock);
-//     if (this->doomed || this->shutdown) 
+//     if (this->doomed || this->shutdown)
 //       {
 // 	if (this->doomed) --this->doomed;
 // 	return false;
@@ -309,7 +309,7 @@
 //     //   {
 //     // 	cerr << "no jobs" << endl;
 //     // 	this->ready.wait(lock);
-//     // 	if (this->doomed || this->shutdown) 
+//     // 	if (this->doomed || this->shutdown)
 //     // 	  {
 //     // 	    if (this->doomed) --this->doomed;
 //     // 	    return false;
@@ -346,7 +346,7 @@
 // 	  boost::lock_guard<boost::mutex> lock(stats->lock);
 // 	  if (stats->raw_cnt == ctr) ++stats->raw_cnt;
 // 	  size_t rnum = util::rand_excl(stats->raw_cnt - ctr++);
-// 	  // cout << stats->raw_cnt << " " << ctr-1 << " " 
+// 	  // cout << stats->raw_cnt << " " << ctr-1 << " "
 // 	  // << rnum << " " << max_samples - stats->good << endl;
 // 	  if (rnum < max_samples - stats->good)
 // 	    {
@@ -364,7 +364,7 @@
 //   agenda::
 //   add_workers(int n)
 //   {
-//     static boost::posix_time::time_duration nodelay(0,0,0,0); 
+//     static boost::posix_time::time_duration nodelay(0,0,0,0);
 //     boost::lock_guard<boost::mutex> lock(this->lock);
 //     // house keeping: remove all workers that have finished
 //     for (size_t i = 0; i < workers.size(); )
@@ -377,7 +377,7 @@
 //   	  }
 //   	else ++i;
 //       }
-//     if (n < 0) 
+//     if (n < 0)
 //       {
 //   	this->doomed -= n;
 //       }
@@ -394,8 +394,8 @@
 //   mmbitext::
 //   jstats::
 //   jstats()
-//   { 
-//     my_aln.reserve(1); 
+//   {
+//     my_aln.reserve(1);
 //   }
 
 //   mmbitext::
@@ -406,8 +406,8 @@
 //     my_wcnt = other.wcnt();
 //     my_aln  = other.aln();
 //   }
-  
-//   void 
+
+//   void
 //   mmbitext::
 //   jstats::
 //   add(float w, vector<uchar> const& a)
@@ -419,7 +419,7 @@
 //       {
 // 	size_t i = 0;
 // 	while (i < my_aln.size() && my_aln[i].second != a) ++i;
-// 	if (i == my_aln.size()) 
+// 	if (i == my_aln.size())
 // 	  my_aln.push_back(pair<size_t,vector<uchar> >(1,a));
 // 	else
 // 	  my_aln[i].first++;
@@ -431,7 +431,7 @@
 //   uint32_t
 //   mmbitext::
 //   jstats::
-//   rcnt() const 
+//   rcnt() const
 //   { return my_rcnt; }
 
 //   float
@@ -443,7 +443,7 @@
 //   vector<pair<size_t, vector<uchar> > > const&
 //   mmbitext::
 //   jstats::
-//   aln() const 
+//   aln() const
 //   { return my_aln; }
 
 // }

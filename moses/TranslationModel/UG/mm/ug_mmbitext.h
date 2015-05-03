@@ -4,10 +4,10 @@
 // Written by Ulrich Germann
 
 // things we can do to speed up things:
-// - set up threads at startup time that force the 
+// - set up threads at startup time that force the
 //   data in to memory sequentially
 //
-// - use multiple agendas for better load balancing and to avoid 
+// - use multiple agendas for better load balancing and to avoid
 //   competition for locks
 
 #include <string>
@@ -46,8 +46,8 @@ namespace Moses {
     class jstats; // phrase pair ("joint") statistics
     class agenda
     {
-      boost::mutex               lock; 
-      boost::condition_variable ready; 
+      boost::mutex               lock;
+      boost::condition_variable ready;
       class job;
       class worker;
       list<job> joblist;
@@ -59,9 +59,9 @@ namespace Moses {
       agenda(mmbitext const& bitext);
       ~agenda();
       void add_workers(int n);
-      sptr<pstats> add_job(mmbitext::iter const& phrase, 
+      sptr<pstats> add_job(mmbitext::iter const& phrase,
 			   size_t const max_samples);
-      bool get_task(uint64_t & sid, uint64_t & offset, uint64_t & len, 
+      bool get_task(uint64_t & sid, uint64_t & offset, uint64_t & len,
 		    bool & fwd, sptr<mmbitext::pstats> & stats);
     };
 
@@ -72,22 +72,22 @@ namespace Moses {
     mmTtrack<char>  Tx;    // word alignments
     mmTtrack<Token> T1,T2; // token tracks
     TokenIndex      V1,V2; // vocabs
-    mmTSA<Token>    I1,I2; // suffix arrays 
+    mmTSA<Token>    I1,I2; // suffix arrays
 
     /// given the source phrase sid[start:stop]
-    //  find the possible start (s1 .. s2) and end (e1 .. e2) 
+    //  find the possible start (s1 .. s2) and end (e1 .. e2)
     //  points of the target phrase; if non-NULL, store word
-    //  alignments in *core_alignment. If /flip/, source phrase is 
+    //  alignments in *core_alignment. If /flip/, source phrase is
     //  L2.
-    bool 
+    bool
     find_trg_phr_bounds
-    (size_t const sid, size_t const start, size_t const stop, 
-     size_t & s1, size_t & s2, size_t & e1, size_t & e2, 
+    (size_t const sid, size_t const start, size_t const stop,
+     size_t & s1, size_t & s2, size_t & e1, size_t & e2,
      vector<uchar> * core_alignment, bool const flip) const;
 
     boost::unordered_map<uint64_t,sptr<pstats> > cache1,cache2;
   private:
-    sptr<pstats> 
+    sptr<pstats>
     prep2(iter const& phrase);
   public:
     mmbitext();
@@ -105,8 +105,8 @@ namespace Moses {
   jstats
   {
     uint32_t my_rcnt; // unweighted count
-    float    my_wcnt; // weighted count 
-    vector<pair<size_t, vector<uchar> > > my_aln; 
+    float    my_wcnt; // weighted count
+    vector<pair<size_t, vector<uchar> > > my_aln;
     boost::mutex lock;
   public:
     jstats();
@@ -117,7 +117,7 @@ namespace Moses {
     void add(float w, vector<uchar> const& a);
   };
 
-  // struct 
+  // struct
   // mmbitext:
   // phrasepair
   // {
@@ -125,32 +125,32 @@ namespace Moses {
   //   size_t len;
   //   size_t cnt;
   //   float  fwd, bwd;
-  
+
   //   map<uint32_t,uint32_t> aln;
   //   string toString(TokenIndex const& V) const;
   //   bool operator<(phrase const& other) const;
   //   bool operator>(phrase const& other) const;
   //   phrase(pair<pair<Token const*, size_t>,jstats> const & foo);
-    
+
   // };
 
 
-  struct 
+  struct
   mmbitext::
   pstats
   {
     boost::mutex lock; // for parallel gathering of stats
     boost::condition_variable ready; // consumers can wait for this data structure to be ready.
 
-    size_t raw_cnt;    // (approximate) raw occurrence count 
+    size_t raw_cnt;    // (approximate) raw occurrence count
     size_t sample_cnt; // number of instances selected during sampling
     size_t good;       // number of selected instances with valid word alignments
     size_t sum_pairs;
-    // size_t snt_cnt; 
+    // size_t snt_cnt;
     // size_t sample_snt;
     size_t in_progress; // keeps track of how many threads are currently working on this
     boost::unordered_map<uint64_t, jstats> trg;
-    pstats(); 
+    pstats();
     // vector<phrase> nbest;
     // void select_nbest(size_t const N=10);
     void release();
@@ -167,7 +167,7 @@ namespace Moses {
   public:
     worker(agenda& a);
     void operator()();
-    
+
   };
 
   class

@@ -394,7 +394,7 @@ class SimpleMap : public map<X,Y> {
  private:
   typedef map<X,Y> OrigMap;
   static const Y yDummy;
-  
+
  public:
   // Constructor / destructor methods...
   SimpleMap ( )       : OrigMap() { }
@@ -899,7 +899,7 @@ class GenericHidVarCPTModel : public SimpleHash<K,typename Y::template ArrayDist
   const typename Y::template ArrayDistrib<P>& getDistrib ( const K& k ) const {
     return HKYP::get(k);
   }
- 
+
   P& setProb ( const Y& y, const K& k ) {
     pair<typename Y::BaseType,P>& yp = HKYP::set(k).add();
     yp.first = y;

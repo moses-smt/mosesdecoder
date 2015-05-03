@@ -37,7 +37,7 @@ void PrintStatistics(const std::vector<uint64_t> &counts, const std::vector<uint
 
 class Master {
   public:
-    explicit Master(PipelineConfig &config) 
+    explicit Master(PipelineConfig &config)
       : config_(config), chains_(config.order), files_(config.order) {
       config_.minimum_block = std::max(NGram::TotalSize(config_.order), config_.minimum_block);
     }
@@ -64,7 +64,7 @@ class Master {
       CreateChains(config_.TotalMemory() - merge_using, count_bounds);
       ngrams.Output(chains_.back(), merge_using);
 
-      // Setup unigram file.  
+      // Setup unigram file.
       files_.push_back(util::MakeTemp(config_.TempPrefix()));
     }
 
@@ -204,7 +204,7 @@ class Master {
     PipelineConfig &config_;
 
     util::stream::Chains chains_;
-    // Often only unigrams, but sometimes all orders.  
+    // Often only unigrams, but sometimes all orders.
     util::FixedArray<util::stream::FileBuffer> files_;
 };
 
@@ -214,7 +214,7 @@ void CountText(int text_file /* input */, int vocab_file /* output */, Master &m
 
   const std::size_t vocab_usage = CorpusCount::VocabUsage(config.vocab_estimate);
   UTIL_THROW_IF(config.TotalMemory() < vocab_usage, util::Exception, "Vocab hash size estimate " << vocab_usage << " exceeds total memory " << config.TotalMemory());
-  std::size_t memory_for_chain = 
+  std::size_t memory_for_chain =
     // This much memory to work with after vocab hash table.
     static_cast<float>(config.TotalMemory() - vocab_usage) /
     // Solve for block size including the dedupe multiplier for one block.
@@ -252,7 +252,7 @@ void InitialProbabilities(const std::vector<uint64_t> &counts, const std::vector
 
   util::stream::Chains gamma_chains(config.order);
   InitialProbabilities(config.initial_probs, discounts, master.MutableChains(), second, gamma_chains, prune_thresholds, prune_vocab);
-  // Don't care about gamma for 0.  
+  // Don't care about gamma for 0.
   gamma_chains[0] >> util::stream::kRecycle;
   gammas.Init(config.order - 1);
   for (std::size_t i = 1; i < config.order; ++i) {
@@ -307,16 +307,16 @@ void Pipeline(PipelineConfig &config, int text_file, Output &output) {
   // master's destructor will wait for chains.  But they might be deadlocked if
   // this thread dies because e.g. it ran out of memory.
   try {
-    util::scoped_fd vocab_file(config.vocab_file.empty() ? 
-        util::MakeTemp(config.TempPrefix()) : 
+    util::scoped_fd vocab_file(config.vocab_file.empty() ?
+        util::MakeTemp(config.TempPrefix()) :
         util::CreateOrThrow(config.vocab_file.c_str()));
     output.SetVocabFD(vocab_file.get());
     uint64_t token_count;
     std::string text_file_name;
-    
+
     std::vector<bool> prune_words;
     CountText(text_file, vocab_file.get(), master, token_count, text_file_name, prune_words);
-    
+
     std::vector<uint64_t> counts;
     std::vector<uint64_t> counts_pruned;
     std::vector<Discount> discounts;

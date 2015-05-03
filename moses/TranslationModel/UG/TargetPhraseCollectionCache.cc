@@ -16,7 +16,7 @@ namespace Moses
     if (a.tv_sec != b.tv_sec) return a.tv_sec > b.tv_sec;
     return (a.tv_nsec >= b.tv_nsec);
   }
-#endif 
+#endif
 
   bool operator<(timeval const& a, timeval const& b)
   {
@@ -30,10 +30,10 @@ namespace Moses
     return (a.tv_usec >= b.tv_usec);
   }
 
-  void 
+  void
   bubble_up(std::vector<TPCollWrapper*>& v, size_t k)
   {
-    if (k >= v.size()) return; 
+    if (k >= v.size()) return;
     for (;k && (v[k]->tstamp < v[k/2]->tstamp); k /=2)
       {
   	std::swap(v[k],v[k/2]);
@@ -41,7 +41,7 @@ namespace Moses
       }
   }
 
-  void 
+  void
   bubble_down(std::vector<TPCollWrapper*>& v, size_t k)
   {
     for (size_t j = 2*(k+1); j <= v.size(); j = 2*((k=j)+1))
@@ -62,7 +62,7 @@ namespace Moses
 
   TPCollWrapper*
   TPCollCache
-  ::encache(TPCollWrapper* const& ptr) 
+  ::encache(TPCollWrapper* const& ptr)
   {
     using namespace boost;
     // update time stamp:
@@ -76,7 +76,7 @@ namespace Moses
       {
 	vector<TPCollWrapper*>& v = m_history;
 	if (ptr->idx >= 0) // ptr is already in history
-	  { 
+	  {
 	    assert(ptr == v[ptr->idx]);
 	    size_t k = 2 * (ptr->idx + 1);
 	    if (k < v.size()) bubble_up(v,k--);
@@ -88,7 +88,7 @@ namespace Moses
 	    v.push_back(ptr);
 	    bubble_up(v,k);
 	  }
-	else // someone else needs to go 
+	else // someone else needs to go
 	  {
 	    v[0]->idx = -1;
 	    release(v[0]);
@@ -98,28 +98,28 @@ namespace Moses
       }
     return ptr;
   } // TPCollCache::encache(...)
-  
-  TPCollWrapper* 
+
+  TPCollWrapper*
   TPCollCache
-  ::get(uint64_t key, size_t revision) 
+  ::get(uint64_t key, size_t revision)
   {
     using namespace boost;
     cache_t::iterator m;
-    { 
+    {
       shared_lock<shared_mutex> lock(m_cache_lock);
       m = m_cache.find(key);
-      if (m == m_cache.end() || m->second->revision != revision) 
+      if (m == m_cache.end() || m->second->revision != revision)
 	return NULL;
       ++m->second->refCount;
     }
-    
+
     encache(m->second);
     return NULL;
   } // TPCollCache::get(...)
-    
+
   void
   TPCollCache
-  ::add(uint64_t key, TPCollWrapper* ptr) 
+  ::add(uint64_t key, TPCollWrapper* ptr)
   {
     {
       boost::unique_lock<boost::shared_mutex> lock(m_cache_lock);
@@ -129,7 +129,7 @@ namespace Moses
     }
     encache(ptr);
   } // TPCollCache::add(...)
-  
+
   void
   TPCollCache
   ::release(TPCollWrapper*& ptr)
@@ -137,25 +137,25 @@ namespace Moses
     if (!ptr) return;
 
     if (--ptr->refCount || ptr->idx >= 0) // tpc is still in use
-      {	
-	ptr = NULL; 
-	return; 
+      {
+	ptr = NULL;
+	return;
       }
-    
+
 #if 0
     timespec t; clock_gettime(CLOCK_MONOTONIC,&t);
     timespec r; clock_getres(CLOCK_MONOTONIC,&r);
     float delta = t.tv_sec - ptr->tstamp.tv_sec;
     cerr << "deleting old cache entry after " << delta << " seconds."
-	 << " clock resolution is " << r.tv_sec << ":" << r.tv_nsec 
+	 << " clock resolution is " << r.tv_sec << ":" << r.tv_nsec
 	 << " at " << __FILE__ << ":" << __LINE__ << endl;
 #endif
-    
+
     boost::upgrade_lock<boost::shared_mutex> lock(m_cache_lock);
     cache_t::iterator m = m_cache.find(ptr->key);
     if (m != m_cache.end() && m->second == ptr)
-      { // the cache could have been updated with a new pointer 
-	// for the same phrase already, so we need to check 
+      { // the cache could have been updated with a new pointer
+	// for the same phrase already, so we need to check
 	// if the pointer we cound is the one we want to get rid of,
 	// hence the second check
 	boost::upgrade_to_unique_lock<boost::shared_mutex> xlock(lock);
@@ -163,7 +163,7 @@ namespace Moses
       }
     delete ptr;
     ptr = NULL;
-  } // TPCollCache::release(...) 
+  } // TPCollCache::release(...)
 
   TPCollWrapper::
   TPCollWrapper(size_t r, uint64_t k)
@@ -175,5 +175,5 @@ namespace Moses
   {
     assert(this->refCount == 0);
   }
-  
+
 } // namespace

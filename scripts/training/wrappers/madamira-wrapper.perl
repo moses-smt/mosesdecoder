@@ -12,7 +12,6 @@ sub GetFactors;
 
 
 my $TMPDIR = "tmp";
-my $SCHEME = "D2";
 my $KEEP_TMP = 0;
 my $MADA_DIR;
 my $CONFIG;
@@ -21,7 +20,6 @@ my $FACTORS_STR;
 my @FACTORS;
 
 GetOptions(
-  "scheme=s" => \$SCHEME,
   "tmpdir=s" => \$TMPDIR,
   "keep-tmp" => \$KEEP_TMP,
   "mada-dir=s" => \$MADA_DIR,

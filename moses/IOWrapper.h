@@ -161,7 +161,7 @@ public:
     return m_detailTreeFragmentsOutputCollector.get();
   }
 
-  void SetInputStreamFromString(std::istringstream &input){
+  void SetInputStreamFromString(std::istringstream &input) {
     m_inputStream = &input;
   }
 

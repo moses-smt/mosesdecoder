@@ -146,7 +146,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
 }
 
 void HyperTreeLoader::ExtractSourceTerminalSetFromHyperPath(
-    const HyperPath &hp, boost::unordered_set<std::size_t> &sourceTerminalSet)
+  const HyperPath &hp, boost::unordered_set<std::size_t> &sourceTerminalSet)
 {
   for (std::vector<HyperPath::NodeSeq>::const_iterator p = hp.nodeSeqs.begin();
        p != hp.nodeSeqs.end(); ++p) {

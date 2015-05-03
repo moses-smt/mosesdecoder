@@ -11,8 +11,9 @@
 // Sennrich, Rico (2015). Modelling and Optimizing on Syntactic N-Grams for Statistical Machine Translation. Transactions of the Association for Computational Linguistics.
 // see 'scripts/training/rdlm' for training scripts
 
-namespace nplm {
-  class neuralTM;
+namespace nplm
+{
+class neuralTM;
 }
 
 namespace Moses
@@ -32,21 +33,21 @@ public:
   {}
 
   float GetApproximateScoreHead() const {
-      return m_approx_head;
+    return m_approx_head;
   }
 
   float GetApproximateScoreLabel() const {
-      return m_approx_label;
+    return m_approx_label;
   }
 
   size_t GetHash() const {
-      return m_hash;
+    return m_hash;
   }
 
   int Compare(const FFState& other) const {
-      if (m_hash == static_cast<const RDLMState*>(&other)->GetHash()) return 0;
-      else if (m_hash > static_cast<const RDLMState*>(&other)->GetHash()) return 1;
-      else return -1;
+    if (m_hash == static_cast<const RDLMState*>(&other)->GetHash()) return 0;
+    else if (m_hash > static_cast<const RDLMState*>(&other)->GetHash()) return 1;
+    else return -1;
   }
 };
 
@@ -121,10 +122,9 @@ public:
     , m_normalizeLabelLM(false)
     , m_sharedVocab(false)
     , m_binarized(0)
-    , m_cacheSize(1000000)
-    {
-      ReadParameters();
-    }
+    , m_cacheSize(1000000) {
+    ReadParameters();
+  }
 
   ~RDLM();
 
@@ -147,21 +147,23 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const {};
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedFutureScore) const {};
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const {};
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {};
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {};
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const {UTIL_THROW(util::Exception, "Not implemented");};
+    ScoreComponentCollection* accumulator) const {
+    UTIL_THROW(util::Exception, "Not implemented");
+  };
   FFState* EvaluateWhenApplied(
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
@@ -173,71 +175,72 @@ public:
   class UnbinarizedChildren
   {
   private:
-      std::vector<TreePointer>::const_iterator iter;
-      std::vector<TreePointer>::const_iterator _begin;
-      std::vector<TreePointer>::const_iterator _end;
-      InternalTree* current;
-      const TreePointerMap & back_pointers;
-      bool binarized;
-      std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > stack;
+    std::vector<TreePointer>::const_iterator iter;
+    std::vector<TreePointer>::const_iterator _begin;
+    std::vector<TreePointer>::const_iterator _end;
+    InternalTree* current;
+    const TreePointerMap & back_pointers;
+    bool binarized;
+    std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > stack;
 
   public:
-      UnbinarizedChildren(InternalTree* root, const TreePointerMap & pointers, bool binary):
-        current(root),
-        back_pointers(pointers),
-        binarized(binary)
-        {
-          stack.reserve(10);
-          _end = current->GetChildren().end();
-          iter = current->GetChildren().begin();
-          // expand virtual node
-          while (binarized && !(*iter)->GetLabel().empty() && (*iter)->GetLabel()[0] == '^') {
-            stack.push_back(std::make_pair(current, iter));
-            // also go through trees or previous hypotheses to rescore nodes for which more context has become available
-            if ((*iter)->IsLeafNT()) {
-              current = back_pointers.find(iter->get())->second.get();
-            }
-            else {
-              current = iter->get();
-            }
-            iter = current->GetChildren().begin();
-          }
-          _begin = iter;
+    UnbinarizedChildren(InternalTree* root, const TreePointerMap & pointers, bool binary):
+      current(root),
+      back_pointers(pointers),
+      binarized(binary) {
+      stack.reserve(10);
+      _end = current->GetChildren().end();
+      iter = current->GetChildren().begin();
+      // expand virtual node
+      while (binarized && !(*iter)->GetLabel().empty() && (*iter)->GetLabel()[0] == '^') {
+        stack.push_back(std::make_pair(current, iter));
+        // also go through trees or previous hypotheses to rescore nodes for which more context has become available
+        if ((*iter)->IsLeafNT()) {
+          current = back_pointers.find(iter->get())->second.get();
+        } else {
+          current = iter->get();
         }
-
-      std::vector<TreePointer>::const_iterator begin() const { return _begin; }
-      std::vector<TreePointer>::const_iterator end() const { return _end; }
-
-      std::vector<TreePointer>::const_iterator operator++() {
-        iter++;
-        if (iter == current->GetChildren().end()) {
-          while (!stack.empty()) {
-            std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> & active = stack.back();
-            current = active.first;
-            iter = ++active.second;
-            stack.pop_back();
-            if (iter != current->GetChildren().end()) {
-              break;
-            }
-          }
-          if (iter == _end) {
-            return iter;
-          }
-        }
-        // expand virtual node
-        while (binarized && !(*iter)->GetLabel().empty() && (*iter)->GetLabel()[0] == '^') {
-          stack.push_back(std::make_pair(current, iter));
-          // also go through trees or previous hypotheses to rescore nodes for which more context has become available
-          if ((*iter)->IsLeafNT()) {
-            current = back_pointers.find(iter->get())->second.get();
-          }
-          else {
-            current = iter->get();
-          }
-          iter = current->GetChildren().begin();
-        }
-        return iter;
+        iter = current->GetChildren().begin();
       }
+      _begin = iter;
+    }
+
+    std::vector<TreePointer>::const_iterator begin() const {
+      return _begin;
+    }
+    std::vector<TreePointer>::const_iterator end() const {
+      return _end;
+    }
+
+    std::vector<TreePointer>::const_iterator operator++() {
+      iter++;
+      if (iter == current->GetChildren().end()) {
+        while (!stack.empty()) {
+          std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> & active = stack.back();
+          current = active.first;
+          iter = ++active.second;
+          stack.pop_back();
+          if (iter != current->GetChildren().end()) {
+            break;
+          }
+        }
+        if (iter == _end) {
+          return iter;
+        }
+      }
+      // expand virtual node
+      while (binarized && !(*iter)->GetLabel().empty() && (*iter)->GetLabel()[0] == '^') {
+        stack.push_back(std::make_pair(current, iter));
+        // also go through trees or previous hypotheses to rescore nodes for which more context has become available
+        if ((*iter)->IsLeafNT()) {
+          current = back_pointers.find(iter->get())->second.get();
+        } else {
+          current = iter->get();
+        }
+        iter = current->GetChildren().begin();
+      }
+      return iter;
+    }
   };
 
 };

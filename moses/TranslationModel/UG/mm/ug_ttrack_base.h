@@ -2,7 +2,7 @@
 // Base class for corpus tracks. mmTtrack (memory-mapped Ttrack) and imTtrack (in-memory Ttrack)
 // are derived from this class.
 
-// This code is part of a refactorization of the earlier Ttrack class as a template class for 
+// This code is part of a refactorization of the earlier Ttrack class as a template class for
 // tokens of arbitrary fixed-length size.
 // (c) 2007-2009 Ulrich Germann. All rights reserved.
 
@@ -27,8 +27,8 @@ namespace ugdiss
   typedef boost::dynamic_bitset<uint64_t> bdBitset;
 
   template<typename sid_t, typename off_t, typename len_t>
-  void 
-  parse_pid(uint64_t const pid, sid_t & sid, 
+  void
+  parse_pid(uint64_t const pid, sid_t & sid,
 	    off_t & off, len_t& len)
   {
     static uint64_t two32 = uint64_t(1)<<32;
@@ -39,12 +39,12 @@ namespace ugdiss
   }
 
   template<typename Token>
-  string 
+  string
   toString(TokenIndex const& V, Token const* x, size_t const len)
   {
     if (!len) return "";
     UTIL_THROW_IF2(!x, HERE << ": Unexpected end of phrase!");
-    ostringstream buf; 
+    ostringstream buf;
     buf << V[x->id()];
     size_t i = 1;
     for (x = x->next(); x && i < len; ++i, x = x->next())
@@ -63,66 +63,66 @@ namespace ugdiss
     typedef TKN Token;
 
     /** @return a pointer to beginning of sentence /sid/ */
-    virtual 
-    TKN const* 
-    sntStart(size_t sid) const = 0; 
+    virtual
+    TKN const*
+    sntStart(size_t sid) const = 0;
 
     /** @return end point of sentence /sid/ */
-    virtual 
-    TKN const* 
-    sntEnd(size_t sid) const = 0; 
+    virtual
+    TKN const*
+    sntEnd(size_t sid) const = 0;
 
     TKN const*
     getToken(Position const& p) const;
 
     template<typename T>
-    T const* 
-    getTokenAs(Position const& p) const  
+    T const*
+    getTokenAs(Position const& p) const
     { return reinterpret_cast<T const*>(getToken(p));  }
 
     template<typename T>
     T const*
-    sntStartAs(id_type sid) const 
+    sntStartAs(id_type sid) const
     { return reinterpret_cast<T const*>(sntStart(sid)); }
 
     template<typename T>
     T const*
-    sntEndAs(id_type sid) const 
+    sntEndAs(id_type sid) const
     { return reinterpret_cast<T const*>(sntEnd(sid));  }
 
     /** @return length of sentence /sid/ */
     size_t sntLen(size_t sid) const { return sntEnd(sid) - sntStart(sid); }
 
-    size_t 
+    size_t
     startPos(id_type sid) const { return sntStart(sid)-sntStart(0); }
-    
-    size_t 
+
+    size_t
     endPos(id_type sid) const { return sntEnd(sid)-sntStart(0); }
 
     /** Don't use this unless you want a copy of the sentence */
-    vector<TKN> 
-    operator[](id_type sid) const 
-    { 
-      return vector<TKN>(sntStart(sid),sntEnd(sid)); 
+    vector<TKN>
+    operator[](id_type sid) const
+    {
+      return vector<TKN>(sntStart(sid),sntEnd(sid));
     }
 
     /** @return size of corpus in number of sentences */
-    virtual size_t size() const = 0;      
+    virtual size_t size() const = 0;
 
     /** @return size of corpus in number of words/tokens */
-    virtual size_t numTokens() const = 0; 
+    virtual size_t numTokens() const = 0;
 
-    /** @return string representation of sentence /sid/ 
+    /** @return string representation of sentence /sid/
      *  Currently only defined for Ttrack<id_type> */
     string str(id_type sid, TokenIndex const& T) const;
 
     string pid2str(TokenIndex const* V, uint64_t pid) const;
 
-    // /** @return string representation of sentence /sid/ 
+    // /** @return string representation of sentence /sid/
     //  *  Currently only defined for Ttrack<id_type> */
     // string str(id_type sid, Vocab const& V) const;
-    
-    /** counts the tokens in the corpus; used for example in the construction of 
+
+    /** counts the tokens in the corpus; used for example in the construction of
      *  token sequence arrays */
     count_type count_tokens(vector<count_type>& cnt, bdBitset const* filter,
                             int lengthCutoff=0, ostream* log=NULL) const;
@@ -130,7 +130,7 @@ namespace ugdiss
     // static id_type toID(TKN const& t);
 
     int cmp(Position const& A, Position const& B, int keyLength) const;
-    int cmp(Position const& A, TKN const* keyStart, int keyLength=-1, 
+    int cmp(Position const& A, TKN const* keyStart, int keyLength=-1,
             int depth=0) const;
 
     virtual id_type findSid(TKN const* t) const = 0; // find the sentence id of a given token
@@ -139,18 +139,18 @@ namespace ugdiss
 
     // the following three functions are currently not used by any program ... (deprecate?)
     TKN const*
-    find_next_within_sentence(TKN const* startKey, 
-                              int         keyLength, 
+    find_next_within_sentence(TKN const* startKey,
+                              int         keyLength,
                               Position    startHere) const;
 
     Position
-    find_first(TKN const* startKey, int keyLength, 
+    find_first(TKN const* startKey, int keyLength,
                bdBitset const* filter=NULL) const;
 
     Position
-    find_next(TKN const* startKey, int keyLength, Position startAfter, 
+    find_next(TKN const* startKey, int keyLength, Position startAfter,
               bdBitset const* filter=NULL) const;
-   
+
 
     virtual size_t offset(TKN const* t) const { return t-sntStart(0); }
   };
@@ -171,11 +171,11 @@ namespace ugdiss
   template<typename TKN>
   count_type
   Ttrack<TKN>::
-  count_tokens(vector<count_type>& cnt, bdBitset const* filter, 
+  count_tokens(vector<count_type>& cnt, bdBitset const* filter,
 	       int lengthCutoff, ostream* log) const
   {
-    bdBitset filter2; 
-    if (!filter) 
+    bdBitset filter2;
+    if (!filter)
       {
 	filter2.resize(this->size());
 	filter2.set();
@@ -184,21 +184,21 @@ namespace ugdiss
     cnt.clear();
     cnt.reserve(500000);
     count_type totalCount=0;
-    
+
     int64_t expectedTotal=0;
     for (size_t sid = 0; sid < this->size(); ++sid)
       expectedTotal += this->sntLen(sid);
-    
+
     for (size_t sid = filter->find_first();
 	 sid < filter->size();
 	 sid = filter->find_next(sid))
       {
 	TKN const* k = sntStart(sid);
 	TKN const* const stop = sntEnd(sid);
-        if (lengthCutoff && stop-k >= lengthCutoff) 
+        if (lengthCutoff && stop-k >= lengthCutoff)
           {
-            if (log) 
-              *log << "WARNING: skipping sentence #" << sid 
+            if (log)
+              *log << "WARNING: skipping sentence #" << sid
                    << " with more than 65536 tokens" << endl;
             expectedTotal -= stop-k;
           }
@@ -217,7 +217,7 @@ namespace ugdiss
     if (this->size() == filter->count())
       {
         if (totalCount != expectedTotal)
-          cerr << "OOPS: expected " << expectedTotal 
+          cerr << "OOPS: expected " << expectedTotal
                << " tokens but counted " << totalCount << endl;
         assert(totalCount == expectedTotal);
       }
@@ -256,16 +256,16 @@ namespace ugdiss
         a = next(a);
         b = next(b);
         // cerr << keyLength << "b. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << endl;
-        if (--keyLength==0 || b < bosB || b >= eosB) 
-          { 
+        if (--keyLength==0 || b < bosB || b >= eosB)
+          {
             ret = (a < bosA || a >= eosA) ? 0 : 1;
             break;
           }
       }
     // cerr << "RETURNING " << ret << endl;
-    return ret; 
+    return ret;
   }
-  
+
   template<typename TKN>
   int
   Ttrack<TKN>::
@@ -287,17 +287,17 @@ namespace ugdiss
         if (*x > *key) return  2;
         key  = key->next();
         x    = x->next();
-        if (--keyLength==0) //  || !key) 
+        if (--keyLength==0) //  || !key)
           return (x == stopx) ? 0 : 1;
         assert(key);
       }
-    return -1; 
+    return -1;
   }
 
   template<typename TKN>
-  TKN const* 
+  TKN const*
   Ttrack<TKN>::
-  find_next_within_sentence(TKN const* startKey, int keyLength, 
+  find_next_within_sentence(TKN const* startKey, int keyLength,
                             Position startHere) const
   {
     for (TKN const* t = getToken(startHere); t; t = getToken(startHere))
@@ -308,12 +308,12 @@ namespace ugdiss
           {
             TKN const* k = startKey->next();
             TKN const* t2 = t->next();
-            if (t2) 
+            if (t2)
               {
-                cout << t2->lemma << "." << int(t2->minpos) << " " 
+                cout << t2->lemma << "." << int(t2->minpos) << " "
                      << k->lemma << "." << int(k->minpos) << " "
                      << t2->cmp(*k) << endl;
-              }            
+              }
           }
 #endif
         int x = cmp(startHere,startKey,keyLength,0);
@@ -330,8 +330,8 @@ namespace ugdiss
   {
     if (filter)
       {
-        for (size_t sid = filter->find_first(); 
-             sid < filter->size(); 
+        for (size_t sid = filter->find_first();
+             sid < filter->size();
              sid = filter->find_next(sid))
           {
             TKN const* x = find_next_within_sentence(startKey,keyLength,Position(sid,0));
@@ -348,7 +348,7 @@ namespace ugdiss
       }
     return Position(this->size(),0);
   }
-  
+
   template<typename TKN>
   typename Ttrack<TKN>::Position
   Ttrack<TKN>::
@@ -411,6 +411,6 @@ namespace ugdiss
       }
     return buf.str();
   }
-  
+
 }
 #endif

@@ -31,7 +31,7 @@ using namespace Moses;
 using namespace Moses::bitext;
 
 #define CACHING_THRESHOLD 1000
-#define lbop boost::math::binomial_distribution<>::find_lower_bound_on_p 
+#define lbop boost::math::binomial_distribution<>::find_lower_bound_on_p
 size_t mctr=0,xctr=0;
 
 typedef L2R_Token<SimpleWordId> Token;
@@ -49,15 +49,15 @@ PScoreWC<Token>   apply_wp;
 vector<float> fweights;
 
 void
-nbest_phrasepairs(uint64_t const  pid1, 
-		  pstats   const& ps, 
+nbest_phrasepairs(uint64_t const  pid1,
+		  pstats   const& ps,
 		  vector<PhrasePair> & nbest)
 {
   pstats::trg_map_t::const_iterator m;
   vector<size_t> idx(nbest.size());
   size_t i=0;
-  for (m  = ps.trg.begin(); 
-       m != ps.trg.end() && i < nbest.size(); 
+  for (m  = ps.trg.begin();
+       m != ps.trg.end() && i < nbest.size();
        ++m)
     {
       // cout << m->second.rcnt() << " " << ps.good << endl;
@@ -74,17 +74,17 @@ nbest_phrasepairs(uint64_t const  pid1,
       ++i;
     }
   // cout << i << " " << nbest.size() << endl;
-  if (i < nbest.size()) 
+  if (i < nbest.size())
     {
       // cout << "Resizing from " << nbest.size() << " to " << i << endl;
       nbest.resize(i);
       idx.resize(i);
     }
   VectorIndexSorter<PhrasePair> sorter(nbest,greater<PhrasePair>());
-  if (m != ps.trg.end()) 
+  if (m != ps.trg.end())
     {
       make_heap(idx.begin(),idx.end(),sorter);
-      PhrasePair cand; 
+      PhrasePair cand;
       cand.init(pid1,ps,5);
       for (; m != ps.trg.end(); ++m)
 	{
@@ -104,7 +104,7 @@ nbest_phrasepairs(uint64_t const  pid1,
     }
   sort(nbest.begin(),nbest.end(),greater<PhrasePair>());
 }
-  
+
 int main(int argc, char* argv[])
 {
   // assert(argc == 4);
@@ -120,8 +120,8 @@ int main(int argc, char* argv[])
   string L2 = "en";
   size_t max_samples = argc > 1 ? atoi(argv[1]) : 1000;
 #endif
-  char c = *base.rbegin(); 
-  if (c != '/' && c != '.') 
+  char c = *base.rbegin();
+  if (c != '/' && c != '.')
     base += ".";
 
   fweights.resize(5,.25);
@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
   string line;
   while (getline(cin,line))
     {
-      vector<id_type> snt; 
+      vector<id_type> snt;
       bt.V1->fillIdSeq(line,snt);
       for (size_t i = 0; i < snt.size(); ++i)
   	{
@@ -156,8 +156,8 @@ int main(int argc, char* argv[])
       	      sptr<pstats> s = bt.lookup(m);
       	      for (size_t j = i; j <= k; ++j)
       		cout << (*bt.V1)[snt[j]] << " ";
-      	      cout << s->good << "/" 
-		   << s->sample_cnt << "/" 
+      	      cout << s->good << "/"
+		   << s->sample_cnt << "/"
 		   << s->raw_cnt << endl;
 	      // vector<PhrasePair> nbest(min(s->trg.size(),size_t(20)));
 	      vector<PhrasePair> nbest(s->trg.size());
@@ -172,17 +172,17 @@ int main(int argc, char* argv[])
 		  cout << "   " << setw(6) << pp.score << " ";
 		  for (uint32_t i = off; i < stop; ++i)
 		    cout << (*bt.V2)[o[i].id()] << " ";
-		  cout << pp.joint << "/" 
+		  cout << pp.joint << "/"
 		       << pp.raw1  << "/"
 		       << pp.raw2  << " |";
-		  BOOST_FOREACH(float f, pp.fvals) 
+		  BOOST_FOREACH(float f, pp.fvals)
 		    cout << " " << f;
 		  cout << endl;
 		}
       	    }
       	}
     }
-#endif  
+#endif
     exit(0);
 }
 #endif

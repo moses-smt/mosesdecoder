@@ -83,7 +83,7 @@ public:
     const counter_t bucketWidth; // ceil(1/error)
 
 private:
-    
+
     /** @var Current epoch bucket ID (b-current) */
     counter_t _bucketId;
 
@@ -182,7 +182,7 @@ class LossyCounterIterator: public std::iterator<std::forward_iterator_tag, type
 public:
 
     typedef LossyCounterIterator<T> self_type;
-    
+
     typedef typename LossyCounter<T>::storage_t::const_iterator const_iterator;
 
 protected:
@@ -288,7 +288,7 @@ protected:
 
 template<class T>
 void LossyCounter<T>::add(const T& item) {
-    
+
     typename storage_t::iterator iter = _storage.find(item);
 
     if ( iter == _storage.end() ) {
@@ -330,7 +330,7 @@ void LossyCounter<T>::prune(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template<class T>
-LossyCounterIterator<T> LossyCounterIterator<T>::operator++(void) {   
+LossyCounterIterator<T> LossyCounterIterator<T>::operator++(void) {
     this->forward();
     return *this;
 }

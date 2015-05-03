@@ -16,15 +16,18 @@ namespace PostprocessEgretForests
 {
 
 SplitPointFileParser::SplitPointFileParser()
-    : m_input(0) {
+  : m_input(0)
+{
 }
 
 SplitPointFileParser::SplitPointFileParser(std::istream &input)
-    : m_input(&input) {
+  : m_input(&input)
+{
   ++(*this);
 }
 
-SplitPointFileParser &SplitPointFileParser::operator++() {
+SplitPointFileParser &SplitPointFileParser::operator++()
+{
   if (!m_input) {
     return *this;
   }
@@ -66,13 +69,15 @@ void SplitPointFileParser::ParseLine(const std::string &line,
 }
 
 bool operator==(const SplitPointFileParser &lhs,
-                const SplitPointFileParser &rhs) {
+                const SplitPointFileParser &rhs)
+{
   // TODO Is this right?  Compare values of istreams if non-zero?
   return lhs.m_input == rhs.m_input;
 }
 
 bool operator!=(const SplitPointFileParser &lhs,
-                const SplitPointFileParser &rhs) {
+                const SplitPointFileParser &rhs)
+{
   return !(lhs == rhs);
 }
 

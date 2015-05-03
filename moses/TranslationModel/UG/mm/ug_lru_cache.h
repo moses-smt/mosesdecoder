@@ -30,25 +30,25 @@ namespace lru_cache
       // timeval      tstamp; // time stamp
       typename boost::shared_ptr<VAL> ptr; // cached shared ptr
     };
-    
+
     mutable boost::shared_mutex m_lock;
     uint32_t m_qfront, m_qback;
-    vector<Record> m_recs; 
+    vector<Record> m_recs;
     map_t m_idx;
 
-    void 
+    void
     update_queue(KEY const& key, uint32_t const p)
     {
       // CALLER MUST LOCK!
-      // "remove" item in slot p from it's current position of the 
-      // queue (which is different from the slot position) and move it 
+      // "remove" item in slot p from it's current position of the
+      // queue (which is different from the slot position) and move it
       // to the end
       Record& r = m_recs[p];
       if (m_recs.size() == 1)
 	r.next = r.prev = m_qback = m_qfront = 0;
-    
+
       if (r.key != key || p == m_qback) return;
-  
+
       if (m_qfront == p)
 	m_qfront = m_recs[r.next].prev = r.next;
       else
@@ -65,8 +65,8 @@ namespace lru_cache
     size_t capacity() const { return m_recs.capacity(); }
     void reserve(size_t s) { m_recs.reserve(s); }
 
-    sptr<VAL> 
-    get(KEY const& key) 
+    sptr<VAL>
+    get(KEY const& key)
     {
       uint32_t p;
       { // brackets needed for lock scoping
@@ -86,13 +86,13 @@ namespace lru_cache
       boost::lock_guard<boost::shared_mutex> lock(m_lock);
       pair<typename map_t::iterator,bool> foo;
       foo = m_idx.insert(make_pair(key,m_recs.size()));
-      
+
       uint32_t p = foo.first->second;
       if (foo.second) // was not in the cache
 	{
 	  if (m_recs.size() < m_recs.capacity())
 	    m_recs.push_back(Record());
-	  else 
+	  else
 	    {
 	      foo.first->second = p = m_qfront;
 	      m_idx.erase(m_recs[p].key);

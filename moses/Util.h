@@ -19,8 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_Util_h
-#define moses_Util_h
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -89,9 +88,16 @@ namespace Moses
 #define NTH_ELEMENT4(begin, middle, end, orderer) std::nth_element(begin, middle, end, orderer)
 #endif
 
-//! delete white spaces at beginning and end of string
-const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
+
 const std::string ToLower(const std::string& str);
+
+//! delete white spaces at beginning and end of string
+inline std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r")
+{
+  std::string res = str;
+  res.erase(str.find_last_not_of(dropChars)+1);
+  return res.erase(0, res.find_first_not_of(dropChars));
+}
 
 //! get string representation of any object/variable, as long as it can pipe to a stream
 template<typename T>
@@ -533,4 +539,3 @@ void ShowWeights();
 
 } // namespace
 
-#endif

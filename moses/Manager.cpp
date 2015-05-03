@@ -72,8 +72,8 @@ Manager::Manager(ttasksptr const& ttask)
 
   const StaticData &staticData = StaticData::Instance();
   SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
-  m_search = Search::CreateSearch(*this, *source, searchAlgorithm, 
-				  *m_transOptColl);
+  m_search = Search::CreateSearch(*this, *source, searchAlgorithm,
+                                  *m_transOptColl);
 
   StaticData::Instance().InitializeForInput(ttask);
 }
@@ -85,9 +85,11 @@ Manager::~Manager()
   StaticData::Instance().CleanUpAfterSentenceProcessing(m_ttask.lock());
 }
 
-const InputType& 
-Manager::GetSource() const 
-{ return m_source ; }
+const InputType&
+Manager::GetSource() const
+{
+  return m_source ;
+}
 
 /**
  * Main decoder loop that translates a sentence by expanding
@@ -129,8 +131,8 @@ void Manager::Decode()
   Timer searchTime;
   searchTime.start();
   m_search->Decode();
-  VERBOSE(1, "Line " << m_source.GetTranslationId() 
-	  << ": Search took " << searchTime << " seconds" << endl);
+  VERBOSE(1, "Line " << m_source.GetTranslationId()
+          << ": Search took " << searchTime << " seconds" << endl);
   IFVERBOSE(2) {
     GetSentenceStats().StopTimeTotal();
     TRACE_ERR(GetSentenceStats());

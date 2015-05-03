@@ -66,8 +66,8 @@ RegisterScoreProducer(FeatureFunction* scoreProducer)
   s_denseVectorSize = scoreProducer->SetIndex(s_denseVectorSize);
   VERBOSE(1, "FeatureFunction: "
           << scoreProducer->GetScoreProducerDescription()
-          << " start: " << start 
-	  << " end: "   << (s_denseVectorSize-1) << endl);
+          << " start: " << start
+          << " end: "   << (s_denseVectorSize-1) << endl);
 }
 
 
@@ -193,22 +193,20 @@ void ScoreComponentCollection::Save(ostream& out, bool multiline) const
     linesep = " ";
   }
 
-  std::vector<FeatureFunction*> const& all_ff 
-    = FeatureFunction::GetFeatureFunctions();
-  BOOST_FOREACH(FeatureFunction const* ff, all_ff)
-    {
-      string name = ff->GetScoreProducerDescription();
-      size_t i = ff->GetIndex();
-      if (ff->GetNumScoreComponents() == 1) 
-	out << name << sep << m_scores[i] << linesep;
-      else 
-	{
-	  size_t stop = i + ff->GetNumScoreComponents();
-	  boost::format fmt("%s_%d");
-	  for (size_t k = 1; i < stop; ++i, ++k) 
-	    out << fmt % name % k << sep << m_scores[i] << linesep;
-	}
+  std::vector<FeatureFunction*> const& all_ff
+  = FeatureFunction::GetFeatureFunctions();
+  BOOST_FOREACH(FeatureFunction const* ff, all_ff) {
+    string name = ff->GetScoreProducerDescription();
+    size_t i = ff->GetIndex();
+    if (ff->GetNumScoreComponents() == 1)
+      out << name << sep << m_scores[i] << linesep;
+    else {
+      size_t stop = i + ff->GetNumScoreComponents();
+      boost::format fmt("%s_%d");
+      for (size_t k = 1; i < stop; ++i, ++k)
+        out << fmt % name % k << sep << m_scores[i] << linesep;
     }
+  }
   // write sparse features
   m_scores.write(out,sep,linesep);
 }

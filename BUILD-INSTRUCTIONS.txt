@@ -1,4 +1,3 @@
-Please see the Moses website on how to compile and run Moses
-   http://www.statmt.org/moses/?n=Development.GetStarted
+Instructions for building and installing Moses are online:
 
-blah blah blah
+   http://www.statmt.org/moses/?n=Development.GetStarted

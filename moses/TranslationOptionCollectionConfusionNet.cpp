@@ -20,8 +20,8 @@ namespace Moses
 
 /** constructor; just initialize the base class */
 TranslationOptionCollectionConfusionNet::
-TranslationOptionCollectionConfusionNet(ttasksptr const& ttask, 
-					const ConfusionNet &input,
+TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
+                                        const ConfusionNet &input,
                                         size_t maxNoTransOptPerCoverage,
                                         float translationOptionThreshold)
   : TranslationOptionCollection(ttask,input, maxNoTransOptPerCoverage,
@@ -161,8 +161,8 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
   }
 
 }
-  
-void 
+
+void
 TranslationOptionCollectionConfusionNet
 ::CreateTranslationOptions()
 {
@@ -202,7 +202,7 @@ CreateTranslationOptionsForRange(const DecodeGraph &decodeGraph,
 bool
 TranslationOptionCollectionConfusionNet::
 CreateTranslationOptionsForRangeNew
-( const DecodeGraph &decodeGraph, size_t startPos, size_t endPos, 
+( const DecodeGraph &decodeGraph, size_t startPos, size_t endPos,
   bool adhereTableLimit, size_t graphInd)
 {
   InputPathList &inputPathList = GetInputPathList(startPos, endPos);

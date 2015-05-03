@@ -344,7 +344,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
   std::set<std::string> strippedTargetLabelSet;
   std::map<std::string, int> strippedTargetTopLabelSet;
-  if (options.stripBitParLabels && 
+  if (options.stripBitParLabels &&
       (!options.glueGrammarFile.empty() || !options.unknownWordSoftMatchesFile.empty())) {
     StripBitParLabels(targetLabelSet, targetTopLabelSet, strippedTargetLabelSet, strippedTargetTopLabelSet);
   }
@@ -699,12 +699,12 @@ void ExtractGHKM::WriteGlueGrammar(
 //  const size_t partOfSpeechSentenceStart = 0;
 //  const size_t partOfSpeechSentenceEnd = 1;
 
-  #ifndef BOS_
-  #define BOS_ "<s>" //Beginning of sentence symbol
-  #endif
-  #ifndef EOS_
-  #define EOS_ "</s>" //End of sentence symbol
-  #endif
+#ifndef BOS_
+#define BOS_ "<s>" //Beginning of sentence symbol
+#endif
+#ifndef EOS_
+#define EOS_ "</s>" //End of sentence symbol
+#endif
 
   std::string sentenceStartSource = BOS_;
   std::string sentenceEndSource   = EOS_;

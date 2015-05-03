@@ -38,8 +38,8 @@ public:
   const SHyperedge *GetBestSHyperedge() const;
 
   typedef std::vector<boost::shared_ptr<KBestExtractor::Derivation> > kBestList_t;
-  void ExtractKBest(std::size_t k, kBestList_t& kBestList, 
-		    bool onlyDistinct=false) const;
+  void ExtractKBest(std::size_t k, kBestList_t& kBestList,
+                    bool onlyDistinct=false) const;
 
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
 

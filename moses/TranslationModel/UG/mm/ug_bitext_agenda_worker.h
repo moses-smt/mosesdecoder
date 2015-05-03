@@ -7,13 +7,13 @@ Bitext<Token>::agenda
 ::operator()()
 {
   // things to do:
-  // 
+  //
   // - have each worker maintain their own pstats object and merge
   //   results at the end (to minimize mutex locking);
-  // 
+  //
   // - use a non-locked, monotonically increasing counter to
   //   ensure the minimum size of samples considered --- it's OK if
-  //   we look at more samples than required. This way, we can 
+  //   we look at more samples than required. This way, we can
   //   reduce the number of lock / unlock operations we need to do
   //   during sampling.
 
@@ -38,13 +38,13 @@ Bitext<Token>::agenda
 			s1, s2, e1, e2, po_fwd, po_bwd, // bounds & orientation
 			&aln, full_aln, !j->fwd));      // aln info / flip sides?
 
-	  if (!good) 
+	  if (!good)
 	    { // no good, probably because phrase is not coherent
 	      j->stats->count_sample(docid, 0, po_fwd, po_bwd);
 	      continue;
 	    }
 
-	  // all good: register this sample as valid 
+	  // all good: register this sample as valid
 	  size_t num_pairs = (s2-s1+1) * (e2-e1+1);
 	  j->stats->count_sample(docid, num_pairs, po_fwd, po_bwd);
 
@@ -52,14 +52,14 @@ Bitext<Token>::agenda
 	  Token const* t = ag.bt.T2->sntStart(sid);
 	  Token const* eos = ag.bt.T2->sntEnd(sid);
 	  cerr << "[" << j->stats->good + 1 << "] ";
-	  while (t != eos) cerr << (*ag.bt.V2)[(t++)->id()] << " "; 
+	  while (t != eos) cerr << (*ag.bt.V2)[(t++)->id()] << " ";
 	  cerr << "[" << docid << "]" << endl;
 #endif
 
 	  float sample_weight = 1./num_pairs;
 	  Token const* o = (j->fwd ? ag.bt.T2 : ag.bt.T1)->sntStart(sid);
 
-	  // adjust offsets in phrase-internal aligment 
+	  // adjust offsets in phrase-internal aligment
 	  for (size_t k = 1; k < aln.size(); k += 2) aln[k] += s2 - s1;
 
 	  vector<uint64_t> seen; seen.reserve(10);
@@ -93,7 +93,7 @@ Bitext<Token>::agenda
 		  UTIL_THROW_IF2(!ok, "Could not extend target phrase.");
 		}
 	      if (s < s2) // shift phrase-internal alignments
-		for (size_t k = 1; k < aln.size(); k += 2) 
+		for (size_t k = 1; k < aln.size(); k += 2)
 		  --aln[k];
 	    }
 	}

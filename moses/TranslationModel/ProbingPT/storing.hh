@@ -2,7 +2,7 @@
 
 #include <cstdio>
 #include <fstream>
-#include <iostream>  
+#include <iostream>
 
 #include "hash.hh" //Includes line_splitter
 #include "probing_hash_utils.hh"

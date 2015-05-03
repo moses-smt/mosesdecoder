@@ -32,10 +32,10 @@ namespace MosesTest
 
 MockHypothesisGuard
 ::MockHypothesisGuard
-( const string& sourceSentence, 
+( const string& sourceSentence,
   const vector<Alignment>& alignments,
   const vector<string>& targetSegments)
-  : m_initialTransOpt(), m_wp("WordPenalty"), 
+  : m_initialTransOpt(), m_wp("WordPenalty"),
     m_uwp("UnknownWordPenalty"), m_dist("Distortion")
 {
   BOOST_CHECK_EQUAL(alignments.size(), targetSegments.size());

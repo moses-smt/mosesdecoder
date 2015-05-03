@@ -20,7 +20,7 @@ namespace ugdiss
 {
   using namespace std;
   template<typename TSA>
-  class 
+  class
   BitSetCache
   {
   public:
@@ -33,15 +33,15 @@ namespace ugdiss
     myMap      cached1,cached2;
     int     threshold;
   public:
-    
+
     BitSetCache() : tsa(NULL), threshold(0) {};
-    BitSetCache(TSA const* t, size_t th=4194304) 
+    BitSetCache(TSA const* t, size_t th=4194304)
     {
       init(t,th);
     };
 
-    void 
-    init(TSA const* t, size_t th=4194304) 
+    void
+    init(TSA const* t, size_t th=4194304)
     {
       tsa       = t;
       threshold = th;
@@ -84,7 +84,7 @@ namespace ugdiss
       if (up-lo > threshold)
         {
           pair<char const*,ushort> k(lo,keyLen);
-          // cout << "bla " << keyStart->id() << " " 
+          // cout << "bla " << keyStart->id() << " "
 	  // << cached2.size() << " " << up-lo << " " << k.second << endl;
           myMapIter m = cached2.find(k);
           if (m != cached2.end())

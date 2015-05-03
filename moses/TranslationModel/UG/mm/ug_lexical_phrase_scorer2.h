@@ -18,8 +18,8 @@ using namespace std;
 namespace ugdiss
 {
 
-  template<typename TKN> 
-  class 
+  template<typename TKN>
+  class
   LexicalPhraseScorer2
   {
     vector<string> ftag;
@@ -28,28 +28,28 @@ namespace ugdiss
     table_t COOC;
     void open(string const& fname);
     template<typename someint>
-    void 
+    void
     score(TKN const* snt1, size_t const s1, size_t const e1,
 	  TKN const* snt2, size_t const s2, size_t const e2,
 	  vector<someint> const & aln, float const alpha,
 	  float & fwd_score, float& bwd_score) const;
 
-    void 
+    void
     score(TKN const* snt1, size_t const s1, size_t const e1,
 	  TKN const* snt2, size_t const s2, size_t const e2,
 	  char const* const aln_start, char const* const aln_end,
 	  float const alpha, float & fwd_score, float& bwd_score) const;
 
     // plup: permissive lookup
-    float plup_fwd(id_type const s,id_type const t, float const alpha) const; 
+    float plup_fwd(id_type const s,id_type const t, float const alpha) const;
     float plup_bwd(id_type const s,id_type const t, float const alpha) const;
-    // to be done: 
-    // - on-the-fly smoothing ? 
-    // - better (than permissive-lookup) treatment of unknown combinations 
+    // to be done:
+    // - on-the-fly smoothing ?
+    // - better (than permissive-lookup) treatment of unknown combinations
     //   permissive lookup is currently used for compatibility reasons
     // - zens-ney smoothed scoring via noisy-or combination
   };
-  
+
   template<typename TKN>
   void
   LexicalPhraseScorer2<TKN>::
@@ -64,7 +64,7 @@ namespace ugdiss
   LexicalPhraseScorer2<TKN>::
   score(TKN const* snt1, size_t const s1, size_t const e1,
 	TKN const* snt2, size_t const s2, size_t const e2,
-	vector<someint> const & aln, float const alpha, 
+	vector<someint> const & aln, float const alpha,
 	float & fwd_score, float& bwd_score) const
   {
     vector<float> p1(e1,0), p2(e2,0);
@@ -74,9 +74,9 @@ namespace ugdiss
       {
 	i1 = aln[k]; i2 = aln[++k];
 	if (i1 < s1 || i1 >= e1 || i2 < s2 || i2 >= e2) continue;
-	p1[i1] += plup_fwd(snt1[i1].id(),snt2[i2].id(),alpha); 
+	p1[i1] += plup_fwd(snt1[i1].id(),snt2[i2].id(),alpha);
 	++c1[i1];
-	p2[i2] += plup_bwd(snt1[i1].id(),snt2[i2].id(),alpha); 
+	p2[i2] += plup_bwd(snt1[i1].id(),snt2[i2].id(),alpha);
 	++c2[i2];
       }
     fwd_score = 0;
@@ -105,19 +105,19 @@ namespace ugdiss
 		   << ": alpha parameter must be >= 0");
     float ret = COOC[s][t]+alpha;
     ret =  (ret?ret:1.)/(COOC.m1(s)+alpha);
-    UTIL_THROW_IF2(ret <= 0 || ret > 1, "At " << __FILE__ << ":" << __LINE__ 
+    UTIL_THROW_IF2(ret <= 0 || ret > 1, "At " << __FILE__ << ":" << __LINE__
 		   << ": result not > 0 and <= 1. alpha = " << alpha << "; "
 		   << COOC[s][t] << "/" << COOC.m1(s));
 
 #if 0
-    cerr << "[" << s << "," << t << "] " 
-	 << COOC.m1(s) << "/" 
-	 << COOC[s][t] << "/" 
+    cerr << "[" << s << "," << t << "] "
+	 << COOC.m1(s) << "/"
+	 << COOC[s][t] << "/"
 	 << COOC.m2(t) << endl;
 #endif
     return ret;
   }
-  
+
   template<typename TKN>
   float
   LexicalPhraseScorer2<TKN>::
@@ -128,11 +128,11 @@ namespace ugdiss
 		   << ": alpha parameter must be >= 0");
     float ret = float(COOC[s][t]+alpha);
     ret = (ret?ret:1.)/(COOC.m2(t)+alpha);
-    UTIL_THROW_IF2(ret <= 0 || ret > 1, "At " << __FILE__ << ":" << __LINE__ 
+    UTIL_THROW_IF2(ret <= 0 || ret > 1, "At " << __FILE__ << ":" << __LINE__
 		   << ": result not > 0 and <= 1.");
     return ret;
   }
-  
+
   template<typename TKN>
   void
   LexicalPhraseScorer2<TKN>::
@@ -148,9 +148,9 @@ namespace ugdiss
       {
 	x = binread(binread(x,i1),i2);
 	if (i1 < s1 || i1 >= e1 || i2 < s2 || i2 >= e2) continue;
-	p1[i1] += plup_fwd(snt1[i1].id(), snt2[i2].id(),alpha); 
+	p1[i1] += plup_fwd(snt1[i1].id(), snt2[i2].id(),alpha);
 	++c1[i1];
-	p2[i2] += plup_bwd(snt1[i1].id(), snt2[i2].id(),alpha); 
+	p2[i2] += plup_bwd(snt1[i1].id(), snt2[i2].id(),alpha);
 	++c2[i2];
       }
     fwd_score = 0;

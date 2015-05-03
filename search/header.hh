@@ -10,7 +10,7 @@
 
 namespace search {
 
-// Copying is shallow.  
+// Copying is shallow.
 class Header {
   public:
     bool Valid() const { return base_; }

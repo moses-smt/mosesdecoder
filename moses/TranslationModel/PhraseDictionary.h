@@ -70,9 +70,9 @@ public:
   **/
 class PhraseDictionary :  public DecodeFeature
 {
-  friend class PhraseDictionaryMultiModelCounts; 
-  // why is this necessary? that's a derived class, so it should have 
-  // access to the 
+  friend class PhraseDictionaryMultiModelCounts;
+  // why is this necessary? that's a derived class, so it should have
+  // access to the
 public:
   virtual bool ProvidesPrefixCheck() const;
 
@@ -104,7 +104,7 @@ public:
   virtual
   bool
   PrefixExists(ttasksptr const& ttask, Phrase const& phrase) const;
-  
+
   // LEGACY!
   // The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
@@ -117,9 +117,8 @@ public:
 
   virtual
   TargetPhraseCollection const *
-  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src)
-  {
-    return GetTargetPhraseCollectionLEGACY(src); 
+  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) {
+    return GetTargetPhraseCollectionLEGACY(src);
   }
 
   virtual
@@ -129,8 +128,7 @@ public:
   virtual
   void
   GetTargetPhraseCollectionBatch(ttasksptr const& ttask,
-				 const InputPathList &inputPathQueue) const
-  {
+                                 const InputPathList &inputPathQueue) const {
     GetTargetPhraseCollectionBatch(inputPathQueue);
   }
 

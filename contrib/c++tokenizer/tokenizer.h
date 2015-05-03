@@ -26,7 +26,7 @@ class Tokenizer {
 
 private:
 
-    typedef enum { 
+    typedef enum {
         empty = 0,
         blank,
         upper, // upper case
@@ -56,7 +56,7 @@ private:
     // non-breaking prefixes (other) ucs4
     std::set<std::wstring> nbpre_gen_ucs4;
 
-    // compiled protected patterns 
+    // compiled protected patterns
     std::vector<re2::RE2 *> prot_pat_vec;
 
 protected:
@@ -96,10 +96,10 @@ protected:
         Tokenizer *tokenizer;
         std::vector<std::string>& in;
         std::vector<std::string>& out;
-        
-        VectorTokenizerCallable(Tokenizer *_tokenizer, 
-                                std::vector<std::string>& _in, 
-                                std::vector<std::string>& _out) 
+
+        VectorTokenizerCallable(Tokenizer *_tokenizer,
+                                std::vector<std::string>& _in,
+                                std::vector<std::string>& _out)
         : tokenizer(_tokenizer)
         , in(_in)
         , out(_out) {
@@ -107,10 +107,10 @@ protected:
 
         void operator()() {
             out.resize(in.size());
-            for (std::size_t ii = 0; ii < in.size(); ++ii) 
+            for (std::size_t ii = 0; ii < in.size(); ++ii)
                 if (in[ii].empty())
                     out[ii] = in[ii];
-                else if (tokenizer->penn_p) 
+                else if (tokenizer->penn_p)
                     out[ii] = tokenizer->penn_tokenize(in[ii]);
                 else
                     out[ii] = tokenizer->quik_tokenize(in[ii]);

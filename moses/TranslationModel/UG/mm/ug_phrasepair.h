@@ -11,7 +11,7 @@ namespace Moses
   namespace bitext
   {
     template<typename Token>
-    class 
+    class
     PhrasePair
     {
     public:
@@ -36,24 +36,24 @@ namespace Moses
 
       bool operator<(PhrasePair const& other) const;
       bool operator>(PhrasePair const& other) const;
-      bool operator<=(PhrasePair const& other) const; 
+      bool operator<=(PhrasePair const& other) const;
       bool operator>=(PhrasePair const& other) const;
 
       void init();
-      void init(uint64_t const pid1, bool is_inverse, 
+      void init(uint64_t const pid1, bool is_inverse,
 		Token const* x,   uint32_t const len,
 		pstats const* ps = NULL, size_t const numfeats=0);
 
-      PhrasePair const& 
-      update(uint64_t const pid2, Token const* x, 
+      PhrasePair const&
+      update(uint64_t const pid2, Token const* x,
 	     uint32_t const len, jstats const& js);
 
       void
-      fill_lr_vec(LRModel::Direction const& dir, 
-		  LRModel::ModelType const& mdl, 
+      fill_lr_vec(LRModel::Direction const& dir,
+		  LRModel::ModelType const& mdl,
 		  vector<float>& v) const;
       void
-      print(ostream& out, TokenIndex const& V1, TokenIndex const& V2, 
+      print(ostream& out, TokenIndex const& V1, TokenIndex const& V2,
 	    LRModel const& LR) const;
 
       class SortByTargetIdSeq
@@ -62,7 +62,7 @@ namespace Moses
 	int cmp(PhrasePair const& a, PhrasePair const& b) const;
 	bool operator()(PhrasePair const& a, PhrasePair const& b) const;
       };
-      
+
       class SortDescendingByJointCount
       {
       public:
@@ -73,8 +73,8 @@ namespace Moses
 
     template<typename Token>
     void PhrasePair<Token>
-    ::init(uint64_t const pid1, bool is_inverse, 
-	   Token const* x, uint32_t const len, 
+    ::init(uint64_t const pid1, bool is_inverse,
+	   Token const* x, uint32_t const len,
 	   pstats const* ps, size_t const numfeats)
     {
       inverse = is_inverse;
@@ -98,15 +98,15 @@ namespace Moses
     template<typename Token>
     PhrasePair<Token> const&
     PhrasePair<Token>
-    ::update(uint64_t const pid2, 
-	     Token const* x, uint32_t const len, jstats const& js)   
+    ::update(uint64_t const pid2,
+	     Token const* x, uint32_t const len, jstats const& js)
     {
       p2    = pid2;
       start2 = x; len2 = len;
       raw2  = js.cnt2();
       joint = js.rcnt();
       assert(js.aln().size());
-      if (js.aln().size()) 
+      if (js.aln().size())
 	aln = js.aln()[0].second;
       // float total_fwd = 0, total_bwd = 0;
       // for (int i = 0; i <= Moses::LRModel::NONE; i++)
@@ -123,48 +123,48 @@ namespace Moses
 	  dfwd[i] = js.dcnt_fwd(po);
 	  dbwd[i] = js.dcnt_bwd(po);
 	}
-      
+
       indoc = js.indoc;
       return *this;
     }
 
     template<typename Token>
-    bool 
+    bool
     PhrasePair<Token>
-    ::operator<(PhrasePair const& other) const 
-    { 
-      return this->score < other.score; 
-    }
-    
-    template<typename Token>
-    bool 
-    PhrasePair<Token>
-    ::operator>(PhrasePair const& other) const
-    { 
-      return this->score > other.score; 
+    ::operator<(PhrasePair const& other) const
+    {
+      return this->score < other.score;
     }
 
     template<typename Token>
-    bool 
+    bool
     PhrasePair<Token>
-    ::operator<=(PhrasePair const& other) const 
-    { 
-      return this->score <= other.score; 
+    ::operator>(PhrasePair const& other) const
+    {
+      return this->score > other.score;
     }
-    
+
     template<typename Token>
-    bool 
+    bool
+    PhrasePair<Token>
+    ::operator<=(PhrasePair const& other) const
+    {
+      return this->score <= other.score;
+    }
+
+    template<typename Token>
+    bool
     PhrasePair<Token>
     ::operator>=(PhrasePair const& other) const
-    { 
-      return this->score >= other.score; 
+    {
+      return this->score >= other.score;
     }
 
     template<typename Token>
     PhrasePair<Token> const&
     PhrasePair<Token>
-    ::operator+=(PhrasePair const& o) 
-    { 
+    ::operator+=(PhrasePair const& o)
+    {
       raw1    += o.raw1;
       raw2    += o.raw2;
       good1   += o.good1;
@@ -178,16 +178,16 @@ namespace Moses
 
     template<typename Token>
     PhrasePair<Token>
-    ::PhrasePair(PhrasePair<Token> const& o) 
+    ::PhrasePair(PhrasePair<Token> const& o)
       : start1(o.start1)   , start2(o.start2)
       , len1(o.len1)       , len2(o.len2)
       , p1(o.p1)           , p2(o.p2)
-      , raw1(o.raw1)       , raw2(o.raw2) 
+      , raw1(o.raw1)       , raw2(o.raw2)
       , sample1(o.sample1) , sample2(o.sample2)
       ,	good1(o.good1)     , good2(o.good2)
-      , joint(o.joint)     
+      , joint(o.joint)
       , fvals(o.fvals)
-      , aln(o.aln)      
+      , aln(o.aln)
       , score(o.score)
       , inverse(o.inverse)
       , indoc(o.indoc)
@@ -198,7 +198,7 @@ namespace Moses
 	  dbwd[i] = o.dbwd[i];
 	}
     }
-    
+
     template<typename Token>
     int PhrasePair<Token>
     ::SortByTargetIdSeq
@@ -207,7 +207,7 @@ namespace Moses
       size_t i = 0;
       Token const* x = a.start2;
       Token const* y = b.start2;
-      while (i < a.len2 && i < b.len2 && x->id() == y->id()) 
+      while (i < a.len2 && i < b.len2 && x->id() == y->id())
 	{
 	  x = x->next();
 	  y = y->next();
@@ -218,7 +218,7 @@ namespace Moses
       if (i == b.len2) return  1;
       return x->id() < y->id() ? -1 : 1;
     }
-    
+
     template<typename Token>
     bool PhrasePair<Token>
     ::SortByTargetIdSeq
@@ -237,16 +237,16 @@ namespace Moses
     }
 
     template<typename Token>
-    bool 
+    bool
     PhrasePair<Token>
     ::SortDescendingByJointCount
     ::operator()(PhrasePair const& a, PhrasePair const& b) const
     {
       return this->cmp(a,b) < 0;
     }
-    
+
     template<typename Token>
-    void 
+    void
     PhrasePair<Token>
     ::init()
     {
@@ -257,21 +257,21 @@ namespace Moses
     }
 
 
-    void 
-    fill_lr_vec2(LRModel::ModelType mdl, float const* const cnt, 
+    void
+    fill_lr_vec2(LRModel::ModelType mdl, float const* const cnt,
 		float const total, float* v);
-    
+
     template<typename Token>
     void
     PhrasePair<Token>
-    ::fill_lr_vec(LRModel::Direction const& dir, 
-		  LRModel::ModelType const& mdl, 
+    ::fill_lr_vec(LRModel::Direction const& dir,
+		  LRModel::ModelType const& mdl,
 		  vector<float>& v) const
     {
       // how many distinct scores do we have?
       size_t num_scores = (mdl == LRModel::MSLR ? 4 : mdl == LRModel::MSD  ? 3 : 2);
       size_t offset;
-      if (dir == LRModel::Bidirectional) 
+      if (dir == LRModel::Bidirectional)
 	{
 	  offset = num_scores;
 	  num_scores *= 2;
@@ -281,32 +281,32 @@ namespace Moses
       v.resize(num_scores);
 
       // determine the denominator
-      float total = 0; 
-      for (size_t i = 0; i <= LRModel::NONE; ++i) 
+      float total = 0;
+      for (size_t i = 0; i <= LRModel::NONE; ++i)
 	total += dfwd[i];
 
       if (dir != LRModel::Forward) // i.e., Backward or Bidirectional
 	fill_lr_vec2(mdl, dbwd, total, &v[0]);
       if (dir != LRModel::Backward) // i.e., Forward or Bidirectional
 	fill_lr_vec2(mdl, dfwd, total, &v[offset]);
-    }      
-    
+    }
+
 
     template<typename Token>
     void
     PhrasePair<Token>
-    ::print(ostream& out, TokenIndex const& V1, TokenIndex const& V2, 
+    ::print(ostream& out, TokenIndex const& V1, TokenIndex const& V2,
 	  LRModel const& LR) const
     {
-      out << toString (V1, this->start1, this->len1) << " ::: " 
-	  << toString (V2, this->start2, this->len2) << " " 
+      out << toString (V1, this->start1, this->len1) << " ::: "
+	  << toString (V2, this->start2, this->len2) << " "
 	  << this->joint << " [";
       for (size_t i = 0; i < this->indoc.size(); ++i)
-	{ 
-	  if (i) out << " "; 
-	  out << this->indoc[i]; 
+	{
+	  if (i) out << " ";
+	  out << this->indoc[i];
 	}
-      out << "] ["; 
+      out << "] [";
       vector<float> lrscores;
       this->fill_lr_vec(LR.GetDirection(), LR.GetModelType(), lrscores);
       for (size_t i = 0; i < lrscores.size(); ++i)
@@ -322,7 +322,7 @@ namespace Moses
 	  if (i) *log << " ";
 	  *log << p.dfwd[i];
 	}
-      *log << "] ["; 
+      *log << "] [";
       for (int i = 0; i <= Moses::LRModel::NONE; i++)
 	{
 	  // PhraseOrientation po = static_cast<PhraseOrientation>(i);

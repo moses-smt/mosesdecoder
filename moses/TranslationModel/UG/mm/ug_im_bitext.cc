@@ -6,15 +6,15 @@ namespace Moses
   {
 
     template<>
-    sptr<imBitext<L2R_Token<SimpleWordId> > > 
+    sptr<imBitext<L2R_Token<SimpleWordId> > >
     imBitext<L2R_Token<SimpleWordId> >::
-    add(vector<string> const& s1, 
-	vector<string> const& s2, 
+    add(vector<string> const& s1,
+	vector<string> const& s2,
 	vector<string> const& aln) const
     {
       typedef L2R_Token<SimpleWordId> TKN;
       assert(s1.size() == s2.size() && s1.size() == aln.size());
-      
+
 #ifndef NDEBUG
       size_t first_new_snt = this->T1 ? this->T1->size() : 0;
 #endif
@@ -24,7 +24,7 @@ namespace Moses
 	boost::unique_lock<boost::shared_mutex> guard(m_lock);
 	ret.reset(new imBitext<TKN>(*this));
       }
-      
+
       // we add the sentences in separate threads (so it's faster)
       boost::thread thread1(snt_adder<TKN>(s1,*ret->V1,ret->myT1,ret->myI1));
       // thread1.join(); // for debugging
@@ -41,10 +41,10 @@ namespace Moses
 	      binwrite(obuf,row);
 	      binwrite(obuf,col);
 	    }
-	  // important: DO NOT replace the two lines below this comment by 
-	  // char const* x = obuf.str().c_str(), as the memory x is pointing 
+	  // important: DO NOT replace the two lines below this comment by
+	  // char const* x = obuf.str().c_str(), as the memory x is pointing
 	  // to is freed immediately upon deconstruction of the string object.
-	  string foo = obuf.str(); 
+	  string foo = obuf.str();
 	  char const* x = foo.c_str();
 	  vector<char> v(x,x+foo.size());
 	  ret->myTx = append(ret->myTx, v);

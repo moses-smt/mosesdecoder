@@ -147,8 +147,7 @@ void InternalTree::GetUnbinarizedChildren(std::vector<TreePointer> &ret) const
     const std::string &label = (*itx)->GetLabel();
     if (!label.empty() && label[0] == '^') {
       (*itx)->GetUnbinarizedChildren(ret);
-    }
-    else {
+    } else {
       ret.push_back(*itx);
     }
   }

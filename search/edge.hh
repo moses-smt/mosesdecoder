@@ -16,13 +16,13 @@ namespace search {
 // Copyable, but the copy will be shallow.
 class PartialEdge : public Header {
   public:
-    // Allow default construction for STL.  
+    // Allow default construction for STL.
     PartialEdge() {}
 
-    PartialEdge(util::Pool &pool, Arity arity) 
+    PartialEdge(util::Pool &pool, Arity arity)
       : Header(pool.Allocate(Size(arity, arity + 1)), arity) {}
-    
-    PartialEdge(util::Pool &pool, Arity arity, Arity chart_states) 
+
+    PartialEdge(util::Pool &pool, Arity arity, Arity chart_states)
       : Header(pool.Allocate(Size(arity, chart_states)), arity) {}
 
     // Non-terminals

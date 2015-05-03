@@ -74,8 +74,8 @@ protected:
   std::vector<const Phrase*> m_unksrcs;
   InputPathList m_inputPathQueue;
 
-  TranslationOptionCollection(ttasksptr const& ttask, 
-			      InputType const& src, size_t maxNoTransOptPerCoverage,
+  TranslationOptionCollection(ttasksptr const& ttask,
+                              InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
 
   void CalcFutureScore();
@@ -177,8 +177,7 @@ public:
     return m_inputPathQueue;
   }
 
-  ttasksptr GetTranslationTask() const
-  {
+  ttasksptr GetTranslationTask() const {
     return m_ttask.lock();
   }
   TO_STRING();

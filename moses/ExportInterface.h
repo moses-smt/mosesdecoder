@@ -45,7 +45,9 @@ public:
   ~SimpleTranslationInterface();
   std::string translate(const std::string &input);
   Moses::StaticData& getStaticData();
-  Moses::Parameter& getParameters(){ return m_params; }
+  Moses::Parameter& getParameters() {
+    return m_params;
+  }
 private:
   SimpleTranslationInterface();
   Moses::Parameter m_params;

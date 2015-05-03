@@ -72,7 +72,7 @@ FFState* TreeStructureFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hy
 
     bool full_sentence = (mytree->GetChildren().back()->GetLabel() == "</s>" || (mytree->GetChildren().back()->GetLabel() == "SEND" && mytree->GetChildren().back()->GetChildren().back()->GetLabel() == "</s>"));
     if (m_binarized && full_sentence) {
-        mytree->Unbinarize();
+      mytree->Unbinarize();
     }
 
     return new TreeState(mytree);

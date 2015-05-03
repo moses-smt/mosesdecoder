@@ -6,14 +6,14 @@
 // string distance measures
 // Code by Ulrich Germann
 
-namespace stringdist 
+namespace stringdist
 {
 
-  UErrorCode strip_accents(UnicodeString & trg) 
+  UErrorCode strip_accents(UnicodeString & trg)
   {
     UErrorCode status = U_ZERO_ERROR;
-    static Transliterator *stripper 
-      = Transliterator::createInstance("NFD; [:M:] Remove; NFC", 
+    static Transliterator *stripper
+      = Transliterator::createInstance("NFD; [:M:] Remove; NFC",
 				       UTRANS_FORWARD, status);
     stripper->transliterate(trg);
     return status;
@@ -22,9 +22,9 @@ namespace stringdist
   char const*
   StringDiff::
   Segment::
-  elabel[] = { "same", "cap", "flip", "permutation", 
-	       "accent", "duplication", 
-	       "insertion", "deletion", 
+  elabel[] = { "same", "cap", "flip", "permutation",
+	       "accent", "duplication",
+	       "insertion", "deletion",
 	       "mismatch", "noinit" };
 
   StringDiff::
@@ -44,7 +44,7 @@ namespace stringdist
   Segment()
     : start_a(-1), end_a(-1), start_b(-1), end_b(-1), match(noinit), dist(0)
   {}
-  
+
   UnicodeString const&
   StringDiff::
   set_a(string const& a)
@@ -74,8 +74,8 @@ namespace stringdist
   {
     return this->b;
   }
-  
-  size_t 
+
+  size_t
   StringDiff::
   size()
   {
@@ -94,7 +94,7 @@ namespace stringdist
   // 	if      (s.match == same) continue;
   // 	else if (s.match == insertion) ret += s.end_b - s.start_b;
   // 	else if (s.match == deletion)  ret += s.end_a - s.start_a;
- 
+
   //     }
   // }
 
@@ -138,7 +138,7 @@ namespace stringdist
 #endif
   }
 
-  float 
+  float
   fillAlignmentMatrix(UChar const* a, size_t const lenA,
 		      UChar const* b, size_t const lenB,
 		      vector<vector<float> > & M)
@@ -164,7 +164,7 @@ namespace stringdist
     return M.back().back();
   }
 
-  float 
+  float
   levenshtein(UChar const* a, size_t const lenA,
 	      UChar const* b, size_t const lenB)
   {
@@ -180,7 +180,7 @@ namespace stringdist
     	cout << endl;
       }
     cout << string(25,'-') << endl;
-#endif 
+#endif
 
     int i = M.size() -1;
     int j = M.back().size() -1;
@@ -207,29 +207,29 @@ namespace stringdist
     return ret;
   }
 
-  
+
 
   StringDiff::
   Segment::
-  Segment(size_t const as, size_t const ae, 
+  Segment(size_t const as, size_t const ae,
 	  size_t const bs, size_t const be,
-	  UnicodeString const& a, 
-	  UnicodeString const& b) 
+	  UnicodeString const& a,
+	  UnicodeString const& b)
   {
     dist = 0;
-    start_a = as; end_a = ae; 
+    start_a = as; end_a = ae;
     start_b = bs; end_b = be;
     if (as == ae)
       match = bs == be ? same : insertion;
-    else if (bs == be) 
+    else if (bs == be)
       match = deletion;
-    else if (be-bs != ae-as) 
+    else if (be-bs != ae-as)
       {
 	match = mismatch;
 	dist  = stringdist::levenshtein(a.getBuffer() + as, ae - as,
 					b.getBuffer() + bs, be - bs);
       }
-    else 
+    else
       {
 	match = same;
 	size_t stop = ae-as;
@@ -251,11 +251,11 @@ namespace stringdist
 	      }
 	  }
       }
-    if (match == insertion)   
+    if (match == insertion)
       {
 	dist = be-bs;
       }
-    else if (match == deletion)    
+    else if (match == deletion)
       {
 	dist = ae-as;
       }
@@ -309,18 +309,18 @@ namespace stringdist
 	if (i) --i;
 	if (j) --j;
       }
-    for (size_t k = 0; k < A.size(); ++k) 
+    for (size_t k = 0; k < A.size(); ++k)
       A[k] = min(A[k],A2[k]);
-    for (size_t k = 0; k < B.size(); ++k) 
+    for (size_t k = 0; k < B.size(); ++k)
       B[k] = min(B[k],B2[k]);
-    
+
     if (a[i] == b[j]) { A[i] = j; B[j] = i; }
     i = 0;
     j = 0;
     size_t I, J;
     while (i < a.length() and j < b.length())
       {
-	if (A[i] < 0) 
+	if (A[i] < 0)
 	  {
 	    I = i + 1;
 	    while (I < A.size() and A[I] < 0) ++I;
@@ -338,24 +338,24 @@ namespace stringdist
 	    difflist.push_back(Segment(i,i,j,J,a,b));
 	    j = J;
 	  }
-	else 
+	else
 	  {
-	    I = i; 
+	    I = i;
 	    J = j;
-	    while(I < A.size() && A[I] >= 0 && J < B.size() && B[J] >= 0) 
+	    while(I < A.size() && A[I] >= 0 && J < B.size() && B[J] >= 0)
 	      { ++I; ++J; }
 	    difflist.push_back(Segment(i,I,j,J,a,b));
 	    i = I; j = J;
 	  }
       }
-    if (i < a.length() || j < b.length()) 
+    if (i < a.length() || j < b.length())
       difflist.push_back(Segment(i,a.length(),j,b.length(),a,b));
 
     diffcnt.assign(noinit,0);
     for (size_t i = 0; i < difflist.size(); ++i)
       {
 	Segment & s = difflist[i];
-	if (s.match == insertion and 
+	if (s.match == insertion and
 	    ((s.start_a and a[s.start_a - 1] == b[s.start_b]) or
 	     (s.end_a < a.length() and a[s.end_a] == b[s.start_b])))
 	  {
@@ -364,7 +364,7 @@ namespace stringdist
 	      sameletter = b[i] == b[i-1];
 	    if (sameletter) s.match = duplication;
 	  }
-	else if (s.match == deletion and 
+	else if (s.match == deletion and
 		 ((s.start_b and b[s.start_b - 1] == a[s.start_a]) or
 		  (s.end_b < b.length() and b[s.end_b] == a[s.start_a])))
 	  {
@@ -380,15 +380,15 @@ namespace stringdist
 
   void
   StringDiff::
-  showDiff(std::ostream& out) 
+  showDiff(std::ostream& out)
   {
     if (difflist.size() == 0) align();
     vector<size_t> fromEnd(difflist.size(),0);
     for (int d = difflist.size()-1; d-- > 0;)
       {
 	fromEnd[d] = a.length() - difflist[d].end_a;
-	// cout << d << " " << fromEnd[d] << " " 
-	//      << difflist[d].start_a << "-" 
+	// cout << d << " " << fromEnd[d] << " "
+	//      << difflist[d].start_a << "-"
 	//      << difflist[d].end_a << endl;
       }
     for (size_t d = 0; d < difflist.size(); ++d)
@@ -402,7 +402,7 @@ namespace stringdist
 	bseg.toUTF8String(bbuf);
 	out << abuf << " ";
 	out << bbuf << " ";
-	out << s.label() << " " 
+	out << s.label() << " "
 	    << s.dist << " "
 	    << fromEnd[d]
 	    << endl;
@@ -423,7 +423,7 @@ namespace stringdist
   {
     return difflist.at(i);
   }
-  
+
   vector<int> const&
   StringDiff::
   getFeatures() const

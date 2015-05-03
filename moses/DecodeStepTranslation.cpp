@@ -215,20 +215,19 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
   UTIL_THROW(util::Exception, "Input path not found");
 }
 
-void 
+void
 DecodeStepTranslation::
 ProcessLEGACY(TranslationOption const& in,
-	      DecodeStep const& decodeStep, 
-	      PartialTranslOptColl &out, 
-	      TranslationOptionCollection *toc, 
-	      bool adhereTableLimit) const
+              DecodeStep const& decodeStep,
+              PartialTranslOptColl &out,
+              TranslationOptionCollection *toc,
+              bool adhereTableLimit) const
 {
-  if (in.GetTargetPhrase().GetSize() == 0) 
-    {
-      // word deletion
-      out.Add(new TranslationOption(in));
-      return;
-    }
+  if (in.GetTargetPhrase().GetSize() == 0) {
+    // word deletion
+    out.Add(new TranslationOption(in));
+    return;
+  }
 
   // normal trans step
   WordsRange const& srcRange = in.GetSourceWordsRange();
@@ -240,35 +239,33 @@ ProcessLEGACY(TranslationOption const& in,
 
   TargetPhraseCollectionWithSourcePhrase const* phraseColl;
   phraseColl = pdict->GetTargetPhraseCollectionLEGACY(toc->GetSource(),srcRange);
-  
-  if (phraseColl != NULL) 
-    {
-      TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
-      iterEnd = ((adhereTableLimit && tableLimit && phraseColl->GetSize() >= tableLimit)
-		 ? phraseColl->begin() + tableLimit : phraseColl->end()); 
-      
-      for (iterTargetPhrase = phraseColl->begin(); 
-	   iterTargetPhrase != iterEnd; 
-	   ++iterTargetPhrase) 
-	{
-	  TargetPhrase const& targetPhrase = **iterTargetPhrase;
-	  if (targetPhrase.GetSize() != currSize ||
-	      (IsFilteringStep() && !in.IsCompatible(targetPhrase, m_conflictFactors)))
-	    continue;
-	  
-	  TargetPhrase outPhrase(inPhrase);
-	  outPhrase.Merge(targetPhrase, m_newOutputFactors);
-	  outPhrase.EvaluateInIsolation(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
-	  
-	  TranslationOption *newTransOpt = new TranslationOption(srcRange, outPhrase);
-	  assert(newTransOpt != NULL);
 
-	  newTransOpt->SetInputPath(inputPath);
-	  
-	  out.Add(newTransOpt);
-	  
-	}
-    } 
+  if (phraseColl != NULL) {
+    TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
+    iterEnd = ((adhereTableLimit && tableLimit && phraseColl->GetSize() >= tableLimit)
+               ? phraseColl->begin() + tableLimit : phraseColl->end());
+
+    for (iterTargetPhrase = phraseColl->begin();
+         iterTargetPhrase != iterEnd;
+         ++iterTargetPhrase) {
+      TargetPhrase const& targetPhrase = **iterTargetPhrase;
+      if (targetPhrase.GetSize() != currSize ||
+          (IsFilteringStep() && !in.IsCompatible(targetPhrase, m_conflictFactors)))
+        continue;
+
+      TargetPhrase outPhrase(inPhrase);
+      outPhrase.Merge(targetPhrase, m_newOutputFactors);
+      outPhrase.EvaluateInIsolation(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
+
+      TranslationOption *newTransOpt = new TranslationOption(srcRange, outPhrase);
+      assert(newTransOpt != NULL);
+
+      newTransOpt->SetInputPath(inputPath);
+
+      out.Add(newTransOpt);
+
+    }
+  }
 }
 }
 

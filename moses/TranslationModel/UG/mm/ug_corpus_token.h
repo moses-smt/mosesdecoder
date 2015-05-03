@@ -19,7 +19,7 @@ namespace ugdiss
 {
   /** Simple wrapper around id_type for use with the Ttrack/TSA template classes */
 
-  class SimpleWordId 
+  class SimpleWordId
   {
     id_type theID;
   public:
@@ -29,7 +29,7 @@ namespace ugdiss
     bool operator==(SimpleWordId const& other) const;
     id_type remap(vector<id_type const*> const& m) const;
   };
-  
+
   /** Token class for suffix arrays */
   template<typename T>
   class
@@ -43,16 +43,16 @@ namespace ugdiss
 
     L2R_Token const* next(int n=1) const { return this+n; }
 
-    /** return a pointer to the end of a sentence; used as a stopping criterion during 
+    /** return a pointer to the end of a sentence; used as a stopping criterion during
      *  comparison of suffixes; see Ttrack::cmp() */
     template<typename TTRACK_TYPE>
-    L2R_Token const* stop(TTRACK_TYPE const& C, id_type sid) const 
-    { 
-      return reinterpret_cast<L2R_Token<T> const*>(C.sntEnd(sid)); 
+    L2R_Token const* stop(TTRACK_TYPE const& C, id_type sid) const
+    {
+      return reinterpret_cast<L2R_Token<T> const*>(C.sntEnd(sid));
     }
 
-    L2R_Token const* stop(L2R_Token const* seqStart, L2R_Token const* seqEnd) const 
-    { 
+    L2R_Token const* stop(L2R_Token const* seqStart, L2R_Token const* seqEnd) const
+    {
       return seqEnd;
     }
 
@@ -69,20 +69,20 @@ namespace ugdiss
   {
   public:
     typedef T Token;
-    
+
     R2L_Token() : T() {};
     R2L_Token(id_type id) : T(id) {};
 
     R2L_Token const* next(int n = 1) const { return this - n; }
 
     template<typename TTRACK_TYPE>
-    R2L_Token const* stop(TTRACK_TYPE const& C, id_type sid) const 
-    { 
-      return reinterpret_cast<R2L_Token<T> const*>(C.sntStart(sid) - 1); 
+    R2L_Token const* stop(TTRACK_TYPE const& C, id_type sid) const
+    {
+      return reinterpret_cast<R2L_Token<T> const*>(C.sntStart(sid) - 1);
     }
 
-    R2L_Token const* stop(R2L_Token const* seqStart, R2L_Token const* seqEnd) const 
-    { 
+    R2L_Token const* stop(R2L_Token const* seqStart, R2L_Token const* seqEnd) const
+    {
       assert(seqStart);
       return seqStart - 1;
     }

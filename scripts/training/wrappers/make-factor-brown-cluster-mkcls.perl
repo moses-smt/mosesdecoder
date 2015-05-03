@@ -3,11 +3,18 @@
 use warnings;
 use strict;
 
-my ($lowercase, $cluster_file,$in,$out,$tmp) = @ARGV;
+my ($lowercase,$cluster_file,$in,$out,$tmp) = @ARGV;
 
 my $CLUSTER = &read_cluster_from_mkcls($cluster_file);
 
-open(IN,$in) || die("ERROR: could not open input");
+# is $lowercase a script?
+if ($lowercase =~ /\//) {
+  open(IN,"$lowercase < $in|") || die("ERROR: could not open input");
+  $lowercase = 0;
+}
+else {
+  open(IN,$in) || die("ERROR: could not open input");
+}
 binmode(IN, ":utf8");
 open(OUT,">$out");
 binmode(OUT, ":utf8");
@@ -18,6 +25,7 @@ while(<IN>) {
   s/ $//;
   my $first = 1;
   foreach my $word (split) {
+    # if lowercase is a flag
     if ($lowercase) {
       $word = lc($word);
     }

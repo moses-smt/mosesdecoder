@@ -168,18 +168,18 @@ static void ShowWeights()
 int main(int argc, char** argv)
 {
   try {
-  
+
     // echo command line, if verbose
     IFVERBOSE(1) {
       TRACE_ERR("command: ");
       for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
       TRACE_ERR(endl);
     }
-  
+
     // set number of significant decimals in output
     fix(cout,PRECISION);
     fix(cerr,PRECISION);
-  
+
     // load all the settings into the Parameter class
     // (stores them as strings, or array of strings)
     Parameter* params = new Parameter();
@@ -187,34 +187,34 @@ int main(int argc, char** argv)
       params->Explain();
       exit(1);
     }
-  
-  
+
+
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
     if (!StaticData::LoadDataStatic(params, argv[0])) {
       exit(1);
     }
-  
+
     // setting "-show-weights" -> just dump out weights and exit
     if (params->isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
-  
+
     // shorthand for accessing information in StaticData
     const StaticData& staticData = StaticData::Instance();
-  
-  
+
+
     //initialise random numbers
     rand_init();
-  
+
     // set up read/writing class
     IOWrapper* ioWrapper = GetIOWrapper(staticData);
     if (!ioWrapper) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);
     }
-  
+
     // check on weights
     vector<float> weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
@@ -233,7 +233,7 @@ int main(int argc, char** argv)
 
     // setting lexicalized reordering setup
     PhraseBasedReorderingState::m_useFirstBackwardScore = false;
-  
+
 
     auto_ptr<OutputCollector> outputCollector;
     outputCollector.reset(new OutputCollector());
@@ -241,7 +241,7 @@ int main(int argc, char** argv)
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
-  
+
     // main loop over set of input sentences
     InputType* source = NULL;
     size_t lineCount = 0;
@@ -259,11 +259,11 @@ int main(int argc, char** argv)
       task->Run();
       delete task;
 #endif
-  
+
       source = NULL; //make sure it doesn't get deleted
       ++lineCount;
     }
-  
+
   // we are done, finishing up
 #ifdef WITH_THREADS
     pool.Stop(true); //flush remaining jobs

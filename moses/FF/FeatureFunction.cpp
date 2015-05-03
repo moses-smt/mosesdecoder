@@ -38,10 +38,10 @@ void FeatureFunction::Destroy()
   RemoveAllInColl(s_staticColl);
 }
 
-// The original declaration as 
+// The original declaration as
 // void FeatureFunction::CallChangeSource(InputType *&input)
-// had me a bit perplexed. Would you really want to allow 
-// any feature function to replace the InputType behind the 
+// had me a bit perplexed. Would you really want to allow
+// any feature function to replace the InputType behind the
 // back of the others? And change what the vector is pointing to?
 
 void FeatureFunction::CallChangeSource(InputType * const&input)
@@ -55,7 +55,7 @@ void FeatureFunction::CallChangeSource(InputType * const&input)
 void FeatureFunction::SetupAll(TranslationTask const& ttask)
 {
   BOOST_FOREACH(FeatureFunction* ff, s_staticColl)
-    ff->Setup(ttask);
+  ff->Setup(ttask);
 }
 
 FeatureFunction::
@@ -190,27 +190,33 @@ void FeatureFunction::SetTuneableComponents(const std::string& value)
   }
 }
 
-void 
+void
 FeatureFunction
 ::InitializeForInput(ttasksptr const& ttask)
-{ InitializeForInput(*(ttask->GetSource().get())); }
+{
+  InitializeForInput(*(ttask->GetSource().get()));
+}
 
-void 
+void
 FeatureFunction
-::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) 
-{ CleanUpAfterSentenceProcessing(*(ttask->GetSource().get())); }
+::CleanUpAfterSentenceProcessing(ttasksptr const& ttask)
+{
+  CleanUpAfterSentenceProcessing(*(ttask->GetSource().get()));
+}
 
-size_t 
+size_t
 FeatureFunction
 ::GetIndex() const
-{ return m_index; }
+{
+  return m_index;
+}
 
 
 /// set index
 //  @return index of the next FF
-size_t 
+size_t
 FeatureFunction
-::SetIndex(size_t const idx) 
+::SetIndex(size_t const idx)
 {
   m_index = idx;
   return this->GetNumScoreComponents() + idx;

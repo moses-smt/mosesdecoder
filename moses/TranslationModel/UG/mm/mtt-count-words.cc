@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
   T.open(bname+".mct");
-  V.open(bname+".tdx"); 
+  V.open(bname+".tdx");
   vector<size_t> cnt(V.ksize(),0);
   for (size_t sid = 0; sid < T.size(); ++sid)
     {
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
   exit(0);
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   namespace po=boost::program_options;
@@ -60,7 +60,7 @@ interpret_args(int ac, char* av[])
   o.add_options()
     ("help,h",    "print this message")
     ;
-  
+
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
     ;

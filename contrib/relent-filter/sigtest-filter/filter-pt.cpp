@@ -1,5 +1,5 @@
 
-#include <cstring> 
+#include <cstring>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

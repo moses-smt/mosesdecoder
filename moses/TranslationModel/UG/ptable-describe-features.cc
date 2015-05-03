@@ -19,7 +19,7 @@ int main()
     {
       if (line.empty()) continue;
       size_t k = line.find_first_not_of(" ");
-      if (line.find("Mmsapt") != k && 
+      if (line.find("Mmsapt") != k &&
 	  line.find("PhraseDictionaryBitextSampling") != k)
 	continue;
       Mmsapt PT(line);
@@ -32,6 +32,6 @@ int main()
     }
   exit(0);
 }
-  
-  
+
+
 

@@ -22,7 +22,7 @@ struct BasicPrint {
     std::cout << "Total: " << total << " OOV: " << oov << '\n';
   }
   void Summary(double, double, uint64_t, uint64_t) {}
-  
+
 };
 
 struct FullPrint : public BasicPrint {
@@ -31,7 +31,7 @@ struct FullPrint : public BasicPrint {
   }
 
   void Summary(double ppl_including_oov, double ppl_excluding_oov, uint64_t corpus_oov, uint64_t corpus_tokens) {
-    std::cout << 
+    std::cout <<
       "Perplexity including OOVs:\t" << ppl_including_oov << "\n"
       "Perplexity excluding OOVs:\t" << ppl_excluding_oov << "\n"
       "OOVs:\t" << corpus_oov << "\n"
