@@ -183,8 +183,8 @@ public:
 
       // optionally update translation options using leave-one-out
       std::vector<bool> keep = (m_leaveOneOut.size() > 0)
-        ? LeaveOneOut(translationOptionList, correct)
-        : std::vector<bool>(translationOptionList.size(), true);
+                               ? LeaveOneOut(translationOptionList, correct)
+                               : std::vector<bool>(translationOptionList.size(), true);
 
       // check whether we (still) have some correct translation
       int firstCorrect = -1;
@@ -312,11 +312,11 @@ public:
       return;
 
     UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
-        "This feature function requires the TabbedSentence input type");
+                   "This feature function requires the TabbedSentence input type");
 
     const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
     UTIL_THROW_IF2(tabbedSentence.GetColumns().size() < 2,
-        "TabbedSentence must contain target<tab>alignment");
+                   "TabbedSentence must contain target<tab>alignment");
 
     // target sentence represented as a phrase
     Phrase *target = new Phrase();

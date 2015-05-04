@@ -96,8 +96,7 @@ public:
   bool RecursiveSearch(const std::vector<NTLabel> & labels, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const;
 
   // Python-like generator that yields next nonterminal leaf on every call
-  $generator(leafNT)
-  {
+  $generator(leafNT) {
     std::vector<TreePointer>::iterator it;
     InternalTree* tree;
     leafNT(InternalTree* root = 0): tree(root) {}
@@ -116,8 +115,7 @@ public:
 
 
   // Python-like generator that yields the parent of the next nonterminal leaf on every call
-  $generator(leafNTParent)
-  {
+  $generator(leafNTParent) {
     std::vector<TreePointer>::iterator it;
     InternalTree* tree;
     leafNTParent(InternalTree* root = 0): tree(root) {}
@@ -135,8 +133,7 @@ public:
   };
 
   // Python-like generator that yields the next nonterminal leaf on every call, and also stores the path from the root of the tree to the nonterminal
-  $generator(leafNTPath)
-  {
+  $generator(leafNTPath) {
     std::vector<TreePointer>::iterator it;
     InternalTree* tree;
     std::vector<InternalTree*> * path;

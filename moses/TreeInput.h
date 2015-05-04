@@ -8,7 +8,7 @@
 
 namespace Moses
 {
-  class TranslationTask;
+class TranslationTask;
 //! @todo what is this?
 class XMLParseOutput
 {

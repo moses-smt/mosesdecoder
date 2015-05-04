@@ -40,7 +40,9 @@ class TranslationTask : public Moses::Task
   TranslationTask(TranslationTask const& other) { }
 
   TranslationTask const&
-  operator=(TranslationTask const& other) { return *this; }
+  operator=(TranslationTask const& other) {
+    return *this;
+  }
 
 protected:
   boost::weak_ptr<TranslationTask> m_self; // weak ptr to myself
@@ -48,7 +50,7 @@ protected:
   // pointer to ContextScope, which stores context-specific information
   TranslationTask() { } ;
   TranslationTask(boost::shared_ptr<Moses::InputType> const& source,
-		  boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
+                  boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
   // Yes, the constructor is protected.
   //
   // TranslationTasks can only be created through the creator
@@ -68,11 +70,15 @@ protected:
 public:
 
   boost::shared_ptr<TranslationTask>
-  self() { return m_self.lock(); }
+  self() {
+    return m_self.lock();
+  }
 
   virtual
   boost::shared_ptr<TranslationTask const>
-  self() const { return m_self.lock(); }
+  self() const {
+    return m_self.lock();
+  }
 
   // creator functions
   static boost::shared_ptr<TranslationTask> create();
@@ -84,7 +90,7 @@ public:
   static
   boost::shared_ptr<TranslationTask>
   create(boost::shared_ptr<Moses::InputType> const& source,
-	 boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
+         boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
 
   ~TranslationTask();
   /** Translate one sentence
@@ -92,15 +98,16 @@ public:
   virtual void Run();
 
   boost::shared_ptr<Moses::InputType>
-  GetSource() const { return m_source; }
+  GetSource() const {
+    return m_source;
+  }
 
   boost::shared_ptr<BaseManager>
   SetupManager(SearchAlgorithm algo = DefaultSearchAlgorithm);
 
 
   boost::shared_ptr<ContextScope> const&
-  GetScope() const
-  {
+  GetScope() const {
     UTIL_THROW_IF2(m_scope == NULL, "No context scope!");
     return m_scope;
   }

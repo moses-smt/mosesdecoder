@@ -136,7 +136,9 @@ public:
   CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
 
   const std::string &
-  GetArgLine() const { return m_argLine; }
+  GetArgLine() const {
+    return m_argLine;
+  }
 
   // given a target phrase containing only factors specified in mask
   // return true if the feature function can be evaluated
@@ -153,8 +155,8 @@ public:
   // source from the input sentence
   virtual void
   EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase,
-		      ScoreComponentCollection& scoreBreakdown,
-		      ScoreComponentCollection& estimatedFutureScore) const = 0;
+                      ScoreComponentCollection& scoreBreakdown,
+                      ScoreComponentCollection& estimatedFutureScore) const = 0;
 
   // override this method if you want to change the input before decoding
   virtual void ChangeSource(InputType * const&input) const { }

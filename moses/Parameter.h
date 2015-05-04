@@ -66,27 +66,27 @@ protected:
 
   void
   AddParam(options_description& optgroup,
-	   value_semantic const* optvalue,
-	   std::string const& paramName,
-	   std::string const& description);
+           value_semantic const* optvalue,
+           std::string const& paramName,
+           std::string const& description);
 
   void
   AddParam(options_description& optgroup,
-	   std::string const &paramName,
-	   std::string const &description);
+           std::string const &paramName,
+           std::string const &description);
 
   void
   AddParam(options_description& optgroup,
-	   value_semantic const* optvalue,
-	   std::string const& paramName,
-	   std::string const& abbrevName,
-	   std::string const& description);
+           value_semantic const* optvalue,
+           std::string const& paramName,
+           std::string const& abbrevName,
+           std::string const& description);
 
   void
   AddParam(options_description& optgroup,
-	   std::string const& paramName,
-	   std::string const& abbrevName,
-	   std::string const& description);
+           std::string const& paramName,
+           std::string const& abbrevName,
+           std::string const& description);
 
   void PrintCredit();
   void PrintFF() const;

@@ -427,7 +427,7 @@ int main(int argc, char** argv)
   ostream *out = &std::cout;
 
   if (input) {
-  	fstream *fin = new fstream(input,ios::in);
+    fstream *fin = new fstream(input,ios::in);
     if (!fin->is_open()) {
       cerr << "cannot open " << input << "\n";
       exit(1);
@@ -436,7 +436,7 @@ int main(int argc, char** argv)
   }
 
   if (output) {
-  	fstream *fout = new fstream(output,ios::out);
+    fstream *fout = new fstream(output,ios::out);
     if (!fout->is_open()) {
       cerr << "cannot open " << output << "\n";
       exit(1);
@@ -506,12 +506,12 @@ int main(int argc, char** argv)
   for (int i=1; i<=MAX_N; i++) delete [] A[i];
   delete [] A;
 
-	if (inp != &std::cin) {
-		delete inp;
-	}
-	if (out != &std::cout) {
-		delete inp;
-	}
+  if (inp != &std::cin) {
+    delete inp;
+  }
+  if (out != &std::cout) {
+    delete inp;
+  }
 
   exit(0);
 }

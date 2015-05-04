@@ -116,18 +116,18 @@ void PropertiesConsolidator::ProcessPropertiesString(const std::string &properti
 
     } else if ( !keyValue[0].compare("POS") ) {
 
-/* DO NOTHING (property is not registered in the decoder at the moment)
-      if ( m_partsOfSpeechFlag ) {
+      /* DO NOTHING (property is not registered in the decoder at the moment)
+            if ( m_partsOfSpeechFlag ) {
 
-        // POS property: replace strings with vocabulary indices
-        out << " {{" << keyValue[0];
-        ProcessPOSPropertyValue(keyValue[1], out);
-        out << "}}";
+              // POS property: replace strings with vocabulary indices
+              out << " {{" << keyValue[0];
+              ProcessPOSPropertyValue(keyValue[1], out);
+              out << "}}";
 
-      } else { // don't process POS property
-        out << " {{" << keyValue[0] << " " << keyValue[1] << "}}";
-      }
-*/
+            } else { // don't process POS property
+              out << " {{" << keyValue[0] << " " << keyValue[1] << "}}";
+            }
+      */
 
     } else {
 

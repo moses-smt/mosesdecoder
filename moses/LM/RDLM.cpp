@@ -13,12 +13,14 @@ namespace Moses
 
 typedef Eigen::Map<Eigen::Matrix<int,Eigen::Dynamic,1> > EigenMap;
 
-RDLM::~RDLM() {
+RDLM::~RDLM()
+{
   delete lm_head_base_instance_;
   delete lm_label_base_instance_;
 }
 
-void RDLM::Load() {
+void RDLM::Load()
+{
 
   lm_head_base_instance_ = new nplm::neuralTM();
   lm_head_base_instance_->read(m_path_head_lm);
@@ -87,8 +89,8 @@ void RDLM::Load() {
 
   // just score provided file, then exit.
   if (!m_debugPath.empty()) {
-      ScoreFile(m_debugPath);
-      exit(1);
+    ScoreFile(m_debugPath);
+    exit(1);
   }
 
 //   {
@@ -202,8 +204,7 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   // ignore glue rules
   if (root->GetLabel() == m_glueSymbol) {
     // recursion
-    for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it)
-    {
+    for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it) {
       Score(it->get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash, num_virtual, rescoring_levels);
     }
     return;
@@ -213,11 +214,11 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   if (m_binarized && root->GetLabel()[0] == '^' && !ancestor_heads.empty()) {
     // recursion
     if (root->IsLeafNT() && m_context_up > 1 && ancestor_heads.size()) {
-        root = back_pointers.find(root)->second.get();
-        rescoring_levels = m_context_up-1;
+      root = back_pointers.find(root)->second.get();
+      rescoring_levels = m_context_up-1;
     }
     for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it) {
-       Score(it->get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash, num_virtual, rescoring_levels);
+      Score(it->get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash, num_virtual, rescoring_levels);
     }
     return;
   }
@@ -239,35 +240,34 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   if (root->GetLength() == 1 && root->GetChildren()[0]->IsTerminal()) {
     // root of tree: score without context
     if (ancestor_heads.empty() || (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head)) {
-        std::vector<int> ngram_head_null (static_head_null);
-        ngram_head_null.back() = lm_head->lookup_output_word(root->GetChildren()[0]->GetLabel());
-        if (m_isPretermBackoff && ngram_head_null.back() == 0) {
-          ngram_head_null.back() = lm_head->lookup_output_word(root->GetLabel());
-        }
-        if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head) {
-            std::vector<int>::iterator it = ngram_head_null.begin();
-            std::fill_n(it, m_context_left, static_start_head);
-            it += m_context_left;
-            std::fill_n(it, m_context_left, static_start_label);
-            it += m_context_left;
-            std::fill_n(it, m_context_right, static_stop_head);
-            it += m_context_right;
-            std::fill_n(it, m_context_right, static_stop_label);
-            it += m_context_right;
-            size_t context_up_nonempty = std::min(m_context_up, ancestor_heads.size());
-            it = std::copy(ancestor_heads.end()-context_up_nonempty, ancestor_heads.end(), it);
-            it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
-        }
-        if (ancestor_labels.size() >= m_context_up && !num_virtual) {
-          score[0] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
-        }
-        else {
-          boost::hash_combine(boundary_hash, ngram_head_null.back());
-          score[1] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
-        }
+      std::vector<int> ngram_head_null (static_head_null);
+      ngram_head_null.back() = lm_head->lookup_output_word(root->GetChildren()[0]->GetLabel());
+      if (m_isPretermBackoff && ngram_head_null.back() == 0) {
+        ngram_head_null.back() = lm_head->lookup_output_word(root->GetLabel());
+      }
+      if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head) {
+        std::vector<int>::iterator it = ngram_head_null.begin();
+        std::fill_n(it, m_context_left, static_start_head);
+        it += m_context_left;
+        std::fill_n(it, m_context_left, static_start_label);
+        it += m_context_left;
+        std::fill_n(it, m_context_right, static_stop_head);
+        it += m_context_right;
+        std::fill_n(it, m_context_right, static_stop_label);
+        it += m_context_right;
+        size_t context_up_nonempty = std::min(m_context_up, ancestor_heads.size());
+        it = std::copy(ancestor_heads.end()-context_up_nonempty, ancestor_heads.end(), it);
+        it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
+      }
+      if (ancestor_labels.size() >= m_context_up && !num_virtual) {
+        score[0] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
+      } else {
+        boost::hash_combine(boundary_hash, ngram_head_null.back());
+        score[1] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
+      }
     }
     return;
-  // we only need to re-visit previous hypotheses if we have more context available.
+    // we only need to re-visit previous hypotheses if we have more context available.
   } else if (root->IsLeafNT()) {
     if (m_context_up > 1 && ancestor_heads.size()) {
       root = back_pointers.find(root)->second.get();
@@ -276,8 +276,7 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
         return;
       }
       rescoring_levels = m_context_up-1;
-    }
-    else {
+    } else {
       return;
     }
   }
@@ -302,19 +301,17 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   int reached_end = 0;
   int label_idx, label_idx_out;
   if (m_binarized && head_label[0] == '^') {
-      virtual_head = true;
-      if (m_binarized == 1 || (m_binarized == 3 && head_label[2] == 'l')) {
-        reached_end = 1; //indicate that we've seen the first symbol of the RHS
-      }
-      else if (m_binarized == 2 || (m_binarized == 3 && head_label[2] == 'r')) {
-        reached_end = 2; // indicate that we've seen the last symbol of the RHS
-      }
-      // with 'full' binarization, direction is encoded in 2nd char
-      std::string clipped_label = (m_binarized == 3) ? head_label.substr(2,head_label.size()-2) : head_label.substr(1,head_label.size()-1);
-      label_idx = lm_label->lookup_input_word(clipped_label);
-      label_idx_out = lm_label->lookup_output_word(clipped_label);
-  }
-  else {
+    virtual_head = true;
+    if (m_binarized == 1 || (m_binarized == 3 && head_label[2] == 'l')) {
+      reached_end = 1; //indicate that we've seen the first symbol of the RHS
+    } else if (m_binarized == 2 || (m_binarized == 3 && head_label[2] == 'r')) {
+      reached_end = 2; // indicate that we've seen the last symbol of the RHS
+    }
+    // with 'full' binarization, direction is encoded in 2nd char
+    std::string clipped_label = (m_binarized == 3) ? head_label.substr(2,head_label.size()-2) : head_label.substr(1,head_label.size()-1);
+    label_idx = lm_label->lookup_input_word(clipped_label);
+    label_idx_out = lm_label->lookup_output_word(clipped_label);
+  } else {
     reached_end = 3; // indicate that we've seen first and last symbol of the RHS
     label_idx = lm_label->lookup_input_word(head_label);
     label_idx_out = lm_label->lookup_output_word(head_label);
@@ -324,49 +321,47 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
 
   // root of tree: score without context
   if (ancestor_heads.empty() || (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head)) {
-      if (head_idx != static_dummy_head && head_idx != static_head_head) {
-        std::vector<int> ngram_head_null (static_head_null);
-        *(ngram_head_null.end()-2) = label_idx;
-        ngram_head_null.back() = head_ids.second;
-        if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head && !num_virtual) {
-            std::vector<int>::iterator it = ngram_head_null.begin();
-            std::fill_n(it, m_context_left, static_start_head);
-            it += m_context_left;
-            std::fill_n(it, m_context_left, static_start_label);
-            it += m_context_left;
-            std::fill_n(it, m_context_right, static_stop_head);
-            it += m_context_right;
-            std::fill_n(it, m_context_right, static_stop_label);
-            it += m_context_right;
-            it = std::copy(ancestor_heads.end()-context_up_nonempty, ancestor_heads.end(), it);
-            it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
-            score[0] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
-        }
-        else {
-            boost::hash_combine(boundary_hash, ngram_head_null.back());
-            score[1] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
-        }
-      }
-      std::vector<int> ngram_label_null (static_label_null);
-      ngram_label_null.back() = label_idx_out;
+    if (head_idx != static_dummy_head && head_idx != static_head_head) {
+      std::vector<int> ngram_head_null (static_head_null);
+      *(ngram_head_null.end()-2) = label_idx;
+      ngram_head_null.back() = head_ids.second;
       if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head && !num_virtual) {
-          std::vector<int>::iterator it = ngram_label_null.begin();
-          std::fill_n(it, m_context_left, static_start_head);
-          it += m_context_left;
-          std::fill_n(it, m_context_left, static_start_label);
-          it += m_context_left;
-          std::fill_n(it, m_context_right, static_stop_head);
-          it += m_context_right;
-          std::fill_n(it, m_context_right, static_stop_label);
-          it += m_context_right;
-          it = std::copy(ancestor_heads.end()-context_up_nonempty, ancestor_heads.end(), it);
-          it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
-          score[2] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram_label_null.data(), ngram_label_null.size())));
+        std::vector<int>::iterator it = ngram_head_null.begin();
+        std::fill_n(it, m_context_left, static_start_head);
+        it += m_context_left;
+        std::fill_n(it, m_context_left, static_start_label);
+        it += m_context_left;
+        std::fill_n(it, m_context_right, static_stop_head);
+        it += m_context_right;
+        std::fill_n(it, m_context_right, static_stop_label);
+        it += m_context_right;
+        it = std::copy(ancestor_heads.end()-context_up_nonempty, ancestor_heads.end(), it);
+        it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
+        score[0] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
+      } else {
+        boost::hash_combine(boundary_hash, ngram_head_null.back());
+        score[1] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
       }
-      else {
-          boost::hash_combine(boundary_hash, ngram_label_null.back());
-          score[3] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram_label_null.data(), ngram_label_null.size())));
-      }
+    }
+    std::vector<int> ngram_label_null (static_label_null);
+    ngram_label_null.back() = label_idx_out;
+    if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head && !num_virtual) {
+      std::vector<int>::iterator it = ngram_label_null.begin();
+      std::fill_n(it, m_context_left, static_start_head);
+      it += m_context_left;
+      std::fill_n(it, m_context_left, static_start_label);
+      it += m_context_left;
+      std::fill_n(it, m_context_right, static_stop_head);
+      it += m_context_right;
+      std::fill_n(it, m_context_right, static_stop_label);
+      it += m_context_right;
+      it = std::copy(ancestor_heads.end()-context_up_nonempty, ancestor_heads.end(), it);
+      it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
+      score[2] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram_label_null.data(), ngram_label_null.size())));
+    } else {
+      boost::hash_combine(boundary_hash, ngram_label_null.back());
+      score[3] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram_label_null.data(), ngram_label_null.size())));
+    }
   }
 
   ancestor_heads.push_back(head_idx);
@@ -374,15 +369,14 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
 
   if (virtual_head) {
     num_virtual = m_context_up;
-  }
-  else if (num_virtual) {
-      --num_virtual;
+  } else if (num_virtual) {
+    --num_virtual;
   }
 
 
   // fill ancestor context (same for all children)
   if (context_up_nonempty < m_context_up) {
-      ++context_up_nonempty;
+    ++context_up_nonempty;
   }
   size_t up_padding = m_context_up - context_up_nonempty;
 
@@ -439,13 +433,13 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
     std::vector<int>::iterator it = ngram.begin();
 
     if (left_padding > 0) {
-        it += left_padding;
+      it += left_padding;
     }
 
     it = std::copy(heads.begin()+left_offset, heads.begin()+i, it);
 
     if (left_padding > 0) {
-        it += left_padding;
+      it += left_padding;
     }
 
     it = std::copy(labels.begin()+left_offset, labels.begin()+i, it);
@@ -453,33 +447,30 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
     it = std::copy(heads.begin()+i+1, heads.begin()+right_offset, it);
 
     if (right_padding > 0) {
-        if (reached_end == 2 || reached_end == 3) {
-            std::fill_n(it, right_padding, static_stop_head);
-            it += right_padding;
-        }
-        else {
-            std::copy(static_label_null.begin()+offset_up_head-m_context_right-right_padding, static_label_null.begin()-m_context_right+offset_up_head, it);
-        }
+      if (reached_end == 2 || reached_end == 3) {
+        std::fill_n(it, right_padding, static_stop_head);
+        it += right_padding;
+      } else {
+        std::copy(static_label_null.begin()+offset_up_head-m_context_right-right_padding, static_label_null.begin()-m_context_right+offset_up_head, it);
+      }
     }
 
     it = std::copy(labels.begin()+i+1, labels.begin()+right_offset, it);
 
     if (right_padding > 0) {
-        if (reached_end == 2 || reached_end == 3) {
-            std::fill_n(it, right_padding, static_stop_label);
-            it += right_padding;
-        }
-        else {
-            std::copy(static_label_null.begin()+offset_up_head-right_padding, static_label_null.begin()+offset_up_head, it);
-        }
+      if (reached_end == 2 || reached_end == 3) {
+        std::fill_n(it, right_padding, static_stop_label);
+        it += right_padding;
+      } else {
+        std::copy(static_label_null.begin()+offset_up_head-right_padding, static_label_null.begin()+offset_up_head, it);
+      }
     }
 
     ngram.back() = labels_output[i];
 
     if (ancestor_labels.size() >= m_context_up && !num_virtual) {
       score[2] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
-    }
-    else {
+    } else {
       boost::hash_combine(boundary_hash, ngram.back());
       score[3] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
     }
@@ -492,8 +483,7 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
 
       if (ancestor_labels.size() >= m_context_up && !num_virtual) {
         score[0] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
-      }
-      else {
+      } else {
         boost::hash_combine(boundary_hash, ngram.back());
         score[1] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
       }
@@ -502,25 +492,24 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
 
     // next time, we need to add less start symbol padding
     if (left_padding)
-        left_padding--;
+      left_padding--;
     else
-        left_offset++;
+      left_offset++;
 
     if (right_offset < heads.size())
-        right_offset++;
+      right_offset++;
     else
-        right_padding++;
+      right_padding++;
   }
 
 
   if (rescoring_levels == 1) {
-      ancestor_heads.pop_back();
-      ancestor_labels.pop_back();
-      return;
+    ancestor_heads.pop_back();
+    ancestor_labels.pop_back();
+    return;
   }
   // recursion
-  for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it)
-  {
+  for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it) {
     Score(it->get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash, num_virtual, rescoring_levels - 1);
   }
   ancestor_heads.pop_back();
@@ -531,19 +520,17 @@ InternalTree* RDLM::GetHead(InternalTree* root, const TreePointerMap & back_poin
 {
   InternalTree *tree;
 
-  for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it)
-  {
+  for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it) {
     if ((*it)->IsLeafNT()) {
       tree = back_pointers.find(it->get())->second.get();
-    }
-    else {
+    } else {
       tree = it->get();
     }
 
     if (m_binarized && tree->GetLabel()[0] == '^') {
-        head_ptr = GetHead(tree, back_pointers, IDs, head_ptr);
-        if (head_ptr != NULL && !m_isPTKVZ) {
-          return head_ptr;
+      head_ptr = GetHead(tree, back_pointers, IDs, head_ptr);
+      if (head_ptr != NULL && !m_isPTKVZ) {
+        return head_ptr;
       }
     }
 
@@ -563,8 +550,7 @@ InternalTree* RDLM::GetHead(InternalTree* root, const TreePointerMap & back_poin
       for (std::vector<TreePointer>::const_iterator it2 = tree->GetChildren().begin(); it2 != tree->GetChildren().end(); ++it2) {
         if ((*it2)->IsLeafNT()) {
           tree2 = back_pointers.find(it2->get())->second.get();
-        }
-        else {
+        } else {
           tree2 = it2->get();
         }
         if (tree2->GetLabel() == "PTKVZ" && tree2->GetLength() == 1 && tree2->GetChildren()[0]->IsTerminal()) {
@@ -602,18 +588,18 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
   // extract head words / labels
   for (std::vector<TreePointer>::const_iterator itx = real_children.begin(); itx != real_children.end(); itx = ++real_children) {
     if ((*itx)->IsTerminal()) {
-        std::cerr << "non-terminal node " << root->GetLabel() << " has a mix of terminal and non-terminal children. This shouldn't happen..." << std::endl;
-        std::cerr << "children: ";
-        for (std::vector<TreePointer>::const_iterator itx2 = root->GetChildren().begin(); itx2 != root->GetChildren().end(); ++itx2) {
-          std::cerr << (*itx2)->GetLabel() << " ";
-        }
-        std::cerr << std::endl;
-        // resize vectors (should we throw exception instead?)
-        heads.pop_back();
-        labels.pop_back();
-        heads_output.pop_back();
-        labels_output.pop_back();
-        continue;
+      std::cerr << "non-terminal node " << root->GetLabel() << " has a mix of terminal and non-terminal children. This shouldn't happen..." << std::endl;
+      std::cerr << "children: ";
+      for (std::vector<TreePointer>::const_iterator itx2 = root->GetChildren().begin(); itx2 != root->GetChildren().end(); ++itx2) {
+        std::cerr << (*itx2)->GetLabel() << " ";
+      }
+      std::cerr << std::endl;
+      // resize vectors (should we throw exception instead?)
+      heads.pop_back();
+      labels.pop_back();
+      heads_output.pop_back();
+      labels_output.pop_back();
+      continue;
     }
     InternalTree* child = itx->get();
     // also go through trees or previous hypotheses to rescore nodes for which more context has become available
@@ -659,8 +645,7 @@ void RDLM::GetIDs(const std::string & head, const std::string & preterminal, std
   }
   if (m_sharedVocab) {
     IDs.second = IDs.first;
-  }
-  else {
+  } else {
     IDs.second = lm_head_base_instance_->lookup_output_word(head);
     if (m_isPretermBackoff && IDs.second == 0) {
       IDs.second = lm_head_base_instance_->lookup_output_word(preterminal);
@@ -672,12 +657,12 @@ void RDLM::GetIDs(const std::string & head, const std::string & preterminal, std
 void RDLM::PrintInfo(std::vector<int> &ngram, nplm::neuralTM* lm) const
 {
   for (size_t i = 0; i < ngram.size()-1; i++) {
-      std::cerr << lm->get_input_vocabulary().words()[ngram[i]] << " ";
+    std::cerr << lm->get_input_vocabulary().words()[ngram[i]] << " ";
   }
   std::cerr << lm->get_output_vocabulary().words()[ngram.back()] << " ";
 
   for (size_t i = 0; i < ngram.size(); i++) {
-      std::cerr << ngram[i] << " ";
+    std::cerr << ngram[i] << " ";
   }
   std::cerr << "score: " << lm->lookup_ngram(ngram) << std::endl;
 }
@@ -691,32 +676,31 @@ RDLM::TreePointerMap RDLM::AssociateLeafNTs(InternalTree* root, const std::vecto
   bool found = false;
   InternalTree::leafNT next_leafNT(root);
   for (std::vector<TreePointer>::const_iterator it_prev = previous.begin(); it_prev != previous.end(); ++it_prev) {
-      found = next_leafNT(it);
-      if (found) {
-          ret[it->get()] = *it_prev;
-      }
-      else {
-          std::cerr << "Warning: leaf nonterminal not found in rule; why did this happen?\n";
-      }
+    found = next_leafNT(it);
+    if (found) {
+      ret[it->get()] = *it_prev;
+    } else {
+      std::cerr << "Warning: leaf nonterminal not found in rule; why did this happen?\n";
+    }
   }
   return ret;
 }
 
 void RDLM::ScoreFile(std::string &path)
 {
-    InputFileStream inStream(path);
-    std::string line, null;
-    std::vector<int> ancestor_heads(m_context_up, static_root_head);
-    std::vector<int> ancestor_labels(m_context_up, static_root_label);
-    while(getline(inStream, line)) {
-        TreePointerMap back_pointers;
-        boost::array<float, 4> score;
-        score.fill(0);
-        InternalTree* mytree (new InternalTree(line));
-        size_t boundary_hash = 0;
-        Score(mytree, back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
-        std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << std::endl;
-    }
+  InputFileStream inStream(path);
+  std::string line, null;
+  std::vector<int> ancestor_heads(m_context_up, static_root_head);
+  std::vector<int> ancestor_labels(m_context_up, static_root_label);
+  while(getline(inStream, line)) {
+    TreePointerMap back_pointers;
+    boost::array<float, 4> score;
+    score.fill(0);
+    InternalTree* mytree (new InternalTree(line));
+    size_t boundary_hash = 0;
+    Score(mytree, back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << std::endl;
+  }
 }
 
 
@@ -727,42 +711,42 @@ void RDLM::SetParameter(const std::string& key, const std::string& value)
     m_tuneable = Scan<bool>(value);
   } else if (key == "filterable") { //ignore
   } else if (key == "path_head_lm") {
-      m_path_head_lm = value;
+    m_path_head_lm = value;
   } else if (key == "path_label_lm") {
-      m_path_label_lm = value;
+    m_path_label_lm = value;
   } else if (key == "ptkvz") {
-      m_isPTKVZ = Scan<bool>(value);
+    m_isPTKVZ = Scan<bool>(value);
   } else if (key == "backoff") {
-      m_isPretermBackoff = Scan<bool>(value);
+    m_isPretermBackoff = Scan<bool>(value);
   } else if (key == "context_up") {
-      m_context_up = Scan<size_t>(value);
+    m_context_up = Scan<size_t>(value);
   } else if (key == "context_left") {
-      m_context_left = Scan<size_t>(value);
+    m_context_left = Scan<size_t>(value);
   } else if (key == "context_right") {
-      m_context_right = Scan<size_t>(value);
+    m_context_right = Scan<size_t>(value);
   } else if (key == "debug_path") {
-      m_debugPath = value;
+    m_debugPath = value;
   } else if (key == "premultiply") {
-      m_premultiply = Scan<bool>(value);
+    m_premultiply = Scan<bool>(value);
   } else if (key == "rerank") {
-      m_rerank = Scan<bool>(value);
+    m_rerank = Scan<bool>(value);
   } else if (key == "normalize_head_lm") {
-      m_normalizeHeadLM = Scan<bool>(value);
+    m_normalizeHeadLM = Scan<bool>(value);
   } else if (key == "normalize_label_lm") {
-      m_normalizeLabelLM = Scan<bool>(value);
+    m_normalizeLabelLM = Scan<bool>(value);
   } else if (key == "binarized") {
-      if (value == "left")
-        m_binarized = 1;
-      else if (value == "right")
-        m_binarized = 2;
-      else if (value == "full")
-        m_binarized = 3;
-      else
-        UTIL_THROW(util::Exception, "Unknown value for argument " << key << "=" << value);
+    if (value == "left")
+      m_binarized = 1;
+    else if (value == "right")
+      m_binarized = 2;
+    else if (value == "full")
+      m_binarized = 3;
+    else
+      UTIL_THROW(util::Exception, "Unknown value for argument " << key << "=" << value);
   } else if (key == "glue_symbol") {
-      m_glueSymbol = value;
+    m_glueSymbol = value;
   } else if (key == "cache_size") {
-      m_cacheSize = Scan<int>(value);
+    m_cacheSize = Scan<int>(value);
   } else {
     UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
   }
@@ -808,8 +792,8 @@ FFState* RDLM::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
     size_t boundary_hash = 0;
     if (!m_rerank) {
       Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
-    accumulator->PlusEquals(ff_idx, score[0] + score[1]);
-    accumulator->PlusEquals(ff_idx+1, score[2] + score[3]);
+      accumulator->PlusEquals(ff_idx, score[0] + score[1]);
+      accumulator->PlusEquals(ff_idx+1, score[2] + score[3]);
     }
     mytree->Combine(previous_trees);
     if (m_rerank && full_sentence) {
@@ -818,12 +802,11 @@ FFState* RDLM::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
       accumulator->PlusEquals(ff_idx+1, score[2] + score[3]);
     }
     if (m_binarized && full_sentence) {
-        mytree->Unbinarize();
+      mytree->Unbinarize();
     }
 
     return new RDLMState(mytree, score[1], score[3], boundary_hash);
-  }
-  else {
+  } else {
     UTIL_THROW2("Error: RDLM active, but no internal tree structure found");
   }
 

@@ -13,7 +13,8 @@
 using namespace std;
 using namespace MosesTuning;
 
-BOOST_AUTO_TEST_CASE(viterbi_simple_lattice) {
+BOOST_AUTO_TEST_CASE(viterbi_simple_lattice)
+{
   Vocab vocab;
   WordVec words;
   string wordStrings[] =
@@ -244,7 +245,8 @@ BOOST_AUTO_TEST_CASE(viterbi_3branch_lattice)
   BOOST_CHECK_EQUAL(6, hopeHypo.bleuStats[8]);
 }
 
-BOOST_AUTO_TEST_CASE(viterbi_full_hypergraph) {
+BOOST_AUTO_TEST_CASE(viterbi_full_hypergraph)
+{
   Vocab vocab;
   //References
   ReferenceSet references;

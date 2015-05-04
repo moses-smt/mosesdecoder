@@ -47,8 +47,8 @@ int PostprocessEgretForests::Main(int argc, char *argv[])
 }
 
 void PostprocessEgretForests::ProcessForest(
-    std::istream &in, std::ostream &out, SplitPointFileParser *splitPointParser,
-    const Options &options)
+  std::istream &in, std::ostream &out, SplitPointFileParser *splitPointParser,
+  const Options &options)
 {
   std::size_t sentNum = 0;
   ForestWriter writer(options, out);
@@ -77,7 +77,7 @@ void PostprocessEgretForests::ProcessForest(
 }
 
 void PostprocessEgretForests::OpenInputFileOrDie(const std::string &filename,
-                                                 std::ifstream &stream)
+    std::ifstream &stream)
 {
   stream.open(filename.c_str());
   if (!stream) {
@@ -88,7 +88,7 @@ void PostprocessEgretForests::OpenInputFileOrDie(const std::string &filename,
 }
 
 void PostprocessEgretForests::ProcessOptions(int argc, char *argv[],
-                                  Options &options) const
+    Options &options) const
 {
   namespace po = boost::program_options;
   namespace cls = boost::program_options::command_line_style;
@@ -119,7 +119,7 @@ void PostprocessEgretForests::ProcessOptions(int argc, char *argv[],
   // (these are used as positional options).
   po::options_description hidden("Hidden options");
   hidden.add_options()
-    // None
+  // None
   ;
 
   // Compose the full set of command-line options.

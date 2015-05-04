@@ -18,8 +18,8 @@
 
 namespace Moses
 {
-  class ContextScope
-  {
+class ContextScope
+{
   protected:
     typedef std::map<void const*, boost::shared_ptr<void> > scratchpad_t;
     typedef scratchpad_t::iterator iter_t;
@@ -35,20 +35,20 @@ namespace Moses
     //   boost::unique_lock<boost::shared_mutex> m_lock;
     // public:
 
-    //   write_access(boost::shared_mutex& lock)
-    // 	: m_lock(lock)
-    //   { }
+  //   write_access(boost::shared_mutex& lock)
+  // 	: m_lock(lock)
+  //   { }
 
-    //   write_access(write_access& other)
-    //   {
-    // 	swap(m_lock, other.m_lock);
-    //   }
-    // };
+  //   write_access(write_access& other)
+  //   {
+  // 	swap(m_lock, other.m_lock);
+  //   }
+  // };
 
-    // write_access lock() const
-    // {
-    //   return write_access(m_lock);
-    // }
+  // write_access lock() const
+  // {
+  //   return write_access(m_lock);
+  // }
 
     template<typename T>
     boost::shared_ptr<void> const&
@@ -92,18 +92,24 @@ namespace Moses
       m_scratchpad[key] = ret;
       return ret;
     }
+    if (!CreateNewIfNecessary) return ret;
+    boost::upgrade_to_unique_lock<shared_mutex> xlock(lock);
+    ret.reset(new T);
+    m_scratchpad[key] = ret;
+    return ret;
+  }
 
-    ContextScope() { }
+  ContextScope() { }
 
-    ContextScope(ContextScope const& other)
-    {
+  ContextScope(ContextScope const& other)
+  {
 #ifdef WITH_THREADS
-      boost::unique_lock<boost::shared_mutex> lock1(this->m_lock);
-      boost::unique_lock<boost::shared_mutex> lock2(other.m_lock);
+    boost::unique_lock<boost::shared_mutex> lock1(this->m_lock);
+    boost::unique_lock<boost::shared_mutex> lock2(other.m_lock);
 #endif
-      m_scratchpad = other.m_scratchpad;
-    }
+    m_scratchpad = other.m_scratchpad;
+  }
 
-  };
+};
 
 };
