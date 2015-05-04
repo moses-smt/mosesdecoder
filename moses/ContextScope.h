@@ -92,12 +92,6 @@ class ContextScope
       m_scratchpad[key] = ret;
       return ret;
     }
-    if (!CreateNewIfNecessary) return ret;
-    boost::upgrade_to_unique_lock<shared_mutex> xlock(lock);
-    ret.reset(new T);
-    m_scratchpad[key] = ret;
-    return ret;
-  }
 
   ContextScope() { }
 
