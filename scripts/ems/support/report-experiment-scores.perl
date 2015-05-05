@@ -20,6 +20,9 @@ $TYPE{"bolt-bleu-c"}   = "BLEU-c";
 $TYPE{"bolt-ter"}      = "TER";
 $TYPE{"bolt-ter-c"}    = "TER-c";
 
+$TYPE{"multi-bleu-detok"}  = "BLEU";
+$TYPE{"multi-bleu-c-detok"}= "BLEU-c";
+
 my %SCORE;
 my %AVERAGE;
 foreach (@ARGV) {
@@ -59,7 +62,8 @@ sub process {
     elsif ($type eq 'ibm-bleu' || $type eq 'ibm-bleu-c') {
 	$SCORE{$set} .= &extract_ibm_bleu($file,$type)." ";
     }
-    elsif ($type eq 'multi-bleu' || $type eq 'multi-bleu-c') {
+    elsif ($type eq 'multi-bleu' || $type eq 'multi-bleu-c'
+	|| $type eq 'multi-bleu-detok' || $type eq 'multi-bleu-c-detok') {
 	$SCORE{$set} .= &extract_multi_bleu($file,$type)." ";
     }
     elsif ($type eq 'meteor') {
