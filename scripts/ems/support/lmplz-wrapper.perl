@@ -24,5 +24,5 @@ my $cmd = "$BIN --text $TEXT --order $ORDER --arpa $LM $settings";
 $cmd .= " -T $TMPDIR" if defined($TMPDIR);
 $cmd .= " -S $MEMORY" if defined($MEMORY);
 $cmd .= " " . join(' ', @ARGV) if scalar(@ARGV);  # Pass remaining args through.
-print "exec: $cmd\n";
+print STDERR "Executing: $cmd\n";
 `$cmd`;
