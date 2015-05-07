@@ -11,6 +11,8 @@
 #include "SemposScorer.h"
 #include "PermutationScorer.h"
 #include "MeteorScorer.h"
+#include "HwcmScorer.h"
+#include "HwcmSScorer.h"
 #include "Reference.h"
 
 using namespace std;
@@ -32,11 +34,14 @@ vector<string> ScorerFactory::getTypes()
   types.push_back(string("SEMPOS"));
   types.push_back(string("LRSCORE"));
   types.push_back(string("METEOR"));
+  types.push_back(string("HWCM"));
+  types.push_back(string("HWCMS"));
   return types;
 }
 
 Scorer* ScorerFactory::getScorer(const string& type, const string& config)
 {
+
   if (type == "BLEU") {
     return new BleuScorer(config);
   } else if (type == "BLEUDOC") {
@@ -56,7 +61,13 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config)
     return (PermutationScorer*) new PermutationScorer(type, config);
   } else if (type == "METEOR") {
     return new MeteorScorer(config);
-  } else {
+  } else if (type == "HWCM") {
+  	    return new HwcmScorer(config);
+  }
+  else if (type == "HWCMS") {
+    return new HwcmSScorer(config);
+  }
+  else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);
     } else {

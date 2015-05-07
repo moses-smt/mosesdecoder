@@ -29,6 +29,9 @@ SemposOverlapping.cpp
 InterpolatedScorer.cpp
 Point.cpp
 PerScorer.cpp
+HwcmSScorer.cpp
+HwcmScorer.cpp
+../moses/FF/InternalTree.cpp
 Scorer.cpp
 ScorerFactory.cpp
 Optimizer.cpp
