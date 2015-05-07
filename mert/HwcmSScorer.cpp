@@ -168,7 +168,7 @@ float HwcmSScorer::calculateScore(const std::vector<int>& comps) const{
 		throw runtime_error(msg.str());
 	}
 
-	//cout<<precision<<" "<<recall<<" "<<(2*precision*recall)/(precision+recall)<<endl;
+	cout<<precision<<" "<<recall<<" "<<(2*precision*recall)/(precision+recall)<<endl;
 	return (2*precision*recall)/(precision+recall); // f1-score
 }
 
