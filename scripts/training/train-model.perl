@@ -228,7 +228,7 @@ $_HELP = 1
 		       'osm-setting=s' => \$_OSM_FACTORS,
 		       'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,
 		       'transliteration-phrase-table=s' => \$_TRANSLITERATION_PHRASE_TABLE,		
-		       'mmsapt=s' => \$_MMSAPT,
+		       'mmsapt' => \$_MMSAPT,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'lexical-reordering-default-scores=s' => \$_LEXICAL_REORDERING_DEFAULT_SCORES,
 		       'do-steps=s' => \$_DO_STEPS,
@@ -2115,11 +2115,13 @@ sub create_ini {
 
      # sum up...
      $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor";
-     $feature_spec .= " L1=$___F L2=$___E ".$_MMSAPT if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
+     $feature_spec .= " L1=$___F L2=$___E " if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
      $feature_spec .= "\n";
-     $weight_spec .= "TranslationModel$i=";
-     for(my $j=0;$j<$basic_weight_count;$j++) { $weight_spec .= " 0.2"; }
-     $weight_spec .= "\n";
+     unless ($phrase_table_impl==11) { # suffix array provides its weights at first iteration
+       $weight_spec .= "TranslationModel$i=";
+       for(my $j=0;$j<$basic_weight_count;$j++) { $weight_spec .= " 0.2"; }
+       $weight_spec .= "\n";
+    }
 
      $i++;
    }
