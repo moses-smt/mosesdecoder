@@ -109,7 +109,7 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
   return out;
 }
 
-  /** returns cached scores */
+/** returns cached scores */
 const Scores*
 TranslationOption::
 GetLexReorderingScores(LexicalReordering const* scoreProducer) const

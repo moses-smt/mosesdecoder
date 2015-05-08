@@ -94,8 +94,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
   mert::VocabularyFactory::GetVocabulary()->clear();
 
   //load reference data
-  for (size_t i = 0; i < referenceFiles.size(); ++i) 
-  {
+  for (size_t i = 0; i < referenceFiles.size(); ++i) {
     TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
 
     ifstream ifs(referenceFiles[i].c_str());
@@ -133,28 +132,27 @@ bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id)
 
 void BleuScorer::ProcessReferenceLine(const std::string& line, Reference* ref) const
 {
-    NgramCounts counts;
-    size_t length = CountNgrams(line, counts, kBleuNgramOrder);
+  NgramCounts counts;
+  size_t length = CountNgrams(line, counts, kBleuNgramOrder);
 
-    //for any counts larger than those already there, merge them in
-    for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
-      const NgramCounts::Key& ngram = ci->first;
-      const NgramCounts::Value newcount = ci->second;
+  //for any counts larger than those already there, merge them in
+  for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
+    const NgramCounts::Key& ngram = ci->first;
+    const NgramCounts::Value newcount = ci->second;
 
-      NgramCounts::Value oldcount = 0;
-      ref->get_counts()->Lookup(ngram, &oldcount);
-      if (newcount > oldcount) {
-        ref->get_counts()->operator[](ngram) = newcount;
-      }
+    NgramCounts::Value oldcount = 0;
+    ref->get_counts()->Lookup(ngram, &oldcount);
+    if (newcount > oldcount) {
+      ref->get_counts()->operator[](ngram) = newcount;
     }
-    //add in the length
-    ref->push_back(length);
+  }
+  //add in the length
+  ref->push_back(length);
 }
 
 bool BleuScorer::GetNextReferenceFromStreams(std::vector<boost::shared_ptr<std::ifstream> >& referenceStreams, Reference& ref) const
 {
-  for (vector<boost::shared_ptr<ifstream> >::iterator ifs=referenceStreams.begin(); ifs!=referenceStreams.end(); ++ifs)
-  {
+  for (vector<boost::shared_ptr<ifstream> >::iterator ifs=referenceStreams.begin(); ifs!=referenceStreams.end(); ++ifs) {
     if (!(*ifs)) return false;
     string line;
     if (!getline(**ifs, line)) return false;
@@ -309,22 +307,20 @@ vector<float> BleuScorer::ScoreNbestList(const string& scoreFile, const string& 
 
   vector<FeatureDataIterator> featureDataIters;
   vector<ScoreDataIterator> scoreDataIters;
-  for (size_t i = 0; i < featureFiles.size(); ++i) 
-  {
+  for (size_t i = 0; i < featureFiles.size(); ++i) {
     featureDataIters.push_back(FeatureDataIterator(featureFiles[i]));
     scoreDataIters.push_back(ScoreDataIterator(scoreFiles[i]));
   }
 
   vector<pair<size_t,size_t> > hypotheses;
-  UTIL_THROW_IF2(featureDataIters[0] == FeatureDataIterator::end(), 
+  UTIL_THROW_IF2(featureDataIters[0] == FeatureDataIterator::end(),
                  "At the end of feature data iterator");
-  for (size_t i = 0; i < featureFiles.size(); ++i) 
-  {
-    UTIL_THROW_IF2(featureDataIters[i] == FeatureDataIterator::end(), 
+  for (size_t i = 0; i < featureFiles.size(); ++i) {
+    UTIL_THROW_IF2(featureDataIters[i] == FeatureDataIterator::end(),
                    "Feature file " << i << " ended prematurely");
-    UTIL_THROW_IF2(scoreDataIters[i] == ScoreDataIterator::end(), 
+    UTIL_THROW_IF2(scoreDataIters[i] == ScoreDataIterator::end(),
                    "Score file " << i << " ended prematurely");
-    UTIL_THROW_IF2(featureDataIters[i]->size() != scoreDataIters[i]->size(), 
+    UTIL_THROW_IF2(featureDataIters[i]->size() != scoreDataIters[i]->size(),
                    "Features and scores have different size");
     for (size_t j = 0; j < featureDataIters[i]->size(); ++j) {
       hypotheses.push_back(pair<size_t,size_t>(i,j));

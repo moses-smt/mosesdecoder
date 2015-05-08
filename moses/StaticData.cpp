@@ -118,7 +118,7 @@ StaticData
 
     string &feature = toks[0];
     std::map<std::string, std::string>::const_iterator iter
-      = featureNameOverride.find(feature);
+    = featureNameOverride.find(feature);
     if (iter == featureNameOverride.end()) {
       // feature name not override
       m_registry.Construct(feature, line);
@@ -146,7 +146,7 @@ StaticData
   m_parameter->SetParameter(m_inputType, "inputtype", SentenceInput);
 
   m_parameter->SetParameter(m_continuePartialTranslation,
-			    "continue-partial-translation", false );
+                            "continue-partial-translation", false );
 
   std::string s_it = "text input";
   if (m_inputType == 1) {
@@ -160,7 +160,7 @@ StaticData
   }
   VERBOSE(2,"input type is: "<<s_it<<"\n");
 
-    // use of xml in input
+  // use of xml in input
   m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
 
   // specify XML tags opening and closing brackets for XML option
@@ -178,7 +178,7 @@ StaticData
   }
 
   m_parameter->SetParameter(m_defaultNonTermOnlyForEmptyRange,
-			    "default-non-term-for-empty-range-only", false );
+                            "default-non-term-for-empty-range-only", false );
 
 }
 
@@ -347,18 +347,18 @@ StaticData
 
 
   m_parameter->SetParameter(m_PrintAlignmentInfoNbest,
-			    "print-alignment-info-in-n-best", false );
+                            "print-alignment-info-in-n-best", false );
 
   // include feature names in the n-best list
   m_parameter->SetParameter(m_labeledNBestList, "labeled-n-best-list", true );
 
   // include word alignment in the n-best list
   m_parameter->SetParameter(m_nBestIncludesSegmentation,
-			    "include-segmentation-in-n-best", false );
+                            "include-segmentation-in-n-best", false );
 
   // print all factors of output translations
   m_parameter->SetParameter(m_reportAllFactorsNBest,
-			    "report-all-factors-in-n-best", false );
+                            "report-all-factors-in-n-best", false );
 
   m_parameter->SetParameter(m_printNBestTrees, "n-best-trees", false );
   return true;
@@ -412,7 +412,7 @@ StaticData
 #ifndef WITH_THREADS
       if (m_threadCount > 1) {
         std::cerr << "Error: Thread count of " << params->at(0)
-		  << " but moses not built with thread support";
+                  << " but moses not built with thread support";
         return false;
       }
 #endif
@@ -426,11 +426,11 @@ StaticData
 ::ini_cube_pruning_options()
 {
   m_parameter->SetParameter(m_cubePruningPopLimit, "cube-pruning-pop-limit",
-			    DEFAULT_CUBE_PRUNING_POP_LIMIT);
+                            DEFAULT_CUBE_PRUNING_POP_LIMIT);
   m_parameter->SetParameter(m_cubePruningDiversity, "cube-pruning-diversity",
-			    DEFAULT_CUBE_PRUNING_DIVERSITY);
+                            DEFAULT_CUBE_PRUNING_DIVERSITY);
   m_parameter->SetParameter(m_cubePruningLazyScoring, "cube-pruning-lazy-scoring",
-			    false);
+                            false);
 }
 
 void
@@ -468,7 +468,7 @@ void
 StaticData
 ::ini_oov_options()
 {
-    // unknown word processing
+  // unknown word processing
   m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
   m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
 
@@ -647,7 +647,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // S2T decoder
   m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",
-			    RecursiveCYKPlus);
+                            RecursiveCYKPlus);
 
 
   ini_zombie_options(); // probably dead, or maybe not
@@ -1016,7 +1016,7 @@ StaticData
 ::InitializeForInput(ttasksptr const& ttask) const
 {
   const std::vector<FeatureFunction*> &producers
-    = FeatureFunction::GetFeatureFunctions();
+  = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
@@ -1024,7 +1024,7 @@ StaticData
       iTime.start();
       ff.InitializeForInput(ttask);
       VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " )"
-	      << "= " << iTime << endl);
+              << "= " << iTime << endl);
     }
   }
 }
@@ -1034,7 +1034,7 @@ StaticData
 ::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
 {
   const std::vector<FeatureFunction*> &producers
-    = FeatureFunction::GetFeatureFunctions();
+  = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
@@ -1111,7 +1111,7 @@ bool StaticData::CheckWeights() const
 
   if (!weightNames.empty()) {
     cerr << "The following weights have no feature function. "
-	 << "Maybe incorrectly spelt weights: ";
+         << "Maybe incorrectly spelt weights: ";
     set<string>::iterator iter;
     for (iter = weightNames.begin(); iter != weightNames.end(); ++iter) {
       cerr << *iter << ",";

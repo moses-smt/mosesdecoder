@@ -83,16 +83,16 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
 
 SimpleTranslationInterface::SimpleTranslationInterface(const string &mosesIni): m_staticData(StaticData::Instance())
 {
-    if (!m_params.LoadParam(mosesIni)) {
-      cerr << "Error; Cannot load parameters at " << mosesIni<<endl;
-      exit(1);
-    }
-    if (!StaticData::LoadDataStatic(&m_params, mosesIni.c_str())) {
-      cerr << "Error; Cannot load static data in file " << mosesIni<<endl;
-      exit(1);
-    }
+  if (!m_params.LoadParam(mosesIni)) {
+    cerr << "Error; Cannot load parameters at " << mosesIni<<endl;
+    exit(1);
+  }
+  if (!StaticData::LoadDataStatic(&m_params, mosesIni.c_str())) {
+    cerr << "Error; Cannot load static data in file " << mosesIni<<endl;
+    exit(1);
+  }
 
-    util::rand_init();
+  util::rand_init();
 
 }
 
@@ -114,13 +114,15 @@ string SimpleTranslationInterface::translate(const string &inputString)
 
   boost::shared_ptr<InputType> source = ioWrapper->ReadInput();
   if (!source) return "Error: Source==null!!!";
-  IFVERBOSE(1) { ResetUserTime(); }
+  IFVERBOSE(1) {
+    ResetUserTime();
+  }
 
   FeatureFunction::CallChangeSource(&*source);
 
   // set up task of translating one sentence
   boost::shared_ptr<TranslationTask> task
-    = TranslationTask::create(source, ioWrapper);
+  = TranslationTask::create(source, ioWrapper);
   task->Run();
 
   string output = outputStream.str();
@@ -147,10 +149,14 @@ int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
-  int port; params.SetParameter(port, "server-port", 8080);
-  bool isSerial; params.SetParameter(isSerial, "serial", false);
-  string logfile; params.SetParameter(logfile, "server-log", string(""));
-  size_t num_threads; params.SetParameter(num_threads, "threads", size_t(10));
+  int port;
+  params.SetParameter(port, "server-port", 8080);
+  bool isSerial;
+  params.SetParameter(isSerial, "serial", false);
+  string logfile;
+  params.SetParameter(logfile, "server-log", string(""));
+  size_t num_threads;
+  params.SetParameter(num_threads, "threads", size_t(10));
   if (isSerial) VERBOSE(1,"Running server in serial mode." << endl);
 
   xmlrpc_c::registry myRegistry;
@@ -166,8 +172,9 @@ run_as_server()
   xmlrpc_c::serverAbyss myAbyssServer(myRegistry, port, logfile);
 
   XVERBOSE(1,"Listening on port " << port << endl);
-  if (isSerial) { while(1) myAbyssServer.runOnce(); }
-  else myAbyssServer.run();
+  if (isSerial) {
+    while(1) myAbyssServer.runOnce();
+  } else myAbyssServer.run();
 
   std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
   // #pragma message("BUILDING MOSES WITH SERVER SUPPORT")
@@ -193,16 +200,15 @@ batch_run()
   // set up read/writing class:
   boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
   UTIL_THROW_IF2(ioWrapper == NULL, "Error; Failed to create IO object"
-		 << " [" << HERE << "]");
+                 << " [" << HERE << "]");
 
   // check on weights
   const ScoreComponentCollection& weights = staticData.GetAllWeights();
-  IFVERBOSE(2)
-    {
-      TRACE_ERR("The global weight vector looks like this: ");
-      TRACE_ERR(weights);
-      TRACE_ERR("\n");
-    }
+  IFVERBOSE(2) {
+    TRACE_ERR("The global weight vector looks like this: ");
+    TRACE_ERR(weights);
+    TRACE_ERR("\n");
+  }
 
 #ifdef WITH_THREADS
   ThreadPool pool(staticData.ThreadCount());
@@ -214,57 +220,53 @@ batch_run()
   // main loop over set of input sentences
 
   boost::shared_ptr<InputType> source;
-  while ((source = ioWrapper->ReadInput()) != NULL)
-    {
-      IFVERBOSE(1) ResetUserTime();
+  while ((source = ioWrapper->ReadInput()) != NULL) {
+    IFVERBOSE(1) ResetUserTime();
 
-      FeatureFunction::CallChangeSource(source.get());
+    FeatureFunction::CallChangeSource(source.get());
 
-      // set up task of translating one sentence
-      boost::shared_ptr<TranslationTask>
-	task = TranslationTask::create(source, ioWrapper);
-      task->SetContextString(context_string);
+    // set up task of translating one sentence
+    boost::shared_ptr<TranslationTask>
+    task = TranslationTask::create(source, ioWrapper);
+    task->SetContextString(context_string);
 
-      // Allow for (sentence-)context-specific processing prior to
-      // decoding. This can be used, for example, for context-sensitive
-      // phrase lookup.
-      FeatureFunction::SetupAll(*task);
+    // Allow for (sentence-)context-specific processing prior to
+    // decoding. This can be used, for example, for context-sensitive
+    // phrase lookup.
+    FeatureFunction::SetupAll(*task);
 
-      // execute task
+    // execute task
 #ifdef WITH_THREADS
 #ifdef PT_UG
-      // simulated post-editing requires threads (within the dynamic phrase tables)
-      // but runs all sentences serially, to allow updating of the bitext.
-      bool spe = params.isParamSpecified("spe-src");
-      if (spe)
-	{
-	  // simulated post-editing: always run single-threaded!
-	  task->Run();
-	  string src,trg,aln;
-	  UTIL_THROW_IF2(!getline(*ioWrapper->spe_src,src), "[" << HERE << "] "
-			 << "missing update data for simulated post-editing.");
-	  UTIL_THROW_IF2(!getline(*ioWrapper->spe_trg,trg), "[" << HERE << "] "
-			 << "missing update data for simulated post-editing.");
-	  UTIL_THROW_IF2(!getline(*ioWrapper->spe_aln,aln), "[" << HERE << "] "
-			 << "missing update data for simulated post-editing.");
-	  BOOST_FOREACH (PhraseDictionary* pd, PhraseDictionary::GetColl())
-	    {
-	      Mmsapt* sapt = dynamic_cast<Mmsapt*>(pd);
-	      if (sapt) sapt->add(src,trg,aln);
-	      VERBOSE(1,"[" << HERE << " added src] " << src << endl);
-	      VERBOSE(1,"[" << HERE << " added trg] " << trg << endl);
-	      VERBOSE(1,"[" << HERE << " added aln] " << aln << endl);
-	    }
-	}
-      else pool.Submit(task);
+    // simulated post-editing requires threads (within the dynamic phrase tables)
+    // but runs all sentences serially, to allow updating of the bitext.
+    bool spe = params.isParamSpecified("spe-src");
+    if (spe) {
+      // simulated post-editing: always run single-threaded!
+      task->Run();
+      string src,trg,aln;
+      UTIL_THROW_IF2(!getline(*ioWrapper->spe_src,src), "[" << HERE << "] "
+                     << "missing update data for simulated post-editing.");
+      UTIL_THROW_IF2(!getline(*ioWrapper->spe_trg,trg), "[" << HERE << "] "
+                     << "missing update data for simulated post-editing.");
+      UTIL_THROW_IF2(!getline(*ioWrapper->spe_aln,aln), "[" << HERE << "] "
+                     << "missing update data for simulated post-editing.");
+      BOOST_FOREACH (PhraseDictionary* pd, PhraseDictionary::GetColl()) {
+        Mmsapt* sapt = dynamic_cast<Mmsapt*>(pd);
+        if (sapt) sapt->add(src,trg,aln);
+        VERBOSE(1,"[" << HERE << " added src] " << src << endl);
+        VERBOSE(1,"[" << HERE << " added trg] " << trg << endl);
+        VERBOSE(1,"[" << HERE << " added aln] " << aln << endl);
+      }
+    } else pool.Submit(task);
 #else
-      pool.Submit(task);
+    pool.Submit(task);
 
 #endif
 #else
-      task->Run();
+    task->Run();
 #endif
-    }
+  }
 
   // we are done, finishing up
 #ifdef WITH_THREADS
@@ -289,52 +291,49 @@ int decoder_main(int argc, char** argv)
 #ifdef NDEBUG
   try
 #endif
-    {
+  {
 #ifdef HAVE_PROTOBUF
-      GOOGLE_PROTOBUF_VERIFY_VERSION;
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
 
-      // echo command line, if verbose
-      IFVERBOSE(1)
-	{
-	  TRACE_ERR("command: ");
-	  for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
-	  TRACE_ERR(endl);
-	}
-
-      // set number of significant decimals in output
-      FixPrecision(cout);
-      FixPrecision(cerr);
-
-      // load all the settings into the Parameter class
-      // (stores them as strings, or array of strings)
-      if (!params.LoadParam(argc,argv))
-	exit(1);
-
-      // initialize all "global" variables, which are stored in StaticData
-      // note: this also loads models such as the language model, etc.
-      if (!StaticData::LoadDataStatic(&params, argv[0]))
-	exit(1);
-
-      // setting "-show-weights" -> just dump out weights and exit
-      if (params.isParamSpecified("show-weights"))
-	{
-	  ShowWeights();
-	  exit(0);
-	}
-
-      if (params.GetParam("server"))
-	return run_as_server();
-      else
-	return batch_run();
-
+    // echo command line, if verbose
+    IFVERBOSE(1) {
+      TRACE_ERR("command: ");
+      for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
+      TRACE_ERR(endl);
     }
+
+    // set number of significant decimals in output
+    FixPrecision(cout);
+    FixPrecision(cerr);
+
+    // load all the settings into the Parameter class
+    // (stores them as strings, or array of strings)
+    if (!params.LoadParam(argc,argv))
+      exit(1);
+
+    // initialize all "global" variables, which are stored in StaticData
+    // note: this also loads models such as the language model, etc.
+    if (!StaticData::LoadDataStatic(&params, argv[0]))
+      exit(1);
+
+    // setting "-show-weights" -> just dump out weights and exit
+    if (params.isParamSpecified("show-weights")) {
+      ShowWeights();
+      exit(0);
+    }
+
+    if (params.GetParam("server"))
+      return run_as_server();
+    else
+      return batch_run();
+
+  }
 #ifdef NDEBUG
-  catch (const std::exception &e)
-    {
-      std::cerr << "Exception: " << e.what() << std::endl;
-      return EXIT_FAILURE;
-    }
+  catch (const std::exception &e) {
+    std::cerr << "Exception: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 #endif
 }
 

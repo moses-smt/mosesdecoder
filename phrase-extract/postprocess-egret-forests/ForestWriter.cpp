@@ -61,7 +61,8 @@ void ForestWriter::WriteVertex(const Forest::Vertex &v)
   }
 }
 
-std::string ForestWriter::PossiblyEscape(const std::string &s) const {
+std::string ForestWriter::PossiblyEscape(const std::string &s) const
+{
   if (m_options.escape) {
     return Escape(s);
   } else {
@@ -70,7 +71,8 @@ std::string ForestWriter::PossiblyEscape(const std::string &s) const {
 }
 
 // Escapes XML special characters.
-std::string ForestWriter::Escape(const std::string &s) const {
+std::string ForestWriter::Escape(const std::string &s) const
+{
   std::string t;
   std::size_t len = s.size();
   t.reserve(len);

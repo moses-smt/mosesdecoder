@@ -157,32 +157,26 @@ FeatureFactory
   std::vector<float> weights = static_data.GetParameter()->GetWeights(featureName);
 
 
-  if (feature->GetNumScoreComponents())
-    {
-      if (weights.size() == 0)
-	{
-	  weights = feature->DefaultWeights();
-	  if (weights.size() == 0)
-	    {
-	      TRACE_ERR("WARNING: No weights specified in config file for FF "
-			<< featureName << ". This FF does not supply default values.\n"
-			<< "WARNING: Auto-initializing all weights for this FF to 1.0");
-	      weights.assign(feature->GetNumScoreComponents(),1.0);
-	    }
-	  else
-	    {
-	      TRACE_ERR("WARNING: No weights specified in config file for FF "
-			<< featureName << ". Using default values supplied by FF.");
-	    }
-	}
-      UTIL_THROW_IF2(weights.size() != feature->GetNumScoreComponents(),
-		     "FATAL ERROR: Mismatch in number of features and number "
-		     << "of weights for Feature Function " << featureName
-		     << " (features: " << feature->GetNumScoreComponents()
-		     << " vs. weights: " << weights.size() << ")");
-      static_data.SetWeights(feature, weights);
+  if (feature->GetNumScoreComponents()) {
+    if (weights.size() == 0) {
+      weights = feature->DefaultWeights();
+      if (weights.size() == 0) {
+        TRACE_ERR("WARNING: No weights specified in config file for FF "
+                  << featureName << ". This FF does not supply default values.\n"
+                  << "WARNING: Auto-initializing all weights for this FF to 1.0");
+        weights.assign(feature->GetNumScoreComponents(),1.0);
+      } else {
+        TRACE_ERR("WARNING: No weights specified in config file for FF "
+                  << featureName << ". Using default values supplied by FF.");
+      }
     }
-  else if (feature->IsTuneable())
+    UTIL_THROW_IF2(weights.size() != feature->GetNumScoreComponents(),
+                   "FATAL ERROR: Mismatch in number of features and number "
+                   << "of weights for Feature Function " << featureName
+                   << " (features: " << feature->GetNumScoreComponents()
+                   << " vs. weights: " << weights.size() << ")");
+    static_data.SetWeights(feature, weights);
+  } else if (feature->IsTuneable())
     static_data.SetWeights(feature, weights);
 }
 

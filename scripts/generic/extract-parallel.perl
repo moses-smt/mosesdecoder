@@ -6,11 +6,17 @@
 use warnings;
 use strict;
 use File::Basename;
-use Cwd 'abs_path';
 
 sub RunFork($);
 sub systemCheck($);
 sub NumStr($);
+sub DigitStr($);
+sub CharStr($);
+
+my $is_osx = ($^O eq "darwin");
+
+my $alph = "abcdefghijklmnopqrstuvwxyz";
+my @alph = (split(//,$alph));
 
 print "Started ".localtime() ."\n";
 
@@ -33,6 +39,7 @@ my $baselineExtract;
 my $glueFile;
 my $phraseOrientation = 0;
 my $phraseOrientationPriorsFile;
+my $splitCmdOption="-d";
 
 my $GZIP_EXEC;
 if(`which pigz`) {
@@ -63,13 +70,15 @@ for (my $i = 8; $i < $#ARGV + 1; ++$i)
     $phraseOrientationPriorsFile = $ARGV[++$i];
     next;
   }
+  $splitCmdOption="",next if $ARGV[$i] eq "--NoNumericSuffix";
 
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
 my $cmd;
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
-$cmd = "mkdir -p $TMPDIR";
+$cmd = "mkdir -p $TMPDIR; ls -l $TMPDIR";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 my $totalLines = int(`cat $align | wc -l`);
@@ -82,20 +91,20 @@ my $pid;
 
 if ($numParallel > 1)
 {
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $target $TMPDIR/target.";
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $target $TMPDIR/target.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 	
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $source $TMPDIR/source.";
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $source $TMPDIR/source.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $align $TMPDIR/align.";
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $align $TMPDIR/align.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
   if ($weights) {
-    $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
+    $cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
     $pid = RunFork($cmd);
     push(@children, $pid);
   }
@@ -110,21 +119,17 @@ else
 {
   my $numStr = NumStr(0);
 
-  $cmd = "ln -s ".abs_path($target)." $TMPDIR/target.$numStr";
-	print STDERR "Executing: $cmd \n";
+  $cmd = "ln -s $target $TMPDIR/target.$numStr";
 	`$cmd`;
 
-  $cmd = "ln -s ".abs_path($source)." $TMPDIR/source.$numStr";
-	print STDERR "Executing: $cmd \n";
+  $cmd = "ln -s $source $TMPDIR/source.$numStr";
 	`$cmd`;
 
-  $cmd = "ln -s ".abs_path($align)." $TMPDIR/align.$numStr";
-	print STDERR "Executing: $cmd \n";
+  $cmd = "ln -s $align $TMPDIR/align.$numStr";
 	`$cmd`;
 
   if ($weights) {
-    $cmd = "ln -s ".abs_path($weights)." $TMPDIR/weights.$numStr";
-    print STDERR "Executing: $cmd \n";
+    $cmd = "ln -s $weights $TMPDIR/weights.$numStr";
     `$cmd`;
   }
 }
@@ -150,8 +155,8 @@ for (my $i = 0; $i < $numParallel; ++$i)
     print "glueArg=$glueArg \n";
 
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $glueArg $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
+    `$cmd`;
 
-    safesystem($cmd) or die;
     exit();
   }
   else
@@ -163,10 +168,6 @@ for (my $i = 0; $i < $numParallel; ++$i)
 # wait for everything is finished
 foreach (@children) {
 	waitpid($_, 0);
-        if($? != 0) {
-                print STDERR "ERROR: Failed to execute: @_\n  $!\n";
-                exit(1);
-        }
 }
 
 # merge
@@ -268,7 +269,6 @@ if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
-print STDERR $cmd;
 `$cmd`;
 
 print STDERR "Finished ".localtime() ."\n";
@@ -301,7 +301,7 @@ sub systemCheck($)
   }
 }
 
-sub NumStr($)
+sub DigitStr($)
 {
     my $i = shift;
     my $numStr;
@@ -329,22 +329,30 @@ sub NumStr($)
     return $numStr;
 }
 
-sub safesystem {
-  print STDERR "Executing: @_\n";
-  system(@_);
-  if ($? == -1) {
-      print STDERR "ERROR: Failed to execute: @_\n  $!\n";
-      exit(1);
-  }
-  elsif ($? & 127) {
-      printf STDERR "ERROR: Execution of: @_\n  died with signal %d, %s coredump\n",
-          ($? & 127),  ($? & 128) ? 'with' : 'without';
-      exit(1);
-  }
-  else {
-    my $exitcode = $? >> 8;
-    print STDERR "Exit code: $exitcode\n" if $exitcode;
-    return ! $exitcode;
-  }
+sub CharStr($)
+{
+    my $i = shift;
+    my $charStr;
+    my @bit=();
+
+    while ($i>0){
+        push @bit, $i%26;
+        $i=int($i/26);
+    }
+    my $offset=scalar(@bit);
+    my $h;
+    for ($h=6;$h>=$offset;--$h) { $charStr.="a"; }
+    for ($h=$offset-1;$h>=0;--$h) { $charStr.="$alph[$bit[$h]]"; }
+    return $charStr;
+}
+
+sub NumStr($)
+{
+    my $i = shift;
+    if ($is_osx){
+        return CharStr($i);
+    }else{
+        return DigitStr($i);
+    }
 }
 

@@ -32,8 +32,7 @@ int main(int argc, char **argv)
 
   // initialize reference streams
   std::vector<boost::shared_ptr<std::ifstream> > refStreams;
-  for (std::vector<std::string>::const_iterator refFile=refFiles.begin(); refFile!=refFiles.end(); ++refFile)
-  {
+  for (std::vector<std::string>::const_iterator refFile=refFiles.begin(); refFile!=refFiles.end(); ++refFile) {
     TRACE_ERR("Loading reference from " << *refFile << std::endl);
     boost::shared_ptr<std::ifstream> ifs(new std::ifstream(refFile->c_str()));
     UTIL_THROW_IF2(!ifs, "Cannot open " << *refFile);
@@ -44,8 +43,7 @@ int main(int argc, char **argv)
   std::string nbestLine;
   int sid = -1;
   Reference ref;
-  while ( getline(std::cin, nbestLine) ) 
-  {
+  while ( getline(std::cin, nbestLine) ) {
     std::vector<std::string> items;
     Moses::TokenizeMultiCharSeparator(items, nbestLine, " ||| ");
     int sidCurrent = Moses::Scan<int>(items[0]);

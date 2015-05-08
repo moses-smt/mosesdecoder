@@ -16,10 +16,10 @@ namespace PostprocessEgretForests
 
 class TopologicalSorter
 {
- public:
+public:
   void Sort(const Forest &, std::vector<const Forest::Vertex *> &);
 
- private:
+private:
   typedef boost::unordered_set<const Forest::Vertex *> VertexSet;
 
   void BuildPredSets(const Forest &);

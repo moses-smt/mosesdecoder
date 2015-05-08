@@ -101,7 +101,7 @@ GetOrientation(int const reoDistance) const
   // this one is for HierarchicalReorderingBackwardState
   return ((m_modelType == LeftRight)
           ? (reoDistance >= 1) ? R : L
-	  : (reoDistance == 1) ? M
+        : (reoDistance == 1) ? M
           : (m_modelType == Monotonic) ? NM
           : (reoDistance == -1)  ? S
           : (m_modelType == MSD) ? D
@@ -115,7 +115,7 @@ GetOrientation(WordsRange const& prev, WordsRange const& cur,
 {
   return ((m_modelType == LeftRight)
           ? cur.GetStartPos() > prev.GetEndPos() ? R : L
-	  : IsMonotonicStep(prev,cur,cov) ? M
+        : IsMonotonicStep(prev,cur,cov) ? M
           : (m_modelType == Monotonic) ? NM
           : IsSwap(prev,cur,cov) ? S
           : (m_modelType == MSD) ? D
@@ -263,7 +263,7 @@ CopyScores(ScoreComponentCollection*  accum,
 
   const SparseReordering* sparse = m_configuration.GetSparseReordering();
   if (sparse) sparse->CopyScores(*relevantOpt, m_prevOption, input, reoType,
-				 m_direction, accum);
+                                   m_direction, accum);
 }
 
 
@@ -342,7 +342,7 @@ Expand(const TranslationOption& topt, const InputType& input,
     LRModel const& lrmodel = m_configuration;
     WordsRange const cur = topt.GetSourceWordsRange();
     LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
-				       : lrmodel.GetOrientation(m_prevRange,cur));
+                                       : lrmodel.GetOrientation(m_prevRange,cur));
     CopyScores(scores, topt, input, reoType);
   }
   return new PhraseBasedReorderingState(this, topt);

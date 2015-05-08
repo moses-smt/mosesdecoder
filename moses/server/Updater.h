@@ -19,26 +19,26 @@
 
 namespace MosesServer
 {
-  class
+class
   Updater: public xmlrpc_c::method
-  {
+{
 
-    typedef std::map<std::string, xmlrpc_c::value> params_t;
+  typedef std::map<std::string, xmlrpc_c::value> params_t;
 
 
-    std::string m_src, m_trg, m_aln;
-    bool m_bounded, m_add2ORLM;
+  std::string m_src, m_trg, m_aln;
+  bool m_bounded, m_add2ORLM;
 
-  public:
-    Updater();
+public:
+  Updater();
 
-    void
-    execute(xmlrpc_c::paramList const& paramList,
-	    xmlrpc_c::value * const  retvalP);
+  void
+  execute(xmlrpc_c::paramList const& paramList,
+          xmlrpc_c::value * const  retvalP);
 
-    void
-    breakOutParams(const params_t& params);
+  void
+  breakOutParams(const params_t& params);
 
-  };
+};
 
 }

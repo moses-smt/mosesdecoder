@@ -133,7 +133,7 @@ public:
       size_t read = 0;
       read += ftruncate(m_file_desc, m_map_size);
       m_data_ptr = (char *)util::MapOrThrow(
-        m_map_size, true, map_shared, false, m_file_desc, 0);
+                     m_map_size, true, map_shared, false, m_file_desc, 0);
       return (pointer)m_data_ptr;
     } else {
       size_t map_offset = (m_data_offset / m_page_size) * m_page_size;
@@ -142,7 +142,7 @@ public:
       size_t map_size = m_map_size + relative_offset;
 
       m_data_ptr = (char *)util::MapOrThrow(
-        m_map_size, false, map_shared, false, m_file_desc, map_offset);
+                     m_map_size, false, map_shared, false, m_file_desc, map_offset);
 
       return (pointer)(m_data_ptr + relative_offset);
     }

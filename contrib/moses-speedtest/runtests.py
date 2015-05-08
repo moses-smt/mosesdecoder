@@ -144,7 +144,7 @@ def parse_testconfig(conffile):
             basebranch = args.replace('\n', '')
         elif opt == 'BASEREV:':
             baserev = args.replace('\n', '')
-        elif opt == 'MOSES_PROFILER_PATH:':  # Optional
+        elif opt == 'MOSES_PROFILER_REPO:':  # Optional
             repo_prof_path = args.replace('\n', '')
         else:
             raise ValueError('Unrecognized option ' + opt)
@@ -199,9 +199,37 @@ def write_log(time_file, logname, config):
     log_write.write(writestr)
     log_write.close()
 
+def write_gprof(command, name, variant, config):
+    """Produces a gprof report from a gmon file"""
+    #Check if we have a directory for the profiling of this testcase:
+    output_dir = config.testlogs + '/' + name
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    outputfile = output_dir + '/' + time.strftime("%d.%m.%Y_%H:%M:%S") + '_' + name + '_' + variant
+
+    #Compile a gprof command and output the file in the directory we just created
+    gmon_path = os.getcwd() + '/gmon.out'  # Path to the profiling file
+    executable_path = command.split(' ')[0]  # Path to the moses binary
+    gprof_command = 'gprof ' + executable_path + ' ' + gmon_path + ' > ' + outputfile
+    subprocess.call([gprof_command], shell=True)
+    os.remove('gmon_path')  # After we are done discard the gmon file
+
+def execute_test(command, path, name, variant, config, profile=False):
+    """Executes a testcase given a whole command, path to the test file output,
+    name of the test and variant tested. Config is the global configuration"""
+    subprocess.Popen([command], stdout=None, stderr=subprocess.PIPE, shell=True).communicate()
+    if not profile:
+        write_log(path, name + '_' + variant, config)
+    else:  # Basically produce a gmon output
+        write_gprof(command, name, variant, config)
+
 
 def execute_tests(testcase, cur_directory, config):
     """Executes timed tests based on the config file"""
+    #Several global commands related to the time wrapper
+    time_command = ' time -p -o /tmp/time_moses_tests '
+    time_path = '/tmp/time_moses_tests'
+
     #Figure out the order of which tests must be executed.
     #Change to the current test directory
     os.chdir(config.tests + '/' + cur_directory)
@@ -211,15 +239,14 @@ def execute_tests(testcase, cur_directory, config):
     #Perform vanilla test and if a cached test exists - as well
     print(testcase.name)
     if 'vanilla' in testcase.permutations:
-        print(testcase.command)
-        subprocess.Popen(['time -p -o /tmp/time_moses_tests ' + testcase.command], stdout=None,\
-         stderr=subprocess.PIPE, shell=True).communicate()
-        write_log('/tmp/time_moses_tests', testcase.name + '_vanilla', config)
+        #Create the command for executing moses
+        whole_command = time_command + testcase.command
+
+        #test normal and cached
+        execute_test(whole_command, time_path, testcase.name, 'vanilla', config)
         if 'cached' in testcase.permutations:
-            subprocess.Popen(['time -p -o /tmp/time_moses_tests ' + testcase.command], stdout=None,\
-            stderr=None, shell=True).communicate()
-            write_log('/tmp/time_moses_tests', testcase.name + '_vanilla_cached', config)
-    
+            execute_test(whole_command, time_path, testcase.name, 'vanilla_cached', config)
+
     #Now perform LD_PRELOAD tests
     if 'ldpre' in testcase.permutations:
         for opt in testcase.ldopts:
@@ -227,18 +254,42 @@ def execute_tests(testcase, cur_directory, config):
             subprocess.call(['sync'], shell=True)
             subprocess.call([config.drop_caches], shell=True)
 
-            #test
-            subprocess.Popen(['LD_PRELOAD ' + opt + ' time -p -o /tmp/time_moses_tests ' + testcase.command], stdout=None,\
-            stderr=None, shell=True).communicate()
-            write_log('/tmp/time_moses_tests', testcase.name + '_ldpre_' + opt, config)
-            if 'cached' in testcase.permutations:
-                subprocess.Popen(['LD_PRELOAD ' + opt + ' time -p -o /tmp/time_moses_tests ' + testcase.command], stdout=None,\
-                stderr=None, shell=True).communicate()
-                write_log('/tmp/time_moses_tests', testcase.name + '_ldpre_' +opt +'_cached', config)
+            #Create the command for executing moses:
+            whole_command = 'LD_PRELOAD ' + opt + time_command + testcase.command
+            variant = 'ldpre_' + opt
 
-    #if 'profile' in testcase.permutations:
-        #TODO Separate the above into functions so we can execute them with profiling moses.
-        #Fix the logic in the main
+            #test normal and cached
+            execute_test(whole_command, time_path, testcase.name, variant, config)
+            if 'cached' in testcase.permutations:
+                execute_test(whole_command, time_path, testcase.name, variant + '_cached', config)
+
+    #Perform profiling test. Mostly same as the above lines but necessary duplication.
+    #All actual code is inside execute_test so those lines shouldn't need modifying
+    if 'profile' in testcase.permutations:
+        subprocess.call(['sync'], shell=True)  # Drop caches first
+        subprocess.call([config.drop_caches], shell=True)
+
+        if 'vanilla' in testcase.permutations:
+            whole_command = testcase.prof_command
+            execute_test(whole_command, time_path, testcase.name, 'profile', config, True)
+            if 'cached' in testcase.permutations:
+                execute_test(whole_command, time_path, testcase.name, 'profile_cached', config, True)
+
+        if 'ldpre' in testcase.permutations:
+            for opt in testcase.ldopts:
+                #Clear caches
+                subprocess.call(['sync'], shell=True)
+                subprocess.call([config.drop_caches], shell=True)
+
+                #Create the command for executing moses:
+                whole_command = 'LD_PRELOAD ' + opt + testcase.prof_command
+                variant = 'profile_ldpre_' + opt
+
+                #test normal and cached
+                execute_test(whole_command, time_path, testcase.name, variant, config, True)
+                if 'cached' in testcase.permutations:
+                    execute_test(whole_command, time_path, testcase.name, variant + '_cached', config, True)
+
 
 # Go through all the test directories and executes tests
 if __name__ == '__main__':

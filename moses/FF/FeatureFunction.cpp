@@ -55,7 +55,7 @@ void FeatureFunction::CallChangeSource(InputType * const&input)
 void FeatureFunction::SetupAll(TranslationTask const& ttask)
 {
   BOOST_FOREACH(FeatureFunction* ff, s_staticColl)
-    ff->Setup(ttask);
+  ff->Setup(ttask);
 }
 
 FeatureFunction::
@@ -193,17 +193,23 @@ void FeatureFunction::SetTuneableComponents(const std::string& value)
 void
 FeatureFunction
 ::InitializeForInput(ttasksptr const& ttask)
-{ InitializeForInput(*(ttask->GetSource().get())); }
+{
+  InitializeForInput(*(ttask->GetSource().get()));
+}
 
 void
 FeatureFunction
 ::CleanUpAfterSentenceProcessing(ttasksptr const& ttask)
-{ CleanUpAfterSentenceProcessing(*(ttask->GetSource().get())); }
+{
+  CleanUpAfterSentenceProcessing(*(ttask->GetSource().get()));
+}
 
 size_t
 FeatureFunction
 ::GetIndex() const
-{ return m_index; }
+{
+  return m_index;
+}
 
 
 /// set index

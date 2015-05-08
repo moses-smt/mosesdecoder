@@ -164,7 +164,7 @@ public:
   // }
 
   void CacheLexReorderingScores(const LexicalReordering &scoreProducer,
-				const Scores &score);
+                                const Scores &score);
 
   TO_STRING();
 

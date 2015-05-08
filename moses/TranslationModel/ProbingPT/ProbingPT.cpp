@@ -10,7 +10,7 @@ using namespace std;
 namespace Moses
 {
 ProbingPT::ProbingPT(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(line,true)
   ,m_engine(NULL)
 {
   ReadParameters();
