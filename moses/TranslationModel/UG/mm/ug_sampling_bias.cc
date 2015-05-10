@@ -1,6 +1,7 @@
 #include "ug_sampling_bias.h"
 #include <iostream>
 #include <boost/foreach.hpp>
+#include "moses/Timer.h"
 
 #ifdef HAVE_CURLPP
 #include <curlpp/Options.hpp>
@@ -40,8 +41,11 @@ namespace Moses
       , m_bias(docname2docid.size(), 0)
     {
 #ifdef HAVE_CURLPP
+      Timer timer;
+      if (log) timer.start(NULL);
       std::string json = query_bias_server(server_url, text);
       init_from_json(json, docname2docid, log);
+      if (log) *log << "Bias query took " << timer << " seconds." << std::endl;
 #endif
     }
 
