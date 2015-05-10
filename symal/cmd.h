@@ -5,8 +5,7 @@
 
 #define	CMD_H
 
-enum CommandType
-{
+enum CommandType {
   CMDDOUBLETYPE = 1,
   CMDENUMTYPE,
   CMDINTTYPE,

@@ -20,8 +20,7 @@ const int MAX_WORD = 10000;  // maximum lengthsource/target strings
 const int MAX_M = 400;       // maximum length of source strings
 const int MAX_N = 400;       // maximum length of target strings
 
-enum Alignment
-{
+enum Alignment {
   UNION = 1,
   INTERSECT,
   GROW,
@@ -429,25 +428,24 @@ int main(int argc, char** argv)
   istream *inp = &std::cin;
   ostream *out = &std::cout;
 
-  try
-  {
+  try {
     if (input) {
       fstream *fin = new fstream(input,ios::in);
       if (!fin->is_open()) throw runtime_error("cannot open " + string(input));
       inp = fin;
     }
-  
+
     if (output) {
       fstream *fout = new fstream(output,ios::out);
       if (!fout->is_open()) throw runtime_error("cannot open " + string(output));
       out = fout;
     }
-  
+
     int a[MAX_M],b[MAX_N],m,n;
     fa=new int[MAX_M+1];
     ea=new int[MAX_N+1];
-  
-  
+
+
     int sents = 0;
     A=new int *[MAX_N+1];
     for (int i=1; i<=MAX_N; i++) A[i]=new int[MAX_M+1];
@@ -473,14 +471,14 @@ int main(int argc, char** argv)
       cerr << "symal: computing grow alignment: diagonal ("
            << diagonal << ") final ("<< isfinal << ")"
            <<  "both-uncovered (" << bothuncovered <<")\n";
-  
+
       while(getals(*inp,m,a,n,b))
         printgrow(*out,m,a,n,b,diagonal,isfinal,bothuncovered);
-  
+
       break;
     case TGTTOSRC:
       cerr << "symal: computing target-to-source alignment\n";
-  
+
       while(getals(*inp,m,a,n,b)) {
         printtgttosrc(*out,m,a,n,b);
         sents++;
@@ -489,7 +487,7 @@ int main(int argc, char** argv)
       break;
     case SRCTOTGT:
       cerr << "symal: computing source-to-target alignment\n";
-  
+
       while(getals(*inp,m,a,n,b)) {
         printsrctotgt(*out,m,a,n,b);
         sents++;
@@ -511,9 +509,7 @@ int main(int argc, char** argv)
     if (out != &std::cout) {
       delete inp;
     }
-  }
-  catch (const std::exception &e)
-  {
+  } catch (const std::exception &e) {
     cerr << e.what() << std::endl;
     exit(1);
   }

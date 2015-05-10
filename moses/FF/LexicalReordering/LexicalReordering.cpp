@@ -140,17 +140,14 @@ SetCache(TranslationOption& to) const
   if (to.GetLexReorderingScores(this)) return;
   // Scores were were set already (e.g., by sampling phrase table)
 
-  if (m_table)
-    {
-      Phrase const& sphrase = to.GetInputPath().GetPhrase();
-      Phrase const& tphrase = to.GetTargetPhrase();
-      to.CacheLexReorderingScores(*this, this->GetProb(sphrase,tphrase));
-    }
-  else // e.g. OOV with Mmsapt
-    {
-      Scores vals(GetNumScoreComponents(), 0);
-      to.CacheLexReorderingScores(*this, vals);
-    }
+  if (m_table) {
+    Phrase const& sphrase = to.GetInputPath().GetPhrase();
+    Phrase const& tphrase = to.GetTargetPhrase();
+    to.CacheLexReorderingScores(*this, this->GetProb(sphrase,tphrase));
+  } else { // e.g. OOV with Mmsapt
+    Scores vals(GetNumScoreComponents(), 0);
+    to.CacheLexReorderingScores(*this, vals);
+  }
 }
 
 LRModel const&
