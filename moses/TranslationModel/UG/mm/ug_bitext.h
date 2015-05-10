@@ -417,6 +417,8 @@ namespace Moses {
     ( string const& bserver, string const& text, ostream* log ) const
     {
       sptr<DocumentBias> ret;
+      UTIL_THROW_IF2(m_sid2docid == NULL,
+		     "Document bias requested but no document map loaded.");
       ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid,
 				 bserver, text, log));
       return ret;
