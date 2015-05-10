@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <list>
 #include <vector>
@@ -15,21 +16,23 @@
 
 using namespace std;
 
-#define MAX_WORD 10000 // maximum lengthsource/target strings
-#define MAX_M 400      // maximum length of source strings
-#define MAX_N 400      // maximum length of target strings
+const int MAX_WORD = 10000;  // maximum lengthsource/target strings
+const int MAX_M = 400;       // maximum length of source strings
+const int MAX_N = 400;       // maximum length of target strings
 
-#define UNION                      1
-#define INTERSECT                  2
-#define GROW                       3
-#define SRCTOTGT                   4
-#define TGTTOSRC                   5
-#define BOOL_YES                   1
-#define BOOL_NO                    0
+enum Alignment {
+  UNION = 1,
+  INTERSECT,
+  GROW,
+  SRCTOTGT,
+  TGTTOSRC,
+};
 
-#define END_ENUM    {   (char*)0,  0 }
+const Enum_T END_ENUM = {'\0', 0};
 
-static Enum_T AlignEnum [] = {
+namespace
+{
+Enum_T AlignEnum [] = {
   {    "union",                        UNION },
   {    "u",                            UNION },
   {    "intersect",                    INTERSECT},
@@ -43,17 +46,15 @@ static Enum_T AlignEnum [] = {
   END_ENUM
 };
 
-static Enum_T BoolEnum [] = {
-  {    "true",        BOOL_YES },
-  {    "yes",         BOOL_YES },
-  {    "y",           BOOL_YES },
-  {    "false",       BOOL_NO },
-  {    "no",          BOOL_NO },
-  {    "n",           BOOL_NO },
+Enum_T BoolEnum [] = {
+  {    "true",        true },
+  {    "yes",         true },
+  {    "y",           true },
+  {    "false",       false },
+  {    "no",          false },
+  {    "n",           false },
   END_ENUM
 };
-
-
 
 // global variables and constants
 
@@ -117,7 +118,7 @@ int getals(istream& inp,int& m, int *a,int& n, int *b)
 
   } else
     return 0;
-};
+}
 
 
 //compute union alignment
@@ -226,7 +227,7 @@ int printsrctotgt(ostream& out,int m,int *a,int n,int* b)
 //to represent the grow alignment as the unionalignment of a
 //directed and inverted alignment
 
-int printgrow(ostream& out,int m,int *a,int n,int* b, bool diagonal=false,bool final=false,bool bothuncovered=false)
+int printgrow(ostream& out,int m,int *a,int n,int* b, bool diagonal=false,bool isfinal=false,bool bothuncovered=false)
 {
 
   ostringstream sout;
@@ -322,7 +323,7 @@ int printgrow(ostream& out,int m,int *a,int n,int* b, bool diagonal=false,bool f
     }
   }
 
-  if (final) {
+  if (isfinal) {
     for (k=unionalignment.begin(); k!=unionalignment.end(); k++)
       if (A[k->first][k->second]==1) {
         point.first=k->first;
@@ -383,6 +384,7 @@ int printgrow(ostream& out,int m,int *a,int n,int* b, bool diagonal=false,bool f
   return 1;
 }
 
+} // namespace
 
 
 //Main file here
@@ -395,7 +397,7 @@ int main(int argc, char** argv)
   char* input= NULL;
   char* output= NULL;
   int diagonal=false;
-  int final=false;
+  int isfinal=false;
   int bothuncovered=false;
 
 
@@ -403,8 +405,8 @@ int main(int argc, char** argv)
                 "alignment", CMDENUMTYPE,  &alignment, AlignEnum,
                 "d", CMDENUMTYPE,  &diagonal, BoolEnum,
                 "diagonal", CMDENUMTYPE,  &diagonal, BoolEnum,
-                "f", CMDENUMTYPE,  &final, BoolEnum,
-                "final", CMDENUMTYPE,  &final, BoolEnum,
+                "f", CMDENUMTYPE,  &isfinal, BoolEnum,
+                "final", CMDENUMTYPE,  &isfinal, BoolEnum,
                 "b", CMDENUMTYPE,  &bothuncovered, BoolEnum,
                 "both", CMDENUMTYPE,  &bothuncovered, BoolEnum,
                 "i", CMDSTRINGTYPE, &input,
@@ -412,9 +414,9 @@ int main(int argc, char** argv)
                 "v", CMDENUMTYPE,  &verbose, BoolEnum,
                 "verbose", CMDENUMTYPE,  &verbose, BoolEnum,
 
-                (char*)NULL);
+                NULL);
 
-  GetParams(&argc, &argv, (char*)NULL);
+  GetParams(&argc, &argv, NULL);
 
   if (alignment==0) {
     cerr << "usage: symal [-i=<inputfile>] [-o=<outputfile>] -a=[u|i|g] -d=[yes|no] -b=[yes|no] -f=[yes|no] \n"
@@ -426,91 +428,90 @@ int main(int argc, char** argv)
   istream *inp = &std::cin;
   ostream *out = &std::cout;
 
-  if (input) {
-    fstream *fin = new fstream(input,ios::in);
-    if (!fin->is_open()) {
-      cerr << "cannot open " << input << "\n";
-      exit(1);
+  try {
+    if (input) {
+      fstream *fin = new fstream(input,ios::in);
+      if (!fin->is_open()) throw runtime_error("cannot open " + string(input));
+      inp = fin;
     }
-    inp = fin;
-  }
 
-  if (output) {
-    fstream *fout = new fstream(output,ios::out);
-    if (!fout->is_open()) {
-      cerr << "cannot open " << output << "\n";
-      exit(1);
+    if (output) {
+      fstream *fout = new fstream(output,ios::out);
+      if (!fout->is_open()) throw runtime_error("cannot open " + string(output));
+      out = fout;
     }
-    out = fout;
-  }
 
-  int a[MAX_M],b[MAX_N],m,n;
-  fa=new int[MAX_M+1];
-  ea=new int[MAX_N+1];
+    int a[MAX_M],b[MAX_N],m,n;
+    fa=new int[MAX_M+1];
+    ea=new int[MAX_N+1];
 
 
-  int sents = 0;
-  A=new int *[MAX_N+1];
-  for (int i=1; i<=MAX_N; i++) A[i]=new int[MAX_M+1];
+    int sents = 0;
+    A=new int *[MAX_N+1];
+    for (int i=1; i<=MAX_N; i++) A[i]=new int[MAX_M+1];
 
-  switch (alignment) {
-  case UNION:
-    cerr << "symal: computing union alignment\n";
-    while(getals(*inp,m,a,n,b)) {
-      prunionalignment(*out,m,a,n,b);
-      sents++;
+    switch (alignment) {
+    case UNION:
+      cerr << "symal: computing union alignment\n";
+      while(getals(*inp,m,a,n,b)) {
+        prunionalignment(*out,m,a,n,b);
+        sents++;
+      }
+      cerr << "Sents: " << sents << endl;
+      break;
+    case INTERSECT:
+      cerr << "symal: computing intersect alignment\n";
+      while(getals(*inp,m,a,n,b)) {
+        printersect(*out,m,a,n,b);
+        sents++;
+      }
+      cerr << "Sents: " << sents << endl;
+      break;
+    case GROW:
+      cerr << "symal: computing grow alignment: diagonal ("
+           << diagonal << ") final ("<< isfinal << ")"
+           <<  "both-uncovered (" << bothuncovered <<")\n";
+
+      while(getals(*inp,m,a,n,b))
+        printgrow(*out,m,a,n,b,diagonal,isfinal,bothuncovered);
+
+      break;
+    case TGTTOSRC:
+      cerr << "symal: computing target-to-source alignment\n";
+
+      while(getals(*inp,m,a,n,b)) {
+        printtgttosrc(*out,m,a,n,b);
+        sents++;
+      }
+      cerr << "Sents: " << sents << endl;
+      break;
+    case SRCTOTGT:
+      cerr << "symal: computing source-to-target alignment\n";
+
+      while(getals(*inp,m,a,n,b)) {
+        printsrctotgt(*out,m,a,n,b);
+        sents++;
+      }
+      cerr << "Sents: " << sents << endl;
+      break;
+    default:
+      throw runtime_error("Unknown alignment");
     }
-    cerr << "Sents: " << sents << endl;
-    break;
-  case INTERSECT:
-    cerr << "symal: computing intersect alignment\n";
-    while(getals(*inp,m,a,n,b)) {
-      printersect(*out,m,a,n,b);
-      sents++;
+
+    delete [] fa;
+    delete [] ea;
+    for (int i=1; i<=MAX_N; i++) delete [] A[i];
+    delete [] A;
+
+    if (inp != &std::cin) {
+      delete inp;
     }
-    cerr << "Sents: " << sents << endl;
-    break;
-  case GROW:
-    cerr << "symal: computing grow alignment: diagonal ("
-         << diagonal << ") final ("<< final << ")"
-         <<  "both-uncovered (" << bothuncovered <<")\n";
-
-    while(getals(*inp,m,a,n,b))
-      printgrow(*out,m,a,n,b,diagonal,final,bothuncovered);
-
-    break;
-  case TGTTOSRC:
-    cerr << "symal: computing target-to-source alignment\n";
-
-    while(getals(*inp,m,a,n,b)) {
-      printtgttosrc(*out,m,a,n,b);
-      sents++;
+    if (out != &std::cout) {
+      delete inp;
     }
-    cerr << "Sents: " << sents << endl;
-    break;
-  case SRCTOTGT:
-    cerr << "symal: computing source-to-target alignment\n";
-
-    while(getals(*inp,m,a,n,b)) {
-      printsrctotgt(*out,m,a,n,b);
-      sents++;
-    }
-    cerr << "Sents: " << sents << endl;
-    break;
-  default:
+  } catch (const std::exception &e) {
+    cerr << e.what() << std::endl;
     exit(1);
-  }
-
-  delete [] fa;
-  delete [] ea;
-  for (int i=1; i<=MAX_N; i++) delete [] A[i];
-  delete [] A;
-
-  if (inp != &std::cin) {
-    delete inp;
-  }
-  if (out != &std::cout) {
-    delete inp;
   }
 
   exit(0);

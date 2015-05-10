@@ -2438,9 +2438,8 @@ sub get_config_tables {
     my $mmsapt = &get("TRAINING:mmsapt");
     if (defined($mmsapt)) {
       $ptImpl = 11; # mmsapt
-      $mmsapt =~ s/num-features=(\d+) // || die("ERROR: mmsapt setting needs to set num-features");
       $numFF = $1;
-      $cmd .= "-mmsapt '$mmsapt' ";
+      $cmd .= "-mmsapt ";
     }
 
     # additional settings for factored models
