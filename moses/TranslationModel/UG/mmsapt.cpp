@@ -205,7 +205,11 @@ namespace Moses
 
     if ((m = param.find("bias-server")) != param.end())
 	m_bias_server = m->second;
-
+    if (m_bias_loglevel)
+      {
+	dflt = pair<string,string>("bias-logfile","/dev/stderr");
+	param.insert(dflt);
+      }
     if ((m = param.find("bias-logfile")) != param.end())
       {
 	m_bias_logfile = m->second;
@@ -213,7 +217,7 @@ namespace Moses
 	  m_bias_log = &std::cerr;
 	else if (m_bias_logfile == "/dev/stdout")
 	  m_bias_log = &std::cout;
-	else
+	else 
 	  {
 	    m_bias_logger.reset(new ofstream(m_bias_logfile.c_str()));
 	    m_bias_log = m_bias_logger.get();
@@ -692,7 +696,7 @@ namespace Moses
     else ret->Prune(true,ret->GetSize());
 
 #if 1
-    if (m_bias_log && m_lr_func)
+    if (m_bias_log && m_lr_func && m_bias_loglevel > 3)
       {
 	typename PhrasePair<Token>::SortDescendingByJointCount sorter;
 	sort(ppfix.begin(), ppfix.end(),sorter);
