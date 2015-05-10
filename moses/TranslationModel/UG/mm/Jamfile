@@ -2,6 +2,7 @@ external-lib bz2 ;
 
 exe mmlex-build : 
 mmlex-build.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -11,6 +12,7 @@ $(TOP)/util//kenutil
 
 exe mmlex-lookup : 
 mmlex-lookup.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -20,6 +22,7 @@ $(TOP)/util//kenutil
 
 exe mtt-demo1 : 
 mtt-demo1.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -29,6 +32,7 @@ $(TOP)/util//kenutil
 
 exe mtt-count-words : 
 mtt-count-words.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -38,6 +42,7 @@ $(TOP)/util//kenutil
 
 exe mtt-build : 
 mtt-build.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -47,6 +52,7 @@ $(TOP)/util//kenutil
 
 exe mtt-dump : 
 mtt-dump.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -56,6 +62,7 @@ $(TOP)/util//kenutil
 
 exe mam2symal : 
 mam2symal.cc
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -65,6 +72,7 @@ $(TOP)/util//kenutil
 
 exe symal2mam : 
 symal2mam.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -74,6 +82,7 @@ $(TOP)/util//kenutil
 
 exe mam_verify : 
 mam_verify.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -94,6 +103,7 @@ $(TOP)/util//kenutil
 
 exe calc-coverage : 
 calc-coverage.cc 
+$(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 

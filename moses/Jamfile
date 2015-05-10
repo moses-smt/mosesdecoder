@@ -91,6 +91,7 @@ if $(with-vw) {
 lib moses :
 [ glob 
   *.cpp
+  parameters/*.cpp
   Syntax/*.cpp
   Syntax/F2S/*.cpp
   Syntax/S2T/*.cpp

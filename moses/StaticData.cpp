@@ -613,6 +613,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   const PARAM_VEC *params;
 
+  m_context_parameters.init(*parameter);
+
   // to cube or not to cube
   m_parameter->SetParameter(m_searchAlgorithm, "search-algorithm", Normal);
 

@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -43,6 +44,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/Factory.h"
 #include "moses/PP/Factory.h"
 
+#include "moses/parameters/ContextParameters.h"
+
 namespace Moses
 {
 
@@ -68,6 +71,9 @@ private:
   static StaticData									s_instance;
 protected:
   Parameter *m_parameter;
+
+  ContextParameters m_context_parameters;
+
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
 
@@ -293,6 +299,9 @@ public:
   const Parameter &GetParameter() const {
     return *m_parameter;
   }
+
+  const ContextParameters&
+  GetContextParameters() const { return m_context_parameters; }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
     return m_inputFactorOrder;
