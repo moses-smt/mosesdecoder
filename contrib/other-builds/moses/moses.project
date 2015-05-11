@@ -873,4 +873,8 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="parameters">
+    <File Name="../../../moses/parameters/ContextParameters.cpp"/>
+    <File Name="../../../moses/parameters/ContextParameters.h"/>
+  </VirtualDirectory>
 </CodeLite_Project>
