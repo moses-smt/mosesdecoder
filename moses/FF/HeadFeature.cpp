@@ -812,7 +812,7 @@ void HeadFeature::Load() {
   // !!!! I NEED TO MAKE THIS CALL SO THE CALL IN EvaluateWhenApplied DOESN"T CRASH !!!!
 
   cerr<<"TEST CallStanfordDep:"<<endl;
-  string temp = CallStanfordDep("(VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))");
+  string temp = CallStanfordDepParsed("(VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))");
   cerr<<"TEMP DEP: "<<temp<<endl;
 
   //this should be done in InitializeForInput (for everysentence ->new thread)
@@ -823,7 +823,15 @@ void HeadFeature::Load() {
 
 }
 
-std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
+std::string HeadFeature::CallStanfordDepParsed(std::string parsedSentence) const{
+	return CallStanfordDep(parsedSentence,javaWrapper->GetProcessParsedSentenceJId());
+}
+
+std::string HeadFeature::CallStanfordDep(std::string sentence) const{
+	return CallStanfordDep(sentence,javaWrapper->GetProcessSentenceJId());
+}
+
+std::string HeadFeature::CallStanfordDep(std::string parsedSentence, jmethodID methodId) const{
 
 	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
 	env->ExceptionDescribe();
@@ -851,7 +859,7 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 	if (!env->ExceptionCheck()){
 		//it's the same method id
 		//VERBOSE(1, "CALLING JMETHOD ProcessParsedSentenceJId: " << env->GetMethodID(javaWrapper->GetRelationsJClass(), "ProcessParsedSentence","(Ljava/lang/String;Z)Ljava/lang/String;") << std::endl);
-		jstring jStanfordDep = reinterpret_cast <jstring> (env ->CallObjectMethod(workingStanforDepObj,javaWrapper->GetProcessParsedSentenceJId(),jSentence,jSpecified));
+		jstring jStanfordDep = reinterpret_cast <jstring> (env ->CallObjectMethod(workingStanforDepObj,methodId,jSentence,jSpecified));
 
 		env->ExceptionDescribe();
 
@@ -872,7 +880,7 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 		javaWrapper->GetVM()->DetachCurrentThread();
 		return dependencies;
 		}
-		//Something goes wrong in ProcessParsedSentence when trying to extract the relations and everythig crashes
+		//Something goes wrong in ProcessParsedSentence when trying to extract the relations and everything crashes
 		//returning a bogus string from ProcessParsedSentence works
 		VERBOSE(1, "jStanfordDep is NULL" << std::endl);
 
@@ -1066,6 +1074,8 @@ void HeadFeature::EvaluateAfterPop(
 		//std::string parsedSentence  = syntaxTree->ToString();
 		std::string parsedSentence = "";
 		syntaxTree->ToStringLevel(parsedSentence,4);
+		if(parsedSentence=="")
+				return;
 		//cout<<"After pop "<<featureID<<" toString4: "<<parsedSentence<<endl;
 
 	//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
@@ -1084,7 +1094,7 @@ void HeadFeature::EvaluateAfterPop(
 			else{
 				//commented the call to StanfordDep to debug memory leak
 				//depRel = "nsubj hate PRN\tdobj hate you";
-				depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+				depRel = CallStanfordDepParsed(parsedSentence); //(parsedSentence);
 				float score = 1.0;
 				DepRelMap &localCacheDepRel = GetCacheDepRel();
 				//if key already returns return iterator to key position
@@ -1239,7 +1249,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 						//commented the call to StanfordDep to debug memory leak
 						//depRel = "nsubj hate PRN\tdobj hate you";
-						depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+						depRel = CallStanfordDepParsed(parsedSentence); //(parsedSentence);
 						float score = 1.0;
 
 						//chunk depRel string into tuples

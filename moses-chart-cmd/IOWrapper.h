@@ -46,6 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "search/applied.hh"
 #include "moses/ChartManager.h"
 
+
 namespace Moses
 {
 class FactorCollection;
@@ -85,6 +86,7 @@ protected:
   Moses::OutputCollector                *m_singleBestOutputCollector;
   Moses::OutputCollector                *m_alignmentInfoCollector;
   Moses::OutputCollector                *m_unknownsCollector;
+  //MARIA
   Moses::OutputCollector								*m_depRelOutputCollector;
 
   typedef std::set< std::pair<size_t, size_t>  > Alignments;

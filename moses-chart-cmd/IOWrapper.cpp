@@ -740,6 +740,7 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   }
 }
 
+
 void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
                                 long translationId)
 {
@@ -796,7 +797,11 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
           const SyntaxTreeState* depTree = dynamic_cast<const SyntaxTreeState*>(hypo.GetFFState(1));
      //     out<< " ||| " << depTree->GetTree()->ToStringHead();
           out<<" ||| ";
-          ChartKBestExtractor::GetDepRel(derivation,out);//depTree->m_depRel;
+          //ChartKBestExtractor::GetDepRelDebug(derivation,out);//depTree->m_depRel;
+          //Can't reuse CreateJavaVM -> singelton class in HeadFeature?
+          //simplest way seems to be to add another script in mert pipeline. Before calling extractor.sh
+          //Extend Java wrapper with a function to process the nbest list -> add some id in the nbelist to index in the DepRel file just like for the references
+          //ChartKBestExtractor::GetDepRel(outputPhrase,out);
         }
 
     out << std::endl;

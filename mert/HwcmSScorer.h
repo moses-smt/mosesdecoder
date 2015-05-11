@@ -12,6 +12,8 @@
 #include <vector>
 
 #include "StatisticsBasedScorer.h"
+#include "moses/FF/CreateJavaVM.h"
+#include "moses/Util.h"
 
 namespace MosesTuning
 {
@@ -29,6 +31,7 @@ public:
   explicit HwcmSScorer(const std::string& config = "");
   ~HwcmSScorer();
 
+  std::string CallStanfordDep(std::string parsedSentence, jmethodID methodId) const;
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
 
@@ -42,10 +45,12 @@ public:
 
   //which means use field 5 or 6 where we extract the tuples from
   bool useAlignment() const {
-    return true;
+    return false;
   }
 
 private:
+  mutable Moses::CreateJavaVM *javaWrapper;
+  jobject m_workingStanforDepObj;
 
   // data extracted from reference files
   std::vector<std::vector<int> > m_ref_lengths;

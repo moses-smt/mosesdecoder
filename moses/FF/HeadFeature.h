@@ -308,6 +308,8 @@ public:
 
   void GetNewStanfordDepObj();
 
+
+
   void SetParameter(const std::string& key, const std::string& value);
 
 
@@ -357,7 +359,9 @@ public:
   void ReadMIModel();
   void ReadLemmaMap();
 
+  std::string CallStanfordDepParsed(std::string parsedSentence) const;
   std::string CallStanfordDep(std::string parsedSentence) const;
+  std::string CallStanfordDep(std::string parsedSentence, jmethodID methodId) const;
   void ProcessDepString(std::string depRelString, std::vector< SyntaxTreePtr > previousTrees,ScoreComponentCollection* accumulator) const;
   void CleanUpAfterSentenceProcessing(const InputType& source);
   float GetWBScore(std::vector< std::string >& depRel) const;

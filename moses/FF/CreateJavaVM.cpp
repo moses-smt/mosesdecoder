@@ -1,5 +1,5 @@
 #include "CreateJavaVM.h"
-#include "moses/StaticData.h"
+//#include "moses/StaticData.h"
 
 
 using namespace std;
@@ -42,10 +42,10 @@ CreateJavaVM::CreateJavaVM(std::string jarPath){
   JNIEnv *env; // keep this pointer local to the constructor as it is only valid in a thread anyway
   jint res = JNI_CreateJavaVM(&vm, (void **)&env, &vm_args);
 
-  VERBOSE(1, "JNI_CreateJavaVM result: jint=" << res << std::endl);
+  cerr<< "JNI_CreateJavaVM result: jint=" << res << endl;
   jclass Relations = env->FindClass("Relations");
   if(Relations==NULL)
-  	cerr<<"Relations class NULL"<<endl;
+  	std::cerr<<"Relations class NULL"<<endl;
   env->ExceptionDescribe();
 	//keep this pointer throughout decoding
   this->relationsJClass = reinterpret_cast <jclass> (env->NewGlobalRef(Relations));
@@ -59,7 +59,7 @@ CreateJavaVM::CreateJavaVM(std::string jarPath){
   		//Get method ID for: object initializer
   		this->DepParsingInitJId = env->GetMethodID(this->relationsJClass, "<init>","()V");
       if(this->DepParsingInitJId==NULL)
-      	cerr<<"constructor MethodID NULL"<<endl;
+      	std::cerr<<"constructor MethodID NULL"<<endl;
       env->ExceptionDescribe();
 
       //Get method ID for: list of selected dep rel types method
@@ -76,7 +76,14 @@ CreateJavaVM::CreateJavaVM(std::string jarPath){
         cerr<<"ProcessParsedSentence MethodID NULL"<<endl;
       env->ExceptionDescribe();
 
-      VERBOSE(1, "JNI finished getting method IDs. ProcessParsedSentenceJId: " << this->ProcessParsedSentenceJId << std::endl);
+      //Get method ID for: process the sentence and return dependencies method
+			this->ProcessSentenceJId = env->GetMethodID(this->relationsJClass, "ProcessSentence",
+														"(Ljava/lang/String;Z)Ljava/lang/String;");
+			if(this->ProcessSentenceJId==NULL)
+				cerr<<"ProcessSentence MethodID NULL"<<endl;
+			env->ExceptionDescribe();
+
+      cerr<< "JNI finished getting method IDs. ProcessParsedSentenceJId: " << this->ProcessParsedSentenceJId <<" ProcessSentenceJId" << this->ProcessSentenceJId<< std::endl;
 
     }
 
@@ -102,7 +109,7 @@ JNIEnv* CreateJavaVM::GetAttachedJniEnvPointer()
   if (getEnvStat == JNI_EDETACHED) {
      // VERBOSE(1, "GetEnv: not attached. Attempting to attach ... ");
       if (vm->AttachCurrentThread((void **)&env, NULL) != 0) {
-          VERBOSE(1, "Failed to attach" << std::endl);
+          cerr<< "Failed to attach" << std::endl;
       }
 /*      else {
           VERBOSE(1, "Attached successfully." << std::endl);
@@ -111,7 +118,7 @@ JNIEnv* CreateJavaVM::GetAttachedJniEnvPointer()
   } else if (getEnvStat == JNI_OK) {
       //
   } else if (getEnvStat == JNI_EVERSION) {
-      VERBOSE(1, "GetEnv: version not supported" << std::endl);
+      cerr<< "GetEnv: version not supported" << std::endl;
   }
   // FIXME aren't we returning a local pointer? why does this work?
   return env;
@@ -179,7 +186,7 @@ void CreateJavaVM::GetDep(std::string parsedSentence){
 
 void CreateJavaVM::TestRuntime(){
 	JNIEnv *env = GetAttachedJniEnvPointer();
-	VERBOSE(1, "START querying dep rel " << std::endl);
+	cerr<< "START querying dep rel " << endl;
 		std::clock_t    start,mid;
 		start = std::clock();
 		mid=start;
@@ -209,7 +216,7 @@ void CreateJavaVM::TestRuntime(){
 	jboolean jSpecified = JNI_TRUE;
 	env->ExceptionDescribe();
 	//test memory
-	VERBOSE(1, "trying to call method ProcessParsedSentenceJId" << std::endl);
+	cerr<< "trying to call method ProcessParsedSentenceJId" << std::endl;
 
 	//make the java method synchronized ? di i need to -> one object for sentence? -> initialized when feature is loaded??
 	//SHOULT HAVE ONE OBJECT PERS SENTENCE AND THEN DELETE SO THE MEMORY GETS FREED -> does it get free?
@@ -227,14 +234,14 @@ void CreateJavaVM::TestRuntime(){
 	env->DeleteLocalRef(jStanfordDep);
 	env->DeleteLocalRef(jStanfordDepObj);
 	if(i%10000==0){
-		VERBOSE(1, i << " "<< (std::clock() - mid) / (double)(CLOCKS_PER_SEC) << std::endl);
+		cerr<< i << " "<< (std::clock() - mid) / (double)(CLOCKS_PER_SEC) << std::endl;
 		mid = std::clock();
 	}
 	//have to figure how to manage this object
 	env->DeleteGlobalRef(relGlobal);
 		}
-		VERBOSE(1, "Time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC) << " s" << std::endl);
-			VERBOSE(1, "STOP querying dep rel " << std::endl);
+		cerr<< "Time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC) << " s" << std::endl;
+			cerr<< "STOP querying dep rel " << std::endl;
 	this->vm->DetachCurrentThread();
 }
 

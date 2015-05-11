@@ -27,9 +27,95 @@ HwcmSScorer::HwcmSScorer(const string& config)
 	m_includeRel = false;
 	m_order = 3;
 	m_totalRef.assign(m_order,0);
+/*	string jarPath= "/Users/mnadejde/Documents/workspace/stanford-parser-full-2014-08-27/stanford-parser-3.4.1-models.jar";
+	jarPath+=":/Users/mnadejde/Documents/workspace/stanford-parser-full-2014-08-27/stanford-parser.jar";
+	jarPath+=":/Users/mnadejde/Documents/workspace/stanford-parser-full-2014-08-27/commons-lang3-3.3.2.jar";
+	jarPath+=":/Users/mnadejde/Documents/workspace/moses_010914/mosesdecoder/Relations/Relations.jar";
+*/
+	javaWrapper = Moses::CreateJavaVM::Instance(config);
+	//Create object
+	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
+
+	env->ExceptionDescribe();
+
+	jobject rel = env->NewObject(javaWrapper->GetRelationsJClass(), javaWrapper->GetDepParsingInitJId());
+			env->ExceptionDescribe();
+
+	m_workingStanforDepObj = env->NewGlobalRef(rel);
+	env->DeleteLocalRef(rel);
+	javaWrapper->GetVM()->DetachCurrentThread();
+
+
 }
 
-HwcmSScorer::~HwcmSScorer() {}
+HwcmSScorer::~HwcmSScorer() {
+	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
+	env->ExceptionDescribe();
+	if (!env->ExceptionCheck()){
+		env->DeleteLocalRef(m_workingStanforDepObj);
+	}
+}
+
+
+std::string HwcmSScorer::CallStanfordDep(std::string parsedSentence, jmethodID methodId) const{
+
+	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
+	env->ExceptionDescribe();
+
+
+	/**
+	 * arguments to be passed to ProcessParsedSentenceJId:
+	 * string: parsed sentence
+	 * boolean: TRUE for selecting certain relations (list them with GetRelationListJId method)
+	*/
+
+	jstring jSentence = env->NewStringUTF(parsedSentence.c_str());
+	jboolean jSpecified = JNI_TRUE;
+	env->ExceptionDescribe();
+
+
+	/**
+	 * Call this method to get a string with the selected dependency relations
+	 * Issues: method should be synchronize since sentences are decoded in parallel and there is only one object per feature
+	 * Alternative should be to have one object per sentence and free it when decoding finished
+	 */
+	if (!env->ExceptionCheck()){
+		//it's the same method id
+		//VERBOSE(1, "CALLING JMETHOD ProcessParsedSentenceJId: " << env->GetMethodID(javaWrapper->GetRelationsJClass(), "ProcessParsedSentence","(Ljava/lang/String;Z)Ljava/lang/String;") << std::endl);
+		jstring jStanfordDep = reinterpret_cast <jstring> (env ->CallObjectMethod(m_workingStanforDepObj,methodId,jSentence,jSpecified));
+
+		env->ExceptionDescribe();
+
+		//Returns a pointer to a UTF-8 string
+		if(jStanfordDep != NULL){
+		const char* stanfordDep = env->GetStringUTFChars(jStanfordDep, 0);
+		std::string dependencies(stanfordDep);
+
+		//how to make sure the memory gets released on the Java side?
+		env->ReleaseStringUTFChars(jStanfordDep, stanfordDep);
+		env->DeleteLocalRef(jSentence);
+
+		env->ExceptionDescribe();
+		javaWrapper->GetVM()->DetachCurrentThread();
+		return dependencies;
+		}
+		std::cerr<< "jStanfordDep is NULL" << std::endl;
+
+		//this would be deleted anyway once the thread detaches?
+		if(jSentence!=NULL){
+			env->DeleteLocalRef(jSentence);
+			env->ExceptionDescribe();
+		}
+
+		javaWrapper->GetVM()->DetachCurrentThread(); //-> when jStanfordDep in null it already crashed?
+
+		return "null";
+	}
+	javaWrapper->GetVM()->DetachCurrentThread();
+
+
+	return "exception";
+}
 
 void HwcmSScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
@@ -52,7 +138,7 @@ void HwcmSScorer::setReferenceFiles(const vector<string>& referenceFiles)
   }
 }
 
-vector <map <string,int> > HwcmSScorer::MakeTuples(string ref, string dep, size_t order, vector<int> &totals){
+vector <map <string,int> > HwcmSScorer::MakeTuples(string sentence, string dep, size_t order, vector<int> &totals){
 	using Moses::Tokenize;
 
 	//cout<<ref<<endl;
@@ -67,7 +153,7 @@ vector <map <string,int> > HwcmSScorer::MakeTuples(string ref, string dep, size_
 	map <int,pair<int,string> > dependencyTuples;
 	pair<map <string,int>::iterator,bool> itChains;
 	pair<map <int, pair<int,string> >::iterator,bool > itTuples;
-	Tokenize(words,ref);
+	Tokenize(words,sentence);
 	Tokenize(dependencies,dep);
 	words.insert(words.begin(),"ROOT");
 
@@ -114,12 +200,15 @@ void HwcmSScorer::prepareStats(std::size_t sid, const std::string& text, ScoreSt
   //instead of alignment I have the dependency tuples -> but I might want to print the trees then "alignment" field will be the 6th
   string sentence = this->preprocessSentence(text);
   vector<string> dependencies = TokenizeMultiCharSeparator(sentence,"|||");
+  string depRel = CallStanfordDep(dependencies[0],javaWrapper->GetProcessSentenceJId());
   vector <map<string,int> > nbestTuples;
   vector<int> totalNbest, totalRef;
   vector<int> stats;
   stats.assign(m_order*3,0);
-  if(dependencies.size()==2){
-  	nbestTuples = MakeTuples(dependencies[0], dependencies[1],m_order, totalNbest);
+  if(dependencies.size()>0){
+  	//cout<<depRel<<endl;
+  	//cout<<dependencies[1]<<endl;
+  	nbestTuples = MakeTuples(dependencies[0], depRel,m_order, totalNbest);
   	if(m_currentRefId!=sid){
   		m_currentRefId=sid;
   		m_currentRefTuples = MakeTuples(m_ref[sid].first, m_ref[sid].second,m_order, totalRef);
@@ -168,7 +257,7 @@ float HwcmSScorer::calculateScore(const std::vector<int>& comps) const{
 		throw runtime_error(msg.str());
 	}
 
-	cout<<precision<<" "<<recall<<" "<<(2*precision*recall)/(precision+recall)<<endl;
+	//cout<<precision<<" "<<recall<<" "<<(2*precision*recall)/(precision+recall)<<endl;
 	return (2*precision*recall)/(precision+recall); // f1-score
 }
 

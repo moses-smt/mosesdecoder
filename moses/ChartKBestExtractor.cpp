@@ -127,8 +127,28 @@ Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
 }
 
 //MARIA
+// I am not able to save a Relations object, therefore when I call this it loads the englishPCFG model each time
+//I have to save all the nbest to a file and then parse it all in one function call
+//then modify mert to read this file as well instead of trying to find the relations in the nbest file
+void ChartKBestExtractor::GetDepRel(const Phrase &outPhrase,std::ostringstream &os){
+	std::string depRel ="";
+	std::stringstream out;
+	 size_t size = outPhrase.GetSize();
+	 for (size_t pos = 0 ; pos < size ; pos++) {
+	      const Factor *factor = outPhrase.GetFactor(pos, 0);
+	      out << *factor;
+	 }
+
+	 //Find HeadFeature -> this is badly done
+	 const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+	 const FeatureFunction *ff = sff[1];
+	 const HeadFeature *hf = dynamic_cast<const HeadFeature*>(ff);
+	 depRel = hf->CallStanfordDep(out.str());
+	 os<<depRel<<endl;
+}
+
 //Find the depRel in the derivation
-void ChartKBestExtractor::GetDepRel(const Derivation &d,std::ostringstream &os){
+void ChartKBestExtractor::GetDepRelDebug(const Derivation &d,std::ostringstream &os){
 	std::string depRel ="";
 	//std::ostream &os();
 	const ChartHypothesis &hypo = d.edge.head->hypothesis;
@@ -161,13 +181,15 @@ void ChartKBestExtractor::GetDepRel(const Derivation &d,std::ostringstream &os){
 	  	      if (word.IsNonTerminal()) {
 	  	        size_t nonTermInd = phrase.GetAlignNonTerm().GetNonTermIndexMap()[pos];
 	  	        const Derivation &subderivation = *d.subderivations[nonTermInd];
-	  	        GetDepRel(subderivation,os);
+	  	        GetDepRelDebug(subderivation,os);
 	  	        //cout<<os.str()<<endl;
 	  	      }
 	  	    }
 
 	  }
 }
+
+
 
 // Generate the target tree of the derivation d.
 TreePointer ChartKBestExtractor::GetOutputTree(const Derivation &d)

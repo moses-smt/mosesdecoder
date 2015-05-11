@@ -40,12 +40,15 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1048685119" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1295498016" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.338150127" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/System/Library/Frameworks/JavaVM.framework"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/moses/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/mert_lib/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/util/Debug&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.585257079" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="JavaVM"/>
+									<listOptionValue builtIn="false" value="boost_serialization"/>
 									<listOptionValue builtIn="false" value="moses"/>
 									<listOptionValue builtIn="false" value="mert_lib"/>
 									<listOptionValue builtIn="false" value="util"/>

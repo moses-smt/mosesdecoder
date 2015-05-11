@@ -99,6 +99,7 @@ local with-jvm = [ option.get "with-jvm" ] ;
 if $(with-jvm) {
   lib jvm : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared <name>jvm <search>$(with-jvm)/jre/lib/amd64/server : :  <include>$(with-jvm)/include <include>$(with-jvm)/include/linux ;
   requirements += <library>jvm ;
+  requirements += <define>JNI_LINUX_SERVER ;
 }
 
 
