@@ -135,6 +135,6 @@
   </Settings>
   <Dependencies Name="Debug">
     <Project Name="util"/>
-    <Project Name="moses"/>
   </Dependencies>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>
