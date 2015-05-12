@@ -64,30 +64,33 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "IOWrapper.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+
 using namespace std;
 
 namespace Moses
 {
 
 IOWrapper::IOWrapper()
-  :m_nBestStream(NULL)
-
-  ,m_outputWordGraphStream(NULL)
-  ,m_outputSearchGraphStream(NULL)
-  ,m_detailedTranslationReportingStream(NULL)
-  ,m_unknownsStream(NULL)
-  ,m_alignmentInfoStream(NULL)
-  ,m_latticeSamplesStream(NULL)
-
-  ,m_surpressSingleBestOutput(false)
-
+  : m_nBestStream(NULL)
+  , m_outputWordGraphStream(NULL)
+  , m_outputSearchGraphStream(NULL)
+  , m_detailedTranslationReportingStream(NULL)
+  , m_unknownsStream(NULL)
+  , m_alignmentInfoStream(NULL)
+  , m_latticeSamplesStream(NULL)
+  , m_surpressSingleBestOutput(false)
   , m_look_ahead(0)
   , m_look_back(0)
   , m_buffered_ahead(0)
-
-  ,spe_src(NULL)
-  ,spe_trg(NULL)
-  ,spe_aln(NULL)
+  , spe_src(NULL)
+  , spe_trg(NULL)
+  , spe_aln(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -214,6 +217,26 @@ IOWrapper::IOWrapper()
     m_singleBestOutputCollector.reset(new Moses::OutputCollector(&std::cout));
   }
 
+  // setup file pattern for hypergraph output
+  char const* key = "output-search-graph-hypergraph";
+  PARAM_VEC const* p = staticData.GetParameter().GetParam(key);
+  std::string& fmt = m_hypergraph_output_filepattern;
+  // first, determine the output directory
+  if (p && p->size() > 2) fmt = p->at(2);
+  else if (nBestFilePath.size() && nBestFilePath != "-" && 
+	   ! boost::starts_with(nBestFilePath, "/dev/stdout"))
+    {
+      fmt = boost::filesystem::path(nBestFilePath).parent_path().string();
+      if (fmt.empty()) fmt = ".";
+    }
+  else fmt = boost::filesystem::current_path().string() + "/hypergraph";
+  if (*fmt.rbegin() != '/') fmt += "/";
+  std::string extension = (p && p->size() > 1 ? p->at(1) : std::string("txt"));
+  UTIL_THROW_IF2(extension != "txt" && extension != "gz" && extension != "bz2",
+		 "Unknown compression type '" << extension 
+		 << "' for hypergraph output!");
+  fmt += string("%d.") + extension;
+
   if (staticData.GetParameter().GetParam("spe-src")) {
     spe_src = new ifstream(staticData.GetParameter().GetParam("spe-src")->at(0).c_str());
     spe_trg = new ifstream(staticData.GetParameter().GetParam("spe-trg")->at(0).c_str());
@@ -330,6 +353,15 @@ set_context_for(InputType& source)
     }
   // cerr << string(80,'=') << endl;
   source.SetContext(context);
+}
+
+
+
+std::string
+IOWrapper::
+GetHypergraphOutputFileName(size_t const id) const
+{
+  return str(boost::format(m_hypergraph_output_filepattern) % id);
 }
 
 

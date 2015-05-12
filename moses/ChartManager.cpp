@@ -291,9 +291,11 @@ void ChartManager::FindReachableHypotheses(
   }
 }
 
-void ChartManager::OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const
+void 
+ChartManager::
+OutputSearchGraphAsHypergraph(std::ostream& out) const
 {
-  ChartSearchGraphWriterHypergraph writer(&outputSearchGraphStream);
+  ChartSearchGraphWriterHypergraph writer(&out);
   WriteSearchGraph(writer);
 }
 
@@ -812,14 +814,14 @@ void ChartManager::OutputDetailedAllTranslationReport(
   collector->Write(translationId, out.str());
 }
 
-void ChartManager::OutputSearchGraphHypergraph() const
-{
-  const StaticData &staticData = StaticData::Instance();
-  if (staticData.GetOutputSearchGraphHypergraph()) {
-    HypergraphOutput<ChartManager> hypergraphOutputChart(PRECISION);
-    hypergraphOutputChart.Write(*this);
-  }
-}
+// void ChartManager::OutputSearchGraphHypergraph() const
+// {
+//   const StaticData &staticData = StaticData::Instance();
+//   if (staticData.GetOutputSearchGraphHypergraph()) {
+//     HypergraphOutput<ChartManager> hypergraphOutputChart(PRECISION);
+//     hypergraphOutputChart.Write(*this);
+//   }
+// }
 
 void ChartManager::OutputBestHypo(OutputCollector *collector, const ChartHypothesis *hypo, long translationId) const
 {

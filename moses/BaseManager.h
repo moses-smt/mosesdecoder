@@ -63,13 +63,16 @@ public:
   virtual void OutputSearchGraph(OutputCollector *collector) const = 0;
   virtual void OutputUnknowns(OutputCollector *collector) const = 0;
   virtual void OutputSearchGraphSLF() const = 0;
-  virtual void OutputSearchGraphHypergraph() const = 0;
+  // virtual void OutputSearchGraphHypergraph() const = 0;
 
+  virtual void OutputSearchGraphAsHypergraph(std::ostream& out) const;
+  virtual void OutputSearchGraphAsHypergraph(std::string const& fname, 
+					     size_t const precision) const;
   /***
    * to be called after processing a sentence
    */
   virtual void CalcDecoderStatistics() const = 0;
-
+  
 };
 
 }

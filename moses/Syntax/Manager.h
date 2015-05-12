@@ -29,7 +29,13 @@ public:
     OutputCollector *collector) const {}
   void OutputLatticeSamples(OutputCollector *collector) const {}
   void OutputSearchGraph(OutputCollector *collector) const {}
-  void OutputSearchGraphHypergraph() const {}
+  // void OutputSearchGraphHypergraph() const {}
+
+  void 
+  OutputSearchGraphAsHypergraph
+  ( std::string const& fname, size_t const precision ) const 
+  { }
+
   void OutputSearchGraphSLF() const {}
   void OutputWordGraph(OutputCollector *collector) const {}
   void OutputDetailedTranslationReport(OutputCollector *collector) const {}
