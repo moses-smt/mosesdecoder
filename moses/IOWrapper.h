@@ -63,6 +63,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "search/applied.hh"
 
+#include <boost/format.hpp>
+
 namespace Moses
 {
 class ScoreComponentCollection;
@@ -119,6 +121,9 @@ protected:
   size_t m_buffered_ahead; /// number of words buffered ahead
   // For context-sensitive decoding: 
   // Number of context words ahead and before the current sentence.
+
+  std::string m_hypergraph_output_filepattern;
+
 public:
   IOWrapper();
   ~IOWrapper();
@@ -172,6 +177,8 @@ public:
   void SetInputStreamFromString(std::istringstream &input) {
     m_inputStream = &input;
   }
+
+  std::string GetHypergraphOutputFileName(size_t const id) const;
 
   // post editing
   std::ifstream *spe_src, *spe_trg, *spe_aln;

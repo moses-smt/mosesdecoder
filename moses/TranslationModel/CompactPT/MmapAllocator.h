@@ -136,13 +136,12 @@ public:
                      m_map_size, true, map_shared, false, m_file_desc, 0);
       return (pointer)m_data_ptr;
     } else {
-      size_t map_offset = (m_data_offset / m_page_size) * m_page_size;
-      size_t relative_offset = m_data_offset - map_offset;
-
-      size_t map_size = m_map_size + relative_offset;
+      const size_t map_offset = (m_data_offset / m_page_size) * m_page_size;
+      const size_t relative_offset = m_data_offset - map_offset;
+      const size_t adjusted_map_size = m_map_size + relative_offset;
 
       m_data_ptr = (char *)util::MapOrThrow(
-                     m_map_size, false, map_shared, false, m_file_desc, map_offset);
+                     adjusted_map_size, false, map_shared, false, m_file_desc, map_offset);
 
       return (pointer)(m_data_ptr + relative_offset);
     }

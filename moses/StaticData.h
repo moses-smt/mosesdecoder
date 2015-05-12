@@ -443,16 +443,21 @@ public:
   size_t GetNBestSize() const {
     return m_nBestSize;
   }
+
   const std::string &GetNBestFilePath() const {
     return m_nBestFilePath;
   }
+
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_outputSearchGraphSLF || m_outputSearchGraphHypergraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
+    return (!m_nBestFilePath.empty() || m_mbr || m_useLatticeMBR || m_mira || 
+	    m_outputSearchGraph || m_outputSearchGraphSLF || 
+	    m_outputSearchGraphHypergraph || m_useConsensusDecoding || 
 #ifdef HAVE_PROTOBUF
-           || m_outputSearchGraphPB
+	    m_outputSearchGraphPB ||
 #endif
-           ;
+	    !m_latticeSamplesFilePath.empty());
   }
+  
   size_t GetLatticeSamplesSize() const {
     return m_latticeSamplesSize;
   }
