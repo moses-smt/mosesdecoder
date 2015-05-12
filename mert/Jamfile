@@ -56,7 +56,7 @@ SentenceLevelScorer.cpp
 Permutation.cpp
 PermutationScorer.cpp
 StatisticsBasedScorer.cpp
-../util//kenutil m ..//z ../moses/moses;
+../util//kenutil m ..//z ../moses/moses ;
 
 exe mert : mert.cpp mert_lib ../moses//ThreadPool ;
 

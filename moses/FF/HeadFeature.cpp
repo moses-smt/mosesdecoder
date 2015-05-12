@@ -994,9 +994,9 @@ void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
 	//localCacheDepRel = ResetCacheDepRel();
 	//localCounters = ResetCounters();
 
-	std::cerr<<"Reset cache: "<<localCache.size()<<endl;
-	std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
-	std::cerr<<"Reset counters: "<<localCounters.depRelCacheHits <<" "<<localCounters.subtreeCacheHits<<endl;
+	//std::cerr<<"Reset cache: "<<localCache.size()<<endl;
+	//std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
+	//std::cerr<<"Reset counters: "<<localCounters.depRelCacheHits <<" "<<localCounters.subtreeCacheHits<<endl;
 	std:cerr<<SyntaxTreeState::equal<<" "<<SyntaxTreeState::not_equal<<" "<<SyntaxTreeState::distinct<<endl;
 	m_counter=0;
 	m_counterDepRel=0;
