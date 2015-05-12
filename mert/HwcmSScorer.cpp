@@ -39,7 +39,10 @@ HwcmSScorer::HwcmSScorer(const string& config)
 	env->ExceptionDescribe();
 
 	jobject rel = env->NewObject(javaWrapper->GetRelationsJClass(), javaWrapper->GetDepParsingInitJId());
-			env->ExceptionDescribe();
+	env->ExceptionDescribe();
+	jmethodID	initLP = 	env->GetMethodID(javaWrapper->GetRelationsJClass(), "InitLP","()V");
+	env ->CallObjectMethod(rel,initLP);
+	env->ExceptionDescribe();
 
 	m_workingStanforDepObj = env->NewGlobalRef(rel);
 	env->DeleteLocalRef(rel);

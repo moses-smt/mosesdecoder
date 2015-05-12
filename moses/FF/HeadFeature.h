@@ -305,6 +305,7 @@ class HeadFeature : public StatefulFeatureFunction
 public:
 
   HeadFeature(const std::string &line);
+  ~HeadFeature(){};
 
   void GetNewStanfordDepObj();
 
@@ -448,6 +449,7 @@ protected:
 	//should do the initialization only once when the wrapper is loaded
 	//could make it a singleton class
 	mutable CreateJavaVM *javaWrapper;
+	mutable jobject m_workingStanforDepObj;
 	mutable unsigned long long m_counter;
 	mutable unsigned long long m_counterDepRel;
 	mutable unsigned long long m_cacheHits;

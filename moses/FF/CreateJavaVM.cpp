@@ -1,5 +1,5 @@
 #include "CreateJavaVM.h"
-#include "time.h"
+#include <time.h">
 //#include "moses/StaticData.h"
 
 
@@ -188,8 +188,8 @@ void CreateJavaVM::GetDep(std::string parsedSentence){
 void CreateJavaVM::TestRuntime(){
 	JNIEnv *env = GetAttachedJniEnvPointer();
 	cerr<< "START querying dep rel " << endl;
-		std::clock_t    start,mid;
-		start = std::clock();
+		clock_t    start,mid;
+		start = clock();
 		mid=start;
 		for(int i=0;i<10000;i++){
 
@@ -235,13 +235,13 @@ void CreateJavaVM::TestRuntime(){
 	env->DeleteLocalRef(jStanfordDep);
 	env->DeleteLocalRef(jStanfordDepObj);
 	if(i%10000==0){
-		cerr<< i << " "<< (std::clock() - mid) / (double)(CLOCKS_PER_SEC) << std::endl;
-		mid = std::clock();
+		cerr<< i << " "<< (clock() - mid) / (double)(CLOCKS_PER_SEC) << std::endl;
+		mid = clock();
 	}
 	//have to figure how to manage this object
 	env->DeleteGlobalRef(relGlobal);
 		}
-		cerr<< "Time: " << (std::clock() - start) / (double)(CLOCKS_PER_SEC) << " s" << std::endl;
+		cerr<< "Time: " << (clock() - start) / (double)(CLOCKS_PER_SEC) << " s" << std::endl;
 			cerr<< "STOP querying dep rel " << std::endl;
 	this->vm->DetachCurrentThread();
 }

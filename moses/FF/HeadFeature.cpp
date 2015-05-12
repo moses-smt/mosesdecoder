@@ -649,6 +649,17 @@ long long SyntaxTreeState::not_equal =0;
 long long SyntaxTreeState::distinct =0;
 
 ////////////////////////////////////////////////////////////////
+/*
+HeadFeature::~HeadFeature(){
+	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
+		env->ExceptionDescribe();
+		if (!env->ExceptionCheck()){
+			env->DeleteLocalRef(m_workingStanforDepObj);
+		}
+
+}
+*/
+
 HeadFeature::HeadFeature(const std::string &line)
   :StatefulFeatureFunction(4, line) //should modify 0 to the number of scores my feature generates
 	,m_headRules(new std::map<std::string, std::vector <std::string> > ())
@@ -799,25 +810,28 @@ void HeadFeature::Load() {
 
   //made CreateJavaVM a singleton class
   javaWrapper = CreateJavaVM::Instance(m_jarPath);
-  //javaWrapper = new CreateJavaVM();
-  //works when i first run this. must be a problem of loosing references to objects??
 
+  //test synchronized -> try thread specific pointer
+  //it doesn't seem to be faster to use one global object -> perhaps synchronization takes as much time as creating a new object. the parsing method is slow and is synchronized in java
+  /*
+	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
 
-  //!!! running on the server: FATAL ERROR in native method: Bad global or local ref passed to JNI
+	env->ExceptionDescribe();
 
+	jobject rel = env->NewObject(javaWrapper->GetRelationsJClass(), javaWrapper->GetDepParsingInitJId());
+			env->ExceptionDescribe();
+
+	m_workingStanforDepObj = env->NewGlobalRef(rel);
+	env->DeleteLocalRef(rel);
+	javaWrapper->GetVM()->DetachCurrentThread();
+*/
+  //!!! running on the server with global reference for Rel object: FATAL ERROR in native method: Bad global or local ref passed to JNI
   //this should be done per sentence
   //-> and if all sentences have access to the same object I need the called method to be synchronized in java
-  //GetNewStanfordDepObj();
-  //javaWrapper->GetDep("bllaa");
-  // !!!! I NEED TO MAKE THIS CALL SO THE CALL IN EvaluateWhenApplied DOESN"T CRASH !!!!
 
   cerr<<"TEST CallStanfordDep:"<<endl;
   string temp = CallStanfordDepParsed("(VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))");
   cerr<<"TEMP DEP: "<<temp<<endl;
-
-  //this should be done in InitializeForInput (for everysentence ->new thread)
-  //the treadspecific pointer gets NULL when the thread exists
-
 
   //javaWrapper->TestRuntime();
 
@@ -836,11 +850,13 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence, jmethodID m
 	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
 	env->ExceptionDescribe();
 
+
 	jobject rel = env->NewObject(javaWrapper->GetRelationsJClass(), javaWrapper->GetDepParsingInitJId());
 			env->ExceptionDescribe();
 
 	jobject workingStanforDepObj = env->NewGlobalRef(rel);
 	env->DeleteLocalRef(rel);
+
 
 	/**
 	 * arguments to be passed to ProcessParsedSentenceJId:
@@ -872,7 +888,9 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence, jmethodID m
 		env->ReleaseStringUTFChars(jStanfordDep, stanfordDep);
 		//should I do
 		//env->DeleteLocalRef(jStanfordDep);
+
 		env->DeleteGlobalRef(workingStanforDepObj);
+
 		//memory leaks before?
 		env->DeleteLocalRef(jSentence);
 
@@ -891,6 +909,7 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence, jmethodID m
 			env->DeleteGlobalRef(workingStanforDepObj);
 			env->ExceptionDescribe();
 		}
+
 		//this would be deleted anyway once the thread detaches?
 		if(jSentence!=NULL){
 			env->DeleteLocalRef(jSentence);
