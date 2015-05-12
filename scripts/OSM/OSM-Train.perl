@@ -5,12 +5,14 @@ use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
 
+#print STDERR "RealBin=$RealBin\n";
 print STDERR "Training OSM - Start\n".`date`;
 
 my $ORDER = 5;
 my $OUT_DIR = "/tmp/osm.$$";
 my $___FACTOR_DELIMITER = "|";
 my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$LMPLZ);
+$LMPLZ = "$RealBin/../../lmplz";
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -28,7 +30,7 @@ die("ERROR: wrong syntax when invoking OSM-Train.perl")
 		       'out-dir=s' => \$OUT_DIR);
 
 # check if the files are in place
-die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, --srilm-dir or --lmplz, and --moses-src-dir") 
+die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, and --moses-src-dir") 
     unless (defined($MOSES_SRC_DIR) && 
 	    defined($CORPUS_F) && 
 	    defined($CORPUS_E) && 
