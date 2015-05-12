@@ -12,7 +12,9 @@ my $ORDER = 5;
 my $OUT_DIR = "/tmp/osm.$$";
 my $___FACTOR_DELIMITER = "|";
 my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$LMPLZ);
-$LMPLZ = "$RealBin/../../lmplz";
+$LMPLZ = "$RealBin/../../bin/lmplz";
+
+my $cmd;
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -85,22 +87,31 @@ my ($factor_val) = @_;
 print "Creating Model ".$factor_val."\n";
 
 print "Extracting Singletons\n";
-`$MOSES_SRC_DIR/scripts/OSM/extract-singletons.perl $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align > $OUT_DIR/$factor_val/Singletons`;
+$cmd = "$MOSES_SRC_DIR/scripts/OSM/extract-singletons.perl $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align > $OUT_DIR/$factor_val/Singletons";
+print STDERR "Executing: $cmd\n";
+`$cmd`;
 
 print "Converting Bilingual Sentence Pair into Operation Corpus\n";
-`$MOSES_SRC_DIR/bin/generateSequences $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align $OUT_DIR/$factor_val/Singletons > $OUT_DIR/$factor_val/opCorpus`;
+$cmd = "$MOSES_SRC_DIR/bin/generateSequences $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align $OUT_DIR/$factor_val/Singletons > $OUT_DIR/$factor_val/opCorpus";
+print STDERR "Executing: $cmd\n";
+`$cmd`;
 
 print "Learning Operation Sequence Translation Model\n";
 if (defined($SRILM_DIR)) {
-  `$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM`;
+    $cmd = "$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM";
+    print STDERR "Executing: $cmd\n";
+    `$cmd`;
 }
 else {
-  `$LMPLZ --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1`;
+  $cmd = "$LMPLZ --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1";
+  print STDERR "Executing: $cmd\n";
+  `$cmd`;
 }
 
 print "Binarizing\n";
-`$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM $OUT_DIR/$factor_val/operationLM.bin`;
-
+$cmd = "$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM $OUT_DIR/$factor_val/operationLM.bin";
+print STDERR "Executing: $cmd\n";
+`$cmd`;
 
 }
 

@@ -1,12 +1,13 @@
 #!/usr/bin/env perl 
 
+#use strict;
 use warnings;
 use Getopt::Std;
 getopts('q');
 
-$target = shift;
-$source = shift;
-$align = shift or die "
+my $target = shift;
+my $source = shift;
+my $align = shift or die "
 Usage: extract-singletons.perl target source align
 
 ";
