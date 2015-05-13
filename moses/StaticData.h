@@ -301,7 +301,9 @@ public:
   }
 
   const ContextParameters&
-  GetContextParameters() const { return m_context_parameters; }
+  GetContextParameters() const {
+    return m_context_parameters;
+  }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
     return m_inputFactorOrder;
@@ -449,15 +451,15 @@ public:
   }
 
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty() || m_mbr || m_useLatticeMBR || m_mira || 
-	    m_outputSearchGraph || m_outputSearchGraphSLF || 
-	    m_outputSearchGraphHypergraph || m_useConsensusDecoding || 
+    return (!m_nBestFilePath.empty() || m_mbr || m_useLatticeMBR || m_mira ||
+            m_outputSearchGraph || m_outputSearchGraphSLF ||
+            m_outputSearchGraphHypergraph || m_useConsensusDecoding ||
 #ifdef HAVE_PROTOBUF
-	    m_outputSearchGraphPB ||
+            m_outputSearchGraphPB ||
 #endif
-	    !m_latticeSamplesFilePath.empty());
+            !m_latticeSamplesFilePath.empty());
   }
-  
+
   size_t GetLatticeSamplesSize() const {
     return m_latticeSamplesSize;
   }

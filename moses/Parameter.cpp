@@ -241,9 +241,9 @@ Parameter::Parameter()
 
   AddParam(misc_opts,"feature", "All the feature functions should be here");
   AddParam(misc_opts,"context-string",
-	   "A (tokenized) string containing context words for context-sensitive translation.");
+           "A (tokenized) string containing context words for context-sensitive translation.");
   AddParam(misc_opts,"context-window",
-	   "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
+           "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
 
   // Compact phrase table and reordering table.
   po::options_description cpt_opts("Options when using compact phrase and reordering tables.");

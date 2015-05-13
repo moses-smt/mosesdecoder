@@ -31,9 +31,9 @@ public:
   void OutputSearchGraph(OutputCollector *collector) const {}
   // void OutputSearchGraphHypergraph() const {}
 
-  void 
+  void
   OutputSearchGraphAsHypergraph
-  ( std::string const& fname, size_t const precision ) const 
+  ( std::string const& fname, size_t const precision ) const
   { }
 
   void OutputSearchGraphSLF() const {}

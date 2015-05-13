@@ -173,13 +173,16 @@ public:
   //! number of words in this sentence/confusion network
   virtual size_t GetSize() const =0;
 
-  virtual boost::shared_ptr<std::string> const& 
-  GetContext() const { return m_context; }
-  
-  virtual void 
-  SetContext(boost::shared_ptr<std::string> const& ctx) 
-  { m_context = ctx; }
-  
+  virtual boost::shared_ptr<std::string> const&
+  GetContext() const {
+    return m_context;
+  }
+
+  virtual void
+  SetContext(boost::shared_ptr<std::string> const& ctx) {
+    m_context = ctx;
+  }
+
   //! populate this InputType with data from in stream
   virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder) =0;
 

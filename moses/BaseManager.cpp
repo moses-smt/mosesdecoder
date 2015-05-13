@@ -44,8 +44,8 @@ OutputSearchGraphAsHypergraph(std::string const& fname, size_t const precision) 
   if (! boost::filesystem::exists(odir))
     boost::filesystem::create_directory(odir);
   UTIL_THROW_IF2(!boost::filesystem::is_directory(odir),
-		 "Cannot output hypergraphs to " << odir
-		 << " because that path exists but is not a directory.");
+                 "Cannot output hypergraphs to " << odir
+                 << " because that path exists but is not a directory.");
 
   // not clear why we need to output the weights every time we dump a search
   // graph into a file again, but that's what the old code did.
@@ -67,21 +67,18 @@ OutputSearchGraphAsHypergraph(std::string const& fname, size_t const precision) 
   else if (boost::ends_with(fname, ".bz2"))
     file.push( boost::iostreams::bzip2_compressor() );
   file.push( boost::iostreams::file_sink(fname, ios_base::out) );
-  if (file.is_complete() && file.good())
-    {
-      file.setf(std::ios::fixed);
-      file.precision(precision);
-      this->OutputSearchGraphAsHypergraph(file);
-      file.flush();
-    }
-  else
-    {
-      TRACE_ERR("Cannot output hypergraph for line "
-		<< this->GetSource().GetTranslationId()
-		<< " because the output file " << fname
-		<< " is not open or not ready for writing"
-		<< std::endl);
-    }
+  if (file.is_complete() && file.good()) {
+    file.setf(std::ios::fixed);
+    file.precision(precision);
+    this->OutputSearchGraphAsHypergraph(file);
+    file.flush();
+  } else {
+    TRACE_ERR("Cannot output hypergraph for line "
+              << this->GetSource().GetTranslationId()
+              << " because the output file " << fname
+              << " is not open or not ready for writing"
+              << std::endl);
+  }
   file.pop();
 }
 
