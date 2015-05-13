@@ -66,13 +66,13 @@ public:
   // virtual void OutputSearchGraphHypergraph() const = 0;
 
   virtual void OutputSearchGraphAsHypergraph(std::ostream& out) const;
-  virtual void OutputSearchGraphAsHypergraph(std::string const& fname, 
-					     size_t const precision) const;
+  virtual void OutputSearchGraphAsHypergraph(std::string const& fname,
+      size_t const precision) const;
   /***
    * to be called after processing a sentence
    */
   virtual void CalcDecoderStatistics() const = 0;
-  
+
 };
 
 }

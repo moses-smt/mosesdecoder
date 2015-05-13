@@ -97,12 +97,12 @@ IOWrapper::IOWrapper()
   // context buffering for context-sensitive decoding
   m_look_ahead = staticData.GetContextParameters().look_ahead;
   m_look_back  = staticData.GetContextParameters().look_back;
-  
+
   m_inputType = staticData.GetInputType();
 
   UTIL_THROW_IF2((m_look_ahead || m_look_back) && m_inputType != SentenceInput,
-		 "Context-sensitive decoding currently works only with sentence input.");
-  
+                 "Context-sensitive decoding currently works only with sentence input.");
+
   m_currentLine = staticData.GetStartTranslationId();
 
   m_inputFactorOrder = &staticData.GetInputFactorOrder();
@@ -223,18 +223,16 @@ IOWrapper::IOWrapper()
   std::string& fmt = m_hypergraph_output_filepattern;
   // first, determine the output directory
   if (p && p->size() > 2) fmt = p->at(2);
-  else if (nBestFilePath.size() && nBestFilePath != "-" && 
-	   ! boost::starts_with(nBestFilePath, "/dev/stdout"))
-    {
-      fmt = boost::filesystem::path(nBestFilePath).parent_path().string();
-      if (fmt.empty()) fmt = ".";
-    }
-  else fmt = boost::filesystem::current_path().string() + "/hypergraph";
+  else if (nBestFilePath.size() && nBestFilePath != "-" &&
+           ! boost::starts_with(nBestFilePath, "/dev/stdout")) {
+    fmt = boost::filesystem::path(nBestFilePath).parent_path().string();
+    if (fmt.empty()) fmt = ".";
+  } else fmt = boost::filesystem::current_path().string() + "/hypergraph";
   if (*fmt.rbegin() != '/') fmt += "/";
   std::string extension = (p && p->size() > 1 ? p->at(1) : std::string("txt"));
   UTIL_THROW_IF2(extension != "txt" && extension != "gz" && extension != "bz2",
-		 "Unknown compression type '" << extension 
-		 << "' for hypergraph output!");
+                 "Unknown compression type '" << extension
+                 << "' for hypergraph output!");
   fmt += string("%d.") + extension;
 
   if (staticData.GetParameter().GetParam("spe-src")) {
@@ -278,10 +276,10 @@ IOWrapper::
 GetBufferedInput()
 {
   switch(m_inputType) {
-  case SentenceInput: 
-    return BufferInput<Sentence>(); 
-  case ConfusionNetworkInput: 
-    return BufferInput<ConfusionNet>(); 
+  case SentenceInput:
+    return BufferInput<Sentence>();
+  case ConfusionNetworkInput:
+    return BufferInput<ConfusionNet>();
   case WordLatticeInput:
     return BufferInput<WordLattice>();
   case TreeInputType:
@@ -294,7 +292,7 @@ GetBufferedInput()
     TRACE_ERR("Unknown input type: " << m_inputType << "\n");
     return boost::shared_ptr<InputType>();
   }
-  
+
 }
 
 boost::shared_ptr<InputType>
@@ -304,53 +302,47 @@ IOWrapper::ReadInput()
   boost::lock_guard<boost::mutex> lock(m_lock);
 #endif
   boost::shared_ptr<InputType> source = GetBufferedInput();
-  if (source) 
-    {
-      source->SetTranslationId(m_currentLine++);
-      this->set_context_for(*source);
-    }
+  if (source) {
+    source->SetTranslationId(m_currentLine++);
+    this->set_context_for(*source);
+  }
   m_past_input.push_back(source);
   return source;
 }
 
-void 
+void
 IOWrapper::
 set_context_for(InputType& source)
 {
   boost::shared_ptr<string> context(new string);
   list<boost::shared_ptr<InputType> >::iterator m = m_past_input.end();
   // remove obsolete past input from buffer:
-  if (m_past_input.end() != m_past_input.begin())
-    {
-      for (size_t cnt = 0; cnt < m_look_back && --m != m_past_input.begin();
-	   cnt += (*m)->GetSize());
-      while (m_past_input.begin() != m) m_past_input.pop_front();
-    }
+  if (m_past_input.end() != m_past_input.begin()) {
+    for (size_t cnt = 0; cnt < m_look_back && --m != m_past_input.begin();
+         cnt += (*m)->GetSize());
+    while (m_past_input.begin() != m) m_past_input.pop_front();
+  }
   // cerr << string(80,'=') << endl;
-  if (m_past_input.size())
-    {
-      m = m_past_input.begin();
-      *context += (*m)->ToString();
-      // cerr << (*m)->ToString() << endl;
-      for (++m; m != m_past_input.end(); ++m)
-	{
-	  // cerr << "\n" << (*m)->ToString() << endl;
-	  *context += string(" ") + (*m)->ToString();
-	}
-      // cerr << string(80,'-') << endl;
+  if (m_past_input.size()) {
+    m = m_past_input.begin();
+    *context += (*m)->ToString();
+    // cerr << (*m)->ToString() << endl;
+    for (++m; m != m_past_input.end(); ++m) {
+      // cerr << "\n" << (*m)->ToString() << endl;
+      *context += string(" ") + (*m)->ToString();
     }
+    // cerr << string(80,'-') << endl;
+  }
   // cerr << source.ToString() << endl;
-  if (m_future_input.size())
-    {
-      // cerr << string(80,'-') << endl;
-      for (m = m_future_input.begin(); m != m_future_input.end(); ++m)
-	{
-	  // if (m != m_future_input.begin()) cerr << "\n";
-	  // cerr << (*m)->ToString() << endl;
-	  if (context->size()) *context += " ";
-	  *context += (*m)->ToString();
-	}
+  if (m_future_input.size()) {
+    // cerr << string(80,'-') << endl;
+    for (m = m_future_input.begin(); m != m_future_input.end(); ++m) {
+      // if (m != m_future_input.begin()) cerr << "\n";
+      // cerr << (*m)->ToString() << endl;
+      if (context->size()) *context += " ";
+      *context += (*m)->ToString();
     }
+  }
   // cerr << string(80,'=') << endl;
   source.SetContext(context);
 }

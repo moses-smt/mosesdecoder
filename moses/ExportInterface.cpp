@@ -228,7 +228,7 @@ batch_run()
     // set up task of translating one sentence
     boost::shared_ptr<TranslationTask>
     task = TranslationTask::create(source, ioWrapper);
-    if (source->GetContext()) 
+    if (source->GetContext())
       task->SetContextString(*source->GetContext());
     else task->SetContextString(context_string);
 

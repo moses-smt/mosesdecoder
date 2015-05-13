@@ -427,7 +427,7 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
 		out << *this;								\
 		return out.str();						\
 	}															\
- 
+
 //! delete and remove every element of a collection object such as set, list etc
 template<class COLL>
 void RemoveAllInColl(COLL &coll)

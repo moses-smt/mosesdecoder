@@ -56,6 +56,10 @@ sub Beautify($)
 		      my $cmd = "astyle --style='k&r' -s2 -v $name";
 		      #print STDERR "Executing: $cmd \n";
 		      `$cmd`;
+
+                      $cmd = "sed -i 's\/[ \\t]*\$\/\/' \"$name\"";                                                                                                 
+                      #print STDERR "Executing: $cmd \n";                                                                                                           
+                      `$cmd`; 
 		    }
 		 }
 	}

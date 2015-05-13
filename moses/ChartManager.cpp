@@ -291,7 +291,7 @@ void ChartManager::FindReachableHypotheses(
   }
 }
 
-void 
+void
 ChartManager::
 OutputSearchGraphAsHypergraph(std::ostream& out) const
 {

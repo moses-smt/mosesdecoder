@@ -57,9 +57,9 @@ public:
   void OutputSearchGraphSLF() const {
   }
 
-  void 
+  void
   OutputSearchGraphAsHypergraph
-  ( std::string const& fname, size_t const precision ) const 
+  ( std::string const& fname, size_t const precision ) const
   { }
 
 

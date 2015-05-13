@@ -47,10 +47,10 @@ namespace Moses
 template class HypergraphOutput<Manager>;
 template class HypergraphOutput<ChartManager>;
 
-void 
+void
 ChartSearchGraphWriterMoses::
-WriteHypos(const ChartHypothesisCollection& hypos, 
-	   const map<unsigned, bool> &reachable) const
+WriteHypos(const ChartHypothesisCollection& hypos,
+           const map<unsigned, bool> &reachable) const
 {
 
   ChartHypothesisCollection::const_iterator iter;
@@ -62,20 +62,18 @@ WriteHypos(const ChartHypothesisCollection& hypos,
     }
 
     const ChartArcList *arcList = mainHypo.GetArcList();
-    if (arcList) 
-      {
-	ChartArcList::const_iterator iterArc;
-	for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) 
-	  {
-	    const ChartHypothesis &arc = **iterArc;
-	    if (reachable.find(arc.GetId()) != reachable.end()) 
-	      (*m_out) << m_lineNumber << " " << arc << endl;
-	  }
+    if (arcList) {
+      ChartArcList::const_iterator iterArc;
+      for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
+        const ChartHypothesis &arc = **iterArc;
+        if (reachable.find(arc.GetId()) != reachable.end())
+          (*m_out) << m_lineNumber << " " << arc << endl;
       }
+    }
   }
 }
 
-void 
+void
 ChartSearchGraphWriterHypergraph::
 WriteHeader(size_t winners, size_t losers) const
 {
@@ -83,10 +81,10 @@ WriteHeader(size_t winners, size_t losers) const
   (*m_out) << winners <<  " " << (winners+losers) << endl;
 }
 
-void 
+void
 ChartSearchGraphWriterHypergraph::
 WriteHypos(const ChartHypothesisCollection& hypos,
-	   const map<unsigned, bool> &reachable) const
+           const map<unsigned, bool> &reachable) const
 {
 
   ChartHypothesisCollection::const_iterator iter;
@@ -113,8 +111,8 @@ WriteHypos(const ChartHypothesisCollection& hypos,
       }
     }
     (*m_out) << edges.size() << endl;
-    for (vector<const ChartHypothesis*>::const_iterator ei = edges.begin(); 
-	 ei != edges.end(); ++ei) {
+    for (vector<const ChartHypothesis*>::const_iterator ei = edges.begin();
+         ei != edges.end(); ++ei) {
       const ChartHypothesis* hypo = *ei;
       const TargetPhrase& target = hypo->GetCurrTargetPhrase();
       size_t ntIndex = 0;
