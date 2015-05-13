@@ -178,7 +178,7 @@ void TranslationTask::Run()
 
   // Output search graph in hypergraph format for Kenneth Heafield's
   // lazy hypergraph decoder; writes to stderr
-  if (StaticData::Instance().GetOutputSearchGraphHypergraph()) 
+  if (StaticData::Instance().GetOutputSearchGraphHypergraph())
     {
       size_t transId = manager->GetSource().GetTranslationId();
       string fname = io->GetHypergraphOutputFileName(transId);

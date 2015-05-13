@@ -217,7 +217,7 @@ namespace Moses
 	  m_bias_log = &std::cerr;
 	else if (m_bias_logfile == "/dev/stdout")
 	  m_bias_log = &std::cout;
-	else 
+	else
 	  {
 	    m_bias_logger.reset(new ofstream(m_bias_logfile.c_str()));
 	    m_bias_log = m_bias_logger.get();

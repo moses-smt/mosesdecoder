@@ -240,9 +240,9 @@ Parameter::Parameter()
   AddParam(misc_opts,"feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
   AddParam(misc_opts,"feature", "All the feature functions should be here");
-  AddParam(misc_opts,"context-string", 
+  AddParam(misc_opts,"context-string",
 	   "A (tokenized) string containing context words for context-sensitive translation.");
-  AddParam(misc_opts,"context-window", 
+  AddParam(misc_opts,"context-window",
 	   "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
 
   // Compact phrase table and reordering table.

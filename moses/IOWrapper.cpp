@@ -97,12 +97,12 @@ IOWrapper::IOWrapper()
   // context buffering for context-sensitive decoding
   m_look_ahead = staticData.GetContextParameters().look_ahead;
   m_look_back  = staticData.GetContextParameters().look_back;
-  
+
   m_inputType = staticData.GetInputType();
 
   UTIL_THROW_IF2((m_look_ahead || m_look_back) && m_inputType != SentenceInput,
 		 "Context-sensitive decoding currently works only with sentence input.");
-  
+
   m_currentLine = staticData.GetStartTranslationId();
 
   m_inputFactorOrder = &staticData.GetInputFactorOrder();
@@ -223,7 +223,7 @@ IOWrapper::IOWrapper()
   std::string& fmt = m_hypergraph_output_filepattern;
   // first, determine the output directory
   if (p && p->size() > 2) fmt = p->at(2);
-  else if (nBestFilePath.size() && nBestFilePath != "-" && 
+  else if (nBestFilePath.size() && nBestFilePath != "-" &&
 	   ! boost::starts_with(nBestFilePath, "/dev/stdout"))
     {
       fmt = boost::filesystem::path(nBestFilePath).parent_path().string();
@@ -233,7 +233,7 @@ IOWrapper::IOWrapper()
   if (*fmt.rbegin() != '/') fmt += "/";
   std::string extension = (p && p->size() > 1 ? p->at(1) : std::string("txt"));
   UTIL_THROW_IF2(extension != "txt" && extension != "gz" && extension != "bz2",
-		 "Unknown compression type '" << extension 
+		 "Unknown compression type '" << extension
 		 << "' for hypergraph output!");
   fmt += string("%d.") + extension;
 
@@ -278,10 +278,10 @@ IOWrapper::
 GetBufferedInput()
 {
   switch(m_inputType) {
-  case SentenceInput: 
-    return BufferInput<Sentence>(); 
-  case ConfusionNetworkInput: 
-    return BufferInput<ConfusionNet>(); 
+  case SentenceInput:
+    return BufferInput<Sentence>();
+  case ConfusionNetworkInput:
+    return BufferInput<ConfusionNet>();
   case WordLatticeInput:
     return BufferInput<WordLattice>();
   case TreeInputType:
@@ -294,7 +294,7 @@ GetBufferedInput()
     TRACE_ERR("Unknown input type: " << m_inputType << "\n");
     return boost::shared_ptr<InputType>();
   }
-  
+
 }
 
 boost::shared_ptr<InputType>
@@ -304,7 +304,7 @@ IOWrapper::ReadInput()
   boost::lock_guard<boost::mutex> lock(m_lock);
 #endif
   boost::shared_ptr<InputType> source = GetBufferedInput();
-  if (source) 
+  if (source)
     {
       source->SetTranslationId(m_currentLine++);
       this->set_context_for(*source);
@@ -313,7 +313,7 @@ IOWrapper::ReadInput()
   return source;
 }
 
-void 
+void
 IOWrapper::
 set_context_for(InputType& source)
 {

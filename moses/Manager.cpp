@@ -1982,10 +1982,10 @@ void Manager::OutputSearchGraphSLF() const
 //   static char const* key = "output-search-graph-hypergraph";
 //   PARAM_VEC const* p = staticData.GetParameter().GetParam(key);
 //   ScoreComponentCollection const& weights = staticData.GetAllWeights();
-//   string const& nBestFile = staticData.GetNBestFilePath(); 
+//   string const& nBestFile = staticData.GetNBestFilePath();
 //   HypergraphOutput<Manager> hypergraphOutput(PRECISION, p, nBestFile, weights);
 //   hypergraphOutput.Write(*this);
-  
+
 // }
 
 void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId) const
