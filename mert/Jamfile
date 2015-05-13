@@ -72,7 +72,9 @@ exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
 exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ..//boost_filesystem ;
 
-alias programs : mert extractor evaluator pro kbmira sentence-bleu sentence-bleu-nbest ;
+exe hgdecode : hgdecode.cpp mert_lib ..//boost_program_options ..//boost_filesystem ;
+
+alias programs : mert extractor evaluator pro kbmira sentence-bleu sentence-bleu-nbest hgdecode ;
 
 unit-test bleu_scorer_test : BleuScorerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ;
