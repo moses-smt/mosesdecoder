@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 
   //write weights
   cerr << "WEIGHTS ";
-  bestHypo.featureVector.write(cerr);
+  bestHypo.featureVector.write(cerr, "=");
   cerr << endl;
 
 }
