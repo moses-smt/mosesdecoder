@@ -39,6 +39,99 @@ namespace MosesTuning
 
 static const ValType BLEU_RATIO = 5;
 
+std::pair<MiraWeightVector*,size_t>
+InitialiseWeights(const string& denseInitFile, const string& sparseInitFile,
+  const string& type, bool verbose)
+{
+  // Dense
+  vector<parameter_t> initParams;
+  if(!denseInitFile.empty()) {
+    ifstream opt(denseInitFile.c_str());
+    string buffer;
+    if (opt.fail()) {
+      cerr << "could not open dense initfile: " << denseInitFile << endl;
+      exit(3);
+    }
+    if (verbose) cerr << "Reading dense features:" << endl;
+    parameter_t val;
+    getline(opt,buffer);
+    if (buffer.find_first_of("=") == buffer.npos) {
+      UTIL_THROW_IF(type == "hypergraph", util::Exception, "For hypergraph version, require dense features in 'name= value' format");
+      cerr << "WARN: dense features in deprecated Moses mert format. Prefer 'name= value' format." << endl;
+      istringstream strstrm(buffer);
+      while(strstrm >> val) {
+        initParams.push_back(val);
+        if(verbose) cerr << val << endl;
+      }
+    } else {
+      vector<string> names;
+      string last_name = "";
+      size_t feature_ctr = 1;
+      do {
+        size_t equals = buffer.find_last_of("=");
+        UTIL_THROW_IF(equals == buffer.npos, util::Exception, "Incorrect format in dense feature file: '"
+                      << buffer << "'");
+        string name = buffer.substr(0,equals);
+        names.push_back(name);
+        initParams.push_back(boost::lexical_cast<ValType>(buffer.substr(equals+2)));
+
+        //Names for features with several values need to have their id added
+        if (name != last_name) feature_ctr = 1;
+        last_name = name;
+        if (feature_ctr>1) {
+          stringstream namestr;
+          namestr << names.back() << "_" << feature_ctr;
+          names[names.size()-1] = namestr.str();
+          if (feature_ctr == 2) {
+            stringstream namestr;
+            namestr << names[names.size()-2] << "_" << (feature_ctr-1);
+            names[names.size()-2] = namestr.str();
+          }
+        }
+        ++feature_ctr;
+
+      } while(getline(opt,buffer));
+
+
+      //Make sure that SparseVector encodes dense feature names as 0..n-1.
+      for (size_t i = 0; i < names.size(); ++i) {
+        size_t id = SparseVector::encode(names[i]);
+        assert(id == i);
+        if (verbose) cerr << names[i] << " " << initParams[i] << endl;
+      }
+
+    }
+
+    opt.close();
+  }
+  size_t initDenseSize = initParams.size();
+  // Sparse
+  if(!sparseInitFile.empty()) {
+    if(initDenseSize==0) {
+      cerr << "sparse initialization requires dense initialization" << endl;
+      exit(3);
+    }
+    ifstream opt(sparseInitFile.c_str());
+    if(opt.fail()) {
+      cerr << "could not open sparse initfile: " << sparseInitFile << endl;
+      exit(3);
+    }
+    int sparseCount=0;
+    parameter_t val;
+    std::string name;
+    while(opt >> name >> val) {
+      size_t id = SparseVector::encode(name) + initDenseSize;
+      while(initParams.size()<=id) initParams.push_back(0.0);
+      initParams[id] = val;
+      sparseCount++;
+    }
+    cerr << "Found " << sparseCount << " initial sparse features" << endl;
+    opt.close();
+  }
+
+  return pair<MiraWeightVector*,size_t>(new MiraWeightVector(initParams), initDenseSize);
+}
+
 ValType HopeFearDecoder::Evaluate(const AvgWeightVector& wv)
 {
   vector<ValType> stats(scorer_->NumberOfScores(),0);

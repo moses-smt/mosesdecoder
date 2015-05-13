@@ -96,6 +96,7 @@ size_t MiraFeatureVector::size() const
   return m_dense.size() + m_sparseVals.size();
 }
 
+
 ValType MiraFeatureVector::sqrNorm() const
 {
   ValType toRet = 0.0;

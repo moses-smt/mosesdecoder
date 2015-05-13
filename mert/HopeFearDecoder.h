@@ -37,6 +37,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace MosesTuning
 {
 
+
+/** Initialise weights from files. Returns weight vector and number of dense features */
+std::pair<MiraWeightVector*,size_t>
+InitialiseWeights(const std::string& denseInitFile, const std::string& sparseInitFile,
+                        const std::string& type, bool verbose);
+
 class Scorer;
 
 /** To be filled in by the decoder */

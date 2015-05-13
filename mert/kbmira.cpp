@@ -129,97 +129,12 @@ int main(int argc, char** argv)
     util::rand_init();
   }
 
-  // Initialize weights
-  ///
-  // Dense
-  vector<parameter_t> initParams;
-  if(!denseInitFile.empty()) {
-    ifstream opt(denseInitFile.c_str());
-    string buffer;
-    if (opt.fail()) {
-      cerr << "could not open dense initfile: " << denseInitFile << endl;
-      exit(3);
-    }
-    if (verbose) cerr << "Reading dense features:" << endl;
-    parameter_t val;
-    getline(opt,buffer);
-    if (buffer.find_first_of("=") == buffer.npos) {
-      UTIL_THROW_IF(type == "hypergraph", util::Exception, "For hypergraph version, require dense features in 'name= value' format");
-      cerr << "WARN: dense features in deprecated Moses mert format. Prefer 'name= value' format." << endl;
-      istringstream strstrm(buffer);
-      while(strstrm >> val) {
-        initParams.push_back(val);
-        if(verbose) cerr << val << endl;
-      }
-    } else {
-      vector<string> names;
-      string last_name = "";
-      size_t feature_ctr = 1;
-      do {
-        size_t equals = buffer.find_last_of("=");
-        UTIL_THROW_IF(equals == buffer.npos, util::Exception, "Incorrect format in dense feature file: '"
-                      << buffer << "'");
-        string name = buffer.substr(0,equals);
-        names.push_back(name);
-        initParams.push_back(boost::lexical_cast<ValType>(buffer.substr(equals+2)));
+  
+  pair<MiraWeightVector*, size_t> ret = InitialiseWeights(denseInitFile, sparseInitFile, type, verbose);
+  boost::scoped_ptr<MiraWeightVector> wv(ret.first);
+  size_t initDenseSize = ret.second;
 
-        //Names for features with several values need to have their id added
-        if (name != last_name) feature_ctr = 1;
-        last_name = name;
-        if (feature_ctr>1) {
-          stringstream namestr;
-          namestr << names.back() << "_" << feature_ctr;
-          names[names.size()-1] = namestr.str();
-          if (feature_ctr == 2) {
-            stringstream namestr;
-            namestr << names[names.size()-2] << "_" << (feature_ctr-1);
-            names[names.size()-2] = namestr.str();
-          }
-        }
-        ++feature_ctr;
-
-      } while(getline(opt,buffer));
-
-
-      //Make sure that SparseVector encodes dense feature names as 0..n-1.
-      for (size_t i = 0; i < names.size(); ++i) {
-        size_t id = SparseVector::encode(names[i]);
-        assert(id == i);
-        if (verbose) cerr << names[i] << " " << initParams[i] << endl;
-      }
-
-    }
-
-    opt.close();
-  }
-  size_t initDenseSize = initParams.size();
-  // Sparse
-  if(!sparseInitFile.empty()) {
-    if(initDenseSize==0) {
-      cerr << "sparse initialization requires dense initialization" << endl;
-      exit(3);
-    }
-    ifstream opt(sparseInitFile.c_str());
-    if(opt.fail()) {
-      cerr << "could not open sparse initfile: " << sparseInitFile << endl;
-      exit(3);
-    }
-    int sparseCount=0;
-    parameter_t val;
-    std::string name;
-    while(opt >> name >> val) {
-      size_t id = SparseVector::encode(name) + initDenseSize;
-      while(initParams.size()<=id) initParams.push_back(0.0);
-      initParams[id] = val;
-      sparseCount++;
-    }
-    cerr << "Found " << sparseCount << " initial sparse features" << endl;
-    opt.close();
-  }
-
-  MiraWeightVector wv(initParams);
-
-  // Initialize scorer
+   // Initialize scorer
   if(sctype != "BLEU" && type == "hypergraph") {
     UTIL_THROW(util::Exception, "hypergraph mira only supports BLEU");
   }
@@ -232,14 +147,14 @@ int main(int argc, char** argv)
   if (type == "nbest") {
     decoder.reset(new NbestHopeFearDecoder(featureFiles, scoreFiles, streaming, no_shuffle, safe_hope, scorer.get()));
   } else if (type == "hypergraph") {
-    decoder.reset(new HypergraphHopeFearDecoder(hgDir, referenceFiles, initDenseSize, streaming, no_shuffle, safe_hope, hgPruning, wv, scorer.get()));
+    decoder.reset(new HypergraphHopeFearDecoder(hgDir, referenceFiles, initDenseSize, streaming, no_shuffle, safe_hope, hgPruning, *wv, scorer.get()));
   } else {
     UTIL_THROW(util::Exception, "Unknown batch mira type: '" << type << "'");
   }
 
   // Training loop
   if (!streaming_out)
-    cerr << "Initial BLEU = " << decoder->Evaluate(wv.avg()) << endl;
+    cerr << "Initial BLEU = " << decoder->Evaluate(wv->avg()) << endl;
   ValType bestBleu = 0;
   for(int j=0; j<n_iters; j++) {
     // MIRA train for one epoch
@@ -249,7 +164,7 @@ int main(int argc, char** argv)
     size_t sentenceIndex = 0;
     for(decoder->reset(); !decoder->finished(); decoder->next()) {
       HopeFearData hfd;
-      decoder->HopeFear(bg,wv,&hfd);
+      decoder->HopeFear(bg,*wv,&hfd);
 
       // Update weights
       if (!hfd.hopeFearEqual && hfd.hopeBleu  > hfd.fearBleu) {
@@ -259,20 +174,20 @@ int main(int argc, char** argv)
         //assert(hfd.hopeBleu + 1e-8 >= hfd.fearBleu);
         ValType delta = hfd.hopeBleu - hfd.fearBleu;
         // Loss and update
-        ValType diff_score = wv.score(diff);
+        ValType diff_score = wv->score(diff);
         ValType loss = delta - diff_score;
         if(verbose) {
           cerr << "Updating sent " << sentenceIndex << endl;
-          cerr << "Wght: " << wv << endl;
-          cerr << "Hope: " << hfd.hopeFeatures << " BLEU:" << hfd.hopeBleu << " Score:" << wv.score(hfd.hopeFeatures) << endl;
-          cerr << "Fear: " << hfd.fearFeatures << " BLEU:" << hfd.fearBleu << " Score:" << wv.score(hfd.fearFeatures) << endl;
+          cerr << "Wght: " << *wv << endl;
+          cerr << "Hope: " << hfd.hopeFeatures << " BLEU:" << hfd.hopeBleu << " Score:" << wv->score(hfd.hopeFeatures) << endl;
+          cerr << "Fear: " << hfd.fearFeatures << " BLEU:" << hfd.fearBleu << " Score:" << wv->score(hfd.fearFeatures) << endl;
           cerr << "Diff: " << diff << " BLEU:" << delta << " Score:" << diff_score << endl;
           cerr << "Loss: " << loss <<  " Scale: " << 1 << endl;
           cerr << endl;
         }
         if(loss > 0) {
           ValType eta = min(c, loss / diff.sqrNorm());
-          wv.update(diff,eta);
+          wv->update(diff,eta);
           totalLoss+=loss;
           iNumUpdates++;
         }
@@ -288,7 +203,7 @@ int main(int argc, char** argv)
       iNumExamples++;
       ++sentenceIndex;
       if (streaming_out)
-        cout << wv << endl;
+        cout << *wv << endl;
     }
     // Training Epoch summary
     cerr << iNumUpdates << "/" << iNumExamples << " updates"
@@ -296,7 +211,7 @@ int main(int argc, char** argv)
 
 
     // Evaluate current average weights
-    AvgWeightVector avg = wv.avg();
+    AvgWeightVector avg = wv->avg();
     ValType bleu = decoder->Evaluate(avg);
     cerr << ", BLEU = " << bleu << endl;
     if(bleu > bestBleu) {
