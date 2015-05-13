@@ -12,7 +12,6 @@ my $ORDER = 5;
 my $OUT_DIR = "/tmp/osm.$$";
 my $___FACTOR_DELIMITER = "|";
 my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$LMPLZ);
-$LMPLZ = "$RealBin/../../bin/lmplz";
 
 my $cmd;
 
@@ -30,6 +29,10 @@ die("ERROR: wrong syntax when invoking OSM-Train.perl")
 		       'srilm-dir=s' => \$SRILM_DIR,
 		       'lmplz=s' => \$LMPLZ,
 		       'out-dir=s' => \$OUT_DIR);
+
+if (!defined($LMPLZ)) {
+    $LMPLZ = "$MOSES_SRC_DIR/bin/lmplz";
+}
 
 # check if the files are in place
 die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, and --moses-src-dir") 
@@ -84,31 +87,31 @@ print "Training OSM - End".`date`;
 sub create_model{
 my ($factor_val) = @_;
 
-print "Creating Model ".$factor_val."\n";
+print STDERR "Creating Model ".$factor_val."\n";
 
-print "Extracting Singletons\n";
+print STDERR "Extracting Singletons\n";
 $cmd = "$MOSES_SRC_DIR/scripts/OSM/extract-singletons.perl $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align > $OUT_DIR/$factor_val/Singletons";
 print STDERR "Executing: $cmd\n";
 `$cmd`;
 
-print "Converting Bilingual Sentence Pair into Operation Corpus\n";
+print STDERR "Converting Bilingual Sentence Pair into Operation Corpus\n";
 $cmd = "$MOSES_SRC_DIR/bin/generateSequences $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align $OUT_DIR/$factor_val/Singletons > $OUT_DIR/$factor_val/opCorpus";
 print STDERR "Executing: $cmd\n";
 `$cmd`;
 
-print "Learning Operation Sequence Translation Model\n";
+print STDERR "Learning Operation Sequence Translation Model\n";
 if (defined($SRILM_DIR)) {
-    $cmd = "$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM";
+    $cmd = "$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM 2>> /dev/stderr";
     print STDERR "Executing: $cmd\n";
     `$cmd`;
 }
 else {
-  $cmd = "$LMPLZ --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1";
+  $cmd = "$LMPLZ -S 20% -T $OUT_DIR --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1 2>> /dev/stderr";
   print STDERR "Executing: $cmd\n";
   `$cmd`;
 }
 
-print "Binarizing\n";
+print STDERR "Binarizing\n";
 $cmd = "$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM $OUT_DIR/$factor_val/operationLM.bin";
 print STDERR "Executing: $cmd\n";
 `$cmd`;
@@ -121,7 +124,7 @@ sub reduce_factors {
 
     my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
 
-    print "Reducing factors to produce $reduced  @ ".`date`;
+    print STDERR "Reducing factors to produce $reduced  @ ".`date`;
     while(-e $reduced.".lock") {
 	sleep(10);
     }
