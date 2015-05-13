@@ -23,6 +23,7 @@ namespace MosesTuning
 
 HwcmSScorer::HwcmSScorer(const string& config)
   : StatisticsBasedScorer("HWCMS",config) {
+	using Moses::TokenizeMultiCharSeparator;
 	m_currentRefId = -1;
 	m_includeRel = false;
 	m_order = 3;
@@ -32,7 +33,8 @@ HwcmSScorer::HwcmSScorer(const string& config)
 	jarPath+=":/Users/mnadejde/Documents/workspace/stanford-parser-full-2014-08-27/commons-lang3-3.3.2.jar";
 	jarPath+=":/Users/mnadejde/Documents/workspace/moses_010914/mosesdecoder/Relations/Relations.jar";
 */
-	javaWrapper = Moses::CreateJavaVM::Instance(config);
+	vector<string> parameters = TokenizeMultiCharSeparator(config,",");
+	javaWrapper = Moses::CreateJavaVM::Instance(parameters[0]);
 	//Create object
 	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
 
