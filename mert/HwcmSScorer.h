@@ -14,6 +14,7 @@
 #include "StatisticsBasedScorer.h"
 #include "moses/FF/CreateJavaVM.h"
 #include "moses/Util.h"
+#include <fstream>
 
 namespace MosesTuning
 {
@@ -51,6 +52,7 @@ public:
 private:
   mutable Moses::CreateJavaVM *javaWrapper;
   jobject m_workingStanforDepObj;
+  std::ofstream inDepNbest;
 
   // data extracted from reference files
   std::vector<std::vector<int> > m_ref_lengths;

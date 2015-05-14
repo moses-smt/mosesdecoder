@@ -51,6 +51,15 @@ HwcmSScorer::HwcmSScorer(const string& config)
 	javaWrapper->GetVM()->DetachCurrentThread();
 
 
+	if(this->getConfig("nbestDepFile")!=""){
+		inDepNbest.open((this->getConfig("nbestDepFile") + ".dep").c_str());
+		if(!inDepNbest.is_open()){
+				cerr<<"Error opening nbest dep file\n";
+				exit(-1);
+		}
+	}
+
+
 }
 
 HwcmSScorer::~HwcmSScorer() {
@@ -204,16 +213,16 @@ void HwcmSScorer::prepareStats(std::size_t sid, const std::string& text, ScoreSt
   //text is processed by loadNBest which reads in the translation and the alignment field if the UseAlignment() says so
   //instead of alignment I have the dependency tuples -> but I might want to print the trees then "alignment" field will be the 6th
   string sentence = this->preprocessSentence(text);
-  vector<string> dependencies = TokenizeMultiCharSeparator(sentence,"|||");
-  string depRel = CallStanfordDep(dependencies[0],javaWrapper->GetProcessSentenceJId());
+  vector<string> nbestEntry = TokenizeMultiCharSeparator(sentence,"|||");
+  string depRel = CallStanfordDep(nbestEntry[0],javaWrapper->GetProcessSentenceJId());
   vector <map<string,int> > nbestTuples;
   vector<int> totalNbest, totalRef;
   vector<int> stats;
   stats.assign(m_order*3,0);
-  if(dependencies.size()>0){
+  if(nbestEntry.size()>0){
   	//cout<<depRel<<endl;
   	//cout<<dependencies[1]<<endl;
-  	nbestTuples = MakeTuples(dependencies[0], depRel,m_order, totalNbest);
+  	nbestTuples = MakeTuples(nbestEntry[0], depRel,m_order, totalNbest);
   	if(m_currentRefId!=sid){
   		m_currentRefId=sid;
   		m_currentRefTuples = MakeTuples(m_ref[sid].first, m_ref[sid].second,m_order, totalRef);
@@ -234,6 +243,17 @@ void HwcmSScorer::prepareStats(std::size_t sid, const std::string& text, ScoreSt
 			stats[i*3+1]=totalNbest[i];
 			stats[i*3+2]=m_totalRef[i];
 		}
+  }
+  if(inDepNbest.is_open()){
+  	inDepNbest<<sentence<<" ||| "; //<<depRel<<" ||| ";
+  	map <string,int>::iterator itNbest;
+  	for(itNbest = nbestTuples[0].begin(); itNbest!= nbestTuples[0].end(); itNbest++)
+  		inDepNbest<<itNbest->first<<" ";
+  	inDepNbest<<"||| ";
+  	for(size_t i=0;i<m_order;i++){
+  		inDepNbest<<stats[i*3]<<" ";
+  	}
+  	inDepNbest<<"\n";
   }
   entry.set(stats);
 }
