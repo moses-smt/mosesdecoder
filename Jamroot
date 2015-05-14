@@ -282,7 +282,6 @@ rephraser
 contrib/c++tokenizer//tokenizer
 ;
 
-symlink $(BINDIR)/moses_chart : moses-cmd//moses ;
 
 install-bin-libs programs ;
 install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
@@ -299,3 +298,8 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
   echo "To disable this message, delete $(TOP)/dist ." ;
   echo ;
 }
+
+#local temp = [ _shell "bash source ./s.sh" ] ;
+local temp = [ _shell "mkdir -p $(TOP)/bin" ] ;
+local temp = [ _shell "rm $(TOP)/bin/moses_chart" ] ;
+local temp = [ _shell "cd $(TOP)/bin && ln -s moses moses_chart" ] ;
