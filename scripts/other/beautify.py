@@ -30,7 +30,7 @@ def run_command(command_line, verbose=False, not_really=False, **kwargs):
     :param verbose: Print what you're doing?
     :param not_really: Skip executing the command, just turn empty.
     :param **kwargs: Other keyword arguments are passed on to `Popen`.
-    :return: Command's standard output.
+    :return: Tuple of command's standard output and standard error output.
     :raises Exception: If command returns nonzero exit status.
     """
     if verbose:
@@ -43,7 +43,7 @@ def run_command(command_line, verbose=False, not_really=False, **kwargs):
         raise Exception(
             "Command '%s' returned nonzero: %s\n(Output was: %s)"
             % (command_line, stderr, stdout))
-    return stdout
+    return stdout, stderr
 
 
 def find_files(root_dir, skip_at_root=None, suffixes=None):
@@ -125,17 +125,25 @@ EXPECTED_ASTYLE_VERSION = "Artistic Style Version 2.01"
 def check_astyle_version(verbose=False, not_really=False):
     """Run `astyle`, to see if it returns the expected version number.
 
+    This matters, because small changes in version numbers can come with
+    enormous diffs.
+
     :raises Exception: If `astyle` is not the expected version.
     """
     # We'll be parsing astyle's output.  Run with C locale to avoid getting
     # translated output.
-    output = run_command(
+    # The output goes to stderr.
+    _, version = run_command(
         ['astyle', '--version'], verbose=verbose, not_really=not_really,
         env={'LC_ALL': 'C'})
-    output = output.strip()
-    if not_really and output != EXPECTED_ASTYLE_VERSION:
+    if not_really:
+        return
+    version = version.strip()
+    if version != EXPECTED_ASTYLE_VERSION:
         raise Exception(
-            "Expected astyle 2.01, but got version string '%s'." % output)
+            "Wrong astyle version.  "
+            "Expected '%s', but got version string '%s'."
+            % (EXPECTED_ASTYLE_VERSION, version))
 
 
 def run_astyle(source_files, verbose=False, not_really=False):
@@ -191,9 +199,6 @@ def parse_arguments():
         '--root-dir', '-r', metavar='DIR', default=getcwd(),
         help="Project root directory.  Defaults to current directory.")
     parser.add_argument(
-        '--any-astyle', action='store_true',
-        help="Accept any version of astyle.")
-    parser.add_argument(
         '--not-really', '-n', action='store_true',
         help="Don't actually change any files.")
     return parser.parse_args()
@@ -203,8 +208,7 @@ def main():
     """Find and format source files."""
     args = parse_arguments()
 
-    if not args.any_astyle:
-        check_astyle_version(verbose=args.verbose)
+    check_astyle_version(verbose=args.verbose)
 
     c_like_files = list_c_like_files(args.root_dir)
     for chunk in chunk_file_list(c_like_files):
