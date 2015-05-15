@@ -41,7 +41,7 @@ namespace MosesTuning
 /** Initialise weights from files. Returns weight vector and number of dense features */
 std::pair<MiraWeightVector*,size_t>
 InitialiseWeights(const std::string& denseInitFile, const std::string& sparseInitFile,
-                        const std::string& type, bool verbose);
+                  const std::string& type, bool verbose);
 
 class Scorer;
 

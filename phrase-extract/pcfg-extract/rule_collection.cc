@@ -23,15 +23,20 @@
 
 #include <cmath>
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
 
-void RuleCollection::Add(std::size_t lhs, const std::vector<std::size_t> &rhs) {
+void RuleCollection::Add(std::size_t lhs, const std::vector<std::size_t> &rhs)
+{
   ++collection_[lhs][rhs];
 }
 
-void RuleCollection::CreatePcfg(Pcfg &pcfg) {
+void RuleCollection::CreatePcfg(Pcfg &pcfg)
+{
   std::vector<std::size_t> key;
   for (const_iterator p = begin(); p != end(); ++p) {
     std::size_t lhs = p->first;

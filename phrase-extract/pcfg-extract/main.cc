@@ -19,7 +19,8 @@
 
 #include "pcfg_extract.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   MosesTraining::Syntax::PCFG::PcfgExtract tool;
   return tool.Main(argc, argv);
 }

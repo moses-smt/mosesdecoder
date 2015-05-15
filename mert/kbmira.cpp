@@ -129,12 +129,12 @@ int main(int argc, char** argv)
     util::rand_init();
   }
 
-  
+
   pair<MiraWeightVector*, size_t> ret = InitialiseWeights(denseInitFile, sparseInitFile, type, verbose);
   boost::scoped_ptr<MiraWeightVector> wv(ret.first);
   size_t initDenseSize = ret.second;
 
-   // Initialize scorer
+  // Initialize scorer
   if(sctype != "BLEU" && type == "hypergraph") {
     UTIL_THROW(util::Exception, "hypergraph mira only supports BLEU");
   }

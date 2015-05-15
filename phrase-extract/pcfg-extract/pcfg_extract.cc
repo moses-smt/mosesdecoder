@@ -43,11 +43,15 @@
 #include <string>
 #include <vector>
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
 
-int PcfgExtract::Main(int argc, char *argv[]) {
+int PcfgExtract::Main(int argc, char *argv[])
+{
   // Process command-line options.
   Options options;
   ProcessOptions(argc, argv, options);
@@ -87,7 +91,8 @@ int PcfgExtract::Main(int argc, char *argv[]) {
 }
 
 void PcfgExtract::ProcessOptions(int argc, char *argv[],
-                                 Options &options) const {
+                                 Options &options) const
+{
   namespace po = boost::program_options;
 
   std::ostringstream usage_top;
@@ -96,7 +101,7 @@ void PcfgExtract::ProcessOptions(int argc, char *argv[],
   // Declare the command line options that are visible to the user.
   po::options_description visible(usage_top.str());
   visible.add_options()
-    ("help", "print help message and exit")
+  ("help", "print help message and exit")
   ;
 
   // Declare the command line options that are hidden from the user

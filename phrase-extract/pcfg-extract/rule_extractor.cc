@@ -21,15 +21,20 @@
 
 #include "pcfg-common/pcfg_tree.h"
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
 
 RuleExtractor::RuleExtractor(Vocabulary &non_term_vocab)
-    : non_term_vocab_(non_term_vocab) {
+  : non_term_vocab_(non_term_vocab)
+{
 }
 
-void RuleExtractor::Extract(const PcfgTree &tree, RuleCollection &rc) const {
+void RuleExtractor::Extract(const PcfgTree &tree, RuleCollection &rc) const
+{
   if (tree.IsPreterminal() || tree.IsLeaf()) {
     return;
   }

@@ -21,16 +21,21 @@
 
 #include <cassert>
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
 
 TreeScorer::TreeScorer(const Pcfg &pcfg, const Vocabulary &non_term_vocab)
-    : pcfg_(pcfg)
-    , non_term_vocab_(non_term_vocab) {
+  : pcfg_(pcfg)
+  , non_term_vocab_(non_term_vocab)
+{
 }
 
-bool TreeScorer::Score(PcfgTree &root) const {
+bool TreeScorer::Score(PcfgTree &root) const
+{
   if (root.IsPreterminal() || root.IsLeaf()) {
     return true;
   }

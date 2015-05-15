@@ -41,7 +41,7 @@ static const ValType BLEU_RATIO = 5;
 
 std::pair<MiraWeightVector*,size_t>
 InitialiseWeights(const string& denseInitFile, const string& sparseInitFile,
-  const string& type, bool verbose)
+                  const string& type, bool verbose)
 {
   // Dense
   vector<parameter_t> initParams;

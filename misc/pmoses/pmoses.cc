@@ -31,7 +31,8 @@ using namespace std;
 using namespace Moses;
 
 //Delete white spaces from the end and the begining of the string
-string trim(string str) {
+string trim(string str)
+{
   string::iterator it;
 
   while ((str.length()>0)&&((*(it=str.begin()))==' ')) {
@@ -53,7 +54,8 @@ string trim(string str) {
 }
 
 
-int main (int argc, char *argv[]) {
+int main (int argc, char *argv[])
+{
   vector<FactorType> input, output;
   vector<float> weight;
   int numScoreComponent=5;

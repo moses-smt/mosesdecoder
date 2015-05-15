@@ -41,11 +41,15 @@
 #include "pcfg-common/typedef.h"
 #include "pcfg-common/xml_tree_parser.h"
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
 
-int PcfgScore::Main(int argc, char *argv[]) {
+int PcfgScore::Main(int argc, char *argv[])
+{
   // Process command-line options.
   Options options;
   ProcessOptions(argc, argv, options);
@@ -95,7 +99,8 @@ int PcfgScore::Main(int argc, char *argv[]) {
   return 0;
 }
 
-void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const {
+void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const
+{
   namespace po = boost::program_options;
 
   std::ostringstream usage_top;
@@ -105,14 +110,14 @@ void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const {
   // Declare the command line options that are visible to the user.
   po::options_description visible(usage_top.str());
   visible.add_options()
-    ("help", "print help message and exit")
+  ("help", "print help message and exit")
   ;
 
   // Declare the command line options that are hidden from the user
   // (these are used as positional options).
   po::options_description hidden("Hidden options");
   hidden.add_options()
-    ("pcfg-file", po::value(&options.pcfg_file), "pcfg file")
+  ("pcfg-file", po::value(&options.pcfg_file), "pcfg file")
   ;
 
   // Compose the full set of command-line options.
