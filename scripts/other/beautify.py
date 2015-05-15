@@ -1,6 +1,11 @@
 #! /usr/bin/env python
 
-"""Reformat source code."""
+"""Reformat project source code.
+
+This requires "astyle" and GNU "sed" in your path.  A uniform exact version of
+astyle is required.  Even slightly different versions can produce many unwanted
+changes.
+"""
 
 # This script should run on Python 2 (2.7 or better) or 3.  Try to keep it
 # future-compatible.
@@ -11,9 +16,9 @@ from __future__ import (
     )
 
 from argparse import ArgumentParser
+from errno import ENOENT
 from os import (
     getcwd,
-    listdir,
     walk,
     )
 import os.path
@@ -22,20 +27,49 @@ from subprocess import (
     Popen,
     )
 
+# Name of the "ignore" file.
+BEAUTIFY_IGNORE = '.beautify-ignore'
 
-def run_command(command_line, verbose=False, not_really=False, **kwargs):
+
+def read_ignore_file(root_dir):
+    """Read the `BEAUTIFY_IGNORE` file from `root_dir`.
+
+    :param root_dir: Root source directory.
+    :return: A list of path prefixes that this script should ignore.
+    """
+    ignore_file = os.path.join(root_dir, BEAUTIFY_IGNORE)
+    try:
+        with open(ignore_file) as ignore_file:
+            ignore_contents = ignore_file.read()
+    except IOError as error:
+        if error.errno == ENOENT:
+            raise Exception(
+                "No .gitignore file found in %s.  "
+                "Is it really the project's root directory?"
+                % root_dir)
+        else:
+            raise
+    ignore_contents = ignore_contents.decode('utf-8')
+    prefixes = []
+    for line in ignore_contents.splitlines():
+        if line != '' and not line.startswith('#'):
+            prefixes.append(line.strip())
+    return prefixes
+
+
+def run_command(command_line, verbose=False, dry_run=False, **kwargs):
     """Run a command through `subprocess.Popen`.
 
     :param command_line: List of command and its arguments.
     :param verbose: Print what you're doing?
-    :param not_really: Skip executing the command, just turn empty.
+    :param dry_run: Skip executing the command, just turn empty.
     :param **kwargs: Other keyword arguments are passed on to `Popen`.
     :return: Tuple of command's standard output and standard error output.
     :raises Exception: If command returns nonzero exit status.
     """
     if verbose:
         print("Running: " + '  '.join(command_line))
-    if not_really:
+    if dry_run:
         return ''
     process = Popen(command_line, stdout=PIPE, stderr=PIPE, **kwargs)
     stdout, stderr = process.communicate()
@@ -46,37 +80,55 @@ def run_command(command_line, verbose=False, not_really=False, **kwargs):
     return stdout, stderr
 
 
-def find_files(root_dir, skip_at_root=None, suffixes=None):
+def matches_prefix(dirpath, filename, prefixes):
+    """Does `dirpath/filename` match any of `prefixes`?"""
+    full_path = os.path.join(dirpath, filename)
+    for prefix in prefixes:
+        if full_path == prefix:
+            # Exact match on the full path.
+            return True
+        if full_path.startswith(prefix + '/'):
+            # File is in a directory that matches a prefix.
+            # (We have to add our own slash, or "foo/bar" will match prefix
+            # "fo", which is probably not what you want.)
+            return True
+    return False
+
+
+def find_files(root_dir, ignore=None, suffixes=None):
     """Find files meeting the given criteria.
 
     :param root_dir: Root source directory.
-    :param skip_at_root: A sequence of files and directories at the
-        root level that should not be included in the search.
+    :param ignore: A sequence of files and directories (relative to `root_dir`)
+        that should not be included in the search.
     :param suffixes: Filename suffixes that you're looking for.  Only files
         with the given suffix in their name will be returned.
     """
-    if skip_at_root is None:
-        skip_at_root = []
-    skip_at_root = [os.path.normpath(path) for path in skip_at_root]
+    root_dir = os.path.abspath(os.path.normpath(root_dir))
+    if ignore is None:
+        ignore = []
+    ignore = [
+        os.path.join(root_dir, os.path.normpath(path))
+        for path in ignore]
     if suffixes is None:
         suffixes = []
     suffixes = frozenset(suffixes)
 
     files = set()
-    starting_points = [
-        os.path.normpath(os.path.join(root_dir, path))
-        for path in sorted(set(listdir(root_dir)) - set(skip_at_root))]
-    for entry in starting_points:
-        for dirpath, _, filenames in walk(entry):
-            for filename in filenames:
-                _, suffix = os.path.splitext(filename)
-                if suffix in suffixes:
-                    files.add(os.path.join(dirpath, filename))
+    for dirpath, _, filenames in walk(os.path.normpath(root_dir)):
+        dirpath = os.path.normpath(dirpath)
+        for filename in filenames:
+            if matches_prefix(dirpath, filename, ignore):
+                continue
+            _, suffix = os.path.splitext(filename)
+            if suffix not in suffixes:
+                continue
+            files.add(os.path.join(dirpath, filename))
 
     return sorted(files)
 
 
-def list_c_like_files(root_dir):
+def list_c_like_files(root_dir, ignore):
     """Return a list of C/C++ source files to beautify.
 
     This is currently still tailored for the Moses source tree.  We may
@@ -85,6 +137,7 @@ def list_c_like_files(root_dir):
     Calls GNU `find` to find files.  It must be in your path.
 
     :param root_dir: Root source directory.
+    :param ignore: Sequence of path prefixes that should be ignored.
     """
     # Filename suffixes for C/C++ source files.
     c_like_suffixes = {
@@ -97,32 +150,13 @@ def list_c_like_files(root_dir):
         '.hpp',
     }
 
-    # Entries in the root directory that we should ignore.  Usually the
-    # reason is that they contain source that is maintained elsewhere.
-    skip_at_root = {
-        'boost',
-        'contrib',
-        'irstlm',
-        'jam-files',
-        'lm',
-        'pcfg-common',
-        'randlm',
-        'search',
-        'srilm',
-        'syntax-common',
-        'UG',
-        'util',
-        'xmlrpc-c',
-        '.git',
-    }
-    return find_files(
-        root_dir, skip_at_root=skip_at_root, suffixes=c_like_suffixes)
+    return find_files(root_dir, ignore=ignore, suffixes=c_like_suffixes)
 
 
 EXPECTED_ASTYLE_VERSION = "Artistic Style Version 2.01"
 
 
-def check_astyle_version(verbose=False, not_really=False):
+def check_astyle_version(verbose=False):
     """Run `astyle`, to see if it returns the expected version number.
 
     This matters, because small changes in version numbers can come with
@@ -134,10 +168,7 @@ def check_astyle_version(verbose=False, not_really=False):
     # translated output.
     # The output goes to stderr.
     _, version = run_command(
-        ['astyle', '--version'], verbose=verbose, not_really=not_really,
-        env={'LC_ALL': 'C'})
-    if not_really:
-        return
+        ['astyle', '--version'], verbose=verbose, env={'LC_ALL': 'C'})
     version = version.strip()
     if version != EXPECTED_ASTYLE_VERSION:
         raise Exception(
@@ -146,34 +177,37 @@ def check_astyle_version(verbose=False, not_really=False):
             % (EXPECTED_ASTYLE_VERSION, version))
 
 
-def run_astyle(source_files, verbose=False, not_really=False):
+def run_astyle(source_files, verbose=False, dry_run=False):
     """Run `astyle` on the given C/C++ source files."""
     command_line = ['astyle', '--style=k&r', '-s2']
     if verbose:
         command_line += ['-v']
     run_command(
-        command_line + source_files, verbose=verbose, not_really=not_really)
+        command_line + source_files, verbose=verbose, dry_run=dry_run)
 
 
-def list_whitespaceable_files(root_dir):
+def list_whitespaceable_files(root_dir, ignore):
     """Return a list of files where we should clean up whitespace.
 
     This includes C/C++ source files, but possibly also other file types.
+
+    :param root_dir: Root source directory.
+    :param ignore: Sequence of path prefixes that should be ignored.
     """
-    return list_c_like_files(root_dir)
+    return list_c_like_files(root_dir, ignore=ignore)
 
 
-def strip_trailing_whitespace(files, verbose=False, not_really=False):
+def strip_trailing_whitespace(files, verbose=False, dry_run=False):
     """Remove trailing whitespace from given text files.
 
     Uses the GNU `sed` command-line tool.  It must be in your path.
 
     :param files: A list of text files.
     :param verbose: Print what you're doing?
-    :param not_really: Don't actually make any changes.
+    :param dry_run: Don't actually make any changes.
     """
     command_line = ['sed', '-i', '-e', 's/[[:space:]]*$//', '--']
-    run_command(command_line + files, verbose=verbose, not_really=not_really)
+    run_command(command_line + files, verbose=verbose, dry_run=dry_run)
 
 
 def chunk_file_list(files, files_per_run=20):
@@ -191,7 +225,7 @@ def chunk_file_list(files, files_per_run=20):
 
 def parse_arguments():
     """Parse command-line arguments, return as Namespace object."""
-    parser = ArgumentParser(description="Reformat the Moses source code.")
+    parser = ArgumentParser(description=__doc__)
     parser.add_argument(
         '--verbose', '-v', action='store_true',
         help="Print whatever is happening to standard output.")
@@ -199,7 +233,7 @@ def parse_arguments():
         '--root-dir', '-r', metavar='DIR', default=getcwd(),
         help="Project root directory.  Defaults to current directory.")
     parser.add_argument(
-        '--not-really', '-n', action='store_true',
+        '--dry-run', '-n', action='store_true',
         help="Don't actually change any files.")
     return parser.parse_args()
 
@@ -208,16 +242,17 @@ def main():
     """Find and format source files."""
     args = parse_arguments()
 
+    ignore = read_ignore_file(args.root_dir)
     check_astyle_version(verbose=args.verbose)
 
-    c_like_files = list_c_like_files(args.root_dir)
+    c_like_files = list_c_like_files(args.root_dir, ignore=ignore)
     for chunk in chunk_file_list(c_like_files):
-        run_astyle(chunk, verbose=args.verbose, not_really=args.not_really)
+        run_astyle(chunk, verbose=args.verbose, dry_run=args.dry_run)
 
-    whitespace_files = list_whitespaceable_files(args.root_dir)
+    whitespace_files = list_whitespaceable_files(args.root_dir, ignore=ignore)
     for chunk in chunk_file_list(whitespace_files):
         strip_trailing_whitespace(
-            chunk, verbose=args.verbose, not_really=args.not_really)
+            chunk, verbose=args.verbose, dry_run=args.dry_run)
 
 
 if __name__ == '__main__':
