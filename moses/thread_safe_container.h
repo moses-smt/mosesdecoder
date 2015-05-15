@@ -99,7 +99,7 @@ public:
   }
 
   VAL const* get(KEY const& key, VAL const& default_val) {
-    boost::shared_lock< boost::shared_mutex > lock(m_lock);
+    boost::unique_lock< boost::shared_mutex > lock(m_lock);
     entry_t entry(key, default_val);
     iter_t foo = m_container.insert(entry).first;
     return &(foo->second);
