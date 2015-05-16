@@ -25,7 +25,7 @@ class Derivation(list):
         for hypothesis in self:
             if hypothesis.span[0] != 0:
                 continue
-            if root == None or hypothesis.span[1] > root.span[1]:
+            if root is None or hypothesis.span[1] > root.span[1]:
                 root = hypothesis
         assert root
         return root
@@ -48,7 +48,8 @@ class Derivation(list):
         non_term_spans = []
         for item in root.source_symbol_info:
             span = item[0]
-            if span != root.span and span in hypo_map: # In hypo_map iff symbol is NT
+            # In hypo_map iff symbol is NT:
+            if span != root.span and span in hypo_map:
                 non_term_spans.append(span)
         non_term_spans.sort()
 
@@ -166,7 +167,9 @@ def main():
         try:
             tree = derivation.construct_target_tree()
         except:
-            msg = "error processing derivation starting at line %d\n" % line_num
+            msg = (
+                "error processing derivation starting at line %d\n"
+                % line_num)
             sys.stderr.write(msg)
             raise
         print tree_to_xml(tree)

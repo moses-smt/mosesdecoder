@@ -9,8 +9,8 @@
 # (Kenneth Heafield,
 # http://www.statmt.org/moses/?n=FactoredTraining.BuildingLanguageModel#ntoc19)
 # facilitate memory efficient multi process decoding.  Input is divided into
-# batches, each of which is decoded sequentially.  Each batch pre-loads the data
-# from previous batches.
+# batches, each of which is decoded sequentially.  Each batch pre-loads the
+# data from previous batches.
 
 # To use in tuning, run mert-moses.pl with --sim-pe=SYMAL where SYMAL is the
 # alignment from input to references.  Specify the number of jobs with
@@ -28,18 +28,30 @@ import threading
 
 HELP = '''Moses with simulated post-editing
 
-Usage: {} moses-cmd -config moses.ini -input-file text.src -ref text.tgt -symal text.src-tgt.symal [options] [decoder flags]
+Usage:
+    {} moses-cmd -config moses.ini -input-file text.src -ref text.tgt \
+    -symal text.src-tgt.symal [options] [decoder flags]
 
 Options:
-    -threads N: number of decoders to run in parallel (default read from moses.ini, 1 if not present)
+    -threads N: number of decoders to run in parallel \
+(default read from moses.ini, 1 if not present)
     -n-best-list nbest.out N [distinct]: location and size of N-best list
     -show-weights: for mert-moses.pl, just call moses and exit
     -tmp: location of temp directory (default /tmp)
 
 Other options (decoder flags) are passed through to moses-cmd\n'''
 
-# Provides progress bar
+
+class ProgramFailure(Exception):
+    """Known kind of failure, with a known presentation to the user.
+
+    Error message will be printed, and the program will return an error,
+    but no traceback will be shown to the user.
+    """
+
+
 class Progress:
+    """Provides progress bar."""
 
     def __init__(self):
         self.i = 0
@@ -61,10 +73,12 @@ class Progress:
             sys.stderr.write('\n')
         self.lock.release()
 
-# Run with atomic (synchronous) I/O
+
 def atomic_io(cmd, in_file, out_file, err_file, prog=None):
+    """Run with atomic (synchronous) I/O."""
     with open(in_file, 'r') as inp, open(out_file, 'w') as out, open(err_file, 'w') as err:
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=err)
+        p = subprocess.Popen(
+            cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=err)
         while True:
             line = inp.readline()
             if not line:
@@ -77,26 +91,29 @@ def atomic_io(cmd, in_file, out_file, err_file, prog=None):
         p.stdin.close()
         p.wait()
 
-# Open plain or gzipped text
+
 def gzopen(f):
+    """Open plain or gzipped text."""
     return gzip.open(f, 'rb') if f.endswith('.gz') else open(f, 'r')
 
-# Word count
+
 def wc(f):
+    """Word count."""
     i = 0
     for line in gzopen(f):
         i += 1
     return i
 
-# Write lines to gzipped file
+
 def write_gzfile(lines, f):
+    """Write lines to gzipped file."""
     out = gzip.open(f, 'wb')
     for line in lines:
         out.write('{}\n'.format(line))
     out.close()
 
-def main(argv):
 
+def main(argv):
     # Defaults
     moses_ini = None
     moses_ini_lines = None
@@ -152,7 +169,7 @@ def main(argv):
             else:
                 cmd = cmd[:i] + cmd[i + 3:]
         elif cmd[i] == '-output-search-graph-hypergraph':
-            # cmd[i + 1] == true 
+            # cmd[i + 1] == true
             hg_ext = cmd[i + 2]
             if i + 3 < len(cmd) and cmd[i + 3][0] != '-':
                 hg_dir = cmd[i + 3]
@@ -181,7 +198,9 @@ def main(argv):
         moses_ini_lines = [line.strip() for line in open(moses_ini, 'r')]
         i = 0
         while i < len(moses_ini_lines):
-            # PhraseDictionaryBitextSampling name=TranslationModel0 output-factor=0 num-features=7 path=corpus. L1=src L2=tgt pfwd=g pbwd=g smooth=0 sample=1000 workers=1
+            # PhraseDictionaryBitextSampling name=TranslationModel0
+            # output-factor=0 num-features=7 path=corpus. L1=src L2=tgt
+            # pfwd=g pbwd=g smooth=0 sample=1000 workers=1
             if moses_ini_lines[i].startswith('PhraseDictionaryBitextSampling'):
                 for (k, v) in (pair.split('=') for pair in moses_ini_lines[i].split()[1:]):
                     if k == 'name':
@@ -193,13 +212,17 @@ def main(argv):
                             mmsapt_static.append(v)
                     elif k == 'L1':
                         if mmsapt_l1 and v != mmsapt_l1:
-                            sys.stderr.write('Error: All PhraseDictionaryBitextSampling entries should have same L1: {} != {}\n'.format(v, mmsapt_l1))
-                            sys.exit(1)
+                            raise ProgramFailure(
+                                'Error: All PhraseDictionaryBitextSampling '
+                                'entries should have same L1: '
+                                '{} != {}\n'.format(v, mmsapt_l1))
                         mmsapt_l1 = v
                     elif k == 'L2':
                         if mmsapt_l2 and v != mmsapt_l2:
-                            sys.stderr.write('Error: All PhraseDictionaryBitextSampling entries should have same L2: {} != {}\n'.format(v, mmsapt_l2))
-                            sys.exit(1)
+                            raise ProgramFailure(
+                                'Error: All PhraseDictionaryBitextSampling '
+                                'entries should have same L2: '
+                                '{} != {}\n'.format(v, mmsapt_l2))
                         mmsapt_l2 = v
             # [threads]
             # 8
@@ -236,32 +259,46 @@ def main(argv):
         sys.stderr.write(HELP.format(argv[0]))
         sys.exit(2)
     if not (os.path.isfile(cmd[0]) and os.access(cmd[0], os.X_OK)):
-        sys.stderr.write('Error: moses-cmd "{}" is not executable\n'.format(cmd[0]))
-        sys.exit(1)
+        raise ProgramFailure(
+            'Error: moses-cmd "{}" is not executable\n'.format(cmd[0]))
     if not mmsapt_dynamic:
-        sys.stderr.write('Error: no PhraseDictionaryBitextSampling entries named "Dynamic..." found in {}.  See http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc40\n'.format(moses_ini))
-        sys.exit(1)
+        raise ProgramFailure((
+            'Error: no PhraseDictionaryBitextSampling entries named '
+            '"Dynamic..." found in {}.  See '
+            'http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc40\n'
+            ).format(moses_ini))
     if wc(text_tgt) != text_len or wc(text_symal) != text_len:
-        sys.stderr.write('Error: length mismatch between "{}", "{}", and "{}"\n'.format(text_src, text_tgt, text_symal))
-        sys.exit(1)
-    
+        raise ProgramFailure(
+            'Error: length mismatch between "{}", "{}", and "{}"\n'.format(
+                text_src, text_tgt, text_symal))
+
     # Setup
     work_dir = tempfile.mkdtemp(prefix='moses.', dir=os.path.abspath(tmp_dir))
     threads = min(threads, text_len)
     batch_size = int(math.ceil(float(text_len) / threads))
 
     # Report settings
-    sys.stderr.write('Moses flags: {}\n'.format(' '.join('\'{}\''.format(s) if ' ' in s else s for s in cmd[1:])))
+    sys.stderr.write(
+        'Moses flags: {}\n'.format(
+            ' '.join('\'{}\''.format(s) if ' ' in s else s for s in cmd[1:])))
     for (i, n) in enumerate(mmsapt_dynamic):
-        sys.stderr.write('Dynamic mmsapt {}: {} {} {}\n'.format(i, n, mmsapt_l1, mmsapt_l2))
+        sys.stderr.write(
+            'Dynamic mmsapt {}: {} {} {}\n'.format(
+                i, n, mmsapt_l1, mmsapt_l2))
     for (i, n) in enumerate(mmsapt_static):
-        sys.stderr.write('Static mmsapt {}: {} {} {}\n'.format(i, n, mmsapt_l1, mmsapt_l2))
+        sys.stderr.write(
+            'Static mmsapt {}: {} {} {}\n'.format(i, n, mmsapt_l1, mmsapt_l2))
     sys.stderr.write('XML mode: {}\n'.format(xml_input))
-    sys.stderr.write('Inputs: {} {} {} ({})\n'.format(text_src, text_tgt, text_symal, text_len))
+    sys.stderr.write(
+        'Inputs: {} {} {} ({})\n'.format(
+            text_src, text_tgt, text_symal, text_len))
     sys.stderr.write('Jobs: {}\n'.format(threads))
     sys.stderr.write('Batch size: {}\n'.format(batch_size))
     if n_best_out:
-        sys.stderr.write('N-best list: {} ({}{})\n'.format(n_best_out, n_best_size, ', distinct' if n_best_distinct else ''))
+        sys.stderr.write(
+            'N-best list: {} ({}{})\n'.format(
+                n_best_out, n_best_size,
+                ', distinct' if n_best_distinct else ''))
     if hg_dir:
         sys.stderr.write('Hypergraph dir: {} ({})\n'.format(hg_dir, hg_ext))
     sys.stderr.write('Temp dir: {}\n'.format(work_dir))
@@ -274,38 +311,59 @@ def main(argv):
     # Current XML source file
     xml_out = None
 
-    # Split into batches.  Each batch after 0 gets extra files with data from previous batches.
+    # Split into batches.  Each batch after 0 gets extra files with data from
+    # previous batches.
     # Data from previous lines in the current batch is added using XML input.
     job = -1
     lc = -1
-    for (src, tgt, symal) in itertools.izip(gzopen(text_src), gzopen(text_tgt), gzopen(text_symal)):
+    lines = itertools.izip(
+        gzopen(text_src), gzopen(text_tgt), gzopen(text_symal))
+    for (src, tgt, symal) in lines:
         (src, tgt, symal) = (src.strip(), tgt.strip(), symal.strip())
         lc += 1
         if lc % batch_size == 0:
             job += 1
             xml_file = os.path.join(work_dir, 'input.{}.xml'.format(job))
-            extra_src_file = os.path.join(work_dir, 'extra.{}.{}.txt.gz'.format(job, mmsapt_l1))
-            extra_tgt_file = os.path.join(work_dir, 'extra.{}.{}.txt.gz'.format(job, mmsapt_l2))
-            extra_symal_file = os.path.join(work_dir, 'extra.{}.{}-{}.symal.gz'.format(job, mmsapt_l1, mmsapt_l2))
+            extra_src_file = os.path.join(
+                work_dir, 'extra.{}.{}.txt.gz'.format(job, mmsapt_l1))
+            extra_tgt_file = os.path.join(
+                work_dir, 'extra.{}.{}.txt.gz'.format(job, mmsapt_l2))
+            extra_symal_file = os.path.join(
+                work_dir, 'extra.{}.{}-{}.symal.gz'.format(
+                    job, mmsapt_l1, mmsapt_l2))
             if job > 0:
                 xml_out.close()
                 write_gzfile(src_lines, extra_src_file)
                 write_gzfile(tgt_lines, extra_tgt_file)
                 write_gzfile(symal_lines, extra_symal_file)
             xml_out = open(xml_file, 'w')
-            with open(os.path.join(work_dir, 'moses.{}.ini'.format(job)), 'w') as moses_ini_out:
-                extra = '' if job == 0 else ' extra={}'.format(os.path.join(work_dir, 'extra.{}.'.format(job)))
-                moses_ini_out.write('{}\n'.format('\n'.join(moses_ini_lines).format(mmsapt_extra=extra)))
+            ini_file = os.path.join(work_dir, 'moses.{}.ini'.format(job))
+            with open(ini_file, 'w') as moses_ini_out:
+                if job == 0:
+                    extra = ''
+                else:
+                    extra = ' extra={}'.format(
+                        os.path.join(work_dir, 'extra.{}.'.format(job)))
+                moses_ini_out.write(
+                    '{}\n'.format(
+                        '\n'.join(moses_ini_lines).format(mmsapt_extra=extra)))
         src_lines.append(src)
         tgt_lines.append(tgt)
         symal_lines.append(symal)
-        # Lines after first start with update tag including previous translation.
-        # Translation of last line of each batch is included in extra for next batch.
+        # Lines after first start with update tag including previous
+        # translation.
+        # Translation of last line of each batch is included in extra for
+        # next batch.
         xml_tags = []
         if lc % batch_size != 0:
+            tag_template = (
+                '<update '
+                'name="{}" source="{}" target="{}" alignment="{}" /> ')
             for n in mmsapt_dynamic:
-                # note: space after tag
-                xml_tags.append('<update name="{}" source="{}" target="{}" alignment="{}" /> '.format(n, src_lines[-2], tgt_lines[-2], symal_lines[-2]))
+                # Note: space after tag.
+                xml_tags.append(
+                    tag_template.format(
+                        n, src_lines[-2], tgt_lines[-2], symal_lines[-2]))
         xml_out.write('{}{}\n'.format(''.join(xml_tags), src))
     xml_out.close()
 
@@ -336,7 +394,9 @@ def main(argv):
         in_file = os.path.join(work_dir, 'input.{}.xml'.format(i))
         out_file = os.path.join(work_dir, 'out.{}'.format(i))
         err_file = os.path.join(work_dir, 'err.{}'.format(i))
-        t = threading.Thread(target=atomic_io, args=(work_cmd, in_file, out_file, err_file, prog))
+        t = threading.Thread(
+            target=atomic_io,
+            args=(work_cmd, in_file, out_file, err_file, prog))
         workers.append(t)
         t.start()
     # Wait for all to finish
@@ -348,18 +408,28 @@ def main(argv):
     if n_best_out:
         with open(n_best_out, 'w') as out:
             for i in range(threads):
-                for line in open(os.path.join(work_dir, 'nbest.{}'.format(i)), 'r'):
+                path = os.path.join(work_dir, 'nbest.{}'.format(i))
+                for line in open(path, 'r'):
                     entry = line.partition(' ')
-                    out.write('{} {}'.format(int(entry[0]) + (i * batch_size), entry[2]))
-    
+                    out.write(
+                        '{} {}'.format(
+                            int(entry[0]) + (i * batch_size), entry[2]))
+
     # Gather hypergraphs
     if hg_dir:
         if not os.path.exists(hg_dir):
             os.mkdir(hg_dir)
-        shutil.copy(os.path.join(work_dir, 'hg.0', 'weights'), os.path.join(hg_dir, 'weights'))
+        shutil.copy(
+            os.path.join(work_dir, 'hg.0', 'weights'),
+            os.path.join(hg_dir, 'weights'))
         for i in range(threads):
             for j in range(batch_size):
-                shutil.copy(os.path.join(work_dir, 'hg.{}'.format(i), '{}.{}'.format(j, hg_ext)), os.path.join(hg_dir, '{}.{}'.format((i * batch_size) + j, hg_ext)))
+                shutil.copy(
+                    os.path.join(
+                        work_dir, 'hg.{}'.format(i),
+                        '{}.{}'.format(j, hg_ext)),
+                    os.path.join(
+                        hg_dir, '{}.{}'.format((i * batch_size) + j, hg_ext)))
 
     # Gather stdout
     for i in range(threads):
@@ -370,4 +440,8 @@ def main(argv):
     shutil.rmtree(work_dir)
 
 if __name__ == '__main__':
-    main(sys.argv)
+    try:
+        main(sys.argv)
+    except ProgramFailure as error:
+        sys.stderr.write("%s\n" % error)
+        sys.exit(1)

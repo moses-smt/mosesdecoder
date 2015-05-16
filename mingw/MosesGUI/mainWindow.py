@@ -8,15 +8,15 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtSql import *
 
-import time, threading
+import threading
 
 from Ui_mainWindow import Ui_MainWindow
-from datamodel import DataModel
 from addMTModel import AddMTModelDialog
 from chooseMTModel import ChooseMTModelDialog
 from engine import Engine
 from credits import DlgCredits
 from util import *
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     """
@@ -26,14 +26,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).setupUi(mainWindow)
         self.tableView.setModel(self.datamodel)
         self.tableView.hideColumn(0)
-        #change status and keep the column
-        QObject.connect(self.datamodel,  SIGNAL("recordUpdated(bool)"),  self.on_datamodel_recordUpdated)
-        QObject.connect(self.datamodel,  SIGNAL("messageBox(QString)"),  self.on_datamodel_messageBox)
-        #the response to change model
+        # Change status and keep the column.
+        QObject.connect(
+            self.datamodel, SIGNAL("recordUpdated(bool)"),
+            self.on_datamodel_recordUpdated)
+        QObject.connect(
+            self.datamodel, SIGNAL("messageBox(QString)"),
+            self.on_datamodel_messageBox)
+        # The response to change model.
         for obj in (self.editModelName, self.editSrcLang, self.editTrgLang):
             obj.installEventFilter(self)
-        
-    def __init__(self, parent = None,  dm=None, moses=None, workdir=None):
+
+    def __init__(self, parent=None,  dm=None, moses=None, workdir=None):
         """
         Constructor
         """
@@ -62,7 +66,7 @@ It might take a while...'''
                 self.engine = None
                 self.clearPanel()
             self.datamodel.delModel(current.row())
-    
+
     @pyqtSignature("")
     def on_newModelBtn_clicked(self):
         """
@@ -70,31 +74,36 @@ It might take a while...'''
         """
         dialog = AddMTModelDialog(self, self.workdir)
         if dialog.exec_():
-            installParam = {'modelName': dialog.modelName,  'source':dialog.source,  'sourceMode':dialog.sourceMode,  'dest': dialog.dest}
+            installParam = {
+                'modelName': dialog.modelName,
+                'source': dialog.source,
+                'sourceMode': dialog.sourceMode,
+                'dest': dialog.dest,
+            }
             self.datamodel.installModel(installParam)
-            self.tableView.selectRow(self.tableView.model().rowCount()-1)
-        #self.datamodel.newEntry()
-        
+            self.tableView.selectRow(self.tableView.model().rowCount() - 1)
+        # self.datamodel.newEntry()
+
     def on_datamodel_recordUpdated(self,  bRecord):
-        #deal with the selection changed problem
+        # Deal with the selection changed problem.
         try:
             if bRecord:
                 current = self.tableView.currentIndex()
-                if current and current.row() <> -1:
+                if current and current.row() != -1:
                     self.curSelection = current.row()
                 else:
                     self.curSelection = None
             else:
-                if not self.curSelection is None:
+                if self.curSelection is not None:
                     self.tableView.selectRow(self.curSelection)
         except Exception, e:
             print >> sys.stderr, str(e)
-                
+
     def on_datamodel_messageBox(self, str):
         doAlert(str)
-    
+
     def closeEvent(self, event):
-        #clear up
+        # Clear up.
         if self.datamodel.destroy():
             event.accept()
         else:
@@ -102,25 +111,31 @@ It might take a while...'''
 
     def eventFilter(self, obj, event):
         for obj in (self.editModelName, self.editSrcLang, self.editTrgLang):
-            if self.gridLayout.indexOf(obj) <> -1:
+            if self.gridLayout.indexOf(obj) != -1:
                 if event.type() == event.MouseButtonPress:
                     dialog = ChooseMTModelDialog(self, self.datamodel)
                     if dialog.exec_():
-                        #get the model
-                        model = {'ID':dialog.ID, 'name':dialog.modelName, 'srclang':dialog.srcLang, 'trglang':dialog.trgLang, 
-                        'path':dialog.path, 'mosesini':dialog.mosesini}
+                        # Get the model.
+                        model = {
+                            'ID': dialog.ID,
+                            'name': dialog.modelName,
+                            'srclang': dialog.srcLang,
+                            'trglang': dialog.trgLang,
+                            'path': dialog.path,
+                            'mosesini': dialog.mosesini,
+                        }
                         self.startEngine(model)
-                    return True #we handle it here
+                    return True  # We handle it here.
         return super(MainWindow, self).eventFilter(obj, event)
-        
+
     def stopEngine(self, engine):
-        #stop the engine with another thread
+        # Stop the engine with another thread.
         def stopEngineThread():
             engine.stop()
         t = threading.Thread(target=stopEngineThread)
         t.start()
         return t
-        
+
     def startEngine(self, model):
         self.editModelName.setText(model['name'])
         self.editSrcLang.setText(model['srclang'])
@@ -131,10 +146,10 @@ It might take a while...'''
             if self.engine:
                 self.stopEngine(self.engine)
                 self.engine = None
-            #create engine
+            # Create engine.
             self.engine = Engine(model, self.moses)
-            
-            #create progress bar dialog
+
+            # Create progress bar dialog.
             if self.progress:
                 self.progress.close()
                 self.progress = None
@@ -145,11 +160,11 @@ It might take a while...'''
             self.progress.setWindowTitle('Loading Model...')
             QObject.connect(self.progress, SIGNAL("canceled()"), self.progressCancelled)
             self.progress.show()
-            
+
             #connect engine signal
             QObject.connect(self.engine, SIGNAL("stepFinished(int)"), self.engineStepFinished)
             QObject.connect(self.engine, SIGNAL("loaded(bool, QString)"), self.engineLoaded)
-            
+
             def startEngineThread():
                 self.engine.start()
             t = threading.Thread(target=startEngineThread)
@@ -160,7 +175,7 @@ It might take a while...'''
                 self.engine = None
             self.clearPanel()
             doAlert("Error start MT engine: " + str(e))
-            
+
     def clearPanel(self):
         if self.engine:
             self.stopEngine(self.engine)
@@ -170,7 +185,7 @@ It might take a while...'''
         self.editTrgLang.setText("")
         self.editSrc.setText("")
         self.editTrg.setText("")
-            
+
     def progressCancelled(self):
         self.clearPanel()
         if self.engine:
@@ -178,11 +193,11 @@ It might take a while...'''
             self.engine = None
         if self.progress:
             self.progress = None
-        
+
     def engineStepFinished(self, nStep):
         if self.progress:
             self.progress.setValue(nStep)
-            
+
     def engineLoaded(self, success, message):
         if not success:
             self.clearPanel()
@@ -192,7 +207,7 @@ It might take a while...'''
             if self.progress:
                 self.progress.setValue(self.progress.maximum())
                 self.progress = None
-    
+
     @pyqtSignature("")
     def on_btnTranslate_clicked(self):
         """
@@ -217,7 +232,7 @@ It might take a while...'''
             doAlert("Translation failed!")
         self.btnTranslate.setEnabled(True)
         self.btnTranslate.setFocus()
-    
+
     @pyqtSignature("QString")
     def on_labelInfo_linkActivated(self, link):
         """
