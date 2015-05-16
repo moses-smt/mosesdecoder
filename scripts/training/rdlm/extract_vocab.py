@@ -9,6 +9,7 @@ import sys
 import codecs
 import argparse
 from collections import Counter
+from textwrap import dedent
 
 # hack for python2/3 compatibility
 from io import open
@@ -19,37 +20,49 @@ try:
 except ImportError:
     from xml.etree import cElementTree as ET
 
+
+HELP_TEXT = dedent("""\
+    generate 5 vocabulary files from parsed corpus in moses XML format
+      [PREFIX].special: around 40 symbols reserved for RDLM
+      [PREFIX].preterminals: preterminal symbols
+      [PREFIX].nonterminals: nonterminal symbols (which are not preterminal)
+      [PREFIX].terminals: terminal symbols
+      [PREFIX].all: all of the above
+""")
+
+
 def create_parser():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=HELP_TEXT)
 
-    help_text =  "generate 5 vocabulary files from parsed corpus in moses XML format\n"
-    help_text += "  [PREFIX].special: around 40 symbols reserved for RDLM\n";
-    help_text += "  [PREFIX].preterminals: preterminal symbols\n";
-    help_text += "  [PREFIX].nonterminals: nonterminal symbols (which are not preterminal)\n";
-    help_text += "  [PREFIX].terminals: terminal symbols\n";
-    help_text += "  [PREFIX].all: all of the above\n"
-
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description=help_text)
-
-    parser.add_argument('--input', '-i', type=argparse.FileType('r'), default=sys.stdin, metavar='PATH',
-                        help='input text (default: standard input).')
-    parser.add_argument('--output', '-o', type=str, default='vocab', metavar='PREFIX',
-                        help='output prefix (default: "vocab")')
-    parser.add_argument('--ptkvz', action="store_true",
-                    help='special rule for German dependency trees: attach separable verb prefixes to verb')
+    parser.add_argument(
+        '--input', '-i', type=argparse.FileType('r'), default=sys.stdin,
+        metavar='PATH',
+        help="Input text (default: standard input).")
+    parser.add_argument(
+        '--output', '-o', type=str, default='vocab', metavar='PREFIX',
+        help="Output prefix (default: 'vocab')")
+    parser.add_argument(
+        '--ptkvz', action="store_true",
+        help=(
+            "Special rule for German dependency trees: attach separable "
+            "verb prefixes to verb."))
 
     return parser
 
-def escape_text(s):
 
-    s = s.replace('|','&#124;') # factor separator
-    s = s.replace('[','&#91;') # syntax non-terminal
-    s = s.replace(']','&#93;') # syntax non-terminal
-    s = s.replace('\'','&apos;') # xml special character
-    s = s.replace('"','&quot;') # xml special character
+def escape_text(s):
+    s = s.replace('|', '&#124;')  # factor separator
+    s = s.replace('[', '&#91;')  # syntax non-terminal
+    s = s.replace(']', '&#93;')  # syntax non-terminal
+    s = s.replace('\'', '&apos;')  # xml special character
+    s = s.replace('"', '&quot;')  # xml special character
     return s
 
-# deterministic heuristic to get head of subtree
+
 def get_head(xml, args):
+    """Deterministic heuristic to get head of subtree."""
     head = None
     preterminal = None
     for child in xml:
@@ -66,6 +79,7 @@ def get_head(xml, args):
                     break
 
     return head, preterminal
+
 
 def get_vocab(xml, args):
 
@@ -87,6 +101,7 @@ def get_vocab(xml, args):
             if not len(child):
                 continue
             get_vocab(child, args)
+
 
 def main(args):
 
@@ -111,10 +126,24 @@ def main(args):
         get_vocab(xml, args)
         i += 1
 
-    special_tokens = ['<unk>', '<null>', '<null_label>', '<null_head>', '<head_label>', '<root_label>', '<start_label>', '<stop_label>', '<head_head>', '<root_head>', '<start_head>', '<dummy_head>', '<stop_head>']
+    special_tokens = [
+        '<unk>',
+        '<null>',
+        '<null_label>',
+        '<null_head>',
+        '<head_label>',
+        '<root_label>',
+        '<start_label>',
+        '<stop_label>',
+        '<head_head>',
+        '<root_head>',
+        '<start_head>',
+        '<dummy_head>',
+        '<stop_head>',
+    ]
 
     for i in range(30):
-      special_tokens.append('<null_{0}>'.format(i))
+        special_tokens.append('<null_{0}>'.format(i))
 
     f = open(args.output + '.special', 'w', encoding='UTF-8')
     for item in special_tokens:
@@ -156,7 +185,6 @@ def main(args):
         i += 1
         f.write(item + '\n')
     f.close()
-
 
 
 if __name__ == '__main__':

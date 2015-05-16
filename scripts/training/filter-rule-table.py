@@ -24,8 +24,10 @@
 import optparse
 import sys
 
+
 class NGram(tuple):
     pass
+
 
 class Gap:
     def __init__(self, minSpan):
@@ -34,8 +36,12 @@ class Gap:
     def getMinSpan(self):
         return self.minSpan
 
+
 def printUsage():
-    sys.stderr.write("Usage: filter-rule-table.py [--min-non-initial-rule-count=N] INPUT")
+    sys.stderr.write(
+        "Usage: "
+        "filter-rule-table.py [--min-non-initial-rule-count=N] INPUT")
+
 
 def main():
     parser = optparse.OptionParser()
@@ -54,14 +60,15 @@ def main():
         inputSentences.append(line.split())
     filterRuleTable(sys.stdin, inputSentences, N, options)
 
+
 def filterRuleTable(ruleTable, inputSentences, N, options):
     # Map each input n-gram (n = 1..N) to a map from sentence indices to
     # lists of intra-sentence indices.
     occurrences = {}
     for i, sentence in enumerate(inputSentences):
-        for n in range(1, N+1):
-            for j in range(0, len(sentence)-n+1):
-                ngram = NGram(sentence[j:j+n])
+        for n in range(1, N + 1):
+            for j in range(0, len(sentence) - n + 1):
+                ngram = NGram(sentence[j:j + n])
                 innerMap = occurrences.setdefault(ngram, {})
                 indices = innerMap.setdefault(i, [])
                 indices.append(j)
@@ -70,15 +77,16 @@ def filterRuleTable(ruleTable, inputSentences, N, options):
     prevRuleIncluded = None
     for line in ruleTable:
         rhs, count = parseRule(line)
+        below_threshold = (count is not None and count < options.minCount)
         # Prune non-initial rule if count is below threshold.
-        if count != None and count < options.minCount and isNonInitialRule(rhs):
+        if below_threshold and isNonInitialRule(rhs):
             if prevRHS != rhs:
                 prevRuleIncluded = None
                 prevRHS = rhs
             continue
         # If source RHS is same as last rule's then we already know whether to
         # filter or not (unless it was pruned before checking).
-        if rhs == prevRHS and prevRuleIncluded != None:
+        if rhs == prevRHS and prevRuleIncluded is not None:
             if prevRuleIncluded:
                 print line,
             continue
@@ -89,7 +97,10 @@ def filterRuleTable(ruleTable, inputSentences, N, options):
             prevRuleIncluded = True
             continue
         segments = segmentRHS(rhs, N)
-        ngramMaps = [occurrences.get(s, {}) for s in segments if isinstance(s, NGram)]
+        ngramMaps = [
+            occurrences.get(s, {})
+            for s in segments
+            if isinstance(s, NGram)]
         if len(ngramMaps) == 0:
             print line,
             prevRuleIncluded = True
@@ -111,9 +122,13 @@ def filterRuleTable(ruleTable, inputSentences, N, options):
                 break
         prevRuleIncluded = match
 
-# Parse a line of the rule table and return a tuple containing two items,
-# the list of RHS source symbols and the rule count (if present).
+
 def parseRule(line):
+    """Parse a line of the rule table.
+
+    :return: A tuple containing two items: the list of RHS source symbols,
+        and the rule count (if present).
+    """
     cols = line.split("|||")
     rhsSourceSymbols = cols[0].split()[:-1]
     ruleCount = None
@@ -123,14 +138,17 @@ def parseRule(line):
             ruleCount = float(counts[2])
     return (rhsSourceSymbols, ruleCount)
 
+
 def isNT(symbol):
     return symbol[0] == '[' and symbol[-1] == ']'
+
 
 def isNonInitialRule(rhs):
     for symbol in rhs:
         if isNT(symbol):
             return True
     return False
+
 
 def segmentRHS(rhs, N):
     segments = []
@@ -159,13 +177,14 @@ def segmentRHS(rhs, N):
         segments.append(NGram(terminals))
     return segments
 
+
 def matchSegments(segments, indexSeq, sentenceLength):
     assert len(segments) > 0
     firstSegment = segments[0]
     i = 0
     if isinstance(firstSegment, Gap):
         minPos = firstSegment.getMinSpan()
-        maxPos = sentenceLength-1
+        maxPos = sentenceLength - 1
     else:
         minPos = indexSeq[i] + len(firstSegment)
         i += 1
@@ -175,7 +194,7 @@ def matchSegments(segments, indexSeq, sentenceLength):
             if minPos + segment.getMinSpan() > sentenceLength:
                 return False
             minPos = minPos + segment.getMinSpan()
-            maxPos = sentenceLength-1
+            maxPos = sentenceLength - 1
         else:
             pos = indexSeq[i]
             i += 1
@@ -184,6 +203,7 @@ def matchSegments(segments, indexSeq, sentenceLength):
             minPos = pos + len(segment)
             maxPos = minPos
     return True
+
 
 def enumerateIndexSeqs(ngramMaps, sentenceIndex, minFirstIndex):
     assert len(ngramMaps) > 0
@@ -195,7 +215,7 @@ def enumerateIndexSeqs(ngramMaps, sentenceIndex, minFirstIndex):
     for index in ngramMaps[0][sentenceIndex]:
         if index < minFirstIndex:
             continue
-        for seq in enumerateIndexSeqs(ngramMaps[1:], sentenceIndex, index+1):
+        for seq in enumerateIndexSeqs(ngramMaps[1:], sentenceIndex, index + 1):
             assert seq[0] > index
             yield [index] + seq
 

@@ -10,17 +10,21 @@ import codecs
 
 from lxml import etree as ET
 
+
 def escape(word):
-    word = word.replace('|','&#124;') # factor separator
-    word = word.replace('[','&#91;') # syntax non-terminal
-    word = word.replace(']','&#93;') # syntax non-terminal
-    word = word.replace('\'','&apos;')
-    word = word.replace('\"','&quot;')
+    # Factor separator:
+    word = word.replace('|', '&#124;')
+    # Syntax non-terminal:
+    word = word.replace('[', '&#91;')
+    # Syntax non-terminal:
+    word = word.replace(']', '&#93;')
+    word = word.replace('\'', '&apos;')
+    word = word.replace('\"', '&quot;')
 
     return word
 
-def make_brackets(xml):
 
+def make_brackets(xml):
     out = ' [' + xml.get('label')
 
     if xml.text and xml.text.strip():
