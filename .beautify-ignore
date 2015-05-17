@@ -17,10 +17,14 @@ contrib
 irstlm
 jam-files
 lm
+mingw/MosesGUI/icons_rc.py
 moses/TranslationModel/UG
 phrase-extract/pcfg-common
 phrase-extract/syntax-common
 randlm
+# Filename suffixes in here are language codes, so e.g. ".pl" means
+# Polish, not Perl.
+scripts/share/nonbreaking_prefixes
 search
 srilm
 util

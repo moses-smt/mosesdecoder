@@ -1,10 +1,12 @@
 #! /usr/bin/env python
 
-"""Reformat project source code.
+"""Reformat project source code, and/or check for style errors ("lint").
 
-This requires "astyle" and GNU "sed" in your path.  A uniform exact version of
-astyle is required.  Even slightly different versions can produce many unwanted
-changes.
+Formatting requires "astyle" and GNU "sed" in your path.  A uniform exact
+version of astyle is required.  Even slightly different versions can produce
+many unwanted changes.
+
+Lint checking requires "pocketlint" in your path.
 """
 
 # This script should run on Python 2 (2.7 or better) or 3.  Try to keep it
@@ -23,12 +25,19 @@ from os import (
     )
 import os.path
 from subprocess import (
+    CalledProcessError,
     PIPE,
     Popen,
     )
+import sys
+
 
 # Name of the "ignore" file.
 BEAUTIFY_IGNORE = '.beautify-ignore'
+
+
+class LintCheckFailure(Exception):
+    """Lint was found, or the lint checker otherwise returned failure."""
 
 
 def read_ignore_file(root_dir):
@@ -60,23 +69,31 @@ def read_ignore_file(root_dir):
 def run_command(command_line, verbose=False, dry_run=False, **kwargs):
     """Run a command through `subprocess.Popen`.
 
+    The command's standard output is written to standard output, but also
+    returned.  Its standard error output is returned if the command succeeds,
+    but printed to our own standard error output if it fails.
+
     :param command_line: List of command and its arguments.
     :param verbose: Print what you're doing?
     :param dry_run: Skip executing the command, just turn empty.
     :param **kwargs: Other keyword arguments are passed on to `Popen`.
     :return: Tuple of command's standard output and standard error output.
-    :raises Exception: If command returns nonzero exit status.
+    :raises CalledProcessError: If command returns nonzero exit status.
     """
     if verbose:
         print("Running: " + '  '.join(command_line))
     if dry_run:
-        return ''
+        return '', ''
     process = Popen(command_line, stdout=PIPE, stderr=PIPE, **kwargs)
     stdout, stderr = process.communicate()
+    sys.stdout.write(stdout)
     if process.returncode != 0:
-        raise Exception(
-            "Command '%s' returned nonzero: %s\n(Output was: %s)"
-            % (command_line, stderr, stdout))
+        sys.stderr.write(stderr)
+        raise CalledProcessError(
+            returncode=process.returncode, cmd=command_line,
+            output=(
+                "Command '%s' returned nonzero: %s\n(Output was: %s)"
+                % (command_line, stderr, stdout)))
     return stdout, stderr
 
 
@@ -99,8 +116,8 @@ def find_files(root_dir, ignore=None, suffixes=None):
     """Find files meeting the given criteria.
 
     :param root_dir: Root source directory.
-    :param ignore: A sequence of files and directories (relative to `root_dir`)
-        that should not be included in the search.
+    :param ignore: A sequence of files and directories (relative to
+        `root_dir`) that should not be included in the search.
     :param suffixes: Filename suffixes that you're looking for.  Only files
         with the given suffix in their name will be returned.
     """
@@ -210,22 +227,103 @@ def strip_trailing_whitespace(files, verbose=False, dry_run=False):
     run_command(command_line + files, verbose=verbose, dry_run=dry_run)
 
 
-def chunk_file_list(files, files_per_run=20):
+def chunk_file_list(files, files_at_a_time=20):
     """Iterator: break a list of files up into chunks.
 
     :param files: Paths of files to process.
-    :param files_per_run: Maximum number of files to process in one
+    :param files_at_a_time: Maximum number of files to process in one
         command invocation.  Stops the command line from getting too long.
     """
     files = list(files)
     while files != []:
-        yield files[:files_per_run]
-        files = files[files_per_run:]
+        yield files[:files_at_a_time]
+        files = files[files_at_a_time:]
+
+
+def format_source(root_dir, ignore, verbose=False, dry_run=False,
+                  files_at_a_time=20):
+    """Reformat source code.
+
+    Uses `astyle` for C and C++.  Also uses GNU `sed` to strip trailing
+    whitespace.
+    """
+    check_astyle_version(verbose=verbose)
+    c_like_files = list_c_like_files(root_dir, ignore=ignore)
+    for chunk in chunk_file_list(c_like_files, files_at_a_time):
+        run_astyle(chunk, verbose=verbose, dry_run=dry_run)
+
+    whitespace_files = list_whitespaceable_files(root_dir, ignore=ignore)
+    for chunk in chunk_file_list(whitespace_files, files_at_a_time):
+        strip_trailing_whitespace(chunk, verbose=verbose, dry_run=dry_run)
+
+
+def check_lint(root_dir, ignore, verbose, dry_run, files_at_a_time,
+               max_line_len, continue_on_error):
+    """Check for lint.
+
+    Unless `continue_on_error` is selected, returns `False` on the first
+    iteration where lint is found, or where the lint checker otherwise
+    returned failure.
+
+    :return: Whether the check found everything OK.
+    """
+    success = True
+    # Suffixes for types of file that pocketlint can check for us.
+    pocketlint_suffixes = [
+        # C/C++.
+        '.c',
+        '.cc',
+        '.cpp',
+        '.cxx',
+        '.h',
+        '.hh',
+        '.hpp',
+        '.hxx',
+        # Configuration file.
+        '.ini',
+        # CSS.
+        '.css',
+        # JavaScript.
+        '.js',
+        # Markdown documentation.
+        '.md',
+        # Perl.
+        '.cgi',
+        '.perl',
+        '.pl',
+        '.pm',
+        # PHP.
+        '.php',
+        # Python.
+        '.py',
+        # Shell script.
+        '.sh',
+        ]
+    lintable_files = find_files(
+        root_dir, ignore=ignore, suffixes=pocketlint_suffixes)
+    command_line = ['pocketlint', '-m', '%d' % max_line_len, '--']
+    for chunk in chunk_file_list(lintable_files, files_at_a_time):
+        try:
+            run_command(
+                command_line + chunk, verbose=verbose, dry_run=dry_run)
+        except CalledProcessError:
+            success = False
+
+        if not success and not continue_on_error:
+            return False
+
+    return success
 
 
 def parse_arguments():
     """Parse command-line arguments, return as Namespace object."""
     parser = ArgumentParser(description=__doc__)
+    parser.add_argument(
+        '--format', '-f', action='store_true',
+        help="Format source code.")
+    parser.add_argument(
+        '--lint', '-l', action='store_true',
+        help="Check for lint.")
     parser.add_argument(
         '--verbose', '-v', action='store_true',
         help="Print whatever is happening to standard output.")
@@ -233,27 +331,53 @@ def parse_arguments():
         '--root-dir', '-r', metavar='DIR', default=getcwd(),
         help="Project root directory.  Defaults to current directory.")
     parser.add_argument(
-        '--dry-run', '-n', action='store_true',
+        '--dry-run', '-d', action='store_true',
         help="Don't actually change any files.")
+    parser.add_argument(
+        '--files-at-a-time', '-n', type=int, metavar='NUMBER', default=20,
+        help=(
+            "Process NUMBER files in one command line.  "
+            "Defaults to %(default)s."))
+    parser.add_argument(
+        '--max-line-len', '-m', type=int, metavar='NUMBER', default=300,
+        help=(
+            "Allow maximum line length of NUMBER characters.  Default is "
+            "%(default)s, optimal for humans is said to be somewhere around "
+            "72, conventional is 78-80."))
+    parser.add_argument(
+        '--ignore-lint-error', '-i', action='store_true',
+        help="Continue checking even if lint is found.")
     return parser.parse_args()
 
 
 def main():
     """Find and format source files."""
     args = parse_arguments()
+    if not args.format and not args.lint:
+        raise Exception("Select action: --format, --lint, or both.")
 
     ignore = read_ignore_file(args.root_dir)
-    check_astyle_version(verbose=args.verbose)
 
-    c_like_files = list_c_like_files(args.root_dir, ignore=ignore)
-    for chunk in chunk_file_list(c_like_files):
-        run_astyle(chunk, verbose=args.verbose, dry_run=args.dry_run)
+    if args.format:
+        format_source(
+            args.root_dir, ignore, verbose=args.verbose,
+            dry_run=args.dry_run, files_at_a_time=args.files_at_a_time)
 
-    whitespace_files = list_whitespaceable_files(args.root_dir, ignore=ignore)
-    for chunk in chunk_file_list(whitespace_files):
-        strip_trailing_whitespace(
-            chunk, verbose=args.verbose, dry_run=args.dry_run)
+    if args.lint:
+        success = check_lint(
+            args.root_dir, ignore, verbose=args.verbose,
+            dry_run=args.dry_run, files_at_a_time=args.files_at_a_time,
+            max_line_len=args.max_line_len,
+            continue_on_error=args.ignore_lint_error)
+        if not success:
+            raise LintCheckFailure("Lint check failed.")
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except LintCheckFailure as error:
+        # This is a failure, but not a bug.  Print a friendly error
+        # message, not a traceback.
+        sys.stderr.write('%s\n' % error)
+        sys.exit(1)
