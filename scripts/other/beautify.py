@@ -247,6 +247,8 @@ def format_source(root_dir, ignore, verbose=False, dry_run=False,
     Uses `astyle` for C and C++.  Also uses GNU `sed` to strip trailing
     whitespace.
     """
+    # TODO: Run perltidy on Perl files.  I get a reasonably close match
+    # on style with: --paren-tightness=2 --cuddled-else
     check_astyle_version(verbose=verbose)
     c_like_files = list_c_like_files(root_dir, ignore=ignore)
     for chunk in chunk_file_list(c_like_files, files_at_a_time):
