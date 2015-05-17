@@ -279,23 +279,31 @@ def check_lint(root_dir, ignore, verbose, dry_run, files_at_a_time,
         '.hh',
         '.hpp',
         '.hxx',
+
         # Configuration file.
         '.ini',
-        # CSS.
-        '.css',
+
+        # CSS: Don't check for now.  Styles differ too much.
+        # '.css',
+
         # JavaScript.
         '.js',
+
         # Markdown documentation.
         '.md',
+
         # Perl.
         '.cgi',
         '.perl',
         '.pl',
         '.pm',
+
         # PHP.
         '.php',
+
         # Python.
         '.py',
+
         # Shell script.
         '.sh',
         ]
@@ -339,7 +347,7 @@ def parse_arguments():
             "Process NUMBER files in one command line.  "
             "Defaults to %(default)s."))
     parser.add_argument(
-        '--max-line-len', '-m', type=int, metavar='NUMBER', default=300,
+        '--max-line-len', '-m', type=int, metavar='NUMBER', default=400,
         help=(
             "Allow maximum line length of NUMBER characters.  Default is "
             "%(default)s, optimal for humans is said to be somewhere around "
