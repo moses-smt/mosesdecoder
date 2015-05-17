@@ -140,34 +140,46 @@ def find_files(root_dir, ignore=None, suffixes=None):
             _, suffix = os.path.splitext(filename)
             if suffix not in suffixes:
                 continue
-            files.add(os.path.join(dirpath, filename))
+            file_path = os.path.join(dirpath, filename)
+            if not os.path.islink(file_path):
+                # Skip symlinks.  If they point to something that we need to
+                # process then we'll probably find it.  If it doesn't, then
+                # we should ignore it anyway.  What we should definitely not
+                # do is overwrite a symlink with a reformatted regular file.
+                files.add(file_path)
 
     return sorted(files)
 
 
-def list_c_like_files(root_dir, ignore):
-    """Return a list of C/C++ source files to beautify.
+# Filename suffixes for C/C++ source files.
+C_LIKE_SUFFIXES = [
+    '.c',
+    '.cc',
+    '.cpp',
+    '.cxx',
+    '.h',
+    '.hh',
+    '.hpp',
+    '.hxx',
+]
 
-    This is currently still tailored for the Moses source tree.  We may
-    generalize it later so we can run it on other codebases as well.
 
-    Calls GNU `find` to find files.  It must be in your path.
+# Filename suffixes for Perl files.
+PERL_SUFFIXES = [
+    '.cgi',
+    '.perl',
+    '.pl',
+    '.pm',
+    ]
 
-    :param root_dir: Root source directory.
-    :param ignore: Sequence of path prefixes that should be ignored.
-    """
-    # Filename suffixes for C/C++ source files.
-    c_like_suffixes = {
-        '.c',
-        '.cc',
-        '.cpp',
-        '.cxx',
-        '.h',
-        '.hh',
-        '.hpp',
-    }
 
-    return find_files(root_dir, ignore=ignore, suffixes=c_like_suffixes)
+# Filename suffixes for types of files where it's probably safe and
+# desirable to strip trailing whitespace.
+WHITESPACEABLE_SUFFIXES = C_LIKE_SUFFIXES + [
+    '.js',
+    '.md',
+    '.php',
+    ]
 
 
 EXPECTED_ASTYLE_VERSION = "Artistic Style Version 2.01"
@@ -203,15 +215,39 @@ def run_astyle(source_files, verbose=False, dry_run=False):
         command_line + source_files, verbose=verbose, dry_run=dry_run)
 
 
-def list_whitespaceable_files(root_dir, ignore):
-    """Return a list of files where we should clean up whitespace.
+def run_perltidy(source_files, verbose=False, dry_run=False):
+    """Run `perltidy` on the given Perl source files."""
+    command_line = [
+        'perltidy',
+        # Repeat until formatting stops changing:
+        '--converge',
+        # Write "if ($foo)", not "if ( $foo )"
+        '--paren-tightness=2',
+        # Write "} else {", with 'else' on the same line as the braces.
+        '--cuddled-else',
+    ]
+    _, stderr = run_command(
+        command_line + source_files, verbose=verbose, dry_run=dry_run)
+    if stderr != '':
+        sys.stderr.write(stderr)
 
-    This includes C/C++ source files, but possibly also other file types.
-
-    :param root_dir: Root source directory.
-    :param ignore: Sequence of path prefixes that should be ignored.
-    """
-    return list_c_like_files(root_dir, ignore=ignore)
+    # Success doesn't tell us much.  If there are errors in the file,
+    # perltidy will still return success, but it will write an additional
+    # output file with .ERR appended to the input file name.
+    # When that happens, we don't trust that reformatting is safe.
+    for org_file in source_files:
+        tidy_file = org_file + '.tdy'
+        fail_file = org_file + '.ERR'
+        if not os.path.isfile(tidy_file):
+            # File did not get reformatted for whatever reason.
+            continue
+        if os.path.isfile(fail_file):
+            # There were failures in this file.  Don't trust the result;
+            # keep the original.
+            os.remove(tidy_file)
+        else:
+            # Yup, this file looks OK.  Overwrite the original.
+            os.rename(tidy_file, org_file)
 
 
 def strip_trailing_whitespace(files, verbose=False, dry_run=False):
@@ -241,20 +277,27 @@ def chunk_file_list(files, files_at_a_time=20):
 
 
 def format_source(root_dir, ignore, verbose=False, dry_run=False,
-                  files_at_a_time=20):
+                  files_at_a_time=20, skip_astyle=False, skip_perltidy=False):
     """Reformat source code.
 
     Uses `astyle` for C and C++.  Also uses GNU `sed` to strip trailing
     whitespace.
     """
-    # TODO: Run perltidy on Perl files.  I get a reasonably close match
-    # on style with: --paren-tightness=2 --cuddled-else
-    check_astyle_version(verbose=verbose)
-    c_like_files = list_c_like_files(root_dir, ignore=ignore)
-    for chunk in chunk_file_list(c_like_files, files_at_a_time):
-        run_astyle(chunk, verbose=verbose, dry_run=dry_run)
+    if not skip_astyle:
+        check_astyle_version(verbose=verbose)
+        c_like_files = find_files(
+            root_dir, ignore=ignore, suffixes=C_LIKE_SUFFIXES)
+        for chunk in chunk_file_list(c_like_files, files_at_a_time):
+            run_astyle(chunk, verbose=verbose, dry_run=dry_run)
 
-    whitespace_files = list_whitespaceable_files(root_dir, ignore=ignore)
+    if not skip_perltidy:
+        perl_files = find_files(
+            root_dir, ignore=ignore, suffixes=PERL_SUFFIXES)
+        for chunk in chunk_file_list(perl_files, files_at_a_time):
+            run_perltidy(chunk, verbose=verbose, dry_run=dry_run)
+
+    whitespace_files = find_files(
+        root_dir, ignore=ignore, suffixes=WHITESPACEABLE_SUFFIXES)
     for chunk in chunk_file_list(whitespace_files, files_at_a_time):
         strip_trailing_whitespace(chunk, verbose=verbose, dry_run=dry_run)
 
@@ -271,42 +314,15 @@ def check_lint(root_dir, ignore, verbose, dry_run, files_at_a_time,
     """
     success = True
     # Suffixes for types of file that pocketlint can check for us.
-    pocketlint_suffixes = [
-        # C/C++.
-        '.c',
-        '.cc',
-        '.cpp',
-        '.cxx',
-        '.h',
-        '.hh',
-        '.hpp',
-        '.hxx',
-
-        # Configuration file.
+    pocketlint_suffixes = C_LIKE_SUFFIXES + PERL_SUFFIXES + [
         '.ini',
-
-        # CSS: Don't check for now.  Styles differ too much.
+        # Don't check for now.  Styles differ too much.
         # '.css',
-
-        # JavaScript.
         '.js',
-
-        # Markdown documentation.
         '.md',
-
-        # Perl.
         '.cgi',
-        '.perl',
-        '.pl',
-        '.pm',
-
-        # PHP.
         '.php',
-
-        # Python.
         '.py',
-
-        # Shell script.
         '.sh',
         ]
     lintable_files = find_files(
@@ -357,6 +373,12 @@ def parse_arguments():
     parser.add_argument(
         '--ignore-lint-error', '-i', action='store_true',
         help="Continue checking even if lint is found.")
+    parser.add_argument(
+        '--skip-astyle', '-A', action='store_true',
+        help="Don't run astyle when formatting.")
+    parser.add_argument(
+        '--skip-perltidy', '-P', action='store_true',
+        help="Don't run perltidy when formatting.")
     return parser.parse_args()
 
 
@@ -371,7 +393,8 @@ def main():
     if args.format:
         format_source(
             args.root_dir, ignore, verbose=args.verbose,
-            dry_run=args.dry_run, files_at_a_time=args.files_at_a_time)
+            dry_run=args.dry_run, files_at_a_time=args.files_at_a_time,
+            skip_astyle=args.skip_astyle, skip_perltidy=args.skip_perltidy)
 
     if args.lint:
         success = check_lint(
