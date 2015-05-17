@@ -50,7 +50,7 @@ void ContextFeature::Evaluate(const InputType &input
 
 	    vector<FactorType> srcFactors;
 	    srcFactors.push_back(0);
-	    string nonTermRep = "[X][X]";
+	    //string nonTermRep = "[X][X]"; was for hiero
 
 	    VERBOSE(5, "Computing vw scores for source context : " << input << endl);
 
@@ -80,13 +80,34 @@ void ContextFeature::Evaluate(const InputType &input
 	            //get source side of rule
 	            CHECK(tp.GetRuleSource() != NULL);
 
-	            //rewrite non-terminals non source side with "[][]"
+	            std::cout << "Source side of rule :" << std::endl;
+	            //FB : display complete rule for debugging
 	            for(int i=0; i< tp.GetRuleSource()->GetSize();i++)
 	            {
-	                //replace X by [X][X] for coherence with rule table
+	            	std::cout << tp.GetRuleSource()->GetWord(i) << " ";
+	            }
+
+	            std::cout << std::endl;
+
+	            //FB : also look at the non-terms in the target !!!
+	            //rewrite non-terminals non source side with "[][]"
+	            //Generate non-term representation
+	            string nonTermRep = "";
+	            for(int i=0; i< tp.GetRuleSource()->GetSize();i++)
+	            {
+	                //replace each non-terminal with bracketed version for coherence with the rule table
+
+	            	//we have the non-term position in the source, so we try to find the aligned non-term on the target side
 	                if(tp.GetRuleSource()->GetWord(i).IsNonTerminal())
 	                {
-	                    sourceSide += nonTermRep;
+	                    //sourceSide += nonTermRep;//was for hiero
+	                	//FB: new for GHKM
+	                	//get source and target non-terminal and put brackets
+	                	CHECK(tp.GetAlignNonTerm().GetAlignmentsForSource(i).size() == 1);//non term align should be 1 to 1
+
+	                	sourceSide += "[" + tp.GetRuleSource()->GetWord(i).GetString(srcFactors,0) + "]";
+	                	sourceSide += "[" + tp.GetWord(*tp.GetAlignNonTerm().GetAlignmentsForSource(i).begin()).GetString(srcFactors,0) + "]";
+
 	                }
 	                else
 	                {
@@ -100,9 +121,11 @@ void ContextFeature::Evaluate(const InputType &input
 	            }
 
 	            //Add parent to source
-	            std::string parentNonTerm = "[X]";
+	            std::string parentNonTerm = "[X]"; //hack : source non-term hard-coded, modify for tree-to-tree systems
 	            sourceSide += " ";
 	            sourceSide += parentNonTerm;
+
+	            std::cout << "New source side : " << sourceSide << std::endl;
 
 	            int wordCounter = 0;
 
@@ -115,7 +138,13 @@ void ContextFeature::Evaluate(const InputType &input
 	                if(tp.GetWord(i).IsNonTerminal() == 1)
 	                {
 	                    //append non-terminal
-	                    targetRepresentation += nonTermRep;
+	                    //targetRepresentation += nonTermRep; //was for hiero
+
+	                    CHECK(tp.GetAlignNonTerm().GetAlignmentsForTarget(i).size() == 1);//non term align should be 1 to 1
+
+	                    targetRepresentation += "[" + tp.GetRuleSource()->GetWord(*tp.GetAlignNonTerm().GetAlignmentsForTarget(i).begin()).GetString(srcFactors,0) + "]";
+	                    targetRepresentation += "[" + tp.GetWord(i).GetString(srcFactors,0) + "]";
+
 
 	                    const AlignmentInfo alignInfo = tp.GetAlignNonTerm();
 	                    const AlignmentInfo::NonTermIndexMap alignInfoIndex = tp.GetAlignNonTerm().GetNonTermIndexMap();
@@ -152,9 +181,12 @@ void ContextFeature::Evaluate(const InputType &input
 
 	            //add parent label to target
 	            targetRepresentation += " ";
-	            targetRepresentation += parentNonTerm;
+	            //targetRepresentation += parentNonTerm; //was for hiero
+	            targetRepresentation += "["+tp.GetTargetLHS().GetString(srcFactors,0)+"]";
 
-	            VERBOSE(5, "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << endl);
+	            VERBOSE(0, "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << endl);
+
+	            std:cout << "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << std::endl;
 	            ruleMap.AddRule(sourceSide,targetRepresentation);
 	            targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
 
