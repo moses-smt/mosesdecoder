@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 #by Philipp Koehn, de-augmented by Evan Herbst

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 # given a moses.ini file, prints a copy to stdout but replaces all relative
@@ -48,14 +48,14 @@ while (<$inih>) {
 		  $abs = ensure_absolute($fn, $ini);
 		  die "File not found or empty: $fn (searched for $abs.minphr)"
 		    if ! -s $abs.".minphr"; # accept compact binarized ttables
-		  $_ = "$type $b $c $d $abs\n";                    
+		  $_ = "$type $b $c $d $abs\n";
                 }
 		else {
 		  $abs = ensure_absolute($fn, $ini);
 		  die "File not found or empty: $fn (searched for $abs or $abs.binphr.idx)"
 		    if ! -s $abs && ! -s $abs.".binphr.idx"; # accept binarized ttables
 		  $_ = "$type $b $c $d $abs\n";
-		}	
+		}
     }
     if ($section eq "generation-file" || $section eq "lmodel-file") {
       chomp;

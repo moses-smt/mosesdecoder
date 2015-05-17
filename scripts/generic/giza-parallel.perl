@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # example
 # ~/giza-parallel.perl 10 split ~/workspace/sourceforge/trunk/scripts/training/train-model.perl ar en train align
@@ -47,7 +47,7 @@ my @childs;
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
-	
+
 	if ($pid == 0)
 	{ # child
 	  $isParent = 0;
@@ -73,7 +73,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
   }
 	else
 	{ # parent
-		push(@childs, $pid);	
+		push(@childs, $pid);
 	}
 
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 #input hindi word urdu word, delete all those entries that have number on any side
 use warnings;
@@ -57,7 +57,7 @@ else
 		$retur = deleteSymbol($_);
 		if($retur == 1)
 		{
-			#print "$_\n"; 
+			#print "$_\n";
 			$retur = deleteEnglish($lang1, $lang2, $_);
 			if ($retur == 1)
 			{
@@ -92,7 +92,7 @@ sub deleteEnglish{
 		else {$backEng = 1; return $backEng;}
 	}
 	elsif($list[0] == 0 && $list[1] == 1)
-	{	
+	{
 #		print "Target is Non-Latin\n";
 		@F=split("\t");
 		if ($F[1] =~ m/[A-Za-z]/) {}
@@ -130,7 +130,7 @@ sub deleteSymbol{
 	elsif(/\,/) {}
 	elsif(/\</){}
 	elsif(/\>/){}
-	else 
+	else
 	{
 		@wrds = split(/\t/);
 		if($wrds[0] eq $wrds[1])
@@ -260,7 +260,7 @@ sub charFreqFilter{
 	$remove = 0;
 
 ########################## search if word contain any of the bad characters ####################################
-	
+
 	foreach (@srcWrdArr)
 	{
 #		print "$srcWrd\n";

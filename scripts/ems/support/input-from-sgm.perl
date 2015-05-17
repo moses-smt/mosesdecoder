@@ -1,9 +1,9 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
 
-die("ERROR syntax: input-from-sgm.perl < in.sgm > in.txt") 
+die("ERROR syntax: input-from-sgm.perl < in.sgm > in.txt")
     unless scalar @ARGV == 0;
 
 while(my $line = <STDIN>) {
@@ -17,7 +17,7 @@ while(my $line = <STDIN>) {
 	   $line !~ /<seg[^>]+>\s*(.*)\s*<\/seg>/i) {
 	my $next_line = <STDIN>;
 	$line .= $next_line;
-	chop($line);	
+	chop($line);
     }
     if ($line =~ /<seg[^>]+>\s*(.*)\s*<\/seg>/i) {
 	my $input = $1;

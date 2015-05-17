@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -22,7 +22,7 @@ while(<TAGGER>) {
     foreach my $word_pos (split) {
 	$word_pos =~ s/\/([^\/]+)$/_$1/;
 	$word_pos = "//_:" if $word_pos eq "//";
-	print STDERR "faulty POS tag: $word_pos\n" 
+	print STDERR "faulty POS tag: $word_pos\n"
 	    unless $word_pos =~ /^.+_([^_]+)$/;
 	print OUT "$1 ";
     }

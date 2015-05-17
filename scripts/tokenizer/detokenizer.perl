@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id: detokenizer.perl 4134 2011-08-08 15:30:54Z bgottesman $
 # Sample De-Tokenizer
@@ -309,7 +309,7 @@ sub charIsCJK {
     my ($char) = @_;
     # $char should be a string of length 1
     my $codepoint = &codepoint_dec($char);
-    
+
     # The following is based on http://en.wikipedia.org/wiki/Basic_Multilingual_Plane#Basic_Multilingual_Plane
 
     # Hangul Jamo (1100–11FF)

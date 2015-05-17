@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 function diff_analysis() {
   global $task,$user,$setup,$id,$id2,$set;
@@ -15,7 +15,7 @@ function diff_analysis() {
       print "Run $id2 ($c2) vs $id ($c)";
   }
   print "</h4>";
-  
+
 ?><script language="javascript" src="javascripts/prototype.js"></script>
 <script language="javascript" src="javascripts/scriptaculous.js"></script>
 <script>
@@ -96,9 +96,9 @@ function precision_by_coverage_diff() {
     $log_info[$log_count]["precision"] += $item[1];
     $log_info[$log_count]["delete"] += $item[2];
     $log_info[$log_count]["length"] += $item[3];
-    $log_info[$log_count]["total"] += $item[4];    
+    $log_info[$log_count]["total"] += $item[4];
   }
-  $log_info_new = $log_info;  
+  $log_info_new = $log_info;
 
   // load base data
   $data = file(get_current_analysis_filename("precision","precision-by-corpus-coverage"));
@@ -154,7 +154,7 @@ function precision_by_coverage_diff_factored($img_width,$total,$file,$factor_id)
     $log_info_factored[$factor][$log_count]["precision"] += $item[2];
     $log_info_factored[$factor][$log_count]["delete"] += $item[3];
     $log_info_factored[$factor][$log_count]["length"] += $item[4];
-    $log_info_factored[$factor][$log_count]["total"] += $item[5];    
+    $log_info_factored[$factor][$log_count]["total"] += $item[5];
   }
   $info_factored_new = $info_factored;
   $info_factored_sum_new = $info_factored_sum;
@@ -225,7 +225,7 @@ function precision_by_word_diff($type) {
     if ($byCoverage != -2 && $byCoverage != $log_count) {
       continue;
     }
-   
+
     //# filter for factor
     $word = $item[5];
     if ($byFactor != "false" && $byFactor != $item[6]) {
@@ -258,7 +258,7 @@ function precision_by_word_diff($type) {
     if ($byCoverage != -2 && $byCoverage != $log_count) {
 	continue;
     }
-   
+
     //# filter for factor
     $word = $item[5];
     if ($byFactor != "false" && $byFactor != $item[6]) {
@@ -319,7 +319,7 @@ ctx.fillRect (0, 0, $size, $size);
     $surface = $item[5];
     $word[$surface] = array();
     $word[$surface]["precision"] = $item[0]; # number of precise translations
-    $word[$surface]["delete"] = $item[1];    # number of deleted 
+    $word[$surface]["delete"] = $item[1];    # number of deleted
     $word[$surface]["total"] = $item[2];     # number of all translations
     $word[$surface]["coverage"] = $item[4];  # count in training corpus
     if ($item[4] == 0) { $log_count = -1; }
@@ -369,7 +369,7 @@ ctx.fillRect (0, 0, $size, $size);
       $matrix[$base][$alt]["coverage2"] = 0;
     }
     # ignore mismatches in source words due to tokenization / casing
-    if (array_key_exists($surface,$word)) { 
+    if (array_key_exists($surface,$word)) {
       $matrix[$base][$alt]["precision1"] += $word[$surface]["precision"];
       $matrix[$base][$alt]["delete1"]    += $word[$surface]["delete"];
       $matrix[$base][$alt]["total1"]     += $word[$surface]["total"];
@@ -413,14 +413,14 @@ ctx.fillRect (0, 0, $size, $size);
 	    $prec_imp = (int)(sqrt($prec1-$prec2));
 	    $prec_color = "255,100,100";
 	  }
-	  else {	    
+	  else {
 	    $prec_base = (int)(sqrt($prec2));
 	    $prec_imp = (int)(sqrt($prec2-$prec1));
 	    $prec_color = "100,255,100";
 	  }
 	  $prec_base_top = (int)(($total-$prec_base)/2);
 	  $prec_imp_top = (int)(($total-$prec_imp)/2);
-	
+
 	  $del1 = $matrix[$base][$alt]["delete1"]*$scale;
 	  $del2 = $matrix[$base][$alt]["delete2"]*$scale;
 	  if ($del1 > $del2) {
@@ -428,7 +428,7 @@ ctx.fillRect (0, 0, $size, $size);
 	    $del_imp = $del1-$del2;
 	    $del_color = "150,100,255";
 	  }
-	  else {	    
+	  else {
 	    $del_base = $del2;
 	    $del_imp = $del2-$del1;
 	    $del_color = "100,200,200";
@@ -470,7 +470,7 @@ ctx.fillRect (0, ".($total+$del_base_height).", $total, $del_imp_height);
 function precision_by_coverage_diff_matrix_details() {
   $alt = $_GET["alt"];
   $base = $_GET["base"];
-    
+
   $impact_total = 0;
   $data = file(get_current_analysis_filename("precision","precision-by-input-word"));
   $word = array(); $class = array();
@@ -483,7 +483,7 @@ function precision_by_coverage_diff_matrix_details() {
       $surface = $item[5];
       $word[$surface] = array();
       $word[$surface]["precision"] = $item[0]; # number of precise translations
-      $word[$surface]["delete"] = $item[1];    # number of deleted 
+      $word[$surface]["delete"] = $item[1];    # number of deleted
       $word[$surface]["total"] = $item[2];     # number of all translations
       $word[$surface]["coverage"] = $item[4];  # count in training corpus
     }
@@ -502,7 +502,7 @@ function precision_by_coverage_diff_matrix_details() {
     $surface = $item[5];
     if ($log_count-$base == $alt && array_key_exists($surface,$word)) {
       $precision = $item[0]; # number of precise translations
-      $delete = $item[1];    # number of deleted 
+      $delete = $item[1];    # number of deleted
       $total = $item[3];     # number of all translations + deletions
       $coverage = $item[4];  # count in training corpus
       $surface = $item[5];
@@ -527,17 +527,17 @@ function precision_by_coverage_diff_matrix_details() {
     }
   }
   sort($all_out);
-  foreach($all_out as $out) { $o = explode("\t",$out); print $o[1]; }  
+  foreach($all_out as $out) { $o = explode("\t",$out); print $o[1]; }
   print "</table>";
 }
 
 function precision_by_coverage_diff_graph($name,$log_info,$log_info_new,$total,$img_width,$sort_type) {
   $keys = array_keys($log_info);
   sort($keys,$sort_type);
-  
+
   print "<div id=\"Toggle$name\" onClick=\"document.getElementById('Table$name').style.display = 'none'; this.style.display = 'none';\" style=\"display:none;\"><font size=-2>(hide table)</font></div>\n";
   print "<div id=\"Table$name\" style=\"display:none;\">\n";
-  print "<table border=1><tr><td align=center>&nbsp;</td><td align=center colspan=3>Precision</td><td align=center colspan=2>Precision Impact</td><td align=center colspan=3>Delete</td><td align=center colspan=2>Delete Impact</td><td align=center>Length</td></tr>\n";  
+  print "<table border=1><tr><td align=center>&nbsp;</td><td align=center colspan=3>Precision</td><td align=center colspan=2>Precision Impact</td><td align=center colspan=3>Delete</td><td align=center colspan=2>Delete Impact</td><td align=center>Length</td></tr>\n";
   foreach ($keys as $i) {
     if (array_key_exists($i,$log_info)) {
       print "<tr><td align=center>$i</td>";
@@ -595,7 +595,7 @@ ctx.font = '9px serif';
     print "ctx.fillRect ($x, 250, $width, $height);";
 
     $total_so_far += $log_info[$i]["total"];
-   
+
     if ($width>3) {
       print "ctx.fillStyle = \"rgb(0,0,0)\";";
       // print "ctx.rotate(-1.5707);";
@@ -763,9 +763,9 @@ function bleu_diff_annotation() {
     $data = file(get_analysis_filename($dir,$set,$idx?$id2:$id,"basic","bleu-annotation"));
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
-      $annotation[$item[1]]["bleu$idx"] = $item[0]; 
-      $annotation[$item[1]]["system$idx"] = $item[2]; 
-      $annotation[$item[1]]["reference"] = $item[3]; 
+      $annotation[$item[1]]["bleu$idx"] = $item[0];
+      $annotation[$item[1]]["system$idx"] = $item[2];
+      $annotation[$item[1]]["reference"] = $item[3];
       $annotation[$item[1]]["id"] = $item[1];
     }
   }
@@ -825,7 +825,7 @@ function bleu_diff_annotation() {
 
   // display
   for($i=0;$i<$count && $i<count($annotation);$i++) {
-     $line = $annotation[$i]; 
+     $line = $annotation[$i];
      print "<font size=-2>[src]</font> ".$input[$line["id"]]."<br>";
 
      $word_with_score1 = split(" ",$line["system1"]);
@@ -840,7 +840,7 @@ function bleu_diff_annotation() {
      $matched_with_score1 = preg_replace('/D/',"",$matched_with_score);
      bleu_line_diff( $word_with_score1, $matched1, $matched_with_score1 );
 
-     print "<font size=-2>[".$id."-".$line["id"].":".$line["bleu0"]."]</font> ";     
+     print "<font size=-2>[".$id."-".$line["id"].":".$line["bleu0"]."]</font> ";
      $matched0 = preg_replace('/I/',"",$matched);
      $matched_with_score0 = preg_replace('/I/',"",$matched_with_score);
      bleu_line_diff( $word_with_score0, $matched0, $matched_with_score0 );
@@ -875,14 +875,14 @@ function ngram_diff($type) {
 
   // load data
   $order = $_GET['order'];
-  
+
   for($idx=0;$idx<2;$idx++) {
     $data = file(get_analysis_filename($dir,$set,$idx?$id2:$id,"basic","n-gram-$type.$order"));
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
-      $ngram_hash[$item[2]]["total$idx"] = $item[0]; 
+      $ngram_hash[$item[2]]["total$idx"] = $item[0];
       $ngram_hash[$item[2]]["correct$idx"] = $item[1];
-    }  
+    }
     unset($data);
   }
 
@@ -893,7 +893,7 @@ function ngram_diff($type) {
     $sort = 'ratio_worse';
     $smooth = 1;
   }
-  
+
   error_reporting(E_ERROR); // otherwise undefined counts trigger notices
 
   // sort index
@@ -914,12 +914,12 @@ function ngram_diff($type) {
         + (2*$item["correct0"] - $item["total0"]);
     }
     else if ($sort == "ratio_worse") {
-      $item["index"] = 
+      $item["index"] =
           ($item["correct1"] + $smooth) / ($item["total1"] + $smooth)
         - ($item["correct0"] + $smooth) / ($item["total0"] + $smooth);
     }
     else if ($sort == "ratio_better") {
-      $item["index"] = 
+      $item["index"] =
         - ($item["correct1"] + $smooth) / ($item["total1"] + $smooth)
         + ($item["correct0"] + $smooth) / ($item["total0"] + $smooth);
     }
@@ -1010,7 +1010,7 @@ function ngram_diff($type) {
     }
     else {
       printf("<td align=right>%+d</td><td>(%d)</td><td align=right>%+d</td><td>(%d)</td></tr>", $ok_diff,$ok,$wrong_diff,$wrong);
-    } 
+    }
   }
   print "</table>\n";
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 #sentence-by-sentence: take in a system output, with any number of factors, and a reference translation, also maybe with factors, and show each sentence and its errors
@@ -69,7 +69,7 @@ while(readLines(\@SYSOUTS, \@sLines) && readLines(\@TRUTHS, \@eLines))
 		my $sourceLine = <SOURCE>;
 		escapeMetachars($sourceLine); #remove inconsistencies in encoding
 		$sourceFactors = extractFactorArrays($sourceLine);
-		push @html, "<tr><td class=\"sent_title\">Source</td><td class=\"source_sentence\" id=\"source$numSentences\">" 
+		push @html, "<tr><td class=\"sent_title\">Source</td><td class=\"source_sentence\" id=\"source$numSentences\">"
 								. getFactoredSentenceHTML($sourceFactors) . "</td></tr>\n";
 	}
 	#process truth
@@ -77,7 +77,7 @@ while(readLines(\@SYSOUTS, \@sLines) && readLines(\@TRUTHS, \@eLines))
 	{
 		escapeMetachars($eLines[$j]); #remove inconsistencies in encoding
 		push @eFactors, extractFactorArrays($eLines[$j]);
-		push @html, "<tr><td class=\"sent_title\">Ref $j</td><td class=\"truth_sentence\" id=\"truth${numSentences}_$j\">" 
+		push @html, "<tr><td class=\"sent_title\">Ref $j</td><td class=\"truth_sentence\" id=\"truth${numSentences}_$j\">"
 								. getFactoredSentenceHTML($eFactors[$j]) . "</td></tr>\n";
 	}
 	#process sysouts
@@ -89,12 +89,12 @@ while(readLines(\@SYSOUTS, \@sLines) && readLines(\@TRUTHS, \@eLines))
 		push @bleuData, getBLEUSentenceDetails($sFactors[$j], \@eFactors, 0);
 		push @{$bleuScores[$j]}, [$numSentences, $bleuData[$j]->[0], 0]; #the last number will be the rank
 		my $pwerData = getPWERSentenceDetails($sFactors[$j], \@eFactors, 0);
-		push @html, "<tr><td class=\"sent_title\">Output $j</td><td class=\"sysout_sentence\" id=\"sysout$numSentences\">" 
+		push @html, "<tr><td class=\"sent_title\">Output $j</td><td class=\"sysout_sentence\" id=\"sysout$numSentences\">"
 								. getFactoredSentenceHTML($sFactors[$j], $pwerData) . "</td></tr>\n";
-		push @html, "<tr><td class=\"sent_title\">N-grams</td><td class=\"sysout_ngrams\" id=\"ngrams$numSentences\">" 
+		push @html, "<tr><td class=\"sent_title\">N-grams</td><td class=\"sysout_ngrams\" id=\"ngrams$numSentences\">"
 								. getAllNgramsHTML($sFactors[$j], $bleuData[$j]->[1], scalar(@truthfiles)) . "</td></tr>\n";
 	}
-	splice(@html, 1, 0, "<div class=\"bleu_report\"><b>Sentence $numSentences)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BLEU:</b> " 
+	splice(@html, 1, 0, "<div class=\"bleu_report\"><b>Sentence $numSentences)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BLEU:</b> "
 							. join("; ", map {sprintf("%.4lg", $_->[0]->[0]) . " (" . join('/', map {sprintf("%.4lg", $_)} @{$_->[0]}[1 .. 4]) . ") "} @bleuData) . "</div><table>\n");
 	push @html, "</table></div>\n";
 	push @htmlSentences, join('', @html);
@@ -142,7 +142,7 @@ function selectSysout(index)
 		var spans = cell.getElementsByTagName('span');
 		cell.childNodes[0].nodeValue = spans[index].firstChild.nodeValue; //something like '0.1 - 0.3'
 	}
-	
+
 	//update the background colors of the sentence divs
 	var allSentences = document.getElementById('all_sentences');
 	var sentences = allSentences.childNodes;
@@ -207,7 +207,7 @@ for(my $i = 0; $i < scalar(@sysoutfiles); $i++)
 print "<table border=0><tr><td><div id=\"legendBLEU\" class=\"legend\"><span class=\"legend_title\">Sentence Background Colors => BLEU Ranges</span><table border=0>";
 for(my $k = 0; $k < scalar(@htmlColors); $k++)
 {
-	print "<tr><td style=\"width: 15px; height: 15px; background: " . $htmlColors[$k] . "\"></td><td align=left style=\"padding-left: 12px\">" 
+	print "<tr><td style=\"width: 15px; height: 15px; background: " . $htmlColors[$k] . "\"></td><td align=left style=\"padding-left: 12px\">"
 							. sprintf("%.4lg", $minBLEU[0]->[$k]) . " - " . sprintf("%.4lg", $maxBLEU[0]->[$k]);
 	for(my $j = 0; $j < scalar(@sysoutfiles); $j++)
 	{
@@ -223,7 +223,7 @@ for(my $k = 1; $k <= scalar(@truthfiles); $k++)
 }
 print "</table></div></td></tr></table><div style=\"font-weight: bold; margin-bottom: 15px\">
 PWER errors are marked in red on output sentence displays.</div>
-<div style=\"margin-bottom: 8px\">Color by system # " 
+<div style=\"margin-bottom: 8px\">Color by system # "
 						. join(' | ', map {"<a href=\"javascript:selectSysout($_);\">$_</a>" . (($_ == '0') ? " (default)" : "")} (0 .. scalar(@sysoutfiles) - 1)) . "</div>
 <div style=\"margin-bottom: 8px\">Sort by <a href=\"javascript:sortByBLEU();\">BLEU score</a> | <a href=\"javascript:sortByCorpusOrder();\">corpus order</a> (default)</div>\n";
 
@@ -472,7 +472,7 @@ sub getSentenceBGColorHTML
 
 #display all matching n-grams in the given sentence, with all 1-grams on one line, then arranged by picking, for each, the first line on which it fits,
 # where a given word position can only be filled by one n-gram per line, so that all n-grams can be shown
-#arguments: sentence (arrayref of arrayrefs of factor strings), arrayref of arrayrefs of matching n-gram [start, length, arrayref of matching reference indices], 
+#arguments: sentence (arrayref of arrayrefs of factor strings), arrayref of arrayrefs of matching n-gram [start, length, arrayref of matching reference indices],
 # number of reference translations
 #return: HTML string
 sub getAllNgramsHTML
@@ -507,9 +507,9 @@ sub getAllNgramsHTML
 		}
 		$n++;
 	}
-	
+
 	my $html = "<table class=\"ngram_table\"><tr><td align=center>" . join("</td><td align=center>", map {$_->[$factorIndex]} @$sentence) . "</td></tr>";
-	
+
 	my $numWords = scalar(@$sentence);
 	my ($curRow, $curCol) = (0, 0); #address in table
 	$html .= "<tr>";

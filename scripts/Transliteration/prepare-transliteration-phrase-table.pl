@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -29,7 +29,7 @@ die("ERROR: you need to define --moses-src-dir --external-bin-dir, --translitera
     unless (defined($MOSES_SRC_DIR) &&
             defined($TRANSLIT_MODEL) &&
             defined($OOV_FILE) &&
-	    defined($INPUT_EXTENSION)&&	
+	    defined($INPUT_EXTENSION)&&
 	    defined($OUTPUT_EXTENSION));
 
 die("ERROR: could not find Transliteration Model '$TRANSLIT_MODEL'")
@@ -63,7 +63,7 @@ sub prepare_for_transliteration
 	my $src;
 	open MYFILE,  "<:encoding(UTF-8)", $testFile or die "Can't open $testFile: $!\n";
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
         chomp;
         #print "$_\n";
@@ -81,7 +81,7 @@ sub prepare_for_transliteration
 	foreach my $key ( keys %UNK )
 	{
   		$src=join(' ', split('',$key));
- 		print MYFILE "$src\n";	
+ 		print MYFILE "$src\n";
 	}
 	 close (MYFILE);
 }
@@ -97,11 +97,11 @@ sub run_transliteration
 	my $eval_file = $list[3];
 
 	`touch $eval_file.moses.table.ini`;
-	
+
 	print STDERR "Filter Table\n";
 
 	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table -reordering-table $TRANSLIT_MODEL/model/reordering-table -config $eval_file.moses.table.ini -lm 0:3:$eval_file.moses.table.ini:8`;
-	
+
 	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $eval_file.filtered $eval_file.moses.table.ini $eval_file  -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
 
 	`rm  $eval_file.moses.table.ini`;
@@ -131,18 +131,18 @@ sub form_corpus
 	my $UNK_FILE_NAME = basename($OOV_FILE);
 	my $target = $EVAL_DIR . "/$UNK_FILE_NAME/training/corpus.$OUTPUT_EXTENSION";
 	my $outFile = "$EVAL_DIR/out.txt";
-	
+
 	open MYFILE,  "<:encoding(UTF-8)", $testFile or die "Can't open $testFile: $!\n";
 	open OUTFILE,  ">:encoding(UTF-8)", $outFile or die "Can't open $outFile: $!\n";
 
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
        	 chomp;
         	#print "$_\n";
         	@words = split(/ /, "$_");
-	 	
-	 
+
+
 		my $i = 2;
 		my $prob;
 
@@ -158,12 +158,12 @@ sub form_corpus
 
 		while ($words[$i] ne "|||")
 		{
-			$i++;	
+			$i++;
 		}
-		
+
 		$i++;
 		$prob = $words[$i];
-        	
+
 		print OUTFILE "$thisStr\t$prob\n";
  	}
  	close (MYFILE);

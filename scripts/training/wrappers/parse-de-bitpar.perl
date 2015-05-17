@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -51,13 +51,13 @@ while(<INPUT>)
         }
         print $TMP $_."\n";
 
-				$hasWords = 1;        
+				$hasWords = 1;
     }
 
     if ($hasWords == 0) {
     	print $TMP " \n";
     }
-        
+
     print $TMP "\n";
 }
 close($TMP);
@@ -76,7 +76,7 @@ while(my $line = <PARSER>) {
     if ($line =~ /^No parse for/) {
         if ($UNPARSEABLE) {
           my $len = length($line);
-          $line = substr($line, 15, $len - 17); 
+          $line = substr($line, 15, $len - 17);
           $line = escape($line);
           print $line;
         }
@@ -90,7 +90,7 @@ while(my $line = <PARSER>) {
     for(my $i=0;$i<length($line);$i++) {
         # print STDERR substr($line,$i)."\n";
 	if (substr($line,$i,4) eq "(*T*") {
-	   my ($trace,$rest) = split(/\)/,substr($line,$i+1)); 
+	   my ($trace,$rest) = split(/\)/,substr($line,$i+1));
 	   $i+=length($trace)+2;
 	   $i++ if substr($line,$i+1,1) eq " ";
 	   die("ERROR: NO LABEL FOR TRACE") unless @LABEL;

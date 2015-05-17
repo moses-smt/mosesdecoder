@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 #use strict;
 use warnings;
@@ -32,7 +32,7 @@ while (<TARGET>) {
     }
 
     for( $i=0; $i<=$#A; $i+=2 ) {
-	if ($target_links[$A[$i]] == 1 && $source_links[$A[$i+1]] == 1 && 
+	if ($target_links[$A[$i]] == 1 && $source_links[$A[$i+1]] == 1 &&
 	    $T[$A[$i]] eq $S[$A[$i+1]])
 	{
 	    $count{$S[$A[$i+1]]}++; # Print this if it only occurs here

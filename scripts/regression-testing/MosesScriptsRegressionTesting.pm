@@ -26,8 +26,8 @@ sub find_data_directory
   print STDERR<<EOT;
 
 You do not appear to have the regression testing data installed.
-You may either specify a non-standard location (absolute path) 
-when running the test suite with the --data-dir option, 
+You may either specify a non-standard location (absolute path)
+when running the test suite with the --data-dir option,
 or, you may install it in any one of the following
 standard locations: $test_script_root, /tmp, or /var/tmp with these
 commands:

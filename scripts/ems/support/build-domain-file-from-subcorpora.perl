@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -7,7 +7,7 @@ use strict;
 # (helper for domain adatpation)
 
 # Creates a file with domain names and end line numbers for different domains
-# within the cleaned training corpus. This file is used by various domain 
+# within the cleaned training corpus. This file is used by various domain
 # adaptation methods.
 
 my ($extension,@SUBCORPORA) = @ARGV;

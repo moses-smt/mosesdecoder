@@ -21,7 +21,7 @@ function load_experiment_info() {
       file_exists($dir."/steps/1")) {
     $topd = dir($dir."/steps");
     while (false !== ($run = $topd->read())) {
-      if (preg_match('/^([0-9]+)$/',$run,$match) 
+      if (preg_match('/^([0-9]+)$/',$run,$match)
           && $run>0
           && !file_exists("$dir/steps/$run/deleted.$run")) {
         $d = dir($dir."/steps/$run");
@@ -49,7 +49,7 @@ function load_experiment_info() {
     }
     $experiment[$id]->start = $stat[9];
   }
-  
+
   reset($experiment);
   while (list($id,$info) = each($experiment)) {
     if (file_exists("$dir/evaluation/report.$id")) {
@@ -57,15 +57,15 @@ function load_experiment_info() {
       foreach ($f as $line_num => $line) {
 	if (preg_match('/^(.+): (.+)/',$line,$match)) {
 	  $experiment[$id]->result[$match[1]] = $match[2];
-          if (!$evalset || !array_key_exists($match[1],$evalset)) { 
-            $evalset[$match[1]] = 0; 
+          if (!$evalset || !array_key_exists($match[1],$evalset)) {
+            $evalset[$match[1]] = 0;
           }
 	  $evalset[$match[1]]++;
 	}
       }
     }
   }
-  
+
   krsort($experiment);
   uksort($evalset,"evalsetsort");
 }
@@ -81,7 +81,7 @@ function load_parameter($run) {
   if (file_exists($dir."/steps/new") ||
       file_exists($dir."/steps/$run")) {
     $file = file("$dir/steps/$run/parameter.$run");
-  } 
+  }
   else {
   $file = file("$dir/steps/parameter.$run");
   }
@@ -121,7 +121,7 @@ function process_file_entry($dir,$entry) {
 	if (file_exists($file.".STDOUT")) { $stat2 = stat($file.".STDOUT"); }
 	if ($stat2[9] > $stat[9]) { $stat = $stat2; }
 	$time = $stat[9];
-	
+
 	if (!$experiment || !array_key_exists($run,$experiment) ||
             !property_exists($experiment[$run],"last_step_time") ||
 	    $time > $experiment[$run]->last_step_time) {
@@ -142,7 +142,7 @@ function get_analysis_version($dir,$set,$id) {
     #while(list($type,$i) = each($analysis_version[$id][$set])) {
     #  print "$type=$i ";
     #}
-    #print ") FROM CACHE<br>"; 
+    #print ") FROM CACHE<br>";
     return $analysis_version[$id][$set];
   }
   $analysis_version[$id][$set]["basic"] = 0;
@@ -188,7 +188,7 @@ function get_analysis_version($dir,$set,$id) {
         file_exists("$dir/model/biconcor.$match[1]")) {
 	$analysis_version[$id][$set]["biconcor"] = $match[1];
       }
-    } 
+    }
   }
 
   # legacy stuff below...
@@ -225,7 +225,7 @@ function get_analysis_version($dir,$set,$id) {
   #while(list($type,$i) = each($analysis_version[$id][$set])) {
   #    print "$type=$i ";
   #}
-  #print ") ZZ<br>"; 
+  #print ") ZZ<br>";
   return $analysis_version[$id][$set];
 }
 

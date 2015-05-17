@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -98,8 +98,8 @@ sub train_factored {
       my $count = $FACTORED_COUNT{$word}{$factored_word};
       $total += $count;
       if ($count > $max) {
-        $max = $count; 
-        $best = $factored_word; 
+        $max = $count;
+        $best = $factored_word;
       }
     }
     $COUNT{$best} = $total;
@@ -132,8 +132,8 @@ sub train_syntax {
       my $count = $LABELED_COUNT{$word}{$label};
       $total += $count;
       if ($count > $max) {
-        $max = $count; 
-        $best = "$word $label"; 
+        $max = $count;
+        $best = "$word $label";
       }
     }
     $COUNT{$best} = $total;
@@ -165,7 +165,7 @@ sub apply {
 	chop; s/\s+/ /g; s/^ //; s/ $//;
 	my @BUFFER; # for xml tags
 	foreach my $factored_word (split) {
-	    print " " unless $first;	    
+	    print " " unless $first;
 	    $first = 0;
 
 	    # syntax: don't split xml
@@ -174,12 +174,12 @@ sub apply {
 		$first = 1;
 		next;
 	    }
-	    
+
 	    # get case class
 	    my $word = $factored_word;
 	    $word =~ s/\|.+//g; # just first factor
 	    my $lc = lc($word);
-	    
+
 	    print STDERR "considering $word ($lc)...\n" if $VERBOSE;
 	    # don't split frequent words
 	    if ((defined($COUNT{$lc}) && $COUNT{$lc}>=$MAX_COUNT) ||
@@ -194,7 +194,7 @@ sub apply {
 	    my $final = length($word)-1;
 	    my %REACHABLE;
 	    for(my $i=0;$i<=$final;$i++) { $REACHABLE{$i} = (); }
-	    
+
 	    print STDERR "splitting $word:\n" if $VERBOSE;
 	    for(my $end=$MIN_SIZE;$end<length($word);$end++) {
 		for(my $start=0;$start<=$end-$MIN_SIZE;$start++) {
@@ -205,10 +205,10 @@ sub apply {
 			my $subword = lc(substr($word,
 					        $start+length($filler),
 					        $end-$start+1-length($filler)));
-			next unless defined($COUNT{$subword});			
+			next unless defined($COUNT{$subword});
 			next unless $COUNT{$subword} >= $MIN_COUNT;
 			print STDERR "\tmatching word $start .. $end ($filler)$subword $COUNT{$subword}\n" if $VERBOSE;
-			push @{$REACHABLE{$end}},"$start $TRUECASE{$subword} $COUNT{$subword}";	
+			push @{$REACHABLE{$end}},"$start $TRUECASE{$subword} $COUNT{$subword}";
 		    }
 		}
 	    }
@@ -230,7 +230,7 @@ sub apply {
 		my ($pos,$decomp,$score,$num,@INDEX) = ($final,"",1,0);
 		while($pos>0) {
 		    last unless scalar @{$REACHABLE{$pos}} > $ITERATOR{$pos}; # dead end?
-		    my ($nextpos,$subword,$count) 
+		    my ($nextpos,$subword,$count)
 			= split(/ /,$REACHABLE{$pos}[ $ITERATOR{$pos} ]);
 		    $decomp = $subword." ".$decomp;
 		    $score *= $count;
@@ -243,7 +243,7 @@ sub apply {
 		chop($decomp);
 		print STDERR "\tsplit: $decomp ($score ** 1/$num) = ".($score ** (1/$num))."\n" if $VERBOSE;
 		$score **= 1/$num;
-		if ($score>$best_score) { 
+		if ($score>$best_score) {
 		    $best_score = $score;
 		    $best_split = $decomp;
 		}
@@ -256,7 +256,7 @@ sub apply {
 		    last if scalar @{$REACHABLE{$increase}} > $ITERATOR{$increase};
 		}
 		last unless scalar @{$REACHABLE{$final}} > $ITERATOR{$final};
-		for(my $i=0;$i<$increase;$i++) { $ITERATOR{$i}=0; }		    
+		for(my $i=0;$i<$increase;$i++) { $ITERATOR{$i}=0; }
 	    }
       if ($best_split !~ / /) {
         print join(" ",@BUFFER)." " if scalar(@BUFFER); @BUFFER = (); # clear buffer

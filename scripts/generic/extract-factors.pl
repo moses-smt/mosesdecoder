@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 #extract-factors.pl: extract only the desired factors from a factored corpus

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -97,7 +97,7 @@ sub reduce_factors {
                 # $first_factor = 0;
                 # print OUT $FACTOR[$factor];
             # }
-        } 
+        }
         print OUT "\n";
     }
     print STDERR "\n";

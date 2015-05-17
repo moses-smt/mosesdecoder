@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 package ph_numbers;
 
@@ -60,8 +60,8 @@ sub mark_numbers {
         }
         $position = $numend;
     }
-    $output .= substr($input,$position); 
-    return $output; 
+    $output .= substr($input,$position);
+    return $output;
 }
 
 sub recognize {
@@ -76,17 +76,17 @@ sub recognize {
             $end = $+[2];
         }
 
-        # ALL characters in the word must be 
+        # ALL characters in the word must be
 				my $isRecognized = 1;
 				if ($start == 0 || substr($input, $start - 1, 1) eq " ") {
-          # 1st word, or previous char is a space        
+          # 1st word, or previous char is a space
         }
         else {
           $isRecognized = 0;
         }
 
         if ($end == length($input) -1 || substr($input, $end, 1) eq " ") {
-        # last word, or next char is a space        
+        # last word, or next char is a space
         }
         else {
           $isRecognized = 0;

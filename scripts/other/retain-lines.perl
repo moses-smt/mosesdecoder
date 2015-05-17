@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 #retain lines in clean.lines-retained.1
 use strict;

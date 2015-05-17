@@ -115,7 +115,7 @@ function run_single_test () {
   if [ -z "$err" ]; then
     ./bjam $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="bjam"
   fi
-  
+
   echo "## regression tests" >> $longlog
   if [ -z "$err" ]; then
     ./bjam $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || err="regression tests"
@@ -158,7 +158,7 @@ function run_single_test () {
     status="FAIL:$err"
   fi
   echo "## Status: $status" >> $longlog
-  
+
   nicedate=$(date +"%Y%m%d-%H%M%S")
   echo "$commit	$status	$configname	$ccversion	$nicedate" \
     >> "$LOGDIR/brief.log"
@@ -180,7 +180,7 @@ done
 # create info files for new commits
 for i in $(git rev-list $MCC_SCAN_BRANCHES); do
   first_char=$(echo $i | grep -o '^.')
-  mkdir -p "$LOGDIR/logs/$configname/$first_char" 
+  mkdir -p "$LOGDIR/logs/$configname/$first_char"
   [ -f "$LOGDIR/logs/$configname/$first_char/$i.info" ] && break;
   git show $i | $MYDIR/shorten_info.pl > "$LOGDIR/logs/$configname/$first_char/$i.info"
 done

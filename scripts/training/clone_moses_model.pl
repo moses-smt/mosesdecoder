@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 # given a moses.ini file, creates a fresh version of it
@@ -136,7 +136,7 @@ sub clone_file_or_die {
         or die "Failed to clone $src into $tgt";
     }
   }
-  
+
   safesystem("echo $src > $tgt.info"); # dump a short information
 }
 

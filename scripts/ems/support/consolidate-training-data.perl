@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id: consolidate-training-data.perl 928 2009-09-02 02:58:01Z philipp $
 

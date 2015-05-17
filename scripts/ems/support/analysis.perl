@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -29,7 +29,7 @@ if (!&GetOptions('system=s' => \$system, # raw output from decoder
                  'search-graph=s' => \$search_graph, # visualization of search graph
 		 'hierarchical' => \$hierarchical) || # hierarchical model?
     !defined($dir)) {
-	die("ERROR: syntax: analysis.perl -system FILE -reference FILE -dir DIR [-input FILE] [-input-corpus FILE] [-ttable FILE] [-score-options SETTINGS] [-segmentation FILE] [-output-corpus FILE] [-alignment-file FILE] [-biconcor BIN]");	
+	die("ERROR: syntax: analysis.perl -system FILE -reference FILE -dir DIR [-input FILE] [-input-corpus FILE] [-ttable FILE] [-score-options SETTINGS] [-segmentation FILE] [-output-corpus FILE] [-alignment-file FILE] [-biconcor BIN]");
 }
 
 `mkdir -p $dir`;
@@ -95,7 +95,7 @@ if (defined($segmentation)) {
 
 # coverage analysis
 my (%INPUT_PHRASE,%CORPUS_COVERED,%TTABLE_COVERED,%TTABLE_ENTROPY);
-if (!defined($coverage_dir) && (defined($ttable) || defined($corpus))) {	
+if (!defined($coverage_dir) && (defined($ttable) || defined($corpus))) {
   if (!defined($input)) {
     die("ERROR: when specifying either ttable or input-corpus, please also specify input\n");
   }
@@ -170,7 +170,7 @@ sub input_phrases {
     $line = &get_factor_phrase($factor,$line);
     &extract_n_grams($line,\%INPUT_PHRASE);
   }
-  close(INPUT);  
+  close(INPUT);
 }
 
 # reduce a factorized phrase into the factors of interest
@@ -279,11 +279,11 @@ sub bleu_annotation {
 	}
 	if (ref($REFERENCE[$i]) eq 'ARRAY') {
 	    foreach my $ref (@{$REFERENCE[$i]}) {
-		print OUT "\t".$ref;	
+		print OUT "\t".$ref;
 	    }
 	}
 	else {
-	  print OUT "\t".$REFERENCE[$i]  
+	  print OUT "\t".$REFERENCE[$i]
 	}
 	print OUT "\n";
     }
@@ -301,7 +301,7 @@ sub add_match {
 	    my $ref_count = 0;
 	    $ref_count = $REF_NGRAM{$length}{$ngram} if defined($REF_NGRAM{$length}{$ngram});
 	    my $match_count = ($sys_count > $ref_count) ? $ref_count : $sys_count;
-	    
+
 	    $$CORRECT{$length}{$ngram} += $match_count;
 	    $$TOTAL{$length}{$ngram} += $sys_count;
 	    #print "$length:$ngram $sys_count $ref_count\n";
@@ -345,7 +345,7 @@ sub ttable_coverage {
     # handling hierarchical
     $in =~ s/ \[[^ \]]+\]$//; # remove lhs nt
     next if $in =~ /\[[^ \]]+\]\[[^ \]]+\]/; # only consider flat rules
-    $in = &get_factor_phrase($factor,$in) if defined($factor) && $factor eq "0"; 
+    $in = &get_factor_phrase($factor,$in) if defined($factor) && $factor eq "0";
     $scores = $COLUMN[4] if defined($hierarchical); #scalar @COLUMN == 5;
     my @IN = split(/ /,$in);
     $size = scalar @IN;
@@ -473,7 +473,7 @@ sub input_annotation {
 	#$ttable_entropy = 0 unless defined($ttable_entropy);
 	$ttable_covered = 0 unless defined($ttable_covered);
 	$corpus_covered = 0 unless defined($corpus_covered);
-	
+
 	if (defined($TTABLE_COVERED{$length}{$phrase})) {
 	  printf OUT "%d-%d:%d:%d:%.5f ",$start,$start+$length-1,$corpus_covered,$ttable_covered,$ttable_entropy;
 	}
@@ -481,7 +481,7 @@ sub input_annotation {
     }
     print OUT "\n";
   }
-  close(INPUT);    
+  close(INPUT);
   close(OUT);
 }
 
@@ -532,7 +532,7 @@ sub extract_n_grams {
     $sentence =~ s/\s+/ /g;
     $sentence =~ s/^ //;
     $sentence =~ s/ $//;
-    
+
     my @WORD = split(/ /,$sentence);
     for(my $length=1;$length<=$MAX_LENGTH;$length++) {
 	for(my $i=0;$i<=scalar(@WORD)-$length;$i++) {
@@ -604,8 +604,8 @@ sub precision_by_coverage {
 	  defined($REF_NGRAM{1}{$ngram})) {
 	my $ref_count = $REF_NGRAM{1}{$ngram};
         my $sys_count = $SYS_NGRAM{1}{$ngram};
-	$PREC_NGRAM{1}{$ngram} = 
-	  ($ref_count >= $sys_count) ? 1 : $ref_count/$sys_count;	    
+	$PREC_NGRAM{1}{$ngram} =
+	  ($ref_count >= $sys_count) ? 1 : $ref_count/$sys_count;
       }
     }
     close(REPORT);
@@ -615,10 +615,10 @@ sub precision_by_coverage {
     while($line =~ /([^|]+) \|(\d+)\-(\d+)\|\s*(.*)$/) {
       my ($output,$from,$to) = ($1,$2,$3);
       $line = $4;
-        
+
       # bug fix: 1-1 unknown word mappings get alignment point
       if ($from == $to &&                         # one
-	  scalar(split(/ /,$output)) == 1 &&      # to one 
+	  scalar(split(/ /,$output)) == 1 &&      # to one
 	  !defined($ALIGNED{$from})) {             # but not aligned
 	push @{$ALIGNED{$from}},$output_pos;
       }
@@ -631,11 +631,11 @@ sub precision_by_coverage {
 
 	my ($precision,$deleted,$length) = (0,0,0);
 
-	# unaligned? note as deleted	
+	# unaligned? note as deleted
 	if (!defined($ALIGNED{$i})) {
 	  $deleted = 1;
 	}
-	# aligned 
+	# aligned
 	else {
 	  foreach my $o (@{$ALIGNED{$i}}) {
 	    $precision += $PREC_NGRAM{1}{$OUTPUT[$o]};
@@ -649,12 +649,12 @@ sub precision_by_coverage {
 	$DELETED_BY_WORD{$word} += $deleted;
 	$PREC_BY_WORD{$word} += $precision;
 	$LENGTH_BY_WORD{$word} += $length;
-	$TOTAL_BY_WORD{$word}++;	
+	$TOTAL_BY_WORD{$word}++;
 
 	$DELETED_BY_COVERAGE{$coverage} += $deleted;
 	$PREC_BY_COVERAGE{$coverage} += $precision;
 	$LENGTH_BY_COVERAGE{$coverage} += $length;
-	$TOTAL_BY_COVERAGE{$coverage}++;	
+	$TOTAL_BY_COVERAGE{$coverage}++;
 
 	if ($precision_by_coverage_factor) {
 	  $DELETED_BY_FACTOR{$FACTOR[$i]} += $deleted;
@@ -662,9 +662,9 @@ sub precision_by_coverage {
 	  $PREC_BY_FACTOR{$FACTOR[$i]} += $precision;
 	  $PREC_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage} += $precision;
 	  $LENGTH_BY_FACTOR{$FACTOR[$i]} += $length;
-	  $LENGTH_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage} += $length;	
-	  $TOTAL_BY_FACTOR{$FACTOR[$i]}++;	    
-	  $TOTAL_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage}++;	
+	  $LENGTH_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage} += $length;
+	  $TOTAL_BY_FACTOR{$FACTOR[$i]}++;
+	  $TOTAL_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage}++;
         }
       }
     }
@@ -853,10 +853,10 @@ sub hs_scan_line {
 # process a single sentence for hierarchical segmentation
 sub hs_process {
     my ($sentence,$DERIVATION,$STATS) = @_;
-    
+
     my $DROP_RULE = shift @{$DERIVATION}; # get rid of S -> S </s>
     my $max = $$DERIVATION[0]{'end'};
-    
+
     # consolidate glue rules into one rule
     my %GLUE_RULE;
     $GLUE_RULE{'start'} = 1;
@@ -867,10 +867,10 @@ sub hs_process {
     while(1) {
 	my $RULE = shift @{$DERIVATION};
 	if (scalar(@{$$RULE{'rule_rhs'}}) == 2 &&
-	     ($$RULE{'rule_lhs'} eq "S" && 
+	     ($$RULE{'rule_lhs'} eq "S" &&
 	      $$RULE{'rule_rhs'}[0] eq "S" &&
 	      $$RULE{'rule_rhs'}[1] eq "X") ||
-	     ($$RULE{'rule_lhs'} eq "Q" && 
+	     ($$RULE{'rule_lhs'} eq "Q" &&
 	      $$RULE{'rule_rhs'}[0] eq "Q")) {
 	    unshift @{$GLUE_RULE{'spans'}},$$RULE{'spans'}[1];
 	    push @{$GLUE_RULE{'rule_rhs'}}, $$RULE{'rule_rhs'}[1];
@@ -883,17 +883,17 @@ sub hs_process {
 	    last;
 	}
     }
-    unshift @{$DERIVATION}, \%GLUE_RULE;	
+    unshift @{$DERIVATION}, \%GLUE_RULE;
     $$STATS{'glue-rule'} += $x;
-    
+
     # create chart
     my %CHART;
     foreach my $RULE (@{$DERIVATION}) {
 	$CHART{$$RULE{'start'}}{$$RULE{'end'}} = $RULE;
     }
-    
+
     # compute depth
-    &hs_compute_depth(1,$max,0,\%CHART);	
+    &hs_compute_depth(1,$max,0,\%CHART);
     my $max_depth = 0;
     foreach my $RULE (@{$DERIVATION}) {
 	next unless defined($$RULE{'depth'}); # better: delete offending rule S -> S <s>
@@ -901,17 +901,17 @@ sub hs_process {
     }
     &hs_recompute_depth(1,$max,\%CHART,$max_depth);
     $$STATS{'depth'} += $max_depth;
-    
+
     # build matrix of divs
-    
+
     my @MATRIX;
     &hs_create_out_span(1,$max,\%CHART,\@MATRIX);
     print OUTPUT_TREE &hs_output_matrix($sentence,\@MATRIX,$max_depth);
-    
+
     my @MATRIX_IN;
     &hs_create_in_span(1,$max,\%CHART,\@MATRIX_IN);
     print INPUT_TREE &hs_output_matrix($sentence,\@MATRIX_IN,$max_depth);
-    
+
     # number rules and get their children
     my $id = 0;
     foreach my $RULE (@{$DERIVATION}) {
@@ -920,10 +920,10 @@ sub hs_process {
 	$$RULE{'id'} = $id++;
     }
     &hs_get_children(1,$max,\%CHART);
-    
+
     foreach my $RULE (@{$DERIVATION}) {
 	next unless defined($$RULE{'start_div'}); # better: delete offending rule S -> S <s>
-	
+
 	print NODE $sentence." ";
 	print NODE $$RULE{'depth'}." ";
 	print NODE $$RULE{'start_div'}." ".$$RULE{'end_div'}." ";
@@ -963,11 +963,11 @@ sub hs_output_matrix {
 		$class = "]";
 	    }
 	    elsif ($OPEN[$d]) {
-		$class = "-";				
+		$class = "-";
 	    }
 	    $out .= $class;
 	}
-	$out .= "\t";		
+	$out .= "\t";
 	$out .= $$SPAN{'lhs'} if defined($$SPAN{'lhs'});
 	$out .= "\t";
 	$out .= $$SPAN{'rhs'} if defined($$SPAN{'rhs'});
@@ -984,9 +984,9 @@ sub hs_output_matrix {
 
 sub hs_rule_type {
     my ($RULE) = @_;
-    
+
     my $type = "";
-    
+
     # output side
     my %NT;
     my $total_word_count = 0;
@@ -998,7 +998,7 @@ sub hs_rule_type {
 	    $word_count = 0;
 	    my $nt = chr(97+$nt_count++);
 	    $NT{$$RULE{'alignment'}{$i}} = $nt;
-	    $type .= $nt;			
+	    $type .= $nt;
 	}
 	else {
 	    $word_count++;
@@ -1006,9 +1006,9 @@ sub hs_rule_type {
 	}
     }
     $type .= $word_count if $word_count > 0;
-    
+
     $type .= ":".$total_word_count.":".$nt_count.":";
-    
+
     # input side
     $word_count = 0;
     $total_word_count = 0;
@@ -1039,7 +1039,7 @@ sub hs_compute_depth {
     my $RULE = $$CHART{$start}{$end};
 
     $$RULE{'depth'} = $depth;
-    
+
     for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
 	# non-terminals
 	if (defined($$RULE{'alignment'}{$i})) {
@@ -1057,7 +1057,7 @@ sub hs_recompute_depth {
       return 0;
     }
     my $RULE = $$CHART{$start}{$end};
-    
+
     my $min_sub_depth = $max_depth+1;
     for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
 	# non-terminals
@@ -1079,10 +1079,10 @@ sub hs_get_children {
       return -1;
     }
     my $RULE = $$CHART{$start}{$end};
-    
+
     my @CHILDREN = ();
     $$RULE{'children'} = \@CHILDREN;
-    
+
     for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
 	# non-terminals
 	if (defined($$RULE{'alignment'}{$i})) {
@@ -1091,7 +1091,7 @@ sub hs_get_children {
 	    push @CHILDREN, $child unless $child == -1;
 	}
     }
-    return $$RULE{'id'};	
+    return $$RULE{'id'};
 }
 
 # create the span annotation for an output sentence
@@ -1102,7 +1102,7 @@ sub hs_create_out_span {
       return;
     }
     my $RULE = $$CHART{$start}{$end};
-    
+
     my %SPAN;
     $SPAN{'start'} = $start;
     $SPAN{'end'} = $end;
@@ -1130,7 +1130,7 @@ sub hs_create_out_span {
 		$SPAN{'end'} = $end;
 		$SPAN{'depth'} = $$RULE{'depth'};
 		push @{$MATRIX},\%SPAN;
-		$THIS_SPAN = \%SPAN;								
+		$THIS_SPAN = \%SPAN;
 	    }
 	    $$THIS_SPAN{'rhs'} .= " " if defined($$THIS_SPAN{'rhs'});
 	    $$THIS_SPAN{'rhs'} .= $$RULE{"rule_rhs"}[$i];
@@ -1150,7 +1150,7 @@ sub hs_create_in_span {
       return;
     }
     my $RULE = $$CHART{$start}{$end};
-    
+
     my %SPAN;
     $SPAN{'start'} = $start;
     $SPAN{'end'} = $end;
@@ -1160,7 +1160,7 @@ sub hs_create_in_span {
     push @{$MATRIX},\%SPAN;
     $$RULE{'start_div_in'} = $#{$MATRIX};
     my $THIS_SPAN = \%SPAN;
-    
+
     my $terminal = 1;
     # in input order ...
     for(my $i=0;$i<scalar(@{$$RULE{'spans'}});$i++) {
@@ -1177,7 +1177,7 @@ sub hs_create_in_span {
 		$SPAN{'end'} = $end;
 		$SPAN{'depth'} = $$RULE{'depth'};
 		push @{$MATRIX},\%SPAN;
-		$THIS_SPAN = \%SPAN;								
+		$THIS_SPAN = \%SPAN;
 	    }
 	    $$THIS_SPAN{'rhs'} .= " " if defined($$THIS_SPAN{'rhs'});
 	    $$THIS_SPAN{'rhs'} .= $$SUBSPAN{'word'};
@@ -1204,7 +1204,7 @@ sub process_search_graph {
       $heuristic_rule_score = $rule_score; # hmmmm....
     }
     else {
-      die("ERROR: buggy search graph line: $_"); 
+      die("ERROR: buggy search graph line: $_");
     }
     chop($alignment) if $alignment;
     chop($children) if $children;

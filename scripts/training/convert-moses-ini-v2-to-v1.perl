@@ -94,7 +94,7 @@ class moses2_to_ini(object):
 
 		# second, match feature/functions attributes to [weight] section values
 		for i, line in [(i, line.strip()) for i, line in enumerate(lines)
-						if line.strip() and not line.strip().startswith('#')]: 
+						if line.strip() and not line.strip().startswith('#')]:
 
 			# add "feature" to assist creating tmpdict for feature/functions
 			line = 'feature=%s' % line
@@ -104,7 +104,7 @@ class moses2_to_ini(object):
 			if tmpdict.get('name') not in self._config:
 				raise RuntimeError('malformed moses.ini v2 file')
 
-			for key, value in [(key.strip(), value.strip()) for key, value 
+			for key, value in [(key.strip(), value.strip()) for key, value
 								in tmpdict.items() if key.strip() != 'name']:
 
 				self._config[tmpdict['name']][key] = value
@@ -195,7 +195,7 @@ def makedir(path, mode=0o777):
 def get_args():
 	'''Parse command-line arguments
 
-	Uses the API compatibility between the legacy 
+	Uses the API compatibility between the legacy
 	argparse.OptionParser and its replacement argparse.ArgumentParser
 	for functional equivelancy and nearly identical help prompt.
 	'''

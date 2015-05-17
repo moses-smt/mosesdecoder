@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -6,7 +6,7 @@ use strict;
 $|++;
 
 while(<STDIN>) {
-  s/ \|\d+\-\d+\| / /g; 
-  s/ \|\d+\-\d+\|$//; 
+  s/ \|\d+\-\d+\| / /g;
+  s/ \|\d+\-\d+\|$//;
   print $_;
 }

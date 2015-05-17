@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -12,7 +12,7 @@ if (scalar(@ARGV) < 4) {
 } else {
 
     my ($SOURCE,$TARGET,$ALIGNMENT,$OUT) = @ARGV;
-    
+
     &get_lexical($SOURCE,$TARGET,$ALIGNMENT,$OUT,0);
 
 }

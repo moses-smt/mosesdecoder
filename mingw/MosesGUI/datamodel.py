@@ -248,7 +248,7 @@ Click "Cancel" to do nothing.'''
                             msg = 'COPY %.0f%%' % (
                                 download_size * 100.0 / total_size)
                         else:
-                            msg = 'COPY %d MB' % (download_size/1048576)
+                            msg = 'COPY %d MB' % (download_size / 1048576)
                         if msg != lastMsg:
                             updateRecord({'status': msg})
                             lastMsg = msg
@@ -289,7 +289,7 @@ Click "Cancel" to do nothing.'''
                             msg = 'DOWNLOAD %.0f%%' % (
                                 download_size * 100.0 / total_size)
                         else:
-                            msg = 'DOWNLOAD %d MB' % (download_size/1048576)
+                            msg = 'DOWNLOAD %d MB' % (download_size / 1048576)
                         if msg != lastMsg:
                             updateRecord({'status': msg})
                             lastMsg = msg
@@ -359,7 +359,7 @@ Click "Cancel" to do nothing.'''
                                     download_size * 100.0 / total_size)
                             else:
                                 msg = 'UNZIP %d MB' % (
-                                    download_size/1048576)
+                                    download_size / 1048576)
                             if msg != lastMsg:
                                 updateRecord({'status': msg})
                                 lastMsg = msg

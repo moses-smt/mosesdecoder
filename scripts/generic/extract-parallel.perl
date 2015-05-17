@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # example
 #  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation --GZOutput
@@ -94,7 +94,7 @@ if ($numParallel > 1)
 	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $target $TMPDIR/target.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
-	
+
 	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $source $TMPDIR/source.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
@@ -108,7 +108,7 @@ if ($numParallel > 1)
     $pid = RunFork($cmd);
     push(@children, $pid);
   }
-	
+
 	# wait for everything is finished
 	foreach (@children) {
 		waitpid($_, 0);
@@ -139,7 +139,7 @@ else
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
-  
+
   if ($pid == 0)
   { # child
     my $numStr = NumStr($i);
@@ -251,8 +251,8 @@ if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
   foreach my $filenamePhraseOrientationPriors (@orientationPriorsCountFiles) {
     if (-f $filenamePhraseOrientationPriors) {
       open my $infilePhraseOrientationPriors, '<', $filenamePhraseOrientationPriors or die "cannot open $filenamePhraseOrientationPriors: $!";
-      while (my $line = <$infilePhraseOrientationPriors>) { 
-        print $line; 
+      while (my $line = <$infilePhraseOrientationPriors>) {
+        print $line;
         my ($key, $value) = split / /, $line;
         $priorCounts{$key} += $value;
       }
@@ -281,7 +281,7 @@ sub RunFork($)
   my $cmd = shift;
 
   my $pid = fork();
-  
+
   if ($pid == 0)
   { # child
     print STDERR $cmd;

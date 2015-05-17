@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -52,13 +52,13 @@ sub init(){
 }
 
 sub VersionMessage(){
-    print STDERR "moses-virtual version 1.0\n"; 
+    print STDERR "moses-virtual version 1.0\n";
     exit;
 }
 
 sub HelpMessage(){
-    print STDERR "moses-virtual simulates the standard behavior of Moses\n"; 
-    print STDERR "USAGE: moses-virtual\n"; 
+    print STDERR "moses-virtual simulates the standard behavior of Moses\n";
+    print STDERR "USAGE: moses-virtual\n";
     print_parameters(1);
     exit;
 }

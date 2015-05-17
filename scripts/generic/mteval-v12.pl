@@ -1,5 +1,5 @@
-#!/usr/bin/env perl 
- 
+#!/usr/bin/env perl
+
 use warnings;
 use strict;
 use utf8;
@@ -7,7 +7,7 @@ use Encode;
 
 binmode STDOUT, ":utf8";
 binmode STDERR, ":utf8";
- 
+
 #################################
 # History:
 #
@@ -116,7 +116,7 @@ my $usage = "\n\nUsage: $0 [-h] -r <ref_file> -s <src_file> -t <tst_file>\n\n".
     "  -e enclose non-ASCII characters between spaces\n".
     "  -h prints this help message to STDOUT\n".
     "\n";
- 
+
 use vars qw ($opt_r $opt_s $opt_t $opt_d $opt_h $opt_b $opt_n $opt_c $opt_x $opt_e);
 use Getopt::Std;
 getopts ('r:s:t:d:hbncx:e');
@@ -133,11 +133,11 @@ my $METHOD = "BOTH";
 if (defined $opt_b) { $METHOD = "BLEU"; }
 if (defined $opt_n) { $METHOD = "NIST"; }
 my $method;
- 
+
 my ($ref_file) = $opt_r;
 my ($src_file) = $opt_s;
 my ($tst_file) = $opt_t;
- 
+
 ######
 # Global variables
 my ($src_lang, $tgt_lang, @tst_sys, @ref_sys); # evaluation parameters
@@ -145,30 +145,30 @@ my (%tst_data, %ref_data); # the data -- with structure:  {system}{document}[seg
 my ($src_id, $ref_id, $tst_id); # unique identifiers for ref and tst translation sets
 my %eval_docs;     # document information for the evaluation data set
 my %ngram_info;    # the information obtained from (the last word in) the ngram
- 
+
 ######
 # Get source document ID's
 ($src_id) = get_source_info ($src_file);
- 
+
 ######
 # Get reference translations
 ($ref_id) = get_MT_data (\%ref_data, "RefSet", $ref_file);
- 
+
 compute_ngram_info ();
- 
+
 ######
 # Get translations to evaluate
 ($tst_id) = get_MT_data (\%tst_data, "TstSet", $tst_file);
- 
+
 ######
 # Check data for completeness and correctness
 check_MT_data ();
- 
+
 ######
 #
 my %NISTmt = ();
 my %BLEUmt = ();
- 
+
 ######
 # Evaluate
 print "  Evaluation of $src_lang-to-$tgt_lang translation using:\n";
@@ -179,7 +179,7 @@ foreach my $doc (sort keys %eval_docs) {
 print "    src set \"$src_id\" (", scalar keys %eval_docs, " docs, $cum_seg segs)\n";
 print "    ref set \"$ref_id\" (", scalar keys %ref_data, " refs)\n";
 print "    tst set \"$tst_id\" (", scalar keys %tst_data, " systems)\n\n";
- 
+
 foreach my $sys (sort @tst_sys) {
     for (my $n=1; $n<=$max_Ngram; $n++) {
         $NISTmt{$n}{$sys}{cum} = 0;
@@ -187,7 +187,7 @@ foreach my $sys (sort @tst_sys) {
         $BLEUmt{$n}{$sys}{cum} = 0;
         $BLEUmt{$n}{$sys}{ind} = 0;
     }
- 
+
     if (($METHOD eq "BOTH") || ($METHOD eq "NIST")) {
         $method="NIST";
         score_system ($sys, %NISTmt);
@@ -197,44 +197,44 @@ foreach my $sys (sort @tst_sys) {
         score_system ($sys, %BLEUmt);
     }
 }
- 
+
 ######
 printout_report ();
- 
+
 ($date, $time) = date_time_stamp();
 print "MT evaluation scorer ended on $date at $time\n";
- 
+
 exit 0;
- 
+
 #################################
- 
+
 sub get_source_info {
- 
+
     my ($file) = @_;
     my ($name, $id, $src, $doc);
     my ($data, $tag, $span);
-     
- 
+
+
 #read data from file
     open (FILE, $file) or die "\nUnable to open translation data file '$file'", $usage;
     binmode FILE, ":utf8";
     $data .= $_ while <FILE>;
     close (FILE);
- 
+
 #get source set info
     die "\n\nFATAL INPUT ERROR:  no 'src_set' tag in src_file '$file'\n\n"
         unless ($tag, $span, $data) = extract_sgml_tag_and_span ("SrcSet", $data);
- 
+
     die "\n\nFATAL INPUT ERROR:  no tag attribute '$name' in file '$file'\n\n"
         unless ($id) = extract_sgml_tag_attribute ($name="SetID", $tag);
- 
+
     die "\n\nFATAL INPUT ERROR:  no tag attribute '$name' in file '$file'\n\n"
         unless ($src) = extract_sgml_tag_attribute ($name="SrcLang", $tag);
     die "\n\nFATAL INPUT ERROR:  $name ('$src') in file '$file' inconsistent\n"
         ."                    with $name in previous input data ('$src_lang')\n\n"
             unless (not defined $src_lang or $src eq $src_lang);
     $src_lang = $src;
- 
+
 #get doc info -- ID and # of segs
     $data = $span;
     while (($tag, $span, $data) = extract_sgml_tag_and_span ("Doc", $data)) {
@@ -254,51 +254,51 @@ sub get_source_info {
         unless keys %eval_docs > 0;
     return $id;
 }
- 
+
 #################################
- 
+
 sub get_MT_data {
- 
+
     my ($docs, $set_tag, $file) = @_;
     my ($name, $id, $src, $tgt, $sys, $doc);
     my ($tag, $span, $data);
- 
+
 #read data from file
     open (FILE, $file) or die "\nUnable to open translation data file '$file'", $usage;
     binmode FILE, ":utf8";
     $data .= $_ while <FILE>;
     close (FILE);
- 
+
 #get tag info
     while (($tag, $span, $data) = extract_sgml_tag_and_span ($set_tag, $data)) {
         die "\n\nFATAL INPUT ERROR:  no tag attribute '$name' in file '$file'\n\n" unless
             ($id) = extract_sgml_tag_attribute ($name="SetID", $tag);
- 
+
         die "\n\nFATAL INPUT ERROR:  no tag attribute '$name' in file '$file'\n\n" unless
             ($src) = extract_sgml_tag_attribute ($name="SrcLang", $tag);
         die "\n\nFATAL INPUT ERROR:  $name ('$src') in file '$file' inconsistent\n"
             ."                    with $name of source ('$src_lang')\n\n"
                 unless $src eq $src_lang;
-         
+
         die "\n\nFATAL INPUT ERROR:  no tag attribute '$name' in file '$file'\n\n" unless
             ($tgt) = extract_sgml_tag_attribute ($name="TrgLang", $tag);
         die "\n\nFATAL INPUT ERROR:  $name ('$tgt') in file '$file' inconsistent\n"
             ."                    with $name of the evaluation ('$tgt_lang')\n\n"
                 unless (not defined $tgt_lang or $tgt eq $tgt_lang);
         $tgt_lang = $tgt;
- 
+
         my $mtdata = $span;
         while (($tag, $span, $mtdata) = extract_sgml_tag_and_span ("Doc", $mtdata)) {
             die "\n\nFATAL INPUT ERROR:  no tag attribute '$name' in file '$file'\n\n" unless
                 (my $sys) = extract_sgml_tag_attribute ($name="SysID", $tag);
-             
+
             die "\n\nFATAL INPUT ERROR:  no tag attribute '$name' in file '$file'\n\n" unless
                 $doc = extract_sgml_tag_attribute ($name="DocID", $tag);
-             
+
             die "\n\nFATAL INPUT ERROR:  document '$doc' for system '$sys' in file '$file'\n"
                 ."                    previously loaded from file '$docs->{$sys}{$doc}{FILE}'\n\n"
                     unless (not defined $docs->{$sys}{$doc});
- 
+
             $span =~ s/[\s\n\r]+/ /g;  # concatenate records
             my $jseg=0, my $seg_data = $span;
             while (($tag, $span, $seg_data) = extract_sgml_tag_and_span ("Seg", $seg_data)) {
@@ -311,14 +311,14 @@ sub get_MT_data {
     }
     return $id;
 }
- 
+
 #################################
- 
+
 sub check_MT_data {
- 
+
     @tst_sys = sort keys %tst_data;
     @ref_sys = sort keys %ref_data;
- 
+
 #every evaluation document must be represented for every system and every reference
     foreach my $doc (sort keys %eval_docs) {
         my $nseg_source = @{$eval_docs{$doc}{SEGS}};
@@ -331,7 +331,7 @@ sub check_MT_data {
                 ."              the source document contains $nseg_source segments.\n\n"
                     unless $nseg == $nseg_source;
         }
- 
+
         foreach my $sys (@ref_sys) {
             die "\n\nFATAL ERROR:  no document '$doc' for reference '$sys'\n\n"
                 unless defined $ref_data{$sys}{$doc};
@@ -343,15 +343,15 @@ sub check_MT_data {
         }
     }
 }
- 
+
 #################################
- 
+
 sub compute_ngram_info {
- 
+
     my ($ref, $doc, $seg);
     my (@wrds, $tot_wrds, %ngrams, $ngram, $mgram);
     my (%ngram_count, @tot_ngrams);
- 
+
     foreach $ref (keys %ref_data) {
         foreach $doc (keys %{$ref_data{$ref}}) {
             foreach $seg (@{$ref_data{$ref}{$doc}{SEGS}}) {
@@ -364,7 +364,7 @@ sub compute_ngram_info {
             }
         }
     }
-     
+
     foreach $ngram (keys %ngram_count) {
         @wrds = split / /, $ngram;
         pop @wrds, $mgram = join " ", @wrds;
@@ -378,24 +378,24 @@ sub compute_ngram_info {
         }
     }
 }
- 
+
 #################################
- 
+
 sub score_system {
- 
+
     my ($sys, $ref, $doc, %SCOREmt);
     ($sys, %SCOREmt) = @_;
     my ($shortest_ref_length, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info);
     my ($cum_ref_length, @cum_match, @cum_tst_cnt, @cum_ref_cnt, @cum_tst_info, @cum_ref_info);
- 
+
     $cum_ref_length = 0;
     for (my $j=1; $j<=$max_Ngram; $j++) {
         $cum_match[$j] = $cum_tst_cnt[$j] = $cum_ref_cnt[$j] = $cum_tst_info[$j] = $cum_ref_info[$j] = 0;
     }
-         
+
     foreach $doc (sort keys %eval_docs) {
         ($shortest_ref_length, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info) = score_document ($sys, $doc);
- 
+
 #output document summary score
         if (($detail >= 1 ) && ($METHOD eq "NIST"))  {
             my %DOCmt = ();
@@ -409,7 +409,7 @@ sub score_system {
             bleu_score($shortest_ref_length, $match_cnt, $tst_cnt, $sys, %DOCmt),
             scalar @{$tst_data{$sys}{$doc}{SEGS}}, $tst_cnt->[1];
         }
-         
+
         $cum_ref_length += $shortest_ref_length;
         for (my $j=1; $j<=$max_Ngram; $j++) {
             $cum_match[$j] += $match_cnt->[$j];
@@ -422,7 +422,7 @@ sub score_system {
                     if (defined $opt_x and $opt_x eq "document info");
         }
     }
- 
+
 #x #output system summary score
 #x    printf "$method score = %.4f for system \"$sys\"\n",
 #x        $method eq "BLEU" ?  bleu_score($cum_ref_length, \@cum_match, \@cum_tst_cnt) :
@@ -434,21 +434,21 @@ sub score_system {
         nist_score (scalar @ref_sys, \@cum_match, \@cum_tst_cnt, \@cum_ref_cnt, \@cum_tst_info, \@cum_ref_info, $sys, %SCOREmt);
     }
 }
- 
+
 #################################
- 
+
 sub score_document {
- 
+
     my ($sys, $ref, $doc);
     ($sys, $doc) = @_;
     my ($shortest_ref_length, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info);
     my ($cum_ref_length, @cum_match, @cum_tst_cnt, @cum_ref_cnt, @cum_tst_info, @cum_ref_info);
- 
+
     $cum_ref_length = 0;
     for (my $j=1; $j<=$max_Ngram; $j++) {
         $cum_match[$j] = $cum_tst_cnt[$j] = $cum_ref_cnt[$j] = $cum_tst_info[$j] = $cum_ref_info[$j] = 0;
     }
-         
+
 #score each segment
     for (my $jseg=0; $jseg<@{$tst_data{$sys}{$doc}{SEGS}}; $jseg++) {
         my @ref_segments = ();
@@ -461,7 +461,7 @@ sub score_document {
             if $detail >= 3;
         ($shortest_ref_length, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info) =
             score_segment ($tst_data{$sys}{$doc}{SEGS}[$jseg], @ref_segments);
- 
+
 #output segment summary score
 #x      printf "$method score = %.4f for system \"$sys\" on segment %d of document \"$doc\" (%d words)\n",
 #x            $method eq "BLEU" ?  bleu_score($shortest_ref_length, $match_cnt, $tst_cnt) :
@@ -478,8 +478,8 @@ sub score_document {
             printf "  $method score using 5-grams = %.4f for system \"$sys\" on segment %d of document \"$doc\" (%d words)\n",
             nist_score (scalar @ref_sys, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info, $sys, %DOCmt), $jseg+1, $tst_cnt->[1];
         }
- 
- 
+
+
         $cum_ref_length += $shortest_ref_length;
         for (my $j=1; $j<=$max_Ngram; $j++) {
             $cum_match[$j] += $match_cnt->[$j];
@@ -491,29 +491,29 @@ sub score_document {
     }
     return ($cum_ref_length, [@cum_match], [@cum_tst_cnt], [@cum_ref_cnt], [@cum_tst_info], [@cum_ref_info]);
 }
- 
+
 #################################
- 
+
 sub score_segment {
- 
+
     my ($tst_seg, @ref_segs) = @_;
     my (@tst_wrds, %tst_ngrams, @match_count, @tst_count, @tst_info);
     my (@ref_wrds, $ref_seg, %ref_ngrams, %ref_ngrams_max, @ref_count, @ref_info);
     my ($ngram);
     my (@nwrds_ref);
     my $shortest_ref_length;
- 
+
     for (my $j=1; $j<= $max_Ngram; $j++) {
         $match_count[$j] = $tst_count[$j] = $ref_count[$j] = $tst_info[$j] = $ref_info[$j] = 0;
     }
- 
+
 # get the ngram counts for the test segment
     @tst_wrds = split /\s+/, $tst_seg;
     %tst_ngrams = %{Words2Ngrams (@tst_wrds)};
     for (my $j=1; $j<=$max_Ngram; $j++) { # compute ngram counts
         $tst_count[$j]  = $j<=@tst_wrds ? (@tst_wrds - $j + 1) : 0;
     }
- 
+
 # get the ngram counts for the reference segments
     foreach $ref_seg (@ref_segs) {
         @ref_wrds = split /\s+/, $ref_seg;
@@ -531,7 +531,7 @@ sub score_segment {
         $shortest_ref_length = scalar @ref_wrds # find the shortest reference segment
             if (not defined $shortest_ref_length) or @ref_wrds < $shortest_ref_length;
     }
- 
+
 # accumulate scoring stats for tst_seg ngrams that match ref_seg ngrams
     foreach $ngram (keys %tst_ngrams) {
         next unless defined $ref_ngrams_max{$ngram};
@@ -541,16 +541,16 @@ sub score_segment {
         printf "%.2f info for each of $count %d-grams = '%s'\n", $ngram_info{$ngram}, scalar @wrds, $ngram
             if $detail >= 3;
     }
- 
+
     return ($shortest_ref_length, [@match_count], [@tst_count], [@ref_count], [@tst_info], [@ref_info]);
 }
- 
+
 #################################
-                                                                                                                                                    
+
 sub bleu_score {
- 
+
     my ($shortest_ref_length, $matching_ngrams, $tst_ngrams, $sys, %SCOREmt) = @_;
- 
+
     my $score = 0;
     my $iscore = 0;
     my $len_score = min (0, 1-$shortest_ref_length/$tst_ngrams->[1]);
@@ -570,33 +570,33 @@ sub bleu_score {
     }
     return $SCOREmt{4}{$sys}{cum};
 }
- 
+
 #################################
- 
+
 sub nist_score {
- 
+
     my ($nsys, $matching_ngrams, $tst_ngrams, $ref_ngrams, $tst_info, $ref_info, $sys, %SCOREmt) = @_;
- 
+
     my $score = 0;
     my $iscore = 0;
- 
- 
+
+
     for (my $n=1; $n<=$max_Ngram; $n++) {
         $score += $tst_info->[$n]/max($tst_ngrams->[$n],1);
         $SCOREmt{$n}{$sys}{cum} = $score * nist_length_penalty($tst_ngrams->[1]/($ref_ngrams->[1]/$nsys));
- 
+
         $iscore = $tst_info->[$n]/max($tst_ngrams->[$n],1);
         $SCOREmt{$n}{$sys}{ind} = $iscore * nist_length_penalty($tst_ngrams->[1]/($ref_ngrams->[1]/$nsys));
     }
     return $SCOREmt{5}{$sys}{cum};
 }
- 
+
 #################################
- 
+
 sub Words2Ngrams { #convert a string of words to an Ngram count hash
- 
+
     my %count = ();
- 
+
     for (; @_; shift) {
         my ($j, $ngram, $word);
         for ($j=0; $j<$max_Ngram and defined($word=$_[$j]); $j++) {
@@ -608,7 +608,7 @@ sub Words2Ngrams { #convert a string of words to an Ngram count hash
 }
 
 #################################
- 
+
 sub NormalizeText {
     my ($norm_text) = @_;
 
@@ -631,18 +631,18 @@ sub NormalizeText {
 		$norm_text =~ s/(\p{P})(\P{N})/ $1 $2/g;
 
 		$norm_text =~ s/(\p{S})/ $1 /g; # tokenize symbols
-		
+
     $norm_text =~ s/\p{Z}+/ /g; # one space only between words
     $norm_text =~ s/^\p{Z}+//; # no leading space
     $norm_text =~ s/\p{Z}+$//; # no trailing space
 
     return $norm_text;
 }
- 
+
 #################################
- 
+
 sub nist_length_penalty {
- 
+
     my ($ratio) = @_;
     return 1 if $ratio >= 1;
     return 0 if $ratio <= 0;
@@ -651,69 +651,69 @@ sub nist_length_penalty {
     my $beta = -log($score_x)/log($ratio_x)/log($ratio_x);
     return exp (-$beta*log($ratio)*log($ratio));
 }
- 
+
 #################################
- 
+
 sub date_time_stamp {
- 
+
     my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
     my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
     my ($date, $time);
-                                                                                                                                                    
+
     $time = sprintf "%2.2d:%2.2d:%2.2d", $hour, $min, $sec;
     $date = sprintf "%4.4s %3.3s %s", 1900+$year, $months[$mon], $mday;
     return ($date, $time);
 }
- 
+
 #################################
- 
+
 sub extract_sgml_tag_and_span {
-     
+
     my ($name, $data) = @_;
-     
+
     ($data =~ m|<$name\s*([^>]*)>(.*?)</$name\s*>(.*)|si) ? ($1, $2, $3) : ();
 }
- 
+
 #################################
- 
+
 sub extract_sgml_tag_attribute {
- 
+
     my ($name, $data) = @_;
- 
+
     ($data =~ m|$name\s*=\s*\"([^\"]*)\"|si) ? ($1) : ();
 }
- 
+
 #################################
- 
+
 sub max {
- 
+
     my ($max, $next);
- 
+
     return unless defined ($max=pop);
     while (defined ($next=pop)) {
         $max = $next if $next > $max;
     }
     return $max;
 }
- 
+
 #################################
- 
+
 sub min {
- 
+
     my ($min, $next);
- 
+
     return unless defined ($min=pop);
     while (defined ($next=pop)) {
         $min = $next if $next < $min;
     }
     return $min;
 }
- 
+
 #################################
- 
+
 sub printout_report
 {
-  
+
     if ( $METHOD eq "BOTH" ) {
         foreach my $sys (sort @tst_sys) {
             printf "NIST score = %2.4f  BLEU score = %.4f for system \"$sys\"\n",$NISTmt{5}{$sys}{cum},$BLEUmt{4}{$sys}{cum};
@@ -727,13 +727,13 @@ sub printout_report
             printf "\nBLEU score = %.4f for system \"$sys\"\n",$BLEUmt{4}{$sys}{cum};
         }
     }
-     
-  
+
+
     printf "\n# ------------------------------------------------------------------------\n\n";
     printf "Individual N-gram scoring\n";
     printf "        1-gram   2-gram   3-gram   4-gram   5-gram   6-gram   7-gram   8-gram   9-gram\n";
     printf "        ------   ------   ------   ------   ------   ------   ------   ------   ------\n";
-                                                                                                                                                    
+
     if (( $METHOD eq "BOTH" ) || ($METHOD eq "NIST")) {
         foreach my $sys (sort @tst_sys) {
             printf " NIST:";
@@ -744,7 +744,7 @@ sub printout_report
         }
         printf "\n";
     }
-     
+
     if (( $METHOD eq "BOTH" ) || ($METHOD eq "BLEU")) {
         foreach my $sys (sort @tst_sys) {
             printf " BLEU:";
@@ -754,12 +754,12 @@ sub printout_report
            printf " \"$sys\"\n";
         }
     }
-     
+
     printf "\n# ------------------------------------------------------------------------\n";
     printf "Cumulative N-gram scoring\n";
     printf "        1-gram   2-gram   3-gram   4-gram   5-gram   6-gram   7-gram   8-gram   9-gram\n";
     printf "        ------   ------   ------   ------   ------   ------   ------   ------   ------\n";
-  
+
     if (( $METHOD eq "BOTH" ) || ($METHOD eq "NIST")) {
         foreach my $sys (sort @tst_sys) {
             printf " NIST:";
@@ -770,8 +770,8 @@ sub printout_report
         }
     }
     printf "\n";
-                                                                                                                                                    
-  
+
+
     if (( $METHOD eq "BOTH" ) || ($METHOD eq "BLEU")) {
         foreach my $sys (sort @tst_sys) {
             printf " BLEU:";

@@ -39,7 +39,7 @@ new Ajax.Request('?analysis=sgviz_data'
     method: "post"
   });
 </script></body></html>
-<?php 
+<?php
 // read graph
 //$file = get_current_analysis_filename("basic","search-graph")."/graph.$sentence";
 //$handle = fopen($file,"r");
@@ -55,7 +55,7 @@ function sgviz_data($sentence) {
   $file = get_current_analysis_filename("basic","search-graph")."/graph.$sentence";
 
   $handle = fopen($file,"r");
-  while (($line = fgets($handle)) !== false) { 
+  while (($line = fgets($handle)) !== false) {
     $e = explode("\t",addslashes(chop($line)));
     $edge[$e[0]] = array($e[1],$e[2],$e[3],$e[4],$e[5],$e[6],$e[7],$e[8],$e[9],$e[10]);
   }

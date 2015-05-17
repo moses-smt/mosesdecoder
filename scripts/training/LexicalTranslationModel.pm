@@ -25,16 +25,16 @@ sub open_compressed {
     # add extensions, if necessary
     $file = $file.".bz2" if ! -e $file && -e $file.".bz2";
     $file = $file.".gz"  if ! -e $file && -e $file.".gz";
-   
+
     # pipe zipped, if necessary
     return "$BZCAT $file|" if $file =~ /\.bz2$/;
-    return "$ZCAT $file|"  if $file =~ /\.gz$/;    
+    return "$ZCAT $file|"  if $file =~ /\.gz$/;
     return $file;
 }
 
 sub fix_spaces {
         my ($in) = @_;
-        $$in =~ s/[ \t]+/ /g; $$in =~ s/[ \t]$//; $$in =~ s/^[ \t]//;    
+        $$in =~ s/[ \t]+/ /g; $$in =~ s/[ \t]$//; $$in =~ s/^[ \t]//;
 }
 
 sub get_lexical {
@@ -112,7 +112,7 @@ sub get_lexical_counts {
 		# local counts
 		$FOREIGN_ALIGNED{$fi}+=$iw;
 		$ENGLISH_ALIGNED{$ei}+=$iw;
-		
+
 		# global counts
 		$$WORD_TRANSLATION{$FOREIGN[$fi]}{$ENGLISH[$ei]}+=$iw;
 		$$TOTAL_FOREIGN{$FOREIGN[$fi]}+=$iw;

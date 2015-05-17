@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 # convert a phrase-table with alignment in Moses' dead-end format
