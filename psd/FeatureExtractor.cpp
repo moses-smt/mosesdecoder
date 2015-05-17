@@ -373,6 +373,7 @@ void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Feat
   size_t sizeOfSpan = span.size();
   for (int i=0; i < sizeOfSpan; i++) {
     //if( span[i].compare(parent)) was for hiero
+
     if(!regex_match (span[i],parentRegex))
       {
         if (indicString.size()>0)
@@ -402,8 +403,8 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
   size_t sizeOfSpan = span.size();
   for (int i=0; i < sizeOfSpan; i++) {
     //if( span[i].compare(parent) ) was for hiero
-    if(!regex_match (span[i],parentRegex))
-    {
+    //if(!regex_match (span[i],parentRegex))
+    //{
         //found = span[i].find(nonTerm); was for hiero
         //if(found != string::npos)
     	if(regex_search(span[i],matchedNonTerm,nonTermDigitRegex))
@@ -427,7 +428,7 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
             {indicString += "_";}
         indicString += span[i];}
     }
-  }
+  //}
   fc->AddFeature("p^" + indicString);
 }
 
