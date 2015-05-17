@@ -23,7 +23,9 @@ Event.simulateMouse = function(element, eventName) {
     options.buttons, options.pointerX, options.pointerY, options.pointerX, options.pointerY,
     options.ctrlKey, options.altKey, options.shiftKey, options.metaKey, 0, $(element));
 
-  if(this.mark) Element.remove(this.mark);
+  if(this.mark) {
+    Element.remove(this.mark);
+  }
   this.mark = document.createElement('div');
   this.mark.appendChild(document.createTextNode(" "));
   document.body.appendChild(this.mark);
@@ -35,8 +37,9 @@ Event.simulateMouse = function(element, eventName) {
   this.mark.style.borderTop = "1px solid red;";
   this.mark.style.borderLeft = "1px solid red;";
 
-  if(this.step)
+  if(this.step) {
     alert('['+new Date().getTime().toString()+'] '+eventName+'/'+Test.Unit.inspect(options));
+  }
 
   $(element).dispatchEvent(oEvent);
 };
@@ -62,7 +65,8 @@ Event.simulateKey = function(element, eventName) {
 };
 
 Event.simulateKeys = function(element, command) {
-  for(var i=0; i<command.length; i++) {
+  var i;
+  for(i=0; i<command.length; i++) {
     Event.simulateKey(element,'keypress',{charCode:command.charCodeAt(i)});
   }
 };
@@ -82,7 +86,9 @@ Test.Unit.Logger.prototype = {
     }
   },
   start: function(testName) {
-    if (!this.log) return;
+    if (!this.log) {
+      return;
+    }
     this.testName = testName;
     this.lastLogLine = document.createElement('tr');
     this.statusCell = document.createElement('td');
@@ -96,18 +102,24 @@ Test.Unit.Logger.prototype = {
     this.loglines.appendChild(this.lastLogLine);
   },
   finish: function(status, summary) {
-    if (!this.log) return;
+    if (!this.log) {
+      return;
+    }
     this.lastLogLine.className = status;
     this.statusCell.innerHTML = status;
     this.messageCell.innerHTML = this._toHTML(summary);
     this.addLinksToResults();
   },
   message: function(message) {
-    if (!this.log) return;
+    if (!this.log) {
+      return;
+    }
     this.messageCell.innerHTML = this._toHTML(message);
   },
   summary: function(summary) {
-    if (!this.log) return;
+    if (!this.log) {
+      return;
+    }
     this.logsummary.innerHTML = this._toHTML(summary);
   },
   _createLogTable: function() {
@@ -138,6 +150,7 @@ Test.Unit.Logger.prototype = {
 Test.Unit.Runner = Class.create();
 Test.Unit.Runner.prototype = {
   initialize: function(testcases) {
+    var i, testcase;
     this.options = Object.extend({
       testLog: 'testlog'
     }, arguments[1] || {});
@@ -148,7 +161,7 @@ Test.Unit.Runner.prototype = {
     }
     if(this.options.tests) {
       this.tests = [];
-      for(var i = 0; i < this.options.tests.length; i++) {
+      for(i = 0; i < this.options.tests.length; i++) {
         if(/^test/.test(this.options.tests[i])) {
           this.tests.push(new Test.Unit.Testcase(this.options.tests[i], testcases[this.options.tests[i]], testcases["setup"], testcases["teardown"]));
         }
@@ -158,7 +171,7 @@ Test.Unit.Runner.prototype = {
         this.tests = [new Test.Unit.Testcase(this.options.test, testcases[this.options.test], testcases["setup"], testcases["teardown"])];
       } else {
         this.tests = [];
-        for(var testcase in testcases) {
+        for(testcase in testcases) {
           if(/^test/.test(testcase)) {
             this.tests.push(
                new Test.Unit.Testcase(
@@ -179,15 +192,15 @@ Test.Unit.Runner.prototype = {
   parseTestsQueryParameter: function(){
     if (window.location.search.parseQuery()["tests"]){
         return window.location.search.parseQuery()["tests"].split(',');
-    };
+    }
   },
   // Returns:
   //  "ERROR" if there was an error,
   //  "FAILURE" if there was a failure, or
   //  "SUCCESS" if there was neither
   getResult: function() {
-    var hasFailure = false;
-    for(var i=0;i<this.tests.length;i++) {
+    var hasFailure = false, i;
+    for(i=0;i<this.tests.length;i++) {
       if (this.tests[i].errors > 0) {
         return "ERROR";
       }
@@ -234,7 +247,8 @@ Test.Unit.Runner.prototype = {
     var failures = 0;
     var errors = 0;
     var messages = [];
-    for(var i=0;i<this.tests.length;i++) {
+    var i;
+    for(i=0;i<this.tests.length;i++) {
       assertions +=   this.tests[i].assertions;
       failures   +=   this.tests[i].failures;
       errors     +=   this.tests[i].errors;
@@ -278,8 +292,12 @@ Test.Unit.Assertions.prototype = {
     this.messages.push(error.name + ": "+ error.message + "(" + Test.Unit.inspect(error) +")");
   },
   status: function() {
-    if (this.failures > 0) return 'failed';
-    if (this.errors > 0) return 'error';
+    if (this.failures > 0) {
+      return 'failed';
+    }
+    if (this.errors > 0) {
+      return 'error';
+    }
     return 'passed';
   },
   assert: function(expression) {
@@ -305,7 +323,7 @@ Test.Unit.Assertions.prototype = {
   assertEnumEqual: function(expected, actual) {
     var message = arguments[2] || "assertEnumEqual";
     try { $A(expected).length == $A(actual).length &&
-      expected.zip(actual).all(function(pair) { return pair[0] == pair[1] }) ?
+      expected.zip(actual).all(function(pair) { return pair[0] == pair[1]; }) ?
         this.pass() : this.fail(message + ': expected ' + Test.Unit.inspect(expected) +
           ', actual ' + Test.Unit.inspect(actual)); }
     catch(e) { this.error(e); }
@@ -392,7 +410,9 @@ Test.Unit.Assertions.prototype = {
     var message = arguments[2] || 'assertReturnsTrue';
     try {
       var m = obj[method];
-      if(!m) m = obj['is'+method.charAt(0).toUpperCase()+method.slice(1)];
+      if(!m) {
+        m = obj['is'+method.charAt(0).toUpperCase()+method.slice(1)];
+      }
       m() ? this.pass() :
       this.fail(message + ": method returned false"); }
     catch(e) { this.error(e); }
@@ -401,7 +421,9 @@ Test.Unit.Assertions.prototype = {
     var message = arguments[2] || 'assertReturnsFalse';
     try {
       var m = obj[method];
-      if(!m) m = obj['is'+method.charAt(0).toUpperCase()+method.slice(1)];
+      if(!m) {
+        m = obj['is'+method.charAt(0).toUpperCase()+method.slice(1)];
+      }
       !m() ? this.pass() :
       this.fail(message + ": method returned true"); }
     catch(e) { this.error(e); }
@@ -423,7 +445,9 @@ Test.Unit.Assertions.prototype = {
     }
     elements.zip(expressions).all(function(pair, index) {
       var element = $(pair.first()), expression = pair.last();
-      if (element.match(expression)) return true;
+      if (element.match(expression)) {
+        return true;
+      }
       this.fail('assertElementsMatch: (in index ' + index + ') expected ' + expression.inspect() + ' but got ' + element.inspect());
     }.bind(this)) && this.pass();
   },
@@ -440,10 +464,13 @@ Test.Unit.Assertions.prototype = {
   },
   _isVisible: function(element) {
     element = $(element);
-    if(!element.parentNode) return true;
+    if(!element.parentNode) {
+      return true;
+    }
     this.assertNotNull(element);
-    if(element.style && Element.getStyle(element, 'display') == 'none')
+    if(element.style && Element.getStyle(element, 'display') == 'none') {
       return false;
+    }
 
     return this._isVisible(element.parentNode);
   },
@@ -525,7 +552,7 @@ Test.setupBDDExtensionMethods = function(){
     shouldRespondTo: 'assertRespondsTo'
   };
   var makeAssertion = function(assertion, args, object) {
-   	this[assertion].apply(this,(args || []).concat([object]));
+    this[assertion].apply(this,(args || []).concat([object]));
   };
 
   Test.BDDMethods = {};

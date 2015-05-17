@@ -58,16 +58,17 @@ function process_hypotheses() {
 
 function index_hypotheses_by_cell() {
   // init edge_lists
-  for(var from=0; from<length; from++) {
+  var from, to, id;
+  for(from=0; from<length; from++) {
     cell_hyps[from] = new Array(length);
-    for(var to=0; to<length; to++) {
-     	cell_hyps[from][to] = new Array();
+    for(to=0; to<length; to++) {
+      cell_hyps[from][to] = new Array();
     }
   }
   // populate
-  for (var id in edge) {
-    var from = edge[id][FROM];
-    var to = edge[id][TO];
+  for (id in edge) {
+    from = edge[id][FROM];
+    to = edge[id][TO];
     edge[id][FROM] = parseInt(from);
     edge[id][TO] = parseInt(to);
     edge[id][RULE_SCORE] = parseFloat(edge[id][RULE_SCORE]);
@@ -79,37 +80,40 @@ function index_hypotheses_by_cell() {
 }
 
 function find_reachable_hypotheses() {
-  for (var i=0;i<cell_hyps[0][length-1].length;i++) {
+  var i;
+  for (i=0;i<cell_hyps[0][length-1].length;i++) {
     id = cell_hyps[0][length-1][i];
     find_reachable_hypotheses_recursive( id );
   }
 }
 
 function find_reachable_hypotheses_recursive( id ) {
+  var children, c;
   if (!(reachable[id] === undefined)) { return; }
   reachable[id] = 1;
-  var children = get_children( id );
-  for(var c=0;c<children.length;c++) {
+  children = get_children( id );
+  for(c=0;c<children.length;c++) {
     find_reachable_hypotheses_recursive( children[c] );
   }
 }
 
 function compute_best_derivation_scores() {
-  for(var from=0; from<length; from++ ) {
+  var from, to, width, cell_max_score, i, id, c;
+  for(from=0; from<length; from++ ) {
     cell_derivation_score[from] = Array();
   }
-  for(var width=length-1; width>=0; width-- ) {
-    for(var from=0; from<length-width; from++ ) {
-      var to = from+width;
-      var cell_max_score = -9.9e9;
-      for (var i=0;i<cell_hyps[from][to].length;i++) {
-        var id = cell_hyps[from][to][i];
+  for(width=length-1; width>=0; width-- ) {
+    for(from=0; from<length-width; from++ ) {
+      to = from+width;
+      cell_max_score = -9.9e9;
+      for (i=0;i<cell_hyps[from][to].length;i++) {
+        id = cell_hyps[from][to][i];
         if (width == length-1) {
           edge[id][DERIVATION_SCORE] = edge[id][HYP_SCORE];
         }
         if (edge[id][DERIVATION_SCORE] != null) {
           var children = get_children(id);
-          for(var c=0;c<children.length;c++) {
+          for(c=0;c<children.length;c++) {
             if (edge[children[c]][DERIVATION_SCORE] == null ||
                 edge[children[c]][DERIVATION_SCORE] < edge[id][DERIVATION_SCORE]) {
               edge[children[c]][DERIVATION_SCORE] = edge[id][DERIVATION_SCORE];
@@ -135,8 +139,8 @@ function draw_menu() {
   draw_menu_button(2,"Number of Hypotheses");
   draw_menu_button(3,"Number of Rule Cubes");
   draw_menu_button(4,"Derivation Score");
-  draw_menu_button(5,"Non-Terminals")
-  draw_menu_button(6,"Hypotheses")
+  draw_menu_button(5,"Non-Terminals");
+  draw_menu_button(6,"Hypotheses");
 }
 var MENU_POSITION_HYPOTHESES = 6; // where is "Hypotheses" in the menu?
 
@@ -184,7 +188,7 @@ function draw_menu_button( id, label ) {
   button.setAttribute("fill", "#c0c0ff");
   button.setAttribute("stroke", "black");
   button.setAttribute("stroke-width", "1");
-  button.setAttribute("onclick","click_menu(" + id + ",0);")
+  button.setAttribute("onclick","click_menu(" + id + ",0);");
   chart.appendChild( button );
 
   var button_label = document.createElementNS(xmlns,"text");
@@ -195,7 +199,7 @@ function draw_menu_button( id, label ) {
   button_label.setAttribute("pointer-events", "none");
   var content = document.createTextNode( label );
   button_label.appendChild( content );
-  button_label.setAttribute("onclick","click_menu(" + id + ",0);")
+  button_label.setAttribute("onclick","click_menu(" + id + ",0);");
 
   chart.appendChild( button_label );
 }
@@ -238,7 +242,7 @@ function draw_option_button( rule_option, id, label ) {
   button.setAttribute("fill", "#fdd017");
   button.setAttribute("stroke", "black");
   button.setAttribute("stroke-width", "1");
-  button.setAttribute("onclick","click_"+(rule_option?"rule_":"")+"option(" + id + ");")
+  button.setAttribute("onclick","click_"+(rule_option?"rule_":"")+"option(" + id + ");");
   chart.appendChild( button );
 
   var button_label = document.createElementNS(xmlns,"text");
@@ -279,7 +283,7 @@ function draw_sort_button( id, label ) {
     else {
       button.setAttribute("fill", "#a0c0ff");
     }
-    button.setAttribute("onclick","click_sort(" + id + ");")
+    button.setAttribute("onclick","click_sort(" + id + ");");
     button.setAttribute("stroke", "black");
     button.setAttribute("stroke-width", "1");
   }
@@ -300,7 +304,7 @@ function draw_sort_button( id, label ) {
 
 function click_sort( id ) {
   if (SORT_OPTION == 3) {
-    remove_non_terminal_treemap(1)
+    remove_non_terminal_treemap(1);
   }
   remove_hypothesis_overview();
 
@@ -387,21 +391,21 @@ function draw_chart() {
       container.appendChild( transform );
 
       // yellow box for the cell
-	    var cell = document.createElementNS(xmlns,"rect");
-	    cell.setAttribute("id", "cellbox-" + from + "-" + to);
-	    cell.setAttribute("x", CELL_MARGIN);
-	    cell.setAttribute("y", CELL_MARGIN);
-		  cell.setAttribute("rx", CELL_BORDER);
-		  cell.setAttribute("ry", CELL_BORDER);
-		  cell.setAttribute("width", CELL_WIDTH-2*CELL_MARGIN);
-		  cell.setAttribute("height", CELL_HEIGHT-2*CELL_MARGIN);
-		  cell.setAttribute("opacity", .75);
-		  cell.setAttribute("fill", get_cell_color(from,to));
-		  cell.setAttribute("stroke", "black");
-		  cell.setAttribute("stroke-width", "1");
-		  cell.setAttribute("onmouseover","hover_cell(" + from + "," + to + ");")
-		  cell.setAttribute("onclick","click_cell(" + from + "," + to + ");")
-		  transform.appendChild( cell );
+      var cell = document.createElementNS(xmlns,"rect");
+      cell.setAttribute("id", "cellbox-" + from + "-" + to);
+      cell.setAttribute("x", CELL_MARGIN);
+      cell.setAttribute("y", CELL_MARGIN);
+      cell.setAttribute("rx", CELL_BORDER);
+      cell.setAttribute("ry", CELL_BORDER);
+      cell.setAttribute("width", CELL_WIDTH-2*CELL_MARGIN);
+      cell.setAttribute("height", CELL_HEIGHT-2*CELL_MARGIN);
+      cell.setAttribute("opacity", .75);
+      cell.setAttribute("fill", get_cell_color(from,to));
+      cell.setAttribute("stroke", "black");
+      cell.setAttribute("stroke-width", "1");
+      cell.setAttribute("onmouseover","hover_cell(" + from + "," + to + ");")
+      cell.setAttribute("onclick","click_cell(" + from + "," + to + ");")
+      transform.appendChild( cell );
     }
 
     // box for the input word
@@ -409,12 +413,12 @@ function draw_chart() {
     input_box.setAttribute("id", "inputbox-" + from);
     input_box.setAttribute("x", CELL_MARGIN+from*CELL_WIDTH);
     input_box.setAttribute("y", CELL_MARGIN+(length)*CELL_HEIGHT);
-	  input_box.setAttribute("rx", 3);
-	  input_box.setAttribute("ry", 3);
-	  input_box.setAttribute("width", CELL_WIDTH-2*CELL_MARGIN);
-	  input_box.setAttribute("height", CELL_HEIGHT/2);
-	  //cell.setAttribute("opacity", .75);
-	  input_box.setAttribute("fill", INPUT_REGULAR_COLOR);
+    input_box.setAttribute("rx", 3);
+    input_box.setAttribute("ry", 3);
+    input_box.setAttribute("width", CELL_WIDTH-2*CELL_MARGIN);
+    input_box.setAttribute("height", CELL_HEIGHT/2);
+    //cell.setAttribute("opacity", .75);
+    input_box.setAttribute("fill", INPUT_REGULAR_COLOR);
     chart.appendChild( input_box );
 
     // input word
@@ -427,7 +431,7 @@ function draw_chart() {
     var content = document.createTextNode( input[from] );
     input_word.appendChild( content );
     chart.appendChild( input_word );
-	}
+  }
   assign_chart_coordinates();
 }
 
@@ -436,7 +440,7 @@ function assign_chart_coordinates() {
     for(var width=1; width<=length-from; width++) {
       var to = from + width - 1;
 
-	    var x = from*CELL_WIDTH + (width-1)*CELL_WIDTH/2;
+      var x = from*CELL_WIDTH + (width-1)*CELL_WIDTH/2;
       var y = (length-width)*CELL_HEIGHT*(1-ZOOM);
       //alert("(x,y) = (" + length + "," + width + "), width = " + ZOOM + ", height = " + (1-ZOOM));
       var cell_width = CELL_WIDTH;
@@ -478,11 +482,11 @@ function assign_chart_coordinates() {
 
       var container = document.getElementById("cell-container-" + from + "-" + to);
       container.setAttribute("x", x);
-	    container.setAttribute("y", y);
+      container.setAttribute("y", y);
       var transform = document.getElementById("cell-" + from + "-" + to);
       transform.setAttribute("transform", "scale(" + (cell_width/CELL_WIDTH) + "," + (cell_height/CELL_HEIGHT) + ")");
     }
-	}
+  }
 }
 
 function remove_chart() {
@@ -530,7 +534,7 @@ function click_cell( from, to ) {
 function highlight_input( from, to, on_off ) {
   for(var i=from; i<=to; i++) {
     var input_box = document.getElementById("inputbox-" + i);
-	  input_box.setAttribute("fill", on_off ? INPUT_HIGHLIGHT_COLOR : INPUT_REGULAR_COLOR);
+    input_box.setAttribute("fill", on_off ? INPUT_HIGHLIGHT_COLOR : INPUT_REGULAR_COLOR);
   }
 }
 
@@ -546,7 +550,7 @@ function annotate_cells_with_hypcount() {
       var to = from + width - 1;
       annotate_cell( from, to, cell_hyps[from][to].length, 20 )
     }
-	}
+  }
 }
 
 function annotate_cells_with_rulecount() {
@@ -564,7 +568,7 @@ function annotate_cells_with_rulecount() {
       }
       annotate_cell( from, to, rule_count, 20 )
     }
-	}
+  }
 }
 
 function annotate_cells_with_derivation_score() {
@@ -575,7 +579,7 @@ function annotate_cells_with_derivation_score() {
       if (score < -9e9) { score = "dead end"; }
       annotate_cell( from, to, score, 15 )
     }
-	}
+  }
 }
 
 function annotate_cell( from, to, label, font_size ) {
@@ -610,7 +614,7 @@ function unannotate_cells() {
       var to = from + width - 1;
       unannotate_cell( from, to );
     }
-	}
+  }
 }
 
 function unannotate_cell( from, to ) {
@@ -953,7 +957,7 @@ function color_cells() {
       var to = from+width-1;
       highlight_cell(from,to,0);
     }
-	}
+  }
 }
 
 function get_cell_color( from, to ) {
@@ -997,7 +1001,7 @@ var SORT_BUTTON_COUNT = 4; // how many in total (incl. "sort by")?
 function hypothesis_overview_cell( from, to ) {
   var width = CELL_WIDTH-2*(CELL_BORDER+CELL_MARGIN+CELL_PADDING);
   var height = CELL_HEIGHT-2*(CELL_BORDER+CELL_MARGIN+CELL_PADDING);
-	var cell = document.getElementById("cell-" + from + "-" + to);
+  var cell = document.getElementById("cell-" + from + "-" + to);
   hypothesis_in_rect( width, height, CELL_BORDER+CELL_MARGIN+CELL_PADDING, CELL_BORDER+CELL_MARGIN+CELL_PADDING, cell, cell_hyps[from][to] );
 }
 
@@ -1041,12 +1045,12 @@ function hypothesis_in_rect( width, height, offset_x, offset_y, parent_element, 
     hyp.setAttribute("cx", x + diameter/2 + offset_x);
     hyp.setAttribute("cy", y + diameter/2 + offset_y);
     hyp.setAttribute("r", diameter/2);
-	  hyp.setAttribute("fill", hyp_color(id, 0));
-	  hyp.setAttribute("onmouseover","hover_hyp(" + id + ");")
-	  hyp.setAttribute("onmouseout","unhover_hyp(" + id + ");")
-	  parent_element.appendChild( hyp );
+    hyp.setAttribute("fill", hyp_color(id, 0));
+    hyp.setAttribute("onmouseover","hover_hyp(" + id + ");")
+    hyp.setAttribute("onmouseout","unhover_hyp(" + id + ");")
+    parent_element.appendChild( hyp );
 
-	  x += diameter;
+    x += diameter;
     if (++column >= row_size) {
       column = 0;
       y += diameter;
@@ -1057,8 +1061,8 @@ function hypothesis_in_rect( width, height, offset_x, offset_y, parent_element, 
 
 function remove_hypothesis_overview() {
   for (var id in edge) {
-	  var cell = document.getElementById("cell-" + edge[id][FROM] + "-" + edge[id][TO]);
- 	  var hyp = document.getElementById("hyp-" + id);
+    var cell = document.getElementById("cell-" + edge[id][FROM] + "-" + edge[id][TO]);
+     var hyp = document.getElementById("hyp-" + id);
     cell.removeChild(hyp);
   }
   // remove sort buttons

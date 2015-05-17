@@ -23,7 +23,9 @@ Event.simulateMouse = function(element, eventName) {
     options.buttons, options.pointerX, options.pointerY, options.pointerX, options.pointerY,
     options.ctrlKey, options.altKey, options.shiftKey, options.metaKey, 0, $(element));
 
-  if(this.mark) Element.remove(this.mark);
+  if(this.mark) {
+    Element.remove(this.mark);
+  }
   this.mark = document.createElement('div');
   this.mark.appendChild(document.createTextNode(" "));
   document.body.appendChild(this.mark);
@@ -35,8 +37,9 @@ Event.simulateMouse = function(element, eventName) {
   this.mark.style.borderTop = "1px solid red;";
   this.mark.style.borderLeft = "1px solid red;";
 
-  if(this.step)
+  if(this.step) {
     alert('['+new Date().getTime().toString()+'] '+eventName+'/'+Test.Unit.inspect(options));
+  }
 
   $(element).dispatchEvent(oEvent);
 };
@@ -62,7 +65,8 @@ Event.simulateKey = function(element, eventName) {
 };
 
 Event.simulateKeys = function(element, command) {
-  for(var i=0; i<command.length; i++) {
+  var i;
+  for(i=0; i<command.length; i++) {
     Event.simulateKey(element,'keypress',{charCode:command.charCodeAt(i)});
   }
 };
