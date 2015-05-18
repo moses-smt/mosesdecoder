@@ -443,7 +443,6 @@ train-in-mono
 concatenate
 	in: LM:stripped-corpus
 	out: concatenated-corpus
-	ignore-unless: lm-training
 	default-name: lm/concatenated
 	template: cat IN > OUT
 train
@@ -479,6 +478,7 @@ binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
+	ignore-unless: lm-training=OR=rlm-training
 	rerun-on-change: lm
 	default-name: lm/concatenated-binlm
 	template: $lm-binarizer IN OUT
