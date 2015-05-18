@@ -443,16 +443,16 @@ train-in-mono
 concatenate
 	in: LM:stripped-corpus
 	out: concatenated-corpus
-	pass-unless: lm-training
+	ignore-unless: lm-training
 	default-name: lm/concatenated
 	template: cat IN > OUT
 train
 	in: concatenated-corpus
 	out: lm
-	default-name: lm/concatenated-model
+	default-name: lm/concatenated-lm
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
-	pass-unless: lm-training
+	ignore-unless: lm-training
 	error: cannot execute binary file
 	error: unrecognised option
 	not-error: BadDiscountException
