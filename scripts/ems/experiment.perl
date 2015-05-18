@@ -2566,8 +2566,8 @@ sub define_training_create_config {
       }
     }
   }
-  shift @LM; # remove interpolated lm
   }
+  shift @LM; # remove interpolated lm
 
   if ($concat_lm) {
     my $type = 0;
