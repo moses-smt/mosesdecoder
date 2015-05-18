@@ -152,7 +152,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
     if (defined($glueFile)) {
       $glueArg = "--GlueGrammar $TMPDIR/glue.$numStr";
     }
-    print "glueArg=$glueArg \n";
+    #print STDERR "glueArg=$glueArg \n";
 
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $glueArg $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
     `$cmd`;
