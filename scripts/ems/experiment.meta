@@ -229,13 +229,30 @@ train
 	in: stripped-corpus
 	out: lm
 	default-name: lm/lm
-	ignore-if: rlm-training
+	ignore-if: rlm-training custom-training
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
 	error: unrecognised option
 	not-error: BadDiscountException
 	not-error: To override this error
+train-custom
+	in: stripped-corpus
+	out: binlm
+	default-name: lm/custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line
+	ignore-if: syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
+train-custom-syntax
+	in: split-corpus
+	out: binlm
+	default-name: lm/custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
 randomize
 	in: lm
 	out: rlm
@@ -263,7 +280,6 @@ binarize
 	template: $lm-binarizer IN OUT
 	error: set KENLM_MAX_ORDER to at least this value
 	final-model: yes
-
 [INTERPOLATED-LM] single
 tuning-from-sgm
 	in: tuning-sgm
@@ -445,6 +461,12 @@ concatenate
 	out: concatenated-corpus
 	default-name: lm/concatenated
 	template: cat IN > OUT
+concatenate-mock-parsed
+	in: LM:split-corpus
+	out: concatenated-split-corpus
+	pass-unless: LM:mock-output-parser-lm
+	default-name: lm/concatenated-mock-parsed
+	template: cat IN > OUT
 train
 	in: concatenated-corpus
 	out: lm
@@ -452,10 +474,28 @@ train
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	ignore-unless: lm-training
+	ignore-if: rlm-training custom-training
 	error: cannot execute binary file
 	error: unrecognised option
 	not-error: BadDiscountException
 	not-error: To override this error
+train-custom
+	in: concatenated-corpus
+	out: binlm
+	default-name: lm/concatenated-custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line
+	ignore-if: syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
+train-custom-syntax
+	in: concatenated-split-corpus
+	out: binlm
+	default-name: lm/concatenated-custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
 randomize
 	in: lm
 	out: rlm
@@ -478,7 +518,7 @@ binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
-	ignore-unless: lm-training=OR=rlm-training
+	ignore-unless: lm-training rlm-training
 	rerun-on-change: lm
 	default-name: lm/concatenated-binlm
 	template: $lm-binarizer IN OUT
