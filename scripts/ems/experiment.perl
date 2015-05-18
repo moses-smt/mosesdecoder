@@ -2499,7 +2499,7 @@ sub get_config_tables {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$transliteration_pt,$generation_table,$sparse_lexical_features,$domains,$osm, @LM)
+    my ($config,$reordering_table,$phrase_translation_table,$transliteration_pt,$generation_table,$sparse_lexical_features,$domains,$osm,$concat_lm, @LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
@@ -2566,8 +2566,31 @@ sub define_training_create_config {
       }
     }
   }
-  }
   shift @LM; # remove interpolated lm
+  }
+
+  if ($concat_lm) {
+    my $type = 0;
+    my $order = &check_backoff_and_get("CONCATENATED-LM:order");
+    # binarizing the lm?
+    $type = 1 if (&get("CONCATENATED-LM:binlm") ||
+                    &backoff_and_get("CONCATENATED-LM:lm-binarizer"));
+    # randomizing the lm?
+    $type = 5 if (&get("CONCATENATED-LM:rlm") ||
+                    &backoff_and_get("CONCATENATED-LM:lm-randomizer"));
+
+    # manually set type
+    $type = &get("CONCATENATED-LM:type") if &get("CONCATENATED-LM:type");
+
+    # which factor is the model trained on?
+    my $factor = 0;
+    if (&backoff_and_get("TRAINING:output-factors") &&
+        &backoff_and_get("CONCATENATED-LM:factors")) {
+        $factor = $OUTPUT_FACTORS{&backoff_and_get("CONCATENATED-LM:factors")};
+    }
+
+    $cmd .= "-lm $factor:$order:$concat_lm:$type ";
+  }
 
 	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).":".join(",",@LM_SETS).") and LM files (".(scalar @LM).":".join(",",@LM).") does not match")
 	    unless scalar @LM == scalar @LM_SETS;
