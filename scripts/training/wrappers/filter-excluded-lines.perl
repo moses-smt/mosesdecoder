@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -29,11 +29,11 @@ if (@excludedLines > 0)
 while(<STDIN>)
 {
     my $line = $_;
-		    
+
     if ($nextLineExcl == $lineNum)
     {
     	$exclInd++;
-    	if ($exclInd < @excludedLines) 
+    	if ($exclInd < @excludedLines)
     	{
 	    	$nextLineExcl = $excludedLines[$exclInd];
 	    }
@@ -43,7 +43,7 @@ while(<STDIN>)
     	print $line;
 	$linesOut++;
     }
-  
+
     $lineNum++;
 }
 #close(STDIN);

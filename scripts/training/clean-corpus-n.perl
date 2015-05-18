@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id: clean-corpus-n.perl 3633 2010-10-21 09:49:27Z phkoehn $
 use warnings;
@@ -64,7 +64,7 @@ if (-e $l2input) {
 } else  {
  die "Error: $l2input does not exist";
 }
- 
+
 open(E,$opn) or die "Can't open '$opn'";
 
 open(FO,">$out.$l1") or die "Can't write $out.$l1";
@@ -102,7 +102,7 @@ while(my $f = <F>) {
     $e = lc($e);
     $f = lc($f);
   }
-  
+
   $e =~ s/\|//g unless $factored_flag;
   $e =~ s/\s+/ /g;
   $e =~ s/^ //;
@@ -126,13 +126,13 @@ while(my $f = <F>) {
   my $max_word_length_plus_one = $max_word_length + 1;
   next if $e =~ /[^\s\|]{$max_word_length_plus_one}/;
   next if $f =~ /[^\s\|]{$max_word_length_plus_one}/;
-  
+
   # An extra check: none of the factors can be blank!
   die "There is a blank factor in $corpus.$l1 on line $innr: $f"
     if $f =~ /[ \|]\|/;
   die "There is a blank factor in $corpus.$l2 on line $innr: $e"
     if $e =~ /[ \|]\|/;
-  
+
   $outnr++;
   print FO $f."\n";
   print EO $e."\n";
@@ -158,7 +158,7 @@ sub word_count {
     $line =~ s/<\S[^>]*\S>/ /g;
     $line =~ s/\s+/ /g;
     $line =~ s/^ //g;
-    $line =~ s/ $//g;    
+    $line =~ s/ $//g;
   }
   my @w = split(/ /,$line);
   return scalar @w;

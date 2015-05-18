@@ -106,7 +106,7 @@ sub calcUnknownTokens
 		return ($self->{'unknownCount'}->{$factorName}, $self->{'tokenCount'}->{'input'});
 	}
 	warn "calcing unknown tokens\n";
-	
+
 	$self->ensureFilenameDefined('input');
 	$self->ensurePhraseTableDefined($factorName);
 	$self->ensureFactorPosDefined($factorName);
@@ -129,7 +129,7 @@ sub calcUnknownTokens
 	}
 	$self->{'unknownCount'}->{$factorName} = $unknownTokens;
 	$self->{'tokenCount'}->{'input'} = $totalTokens;
-	
+
 	return ($unknownTokens, $totalTokens);
 }
 
@@ -145,7 +145,7 @@ sub calcNounAdjWER_PWERDiff
 		return @{$self->{'nnAdjWERPWER'}->{$sysname}};
 	}
 	warn "calcing NN/JJ PWER/WER\n";
-	
+
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
 	$self->ensureFactorPosDefined('surf');
@@ -164,7 +164,7 @@ sub calcNounAdjWER_PWERDiff
 		($sentWer, $tmp) = $self->sentencePWER(\@nnAdjSWords, \@nnAdjEWords, $self->{'factorIndices'}->{'surf'});
 		$pwerScore += $sentWer;
 	}
-	
+
 	#unhog memory
 	$self->releaseSentences('truth');
 	$self->releaseSentences($sysname);
@@ -186,16 +186,16 @@ sub calcOverallWER
 		return $self->{'sysoutWER'}->{$sysname}->{$factorName}->[0];
 	}
 	warn "calcing WER\n";
-	
+
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
 	$self->ensureFactorPosDefined($factorName);
 	$self->loadSentences('truth', $self->{'truthFilename'});
 	$self->loadSentences($sysname, $self->{'sysoutFilenames'}->{$sysname});
-	
+
 	my ($wer, $swers, $indices) = $self->corpusWER($self->{$sysname}, $self->{'truth'}, $self->{'factorIndices'}->{$factorName});
 	$self->{'sysoutWER'}->{$sysname}->{$factorName} = [$wer, $swers, $indices]; #total; arrayref of scores for individual sentences; arrayref of arrayrefs of offending words in each sentence
-	
+
 	#unhog memory
 	$self->releaseSentences('truth');
 	$self->releaseSentences($sysname);
@@ -216,16 +216,16 @@ sub calcOverallPWER
 		return $self->{'sysoutPWER'}->{$sysname}->{$factorName}->[0];
 	}
 	warn "calcing PWER\n";
-	
+
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
 	$self->ensureFactorPosDefined($factorName);
 	$self->loadSentences('truth', $self->{'truthFilename'});
 	$self->loadSentences($sysname, $self->{'sysoutFilenames'}->{$sysname});
-	
+
 	my ($pwer, $spwers, $indices) = $self->corpusPWER($self->{$sysname}, $self->{'truth'}, $self->{'factorIndices'}->{$factorName});
 	$self->{'sysoutPWER'}->{$sysname}->{$factorName} = [$pwer, $spwers, $indices]; #total; arrayref of scores for individual sentences; arrayref of arrayrefs of offending words in each sentence
-	
+
 	#unhog memory
 	$self->releaseSentences('truth');
 	$self->releaseSentences($sysname);
@@ -244,23 +244,23 @@ sub calcBLEU
 		return $self->{'bleuScores'}->{$sysname}->{$factorName};
 	}
 	warn "calcing BLEU\n";
-	
+
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
 	$self->ensureFactorPosDefined($factorName);
 	$self->loadSentences('truth', $self->{'truthFilename'});
 	$self->loadSentences($sysname, $self->{'sysoutFilenames'}->{$sysname});
-	
+
 	#score structure: various total scores, arrayref of by-sentence score arrays
 	if(!exists $self->{'bleuScores'}->{$sysname}) {$self->{'bleuScores'}->{$sysname} = {};}
 	if(!exists $self->{'bleuScores'}->{$sysname}->{$factorName}) {$self->{'bleuScores'}->{$sysname}->{$factorName} = [[], []];}
-	
+
 	my ($good1, $tot1, $good2, $tot2, $good3, $tot3, $good4, $tot4, $totCLength, $totRLength) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	my $factorIndex = $self->{'factorIndices'}->{$factorName};
 	for(my $i = 0; $i < scalar(@{$self->{'truth'}}); $i++)
 	{
 		my ($truthSentence, $sysoutSentence) = ($self->{'truth'}->[$i], $self->{$sysname}->[$i]);
-		my ($unigood, $unicount, $bigood, $bicount, $trigood, $tricount, $quadrugood, $quadrucount, $cLength, $rLength) = 
+		my ($unigood, $unicount, $bigood, $bicount, $trigood, $tricount, $quadrugood, $quadrucount, $cLength, $rLength) =
 				$self->sentenceBLEU($truthSentence, $sysoutSentence, $factorIndex, 0); #last argument is whether to debug-print
 		push @{$self->{'bleuScores'}->{$sysname}->{$factorName}->[1]}, [$unigood, $unicount, $bigood, $bicount, $trigood, $tricount, $quadrugood, $quadrucount, $cLength, $rLength];
 		$good1 += $unigood; $tot1 += $unicount;
@@ -271,7 +271,7 @@ sub calcBLEU
 		$totRLength += $rLength;
 	}
 	my $brevity = ($totCLength > $totRLength || $totCLength == 0) ? 1 : exp(1 - $totRLength / $totCLength);
-	my ($pct1, $pct2, $pct3, $pct4) = ($tot1 == 0 ? -1 : $good1 / $tot1, $tot2 == 0 ? -1 : $good2 / $tot2, 
+	my ($pct1, $pct2, $pct3, $pct4) = ($tot1 == 0 ? -1 : $good1 / $tot1, $tot2 == 0 ? -1 : $good2 / $tot2,
 													$tot3 == 0 ? -1 : $good3 / $tot3, $tot4 == 0 ? -1 : $good4 / $tot4);
 	my ($logsum, $logcount) = (0, 0);
 	if($tot1 > 0) {$logsum += my_log($pct1); $logcount++;}
@@ -280,7 +280,7 @@ sub calcBLEU
 	if($tot4 > 0) {$logsum += my_log($pct4); $logcount++;}
 	my $bleu = $brevity * exp($logsum / $logcount);
 	$self->{'bleuScores'}->{$sysname}->{$factorName}->[0] = [$bleu, 100 * $pct1, 100 * $pct2, 100 * $pct3, 100 * $pct4, $brevity];
-  
+
 	#unhog memory
 	$self->releaseSentences('truth');
 	$self->releaseSentences($sysname);
@@ -302,13 +302,13 @@ sub statisticallyTestBLEUResults
 		return $self->{'bleuConfidence'}->{$sysname}->{$factorName};
 	}
 	warn "performing consistency tests\n";
-	
+
 	my $k = 30; #HARDCODED NUMBER OF SUBSETS (WE DO k-FOLD CROSS-VALIDATION); IF YOU CHANGE THIS YOU MUST ALSO CHANGE getApproxPValue() and $criticalTStat
 	my $criticalTStat = 2.045; #hardcoded value given alpha (.025 here) and degrees of freedom (= $k - 1) ########################################
 	$self->ensureFilenameDefined('truth');
 	$self->ensureFilenameDefined($sysname);
 	$self->ensureFactorPosDefined($factorName);
-	
+
 	#ensure we have full-corpus BLEU results
 	if(!exists $self->{'bleuScores'}->{$sysname}->{$factorName})
 	{
@@ -316,7 +316,7 @@ sub statisticallyTestBLEUResults
 	}
 	if(!exists $self->{'subsetBLEUstats'}->{$sysname}) {$self->{'subsetBLEUstats'}->{$sysname} = {};}
 	if(!exists $self->{'subsetBLEUstats'}->{$sysname}->{$factorName}) {$self->{'subsetBLEUstats'}->{$sysname}->{$factorName} = [];}
-	
+
 	#calculate n-gram precisions for each small subset
 	my @sentenceStats = @{$self->{'bleuScores'}->{$sysname}->{$factorName}->[1]};
 	for(my $i = 0; $i < $k; $i++)
@@ -355,10 +355,10 @@ sub statisticallyTestBLEUResults
 		$devs[$i] = sqrt($devs[$i] / ($k - 1));
 		$t->[$i] = ($fullCorpusBLEU->[$i + 1] / 100 - $means[$i]) / $devs[$i];
 		push @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[0]}, getLowerBoundPValue($t->[$i]); #p-value for overall score vs. subset average
-		push @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[1]}, 
+		push @{$self->{'bleuConfidence'}->{$sysname}->{$factorName}->[1]},
 							[$means[$i] - $criticalTStat * $devs[$i] / sqrt($k), $means[$i] + $criticalTStat * $devs[$i] / sqrt($k)]; #the confidence interval
 	}
-	
+
 	return $self->{'bleuConfidence'}->{$sysname}->{$factorName};
 }
 
@@ -374,7 +374,7 @@ sub calcPerplexity
 		return $self->{'perplexity'}->{$sysname}->{$factorName};
 	}
 	warn "calcing perplexity\n";
-	
+
 	$self->ensureFilenameDefined($sysname);
 	my $sysoutFilename;
 	if($sysname eq 'truth' || $sysname eq 'input') {$sysoutFilename = $self->{"${sysname}Filename"};}
@@ -395,26 +395,26 @@ sub calcPerplexity
 #run a paired t test and a sign test on BLEU statistics for subsets of both systems' outputs
 #arguments: system name 1, system name 2, factor name
 #return: arrayref of [arrayref of confidence levels for t test at which results differ, arrayref of index (0/1) of better system by t test,
-#                     arrayref of confidence levels for sign test at which results differ, arrayref of index (0/1) of better system by sign test], 
+#                     arrayref of confidence levels for sign test at which results differ, arrayref of index (0/1) of better system by sign test],
 #     where each inner arrayref has one element per n-gram order considered
 sub statisticallyCompareSystemResults
 {
 	my ($self, $sysname1, $sysname2, $factorName) = @_;
 	#check in-memory cache first
-	if(exists $self->{'comparisonStats'}->{$sysname1} && exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2} 
+	if(exists $self->{'comparisonStats'}->{$sysname1} && exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}
 		&& exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName})
 	{
 		return $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName};
 	}
 	warn "comparing sysoutputs\n";
-	
+
 	$self->ensureFilenameDefined($sysname1);
 	$self->ensureFilenameDefined($sysname2);
 	$self->ensureFactorPosDefined($factorName);
 	#make sure we have tallied results for both systems
 	if(!exists $self->{'subsetBLEUstats'}->{$sysname1}->{$factorName}) {$self->statisticallyTestBLEUResults($sysname1, $factorName);}
 	if(!exists $self->{'subsetBLEUstats'}->{$sysname2}->{$factorName}) {$self->statisticallyTestBLEUResults($sysname2, $factorName);}
-	
+
 	if(!exists $self->{'comparisonStats'}->{$sysname1}) {$self->{'comparisonStats'}->{$sysname1} = {};}
 	if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2} = {};}
 	if(!exists $self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName}) {$self->{'comparisonStats'}->{$sysname1}->{$sysname2}->{$factorName} = [];}
@@ -570,7 +570,7 @@ sub writeCacheFile
 	}
 	#store WER, PWER to disk
 	print CACHEFILE "\nWER scores\n";
-	my $printWERFunc = 
+	my $printWERFunc =
 	sub
 	{
 		my $werType = shift;
@@ -791,7 +791,7 @@ sub getLowerBoundPValue
 		0.683  => .5,
 		0.854  => .4,
 		1.055  => .3,
-		1.311  => .2, 
+		1.311  => .2,
 		1.699  => .1
 	);
 	foreach my $tCmp (sort keys %t2p) {return $t2p{$tCmp} if $t <= $tCmp;}
@@ -803,7 +803,7 @@ sub getUpperBoundPValue
 {
 	my $t = abs(shift);
 	#encode various known p-values for ###### DOF = 29 ######
-	my %t2p = 
+	my %t2p =
 	(
 		4.506 => .0001,
 		4.254 => .0002,
@@ -913,7 +913,7 @@ sub loadSentences
 	my ($self, $sysname, $filename) = @_;
 	#if the sentences are already loaded, leave them be
 	if(exists $self->{$sysname} && scalar(@{$self->{$sysname}}) > 0) {return;}
-	
+
 	$self->{$sysname} = [];
 	$self->{'tokenCount'}->{$sysname} = 0;
 	open(INFILE, "<$filename") or die "Corpus::load(): couldn't open '$filename' for read\n";
@@ -929,7 +929,7 @@ sub loadSentences
 		}
 		push @{$self->{$sysname}}, $refFactors;
 	}
-	close(INFILE);	
+	close(INFILE);
 }
 
 #free the memory used for the given corpus (but NOT any associated calculations, eg WER)
@@ -948,7 +948,7 @@ sub loadPhraseTable
 {
 	my ($self, $factorName) = @_;
 	$self->ensurePhraseTableDefined($factorName);
-	
+
 	my $filename = $self->{'phraseTableFilenames'}->{$factorName};
 	open(PTABLE, "<$filename") or die "couldn't open '$filename' for read\n";
 	$self->{'phraseTables'}->{$factorName} = {}; #create ref to phrase table (hash of strings, for source phrases, to anything whatsoever)
@@ -1022,7 +1022,7 @@ sub sentenceWER
 	my ($totWER, $indices) = (0, []);
 	my ($sLength, $eLength) = (scalar(@$refSysOutput), scalar(@$refTruth));
 	if($sLength == 0 || $eLength == 0) {return ($totWER, $indices);} #special case
-	
+
 	my @refWordsMatchIndices = (-1) x $eLength; #at what sysout-word index this truth word is first matched
 	my @sysoutWordsMatchIndices = (-1) x $sLength; #at what truth-word index this sysout word is first matched
 	my $table = []; #index by sysout word index, then truth word index; a cell holds max count of matching words and direction we came to get it
@@ -1041,7 +1041,7 @@ sub sentenceWER
 			push @{$table->[$i]}, [($match ? $maxPrev + 1 : $maxPrev), $prevDir];
 		}
 	}
-	
+
 	#look back along the path and get indices of non-matching words
 	my @unusedSysout = (0) x $sLength; #whether each sysout word was matched--used for outputting html table
 	my ($i, $j) = ($sLength - 1, $eLength - 1);
@@ -1066,7 +1066,7 @@ sub sentenceWER
 	#we're at the first sysout word; finish up checking for matches
 	while($j > 0 && $refWordsMatchIndices[$j] != 0) {push @{$table->[0]->[$j]}, 0; $j--;}
 	if($j == 0 && $refWordsMatchIndices[0] != 0) {unshift @$indices, 0; $unusedSysout[0] = 1;} #no truth word was matched to the first sysout word
-	
+
 	#print some HTML to debug the WER algorithm
 #	print "<table border=1><tr><td></td><td>" . join("</td><td>", map {() . $_->[$index]} @$refTruth) . "</td></tr>";
 #	for(my $i = 0; $i < $sLength; $i++)
@@ -1086,7 +1086,7 @@ sub sentenceWER
 #		print "</tr>";
 #	}
 #	print "</table>";
-	
+
 	my $matchCount = 0;
 	if($sLength > 0) {$matchCount = $table->[$sLength - 1]->[$eLength - 1]->[0];}
 	return ($sLength - $matchCount, $indices);
@@ -1192,7 +1192,7 @@ sub sentenceBLEU
 	$total2 = max(1, $total - 1);
 	$total3 = max(1, $total - 2);
 	$total4 = max(1, $total - 3);
-	
+
 	return ($correct1, $total1, $correct2, $total2, $correct3, $total3, $correct4, $total4, $length_translation, $length_reference);
 }
 

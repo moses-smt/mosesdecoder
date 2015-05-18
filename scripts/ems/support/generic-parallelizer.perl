@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -25,7 +25,7 @@ $qflags = "" unless $qflags;
 
 # create split input files
 my $sentenceN = `cat $infile | wc -l`;
-my $splitN = int(($sentenceN+$jobs-0.5) / $jobs); 
+my $splitN = int(($sentenceN+$jobs-0.5) / $jobs);
 `split -a 2 -l $splitN $infile $tmpdir/in-$$-`;
 
 # find out the names of the jobs
@@ -56,7 +56,7 @@ foreach my $job (@JOB){
 
 # get qsub ID
 my @QSUB_ID;
-foreach my $job (@JOB){    
+foreach my $job (@JOB){
     `cat $tmpdir/job-$$-$job.log` =~ /Your job (\d+) /
 	or die "ERROR: Can't read log of job $tmpdir/job-$$-$job.log";
     push @QSUB_ID,$1;

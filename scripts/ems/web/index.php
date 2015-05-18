@@ -29,7 +29,7 @@ else if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
 
   if (array_key_exists("show",$_GET)) { show(); }
   else if (array_key_exists("diff",$_GET)) { diff(); }
-  else if (array_key_exists("analysis",$_GET)) { 
+  else if (array_key_exists("analysis",$_GET)) {
     $action = $_GET["analysis"];
     $set = $_GET["set"];
     $id = $_GET["id"];
@@ -60,7 +60,7 @@ else if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
         if ($match[2] == $set) {
           $id_array[] = $match[1];
         }
-      }      
+      }
     }
     if (count($id_array) != 2) {
       print "ERROR: comp 2!";

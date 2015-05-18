@@ -1,8 +1,8 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
-#Converts direct and inverted alignments into a more compact 
-#bi-alignment format. It optionally reads the counting file 
+#Converts direct and inverted alignments into a more compact
+#bi-alignment format. It optionally reads the counting file
 #produced by giza containing the frequency of each traning sentence.
 
 #Copyright Marcello Federico, November 2004
@@ -15,12 +15,12 @@ while ($w=shift @ARGV){
   $dir=shift(@ARGV),next  if $w eq "-d";
   $inv=shift(@ARGV),next  if $w eq "-i";
   $cnt=shift(@ARGV),next  if $w eq "-c";
-} 
+}
 
 my $lc = 0;
 
 if (!$dir || !$inv){
- print  "usage: giza2bal.pl [-c <count-file>] -d <dir-align-file> -i <inv-align-file>\n"; 
+ print  "usage: giza2bal.pl [-c <count-file>] -d <dir-align-file> -i <inv-align-file>\n";
  print  "input files can be also commands, e.g. -d \"gunzip -c file.gz\"\n";
  exit(0);
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -28,8 +28,8 @@ die("interpolate-lm.perl --tuning set --name out-lm --lm lm0,lm1,lm2,lm3 [--sril
 
 # check and set default to unset parameters
 die("ERROR: please specify output language model name --name") unless defined($NAME);
-die("ERROR: please specify tuning set with --tuning") unless defined($TUNING); 
-die("ERROR: please specify language models with --lm") unless defined($LM); 
+die("ERROR: please specify tuning set with --tuning") unless defined($TUNING);
+die("ERROR: please specify language models with --lm") unless defined($LM);
 die("ERROR: can't read $TUNING") unless -e $TUNING;
 die("ERROR: did not find srilm dir") unless -e $SRILM;
 die("ERROR: cannot run ngram") unless -x $SRILM."/ngram";
@@ -152,7 +152,7 @@ sub interpolate {
     $mix =~ /best lambda \(([\d\. e-]+)\)/ || die("ERROR: computing lambdas failed: $mix");
     @LAMBDA = split(/ /,$1);
   }
- 
+
   # create new language model
   print STDERR "creating new language model...\n";
   my $i = 0;
@@ -196,7 +196,7 @@ sub saferun3 {
   print STDERR "Executing: @_\n";
   my $wtr = gensym();
   my $rdr = gensym();
-  my $err = gensym(); 
+  my $err = gensym();
   my $pid = open3($wtr, $rdr, $err, @_);
   close($wtr);
   my $gotout = "";

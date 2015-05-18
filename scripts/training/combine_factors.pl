@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 # given a list of files, combines them to a single corpus (sent to stdout)
@@ -50,7 +50,7 @@ while (defined $_) {
       if $#toks != $#intokens;
     $lines_of_extratoks[$factor] = \@toks;
   }
-  
+
   # for every token, print the factors in the order as user wished
   for(my $i=0; $i<=$#intokens; $i++) {
     my $token = $intokens[$i];

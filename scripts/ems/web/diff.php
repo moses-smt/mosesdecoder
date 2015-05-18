@@ -37,7 +37,7 @@ function compute_diff($base,$change) {
   foreach ($all_parameters as $parameter) {
     if (!array_key_exists($parameter,$parameter_base)) {
       $parameter_base[$parameter] = "";
-    } 
+    }
     if (!array_key_exists($parameter,$parameter_change)) {
       $parameter_change[$parameter] = "";
     }

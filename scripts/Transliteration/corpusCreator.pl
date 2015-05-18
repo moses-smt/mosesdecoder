@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -29,15 +29,15 @@ open FH,  "<:encoding(UTF-8)", "$tPath/$tFile" or die "Can't open $tPath/$tFile:
 open MYSFILE,  ">:encoding(UTF-8)", "$tPath/training/corpus.$inp_ext" or die "Can't open $tPath/training/corpus.$inp_ext: $!\n";
 open MYTFILE,  ">:encoding(UTF-8)", "$tPath/training/corpus.$op_ext" or die "Can't open $tPath/training/corpus.$op_ext: $!\n";
 
-while (<FH>) 
+while (<FH>)
 {
-    chomp;    
+    chomp;
     my ($src,$tgt) = split(/\t/);
-    
-    $s = join(' ', split('',$src)); 
-    $t = join(' ', split('',$tgt)); 
+
+    $s = join(' ', split('',$src));
+    $t = join(' ', split('',$tgt));
     print MYSFILE "$s\n";
-    print MYTFILE "$t\n";	  
+    print MYTFILE "$t\n";
     push(@source, $s);
     push(@target, $t);
 }

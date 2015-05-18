@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 use warnings;
@@ -48,7 +48,7 @@ sub get_generation {
 
     my %INCLUDE_SOURCE;
     foreach my $factor (split(/,/,$factor_e_source)) {
-	
+
 	$INCLUDE_SOURCE{$factor} = 1;
     }
     my %INCLUDE;
@@ -76,14 +76,14 @@ sub get_generation {
 		$target .= "|" unless $first_factor;
 		$first_factor = 0;
 		$target .= $FACTOR[$factor];
-	    }	    
+	    }
 	    $GENERATION{$source}{$target}++;
 	    $GENERATION_TOTAL_SOURCE{$source}++;
 	    $GENERATION_TOTAL_TARGET{$target}++;
 	}
-    } 
+    }
     close(E);
- 
+
     open(GEN,">$_OUTPUT.$factor") or die "Can't write $_OUTPUT.$factor";
     foreach my $source (keys %GENERATION) {
 	foreach my $target (keys %{$GENERATION{$source}}) {

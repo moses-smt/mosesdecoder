@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 # given a pathname to a factored corpus, a list of (numeric) factors to keep
@@ -72,7 +72,7 @@ while (<$corp_stream>) {
       if $#toks != $#intokens;
     $lines_of_extratoks{$factor} = \@toks;
   }
-  
+
   # for every token, print the factors in the order as user wished
   for(my $i=0; $i<=$#intokens; $i++) {
     my $token = $intokens[$i];

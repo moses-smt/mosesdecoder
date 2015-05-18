@@ -28,7 +28,7 @@ enum Alignment {
   TGTTOSRC,
 };
 
-const Enum_T END_ENUM = {'\0', 0};
+const Enum_T END_ENUM = {0, 0};
 
 namespace
 {

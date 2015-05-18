@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # Uses Google AJAX API to collect many translations, i.e. create a parallel
 # corpus of Google translations.
@@ -102,7 +102,7 @@ sub collect_translations {
     # infinite loop, until everything translated
     my $gotlines = wcl($outfile);
     print STDERR "$outfile contains $gotlines lines already, extending.\n";
-  
+
     my $nr = 0;
     my @inlines = ();
     my $droplast = 0;
@@ -146,9 +146,9 @@ sub collect_translations {
         }
       }
     }
-  
+
     my $outlines;
-    
+
     if (0 == scalar @inlines) {
       # special case: skipping too long sentences
       $outlines = [""];
@@ -156,7 +156,7 @@ sub collect_translations {
       $outlines = translate_batch(\@inlines);
       last if !defined $outlines;
     }
-  
+
     *OUTF = my_append($outfile);
     foreach my $outline (@$outlines) {
       print OUTF $outline."\n";

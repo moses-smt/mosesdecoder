@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # example
 # ./score-parallel.perl 8 "gsort --batch-size=253" ./score ./extract.2.sorted.gz ./lex.2.f2e ./phrase-table.2.half.f2e  --GoodTuring ./phrase-table.2.coc 0
@@ -35,7 +35,7 @@ my $sortCmd			= $ARGV[1];
 my $scoreCmd		= $ARGV[2];
 
 my $extractFile = $ARGV[3]; # 1st arg of extract argument
-my $lexFile 		= $ARGV[4]; 
+my $lexFile 		= $ARGV[4];
 my $ptHalf 			= $ARGV[5]; # output
 my $inverse = 0;
 my $sourceLabelsFile;
@@ -92,7 +92,7 @@ if ($numParallel <= 1)
   }
   print STDERR "$cmd \n";
   systemCheck($cmd);
-  
+
   $fileCount = 1;
 }
 else
@@ -103,7 +103,7 @@ else
 	else {
 		open(IN, $extractFile) || die "can't open $extractFile";
 	}
-	
+
 	my $lastlineContext;
 	if ($FlexibilityScore) {
 		$lastlineContext = "";
@@ -117,25 +117,25 @@ else
 
 	my $filePath  = "$TMPDIR/extract.$fileCount.gz";
 	open (OUT, "| $GZIP_EXEC -c > $filePath") or die "error starting $GZIP_EXEC $!";
-	
+
 	my $lineCount = 0;
 	my $line;
 	my $prevSourcePhrase = "";
-	while ($line=<IN>) 
+	while ($line=<IN>)
 	{
 		chomp($line);
 		++$lineCount;
-	
+
 		if ($lineCount > $EXTRACT_SPLIT_LINES)
 		{ # over line limit. Cut off at next source phrase change
 			my $sourcePhrase = GetSourcePhrase($line);
-			
+
 			if ($prevSourcePhrase eq "")
 			{ # start comparing
 				$prevSourcePhrase = $sourcePhrase;
 			}
 			elsif ($sourcePhrase eq $prevSourcePhrase)
-			{ # can't cut off yet. Do nothing      
+			{ # can't cut off yet. Do nothing
 			}
 			else
 			{ # cut off, open next min-extract file & write to that instead
@@ -155,9 +155,9 @@ else
 		else
 		{ # keep on writing to current mini-extract file
 		}
-	
+
 		print OUT "$line\n";
-	
+
 	}
 	close OUT;
 	if ($FlexibilityScore) {
@@ -287,7 +287,7 @@ if (-e $cocPath)
 }
 
 # merge source label files
-if (!$inverse && defined($sourceLabelsFile)) 
+if (!$inverse && defined($sourceLabelsFile))
 {
   my $cmd = "(echo \"GlueTop 0\"; echo \"GlueX 1\"; echo \"SSTART 2\"; echo \"SEND 3\"; cat $TMPDIR/phrase-table.half.*.gz.syntaxLabels.src | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+3]}/\") > $sourceLabelsFile";
   print STDERR "Merging source label files: $cmd \n";
@@ -295,7 +295,7 @@ if (!$inverse && defined($sourceLabelsFile))
 }
 
 # merge parts-of-speech files
-if (!$inverse && defined($partsOfSpeechFile)) 
+if (!$inverse && defined($partsOfSpeechFile))
 {
   my $cmd = "(echo \"SSTART 0\"; echo \"SEND 1\"; cat $TMPDIR/phrase-table.half.*.gz.partsOfSpeech | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+1]}/\") > $partsOfSpeechFile";
   print STDERR "Merging parts-of-speech files: $cmd \n";
@@ -317,7 +317,7 @@ sub RunFork($)
   my $cmd = shift;
 
   my $pid = fork();
-  
+
   if ($pid == 0)
   { # child
     print STDERR $cmd;
@@ -388,7 +388,7 @@ sub CutContextFile($$$)
     }
 
     #write all lines in context file until we meet last source phrase in extract file
-    while ($line=<IN_CONTEXT>) 
+    while ($line=<IN_CONTEXT>)
     {
     chomp($line);
     $sourcePhrase = GetSourcePhrase($line);
@@ -397,7 +397,7 @@ sub CutContextFile($$$)
     }
 
     #write all lines in context file that correspond to last source phrase in extract file
-    while ($line=<IN_CONTEXT>) 
+    while ($line=<IN_CONTEXT>)
     {
     chomp($line);
     $sourcePhrase = GetSourcePhrase($line);

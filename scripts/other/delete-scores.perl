@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -21,10 +21,10 @@ my @keepScores = split(/,/, $keepScoresStr);
 while (my $line = <STDIN>) {
   chomp($line);
   #print STDERR "line=$line\n";
-  
+
   my @toks = split(/\|/, $line);
   my @scores = split(/ /, $toks[6]);
-  
+
   $toks[6] = DeleteScore($toks[6], \@keepScores);
 
   # output
@@ -48,7 +48,7 @@ sub DeleteScore
 {
   my $string = $_[0];
   my @keepScores = @{$_[1]};
-  
+
   $string = trim($string);
   my @toks = split(/ /, $string);
 
@@ -57,7 +57,7 @@ sub DeleteScore
     $string .= $toks[ $keepScores[$i] ] ." ";
   }
   $string = " " .$string;
-  
+
   return $string;
 }
 

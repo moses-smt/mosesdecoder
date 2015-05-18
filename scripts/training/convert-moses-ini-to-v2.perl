@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -24,7 +24,7 @@ for(; $i<scalar(@INI); $i++) {
 	if ($section eq "ttable-file" ||
 	    $section eq "distortion-file" ||
 	    $section eq "generation-file" ||
-	    $section eq "lmodel-file" || 
+	    $section eq "lmodel-file" ||
 	    $section eq "ttable-limit" ||
 	    $section eq "target-word-insertion-feature" ||
 	    $section eq "source-word-deletion-feature" ||
@@ -50,7 +50,7 @@ for(; $i<scalar(@INI); $i++) {
 	}
 	elsif ($section eq "report-sparse-features") {
     &get_data(); # ignore
-  } 
+  }
 	else {
 	    print STDERR "include section [$section] verbatim.\n";
 	    print $header.$line;
@@ -153,12 +153,12 @@ foreach my $section (keys %FEATURE) {
 	foreach my $line (@{$FEATURE{$section}}) {
 	    my ($factors,$type,$weight_count,$file) = split(/ /,$line);
 	    my ($input_factor,$output_factor) = split(/\-/, $factors);
-	    $feature .= "LexicalReordering name=LexicalReordering$i num-features=$weight_count type=$type input-factor=$input_factor output-factor=$output_factor path=$file\n";	    
+	    $feature .= "LexicalReordering name=LexicalReordering$i num-features=$weight_count type=$type input-factor=$input_factor output-factor=$output_factor path=$file\n";
 	    $weight .= "LexicalReordering$i=".&get_weights(\@W,$weight_count)."\n";
 	    $i++;
 	}
     }
-	
+
     elsif ($section eq "lmodel-file") {
 	my $i = 0;
 	my @W = @{$WEIGHT{"l"}};

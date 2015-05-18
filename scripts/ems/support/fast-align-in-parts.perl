@@ -24,7 +24,7 @@ die("ERROR - usage: fast-align-in-parts.perl -bin FAST_ALIGN_BIN -i PARALLEL_COR
       && $MAX_LINES > 0;
 die("ERROR - input file does not exist: $IN") unless -e $IN;
 die("ERROR - fast_align binary does not exist: $BIN") unless -e $BIN;
-        
+
 chomp(my $line_count = `cat $IN | wc -l`);
 
 # not more than maximal number of lines -> just run it regulary

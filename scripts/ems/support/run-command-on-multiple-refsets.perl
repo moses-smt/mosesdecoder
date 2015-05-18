@@ -1,9 +1,9 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
 
-die("ERROR: syntax: run-command-on-multiple-refsets.perl cmd in out") 
+die("ERROR: syntax: run-command-on-multiple-refsets.perl cmd in out")
     unless scalar @ARGV == 3;
 my ($cmd,$in,$out) = @ARGV;
 

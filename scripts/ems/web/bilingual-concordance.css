@@ -17,57 +17,57 @@
   text-align: center;
 }
 
-table.biconcor { 
-  table-layout: fixed; 
-  padding: 0px; 
-  margin: 0px; 
+table.biconcor {
+  table-layout: fixed;
+  padding: 0px;
+  margin: 0px;
 }
 
-tr.biconcor { 
-  padding: 0px; 
-  margin: 0px; 
+tr.biconcor {
+  padding: 0px;
+  margin: 0px;
 }
 
-td.biconcor { 
-  white-space: nowrap; 
-  overflow: hidden; 
-  padding: 0px; 
-  margin: 0px; 
+td.biconcor {
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0px;
+  margin: 0px;
 }
 
-td.pp_source_left { 
+td.pp_source_left {
   font-size: 70%;
-  text-align: right; 
+  text-align: right;
 }
 
-td.pp_target_left { 
+td.pp_target_left {
   font-size: 70%;
-  text-align: right; 
+  text-align: right;
 }
 
-td.pp_source { 
+td.pp_source {
   font-size: 70%;
-  font-weight: bold; 
+  font-weight: bold;
 }
 
-td.pp_target { 
+td.pp_target {
   font-size: 70%;
-  font-weight: bold; 
+  font-weight: bold;
 }
 
-td.mismatch_target { 
+td.mismatch_target {
   font-size: 70%;
   text-align: center;
 }
 
-td.pp_source_right { 
+td.pp_source_right {
   font-size: 70%;
-  border-style:solid; 
-  border-width:0px 2px 0px 0px ; 
-  border-color: black; 
+  border-style:solid;
+  border-width:0px 2px 0px 0px ;
+  border-color: black;
 }
 
-td.pp_target_right { 
+td.pp_target_right {
   font-size: 70%;
 }
 
@@ -88,11 +88,11 @@ span.mismatch_misaligned {
 }
 
 span.mismatch_aligned {
-  font-weight: bold; 
+  font-weight: bold;
 }
 
 td.pp_more {
   font-size: 70%;
   color: navy;
-  text-align: center; 
+  text-align: center;
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -31,8 +31,8 @@ die("ERROR: you need to define --moses-src-dir --external-bin-dir, --translitera
     unless (defined($MOSES_SRC_DIR) &&
             defined($TRANSLIT_MODEL) &&
             defined($OOV_FILE) &&
-	     defined($INPUT_EXTENSION)&&	
-	     defined($OUTPUT_EXTENSION)&&	
+	     defined($INPUT_EXTENSION)&&
+	     defined($OUTPUT_EXTENSION)&&
 	     defined($EXTERNAL_BIN_DIR));
 
 die("ERROR: could not find Transliteration Model '$TRANSLIT_MODEL'")
@@ -68,7 +68,7 @@ sub prepare_for_transliteration
 
 	open MYFILE,  "<:encoding(UTF-8)", $testFile or die "Can't open $testFile: $!\n";
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
         chomp;
         #print "$_\n";
@@ -76,12 +76,12 @@ sub prepare_for_transliteration
 
 	 foreach (@words)
          {
-		
+
 		@tW = split /\Q$___FACTOR_DELIMITER/;
 
 		if (defined $tW[0])
 		{
-		
+
 		  if (! ($tW[0] =~ /[0-9.,]/))
 		   {
 			$UNK{$tW[0]} = 1;
@@ -90,7 +90,7 @@ sub prepare_for_transliteration
 		   {
 		   	print "Not transliterating $tW[0] \n";
 		   }
-		}    
+		}
          }
 	}
 	 close (MYFILE);
@@ -100,7 +100,7 @@ sub prepare_for_transliteration
 	foreach my $key ( keys %UNK )
 	{
   		$src=join(' ', split('',$key));
- 		print MYFILE "$src\n";	
+ 		print MYFILE "$src\n";
 	}
 	 close (MYFILE);
 }
@@ -116,7 +116,7 @@ sub run_transliteration
 	my $eval_file = $list[3];
 
 	`touch $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini`;
-	
+
 	print "Filter Table\n";
 
 	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table -config $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini -lm 0:3:$TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini:8`;
@@ -152,16 +152,16 @@ sub form_corpus
 
 	my $antLog = exp(0.2);
 	my $phraseTable = $list[2];
-	
+
 	open MYFILE,  "<:encoding(UTF-8)", $inp_file or die "Can't open $inp_file: $!\n";
 	open PT,  ">:encoding(UTF-8)", $phraseTable or die "Can't open $phraseTable: $!\n";
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
         chomp;
         #print "$_\n";
         @words = split(/ /, "$_");
-	 
+
 	  $thisStr = "";
 	  foreach (@words)
          {
@@ -169,14 +169,14 @@ sub form_corpus
          }
 
 	  push(@UNK, $thisStr);
-	  $vocab{$thisStr} = 1;	
+	  $vocab{$thisStr} = 1;
 	}
 	 close (MYFILE);
 
 	open MYFILE,  "<:encoding(UTF-8)", $testFile or die "Can't open $testFile: $!\n";
 	my $inpCount = 0;
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
        	 chomp;
         	#print "$_\n";
@@ -186,8 +186,8 @@ sub form_corpus
 
 		if ($prev != $sNum){
 			$inpCount++;
-		} 
-	
+		}
+
 		my $i = 2;
 		$thisStr = "";
 		$features = "";
@@ -199,7 +199,7 @@ sub form_corpus
 		}
 
 		$i++;
-		
+
 		while ($words[$i] ne "|||")
 		{
 			if ($words[$i] =~ /Penalty0/ || $words[$i] eq "Distortion0=" || $words[$i] eq "LM0=" ){
@@ -214,7 +214,7 @@ sub form_corpus
 		$i++;
 
 		#$features = $features . " " . $words[$i];
-		
+
 		if ($thisStr ne ""){
 		 print PT "$UNK[$inpCount] ||| $thisStr ||| $features ||| 0-0 ||| 0 0 0\n";
 		}
@@ -223,9 +223,9 @@ sub form_corpus
  	close (MYFILE);
 	close (PT);
 
-		
+
 	`gzip $phraseTable`;
-	
+
 }
 
 

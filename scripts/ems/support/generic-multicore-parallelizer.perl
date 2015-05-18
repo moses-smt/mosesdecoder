@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -6,7 +6,7 @@ use strict;
 my $cores = 8;
 my $serial = 1;
 my ($infile,$outfile,$cmd,$tmpdir);
-my $parent = $$; 
+my $parent = $$;
 
 use Getopt::Long qw(:config pass_through no_ignore_case);
 GetOptions('cores=i' => \$cores,
@@ -27,7 +27,7 @@ die("ERROR: you need to specify a tempdir with -tmpdir") unless $tmpdir;
 
 # create split input files
 my $sentenceN = `cat $infile | wc -l`;
-my $splitN = int(($sentenceN+($cores*$serial)-0.5) / ($cores*$serial)); 
+my $splitN = int(($sentenceN+($cores*$serial)-0.5) / ($cores*$serial));
 print STDERR "split -a 3 -l $splitN $infile $tmpdir/in-$parent-\n";
 `split -a 4 -l $splitN $infile $tmpdir/in-$parent-`;
 

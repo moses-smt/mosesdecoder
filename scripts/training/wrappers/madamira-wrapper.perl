@@ -50,7 +50,7 @@ my $infile = "$TMPDIR/input";
 print STDERR $infile."\n";
 
 open(TMP,">$infile");
-while(<STDIN>) { 
+while(<STDIN>) {
     print TMP $_;
 }
 close(TMP);
@@ -58,7 +58,7 @@ close(TMP);
 my $cmd;
 
 # split input file
-my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
+my $SPLIT_EXEC = `gsplit --help 2>/dev/null`;
 if($SPLIT_EXEC) {
     $SPLIT_EXEC = 'gsplit';
 }
@@ -80,7 +80,7 @@ print STDERR "Executing: $cmd\n";
 # get stuff out of mada output
 open(MADA_OUT,"<$infile.mada");
 #binmode(MADA_OUT, ":utf8");
-while(my $line = <MADA_OUT>) { 
+while(my $line = <MADA_OUT>) {
     chomp($line);
   #print STDERR "line=$line \n";
 
@@ -93,11 +93,11 @@ while(my $line = <MADA_OUT>) {
         # word
 	my $word = substr($line, 7, length($line) - 8);
         #print STDERR "FOund $word\n";
-	
+
 	for (my $i = 0; $i < 4; ++$i) {
 	    $line = <MADA_OUT>;
 	}
-	
+
 	my $factors = GetFactors($line, \@FACTORS);
 	$word .= $factors;
 
@@ -140,7 +140,7 @@ sub GetFactors
 
 	$ret .= "|$value";
     }
-    
+
     return $ret;
 }
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -8,7 +8,7 @@ while ($line = <STDIN>)
 {
   chomp($line);
   my @toks = split(/ /, $line);
-  
+
   foreach (my $i = 0; $i < @toks; ++$i)
   {
     my $tok = $toks[$i];

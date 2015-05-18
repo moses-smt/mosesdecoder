@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 # $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
@@ -99,7 +99,7 @@ my $megam_default_options = "-fvals -maxi 30 -nobias binary";
 # Flags related to Batch MIRA (Cherry & Foster, 2012)
 my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 
-# Hypergraph mira 
+# Hypergraph mira
 my $___HG_MIRA = 0;
 
 # Train phrase model mixture weights with PRO (Haddow, NAACL 2012)
@@ -380,7 +380,7 @@ if ($__PROMIX_TRAINING) {
   die "Not executable $__PROMIX_TRAINING" unless -x $__PROMIX_TRAINING;
   die "For promix training, specify the tables using --promix-table arguments" unless @__PROMIX_TABLES;
   die "For mixture model, need at least 2 tables" unless scalar(@__PROMIX_TABLES) > 1;
-  
+
   for my $TABLE (@__PROMIX_TABLES) {
     die "Phrase table $TABLE not found" unless -r $TABLE;
   }
@@ -537,7 +537,7 @@ if ($__PROMIX_TRAINING) {
   for (my $i = 0; $i < scalar(@__PROMIX_TABLES); ++$i) {
     # Create filtered, binarised tables
     my $filtered_config = "moses_$i.ini";
-    substitute_ttable($___CONFIG, $filtered_config, $__PROMIX_TABLES[$i]); 
+    substitute_ttable($___CONFIG, $filtered_config, $__PROMIX_TABLES[$i]);
     #TODO: Remove reordering table from config, as we don't need to filter
     # and binarise it.
     my $filtered_path = "filtered_$i";
@@ -548,7 +548,7 @@ if ($__PROMIX_TRAINING) {
     push (@_PROMIX_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
   }
 }
- 
+
 if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
   if (-e "$outdir/moses.ini") {
@@ -577,7 +577,7 @@ if ($___FILTER_PHRASE_TABLE) {
 my $featlist = get_featlist_from_moses($___CONFIG);
 $featlist = insert_ranges_to_featlist($featlist, $___RANGES);
 
-# Mark which features are disabled 
+# Mark which features are disabled
 if (defined $___ACTIVATE_FEATURES) {
   $featlist->{"enabled"}    = undef;
   my %enabled = map { ($_, 1) } split /[, ]+/, $___ACTIVATE_FEATURES;
@@ -730,22 +730,22 @@ while (1) {
       # total number of weights is 1 less than number of phrase features, multiplied
       # by the number of tables
       $num_mixed_phrase_features = (grep { $_ eq 'tm' } @{$featlist->{"names"}}) - 1;
-  
-      @promix_weights = (1.0/scalar(@__PROMIX_TABLES)) x 
+
+      @promix_weights = (1.0/scalar(@__PROMIX_TABLES)) x
         ($num_mixed_phrase_features * scalar(@__PROMIX_TABLES));
     }
-    
+
     # backup orig config, so we always add the table into it
-    $uninterpolated_config= $___CONFIG unless $uninterpolated_config; 
+    $uninterpolated_config= $___CONFIG unless $uninterpolated_config;
 
     # Interpolation
     my $interpolated_phrase_table = "interpolate";
     for my $itable (@_PROMIX_TABLES_BIN) {
       $interpolated_phrase_table .= " 1:$itable";
     }
-    
+
     # Create an ini file for the interpolated phrase table
-    $interpolated_config ="moses.interpolated.ini"; 
+    $interpolated_config ="moses.interpolated.ini";
     substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "99");
 
     # Append the multimodel weights
@@ -903,7 +903,7 @@ while (1) {
                           " --scfile " .  join(" --scfile ", split(/,/, $scfiles));
 
   push @allnbests, $nbest_file;
-  my $promix_file_settings = 
+  my $promix_file_settings =
                           "--scfile " .  join(" --scfile ", split(/,/, $scfiles)) .
                           " --nbest " . join(" --nbest ", @allnbests);
 
@@ -961,7 +961,7 @@ while (1) {
     $mira_settings .= " --type hypergraph ";
     $mira_settings .= join(" ", map {"--reference $_"} @references);
     $mira_settings .= " --hgdir $hypergraph_dir ";
-    #$mira_settings .= "--verbose "; 
+    #$mira_settings .= "--verbose ";
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile, 1);
   } elsif ($__PROMIX_TRAINING) {
@@ -976,7 +976,7 @@ while (1) {
     print "Finished promix optimisation at " . `date`;
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile, ($__THREADS ? $__THREADS : 1) );
-  } 
+  }
 
   die "Optimization failed, file $weights_out_file does not exist or is empty"
     if ! -s $weights_out_file;
@@ -1195,7 +1195,7 @@ sub get_weights_from_mert {
     }
     close $fh;
     die "It seems feature values are invalid or unable to read $outfile." if $sum < 1e-09;
-  
+
     $devbleu = "unknown";
     foreach (@WEIGHT) { $_ /= $sum; }
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
@@ -1286,7 +1286,7 @@ sub run_decoder {
     if (defined $___JOBS && $___JOBS > 1) {
       die "Hypergraph mira not supported by moses-parallel" if $___HG_MIRA;
       $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG";
-      $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE); 
+      $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
       $decoder_cmd .= " -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE distinct\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
       my $nbest_list_cmd = "-n-best-list $filename $___N_BEST_LIST_SIZE distinct";
@@ -1403,7 +1403,7 @@ sub get_featlist_from_file {
     if (/^(\S+)= (.+)$/) { # only for feature functions with dense features
       my ($longname, $valuesStr) = ($1, $2);
       next if (!defined($valuesStr));
-    
+
       my @values = split(/ /, $valuesStr);
       my $valcnt = 0;
       my $hastuneablecomponent = 0;
@@ -1605,7 +1605,7 @@ sub create_config {
 
   # write all weights
   print $out "[weight]\n";
-  
+
   my $prevName = "";
   my $outStr = "";
   my $valcnt = 0;
@@ -1613,7 +1613,7 @@ sub create_config {
   for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
     my $name = $featlist->{"names"}->[$i];
     my $val = $featlist->{"values"}->[$i];
-    
+
     if ($prevName ne $name) {
       print $out "$outStr\n";
       $valcnt = 0;

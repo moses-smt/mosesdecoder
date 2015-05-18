@@ -56,7 +56,7 @@ my $infile = "$TMPDIR/input";
 print STDERR $infile."\n";
 
 open(TMP,">$infile");
-while(<STDIN>) { 
+while(<STDIN>) {
     print TMP $_;
 }
 close(TMP);
@@ -65,7 +65,7 @@ my $cmd;
 
 if ($USE_PARALLEL) {
   # split input file
-  my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
+  my $SPLIT_EXEC = `gsplit --help 2>/dev/null`;
   if($SPLIT_EXEC) {
     $SPLIT_EXEC = 'gsplit';
   }
@@ -97,7 +97,7 @@ else {
 # get stuff out of mada output
 open(MADA_OUT,"<$infile.mada");
 #binmode(MADA_OUT, ":utf8");
-while(my $line = <MADA_OUT>) { 
+while(my $line = <MADA_OUT>) {
   chomp($line);
 	print "$line\n";
 }

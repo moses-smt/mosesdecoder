@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -17,7 +17,7 @@ while(<IN>) {
         if (length($word) > $size) {
 	    $word = substr($word,length($word)-$size);
         }
-	print OUT " " unless $first; 
+	print OUT " " unless $first;
         $first = 0;
 	print OUT lc($word);
     }

@@ -7,16 +7,18 @@ Module implementing Dialog.
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-import os, datetime
+import datetime
+import os
 
 from Ui_addMTModel import Ui_Dialog
 from util import *
+
 
 class AddMTModelDialog(QDialog, Ui_Dialog):
     """
     Class documentation goes here.
     """
-    def __init__(self, parent = None, workdir=None):
+    def __init__(self, parent=None, workdir=None):
         """
         Constructor
         """
@@ -27,7 +29,7 @@ class AddMTModelDialog(QDialog, Ui_Dialog):
         todir, timestr = self.findEmptyDirWithTime(self.workdir)
         self.editPath.setText(todir)
         self.editName.setText("SampleModel_" + timestr)
-        
+
     def findEmptyDirWithTime(self, workdir):
         if not self.timestr:
             self.timestr = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
@@ -37,7 +39,7 @@ class AddMTModelDialog(QDialog, Ui_Dialog):
                 break
             self.timestr = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
         return todir, self.timestr
-    
+
     @pyqtSignature("")
     def on_btnLocal_clicked(self):
         """
@@ -49,7 +51,7 @@ class AddMTModelDialog(QDialog, Ui_Dialog):
         dialog.setViewMode(QFileDialog.Detail)
         if dialog.exec_():
             self.editLocal.setText(dialog.selectedFiles()[0])
-    
+
     @pyqtSignature("")
     def on_btnPath_clicked(self):
         """
@@ -63,21 +65,21 @@ class AddMTModelDialog(QDialog, Ui_Dialog):
             root = str(dialog.selectedFiles()[0])
             todir, _ = self.findEmptyDirWithTime(root)
             self.editPath.setText(todir)
-    
+
     @pyqtSignature("bool")
     def on_grpBoxInternet_toggled(self, p0):
         """
         Slot documentation goes here.
         """
         self.grpBoxLocal.setChecked(not p0)
-    
+
     @pyqtSignature("bool")
     def on_grpBoxLocal_toggled(self, p0):
         """
         Slot documentation goes here.
         """
         self.grpBoxInternet.setChecked(not p0)
-    
+
     @pyqtSignature("")
     def on_buttonBox_accepted(self):
         """
@@ -85,7 +87,7 @@ class AddMTModelDialog(QDialog, Ui_Dialog):
         """
         def checkEmpty(mystr):
             return len(str(mystr).strip()) <= 0
-        
+
         #check everything
         self.modelName = self.editName.text()
         if checkEmpty(self.modelName):
@@ -111,4 +113,3 @@ class AddMTModelDialog(QDialog, Ui_Dialog):
             doAlert("Please provide non-empty Install Destination Folder")
             return
         self.accept()
-    

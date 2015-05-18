@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -18,7 +18,7 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
   my @SPEC = split(/\s+/,$feature_spec);
 
   my $factor = ($SPEC[0] eq 'word-translation') ? "0-0" : "0";
-  $factor = $1 if $feature_spec =~ / factor ([\d\-]+)/; 
+  $factor = $1 if $feature_spec =~ / factor ([\d\-]+)/;
   $feature_spec =~ s/ factor ([\d\-]+)//;
 
   if ($SPEC[0] eq 'target-word-insertion') {
@@ -107,7 +107,7 @@ sub create_top_words {
   open(TOP,">$file");
   for(my $i=0; $i<$count && $i<scalar(@SORTED); $i++) {
     $SORTED[$i] =~ /^\d+ (.+)$/;
-    print TOP "$1\n"; 
+    print TOP "$1\n";
   }
   close(TOP);
 

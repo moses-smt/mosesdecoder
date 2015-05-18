@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -13,16 +13,16 @@ use strict;
   while (<MYFILE>) {
  	chomp;
  	#print "$_\n";
-	
+
 	$sentence = "$_";
 	@words = split(/ /, $sentence);
-	
-	foreach (@words) 
+
+	foreach (@words)
 	{
  		 my ($factor_f,$factor_e) = split(/\-/,"$_");
 		 print $factor_e . " " . $factor_f . " ";
- 	} 
-	
+ 	}
+
 	print "\n";
  }
- close (MYFILE); 
+ close (MYFILE);

@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # given a moses.ini, filter the phrase tables to contain
 # only ttable-limit options per source phrase
@@ -155,7 +155,7 @@ sub filter_table
     push @tgt_phrases, {
       str => $line,
       score => sum(map { $weights[$_] * log $scores[$_] } (0 .. $#weights))
-    };    
+    };
   }
   printf STDERR "Finished, kept %d%% of phrases\n", $kept / $total * 100;
   close $in;

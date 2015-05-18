@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 # main page frame, triggers the loading of parts
 function show_analysis() {
@@ -122,7 +122,7 @@ function precision_by_coverage() {
     $log_info[$log_count]["precision"] += $item[1];
     $log_info[$log_count]["delete"] += $item[2];
     $log_info[$log_count]["length"] += $item[3];
-    $log_info[$log_count]["total"] += $item[4];    
+    $log_info[$log_count]["total"] += $item[4];
   }
   print "<h4>By log<sub>2</sub>-count in the training corpus</h4>";
   precision_by_coverage_graph("byCoverage",$log_info,$total,$img_width,SORT_NUMERIC);
@@ -159,7 +159,7 @@ function precision_by_coverage_factored($img_width,$total,$file,$factor_id) {
     $log_info_factored[$factor][$log_count]["precision"] += $item[2];
     $log_info_factored[$factor][$log_count]["delete"] += $item[3];
     $log_info_factored[$factor][$log_count]["length"] += $item[4];
-    $log_info_factored[$factor][$log_count]["total"] += $item[5];    
+    $log_info_factored[$factor][$log_count]["total"] += $item[5];
   }
   print "<h4>By factor ".factor_name("input",$factor_id)."</h4>";
   precision_by_coverage_graph("byFactor",$info_factored_sum,$total,$img_width,SORT_STRING);
@@ -203,7 +203,7 @@ function precision_by_word($type) {
     if ($byCoverage != -2 && $byCoverage != $log_count) {
 	continue;
     }
-   
+
     //# filter for factor
     $word = $item[5];
     if ($byFactor != "false" && $byFactor != $item[6]) {
@@ -231,7 +231,7 @@ function precision_by_word($type) {
 function precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_type) {
   $keys = array_keys($log_info);
   sort($keys,$sort_type);
-  
+
   $img_width /= 100;
   print "<div id=\"LatexToggle$name\" onClick=\"document.getElementById('Latex$name').style.display = 'block'; this.style.display = 'none';\" style=\"display:none;\"><font size=-2>(show LaTeX)</font></div>\n";
   print "<div id=\"Latex$name\" style=\"display:none;\">\n";
@@ -242,7 +242,7 @@ function precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_typ
       $height = 1.8-$line/10*1.8;
       print "\\draw[thin,lightgray] (0.2,-$height) ";
       print "node[anchor=east,black] {".$line."0\\%} -- ";
-      print "($img_width,-$height) ;<br>\n"; 
+      print "($img_width,-$height) ;<br>\n";
   }
   print "% co-ordinates for deletion<br>\n";
   for($line=0;$line<=3;$line++) {
@@ -251,7 +251,7 @@ function precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_typ
       if ($line != 0) {
 	  print "node[anchor=east,black] {".$line."0\\%} ";
       }
-      print "-- ($img_width,-$height) ;<br>\n"; 
+      print "-- ($img_width,-$height) ;<br>\n";
   }
 
   print "% boxes<br>\n";
@@ -265,13 +265,13 @@ function precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_typ
 
     $width += $x;
     $height += $y;
-    
+
     print "\\filldraw[very thin,gray] ($x,-$y) rectangle($width,-$height) ;<br>";
     print "\\draw[very thin,black] ($x,-$y) rectangle($width,-$height);<br>";
     if ($width-$x>.1) {
 	print "\\draw (".(($x+$width)/2).",-1.8) node[anchor=north,black] {".$i."};<br>";
     }
- 
+
 
     $del_ratio = $log_info[$i]["delete"]/$log_info[$i]["total"];
     $height = $del_ratio*1.80;
@@ -281,10 +281,10 @@ function precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_typ
     print "\\filldraw[very thin,lightgray] ($x,-2) rectangle($width,-$height);<br>\n";
     print "\\draw[very thin,black] ($x,-2) rectangle($width,-$height);<br>\n";
 
-    $total_so_far += $log_info[$i]["total"];   
+    $total_so_far += $log_info[$i]["total"];
   }
   print "\\end{tikzpicture}</code>";
-  print "</div>"; 
+  print "</div>";
 }
 
 function precision_by_coverage_graph($name,$log_info,$total,$img_width,$sort_type) {
@@ -351,7 +351,7 @@ ctx.font = '9px serif';
     print "ctx.fillRect ($x, 200, $width, $height);";
 
     $total_so_far += $log_info[$i]["total"];
-   
+
     if ($width>3) {
       print "ctx.fillStyle = \"rgb(0,0,0)\";";
       // print "ctx.rotate(-1.5707);";
@@ -410,7 +410,7 @@ function ngram_summary() {
 	 $info["$type-1-correct"],
 	 $info["$type-2-correct"],
 	 $info["$type-3-correct"],
-	 $info["$type-4-correct"]);    
+	 $info["$type-4-correct"]);
   printf("<tr><td>&nbsp;</td><td>%.1f%s</td><td>%.1f%s</td><td>%.1f%s</td><td>%.1f%s</td></tr>\n",
 	 $info["$type-1-correct"]/$info["$type-1-total"]*100,'%',
 	 $info["$type-2-correct"]/$info["$type-2-total"]*100,'%',
@@ -483,7 +483,7 @@ function ngram_show($type) {
   $data = file(get_current_analysis_filename("basic","n-gram-$type.$order"));
   for($i=0;$i<count($data);$i++) {
      $item = split("\t",$data[$i]);
-     $line["total"] = $item[0]; 
+     $line["total"] = $item[0];
      $line["correct"] = $item[1];
      $line["ngram"] = $item[2];
      $ngram[] = $line;
@@ -496,7 +496,7 @@ function ngram_show($type) {
     $sort = 'ratio_worst';
     $smooth = 1;
   }
-  
+
   // sort index
   for($i=0;$i<count($ngram);$i++) {
     if ($sort == "abs_worst") {
@@ -806,7 +806,7 @@ function segmentation_summary() {
       if (array_key_exists($in,$count) &&
           array_key_exists($out,$count[$in])) {
 	  $c = $count[$in][$out];
-      } 
+      }
       else { $c = 0; }
       printf("<td align=right nowrap>%d (%.1f%s)</td>",$c,100*$c/$total,"%");
     }
@@ -885,8 +885,8 @@ function bleu_show() {
   $count = $_GET['count'];
   if ($count == 0) { $count = 5; }
 
-  $filter = ""; 
-  if (array_key_exists("filter",$_GET)) { 
+  $filter = "";
+  if (array_key_exists("filter",$_GET)) {
     $filter = base64_decode($_GET['filter']);
   }
 
@@ -924,7 +924,7 @@ function bleu_show() {
   if ($filter != "") {
     print "; filter: '$filter'";
   }
-  
+
   sentence_annotation($count,$filter);
   print "<p align=center><A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count,'".base64_encode($filter)."')\">5 more</A> | ";
   print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',10+$count,'".base64_encode($filter)."')\">10 more</A> | ";
@@ -950,28 +950,28 @@ function sentence_annotation($count,$filter) {
 	$word = explode(" ",$item[0]);
 	$keep = 0;
 	for($j=0;$j<count($word);$j++) {
-	  if ($word[$j] == $filter) { 
-	    $keep = 1; 
+	  if ($word[$j] == $filter) {
+	    $keep = 1;
 	  }
 	}
-	if (!$keep) { $filtered[$i] = 1; }	
+	if (!$keep) { $filtered[$i] = 1; }
       }
-    }  
+    }
   }
-  
-  # load bleu scores 
+
+  # load bleu scores
   $data = file(get_current_analysis_filename("basic","bleu-annotation"));
   for($i=0;$i<count($data);$i++) {
     $item = split("\t",$data[$i]);
     if (! array_key_exists($item[1],$filtered)) {
-      $line["bleu"] = $item[0]; 
-      $line["id"] = $item[1]; 
+      $line["bleu"] = $item[0];
+      $line["id"] = $item[1];
       $line["system"] = $item[2];
-      $line["reference"] = ""; 
+      $line["reference"] = "";
       for($j=3;$j<count($item);$j++) {
         if ($j>3) { $line["reference"] .= "<br>"; };
         $line["reference"] .= $item[$j];
-      } 
+      }
       $bleu[] = $line;
     }
   }
@@ -987,7 +987,7 @@ function sentence_annotation($count,$filter) {
     else if ($sort == "worst" || $sort == "75") {
       $a_idx = $a["bleu"];
       $b_idx = $b["bleu"];
-      if ($a_idx == $b_idx) { 
+      if ($a_idx == $b_idx) {
         $a_idx = $b["id"];
         $b_idx = $a["id"];
       }
@@ -995,7 +995,7 @@ function sentence_annotation($count,$filter) {
     else if ($sort == "best" || $sort == "avg" || $sort == "25") {
       $a_idx = -$a["bleu"];
       $b_idx = -$b["bleu"];
-      if ($a_idx == $b_idx) { 
+      if ($a_idx == $b_idx) {
         $a_idx = $a["id"];
         $b_idx = $b["id"];
       }
@@ -1021,7 +1021,7 @@ function sentence_annotation($count,$filter) {
 
   $retained = array();
   for($i=$offset;$i<$count+$offset && $i<count($bleu);$i++) {
-    $line = $bleu[$i]; 
+    $line = $bleu[$i];
     $retained[$line["id"]] = 1;
   }
 
@@ -1056,7 +1056,7 @@ function sentence_annotation($count,$filter) {
       list($sentence,$brackets,$nt,$words) = split("\t",$data[$i]);
       if ($sentence != $last_sentence) { $span = 0; }
       $last_sentence = $sentence;
-      if (array_key_exists($sentence,$retained)) {      
+      if (array_key_exists($sentence,$retained)) {
 	$segmentation[$sentence][$span]["brackets"] = $brackets;
 #	  $segmentation[$sentence][$span]["nt"] = $nt;
 	$segmentation[$sentence][$span]["words"] = rtrim($words);
@@ -1083,7 +1083,7 @@ function sentence_annotation($count,$filter) {
       list($sentence,$brackets,$nt,$words) = split("\t",$data[$i]);
       if ($sentence != $last_sentence) { $span = 0; }
       $last_sentence = $sentence;
-      if (array_key_exists($sentence,$retained)) {      
+      if (array_key_exists($sentence,$retained)) {
 	$segmentation_out[$sentence][$span]["brackets"] = $brackets;
 	$segmentation_out[$sentence][$span]["nt"] = $nt;
 	$segmentation_out[$sentence][$span]["words"] = rtrim($words);
@@ -1109,7 +1109,7 @@ function sentence_annotation($count,$filter) {
       list($sentence,$depth,$start_div,$end_div,$start_div_in,$end_div_in,$children) = split(" ",$data[$i]);
       if ($sentence != $last_sentence) { $n = 0; }
       $last_sentence = $sentence;
-      if (array_key_exists($sentence,$retained)) {      
+      if (array_key_exists($sentence,$retained)) {
 	$node[$sentence][$n]['depth'] = $depth;
 	$node[$sentence][$n]['start_div'] = $start_div;
 	$node[$sentence][$n]['end_div'] = $end_div;
@@ -1119,10 +1119,10 @@ function sentence_annotation($count,$filter) {
 	$n++;
       }
     }
-  } 
+  }
 
   # display
-  if ($filter != "") { 
+  if ($filter != "") {
       print " (".(count($input)-count($filtered))." retaining)";
   }
   print "</font><BR>\n";
@@ -1130,7 +1130,7 @@ function sentence_annotation($count,$filter) {
   $biconcor = get_biconcor_version($dir,$set,$id);
   //print "<div id=\"debug\">$sort / $offset</div>";
   for($i=$offset;$i<$count+$offset && $i<count($bleu);$i++) {
-     $line = $bleu[$i]; 
+     $line = $bleu[$i];
      $search_graph_dir = get_current_analysis_filename("basic","search-graph");
      if (file_exists($search_graph_dir) && file_exists($search_graph_dir."/graph.".$line["id"])) {
        $state = return_state_for_link();
@@ -1279,7 +1279,7 @@ function input_annotation($sentence,$input,$segmentation,$filter) {
       print "<tr><td colspan=".($sep_end-$sep_start)."><div style=\"position:relative; z-index:1;\">";
       for($j=$sep_start;$j<$sep_end;$j++) {
         if ($segmentation && array_key_exists($j,$segmentation["input_start"])) {
-          $id = $segmentation["input_start"][$j];  
+          $id = $segmentation["input_start"][$j];
           print "<span id=\"input-$sentence-$id\" style=\"border-color:#000000; border-style:solid; border-width:1px;\" onmouseover=\"highlight_phrase($sentence,$id);\" onmouseout=\"lowlight_phrase($sentence,$id);\">";
         }
         if (array_key_exists($j,$coverage)) {
@@ -1413,7 +1413,7 @@ function annotation_hierarchical($sentence,$segmentation,$segmentation_out,$node
 	    print "<span style=\"opacity:0\">|</span>";
 	}
 
-	$span_word = array(); 
+	$span_word = array();
 	if ($words != "") { $span_word = split(" ",$words); }
 	for($w=0;$w<count($span_word);$w++) {
 	    if ($w > 0) { print " "; }

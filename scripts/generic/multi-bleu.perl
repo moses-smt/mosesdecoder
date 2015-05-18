@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 use warnings;
@@ -73,7 +73,7 @@ while(<STDIN>) {
 		$REF_NGRAM_N{$ngram}++;
 	    }
 	    foreach my $ngram (keys %REF_NGRAM_N) {
-		if (!defined($REF_NGRAM{$ngram}) || 
+		if (!defined($REF_NGRAM{$ngram}) ||
 		    $REF_NGRAM{$ngram} < $REF_NGRAM_N{$ngram}) {
 		    $REF_NGRAM{$ngram} = $REF_NGRAM_N{$ngram};
 #	    print "$i: REF_NGRAM{$ngram} = $REF_NGRAM{$ngram}<BR>\n";

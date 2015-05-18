@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -31,12 +31,12 @@ $MODEL = "greek" if $LANGUAGE eq "el";
 die("Unknown language '$LANGUAGE'") unless defined($MODEL);
 $MODEL = $TREE_TAGGER."/lib/".$MODEL.".par";
 
-# define encoding conversion into Latin1 or Greek if required 
+# define encoding conversion into Latin1 or Greek if required
 my $CONV = "";
-#$CONV = "iconv --unicode-subst=X -f utf8 -t iso-8859-1|" 
-$CONV = "perl -ne 'use Encode; print encode(\"iso-8859-1\", decode(\"utf8\", \$_));' |" 
+#$CONV = "iconv --unicode-subst=X -f utf8 -t iso-8859-1|"
+$CONV = "perl -ne 'use Encode; print encode(\"iso-8859-1\", decode(\"utf8\", \$_));' |"
 	unless $MODEL =~ /utf8/ || $LANGUAGE eq "bg";
-$CONV = "perl -ne 'use Encode; print encode(\"iso-8859-7\", decode(\"utf8\", \$_));' |" 
+$CONV = "perl -ne 'use Encode; print encode(\"iso-8859-7\", decode(\"utf8\", \$_));' |"
 	if $LANGUAGE eq "el";
 
 # pipe in data into tagger, process its output

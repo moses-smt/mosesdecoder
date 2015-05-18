@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -18,7 +18,7 @@ die("ERROR: syntax is: parse-de-berkeley.perl [-split-hyphen] [-split-slash] [-m
    'mark-split' => \$MARK_SPLIT,
    'binarize' => \$BINARIZE,
    'unparseable' => \$UNPARSEABLE
-   
+
    )
   && defined($JAR) && defined($GRAMMAR);
 
@@ -76,7 +76,7 @@ while(<PARSE>) {
   #print STDERR "outLine=$outLine" .length($outLine) ."\n";
 
   if ($UNPARSEABLE == 1 && length($outLine) == 1) {
-	  print $unparsedLine;  
+	  print $unparsedLine;
   }
   else {
 	  print $outLine;

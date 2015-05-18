@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 # Collects and prints all n-grams that appear in the given corpus both
 # tokenized as well as untokenized.
 # Ondrej Bojar

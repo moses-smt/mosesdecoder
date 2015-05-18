@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -35,19 +35,19 @@ if (!defined($LMPLZ)) {
 }
 
 # check if the files are in place
-die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, and --moses-src-dir") 
-    unless (defined($MOSES_SRC_DIR) && 
-	    defined($CORPUS_F) && 
-	    defined($CORPUS_E) && 
-	    defined($ALIGNMENT)&& 
+die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, and --moses-src-dir")
+    unless (defined($MOSES_SRC_DIR) &&
+	    defined($CORPUS_F) &&
+	    defined($CORPUS_E) &&
+	    defined($ALIGNMENT)&&
 	    (defined($SRILM_DIR) || defined($LMPLZ)));
-die("ERROR: could not find input corpus file '$CORPUS_F'") 
+die("ERROR: could not find input corpus file '$CORPUS_F'")
     unless -e $CORPUS_F;
-die("ERROR: could not find output corpus file '$CORPUS_E'") 
+die("ERROR: could not find output corpus file '$CORPUS_E'")
     unless -e $CORPUS_E;
-die("ERROR: could not find algnment file '$ALIGNMENT'") 
+die("ERROR: could not find algnment file '$ALIGNMENT'")
     unless -e $ALIGNMENT;
-die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM") 
+die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM")
     unless -e "$MOSES_SRC_DIR/scripts/OSM/flipAlignment.perl";
 
 # create factors
@@ -55,13 +55,13 @@ die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM")
 `$MOSES_SRC_DIR/scripts/OSM/flipAlignment.perl $ALIGNMENT > $OUT_DIR/align`;
 
 if (defined($FACTOR)) {
-  
+
    my @factor_values = split(/\+/, $FACTOR);
- 
+
     foreach my $factor_val (@factor_values) {
     `mkdir $OUT_DIR/$factor_val`;
   my ($factor_f,$factor_e) = split(/\-/,$factor_val);
-    
+
     $CORPUS_F =~ /^(.+)\.([^\.]+)/;
     my ($corpus_stem_f,$ext_f) = ($1,$2);
     $CORPUS_E =~ /^(.+)\.([^\.]+)/;
@@ -77,7 +77,7 @@ if (defined($FACTOR)) {
 else {
     `ln -s $CORPUS_F $OUT_DIR/f`;
     `ln -s $CORPUS_E $OUT_DIR/e`;
-     create_model("");	
+     create_model("");
 }
 
 # create model
@@ -184,7 +184,7 @@ sub reduce_factors {
               die "ERROR: Couldn't find factor $outfactor in token \"$_\" in $full LINE $nr" if !defined $out;
               print OUT $out;
             }
-	} 
+	}
 	print OUT "\n";
     }
     print STDERR "\n";

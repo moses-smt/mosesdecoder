@@ -1,9 +1,9 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
 
-die("ERROR syntax: reference-from-sgm.perl ref src out") 
+die("ERROR syntax: reference-from-sgm.perl ref src out")
     unless scalar @ARGV == 3;
 my ($ref,$src,$txt) = @ARGV;
 

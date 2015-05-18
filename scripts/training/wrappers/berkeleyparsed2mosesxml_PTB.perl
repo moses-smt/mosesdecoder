@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -31,7 +31,7 @@ while(<STDIN>) {
   s/(\(\S+ )\)\)/$1\&closingparenthesis;\)/g;
 
 
-  
+
   # convert into tree
   s/\((\S+) /<tree label=\"$1\"> /g;
   s/\)/ <\/tree> /g;
@@ -41,7 +41,7 @@ while(<STDIN>) {
   s/\-RRB\-/\)/g;
   s/ +/ /g;
   s/ $//g;
-  
+
   # de-escape parentheses that were part of the input text
   s/\&openingparenthesis;/\(/g;
   s/\&closingparenthesis;/\)/g;

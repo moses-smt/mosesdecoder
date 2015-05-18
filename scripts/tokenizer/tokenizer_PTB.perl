@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # Sample Tokenizer
 ### Version 1.1
@@ -32,7 +32,7 @@ my $TIMING = 0;
 my $NUM_THREADS = 1;
 my $NUM_SENTENCES_PER_THREAD = 2000;
 
-while (@ARGV) 
+while (@ARGV)
 {
 	$_ = shift;
 	/^-b$/ && ($| = 1, next);
@@ -54,7 +54,7 @@ if ($TIMING)
 }
 
 # print help message
-if ($HELP) 
+if ($HELP)
 {
 	print "Usage ./tokenizer.perl (-l [en|de|...]) (-threads 4) < textfile > tokenizedfile\n";
         print "Options:\n";
@@ -65,7 +65,7 @@ if ($HELP)
 	exit;
 }
 
-if (!$QUIET) 
+if (!$QUIET)
 {
 	print STDERR "Tokenizer Version 1.1\n";
 	print STDERR "Language: $language\n";
@@ -86,7 +86,7 @@ my $count_sentences = 0;
 
 if ($NUM_THREADS > 1)
 {# multi-threading tokenization
-    while(<STDIN>) 
+    while(<STDIN>)
     {
         $count_sentences = $count_sentences + 1;
         push(@batch_sentences, $_);
@@ -146,14 +146,14 @@ if ($NUM_THREADS > 1)
 }
 else
 {# single thread only
-    while(<STDIN>) 
+    while(<STDIN>)
     {
-        if (($SKIP_XML && /^<.+>$/) || /^\s*$/) 
+        if (($SKIP_XML && /^<.+>$/) || /^\s*$/)
         {
             #don't try to tokenize XML/HTML tag lines
             print $_;
         }
-        else 
+        else
         {
             print &tokenize($_);
         }
@@ -179,7 +179,7 @@ sub tokenize_batch
     my(@tokenized_list) = ();
     foreach (@text_list)
     {
-        if (($SKIP_XML && /^<.+>$/) || /^\s*$/) 
+        if (($SKIP_XML && /^<.+>$/) || /^\s*$/)
         {
             #don't try to tokenize XML/HTML tag lines
             push(@tokenized_list, $_);
@@ -195,13 +195,13 @@ sub tokenize_batch
 # the actual tokenize function which tokenizes one input string
 # input: one string
 # return: the tokenized string for the input string
-sub tokenize 
+sub tokenize
 {
     my($text) = @_;
 
     #clean some stuff so you don't get &amp; -> &amp;amp;
     #news-commentary stuff
-    
+
     $text =~ s/\&#45;/ /g;
     $text =~ s/\&45;/ /g;
     $text =~ s/\&#160;/ /g;
@@ -221,7 +221,7 @@ sub tokenize
 
     chomp($text);
     $text = " $text ";
-    
+
     # remove ASCII junk
     $text =~ s/\s+/ /g;
     $text =~ s/[\000-\037]//g;
@@ -230,14 +230,14 @@ sub tokenize
     $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
 
     # aggressive hyphen splitting
-    if ($AGGRESSIVE) 
+    if ($AGGRESSIVE)
     {
         $text =~ s/([\p{IsAlnum}])\-([\p{IsAlnum}])/$1 \@-\@ $2/g;
     }
 
     #multi-dots stay together
     $text =~ s/\.([\.]+)/ DOTMULTI$1/g;
-    while($text =~ /DOTMULTI\./) 
+    while($text =~ /DOTMULTI\./)
     {
         $text =~ s/DOTMULTI\.([^\.])/DOTDOTMULTI $1/g;
         $text =~ s/DOTMULTI\./DOTDOTMULTI/g;
@@ -248,14 +248,14 @@ sub tokenize
     # separate , pre and post number
     $text =~ s/([\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
     $text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
-	      
+
     # turn `into '
     #$text =~ s/\`/\'/g;
-	
+
     #turn '' into "
     #$text =~ s/\'\'/ \" /g;
 
-    if ($language eq "en") 
+    if ($language eq "en")
     {
         #split contractions right
         # $text =~ s/ [']([\p{IsAlpha}])/ '$1/g; #MARIA: is pretokenized for parsing vb'll -> vb 'll
@@ -282,8 +282,8 @@ sub tokenize
         $text =~ s/([\p{IsN}])[']s/$1 's/g;
         $text =~ s/([\p{IsN}]) [']s/$1 's/g;
         $text =~ s/([\p{IsN}]) [']  s/$1 's/g;
-        
-        
+
+
 
         #other english contractions -> from PTB tokenizer.sed
         $text =~ s/([Cc])annot/$1an not/g;
@@ -293,45 +293,45 @@ sub tokenize
         $text =~ s/([Ll])emme/$1em me/g;
         $text =~ s/([Ww])anna/$1an na/g;
         $text =~ s/([Dd]) 'ye/$1' ye/g;
-        
-    } 
-    elsif (($language eq "fr") or ($language eq "it")) 
+
+    }
+    elsif (($language eq "fr") or ($language eq "it"))
     {
-        #split contractions left	
+        #split contractions left
         $text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([^\p{IsAlpha}])[']([\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([\p{IsAlpha}])[']([\p{IsAlpha}])/$1' $2/g;
-    } 
-    else 
+    }
+    else
     {
         $text =~ s/\'/ \' /g;
     }
-	
+
     #word token method
     my @words = split(/\s/,$text);
     $text = "";
-    for (my $i=0;$i<(scalar(@words));$i++) 
+    for (my $i=0;$i<(scalar(@words));$i++)
     {
         my $word = $words[$i];
-        if ( $word =~ /^(\S+)\.$/) 
+        if ( $word =~ /^(\S+)\.$/)
         {
             my $pre = $1;
-            if (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || ($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==1) || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/))) 
+            if (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || ($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==1) || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/)))
             {
                 #no change
-			} 
-            elsif (($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==2) && ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[0-9]+/))) 
+			}
+            elsif (($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==2) && ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[0-9]+/)))
             {
                 #no change
-            } 
-            else 
+            }
+            else
             {
                 $word = $pre." .";
             }
         }
         $text .= $word." ";
-    }		
+    }
 
     # clean up extraneous spaces
     $text =~ s/ +/ /g;
@@ -339,7 +339,7 @@ sub tokenize
     $text =~ s/ $//g;
 
     #restore multi-dots
-    while($text =~ /DOTDOTMULTI/) 
+    while($text =~ /DOTDOTMULTI/)
     {
         $text =~ s/DOTDOTMULTI/DOTMULTI./g;
     }
@@ -361,34 +361,34 @@ sub tokenize
     return $text;
 }
 
-sub load_prefixes 
+sub load_prefixes
 {
     my ($language, $PREFIX_REF) = @_;
-	
+
     my $prefixfile = "$mydir/nonbreaking_prefix.$language";
-	
+
     #default back to English if we don't have a language-specific prefix file
-    if (!(-e $prefixfile)) 
+    if (!(-e $prefixfile))
     {
         $prefixfile = "$mydir/nonbreaking_prefix.en";
         print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n";
         die ("ERROR: No abbreviations files found in $mydir\n") unless (-e $prefixfile);
     }
-	
-    if (-e "$prefixfile") 
+
+    if (-e "$prefixfile")
     {
         open(PREFIX, "<:utf8", "$prefixfile");
-        while (<PREFIX>) 
+        while (<PREFIX>)
         {
             my $item = $_;
             chomp($item);
-            if (($item) && (substr($item,0,1) ne "#")) 
+            if (($item) && (substr($item,0,1) ne "#"))
             {
-                if ($item =~ /(.*)[\s]+(\#NUMERIC_ONLY\#)/) 
+                if ($item =~ /(.*)[\s]+(\#NUMERIC_ONLY\#)/)
                 {
                     $PREFIX_REF->{$1} = 2;
-                } 
-                else 
+                }
+                else
                 {
                     $PREFIX_REF->{$item} = 1;
                 }

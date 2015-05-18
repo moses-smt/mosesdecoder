@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 # A very simple script that converts fsal back to fsa format (openfst lattices)
 # Ondrej Bojar, bojar@ufal.mff.cuni.cz
 

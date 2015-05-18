@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -20,7 +20,7 @@ my ($dummy, $tmpfile) = tempfile("mada-in-XXXX", DIR=>$TMPDIR, UNLINK=>!$KEEP_TM
 
 print STDERR $tmpfile."\n";
 open(TMP,">$tmpfile");
-while(<STDIN>) { 
+while(<STDIN>) {
   print TMP $_;
 }
 close(TMP);

@@ -9,7 +9,7 @@ use File::Basename;
 
 
 my $continue = 0;
-my $args = ""; 
+my $args = "";
 my $config;
 
 GetOptions("continue=i"  => \$continue,

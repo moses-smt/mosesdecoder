@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 # Converts AT&T FSA format to 'python lattice format'.
 # Note that the input FSA needs to be epsilon-free and topologically sorted.
 # This script checks for topological sortedness.
@@ -66,7 +66,7 @@ foreach my $inf (@infiles) {
       # final nodes can have a cost
       die "$inf:$nr:Final state $src has cost $tgt. Unsupported, use --ignore-final-state-cost"
         if defined $tgt && !$ignore_final_state_cost;
-        
+
       next;
     }
     $weight = 0 if !defined $weight;
@@ -107,7 +107,7 @@ foreach my $inf (@infiles) {
     next if defined $denseids{$id};
     $denseids{$id} = $nextid;
   }
-  
+
   foreach my $f (keys %is_final) {
     if (defined $outnodes[$f]) {
       print STDERR "$inf:Node $f is final but it has outgoing edges!\n";
@@ -118,7 +118,7 @@ foreach my $inf (@infiles) {
 #   foreach my $src (sort {$a<=>$b} keys %denseids) {
 #     print STDERR "$src  ...> $denseids{$src}\n";
 #   }
-  
+
   print "(";
   for(my $origsrc = 0; $origsrc < @outnodes; $origsrc++) {
     my $src = $denseids{$origsrc};

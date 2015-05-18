@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 use warnings;
 
@@ -45,7 +45,7 @@ while(my $line = <STDIN>) {
   elsif ($feature_section && $line =~ /LexicalReordering/) {
     print $arr[$ind]."\n";
     ++$ind;
-  }  
+  }
   else {
     print "$line\n";
   }
