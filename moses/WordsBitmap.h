@@ -54,7 +54,7 @@ protected:
   }
 
   //sets elements by vector
-  void Initialize(std::vector<bool> vector) {
+  void Initialize(const std::vector<bool>& vector) {
     size_t vector_size = vector.size();
     for (size_t pos = 0 ; pos < m_size ; pos++) {
       if (pos < vector_size && vector[pos] == true) m_bitmap[pos] = true;
@@ -65,7 +65,7 @@ protected:
 
 public:
   //! create WordsBitmap of length size and initialise with vector
-  WordsBitmap(size_t size, std::vector<bool> initialize_vector)
+  WordsBitmap(size_t size, const std::vector<bool>& initialize_vector)
     :m_size	(size) {
     m_bitmap = (bool*) malloc(sizeof(bool) * size);
     Initialize(initialize_vector);
@@ -206,9 +206,6 @@ public:
     return r;
   }
 
-
-  //! TODO - ??? no idea
-  int GetFutureCosts(int lastPos) const ;
 
   //! converts bitmap into an integer ID: it consists of two parts: the first 16 bit are the pattern between the first gap and the last word-1, the second 16 bit are the number of filled positions. enforces a sentence length limit of 65535 and a max distortion of 16
   WordsBitmapID GetID() const {

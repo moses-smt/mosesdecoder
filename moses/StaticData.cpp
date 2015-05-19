@@ -389,7 +389,11 @@ StaticData
   m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
   m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
 
-  m_threadCount = 1;
+  m_threadCount =
+#ifdef WITH_THREADS
+    boost::thread::hardware_concurrency() ? boost::thread::hardware_concurrency() :
+#endif
+    1;
   params = m_parameter->GetParam("threads");
   if (params && params->size()) {
     if (params->at(0) == "all") {
