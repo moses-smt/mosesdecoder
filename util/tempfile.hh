@@ -10,13 +10,14 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
 #include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "util/exception.hh"
-#include "util/unistd.hh"
 
 namespace util
 {

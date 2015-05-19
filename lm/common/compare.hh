@@ -1,18 +1,12 @@
-#ifndef LM_BUILDER_SORT_H
-#define LM_BUILDER_SORT_H
+#ifndef LM_COMMON_COMPARE_H
+#define LM_COMMON_COMPARE_H
 
-#include "lm/builder/ngram_stream.hh"
-#include "lm/builder/ngram.hh"
 #include "lm/word_index.hh"
-#include "util/stream/sort.hh"
-
-#include "util/stream/timer.hh"
 
 #include <functional>
 #include <string>
 
 namespace lm {
-namespace builder {
 
 /**
  * Abstract parent class for defining custom n-gram comparators.
@@ -175,70 +169,6 @@ class PrefixOrder : public Comparator<PrefixOrder> {
     static const unsigned kMatchOffset = 0;
 };
 
-// Sum counts for the same n-gram.
-struct AddCombiner {
-  bool operator()(void *first_void, const void *second_void, const SuffixOrder &compare) const {
-    NGram first(first_void, compare.Order());
-    // There isn't a const version of NGram.
-    NGram second(const_cast<void*>(second_void), compare.Order());
-    if (memcmp(first.begin(), second.begin(), sizeof(WordIndex) * compare.Order())) return false;
-    first.Count() += second.Count();
-    return true;
-  }
-};
-
-// The combiner is only used on a single chain, so I didn't bother to allow
-// that template.
-/**
- * Represents an @ref util::FixedArray "array" capable of storing @ref util::stream::Sort "Sort" objects.
- *
- * In the anticipated use case, an instance of this class will maintain one @ref util::stream::Sort "Sort" object
- * for each n-gram order (ranging from 1 up to the maximum n-gram order being processed).
- * Use in this manner would enable the n-grams each n-gram order to be sorted, in parallel.
- *
- * @tparam Compare An @ref Comparator "ngram comparator" to use during sorting.
- */
-template <class Compare> class Sorts : public util::FixedArray<util::stream::Sort<Compare> > {
-  private:
-    typedef util::stream::Sort<Compare> S;
-    typedef util::FixedArray<S> P;
-
-  public:
-
-    /**
-     * Constructs, but does not initialize.
-     *
-     * @ref util::FixedArray::Init() "Init" must be called before use.
-     *
-     * @see util::FixedArray::Init()
-     */
-    Sorts() {}
-
-    /**
-     * Constructs an @ref util::FixedArray "array" capable of storing a fixed number of @ref util::stream::Sort "Sort" objects.
-     *
-     * @param number The maximum number of @ref util::stream::Sort "sorters" that can be held by this @ref util::FixedArray "array"
-     * @see util::FixedArray::FixedArray()
-     */
-    explicit Sorts(std::size_t number) : util::FixedArray<util::stream::Sort<Compare> >(number) {}
-
-    /**
-     * Constructs a new @ref util::stream::Sort "Sort" object which is stored in this @ref util::FixedArray "array".
-     *
-     * The new @ref util::stream::Sort "Sort" object is constructed using the provided @ref util::stream::SortConfig "SortConfig" and @ref Comparator "ngram comparator";
-     * once constructed, a new worker @ref util::stream::Thread "thread" (owned by the @ref util::stream::Chain "chain") will sort the n-gram data stored
-     * in the @ref util::stream::Block "blocks" of the provided @ref util::stream::Chain "chain".
-     *
-     * @see util::stream::Sort::Sort()
-     * @see util::stream::Chain::operator>>()
-     */
-    void push_back(util::stream::Chain &chain, const util::stream::SortConfig &config, const Compare &compare) {
-      new (P::end()) S(chain, config, compare); // use "placement new" syntax to initalize S in an already-allocated memory location
-      P::Constructed();
-    }
-};
-
-} // namespace builder
 } // namespace lm
 
-#endif // LM_BUILDER_SORT_H
+#endif // LM_COMMON_COMPARE_H

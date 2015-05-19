@@ -2,6 +2,7 @@
 #define LM_BUILDER_INITIAL_PROBABILITIES_H
 
 #include "lm/builder/discount.hh"
+#include "lm/word_index.hh"
 #include "util/stream/config.hh"
 
 #include <vector>
@@ -10,6 +11,8 @@ namespace util { namespace stream { class Chains; } }
 
 namespace lm {
 namespace builder {
+
+class SpecialVocab;
 
 struct InitialProbabilitiesConfig {
   // These should be small buffers to keep the adder from getting too far ahead
@@ -34,7 +37,8 @@ void InitialProbabilities(
     util::stream::Chains &second_in,
     util::stream::Chains &gamma_out,
     const std::vector<uint64_t> &prune_thresholds,
-    bool prune_vocab);
+    bool prune_vocab,
+    const SpecialVocab &vocab);
 
 } // namespace builder
 } // namespace lm
