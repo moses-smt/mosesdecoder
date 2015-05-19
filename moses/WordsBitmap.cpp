@@ -26,43 +26,6 @@ namespace Moses
 
 TO_STRING_BODY(WordsBitmap);
 
-int WordsBitmap::GetFutureCosts(int lastPos) const
-{
-  int sum=0;
-  bool aim1=0,ai=0,aip1=m_bitmap[0];
-
-  for(size_t i=0; i<m_size; ++i) {
-    aim1 = ai;
-    ai   = aip1;
-    aip1 = (i+1==m_size || m_bitmap[i+1]);
-
-#ifndef NDEBUG
-    if( i>0 ) {
-      assert( aim1==(i==0||m_bitmap[i-1]==1));
-    }
-
-    if( i+1<m_size ) {
-      assert( aip1==m_bitmap[i+1]);
-    }
-#endif
-    if((i==0||aim1)&&ai==0) {
-      sum+=abs(lastPos-static_cast<int>(i)+1);
-      //      sum+=getJumpCosts(lastPos,i,maxJumpWidth);
-    }
-    //    if(sum>1e5) return sum;
-    if(i>0 && ai==0 && (i+1==m_size||aip1) )
-      lastPos = (int) (i+1);
-  }
-
-  //  sum+=getJumpCosts(lastPos,as,maxJumpWidth);
-  sum+=abs(lastPos-static_cast<int>(m_size)+1); //getCosts(lastPos,as);
-  assert(sum>=0);
-
-  //	TRACE_ERR(sum<<"\n");
-
-  return sum;
-}
-
 bool WordsBitmap::IsAdjacent(size_t startPos, size_t endPos) const
 {
   if (GetNumWordsCovered() == 0) {
