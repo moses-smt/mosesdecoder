@@ -593,7 +593,7 @@ namespace Moses
 	inputPath.SetTargetPhrases(*this, targetPhrases, NULL);
       }
   }
-
+  
   TargetPhraseCollection const*
   Mmsapt::
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const
@@ -645,6 +645,7 @@ namespace Moses
     // get context-specific cache of items previously looked up
     sptr<ContextScope> const& scope = ttask->GetScope();
     sptr<TPCollCache> cache = scope->get<TPCollCache>(cache_key);
+    if (!cache) cache = m_cache;
     TPCollWrapper* ret = cache->get(phrasekey, dyn->revision());
     // TO DO: we should revise the revision mechanism: we take the length
     // of the dynamic bitext (in sentences) at the time the PT entry

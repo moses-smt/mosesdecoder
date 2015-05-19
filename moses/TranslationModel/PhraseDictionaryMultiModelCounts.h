@@ -96,7 +96,7 @@ public:
   std::vector<float> MinimizePerplexity(std::vector<std::pair<std::string, std::string> > &phrase_pair_vector);
 #endif
   // functions below required by base class
-  virtual void InitializeForInput(InputType const&) {
+  virtual void InitializeForInput(ttasksptr const& ttask) {
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
 

@@ -117,7 +117,7 @@ public:
 
   virtual
   TargetPhraseCollection const *
-  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) {
+  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) const {
     return GetTargetPhraseCollectionLEGACY(src);
   }
 
@@ -133,7 +133,7 @@ public:
   }
 
   //! Create entry for translation of source to targetPhrase
-  virtual void InitializeForInput(InputType const& source) {
+  virtual void InitializeForInput(ttasksptr const& ttask) {
   }
   // clean up temporary memory, called after processing each sentence
   virtual void CleanUpAfterSentenceProcessing(const InputType& source) {

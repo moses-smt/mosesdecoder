@@ -3,6 +3,7 @@
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
 #include "moses/Hypothesis.h"
+#include "moses/TranslationTask.h"
 #include "util/string_piece_hash.hh"
 
 using namespace std;
@@ -104,10 +105,13 @@ bool GlobalLexicalModelUnlimited::Load(const std::string &filePathSource,
   return true;
 }
 
-void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
+void GlobalLexicalModelUnlimited::InitializeForInput(ttasksptr const& ttask)
 {
+  UTIL_THROW_IF2(ttask->GetSource()->GetType() != SentenceInput, 
+		 "GlobalLexicalModel works only with sentence input.");
+  Sentence const* s = reinterpret_cast<Sentence const*>(ttask->GetSource().get());
   m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
+  m_local->input = s;
 }
 
 void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const

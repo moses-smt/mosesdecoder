@@ -85,7 +85,7 @@ public:
 #endif
   // functions below required by base class
   virtual const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
-  virtual void InitializeForInput(InputType const&) {
+  virtual void InitializeForInput(ttasksptr const& ttask) {
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
   ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, std::size_t);

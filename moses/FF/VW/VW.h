@@ -306,7 +306,8 @@ public:
     }
   }
 
-  virtual void InitializeForInput(InputType const& source) {
+  virtual void InitializeForInput(ttasksptr const& ttask) {
+    InputType const& source = ttask->GetSource();
     // tabbed sentence is assumed only in training
     if (! m_train)
       return;

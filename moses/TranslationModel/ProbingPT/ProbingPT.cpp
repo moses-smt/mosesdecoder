@@ -61,7 +61,7 @@ void ProbingPT::Load()
   }
 }
 
-void ProbingPT::InitializeForInput(InputType const& source)
+void ProbingPT::InitializeForInput(ttasksptr const& ttask)
 {
   ReduceCache();
 }

@@ -176,9 +176,10 @@ void OxLM<Model>::savePersistentCache(const string& cache_file) const
 }
 
 template<class Model>
-void OxLM<Model>::InitializeForInput(const InputType& source)
+void OxLM<Model>::InitializeForInput(ttasksptr const& ttask)
 {
-  LanguageModelSingleFactor::InitializeForInput(source);
+  const InputType& source = ttask->GetSource();
+  LanguageModelSingleFactor::InitializeForInput(ttask);
 
   if (persistentCache) {
     if (!cache.get()) {

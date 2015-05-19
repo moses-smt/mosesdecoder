@@ -11,6 +11,7 @@
 #include "moses/InputType.h"
 #include "moses/InputFileStream.h"
 #include "moses/TypeDef.h"
+#include "moses/TranslationTask.h"
 #include "moses/StaticData.h"
 #include "Loader.h"
 #include "LoaderFactory.h"
@@ -36,8 +37,9 @@ void PhraseDictionaryALSuffixArray::Load()
   SetFeaturesToApply();
 }
 
-void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
+void PhraseDictionaryALSuffixArray::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& source = *ttask->GetSource();
   // populate with rules for this sentence
   long translationId = source.GetTranslationId();
 

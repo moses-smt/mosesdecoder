@@ -13,6 +13,7 @@
 #include "moses/StaticData.h"
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
+#include "moses/TranslationTask.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -40,8 +41,9 @@ void PhraseDictionaryTreeAdaptor::Load()
   SetFeaturesToApply();
 }
 
-void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
+void PhraseDictionaryTreeAdaptor::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& source = *ttask->GetSource();
   const StaticData &staticData = StaticData::Instance();
 
   ReduceCache();

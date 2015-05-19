@@ -123,7 +123,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void InitializeForInput(InputType const& source);
+  void InitializeForInput(ttasksptr const& ttask);
 
   //  virtual void InitializeForInput(InputType const&) {
   //    /* Don't do anything source specific here as this object is shared between threads.*/

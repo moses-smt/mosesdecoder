@@ -44,8 +44,8 @@ public:
   EmptyHypothesisState(const InputType &input) const;
 
   void
-  InitializeForInput(const InputType& i) {
-    if (m_table) m_table->InitializeForInput(i);
+  InitializeForInput(ttasksptr const& ttask) {
+    if (m_table) m_table->InitializeForInput(ttask);
   }
 
   Scores

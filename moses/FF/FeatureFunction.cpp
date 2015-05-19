@@ -190,12 +190,12 @@ void FeatureFunction::SetTuneableComponents(const std::string& value)
   }
 }
 
-void
-FeatureFunction
-::InitializeForInput(ttasksptr const& ttask)
-{
-  InitializeForInput(*(ttask->GetSource().get()));
-}
+// void
+// FeatureFunction
+// ::InitializeForInput(ttasksptr const& ttask)
+// {
+//   InitializeForInput(*(ttask->GetSource().get()));
+// }
 
 void
 FeatureFunction

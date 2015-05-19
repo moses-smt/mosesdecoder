@@ -101,9 +101,10 @@ void SourceOxLM::SetParameter(const string& key, const string& value)
   }
 }
 
-void SourceOxLM::InitializeForInput(const InputType& source)
+void SourceOxLM::InitializeForInput(ttasksptr const& ttask)
 {
-  BilingualLM::InitializeForInput(source);
+  const InputType& source = ttasksptr->GetSource();
+  BilingualLM::InitializeForInput(ttask, source);
 
   if (persistentCache) {
     if (!cache.get()) {

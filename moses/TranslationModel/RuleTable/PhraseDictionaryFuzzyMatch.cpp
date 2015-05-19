@@ -43,6 +43,7 @@
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
+#include "moses/TranslationTask.h"
 #include "util/file.hh"
 #include "util/exception.hh"
 #include "util/random.hh"
@@ -172,8 +173,9 @@ int removedirectoryrecursively(const char *dirname)
   return 1;
 }
 
-void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSentence)
+void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& inputSentence = *ttask->GetSource();
 #if defined __MINGW32__
   char dirName[] = "moses.XXXXXX";
 #else

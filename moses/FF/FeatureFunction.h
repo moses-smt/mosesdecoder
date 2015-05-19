@@ -122,14 +122,12 @@ public:
 
 protected:
   virtual void
-  InitializeForInput(InputType const& source) { }
-  virtual void
   CleanUpAfterSentenceProcessing(InputType const& source) { }
 
 public:
   //! Called before search and collecting of translation options
   virtual void
-  InitializeForInput(ttasksptr const& ttask);
+  InitializeForInput(ttasksptr const& ttask) { };
 
   // clean up temporary memory, called after processing each sentence
   virtual void

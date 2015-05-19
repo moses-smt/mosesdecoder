@@ -54,7 +54,7 @@ public:
 
   virtual
   void
-  InitializeForInput(const InputType&) {
+  InitializeForInput(ttasksptr const& ttask) {
     /* override for on-demand loading */
   };
 
@@ -177,7 +177,7 @@ public:
 
   virtual
   void
-  InitializeForInput(const InputType& input);
+  InitializeForInput(ttasksptr const& ttask);
 
   virtual
   void

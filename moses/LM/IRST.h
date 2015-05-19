@@ -104,7 +104,7 @@ public:
   */
 
 
-  void InitializeForInput(InputType const& source);
+  void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
   void set_dictionary_upperbound(int dub) {

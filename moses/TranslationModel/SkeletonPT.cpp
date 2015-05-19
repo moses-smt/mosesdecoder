@@ -17,7 +17,7 @@ void SkeletonPT::Load()
   SetFeaturesToApply();
 }
 
-void SkeletonPT::InitializeForInput(InputType const& source)
+void SkeletonPT::InitializeForInput(ttasksptr const& ttask)
 {
   ReduceCache();
 }

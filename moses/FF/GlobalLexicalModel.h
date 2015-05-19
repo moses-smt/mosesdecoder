@@ -66,7 +66,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void InitializeForInput( Sentence const& in );
+  void InitializeForInput(ttasksptr const& ttask);
 
   bool IsUseable(const FactorMask &mask) const;
 

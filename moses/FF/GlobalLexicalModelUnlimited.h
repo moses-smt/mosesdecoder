@@ -42,6 +42,7 @@ class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
   typedef std::map< std::string, short > StringHash;
 
   struct ThreadLocalStorage {
+    // const Sentence *input;
     const Sentence *input;
   };
 
@@ -73,7 +74,7 @@ public:
 
   bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
-  void InitializeForInput( Sentence const& in );
+  void InitializeForInput(ttasksptr const& ttask);
 
   const FFState* EmptyHypothesisState(const InputType &) const {
     return new DummyState();

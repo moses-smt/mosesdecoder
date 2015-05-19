@@ -53,7 +53,7 @@ public:
             , float weightWP);
 
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
-  virtual void InitializeForInput(InputType const& source);
+  virtual void InitializeForInput(ttasksptr const& ttask);
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollectionBase &) {

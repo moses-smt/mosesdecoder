@@ -51,7 +51,7 @@ public:
     const ChartParser &parser,
     const ChartCellCollectionBase &,
     std::size_t);
-  void InitializeForInput(InputType const& inputSentence);
+  void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
   void SetParameter(const std::string& key, const std::string& value);

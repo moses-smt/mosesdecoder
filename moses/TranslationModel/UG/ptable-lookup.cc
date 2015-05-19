@@ -1,5 +1,6 @@
 #include "mmsapt.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "moses/TranslationTask.h"
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
@@ -67,17 +68,19 @@ int main(int argc, char* argv[])
   string line;
   while (true)
     {
-      Sentence phrase;
-      if (!phrase.Read(cin,ifo)) break;
+      boost::shared_ptr<Sentence> phrase(new Sentence);
+      if (!phrase->Read(cin,ifo)) break;
+      boost::shared_ptr<TranslationTask> ttask;
+      ttask = TranslationTask::create(phrase);
       if (pdta)
 	{
-	  pdta->InitializeForInput(phrase);
+	  pdta->InitializeForInput(ttask);
 	  // do we also need to call CleanupAfterSentenceProcessing at the end?
 	}
-      Phrase& p = phrase;
+      Phrase& p = *phrase;
 
       cout << p << endl;
-      TargetPhraseCollection const* trg = PT->GetTargetPhraseCollectionLEGACY(p);
+      TargetPhraseCollection const* trg = PT->GetTargetPhraseCollectionLEGACY(ttask,p);
       if (!trg) continue;
       vector<size_t> order(trg->GetSize());
       for (size_t i = 0; i < order.size(); ++i) order[i] = i;

@@ -145,7 +145,7 @@ void PhraseDictionaryDynamicCacheBased::SetParameter(const std::string& key, con
   }
 }
 
-void PhraseDictionaryDynamicCacheBased::InitializeForInput(InputType const& source)
+void PhraseDictionaryDynamicCacheBased::InitializeForInput(ttasksptr const& ttask)
 {
   ReduceCache();
 }

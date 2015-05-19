@@ -3,6 +3,7 @@
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
 #include "moses/TranslationOption.h"
+#include "moses/TranslationTask.h"
 #include "moses/FactorCollection.h"
 #include "util/exception.hh"
 
@@ -108,10 +109,13 @@ void GlobalLexicalModel::Load()
   }
 }
 
-void GlobalLexicalModel::InitializeForInput( Sentence const& in )
+void GlobalLexicalModel::InitializeForInput(ttasksptr const& ttask)
 {
+  UTIL_THROW_IF2(ttask->GetSource()->GetType() != SentenceInput, 
+		 "GlobalLexicalModel works only with sentence input.");
+  Sentence const* s = reinterpret_cast<Sentence const*>(ttask->GetSource().get());
   m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
+  m_local->input = s;
 }
 
 float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
