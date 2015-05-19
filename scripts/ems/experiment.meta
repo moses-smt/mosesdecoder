@@ -229,13 +229,30 @@ train
 	in: stripped-corpus
 	out: lm
 	default-name: lm/lm
-	ignore-if: rlm-training
+	ignore-if: rlm-training custom-training
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
 	error: unrecognised option
 	not-error: BadDiscountException
 	not-error: To override this error
+train-custom
+	in: stripped-corpus
+	out: binlm
+	default-name: lm/custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line
+	ignore-if: syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
+train-custom-syntax
+	in: split-corpus
+	out: binlm
+	default-name: lm/custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
 randomize
 	in: lm
 	out: rlm
@@ -263,7 +280,6 @@ binarize
 	template: $lm-binarizer IN OUT
 	error: set KENLM_MAX_ORDER to at least this value
 	final-model: yes
-
 [INTERPOLATED-LM] single
 tuning-from-sgm
 	in: tuning-sgm
@@ -439,7 +455,75 @@ train-in-mono
 	ignore-if: indomain-stem
 	default-name: mml/model
 	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN -in-target IN1 -out-source IN2.$input-extension -out-target IN2.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings
-
+[CONCATENATED-LM] single
+concatenate
+	in: LM:stripped-corpus
+	out: concatenated-corpus
+	default-name: lm/concatenated
+	template: cat IN > OUT
+concatenate-mock-parsed
+	in: LM:split-corpus
+	out: concatenated-split-corpus
+	pass-unless: LM:mock-output-parser-lm
+	default-name: lm/concatenated-mock-parsed
+	template: cat IN > OUT
+train
+	in: concatenated-corpus
+	out: lm
+	default-name: lm/concatenated-lm
+	rerun-on-change: lm-training order settings
+	template: $lm-training -order $order $settings -text IN -lm OUT
+	ignore-unless: lm-training
+	ignore-if: rlm-training custom-training
+	error: cannot execute binary file
+	error: unrecognised option
+	not-error: BadDiscountException
+	not-error: To override this error
+train-custom
+	in: concatenated-corpus
+	out: binlm
+	default-name: lm/concatenated-custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line
+	ignore-if: syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
+train-custom-syntax
+	in: concatenated-split-corpus
+	out: binlm
+	default-name: lm/concatenated-custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
+randomize
+	in: lm
+	out: rlm
+	default-name: lm/concatenated-rlm
+	pass-unless: lm-randomizer
+	ignore-if: rlm-training
+train-randomized
+	in: concatenated-corpus
+	out: rlm
+	default-name: lm/concatenated-rlm
+	ignore-unless: rlm-training
+	rerun-on-change: rlm-training order
+quantize
+	in: rlm
+	out: qlm
+	pass-unless: lm-quantizer
+	default-name: lm/concatenated-qlm
+	template: $lm-quantizer IN OUT
+binarize
+	in: qlm
+	out: binlm
+	pass-unless: lm-binarizer
+	ignore-unless: lm-training rlm-training
+	rerun-on-change: lm
+	default-name: lm/concatenated-binlm
+	template: $lm-binarizer IN OUT
+	error: set KENLM_MAX_ORDER to at least this value
+	final-model: yes
 [TRAINING] single
 consolidate
 	in: CORPUS:clean-split-stem
@@ -699,7 +783,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model CONCATENATED-LM:binlm INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero thot
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature

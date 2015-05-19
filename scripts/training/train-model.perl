@@ -130,6 +130,8 @@ my($_EXTERNAL_BINDIR,
    	$_NUM_LATTICE_FEATURES,
    	$IGNORE,
    	$_FLEXIBILITY_SCORE,
+   	$_FEATURE_LINES,
+   	$_WEIGHT_LINES,
    	$_EXTRACT_COMMAND,
    	$_SCORE_COMMAND);
 my $_BASELINE_CORPUS = "";
@@ -248,6 +250,8 @@ $_HELP = 1
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
+		       'config-add-feature-lines=s' => \$_FEATURE_LINES,
+		       'config-add-weight-lines=s' => \$_WEIGHT_LINES,
 		       'extract-command=s' => \$_EXTRACT_COMMAND,
 		       'score-command=s' => \$_SCORE_COMMAND,
                );
@@ -2052,6 +2056,18 @@ sub create_ini {
    # translation tables
    my $i=0;
    my @SPECIFIED_TABLE = @_PHRASE_TABLE;
+
+   if (defined($_FEATURE_LINES)) {
+     foreach my $f (split(/;/,$_FEATURE_LINES)) {
+       $feature_spec .= $f . "\n";
+     }
+   }
+   if (defined($_WEIGHT_LINES)) {
+     foreach my $f (split(/;/,$_WEIGHT_LINES)) {
+       $weight_spec .= $f . "\n";
+     }
+   }
+
 
    # number of weights
    my $basic_weight_count = 4; # both directions, lex and phrase

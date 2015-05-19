@@ -2499,7 +2499,7 @@ sub get_config_tables {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$transliteration_pt,$generation_table,$sparse_lexical_features,$domains,$osm, @LM)
+    my ($config,$reordering_table,$phrase_translation_table,$transliteration_pt,$generation_table,$sparse_lexical_features,$domains,$osm,$concat_lm, @LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
@@ -2569,43 +2569,89 @@ sub define_training_create_config {
   }
   shift @LM; # remove interpolated lm
 
+  my $feature_lines = "";
+  my $weight_lines = "";
+
+  if ($concat_lm) {
+    if (&get("CONCATENATED-LM:config-feature-line") && &get("CONCATENATED-LM:config-weight-line")) {
+        $feature_lines .= &get("CONCATENATED-LM:config-feature-line") . ";";
+        $weight_lines .= &get("CONCATENATED-LM:config-weight-line") . ";";
+    }
+    else {
+        my $type = 0;
+        my $order = &check_backoff_and_get("CONCATENATED-LM:order");
+        # binarizing the lm?
+        $type = 1 if (&get("CONCATENATED-LM:binlm") ||
+                        &backoff_and_get("CONCATENATED-LM:lm-binarizer"));
+        # randomizing the lm?
+        $type = 5 if (&get("CONCATENATED-LM:rlm") ||
+                        &backoff_and_get("CONCATENATED-LM:lm-randomizer"));
+
+        # manually set type
+        $type = &get("CONCATENATED-LM:type") if &get("CONCATENATED-LM:type");
+
+        # which factor is the model trained on?
+        my $factor = 0;
+        if (&backoff_and_get("TRAINING:output-factors") &&
+                &backoff_and_get("CONCATENATED-LM:factors")) {
+                $factor = $OUTPUT_FACTORS{&backoff_and_get("CONCATENATED-LM:factors")};
+        }
+
+        $cmd .= "-lm $factor:$order:$concat_lm:$type ";
+    }
+  }
+
 	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).":".join(",",@LM_SETS).") and LM files (".(scalar @LM).":".join(",",@LM).") does not match")
 	    unless scalar @LM == scalar @LM_SETS;
 	foreach my $lm (@LM) {
 	    my $set = shift @LM_SETS;
       next if defined($INTERPOLATED_AWAY{$set});
-	    my $order = &check_backoff_and_get("LM:$set:order");
 
-	    my $lm_file = "$lm";
-	    my $type = 0; # default: SRILM
-
-	    # binarized language model?
-	    $type = 1 if (&get("LM:$set:binlm") ||
-			  &backoff_and_get("LM:$set:lm-binarizer"));
-
-	    # using a randomized lm?
-	    $type = 5 if (&get("LM:$set:rlm") ||
-			  &backoff_and_get("LM:$set:rlm-training") ||
-			  &backoff_and_get("LM:$set:lm-randomizer"));
-
-      # manually set type
-      $type = &backoff_and_get("LM:$set:type") if (&backoff_and_get("LM:$set:type"));
-
-	    # binarized by INTERPOLATED-LM
-	    if (&get("INTERPOLATED-LM:lm-binarizer")) {
-	      $lm_file =~ s/\.lm/\.binlm/;
-	      $type = 1;
-              $type = &get("INTERPOLATED-LM:type") if &get("INTERPOLATED-LM:type");
+            if (&get("LM:$set:config-feature-line") && &get("LM:$set:config-weight-line")) {
+                $feature_lines .= &get("LM:$set:config-feature-line") . ";";
+                $weight_lines .= &get("LM:$set:config-weight-line") . ";";
             }
+            else {
+                my $order = &check_backoff_and_get("LM:$set:order");
 
-	    # which factor is the model trained on?
-	    my $factor = 0;
-	    if (&backoff_and_get("TRAINING:output-factors") &&
-		&backoff_and_get("LM:$set:factors")) {
-		$factor = $OUTPUT_FACTORS{&backoff_and_get("LM:$set:factors")};
-	    }
+                my $lm_file = "$lm";
+                my $type = 0; # default: SRILM
 
-	    $cmd .= "-lm $factor:$order:$lm_file:$type ";
+                # binarized language model?
+                $type = 1 if (&get("LM:$set:binlm") ||
+                    &backoff_and_get("LM:$set:lm-binarizer"));
+
+                # using a randomized lm?
+                $type = 5 if (&get("LM:$set:rlm") ||
+                    &backoff_and_get("LM:$set:rlm-training") ||
+                    &backoff_and_get("LM:$set:lm-randomizer"));
+
+                # manually set type
+                $type = &backoff_and_get("LM:$set:type") if (&backoff_and_get("LM:$set:type"));
+
+                # binarized by INTERPOLATED-LM
+                if (&get("INTERPOLATED-LM:lm-binarizer")) {
+                    $lm_file =~ s/\.lm/\.binlm/;
+                    $type = 1;
+                    $type = &get("INTERPOLATED-LM:type") if &get("INTERPOLATED-LM:type");
+                }
+
+                # which factor is the model trained on?
+                my $factor = 0;
+                if (&backoff_and_get("TRAINING:output-factors") &&
+                    &backoff_and_get("LM:$set:factors")) {
+                    $factor = $OUTPUT_FACTORS{&backoff_and_get("LM:$set:factors")};
+                }
+
+                $cmd .= "-lm $factor:$order:$lm_file:$type ";
+            }
+    }
+
+    if (defined($feature_lines)) {
+        $cmd .= "-config-add-feature-lines \"$feature_lines\" ";
+    }
+    if (defined($weight_lines)) {
+        $cmd .= "-config-add-weight-lines \"$weight_lines\" ";
     }
 
     &create_step($step_id,$cmd);
