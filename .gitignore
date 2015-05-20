@@ -21,6 +21,7 @@ lm/build_binary
 lm/query
 mert/evaluator
 mert/extractor
+mert/hgdecode
 mert/mert
 mert/megam_i686.opt
 mert/pro
