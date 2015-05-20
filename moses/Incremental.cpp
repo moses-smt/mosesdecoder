@@ -1,3 +1,4 @@
+#include <cmath>
 #include <stdexcept>
 
 #include "moses/Incremental.h"
