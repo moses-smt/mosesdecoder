@@ -171,13 +171,14 @@ use-parallel-corpus
   out: tokenized-corpus
 	default-name: lm/tok
 	ignore-unless: parallel-corpus-stem
-	template: ln -s IN.$output-extension  OUT	
+	template: ln -s IN.$output-extension  OUT
+	error: failed to create symbolic link
 tokenize
 	in: raw-corpus
 	out: tokenized-corpus
 	default-name: lm/tok
 	pass-unless: output-tokenizer
-	ignore-if: parallel-corpus-stem concatenate-files link-file concatenate-files-split link-file-split
+	ignore-if: parallel-corpus-stem concatenate-files concatenate-files-split
 	template: $output-tokenizer < IN > OUT
 	parallelizable: yes
 mock-parse
@@ -185,14 +186,14 @@ mock-parse
 	out: mock-parsed-corpus
 	default-name: lm/mock-parsed
 	pass-unless: mock-output-parser-lm
-	ignore-if: concatenate-files link-file concatenate-files-split link-file-split
+	ignore-if: concatenate-files concatenate-files-split
 	template: $mock-output-parser-lm < IN > OUT
 factorize
 	in: mock-parsed-corpus
 	out: factorized-corpus
 	default-name: lm/factored
 	pass-unless: factors
-	ignore-if: concatenate-files link-file concatenate-files-split link-file-split
+	ignore-if: concatenate-files concatenate-files-split
 	parallelizable: yes
 	error: can't open
 	error: incompatible number of words in factor
@@ -201,7 +202,7 @@ lowercase
 	out: lowercased-corpus
 	default-name: lm/lowercased
 	pass-unless: output-lowercaser
-	ignore-if: output-truecaser concatenate-files link-file concatenate-files-split link-file-split
+	ignore-if: output-truecaser concatenate-files concatenate-files-split
 	#only-factor-0: yes
 	template: $output-lowercaser < IN > OUT
 	parallelizable: yes
@@ -211,7 +212,7 @@ truecase
 	rerun-on-change: output-truecaser
 	default-name: lm/truecased
 	ignore-unless: output-truecaser
-	ignore-if: concatenate-files link-file concatenate-files-split link-file-split
+	ignore-if: concatenate-files concatenate-files-split
 	only-factor-0: yes
 	template: $output-truecaser -model IN1.$output-extension < IN > OUT
 	parallelizable: yes
@@ -221,14 +222,14 @@ split
 	rerun-on-change: output-splitter
 	default-name: lm/split
 	pass-unless: output-splitter
-	ignore-if: concatenate-files link-file concatenate-files-split link-file-split
+	ignore-if: concatenate-files concatenate-files-split
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 strip
         in: split-corpus
         out: stripped-corpus
         default-name: lm/stripped
         pass-unless: mock-output-parser-lm
-        ignore-if: concatenate-files link-file
+        ignore-if: concatenate-files
         template: $moses-script-dir/training/strip-xml.perl < IN > OUT
 concatenate-split
         in: concatenate-files-split
@@ -242,18 +243,6 @@ concatenate
         ignore-unless: concatenate-files
         default-name: lm/stripped
         template: cat IN > OUT
-link-split
-	in: link-file-split
-	out: split-corpus
-	default-name: lm/split
-	ignore-unless: link-file-split
-	template: ln -s IN OUT
-link
-	in: link-file
-	out: stripped-corpus
-	default-name: lm/stripped
-	ignore-unless: link-file
-	template: ln -s IN OUT
 train
 	in: stripped-corpus
 	out: lm
