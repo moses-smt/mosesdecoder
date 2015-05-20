@@ -306,28 +306,6 @@ factor-script = "$moses-script-dir/training/wrappers/make-factor-en-pos.mxpost.p
 #settings = "--line-count 100000"
 
 #################################################################
-# TRAIN LANGUAGE MODELS ON CONCATENATION OF DATA
-
-[CONCATENATED-LM] IGNORE
-
-### tool to be used for language model training
-# for instance: ngram-count (SRILM), train-lm-on-disk.perl (Edinburgh)
-#
-#lm-training = $srilm-dir/ngram-count
-#settings = "-interpolate -kndiscount -unk"
-#order = 5
-
-### script to create quantized language model format
-# (default: no quantization)
-#
-#lm-quantizer = $moses-src-dir/irstlm/bin/quantize-lm
-
-### script to use for binary table format for irstlm or kenlm
-# kenlm, also set type to 8
-#lm-binarizer = $moses-src-dir/bin/build_binary
-#type = 8
-
-#################################################################
 # TRANSLATION MODEL TRAINING
 
 [TRAINING]
