@@ -6,13 +6,14 @@
 #include "lm/config.hh"
 #include "lm/weights.hh"
 #include "util/exception.hh"
+#include "util/fake_ofstream.hh"
 #include "util/file.hh"
 #include "util/joint_sort.hh"
 #include "util/murmur_hash.hh"
 #include "util/probing_hash_table.hh"
 
-#include <string>
 #include <cstring>
+#include <string>
 
 namespace lm {
 namespace ngram {
@@ -31,6 +32,7 @@ const uint64_t kUnknownHash = detail::HashForVocab("<unk>", 5);
 // Sadly some LMs have <UNK>.
 const uint64_t kUnknownCapHash = detail::HashForVocab("<UNK>", 5);
 
+// TODO: replace with FilePiece.
 void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint64_t offset) {
   util::SeekOrThrow(fd, offset);
   // Check that we're at the right place by reading <unk> which is always first.
@@ -69,15 +71,30 @@ void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint
   UTIL_THROW_IF(expected_count != index, FormatLoadException, "The binary file has the wrong number of words at the end.  This could be caused by a truncated binary file.");
 }
 
+// Constructor ordering madness.
+int SeekAndReturn(int fd, uint64_t start) {
+  util::SeekOrThrow(fd, start);
+  return fd;
+}
 } // namespace
 
+ImmediateWriteWordsWrapper::ImmediateWriteWordsWrapper(EnumerateVocab *inner, int fd, uint64_t start)
+  : inner_(inner), stream_(SeekAndReturn(fd, start)) {}
+
 WriteWordsWrapper::WriteWordsWrapper(EnumerateVocab *inner) : inner_(inner) {}
-WriteWordsWrapper::~WriteWordsWrapper() {}
 
 void WriteWordsWrapper::Add(WordIndex index, const StringPiece &str) {
   if (inner_) inner_->Add(index, str);
   buffer_.append(str.data(), str.size());
   buffer_.push_back(0);
+}
+
+void WriteWordsWrapper::Write(int fd, uint64_t start) {
+  util::SeekOrThrow(fd, start);
+  util::WriteOrThrow(fd, buffer_.data(), buffer_.size());
+  // Free memory from the string.
+  std::string for_swap;
+  std::swap(buffer_, for_swap);
 }
 
 SortedVocabulary::SortedVocabulary() : begin_(NULL), end_(NULL), enumerate_(NULL) {}
@@ -126,10 +143,78 @@ WordIndex SortedVocabulary::Insert(const StringPiece &str) {
   return end_ - begin_;
 }
 
-void SortedVocabulary::FinishedLoading(ProbBackoff *reorder_vocab) {
+void SortedVocabulary::FinishedLoading(ProbBackoff *reorder) {
+  GenericFinished(reorder);
+}
+
+namespace {
+#pragma pack(push)
+#pragma pack(4)
+struct RenumberEntry {
+  uint64_t hash;
+  const char *str;
+  WordIndex old;
+  bool operator<(const RenumberEntry &other) const {
+    return hash < other.hash;
+  }
+};
+#pragma pack(pop)
+} // namespace
+
+void SortedVocabulary::ComputeRenumbering(WordIndex types, int from_words, int to_words, std::vector<WordIndex> &mapping) {
+  mapping.clear();
+  uint64_t file_size = util::SizeOrThrow(from_words);
+  util::scoped_memory strings;
+  util::MapRead(util::POPULATE_OR_READ, from_words, 0, file_size, strings);
+  const char *const start = static_cast<const char*>(strings.get());
+  UTIL_THROW_IF(memcmp(start, "<unk>", 6), FormatLoadException, "Vocab file does not begin with <unk> followed by null");
+  std::vector<RenumberEntry> entries;
+  entries.reserve(types - 1);
+  RenumberEntry entry;
+  entry.old = 1;
+  for (entry.str = start + 6 /* skip <unk>\0 */; entry.str < start + file_size; ++entry.old) {
+    StringPiece str(entry.str, strlen(entry.str));
+    entry.hash = detail::HashForVocab(str);
+    entries.push_back(entry);
+    entry.str += str.size() + 1;
+  }
+  UTIL_THROW_IF2(entries.size() != types - 1, "Wrong number of vocab ids.  Got " << (entries.size() + 1) << " expected " << types);
+  std::sort(entries.begin(), entries.end());
+  // Write out new vocab file.
+  {
+    util::FakeOFStream out(to_words);
+    out << "<unk>" << '\0';
+    for (std::vector<RenumberEntry>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
+      out << i->str << '\0';
+    }
+  }
+  strings.reset();
+
+  mapping.resize(types);
+  mapping[0] = 0; // <unk>
+  for (std::vector<RenumberEntry>::const_iterator i = entries.begin(); i != entries.end(); ++i) {
+    mapping[i->old] = i + 1 - entries.begin();
+  }
+}
+
+void SortedVocabulary::Populated() {
+  saw_unk_ = true;
+  SetSpecial(Index("<s>"), Index("</s>"), 0);
+  bound_ = end_ - begin_ + 1;
+  *(reinterpret_cast<uint64_t*>(begin_) - 1) = end_ - begin_;
+}
+
+void SortedVocabulary::LoadedBinary(bool have_words, int fd, EnumerateVocab *to, uint64_t offset) {
+  end_ = begin_ + *(reinterpret_cast<const uint64_t*>(begin_) - 1);
+  SetSpecial(Index("<s>"), Index("</s>"), 0);
+  bound_ = end_ - begin_ + 1;
+  if (have_words) ReadWords(fd, to, bound_, offset);
+}
+
+template <class T> void SortedVocabulary::GenericFinished(T *reorder) {
   if (enumerate_) {
     if (!strings_to_enumerate_.empty()) {
-      util::PairedIterator<ProbBackoff*, StringPiece*> values(reorder_vocab + 1, &*strings_to_enumerate_.begin());
+      util::PairedIterator<T*, StringPiece*> values(reorder + 1, &*strings_to_enumerate_.begin());
       util::JointSort(begin_, end_, values);
     }
     for (WordIndex i = 0; i < static_cast<WordIndex>(end_ - begin_); ++i) {
@@ -139,20 +224,13 @@ void SortedVocabulary::FinishedLoading(ProbBackoff *reorder_vocab) {
     strings_to_enumerate_.clear();
     string_backing_.FreeAll();
   } else {
-    util::JointSort(begin_, end_, reorder_vocab + 1);
+    util::JointSort(begin_, end_, reorder + 1);
   }
   SetSpecial(Index("<s>"), Index("</s>"), 0);
   // Save size.  Excludes UNK.
   *(reinterpret_cast<uint64_t*>(begin_) - 1) = end_ - begin_;
   // Includes UNK.
   bound_ = end_ - begin_ + 1;
-}
-
-void SortedVocabulary::LoadedBinary(bool have_words, int fd, EnumerateVocab *to, uint64_t offset) {
-  end_ = begin_ + *(reinterpret_cast<const uint64_t*>(begin_) - 1);
-  SetSpecial(Index("<s>"), Index("</s>"), 0);
-  bound_ = end_ - begin_ + 1;
-  if (have_words) ReadWords(fd, to, bound_, offset);
 }
 
 namespace {
@@ -209,7 +287,7 @@ WordIndex ProbingVocabulary::Insert(const StringPiece &str) {
   }
 }
 
-void ProbingVocabulary::FinishedLoading() {
+void ProbingVocabulary::InternalFinishedLoading() {
   lookup_.FinishedInserting();
   header_->bound = bound_;
   header_->version = kProbingVocabularyVersion;

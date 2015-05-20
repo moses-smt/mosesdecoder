@@ -1,111 +1,135 @@
 /* Like std::ofstream but without being incredibly slow.  Backed by a raw fd.
- * Does not support many data types.  Currently, it's targeted at writing ARPA
- * files quickly.
+ * Supports most of the built-in types except for void* and long double.
  */
 #ifndef UTIL_FAKE_OFSTREAM_H
 #define UTIL_FAKE_OFSTREAM_H
 
-#include "util/double-conversion/double-conversion.h"
-#include "util/double-conversion/utils.h"
 #include "util/file.hh"
+#include "util/float_to_string.hh"
+#include "util/integer_to_string.hh"
 #include "util/scoped.hh"
 #include "util/string_piece.hh"
 
-#define BOOST_LEXICAL_CAST_ASSUME_C_LOCALE
-#include <boost/lexical_cast.hpp>
+#include <cassert>
+#include <cstring>
+
+#include <stdint.h>
 
 namespace util {
 class FakeOFStream {
   public:
+    // Maximum over all ToString operations.
+    // static const std::size_t kMinBuf = 20;
+    // This was causing compile failures in debug, so now 20 is written directly.
+    //
     // Does not take ownership of out.
     // Allows default constructor, but must call SetFD.
     explicit FakeOFStream(int out = -1, std::size_t buffer_size = 1048576)
-      : buf_(util::MallocOrThrow(buffer_size)),
-        builder_(static_cast<char*>(buf_.get()), buffer_size),
-        // Mostly the default but with inf instead.  And no flags.
-        convert_(double_conversion::DoubleToStringConverter::NO_FLAGS, "inf", "NaN", 'e', -6, 21, 6, 0),
-        fd_(out),
-        buffer_size_(buffer_size) {}
+      : buf_(util::MallocOrThrow(std::max(buffer_size, (size_t)20))),
+        current_(static_cast<char*>(buf_.get())),
+        end_(current_ + std::max(buffer_size, (size_t)20)),
+        fd_(out) {}
 
     ~FakeOFStream() {
-      if (buf_.get()) Flush();
+      // Could have called Finish already
+      flush();
     }
 
     void SetFD(int to) {
-      if (builder_.position()) Flush();
+      flush();
       fd_ = to;
     }
 
-    FakeOFStream &Write(const void *data, std::size_t length) {
-      // Dominant case
-      if (static_cast<std::size_t>(builder_.size() - builder_.position()) > length) {
-        builder_.AddSubstring((const char*)data, length);
+    FakeOFStream &write(const void *data, std::size_t length) {
+      if (UTIL_LIKELY(current_ + length <= end_)) {
+        std::memcpy(current_, data, length);
+        current_ += length;
         return *this;
       }
-      Flush();
-      if (length > buffer_size_) {
-        util::WriteOrThrow(fd_, data, length);
+      flush();
+      if (current_ + length <= end_) {
+        std::memcpy(current_, data, length);
+        current_ += length;
       } else {
-        builder_.AddSubstring((const char*)data, length);
+        util::WriteOrThrow(fd_, data, length);
       }
       return *this;
     }
 
+    // This also covers std::string and char*
     FakeOFStream &operator<<(StringPiece str) {
-      return Write(str.data(), str.size());
+      return write(str.data(), str.size());
     }
 
-    FakeOFStream &operator<<(float value) {
-      // Odd, but this is the largest number found in the comments.
-      EnsureRemaining(double_conversion::DoubleToStringConverter::kMaxPrecisionDigits + 8);
-      convert_.ToShortestSingle(value, &builder_);
+    // For anything with ToStringBuf<T>::kBytes, define operator<< using ToString.
+    // This includes uint64_t, int64_t, uint32_t, int32_t, uint16_t, int16_t,
+    // float, double
+  private:
+    template <int Arg> struct EnableIfKludge {
+      typedef FakeOFStream type;
+    };
+  public:
+    template <class T> typename EnableIfKludge<ToStringBuf<T>::kBytes>::type &operator<<(const T value) {
+      EnsureRemaining(ToStringBuf<T>::kBytes);
+      current_ = ToString(value, current_);
+      assert(current_ <= end_);
       return *this;
-    }
-
-    FakeOFStream &operator<<(double value) {
-      EnsureRemaining(double_conversion::DoubleToStringConverter::kMaxPrecisionDigits + 8);
-      convert_.ToShortest(value, &builder_);
-      return *this;
-    }
-
-    // Inefficient!  TODO: more efficient implementation
-    FakeOFStream &operator<<(unsigned value) {
-      return *this << boost::lexical_cast<std::string>(value);
     }
 
     FakeOFStream &operator<<(char c) {
       EnsureRemaining(1);
-      builder_.AddCharacter(c);
+      *current_++ = c;
+      return *this;
+    }
+
+    FakeOFStream &operator<<(unsigned char c) {
+      EnsureRemaining(1);
+      *current_++ = static_cast<char>(c);
+      return *this;
+    }
+
+    /* clang on OS X appears to consider std::size_t aka unsigned long distinct
+     * from uint64_t.  So this function makes clang work.  gcc considers
+     * uint64_t and std::size_t the same (on 64-bit) so this isn't necessary.
+     * But it does no harm since gcc sees it as a specialization of the
+     * EnableIfKludge template.
+     * Also, delegating to *this << static_cast<uint64_t>(value) would loop
+     * indefinitely on gcc.
+     */
+    FakeOFStream &operator<<(std::size_t value) {
+      EnsureRemaining(ToStringBuf<uint64_t>::kBytes);
+      current_ = ToString(static_cast<uint64_t>(value), current_);
       return *this;
     }
 
     // Note this does not sync.
-    void Flush() {
-      util::WriteOrThrow(fd_, buf_.get(), builder_.position());
-      builder_.Reset();
+    void flush() {
+      if (current_ != buf_.get()) {
+        util::WriteOrThrow(fd_, buf_.get(), current_ - (char*)buf_.get());
+        current_ = static_cast<char*>(buf_.get());
+      }
     }
 
     // Not necessary, but does assure the data is cleared.
     void Finish() {
-      Flush();
-      // It will segfault trying to null terminate otherwise.
-      builder_.Finalize();
+      flush();
       buf_.reset();
+      current_ = NULL;
       util::FSyncOrThrow(fd_);
     }
 
   private:
     void EnsureRemaining(std::size_t amount) {
-      if (static_cast<std::size_t>(builder_.size() - builder_.position()) <= amount) {
-        Flush();
+      if (UTIL_UNLIKELY(current_ + amount > end_)) {
+        flush();
+        assert(current_ + amount <= end_);
       }
     }
 
     util::scoped_malloc buf_;
-    double_conversion::StringBuilder builder_;
-    double_conversion::DoubleToStringConverter convert_;
+    char *current_, *end_;
+
     int fd_;
-    const std::size_t buffer_size_;
 };
 
 } // namespace

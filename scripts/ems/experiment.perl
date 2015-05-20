@@ -619,10 +619,24 @@ sub find_steps_for_module {
 	    foreach my $in (@IN) {
 		print "\t\tneeds input $in: " if $VERBOSE;
 		if(defined($CONFIG{$in}) && $CONFIG{$in}[0] =~ /^\[(.+)\]$/) {
-		    $in = $1;
-		    print $in if $VERBOSE;
-		    push @{$NEEDED{$in}}, $#DO_STEP;
-		    print "\n\t\tcross-directed to $in\n" if $VERBOSE;
+		    # multiple input, explicitly defined (example: LM:{europarl,nc}:lm )
+		    if ($CONFIG{$in}[0] =~ /^\[([^:]+):{(\S+)}:(\S+)\]$/) {
+			my @SETS = split(',', $2);
+			foreach my $set (@SETS) {
+			    $in = &construct_name($1,$set,$3);
+			    print $in if $VERBOSE;
+			    push @{$NEEDED{$in}}, $#DO_STEP;
+			    push @{$USES_INPUT{$#DO_STEP}},$in;
+			    print "\n\t\tcross-directed to $in\n" if $VERBOSE;
+			}
+		    $in = "";
+		    }
+		    else {
+			$in = $1;
+			print $in if $VERBOSE;
+			push @{$NEEDED{$in}}, $#DO_STEP;
+			print "\n\t\tcross-directed to $in\n" if $VERBOSE;
+		    }
 		}
 		elsif(defined($CONFIG{$in})) {
 		    print "\n\t\t... but that is specified\n" if $VERBOSE;
@@ -2499,7 +2513,7 @@ sub get_config_tables {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$transliteration_pt,$generation_table,$sparse_lexical_features,$domains,$osm,$concat_lm, @LM)
+    my ($config,$reordering_table,$phrase_translation_table,$transliteration_pt,$generation_table,$sparse_lexical_features,$domains,$osm, @LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
@@ -2572,34 +2586,6 @@ sub define_training_create_config {
   my $feature_lines = "";
   my $weight_lines = "";
 
-  if ($concat_lm) {
-    if (&get("CONCATENATED-LM:config-feature-line") && &get("CONCATENATED-LM:config-weight-line")) {
-        $feature_lines .= &get("CONCATENATED-LM:config-feature-line") . ";";
-        $weight_lines .= &get("CONCATENATED-LM:config-weight-line") . ";";
-    }
-    else {
-        my $type = 0;
-        my $order = &check_backoff_and_get("CONCATENATED-LM:order");
-        # binarizing the lm?
-        $type = 1 if (&get("CONCATENATED-LM:binlm") ||
-                        &backoff_and_get("CONCATENATED-LM:lm-binarizer"));
-        # randomizing the lm?
-        $type = 5 if (&get("CONCATENATED-LM:rlm") ||
-                        &backoff_and_get("CONCATENATED-LM:lm-randomizer"));
-
-        # manually set type
-        $type = &get("CONCATENATED-LM:type") if &get("CONCATENATED-LM:type");
-
-        # which factor is the model trained on?
-        my $factor = 0;
-        if (&backoff_and_get("TRAINING:output-factors") &&
-                &backoff_and_get("CONCATENATED-LM:factors")) {
-                $factor = $OUTPUT_FACTORS{&backoff_and_get("CONCATENATED-LM:factors")};
-        }
-
-        $cmd .= "-lm $factor:$order:$concat_lm:$type ";
-    }
-  }
 
 	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).":".join(",",@LM_SETS).") and LM files (".(scalar @LM).":".join(",",@LM).") does not match")
 	    unless scalar @LM == scalar @LM_SETS;
@@ -2628,13 +2614,6 @@ sub define_training_create_config {
 
                 # manually set type
                 $type = &backoff_and_get("LM:$set:type") if (&backoff_and_get("LM:$set:type"));
-
-                # binarized by INTERPOLATED-LM
-                if (&get("INTERPOLATED-LM:lm-binarizer")) {
-                    $lm_file =~ s/\.lm/\.binlm/;
-                    $type = 1;
-                    $type = &get("INTERPOLATED-LM:type") if &get("INTERPOLATED-LM:type");
-                }
 
                 # which factor is the model trained on?
                 my $factor = 0;
@@ -2813,6 +2792,7 @@ sub get_interpolated_lm_sets {
   my $count=0;
   my $icount=0;
   foreach my $set (@LM_SETS) {
+    next if (&get("LM:$set:exclude-from-interpolation"));
     my $order = &check_backoff_and_get("LM:$set:order");
 
     my $factor = 0;

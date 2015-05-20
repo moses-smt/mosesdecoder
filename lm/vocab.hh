@@ -30,15 +30,32 @@ inline uint64_t HashForVocab(const StringPiece &str) {
 struct ProbingVocabularyHeader;
 } // namespace detail
 
+// Writes words immediately to a file instead of buffering, because we know
+// where in the file to put them.
+class ImmediateWriteWordsWrapper : public EnumerateVocab {
+  public:
+    ImmediateWriteWordsWrapper(EnumerateVocab *inner, int fd, uint64_t start);
+
+    void Add(WordIndex index, const StringPiece &str) {
+      stream_ << str << '\0';
+      if (inner_) inner_->Add(index, str);
+    }
+
+  private:
+    EnumerateVocab *inner_;
+
+    util::FakeOFStream stream_;
+};
+
+// When the binary size isn't known yet.
 class WriteWordsWrapper : public EnumerateVocab {
   public:
     WriteWordsWrapper(EnumerateVocab *inner);
 
-    ~WriteWordsWrapper();
-
     void Add(WordIndex index, const StringPiece &str);
 
     const std::string &Buffer() const { return buffer_; }
+    void Write(int fd, uint64_t start);
 
   private:
     EnumerateVocab *inner_;
@@ -67,6 +84,12 @@ class SortedVocabulary : public base::Vocabulary {
     // Size for purposes of file writing
     static uint64_t Size(uint64_t entries, const Config &config);
 
+    /* Read null-delimited words from file from_words, renumber according to
+     * hash order, write null-delimited words to to_words, and create a mapping
+     * from old id to new id.  The 0th vocab word must be <unk>.
+     */
+    static void ComputeRenumbering(WordIndex types, int from_words, int to_words, std::vector<WordIndex> &mapping);
+
     // Vocab words are [0, Bound())  Only valid after FinishedLoading/LoadedBinary.
     WordIndex Bound() const { return bound_; }
 
@@ -77,8 +100,8 @@ class SortedVocabulary : public base::Vocabulary {
 
     void ConfigureEnumerate(EnumerateVocab *to, std::size_t max_entries);
 
+    // Insert and FinishedLoading go together.
     WordIndex Insert(const StringPiece &str);
-
     // Reorders reorder_vocab so that the IDs are sorted.
     void FinishedLoading(ProbBackoff *reorder_vocab);
 
@@ -89,7 +112,13 @@ class SortedVocabulary : public base::Vocabulary {
 
     void LoadedBinary(bool have_words, int fd, EnumerateVocab *to, uint64_t offset);
 
+    uint64_t *&EndHack() { return end_; }
+
+    void Populated();
+
   private:
+    template <class T> void GenericFinished(T *reorder);
+
     uint64_t *begin_, *end_;
 
     WordIndex bound_;
@@ -153,9 +182,8 @@ class ProbingVocabulary : public base::Vocabulary {
     WordIndex Insert(const StringPiece &str);
 
     template <class Weights> void FinishedLoading(Weights * /*reorder_vocab*/) {
-      FinishedLoading();
+      InternalFinishedLoading();
     }
-    void FinishedLoading();
 
     std::size_t UnkCountChangePadding() const { return 0; }
 
@@ -164,6 +192,8 @@ class ProbingVocabulary : public base::Vocabulary {
     void LoadedBinary(bool have_words, int fd, EnumerateVocab *to, uint64_t offset);
 
   private:
+    void InternalFinishedLoading();
+
     typedef util::ProbingHashTable<ProbingVocabularyEntry, util::IdentityHash> Lookup;
 
     Lookup lookup_;

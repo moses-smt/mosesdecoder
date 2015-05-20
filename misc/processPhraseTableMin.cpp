@@ -67,7 +67,11 @@ int main(int argc, char **argv)
   bool sortScoreIndexSet = false;
   size_t sortScoreIndex = 2;
   bool warnMe = true;
-  size_t threads = 1;
+  size_t threads = 
+		#ifdef WITH_THREADS
+    	boost::thread::hardware_concurrency() ? boost::thread::hardware_concurrency() :
+		#endif
+    	1;
 
   if(1 >= argc) {
     printHelp(argv);
