@@ -7,6 +7,7 @@
 
 #include "moses/FactorCollection.h"
 #include "moses/InputType.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 using namespace oxlm;
