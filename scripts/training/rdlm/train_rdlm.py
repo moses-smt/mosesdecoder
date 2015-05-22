@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--working-dir", dest="working_dir", metavar="PATH")
 parser.add_argument(
-    "--corpus", dest="corpus_stem", metavar="PATH", help="Input file.")
+    "--corpus", '-text', dest="corpus_stem", metavar="PATH", help="Input file.")
 parser.add_argument(
     "--nplm-home", dest="nplm_home", metavar="PATH", required=True,
     help="Location of NPLM.")
@@ -169,6 +169,13 @@ def prepare_vocabulary(options):
 
 def main(options):
 
+    if options.output_dir is None:
+        options.output_dir = options.working_dir
+    else:
+        # Create output dir if necessary
+        if not os.path.exists(options.output_dir):
+            os.makedirs(options.output_dir)
+
     options.ngram_size = (
         2 * options.up_context_size +
         2 * options.left_context_size +
@@ -209,6 +216,8 @@ def main(options):
         sys.stderr.write('extracting syntactic n-grams (validation file)\n')
         extract_syntactic_ngrams.main(extract_options)
         extract_options.output.close()
+    else:
+        options.validation_file = None
 
     sys.stderr.write('training neural network\n')
     train_nplm.main(options)
@@ -235,5 +244,7 @@ if __name__ == "__main__":
         sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
         sys.stdin = codecs.getreader('UTF-8')(sys.stdin)
 
-    options = parser.parse_args()
+    options = parser.parse_known_args()[0]
+    if parser.parse_known_args()[1]:
+        sys.stderr.write('Warning: unknown arguments: {0}\n'.format(parser.parse_known_args()[1]))
     main(options)
