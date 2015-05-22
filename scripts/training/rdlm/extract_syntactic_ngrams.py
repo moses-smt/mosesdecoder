@@ -133,7 +133,7 @@ def get_syntactic_ngrams(xml, options, vocab, output_vocab,
         skip_glue_labels = [
             options.glue_symbol,
             options.start_symbol,
-            options.end_symbo,
+            options.end_symbol,
             ]
         if xml.get('label') in skip_glue_labels:
             for child in xml:
