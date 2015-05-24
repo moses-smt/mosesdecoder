@@ -89,7 +89,7 @@ if [ path.exists $(home)/moses-environment.jam ]
 include $(TOP)/jam-files/check-environment.jam ; # get resource locations 
                                                  # from environment variables
 include $(TOP)/jam-files/xmlrpc-c.jam ; # xmlrpc-c stuff for the server
-include $(TOP)/jam-files/curlpp.jam ;   # curlpp stuff for bias lookup (MMT only)
+# include $(TOP)/jam-files/curlpp.jam ;   # curlpp stuff for bias lookup (MMT only)
 
 # exit "done" : 0 ;
 

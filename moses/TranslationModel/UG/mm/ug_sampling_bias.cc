@@ -3,11 +3,15 @@
 #include <boost/foreach.hpp>
 #include "moses/Timer.h"
 
-#ifdef HAVE_CURLPP
-#include <curlpp/Options.hpp>
-#include <curlpp/cURLpp.hpp>
-#include <curlpp/Easy.hpp>
-#endif
+// #ifdef HAVE_CURLPP
+// #include <curlpp/Options.hpp>
+// #include <curlpp/cURLpp.hpp>
+// #include <curlpp/Easy.hpp>
+// #endif
+
+// #ifdef WITH_MMT_BIAS_CLIENT
+#include "ug_http_client.h"
+// #endif
 
 namespace Moses
 {
@@ -15,21 +19,17 @@ namespace Moses
   {
     using ugdiss::id_type;
 
-#ifdef HAVE_CURLPP
+    // #ifdef WITH_MMT_BIAS_CLIENT
     std::string
     query_bias_server(std::string const& url, std::string const& text)
     {
-      // communicate with the bias server; resuts will be in ...
-      std::ostringstream os;
-      curlpp::Easy myRequest;
-      std::string query = url+curlpp::escape(text);
-      myRequest.setOpt(new curlpp::options::Url(query));
-      curlpp::options::WriteStream ws(&os);
-      myRequest.setOpt(ws); // Give it to your request
-      myRequest.perform();  // This will output to os
-      return os.str();
+      std::string query = url+uri_encode(text);
+      boost::asio::io_service io_service;
+      Moses::http_client c(io_service, query);
+      io_service.run();
+      return c.content();
     }
-#endif
+    // #endif
 
     DocumentBias
     ::DocumentBias
@@ -40,13 +40,13 @@ namespace Moses
       : m_sid2docid(sid2doc)
       , m_bias(docname2docid.size(), 0)
     {
-#ifdef HAVE_CURLPP
+      // #ifdef HAVE_CURLPP
       Timer timer;
       if (log) timer.start(NULL);
       std::string json = query_bias_server(server_url, text);
       init_from_json(json, docname2docid, log);
       if (log) *log << "Bias query took " << timer << " seconds." << std::endl;
-#endif
+      // #endif
     }
 
     void
