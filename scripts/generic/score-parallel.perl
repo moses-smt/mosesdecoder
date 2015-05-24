@@ -188,7 +188,7 @@ for (my $i = 0; $i < $fileCount; ++$i)
   print STDERR $cmd;
 
   if ($FlexibilityScore) {
-    $cmd .= "zcat $TMPDIR/phrase-table.half.$numStr.gz | $FlexibilityCmd $TMPDIR/extract.context.$i.gz";
+    $cmd .= "gzip -cd $TMPDIR/phrase-table.half.$numStr.gz | $FlexibilityCmd $TMPDIR/extract.context.$i.gz";
     $cmd .= " --Inverse" if ($otherExtractArgs =~ /--Inverse/);
     $cmd .= " --Hierarchical" if ($otherExtractArgs =~ /--Hierarchical/);
     $cmd .= " | $GZIP_EXEC -c > $TMPDIR/phrase-table.half.$numStr.flex.gz\n";
