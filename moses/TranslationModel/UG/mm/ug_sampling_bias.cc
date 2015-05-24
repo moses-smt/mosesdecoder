@@ -25,7 +25,7 @@ namespace Moses
     {
       std::string query = url+uri_encode(text);
       boost::asio::io_service io_service;
-      Moses::client c(io_service, query);
+      Moses::http_client c(io_service, query);
       io_service.run();
       return c.content();
     }
