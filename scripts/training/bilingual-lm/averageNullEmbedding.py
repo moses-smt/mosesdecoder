@@ -21,15 +21,9 @@ parser.add_argument(
     required=True)
 
 
-options = parser.parse_args()
-
-sys.path.append(options.nplm_python_path)
-import nplm
-
-
 def load_model(model_file):
+    import nplm
     return nplm.NeuralLM.from_file(model_file)
-
 
 def get_weights(path, length):
     counter = [0] * length
@@ -38,8 +32,9 @@ def get_weights(path, length):
         counter[last_context] += 1
     return counter
 
+def main(options):
 
-if __name__ == "__main__":
+    sys.path.append(options.nplm_python_path)
 
     model = load_model(options.input_model)
     if options.null_idx == -1:
@@ -50,3 +45,8 @@ if __name__ == "__main__":
     model.input_embeddings[options.null_idx] = numpy.average(
         numpy.array(model.input_embeddings), weights=weights, axis=0)
     model.to_file(open(options.output_model, 'w'))
+
+if __name__ == "__main__":
+
+    options = parser.parse_args()
+    main(options)
