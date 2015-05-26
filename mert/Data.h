@@ -16,6 +16,9 @@
 #include "FeatureData.h"
 #include "ScoreData.h"
 
+#include "ExtractFeatures.h"
+#include "util/file_piece.hh"
+
 namespace MosesTuning
 {
 
@@ -35,6 +38,12 @@ private:
   ScoreDataHandle m_score_data;
   FeatureDataHandle m_feature_data;
   SparseVector m_sparse_weights;
+
+
+
+  //MARIA
+  //extract feature values from nbest list
+  //ExtractFeatures m_depFeatures;
 
 public:
   explicit Data(Scorer* scorer, const std::string& sparseweightsfile="");
@@ -67,7 +76,7 @@ public:
     m_feature_data->Features(f);
   }
 
-  void loadNBest(const std::string &file);
+  void loadNBest(const std::string &file, ExtractFeatures &depFeatures);
 
   void load(const std::string &featfile, const std::string &scorefile);
 

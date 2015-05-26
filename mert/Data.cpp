@@ -21,6 +21,8 @@
 #include "util/string_piece.hh"
 #include "FeatureDataIterator.h"
 
+
+
 using namespace std;
 
 namespace MosesTuning
@@ -32,6 +34,8 @@ Data::Data(Scorer* scorer, const string& sparse_weights_file)
     m_num_scores(0),
     m_score_data(new ScoreData(m_scorer)),
     m_feature_data(new FeatureData)
+   // m_depFeatures(m_scorer->getConfig("javaPath"),m_scorer->getConfig("m_modelFileARPA"),m_scorer->getConfig("m_modelFileMI"))
+
 {
   TRACE_ERR("Data::m_score_type " << m_score_type << endl);
   TRACE_ERR("Data::Scorer type from Scorer: " << m_scorer->getName() << endl);
@@ -43,6 +47,8 @@ Data::Data(Scorer* scorer, const string& sparse_weights_file)
     msg << "}";
     TRACE_ERR(msg.str() << std::endl);
   }
+
+
 }
 
 //ADDED BY TS
@@ -135,10 +141,22 @@ void Data::load(const std::string &featfile, const std::string &scorefile)
   m_score_data->load(scorefile);
 }
 
-void Data::loadNBest(const string &file)
+void Data::loadNBest(const string &file, ExtractFeatures &depFeatures)
 {
   TRACE_ERR("loading nbest from " << file << endl);
   util::FilePiece in(file.c_str());
+  ifstream inExtraData;
+  ofstream outExtraData;
+  if(depFeatures.getExtraData()=="in"){
+  	inExtraData.open((file+".dep").c_str());
+  	if(!inExtraData.is_open())
+  		cerr<<"Input File with nbest dependencies could not be opened\n";
+  }
+  if(depFeatures.getExtraData()=="out"){
+  	outExtraData.open((file+".dep").c_str());
+  	if(!outExtraData.is_open())
+  	  cerr<<"Output File with nbest dependencies could not be opened\n";
+  }
 
   ScoreStats scoreentry;
   string sentence, feature_str, alignment;
@@ -171,12 +189,42 @@ void Data::loadNBest(const string &file)
           }
         }
       }
+
+      //MARIA
+      //compute extra data or read from file
+      string depRel="";
+      if(outExtraData.is_open()){
+      	depRel = depFeatures.CallStanfordDep(sentence);
+     		outExtraData<<sentence_index<<" ||| "<<depRel<<endl;
+      }
+      if(inExtraData.is_open()){
+      	//depending on scorer or Extra Features you would load a different file?
+      	string line;
+      	getline(inExtraData,line);
+      	if (line.empty()) continue;
+      	util::TokenIter<util::MultiCharacter> it(line, util::MultiCharacter("|||"));
+      	if(sentence_index != ParseInt(*it))
+      		cerr<<"Sentence index in extra data file doesn't align with nbest file sentence index\n";
+      	++it;
+      	depRel = it->as_string();
+      }
+
       //TODO check alignment exists if scorers need it
 
       if (m_scorer->useAlignment()) {
         sentence += "|||";
         sentence += alignment;
       }
+
+      if(m_scorer->useExtraData() || outExtraData.is_open() || inExtraData.is_open()){
+      	//either compute extraData here or read it from a file
+      	//scenarios:
+      	// 1.compute score with extra data from file or computed here
+      	// 2.compute extra feature (and score?)  ---"---"---
+      	sentence += "|||";
+      	sentence += depRel;
+      }
+
       m_scorer->prepareStats(sentence_index, sentence, scoreentry);
 
       m_score_data->add(scoreentry, sentence_index);
@@ -184,14 +232,32 @@ void Data::loadNBest(const string &file)
       // examine first line for name of features
       if (!existsFeatureNames()) {
         InitFeatureMap(feature_str);
+        if(depFeatures.ComputeExtraFeatures()){
+        	string extraFeatureName = depFeatures.GetFeatureNames();
+        	m_feature_data->extendFeatureMap(extraFeatureName);
+        }
+
       }
+
+      //MARIA
+			//compute extra features
+      //I hate this code with the feature data and feature array all to copy a bunch of numbers from one file to another
+      if(depFeatures.ComputeExtraFeatures()){
+      	string extraFeatureStr = depFeatures.GetFeatureStr(sentence,depRel);
+				//cout<<"New Feature Score: "<<extraFeatureStr<<endl;
+				feature_str += " "+extraFeatureStr;
+			}
+
       AddFeatures(feature_str, sentence_index);
+
     } catch (util::EndOfFileException &e) {
       PrintUserTime("Loaded N-best lists");
       break;
     }
   }
 }
+
+
 
 void Data::save(const std::string &featfile, const std::string &scorefile, bool bin)
 {

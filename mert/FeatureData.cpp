@@ -146,6 +146,21 @@ void FeatureData::setFeatureMap(const string& feat)
   }
 }
 
+void FeatureData::extendFeatureMap(const string& feat)
+{
+  m_features += " "+feat;
+
+  vector<string> buf;
+  Tokenize(feat.c_str(), ' ', &buf);
+  for (vector<string>::const_iterator it = buf.begin();
+       it != buf.end(); ++it) {
+    const size_t size = m_index_to_feature_name.size();
+    m_feature_name_to_index[*it] = size;
+    m_index_to_feature_name[size] = *it;
+    ++m_num_features;
+  }
+}
+
 string FeatureData::ToString() const
 {
   string res;

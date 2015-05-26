@@ -113,6 +113,20 @@ public:
     return false;
   };
 
+  /*
+   * Scorer uses extra data instead of Alignment
+   */
+  virtual bool useExtraData() const {
+      //cout << "Scorer::useAlignment returning false " << endl;
+      return false;
+    };
+
+
+  /*
+   * Get extra data needed by ExtractFeatures
+   */
+  virtual std::vector< std::vector<std::string> > getExtraData() const {};
+
   /**
    * Set the factors, which should be used for this metric
    */

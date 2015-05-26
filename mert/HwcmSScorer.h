@@ -16,6 +16,7 @@
 #include "moses/Util.h"
 #include <fstream>
 
+
 namespace MosesTuning
 {
 
@@ -33,6 +34,8 @@ public:
   ~HwcmSScorer();
 
   std::string CallStanfordDep(std::string parsedSentence, jmethodID methodId) const;
+
+
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
 
@@ -49,10 +52,25 @@ public:
     return false;
   }
 
+  /*
+   * Scorer uses extra data instead of Alignment
+   */
+  virtual bool useExtraData() const {
+      //cout << "Scorer::useAlignment returning false " << endl;
+      return true;
+    };
+
+  std::vector<std::vector<std::string> > getExtraData() const {
+  	return m_currentDepRel;
+  }
+
 private:
   mutable Moses::CreateJavaVM *javaWrapper;
   jobject m_workingStanforDepObj;
   std::ofstream inDepNbest;
+
+  //models
+  //boost::shared_ptr<lm::ngram::Model> m_WBmodel;
 
   // data extracted from reference files
   std::vector<std::vector<int> > m_ref_lengths;
@@ -62,6 +80,7 @@ private:
   bool m_includeRel;
   std::vector<int> m_totalRef;
   size_t m_order; //3 means: child + 3 ancestors
+  std::vector< std::vector<std::string> > m_currentDepRel;
 
   // no copying allowed
   HwcmSScorer(const HwcmSScorer&);

@@ -17,6 +17,8 @@
 #include "Timer.h"
 #include "Util.h"
 
+
+
 using namespace std;
 using namespace MosesTuning;
 
@@ -28,6 +30,7 @@ void usage()
   cerr << "usage: extractor [options])" << endl;
   cerr << "[--sctype|-s] the scorer type (default BLEU)" << endl;
   cerr << "[--scconfig|-c] configuration string passed to scorer" << endl;
+  cerr << "[--efconfig|-e] configuration string passed to ExtractFeatures" << endl;
   cerr << "\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc " << endl;
   cerr << "[--reference|-r] comma separated list of reference files" << endl;
   cerr << "[--binary|-b] use binary output format (default to text )" << endl;
@@ -47,6 +50,7 @@ void usage()
 static struct option long_options[] = {
   {"sctype", required_argument, 0, 's'},
   {"scconfig", required_argument,0, 'c'},
+  {"efconfig", required_argument,0, 'e'}, //config for extract features class
   {"factors", required_argument,0, 'f'},
   {"filter", required_argument,0, 'l'},
   {"reference", required_argument, 0, 'r'},
@@ -66,6 +70,7 @@ static struct option long_options[] = {
 struct ProgramOption {
   string scorerType;
   string scorerConfig;
+  string extractFeatureConfig;
   string scorerFactors;
   string scorerFilter;
   string referenceFile;
@@ -81,6 +86,7 @@ struct ProgramOption {
   ProgramOption()
     : scorerType("BLEU"),
       scorerConfig(""),
+      extractFeatureConfig(""),
       scorerFactors(""),
       scorerFilter(""),
       referenceFile(""),
@@ -106,6 +112,9 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt)
       break;
     case 'c':
       opt->scorerConfig = string(optarg);
+      break;
+    case 'e':
+      opt->extractFeatureConfig = string(optarg);
       break;
     case 'f':
       opt->scorerFactors = string(optarg);
@@ -154,6 +163,8 @@ int main(int argc, char** argv)
 
   ProgramOption option;
   ParseCommandOptions(argc, argv, &option);
+
+  ExtractFeatures depFeatures(option.extractFeatureConfig);
 
   try {
     // check whether score statistics file is specified
@@ -217,6 +228,11 @@ int main(int argc, char** argv)
 //    PrintUserTime("References loaded");
 
     Data data(scorer.get());
+    //check for option
+    //data.setInExtraData(nbestFiles[0]+".dep");
+    //data.setOutExtraData(nbestFiles[0]+".dep");
+    //data.computeExtraFeatures(true);
+
 
     // load old data
     for (size_t i = 0; i < prevScoreDataFiles.size(); i++) {
@@ -227,15 +243,15 @@ int main(int argc, char** argv)
 
     // computing score statistics of each nbest file
     for (size_t i = 0; i < nbestFiles.size(); i++) {
-      data.loadNBest(nbestFiles.at(i));
+      data.loadNBest(nbestFiles.at(i),depFeatures);
     }
 
 //    PrintUserTime("Nbest entries loaded and scored");
 
     //ADDED_BY_TS
-    if (!option.allowDuplicates) {
-      data.removeDuplicates();
-    }
+//    if (!option.allowDuplicates) {
+//      data.removeDuplicates();
+//    }
     //END_ADDED
 
     data.save(option.featureDataFile, option.scoreDataFile, option.binmode);

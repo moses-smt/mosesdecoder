@@ -138,6 +138,7 @@ public:
   }
 
   void setFeatureMap(const std::string& feat);
+  void extendFeatureMap(const std::string& feat);
 
   /* For debugging */
   std::string ToString() const;

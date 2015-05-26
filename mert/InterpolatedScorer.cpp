@@ -175,7 +175,7 @@ void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats
   int i = 0;
   for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin(); itsc != m_scorers.end(); ++itsc) {
     ScoreStats tempEntry;
-    if ((*itsc)->useAlignment()) {
+    if ((*itsc)->useAlignment() || (*itsc)->useExtraData() ) {
       (*itsc)->prepareStats(sid, text, tempEntry);
     } else {
       (*itsc)->prepareStats(sid, sentence, tempEntry);
