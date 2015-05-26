@@ -19,6 +19,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <iostream>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include "OutputFileStream.h"
@@ -32,11 +33,13 @@ namespace Moses
 OutputFileStream::OutputFileStream()
   :boost::iostreams::filtering_ostream()
   ,m_outFile(NULL)
+  ,m_open(false)
 {
 }
 
 OutputFileStream::OutputFileStream(const std::string &filePath)
-  : m_outFile(NULL)
+  :m_outFile(NULL)
+  ,m_open(false)
 {
   Open(filePath);
 }
@@ -48,32 +51,38 @@ OutputFileStream::~OutputFileStream()
 
 bool OutputFileStream::Open(const std::string &filePath)
 {
-  m_outFile = new ofstream(filePath.c_str(), ios_base::out | ios_base::binary);
-  if (m_outFile->fail()) {
-    return false;
+  assert(!m_open);
+  if (filePath == std::string("-")) {
+    // Write to standard output.  Leave m_outFile null.
+    this->push(std::cout);
+  } else {
+    m_outFile = new ofstream(filePath.c_str(), ios_base::out | ios_base::binary);
+    if (m_outFile->fail()) {
+      return false;
+    }
+
+    if (ends_with(filePath, ".gz")) {
+      this->push(boost::iostreams::gzip_compressor());
+    }
+    this->push(*m_outFile);
   }
 
-  if (ends_with(filePath, ".gz")) {
-    this->push(boost::iostreams::gzip_compressor());
-  }
-  this->push(*m_outFile);
-
+  m_open = true;
   return true;
 }
 
 void OutputFileStream::Close()
 {
-  if (m_outFile == NULL) {
-    return;
-  }
-
+  if (!m_open) return;
   this->flush();
-  this->pop(); // file
+  if (m_outFile) {
+    this->pop(); // file
 
-  m_outFile->close();
-  delete m_outFile;
-  m_outFile = NULL;
-  return;
+    m_outFile->close();
+    delete m_outFile;
+    m_outFile = NULL;
+  }
+  m_open = false;
 }
 
 
