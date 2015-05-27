@@ -212,7 +212,9 @@ void ExtractFeatures::InitConfig(const string& config)
     string nv = config.substr(start, end - start);
     size_t split = nv.find(":");
     if (split == string::npos) {
-      throw runtime_error("Missing colon when processing scorer config: " + config);
+      //throw runtime_error("Missing colon when processing scorer config: " + config);
+    	cerr<< "Missing colon when processing scorer config: " + config<<endl;
+    	exit(-1);
     }
     const string name = nv.substr(0, split);
     const string value = nv.substr(split + 1, nv.size() - split - 1);
