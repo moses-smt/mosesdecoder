@@ -30,19 +30,19 @@ def main():
         parser.error("incorrect number of arguments")
 
     tree = ""
+    line_num = 0
     for line in sys.stdin:
+        line_num += 1
+        # Check for a blank line (the sentence delimiter).
         if line.strip() == "":
             if not balanced(tree):
-                warn("unbalanced parentheses at line %d: "
+                warn("unbalanced parentheses in tree ending at line %d: "
                      "discarding tree" % line_num)
                 tree = ""
-            if tree == "" and options.berkeley:
-                print "(())"
-            else:
-                tree = beautify(tree)
-                if options.berkeley:
-                    tree = berkelify(tree)
-                print tree
+            tree = beautify(tree)
+            if options.berkeley:
+                tree = berkelify(tree)
+            print tree
             tree = ""
             continue
         tokens = line.split()
@@ -81,8 +81,8 @@ def beautify(tree):
     return s.strip()
 
 def berkelify(tree):
-    if len(tree) == 0:
-        return tree
+    if tree == "":
+        return "(())"
     assert tree[0] == "("
     pos = tree.find(" (", 1)
     assert pos != -1
@@ -91,8 +91,7 @@ def berkelify(tree):
 
 def warn(msg):
     prog_name = os.path.basename(sys.argv[0])
-    sys.stderr.write("%s: warning: %s" % (prog_name, msg))
-    sys.exit(1)
+    sys.stderr.write("%s: warning: %s\n" % (prog_name, msg))
 
 if __name__ == "__main__":
     main()
