@@ -50,7 +50,7 @@ void ContextFeature::Evaluate(const InputType &input
 
 	    vector<FactorType> srcFactors;
 	    srcFactors.push_back(0);
-	    //string nonTermRep = "[X][X]"; was for hiero
+	    string nonTermRep = "[X][X]"; //FB: also for ghkm, we want the source side non-terminals to be undecorated
 
 	    VERBOSE(5, "Computing vw scores for source context : " << input << endl);
 
@@ -92,7 +92,6 @@ void ContextFeature::Evaluate(const InputType &input
 	            //FB : also look at the non-terms in the target !!!
 	            //rewrite non-terminals non source side with "[][]"
 	            //Generate non-term representation
-	            string nonTermRep = "";
 	            for(int i=0; i< tp.GetRuleSource()->GetSize();i++)
 	            {
 	                //replace each non-terminal with bracketed version for coherence with the rule table
@@ -100,13 +99,14 @@ void ContextFeature::Evaluate(const InputType &input
 	            	//we have the non-term position in the source, so we try to find the aligned non-term on the target side
 	                if(tp.GetRuleSource()->GetWord(i).IsNonTerminal())
 	                {
-	                    //sourceSide += nonTermRep;//was for hiero
-	                	//FB: new for GHKM
-	                	//get source and target non-terminal and put brackets
-	                	CHECK(tp.GetAlignNonTerm().GetAlignmentsForSource(i).size() == 1);//non term align should be 1 to 1
+	                    sourceSide += nonTermRep;//was for hiero
 
-	                	sourceSide += "[" + tp.GetRuleSource()->GetWord(i).GetString(srcFactors,0) + "]";
-	                	sourceSide += "[" + tp.GetWord(*tp.GetAlignNonTerm().GetAlignmentsForSource(i).begin()).GetString(srcFactors,0) + "]";
+	                    //FB: uncomment below to have the standard ghkm representation [X][NT]
+	                	//get source and target non-terminal and put brackets
+	                	//CHECK(tp.GetAlignNonTerm().GetAlignmentsForSource(i).size() == 1);//non term align should be 1 to 1
+
+	                	//sourceSide += "[" + tp.GetRuleSource()->GetWord(i).GetString(srcFactors,0) + "]";
+	                	//sourceSide += "[" + tp.GetWord(*tp.GetAlignNonTerm().GetAlignmentsForSource(i).begin()).GetString(srcFactors,0) + "]";
 
 	                }
 	                else

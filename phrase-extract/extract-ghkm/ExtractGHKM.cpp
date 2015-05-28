@@ -655,10 +655,17 @@ void ExtractGHKM::WritePsdAnnot(
 			  assert(foundIndex==1);
 
 			  //find alignment where align.first == i and take align.second
-			  ruleSource+="["+sourceRHS[i].GetValue()+"]";
-			  ruleSource+="["+targetRHS[targetIndex].GetValue()+"]";
+
+			  //For features on the source side, we want the source non-terms to be completely undecorated
+			  ruleSource+="[X][X]";
 			  ruleSource+= " ";
 			  ntCounter++;
+
+			  //FB: uncomment for standarad ghkm format [X][NT]
+			  //ruleSource+="["+sourceRHS[i].GetValue()+"]";
+			  //ruleSource+="["+targetRHS[targetIndex].GetValue()+"]";
+			  //ruleSource+= " ";
+			  //ntCounter++;
 		  }
 		  else
 		  {
