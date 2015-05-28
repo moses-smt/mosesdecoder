@@ -17,14 +17,12 @@ if ($SCRIPTS_ROOTDIR eq '') {
 }
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 
-my ($binarizer, $input_config, $output_config, $min_score);
+my ($binarizer, $input_config, $output_config);
 my $opt_hierarchical = 0;
-$binarizer = "$SCRIPTS_ROOTDIR/../bin/processPhraseTableMin";
-$min_score = "0";
+$binarizer = "$SCRIPTS_ROOTDIR/../bin/processPhraseTable";
 GetOptions(
   "Hierarchical" => \$opt_hierarchical,
-  "Binarizer=s" => \$binarizer,
-  "MinScore=s" => \$min_score
+  "Binarizer=s" => \$binarizer
 ) or exit(1);
 
 $input_config = shift;
@@ -39,9 +37,7 @@ my $hierarchical = "";
 $hierarchical = "-Hierarchical" if $opt_hierarchical;
 my $targetdir = "$output_config.tables";
 
-my $cmd = "$RealBin/filter-model-given-input.pl  $targetdir $input_config /dev/null $hierarchical -nofilter -Binarizer $binarizer";
-$cmd .= "--MinScore $min_score" if (defined $min_score);
-safesystem($cmd) || die "binarising failed";
+safesystem("$RealBin/filter-model-given-input.pl  $targetdir $input_config /dev/null $hierarchical -nofilter -Binarizer $binarizer") || die "binarising failed";
 safesystem("rm -f $output_config; ln -s $targetdir/moses.ini $output_config") || die "failed to link new ini file";
 
 #FIXME: Why isn't this in a module?
