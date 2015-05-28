@@ -125,7 +125,7 @@ void ContextFeature::Evaluate(const InputType &input
 	            sourceSide += " ";
 	            sourceSide += parentNonTerm;
 
-	            std::cout << "New source side : " << sourceSide << std::endl;
+	            VERBOSE(0, "New source side : " << sourceSide << std::endl);
 
 	            int wordCounter = 0;
 
@@ -186,7 +186,6 @@ void ContextFeature::Evaluate(const InputType &input
 
 	            VERBOSE(0, "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << endl);
 
-	            std:cout << "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << std::endl;
 	            ruleMap.AddRule(sourceSide,targetRepresentation);
 	            targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
 

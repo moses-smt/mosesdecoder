@@ -432,7 +432,7 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
     }
   }
   fc->AddFeature("p^" + indicString);
-  fc->AddFeature("lhs^" + string(matchedParent[0]));
+  fc->AddFeature("head^" + string(matchedParent[0]));
 }
 
 
