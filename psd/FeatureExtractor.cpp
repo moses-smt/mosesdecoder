@@ -399,12 +399,14 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
   string indicString = "";
   size_t nonTermCounter = 0;
 
+  boost::smatch matchedParent; //for parent non-terminal feature
+
   size_t found;
   size_t sizeOfSpan = span.size();
   for (int i=0; i < sizeOfSpan; i++) {
     //if( span[i].compare(parent) ) was for hiero
-    //if(!regex_match (span[i],parentRegex))
-    //{
+    if(!regex_match (span[i],matchedParent,parentRegex))
+    {
         //found = span[i].find(nonTerm); was for hiero
         //if(found != string::npos)
     	if(regex_search(span[i],matchedNonTerm,nonTermDigitRegex))
@@ -428,8 +430,9 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
             {indicString += "_";}
         indicString += span[i];}
     }
-  //}
+  }
   fc->AddFeature("p^" + indicString);
+  fc->AddFeature("lhs^" + string(matchedParent[0]));
 }
 
 
