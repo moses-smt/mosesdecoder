@@ -1,6 +1,3 @@
-// $Id: SyntaxTree.h 1960 2008-12-15 12:52:38Z phkoehn $
-// vim:tabstop=2
-
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2009 University of Edinburgh
@@ -20,12 +17,12 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-
 #pragma once
-#include <string>
-#include <vector>
+
 #include <map>
 #include <sstream>
+#include <string>
+#include <vector>
 
 namespace MosesTraining
 {
@@ -79,7 +76,7 @@ public:
 typedef std::vector< int > SplitPoints;
 typedef std::vector< SplitPoints > ParentNodes;
 
-class SyntaxTree
+class SyntaxNodeCollection
 {
 protected:
   std::vector< SyntaxNode* > m_nodes;
@@ -93,14 +90,12 @@ protected:
   int m_size;
   std::vector< SyntaxNode* > m_emptyNode;
 
-  friend std::ostream& operator<<(std::ostream&, const SyntaxTree&);
-
 public:
-  SyntaxTree()
+  SyntaxNodeCollection()
     : m_top(0)  // m_top doesn't get set unless ConnectNodes is called.
     , m_size(0) {}
 
-  ~SyntaxTree();
+  ~SyntaxNodeCollection();
 
   SyntaxNode *AddNode( int startPos, int endPos, std::string label );
 
@@ -119,10 +114,6 @@ public:
   }
   void ConnectNodes();
   void Clear();
-  std::string ToString() const;
 };
 
-std::ostream& operator<<(std::ostream&, const SyntaxTree&);
-
-}
-
+}  // namespace MosesTraining

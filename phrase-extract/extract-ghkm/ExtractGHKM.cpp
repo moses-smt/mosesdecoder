@@ -172,7 +172,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
 
     // Parse source tree and construct a SyntaxTree object.
-    MosesTraining::SyntaxTree sourceSyntaxTree;
+    MosesTraining::SyntaxNodeCollection sourceSyntaxTree;
     MosesTraining::SyntaxNode *sourceSyntaxTreeRoot=NULL;
 
     if (options.sourceLabels) {
@@ -196,7 +196,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     // Read source tokens.
     std::vector<std::string> sourceTokens(ReadTokens(sourceLine));
 
-    // Construct a source ParseTree object from the SyntaxTree object.
+    // Construct a source ParseTree object from the SyntaxNodeCollection object.
     std::auto_ptr<ParseTree> sourceParseTree;
 
     if (options.sourceLabels) {

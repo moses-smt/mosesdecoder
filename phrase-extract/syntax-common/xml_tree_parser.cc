@@ -13,17 +13,17 @@ namespace Syntax {
 
 StringTree *XmlTreeParser::Parse(const std::string &line) {
   line_ = line;
-  tree_.Clear();
+  node_collection_.Clear();
   try {
-    if (!ProcessAndStripXMLTags(line_, tree_, label_set_, top_label_set_,
-                                false)) {
+    if (!ProcessAndStripXMLTags(line_, node_collection_, label_set_,
+                                top_label_set_, false)) {
       throw Exception("");
     }
   } catch (const XmlException &e) {
     throw Exception(e.getMsg());
   }
-  tree_.ConnectNodes();
-  SyntaxNode *root = tree_.GetTop();
+  node_collection_.ConnectNodes();
+  SyntaxNode *root = node_collection_.GetTop();
   assert(root);
   words_ = util::tokenize(line_);
   return ConvertTree(*root, words_);

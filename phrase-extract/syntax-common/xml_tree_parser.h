@@ -26,7 +26,7 @@ class XmlTreeParser {
   std::set<std::string> label_set_;
   std::map<std::string, int> top_label_set_;
   std::string line_;
-  MosesTraining::SyntaxTree tree_;
+  MosesTraining::SyntaxNodeCollection node_collection_;
   std::vector<std::string> words_;
 };
 
