@@ -38,6 +38,17 @@ BEAUTIFY_IGNORE = '.beautify-ignore'
 
 class LintCheckFailure(Exception):
     """Lint was found, or the lint checker otherwise returned failure."""
+    exit_code = 1
+
+
+class ProgramFailure(Exception):
+    """The program failed, but it's not a bug.  No traceback."""
+    exit_code = 2
+
+
+class CommandLineError(Exception):
+    """Something wrong with the command-line arguments."""
+    exit_code = 3
 
 
 def read_ignore_file(root_dir):
@@ -52,7 +63,7 @@ def read_ignore_file(root_dir):
             ignore_contents = ignore_file.read()
     except IOError as error:
         if error.errno == ENOENT:
-            raise Exception(
+            raise ProgramFailure(
                 "No .gitignore file found in %s.  "
                 "Is it really the project's root directory?"
                 % root_dir)
@@ -200,7 +211,7 @@ def check_astyle_version(verbose=False):
         ['astyle', '--version'], verbose=verbose, env={'LC_ALL': 'C'})
     version = version.strip()
     if version != EXPECTED_ASTYLE_VERSION:
-        raise Exception(
+        raise ProgramFailure(
             "Wrong astyle version.  "
             "Expected '%s', but got version string '%s'."
             % (EXPECTED_ASTYLE_VERSION, version))
@@ -226,8 +237,15 @@ def run_perltidy(source_files, verbose=False, dry_run=False):
         # Write "} else {", with 'else' on the same line as the braces.
         '--cuddled-else',
     ]
-    _, stderr = run_command(
-        command_line + source_files, verbose=verbose, dry_run=dry_run)
+    try:
+        _, stderr = run_command(
+            command_line + source_files, verbose=verbose, dry_run=dry_run)
+    except OSError as error:
+        if error.errno == ENOENT:
+            raise ProgramFailure(
+                "Could not run 'perltidy'.  Make sure that it is installed.")
+        else:
+            raise
     if stderr != '':
         sys.stderr.write(stderr)
 
@@ -386,7 +404,7 @@ def main():
     """Find and format source files."""
     args = parse_arguments()
     if not args.format and not args.lint:
-        raise Exception("Select action: --format, --lint, or both.")
+        raise CommandLineError("Select action: --format, --lint, or both.")
 
     ignore = read_ignore_file(args.root_dir)
 
@@ -409,8 +427,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except LintCheckFailure as error:
+    except (CommandLineError, LintCheckFailure, ProgramFailure) as error:
         # This is a failure, but not a bug.  Print a friendly error
         # message, not a traceback.
         sys.stderr.write('%s\n' % error)
-        sys.exit(1)
+        sys.exit(error.exit_code)
