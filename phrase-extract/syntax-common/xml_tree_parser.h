@@ -5,7 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "SyntaxTree.h"
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
 
 #include "exception.h"
 #include "string_tree.h"

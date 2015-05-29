@@ -24,7 +24,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <sstream>
-#include "SyntaxTree.h"
+
+#include "SyntaxNodeCollection.h"
 #include "XmlException.h"
 
 using namespace std;

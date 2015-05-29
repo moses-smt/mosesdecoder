@@ -41,7 +41,7 @@
 #include "HoleCollection.h"
 #include "RuleExist.h"
 #include "SentenceAlignmentWithSyntax.h"
-#include "SyntaxTree.h"
+#include "SyntaxNode.h"
 #include "tables-core.h"
 #include "XmlTree.h"
 #include "InputFileStream.h"

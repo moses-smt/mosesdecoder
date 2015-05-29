@@ -19,15 +19,15 @@
 
 #pragma once
 
-#include "Alignment.h"
-#include "Rule.h"
-#include "SyntaxTree.h"
-
 #include <string>
 #include <vector>
 #include <list>
 #include <memory>
 #include <iostream>
+
+#include "Alignment.h"
+#include "Rule.h"
+#include "SyntaxNodeCollection.h"
 
 namespace Moses
 {
@@ -95,4 +95,3 @@ private:
 
 }  // namespace GHKM
 }  // namespace Moses
-

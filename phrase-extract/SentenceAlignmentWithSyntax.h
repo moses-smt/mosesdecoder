@@ -28,7 +28,7 @@
 
 #include "RuleExtractionOptions.h"
 #include "SentenceAlignment.h"
-#include "SyntaxTree.h"
+#include "SyntaxNodeCollection.h"
 
 namespace MosesTraining
 {

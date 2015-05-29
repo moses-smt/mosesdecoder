@@ -18,7 +18,7 @@
  ***********************************************************************/
 
 
-#include "SyntaxTree.h"
+#include "SyntaxNodeCollection.h"
 
 #include <cassert>
 #include <iostream>
@@ -42,7 +42,8 @@ void SyntaxNodeCollection::Clear()
   m_index.clear();
 }
 
-SyntaxNode *SyntaxNodeCollection::AddNode( int startPos, int endPos, std::string label )
+SyntaxNode *SyntaxNodeCollection::AddNode(int startPos, int endPos,
+                                          const std::string &label)
 {
   SyntaxNode* newNode = new SyntaxNode( startPos, endPos, label );
   m_nodes.push_back( newNode );
@@ -151,4 +152,4 @@ void SyntaxNodeCollection::ConnectNodes()
   }
 }
 
-}
+}  // namespace MosesTraining

@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "SyntaxTree.h"
+#include "SyntaxNodeCollection.h"
 #include "XmlTree.h"
 
 #define LINE_MAX_LENGTH 1000000

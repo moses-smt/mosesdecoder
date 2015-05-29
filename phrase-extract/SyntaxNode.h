@@ -72,48 +72,4 @@ public:
   }
 };
 
-
-typedef std::vector< int > SplitPoints;
-typedef std::vector< SplitPoints > ParentNodes;
-
-class SyntaxNodeCollection
-{
-protected:
-  std::vector< SyntaxNode* > m_nodes;
-  SyntaxNode* m_top;
-
-  typedef std::map< int, std::vector< SyntaxNode* > > SyntaxTreeIndex2;
-  typedef SyntaxTreeIndex2::const_iterator SyntaxTreeIndexIterator2;
-  typedef std::map< int, SyntaxTreeIndex2 > SyntaxTreeIndex;
-  typedef SyntaxTreeIndex::const_iterator SyntaxTreeIndexIterator;
-  SyntaxTreeIndex m_index;
-  int m_size;
-  std::vector< SyntaxNode* > m_emptyNode;
-
-public:
-  SyntaxNodeCollection()
-    : m_top(0)  // m_top doesn't get set unless ConnectNodes is called.
-    , m_size(0) {}
-
-  ~SyntaxNodeCollection();
-
-  SyntaxNode *AddNode( int startPos, int endPos, std::string label );
-
-  SyntaxNode *GetTop() {
-    return m_top;
-  }
-
-  ParentNodes Parse();
-  bool HasNode( int startPos, int endPos ) const;
-  const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;
-  const std::vector< SyntaxNode* >& GetAllNodes() {
-    return m_nodes;
-  };
-  size_t GetNumWords() const {
-    return m_size;
-  }
-  void ConnectNodes();
-  void Clear();
-};
-
 }  // namespace MosesTraining

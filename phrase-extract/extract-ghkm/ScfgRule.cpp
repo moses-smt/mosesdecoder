@@ -19,11 +19,12 @@
 
 #include "ScfgRule.h"
 
+#include <algorithm>
+
 #include "Node.h"
 #include "Subgraph.h"
-#include "SyntaxTree.h"
-
-#include <algorithm>
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
 
 namespace Moses
 {

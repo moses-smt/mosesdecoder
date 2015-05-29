@@ -28,7 +28,8 @@
 #include <vector>
 
 #include "pcfg_tree.h"
-#include "SyntaxTree.h"
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
 
 namespace MosesTraining {
 namespace Syntax {

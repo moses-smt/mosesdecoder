@@ -23,13 +23,14 @@
 
 #include "Exception.h"
 
-#include "SyntaxTree.h"
-
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
 
 namespace Moses
 {
