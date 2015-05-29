@@ -1,4 +1,9 @@
 #! /usr/bin/env python
+#
+# Originally written in 2015 by Jeroen Vermeulen (Precision Translation Tools).
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 """Reformat project source code, and/or check for style errors ("lint").
 

@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
-""" train feed-forward neural network LM with NPLM tool
-resulting model can be used in Moses as feature function NeuralLM
+"""Train feed-forward neural network LM with NPLM tool.
+
+The resulting model can be used in Moses as feature function NeuralLM.
 """
 
 from __future__ import print_function, unicode_literals

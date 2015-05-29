@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Rico Sennrich
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
-# convert trees in moses XML format to PTB-style bracketed format
+"""Convert trees in moses XML format to PTB-style bracketed format."""
 
 from __future__ import print_function, unicode_literals
 import sys
