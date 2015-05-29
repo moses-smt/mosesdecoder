@@ -357,7 +357,9 @@ foreach my $step (@step_conf) {
 
 # supporting binaries from other packages
 my $MKCLS = "$_EXTERNAL_BINDIR/mkcls";
-my $MGIZA_MERGE_ALIGN = "$_EXTERNAL_BINDIR/merge_alignment.py";
+my $MGIZA_MERGE_ALIGN_IN_BIN = "$_EXTERNAL_BINDIR/merge_alignment.py";
+my $MGIZA_MERGE_ALIGN_IN_SCRIPTS = "$_EXTERNAL_BINDIR/../scripts/merge_alignment.py";
+my $MGIZA_MERGE_ALIGN;
 my $GIZA;
 my $SNT2COOC;
 
@@ -387,7 +389,13 @@ if ($STEPS[1] || $STEPS[2])
 		if (!defined($_MGIZA_CPUS)) {
 			$_MGIZA_CPUS=4;
 		}
-		die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
+		if (-x $MGIZA_MERGE_ALIGN_IN_BIN) {
+			$MGIZA_MERGE_ALIGN = $MGIZA_MERGE_ALIGN_IN_BIN;
+		} elsif (-x $MGIZA_MERGE_ALIGN_IN_SCRIPTS) {
+			$MGIZA_MERGE_ALIGN = $MGIZA_MERGE_ALIGN_IN_SCRIPTS;
+		} else {
+			die("ERROR: Cannot find $MGIZA_MERGE_ALIGN_IN_BIN or $MGIZA_MERGE_ALIGN_IN_SCRIPTS");
+		}
 	}
 
 	# override
