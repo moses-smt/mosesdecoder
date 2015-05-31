@@ -28,7 +28,8 @@
 #include <vector>
 
 #include "pcfg_tree.h"
-#include "SyntaxTree.h"
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
 
 namespace MosesTraining {
 namespace Syntax {
@@ -47,7 +48,7 @@ class XmlTreeParser {
   std::set<std::string> m_labelSet;
   std::map<std::string, int> m_topLabelSet;
   std::string m_line;
-  MosesTraining::SyntaxTree m_tree;
+  MosesTraining::SyntaxNodeCollection m_tree;
   std::vector<std::string> m_words;
 };
 

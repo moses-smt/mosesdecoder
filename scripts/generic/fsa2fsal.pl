@@ -4,6 +4,9 @@
 # ' ' to delimit nodes (i.e. original lines).
 # Some rudimentary sanity checks are done on the fly.
 # Ondrej Bojar, bojar@ufal.mff.cuni.cz
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;

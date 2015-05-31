@@ -19,11 +19,12 @@
 
 #include "ScfgRule.h"
 
+#include <algorithm>
+
 #include "Node.h"
 #include "Subgraph.h"
-#include "SyntaxTree.h"
-
-#include <algorithm>
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
 
 namespace Moses
 {
@@ -31,7 +32,7 @@ namespace GHKM
 {
 
 ScfgRule::ScfgRule(const Subgraph &fragment,
-                   const MosesTraining::SyntaxTree *sourceSyntaxTree)
+                   const MosesTraining::SyntaxNodeCollection *sourceSyntaxTree)
   : m_graphFragment(fragment)
   , m_sourceLHS("X", NonTerminal)
   , m_targetLHS(fragment.GetRoot()->GetLabel(), NonTerminal)
@@ -133,9 +134,9 @@ ScfgRule::ScfgRule(const Subgraph &fragment,
   }
 }
 
-void ScfgRule::PushSourceLabel(const MosesTraining::SyntaxTree *sourceSyntaxTree,
-                               const Node *node,
-                               const std::string &nonMatchingLabel)
+void ScfgRule::PushSourceLabel(
+    const MosesTraining::SyntaxNodeCollection *sourceSyntaxTree,
+    const Node *node, const std::string &nonMatchingLabel)
 {
   ContiguousSpan span = Closure(node->GetSpan());
   if (sourceSyntaxTree->HasNode(span.first,span.second)) { // does a source constituent match the span?

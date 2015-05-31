@@ -1,20 +1,25 @@
 #!/usr/bin/env python
 
 # Written by Michael Denkowski
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
-# This script parallelizes decoding with simulated post-editing via moses XML
-# input (XML entities need to be escaped in tokenization).  Memory mapped
-# dynamic phrase tables (Ulrich Germann,
-# www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc40) and language models
-# (Kenneth Heafield,
-# http://www.statmt.org/moses/?n=FactoredTraining.BuildingLanguageModel#ntoc19)
-# facilitate memory efficient multi process decoding.  Input is divided into
-# batches, each of which is decoded sequentially.  Each batch pre-loads the
-# data from previous batches.
+"""Parallelize decoding with simulated post-editing via moses XML input.
 
-# To use in tuning, run mert-moses.pl with --sim-pe=SYMAL where SYMAL is the
-# alignment from input to references.  Specify the number of jobs with
-# --decoder-flags="-threads N".
+(XML entities need to be escaped in tokenization).  Memory mapped
+dynamic phrase tables (Ulrich Germann,
+www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc40) and language models
+(Kenneth Heafield,
+http://www.statmt.org/moses/?n=FactoredTraining.BuildingLanguageModel#ntoc19)
+facilitate memory efficient multi process decoding.  Input is divided into
+batches, each of which is decoded sequentially.  Each batch pre-loads the
+data from previous batches.
+
+To use in tuning, run mert-moses.pl with --sim-pe=SYMAL where SYMAL is the
+alignment from input to references.  Specify the number of jobs with
+--decoder-flags="-threads N".
+"""
 
 import gzip
 import itertools

@@ -1,6 +1,3 @@
-// $Id: SyntaxTree.h 1960 2008-12-15 12:52:38Z phkoehn $
-// vim:tabstop=2
-
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2009 University of Edinburgh
@@ -20,12 +17,12 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-
 #pragma once
-#include <string>
-#include <vector>
+
 #include <map>
 #include <sstream>
+#include <string>
+#include <vector>
 
 namespace MosesTraining
 {
@@ -75,54 +72,4 @@ public:
   }
 };
 
-
-typedef std::vector< int > SplitPoints;
-typedef std::vector< SplitPoints > ParentNodes;
-
-class SyntaxTree
-{
-protected:
-  std::vector< SyntaxNode* > m_nodes;
-  SyntaxNode* m_top;
-
-  typedef std::map< int, std::vector< SyntaxNode* > > SyntaxTreeIndex2;
-  typedef SyntaxTreeIndex2::const_iterator SyntaxTreeIndexIterator2;
-  typedef std::map< int, SyntaxTreeIndex2 > SyntaxTreeIndex;
-  typedef SyntaxTreeIndex::const_iterator SyntaxTreeIndexIterator;
-  SyntaxTreeIndex m_index;
-  int m_size;
-  std::vector< SyntaxNode* > m_emptyNode;
-
-  friend std::ostream& operator<<(std::ostream&, const SyntaxTree&);
-
-public:
-  SyntaxTree()
-    : m_top(0)  // m_top doesn't get set unless ConnectNodes is called.
-    , m_size(0) {}
-
-  ~SyntaxTree();
-
-  SyntaxNode *AddNode( int startPos, int endPos, std::string label );
-
-  SyntaxNode *GetTop() {
-    return m_top;
-  }
-
-  ParentNodes Parse();
-  bool HasNode( int startPos, int endPos ) const;
-  const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;
-  const std::vector< SyntaxNode* >& GetAllNodes() {
-    return m_nodes;
-  };
-  size_t GetNumWords() const {
-    return m_size;
-  }
-  void ConnectNodes();
-  void Clear();
-  std::string ToString() const;
-};
-
-std::ostream& operator<<(std::ostream&, const SyntaxTree&);
-
-}
-
+}  // namespace MosesTraining

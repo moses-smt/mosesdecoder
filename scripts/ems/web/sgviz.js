@@ -1,3 +1,7 @@
+/*
+This file is part of moses.  Its use is licensed under the GNU Lesser General
+Public License version 2.1 or, at your option, any later version.
+*/
 var xmlns="http://www.w3.org/2000/svg";
 var RECOMBINED = 0;
 var FROM = 1;

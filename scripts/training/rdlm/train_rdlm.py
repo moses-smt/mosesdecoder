@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 from __future__ import print_function, unicode_literals
 
@@ -91,11 +94,14 @@ parser.add_argument(
     "--output-words-file", dest="output_words_file", metavar="PATH",
     help="Output vocabulary (default: %(default)s).")
 parser.add_argument(
-    "--input_vocab_size", dest="input_vocab_size", type=int, metavar="INT",
+    "--input-vocab-size", dest="input_vocab_size", type=int, metavar="INT",
     help="Input vocabulary size (default: %(default)s).")
 parser.add_argument(
     "--output-vocab-size", dest="output_vocab_size", type=int, metavar="INT",
     help="Output vocabulary size (default: %(default)s).")
+parser.add_argument(
+    "--mmap", dest="mmap", action="store_true",
+    help="Use memory-mapped file (for lower memory consumption).")
 
 
 parser.set_defaults(
@@ -192,11 +198,14 @@ def main(options):
             "extracting vocabulary from training text.\n")
         prepare_vocabulary(options)
 
+    numberized_file = os.path.basename(options.corpus_stem) + '.numberized'
+    train_file = numberized_file
+    if options.mmap:
+        train_file += '.mmap'
+
     extract_options = extract_syntactic_ngrams.create_parser().parse_args([
         '--input', options.corpus_stem,
-        '--output', os.path.join(
-            options.working_dir,
-            os.path.basename(options.corpus_stem) + '.numberized'),
+        '--output', os.path.join(options.working_dir, numberized_file),
         '--vocab', options.input_words_file,
         '--output_vocab', options.output_words_file,
         '--right_context', str(options.right_context_size),
@@ -219,6 +228,23 @@ def main(options):
     else:
         options.validation_file = None
 
+    if options.mmap:
+        try:
+            os.remove(os.path.join(options.working_dir, train_file))
+        except OSError:
+            pass
+        mmap_cmd = [os.path.join(options.nplm_home, 'src', 'createMmap'),
+                    '--input_file',
+                    os.path.join(options.working_dir, numberized_file),
+                    '--output_file',
+                    os.path.join(options.working_dir, train_file)
+                    ]
+        sys.stderr.write('creating memory-mapped file\n')
+        sys.stderr.write('executing: ' + ', '.join(mmap_cmd) + '\n')
+        ret = subprocess.call(mmap_cmd)
+        if ret:
+            raise Exception("creating memory-mapped file failed")
+
     sys.stderr.write('training neural network\n')
     train_nplm.main(options)
 
@@ -231,7 +257,7 @@ def main(options):
             options.output_model + '.model.nplm.' + str(options.epochs)),
         os.path.join(
             options.working_dir,
-            os.path.basename(options.corpus_stem) + '.numberized'),
+            numberized_file),
         os.path.join(options.output_dir, options.output_model + '.model.nplm')
         ])
     if ret:

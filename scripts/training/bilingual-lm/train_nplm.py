@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 from __future__ import print_function, unicode_literals
 
@@ -36,7 +39,8 @@ parser.add_argument("--input-words-file", dest="input_words_file")
 parser.add_argument("--output-words-file", dest="output_words_file")
 parser.add_argument("--input_vocab_size", dest="input_vocab_size", type=int)
 parser.add_argument("--output_vocab_size", dest="output_vocab_size", type=int)
-
+parser.add_argument("--mmap", dest="mmap", action="store_true",
+    help="Use memory-mapped file (for lower memory consumption).")
 
 parser.set_defaults(
     working_dir="working",
@@ -110,6 +114,11 @@ def main(options):
         options.working_dir,
         os.path.basename(options.corpus_stem) + ".numberized")
 
+    mmap_command = []
+    if options.mmap:
+        in_file += '.mmap'
+        mmap_command = ['--mmap_file', '1']
+
     model_prefix = os.path.join(
         options.output_dir, options.output_model + ".model.nplm")
     train_args = [
@@ -124,9 +133,9 @@ def main(options):
         "--input_embedding_dimension", str(options.input_embedding),
         "--output_embedding_dimension", str(options.output_embedding),
         "--num_threads", str(options.threads),
-        "--activation_function",
-        options.activation_fn,
-    ] + validations_command + vocab_command
+        "--activation_function", options.activation_fn,
+        "--ngram_size", str(options.ngram_size),
+    ] + validations_command + vocab_command + mmap_command
     print("Train model command: ")
     print(', '.join(train_args))
 

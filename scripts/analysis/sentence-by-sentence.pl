@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 #sentence-by-sentence: take in a system output, with any number of factors, and a reference translation, also maybe with factors, and show each sentence and its errors

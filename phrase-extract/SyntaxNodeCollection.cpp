@@ -1,6 +1,3 @@
-// $Id: SyntaxTree.cpp 1960 2008-12-15 12:52:38Z phkoehn $
-// vim:tabstop=2
-
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2009 University of Edinburgh
@@ -21,7 +18,7 @@
  ***********************************************************************/
 
 
-#include "SyntaxTree.h"
+#include "SyntaxNodeCollection.h"
 
 #include <cassert>
 #include <iostream>
@@ -29,12 +26,12 @@
 namespace MosesTraining
 {
 
-SyntaxTree::~SyntaxTree()
+SyntaxNodeCollection::~SyntaxNodeCollection()
 {
   Clear();
 }
 
-void SyntaxTree::Clear()
+void SyntaxNodeCollection::Clear()
 {
   m_top = 0;
   // loop through all m_nodes, delete them
@@ -45,7 +42,8 @@ void SyntaxTree::Clear()
   m_index.clear();
 }
 
-SyntaxNode *SyntaxTree::AddNode( int startPos, int endPos, std::string label )
+SyntaxNode *SyntaxNodeCollection::AddNode(int startPos, int endPos,
+                                          const std::string &label)
 {
   SyntaxNode* newNode = new SyntaxNode( startPos, endPos, label );
   m_nodes.push_back( newNode );
@@ -54,7 +52,7 @@ SyntaxNode *SyntaxTree::AddNode( int startPos, int endPos, std::string label )
   return newNode;
 }
 
-ParentNodes SyntaxTree::Parse()
+ParentNodes SyntaxNodeCollection::Parse()
 {
   ParentNodes parents;
 
@@ -94,12 +92,12 @@ ParentNodes SyntaxTree::Parse()
   return parents;
 }
 
-bool SyntaxTree::HasNode( int startPos, int endPos ) const
+bool SyntaxNodeCollection::HasNode( int startPos, int endPos ) const
 {
   return GetNodes( startPos, endPos).size() > 0;
 }
 
-const std::vector< SyntaxNode* >& SyntaxTree::GetNodes( int startPos, int endPos ) const
+const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodes( int startPos, int endPos ) const
 {
   SyntaxTreeIndexIterator startIndex = m_index.find( startPos );
   if (startIndex == m_index.end() )
@@ -112,15 +110,7 @@ const std::vector< SyntaxNode* >& SyntaxTree::GetNodes( int startPos, int endPos
   return endIndex->second;
 }
 
-// for printing out tree
-std::string SyntaxTree::ToString() const
-{
-  std::stringstream out;
-  out << *this;
-  return out.str();
-}
-
-void SyntaxTree::ConnectNodes()
+void SyntaxNodeCollection::ConnectNodes()
 {
   typedef SyntaxTreeIndex2::const_reverse_iterator InnerIterator;
 
@@ -162,27 +152,4 @@ void SyntaxTree::ConnectNodes()
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const SyntaxTree& t)
-{
-  size_t size = t.m_index.size();
-  for(size_t length=1; length<=size; length++) {
-    for(size_t space=0; space<length; space++) {
-      os << "    ";
-    }
-    for(size_t start=0; start<=size-length; start++) {
-
-      if (t.HasNode( start, start+(length-1) )) {
-        std::string label = t.GetNodes( start, start+(length-1) )[0]->GetLabel() + "#######";
-
-        os << label.substr(0,7) << " ";
-      } else {
-        os << "------- ";
-      }
-    }
-    os << std::endl;
-  }
-  return os;
-}
-
-}
-
+}  // namespace MosesTraining
