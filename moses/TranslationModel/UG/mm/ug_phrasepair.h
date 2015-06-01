@@ -3,7 +3,9 @@
 #include <vector>
 #include "ug_typedefs.h"
 #include "ug_bitext_pstats.h"
+#ifndef NO_MOSES
 #include "moses/FF/LexicalReordering/LexicalReorderingState.h"
+#endif
 #include "boost/format.hpp"
 #include "tpt_tokenindex.h"
 namespace Moses
@@ -52,9 +54,11 @@ namespace Moses
       fill_lr_vec(LRModel::Direction const& dir,
 		  LRModel::ModelType const& mdl,
 		  vector<float>& v) const;
+#ifndef NO_MOSES
       void
       print(ostream& out, TokenIndex const& V1, TokenIndex const& V2,
 	    LRModel const& LR) const;
+#endif 
 
       class SortByTargetIdSeq
       {
@@ -292,6 +296,7 @@ namespace Moses
     }
 
 
+#ifndef NO_MOSES
     template<typename Token>
     void
     PhrasePair<Token>
@@ -331,5 +336,6 @@ namespace Moses
 	}
 #endif
     }
+#endif
   } // namespace bitext
 } // namespace Moses
