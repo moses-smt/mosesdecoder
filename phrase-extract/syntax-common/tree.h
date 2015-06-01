@@ -72,7 +72,7 @@ class Tree {
   // iterators.  V is the value type: either Tree<T> or const Tree<T>.
   template<typename V> class PreOrderIter;
   // template<typename V> class PostOrderIter; TODO
-  // template<typename V> class LeafIter; TODO
+  template<typename V> class LeafIter;
 
  public:
   // Pre-order iterators.
@@ -84,8 +84,8 @@ class Tree {
   // typedef PostOrderIter<const Tree<T> > ConstPostOrderIterator; TODO
 
   // Leaf iterators (left-to-right).
-  // typedef LeafIter<Tree<T> > LeafIterator;  TODO
-  // typedef LeafIter<const Tree<T> > ConstLeafIterator; TODO
+  typedef LeafIter<Tree<T> > LeafIterator;
+  typedef LeafIter<const Tree<T> > ConstLeafIterator;
 
  private:
   T value_;
