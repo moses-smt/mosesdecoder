@@ -1,19 +1,24 @@
 #!/usr/bin/env python
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
-# Read SENNA output (from stdin), extract the parse trees, and write them in
-# PTB-style bracketed format (to stdout).
-#
-# The SENNA output is assumed to contain tokens in the first column, POS tags
-# in the second column, and PSG fragments in the final column.
-#
-# It is also assumed that SENNA was run through the parse-en-senna.perl wrapper,
-# which:
-#
-#   - Substitutes the special "SENTENCE_TOO_LONG" token for sentences that
-#     exceed SENNA's hardcoded limit.
-#
-#   - Replaces the bracket-like tokens "-LRB-", "-RRB-", etc. with "(", ")",
-#     etc.
+"""
+Read SENNA output (from stdin), extract the parse trees, and write them in
+PTB-style bracketed format (to stdout).
+
+The SENNA output is assumed to contain tokens in the first column, POS tags
+in the second column, and PSG fragments in the final column.
+
+It is also assumed that SENNA was run through the parse-en-senna.perl wrapper,
+which:
+
+  - Substitutes the special "SENTENCE_TOO_LONG" token for sentences that
+    exceed SENNA's hardcoded limit.
+
+  - Replaces the bracket-like tokens "-LRB-", "-RRB-", etc. with "(", ")",
+    etc.
+"""
 
 import optparse
 import os

@@ -7,7 +7,7 @@
 
 #include "Alignment.h"
 
-namespace Moses
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -54,6 +54,6 @@ protected:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining
 
 #endif

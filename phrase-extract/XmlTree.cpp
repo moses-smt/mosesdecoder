@@ -1,6 +1,3 @@
-// $Id: XmlOption.cpp 1960 2008-12-15 12:52:38Z phkoehn $
-// vim:tabstop=2
-
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2006 University of Edinburgh
@@ -27,7 +24,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <sstream>
-#include "SyntaxTree.h"
+
+#include "SyntaxNodeCollection.h"
 #include "XmlException.h"
 
 using namespace std;
@@ -228,7 +226,10 @@ vector<string> TokenizeXml(const string& str)
 	parse because we don't have the completed source parsed until after this function
 	removes all the markup from it (CreateFromString in Sentence::Read).
 */
-bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &labelCollection, map< string, int > &topLabelCollection, bool unescapeSpecialChars )
+bool ProcessAndStripXMLTags(string &line, SyntaxNodeCollection &nodeCollection,
+                            set< string > &labelCollection,
+                            map< string, int > &topLabelCollection,
+                            bool unescapeSpecialChars )
 {
   //parse XML markup in translation line
 
@@ -374,7 +375,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
           cerr << "XML TAG LABEL IS: '" << label << "'" << endl;
           cerr << "XML SPAN IS: " << startPos << "-" << (endPos-1) << endl;
         }
-        SyntaxNode *node = tree.AddNode( startPos, endPos-1, label );
+        SyntaxNode *node = nodeCollection.AddNode( startPos, endPos-1, label );
         node->SetPcfgScore(pcfgScore);
       }
     }
@@ -386,7 +387,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
   }
 
   // collect top labels
-  const vector< SyntaxNode* >& topNodes = tree.GetNodes( 0, wordPos-1 );
+  const vector< SyntaxNode* >& topNodes = nodeCollection.GetNodes( 0, wordPos-1 );
   for( vector< SyntaxNode* >::const_iterator node = topNodes.begin(); node != topNodes.end(); node++ ) {
     SyntaxNode *n = *node;
     const string &label = n->GetLabel();

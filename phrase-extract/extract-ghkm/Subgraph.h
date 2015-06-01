@@ -19,12 +19,12 @@
 
 #pragma once
 
-#include "Node.h"
-
 #include <set>
 #include <vector>
 
-namespace Moses
+#include "Node.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -137,5 +137,5 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining
 

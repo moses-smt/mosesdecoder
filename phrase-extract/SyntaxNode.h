@@ -1,6 +1,6 @@
 /***********************************************************************
   Moses - factored phrase-based language decoder
-  Copyright (C) 2006 University of Edinburgh
+  Copyright (C) 2009 University of Edinburgh
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -19,23 +19,57 @@
 
 #pragma once
 
+#include <map>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <set>
-#include <map>
-
-#include "SyntaxNodeCollection.h"
 
 namespace MosesTraining
 {
 
-std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName);
-std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
-std::string TrimXml(const std::string& str);
-bool isXmlTag(const std::string& tag);
-std::vector<std::string> TokenizeXml(const std::string& str);
-bool ProcessAndStripXMLTags(std::string &line, SyntaxNodeCollection &tree, std::set< std::string > &labelCollection, std::map< std::string, int > &topLabelCollection, bool unescape = true);
-std::string unescape(const std::string &str);
+class SyntaxNode
+{
+protected:
+  int m_start, m_end;
+  std::string m_label;
+  std::vector< SyntaxNode* > m_children;
+  SyntaxNode* m_parent;
+  float m_pcfgScore;
+public:
+  SyntaxNode( int startPos, int endPos, std::string label )
+    :m_start(startPos)
+    ,m_end(endPos)
+    ,m_label(label)
+    ,m_parent(0)
+    ,m_pcfgScore(0.0f) {
+  }
+  int GetStart() const {
+    return m_start;
+  }
+  int GetEnd() const {
+    return m_end;
+  }
+  std::string GetLabel() const {
+    return m_label;
+  }
+  float GetPcfgScore() const {
+    return m_pcfgScore;
+  }
+  void SetPcfgScore(float score) {
+    m_pcfgScore = score;
+  }
+  SyntaxNode *GetParent() {
+    return m_parent;
+  }
+  void SetParent(SyntaxNode *parent) {
+    m_parent = parent;
+  }
+  void AddChild(SyntaxNode* child) {
+    m_children.push_back(child);
+  }
+  const std::vector< SyntaxNode* > &GetChildren() const {
+    return m_children;
+  }
+};
 
-
-} // namespace MosesTraining
+}  // namespace MosesTraining

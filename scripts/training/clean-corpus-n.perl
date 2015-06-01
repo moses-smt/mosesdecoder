@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id: clean-corpus-n.perl 3633 2010-10-21 09:49:27Z phkoehn $
 use warnings;

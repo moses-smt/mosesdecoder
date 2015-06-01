@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf8 -*-
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 3 or, at your option, any later version.
 
 
 from __future__ import (

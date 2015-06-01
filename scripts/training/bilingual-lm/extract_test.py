@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 """Create a test corpus, using a previously pruned vocabulary."""
 

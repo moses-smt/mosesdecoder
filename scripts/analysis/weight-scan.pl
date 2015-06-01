@@ -1,4 +1,8 @@
 #!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
+
 # runs Moses many times changing the values of one weight, all others fixed
 # nbest lists are always produced to allow for comparison of real and
 # 'projected' BLEU (BLEU estimated from n-best lists collected at a neighouring

@@ -19,15 +19,15 @@
 
 #include "ComposedRule.h"
 
-#include "Node.h"
-#include "Options.h"
-#include "Subgraph.h"
-
 #include <set>
 #include <vector>
 #include <queue>
 
-namespace Moses
+#include "Node.h"
+#include "Options.h"
+#include "Subgraph.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -128,4 +128,4 @@ Subgraph ComposedRule::CreateSubgraph()
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining

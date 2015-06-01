@@ -107,6 +107,7 @@ function run_single_test () {
   #regtest_dir=$PWD/$(basename $regtest_file .tgz)
   cd ..
 
+  ./scripts/other/beautify.py --format --skip-perltidy
 
   echo "## ./bjam clean" >> $longlog
   ./bjam clean $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
@@ -153,8 +154,10 @@ function run_single_test () {
   date >> $longlog
 
   if [ -z "$err" ]; then
+    git commit -am "automatic daily beautifier"
     status="OK"
   else
+    git reset --hard HEAD
     status="FAIL:$err"
   fi
   echo "## Status: $status" >> $longlog
@@ -187,7 +190,7 @@ done
 
 #### Main loop over all commits
 for i in $MCC_SCAN_BRANCHES; do
-  warn "On brach $i"
+  warn "On branch $i"
   git rev-list $i \
   | while read commit; do
     first_char=$(echo $commit | grep -o '^.')

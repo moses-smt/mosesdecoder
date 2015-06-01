@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # example
 # ./score-parallel.perl 8 "gsort --batch-size=253" ./score ./extract.2.sorted.gz ./lex.2.f2e ./phrase-table.2.half.f2e  --GoodTuring ./phrase-table.2.coc 0

@@ -1,6 +1,3 @@
-// $Id: SyntaxTree.cpp 1960 2008-12-15 12:52:38Z phkoehn $
-// vim:tabstop=2
-
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2009 University of Edinburgh
@@ -21,20 +18,22 @@
  ***********************************************************************/
 
 
-#include "SyntaxTree.h"
+#include "SyntaxNodeCollection.h"
 
 #include <cassert>
 #include <iostream>
 
+#include <boost/make_shared.hpp>
+
 namespace MosesTraining
 {
 
-SyntaxTree::~SyntaxTree()
+SyntaxNodeCollection::~SyntaxNodeCollection()
 {
   Clear();
 }
 
-void SyntaxTree::Clear()
+void SyntaxNodeCollection::Clear()
 {
   m_top = 0;
   // loop through all m_nodes, delete them
@@ -45,7 +44,8 @@ void SyntaxTree::Clear()
   m_index.clear();
 }
 
-SyntaxNode *SyntaxTree::AddNode( int startPos, int endPos, std::string label )
+SyntaxNode *SyntaxNodeCollection::AddNode(int startPos, int endPos,
+                                          const std::string &label)
 {
   SyntaxNode* newNode = new SyntaxNode( startPos, endPos, label );
   m_nodes.push_back( newNode );
@@ -54,7 +54,7 @@ SyntaxNode *SyntaxTree::AddNode( int startPos, int endPos, std::string label )
   return newNode;
 }
 
-ParentNodes SyntaxTree::Parse()
+ParentNodes SyntaxNodeCollection::Parse()
 {
   ParentNodes parents;
 
@@ -94,12 +94,12 @@ ParentNodes SyntaxTree::Parse()
   return parents;
 }
 
-bool SyntaxTree::HasNode( int startPos, int endPos ) const
+bool SyntaxNodeCollection::HasNode( int startPos, int endPos ) const
 {
   return GetNodes( startPos, endPos).size() > 0;
 }
 
-const std::vector< SyntaxNode* >& SyntaxTree::GetNodes( int startPos, int endPos ) const
+const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodes( int startPos, int endPos ) const
 {
   SyntaxTreeIndexIterator startIndex = m_index.find( startPos );
   if (startIndex == m_index.end() )
@@ -112,15 +112,7 @@ const std::vector< SyntaxNode* >& SyntaxTree::GetNodes( int startPos, int endPos
   return endIndex->second;
 }
 
-// for printing out tree
-std::string SyntaxTree::ToString() const
-{
-  std::stringstream out;
-  out << *this;
-  return out.str();
-}
-
-void SyntaxTree::ConnectNodes()
+void SyntaxNodeCollection::ConnectNodes()
 {
   typedef SyntaxTreeIndex2::const_reverse_iterator InnerIterator;
 
@@ -162,27 +154,63 @@ void SyntaxTree::ConnectNodes()
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const SyntaxTree& t)
+//boost::shared_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
+std::auto_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
 {
-  size_t size = t.m_index.size();
-  for(size_t length=1; length<=size; length++) {
-    for(size_t space=0; space<length; space++) {
-      os << "    ";
-    }
-    for(size_t start=0; start<=size-length; start++) {
+  std::map<SyntaxNode *, SyntaxTree *> nodeToTree;
 
-      if (t.HasNode( start, start+(length-1) )) {
-        std::string label = t.GetNodes( start, start+(length-1) )[0]->GetLabel() + "#######";
+  // Create a SyntaxTree object for each SyntaxNode.
+  for (std::vector<SyntaxNode*>::const_iterator p = m_nodes.begin();
+       p != m_nodes.end(); ++p) {
+    nodeToTree[*p] = new SyntaxTree(**p);
+  }
 
-        os << label.substr(0,7) << " ";
-      } else {
-        os << "------- ";
+  // Connect the SyntaxTrees.
+  typedef SyntaxTreeIndex2::const_reverse_iterator InnerIterator;
+
+  SyntaxTree *root = 0;
+  SyntaxNode *prevNode = 0;
+  SyntaxTree *prevTree = 0;
+  // Iterate over all start indices from lowest to highest.
+  for (SyntaxTreeIndexIterator p = m_index.begin(); p != m_index.end(); ++p) {
+    const SyntaxTreeIndex2 &inner = p->second;
+    // Iterate over all end indices from highest to lowest.
+    for (InnerIterator q = inner.rbegin(); q != inner.rend(); ++q) {
+      const std::vector<SyntaxNode*> &nodes = q->second;
+      // Iterate over all nodes that cover the same span in order of tree
+      // depth, top-most first.
+      for (std::vector<SyntaxNode*>::const_reverse_iterator r = nodes.rbegin();
+           r != nodes.rend(); ++r) {
+        SyntaxNode *node = *r;
+        SyntaxTree *tree = nodeToTree[node];
+        if (!prevNode) {
+          // node is the root.
+          root = tree;
+          tree->parent() = 0;
+        } else if (prevNode->GetStart() == node->GetStart()) {
+          // prevNode is the parent of node.
+          assert(prevNode->GetEnd() >= node->GetEnd());
+          tree->parent() = prevTree;
+          prevTree->children().push_back(tree);
+        } else {
+          // prevNode is a descendant of node's parent.  The lowest common
+          // ancestor of prevNode and node will be node's parent.
+          SyntaxTree *ancestor = prevTree->parent();
+          while (ancestor->value().GetEnd() < tree->value().GetEnd()) {
+            ancestor = ancestor->parent();
+          }
+          assert(ancestor);
+          tree->parent() = ancestor;
+          ancestor->children().push_back(tree);
+        }
+        prevNode = node;
+        prevTree = tree;
       }
     }
-    os << std::endl;
   }
-  return os;
+
+  //return boost::shared_ptr<SyntaxTree>(root);
+  return std::auto_ptr<SyntaxTree>(root);
 }
 
-}
-
+}  // namespace MosesTraining

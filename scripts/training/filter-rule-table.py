@@ -1,25 +1,29 @@
 #!/usr/bin/env python
 
 # Author: Phil Williams
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
-# Usage: filter-rule-table.py [--min-non-initial-rule-count=N] INPUT
-#
-# Given a rule table (on stdin) and an input text, filter out rules that
-# couldn't be used in parsing the input and write the resulting rule table
-# to stdout.  The input text is assumed to contain the same factors as
-# the rule table and is assumed to be small (not more than a few thousand
-# sentences): the current algorithm won't scale well to large input sets.
-#
-# The filtering algorithm considers a source RHS to be a sequence of
-# words and gaps, which must match a sequence of words in one of the
-# input sentences, with at least one input word per gap.  The NT labels
-# are ignored, so for example a rule with the source RHS "the JJ dog"
-# would be allowed if the sequence "the slobbering dog" occurs in one of
-# the input sentences, even if there's no rule to derive a JJ from
-# "slobbering."  (If "slobbering" were an unknown word, the 'unknown-lhs'
-# decoder option would allow it to take a number of NT labels, likely
-# including JJ, with varying probabilities, so removing the rule would
-# be a bad idea.)
+"""Usage: filter-rule-table.py [--min-non-initial-rule-count=N] INPUT
+
+Given a rule table (on stdin) and an input text, filter out rules that
+couldn't be used in parsing the input and write the resulting rule table
+to stdout.  The input text is assumed to contain the same factors as
+the rule table and is assumed to be small (not more than a few thousand
+sentences): the current algorithm won't scale well to large input sets.
+
+The filtering algorithm considers a source RHS to be a sequence of
+words and gaps, which must match a sequence of words in one of the
+input sentences, with at least one input word per gap.  The NT labels
+are ignored, so for example a rule with the source RHS "the JJ dog"
+would be allowed if the sequence "the slobbering dog" occurs in one of
+the input sentences, even if there's no rule to derive a JJ from
+"slobbering."  (If "slobbering" were an unknown word, the 'unknown-lhs'
+decoder option would allow it to take a number of NT labels, likely
+including JJ, with varying probabilities, so removing the rule would
+be a bad idea.)
+"""
 
 import optparse
 import sys

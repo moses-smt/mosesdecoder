@@ -19,23 +19,24 @@
 
 #include "AlignmentGraph.h"
 
-#include "ComposedRule.h"
-#include "Node.h"
-#include "Options.h"
-#include "ParseTree.h"
-#include "Subgraph.h"
-
 #include <algorithm>
 #include <cassert>
 #include <memory>
 #include <stack>
 
-namespace Moses
+#include "SyntaxTree.h"
+
+#include "ComposedRule.h"
+#include "Node.h"
+#include "Options.h"
+#include "Subgraph.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
 
-AlignmentGraph::AlignmentGraph(const ParseTree *t,
+AlignmentGraph::AlignmentGraph(const SyntaxTree *t,
                                const std::vector<std::string> &s,
                                const Alignment &a)
 {
@@ -208,20 +209,20 @@ void AlignmentGraph::ExtractComposedRules(Node *node, const Options &options)
   }
 }
 
-Node *AlignmentGraph::CopyParseTree(const ParseTree *root)
+Node *AlignmentGraph::CopyParseTree(const SyntaxTree *root)
 {
   NodeType nodeType = (root->IsLeaf()) ? TARGET : TREE;
 
-  std::auto_ptr<Node> n(new Node(root->GetLabel(), nodeType));
+  std::auto_ptr<Node> n(new Node(root->value().GetLabel(), nodeType));
 
   if (nodeType == TREE) {
-    n->SetPcfgScore(root->GetPcfgScore());
+    n->SetPcfgScore(root->value().GetPcfgScore());
   }
 
-  const std::vector<ParseTree *> &children = root->GetChildren();
+  const std::vector<SyntaxTree *> &children = root->children();
   std::vector<Node *> childNodes;
   childNodes.reserve(children.size());
-  for (std::vector<ParseTree *>::const_iterator p(children.begin());
+  for (std::vector<SyntaxTree *>::const_iterator p(children.begin());
        p != children.end(); ++p) {
     Node *child = CopyParseTree(*p);
     child->AddParent(n.get());
@@ -385,4 +386,4 @@ Node *AlignmentGraph::DetermineAttachmentPoint(int index)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining
