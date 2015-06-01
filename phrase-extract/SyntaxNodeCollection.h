@@ -24,7 +24,10 @@
 #include <string>
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 #include "SyntaxNode.h"
+#include "SyntaxTree.h"
 
 namespace MosesTraining
 {
@@ -70,6 +73,9 @@ public:
   }
   void ConnectNodes();
   void Clear();
+
+  std::auto_ptr<SyntaxTree> ExtractTree();
+  //boost::shared_ptr<SyntaxTree> ExtractTree();
 };
 
 }  // namespace MosesTraining

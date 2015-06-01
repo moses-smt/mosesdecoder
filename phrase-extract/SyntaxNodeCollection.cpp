@@ -23,6 +23,8 @@
 #include <cassert>
 #include <iostream>
 
+#include <boost/make_shared.hpp>
+
 namespace MosesTraining
 {
 
@@ -150,6 +152,65 @@ void SyntaxNodeCollection::ConnectNodes()
       }
     }
   }
+}
+
+//boost::shared_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
+std::auto_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
+{
+  std::map<SyntaxNode *, SyntaxTree *> nodeToTree;
+
+  // Create a SyntaxTree object for each SyntaxNode.
+  for (std::vector<SyntaxNode*>::const_iterator p = m_nodes.begin();
+       p != m_nodes.end(); ++p) {
+    nodeToTree[*p] = new SyntaxTree(**p);
+  }
+
+  // Connect the SyntaxTrees.
+  typedef SyntaxTreeIndex2::const_reverse_iterator InnerIterator;
+
+  SyntaxTree *root = 0;
+  SyntaxNode *prevNode = 0;
+  SyntaxTree *prevTree = 0;
+  // Iterate over all start indices from lowest to highest.
+  for (SyntaxTreeIndexIterator p = m_index.begin(); p != m_index.end(); ++p) {
+    const SyntaxTreeIndex2 &inner = p->second;
+    // Iterate over all end indices from highest to lowest.
+    for (InnerIterator q = inner.rbegin(); q != inner.rend(); ++q) {
+      const std::vector<SyntaxNode*> &nodes = q->second;
+      // Iterate over all nodes that cover the same span in order of tree
+      // depth, top-most first.
+      for (std::vector<SyntaxNode*>::const_reverse_iterator r = nodes.rbegin();
+           r != nodes.rend(); ++r) {
+        SyntaxNode *node = *r;
+        SyntaxTree *tree = nodeToTree[node];
+        if (!prevNode) {
+          // node is the root.
+          root = tree;
+          tree->parent() = 0;
+        } else if (prevNode->GetStart() == node->GetStart()) {
+          // prevNode is the parent of node.
+          assert(prevNode->GetEnd() >= node->GetEnd());
+          tree->parent() = prevTree;
+          prevTree->children().push_back(tree);
+        } else {
+          // prevNode is a descendant of node's parent.  The lowest common
+          // ancestor of prevNode and node will be node's parent.
+          SyntaxTree *ancestor = prevTree->parent();
+          while (ancestor->value().GetEnd() < tree->value().GetEnd()) {
+            ancestor = ancestor->parent();
+          }
+          assert(ancestor);
+          tree->parent() = ancestor;
+          ancestor->children().push_back(tree);
+        }
+        prevNode = node;
+        prevTree = tree;
+      }
+    }
+  }
+
+  //return boost::shared_ptr<SyntaxTree>(root);
+  return std::auto_ptr<SyntaxTree>(root);
 }
 
 }  // namespace MosesTraining

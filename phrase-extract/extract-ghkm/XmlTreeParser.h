@@ -54,12 +54,13 @@ public:
   };
 
 private:
-
   std::set<std::string> &m_labelSet;
   std::map<std::string, int> &m_topLabelSet;
   std::string m_line;
   SyntaxNodeCollection m_tree;
   std::vector<std::string> m_words;
+
+  void AttachWords(const std::vector<std::string> &, SyntaxTree &);
 };
 
 }  // namespace GHKM
