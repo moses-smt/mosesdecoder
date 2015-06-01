@@ -2,7 +2,6 @@
 
 #include "Node.h"
 #include "Subgraph.h"
-#include "SyntaxTree.h"
 
 #include <algorithm>
 
