@@ -1,7 +1,22 @@
-# Some systems apparently distinguish between shell 
-# variables and environment variables. The latter are
-# visible to the make utility, the former apparently not,
-# so we need to set them if they are not defined yet
+SHELL = bash
+MAKEFLAGS += --warn-undefined-variables
+.DEFAULT_GOAL = all
+.SUFFIXES:
+
+# ===============================================================================
+# LOCAL ENVIRONMENT
+# ===============================================================================
+
+# shell script snippet:
+define find_moses_root
+d=$$(pwd);
+while [[ ! -e $$d/Jamroot && $$d != "/" ]] ; do
+    d=$$(dirname $$d); 
+done; 
+echo $$d
+endef
+
+MOSES_ROOT := $(shell $(find_moses_root))
 
 # ===============================================================================
 # COMPILATION PREFERENCES
@@ -10,107 +25,102 @@
 # OPTI:   optimization level
 # PROF:   profiler switches 
 
-CCACHE  = ccache
-OPTI    = 3
-EXE_TAG = exe
-PROF = 
-# PROF = -g -pg
+# compiler command
+compiler ?= g++
+variant  ?= runtime
+link     ?= static
 
-# ===============================================================================
+CXX       = $(shell which ccache) $(compiler)  
+CXXFLAGS += -DMAX_NUM_FACTORS=4
+CXXFLAGS += -DKENLM_MAX_ORDER=5
+CXXFLAGS += -DWITH_THREADS
+CXXFLAGS += -DNO_MOSES
+CXXFLAGS += -I${MOSES_ROOT} -I.
 
-SHELL         = bash
-MAKEFLAGS    += --warn-undefined-variables
-.DEFAULT_GOAL = all
-.SUFFIXES:
+ifeq ($(variant),debug)
+CXXFLAGS += -ggdb -O0
+else ifeq ($(variant),profile)
+CXXFLAGS += -g -pg -O3
+else ifeq ($(variant),syntax)
+CXXFLAGS += -fsyntax-only
+endif
+
+# LDFLAGS  = -L${MOSES_ROOT}/lib -L ./lib/
+
+# WDIR = build/$(variant)/${HOSTTYPE}/${KERNEL}
+WDIR = build/$(variant)
 
 # ===============================================================================
 # COMPILATION 'LOCALIZATION'
-HOST     ?= $(shell hostname)
-HOSTTYPE ?= $(shell uname -m)
-KERNEL    = $(shell uname -r)
+HOST       ?= $(shell hostname)
+HOSTTYPE   ?= $(shell uname -m)
+KERNEL      = $(shell uname -r)
 
-MOSES_ROOT  = ${HOME}/code/mosesdecoder
-WDIR        = build/${HOSTTYPE}/${KERNEL}/${OPTI}
-VPATH       = ${HOME}/code/mosesdecoder/
-CXXFLAGS    = ${PROF} -ggdb -Wall -O${OPTI} ${INCLUDES} 
-CXXFLAGS   += -DMAX_NUM_FACTORS=4
-CXXFLAGS   += -DKENLM_MAX_ORDER=5
-modirs     := $(addprefix -I,$(shell find ${MOSES_ROOT}/moses ${MOSES_ROOT}/contrib -type d))
-CXXFLAGS   += -I${MOSES_ROOT} 
-INCLUDES    = 
-BZLIB       =  
-BOOSTLIBTAG = 
+nil:
 
-lzma = lzma
-#lzma = 
-REQLIBS = m z pthread dl ${lzma} ${BZLIB} \
-	boost_thread${BOOSTLIBTAG} \
-	boost_program_options${BOOSTLIBTAG} \
-	boost_system${BOOSTLIBTAG} \
-	boost_filesystem${BOOSTLIBTAG} \
-	boost_iostreams${BOOSTLIBTAG} z bz2
+# libraries required
 
-# 	icuuc icuio icui18n \
-
-LIBS     = $(addprefix -l, moses ${REQLIBS}) 
-LIBS     = $(addprefix -l, ${REQLIBS}) 
-LIBDIRS   = -L${HOME}/code/mosesdecoder/lib
-LIBDIRS  += -L${HOME}/lib
-PREFIX ?= .
-BINDIR ?= ${PREFIX}/bin
-ifeq "$(OPTI)" "0"
-BINPREF = debug.
-else
-BINPREF = 
+LIBS  = m z bz2 pthread dl ${BOOSTLIBS}
+BOOSTLIBS := thread system filesystem program_options iostreams
+BOOSTLIBS := $(addprefix boost_,${BOOSTLIBS})
+ifdef ($(BOOSTLIBTAG),"")
+BOOSTLIBS := $(addsuffix ${BOOSTLIBTAG},${BOOSTLIBS})
 endif
 
+cc2obj = $(addsuffix .o,$(patsubst ${MOSES_ROOT}%,$(WDIR)%,\
+	 	        $(patsubst .%,$(WDIR)%,$(basename $1))))
+cc2exe = $(addprefix ./bin/$(variant)/,$(basename $(notdir $1)))
+cc2trg = $(basename $(notdir $1)) 
 
-OBJ2 :=
+define compile
 
-define compile 
-
-DEP  += ${WDIR}/$(basename $(notdir $1)).d
-${WDIR}/$(basename $(notdir $1)).o : $1 $(wildcard $(basename $1).h)
+DEP += $(basename $(call cc2obj,$1)).d
+$(call cc2obj,$1): $1
 	@echo -e "COMPILING $1"
 	@mkdir -p $$(@D)
-	${CXX} ${CXXFLAGS} -MD -MP -c $$(abspath $$<) -o $$@
+	@${CXX} ${CXXFLAGS} -MD -MP -c $$< -o $$@
 
 endef
 
-testprogs = test-dynamic-im-tsa try-align
-programs  = mtt-build mtt-dump symal2mam custom-pt mmlex-build ${testprogs}
-programs += mtt-count-words
+define build
 
-all: $(addprefix ${BINDIR}/${BINPREF}, $(programs))
-	@echo $^
-clean:
-	rm -f ${WDIR}/*.o ${WDIR}/*.d
+$(call cc2trg,$1): $(call cc2exe,$1)
+$(call cc2exe,$1): $(call cc2obj,$1) $(LIBOBJ)
+ifneq ($(variant),syntax)
+	@echo -e "LINKING $$@"
+	@mkdir -p $${@D}
+	@${CXX} ${CXXFLAGS} -o $$@ $(LIBOBJ) $(addprefix -l,${LIBS}) $$<
+endif
 
-custom-pt: ${BINDIR}/${BINPREF}custom-pt
-	echo $^
+endef
 
-INMOGEN = $(wildcard ${MOSES_ROOT}/moses/TranslationModel/UG/generic/*/*.cpp)
-#INMOMM  = $(wildcard ${MOSES_ROOT}/moses/TranslationModel/UG/mm/*.cc)
-#INMOMM += $(wildcard ${MOSES_ROOT}/moses/TranslationModel/UG/mm/*.cpp)
-OBJ     = $(patsubst %.cc,%.o,$(wildcard $(patsubst %.h,%.cc,$(wildcard *.h))))
-OBJ    += $(patsubst %.cpp,%.o,${INMOGEN})
-#OBJ    += $(patsubst %.cpp,%.o,${INMOMM})
-#OBJ    += $(patsubst %.cc,%.o,${INMOMM})
-EXE     = $(patsubst %.cc,%.o,$(filter-out $(patsubst %.h,%.cc,$(wildcard *.h)),$(wildcard *.cc)))
+# list files here that you want explicitly excluded from compilation
+skip  = sim-pe.cc 
+skip += mtt.count.cc 
+skip += try-align2.cc 
+skip += spe-check-coverage3.cc
+skip += mmsapt.cpp
+skip += ug_stringdist.cc
+skip += ug_splice_arglist.cc
+skip += ug_lexical_reordering.cc
+skip += ug_sampling_bias.cc
 
-$(foreach cpp,${INMOGEN},$(eval $(call compile,${cpp})))
-$(foreach cpp,$(wildcard *.cc),$(eval $(call compile,${cpp})))
-$(addprefix ${BINDIR}/${BINPREF}, $(programs)): $(addprefix ${WDIR}/,$(notdir ${OBJ}))
-$(addprefix ${BINDIR}/${BINPREF}, $(programs)): ${MOSES_ROOT}/lib/libmoses.a 
-${BINDIR}/${BINPREF}%: ${WDIR}/%.o ${WDIR}/mmsapt_align.o
-	@mkdir -p ${BINDIR}
-	echo PREREQS: $^
-	$(CXX) $(CXXFLAGS) -o $@ $^ ${LIBDIRS} ${LIBS} 
+# objects from elsewhere in the moses tree that are needed
+extra = ${MOSES_ROOT}/util/exception.cc
 
-#try-align: ${WDIR}/try-align.o ${WDIR}/tpt_tokenindex.o 
-#	$(CXX) $(CXXFLAGS) -o $@ $^ ${LIBDIRS}
+$(foreach f,$(skip),$(eval broken+=$(shell find -name $f)))
 
-.SECONDARY: 
+$(info SCANNING DIRECTORY TREE FOR FILES)
+find_cfiles = find -name '*.cc' -or -name '*.cpp'
+CFILES    = $(filter-out $(broken), $(shell $(find_cfiles)))
+PROGRAMS := $(shell $(find_cfiles) | xargs grep -lP '^(int +)?main')
+PROGRAMS := $(filter-out $(broken),$(PROGRAMS))
+
+ALLOBJ = $(call cc2obj,$(CFILES) $(extra))
+LIBOBJ = $(call cc2obj,$(filter-out $(PROGRAMS),$(CFILES) $(extra)))
+
+$(foreach f,$(CFILES) $(extra),$(eval $(call compile,$f)))
+$(foreach p,$(PROGRAMS),$(eval $(call build,$p)))
 
 -include $(DEP)
 
