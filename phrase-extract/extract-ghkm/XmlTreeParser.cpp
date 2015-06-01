@@ -66,8 +66,7 @@ std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
   const SyntaxNode &tree,
   const std::vector<std::string> &words)
 {
-  std::auto_ptr<ParseTree> root(new ParseTree(tree.GetLabel()));
-  root->SetPcfgScore(tree.GetPcfgScore());
+  std::auto_ptr<ParseTree> root(new ParseTree(tree));
   const std::vector<SyntaxNode*> &children = tree.GetChildren();
   if (children.empty()) {
     if (tree.GetStart() != tree.GetEnd()) {
@@ -76,16 +75,17 @@ std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
           << "-" << tree.GetEnd() << "): this is currently unsupported";
       throw Exception(msg.str());
     }
-    std::auto_ptr<ParseTree> leaf(new ParseTree(words[tree.GetStart()]));
-    leaf->SetParent(root.get());
-    root->AddChild(leaf.release());
+    SyntaxNode value(tree.GetStart(), tree.GetStart(), words[tree.GetStart()]);
+    std::auto_ptr<ParseTree> leaf(new ParseTree(value));
+    leaf->parent() = root.get();
+    root->children().push_back(leaf.release());
   } else {
     for (std::vector<SyntaxNode*>::const_iterator p = children.begin();
          p != children.end(); ++p) {
       assert(*p);
       std::auto_ptr<ParseTree> child = ConvertTree(**p, words);
-      child->SetParent(root.get());
-      root->AddChild(child.release());
+      child->parent() = root.get();
+      root->children().push_back(child.release());
     }
   }
   return root;

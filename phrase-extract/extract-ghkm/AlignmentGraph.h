@@ -23,6 +23,7 @@
 
 #include "Alignment.h"
 #include "Options.h"
+#include "ParseTree.h"
 
 #include <set>
 #include <string>
@@ -34,7 +35,6 @@ namespace GHKM
 {
 
 class Node;
-class ParseTree;
 class Subgraph;
 
 class AlignmentGraph

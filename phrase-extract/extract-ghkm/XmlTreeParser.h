@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 
+#include "ParseTree.h"
 #include "SyntaxNode.h"
 #include "SyntaxNodeCollection.h"
 
@@ -36,8 +37,6 @@ namespace Moses
 {
 namespace GHKM
 {
-
-class ParseTree;
 
 // Parses a string in Moses' XML parse tree format and returns a ParseTree
 // object.

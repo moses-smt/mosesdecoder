@@ -25,6 +25,8 @@
 #include <string>
 #include <vector>
 
+#include "ParseTree.h"
+
 namespace Moses
 {
 
@@ -34,7 +36,6 @@ namespace GHKM
 {
 
 struct Options;
-class ParseTree;
 
 class ExtractGHKM
 {

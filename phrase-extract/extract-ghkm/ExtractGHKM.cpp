@@ -828,24 +828,22 @@ void ExtractGHKM::CollectWordLabelCounts(
   std::map<std::string, int> &wordCount,
   std::map<std::string, std::string> &wordLabel)
 {
-  std::vector<const ParseTree*> leaves;
-  root.GetLeaves(std::back_inserter(leaves));
-  for (std::vector<const ParseTree *>::const_iterator p = leaves.begin();
-       p != leaves.end(); ++p) {
-    const ParseTree &leaf = **p;
-    const std::string &word = leaf.GetLabel();
-    const ParseTree *ancestor = leaf.GetParent();
+  for (ParseTree::ConstLeafIterator p(root);
+       p != ParseTree::ConstLeafIterator(); ++p) {
+    const ParseTree &leaf = *p;
+    const std::string &word = leaf.value().GetLabel();
+    const ParseTree *ancestor = leaf.parent();
     // If unary rule elimination is enabled and this word is at the end of a
     // chain of unary rewrites, e.g.
     //    PN-SB -> NE -> word
     // then record the constituent label at the top of the chain instead of
     // the part-of-speech label.
     while (!options.allowUnary &&
-           ancestor->GetParent() &&
-           ancestor->GetParent()->GetChildren().size() == 1) {
-      ancestor = ancestor->GetParent();
+           ancestor->parent() &&
+           ancestor->parent()->children().size() == 1) {
+      ancestor = ancestor->parent();
     }
-    const std::string &label = ancestor->GetLabel();
+    const std::string &label = ancestor->value().GetLabel();
     ++wordCount[word];
     wordLabel[word] = label;
   }
@@ -854,12 +852,10 @@ void ExtractGHKM::CollectWordLabelCounts(
 std::vector<std::string> ExtractGHKM::ReadTokens(const ParseTree &root) const
 {
   std::vector<std::string> tokens;
-  std::vector<const ParseTree*> leaves;
-  root.GetLeaves(std::back_inserter(leaves));
-  for (std::vector<const ParseTree *>::const_iterator p = leaves.begin();
-       p != leaves.end(); ++p) {
-    const ParseTree &leaf = **p;
-    const std::string &word = leaf.GetLabel();
+  for (ParseTree::ConstLeafIterator p(root);
+       p != ParseTree::ConstLeafIterator(); ++p) {
+    const ParseTree &leaf = *p;
+    const std::string &word = leaf.value().GetLabel();
     tokens.push_back(word);
   }
   return tokens;

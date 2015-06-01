@@ -21,75 +21,16 @@
 #ifndef EXTRACT_GHKM_PARSE_TREE_H_
 #define EXTRACT_GHKM_PARSE_TREE_H_
 
-#include <string>
-#include <vector>
+#include "syntax-common/tree.h"
+
+#include "SyntaxNode.h"
 
 namespace Moses
 {
 namespace GHKM
 {
 
-class ParseTree
-{
-public:
-  ParseTree(const std::string &label)
-    : m_label(label)
-    , m_parent(0)
-    , m_pcfgScore(0.0) {}
-
-  ~ParseTree();
-
-  const std::string &GetLabel() const {
-    return m_label;
-  }
-  const std::vector<ParseTree*> &GetChildren() const {
-    return m_children;
-  }
-  const ParseTree *GetParent() const {
-    return m_parent;
-  }
-  float GetPcfgScore() const {
-    return m_pcfgScore;
-  }
-
-  void SetParent(ParseTree *);
-  void SetChildren(const std::vector<ParseTree*> &);
-  void SetPcfgScore(float score) {
-    m_pcfgScore = score;
-  }
-
-  void AddChild(ParseTree *);
-
-  bool IsLeaf() const;
-
-  template<typename OutputIterator>
-  void GetLeaves(OutputIterator) const;
-
-private:
-  // Disallow copying
-  ParseTree(const ParseTree &);
-  ParseTree &operator=(const ParseTree &);
-
-  std::string m_label;
-  std::vector<ParseTree*> m_children;
-  ParseTree *m_parent;
-  float m_pcfgScore;  // log probability
-};
-
-template<typename OutputIterator>
-void ParseTree::GetLeaves(OutputIterator result) const
-{
-  if (IsLeaf()) {
-    *result++ = this;
-  } else {
-    std::vector<ParseTree *>::const_iterator p = m_children.begin();
-    std::vector<ParseTree *>::const_iterator end = m_children.end();
-    while (p != end) {
-      ParseTree &child = **p++;
-      child.GetLeaves(result);
-    }
-  }
-}
+typedef MosesTraining::Syntax::Tree<MosesTraining::SyntaxNode> ParseTree;
 
 }  // namespace GHKM
 }  // namespace Moses
