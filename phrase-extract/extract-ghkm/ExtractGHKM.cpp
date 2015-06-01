@@ -19,29 +19,6 @@
 
 #include "ExtractGHKM.h"
 
-#include "Alignment.h"
-#include "AlignmentGraph.h"
-#include "Exception.h"
-#include "InputFileStream.h"
-#include "Node.h"
-#include "OutputFileStream.h"
-#include "Options.h"
-#include "ParseTree.h"
-#include "PhraseOrientation.h"
-#include "ScfgRule.h"
-#include "ScfgRuleWriter.h"
-#include "Span.h"
-#include "StsgRule.h"
-#include "StsgRuleWriter.h"
-#include "SyntaxNode.h"
-#include "SyntaxNodeCollection.h"
-#include "tables-core.h"
-#include "XmlException.h"
-#include "XmlTree.h"
-#include "XmlTreeParser.h"
-
-#include <boost/program_options.hpp>
-
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
@@ -51,13 +28,40 @@
 #include <sstream>
 #include <vector>
 
-namespace Moses
+#include <boost/program_options.hpp>
+
+#include "InputFileStream.h"
+#include "OutputFileStream.h"
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
+#include "SyntaxTree.h"
+#include "tables-core.h"
+#include "XmlException.h"
+#include "XmlTree.h"
+
+#include "Alignment.h"
+#include "AlignmentGraph.h"
+#include "Exception.h"
+#include "Node.h"
+#include "Options.h"
+#include "PhraseOrientation.h"
+#include "ScfgRule.h"
+#include "ScfgRuleWriter.h"
+#include "Span.h"
+#include "StsgRule.h"
+#include "StsgRuleWriter.h"
+#include "XmlTreeParser.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
 
 int ExtractGHKM::Main(int argc, char *argv[])
 {
+  using Moses::InputFileStream;
+  using Moses::OutputFileStream;
+
   // Process command-line options.
   Options options;
   ProcessOptions(argc, argv, options);
@@ -158,7 +162,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
       std::cerr << "skipping line " << lineNum << " with empty target tree\n";
       continue;
     }
-    std::auto_ptr<ParseTree> targetParseTree;
+    std::auto_ptr<SyntaxTree> targetParseTree;
     try {
       targetParseTree = targetXmlTreeParser.Parse(targetLine);
       assert(targetParseTree.get());
@@ -173,8 +177,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
 
     // Parse source tree and construct a SyntaxTree object.
-    MosesTraining::SyntaxNodeCollection sourceSyntaxTree;
-    MosesTraining::SyntaxNode *sourceSyntaxTreeRoot=NULL;
+    SyntaxNodeCollection sourceSyntaxTree;
+    SyntaxNode *sourceSyntaxTreeRoot=NULL;
 
     if (options.sourceLabels) {
       try {
@@ -197,8 +201,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
     // Read source tokens.
     std::vector<std::string> sourceTokens(ReadTokens(sourceLine));
 
-    // Construct a source ParseTree object from the SyntaxNodeCollection object.
-    std::auto_ptr<ParseTree> sourceParseTree;
+    // Construct a source SyntaxTree object from the SyntaxNodeCollection
+    // object.
+    std::auto_ptr<SyntaxTree> sourceParseTree;
 
     if (options.sourceLabels) {
       try {
@@ -264,12 +269,12 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
       const std::vector<const Subgraph *> &rules = (*p)->GetRules();
 
-      Moses::GHKM::PhraseOrientation::REO_CLASS l2rOrientation=Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN, r2lOrientation=Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN;
+      PhraseOrientation::REO_CLASS l2rOrientation=PhraseOrientation::REO_CLASS_UNKNOWN, r2lOrientation=PhraseOrientation::REO_CLASS_UNKNOWN;
       if (options.phraseOrientation && !rules.empty()) {
         int sourceSpanBegin = *((*p)->GetSpan().begin());
         int sourceSpanEnd   = *((*p)->GetSpan().rbegin());
-        l2rOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,Moses::GHKM::PhraseOrientation::REO_DIR_L2R);
-        r2lOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,Moses::GHKM::PhraseOrientation::REO_DIR_R2L);
+        l2rOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,PhraseOrientation::REO_DIR_L2R);
+        r2lOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,PhraseOrientation::REO_DIR_R2L);
         // std::cerr << "span " << sourceSpanBegin << " " << sourceSpanEnd << std::endl;
         // std::cerr << "phraseOrientation " << phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd) << std::endl;
       }
@@ -310,8 +315,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
             fwdExtractStream << " ";
             phraseOrientation.WriteOrientation(fwdExtractStream,r2lOrientation);
             fwdExtractStream << "}}";
-            phraseOrientation.IncrementPriorCount(Moses::GHKM::PhraseOrientation::REO_DIR_L2R,l2rOrientation,1);
-            phraseOrientation.IncrementPriorCount(Moses::GHKM::PhraseOrientation::REO_DIR_R2L,r2lOrientation,1);
+            phraseOrientation.IncrementPriorCount(PhraseOrientation::REO_DIR_L2R,l2rOrientation,1);
+            phraseOrientation.IncrementPriorCount(PhraseOrientation::REO_DIR_R2L,r2lOrientation,1);
           }
           fwdExtractStream << std::endl;
           invExtractStream << std::endl;
@@ -400,7 +405,7 @@ void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
 }
 
 void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
-                                      OutputFileStream &stream)
+                                      Moses::OutputFileStream &stream)
 {
   bool ret = stream.Open(filename);
   if (!ret) {
@@ -823,16 +828,16 @@ void ExtractGHKM::WriteSourceLabelSet(
 }
 
 void ExtractGHKM::CollectWordLabelCounts(
-  ParseTree &root,
+  SyntaxTree &root,
   const Options &options,
   std::map<std::string, int> &wordCount,
   std::map<std::string, std::string> &wordLabel)
 {
-  for (ParseTree::ConstLeafIterator p(root);
-       p != ParseTree::ConstLeafIterator(); ++p) {
-    const ParseTree &leaf = *p;
+  for (SyntaxTree::ConstLeafIterator p(root);
+       p != SyntaxTree::ConstLeafIterator(); ++p) {
+    const SyntaxTree &leaf = *p;
     const std::string &word = leaf.value().GetLabel();
-    const ParseTree *ancestor = leaf.parent();
+    const SyntaxTree *ancestor = leaf.parent();
     // If unary rule elimination is enabled and this word is at the end of a
     // chain of unary rewrites, e.g.
     //    PN-SB -> NE -> word
@@ -849,12 +854,12 @@ void ExtractGHKM::CollectWordLabelCounts(
   }
 }
 
-std::vector<std::string> ExtractGHKM::ReadTokens(const ParseTree &root) const
+std::vector<std::string> ExtractGHKM::ReadTokens(const SyntaxTree &root) const
 {
   std::vector<std::string> tokens;
-  for (ParseTree::ConstLeafIterator p(root);
-       p != ParseTree::ConstLeafIterator(); ++p) {
-    const ParseTree &leaf = *p;
+  for (SyntaxTree::ConstLeafIterator p(root);
+       p != SyntaxTree::ConstLeafIterator(); ++p) {
+    const SyntaxTree &leaf = *p;
     const std::string &word = leaf.value().GetLabel();
     tokens.push_back(word);
   }
@@ -956,4 +961,4 @@ void ExtractGHKM::StripBitParLabels(
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining

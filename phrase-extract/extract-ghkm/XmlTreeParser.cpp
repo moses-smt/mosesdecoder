@@ -19,18 +19,17 @@
 
 #include "XmlTreeParser.h"
 
-#include "ParseTree.h"
-#include "tables-core.h"
-#include "XmlException.h"
-#include "XmlTree.h"
-#include "util/tokenize.hh"
-
 #include <cassert>
 #include <vector>
 
-using namespace MosesTraining;
+#include "util/tokenize.hh"
 
-namespace Moses
+#include "SyntaxTree.h"
+#include "tables-core.h"
+#include "XmlException.h"
+#include "XmlTree.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -42,7 +41,7 @@ XmlTreeParser::XmlTreeParser(std::set<std::string> &labelSet,
 {
 }
 
-std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
+std::auto_ptr<SyntaxTree> XmlTreeParser::Parse(const std::string &line)
 {
   m_line = line;
   m_tree.Clear();
@@ -61,12 +60,12 @@ std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
   return ConvertTree(*root, m_words);
 }
 
-// Converts a SyntaxNode tree to a Moses::GHKM::ParseTree.
-std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
+// Converts a SyntaxNode tree to a MosesTraining::GHKM::SyntaxTree.
+std::auto_ptr<SyntaxTree> XmlTreeParser::ConvertTree(
   const SyntaxNode &tree,
   const std::vector<std::string> &words)
 {
-  std::auto_ptr<ParseTree> root(new ParseTree(tree));
+  std::auto_ptr<SyntaxTree> root(new SyntaxTree(tree));
   const std::vector<SyntaxNode*> &children = tree.GetChildren();
   if (children.empty()) {
     if (tree.GetStart() != tree.GetEnd()) {
@@ -76,14 +75,14 @@ std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
       throw Exception(msg.str());
     }
     SyntaxNode value(tree.GetStart(), tree.GetStart(), words[tree.GetStart()]);
-    std::auto_ptr<ParseTree> leaf(new ParseTree(value));
+    std::auto_ptr<SyntaxTree> leaf(new SyntaxTree(value));
     leaf->parent() = root.get();
     root->children().push_back(leaf.release());
   } else {
     for (std::vector<SyntaxNode*>::const_iterator p = children.begin();
          p != children.end(); ++p) {
       assert(*p);
-      std::auto_ptr<ParseTree> child = ConvertTree(**p, words);
+      std::auto_ptr<SyntaxTree> child = ConvertTree(**p, words);
       child->parent() = root.get();
       root->children().push_back(child.release());
     }
@@ -92,4 +91,4 @@ std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining

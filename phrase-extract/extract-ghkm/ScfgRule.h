@@ -29,7 +29,7 @@
 #include "Rule.h"
 #include "SyntaxNodeCollection.h"
 
-namespace Moses
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -41,7 +41,7 @@ class ScfgRule : public Rule
 {
 public:
   ScfgRule(const Subgraph &fragment,
-           const MosesTraining::SyntaxNodeCollection *sourceSyntaxTree = 0);
+           const SyntaxNodeCollection *sourceSyntaxTree = 0);
 
   const Subgraph &GetGraphFragment() const {
     return m_graphFragment;
@@ -78,9 +78,8 @@ public:
   }
 
 private:
-  void PushSourceLabel(
-      const MosesTraining::SyntaxNodeCollection *sourceSyntaxTree,
-      const Node *node, const std::string &nonMatchingLabel);
+  void PushSourceLabel(const SyntaxNodeCollection *sourceSyntaxTree,
+                       const Node *node, const std::string &nonMatchingLabel);
 
   const Subgraph& m_graphFragment;
   Symbol m_sourceLHS;
@@ -94,4 +93,4 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining

@@ -1,11 +1,11 @@
 #include "StsgRule.h"
 
+#include <algorithm>
+
 #include "Node.h"
 #include "Subgraph.h"
 
-#include <algorithm>
-
-namespace Moses
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -91,4 +91,4 @@ StsgRule::StsgRule(const Subgraph &fragment)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining

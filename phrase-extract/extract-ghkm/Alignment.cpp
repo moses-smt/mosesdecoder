@@ -25,7 +25,7 @@
 #include <cassert>
 #include <cstdlib>
 
-namespace Moses
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -70,4 +70,4 @@ void FlipAlignment(Alignment &a)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining

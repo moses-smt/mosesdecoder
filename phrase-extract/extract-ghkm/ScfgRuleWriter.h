@@ -19,11 +19,11 @@
 
 #pragma once
 
-#include "Subgraph.h"
-
 #include <ostream>
 
-namespace Moses
+#include "Subgraph.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -57,5 +57,5 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining
 
