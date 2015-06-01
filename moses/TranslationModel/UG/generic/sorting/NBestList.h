@@ -74,7 +74,7 @@ operator[](int i) const
   if (m_changed) {
     m_order.assign(m_heap.begin(),m_heap.end());
     for (size_t k = m_heap.size(); k != 0; --k)
-      pop_heap(m_order.begin(), m_order.begin()+k);
+      pop_heap(m_order.begin(), m_order.begin()+k,m_better);
     m_changed = false;
   }
   if (i < 0) i += m_order.size();
