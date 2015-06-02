@@ -1,4 +1,4 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 #
 # This file is part of moses.  Its use is licensed under the GNU Lesser General
 # Public License version 2.1 or, at your option, any later version.
@@ -66,7 +66,7 @@ while(<STDIN>) {
   my $num_bytes;
   {
     use bytes;
-    $num_bytes = length($_); 
+    $num_bytes = length($_);
   }
   if ($num_bytes > 1023) {
     print TMP_PROCESSED "SENTENCE_TOO_LONG\n";
