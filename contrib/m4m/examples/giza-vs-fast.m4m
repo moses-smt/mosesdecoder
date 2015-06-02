@@ -96,4 +96,4 @@ reset-lm:
 	-rm -rf lm
 reset-all: reset-lm reset-aln
 	-rm -rf $(wildcard crp/trn/*/[ct]* crp/dev/[ct]* crp/tst/[ct]*) 
-	-rm -rf aux
+	-rm -rf auxiliary
