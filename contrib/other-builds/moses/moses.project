@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="moses" InternalType="Library">
   <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00010001N0005Debug000000000000]]>
+    </Plugin>
     <Plugin Name="CMakePlugin">
       <![CDATA[[{
   "name": "Debug",
@@ -12,9 +15,6 @@
   "arguments": [],
   "parentProject": ""
  }]]]>
-    </Plugin>
-    <Plugin Name="qmake">
-      <![CDATA[00010001N0005Debug000000000000]]>
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="TranslationModel">
@@ -531,8 +531,6 @@
     <File Name="../../../moses/FF/RuleScope.h"/>
     <File Name="../../../moses/FF/SetSourcePhrase.cpp"/>
     <File Name="../../../moses/FF/SetSourcePhrase.h"/>
-    <File Name="../../../moses/FF/SkeletonChangeInput.cpp"/>
-    <File Name="../../../moses/FF/SkeletonChangeInput.h"/>
     <File Name="../../../moses/FF/SkeletonStatefulFF.cpp"/>
     <File Name="../../../moses/FF/SkeletonStatefulFF.h"/>
     <File Name="../../../moses/FF/SkeletonStatelessFF.cpp"/>

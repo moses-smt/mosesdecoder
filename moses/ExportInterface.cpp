@@ -118,8 +118,6 @@ string SimpleTranslationInterface::translate(const string &inputString)
     ResetUserTime();
   }
 
-  FeatureFunction::CallChangeSource(&*source);
-
   // set up task of translating one sentence
   boost::shared_ptr<TranslationTask> task
   = TranslationTask::create(source, ioWrapper);
@@ -222,8 +220,6 @@ batch_run()
   boost::shared_ptr<InputType> source;
   while ((source = ioWrapper->ReadInput()) != NULL) {
     IFVERBOSE(1) ResetUserTime();
-
-    FeatureFunction::CallChangeSource(source.get());
 
     // set up task of translating one sentence
     boost::shared_ptr<TranslationTask>
