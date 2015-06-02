@@ -30,6 +30,8 @@
 
 #include <boost/program_options.hpp>
 
+#include "syntax-common/xml_tree_parser.h"
+
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 #include "SyntaxNode.h"
@@ -50,7 +52,6 @@
 #include "Span.h"
 #include "StsgRule.h"
 #include "StsgRuleWriter.h"
-#include "XmlTreeParser.h"
 
 namespace MosesTraining
 {
@@ -138,8 +139,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string sourceLine;
   std::string alignmentLine;
   Alignment alignment;
-  XmlTreeParser targetXmlTreeParser(targetLabelSet, targetTopLabelSet);
-  XmlTreeParser sourceXmlTreeParser(sourceLabelSet, sourceTopLabelSet);
+  Syntax::XmlTreeParser targetXmlTreeParser(targetLabelSet, targetTopLabelSet);
+  Syntax::XmlTreeParser sourceXmlTreeParser(sourceLabelSet, sourceTopLabelSet);
   ScfgRuleWriter scfgWriter(fwdExtractStream, invExtractStream, options);
   StsgRuleWriter stsgWriter(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;

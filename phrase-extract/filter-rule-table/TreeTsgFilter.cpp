@@ -8,13 +8,13 @@ namespace FilterRuleTable
 {
 
 TreeTsgFilter::TreeTsgFilter(
-  const std::vector<boost::shared_ptr<StringTree> > &sentences)
+  const std::vector<boost::shared_ptr<SyntaxTree> > &sentences)
 {
-  // Convert each StringTree to an IdTree.
+  // Convert each SyntaxTree to an IdTree.
   m_sentences.reserve(sentences.size());
-  for (std::vector<boost::shared_ptr<StringTree> >::const_iterator p =
+  for (std::vector<boost::shared_ptr<SyntaxTree> >::const_iterator p =
          sentences.begin(); p != sentences.end(); ++p) {
-    m_sentences.push_back(boost::shared_ptr<IdTree>(StringTreeToIdTree(**p)));
+    m_sentences.push_back(boost::shared_ptr<IdTree>(SyntaxTreeToIdTree(**p)));
   }
 
   m_labelToTree.resize(m_testVocab.Size());
@@ -25,15 +25,15 @@ TreeTsgFilter::TreeTsgFilter(
   }
 }
 
-TreeTsgFilter::IdTree *TreeTsgFilter::StringTreeToIdTree(const StringTree &s)
+TreeTsgFilter::IdTree *TreeTsgFilter::SyntaxTreeToIdTree(const SyntaxTree &s)
 {
-  IdTree *t = new IdTree(m_testVocab.Insert(s.value()));
-  const std::vector<StringTree*> &sChildren = s.children();
+  IdTree *t = new IdTree(m_testVocab.Insert(s.value().GetLabel()));
+  const std::vector<SyntaxTree*> &sChildren = s.children();
   std::vector<IdTree*> &tChildren = t->children();
   tChildren.reserve(sChildren.size());
-  for (std::vector<StringTree*>::const_iterator p = sChildren.begin();
+  for (std::vector<SyntaxTree*>::const_iterator p = sChildren.begin();
        p != sChildren.end(); ++p) {
-    IdTree *child = StringTreeToIdTree(**p);
+    IdTree *child = SyntaxTreeToIdTree(**p);
     child->parent() = t;
     tChildren.push_back(child);
   }

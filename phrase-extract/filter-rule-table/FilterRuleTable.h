@@ -5,7 +5,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "syntax-common/string_tree.h"
+#include "SyntaxTree.h"
 
 #include "StringForest.h"
 
@@ -36,7 +36,7 @@ private:
   void Filter(const std::vector<std::vector<std::string> > &);
 
   // Filter rule table (on std::cin) for test set (parse tree version).
-  void Filter(const std::vector<boost::shared_ptr<StringTree> > &);
+  void Filter(const std::vector<boost::shared_ptr<SyntaxTree> > &);
 
   void ProcessOptions(int, char *[], Options &) const;
 
@@ -46,7 +46,7 @@ private:
 
   // Read test set (tree version)
   void ReadTestSet(std::istream &,
-                   std::vector<boost::shared_ptr<StringTree> > &);
+                   std::vector<boost::shared_ptr<SyntaxTree> > &);
 
   // Read test set (forest version)
   void ReadTestSet(std::istream &,

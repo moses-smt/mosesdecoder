@@ -82,7 +82,7 @@ int FilterRuleTable::Main(int argc, char *argv[])
     StringCfgFilter filter(testStrings);
     filter.Filter(std::cin, std::cout);
   } else if (testSentenceFormat == kTree) {
-    std::vector<boost::shared_ptr<StringTree> > testTrees;
+    std::vector<boost::shared_ptr<SyntaxTree> > testTrees;
     ReadTestSet(testStream, testTrees);
     if (sourceSideRuleFormat == kCfg) {
       // TODO Implement TreeCfgFilter
@@ -124,9 +124,11 @@ void FilterRuleTable::ReadTestSet(
 }
 
 void FilterRuleTable::ReadTestSet(
-  std::istream &input, std::vector<boost::shared_ptr<StringTree> > &sentences)
+  std::istream &input, std::vector<boost::shared_ptr<SyntaxTree> > &sentences)
 {
-  XmlTreeParser parser;
+  std::set<std::string> labelSet;
+  std::map<std::string, int> topLabelSet;
+  XmlTreeParser parser(labelSet, topLabelSet);
   int lineNum = 0;
   std::string line;
   while (std::getline(input, line)) {
@@ -136,7 +138,8 @@ void FilterRuleTable::ReadTestSet(
                 << std::endl;
       continue;
     }
-    sentences.push_back(boost::shared_ptr<StringTree>(parser.Parse(line)));
+    sentences.push_back(
+        boost::shared_ptr<SyntaxTree>(parser.Parse(line).release()));
   }
 }
 
