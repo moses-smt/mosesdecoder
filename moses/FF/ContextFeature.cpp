@@ -300,7 +300,9 @@ ChartTranslation ContextFeature::GetPSDTranslation(const string targetRep, const
   //alignment between terminals and non-terminals
   // alignment between terminals
   const AlignmentInfo &alignInfoTerm = tp->GetAlignTerm();
-  VERBOSE(5, "Added alignment Info : " << alignInfoTerm << std::endl);
+  VERBOSE(1, "Added alignment Info : " << alignInfoTerm << std::endl);
+
+  //put nonterm
   AlignmentInfo::const_iterator it;
   for (it = alignInfoTerm.begin(); it != alignInfoTerm.end(); it++)
     //cerr << "Added Alignment : " << (*it) << endl;
@@ -308,16 +310,42 @@ ChartTranslation ContextFeature::GetPSDTranslation(const string targetRep, const
 
   //alignment between non-terminals
   const AlignmentInfo &alignInfoNonTerm = tp->GetAlignNonTerm();
-  const vector<size_t> &alignInfoNonTermIndex = tp->GetAlignNonTerm().GetNonTermIndexMap();
-  VERBOSE(5, "Added alignment Info between non terms : " << alignInfoNonTerm << std::endl);
-  //TODO : modify implementation here : count the number of non-terminals and search
-  //Do not use the positions
+  AlignmentInfo :: const_iterator nonTermIt;
+
+  size_t nonTermCounter = 0;
+  vector<std::pair<size_t,size_t> > nonTermVec;
+  std:pair<size_t,size_t> nonTermIndex;
+  for (nonTermIt = alignInfoNonTerm.begin(); nonTermIt != alignInfoNonTerm.end(); nonTermIt++)
+  {
+	  VERBOSE(1, "Second Element of align " << nonTermIt->second << std::endl);
+	  size_t index = nonTermIt->second;
+	  std::cerr << "INDEX:" << index << std::endl;
+	  nonTermIndex = std::make_pair(index,nonTermCounter);
+	  nonTermVec.push_back(nonTermIndex);
+	  nonTermCounter++;
+  }
+
+  std::sort(nonTermVec.begin(),nonTermVec.end());
+  nonTermCounter = 0;
+  pair<size_t,size_t> nonTermPair;
+  vector<std::pair<size_t,size_t> > :: const_iterator newNonTermVecIt;
+  for (newNonTermVecIt=nonTermVec.begin();newNonTermVecIt!=nonTermVec.end();newNonTermVecIt++)
+  {
+	  nonTermPair = std::make_pair(newNonTermVecIt->second,nonTermCounter);
+	  psdOpt.m_nonTermAlignment.insert(nonTermPair);
+	  VERBOSE(1,std::cerr << "Inserted alignment : " <<  newNonTermVecIt->second << ": " << nonTermCounter << std::endl);
+	  nonTermCounter++;
+  }
+
+  //OLD CODE
+  /*
   for (it = alignInfoNonTerm.begin(); it != alignInfoNonTerm.end(); it++)
   {
+
 	  std:pair<size_t,size_t> nonTermIndexMapPair = std::make_pair(it->second,alignInfoNonTermIndex[it->second]);
-	  VERBOSE(5,std::cerr << "Inserted alignment : " <<  it->second << ": " << alignInfoNonTermIndex[it->second] << std::endl);
+	  VERBOSE(1,std::cerr << "Inserted alignment : " <<  it->second << ": " << alignInfoNonTermIndex[it->second] << std::endl);
 	  psdOpt.m_nonTermAlignment.insert(nonTermIndexMapPair);
-  }
+  }*/
 
   // scores
   const vector<PhraseDictionary*>& ttables = StaticData::Instance().GetPhraseDictionaries();

@@ -529,13 +529,6 @@ void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, c
 void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhrase, const vector<string> &tgtPhrase,
     const AlignmentType &alignTerm, const AlignmentType &alignNonTerm, FeatureConsumer *fc)
 {
-  /*vector<string> :: const_iterator itr_source;
-  for(itr_source = srcPhrase.begin(); itr_source != srcPhrase.end(); itr_source++)
-  {cerr << "Source : " << *itr_source << endl;}
-
-   vector<string> :: const_iterator itr_target;
-  for(itr_target = tgtPhrase.begin(); itr_target != tgtPhrase.end(); itr_target++)
-  {cerr << "Target : " << *itr_target << endl;}*/
 
   AlignmentType::const_iterator it;
   set<size_t> srcAligned;
@@ -571,9 +564,12 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
   //find non-terminals source
   for(size_t i = 0; i < srcPhrase.size(); i++)
     {
+	  //std::cerr << "LOOKING FOR SOURCE : " << srcPhrase[i] << std::endl;
       //store non-terminals in vector for nt pairs
       if(regex_search (srcPhrase[i],matchedNonTermSource,nonTermRegex))
-          sourceNonTerms.push_back(string(matchedNonTermSource[1]));
+    	  {
+    	  	  //std::cerr << "PUSH BACK MATCHED SOURCE : " << string(matchedNonTermSource[1]) << std::endl;
+    	  	  sourceNonTerms.push_back(string(matchedNonTermSource[1]));}
     }
 
   /* FABIS CODE
@@ -595,8 +591,12 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
   //find non-terminals target
   for(size_t i = 0; i < tgtPhrase.size(); i++)
     {
+
+	  //std::cerr << "LOOKING FOR TARGET : " << tgtPhrase[i] << std::endl;
+
       //store non-terminals in vector for nt pairs
       if(regex_search (tgtPhrase[i],matchedNonTermTarget,nonTermRegex))
+    	  //std::cerr << "PUSH BACK MATCHED TARGET : " << string(matchedNonTermTarget[2]) << std::endl;
           targetNonTerms.push_back(string(matchedNonTermTarget[2]));
     }
   
@@ -631,10 +631,12 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
      ostringstream s1;
      s1 << it->first;
      string sourceAlign =s1.str();
+     //std::cerr << "SOURCE ALIGN: "<< sourceAlign << std::endl;
 
      ostringstream s2;
      s2 << it->second;
      string targetAlign =s2.str();
+     //std::cerr << "TARGET ALIGN: "<< targetAlign << std::endl;
 
      // NIN: fixed output for ntpair
     //fc->AddFeature("ntpair^" + sourceNonTerms[nonTermVecCounter] + sourceAlign + "^" + targetNonTerms[nonTermVecCounter] + targetAlign);
