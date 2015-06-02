@@ -80,6 +80,39 @@ string ParseXmlTagAttribute(const string& tag,const string& attributeName)
   return tag.substr(contentsStart,contentsEnd-contentsStart);
 }
 
+// TODO Special handling of "label" attribute
+// s should be a sequence of name=attribute pairs separated by whitespace.
+// e.g. "label=\"S\" pcfg=\"-1.452\" foo=\"blah\\\"blah\""
+void ParseXmlTagAttributes(const std::string &s,
+                           std::map<std::string, std::string> &attributes)
+{
+  std::size_t begin = 0;
+  while (true) {
+    std::size_t pos = s.find('=', begin);
+    if (pos == std::string::npos) {
+      return;
+    }
+    std::string name = Trim(s.substr(begin, pos-begin));
+    begin = s.find('"', pos+1);
+    if (begin == std::string::npos) {
+      throw XmlException("invalid tag content");
+    }
+    pos = s.find('"', begin+1);
+    if (pos == std::string::npos) {
+      throw XmlException("invalid tag content");
+    }
+    while (s[pos-1] == '\\') {
+      pos = s.find('"', pos+1);
+      if (pos == std::string::npos) {
+        throw XmlException("invalid tag content");
+      }
+    }
+    // TODO unescape \"
+    attributes[name] = s.substr(begin+1, pos-begin-1);
+    begin = pos+1;
+  }
+}
+
 /**
  * Remove "<" and ">" from XML tag
  *
@@ -377,6 +410,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxNodeCollection &nodeCollection,
         }
         SyntaxNode *node = nodeCollection.AddNode( startPos, endPos-1, label );
         node->SetPcfgScore(pcfgScore);
+        ParseXmlTagAttributes(tagContent, node->attributes);
       }
     }
   }

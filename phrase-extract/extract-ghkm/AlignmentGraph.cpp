@@ -216,7 +216,13 @@ Node *AlignmentGraph::CopyParseTree(const SyntaxTree *root)
   std::auto_ptr<Node> n(new Node(root->value().GetLabel(), nodeType));
 
   if (nodeType == TREE) {
-    n->SetPcfgScore(root->value().GetPcfgScore());
+    float score = 0.0f;
+    SyntaxNode::AttributeMap::const_iterator p =
+        root->value().attributes.find("pcfg");
+    if (p != root->value().attributes.end()) {
+      score = std::atof(p->second.c_str());
+    }
+    n->SetPcfgScore(score);
   }
 
   const std::vector<SyntaxTree *> &children = root->children();

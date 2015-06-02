@@ -36,6 +36,10 @@ protected:
   SyntaxNode* m_parent;
   float m_pcfgScore;
 public:
+  typedef std::map<std::string, std::string> AttributeMap;
+
+  AttributeMap attributes;
+
   SyntaxNode( int startPos, int endPos, std::string label )
     :m_start(startPos)
     ,m_end(endPos)
