@@ -23,8 +23,6 @@
 #include <cassert>
 #include <iostream>
 
-#include <boost/make_shared.hpp>
-
 namespace MosesTraining
 {
 
@@ -154,7 +152,6 @@ void SyntaxNodeCollection::ConnectNodes()
   }
 }
 
-//boost::shared_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
 std::auto_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
 {
   std::map<SyntaxNode *, SyntaxTree *> nodeToTree;
@@ -209,7 +206,6 @@ std::auto_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
     }
   }
 
-  //return boost::shared_ptr<SyntaxTree>(root);
   return std::auto_ptr<SyntaxTree>(root);
 }
 

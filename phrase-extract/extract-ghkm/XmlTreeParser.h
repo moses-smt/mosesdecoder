@@ -44,20 +44,22 @@ class XmlTreeParser
 {
 public:
   XmlTreeParser(std::set<std::string> &, std::map<std::string, int> &);
-  std::auto_ptr<SyntaxTree> Parse(const std::string &);
 
-  static std::auto_ptr<SyntaxTree> ConvertTree(const SyntaxNode &,
-      const std::vector<std::string> &);
+  std::auto_ptr<SyntaxTree> Parse(const std::string &);
 
   const std::vector<std::string>& GetWords() {
     return m_words;
-  };
+  }
+
+  const SyntaxNodeCollection &GetNodeCollection() const {
+    return m_nodeCollection;
+  }
 
 private:
   std::set<std::string> &m_labelSet;
   std::map<std::string, int> &m_topLabelSet;
   std::string m_line;
-  SyntaxNodeCollection m_tree;
+  SyntaxNodeCollection m_nodeCollection;
   std::vector<std::string> m_words;
 
   void AttachWords(const std::vector<std::string> &, SyntaxTree &);

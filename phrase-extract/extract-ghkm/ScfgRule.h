@@ -41,7 +41,7 @@ class ScfgRule : public Rule
 {
 public:
   ScfgRule(const Subgraph &fragment,
-           const SyntaxNodeCollection *sourceSyntaxTree = 0);
+           const SyntaxNodeCollection *sourceNodeCollection = 0);
 
   const Subgraph &GetGraphFragment() const {
     return m_graphFragment;
@@ -78,7 +78,7 @@ public:
   }
 
 private:
-  void PushSourceLabel(const SyntaxNodeCollection *sourceSyntaxTree,
+  void PushSourceLabel(const SyntaxNodeCollection *sourceNodeCollection,
                        const Node *node, const std::string &nonMatchingLabel);
 
   const Subgraph& m_graphFragment;

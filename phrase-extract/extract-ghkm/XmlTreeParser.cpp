@@ -44,49 +44,18 @@ XmlTreeParser::XmlTreeParser(std::set<std::string> &labelSet,
 std::auto_ptr<SyntaxTree> XmlTreeParser::Parse(const std::string &line)
 {
   m_line = line;
-  m_tree.Clear();
+  m_nodeCollection.Clear();
   try {
-    if (!ProcessAndStripXMLTags(m_line, m_tree, m_labelSet, m_topLabelSet,
-                                false)) {
+    if (!ProcessAndStripXMLTags(m_line, m_nodeCollection, m_labelSet,
+                                m_topLabelSet, false)) {
       throw Exception("");
     }
   } catch (const XmlException &e) {
     throw Exception(e.getMsg());
   }
-  //boost::shared_ptr<SyntaxTree> root = m_tree.ExtractTree();
-  std::auto_ptr<SyntaxTree> root = m_tree.ExtractTree();
+  std::auto_ptr<SyntaxTree> root = m_nodeCollection.ExtractTree();
   m_words = util::tokenize(m_line);
   AttachWords(m_words, *root);
-  return root;
-}
-
-// Converts a SyntaxNode tree to a MosesTraining::GHKM::SyntaxTree.
-std::auto_ptr<SyntaxTree> XmlTreeParser::ConvertTree(
-  const SyntaxNode &tree,
-  const std::vector<std::string> &words)
-{
-  std::auto_ptr<SyntaxTree> root(new SyntaxTree(tree));
-  const std::vector<SyntaxNode*> &children = tree.GetChildren();
-  if (children.empty()) {
-    if (tree.GetStart() != tree.GetEnd()) {
-      std::ostringstream msg;
-      msg << "leaf node covers multiple words (" << tree.GetStart()
-          << "-" << tree.GetEnd() << "): this is currently unsupported";
-      throw Exception(msg.str());
-    }
-    SyntaxNode value(tree.GetStart(), tree.GetStart(), words[tree.GetStart()]);
-    std::auto_ptr<SyntaxTree> leaf(new SyntaxTree(value));
-    leaf->parent() = root.get();
-    root->children().push_back(leaf.release());
-  } else {
-    for (std::vector<SyntaxNode*>::const_iterator p = children.begin();
-         p != children.end(); ++p) {
-      assert(*p);
-      std::auto_ptr<SyntaxTree> child = ConvertTree(**p, words);
-      child->parent() = root.get();
-      root->children().push_back(child.release());
-    }
-  }
   return root;
 }
 
