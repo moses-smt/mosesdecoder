@@ -19,11 +19,9 @@ namespace Moses {
     bool include_all_factors;
 
     std::string output_file_path;
-    
+
     bool init(Parameter const& param);
 
   };
-
-
 
 }

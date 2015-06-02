@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(initialise)
   bitvec[2] = true;
   bitvec[3] = true;
   bitvec[7] = true;
-  
+
   WordsBitmap wbm2(7,bitvec);
   BOOST_CHECK_EQUAL(wbm2.GetSize(),7);
   for (size_t i = 0; i < 7; ++i) {

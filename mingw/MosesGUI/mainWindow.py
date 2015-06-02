@@ -4,10 +4,19 @@
 Module implementing MainWindow.
 """
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtSql import *
+from PyQt4.QtCore import (
+    pyqtSignature,
+    QObject,
+    Qt,
+    SIGNAL,
+    )
+from PyQt4.QtGui import (
+    QMainWindow,
+    QMessageBox,
+    QProgressDialog,
+    )
 
+import sys
 import threading
 
 from Ui_mainWindow import Ui_MainWindow
@@ -15,7 +24,7 @@ from addMTModel import AddMTModelDialog
 from chooseMTModel import ChooseMTModelDialog
 from engine import Engine
 from credits import DlgCredits
-from util import *
+from util import doAlert
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -54,18 +63,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Slot documentation goes here.
         """
         current = self.tableView.currentIndex()
-        if current and current.row() >= 0:
-            if self.engine and self.datamodel.getRowID(current.row()) == self.engine.model['ID']:
-                text = '''The model is still in use, do you want to stop and delete it?
-It might take a while...'''
-                reply = QMessageBox.question(None, 'Message', text, QMessageBox.Yes, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    return
-                t = self.stopEngine(self.engine)
-                t.join()
-                self.engine = None
-                self.clearPanel()
-            self.datamodel.delModel(current.row())
+        if not current or current.row() < 0:
+            return
+        model_in_use = (
+            self.engine and
+            self.datamodel.getRowID(current.row()) == self.engine.model['ID']
+            )
+        if model_in_use:
+            text = (
+                "The model is still in use, do you want to "
+                "stop and delete it?\n"
+                "It might take a while..."
+                )
+            reply = QMessageBox.question(
+                None, 'Message', text, QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                return
+            t = self.stopEngine(self.engine)
+            t.join()
+            self.engine = None
+            self.clearPanel()
+        self.datamodel.delModel(current.row())
 
     @pyqtSignature("")
     def on_newModelBtn_clicked(self):
@@ -153,17 +171,24 @@ It might take a while...'''
             if self.progress:
                 self.progress.close()
                 self.progress = None
-            self.progress = QProgressDialog("Model: %s" % model['name'], "Cancel", 0, self.engine.countSteps(), self)
+            self.progress = QProgressDialog(
+                "Model: %s" % model['name'], "Cancel", 0,
+                self.engine.countSteps(), self)
             self.progress.setAutoReset(True)
             self.progress.setAutoClose(True)
             self.progress.setWindowModality(Qt.WindowModal)
             self.progress.setWindowTitle('Loading Model...')
-            QObject.connect(self.progress, SIGNAL("canceled()"), self.progressCancelled)
+            QObject.connect(
+                self.progress, SIGNAL("canceled()"), self.progressCancelled)
             self.progress.show()
 
-            #connect engine signal
-            QObject.connect(self.engine, SIGNAL("stepFinished(int)"), self.engineStepFinished)
-            QObject.connect(self.engine, SIGNAL("loaded(bool, QString)"), self.engineLoaded)
+            # Connect engine signal.
+            QObject.connect(
+                self.engine, SIGNAL("stepFinished(int)"),
+                self.engineStepFinished)
+            QObject.connect(
+                self.engine, SIGNAL("loaded(bool, QString)"),
+                self.engineLoaded)
 
             def startEngineThread():
                 self.engine.start()
@@ -225,7 +250,9 @@ It might take a while...'''
                 if text.strip() == "":
                     trans.append(text)
                 else:
-                    trans.append(self.engine.translate(text.replace('\r', ' ').strip()).decode('utf8'))
+                    trans.append(
+                        self.engine.translate(
+                            text.replace('\r', ' ').strip()).decode('utf8'))
             self.editTrg.setText('\n'.join(trans))
         except Exception, e:
             print >> sys.stderr, str(e)

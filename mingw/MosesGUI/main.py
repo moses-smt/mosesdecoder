@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4.QtGui import QApplication
 
 import os
 import sys
@@ -9,7 +8,6 @@ import sys
 from mainWindow import MainWindow
 from datamodel import DataModel
 from moses import Moses
-from util import *
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

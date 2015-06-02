@@ -8,7 +8,7 @@ namespace Moses {
     bool& x = need_alignment_info;
     P.SetParameter(x, "print-alignment-info", false);
     if (!x) P.SetParameter(x, "print-alignment-info-in-n-best", false);
-    if (!x) 
+    if (!x)
       {
 	PARAM_VEC const* params = P.GetParam("alignment-output-file");
 	x = params && params->size();

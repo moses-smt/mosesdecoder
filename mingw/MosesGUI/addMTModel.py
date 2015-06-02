@@ -4,14 +4,17 @@
 Module implementing Dialog.
 """
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt4.QtGui import (
+    QDialog,
+    QFileDialog,
+    )
+from PyQt4.QtCore import pyqtSignature
 
 import datetime
 import os
 
 from Ui_addMTModel import Ui_Dialog
-from util import *
+from util import doAlert
 
 
 class AddMTModelDialog(QDialog, Ui_Dialog):
@@ -88,7 +91,7 @@ class AddMTModelDialog(QDialog, Ui_Dialog):
         def checkEmpty(mystr):
             return len(str(mystr).strip()) <= 0
 
-        #check everything
+        # Check everything.
         self.modelName = self.editName.text()
         if checkEmpty(self.modelName):
             doAlert("Please provide non-empty Model Name")
