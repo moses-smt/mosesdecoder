@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # execute: ~/workspace/bin/moses-smt/scripts/training/wrappers/suffix-array-create.sh $SA_EXEC_DIR $SOURCE_CORPUS $TARGET_CORPUS $ALIGNMENT $SA_OUTPUT
 

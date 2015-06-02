@@ -1,5 +1,8 @@
 #package Corpus: hold a bunch of sentences in any language, with translation factors and stats about individual sentences and the corpus as a whole
 #Evan Herbst, 7 / 25 / 06
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 package Corpus;
 BEGIN

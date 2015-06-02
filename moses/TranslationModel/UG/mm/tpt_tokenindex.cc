@@ -16,7 +16,8 @@ namespace ugdiss
 
   TokenIndex::
   TokenIndex(string unkToken)
-    : ridx(0),unkLabel(unkToken),unkId(1),numTokens(0)
+    : ridx(0), unkLabel(unkToken), unkId(1), numTokens(0)
+    , startIdx(0), endIdx(0)
   {
     lock.reset(new boost::mutex());
   };
@@ -94,15 +95,25 @@ namespace ugdiss
   TokenIndex::
   operator[](char const* p) const
   {
-    if (startIdx==endIdx && !dynamic) return strcmp(p,"NULL") && unkId;
-    Entry const* bla = lower_bound(startIdx,endIdx,p,comp);
-    if (bla != endIdx && !strcmp(comp.base+bla->offset,p))
-      return bla->id;
-    if (!dynamic) return unkId;
+    if (startIdx != endIdx)
+      {
+	Entry const* bla = lower_bound(startIdx,endIdx,p,comp);
+	if (bla != endIdx && !strcmp(comp.base+bla->offset,p))
+	  return bla->id;
+	if (!dynamic) return unkId;
+      }
+    else if (!dynamic) return strcmp(p,"NULL") && unkId;
+    
     boost::lock_guard<boost::mutex> lk(*this->lock);
-    // stuff below is new as of 2011-01-30, for dynamic adding of unknown items
-    // IMPORTANT: numTokens is not currently not changed, it is the number of
-    // PRE-EXISING TOKENS, not including dynamically added Items
+    // stuff below is new as of 2011-01-30, for dynamic adding of
+    // unknown items IMPORTANT: numTokens is not currently not
+    // changed, it is the number of PRE-EXISING TOKENS, not including
+    // dynamically added Items
+    // if (!str2idExtra)
+    //   {
+    //     this->str2idExtra.reset(new map<string,id_type>());
+    //     this->newWords.reset(new vector<string>());
+    //   }
     map<string,id_type>::value_type newItem(p,str2idExtra->size()+numTokens);
     pair<map<string,id_type>::iterator,bool> foo = str2idExtra->insert(newItem);
     if (foo.second) // it actually is a new item
@@ -144,10 +155,13 @@ namespace ugdiss
     if (!ridx.size())
       {
 	boost::lock_guard<boost::mutex> lk(*this->lock);
+	// Someone else (multi-threading!) may have created the 
+	// reverse index in the meantime, so let's check again
 	if (!ridx.size()) ridx = reverseIndex();
       }
     if (id < ridx.size())
       return ridx[id];
+    
     boost::lock_guard<boost::mutex> lk(*this->lock);
     if (dynamic && id < ridx.size()+newWords->size())
       return (*newWords)[id-ridx.size()].c_str();

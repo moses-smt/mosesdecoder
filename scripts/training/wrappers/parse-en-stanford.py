@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Author: Rico Sennrich
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
-# (hacky) wrapper around Stanford CoreNLP to produce CoNLL dependency format.
-# assumes tokenized and sentence-split text.
+"""
+(Hacky) wrapper around Stanford CoreNLP to produce CoNLL dependency format.
+Assumes tokenized and sentence-split text.
 
-# to get Moses XML format, first projectivize the trees, then use conll2mosesxml.py.
+To get Moses XML format, first projectivize the trees, then use
+conll2mosesxml.py.
+"""
 
 from __future__ import print_function, unicode_literals
 import os

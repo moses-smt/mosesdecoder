@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     // process into syntax tree representation
     set< string > labelCollection;         // set of labels, not used
     map< string, int > topLabelCollection; // count of top labels, not used
-    SyntaxTree tree;
+    SyntaxNodeCollection tree;
     ProcessAndStripXMLTags( inBufferString, tree, labelCollection, topLabelCollection, false );
     const vector< string > inWords = util::tokenize( inBufferString );
 
@@ -105,7 +105,7 @@ void init(int argc, char* argv[])
   }
 }
 
-void store( SyntaxTree &tree, const vector< string > &words )
+void store( SyntaxNodeCollection &tree, const vector< string > &words )
 {
   // output words
   for( size_t i=0; i<words.size(); i++ ) {
@@ -126,7 +126,7 @@ void store( SyntaxTree &tree, const vector< string > &words )
   cout << endl;
 }
 
-void LeftBinarize( SyntaxTree &tree, ParentNodes &parents )
+void LeftBinarize( SyntaxNodeCollection &tree, ParentNodes &parents )
 {
   for(ParentNodes::const_iterator p = parents.begin(); p != parents.end(); p++) {
     const SplitPoints &point = *p;
@@ -143,7 +143,7 @@ void LeftBinarize( SyntaxTree &tree, ParentNodes &parents )
   }
 }
 
-void RightBinarize( SyntaxTree &tree, ParentNodes &parents )
+void RightBinarize( SyntaxNodeCollection &tree, ParentNodes &parents )
 {
   for(ParentNodes::const_iterator p = parents.begin(); p != parents.end(); p++) {
     const SplitPoints &point = *p;
@@ -161,11 +161,11 @@ void RightBinarize( SyntaxTree &tree, ParentNodes &parents )
   }
 }
 
-void SAMT( SyntaxTree &tree, ParentNodes &parents )
+void SAMT( SyntaxNodeCollection &tree, ParentNodes &parents )
 {
   int numWords = tree.GetNumWords();
 
-  SyntaxTree newTree; // to store new nodes
+  SyntaxNodeCollection newTree; // to store new nodes
 
   // look through parents to combine children
   for(ParentNodes::const_iterator p = parents.begin(); p != parents.end(); p++) {

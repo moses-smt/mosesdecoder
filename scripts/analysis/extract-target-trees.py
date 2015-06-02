@@ -1,9 +1,13 @@
 #!/usr/bin/env python
-
-# Usage: extract-target-trees.py [FILE]
 #
-# Reads moses-chart's -T output from FILE or standard input and writes trees to
-# standard output in Moses' XML tree format.
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
+
+"""Usage: extract-target-trees.py [FILE]
+
+Reads moses-chart's -T output from FILE or standard input and writes trees to
+standard output in Moses' XML tree format.
+"""
 
 import re
 import sys

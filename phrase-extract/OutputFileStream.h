@@ -30,19 +30,50 @@
 namespace Moses
 {
 
-/** Used in place of std::istream, can read zipped files if it ends in .gz
+/** Version of std::ostream with transparent compression.
+ *
+ * Transparently compresses output when writing to a file whose name ends in
+ * ".gz".  Or, writes to stdout instead of a file when given a filename
+ * consisting of just a dash ("-").
  */
 class OutputFileStream : public boost::iostreams::filtering_ostream
 {
-protected:
+private:
+  /** File that needs flushing & closing when we close this stream.
+   *
+   * Is NULL when no file is opened, e.g. when writing to standard output.
+   */
   std::ofstream *m_outFile;
+
+  /// Is this stream open?
+  bool m_open;
+
 public:
+  /** Create an unopened OutputFileStream.
+   *
+   * Until it's been opened, nothing can be done with this stream.
+   */
   OutputFileStream();
 
+  /// Create an OutputFileStream, and open it by calling Open().
   OutputFileStream(const std::string &filePath);
   virtual ~OutputFileStream();
 
+  // TODO: Can we please just always throw an exception when this fails?
+  /** Open stream.
+   *
+   * If filePath is "-" (just a dash), this opens the stream for writing to
+   * standard output.  Otherwise, it opens the given file.  If the filename
+   * has the ".gz" suffix, output will be transparently compressed.
+   *
+   * Call Close() to close the file.
+   *
+   * Returns whether opening the file was successful.  It may also throw an
+   * exception on failure.
+   */
   bool Open(const std::string &filePath);
+
+  /// Flush and close stream.  After this, the stream can be opened again.
   void Close();
 };
 

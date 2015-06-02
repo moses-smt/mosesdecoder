@@ -858,22 +858,22 @@ parse-input-devtest
 	ignore-unless: use-mira	
 	template: $input-parser < IN > OUT
 parse-relax-input
-	in: parsed-input
-	out: parse-relaxed-input
+	in: split-input
+	out: input
 	default-name: tuning/input.parse-relaxed
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
     template: $input-parse-relaxer < IN > OUT
 parse-relax-input-devtest
-	in: parsed-input-devtest
-	out: parse-relaxed-input-devtest
+	in: split-input-devtest
+	out: input-devtest
 	default-name: tuning/input.devtest.parse-relaxed
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira
     template: $input-parse-relaxer < IN > OUT
 factorize-input
-	in: parse-relaxed-input
+	in: parsed-input
 	out: factorized-input
 	default-name: tuning/input.factorized
 	rerun-on-change: TRAINING:input-factors
@@ -881,7 +881,7 @@ factorize-input
 	error: can't open
 	error: incompatible number of words in factor
 factorize-input-devtest
-	in: parse-relaxed-input-devtest
+	in: parsed-input-devtest
 	out: factorized-input-devtest
 	default-name: tuning/input.devtest.factorized
 	rerun-on-change: TRAINING:input-factors
@@ -934,14 +934,14 @@ truecase-input-devtest
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
 	in: truecased-input SPLITTER:splitter-model
-	out: input
+	out: split-input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 split-input-devtest
 	in: truecased-input-devtest SPLITTER:splitter-model
-	out: input-devtest
+	out: split-input-devtest
 	rerun-on-change: input-splitter
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
@@ -1148,14 +1148,14 @@ parse-input
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	template: $input-parser < IN > OUT
 parse-relax-input
-	in: parsed-input
-	out: parse-relaxed-input
+	in: split-input
+	out: input
 	default-name: evaluation/input.parse-relaxed
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
     template: $input-parse-relaxer < IN > OUT
 factorize-input
-	in: parse-relaxed-input
+	in: parsed-input
 	out: factorized-input
 	default-name: evaluation/input.factorized
 	rerun-on-change: TRAINING:input-factors
@@ -1187,7 +1187,7 @@ truecase-input
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input
 	in: truecased-input SPLITTER:splitter-model
-	out: input
+	out: split-input
 	default-name: evaluation/input.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT

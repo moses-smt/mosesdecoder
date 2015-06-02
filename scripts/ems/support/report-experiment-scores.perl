@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id: report-experiment-scores.perl 407 2008-11-10 14:43:31Z philipp $
 

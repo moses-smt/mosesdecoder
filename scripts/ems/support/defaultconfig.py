@@ -1,4 +1,7 @@
 #!/usr/bin/env python2
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 """Version of ConfigParser which accepts default values."""
 

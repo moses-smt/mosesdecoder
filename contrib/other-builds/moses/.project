@@ -221,6 +221,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ConfusionNet.h</locationURI>
 		</link>
 		<link>
+			<name>ContextParameters.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ContextParameters.cpp</locationURI>
+		</link>
+		<link>
+			<name>ContextParameters.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ContextParameters.h</locationURI>
+		</link>
+		<link>
 			<name>DecodeGraph.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/DecodeGraph.cpp</locationURI>

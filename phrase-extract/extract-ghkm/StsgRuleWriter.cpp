@@ -1,9 +1,5 @@
 #include "StsgRuleWriter.h"
 
-#include "Alignment.h"
-#include "Options.h"
-#include "StsgRule.h"
-
 #include <cassert>
 #include <cmath>
 #include <ostream>
@@ -11,7 +7,11 @@
 #include <sstream>
 #include <vector>
 
-namespace Moses
+#include "Alignment.h"
+#include "Options.h"
+#include "StsgRule.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -92,4 +92,4 @@ void StsgRuleWriter::Write(const StsgRule &rule)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining

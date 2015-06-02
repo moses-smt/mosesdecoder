@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # example
 # ./score-parallel.perl 8 "gsort --batch-size=253" ./score ./extract.2.sorted.gz ./lex.2.f2e ./phrase-table.2.half.f2e  --GoodTuring ./phrase-table.2.coc 0
@@ -188,7 +191,7 @@ for (my $i = 0; $i < $fileCount; ++$i)
   print STDERR $cmd;
 
   if ($FlexibilityScore) {
-    $cmd .= "zcat $TMPDIR/phrase-table.half.$numStr.gz | $FlexibilityCmd $TMPDIR/extract.context.$i.gz";
+    $cmd .= "gzip -cd $TMPDIR/phrase-table.half.$numStr.gz | $FlexibilityCmd $TMPDIR/extract.context.$i.gz";
     $cmd .= " --Inverse" if ($otherExtractArgs =~ /--Inverse/);
     $cmd .= " --Hierarchical" if ($otherExtractArgs =~ /--Hierarchical/);
     $cmd .= " | $GZIP_EXEC -c > $TMPDIR/phrase-table.half.$numStr.flex.gz\n";

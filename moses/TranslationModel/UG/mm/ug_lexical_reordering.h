@@ -1,9 +1,35 @@
 // -*- c++ -*-
 #pragma once
 #include <vector>
-#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
 
-namespace Moses { namespace bitext {
+#ifndef NO_MOSES
+#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
+#endif
+
+namespace Moses { 
+#ifdef NO_MOSES
+namespace LRModel{
+
+  enum ModelType { Monotonic, MSD, MSLR, LeftRight, None };
+  enum Direction { Forward, Backward, Bidirectional };
+
+  enum ReorderingType {
+    M    = 0, // monotonic
+    NM   = 1, // non-monotonic
+    S    = 1, // swap
+    D    = 2, // discontinuous
+    DL   = 2, // discontinuous, left
+    DR   = 3, // discontinuous, right
+    R    = 0, // right
+    L    = 1, // left
+    MAX  = 3, // largest possible
+    NONE = 4  // largest possible
+  };
+
+}
+#endif
+
+namespace bitext {
 
 typedef Moses::LRModel::ReorderingType PhraseOrientation;
 

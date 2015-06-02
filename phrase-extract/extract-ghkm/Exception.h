@@ -23,7 +23,7 @@
 
 #include <string>
 
-namespace Moses
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -41,6 +41,6 @@ private:
 };
 
 } // namespace GHKM
-} // namespace Moses
+} // namespace MosesTraining
 
 #endif

@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
-""" train feed-forward neural network LM with NPLM tool
-resulting model can be used in Moses as feature function NeuralLM
+"""Train feed-forward neural network LM with NPLM tool.
+
+The resulting model can be used in Moses as feature function NeuralLM.
 """
 
 from __future__ import print_function, unicode_literals
@@ -83,6 +87,9 @@ parser.add_argument(
 parser.add_argument(
     "--vocab-size", dest="vocab_size", type=int, metavar="INT",
     help="Vocabulary size (default: %(default)s).")
+parser.add_argument(
+    "--mmap", dest="mmap", action="store_true",
+    help="Use memory-mapped file (for lower memory consumption).")
 
 parser.set_defaults(
     working_dir="working",
@@ -117,20 +124,43 @@ def main(options):
         if not os.path.exists(options.output_dir):
             os.makedirs(options.output_dir)
 
+    numberized_file = os.path.basename(options.corpus_stem) + '.numberized'
+    train_file = numberized_file
+    if options.mmap:
+        train_file += '.mmap'
+
     extraction_cmd = [os.path.join(options.nplm_home, 'src', 'prepareNeuralLM'),
                       '--train_text', options.corpus_stem,
                       '--ngramize', '1',
                       '--ngram_size', str(options.ngram_size),
                       '--vocab_size', str(options.vocab_size),
                       '--write_words_file', os.path.join(options.working_dir, options.words_file),
-                      '--train_file', os.path.join(options.working_dir, os.path.basename(options.corpus_stem) + '.numberized')
+                      '--train_file', os.path.join(options.working_dir, numberized_file)
                       ]
 
     sys.stderr.write('extracting n-grams\n')
+    sys.stderr.write('executing: ' + ', '.join(extraction_cmd) + '\n')
     ret = subprocess.call(extraction_cmd)
     if ret:
         raise Exception("preparing neural LM failed")
-    
+
+    if options.mmap:
+        try:
+            os.remove(os.path.join(options.working_dir, train_file))
+        except OSError:
+            pass
+        mmap_cmd = [os.path.join(options.nplm_home, 'src', 'createMmap'),
+                    '--input_file',
+                    os.path.join(options.working_dir, numberized_file),
+                    '--output_file',
+                    os.path.join(options.working_dir, train_file)
+                    ]
+        sys.stderr.write('creating memory-mapped file\n')
+        sys.stderr.write('executing: ' + ', '.join(mmap_cmd) + '\n')
+        ret = subprocess.call(mmap_cmd)
+        if ret:
+            raise Exception("creating memory-mapped file failed")
+
     if options.validation_corpus:
 
         extraction_cmd = [os.path.join(options.nplm_home, 'src', 'prepareNeuralLM'),
@@ -143,6 +173,7 @@ def main(options):
                           ]
 
         sys.stderr.write('extracting n-grams (validation file)\n')
+        sys.stderr.write('executing: ' + ', '.join(extraction_cmd) + '\n')
         ret = subprocess.call(extraction_cmd)
         if ret:
             raise Exception("preparing neural LM failed")
@@ -162,7 +193,7 @@ def main(options):
     average_options = averageNullEmbedding.parser.parse_args(
         ['-i', os.path.join(options.output_dir, options.output_model + '.model.nplm.' + str(options.epochs)),
          '-o', os.path.join(options.output_dir, options.output_model + '.model.nplm'),
-         '-t', os.path.join(options.working_dir, os.path.basename(options.corpus_stem) + '.numberized'),
+         '-t', os.path.join(options.working_dir, numberized_file),
          '-p', os.path.join(options.nplm_home, 'python')])
     averageNullEmbedding.main(average_options)
 

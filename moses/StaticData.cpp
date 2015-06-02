@@ -63,8 +63,8 @@ StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
   , m_inputType(SentenceInput)
-  , m_onlyDistinctNBest(false)
-  , m_needAlignmentInfo(false)
+    // , m_onlyDistinctNBest(false)
+    // , m_needAlignmentInfo(false)
   , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
@@ -203,25 +203,26 @@ StaticData
   //word-to-word alignment
   // alignments
   m_parameter->SetParameter(m_PrintAlignmentInfo, "print-alignment-info", false );
-  if (m_PrintAlignmentInfo) {
-    m_needAlignmentInfo = true;
-  }
+
+  // if (m_PrintAlignmentInfo) { // => now in BookkeepingOptions::init()
+  // m_needAlignmentInfo = true;
+  // }
 
   m_parameter->SetParameter(m_wordAlignmentSort, "sort-word-alignment", NoSort);
 
-  if (m_PrintAlignmentInfoNbest) {
-    m_needAlignmentInfo = true;
-  }
+  // if (m_PrintAlignmentInfoNbest) { // => now in BookkeepingOptions::init()
+  //   m_needAlignmentInfo = true;
+  // }
 
   params = m_parameter->GetParam("alignment-output-file");
   if (params && params->size()) {
     m_alignmentOutputFile = Scan<std::string>(params->at(0));
-    m_needAlignmentInfo = true;
+    // m_needAlignmentInfo = true; // => now in BookkeepingOptions::init()
   }
 
   m_parameter->SetParameter( m_PrintID, "print-id", false );
   m_parameter->SetParameter( m_PrintPassthroughInformation, "print-passthrough", false );
-  m_parameter->SetParameter( m_PrintPassthroughInformationInNBest, "print-passthrough-in-n-best", false );
+  // m_parameter->SetParameter( m_PrintPassthroughInformationInNBest, "print-passthrough-in-n-best", false ); // => now in BookkeepingOptions::init()
 
   // word graph
   params = m_parameter->GetParam("output-word-graph");
@@ -327,41 +328,7 @@ bool
 StaticData
 ::ini_nbest_options()
 {
-  const PARAM_VEC *params;
-  // n-best
-  params = m_parameter->GetParam("n-best-list");
-  if (params) {
-    if (params->size() >= 2) {
-      m_nBestFilePath = params->at(0);
-      m_nBestSize = Scan<size_t>( params->at(1) );
-      m_onlyDistinctNBest=(params->size()>2 && params->at(2)=="distinct");
-    } else {
-      std::cerr << "wrong format for switch -n-best-list file size [disinct]";
-      return false;
-    }
-  } else {
-    m_nBestSize = 0;
-  }
-
-  m_parameter->SetParameter<size_t>(m_nBestFactor, "n-best-factor", 20);
-
-
-  m_parameter->SetParameter(m_PrintAlignmentInfoNbest,
-                            "print-alignment-info-in-n-best", false );
-
-  // include feature names in the n-best list
-  m_parameter->SetParameter(m_labeledNBestList, "labeled-n-best-list", true );
-
-  // include word alignment in the n-best list
-  m_parameter->SetParameter(m_nBestIncludesSegmentation,
-                            "include-segmentation-in-n-best", false );
-
-  // print all factors of output translations
-  m_parameter->SetParameter(m_reportAllFactorsNBest,
-                            "report-all-factors-in-n-best", false );
-
-  m_parameter->SetParameter(m_printNBestTrees, "n-best-trees", false );
-  return true;
+  return m_nbest_options.init(*m_parameter);
 }
 
 void
@@ -625,8 +592,9 @@ bool StaticData::LoadData(Parameter *parameter)
   // input, output
   ini_factor_maps();
   ini_input_options();
+  m_bookkeeping_options.init(*parameter);
+  m_nbest_options.init(*parameter); // if (!ini_nbest_options()) return false; 
   if (!ini_output_options()) return false;
-  if (!ini_nbest_options())  return false;
 
   // threading etc.
   if (!ini_performance_options()) return false;
@@ -646,6 +614,17 @@ bool StaticData::LoadData(Parameter *parameter)
   ini_consensus_decoding_options();
 
   ini_mira_options();
+
+  // set m_nbest_options.enabled = true if necessary:
+  if (m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_outputSearchGraphSLF 
+      || m_mira || m_outputSearchGraphHypergraph || m_useConsensusDecoding 
+#ifdef HAVE_PROTOBUF
+      || m_outputSearchGraphPB 
+#endif
+      || m_latticeSamplesFilePath.size())
+    { 
+      m_nbest_options.enabled = true; 
+    }
 
   // S2T decoder
   m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",

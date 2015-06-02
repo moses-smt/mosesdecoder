@@ -21,32 +21,32 @@
 #ifndef EXTRACT_GHKM_XML_TREE_PARSER_H_
 #define EXTRACT_GHKM_XML_TREE_PARSER_H_
 
-#include "Exception.h"
-
-#include "SyntaxTree.h"
-
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
-namespace Moses
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
+#include "SyntaxTree.h"
+
+#include "Exception.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
 
-class ParseTree;
-
-// Parses a string in Moses' XML parse tree format and returns a ParseTree
+// Parses a string in Moses' XML parse tree format and returns a SyntaxTree
 // object.
 class XmlTreeParser
 {
 public:
   XmlTreeParser(std::set<std::string> &, std::map<std::string, int> &);
-  std::auto_ptr<ParseTree> Parse(const std::string &);
+  std::auto_ptr<SyntaxTree> Parse(const std::string &);
 
-  static std::auto_ptr<ParseTree> ConvertTree(const MosesTraining::SyntaxNode &,
+  static std::auto_ptr<SyntaxTree> ConvertTree(const SyntaxNode &,
       const std::vector<std::string> &);
 
   const std::vector<std::string>& GetWords() {
@@ -54,15 +54,16 @@ public:
   };
 
 private:
-
   std::set<std::string> &m_labelSet;
   std::map<std::string, int> &m_topLabelSet;
   std::string m_line;
-  MosesTraining::SyntaxTree m_tree;
+  SyntaxNodeCollection m_tree;
   std::vector<std::string> m_words;
+
+  void AttachWords(const std::vector<std::string> &, SyntaxTree &);
 };
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining
 
 #endif

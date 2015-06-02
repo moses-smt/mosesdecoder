@@ -1,4 +1,10 @@
 <?php
+
+/*
+This file is part of moses.  Its use is licensed under the GNU Lesser General
+Public License version 2.1 or, at your option, any later version.
+*/
+
 function sgviz($sentence) {
   global $setup,$dir,$id,$set;
 ?><html><head><title>Search Graph Visualization, Sentence <?php $sentence ?></title>

@@ -25,16 +25,15 @@
 #include <string>
 #include <vector>
 
-namespace Moses
+#include "OutputFileStream.h"
+#include "SyntaxTree.h"
+
+namespace MosesTraining
 {
-
-class OutputFileStream;
-
 namespace GHKM
 {
 
 struct Options;
-class ParseTree;
 
 class ExtractGHKM
 {
@@ -51,9 +50,9 @@ private:
   void Error(const std::string &) const;
   void OpenInputFileOrDie(const std::string &, std::ifstream &);
   void OpenOutputFileOrDie(const std::string &, std::ofstream &);
-  void OpenOutputFileOrDie(const std::string &, OutputFileStream &);
-  void RecordTreeLabels(const ParseTree &, std::set<std::string> &);
-  void CollectWordLabelCounts(ParseTree &,
+  void OpenOutputFileOrDie(const std::string &, Moses::OutputFileStream &);
+  void RecordTreeLabels(const SyntaxTree &, std::set<std::string> &);
+  void CollectWordLabelCounts(SyntaxTree &,
                               const Options &,
                               std::map<std::string, int> &,
                               std::map<std::string, std::string> &);
@@ -77,7 +76,7 @@ private:
                          std::map<std::string, int> &outTopLabelSet) const;
 
   std::vector<std::string> ReadTokens(const std::string &) const;
-  std::vector<std::string> ReadTokens(const ParseTree &root) const;
+  std::vector<std::string> ReadTokens(const SyntaxTree &root) const;
 
   void ProcessOptions(int, char *[], Options &) const;
 
@@ -85,5 +84,4 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
-
+}  // namespace MosesTraining

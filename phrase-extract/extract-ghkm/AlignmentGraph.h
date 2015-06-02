@@ -21,26 +21,27 @@
 #ifndef EXTRACT_GHKM_ALIGNMENT_GRAPH_H_
 #define EXTRACT_GHKM_ALIGNMENT_GRAPH_H_
 
-#include "Alignment.h"
-#include "Options.h"
-
 #include <set>
 #include <string>
 #include <vector>
 
-namespace Moses
+#include "SyntaxTree.h"
+
+#include "Alignment.h"
+#include "Options.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
 
 class Node;
-class ParseTree;
 class Subgraph;
 
 class AlignmentGraph
 {
 public:
-  AlignmentGraph(const ParseTree *,
+  AlignmentGraph(const SyntaxTree *,
                  const std::vector<std::string> &,
                  const Alignment &);
 
@@ -61,7 +62,7 @@ private:
   AlignmentGraph(const AlignmentGraph &);
   AlignmentGraph &operator=(const AlignmentGraph &);
 
-  Node *CopyParseTree(const ParseTree *);
+  Node *CopyParseTree(const SyntaxTree *);
   void ComputeFrontierSet(Node *, const Options &, std::set<Node *> &) const;
   void CalcComplementSpans(Node *);
   void GetTargetTreeLeaves(Node *, std::vector<Node *> &);
@@ -77,6 +78,6 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining
 
 #endif
