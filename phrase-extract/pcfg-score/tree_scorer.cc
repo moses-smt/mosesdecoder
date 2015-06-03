@@ -58,13 +58,13 @@ bool TreeScorer::CalcScores(SyntaxTree &root)
 
   std::vector<std::size_t> key;
   key.reserve(children.size()+1);
-  key.push_back(non_term_vocab_.Lookup(root.value().GetLabel()));
+  key.push_back(non_term_vocab_.Lookup(root.value().label));
 
   for (std::vector<SyntaxTree *>::const_iterator p(children.begin());
        p != children.end(); ++p) {
     SyntaxTree *child = *p;
     assert(!child->IsLeaf());
-    key.push_back(non_term_vocab_.Lookup(child->value().GetLabel()));
+    key.push_back(non_term_vocab_.Lookup(child->value().label));
     if (!CalcScores(*child)) {
       return false;
     }

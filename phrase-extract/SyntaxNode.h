@@ -20,37 +20,23 @@
 #pragma once
 
 #include <map>
-#include <sstream>
 #include <string>
-#include <vector>
 
-namespace MosesTraining
-{
+namespace MosesTraining {
 
-class SyntaxNode
-{
-protected:
-  int m_start, m_end;
-  std::string m_label;
-public:
+struct SyntaxNode {
   typedef std::map<std::string, std::string> AttributeMap;
 
-  AttributeMap attributes;
+  SyntaxNode(const std::string &label_, int start_, int end_)
+    : label(label_)
+    , start(start_)
+    , end(end_) {
+  }
 
-  SyntaxNode( int startPos, int endPos, std::string label )
-    :m_start(startPos)
-    ,m_end(endPos)
-    ,m_label(label) {
-  }
-  int GetStart() const {
-    return m_start;
-  }
-  int GetEnd() const {
-    return m_end;
-  }
-  std::string GetLabel() const {
-    return m_label;
-  }
+  std::string label;
+  int start;
+  int end;
+  AttributeMap attributes;
 };
 
 }  // namespace MosesTraining

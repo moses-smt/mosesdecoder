@@ -419,7 +419,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxNodeCollection &nodeCollection,
   const vector< SyntaxNode* >& topNodes = nodeCollection.GetNodes( 0, wordPos-1 );
   for( vector< SyntaxNode* >::const_iterator node = topNodes.begin(); node != topNodes.end(); node++ ) {
     SyntaxNode *n = *node;
-    const string &label = n->GetLabel();
+    const string &label = n->label;
     if (topLabelCollection.find( label ) == topLabelCollection.end())
       topLabelCollection[ label ] = 0;
     topLabelCollection[ label ]++;

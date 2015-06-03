@@ -144,7 +144,7 @@ void ScfgRule::PushSourceLabel(const SyntaxNodeCollection *sourceNodeCollection,
       sourceNodeCollection->GetNodes(span.first,span.second);
     if (!sourceLabels.empty()) {
       // store the topmost matching label from the source syntax tree
-      m_sourceLabels.push_back(sourceLabels.back()->GetLabel());
+      m_sourceLabels.push_back(sourceLabels.back()->label);
     }
   } else {
     // no matching source-side syntactic constituent: store nonMatchingLabel

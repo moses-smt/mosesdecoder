@@ -44,7 +44,7 @@ void SyntaxNodeCollection::Clear()
 SyntaxNode *SyntaxNodeCollection::AddNode(int startPos, int endPos,
                                           const std::string &label)
 {
-  SyntaxNode* newNode = new SyntaxNode( startPos, endPos, label );
+  SyntaxNode* newNode = new SyntaxNode(label, startPos, endPos);
   m_nodes.push_back( newNode );
   m_index[ startPos ][ endPos ].push_back( newNode );
   m_size = std::max(endPos+1, m_size);
@@ -141,16 +141,16 @@ std::auto_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
           // node is the root.
           root = tree;
           tree->parent() = 0;
-        } else if (prevNode->GetStart() == node->GetStart()) {
+        } else if (prevNode->start == node->start) {
           // prevNode is the parent of node.
-          assert(prevNode->GetEnd() >= node->GetEnd());
+          assert(prevNode->end >= node->end);
           tree->parent() = prevTree;
           prevTree->children().push_back(tree);
         } else {
           // prevNode is a descendant of node's parent.  The lowest common
           // ancestor of prevNode and node will be node's parent.
           SyntaxTree *ancestor = prevTree->parent();
-          while (ancestor->value().GetEnd() < tree->value().GetEnd()) {
+          while (ancestor->value().end < tree->value().end) {
             ancestor = ancestor->parent();
           }
           assert(ancestor);

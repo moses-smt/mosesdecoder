@@ -813,7 +813,7 @@ void ExtractGHKM::CollectWordLabelCounts(
   for (SyntaxTree::ConstLeafIterator p(root);
        p != SyntaxTree::ConstLeafIterator(); ++p) {
     const SyntaxTree &leaf = *p;
-    const std::string &word = leaf.value().GetLabel();
+    const std::string &word = leaf.value().label;
     const SyntaxTree *ancestor = leaf.parent();
     // If unary rule elimination is enabled and this word is at the end of a
     // chain of unary rewrites, e.g.
@@ -825,7 +825,7 @@ void ExtractGHKM::CollectWordLabelCounts(
            ancestor->parent()->children().size() == 1) {
       ancestor = ancestor->parent();
     }
-    const std::string &label = ancestor->value().GetLabel();
+    const std::string &label = ancestor->value().label;
     ++wordCount[word];
     wordLabel[word] = label;
   }
@@ -837,7 +837,7 @@ std::vector<std::string> ExtractGHKM::ReadTokens(const SyntaxTree &root) const
   for (SyntaxTree::ConstLeafIterator p(root);
        p != SyntaxTree::ConstLeafIterator(); ++p) {
     const SyntaxTree &leaf = *p;
-    const std::string &word = leaf.value().GetLabel();
+    const std::string &word = leaf.value().label;
     tokens.push_back(word);
   }
   return tokens;

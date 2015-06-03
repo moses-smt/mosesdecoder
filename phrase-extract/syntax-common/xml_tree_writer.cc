@@ -16,7 +16,7 @@ void XmlTreeWriter::Write(const SyntaxTree &tree) const {
   assert(!tree.IsLeaf());
 
   // Opening tag
-  out_ << "<tree label=\"" << Escape(tree.value().GetLabel()) << "\"";
+  out_ << "<tree label=\"" << Escape(tree.value().label) << "\"";
   for (SyntaxNode::AttributeMap::const_iterator
        p = tree.value().attributes.begin();
        p != tree.value().attributes.end(); ++p) {
@@ -31,7 +31,7 @@ void XmlTreeWriter::Write(const SyntaxTree &tree) const {
        p != tree.children().end(); ++p) {
     SyntaxTree &child = **p;
     if (child.IsLeaf()) {
-      out_ << " " << Escape(child.value().GetLabel());
+      out_ << " " << Escape(child.value().label);
     } else {
       out_ << " ";
       Write(child);

@@ -37,7 +37,7 @@ void RuleExtractor::Extract(const SyntaxTree &tree, RuleCollection &rc) const
     return;
   }
 
-  std::size_t lhs = non_term_vocab_.Insert(tree.value().GetLabel());
+  std::size_t lhs = non_term_vocab_.Insert(tree.value().label);
   std::vector<std::size_t> rhs;
 
   const std::vector<SyntaxTree *> &children = tree.children();
@@ -45,7 +45,7 @@ void RuleExtractor::Extract(const SyntaxTree &tree, RuleCollection &rc) const
   for (std::vector<SyntaxTree *>::const_iterator p(children.begin());
        p != children.end(); ++p) {
     const SyntaxTree &child = **p;
-    rhs.push_back(non_term_vocab_.Insert(child.value().GetLabel()));
+    rhs.push_back(non_term_vocab_.Insert(child.value().label));
     Extract(child, rc);
   }
   rc.Add(lhs, rhs);
