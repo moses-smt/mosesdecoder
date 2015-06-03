@@ -6,11 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "SyntaxNode.h"
 #include "SyntaxNodeCollection.h"
 #include "SyntaxTree.h"
-
-#include "exception.h"
 
 namespace MosesTraining {
 namespace Syntax {
@@ -25,44 +22,36 @@ namespace Syntax {
  */
 class XmlTreeParser {
  public:
-  XmlTreeParser(std::set<std::string> &, std::map<std::string, int> &);
-
   //! Parse a single sentence and return a SyntaxTree (with words attached).
-  std::auto_ptr<SyntaxTree> Parse(const std::string &, bool=false);
+  std::auto_ptr<SyntaxTree> Parse(const std::string &, bool unescape=false);
 
-  // TODO
-  //! Get the sentence string (see ProcessAndStripXMLTags)
-  //const std::string &sentence() const;
+  //! Get the sentence string (as returned by ProcessAndStripXMLTags).
+  const std::string &sentence() const { return sentence_; }
 
-  // FIXME
-  //! Get the sentence as a vector of tokens
-  const std::vector<std::string>& GetWords() { return words_; }
+  //! Get the sentence as a vector of words.
+  const std::vector<std::string> &words() const { return words_; }
 
-  // TODO
-  //! Get the node collection (see ProcessAndStripXMLTags)
-  const SyntaxNodeCollection &node_collection() const;
-
-  // TODO
-  //! Get the label set (see ProcessAndStripXMLTags)
-  const std::set<std::string> &label_set() const;
-
-  // TODO
-  //! Get the top label set (see ProcessAndStripXMLTags)
-  const std::map<std::string, int> &top_label_set() const;
-
-  // FIXME
-  const SyntaxNodeCollection &GetNodeCollection() const {
+  //! Get the node collection (as returned by ProcessAndStripXMLTags).
+  const SyntaxNodeCollection &node_collection() const {
     return node_collection_;
   }
 
- private:
-  std::set<std::string> &label_set_;
-  std::map<std::string, int> &top_label_set_;
-  std::string line_;
-  SyntaxNodeCollection node_collection_;
-  std::vector<std::string> words_;
+  //! Get the label set (as returned by ProcessAndStripXMLTags).
+  const std::set<std::string> &label_set() const { return label_set_; }
 
+  //! Get the top label set (as returned by ProcessAndStripXMLTags).
+  const std::map<std::string, int> &top_label_set() const {
+    return top_label_set_;
+  }
+
+ private:
   void AttachWords(const std::vector<std::string> &, SyntaxTree &);
+
+  std::string sentence_;
+  SyntaxNodeCollection node_collection_;
+  std::set<std::string> label_set_;
+  std::map<std::string, int> top_label_set_;
+  std::vector<std::string> words_;
 };
 
 }  // namespace Syntax

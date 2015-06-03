@@ -60,9 +60,7 @@ int PcfgExtract::Main(int argc, char *argv[])
   Vocabulary non_term_vocab;
   RuleExtractor rule_extractor(non_term_vocab);
   RuleCollection rule_collection;
-  std::set<std::string> label_set;
-  std::map<std::string, int> top_label_set;
-  XmlTreeParser parser(label_set, top_label_set);
+  XmlTreeParser parser;
   std::string line;
   std::size_t line_num = 0;
   std::auto_ptr<MosesTraining::SyntaxTree> tree;

@@ -66,9 +66,7 @@ int PcfgScore::Main(int argc, char *argv[])
 
   // Score corpus according to PCFG.
   TreeScorer scorer(pcfg, non_term_vocab);
-  std::set<std::string> label_set;
-  std::map<std::string, int> top_label_set;
-  XmlTreeParser parser(label_set, top_label_set);
+  XmlTreeParser parser;
   XmlTreeWriter writer(std::cout);
   std::string line;
   std::size_t line_num = 0;

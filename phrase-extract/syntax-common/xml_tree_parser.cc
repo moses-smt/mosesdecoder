@@ -10,23 +10,18 @@
 #include "XmlException.h"
 #include "XmlTree.h"
 
+#include "exception.h"
+
 namespace MosesTraining {
 namespace Syntax {
-
-XmlTreeParser::XmlTreeParser(std::set<std::string> &labelSet,
-                             std::map<std::string, int> &topLabelSet)
-  : label_set_(labelSet)
-  , top_label_set_(topLabelSet)
-{
-}
 
 std::auto_ptr<SyntaxTree> XmlTreeParser::Parse(const std::string &line,
                                                bool unescape)
 {
-  line_ = line;
+  sentence_ = line;
   node_collection_.Clear();
   try {
-    if (!ProcessAndStripXMLTags(line_, node_collection_, label_set_,
+    if (!ProcessAndStripXMLTags(sentence_, node_collection_, label_set_,
                                 top_label_set_, unescape)) {
       throw Exception("");
     }
@@ -34,7 +29,7 @@ std::auto_ptr<SyntaxTree> XmlTreeParser::Parse(const std::string &line,
     throw Exception(e.getMsg());
   }
   std::auto_ptr<SyntaxTree> root = node_collection_.ExtractTree();
-  words_ = util::tokenize(line_);
+  words_ = util::tokenize(sentence_);
   AttachWords(words_, *root);
   return root;
 }
