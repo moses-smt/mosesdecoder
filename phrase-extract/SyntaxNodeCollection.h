@@ -31,9 +31,6 @@
 namespace MosesTraining
 {
 
-typedef std::vector< int > SplitPoints;
-typedef std::vector< SplitPoints > ParentNodes;
-
 /** A collection of SyntaxNodes organized by start and end position.
  *
  */
@@ -46,9 +43,6 @@ public:
 
   //! Construct and insert a new SyntaxNode.
   SyntaxNode *AddNode( int startPos, int endPos, const std::string &label );
-
-  // TODO Rename (and move?)
-  ParentNodes Parse();
 
   //! Return true iff there are one or more SyntaxNodes with the given span.
   bool HasNode( int startPos, int endPos ) const;

@@ -51,46 +51,6 @@ SyntaxNode *SyntaxNodeCollection::AddNode(int startPos, int endPos,
   return newNode;
 }
 
-ParentNodes SyntaxNodeCollection::Parse()
-{
-  ParentNodes parents;
-
-  // looping through all spans of size >= 2
-  for( int length=2; length<=m_numWords; length++ ) {
-    for( int startPos = 0; startPos <= m_numWords-length; startPos++ ) {
-      if (HasNode( startPos, startPos+length-1 )) {
-        // processing one (parent) span
-
-        //std::cerr << "# " << startPos << "-" << (startPos+length-1) << ":";
-        SplitPoints splitPoints;
-        splitPoints.push_back( startPos );
-        //std::cerr << " " << startPos;
-
-        int first = 1;
-        int covered = 0;
-        int found_somehing = 1; // break loop if nothing found
-        while( covered < length && found_somehing ) {
-          // find largest covering subspan (child)
-          // starting at last covered position
-          found_somehing = 0;
-          for( int midPos=length-first; midPos>covered; midPos-- ) {
-            if( HasNode( startPos+covered, startPos+midPos-1 ) ) {
-              covered = midPos;
-              splitPoints.push_back( startPos+covered );
-              // std::cerr << " " << ( startPos+covered );
-              first = 0;
-              found_somehing = 1;
-            }
-          }
-        }
-        // std::cerr << std::endl;
-        parents.push_back( splitPoints );
-      }
-    }
-  }
-  return parents;
-}
-
 bool SyntaxNodeCollection::HasNode( int startPos, int endPos ) const
 {
   return GetNodes( startPos, endPos).size() > 0;

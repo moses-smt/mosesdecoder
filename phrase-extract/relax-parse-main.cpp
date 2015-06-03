@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     // output tree
     // cerr << "BEFORE:" << endl << tree;
 
-    ParentNodes parents = tree.Parse();
+    ParentNodes parents = determineSplitPoints(tree);
 
     // execute selected grammar relaxation schemes
     if (leftBinarizeFlag)
@@ -270,4 +270,46 @@ void SAMT( SyntaxNodeCollection &tree, ParentNodes &parents )
   for( size_t i=0; i<nodes.size(); i++ ) {
     tree.AddNode( nodes[i]->start, nodes[i]->end, nodes[i]->label);
   }
+}
+
+ParentNodes determineSplitPoints(const SyntaxNodeCollection &nodeColl)
+{
+  ParentNodes parents;
+
+  const std::size_t numWords = nodeColl.GetNumWords();
+
+  // looping through all spans of size >= 2
+  for( int length=2; length<=numWords; length++ ) {
+    for( int startPos = 0; startPos <= numWords-length; startPos++ ) {
+      if (nodeColl.HasNode( startPos, startPos+length-1 )) {
+        // processing one (parent) span
+
+        //std::cerr << "# " << startPos << "-" << (startPos+length-1) << ":";
+        SplitPoints splitPoints;
+        splitPoints.push_back( startPos );
+        //std::cerr << " " << startPos;
+
+        int first = 1;
+        int covered = 0;
+        int found_somehing = 1; // break loop if nothing found
+        while( covered < length && found_somehing ) {
+          // find largest covering subspan (child)
+          // starting at last covered position
+          found_somehing = 0;
+          for( int midPos=length-first; midPos>covered; midPos-- ) {
+            if( nodeColl.HasNode( startPos+covered, startPos+midPos-1 ) ) {
+              covered = midPos;
+              splitPoints.push_back( startPos+covered );
+              // std::cerr << " " << ( startPos+covered );
+              first = 0;
+              found_somehing = 1;
+            }
+          }
+        }
+        // std::cerr << std::endl;
+        parents.push_back( splitPoints );
+      }
+    }
+  }
+  return parents;
 }
