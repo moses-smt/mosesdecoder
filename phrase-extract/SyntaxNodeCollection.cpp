@@ -47,7 +47,7 @@ SyntaxNode *SyntaxNodeCollection::AddNode(int startPos, int endPos,
   SyntaxNode* newNode = new SyntaxNode(label, startPos, endPos);
   m_nodes.push_back( newNode );
   m_index[ startPos ][ endPos ].push_back( newNode );
-  m_size = std::max(endPos+1, m_size);
+  m_numWords = std::max(endPos+1, m_numWords);
   return newNode;
 }
 
@@ -56,8 +56,8 @@ ParentNodes SyntaxNodeCollection::Parse()
   ParentNodes parents;
 
   // looping through all spans of size >= 2
-  for( int length=2; length<=m_size; length++ ) {
-    for( int startPos = 0; startPos <= m_size-length; startPos++ ) {
+  for( int length=2; length<=m_numWords; length++ ) {
+    for( int startPos = 0; startPos <= m_numWords-length; startPos++ ) {
       if (HasNode( startPos, startPos+length-1 )) {
         // processing one (parent) span
 
@@ -96,13 +96,14 @@ bool SyntaxNodeCollection::HasNode( int startPos, int endPos ) const
   return GetNodes( startPos, endPos).size() > 0;
 }
 
-const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodes( int startPos, int endPos ) const
+const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodes(
+    int startPos, int endPos ) const
 {
-  SyntaxTreeIndexIterator startIndex = m_index.find( startPos );
+  NodeIndex::const_iterator startIndex = m_index.find( startPos );
   if (startIndex == m_index.end() )
     return m_emptyNode;
 
-  SyntaxTreeIndexIterator2 endIndex = startIndex->second.find( endPos );
+  InnerNodeIndex::const_iterator endIndex = startIndex->second.find( endPos );
   if (endIndex == startIndex->second.end())
     return m_emptyNode;
 
@@ -120,14 +121,15 @@ std::auto_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()
   }
 
   // Connect the SyntaxTrees.
-  typedef SyntaxTreeIndex2::const_reverse_iterator InnerIterator;
+  typedef NodeIndex::const_iterator OuterIterator;
+  typedef InnerNodeIndex::const_reverse_iterator InnerIterator;
 
   SyntaxTree *root = 0;
   SyntaxNode *prevNode = 0;
   SyntaxTree *prevTree = 0;
   // Iterate over all start indices from lowest to highest.
-  for (SyntaxTreeIndexIterator p = m_index.begin(); p != m_index.end(); ++p) {
-    const SyntaxTreeIndex2 &inner = p->second;
+  for (OuterIterator p = m_index.begin(); p != m_index.end(); ++p) {
+    const InnerNodeIndex &inner = p->second;
     // Iterate over all end indices from highest to lowest.
     for (InnerIterator q = inner.rbegin(); q != inner.rend(); ++q) {
       const std::vector<SyntaxNode*> &nodes = q->second;
