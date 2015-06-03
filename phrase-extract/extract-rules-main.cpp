@@ -110,6 +110,8 @@ void collectWordLabelCounts(SentenceAlignmentWithSyntax &sentence );
 void writeGlueGrammar(const string &, RuleExtractionOptions &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection);
 void writeUnknownWordLabel(const string &);
 
+double getPcfgScore(const SyntaxNode &);
+
 
 int main(int argc, char* argv[])
 {
@@ -564,8 +566,7 @@ string ExtractTask::saveTargetHieroPhrase( int startT, int endT, int startS, int
       }
 
       if (m_options.pcfgScore) {
-        double score = m_sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]->GetPcfgScore();
-        logPCFGScore -= score;
+        logPCFGScore -= getPcfgScore(*m_sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]);
       }
 
       currPos = hole.GetEnd(1);
@@ -689,7 +690,7 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
 
   // target
   if (m_options.pcfgScore) {
-    double logPCFGScore = m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0]]->GetPcfgScore();
+    double logPCFGScore = getPcfgScore(*m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0]]);
     rule.target = saveTargetHieroPhrase(startT, endT, startS, endS, indexT, holeColl, labelIndex, logPCFGScore, countS)
                   + " [" + targetLabel + "]";
     rule.pcfgScore = std::exp(logPCFGScore);
@@ -973,7 +974,7 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
   rule.target += "[" + targetLabel + "]";
 
   if (m_options.pcfgScore) {
-    double logPCFGScore = m_sentence.targetTree.GetNodes(startT,endT)[0]->GetPcfgScore();
+    double logPCFGScore = getPcfgScore(*m_sentence.targetTree.GetNodes(startT,endT)[0]);
     rule.pcfgScore = std::exp(logPCFGScore);
   }
 
@@ -1193,4 +1194,14 @@ void writeUnknownWordLabel(const string & fileName)
   }
 
   outFile.close();
+}
+
+double getPcfgScore(const SyntaxNode &node)
+{
+  double score = 0.0f;
+  SyntaxNode::AttributeMap::const_iterator p = node.attributes.find("pcfg");
+  if (p != node.attributes.end()) {
+    score = std::atof(p->second.c_str());
+  }
+  return score;
 }

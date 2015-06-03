@@ -33,7 +33,6 @@ SyntaxNodeCollection::~SyntaxNodeCollection()
 
 void SyntaxNodeCollection::Clear()
 {
-  m_top = 0;
   // loop through all m_nodes, delete them
   for(size_t i=0; i<m_nodes.size(); i++) {
     delete m_nodes[i];
@@ -108,48 +107,6 @@ const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodes( int startPos, 
     return m_emptyNode;
 
   return endIndex->second;
-}
-
-void SyntaxNodeCollection::ConnectNodes()
-{
-  typedef SyntaxTreeIndex2::const_reverse_iterator InnerIterator;
-
-  SyntaxNode *prev = 0;
-  // Iterate over all start indices from lowest to highest.
-  for (SyntaxTreeIndexIterator p = m_index.begin(); p != m_index.end(); ++p) {
-    const SyntaxTreeIndex2 &inner = p->second;
-    // Iterate over all end indices from highest to lowest.
-    for (InnerIterator q = inner.rbegin(); q != inner.rend(); ++q) {
-      const std::vector<SyntaxNode*> &nodes = q->second;
-      // Iterate over all nodes that cover the same span in order of tree
-      // depth, top-most first.
-      for (std::vector<SyntaxNode*>::const_reverse_iterator r = nodes.rbegin();
-           r != nodes.rend(); ++r) {
-        SyntaxNode *node = *r;
-        if (!prev) {
-          // node is the root.
-          m_top = node;
-          node->SetParent(0);
-        } else if (prev->GetStart() == node->GetStart()) {
-          // prev is the parent of node.
-          assert(prev->GetEnd() >= node->GetEnd());
-          node->SetParent(prev);
-          prev->AddChild(node);
-        } else {
-          // prev is a descendant of node's parent.  The lowest common
-          // ancestor of prev and node will be node's parent.
-          SyntaxNode *ancestor = prev->GetParent();
-          while (ancestor->GetEnd() < node->GetEnd()) {
-            ancestor = ancestor->GetParent();
-          }
-          assert(ancestor);
-          node->SetParent(ancestor);
-          ancestor->AddChild(node);
-        }
-        prev = node;
-      }
-    }
-  }
 }
 
 std::auto_ptr<SyntaxTree> SyntaxNodeCollection::ExtractTree()

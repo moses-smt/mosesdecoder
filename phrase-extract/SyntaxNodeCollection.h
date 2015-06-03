@@ -38,7 +38,6 @@ class SyntaxNodeCollection
 {
 protected:
   std::vector< SyntaxNode* > m_nodes;
-  SyntaxNode* m_top;
 
   typedef std::map< int, std::vector< SyntaxNode* > > SyntaxTreeIndex2;
   typedef SyntaxTreeIndex2::const_iterator SyntaxTreeIndexIterator2;
@@ -49,17 +48,11 @@ protected:
   std::vector< SyntaxNode* > m_emptyNode;
 
 public:
-  SyntaxNodeCollection()
-    : m_top(0)  // m_top doesn't get set unless ConnectNodes is called.
-    , m_size(0) {}
+  SyntaxNodeCollection() : m_size(0) {}
 
   ~SyntaxNodeCollection();
 
   SyntaxNode *AddNode( int startPos, int endPos, const std::string &label );
-
-  SyntaxNode *GetTop() {
-    return m_top;
-  }
 
   ParentNodes Parse();
   bool HasNode( int startPos, int endPos ) const;
@@ -70,7 +63,6 @@ public:
   size_t GetNumWords() const {
     return m_size;
   }
-  void ConnectNodes();
   void Clear();
 
   std::auto_ptr<SyntaxTree> ExtractTree();
