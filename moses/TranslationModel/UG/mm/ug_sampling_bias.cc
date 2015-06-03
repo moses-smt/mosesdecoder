@@ -152,7 +152,7 @@ namespace Moses
       : m_bias(bias) { }
 
     SentenceBias
-    ::SentenceBias(size_t const s) : m_bias(s) { }
+    ::SentenceBias(size_t const s, float const f) : m_bias(s,f) { }
 
     id_type
     SentenceBias
