@@ -20,13 +20,14 @@ XmlTreeParser::XmlTreeParser(std::set<std::string> &labelSet,
 {
 }
 
-std::auto_ptr<SyntaxTree> XmlTreeParser::Parse(const std::string &line)
+std::auto_ptr<SyntaxTree> XmlTreeParser::Parse(const std::string &line,
+                                               bool unescape)
 {
   line_ = line;
   node_collection_.Clear();
   try {
     if (!ProcessAndStripXMLTags(line_, node_collection_, label_set_,
-                                top_label_set_, false)) {
+                                top_label_set_, unescape)) {
       throw Exception("");
     }
   } catch (const XmlException &e) {
