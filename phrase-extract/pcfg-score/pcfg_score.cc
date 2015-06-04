@@ -36,11 +36,10 @@
 #include "SyntaxTree.h"
 
 #include "syntax-common/exception.h"
+#include "syntax-common/pcfg.h"
+#include "syntax-common/vocabulary.h"
 #include "syntax-common/xml_tree_parser.h"
 #include "syntax-common/xml_tree_writer.h"
-
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/typedef.h"
 
 namespace MosesTraining
 {

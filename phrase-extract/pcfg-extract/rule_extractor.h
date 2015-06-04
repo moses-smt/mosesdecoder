@@ -23,7 +23,7 @@
 
 #include "SyntaxTree.h"
 
-#include "pcfg-common/typedef.h"
+#include "syntax-common/vocabulary.h"
 
 #include "rule_collection.h"
 
@@ -39,7 +39,7 @@ class RuleExtractor
 {
 public:
   RuleExtractor(Vocabulary &);
-  void Extract(const MosesTraining::SyntaxTree &, RuleCollection &) const;
+  void Extract(const SyntaxTree &, RuleCollection &) const;
 private:
   Vocabulary &non_term_vocab_;
 };
