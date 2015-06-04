@@ -17,6 +17,14 @@ configname=$(basename $configf | sed 's/\.config$//')
 
 source "$configf"
 
+# beautifier
+git clone git@github.com:moses-smt/mosesdecoder.git /tmp/moses
+cd /tmp/moses
+./scripts/other/beautify.py --format --skip-perltidy
+git commit -am "daily automatic beautifier"
+git push
+rm -rf /tmp/moses
+
 [ -z "$MCC_SCAN_BRANCHES" ] \
   && die "Bad config $configf; does not define MCC_SCAN_BRANCHES"
 
