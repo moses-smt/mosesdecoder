@@ -24,6 +24,7 @@ cd /tmp/moses
 git commit -am "daily automatic beautifier"
 git push
 rm -rf /tmp/moses
+cd -
 
 [ -z "$MCC_SCAN_BRANCHES" ] \
   && die "Bad config $configf; does not define MCC_SCAN_BRANCHES"
