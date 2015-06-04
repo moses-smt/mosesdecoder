@@ -167,7 +167,7 @@ void FilterRuleTable::ProcessOptions(int argc, char *argv[],
   // Construct the 'top' of the usage message: the bit that comes before the
   // options list.
   std::ostringstream usageTop;
-  usageTop << "Usage: " << GetName()
+  usageTop << "Usage: " << name()
            << " [OPTION]... MODEL TEST\n\n"
            << "Filter for SCFG/STSG rule tables.\n\n"
            << "Options";
@@ -203,11 +203,8 @@ void FilterRuleTable::ProcessOptions(int argc, char *argv[],
 
   // Process the command-line.
   po::variables_map vm;
-  const int optionStyle = cls::allow_long
-                          | cls::long_allow_adjacent
-                          | cls::long_allow_next;
   try {
-    po::store(po::command_line_parser(argc, argv).style(optionStyle).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmdLineOptions).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {
@@ -227,17 +224,6 @@ void FilterRuleTable::ProcessOptions(int argc, char *argv[],
     std::cerr << visible << usageBottom.str() << std::endl;
     std::exit(1);
   }
-}
-
-void FilterRuleTable::Error(const std::string &msg) const
-{
-  std::cerr << GetName() << ": error: " << msg << std::endl;
-  std::exit(1);
-}
-
-void FilterRuleTable::Warn(const std::string &msg) const
-{
-  std::cerr << GetName() << ": warning: " << msg << std::endl;
 }
 
 }  // namespace FilterRuleTable

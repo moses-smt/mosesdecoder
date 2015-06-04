@@ -118,7 +118,7 @@ void PcfgExtract::ProcessOptions(int argc, char *argv[],
   // Process the command-line.
   po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).style(CommonOptionStyle()).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmd_line_options).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {

@@ -359,39 +359,6 @@ int ExtractGHKM::Main(int argc, char *argv[])
   return 0;
 }
 
-void ExtractGHKM::OpenInputFileOrDie(const std::string &filename,
-                                     std::ifstream &stream)
-{
-  stream.open(filename.c_str());
-  if (!stream) {
-    std::ostringstream msg;
-    msg << "failed to open input file: " << filename;
-    Error(msg.str());
-  }
-}
-
-void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
-                                      std::ofstream &stream)
-{
-  stream.open(filename.c_str());
-  if (!stream) {
-    std::ostringstream msg;
-    msg << "failed to open output file: " << filename;
-    Error(msg.str());
-  }
-}
-
-void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
-                                      Moses::OutputFileStream &stream)
-{
-  bool ret = stream.Open(filename);
-  if (!ret) {
-    std::ostringstream msg;
-    msg << "failed to open output file: " << filename;
-    Error(msg.str());
-  }
-}
-
 void ExtractGHKM::ProcessOptions(int argc, char *argv[],
                                  Options &options) const
 {
@@ -401,7 +368,7 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   // Construct the 'top' of the usage message: the bit that comes before the
   // options list.
   std::ostringstream usageTop;
-  usageTop << "Usage: " << GetName()
+  usageTop << "Usage: " << name()
            << " [OPTION]... TARGET SOURCE ALIGNMENT EXTRACT\n\n"
            << "SCFG rule extractor based on the GHKM algorithm described in\n"
            << "Galley et al. (2004).\n\n"
@@ -547,11 +514,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
 
   // Process the command-line.
   po::variables_map vm;
-  const int optionStyle = cls::allow_long
-                          | cls::long_allow_adjacent
-                          | cls::long_allow_next;
   try {
-    po::store(po::command_line_parser(argc, argv).style(optionStyle).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmdLineOptions).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {
@@ -633,12 +597,6 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     options.sourceUnknownWordFile.clear();
     options.unknownWordSoftMatchesFile.clear();
   }
-}
-
-void ExtractGHKM::Error(const std::string &msg) const
-{
-  std::cerr << GetName() << ": " << msg << std::endl;
-  std::exit(1);
 }
 
 std::vector<std::string> ExtractGHKM::ReadTokens(const std::string &s) const
