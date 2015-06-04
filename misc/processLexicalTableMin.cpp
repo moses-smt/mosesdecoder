@@ -54,7 +54,7 @@ int main(int argc, char** argv)
   bool multipleScoreTrees = true;
   size_t quantize = 0;
 
-  size_t threads = 
+  size_t threads =
 		#ifdef WITH_THREADS
     	boost::thread::hardware_concurrency() ? boost::thread::hardware_concurrency() :
 		#endif

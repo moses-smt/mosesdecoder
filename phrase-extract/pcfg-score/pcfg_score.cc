@@ -33,13 +33,14 @@
 
 #include <boost/program_options.hpp>
 
+#include "SyntaxTree.h"
+
 #include "syntax-common/exception.h"
+#include "syntax-common/xml_tree_parser.h"
+#include "syntax-common/xml_tree_writer.h"
 
 #include "pcfg-common/pcfg.h"
-#include "pcfg-common/pcfg_tree.h"
-#include "pcfg-common/syntax_tree.h"
 #include "pcfg-common/typedef.h"
-#include "pcfg-common/xml_tree_parser.h"
 
 namespace MosesTraining
 {
@@ -66,14 +67,14 @@ int PcfgScore::Main(int argc, char *argv[])
   // Score corpus according to PCFG.
   TreeScorer scorer(pcfg, non_term_vocab);
   XmlTreeParser parser;
-  XmlTreeWriter<PcfgTree> writer;
+  XmlTreeWriter writer(std::cout);
   std::string line;
   std::size_t line_num = 0;
-  std::auto_ptr<PcfgTree> tree;
+  std::auto_ptr<SyntaxTree> tree;
   while (std::getline(std::cin, line)) {
     ++line_num;
     try {
-      tree = parser.Parse(line);
+      tree = parser.Parse(line, true);
     } catch (Exception &e) {
       std::ostringstream msg;
       msg << "line " << line_num << ": " << e.msg();
@@ -93,7 +94,7 @@ int PcfgScore::Main(int argc, char *argv[])
       std::cout << line << std::endl;
       continue;
     }
-    writer.Write(*tree, std::cout);
+    writer.Write(*tree);
   }
 
   return 0;

@@ -130,7 +130,15 @@ int main(int argc, char* argv[])
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PartsOfSpeech] [--PCFG] [--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] [--TargetPreferenceLabels] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+    std::cerr <<
+        "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] "
+        "[--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] "
+        "[--NoWordAlignment] [--UnalignedPenalty] "
+        "[--UnalignedFunctionWordPenalty function-word-file] "
+        "[--MinCountHierarchical count] [--PartsOfSpeech] [--PCFG] "
+        "[--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] "
+        "[--TargetPreferenceLabels] [--UnpairedExtractFormat] "
+        "[--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }
@@ -147,7 +155,8 @@ int main(int argc, char* argv[])
   std::string fileNameLeftHandSideTargetPreferenceLabelCounts;
   std::string fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts;
   std::string fileNamePhraseOrientationPriors;
-  std::vector<std::string> featureArgs; // all unknown args passed to feature manager
+  // All unknown args are passed to feature manager.
+  std::vector<std::string> featureArgs;
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {

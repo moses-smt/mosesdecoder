@@ -110,6 +110,8 @@ void collectWordLabelCounts(SentenceAlignmentWithSyntax &sentence );
 void writeGlueGrammar(const string &, RuleExtractionOptions &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection);
 void writeUnknownWordLabel(const string &);
 
+double getPcfgScore(const SyntaxNode &);
+
 
 int main(int argc, char* argv[])
 {
@@ -505,7 +507,7 @@ void ExtractTask::preprocessSourceHieroPhrase( int startT, int endT, int startS,
 
       int labelI = labelIndex[ 2+holeCount+holeTotal ];
       string label = m_options.sourceSyntax ?
-                     m_sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
+                     m_sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->label : "X";
       hole.SetLabel(label, 0);
 
       currPos = hole.GetEnd(0);
@@ -548,7 +550,7 @@ string ExtractTask::saveTargetHieroPhrase( int startT, int endT, int startS, int
       int labelI = labelIndex[ 2+holeCount ];
       string targetLabel;
       if (m_options.targetSyntax) {
-        targetLabel = m_sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]->GetLabel();
+        targetLabel = m_sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]->label;
       } else if (m_options.boundaryRules && (startS == 0 || endS == countS - 1)) {
         targetLabel = "S";
       } else {
@@ -564,8 +566,7 @@ string ExtractTask::saveTargetHieroPhrase( int startT, int endT, int startS, int
       }
 
       if (m_options.pcfgScore) {
-        double score = m_sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]->GetPcfgScore();
-        logPCFGScore -= score;
+        logPCFGScore -= getPcfgScore(*m_sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]);
       }
 
       currPos = hole.GetEnd(1);
@@ -674,7 +675,7 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
   // phrase labels
   string targetLabel;
   if (m_options.targetSyntax) {
-    targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0] ]->GetLabel();
+    targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0] ]->label;
   } else if (m_options.boundaryRules && (startS == 0 || endS == countS - 1)) {
     targetLabel = "S";
   } else {
@@ -682,14 +683,14 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
   }
 
   string sourceLabel = m_options.sourceSyntax ?
-                       m_sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
+                       m_sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->label : "X";
 
   // create non-terms on the source side
   preprocessSourceHieroPhrase(startT, endT, startS, endS, indexS, holeColl, labelIndex);
 
   // target
   if (m_options.pcfgScore) {
-    double logPCFGScore = m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0]]->GetPcfgScore();
+    double logPCFGScore = getPcfgScore(*m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0]]);
     rule.target = saveTargetHieroPhrase(startT, endT, startS, endS, indexT, holeColl, labelIndex, logPCFGScore, countS)
                   + " [" + targetLabel + "]";
     rule.pcfgScore = std::exp(logPCFGScore);
@@ -946,13 +947,13 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
   // phrase labels
   string targetLabel,sourceLabel;
   if (m_options.targetSyntax && m_options.conditionOnTargetLhs) {
-    sourceLabel = targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[0]->GetLabel();
+    sourceLabel = targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[0]->label;
   } else {
     sourceLabel = m_options.sourceSyntax ?
-                  m_sentence.sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
+                  m_sentence.sourceTree.GetNodes(startS,endS)[0]->label : "X";
 
     if (m_options.targetSyntax) {
-      targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[0]->GetLabel();
+      targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[0]->label;
     } else if (m_options.boundaryRules && (startS == 0 || endS == countS - 1)) {
       targetLabel = "S";
     } else {
@@ -973,7 +974,7 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
   rule.target += "[" + targetLabel + "]";
 
   if (m_options.pcfgScore) {
-    double logPCFGScore = m_sentence.targetTree.GetNodes(startT,endT)[0]->GetPcfgScore();
+    double logPCFGScore = getPcfgScore(*m_sentence.targetTree.GetNodes(startT,endT)[0]);
     rule.pcfgScore = std::exp(logPCFGScore);
   }
 
@@ -1165,7 +1166,7 @@ void collectWordLabelCounts( SentenceAlignmentWithSyntax &sentence )
     const vector< SyntaxNode* >& labels = sentence.targetTree.GetNodes(ti,ti);
     if (labels.size() > 0) {
       wordCount[ word ]++;
-      wordLabel[ word ] = labels[0]->GetLabel();
+      wordLabel[ word ] = labels[0]->label;
     }
   }
 }
@@ -1193,4 +1194,14 @@ void writeUnknownWordLabel(const string & fileName)
   }
 
   outFile.close();
+}
+
+double getPcfgScore(const SyntaxNode &node)
+{
+  double score = 0.0f;
+  SyntaxNode::AttributeMap::const_iterator p = node.attributes.find("pcfg");
+  if (p != node.attributes.end()) {
+    score = std::atof(p->second.c_str());
+  }
+  return score;
 }

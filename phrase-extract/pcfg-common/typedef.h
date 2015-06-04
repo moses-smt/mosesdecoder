@@ -24,7 +24,6 @@
 #include <string>
 
 #include "syntax-common/numbered_set.h"
-#include "syntax_tree.h"
 
 namespace MosesTraining {
 namespace Syntax {

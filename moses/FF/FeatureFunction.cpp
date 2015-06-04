@@ -38,20 +38,6 @@ void FeatureFunction::Destroy()
   RemoveAllInColl(s_staticColl);
 }
 
-// The original declaration as
-// void FeatureFunction::CallChangeSource(InputType *&input)
-// had me a bit perplexed. Would you really want to allow
-// any feature function to replace the InputType behind the
-// back of the others? And change what the vector is pointing to?
-
-void FeatureFunction::CallChangeSource(InputType * const&input)
-{
-  for (size_t i = 0; i < s_staticColl.size(); ++i) {
-    const FeatureFunction &ff = *s_staticColl[i];
-    ff.ChangeSource(input);
-  }
-}
-
 void FeatureFunction::SetupAll(TranslationTask const& ttask)
 {
   BOOST_FOREACH(FeatureFunction* ff, s_staticColl)

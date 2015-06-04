@@ -19,20 +19,6 @@
 
 #include "pcfg_extract.h"
 
-#include "options.h"
-#include "rule_collection.h"
-#include "rule_extractor.h"
-
-#include "syntax-common/exception.h"
-
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/pcfg_tree.h"
-#include "pcfg-common/syntax_tree.h"
-#include "pcfg-common/typedef.h"
-#include "pcfg-common/xml_tree_parser.h"
-
-#include <boost/program_options.hpp>
-
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
@@ -42,6 +28,20 @@
 #include <set>
 #include <string>
 #include <vector>
+
+#include <boost/program_options.hpp>
+
+#include "syntax-common/exception.h"
+#include "syntax-common/xml_tree_parser.h"
+
+#include "SyntaxTree.h"
+
+#include "pcfg-common/pcfg.h"
+#include "pcfg-common/typedef.h"
+
+#include "options.h"
+#include "rule_collection.h"
+#include "rule_extractor.h"
 
 namespace MosesTraining
 {
@@ -63,7 +63,7 @@ int PcfgExtract::Main(int argc, char *argv[])
   XmlTreeParser parser;
   std::string line;
   std::size_t line_num = 0;
-  std::auto_ptr<PcfgTree> tree;
+  std::auto_ptr<MosesTraining::SyntaxTree> tree;
   while (std::getline(std::cin, line)) {
     ++line_num;
     try {
