@@ -265,12 +265,12 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
       pdmm->SetTemporaryMultiModelWeightsVector(w);
     }
   }
-  
+
   si = params.find("nbest");
   if (si != params.end())
     m_nbestSize = xmlrpc_c::value_int(si->second);
-  
-  
+
+
   // // biased sampling for suffix-array-based sampling phrase table?
   // if ((si = params.find("bias")) != params.end())
   //   {
