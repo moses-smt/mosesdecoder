@@ -22,7 +22,8 @@
 #include <map>
 #include <string>
 
-namespace MosesTraining {
+namespace MosesTraining
+{
 
 struct SyntaxNode {
   typedef std::map<std::string, std::string> AttributeMap;

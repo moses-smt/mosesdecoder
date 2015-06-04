@@ -137,7 +137,7 @@ void FilterRuleTable::ReadTestSet(
       continue;
     }
     sentences.push_back(
-        boost::shared_ptr<SyntaxTree>(parser.Parse(line).release()));
+      boost::shared_ptr<SyntaxTree>(parser.Parse(line).release()));
   }
 }
 

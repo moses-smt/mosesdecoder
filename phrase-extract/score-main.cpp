@@ -131,14 +131,14 @@ int main(int argc, char* argv[])
   ScoreFeatureManager featureManager;
   if (argc < 4) {
     std::cerr <<
-        "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] "
-        "[--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] "
-        "[--NoWordAlignment] [--UnalignedPenalty] "
-        "[--UnalignedFunctionWordPenalty function-word-file] "
-        "[--MinCountHierarchical count] [--PartsOfSpeech] [--PCFG] "
-        "[--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] "
-        "[--TargetPreferenceLabels] [--UnpairedExtractFormat] "
-        "[--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+              "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] "
+              "[--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] "
+              "[--NoWordAlignment] [--UnalignedPenalty] "
+              "[--UnalignedFunctionWordPenalty function-word-file] "
+              "[--MinCountHierarchical count] [--PartsOfSpeech] [--PCFG] "
+              "[--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] "
+              "[--TargetPreferenceLabels] [--UnpairedExtractFormat] "
+              "[--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }

@@ -303,12 +303,11 @@ ReadInput()
   boost::lock_guard<boost::mutex> lock(m_lock);
 #endif
   boost::shared_ptr<InputType> source = GetBufferedInput();
-  if (source)
-    {
-      source->SetTranslationId(m_currentLine++);
-      if (m_look_ahead || m_look_back)
-	this->set_context_for(*source);
-    }
+  if (source) {
+    source->SetTranslationId(m_currentLine++);
+    if (m_look_ahead || m_look_back)
+      this->set_context_for(*source);
+  }
   m_past_input.push_back(source);
   return source;
 }
