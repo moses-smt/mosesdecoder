@@ -27,7 +27,7 @@ TreeTsgFilter::TreeTsgFilter(
 
 TreeTsgFilter::IdTree *TreeTsgFilter::SyntaxTreeToIdTree(const SyntaxTree &s)
 {
-  IdTree *t = new IdTree(m_testVocab.Insert(s.value().GetLabel()));
+  IdTree *t = new IdTree(m_testVocab.Insert(s.value().label));
   const std::vector<SyntaxTree*> &sChildren = s.children();
   std::vector<IdTree*> &tChildren = t->children();
   tChildren.reserve(sChildren.size());

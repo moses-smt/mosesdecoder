@@ -6,39 +6,52 @@
 #include <string>
 #include <vector>
 
-#include "SyntaxNode.h"
 #include "SyntaxNodeCollection.h"
 #include "SyntaxTree.h"
-
-#include "exception.h"
 
 namespace MosesTraining {
 namespace Syntax {
 
-// Parses a string in Moses' XML parse tree format and returns a SyntaxTree
-// object.  This is a wrapper around the ProcessAndStripXMLTags function.
+/** Parses string representations of parse trees in Moses' XML format and
+ *  converts them to SyntaxTree objects.
+ *
+ *  This is a thin wrapper around the ProcessAndStripXMLTags function.  After
+ *  calling Parse(), the output of the ProcessAndStripXMLTags function (the
+ *  sentence, node collection, label set, and top label set) are available via
+ *  accessors.
+ */
 class XmlTreeParser {
  public:
-  XmlTreeParser(std::set<std::string> &, std::map<std::string, int> &);
+  //! Parse a single sentence and return a SyntaxTree (with words attached).
+  std::auto_ptr<SyntaxTree> Parse(const std::string &, bool unescape=false);
 
-  std::auto_ptr<SyntaxTree> Parse(const std::string &);
+  //! Get the sentence string (as returned by ProcessAndStripXMLTags).
+  const std::string &sentence() const { return sentence_; }
 
-  const std::vector<std::string>& GetWords() {
-    return words_;
-  }
+  //! Get the sentence as a vector of words.
+  const std::vector<std::string> &words() const { return words_; }
 
-  const SyntaxNodeCollection &GetNodeCollection() const {
+  //! Get the node collection (as returned by ProcessAndStripXMLTags).
+  const SyntaxNodeCollection &node_collection() const {
     return node_collection_;
   }
 
- private:
-  std::set<std::string> &label_set_;
-  std::map<std::string, int> &top_label_set_;
-  std::string line_;
-  SyntaxNodeCollection node_collection_;
-  std::vector<std::string> words_;
+  //! Get the label set (as returned by ProcessAndStripXMLTags).
+  const std::set<std::string> &label_set() const { return label_set_; }
 
+  //! Get the top label set (as returned by ProcessAndStripXMLTags).
+  const std::map<std::string, int> &top_label_set() const {
+    return top_label_set_;
+  }
+
+ private:
   void AttachWords(const std::vector<std::string> &, SyntaxTree &);
+
+  std::string sentence_;
+  SyntaxNodeCollection node_collection_;
+  std::set<std::string> label_set_;
+  std::map<std::string, int> top_label_set_;
+  std::vector<std::string> words_;
 };
 
 }  // namespace Syntax

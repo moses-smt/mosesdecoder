@@ -126,9 +126,7 @@ void FilterRuleTable::ReadTestSet(
 void FilterRuleTable::ReadTestSet(
   std::istream &input, std::vector<boost::shared_ptr<SyntaxTree> > &sentences)
 {
-  std::set<std::string> labelSet;
-  std::map<std::string, int> topLabelSet;
-  XmlTreeParser parser(labelSet, topLabelSet);
+  XmlTreeParser parser;
   int lineNum = 0;
   std::string line;
   while (std::getline(input, line)) {

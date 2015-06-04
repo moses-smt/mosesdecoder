@@ -31,49 +31,47 @@
 namespace MosesTraining
 {
 
-typedef std::vector< int > SplitPoints;
-typedef std::vector< SplitPoints > ParentNodes;
-
+/** A collection of SyntaxNodes organized by start and end position.
+ *
+ */
 class SyntaxNodeCollection
 {
-protected:
-  std::vector< SyntaxNode* > m_nodes;
-  SyntaxNode* m_top;
-
-  typedef std::map< int, std::vector< SyntaxNode* > > SyntaxTreeIndex2;
-  typedef SyntaxTreeIndex2::const_iterator SyntaxTreeIndexIterator2;
-  typedef std::map< int, SyntaxTreeIndex2 > SyntaxTreeIndex;
-  typedef SyntaxTreeIndex::const_iterator SyntaxTreeIndexIterator;
-  SyntaxTreeIndex m_index;
-  int m_size;
-  std::vector< SyntaxNode* > m_emptyNode;
-
 public:
-  SyntaxNodeCollection()
-    : m_top(0)  // m_top doesn't get set unless ConnectNodes is called.
-    , m_size(0) {}
+  SyntaxNodeCollection() : m_numWords(0) {}
 
   ~SyntaxNodeCollection();
 
+  //! Construct and insert a new SyntaxNode.
   SyntaxNode *AddNode( int startPos, int endPos, const std::string &label );
 
-  SyntaxNode *GetTop() {
-    return m_top;
-  }
-
-  ParentNodes Parse();
+  //! Return true iff there are one or more SyntaxNodes with the given span.
   bool HasNode( int startPos, int endPos ) const;
+
+  //! Lookup the SyntaxNodes for a given span.
   const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;
-  const std::vector< SyntaxNode* >& GetAllNodes() {
-    return m_nodes;
-  };
+
+  //! Get a vector of pointers to all SyntaxNodes (unordered).
+  const std::vector< SyntaxNode* >& GetAllNodes() { return m_nodes; };
+
   size_t GetNumWords() const {
-    return m_size;
+    return m_numWords;
   }
-  void ConnectNodes();
   void Clear();
 
   std::auto_ptr<SyntaxTree> ExtractTree();
+
+private:
+  typedef std::map< int, std::vector< SyntaxNode* > > InnerNodeIndex;
+  typedef std::map< int, InnerNodeIndex > NodeIndex;
+
+  // Not copyable.
+  SyntaxNodeCollection(const SyntaxNodeCollection &);
+  SyntaxNodeCollection &operator=(const SyntaxNodeCollection &);
+
+  std::vector< SyntaxNode* > m_nodes;
+  NodeIndex m_index;
+  int m_numWords;
+  std::vector< SyntaxNode* > m_emptyNode;
 };
 
 }  // namespace MosesTraining

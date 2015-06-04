@@ -398,10 +398,6 @@ bool ProcessAndStripXMLTags(string &line, SyntaxNodeCollection &nodeCollection,
         string label = ParseXmlTagAttribute(tagContent,"label");
         labelCollection.insert( label );
 
-        string pcfgString = ParseXmlTagAttribute(tagContent,"pcfg");
-        float pcfgScore = pcfgString == "" ? 0.0f
-                          : std::atof(pcfgString.c_str());
-
         // report what we have processed so far
         if (0) {
           cerr << "XML TAG NAME IS: '" << tagName << "'" << endl;
@@ -409,7 +405,6 @@ bool ProcessAndStripXMLTags(string &line, SyntaxNodeCollection &nodeCollection,
           cerr << "XML SPAN IS: " << startPos << "-" << (endPos-1) << endl;
         }
         SyntaxNode *node = nodeCollection.AddNode( startPos, endPos-1, label );
-        node->SetPcfgScore(pcfgScore);
         ParseXmlTagAttributes(tagContent, node->attributes);
       }
     }
@@ -424,7 +419,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxNodeCollection &nodeCollection,
   const vector< SyntaxNode* >& topNodes = nodeCollection.GetNodes( 0, wordPos-1 );
   for( vector< SyntaxNode* >::const_iterator node = topNodes.begin(); node != topNodes.end(); node++ ) {
     SyntaxNode *n = *node;
-    const string &label = n->GetLabel();
+    const string &label = n->label;
     if (topLabelCollection.find( label ) == topLabelCollection.end())
       topLabelCollection[ label ] = 0;
     topLabelCollection[ label ]++;

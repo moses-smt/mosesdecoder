@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <memory>
 #include <stack>
 
@@ -213,7 +214,7 @@ Node *AlignmentGraph::CopyParseTree(const SyntaxTree *root)
 {
   NodeType nodeType = (root->IsLeaf()) ? TARGET : TREE;
 
-  std::auto_ptr<Node> n(new Node(root->value().GetLabel(), nodeType));
+  std::auto_ptr<Node> n(new Node(root->value().label, nodeType));
 
   if (nodeType == TREE) {
     float score = 0.0f;
