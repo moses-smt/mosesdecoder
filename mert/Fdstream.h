@@ -67,7 +67,9 @@ private:
 
 protected:
   /// For child classes only: retrieve filebuf.
-  __gnu_cxx::stdio_filebuf<char> *get_filebuf() { return _filebuf; }
+  __gnu_cxx::stdio_filebuf<char> *get_filebuf() {
+    return _filebuf;
+  }
 };
 
 class ifdstream : public _fdstream

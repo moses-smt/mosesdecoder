@@ -87,13 +87,13 @@ class ExtractTask
 {
 public:
   ExtractTask(
-          size_t id, SentenceAlignment &sentence,
-          PhraseExtractionOptions &initoptions,
-          Moses::OutputFileStream &extractFile,
-          Moses::OutputFileStream &extractFileInv,
-          Moses::OutputFileStream &extractFileOrientation,
-          Moses::OutputFileStream &extractFileContext,
-          Moses::OutputFileStream &extractFileContextInv):
+    size_t id, SentenceAlignment &sentence,
+    PhraseExtractionOptions &initoptions,
+    Moses::OutputFileStream &extractFile,
+    Moses::OutputFileStream &extractFileInv,
+    Moses::OutputFileStream &extractFileOrientation,
+    Moses::OutputFileStream &extractFileContext,
+    Moses::OutputFileStream &extractFileContextInv):
     m_sentence(sentence),
     m_options(initoptions),
     m_extractFile(extractFile),

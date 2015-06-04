@@ -2,13 +2,13 @@
 #include "moses/Parameter.h"
 // #include <string>
 
-namespace Moses {
+namespace Moses
+{
 
-  struct BookkeepingOptions
-  {
-    bool need_alignment_info;
-    bool init(Parameter const& param);
-  };
+struct BookkeepingOptions {
+  bool need_alignment_info;
+  bool init(Parameter const& param);
+};
 
 
 

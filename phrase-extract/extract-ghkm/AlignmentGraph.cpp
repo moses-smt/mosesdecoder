@@ -219,7 +219,7 @@ Node *AlignmentGraph::CopyParseTree(const SyntaxTree *root)
   if (nodeType == TREE) {
     float score = 0.0f;
     SyntaxNode::AttributeMap::const_iterator p =
-        root->value().attributes.find("pcfg");
+      root->value().attributes.find("pcfg");
     if (p != root->value().attributes.end()) {
       score = std::atof(p->second.c_str());
     }

@@ -51,7 +51,9 @@ public:
   const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;
 
   //! Get a vector of pointers to all SyntaxNodes (unordered).
-  const std::vector< SyntaxNode* >& GetAllNodes() { return m_nodes; };
+  const std::vector< SyntaxNode* >& GetAllNodes() {
+    return m_nodes;
+  };
 
   size_t GetNumWords() const {
     return m_numWords;
