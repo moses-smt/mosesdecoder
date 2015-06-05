@@ -64,6 +64,7 @@
 #include "ug_lexical_reordering.h"
 #include "ug_sampling_bias.h"
 #include "ug_phrasepair.h"
+#include "ug_phrase_extraction_record.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_ref_counter.h"
 
 #define PSTATS_CACHE_THRESHOLD 50
@@ -145,6 +146,8 @@ namespace Moses {
 	std::vector<uchar> * core_alignment, // stores the core alignment
 	bitvector* full_alignment, // stores full word alignment for this sent.
 	bool const flip) const;   // flip source and target (reverse lookup)
+
+      bool find_trg_phr_bounds(PhraseExtractionRecord& rec) const;
 
       // prep2 launches sampling and returns immediately.
       // lookup (below) waits for the job to finish before it returns
@@ -322,9 +325,19 @@ namespace Moses {
     template<typename Token>
     bool
     Bitext<Token>::
+    find_trg_phr_bounds(PhraseExtractionRecord& rec) const
+    {
+      return find_trg_phr_bounds(rec.sid, rec.start, rec.stop,
+				 rec.s1, rec.s2, rec.e1, rec.e2,
+				 rec.po_fwd, rec.po_bwd, 
+				 rec.aln, rec.full_aln, rec.flip);
+    }
+
+    template<typename Token>
+    bool
+    Bitext<Token>::
     find_trg_phr_bounds
-    (size_t const sid,
-     size_t const start, size_t const stop,
+    (size_t const sid, size_t const start, size_t const stop,
      size_t & s1, size_t & s2, size_t & e1, size_t & e2,
      int & po_fwd, int & po_bwd,
      std::vector<uchar>* core_alignment, bitvector* full_alignment,
