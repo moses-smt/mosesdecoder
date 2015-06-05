@@ -7,6 +7,7 @@
 #include "mmsapt.h"
 #include <boost/foreach.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/thread/locks.hpp>
 #include <algorithm>
@@ -509,7 +510,7 @@ namespace Moses
     if (fix)
       {
 	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
-	  (*ff)(btfix, *fix, &fvals);
+	  (*ff)(*btfix, *fix, &fvals);
       }
     if (dyn)
       {
@@ -541,7 +542,7 @@ namespace Moses
     if (fix)
       {
  	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
-	  (*ff)(btfix, pool, &fvals);
+	  (*ff)(*btfix, pool, &fvals);
       }
     else
       {
@@ -673,7 +674,7 @@ namespace Moses
     PhrasePair<Token>::SortByTargetIdSeq sort_by_tgt_id;
     if (sfix)
       {
-	expand(mfix, btfix, *sfix, ppfix, m_bias_log);
+	expand(mfix, *btfix, *sfix, ppfix, m_bias_log);
 	sort(ppfix.begin(), ppfix.end(),sort_by_tgt_id);
       }
     if (sdyn)

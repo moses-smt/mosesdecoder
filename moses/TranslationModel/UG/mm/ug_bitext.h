@@ -64,6 +64,7 @@
 #include "ug_lexical_reordering.h"
 #include "ug_sampling_bias.h"
 #include "ug_phrasepair.h"
+#include "moses/TranslationModel/UG/generic/threading/ug_ref_counter.h"
 
 #define PSTATS_CACHE_THRESHOLD 50
 
@@ -92,7 +93,7 @@ namespace Moses {
 #endif
 
     template<typename TKN>
-    class Bitext
+    class Bitext : public reference_counter
     {
     public:
       typedef TKN Token;
