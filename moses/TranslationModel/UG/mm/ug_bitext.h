@@ -35,6 +35,7 @@
 #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
 #include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
+#include "moses/TranslationModel/UG/generic/threading/ug_ref_counter.h"
 // #include "moses/FF/LexicalReordering/LexicalReorderingState.h"
 #include "moses/Util.h"
 
@@ -97,6 +98,7 @@ namespace Moses {
     class Bitext : public reference_counter
     {
     public:
+      template<typename Token> friend class BitextSampler;
       typedef TKN Token;
       typedef typename TSA<Token>::tree_iterator   iter;
       typedef typename std::vector<PhrasePair<Token> > vec_ppair;
@@ -136,18 +138,17 @@ namespace Moses {
       //  points of the target phrase; if non-NULL, store word
       //  alignments in *core_alignment. If /flip/, source phrase is
       //  L2.
+      bool find_trg_phr_bounds(PhraseExtractionRecord& rec);
       bool find_trg_phr_bounds
       ( size_t const sid,    // sentence to investigate
 	size_t const start,  // start of source phrase
 	size_t const stop,   // last position of source phrase
-        size_t & s1, size_t & s2, // beginning and end of target start
+	size_t & s1, size_t & s2, // beginning and end of target start
 	size_t & e1, size_t & e2, // beginning and end of target end
-        int& po_fwd, int& po_bwd, // phrase orientations
+	int& po_fwd, int& po_bwd, // phrase orientations
 	std::vector<uchar> * core_alignment, // stores the core alignment
-	bitvector* full_alignment, // stores full word alignment for this sent.
-	bool const flip) const;   // flip source and target (reverse lookup)
-
-      bool find_trg_phr_bounds(PhraseExtractionRecord& rec) const;
+      	bitvector* full_alignment, // stores full word alignment for this sent.
+      	bool const flip) const;   // flip source and target (reverse lookup)
 
       // prep2 launches sampling and returns immediately.
       // lookup (below) waits for the job to finish before it returns
@@ -181,7 +182,6 @@ namespace Moses {
       lookup(ttasksptr const& ttask, iter const& phrase, int max_sample = -1) const;
       void prep(ttasksptr const& ttask, iter const& phrase) const;
 #endif
-
 
       void   setDefaultSampleSize(size_t const max_samples);
       size_t getDefaultSampleSize() const;
@@ -337,21 +337,24 @@ namespace Moses {
     bool
     Bitext<Token>::
     find_trg_phr_bounds
-    (size_t const sid, size_t const start, size_t const stop,
-     size_t & s1, size_t & s2, size_t & e1, size_t & e2,
-     int & po_fwd, int & po_bwd,
-     std::vector<uchar>* core_alignment, bitvector* full_alignment,
-     bool const flip) const
+    ( size_t const sid,    // sentence to investigate
+      size_t const start,  // start of source phrase
+      size_t const stop,   // last position of source phrase
+      size_t & s1, size_t & s2, // beginning and end of target start
+      size_t & e1, size_t & e2, // beginning and end of target end
+      int& po_fwd, int& po_bwd, // phrase orientations
+      std::vector<uchar> * core_alignment, // stores the core alignment
+      bitvector* full_alignment, // stores full word alignment for this sent.
+      bool const flip) const     // flip source and target (reverse lookup)
     {
       // if (core_alignment) cout << "HAVE CORE ALIGNMENT" << endl;
-
-      // a word on the core_alignment:
+      // a word on the core_alignment (core_alignment):
       //
-      // since fringe words ([s1,...,s2),[e1,..,e2) if s1 < s2, or e1
+      // Since fringe words ([s1,...,s2),[e1,..,e2) if s1 < s2, or e1
       // < e2, respectively) are be definition unaligned, we store
-      // only the core alignment in *core_alignment it is up to the
-      // calling function to shift alignment points over for start
-      // positions of extracted phrases that start with a fringe word
+      // only the core alignment in *aln. It is up to the calling
+      // function to shift alignment points over for start positions
+      // of extracted phrases that start with a fringe word
       assert(T1);
       assert(T2);
       assert(Tx);
@@ -378,19 +381,29 @@ namespace Moses {
       size_t lft = forbidden.size();
       size_t rgt = 0;
       std::vector<std::vector<ushort> > aln1(slen1),aln2(slen2);
+
+      // process word alignment for this sentence
       char const* p = Tx->sntStart(sid);
       char const* x = Tx->sntEnd(sid);
-
       while (p < x)
 	{
-	  if (flip) { p = binread(p,trg); assert(p<x); p = binread(p,src); }
-	  else      { p = binread(p,src); assert(p<x); p = binread(p,trg); }
-
+	  if (flip) 
+	    { 
+	      p = binread(p,trg); 
+	      assert(p<x); 
+	      p = binread(p,src); 
+	    }
+	  else 
+	    { 
+	      p = binread(p,src); 
+	      assert(p<x); 
+	      p = binread(p,trg); 
+	    }
+	  
 	  UTIL_THROW_IF2((src >= slen1 || trg >= slen2),
 			 "Alignment range error at sentence " << sid << "!\n"
-			 << src << "/" << slen1 << " " <<
-			 trg << "/" << slen2);
-
+			 << src << "/" << slen1 << " " << trg << "/" << slen2);
+	  
 	  if (src < start || src >= stop)
 	    forbidden.set(trg);
 	  else
@@ -422,8 +435,8 @@ namespace Moses {
 	    {
 	      BOOST_FOREACH(ushort x, aln1[i])
 		{
-		  core_alignment->push_back(i-start);
-		  core_alignment->push_back(x-lft);
+		  core_alignment->push_back(i - start);
+		  core_alignment->push_back(x - lft);
 		}
 	    }
 	  // now determine fwd and bwd phrase orientation
