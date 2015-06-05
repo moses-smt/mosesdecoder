@@ -1,4 +1,5 @@
 #include "ug_lexical_reordering.h"
+#include "moses/Util.h"
 namespace Moses
 {
   namespace bitext
