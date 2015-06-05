@@ -5,6 +5,7 @@
 
 #include <boost/thread.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 #include "moses/TypeDef.h"
 #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
@@ -63,7 +64,7 @@ namespace Moses
     typedef PhraseScorer<Token> pscorer;
   private:
     // vector<sptr<bitext> > shards;
-    mmbitext btfix;
+    iptr<mmbitext> btfix;
     sptr<imbitext> btdyn;
     std::string m_bname, m_extra_data, m_bias_file,m_bias_server;
     std::string L1;
