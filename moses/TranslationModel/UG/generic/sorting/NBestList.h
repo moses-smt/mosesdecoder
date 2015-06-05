@@ -1,3 +1,4 @@
+// -*- mode: c++; tab-width: 2; indent-tabs-mode:nil; -*-
 #ifndef __n_best_list_h
 #define __n_best_list_h
 #include <algorithm>
@@ -27,6 +28,7 @@ public:
   NBestList(size_t const max_size);
   bool add(THINGY const& item);
   THINGY const& operator[](int i) const;
+  THINGY const& get_unsorted(int i) const;
   size_t size() const {
     return m_heap.size();
   }
@@ -80,6 +82,16 @@ operator[](int i) const
   if (i < 0) i += m_order.size();
   return m_list[m_order.at(i)];
 }
+
+template<typename THINGY, typename CMP>
+THINGY const&
+NBestList<THINGY,CMP>::
+get_unsorted(int i) const
+{
+  if (i < 0) i += m_heap.size();
+  return m_list[m_heap.at(i)];
+}
+
 
 }
 #endif
