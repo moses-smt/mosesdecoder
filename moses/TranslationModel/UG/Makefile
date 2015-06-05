@@ -60,7 +60,8 @@ nil:
 
 # libraries required
 
-LIBS  = m z bz2 pthread dl ${BOOSTLIBS}
+LIBS  = m z bz2 pthread dl ${BOOSTLIBS} 
+#LIBS += tcmalloc
 BOOSTLIBS := thread system filesystem program_options iostreams
 BOOSTLIBS := $(addprefix boost_,${BOOSTLIBS})
 ifdef ($(BOOSTLIBTAG),"")
@@ -102,13 +103,13 @@ skip += spe-check-coverage3.cc
 skip += mmsapt.cpp
 skip += ug_stringdist.cc
 skip += ug_splice_arglist.cc
-skip += ug_lexical_reordering.cc
-skip += ug_sampling_bias.cc
+# skip += ug_lexical_reordering.cc
 
 # objects from elsewhere in the moses tree that are needed
 extra = ${MOSES_ROOT}/util/exception.cc
 
 $(foreach f,$(skip),$(eval broken+=$(shell find -name $f)))
+broken += $(wildcard ./mm/stashed/*)
 
 $(info SCANNING DIRECTORY TREE FOR FILES)
 find_cfiles = find -name '*.cc' -or -name '*.cpp'
@@ -121,6 +122,12 @@ LIBOBJ = $(call cc2obj,$(filter-out $(PROGRAMS),$(CFILES) $(extra)))
 
 $(foreach f,$(CFILES) $(extra),$(eval $(call compile,$f)))
 $(foreach p,$(PROGRAMS),$(eval $(call build,$p)))
+
+ifeq ($(filter relink,$(MAKECMDGOALS)),relink)
+.PHONY: relink
+$(foreach p,$(PROGRAMS),$(eval .PHONY: $(call cc2exe,$p)))
+relink: $(filter-out relink,$(MAKECMDGOALS))
+endif
 
 -include $(DEP)
 
