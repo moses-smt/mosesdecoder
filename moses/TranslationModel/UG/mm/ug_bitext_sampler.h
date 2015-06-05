@@ -7,6 +7,7 @@
 #include "ug_bitext_pstats.h"
 #include "ug_sampling_bias.h"
 #include "ug_tsa_array_entry.h"
+#include "ug_bitext_phrase_extraction_record.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_ref_counter.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
 #include "moses/TranslationModel/UG/generic/sorting/NBestList.h"
