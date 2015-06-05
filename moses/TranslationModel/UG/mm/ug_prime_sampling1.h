@@ -3,7 +3,7 @@
 // Author: Ulrich Germann
 #pragma once
 #include "ug_bitext.h"
-#includde "ug_sampling_bias.h"
+#include "ug_sampling_bias.h"
 #include <vector>
 // #ifndef NO_MOSES
 namespace Moses {
@@ -19,7 +19,7 @@ typedef imTSA<Token> imtsa;
 
 template<typename Token> 
 void 
-mark(typename TSA<Token>::tree_iterator const& r, SentenceBias>& hits)
+mark(typename TSA<Token>::tree_iterator const& r, SentenceBias& hits)
 {
   char const* stop = r.upper_bound(-1);
   for (tsa::ArrayEntry I(r.lower_bound(-1)); I.next < stop;) 
@@ -33,9 +33,8 @@ mark(typename TSA<Token>::tree_iterator const& r, SentenceBias>& hits)
 template<typename Token> 
 bool
 process(typename TSA<Token>::tree_iterator& m, 
-  typename TSA<Token>::tree_iterator& r,
-        typename std::vector<float> & hits,
-  size_t const max_count=1000)
+        typename TSA<Token>::tree_iterator& r,
+        SentenceBias& hits, size_t const max_count=1000)
 {
   if (m.down())
     {
@@ -65,7 +64,7 @@ prime_sampling1(TSA<Token> const& refIdx,
 {
   typename TSA<Token>::tree_iterator m(&newIdx);
   typename TSA<Token>::tree_iterator r(&refIdx);
-  sptr<std::vector<float> > ret;
+  sptr<SentenceBias> ret;
   ret.reset(new SentenceBias(refIdx.getCorpus()->size(),0));
   process<Token>(m, r, *ret, max_count);
   return ret;
