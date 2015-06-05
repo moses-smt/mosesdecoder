@@ -1,5 +1,7 @@
 // -*- c++ -*-
 #pragma once
+#include "ug_typedefs.h"
+#include <stdint.h>
 #include <vector>
 
 #ifndef NO_MOSES
