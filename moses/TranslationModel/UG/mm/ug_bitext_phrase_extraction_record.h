@@ -1,4 +1,5 @@
 // -*- mode: c++; tab-width: 2; indent-tabs-mode: nil -*-
+#pragma once
 #include <vector>
 #include "ug_typedefs.h"
 
