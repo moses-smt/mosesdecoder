@@ -65,7 +65,7 @@
 #include "ug_lexical_reordering.h"
 #include "ug_sampling_bias.h"
 #include "ug_phrasepair.h"
-#include "ug_phrase_extraction_record.h"
+#include "ug_bitext_phrase_extraction_record.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_ref_counter.h"
 
 #define PSTATS_CACHE_THRESHOLD 50
@@ -138,7 +138,7 @@ namespace Moses {
       //  points of the target phrase; if non-NULL, store word
       //  alignments in *core_alignment. If /flip/, source phrase is
       //  L2.
-      bool find_trg_phr_bounds(PhraseExtractionRecord& rec);
+      bool find_trg_phr_bounds(PhraseExtractionRecord& rec) const;
       bool find_trg_phr_bounds
       ( size_t const sid,    // sentence to investigate
 	size_t const start,  // start of source phrase
