@@ -206,6 +206,7 @@ namespace Moses {
 
       string docname(id_type const sid) const;
 
+      vector<id_type> const* sid2did() const;
     };
 
 #include "ug_bitext_agenda.h"
@@ -219,6 +220,14 @@ namespace Moses {
 	return m_docname[(*m_sid2docid)[sid]];
       else
 	return "";
+    }
+
+    template<typename Token>
+    vector<id_type> const*
+    Bitext<Token>::
+    sid2did() const
+    {
+      return m_sid2docid.get();
     }
 
     template<typename Token>
