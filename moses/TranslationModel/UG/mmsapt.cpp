@@ -851,7 +851,9 @@ namespace Moses
       input.push_back(s->ToString());
 
     size_t N = 10 * m_default_sample_size;
+    VERBOSE(1,"Priming bias for ranking. [" << HERE << "]" << endl);
     context->bias = prime_sampling1(*bt->V1, *bt->I1, input, N);
+    VERBOSE(1,"Done. [" << HERE << "]" << endl);
     
   }
 
