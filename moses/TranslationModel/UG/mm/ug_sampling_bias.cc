@@ -32,14 +32,26 @@ namespace Moses
       return c.content();
     }
     // #endif
+    
+    SamplingBias::
+    SamplingBias(std::vector<id_type> const* sid2doc)
+      : m_sid2docid(sid2doc)
+    { }
 
+    int 
+    SamplingBias::
+    GetClass(id_type const idx) const
+    {
+      return m_sid2docid ? m_sid2docid->at(idx) : -1;
+    }
+
+    DocumentBias::
     DocumentBias
-    ::DocumentBias
     ( std::vector<id_type> const& sid2doc,
       std::map<std::string,id_type> const& docname2docid,
       std::string const& server_url, std::string const& text,
       std::ostream* log)
-      : m_sid2docid(sid2doc)
+      : SamplingBias(&sid2doc)
       , m_bias(docname2docid.size(), 0)
     {
       // #ifdef HAVE_CURLPP
@@ -53,8 +65,8 @@ namespace Moses
     }
 
     void
-    DocumentBias
-    ::init_from_json
+    DocumentBias::
+    init_from_json
     ( std::string const& json, std::map<std::string,id_type> const& docname2docid,
       std::ostream* log)
     { // poor man's special purpose json parser for responses from the
@@ -111,9 +123,9 @@ namespace Moses
     }
 
     void
-    DocumentBias
-    ::init(std::map<std::string,float> const& biasmap,
-	   std::map<std::string,id_type> const& docname2docid)
+    DocumentBias::
+    init(std::map<std::string,float> const& biasmap,
+	 std::map<std::string,id_type> const& docname2docid)
     {
       typedef std::map<std::string, id_type>::value_type doc_record;
       float total = 0;
@@ -127,59 +139,56 @@ namespace Moses
 	std::cerr << "BIAS " << d.first << " " << m_bias[d.second] << std::endl;
     }
 
-    id_type
-    DocumentBias
-    ::GetClass(id_type const idx) const
-    {
-      return m_sid2docid.at(idx);
-    }
-
     float
-    DocumentBias
-    ::operator[](id_type const idx) const
+    DocumentBias::
+    operator[](id_type const idx) const
     {
-      UTIL_THROW_IF2(idx >= m_sid2docid.size(),
-		     "Out of bounds: " << idx << "/" << m_sid2docid.size());
-      return m_bias[m_sid2docid[idx]];
+      UTIL_THROW_IF2(idx >= m_sid2docid->size(), "Out of bounds: " 
+		     << idx << "/" << m_sid2docid->size());
+      return m_bias[(*m_sid2docid)[idx]];
     }
 
     size_t
-    DocumentBias
-    ::size() const
-    { return m_sid2docid.size(); }
+    DocumentBias::
+    size() const
+    { return m_sid2docid->size(); }
 
 
 
-    SentenceBias
-    ::SentenceBias(std::vector<float> const& bias)
-      : m_bias(bias) { }
+    SentenceBias::
+    SentenceBias(std::vector<float> const& bias,
+		   std::vector<id_type> const* sid2doc)
+      : SamplingBias(sid2doc)
+      , m_bias(bias) 
+    { }
 
-    SentenceBias
-    ::SentenceBias(size_t const s, float const f) : m_bias(s,f) { }
-
-    id_type
-    SentenceBias
-    ::GetClass(id_type idx) const { return idx; }
+    SentenceBias::
+    SentenceBias(size_t const s, float const f,
+		 std::vector<id_type> const* sid2doc)
+      
+      : SamplingBias(sid2doc)
+      , m_bias(s,f) 
+    { }
 
     float&
-    SentenceBias
-    ::operator[](id_type const idx)
+    SentenceBias::
+    operator[](id_type const idx)
     {
       UTIL_THROW_IF2(idx >= m_bias.size(), "Out of bounds");
       return m_bias[idx];
     }
 
     float
-    SentenceBias
-    ::operator[](id_type const idx) const
+    SentenceBias::
+    operator[](id_type const idx) const
     {
       UTIL_THROW_IF2(idx >= m_bias.size(), "Out of bounds");
       return m_bias[idx];
     }
 
     size_t
-    SentenceBias
-    ::size() const { return m_bias.size(); }
+    SentenceBias::
+    size() const { return m_bias.size(); }
 
   }
 }

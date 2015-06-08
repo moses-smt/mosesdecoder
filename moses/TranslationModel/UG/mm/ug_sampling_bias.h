@@ -17,7 +17,10 @@ namespace Moses
 
     class SamplingBias
     {
+    protected:
+      std::vector<id_type> const* m_sid2docid;
     public:
+      SamplingBias(std::vector<id_type> const* sid2docid);
       int loglevel;
       std::ostream* log;
       virtual float
@@ -27,37 +30,33 @@ namespace Moses
       virtual size_t size() const = 0;
       // number of classes
 
-      virtual id_type
-      GetClass(id_type const ID) const = 0;
-      // returns class of item ID
+      virtual int
+      GetClass(id_type const ID) const;
+      // returns class/document/domain id of item ID
     };
 
     class
     DocumentBias : public SamplingBias
     {
-      std::vector<id_type> const& m_sid2docid;
       std::vector<float> m_bias;
-
     public:
-
+      
       DocumentBias(std::vector<id_type> const& sid2doc,
 		   std::map<std::string,id_type> const& docname2docid,
-		   std::string const& server_url, std::string const& text,
+		   std::string const& server_url, 
+		   std::string const& text,
 		   std::ostream* log);
-
+      
       void
       init_from_json
       ( std::string const& json,
 	std::map<std::string,id_type> const& docname2docid,
 	std::ostream* log );
-
+      
       void
       init
       ( std::map<std::string,float> const& biasmap,
 	std::map<std::string,id_type> const& docname2docid);
-
-      id_type
-      GetClass(id_type const idx) const;
 
       float
       operator[](id_type const idx) const;
@@ -71,10 +70,11 @@ namespace Moses
     {
       std::vector<float> m_bias;
     public:
-      SentenceBias(std::vector<float> const& bias);
-      SentenceBias(size_t const s, float const f = 0);
+      SentenceBias(std::vector<float> const& bias,
+		   std::vector<id_type> const* sid2docid = NULL);
 
-      id_type GetClass(id_type idx) const;
+      SentenceBias(size_t const s, float const f = 0, 
+		   std::vector<id_type> const* sid2docid = NULL);
 
       float& operator[](id_type const idx);
       float  operator[](id_type const idx) const;
