@@ -1,3 +1,4 @@
+#include <boost/thread/locks.hpp>
 #include "ug_bitext_pstats.h"
 
 namespace Moses
@@ -65,7 +66,7 @@ namespace Moses
 
     bool
     pstats::
-    add(uint64_t pid, float const w,
+    add(uint64_t pid, float const w, float const b,
 	vector<uchar> const& a,
 	uint32_t const cnt2,
 	uint32_t fwd_o,
@@ -73,13 +74,22 @@ namespace Moses
     {
       boost::lock_guard<boost::mutex> guard(this->lock);
       jstats& entry = this->trg[pid];
-      entry.add(w, a, cnt2, fwd_o, bwd_o, docid);
+      entry.add(w, b, a, cnt2, fwd_o, bwd_o, docid);
       if (this->good < entry.rcnt())
 	{
 	  UTIL_THROW(util::Exception, "more joint counts than good counts:"
 		     << entry.rcnt() << "/" << this->good << "!");
 	}
       return true;
+    }
+
+    void 
+    pstats::
+    wait() const
+    {
+      boost::unique_lock<boost::mutex> lock(this->lock);
+      while (this->in_progress)
+	this->ready.wait(lock);
     }
 
   }

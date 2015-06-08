@@ -21,8 +21,8 @@ namespace Moses
 #if UG_BITEXT_TRACK_ACTIVE_THREADS
       static ThreadSafeCounter active;
 #endif
-      boost::mutex lock;               // for parallel gathering of stats
-      boost::condition_variable ready; // consumers can wait for me to be ready
+      mutable boost::mutex lock;               // for parallel gathering of stats
+      mutable boost::condition_variable ready; // consumers can wait for me to be ready
 
       size_t raw_cnt;     // (approximate) raw occurrence count
       size_t sample_cnt;  // number of instances selected during sampling
@@ -46,6 +46,7 @@ namespace Moses
       bool
       add(uint64_t const  pid, // target phrase id
 	  float const       w, // sample weight (1./(# of phrases extractable))
+	  float const       b, // sample bias score
 	  alnvec const&     a, // local alignment
 	  uint32_t const cnt2, // raw target phrase count
 	  uint32_t fwd_o,      // fwd. phrase orientation
@@ -57,6 +58,7 @@ namespace Moses
 		   size_t const num_pairs, // # of phrases extractable here
 		   int const po_fwd,       // fwd phrase orientation
 		   int const po_bwd);      // bwd phrase orientation
+      void wait() const;
     };
 
   }
