@@ -28,7 +28,7 @@ namespace Moses
       float dfwd[Moses::LRModel::NONE+1]; // distortion counts // counts or probs?
       float dbwd[Moses::LRModel::NONE+1]; // distortion counts
       std::vector<uchar> aln;
-      float score;
+      float score, cum_bias;
       bool inverse;
       std::vector<uint32_t> indoc;
       PhrasePair() { };
@@ -96,6 +96,7 @@ namespace Moses
       good2   = 0;
       sample2 = 0;
       raw2    = 0;
+      cum_bias = 0;
       fvals.resize(numfeats);
     }
 
@@ -109,6 +110,7 @@ namespace Moses
       start2 = x; len2 = len;
       raw2  = js.cnt2();
       joint = js.rcnt();
+      cum_bias = js.bcnt();
       assert(js.aln().size());
       if (js.aln().size())
 	aln = js.aln()[0].second;
@@ -176,6 +178,7 @@ namespace Moses
       joint   += o.joint;
       sample1 += o.sample1;
       sample2 += o.sample2;
+      cum_bias += o.cum_bias;
       // todo: add distortion counts
       return *this;
     }
@@ -189,7 +192,7 @@ namespace Moses
       , raw1(o.raw1)       , raw2(o.raw2)
       , sample1(o.sample1) , sample2(o.sample2)
       ,	good1(o.good1)     , good2(o.good2)
-      , joint(o.joint)
+      , joint(o.joint)     , cum_bias(o.cum_bias)  
       , fvals(o.fvals)
       , aln(o.aln)
       , score(o.score)

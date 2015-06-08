@@ -6,6 +6,7 @@ namespace Moses
 
     uint32_t jstats::rcnt() const { return my_rcnt; }
     float    jstats::wcnt() const { return my_wcnt; }
+    float    jstats::bcnt() const { return my_bcnt; }
     uint32_t jstats::cnt2() const { return my_cnt2; }
 
     // What was that used for again? UG
@@ -15,7 +16,7 @@ namespace Moses
 
     jstats::
     jstats()
-      : my_rcnt(0), my_cnt2(0), my_wcnt(0)
+      : my_rcnt(0), my_cnt2(0), my_wcnt(0), my_bcnt(0)
     {
       for (int i = 0; i <= Moses::LRModel::NONE; ++i)
 	ofwd[i] = obwd[i] = 0;
@@ -27,6 +28,7 @@ namespace Moses
     {
       my_rcnt = other.rcnt();
       my_wcnt = other.wcnt();
+      my_bcnt = other.bcnt();
       my_aln  = other.aln();
       indoc   = other.indoc;
       for (int i = 0; i <= Moses::LRModel::NONE; i++)
@@ -54,13 +56,14 @@ namespace Moses
 
     void
     jstats::
-    add(float w, vector<uchar> const& a, uint32_t const cnt2,
+    add(float w, float b, vector<uchar> const& a, uint32_t const cnt2,
 	uint32_t fwd_orient, uint32_t bwd_orient, int const docid)
     {
       boost::lock_guard<boost::mutex> lk(this->lock);
       my_cnt2 = cnt2;
       my_rcnt += 1;
       my_wcnt += w;
+      my_bcnt += b;
       if (a.size())
 	{
 	  size_t i = 0;
