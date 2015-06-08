@@ -45,6 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <list>
 #include <iomanip>
+#include <limits>
 
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"
@@ -183,6 +184,21 @@ public:
   // post editing
   std::ifstream *spe_src, *spe_trg, *spe_aln;
 
+  std::list<boost::shared_ptr<InputType> > const& GetPastInput() const { 
+    return m_past_input;
+  }
+
+  std::list<boost::shared_ptr<InputType> > const& GetFutureInput() const {
+    return m_future_input;
+  }
+  size_t GetLookAhead() const {
+    return m_look_ahead;
+  }
+
+  size_t GetLookBack() const {
+    return m_look_back;
+  }
+      
 private:
   template<class itype>
   boost::shared_ptr<InputType>
@@ -212,10 +228,10 @@ BufferInput()
       return ret;
     ret = source;
   }
-
   while (m_buffered_ahead < m_look_ahead) {
     source.reset(new itype);
-    if (!source->Read(*m_inputStream, *m_inputFactorOrder)) break;
+    if (!source->Read(*m_inputStream, *m_inputFactorOrder)) 
+      break;
     m_future_input.push_back(source);
     m_buffered_ahead += source->GetSize();
   }
