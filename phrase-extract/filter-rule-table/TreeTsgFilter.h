@@ -8,8 +8,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
+#include "SyntaxTree.h"
+
 #include "syntax-common/numbered_set.h"
-#include "syntax-common/string_tree.h"
 #include "syntax-common/tree.h"
 #include "syntax-common/tree_fragment_tokenizer.h"
 
@@ -29,7 +30,7 @@ class TreeTsgFilter : public TsgFilter
 {
 public:
   // Initialize the filter for a given set of test sentences.
-  TreeTsgFilter(const std::vector<boost::shared_ptr<StringTree> > &);
+  TreeTsgFilter(const std::vector<boost::shared_ptr<SyntaxTree> > &);
 
 private:
   // Add an entry to m_labelToTree for every subtree of the given tree.
@@ -41,9 +42,9 @@ private:
   // Try to match a fragment against a specific subtree of a test tree.
   bool MatchFragment(const IdTree &, const IdTree &);
 
-  // Convert a StringTree to an IdTree (wrt m_testVocab).  Inserts symbols into
+  // Convert a SyntaxTree to an IdTree (wrt m_testVocab).  Inserts symbols into
   // m_testVocab.
-  IdTree *StringTreeToIdTree(const StringTree &);
+  IdTree *SyntaxTreeToIdTree(const SyntaxTree &);
 
   std::vector<boost::shared_ptr<IdTree> > m_sentences;
   std::vector<std::vector<const IdTree *> > m_labelToTree;

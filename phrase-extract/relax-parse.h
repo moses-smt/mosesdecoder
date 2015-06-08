@@ -37,10 +37,14 @@ bool leftBinarizeFlag = false;
 bool rightBinarizeFlag = false;
 char SAMTLevel = 0;
 
+typedef std::vector< int > SplitPoints;
+typedef std::vector< SplitPoints > ParentNodes;
+
 // functions
 void init(int argc, char* argv[]);
+ParentNodes determineSplitPoints(const MosesTraining::SyntaxNodeCollection &);
 void store( MosesTraining::SyntaxNodeCollection &tree, const std::vector<std::string> &words );
-void LeftBinarize( MosesTraining::SyntaxNodeCollection &tree, MosesTraining::ParentNodes &parents );
-void RightBinarize( MosesTraining::SyntaxNodeCollection &tree, MosesTraining::ParentNodes &parents );
-void SAMT( MosesTraining::SyntaxNodeCollection &tree, MosesTraining::ParentNodes &parents );
+void LeftBinarize( MosesTraining::SyntaxNodeCollection &tree, ParentNodes &parents );
+void RightBinarize( MosesTraining::SyntaxNodeCollection &tree, ParentNodes &parents );
+void SAMT( MosesTraining::SyntaxNodeCollection &tree, ParentNodes &parents );
 

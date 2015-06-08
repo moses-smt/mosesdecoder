@@ -4,11 +4,18 @@
 Module implementing ChooseMTModelDialog.
 """
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtSql import *
+import sys
+
+from PyQt4.QtCore import (
+    pyqtSignature,
+    QObject,
+    SIGNAL,
+    )
+from PyQt4.QtGui import QDialog
+from PyQt4.QtSql import QSqlQueryModel
 
 from Ui_chooseMTModel import Ui_Dialog
+from util import doAlert
 
 
 class ChooseMTModelDialog(QDialog, Ui_Dialog):
@@ -28,14 +35,20 @@ class ChooseMTModelDialog(QDialog, Ui_Dialog):
         self.selTableView.hideColumn(0)
         self.selTableView.hideColumn(5)
         self.selTableView.hideColumn(6)
-        #change status and keep the column
-        QObject.connect(datamodel,  SIGNAL("modelInstalled()"),  self.on_datamodel_modelInstalled)
+        # Change status and keep the column.
+        QObject.connect(
+            datamodel,  SIGNAL("modelInstalled()"),
+            self.on_datamodel_modelInstalled)
 
     def updateModel(self):
-        self.model.setQuery('SELECT ID, name, srclang, trglang, status, path, mosesini FROM models WHERE status = "READY" AND deleted != "True"', self.database)
+        self.model.setQuery(
+            'SELECT ID, name, srclang, trglang, status, path, mosesini '
+            'FROM models '
+            'WHERE status = "READY" AND deleted != "True"',
+            self.database)
 
     def on_datamodel_recordUpdated(self,  bRecord):
-        #deal with the selection changed problem
+        """Deal with the selection changed problem."""
         try:
             if bRecord:
                 current = self.selTableView.currentIndex()
@@ -44,9 +57,9 @@ class ChooseMTModelDialog(QDialog, Ui_Dialog):
                 else:
                     self.curSelection = None
             else:
-                if not self.curSelection is None:
+                if self.curSelection is not None:
                     self.selTableView.selectRow(self.curSelection)
-        except Exception, e:
+        except Exception as e:
             print >> sys.stderr, str(e)
 
     def on_datamodel_modelInstalled(self):

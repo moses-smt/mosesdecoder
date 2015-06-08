@@ -23,6 +23,7 @@ sys.path.append(os.path.join(sys.path[0], 'bilingual-lm'))
 import train_nplm
 import averageNullEmbedding
 
+
 logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
@@ -30,7 +31,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--working-dir", dest="working_dir", metavar="PATH")
 parser.add_argument(
-    "--corpus", '-text', dest="corpus_stem", metavar="PATH", help="Input file.")
+    "--corpus", '-text', dest="corpus_stem", metavar="PATH",
+    help="Input file.")
 parser.add_argument(
     "--nplm-home", dest="nplm_home", metavar="PATH", required=True,
     help="Location of NPLM.")
@@ -113,6 +115,7 @@ parser.set_defaults(
     words_file='vocab',
     vocab_size=500000)
 
+
 def main(options):
 
     options.ngram_size = options.order
@@ -129,14 +132,16 @@ def main(options):
     if options.mmap:
         train_file += '.mmap'
 
-    extraction_cmd = [os.path.join(options.nplm_home, 'src', 'prepareNeuralLM'),
-                      '--train_text', options.corpus_stem,
-                      '--ngramize', '1',
-                      '--ngram_size', str(options.ngram_size),
-                      '--vocab_size', str(options.vocab_size),
-                      '--write_words_file', os.path.join(options.working_dir, options.words_file),
-                      '--train_file', os.path.join(options.working_dir, numberized_file)
-                      ]
+    extraction_cmd = [
+        os.path.join(options.nplm_home, 'src', 'prepareNeuralLM'),
+        '--train_text', options.corpus_stem,
+        '--ngramize', '1',
+        '--ngram_size', str(options.ngram_size),
+        '--vocab_size', str(options.vocab_size),
+        '--write_words_file', os.path.join(
+            options.working_dir, options.words_file),
+        '--train_file', os.path.join(options.working_dir, numberized_file)
+        ]
 
     sys.stderr.write('extracting n-grams\n')
     sys.stderr.write('executing: ' + ', '.join(extraction_cmd) + '\n')
@@ -149,12 +154,13 @@ def main(options):
             os.remove(os.path.join(options.working_dir, train_file))
         except OSError:
             pass
-        mmap_cmd = [os.path.join(options.nplm_home, 'src', 'createMmap'),
-                    '--input_file',
-                    os.path.join(options.working_dir, numberized_file),
-                    '--output_file',
-                    os.path.join(options.working_dir, train_file)
-                    ]
+        mmap_cmd = [
+            os.path.join(options.nplm_home, 'src', 'createMmap'),
+            '--input_file',
+            os.path.join(options.working_dir, numberized_file),
+            '--output_file',
+            os.path.join(options.working_dir, train_file)
+            ]
         sys.stderr.write('creating memory-mapped file\n')
         sys.stderr.write('executing: ' + ', '.join(mmap_cmd) + '\n')
         ret = subprocess.call(mmap_cmd)
@@ -163,14 +169,18 @@ def main(options):
 
     if options.validation_corpus:
 
-        extraction_cmd = [os.path.join(options.nplm_home, 'src', 'prepareNeuralLM'),
-                          '--train_text', options.validation_corpus,
-                          '--ngramize', '1',
-                          '--ngram_size', str(options.ngram_size),
-                          '--vocab_size', str(options.vocab_size),
-                          '--words_file', os.path.join(options.working_dir, options.words_file),
-                          '--train_file', os.path.join(options.working_dir, os.path.basename(options.validation_corpus) + '.numberized')
-                          ]
+        extraction_cmd = [
+            os.path.join(options.nplm_home, 'src', 'prepareNeuralLM'),
+            '--train_text', options.validation_corpus,
+            '--ngramize', '1',
+            '--ngram_size', str(options.ngram_size),
+            '--vocab_size', str(options.vocab_size),
+            '--words_file', os.path.join(
+                options.working_dir, options.words_file),
+            '--train_file', os.path.join(
+                options.working_dir,
+                os.path.basename(options.validation_corpus) + '.numberized')
+            ]
 
         sys.stderr.write('extracting n-grams (validation file)\n')
         sys.stderr.write('executing: ' + ', '.join(extraction_cmd) + '\n')
@@ -190,11 +200,15 @@ def main(options):
     train_nplm.main(options)
 
     sys.stderr.write('averaging null words\n')
-    average_options = averageNullEmbedding.parser.parse_args(
-        ['-i', os.path.join(options.output_dir, options.output_model + '.model.nplm.' + str(options.epochs)),
-         '-o', os.path.join(options.output_dir, options.output_model + '.model.nplm'),
-         '-t', os.path.join(options.working_dir, numberized_file),
-         '-p', os.path.join(options.nplm_home, 'python')])
+    average_options = averageNullEmbedding.parser.parse_args([
+        '-i', os.path.join(
+            options.output_dir,
+            options.output_model + '.model.nplm.' + str(options.epochs)),
+        '-o', os.path.join(
+            options.output_dir, options.output_model + '.model.nplm'),
+        '-t', os.path.join(options.working_dir, numberized_file),
+        '-p', os.path.join(options.nplm_home, 'python'),
+    ])
     averageNullEmbedding.main(average_options)
 
 
@@ -206,5 +220,7 @@ if __name__ == "__main__":
 
     options = parser.parse_known_args()[0]
     if parser.parse_known_args()[1]:
-        sys.stderr.write('Warning: unknown arguments: {0}\n'.format(parser.parse_known_args()[1]))
+        sys.stderr.write(
+            "Warning: unknown arguments: {0}\n".format(
+                parser.parse_known_args()[1]))
     main(options)

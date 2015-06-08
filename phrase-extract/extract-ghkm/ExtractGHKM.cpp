@@ -30,6 +30,8 @@
 
 #include <boost/program_options.hpp>
 
+#include "syntax-common/xml_tree_parser.h"
+
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 #include "SyntaxNode.h"
@@ -50,7 +52,6 @@
 #include "Span.h"
 #include "StsgRule.h"
 #include "StsgRuleWriter.h"
-#include "XmlTreeParser.h"
 
 namespace MosesTraining
 {
@@ -118,14 +119,6 @@ int ExtractGHKM::Main(int argc, char *argv[])
     OpenOutputFileOrDie(options.unknownWordSoftMatchesFile, unknownWordSoftMatchesStream);
   }
 
-  // Target label sets for producing glue grammar.
-  std::set<std::string> targetLabelSet;
-  std::map<std::string, int> targetTopLabelSet;
-
-  // Source label sets for producing glue grammar.
-  std::set<std::string> sourceLabelSet;
-  std::map<std::string, int> sourceTopLabelSet;
-
   // Word count statistics for producing unknown word labels.
   std::map<std::string, int> targetWordCount;
   std::map<std::string, std::string> targetWordLabel;
@@ -138,7 +131,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string sourceLine;
   std::string alignmentLine;
   Alignment alignment;
-  XmlTreeParser targetXmlTreeParser(targetLabelSet, targetTopLabelSet);
+  Syntax::XmlTreeParser targetXmlTreeParser;
+  Syntax::XmlTreeParser sourceXmlTreeParser;
   ScfgRuleWriter scfgWriter(fwdExtractStream, invExtractStream, options);
   StsgRuleWriter stsgWriter(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
@@ -175,39 +169,14 @@ int ExtractGHKM::Main(int argc, char *argv[])
       Error(oss.str());
     }
 
-
-    // Parse source tree and construct a SyntaxTree object.
-    SyntaxNodeCollection sourceSyntaxTree;
-    SyntaxNode *sourceSyntaxTreeRoot=NULL;
-
-    if (options.sourceLabels) {
-      try {
-        if (!ProcessAndStripXMLTags(sourceLine, sourceSyntaxTree, sourceLabelSet, sourceTopLabelSet, false)) {
-          throw Exception("");
-        }
-        sourceSyntaxTree.ConnectNodes();
-        sourceSyntaxTreeRoot = sourceSyntaxTree.GetTop();
-        assert(sourceSyntaxTreeRoot);
-      } catch (const Exception &e) {
-        std::ostringstream oss;
-        oss << "Failed to parse source XML tree at line " << lineNum;
-        if (!e.GetMsg().empty()) {
-          oss << ": " << e.GetMsg();
-        }
-        Error(oss.str());
-      }
-    }
-
-    // Read source tokens.
-    std::vector<std::string> sourceTokens(ReadTokens(sourceLine));
-
-    // Construct a source SyntaxTree object from the SyntaxNodeCollection
-    // object.
+    // Read source tokens (and parse tree if using source labels).
+    std::vector<std::string> sourceTokens;
     std::auto_ptr<SyntaxTree> sourceParseTree;
-
-    if (options.sourceLabels) {
+    if (!options.sourceLabels) {
+      sourceTokens = ReadTokens(sourceLine);
+    } else {
       try {
-        sourceParseTree = XmlTreeParser::ConvertTree(*sourceSyntaxTreeRoot, sourceTokens);
+        sourceParseTree = sourceXmlTreeParser.Parse(sourceLine);
         assert(sourceParseTree.get());
       } catch (const Exception &e) {
         std::ostringstream oss;
@@ -217,8 +186,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
         }
         Error(oss.str());
       }
+      sourceTokens = sourceXmlTreeParser.words();
     }
-
 
     // Read word alignments.
     try {
@@ -239,12 +208,14 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
     // Record word counts.
     if (!options.targetUnknownWordFile.empty()) {
-      CollectWordLabelCounts(*targetParseTree, options, targetWordCount, targetWordLabel);
+      CollectWordLabelCounts(*targetParseTree, options, targetWordCount,
+                             targetWordLabel);
     }
 
     // Record word counts: source side.
     if (options.sourceLabels && !options.sourceUnknownWordFile.empty()) {
-      CollectWordLabelCounts(*sourceParseTree, options, sourceWordCount, sourceWordLabel);
+      CollectWordLabelCounts(*sourceParseTree, options, sourceWordCount,
+                             sourceWordLabel);
     }
 
     // Form an alignment graph from the target tree, source words, and
@@ -260,7 +231,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
     }
 
     // Initialize phrase orientation scoring object
-    PhraseOrientation phraseOrientation( sourceTokens.size(), targetXmlTreeParser.GetWords().size(), alignment);
+    PhraseOrientation phraseOrientation(sourceTokens.size(),
+                                        targetXmlTreeParser.words().size(), alignment);
 
     // Write the rules, subject to scope pruning.
     const std::vector<Node *> &targetNodes = graph.GetTargetNodes();
@@ -292,7 +264,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
         // SCFG output.
         ScfgRule *r = 0;
         if (options.sourceLabels) {
-          r = new ScfgRule(**q, &sourceSyntaxTree);
+          r = new ScfgRule(**q, &sourceXmlTreeParser.node_collection());
         } else {
           r = new ScfgRule(**q);
         }
@@ -335,14 +307,14 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
   std::map<std::string,size_t> sourceLabels;
   if (options.sourceLabels && !options.sourceLabelSetFile.empty()) {
-
-    sourceLabelSet.insert("XLHS"); // non-matching label (left-hand side)
-    sourceLabelSet.insert("XRHS"); // non-matching label (right-hand side)
-    sourceLabelSet.insert("TOPLABEL");  // as used in the glue grammar
-    sourceLabelSet.insert("SOMELABEL"); // as used in the glue grammar
+    std::set<std::string> extendedLabelSet = sourceXmlTreeParser.label_set();
+    extendedLabelSet.insert("XLHS"); // non-matching label (left-hand side)
+    extendedLabelSet.insert("XRHS"); // non-matching label (right-hand side)
+    extendedLabelSet.insert("TOPLABEL");  // as used in the glue grammar
+    extendedLabelSet.insert("SOMELABEL"); // as used in the glue grammar
     size_t index = 0;
-    for (std::set<std::string>::const_iterator iter=sourceLabelSet.begin();
-         iter!=sourceLabelSet.end(); ++iter, ++index) {
+    for (std::set<std::string>::const_iterator iter=extendedLabelSet.begin();
+         iter!=extendedLabelSet.end(); ++iter, ++index) {
       sourceLabels.insert(std::pair<std::string,size_t>(*iter,index));
     }
     WriteSourceLabelSet(sourceLabels, sourceLabelSetStream);
@@ -352,14 +324,18 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::map<std::string, int> strippedTargetTopLabelSet;
   if (options.stripBitParLabels &&
       (!options.glueGrammarFile.empty() || !options.unknownWordSoftMatchesFile.empty())) {
-    StripBitParLabels(targetLabelSet, targetTopLabelSet, strippedTargetLabelSet, strippedTargetTopLabelSet);
+    StripBitParLabels(targetXmlTreeParser.label_set(),
+                      targetXmlTreeParser.top_label_set(),
+                      strippedTargetLabelSet, strippedTargetTopLabelSet);
   }
 
   if (!options.glueGrammarFile.empty()) {
     if (options.stripBitParLabels) {
       WriteGlueGrammar(strippedTargetLabelSet, strippedTargetTopLabelSet, sourceLabels, options, glueGrammarStream);
     } else {
-      WriteGlueGrammar(targetLabelSet, targetTopLabelSet, sourceLabels, options, glueGrammarStream);
+      WriteGlueGrammar(targetXmlTreeParser.label_set(),
+                       targetXmlTreeParser.top_label_set(),
+                       sourceLabels, options, glueGrammarStream);
     }
   }
 
@@ -375,44 +351,12 @@ int ExtractGHKM::Main(int argc, char *argv[])
     if (options.stripBitParLabels) {
       WriteUnknownWordSoftMatches(strippedTargetLabelSet, unknownWordSoftMatchesStream);
     } else {
-      WriteUnknownWordSoftMatches(targetLabelSet, unknownWordSoftMatchesStream);
+      WriteUnknownWordSoftMatches(targetXmlTreeParser.label_set(),
+                                  unknownWordSoftMatchesStream);
     }
   }
 
   return 0;
-}
-
-void ExtractGHKM::OpenInputFileOrDie(const std::string &filename,
-                                     std::ifstream &stream)
-{
-  stream.open(filename.c_str());
-  if (!stream) {
-    std::ostringstream msg;
-    msg << "failed to open input file: " << filename;
-    Error(msg.str());
-  }
-}
-
-void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
-                                      std::ofstream &stream)
-{
-  stream.open(filename.c_str());
-  if (!stream) {
-    std::ostringstream msg;
-    msg << "failed to open output file: " << filename;
-    Error(msg.str());
-  }
-}
-
-void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
-                                      Moses::OutputFileStream &stream)
-{
-  bool ret = stream.Open(filename);
-  if (!ret) {
-    std::ostringstream msg;
-    msg << "failed to open output file: " << filename;
-    Error(msg.str());
-  }
 }
 
 void ExtractGHKM::ProcessOptions(int argc, char *argv[],
@@ -424,7 +368,7 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   // Construct the 'top' of the usage message: the bit that comes before the
   // options list.
   std::ostringstream usageTop;
-  usageTop << "Usage: " << GetName()
+  usageTop << "Usage: " << name()
            << " [OPTION]... TARGET SOURCE ALIGNMENT EXTRACT\n\n"
            << "SCFG rule extractor based on the GHKM algorithm described in\n"
            << "Galley et al. (2004).\n\n"
@@ -436,21 +380,21 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
               << "\nThe parse tree is assumed to contain part-of-speech preterminal nodes.\n"
               << "\n"
               << "For the composed rule constraints: rule depth is the "
-                 "maximum distance from the\nrule's root node to a sink "
-                 "node, not counting preterminal expansions or word\n"
-                 "alignments.  Rule size is the measure defined in DeNeefe "
-                 "et al (2007): the\nnumber of non-part-of-speech, non-leaf "
-                 "constituent labels in the target tree.\nNode count is the "
-                 "number of target tree nodes (excluding target words).\n"
+              "maximum distance from the\nrule's root node to a sink "
+              "node, not counting preterminal expansions or word\n"
+              "alignments.  Rule size is the measure defined in DeNeefe "
+              "et al (2007): the\nnumber of non-part-of-speech, non-leaf "
+              "constituent labels in the target tree.\nNode count is the "
+              "number of target tree nodes (excluding target words).\n"
               << "\n"
               << "Scope pruning (Hopkins and Langmead, 2010) is applied to both minimal and\ncomposed rules.\n"
               << "\n"
               << "Unaligned source words are attached to the tree using the "
-                 "following heuristic:\nif there are aligned source words to "
-                 "both the left and the right of an unaligned\nsource word "
-                 "then it is attached to the lowest common ancestor of its "
-                 "nearest\nsuch left and right neighbours.  Otherwise, it is "
-                 "attached to the root of the\nparse tree.\n"
+              "following heuristic:\nif there are aligned source words to "
+              "both the left and the right of an unaligned\nsource word "
+              "then it is attached to the lowest common ancestor of its "
+              "nearest\nsuch left and right neighbours.  Otherwise, it is "
+              "attached to the root of the\nparse tree.\n"
               << "\n"
               << "Unless the --AllowUnary option is given, unary rules containing no lexical\nsource items are eliminated using the method described in Chung et al. (2011).\nThe parsing algorithm used in Moses is unable to handle such rules.\n"
               << "\n"
@@ -570,11 +514,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
 
   // Process the command-line.
   po::variables_map vm;
-  const int optionStyle = cls::allow_long
-                          | cls::long_allow_adjacent
-                          | cls::long_allow_next;
   try {
-    po::store(po::command_line_parser(argc, argv).style(optionStyle).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmdLineOptions).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {
@@ -656,12 +597,6 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     options.sourceUnknownWordFile.clear();
     options.unknownWordSoftMatchesFile.clear();
   }
-}
-
-void ExtractGHKM::Error(const std::string &msg) const
-{
-  std::cerr << GetName() << ": " << msg << std::endl;
-  std::exit(1);
 }
 
 std::vector<std::string> ExtractGHKM::ReadTokens(const std::string &s) const
@@ -836,7 +771,7 @@ void ExtractGHKM::CollectWordLabelCounts(
   for (SyntaxTree::ConstLeafIterator p(root);
        p != SyntaxTree::ConstLeafIterator(); ++p) {
     const SyntaxTree &leaf = *p;
-    const std::string &word = leaf.value().GetLabel();
+    const std::string &word = leaf.value().label;
     const SyntaxTree *ancestor = leaf.parent();
     // If unary rule elimination is enabled and this word is at the end of a
     // chain of unary rewrites, e.g.
@@ -848,7 +783,7 @@ void ExtractGHKM::CollectWordLabelCounts(
            ancestor->parent()->children().size() == 1) {
       ancestor = ancestor->parent();
     }
-    const std::string &label = ancestor->value().GetLabel();
+    const std::string &label = ancestor->value().label;
     ++wordCount[word];
     wordLabel[word] = label;
   }
@@ -860,7 +795,7 @@ std::vector<std::string> ExtractGHKM::ReadTokens(const SyntaxTree &root) const
   for (SyntaxTree::ConstLeafIterator p(root);
        p != SyntaxTree::ConstLeafIterator(); ++p) {
     const SyntaxTree &leaf = *p;
-    const std::string &word = leaf.value().GetLabel();
+    const std::string &word = leaf.value().label;
     tokens.push_back(word);
   }
   return tokens;
