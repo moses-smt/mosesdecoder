@@ -92,6 +92,12 @@ public:
   create(boost::shared_ptr<Moses::InputType> const& source,
          boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
 
+  static
+  boost::shared_ptr<TranslationTask>
+  create(boost::shared_ptr<Moses::InputType> const& source,
+         boost::shared_ptr<Moses::IOWrapper> const& ioWrapper,
+	 boost::shared_ptr<ContextScope>     const& scope);
+
   ~TranslationTask();
   /** Translate one sentence
    * gets called by main function implemented at end of this source file */
@@ -100,6 +106,11 @@ public:
   boost::shared_ptr<Moses::InputType>
   GetSource() const {
     return m_source;
+  }
+
+  boost::shared_ptr<Moses::IOWrapper const>
+  GetIOWrapper() const {
+    return m_ioWrapper;
   }
 
   boost::shared_ptr<BaseManager>

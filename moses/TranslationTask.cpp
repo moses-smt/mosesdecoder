@@ -61,6 +61,18 @@ TranslationTask
   return ret;
 }
 
+boost::shared_ptr<TranslationTask>
+TranslationTask
+::create(boost::shared_ptr<InputType> const& source,
+         boost::shared_ptr<IOWrapper> const& ioWrapper,
+	 boost::shared_ptr<ContextScope> const& scope)
+{
+  boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
+  ret->m_self  = ret;
+  ret->m_scope = scope;
+  return ret;
+}
+
 TranslationTask
 ::TranslationTask(boost::shared_ptr<InputType> const& source,
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
