@@ -41,7 +41,7 @@ namespace bitext
     // const members
     // sptr<bitext const> const   m_bitext; // keep bitext alive while I am 
     // should be an 
-    iptr<bitext>       const   m_bitext; // keep bitext alive as long as I am 
+    iptr<bitext const> const   m_bitext; // keep bitext alive as long as I am 
     size_t             const     m_plen; // length of lookup phrase
     bool               const      m_fwd; // forward or backward direction?
     sptr<tsa const>    const     m_root; // root of suffix array
@@ -60,7 +60,9 @@ namespace bitext
     size_t perform_ranked_sampling();
     
   public:
-    BitextSampler(bitext*  const bitext, typename bitext::iter const& phrase,
+    BitextSampler(BitextSampler const& other);
+    BitextSampler const& operator=(BitextSampler const& other);
+    BitextSampler(bitext const*  const bitext, typename bitext::iter const& phrase,
 		  sptr<SamplingBias const> const& bias, size_t const max_samples,
 		  sampling_method const method); 
     ~BitextSampler();
@@ -71,7 +73,7 @@ namespace bitext
   
   template<typename Token>
   BitextSampler<Token>::
-  BitextSampler(Bitext<Token>* const bitext, 
+  BitextSampler(Bitext<Token> const* const bitext, 
 		typename bitext::iter const& phrase,
 		sptr<SamplingBias const> const& bias, size_t const max_samples,
 		sampling_method const method)
@@ -92,6 +94,30 @@ namespace bitext
     m_stats->raw_cnt = phrase.ca();
     m_stats->register_worker();
   }
+  
+  template<typename Token>
+  BitextSampler<Token>::
+  BitextSampler(BitextSampler const& other)
+    : m_bitext(other.m_bitext)
+    , m_plen(other.m_plen)
+    , m_fwd(other.m_fwd)
+    , m_root(other.m_root)
+    , m_next(other.m_next)
+    , m_stop(other.m_stop)
+    , m_method(other.m_method)
+    , m_bias(other.m_bias)
+    , m_samples(other.m_samples)
+  {
+    // lock both instances
+    boost::unique_lock<boost::mutex> mylock(m_lock);
+    boost::unique_lock<boost::mutex> yrlock(other.m_lock);
+    // actually, BitextSamplers should only copied on job submission
+    m_stats = other.m_stats;
+    m_stats->register_worker();
+    m_ctr = other.m_ctr; 
+    m_total_bias = other.m_total_bias;
+    m_finished = other.m_finished;
+  }
 
   // Ranked sampling sorts all samples by score and then considers the top-ranked 
   // candidates for phrase extraction.
@@ -106,13 +132,13 @@ namespace bitext
     ugdiss::tsa::ArrayEntry I(m_next);
     while (I.next < m_stop)
       {
-	++m_ctr;
-	nbest.add(m_root->readEntry(I.next,I));
+        ++m_ctr;
+        nbest.add(m_root->readEntry(I.next,I));
       }
     for (size_t i = 0; i < nbest.size(); ++i)
       consider_sample(nbest.get_unsorted(i));
-    cerr << m_ctr << " samples considered at " 
-	 << __FILE__ << ":" << __LINE__ << endl;
+    // cerr << m_ctr << " samples considered at " 
+    //      << __FILE__ << ":" << __LINE__ << endl;
     return m_ctr;
   }
   
@@ -153,29 +179,29 @@ namespace bitext
     
     for (size_t s = rec.s1; s <= rec.s2; ++s)
       {
-	TSA<Token> const& I = m_fwd ? *m_bitext->I2 : *m_bitext->I1;
-	sptr<tsa_iter> b = I.find(o + s, rec.e1 - s);
-	UTIL_THROW_IF2(!b || b->size() < rec.e1 - s, "target phrase not found");
+        TSA<Token> const& I = m_fwd ? *m_bitext->I2 : *m_bitext->I1;
+        sptr<tsa_iter> b = I.find(o + s, rec.e1 - s);
+        UTIL_THROW_IF2(!b || b->size() < rec.e1 - s, "target phrase not found");
 	
-	for (size_t i = rec.e1; i <= rec.e2; ++i)
-	  {
-	    uint64_t tpid = b->getPid();
-	    
-	    // poor man's protection against over-counting
-	    size_t s = 0;
-	    while (s < seen.size() && seen[s] != tpid) ++s;
-	    if (s < seen.size()) continue;
-	    seen.push_back(tpid);
-	    
-	    size_t raw2 = b->approxOccurrenceCount();
-	    m_stats->add(tpid, sample_weight, aln, raw2,
-			 rec.po_fwd, rec.po_bwd, docid);
-	    bool ok = (i == rec.e2) || b->extend(o[i].id());
-	    UTIL_THROW_IF2(!ok, "Could not extend target phrase.");
-	  }
-	if (s < rec.s2) // shift phrase-internal alignments
-	  for (size_t k = 1; k < aln.size(); k += 2)
-	    --aln[k];
+        for (size_t i = rec.e1; i <= rec.e2; ++i)
+          {
+            uint64_t tpid = b->getPid();
+            
+            // poor man's protection against over-counting
+            size_t s = 0;
+            while (s < seen.size() && seen[s] != tpid) ++s;
+            if (s < seen.size()) continue;
+            seen.push_back(tpid);
+            
+            size_t raw2 = b->approxOccurrenceCount();
+            m_stats->add(tpid, sample_weight, m_bias ? (*m_bias)[p.sid] : 1, 
+                         aln, raw2, rec.po_fwd, rec.po_bwd, docid);
+            bool ok = (i == rec.e2) || b->extend(o[i].id());
+            UTIL_THROW_IF2(!ok, "Could not extend target phrase.");
+          }
+        if (s < rec.s2) // shift phrase-internal alignments
+          for (size_t k = 1; k < aln.size(); k += 2)
+            --aln[k];
       }
   }
   
@@ -206,18 +232,18 @@ namespace bitext
   BitextSampler<Token>::
   stats() 
   {
-    if (m_ctr == 0) (*this)();
-    boost::unique_lock<boost::mutex> lock(m_lock);
-    while (!m_finished)
-      m_ready.wait(lock);
+    // if (m_ctr == 0) (*this)();
+    // boost::unique_lock<boost::mutex> lock(m_lock);
+    // while (!m_finished)
+    // m_ready.wait(lock);
     return m_stats;
   }
 
   template<typename Token>
   BitextSampler<Token>::
   ~BitextSampler()
-  {
-    cerr << "bye" << endl;
+  { 
+    m_stats->release();
   }
 
 } // end of namespace bitext
