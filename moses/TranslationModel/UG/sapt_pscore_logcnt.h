@@ -2,7 +2,7 @@
 // Phrase scorer that rewards the number of phrase pair occurrences in a bitext
 // with the asymptotic function x/(j+x) where x > 0 is a function
 // parameter that determines the steepness of the rewards curve
-// written by Ulrich Germann 
+// written by Ulrich Germann
 
 #include "sapt_pscore_base.h"
 #include <boost/dynamic_bitset.hpp>
@@ -10,15 +10,15 @@
 using namespace std;
 namespace Moses {
   namespace bitext  {
-    
+
     template<typename Token>
     class
     PScoreLogCnt : public PhraseScorer<Token>
     {
       string m_specs;
     public:
-      PScoreLogCnt(string const specs) 
-      { 
+      PScoreLogCnt(string const specs)
+      {
 	this->m_index = -1;
 	this->m_specs = specs;
 	if (specs.find("r1") != string::npos) // raw source phrase counts
@@ -35,11 +35,11 @@ namespace Moses {
       }
 
       bool
-      isIntegerValued(int i) const { return true; } 
+      isIntegerValued(int i) const { return true; }
 
-      void 
-      operator()(Bitext<Token> const& bt, 
-		 PhrasePair<Token>& pp, 
+      void
+      operator()(Bitext<Token> const& bt,
+		 PhrasePair<Token>& pp,
 		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
@@ -49,15 +49,15 @@ namespace Moses {
 	assert(pp.joint);
 	assert(pp.raw2);
 	size_t i = this->m_index;
-	if (m_specs.find("r1") != string::npos) 
+	if (m_specs.find("r1") != string::npos)
 	  (*dest)[i++] = log(pp.raw1);
-	if (m_specs.find("s1") != string::npos) 
+	if (m_specs.find("s1") != string::npos)
 	  (*dest)[i++] = log(pp.sample1);
-	if (m_specs.find("g1") != string::npos) 
+	if (m_specs.find("g1") != string::npos)
 	  (*dest)[i++] = log(pp.good1);
-	if (m_specs.find("j") != string::npos) 
+	if (m_specs.find("j") != string::npos)
 	  (*dest)[i++] = log(pp.joint);
-	if (m_specs.find("r2") != string::npos) 
+	if (m_specs.find("r2") != string::npos)
 	  (*dest)[++i] = log(pp.raw2);
       }
     };

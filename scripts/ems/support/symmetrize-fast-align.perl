@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 die("ERROR: syntax is fastalign2bal.perl direct-alignment inverse-alignment source-file target-file out-stem symmetrization-method symal\n") unless scalar(@ARGV) == 7;
@@ -44,7 +48,10 @@ sub convert {
   my ($text,$alignment,$is_inverse) = @_;
   chop($text);
   chop($alignment);
-  $text =~ s/\s+$//;
+  $text =~ s/\<[^\>]+\>/ /g;
+  $text =~ s/\s+/ /;
+  $text =~ s/ $//;
+  $text =~ s/^ //;
   $alignment =~ s/\s+$//;
   my @TEXT = split(/\s+/,$text);
   print OUT scalar(@TEXT)." ".$text." #";

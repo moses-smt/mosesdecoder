@@ -80,7 +80,7 @@ void VecE<N,I,RC>::read ( char* ps, const ReaderContext& rc ) {
   */
   char* psT; int i=0;
   for ( char* psU=strtok_r(ps,",",&psT);
-        psU && i<NUM_ENTS; 
+        psU && i<NUM_ENTS;
         psU=strtok_r(NULL,",",&psT),i++ )
     StaticSafeArray<N,I>::set(i) = psU;
 }
@@ -166,7 +166,7 @@ void VecV<N,I,RC,ND1,ND2>::read ( char* ps, VecVReaderContext& rc ) {
   // Chop into individual coinds strings...
   char* psT; int i=0;
   for ( char* psU=strtok_r(ps,",",&psT);
-        psU && i<NUM_ENTS; 
+        psU && i<NUM_ENTS;
         psU=strtok_r(NULL,",",&psT), i++ )
     asV.set(i) = psU;
 
@@ -230,7 +230,7 @@ class JointVecV { //// : public StaticSafeArray<V1::NUM_ENTS+V2::NUM_ENTS,I> {
   static const int NUM_ENTS;
   // Constructor / destructor methods...
   JointVecV ( ) { }
-  JointVecV ( const V1& a1, const V2& a2 ) { 
+  JointVecV ( const V1& a1, const V2& a2 ) {
     ////fprintf(stderr,"iJoin "); a1.V1::write(stderr); fprintf(stderr," "); a2.V2::write(stderr); fprintf(stderr,"\n");
     for (int i=0; i<NUM_ENTS; i++) {
       if ( i<V1::NUM_ENTS ) set(i) = (a1.get(i)==-1)              ? IntType(-1) : (a1.get(i)<V1::NUM_ENTS) ? IntType(a1.get(i)) : a1.get(i)+V2::NUM_ENTS;

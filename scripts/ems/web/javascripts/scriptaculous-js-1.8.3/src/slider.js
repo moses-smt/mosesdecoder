@@ -5,7 +5,9 @@
 // script.aculo.us is freely distributable under the terms of an MIT-style license.
 // For details, see the script.aculo.us web site: http://script.aculo.us/
 
-if (!Control) var Control = { };
+if (!Control) {
+  var Control = { };
+}
 
 // options:
 //  axis: 'vertical', or 'horizontal' (default)
@@ -18,7 +20,7 @@ Control.Slider = Class.create({
     var slider = this;
 
     if (Object.isArray(handle)) {
-      this.handles = handle.collect( function(e) { return $(e) });
+      this.handles = handle.collect( function(e) { return $(e); });
     } else {
       this.handles = [$(handle)];
     }
@@ -32,8 +34,8 @@ Control.Slider = Class.create({
     this.range     = this.options.range || $R(0,1);
 
     this.value     = 0; // assure backwards compat
-    this.values    = this.handles.map( function() { return 0 });
-    this.spans     = this.options.spans ? this.options.spans.map(function(s){ return $(s) }) : false;
+    this.values    = this.handles.map( function() { return 0; });
+    this.spans     = this.options.spans ? this.options.spans.map(function(s){ return $(s); }) : false;
     this.options.startSpan = $(this.options.startSpan || null);
     this.options.endSpan   = $(this.options.endSpan || null);
 
@@ -58,7 +60,9 @@ Control.Slider = Class.create({
     this.dragging = false;
     this.disabled = false;
 
-    if (this.options.disabled) this.setDisabled();
+    if (this.options.disabled) {
+      this.setDisabled();
+    }
 
     // Allowed values array
     this.allowedValues = this.options.values ? this.options.values.sortBy(Prototype.K) : false;
@@ -104,8 +108,12 @@ Control.Slider = Class.create({
   },
   getNearestValue: function(value){
     if (this.allowedValues){
-      if (value >= this.allowedValues.max()) return(this.allowedValues.max());
-      if (value <= this.allowedValues.min()) return(this.allowedValues.min());
+      if (value >= this.allowedValues.max()) {
+        return(this.allowedValues.max());
+      }
+      if (value <= this.allowedValues.min()) {
+        return(this.allowedValues.min());
+      }
 
       var offset = Math.abs(this.allowedValues[0] - value);
       var newValue = this.allowedValues[0];
@@ -118,8 +126,12 @@ Control.Slider = Class.create({
       });
       return newValue;
     }
-    if (value > this.range.end) return this.range.end;
-    if (value < this.range.start) return this.range.start;
+    if (value > this.range.end) {
+      return this.range.end;
+    }
+    if (value < this.range.start) {
+      return this.range.start;
+    }
     return value;
   },
   setValue: function(sliderValue, handleIdx){
@@ -130,10 +142,12 @@ Control.Slider = Class.create({
     }
     handleIdx = handleIdx || this.activeHandleIdx || 0;
     if (this.initialized && this.restricted) {
-      if ((handleIdx>0) && (sliderValue<this.values[handleIdx-1]))
+      if ((handleIdx>0) && (sliderValue<this.values[handleIdx-1])) {
         sliderValue = this.values[handleIdx-1];
-      if ((handleIdx < (this.handles.length-1)) && (sliderValue>this.values[handleIdx+1]))
+      }
+      if ((handleIdx < (this.handles.length-1)) && (sliderValue>this.values[handleIdx+1])) {
         sliderValue = this.values[handleIdx+1];
+      }
     }
     sliderValue = this.getNearestValue(sliderValue);
     this.values[handleIdx] = sliderValue;
@@ -143,7 +157,9 @@ Control.Slider = Class.create({
       this.translateToPx(sliderValue);
 
     this.drawSpans();
-    if (!this.dragging || !this.event) this.updateFinished();
+    if (!this.dragging || !this.event) {
+      this.updateFinished();
+    }
   },
   setValueBy: function(delta, handleIdx) {
     this.setValue(this.values[handleIdx || this.activeHandleIdx || 0] + delta,
@@ -178,14 +194,17 @@ Control.Slider = Class.create({
   },
   drawSpans: function() {
     var slider = this;
-    if (this.spans)
-      $R(0, this.spans.length-1).each(function(r) { slider.setSpan(slider.spans[r], slider.getRange(r)) });
-    if (this.options.startSpan)
+    if (this.spans) {
+      $R(0, this.spans.length-1).each(function(r) { slider.setSpan(slider.spans[r], slider.getRange(r)); });
+    }
+    if (this.options.startSpan) {
       this.setSpan(this.options.startSpan,
         $R(0, this.values.length>1 ? this.getRange(0).min() : this.value ));
-    if (this.options.endSpan)
+    }
+    if (this.options.endSpan) {
       this.setSpan(this.options.endSpan,
         $R(this.values.length>1 ? this.getRange(this.spans.length-1).max() : this.value, this.maximum));
+    }
   },
   setSpan: function(span, range) {
     if (this.isVertical()) {
@@ -197,7 +216,7 @@ Control.Slider = Class.create({
     }
   },
   updateStyles: function() {
-    this.handles.each( function(h){ Element.removeClassName(h, 'selected') });
+    this.handles.each( function(h){ Element.removeClassName(h, 'selected'); });
     Element.addClassName(this.activeHandle, 'selected');
   },
   startDrag: function(event) {
@@ -219,8 +238,9 @@ Control.Slider = Class.create({
           this.offsetY = (pointer[1] - offsets[1]);
         } else {
           // find the handle (prevents issues with Safari)
-          while((this.handles.indexOf(handle) == -1) && handle.parentNode)
+          while((this.handles.indexOf(handle) == -1) && handle.parentNode) {
             handle = handle.parentNode;
+          }
 
           if (this.handles.indexOf(handle)!=-1) {
             this.activeHandle    = handle;
@@ -238,9 +258,13 @@ Control.Slider = Class.create({
   },
   update: function(event) {
    if (this.active) {
-      if (!this.dragging) this.dragging = true;
+      if (!this.dragging) {
+        this.dragging = true;
+      }
       this.draw(event);
-      if (Prototype.Browser.WebKit) window.scrollBy(0,0);
+      if (Prototype.Browser.WebKit) {
+        window.scrollBy(0,0);
+      }
       Event.stop(event);
    }
   },
@@ -251,8 +275,9 @@ Control.Slider = Class.create({
     pointer[1] -= this.offsetY + offsets[1];
     this.event = event;
     this.setValue(this.translateToValue( this.isVertical() ? pointer[1] : pointer[0] ));
-    if (this.initialized && this.options.onSlide)
+    if (this.initialized && this.options.onSlide) {
       this.options.onSlide(this.values.length>1 ? this.values : this.value, this);
+    }
   },
   endDrag: function(event) {
     if (this.active && this.dragging) {
@@ -268,8 +293,9 @@ Control.Slider = Class.create({
     this.updateFinished();
   },
   updateFinished: function() {
-    if (this.initialized && this.options.onChange)
+    if (this.initialized && this.options.onChange) {
       this.options.onChange(this.values.length>1 ? this.values : this.value, this);
+    }
     this.event = null;
   }
 });

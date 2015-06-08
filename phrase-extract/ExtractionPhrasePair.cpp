@@ -242,7 +242,7 @@ void ExtractionPhrasePair::AddProperties( const std::string &propertiesString, f
     vector<std::string> keyValue = Moses::TokenizeFirstOnly(tok, " ");
     if (keyValue.size() == 2) {
       AddProperty(keyValue[0], keyValue[1], count);
-    } 
+    }
   }
 }
 

@@ -16,8 +16,8 @@ struct ScoreRuleRet {
   unsigned int oov;
 };
 
-// Pass <s> and </s> normally.  
-// Indicate non-terminals with kNonTerminal.  
+// Pass <s> and </s> normally.
+// Indicate non-terminals with kNonTerminal.
 template <class Model> ScoreRuleRet ScoreRule(const Model &model, const std::vector<lm::WordIndex> &words, lm::ngram::ChartState *state_out);
 
 } // namespace search

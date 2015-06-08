@@ -1,4 +1,7 @@
-#! /usr/bin/perl
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 #######################
@@ -15,10 +18,11 @@
 #             added checks for existence of decoder and configuration file
 # 26 Jul 2006 fix a bug related to the use of absolute path for srcfile and nbestfile
 
+use warnings;
 use strict;
 
 #######################
-#Customizable parameters 
+#Customizable parameters
 
 #parameters for submiiting processes through Sun GridEngine
 my $queueparameters="";
@@ -28,7 +32,7 @@ my $queueparameters="";
 # my $queueparameters="-l q1dm -pe pe_mth 2 -hard";
 # etc.
 
-# look for the correct pwdcmd 
+# look for the correct pwdcmd
 my $pwdcmd = getPwdCmd();
 
 my $workingdir = `$pwdcmd`; chomp $workingdir;
@@ -38,7 +42,7 @@ my $splitpfx="split$$";
 $SIG{'INT'} = \&kill_all_and_quit; # catch exception for CTRL-C
 
 #######################
-#Default parameters 
+#Default parameters
 my $jobscript="$workingdir/job$$";
 my $qsubout="$workingdir/out.job$$";
 my $qsuberr="$workingdir/err.job$$";
@@ -115,7 +119,7 @@ sub init(){
   getSearchGraphParameters();
 
   getWordGraphParameters();
-  
+
   getLogParameters();
 
 #print_parameters();
@@ -204,7 +208,7 @@ sub print_parameters(){
   print STDERR "Inputtype: text\n" if $inputtype == 0;
   print STDERR "Inputtype: confusion network\n" if $inputtype == 1;
   print STDERR "Inputtype: lattices\n" if $inputtype == 2;
-  
+
   print STDERR "parameters directly passed to Moses: $mosesparameters\n";
 }
 
@@ -394,7 +398,7 @@ elsif ($inputtype==1){ #confusion network input
 
   $cmd="split $decimal -a 2 -l $splitN $tmpfile $tmpfile-";
   safesystem("$cmd") or die;
- 
+
   my @idxlist=();
   chomp(@idxlist=`ls $tmpfile-*`);
   grep(s/.+(\-\S+)$/$1/e,@idxlist);
@@ -455,7 +459,7 @@ while ($robust && scalar @idx_todo) {
     $batch_and_join = "-b no -j yes";
   }
   $cmd="qsub $queueparameters $batch_and_join -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash > ${jobscript}${idx}.log 2>&1";
-  print STDERR "$cmd\n" if $dbg; 
+  print STDERR "$cmd\n" if $dbg;
 
   safesystem($cmd) or die;
 
@@ -491,7 +495,7 @@ while ($robust && scalar @idx_todo) {
   # start the 'hold' job, i.e. the job that will wait
   $cmd="qsub -cwd $queueparameters $hj -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript 2> $qsubname.W.log";
   safesystem($cmd) or kill_all_and_quit();
-  
+
   # and wait for checkpoint file to appear
   my $nr=0;
   while (!-e $checkpointfile) {
@@ -501,7 +505,7 @@ while ($robust && scalar @idx_todo) {
   }
   print STDERR "End of waiting.\n";
   safesystem("\\rm -f $checkpointfile $syncscript") or kill_all_and_quit();
-  
+
   my $failure = 1;
   my $nr = 0;
   while ($nr < 60 && $failure) {
@@ -541,22 +545,22 @@ while ($robust && scalar @idx_todo) {
 	 print STDERR "some jobs crashed: ".join(" ",@idx_still_todo)."\n";
 	 kill_all_and_quit();
      }
-     
+
  }
 }
 
 #concatenating translations and removing temporary files
 concatenate_1best();
 concatenate_logs() if $logflag;
-concatenate_ali() if defined $alifile;  
-concatenate_details() if defined $detailsfile;  
-concatenate_nbest() if $nbestflag;  
+concatenate_ali() if defined $alifile;
+concatenate_details() if defined $detailsfile;
+concatenate_nbest() if $nbestflag;
 safesystem("cat nbest$$ >> /dev/stdout") if $nbestlist[0] eq '-';
 
-concatenate_searchgraph() if $searchgraphflag;  
+concatenate_searchgraph() if $searchgraphflag;
 safesystem("cat searchgraph$$ >> /dev/stdout") if $searchgraphlist eq '-';
 
-concatenate_wordgraph() if $wordgraphflag;  
+concatenate_wordgraph() if $wordgraphflag;
 safesystem("cat wordgraph$$ >> /dev/stdout") if $wordgraphlist[0] eq '-';
 
 remove_temporary_files();
@@ -565,7 +569,7 @@ remove_temporary_files();
 #script creation
 sub preparing_script(){
   my $currStartTranslationId = 0;
-  
+
   foreach my $idx (@idxlist){
     my $scriptheader="";
     $scriptheader.="\#\! /bin/bash\n\n";
@@ -652,7 +656,7 @@ sub preparing_script(){
 
     #setting permissions of each script
     chmod(oct(755),"${jobscript}${idx}.bash");
-    
+
     $currStartTranslationId += $splitN;
   }
 }
@@ -682,8 +686,8 @@ sub concatenate_wordgraph(){
       my $code="";
       if (/^UTTERANCE=/){
         ($code)=($_=~/^UTTERANCE=(\d+)/);
-     
-	print STDERR "code:$code offset:$offset\n"; 
+
+	print STDERR "code:$code offset:$offset\n";
         $code += $offset;
         if ($code ne $oldcode){
 
@@ -694,11 +698,11 @@ sub concatenate_wordgraph(){
           while ($code - $oldcode > 1){
              $oldcode++;
              print OUT "UTTERANCE=$oldcode\n";
-	print STDERR " to OUT -> code:$oldcode\n"; 
+	print STDERR " to OUT -> code:$oldcode\n";
              print OUT "_EMPTYWORDGRAPH_\n";
           }
         }
-      
+
         $oldcode=$code;
         print OUT "UTTERANCE=$oldcode\n";
         next;
@@ -771,14 +775,14 @@ sub concatenate_nbest(){
   my $newcode=-1;
   my %inplength = ();
   my $offset = 0;
- 
+
 # get the list of feature and set a fictitious string with zero scores
   open (IN, "${nbestfile}.${splitpfx}$idxlist[0]");
   my $str = <IN>;
   chomp($str);
   close(IN);
   my ($code,$trans,$featurescores,$globalscore)=split(/\|\|\|/,$str);
-  
+
   my $emptytrans = "  ";
   my $emptyglobalscore = " 0.0";
   my $emptyfeaturescores = $featurescores;
@@ -922,7 +926,7 @@ sub check_translation(){
       die "INPUTTYPE:$inputtype is unknown!\n";
     }
     chomp($outputN=`wc -l ${inputfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
-    
+
     if ($inputN != $outputN){
       print STDERR "Split ($idx) were not entirely translated\n";
       print STDERR "outputN=$outputN inputN=$inputN\n";
@@ -959,9 +963,9 @@ sub check_translation_old_sge(){
       print STDERR "outputfile=${inputfile}.$splitpfx$idx.trans inputfile=${inputfile}.$splitpfx$idx\n";
       return 1;
     }
-		
+
   }
-  return 0; 
+  return 0;
 }
 
 sub remove_temporary_files(){

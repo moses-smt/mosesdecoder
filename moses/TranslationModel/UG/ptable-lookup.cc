@@ -1,5 +1,6 @@
 #include "mmsapt.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "moses/TranslationTask.h"
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
@@ -19,13 +20,13 @@ class SimplePhrase : public Moses::Phrase
   vector<FactorType> const m_fo; // factor order
 public:
   SimplePhrase(): m_fo(1,FactorType(0)) {}
-  
-  void init(string const& s) 
+
+  void init(string const& s)
   {
     istringstream buf(s); string w;
-    while (buf >> w) 
+    while (buf >> w)
       {
-	Word wrd; 
+	Word wrd;
 	this->AddWord().CreateFromString(Input,m_fo,StringPiece(w),false,false);
       }
   }
@@ -63,29 +64,31 @@ int main(int argc, char* argv[])
       cerr << "Phrase table implementation not supported by this utility." << endl;
       exit(1);
     }
-  
+
   string line;
   while (true)
     {
-      Sentence phrase;
-      if (!phrase.Read(cin,ifo)) break;
-      if (pdta) 
+      boost::shared_ptr<Sentence> phrase(new Sentence);
+      if (!phrase->Read(cin,ifo)) break;
+      boost::shared_ptr<TranslationTask> ttask;
+      ttask = TranslationTask::create(phrase);
+      if (pdta)
 	{
-	  pdta->InitializeForInput(phrase); 
+	  pdta->InitializeForInput(ttask);
 	  // do we also need to call CleanupAfterSentenceProcessing at the end?
 	}
-      Phrase& p = phrase;
+      Phrase& p = *phrase;
 
       cout << p << endl;
-      TargetPhraseCollection const* trg = PT->GetTargetPhraseCollectionLEGACY(p);
+      TargetPhraseCollection const* trg = PT->GetTargetPhraseCollectionLEGACY(ttask,p);
       if (!trg) continue;
-      vector<size_t> order(trg->GetSize()); 
+      vector<size_t> order(trg->GetSize());
       for (size_t i = 0; i < order.size(); ++i) order[i] = i;
       sort(order.begin(),order.end(),TargetPhraseIndexSorter(*trg));
       size_t k = 0;
-      // size_t precision = 
+      // size_t precision =
       cout.precision(2);
-      
+
       vector<string> fname;
       if (mmsapt)
       	{
@@ -101,12 +104,13 @@ int main(int argc, char* argv[])
       	  Phrase const& phr = static_cast<Phrase const&>(*(*trg)[i]);
       	  cout << setw(3) << ++k << " " << phr << endl;
       	  ScoreComponentCollection const& scc = (*trg)[i]->GetScoreBreakdown();
-      	  ScoreComponentCollection::IndexPair idx = scc.GetIndexes(PT);
+	  size_t start = PT->GetIndex();
+	  size_t stop  = start + PT->GetNumScoreComponents();
       	  FVector const& scores = scc.GetScoresVector();
       	  cout << "   ";
-      	  for (size_t k = idx.first; k < idx.second; ++k)
+      	  for (size_t k = start; k < stop; ++k)
       	    {
-	      size_t j = k-idx.first;
+	      size_t j = k-start;
 	      float f = (mmsapt ? mmsapt->isLogVal(j) ? exp(scores[k]) : scores[k]
 			 : scores[k] < 0 ? exp(scores[k]) : scores[k]);
 	      string fmt = (mmsapt && mmsapt->isInteger(j)) ? "%10d" : "%10.8f";
@@ -118,6 +122,6 @@ int main(int argc, char* argv[])
     }
   exit(0);
 }
-  
-  
+
+
 

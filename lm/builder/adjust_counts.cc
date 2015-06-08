@@ -1,5 +1,6 @@
 #include "lm/builder/adjust_counts.hh"
-#include "lm/builder/ngram_stream.hh"
+#include "lm/common/ngram_stream.hh"
+#include "lm/builder/payload.hh"
 #include "util/stream/timer.hh"
 
 #include <algorithm>
@@ -13,7 +14,7 @@ BadDiscountException::~BadDiscountException() throw() {}
 
 namespace {
 // Return last word in full that is different.
-const WordIndex* FindDifference(const NGram &full, const NGram &lower_last) {
+const WordIndex* FindDifference(const NGram<BuildingPayload> &full, const NGram<BuildingPayload> &lower_last) {
   const WordIndex *cur_word = full.end() - 1;
   const WordIndex *pre_word = lower_last.end() - 1;
   // Find last difference.
@@ -48,7 +49,8 @@ class StatCollector {
             // TODO: Specialize error message for j == 3, meaning 3+
             UTIL_THROW_IF(s.n[j] == 0, BadDiscountException, "Could not calculate Kneser-Ney discounts for "
                 << (i+1) << "-grams with adjusted count " << (j+1) << " because we didn't observe any "
-                << (i+1) << "-grams with adjusted count " << j << "; Is this small or artificial data?");
+                << (i+1) << "-grams with adjusted count " << j << "; Is this small or artificial data?\n"
+                << "Try deduplicating the input.  To override this error for e.g. a class-based model, rerun with --discount_fallback\n");
           }
 
           // See equation (26) in Chen and Goodman.
@@ -63,7 +65,7 @@ class StatCollector {
             case THROW_UP:
               throw;
             case COMPLAIN:
-              std::cerr << e.what() << "  Substituting fallback discounts D1=" << config.fallback.amount[1] << " D2=" << config.fallback.amount[2] << " D3+=" << config.fallback.amount[3] << std::endl;
+              std::cerr << "Substituting fallback discounts for order " << i << ": D1=" << config.fallback.amount[1] << " D2=" << config.fallback.amount[2] << " D3+=" << config.fallback.amount[3] << std::endl;
             case SILENT:
               break;
           }
@@ -110,41 +112,41 @@ class StatCollector {
 class CollapseStream {
   public:
     CollapseStream(const util::stream::ChainPosition &position, uint64_t prune_threshold, const std::vector<bool>& prune_words) :
-      current_(NULL, NGram::OrderFromSize(position.GetChain().EntrySize())),
+      current_(NULL, NGram<BuildingPayload>::OrderFromSize(position.GetChain().EntrySize())),
       prune_threshold_(prune_threshold),
       prune_words_(prune_words),
-      block_(position) { 
+      block_(position) {
       StartBlock();
     }
 
-    const NGram &operator*() const { return current_; }
-    const NGram *operator->() const { return &current_; }
+    const NGram<BuildingPayload> &operator*() const { return current_; }
+    const NGram<BuildingPayload> *operator->() const { return &current_; }
 
     operator bool() const { return block_; }
 
     CollapseStream &operator++() {
       assert(block_);
-      
+
       if (current_.begin()[1] == kBOS && current_.Base() < copy_from_) {
         memcpy(current_.Base(), copy_from_, current_.TotalSize());
         UpdateCopyFrom();
-        
+
         // Mark highest order n-grams for later pruning
-        if(current_.Count() <= prune_threshold_) {
-          current_.Mark(); 
+        if(current_.Value().count <= prune_threshold_) {
+          current_.Value().Mark();
         }
-        
+
         if(!prune_words_.empty()) {
           for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
             if(prune_words_[*i]) {
-              current_.Mark(); 
+              current_.Value().Mark();
               break;
             }
           }
         }
-        
+
       }
-    
+
       current_.NextInMemory();
       uint8_t *block_base = static_cast<uint8_t*>(block_->Get());
       if (current_.Base() == block_base + block_->ValidSize()) {
@@ -152,21 +154,21 @@ class CollapseStream {
         ++block_;
         StartBlock();
       }
-      
+
       // Mark highest order n-grams for later pruning
-      if(current_.Count() <= prune_threshold_) {
-        current_.Mark(); 
+      if(current_.Value().count <= prune_threshold_) {
+        current_.Value().Mark();
       }
 
       if(!prune_words_.empty()) {
         for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
           if(prune_words_[*i]) {
-            current_.Mark(); 
+            current_.Value().Mark();
             break;
           }
         }
       }
-      
+
       return *this;
     }
 
@@ -179,31 +181,31 @@ class CollapseStream {
       current_.ReBase(block_->Get());
       copy_from_ = static_cast<uint8_t*>(block_->Get()) + block_->ValidSize();
       UpdateCopyFrom();
-      
+
       // Mark highest order n-grams for later pruning
-      if(current_.Count() <= prune_threshold_) {
-        current_.Mark(); 
+      if(current_.Value().count <= prune_threshold_) {
+        current_.Value().Mark();
       }
 
       if(!prune_words_.empty()) {
         for(WordIndex* i = current_.begin(); i != current_.end(); i++) {
           if(prune_words_[*i]) {
-            current_.Mark(); 
+            current_.Value().Mark();
             break;
           }
         }
       }
-      
+
     }
 
     // Find last without bos.
     void UpdateCopyFrom() {
       for (copy_from_ -= current_.TotalSize(); copy_from_ >= current_.Base(); copy_from_ -= current_.TotalSize()) {
-        if (NGram(copy_from_, current_.Order()).begin()[1] != kBOS) break;
+        if (NGram<BuildingPayload>(copy_from_, current_.Order()).begin()[1] != kBOS) break;
       }
     }
 
-    NGram current_;
+    NGram<BuildingPayload> current_;
 
     // Goes backwards in the block
     uint8_t *copy_from_;
@@ -221,37 +223,37 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
   StatCollector stats(order, counts_, counts_pruned_, discounts_);
   if (order == 1) {
 
-    // Only unigrams.  Just collect stats.  
-    for (NGramStream full(positions[0]); full; ++full) {
-      
+    // Only unigrams.  Just collect stats.
+    for (NGramStream<BuildingPayload> full(positions[0]); full; ++full) {
+
       // Do not prune <s> </s> <unk>
       if(*full->begin() > 2) {
-        if(full->Count() <= prune_thresholds_[0])
-          full->Mark();
-      
+        if(full->Value().count <= prune_thresholds_[0])
+          full->Value().Mark();
+
         if(!prune_words_.empty() && prune_words_[*full->begin()])
-          full->Mark();
+          full->Value().Mark();
       }
-      
-      stats.AddFull(full->UnmarkedCount(), full->IsMarked());
+
+      stats.AddFull(full->Value().UnmarkedCount(), full->Value().IsMarked());
     }
 
     stats.CalculateDiscounts(discount_config_);
     return;
   }
 
-  NGramStreams streams;
+  NGramStreams<BuildingPayload> streams;
   streams.Init(positions, positions.size() - 1);
-  
+
   CollapseStream full(positions[positions.size() - 1], prune_thresholds_.back(), prune_words_);
 
   // Initialization: <unk> has count 0 and so does <s>.
-  NGramStream *lower_valid = streams.begin();
-  const NGramStream *const streams_begin = streams.begin();
-  streams[0]->Count() = 0;
+  NGramStream<BuildingPayload> *lower_valid = streams.begin();
+  const NGramStream<BuildingPayload> *const streams_begin = streams.begin();
+  streams[0]->Value().count = 0;
   *streams[0]->begin() = kUNK;
   stats.Add(0, 0);
-  (++streams[0])->Count() = 0;
+  (++streams[0])->Value().count = 0;
   *streams[0]->begin() = kBOS;
   // <s> is not in stats yet because it will get put in later.
 
@@ -260,7 +262,7 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
   std::vector<uint64_t> actual_counts(positions.size(), 0);
   // Something of a hack: don't prune <s>.
   actual_counts[0] = std::numeric_limits<uint64_t>::max();
-  
+
   // Iterate over full (the stream of the highest order ngrams)
   for (; full; ++full) {
     const WordIndex *different = FindDifference(*full, **lower_valid);
@@ -270,28 +272,28 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
     for (; lower_valid >= &streams[same]; --lower_valid) {
       uint64_t order_minus_1 = lower_valid - streams_begin;
       if(actual_counts[order_minus_1] <= prune_thresholds_[order_minus_1])
-        (*lower_valid)->Mark();
-      
+        (*lower_valid)->Value().Mark();
+
       if(!prune_words_.empty()) {
         for(WordIndex* i = (*lower_valid)->begin(); i != (*lower_valid)->end(); i++) {
           if(prune_words_[*i]) {
-            (*lower_valid)->Mark(); 
+            (*lower_valid)->Value().Mark();
             break;
           }
         }
       }
-        
-      stats.Add(order_minus_1, (*lower_valid)->UnmarkedCount(), (*lower_valid)->IsMarked());
+
+      stats.Add(order_minus_1, (*lower_valid)->Value().UnmarkedCount(), (*lower_valid)->Value().IsMarked());
       ++*lower_valid;
     }
 
     // STEP 2: Update n-grams that still match.
     // n-grams that match get count from the full entry.
     for (std::size_t i = 0; i < same; ++i) {
-      actual_counts[i] += full->UnmarkedCount();
+      actual_counts[i] += full->Value().UnmarkedCount();
     }
     // Increment the number of unique extensions for the longest match.
-    if (same) ++streams[same - 1]->Count();
+    if (same) ++streams[same - 1]->Value().count;
 
     // STEP 3: Initialize new n-grams.
     // This is here because bos is also const WordIndex *, so copy gets
@@ -300,47 +302,47 @@ void AdjustCounts::Run(const util::stream::ChainPositions &positions) {
     // Initialize and mark as valid up to bos.
     const WordIndex *bos;
     for (bos = different; (bos > full->begin()) && (*bos != kBOS); --bos) {
-      NGramStream &to = *++lower_valid;
+      NGramStream<BuildingPayload> &to = *++lower_valid;
       std::copy(bos, full_end, to->begin());
-      to->Count() = 1;
-      actual_counts[lower_valid - streams_begin] = full->UnmarkedCount();
+      to->Value().count = 1;
+      actual_counts[lower_valid - streams_begin] = full->Value().UnmarkedCount();
     }
     // Now bos indicates where <s> is or is the 0th word of full.
     if (bos != full->begin()) {
       // There is an <s> beyond the 0th word.
-      NGramStream &to = *++lower_valid;
+      NGramStream<BuildingPayload> &to = *++lower_valid;
       std::copy(bos, full_end, to->begin());
 
       // Anything that begins with <s> has full non adjusted count.
-      to->Count() = full->UnmarkedCount();
-      actual_counts[lower_valid - streams_begin] = full->UnmarkedCount();
+      to->Value().count = full->Value().UnmarkedCount();
+      actual_counts[lower_valid - streams_begin] = full->Value().UnmarkedCount();
     } else {
-      stats.AddFull(full->UnmarkedCount(), full->IsMarked());
+      stats.AddFull(full->Value().UnmarkedCount(), full->Value().IsMarked());
     }
     assert(lower_valid >= &streams[0]);
   }
 
   // The above loop outputs n-grams when it observes changes.  This outputs
   // the last n-grams.
-  for (NGramStream *s = streams.begin(); s <= lower_valid; ++s) {
+  for (NGramStream<BuildingPayload> *s = streams.begin(); s <= lower_valid; ++s) {
     uint64_t lower_count = actual_counts[(*s)->Order() - 1];
     if(lower_count <= prune_thresholds_[(*s)->Order() - 1])
-      (*s)->Mark();
-      
+      (*s)->Value().Mark();
+
     if(!prune_words_.empty()) {
       for(WordIndex* i = (*s)->begin(); i != (*s)->end(); i++) {
         if(prune_words_[*i]) {
-          (*s)->Mark(); 
+          (*s)->Value().Mark();
           break;
         }
       }
     }
-      
-    stats.Add(s - streams.begin(), lower_count, (*s)->IsMarked());
+
+    stats.Add(s - streams.begin(), lower_count, (*s)->Value().IsMarked());
     ++*s;
   }
   // Poison everyone!  Except the N-grams which were already poisoned by the input.
-  for (NGramStream *s = streams.begin(); s != streams.end(); ++s)
+  for (NGramStream<BuildingPayload> *s = streams.begin(); s != streams.end(); ++s)
     s->Poison();
 
   stats.CalculateDiscounts(discount_config_);

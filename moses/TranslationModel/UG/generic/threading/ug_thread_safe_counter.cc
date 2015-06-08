@@ -3,10 +3,10 @@ namespace Moses
 {
   ThreadSafeCounter::
   ThreadSafeCounter()
-    : ctr(0) 
+    : ctr(0)
   { }
 
-  size_t 
+  size_t
   ThreadSafeCounter::
   operator++()
   {
@@ -14,21 +14,21 @@ namespace Moses
     return ++ctr;
   }
 
-  size_t 
+  size_t
   ThreadSafeCounter::
   operator++(int foo)
   {
     boost::lock_guard<boost::mutex> guard(this->lock);
     return ctr++;
   }
-  
+
   ThreadSafeCounter::
   operator size_t() const
   {
     return ctr;
   }
 
-  size_t 
+  size_t
   ThreadSafeCounter::
   operator--()
   {
@@ -36,13 +36,13 @@ namespace Moses
     return --ctr;
   }
 
-  size_t 
+  size_t
   ThreadSafeCounter::
   operator--(int foo)
   {
     boost::lock_guard<boost::mutex> guard(this->lock);
     return ctr--;
   }
-  
-  
+
+
 }

@@ -17,6 +17,15 @@ configname=$(basename $configf | sed 's/\.config$//')
 
 source "$configf"
 
+# beautifier
+git clone git@github.com:moses-smt/mosesdecoder.git /tmp/moses
+cd /tmp/moses
+./scripts/other/beautify.py --format --skip-perltidy
+git commit -am "daily automatic beautifier"
+git push
+rm -rf /tmp/moses
+cd -
+
 [ -z "$MCC_SCAN_BRANCHES" ] \
   && die "Bad config $configf; does not define MCC_SCAN_BRANCHES"
 
@@ -107,7 +116,6 @@ function run_single_test () {
   #regtest_dir=$PWD/$(basename $regtest_file .tgz)
   cd ..
 
-
   echo "## ./bjam clean" >> $longlog
   ./bjam clean $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
 
@@ -115,7 +123,7 @@ function run_single_test () {
   if [ -z "$err" ]; then
     ./bjam $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="bjam"
   fi
-  
+
   echo "## regression tests" >> $longlog
   if [ -z "$err" ]; then
     ./bjam $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || err="regression tests"
@@ -155,10 +163,11 @@ function run_single_test () {
   if [ -z "$err" ]; then
     status="OK"
   else
+    git reset --hard HEAD
     status="FAIL:$err"
   fi
   echo "## Status: $status" >> $longlog
-  
+
   nicedate=$(date +"%Y%m%d-%H%M%S")
   echo "$commit	$status	$configname	$ccversion	$nicedate" \
     >> "$LOGDIR/brief.log"
@@ -180,14 +189,14 @@ done
 # create info files for new commits
 for i in $(git rev-list $MCC_SCAN_BRANCHES); do
   first_char=$(echo $i | grep -o '^.')
-  mkdir -p "$LOGDIR/logs/$configname/$first_char" 
+  mkdir -p "$LOGDIR/logs/$configname/$first_char"
   [ -f "$LOGDIR/logs/$configname/$first_char/$i.info" ] && break;
   git show $i | $MYDIR/shorten_info.pl > "$LOGDIR/logs/$configname/$first_char/$i.info"
 done
 
 #### Main loop over all commits
 for i in $MCC_SCAN_BRANCHES; do
-  warn "On brach $i"
+  warn "On branch $i"
   git rev-list $i \
   | while read commit; do
     first_char=$(echo $commit | grep -o '^.')

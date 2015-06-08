@@ -11,8 +11,8 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <stdlib.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cassert>
 #include <cstring>
 #include <sstream>
 #include <map>
@@ -86,7 +86,14 @@ namespace MosesTraining
 class ExtractTask
 {
 public:
-  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation, Moses::OutputFileStream &extractFileContext, Moses::OutputFileStream &extractFileContextInv):
+  ExtractTask(
+    size_t id, SentenceAlignment &sentence,
+    PhraseExtractionOptions &initoptions,
+    Moses::OutputFileStream &extractFile,
+    Moses::OutputFileStream &extractFileInv,
+    Moses::OutputFileStream &extractFileOrientation,
+    Moses::OutputFileStream &extractFileContext,
+    Moses::OutputFileStream &extractFileContextInv):
     m_sentence(sentence),
     m_options(initoptions),
     m_extractFile(extractFile),

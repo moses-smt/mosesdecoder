@@ -9,6 +9,7 @@
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/WordsRange.h"
+#include "moses/TranslationOption.h"
 
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "util/exception.hh"
@@ -43,8 +44,8 @@ public:
   EmptyHypothesisState(const InputType &input) const;
 
   void
-  InitializeForInput(const InputType& i) {
-    m_table->InitializeForInput(i);
+  InitializeForInput(ttasksptr const& ttask) {
+    if (m_table) m_table->InitializeForInput(ttask);
   }
 
   Scores
@@ -95,6 +96,14 @@ public:
     return m_defaultScores[i];
   }
 
+  virtual
+  void
+  SetCache(TranslationOption& to) const;
+
+  virtual
+  void
+  SetCache(TranslationOptionList& tol) const;
+
 private:
   bool DecodeCondition(std::string s);
   bool DecodeDirection(std::string s);
@@ -109,6 +118,8 @@ private:
   std::string m_filePath;
   bool m_haveDefaultScores;
   Scores m_defaultScores;
+public:
+  LRModel const& GetModel() const;
 };
 
 }

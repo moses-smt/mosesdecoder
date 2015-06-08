@@ -18,10 +18,6 @@
  ***********************************************************************/
 
 #include <sstream>
-#include <cstdio>
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
 #include <assert.h>
 #include <cstring>
 #include <map>
@@ -38,7 +34,8 @@
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 
-using namespace std;
+#include "moses/Util.h"
+
 using namespace boost::algorithm;
 using namespace MosesTraining;
 
@@ -67,7 +64,9 @@ bool unalignedFlag = false;
 bool unalignedFWFlag = false;
 bool crossedNonTerm = false;
 bool spanLength = false;
+bool ruleLength = false;
 bool nonTermContext = false;
+bool nonTermContextTarget = false;
 
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
@@ -96,7 +95,6 @@ Vocabulary vcbS;
 
 } // namespace
 
-std::vector<std::string> tokenize( const char [] );
 
 void processLine( std::string line,
                   int lineID, bool includeSentenceIdFlag, int &sentenceId,
@@ -109,19 +107,20 @@ void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float>
                                    const std::string &fileNameLeftHandSideSourceLabelCounts,
                                    const std::string &fileNameLeftHandSideTargetSourceLabelCounts );
 void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fileName );
-void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile,
+void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb );
-void outputPhrasePair(const ExtractionPhrasePair &phrasePair, float, int, ostream &phraseTableFile, const ScoreFeatureManager &featureManager, const MaybeLog &maybeLog );
+void outputPhrasePair(const ExtractionPhrasePair &phrasePair, float, int, std::ostream &phraseTableFile, const ScoreFeatureManager &featureManager, const MaybeLog &maybeLog );
 double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
 double computeUnalignedPenalty( const ALIGNMENT *alignmentTargetToSource );
-set<std::string> functionWordList;
+std::set<std::string> functionWordList;
 void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors, std::vector<float> &orientationClassPriorsL2R, std::vector<float> &orientationClassPriorsR2L);
-void loadFunctionWords( const string &fileNameFunctionWords );
+void loadFunctionWords( const std::string &fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
 int calcCrossedNonTerm( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
-void printSourcePhrase( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *targetToSourceAlignment, ostream &out );
-void printTargetPhrase( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *targetToSourceAlignment, ostream &out );
+void printSourcePhrase( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *targetToSourceAlignment, std::ostream &out );
+void printTargetPhrase( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *targetToSourceAlignment, std::ostream &out );
 void invertAlignment( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *inTargetToSourceAlignment, ALIGNMENT *outSourceToTargetAlignment );
+size_t NumNonTerminal(const PHRASE *phraseSource);
 
 
 int main(int argc, char* argv[])
@@ -131,7 +130,15 @@ int main(int argc, char* argv[])
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PartsOfSpeech] [--PCFG] [--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] [--TargetPreferenceLabels] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+    std::cerr <<
+              "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] "
+              "[--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] "
+              "[--NoWordAlignment] [--UnalignedPenalty] "
+              "[--UnalignedFunctionWordPenalty function-word-file] "
+              "[--MinCountHierarchical count] [--PartsOfSpeech] [--PCFG] "
+              "[--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] "
+              "[--TargetPreferenceLabels] [--UnpairedExtractFormat] "
+              "[--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }
@@ -148,7 +155,8 @@ int main(int argc, char* argv[])
   std::string fileNameLeftHandSideTargetPreferenceLabelCounts;
   std::string fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts;
   std::string fileNamePhraseOrientationPriors;
-  std::vector<std::string> featureArgs; // all unknown args passed to feature manager
+  // All unknown args are passed to feature manager.
+  std::vector<std::string> featureArgs;
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {
@@ -228,7 +236,7 @@ int main(int argc, char* argv[])
       negLogProb = -1;
       std::cerr << "using negative log-probabilities" << std::endl;
     } else if (strcmp(argv[i],"--MinCountHierarchical") == 0) {
-      minCountHierarchical = atof(argv[++i]);
+      minCountHierarchical = Moses::Scan<float>( argv[++i] );
       std::cerr << "dropping all phrase pairs occurring less than " << minCountHierarchical << " times" << std::endl;
       minCountHierarchical -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
@@ -245,9 +253,15 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--SpanLength") == 0) {
       spanLength = true;
       std::cerr << "span length feature" << std::endl;
+    } else if (strcmp(argv[i],"--RuleLength") == 0) {
+      ruleLength = true;
+      std::cerr << "rule length feature" << std::endl;
     } else if (strcmp(argv[i],"--NonTermContext") == 0) {
       nonTermContext = true;
       std::cerr << "non-term context" << std::endl;
+    } else if (strcmp(argv[i],"--NonTermContextTarget") == 0) {
+      nonTermContextTarget = true;
+      std::cerr << "non-term context (target)" << std::endl;
     } else {
       featureArgs.push_back(argv[i]);
       ++i;
@@ -291,10 +305,9 @@ int main(int argc, char* argv[])
     std::cerr << "ERROR: could not open extract file " << fileNameExtract << std::endl;
     exit(1);
   }
-  istream &extractFileP = extractFile;
 
   // output file: phrase translation table
-  ostream *phraseTableFile;
+  std::ostream *phraseTableFile;
 
   if (fileNamePhraseTable == "-") {
     phraseTableFile = &std::cout;
@@ -310,8 +323,7 @@ int main(int argc, char* argv[])
   }
 
   // loop through all extracted phrase translations
-  string line, lastLine;
-  lastLine[0] = '\0';
+  std::string line, lastLine;
   ExtractionPhrasePair *phrasePair = NULL;
   std::vector< ExtractionPhrasePair* > phrasePairsWithSameSource;
   std::vector< ExtractionPhrasePair* > phrasePairsWithSameSourceAndTarget; // required for hierarchical rules only, as non-terminal alignments might make the phrases incompatible
@@ -323,8 +335,7 @@ int main(int argc, char* argv[])
   float tmpCount=0.0f, tmpPcfgSum=0.0f;
 
   int i=0;
-  // TODO why read only the 1st line?
-  if ( getline(extractFileP, line) ) {
+  if ( getline(extractFile, line) ) {
     ++i;
     tmpPhraseSource = new PHRASE();
     tmpPhraseTarget = new PHRASE();
@@ -346,7 +357,7 @@ int main(int argc, char* argv[])
     lastLine = line;
   }
 
-  while ( getline(extractFileP, line) ) {
+  while ( getline(extractFile, line) ) {
 
     if ( ++i % 100000 == 0 ) {
       std::cerr << "." << std::flush;
@@ -503,7 +514,8 @@ void processLine( std::string line,
   phraseTarget->clear();
   targetToSourceAlignment->clear();
 
-  std::vector<std::string> token = tokenize( line.c_str() );
+  std::vector<std::string> token;
+  Moses::Tokenize( token, line );
   int item = 1;
   for ( size_t j=0; j<token.size(); ++j ) {
     if (token[j] == "|||") {
@@ -534,7 +546,7 @@ void processLine( std::string line,
     } else if (item + (includeSentenceIdFlag?-1:0) == 4) { // count
       sscanf(token[j].c_str(), "%f", &count);
     } else if (item + (includeSentenceIdFlag?-1:0) == 5) { // target syntax PCFG score
-      float pcfgScore = std::atof(token[j].c_str());
+      float pcfgScore = Moses::Scan<float>( token[j] );
       pcfgSum = pcfgScore * count;
     }
   }
@@ -548,17 +560,17 @@ void processLine( std::string line,
     count = 1.0;
   }
   if (item < 3 || item > (includeSentenceIdFlag?7:6)) {
-    std::cerr << "ERROR: faulty line " << lineID << ": " << line << endl;
+    std::cerr << "ERROR: faulty line " << lineID << ": " << line << std::endl;
   }
 
 }
 
 
-void writeCountOfCounts( const string &fileNameCountOfCounts )
+void writeCountOfCounts( const std::string &fileNameCountOfCounts )
 {
   // open file
   Moses::OutputFileStream countOfCountsFile;
-  bool success = countOfCountsFile.Open(fileNameCountOfCounts.c_str());
+  bool success = countOfCountsFile.Open(fileNameCountOfCounts);
   if (!success) {
     std::cerr << "ERROR: could not open count-of-counts file "
               << fileNameCountOfCounts << std::endl;
@@ -583,7 +595,7 @@ void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float>
 {
   // open file
   Moses::OutputFileStream leftHandSideSourceLabelCounts;
-  bool success = leftHandSideSourceLabelCounts.Open(fileNameLeftHandSideSourceLabelCounts.c_str());
+  bool success = leftHandSideSourceLabelCounts.Open(fileNameLeftHandSideSourceLabelCounts);
   if (!success) {
     std::cerr << "ERROR: could not open left-hand side label counts file "
               << fileNameLeftHandSideSourceLabelCounts << std::endl;
@@ -600,7 +612,7 @@ void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float>
 
   // open file
   Moses::OutputFileStream leftHandSideTargetSourceLabelCounts;
-  success = leftHandSideTargetSourceLabelCounts.Open(fileNameLeftHandSideTargetSourceLabelCounts.c_str());
+  success = leftHandSideTargetSourceLabelCounts.Open(fileNameLeftHandSideTargetSourceLabelCounts);
   if (!success) {
     std::cerr << "ERROR: could not open left-hand side label joint counts file "
               << fileNameLeftHandSideTargetSourceLabelCounts << std::endl;
@@ -624,7 +636,7 @@ void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fi
 {
   // open file
   Moses::OutputFileStream out;
-  bool success = out.Open(fileName.c_str());
+  bool success = out.Open(fileName);
   if (!success) {
     std::cerr << "ERROR: could not open file "
               << fileName << " for writing" << std::endl;
@@ -640,7 +652,7 @@ void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fi
 }
 
 
-void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile,
+void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb )
 {
   if (phrasePairsWithSameSource.size() == 0) {
@@ -668,7 +680,7 @@ void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSa
 
 void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
                       float totalCount, int distinctCount,
-                      ostream &phraseTableFile,
+                      std::ostream &phraseTableFile,
                       const ScoreFeatureManager& featureManager,
                       const MaybeLog& maybeLogProb )
 {
@@ -677,13 +689,14 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   const ALIGNMENT *bestAlignmentT2S = phrasePair.FindBestAlignmentTargetToSource();
   float count = phrasePair.GetCount();
 
-  map< string, float > domainCount;
+  std::map< std::string, float > domainCount;
 
   // collect count of count statistics
   if (goodTuringFlag || kneserNeyFlag) {
     totalDistinct++;
     int countInt = count + 0.99999;
-    if (countInt <= COC_MAX)
+    if ((countInt <= COC_MAX) &&
+        (countInt > 0))
       countOfCounts[ countInt ]++;
   }
 
@@ -796,13 +809,13 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   // extra features
   ScoreFeatureContext context(phrasePair, maybeLogProb);
   std::vector<float> extraDense;
-  map<string,float> extraSparse;
+  std::map<std::string,float> extraSparse;
   featureManager.addFeatures(context, extraDense, extraSparse);
   for (size_t i = 0; i < extraDense.size(); ++i) {
     phraseTableFile << " " << extraDense[i];
   }
 
-  for (map<string,float>::const_iterator i = extraSparse.begin();
+  for (std::map<std::string,float>::const_iterator i = extraSparse.begin();
        i != extraSparse.end(); ++i) {
     phraseTableFile << " " << i->first << " " << i->second;
   }
@@ -882,23 +895,47 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   }
 
   if (spanLength && !inverseFlag) {
-    string propValue = phrasePair.CollectAllPropertyValues("SpanLength");
+    std::string propValue = phrasePair.CollectAllPropertyValues("SpanLength");
     if (!propValue.empty()) {
       phraseTableFile << " {{SpanLength " << propValue << "}}";
     }
   }
 
-  if (nonTermContext && !inverseFlag) {
-    string propValue = phrasePair.CollectAllPropertyValues("NonTermContext");
+  if (ruleLength && !inverseFlag) {
+    std::string propValue = phrasePair.CollectAllPropertyValues("RuleLength");
     if (!propValue.empty()) {
-      phraseTableFile << " {{NonTermContext " << propValue << "}}";
+      phraseTableFile << " {{RuleLength " << propValue << "}}";
+    }
+  }
+
+  if (nonTermContext && !inverseFlag) {
+    std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContext");
+    if (!propValue.empty() && propValue.size() < 50000) {
+      size_t nNTs = NumNonTerminal(phraseSource);
+      phraseTableFile << " {{NonTermContext " << nNTs << " " << propValue << "}}";
+    }
+  }
+
+  if (nonTermContextTarget && !inverseFlag) {
+    std::string propValue = phrasePair.CollectAllPropertyValues("NonTermContextTarget");
+    if (!propValue.empty() && propValue.size() < 50000) {
+      size_t nNTs = NumNonTerminal(phraseSource);
+      phraseTableFile << " {{NonTermContextTarget " << nNTs << " " << propValue << "}}";
     }
   }
 
   phraseTableFile << std::endl;
 }
 
-
+size_t NumNonTerminal(const PHRASE *phraseSource)
+{
+  size_t nNTs = 0;
+  for(size_t j=0; j<phraseSource->size()-1; ++j) {
+    if (isNonTerminal(vcbS.getWord( phraseSource->at(j) )))
+      ++nNTs;
+  }
+  return nNTs;
+}
 
 void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors,
                            std::vector<float> &orientationClassPriorsL2R,
@@ -907,8 +944,7 @@ void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors,
   assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dleft dright
 
   std::cerr << "Loading phrase orientation priors from " << fileNamePhraseOrientationPriors;
-  ifstream inFile;
-  inFile.open(fileNamePhraseOrientationPriors.c_str());
+  Moses::InputFileStream inFile(fileNamePhraseOrientationPriors);
   if (inFile.fail()) {
     std::cerr << " - ERROR: could not open file" << std::endl;
     exit(1);
@@ -919,7 +955,7 @@ void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors,
   float l2rSum = 0;
   float r2lSum = 0;
   while (getline(inFile, line)) {
-    istringstream tokenizer(line);
+    std::istringstream tokenizer(line);
     std::string key;
     tokenizer >> key;
 
@@ -983,7 +1019,7 @@ void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors,
   }
 
   std::cerr << " - read " << linesRead << " lines from orientation priors file" << std::endl;
-  inFile.close();
+  inFile.Close();
 }
 
 
@@ -1038,7 +1074,7 @@ double computeUnalignedPenalty( const ALIGNMENT *alignmentTargetToSource )
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
   for(size_t ti=0; ti<alignmentTargetToSource->size(); ++ti) {
-    const set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
+    const std::set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
     if (srcIndices.empty()) {
       unaligned *= 2.718;
     }
@@ -1053,7 +1089,7 @@ double computeUnalignedFWPenalty( const PHRASE *phraseTarget, const ALIGNMENT *a
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
   for(size_t ti=0; ti<alignmentTargetToSource->size(); ++ti) {
-    const set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
+    const std::set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
     if (srcIndices.empty() && functionWordList.find( vcbT.getWord( phraseTarget->at(ti) ) ) != functionWordList.end()) {
       unaligned *= 2.718;
     }
@@ -1061,26 +1097,25 @@ double computeUnalignedFWPenalty( const PHRASE *phraseTarget, const ALIGNMENT *a
   return unaligned;
 }
 
-void loadFunctionWords( const string &fileName )
+void loadFunctionWords( const std::string &fileName )
 {
   std::cerr << "Loading function word list from " << fileName;
-  ifstream inFile;
-  inFile.open(fileName.c_str());
+  Moses::InputFileStream inFile(fileName);
   if (inFile.fail()) {
     std::cerr << " - ERROR: could not open file" << std::endl;
     exit(1);
   }
-  istream *inFileP = &inFile;
 
-  string line;
-  while(getline(*inFileP, line)) {
-    std::vector<string> token = tokenize( line.c_str() );
+  std::string line;
+  while(getline(inFile, line)) {
+    std::vector<std::string> token;
+    Moses::Tokenize( token, line );
     if (token.size() > 0)
       functionWordList.insert( token[0] );
   }
 
   std::cerr << " - read " << functionWordList.size() << " function words" << std::endl;
-  inFile.close();
+  inFile.Close();
 }
 
 
@@ -1091,14 +1126,14 @@ double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phra
   int null = vcbS.getWordID("NULL");
   // all target words have to be explained
   for(size_t ti=0; ti<alignmentTargetToSource->size(); ti++) {
-    const set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
+    const std::set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
     if (srcIndices.empty()) {
       // explain unaligned word by NULL
       lexScore *= lexTable.permissiveLookup( null, phraseTarget->at(ti) );
     } else {
       // go through all the aligned words to compute average
       double thisWordScore = 0;
-      for (set< size_t >::const_iterator p(srcIndices.begin()); p != srcIndices.end(); ++p) {
+      for (std::set< size_t >::const_iterator p(srcIndices.begin()); p != srcIndices.end(); ++p) {
         thisWordScore += lexTable.permissiveLookup( phraseSource->at(*p), phraseTarget->at(ti) );
       }
       lexScore *= thisWordScore / (double)srcIndices.size();
@@ -1108,24 +1143,23 @@ double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phra
 }
 
 
-void LexicalTable::load( const string &fileName )
+void LexicalTable::load( const std::string &fileName )
 {
   std::cerr << "Loading lexical translation table from " << fileName;
-  ifstream inFile;
-  inFile.open(fileName.c_str());
+  Moses::InputFileStream inFile(fileName);
   if (inFile.fail()) {
     std::cerr << " - ERROR: could not open file" << std::endl;
     exit(1);
   }
-  istream *inFileP = &inFile;
 
-  string line;
+  std::string line;
   int i=0;
-  while(getline(*inFileP, line)) {
+  while(getline(inFile, line)) {
     i++;
-    if (i%100000 == 0) std::cerr << "." << flush;
+    if (i%100000 == 0) std::cerr << "." << std::flush;
 
-    std::vector<string> token = tokenize( line.c_str() );
+    std::vector<std::string> token;
+    Moses::Tokenize( token, line );
     if (token.size() != 3) {
       std::cerr << "line " << i << " in " << fileName
                 << " has wrong number of tokens, skipping:" << std::endl
@@ -1133,7 +1167,7 @@ void LexicalTable::load( const string &fileName )
       continue;
     }
 
-    double prob = atof( token[2].c_str() );
+    double prob = Moses::Scan<double>( token[2] );
     WORD_ID wordT = vcbT.storeIfNew( token[0] );
     WORD_ID wordS = vcbS.storeIfNew( token[1] );
     ltable[ wordS ][ wordT ] = prob;
@@ -1143,7 +1177,7 @@ void LexicalTable::load( const string &fileName )
 
 
 void printSourcePhrase(const PHRASE *phraseSource, const PHRASE *phraseTarget,
-                       const ALIGNMENT *targetToSourceAlignment, ostream &out)
+                       const ALIGNMENT *targetToSourceAlignment, std::ostream &out)
 {
   // get corresponding target non-terminal and output pair
   ALIGNMENT *sourceToTargetAlignment = new ALIGNMENT();
@@ -1175,7 +1209,7 @@ void printSourcePhrase(const PHRASE *phraseSource, const PHRASE *phraseTarget,
 
 
 void printTargetPhrase(const PHRASE *phraseSource, const PHRASE *phraseTarget,
-                       const ALIGNMENT *targetToSourceAlignment, ostream &out)
+                       const ALIGNMENT *targetToSourceAlignment, std::ostream &out)
 {
   // output target symbols, except root, in rule table format
   for (std::size_t i = 0; i < phraseTarget->size()-1; ++i) {

@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 my ($source_file,$target_file,$alignment_factors) = @ARGV;
@@ -19,6 +23,14 @@ while(my $source = <SOURCE>) {
   my $target = <TARGET>;
   chop($source);
   chop($target);
+
+  # remove markup
+  foreach my $line (\$source,\$target) {
+    $$line =~ s/\<[^\>]+\>/ /g;
+    $$line =~ s/\s+/ /g;
+    $$line =~ s/^ //;
+    $$line =~ s/ $//;
+  }
 
   # no factors
   if (!defined($alignment_factors)) {

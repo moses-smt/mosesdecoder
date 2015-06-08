@@ -168,9 +168,10 @@ TreePointer ChartKBestExtractor::GetOutputTree(const Derivation &d)
     }
 
     mytree->Combine(previous_trees);
+    mytree->Unbinarize();
     return mytree;
   } else {
-    UTIL_THROW2("Error: TreeStructureFeature active, but no internal tree structure found");
+    UTIL_THROW2("Error: k-best tree output active, but no internal tree structure found");
   }
 }
 

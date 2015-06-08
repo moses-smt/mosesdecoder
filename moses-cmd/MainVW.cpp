@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TrainingTask.h"
+#include "util/random.hh"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -117,14 +118,14 @@ int main(int argc, char** argv)
 
 
     //initialise random numbers
-    srand(time(NULL));
+    util::rand_init();
 
     // set up read/writing class
     IFVERBOSE(1) {
       PrintUserTime("Created input-output object");
     }
 
-    IOWrapper* ioWrapper = new IOWrapper();
+    boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper());
     if (ioWrapper == NULL) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);
@@ -143,29 +144,23 @@ int main(int argc, char** argv)
 #endif
 
     // main loop over set of input sentences
-    InputType* source = NULL;
-    size_t lineCount = staticData.GetStartTranslationId();
-    while(ioWrapper->ReadInput(staticData.GetInputType(),source)) {
-      source->SetTranslationId(lineCount);
+
+    boost::shared_ptr<InputType> source;
+    while ((source = ioWrapper->ReadInput()) != NULL) {
       IFVERBOSE(1) {
         ResetUserTime();
       }
 
-      FeatureFunction::CallChangeSource(source);
-
       // set up task of training one sentence
-      TrainingTask* task = new TrainingTask(source, *ioWrapper);
+      boost::shared_ptr<TrainingTask> task;
+      task = TrainingTask::create(source, ioWrapper);
 
       // execute task
 #ifdef WITH_THREADS
       pool.Submit(task);
 #else
       task->Run();
-      delete task;
 #endif
-
-      source = NULL; //make sure it doesn't get deleted
-      ++lineCount;
     }
 
     // we are done, finishing up
@@ -173,7 +168,6 @@ int main(int argc, char** argv)
     pool.Stop(true); //flush remaining jobs
 #endif
 
-    delete ioWrapper;
     FeatureFunction::Destroy();
 
   } catch (const std::exception &e) {

@@ -1,0 +1,42 @@
+# get stuff from environment variables if not set on the command line
+# unless blocked explicitly
+for local what in cmph irstlm  
+{  
+   if ! [ option.get "with-$(what)" ] && ! [ option.get "no-$(what)" : : no ] 
+   {
+      local where = [ os.environ "$(what:U)_ROOT" ] ;
+      if $(where) 
+      { 
+         echo "setting option with-$(what) from environment variable "
+              "$(what:U)_ROOT ." ;
+         option.set "with-$(what)" : $(where) ; 
+       }
+   }
+   local where = [ option.get "with-$(what)" ] ;
+}
+
+# if --with-moses-regtest is specified without a directory
+local regtest = [ option.get "with-moses-regtest" : no : yes ] ;
+if $(regtest) = yes 
+{ # regtests requested but no path given 
+  echo "Regression tests requested but no path given." ; 
+  local $(where)  = [ os.environ "MOSES_REGTEST_ROOT" ] ;
+  if ! $(where) 
+  {
+    local HOME = [ os.environ "HOME" ] ; 
+    if [ path.exists $(HOME)/moses-regression-tests ] 
+    {
+      echo "Using ~/moses-regression-tests as the default." ; 
+      option.set "with-moses-regtest" : "~/moses-regression-tests" ; 
+    }
+  }
+  else 
+  { 
+    if [ path.exists $(where) ] 
+    {
+      echo "Using $(where) from environment variable MOSES_REGTEST_ROOT."
+      option.set "with-regtest" : $(where) ; 
+    }
+  }
+}
+

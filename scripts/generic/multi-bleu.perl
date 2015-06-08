@@ -1,6 +1,10 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
+use warnings;
 use strict;
 
 my $lowercase = 0;
@@ -72,7 +76,7 @@ while(<STDIN>) {
 		$REF_NGRAM_N{$ngram}++;
 	    }
 	    foreach my $ngram (keys %REF_NGRAM_N) {
-		if (!defined($REF_NGRAM{$ngram}) || 
+		if (!defined($REF_NGRAM{$ngram}) ||
 		    $REF_NGRAM{$ngram} < $REF_NGRAM_N{$ngram}) {
 		    $REF_NGRAM{$ngram} = $REF_NGRAM_N{$ngram};
 #	    print "$i: REF_NGRAM{$ngram} = $REF_NGRAM{$ngram}<BR>\n";

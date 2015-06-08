@@ -1,4 +1,3 @@
-
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
@@ -20,16 +19,18 @@
 
 #pragma once
 
-#include "Alignment.h"
-#include "moses/AlignmentInfo.h"
-
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
 #include <boost/unordered_map.hpp>
 
-namespace Moses
+#include "moses/AlignmentInfo.h"
+
+#include "Alignment.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -53,8 +54,8 @@ public:
 
   PhraseOrientation(int sourceSize,
                     int targetSize,
-                    const AlignmentInfo &alignTerm,
-                    const AlignmentInfo &alignNonTerm);
+                    const Moses::AlignmentInfo &alignTerm,
+                    const Moses::AlignmentInfo &alignNonTerm);
 
   REO_CLASS GetOrientationInfo(int startF, int endF, REO_DIR direction) const;
   REO_CLASS GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const;
@@ -119,5 +120,4 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
-
+}  // namespace MosesTraining

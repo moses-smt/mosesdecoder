@@ -1,8 +1,12 @@
-#! /usr/bin/perl
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # example
 # ~/giza-parallel.perl 10 split ~/workspace/sourceforge/trunk/scripts/training/train-model.perl ar en train align
 
+use warnings;
 use strict;
 use File::Basename;
 
@@ -46,7 +50,7 @@ my @childs;
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
-	
+
 	if ($pid == 0)
 	{ # child
 	  $isParent = 0;
@@ -72,7 +76,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
   }
 	else
 	{ # parent
-		push(@childs, $pid);	
+		push(@childs, $pid);
 	}
 
 }

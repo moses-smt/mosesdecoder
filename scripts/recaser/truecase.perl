@@ -1,6 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id: train-recaser.perl 1326 2007-03-26 05:44:27Z bojar $
+
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 
@@ -88,8 +93,20 @@ sub split_xml {
   while($line =~ /\S/) {
     # XML tag
     if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
-      $MARKUP[$i] .= $1." ";
-      $line = $2;
+      my $potential_xml = $1;
+      my $line_next = $2;
+      # exception for factor that is an XML tag
+      if ($line =~ /^\S/ && scalar(@WORD)>0 && $WORD[$i-1] =~ /\|$/) {
+	$WORD[$i-1] .= $potential_xml;
+	if ($line_next =~ /^(\|+)(.*)$/) {
+	  $WORD[$i-1] .= $1;
+	  $line_next = $2;
+	}
+      }
+      else {
+        $MARKUP[$i] .= $potential_xml." ";
+      }
+      $line = $line_next;
     }
     # non-XML text
     elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {

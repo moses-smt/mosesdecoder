@@ -1,15 +1,22 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
 
+#print STDERR "RealBin=$RealBin\n";
 print STDERR "Training OSM - Start\n".`date`;
 
 my $ORDER = 5;
 my $OUT_DIR = "/tmp/osm.$$";
 my $___FACTOR_DELIMITER = "|";
 my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$LMPLZ);
+
+my $cmd;
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -26,20 +33,24 @@ die("ERROR: wrong syntax when invoking OSM-Train.perl")
 		       'lmplz=s' => \$LMPLZ,
 		       'out-dir=s' => \$OUT_DIR);
 
+if (!defined($LMPLZ)) {
+    $LMPLZ = "$MOSES_SRC_DIR/bin/lmplz";
+}
+
 # check if the files are in place
-die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, --srilm-dir or --lmplz, and --moses-src-dir") 
-    unless (defined($MOSES_SRC_DIR) && 
-	    defined($CORPUS_F) && 
-	    defined($CORPUS_E) && 
-	    defined($ALIGNMENT)&& 
+die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, and --moses-src-dir")
+    unless (defined($MOSES_SRC_DIR) &&
+	    defined($CORPUS_F) &&
+	    defined($CORPUS_E) &&
+	    defined($ALIGNMENT)&&
 	    (defined($SRILM_DIR) || defined($LMPLZ)));
-die("ERROR: could not find input corpus file '$CORPUS_F'") 
+die("ERROR: could not find input corpus file '$CORPUS_F'")
     unless -e $CORPUS_F;
-die("ERROR: could not find output corpus file '$CORPUS_E'") 
+die("ERROR: could not find output corpus file '$CORPUS_E'")
     unless -e $CORPUS_E;
-die("ERROR: could not find algnment file '$ALIGNMENT'") 
+die("ERROR: could not find algnment file '$ALIGNMENT'")
     unless -e $ALIGNMENT;
-die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM") 
+die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM")
     unless -e "$MOSES_SRC_DIR/scripts/OSM/flipAlignment.perl";
 
 # create factors
@@ -47,13 +58,13 @@ die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM")
 `$MOSES_SRC_DIR/scripts/OSM/flipAlignment.perl $ALIGNMENT > $OUT_DIR/align`;
 
 if (defined($FACTOR)) {
-  
+
    my @factor_values = split(/\+/, $FACTOR);
- 
+
     foreach my $factor_val (@factor_values) {
     `mkdir $OUT_DIR/$factor_val`;
   my ($factor_f,$factor_e) = split(/\-/,$factor_val);
-    
+
     $CORPUS_F =~ /^(.+)\.([^\.]+)/;
     my ($corpus_stem_f,$ext_f) = ($1,$2);
     $CORPUS_E =~ /^(.+)\.([^\.]+)/;
@@ -69,7 +80,7 @@ if (defined($FACTOR)) {
 else {
     `ln -s $CORPUS_F $OUT_DIR/f`;
     `ln -s $CORPUS_E $OUT_DIR/e`;
-     create_model("");	
+     create_model("");
 }
 
 # create model
@@ -79,25 +90,34 @@ print "Training OSM - End".`date`;
 sub create_model{
 my ($factor_val) = @_;
 
-print "Creating Model ".$factor_val."\n";
+print STDERR "Creating Model ".$factor_val."\n";
 
-print "Extracting Singletons\n";
-`$MOSES_SRC_DIR/scripts/OSM/extract-singletons.perl $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align > $OUT_DIR/$factor_val/Singletons`;
+print STDERR "Extracting Singletons\n";
+$cmd = "$MOSES_SRC_DIR/scripts/OSM/extract-singletons.perl $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align > $OUT_DIR/$factor_val/Singletons";
+print STDERR "Executing: $cmd\n";
+`$cmd`;
 
-print "Converting Bilingual Sentence Pair into Operation Corpus\n";
-`$MOSES_SRC_DIR/bin/generateSequences $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align $OUT_DIR/$factor_val/Singletons > $OUT_DIR/$factor_val/opCorpus`;
+print STDERR "Converting Bilingual Sentence Pair into Operation Corpus\n";
+$cmd = "$MOSES_SRC_DIR/bin/generateSequences $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align $OUT_DIR/$factor_val/Singletons > $OUT_DIR/$factor_val/opCorpus";
+print STDERR "Executing: $cmd\n";
+`$cmd`;
 
-print "Learning Operation Sequence Translation Model\n";
-if (defined($LMPLZ)) {
-  `$LMPLZ --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1`;
+print STDERR "Learning Operation Sequence Translation Model\n";
+if (defined($SRILM_DIR)) {
+    $cmd = "$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM 2>> /dev/stderr";
+    print STDERR "Executing: $cmd\n";
+    `$cmd`;
 }
 else {
-  `$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM`;
+  $cmd = "$LMPLZ -S 20% -T $OUT_DIR --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1 2>> /dev/stderr";
+  print STDERR "Executing: $cmd\n";
+  `$cmd`;
 }
 
-print "Binarizing\n";
-`$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM $OUT_DIR/$factor_val/operationLM.bin`;
-
+print STDERR "Binarizing\n";
+$cmd = "$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM $OUT_DIR/$factor_val/operationLM.bin";
+print STDERR "Executing: $cmd\n";
+`$cmd`;
 
 }
 
@@ -107,7 +127,7 @@ sub reduce_factors {
 
     my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
 
-    print "Reducing factors to produce $reduced  @ ".`date`;
+    print STDERR "Reducing factors to produce $reduced  @ ".`date`;
     while(-e $reduced.".lock") {
 	sleep(10);
     }
@@ -167,7 +187,7 @@ sub reduce_factors {
               die "ERROR: Couldn't find factor $outfactor in token \"$_\" in $full LINE $nr" if !defined $out;
               print OUT $out;
             }
-	} 
+	}
 	print OUT "\n";
     }
     print STDERR "\n";

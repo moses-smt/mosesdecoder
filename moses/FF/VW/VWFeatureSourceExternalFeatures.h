@@ -39,7 +39,8 @@ public:
       VWFeatureSource::SetParameter(key, value);
   }
 
-  virtual void InitializeForInput(InputType const& source) {
+  virtual void InitializeForInput(ttasksptr const& ttask) {
+    InputType const& source = ttask->GetSource();
     UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
                    "This feature function requires the TabbedSentence input type");
 

@@ -75,7 +75,7 @@ public:
     const ChartCellCollectionBase &,
     std::size_t);
 
-  virtual void InitializeForInput(InputType const& source);
+  virtual void InitializeForInput(ttasksptr const& ttask);
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   const TargetPhraseCollection *GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;

@@ -7,7 +7,7 @@
 #include <vector>
 
 //Gets the MurmurmurHash for give string
-uint64_t getHash(StringPiece text); 
+uint64_t getHash(StringPiece text);
 
 std::vector<uint64_t> getVocabIDs(StringPiece textin);
 

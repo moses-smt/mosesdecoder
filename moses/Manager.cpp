@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WIN32
 #include <hash_set>
 #else
-#include <ext/hash_set>
+// #include <ext/hash_set>
 #endif
 
 #include <algorithm>
@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/LM/Base.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationAnalysis.h"
+#include "moses/TranslationTask.h"
 #include "moses/HypergraphOutput.h"
 #include "moses/mbr.h"
 #include "moses/LatticeMBR.h"
@@ -54,31 +55,40 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "util/exception.hh"
+#include "util/random.hh"
 
 using namespace std;
 
 namespace Moses
 {
-Manager::Manager(InputType const& source)
-  :BaseManager(source)
-  ,m_transOptColl(source.CreateTranslationOptionCollection())
-  ,interrupted_flag(0)
-  ,m_hypoId(0)
+
+Manager::Manager(ttasksptr const& ttask)
+  : BaseManager(ttask)
+  , interrupted_flag(0)
+  , m_hypoId(0)
 {
+  boost::shared_ptr<InputType> source = ttask->GetSource();
+  m_transOptColl = source->CreateTranslationOptionCollection(ttask);
+
   const StaticData &staticData = StaticData::Instance();
   SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
-  m_search = Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl);
+  m_search = Search::CreateSearch(*this, *source, searchAlgorithm,
+                                  *m_transOptColl);
 
-  StaticData::Instance().InitializeForInput(m_source);
+  StaticData::Instance().InitializeForInput(ttask);
 }
 
 Manager::~Manager()
 {
   delete m_transOptColl;
   delete m_search;
-  // this is a comment ...
+  StaticData::Instance().CleanUpAfterSentenceProcessing(m_ttask.lock());
+}
 
-  StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
+const InputType&
+Manager::GetSource() const
+{
+  return m_source ;
 }
 
 /**
@@ -121,7 +131,8 @@ void Manager::Decode()
   Timer searchTime;
   searchTime.start();
   m_search->Decode();
-  VERBOSE(1, "Line " << m_source.GetTranslationId() << ": Search took " << searchTime << " seconds" << endl);
+  VERBOSE(1, "Line " << m_source.GetTranslationId()
+          << ": Search took " << searchTime << " seconds" << endl);
   IFVERBOSE(2) {
     GetSentenceStats().StopTimeTotal();
     TRACE_ERR(GetSentenceStats());
@@ -418,7 +429,7 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
       //cerr << endl;
 
       //draw the sample
-      float frandom = log((float)rand()/RAND_MAX);
+      const float frandom = log(util::rand_incl(0.0f, 1.0f));
       size_t position = 1;
       float sum = candidateScores[0];
       for (; position < candidateScores.size() && sum < frandom; ++position) {
@@ -1637,7 +1648,7 @@ void Manager::OutputNBest(std::ostream& out
     out << " |||";
 
     // print scores with feature names
-    path.GetScoreBreakdown().OutputAllFeatureScores(out );
+    path.GetScoreBreakdown()->OutputAllFeatureScores(out);
 
     // total
     out << " ||| " << path.GetTotalScore();
@@ -1868,8 +1879,7 @@ void Manager::OutputAlignment(ostream &out, const vector<const Hypothesis *> &ed
 
     targetOffset += tp.GetSize();
   }
-  // Removing std::endl here breaks -alignment-output-file, so stop doing that, please :)
-  // Or fix it somewhere else.
+  // Used by --alignment-output-file so requires endl
   out << std::endl;
 }
 
@@ -1964,14 +1974,19 @@ void Manager::OutputSearchGraphSLF() const
 
 }
 
-void Manager::OutputSearchGraphHypergraph() const
-{
-  const StaticData &staticData = StaticData::Instance();
-  if (staticData.GetOutputSearchGraphHypergraph()) {
-    HypergraphOutput<Manager> hypergraphOutput(PRECISION);
-    hypergraphOutput.Write(*this);
-  }
-}
+// void Manager::OutputSearchGraphHypergraph() const
+// {
+//   const StaticData &staticData = StaticData::Instance();
+//   if (!staticData.GetOutputSearchGraphHypergraph()) return;
+
+//   static char const* key = "output-search-graph-hypergraph";
+//   PARAM_VEC const* p = staticData.GetParameter().GetParam(key);
+//   ScoreComponentCollection const& weights = staticData.GetAllWeights();
+//   string const& nBestFile = staticData.GetNBestFilePath();
+//   HypergraphOutput<Manager> hypergraphOutput(PRECISION, p, nBestFile, weights);
+//   hypergraphOutput.Write(*this);
+
+// }
 
 void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId) const
 {
@@ -2024,6 +2039,8 @@ void Manager::OutputBestHypo(const Moses::TrellisPath &path, long /*translationI
 void Manager::OutputAlignment(std::ostringstream &out, const TrellisPath &path) const
 {
   Hypothesis::OutputAlignment(out, path.GetEdges());
+  // Used by --alignment-output-file so requires endl
+  out << std::endl;
 }
 
 } // namespace

@@ -9,7 +9,7 @@
 #include <boost/scoped_ptr.hpp>
 
 /* Wrapper to NPLM "by Ashish Vaswani, with contributions from David Chiang
- * and Victoria Fossum."  
+ * and Victoria Fossum."
  * http://nlg.isi.edu/software/nplm/
  */
 
@@ -49,6 +49,8 @@ struct State {
   WordIndex words[NPLM_MAX_ORDER - 1];
 };
 
+class Backend;
+
 class Model : public lm::base::ModelFacade<Model, State, Vocabulary> {
   private:
     typedef lm::base::ModelFacade<Model, State, Vocabulary> P;
@@ -68,7 +70,7 @@ class Model : public lm::base::ModelFacade<Model, State, Vocabulary> {
   private:
     boost::scoped_ptr<nplm::neuralLM> base_instance_;
 
-    mutable boost::thread_specific_ptr<nplm::neuralLM> backend_;
+    mutable boost::thread_specific_ptr<Backend> backend_;
 
     Vocabulary vocab_;
 

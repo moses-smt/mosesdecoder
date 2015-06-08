@@ -1,11 +1,15 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 my $cores = 8;
 my $serial = 1;
 my ($infile,$outfile,$cmd,$tmpdir);
-my $parent = $$; 
+my $parent = $$;
 
 use Getopt::Long qw(:config pass_through no_ignore_case);
 GetOptions('cores=i' => \$cores,
@@ -26,7 +30,7 @@ die("ERROR: you need to specify a tempdir with -tmpdir") unless $tmpdir;
 
 # create split input files
 my $sentenceN = `cat $infile | wc -l`;
-my $splitN = int(($sentenceN+($cores*$serial)-0.5) / ($cores*$serial)); 
+my $splitN = int(($sentenceN+($cores*$serial)-0.5) / ($cores*$serial));
 print STDERR "split -a 3 -l $splitN $infile $tmpdir/in-$parent-\n";
 `split -a 4 -l $splitN $infile $tmpdir/in-$parent-`;
 

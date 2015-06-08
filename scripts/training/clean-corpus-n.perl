@@ -1,6 +1,10 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id: clean-corpus-n.perl 3633 2010-10-21 09:49:27Z phkoehn $
+use warnings;
 use strict;
 use Getopt::Long;
 my $help;
@@ -49,7 +53,7 @@ my $l1input = "$corpus.$l1";
 if (-e $l1input) {
   $opn = $l1input;
 } elsif (-e $l1input.".gz") {
-  $opn = "zcat $l1input.gz |";
+  $opn = "gunzip -c $l1input.gz |";
 } else {
     die "Error: $l1input does not exist";
 }
@@ -59,11 +63,11 @@ my $l2input = "$corpus.$l2";
 if (-e $l2input) {
   $opn = $l2input;
 } elsif (-e $l2input.".gz") {
-  $opn = "zcat $l2input.gz |";
+  $opn = "gunzip -c $l2input.gz |";
 } else  {
  die "Error: $l2input does not exist";
 }
- 
+
 open(E,$opn) or die "Can't open '$opn'";
 
 open(FO,">$out.$l1") or die "Can't write $out.$l1";
@@ -101,7 +105,7 @@ while(my $f = <F>) {
     $e = lc($e);
     $f = lc($f);
   }
-  
+
   $e =~ s/\|//g unless $factored_flag;
   $e =~ s/\s+/ /g;
   $e =~ s/^ //;
@@ -125,13 +129,13 @@ while(my $f = <F>) {
   my $max_word_length_plus_one = $max_word_length + 1;
   next if $e =~ /[^\s\|]{$max_word_length_plus_one}/;
   next if $f =~ /[^\s\|]{$max_word_length_plus_one}/;
-  
+
   # An extra check: none of the factors can be blank!
   die "There is a blank factor in $corpus.$l1 on line $innr: $f"
     if $f =~ /[ \|]\|/;
   die "There is a blank factor in $corpus.$l2 on line $innr: $e"
     if $e =~ /[ \|]\|/;
-  
+
   $outnr++;
   print FO $f."\n";
   print EO $e."\n";
@@ -154,10 +158,10 @@ print STDERR "Input sentences: $innr  Output sentences:  $outnr\n";
 sub word_count {
   my ($line) = @_;
   if ($ignore_xml) {
-    $line =~ s/<\S[^>]*\S>//g;
+    $line =~ s/<\S[^>]*\S>/ /g;
     $line =~ s/\s+/ /g;
     $line =~ s/^ //g;
-    $line =~ s/ $//g;    
+    $line =~ s/ $//g;
   }
   my @w = split(/ /,$line);
   return scalar @w;

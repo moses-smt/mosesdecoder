@@ -30,7 +30,7 @@ public:
     const std::vector<const Word*> &contextFactor,
     State* finalState = 0) const;
 
-  virtual void InitializeForInput(const InputType& source);
+  virtual void InitializeForInput(ttasksptr const& ttask);
 
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 

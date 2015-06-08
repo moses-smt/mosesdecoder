@@ -18,12 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_SCFG_RULE_H_
-#define EXTRACT_GHKM_SCFG_RULE_H_
-
-#include "Alignment.h"
-#include "Rule.h"
-#include "SyntaxTree.h"
 
 #include <string>
 #include <vector>
@@ -31,7 +25,11 @@
 #include <memory>
 #include <iostream>
 
-namespace Moses
+#include "Alignment.h"
+#include "Rule.h"
+#include "SyntaxNodeCollection.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -43,8 +41,11 @@ class ScfgRule : public Rule
 {
 public:
   ScfgRule(const Subgraph &fragment,
-           const MosesTraining::SyntaxTree *sourceSyntaxTree = 0);
+           const SyntaxNodeCollection *sourceNodeCollection = 0);
 
+  const Subgraph &GetGraphFragment() const {
+    return m_graphFragment;
+  }
   const Symbol &GetSourceLHS() const {
     return m_sourceLHS;
   }
@@ -77,10 +78,10 @@ public:
   }
 
 private:
-  void PushSourceLabel(const MosesTraining::SyntaxTree *sourceSyntaxTree,
-                       const Node *node,
-                       const std::string &nonMatchingLabel);
+  void PushSourceLabel(const SyntaxNodeCollection *sourceNodeCollection,
+                       const Node *node, const std::string &nonMatchingLabel);
 
+  const Subgraph& m_graphFragment;
   Symbol m_sourceLHS;
   Symbol m_targetLHS;
   std::vector<Symbol> m_sourceRHS;
@@ -92,6 +93,4 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
-
-#endif
+}  // namespace MosesTraining

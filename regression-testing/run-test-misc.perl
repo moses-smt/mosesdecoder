@@ -1,10 +1,10 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 
 use strict;
 
 BEGIN {
-use Cwd qw/ abs_path cwd /; 
-use File::Basename; 
+use Cwd qw/ abs_path cwd /;
+use File::Basename;
 my $script_dir = dirname(abs_path($0));
 print STDERR  "script_dir=$script_dir\n";
 push @INC, $script_dir;
@@ -27,10 +27,10 @@ GetOptions("moses-root=s" => \$mosesRoot,
           ) or exit 1;
 
 # output dir
-unless (defined $results_dir) 
-{ 
+unless (defined $results_dir)
+{
   my $ts = get_timestamp($mosesRoot);
-  $results_dir = "$data_dir/results/$test_name/$ts"; 
+  $results_dir = "$data_dir/results/$test_name/$ts";
 }
 
 `mkdir -p $results_dir`;

@@ -22,6 +22,14 @@ rule shell_or_fail ( cmd ) {
   }
 }
 
+rule shell_or_die ( cmd ) {
+  local ret = [ SHELL $(cmd) : exit-status ] ;
+  if $(ret[2]) != 0 {
+    exit $(cmd) failed : 1 ;
+  }
+  return [ trim-nl $(ret[1]) ] ;
+}
+
 cxxflags = [ os.environ "CXXFLAGS" ] ;
 cflags = [ os.environ "CFLAGS" ] ;
 ldflags = [ os.environ "LDFLAGS" ] ;

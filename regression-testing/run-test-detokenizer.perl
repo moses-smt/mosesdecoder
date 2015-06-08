@@ -166,12 +166,12 @@ sub runDetokenizerTest {
     unless (mkdir($testOutputDir)) {
 	return fail($testCase->getName().": Failed to create output directory ".$testOutputDir." [".$!."]");
     }
-    
+
     open TOK, ">".$tokenizedFile;
     binmode TOK, ":utf8";
     print TOK $testCase->getTokenizedText();
     close TOK;
-    
+
     open TRUTH, ">".$expectedFile;
     binmode TRUTH, ":utf8";
     print TRUTH $testCase->getRightAnswer();

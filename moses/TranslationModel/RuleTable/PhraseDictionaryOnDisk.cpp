@@ -25,6 +25,7 @@
 #include "moses/InputPath.h"
 #include "moses/TranslationModel/CYKPlusParser/DotChartOnDisk.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h"
+#include "moses/TranslationTask.h"
 
 #include "OnDiskPt/OnDiskWrapper.h"
 #include "OnDiskPt/Word.h"
@@ -35,7 +36,7 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryOnDisk::PhraseDictionaryOnDisk(const std::string &line)
-  : MyBase(line)
+  : MyBase(line, true)
   , m_maxSpanDefault(NOT_FOUND)
   , m_maxSpanLabelled(NOT_FOUND)
 {
@@ -78,8 +79,9 @@ const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
   return *dict;
 }
 
-void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
+void PhraseDictionaryOnDisk::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& source = *ttask->GetSource();
   ReduceCache();
 
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();

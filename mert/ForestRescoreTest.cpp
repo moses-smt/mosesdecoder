@@ -1,6 +1,9 @@
 #include <iostream>
 
+#include "util/tokenize_piece.hh"
+
 #include "ForestRescore.h"
+#include "MiraFeatureVector.h"
 
 #define BOOST_TEST_MODULE MertForestRescore
 #include <boost/test/unit_test.hpp>
@@ -241,6 +244,4 @@ BOOST_AUTO_TEST_CASE(viterbi_3branch_lattice)
   BOOST_CHECK_EQUAL(3, hopeHypo.bleuStats[7]);
   BOOST_CHECK_EQUAL(6, hopeHypo.bleuStats[8]);
 }
-
-
 

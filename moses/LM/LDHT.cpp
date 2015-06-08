@@ -83,7 +83,7 @@ public:
   LDHT::Client* getClientSafe();
   LDHT::Client* initTSSClient();
   virtual ~LanguageModelLDHT();
-  virtual void InitializeForInput(InputType const& source);
+  virtual void InitializeForInput(ttasksptr const& ttask);
   virtual void CleanUpAfterSentenceProcessing(const InputType &source);
   virtual const FFState* EmptyHypothesisState(const InputType& input) const;
   virtual void CalcScore(const Phrase& phrase,
@@ -189,7 +189,7 @@ LDHT::Client* LanguageModelLDHT::initTSSClient()
   return client;
 }
 
-void LanguageModelLDHT::InitializeForInput(InputType const& source)
+void LanguageModelLDHT::InitializeForInput(ttasksptr const& ttask)
 {
   getClientSafe()->clearCache();
   m_start_tick = LDHT::Util::rdtsc();

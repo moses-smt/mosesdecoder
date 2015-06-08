@@ -10,7 +10,7 @@ div.leaf {
 	border:1px solid black;
 	margin:2px;
 	padding:0px;
-	font-weight: normal; 
+	font-weight: normal;
 	background-color: white;	
 }
 div.empty {
@@ -34,7 +34,7 @@ div.continued {
 	margin-right: 0px;
 	padding: 0px;
 	padding-top: 0px;
-	font-weight: normal; 
+	font-weight: normal;
 	background-color: white;		
 }
 div.opening {
@@ -44,7 +44,7 @@ div.opening {
 	margin:2px;
 	margin-right: 0px;
 	padding: 0px;
-	font-weight: normal; 
+	font-weight: normal;
 	background-color: white;		
 }
 div.closing {
@@ -54,6 +54,6 @@ div.closing {
 	margin:2px;
 	margin-left: 0px;
 	padding: 0px;
-	font-weight: normal; 
+	font-weight: normal;
 	background-color: white;		
 }

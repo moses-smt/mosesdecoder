@@ -31,8 +31,8 @@ namespace OnDiskPt
 
 size_t PhraseNode::GetNodeSize(size_t numChildren, size_t wordSize, size_t countSize)
 {
-  size_t ret = sizeof(UINT64) * 2 // num children, value
-               + (wordSize + sizeof(UINT64)) * numChildren // word + ptr to next source node
+  size_t ret = sizeof(uint64_t) * 2 // num children, value
+               + (wordSize + sizeof(uint64_t)) * numChildren // word + ptr to next source node
                + sizeof(float) * countSize; // count info
   return ret;
 }
@@ -45,7 +45,7 @@ PhraseNode::PhraseNode()
 {
 }
 
-PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
+PhraseNode::PhraseNode(uint64_t filePos, OnDiskWrapper &onDiskWrapper)
   :m_counts(onDiskWrapper.GetNumCounts())
 {
   // load saved node
@@ -55,26 +55,26 @@ PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
 
   std::fstream &file = onDiskWrapper.GetFileSource();
   file.seekg(filePos);
-  assert(filePos == (UINT64)file.tellg());
+  assert(filePos == (uint64_t)file.tellg());
 
-  file.read((char*) &m_numChildrenLoad, sizeof(UINT64));
+  file.read((char*) &m_numChildrenLoad, sizeof(uint64_t));
 
   size_t memAlloc = GetNodeSize(m_numChildrenLoad, onDiskWrapper.GetSourceWordSize(), countSize);
   m_memLoad = (char*) malloc(memAlloc);
 
   // go to start of node again
   file.seekg(filePos);
-  assert(filePos == (UINT64)file.tellg());
+  assert(filePos == (uint64_t)file.tellg());
 
   // read everything into memory
   file.read(m_memLoad, memAlloc);
-  assert(filePos + memAlloc == (UINT64)file.tellg());
+  assert(filePos + memAlloc == (uint64_t)file.tellg());
 
   // get value
-  m_value = ((UINT64*)m_memLoad)[1];
+  m_value = ((uint64_t*)m_memLoad)[1];
 
   // get counts
-  float *memFloat = (float*) (m_memLoad + sizeof(UINT64) * 2);
+  float *memFloat = (float*) (m_memLoad + sizeof(uint64_t) * 2);
 
   assert(countSize == 1);
   m_counts[0] = memFloat[0];
@@ -108,10 +108,10 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
   //memset(mem, 0xfe, memAlloc);
 
   size_t memUsed = 0;
-  UINT64 *memArray = (UINT64*) mem;
+  uint64_t *memArray = (uint64_t*) mem;
   memArray[0] = GetSize(); // num of children
   memArray[1] = m_value;   // file pos of corresponding target phrases
-  memUsed += 2 * sizeof(UINT64);
+  memUsed += 2 * sizeof(uint64_t);
 
   // count info
   float *memFloat = (float*) (mem + memUsed);
@@ -133,9 +133,9 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
     size_t wordMemUsed = childWord.WriteToMemory(currMem);
     memUsed += wordMemUsed;
 
-    UINT64 *memArray = (UINT64*) (mem + memUsed);
+    uint64_t *memArray = (uint64_t*) (mem + memUsed);
     memArray[0] = childNode.GetFilePos();
-    memUsed += sizeof(UINT64);
+    memUsed += sizeof(uint64_t);
 
   }
 
@@ -148,7 +148,7 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
   file.seekp(0, ios::end);
   file.write(mem, memUsed);
 
-  UINT64 endPos = file.tellp();
+  uint64_t endPos = file.tellp();
   assert(m_filePos + memUsed == endPos);
 
   free(mem);
@@ -206,7 +206,7 @@ const PhraseNode *PhraseNode::GetChild(const Word &wordSought, OnDiskWrapper &on
     x = (l + r) / 2;
 
     Word wordFound;
-    UINT64 childFilePos;
+    uint64_t childFilePos;
     GetChild(wordFound, childFilePos, x, onDiskWrapper);
 
     if (wordSought == wordFound) {
@@ -222,14 +222,14 @@ const PhraseNode *PhraseNode::GetChild(const Word &wordSought, OnDiskWrapper &on
   return ret;
 }
 
-void PhraseNode::GetChild(Word &wordFound, UINT64 &childFilePos, size_t ind, OnDiskWrapper &onDiskWrapper) const
+void PhraseNode::GetChild(Word &wordFound, uint64_t &childFilePos, size_t ind, OnDiskWrapper &onDiskWrapper) const
 {
 
   size_t wordSize = onDiskWrapper.GetSourceWordSize();
-  size_t childSize = wordSize + sizeof(UINT64);
+  size_t childSize = wordSize + sizeof(uint64_t);
 
   char *currMem = m_memLoad
-                  + sizeof(UINT64) * 2 // size & file pos of target phrase coll
+                  + sizeof(uint64_t) * 2 // size & file pos of target phrase coll
                   + sizeof(float) * onDiskWrapper.GetNumCounts() // count info
                   + childSize * ind;
 
@@ -237,15 +237,15 @@ void PhraseNode::GetChild(Word &wordFound, UINT64 &childFilePos, size_t ind, OnD
   assert(memRead == childSize);
 }
 
-size_t PhraseNode::ReadChild(Word &wordFound, UINT64 &childFilePos, const char *mem) const
+size_t PhraseNode::ReadChild(Word &wordFound, uint64_t &childFilePos, const char *mem) const
 {
   size_t memRead = wordFound.ReadFromMemory(mem);
 
   const char *currMem = mem + memRead;
-  UINT64 *memArray = (UINT64*) (currMem);
+  uint64_t *memArray = (uint64_t*) (currMem);
   childFilePos = memArray[0];
 
-  memRead += sizeof(UINT64);
+  memRead += sizeof(uint64_t);
   return memRead;
 }
 

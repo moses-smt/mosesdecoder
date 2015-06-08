@@ -53,6 +53,7 @@ string bestShiftStruct::toString()
   s << m_best_shift->toString() << endl;
   s << m_best_align->toString() << endl;
 //	    s << (*m_empty) << endl;
+  return s.str();
 }
 bool bestShiftStruct::getEmpty()
 {

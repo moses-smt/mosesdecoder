@@ -1,10 +1,15 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
+
 # Uses Google AJAX API to collect many translations, i.e. create a parallel
 # corpus of Google translations.
 # Expects one sentence per line, not tokenized!
 #
 # Ondrej Bojar, bojar@ufal.mff.cuni.cz
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use Getopt::Long;
 use CGI;
@@ -100,7 +105,7 @@ sub collect_translations {
     # infinite loop, until everything translated
     my $gotlines = wcl($outfile);
     print STDERR "$outfile contains $gotlines lines already, extending.\n";
-  
+
     my $nr = 0;
     my @inlines = ();
     my $droplast = 0;
@@ -144,9 +149,9 @@ sub collect_translations {
         }
       }
     }
-  
+
     my $outlines;
-    
+
     if (0 == scalar @inlines) {
       # special case: skipping too long sentences
       $outlines = [""];
@@ -154,7 +159,7 @@ sub collect_translations {
       $outlines = translate_batch(\@inlines);
       last if !defined $outlines;
     }
-  
+
     *OUTF = my_append($outfile);
     foreach my $outline (@$outlines) {
       print OUTF $outline."\n";

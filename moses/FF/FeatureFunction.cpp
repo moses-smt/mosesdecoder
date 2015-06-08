@@ -6,8 +6,11 @@
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
+#include "moses/TranslationTask.h"
 #include "moses/Util.h"
 #include "moses/FF/DistortionScoreProducer.h"
+
+#include <boost/foreach.hpp>
 
 using namespace std;
 
@@ -35,23 +38,23 @@ void FeatureFunction::Destroy()
   RemoveAllInColl(s_staticColl);
 }
 
-void FeatureFunction::CallChangeSource(InputType *&input)
+void FeatureFunction::SetupAll(TranslationTask const& ttask)
 {
-  for (size_t i = 0; i < s_staticColl.size(); ++i) {
-    const FeatureFunction &ff = *s_staticColl[i];
-    ff.ChangeSource(input);
-  }
+  BOOST_FOREACH(FeatureFunction* ff, s_staticColl)
+  ff->Setup(ttask);
 }
 
 FeatureFunction::
-FeatureFunction(const std::string& line)
+FeatureFunction(const std::string& line, bool registerNow)
   : m_tuneable(true)
   , m_requireSortingAfterSourceContext(false)
   , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(1)
+  , m_index(0)
 {
   m_numTuneableComponents = m_numScoreComponents;
-  Initialize(line);
+  ParseLine(line);
+  if (registerNow) Register();
 }
 
 FeatureFunction::
@@ -61,17 +64,17 @@ FeatureFunction(size_t numScoreComponents,
   , m_requireSortingAfterSourceContext(false)
   , m_verbosity(std::numeric_limits<std::size_t>::max())
   , m_numScoreComponents(numScoreComponents)
+  , m_index(0)
 {
   m_numTuneableComponents = m_numScoreComponents;
-  Initialize(line);
+  ParseLine(line);
+  Register();
 }
 
 void
 FeatureFunction::
-Initialize(const std::string &line)
+Register()
 {
-  ParseLine(line);
-
   ScoreComponentCollection::RegisterScoreProducer(this);
   s_staticColl.push_back(this);
 }
@@ -149,7 +152,8 @@ void FeatureFunction::ReadParameters()
 
 std::vector<float> FeatureFunction::DefaultWeights() const
 {
-  UTIL_THROW2(GetScoreProducerDescription() << ": No default weights");
+  return std::vector<float>(this->m_numScoreComponents,1.0);
+  // UTIL_THROW2(GetScoreProducerDescription() << ": No default weights");
 }
 
 void FeatureFunction::SetTuneableComponents(const std::string& value)
@@ -170,6 +174,38 @@ void FeatureFunction::SetTuneableComponents(const std::string& value)
       --m_numTuneableComponents;
     }
   }
+}
+
+// void
+// FeatureFunction
+// ::InitializeForInput(ttasksptr const& ttask)
+// {
+//   InitializeForInput(*(ttask->GetSource().get()));
+// }
+
+void
+FeatureFunction
+::CleanUpAfterSentenceProcessing(ttasksptr const& ttask)
+{
+  CleanUpAfterSentenceProcessing(*(ttask->GetSource().get()));
+}
+
+size_t
+FeatureFunction
+::GetIndex() const
+{
+  return m_index;
+}
+
+
+/// set index
+//  @return index of the next FF
+size_t
+FeatureFunction
+::SetIndex(size_t const idx)
+{
+  m_index = idx;
+  return this->GetNumScoreComponents() + idx;
 }
 
 }

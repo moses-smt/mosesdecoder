@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #pragma once
 
 #include <iostream>
@@ -30,12 +31,11 @@ namespace S2T
 {
 
 template<typename Parser>
-Manager<Parser>::Manager(const InputType &source)
-  : Syntax::Manager(source)
-  , m_pchart(source.GetSize(), Parser::RequiresCompressedChart())
-  , m_schart(source.GetSize())
-{
-}
+Manager<Parser>::Manager(ttasksptr const& ttask)
+  : Syntax::Manager(ttask)
+  , m_pchart(m_source.GetSize(), Parser::RequiresCompressedChart())
+  , m_schart(m_source.GetSize())
+{ }
 
 template<typename Parser>
 void Manager<Parser>::InitializeCharts()

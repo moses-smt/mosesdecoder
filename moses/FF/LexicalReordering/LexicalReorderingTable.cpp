@@ -7,6 +7,7 @@
 #include "moses/GenerationDictionary.h"
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
+#include "moses/TranslationTask.h"
 
 #if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
@@ -290,8 +291,9 @@ auxFindScoreForContext(const Candidates& cands, const Phrase& context)
 
 void
 LexicalReorderingTableTree::
-InitializeForInput(const InputType& input)
+InitializeForInput(ttasksptr const& ttask)
 {
+  const InputType& input = *ttask->GetSource();
   ClearCache();
   if(ConfusionNet const* cn = dynamic_cast<ConfusionNet const*>(&input)) {
     Cache(*cn);

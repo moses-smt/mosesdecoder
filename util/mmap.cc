@@ -11,11 +11,11 @@
 
 #include <iostream>
 
-#include <assert.h>
+#include <cassert>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
@@ -56,7 +56,7 @@ void UnmapOrThrow(void *start, size_t length) {
 scoped_mmap::~scoped_mmap() {
   if (data_ != (void*)-1) {
     try {
-      // Thanks Denis Filimonov for pointing out NFS likes msync first.  
+      // Thanks Denis Filimonov for pointing out NFS likes msync first.
       SyncOrThrow(data_, size_);
       UnmapOrThrow(data_, size_);
     } catch (const util::ErrnoException &e) {

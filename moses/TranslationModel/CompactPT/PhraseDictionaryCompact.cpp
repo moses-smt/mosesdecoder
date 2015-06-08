@@ -44,7 +44,7 @@ namespace Moses
 {
 
 PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
-  :PhraseDictionary(line)
+  :PhraseDictionary(line, true)
   ,m_inMemory(true)
   ,m_useAlignmentInfo(true)
   ,m_hash(10, 16)

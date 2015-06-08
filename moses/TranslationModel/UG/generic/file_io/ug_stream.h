@@ -23,7 +23,7 @@ using namespace boost::iostreams;
 
 /** open input file that is possibly compressed
  *  decompression filters are automatically added based on the file name
- *  gzip for .gz; bzip2 for bz2. 
+ *  gzip for .gz; bzip2 for bz2.
  */
 filtering_istream* open_input_stream(string fname);
 void open_input_stream(string fname, filtering_istream& in);

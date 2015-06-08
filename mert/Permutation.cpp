@@ -8,7 +8,7 @@
 
 #include <fstream>
 #include <sstream>
-#include <math.h>
+#include <cmath>
 #include "Permutation.h"
 #include "Util.h"
 

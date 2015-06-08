@@ -17,24 +17,28 @@
 #include <xmlrpc-c/server_abyss.hpp>
 
 
-namespace MoseServer
+namespace MosesServer
 {
-  class 
+class
   Updater: public xmlrpc_c::method
-  {
-    std::string m_src, m_trg, m_aln;
-    bool m_bounded, m_add2ORLM;
+{
 
-  public:
-    Updater();
-    
-    void
-    execute(xmlrpc_c::paramList const& paramList,
-	    xmlrpc_c::value * const  retvalP);
+  typedef std::map<std::string, xmlrpc_c::value> params_t;
 
-    void 
-    breakOutParams(const params_t& params);
-      
-  };
+
+  std::string m_src, m_trg, m_aln;
+  bool m_bounded, m_add2ORLM;
+
+public:
+  Updater();
+
+  void
+  execute(xmlrpc_c::paramList const& paramList,
+          xmlrpc_c::value * const  retvalP);
+
+  void
+  breakOutParams(const params_t& params);
+
+};
 
 }

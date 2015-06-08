@@ -23,8 +23,6 @@ void UnalignedWordCountFeature::EvaluateInIsolation(const Phrase &source
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const
 {
-  const size_t ffScoreIndex(scoreBreakdown.GetIndexes(this).first);
-
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   const size_t sourceLength = source.GetSize();
   const size_t targetLength = targetPhrase.GetSize();
@@ -57,8 +55,8 @@ void UnalignedWordCountFeature::EvaluateInIsolation(const Phrase &source
     }
   }
 
-  scoreBreakdown.PlusEquals(ffScoreIndex, sourceUnalignedCount);
-  scoreBreakdown.PlusEquals(ffScoreIndex+1, targetUnalignedCount);
+  scoreBreakdown.PlusEquals(m_index, sourceUnalignedCount);
+  scoreBreakdown.PlusEquals(m_index+1, targetUnalignedCount);
 
   IFFEATUREVERBOSE(2) {
     FEATUREVERBOSE(2, source << std::endl);

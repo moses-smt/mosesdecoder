@@ -38,7 +38,7 @@ class StringIndex{
   map <string, int> msi;
   map <int, string> mis;
   int maxIndex;
-    
+
  public:
 
   // Constructor / destructor methods...

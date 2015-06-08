@@ -23,7 +23,7 @@ public:
 
   void Load();
 
-  void InitializeForInput(InputType const& source);
+  void InitializeForInput(ttasksptr const& ttask);
 
   // for phrase-based model
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;

@@ -1,16 +1,18 @@
 // vim:tabstop=2
-#include <stdlib.h>
+#include <cstdlib>
+
 #include "PhraseDictionaryTransliteration.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "moses/DecodeGraph.h"
 #include "moses/DecodeStep.h"
+#include "util/tempfile.hh"
 
 using namespace std;
 
 namespace Moses
 {
 PhraseDictionaryTransliteration::PhraseDictionaryTransliteration(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(line, true)
 {
   ReadParameters();
   UTIL_THROW_IF2(m_mosesDir.empty() ||
@@ -68,12 +70,10 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
   } else {
     // TRANSLITERATE
-    char *ptr = tmpnam(NULL);
-    string inFile(ptr);
-    ptr = tmpnam(NULL);
-    string outDir(ptr);
+    const util::temp_file inFile;
+    const util::temp_dir outDir;
 
-    ofstream inStream(inFile.c_str());
+    ofstream inStream(inFile.path().c_str());
     inStream << sourcePhrase.ToString() << endl;
     inStream.close();
 
@@ -83,14 +83,14 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
                  " --external-bin-dir " + m_externalDir +
                  " --input-extension " + m_inputLang +
                  " --output-extension " + m_outputLang +
-                 " --oov-file " + inFile +
-                 " --out-dir " + outDir;
+                 " --oov-file " + inFile.path() +
+                 " --out-dir " + outDir.path();
 
     int ret = system(cmd.c_str());
     UTIL_THROW_IF2(ret != 0, "Transliteration script error");
 
     TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-    vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir);
+    vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir.path());
     vector<TargetPhrase*>::const_iterator iter;
     for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
       TargetPhrase *tp = *iter;
@@ -101,12 +101,6 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
     cache[hash] = value;
 
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
-
-    // clean up temporary files
-    remove(inFile.c_str());
-
-    cmd = "rm -rf " + outDir;
-    system(cmd.c_str());
   }
 }
 

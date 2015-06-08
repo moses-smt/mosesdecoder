@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread/tss.hpp>
 #else
 #include <boost/scoped_ptr.hpp>
-#include <time.h>
+#include <ctime>
 #endif
 
 #include "moses/Phrase.h"
@@ -70,6 +70,9 @@ public:
   **/
 class PhraseDictionary :  public DecodeFeature
 {
+  friend class PhraseDictionaryMultiModelCounts;
+  // why is this necessary? that's a derived class, so it should have
+  // access to the
 public:
   virtual bool ProvidesPrefixCheck() const;
 
@@ -77,7 +80,7 @@ public:
     return s_staticColl;
   }
 
-  PhraseDictionary(const std::string &line);
+  PhraseDictionary(const std::string &line, bool registerNow);
 
   virtual ~PhraseDictionary() {
   }
@@ -100,23 +103,37 @@ public:
   //  exist in the table.
   virtual
   bool
-  PrefixExists(Phrase const& phrase) const;
+  PrefixExists(ttasksptr const& ttask, Phrase const& phrase) const;
 
   // LEGACY!
   // The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
 
+public:
   virtual
   TargetPhraseCollection const *
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
   virtual
+  TargetPhraseCollection const *
+  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) const {
+    return GetTargetPhraseCollectionLEGACY(src);
+  }
+
+  virtual
   void
   GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
+  virtual
+  void
+  GetTargetPhraseCollectionBatch(ttasksptr const& ttask,
+                                 const InputPathList &inputPathQueue) const {
+    GetTargetPhraseCollectionBatch(inputPathQueue);
+  }
+
   //! Create entry for translation of source to targetPhrase
-  virtual void InitializeForInput(InputType const& source) {
+  virtual void InitializeForInput(ttasksptr const& ttask) {
   }
   // clean up temporary memory, called after processing each sentence
   virtual void CleanUpAfterSentenceProcessing(const InputType& source) {

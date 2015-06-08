@@ -14,7 +14,7 @@ namespace Syntax
 class Manager : public BaseManager
 {
 public:
-  Manager(const InputType &);
+  Manager(ttasksptr const& ttask);
 
   // Virtual functions from Moses::BaseManager that are implemented the same
   // way for all Syntax managers.
@@ -29,7 +29,13 @@ public:
     OutputCollector *collector) const {}
   void OutputLatticeSamples(OutputCollector *collector) const {}
   void OutputSearchGraph(OutputCollector *collector) const {}
-  void OutputSearchGraphHypergraph() const {}
+  // void OutputSearchGraphHypergraph() const {}
+
+  void
+  OutputSearchGraphAsHypergraph
+  ( std::string const& fname, size_t const precision ) const
+  { }
+
   void OutputSearchGraphSLF() const {}
   void OutputWordGraph(OutputCollector *collector) const {}
   void OutputDetailedTranslationReport(OutputCollector *collector) const {}

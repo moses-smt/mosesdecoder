@@ -42,7 +42,7 @@ class GenericRACPTModel : public SimpleHash<K,P> {
     return ( SimpleHash<K,P>::contains(k) );
   }
 
-/*  
+/*
   P getProb ( const IterVal& ikyp, const K& k ) const {
     if ( ikyp.iter.first == ikyp.iter.second ) { cerr<<"ERROR: no iterator to fix probability: "<<k<<endl; return P(); }
     return ( ikyp.iter.first->second );
@@ -91,7 +91,7 @@ class GenericRACPTModel : public SimpleHash<K,P> {
     for ( typename HKP::const_iterator ik=HKP::begin(); ik!=HKP::end(); ik++ ) {
       K k=ik->first;
       os << psId<<" "<<k<<" = "<<getProb(k).toDouble()<<endl;
-    
+
 //      IterVal y;
 //      for ( bool b=setFirst(y,k); b; b=setNext(y,k) )
 //        os<<psId<<" "<<k<<" : "<<y<<" = "<<getProb(y,k).toDouble()<<"\n";
@@ -110,14 +110,14 @@ class GenericRACPTModel : public SimpleHash<K,P> {
 
   friend pair<StringInput,GenericRACPTModel<K,P>*> operator>> ( StringInput si, GenericRACPTModel<K,P>& m ) {
     return pair<StringInput,GenericRACPTModel<K,P>*>(si,&m); }
-    
+
   friend StringInput operator>> ( pair<StringInput,GenericRACPTModel<K,P>*> delimbuff, const char* psD ) {
-    K k; 
-    StringInput si,si2,si3; 
+    K k;
+    StringInput si,si2,si3;
     GenericRACPTModel<K,P>& m = *delimbuff.second;
     si=delimbuff.first;
     if ( si==NULL ) return si;
-    
+
     // Kill the colon since we're treating the whole thing as the condition
     char * str = si.c_str();
     char * p = strchr(str, ':');
@@ -125,17 +125,17 @@ class GenericRACPTModel : public SimpleHash<K,P> {
       p[0] = ' ';
     }
     si=str;
-    while((si2=si>>" ")!=NULL)si=si2; 
+    while((si2=si>>" ")!=NULL)si=si2;
     si=si>>k>>" ";
-    while((si2=si>>" ")!=NULL)si=si2; 
+    while((si2=si>>" ")!=NULL)si=si2;
     si=si>>"= ";
-    while((si2=si>>" ")!=NULL)si=si2; 
+    while((si2=si>>" ")!=NULL)si=si2;
     return (si!=NULL) ? si>>m.setProb(k)>>psD : si;
   }
 };
 
 
-template<class Y, class P> 
+template<class Y, class P>
 class RandAccCPT1DModel : public GenericRACPTModel<MapKey1D<Y>,P> {
  public:
 //  typedef typename GenericCPTModel<Y,MapKey1D<Unit>,P>::IterVal IterVal;
@@ -170,7 +170,7 @@ P& setProb ( const Y& y ) {
 
 
 ////////////////////
-template<class Y, class X1, class P> 
+template<class Y, class X1, class P>
 class RandAccCPT2DModel : public GenericRACPTModel<MapKey2D<X1,Y>,P> {
  public:
 
@@ -187,7 +187,7 @@ class RandAccCPT2DModel : public GenericRACPTModel<MapKey2D<X1,Y>,P> {
   P getProb ( const Y& y, const X1& x1 ) const {
     return GenericRACPTModel<MapKey2D<X1,Y>,P>::getProb ( MapKey2D<X1,Y>(x1,y) );
   }
-  
+
 /*
   P& setProb ( const Y& y, const X1& x1 ) {
     cerr << "setProb called on racpt2d" << endl;
@@ -199,7 +199,7 @@ class RandAccCPT2DModel : public GenericRACPTModel<MapKey2D<X1,Y>,P> {
 
 
 ////////////////////
-template<class Y, class X1, class X2, class P> 
+template<class Y, class X1, class X2, class P>
 class RandAccCPT3DModel : public GenericRACPTModel<MapKey3D<X1,X2,Y>,P> {
  public:
 
@@ -219,7 +219,7 @@ class RandAccCPT3DModel : public GenericRACPTModel<MapKey3D<X1,X2,Y>,P> {
 
 /*
 ////////////////////
-template<class Y, class X1, class X2, class X3, class P> 
+template<class Y, class X1, class X2, class X3, class P>
 class CPT4DModel : public GenericCPTModel<Y,MapKey3D<X1,X2,X3>,P> {
  public:
   typedef typename GenericCPTModel<Y,MapKey3D<X1,X2,X3>,P>::IterVal IterVal;
@@ -256,7 +256,7 @@ class CPT4DModel : public GenericCPTModel<Y,MapKey3D<X1,X2,X3>,P> {
 
 
 ////////////////////
-template<class Y, class X1, class X2, class X3, class X4, class P> 
+template<class Y, class X1, class X2, class X3, class X4, class P>
 class CPT5DModel : public GenericCPTModel<Y,MapKey4D<X1,X2,X3,X4>,P> {
  public:
   typedef typename GenericCPTModel<Y,MapKey4D<X1,X2,X3,X4>,P>::IterVal IterVal;
@@ -293,7 +293,7 @@ class CPT5DModel : public GenericCPTModel<Y,MapKey4D<X1,X2,X3,X4>,P> {
 
 
 ////////////////////
-template<class Y, class X1, class X2, class X3, class X4, class X5, class P> 
+template<class Y, class X1, class X2, class X3, class X4, class X5, class P>
 class RACPT6DModel : public GenericCPTModel<Y,MapKey5D<X1,X2,X3,X4,X5>,P> {
  public:
   typedef typename GenericCPTModel<Y,MapKey5D<X1,X2,X3,X4,X5>,P>::IterVal IterVal;

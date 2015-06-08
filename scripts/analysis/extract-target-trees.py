@@ -1,9 +1,13 @@
 #!/usr/bin/env python
-
-# Usage: extract-target-trees.py [FILE]
 #
-# Reads moses-chart's -T output from FILE or standard input and writes trees to
-# standard output in Moses' XML tree format.
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
+
+"""Usage: extract-target-trees.py [FILE]
+
+Reads moses-chart's -T output from FILE or standard input and writes trees to
+standard output in Moses' XML tree format.
+"""
 
 import re
 import sys
@@ -25,7 +29,7 @@ class Derivation(list):
         for hypothesis in self:
             if hypothesis.span[0] != 0:
                 continue
-            if root == None or hypothesis.span[1] > root.span[1]:
+            if root is None or hypothesis.span[1] > root.span[1]:
                 root = hypothesis
         assert root
         return root
@@ -48,7 +52,8 @@ class Derivation(list):
         non_term_spans = []
         for item in root.source_symbol_info:
             span = item[0]
-            if span != root.span and span in hypo_map: # In hypo_map iff symbol is NT
+            # In hypo_map iff symbol is NT:
+            if span != root.span and span in hypo_map:
                 non_term_spans.append(span)
         non_term_spans.sort()
 
@@ -166,7 +171,9 @@ def main():
         try:
             tree = derivation.construct_target_tree()
         except:
-            msg = "error processing derivation starting at line %d\n" % line_num
+            msg = (
+                "error processing derivation starting at line %d\n"
+                % line_num)
             sys.stderr.write(msg)
             raise
         print tree_to_xml(tree)

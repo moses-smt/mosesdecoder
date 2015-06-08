@@ -1,5 +1,5 @@
 // -*- c++ -*-
-// written by Ulrich Germann 
+// written by Ulrich Germann
 #pragma once
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
 #include "util/exception.hh"
@@ -20,15 +20,15 @@ namespace Moses {
     this->m_num_feats = 1;
     this->m_feature_names.push_back(string("phrasecount"));
       }
-    
-      void 
+
+      void
       operator()(Bitext<Token> const& bt,
-         PhrasePair<Token>& pp, 
+         PhrasePair<Token>& pp,
 		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
 	(*dest)[this->m_index] = 1;
-      }    
+      }
     };
   }
 }

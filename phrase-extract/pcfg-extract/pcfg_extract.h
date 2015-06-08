@@ -21,7 +21,7 @@
 #ifndef PCFG_EXTRACT_PCFG_EXTRACT_H_
 #define PCFG_EXTRACT_PCFG_EXTRACT_H_
 
-#include "pcfg-common/tool.h"
+#include "syntax-common/tool.h"
 
 namespace MosesTraining
 {

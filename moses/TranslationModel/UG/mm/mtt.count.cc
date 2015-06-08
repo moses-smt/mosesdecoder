@@ -36,14 +36,14 @@ bool   echo;
 int main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
-  
+
   T.open(bname+".mct");
   V.open(bname+".tdx"); V.iniReverseIndex();
   I.open(bname+".sfa",&T);
   string line;
   while (getline(cin,line))
     {
-      vector<id_type> phr; 
+      vector<id_type> phr;
       V.fillIdSeq(line,phr);
       TSA<Token>::tree_iterator m(&I);
       size_t i = 0;
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   exit(0);
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   namespace po=boost::program_options;
@@ -68,7 +68,7 @@ interpret_args(int ac, char* av[])
     ("help,h",    "print this message")
     ("echo,e", po::bool_switch(&echo), "repeat lookup phrases")
     ;
-  
+
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
     ;

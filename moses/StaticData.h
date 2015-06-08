@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -43,6 +44,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/Factory.h"
 #include "moses/PP/Factory.h"
 
+#include "moses/parameters/ContextParameters.h"
+#include "moses/parameters/NBestOptions.h"
+#include "moses/parameters/BookkeepingOptions.h"
+
 namespace Moses
 {
 
@@ -68,6 +73,9 @@ private:
   static StaticData									s_instance;
 protected:
   Parameter *m_parameter;
+
+  ContextParameters m_context_parameters;
+
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
 
@@ -89,18 +97,21 @@ protected:
   // 0		= no disortion (monotone in old pharaoh)
   bool m_reorderingConstraint; //! use additional reordering constraints
   bool m_useEarlyDistortionCost;
-  size_t
-  m_maxHypoStackSize //! hypothesis-stack size that triggers pruning
-  , m_minHypoStackDiversity //! minimum number of hypothesis in stack for each source word coverage
-  , m_nBestSize
-  , m_latticeSamplesSize
-  , m_nBestFactor
-  , m_maxNoTransOptPerCoverage
-  , m_maxNoPartTransOpt
-  , m_maxPhraseLength;
+  size_t m_maxHypoStackSize; //! hypothesis-stack size that triggers pruning
+  size_t m_minHypoStackDiversity; //! minimum number of hypothesis in stack for each source word coverage;
+  NBestOptions m_nbest_options;
+  BookkeepingOptions m_bookkeeping_options;
+  // size_t m_nBestSize;
+  // size_t m_nBestFactor;
 
-  std::string		m_nBestFilePath, m_latticeSamplesFilePath;
-  bool                  m_labeledNBestList,m_nBestIncludesSegmentation;
+  size_t m_latticeSamplesSize;
+  size_t m_maxNoTransOptPerCoverage;
+  size_t m_maxNoPartTransOpt;
+  size_t m_maxPhraseLength;
+
+  // std::string m_nBestFilePath;
+  std::string  m_latticeSamplesFilePath;
+  // bool m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
   bool m_wordDeletionEnabled;
@@ -122,21 +133,21 @@ protected:
   bool m_reportSegmentation;
   bool m_reportSegmentationEnriched;
   bool m_reportAllFactors;
-  bool m_reportAllFactorsNBest;
+  // bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
   std::string m_detailedTreeFragmentsTranslationReportingFilePath;
 
   //DIMw
   std::string m_detailedAllTranslationReportingFilePath;
 
-  bool m_onlyDistinctNBest;
+  // bool m_onlyDistinctNBest;
   bool m_PrintAlignmentInfo;
-  bool m_needAlignmentInfo;
-  bool m_PrintAlignmentInfoNbest;
+  // bool m_needAlignmentInfo; // => BookkeepingOptions
+  // bool m_PrintAlignmentInfoNbest;
 
   bool m_PrintID;
   bool m_PrintPassthroughInformation;
-  bool m_PrintPassthroughInformationInNBest;
+  // bool m_PrintPassthroughInformationInNBest;
 
   std::string m_alignmentOutputFile;
 
@@ -208,7 +219,7 @@ protected:
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
   S2TParsingAlgorithm m_s2tParsingAlgorithm;
-  bool m_printNBestTrees;
+  // bool m_printNBestTrees;
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
@@ -236,6 +247,26 @@ protected:
   // number of nonterminal labels
 //   size_t m_nonTerminalSize;
 
+
+  void ini_compact_table_options();
+  void ini_consensus_decoding_options();
+  void ini_cube_pruning_options();
+  void ini_distortion_options();
+  void ini_factor_maps();
+  void ini_input_options();
+  void ini_lm_options();
+  void ini_lmbr_options();
+  void ini_mbr_options();
+  void ini_mira_options();
+  bool ini_nbest_options();
+  void ini_oov_options();
+  bool ini_output_options();
+  bool ini_performance_options();
+  void ini_phrase_lookup_options();
+  bool ini_stack_decoding_options();
+  void ini_zombie_options();
+
+  void initialize_features();
 public:
 
   bool IsAlwaysCreateDirectTranslationOption() const {
@@ -272,6 +303,11 @@ public:
 
   const Parameter &GetParameter() const {
     return *m_parameter;
+  }
+
+  const ContextParameters&
+  GetContextParameters() const {
+    return m_context_parameters;
   }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
@@ -330,7 +366,8 @@ public:
     return m_PrintPassthroughInformation;
   }
   bool IsPassthroughInNBestEnabled() const {
-    return m_PrintPassthroughInformationInNBest;
+    return m_nbest_options.include_passthrough;
+    // return m_PrintPassthroughInformationInNBest;
   }
   int GetMaxDistortion() const {
     return m_maxDistortion;
@@ -365,11 +402,22 @@ public:
     if (m_reportSegmentationEnriched) return 2;
     return 0;
   }
+  void SetReportSegmentation(const int &val) {
+    if (val == 0)
+      m_reportSegmentation = m_reportSegmentationEnriched = false;
+    else if (val == 1)
+      m_reportSegmentation = true;
+    else if (val == 2)
+      m_reportSegmentationEnriched = true;
+    else
+      std::cerr << "Warning: Invalid value for reportSegmentation (0 - 2)!  Ignoring";
+  }
   bool GetReportAllFactors() const {
     return m_reportAllFactors;
   }
   bool GetReportAllFactorsNBest() const {
-    return m_reportAllFactorsNBest;
+    return m_nbest_options.include_all_factors;
+    // return m_reportAllFactorsNBest;
   }
   bool IsDetailedTranslationReportingEnabled() const {
     return !m_detailedTranslationReportingFilePath.empty();
@@ -389,7 +437,8 @@ public:
     return m_detailedTreeFragmentsTranslationReportingFilePath;
   }
   bool IsLabeledNBestList() const {
-    return m_labeledNBestList;
+    return m_nbest_options.include_feature_labels;
+    // return m_labeledNBestList;
   }
 
   bool UseMinphrInMemory() const {
@@ -402,18 +451,26 @@ public:
 
   // for mert
   size_t GetNBestSize() const {
-    return m_nBestSize;
+    return m_nbest_options.nbest_size;
+    // return m_nBestSize;
   }
+
   const std::string &GetNBestFilePath() const {
-    return m_nBestFilePath;
+    return m_nbest_options.output_file_path;
+    // return m_nBestFilePath;
   }
+
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_outputSearchGraphSLF || m_outputSearchGraphHypergraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
-#ifdef HAVE_PROTOBUF
-           || m_outputSearchGraphPB
-#endif
-           ;
+    return m_nbest_options.enabled;
+    //     return (!m_nBestFilePath.empty() || m_mbr || m_useLatticeMBR || m_mira ||
+    //             m_outputSearchGraph || m_outputSearchGraphSLF ||
+    //             m_outputSearchGraphHypergraph || m_useConsensusDecoding ||
+    // #ifdef HAVE_PROTOBUF
+    //             m_outputSearchGraphPB ||
+    // #endif
+    //             !m_latticeSamplesFilePath.empty());
   }
+
   size_t GetLatticeSamplesSize() const {
     return m_latticeSamplesSize;
   }
@@ -423,7 +480,8 @@ public:
   }
 
   size_t GetNBestFactor() const {
-    return m_nBestFactor;
+    return m_nbest_options.factor;
+    // return m_nBestFactor;
   }
   bool GetOutputWordGraph() const {
     return m_outputWordGraph;
@@ -436,16 +494,26 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  bool IsSyntax() const {
-    return m_searchAlgorithm == CYKPlus ||
-           m_searchAlgorithm == ChartIncremental ||
-           m_searchAlgorithm == SyntaxS2T ||
-           m_searchAlgorithm == SyntaxT2S ||
-           m_searchAlgorithm == SyntaxT2S_SCFG ||
-           m_searchAlgorithm == SyntaxF2S;
+
+  // bool IsSyntax() const {
+  //   return m_searchAlgorithm == CYKPlus ||
+  //          m_searchAlgorithm == ChartIncremental ||
+  //          m_searchAlgorithm == SyntaxS2T ||
+  //          m_searchAlgorithm == SyntaxT2S ||
+  //          m_searchAlgorithm == SyntaxT2S_SCFG ||
+  //          m_searchAlgorithm == SyntaxF2S;
+  // }
+
+  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
+    if (algo == DefaultSearchAlgorithm)
+      algo = m_searchAlgorithm;
+    return (algo == CYKPlus   || algo == ChartIncremental ||
+            algo == SyntaxS2T || algo == SyntaxT2S ||
+            algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
   }
 
-  const ScoreComponentCollection& GetAllWeights() const {
+  const ScoreComponentCollection&
+  GetAllWeights() const {
     return m_allWeights;
   }
 
@@ -471,7 +539,8 @@ public:
   void SetWeights(const FeatureFunction* sp, const std::vector<float>& weights);
 
   bool GetDistinctNBest() const {
-    return m_onlyDistinctNBest;
+    return m_nbest_options.only_distinct;
+    // return m_onlyDistinctNBest;
   }
   const std::string& GetFactorDelimiter() const {
     return m_factorDelimiter;
@@ -636,7 +705,8 @@ public:
   const std::string &GetBinDirectory() const;
 
   bool NeedAlignmentInfo() const {
-    return m_needAlignmentInfo;
+    return m_bookkeeping_options.need_alignment_info;
+    // return m_needAlignmentInfo;
   }
   const std::string &GetAlignmentOutputFile() const {
     return m_alignmentOutputFile;
@@ -645,14 +715,16 @@ public:
     return m_PrintAlignmentInfo;
   }
   bool PrintAlignmentInfoInNbest() const {
-    return m_PrintAlignmentInfoNbest;
+    return m_nbest_options.include_alignment_info;
+    // return m_PrintAlignmentInfoNbest;
   }
   WordAlignmentSort GetWordAlignmentSort() const {
     return m_wordAlignmentSort;
   }
 
   bool NBestIncludesSegmentation() const {
-    return m_nBestIncludesSegmentation;
+    return m_nbest_options.include_segmentation;
+    // return m_nBestIncludesSegmentation;
   }
 
   bool GetHasAlternateWeightSettings() const {
@@ -732,8 +804,9 @@ public:
   }
 
   //sentence (and thread) specific initialisationn and cleanup
-  void InitializeForInput(const InputType& source) const;
-  void CleanUpAfterSentenceProcessing(const InputType& source) const;
+  // void InitializeForInput(const InputType& source, ttaskptr const& ttask) const;
+  void InitializeForInput(ttasksptr const& ttask) const;
+  void CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const;
 
   void LoadFeatureFunctions();
   bool CheckWeights() const;
@@ -792,7 +865,8 @@ public:
   }
 
   bool PrintNBestTrees() const {
-    return m_printNBestTrees;
+    return m_nbest_options.print_trees;
+    // return m_printNBestTrees;
   }
 
   bool RequireSortingAfterSourceContext() const {

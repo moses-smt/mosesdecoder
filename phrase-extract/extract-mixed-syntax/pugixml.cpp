@@ -16,17 +16,17 @@
 
 #include "pugixml.hpp"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <wchar.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <cassert>
+#include <cwchar>
 
 #ifndef PUGIXML_NO_XPATH
-#	include <math.h>
+#	include <cmath>
 #	include <float.h>
 #	ifdef PUGIXML_NO_EXCEPTIONS
-#		include <setjmp.h>
+#		include <csetjmp>
 #	endif
 #endif
 
@@ -50,7 +50,7 @@
 #endif
 
 #ifdef __INTEL_COMPILER
-#	pragma warning(disable: 177) // function was declared but never referenced 
+#	pragma warning(disable: 177) // function was declared but never referenced
 #	pragma warning(disable: 279) // controlling expression is constant
 #	pragma warning(disable: 1478 1786) // function was declared "deprecated"
 #	pragma warning(disable: 1684) // conversion from pointer to same-sized integral type

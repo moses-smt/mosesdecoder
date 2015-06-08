@@ -57,7 +57,7 @@ template<typename T> inline void fRead(FILE* f,T& t)
 
 template<typename T> inline size_t fWrite(FILE* f,const T* b,const T* e)
 {
-  UINT32 s=std::distance(b,e);
+  uint32_t s=std::distance(b,e);
   size_t rv=fWrite(f,s);
   if(fwrite(b,sizeof(T),s,f)!=s) {
     UTIL_THROW2("ERROR: fwrite!");
@@ -67,7 +67,7 @@ template<typename T> inline size_t fWrite(FILE* f,const T* b,const T* e)
 
 template<typename T> inline size_t fWrite(FILE* f,const T b,const T e)
 {
-  UINT32 s=std::distance(b,e);
+  uint32_t s=std::distance(b,e);
   size_t rv=fWrite(f,s);
   if(fwrite(&(*b),sizeof(T),s,f)!=s) {
     UTIL_THROW2("ERROR: fwrite!");
@@ -77,7 +77,7 @@ template<typename T> inline size_t fWrite(FILE* f,const T b,const T e)
 
 template<typename C> inline size_t fWriteVector(FILE* f,const C& v)
 {
-  UINT32 s=v.size();
+  uint32_t s=v.size();
   size_t rv=fWrite(f,s);
   if(fwrite(&v[0],sizeof(typename C::value_type),s,f)!=s) {
     UTIL_THROW2("ERROR: fwrite!");
@@ -87,7 +87,7 @@ template<typename C> inline size_t fWriteVector(FILE* f,const C& v)
 
 template<typename C> inline void fReadVector(FILE* f, C& v)
 {
-  UINT32 s;
+  uint32_t s;
   fRead(f,s);
   v.resize(s);
   size_t r=fread(&(*v.begin()),sizeof(typename C::value_type),s,f);
@@ -96,7 +96,7 @@ template<typename C> inline void fReadVector(FILE* f, C& v)
   }
 }
 
-inline size_t fWriteString(FILE* f,const char* e, UINT32 s)
+inline size_t fWriteString(FILE* f,const char* e, uint32_t s)
 {
   size_t rv=fWrite(f,s);
   if(fwrite(e,sizeof(char),s,f)!=s) {
@@ -107,7 +107,7 @@ inline size_t fWriteString(FILE* f,const char* e, UINT32 s)
 
 inline void fReadString(FILE* f,std::string& e)
 {
-  UINT32 s;
+  uint32_t s;
   fRead(f,s);
   char* a=new char[s+1];
   if(fread(a,sizeof(char),s,f)!=s) {
@@ -120,7 +120,7 @@ inline void fReadString(FILE* f,std::string& e)
 
 inline size_t fWriteStringVector(FILE* f,const std::vector<std::string>& v)
 {
-  UINT32 s=v.size();
+  uint32_t s=v.size();
   size_t totrv=fWrite(f,s);
   for (size_t i=0; i<s; i++) {
     totrv+=fWriteString(f,v.at(i).c_str(),v.at(i).size());
@@ -130,7 +130,7 @@ inline size_t fWriteStringVector(FILE* f,const std::vector<std::string>& v)
 
 inline void fReadStringVector(FILE* f, std::vector<std::string>& v)
 {
-  UINT32 s;
+  uint32_t s;
   fRead(f,s);
   v.resize(s);
 

@@ -29,7 +29,7 @@
 #include <cstring>
 #include <cctype>
 #include <algorithm>
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 #include <iomanip>
 #include <boost/algorithm/string/predicate.hpp>
@@ -88,13 +88,6 @@ bool FileExists(const std::string& filePath)
 {
   ifstream ifs(filePath.c_str());
   return !ifs.fail();
-}
-
-const std::string Trim(const std::string& str, const std::string dropChars)
-{
-  std::string res = str;
-  res.erase(str.find_last_not_of(dropChars)+1);
-  return res.erase(0, res.find_first_not_of(dropChars));
 }
 
 void ResetUserTime()

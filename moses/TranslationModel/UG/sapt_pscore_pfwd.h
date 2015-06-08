@@ -1,5 +1,5 @@
 // -*- c++ -*-
-// written by Ulrich Germann 
+// written by Ulrich Germann
 #pragma once
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
 #include "util/exception.hh"
@@ -18,10 +18,10 @@ namespace Moses {
 
     public:
 
-      PScorePfwd(float const c, string d) 
-      { 
+      PScorePfwd(float const c, string d)
+      {
 	this->m_index = -1;
-	conf  = c; 
+	conf  = c;
 	denom = d;
 	size_t checksum = d.size();
 	BOOST_FOREACH(char const& x, denom)
@@ -32,17 +32,17 @@ namespace Moses {
 	    this->m_feature_names.push_back(s);
 	  }
 	this->m_num_feats = this->m_feature_names.size();
-	UTIL_THROW_IF2(this->m_feature_names.size() != checksum, 
-		       "Unknown parameter in specification '" 
+	UTIL_THROW_IF2(this->m_feature_names.size() != checksum,
+		       "Unknown parameter in specification '"
 		       << d << "' for Pfwd phrase scorer at " << HERE);
       }
-      
-      void 
-      operator()(Bitext<Token> const& bt, PhrasePair<Token> & pp, 
+
+      void
+      operator()(Bitext<Token> const& bt, PhrasePair<Token> & pp,
 		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
-	if (pp.joint > pp.good1) 
+	if (pp.joint > pp.good1)
 	  {
 	    pp.joint = pp.good1;
 	    // cerr<<bt.toString(pp.p1,0)<<" ::: "<<bt.toString(pp.p2,1)<<endl;
@@ -53,18 +53,18 @@ namespace Moses {
 	  {
 	    switch (c)
 	      {
-	      case 'g': 
-		(*dest)[i++] = log(lbop(pp.good1, pp.joint, conf)); 
+	      case 'g':
+		(*dest)[i++] = log(lbop(pp.good1, pp.joint, conf));
 		break;
-	      case 's': 
-		(*dest)[i++] = log(lbop(pp.sample1, pp.joint, conf)); 
+	      case 's':
+		(*dest)[i++] = log(lbop(pp.sample1, pp.joint, conf));
 		break;
 	      case 'r':
-		(*dest)[i++] = log(lbop(pp.raw1, pp.joint, conf)); 
+		(*dest)[i++] = log(lbop(pp.raw1, pp.joint, conf));
 	      }
 	  }
       }
     };
   }
 }
-  
+

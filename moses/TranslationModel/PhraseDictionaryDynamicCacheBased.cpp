@@ -36,7 +36,7 @@ PhraseDictionaryDynamicCacheBased *PhraseDictionaryDynamicCacheBased::s_instance
 
 //! contructor
 PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(line, true)
 {
   std::cerr << "Initializing PhraseDictionaryDynamicCacheBased feature..." << std::endl;
 
@@ -145,7 +145,7 @@ void PhraseDictionaryDynamicCacheBased::SetParameter(const std::string& key, con
   }
 }
 
-void PhraseDictionaryDynamicCacheBased::InitializeForInput(InputType const& source)
+void PhraseDictionaryDynamicCacheBased::InitializeForInput(ttasksptr const& ttask)
 {
   ReduceCache();
 }
@@ -329,7 +329,7 @@ void PhraseDictionaryDynamicCacheBased::ClearEntries(std::string sourcePhraseStr
 {
   VERBOSE(3,"PhraseDictionaryDynamicCacheBased::ClearEntries(std::string sourcePhraseString, std::string targetPhraseString)" << std::endl);
   const StaticData &staticData = StaticData::Instance();
-  const std::string& factorDelimiter = staticData.GetFactorDelimiter();
+  // const std::string& factorDelimiter = staticData.GetFactorDelimiter();
   Phrase sourcePhrase(0);
   Phrase targetPhrase(0);
 
@@ -425,7 +425,7 @@ void PhraseDictionaryDynamicCacheBased::ClearSource(std::vector<std::string> ent
 {
   VERBOSE(3,"entries.size():|" << entries.size() << "|" << std::endl);
   const StaticData &staticData = StaticData::Instance();
-  const std::string& factorDelimiter = staticData.GetFactorDelimiter();
+  // const std::string& factorDelimiter = staticData.GetFactorDelimiter();
   Phrase sourcePhrase(0);
 
   std::vector<std::string>::iterator it;
@@ -513,7 +513,7 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
 {
   VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString, std::string waString)" << std::endl);
   const StaticData &staticData = StaticData::Instance();
-  const std::string& factorDelimiter = staticData.GetFactorDelimiter();
+  // const std::string& factorDelimiter = staticData.GetFactorDelimiter();
   Phrase sourcePhrase(0);
   TargetPhrase targetPhrase(0);
 

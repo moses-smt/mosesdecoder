@@ -1,6 +1,10 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
+use warnings;
 use strict;
 use FindBin qw($Bin);
 use Getopt::Long "GetOptions";
@@ -39,7 +43,7 @@ $ERROR = "training Aborted."
 
 # check and set default to unset parameters
 $ERROR = "please specify working dir --dir" unless defined($DIR) || defined($HELP);
-$ERROR = "please specify --corpus" if !defined($CORPUS) && !defined($HELP) 
+$ERROR = "please specify --corpus" if !defined($CORPUS) && !defined($HELP)
                                   && $FIRST_STEP <= 2 && $LAST_STEP >= 1;
 
 if ($HELP || $ERROR) {
@@ -69,7 +73,7 @@ if ($HELP || $ERROR) {
   (1) Truecasing;
   (2) Language Model Training;
   (3) Data Preparation
-  (4-10) Recaser Model Training; 
+  (4-10) Recaser Model Training;
   (11) Cleanup.
   --first-step=[1-11]       ... step where script starts (default: 1).
   --last-step=[1-11]        ... step where script ends (default: 11).
@@ -188,7 +192,7 @@ sub train_recase_model {
     }
     else {
       $cmd .= " --score-options='--OnlyDirect'";
-    } 
+    }
     if (uc $LM eq "IRSTLM") {
         $cmd .= " --lm 0:3:$DIR/cased.irstlm.gz:1";
     }

@@ -14,11 +14,11 @@ namespace ugdiss {
   void numwrite(std::ostream& out, uint16_t const& x);
   void numwrite(std::ostream& out, uint32_t const& x);
   void numwrite(std::ostream& out, uint64_t const& x);
-    
+
   char const* numread(char const* src, uint16_t & x);
   char const* numread(char const* src, uint32_t & x);
   char const* numread(char const* src, uint64_t & x);
-  
+
 // template<typename uintNumber>
 // void
 // numwrite(std::ostream& out, uintNumber const& x)
@@ -54,7 +54,7 @@ namespace ugdiss {
 //     case 8: x = bswap_64(x); break;
 //     default: break;
 //     }
-// #endif  
+// #endif
 // }
 
 // template<typename uintNumber>
@@ -71,7 +71,7 @@ namespace ugdiss {
 //     case 8: x = bswap_64(x); break;
 //     default: break;
 //     }
-// #endif  
+// #endif
 //   return src+sizeof(uintNumber);
 // }
 } // end of namespace ugdiss

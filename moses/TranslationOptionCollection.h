@@ -65,6 +65,7 @@ class TranslationOptionCollection
   friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
   TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
 protected:
+  ttaskwptr m_ttask; // that is and must be a weak pointer!
   std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
   InputType const			&m_source; /*< reference to the input */
   SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
@@ -73,7 +74,8 @@ protected:
   std::vector<const Phrase*> m_unksrcs;
   InputPathList m_inputPathQueue;
 
-  TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage,
+  TranslationOptionCollection(ttasksptr const& ttask,
+                              InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
 
   void CalcFutureScore();
@@ -175,7 +177,9 @@ public:
     return m_inputPathQueue;
   }
 
-
+  ttasksptr GetTranslationTask() const {
+    return m_ttask.lock();
+  }
   TO_STRING();
 };
 

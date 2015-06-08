@@ -5,7 +5,7 @@
 
 #include <ostream>
 
-#include <math.h>
+#include <cmath>
 
 namespace search {
 

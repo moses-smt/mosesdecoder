@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2012 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -33,26 +33,30 @@
 
 #include <boost/program_options.hpp>
 
+#include "SyntaxTree.h"
+
 #include "syntax-common/exception.h"
+#include "syntax-common/pcfg.h"
+#include "syntax-common/vocabulary.h"
+#include "syntax-common/xml_tree_parser.h"
+#include "syntax-common/xml_tree_writer.h"
 
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/pcfg_tree.h"
-#include "pcfg-common/syntax_tree.h"
-#include "pcfg-common/typedef.h"
-#include "pcfg-common/xml_tree_parser.h"
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
-
-int PcfgScore::Main(int argc, char *argv[]) {
+int PcfgScore::Main(int argc, char *argv[])
+{
   // Process command-line options.
   Options options;
   ProcessOptions(argc, argv, options);
 
   // Open PCFG stream.
   std::ifstream pcfg_stream;
-  OpenNamedInputOrDie(options.pcfg_file, pcfg_stream);
+  OpenInputFileOrDie(options.pcfg_file, pcfg_stream);
 
   // Read PCFG.
   Pcfg pcfg;
@@ -62,14 +66,14 @@ int PcfgScore::Main(int argc, char *argv[]) {
   // Score corpus according to PCFG.
   TreeScorer scorer(pcfg, non_term_vocab);
   XmlTreeParser parser;
-  XmlTreeWriter<PcfgTree> writer;
+  XmlTreeWriter writer(std::cout);
   std::string line;
   std::size_t line_num = 0;
-  std::auto_ptr<PcfgTree> tree;
+  std::auto_ptr<SyntaxTree> tree;
   while (std::getline(std::cin, line)) {
     ++line_num;
     try {
-      tree = parser.Parse(line);
+      tree = parser.Parse(line, true);
     } catch (Exception &e) {
       std::ostringstream msg;
       msg << "line " << line_num << ": " << e.msg();
@@ -89,13 +93,14 @@ int PcfgScore::Main(int argc, char *argv[]) {
       std::cout << line << std::endl;
       continue;
     }
-    writer.Write(*tree, std::cout);
+    writer.Write(*tree);
   }
 
   return 0;
 }
 
-void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const {
+void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const
+{
   namespace po = boost::program_options;
 
   std::ostringstream usage_top;
@@ -105,14 +110,14 @@ void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const {
   // Declare the command line options that are visible to the user.
   po::options_description visible(usage_top.str());
   visible.add_options()
-    ("help", "print help message and exit")
+  ("help", "print help message and exit")
   ;
 
   // Declare the command line options that are hidden from the user
   // (these are used as positional options).
   po::options_description hidden("Hidden options");
   hidden.add_options()
-    ("pcfg-file", po::value(&options.pcfg_file), "pcfg file")
+  ("pcfg-file", po::value(&options.pcfg_file), "pcfg file")
   ;
 
   // Compose the full set of command-line options.
@@ -126,7 +131,7 @@ void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const {
   // Process the command-line.
   po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).style(CommonOptionStyle()).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmd_line_options).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {

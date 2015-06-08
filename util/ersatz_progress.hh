@@ -3,11 +3,10 @@
 
 #include <iostream>
 #include <string>
-
 #include <stdint.h>
 
 // Ersatz version of boost::progress so core language model doesn't depend on
-// boost.  Also adds option to print nothing.  
+// boost.  Also adds option to print nothing.
 
 namespace util {
 
@@ -15,10 +14,10 @@ extern const char kProgressBanner[];
 
 class ErsatzProgress {
   public:
-    // No output.  
+    // No output.
     ErsatzProgress();
 
-    // Null means no output.  The null value is useful for passing along the ostream pointer from another caller.   
+    // Null means no output.  The null value is useful for passing along the ostream pointer from another caller.
     explicit ErsatzProgress(uint64_t complete, std::ostream *to = &std::cerr, const std::string &message = "");
 
     ~ErsatzProgress();

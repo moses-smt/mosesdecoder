@@ -37,13 +37,23 @@ void RuleMatcherHyperTree<Callback>::EnumerateHyperedges(
     m_queue.pop();
     if (item.trieNode->HasRules()) {
       const FNS &fns = item.annotatedFNS.fns;
+      // Set the output hyperedge's tail.
       m_hyperedge.tail.clear();
       for (FNS::const_iterator p = fns.begin(); p != fns.end(); ++p) {
         const Forest::Vertex *v = *p;
         m_hyperedge.tail.push_back(const_cast<PVertex *>(&(v->pvertex)));
       }
+      // Set the output hyperedge label's input weight.
+      m_hyperedge.label.inputWeight = 0.0f;
+      for (std::vector<const Forest::Hyperedge *>::const_iterator
+           p = item.annotatedFNS.fragment.begin();
+           p != item.annotatedFNS.fragment.end(); ++p) {
+        m_hyperedge.label.inputWeight += (*p)->weight;
+      }
+      // Set the output hyperedge label's translation set pointer.
       m_hyperedge.label.translations =
         &(item.trieNode->GetTargetPhraseCollection());
+      // Pass the output hyperedge to the callback.
       callback(m_hyperedge);
     }
     PropagateNextLexel(item);
@@ -154,7 +164,7 @@ bool RuleMatcherHyperTree<Callback>::MatchChildren(
   if (children.size() != subSeqSize) {
     return false;
   }
-  for (int i = 0; i < subSeqSize; ++i) {
+  for (size_t i = 0; i < subSeqSize; ++i) {
     if (edgeLabel[pos+i] != children[i]->pvertex.symbol[0]->GetId()) {
       return false;
     }
@@ -180,8 +190,9 @@ int RuleMatcherHyperTree<Callback>::SubSeqLength(const HyperPath::NodeSeq &seq,
     int pos)
 {
   int length = 0;
-  while (pos != seq.size() && seq[pos] != HyperPath::kComma) {
-    ++pos;
+  HyperPath::NodeSeq::size_type curpos = pos;
+  while (curpos != seq.size() && seq[curpos] != HyperPath::kComma) {
+    ++curpos;
     ++length;
   }
   return length;

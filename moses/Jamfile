@@ -1,3 +1,4 @@
+# -*- jam -*-
 max-factors = [ option.get "max-factors" : 4 : 4 ] ;
 path-constant FACTOR-LOG : bin/factor.log ;
 update-if-changed $(FACTOR-LOG) $(max-factors) ;
@@ -54,6 +55,21 @@ update-if-changed $(LM-LOG) $(current) ;
 
 obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <dependency>$(LM-LOG) ;
 
+# check if we have xmlrpc-c's abyss server available
+# if yes, include server capabilities in the moses executable
+# include $(TOP)/jam-files/server.jam ;
+
+if [ xmlrpc ] 
+{
+  echo "BUILDING MOSES SERVER!" ;
+  alias mserver : [ glob server/*.cpp ] ;
+}
+else 
+{
+  echo "NOT BUILDING MOSES SERVER!" ;
+  alias mserver ;
+}
+
 if [ option.get "with-mm" : no : yes ] = yes
 {
   alias mmlib : 
@@ -65,28 +81,6 @@ if [ option.get "with-mm" : no : yes ] = yes
   alias mmlib ;
 }
 
-if $(build-moses-server) = true
-{
-
-  xmlrpc-linkflags = [ shell_or_fail "$(xmlrpc-command) c++2 abyss-server --libs" ] ;
-  xmlrpc-cxxflags = [ shell_or_fail "$(xmlrpc-command) c++2 abyss-server --cflags" ] ;
-
-  requirements += <define>HAVE_XMLRPC_C ;
-  requirements += <linkflags>$(xmlrpc-linkflags) ;
-  requirements += <cxxflags>$(xmlrpc-cxxflags) ; 
-  alias mserverlib : $(TOP)/moses/server//mserver ;
-
-  # exe mosesserver : mosesserver.cpp ../../moses//moses ../../OnDiskPt//OnDiskPt ../..//boost_filesystem  : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
-
-} 
-else 
-{
-  alias mserverlib ;
-}
-
-
-
-
 local with-vw = [ option.get "with-vw" ] ;
 if $(with-vw) {
   alias vwfiles : [ glob FF/VW/*.cpp ] ;
@@ -97,6 +91,7 @@ if $(with-vw) {
 lib moses :
 [ glob 
   *.cpp
+  parameters/*.cpp
   Syntax/*.cpp
   Syntax/F2S/*.cpp
   Syntax/S2T/*.cpp
@@ -121,11 +116,19 @@ lib moses :
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
-] vwfiles 
-headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
-
-..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-$(TOP)//boost_filesystem $(TOP)//boost_iostreams mmlib mserverlib
+] 
+vwfiles synlm mmlib mserver headers 
+FF_Factory.o 
+LM//LM 
+TranslationModel/CompactPT//CompactPT 
+TranslationModel/ProbingPT//ProbingPT 
+ThreadPool
+..//search 
+../util/double-conversion//double-conversion 
+..//z 
+../OnDiskPt//OnDiskPt 
+$(TOP)//boost_filesystem 
+$(TOP)//boost_iostreams 
 :
 <threading>single:<source>../util//rt
 ;

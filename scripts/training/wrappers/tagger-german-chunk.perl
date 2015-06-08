@@ -1,10 +1,14 @@
-#!/usr/bin/perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 
-# split -a 5 -d  ../europarl.clean.5.de 
-# ls -1 x????? | ~/workspace/coreutils/parallel/src/parallel /home/s0565741/workspace/treetagger/cmd/run-tagger-chunker-german.sh 
+# split -a 5 -d  ../europarl.clean.5.de
+# ls -1 x????? | ~/workspace/coreutils/parallel/src/parallel /home/s0565741/workspace/treetagger/cmd/run-tagger-chunker-german.sh
 # cat x?????.out > ../out
 
 my $chunkedPath;
@@ -39,11 +43,11 @@ if (!defined($chunkedPath)) {
     print STDERR "must defined -tree-tagger \n";
     exit(1);
   }
-  
+
   $chunkedPath = "$TMPDIR/chunked";
   print STDERR "chunkedPath not defined. Now $chunkedPath \n";
   my $cmd = "$treetaggerPath/cmd/tagger-chunker-german-utf8  < $inPath > $chunkedPath";
-  `$cmd`;  
+  `$cmd`;
 }
 
 # convert chunked file into Moses XML
@@ -82,7 +86,7 @@ while(my $chunkLine = <CHUNKED>) {
     else {
       # beginning of tag
       if ($wordPos == ($numWords - 1)) {
-        # closing bracket of last word in sentence                                                                                      
+        # closing bracket of last word in sentence
         print "\n";
         $sentence = <IN>;
         chomp($sentence);

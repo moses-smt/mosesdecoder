@@ -86,6 +86,10 @@ struct VWTargetSentence {
       int src = it->first;
       int tgt = it->second;
 
+      if (src >= m_sourceConstraints.size() || tgt >= m_targetConstraints.size()) {
+        UTIL_THROW2("VW :: alignment point out of bounds: " << src << "-" << tgt);
+      }
+
       m_sourceConstraints[src].Update(tgt);
       m_targetConstraints[tgt].Update(src);
     }
@@ -161,7 +165,7 @@ public:
     const std::vector<VWFeatureBase*>& sourceFeatures =
       VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
 
-    const std::vector<VWFeatureBase*>& targetFeatures = 
+    const std::vector<VWFeatureBase*>& targetFeatures =
       VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
     const WordsRange &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
@@ -179,8 +183,8 @@ public:
 
       // optionally update translation options using leave-one-out
       std::vector<bool> keep = (m_leaveOneOut.size() > 0)
-        ? LeaveOneOut(translationOptionList, correct)
-        : std::vector<bool>(translationOptionList.size(), true);
+                               ? LeaveOneOut(translationOptionList, correct)
+                               : std::vector<bool>(translationOptionList.size(), true);
 
       // check whether we (still) have some correct translation
       int firstCorrect = -1;
@@ -225,7 +229,7 @@ public:
       //
       // predict using a trained classifier, use this in decoding (=at test time)
       //
-      
+
       std::vector<float> losses(translationOptionList.size());
 
       // extract source side features
@@ -292,7 +296,7 @@ public:
       // classifier (squared/logistic/hinge/...), hence the name "loss"
       if (value == "logistic") {
         m_normalizer = (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer();
-      } else if (value == "squared") {      
+      } else if (value == "squared") {
         m_normalizer = (Discriminative::Normalizer *) new Discriminative::SquaredLossNormalizer();
       } else {
         UTIL_THROW2("Unknown loss type:" << value);
@@ -302,18 +306,19 @@ public:
     }
   }
 
-  virtual void InitializeForInput(InputType const& source) {
+  virtual void InitializeForInput(ttasksptr const& ttask) {
+    InputType const& source = ttask->GetSource();
     // tabbed sentence is assumed only in training
     if (! m_train)
       return;
 
     UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
-        "This feature function requires the TabbedSentence input type");
+                   "This feature function requires the TabbedSentence input type");
 
     const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
     UTIL_THROW_IF2(tabbedSentence.GetColumns().size() < 2,
-        "TabbedSentence must contain target<tab>alignment");
-    
+                   "TabbedSentence must contain target<tab>alignment");
+
     // target sentence represented as a phrase
     Phrase *target = new Phrase();
     target->CreateFromString(
@@ -427,7 +432,7 @@ private:
       const TargetPhrase &targetPhrase = topt->GetTargetPhrase();
 
       // extract raw counts from phrase-table property
-      const CountsPhraseProperty *property = 
+      const CountsPhraseProperty *property =
         static_cast<const CountsPhraseProperty *>(targetPhrase.GetProperty("Counts"));
 
       if (! property) {

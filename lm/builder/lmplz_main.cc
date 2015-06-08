@@ -53,7 +53,7 @@ std::vector<uint64_t> ParsePruning(const std::vector<std::string> &param, std::s
   // throw if each n-gram order has not  threshold specified
   UTIL_THROW_IF(prune_thresholds.size() > order, util::Exception, "You specified pruning thresholds for orders 1 through " << prune_thresholds.size() << " but the model only has order " << order);
   // threshold for unigram can only be 0 (no pruning)
-  
+
   // check if threshold are not in decreasing order
   uint64_t lower_threshold = 0;
   for (std::vector<uint64_t>::iterator it = prune_thresholds.begin(); it != prune_thresholds.end(); ++it) {
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     po::options_description options("Language model building options");
     lm::builder::PipelineConfig pipeline;
 
-    std::string text, arpa;
+    std::string text, intermediate, arpa;
     std::vector<std::string> pruning;
     std::vector<std::string> discount_fallback;
     std::vector<std::string> discount_fallback_default;
@@ -116,6 +116,8 @@ int main(int argc, char *argv[]) {
       ("verbose_header", po::bool_switch(&verbose_header), "Add a verbose header to the ARPA file that includes information such as token count, smoothing type, etc.")
       ("text", po::value<std::string>(&text), "Read text from a file instead of stdin")
       ("arpa", po::value<std::string>(&arpa), "Write ARPA to a file instead of stdout")
+      ("intermediate", po::value<std::string>(&intermediate), "Write ngrams to an intermediate file.  Turns off ARPA output (which can be reactivated by --arpa file).  Forces --renumber on.  Implicitly makes --vocab_file be the provided name + .vocab.")
+      ("renumber", po::bool_switch(&pipeline.renumber_vocabulary), "Rrenumber the vocabulary identifiers so that they are monotone with the hash of each string.  This is consistent with the ordering used by the trie data structure.")
       ("collapse_values", po::bool_switch(&pipeline.output_q), "Collapse probability and backoff into a single value, q that yields the same sentence-level probabilities.  See http://kheafield.com/professional/edinburgh/rest_paper.pdf for more details, including a proof.")
       ("prune", po::value<std::vector<std::string> >(&pruning)->multitoken(), "Prune n-grams with count less than or equal to the given threshold.  Specify one value for each order i.e. 0 0 1 to prune singleton trigrams and above.  The sequence of values must be non-decreasing and the last value applies to any remaining orders. Default is to not prune, which is equivalent to --prune 0.")
       ("limit_vocab_file", po::value<std::string>(&pipeline.prune_vocab_file)->default_value(""), "Read allowed vocabulary separated by whitespace. N-grams that contain vocabulary items not in this list will be pruned. Can be combined with --prune arg")
@@ -124,7 +126,7 @@ int main(int argc, char *argv[]) {
     po::store(po::parse_command_line(argc, argv, options), vm);
 
     if (argc == 1 || vm["help"].as<bool>()) {
-      std::cerr << 
+      std::cerr <<
         "Builds unpruned language models with modified Kneser-Ney smoothing.\n\n"
         "Please cite:\n"
         "@inproceedings{Heafield-estimate,\n"
@@ -147,7 +149,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "This machine has " << mem << " bytes of memory.\n\n";
       } else {
         std::cerr << "Unable to determine the amount of memory on this machine.\n\n";
-      } 
+      }
       std::cerr << options << std::endl;
       return 1;
     }
@@ -191,17 +193,18 @@ int main(int argc, char *argv[]) {
     else {
       pipeline.prune_vocab = false;
     }
-    
+
     util::NormalizeTempPrefix(pipeline.sort.temp_prefix);
 
     lm::builder::InitialProbabilitiesConfig &initial = pipeline.initial_probs;
-    // TODO: evaluate options for these.  
+    // TODO: evaluate options for these.
     initial.adder_in.total_memory = 32768;
     initial.adder_in.block_count = 2;
     initial.adder_out.total_memory = 32768;
     initial.adder_out.block_count = 2;
     pipeline.read_backoffs = initial.adder_out;
 
+    // Read from stdin, write to stdout by default
     util::scoped_fd in(0), out(1);
     if (vm.count("text")) {
       in.reset(util::OpenReadOrThrow(text.c_str()));
@@ -210,10 +213,20 @@ int main(int argc, char *argv[]) {
       out.reset(util::CreateOrThrow(arpa.c_str()));
     }
 
-    // Read from stdin
     try {
-      lm::builder::Output output;
-      output.Add(new lm::builder::PrintARPA(out.release(), verbose_header));
+      bool writing_intermediate = vm.count("intermediate");
+      if (writing_intermediate) {
+        pipeline.renumber_vocabulary = true;
+        if (!pipeline.vocab_file.empty()) {
+          std::cerr << "--intermediate and --vocab_file are incompatible because --intermediate already makes a vocab file." << std::endl;
+          return 1;
+        }
+        pipeline.vocab_file = intermediate + ".vocab";
+      }
+      lm::builder::Output output(writing_intermediate ? intermediate : pipeline.sort.temp_prefix, writing_intermediate);
+      if (!writing_intermediate || vm.count("arpa")) {
+        output.Add(new lm::builder::PrintARPA(out.release(), verbose_header));
+      }
       lm::builder::Pipeline(pipeline, in.release(), output);
     } catch (const util::MallocException &e) {
       std::cerr << e.what() << std::endl;

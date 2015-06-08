@@ -9,7 +9,7 @@
 #include <functional>
 #include <vector>
 
-#include <assert.h>
+#include <cassert>
 #include <stdint.h>
 
 namespace util {
@@ -34,7 +34,7 @@ template <class EntryT, class HashT, class EqualT> class AutoProbing;
  * Memory management and initialization is externalized to make it easier to
  * serialize these to disk and load them quickly.
  * Uses linear probing to find value.
- * Only insert and lookup operations.  
+ * Only insert and lookup operations.
  */
 template <class EntryT, class HashT, class EqualT = std::equal_to<typename EntryT::Key> > class ProbingHashTable {
   public:
@@ -50,7 +50,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
       return buckets * sizeof(Entry);
     }
 
-    // Must be assigned to later.  
+    // Must be assigned to later.
     ProbingHashTable() : entries_(0)
 #ifdef DEBUG
       , initialized_(false)
@@ -88,7 +88,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 #ifdef DEBUG
       assert(initialized_);
 #endif
-      for (MutableIterator i = Ideal(t);;) {
+      for (MutableIterator i = Ideal(t.GetKey());;) {
         Key got(i->GetKey());
         if (equal_(got, t.GetKey())) { out = i; return true; }
         if (equal_(got, invalid_)) {
@@ -98,17 +98,17 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
           return false;
         }
         if (++i == end_) i = begin_;
-      }   
+      }
     }
 
     void FinishedInserting() {}
 
-    // Don't change anything related to GetKey,  
+    // Don't change anything related to GetKey,
     template <class Key> bool UnsafeMutableFind(const Key key, MutableIterator &out) {
 #ifdef DEBUG
       assert(initialized_);
 #endif
-      for (MutableIterator i(begin_ + (hash_(key) % buckets_));;) {
+      for (MutableIterator i(Ideal(key));;) {
         Key got(i->GetKey());
         if (equal_(got, key)) { out = i; return true; }
         if (equal_(got, invalid_)) return false;
@@ -118,7 +118,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 
     // Like UnsafeMutableFind, but the key must be there.
     template <class Key> MutableIterator UnsafeMutableMustFind(const Key key) {
-       for (MutableIterator i(begin_ + (hash_(key) % buckets_));;) {
+       for (MutableIterator i(Ideal(key));;) {
         Key got(i->GetKey());
         if (equal_(got, key)) { return i; }
         assert(!equal_(got, invalid_));
@@ -131,17 +131,17 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 #ifdef DEBUG
       assert(initialized_);
 #endif
-      for (ConstIterator i(begin_ + (hash_(key) % buckets_));;) {
+      for (ConstIterator i(Ideal(key));;) {
         Key got(i->GetKey());
         if (equal_(got, key)) { out = i; return true; }
         if (equal_(got, invalid_)) return false;
         if (++i == end_) i = begin_;
-      }    
+      }
     }
 
     // Like Find but we're sure it must be there.
     template <class Key> ConstIterator MustFind(const Key key) const {
-      for (ConstIterator i(begin_ + (hash_(key) % buckets_));;) {
+      for (ConstIterator i(Ideal(key));;) {
         Key got(i->GetKey());
         if (equal_(got, key)) { return i; }
         assert(!equal_(got, invalid_));
@@ -213,7 +213,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
       MutableIterator i;
       // Beginning can be wrap-arounds.
       for (i = begin_; !equal_(i->GetKey(), invalid_); ++i) {
-        MutableIterator ideal = Ideal(*i);
+        MutableIterator ideal = Ideal(i->GetKey());
         UTIL_THROW_IF(ideal > i && ideal <= last, Exception, "Inconsistency at position " << (i - begin_) << " should be at " << (ideal - begin_));
       }
       MutableIterator pre_gap = i;
@@ -222,7 +222,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
           pre_gap = i;
           continue;
         }
-        MutableIterator ideal = Ideal(*i);
+        MutableIterator ideal = Ideal(i->GetKey());
         UTIL_THROW_IF(ideal > i || ideal <= pre_gap, Exception, "Inconsistency at position " << (i - begin_) << " with ideal " << (ideal - begin_));
       }
     }
@@ -230,12 +230,15 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
   private:
     friend class AutoProbing<Entry, Hash, Equal>;
 
-    template <class T> MutableIterator Ideal(const T &t) {
-      return begin_ + (hash_(t.GetKey()) % buckets_);
+    MutableIterator Ideal(const Key key) {
+      return begin_ + (hash_(key) % buckets_);
+    }
+    ConstIterator Ideal(const Key key) const {
+      return begin_ + (hash_(key) % buckets_);
     }
 
     template <class T> MutableIterator UncheckedInsert(const T &t) {
-      for (MutableIterator i(Ideal(t));;) {
+      for (MutableIterator i(Ideal(t.GetKey()));;) {
         if (equal_(i->GetKey(), invalid_)) { *i = t; return i; }
         if (++i == end_) { i = begin_; }
       }
@@ -253,7 +256,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 #endif
 };
 
-// Resizable linear probing hash table.  This owns the memory.  
+// Resizable linear probing hash table.  This owns the memory.
 template <class EntryT, class HashT, class EqualT = std::equal_to<typename EntryT::Key> > class AutoProbing {
   private:
     typedef ProbingHashTable<EntryT, HashT, EqualT> Backend;
@@ -277,6 +280,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 
     // Assumes that the key is unique.  Multiple insertions won't cause a failure, just inconsistent lookup.
     template <class T> MutableIterator Insert(const T &t) {
+      ++backend_.entries_;
       DoubleIfNeeded();
       return backend_.UncheckedInsert(t);
     }

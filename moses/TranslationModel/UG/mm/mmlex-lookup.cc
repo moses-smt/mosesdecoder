@@ -1,8 +1,8 @@
 // -*- c++ -*-
 // Program to extract word cooccurrence counts from a memory-mapped
 // word-aligned bitext stores the counts lexicon in the format for
-// mm2dTable<uint32_t> (ug_mm_2d_table.h) 
-// 
+// mm2dTable<uint32_t> (ug_mm_2d_table.h)
+//
 // (c) 2010-2012 Ulrich Germann
 
 // to do: multi-threading
@@ -20,8 +20,8 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 #include <boost/math/distributions/binomial.hpp>
-#include <boost/unordered_map.hpp> 
-#include <boost/unordered_set.hpp> 
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
 #include "ug_mm_2d_table.h"
@@ -35,7 +35,7 @@ using namespace boost::math;
 typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> LEX_t;
 typedef SimpleWordId Token;
 
-// DECLARATIONS 
+// DECLARATIONS
 void interpret_args(int ac, char* av[]);
 
 string swrd,twrd,L1,L2,bname;
@@ -43,7 +43,7 @@ TokenIndex V1,V2;
 LEX_t LEX;
 
 
-void 
+void
 lookup_source(ostream& out, id_type r)
 {
   vector<LEX_t::Cell> foo(LEX[r].start,LEX[r].stop);
@@ -57,7 +57,7 @@ lookup_source(ostream& out, id_type r)
     }
 }
 
-void 
+void
 lookup_target(ostream& out, id_type c)
 {
   vector<LEX_t::Cell> foo;
@@ -65,7 +65,7 @@ lookup_target(ostream& out, id_type c)
   for (size_t r = 0; r < LEX.numRows; ++r)
     {
       size_t j = LEX[r][c];
-      if (j) 
+      if (j)
 	{
 	  cell.id  = r;
 	  cell.val = j;
@@ -82,7 +82,7 @@ lookup_target(ostream& out, id_type c)
     }
 }
 
-void 
+void
 dump(ostream& out)
 {
   for (size_t r = 0; r < LEX.numRows; ++r)
@@ -91,7 +91,7 @@ dump(ostream& out)
 }
 
 
-int 
+int
 main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
@@ -100,14 +100,14 @@ main(int argc, char* argv[])
   V1.open(bname+L1+".tdx");
   V2.open(bname+L2+".tdx");
   LEX.open(bname+L1+"-"+L2+".lex");
- 
+
   cout.precision(2);
   id_type swid = V1[swrd];
   id_type twid = V2[twrd];
   if (swid != 1 && twid != 1)
     {
-      cout << swrd << " " << twrd << " " 
-	   << LEX.m1(swid)    << " / " 
+      cout << swrd << " " << twrd << " "
+	   << LEX.m1(swid)    << " / "
 	   << LEX[swid][twid] << " / "
 	   << LEX.m2(twid)    << endl;
     }
@@ -119,7 +119,7 @@ main(int argc, char* argv[])
     dump(cout);
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   namespace po=boost::program_options;
@@ -133,7 +133,7 @@ interpret_args(int ac, char* av[])
     ("source,s",po::value<string>(&swrd),"source word")
     ("target,t",po::value<string>(&twrd),"target word")
     ;
-  
+
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
     ("L1",    po::value<string>(&L1),"L1 tag")

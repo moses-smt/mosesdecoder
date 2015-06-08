@@ -3,16 +3,16 @@
  * Chain(config) >> Read(file) >> sorter.Unsorted();
  * Stream stream;
  * Chain chain(config) >> sorter.Sorted(internal_config, lazy_config) >> stream;
- * 
- * Note that sorter must outlive any threads that use Unsorted or Sorted.  
+ *
+ * Note that sorter must outlive any threads that use Unsorted or Sorted.
  *
  * Combiners take the form:
  * bool operator()(void *into, const void *option, const Compare &compare) const
  * which returns true iff a combination happened.  The sorting algorithm
- * guarantees compare(into, option).  But it does not guarantee 
- * compare(option, into).  
+ * guarantees compare(into, option).  But it does not guarantee
+ * compare(option, into).
  * Currently, combining is only done in merge steps, not during on-the-fly
- * sort.  Use a hash table for that.  
+ * sort.  Use a hash table for that.
  */
 
 #ifndef UTIL_STREAM_SORT_H
@@ -25,6 +25,7 @@
 #include "util/stream/timer.hh"
 
 #include "util/file.hh"
+#include "util/fixed_array.hh"
 #include "util/scoped.hh"
 #include "util/sized_iterator.hh"
 
@@ -37,12 +38,12 @@ namespace util {
 namespace stream {
 
 struct NeverCombine {
-  template <class Compare> bool operator()(const void *, const void *, const Compare &) const { 
+  template <class Compare> bool operator()(const void *, const void *, const Compare &) const {
     return false;
   }
 };
 
-// Manage the offsets of sorted blocks in a file.  
+// Manage the offsets of sorted blocks in a file.
 class Offsets {
   public:
     explicit Offsets(int fd) : log_(fd) {
@@ -150,7 +151,7 @@ template <class Compare> class MergeQueue {
     }
 
   private:
-    // Priority queue contains these entries.  
+    // Priority queue contains these entries.
     class Entry {
       public:
         Entry() {}
@@ -195,7 +196,7 @@ template <class Compare> class MergeQueue {
         uint64_t remaining_, offset_;
     };
 
-    // Wrapper comparison function for queue entries.   
+    // Wrapper comparison function for queue entries.
     class Greater : public std::binary_function<const Entry &, const Entry &, bool> {
       public:
         explicit Greater(const Compare &compare) : compare_(compare) {}
@@ -217,10 +218,10 @@ template <class Compare> class MergeQueue {
 };
 
 /* A worker object that merges.  If the number of pieces to merge exceeds the
- * arity, it outputs multiple sorted blocks, recording to out_offsets.  
+ * arity, it outputs multiple sorted blocks, recording to out_offsets.
  * However, users will only every see a single sorted block out output because
  * Sort::Sorted insures the arity is higher than the number of pieces before
- * returning this.   
+ * returning this.
  */
 template <class Compare, class Combine> class MergingReader {
   public:
@@ -235,7 +236,7 @@ template <class Compare, class Combine> class MergingReader {
     }
 
     void Run(const ChainPosition &position, bool assert_one) {
-      // Special case: nothing to read.  
+      // Special case: nothing to read.
       if (!in_offsets_->RemainingBlocks()) {
         Link l(position);
         l.Poison();
@@ -267,7 +268,7 @@ template <class Compare, class Combine> class MergingReader {
 
         // Populate queue.
         MergeQueue<Compare> queue(in_, per_buffer, entry_size, compare_);
-        for (uint8_t *buf = static_cast<uint8_t*>(buffer.get()); 
+        for (uint8_t *buf = static_cast<uint8_t*>(buffer.get());
             in_offsets_->RemainingBlocks() && (buf + std::min(per_buffer, in_offsets_->PeekSize()) <= buffer_end);) {
           uint64_t offset = in_offsets_->TotalOffset();
           uint64_t size = in_offsets_->NextSize();
@@ -285,7 +286,7 @@ template <class Compare, class Combine> class MergingReader {
         }
 
         uint64_t written = 0;
-        // Merge including combiner support.  
+        // Merge including combiner support.
         memcpy(str.Get(), queue.Top(), entry_size);
         for (queue.Pop(); !queue.Empty(); queue.Pop()) {
           if (!combine_(str.Get(), queue.Top(), compare_)) {
@@ -300,9 +301,9 @@ template <class Compare, class Combine> class MergingReader {
       str.Poison();
     }
 
-  private: 
+  private:
     void ReadSingle(uint64_t offset, const uint64_t size, const ChainPosition &position) {
-      // Special case: only one to read.  
+      // Special case: only one to read.
       const uint64_t end = offset + size;
       const uint64_t block_size = position.GetChain().BlockSize();
       Link l(position);
@@ -315,7 +316,7 @@ template <class Compare, class Combine> class MergingReader {
       (++l).Poison();
       return;
     }
-   
+
     Compare compare_;
     Combine combine_;
 
@@ -326,17 +327,17 @@ template <class Compare, class Combine> class MergingReader {
 
   private:
     Offsets *out_offsets_;
- 
+
     std::size_t buffer_size_;
     std::size_t total_memory_;
 };
 
-// The lazy step owns the remaining files.  This keeps track of them.  
+// The lazy step owns the remaining files.  This keeps track of them.
 template <class Compare, class Combine> class OwningMergingReader : public MergingReader<Compare, Combine> {
   private:
     typedef MergingReader<Compare, Combine> P;
   public:
-    OwningMergingReader(int data, const Offsets &offsets, std::size_t buffer, std::size_t lazy, const Compare &compare, const Combine &combine) 
+    OwningMergingReader(int data, const Offsets &offsets, std::size_t buffer, std::size_t lazy, const Compare &compare, const Combine &combine)
       : P(data, NULL, NULL, buffer, lazy, compare, combine),
         data_(data),
         offsets_(offsets) {}
@@ -353,7 +354,7 @@ template <class Compare, class Combine> class OwningMergingReader : public Mergi
     Offsets offsets_;
 };
 
-// Don't use this directly.  Worker that sorts blocks.   
+// Don't use this directly.  Worker that sorts blocks.
 template <class Compare> class BlockSorter {
   public:
     BlockSorter(Offsets &offsets, const Compare &compare) :
@@ -362,7 +363,7 @@ template <class Compare> class BlockSorter {
     void Run(const ChainPosition &position) {
       const std::size_t entry_size = position.GetChain().EntrySize();
       for (Link link(position); link; ++link) {
-        // Record the size of each block in a separate file.    
+        // Record the size of each block in a separate file.
         offsets_->Append(link->ValidSize());
         void *end = static_cast<uint8_t*>(link->Get()) + link->ValidSize();
 #if defined(_WIN32) || defined(_WIN64)
@@ -399,7 +400,7 @@ template <class Compare, class Combine = NeverCombine> class Sort {
         compare_(compare), combine_(combine),
         entry_size_(in.EntrySize()) {
       UTIL_THROW_IF(!entry_size_, BadSortConfig, "Sorting entries of size 0");
-      // Make buffer_size a multiple of the entry_size.  
+      // Make buffer_size a multiple of the entry_size.
       config_.buffer_size -= config_.buffer_size % entry_size_;
       UTIL_THROW_IF(!config_.buffer_size, BadSortConfig, "Sort buffer too small");
       UTIL_THROW_IF(config_.total_memory < config_.buffer_size * 4, BadSortConfig, "Sorting memory " << config_.total_memory << " is too small for four buffers (two read and two write).");
@@ -429,7 +430,7 @@ template <class Compare, class Combine = NeverCombine> class Sort {
       Offsets offsets2(offsets2_file.get());
       Offsets *offsets_in = &offsets_, *offsets_out = &offsets2;
 
-      // Double buffered writing.  
+      // Double buffered writing.
       ChainConfig chain_config;
       chain_config.entry_size = entry_size_;
       chain_config.block_count = 2;
@@ -472,7 +473,7 @@ template <class Compare, class Combine = NeverCombine> class Sort {
     }
 
     // Output to chain, using this amount of memory, maximum, for lazy merge
-    // sort.  
+    // sort.
     void Output(Chain &out, std::size_t lazy_memory) {
       Merge(lazy_memory);
       out.SetProgressTarget(Size());
@@ -483,15 +484,15 @@ template <class Compare, class Combine = NeverCombine> class Sort {
 
     /* If a pipeline step is reading sorted input and writing to a different
      * sort order, then there's a trade-off between using RAM to read lazily
-     * (avoiding copying the file) and using RAM to increase block size and, 
+     * (avoiding copying the file) and using RAM to increase block size and,
      * therefore, decrease the number of merge sort passes in the next
-     * iteration.  
-     * 
+     * iteration.
+     *
      * Merge sort takes log_{arity}(pieces) passes.  Thus, each time the chain
      * block size is multiplied by arity, the number of output passes decreases
      * by one.  Up to a constant, then, log_{arity}(chain) is the number of
      * passes saved.  Chain simply divides the memory evenly over all blocks.
-     * 
+     *
      * Lazy sort saves this many passes (up to a constant)
      *   log_{arity}((memory-lazy)/block_count) + 1
      * Non-lazy sort saves this many passes (up to the same constant):
@@ -535,7 +536,7 @@ template <class Compare, class Combine = NeverCombine> class Sort {
     const std::size_t entry_size_;
 };
 
-// returns bytes to be read on demand.  
+// returns bytes to be read on demand.
 template <class Compare, class Combine> uint64_t BlockingSort(Chain &chain, const SortConfig &config, const Compare &compare = Compare(), const Combine &combine = NeverCombine()) {
   Sort<Compare, Combine> sorter(chain, config, compare, combine);
   chain.Wait(true);
@@ -543,6 +544,54 @@ template <class Compare, class Combine> uint64_t BlockingSort(Chain &chain, cons
   sorter.Output(chain);
   return size;
 }
+
+/**
+ * Represents an @ref util::FixedArray "array" capable of storing @ref util::stream::Sort "Sort" objects.
+ *
+ * In the anticipated use case, an instance of this class will maintain one @ref util::stream::Sort "Sort" object
+ * for each n-gram order (ranging from 1 up to the maximum n-gram order being processed).
+ * Use in this manner would enable the n-grams each n-gram order to be sorted, in parallel.
+ *
+ * @tparam Compare An @ref Comparator "ngram comparator" to use during sorting.
+ */
+template <class Compare, class Combine = NeverCombine> class Sorts : public FixedArray<Sort<Compare, Combine> > {
+  private:
+    typedef Sort<Compare, Combine> S;
+    typedef FixedArray<S> P;
+
+  public:
+    /**
+     * Constructs, but does not initialize.
+     *
+     * @ref util::FixedArray::Init() "Init" must be called before use.
+     *
+     * @see util::FixedArray::Init()
+     */
+    Sorts() {}
+
+    /**
+     * Constructs an @ref util::FixedArray "array" capable of storing a fixed number of @ref util::stream::Sort "Sort" objects.
+     *
+     * @param number The maximum number of @ref util::stream::Sort "sorters" that can be held by this @ref util::FixedArray "array"
+     * @see util::FixedArray::FixedArray()
+     */
+    explicit Sorts(std::size_t number) : FixedArray<Sort<Compare, Combine> >(number) {}
+
+    /**
+     * Constructs a new @ref util::stream::Sort "Sort" object which is stored in this @ref util::FixedArray "array".
+     *
+     * The new @ref util::stream::Sort "Sort" object is constructed using the provided @ref util::stream::SortConfig "SortConfig" and @ref Comparator "ngram   comparator";
+     * once constructed, a new worker @ref util::stream::Thread "thread" (owned by the @ref util::stream::Chain "chain") will sort the n-gram data stored
+     * in the @ref util::stream::Block "blocks" of the provided @ref util::stream::Chain "chain".
+     *
+     * @see util::stream::Sort::Sort()
+     * @see util::stream::Chain::operator>>()
+     */
+    void push_back(util::stream::Chain &chain, const util::stream::SortConfig &config, const Compare &compare = Compare(), const Combine &combine = Combine()) {
+      new (P::end()) S(chain, config, compare, combine); // use "placement new" syntax to initalize S in an already-allocated memory location
+      P::Constructed();
+    }
+};
 
 } // namespace stream
 } // namespace util

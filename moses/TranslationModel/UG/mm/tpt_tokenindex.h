@@ -3,7 +3,7 @@
 //
 // - Vocab items should be stored in order of ids, so that we can determine their length
 //   by taking computing V[id+1] - V[id] instead of using strlen.
-// 
+//
 // (c) 2007,2008 Ulrich Germann
 
 #ifndef __ugTokenIndex_hh
@@ -30,7 +30,7 @@ namespace ugdiss
     /** Reverse index: maps from ID to char const* */
     mutable vector<char const*> ridx;
     /** Label for the UNK token */
-    string unkLabel; 
+    string unkLabel;
     id_type unkId,numTokens;
 
     /// New 2013-09-02: thread-safe
@@ -42,9 +42,9 @@ namespace ugdiss
     boost::shared_ptr<vector<string> > newWords;
     // The use of pointers to external items is a bit of a bad hack
     // in terms of the semantic of TokenIndex const: since external items
-    // are changed, the TokenIndex instance remains unchanged and const works, 
-    // even though in reality the underlying object on the coceptual level 
-    // *IS* changed. This means that dynamic TokenIndex instances are not 
+    // are changed, the TokenIndex instance remains unchanged and const works,
+    // even though in reality the underlying object on the coceptual level
+    // *IS* changed. This means that dynamic TokenIndex instances are not
     // thread-safe!
 
   public:
@@ -53,7 +53,7 @@ namespace ugdiss
     {
     public:
       uint32_t offset;
-      id_type  id; 
+      id_type  id;
     };
 
     /** Comparison function object used for Entry instances */
@@ -111,19 +111,19 @@ namespace ugdiss
     void setUnkLabel(string unk);
   };
 
-  void 
-  write_tokenindex_to_disk(vector<pair<string,uint32_t> > const& tok, 
+  void
+  write_tokenindex_to_disk(vector<pair<string,uint32_t> > const& tok,
                            string const& ofile, string const& unkToken);
 
   /** for sorting words by frequency */
   class compWords
   {
     string unk;
-  public: 
+  public:
     compWords(string _unk) : unk(_unk) {};
-    
+
     bool
-    operator()(pair<string,size_t> const& A, 
+    operator()(pair<string,size_t> const& A,
                pair<string,size_t> const& B) const
     {
       if (A.first == unk) return false;// do we still need this special treatment?
@@ -142,7 +142,7 @@ namespace ugdiss
     typedef pair<string,uint32_t>  Token;      // token and id
 
 
-    // first, sort the word list in decreasing order of frequency, so that we 
+    // first, sort the word list in decreasing order of frequency, so that we
     // can assign IDs in an encoding-efficient manner (high frequency. low ID)
     vector<pair<string,size_t> > wcounts(M.size()); // for sorting by frequency
     typedef typename MYMAP::const_iterator myIter;
@@ -156,16 +156,16 @@ namespace ugdiss
     sort(wcounts.begin(),wcounts.end(),compFunc);
 
     // Assign IDs ...
-    vector<Token> tok(wcounts.size()); 
+    vector<Token> tok(wcounts.size());
     for (size_t i = 0; i < wcounts.size(); i++)
       tok[i] = Token(wcounts[i].first,i);
     // and re-sort in alphabetical order
-    sort(tok.begin(),tok.end()); 
+    sort(tok.begin(),tok.end());
     write_tokenindex_to_disk(tok,ofile,unkToken);
   }
 
   template<typename Token>
-  void 
+  void
   fill_token_seq(TokenIndex& V, string const& line, vector<Token>& dest)
   {
     istringstream buf(line); string w;

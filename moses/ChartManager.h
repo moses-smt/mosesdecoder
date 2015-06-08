@@ -33,8 +33,6 @@
 #include "BaseManager.h"
 #include "moses/Syntax/KBestExtractor.h"
 
-#include <boost/shared_ptr.hpp>
-
 namespace Moses
 {
 
@@ -103,7 +101,7 @@ private:
   void Backtrack(const ChartHypothesis *hypo) const;
 
 public:
-  ChartManager(InputType const& source);
+  ChartManager(ttasksptr const& ttask);
   ~ChartManager();
   void Decode();
   void AddXmlChartOptions();
@@ -156,7 +154,7 @@ public:
   void OutputSearchGraph(OutputCollector *collector) const;
   void OutputSearchGraphSLF() const {
   }
-  void OutputSearchGraphHypergraph() const;
+  // void OutputSearchGraphHypergraph() const;
 
 };
 

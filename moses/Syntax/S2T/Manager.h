@@ -30,7 +30,7 @@ template<typename Parser>
 class Manager : public Syntax::Manager
 {
 public:
-  Manager(const InputType &);
+  Manager(ttasksptr const& ttask);
 
   void Decode();
 

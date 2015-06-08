@@ -40,7 +40,7 @@ class DecodeFeature : public StatelessFeatureFunction
 {
 
 public:
-  DecodeFeature(const std::string &line);
+  DecodeFeature(const std::string &line, bool registerNow);
 
   DecodeFeature(size_t numScoreComponents
                 , const std::string &line);

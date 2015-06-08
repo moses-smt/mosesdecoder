@@ -1,14 +1,25 @@
-#! /usr/bin/perl -w 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # example
 #  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation --GZOutput
 
+use warnings;
 use strict;
 use File::Basename;
 
 sub RunFork($);
 sub systemCheck($);
 sub NumStr($);
+sub DigitStr($);
+sub CharStr($);
+
+my $is_osx = ($^O eq "darwin");
+
+my $alph = "abcdefghijklmnopqrstuvwxyz";
+my @alph = (split(//,$alph));
 
 print "Started ".localtime() ."\n";
 
@@ -31,9 +42,10 @@ my $baselineExtract;
 my $glueFile;
 my $phraseOrientation = 0;
 my $phraseOrientationPriorsFile;
+my $splitCmdOption="-d";
 
-my $GZIP_EXEC; # = which("pigz"); 
-if(-f "/usr/bin/pigz") {
+my $GZIP_EXEC;
+if(`which pigz`) {
   $GZIP_EXEC = 'pigz';
 }
 else {
@@ -61,13 +73,15 @@ for (my $i = 8; $i < $#ARGV + 1; ++$i)
     $phraseOrientationPriorsFile = $ARGV[++$i];
     next;
   }
+  $splitCmdOption="",next if $ARGV[$i] eq "--NoNumericSuffix";
 
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
 my $cmd;
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
-$cmd = "mkdir -p $TMPDIR";
+$cmd = "mkdir -p $TMPDIR; ls -l $TMPDIR";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 my $totalLines = int(`cat $align | wc -l`);
@@ -80,24 +94,24 @@ my $pid;
 
 if ($numParallel > 1)
 {
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $target $TMPDIR/target.";
-	$pid = RunFork($cmd);
-	push(@children, $pid);
-	
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $source $TMPDIR/source.";
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $target $TMPDIR/target.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $align $TMPDIR/align.";
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $source $TMPDIR/source.";
+	$pid = RunFork($cmd);
+	push(@children, $pid);
+
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $align $TMPDIR/align.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
   if ($weights) {
-    $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
+    $cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
     $pid = RunFork($cmd);
     push(@children, $pid);
   }
-	
+
 	# wait for everything is finished
 	foreach (@children) {
 		waitpid($_, 0);
@@ -109,20 +123,16 @@ else
   my $numStr = NumStr(0);
 
   $cmd = "ln -s $target $TMPDIR/target.$numStr";
-	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
   $cmd = "ln -s $source $TMPDIR/source.$numStr";
-	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
   $cmd = "ln -s $align $TMPDIR/align.$numStr";
-	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
   if ($weights) {
     $cmd = "ln -s $weights $TMPDIR/weights.$numStr";
-    print STDERR "Executing: $cmd \n";
     `$cmd`;
   }
 }
@@ -132,7 +142,7 @@ else
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
-  
+
   if ($pid == 0)
   { # child
     my $numStr = NumStr($i);
@@ -145,10 +155,9 @@ for (my $i = 0; $i < $numParallel; ++$i)
     if (defined($glueFile)) {
       $glueArg = "--GlueGrammar $TMPDIR/glue.$numStr";
     }
-    print "glueArg=$glueArg \n";
+    #print STDERR "glueArg=$glueArg \n";
 
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $glueArg $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
-    print STDERR $cmd;
     `$cmd`;
 
     exit();
@@ -245,8 +254,8 @@ if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
   foreach my $filenamePhraseOrientationPriors (@orientationPriorsCountFiles) {
     if (-f $filenamePhraseOrientationPriors) {
       open my $infilePhraseOrientationPriors, '<', $filenamePhraseOrientationPriors or die "cannot open $filenamePhraseOrientationPriors: $!";
-      while (my $line = <$infilePhraseOrientationPriors>) { 
-        print $line; 
+      while (my $line = <$infilePhraseOrientationPriors>) {
+        print $line;
         my ($key, $value) = split / /, $line;
         $priorCounts{$key} += $value;
       }
@@ -263,7 +272,6 @@ if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
-print STDERR $cmd;
 `$cmd`;
 
 print STDERR "Finished ".localtime() ."\n";
@@ -276,7 +284,7 @@ sub RunFork($)
   my $cmd = shift;
 
   my $pid = fork();
-  
+
   if ($pid == 0)
   { # child
     print STDERR $cmd;
@@ -296,7 +304,7 @@ sub systemCheck($)
   }
 }
 
-sub NumStr($)
+sub DigitStr($)
 {
     my $i = shift;
     my $numStr;
@@ -322,5 +330,32 @@ sub NumStr($)
 	$numStr = $i;
     }
     return $numStr;
+}
+
+sub CharStr($)
+{
+    my $i = shift;
+    my $charStr;
+    my @bit=();
+
+    while ($i>0){
+        push @bit, $i%26;
+        $i=int($i/26);
+    }
+    my $offset=scalar(@bit);
+    my $h;
+    for ($h=6;$h>=$offset;--$h) { $charStr.="a"; }
+    for ($h=$offset-1;$h>=0;--$h) { $charStr.="$alph[$bit[$h]]"; }
+    return $charStr;
+}
+
+sub NumStr($)
+{
+    my $i = shift;
+    if ($is_osx){
+        return CharStr($i);
+    }else{
+        return DigitStr($i);
+    }
 }
 

@@ -20,7 +20,7 @@ typedef Bitext<Token>::iter iter;
 
 mmbitext bg;
 
-void 
+void
 show(ostream& out, iter& f)
 {
   iter b(bg.I2.get(),f.getToken(0),f.size());
@@ -29,11 +29,11 @@ show(ostream& out, iter& f)
   else
     out << string(12,' ');
   out << " " << setw(5) <<  int(round(f.approxOccurrenceCount())) << " ";
-  out << f.str(bg.V1.get()) << endl; 
+  out << f.str(bg.V1.get()) << endl;
 }
 
 
-void 
+void
 dump(ostream& out, iter& f)
 {
   float cnt = f.size() ? f.approxOccurrenceCount() : 0;
@@ -44,12 +44,12 @@ dump(ostream& out, iter& f)
       while (f.over());
       f.up();
     }
-  if (f.size() && cnt < f.approxOccurrenceCount() && f.approxOccurrenceCount() > 1) 
+  if (f.size() && cnt < f.approxOccurrenceCount() && f.approxOccurrenceCount() > 1)
     show(out,f);
 }
 
 
-void 
+void
 read_data(string fname, vector<string>& dest)
 {
   ifstream in(fname.c_str());
@@ -71,6 +71,6 @@ int main(int argc, char* argv[])
   dump(cout,mfg);
   exit(0);
 }
-  
-  
+
+
 

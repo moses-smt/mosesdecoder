@@ -36,7 +36,7 @@ namespace Moses
 std::vector<GenerationDictionary*> GenerationDictionary::s_staticColl;
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
-  : DecodeFeature(line)
+  : DecodeFeature(line, true)
 {
   s_staticColl.push_back(this);
 

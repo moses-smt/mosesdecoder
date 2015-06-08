@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 #include <queue>
-#include <assert.h>
+#include <cassert>
 #include <limits>
 
 namespace Moses

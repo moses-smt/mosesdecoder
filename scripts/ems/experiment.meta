@@ -7,8 +7,15 @@ get-corpus
 	default-name: corpus/txt
 	rerun-on-change: input-extension output-extension
 	template: IN OUT $input-extension $output-extension
+pre-tok-clean
+        in: raw-stem
+        out: pre-tok-cleaned
+        default-name: corpus/pre-tok-cleaned
+        pass-unless: pre-tok-clean
+        template: $pre-tok-clean IN $input-extension $output-extension OUT OUT.lines-retained
+        parallelizable: yes
 tokenize
-	in: raw-stem
+	in: pre-tok-cleaned
 	out: tokenized-stem
 	default-name: corpus/tok
 	pass-unless: input-tokenizer output-tokenizer
@@ -81,6 +88,7 @@ lowercase
 	pass-unless: input-lowercaser output-lowercaser
 	template-if: input-lowercaser IN.$input-extension OUT.$input-extension
 	template-if: output-lowercaser IN.$output-extension OUT.$output-extension
+	parallelizable: yes
 split
 	in: lowercased-stem SPLITTER:splitter-model
 	out: split-stem
@@ -149,6 +157,7 @@ train
 	out: splitter-model
 	default-name: splitter/split-model
 	ignore-unless: input-splitter output-splitter
+	ignore-if: no-splitter-training
 
 [LM] multiple
 get-corpus
@@ -157,11 +166,19 @@ get-corpus
 	pass-unless: get-corpus-script
 	default-name: lm/txt
 	template: $get-corpus-script > OUT
+use-parallel-corpus
+  in: parallel-corpus-stem
+  out: tokenized-corpus
+	default-name: lm/tok
+	ignore-unless: parallel-corpus-stem
+	template: ln -s IN.$output-extension  OUT
+	error: failed to create symbolic link
 tokenize
 	in: raw-corpus
 	out: tokenized-corpus
 	default-name: lm/tok
 	pass-unless: output-tokenizer
+	ignore-if: parallel-corpus-stem concatenate-files concatenate-files-split
 	template: $output-tokenizer < IN > OUT
 	parallelizable: yes
 mock-parse
@@ -169,12 +186,14 @@ mock-parse
 	out: mock-parsed-corpus
 	default-name: lm/mock-parsed
 	pass-unless: mock-output-parser-lm
+	ignore-if: concatenate-files concatenate-files-split
 	template: $mock-output-parser-lm < IN > OUT
 factorize
 	in: mock-parsed-corpus
 	out: factorized-corpus
 	default-name: lm/factored
-	pass-unless: factors	
+	pass-unless: factors
+	ignore-if: concatenate-files concatenate-files-split
 	parallelizable: yes
 	error: can't open
 	error: incompatible number of words in factor
@@ -183,8 +202,8 @@ lowercase
 	out: lowercased-corpus
 	default-name: lm/lowercased
 	pass-unless: output-lowercaser
-	ignore-if: output-truecaser
-	only-factor-0: yes
+	ignore-if: output-truecaser concatenate-files concatenate-files-split
+	#only-factor-0: yes
 	template: $output-lowercaser < IN > OUT
 	parallelizable: yes
 truecase
@@ -193,6 +212,7 @@ truecase
 	rerun-on-change: output-truecaser
 	default-name: lm/truecased
 	ignore-unless: output-truecaser
+	ignore-if: concatenate-files concatenate-files-split
 	only-factor-0: yes
 	template: $output-truecaser -model IN1.$output-extension < IN > OUT
 	parallelizable: yes
@@ -202,16 +222,55 @@ split
 	rerun-on-change: output-splitter
 	default-name: lm/split
 	pass-unless: output-splitter
+	ignore-if: concatenate-files concatenate-files-split
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
+strip
+        in: split-corpus
+        out: stripped-corpus
+        default-name: lm/stripped
+        pass-unless: mock-output-parser-lm
+        ignore-if: concatenate-files
+        template: $moses-script-dir/training/strip-xml.perl < IN > OUT
+concatenate-split
+        in: concatenate-files-split
+        out: split-corpus
+        ignore-unless: concatenate-files-split
+        default-name: lm/split
+        template: cat IN > OUT
+concatenate
+        in: concatenate-files
+        out: stripped-corpus
+        ignore-unless: concatenate-files
+        default-name: lm/stripped
+        template: cat IN > OUT
 train
-	in: split-corpus
+	in: stripped-corpus
 	out: lm
 	default-name: lm/lm
-	ignore-if: rlm-training
+	ignore-if: rlm-training custom-training
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
 	error: unrecognised option
+	not-error: BadDiscountException
+	not-error: To override this error
+train-custom
+	in: stripped-corpus
+	out: binlm
+	default-name: lm/custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line
+	ignore-if: syntactic
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
+train-custom-syntax
+	in: split-corpus
+	out: binlm
+	default-name: lm/custom-lm
+	rerun-on-change: custom-training
+	ignore-unless: AND custom-training config-feature-line config-weight-line syntactic mock-output-parser-lm
+	template: $custom-training -text IN -lm OUT
+	final-model: yes
 randomize
 	in: lm
 	out: rlm
@@ -219,7 +278,7 @@ randomize
 	pass-unless: lm-randomizer
 	ignore-if: rlm-training
 train-randomized
-	in: split-corpus
+	in: stripped-corpus
 	out: rlm
 	default-name: lm/rlm
 	ignore-unless: rlm-training
@@ -239,7 +298,6 @@ binarize
 	template: $lm-binarizer IN OUT
 	error: set KENLM_MAX_ORDER to at least this value
 	final-model: yes
-
 [INTERPOLATED-LM] single
 tuning-from-sgm
 	in: tuning-sgm
@@ -288,8 +346,14 @@ split-tuning
 	default-name: lm/interpolate-tuning.split
 	pass-unless: output-splitter
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
+strip-tuning
+	in: split-tuning
+	out: stripped-tuning
+	default-name: lm/interpolate-tuning.stripped
+	pass-unless: mock-output-parser-lm
+	template: $moses-script-dir/training/strip-xml.perl < IN > OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
 interpolate
-	in: script split-tuning LM:lm
+	in: script stripped-tuning LM:lm
 	rerun-on-change: srilm-dir group weights
 	out: lm
 	default-name: lm/interpolated-lm
@@ -409,7 +473,6 @@ train-in-mono
 	ignore-if: indomain-stem
 	default-name: mml/model
 	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN -in-target IN1 -out-source IN2.$input-extension -out-target IN2.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings
-
 [TRAINING] single
 consolidate
 	in: CORPUS:clean-split-stem
@@ -445,14 +508,32 @@ fast-align
 	in: prepared-data-fast-align
 	out: fast-alignment
 	rerun-on-change: fast-align-settings
+	ignore-if: fast-align-max-lines
 	template: $external-bin-dir/fast_align -i IN $fast-align-settings > OUT
 	default-name: fast-align
 fast-align-inverse
 	in: prepared-data-fast-align
 	out: fast-alignment-inverse
 	rerun-on-change: fast-align-settings
+	ignore-if: fast-align-max-lines
 	template: $external-bin-dir/fast_align -i IN -r $fast-align-settings > OUT
 	default-name: fast-align-inverse
+fast-align-in-parts
+	in: prepared-data-fast-align
+	out: fast-alignment
+	rerun-on-change: fast-align-settings fast-align-max-lines
+	ignore-unless: fast-align-max-lines
+	tmp-name: training/tmp.fast-align
+	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' > OUT
+	default-name: fast-align
+fast-align-in-parts-inverse
+	in: prepared-data-fast-align
+	out: fast-alignment-inverse
+	rerun-on-change: fast-align-settings fast-align-max-lines
+	ignore-unless: fast-align-max-lines
+	tmp-name: training/tmp.fast-align-inverse
+	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -r -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' > OUT
+	default-name: fast-align
 symmetrize-fast-align
 	in: fast-alignment fast-alignment-inverse corpus-mml-prefilter=OR=corpus
 	out: word-alignment
@@ -554,7 +635,7 @@ build-osm
 	out: osm-model
 	ignore-unless: operation-sequence-model
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
-	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --srilm-dir $srilm-dir $operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir $operation-sequence-model-settings
 	default-name: model/OSM
 build-transliteration-model
 	in: corpus word-alignment 
@@ -651,10 +732,10 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero thot
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature
 	default-name: model/moses.ini
 	error: Unknown option
 	final-model: yes
@@ -777,22 +858,22 @@ parse-input-devtest
 	ignore-unless: use-mira	
 	template: $input-parser < IN > OUT
 parse-relax-input
-	in: parsed-input
-	out: parse-relaxed-input
+	in: split-input
+	out: input
 	default-name: tuning/input.parse-relaxed
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
     template: $input-parse-relaxer < IN > OUT
 parse-relax-input-devtest
-	in: parsed-input-devtest
-	out: parse-relaxed-input-devtest
+	in: split-input-devtest
+	out: input-devtest
 	default-name: tuning/input.devtest.parse-relaxed
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira
     template: $input-parse-relaxer < IN > OUT
 factorize-input
-	in: parse-relaxed-input
+	in: parsed-input
 	out: factorized-input
 	default-name: tuning/input.factorized
 	rerun-on-change: TRAINING:input-factors
@@ -800,7 +881,7 @@ factorize-input
 	error: can't open
 	error: incompatible number of words in factor
 factorize-input-devtest
-	in: parse-relaxed-input-devtest
+	in: parsed-input-devtest
 	out: factorized-input-devtest
 	default-name: tuning/input.devtest.factorized
 	rerun-on-change: TRAINING:input-factors
@@ -853,14 +934,14 @@ truecase-input-devtest
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
 	in: truecased-input SPLITTER:splitter-model
-	out: input
+	out: split-input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 split-input-devtest
 	in: truecased-input-devtest SPLITTER:splitter-model
-	out: input-devtest
+	out: split-input-devtest
 	rerun-on-change: input-splitter
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
@@ -939,31 +1020,46 @@ truecase-reference-devtest
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
 split-reference
 	in: truecased-reference SPLITTER:splitter-model
-	out: reference
+	out: split-ref
 	default-name: tuning/reference.split
 	pass-unless: output-splitter
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 split-reference-devtest
 	in: truecased-reference-devtest SPLITTER:splitter-model
-	out: reference-devtest
+	out: split-ref-devtest
 	default-name: tuning/reference.devtest.split
 	pass-unless: output-splitter
 	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
+strip-reference
+	in: split-ref
+	out: reference
+	default-name: tuning/reference.stripped
+	pass-unless: mock-output-parser-references
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $moses-script-dir/training/strip-xml.perl < IN > OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
+strip-reference-devtest
+	in: split-ref-devtest
+	out: reference
+	default-name: tuning/reference.devtest.stripped
+	pass-unless: mock-output-parser-references
+	ignore-unless: use-mira
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $moses-script-dir/training/strip-xml.perl < IN > OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
 filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir
 	default-name: tuning/filtered
-	rerun-on-change: filter-settings ttable-binarizer TRAINING:no-glue-grammar
+	rerun-on-change: filter-settings ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
 	ignore-if: TRAINING:binarize-all
 	error: already exists. Please delete
 filter-devtest
 	in: input-devtest TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table
 	out: filtered-dir-devtest
 	default-name: tuning/filtered.devtest
-	rerun-on-change: filter-settings ttable-binarizer TRAINING:no-glue-grammar
+	rerun-on-change: filter-settings ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
 	ignore-if: TRAINING:binarize-all
 	ignore-unless: use-mira	
 	error: already exists. Please delete
@@ -1052,14 +1148,14 @@ parse-input
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	template: $input-parser < IN > OUT
 parse-relax-input
-	in: parsed-input
-	out: parse-relaxed-input
+	in: split-input
+	out: input
 	default-name: evaluation/input.parse-relaxed
 	pass-unless: input-parse-relaxer
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
     template: $input-parse-relaxer < IN > OUT
 factorize-input
-	in: parse-relaxed-input
+	in: parsed-input
 	out: factorized-input
 	default-name: evaluation/input.factorized
 	rerun-on-change: TRAINING:input-factors
@@ -1091,7 +1187,7 @@ truecase-input
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input
 	in: truecased-input SPLITTER:splitter-model
-	out: input
+	out: split-input
 	default-name: evaluation/input.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
@@ -1099,7 +1195,7 @@ filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir 
 	default-name: evaluation/filtered
-	rerun-on-change: filter-settings report-precision-by-coverage ttable-binarizer TRAINING:no-glue-grammar
+	rerun-on-change: filter-settings report-precision-by-coverage ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
 	error: already exists. Please delete
@@ -1202,12 +1298,19 @@ mock-parse-reference
 	template: $mock-output-parser-references < IN > OUT
 lowercase-reference
 	in: mock-parsed-reference
-	out: reference
-	default-name: evaluation/reference
+	out: lowercased-reference
+	default-name: evaluation/reference.lowercased
 	pass-unless: output-lowercaser
-  pass-if: recaser
+	pass-if: recaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
+strip-reference
+	in: lowercased-reference
+	out: reference
+	default-name: evaluation/reference
+	pass-unless: mock-output-parser-references
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $moses-script-dir/training/strip-xml.perl < IN > OUT && $moses-script-dir/training/wrappers/mosesxml2brackets.py < IN > OUT.trees
 wade
 	in: filtered-dir truecased-input tokenized-reference alignment system-output
 	out: wade-analysis
@@ -1281,6 +1384,24 @@ multi-bleu-c
 	rerun-on-change: multi-bleu-c
 	template: $multi-bleu-c IN1 < IN > OUT
 	final-model: yes
+
+multi-bleu-detok
+        in: detokenized-output tokenized-reference
+        out: multi-bleu-detok-score
+        default-name: evaluation/multi-bleu-detok
+        ignore-unless: multi-bleu-detok
+        rerun-on-change: multi-bleu-detok
+        template: $multi-bleu-detok IN1 < IN > OUT
+        final-model: yes
+multi-bleu-c-detok
+        in: detokenized-output tokenized-reference
+        out: multi-bleu-c-detok-score
+        default-name: evaluation/multi-bleu-c-detok
+        ignore-unless: multi-bleu-c-detok
+        rerun-on-change: multi-bleu-c-detok
+        template: $multi-bleu-c-detok IN1 < IN > OUT
+        final-model: yes
+
 ter
 	in: wrapped-output reference-sgm
 	out: ter-score
@@ -1328,6 +1449,6 @@ analysis-precision
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:multi-bleu-detok-score EVALUATION:multi-bleu-c-detok-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
 	out: report
 	default-name: evaluation/report

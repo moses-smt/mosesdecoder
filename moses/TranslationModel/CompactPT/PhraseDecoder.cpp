@@ -414,6 +414,12 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
     if(state == Add) {
       if(m_phraseDictionary.m_useAlignmentInfo) {
+        size_t sourceSize = sourcePhrase.GetSize();
+        size_t targetSize = targetPhrase->GetSize();
+        for(std::set<AlignPointSizeT>::iterator it = alignment.begin(); it != alignment.end(); it++) {
+          if(it->first >= sourceSize || it->second >= targetSize)
+            return TargetPhraseVectorPtr();
+        }
         targetPhrase->SetAlignTerm(alignment);
       }
 

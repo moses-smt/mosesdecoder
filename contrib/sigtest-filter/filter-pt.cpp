@@ -1,5 +1,5 @@
 
-#include <cstring> 
+#include <cstring>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -14,7 +14,7 @@
 #include <set>
 
 #include <boost/thread/tss.hpp>
-#include <boost/thread.hpp> 
+#include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
 
 #ifdef WIN32
@@ -58,9 +58,9 @@ typedef boost::shared_ptr<std::vector<TextLenType> > SentIdSet;
 class Cache {
   typedef std::pair<SentIdSet, clock_t> ClockedSet;
   typedef boost::unordered_map<std::string, ClockedSet> ClockedMap;
-  
+
   public:
-    
+
     SentIdSet get(const std::string& phrase) {
       boost::shared_lock<boost::shared_mutex> lock(m_mutex);
       if(m_cont.count(phrase)) {
@@ -70,27 +70,27 @@ class Cache {
       }
       return SentIdSet( new SentIdSet::element_type() );
     }
-    
+
     void put(const std::string& phrase, const SentIdSet set) {
       boost::unique_lock<boost::shared_mutex> lock(m_mutex);
       m_cont[phrase] = std::make_pair(set, clock());
     }
-    
+
     static void set_max_cache(size_t max_cache) {
       s_max_cache = max_cache;
     }
-    
+
     void prune() {
       if(s_max_cache > 0) {
         boost::upgrade_lock<boost::shared_mutex> lock(m_mutex);
         if(m_cont.size() > s_max_cache) {
           std::vector<clock_t> clocks;
-          for(ClockedMap::iterator it = m_cont.begin(); it != m_cont.end(); it++) 
+          for(ClockedMap::iterator it = m_cont.begin(); it != m_cont.end(); it++)
             clocks.push_back(it->second.second);
-          
+
           std::sort(clocks.begin(), clocks.end());
           clock_t out = clocks[m_cont.size() - s_max_cache];
-          
+
           boost::upgrade_to_unique_lock<boost::shared_mutex> uniq_lock(lock);
           for(ClockedMap::iterator it = m_cont.begin(); it != m_cont.end(); it++)
             if(it->second.second < out)
@@ -98,7 +98,7 @@ class Cache {
         }
       }
     }
-  
+
   private:
     ClockedMap m_cont;
     boost::shared_mutex m_mutex;
@@ -282,12 +282,12 @@ void lookup_phrase(SentIdSet& ids, const std::string& phrase,
            i != locations.end(); ++i) {
           ids->push_back(i->sentIdInCorpus);
       }
-      
+
       std::sort(ids->begin(), ids->end());
       SentIdSet::element_type::iterator it =
         std::unique(ids->begin(), ids->end());
       ids->resize(it - ids->begin());
-      
+
       if(ids->size() >= MINIMUM_SIZE_TO_KEEP)
         cache.put(phrase, ids);
     }
@@ -295,8 +295,8 @@ void lookup_phrase(SentIdSet& ids, const std::string& phrase,
 
 void lookup_multiple_phrases(SentIdSet& ids, vector<std::string> & phrases,
                              C_SuffixArraySearchApplicationBase & my_sa,
-                             const std::string & rule, Cache& cache) 
-{ 
+                             const std::string & rule, Cache& cache)
+{
 
     if (phrases.size() == 1) {
         lookup_phrase(ids, phrases.front(), my_sa, cache);
@@ -372,32 +372,32 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options,
       delete *i;
     options.erase(options.begin() + pfe_filter_limit,options.end());
   }
-  
+
   if (pef_filter_only)
     return;
-  
+
   if (options.empty())
     return;
-  
+
   SentIdSet fset( new SentIdSet::element_type() );
   find_occurrences(fset, options.front()->f_phrase, f_sa, f_cache);
   size_t cf = fset->size();
-  
+
   for (std::vector<PTEntry*>::iterator i = options.begin();
        i != options.end(); ++i) {
     const std::string& e_phrase = (*i)->e_phrase;
     SentIdSet eset( new SentIdSet::element_type() );
     find_occurrences(eset, e_phrase, e_sa, e_cache);
     size_t ce = eset->size();
-    
+
     SentIdSet efset( new SentIdSet::element_type() );
     ordered_set_intersect(efset, fset, eset);
     size_t cef = efset->size();
-    
+
     double nlp = -log(fisher_exact(cef, cf, ce));
     (*i)->set_cooc_stats(cef, cf, ce, nlp);
   }
-  
+
   std::vector<PTEntry*>::iterator new_end =
     std::remove_if(options.begin(), options.end(),
                    NlogSigThresholder(sig_filter_limit));
@@ -406,7 +406,7 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options,
 }
 
 void filter(std::istream* in, std::ostream* out, int pfe_index) {
-      
+
   std::vector<std::string> lines;
   std::string prev = "";
   std::vector<PTEntry*> options;
@@ -415,23 +415,23 @@ void filter(std::istream* in, std::ostream* out, int pfe_index) {
       boost::mutex::scoped_lock lock(in_mutex);
       if(in->eof())
         break;
-      
+
       lines.clear();
       std::string line;
       while(getline(*in, line) && lines.size() < 500000)
         lines.push_back(line);
     }
-    
+
     std::stringstream out_temp;
     for(std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++) {
       size_t tmp_lines = ++pt_lines;
       if(tmp_lines % 10000 == 0) {
         boost::mutex::scoped_lock lock(err_mutex);
         std::cerr << ".";
-      
+
         if(tmp_lines % 500000 == 0)
           std::cerr << "[n:" << tmp_lines << "]\n";
-  
+
         if(tmp_lines % 10000000 == 0) {
           float pfefper = (100.0*(float)nremoved_pfefilter)/(float)pt_lines;
           float sigfper = (100.0*(float)nremoved_sigfilter)/(float)pt_lines;
@@ -446,30 +446,30 @@ void filter(std::istream* in, std::ostream* out, int pfe_index) {
                     << "------------------------------------------------------\n";
         }
       }
-      
+
       if(pt_lines % 10000 == 0) {
         f_cache.prune();
         e_cache.prune();
       }
-      
+
       if(it->length() > 0) {
         PTEntry* pp = new PTEntry(it->c_str(), pfe_index);
         if (prev != pp->f_phrase) {
           prev = pp->f_phrase;
-  
+
           if (!options.empty()) {  // always true after first line
             compute_cooc_stats_and_filter(options, f_cache, e_cache);
           }
-          
+
           for (std::vector<PTEntry*>::iterator i = options.begin();
                i != options.end(); ++i) {
             out_temp << **i << '\n';
             delete *i;
           }
-        
+
           options.clear();
           options.push_back(pp);
-  
+
         } else {
           options.push_back(pp);
         }
@@ -479,7 +479,7 @@ void filter(std::istream* in, std::ostream* out, int pfe_index) {
     *out << out_temp.str() << std::flush;
   }
   compute_cooc_stats_and_filter(options, f_cache, e_cache);
-  
+
   boost::mutex::scoped_lock lock(out_mutex);
   for (std::vector<PTEntry*>::iterator i = options.begin();
        i != options.end(); ++i) {
@@ -512,11 +512,11 @@ int main(int argc, char * argv[])
       pfe_filter_limit = atoi(optarg);
       std::cerr << "P(f|e) filter limit: " << pfe_filter_limit << std::endl;
       break;
-    case 't': 
+    case 't':
       threads = atoi(optarg);
       std::cerr << "Using threads: " << threads << std::endl;
       break;
-    case 'm': 
+    case 'm':
       max_cache = atoi(optarg);
       std::cerr << "Using max phrases in caches: " << max_cache << std::endl;
       break;
@@ -548,13 +548,13 @@ int main(int argc, char * argv[])
       usage();
     }
   }
-    
+
   if (sig_filter_limit == 0.0) pef_filter_only = true;
   //-----------------------------------------------------------------------------
   if (optind != argc || ((!efile || !ffile) && !pef_filter_only)) {
     usage();
   }
-  
+
   //load the indexed corpus with vocabulary(noVoc=false) and with offset(noOffset=false)
   if (!pef_filter_only) {
     e_sa.loadData_forSearch(efile, false, false);
@@ -582,15 +582,15 @@ int main(int argc, char * argv[])
 
   Cache::set_max_cache(max_cache);
   std::ios_base::sync_with_stdio(false);
-  
+
   boost::thread_group threadGroup;
-  for(int i = 0; i < threads; i++) 
+  for(int i = 0; i < threads; i++)
     threadGroup.add_thread(new boost::thread(filter, &std::cin, &std::cout, pfe_index));
   threadGroup.join_all();
 
   float pfefper = (100.0*(float)nremoved_pfefilter)/(float)pt_lines;
   float sigfper = (100.0*(float)nremoved_sigfilter)/(float)pt_lines;
-  
+
   std::cerr << "\n\n------------------------------------------------------\n"
             << "  unfiltered phrases pairs: " << pt_lines << "\n"
             << "\n"
@@ -599,5 +599,5 @@ int main(int argc, char * argv[])
             << "            TOTAL FILTERED: " << (nremoved_pfefilter + nremoved_sigfilter) << "   (" << (sigfper + pfefper) << "%)\n"
             << "\n"
             << "     FILTERED phrase pairs: " << (pt_lines - nremoved_pfefilter - nremoved_sigfilter) << "   (" << (100.0-sigfper - pfefper) << "%)\n"
-            << "------------------------------------------------------\n";  
+            << "------------------------------------------------------\n";
 }

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <stdexcept>
 
 #include "moses/Incremental.h"
@@ -203,14 +204,23 @@ struct ChartCellBaseFactory {
 
 } // namespace
 
-Manager::Manager(const InputType &source) :
-  BaseManager(source),
-  cells_(source, ChartCellBaseFactory()),
-  parser_(source, cells_),
-  n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
+Manager::Manager(ttasksptr const& ttask)
+  : BaseManager(ttask)
+  , cells_(m_source, ChartCellBaseFactory(), parser_)
+  , parser_(ttask, cells_)
+  , n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize()))
+{ }
 
 Manager::~Manager()
+{ }
+
+
+namespace
 {
+// Natural logarithm of 10.
+//
+// Some implementations of <cmath> define M_LM10, but not all.
+const float log_10 = logf(10);
 }
 
 template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
@@ -218,7 +228,7 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
   const LanguageModel &abstract = LanguageModel::GetFirstLM();
   const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
-  search::Config config(abstract.GetWeight() * M_LN10, data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
+  search::Config config(abstract.GetWeight() * log_10, data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
   search::Context<Model> context(config, model);
 
   size_t size = m_source.GetSize();

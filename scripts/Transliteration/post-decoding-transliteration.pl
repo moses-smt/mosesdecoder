@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 use utf8;
@@ -33,10 +37,10 @@ die("ERROR: you need to define --moses-src-dir --external-bin-dir, --translitera
     unless (defined($MOSES_SRC_DIR) &&
             defined($TRANSLIT_MODEL) &&
             defined($OOV_FILE) &&
-	     defined($INPUT_EXTENSION)&&	
-	     defined($OUTPUT_EXTENSION)&&	
+	     defined($INPUT_EXTENSION)&&
+	     defined($OUTPUT_EXTENSION)&&
 	     defined($INPUT_FILE)&&
-	     defined($EXTERNAL_BIN_DIR)&&	
+	     defined($EXTERNAL_BIN_DIR)&&
             defined($LM_FILE));
 if (! -e $LM_FILE) {
   my $LM_FILE_WORD = `ls $LM_FILE*word*`;
@@ -82,7 +86,7 @@ sub prepare_for_transliteration
 
 	open MYFILE,  "<:encoding(UTF-8)", $testFile or die "Can't open $testFile: $!\n";
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
         chomp;
         #print "$_\n";
@@ -90,12 +94,12 @@ sub prepare_for_transliteration
 
 	 foreach (@words)
          {
-		
+
 		@tW = split /\Q$___FACTOR_DELIMITER/;
 
 		if (defined $tW[0])
 		{
-		
+
 		  if (! ($tW[0] =~ /[0-9.,]/))
 		   {
 			$UNK{$tW[0]} = 1;
@@ -104,7 +108,7 @@ sub prepare_for_transliteration
 		   {
 		   	print "Not transliterating $tW[0] \n";
 		   }
-		}    
+		}
          }
 	}
 	 close (MYFILE);
@@ -114,7 +118,7 @@ sub prepare_for_transliteration
 	foreach my $key ( keys %UNK )
 	{
   		$src=join(' ', split('',$key));
- 		print MYFILE "$src\n";	
+ 		print MYFILE "$src\n";
 	}
 	 close (MYFILE);
 }
@@ -130,21 +134,42 @@ sub run_transliteration
 	my $eval_file = $list[3];
 
 	`touch $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini`;
-	
+
 	print "Filter Table\n";
 
-	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table -config $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini -lm 0:3:$TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini:8`;
+	`$MOSES_SRC/scripts/training/train-model.perl \
+            -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 \
+            -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION \
+            -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 \
+            -score-options '--KneserNey' \
+            -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table \
+            -config $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini \
+            -lm 0:3:$TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini:8`;
 
-	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $TRANSLIT_MODEL/evaluation/$eval_file.filtered $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini $TRANSLIT_MODEL/evaluation/$eval_file  -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
+	`$MOSES_SRC/scripts/training/filter-model-given-input.pl \
+            $TRANSLIT_MODEL/evaluation/$eval_file.filtered \
+            $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini \
+            $TRANSLIT_MODEL/evaluation/$eval_file \
+            -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
 
 	`rm  $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini`;
 
 	print "Apply Filter\n";
 
-	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables-and-weights.perl $TRANSLIT_MODEL/evaluation/$eval_file.filtered/moses.ini $TRANSLIT_MODEL/model/moses.ini $TRANSLIT_MODEL/tuning/moses.tuned.ini $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini`;
+	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables-and-weights.perl \
+            $TRANSLIT_MODEL/evaluation/$eval_file.filtered/moses.ini \
+            $TRANSLIT_MODEL/model/moses.ini \
+            $TRANSLIT_MODEL/tuning/moses.tuned.ini \
+            $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini`;
 
   my $drop_stderr = $VERBOSE ? "" : " 2>/dev/null";
-	`$DECODER -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -drop-unknown -distortion-limit 0 -n-best-list $TRANSLIT_MODEL/evaluation/$eval_file.op.nBest 1000 distinct -f $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini < $TRANSLIT_MODEL/evaluation/$eval_file > $TRANSLIT_MODEL/evaluation/$eval_file.op $drop_stderr`;
+	`$DECODER \
+            -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 \
+            -threads 16 -drop-unknown -distortion-limit 0 \
+            -n-best-list $TRANSLIT_MODEL/evaluation/$eval_file.op.nBest 1000 \
+            distinct -f $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini \
+            < $TRANSLIT_MODEL/evaluation/$eval_file \
+            > $TRANSLIT_MODEL/evaluation/$eval_file.op $drop_stderr`;
 
 }
 
@@ -170,16 +195,16 @@ sub form_corpus
 	my $antLog = exp(0.2);
 
 	my $phraseTable = $EVAL_DIR . "/Transliteration-Module/$OUTPUT_FILE_NAME/model/phrase-table";
-	
+
 	open MYFILE,  "<:encoding(UTF-8)", $inp_file or die "Can't open $inp_file: $!\n";
 	open PT,  ">:encoding(UTF-8)", $phraseTable or die "Can't open $phraseTable: $!\n";
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
         chomp;
         #print "$_\n";
         @words = split(/ /, "$_");
-	 
+
 	  $thisStr = "";
 	  foreach (@words)
          {
@@ -187,14 +212,14 @@ sub form_corpus
          }
 
 	  push(@UNK, $thisStr);
-	  $vocab{$thisStr} = 1;	
+	  $vocab{$thisStr} = 1;
 	}
 	 close (MYFILE);
 
 	open MYFILE,  "<:encoding(UTF-8)", $testFile or die "Can't open $testFile: $!\n";
 	my $inpCount = 0;
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
        	 chomp;
         	#print "$_\n";
@@ -204,8 +229,8 @@ sub form_corpus
 
 		if ($prev != $sNum){
 			$inpCount++;
-		} 
-	
+		}
+
 		my $i = 2;
 		$thisStr = "";
 		$features = "";
@@ -217,7 +242,7 @@ sub form_corpus
 		}
 
 		$i++;
-		
+
 		while ($words[$i] ne "|||")
 		{
 			if ($words[$i] =~ /Penalty0/ || $words[$i] eq "Distortion0=" || $words[$i] eq "LM0=" ){
@@ -232,39 +257,39 @@ sub form_corpus
 		$i++;
 
 		#$features = $features . " " . $words[$i];
-		
+
 		if ($thisStr ne ""){
 		 print PT "$UNK[$inpCount] ||| $thisStr ||| $features ||| 0-0 ||| 0 0 0\n";
 		}
 		$prev = $sNum;
  	}
  	close (MYFILE);
-	
+
 
 	open MYFILE,  "<:encoding(UTF-8)", $INPUT_FILE or die "Can't open $INPUT_FILE: $!\n";
-	
+
 	my %dd;
 
-	while (<MYFILE>) 
+	while (<MYFILE>)
 	{
        	chomp;
         	@words = split(/ /, "$_");
-		
+
 		foreach (@words)
          	{
          		if (! exists $vocab{$_} && ! exists $dd{$_}){
-			
+
 				print PT "$_ ||| $_ ||| 1.0 1.0 1.0 1.0 ||| 0-0 ||| 0 0 0\n";
-				$dd{$_} = 1;	
+				$dd{$_} = 1;
 			}
          	}
-	}			
-		
+	}
+
 	close (PT);
 	close (MYFILE);
-		
+
 	`gzip $phraseTable`;
-	
+
 }
 
 
@@ -287,25 +312,55 @@ sub run_decoder
     $find = ".output.";
   }
 	$final_file =~ s/$find/$replace/g;
-	
+
 	`mkdir $corpus_dir/evaluation`;
 
-	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -lmodel-oov-feature "yes" -post-decoding-translit "yes" -phrase-translation-table $corpus_dir/model/phrase-table -config $corpus_dir/model/moses.ini -lm 0:5:$LM_FILE:8`;
+	`$MOSES_SRC/scripts/training/train-model.perl \
+            -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 \
+            -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION \
+            -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 \
+            -lmodel-oov-feature "yes" -post-decoding-translit "yes" \
+            -phrase-translation-table $corpus_dir/model/phrase-table \
+            -config $corpus_dir/model/moses.ini -lm 0:5:$LM_FILE:8`;
 
 	`touch $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini`;
 
-	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -lmodel-oov-feature "yes" -post-decoding-translit "yes" -phrase-translation-table $corpus_dir/model/phrase-table -config $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini -lm 0:3:$corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini:8`;
+	`$MOSES_SRC/scripts/training/train-model.perl \
+            -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 \
+            -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION \
+            -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 \
+            -lmodel-oov-feature "yes" -post-decoding-translit "yes" \
+            -phrase-translation-table $corpus_dir/model/phrase-table \
+            -config $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini \
+            -lm 0:3:$corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini:8`;
 
-	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $corpus_dir/evaluation/filtered $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini $INPUT_FILE  -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
+	`$MOSES_SRC/scripts/training/filter-model-given-input.pl \
+            $corpus_dir/evaluation/filtered \
+            $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini \
+            $INPUT_FILE  -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt \
+            1 1 4 100 2"`;
 
 	`rm $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini`;
 
-	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables.perl $corpus_dir/evaluation/filtered/moses.ini < $corpus_dir/model/moses.ini > $corpus_dir/evaluation/moses.filtered.ini`;
-	
+	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables.perl \
+            $corpus_dir/evaluation/filtered/moses.ini \
+            < $corpus_dir/model/moses.ini \
+            > $corpus_dir/evaluation/moses.filtered.ini`;
+
   my $drop_stderr = $VERBOSE ? "" : " 2>/dev/null";
-	`$DECODER -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -feature-overwrite 'TranslationModel0 table-limit=100' -max-trans-opt-per-coverage 100 -f $corpus_dir/evaluation/moses.filtered.ini -distortion-limit 0 < $INPUT_FILE > $OUTPUT_FILE $drop_stderr`;
-	
-	print "$DECODER -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -feature-overwrite 'TranslationModel0 table-limit=100' -max-trans-opt-per-coverage 100 -f $corpus_dir/evaluation/moses.filtered.ini -distortion-limit 0 < $INPUT_FILE > $OUTPUT_FILE $drop_stderr\n";
+	`$DECODER \
+            -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 \
+            -threads 16 -feature-overwrite 'TranslationModel0 table-limit=100' \
+            -max-trans-opt-per-coverage 100 \
+            -f $corpus_dir/evaluation/moses.filtered.ini -distortion-limit 0 \
+            < $INPUT_FILE \
+            > $OUTPUT_FILE $drop_stderr`;
+
+	print "$DECODER \
+            -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 \
+            -threads 16 -feature-overwrite 'TranslationModel0 table-limit=100' \
+            -max-trans-opt-per-coverage 100 \
+            -f $corpus_dir/evaluation/moses.filtered.ini -distortion-limit 0 \
+            < $INPUT_FILE \
+            > $OUTPUT_FILE $drop_stderr\n";
 }
-
-

@@ -56,10 +56,12 @@ namespace Moses
  * corresponding data structure is initialized here This fn should be
  * called by inherited classe */
 TranslationOptionCollection::
-TranslationOptionCollection(InputType const& src,
+TranslationOptionCollection(ttasksptr const& ttask,
+                            InputType const& src,
                             size_t maxNoTransOptPerCoverage,
                             float translationOptionThreshold)
-  : m_source(src)
+  : m_ttask(ttask)
+  , m_source(src)
   , m_futureScore(src.GetSize())
   , m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
   , m_translationOptionThreshold(translationOptionThreshold)
@@ -622,24 +624,14 @@ void
 TranslationOptionCollection::
 CacheLexReordering()
 {
-  typedef StatefulFeatureFunction sfFF;
-  std::vector<const sfFF*> const& all_sfff
-  = sfFF::GetStatefulFeatureFunctions();
   size_t const stop = m_source.GetSize();
-
-  BOOST_FOREACH(sfFF const* ff, all_sfff) {
+  typedef StatefulFeatureFunction sfFF;
+  BOOST_FOREACH(sfFF const* ff, sfFF::GetStatefulFeatureFunctions()) {
     if (typeid(*ff) != typeid(LexicalReordering)) continue;
     LexicalReordering const& lr = static_cast<const LexicalReordering&>(*ff);
-    for (size_t s = 0 ; s < stop ; s++) {
-      BOOST_FOREACH(TranslationOptionList const& tol, m_collection[s]) {
-        BOOST_FOREACH(TranslationOption* to, tol) {
-          Phrase const& sphrase = to->GetInputPath().GetPhrase();
-          Phrase const& tphrase = to->GetTargetPhrase();
-          Scores score = lr.GetProb(sphrase,tphrase);
-          if (!score.empty()) to->CacheLexReorderingScores(lr, score);
-        }
-      }
-    }
+    for (size_t s = 0 ; s < stop ; s++)
+      BOOST_FOREACH(TranslationOptionList& tol, m_collection[s])
+      lr.SetCache(tol);
   }
 }
 
@@ -676,7 +668,7 @@ GetTargetPhraseCollectionBatch()
       const Tstep* tstep = dynamic_cast<const Tstep *>(*i);
       if (tstep) {
         const PhraseDictionary &pdict = *tstep->GetPhraseDictionaryFeature();
-        pdict.GetTargetPhraseCollectionBatch(m_inputPathQueue);
+        pdict.GetTargetPhraseCollectionBatch(m_ttask.lock(), m_inputPathQueue);
       }
     }
   }

@@ -19,10 +19,10 @@ ConsistentPhrases::ConsistentPhrases()
 
 ConsistentPhrases::~ConsistentPhrases()
 {
-  for (int start = 0; start < m_coll.size(); ++start) {
+  for (size_t start = 0; start < m_coll.size(); ++start) {
     std::vector<Coll> &allSourceStart = m_coll[start];
 
-    for (int size = 0; size < allSourceStart.size(); ++size) {
+    for (size_t size = 0; size < allSourceStart.size(); ++size) {
       Coll &coll = allSourceStart[size];
       Moses::RemoveAllInColl(coll);
     }
@@ -48,8 +48,8 @@ void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
       targetStart, targetEnd,
       params);
 
-  pair<Coll::iterator, bool> inserted = coll.insert(cp);
-  assert(inserted.second);
+  assert(coll.find(cp) == coll.end());
+  coll.insert(cp);
 }
 
 const ConsistentPhrases::Coll &ConsistentPhrases::GetColl(int sourceStart, int sourceEnd) const
@@ -69,10 +69,10 @@ ConsistentPhrases::Coll &ConsistentPhrases::GetColl(int sourceStart, int sourceE
 std::string ConsistentPhrases::Debug() const
 {
   std::stringstream out;
-  for (int start = 0; start < m_coll.size(); ++start) {
+  for (size_t start = 0; start < m_coll.size(); ++start) {
     const std::vector<Coll> &allSourceStart = m_coll[start];
 
-    for (int size = 0; size < allSourceStart.size(); ++size) {
+    for (size_t size = 0; size < allSourceStart.size(); ++size) {
       const Coll &coll = allSourceStart[size];
 
       Coll::const_iterator iter;
@@ -89,9 +89,9 @@ std::string ConsistentPhrases::Debug() const
 void ConsistentPhrases::AddHieroNonTerms(const Parameter &params)
 {
   // add [X] labels everywhere
-  for (int i = 0; i < m_coll.size(); ++i) {
+  for (size_t i = 0; i < m_coll.size(); ++i) {
     vector<Coll> &inner = m_coll[i];
-    for (int j = 0; j < inner.size(); ++j) {
+    for (size_t j = 0; j < inner.size(); ++j) {
       ConsistentPhrases::Coll &coll = inner[j];
       ConsistentPhrases::Coll::iterator iter;
       for (iter = coll.begin(); iter != coll.end(); ++iter) {

@@ -10,7 +10,7 @@ using namespace std;
 namespace Moses
 {
 ProbingPT::ProbingPT(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(line,true)
   ,m_engine(NULL)
 {
   ReadParameters();
@@ -61,7 +61,7 @@ void ProbingPT::Load()
   }
 }
 
-void ProbingPT::InitializeForInput(InputType const& source)
+void ProbingPT::InitializeForInput(ttasksptr const& ttask)
 {
   ReduceCache();
 }

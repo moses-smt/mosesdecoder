@@ -21,12 +21,12 @@
 #ifndef EXTRACT_GHKM_COMPOSED_RULE_H_
 #define EXTRACT_GHKM_COMPOSED_RULE_H_
 
-#include "Subgraph.h"
-
 #include <vector>
 #include <queue>
 
-namespace Moses
+#include "Subgraph.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -67,6 +67,6 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining
 
 #endif

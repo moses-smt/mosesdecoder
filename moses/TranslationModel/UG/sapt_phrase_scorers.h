@@ -1,6 +1,6 @@
 // -*- c++ -*-
 // Phrase scoring functions for suffix array-based phrase tables
-// written by Ulrich Germann 
+// written by Ulrich Germann
 #pragma once
 #include "sapt_pscore_unaligned.h"   // count # of unaligned words
 #include "sapt_pscore_provenance.h"  // reward for joint phrase occ. per corpus

@@ -25,13 +25,13 @@ namespace ugdiss
       return NULL;
     };
 
-    ConllBottomUpToken const* 
-    stop(ConllBottomUpToken const* seqStart, 
+    ConllBottomUpToken const*
+    stop(ConllBottomUpToken const* seqStart,
          ConllBottomUpToken const* seqEnd) const
     {
       return NULL;
     };
-    
+
     bool operator<(T const& other)  const { return this->cmp(other)  < 0; }
     bool operator>(T const& other)  const { return this->cmp(other)  > 0; }
     bool operator==(T const& other) const { return this->cmp(other) == 0; }
@@ -44,9 +44,9 @@ namespace ugdiss
       return false;
     }
   };
-  
+
   template<typename T>
-  ConllBottomUpToken<T> const*   
+  ConllBottomUpToken<T> const*
   ConllBottomUpToken<T>::
   next(int length) const
   {

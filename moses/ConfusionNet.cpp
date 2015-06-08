@@ -61,8 +61,7 @@ GetColumnIncrement(size_t i, size_t j) const
 }
 
 ConfusionNet::
-ConfusionNet()
-  : InputType()
+ConfusionNet() : InputType()
 {
   stats.createOne();
 
@@ -80,7 +79,7 @@ ConfusionNet::
 }
 
 ConfusionNet::
-ConfusionNet(Sentence const& s)
+ConfusionNet(Sentence const& s) : InputType()
 {
   data.resize(s.GetSize());
   for(size_t i=0; i<s.GetSize(); ++i) {
@@ -292,7 +291,7 @@ std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn)
 
 TranslationOptionCollection*
 ConfusionNet::
-CreateTranslationOptionCollection() const
+CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   size_t maxNoTransOptPerCoverage
   = StaticData::Instance().GetMaxNoTransOptPerCoverage();
@@ -300,7 +299,7 @@ CreateTranslationOptionCollection() const
   = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
   = new TranslationOptionCollectionConfusionNet
-  (*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  (ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
   assert(rv);
   return rv;
 }

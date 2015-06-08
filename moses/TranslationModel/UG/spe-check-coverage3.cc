@@ -22,7 +22,7 @@ typedef Bitext<Token>::iter iter;
 mmbitext bg;
 vector<string> src,trg,aln;
 
-void 
+void
 show(ostream& out, iter& f)
 {
   iter b(bg.I2.get(),f.getToken(0),f.size());
@@ -31,11 +31,11 @@ show(ostream& out, iter& f)
   else
     out << string(12,' ');
   out << " " << setw(5) <<  int(round(f.approxOccurrenceCount())) << " ";
-  out << f.str(bg.V1.get()) << endl; 
+  out << f.str(bg.V1.get()) << endl;
 }
 
 
-void 
+void
 dump(ostream& out, iter& f)
 {
   float cnt = f.size() ? f.approxOccurrenceCount() : 0;
@@ -46,12 +46,12 @@ dump(ostream& out, iter& f)
       while (f.over());
       f.up();
     }
-  if (f.size() && cnt < f.approxOccurrenceCount() && f.approxOccurrenceCount() > 1) 
+  if (f.size() && cnt < f.approxOccurrenceCount() && f.approxOccurrenceCount() > 1)
     show(out,f);
 }
 
 
-void 
+void
 read_data(string fname, vector<string>& dest)
 {
   ifstream in(fname.c_str());
@@ -60,14 +60,14 @@ read_data(string fname, vector<string>& dest)
   in.close();
 }
 
-void 
-show_snt(ostream& out, TokenIndex const& V, vector<Token> const& snt, 
+void
+show_snt(ostream& out, TokenIndex const& V, vector<Token> const& snt,
 	 vector<vector<int> > const& a)
 {
   for (size_t i = 0; i < snt.size(); ++i)
     {
       cout << format("%d:%s[") % i % V[snt[i].id()];
-      for (size_t k = 0; k < a[i].size(); ++k) 
+      for (size_t k = 0; k < a[i].size(); ++k)
 	cout << (k?",":"") << a[i][k];
       cout << "] ";
     }
@@ -77,7 +77,7 @@ show_snt(ostream& out, TokenIndex const& V, vector<Token> const& snt,
 
 void show_pair(size_t const sid)
 {
-  vector<Token> s,t; 
+  vector<Token> s,t;
   fill_token_seq(*bg.V1,src[sid],s);
   fill_token_seq(*bg.V2,trg[sid],t);
   vector<vector<int> > a1(s.size()),a2(t.size());
@@ -97,11 +97,11 @@ void show_pair(size_t const sid)
 
 int main(int argc, char* argv[])
 {
-  if (argc < 5) 
+  if (argc < 5)
     {
-      cerr << "usage: " << argv[0] 
-	   << " <bg base name> <L1> <L2> <fg base name>" 
-	   << endl; 
+      cerr << "usage: " << argv[0]
+	   << " <bg base name> <L1> <L2> <fg base name>"
+	   << endl;
       exit(1);
     }
   bg.open(argv[1],argv[2],argv[3]);
@@ -122,10 +122,10 @@ int main(int argc, char* argv[])
       bias[sid] = 0;
       // cout << src[sid] << endl << trg[sid] << endl;
       // show_pair(sid);
-      vector<Token> snt; 
+      vector<Token> snt;
       fill_token_seq(*bg.V1,src[sid],snt);
       vector<vector<sptr<vector<PhrasePair<Token> > > > > FG,BG;
-      fg->lookup(snt,*fg->I1,FG,NULL,NULL,&bias,true); 
+      fg->lookup(snt,*fg->I1,FG,NULL,NULL,&bias,true);
       bg.lookup(snt,*bg.I1,BG,NULL,NULL,NULL,true);
       set<sptr<vector<PhrasePair<Token> > > > seen;
       for (size_t i = 0; i < snt.size(); ++i)
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 	    {
 	      if (!m0.extend(snt[i+k].id())) break;
 	      if (k && m0.approxOccurrenceCount() < 2) break;
-	      if (m1.size() == k && (!m1.extend(snt[i+k].id()) || 
+	      if (m1.size() == k && (!m1.extend(snt[i+k].id()) ||
 				     m1.approxOccurrenceCount() < 25))
 		{
 		  cout << toString((*fg->V1), m0.getToken(0), m0.size()) << " "
@@ -156,8 +156,8 @@ int main(int argc, char* argv[])
 		  sptr<pstats> bgstats;
 		  jstats const* bgjstats = NULL;
 		  Bitext<Token>::iter m2(bg.I2.get(), pp.start2, pp.len2);
-		  if (m1.approxOccurrenceCount() > 5000 || 
-		      m2.approxOccurrenceCount() > 5000) 
+		  if (m1.approxOccurrenceCount() > 5000 ||
+		      m2.approxOccurrenceCount() > 5000)
 		    continue;
 		  if (m1.size() == pp.len1 && m2.size() == pp.len2)
 		    {
@@ -173,9 +173,9 @@ int main(int argc, char* argv[])
 		  cout << toString(*fg->V1, pp.start1, pp.len1) << " ::: "
 		       << toString(*fg->V2, pp.start2, pp.len2) << " "
 		       << format("[%u/%u/%u]") % pp.good1 % pp.joint % pp.good2;
-		  if (bgjstats) 
-		    cout << " " << (format("[%u/%u/%u]") 
-				    % bgstats->good % bgjstats->rcnt() 
+		  if (bgjstats)
+		    cout << " " << (format("[%u/%u/%u]")
+				    % bgstats->good % bgjstats->rcnt()
 				    % (bgjstats->cnt2() * bgstats->good
 				       / bgstats->raw_cnt));
 		  else if (m1.size() == pp.len1)
@@ -189,6 +189,6 @@ int main(int argc, char* argv[])
     }
   exit(0);
 }
-  
-  
+
+
 

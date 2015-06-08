@@ -31,7 +31,7 @@ private:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void InitializeForInput(const InputType& source);
+  void InitializeForInput(ttasksptr const& ttask);
 
   void CleanUpAfterSentenceProcessing(const InputType& source);
 

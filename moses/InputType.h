@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 // vim:tabstop=2
 
@@ -37,7 +38,7 @@ class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
 class ChartTranslationOptions;
-
+class TranslationTask;
 /** base class for all types of inputs to the decoder,
  *  eg. sentences, confusion networks, lattices and tree
  */
@@ -57,7 +58,7 @@ protected:
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   std::string m_textType;
   std::string m_passthrough;
-
+  boost::shared_ptr<std::string> m_context;
 public:
 
   // used in -continue-partial-translation
@@ -172,6 +173,16 @@ public:
   //! number of words in this sentence/confusion network
   virtual size_t GetSize() const =0;
 
+  virtual boost::shared_ptr<std::string> const&
+  GetContext() const {
+    return m_context;
+  }
+
+  virtual void
+  SetContext(boost::shared_ptr<std::string> const& ctx) {
+    m_context = ctx;
+  }
+
   //! populate this InputType with data from in stream
   virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder) =0;
 
@@ -179,7 +190,8 @@ public:
   virtual void Print(std::ostream&) const =0;
 
   //! create trans options specific to this InputType
-  virtual TranslationOptionCollection* CreateTranslationOptionCollection() const=0;
+  virtual TranslationOptionCollection*
+  CreateTranslationOptionCollection(ttasksptr const& ttask) const=0;
 
   //! return substring. Only valid for Sentence class. TODO - get rid of this fn
   virtual Phrase GetSubString(const WordsRange&) const =0;

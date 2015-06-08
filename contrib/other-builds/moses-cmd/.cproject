@@ -15,7 +15,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.461114338" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.461114338" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.461114338." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1896491482" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.gnu.platform.exe.debug.2144309834" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
@@ -65,6 +65,7 @@
 									<listOptionValue builtIn="false" value="boost_system"/>
 									<listOptionValue builtIn="false" value="boost_thread"/>
 									<listOptionValue builtIn="false" value="boost_filesystem"/>
+									<listOptionValue builtIn="false" value="boost_program_options"/>
 									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="z"/>
 									<listOptionValue builtIn="false" value="bz2"/>
@@ -103,7 +104,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.release.2121690436" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.release.2121690436" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.release.2121690436." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.1577734572" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.gnu.platform.exe.release.1535487925" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.release"/>
@@ -155,10 +156,10 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Release">
+		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/moses-cmd"/>
 		</configuration>
-		<configuration configurationName="Debug">
+		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/moses-cmd"/>
 		</configuration>
 	</storageModule>

@@ -18,7 +18,7 @@ function get_all_branch_names()
 }
 
 class Branch
-{  
+{
   public function __construct($name)
   {
     $this->name = $name;
@@ -72,7 +72,7 @@ class Commit
     while (($line = fgets($log_hdl)) !== false) {
       if (preg_match('/tests passed/', $line)) {
         $this->passed_percent = substr($line, 0, strpos('%', $line));
-      } 
+      }
       else if (preg_match('/INVESTIGATE THESE FAILED TESTS/', $line)) {
         $this->failed_tests = substr($line, 39);
       }
@@ -113,7 +113,7 @@ class Commit
       return file_exists(StaticData::logs_path . "/" . substr($this->name, 0, 1) . "/" . $this->name . ".OK");
     }
   }
-  
+
   public function get_status()
   {
     return $this->was_tested()
@@ -157,12 +157,12 @@ class Commit
 
   public function get_log_file()
   {
-    return "show_commit.php?commit_id=$this->name&type=log"; 
+    return "show_commit.php?commit_id=$this->name&type=log";
   }
 
   public function get_info_file()
   {
-    return "show_commit.php?commit_id=$this->name&type=info"; 
+    return "show_commit.php?commit_id=$this->name&type=info";
   }
 
   private function open_log()
@@ -182,7 +182,7 @@ class Commit
   private $message;
   private $author;
   private $timestamp;
-  
+
 }
 
 ?>

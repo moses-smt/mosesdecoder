@@ -105,10 +105,10 @@ bool PhraseDictionaryInterpolated::Load(
   return true;
 }
 
-void PhraseDictionaryInterpolated::InitializeForInput(InputType const& source)
+void PhraseDictionaryInterpolated::InitializeForInput(ttasksptr const& ttask)
 {
   for (size_t i = 0; i < m_dictionaries.size(); ++i) {
-    m_dictionaries[i]->InitializeForInput(source);
+    m_dictionaries[i]->InitializeForInput(ttask);
   }
 }
 

@@ -5,7 +5,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include <assert.h>
+#include <cassert>
 #include <stdint.h>
 
 namespace util {
@@ -37,7 +37,7 @@ class Stream : boost::noncopyable {
       ++block_it_;
       block_it_.Poison();
     }
-    
+
     Stream &operator++() {
       assert(*this);
       assert(current_ < end_);

@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef HAVE_XMLRPC_C
 #include <xmlrpc-c/base.hpp>
-#endif 
+#endif
 
 namespace Moses
 {
@@ -289,12 +289,12 @@ public:
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
 
 #ifdef HAVE_XMLRPC_C
-  void OutputWordAlignment(vector<xmlrpc_c::value>& out) const;
-  void OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const;
-#endif 
+  void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
+  void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
+#endif
 
 
-  
+
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
@@ -313,7 +313,7 @@ struct CompareHypothesisTotalScore {
 	ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool(); \
 	pool.freeObject(hypo); \
 } \
- 
+
 #else
 #define FREEHYPO(hypo) delete hypo
 #endif

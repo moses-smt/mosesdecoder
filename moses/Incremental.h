@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #pragma once
 
 #include "lm/word_index.hh"
@@ -24,7 +25,7 @@ namespace Incremental
 class Manager : public BaseManager
 {
 public:
-  Manager(const InputType &source);
+  Manager(ttasksptr const& ttask);
 
   ~Manager();
 
@@ -55,8 +56,11 @@ public:
   }
   void OutputSearchGraphSLF() const {
   }
-  void OutputSearchGraphHypergraph() const {
-  }
+
+  void
+  OutputSearchGraphAsHypergraph
+  ( std::string const& fname, size_t const precision ) const
+  { }
 
 
 private:

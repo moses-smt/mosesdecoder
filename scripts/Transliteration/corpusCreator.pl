@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 use utf8;
@@ -28,15 +32,15 @@ open FH,  "<:encoding(UTF-8)", "$tPath/$tFile" or die "Can't open $tPath/$tFile:
 open MYSFILE,  ">:encoding(UTF-8)", "$tPath/training/corpus.$inp_ext" or die "Can't open $tPath/training/corpus.$inp_ext: $!\n";
 open MYTFILE,  ">:encoding(UTF-8)", "$tPath/training/corpus.$op_ext" or die "Can't open $tPath/training/corpus.$op_ext: $!\n";
 
-while (<FH>) 
+while (<FH>)
 {
-    chomp;    
+    chomp;
     my ($src,$tgt) = split(/\t/);
-    
-    $s = join(' ', split('',$src)); 
-    $t = join(' ', split('',$tgt)); 
+
+    $s = join(' ', split('',$src));
+    $t = join(' ', split('',$tgt));
     print MYSFILE "$s\n";
-    print MYTFILE "$t\n";	  
+    print MYTFILE "$t\n";
     push(@source, $s);
     push(@target, $t);
 }

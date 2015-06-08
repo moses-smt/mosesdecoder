@@ -30,12 +30,15 @@ namespace Moses
 {
 class InputType;
 class ChartManager;
+class ChartParser;
 
 class ChartCellCollectionBase
 {
 public:
-  template <class Factory> ChartCellCollectionBase(const InputType &input, const Factory &factory) :
-    m_cells(input.GetSize()) {
+  template <class Factory> ChartCellCollectionBase(const InputType &input,
+      const Factory &factory,
+      const ChartParser &parser)
+    :m_cells(input.GetSize()) {
 
     size_t size = input.GetSize();
     for (size_t startPos = 0; startPos < size; ++startPos) {

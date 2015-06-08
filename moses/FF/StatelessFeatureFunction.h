@@ -20,7 +20,7 @@ public:
     return m_statelessFFs;
   }
 
-  StatelessFeatureFunction(const std::string &line);
+  StatelessFeatureFunction(const std::string &line, bool registerNow);
   StatelessFeatureFunction(size_t numScoreComponents, const std::string &line);
 
   /**

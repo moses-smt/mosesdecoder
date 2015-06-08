@@ -16,7 +16,6 @@
  * filent.c - scan directories and archives on NT
  *
  * External routines:
- *  file_archscan()                 - scan an archive for files
  *  file_mkdir()                    - create a directory
  *  file_supported_fmt_resolution() - file modification timestamp resolution
  *
@@ -307,129 +306,6 @@ void file_supported_fmt_resolution( timestamp * const t )
      * just the same as the Windows OS itself.
      */
     timestamp_init( t, 0, 0 );
-}
-
-
-/*
- * file_archscan() - scan an archive for files
- */
-
-/* Straight from SunOS */
-
-#define ARMAG  "!<arch>\n"
-#define SARMAG  8
-
-#define ARFMAG  "`\n"
-
-struct ar_hdr
-{
-    char ar_name[ 16 ];
-    char ar_date[ 12 ];
-    char ar_uid[ 6 ];
-    char ar_gid[ 6 ];
-    char ar_mode[ 8 ];
-    char ar_size[ 10 ];
-    char ar_fmag[ 2 ];
-};
-
-#define SARFMAG  2
-#define SARHDR  sizeof( struct ar_hdr )
-
-void file_archscan( char const * archive, scanback func, void * closure )
-{
-    struct ar_hdr ar_hdr;
-    char * string_table = 0;
-    char buf[ MAXJPATH ];
-    long offset;
-    int const fd = open( archive, O_RDONLY | O_BINARY, 0 );
-
-    if ( fd < 0 )
-        return;
-
-    if ( read( fd, buf, SARMAG ) != SARMAG || strncmp( ARMAG, buf, SARMAG ) )
-    {
-        close( fd );
-        return;
-    }
-
-    offset = SARMAG;
-
-    if ( DEBUG_BINDSCAN )
-        printf( "scan archive %s\n", archive );
-
-    while ( ( read( fd, &ar_hdr, SARHDR ) == SARHDR ) &&
-        !memcmp( ar_hdr.ar_fmag, ARFMAG, SARFMAG ) )
-    {
-        long lar_date;
-        long lar_size;
-        char * name = 0;
-        char * endname;
-
-        sscanf( ar_hdr.ar_date, "%ld", &lar_date );
-        sscanf( ar_hdr.ar_size, "%ld", &lar_size );
-
-        lar_size = ( lar_size + 1 ) & ~1;
-
-        if ( ar_hdr.ar_name[ 0 ] == '/' && ar_hdr.ar_name[ 1 ] == '/' )
-        {
-            /* This is the "string table" entry of the symbol table, holding
-             * filename strings longer than 15 characters, i.e. those that do
-             * not fit into ar_name.
-             */
-            string_table = BJAM_MALLOC_ATOMIC( lar_size + 1 );
-            if ( read( fd, string_table, lar_size ) != lar_size )
-                printf( "error reading string table\n" );
-            string_table[ lar_size ] = '\0';
-            offset += SARHDR + lar_size;
-            continue;
-        }
-        else if ( ar_hdr.ar_name[ 0 ] == '/' && ar_hdr.ar_name[ 1 ] != ' ' )
-        {
-            /* Long filenames are recognized by "/nnnn" where nnnn is the
-             * string's offset in the string table represented in ASCII
-             * decimals.
-             */
-            name = string_table + atoi( ar_hdr.ar_name + 1 );
-            for ( endname = name; *endname && *endname != '\n'; ++endname );
-        }
-        else
-        {
-            /* normal name */
-            name = ar_hdr.ar_name;
-            endname = name + sizeof( ar_hdr.ar_name );
-        }
-
-        /* strip trailing white-space, slashes, and backslashes */
-
-        while ( endname-- > name )
-            if ( !isspace( *endname ) && ( *endname != '\\' ) && ( *endname !=
-                '/' ) )
-                break;
-        *++endname = 0;
-
-        /* strip leading directory names, an NT specialty */
-        {
-            char * c;
-            if ( c = strrchr( name, '/' ) )
-                name = c + 1;
-            if ( c = strrchr( name, '\\' ) )
-                name = c + 1;
-        }
-
-        sprintf( buf, "%s(%.*s)", archive, endname - name, name );
-        {
-            OBJECT * const member = object_new( buf );
-            timestamp time;
-            timestamp_init( &time, (time_t)lar_date, 0 );
-            (*func)( closure, member, 1 /* time valid */, &time );
-            object_free( member );
-        }
-
-        offset += SARHDR + lar_size;
-        lseek( fd, offset, 0 );
-    }
-
-    close( fd );
 }
 
 #endif  /* OS_NT */

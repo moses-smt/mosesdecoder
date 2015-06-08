@@ -7,7 +7,7 @@ using namespace std;
 namespace Moses
 {
 SkeletonPT::SkeletonPT(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(line, true)
 {
   ReadParameters();
 }
@@ -17,7 +17,7 @@ void SkeletonPT::Load()
   SetFeaturesToApply();
 }
 
-void SkeletonPT::InitializeForInput(InputType const& source)
+void SkeletonPT::InitializeForInput(ttasksptr const& ttask)
 {
   ReduceCache();
 }

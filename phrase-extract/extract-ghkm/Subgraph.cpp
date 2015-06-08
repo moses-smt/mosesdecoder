@@ -18,10 +18,11 @@
 ***********************************************************************/
 
 #include <iostream>
-#include "Subgraph.h"
-#include "Node.h"
 
-namespace Moses
+#include "Node.h"
+#include "Subgraph.h"
+
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -168,5 +169,30 @@ void Subgraph::RecursivelyPrintPartsOfSpeech(const Node *n, std::ostream &out) c
   }
 }
 
-}  // namespace Moses
+void Subgraph::GetPartsOfSpeech(std::vector<std::string> &out) const
+{
+  out.clear();
+  RecursivelyGetPartsOfSpeech(m_root,out);
+}
+
+void Subgraph::RecursivelyGetPartsOfSpeech(const Node *n, std::vector<std::string> &out) const
+{
+  NodeType nodeType = n->GetType();
+  if (nodeType == TREE) {
+    if (m_leaves.find(n) == m_leaves.end()) {
+      const std::vector<Node *> &children = n->GetChildren();
+      for (std::vector<Node *>::const_iterator p(children.begin());
+           p != children.end(); ++p) {
+        Node *child = *p;
+        if (child->GetType() == TARGET) {
+          out.push_back(n->GetLabel());
+        } else {
+          RecursivelyGetPartsOfSpeech(child,out);
+        }
+      }
+    }
+  }
+}
+
+}  // namespace MosesTraining
 }  // namespace GHKM

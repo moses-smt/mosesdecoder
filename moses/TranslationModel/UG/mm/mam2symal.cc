@@ -22,7 +22,7 @@ typedef L2R_Token<Conll_Sform> Token;
 mmTtrack<char> MAM;
 bool with_sids;
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   po::variables_map vm;
@@ -31,7 +31,7 @@ interpret_args(int ac, char* av[])
     ("help,h",    "print this message")
     ("numbers,n", po::bool_switch(&with_sids), "print sentence ids as first token")
     ;
-  
+
   po::options_description h("Hidden Options");
   h.add_options()
     ("mamfile", po::value<string>(&mamfile), "mamfile")
@@ -40,7 +40,7 @@ interpret_args(int ac, char* av[])
   po::positional_options_description a;
   a.add("mamfile",1);
   a.add("range",-1);
-  
+
   po::store(po::command_line_parser(ac,av)
             .options(h.add(o))
             .positional(a)
@@ -56,11 +56,11 @@ interpret_args(int ac, char* av[])
     }
 }
 
-void 
+void
 printRangeMAM(size_t start, size_t stop)
 {
   for (;start < stop; start++)
-    { 
+    {
       // size_t i = 0;
       char const* p = MAM.sntStart(start);
       char const* q = MAM.sntEnd(start);
@@ -76,7 +76,7 @@ printRangeMAM(size_t start, size_t stop)
     }
 }
 
-int 
+int
 main(int argc, char*argv[])
 {
   interpret_args(argc,argv);
@@ -91,7 +91,7 @@ main(int argc, char*argv[])
           buf>>first;
           if (buf.peek() == '-') buf>>c>>last;
           else                   last = first;
-	  if (last < MAM.size()) 
+	  if (last < MAM.size())
 	    printRangeMAM(first,last+1);
 	}
     }

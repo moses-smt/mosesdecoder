@@ -3,7 +3,7 @@
 #include <string>
 #include <boost/thread/tss.hpp>
 
-#include "Classifier.h"
+#include "vw/Classifier.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/FF/StatelessFeatureFunction.h"

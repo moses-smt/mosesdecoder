@@ -13,8 +13,11 @@
 #include "LexicalReordering.h"
 #include "SparseReordering.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -57,6 +60,7 @@ const std::string& SparseReorderingFeatureKey::Name (const string& wordListId)
 
 SparseReordering::SparseReordering(const map<string,string>& config, const LexicalReordering* producer)
   : m_producer(producer)
+  , m_useWeightMap(false)
 {
   static const string kSource= "source";
   static const string kTarget = "target";
@@ -80,6 +84,14 @@ SparseReordering::SparseReordering(const map<string,string>& config, const Lexic
       } else {
         UTIL_THROW(util::Exception, "Sparse reordering requires source or target, not " << fields[1]);
       }
+    } else if (fields[0] == "weights") {
+      ReadWeightMap(i->second);
+      m_useWeightMap = true;
+      for (int reoType=0; reoType<=LRModel::MAX; ++reoType) {
+        ostringstream buf;
+        buf << reoType;
+        m_featureMap2.push_back(m_producer->GetFeatureName(buf.str()));
+      }
 
     } else if (fields[0] == "phrase") {
       m_usePhrase = true;
@@ -101,9 +113,11 @@ void SparseReordering::PreCalculateFeatureNames(size_t index, const string& id, 
     for (size_t position = SparseReorderingFeatureKey::First;
          position <= SparseReorderingFeatureKey::Last; ++position) {
       for (int reoType = 0; reoType <= LRModel::MAX; ++reoType) {
-        SparseReorderingFeatureKey key(
-          index, static_cast<SparseReorderingFeatureKey::Type>(type), factor, isCluster,
-          static_cast<SparseReorderingFeatureKey::Position>(position), side, reoType);
+        SparseReorderingFeatureKey
+        key(index, static_cast<SparseReorderingFeatureKey::Type>(type),
+            factor, isCluster,
+            static_cast<SparseReorderingFeatureKey::Position>(position),
+            side, static_cast<LRModel::ReorderingType>(reoType));
         m_featureMap.insert(pair<SparseReorderingFeatureKey, FName>(key,m_producer->GetFeatureName(key.Name(id))));
       }
     }
@@ -173,7 +187,16 @@ void SparseReordering::AddFeatures(
     SparseReorderingFeatureKey key(id, type, wordFactor, false, position, side, reoType);
     FeatureMap::const_iterator fmi = m_featureMap.find(key);
     assert(fmi != m_featureMap.end());
-    scores->SparsePlusEquals(fmi->second, 1.0);
+    if (m_useWeightMap) {
+      WeightMap::const_iterator wmi = m_weightMap.find(fmi->second.name());
+      if (wmi != m_weightMap.end()) {
+        if (wmi->second != 0) {
+          scores->SparsePlusEquals(m_featureMap2[reoType], wmi->second);
+        }
+      }
+    } else {
+      scores->SparsePlusEquals(fmi->second, 1.0);
+    }
   }
 
   for (size_t id = 0; id < clusterMaps->size(); ++id) {
@@ -184,7 +207,16 @@ void SparseReordering::AddFeatures(
       SparseReorderingFeatureKey key(id, type, clusterIter->second, true, position, side, reoType);
       FeatureMap::const_iterator fmi = m_featureMap.find(key);
       assert(fmi != m_featureMap.end());
-      scores->SparsePlusEquals(fmi->second, 1.0);
+      if (m_useWeightMap) {
+        WeightMap::const_iterator wmi = m_weightMap.find(fmi->second.name());
+        if (wmi != m_weightMap.end()) {
+          if (wmi->second != 0) {
+            scores->SparsePlusEquals(m_featureMap2[reoType], wmi->second);
+          }
+        }
+      } else {
+        scores->SparsePlusEquals(fmi->second, 1.0);
+      }
     }
   }
 
@@ -253,6 +285,30 @@ void SparseReordering::CopyScores(
 
 
 }
+
+
+void SparseReordering::ReadWeightMap(const string& filename)
+{
+  util::FilePiece file(filename.c_str());
+  StringPiece line;
+  while (true) {
+    try {
+      line = file.ReadLine();
+    } catch (const util::EndOfFileException &e) {
+      break;
+    }
+    util::TokenIter<util::SingleCharacter, true> lineIter(line,util::SingleCharacter(' '));
+    UTIL_THROW_IF2(!lineIter, "Malformed weight line: '" << line << "'");
+    const std::string& name = lineIter->as_string();
+    ++lineIter;
+    UTIL_THROW_IF2(!lineIter, "Malformed weight line: '" << line << "'");
+    float weight = Moses::Scan<float>(lineIter->as_string());
+
+    std::pair< WeightMap::iterator, bool> inserted = m_weightMap.insert( std::make_pair(name, weight) );
+    UTIL_THROW_IF2(!inserted.second, "Duplicate weight: '" << name << "'");
+  }
+}
+
 
 } //namespace
 

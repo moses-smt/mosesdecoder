@@ -1,11 +1,16 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+#use strict;
+use warnings;
 use Getopt::Std;
 getopts('q');
 
-$target = shift;
-$source = shift;
-$align = shift or die "
+my $target = shift;
+my $source = shift;
+my $align = shift or die "
 Usage: extract-singletons.perl target source align
 
 ";
@@ -30,7 +35,7 @@ while (<TARGET>) {
     }
 
     for( $i=0; $i<=$#A; $i+=2 ) {
-	if ($target_links[$A[$i]] == 1 && $source_links[$A[$i+1]] == 1 && 
+	if ($target_links[$A[$i]] == 1 && $source_links[$A[$i+1]] == 1 &&
 	    $T[$A[$i]] eq $S[$A[$i+1]])
 	{
 	    $count{$S[$A[$i+1]]}++; # Print this if it only occurs here

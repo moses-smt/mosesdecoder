@@ -1,6 +1,3 @@
-// $Id: XmlOption.cpp 1960 2008-12-15 12:52:38Z phkoehn $
-// vim:tabstop=2
-
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2006 University of Edinburgh
@@ -21,11 +18,13 @@
  ***********************************************************************/
 
 #pragma once
+
 #include <string>
 #include <vector>
 #include <set>
 #include <map>
-#include "SyntaxTree.h"
+
+#include "SyntaxNodeCollection.h"
 
 namespace MosesTraining
 {
@@ -35,9 +34,8 @@ std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r"
 std::string TrimXml(const std::string& str);
 bool isXmlTag(const std::string& tag);
 std::vector<std::string> TokenizeXml(const std::string& str);
-bool ProcessAndStripXMLTags(std::string &line, SyntaxTree &tree, std::set< std::string > &labelCollection, std::map< std::string, int > &topLabelCollection, bool unescape = true);
+bool ProcessAndStripXMLTags(std::string &line, SyntaxNodeCollection &tree, std::set< std::string > &labelCollection, std::map< std::string, int > &topLabelCollection, bool unescape = true);
 std::string unescape(const std::string &str);
 
 
-} // namespace
-
+} // namespace MosesTraining
