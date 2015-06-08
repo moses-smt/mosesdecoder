@@ -31,7 +31,7 @@ mark(typename TSA<Token>::tree_iterator const& r, SentenceBias& hits)
 }
 
 template<typename Token> 
-bool
+void
 process(typename TSA<Token>::tree_iterator& m, 
         typename TSA<Token>::tree_iterator& r,
         SentenceBias& hits, size_t const max_count=1000)
@@ -60,12 +60,13 @@ template<typename Token>
 sptr<SentenceBias>
 prime_sampling1(TSA<Token> const& refIdx,  
                 TSA<Token> const& newIdx,  
-                size_t const max_count)
+                size_t const max_count,
+                std::vector<id_type> const* sid2docid = NULL)
 {
   typename TSA<Token>::tree_iterator m(&newIdx);
   typename TSA<Token>::tree_iterator r(&refIdx);
   sptr<SentenceBias> ret;
-  ret.reset(new SentenceBias(refIdx.getCorpus()->size(),0));
+  ret.reset(new SentenceBias(refIdx.getCorpus()->size(),0, sid2docid));
   process<Token>(m, r, *ret, max_count);
   return ret;
 }
