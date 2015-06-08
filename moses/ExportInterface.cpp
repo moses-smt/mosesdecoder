@@ -220,14 +220,26 @@ batch_run()
   // main loop over set of input sentences
 
   boost::shared_ptr<InputType> source;
+
+  // global scope of caches, biases, etc., if any
+  boost::shared_ptr<ContextScope> gscope;
+  if ((ioWrapper->GetLookAhead() + ioWrapper->GetLookBack() == 0) 
+      || ioWrapper->GetLookAhead() == std::numeric_limits<size_t>::max())
+    gscope.reset(new ContextScope);
+
   while ((source = ioWrapper->ReadInput()) != NULL) {
     IFVERBOSE(1) ResetUserTime();
 
     FeatureFunction::CallChangeSource(source.get());
 
     // set up task of translating one sentence
-    boost::shared_ptr<TranslationTask>
-    task = TranslationTask::create(source, ioWrapper);
+    boost::shared_ptr<ContextScope>  lscope;
+    if (gscope) lscope = gscope;
+    else lscope.reset(new ContextScope);
+    
+    boost::shared_ptr<TranslationTask> task;
+    task = TranslationTask::create(source, ioWrapper, lscope);
+
     if (source->GetContext())
       task->SetContextString(*source->GetContext());
     else task->SetContextString(context_string);
