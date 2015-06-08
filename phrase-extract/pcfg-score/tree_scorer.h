@@ -21,9 +21,10 @@
 #ifndef PCFG_SCORE_TREE_SCORER_H_
 #define PCFG_SCORE_TREE_SCORER_H_
 
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/pcfg_tree.h"
-#include "pcfg-common/typedef.h"
+#include "SyntaxTree.h"
+
+#include "syntax-common/vocabulary.h"
+#include "syntax-common/pcfg.h"
 
 namespace MosesTraining
 {
@@ -39,11 +40,16 @@ public:
 
   // Score tree according to PCFG.  Returns false if unsuccessful (due to
   // missing rule).
-  bool Score(PcfgTree &) const;
+  bool Score(SyntaxTree &);
 
 private:
   const Pcfg &pcfg_;
   const Vocabulary &non_term_vocab_;
+  std::map<SyntaxTree *, double> scores_;
+
+  bool CalcScores(SyntaxTree &);
+  void SetAttributes(SyntaxTree &);
+  void ZeroScores(SyntaxTree &);
 };
 
 }  // namespace PCFG

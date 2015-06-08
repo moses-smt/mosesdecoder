@@ -103,7 +103,7 @@ protected:
   BookkeepingOptions m_bookkeeping_options;
   // size_t m_nBestSize;
   // size_t m_nBestFactor;
-  
+
   size_t m_latticeSamplesSize;
   size_t m_maxNoTransOptPerCoverage;
   size_t m_maxNoPartTransOpt;

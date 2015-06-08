@@ -122,17 +122,38 @@ sub run_transliteration
 
 	print "Filter Table\n";
 
-	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table -config $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini -lm 0:3:$TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini:8`;
+	`$MOSES_SRC/scripts/training/train-model.perl \
+            -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 \
+            -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION \
+            -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 \
+            -score-options '--KneserNey' \
+            -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table \
+            -config $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini \
+            -lm 0:3:$TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini:8`;
 
-	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $TRANSLIT_MODEL/evaluation/$eval_file.filtered $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini $TRANSLIT_MODEL/evaluation/$eval_file  -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
+	`$MOSES_SRC/scripts/training/filter-model-given-input.pl \
+            $TRANSLIT_MODEL/evaluation/$eval_file.filtered \
+            $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini \
+            $TRANSLIT_MODEL/evaluation/$eval_file  \
+            -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
 
 	`rm  $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini`;
 
 	print "Apply Filter\n";
 
-	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables-and-weights.perl $TRANSLIT_MODEL/evaluation/$eval_file.filtered/moses.ini $TRANSLIT_MODEL/model/moses.ini $TRANSLIT_MODEL/tuning/moses.tuned.ini $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini`;
+	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables-and-weights.perl \
+            $TRANSLIT_MODEL/evaluation/$eval_file.filtered/moses.ini \
+            $TRANSLIT_MODEL/model/moses.ini \
+            $TRANSLIT_MODEL/tuning/moses.tuned.ini \
+            $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini`;
 
-	`$MOSES_SRC/bin/moses -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -drop-unknown -distortion-limit 0 -n-best-list $TRANSLIT_MODEL/evaluation/$eval_file.op.nBest 100 distinct -f $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini < $TRANSLIT_MODEL/evaluation/$eval_file > $TRANSLIT_MODEL/evaluation/$eval_file.op`;
+	`$MOSES_SRC/bin/moses \
+            -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 \
+            -threads 16 -drop-unknown -distortion-limit 0 \
+            -n-best-list $TRANSLIT_MODEL/evaluation/$eval_file.op.nBest 100 \
+            distinct -f $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini \
+            < $TRANSLIT_MODEL/evaluation/$eval_file \
+            > $TRANSLIT_MODEL/evaluation/$eval_file.op`;
 
 }
 

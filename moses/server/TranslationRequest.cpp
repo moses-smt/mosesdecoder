@@ -221,6 +221,7 @@ TranslationRequest::
 TranslationRequest(xmlrpc_c::paramList const& paramList,
                    boost::condition_variable& cond, boost::mutex& mut)
   : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
+  , m_nbestSize(0)
 { }
 
 void
@@ -264,6 +265,11 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
       pdmm->SetTemporaryMultiModelWeightsVector(w);
     }
   }
+
+  si = params.find("nbest");
+  if (si != params.end())
+    m_nbestSize = xmlrpc_c::value_int(si->second);
+
 
   // // biased sampling for suffix-array-based sampling phrase table?
   // if ((si = params.find("bias")) != params.end())

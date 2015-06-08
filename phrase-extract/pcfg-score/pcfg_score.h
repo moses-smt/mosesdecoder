@@ -21,7 +21,7 @@
 #ifndef PCFG_SCORE_PCFG_SCORE_H_
 #define PCFG_SCORE_PCFG_SCORE_H_
 
-#include "pcfg-common/tool.h"
+#include "syntax-common/tool.h"
 
 namespace MosesTraining
 {

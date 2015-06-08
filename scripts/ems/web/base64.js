@@ -21,16 +21,19 @@
     // constants
     var b64chars
         = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    var b64tab = function(bin) {
-        var t = {};
-        for (var i = 0, l = bin.length; i < l; i++) t[bin.charAt(i)] = i;
+    var b64tab = (function(bin) {
+        var t = {}, i, l;
+        for (i = 0, l = bin.length; i < l; i++) {
+            t[bin.charAt(i)] = i;
+        }
         return t;
-    }(b64chars);
+    })(b64chars);
     var fromCharCode = String.fromCharCode;
     // encoder stuff
     var cb_utob = function(c) {
+        var cc;
         if (c.length < 2) {
-            var cc = c.charCodeAt(0);
+            cc = c.charCodeAt(0);
             return cc < 0x80 ? c
                 : cc < 0x800 ? (fromCharCode(0xc0 | (cc >>> 6))
                                 + fromCharCode(0x80 | (cc & 0x3f)))
@@ -38,7 +41,7 @@
                    + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
                    + fromCharCode(0x80 | ( cc         & 0x3f)));
         } else {
-            var cc = 0x10000
+            cc = 0x10000
                 + (c.charCodeAt(0) - 0xD800) * 0x400
                 + (c.charCodeAt(1) - 0xDC00);
             return (fromCharCode(0xf0 | ((cc >>> 18) & 0x07))
@@ -70,19 +73,21 @@
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
     var _encode = buffer ? function (u) {
-        return (u.constructor === buffer.constructor ? u : new buffer(u))
-        .toString('base64')
+        return (
+            u.constructor === buffer.constructor ? u : new buffer(u)
+            ).toString('base64');
     }
-    : function (u) { return btoa(utob(u)) }
+    : function (u) { return btoa(utob(u)); }
     ;
     var encode = function(u, urisafe) {
-        return !urisafe
-            ? _encode(String(u))
-            : _encode(String(u)).replace(/[+\/]/g, function(m0) {
-                return m0 == '+' ? '-' : '_';
+        return (
+            !urisafe ?
+            _encode(String(u)) :
+            _encode(String(u)).replace(/[+\/]/g, function(m0) {
+                return (m0 === '+') ? '-' : '_';
             }).replace(/=/g, '');
     };
-    var encodeURI = function(u) { return encode(u, true) };
+    var encodeURI = function(u) { return encode(u, true); };
     // decoder stuff
     var re_btou = new RegExp([
         '[\xC0-\xDF][\x80-\xBF]',

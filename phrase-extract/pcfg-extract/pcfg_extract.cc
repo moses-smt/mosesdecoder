@@ -19,20 +19,6 @@
 
 #include "pcfg_extract.h"
 
-#include "options.h"
-#include "rule_collection.h"
-#include "rule_extractor.h"
-
-#include "syntax-common/exception.h"
-
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/pcfg_tree.h"
-#include "pcfg-common/syntax_tree.h"
-#include "pcfg-common/typedef.h"
-#include "pcfg-common/xml_tree_parser.h"
-
-#include <boost/program_options.hpp>
-
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
@@ -42,6 +28,19 @@
 #include <set>
 #include <string>
 #include <vector>
+
+#include <boost/program_options.hpp>
+
+#include "syntax-common/exception.h"
+#include "syntax-common/pcfg.h"
+#include "syntax-common/vocabulary.h"
+#include "syntax-common/xml_tree_parser.h"
+
+#include "SyntaxTree.h"
+
+#include "options.h"
+#include "rule_collection.h"
+#include "rule_extractor.h"
 
 namespace MosesTraining
 {
@@ -63,7 +62,7 @@ int PcfgExtract::Main(int argc, char *argv[])
   XmlTreeParser parser;
   std::string line;
   std::size_t line_num = 0;
-  std::auto_ptr<PcfgTree> tree;
+  std::auto_ptr<MosesTraining::SyntaxTree> tree;
   while (std::getline(std::cin, line)) {
     ++line_num;
     try {
@@ -119,7 +118,7 @@ void PcfgExtract::ProcessOptions(int argc, char *argv[],
   // Process the command-line.
   po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).style(CommonOptionStyle()).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmd_line_options).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {

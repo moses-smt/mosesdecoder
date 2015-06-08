@@ -11,8 +11,8 @@ MAKEFLAGS += --warn-undefined-variables
 define find_moses_root
 d=$$(pwd);
 while [[ ! -e $$d/Jamroot && $$d != "/" ]] ; do
-    d=$$(dirname $$d); 
-done; 
+    d=$$(dirname $$d);
+done;
 echo $$d
 endef
 
@@ -23,14 +23,14 @@ MOSES_ROOT := $(shell $(find_moses_root))
 # ===============================================================================
 # CCACHE: if set to ccache, use ccache to speed up compilation
 # OPTI:   optimization level
-# PROF:   profiler switches 
+# PROF:   profiler switches
 
 # compiler command
 compiler ?= g++
 variant  ?= runtime
 link     ?= static
 
-CXX       = $(shell which ccache) $(compiler)  
+CXX       = $(shell which ccache) $(compiler)
 CXXFLAGS += -DMAX_NUM_FACTORS=4
 CXXFLAGS += -DKENLM_MAX_ORDER=5
 CXXFLAGS += -DWITH_THREADS
@@ -70,7 +70,7 @@ endif
 cc2obj = $(addsuffix .o,$(patsubst ${MOSES_ROOT}%,$(WDIR)%,\
 	 	        $(patsubst .%,$(WDIR)%,$(basename $1))))
 cc2exe = $(addprefix ./bin/$(variant)/,$(basename $(notdir $1)))
-cc2trg = $(basename $(notdir $1)) 
+cc2trg = $(basename $(notdir $1))
 
 define compile
 
@@ -95,9 +95,9 @@ endif
 endef
 
 # list files here that you want explicitly excluded from compilation
-skip  = sim-pe.cc 
-skip += mtt.count.cc 
-skip += try-align2.cc 
+skip  = sim-pe.cc
+skip += mtt.count.cc
+skip += try-align2.cc
 skip += spe-check-coverage3.cc
 skip += mmsapt.cpp
 skip += ug_stringdist.cc

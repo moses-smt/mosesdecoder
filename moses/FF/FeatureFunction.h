@@ -62,9 +62,6 @@ public:
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 
-  static void CallChangeSource(InputType * const&input);
-  // see my note in FeatureFunction.cpp --- UG
-
   FeatureFunction(const std::string &line, bool initializeNow);
   FeatureFunction(size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;
@@ -155,9 +152,6 @@ public:
   EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase,
                       ScoreComponentCollection& scoreBreakdown,
                       ScoreComponentCollection& estimatedFutureScore) const = 0;
-
-  // override this method if you want to change the input before decoding
-  virtual void ChangeSource(InputType * const&input) const { }
 
   // for context-dependent processing
   static void SetupAll(TranslationTask const& task);

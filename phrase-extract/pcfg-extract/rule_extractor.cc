@@ -19,8 +19,6 @@
 
 #include "rule_extractor.h"
 
-#include "pcfg-common/pcfg_tree.h"
-
 namespace MosesTraining
 {
 namespace Syntax
@@ -33,21 +31,21 @@ RuleExtractor::RuleExtractor(Vocabulary &non_term_vocab)
 {
 }
 
-void RuleExtractor::Extract(const PcfgTree &tree, RuleCollection &rc) const
+void RuleExtractor::Extract(const SyntaxTree &tree, RuleCollection &rc) const
 {
-  if (tree.IsPreterminal() || tree.IsLeaf()) {
+  if (tree.IsLeaf() || tree.children()[0]->IsLeaf()) {
     return;
   }
 
-  std::size_t lhs = non_term_vocab_.Insert(tree.label());
+  std::size_t lhs = non_term_vocab_.Insert(tree.value().label);
   std::vector<std::size_t> rhs;
 
-  const std::vector<PcfgTree *> &children = tree.children();
+  const std::vector<SyntaxTree *> &children = tree.children();
   rhs.reserve(children.size());
-  for (std::vector<PcfgTree *>::const_iterator p(children.begin());
+  for (std::vector<SyntaxTree *>::const_iterator p(children.begin());
        p != children.end(); ++p) {
-    const PcfgTree &child = **p;
-    rhs.push_back(non_term_vocab_.Insert(child.label()));
+    const SyntaxTree &child = **p;
+    rhs.push_back(non_term_vocab_.Insert(child.value().label));
     Extract(child, rc);
   }
   rc.Add(lhs, rhs);
