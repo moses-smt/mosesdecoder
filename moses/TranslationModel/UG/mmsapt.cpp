@@ -77,10 +77,12 @@ namespace Moses
     , m_bias_log(NULL)
     , m_bias_loglevel(0)
     , m_lr_func(NULL)
+    , bias_key(((char*)this)+3)
     , cache_key(((char*)this)+2)
     , context_key(((char*)this)+1)
       // , m_tpc_ctr(0)
     , ofactor(1,0)
+    , m_sampling_method(ranked_sampling)
   {
     init(line);
     setup_local_feature_functions();
@@ -232,6 +234,18 @@ namespace Moses
     if ((m = param.find("extra")) != param.end())
       m_extra_data = m->second;
 
+    if ((m = param.find("method")) != param.end())
+      {
+	if (m->second == "rank")
+	  m_sampling_method = ranked_sampling;
+	else if (m->second == "random")
+	  m_sampling_method = random_sampling;
+	else if (m->second == "full")
+	  m_sampling_method = full_coverage;
+	else UTIL_THROW2("unrecognized specification 'method='" << m->second
+			 << "' in line:\n" << line);
+      }
+    
     dflt = pair<string,string>("tuneable","true");
     m_tuneable = Scan<bool>(param.insert(dflt).first->second.c_str());
 
@@ -262,6 +276,7 @@ namespace Moses
     // known_parameters.push_back("limit"); // replaced by "table-limit"
     known_parameters.push_back("logcnt");
     known_parameters.push_back("lr-func"); // associated lexical reordering function
+    known_parameters.push_back("method");
     known_parameters.push_back("name");
     known_parameters.push_back("num-features");
     known_parameters.push_back("output-factor");
@@ -441,6 +456,7 @@ namespace Moses
   Mmsapt::
   Load(bool with_checks)
   {
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
     // load feature functions (i.e., load underlying data bases, if any)
     BOOST_FOREACH(sptr<pscorer>& ff, m_active_ff_fix) ff->load();
     BOOST_FOREACH(sptr<pscorer>& ff, m_active_ff_dyn) ff->load();
@@ -455,9 +471,11 @@ namespace Moses
 		       << this->m_numScoreComponents << ")!\n";);
       }
 #endif
+
+    m_thread_pool.reset(new ug::ThreadPool(max(m_workers,size_t(1))));
+
     // Load corpora. For the time being, we can have one memory-mapped static
     // corpus and one in-memory dynamic corpus
-    boost::unique_lock<boost::shared_mutex> lock(m_lock);
 
     btfix->m_num_workers = this->m_workers;
     btfix->open(m_bname, L1, L2);
@@ -667,7 +685,19 @@ namespace Moses
     // for btfix.
     sptr<pstats> sfix,sdyn;
 
-    if (mfix.size() == sphrase.size()) sfix = btfix->lookup(ttask, mfix);
+    if (mfix.size() == sphrase.size()) 
+      {
+	sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get());
+	sptr<pstats> const* foo = context->cache1->get(mfix.getPid());
+	if (foo) { sfix = *foo; sfix->wait(); }
+	else 
+	  {
+	    BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
+				   m_default_sample_size, m_sampling_method);
+	    s();
+	    sfix = s.stats();
+	  }
+      }
     if (mdyn.size() == sphrase.size()) sdyn = dyn->lookup(ttask, mdyn);
 
     vector<PhrasePair<Token> > ppfix,ppdyn;
@@ -764,18 +794,17 @@ namespace Moses
   ChartRuleLookupManager*
   Mmsapt::
   CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &,
-			  size_t UnclearWhatThisVariableIsSupposedToAccomplishBecauseNobodyBotheredToDocumentItInPhraseTableDotHButIllTakeThisAsAnOpportunityToComplyWithTheMosesConventionOfRidiculouslyLongVariableAndClassNames)
+			  size_t )
   {
     throw "CreateRuleLookupManager is currently not supported in Mmsapt!";
   }
 
   void
   Mmsapt::
-  InitializeForInput(ttasksptr const& ttask)
+  set_bias_via_server(ttasksptr const& ttask)
   {
     sptr<ContextScope> const& scope = ttask->GetScope();
-    sptr<ContextForQuery> context
-      = scope->get<ContextForQuery>(&btfix, true);
+    sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
     if (m_bias_server.size() && context->bias == NULL)
       { // we need to create the bias
 	boost::unique_lock<boost::shared_mutex> lock(context->lock);
@@ -784,8 +813,7 @@ namespace Moses
 	  {
 	    if (m_bias_log)
 	      {
-		*m_bias_log << HERE << endl
-			    << "BIAS LOOKUP CONTEXT: "
+		*m_bias_log << HERE << endl << "BIAS LOOKUP CONTEXT: " 
 			    << context_words << endl;
 		context->bias_log = m_bias_log;
 	      }
@@ -797,6 +825,60 @@ namespace Moses
 	if (!context->cache1) context->cache1.reset(new pstats::cache_t);
 	if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       }
+  }
+  
+  void
+  Mmsapt::
+  set_bias_for_ranking(ttasksptr const& ttask, iptr<Bitext<Token> const> bt)
+  { // thinking ahead: shard-specific set-up, for multi-shard Mmsapts
+    
+    sptr<ContextScope> const& scope = ttask->GetScope();
+    if (!scope) return;
+    
+    sptr<ContextForQuery> context = scope->get<ContextForQuery>(bt.get(), true);
+    if (context->bias) return;
+
+    if (!context->cache1) context->cache1.reset(new pstats::cache_t);
+    if (!context->cache2) context->cache2.reset(new pstats::cache_t);
+
+    sptr<IOWrapper const> iowrapper = ttask->GetIOWrapper();
+    vector<string> input;
+    input.reserve(iowrapper->GetPastInput().size() + 
+		  iowrapper->GetFutureInput().size());
+    BOOST_FOREACH(sptr<InputType> const& s, iowrapper->GetPastInput())
+      input.push_back(s->ToString());
+    BOOST_FOREACH(sptr<InputType> const& s, iowrapper->GetFutureInput())
+      input.push_back(s->ToString());
+
+    size_t N = 10 * m_default_sample_size;
+    context->bias = prime_sampling1(*bt->V1, *bt->I1, input, N);
+    
+  }
+
+  // void
+  // Mmsapt::
+  // set_bias_via_ranking(ttasksptr const& ttask)
+  // {
+  //   sptr<ContextScope> const& scope = ttask->GetScope();
+  //   if (!scope) return;
+  //   sptr<SentenceBias> bias = scope->get<SentenceBias>(bias_key);
+  //   // For the time being, let's assume that ranking is always primed 
+  //   // on the entire document and leave local priming for another day.
+  //   if (bias) return;
+  //   // 
+  // }
+
+  void
+  Mmsapt::
+  InitializeForInput(ttasksptr const& ttask)
+  {
+    set_bias_for_ranking(ttask, this->btfix);
+    // to do: depending on method, set bias for ranking, via consulting the bias 
+    // server, or none at al.
+
+    sptr<ContextScope> const& scope = ttask->GetScope();
+    sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+
     boost::unique_lock<boost::shared_mutex> mylock(m_lock);
     sptr<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
     if (!localcache)
@@ -828,13 +910,24 @@ namespace Moses
   PrefixExists(ttasksptr const& ttask, Moses::Phrase const& phrase) const
   {
     if (phrase.GetSize() == 0) return false;
-    vector<id_type> myphrase;
+    sptr<ContextScope> const& scope = ttask->GetScope();
+
+    vector<id_type> myphrase; 
     fillIdSeq(phrase,input_factor,*btfix->V1,myphrase);
 
     TSA<Token>::tree_iterator mfix(btfix->I1.get(),&myphrase[0],myphrase.size());
     if (mfix.size() == myphrase.size())
       {
-	btfix->prep(ttask, mfix);
+	sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+	uint64_t pid = mfix.getPid();
+	if (!context->cache1->get(pid))
+	  {
+	    BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
+				   m_default_sample_size, m_sampling_method);
+	    if (*context->cache1->get(pid, s.stats()) == s.stats())
+	      m_thread_pool->add(s);
+	  }
+	// btfix->prep(ttask, mfix);
 	// cerr << phrase << " " << mfix.approxOccurrenceCount() << endl;
 	return true;
       }

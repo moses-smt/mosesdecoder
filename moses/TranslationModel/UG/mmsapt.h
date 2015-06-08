@@ -11,6 +11,7 @@
 #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
 #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
 #include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/threading/ug_thread_pool.h"
 
 #include "moses/TranslationModel/UG/mm/ug_mm_ttrack.h"
 #include "moses/TranslationModel/UG/mm/ug_mm_tsa.h"
@@ -19,6 +20,8 @@
 #include "moses/TranslationModel/UG/mm/ug_typedefs.h"
 #include "moses/TranslationModel/UG/mm/tpt_pickler.h"
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
+#include "moses/TranslationModel/UG/mm/ug_prime_sampling1.h"
+#include "moses/TranslationModel/UG/mm/ug_bitext_sampler.h"
 #include "moses/TranslationModel/UG/mm/ug_lexical_phrase_scorer2.h"
 
 #include "moses/TranslationModel/UG/TargetPhraseCollectionCache.h"
@@ -82,7 +85,10 @@ namespace Moses
     int m_bias_loglevel;
     LexicalReordering* m_lr_func; // associated lexical reordering function
     string m_lr_func_name; // name of associated lexical reordering function
+    sampling_method m_sampling_method; // sampling method, see ug_bitext_sampler
+    boost::scoped_ptr<ug::ThreadPool> m_thread_pool;
   public:
+    void* const  bias_key;    // for getting bias from ttask
     void* const  cache_key;   // for getting cache from ttask
     void* const  context_key; // for context scope from ttask
   private:
@@ -116,8 +122,8 @@ namespace Moses
 	     std::vector<sptr<pscorer> >* registry = NULL);
     // add feature function if specified
 
-    void
-    add_corpus_specific_features(std::vector<sptr<pscorer > >& ffvec);
+    // void
+    // add_corpus_specific_features(std::vector<sptr<pscorer > >& ffvec);
 
     // built-in feature functions
     // PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
@@ -136,6 +142,10 @@ namespace Moses
     std::vector<FactorType> ofactor;
 
     void setup_local_feature_functions();
+    void set_bias_via_server(ttasksptr const& ttask);
+
+    void 
+    set_bias_for_ranking(ttasksptr const& ttask, iptr<Bitext<Token> const> bt);
 
   private:
 
