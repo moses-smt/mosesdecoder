@@ -34,15 +34,17 @@ namespace Moses
 
     COMP const& Compare;
     VectorIndexSorter(std::vector<VAL> const& v, COMP const& comp)
-      : m_vecref(v), Compare(comp) {
-    }
+      : m_vecref(v), Compare(comp) 
+    { }
 
     VectorIndexSorter(std::vector<VAL> const& v)
-      : m_vecref(v), m_comp(new COMP()), Compare(*m_comp) {
-    }
+      : m_vecref(v), m_comp(new COMP()), Compare(*m_comp) 
+    { }
 
-    bool operator()(IDX_T const & a, IDX_T const & b) const {
-      bool fwd = Compare(m_vecref.at(a) ,m_vecref.at(b));
+    bool 
+    operator()(IDX_T const & a, IDX_T const & b) const 
+    {
+      bool fwd = Compare(m_vecref.at(a), m_vecref.at(b));
       bool bwd = Compare(m_vecref[b],    m_vecref[a]);
       return (fwd == bwd ? a < b : fwd);
     }
@@ -61,7 +63,7 @@ namespace Moses
   GetOrder() const
   {
     boost::shared_ptr<std::vector<IDX_T> > ret(new std::vector<IDX_T>(m_vecref.size()));
-    get_order(*ret);
+    GetOrder(*ret);
     return ret;
   }
 
