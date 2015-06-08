@@ -444,6 +444,7 @@ StaticData
   //source word deletion
   m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
 
+  m_parameter->SetParameter(m_isAlwaysCreateDirectTranslationOption, "always-create-direct-transopt", false );
 }
 
 void
