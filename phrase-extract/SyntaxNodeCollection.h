@@ -56,7 +56,9 @@ public:
   };
 
   //! Get the number of words (defined as 1 + the max end pos of any node).
-  std::size_t GetNumWords() const { return m_numWords; }
+  std::size_t GetNumWords() const {
+    return m_numWords;
+  }
 
   //! Clear the container (this deletes the SyntaxNodes).
   void Clear();
