@@ -483,7 +483,7 @@ score-settings = "--GoodTuring --MinScore 2:0.0001"
 ### instead of tuning with this setting, old weights may be recycled
 # specify here an old configuration file with matching weights
 #
-weight-config = $toy-data/weight.ini
+weight-config = $toy-data/weight_bilinguallm.ini
 
 ### tuning script to be used
 #
