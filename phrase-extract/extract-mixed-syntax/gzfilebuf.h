@@ -12,7 +12,8 @@ public:
   gzfilebuf(const char *filename) {
     _gzf = gzopen(filename, "rb");
     if (!_gzf)
-      throw std::runtime_error("Could not open " + std::string(filename) + ".");    setg (_buff+sizeof(int),     // beginning of putback area
+      throw std::runtime_error("Could not open " + std::string(filename) + ".");
+    setg (_buff+sizeof(int),     // beginning of putback area
           _buff+sizeof(int),     // read position
           _buff+sizeof(int));    // end position
   }
