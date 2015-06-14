@@ -143,6 +143,7 @@ Parameter::Parameter()
   AddParam(oov_opts,"mark-unknown", "mu", "mark unknown words in output");
   AddParam(oov_opts,"lmodel-oov-feature", "add language model oov feature, one per model");
   AddParam(oov_opts,"output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
+  AddParam(oov_opts,"always-create-direct-transopt", "Always create a translation that translates the source word ad-verbatim");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // input options

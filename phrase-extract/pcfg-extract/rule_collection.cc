@@ -19,7 +19,7 @@
 
 #include "rule_collection.h"
 
-#include "pcfg-common/pcfg.h"
+#include "syntax-common/pcfg.h"
 
 #include <cmath>
 

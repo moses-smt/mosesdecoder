@@ -30,19 +30,23 @@ namespace PostprocessEgretForests
 
 int PostprocessEgretForests::Main(int argc, char *argv[])
 {
-  // Process command-line options.
-  Options options;
-  ProcessOptions(argc, argv, options);
+  try {
+    // Process command-line options.
+    Options options;
+    ProcessOptions(argc, argv, options);
 
-  // Open input files.
-  boost::scoped_ptr<SplitPointFileParser> splitPointParser;
-  std::ifstream splitPointFileStream;
-  if (!options.splitPointsFile.empty()) {
-    OpenInputFileOrDie(options.splitPointsFile, splitPointFileStream);
-    splitPointParser.reset(new SplitPointFileParser(splitPointFileStream));
+    // Open input files.
+    boost::scoped_ptr<SplitPointFileParser> splitPointParser;
+    std::ifstream splitPointFileStream;
+    if (!options.splitPointsFile.empty()) {
+      OpenInputFileOrDie(options.splitPointsFile, splitPointFileStream);
+      splitPointParser.reset(new SplitPointFileParser(splitPointFileStream));
+    }
+
+    ProcessForest(std::cin, std::cout, splitPointParser.get(), options);
+  } catch (const MosesTraining::Syntax::Exception &e) {
+    Error(e.msg());
   }
-
-  ProcessForest(std::cin, std::cout, splitPointParser.get(), options);
   return 0;
 }
 
@@ -76,17 +80,6 @@ void PostprocessEgretForests::ProcessForest(
   }
 }
 
-void PostprocessEgretForests::OpenInputFileOrDie(const std::string &filename,
-    std::ifstream &stream)
-{
-  stream.open(filename.c_str());
-  if (!stream) {
-    std::ostringstream msg;
-    msg << "failed to open input file: " << filename;
-    Error(msg.str());
-  }
-}
-
 void PostprocessEgretForests::ProcessOptions(int argc, char *argv[],
     Options &options) const
 {
@@ -96,7 +89,7 @@ void PostprocessEgretForests::ProcessOptions(int argc, char *argv[],
   // Construct the 'top' of the usage message: the bit that comes before the
   // options list.
   std::ostringstream usageTop;
-  usageTop << "Usage: " << GetName()
+  usageTop << "Usage: " << name()
            << " [OPTION]...\n\n"
            << "TODO\n\n"
            << "Options";
@@ -132,11 +125,8 @@ void PostprocessEgretForests::ProcessOptions(int argc, char *argv[],
 
   // Process the command-line.
   po::variables_map vm;
-  const int optionStyle = cls::allow_long
-                          | cls::long_allow_adjacent
-                          | cls::long_allow_next;
   try {
-    po::store(po::command_line_parser(argc, argv).style(optionStyle).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmdLineOptions).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {
@@ -154,12 +144,6 @@ void PostprocessEgretForests::ProcessOptions(int argc, char *argv[],
   if (vm.count("Escape")) {
     options.escape = true;
   }
-}
-
-void PostprocessEgretForests::Error(const std::string &msg) const
-{
-  std::cerr << GetName() << ": " << msg << std::endl;
-  std::exit(1);
 }
 
 }  // namespace PostprocessEgretForests

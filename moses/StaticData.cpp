@@ -63,8 +63,8 @@ StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
   , m_inputType(SentenceInput)
-    // , m_onlyDistinctNBest(false)
-    // , m_needAlignmentInfo(false)
+  // , m_onlyDistinctNBest(false)
+  // , m_needAlignmentInfo(false)
   , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
@@ -444,6 +444,7 @@ StaticData
   //source word deletion
   m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
 
+  m_parameter->SetParameter(m_isAlwaysCreateDirectTranslationOption, "always-create-direct-transopt", false );
 }
 
 void
@@ -593,7 +594,7 @@ bool StaticData::LoadData(Parameter *parameter)
   ini_factor_maps();
   ini_input_options();
   m_bookkeeping_options.init(*parameter);
-  m_nbest_options.init(*parameter); // if (!ini_nbest_options()) return false; 
+  m_nbest_options.init(*parameter); // if (!ini_nbest_options()) return false;
   if (!ini_output_options()) return false;
 
   // threading etc.
@@ -616,15 +617,14 @@ bool StaticData::LoadData(Parameter *parameter)
   ini_mira_options();
 
   // set m_nbest_options.enabled = true if necessary:
-  if (m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_outputSearchGraphSLF 
-      || m_mira || m_outputSearchGraphHypergraph || m_useConsensusDecoding 
+  if (m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_outputSearchGraphSLF
+      || m_mira || m_outputSearchGraphHypergraph || m_useConsensusDecoding
 #ifdef HAVE_PROTOBUF
-      || m_outputSearchGraphPB 
+      || m_outputSearchGraphPB
 #endif
-      || m_latticeSamplesFilePath.size())
-    { 
-      m_nbest_options.enabled = true; 
-    }
+      || m_latticeSamplesFilePath.size()) {
+    m_nbest_options.enabled = true;
+  }
 
   // S2T decoder
   m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",
@@ -1371,4 +1371,3 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
 }
 
 } // namespace
-

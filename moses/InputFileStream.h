@@ -37,7 +37,7 @@ protected:
   std::streambuf *m_streambuf;
 public:
 
-  InputFileStream(const std::string &filePath);
+  explicit InputFileStream(const std::string &filePath);
   ~InputFileStream();
 
   void Close();
