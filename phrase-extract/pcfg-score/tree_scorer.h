@@ -23,8 +23,8 @@
 
 #include "SyntaxTree.h"
 
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/typedef.h"
+#include "syntax-common/vocabulary.h"
+#include "syntax-common/pcfg.h"
 
 namespace MosesTraining
 {

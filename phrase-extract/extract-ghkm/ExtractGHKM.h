@@ -28,6 +28,8 @@
 #include "OutputFileStream.h"
 #include "SyntaxTree.h"
 
+#include "syntax-common/tool.h"
+
 namespace MosesTraining
 {
 namespace GHKM
@@ -35,22 +37,14 @@ namespace GHKM
 
 struct Options;
 
-class ExtractGHKM
+class ExtractGHKM : public Syntax::Tool
 {
 public:
+  ExtractGHKM() : Tool("extract-ghkm") {}
 
-  ExtractGHKM() : m_name("extract-ghkm") {}
-  const std::string &GetName() const {
-    return m_name;
-  }
-  int Main(int argc, char *argv[]);
+  virtual int Main(int argc, char *argv[]);
 
 private:
-
-  void Error(const std::string &) const;
-  void OpenInputFileOrDie(const std::string &, std::ifstream &);
-  void OpenOutputFileOrDie(const std::string &, std::ofstream &);
-  void OpenOutputFileOrDie(const std::string &, Moses::OutputFileStream &);
   void RecordTreeLabels(const SyntaxTree &, std::set<std::string> &);
   void CollectWordLabelCounts(SyntaxTree &,
                               const Options &,
@@ -79,8 +73,6 @@ private:
   std::vector<std::string> ReadTokens(const SyntaxTree &root) const;
 
   void ProcessOptions(int, char *[], Options &) const;
-
-  std::string m_name;
 };
 
 }  // namespace GHKM

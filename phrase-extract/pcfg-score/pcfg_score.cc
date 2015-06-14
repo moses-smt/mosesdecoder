@@ -36,11 +36,10 @@
 #include "SyntaxTree.h"
 
 #include "syntax-common/exception.h"
+#include "syntax-common/pcfg.h"
+#include "syntax-common/vocabulary.h"
 #include "syntax-common/xml_tree_parser.h"
 #include "syntax-common/xml_tree_writer.h"
-
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/typedef.h"
 
 namespace MosesTraining
 {
@@ -57,7 +56,7 @@ int PcfgScore::Main(int argc, char *argv[])
 
   // Open PCFG stream.
   std::ifstream pcfg_stream;
-  OpenNamedInputOrDie(options.pcfg_file, pcfg_stream);
+  OpenInputFileOrDie(options.pcfg_file, pcfg_stream);
 
   // Read PCFG.
   Pcfg pcfg;
@@ -132,7 +131,7 @@ void PcfgScore::ProcessOptions(int argc, char *argv[], Options &options) const
   // Process the command-line.
   po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).style(CommonOptionStyle()).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmd_line_options).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {

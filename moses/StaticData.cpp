@@ -63,8 +63,8 @@ StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
   , m_inputType(SentenceInput)
-    // , m_onlyDistinctNBest(false)
-    // , m_needAlignmentInfo(false)
+  // , m_onlyDistinctNBest(false)
+  // , m_needAlignmentInfo(false)
   , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
@@ -444,6 +444,7 @@ StaticData
   //source word deletion
   m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
 
+  m_parameter->SetParameter(m_isAlwaysCreateDirectTranslationOption, "always-create-direct-transopt", false );
 }
 
 void
@@ -621,10 +622,9 @@ bool StaticData::LoadData(Parameter *parameter)
 #ifdef HAVE_PROTOBUF
       || m_outputSearchGraphPB
 #endif
-      || m_latticeSamplesFilePath.size())
-    {
-      m_nbest_options.enabled = true;
-    }
+      || m_latticeSamplesFilePath.size()) {
+    m_nbest_options.enabled = true;
+  }
 
   // S2T decoder
   m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",

@@ -798,6 +798,10 @@
   <VirtualDirectory Name="parameters">
     <File Name="../../../moses/parameters/ContextParameters.cpp"/>
     <File Name="../../../moses/parameters/ContextParameters.h"/>
+    <File Name="../../../moses/parameters/BookkeepingOptions.cpp"/>
+    <File Name="../../../moses/parameters/BookkeepingOptions.h"/>
+    <File Name="../../../moses/parameters/NBestOptions.cpp"/>
+    <File Name="../../../moses/parameters/NBestOptions.h"/>
   </VirtualDirectory>
   <Settings Type="Static Library">
     <GlobalSettings>
@@ -812,9 +816,9 @@
     <Configuration Name="Debug" CompilerType="GCC" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
-        <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder"/>
-        <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder/phrase-extract"/>
-        <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder/boost/include"/>
+        <IncludePath Value="../../../"/>
+        <IncludePath Value="../../../phrase-extract"/>
+        <IncludePath Value="../../../boost/include"/>
         <Preprocessor Value="MAX_NUM_FACTORS=4"/>
         <Preprocessor Value="KENLM_MAX_ORDER=7"/>
         <Preprocessor Value="WITH_THREADS"/>

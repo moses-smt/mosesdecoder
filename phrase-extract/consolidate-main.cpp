@@ -73,17 +73,17 @@ int main(int argc, char* argv[])
 
   if (argc < 4) {
     std::cerr <<
-      "syntax: "
-      "consolidate phrase-table.direct "
-      "phrase-table.indirect "
-      "phrase-table.consolidated "
-      "[--Hierarchical] [--OnlyDirect] [--PhraseCount] "
-      "[--GoodTuring counts-of-counts-file] "
-      "[--KneserNey counts-of-counts-file] [--LowCountFeature] "
-      "[--SourceLabels source-labels-file] "
-      "[--PartsOfSpeech parts-of-speech-file] "
-      "[--MinScore id:threshold[,id:threshold]*]"
-      << std::endl;
+              "syntax: "
+              "consolidate phrase-table.direct "
+              "phrase-table.indirect "
+              "phrase-table.consolidated "
+              "[--Hierarchical] [--OnlyDirect] [--PhraseCount] "
+              "[--GoodTuring counts-of-counts-file] "
+              "[--KneserNey counts-of-counts-file] [--LowCountFeature] "
+              "[--SourceLabels source-labels-file] "
+              "[--PartsOfSpeech parts-of-speech-file] "
+              "[--MinScore id:threshold[,id:threshold]*]"
+              << std::endl;
     exit(1);
   }
   const std::string fileNameDirect = argv[1];

@@ -232,7 +232,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
     // Initialize phrase orientation scoring object
     PhraseOrientation phraseOrientation(sourceTokens.size(),
-        targetXmlTreeParser.words().size(), alignment);
+                                        targetXmlTreeParser.words().size(), alignment);
 
     // Write the rules, subject to scope pruning.
     const std::vector<Node *> &targetNodes = graph.GetTargetNodes();
@@ -359,39 +359,6 @@ int ExtractGHKM::Main(int argc, char *argv[])
   return 0;
 }
 
-void ExtractGHKM::OpenInputFileOrDie(const std::string &filename,
-                                     std::ifstream &stream)
-{
-  stream.open(filename.c_str());
-  if (!stream) {
-    std::ostringstream msg;
-    msg << "failed to open input file: " << filename;
-    Error(msg.str());
-  }
-}
-
-void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
-                                      std::ofstream &stream)
-{
-  stream.open(filename.c_str());
-  if (!stream) {
-    std::ostringstream msg;
-    msg << "failed to open output file: " << filename;
-    Error(msg.str());
-  }
-}
-
-void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
-                                      Moses::OutputFileStream &stream)
-{
-  bool ret = stream.Open(filename);
-  if (!ret) {
-    std::ostringstream msg;
-    msg << "failed to open output file: " << filename;
-    Error(msg.str());
-  }
-}
-
 void ExtractGHKM::ProcessOptions(int argc, char *argv[],
                                  Options &options) const
 {
@@ -401,7 +368,7 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   // Construct the 'top' of the usage message: the bit that comes before the
   // options list.
   std::ostringstream usageTop;
-  usageTop << "Usage: " << GetName()
+  usageTop << "Usage: " << name()
            << " [OPTION]... TARGET SOURCE ALIGNMENT EXTRACT\n\n"
            << "SCFG rule extractor based on the GHKM algorithm described in\n"
            << "Galley et al. (2004).\n\n"
@@ -413,21 +380,21 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
               << "\nThe parse tree is assumed to contain part-of-speech preterminal nodes.\n"
               << "\n"
               << "For the composed rule constraints: rule depth is the "
-                 "maximum distance from the\nrule's root node to a sink "
-                 "node, not counting preterminal expansions or word\n"
-                 "alignments.  Rule size is the measure defined in DeNeefe "
-                 "et al (2007): the\nnumber of non-part-of-speech, non-leaf "
-                 "constituent labels in the target tree.\nNode count is the "
-                 "number of target tree nodes (excluding target words).\n"
+              "maximum distance from the\nrule's root node to a sink "
+              "node, not counting preterminal expansions or word\n"
+              "alignments.  Rule size is the measure defined in DeNeefe "
+              "et al (2007): the\nnumber of non-part-of-speech, non-leaf "
+              "constituent labels in the target tree.\nNode count is the "
+              "number of target tree nodes (excluding target words).\n"
               << "\n"
               << "Scope pruning (Hopkins and Langmead, 2010) is applied to both minimal and\ncomposed rules.\n"
               << "\n"
               << "Unaligned source words are attached to the tree using the "
-                 "following heuristic:\nif there are aligned source words to "
-                 "both the left and the right of an unaligned\nsource word "
-                 "then it is attached to the lowest common ancestor of its "
-                 "nearest\nsuch left and right neighbours.  Otherwise, it is "
-                 "attached to the root of the\nparse tree.\n"
+              "following heuristic:\nif there are aligned source words to "
+              "both the left and the right of an unaligned\nsource word "
+              "then it is attached to the lowest common ancestor of its "
+              "nearest\nsuch left and right neighbours.  Otherwise, it is "
+              "attached to the root of the\nparse tree.\n"
               << "\n"
               << "Unless the --AllowUnary option is given, unary rules containing no lexical\nsource items are eliminated using the method described in Chung et al. (2011).\nThe parsing algorithm used in Moses is unable to handle such rules.\n"
               << "\n"
@@ -547,11 +514,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
 
   // Process the command-line.
   po::variables_map vm;
-  const int optionStyle = cls::allow_long
-                          | cls::long_allow_adjacent
-                          | cls::long_allow_next;
   try {
-    po::store(po::command_line_parser(argc, argv).style(optionStyle).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmdLineOptions).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {
@@ -633,12 +597,6 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     options.sourceUnknownWordFile.clear();
     options.unknownWordSoftMatchesFile.clear();
   }
-}
-
-void ExtractGHKM::Error(const std::string &msg) const
-{
-  std::cerr << GetName() << ": " << msg << std::endl;
-  std::exit(1);
 }
 
 std::vector<std::string> ExtractGHKM::ReadTokens(const std::string &s) const

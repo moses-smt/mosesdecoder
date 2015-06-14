@@ -25,7 +25,7 @@
 
 #include <boost/unordered_map.hpp>
 
-#include "pcfg-common/pcfg.h"
+#include "syntax-common/pcfg.h"
 
 namespace MosesTraining
 {

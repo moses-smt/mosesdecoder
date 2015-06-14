@@ -7,6 +7,8 @@
 
 #include "SyntaxTree.h"
 
+#include "syntax-common/tool.h"
+
 #include "StringForest.h"
 
 namespace MosesTraining
@@ -18,20 +20,14 @@ namespace FilterRuleTable
 
 struct Options;
 
-class FilterRuleTable
+class FilterRuleTable : public Tool
 {
 public:
-  FilterRuleTable() : m_name("filter-rule-table") {}
+  FilterRuleTable() : Tool("filter-rule-table") {}
 
-  const std::string &GetName() const {
-    return m_name;
-  }
-
-  int Main(int argc, char *argv[]);
+  virtual int Main(int argc, char *argv[]);
 
 private:
-  void Error(const std::string &) const;
-
   // Filter rule table (on std::cin) for test set (string version).
   void Filter(const std::vector<std::vector<std::string> > &);
 
@@ -51,10 +47,6 @@ private:
   // Read test set (forest version)
   void ReadTestSet(std::istream &,
                    std::vector<boost::shared_ptr<StringForest> > &);
-
-  void Warn(const std::string &) const;
-
-  std::string m_name;
 };
 
 }  // namespace FilterRuleTable

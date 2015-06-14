@@ -22,8 +22,12 @@
 #include <map>
 #include <string>
 
-namespace MosesTraining {
+namespace MosesTraining
+{
 
+/*! A node in a syntactic structure (tree, lattice, etc.).  SyntaxNodes have a
+ *  label and a span plus an arbitrary set of name/value attributes.
+ */
 struct SyntaxNode {
   typedef std::map<std::string, std::string> AttributeMap;
 

@@ -42,7 +42,7 @@ void SyntaxNodeCollection::Clear()
 }
 
 SyntaxNode *SyntaxNodeCollection::AddNode(int startPos, int endPos,
-                                          const std::string &label)
+    const std::string &label)
 {
   SyntaxNode* newNode = new SyntaxNode(label, startPos, endPos);
   m_nodes.push_back( newNode );
@@ -57,7 +57,7 @@ bool SyntaxNodeCollection::HasNode( int startPos, int endPos ) const
 }
 
 const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodes(
-    int startPos, int endPos ) const
+  int startPos, int endPos ) const
 {
   NodeIndex::const_iterator startIndex = m_index.find( startPos );
   if (startIndex == m_index.end() )
