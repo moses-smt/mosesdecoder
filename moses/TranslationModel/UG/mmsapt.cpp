@@ -78,11 +78,11 @@ namespace Moses
     , m_bias_loglevel(0)
     , m_lr_func(NULL)
     , bias_key(((char*)this)+3)
+    , m_sampling_method(ranked_sampling)
     , cache_key(((char*)this)+2)
     , context_key(((char*)this)+1)
       // , m_tpc_ctr(0)
     , ofactor(1,0)
-    , m_sampling_method(ranked_sampling)
   {
     init(line);
     setup_local_feature_functions();
@@ -836,6 +836,7 @@ namespace Moses
     if (!scope) return;
     
     sptr<ContextForQuery> context = scope->get<ContextForQuery>(bt.get(), true);
+    boost::unique_lock<boost::shared_mutex> lock(context->lock);
     if (context->bias) return;
 
     if (!context->cache1) context->cache1.reset(new pstats::cache_t);
