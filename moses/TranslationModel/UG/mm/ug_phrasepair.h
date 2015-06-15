@@ -24,11 +24,12 @@ namespace Moses
       uint32_t len2;
       uint64_t p1, p2;
       uint32_t raw1, raw2, sample1, sample2, good1, good2, joint;
+      float  cum_bias;
       std::vector<float> fvals;
       float dfwd[Moses::LRModel::NONE+1]; // distortion counts // counts or probs?
       float dbwd[Moses::LRModel::NONE+1]; // distortion counts
       std::vector<uchar> aln;
-      float score, cum_bias;
+      float score;
       bool inverse;
       std::vector<uint32_t> indoc;
       PhrasePair() { };
