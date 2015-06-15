@@ -166,14 +166,14 @@ prepare-bilingual-nplm
 	ignore-unless: bilingual-lm
 	rerun-on-change: TRAINING:corpus TRAINING:word-alignment
 	template: $moses-script-dir/training/bilingual-lm/extract_training.py -c IN0 -e $output-extension -f $input-extension -a IN1.$TRAINING:alignment-symmetrization-method -w $working-dir/$bilingual-lm-workdir -n $order -m $source-window $bilingual-lm-settings
-	default-name: LM/bilingualLM_prep
+	default-name: lm/bilingualLM_prep
 train-bilingual-lm
 	in: numberized_ngrams TRAINING:corpus 
 	out: binlm
 	ignore-unless: bilingual-lm
 	rerun-on-change: numberized_ngrams
 	template: $moses-script-dir/training/bilingual-lm/train_nplm.py -w $working-dir/$bilingual-lm-workdir -c IN1 -r $working-dir/$nplm-output-dir -n $train_order $nplm-settings
-	default-name: LM/BilingualLM
+	default-name: lm/bilingualLM
 get-corpus
 	in: get-corpus-script
 	out: raw-corpus
