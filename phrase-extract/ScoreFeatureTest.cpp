@@ -53,16 +53,16 @@ BOOST_AUTO_TEST_CASE(manager_configure_domain_except)
   //Check that configure rejects illegal domain arg combinations
   ScoreFeatureManager manager;
   BOOST_CHECK_THROW(
-    manager.configure(boost::assign::list_of("--DomainRatio")("/dev/null")("--DomainIndicator")("/dev/null")),
+    manager.configure({"--DomainRatio","/dev/null","--DomainIndicator","/dev/null"}),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure(boost::assign::list_of("--SparseDomainSubset")("/dev/null")("--SparseDomainRatio")("/dev/null")),
+    manager.configure({"--SparseDomainSubset","/dev/null","--SparseDomainRatio","/dev/null"}),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure(boost::assign::list_of("--SparseDomainBlah")("/dev/null")),
+    manager.configure({"--SparseDomainBlah","/dev/null"}),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure(boost::assign::list_of("--DomainSubset")),
+    manager.configure({"--DomainSubset"}),
     ScoreFeatureArgumentException);
 }
 
@@ -84,16 +84,16 @@ static void checkDomainConfigured(
 BOOST_AUTO_TEST_CASE(manager_config_domain)
 {
   checkDomainConfigured<RatioDomainFeature>
-  (boost::assign::list_of ("--DomainRatio")("/dev/null"));
+  ({"--DomainRatio","/dev/null"});
   checkDomainConfigured<IndicatorDomainFeature>
-  (boost::assign::list_of("--DomainIndicator")("/dev/null"));
+  ({"--DomainIndicator","/dev/null"});
   checkDomainConfigured<SubsetDomainFeature>
-  (boost::assign::list_of("--DomainSubset")("/dev/null"));
+  ({"--DomainSubset","/dev/null"});
   checkDomainConfigured<SparseRatioDomainFeature>
-  (boost::assign::list_of("--SparseDomainRatio")("/dev/null"));
+  ({"--SparseDomainRatio","/dev/null"});
   checkDomainConfigured<SparseIndicatorDomainFeature>
-  (boost::assign::list_of("--SparseDomainIndicator")("/dev/null"));
+  ({"--SparseDomainIndicator","/dev/null"});
   checkDomainConfigured<SparseSubsetDomainFeature>
-  (boost::assign::list_of("--SparseDomainSubset")("/dev/null"));
+  ({"--SparseDomainSubset","/dev/null"});
 }
 
