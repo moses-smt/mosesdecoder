@@ -53,16 +53,16 @@ BOOST_AUTO_TEST_CASE(manager_configure_domain_except)
   //Check that configure rejects illegal domain arg combinations
   ScoreFeatureManager manager;
   BOOST_CHECK_THROW(
-    manager.configure( {"--DomainRatio","/dev/null","--DomainIndicator","/dev/null"}),
+    manager.configure(boost::assign::list_of("--DomainRatio")("/dev/null")("--DomainIndicator")("/dev/null")),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure( {"--SparseDomainSubset","/dev/null","--SparseDomainRatio","/dev/null"}),
+    manager.configure(boost::assign::list_of("--SparseDomainSubset")("/dev/null")("--SparseDomainRatio")("/dev/null")),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure( {"--SparseDomainBlah","/dev/null"}),
+    manager.configure(boost::assign::list_of("--SparseDomainBlah")("/dev/null")),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure( {"--DomainSubset"}),
+    manager.configure(boost::assign::list_of("--DomainSubset")),
     ScoreFeatureArgumentException);
 }
 
@@ -84,16 +84,16 @@ static void checkDomainConfigured(
 BOOST_AUTO_TEST_CASE(manager_config_domain)
 {
   checkDomainConfigured<RatioDomainFeature>
-  ( {"--DomainRatio","/dev/null"});
+  (boost::assign::list_of ("--DomainRatio")("/dev/null"));
   checkDomainConfigured<IndicatorDomainFeature>
-  ( {"--DomainIndicator","/dev/null"});
+  (boost::assign::list_of("--DomainIndicator")("/dev/null"));
   checkDomainConfigured<SubsetDomainFeature>
-  ( {"--DomainSubset","/dev/null"});
+  (boost::assign::list_of("--DomainSubset")("/dev/null"));
   checkDomainConfigured<SparseRatioDomainFeature>
-  ( {"--SparseDomainRatio","/dev/null"});
+  (boost::assign::list_of("--SparseDomainRatio")("/dev/null"));
   checkDomainConfigured<SparseIndicatorDomainFeature>
-  ( {"--SparseDomainIndicator","/dev/null"});
+  (boost::assign::list_of("--SparseDomainIndicator")("/dev/null"));
   checkDomainConfigured<SparseSubsetDomainFeature>
-  ( {"--SparseDomainSubset","/dev/null"});
+  (boost::assign::list_of("--SparseDomainSubset")("/dev/null"));
 }
 
