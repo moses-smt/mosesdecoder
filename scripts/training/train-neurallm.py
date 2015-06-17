@@ -187,12 +187,14 @@ def main(options):
         ret = subprocess.call(extraction_cmd)
         if ret:
             raise Exception("preparing neural LM failed")
+        options.validation_file = os.path.join(
+            options.working_dir, os.path.basename(options.validation_corpus))
 
     else:
         options.validation_file = None
 
-    options.input_words_file = options.words_file
-    options.output_words_file = options.words_file
+    options.input_words_file = os.path.join(options.working_dir, options.words_file)
+    options.output_words_file = os.path.join(options.working_dir, options.words_file)
     options.input_vocab_size = options.vocab_size
     options.output_vocab_size = options.vocab_size
 
