@@ -25,7 +25,7 @@
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <boost/assign/list_of.hpp>
+#include <unordered_set>
 
 using namespace MosesTraining;
 using namespace std;
@@ -95,5 +95,15 @@ BOOST_AUTO_TEST_CASE(manager_config_domain)
   ( {"--SparseDomainIndicator","/dev/null"});
   checkDomainConfigured<SparseSubsetDomainFeature>
   ( {"--SparseDomainSubset","/dev/null"});
+  
+  unordered_set<int> s;
+  s.insert(4);
+  s.insert(7);
+  s.insert(4);
+  s.insert(1);
+  
+  for (auto i: s) {
+  	cerr << i << " ";
+  }
 }
 
