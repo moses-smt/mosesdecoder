@@ -62,7 +62,7 @@ void Vocabulary::Save(const string& fileName ) const
   vcbFile.open( fileName.c_str(), ios::out | ios::ate | ios::trunc);
 
   if (!vcbFile) {
-    cerr << "Failed to open " << vcbFile << endl;
+    cerr << "Failed to open " << fileName << endl;
     exit(1);
   }
 
@@ -81,7 +81,7 @@ void Vocabulary::Load(const string& fileName )
   vcbFile.open(fileName.c_str());
 
   if (!vcbFile) {
-    cerr << "no such file or directory: " << vcbFile << endl;
+    cerr << "no such file or directory: " << fileName << endl;
     exit(1);
   }
 

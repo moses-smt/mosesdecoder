@@ -148,13 +148,10 @@ int main(int argc, char** argv)
       cerr << lineNum << " ";
     }
 
-    bool success;
-    success = getline(strmSource, lineSource);
-    if (!success) {
+    if (!getline(strmSource, lineSource)) {
       throw "Couldn't read source";
     }
-    success = getline(strmAlignment, lineAlignment);
-    if (!success) {
+    if (!getline(strmAlignment, lineAlignment)) {
       throw "Couldn't read alignment";
     }
 
