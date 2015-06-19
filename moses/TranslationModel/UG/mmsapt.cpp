@@ -77,8 +77,8 @@ namespace Moses
     , m_bias_log(NULL)
     , m_bias_loglevel(0)
     , m_lr_func(NULL)
-    , bias_key(((char*)this)+3)
     , m_sampling_method(ranked_sampling)
+    , bias_key(((char*)this)+3)
     , cache_key(((char*)this)+2)
     , context_key(((char*)this)+1)
       // , m_tpc_ctr(0)
@@ -200,6 +200,7 @@ namespace Moses
     param.insert(pair<string,string>("coh",    "0"));
     param.insert(pair<string,string>("rare",   "1"));
     param.insert(pair<string,string>("prov",   "1"));
+    param.insert(pair<string,string>("cumb",   "0"));
 
     poolCounts = true;
 
@@ -269,6 +270,7 @@ namespace Moses
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
+    known_parameters.push_back("cumb");
     known_parameters.push_back("extra");
     known_parameters.push_back("feature-sets");
     known_parameters.push_back("input-factor");
@@ -425,6 +427,7 @@ namespace Moses
 	    check_ff<PScoreRareness<Token> > ("rare", &m_active_ff_common);
 	    check_ff<PScoreUnaligned<Token> >("unal", &m_active_ff_common);
 	    check_ff<PScoreCoherence<Token> >("coh",  &m_active_ff_common);
+	    check_ff<PScoreCumBias<Token> >("cumb",  &m_active_ff_common);
 
 	    // for these ones either way is possible (specification ends with '+'
 	    // if corpus-specific
