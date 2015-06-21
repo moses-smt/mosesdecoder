@@ -61,9 +61,6 @@ public:
   typedef const T& const_reference;
   typedef std::size_t    size_type;
   typedef std::ptrdiff_t difference_type;
-
-  MmapAllocator(MmapAllocator &&) = delete; 	
-  MmapAllocator(const MmapAllocator &&) = delete; 		
   
   MmapAllocator() throw()
     : m_file_ptr(std::tmpfile()), m_file_desc(fileno(m_file_ptr)),
