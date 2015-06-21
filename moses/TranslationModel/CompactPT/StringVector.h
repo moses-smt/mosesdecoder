@@ -235,7 +235,7 @@ public:
     if(map == false) {
       // Read data into temporary file (default constructor of MmapAllocator)
       // and map memory onto temporary file. Can be resized.
-      c = new std::vector<ValueT, MmapAllocator<ValueT> >(valSize, 0); 
+      c = new std::vector<ValueT, MmapAllocator<ValueT> >(valSize, 0);
       byteSize += std::fread(&(*c)[0], sizeof(ValueT), valSize, in) * sizeof(ValueT);
     } else {
       // Map it directly on specified region of file "in" starting at valPos
@@ -245,7 +245,7 @@ public:
       Allocator<ValueT> alloc(in, valPos);
       c = new std::vector<ValueT, Allocator<ValueT> >(alloc);
       c->resize(valSize, 0);
-      
+
       byteSize += valSize * sizeof(ValueT);
     }
 
