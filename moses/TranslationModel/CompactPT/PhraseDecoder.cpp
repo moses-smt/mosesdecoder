@@ -224,9 +224,9 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(const Phrase &
     // Retrieve compressed and encoded target phrase collection
     std::string encodedPhraseCollection;
     if(m_phraseDictionary.m_inMemory)
-      encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMemory[sourcePhraseId];
+      encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMemory[sourcePhraseId].str();
     else
-      encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMapped[sourcePhraseId];
+      encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMapped[sourcePhraseId].str();
 
     BitWrapper<> encodedBitStream(encodedPhraseCollection);
     if(m_coding == PREnc && bitsLeft)
