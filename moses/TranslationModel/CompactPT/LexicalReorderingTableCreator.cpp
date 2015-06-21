@@ -52,13 +52,12 @@ LexicalReorderingTableCreator::LexicalReorderingTableCreator(
 
   std::cerr << "Pass 1/2: Creating phrase index + Counting scores" << std::endl;
   m_hash.BeginSave(m_outFile);
-
-
+  
   if(tempfilePath.size()) {
     MmapAllocator<unsigned char> allocEncoded(util::FMakeTemp(tempfilePath));
     m_encodedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
   } else {
-    m_encodedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+    m_encodedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(true);
   }
 
   EncodeScores();
@@ -68,12 +67,12 @@ LexicalReorderingTableCreator::LexicalReorderingTableCreator(
 
   std::cerr << "Pass 2/2: Compressing scores" << std::endl;
 
-
+  
   if(tempfilePath.size()) {
     MmapAllocator<unsigned char> allocCompressed(util::FMakeTemp(tempfilePath));
     m_compressedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocCompressed);
   } else {
-    m_compressedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+    m_compressedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(true);
   }
   CompressScores();
 
