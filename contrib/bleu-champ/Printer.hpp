@@ -74,7 +74,7 @@ void PrintStatistics(const Ladder& ladder) {
   std::cerr << "Bead statistics: " << std::endl;
   for(auto& item : stats) {
     float percent = ((float)item.second/(ladder.size()-1)) * 100;
-    fprintf(stderr, "    %lu-%lu : %4lu (%5.2f\%)\n", item.first[0], item.first[1], item.second, percent);
+    fprintf(stderr, "    %u-%u : %4lu (%5.2f%%)\n", item.first[0], item.first[1], item.second, percent);
   }
   std::cerr << std::endl;
  

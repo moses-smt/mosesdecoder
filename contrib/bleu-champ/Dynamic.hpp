@@ -13,14 +13,14 @@ const float MIN = std::numeric_limits<float>::lowest();
 struct Bead {
   Bead() : m_bead{0 ,0} {}
   
-  Bead(size_t i, size_t j) : m_bead{i, j} {}
+  Bead(uint16_t i, uint16_t j) : m_bead{i, j} {}
   
-  inline size_t& operator[](size_t i) {
+  inline uint16_t& operator[](uint16_t i) {
     UTIL_THROW_IF(i > 1, util::Exception, "Error: Only two elements in bead.");
     return m_bead[i];
   }
 
-  inline const size_t& operator[](size_t i) const {
+  inline const uint16_t& operator[](uint16_t i) const {
     return const_cast<Bead&>(*this)[i];
   }
   
@@ -28,7 +28,7 @@ struct Bead {
     return m_bead[0] < b[0] || (m_bead[0] == b[0] && m_bead[1] < b[1]);
   }
   
-  size_t m_bead[2];
+  uint16_t m_bead[2];
 };
 
 std::ostream& operator<<(std::ostream &o, Bead bead) {
@@ -38,8 +38,8 @@ std::ostream& operator<<(std::ostream &o, Bead bead) {
 typedef std::vector<Bead> Beads;
 
 struct Rung {
-  size_t i;
-  size_t j;
+  uint16_t i;
+  uint16_t j;
   Bead bead;
   float score;
 };
@@ -48,7 +48,7 @@ typedef std::vector<Rung> Ladder;
 
 /******************************************************************************/
 
-template <Beads& allowedBeads>
+template <const Beads& allowedBeads>
 struct Search {
   public:
     Search()
@@ -56,7 +56,6 @@ struct Search {
     {
       UTIL_THROW_IF(m_allowedBeads.size() < 1, util::Exception,
                     "Error: You have to define at least one search bead.");
-      std::sort(m_allowedBeads.begin(), m_allowedBeads.end());
     }
     
     virtual const Beads& operator()() const {
@@ -71,13 +70,13 @@ struct Search {
     }
   
   private:
-    Beads& m_allowedBeads;
+    const Beads& m_allowedBeads;
 };
 
-Beads fastBeads = {{0,1}, {1,0}, {1,1}};
+extern const Beads fastBeads = {{0,1}, {1,0}, {1,1}};
 typedef Search<fastBeads> Fast;
 
-Beads fullBeads = {{0,1}, {1,0}, {1,1}, {1,2}, {2,1}, {2,2},
+extern const Beads fullBeads = {{0,1}, {1,0}, {1,1}, {1,2}, {2,1}, {2,2},
                    {1,3}, {3,1}, {2,3}, {3,2}, {3,3}, {1,4},
                    {2,4}, {3,4}, {4,3}, {4,2}, {4,1}};
 typedef Search<fullBeads> Full;
@@ -115,25 +114,25 @@ class Dynamic {
       Align(m_corpus1.size(), m_corpus2.size());
     }
     
-    float Align(size_t i, size_t j) {
+    float Align(uint16_t i, uint16_t j) {
       if(i == 0 && j == 0)
         return 0;
       
       if(m_seen[i][j] != MIN)
         return m_seen[i][j];
       
-      Beads allowedBeads = m_config.Search()();
+      const Beads& allowedBeads = m_config.Search()();
       
       float bestScore = MIN;
       Bead bestBead = allowedBeads[0];
       
-      for(Bead& bead : allowedBeads) {
+      for(auto& bead : allowedBeads) {
         float score = MIN;
         if(i >= bead[0] && j >= bead[1] && InCorridor(i - bead[0], j - bead[1])) {
           score = Align(i - bead[0], j - bead[1])
                   + m_config.Scorer()(m_corpus1(i - bead[0], i - 1),
-                                      m_corpus2(j - bead[1], j - 1))
-                  + m_config.Search().Penalty(bead);
+                                      m_corpus2(j - bead[1], j - 1));
+                  //+ m_config.Search().Penalty(bead);
           
           if(score > bestScore) {
             bestScore = score;
@@ -147,7 +146,7 @@ class Dynamic {
       return bestScore;    
     }
 
-    bool InCorridor(size_t i, size_t j) {
+    bool InCorridor(uint16_t i, uint16_t j) {
       if(!m_corridor.empty()) {
         return m_corridor[i][j];
       }
@@ -167,7 +166,7 @@ class Dynamic {
       return ladder;
     }
   
-    void BackTrack(size_t i, size_t j, Ladder& ladder) {
+    void BackTrack(uint16_t i, uint16_t j, Ladder& ladder) {
       if(i == 0 && j == 0)
         return;
       
@@ -191,21 +190,21 @@ class Dynamic {
       UTIL_THROW_IF(ladder.empty(), util::Exception,
                     "Error: No elements in ladder.");
       
-      size_t m = ladder.back().i;
-      size_t n = ladder.back().j;
+      uint16_t m = ladder.back().i;
+      uint16_t n = ladder.back().j;
       
       int radius = std::max(width / 2, 1);
       m_corridor.resize(m + 1, std::vector<bool>(n + 1, false));
       
       for(const Rung& r : ladder) {
-        size_t left = std::max(0, (int)r.i - radius);
-        size_t right = std::min((int)m + 1, (int)r.i + radius);
+        uint16_t left = std::max(0, (int)r.i - radius);
+        uint16_t right = std::min((int)m + 1, (int)r.i + radius);
         
-        for(size_t i = left; i < right; i++) {
-          size_t bottom = std::max(0, (int)r.j - radius);
-          size_t top = std::min((int)n + 1, (int)r.j + radius);
+        for(uint16_t i = left; i < right; i++) {
+          uint16_t bottom = std::max(0, (int)r.j - radius);
+          uint16_t top = std::min((int)n + 1, (int)r.j + radius);
           
-          for(size_t j = bottom; j < top; j++) {
+          for(uint16_t j = bottom; j < top; j++) {
             m_corridor[i][j] = true;
           }
         }
