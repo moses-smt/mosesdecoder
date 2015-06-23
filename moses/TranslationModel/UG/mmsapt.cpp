@@ -794,7 +794,7 @@ namespace Moses
 	  }
 	if (!context->cache1) context->cache1.reset(new pstats::cache_t);
 	if (!context->cache2) context->cache2.reset(new pstats::cache_t);
-      } else if (ttask->GetContextWeights().empty()) {
+      } else if (!ttask->GetContextWeights().empty()) {
           if (m_bias_log)
             {
               *m_bias_log << HERE << endl
