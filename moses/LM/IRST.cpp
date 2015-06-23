@@ -278,7 +278,7 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
   fullScore = ngramScore + before_boundary;
 }
 
-FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
+FFState* LanguageModelIRST::EvaluateWhenAppliedWithContext(ttasksptr const& ttasks, const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   if (!hypo.GetCurrTargetLength()) {
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));

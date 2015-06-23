@@ -93,7 +93,7 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
 
-  virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+  virtual FFState *EvaluateWhenAppliedWithContext(ttasksptr const& ttasks, const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
