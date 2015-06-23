@@ -794,6 +794,19 @@ namespace Moses
 	  }
 	if (!context->cache1) context->cache1.reset(new pstats::cache_t);
 	if (!context->cache2) context->cache2.reset(new pstats::cache_t);
+      } else if (ttask->GetContextWeights().empty()) {
+          if (m_bias_log)
+            {
+              *m_bias_log << HERE << endl
+                          << "BIAS FROM MAP LOOKUP" << endl;
+              context->bias_log = m_bias_log;
+            }
+          context->bias
+            = btfix.SetupDocumentBias(ttask->GetContextWeights(), m_bias_log);
+          context->bias->loglevel = m_bias_loglevel;
+          context->bias->log = m_bias_log;
+        if (!context->cache1) context->cache1.reset(new pstats::cache_t);
+        if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       }
     boost::unique_lock<boost::shared_mutex> mylock(m_lock);
     sptr<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
