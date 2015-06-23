@@ -215,6 +215,9 @@ batch_run()
   std::string context_string;
   params.SetParameter(context_string,"context-string",string(""));
 
+  std::string context_weights;
+  params.SetParameter(context_weights,"context-weights",string(""));
+
   // main loop over set of input sentences
 
   boost::shared_ptr<InputType> source;
@@ -228,6 +231,12 @@ batch_run()
       task->SetContextString(*source->GetContext());
     else task->SetContextString(context_string);
 
+    //if (source->GetContextWeights().isEmpty())
+    //  task->SetContextWeights(*source->GetContextWeights());
+    /*else //The context_weights will never be passed to the config file.*/
+    if (context_weights != "") {
+      task->SetContextWeights(context_weights);
+    }
     // Allow for (sentence-)context-specific processing prior to
     // decoding. This can be used, for example, for context-sensitive
     // phrase lookup.
