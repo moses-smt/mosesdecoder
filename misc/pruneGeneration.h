@@ -7,12 +7,12 @@ class Rec
 public:
   float prob;
   std::string line;
-  
+
   Rec(float aprob, const std::string &aline)
-  :prob(aprob)
-  ,line(aline)
+    :prob(aprob)
+    ,line(aline)
   {}
-  
+
   inline bool operator< (const Rec &compare) const {
     return prob < compare.prob;
   }

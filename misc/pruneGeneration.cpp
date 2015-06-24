@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
   cerr << "Starting" << endl;
   int limit = atoi(argv[1]);
-  
+
   vector<Rec> records;
   string prevInWord;
   string line;
@@ -20,12 +20,12 @@ int main(int argc, char **argv)
     vector<string> toks;
     Tokenize(toks, line);
     assert(toks.size() == 4);
-    
+
     if (prevInWord != toks[0]) {
       Output(limit, records);
       records.clear();
     }
-    
+
     // add new record
     float prob = atof(toks[2].c_str());
     records.push_back(Rec(prob, line));
@@ -37,13 +37,13 @@ int main(int argc, char **argv)
   Output(limit, records);
   records.clear();
 
-  cerr << "Finished" << endl;  
+  cerr << "Finished" << endl;
 }
 
 void Output(int limit, vector<Rec> &records)
 {
   std::sort(records.rbegin(), records.rend());
-  
+
   for (size_t i = 0; i < limit && i < records.size(); ++i) {
     const Rec &rec = records[i];
     cout << rec.line << endl;
