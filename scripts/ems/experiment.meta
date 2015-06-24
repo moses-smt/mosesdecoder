@@ -739,6 +739,14 @@ build-generation-custom
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 	final-model: yes
+generation-prune
+	in: generation-table
+	out: generation-table-pruned
+	rerun-on-change: TRAINING:prune-generation
+	pass-unless: AND TRAINING:prune-generation
+	default-name: model/generation-table-pruned
+	final-model: yes
+	template: $TRAINING:prune-generation < IN > OUT
 build-sparse
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
         out: sparse
@@ -747,7 +755,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table-pruned sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero thot
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature
