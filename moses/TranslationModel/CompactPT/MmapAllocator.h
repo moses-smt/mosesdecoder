@@ -61,7 +61,7 @@ public:
   typedef const T& const_reference;
   typedef std::size_t    size_type;
   typedef std::ptrdiff_t difference_type;
-  
+
   MmapAllocator() throw()
     : m_file_ptr(std::tmpfile()), m_file_desc(fileno(m_file_ptr)),
       m_page_size(util::SizePage()), m_map_size(0), m_data_ptr(0),
@@ -154,7 +154,7 @@ public:
       const size_t map_offset = (m_data_offset / m_page_size) * m_page_size;
       const size_t relative_offset = m_data_offset - map_offset;
       const size_t adjusted_map_size = m_map_size + relative_offset;
-      
+
       util::UnmapOrThrow((pointer)((char*)p - relative_offset), adjusted_map_size);
     }
   }
