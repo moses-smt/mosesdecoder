@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <cassert>
+#include <algorithm>
+#include <functional>
 #include "pruneGeneration.h"
 
 using namespace std;
