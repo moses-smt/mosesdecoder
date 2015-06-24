@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 
 void Output(int limit, vector<Rec> &records)
 {
-  Prune(limit, records);
+  std::sort(records.rbegin(), records.rend());
   
   for (size_t i = 0; i < limit && i < records.size(); ++i) {
     const Rec &rec = records[i];
@@ -50,8 +50,3 @@ void Output(int limit, vector<Rec> &records)
   }
 }
 
-void Prune(int limit, std::vector<Rec> &records)
-{
-  std::sort(records.rbegin(), records.rend());
-  
-}

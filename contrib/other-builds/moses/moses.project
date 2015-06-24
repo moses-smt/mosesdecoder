@@ -793,8 +793,6 @@
     <File Name="../../../moses/PP/SpanLengthPhraseProperty.h"/>
     <File Name="../../../moses/PP/TreeStructurePhraseProperty.h"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
   <VirtualDirectory Name="parameters">
     <File Name="../../../moses/parameters/ContextParameters.cpp"/>
     <File Name="../../../moses/parameters/ContextParameters.h"/>
@@ -897,4 +895,6 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

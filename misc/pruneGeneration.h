@@ -21,7 +21,6 @@ public:
 ////////////////////////////////////////////////////////////
 
 void Output(int limit, std::vector<Rec> &records);
-void Prune(int limit, std::vector<Rec> &records);
 
 ////////////////////////////////////////////////////////////
 inline void Tokenize(std::vector<std::string> &output
