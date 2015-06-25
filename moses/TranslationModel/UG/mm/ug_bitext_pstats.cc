@@ -58,7 +58,7 @@ namespace Moses
       ++obwd[po_bwd];
       if (docid >= 0)
 	{
-	  while (int(indoc.size()) <= docid) indoc.push_back(0);
+	  // while (int(indoc.size()) <= docid) indoc.push_back(0);
 	  ++indoc[docid];
 	}
     }

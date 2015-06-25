@@ -33,8 +33,8 @@ namespace Moses
       uint32_t ofwd[Moses::LRModel::NONE+1]; // distribution of fwd phrase orientations
       uint32_t obwd[Moses::LRModel::NONE+1]; // distribution of bwd phrase orientations
 
-      std::vector<uint32_t> indoc; // distribution over where samples came from
-
+      // std::vector<uint32_t> indoc; // distribution over where samples came from
+      std::map<uint32_t,uint32_t> indoc; 
       typedef std::map<uint64_t, jstats> trg_map_t;
       trg_map_t trg;
       pstats();

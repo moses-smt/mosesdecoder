@@ -27,7 +27,8 @@ namespace Moses
       uint32_t obwd[Moses::LRModel::NONE+1]; // backward distortion type counts
 
     public:
-      vector<uint32_t> indoc; // counts origin of samples (for biased sampling)
+      std::map<uint32_t,uint32_t> indoc;
+      // vector<uint32_t> indoc; // counts origin of samples (for biased sampling)
       jstats();
       jstats(jstats const& other);
       uint32_t rcnt() const; // raw joint counts

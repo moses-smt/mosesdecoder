@@ -76,7 +76,7 @@ namespace Moses
       ++obwd[bwd_orient];
       if (docid >= 0)
 	{
-	  while (int(indoc.size()) <= docid) indoc.push_back(0);
+	  // while (int(indoc.size()) <= docid) indoc.push_back(0);
 	  ++indoc[docid];
 	}
     }
