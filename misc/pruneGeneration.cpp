@@ -3,8 +3,10 @@
 #include <cassert>
 #include <algorithm>
 #include <functional>
+#include <boost/filesystem.hpp>
 #include "pruneGeneration.h"
 #include "moses/InputFileStream.h"
+#include "moses/OutputFileStream.h"
 
 using namespace std;
 
@@ -12,8 +14,46 @@ int main(int argc, char **argv)
 {
   cerr << "Starting" << endl;
   int limit = atoi(argv[1]);
+  string inPathStem = argv[2];
+  string outPathStem = argv[3];
 
-  Process(limit, cin, cout);
+  namespace fs = boost::filesystem;
+
+  //cerr << "inPathStem=" << inPathStem << endl;
+  fs::path p(inPathStem);
+  fs::path dir = p.parent_path();
+  //cerr << "dir=" << dir << endl;
+
+  fs::path fileStem = p.filename();
+  string fileStemStr = fileStem.native();
+  size_t fileStemStrSize = fileStemStr.size();
+  //cerr << "fileStem=" << fileStemStr << endl;
+
+  // loop thru each file in directory
+  fs::directory_iterator end_iter;
+  for( fs::directory_iterator dir_iter(dir) ; dir_iter != end_iter ; ++dir_iter) {  
+    if (fs::is_regular_file(dir_iter->status())) {
+      fs::path currPath = *dir_iter;
+      string currPathStr = currPath.native();
+      //cerr << "currPathStr=" << currPathStr << endl;
+
+      fs::path currFile = currPath.filename();
+      string currFileStr = currFile.native();
+
+      if (currFileStr.find(fileStemStr) == 0) {
+        // found gen table we need
+        //cerr << "found=" << currPathStr << endl;
+        string suffix = currFileStr.substr(fileStemStrSize, currFileStr.size() - fileStemStrSize);
+        string outPath = outPathStem + suffix;
+        cerr << "PRUNING " << currPathStr << " TO " << outPath << endl;
+        
+        Moses::InputFileStream inStrme(currPathStr);
+        Moses::OutputFileStream outStrme(outPath);
+        Process(limit, inStrme, outStrme);
+        
+      }
+    }
+  }
   
   cerr << "Finished" << endl;
 }
@@ -52,7 +92,7 @@ void Output(ostream &outStrme, vector<Rec> &records, int limit)
 
   for (size_t i = 0; i < limit && i < records.size(); ++i) {
     const Rec &rec = records[i];
-    cout << rec.line << endl;
+    outStrme << rec.line << endl;
   }
 }
 
