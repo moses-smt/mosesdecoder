@@ -72,6 +72,9 @@ public:
    * \param oovCount number of LM OOVs
    */
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const = 0;
+  virtual void CalcScoreWithContext(ttasksptr const& ttask, const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const {
+    CalcScore(phrase, fullScore, ngramScore, oovCount);
+  }
   virtual void CalcScoreFromCache(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const {
   }
 

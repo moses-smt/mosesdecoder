@@ -174,6 +174,10 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
+const ttasksptr& TargetPhrase::GetTtask() const {
+  return m_ttask;
+}
+
 void TargetPhrase::EvaluateInIsolation(const Phrase &source)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
