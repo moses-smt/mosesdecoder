@@ -746,7 +746,7 @@ generation-prune
 	pass-unless: AND TRAINING:prune-generation
 	default-name: model/generation-table-pruned
 	final-model: yes
-	template: $TRAINING:prune-generation < IN > OUT
+	template: $TRAINING:prune-generation IN OUT
 build-sparse
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
         out: sparse
