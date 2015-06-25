@@ -32,6 +32,7 @@
 #include "Util.h"
 #include "AlignmentInfoCollection.h"
 #include "InputPath.h"
+#include "TranslationTask.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include <boost/foreach.hpp>
 
@@ -48,6 +49,7 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
   , m_container(pt)
+  , m_ttask(NULL)
 {
 
   //ACAT
@@ -56,6 +58,52 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
                    // staticData.GetFactorDelimiter(), // eliminated [UG]
                    NULL);
+}
+
+TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const PhraseDictionary *pt)
+  :Phrase(0)
+  , m_fullScore(0.0)
+  , m_futureScore(0.0)
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
+  , m_container(pt)
+  , m_ttask(ttask)
+{
+
+  //ACAT
+  const StaticData &staticData = StaticData::Instance();
+  // XXX should this really be InputFactorOrder???
+  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
+                   // staticData.GetFactorDelimiter(), // eliminated [UG]
+                   NULL);
+}
+
+TargetPhrase::TargetPhrase(ttasksptr& ttask, const PhraseDictionary *pt)
+  :Phrase()
+  , m_fullScore(0.0)
+  , m_futureScore(0.0)
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
+  , m_container(pt)
+  , m_ttask(ttask)
+{
+}
+
+TargetPhrase::TargetPhrase(ttasksptr& ttask, const Phrase &phrase, const PhraseDictionary *pt)
+  : Phrase(phrase)
+  , m_fullScore(0.0)
+  , m_futureScore(0.0)
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
+  , m_container(pt)
+  , m_ttask(ttask)
+{
 }
 
 TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
@@ -67,6 +115,7 @@ TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
   , m_container(pt)
+  , m_ttask(NULL)
 {
 }
 
@@ -79,6 +128,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
   , m_container(pt)
+  , m_ttask(NULL)
 {
 }
 
@@ -92,6 +142,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_alignNonTerm(copy.m_alignNonTerm)
   , m_properties(copy.m_properties)
   , m_container(copy.m_container)
+  , m_ttask(copy.m_ttask)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(*copy.m_lhsTarget);

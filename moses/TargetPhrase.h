@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "AlignmentInfoCollection.h"
 #include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
+//#include "moses/TranslationTask.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
@@ -58,6 +59,7 @@ public:
   Scores const* GetExtraScores(FeatureFunction const* ff) const;
   void SetExtraScores(FeatureFunction const* ff,
                       boost::shared_ptr<Scores> const& scores);
+  ttasksptr m_ttask;
 
 private:
   ScoreCache_t m_cached_scores;
@@ -85,6 +87,12 @@ public:
   TargetPhrase(std::string out_string, const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
+
+  /*ttasksptr version*/
+  TargetPhrase(ttasksptr &ttask, const PhraseDictionary *pt = NULL);
+  TargetPhrase(ttasksptr &ttask, std::string out_string, const PhraseDictionary *pt = NULL);
+  explicit TargetPhrase(ttasksptr &ttask, const Phrase &targetPhrase, const PhraseDictionary *pt);
+
   ~TargetPhrase();
 
   // 1st evaluate method. Called during loading of phrase table.
