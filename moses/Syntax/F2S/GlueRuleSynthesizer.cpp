@@ -4,7 +4,6 @@
 
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/StaticData.h"
-#include "moses/TranslationTask.h"
 
 namespace Moses
 {
@@ -54,8 +53,7 @@ TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer =
     UnknownWordPenaltyProducer::Instance();
 
-  const ttasksptr ttask = NULL;
-  TargetPhrase *targetPhrase = new TargetPhrase(ttask);
+  TargetPhrase *targetPhrase = new TargetPhrase();
 
   std::ostringstream alignmentSS;
   for (std::size_t i = 0; i < e.tail.size(); ++i) {

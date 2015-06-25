@@ -2,7 +2,6 @@
 
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/StaticData.h"
-#include "moses/TranslationTask.h"
 
 namespace Moses
 {
@@ -71,8 +70,7 @@ TargetPhrase *OovHandler<RuleTrie>::SynthesizeTargetPhrase(
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer =
     UnknownWordPenaltyProducer::Instance();
 
-  const ttasksptr ttask = NULL;
-  TargetPhrase *targetPhrase = new TargetPhrase(ttask);
+  TargetPhrase *targetPhrase = new TargetPhrase();
   Word &targetWord = targetPhrase->AddWord();
   targetWord.CreateUnknownWord(oov);
 

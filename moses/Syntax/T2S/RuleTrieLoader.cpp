@@ -19,7 +19,6 @@
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "moses/Syntax/RuleTableFF.h"
-#include "moses/TranslationTask.h"
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
@@ -106,8 +105,7 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
     Word *targetLHS;
 
     // create target phrase obj
-    const ttasksptr ttasks = NULL;
-    TargetPhrase *targetPhrase = new TargetPhrase(ttasks, &ff);
+    TargetPhrase *targetPhrase = new TargetPhrase(&ff);
     // targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
     targetPhrase->CreateFromString(Output, output, targetPhraseString, &targetLHS);
     // source

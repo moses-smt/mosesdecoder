@@ -267,7 +267,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
     sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, &sourceLHS);
 
     // create target phrase obj
-    TargetPhrase *targetPhrase = new TargetPhrase(ttask, this);
+    TargetPhrase *targetPhrase = new TargetPhrase(this);
     targetPhrase->CreateFromString(Output, m_output, targetPhraseString, &targetLHS);
 
     // rest of target phrase

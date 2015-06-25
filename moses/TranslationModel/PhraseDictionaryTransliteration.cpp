@@ -5,7 +5,6 @@
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "moses/DecodeGraph.h"
 #include "moses/DecodeStep.h"
-#include "moses/TranslationTask.h"
 #include "util/tempfile.hh"
 
 using namespace std;
@@ -118,8 +117,7 @@ std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(
     Tokenize(toks, line, "\t");
     UTIL_THROW_IF2(toks.size() != 2, "Error in transliteration output file. Expecting word\tscore");
 
-    const ttasksptr ttask = NULL;
-    TargetPhrase *tp = new TargetPhrase(ttask, this);
+    TargetPhrase *tp = new TargetPhrase(this);
     Word &word = tp->AddWord();
     word.CreateFromString(Output, m_output, toks[0], false);
 

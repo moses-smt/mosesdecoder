@@ -39,7 +39,7 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase(const ttasksptr ttasks, std::string out_string, const PhraseDictionary *pt)
+TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   :Phrase(0)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -48,7 +48,6 @@ TargetPhrase::TargetPhrase(const ttasksptr ttasks, std::string out_string, const
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
   , m_container(pt)
-  , m_ttasks(ttasks)
 {
 
   //ACAT
@@ -59,7 +58,7 @@ TargetPhrase::TargetPhrase(const ttasksptr ttasks, std::string out_string, const
                    NULL);
 }
 
-TargetPhrase::TargetPhrase(const ttasksptr ttasks, const PhraseDictionary *pt)
+TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
   :Phrase()
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -68,11 +67,10 @@ TargetPhrase::TargetPhrase(const ttasksptr ttasks, const PhraseDictionary *pt)
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
   , m_container(pt)
-  , m_ttasks(ttasks)
 {
 }
 
-TargetPhrase::TargetPhrase(const ttasksptr ttasks, const Phrase &phrase, const PhraseDictionary *pt)
+TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
   : Phrase(phrase)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -81,7 +79,6 @@ TargetPhrase::TargetPhrase(const ttasksptr ttasks, const Phrase &phrase, const P
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
   , m_container(pt)
-  , m_ttasks(ttasks)
 {
 }
 
@@ -95,7 +92,6 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_alignNonTerm(copy.m_alignNonTerm)
   , m_properties(copy.m_properties)
   , m_container(copy.m_container)
-  , m_ttasks(copy.m_ttasks)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(*copy.m_lhsTarget);

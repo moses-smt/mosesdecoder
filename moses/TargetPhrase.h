@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
 #include "AlignmentInfoCollection.h"
-#include "moses/TranslationTask.h"
 #include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
 
@@ -80,19 +79,13 @@ private:
   const PhraseDictionary *m_container;
 
   mutable boost::unordered_map<const std::string, boost::shared_ptr<void> > m_data;
-  const ttasksptr m_ttasks;
 
 public:
-  TargetPhrase(const ttasksptr ttasks, const PhraseDictionary *pt = NULL);
-  TargetPhrase(const ttasksptr ttasks, std::string out_string, const PhraseDictionary *pt = NULL);
+  TargetPhrase(const PhraseDictionary *pt = NULL);
+  TargetPhrase(std::string out_string, const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
-  explicit TargetPhrase(const ttasksptr ttasks, const Phrase &targetPhrase, const PhraseDictionary *pt);
+  explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
   ~TargetPhrase();
-
-  //GetTtasks PTr
-  const ttasksptr getTtasksPtr(){
-    return m_ttasks;
-  }
 
   // 1st evaluate method. Called during loading of phrase table.
   void EvaluateInIsolation(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
