@@ -38,6 +38,13 @@ TranslationTask::GetContextWeights() const
 
 void
 TranslationTask
+::ReSetContextWeights(std::map<std::string, float> const& new_weights)
+{
+  m_context_weights = new_weights;
+}
+
+void
+TranslationTask
 ::SetContextString(std::string const& context)
 {
   m_context_string = context;

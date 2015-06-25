@@ -36,6 +36,7 @@ using namespace irstlm;
 #include "moses/Phrase.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 
@@ -284,6 +285,9 @@ FFState* LanguageModelIRST::EvaluateWhenAppliedWithContext(ttasksptr const& ttas
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
     return ret.release();
   }
+
+  //get the context_weight map here
+  std::map<std::string, float> context_weight = ttasks->GetContextWeights();
 
   //[begin, end) in STL-like fashion.
   const int begin = (const int) hypo.GetCurrTargetWordsRange().GetStartPos();

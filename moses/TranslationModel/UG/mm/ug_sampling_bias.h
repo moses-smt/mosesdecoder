@@ -20,6 +20,8 @@ namespace Moses
     public:
       int loglevel;
       std::ostream* log;
+      std::map<std::string, float> m_bias_map; //Map to store the biasmap as you get it from the server
+      std::map<std::string, float>& getBiasMap();
       virtual float
       operator[](id_type const ID) const = 0;
       // returns (unnormalized bias) for the class of item ID

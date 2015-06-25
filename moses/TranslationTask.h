@@ -118,6 +118,8 @@ public:
 
   std::map<std::string, float> const& GetContextWeights() const;
   void SetContextWeights(std::string const& context_weights);
+  void ReSetContextWeights(std::map<std::string, float> const& new_weights);
+
 
 protected:
   boost::shared_ptr<Moses::InputType> m_source;

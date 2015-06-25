@@ -60,6 +60,10 @@ namespace Moses
     init(context_weights, docname2docid);
     }
 
+    std::map<std::string, float>& SamplingBias::getBiasMap() {
+      return m_bias_map;
+    }
+
     void
     DocumentBias
     ::init_from_json
@@ -96,6 +100,7 @@ namespace Moses
 		   << x.first << " " << x.second << std::endl;
 	    }
 	}
+      m_bias_map = bias;
       init(bias, docname2docid);
 
       // using xmlrpc_parse_json didn't always work (parser errors)
