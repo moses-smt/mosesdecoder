@@ -37,6 +37,7 @@ namespace Moses
     {
       std::vector<id_type> const& m_sid2docid;
       std::vector<float> m_bias;
+      // std::map<int,float> m_bias;
 
     public:
 

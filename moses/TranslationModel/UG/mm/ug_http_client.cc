@@ -1,4 +1,5 @@
 #include "ug_http_client.h"
+#include "moses/Util.h"
 namespace Moses
 {
 using boost::asio::ip::tcp;
@@ -31,10 +32,16 @@ http_client(boost::asio::io_service& io_service, std::string url)
   p = std::min(url.find_first_of(":/"), url.size());
   q = std::min(url.find("/"), url.size());
   if (p < url.size() && url[p] == ':') 
-    port = url.substr(p,q-p);
+    port = url.substr(p+1,q-p-1);
   server = url.substr(0,p);
   if (q < url.size()) 
     path = url.substr(q);
+#if 0
+  std::cerr << HERE << std::endl;
+  std::cerr << "SERVER " << server << std::endl;
+  std::cerr << "PORT   |" << port << "|" << std::endl;
+  std::cerr << "PATH " << path << std::endl; 
+#endif
   init(server, port, path);
 }
 
@@ -55,7 +62,7 @@ init(std::string const& server, std::string const& port, std::string const& path
   
   // Start an asynchronous resolve to translate the server and service names
   // into a list of endpoints.
-  tcp::resolver::query query(server, port);
+  tcp::resolver::query query(server, port.c_str());
   resolver_.async_resolve(query,
 			  boost::bind(&http_client::handle_resolve, this,
 				      boost::asio::placeholders::error,

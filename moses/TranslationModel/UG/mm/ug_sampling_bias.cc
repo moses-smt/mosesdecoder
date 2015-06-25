@@ -2,7 +2,7 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 #include "moses/Timer.h"
-
+// #include <curl/curl.h>
 // #ifdef HAVE_CURLPP
 // #include <curlpp/Options.hpp>
 // #include <curlpp/cURLpp.hpp>
@@ -19,19 +19,77 @@ namespace Moses
   {
     using ugdiss::id_type;
 
-    // #ifdef WITH_MMT_BIAS_CLIENT
-    std::string
-    query_bias_server(std::string const& url, std::string const& text)
+    size_t ca_write_callback(void *ptr, size_t size, size_t nmemb, 
+			     std::string* response) 
     {
-      std::string query = url+uri_encode(text);
+      char const* c = reinterpret_cast<char const*>(ptr);
+      *response += std::string(c, size * nmemb);
+      return size * nmemb;
+    }
+
+    std::string 
+    query_bias_server(std::string const& server, std::string const& context) 
+    {
+#if 0
+      std::string query = server + uri_encode(context);
+      std::string response;
+      
+      CURL* curl = curl_easy_init();
+      UTIL_THROW_IF2(!curl, "Could not init curl.");
+      curl_easy_setopt(curl, CURLOPT_URL, query.c_str());
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ca_write_callback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+      CURLcode res = curl_easy_perform(curl);
+      curl_easy_cleanup(curl);
+      return response;
+#else
+      std::string query = server+uri_encode(context);
       boost::asio::io_service io_service;
       Moses::http_client c(io_service, query);
       io_service.run();
-      return c.content();
-    }
-    // #endif
 
-    DocumentBias
+      std::string response = c.content();
+      std::cerr << "SERVER RESPONSE: " << response << std::endl;
+
+      return c.content();
+#endif
+    }
+
+//     // #ifdef WITH_MMT_BIAS_CLIENT
+//     std::string
+//     query_bias_server(std::string const& url, std::string const& text)
+//     {
+// #if 1
+//       std::string query = url+uri_encode(text);
+//       boost::asio::io_service io_service;
+//       Moses::http_client c(io_service, query);
+//       io_service.run();
+
+//       std::string response = c.content();
+//       std::cerr << "SERVER RESPONSE: " << response << std::endl;
+
+//       return c.content();
+// #else
+//       return "";
+// #endif
+//     }
+//     // #endif
+
+
+    // std::string
+    // query_bias_server(std::string const& url, int const port, 
+    // 		      std::string const& context,
+    // 		      std::string const& src_lang)
+    // {
+    //   char* response 
+    // 	= ca_get_context(url.c_str(), port, context.c_str(), src_lang.c_str());
+    //   UTIL_THROW_IF2(!response, "No response from server");
+    //   std::string json = response;
+    //   free(response);
+    //   return json;
+    // }
+
+    DocumentBias 
     ::DocumentBias
     ( std::vector<id_type> const& sid2doc,
       std::map<std::string,id_type> const& docname2docid,
@@ -44,6 +102,7 @@ namespace Moses
       Timer timer;
       if (log) timer.start(NULL);
       std::string json = query_bias_server(server_url, text);
+      std::cerr << "SERVER RESPONSE " << json << std::endl;
       init_from_json(json, docname2docid, log);
       if (log) *log << "Bias query took " << timer << " seconds." << std::endl;
       // #endif
