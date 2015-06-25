@@ -496,7 +496,8 @@ namespace Moses
 
   TargetPhrase*
   Mmsapt::
-  mkTPhrase(Phrase const& src,
+  mkTPhrase(ttasksptr const& ttask,
+            Phrase const& src,
 	    PhrasePair<Token>* fix,
 	    PhrasePair<Token>* dyn,
 	    sptr<Bitext<Token> > const& dynbt) const
@@ -547,7 +548,7 @@ namespace Moses
  	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
 	  (*ff)(*dynbt, pool, &fvals);
       }
-    TargetPhrase* tp = new TargetPhrase(this);
+    TargetPhrase* tp = new TargetPhrase(ttask, this);
     Token const* x = fix ? fix->start2 : dyn->start2;
     uint32_t len = fix ? fix->len2 : dyn->len2;
     for (uint32_t k = 0; k < len; ++k, x = x->next())
@@ -687,12 +688,12 @@ namespace Moses
     while (i < ppfix.size() && k < ppdyn.size())
       {
 	int cmp = sorter.cmp(ppfix[i], ppdyn[k]);
-	if      (cmp  < 0) ret->Add(mkTPhrase(src,&ppfix[i++],NULL,dyn));
-	else if (cmp == 0) ret->Add(mkTPhrase(src,&ppfix[i++],&ppdyn[k++],dyn));
-	else               ret->Add(mkTPhrase(src,NULL,&ppdyn[k++],dyn));
+	if      (cmp  < 0) ret->Add(mkTPhrase(ttask, src,&ppfix[i++],NULL,dyn));
+	else if (cmp == 0) ret->Add(mkTPhrase(ttask, src,&ppfix[i++],&ppdyn[k++],dyn));
+	else               ret->Add(mkTPhrase(ttask, src,NULL,&ppdyn[k++],dyn));
       }
-    while (i < ppfix.size()) ret->Add(mkTPhrase(src,&ppfix[i++],NULL,dyn));
-    while (k < ppdyn.size()) ret->Add(mkTPhrase(src,NULL,&ppdyn[k++],dyn));
+    while (i < ppfix.size()) ret->Add(mkTPhrase(ttask, src,&ppfix[i++],NULL,dyn));
+    while (k < ppdyn.size()) ret->Add(mkTPhrase(ttask, src,NULL,&ppdyn[k++],dyn));
     if (m_tableLimit) ret->Prune(true, m_tableLimit);
     else ret->Prune(true,ret->GetSize());
 

@@ -126,8 +126,9 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
       (m_tableLimit == 0 || tpv->size() < m_tableLimit) ?
       tpv->end() : tpv->begin() + m_tableLimit;
     NTH_ELEMENT4(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
+    const ttasksptr ttask = NULL;
     for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++) {
-      TargetPhrase *tp = new TargetPhrase(*it);
+      TargetPhrase *tp = new TargetPhrase(ttask, *it);
       phraseColl->Add(tp);
     }
 

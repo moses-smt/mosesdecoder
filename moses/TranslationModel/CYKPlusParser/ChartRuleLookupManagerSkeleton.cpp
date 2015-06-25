@@ -30,6 +30,7 @@
 #include "moses/ChartCellCollection.h"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "moses/TranslationModel/SkeletonPT.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 
@@ -79,7 +80,8 @@ TargetPhrase *ChartRuleLookupManagerSkeleton::CreateTargetPhrase(const Word &sou
   string str = sourceWord.GetFactor(0)->GetString().as_string();
   str = "ChartManagerSkeleton:" + str;
 
-  TargetPhrase *tp = new TargetPhrase(&m_skeletonPT);
+  const ttasksptr ttask = NULL;
+  TargetPhrase *tp = new TargetPhrase(ttask, &m_skeletonPT);
   Word &word = tp->AddWord();
   word.CreateFromString(Output, m_skeletonPT.GetOutput(), str, false);
 

@@ -21,6 +21,7 @@
 
 #include "moses/AlignmentInfoCollection.h"
 #include "moses/InputFileStream.h"
+#include "moses/TranslationTask.h"
 #include "moses/Util.h"
 #include "moses/Word.h"
 #include "Trie.h"
@@ -217,7 +218,8 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     // The remaining columns are currently ignored.
 
     // Create and score target phrase.
-    TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase, &ruleTable);
+    const ttasksptr ttask = NULL;
+    TargetPhrase *targetPhrase = new TargetPhrase(ttask, targetPhrasePhrase, &ruleTable);
     targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
 

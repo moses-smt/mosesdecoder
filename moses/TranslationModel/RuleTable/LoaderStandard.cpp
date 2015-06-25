@@ -36,6 +36,7 @@
 #include "moses/WordsRange.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
+#include "moses/TranslationTask.h"
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
@@ -217,7 +218,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Word *targetLHS;
 
     // create target phrase obj
-    TargetPhrase *targetPhrase = new TargetPhrase(&ruleTable);
+    const ttasksptr ttask = NULL;
+    TargetPhrase *targetPhrase = new TargetPhrase(ttask, &ruleTable);
     targetPhrase->CreateFromString(Output, output, targetPhraseString, &targetLHS);
     // source
     Phrase sourcePhrase;

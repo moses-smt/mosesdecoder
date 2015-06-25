@@ -1,6 +1,7 @@
 // vim:tabstop=2
 #include "ProbingPT.h"
 #include "moses/StaticData.h"
+#include "moses/TranslationTask.h"
 #include "moses/FactorCollection.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "quering.hh"
@@ -152,7 +153,8 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
   const std::vector<unsigned int> &probingPhrase = probingTargetPhrase.target_phrase;
   size_t size = probingPhrase.size();
 
-  TargetPhrase *tp = new TargetPhrase(this);
+  const ttasksptr ttask = NULL;
+  TargetPhrase *tp = new TargetPhrase(ttask, this);
 
   // words
   for (size_t i = 0; i < size; ++i) {

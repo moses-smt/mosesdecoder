@@ -19,6 +19,7 @@
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "moses/Syntax/RuleTableFF.h"
+#include "moses/TranslationTask.h"
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
@@ -109,7 +110,8 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
     ExtractSourceTerminalSetFromHyperPath(sourceFragment, sourceTermSet);
 
     // Target-side
-    TargetPhrase *targetPhrase = new TargetPhrase(&ff);
+    const ttasksptr ttasks = NULL;
+    TargetPhrase *targetPhrase = new TargetPhrase(ttasks, &ff);
     Word *targetLHS = NULL;
     targetPhrase->CreateFromString(Output, output, targetString, &targetLHS);
     targetPhrase->SetTargetLHS(targetLHS);
