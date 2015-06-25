@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <iostream>
 
 class Rec
 {
@@ -20,7 +21,8 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-void Output(int limit, std::vector<Rec> &records);
+void Process(int limit, std::istream &inStrme, std::ostream &outStrme);
+void Output(std::ostream &outStrme, std::vector<Rec> &records, int limit);
 
 ////////////////////////////////////////////////////////////
 inline void Tokenize(std::vector<std::string> &output

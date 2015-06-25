@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
 #include <cassert>
 #include <algorithm>
 #include <functional>
 #include "pruneGeneration.h"
+#include "moses/InputFileStream.h"
 
 using namespace std;
 
@@ -13,16 +13,23 @@ int main(int argc, char **argv)
   cerr << "Starting" << endl;
   int limit = atoi(argv[1]);
 
+  Process(limit, cin, cout);
+  
+  cerr << "Finished" << endl;
+}
+
+void Process(int limit, istream &inStrme, ostream &outStrme)
+{
   vector<Rec> records;
   string prevInWord;
   string line;
-  while (getline(cin, line)) {
+  while (getline(inStrme, line)) {
     vector<string> toks;
     Tokenize(toks, line);
     assert(toks.size() == 4);
 
     if (prevInWord != toks[0]) {
-      Output(limit, records);
+      Output(outStrme, records, limit);
       records.clear();
     }
 
@@ -34,13 +41,12 @@ int main(int argc, char **argv)
   }
 
   // last
-  Output(limit, records);
+  Output(outStrme, records, limit);
   records.clear();
 
-  cerr << "Finished" << endl;
 }
 
-void Output(int limit, vector<Rec> &records)
+void Output(ostream &outStrme, vector<Rec> &records, int limit)
 {
   std::sort(records.rbegin(), records.rend());
 
