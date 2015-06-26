@@ -374,7 +374,7 @@ sub NumStr($)
 sub GetSplitVersion($)
 {
 	my $splitCmd = shift;
-	my $retVal = system("$splitCmd -h");
+	my $retVal = system("$splitCmd --help");
 	if ($retVal != 0) {
 		return 1;
 	}
