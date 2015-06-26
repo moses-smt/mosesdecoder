@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 
   // loop thru each file in directory
   fs::directory_iterator end_iter;
-  for( fs::directory_iterator dir_iter(dir) ; dir_iter != end_iter ; ++dir_iter) {  
+  for( fs::directory_iterator dir_iter(dir) ; dir_iter != end_iter ; ++dir_iter) {
     if (fs::is_regular_file(dir_iter->status())) {
       fs::path currPath = *dir_iter;
       string currPathStr = currPath.native();
@@ -46,15 +46,15 @@ int main(int argc, char **argv)
         string suffix = currFileStr.substr(fileStemStrSize, currFileStr.size() - fileStemStrSize);
         string outPath = outPathStem + suffix;
         cerr << "PRUNING " << currPathStr << " TO " << outPath << endl;
-        
+
         Moses::InputFileStream inStrme(currPathStr);
         Moses::OutputFileStream outStrme(outPath);
         Process(limit, inStrme, outStrme);
-        
+
       }
     }
   }
-  
+
   cerr << "Finished" << endl;
 }
 
