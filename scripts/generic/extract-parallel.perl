@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/env perl 
 #
 # This file is part of moses.  Its use is licensed under the GNU Lesser General
 # Public License version 2.1 or, at your option, any later version.
@@ -15,8 +15,7 @@ sub systemCheck($);
 sub NumStr($);
 sub DigitStr($);
 sub CharStr($);
-
-my $is_osx = ($^O eq "darwin");
+sub GetSplitVersion($);
 
 my $alph = "abcdefghijklmnopqrstuvwxyz";
 my @alph = (split(//,$alph));
@@ -42,7 +41,7 @@ my $baselineExtract;
 my $glueFile;
 my $phraseOrientation = 0;
 my $phraseOrientationPriorsFile;
-my $splitCmdOption="-d";
+my $splitCmdOption = "";
 
 my $GZIP_EXEC;
 if(`which pigz`) {
@@ -52,6 +51,15 @@ else {
   $GZIP_EXEC = 'gzip';
 }
 print STDERR "using $GZIP_EXEC \n";
+
+my $isBSDSplit = GetSplitVersion($splitCmd);
+print STDERR "isBSDSplit=$isBSDSplit \n";
+
+if ($isBSDSplit == 0) {
+	$splitCmdOption .= "-d";
+}
+
+my $gzOut = 0; 
 
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
@@ -73,10 +81,14 @@ for (my $i = 8; $i < $#ARGV + 1; ++$i)
     $phraseOrientationPriorsFile = $ARGV[++$i];
     next;
   }
-  $splitCmdOption="",next if $ARGV[$i] eq "--NoNumericSuffix";
+  if ($ARGV[$i] eq '--GZOutput') {
+  	$gzOut = 1;
+  }
 
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
+
+die("Need to specify --GZOutput for parallel extract") if ($gzOut == 0);
 
 my $cmd;
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
@@ -272,7 +284,7 @@ if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
-`$cmd`;
+systemCheck($cmd);
 
 print STDERR "Finished ".localtime() ."\n";
 
@@ -352,10 +364,22 @@ sub CharStr($)
 sub NumStr($)
 {
     my $i = shift;
-    if ($is_osx){
+    if ($isBSDSplit){
         return CharStr($i);
     }else{
         return DigitStr($i);
     }
+}
+
+sub GetSplitVersion($)
+{
+	my $splitCmd = shift;
+	my $retVal = system("$splitCmd -h");
+	if ($retVal != 0) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
