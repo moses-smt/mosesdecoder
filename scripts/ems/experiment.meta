@@ -743,7 +743,7 @@ generation-prune
 	in: generation-table
 	out: generation-table-pruned
 	rerun-on-change: TRAINING:prune-generation
-	pass-unless: AND TRAINING:prune-generation
+	ignore-unless: AND TRAINING:prune-generation
 	default-name: model/generation-table-pruned
 	final-model: yes
 	template: $TRAINING:prune-generation IN OUT
