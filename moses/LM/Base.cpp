@@ -78,7 +78,11 @@ void LanguageModel::EvaluateInIsolation(const Phrase &source
   float fullScore, nGramScore;
   size_t oovCount;
 
-  CalcScoreWithContext(targetPhrase.GetTtask(), targetPhrase, fullScore, nGramScore, oovCount);
+  if (targetPhrase.HasTtaskSPtr()){
+    CalcScoreWithContext(targetPhrase.GetTtask(), targetPhrase, fullScore, nGramScore, oovCount);
+  }else{
+    CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
+  }
   //CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
   float estimateScore = fullScore - nGramScore;
 

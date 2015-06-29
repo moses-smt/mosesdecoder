@@ -48,10 +48,9 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_ttask_flag(false)
   , m_container(pt)
-  , m_ttask(NULL)
 {
-
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   // XXX should this really be InputFactorOrder???
@@ -68,8 +67,9 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_container(pt)
   , m_ttask(ttask)
+  , m_ttask_flag(true)
+  , m_container(pt)
 {
 
   //ACAT
@@ -88,8 +88,9 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, const PhraseDictionary *pt)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_container(pt)
   , m_ttask(ttask)
+  , m_ttask_flag(true)
+  , m_container(pt)
 {
 }
 
@@ -101,8 +102,9 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, const Phrase &phrase, const PhraseD
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_container(pt)
   , m_ttask(ttask)
+  , m_ttask_flag(true)
+  , m_container(pt)
 {
 }
 
@@ -114,8 +116,8 @@ TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_ttask_flag(false)
   , m_container(pt)
-  , m_ttask(NULL)
 {
 }
 
@@ -127,8 +129,8 @@ TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_ttask_flag(false)
   , m_container(pt)
-  , m_ttask(NULL)
 {
 }
 
@@ -141,8 +143,9 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
   , m_properties(copy.m_properties)
-  , m_container(copy.m_container)
   , m_ttask(copy.m_ttask)
+  , m_ttask_flag(true)
+  , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(*copy.m_lhsTarget);
@@ -173,6 +176,10 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
     pb->add_trg_words(GetWord(pos)[0]->GetString());
 }
 #endif
+
+bool TargetPhrase::HasTtaskSPtr() const {
+  return m_ttask_flag;
+}
 
 const ttasksptr& TargetPhrase::GetTtask() const {
   return m_ttask;
