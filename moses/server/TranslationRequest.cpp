@@ -1,5 +1,5 @@
 #include "TranslationRequest.h"
-#include "moses/ContextScope.h" 
+#include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
 
 namespace MosesServer
