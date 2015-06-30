@@ -78,9 +78,11 @@ exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
 exe proM2 : proM2.cpp mert_lib ..//boost_program_options ;
 
+exe m2scorer : m2scorer.cpp mert_lib ..//boost_program_options ;
+
 exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ..//boost_filesystem ;
 
-alias programs : mert extractor evaluator pro proM2 kbmira sentence-bleu ;
+alias programs : mert extractor evaluator pro proM2 m2scorer kbmira sentence-bleu ;
 
 unit-test bleu_scorer_test : BleuScorerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ;

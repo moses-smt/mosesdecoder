@@ -11,6 +11,7 @@
 #include "util/exception.hh"
 
 #include <functional>
+#include <algorithm>
 
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
@@ -156,7 +157,7 @@ std::string CorrectionPattern::CreateSinglePattern(const Tokens &s1, const Token
   }
 }
 
-std::string GetContext(size_t pos,
+std::vector<std::string> GetContext(size_t pos,
                        size_t len,
                        size_t window,
                        const InputType &input,
@@ -170,21 +171,43 @@ std::string GetContext(size_t pos,
   int leftPos  = range.GetStartPos() + pos - len - 1; 
   int rightPos = range.GetStartPos() + pos; 
   
-  std::string context = isRight ? "_right(«</s>»)" : "left(«<s>»)_";
+  std::vector<std::string> contexts;
   
-  if(!isRight && leftPos >= 0)
-    context =
-      "left(«"
-      + sentence.GetWord(leftPos).GetString(factorTypes, false)
-      + "»)_";
-    
-  if(isRight && rightPos < (int)sentence.GetSize())
-    context =
-      "_right(«"
-      + sentence.GetWord(rightPos).GetString(factorTypes, false)
-      + "»)";
-  
-  return context;
+  for(int length = 1; length <= (int)window; ++length) {
+    std::vector<std::string> current;
+    if(!isRight) {
+      for(int i = 0; i < length; i++) {
+        if(leftPos - i >= 0) {
+          current.push_back(sentence.GetWord(leftPos - i).GetString(factorTypes, false));
+        }
+        else {
+          current.push_back("<s>");
+        }
+      }
+      
+      if(current.back() == "<s>" && current.size() >= 2 && current[current.size()-2] == "<s>")
+        continue;
+      
+      std::reverse(current.begin(), current.end());
+      contexts.push_back("left(«" + boost::join(current, "·") + "»)_");
+    }
+    if(isRight) {
+      for(int i = 0; i < length; i++) {
+        if(rightPos + i < (int)sentence.GetSize()) {
+          current.push_back(sentence.GetWord(rightPos + i).GetString(factorTypes, false));
+        }
+        else {
+          current.push_back("</s>");
+        }
+      }
+
+      if(current.back() == "</s>" && current.size() >= 2 && current[current.size()-2] == "</s>")
+        continue;
+
+      contexts.push_back("_right(«" + boost::join(current, "·") + "»)");
+    }
+  }  
+  return contexts;
 }
 
 std::vector<std::string>
@@ -202,14 +225,21 @@ CorrectionPattern::CreatePattern(const Tokens &s1,
     if(type == 'm') {
       if(lastType != 'm') {
         std::string pattern = CreateSinglePattern(source, target);
-        
+        patternList.push_back(pattern);
+      
         if(m_context > 0) {
-          std::string leftContext =  GetContext(i, source.size(), m_context, input, inputPath, m_contextFactors, false);
-          std::string rightContext = GetContext(i, source.size(), m_context, input, inputPath, m_contextFactors, true);
-          patternList.push_back(pattern);
-          patternList.push_back(pattern + rightContext);
-          patternList.push_back(leftContext + pattern);
-          patternList.push_back(leftContext + pattern + rightContext);
+          std::vector<std::string> leftContexts =  GetContext(i, source.size(), m_context, input, inputPath, m_contextFactors, false);
+          std::vector<std::string> rightContexts = GetContext(i, source.size(), m_context, input, inputPath, m_contextFactors, true);
+          
+          BOOST_FOREACH(std::string left, leftContexts)
+            patternList.push_back(left + pattern);
+
+          BOOST_FOREACH(std::string right, rightContexts)
+            patternList.push_back(pattern + right);
+          
+          BOOST_FOREACH(std::string left, leftContexts)
+            BOOST_FOREACH(std::string right, rightContexts)
+              patternList.push_back(left + pattern + right);
         }
       }
       source.clear();
@@ -236,12 +266,18 @@ CorrectionPattern::CreatePattern(const Tokens &s1,
     patternList.push_back(pattern);
     
     if(m_context > 0) {
-      std::string leftContext =  GetContext(i, source.size(), m_context, input, inputPath, m_contextFactors, false);
-      std::string rightContext = GetContext(i, source.size(), m_context, input, inputPath, m_contextFactors, true);
-    
-      patternList.push_back(pattern + rightContext);
-      patternList.push_back(leftContext + pattern);
-      patternList.push_back(leftContext + pattern + rightContext);
+      std::vector<std::string> leftContexts =  GetContext(i, source.size(), m_context, input, inputPath, m_contextFactors, false);
+      std::vector<std::string> rightContexts = GetContext(i, source.size(), m_context, input, inputPath, m_contextFactors, true);
+      
+      BOOST_FOREACH(std::string left, leftContexts)
+        patternList.push_back(left + pattern);
+
+      BOOST_FOREACH(std::string right, rightContexts)
+        patternList.push_back(pattern + right);
+      
+      BOOST_FOREACH(std::string left, leftContexts)
+        BOOST_FOREACH(std::string right, rightContexts)
+          patternList.push_back(left + pattern + right);
     }
   }
   

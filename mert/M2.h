@@ -40,18 +40,28 @@ struct Annot {
     bool operator<(Annot a) const {
         return i < a.i || (i == a.i && j < a.j)
             || (i == a.i && j == a.j && annotator < a.annotator)
-            || (i == a.i && j == a.j && annotator == a.annotator && edit < a.edit);
+            || (i == a.i && j == a.j && annotator == a.annotator && transform(edit) < transform(a.edit));
     }
+
+    bool operator==(Annot a) const {
+       return (!(*this < a) && !(a < *this));
+    }
+
+    static std::string transform(const std::string& e);
+
+    static bool lowercase;
 };
 
 typedef std::set<Annot> Annots;
-typedef std::pair<Sentence, Annots> Unit;
+typedef std::set<size_t> Users;
+
+struct Unit {
+    Sentence first;
+    Annots second;
+    Users third;
+};
 
 typedef std::vector<Unit> M2File;
-
-//std::ostream& operator<<(std::ostream& o, Annot a) {
-//    return o << a.annotator << " (" << a.i << "," << a.j << ") : \"" << a.edit << "\"";
-//}
 
 struct Edit {
   Edit(float c = 1.0, size_t ch = 0, size_t unch = 1, std::string e = "")
@@ -80,10 +90,6 @@ struct Vertex {
   size_t j;
 };
 
-//std::ostream& operator<<(std::ostream &o, Vertex v) {
-//    return o << "(" << v.i << "," << v.j << ")";
-//}
-
 struct Edge {
   Edge(Vertex vv = Vertex(), Vertex uu = Vertex(), Edit editt = Edit())
   : v(vv), u(uu), edit(editt) {}
@@ -98,10 +104,6 @@ struct Edge {
 };
 
 Edge operator+(Edge e1, Edge e2);
-
-//std::ostream& operator<<(std::ostream &o, Edge e) {
-//    return o << e.v << " -> " << e.u << " : \"" << e.edit.edit << "\" " << e.edit.cost ;
-//}
 
 typedef std::vector<size_t> Row;
 typedef std::vector<Row> Matrix;
@@ -132,12 +134,16 @@ class M2 {
     size_t m_max_unchanged;
     float m_beta;
     bool m_lowercase;
-    
-    std::set<size_t> m_annotators; 
+    bool m_verbose;
     
   public:
-    M2() : m_max_unchanged(2), m_beta(0.5), m_lowercase(true) {}
-    M2(size_t max_unchanged, float beta, bool truecase) : m_max_unchanged(max_unchanged), m_beta(beta), m_lowercase(!truecase) {}
+    M2() : m_max_unchanged(2), m_beta(0.5), m_lowercase(true), m_verbose(false) { }
+    M2(size_t max_unchanged, float beta, bool truecase, bool verbose = false) 
+    : m_max_unchanged(max_unchanged), m_beta(beta), m_lowercase(!truecase), m_verbose(verbose) {
+       if(!m_lowercase) {
+          Annot::lowercase = false;
+       }
+    }
     
     float Beta() {
         return m_beta;
@@ -147,27 +153,23 @@ class M2 {
         std::ifstream m2file(filename.c_str());
         std::string line;
         
-        //M2 m2;
         Unit unit;
         bool first = true;
         
         while(std::getline(m2file, line)) {
             if(line.size() > 2) {
               if(line.substr(0, 2) == "S ") {
-                if(!first)
+                if(!first) {
+                    if(unit.third.empty())
+                        unit.third.insert(0);
                     m_m2.push_back(unit);
+                }
                 first = false;
     
                 unit.first = Sentence();
                 unit.second = Annots();
     
                 std::string sentenceLine = line.substr(2);
-                
-                if(m_lowercase)
-                    sentenceLine = ToLower(sentenceLine);
-                
-                //std::cout << sentenceLine << std::endl;
-                
                 boost::split(unit.first, sentenceLine, boost::is_any_of(" "), boost::token_compress_on);
               }
               if(line.substr(0, 2) == "A ") {
@@ -182,22 +184,25 @@ class M2 {
                     rangeStr >> a.i >> a.j;
                     a.type = annot[1];
                     a.edit = annot[2];            
-                    
-                    if(m_lowercase)
-                        a.edit = ToLower(a.edit);
-                    
+                        
                     std::stringstream annotStr(annot[5]);
                     annotStr >> a.annotator;
                     
-                    m_annotators.insert(a.annotator);
+                    unit.third.insert(a.annotator);
                     unit.second.insert(a);
-                    //std::cout << a << std::endl;
+                }
+                else {
+                    std::stringstream annotStr(annot[5]);
+                    size_t annotator;
+                    annotStr >> annotator;
+                    unit.third.insert(annotator);
                 }
               }
             }
         }
+        if(unit.third.empty())
+            unit.third.insert(0);
         m_m2.push_back(unit);   
-        //std::cout << m2.size() << std::endl;
     }
     
     size_t LevenshteinMatrix(const Sentence &s1, const Sentence &s2, Matrix &d, TrackMatrix &bt) {
@@ -226,7 +231,7 @@ class M2 {
         int cost;
         for(size_t i = 1; i <= n; ++i) {
           for(size_t j = 1; j <= m; ++j) {
-            if(s1[i-1] == s2[j-1])
+            if(Annot::transform(s1[i-1]) == Annot::transform(s2[j-1]))
               cost = 0;
             else 
               cost = 2;
@@ -245,30 +250,12 @@ class M2 {
               bt[i][j].insert(Info(Vertex(i - 1, j - 1), cost ? Edit(1, 1, 0, s2[j - 1]) : Edit(1, 0, 1, s2[j - 1]) ));
           }
         }
-        
-        /*
-        for(size_t i = 0; i < d.size(); ++i) {
-          for(size_t j = 0; j < d[i].size(); ++j) {
-              std::cout << (d[i][j] < 10 ? " " : "") << d[i][j] << " ";
-          }
-          std::cout << std::endl;
-        }
-        */
-      
         return d[n][m];
     }
       
       
     void BuildGraph(const TrackMatrix &bt, Vertices &V, Edges &E) {    
         Vertex start(bt.size() - 1, bt[0].size() - 1);
-        
-        /*
-        for(size_t i = 0; i < bt.size(); ++i) {
-            for(size_t j = 0; j < bt[i].size(); ++j) {
-                std::cout << i << " " << j << " : " << (bt[i][j].size() > 0 ? bt[i][j].begin()->v : Vertex(-1,-1)) << std::endl;
-            }
-        }
-        */
         
         std::queue<Vertex> Q;
         Q.push(start);
@@ -278,7 +265,6 @@ class M2 {
             if(V.count(v) > 0)
                 continue;
             V.insert(v);
-            
             for(Track::iterator it = bt[v.i][v.j].begin();
                 it != bt[v.i][v.j].end(); ++it) {
                 Edge e(it->v, v, it->edit);
@@ -306,12 +292,15 @@ class M2 {
         } while(newE.size() > 0); 
     }
     
-    void AddWeights(Edges &E, const Unit &u) {
+    void AddWeights(Edges &E, const Unit &u, size_t aid) {
         for(Edges::iterator it1 = E.begin(); it1 != E.end(); ++it1) {
             if(it1->edit.changed > 0) {
                 const_cast<float&>(it1->edit.cost) += 0.001;   
                 for(Annots::iterator it2 = u.second.begin(); it2 != u.second.end(); ++it2) {
-                    if(it1->v.i == it2->i && it1->u.i == it2->j && it1->edit.edit == it2->edit) {
+                    // if matches an annotator
+                    if(it1->v.i == it2->i && it1->u.i == it2->j 
+                       && Annot::transform(it1->edit.edit) == Annot::transform(it2->edit)
+                       && it2->annotator == aid) {
                         int newWeight = -(m_max_unchanged + 1) * E.size();
                         const_cast<float&>(it1->edit.cost) = newWeight;
                     }
@@ -365,101 +354,94 @@ class M2 {
         E.clear();
         E.insert(newE.begin(), newE.end());
     }
-    
-    void AddStats(const Edges &E, const Annots &a, Stats &stats) {
+
+    void AddStats(const std::vector<Edges> &Es, const Unit &u, Stats &stats, size_t line) {
+        
         std::map<size_t, Stats> statsPerAnnotator;
-        for(std::set<size_t>::iterator it = m_annotators.begin();
-            it != m_annotators.end(); ++it) {
+        for(std::set<size_t>::iterator it = u.third.begin();
+            it != u.third.end(); ++it) {
             statsPerAnnotator[*it] = Stats(4, 0);
         }
-        
-        for(Annots::iterator it = a.begin(); it != a.end(); it++)
+
+        for(Annots::iterator it = u.second.begin(); it != u.second.end(); it++)
             statsPerAnnotator[it->annotator][2]++;
-        
-        for(Edges::iterator eit = E.begin(); eit != E.end(); ++eit) {
-          //std::cout << *it << std::endl;
-          if(eit->edit.changed > 0) {
-            for(std::set<size_t>::iterator ait = m_annotators.begin();
-                ait != m_annotators.end(); ++ait) {
+
+        for(std::set<size_t>::iterator ait = u.third.begin();
+                ait != u.third.end(); ++ait) {    
+          for(Edges::iterator eit = Es[*ait].begin(); eit != Es[*ait].end(); ++eit) {
+            if(eit->edit.changed > 0) {
                 statsPerAnnotator[*ait][1]++;
-                
                 Annot f;
                 f.i = eit->v.i;
                 f.j = eit->u.i;
                 f.annotator = *ait;
                 f.edit = eit->edit.edit;
-                Annots::iterator fit = a.find(f);
-                if(fit != a.end()) {
+                for(Annots::iterator fit = u.second.begin(); fit != u.second.end(); fit++) {
+                  if(f == *fit) 
                     statsPerAnnotator[*ait][0]++;
                 }
             }
           }
         }
-        
         size_t bestAnnot = 0;
         float  bestF = -1;
-        for(std::set<size_t>::iterator it = m_annotators.begin();
-            it != m_annotators.end(); ++it) {
+        for(std::set<size_t>::iterator it = u.third.begin();
+            it != u.third.end(); ++it) {
             Stats localStats = stats;
             localStats[0] += statsPerAnnotator[*it][0];
             localStats[1] += statsPerAnnotator[*it][1];
             localStats[2] += statsPerAnnotator[*it][2];
-
+            if(m_verbose)
+              std::cerr << *it << " : " << localStats[0] << " " << localStats[1] << " " << localStats[2] << std::endl;
             float f = FScore(localStats);
+            if(m_verbose)
+              std::cerr << f << std::endl;
             if(f > bestF) {
                 bestF = f;
                 bestAnnot = *it;
             }
         }
+        if(m_verbose)
+          std::cerr << ">> Chosen Annotator for line " << line + 1 << " : " << bestAnnot << std::endl;
         stats[0] += statsPerAnnotator[bestAnnot][0];
         stats[1] += statsPerAnnotator[bestAnnot][1];
         stats[2] += statsPerAnnotator[bestAnnot][2];
     }
     
-    void SufStats(const std::string &sStr, size_t i, Stats &stats) {        
-        Matrix d;
-        TrackMatrix bt;
-        
-        Vertices V;
-        Edges E;
+    void SufStats(const std::string &sStr, size_t i, Stats &stats) {                
+        std::string temp = sStr;
         
         Sentence s;
-        
-        std::string temp = sStr;
-        if(m_lowercase)
-            temp = ToLower(temp);
-        
         boost::split(s, temp, boost::is_any_of(" "), boost::token_compress_on);
         
         Unit &unit = m_m2[i];
                 
+        Matrix d;
+        TrackMatrix bt;
         size_t distance = LevenshteinMatrix(unit.first, s, d, bt);
+
+        std::vector<Vertices> Vs(unit.third.size());
+        std::vector<Edges> Es(unit.third.size());
+
         if(distance > unit.first.size()) {
             std::cerr << "Levenshtein distance is greater than source size." << std::endl;
-            stats[0] =  0;
+            stats[0] = 0;
             stats[1] = distance;
-            stats[2] =  0;
+            stats[2] = 0;
             stats[3] = unit.first.size();
             return;
         }
-        else if(distance > 0) {      
-            BuildGraph(bt, V, E);
-            AddWeights(E, unit);    
-            BellmanFord(V, E);        
+        else if(distance > 0) {
+            for(size_t j = 0; j < unit.third.size(); j++) { 
+              BuildGraph(bt, Vs[j], Es[j]);
+              AddWeights(Es[j], unit, j);    
+              BellmanFord(Vs[j], Es[j]);
+            }
         }
-        
-        //std::cout << s << std::endl;
-        //std::cout << unit.first << std::endl;
-        
-        AddStats(E, unit.second, stats);
-        
-        //std::cerr << s << std::endl;
-        //std::cerr << unit.first << std::endl;
-        //std::cerr << stats[0] << " " << stats[1] << " " << stats[2] << std::endl;
-        
-        // source length
+        AddStats(Es, unit, stats, i);
         stats[3] = unit.first.size();
     }
+
     
     float FScore(const Stats& stats) {
         float p = 1.0;

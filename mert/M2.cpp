@@ -1,9 +1,23 @@
 
+#include <boost/algorithm/string.hpp>
+
 #include "M2.h"
 
 namespace MosesTuning {
 
 namespace M2 {
+
+bool Annot::lowercase = true;
+
+ std::string Annot::transform(const std::string& e) {
+      std::string temp = e;                                                                                                                           
+      if(lowercase) {
+        boost::erase_all(temp, " ");                                                                                                                                                                   
+        return ToLower(temp);
+      }                                                                                                                                                               
+      else                                                                                                                                                                               
+        return e;                                                                                                                                                                        
+    }  
 
 const std::string ToLower(const std::string& str)
 {

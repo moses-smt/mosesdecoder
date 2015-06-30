@@ -16,6 +16,8 @@ public:
   virtual const lm::ngram::State &BeginSentenceState() const = 0;
 
   virtual const lm::ngram::State &NullContextState() const = 0;
+  
+  virtual ~KenOSMBase() {}
 };
 
 template <class KenModel>

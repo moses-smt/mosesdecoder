@@ -16,14 +16,10 @@ namespace MosesTuning
 
 M2Scorer::M2Scorer(const string& config)
   : StatisticsBasedScorer("M2Scorer", config),
-    /*beta_(Scan<float>(getConfig("beta", "0.5"))),
+    beta_(Scan<float>(getConfig("beta", "0.5"))),
     max_unchanged_words_(Scan<int>(getConfig("max_unchanged_words", "2"))),
-    truecase_(false),
-    verbose_(Scan<bool>(getConfig("verbose", "false"))),*/
-    beta_(0.5),
-    max_unchanged_words_(2),
-    truecase_(false),
-    verbose_(false),
+    truecase_(Scan<bool>(getConfig("truecase", "false"))),
+    verbose_(Scan<bool>(getConfig("verbose", "false"))),
     m2_(max_unchanged_words_, beta_, truecase_)
 {}
 
@@ -38,18 +34,8 @@ void M2Scorer::setReferenceFiles(const vector<string>& referenceFiles)
 void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
   string sentence = trimStr(this->preprocessSentence(text));
-  
-  /*
-  std::pair<size_t, string> sidSent(sid, sentence);
-  if(seen_.count(sidSent) != 0) {
-    entry.set(seen_[sidSent]);
-    return;
-  }*/
-  
   std::vector<ScoreStatsType> stats(4, 0);
   m2_.SufStats(sentence, sid, stats);
-  
-  //seen_[sidSent] = stats;
   entry.set(stats);
 }
 

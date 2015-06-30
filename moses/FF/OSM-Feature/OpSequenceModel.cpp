@@ -128,7 +128,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
 
   vector <int> alignments;
 
-
+  //std::cerr << startIndex << " " << endIndex << std::endl;
 
   AlignmentInfo::const_iterator iter;
 
@@ -142,15 +142,27 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   //cerr<<bitmap<<endl;
   //cerr<<startIndex<<" "<<endIndex<<endl;
 
-
-  for (int i = startIndex; i <= endIndex; i++) {
-    myBitmap.SetValue(i,0); // resetting coverage of this phrase ...
-    mySourcePhrase.push_back(source.GetWord(i).GetFactor(sFactor)->GetString().as_string());
-    // cerr<<mySourcePhrase[i]<<endl;
+  // If lattice
+  if(source.GetType() == 1 || source.GetType() == 2) {
+    const Phrase& sourcePhrase = cur_hypo.GetTranslationOption().GetInputPath().GetPhrase();
+    const WordsRange &sourceRange = cur_hypo.GetTranslationOption().GetInputPath().GetWordsRange();
+    startIndex  = sourceRange.GetStartPos();
+    endIndex = startIndex + sourcePhrase.GetSize() - 1;
+    //std::cerr << startIndex << " " << endIndex << " " << sourcePhrase.GetSize() << std::endl;
+    for (int i = startIndex; i <= endIndex; i++)
+      myBitmap.SetValue(i,0); 
+    for (int i = 0; i < sourcePhrase.GetSize(); i++)
+      mySourcePhrase.push_back(sourcePhrase.GetWord(i).GetFactor(sFactor)->GetString().as_string());
   }
-
+  else {
+    for (int i = startIndex; i <= endIndex; i++) {
+      myBitmap.SetValue(i,0); // resetting coverage of this phrase ...
+      mySourcePhrase.push_back(source.GetWord(i).GetFactor(sFactor)->GetString().as_string());
+      // cerr<<mySourcePhrase[i]<<endl;
+    }
+  }
+  
   for (int i = 0; i < target.GetSize(); i++) {
-
     if (target.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
     else
