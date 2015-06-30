@@ -293,35 +293,35 @@ int osmHypothesis :: closestGap(map <int,string> gap, int j1, int & gp)
   map <int,string> :: iterator iter;
 
   iter=gap.end();
-
-  do {
-    iter--;
-    //cout<<"Trapped "<<iter->first<<endl;
-
-    if(iter->first==j1 && iter->second== "Unfilled") {
-      opGap++;
-      gp = opGap;
-      return j1;
-
-    }
-
-    if(iter->second =="Unfilled") {
-      opGap++;
-      temp = iter->first - j1;
-
-      if(temp<0)
-        temp=temp * -1;
-
-      if(dist>temp && iter->first < j1) {
-        dist=temp;
-        value=iter->first;
-        gp=opGap;
+  if(iter != gap.begin()) {
+    do {
+      iter--;
+      //cout<<"Trapped "<<iter->first<<endl;
+  
+      if(iter->first==j1 && iter->second== "Unfilled") {
+        opGap++;
+        gp = opGap;
+        return j1;
+  
       }
-    }
-
-
-  } while(iter!=gap.begin());
-
+  
+      if(iter->second =="Unfilled") {
+        opGap++;
+        temp = iter->first - j1;
+  
+        if(temp<0)
+          temp=temp * -1;
+  
+        if(dist>temp && iter->first < j1) {
+          dist=temp;
+          value=iter->first;
+          gp=opGap;
+        }
+      }
+  
+  
+    } while(iter!=gap.begin());
+  }
   return value;
 }
 
