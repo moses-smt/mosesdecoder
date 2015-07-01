@@ -1115,7 +1115,8 @@ void StaticData::LoadSparseWeightsFromConfig()
   }
 
   std::map<std::string, std::vector<float> > weights = m_parameter->GetAllWeights();
-  for (auto iter = weights.begin(); iter != weights.end(); ++iter) {
+	std::map<std::string, std::vector<float> >::iterator iter;
+  for (iter = weights.begin(); iter != weights.end(); ++iter) {
     // this indicates that it is sparse feature
     if (featureNames.find(iter->first) == featureNames.end()) {
       UTIL_THROW_IF2(iter->second.size() != 1, "ERROR: only one weight per sparse feature allowed: " << iter->first);
