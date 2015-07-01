@@ -144,7 +144,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_alignNonTerm(copy.m_alignNonTerm)
   , m_properties(copy.m_properties)
   , m_ttask(copy.m_ttask)
-  , m_ttask_flag(true)
+  , m_ttask_flag(copy.m_ttask_flag)
   , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
