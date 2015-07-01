@@ -182,7 +182,7 @@ bool TargetPhrase::HasTtaskSPtr() const {
 }
 
 const ttasksptr& TargetPhrase::GetTtask() const {
-  return m_ttask;
+  return m_ttask.lock();
 }
 
 void TargetPhrase::EvaluateInIsolation(const Phrase &source)
