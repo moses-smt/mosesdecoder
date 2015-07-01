@@ -20,6 +20,8 @@ namespace Moses
     public:
       int loglevel;
       std::ostream* log;
+      std::map<std::string, float> m_bias_map; //Map to store the biasmap as you get it from the server
+      std::map<std::string, float>& getBiasMap();
       virtual float
       operator[](id_type const ID) const = 0;
       // returns (unnormalized bias) for the class of item ID
@@ -45,6 +47,11 @@ namespace Moses
 		   std::map<std::string,id_type> const& docname2docid,
 		   std::string const& server_url, std::string const& text,
 		   std::ostream* log);
+
+      DocumentBias(std::vector<id_type> const& sid2doc,
+                   std::map<std::string,id_type> const& docname2docid,
+                   std::map<std::string, float> const& context_weights,
+                   std::ostream* log);
 
       void
       init_from_json

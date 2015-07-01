@@ -149,7 +149,8 @@ namespace Moses
     mm2dtable_t COOCraw;
 
     TargetPhrase*
-    mkTPhrase(Phrase const& src,
+    mkTPhrase(ttasksptr const& ttask,
+              Phrase const& src,
 	      Moses::bitext::PhrasePair<Token>* fix,
 	      Moses::bitext::PhrasePair<Token>* dyn,
 	      sptr<Bitext<Token> > const& dynbt) const;

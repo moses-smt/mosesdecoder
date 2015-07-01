@@ -67,6 +67,7 @@ protected:
   // task stays alive till it's done with it.
 
   std::string m_context_string;
+  std::map<std::string, float> m_context_weights;
 public:
 
   boost::shared_ptr<TranslationTask>
@@ -114,6 +115,11 @@ public:
 
   std::string const& GetContextString() const;
   void SetContextString(std::string const& context);
+
+  std::map<std::string, float> const& GetContextWeights() const;
+  void SetContextWeights(std::string const& context_weights);
+  void ReSetContextWeights(std::map<std::string, float> const& new_weights);
+
 
 protected:
   boost::shared_ptr<Moses::InputType> m_source;

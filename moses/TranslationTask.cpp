@@ -30,6 +30,19 @@ TranslationTask
   return m_context_string;
 }
 
+std::map<std::string, float> const&
+TranslationTask::GetContextWeights() const
+{
+  return m_context_weights;
+}
+
+void
+TranslationTask
+::ReSetContextWeights(std::map<std::string, float> const& new_weights)
+{
+  m_context_weights = new_weights;
+}
+
 void
 TranslationTask
 ::SetContextString(std::string const& context)
@@ -37,6 +50,16 @@ TranslationTask
   m_context_string = context;
 }
 
+void
+TranslationTask
+::SetContextWeights(std::string const& context_weights)
+{
+  std::vector<std::string> tokens = Tokenize(context_weights,":");
+  for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
+    std::vector<std::string> key_and_value = Tokenize(*it, ",");
+    m_context_weights.insert(std::pair<std::string, float>(key_and_value[0], atof(key_and_value[1].c_str())));
+  }
+}
 
 
 boost::shared_ptr<TranslationTask>

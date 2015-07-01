@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "AlignmentInfoCollection.h"
 #include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
+//#include "moses/TranslationTask.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
@@ -52,15 +53,16 @@ class PhraseDictionary;
 class TargetPhrase: public Phrase
 {
 public:
-  typedef std::map<FeatureFunction const*, boost::shared_ptr<Scores> >
-  ScoreCache_t;
+  typedef std::map<FeatureFunction const*, boost::shared_ptr<Scores> > ScoreCache_t;
   ScoreCache_t const& GetExtraScores() const;
   Scores const* GetExtraScores(FeatureFunction const* ff) const;
-  void SetExtraScores(FeatureFunction const* ff,
-                      boost::shared_ptr<Scores> const& scores);
+  void SetExtraScores(FeatureFunction const* ff,boost::shared_ptr<Scores> const& scores);
+
 
 private:
   ScoreCache_t m_cached_scores;
+  ttasksptr m_ttask;
+  bool m_ttask_flag;
 
 private:
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
@@ -85,6 +87,14 @@ public:
   TargetPhrase(std::string out_string, const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
+
+  /*ttasksptr version*/
+  TargetPhrase(ttasksptr &ttask, const PhraseDictionary *pt = NULL);
+  TargetPhrase(ttasksptr &ttask, std::string out_string, const PhraseDictionary *pt = NULL);
+  explicit TargetPhrase(ttasksptr &ttask, const Phrase &targetPhrase, const PhraseDictionary *pt);
+  const ttasksptr& GetTtask() const;
+  bool HasTtaskSPtr() const;
+
   ~TargetPhrase();
 
   // 1st evaluate method. Called during loading of phrase table.

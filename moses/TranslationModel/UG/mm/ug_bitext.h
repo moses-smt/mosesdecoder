@@ -192,6 +192,8 @@ namespace Moses {
       sptr<DocumentBias>
       SetupDocumentBias(string const& bserver, string const& text, ostream* log) const;
 
+      sptr<DocumentBias>
+      SetupDocumentBias(map<string,float> context_weights, ostream* log) const;
 
       void
       mark_match(Token const* start, Token const* end, iter const& m,
@@ -430,6 +432,20 @@ namespace Moses {
 		     "Document bias requested but no document map loaded.");
       ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid,
 				 bserver, text, log));
+      return ret;
+    }
+
+    template<typename Token>
+    sptr<DocumentBias>
+    Bitext<Token>::
+    SetupDocumentBias
+    ( map<string,float> context_weights, ostream* log ) const
+    {
+      sptr<DocumentBias> ret;
+      UTIL_THROW_IF2(m_sid2docid == NULL,
+                     "Document bias requested but no document map loaded.");
+      ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid,
+                                 context_weights, log));
       return ret;
     }
 
