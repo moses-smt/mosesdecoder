@@ -24,9 +24,10 @@
 #define  BOOST_TEST_MODULE MosesTrainingScoreFeature
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/assign/list_of.hpp>
 
-#include <unordered_set>
-#include <unordered_map>
+//#include <unordered_set>
+//#include <unordered_map>
 
 using namespace MosesTraining;
 using namespace std;
@@ -54,16 +55,16 @@ BOOST_AUTO_TEST_CASE(manager_configure_domain_except)
   //Check that configure rejects illegal domain arg combinations
   ScoreFeatureManager manager;
   BOOST_CHECK_THROW(
-    manager.configure( {"--DomainRatio","/dev/null","--DomainIndicator","/dev/null"}),
+    manager.configure(boost::assign::list_of("--DomainRatio")("/dev/null")("--DomainIndicator")("/dev/null")),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure( {"--SparseDomainSubset","/dev/null","--SparseDomainRatio","/dev/null"}),
+    manager.configure(boost::assign::list_of("--SparseDomainSubset")("/dev/null")("--SparseDomainRatio")("/dev/null")),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure( {"--SparseDomainBlah","/dev/null"}),
+    manager.configure(boost::assign::list_of("--SparseDomainBlah")("/dev/null")),
     ScoreFeatureArgumentException);
   BOOST_CHECK_THROW(
-    manager.configure( {"--DomainSubset"}),
+    manager.configure(boost::assign::list_of("--DomainSubset")),
     ScoreFeatureArgumentException);
 }
 
@@ -97,25 +98,27 @@ T adder(T first, Args... args)
 BOOST_AUTO_TEST_CASE(manager_config_domain)
 {
   checkDomainConfigured<RatioDomainFeature>
-  ( {"--DomainRatio","/dev/null"});
+  (boost::assign::list_of("--DomainRatio")("/dev/null"));
   checkDomainConfigured<IndicatorDomainFeature>
-  ( {"--DomainIndicator","/dev/null"});
+  (boost::assign::list_of("--DomainIndicator")("/dev/null"));
   checkDomainConfigured<SubsetDomainFeature>
-  ( {"--DomainSubset","/dev/null"});
+  (boost::assign::list_of("--DomainSubset")("/dev/null"));
   checkDomainConfigured<SparseRatioDomainFeature>
-  ( {"--SparseDomainRatio","/dev/null"});
+  (boost::assign::list_of("--SparseDomainRatio")("/dev/null"));
   checkDomainConfigured<SparseIndicatorDomainFeature>
-  ( {"--SparseDomainIndicator","/dev/null"});
+  (boost::assign::list_of("--SparseDomainIndicator")("/dev/null"));
   checkDomainConfigured<SparseSubsetDomainFeature>
-  ( {"--SparseDomainSubset","/dev/null"});
+  (boost::assign::list_of("--SparseDomainSubset")("/dev/null"));
 
+  /*
+  // C++11 testing
   unordered_set<int> s;
   s.insert(4);
   s.insert(7);
   s.insert(4);
   s.insert(1);
 
-for (auto i: s) {
+  for (auto i: s) {
     cerr << i << " ";
   }
 
@@ -124,7 +127,7 @@ for (auto i: s) {
   m["ba"] = 6;
   m["aabc"] = 7;
 
-for (auto i: m) {
+  for (auto i: m) {
     cerr << i.first << "=" << i.second << " ";
   }
 
@@ -132,6 +135,6 @@ for (auto i: m) {
 
   std::string s1 = "x", s2 = "aa", s3 = "bb", s4 = "yy";
   std::string ssum = adder(s1, s2, s3, s4);
-
+  */
 }
 
