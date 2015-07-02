@@ -255,7 +255,7 @@ def execute_tests(testcase, cur_directory, config):
             subprocess.call([config.drop_caches], shell=True)
 
             #Create the command for executing moses:
-            whole_command = 'LD_PRELOAD ' + opt + time_command + testcase.command
+            whole_command = 'LD_PRELOAD=' + opt + time_command + testcase.command
             variant = 'ldpre_' + opt
 
             #test normal and cached
@@ -282,7 +282,7 @@ def execute_tests(testcase, cur_directory, config):
                 subprocess.call([config.drop_caches], shell=True)
 
                 #Create the command for executing moses:
-                whole_command = 'LD_PRELOAD ' + opt + testcase.prof_command
+                whole_command = 'LD_PRELOAD=' + opt + testcase.prof_command
                 variant = 'profile_ldpre_' + opt
 
                 #test normal and cached
