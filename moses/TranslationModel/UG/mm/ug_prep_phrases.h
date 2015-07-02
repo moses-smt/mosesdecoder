@@ -46,32 +46,32 @@ struct StatsCollector
     if (!lcache) lcache.reset(new lcache_t);
     if (m.down())
       {
-	do 
-	  {
-	    if (!r.extend(m.getToken(-1)->id())) continue;
-	    this->process(m, r);
-	    uint64_t pid = r.getPid();
-	    sptr<pstats> stats;
-	    if (hcache) stats = hcache->get(pid); 
-	    if (!stats && pcache)
-	      {
-		sptr<pstats> const* foo = pcache->get(pid);
-		if (foo) stats = *foo; 
-	      }
-	    if (!stats) // need to sample
-	      {
-		BitextSampler<Token> s(bitext.get(), r, bias, sample_size, method);
-		stats = s.stats();
-		if (hcache) hcache->set(pid,stats);
-		if (pcache && r.ca() >= pcache_th) pcache->set(pid,stats);
-		if (tpool) tpool->add(s);
-		else s();
-	      }
-	    (*lcache)[pid] = stats;
-	    r.up();
-	  }
-	while (m.over());
-	m.up();
+        do 
+          {
+            if (!r.extend(m.getToken(-1)->id())) continue;
+            this->process(m, r);
+            uint64_t pid = r.getPid();
+            sptr<pstats> stats;
+            if (hcache) stats = hcache->get(pid); 
+            if (!stats && pcache)
+              {
+                sptr<pstats> const* foo = pcache->get(pid);
+                if (foo) stats = *foo; 
+              }
+            if (!stats) // need to sample
+              {
+                BitextSampler<Token> s(bitext.get(), r, bias, sample_size, method);
+                stats = s.stats();
+                if (hcache) hcache->set(pid,stats);
+                if (pcache && r.ca() >= pcache_th) pcache->set(pid,stats);
+                if (tpool) tpool->add(s);
+                else s();
+              }
+            (*lcache)[pid] = stats;
+            r.up();
+          }
+        while (m.over());
+        m.up();
       }
   }
 };
