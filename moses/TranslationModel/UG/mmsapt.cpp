@@ -296,6 +296,7 @@ namespace Moses
   load_extra_data(string bname, bool locking = true)
   {
     using namespace boost;
+    using namespace ugdiss;
     // TO DO: ADD CHECKS FOR ROBUSTNESS
     // - file existence?
     // - same number of lines?
@@ -701,7 +702,7 @@ namespace Moses
 #if 1
     if (m_bias_log && m_lr_func && m_bias_loglevel > 3)
       {
-	typename PhrasePair<Token>::SortDescendingByJointCount sorter;
+	PhrasePair<Token>::SortDescendingByJointCount sorter;
 	sort(ppfix.begin(), ppfix.end(),sorter);
 	BOOST_FOREACH(PhrasePair<Token> const& pp, ppfix)
 	  {

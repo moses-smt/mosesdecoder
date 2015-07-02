@@ -2,7 +2,7 @@
 #pragma once
 
 #include <map>
-#include<vector>
+#include <vector>
 #include <string>
 #include <iostream>
 #include "moses/Util.h"

@@ -15,22 +15,22 @@
 #include "ug_conll_bottom_up_token.h"
 #include "ug_typedefs.h"
 
-using namespace std;
+// using namespace std;
 namespace ugdiss
 {
 
-  // Fills the vector v with pointers to the internal root r_x for the
+  // Fills the std::vector v with pointers to the internal root r_x for the
   // stretch [start,x] for all x: start <= x < stop. If the stretch
   // is incoherent, r_x is NULL
   template<typename T>
   void
-  fill_L2R_roots(T const* start,T const* stop, vector<T const*>& v)
+  fill_L2R_roots(T const* start,T const* stop, std::vector<T const*>& v)
   {
     assert(stop>start);
     v.resize(stop-start);
     v[0] = start;
     bitvector isR(v.size());
-    vector<T const*> root(v.size());
+    std::vector<T const*> root(v.size());
     isR.set(0);
     root[0] = start+start->parent;
     for (T const* x = start+1; x < stop; ++x)
@@ -95,7 +95,7 @@ namespace ugdiss
 
   template<typename T>
   T const*
-  findInternalRoot(vector<T> const& v)
+  findInternalRoot(std::vector<T> const& v)
   {
     T const* a = as<T>(&(*v.begin()));
     T const* b = as<T>(&(*v.end()));
@@ -108,7 +108,7 @@ namespace ugdiss
   public:
     Conll_Record const*        rec; // pointer to the record (see below) for this node
     DTNode*           parent; // pointer to my parent
-    vector<DTNode*> children; // children (in the order they appear in the sentence)
+    std::vector<DTNode*> children; // children (in the order they appear in the sentence)
     DTNode(Conll_Record const* p);
   };
 
@@ -117,7 +117,7 @@ namespace ugdiss
   DependencyTree
   {
   public:
-    vector<DTNode> w;
+    std::vector<DTNode> w;
     DependencyTree(Conll_Record const* first, Conll_Record const* last);
   };
 #endif

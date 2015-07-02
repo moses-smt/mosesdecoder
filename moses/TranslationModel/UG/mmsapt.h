@@ -145,7 +145,7 @@ namespace Moses
 
     std::vector<std::vector<id_type> > wlex21;
     // word translation lexicon (without counts, get these from calc_lex.COOC)
-    typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> mm2dtable_t;
+    typedef ugdiss::mm2dTable<id_type,id_type,uint32_t,uint32_t> mm2dtable_t;
     mm2dtable_t COOCraw;
 
     TargetPhrase*

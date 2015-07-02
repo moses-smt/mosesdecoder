@@ -16,7 +16,7 @@ namespace Moses {
       float    m_alpha;
       string m_lexfile;
     public:
-      LexicalPhraseScorer2<Token> scorer;
+      ugdiss::LexicalPhraseScorer2<Token> scorer;
 
       PScoreLex1(string const& alphaspec, string const& lexfile)
       {

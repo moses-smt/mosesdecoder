@@ -50,7 +50,7 @@ public:
 
   //! the input sentence being decoded
   const InputType& GetSource() const;
-  const ttasksptr& GetTtask() const;
+  const ttasksptr  GetTtask() const;
 
   virtual void Decode() = 0;
   // outputs
