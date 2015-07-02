@@ -130,7 +130,7 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
     MmapAllocator<unsigned char> allocCompressed(util::FMakeTemp(tempfilePath));
     m_compressedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocCompressed);
   } else {
-    m_compressedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+    m_compressedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>(true);
   }
   CompressTargetPhrases();
 
@@ -203,7 +203,7 @@ void PhraseTableCreator::Save()
         = m_sourceSymbolsMap.begin(); it != m_sourceSymbolsMap.end(); it++)
       temp1[it->second] = it->first;
     std::sort(temp1.begin(), temp1.end());
-    StringVector<unsigned char, unsigned, std::allocator> sourceSymbols;
+    StringVector<unsigned char, unsigned, std::allocator> sourceSymbols(true);
     for(std::vector<std::string>::iterator it = temp1.begin();
         it != temp1.end(); it++)
       sourceSymbols.push_back(*it);
@@ -224,7 +224,7 @@ void PhraseTableCreator::Save()
   for(boost::unordered_map<std::string, unsigned>::iterator it
       = m_targetSymbolsMap.begin(); it != m_targetSymbolsMap.end(); it++)
     temp2[it->second] = it->first;
-  StringVector<unsigned char, unsigned, std::allocator> targetSymbols;
+  StringVector<unsigned char, unsigned, std::allocator> targetSymbols(true);
   for(std::vector<std::string>::iterator it = temp2.begin();
       it != temp2.end(); it++)
     targetSymbols.push_back(*it);

@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 if [ $# -lt 8 ]
 	then
@@ -25,7 +28,15 @@ shift
 shift
 shift
 
-JAVA_CMD="/usr/local/share/java/bin/java $JAVA_OPTS -jar $JAR -Data.trainSources $INFILE.list -Main.loadParamsDir $PARAMDIR -exec.execDir $OUTNAME -Main.loadLexicalModelOnly false -Data.englishSuffix $SLANG -Data.foreignSuffix $TLANG -exec.create true -Main.saveParams false -Main.alignTraining true -Main.forwardModels HMM -Main.reverseModels HMM -Main.mode JOINT -Main.iters 0 -Data.testSources -EMWordAligner.posteriorDecodingThreshold $POSTERIOR $@"
+JAVA_CMD="/usr/local/share/java/bin/java \
+      $JAVA_OPTS -jar $JAR -Data.trainSources $INFILE.list \
+      -Main.loadParamsDir $PARAMDIR -exec.execDir $OUTNAME \
+      -Main.loadLexicalModelOnly false -Data.englishSuffix $SLANG \
+      -Data.foreignSuffix $TLANG -exec.create true -Main.saveParams false \
+      -Main.alignTraining true -Main.forwardModels HMM \
+      -Main.reverseModels HMM -Main.mode JOINT -Main.iters 0 \
+      -Data.testSources -EMWordAligner.posteriorDecodingThreshold $POSTERIOR \
+      $@"
 echo "Running $JAVA_CMD"
 $JAVA_CMD
 

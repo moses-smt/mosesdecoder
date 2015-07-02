@@ -24,8 +24,10 @@
 #define  BOOST_TEST_MODULE MosesTrainingScoreFeature
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
-
 #include <boost/assign/list_of.hpp>
+
+//#include <unordered_set>
+//#include <unordered_map>
 
 using namespace MosesTraining;
 using namespace std;
@@ -81,10 +83,22 @@ static void checkDomainConfigured(
   BOOST_CHECK(manager.includeSentenceId());
 }
 
+template<typename T>
+T adder(T v)
+{
+  return v;
+}
+
+template<typename T, typename... Args>
+T adder(T first, Args... args)
+{
+  return first + adder(args...);
+}
+
 BOOST_AUTO_TEST_CASE(manager_config_domain)
 {
   checkDomainConfigured<RatioDomainFeature>
-  (boost::assign::list_of ("--DomainRatio")("/dev/null"));
+  (boost::assign::list_of("--DomainRatio")("/dev/null"));
   checkDomainConfigured<IndicatorDomainFeature>
   (boost::assign::list_of("--DomainIndicator")("/dev/null"));
   checkDomainConfigured<SubsetDomainFeature>
@@ -95,5 +109,32 @@ BOOST_AUTO_TEST_CASE(manager_config_domain)
   (boost::assign::list_of("--SparseDomainIndicator")("/dev/null"));
   checkDomainConfigured<SparseSubsetDomainFeature>
   (boost::assign::list_of("--SparseDomainSubset")("/dev/null"));
+
+  /*
+  // C++11 testing
+  unordered_set<int> s;
+  s.insert(4);
+  s.insert(7);
+  s.insert(4);
+  s.insert(1);
+
+  for (auto i: s) {
+    cerr << i << " ";
+  }
+
+  unordered_map<std::string, int> m;
+  m["a"] = 4;
+  m["ba"] = 6;
+  m["aabc"] = 7;
+
+  for (auto i: m) {
+    cerr << i.first << "=" << i.second << " ";
+  }
+
+  long sum = adder(1, 2, 3, 8, 7);
+
+  std::string s1 = "x", s2 = "aa", s3 = "bb", s4 = "yy";
+  std::string ssum = adder(s1, s2, s3, s4);
+  */
 }
 

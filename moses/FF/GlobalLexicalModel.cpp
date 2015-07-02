@@ -111,8 +111,8 @@ void GlobalLexicalModel::Load()
 
 void GlobalLexicalModel::InitializeForInput(ttasksptr const& ttask)
 {
-  UTIL_THROW_IF2(ttask->GetSource()->GetType() != SentenceInput, 
-		 "GlobalLexicalModel works only with sentence input.");
+  UTIL_THROW_IF2(ttask->GetSource()->GetType() != SentenceInput,
+                 "GlobalLexicalModel works only with sentence input.");
   Sentence const* s = reinterpret_cast<Sentence const*>(ttask->GetSource().get());
   m_local.reset(new ThreadLocalStorage);
   m_local->input = s;

@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Rico Sennrich
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 """
 Extract syntactic n-grams from dependency treebank in Moses XML format for
@@ -133,7 +136,7 @@ def get_syntactic_ngrams(xml, options, vocab, output_vocab,
         skip_glue_labels = [
             options.glue_symbol,
             options.start_symbol,
-            options.end_symbo,
+            options.end_symbol,
             ]
         if xml.get('label') in skip_glue_labels:
             for child in xml:

@@ -6,6 +6,9 @@
 #produced by giza containing the frequency of each traning sentence.
 
 #Copyright Marcello Federico, November 2004
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 #use warnings;
 

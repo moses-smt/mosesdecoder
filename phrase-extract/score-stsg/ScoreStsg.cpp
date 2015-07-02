@@ -35,7 +35,7 @@ namespace ScoreStsg
 const int ScoreStsg::kCountOfCountsMax = 10;
 
 ScoreStsg::ScoreStsg()
-  : m_name("score-stsg")
+  : Tool("score-stsg")
   , m_lexTable(m_srcVocab, m_tgtVocab)
   , m_countOfCounts(kCountOfCountsMax, 0)
   , m_totalDistinct(0)
@@ -300,17 +300,6 @@ double ScoreStsg::ComputeLexProb(const std::vector<RuleSymbol> &sourceFrontier,
   return lexScore;
 }
 
-void ScoreStsg::OpenOutputFileOrDie(const std::string &filename,
-                                    Moses::OutputFileStream &stream)
-{
-  bool ret = stream.Open(filename);
-  if (!ret) {
-    std::ostringstream msg;
-    msg << "failed to open output file: " << filename;
-    Error(msg.str());
-  }
-}
-
 void ScoreStsg::ProcessOptions(int argc, char *argv[], Options &options) const
 {
   namespace po = boost::program_options;
@@ -319,7 +308,7 @@ void ScoreStsg::ProcessOptions(int argc, char *argv[], Options &options) const
   // Construct the 'top' of the usage message: the bit that comes before the
   // options list.
   std::ostringstream usageTop;
-  usageTop << "Usage: " << GetName()
+  usageTop << "Usage: " << name()
            << " [OPTION]... EXTRACT LEX TABLE\n\n"
            << "STSG rule scorer\n\n"
            << "Options";
@@ -386,11 +375,8 @@ void ScoreStsg::ProcessOptions(int argc, char *argv[], Options &options) const
 
   // Process the command-line.
   po::variables_map vm;
-  const int optionStyle = cls::allow_long
-                          | cls::long_allow_adjacent
-                          | cls::long_allow_next;
   try {
-    po::store(po::command_line_parser(argc, argv).style(optionStyle).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmdLineOptions).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {
@@ -438,12 +424,6 @@ void ScoreStsg::ProcessOptions(int argc, char *argv[], Options &options) const
   if (vm.count("TreeScore") || vm.count("PCFG")) {
     options.treeScore = true;
   }
-}
-
-void ScoreStsg::Error(const std::string &msg) const
-{
-  std::cerr << GetName() << ": " << msg << std::endl;
-  std::exit(1);
 }
 
 }  // namespace ScoreStsg

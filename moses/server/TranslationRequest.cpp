@@ -1,4 +1,5 @@
 #include "TranslationRequest.h"
+#include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
 
 namespace MosesServer
@@ -30,6 +31,7 @@ create(xmlrpc_c::paramList const& paramList,
   boost::shared_ptr<TranslationRequest> ret;
   ret.reset(new TranslationRequest(paramList,cond, mut));
   ret->m_self = ret;
+  ret->m_scope.reset(new Moses::ContextScope);
   return ret;
 }
 
@@ -221,6 +223,7 @@ TranslationRequest::
 TranslationRequest(xmlrpc_c::paramList const& paramList,
                    boost::condition_variable& cond, boost::mutex& mut)
   : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
+  , m_nbestSize(0)
 { }
 
 void
@@ -265,6 +268,14 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
     }
   }
 
+  si = params.find("nbest");
+  if (si != params.end())
+    m_nbestSize = xmlrpc_c::value_int(si->second);
+
+  si = params.find("context");
+  if (si != params.end()) {
+    m_context_string = xmlrpc_c::value_string(si->second);
+  }
   // // biased sampling for suffix-array-based sampling phrase table?
   // if ((si = params.find("bias")) != params.end())
   //   {

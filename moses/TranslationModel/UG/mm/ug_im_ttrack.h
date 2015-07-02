@@ -57,7 +57,7 @@ namespace ugdiss
   public:
 
     imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d);
-    imTtrack(istream& in, TokenIndex const& V, ostream* log = NULL);
+    imTtrack(istream& in, TokenIndex& V, ostream* log = NULL);
     imTtrack(size_t reserve = 0);
     // imTtrack(istream& in, Vocab& V);
 
@@ -131,24 +131,30 @@ namespace ugdiss
 
   template<typename Token>
   imTtrack<Token>::
-  imTtrack(istream& in, TokenIndex const& V, ostream* log)
+  imTtrack(istream& in, TokenIndex& V, ostream* log)
     : numToks(0)
   {
     myData.reset(new vector<vector<Token> >());
     string line,w;
     size_t linectr=0;
     boost::unordered_map<string,id_type> H;
-    for (id_type i = 0; i < V.knownVocabSize(); ++i)
-      H[V[i]] = i;
+    // for (id_type i = 0; i < V.knownVocabSize(); ++i)
+    // H[V[i]] = i;
     while (getline(in,line))
       {
+	// cout << line << endl;
 	myData->push_back(vector<Token>());
 	if (log && ++linectr%1000000==0)
 	  *log << linectr/1000000 << "M lines of input processed" << endl;
 	istringstream buf(line);
+	// cout << line << endl;
 	while (buf>>w)
-	  myData->back().push_back(Token(H[w]));
-	myData->back().resize(myData.back().size());
+	  {
+	    myData->back().push_back(Token(V[w]));
+	    // cout << w << " " << myData->back().back().id() << " " 
+	    // << V[w] << endl;
+	  }
+	// myData->back().resize(myData->back().size(), Token(0));
 	numToks += myData->back().size();
       }
   }

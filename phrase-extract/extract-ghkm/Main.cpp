@@ -21,6 +21,6 @@
 
 int main(int argc, char *argv[])
 {
-  Moses::GHKM::ExtractGHKM tool;
+  MosesTraining::GHKM::ExtractGHKM tool;
   return tool.Main(argc, argv);
 }

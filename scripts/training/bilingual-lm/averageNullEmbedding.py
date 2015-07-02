@@ -1,7 +1,11 @@
 #!/usr/bin/env python2
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 import sys
 import numpy
 import argparse
+
 
 parser = argparse.ArgumentParser(
     description=(
@@ -21,13 +25,8 @@ parser.add_argument(
     required=True)
 
 
-options = parser.parse_args()
-
-sys.path.append(options.nplm_python_path)
-import nplm
-
-
 def load_model(model_file):
+    import nplm
     return nplm.NeuralLM.from_file(model_file)
 
 
@@ -39,7 +38,9 @@ def get_weights(path, length):
     return counter
 
 
-if __name__ == "__main__":
+def main(options):
+
+    sys.path.append(options.nplm_python_path)
 
     model = load_model(options.input_model)
     if options.null_idx == -1:
@@ -50,3 +51,8 @@ if __name__ == "__main__":
     model.input_embeddings[options.null_idx] = numpy.average(
         numpy.array(model.input_embeddings), weights=weights, axis=0)
     model.to_file(open(options.output_model, 'w'))
+
+
+if __name__ == "__main__":
+    options = parser.parse_args()
+    main(options)

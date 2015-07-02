@@ -1,5 +1,10 @@
 <?php
 
+/*
+This file is part of moses.  Its use is licensed under the GNU Lesser General
+Public License version 2.1 or, at your option, any later version.
+*/
+
 # main page frame, triggers the loading of parts
 function show_analysis() {
   global $task,$user,$setup,$id,$set;

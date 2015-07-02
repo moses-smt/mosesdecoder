@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 from __future__ import print_function, unicode_literals
 
@@ -23,7 +26,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--working-dir", dest="working_dir", metavar="PATH")
 parser.add_argument(
-    "--corpus", dest="corpus_stem", metavar="PATH", help="Input file.")
+    "--corpus", '-text', dest="corpus_stem", metavar="PATH", help="Input file.")
 parser.add_argument(
     "--nplm-home", dest="nplm_home", metavar="PATH", required=True,
     help="Location of NPLM.")
@@ -91,11 +94,14 @@ parser.add_argument(
     "--output-words-file", dest="output_words_file", metavar="PATH",
     help="Output vocabulary (default: %(default)s).")
 parser.add_argument(
-    "--input_vocab_size", dest="input_vocab_size", type=int, metavar="INT",
+    "--input-vocab-size", dest="input_vocab_size", type=int, metavar="INT",
     help="Input vocabulary size (default: %(default)s).")
 parser.add_argument(
     "--output-vocab-size", dest="output_vocab_size", type=int, metavar="INT",
     help="Output vocabulary size (default: %(default)s).")
+parser.add_argument(
+    "--mmap", dest="mmap", action="store_true",
+    help="Use memory-mapped file (for lower memory consumption).")
 
 
 parser.set_defaults(
@@ -169,6 +175,13 @@ def prepare_vocabulary(options):
 
 def main(options):
 
+    if options.output_dir is None:
+        options.output_dir = options.working_dir
+    else:
+        # Create output dir if necessary
+        if not os.path.exists(options.output_dir):
+            os.makedirs(options.output_dir)
+
     options.ngram_size = (
         2 * options.up_context_size +
         2 * options.left_context_size +
@@ -185,11 +198,14 @@ def main(options):
             "extracting vocabulary from training text.\n")
         prepare_vocabulary(options)
 
+    numberized_file = os.path.basename(options.corpus_stem) + '.numberized'
+    train_file = numberized_file
+    if options.mmap:
+        train_file += '.mmap'
+
     extract_options = extract_syntactic_ngrams.create_parser().parse_args([
         '--input', options.corpus_stem,
-        '--output', os.path.join(
-            options.working_dir,
-            os.path.basename(options.corpus_stem) + '.numberized'),
+        '--output', os.path.join(options.working_dir, numberized_file),
         '--vocab', options.input_words_file,
         '--output_vocab', options.output_words_file,
         '--right_context', str(options.right_context_size),
@@ -209,6 +225,25 @@ def main(options):
         sys.stderr.write('extracting syntactic n-grams (validation file)\n')
         extract_syntactic_ngrams.main(extract_options)
         extract_options.output.close()
+    else:
+        options.validation_file = None
+
+    if options.mmap:
+        try:
+            os.remove(os.path.join(options.working_dir, train_file))
+        except OSError:
+            pass
+        mmap_cmd = [os.path.join(options.nplm_home, 'src', 'createMmap'),
+                    '--input_file',
+                    os.path.join(options.working_dir, numberized_file),
+                    '--output_file',
+                    os.path.join(options.working_dir, train_file)
+                    ]
+        sys.stderr.write('creating memory-mapped file\n')
+        sys.stderr.write('executing: ' + ', '.join(mmap_cmd) + '\n')
+        ret = subprocess.call(mmap_cmd)
+        if ret:
+            raise Exception("creating memory-mapped file failed")
 
     sys.stderr.write('training neural network\n')
     train_nplm.main(options)
@@ -222,7 +257,7 @@ def main(options):
             options.output_model + '.model.nplm.' + str(options.epochs)),
         os.path.join(
             options.working_dir,
-            os.path.basename(options.corpus_stem) + '.numberized'),
+            numberized_file),
         os.path.join(options.output_dir, options.output_model + '.model.nplm')
         ])
     if ret:
@@ -235,5 +270,7 @@ if __name__ == "__main__":
         sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
         sys.stdin = codecs.getreader('UTF-8')(sys.stdin)
 
-    options = parser.parse_args()
+    options = parser.parse_known_args()[0]
+    if parser.parse_known_args()[1]:
+        sys.stderr.write('Warning: unknown arguments: {0}\n'.format(parser.parse_known_args()[1]))
     main(options)

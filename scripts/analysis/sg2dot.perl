@@ -3,6 +3,8 @@
 # Author : Loic BARRAULT
 # Script to convert MOSES searchgraph to DOT format
 #
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;

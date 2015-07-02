@@ -40,8 +40,8 @@ endef
 define truecase
 
 $2/cased/%.$3.gz: caser  = ${run-truecaser} 
-$2/cased/%.$3.gz: caser += -model ${WDIR}/aux/truecasing-model.$1
-$2/cased/%.$3.gz: | $2/tok/%.$3.gz  ${WDIR}/aux/truecasing-model.$1
+$2/cased/%.$3.gz: caser += -model ${WDIR}/auxiliary/truecasing-model.$1
+$2/cased/%.$3.gz: | $2/tok/%.$3.gz  ${WDIR}/auxiliary/truecasing-model.$1
 	$$(lock)
 	zcat $$(word 1, $$|) | ${parallel} --pipe -k $${caser} | gzip > $$@_
 	mv $$@_ $$@
@@ -127,8 +127,8 @@ endef
 # .SECONDARY: $(call trn.tok-mno,${L1}) $(call trn.tok-pll,${L1})
 # .SECONDARY: $(call trn.tok-mno,${L2}) $(call trn.tok-pll,${L2})
 
-#${WDIR}/aux/truecasing-model.${L1}: | $(call trn.tok-mno,${L1}) $(call trn.tok-pll,${L1})
-${WDIR}/aux/truecasing-model.${L1}: | $(call trn.tok-mno,${L1}) 
+#${WDIR}/auxiliary/truecasing-model.${L1}: | $(call trn.tok-mno,${L1}) $(call trn.tok-pll,${L1})
+${WDIR}/auxiliary/truecasing-model.${L1}: | $(call trn.tok-mno,${L1}) 
 	$(lock)
 	$(if $|,,$(error Can't find training data for $@!))#'
 	${train-truecaser} -model $@_ -corpus <(echo $| | xargs zcat -f) 
@@ -136,8 +136,8 @@ ${WDIR}/aux/truecasing-model.${L1}: | $(call trn.tok-mno,${L1})
 	mv $@_ $@
 	$(unlock)
 
-#${WDIR}/aux/truecasing-model.${L2}: | $(call trn.tok-mno,${L2}) $(call trn.tok-pll,${L2})
-${WDIR}/aux/truecasing-model.${L2}: | $(call trn.tok-mno,${L2}) 
+#${WDIR}/auxiliary/truecasing-model.${L2}: | $(call trn.tok-mno,${L2}) $(call trn.tok-pll,${L2})
+${WDIR}/auxiliary/truecasing-model.${L2}: | $(call trn.tok-mno,${L2}) 
 	$(lock)
 	$(if $|,,$(error Can't find training data for $@!))#'
 	${train-truecaser} -model $@_ -corpus <(echo $| | xargs zcat -f) 

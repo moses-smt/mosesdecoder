@@ -12,7 +12,7 @@ namespace FilterRuleTable
 {
 
 TreeCfgFilter::TreeCfgFilter(
-  const std::vector<boost::shared_ptr<StringTree> > &sentences)
+  const std::vector<boost::shared_ptr<SyntaxTree> > &sentences)
 {
 }
 

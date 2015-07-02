@@ -151,9 +151,6 @@ int main(int argc, char** argv)
         ResetUserTime();
       }
 
-      InputType* foo = source.get();
-      FeatureFunction::CallChangeSource(foo);
-
       // set up task of training one sentence
       boost::shared_ptr<TrainingTask> task;
       task = TrainingTask::create(source, ioWrapper);

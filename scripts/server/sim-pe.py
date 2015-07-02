@@ -2,8 +2,14 @@
 # -*- coding: utf-8 -*-
 
 # Written by Ulrich Germann on the basis of contrib/server/client.py.
-# This script simulates post-editing of MT output and incrementally
-# updates the dynamic phrase tables in the moses server.
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
+
+"""Simulate post-editing of MT output.
+
+Incrementally updates the dynamic phrase tables in the moses server.
+"""
 
 import argparse
 import os

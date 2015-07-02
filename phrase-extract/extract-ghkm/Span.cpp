@@ -19,7 +19,7 @@
 
 #include "Span.h"
 
-namespace Moses
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -45,4 +45,4 @@ ContiguousSpan Closure(const Span &s)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining

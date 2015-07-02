@@ -18,8 +18,6 @@
  ***********************************************************************/
 
 #pragma once
-#ifndef moses_ChartRuleLookupManagerMemory_h
-#define moses_ChartRuleLookupManagerMemory_h
 
 #include <vector>
 
@@ -97,4 +95,3 @@ private:
 
 }  // namespace Moses
 
-#endif

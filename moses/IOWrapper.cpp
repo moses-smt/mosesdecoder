@@ -296,7 +296,8 @@ GetBufferedInput()
 }
 
 boost::shared_ptr<InputType>
-IOWrapper::ReadInput()
+IOWrapper::
+ReadInput()
 {
 #ifdef WITH_THREADS
   boost::lock_guard<boost::mutex> lock(m_lock);
@@ -304,7 +305,8 @@ IOWrapper::ReadInput()
   boost::shared_ptr<InputType> source = GetBufferedInput();
   if (source) {
     source->SetTranslationId(m_currentLine++);
-    this->set_context_for(*source);
+    if (m_look_ahead || m_look_back)
+      this->set_context_for(*source);
   }
   m_past_input.push_back(source);
   return source;
@@ -344,7 +346,7 @@ set_context_for(InputType& source)
     }
   }
   // cerr << string(80,'=') << endl;
-  source.SetContext(context);
+  if (context->size()) source.SetContext(context);
 }
 
 

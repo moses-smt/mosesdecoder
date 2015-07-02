@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # compute Bleu scores with confidence intervals via boostrap resampling
 # written by Ulrich Germann
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 from argparse import ArgumentParser
 import math

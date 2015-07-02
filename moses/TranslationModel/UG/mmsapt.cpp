@@ -1,8 +1,8 @@
-#ifdef HAVE_CURLPP
-#include <curlpp/Options.hpp>
-#include <curlpp/cURLpp.hpp>
-#include <curlpp/Easy.hpp>
-#endif
+// #ifdef HAVE_CURLPP
+// #include <curlpp/Options.hpp>
+// #include <curlpp/cURLpp.hpp>
+// #include <curlpp/Easy.hpp>
+// #endif
 
 #include "mmsapt.h"
 #include <boost/foreach.hpp>

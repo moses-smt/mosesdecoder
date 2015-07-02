@@ -8,8 +8,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
+#include "SyntaxTree.h"
+
 #include "syntax-common/numbered_set.h"
-#include "syntax-common/string_tree.h"
 #include "syntax-common/tree.h"
 #include "syntax-common/tree_fragment_tokenizer.h"
 
@@ -29,7 +30,7 @@ class TreeCfgFilter : public CfgFilter
 {
 public:
   // Initialize the filter for a given set of test sentences.
-  TreeCfgFilter(const std::vector<boost::shared_ptr<StringTree> > &);
+  TreeCfgFilter(const std::vector<boost::shared_ptr<SyntaxTree> > &);
 
   void Filter(std::istream &in, std::ostream &out);
 };

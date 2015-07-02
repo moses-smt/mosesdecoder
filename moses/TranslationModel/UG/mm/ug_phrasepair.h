@@ -3,7 +3,9 @@
 #include <vector>
 #include "ug_typedefs.h"
 #include "ug_bitext_pstats.h"
+#ifndef NO_MOSES
 #include "moses/FF/LexicalReordering/LexicalReorderingState.h"
+#endif
 #include "boost/format.hpp"
 #include "tpt_tokenindex.h"
 namespace Moses
@@ -28,7 +30,8 @@ namespace Moses
       std::vector<uchar> aln;
       float score;
       bool inverse;
-      std::vector<uint32_t> indoc;
+      // std::vector<uint32_t> indoc;
+      std::map<uint32_t,uint32_t> indoc;
       PhrasePair() { };
       PhrasePair(PhrasePair const& o);
 
@@ -52,9 +55,11 @@ namespace Moses
       fill_lr_vec(LRModel::Direction const& dir,
 		  LRModel::ModelType const& mdl,
 		  vector<float>& v) const;
+#ifndef NO_MOSES
       void
       print(ostream& out, TokenIndex const& V1, TokenIndex const& V2,
 	    LRModel const& LR) const;
+#endif 
 
       class SortByTargetIdSeq
       {
@@ -292,6 +297,7 @@ namespace Moses
     }
 
 
+#ifndef NO_MOSES
     template<typename Token>
     void
     PhrasePair<Token>
@@ -301,10 +307,12 @@ namespace Moses
       out << toString (V1, this->start1, this->len1) << " ::: "
 	  << toString (V2, this->start2, this->len2) << " "
 	  << this->joint << " [";
-      for (size_t i = 0; i < this->indoc.size(); ++i)
+      // for (size_t i = 0; i < this->indoc.size(); ++i)
+      for (std::map<uint32_t,uint32_t>::const_iterator m = indoc.begin();
+	   m != indoc.end(); ++m)
 	{
-	  if (i) out << " ";
-	  out << this->indoc[i];
+	  if (m != indoc.begin()) out << " ";
+	  out << m->first << ":" << m->second;
 	}
       out << "] [";
       vector<float> lrscores;
@@ -331,5 +339,6 @@ namespace Moses
 	}
 #endif
     }
+#endif
   } // namespace bitext
 } // namespace Moses

@@ -137,7 +137,10 @@ int Bitext<Token>::agenda::job
 
   float p = (*m_bias)[sid];
   id_type docid = m_bias->GetClass(sid);
-  uint32_t k = docid < stats->indoc.size() ? stats->indoc[docid] : 0;
+  
+  // uint32_t k = docid < stats->indoc.size() ? stats->indoc[docid] : 0;
+  std::map<uint32_t,uint32_t>::const_iterator m = stats->indoc.find(docid);
+  uint32_t k = m != stats->indoc.end() ? m->second : 0 ;
 
   // always consider candidates from dominating documents and
   // from documents that have not been considered at all yet
@@ -159,11 +162,17 @@ int Bitext<Token>::agenda::job
 	e = root->getCorpus()->sntEnd(sid);
       *log << docid << ":" << sid << " " << size_t(k) << "/" << N
 	   << " @" << p << " => " << d << " [";
-      for (size_t i = 0; i < stats->indoc.size(); ++i)
+      for (std::map<uint32_t, uint32_t>::const_iterator m = stats->indoc.begin();
+	   m != stats->indoc.end(); ++m)
 	{
-	  if (i) *log << " ";
-	  *log << stats->indoc[i];
+	  if (m != stats->indoc.begin()) *log << " ";
+	  *log << m->first << ":" << m->second;
 	}
+      // for (size_t i = 0; i < stats->indoc.size(); ++i)
+      // 	{
+      // 	  if (i) *log << " ";
+      // 	  *log << stats->indoc[i];
+      // 	}
       *log << "] ";
       for (; x < e; ++x) *log << (*m_bitext->V1)[x->id()] << " ";
       if (!ret) *log << "SKIP";

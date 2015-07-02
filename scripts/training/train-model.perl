@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;
@@ -2355,6 +2358,8 @@ sub create_ini {
 
   print INI "\n# dense weights for feature functions\n";
   print INI "[weight]\n";
+  print INI "# The default weights are NOT optimized for translation quality. You MUST tune the weights.\n";
+  print INI "# Documentation for tuning is here: http://www.statmt.org/moses/?n=FactoredTraining.Tuning \n";
   print INI "UnknownWordPenalty0= 1\n";
   print INI "WordPenalty0= -1\n";
   print INI "PhrasePenalty0= 0.2\n";

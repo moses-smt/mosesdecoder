@@ -3,7 +3,7 @@
 #include "Node.h"
 #include "Subgraph.h"
 
-namespace Moses
+namespace MosesTraining
 {
 namespace GHKM
 {
@@ -38,4 +38,4 @@ bool Rule::PartitionOrderComp(const Node *a, const Node *b)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace MosesTraining
