@@ -83,14 +83,14 @@ int main(int argc, char* argv[])
   sptr<imttrack> icrp = read_input(*B.V1);
   imtsa newIdx(icrp,NULL);
   sptr<SentenceBias> bias = prime_sampling1(*B.I1, newIdx, 5000, B.sid2did());
-  cerr << "primed" << endl;
-  ug::ThreadPool T(boost::thread::hardware_concurrency());
+  cerr << "primed " << endl;
+  ug::ThreadPool T(1); // boost::thread::hardware_concurrency());
   TSA<Token>::tree_iterator m(&newIdx);
   // dump(m, *B.V1);
   // exit(0);
   TSA<Token>::tree_iterator r(B.I1.get());
   StatsCollector<Token> collect(Bptr, bias);
-  collect.tpool = &T;
+  // collect.tpool = &T;
   collect.process(m, r);
 
   typedef PhrasePair<Token>::SortDescendingByJointCount sorter_t;
@@ -119,7 +119,14 @@ int main(int argc, char* argv[])
                   PhrasePair<Token> const& pp = pplist[i];
                   // if (pp.joint == 1) break;
                   cout << boost::format("   %6d %.5f | ") % pp.joint % pp.cum_bias 
-                       << toString(*B.V2, pp.start2, pp.len2) << endl;
+                       << toString(*B.V2, pp.start2, pp.len2) 
+                       << " [";
+                  for (size_t d = 0; d < pp.indoc.size(); ++d)
+                    {
+                      if (d) cout << ":";
+                      cout << pp.indoc[d];
+                    }
+                  cout << "]" << endl;
                   if (++ctr == 5) break;
                 }
            }
