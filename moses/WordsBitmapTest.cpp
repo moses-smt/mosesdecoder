@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(getset)
   BOOST_CHECK_EQUAL(wbm.GetValue(2),false);
   wbm.SetValue(2,true);
   BOOST_CHECK_EQUAL(wbm.GetValue(2),true);
-  
+
 
   wbm.SetValue(1,3,true);
   BOOST_CHECK_EQUAL(wbm.GetValue(1),true);
