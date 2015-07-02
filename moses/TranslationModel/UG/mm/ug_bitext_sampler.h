@@ -56,7 +56,7 @@ namespace bitext
     size_t                        m_ctr; // number of samples considered
     float                  m_total_bias; // for random sampling with bias
     bool                     m_finished;
-    void   consider_sample(TokenPosition const& p);
+    bool   consider_sample(TokenPosition const& p);
     size_t perform_ranked_sampling();
     
   public:
@@ -93,6 +93,7 @@ namespace bitext
     m_stats.reset(new pstats);
     m_stats->raw_cnt = phrase.ca();
     m_stats->register_worker();
+    // cerr << phrase.str(bitext->V1.get()) << " [" << HERE << "]" << endl;
   }
   
   template<typename Token>
@@ -128,22 +129,24 @@ namespace bitext
   {
     if (m_next == m_stop) return m_ctr;
     CandidateSorter sorter(*m_bias);
-    NBestList<TokenPosition, CandidateSorter> nbest(m_samples,sorter);
+    // below: nbest size = 20 * m_samples to allow for failed phrase extraction
+    NBestList<TokenPosition, CandidateSorter> nbest(20*m_samples,sorter);
     ugdiss::tsa::ArrayEntry I(m_next);
     while (I.next < m_stop)
       {
         ++m_ctr;
         nbest.add(m_root->readEntry(I.next,I));
       }
-    for (size_t i = 0; i < nbest.size(); ++i)
-      consider_sample(nbest.get_unsorted(i));
+    size_t n = 0;
+    for (size_t i = 0; n < m_samples && i < nbest.size(); ++i)
+      if (consider_sample(nbest[i])) ++n;;
     // cerr << m_ctr << " samples considered at " 
     //      << __FILE__ << ":" << __LINE__ << endl;
     return m_ctr;
   }
   
   template<typename Token>
-  void
+  bool
   BitextSampler<Token>::
   consider_sample(TokenPosition const& p)
   {
@@ -152,11 +155,18 @@ namespace bitext
     PhraseExtractionRecord rec(p.sid, p.offset, p.offset + m_plen, 
                                !m_fwd, &aln, &full_aln);
     int docid  = m_bias ? m_bias->GetClass(p.sid) : -1;
+
     bool good = m_bitext->find_trg_phr_bounds(rec);
+
+#if 0
+    cerr << p.sid << " " << docid << " " 
+         << (good ? "OK " : "bad ") 
+         << __FILE__ << ":" << __LINE__ << endl;
+#endif
     if (!good)
       { // no good, probably because phrase is not coherent
         m_stats->count_sample(docid, 0, rec.po_fwd, rec.po_bwd);
-        return;
+        return false;
       }
     
     // all good: register this sample as valid
@@ -203,6 +213,7 @@ namespace bitext
           for (size_t k = 1; k < aln.size(); k += 2)
             --aln[k];
       }
+    return true;
   }
   
   template<typename Token>
