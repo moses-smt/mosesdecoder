@@ -52,7 +52,15 @@ BOOST_AUTO_TEST_CASE(initialise)
   }
 
 
+  bitvec[0] = true;
+  bitvec[1] = true;
+  WordsBitmap wbm3(7,bitvec);
+  BOOST_CHECK_EQUAL(wbm3.GetFirstGapPos(),4);
+
+  WordsBitmap wbm4(4,bitvec);
+  BOOST_CHECK_EQUAL(wbm4.GetFirstGapPos(),NOT_FOUND);
 }
+
 
 BOOST_AUTO_TEST_CASE(getset)
 {
@@ -62,6 +70,7 @@ BOOST_AUTO_TEST_CASE(getset)
   BOOST_CHECK_EQUAL(wbm.GetValue(2),false);
   wbm.SetValue(2,true);
   BOOST_CHECK_EQUAL(wbm.GetValue(2),true);
+
 
   wbm.SetValue(1,3,true);
   BOOST_CHECK_EQUAL(wbm.GetValue(1),true);
@@ -110,6 +119,20 @@ BOOST_AUTO_TEST_CASE(positions)
   BOOST_CHECK_EQUAL(wbm.GetLastGapPos(), 9);
   BOOST_CHECK_EQUAL(wbm.GetLastPos(), 7);
 
+  WordsRange wr(2,4);
+  wbm.SetValue(wr,true);
+  BOOST_CHECK_EQUAL(wbm.GetFirstGapPos(),5);
+
+  WordsRange wr2(5,8);
+  wbm.SetValue(wr2,true);
+  BOOST_CHECK_EQUAL(wbm.GetFirstGapPos(),9);
+
+  wbm.SetValue(9,true);
+  BOOST_CHECK_EQUAL(wbm.GetFirstGapPos(),NOT_FOUND);
+
+  wbm.SetValue(wr,false);
+  BOOST_CHECK_EQUAL(wbm.GetFirstGapPos(),2);
+
   WordsBitmap wbm2(2);
   wbm2.SetValue(0,true);
   wbm2.SetValue(1,true);
@@ -120,8 +143,8 @@ BOOST_AUTO_TEST_CASE(positions)
   BOOST_CHECK_EQUAL(wbm3.GetLastGapPos(), 4);
   BOOST_CHECK_EQUAL(wbm3.GetLastPos(), NOT_FOUND);
 
-
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()
 
