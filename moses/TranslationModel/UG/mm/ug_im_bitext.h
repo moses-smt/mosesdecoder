@@ -25,12 +25,12 @@ namespace Moses
       imBitext(imBitext const& other);
 
       // sptr<imBitext<TKN> >
-      // add(vector<TKN> const& s1, vector<TKN> const& s2, vector<ushort> & a);
+      // add(vector<TKN> const& s1, std::vector<TKN> const& s2, vector<ushort> & a);
 
       sptr<imBitext<TKN> >
       add(vector<string> const& s1,
-	  vector<string> const& s2,
-	  vector<string> const& a) const;
+	  std::vector<string> const& s2,
+	  std::vector<string> const& a) const;
 
     };
 

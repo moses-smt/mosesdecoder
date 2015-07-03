@@ -243,6 +243,7 @@ Parameter::Parameter()
   AddParam(misc_opts,"feature", "All the feature functions should be here");
   AddParam(misc_opts,"context-string",
            "A (tokenized) string containing context words for context-sensitive translation.");
+  AddParam(misc_opts,"context-weights", "A key-value map for context-sensitive translation.");
   AddParam(misc_opts,"context-window",
            "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
 

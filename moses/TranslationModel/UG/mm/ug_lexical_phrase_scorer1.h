@@ -11,7 +11,7 @@
 #include <boost/unordered_map.hpp>
 #include "tpt_pickler.h"
 
-using namespace std;
+// using namespace std;
 namespace ugdiss
 {
 
@@ -20,16 +20,16 @@ namespace ugdiss
   LexicalPhraseScorer1
   {
     typedef boost::unordered_map<id_type, float> inner_map_t;
-    vector<inner_map_t> L1_given_L2;
-    vector<inner_map_t> L2_given_L1;
+    std::vector<inner_map_t> L1_given_L2;
+    std::vector<inner_map_t> L2_given_L1;
     void load_lex (string const& fname, TokenIndex & V1, TokenIndex & V2,
-		   vector<inner_map_t> & lex);
+		   std::vector<inner_map_t> & lex);
   public:
     void open(string const& bname, string const& L1, string const& L2,
 	      TokenIndex & V1, TokenIndex & V2);
     void score(TKN const* snt1, size_t const s1, size_t const e1,
 	       TKN const* snt2, size_t const s2, size_t const e2,
-	       vector<ushort> aln, float & fwd_score, float& bwd_score);
+	       std::vector<ushort> aln, float & fwd_score, float& bwd_score);
     void score(TKN const* snt1, size_t const s1, size_t const e1,
 	       TKN const* snt2, size_t const s2, size_t const e2,
 	       char const* const aln_start, char const* const aln_end,
@@ -42,10 +42,10 @@ namespace ugdiss
   void
   LexicalPhraseScorer1<TKN>::
   load_lex (string const& fname, TokenIndex & V1, TokenIndex & V2,
-	    vector<inner_map_t> & lex)
+	    std::vector<inner_map_t> & lex)
   {
     boost::iostreams::filtering_istream in;
-    cout << fname << endl;
+    cout << fname << std::endl;
     open_input_stream(fname,in);
     lex.resize(V1.ksize());
     string w1,w2; float p;
@@ -66,8 +66,8 @@ namespace ugdiss
   {
     string lex1 = bname+L1+"-"+L2+"."+L1+"-given-"+L2+".lex.gz";
     string lex2 = bname+L1+"-"+L2+"."+L2+"-given-"+L1+".lex.gz";
-    cout << lex1 << endl;
-    cout << lex2 << endl;
+    cout << lex1 << std::endl;
+    cout << lex2 << std::endl;
     load_lex(lex1,V1,V2,L1_given_L2);
     load_lex(lex2,V2,V1,L2_given_L1);
   }
@@ -79,8 +79,8 @@ namespace ugdiss
 	TKN const* snt2, size_t const s2, size_t const e2,
 	vector<ushort> aln, float & fwd_score, float& bwd_score)
   {
-    vector<float> p1(e1,0), p2(e2,0);
-    vector<int>   c1(e1,0), c2(e2,0);
+    std::vector<float> p1(e1,0), p2(e2,0);
+    std::vector<int>   c1(e1,0), c2(e2,0);
     size_t i1=0,i2=0;
     for (size_t k = 0; k < aln.size(); ++k)
       {
@@ -126,8 +126,8 @@ namespace ugdiss
 	char const* const aln_start, char const* const aln_end,
 	float & fwd_score, float& bwd_score)
   {
-    vector<float> p1(e1,0), p2(e2,0);
-    vector<int>   c1(e1,0), c2(e2,0);
+    std::vector<float> p1(e1,0), p2(e2,0);
+    std::vector<int>   c1(e1,0), c2(e2,0);
     size_t i1=0,i2=0;
     for (char const* x = aln_start; x < aln_end;)
       {

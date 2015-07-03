@@ -80,7 +80,6 @@ string ParseXmlTagAttribute(const string& tag,const string& attributeName)
   return tag.substr(contentsStart,contentsEnd-contentsStart);
 }
 
-// TODO Special handling of "label" attribute
 // s should be a sequence of name=attribute pairs separated by whitespace.
 // e.g. "label=\"S\" pcfg=\"-1.452\" foo=\"blah\\\"blah\""
 void ParseXmlTagAttributes(const std::string &s,
@@ -107,8 +106,9 @@ void ParseXmlTagAttributes(const std::string &s,
         throw XmlException("invalid tag content");
       }
     }
-    // TODO unescape \"
-    attributes[name] = s.substr(begin+1, pos-begin-1);
+    if (name != "label" && name != "span") {
+      attributes[name] = s.substr(begin+1, pos-begin-1);
+    }
     begin = pos+1;
   }
 }
@@ -245,20 +245,17 @@ vector<string> TokenizeXml(const string& str)
 }
 
 /**
- * Process a sentence with xml annotation
- * Xml tags may specifiy additional/replacing translation options
- * and reordering constraints
+ * Process a sentence with XML-style annotation of syntactic nodes.
  *
- * \param line in: sentence, out: sentence without the xml
- * \param res vector with translation options specified by xml
- * \param reorderingConstraint reordering constraint zones specified by xml
- * \param walls reordering constraint walls specified by xml
+ * \param line[in,out]            in: sentence, out: sentence without the XML
+ * \param nodeCollection[out]     the collection of SyntaxNode objects for this
+ *                                sentence
+ * \param labelCollection[out]    label values are inserted into this set
+ * \param topLabelCollection[out] top labels (key) and their counts (value)
+ *                                are inserted into this map
+ * \param unescapeSpecialChars    flag indicating whether XML special characters
+ *                                should be unescaped
  */
-/*TODO: we'd only have to return a vector of XML options if we dropped linking. 2-d vector
-	is so we can link things up afterwards. We can't create TranslationOptions as we
-	parse because we don't have the completed source parsed until after this function
-	removes all the markup from it (CreateFromString in Sentence::Read).
-*/
 bool ProcessAndStripXMLTags(string &line, SyntaxNodeCollection &nodeCollection,
                             set< string > &labelCollection,
                             map< string, int > &topLabelCollection,

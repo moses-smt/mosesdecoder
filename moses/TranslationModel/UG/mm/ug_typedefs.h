@@ -10,24 +10,24 @@
 #include "tpt_typedefs.h"
 namespace ugdiss
 {
-  using namespace std;
+  // using namespace std;
   typedef boost::dynamic_bitset<uint64_t> bitvector;
 
-  typedef vector<vector<float> >     flt_2d_table;
-  typedef vector<flt_2d_table>       flt_3d_table;
-  typedef vector<flt_3d_table>       flt_4d_table;
+  typedef std::vector<std::vector<float> > flt_2d_table;
+  typedef std::vector<flt_2d_table>        flt_3d_table;
+  typedef std::vector<flt_3d_table>        flt_4d_table;
 
-  typedef vector<vector<ushort> > ushort_2d_table;
-  typedef vector<ushort_2d_table> ushort_3d_table;
-  typedef vector<ushort_3d_table> ushort_4d_table;
+  typedef std::vector<std::vector<ushort> > ushort_2d_table;
+  typedef std::vector<ushort_2d_table>      ushort_3d_table;
+  typedef std::vector<ushort_3d_table>      ushort_4d_table;
 
-  typedef vector<vector<short> >   short_2d_table;
-  typedef vector<short_2d_table>   short_3d_table;
-  typedef vector<short_3d_table>   short_4d_table;
+  typedef std::vector<std::vector<short> > short_2d_table;
+  typedef std::vector<short_2d_table>      short_3d_table;
+  typedef std::vector<short_3d_table>      short_4d_table;
 
-  typedef vector<vector<int> >       int_2d_table;
-  typedef vector<int_2d_table>       int_3d_table;
-  typedef vector<int_3d_table>       int_4d_table;
+  typedef std::vector<std::vector<int> > int_2d_table;
+  typedef std::vector<int_2d_table>      int_3d_table;
+  typedef std::vector<int_3d_table>      int_4d_table;
 }
 
 #define sptr   boost::shared_ptr

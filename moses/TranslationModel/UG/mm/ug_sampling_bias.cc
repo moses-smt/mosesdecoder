@@ -21,14 +21,17 @@ namespace Moses
   {
     using ugdiss::id_type;
 
-    // #ifdef WITH_MMT_BIAS_CLIENT
-    std::string
-    query_bias_server(std::string const& url, std::string const& text)
+    std::string 
+    query_bias_server(std::string const& server, std::string const& context) 
     {
-      std::string query = url+uri_encode(text);
+      std::string query = server+uri_encode(context);
       boost::asio::io_service io_service;
       Moses::http_client c(io_service, query);
       io_service.run();
+
+      // std::string response = c.content();
+      // std::cerr << "SERVER RESPONSE: " << response << std::endl;
+
       return c.content();
     }
     // #endif
@@ -59,9 +62,24 @@ namespace Moses
       Timer timer;
       if (log) timer.start(NULL);
       std::string json = query_bias_server(server_url, text);
+      // std::cerr << "SERVER RESPONSE " << json << std::endl;
       init_from_json(json, docname2docid, log);
       if (log) *log << "Bias query took " << timer << " seconds." << std::endl;
-#endif
+    }
+
+    DocumentBias
+    ::DocumentBias(std::vector<id_type> const& sid2doc,
+                   std::map<std::string,id_type> const& docname2docid,
+                   std::map<std::string, float> const& context_weights,
+                   std::ostream* log)
+                   : m_sid2docid(sid2doc)
+                   , m_bias(docname2docid.size(), 0)
+    {
+    init(context_weights, docname2docid);
+    }
+
+    std::map<std::string, float>& SamplingBias::getBiasMap() {
+      return m_bias_map;
     }
 
     void

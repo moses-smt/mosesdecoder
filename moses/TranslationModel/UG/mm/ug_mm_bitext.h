@@ -35,7 +35,7 @@ namespace Moses
       // in the future, we might also allow listing documents with
       // sentence ranges.
       string buffer,docname; size_t a=0,b;
-      this->m_sid2docid.reset(new vector<id_type>(this->T1->size()));
+      this->m_sid2docid.reset(new std::vector<id_type>(this->T1->size()));
       while(getline(docmap,buffer))
 	{
 	  istringstream line(buffer);
@@ -46,7 +46,7 @@ namespace Moses
 	  this->m_docname.push_back(docname);
 	  line >> b;
 #ifndef NO_MOSES
-	  VERBOSE(1, "DOCUMENT MAP " << docname << " " << a << "-" << b+a << endl);
+	  VERBOSE(1, "DOCUMENT MAP " << docname << " " << a << "-" << b+a << std::endl);
 #endif
 	  for (b += a; a < b; ++a)
 	    (*this->m_sid2docid)[a] = docid;

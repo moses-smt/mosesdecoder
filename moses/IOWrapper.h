@@ -62,8 +62,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartKBestExtractor.h"
 #include "moses/Syntax/KBestExtractor.h"
 
-#include "search/applied.hh"
-
 #include <boost/format.hpp>
 
 namespace Moses

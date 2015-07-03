@@ -230,9 +230,11 @@ EvaluateWhenApplied(StatefulFeatureFunction const& sfff,
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( sfff )) {
-    m_ffStates[state_idx]
-    = sfff.EvaluateWhenApplied
-      (*this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+    Manager& manager = this->GetManager(); //Get the manager and the ttask
+    ttasksptr const& ttask = manager.GetTtask();
+
+    m_ffStates[state_idx] = sfff.EvaluateWhenAppliedWithContext
+      (ttask, *this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
        &m_currScoreBreakdown);
   }
 }

@@ -31,8 +31,8 @@
 #include "ug_corpus_token.h"
 #include "tpt_pickler.h"
 
-using namespace ugdiss;
-using namespace std;
+// using namespace ugdiss;
+// using namespace std;
 namespace Moses {
 
   typedef L2R_Token<SimpleWordId>      Token;
@@ -43,7 +43,7 @@ namespace Moses {
   public:
     typedef mmTSA<Token>::tree_iterator iter;
     class pstats; // one-sided phrase statistics
-    class jstats; // phrase pair ("joint") statistics
+    class jstats; // phrase std::pair ("joint") statistics
     class agenda
     {
       boost::mutex               lock;
@@ -51,7 +51,7 @@ namespace Moses {
       class job;
       class worker;
       list<job> joblist;
-      vector<sptr<boost::thread> > workers;
+      std::vector<sptr<boost::thread> > workers;
       bool shutdown;
       size_t doomed;
     public:
@@ -83,7 +83,7 @@ namespace Moses {
     find_trg_phr_bounds
     (size_t const sid, size_t const start, size_t const stop,
      size_t & s1, size_t & s2, size_t & e1, size_t & e2,
-     vector<uchar> * core_alignment, bool const flip) const;
+     std::vector<uchar> * core_alignment, bool const flip) const;
 
     boost::unordered_map<uint64_t,sptr<pstats> > cache1,cache2;
   private:
@@ -99,22 +99,22 @@ namespace Moses {
     void prep(iter const& phrase);
   };
 
-  // "joint" (i.e., phrase pair) statistics
+  // "joint" (i.e., phrase std::pair) statistics
   class
   mmbitext::
   jstats
   {
     uint32_t my_rcnt; // unweighted count
     float    my_wcnt; // weighted count
-    vector<pair<size_t, vector<uchar> > > my_aln;
+    std::vector<pair<size_t, vector<uchar> > > my_aln;
     boost::mutex lock;
   public:
     jstats();
     jstats(jstats const& other);
     uint32_t rcnt() const;
     float    wcnt() const;
-    vector<pair<size_t, vector<uchar> > > const & aln() const;
-    void add(float w, vector<uchar> const& a);
+    std::vector<pair<size_t, vector<uchar> > > const & aln() const;
+    void add(float w, std::vector<uchar> const& a);
   };
 
   // struct
@@ -151,11 +151,11 @@ namespace Moses {
     size_t in_progress; // keeps track of how many threads are currently working on this
     boost::unordered_map<uint64_t, jstats> trg;
     pstats();
-    // vector<phrase> nbest;
+    // std::vector<phrase> nbest;
     // void select_nbest(size_t const N=10);
     void release();
     void register_worker();
-    void add(mmbitext::iter const& trg_phrase, float const w, vector<uchar> const& a);
+    void add(mmbitext::iter const& trg_phrase, float const w, std::vector<uchar> const& a);
   };
 
   class

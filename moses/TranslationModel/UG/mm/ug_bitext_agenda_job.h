@@ -100,7 +100,7 @@ Bitext<Token>::agenda::job
 #if 0
 	  cerr << ctr++ << " " << m.str(m_bitext->V1.get())
 	       << " " << sid << "/" << root->getCorpusSize()
-	       << " " << offset << " " << stop-x << endl;
+	       << " " << offset << " " << stop-x << std::endl;
 #endif
 	  bias_total += (*m_bias)[sid];
 	  ++stats->raw_cnt;
@@ -109,7 +109,7 @@ Bitext<Token>::agenda::job
 #if UG_BITEXT_TRACK_ACTIVE_THREADS
   ++active;
   // if (active%5 == 0)
-  // cerr << size_t(active) << " active jobs at " << __FILE__ << ":" << __LINE__ << endl;
+  // cerr << size_t(active) << " active jobs at " << __FILE__ << ":" << __LINE__ << std::endl;
 #endif
 }
 
@@ -130,14 +130,17 @@ int Bitext<Token>::agenda::job
 
   if (!m_bias) return 1;
 
-  using namespace boost::math;
+  // // using namespace boost::math;
   typedef boost::math::binomial_distribution<> binomial;
 
-  ostream* log = m_bias->loglevel > 1 ? m_bias->log : NULL;
+  std::ostream* log = m_bias->loglevel > 1 ? m_bias->log : NULL;
 
   float p = (*m_bias)[sid];
   id_type docid = m_bias->GetClass(sid);
-  uint32_t k = docid < stats->indoc.size() ? stats->indoc[docid] : 0;
+  
+  // uint32_t k = docid < stats->indoc.size() ? stats->indoc[docid] : 0;
+  std::map<uint32_t,uint32_t>::const_iterator m = stats->indoc.find(docid);
+  uint32_t k = m != stats->indoc.end() ? m->second : 0 ;
 
   // always consider candidates from dominating documents and
   // from documents that have not been considered at all yet
@@ -159,16 +162,22 @@ int Bitext<Token>::agenda::job
 	e = root->getCorpus()->sntEnd(sid);
       *log << docid << ":" << sid << " " << size_t(k) << "/" << N
 	   << " @" << p << " => " << d << " [";
-      for (size_t i = 0; i < stats->indoc.size(); ++i)
+      for (std::map<uint32_t, uint32_t>::const_iterator m = stats->indoc.begin();
+	   m != stats->indoc.end(); ++m)
 	{
-	  if (i) *log << " ";
-	  *log << stats->indoc[i];
+	  if (m != stats->indoc.begin()) *log << " ";
+	  *log << m->first << ":" << m->second;
 	}
+      // for (size_t i = 0; i < stats->indoc.size(); ++i)
+      // 	{
+      // 	  if (i) *log << " ";
+      // 	  *log << stats->indoc[i];
+      // 	}
       *log << "] ";
       for (; x < e; ++x) *log << (*m_bitext->V1)[x->id()] << " ";
       if (!ret) *log << "SKIP";
       else if (p < .5 && d > .9) *log << "FORCE";
-      *log << endl;
+      *log << std::endl;
     }
 
   return (ret ? (p < .5 && d > .9) ? 2 : 1 : 0);

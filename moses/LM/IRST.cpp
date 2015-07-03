@@ -36,6 +36,7 @@ using namespace irstlm;
 #include "moses/Phrase.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 
@@ -237,13 +238,16 @@ const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*
   return ret.release();
 }
 
-void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
+void LanguageModelIRST::CalcScoreWithContext(ttasksptr const& ttasks, const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
   fullScore = 0;
   ngramScore = 0;
   oovCount = 0;
 
   if ( !phrase.GetSize() ) return;
+
+  //get the context_weight map here
+  std::map<std::string, float> context_weight = ttasks->GetContextWeights();
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
@@ -278,12 +282,15 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
   fullScore = ngramScore + before_boundary;
 }
 
-FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
+FFState* LanguageModelIRST::EvaluateWhenAppliedWithContext(ttasksptr const& ttasks, const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   if (!hypo.GetCurrTargetLength()) {
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
     return ret.release();
   }
+
+  //get the context_weight map here
+  std::map<std::string, float> context_weight = ttasks->GetContextWeights();
 
   //[begin, end) in STL-like fashion.
   const int begin = (const int) hypo.GetCurrTargetWordsRange().GetStartPos();

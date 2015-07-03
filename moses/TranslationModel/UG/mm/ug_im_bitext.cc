@@ -38,8 +38,8 @@ namespace Moses
 	    {
 	      UTIL_THROW_IF2(c != '-', "[" << HERE << "] "
 			     << "Error in alignment information:\n" << a);
-	      binwrite(obuf,row);
-	      binwrite(obuf,col);
+	      ugdiss::binwrite(obuf,row);
+	      ugdiss::binwrite(obuf,col);
 	    }
 	  // important: DO NOT replace the two lines below this comment by
 	  // char const* x = obuf.str().c_str(), as the memory x is pointing

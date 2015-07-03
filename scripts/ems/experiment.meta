@@ -160,6 +160,20 @@ train
 	ignore-if: no-splitter-training
 
 [LM] multiple
+prepare-bilingual-nplm
+	in: TRAINING:corpus TRAINING:word-alignment
+	out: numberized_ngrams
+	ignore-unless: bilingual-lm
+	rerun-on-change: TRAINING:corpus TRAINING:word-alignment
+	template: $moses-script-dir/training/bilingual-lm/extract_training.py -c IN0 -e $output-extension -f $input-extension -a IN1.$TRAINING:alignment-symmetrization-method -w $working-dir/$bilingual-lm-workdir -n $order -m $source-window $bilingual-lm-settings
+	default-name: lm/bilingualLM_prep
+train-bilingual-lm
+	in: numberized_ngrams TRAINING:corpus 
+	out: binlm
+	ignore-unless: bilingual-lm
+	rerun-on-change: numberized_ngrams
+	template: $moses-script-dir/training/bilingual-lm/train_nplm.py -w $working-dir/$bilingual-lm-workdir -c IN1 -r $working-dir/$nplm-output-dir -n $train_order $nplm-settings
+	default-name: lm/bilingualLM
 get-corpus
 	in: get-corpus-script
 	out: raw-corpus
@@ -247,7 +261,7 @@ train
 	in: stripped-corpus
 	out: lm
 	default-name: lm/lm
-	ignore-if: rlm-training custom-training
+	ignore-if: rlm-training custom-training bilingual-lm
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
@@ -293,6 +307,7 @@ binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
+	ignore-if: bilingual-lm
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
@@ -724,6 +739,14 @@ build-generation-custom
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 	final-model: yes
+generation-prune
+	in: generation-table
+	out: generation-table-pruned
+	rerun-on-change: TRAINING:prune-generation
+	ignore-unless: AND TRAINING:prune-generation
+	default-name: model/generation-table-pruned
+	final-model: yes
+	template: $TRAINING:prune-generation IN OUT
 build-sparse
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
         out: sparse
@@ -732,7 +755,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table-pruned sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero thot
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature

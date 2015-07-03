@@ -1,4 +1,5 @@
 #include "ug_http_client.h"
+#include "moses/Util.h"
 namespace Moses
 {
 using boost::asio::ip::tcp;
@@ -7,28 +8,46 @@ std::string http_client::content() const { return m_content.str(); }
 
 http_client::
 http_client(boost::asio::io_service& io_service,
-	    const std::string& server, const std::string& path)
+	    std::string const& server, 
+	    std::string const& port,
+	    std::string const& path)
   : resolver_(io_service), socket_(io_service)
 {
-  init(server,path);
+  init(server, port, path);
 }
-
+  
 http_client::
 http_client(boost::asio::io_service& io_service, std::string url)
   : resolver_(io_service), socket_(io_service)
 {
-  size_t p = url.find("://");
-  if (p < url.size()) url.erase(0,p+3);
-  p = url.find("/");
+  std::string server;
+  std::string path = "/";
+  std::string port = "http";
+  size_t p = url.find("://"), q;
   if (p < url.size()) 
-    init(url.substr(0,p),url.substr(p));
-  else 
-    init(url,"/");
+    {
+      port = url.substr(0,p);
+      url.erase(0, p+3);
+    }
+  p = std::min(url.find_first_of(":/"), url.size());
+  q = std::min(url.find("/"), url.size());
+  if (p < url.size() && url[p] == ':') 
+    port = url.substr(p+1,q-p-1);
+  server = url.substr(0,p);
+  if (q < url.size()) 
+    path = url.substr(q);
+#if 0
+  std::cerr << HERE << std::endl;
+  std::cerr << "SERVER " << server << std::endl;
+  std::cerr << "PORT   |" << port << "|" << std::endl;
+  std::cerr << "PATH " << path << std::endl; 
+#endif
+  init(server, port, path);
 }
 
 void 
 http_client::
-init(std::string const& server, std::string const& path)
+init(std::string const& server, std::string const& port, std::string const& path)
 {
   // Form the request. We specify the "Connection: close" header so
   // that the server will close the socket after transmitting the
@@ -43,7 +62,7 @@ init(std::string const& server, std::string const& path)
   
   // Start an asynchronous resolve to translate the server and service names
   // into a list of endpoints.
-  tcp::resolver::query query(server, "http");
+  tcp::resolver::query query(server, port.c_str());
   resolver_.async_resolve(query,
 			  boost::bind(&http_client::handle_resolve, this,
 				      boost::asio::placeholders::error,

@@ -315,6 +315,7 @@ namespace Moses
   load_extra_data(string bname, bool locking = true)
   {
     using namespace boost;
+    using namespace ugdiss;
     // TO DO: ADD CHECKS FOR ROBUSTNESS
     // - file existence?
     // - same number of lines?
@@ -519,7 +520,8 @@ namespace Moses
 
   TargetPhrase*
   Mmsapt::
-  mkTPhrase(Phrase const& src,
+  mkTPhrase(ttasksptr const& ttask,
+            Phrase const& src,
 	    PhrasePair<Token>* fix,
 	    PhrasePair<Token>* dyn,
 	    sptr<Bitext<Token> > const& dynbt) const
@@ -570,7 +572,8 @@ namespace Moses
  	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
 	  (*ff)(*dynbt, pool, &fvals);
       }
-    TargetPhrase* tp = new TargetPhrase(this);
+
+    TargetPhrase* tp = new TargetPhrase(const_cast<ttasksptr&>(ttask), this);
     Token const* x = fix ? fix->start2 : dyn->start2;
     uint32_t len = fix ? fix->len2 : dyn->len2;
     for (uint32_t k = 0; k < len; ++k, x = x->next())
@@ -722,19 +725,19 @@ namespace Moses
     while (i < ppfix.size() && k < ppdyn.size())
       {
 	int cmp = sorter.cmp(ppfix[i], ppdyn[k]);
-	if      (cmp  < 0) ret->Add(mkTPhrase(src,&ppfix[i++],NULL,dyn));
-	else if (cmp == 0) ret->Add(mkTPhrase(src,&ppfix[i++],&ppdyn[k++],dyn));
-	else               ret->Add(mkTPhrase(src,NULL,&ppdyn[k++],dyn));
+	if      (cmp  < 0) ret->Add(mkTPhrase(ttask,src,&ppfix[i++],NULL,dyn));
+	else if (cmp == 0) ret->Add(mkTPhrase(ttask,src,&ppfix[i++],&ppdyn[k++],dyn));
+	else               ret->Add(mkTPhrase(ttask,src,NULL,&ppdyn[k++],dyn));
       }
-    while (i < ppfix.size()) ret->Add(mkTPhrase(src,&ppfix[i++],NULL,dyn));
-    while (k < ppdyn.size()) ret->Add(mkTPhrase(src,NULL,&ppdyn[k++],dyn));
+    while (i < ppfix.size()) ret->Add(mkTPhrase(ttask,src,&ppfix[i++],NULL,dyn));
+    while (k < ppdyn.size()) ret->Add(mkTPhrase(ttask,src,NULL,&ppdyn[k++],dyn));
     if (m_tableLimit) ret->Prune(true, m_tableLimit);
     else ret->Prune(true,ret->GetSize());
 
 #if 1
     if (m_bias_log && m_lr_func && m_bias_loglevel > 3)
       {
-	typename PhrasePair<Token>::SortDescendingByJointCount sorter;
+	PhrasePair<Token>::SortDescendingByJointCount sorter;
 	sort(ppfix.begin(), ppfix.end(),sorter);
 	BOOST_FOREACH(PhrasePair<Token> const& pp, ppfix)
 	  {
@@ -824,9 +827,25 @@ namespace Moses
 	      = btfix->SetupDocumentBias(m_bias_server, context_words, m_bias_log);
 	    context->bias->loglevel = m_bias_loglevel;
 	    context->bias->log = m_bias_log;
+            //Reset the bias in the ttaskptr so that other functions
+            //so that other functions can utilize the biases;
+            ttask->ReSetContextWeights(context->bias->getBiasMap());
 	  }
 	if (!context->cache1) context->cache1.reset(new pstats::cache_t);
 	if (!context->cache2) context->cache2.reset(new pstats::cache_t);
+      } else if (!ttask->GetContextWeights().empty()) {
+          if (m_bias_log)
+            {
+              *m_bias_log << HERE << endl
+                          << "BIAS FROM MAP LOOKUP" << endl;
+              context->bias_log = m_bias_log;
+            }
+          context->bias
+            = btfix.SetupDocumentBias(ttask->GetContextWeights(), m_bias_log);
+          context->bias->loglevel = m_bias_loglevel;
+          context->bias->log = m_bias_log;
+        if (!context->cache1) context->cache1.reset(new pstats::cache_t);
+        if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       }
   }
   

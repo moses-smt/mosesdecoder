@@ -14,7 +14,7 @@
 #include "tpt_pickler.h"
 #include "ug_mm_2d_table.h"
 #include "util/exception.hh"
-using namespace std;
+// using namespace std;
 namespace ugdiss
 {
 
@@ -22,7 +22,7 @@ namespace ugdiss
   class
   LexicalPhraseScorer2
   {
-    vector<string> ftag;
+    std::vector<string> ftag;
   public:
     typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> table_t;
     table_t COOC;
@@ -31,7 +31,7 @@ namespace ugdiss
     void
     score(TKN const* snt1, size_t const s1, size_t const e1,
 	  TKN const* snt2, size_t const s2, size_t const e2,
-	  vector<someint> const & aln, float const alpha,
+	  std::vector<someint> const & aln, float const alpha,
 	  float & fwd_score, float& bwd_score) const;
 
     void
@@ -67,8 +67,8 @@ namespace ugdiss
 	vector<someint> const & aln, float const alpha,
 	float & fwd_score, float& bwd_score) const
   {
-    vector<float> p1(e1,0), p2(e2,0);
-    vector<int>   c1(e1,0), c2(e2,0);
+    std::vector<float> p1(e1,0), p2(e2,0);
+    std::vector<int>   c1(e1,0), c2(e2,0);
     size_t i1=0,i2=0;
     for (size_t k = 0; k < aln.size(); ++k)
       {
@@ -113,7 +113,7 @@ namespace ugdiss
     cerr << "[" << s << "," << t << "] "
 	 << COOC.m1(s) << "/"
 	 << COOC[s][t] << "/"
-	 << COOC.m2(t) << endl;
+	 << COOC.m2(t) << std::endl;
 #endif
     return ret;
   }
@@ -141,8 +141,8 @@ namespace ugdiss
 	char const* const aln_start, char const* const aln_end,
 	float const alpha, float & fwd_score, float& bwd_score) const
   {
-    vector<float> p1(e1,0), p2(e2,0);
-    vector<int>   c1(e1,0), c2(e2,0);
+    std::vector<float> p1(e1,0), p2(e2,0);
+    std::vector<int>   c1(e1,0), c2(e2,0);
     size_t i1=0,i2=0;
     for (char const* x = aln_start; x < aln_end;)
       {

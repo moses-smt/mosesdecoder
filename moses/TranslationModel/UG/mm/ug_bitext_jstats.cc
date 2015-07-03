@@ -69,7 +69,7 @@ namespace Moses
 	  size_t i = 0;
 	  while (i < my_aln.size() && my_aln[i].second != a) ++i;
 	  if (i == my_aln.size())
-	    my_aln.push_back(pair<size_t,vector<uchar> >(1,a));
+	    my_aln.push_back(std::pair<size_t,std::vector<unsigned char> >(1,a));
 	  else
 	    my_aln[i].first++;
 	  if (my_aln[i].first > my_aln[i/2].first)
@@ -79,12 +79,12 @@ namespace Moses
       ++obwd[bwd_orient];
       if (docid >= 0)
 	{
-	  while (int(indoc.size()) <= docid) indoc.push_back(0);
+	  // while (int(indoc.size()) <= docid) indoc.push_back(0);
 	  ++indoc[docid];
 	}
     }
 
-    vector<pair<size_t, vector<uchar> > > const&
+    std::vector<std::pair<size_t, std::vector<unsigned char> > > const&
     jstats::
     aln() const
     { return my_aln; }

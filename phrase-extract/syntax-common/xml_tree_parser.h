@@ -16,7 +16,7 @@ namespace Syntax {
  *  converts them to SyntaxTree objects.
  *
  *  This is a thin wrapper around the ProcessAndStripXMLTags function.  After
- *  calling Parse(), the output of the ProcessAndStripXMLTags function (the
+ *  calling Parse(), the output from the ProcessAndStripXMLTags call (the
  *  sentence, node collection, label set, and top label set) are available via
  *  accessors.
  */

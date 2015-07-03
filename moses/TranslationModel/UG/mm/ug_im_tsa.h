@@ -20,8 +20,8 @@
 
 namespace ugdiss
 {
-  using namespace std;
-  using namespace boost;
+  // using namespace std;
+  // using namespace boost;
   namespace bio=boost::iostreams;
 
   // template<typename TOKEN> class imBitext<TOKEN>;
@@ -37,8 +37,8 @@ namespace ugdiss
     friend class tree_iterator;
 
   private:
-    vector<cpos>          sufa; // stores the actual array
-    vector<filepos_type> index; /* top-level index into regions in sufa
+    std::vector<cpos>          sufa; // stores the actual array
+    std::vector<filepos_type> index; /* top-level index into regions in sufa
                                  * (for faster access) */
   private:
     char const*
@@ -54,11 +54,11 @@ namespace ugdiss
     imTSA();
     imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c,
 	  bdBitset const* filt,
-	  ostream* log = NULL);
+	  std::ostream* log = NULL);
 
     imTSA(imTSA<TOKEN> const& prior,
 	  boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
-	  vector<id_type> const& newsids, size_t const vsize);
+	  std::vector<id_type> const& newsids, size_t const vsize);
 
     count_type
     sntCnt(char const* p, char const * const q) const;
@@ -86,7 +86,7 @@ namespace ugdiss
     sanityCheck() const;
 
     void
-    save_as_mm_tsa(string fname) const;
+    save_as_mm_tsa(std::string fname) const;
 
     /// add a sentence to the database
     // shared_ptr<imTSA<TOKEN> > add(vector<TOKEN> const& snt) const;
@@ -140,7 +140,7 @@ namespace ugdiss
   // specified in filter
   template<typename TOKEN>
   imTSA<TOKEN>::
-  imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filter, ostream* log)
+  imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filter, std::ostream* log)
   {
     assert(c);
     this->corpus = c;
@@ -166,14 +166,14 @@ namespace ugdiss
     // alignment in the memory, using a ushort instead of a uint32_t might not
     // even make a difference.
 
-    vector<count_type> wcnt; // word counts
+    std::vector<count_type> wcnt; // word counts
     sufa.resize(c->count_tokens(wcnt,filter,slimit,log));
 
-    if (log) *log << sufa.size() << "." << endl;
+    if (log) *log << sufa.size() << "." << std::endl;
     // exit(1);
-    // we use a second vector that keeps track for each ID of the current insertion
+    // we use a second std::vector that keeps track for each ID of the current insertion
     // position in the array
-    vector<count_type> tmp(wcnt.size(),0);
+    std::vector<count_type> tmp(wcnt.size(),0);
     for (size_t i = 1; i < wcnt.size(); ++i)
       tmp[i] = tmp[i-1] + wcnt[i-1];
 
@@ -198,14 +198,14 @@ namespace ugdiss
       }
 
     // Now sort the array
-    if (log) *log << "sorting ...." << endl;
+    if (log) *log << "sorting ...." << std::endl;
     index.resize(wcnt.size()+1,0);
     typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(c.get());
     for (size_t i = 0; i < wcnt.size(); i++)
       {
         if (log && wcnt[i] > 5000)
           *log << "sorting " << wcnt[i]
-               << " entries starting with id " << i << "." << endl;
+               << " entries starting with id " << i << "." << std::endl;
         index[i+1] = index[i]+wcnt[i];
         assert(index[i+1]==tmp[i]); // sanity check
         if (wcnt[i]>1)
@@ -217,7 +217,7 @@ namespace ugdiss
     this->indexSize  = this->index.size();
 #if 1
     // Sanity check during code development. Can be removed once the thing is stable.
-    typename vector<cpos>::iterator m = sufa.begin();
+    typename std::vector<cpos>::iterator m = sufa.begin();
     for (size_t i = 0; i < wcnt.size(); i++)
       {
         for (size_t k = 0; k < wcnt[i]; ++k,++m)
@@ -330,14 +330,14 @@ namespace ugdiss
   template<typename TOKEN>
   void
   imTSA<TOKEN>::
-  save_as_mm_tsa(string fname) const
+  save_as_mm_tsa(std::string fname) const
   {
-    ofstream out(fname.c_str());
+    std::ofstream out(fname.c_str());
     filepos_type idxStart(0);
     id_type idxSize(index.size());
     numwrite(out,idxStart);
     numwrite(out,idxSize);
-    vector<filepos_type> mmIndex;
+    std::vector<filepos_type> mmIndex;
     for (size_t i = 1; i < this->index.size(); i++)
       {
 	mmIndex.push_back(out.tellp());
@@ -360,7 +360,7 @@ namespace ugdiss
   imTSA<TOKEN>::
   imTSA(imTSA<TOKEN> const& prior,
   	boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
-  	vector<id_type> const& newsids, size_t const vsize)
+  	std::vector<id_type> const& newsids, size_t const vsize)
   {
     typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(crp.get());
 
@@ -369,7 +369,7 @@ namespace ugdiss
     size_t newToks = 0;
     BOOST_FOREACH(id_type sid, newsids)
       newToks += crp->sntLen(sid);
-    vector<cpos> nidx(newToks); // new array entries
+    std::vector<cpos> nidx(newToks); // new array entries
 
     size_t n = 0;
     BOOST_FOREACH(id_type sid, newsids)
@@ -390,9 +390,9 @@ namespace ugdiss
     this->index.resize(vsize+1);
 
     size_t i = 0;
-    typename vector<cpos>::iterator k = this->sufa.begin();
+    typename std::vector<cpos>::iterator k = this->sufa.begin();
     // cerr << newToks << " new items at "
-    // << __FILE__ << ":" << __LINE__ << endl;
+    // << __FILE__ << ":" << __LINE__ << std::endl;
     for (size_t n = 0; n < nidx.size();)
       {
   	id_type nid = crp->getToken(nidx[n])->id();

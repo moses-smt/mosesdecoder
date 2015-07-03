@@ -59,7 +59,7 @@ namespace Moses
       ++obwd[po_bwd];
       if (docid >= 0)
 	{
-	  while (int(indoc.size()) <= docid) indoc.push_back(0);
+	  // while (int(indoc.size()) <= docid) indoc.push_back(0);
 	  ++indoc[docid];
 	}
     }
@@ -67,7 +67,7 @@ namespace Moses
     bool
     pstats::
     add(uint64_t pid, float const w, float const b,
-	vector<uchar> const& a,
+	std::vector<unsigned char> const& a,
 	uint32_t const cnt2,
 	uint32_t fwd_o,
 	uint32_t bwd_o, int const docid)

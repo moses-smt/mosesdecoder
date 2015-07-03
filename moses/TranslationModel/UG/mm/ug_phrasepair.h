@@ -12,6 +12,9 @@ namespace Moses
 {
   namespace bitext
   {
+
+    using ugdiss::TokenIndex;
+
     template<typename Token>
     class
     PhrasePair
@@ -28,10 +31,11 @@ namespace Moses
       std::vector<float> fvals;
       float dfwd[Moses::LRModel::NONE+1]; // distortion counts // counts or probs?
       float dbwd[Moses::LRModel::NONE+1]; // distortion counts
-      std::vector<uchar> aln;
+      std::vector<unsigned char> aln;
       float score;
       bool inverse;
-      std::vector<uint32_t> indoc;
+      // std::vector<uint32_t> indoc;
+      std::map<uint32_t,uint32_t> indoc;
       PhrasePair() { };
       PhrasePair(PhrasePair const& o);
 
@@ -54,10 +58,10 @@ namespace Moses
       void
       fill_lr_vec(LRModel::Direction const& dir,
 		  LRModel::ModelType const& mdl,
-		  vector<float>& v) const;
+		  std::vector<float>& v) const;
 #ifndef NO_MOSES
       void
-      print(ostream& out, TokenIndex const& V1, TokenIndex const& V2,
+      print(std::ostream& out, TokenIndex const& V1, TokenIndex const& V2,
 	    LRModel const& LR) const;
 #endif 
 
@@ -274,7 +278,7 @@ namespace Moses
     PhrasePair<Token>
     ::fill_lr_vec(LRModel::Direction const& dir,
 		  LRModel::ModelType const& mdl,
-		  vector<float>& v) const
+		  std::vector<float>& v) const
     {
       // how many distinct scores do we have?
       size_t num_scores = (mdl == LRModel::MSLR ? 4 : mdl == LRModel::MSD  ? 3 : 2);
@@ -304,26 +308,28 @@ namespace Moses
     template<typename Token>
     void
     PhrasePair<Token>
-    ::print(ostream& out, TokenIndex const& V1, TokenIndex const& V2,
+    ::print(std::ostream& out, TokenIndex const& V1, TokenIndex const& V2,
 	  LRModel const& LR) const
     {
       out << toString (V1, this->start1, this->len1) << " ::: "
 	  << toString (V2, this->start2, this->len2) << " "
 	  << this->joint << " [";
-      for (size_t i = 0; i < this->indoc.size(); ++i)
+      // for (size_t i = 0; i < this->indoc.size(); ++i)
+      for (std::map<uint32_t,uint32_t>::const_iterator m = indoc.begin();
+	   m != indoc.end(); ++m)
 	{
-	  if (i) out << " ";
-	  out << this->indoc[i];
+	  if (m != indoc.begin()) out << " ";
+	  out << m->first << ":" << m->second;
 	}
       out << "] [";
-      vector<float> lrscores;
+      std::vector<float> lrscores;
       this->fill_lr_vec(LR.GetDirection(), LR.GetModelType(), lrscores);
       for (size_t i = 0; i < lrscores.size(); ++i)
 	{
 	  if (i) out << " ";
 	  out << boost::format("%.2f") % exp(lrscores[i]);
 	}
-      out << "]" << endl;
+      out << "]" << std::endl;
 #if 0
       for (int i = 0; i <= Moses::LRModel::NONE; i++)
 	{
