@@ -177,11 +177,13 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
-bool TargetPhrase::HasTtaskSPtr() const {
+bool TargetPhrase::HasTtaskSPtr() const
+{
   return m_ttask_flag;
 }
 
-const ttasksptr& TargetPhrase::GetTtask() const {
+const ttasksptr& TargetPhrase::GetTtask() const
+{
   return m_ttask;
 }
 
