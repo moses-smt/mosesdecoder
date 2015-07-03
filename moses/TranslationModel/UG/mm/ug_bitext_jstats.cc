@@ -56,7 +56,7 @@ namespace Moses
 
     void
     jstats::
-    add(float w, float b, vector<uchar> const& a, uint32_t const cnt2,
+    add(float w, float b, std::vector<unsigned char> const& a, uint32_t const cnt2,
 	uint32_t fwd_orient, uint32_t bwd_orient, int const docid)
     {
       boost::lock_guard<boost::mutex> lk(this->lock);

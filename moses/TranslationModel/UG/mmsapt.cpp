@@ -841,7 +841,7 @@ namespace Moses
               context->bias_log = m_bias_log;
             }
           context->bias
-            = btfix.SetupDocumentBias(ttask->GetContextWeights(), m_bias_log);
+            = btfix->SetupDocumentBias(ttask->GetContextWeights(), m_bias_log);
           context->bias->loglevel = m_bias_loglevel;
           context->bias->log = m_bias_log;
         if (!context->cache1) context->cache1.reset(new pstats::cache_t);

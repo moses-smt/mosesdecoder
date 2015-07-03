@@ -49,16 +49,15 @@ namespace Moses
     }
 
     DocumentBias::
-    DocumentBias
-    ( std::vector<id_type> const& sid2doc,
-      std::map<std::string,id_type> const& docname2docid,
-      std::string const& server_url, std::string const& text,
-      std::ostream* log)
+    DocumentBias(std::vector<id_type> const& sid2doc,
+		 std::map<std::string,id_type> const& docname2docid,
+		 std::string const& server_url, std::string const& text,
+		 std::ostream* log)
       : SamplingBias(&sid2doc)
       , m_bias(docname2docid.size(), 0)
     {
       // #ifdef HAVE_CURLPP
-#ifndef NO_MOSES
+      // #ifndef NO_MOSES
       Timer timer;
       if (log) timer.start(NULL);
       std::string json = query_bias_server(server_url, text);
@@ -67,13 +66,13 @@ namespace Moses
       if (log) *log << "Bias query took " << timer << " seconds." << std::endl;
     }
 
-    DocumentBias
-    ::DocumentBias(std::vector<id_type> const& sid2doc,
-                   std::map<std::string,id_type> const& docname2docid,
-                   std::map<std::string, float> const& context_weights,
-                   std::ostream* log)
-                   : m_sid2docid(sid2doc)
-                   , m_bias(docname2docid.size(), 0)
+    DocumentBias::
+    DocumentBias(std::vector<id_type> const& sid2doc,
+		 std::map<std::string,id_type> const& docname2docid,
+		 std::map<std::string, float> const& context_weights,
+		 std::ostream* log)
+      : SamplingBias(&sid2doc)
+      , m_bias(docname2docid.size(), 0)
     {
     init(context_weights, docname2docid);
     }

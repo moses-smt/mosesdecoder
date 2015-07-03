@@ -363,7 +363,7 @@ namespace Moses {
       size_t & s1, size_t & s2, // beginning and end of target start
       size_t & e1, size_t & e2, // beginning and end of target end
       int& po_fwd, int& po_bwd, // phrase orientations
-      std::vector<uchar> * core_alignment, // stores the core alignment
+      std::vector<unsigned char> * core_alignment, // stores the core alignment
       bitvector* full_alignment, // stores full word alignment for this sent.
       bool const flip) const     // flip source and target (reverse lookup)
     {

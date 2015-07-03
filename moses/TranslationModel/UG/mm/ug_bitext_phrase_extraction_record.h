@@ -13,12 +13,12 @@ namespace Moses
       bool   const        flip; // 'backward' lookup from L2
       size_t    s1, s2, e1, e2; // soft and hard boundaries of target phrase
       int       po_fwd, po_bwd; // fwd and bwd phrase orientation 
-      std::vector<uchar>*  aln; // local alignments
-      bitvector*      full_aln; // full word alignment for sentence
+      std::vector<unsigned char>*  aln; // local alignments
+      ugdiss::bitvector*      full_aln; // full word alignment for sentence
 
       PhraseExtractionRecord(size_t const xsid, size_t const xstart, 
                              size_t const xstop, bool const xflip,
-                             std::vector<uchar>* xaln, bitvector* xfull_aln = NULL)
+                             std::vector<unsigned char>* xaln, ugdiss::bitvector* xfull_aln = NULL)
         : sid(xsid), start(xstart), stop(xstop), flip(xflip) 
         , aln(xaln), full_aln(xfull_aln) { }
     };

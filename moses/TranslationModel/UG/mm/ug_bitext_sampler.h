@@ -150,7 +150,7 @@ namespace bitext
   BitextSampler<Token>::
   consider_sample(TokenPosition const& p)
   {
-    vector<uchar>  aln; 
+    std::vector<unsigned char>  aln; 
     bitvector full_aln(100*100);
     PhraseExtractionRecord rec(p.sid, p.offset, p.offset + m_plen, 
                                !m_fwd, &aln, &full_aln);
