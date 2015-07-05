@@ -833,17 +833,19 @@ namespace Moses
 	  }
 	if (!context->cache1) context->cache1.reset(new pstats::cache_t);
 	if (!context->cache2) context->cache2.reset(new pstats::cache_t);
-      } else if (!ttask->GetContextWeights().empty()) {
-          if (m_bias_log)
-            {
-              *m_bias_log << HERE << endl
-                          << "BIAS FROM MAP LOOKUP" << endl;
-              context->bias_log = m_bias_log;
-            }
-          context->bias
-            = btfix->SetupDocumentBias(ttask->GetContextWeights(), m_bias_log);
-          context->bias->loglevel = m_bias_loglevel;
-          context->bias->log = m_bias_log;
+      } 
+    else if (!ttask->GetContextWeights().empty()) 
+      {
+	if (m_bias_log)
+	  {
+	    *m_bias_log << HERE << endl
+			<< "BIAS FROM MAP LOOKUP" << endl;
+	    context->bias_log = m_bias_log;
+	  }
+	context->bias
+	  = btfix->SetupDocumentBias(ttask->GetContextWeights(), m_bias_log);
+	context->bias->loglevel = m_bias_loglevel;
+	context->bias->log = m_bias_log;
         if (!context->cache1) context->cache1.reset(new pstats::cache_t);
         if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       }
@@ -897,12 +899,14 @@ namespace Moses
   Mmsapt::
   InitializeForInput(ttasksptr const& ttask)
   {
-    set_bias_for_ranking(ttask, this->btfix);
-    // to do: depending on method, set bias for ranking, via consulting the bias 
-    // server, or none at al.
-
     sptr<ContextScope> const& scope = ttask->GetScope();
     sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+
+    // set sampling bias, depending on sampling method specified
+    if (m_sampling_method == ranked_sampling)
+      set_bias_for_ranking(ttask, this->btfix);
+    else if (m_sampling_method == random_sampling)
+      set_bias_via_server(ttask);
 
     boost::unique_lock<boost::shared_mutex> mylock(m_lock);
     sptr<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
