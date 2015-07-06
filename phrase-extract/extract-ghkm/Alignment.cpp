@@ -19,7 +19,7 @@
 
 #include "Alignment.h"
 
-#include "Exception.h"
+#include "syntax-common/exception.h"
 
 #include <algorithm>
 #include <cassert>
@@ -44,7 +44,7 @@ void ReadAlignment(const std::string &s, Alignment &a)
     }
     int src = std::atoi(s.substr(begin, end-begin).c_str());
     if (end+1 == s.size()) {
-      throw Exception("Target index missing");
+      throw Syntax::Exception("Target index missing");
     }
 
     begin = end+1;

@@ -30,6 +30,7 @@
 
 #include <boost/program_options.hpp>
 
+#include "syntax-common/exception.h"
 #include "syntax-common/xml_tree_parser.h"
 
 #include "InputFileStream.h"
@@ -43,7 +44,6 @@
 
 #include "Alignment.h"
 #include "AlignmentGraph.h"
-#include "Exception.h"
 #include "Node.h"
 #include "Options.h"
 #include "PhraseOrientation.h"
@@ -160,11 +160,11 @@ int ExtractGHKM::Main(int argc, char *argv[])
     try {
       targetParseTree = targetXmlTreeParser.Parse(targetLine);
       assert(targetParseTree.get());
-    } catch (const Exception &e) {
+    } catch (const Syntax::Exception &e) {
       std::ostringstream oss;
       oss << "Failed to parse target XML tree at line " << lineNum;
-      if (!e.GetMsg().empty()) {
-        oss << ": " << e.GetMsg();
+      if (!e.msg().empty()) {
+        oss << ": " << e.msg();
       }
       Error(oss.str());
     }
@@ -178,11 +178,11 @@ int ExtractGHKM::Main(int argc, char *argv[])
       try {
         sourceParseTree = sourceXmlTreeParser.Parse(sourceLine);
         assert(sourceParseTree.get());
-      } catch (const Exception &e) {
+      } catch (const Syntax::Exception &e) {
         std::ostringstream oss;
         oss << "Failed to parse source XML tree at line " << lineNum;
-        if (!e.GetMsg().empty()) {
-          oss << ": " << e.GetMsg();
+        if (!e.msg().empty()) {
+          oss << ": " << e.msg();
         }
         Error(oss.str());
       }
@@ -192,10 +192,10 @@ int ExtractGHKM::Main(int argc, char *argv[])
     // Read word alignments.
     try {
       ReadAlignment(alignmentLine, alignment);
-    } catch (const Exception &e) {
+    } catch (const Syntax::Exception &e) {
       std::ostringstream oss;
       oss << "Failed to read alignment at line " << lineNum << ": ";
-      oss << e.GetMsg();
+      oss << e.msg();
       Error(oss.str());
     }
     if (alignment.size() == 0) {
