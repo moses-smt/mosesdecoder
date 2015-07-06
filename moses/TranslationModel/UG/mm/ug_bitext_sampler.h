@@ -186,6 +186,8 @@ BitextSampler(Bitext<Token> const* const bitext,
   , m_ctr(0)
   , m_total_bias(0)
   , m_finished(false)
+  , m_rnd(0)
+  , m_rnd_denom(m_rnd.max() + 1)
 {
   m_stats.reset(new pstats);
   m_stats->raw_cnt = phrase.ca();
@@ -205,6 +207,8 @@ BitextSampler(BitextSampler const& other)
   , m_method(other.m_method)
   , m_bias(other.m_bias)
   , m_samples(other.m_samples)
+  , m_rnd(0)
+  , m_rnd_denom(m_rnd.max() + 1)
 {
   // lock both instances
   boost::unique_lock<boost::mutex> mylock(m_lock);
