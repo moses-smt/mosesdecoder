@@ -53,16 +53,6 @@ namespace Moses
       }
   }
 
-#if 0
-  Mmsapt::
-  Mmsapt(string const& description, string const& line)
-    : PhraseDictionary(description,line), ofactor(1,0), m_bias_log(NULL)
-    , m_bias_loglevel(0)
-  {
-    this->init(line);
-  }
-#endif
-
   vector<string> const&
   Mmsapt::
   GetFeatureNames() const
@@ -392,14 +382,6 @@ namespace Moses
       }
   }
 
-  // void
-  // Mmsapt::
-  // add_corpus_specific_features(vector<sptr<pscorer > >& registry)
-  // {
-  //   check_ff<PScorePbwd<Token> >("pbwd",m_lbop_conf,registry);
-  //   check_ff<PScoreLogCnt<Token> >("logcnt",registry);
-  // }
-
   void
   Mmsapt::
   Load()
@@ -655,12 +637,6 @@ namespace Moses
       for (size_t i = 0; mdyn.size() == i && i < sphrase.size(); ++i)
 	mdyn.extend(sphrase[i]);
 
-#if 0
-    cerr << src << endl;
-    cerr << mfix.size() << ":" << mfix.getPid() << " "
-	 << mdyn.size() << " " << mdyn.getPid() << endl;
-#endif
-
     if (mdyn.size() != sphrase.size() && mfix.size() != sphrase.size())
       return NULL; // phrase not found in either bitext
 
@@ -746,32 +722,6 @@ namespace Moses
 	  }
       }
 #endif
-
-
-#if 0
-    if (combine_pstats(src,
-		       mfix.getPid(), sfix.get(), btfix,
-		       mdyn.getPid(), sdyn.get(),  *dyn, ret))
-      {
-#if 0
-	sort(ret->begin(), ret->end(), CompareTargetPhrase());
-	cout << "SOURCE PHRASE: " << src << endl;
-	size_t i = 0;
-	for (TargetPhraseCollection::iterator r = ret->begin(); r != ret->end(); ++r)
-	  {
-	    cout << ++i << " " << **r << endl;
-	    FVector fv = (*r)->GetScoreBreakdown().CreateFVector();
-	    typedef pair<Moses::FName,float> item_t;
-	    BOOST_FOREACH(item_t f, fv)
-	      cout << f.first << ":" << f.second << " ";
-	    cout << endl;
-	  }
-#endif
-      }
-#endif
-
-    // put the result in the cache and return
-
     cache->add(phrasekey, ret);
     return ret;
   }
@@ -831,8 +781,8 @@ namespace Moses
             //so that other functions can utilize the biases;
             ttask->ReSetContextWeights(context->bias->getBiasMap());
 	  }
-	if (!context->cache1) context->cache1.reset(new pstats::cache_t);
-	if (!context->cache2) context->cache2.reset(new pstats::cache_t);
+	// if (!context->cache1) context->cache1.reset(new pstats::cache_t);
+	// if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       } 
     else if (!ttask->GetContextWeights().empty()) 
       {
@@ -846,9 +796,11 @@ namespace Moses
 	  = btfix->SetupDocumentBias(ttask->GetContextWeights(), m_bias_log);
 	context->bias->loglevel = m_bias_loglevel;
 	context->bias->log = m_bias_log;
-        if (!context->cache1) context->cache1.reset(new pstats::cache_t);
-        if (!context->cache2) context->cache2.reset(new pstats::cache_t);
+        // if (!context->cache1) context->cache1.reset(new pstats::cache_t);
+        // if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       }
+    if (!context->cache1) context->cache1.reset(new pstats::cache_t);
+    if (!context->cache2) context->cache2.reset(new pstats::cache_t);
   }
   
   void
@@ -907,6 +859,7 @@ namespace Moses
       set_bias_for_ranking(ttask, this->btfix);
     else if (m_sampling_method == random_sampling)
       set_bias_via_server(ttask);
+    else UTIL_THROW2("Unknown sampling method: " << m_sampling_method);
 
     boost::unique_lock<boost::shared_mutex> mylock(m_lock);
     sptr<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
