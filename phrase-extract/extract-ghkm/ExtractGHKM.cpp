@@ -55,6 +55,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -131,8 +133,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string sourceLine;
   std::string alignmentLine;
   Alignment alignment;
-  Syntax::XmlTreeParser targetXmlTreeParser;
-  Syntax::XmlTreeParser sourceXmlTreeParser;
+  XmlTreeParser targetXmlTreeParser;
+  XmlTreeParser sourceXmlTreeParser;
   ScfgRuleWriter scfgWriter(fwdExtractStream, invExtractStream, options);
   StsgRuleWriter stsgWriter(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
@@ -160,7 +162,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     try {
       targetParseTree = targetXmlTreeParser.Parse(targetLine);
       assert(targetParseTree.get());
-    } catch (const Syntax::Exception &e) {
+    } catch (const Exception &e) {
       std::ostringstream oss;
       oss << "Failed to parse target XML tree at line " << lineNum;
       if (!e.msg().empty()) {
@@ -178,7 +180,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
       try {
         sourceParseTree = sourceXmlTreeParser.Parse(sourceLine);
         assert(sourceParseTree.get());
-      } catch (const Syntax::Exception &e) {
+      } catch (const Exception &e) {
         std::ostringstream oss;
         oss << "Failed to parse source XML tree at line " << lineNum;
         if (!e.msg().empty()) {
@@ -192,7 +194,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     // Read word alignments.
     try {
       ReadAlignment(alignmentLine, alignment);
-    } catch (const Syntax::Exception &e) {
+    } catch (const Exception &e) {
       std::ostringstream oss;
       oss << "Failed to read alignment at line " << lineNum << ": ";
       oss << e.msg();
@@ -896,4 +898,5 @@ void ExtractGHKM::StripBitParLabels(
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

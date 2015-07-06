@@ -32,6 +32,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -229,4 +231,5 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

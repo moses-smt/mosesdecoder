@@ -27,6 +27,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -44,7 +46,7 @@ void ReadAlignment(const std::string &s, Alignment &a)
     }
     int src = std::atoi(s.substr(begin, end-begin).c_str());
     if (end+1 == s.size()) {
-      throw Syntax::Exception("Target index missing");
+      throw Exception("Target index missing");
     }
 
     begin = end+1;
@@ -70,4 +72,5 @@ void FlipAlignment(Alignment &a)
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

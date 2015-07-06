@@ -32,12 +32,14 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
 struct Options;
 
-class ExtractGHKM : public Syntax::Tool
+class ExtractGHKM : public Tool
 {
 public:
   ExtractGHKM() : Tool("extract-ghkm") {}
@@ -76,4 +78,5 @@ private:
 };
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

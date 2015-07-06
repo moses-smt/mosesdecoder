@@ -32,6 +32,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -64,6 +66,7 @@ private:
 
   Node *CopyParseTree(const SyntaxTree *);
   void ComputeFrontierSet(Node *, const Options &, std::set<Node *> &) const;
+  bool IsFrontierNode(const Node &, const Options &) const;
   void CalcComplementSpans(Node *);
   void GetTargetTreeLeaves(Node *, std::vector<Node *> &);
   void AttachUnalignedSourceWords();
@@ -78,6 +81,7 @@ private:
 };
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining
 
 #endif
