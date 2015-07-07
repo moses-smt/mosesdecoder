@@ -63,7 +63,7 @@ BitextSampler : public reference_counter
   bool                     m_finished;
 
   boost::taus88 m_rnd;  // every job has its own pseudo random generator
-  double m_rnddenom;    // denominator for scaling random sampling
+  // double m_rnd_denom;   // denominator for scaling random sampling
   double m_bias_total;
 
   bool   consider_sample(TokenPosition const& p);
@@ -187,7 +187,7 @@ BitextSampler(Bitext<Token> const* const bitext,
   , m_total_bias(0)
   , m_finished(false)
   , m_rnd(0)
-  , m_rnd_denom(m_rnd.max() + 1)
+    // , m_rnd_denom(m_rnd.max() + 1)
 {
   m_stats.reset(new pstats);
   m_stats->raw_cnt = phrase.ca();
@@ -208,7 +208,7 @@ BitextSampler(BitextSampler const& other)
   , m_bias(other.m_bias)
   , m_samples(other.m_samples)
   , m_rnd(0)
-  , m_rnd_denom(m_rnd.max() + 1)
+    // , m_rnd_denom(m_rnd.max() + 1)
 {
   // lock both instances
   boost::unique_lock<boost::mutex> mylock(m_lock);
