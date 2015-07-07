@@ -63,21 +63,21 @@ The _Variants:_ line specifies what type of tests should we run. This particular
 If you want to produce profiler results together in some tests you need to specify the _MOSES\_PROFILER\_REPO_ in the config
 ```bash
 git clone https://github.com/moses-smt/mosesdecoder.git mosesdecoder-profile
-cd mosesdecoder
+cd mosesdecoder-profile
 ./bjam -j10 --with-cmph=/usr/include/ variant=profile
 ```
 
-Afterwards for testcases which contain the **profile** keyword in **Variants** you will see a directory inside _TEST\_LOG\_DIR which contains the **gprof** output from every run.
+Afterwards for testcases which contain the **profile** keyword in **Variants** you will see a directory inside _TEST\_LOG\_DIR which contains the **gprof** output from every run (files ending in **\_profile**).
 
 #### Produce google profiler results.
 If you want to produce profiler results together in some tests you need to specify the _MOSES\_GOOGLE\_PROFILER\_REPO in the config
 ```bash
 git clone https://github.com/moses-smt/mosesdecoder.git mosesdecoder-google-profile
 cd mosesdecoder
-./bjam link=shared -j10 --full-tcmalloc- -with-cmph=/usr/include/
+./bjam link=shared -j10 --full-tcmalloc --with-cmph=/usr/include/
 ```
 
-Afterwards for testcases which contain the **google-profiler** keyword in **Variants** you will see a directory inside _TEST\_LOG\_DIR which contains the **google-profiler** output from every run.
+Afterwards for testcases which contain the **google-profiler** keyword in **Variants** you will see a directory inside _TEST\_LOG\_DIR which contains the **google-profiler** output from every run (files prefixed with **pprof**). To analyze the output you need to use [pprof](http://google-perftools.googlecode.com/svn/trunk/doc/cpuprofile.html).
 
 ### Running tests.
 Running the tests is done through the **runtests.py** script.
