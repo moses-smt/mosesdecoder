@@ -165,8 +165,8 @@ FeatureFactory
                   << "WARNING: Auto-initializing all weights for this FF to 1.0");
         weights.assign(feature->GetNumScoreComponents(),1.0);
       } else {
-        TRACE_ERR("WARNING: No weights specified in config file for FF "
-                  << featureName << ". Using default values supplied by FF.");
+        VERBOSE(2,"WARNING: No weights specified in config file for FF "
+		<< featureName << ". Using default values supplied by FF.");
       }
     }
     UTIL_THROW_IF2(weights.size() != feature->GetNumScoreComponents(),
