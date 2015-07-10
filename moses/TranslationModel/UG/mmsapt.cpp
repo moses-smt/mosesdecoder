@@ -227,7 +227,7 @@ namespace Moses
 
     if ((m = param.find("method")) != param.end())
       {
-	if (m->second == "rank")
+	if (m->second == "rank" || m->second == "ranked")
 	  m_sampling_method = ranked_sampling;
 	else if (m->second == "random")
 	  m_sampling_method = random_sampling;
