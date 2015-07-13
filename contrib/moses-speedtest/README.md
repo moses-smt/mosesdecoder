@@ -28,14 +28,16 @@ TEST_DIR: /home/moses-speedtest/phrase_tables/tests
 TEST_LOG_DIR: /home/moses-speedtest/phrase_tables/testlogs
 BASEBRANCH: RELEASE-2.1.1
 MOSES_PROFILER_REPO: /home/moses-speedtest/moses-standard/mosesdecoder-variant-prof
+MOSES_GOOGLE_PROFILER_REPO: /home/moses-speedtest/moses-standard/mosesdecoder-variant-gperftools
 </pre>
 
 The _MOSES\_REPO\_PATH_ is the place where you have set up and built moses.
-The _DROP\_CACHES\_COMM_ is the command that would b eused to drop caches. It should run without needing root access.
+The _DROP\_CACHES\_COMM_ is the command that would be used to drop caches. It should run without needing root access.
 _TEST\_DIR_ is the directory where all the tests will reside.
 _TEST\_LOG\_DIR_ is the directory where the performance logs will be gathered. It should be created before running the testsuite for the first time.
 _BASEBRANCH_ is the branch against which all new tests will be compared. It should normally be set to be the latest Moses stable release.
 _MOSES\_PROFILER\_REPO_ is a path to a moses repository set up and built with profiling enabled. Optional if you want to produce profiling results.
+_MOSES\_GOOGLE\_PROFILER\_REPO is a path to moses repository set up with full tcmalloc and profiler, as well as shared link for use with gperftools.
 ### Creating tests
 
 In order to create a test one should go into the TEST_DIR and create a new folder. That folder will be used for the name of the test.
@@ -45,7 +47,7 @@ An example such configuration file is **test\_config**
 <pre>
 Command: moses -f ... -i fff #Looks for the command in the /bin directory of the repo specified in the testsuite_config
 LDPRE: ldpreloads #Comma separated LD_LIBRARY_PATH:/, 
-Variants: vanilla, cached, ldpre, profile #Can't have cached without ldpre or vanilla
+Variants: vanilla, cached, ldpre, profile, google-profiler #Can't have cached without ldpre or vanilla
 </pre>
 
 The _Command:_ line specifies the executable (which is looked up in the /bin directory of the repo.) and any arguments necessary. Before running the test, the script cds to the current test directory so you can use relative paths.
@@ -61,11 +63,21 @@ The _Variants:_ line specifies what type of tests should we run. This particular
 If you want to produce profiler results together in some tests you need to specify the _MOSES\_PROFILER\_REPO_ in the config
 ```bash
 git clone https://github.com/moses-smt/mosesdecoder.git mosesdecoder-profile
-cd mosesdecoder
+cd mosesdecoder-profile
 ./bjam -j10 --with-cmph=/usr/include/ variant=profile
 ```
 
-Afterwards for testcases which contain the **profile** keyword in **Variants** you will see a directory inside _TEST\_LOG\_DIR which contains the **gprof** output from every run.
+Afterwards for testcases which contain the **profile** keyword in **Variants** you will see a directory inside _TEST\_LOG\_DIR which contains the **gprof** output from every run (files ending in **\_profile**).
+
+#### Produce google profiler results.
+If you want to produce profiler results together in some tests you need to specify the _MOSES\_GOOGLE\_PROFILER\_REPO in the config
+```bash
+git clone https://github.com/moses-smt/mosesdecoder.git mosesdecoder-google-profile
+cd mosesdecoder
+./bjam link=shared -j10 --full-tcmalloc --with-cmph=/usr/include/
+```
+
+Afterwards for testcases which contain the **google-profiler** keyword in **Variants** you will see a directory inside _TEST\_LOG\_DIR which contains the **google-profiler** output from every run (files prefixed with **pprof**). To analyze the output you need to use [pprof](http://google-perftools.googlecode.com/svn/trunk/doc/cpuprofile.html).
 
 ### Running tests.
 Running the tests is done through the **runtests.py** script.

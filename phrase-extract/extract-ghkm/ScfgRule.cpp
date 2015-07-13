@@ -28,6 +28,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -197,4 +199,5 @@ void ScfgRule::UpdateSourceLabelCoocCounts(std::map< std::string, std::map<std::
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

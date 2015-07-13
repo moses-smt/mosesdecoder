@@ -234,8 +234,8 @@ EvaluateWhenApplied(StatefulFeatureFunction const& sfff,
     ttasksptr const& ttask = manager.GetTtask();
 
     m_ffStates[state_idx] = sfff.EvaluateWhenAppliedWithContext
-      (ttask, *this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-       &m_currScoreBreakdown);
+                            (ttask, *this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+                             &m_currScoreBreakdown);
   }
 }
 

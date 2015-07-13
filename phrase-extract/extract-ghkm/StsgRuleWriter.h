@@ -8,6 +8,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -36,6 +38,7 @@ private:
 };
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining
 
 #endif

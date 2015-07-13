@@ -25,6 +25,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -35,5 +37,5 @@ void ReadAlignment(const std::string &, Alignment &);
 void FlipAlignment(Alignment &);
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining
-

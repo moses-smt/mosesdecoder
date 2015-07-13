@@ -23,6 +23,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -70,4 +72,5 @@ void Node::GetTargetWords(std::vector<std::string> &targetWords) const
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

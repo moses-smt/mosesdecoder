@@ -1135,6 +1135,12 @@ sub define_step {
 	elsif ($DO_STEP[$i] =~ /^LM:(.+):train-randomized$/) {
 	    &define_lm_train_randomized($i,$1);
 	}
+  elsif ($DO_STEP[$i] =~ /^LM:(.+):train-bilingual-lm$/) {
+	    &define_lm_train_bilingual_lm($i,$1);
+  }
+  elsif ($DO_STEP[$i] =~ /^LM:(.+):prepare-bilingual-lm$/) {
+	    &define_lm_prepare_bilingual_lm($i,$1);
+  }
         elsif ($DO_STEP[$i] eq 'TRAINING:prepare-data') {
             &define_training_prepare_data($i);
         }
@@ -1775,6 +1781,69 @@ sub define_lm_train_randomized {
     $cmd .= "mv $output.BloomMap $output\n";
 
     &create_step($step_id,$cmd);
+}
+
+sub define_lm_train_bilingual_lm {
+    my ($step_id,$set) = @_;
+	  my ($working_dir, $ngrams, $corpus)		= &get_output_and_input($step_id);
+    my $scripts = &check_backoff_and_get("LM:moses-script-dir");
+    my $cmd = "$scripts/training/bilingual-lm/train_nplm.py -w $working_dir -c $corpus -r $working_dir";
+    my $nplm_dir = &check_backoff_and_get("LM:$set:nplm-dir");
+    $cmd .= " -l $nplm_dir";
+
+    my ($n, $m, $total_order) = &get_bilingual_lm_order($set);
+    $cmd .= " -n $total_order";
+
+    my $epochs = &get_bilingual_lm_epochs($set);
+    $cmd .= " -e $epochs" if defined($epochs);
+
+    my $nplm_settings = backoff_and_get("LM:$set:nplm-settings");
+    $cmd .= " $nplm_settings" if defined($nplm_settings);
+
+    # Create the ini file
+    $cmd .= "\n";
+    $cmd .= "$scripts/training/bilingual-lm/create_blm_ini.py -w $working_dir -n $n -m $m -x $set -e $epochs";
+
+    &create_step($step_id,$cmd);
+}
+
+sub define_lm_prepare_bilingual_lm {
+    my ($step_id,$set) = @_;
+	  my ($working_dir, $corpus, $align)		= &get_output_and_input($step_id);
+    my $scripts = &check_backoff_and_get("LM:moses-script-dir");
+    my $cmd = "$scripts/training/bilingual-lm/extract_training.py -w $working_dir -c $corpus";
+
+    my $input_extension = &check_backoff_and_get("GENERAL:input-extension");
+    my $output_extension = &check_backoff_and_get("GENERAL:output-extension");
+    $cmd .= " -e $output_extension -f $input_extension";
+
+    my $align_method = &check_backoff_and_get("TRAINING:alignment-symmetrization-method");
+    $cmd .= " -a $align.$align_method";
+
+    my ($n, $m, $total_order) = &get_bilingual_lm_order($set);
+    $cmd .= " -n $n -m $m";
+
+    my $bilingual_settings = backoff_and_get("LM:$set:bilingual-lm-settings");
+    $cmd .= " $bilingual_settings" if defined($bilingual_settings);
+
+
+    &create_step($step_id,$cmd);
+}
+
+sub get_bilingual_lm_order {
+  my ($set) = @_;
+  my $order = &backoff_and_get("LM:$set:order");
+  $order = 5 unless defined ($order);
+  my $source_window = &backoff_and_get("LM:$set:source-window");
+  $source_window = 4 unless defined ($order);
+  return ($order, $source_window, $order + 2*$source_window+1);
+}
+
+sub get_bilingual_lm_epochs {
+  my ($set) = @_;
+  my $epochs = &backoff_and_get("LM:$set:epochs");
+  $epochs = 10 unless defined($epochs);
+  return $epochs;
 }
 
 sub define_lm_randomize {
@@ -2548,7 +2617,8 @@ sub define_training_create_config {
     }
 
     # sparse lexical features provide additional content for config file
-    $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
+    my @additional_ini_files;
+    push  (@additional_ini_files, "$sparse_lexical_features.ini") if $sparse_lexical_features;
 
     my @LM_SETS = &get_sets("LM");
     my %INTERPOLATED_AWAY;
@@ -2599,8 +2669,9 @@ sub define_training_create_config {
             if (&get("LM:$set:config-feature-line") && &get("LM:$set:config-weight-line")) {
                 $feature_lines .= &get("LM:$set:config-feature-line") . ";";
                 $weight_lines .= &get("LM:$set:config-weight-line") . ";";
-            }
-            else {
+            } elsif (&get("LM:$set:bilingual-lm")) {
+               push(@additional_ini_files, "$lm/blm.ini"); 
+            } else {
                 my $order = &check_backoff_and_get("LM:$set:order");
 
                 my $lm_file = "$lm";
@@ -2629,12 +2700,14 @@ sub define_training_create_config {
             }
     }
 
-    if (defined($feature_lines)) {
+    if ($feature_lines) {
         $cmd .= "-config-add-feature-lines \"$feature_lines\" ";
     }
-    if (defined($weight_lines)) {
+    if ($weight_lines) {
         $cmd .= "-config-add-weight-lines \"$weight_lines\" ";
     }
+
+    $cmd .= "-additional-ini-file " . join(":", @additional_ini_files);
 
     &create_step($step_id,$cmd);
 }
@@ -2795,7 +2868,7 @@ sub get_interpolated_lm_sets {
   my $count=0;
   my $icount=0;
   foreach my $set (@LM_SETS) {
-    next if (&get("LM:$set:exclude-from-interpolation"));
+    next if (&get("LM:$set:exclude-from-interpolation")) or (&get("LM:$set:bilingual-lm"));
     my $order = &check_backoff_and_get("LM:$set:order");
 
     my $factor = 0;

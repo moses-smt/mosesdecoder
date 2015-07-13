@@ -7,6 +7,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -91,4 +93,5 @@ StsgRule::StsgRule(const Subgraph &fragment)
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

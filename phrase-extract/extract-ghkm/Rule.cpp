@@ -5,6 +5,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -38,4 +40,5 @@ bool Rule::PartitionOrderComp(const Node *a, const Node *b)
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining
