@@ -2343,7 +2343,9 @@ sub create_ini {
   }
   if ($_ADDITIONAL_INI_FILE) {
     print INI "\n# additional settings\n\n";
-    print INI `cat $_ADDITIONAL_INI_FILE`;
+    for my $AIF (split (/:/, $_ADDITIONAL_INI_FILE)) {
+      print INI `cat $AIF`;
+    }
   }
 
   # feature functions and weights

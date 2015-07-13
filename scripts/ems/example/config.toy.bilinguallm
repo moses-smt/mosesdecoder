@@ -194,21 +194,19 @@ raw-corpus = $toy-data/nc-5k.$output-extension
 
 [LM:bilingual-lm]
 #bilingual-lm
-exclude-from-interpolation = true
+
+#required settings
 bilingual-lm = "yes"
-bilingual-lm-workdir = "bilingual"
-bilingual-lm-settings = ""
 order = "5"
 source-window = "4"
+nplm-dir = "/mnt/gna0/rsennrich/tools/nplm-0.3-gpu-experimental/"
 
-#actual training
-train_order = "14" #this is equal to order + 2*source-window + 1
-nplm-output-dir = "nplm_out"
-nplm-settings = "-l /mnt/gna0/rsennrich/tools/nplm-0.3-gpu-experimental/"
+# Add extra settings for ngram extraction or nplm training
+#bilingual-lm-settings = ""
+#nplm-settings = ""
 
-#Config file generation:
-config-feature-line = "BilingualNPLM order=$order source_window=$source-window path=$working-dir/$nplm-output-dir/train.10k.model.nplm.10 source_vocab=$working-dir/$bilingual-lm-workdir/vocab.source target_vocab=$working-dir/$bilingual-lm-workdir/vocab.target"
-config-weight-line = "BilingualNPLM0= 0.1"
+# Defaults to 10
+#epochs = 2
 
 #################################################################
 # INTERPOLATING LANGUAGE MODELS

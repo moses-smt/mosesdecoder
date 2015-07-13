@@ -13,6 +13,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -92,4 +94,5 @@ void StsgRuleWriter::Write(const StsgRule &rule)
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

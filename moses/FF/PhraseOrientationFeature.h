@@ -302,8 +302,8 @@ public:
 
   struct ReoClassData {
   public:
-    std::vector<MosesTraining::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
-    std::vector<MosesTraining::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
+    std::vector<MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
+    std::vector<MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
     bool firstNonTerminalIsBoundary;
     bool firstNonTerminalPreviousSourceSpanIsAligned;
     bool firstNonTerminalFollowingSourceSpanIsAligned;
@@ -401,7 +401,7 @@ protected:
                                  ScoreComponentCollection* scoreBreakdown,
                                  const std::string* o) const;
 
-  const std::string* ToString(const MosesTraining::GHKM::PhraseOrientation::REO_CLASS o) const;
+  const std::string* ToString(const MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS o) const;
 
   static const std::string MORIENT;
   static const std::string SORIENT;

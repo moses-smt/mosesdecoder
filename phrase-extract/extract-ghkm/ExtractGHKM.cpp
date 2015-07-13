@@ -30,6 +30,7 @@
 
 #include <boost/program_options.hpp>
 
+#include "syntax-common/exception.h"
 #include "syntax-common/xml_tree_parser.h"
 
 #include "InputFileStream.h"
@@ -43,7 +44,6 @@
 
 #include "Alignment.h"
 #include "AlignmentGraph.h"
-#include "Exception.h"
 #include "Node.h"
 #include "Options.h"
 #include "PhraseOrientation.h"
@@ -54,6 +54,8 @@
 #include "StsgRuleWriter.h"
 
 namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -131,8 +133,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string sourceLine;
   std::string alignmentLine;
   Alignment alignment;
-  Syntax::XmlTreeParser targetXmlTreeParser;
-  Syntax::XmlTreeParser sourceXmlTreeParser;
+  XmlTreeParser targetXmlTreeParser;
+  XmlTreeParser sourceXmlTreeParser;
   ScfgRuleWriter scfgWriter(fwdExtractStream, invExtractStream, options);
   StsgRuleWriter stsgWriter(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
@@ -163,8 +165,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
     } catch (const Exception &e) {
       std::ostringstream oss;
       oss << "Failed to parse target XML tree at line " << lineNum;
-      if (!e.GetMsg().empty()) {
-        oss << ": " << e.GetMsg();
+      if (!e.msg().empty()) {
+        oss << ": " << e.msg();
       }
       Error(oss.str());
     }
@@ -181,8 +183,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
       } catch (const Exception &e) {
         std::ostringstream oss;
         oss << "Failed to parse source XML tree at line " << lineNum;
-        if (!e.GetMsg().empty()) {
-          oss << ": " << e.GetMsg();
+        if (!e.msg().empty()) {
+          oss << ": " << e.msg();
         }
         Error(oss.str());
       }
@@ -195,7 +197,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     } catch (const Exception &e) {
       std::ostringstream oss;
       oss << "Failed to read alignment at line " << lineNum << ": ";
-      oss << e.GetMsg();
+      oss << e.msg();
       Error(oss.str());
     }
     if (alignment.size() == 0) {
@@ -896,4 +898,5 @@ void ExtractGHKM::StripBitParLabels(
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

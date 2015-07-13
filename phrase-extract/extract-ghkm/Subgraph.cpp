@@ -24,6 +24,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -195,4 +197,5 @@ void Subgraph::RecursivelyGetPartsOfSpeech(const Node *n, std::vector<std::strin
 }
 
 }  // namespace MosesTraining
+}  // namespace Syntax
 }  // namespace GHKM

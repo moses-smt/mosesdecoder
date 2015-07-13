@@ -19,13 +19,15 @@
 
 #include "Alignment.h"
 
-#include "Exception.h"
+#include "syntax-common/exception.h"
 
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
 
 namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -70,4 +72,5 @@ void FlipAlignment(Alignment &a)
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

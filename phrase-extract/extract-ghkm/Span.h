@@ -26,6 +26,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -37,6 +39,7 @@ bool SpansIntersect(const Span &, const ContiguousSpan &);
 ContiguousSpan Closure(const Span &);
 
 }  // namespace MosesTraining
+}  // namespace Syntax
 }  // namespace GHKM
 
 #endif

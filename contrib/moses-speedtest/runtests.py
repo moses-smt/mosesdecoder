@@ -119,7 +119,7 @@ def parse_configfile(conffile, testdir, moses_repo, moses_prof_repo=None, moses_
             if moses_prof_repo is not None:  # Get optional command for profiling
                 prof_command = moses_prof_repo + '/bin/' + command
             if moses_gprof_repo is not None: # Get optional command for google-perftools
-                gprof_command = moses_gprof_repo + '/bin' + command
+                gprof_command = moses_gprof_repo + '/bin/' + command
             command = moses_repo + '/bin/' + command
         elif opt == 'LDPRE:':
             ldopts = args.replace('\n', '')
@@ -226,14 +226,14 @@ def write_gprof(command, name, variant, config):
     executable_path = command.split(' ')[0]  # Path to the moses binary
     gprof_command = 'gprof ' + executable_path + ' ' + gmon_path + ' > ' + outputfile
     subprocess.call([gprof_command], shell=True)
-    os.remove('gmon_path')  # After we are done discard the gmon file
+    os.remove(gmon_path)  # After we are done discard the gmon file
 
 def write_pprof(name, variant, config):
     """Copies the google-perftools profiler output to the corresponding test directory"""
     output_dir = config.testlogs + '/' + name
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    outputfile = output_dir + '/gprof_' + time.strftime("%d.%m.%Y_%H:%M:%S") + '_' + name + '_' + variant
+    outputfile = output_dir + '/pprof_' + time.strftime("%d.%m.%Y_%H:%M:%S") + '_' + name + '_' + variant
     shutil.move("/tmp/moses.prof", outputfile)
 
 
@@ -373,7 +373,7 @@ if __name__ == '__main__':
 
     for logfile in os.listdir(CONFIG.testlogs):
         logfile_name = CONFIG.testlogs + '/' + logfile
-        if not check_for_basever(logfile_name, CONFIG.basebranch):
+        if os.path.isfile(logfile_name) and not check_for_basever(logfile_name, CONFIG.basebranch):
             logfile = logfile.replace('_vanilla', '')
             logfile = logfile.replace('_cached', '')
             logfile = logfile.replace('_ldpre', '')
@@ -384,7 +384,7 @@ if __name__ == '__main__':
         #Create a new configuration for base version tests:
         BASECONFIG = Configuration(CONFIG.repo, CONFIG.drop_caches,\
             CONFIG.tests, CONFIG.testlogs, CONFIG.basebranch,\
-            CONFIG.baserev, CONFIG.repo_prof)
+            CONFIG.baserev, CONFIG.repo_prof, CONFIG.repo_gprof)
         BASECONFIG.additional_args(None, CONFIG.baserev, CONFIG.basebranch)
         #Set up the repository and get its revision:
         REVISION = repoinit(BASECONFIG)
@@ -406,7 +406,7 @@ if __name__ == '__main__':
         #Perform tests
         for directory in FIRSTTIME:
             cur_testcase = parse_configfile(BASECONFIG.tests + '/' + directory +\
-            '/config', directory, BASECONFIG.repo)
+            '/config', directory, BASECONFIG.repo, BASECONFIG.repo_prof, BASECONFIG.repo_gprof)
             execute_tests(cur_testcase, directory, BASECONFIG)
 
         #Reset back the repository to the normal configuration
@@ -430,10 +430,10 @@ if __name__ == '__main__':
 
     if CONFIG.singletest:
         TESTCASE = parse_configfile(CONFIG.tests + '/' +\
-            CONFIG.singletest + '/config', CONFIG.singletest, CONFIG.repo)
+            CONFIG.singletest + '/config', CONFIG.singletest, CONFIG.repo, CONFIG.repo_prof, CONFIG.repo_gprof)
         execute_tests(TESTCASE, CONFIG.singletest, CONFIG)
     else:
         for directory in ALL_DIR:
             cur_testcase = parse_configfile(CONFIG.tests + '/' + directory +\
-            '/config', directory, CONFIG.repo)
+            '/config', directory, CONFIG.repo, CONFIG.repo_prof, CONFIG.repo_gprof)
             execute_tests(cur_testcase, directory, CONFIG)
