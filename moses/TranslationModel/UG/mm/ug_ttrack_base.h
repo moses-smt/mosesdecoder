@@ -22,7 +22,7 @@
 
 namespace ugdiss
 {
-  using namespace std;
+  // using namespace std;
 
   typedef boost::dynamic_bitset<uint64_t> bdBitset;
 
@@ -39,12 +39,12 @@ namespace ugdiss
   }
 
   template<typename Token>
-  string
+  std::string
   toString(TokenIndex const& V, Token const* x, size_t const len)
   {
     if (!len) return "";
     UTIL_THROW_IF2(!x, HERE << ": Unexpected end of phrase!");
-    ostringstream buf;
+    std::ostringstream buf;
     buf << V[x->id()];
     size_t i = 1;
     for (x = x->next(); x && i < len; ++i, x = x->next())
@@ -100,10 +100,10 @@ namespace ugdiss
     endPos(id_type sid) const { return sntEnd(sid)-sntStart(0); }
 
     /** Don't use this unless you want a copy of the sentence */
-    vector<TKN>
+    std::vector<TKN>
     operator[](id_type sid) const
     {
-      return vector<TKN>(sntStart(sid),sntEnd(sid));
+      return std::vector<TKN>(sntStart(sid),sntEnd(sid));
     }
 
     /** @return size of corpus in number of sentences */
@@ -114,9 +114,9 @@ namespace ugdiss
 
     /** @return string representation of sentence /sid/
      *  Currently only defined for Ttrack<id_type> */
-    string str(id_type sid, TokenIndex const& T) const;
+    std::string str(id_type sid, TokenIndex const& T) const;
 
-    string pid2str(TokenIndex const* V, uint64_t pid) const;
+    std::string pid2str(TokenIndex const* V, uint64_t pid) const;
 
     // /** @return string representation of sentence /sid/
     //  *  Currently only defined for Ttrack<id_type> */
@@ -124,8 +124,8 @@ namespace ugdiss
 
     /** counts the tokens in the corpus; used for example in the construction of
      *  token sequence arrays */
-    count_type count_tokens(vector<count_type>& cnt, bdBitset const* filter,
-                            int lengthCutoff=0, ostream* log=NULL) const;
+    count_type count_tokens(std::vector<count_type>& cnt, bdBitset const* filter,
+                            int lengthCutoff=0, std::ostream* log=NULL) const;
 
     // static id_type toID(TKN const& t);
 
@@ -171,8 +171,8 @@ namespace ugdiss
   template<typename TKN>
   count_type
   Ttrack<TKN>::
-  count_tokens(vector<count_type>& cnt, bdBitset const* filter,
-	       int lengthCutoff, ostream* log) const
+  count_tokens(std::vector<count_type>& cnt, bdBitset const* filter,
+	       int lengthCutoff, std::ostream* log) const
   {
     bdBitset filter2;
     if (!filter)
@@ -199,7 +199,7 @@ namespace ugdiss
           {
             if (log)
               *log << "WARNING: skipping sentence #" << sid
-                   << " with more than 65536 tokens" << endl;
+                   << " with more than 65536 tokens" << std::endl;
             expectedTotal -= stop-k;
           }
         else
@@ -207,7 +207,7 @@ namespace ugdiss
             totalCount += stop-k;
             for (; k < stop; ++k)
               {
-		// cout << sid << " " << stop-k << " " << k->lemma << " " << k->id() << " " << sizeof(*k) << endl;
+		// cout << sid << " " << stop-k << " " << k->lemma << " " << k->id() << " " << sizeof(*k) << std::endl;
                 id_type wid = k->id();
                 while (wid >= cnt.size()) cnt.push_back(0);
                 cnt[wid]++;
@@ -217,8 +217,8 @@ namespace ugdiss
     if (this->size() == filter->count())
       {
         if (totalCount != expectedTotal)
-          cerr << "OOPS: expected " << expectedTotal
-               << " tokens but counted " << totalCount << endl;
+	  std::cerr << "OOPS: expected " << expectedTotal
+		    << " tokens but counted " << totalCount << std::endl;
         assert(totalCount == expectedTotal);
       }
     return totalCount;
@@ -244,25 +244,25 @@ namespace ugdiss
     int ret=-1;
 
 #if 0
-    cerr << "A: "; for (TKN const* x = a; x; x = next(x)) cerr << x->lemma << " "; cerr << endl;
-    cerr << "B: "; for (TKN const* x = b; x; x = next(x)) cerr << x->lemma << " "; cerr << endl;
+    cerr << "A: "; for (TKN const* x = a; x; x = next(x)) cerr << x->lemma << " "; cerr << std::endl;
+    cerr << "B: "; for (TKN const* x = b; x; x = next(x)) cerr << x->lemma << " "; cerr << std::endl;
 #endif
 
     while (a >= bosA && a < eosA)
       {
-        // cerr << keyLength << "a. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << endl;
+        // cerr << keyLength << "a. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << std::endl;
 	if (*a < *b) {          break; } // return -1;
         if (*a > *b) { ret = 2; break; } // return  2;
         a = next(a);
         b = next(b);
-        // cerr << keyLength << "b. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << endl;
+        // cerr << keyLength << "b. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << std::endl;
         if (--keyLength==0 || b < bosB || b >= eosB)
           {
             ret = (a < bosA || a >= eosA) ? 0 : 1;
             break;
           }
       }
-    // cerr << "RETURNING " << ret << endl;
+    // cerr << "RETURNING " << ret << std::endl;
     return ret;
   }
 
@@ -312,7 +312,7 @@ namespace ugdiss
               {
                 cout << t2->lemma << "." << int(t2->minpos) << " "
                      << k->lemma << "." << int(k->minpos) << " "
-                     << t2->cmp(*k) << endl;
+                     << t2->cmp(*k) << std::endl;
               }
           }
 #endif
@@ -382,7 +382,7 @@ namespace ugdiss
   }
 
   template<typename TKN>
-  string
+  std::string
   Ttrack<TKN>::
   pid2str(TokenIndex const* V, uint64_t pid) const
   {
@@ -390,7 +390,7 @@ namespace ugdiss
     pid >>= 16;
     uint32_t off = pid % (1<<16);
     uint32_t sid = pid>>16;
-    ostringstream buf;
+    std::ostringstream buf;
     TKN const* t    = sntStart(sid) + off;
     TKN const* stop = t + len;
     if (V)

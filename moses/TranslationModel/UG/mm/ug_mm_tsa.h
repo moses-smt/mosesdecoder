@@ -19,7 +19,7 @@
 
 namespace ugdiss
 {
-  using namespace std;
+  // using namespace std;
   namespace bio=boost::iostreams;
 
   template<typename TOKEN>
@@ -43,8 +43,8 @@ namespace ugdiss
 
   public:
     mmTSA();
-    mmTSA(string fname, Ttrack<TOKEN> const* c);
-    void open(string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c);
+    mmTSA(std::string fname, Ttrack<TOKEN> const* c);
+    void open(std::string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c);
 
     count_type
     sntCnt(char const* p, char const * const q) const;
@@ -109,7 +109,7 @@ namespace ugdiss
 
   template<typename TOKEN>
   mmTSA<TOKEN>::
-  mmTSA(string fname, Ttrack<TOKEN> const* c)
+  mmTSA(std::string fname, Ttrack<TOKEN> const* c)
   {
     open(fname,c);
   }
@@ -119,12 +119,12 @@ namespace ugdiss
   template<typename TOKEN>
   void
   mmTSA<TOKEN>::
-  open(string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c)
+  open(std::string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c)
   {
     this->bsc.reset(new BitSetCache<TSA<TOKEN> >(this));
     if (access(fname.c_str(),F_OK))
       {
-        ostringstream msg;
+        std::ostringstream msg;
         msg << "mmTSA<>::open: File '" << fname << "' does not exist.";
         throw std::runtime_error(msg.str().c_str());
       }
@@ -137,7 +137,7 @@ namespace ugdiss
     p = numread(p,idxOffset);
     p = numread(p,this->indexSize);
 
-    // cerr << fname << ": " << idxOffset << " " << this->indexSize << endl;
+    // cerr << fname << ": " << idxOffset << " " << this->indexSize << std::endl;
 
     this->startArray = p;
     this->index      = reinterpret_cast<filepos_type const*>(file.data()+idxOffset);
@@ -243,7 +243,7 @@ namespace ugdiss
   {
     raw = 0;
     id_type sid; uint16_t off;
-    boost::dynamic_bitset<typename ::uint64_t> check(this->corpus->size());
+    boost::dynamic_bitset<uint64_t> check(this->corpus->size());
     while (p < q)
       {
 	p = tightread(p,q,sid);

@@ -13,7 +13,7 @@
 namespace bio=boost::iostreams;
 namespace ugdiss
 {
-  using namespace std;
+  // using namespace std;
   template<typename OFFSET, typename ID, typename VAL, typename INIT>
   class
   mm2dTable
@@ -71,12 +71,12 @@ namespace ugdiss
     }
 
 
-    void open(string fname);
+    void open(std::string fname);
     void close();
 
     Row operator[](ID key) const;
 
-    mm2dTable(string const fname="") { if (!fname.empty()) open(fname); };
+    mm2dTable(std::string const fname="") { if (!fname.empty()) open(fname); };
     ~mm2dTable() { file.reset(); };
   };
 
@@ -103,32 +103,32 @@ namespace ugdiss
   operator[](ID key) const
   {
     if (start==stop) return INIT(0);
-    Cell const* c = lower_bound(start,stop,key);
+    Cell const* c = std::lower_bound(start,stop,key);
     return (c != stop && c->id == key ? c->val : INIT(0));
   }
 
   template<typename OFFSET, typename ID, typename VAL, typename INIT>
   void
   mm2dTable<OFFSET,ID,VAL,INIT>::
-  open(string fname)
+  open(std::string fname)
   {
-    // cout << "opening " << fname << " at " << __FILE__ << ":" << __LINE__ << endl;
+    // cout << "opening " << fname << " at " << __FILE__ << ":" << __LINE__ << std::endl;
     if (access(fname.c_str(),R_OK))
       {
-	ostringstream msg;
+	std::ostringstream msg;
         msg << "[" << __FILE__ << ":" << __LINE__ <<"] FATAL ERROR: "
-	    << "file '" << fname << " is not accessible." << endl;
-	string foo = msg.str();
+	    << "file '" << fname << " is not accessible." << std::endl;
+	std::string foo = msg.str();
 	UTIL_THROW(util::Exception,foo.c_str());
       }
     file.reset(new bio::mapped_file_source());
     file->open(fname);
     if (!file->is_open())
       {
-	ostringstream msg;
+	std::ostringstream msg;
         msg << "[" << __FILE__ << ":" << __LINE__ <<"] FATAL ERROR: "
-	    << "Opening file '" << fname << "' failed." << endl;
-	string foo = msg.str();
+	    << "Opening file '" << fname << "' failed." << std::endl;
+	std::string foo = msg.str();
 	UTIL_THROW(util::Exception,foo.c_str());
       }
     char const* p = file->data();
@@ -137,15 +137,15 @@ namespace ugdiss
     numRows = *reinterpret_cast<ID const*>(p);   p += sizeof(id_type);
     numCols = *reinterpret_cast<ID const*>(p);   p += sizeof(id_type);
     data = reinterpret_cast<Cell const*>(p);
-    // cout << numRows << " rows; " << numCols << " columns " << endl;
+    // cout << numRows << " rows; " << numCols << " columns " << std::endl;
     M1 = reinterpret_cast<VAL const*>(index+numRows+1);
     M2 = M1+numRows;
     //    cout << "Table " << fname << " has " << numRows << " rows and "
-    //         << numCols << " columns." << endl;
+    //         << numCols << " columns." << std::endl;
     //     cout << "File size is " << file.size()*1024 << " bytes; ";
     //     cout << "M2 starts " << (reinterpret_cast<char const*>(M2) - file.data())
-    //          << " bytes into the file" << endl;
-    // cout << M2[0] << endl;
+    //          << " bytes into the file" << std::endl;
+    // cout << M2[0] << std::endl;
   }
 
   template<
@@ -156,15 +156,15 @@ namespace ugdiss
     typename ICONT   // inner container type
     >
   void
-  write_mm_2d_table(ostream& out, vector<ICONT> const& T,
-                    vector<VAL> const* m1    = NULL,
-                    vector<VAL> const* m2    = NULL)
+  write_mm_2d_table(std::ostream& out, std::vector<ICONT> const& T,
+                    std::vector<VAL> const* m1    = NULL,
+                    std::vector<VAL> const* m2    = NULL)
   {
     assert(T.size());
     typedef typename ICONT::const_iterator iter;
 
     // compute marginals if necessary
-    vector<VAL> m1x,m2x;
+    std::vector<VAL> m1x,m2x;
     if (!m1)
       {
         m1x.resize(T.size(),INIT(0));
@@ -191,7 +191,7 @@ namespace ugdiss
     numwrite(out,id_type(m2->size())); // number of columns
 
     // write actual table
-    vector<OFFSET> index;
+    std::vector<OFFSET> index;
     size_t ctr =0;
     index.reserve(m1->size()+1);
     for (ID r = 0; r < ID(T.size()); ++r)

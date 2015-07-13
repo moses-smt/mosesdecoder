@@ -21,8 +21,8 @@
 namespace ugdiss
 {
 
-  using namespace std;
-  using namespace boost;
+  // using namespace std;
+  // using namespace boost;
   namespace bio=boost::iostreams;
 
   template<typename TKN>
@@ -56,7 +56,7 @@ namespace ugdiss
     typedef boost::shared_ptr<bitvector>         bitset_pointer;
     typedef TKN                                        Token;
     typedef BitSetCache<TSA<TKN> >                     BSC_t;
-    /* to allow caching of bit vectors that are expensive to create on
+    /* to allow caching of bit std::vectors that are expensive to create on
      * the fly */
 
     friend class TSA_tree_iterator<TKN>;
@@ -148,8 +148,8 @@ namespace ugdiss
      *  [keyStart,keyStop)
      */
     char const*
-    lower_bound(typename vector<TKN>::const_iterator const& keyStart,
-                typename vector<TKN>::const_iterator const& keyStop) const;
+    lower_bound(typename std::vector<TKN>::const_iterator const& keyStart,
+                typename std::vector<TKN>::const_iterator const& keyStop) const;
     char const*
     lower_bound(TKN const* keyStart, TKN const* keyStop) const;
 
@@ -160,29 +160,29 @@ namespace ugdiss
      *  [keyStart,keyStop)
      */
     char const*
-    upper_bound(typename vector<TKN>::const_iterator const& keyStart,
-                typename vector<TKN>::const_iterator const& keyStop) const;
+    upper_bound(typename std::vector<TKN>::const_iterator const& keyStart,
+                typename std::vector<TKN>::const_iterator const& keyStop) const;
 
     char const*
     upper_bound(TKN const* keyStart, int keyLength) const;
 
 
     /** dump all suffixes in order to /out/ */
-    void dump(ostream& out, TokenIndex const& T) const;
+    void dump(std::ostream& out, TokenIndex const& T) const;
 
     /** fill the dynamic bit set with true for all sentences that contain
      *  /phrase/.
      *  @return the raw number of occurrences.
      */
     count_type
-    fillBitSet(vector<TKN> const& phrase, bdBitset& dest) const;
+    fillBitSet(std::vector<TKN> const& phrase, bdBitset& dest) const;
 
     count_type
     fillBitSet(TKN const* key, size_t keyLen, bdBitset& dest) const;
 
     count_type
     setBits(char const* startRange, char const* endRange,
-            boost::dynamic_bitset<typename ::uint64_t>& bs) const;
+            boost::dynamic_bitset<uint64_t>& bs) const;
 
     void
     setTokenBits(char const* startRange, char const* endRange, size_t len,
@@ -246,11 +246,11 @@ namespace ugdiss
     getCounts(char const* p, char const* const q,
 	      count_type& sids, count_type& raw) const = 0;
 
-    string
+    std::string
     suffixAt(char const* p, TokenIndex const* V=NULL, size_t maxlen=0)
       const;
 
-    string
+    std::string
     suffixAt(ArrayEntry const& I, TokenIndex const* V=NULL, size_t maxlen=0)
       const;
 
@@ -269,18 +269,18 @@ namespace ugdiss
         next 16 bits: length of the phrase
     */
     ::uint64_t
-    getSequenceId(typename vector<TKN>::const_iterator const& pstart,
-                  typename vector<TKN>::const_iterator const& pstop) const;
+    getSequenceId(typename std::vector<TKN>::const_iterator const& pstart,
+                  typename std::vector<TKN>::const_iterator const& pstop) const;
 
     ::uint64_t
     getSequenceId(TKN const* t, ushort plen) const;
 
     /** Return the phrase represented by phrase ID pid_ */
-    string
+    std::string
     getSequence(::uint64_t pid, TokenIndex const& V) const;
 
     /** Return the phrase represented by phrase ID pid_ */
-    vector<TKN>
+    std::vector<TKN>
     getSequence(::uint64_t pid) const;
 
     TKN const*
@@ -308,7 +308,7 @@ namespace ugdiss
 
     bool
     findBranches(TKN const* base, bitvector const& terminals,
-                 vector<tree_iterator>& dest) const;
+                 std::vector<tree_iterator>& dest) const;
 
     double aveIndexEntrySize() const
     {
@@ -356,7 +356,7 @@ namespace ugdiss
   template<typename TKN>
   count_type
   TSA<TKN>::
-  fillBitSet(vector<TKN> const& key,
+  fillBitSet(std::vector<TKN> const& key,
              bitvector& bitset) const
   {
     if (!key.size()) return 0;
@@ -555,8 +555,8 @@ namespace ugdiss
   template<typename TKN>
   char const*
   TSA<TKN>::
-  lower_bound(typename vector<TKN>::const_iterator const& keyStart,
-              typename vector<TKN>::const_iterator const& keyStop) const
+  lower_bound(typename std::vector<TKN>::const_iterator const& keyStart,
+              typename std::vector<TKN>::const_iterator const& keyStop) const
   {
     TKN const* const a = &(*keyStart);
     TKN const* const z = &(*keyStop);
@@ -597,8 +597,8 @@ namespace ugdiss
   template<typename TKN>
   char const*
   TSA<TKN>::
-  upper_bound(typename vector<TKN>::const_iterator const& keyStart,
-              typename vector<TKN>::const_iterator const& keyStop) const
+  upper_bound(typename std::vector<TKN>::const_iterator const& keyStart,
+              typename std::vector<TKN>::const_iterator const& keyStop) const
   {
     TKN const* const a = &((TKN)*keyStart);
     TKN const* const z = &((TKN)*keyStop);
@@ -631,7 +631,7 @@ namespace ugdiss
   {
     char const* lo = lower_bound(keyStart,keyLen);
     char const* up = upper_bound(keyStart,keyLen);
-    // cerr << up-lo << endl;
+    // cerr << up-lo << std::endl;
     return rawCnt(lo,up);
   }
 
@@ -640,8 +640,8 @@ namespace ugdiss
   template<typename TKN>
   ::uint64_t
   TSA<TKN>::
-  getSequenceId(typename vector<TKN>::const_iterator const& pstart,
-                typename vector<TKN>::const_iterator const& pstop) const
+  getSequenceId(typename std::vector<TKN>::const_iterator const& pstart,
+                typename std::vector<TKN>::const_iterator const& pstop) const
   {
     return getSequenceId(&(*pstart),pstop-pstart);
   }
@@ -668,14 +668,14 @@ namespace ugdiss
   //---------------------------------------------------------------------------
 
   template<typename TKN>
-  vector<TKN>
+  std::vector<TKN>
   TSA<TKN>::
   getSequence(::uint64_t pid) const
   {
     size_t   plen = pid % 65536;
     size_t offset = (pid >> 16) % 65536;
     TKN const* w = corpus->sntStart(pid >> 32)+offset;
-    vector<TKN> ret(plen);
+    std::vector<TKN> ret(plen);
     for (size_t i = 0; i < plen; i++, w = w->next())
       {
         assert(w);
@@ -685,11 +685,11 @@ namespace ugdiss
   }
 
   template<typename TKN>
-  string
+  std::string
   TSA<TKN>::
   getSequence(::uint64_t pid, TokenIndex const& V) const
   {
-    ostringstream buf;
+    std::ostringstream buf;
     TKN const* a = getSequenceStart(pid);
     buf << V[a->id()];
     size_t len = getSequenceLength(pid);
@@ -806,7 +806,7 @@ namespace ugdiss
   bool
   TSA<TKN>::
   findBranches(TKN const* base, bitvector const& terminals,
-               vector<tree_iterator>& dest) const
+               std::vector<tree_iterator>& dest) const
   {
     dest.assign(terminals.count(),tree_iterator(this));
     for (size_t i = terminals.find_first(), k = 0;

@@ -21,10 +21,11 @@
 #include "ug_ttrack_base.h"
 #include "num_read_write.h"
 #include "ug_load_primer.h"
+#include "ug_tsa_base.h"
 
 namespace ugdiss
 {
-  using namespace std;
+  // using namespace std;
   namespace bio=boost::iostreams;
 
   template<typename TKN=id_type>
@@ -42,7 +43,7 @@ namespace ugdiss
 			   * of more than four billion words)
 			   */
   public:
-    mmTtrack(string fname);
+    mmTtrack(std::string fname);
     mmTtrack();
 
     // return pointer to beginning of sentence
@@ -58,20 +59,20 @@ namespace ugdiss
     size_t numTokens() const;
 
     // open an mmTtrack file
-    void open(string fname);
+    void open(std::string fname);
 
     //  FUNCTIONS FOR BUILDING CORPUS TRACKS
     // write a blank file header at the beginning of a new ttrack file
-    void write_blank_file_header(ostream& out) const;
+    void write_blank_file_header(std::ostream& out) const;
 
     // write the sentence index /idx/ and fill the file header
-    void write_index_and_finalize(ostream& out,
-				  vector<id_type> const& idx,
+    void write_index_and_finalize(std::ostream& out,
+				  std::vector<id_type> const& idx,
 				  count_type tokenCount) const;
 
     // copy a contiguous sequence of sentences to another stream
     // return the number of tokens copied
-    id_type copySentences(ostream& trg, id_type start, id_type stop) const;
+    id_type copySentences(std::ostream& trg, id_type start, id_type stop) const;
 
     /** find the sentence id of a given token */
     id_type findSid(TKN const* t) const;
@@ -79,7 +80,7 @@ namespace ugdiss
     id_type findSid(id_type tokenOffset) const;
 
     /// re-assign ids based on the id maps in /f/
-    void remap(string const fname, vector<id_type const*> const & f) const;
+    void remap(std::string const fname, std::vector<id_type const*> const & f) const;
 
   };
 
@@ -87,7 +88,7 @@ namespace ugdiss
   template<typename TKN>
   void
   mmTtrack<TKN>::
-  remap(string const fname, vector<id_type const*> const & f) const
+  remap(std::string const fname, std::vector<id_type const*> const & f) const
   {
     bio::mapped_file myfile(fname);
     assert(myfile.is_open());
@@ -128,8 +129,9 @@ namespace ugdiss
   {
     if (sid >= this->numSent)
       {
-        cerr << "Fatal error: requested sentence #"<<sid<<" is beyond corpus size ("
-             << this->numSent <<")" << endl;
+	std::cerr << "Fatal error: requested sentence #"
+		  << sid <<" is beyond corpus size ("
+		  << this->numSent <<")" << std::endl;
       }
     assert(sid < this->numSent);
     return data+index[sid];
@@ -155,7 +157,7 @@ namespace ugdiss
 
   template<typename TKN>
   mmTtrack<TKN>::
-  mmTtrack(string fname)
+  mmTtrack(std::string fname)
   {
     open(fname);
   }
@@ -163,18 +165,18 @@ namespace ugdiss
   template<typename TKN>
   void
   mmTtrack<TKN>::
-  open(string fname)
+  open(std::string fname)
   {
     if (access(fname.c_str(),F_OK))
       {
-        ostringstream msg;
+	std::ostringstream msg;
         msg << "mmTtrack<>::open: File '" << fname << "' does not exist.";
         throw std::runtime_error(msg.str().c_str());
       }
     file.open(fname);
     if (!file.is_open())
       {
-	cerr << "Error opening file " << fname << endl;
+	std::cerr << "Error opening file " << fname << std::endl;
 	assert(0);
       }
     filepos_type idxOffset;
@@ -192,7 +194,7 @@ namespace ugdiss
   findSid(TKN const* t) const
   {
     id_type tokenPos = t-data;
-    id_type const* p = upper_bound(index,index+this->numSent,tokenPos);
+    id_type const* p = std::upper_bound(index,index+this->numSent,tokenPos);
     assert(p>index);
     return p-index-1;
   }
@@ -202,7 +204,7 @@ namespace ugdiss
   mmTtrack<TKN>::
   findSid(id_type tokenPos) const
   {
-    id_type const* p = upper_bound(index,index+this->numSent,tokenPos);
+    id_type const* p = std::upper_bound(index,index+this->numSent,tokenPos);
     assert(p>index);
     return p-index-1;
   }
@@ -210,7 +212,7 @@ namespace ugdiss
   template<typename TKN>
   void
   mmTtrack<TKN>::
-  write_blank_file_header(ostream& out) const
+  write_blank_file_header(std::ostream& out) const
   {
     numwrite(out,filepos_type(0)); // place holder for index start
     numwrite(out,id_type(0));      // place holder for index size
@@ -220,8 +222,8 @@ namespace ugdiss
   template<typename TKN>
   void
   mmTtrack<TKN>::
-  write_index_and_finalize(ostream& out,
-			   vector<id_type>const& idx,
+  write_index_and_finalize(std::ostream& out,
+			   std::vector<id_type>const& idx,
 			   id_type tokenCount) const
   {
     id_type       idxSize = idx.size();
@@ -237,7 +239,7 @@ namespace ugdiss
   template<typename TKN>
   id_type
   mmTtrack<TKN>::
-  copySentences(ostream& trg, id_type start, id_type stop) const
+  copySentences(std::ostream& trg, id_type start, id_type stop) const
   {
     assert(stop > start);
     TKN const* a = sntStart(start);

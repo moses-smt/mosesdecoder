@@ -76,7 +76,7 @@ void Bitext<Token>
 	}
       else ++i;
     }
-  // cerr << workers.size() << "/" << target << " active" << endl;
+  // cerr << workers.size() << "/" << target << " active" << std::endl;
   if (int(workers.size()) > target)
     this->doomed = workers.size() - target;
   else
@@ -132,7 +132,7 @@ Bitext<Token>
 ::agenda
 ::get_job()
 {
-  // cerr << workers.size() << " workers on record" << endl;
+  // cerr << workers.size() << " workers on record" << std::endl;
   sptr<job> ret;
   if (this->shutdown) return ret;
   boost::unique_lock<boost::mutex> lock(this->lock);

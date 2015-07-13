@@ -9,24 +9,24 @@
 #include <boost/dynamic_bitset.hpp>
 #include <stdint.h>
 #include <iostream>
-// A simple mechanism for caching bit vectors representing occurrences of token
+// A simple mechanism for caching bit std::vectors representing occurrences of token
 // sequences in a corpus. Useful for very frequent items for which the bit
-// vector is expensive to create on the fly. The variable threshold determines
-// when bit vectors are cached and when they are created on the fly, using the
+// std::vector is expensive to create on the fly. The variable threshold determines
+// when bit std::vectors are cached and when they are created on the fly, using the
 // size of the range of entries in the TSA's index in bytes to determine
-// whether or not to store the respective bit vector in the cache.
+// whether or not to store the respective bit std::vector in the cache.
 
 namespace ugdiss
 {
-  using namespace std;
+  // using namespace std;
   template<typename TSA>
   class
   BitSetCache
   {
   public:
-    typedef boost::dynamic_bitset<typename ::uint64_t>         BitSet;
+    typedef boost::dynamic_bitset<uint64_t>         BitSet;
     typedef boost::shared_ptr<BitSet>                bsptr;
-    typedef map<pair<char const*,ushort>,bsptr> myMap;
+    typedef std::map<std::pair<char const*,ushort>,bsptr> myMap;
     typedef myMap::iterator                      myMapIter;
   private:
     TSA const*    tsa;
@@ -56,7 +56,7 @@ namespace ugdiss
       if (!lo) return ret;
       if (up-lo > threshold)
         {
-          pair<char const*,ushort> k(lo,keyLen);
+          std::pair<char const*,ushort> k(lo,keyLen);
           myMapIter m = cached1.find(k);
           if (m != cached1.end())
             ret = m->second;
@@ -83,9 +83,9 @@ namespace ugdiss
       if (!lo) return ret;
       if (up-lo > threshold)
         {
-          pair<char const*,ushort> k(lo,keyLen);
+          std::pair<char const*,ushort> k(lo,keyLen);
           // cout << "bla " << keyStart->id() << " "
-	  // << cached2.size() << " " << up-lo << " " << k.second << endl;
+	  // << cached2.size() << " " << up-lo << " " << k.second << std::endl;
           myMapIter m = cached2.find(k);
           if (m != cached2.end())
             ret = m->second;

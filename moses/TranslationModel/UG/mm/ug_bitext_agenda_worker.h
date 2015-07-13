@@ -17,9 +17,9 @@ Bitext<Token>::agenda
   //   reduce the number of lock / unlock operations we need to do
   //   during sampling.
 
-  uint64_t sid=0, offset=0;      // sid and offset of source phrase
-  size_t s1=0, s2=0, e1=0, e2=0; // soft and hard boundaries of target phrase
-  vector<uchar> aln;             // stores phrase-pair-internal alignment
+  uint64_t sid=0, offset=0;       // sid and offset of source phrase
+  size_t s1=0, s2=0, e1=0, e2=0;  // soft and hard boundaries of target phrase
+  std::vector<unsigned char> aln; // stores phrase-pair-internal alignment
   while(sptr<job> j = ag.get_job())
     {
       j->stats->register_worker();
@@ -53,7 +53,7 @@ Bitext<Token>::agenda
 	  Token const* eos = ag.bt.T2->sntEnd(sid);
 	  cerr << "[" << j->stats->good + 1 << "] ";
 	  while (t != eos) cerr << (*ag.bt.V2)[(t++)->id()] << " ";
-	  cerr << "[" << docid << "]" << endl;
+	  cerr << "[" << docid << "]" << std::endl;
 #endif
 
 	  float sample_weight = 1./num_pairs;
@@ -62,11 +62,11 @@ Bitext<Token>::agenda
 	  // adjust offsets in phrase-internal aligment
 	  for (size_t k = 1; k < aln.size(); k += 2) aln[k] += s2 - s1;
 
-	  vector<uint64_t> seen; seen.reserve(10);
+	  std::vector<uint64_t> seen; seen.reserve(10);
 	  // It is possible that the phrase extraction extracts the same
 	  // phrase twice, e.g., when word a co-occurs with sequence b b b
 	  // but is aligned only to the middle word. We can only count
-	  // each phrase pair once per source phrase occurrence, or else
+	  // each phrase std::pair once per source phrase occurrence, or else
 	  // run the risk of having more joint counts than marginal
 	  // counts.
 

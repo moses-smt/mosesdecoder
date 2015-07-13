@@ -3,7 +3,7 @@ namespace ugdiss
 {
   Conll_Record
   Conll_Record::
-  remap(vector<id_type const*> const& m) const
+  remap(std::vector<id_type const*> const& m) const
   {
     Conll_Record ret;
     ret.sform   = m.size() > 0 && m[0] ? m[0][this->sform]   : this->sform;
