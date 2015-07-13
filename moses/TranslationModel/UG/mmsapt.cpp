@@ -21,14 +21,14 @@ namespace Moses
   using namespace boost;
 
   void
-  fillIdSeq(Phrase const& mophrase, size_t const ifactor,
+  fillIdSeq(Phrase const& mophrase, std::vector<FactorType> const& ifactors,
 	    TokenIndex const& V, vector<id_type>& dest)
   {
     dest.resize(mophrase.GetSize());
     for (size_t i = 0; i < mophrase.GetSize(); ++i)
       {
-	Factor const* f = mophrase.GetFactor(i,ifactor);
-	dest[i] = V[f->ToString()];
+	// Factor const* f = mophrase.GetFactor(i,ifactor);
+	dest[i] = V[mophrase.GetWord(i).GetString(ifactors, false)]; // f->ToString()];
       }
   }
 
@@ -72,7 +72,8 @@ namespace Moses
     , cache_key(((char*)this)+2)
     , context_key(((char*)this)+1)
       // , m_tpc_ctr(0)
-    , ofactor(1,0)
+      // , m_ifactor(1,0)
+      // , m_ofactor(1,0)
   {
     init(line);
     setup_local_feature_functions();
@@ -149,12 +150,17 @@ namespace Moses
 
     // set defaults for all parameters if not specified so far
     pair<string,string> dflt("input-factor","0");
-    input_factor = atoi(param.insert(dflt).first->second.c_str());
-    // shouldn't that be a string?
-
+    string ifactors = param.insert(dflt).first->second;
+    size_t p = 0;
+    for (size_t q = ifactors.find(','); q < ifactors.size(); q = ifactors.find(',', p=q+1))
+      m_ifactor.push_back(atoi(ifactors.substr(p, q-p).c_str()));
+    m_ifactor.push_back(atoi(ifactors.substr(p).c_str()));
+    
     dflt = pair<string,string> ("output-factor","0");
-    output_factor = atoi(param.insert(dflt).first->second.c_str());
-    ofactor.assign(1,output_factor);
+    string ofactors = param.insert(dflt).first->second;
+    for (size_t q = ofactors.find(',', p=0); q < ifactors.size(); q = ifactors.find(',', p=q+1))
+      m_ofactor.push_back(atoi(ifactors.substr(p, q-p).c_str()));
+    m_ofactor.push_back(atoi(ofactors.substr(p).c_str()));
 
     dflt = pair<string,string> ("smooth",".01");
     m_lbop_conf = atof(param.insert(dflt).first->second.c_str());
@@ -561,7 +567,8 @@ namespace Moses
     for (uint32_t k = 0; k < len; ++k, x = x->next())
       {
 	StringPiece wrd = (*(btfix->V2))[x->id()];
-	Word w; w.CreateFromString(Output,ofactor,wrd,false);
+	Word w; 
+	w.CreateFromString(Output, m_ofactor, wrd, false);
 	tp->AddWord(w);
       }
     tp->SetAlignTerm(pool.aln);
@@ -616,7 +623,7 @@ namespace Moses
   {
     // map from Moses Phrase to internal id sequence
     vector<id_type> sphrase;
-    fillIdSeq(src,input_factor,*(btfix->V1),sphrase);
+    fillIdSeq(src, m_ifactor, *(btfix->V1), sphrase);
     if (sphrase.size() == 0) return NULL;
 
     // Reserve a local copy of the dynamic bitext in its current form. /btdyn/
@@ -895,7 +902,7 @@ namespace Moses
     sptr<ContextScope> const& scope = ttask->GetScope();
 
     vector<id_type> myphrase; 
-    fillIdSeq(phrase,input_factor,*btfix->V1,myphrase);
+    fillIdSeq(phrase, m_ifactor, *btfix->V1, myphrase);
 
     TSA<Token>::tree_iterator mfix(btfix->I1.get(),&myphrase[0],myphrase.size());
     if (mfix.size() == myphrase.size())

@@ -95,8 +95,12 @@ namespace Moses
     boost::shared_ptr<SamplingBias> m_bias; // for global default bias
     boost::shared_ptr<TPCollCache> m_cache; // for global default bias
     size_t m_cache_size;  //
-    size_t input_factor;  //
-    size_t output_factor; // we can actually return entire Tokens!
+    // size_t input_factor;  //
+    // size_t output_factor; // we can actually return entire Tokens!
+
+    std::vector<ushort> m_input_factor;
+    std::vector<ushort> m_output_factor;
+
 
     // for display for human inspection (ttable dumps):
     std::vector<std::string> m_feature_names; // names of features activated
@@ -139,7 +143,7 @@ namespace Moses
     // for more complex operations on the cache
     bool withPbwd;
     bool poolCounts;
-    std::vector<FactorType> ofactor;
+    std::vector<FactorType> m_ifactor, m_ofactor;
 
     void setup_local_feature_functions();
     void set_bias_via_server(ttasksptr const& ttask);
