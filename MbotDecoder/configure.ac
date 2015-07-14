@@ -1,7 +1,10 @@
-AC_INIT(moses/src)
+AC_INIT(moses, 0.1)
+
+AC_CONFIG_SRCDIR(moses/src)
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(moses, 0.1)
+
+AM_INIT_AUTOMAKE([subdir-objects no-dependencies])
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -327,6 +330,6 @@ AC_CHECK_HEADER(zlib.h,
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile util/Makefile lm/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile util/Makefile lm/Makefile mbot-extract/Makefile fix-mbot-extract/Makefile test-mbot-extract/Makefile)
 
 AC_OUTPUT()
