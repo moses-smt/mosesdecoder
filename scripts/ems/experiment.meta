@@ -521,14 +521,14 @@ fast-align
 	in: prepared-data-fast-align
 	out: fast-alignment
 	rerun-on-change: fast-align-settings
-	ignore-if: fast-align-max-lines
+	ignore-if: fast-align-max-lines fast-align-save-model
 	template: $external-bin-dir/fast_align -i IN $fast-align-settings > OUT
 	default-name: fast-align
 fast-align-inverse
 	in: prepared-data-fast-align
 	out: fast-alignment-inverse
 	rerun-on-change: fast-align-settings
-	ignore-if: fast-align-max-lines
+	ignore-if: fast-align-max-lines fast-align-save-model
 	template: $external-bin-dir/fast_align -i IN -r $fast-align-settings > OUT
 	default-name: fast-align-inverse
 fast-align-in-parts
@@ -537,7 +537,7 @@ fast-align-in-parts
 	rerun-on-change: fast-align-settings fast-align-max-lines
 	ignore-unless: fast-align-max-lines
 	tmp-name: training/tmp.fast-align
-	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' > OUT
+	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' -save-model '$?fast-align-save-model' -o OUT
 	default-name: fast-align
 fast-align-in-parts-inverse
 	in: prepared-data-fast-align
@@ -545,8 +545,24 @@ fast-align-in-parts-inverse
 	rerun-on-change: fast-align-settings fast-align-max-lines
 	ignore-unless: fast-align-max-lines
 	tmp-name: training/tmp.fast-align-inverse
-	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -r -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' > OUT
+	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -r -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' -save-model '$?fast-align-save-model' -o OUT
+	default-name: fast-align-inverse
+fast-align-save-model
+	in: prepared-data-fast-align
+	out: fast-alignment
+	ignore-unless: fast-align-save-model
+	ignore-if: fast-align-max-lines
 	default-name: fast-align
+	tmp-name: training/tmp.fast-align-inverse
+	template: $external-bin-dir/fast_align -i IN $fast-align-settings -p OUT.parameters > OUT 2> OUT.log
+fast-align-save-model-inverse
+	in: prepared-data-fast-align
+	out: fast-alignment-inverse
+	ignore-unless: fast-align-save-model
+	ignore-if: fast-align-max-lines
+	default-name: fast-align-inverse
+	tmp-name: training/tmp.fast-align-inverse
+	template: $external-bin-dir/fast_align -r -i IN $fast-align-settings -p OUT.parameters > OUT 2> OUT.log
 symmetrize-fast-align
 	in: fast-alignment fast-alignment-inverse corpus-mml-prefilter=OR=corpus
 	out: word-alignment

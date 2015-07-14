@@ -3527,12 +3527,20 @@ sub define_template {
     }
     $cmd =~ s/VERSION/$VERSION/g;
     print "\tcmd is $cmd\n" if $VERBOSE;
-    while ($cmd =~ /^([\S\s]*)\$\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
-           $cmd =~ /^([\S\s]*)\$([^\s\/\"\']+)([\S\s]*)$/) {
-	my ($pre,$variable,$post) = ($1,$2,$3);
-	$cmd = $pre
-	    . &check_backoff_and_get(&extend_local_name($module,$set,$variable))
-	    . $post;
+
+    # replace variables
+    while ($cmd =~ /^([\S\s]*)\$(\??)\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
+           $cmd =~ /^([\S\s]*)\$(\??)([^\s\/\"\']+)([\S\s]*)$/) {
+	my ($pre,$optional,$variable,$post) = ($1,$2,$3,$4);
+	my $value;
+	if ($optional eq '?') {
+	  $value = &backoff_and_get(&extend_local_name($module,$set,$variable));
+          $value = "" unless $value;
+        }
+	else {
+	  $value = &check_backoff_and_get(&extend_local_name($module,$set,$variable));
+	} 
+	$cmd = $pre.$value.$post;
     }
 
     # deal with pipelined commands
