@@ -2707,7 +2707,9 @@ sub define_training_create_config {
         $cmd .= "-config-add-weight-lines \"$weight_lines\" ";
     }
 
-    $cmd .= "-additional-ini-file " . join(":", @additional_ini_files);
+    if (@additional_ini_files) {
+        $cmd .= "-additional-ini-file " . join(":", @additional_ini_files);
+    }
 
     &create_step($step_id,$cmd);
 }
