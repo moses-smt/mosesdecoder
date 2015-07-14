@@ -853,7 +853,7 @@ sub delete_output {
     `rm -r $file` if $EXECUTE;
   }
   # delete regular file that matches exactly
-  if (-e $file) {
+  elsif (-e $file) {
     print "\tdelete file $file\n";
     `rm $file` if $EXECUTE;
   }
@@ -864,13 +864,13 @@ sub delete_output {
   foreach (`ls $dir`) {
     chop;
     next unless substr($_,0,length($f)) eq $f;
-    if (-e "$dir/$_") {
+    if (-d "$dir/$_") {
+      print "\tdelete directory $file\n";
+      `rm -r $dir/$_` if $EXECUTE;
+    }
+    elsif (-e "$dir/$_") {
       print "\tdelete file $dir/$_\n";
       `rm $dir/$_` if $EXECUTE;
-    }
-    else {
-      print "\tdelete directory $dir/$_\n";
-      `rm -r $dir/$_` if $EXECUTE;
     }
   }
 }

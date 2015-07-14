@@ -775,6 +775,7 @@ create-config
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature
 	default-name: model/moses.ini
 	error: Unknown option
+	error: requires an argument
 	final-model: yes
 binarize-config
 	in: config
