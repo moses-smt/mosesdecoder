@@ -14,14 +14,14 @@
 
 namespace lru_cache
 {
-  using namespace std;
-  using namespace boost;
+  // using namespace std;
+  // using namespace boost;
 
   template<typename KEY, typename VAL>
   class LRU_Cache
   {
   public:
-    typedef unordered_map<KEY,uint32_t> map_t;
+    typedef boost::unordered_map<KEY,uint32_t> map_t;
   private:
     struct Record
     {
@@ -33,7 +33,7 @@ namespace lru_cache
 
     mutable boost::shared_mutex m_lock;
     uint32_t m_qfront, m_qback;
-    vector<Record> m_recs;
+    std::vector<Record> m_recs;
     map_t m_idx;
 
     void
@@ -84,7 +84,7 @@ namespace lru_cache
     set(KEY const& key, sptr<VAL> const& ptr)
     {
       boost::lock_guard<boost::shared_mutex> lock(m_lock);
-      pair<typename map_t::iterator,bool> foo;
+      std::pair<typename map_t::iterator,bool> foo;
       foo = m_idx.insert(make_pair(key,m_recs.size()));
 
       uint32_t p = foo.first->second;

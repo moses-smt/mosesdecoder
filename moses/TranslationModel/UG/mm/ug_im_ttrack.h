@@ -28,8 +28,8 @@
 
 namespace ugdiss
 {
-  using namespace std;
-  using namespace boost;
+  // using namespace std;
+  // using namespace boost;
   namespace bio=boost::iostreams;
 
   template<typename Token> class imTSA;
@@ -37,7 +37,8 @@ namespace ugdiss
 
   template<typename TOKEN>
   typename boost::shared_ptr<imTtrack<TOKEN> >
-  append(typename boost::shared_ptr<imTtrack<TOKEN> > const &  crp, vector<TOKEN> const & snt);
+  append(typename boost::shared_ptr<imTtrack<TOKEN> > const &  crp, 
+	 std::vector<TOKEN> const & snt);
 
   template<typename Token>
   class imTtrack : public Ttrack<Token>
@@ -45,19 +46,20 @@ namespace ugdiss
 
   private:
     size_t numToks;
-    boost::shared_ptr<vector<vector<Token> > > myData;  // pointer to corpus data
+    boost::shared_ptr<typename std::vector<std::vector<Token> > > myData;  
+    // pointer to corpus data
     friend class imTSA<Token>;
 
     friend
     typename boost::shared_ptr<imTtrack<Token> >
-    append<Token>(typename boost::shared_ptr<imTtrack<Token> > const & crp, vector<Token> const & snt);
+    append<Token>(typename boost::shared_ptr<imTtrack<Token> > const & crp, std::vector<Token> const & snt);
 
     void m_check_token_count(); // debugging function
 
   public:
 
-    imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d);
-    imTtrack(istream& in, TokenIndex& V, ostream* log = NULL);
+    imTtrack(boost::shared_ptr<std::vector<std::vector<Token> > > const& d);
+    imTtrack(std::istream& in, TokenIndex& V, std::ostream* log = NULL);
     imTtrack(size_t reserve = 0);
     // imTtrack(istream& in, Vocab& V);
 
@@ -80,7 +82,7 @@ namespace ugdiss
   m_check_token_count()
   { // sanity check
     size_t check = 0;
-    BOOST_FOREACH(vector<Token> const& s, *myData)
+    BOOST_FOREACH(std::vector<Token> const& s, *myData)
       check += s.size();
     UTIL_THROW_IF2(check != this->numToks, "[" << HERE << "]"
 		   << " Wrong token count after appending sentence!"
@@ -131,28 +133,28 @@ namespace ugdiss
 
   template<typename Token>
   imTtrack<Token>::
-  imTtrack(istream& in, TokenIndex& V, ostream* log)
+  imTtrack(std::istream& in, TokenIndex& V, std::ostream* log)
     : numToks(0)
   {
-    myData.reset(new vector<vector<Token> >());
-    string line,w;
+    myData.reset(new std::vector<std::vector<Token> >());
+    std::string line,w;
     size_t linectr=0;
-    boost::unordered_map<string,id_type> H;
+    boost::unordered_map<std::string,id_type> H;
     // for (id_type i = 0; i < V.knownVocabSize(); ++i)
     // H[V[i]] = i;
     while (getline(in,line))
       {
-	// cout << line << endl;
-	myData->push_back(vector<Token>());
+	// cout << line << std::endl;
+	myData->push_back(std::vector<Token>());
 	if (log && ++linectr%1000000==0)
-	  *log << linectr/1000000 << "M lines of input processed" << endl;
-	istringstream buf(line);
-	// cout << line << endl;
+	  *log << linectr/1000000 << "M lines of input processed" << std::endl;
+	std::istringstream buf(line);
+	// cout << line << std::endl;
 	while (buf>>w)
 	  {
 	    myData->back().push_back(Token(V[w]));
 	    // cout << w << " " << myData->back().back().id() << " " 
-	    // << V[w] << endl;
+	    // << V[w] << std::endl;
 	  }
 	// myData->back().resize(myData->back().size(), Token(0));
 	numToks += myData->back().size();
@@ -164,17 +166,17 @@ namespace ugdiss
   imTtrack(size_t reserve)
     : numToks(0)
   {
-    myData.reset(new vector<vector<Token> >());
+    myData.reset(new std::vector<std::vector<Token> >());
     if (reserve) myData->reserve(reserve);
   }
 
   template<typename Token>
   imTtrack<Token>::
-  imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d)
+  imTtrack(boost::shared_ptr<std::vector<std::vector<Token> > > const& d)
     : numToks(0)
   {
     myData  = d;
-    BOOST_FOREACH(vector<Token> const& v, *d)
+    BOOST_FOREACH(std::vector<Token> const& v, *d)
       numToks += v.size();
   }
 
@@ -186,7 +188,7 @@ namespace ugdiss
     id_type i;
     for (i = 0; i < myData->size(); ++i)
       {
-	vector<Token> const& v = (*myData)[i];
+	std::vector<Token> const& v = (*myData)[i];
 	if (v.size() == 0) continue;
 	if (&v.front() <= t && &v.back() >= t)
 	  break;
@@ -197,7 +199,7 @@ namespace ugdiss
   /// add a sentence to the database
   template<typename TOKEN>
   boost::shared_ptr<imTtrack<TOKEN> >
-  append(boost::shared_ptr<imTtrack<TOKEN> > const& crp, vector<TOKEN> const & snt)
+  append(boost::shared_ptr<imTtrack<TOKEN> > const& crp, std::vector<TOKEN> const & snt)
   {
 #if 1
     if (crp) crp->m_check_token_count();

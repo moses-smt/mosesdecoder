@@ -27,7 +27,7 @@ namespace Moses {
 	  {
 	    if (x == '+') { --checksum; continue; }
 	    if (x != 'g' && x != 's' && x != 'r') continue;
-	    string s = (format("pbwd-%c%.3f") % x % c).str();
+	    string s = (boost::format("pbwd-%c%.3f") % x % c).str();
 	    this->m_feature_names.push_back(s);
 	  }
 	this->m_num_feats = this->m_feature_names.size();

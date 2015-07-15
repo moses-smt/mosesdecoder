@@ -853,7 +853,7 @@ sub delete_output {
     `rm -r $file` if $EXECUTE;
   }
   # delete regular file that matches exactly
-  if (-e $file) {
+  elsif (-e $file) {
     print "\tdelete file $file\n";
     `rm $file` if $EXECUTE;
   }
@@ -864,13 +864,13 @@ sub delete_output {
   foreach (`ls $dir`) {
     chop;
     next unless substr($_,0,length($f)) eq $f;
-    if (-e "$dir/$_") {
+    if (-d "$dir/$_") {
+      print "\tdelete directory $file\n";
+      `rm -r $dir/$_` if $EXECUTE;
+    }
+    elsif (-e "$dir/$_") {
       print "\tdelete file $dir/$_\n";
       `rm $dir/$_` if $EXECUTE;
-    }
-    else {
-      print "\tdelete directory $dir/$_\n";
-      `rm -r $dir/$_` if $EXECUTE;
     }
   }
 }
@@ -2707,7 +2707,9 @@ sub define_training_create_config {
         $cmd .= "-config-add-weight-lines \"$weight_lines\" ";
     }
 
-    $cmd .= "-additional-ini-file " . join(":", @additional_ini_files);
+    if (@additional_ini_files) {
+        $cmd .= "-additional-ini-file " . join(":", @additional_ini_files);
+    }
 
     &create_step($step_id,$cmd);
 }
@@ -3527,12 +3529,20 @@ sub define_template {
     }
     $cmd =~ s/VERSION/$VERSION/g;
     print "\tcmd is $cmd\n" if $VERBOSE;
-    while ($cmd =~ /^([\S\s]*)\$\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
-           $cmd =~ /^([\S\s]*)\$([^\s\/\"\']+)([\S\s]*)$/) {
-	my ($pre,$variable,$post) = ($1,$2,$3);
-	$cmd = $pre
-	    . &check_backoff_and_get(&extend_local_name($module,$set,$variable))
-	    . $post;
+
+    # replace variables
+    while ($cmd =~ /^([\S\s]*)\$(\??)\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
+           $cmd =~ /^([\S\s]*)\$(\??)([^\s\/\"\']+)([\S\s]*)$/) {
+	my ($pre,$optional,$variable,$post) = ($1,$2,$3,$4);
+	my $value;
+	if ($optional eq '?') {
+	  $value = &backoff_and_get(&extend_local_name($module,$set,$variable));
+          $value = "" unless $value;
+        }
+	else {
+	  $value = &check_backoff_and_get(&extend_local_name($module,$set,$variable));
+	} 
+	$cmd = $pre.$value.$post;
     }
 
     # deal with pipelined commands

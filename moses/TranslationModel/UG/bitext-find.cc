@@ -85,24 +85,25 @@ int main(int argc, char* argv[])
       ++k;
 
       size_t s1,s2,e1,e2; int po_fwd=-1,po_bwd=-1;
-      vector<uchar> caln;
-      // cout << sid  << " " << B.docname(sid) << endl;
+      std::vector<unsigned char> caln;
+      // cout << sid  << " " << B.docname(sid) << std::endl;
       if (!B.find_trg_phr_bounds(sid, off, off+m.size(),
 				 s1,s2,e1,e2,po_fwd,po_bwd,
 				 &caln, NULL, &m == &m2))
 	{
-	  // cout << "alignment failure" << endl;
+	  // cout << "alignment failure" << std::endl;
 	}
 
-      cout << sid  << " " << B.docname(sid)
-	   << " dfwd=" << po_fwd << " dbwd=" << po_bwd
-	   << "\n";
-      write_sentence(*B.T1, sid, *B.V1, cout); cout << "\n";
-      write_sentence(*B.T2, sid, *B.V2, cout); cout << "\n";
+      std::cout << sid  << " " << B.docname(sid)
+		<< " dfwd=" << po_fwd << " dbwd=" << po_bwd
+		<< "\n";
+      
+      write_sentence(*B.T1, sid, *B.V1, std::cout); std::cout << "\n";
+      write_sentence(*B.T2, sid, *B.V2, std::cout); std::cout << "\n";
       B.write_yawat_alignment(sid,
 			      m1.size() ? &m1 : NULL,
-			      m2.size() ? &m2 : NULL, cout);
-      cout << endl;
+			      m2.size() ? &m2 : NULL, std::cout);
+      std::cout << std::endl;
 
     }
 }
@@ -141,9 +142,9 @@ interpret_args(int ac, char* av[])
   po::notify(vm);
   if (vm.count("help"))
     {
-      cout << "\nusage:\n\t" << av[0]
-           << " [options] [--q1=<L1string>] [--q2=<L2string>]" << endl;
-      cout << o << endl;
+      std::cout << "\nusage:\n\t" << av[0]
+           << " [options] [--q1=<L1string>] [--q2=<L2string>]" << std::endl;
+      std::cout << o << std::endl;
       exit(0);
     }
 }

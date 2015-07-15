@@ -27,7 +27,7 @@ namespace ugdiss
     id_type const& id() const;
     int cmp(SimpleWordId const& other) const;
     bool operator==(SimpleWordId const& other) const;
-    id_type remap(vector<id_type const*> const& m) const;
+    id_type remap(std::vector<id_type const*> const& m) const;
   };
 
   /** Token class for suffix arrays */

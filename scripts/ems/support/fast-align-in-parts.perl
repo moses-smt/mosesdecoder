@@ -12,28 +12,33 @@ use warnings;
 use strict;
 use Getopt::Long qw(:config pass_through no_ignore_case permute);
 
-my ($BIN,$IN,$MAX_LINES,$SETTINGS,$REVERSE,$TMP);
+my ($BIN,$IN,$OUT,$MAX_LINES,$SETTINGS,$REVERSE,$SAVE_MODEL,$TMP);
 
 GetOptions('bin=s' => \$BIN,
            'i=s' => \$IN,
+           'o=s' => \$OUT,
            'max-lines=i' => \$MAX_LINES,
            'settings=s' => \$SETTINGS,
+           'save-model=s' => \$SAVE_MODEL,
            'r' => \$REVERSE,
            'tmp=s' => \$TMP,
           ) or exit(1);
 
-die("ERROR - usage: fast-align-in-parts.perl -bin FAST_ALIGN_BIN -i PARALLEL_CORPUS -max-lines COUNT -settings CONFIG [-r] -tmp TMPDIR")
-  unless defined($BIN) && defined($IN) && defined($SETTINGS) && defined($TMP) && defined($MAX_LINES)
+die("ERROR - usage: fast-align-in-parts.perl -bin FAST_ALIGN_BIN -i PARALLEL_CORPUS -max-lines COUNT -settings CONFIG [-r] -tmp TMPDIR [-save-model MODEL] -o ALIGNMENTS")
+  unless defined($BIN) && defined($IN) && defined($SETTINGS) && defined($TMP) 
+      && defined($MAX_LINES) && defined($OUT)
       && $MAX_LINES > 0;
 die("ERROR - input file does not exist: $IN") unless -e $IN;
 die("ERROR - fast_align binary does not exist: $BIN") unless -e $BIN;
 
+$SAVE_MODEL = defined($SAVE_MODEL) && $SAVE_MODEL && $SAVE_MODEL ne 'no';
 chomp(my $line_count = `cat $IN | wc -l`);
 
 # not more than maximal number of lines -> just run it regulary
 if ($MAX_LINES > $line_count) {
-  my $cmd = "$BIN -i $IN $SETTINGS";
+  my $cmd = "$BIN -i $IN $SETTINGS >$OUT";
   $cmd .= " -r" if defined($REVERSE);
+  $cmd .= " -p $OUT.parameters 2> $OUT.log" if $SAVE_MODEL;
   safesystem($cmd) or die;
   exit(0);
 }
@@ -56,6 +61,7 @@ foreach my $input_file (@INPUT_FILES) {
   # process part
   my $cmd = "$BIN -i $input_file $SETTINGS";
   $cmd .= " -r" if defined($REVERSE);
+  $cmd .= " -p $output_file.parameters 2> $output_file.log" if $SAVE_MODEL;
   $cmd .= " >$output_file";
   safesystem($cmd) or die;
   die("ERROR: no output produced from command $cmd") unless -e $output_file;
@@ -67,11 +73,62 @@ foreach my $input_file (@INPUT_FILES) {
 }
 
 # join output
-$cmd = "cat $TMP/aligned-*";
+$cmd = "cat $TMP/aligned-?? > $OUT";
 safesystem($cmd) or die;
 
-$cmd = "rm -r $TMP/* ; rmdir $TMP";
+# join model
+&join_model(scalar @INPUT_FILES) if $SAVE_MODEL;
+&join_log(scalar @INPUT_FILES) if $SAVE_MODEL;
+
+$cmd = "rm $TMP/* ; rmdir $TMP";
 safesystem($cmd);
+
+sub join_model {
+  my ($count) = @_;
+  open(CONCAT,"cat $TMP/aligned-*.parameters | LC_ALL=C sort -T $TMP -S 10%|");
+  open(JOINED,">$OUT.parameters");
+  my ($last_f,$last_e,$f,$e,$score,$merged_score);
+  while(<CONCAT>) {
+    ($f,$e,$score) = split;
+    if (!defined($last_f) || $f ne $last_f || $e ne $last_e) {
+      printf JOINED "%s %s %f\n",$last_f,$last_e,log($merged_score) if defined($last_f);
+      $last_f = $f;
+      $last_e = $e;
+      $merged_score = 0;
+    } 
+    $merged_score += exp($score)/$count;
+  }
+  printf JOINED "%s %s %f\n",$f,$e,log($merged_score);
+  close(CONCAT);
+  close(JOINED);
+}
+
+sub merge_entry {
+  my ($count,$f,$e,@SCORE) = @_;
+  my $score = 0;
+  foreach (@SCORE) {
+    $score += exp($_)/$count;
+  }
+  $score = log($score);
+  print JOINED "$f $e $score\n";
+}
+
+sub join_log {
+  my ($count) = @_;
+  open(CONCAT,"cat $TMP/aligned-*.log |");
+  my ($length,$tension,$tension_count) = (0,0,0);
+  while(<CONCAT>) {
+    $length += $1 if /expected target length = source length \* ([\d\.]+)/;
+    $tension += $1 if /final tension: ([\d\.]+)/ and (++$tension_count % 3 == 0);
+  }
+  close(CONCAT);
+  $length /= $count;
+  $tension /= $count;
+  open(JOINED,">$OUT.log");
+  print JOINED "expected target length = source length * $length\n";
+  print JOINED "     final tension: $tension\n";
+  close(JOINED);
+}
 
 sub safesystem {
   print STDERR "Executing: @_\n";

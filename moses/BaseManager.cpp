@@ -27,7 +27,7 @@ BaseManager::GetSource() const
   return m_source;
 }
 
-const ttasksptr&
+const ttasksptr
 BaseManager::GetTtask() const
 {
   return m_ttask.lock();

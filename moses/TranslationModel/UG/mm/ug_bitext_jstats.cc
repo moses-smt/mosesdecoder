@@ -54,7 +54,7 @@ namespace Moses
 
     void
     jstats::
-    add(float w, vector<uchar> const& a, uint32_t const cnt2,
+    add(float w, std::vector<unsigned char> const& a, uint32_t const cnt2,
 	uint32_t fwd_orient, uint32_t bwd_orient, int const docid)
     {
       boost::lock_guard<boost::mutex> lk(this->lock);
@@ -66,7 +66,7 @@ namespace Moses
 	  size_t i = 0;
 	  while (i < my_aln.size() && my_aln[i].second != a) ++i;
 	  if (i == my_aln.size())
-	    my_aln.push_back(pair<size_t,vector<uchar> >(1,a));
+	    my_aln.push_back(std::pair<size_t,std::vector<unsigned char> >(1,a));
 	  else
 	    my_aln[i].first++;
 	  if (my_aln[i].first > my_aln[i/2].first)
@@ -81,7 +81,7 @@ namespace Moses
 	}
     }
 
-    vector<pair<size_t, vector<uchar> > > const&
+    std::vector<std::pair<size_t, std::vector<unsigned char> > > const&
     jstats::
     aln() const
     { return my_aln; }

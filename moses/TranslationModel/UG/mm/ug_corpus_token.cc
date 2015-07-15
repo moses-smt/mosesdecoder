@@ -35,7 +35,7 @@ namespace ugdiss
 
   id_type
   SimpleWordId::
-  remap(vector<id_type const*> const& m) const
+  remap(std::vector<id_type const*> const& m) const
   {
     if (!m[0]) return theID;
     return m[0][theID];

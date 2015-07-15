@@ -71,10 +71,19 @@ namespace Moses {
   class Mmsapt;
   namespace bitext
   {
-    using namespace ugdiss;
-
+    // using namespace ugdiss;
+    using ugdiss::bitvector;
+    using ugdiss::Ttrack;
+    using ugdiss::TSA;
+    using ugdiss::imTSA;
+    using ugdiss::mmTSA;
+    using ugdiss::L2R_Token;
+    using ugdiss::SimpleWordId;
+    using ugdiss::imTtrack;
+    using ugdiss::mmTtrack;
+    using ugdiss::binread;
     float lbop(size_t const tries, size_t const succ, float const confidence);
-    void write_bitvector(bitvector const& v, ostream& out);
+    void write_bitvector(bitvector const& v, std::ostream& out);
 
 #ifndef NO_MOSES
     struct
@@ -86,7 +95,7 @@ namespace Moses {
       boost::shared_mutex lock;
       sptr<SamplingBias> bias;
       sptr<pstats::cache_t> cache1, cache2;
-      ostream* bias_log;
+      std::ostream* bias_log;
       ContextForQuery() : bias_log(NULL) { }
     };
 #endif
@@ -96,10 +105,10 @@ namespace Moses {
     {
     public:
       typedef TKN Token;
-      typedef typename TSA<Token>::tree_iterator   iter;
+      typedef typename ugdiss::TSA<Token>::tree_iterator   iter;
       typedef typename std::vector<PhrasePair<Token> > vec_ppair;
       typedef typename lru_cache::LRU_Cache<uint64_t, vec_ppair> pplist_cache_t;
-      typedef TSA<Token> tsa;
+      typedef ugdiss::TSA<Token> tsa;
       friend class Moses::Mmsapt;
     protected:
       mutable boost::shared_mutex m_lock; // for thread-safe operation
@@ -112,7 +121,7 @@ namespace Moses {
       size_t m_pstats_cache_threshold; // threshold for caching sampling results
       sptr<pstats::cache_t> m_cache1, m_cache2; // caches for sampling results
 
-      vector<string> m_docname;
+      std::vector<string> m_docname;
       map<string,id_type>  m_docname2docid; // maps from doc names to ids
       sptr<std::vector<id_type> >   m_sid2docid; // maps from sentences to docs (ids)
 
@@ -141,7 +150,7 @@ namespace Moses {
         size_t & s1, size_t & s2, // beginning and end of target start
 	size_t & e1, size_t & e2, // beginning and end of target end
         int& po_fwd, int& po_bwd, // phrase orientations
-	std::vector<uchar> * core_alignment, // stores the core alignment
+	std::vector<unsigned char> * core_alignment, // stores the core alignment
 	bitvector* full_alignment, // stores full word alignment for this sent.
 	bool const flip) const;   // flip source and target (reverse lookup)
 
@@ -190,17 +199,17 @@ namespace Moses {
       loadSentenceBias(string const& fname) const;
 
       sptr<DocumentBias>
-      SetupDocumentBias(string const& bserver, string const& text, ostream* log) const;
+      SetupDocumentBias(string const& bserver, string const& text, std::ostream* log) const;
 
       sptr<DocumentBias>
-      SetupDocumentBias(map<string,float> context_weights, ostream* log) const;
+      SetupDocumentBias(map<string,float> context_weights, std::ostream* log) const;
 
       void
       mark_match(Token const* start, Token const* end, iter const& m,
 		 bitvector& check) const;
       void
       write_yawat_alignment
-      ( id_type const sid, iter const* m1, iter const* m2, ostream& out ) const;
+      ( id_type const sid, iter const* m1, iter const* m2, std::ostream& out ) const;
 
       string docname(id_type const sid) const;
 
@@ -229,7 +238,7 @@ namespace Moses {
       size_t i = 0;
       float v; while (in>>v) (*ret)[i++] = v;
       UTIL_THROW_IF2(i != T1->size(),
-		     "Mismatch between bias vector size and corpus size at "
+		     "Mismatch between bias std::vector size and corpus size at "
 		     << HERE);
       return ret;
     }
@@ -239,8 +248,8 @@ namespace Moses {
     Bitext<Token>::
     toString(uint64_t pid, int isL2) const
     {
-      ostringstream buf;
-      uint32_t sid,off,len; parse_pid(pid,sid,off,len);
+      std::ostringstream buf;
+      uint32_t sid,off,len; ugdiss::parse_pid(pid,sid,off,len);
       Token const* t = (isL2 ? T2 : T1)->sntStart(sid) + off;
       Token const* x = t + len;
       TokenIndex const& V = isL2 ? *V2 : *V1;
@@ -328,10 +337,10 @@ namespace Moses {
      size_t const start, size_t const stop,
      size_t & s1, size_t & s2, size_t & e1, size_t & e2,
      int & po_fwd, int & po_bwd,
-     std::vector<uchar>* core_alignment, bitvector* full_alignment,
+     std::vector<unsigned char>* core_alignment, bitvector* full_alignment,
      bool const flip) const
     {
-      // if (core_alignment) cout << "HAVE CORE ALIGNMENT" << endl;
+      // if (core_alignment) cout << "HAVE CORE ALIGNMENT" << std::endl;
 
       // a word on the core_alignment:
       //
@@ -425,7 +434,7 @@ namespace Moses {
     sptr<DocumentBias>
     Bitext<Token>::
     SetupDocumentBias
-    ( string const& bserver, string const& text, ostream* log ) const
+    ( string const& bserver, string const& text, std::ostream* log ) const
     {
       sptr<DocumentBias> ret;
       UTIL_THROW_IF2(m_sid2docid == NULL,
@@ -439,7 +448,7 @@ namespace Moses {
     sptr<DocumentBias>
     Bitext<Token>::
     SetupDocumentBias
-    ( map<string,float> context_weights, ostream* log ) const
+    ( map<string,float> context_weights, std::ostream* log ) const
     {
       sptr<DocumentBias> ret;
       UTIL_THROW_IF2(m_sid2docid == NULL,
@@ -541,12 +550,12 @@ namespace Moses {
 
 	m_pp.init(m_pid1, m_is_inverse, m_token,m_len,m_pstats.get(),0);
 
-	// convert pstats entries to phrase pairs
+	// convert pstats entries to phrase std::pairs
 	pstats::trg_map_t::iterator a;
 	for (a = m_pstats->trg.begin(); a != m_pstats->trg.end(); ++a)
 	  {
 	    uint32_t sid,off,len;
-	    parse_pid(a->first, sid, off, len);
+	    ugdiss::parse_pid(a->first, sid, off, len);
 	    m_pp.update(a->first, m_other.sntStart(sid)+off, len, a->second);
 	    m_pp.good2 = max(uint32_t(m_pp.raw2 * float(m_pp.good1)/m_pp.raw1),
 			     m_pp.joint);
@@ -596,16 +605,16 @@ namespace Moses {
     void
     Bitext<Token>::
     write_yawat_alignment
-    ( id_type const sid, iter const* m1, iter const* m2, ostream& out ) const
+    ( id_type const sid, iter const* m1, iter const* m2, std::ostream& out ) const
     {
-      vector<int> a1(T1->sntLen(sid),-1), a2(T2->sntLen(sid),-1);
+      std::vector<int> a1(T1->sntLen(sid),-1), a2(T2->sntLen(sid),-1);
       bitvector f1(a1.size()), f2(a2.size());
       if (m1) mark_match(T1->sntStart(sid), T1->sntEnd(sid), *m1, f1);
       if (m2) mark_match(T2->sntStart(sid), T2->sntEnd(sid), *m2, f2);
 
-      vector<pair<bitvector,bitvector> > agroups;
-      vector<string> grouplabel;
-      pair<bitvector,bitvector> ag;
+      std::vector<pair<bitvector,bitvector> > agroups;
+      std::vector<string> grouplabel;
+      std::pair<bitvector,bitvector> ag;
       ag.first.resize(a1.size());
       ag.second.resize(a2.size());
       char const* x = Tx->sntStart(sid);
@@ -670,19 +679,19 @@ namespace Moses {
     void
     expand(typename Bitext<Token>::iter const& m,
 	   Bitext<Token> const& bt, pstats const& ps,
-	   std::vector<PhrasePair<Token> >& dest, ostream* log)
+	   std::vector<PhrasePair<Token> >& dest, std::ostream* log)
     {
       bool fwd = m.root == bt.I1.get();
       dest.reserve(ps.trg.size());
       PhrasePair<Token> pp;
       pp.init(m.getPid(), !fwd, m.getToken(0), m.size(), &ps, 0);
       // cout << HERE << " "
-      // << toString(*(fwd ? bt.V1 : bt.V2), pp.start1,pp.len1) << endl;
+      // << toString(*(fwd ? bt.V1 : bt.V2), pp.start1,pp.len1) << std::endl;
       pstats::trg_map_t::const_iterator a;
       for (a = ps.trg.begin(); a != ps.trg.end(); ++a)
 	{
 	  uint32_t sid,off,len;
-	  parse_pid(a->first, sid, off, len);
+	  ugdiss::parse_pid(a->first, sid, off, len);
 	  pp.update(a->first, (fwd ? bt.T2 : bt.T1)->sntStart(sid)+off,
 		    len, a->second);
 	  dest.push_back(pp);

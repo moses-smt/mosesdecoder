@@ -5,7 +5,7 @@
 
 namespace ugdiss
 {
-  using namespace std;
+  // using namespace std;
 
   class
   Conll_Record
@@ -29,7 +29,7 @@ namespace ugdiss
 
     // virtual bool operator==(Conll_Record const& other) const;
     // virtual bool operator<(Conll_Record const& other) const;
-    Conll_Record remap(vector<id_type const*> const& m) const;
+    Conll_Record remap(std::vector<id_type const*> const& m) const;
 
 #if 0
     /** constructor for conversion from CONLL-stype text format
