@@ -179,7 +179,7 @@ if [ option.get "with-icu" : : "yes" ]
   requirements += <library>icui18n/<link>shared ;
   requirements += <cxxflags>-fPIC ;
   requirements += <address-model>64 ;
-  requirements += <runtime-link>shared ;
+#  requirements += <runtime-link>shared ;
 }
 
 if [ option.get "with-probing-pt" : : "yes" ]

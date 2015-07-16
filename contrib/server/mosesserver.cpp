@@ -740,20 +740,23 @@ int main(int argc, char** argv)
   myRegistry.addMethod("updater", updater);
   myRegistry.addMethod("optimize", optimizer);
 
+  /* CODE FOR old xmlrpc-c v. 1.32 or lower
   xmlrpc_c::serverAbyss myAbyssServer(
 				      myRegistry,
 				      port,              // TCP port on which to listen
 				      logfile
 				      );
-  /* doesn't work with xmlrpc-c v. 1.16.33 - ie very old lib on Ubuntu 12.04
+  */
+
+  /* doesn't work with xmlrpc-c v. 1.16.33 - ie very old lib on Ubuntu 12.04 */
   xmlrpc_c::serverAbyss myAbyssServer(
     xmlrpc_c::serverAbyss::constrOpt()
-    .registryPtr(&myRegistry)
+    .registryP(&myRegistry)
     .portNumber(port)              // TCP port on which to listen
     .logFileName(logfile)
     .allowOrigin("*")
+    .maxConn((unsigned int)numThreads)
   );
-  */
 
   XVERBOSE(1,"Listening on port " << port << endl);
   if (isSerial) {

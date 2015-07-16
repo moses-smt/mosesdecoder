@@ -359,6 +359,7 @@ int main(int argc, char* argv[])
 
   while ( getline(extractFile, line) ) {
 
+    // Print progress dots to stderr.
     if ( ++i % 100000 == 0 ) {
       std::cerr << "." << std::flush;
     }
@@ -449,6 +450,9 @@ int main(int argc, char* argv[])
     }
 
   }
+
+  // We've been printing progress dots to stderr.  End the line.
+  std::cerr << std::endl;
 
   processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
   for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
