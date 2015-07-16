@@ -213,7 +213,8 @@ RecombineCompare(const Hypothesis &compare) const
 
   for (unsigned i = 0; i < m_ffStates.size(); ++i) {
     if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) {
-      comp = m_ffStates[i] - compare.m_ffStates[i];
+      // TODO: Can this situation actually occur?
+      comp = int(m_ffStates[i] != NULL) - int(compare.m_ffStates[i] != NULL);
     } else {
       comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
     }

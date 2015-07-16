@@ -283,6 +283,7 @@ int main(int argc, char* argv[])
   string englishString, foreignString, alignmentString, weightString;
 
   while(getline(*eFileP, englishString)) {
+    // Print progress dots to stderr.
     i++;
     if (i%10000 == 0) cerr << "." << flush;
 
@@ -337,6 +338,9 @@ int main(int argc, char* argv[])
       extractFileContextInv.Close();
     }
   }
+
+  // We've been printing progress dots to stderr.  End the line.
+  cerr << endl;
 }
 
 namespace MosesTraining

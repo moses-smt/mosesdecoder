@@ -259,6 +259,7 @@ void processFiles( const std::string& fileNameDirect,
   // loop through all extracted phrase translations
   int i=0;
   while(true) {
+    // Print progress dots to stderr.
     i++;
     if (i%100000 == 0) std::cerr << "." << std::flush;
 
@@ -436,6 +437,9 @@ void processFiles( const std::string& fileNameDirect,
   fileDirect.Close();
   fileIndirect.Close();
   fileConsolidated.Close();
+
+  // We've been printing progress dots to stderr.  End the line.
+  std::cerr << std::endl;
 }
 
 
