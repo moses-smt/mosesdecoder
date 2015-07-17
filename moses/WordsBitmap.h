@@ -38,9 +38,14 @@ typedef unsigned long WordsBitmapID;
 
 /** Vector of boolean to represent whether a word has been translated or not.
  *
- * Implemented using a vector of char.  A vector of bool, or a Boost
- * dynamic_bitset, could be much more efficient in theory but unfortunately
- * algorithms like std::find() are not optimized for them.
+ * Implemented using a vector of char, which is usually the same representation
+ * for the elements that a C array of bool would use.  A vector of bool, or a
+ * Boost dynamic_bitset, could be much more efficient in theory.  Unfortunately
+ * algorithms like std::find() are not optimized for vector<bool> on gcc or
+ * clang, and dynamic_bitset lacks all the optimized search operations we want.
+ * Only benchmarking will tell what works best.  Perhaps dynamic_bitset could
+ * still be a dramatic improvement, if we flip the meaning of the bits around
+ * so we can use its find_first() and find_next() for the most common searches.
  */
 class WordsBitmap
 {
