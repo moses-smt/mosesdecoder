@@ -70,7 +70,7 @@ void RDLM::Load()
     static_label_null[i] = lm_label_base_instance_->lookup_input_word(numstr);
   }
 
-  static_dummy_head = lm_head_base_instance_->lookup_input_word(dummy_head);
+  static_dummy_head = lm_head_base_instance_->lookup_input_word(dummy_head.GetString(0).as_string());
 
   static_start_head = lm_head_base_instance_->lookup_input_word("<start_head>");
   static_start_label = lm_head_base_instance_->lookup_input_word("<start_label>");
@@ -211,7 +211,7 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   }
 
   // ignore virtual nodes (in binarization; except if it's the root)
-  if (m_binarized && root->GetLabel()[0] == '^' && !ancestor_heads.empty()) {
+  if (m_binarized && root->GetLabel().GetString(0).as_string()[0] == '^' && !ancestor_heads.empty()) {
     // recursion
     if (root->IsLeafNT() && m_context_up > 1 && ancestor_heads.size()) {
       root = back_pointers.find(root)->second.get();
@@ -241,9 +241,9 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
     // root of tree: score without context
     if (ancestor_heads.empty() || (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head)) {
       std::vector<int> ngram_head_null (static_head_null);
-      ngram_head_null.back() = lm_head->lookup_output_word(root->GetChildren()[0]->GetLabel());
+      ngram_head_null.back() = lm_head->lookup_output_word(root->GetChildren()[0]->GetLabel().GetString(m_factorType).as_string());
       if (m_isPretermBackoff && ngram_head_null.back() == 0) {
-        ngram_head_null.back() = lm_head->lookup_output_word(root->GetLabel());
+        ngram_head_null.back() = lm_head->lookup_output_word(root->GetLabel().GetString(m_factorType).as_string());
       }
       if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head) {
         std::vector<int>::iterator it = ngram_head_null.begin();
@@ -296,7 +296,7 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   }
 
   size_t context_up_nonempty = std::min(m_context_up, ancestor_heads.size());
-  const std::string & head_label = root->GetLabel();
+  const std::string & head_label = root->GetLabel().GetString(0).as_string();
   bool virtual_head = false;
   int reached_end = 0;
   int label_idx, label_idx_out;
@@ -527,7 +527,7 @@ bool RDLM::GetHead(InternalTree* root, const TreePointerMap & back_pointers, std
       tree = it->get();
     }
 
-    if (m_binarized && tree->GetLabel()[0] == '^') {
+    if (m_binarized && tree->GetLabel().GetString(0).as_string()[0] == '^') {
       bool found = GetHead(tree, back_pointers, IDs);
       if (found) {
         return true;
@@ -597,8 +597,8 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
       child_ids = std::make_pair(static_dummy_head, static_dummy_head);
     }
 
-    labels[j] = lm_head->lookup_input_word(child->GetLabel());
-    labels_output[j] = lm_label->lookup_output_word(child->GetLabel());
+    labels[j] = lm_head->lookup_input_word(child->GetLabel().GetString(0).as_string());
+    labels_output[j] = lm_label->lookup_output_word(child->GetLabel().GetString(0).as_string());
     heads[j] = child_ids.first;
     heads_output[j] = child_ids.second;
     j++;
@@ -613,18 +613,18 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
 }
 
 
-void RDLM::GetIDs(const std::string & head, const std::string & preterminal, std::pair<int,int> & IDs) const
+void RDLM::GetIDs(const Word & head, const Word & preterminal, std::pair<int,int> & IDs) const
 {
-  IDs.first = lm_head_base_instance_->lookup_input_word(head);
+  IDs.first = lm_head_base_instance_->lookup_input_word(head.GetString(m_factorType).as_string());
   if (m_isPretermBackoff && IDs.first == 0) {
-    IDs.first = lm_head_base_instance_->lookup_input_word(preterminal);
+    IDs.first = lm_head_base_instance_->lookup_input_word(preterminal.GetString(0).as_string());
   }
   if (m_sharedVocab) {
     IDs.second = IDs.first;
   } else {
-    IDs.second = lm_head_base_instance_->lookup_output_word(head);
+    IDs.second = lm_head_base_instance_->lookup_output_word(head.GetString(m_factorType).as_string());
     if (m_isPretermBackoff && IDs.second == 0) {
-      IDs.second = lm_head_base_instance_->lookup_output_word(preterminal);
+      IDs.second = lm_head_base_instance_->lookup_output_word(preterminal.GetString(0).as_string());
     }
   }
 }
@@ -718,7 +718,9 @@ void RDLM::SetParameter(const std::string& key, const std::string& value)
     else
       UTIL_THROW(util::Exception, "Unknown value for argument " << key << "=" << value);
   } else if (key == "glue_symbol") {
-    m_glueSymbol = value;
+    m_glueSymbolString = value;
+  } else if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
   } else if (key == "cache_size") {
     m_cacheSize = Scan<int>(value);
   } else {
