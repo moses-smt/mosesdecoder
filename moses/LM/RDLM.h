@@ -68,7 +68,6 @@ class RDLM : public StatefulFeatureFunction
   std::string m_endTag;
   std::string m_path_head_lm;
   std::string m_path_label_lm;
-  bool m_isPTKVZ;
   bool m_isPretermBackoff;
   size_t m_context_left;
   size_t m_context_right;
@@ -111,7 +110,6 @@ public:
     , m_startSymbol("SSTART")
     , m_endSymbol("SEND")
     , m_endTag("</s>")
-    , m_isPTKVZ(false)
     , m_isPretermBackoff(true)
     , m_context_left(3)
     , m_context_right(0)
@@ -133,7 +131,7 @@ public:
   }
 
   void Score(InternalTree* root, const TreePointerMap & back_pointers, boost::array<float,4> &score, std::vector<int> &ancestor_heads, std::vector<int> &ancestor_labels, size_t &boundary_hash, int num_virtual = 0, int rescoring_levels = 0) const;
-  InternalTree* GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs, InternalTree * head_ptr=NULL) const;
+  bool GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs) const;
   void GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, const nplm::neuralTM *lm_head, const nplm::neuralTM *lm_labels, std::vector<int> & heads, std::vector<int> & labels, std::vector<int> & heads_output, std::vector<int> & labels_output) const;
   void GetIDs(const std::string & head, const std::string & preterminal, std::pair<int,int> & IDs) const;
   void ScoreFile(std::string &path); //for debugging
