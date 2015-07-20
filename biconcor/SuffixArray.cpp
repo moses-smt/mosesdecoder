@@ -142,7 +142,7 @@ void SuffixArray::Create(const string& fileName )
 }
 
 // very specific code to deal with common crawl document ids
-bool SuffixArray::ProcessDocumentLine( const char *line, const size_t sentenceId ) 
+bool SuffixArray::ProcessDocumentLine( const char *line, const size_t sentenceId )
 {
   size_t i;
   // first 32 characters are hex-hash
@@ -158,7 +158,7 @@ bool SuffixArray::ProcessDocumentLine( const char *line, const size_t sentenceId
     if (line[i] != '.' && (line[i] < '0' || line[i] > '9')) {
       return false;
     }
-  } 
+  }
   i++;
 
   // last token is url (=name)
@@ -337,7 +337,7 @@ void SuffixArray::List(INDEX start, INDEX end)
   }
 }
 
-void SuffixArray::PrintSentenceMatches( const std::vector< WORD > &phrase ) 
+void SuffixArray::PrintSentenceMatches( const std::vector< WORD > &phrase )
 {
   cout << "QUERY\t";
   for(size_t i=0; i<phrase.size(); i++) {
@@ -358,7 +358,7 @@ void SuffixArray::PrintSentenceMatches( const std::vector< WORD > &phrase )
 
   // loop through all matches
   cout << (lastMatch-firstMatch+1) << " matches" << endl;
-  for(INDEX i=firstMatch; i<=lastMatch;i++) {
+  for(INDEX i=firstMatch; i<=lastMatch; i++) {
     // get sentence information
     INDEX pos = GetPosition( i );
     INDEX start = pos - GetWordInSentence( pos );
@@ -394,8 +394,7 @@ SuffixArray::INDEX SuffixArray::GetDocument( INDEX sentence ) const
     }
     if (sentence < m_document[mid]) {
       max = mid-1;
-    }
-    else {
+    } else {
       min = mid+1;
     }
   }
@@ -416,13 +415,13 @@ void SuffixArray::Save(const string& fileName ) const
   fwrite( m_sentenceLength, sizeof(char), m_sentenceCount, pFile); // sentence length
 
   char useDocument = m_useDocument; // not sure if that is needed
-  fwrite( &useDocument, sizeof(char), 1, pFile ); 
+  fwrite( &useDocument, sizeof(char), 1, pFile );
   if (m_useDocument) {
-    fwrite( &m_documentCount, sizeof(INDEX), 1, pFile ); 
-    fwrite( m_document, sizeof(INDEX), m_documentCount, pFile ); 
-    fwrite( m_documentName, sizeof(INDEX), m_documentCount, pFile ); 
-    fwrite( &m_documentNameLength, sizeof(INDEX), 1, pFile ); 
-    fwrite( m_documentNameBuffer, sizeof(char), m_documentNameLength, pFile ); 
+    fwrite( &m_documentCount, sizeof(INDEX), 1, pFile );
+    fwrite( m_document, sizeof(INDEX), m_documentCount, pFile );
+    fwrite( m_documentName, sizeof(INDEX), m_documentCount, pFile );
+    fwrite( &m_documentNameLength, sizeof(INDEX), 1, pFile );
+    fwrite( m_documentNameBuffer, sizeof(char), m_documentNameLength, pFile );
   }
   fclose( pFile );
 
@@ -436,8 +435,8 @@ void SuffixArray::Load(const string& fileName )
 
   cerr << "loading from " << fileName << endl;
 
-  fread( &m_size, sizeof(INDEX), 1, pFile ) 
-    || Error("could not read m_size from", fileName);
+  fread( &m_size, sizeof(INDEX), 1, pFile )
+  || Error("could not read m_size from", fileName);
   cerr << "words in corpus: " << m_size << endl;
 
   m_array = (WORD_ID*) calloc( sizeof( WORD_ID ), m_size );
@@ -449,47 +448,47 @@ void SuffixArray::Load(const string& fileName )
   CheckAllocation(m_wordInSentence != NULL, "m_wordInSentence");
   CheckAllocation(m_sentence != NULL, "m_sentence");
   fread( m_array, sizeof(WORD_ID), m_size, pFile ) // corpus
-    || Error("could not read m_array from", fileName);
+  || Error("could not read m_array from", fileName);
   fread( m_index, sizeof(INDEX), m_size, pFile )   // suffix array
-    || Error("could not read m_index from", fileName);
+  || Error("could not read m_index from", fileName);
   fread( m_wordInSentence, sizeof(char), m_size, pFile) // word index
-    || Error("could not read m_wordInSentence from", fileName);
+  || Error("could not read m_wordInSentence from", fileName);
   fread( m_sentence, sizeof(INDEX), m_size, pFile ) // sentence index
-    || Error("could not read m_sentence from", fileName);
+  || Error("could not read m_sentence from", fileName);
 
   fread( &m_sentenceCount, sizeof(INDEX), 1, pFile )
-    || Error("could not read m_sentenceCount from", fileName);
+  || Error("could not read m_sentenceCount from", fileName);
   cerr << "sentences in corpus: " << m_sentenceCount << endl;
 
   m_sentenceLength = (char*) calloc( sizeof( char ), m_sentenceCount );
   CheckAllocation(m_sentenceLength != NULL, "m_sentenceLength");
   fread( m_sentenceLength, sizeof(char), m_sentenceCount, pFile) // sentence length
-    || Error("could not read m_sentenceLength from", fileName);
+  || Error("could not read m_sentenceLength from", fileName);
 
   if (m_useDocument) { // do not read it when you do not need it
     char useDocument;
     fread( &useDocument, sizeof(char), 1, pFile )
-      || Error("could not read m_useDocument from", fileName);
+    || Error("could not read m_useDocument from", fileName);
     if (!useDocument) {
       cerr << "Error: stored suffix array does not have a document index\n";
       exit(1);
     }
-    fread( &m_documentCount, sizeof(INDEX), 1, pFile ) 
-      || Error("could not read m_documentCount from", fileName);
+    fread( &m_documentCount, sizeof(INDEX), 1, pFile )
+    || Error("could not read m_documentCount from", fileName);
     m_document = (INDEX*) calloc( sizeof( INDEX ), m_documentCount );
     m_documentName = (INDEX*) calloc( sizeof( INDEX ), m_documentCount );
     CheckAllocation(m_document != NULL, "m_document");
     CheckAllocation(m_documentName != NULL, "m_documentName");
-    fread( m_document, sizeof(INDEX), m_documentCount, pFile ) 
-      || Error("could not read m_document from", fileName);
-    fread( m_documentName, sizeof(INDEX), m_documentCount, pFile ) 
-      || Error("could not read m_documentName from", fileName);
+    fread( m_document, sizeof(INDEX), m_documentCount, pFile )
+    || Error("could not read m_document from", fileName);
+    fread( m_documentName, sizeof(INDEX), m_documentCount, pFile )
+    || Error("could not read m_documentName from", fileName);
     fread( &m_documentNameLength, sizeof(INDEX), 1, pFile )
-      || Error("could not read m_documentNameLength from", fileName);
+    || Error("could not read m_documentNameLength from", fileName);
     m_documentNameBuffer = (char*) calloc( sizeof( char ), m_documentNameLength );
     CheckAllocation(m_documentNameBuffer != NULL, "m_documentNameBuffer");
     fread( m_documentNameBuffer, sizeof(char), m_documentNameLength, pFile )
-      || Error("could not read m_document from", fileName);
+    || Error("could not read m_document from", fileName);
   }
 
   fclose( pFile );
@@ -497,16 +496,16 @@ void SuffixArray::Load(const string& fileName )
   m_vcb.Load( fileName + ".src-vcb" );
 }
 
-void SuffixArray::CheckAllocation( bool check, const char *dataStructure ) const 
+void SuffixArray::CheckAllocation( bool check, const char *dataStructure ) const
 {
   if (check) return;
   cerr << "Error: could not allocate memory for " << dataStructure << endl;
   exit(1);
 }
 
-bool SuffixArray::Error( const char *message, const string &fileName) const 
+bool SuffixArray::Error( const char *message, const string &fileName) const
 {
   cerr << "Error: " << message << " " << fileName << endl;
   exit(1);
-  return true; // yeah, i know. 
+  return true; // yeah, i know.
 }

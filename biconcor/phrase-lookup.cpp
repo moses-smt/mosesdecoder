@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
   bool createFlag = false;
   bool queryFlag = false;
   bool querySentenceFlag = false;
-  
+
   int stdioFlag = false;  // receive requests from STDIN, respond to STDOUT
   string info = "usage: biconcor\n\t[--load model-file]\n\t[--save model-file]\n\t[--create corpus]\n\t[--query string]\n\t[--stdio]\n";
   while(1) {
@@ -113,16 +113,13 @@ int main(int argc, char* argv[])
       if (querySentenceFlag) {
         vector< string > queryString = util::tokenize( query.c_str() );
         suffixArray.PrintSentenceMatches( queryString );
-      }
-      else {
+      } else {
         cout << lookup( query ) << endl;
       }
     }
-  } 
-  else if (queryFlag) {
+  } else if (queryFlag) {
     cout << lookup( query ) << endl;
-  } 
-  else if (querySentenceFlag) {
+  } else if (querySentenceFlag) {
     vector< string > queryString = util::tokenize( query.c_str() );
     suffixArray.PrintSentenceMatches( queryString );
   }
