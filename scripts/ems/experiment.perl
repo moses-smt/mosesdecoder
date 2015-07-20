@@ -2906,6 +2906,7 @@ sub get_training_setting {
     my $pcfg = &get("TRAINING:use-pcfg-feature");
     my $baseline_alignment = &get("TRAINING:baseline-alignment-model");
     my $no_glue_grammar = &get("TRAINING:no-glue-grammar");
+    my $mmsapt = &get("TRAINING:mmsapt");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2930,6 +2931,7 @@ sub get_training_setting {
     $cmd .= "-parallel " if $parallel;
     $cmd .= "-pcfg " if $pcfg;
     $cmd .= "-baseline-alignment-model $baseline_alignment " if defined($baseline_alignment) && ($step == 1 || $step == 2);
+    $cmd .= "-mmsapt " if defined($mmsapt);
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
