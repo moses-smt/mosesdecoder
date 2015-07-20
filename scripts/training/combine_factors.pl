@@ -37,9 +37,7 @@ while (defined $_) {
   $nr++;
   print STDERR "." if $nr % 10000 == 0;
   print STDERR "($nr)" if $nr % 100000 == 0;
-  chomp;
-  s/\s+/ /g; s/^ //; s/ $//;
-  my @intokens = split / /;
+  my ($intokens,$MARKUP) = split_xml($_);
   # load lines of corresponding streams and ensure equal number of words
   my @lines_of_extratoks;
   foreach my $factor (0..$#streams) {
@@ -49,14 +47,17 @@ while (defined $_) {
     chomp($line);
     $line =~ s/\s+/ /g; $line =~ s/^ //; $line =~ s/ $//;
     my @toks = split / /, $line;
-    die "Incompatible number of words in factor $factor on line $nr. ($#toks != $#intokens)"
-      if $#toks != $#intokens;
+    die "Incompatible number of words in factor $factor on line $nr. ($#toks != $#$intokens)"
+      if $#toks != $#$intokens;
     $lines_of_extratoks[$factor] = \@toks;
   }
 
   # for every token, print the factors in the order as user wished
-  for(my $i=0; $i<=$#intokens; $i++) {
-    my $token = $intokens[$i];
+  for(my $i=0; $i<=$#$intokens; $i++) {
+    print " " if $i && $$MARKUP[$i] eq '';
+    print $$MARKUP[$i];
+
+    my $token = $$intokens[$i];
     my @outtoken = ();
     push @outtoken, $token; # add the first one
     # print STDERR "Token: $token\n";
@@ -69,11 +70,56 @@ while (defined $_) {
     print " " if $i != 0;
     print join("|", @outtoken);
   }
+  print $$MARKUP[$#$MARKUP];
   print "\n";
   $_ = readline($firststream);
 }
 close $firststream;
 print STDERR "Done.\n";
+
+# store away xml markup
+sub split_xml {
+  my ($line) = @_;
+  my (@WORD,@MARKUP);
+  my $i = 0;
+  $MARKUP[0] = "";
+  while($line =~ /\S/) {
+    # XML tag
+    if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
+      my $potential_xml = $1;
+      my $line_next = $2;
+      # exception for factor that is an XML tag
+      if ($line =~ /^\S/ && scalar(@WORD)>0 && $WORD[$i-1] =~ /\|$/) {
+	$WORD[$i-1] .= $potential_xml;
+	if ($line_next =~ /^(\|+)(.*)$/) {
+	  $WORD[$i-1] .= $1;
+	  $line_next = $2;
+	}
+      }
+      else {
+        $MARKUP[$i] .= $potential_xml." ";
+      }
+      $line = $line_next;
+    }
+    # non-XML text
+    elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {
+      $WORD[$i++] = $1;
+      $MARKUP[$i] = "";
+      $line = $2;
+    }
+    # '<' or '>' occurs in word, but it's not an XML tag
+    elsif ($line =~ /^\s*(\S+)(.*)$/) {
+      $WORD[$i++] = $1;
+      $MARKUP[$i] = "";
+      $line = $2;
+      }
+    else {
+      die("ERROR: huh? $line\n");
+    }
+  }
+  chop($MARKUP[$#MARKUP]);
+  return (\@WORD,\@MARKUP);
+}
 
 
 
