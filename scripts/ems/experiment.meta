@@ -659,7 +659,7 @@ build-biconcor
 	final-model: yes
 build-suffix-array
 	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
-	out: phrase-translation-table
+	out: sigtest-filter-phrase-translation-table
 	default-name: model/suffix-array
 	ignore-unless: suffix-array
 	error: usage
@@ -731,11 +731,18 @@ build-ttable
 	final-model: yes
 build-mmsapt
 	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
-	out: phrase-translation-table
+	out: sigtest-filter-phrase-translation-table
 	ignore-unless: mmsapt
 	default-name: model/phrase-table-mmsapt
 	template: $moses-script-dir/training/build-mmsapt.perl --alignment IN.$alignment-symmetrization-method --corpus IN1 --f $input-extension --e $output-extension --dir OUT --settings '$mmsapt'
 	final-model: yes
+custom-phrase-table-pruning
+	in: phrase-translation-table
+	out: sigtest-filter-phrase-translation-table
+	ignore-unless: custom-phrase-table-pruning
+	ignore-if: mmsapt
+	template: $custom-phrase-table-pruning IN OUT
+	default-name: model/phrase-table-pruned
 sigtest-filter-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: sigtest-filter-suffix-array
@@ -757,7 +764,7 @@ sigtest-filter-ttable
 	out: sigtest-filter-phrase-translation-table
 	default-name: model/phrase-table-sigtest-filter
 	pass-unless: sigtest-filter
-	ignore-if: TRAINING:config
+	ignore-if: TRAINING:config custom-phrase-table-pruning
 	final-model: yes
 sigtest-filter-reordering
 	in: reordering-table sigtest-filter-suffix-array
