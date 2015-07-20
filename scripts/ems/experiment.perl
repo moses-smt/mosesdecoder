@@ -1119,13 +1119,13 @@ sub define_step {
 	next if $RE_USE[$i];
 	next if defined($PASS{$i});
 	next if &define_template($i);
-        if ($DO_STEP[$i] =~ /^CORPUS:(.+):factorize$/) {
+        if ($DO_STEP[$i] =~ /^CORPUS:(.+):(post-split-)?factorize$/) {
             &define_corpus_factorize($i);
         }
 	elsif ($DO_STEP[$i] eq 'SPLITTER:train') {
 	    &define_splitter_train($i);
 	}
-        elsif ($DO_STEP[$i] =~ /^LM:(.+):factorize$/) {
+        elsif ($DO_STEP[$i] =~ /^LM:(.+):(post-split-)?factorize$/) {
             &define_lm_factorize($i,$1);
         }
 	elsif ($DO_STEP[$i] =~ /^LM:(.+):randomize$/ ||
@@ -1188,7 +1188,7 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:create-config' || $DO_STEP[$i] eq 'TRAINING:create-config-interpolated-lm') {
 	    &define_training_create_config($i);
 	}
-	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:factorize-tuning') {
+	elsif ($DO_STEP[$i] =~ /^INTERPOLATED-LM:(post-split-)?factorize-tuning$/) {
 	    &define_interpolated_lm_factorize_tuning($i);
 	}
 	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:interpolate') {
