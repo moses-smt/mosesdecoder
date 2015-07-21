@@ -89,11 +89,6 @@ def create_parser():
         help=(
             "Sentence end symbol. Will be skipped during extraction "
             "(default: %(default)s)"))
-    parser.add_argument(
-        '--ptkvz', action='store_true',
-        help=(
-            "Special rule for German dependency trees: "
-            "concatenate separable verb prefix and verb."))
     return parser
 
 
@@ -107,22 +102,15 @@ def escape_text(s):
     return s
 
 
-def get_head(xml, add_ptkvz):
+def get_head(xml):
     """Deterministic heuristic to get head of subtree."""
     head = None
     preterminal = None
     for child in xml:
         if not len(child):
-            if head is not None:
-                continue
             preterminal = child.get('label')
             head = escape_text(child.text.strip())
-
-        elif add_ptkvz and head and child.get('label') == 'avz':
-            for grandchild in child:
-                if grandchild.get('label') == 'PTKVZ':
-                    head = escape_text(grandchild.text.strip()) + head
-                    break
+            return head, preterminal
 
     return head, preterminal
 
@@ -159,7 +147,7 @@ def get_syntactic_ngrams(xml, options, vocab, output_vocab,
             parent_labels = (
                 [vocab.get('<root_label>', 0)] * options.up_context)
 
-            head, preterminal = get_head(xml, options.ptkvz)
+            head, preterminal = get_head(xml)
             if not head:
                 head = '<dummy_head>'
                 preterminal = head
@@ -222,7 +210,7 @@ def get_syntactic_ngrams(xml, options, vocab, output_vocab,
                 preterminal_child = head_child
                 child_label = '<head_label>'
             else:
-                head_child, preterminal_child = get_head(child, options.ptkvz)
+                head_child, preterminal_child = get_head(child)
                 child_label = child.get('label')
 
             if head_child is None:

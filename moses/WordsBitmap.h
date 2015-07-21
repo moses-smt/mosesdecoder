@@ -38,9 +38,14 @@ typedef unsigned long WordsBitmapID;
 
 /** Vector of boolean to represent whether a word has been translated or not.
  *
- * Implemented using a vector of char.  A vector of bool, or a Boost
- * dynamic_bitset, could be much more efficient in theory but unfortunately
- * algorithms like std::find() are not optimized for them.
+ * Implemented using a vector of char, which is usually the same representation
+ * for the elements that a C array of bool would use.  A vector of bool, or a
+ * Boost dynamic_bitset, could be much more efficient in theory.  Unfortunately
+ * algorithms like std::find() are not optimized for vector<bool> on gcc or
+ * clang, and dynamic_bitset lacks all the optimized search operations we want.
+ * Only benchmarking will tell what works best.  Perhaps dynamic_bitset could
+ * still be a dramatic improvement, if we flip the meaning of the bits around
+ * so we can use its find_first() and find_next() for the most common searches.
  */
 class WordsBitmap
 {
@@ -86,10 +91,10 @@ public:
 
     // Find the first gap, and cache it.
     std::vector<char>::const_iterator first_gap = std::find(
-      m_bitmap.begin(), m_bitmap.end(), false);
+          m_bitmap.begin(), m_bitmap.end(), false);
     m_firstGap = (
-      (first_gap == m_bitmap.end()) ?
-        NOT_FOUND : first_gap - m_bitmap.begin());
+                   (first_gap == m_bitmap.end()) ?
+                   NOT_FOUND : first_gap - m_bitmap.begin());
   }
 
   //! Create WordsBitmap of length size and initialise.
@@ -191,7 +196,7 @@ public:
       return (thisSize < compareSize) ? -1 : 1;
     }
     return std::memcmp(
-      &m_bitmap[0], &compare.m_bitmap[0], thisSize * sizeof(bool));
+             &m_bitmap[0], &compare.m_bitmap[0], thisSize * sizeof(bool));
   }
 
   bool operator< (const WordsBitmap &compare) const {
@@ -209,9 +214,9 @@ public:
   inline size_t GetEdgeToTheRightOf(size_t r) const {
     if (r+1 == m_bitmap.size()) return r;
     return (
-      std::find(m_bitmap.begin() + r + 1, m_bitmap.end(), true) -
-      m_bitmap.begin()
-      ) - 1;
+             std::find(m_bitmap.begin() + r + 1, m_bitmap.end(), true) -
+             m_bitmap.begin()
+           ) - 1;
   }
 
 

@@ -1,27 +1,24 @@
 #include "InternalTree.h"
+#include "moses/StaticData.h"
 
 namespace Moses
 {
 
-InternalTree::InternalTree(const std::string & line, size_t start, size_t len, const bool terminal):
-  m_value_nt(0),
-  m_isTerminal(terminal)
+InternalTree::InternalTree(const std::string & line, size_t start, size_t len, const bool nonterminal)
 {
 
   if (len > 0) {
-    m_value.assign(line, start, len);
+    m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), StringPiece(line).substr(start, len), nonterminal);
   }
 }
 
-InternalTree::InternalTree(const std::string & line, const bool terminal):
-  m_value_nt(0),
-  m_isTerminal(terminal)
+InternalTree::InternalTree(const std::string & line, const bool nonterminal)
 {
 
   size_t found = line.find_first_of("[] ");
 
   if (found == line.npos) {
-    m_value = line;
+    m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), line, nonterminal);
   } else {
     AddSubTree(line, 0);
   }
@@ -32,6 +29,7 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos)
 
   char token = 0;
   size_t len = 0;
+  bool has_value = false;
 
   while (token != ']' && pos != std::string::npos) {
     size_t oldpos = pos;
@@ -41,29 +39,26 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos)
     len = pos-oldpos;
 
     if (token == '[') {
-      if (!m_value.empty()) {
-        m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, false));
+      if (has_value) {
+        m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, true));
         pos = m_children.back()->AddSubTree(line, pos+1);
       } else {
         if (len > 0) {
-          m_value.assign(line, oldpos, len);
+          m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), StringPiece(line).substr(oldpos, len), false);
+          has_value = true;
         }
         pos = AddSubTree(line, pos+1);
       }
     } else if (token == ' ' || token == ']') {
-      if (len > 0 && m_value.empty()) {
-        m_value.assign(line, oldpos, len);
+      if (len > 0 && !has_value) {
+        m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), StringPiece(line).substr(oldpos, len), true);
+        has_value = true;
       } else if (len > 0) {
-        m_isTerminal = false;
-        m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, true));
+        m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, false));
       }
       if (token == ' ') {
         pos++;
       }
-    }
-
-    if (!m_children.empty()) {
-      m_isTerminal = false;
     }
   }
 
@@ -82,16 +77,16 @@ std::string InternalTree::GetString(bool start) const
     ret += " ";
   }
 
-  if (!m_isTerminal) {
+  if (!IsTerminal()) {
     ret += "[";
   }
 
-  ret += m_value;
+  ret += m_value.GetString(StaticData::Instance().GetOutputFactorOrder(), false);
   for (std::vector<TreePointer>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
     ret += (*it)->GetString(false);
   }
 
-  if (!m_isTerminal) {
+  if (!IsTerminal()) {
     ret += "]";
   }
   return ret;
@@ -120,13 +115,13 @@ void InternalTree::Unbinarize()
 {
 
   // nodes with virtual label cannot be unbinarized
-  if (m_value.empty() || m_value[0] == '^') {
+  if (m_value.GetString(0).empty() || m_value.GetString(0).as_string()[0] == '^') {
     return;
   }
 
   //if node has child that is virtual node, get unbinarized list of children
   for (std::vector<TreePointer>::iterator it = m_children.begin(); it != m_children.end(); ++it) {
-    if (!(*it)->IsTerminal() && (*it)->GetLabel()[0] == '^') {
+    if (!(*it)->IsTerminal() && (*it)->GetLabel().GetString(0).as_string()[0] == '^') {
       std::vector<TreePointer> new_children;
       GetUnbinarizedChildren(new_children);
       m_children = new_children;
@@ -144,8 +139,8 @@ void InternalTree::Unbinarize()
 void InternalTree::GetUnbinarizedChildren(std::vector<TreePointer> &ret) const
 {
   for (std::vector<TreePointer>::const_iterator itx = m_children.begin(); itx != m_children.end(); ++itx) {
-    const std::string &label = (*itx)->GetLabel();
-    if (!label.empty() && label[0] == '^') {
+    const StringPiece label = (*itx)->GetLabel().GetString(0);
+    if (!label.empty() && label.as_string()[0] == '^') {
       (*itx)->GetUnbinarizedChildren(ret);
     } else {
       ret.push_back(*itx);
@@ -153,7 +148,7 @@ void InternalTree::GetUnbinarizedChildren(std::vector<TreePointer> &ret) const
   }
 }
 
-bool InternalTree::FlatSearch(const std::string & label, std::vector<TreePointer>::const_iterator & it) const
+bool InternalTree::FlatSearch(const Word & label, std::vector<TreePointer>::const_iterator & it) const
 {
   for (it = m_children.begin(); it != m_children.end(); ++it) {
     if ((*it)->GetLabel() == label) {
@@ -163,7 +158,7 @@ bool InternalTree::FlatSearch(const std::string & label, std::vector<TreePointer
   return false;
 }
 
-bool InternalTree::RecursiveSearch(const std::string & label, std::vector<TreePointer>::const_iterator & it) const
+bool InternalTree::RecursiveSearch(const Word & label, std::vector<TreePointer>::const_iterator & it) const
 {
   for (it = m_children.begin(); it != m_children.end(); ++it) {
     if ((*it)->GetLabel() == label) {
@@ -178,7 +173,7 @@ bool InternalTree::RecursiveSearch(const std::string & label, std::vector<TreePo
   return false;
 }
 
-bool InternalTree::RecursiveSearch(const std::string & label, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const
+bool InternalTree::RecursiveSearch(const Word & label, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const
 {
   for (it = m_children.begin(); it != m_children.end(); ++it) {
     if ((*it)->GetLabel() == label) {
@@ -187,90 +182,6 @@ bool InternalTree::RecursiveSearch(const std::string & label, std::vector<TreePo
     }
     std::vector<TreePointer>::const_iterator it2;
     if ((*it)->RecursiveSearch(label, it2, parent)) {
-      it = it2;
-      return true;
-    }
-  }
-  return false;
-}
-
-
-bool InternalTree::FlatSearch(const NTLabel & label, std::vector<TreePointer>::const_iterator & it) const
-{
-  for (it = m_children.begin(); it != m_children.end(); ++it) {
-    if ((*it)->GetNTLabel() == label) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool InternalTree::RecursiveSearch(const NTLabel & label, std::vector<TreePointer>::const_iterator & it) const
-{
-  for (it = m_children.begin(); it != m_children.end(); ++it) {
-    if ((*it)->GetNTLabel() == label) {
-      return true;
-    }
-    std::vector<TreePointer>::const_iterator it2;
-    if ((*it)->RecursiveSearch(label, it2)) {
-      it = it2;
-      return true;
-    }
-  }
-  return false;
-}
-
-bool InternalTree::RecursiveSearch(const NTLabel & label, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const
-{
-  for (it = m_children.begin(); it != m_children.end(); ++it) {
-    if ((*it)->GetNTLabel() == label) {
-      parent = this;
-      return true;
-    }
-    std::vector<TreePointer>::const_iterator it2;
-    if ((*it)->RecursiveSearch(label, it2, parent)) {
-      it = it2;
-      return true;
-    }
-  }
-  return false;
-}
-
-
-bool InternalTree::FlatSearch(const std::vector<NTLabel> & labels, std::vector<TreePointer>::const_iterator & it) const
-{
-  for (it = m_children.begin(); it != m_children.end(); ++it) {
-    if (std::binary_search(labels.begin(), labels.end(), (*it)->GetNTLabel())) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool InternalTree::RecursiveSearch(const std::vector<NTLabel> & labels, std::vector<TreePointer>::const_iterator & it) const
-{
-  for (it = m_children.begin(); it != m_children.end(); ++it) {
-    if (std::binary_search(labels.begin(), labels.end(), (*it)->GetNTLabel())) {
-      return true;
-    }
-    std::vector<TreePointer>::const_iterator it2;
-    if ((*it)->RecursiveSearch(labels, it2)) {
-      it = it2;
-      return true;
-    }
-  }
-  return false;
-}
-
-bool InternalTree::RecursiveSearch(const std::vector<NTLabel> & labels, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const
-{
-  for (it = m_children.begin(); it != m_children.end(); ++it) {
-    if (std::binary_search(labels.begin(), labels.end(), (*it)->GetNTLabel())) {
-      parent = this;
-      return true;
-    }
-    std::vector<TreePointer>::const_iterator it2;
-    if ((*it)->RecursiveSearch(labels, it2, parent)) {
       it = it2;
       return true;
     }

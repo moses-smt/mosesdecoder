@@ -1119,13 +1119,13 @@ sub define_step {
 	next if $RE_USE[$i];
 	next if defined($PASS{$i});
 	next if &define_template($i);
-        if ($DO_STEP[$i] =~ /^CORPUS:(.+):factorize$/) {
+        if ($DO_STEP[$i] =~ /^CORPUS:(.+):(post-split-)?factorize$/) {
             &define_corpus_factorize($i);
         }
 	elsif ($DO_STEP[$i] eq 'SPLITTER:train') {
 	    &define_splitter_train($i);
 	}
-        elsif ($DO_STEP[$i] =~ /^LM:(.+):factorize$/) {
+        elsif ($DO_STEP[$i] =~ /^LM:(.+):(post-split-)?factorize$/) {
             &define_lm_factorize($i,$1);
         }
 	elsif ($DO_STEP[$i] =~ /^LM:(.+):randomize$/ ||
@@ -1188,7 +1188,7 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:create-config' || $DO_STEP[$i] eq 'TRAINING:create-config-interpolated-lm') {
 	    &define_training_create_config($i);
 	}
-	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:factorize-tuning') {
+	elsif ($DO_STEP[$i] =~ /^INTERPOLATED-LM:(post-split-)?factorize-tuning$/) {
 	    &define_interpolated_lm_factorize_tuning($i);
 	}
 	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:interpolate') {
@@ -2906,6 +2906,7 @@ sub get_training_setting {
     my $pcfg = &get("TRAINING:use-pcfg-feature");
     my $baseline_alignment = &get("TRAINING:baseline-alignment-model");
     my $no_glue_grammar = &get("TRAINING:no-glue-grammar");
+    my $mmsapt = &get("TRAINING:mmsapt");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2930,6 +2931,7 @@ sub get_training_setting {
     $cmd .= "-parallel " if $parallel;
     $cmd .= "-pcfg " if $pcfg;
     $cmd .= "-baseline-alignment-model $baseline_alignment " if defined($baseline_alignment) && ($step == 1 || $step == 2);
+    $cmd .= "-mmsapt " if defined($mmsapt);
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
