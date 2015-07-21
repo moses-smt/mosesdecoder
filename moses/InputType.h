@@ -58,7 +58,7 @@ protected:
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   std::string m_textType;
   std::string m_passthrough;
-  boost::shared_ptr<std::string> m_context;
+  boost::shared_ptr<std::vector<std::string> > m_context;
 public:
 
   // used in -continue-partial-translation
@@ -173,13 +173,13 @@ public:
   //! number of words in this sentence/confusion network
   virtual size_t GetSize() const =0;
 
-  virtual boost::shared_ptr<std::string> const&
+  virtual boost::shared_ptr<std::vector<std::string> > const&
   GetContext() const {
     return m_context;
   }
 
   virtual void
-  SetContext(boost::shared_ptr<std::string> const& ctx) {
+  SetContext(boost::shared_ptr<std::vector<std::string> > const& ctx) {
     m_context = ctx;
   }
 

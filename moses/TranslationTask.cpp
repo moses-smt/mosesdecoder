@@ -23,11 +23,11 @@ using namespace std;
 namespace Moses
 {
 
-std::string const&
-TranslationTask
-::GetContextString() const
+boost::shared_ptr<std::vector<std::string> > 
+TranslationTask::
+GetContextWindow() const
 {
-  return m_context_string;
+  return m_context;
 }
 
 std::map<std::string, float> const&
@@ -44,15 +44,15 @@ TranslationTask
 }
 
 void
-TranslationTask
-::SetContextString(std::string const& context)
+TranslationTask::
+SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw)
 {
-  m_context_string = context;
+  m_context = cw;
 }
 
 void
-TranslationTask
-::SetContextWeights(std::string const& context_weights)
+TranslationTask::
+SetContextWeights(std::string const& context_weights)
 {
   std::vector<std::string> tokens = Tokenize(context_weights,":");
   for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {

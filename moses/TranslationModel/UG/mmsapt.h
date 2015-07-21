@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Sampling phrase table implementation based on memory-mapped suffix arrays.
 // Design and code by Ulrich Germann.
 #pragma once

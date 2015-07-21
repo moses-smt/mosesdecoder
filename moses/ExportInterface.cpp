@@ -212,23 +212,36 @@ batch_run()
   ThreadPool pool(staticData.ThreadCount());
 #endif
 
-  std::string context_string;
+  // using context for adaptation:
+  // e.g., context words / strings from config file / cmd line 
+  std::string context_string; 
   params.SetParameter(context_string,"context-string",string(""));
 
+  // ... or weights for documents/domains from config file / cmd. line
   std::string context_weights;
   params.SetParameter(context_weights,"context-weights",string(""));
 
-  // main loop over set of input sentences
+  // ... or the surrounding context (--context-window ...)
+  size_t size_t_max = std::numeric_limits<size_t>::max();
+  bool use_context_window = ioWrapper->GetLookAhead() || ioWrapper->GetLookBack();
+  bool use_context = use_context_window || context_string.size();
+  bool use_sliding_context_window = (use_context_window 
+				     && ioWrapper->GetLookAhead() != size_t_max);
 
-  boost::shared_ptr<InputType> source;
+  boost::shared_ptr<std::vector<std::string> >  context_window;
+  boost::shared_ptr<std::vector<std::string> >* cw;
+  cw = use_context_window ? &context_window : NULL;
+  if (!cw && context_string.size()) 
+    context_window.reset(new std::vector<std::string>(1,context_string));
 
   // global scope of caches, biases, etc., if any
   boost::shared_ptr<ContextScope> gscope;
-  if ((ioWrapper->GetLookAhead() + ioWrapper->GetLookBack() == 0) 
-      || ioWrapper->GetLookAhead() == std::numeric_limits<size_t>::max())
+  if (!use_sliding_context_window) 
     gscope.reset(new ContextScope);
 
-  while ((source = ioWrapper->ReadInput()) != NULL) {
+  // main loop over set of input sentences
+  boost::shared_ptr<InputType> source;
+  while ((source = ioWrapper->ReadInput(cw)) != NULL) {
     IFVERBOSE(1) ResetUserTime();
 
     // set up task of translating one sentence
@@ -236,19 +249,22 @@ batch_run()
     if (gscope) lscope = gscope;
     else lscope.reset(new ContextScope);
     
-    boost::shared_ptr<TranslationTask> task;
+    boost::shared_ptr<TranslationTask> task; 
     task = TranslationTask::create(source, ioWrapper, lscope);
-
-    if (source->GetContext())
-      task->SetContextString(*source->GetContext());
-    else task->SetContextString(context_string);
-
-    //if (source->GetContextWeights().isEmpty())
-    //  task->SetContextWeights(*source->GetContextWeights());
-    /*else //The context_weights will never be passed to the config file.*/
-    if (context_weights != "") {
+    
+    if (cw)
+      {
+	if (context_string.size())
+	  context_window->push_back(context_string);
+	if(!use_sliding_context_window)
+	  cw = NULL;
+      }
+    if (context_window)
+      task->SetContextWindow(context_window);
+    
+    if (context_weights != "") 
       task->SetContextWeights(context_weights);
-    }
+
     // Allow for (sentence-)context-specific processing prior to
     // decoding. This can be used, for example, for context-sensitive
     // phrase lookup.

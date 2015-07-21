@@ -66,7 +66,7 @@ protected:
   // task is still live or not, or maintain a shared_ptr to ensure the
   // task stays alive till it's done with it.
 
-  std::string m_context_string;
+  boost::shared_ptr<std::vector<std::string> > m_context;
   std::map<std::string, float> m_context_weights;
 public:
 
@@ -124,8 +124,11 @@ public:
     return m_scope;
   }
 
-  std::string const& GetContextString() const;
-  void SetContextString(std::string const& context);
+  boost::shared_ptr<std::vector<std::string> > 
+  GetContextWindow() const;
+
+  void 
+  SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw);
 
   std::map<std::string, float> const& GetContextWeights() const;
   void SetContextWeights(std::string const& context_weights);

@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <stack>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 
 #include "moses/Syntax/KBestExtractor.h"
 #include "moses/Syntax/PVertex.h"
@@ -297,7 +298,7 @@ GetBufferedInput()
 
 boost::shared_ptr<InputType>
 IOWrapper::
-ReadInput()
+ReadInput(boost::shared_ptr<std::vector<std::string> >* cw)
 {
 #ifdef WITH_THREADS
   boost::lock_guard<boost::mutex> lock(m_lock);
@@ -305,48 +306,33 @@ ReadInput()
   boost::shared_ptr<InputType> source = GetBufferedInput();
   if (source) {
     source->SetTranslationId(m_currentLine++);
-    if (m_look_ahead || m_look_back)
-      this->set_context_for(*source);
+    
+    // when using a sliding context window, remove obsolete past input from buffer:
+    if (m_past_input.size() && m_look_back != std::numeric_limits<size_t>::max())
+      { 
+	list<boost::shared_ptr<InputType> >::iterator m = m_past_input.end();
+	for (size_t cnt = 0; cnt < m_look_back && --m != m_past_input.begin();) 
+	  cnt += (*m)->GetSize();
+	while (m_past_input.begin() != m) m_past_input.pop_front();
+      }
+    
+    if (m_look_back)
+      m_past_input.push_back(source);
   }
-  m_past_input.push_back(source);
+  if (cw) *cw = GetCurrentContextWindow();
   return source;
 }
 
-void
+boost::shared_ptr<std::vector<std::string> > 
 IOWrapper::
-set_context_for(InputType& source)
+GetCurrentContextWindow() const
 {
-  boost::shared_ptr<string> context(new string);
-  list<boost::shared_ptr<InputType> >::iterator m = m_past_input.end();
-  // remove obsolete past input from buffer:
-  if (m_past_input.end() != m_past_input.begin()) {
-    for (size_t cnt = 0; cnt < m_look_back && --m != m_past_input.begin();
-         cnt += (*m)->GetSize());
-    while (m_past_input.begin() != m) m_past_input.pop_front();
-  }
-  // cerr << string(80,'=') << endl;
-  if (m_past_input.size()) {
-    m = m_past_input.begin();
-    *context += (*m)->ToString();
-    // cerr << (*m)->ToString() << endl;
-    for (++m; m != m_past_input.end(); ++m) {
-      // cerr << "\n" << (*m)->ToString() << endl;
-      *context += string(" ") + (*m)->ToString();
-    }
-    // cerr << string(80,'-') << endl;
-  }
-  // cerr << source.ToString() << endl;
-  if (m_future_input.size()) {
-    // cerr << string(80,'-') << endl;
-    for (m = m_future_input.begin(); m != m_future_input.end(); ++m) {
-      // if (m != m_future_input.begin()) cerr << "\n";
-      // cerr << (*m)->ToString() << endl;
-      if (context->size()) *context += " ";
-      *context += (*m)->ToString();
-    }
-  }
-  // cerr << string(80,'=') << endl;
-  if (context->size()) source.SetContext(context);
+  boost::shared_ptr<std::vector<string> > context(new std::vector<string>);
+  BOOST_FOREACH(boost::shared_ptr<InputType> const& i, m_past_input)
+    context->push_back(i->ToString());
+  BOOST_FOREACH(boost::shared_ptr<InputType> const& i, m_future_input)
+    context->push_back(i->ToString());
+  return context;
 }
 
 

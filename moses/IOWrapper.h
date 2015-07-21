@@ -128,7 +128,9 @@ public:
   ~IOWrapper();
 
   // Moses::InputType* GetInput(Moses::InputType *inputType);
-  boost::shared_ptr<InputType> ReadInput();
+
+  boost::shared_ptr<InputType> 
+  ReadInput(boost::shared_ptr<std::vector<std::string> >* cw = NULL);
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector.get();
@@ -205,8 +207,8 @@ private:
   boost::shared_ptr<InputType>
   GetBufferedInput();
 
-  void
-  set_context_for(InputType& source);
+  boost::shared_ptr<std::vector<std::string> > 
+  GetCurrentContextWindow() const;
 };
 
 template<class itype>
