@@ -26,6 +26,8 @@ namespace ugdiss
 
   typedef boost::dynamic_bitset<uint64_t> bdBitset;
 
+  size_t len_from_pid(uint64_t pid);
+
   template<typename sid_t, typename off_t, typename len_t>
   void
   parse_pid(uint64_t const pid, sid_t & sid,
