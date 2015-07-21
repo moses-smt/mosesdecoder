@@ -168,14 +168,14 @@ run_as_server()
   myRegistry.addMethod("optimize", optimizer);
 
   xmlrpc_c::serverAbyss myAbyssServer(
-		xmlrpc_c::serverAbyss::constrOpt()
-			.registryP(&myRegistry)
-			.portNumber(port)              // TCP port on which to listen
-			.logFileName(logfile)
-			.allowOrigin("*")
-			.maxConn((unsigned int)num_threads)
-	);
-	
+    xmlrpc_c::serverAbyss::constrOpt()
+    .registryP(&myRegistry)
+    .portNumber(port)              // TCP port on which to listen
+    .logFileName(logfile)
+    .allowOrigin("*")
+    .maxConn((unsigned int)num_threads)
+  );
+
   XVERBOSE(1,"Listening on port " << port << endl);
   if (isSerial) {
     while(1) myAbyssServer.runOnce();
