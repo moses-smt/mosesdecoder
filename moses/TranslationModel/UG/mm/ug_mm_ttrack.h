@@ -54,7 +54,7 @@ namespace ugdiss
     // return size of corpus (in number of sentences)
     size_t size() const;
 
-    // return size of corpus (in number of sentences)
+    // return size of corpus (in number of tokens)
     size_t numTokens() const;
 
     // open an mmTtrack file
