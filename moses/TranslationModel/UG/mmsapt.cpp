@@ -14,6 +14,7 @@
 #include <algorithm>
 #include "util/exception.hh"
 #include <set>
+#include "util/usage.hh"
 
 namespace Moses
 {
@@ -849,8 +850,11 @@ namespace Moses
 
     size_t N = 10 * m_default_sample_size;
     VERBOSE(1,"Priming bias for ranking. [" << HERE << "]" << endl);
+    
+    double t = util::WallTime();
     context->bias = prime_sampling1(*bt->V1, *bt->I1, *input, N);
-    VERBOSE(1,"Done. [" << HERE << "]" << endl);
+    VERBOSE(1,"Priming took " << util::WallTime() - t << " sec. (wall) " 
+            << "[" << HERE << "]" << endl);
     
   }
 
