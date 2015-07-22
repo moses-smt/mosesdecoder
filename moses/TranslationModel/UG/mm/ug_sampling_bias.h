@@ -23,7 +23,8 @@ namespace Moses
       SamplingBias(std::vector<id_type> const* sid2docid);
       int loglevel;
       std::ostream* log;
-      std::map<std::string, float> m_bias_map; //Map to store the biasmap as you get it from the server
+      // Map to store the biasmap as you get it from the server:
+      std::map<std::string, float> m_bias_map; 
       std::map<std::string, float>& getBiasMap();
       virtual float
       operator[](id_type const ID) const = 0;
@@ -40,7 +41,8 @@ namespace Moses
     class
     DocumentBias : public SamplingBias
     {
-      std::vector<float> m_bias;
+      // std::vector<float> m_bias;
+      std::map<id_type, float> m_bias;
     public:
 
       DocumentBias(std::vector<id_type> const& sid2doc,
