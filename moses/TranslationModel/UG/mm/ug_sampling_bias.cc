@@ -31,6 +31,7 @@ namespace Moses
 
       // std::string response = c.content();
       // std::cerr << "SERVER RESPONSE: " << response << std::endl;
+      UTIL_THROW_IF2(c.content().size() == 0, "No response from bias server!");
 
       return c.content();
     }
@@ -52,29 +53,33 @@ namespace Moses
     DocumentBias(std::vector<id_type> const& sid2doc,
 		 std::map<std::string,id_type> const& docname2docid,
 		 std::string const& server_url, std::string const& text,
-		 std::ostream* log)
+		 std::ostream* _log)
       : SamplingBias(&sid2doc)
-      , m_bias(docname2docid.size(), 0)
+	// , m_bias(docname2docid.size(), 0)
     {
-      // #ifdef HAVE_CURLPP
-      // #ifndef NO_MOSES
+      this->log = _log;
+#ifndef NO_MOSES
       Timer timer;
-      if (log) timer.start(NULL);
+      if (_log) timer.start(NULL);
+#endif
       std::string json = query_bias_server(server_url, text);
       // std::cerr << "SERVER RESPONSE " << json << std::endl;
       init_from_json(json, docname2docid, log);
-      if (log) *log << "Bias query took " << timer << " seconds." << std::endl;
+#ifndef NO_MOSES
+      if (_log) *_log << "Bias query took " << timer << " seconds." << std::endl;
+#endif
     }
 
     DocumentBias::
     DocumentBias(std::vector<id_type> const& sid2doc,
 		 std::map<std::string,id_type> const& docname2docid,
 		 std::map<std::string, float> const& context_weights,
-		 std::ostream* log)
+		 std::ostream* _log)
       : SamplingBias(&sid2doc)
-      , m_bias(docname2docid.size(), 0)
+	// , m_bias(docname2docid.size(), 0)
     {
-    init(context_weights, docname2docid);
+      this->log = _log;
+      init(context_weights, docname2docid);
     }
 
     std::map<std::string, float>& SamplingBias::getBiasMap() {
@@ -144,25 +149,41 @@ namespace Moses
     init(std::map<std::string,float> const& biasmap,
 	 std::map<std::string,id_type> const& docname2docid)
     {
-      typedef std::map<std::string, id_type>::value_type doc_record;
+      typedef std::map<std::string, float>::value_type bias_record;
       float total = 0;
-      BOOST_FOREACH(doc_record const& d, docname2docid)
+      BOOST_FOREACH(bias_record const& b, biasmap)
 	{
-	  std::map<std::string, float>::const_iterator m = biasmap.find(d.first);
-	  if (m != biasmap.end()) total += (m_bias[d.second] = m->second);
-	  }
-      if (total) { BOOST_FOREACH(float& f, m_bias) f /= total; }
-      BOOST_FOREACH(doc_record const& d, docname2docid)
-	std::cerr << "BIAS " << d.first << " " << m_bias[d.second] << std::endl;
+	  std::map<std::string, id_type>::const_iterator m = docname2docid.find(b.first);
+	  if (m != docname2docid.end()) 
+	    total += (m_bias[m->second] = b.second);
+	}
+      if (total) 
+	{ 
+	  typedef std::map<id_type, float>::value_type item;
+	  BOOST_FOREACH(item& i, m_bias) i.second /= total; 
+	}
+      
+      if (log)
+	{
+	  BOOST_FOREACH(bias_record const& b, biasmap)
+	    {
+	      std::map<std::string, id_type>::const_iterator m = docname2docid.find(b.first);
+	      if (m != docname2docid.end()) 
+		*log << "BIAS " << b.first << " " << m_bias[m->second] << std::endl;
+	      else
+		*log << "WARNING: bias reported for unknown document " << b.first << std::endl;
+	    }
+	}
     }
 
     float
     DocumentBias::
     operator[](id_type const idx) const
     {
-      UTIL_THROW_IF2(idx >= m_sid2docid->size(), "Out of bounds: " 
-		     << idx << "/" << m_sid2docid->size());
-      return m_bias[(*m_sid2docid)[idx]];
+      // UTIL_THROW_IF2(idx >= m_sid2docid->size(), "Out of bounds: " 
+      // << idx << "/" << m_sid2docid->size());
+      std::map<id_type, float>::const_iterator m = m_bias.find((*m_sid2docid)[idx]);
+      return m != m_bias.end() ? m->second : 0;
     }
 
     size_t
