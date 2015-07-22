@@ -1,11 +1,18 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
-# $Id: multi-bleu.perl,v 1.1.1.1 2013/01/06 16:54:11 braunefe Exp $
+# $Id$
+use warnings;
 use strict;
+
+my $lowercase = 0;
+if ($ARGV[0] eq "-lc") {
+  $lowercase = 1;
+  shift;
+}
 
 my $stem = $ARGV[0];
 if (!defined $stem) {
-  print STDERR "usage: multi-bleu.pl reference < hypothesis\n";
+  print STDERR "usage: multi-bleu.pl [-lc] reference < hypothesis\n";
   print STDERR "Reads the references from reference or reference0, reference1, ...\n";
   exit(1);
 }
@@ -19,6 +26,7 @@ while(-e "$stem$ref") {
     $ref++;
 }
 &add_to_ref($stem,\@REF) if -e $stem;
+die("ERROR: could not find reference file $stem") unless scalar @REF;
 
 sub add_to_ref {
     my ($file,$REF) = @_;
@@ -35,13 +43,15 @@ my(@CORRECT,@TOTAL,$length_translation,$length_reference);
 my $s=0;
 while(<STDIN>) {
     chop;
+    $_ = lc if $lowercase;
     my @WORD = split;
     my %REF_NGRAM = ();
     my $length_translation_this_sentence = scalar(@WORD);
     my ($closest_diff,$closest_length) = (9999,9999);
     foreach my $reference (@{$REF[$s]}) {
 #      print "$s $_ <=> $reference\n";
-	my @WORD = split(/ /,$reference);
+  $reference = lc($reference) if $lowercase;
+	my @WORD = split(' ',$reference);
 	my $length = scalar(@WORD);
         my $diff = abs($length_translation_this_sentence-$length);
 	if ($diff < $closest_diff) {
@@ -63,7 +73,7 @@ while(<STDIN>) {
 		$REF_NGRAM_N{$ngram}++;
 	    }
 	    foreach my $ngram (keys %REF_NGRAM_N) {
-		if (!defined($REF_NGRAM{$ngram}) || 
+		if (!defined($REF_NGRAM{$ngram}) ||
 		    $REF_NGRAM{$ngram} < $REF_NGRAM_N{$ngram}) {
 		    $REF_NGRAM{$ngram} = $REF_NGRAM_N{$ngram};
 #	    print "$i: REF_NGRAM{$ngram} = $REF_NGRAM{$ngram}<BR>\n";

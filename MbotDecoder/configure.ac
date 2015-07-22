@@ -330,6 +330,6 @@ AC_CHECK_HEADER(zlib.h,
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile util/Makefile lm/Makefile mbot-extract/Makefile fix-mbot-extract/Makefile test-mbot-extract/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile util/Makefile lm/Makefile mbot-extract/Makefile)
 
 AC_OUTPUT()
