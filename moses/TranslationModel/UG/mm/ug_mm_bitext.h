@@ -46,7 +46,7 @@ namespace Moses
 	  this->m_docname.push_back(docname);
 	  line >> b;
 #ifndef NO_MOSES
-	  VERBOSE(1, "DOCUMENT MAP " << docname << " " << a << "-" << b+a << std::endl);
+	  VERBOSE(2, "DOCUMENT MAP " << docname << " " << a << "-" << b+a << std::endl);
 #endif
 	  for (b += a; a < b; ++a)
 	    (*this->m_sid2docid)[a] = docid;
