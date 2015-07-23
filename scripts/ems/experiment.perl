@@ -1141,6 +1141,9 @@ sub define_step {
   elsif ($DO_STEP[$i] =~ /^LM:(.+):prepare-bilingual-lm$/) {
 	    &define_lm_prepare_bilingual_lm($i,$1);
   }
+  elsif ($DO_STEP[$i] =~ /^LM:(.+):train-nplm$/) {
+      &define_lm_train_nplm($i,$1);
+  }
         elsif ($DO_STEP[$i] eq 'TRAINING:prepare-data') {
             &define_training_prepare_data($i);
         }
@@ -1826,6 +1829,32 @@ sub define_lm_prepare_bilingual_lm {
     my $bilingual_settings = backoff_and_get("LM:$set:bilingual-lm-settings");
     $cmd .= " $bilingual_settings" if defined($bilingual_settings);
 
+
+    &create_step($step_id,$cmd);
+}
+
+sub define_lm_train_nplm {
+    my ($step_id,$set) = @_;
+	  my ($working_dir, $corpus)		= &get_output_and_input($step_id);
+    my $scripts = &check_backoff_and_get("LM:moses-script-dir");
+    my $cmd = "$scripts/training/train-neurallm.py --mmap --working-dir $working_dir --corpus $corpus";
+    my $nplm_dir = &check_backoff_and_get("LM:$set:nplm-dir");
+    $cmd .= " --nplm-home $nplm_dir";
+
+    my $epochs = &backoff_and_get("LM:$set:epochs");
+    $epochs = 2 unless defined($epochs);
+    $cmd .= " --epochs $epochs";
+
+    my $nplm_settings = backoff_and_get("LM:$set:nplm-settings");
+    $cmd .= " $nplm_settings" if defined($nplm_settings);
+
+    my $order = &backoff_and_get("LM:$set:order");
+    $order = 5 unless defined($order);
+    $cmd .= " --order $order";
+
+    # Create the ini file
+    $cmd .= "\n";
+    $cmd .= "$scripts/training/create_nplm_ini.py -w $working_dir -e $epochs -x $set -n $order";
 
     &create_step($step_id,$cmd);
 }
@@ -2669,6 +2698,8 @@ sub define_training_create_config {
             if (&get("LM:$set:config-feature-line") && &get("LM:$set:config-weight-line")) {
                 $feature_lines .= &get("LM:$set:config-feature-line") . ";";
                 $weight_lines .= &get("LM:$set:config-weight-line") . ";";
+            } elsif (&get("LM:$set:nplm")) {
+               push(@additional_ini_files, "$lm/nplm.ini"); 
             } elsif (&get("LM:$set:bilingual-lm")) {
                push(@additional_ini_files, "$lm/blm.ini"); 
             } else {
@@ -2870,7 +2901,8 @@ sub get_interpolated_lm_sets {
   my $count=0;
   my $icount=0;
   foreach my $set (@LM_SETS) {
-    next if (&get("LM:$set:exclude-from-interpolation")) or (&get("LM:$set:bilingual-lm"));
+    next if (&get("LM:$set:exclude-from-interpolation")) or (&get("LM:$set:bilingual-lm")) 
+      or (&get("LM:$set:nplm"));
     my $order = &check_backoff_and_get("LM:$set:order");
 
     my $factor = 0;

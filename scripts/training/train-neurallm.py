@@ -122,10 +122,11 @@ def main(options):
 
     if options.output_dir is None:
         options.output_dir = options.working_dir
-    else:
-        # Create output dir if necessary
-        if not os.path.exists(options.output_dir):
-            os.makedirs(options.output_dir)
+    # Create dirs if necessary
+    if not os.path.exists(options.working_dir):
+        os.makedirs(options.working_dir)
+    if not os.path.exists(options.output_dir):
+        os.makedirs(options.output_dir)
 
     numberized_file = os.path.basename(options.corpus_stem) + '.numberized'
     train_file = numberized_file

@@ -182,6 +182,12 @@ train-bilingual-lm
 	ignore-unless: bilingual-lm
 	rerun-on-change: numberized_ngrams
 	default-name: lm/blm
+train-nplm
+  in: stripped-corpus
+  out: binlm
+  ignore-unless: nplm
+  rerun-on-change: stripped-corpus
+  default-name: lm/nplm
 get-corpus
 	in: get-corpus-script
 	out: raw-corpus
@@ -279,7 +285,7 @@ train
 	in: stripped-corpus
 	out: lm
 	default-name: lm/lm
-	ignore-if: rlm-training custom-training bilingual-lm
+	ignore-if: rlm-training custom-training bilingual-lm nplm
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
