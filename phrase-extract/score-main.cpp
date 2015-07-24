@@ -20,6 +20,7 @@
 #include <sstream>
 #include <assert.h>
 #include <cstring>
+#include <list>
 #include <map>
 #include <set>
 #include <vector>
@@ -70,6 +71,7 @@ bool nonTermContextTarget = false;
 
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
+float minCount = 0;
 float minCountHierarchical = 0;
 bool phraseOrientationPriorsFlag = false;
 
@@ -107,7 +109,7 @@ void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float>
                                    const std::string &fileNameLeftHandSideSourceLabelCounts,
                                    const std::string &fileNameLeftHandSideTargetSourceLabelCounts );
 void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fileName );
-void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
+void processPhrasePairs( std::list< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb );
 void outputPhrasePair(const ExtractionPhrasePair &phrasePair, float, int, std::ostream &phraseTableFile, const ScoreFeatureManager &featureManager, const MaybeLog &maybeLog );
 double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
@@ -131,14 +133,28 @@ int main(int argc, char* argv[])
   ScoreFeatureManager featureManager;
   if (argc < 4) {
     std::cerr <<
-              "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] "
-              "[--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] "
-              "[--NoWordAlignment] [--UnalignedPenalty] "
+              "syntax: score extract lex phrase-table "
+              "[--Inverse] "
+              "[--Hierarchical] "
+              "[--LogProb] "
+              "[--NegLogProb] "
+              "[--NoLex] "
+              "[--GoodTuring] "
+              "[--KneserNey] "
+              "[--NoWordAlignment] "
+              "[--UnalignedPenalty] "
               "[--UnalignedFunctionWordPenalty function-word-file] "
-              "[--MinCountHierarchical count] [--PartsOfSpeech] [--PCFG] "
-              "[--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] "
-              "[--TargetPreferenceLabels] [--UnpairedExtractFormat] "
-              "[--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+              "[--MinCountHierarchical count] "
+              "[--PartsOfSpeech] "
+              "[--PCFG] "
+              "[--TreeFragments] "
+              "[--SourceLabels] "
+              "[--SourceLabelCountsLHS] "
+              "[--TargetPreferenceLabels] "
+              "[--UnpairedExtractFormat] "
+              "[--ConditionOnTargetLHS] "
+              "[--CrossedNonTerm]" 
+              << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }
@@ -235,9 +251,13 @@ int main(int argc, char* argv[])
       logProbFlag = true;
       negLogProb = -1;
       std::cerr << "using negative log-probabilities" << std::endl;
+    } else if (strcmp(argv[i],"--MinCount") == 0) {
+      minCount = Moses::Scan<float>( argv[++i] );
+      std::cerr << "dropping all phrase pairs occurring less than " << minCount << " times" << std::endl;
+      minCount -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--MinCountHierarchical") == 0) {
       minCountHierarchical = Moses::Scan<float>( argv[++i] );
-      std::cerr << "dropping all phrase pairs occurring less than " << minCountHierarchical << " times" << std::endl;
+      std::cerr << "dropping all hierarchical phrase pairs occurring less than " << minCountHierarchical << " times" << std::endl;
       minCountHierarchical -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
       crossedNonTerm = true;
@@ -325,8 +345,8 @@ int main(int argc, char* argv[])
   // loop through all extracted phrase translations
   std::string line, lastLine;
   ExtractionPhrasePair *phrasePair = NULL;
-  std::vector< ExtractionPhrasePair* > phrasePairsWithSameSource;
-  std::vector< ExtractionPhrasePair* > phrasePairsWithSameSourceAndTarget; // required for hierarchical rules only, as non-terminal alignments might make the phrases incompatible
+  std::list< ExtractionPhrasePair* > phrasePairsWithSameSource;
+  std::list< ExtractionPhrasePair* > phrasePairsWithSameSourceAndTarget; // required for hierarchical rules only, as non-terminal alignments might make the phrases incompatible
 
   int tmpSentenceId;
   PHRASE *tmpPhraseSource, *tmpPhraseTarget;
@@ -390,7 +410,7 @@ int main(int argc, char* argv[])
     // once the first of them has been found to have to be set to false
 
     if ( hierarchicalFlag ) {
-      for ( std::vector< ExtractionPhrasePair* >::const_iterator iter = phrasePairsWithSameSourceAndTarget.begin();
+      for ( std::list< ExtractionPhrasePair* >::const_iterator iter = phrasePairsWithSameSourceAndTarget.begin();
             iter != phrasePairsWithSameSourceAndTarget.end(); ++iter ) {
         if ( (*iter)->Matches( tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment,
                                sourceMatch, targetMatch, alignmentMatch ) ) {
@@ -420,7 +440,7 @@ int main(int argc, char* argv[])
       if ( !phrasePairsWithSameSource.empty() &&
            !sourceMatch ) {
         processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
-        for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+        for ( std::list< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
               iter!=phrasePairsWithSameSource.end(); ++iter) {
           delete *iter;
         }
@@ -455,7 +475,7 @@ int main(int argc, char* argv[])
   std::cerr << std::endl;
 
   processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
-  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::list< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     delete *iter;
   }
@@ -656,7 +676,7 @@ void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fi
 }
 
 
-void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
+void processPhrasePairs( std::list< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb )
 {
   if (phrasePairsWithSameSource.size() == 0) {
@@ -668,14 +688,14 @@ void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSa
   //std::cerr << "phrasePairs.size() = " << phrasePairs.size() << std::endl;
 
   // loop through phrase pairs
-  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::list< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     // add to total count
     totalSource += (*iter)->GetCount();
   }
 
   // output the distinct phrase pairs, one at a time
-  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::list< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     // add to total count
     outputPhrasePair( **iter, totalSource, phrasePairsWithSameSource.size(), phraseTableFile, featureManager, maybeLogProb );
@@ -704,15 +724,14 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
       countOfCounts[ countInt ]++;
   }
 
-  // compute PCFG score
-  float pcfgScore = 0;
-  if (pcfgFlag && !inverseFlag) {
-    pcfgScore = phrasePair.GetPcfgScore() / count;
-  }
-
   // output phrases
   const PHRASE *phraseSource = phrasePair.GetSource();
   const PHRASE *phraseTarget = phrasePair.GetTarget();
+
+  // do not output if count below threshold
+  if (count < minCount) {
+    return;
+  }
 
   // do not output if hierarchical and count below threshold
   if (hierarchicalFlag && count < minCountHierarchical) {
@@ -720,6 +739,12 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
       if (isNonTerminal(vcbS.getWord( phraseSource->at(j) )))
         return;
     }
+  }
+
+  // compute PCFG score
+  float pcfgScore = 0;
+  if (pcfgFlag && !inverseFlag) {
+    pcfgScore = phrasePair.GetPcfgScore() / count;
   }
 
   // source phrase (unless inverse)
