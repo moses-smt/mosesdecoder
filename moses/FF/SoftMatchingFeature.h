@@ -55,6 +55,7 @@ public:
 private:
   mutable std::vector<std::vector<Word> > m_softMatches; // map RHS of new rule to list of possible LHS of old rule (subtree)
   mutable std::vector<std::vector<std::string> > m_nameCache;
+  bool m_scoreIdentical;
 
 #ifdef WITH_THREADS
   //reader-writer lock

@@ -12,7 +12,7 @@ namespace Moses
 {
 
 RulePairUnlexicalizedSource::RulePairUnlexicalizedSource(const std::string &line)
-  : StatelessFeatureFunction(0, line)
+  : StatelessFeatureFunction(1, line)
   , m_glueRules(false)
   , m_nonGlueRules(true)
   , m_glueTargetLHSStr("Q")
@@ -81,6 +81,9 @@ void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
   }
 
   scoreBreakdown.PlusEquals(this, namestr.str(), 1);
+  if ( targetPhraseLHS != m_glueTargetLHS ) {
+    scoreBreakdown.PlusEquals(this, 1);
+  }
 }
 
 }
