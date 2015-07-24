@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <assert.h>
+#include <cstdlib>
 #include <cstring>
 #include <list>
 #include <map>
@@ -252,11 +253,11 @@ int main(int argc, char* argv[])
       negLogProb = -1;
       std::cerr << "using negative log-probabilities" << std::endl;
     } else if (strcmp(argv[i],"--MinCount") == 0) {
-      minCount = Moses::Scan<float>( argv[++i] );
+      minCount = std::atof( argv[++i] );
       std::cerr << "dropping all phrase pairs occurring less than " << minCount << " times" << std::endl;
       minCount -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--MinCountHierarchical") == 0) {
-      minCountHierarchical = Moses::Scan<float>( argv[++i] );
+      minCountHierarchical = std::atof( argv[++i] );
       std::cerr << "dropping all hierarchical phrase pairs occurring less than " << minCountHierarchical << " times" << std::endl;
       minCountHierarchical -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
@@ -570,7 +571,7 @@ void processLine( std::string line,
     } else if (item + (includeSentenceIdFlag?-1:0) == 4) { // count
       sscanf(token[j].c_str(), "%f", &count);
     } else if (item + (includeSentenceIdFlag?-1:0) == 5) { // target syntax PCFG score
-      float pcfgScore = Moses::Scan<float>( token[j] );
+      float pcfgScore = std::atof( token[j].c_str() );
       pcfgSum = pcfgScore * count;
     }
   }
@@ -1196,7 +1197,7 @@ void LexicalTable::load( const std::string &fileName )
       continue;
     }
 
-    double prob = Moses::Scan<double>( token[2] );
+    double prob = std::atof( token[2].c_str() );
     WORD_ID wordT = vcbT.storeIfNew( token[0] );
     WORD_ID wordS = vcbS.storeIfNew( token[1] );
     ltable[ wordS ][ wordT ] = prob;

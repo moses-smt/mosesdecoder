@@ -17,6 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <cstdlib>
 #include <vector>
 #include <string>
 
@@ -123,7 +124,7 @@ int main(int argc, char* argv[])
       std::cerr << "include "<< (sparseCountBinFeatureFlag ? "sparse " : "") << "count bin feature:";
       int prev = 0;
       while(i+1<argc && argv[i+1][0]>='0' && argv[i+1][0]<='9') {
-        int binCount = Moses::Scan<int>(argv[++i]);
+        int binCount = std::atoi( argv[++i] );
         countBin.push_back( binCount );
         if (prev+1 == binCount) {
           std::cerr << " " << binCount;
@@ -164,8 +165,8 @@ int main(int argc, char* argv[])
         }
         pos = single_setting.find(":");
         UTIL_THROW_IF2(pos == std::string::npos, "faulty MinScore setting '" << single_setting << "' in '" << argv[i] << "'");
-        unsigned int field = Moses::Scan<unsigned int>( single_setting.substr(0,pos) );
-        float threshold = Moses::Scan<float>( single_setting.substr(pos+1) );
+        unsigned int field = std::atoll( single_setting.substr(0,pos).c_str() );
+        float threshold = std::atof( single_setting.substr(pos+1).c_str() );
         if (field == 0) {
           minScore0 = threshold;
           std::cerr << "setting minScore0 to " << threshold << std::endl;
@@ -195,9 +196,9 @@ void loadCountOfCounts( const std::string& fileNameCountOfCounts )
   std::string line;
   while (getline(fileCountOfCounts, line)) {
     if (totalCount < 0)
-      totalCount = Moses::Scan<float>(line); // total number of distinct phrase pairs
+      totalCount = std::atof( line.c_str() ); // total number of distinct phrase pairs
     else
-      countOfCounts.push_back( Moses::Scan<float>(line) );
+      countOfCounts.push_back( std::atof( line.c_str() ) );
   }
   fileCountOfCounts.Close();
 
@@ -286,13 +287,13 @@ void processFiles( const std::string& fileNameDirect,
     Moses::Tokenize( directCounts, itemDirect[4] );
     std::vector<std::string> indirectCounts;
     Moses::Tokenize( indirectCounts, itemIndirect[4] );
-    float countF = Moses::Scan<float>(directCounts[0]);
-    float countE = Moses::Scan<float>(indirectCounts[0]);
-    float countEF = Moses::Scan<float>(indirectCounts[1]);
+    float countF  = std::atof( directCounts[0].c_str() );
+    float countE  = std::atof( indirectCounts[0].c_str() );
+    float countEF = std::atof( indirectCounts[1].c_str() );
     float n1_F, n1_E;
     if (kneserNeyFlag) {
-      n1_F = Moses::Scan<float>(directCounts[2]);
-      n1_E = Moses::Scan<float>(indirectCounts[2]);
+      n1_F = std::atof( directCounts[2].c_str() );
+      n1_E = std::atof( indirectCounts[2].c_str() );
     }
 
     // Good Turing discounting
