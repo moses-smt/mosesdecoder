@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
               "[--TargetPreferenceLabels] "
               "[--UnpairedExtractFormat] "
               "[--ConditionOnTargetLHS] "
-              "[--CrossedNonTerm]" 
+              "[--CrossedNonTerm]"
               << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);

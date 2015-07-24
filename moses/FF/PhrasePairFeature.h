@@ -31,8 +31,7 @@ class PhrasePairFeature: public StatelessFeatureFunction
   CharHash m_punctuationHash;
   std::string m_filePathSource;
 
-  inline std::string ReplaceTilde(const StringPiece &str) const
-  {
+  inline std::string ReplaceTilde(const StringPiece &str) const {
     std::string out = str.as_string();
     size_t pos = out.find('~');
     while ( pos != std::string::npos ) {
