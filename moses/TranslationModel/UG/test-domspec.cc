@@ -5,6 +5,8 @@
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+#include <boost/math/distributions/binomial.hpp>
+
 #include "mm/ug_bitext.h"
 #include "mm/tpt_typedefs.h"
 #include "mm/ug_prime_sampling1.h"
@@ -49,16 +51,49 @@ show(Bitext<Token> const& B, iter const& m, pstats& stats)
   VectorIndexSorter<PhrasePair<Token>, sorter_t> viso(pplist, sorter);
   sptr<vector<size_t> > ranked = viso.GetOrder();
   size_t ctr=0;
+  size_t cumul=0;
   BOOST_FOREACH(size_t const i, *ranked)
     {
-      PhrasePair<Token> const& pp = pplist[i];
-      cout << boost::format("   %6d | ") % pp.joint  
-           << toString(*B.V2, pp.start2, pp.len2) << endl; 
       typedef map<uint32_t, uint32_t>::value_type entry_t;
+
+      PhrasePair<Token> const& pp = pplist[i];
+      if (pp.joint < pp.good1 * .01) break;
+      size_t remarkable = 0;
+      float p = float(pp.joint)/pp.good1;
       BOOST_FOREACH(entry_t const& e, pp.indoc)
         {
-          cout << float(pp.joint)/pp.raw1 * stats.indoc[e.first]
-               << "/" << e.second << "/" << stats.indoc[e.first] << endl;
+          boost::math::binomial binomi(stats.indoc[e.first], p);
+          float x = boost::math::cdf(binomi, e.second);
+          float y = boost::math::cdf(boost::math::complement(binomi, e.second-1));
+          if ((x > .01 && y > .01) || e.second < 5) continue;
+          remarkable += e.second;
+          // cout <<  p * stats.indoc[e.first]
+          //      << "/" << e.second << "/" << stats.indoc[e.first] 
+          //      << " " << boost::math::cdf(binomi, e.second)
+          //      << " " << boost::math::cdf(boost::math::complement(binomi, e.second-1))
+          //      << " " << toString(*B.V2, pp.start2, pp.len2) 
+          //      << endl;
+        }
+      if (remarkable*20 > pp.good1)
+        {
+          cout << boost::format("   %6d | ") % pp.joint  
+               << toString(*B.V2, pp.start2, pp.len2) 
+               << boost::format(" (%d: %.2f)") % cumul % (float(cumul)/pp.good1)
+               << endl; 
+          BOOST_FOREACH(entry_t const& e, pp.indoc)
+            {
+              boost::math::binomial binomi(stats.indoc[e.first], p);
+              float x = boost::math::cdf(binomi, e.second);
+              float y = boost::math::cdf(boost::math::complement(binomi, e.second-1));
+              if ((x > .001 && y > .001) || e.second < 20) continue;
+              cout <<  p * stats.indoc[e.first]
+                   << "/" << e.second << "/" << stats.indoc[e.first] 
+                   << " " << boost::math::cdf(binomi, e.second)
+                   << " " << boost::math::cdf(boost::math::complement
+                                              (binomi, e.second-1))
+                   << " " << toString(*B.V2, pp.start2, pp.len2) 
+                   << endl;
+            }
         }
     }
 }
@@ -67,15 +102,23 @@ show(Bitext<Token> const& B, iter const& m, pstats& stats)
 void 
 process(Bitext<Token> const* bitext, TSA<Token>::tree_iterator& m)
 {
-  if (m.approxOccurrenceCount() <= 5000) return;
-  boost::shared_ptr<SamplingBias> nil;
-  Moses::bitext::sampling_method random = Moses::bitext::random_sampling;
-  Moses::bitext::BitextSampler<Token> s(bitext, m, nil, 10000, random);
-  s();
-  show(*bitext, m, *s.stats());
-  if (m.down())
+  static boost::shared_ptr<SamplingBias> nil(new SamplingBiasAlways(bitext->sid2did()));
+  static Moses::bitext::sampling_method random = Moses::bitext::random_sampling;
+  // if (m.down())
+  if (m.extend((*bitext->V1)["job"]))
     {
-      do { process(bitext, m); } while (m.over());
+      do 
+        { 
+          if (m.ca() >= 5000) 
+            {
+              // cout << m.str(bitext->V1.get()) << " [" << m.ca() << "]" << endl;
+              Moses::bitext::BitextSampler<Token> s(bitext, m, nil, 10000, random);
+              s();
+              show(*bitext, m, *s.stats());
+              process(bitext, m); 
+            } 
+        } 
+      while (m.over());
       m.up();
     }
 }
@@ -83,10 +126,11 @@ process(Bitext<Token> const* bitext, TSA<Token>::tree_iterator& m)
 int main(int argc, char* argv[])
 {
   interpret_args(argc, argv);
-  mmbitext B; 
-  B.open(bname, L1, L2);
-  TSA<Token>::tree_iterator m(B.I1.get());
-  process(&B, m);
+  iptr<mmbitext> B(new mmbitext); 
+  B->open(bname, L1, L2);
+  TSA<Token>::tree_iterator m(B->I1.get());
+  // m.extend((*B.V1)["job"]);
+  process(B.get(), m);
 }
 
 void
