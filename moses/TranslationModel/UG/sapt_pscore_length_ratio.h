@@ -1,4 +1,4 @@
-// -*- mode: c++; intent-tabs-mode: nil; tab-width: 2 -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // Phrase scorer that considers the length ratio of the two phrases.
 // Written by Ulrich Germann.
 // 
