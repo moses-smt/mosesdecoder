@@ -91,5 +91,17 @@ namespace Moses
 
     };
 
+    class
+    SamplingBiasAlways : public SamplingBias
+    {
+    public:
+      SamplingBiasAlways(std::vector<id_type> const* sid2docid)
+	: SamplingBias(sid2docid) {} 
+      
+      float operator[](id_type const idx)       { return 1; }
+      float operator[](id_type const idx) const { return 1; }
+      size_t size() const { return 0; }
+    };
+
   }
 }
