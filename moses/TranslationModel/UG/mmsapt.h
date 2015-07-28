@@ -2,6 +2,7 @@
 // Sampling phrase table implementation based on memory-mapped suffix arrays.
 // Design and code by Ulrich Germann.
 #pragma once
+#define PROVIDES_RANKED_SAMPLING 0
 
 #include <boost/thread.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -20,7 +21,6 @@
 #include "moses/TranslationModel/UG/mm/ug_typedefs.h"
 #include "moses/TranslationModel/UG/mm/tpt_pickler.h"
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
-#include "moses/TranslationModel/UG/mm/ug_prime_sampling1.h"
 #include "moses/TranslationModel/UG/mm/ug_bitext_sampler.h"
 #include "moses/TranslationModel/UG/mm/ug_lexical_phrase_scorer2.h"
 
@@ -148,9 +148,10 @@ namespace Moses
     void setup_local_feature_functions();
     void set_bias_via_server(ttasksptr const& ttask);
 
+#if PROVIDES_RANKED_SAMPLING
     void 
     set_bias_for_ranking(ttasksptr const& ttask, iptr<Bitext<Token> const> bt);
-
+#endif
   private:
 
     void read_config_file(std::string fname, std::map<std::string,std::string>& param);

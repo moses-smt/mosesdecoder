@@ -69,7 +69,7 @@ namespace Moses
     , m_bias_log(NULL)
     , m_bias_loglevel(0)
     , m_lr_func(NULL)
-    , m_sampling_method(ranked_sampling)
+    , m_sampling_method(random_sampling)
     , bias_key(((char*)this)+3)
     , cache_key(((char*)this)+2)
     , context_key(((char*)this)+1)
@@ -236,9 +236,7 @@ namespace Moses
 
     if ((m = param.find("method")) != param.end())
       {
-        if (m->second == "rank" || m->second == "ranked")
-          m_sampling_method = ranked_sampling;
-        else if (m->second == "random")
+        if (m->second == "random")
           m_sampling_method = random_sampling;
         else if (m->second == "full")
           m_sampling_method = full_coverage;
@@ -823,65 +821,13 @@ namespace Moses
   
   void
   Mmsapt::
-  set_bias_for_ranking(ttasksptr const& ttask, iptr<Bitext<Token> const> bt)
-  { // thinking ahead: shard-specific set-up, for multi-shard Mmsapts
-    
-    sptr<ContextScope> const& scope = ttask->GetScope();
-    if (!scope) return;
-
-    sptr<vector<string> const> input = ttask->GetContextWindow();
-    if (!input) return;
-
-    sptr<ContextForQuery> context = scope->get<ContextForQuery>(bt.get(), true);
-    boost::unique_lock<boost::shared_mutex> lock(context->lock);
-    if (context->bias) return;
-
-    if (!context->cache1) context->cache1.reset(new pstats::cache_t);
-    if (!context->cache2) context->cache2.reset(new pstats::cache_t);
-
-    // sptr<IOWrapper const> iowrapper = ttask->GetIOWrapper();
-    // vector<string> input;
-    // input.reserve(iowrapper->GetPastInput().size() + 
-    // 		  iowrapper->GetFutureInput().size());
-    // BOOST_FOREACH(sptr<InputType> const& s, iowrapper->GetPastInput())
-    //   input.push_back(s->ToString());
-    // BOOST_FOREACH(sptr<InputType> const& s, iowrapper->GetFutureInput())
-    //   input.push_back(s->ToString());
-
-    size_t N = 10 * m_default_sample_size;
-    VERBOSE(1,"Priming bias for ranking. [" << HERE << "]" << endl);
-    
-    double t = util::WallTime();
-    context->bias = prime_sampling1(*bt->V1, *bt->I1, *input, N);
-    VERBOSE(1,"Priming took " << util::WallTime() - t << " sec. (wall) " 
-            << "[" << HERE << "]" << endl);
-    
-  }
-
-  // void
-  // Mmsapt::
-  // set_bias_via_ranking(ttasksptr const& ttask)
-  // {
-  //   sptr<ContextScope> const& scope = ttask->GetScope();
-  //   if (!scope) return;
-  //   sptr<SentenceBias> bias = scope->get<SentenceBias>(bias_key);
-  //   // For the time being, let's assume that ranking is always primed 
-  //   // on the entire document and leave local priming for another day.
-  //   if (bias) return;
-  //   // 
-  // }
-
-  void
-  Mmsapt::
   InitializeForInput(ttasksptr const& ttask)
   {
     sptr<ContextScope> const& scope = ttask->GetScope();
     sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
 
     // set sampling bias, depending on sampling method specified
-    if (m_sampling_method == ranked_sampling)
-      set_bias_for_ranking(ttask, this->btfix);
-    else if (m_sampling_method == random_sampling)
+    if (m_sampling_method == random_sampling)
       set_bias_via_server(ttask);
     else UTIL_THROW2("Unknown sampling method: " << m_sampling_method);
 

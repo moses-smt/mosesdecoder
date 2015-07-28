@@ -243,8 +243,7 @@ perform_ranked_sampling()
   return m_ctr;
 }
   
-// Ranked sampling sorts all samples by score and then considers the top-ranked 
-// candidates for phrase extraction.
+// Uniform sampling 
 template<typename Token>
 size_t
 BitextSampler<Token>::
