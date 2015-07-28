@@ -118,7 +118,7 @@ post-split-factorize
         out: post-split-factorized-stem
         rerun-on-change: TRAINING:input-factors TRAINING:output-factors
         default-name: corpus/split-factored
-        pass-unless: AND TRAINING:input-factors factorize-after-split
+        pass-unless: factorize-after-split
         parallelizable: yes
         error: can't open
         error: incompatible number of words in factor
@@ -257,7 +257,8 @@ post-split-factorize
         in: split-corpus
         out: split-factorized-corpus
         default-name: lm/split-factored
-        pass-unless: AND factors factorize-after-split
+        rerun-on-change: TRAINING:input-factors TRAINING:output-factors
+        pass-unless: factorize-after-split
         ignore-if: concatenate-files concatenate-files-split
         parallelizable: yes
         error: can't open
@@ -390,7 +391,8 @@ post-split-factorize-tuning
         in: split-tuning
         out: post-split-factorized-tuning
         default-name: lm/interpolate-tuning.split-factored
-        pass-unless: AND TRAINING:output-factors factorize-after-split
+        rerun-on-change: TRAINING:input-factors TRAINING:output-factors
+        pass-unless: factorize-after-split
         parallelizable: yes
         error: can't open
         error: incompatible number of words in factor
