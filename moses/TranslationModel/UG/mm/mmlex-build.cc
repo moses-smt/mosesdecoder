@@ -221,14 +221,14 @@ processSentence(id_type sid)
   Token const* e1 = T1.sntEnd(sid);
   Token const* s2 = T2.sntStart(sid);
   Token const* e2 = T2.sntEnd(sid);
-  vector<ushort> cnt1(V1.ksize(),0);
-  vector<ushort> cnt2(V2.ksize(),0);
-  for (Token const* x = s1; x < e1; ++x)
-    ++cnt1.at(x->id());
-  for (Token const* x = s2; x < e2; ++x)
-    ++cnt2.at(x->id());
+  // vector<ushort> cnt1(V1.ksize(),0);
+  // vector<ushort> cnt2(V2.ksize(),0);
+  // for (Token const* x = s1; x < e1; ++x)
+  // ++cnt1.at(x->id());
+  // for (Token const* x = s2; x < e2; ++x)
+  // ++cnt2.at(x->id());
 
-  boost::unordered_set<wpair> seen;
+  // boost::unordered_set<wpair> seen;
   bitvector check1(T1.sntLen(sid)); check1.set();
   bitvector check2(T2.sntLen(sid)); check2.set();
 
@@ -236,7 +236,8 @@ processSentence(id_type sid)
   char const*   p = Tx.sntStart(sid);
   char const*   q = Tx.sntEnd(sid);
   ushort r,c;
-  // cout << sid << " " << q-p << endl;
+  if (verbose && sid % 1000000 == 0)
+    cerr << sid/1000000 << " M sentences processed" << endl;
   while (p < q)
     {
       p = binread(p,r);
@@ -257,8 +258,8 @@ processSentence(id_type sid)
       wpair k(id1,id2);
       Count& cnt = CNT[k];
       cnt.a++;
-      if (seen.insert(k).second)
-	cnt.c += cnt1[id1] * cnt2[id2];
+      // if (seen.insert(k).second)
+      // cnt.c += cnt1[id1] * cnt2[id2];
     }
   // count unaliged words
   for (size_t i = check1.find_first();
@@ -292,11 +293,11 @@ main(int argc, char* argv[])
   // cerr << "done counting" << endl;
   ofstream aln_out,coc_out;
   if (oname.size()) aln_out.open(oname.c_str());
-  if (cooc.size())  coc_out.open(cooc.c_str());
+  // if (cooc.size())  coc_out.open(cooc.c_str());
   writeTable(oname.size() ? &aln_out : NULL,
 	     cooc.size()  ? &coc_out : NULL);
   if (oname.size()) aln_out.close();
-  if (cooc.size())  coc_out.close();
+  // if (cooc.size())  coc_out.close();
 }
 
 void
@@ -312,8 +313,8 @@ interpret_args(int ac, char* av[])
     ("help,h",    "print this message")
     ("cfg,f", po::value<string>(&cfgFile),"config file")
     ("oname,o", po::value<string>(&oname),"output file name")
-    ("cooc,c", po::value<string>(&cooc),
-     "file name for raw co-occurrence counts")
+    // ("cooc,c", po::value<string>(&cooc),
+    // "file name for raw co-occurrence counts")
     ("verbose,v", po::value<int>(&verbose)->default_value(0)->implicit_value(1),
      "verbosity level")
     ("threads,t", po::value<size_t>(&num_threads)->default_value(4),
@@ -339,7 +340,8 @@ interpret_args(int ac, char* av[])
       cout << o << endl;
       exit(0);
     }
-  num_threads = min(num_threads,24UL);
+  size_t num_cores = boost::thread::hardware_concurrency();
+  num_threads = min(num_threads,num_cores);
 }
 
 
