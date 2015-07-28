@@ -114,6 +114,8 @@ protected:
   // bool m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
+  std::string m_unknownWordPrefix;
+  std::string m_unknownWordSuffix;
   bool m_wordDeletionEnabled;
 
   bool m_disableDiscarding;
@@ -325,6 +327,12 @@ public:
   }
   inline bool GetMarkUnknown() const {
     return m_markUnknown;
+  }
+  inline std::string GetUnknownWordPrefix() const {
+    return m_unknownWordPrefix;
+  }
+  inline std::string GetUnknownWordSuffix() const {
+    return m_unknownWordSuffix;
   }
   inline bool GetDisableDiscarding() const {
     return m_disableDiscarding;

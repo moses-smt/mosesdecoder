@@ -21,6 +21,7 @@
 #include "ug_ttrack_base.h"
 #include "num_read_write.h"
 #include "ug_load_primer.h"
+#include "ug_tsa_base.h"
 
 namespace ugdiss
 {
@@ -193,7 +194,7 @@ namespace ugdiss
   findSid(TKN const* t) const
   {
     id_type tokenPos = t-data;
-    id_type const* p = upper_bound(index,index+this->numSent,tokenPos);
+    id_type const* p = std::upper_bound(index,index+this->numSent,tokenPos);
     assert(p>index);
     return p-index-1;
   }
@@ -203,7 +204,7 @@ namespace ugdiss
   mmTtrack<TKN>::
   findSid(id_type tokenPos) const
   {
-    id_type const* p = upper_bound(index,index+this->numSent,tokenPos);
+    id_type const* p = std::upper_bound(index,index+this->numSent,tokenPos);
     assert(p>index);
     return p-index-1;
   }

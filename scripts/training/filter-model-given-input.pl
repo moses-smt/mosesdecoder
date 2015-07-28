@@ -37,6 +37,12 @@ my $MAX_LENGTH = 10;
 # utilities
 my $ZCAT = "gzip -cd";
 
+# sometimes you just have to do the right thing without asking
+my $sort_option = "";
+if (`echo 'youcandoit' | sort --compress-program gzip 2>/dev/null` =~ /youcandoit/) {
+  $sort_option = "--compress-program gzip ";
+}
+
 # get optional parameters
 my $opt_hierarchical = 0;
 my $binarizer = undef;
@@ -410,13 +416,13 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         # ... phrase translation model
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
-          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads && rm $mid_file.sorted";
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort $sort_option -T $tempdir | gzip - > $mid_file.sorted.gz && $binarizer -in $mid_file.sorted.gz -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads && rm $mid_file.sorted.gz";
           safesystem($cmd) or die "Can't binarize";
         } elsif ($binarizer =~ /CreateOnDiskPt/) {
       	  my $cmd = "$binarizer $mid_file $new_file.bin";
           safesystem($cmd) or die "Can't binarize";
         } else {
-          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort $sort_option -T $tempdir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
           safesystem($cmd) or die "Can't binarize";
         }
       }
@@ -431,7 +437,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
-          $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $lexbin -in $mid_file.sorted -out $new_file -threads $threads && rm $mid_file.sorted";
+          $cmd = "$catcmd $mid_file | LC_ALL=C sort $sort_option -T $tempdir | gzip - > $mid_file.sorted.gz && $lexbin -in $mid_file.sorted.gz -out $new_file -threads $threads && rm $mid_file.sorted.gz";
         } else {
           $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
           $cmd = "$lexbin -in $mid_file -out $new_file";

@@ -5,30 +5,28 @@
 #include <map>
 #include <vector>
 #include "FFState.h"
+#include "moses/Word.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include "util/generator.hh"
 #include "util/exception.hh"
+#include "util/string_piece.hh"
 
 namespace Moses
 {
 
 class InternalTree;
 typedef boost::shared_ptr<InternalTree> TreePointer;
-typedef int NTLabel;
 
 class InternalTree
 {
-  std::string m_value;
-  NTLabel m_value_nt;
+  Word m_value;
   std::vector<TreePointer> m_children;
-  bool m_isTerminal;
 public:
   InternalTree(const std::string & line, size_t start, size_t len, const bool terminal);
-  InternalTree(const std::string & line, const bool terminal = false);
+  InternalTree(const std::string & line, const bool nonterminal = true);
   InternalTree(const InternalTree & tree):
-    m_value(tree.m_value),
-    m_isTerminal(tree.m_isTerminal) {
+    m_value(tree.m_value) {
     const std::vector<TreePointer> & children = tree.m_children;
     for (std::vector<TreePointer>::const_iterator it = children.begin(); it != children.end(); it++) {
       m_children.push_back(boost::make_shared<InternalTree>(**it));
@@ -40,18 +38,8 @@ public:
   void Combine(const std::vector<TreePointer> &previous);
   void Unbinarize();
   void GetUnbinarizedChildren(std::vector<TreePointer> &children) const;
-  const std::string & GetLabel() const {
+  const Word & GetLabel() const {
     return m_value;
-  }
-
-  // optionally identify label by int instead of string;
-  // allows abstraction if multiple nonterminal strings should map to same label.
-  const NTLabel & GetNTLabel() const {
-    return m_value_nt;
-  }
-
-  void SetNTLabel(NTLabel value) {
-    m_value_nt = value;
   }
 
   size_t GetLength() const {
@@ -62,38 +50,22 @@ public:
   }
 
   bool IsTerminal() const {
-    return m_isTerminal;
+    return !m_value.IsNonTerminal();
   }
 
   bool IsLeafNT() const {
-    return (!m_isTerminal && m_children.size() == 0);
+    return (m_value.IsNonTerminal() && m_children.size() == 0);
   }
 
   // different methods to search a tree (either just direct children (FlatSearch) or all children (RecursiveSearch)) for constituents.
   // can be used for formulating syntax constraints.
 
   // if found, 'it' is iterator to first tree node that matches search string
-  bool FlatSearch(const std::string & label, std::vector<TreePointer>::const_iterator & it) const;
-  bool RecursiveSearch(const std::string & label, std::vector<TreePointer>::const_iterator & it) const;
+  bool FlatSearch(const Word & label, std::vector<TreePointer>::const_iterator & it) const;
+  bool RecursiveSearch(const Word & label, std::vector<TreePointer>::const_iterator & it) const;
 
   // if found, 'it' is iterator to first tree node that matches search string, and 'parent' to its parent node
-  bool RecursiveSearch(const std::string & label, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const;
-
-  // use NTLabel for search to reduce number of string comparisons / deal with synonymous labels
-  // if found, 'it' is iterator to first tree node that matches search string
-  bool FlatSearch(const NTLabel & label, std::vector<TreePointer>::const_iterator & it) const;
-  bool RecursiveSearch(const NTLabel & label, std::vector<TreePointer>::const_iterator & it) const;
-
-  // if found, 'it' is iterator to first tree node that matches search string, and 'parent' to its parent node
-  bool RecursiveSearch(const NTLabel & label, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const;
-
-  // pass vector of possible labels to search
-  // if found, 'it' is iterator to first tree node that matches search string
-  bool FlatSearch(const std::vector<NTLabel> & labels, std::vector<TreePointer>::const_iterator & it) const;
-  bool RecursiveSearch(const std::vector<NTLabel> & labels, std::vector<TreePointer>::const_iterator & it) const;
-
-  // if found, 'it' is iterator to first tree node that matches search string, and 'parent' to its parent node
-  bool RecursiveSearch(const std::vector<NTLabel> & labels, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const;
+  bool RecursiveSearch(const Word & label, std::vector<TreePointer>::const_iterator & it, InternalTree const* &parent) const;
 
   // Python-like generator that yields next nonterminal leaf on every call
   $generator(leafNT) {

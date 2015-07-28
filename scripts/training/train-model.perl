@@ -1604,6 +1604,7 @@ sub extract_phrase {
     $cmd .= " --InstanceWeights $_INSTANCE_WEIGHTS_FILE " if defined $_INSTANCE_WEIGHTS_FILE;
     $cmd .= " --BaselineExtract $_BASELINE_EXTRACT" if defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT =~ /extract-parallel.perl/;
     $cmd .= " --FlexibilityScore" if $_FLEXIBILITY_SCORE;
+    $cmd .= " --NoTTable" if $_MMSAPT;
 
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
@@ -1611,12 +1612,16 @@ sub extract_phrase {
 
     if (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) {
       print STDERR "merging with baseline extract from $_BASELINE_EXTRACT\n";
-      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | $GZIP_EXEC > $extract_file.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | $GZIP_EXEC > $extract_file.inv.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | $GZIP_EXEC > $extract_file.gz")
+        if -e "$extract_file$suffix.gz";
+      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | $GZIP_EXEC > $extract_file.inv.gz")
+        if -e "$extract_file$suffix.inv.gz";
       safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | $GZIP_EXEC > $extract_file.o.gz")
 	if -e "$extract_file$suffix.o.gz";
-      safesystem("rm $extract_file$suffix.gz");
-      safesystem("rm $extract_file$suffix.inv.gz");
+      safesystem("rm $extract_file$suffix.gz")
+        if -e "$extract_file$suffix.gz";
+      safesystem("rm $extract_file$suffix.inv.gz")
+        if -e "$extract_file$suffix.inv.gz";
       safesystem("rm $extract_file$suffix.o.gz")
         if -e "$extract_file$suffix.o.gz";
     }
@@ -2343,7 +2348,9 @@ sub create_ini {
   }
   if ($_ADDITIONAL_INI_FILE) {
     print INI "\n# additional settings\n\n";
-    print INI `cat $_ADDITIONAL_INI_FILE`;
+    for my $AIF (split (/:/, $_ADDITIONAL_INI_FILE)) {
+      print INI `cat $AIF`;
+    }
   }
 
   # feature functions and weights

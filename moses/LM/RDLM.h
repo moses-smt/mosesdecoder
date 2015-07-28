@@ -3,6 +3,7 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/FFState.h"
 #include "moses/FF/InternalTree.h"
+#include "moses/Word.h"
 
 #include <boost/thread/tss.hpp>
 #include <boost/array.hpp>
@@ -61,14 +62,14 @@ class RDLM : public StatefulFeatureFunction
   nplm::neuralTM* lm_label_base_instance_;
   mutable boost::thread_specific_ptr<nplm::neuralTM> lm_label_backend_;
 
-  std::string dummy_head;
-  std::string m_glueSymbol;
-  std::string m_startSymbol;
-  std::string m_endSymbol;
-  std::string m_endTag;
+  std::string m_glueSymbolString;
+  Word dummy_head;
+  Word m_glueSymbol;
+  Word m_startSymbol;
+  Word m_endSymbol;
+  Word m_endTag;
   std::string m_path_head_lm;
   std::string m_path_label_lm;
-  bool m_isPTKVZ;
   bool m_isPretermBackoff;
   size_t m_context_left;
   size_t m_context_right;
@@ -103,15 +104,12 @@ class RDLM : public StatefulFeatureFunction
   int static_stop_label_output;
   int static_start_label_output;
 
+  FactorType m_factorType;
+
 public:
   RDLM(const std::string &line)
     : StatefulFeatureFunction(2, line)
-    , dummy_head("<dummy_head>")
-    , m_glueSymbol("Q")
-    , m_startSymbol("SSTART")
-    , m_endSymbol("SEND")
-    , m_endTag("</s>")
-    , m_isPTKVZ(false)
+    , m_glueSymbolString("Q")
     , m_isPretermBackoff(true)
     , m_context_left(3)
     , m_context_right(0)
@@ -122,8 +120,16 @@ public:
     , m_normalizeLabelLM(false)
     , m_sharedVocab(false)
     , m_binarized(0)
-    , m_cacheSize(1000000) {
+    , m_cacheSize(1000000)
+    , m_factorType(0) {
     ReadParameters();
+    std::vector<FactorType> factors;
+    factors.push_back(0);
+    dummy_head.CreateFromString(Output, factors, "<dummy_head>", false);
+    m_glueSymbol.CreateFromString(Output, factors, m_glueSymbolString, true);
+    m_startSymbol.CreateFromString(Output, factors, "SSTART", true);
+    m_endSymbol.CreateFromString(Output, factors, "SEND", true);
+    m_endTag.CreateFromString(Output, factors, "</s>", false);
   }
 
   ~RDLM();
@@ -133,9 +139,9 @@ public:
   }
 
   void Score(InternalTree* root, const TreePointerMap & back_pointers, boost::array<float,4> &score, std::vector<int> &ancestor_heads, std::vector<int> &ancestor_labels, size_t &boundary_hash, int num_virtual = 0, int rescoring_levels = 0) const;
-  InternalTree* GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs, InternalTree * head_ptr=NULL) const;
+  bool GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs) const;
   void GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, const nplm::neuralTM *lm_head, const nplm::neuralTM *lm_labels, std::vector<int> & heads, std::vector<int> & labels, std::vector<int> & heads_output, std::vector<int> & labels_output) const;
-  void GetIDs(const std::string & head, const std::string & preterminal, std::pair<int,int> & IDs) const;
+  void GetIDs(const Word & head, const Word & preterminal, std::pair<int,int> & IDs) const;
   void ScoreFile(std::string &path); //for debugging
   void PrintInfo(std::vector<int> &ngram, nplm::neuralTM* lm) const; //for debugging
 
@@ -192,7 +198,7 @@ public:
       _end = current->GetChildren().end();
       iter = current->GetChildren().begin();
       // expand virtual node
-      while (binarized && !(*iter)->GetLabel().empty() && (*iter)->GetLabel()[0] == '^') {
+      while (binarized && !(*iter)->GetLabel().GetString(0).empty() && (*iter)->GetLabel().GetString(0).data()[0] == '^') {
         stack.push_back(std::make_pair(current, iter));
         // also go through trees or previous hypotheses to rescore nodes for which more context has become available
         if ((*iter)->IsLeafNT()) {
@@ -229,7 +235,7 @@ public:
         }
       }
       // expand virtual node
-      while (binarized && !(*iter)->GetLabel().empty() && (*iter)->GetLabel()[0] == '^') {
+      while (binarized && !(*iter)->GetLabel().GetString(0).empty() && (*iter)->GetLabel().GetString(0).data()[0] == '^') {
         stack.push_back(std::make_pair(current, iter));
         // also go through trees or previous hypotheses to rescore nodes for which more context has become available
         if ((*iter)->IsLeafNT()) {

@@ -141,6 +141,8 @@ Parameter::Parameter()
   po::options_description oov_opts("OOV Handling Options");
   AddParam(oov_opts,"drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam(oov_opts,"mark-unknown", "mu", "mark unknown words in output");
+  AddParam(oov_opts,"unknown-word-prefix", "prefix to unknwon word when marked (default: 'UNK')");
+  AddParam(oov_opts,"unknown-word-suffix", "suffix to unknwon word when marked (default: '')");
   AddParam(oov_opts,"lmodel-oov-feature", "add language model oov feature, one per model");
   AddParam(oov_opts,"output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
   AddParam(oov_opts,"always-create-direct-transopt", "Always create a translation that translates the source word ad-verbatim");

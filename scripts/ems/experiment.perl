@@ -853,7 +853,7 @@ sub delete_output {
     `rm -r $file` if $EXECUTE;
   }
   # delete regular file that matches exactly
-  if (-e $file) {
+  elsif (-e $file) {
     print "\tdelete file $file\n";
     `rm $file` if $EXECUTE;
   }
@@ -864,13 +864,13 @@ sub delete_output {
   foreach (`ls $dir`) {
     chop;
     next unless substr($_,0,length($f)) eq $f;
-    if (-e "$dir/$_") {
+    if (-d "$dir/$_") {
+      print "\tdelete directory $file\n";
+      `rm -r $dir/$_` if $EXECUTE;
+    }
+    elsif (-e "$dir/$_") {
       print "\tdelete file $dir/$_\n";
       `rm $dir/$_` if $EXECUTE;
-    }
-    else {
-      print "\tdelete directory $dir/$_\n";
-      `rm -r $dir/$_` if $EXECUTE;
     }
   }
 }
@@ -1119,13 +1119,13 @@ sub define_step {
 	next if $RE_USE[$i];
 	next if defined($PASS{$i});
 	next if &define_template($i);
-        if ($DO_STEP[$i] =~ /^CORPUS:(.+):factorize$/) {
+        if ($DO_STEP[$i] =~ /^CORPUS:(.+):(post-split-)?factorize$/) {
             &define_corpus_factorize($i);
         }
 	elsif ($DO_STEP[$i] eq 'SPLITTER:train') {
 	    &define_splitter_train($i);
 	}
-        elsif ($DO_STEP[$i] =~ /^LM:(.+):factorize$/) {
+        elsif ($DO_STEP[$i] =~ /^LM:(.+):(post-split-)?factorize$/) {
             &define_lm_factorize($i,$1);
         }
 	elsif ($DO_STEP[$i] =~ /^LM:(.+):randomize$/ ||
@@ -1135,6 +1135,15 @@ sub define_step {
 	elsif ($DO_STEP[$i] =~ /^LM:(.+):train-randomized$/) {
 	    &define_lm_train_randomized($i,$1);
 	}
+  elsif ($DO_STEP[$i] =~ /^LM:(.+):train-bilingual-lm$/) {
+	    &define_lm_train_bilingual_lm($i,$1);
+  }
+  elsif ($DO_STEP[$i] =~ /^LM:(.+):prepare-bilingual-lm$/) {
+	    &define_lm_prepare_bilingual_lm($i,$1);
+  }
+  elsif ($DO_STEP[$i] =~ /^LM:(.+):train-nplm$/) {
+      &define_lm_train_nplm($i,$1);
+  }
         elsif ($DO_STEP[$i] eq 'TRAINING:prepare-data') {
             &define_training_prepare_data($i);
         }
@@ -1182,7 +1191,7 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:create-config' || $DO_STEP[$i] eq 'TRAINING:create-config-interpolated-lm') {
 	    &define_training_create_config($i);
 	}
-	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:factorize-tuning') {
+	elsif ($DO_STEP[$i] =~ /^INTERPOLATED-LM:(post-split-)?factorize-tuning$/) {
 	    &define_interpolated_lm_factorize_tuning($i);
 	}
 	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:interpolate') {
@@ -1775,6 +1784,95 @@ sub define_lm_train_randomized {
     $cmd .= "mv $output.BloomMap $output\n";
 
     &create_step($step_id,$cmd);
+}
+
+sub define_lm_train_bilingual_lm {
+    my ($step_id,$set) = @_;
+	  my ($working_dir, $ngrams, $corpus)		= &get_output_and_input($step_id);
+    my $scripts = &check_backoff_and_get("LM:moses-script-dir");
+    my $cmd = "$scripts/training/bilingual-lm/train_nplm.py -w $working_dir -c $corpus -r $working_dir";
+    my $nplm_dir = &check_backoff_and_get("LM:$set:nplm-dir");
+    $cmd .= " -l $nplm_dir";
+
+    my ($n, $m, $total_order) = &get_bilingual_lm_order($set);
+    $cmd .= " -n $total_order";
+
+    my $epochs = &get_bilingual_lm_epochs($set);
+    $cmd .= " -e $epochs" if defined($epochs);
+
+    my $nplm_settings = backoff_and_get("LM:$set:nplm-settings");
+    $cmd .= " $nplm_settings" if defined($nplm_settings);
+
+    # Create the ini file
+    $cmd .= "\n";
+    $cmd .= "$scripts/training/bilingual-lm/create_blm_ini.py -w $working_dir -n $n -m $m -x $set -e $epochs";
+
+    &create_step($step_id,$cmd);
+}
+
+sub define_lm_prepare_bilingual_lm {
+    my ($step_id,$set) = @_;
+	  my ($working_dir, $corpus, $align)		= &get_output_and_input($step_id);
+    my $scripts = &check_backoff_and_get("LM:moses-script-dir");
+    my $cmd = "$scripts/training/bilingual-lm/extract_training.py -w $working_dir -c $corpus";
+
+    my $input_extension = &check_backoff_and_get("GENERAL:input-extension");
+    my $output_extension = &check_backoff_and_get("GENERAL:output-extension");
+    $cmd .= " -e $output_extension -f $input_extension";
+
+    my $align_method = &check_backoff_and_get("TRAINING:alignment-symmetrization-method");
+    $cmd .= " -a $align.$align_method";
+
+    my ($n, $m, $total_order) = &get_bilingual_lm_order($set);
+    $cmd .= " -n $n -m $m";
+
+    my $bilingual_settings = backoff_and_get("LM:$set:bilingual-lm-settings");
+    $cmd .= " $bilingual_settings" if defined($bilingual_settings);
+
+
+    &create_step($step_id,$cmd);
+}
+
+sub define_lm_train_nplm {
+    my ($step_id,$set) = @_;
+	  my ($working_dir, $corpus)		= &get_output_and_input($step_id);
+    my $scripts = &check_backoff_and_get("LM:moses-script-dir");
+    my $cmd = "$scripts/training/train-neurallm.py --mmap --working-dir $working_dir --corpus $corpus";
+    my $nplm_dir = &check_backoff_and_get("LM:$set:nplm-dir");
+    $cmd .= " --nplm-home $nplm_dir";
+
+    my $epochs = &backoff_and_get("LM:$set:epochs");
+    $epochs = 2 unless defined($epochs);
+    $cmd .= " --epochs $epochs";
+
+    my $nplm_settings = backoff_and_get("LM:$set:nplm-settings");
+    $cmd .= " $nplm_settings" if defined($nplm_settings);
+
+    my $order = &backoff_and_get("LM:$set:order");
+    $order = 5 unless defined($order);
+    $cmd .= " --order $order";
+
+    # Create the ini file
+    $cmd .= "\n";
+    $cmd .= "$scripts/training/create_nplm_ini.py -w $working_dir -e $epochs -x $set -n $order";
+
+    &create_step($step_id,$cmd);
+}
+
+sub get_bilingual_lm_order {
+  my ($set) = @_;
+  my $order = &backoff_and_get("LM:$set:order");
+  $order = 5 unless defined ($order);
+  my $source_window = &backoff_and_get("LM:$set:source-window");
+  $source_window = 4 unless defined ($order);
+  return ($order, $source_window, $order + 2*$source_window+1);
+}
+
+sub get_bilingual_lm_epochs {
+  my ($set) = @_;
+  my $epochs = &backoff_and_get("LM:$set:epochs");
+  $epochs = 10 unless defined($epochs);
+  return $epochs;
 }
 
 sub define_lm_randomize {
@@ -2548,7 +2646,8 @@ sub define_training_create_config {
     }
 
     # sparse lexical features provide additional content for config file
-    $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
+    my @additional_ini_files;
+    push  (@additional_ini_files, "$sparse_lexical_features.ini") if $sparse_lexical_features;
 
     my @LM_SETS = &get_sets("LM");
     my %INTERPOLATED_AWAY;
@@ -2599,8 +2698,11 @@ sub define_training_create_config {
             if (&get("LM:$set:config-feature-line") && &get("LM:$set:config-weight-line")) {
                 $feature_lines .= &get("LM:$set:config-feature-line") . ";";
                 $weight_lines .= &get("LM:$set:config-weight-line") . ";";
-            }
-            else {
+            } elsif (&get("LM:$set:nplm")) {
+               push(@additional_ini_files, "$lm/nplm.ini"); 
+            } elsif (&get("LM:$set:bilingual-lm")) {
+               push(@additional_ini_files, "$lm/blm.ini"); 
+            } else {
                 my $order = &check_backoff_and_get("LM:$set:order");
 
                 my $lm_file = "$lm";
@@ -2629,11 +2731,15 @@ sub define_training_create_config {
             }
     }
 
-    if (defined($feature_lines)) {
+    if ($feature_lines) {
         $cmd .= "-config-add-feature-lines \"$feature_lines\" ";
     }
-    if (defined($weight_lines)) {
+    if ($weight_lines) {
         $cmd .= "-config-add-weight-lines \"$weight_lines\" ";
+    }
+
+    if (@additional_ini_files) {
+        $cmd .= "-additional-ini-file " . join(":", @additional_ini_files);
     }
 
     &create_step($step_id,$cmd);
@@ -2795,7 +2901,8 @@ sub get_interpolated_lm_sets {
   my $count=0;
   my $icount=0;
   foreach my $set (@LM_SETS) {
-    next if (&get("LM:$set:exclude-from-interpolation"));
+    next if (&get("LM:$set:exclude-from-interpolation")) or (&get("LM:$set:bilingual-lm")) 
+      or (&get("LM:$set:nplm"));
     my $order = &check_backoff_and_get("LM:$set:order");
 
     my $factor = 0;
@@ -2831,6 +2938,7 @@ sub get_training_setting {
     my $pcfg = &get("TRAINING:use-pcfg-feature");
     my $baseline_alignment = &get("TRAINING:baseline-alignment-model");
     my $no_glue_grammar = &get("TRAINING:no-glue-grammar");
+    my $mmsapt = &get("TRAINING:mmsapt");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2855,6 +2963,7 @@ sub get_training_setting {
     $cmd .= "-parallel " if $parallel;
     $cmd .= "-pcfg " if $pcfg;
     $cmd .= "-baseline-alignment-model $baseline_alignment " if defined($baseline_alignment) && ($step == 1 || $step == 2);
+    $cmd .= "-mmsapt " if defined($mmsapt);
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
@@ -3454,12 +3563,20 @@ sub define_template {
     }
     $cmd =~ s/VERSION/$VERSION/g;
     print "\tcmd is $cmd\n" if $VERBOSE;
-    while ($cmd =~ /^([\S\s]*)\$\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
-           $cmd =~ /^([\S\s]*)\$([^\s\/\"\']+)([\S\s]*)$/) {
-	my ($pre,$variable,$post) = ($1,$2,$3);
-	$cmd = $pre
-	    . &check_backoff_and_get(&extend_local_name($module,$set,$variable))
-	    . $post;
+
+    # replace variables
+    while ($cmd =~ /^([\S\s]*)\$(\??)\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
+           $cmd =~ /^([\S\s]*)\$(\??)([^\s\/\"\']+)([\S\s]*)$/) {
+	my ($pre,$optional,$variable,$post) = ($1,$2,$3,$4);
+	my $value;
+	if ($optional eq '?') {
+	  $value = &backoff_and_get(&extend_local_name($module,$set,$variable));
+          $value = "" unless $value;
+        }
+	else {
+	  $value = &check_backoff_and_get(&extend_local_name($module,$set,$variable));
+	} 
+	$cmd = $pre.$value.$post;
     }
 
     # deal with pipelined commands

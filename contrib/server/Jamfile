@@ -13,7 +13,7 @@ with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
 if $(with-xmlrpc-c) {
   echo While building mosesserver ... ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking the XMLRPC-C library; Do NOT use v.1.25.29            !!!" ;
+  echo "!!! You are linking the XMLRPC-C library; Must be v.1.32 (September 2012) or higher !!!" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
 
   build-moses-server = true ;

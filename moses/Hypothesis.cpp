@@ -213,7 +213,8 @@ RecombineCompare(const Hypothesis &compare) const
 
   for (unsigned i = 0; i < m_ffStates.size(); ++i) {
     if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) {
-      comp = m_ffStates[i] - compare.m_ffStates[i];
+      // TODO: Can this situation actually occur?
+      comp = int(m_ffStates[i] != NULL) - int(compare.m_ffStates[i] != NULL);
     } else {
       comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
     }
@@ -234,8 +235,8 @@ EvaluateWhenApplied(StatefulFeatureFunction const& sfff,
     ttasksptr const& ttask = manager.GetTtask();
 
     m_ffStates[state_idx] = sfff.EvaluateWhenAppliedWithContext
-      (ttask, *this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-       &m_currScoreBreakdown);
+                            (ttask, *this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+                             &m_currScoreBreakdown);
   }
 }
 
@@ -585,7 +586,9 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
       //preface surface form with UNK if marking unknowns
       const Word &word = phrase.GetWord(pos);
       if(markUnknown && word.IsOOV()) {
-        out << "UNK" << *factor;
+        out << StaticData::Instance().GetUnknownWordPrefix()
+            << *factor
+            << StaticData::Instance().GetUnknownWordSuffix();
       } else {
         out << *factor;
       }

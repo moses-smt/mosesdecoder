@@ -103,7 +103,7 @@ namespace ugdiss
   operator[](ID key) const
   {
     if (start==stop) return INIT(0);
-    Cell const* c = lower_bound(start,stop,key);
+    Cell const* c = std::lower_bound(start,stop,key);
     return (c != stop && c->id == key ? c->val : INIT(0));
   }
 

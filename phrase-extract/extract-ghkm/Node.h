@@ -30,6 +30,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -215,6 +217,7 @@ Node *Node::LowestCommonAncestor(InputIterator first, InputIterator last)
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining
 
 #endif
