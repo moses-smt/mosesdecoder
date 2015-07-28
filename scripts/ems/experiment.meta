@@ -604,6 +604,7 @@ symmetrize-fast-align
 	in: fast-alignment fast-alignment-inverse corpus-mml-prefilter=OR=corpus
 	out: word-alignment
 	ignore-unless: fast-align-settings
+	rerun-on-change: alignment-symmetrization-method
 	template: $moses-script-dir/ems/support/symmetrize-fast-align.perl IN IN1 IN2.$input-extension IN2.$output-extension OUT $alignment-symmetrization-method $moses-src-dir/bin/symal
         default-name: model/aligned
 prepare-data
