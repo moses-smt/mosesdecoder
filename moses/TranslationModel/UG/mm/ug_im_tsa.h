@@ -12,11 +12,15 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/foreach.hpp>
+#include <boost/thread.hpp>
 
 #include "tpt_tightindex.h"
 #include "tpt_tokenindex.h"
 #include "ug_tsa_base.h"
 #include "tpt_pickler.h"
+
+#include "moses/TranslationModel/UG/generic/threading/ug_thread_pool.h"
+#include "util/usage.hh"
 
 namespace ugdiss
 {
@@ -25,6 +29,33 @@ namespace ugdiss
   namespace bio=boost::iostreams;
 
   // template<typename TOKEN> class imBitext<TOKEN>;
+
+
+  template<typename TOKEN, typename SORTER>
+  class TsaSorter
+  {
+  public:
+    typedef typename Ttrack<TOKEN>::Position cpos;
+    typedef typename std::vector<cpos>::iterator iter;
+  private:
+    SORTER m_sorter;
+    iter m_begin;
+    iter m_end;
+  public:
+    TsaSorter(SORTER sorter, iter& begin, iter& end)
+      : m_sorter(sorter),
+	m_begin(begin),
+	m_end(end) { }
+    
+    bool 
+    operator()()
+    {
+      std::sort(m_begin, m_end, m_sorter);
+      return true;
+    }
+    
+  };
+
 
  //-----------------------------------------------------------------------
   template<typename TOKEN>
@@ -52,9 +83,8 @@ namespace ugdiss
 
   public:
     imTSA();
-    imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c,
-	  bdBitset const* filt,
-	  std::ostream* log = NULL);
+    imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filt, 
+	  std::ostream* log = NULL, size_t threads = 0);
 
     imTSA(imTSA<TOKEN> const& prior,
 	  boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
@@ -140,8 +170,11 @@ namespace ugdiss
   // specified in filter
   template<typename TOKEN>
   imTSA<TOKEN>::
-  imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filter, std::ostream* log)
+  imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, 
+	bdBitset const* filter,	std::ostream* log, size_t threads)
   {
+    if (threads == 0) 
+      threads = boost::thread::hardware_concurrency();
     assert(c);
     this->corpus = c;
     bdBitset  filter2;
@@ -198,19 +231,34 @@ namespace ugdiss
       }
 
     // Now sort the array
-    if (log) *log << "sorting ...." << std::endl;
+    if (log) *log << "sorting .... with " << threads << " threads." << std::endl;
+    double start_time = util::WallTime();
+    boost::scoped_ptr<ug::ThreadPool> tpool;
+    tpool.reset(new ug::ThreadPool(threads));
+    
     index.resize(wcnt.size()+1,0);
-    typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(c.get());
+    typedef typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter_t;
+    sorter_t sorter(c.get());
     for (size_t i = 0; i < wcnt.size(); i++)
       {
-        if (log && wcnt[i] > 5000)
-          *log << "sorting " << wcnt[i]
-               << " entries starting with id " << i << "." << std::endl;
+        // if (log && wcnt[i] > 5000)
+        //   *log << "sorting " << wcnt[i]
+        //        << " entries starting with id " << i << "." << std::endl;
         index[i+1] = index[i]+wcnt[i];
         assert(index[i+1]==tmp[i]); // sanity check
         if (wcnt[i]>1)
-          sort(sufa.begin()+index[i],sufa.begin()+index[i+1],sorter);
+	  {
+	    typename std::vector<cpos>::iterator b,e;
+	    b = sufa.begin()+index[i];
+	    e = sufa.begin()+index[i+1];
+	    TsaSorter<TOKEN,sorter_t> foo(sorter,b,e);
+	    tpool->add(foo);
+	    // sort(sufa.begin()+index[i],sufa.begin()+index[i+1],sorter);
+	  }
       }
+    tpool.reset();
+    if (log) *log << "Done sorting after " << util::WallTime() - start_time
+		  << " seconds." << std::endl;
     this->startArray = reinterpret_cast<char const*>(&(*sufa.begin()));
     this->endArray   = reinterpret_cast<char const*>(&(*sufa.end()));
     this->numTokens  = sufa.size();
