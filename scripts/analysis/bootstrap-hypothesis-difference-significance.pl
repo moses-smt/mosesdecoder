@@ -313,6 +313,9 @@ sub preEvalHypoSnt {
 
 		#correct, total
 		for my $ngram (keys %$hypNgramCounts) {
+			if (!exists $refNgramCounts->{$ngram}) {
+				$refNgramCounts->{$ngram} = 0;
+			}
 			$coocUpd = min($hypNgramCounts->{$ngram}, $refNgramCounts->{$ngram});
 			$correctNgramCounts += $coocUpd;
 			$totalNgramCounts += $hypNgramCounts->{$ngram};
@@ -514,6 +517,9 @@ sub groupNgramsMultiSrc {
 		my $currNgramCounts = groupNgrams($ref->[$lineIdx], $order);
 
 		for my $currNgram (keys %$currNgramCounts) {
+			if (!exists $result{$currNgram}) {
+				$result{$currNgram} = 0;
+			}
 			$result{$currNgram} = max($result{$currNgram}, $currNgramCounts->{$currNgram});
 		}
 	}
