@@ -826,9 +826,9 @@ binarize-config
 	in: config
 	out: bin-config
 	pass-unless: binarize-all
-	rerun-on-change: config
+	rerun-on-change: config 
 	default-name: model/moses.bin.ini
-	template: $binarize-all IN OUT -Binarizer $ttable-binarizer 
+	template: $binarize-all IN OUT -Binarizer "$ttable-binarizer" 
 	final-model: yes
 hiero-compile-source-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
