@@ -141,22 +141,6 @@ sub run_transliteration
 
 	print "Filter Table... ".`date`;
 
-<<<<<<< Updated upstream
-	`$MOSES_SRC/scripts/training/train-model.perl \\
-            -first-step 9 \\
-            -external-bin-dir $EXTERNAL_BIN_DIR \\
-            -f $INPUT_EXTENSION \\
-            -e $OUTPUT_EXTENSION \\
-            -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table \\
-            -config $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini \\
-            -lm 0:3:$TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini:8`;
-
-	`$MOSES_SRC/scripts/training/filter-model-given-input.pl \\
-            $TRANSLIT_MODEL/evaluation/$eval_file.filtered \\
-            $TRANSLIT_MODEL/evaluation/$eval_file.moses.table.ini \\
-            $TRANSLIT_MODEL/evaluation/$eval_file \\
-            -Binarizer "$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2"`;
-=======
 	my $cmd = "$MOSES_SRC/scripts/training/train-model.perl -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table -config $TMP_DIR/transliteration/$eval_file.moses.table.ini -lm 0:3:$TMP_DIR/transliteration/$eval_file.moses.table.ini:8";
         print $cmd."\n";
         `$cmd`;
@@ -164,28 +148,11 @@ sub run_transliteration
 	$cmd = "$MOSES_SRC/scripts/training/filter-model-given-input.pl $TMP_DIR/transliteration/$eval_file.filtered $TMP_DIR/transliteration/$eval_file.moses.table.ini $TMP_DIR/transliteration/$eval_file -Binarizer \"$MOSES_SRC/bin/CreateOnDiskPt 1 1 4 100 2\"";
         print $cmd."\n";
         `$cmd`;
->>>>>>> Stashed changes
 
 	`rm  $TMP_DIR/transliteration/$eval_file.moses.table.ini`;
 
 	print "Apply Filter\n";
 
-<<<<<<< Updated upstream
-	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables-and-weights.perl \\
-            $TRANSLIT_MODEL/evaluation/$eval_file.filtered/moses.ini \\
-            $TRANSLIT_MODEL/model/moses.ini \\
-            $TRANSLIT_MODEL/tuning/moses.tuned.ini \\
-            $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini`;
-
-  my $drop_stderr = $VERBOSE ? "" : " 2>/dev/null";
-	`$DECODER \\
-            -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 \\
-            -threads 16 -drop-unknown -distortion-limit 0 \\
-            -n-best-list $TRANSLIT_MODEL/evaluation/$eval_file.op.nBest 1000 \\
-            distinct -f $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini \\
-            < $TRANSLIT_MODEL/evaluation/$eval_file \\
-            > $TRANSLIT_MODEL/evaluation/$eval_file.op $drop_stderr`;
-=======
 	$cmd = "$MOSES_SRC/scripts/ems/support/substitute-filtered-tables-and-weights.perl $TMP_DIR/transliteration/$eval_file.filtered/moses.ini $TRANSLIT_MODEL/model/moses.ini $TRANSLIT_MODEL/tuning/moses.tuned.ini $TMP_DIR/transliteration/$eval_file.filtered.ini";
         print $cmd."\n";
         `$cmd`;
@@ -194,7 +161,6 @@ sub run_transliteration
 	$cmd = "$DECODER -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -drop-unknown -distortion-limit 0 -n-best-list $TMP_DIR/transliteration/$eval_file.op.nBest 1000 distinct -f $TMP_DIR/transliteration/$eval_file.filtered.ini < $TMP_DIR/transliteration/$eval_file > $TMP_DIR/transliteration/$eval_file.op $drop_stderr";
         print $cmd."\n";
         `$cmd`;
->>>>>>> Stashed changes
 }
 
 ################### Read the output of Transliteration Model and Form Corpus ###############################
