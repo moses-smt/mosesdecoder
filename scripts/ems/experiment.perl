@@ -1098,7 +1098,7 @@ sub draw_agenda_graph {
     print DOT "}\n";
     close(DOT);
     my $graph_file = &steps_file("graph.$VERSION",$VERSION);
-    `dot -Tps $graph_file.dot >$graph_file.ps`;
+    `dot -Tps $graph_file.dot >$graph_file.ps 2>/dev/null`;
     `convert -alpha off $graph_file.ps $graph_file.png`;
 }
 
@@ -1992,6 +1992,12 @@ sub define_tuning_tune {
 	my $tune_inputtype = &backoff_and_get("TUNING:inputtype");
 	my $jobs = &backoff_and_get("TUNING:jobs");
 	my $decoder = &check_backoff_and_get("TUNING:decoder");
+        my $cache_model = &backoff_and_get("GENERAL:cache-model");
+
+        if (defined($cache_model) && !($jobs && $jobs>1 && $CLUSTER)) {
+          $cmd .= "MOSES_INI=`$scripts/ems/support/cache-model.perl $config $cache_model`\n";
+          $config = "\$MOSES_INI";
+        }
 
 	my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
 	$decoder_settings = "" unless $decoder_settings;
@@ -2000,7 +2006,7 @@ sub define_tuning_tune {
 	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
 	$tuning_settings = "" unless $tuning_settings;
 
-	$cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $tmp_dir --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
+	$cmd .= "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $tmp_dir --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
 	$cmd .= " --lambdas \"$lambda\"" if $lambda;
 	$cmd .= " --continue" if $tune_continue;
 	$cmd .= " --skip-decoder" if $skip_decoder;
@@ -2009,6 +2015,7 @@ sub define_tuning_tune {
 	my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
 	$cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
 	$cmd .= " --jobs $jobs" if $CLUSTER && $jobs && $jobs>1;
+        $cmd .= " --cache-model $cache_model" if $cache_model && $CLUSTER && $jobs && $jobs>1;
 	my $tuning_dir = $tuned_config;
 	$tuning_dir =~ s/\/[^\/]+$//;
 	$cmd .= "\nmkdir -p $tuning_dir";
@@ -3190,12 +3197,6 @@ sub define_evaluation_decode {
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
     my $post_decoding_transliteration = &get("TRAINING:post-decoding-transliteration");
 
-   # If Transliteration Module is to be used as post-decoding step ...
-   if (defined($post_decoding_transliteration) && $post_decoding_transliteration eq "yes"){
-	$settings .= " -output-unknowns $system_output.oov";
-   }
-
-
     # specify additional output for analysis
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
       $settings .= " -alignment-output-file $system_output.wa";
@@ -3224,8 +3225,16 @@ sub define_evaluation_decode {
 	$input = $input_with_tags;
     }
 
-    # create command
+    # cache model on local disk
     my $cmd;
+    my $cache_model = &backoff_and_get("GENERAL:cache-model");
+    if (defined($cache_model) && !($jobs && $jobs>1 && $CLUSTER)) {
+      my $scripts = &check_and_get("GENERAL:moses-script-dir");
+      $cmd = "MOSES_INI=`$scripts/ems/support/cache-model.perl $config $cache_model`\n";
+      $config = "\$MOSES_INI";
+    }
+
+    # create command
     my $nbest_size;
     $nbest_size = $nbest if $nbest;
     $nbest_size =~ s/[^\d]//g if $nbest;
@@ -3241,6 +3250,7 @@ sub define_evaluation_decode {
 	$cmd .= " -queue-parameters \"$qsub_args\"" if ($CLUSTER && $qsub_args);
 	$cmd .= " -decoder $decoder";
 	$cmd .= " -config $config";
+        $cmd .= " -cache-model $cache_model" if defined($cache_model);
 	$cmd .= " -input-file $input";
 	$cmd .= " --jobs $jobs";
 	$cmd .= " -decoder-parameters \"$settings\" > $system_output";
@@ -3250,6 +3260,10 @@ sub define_evaluation_decode {
 	$cmd = "$decoder $settings -v 0 -f $config < $input > $system_output";
 	$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
     }
+
+    # If Transliteration Module is to be used as post-decoding step ...
+    $cmd .= " -output-unknowns $system_output.oov"
+      if defined($post_decoding_transliteration) && $post_decoding_transliteration eq "yes";
 
     &create_step($step_id,$cmd);
 }

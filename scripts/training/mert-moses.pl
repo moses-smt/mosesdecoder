@@ -81,6 +81,7 @@ my $___LATTICE_SAMPLES = 0;
 my $queue_flags = "-hard";  # extra parameters for parallelizer
       # the -l ws0ssmt was relevant only to JHU 2006 workshop
 my $___JOBS = undef; # if parallel, number of jobs to use (undef or <= 0 -> serial)
+my $___CACHE_MODEL = undef; # if models need to be copied to local disk from NFS
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
@@ -183,6 +184,7 @@ GetOptions(
   "lattice-samples=i" => \$___LATTICE_SAMPLES,
   "queue-flags=s" => \$queue_flags,
   "jobs=i" => \$___JOBS,
+  "cache-model=s" => \$___CACHE_MODEL,
   "decoder-flags=s" => \$___DECODER_FLAGS,
   "continue" => \$continue,
   "skip-decoder" => \$skip_decoder,
@@ -245,6 +247,7 @@ Options:
   --nbest=100            ... how big nbestlist to generate
   --lattice-samples      ... how many lattice samples (Chatterjee & Cancedda, emnlp 2010)
   --jobs=N               ... set this to anything to run moses in parallel
+  --cache-model=STRING   ... local directory into which copy model before running decoder
   --mosesparallelcmd=STR ... use a different script instead of moses-parallel
   --queue-flags=STRING   ... anything you with to pass to qsub, eg.
                              '-l ws06osssmt=true'. The default is: '-hard'
@@ -1143,7 +1146,7 @@ if($___RETURN_BEST_DEV) {
     }
     my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " $mert_extract_args $candidate";
     $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
-    safesystem("$cmd 2> /dev/null 1> $evalout");
+    &submit_or_exec($cmd, $evalout, "/dev/null", 1);
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
     my $bleu = <$fh>;
     chomp $bleu;
@@ -1291,6 +1294,7 @@ sub run_decoder {
       die "Hypergraph mira not supported by moses-parallel" if $___HG_MIRA;
       $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG";
       $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
+      $decoder_cmd .= " -cache-model $___CACHE_MODEL" if defined($___CACHE_MODEL);
       $decoder_cmd .= " -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE distinct\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
       my $nbest_list_cmd = "-n-best-list $filename $___N_BEST_LIST_SIZE distinct";
@@ -1380,7 +1384,12 @@ sub get_featlist_from_moses {
     print STDERR "Using cached features list: $featlistfn\n";
   } else {
     print STDERR "Asking moses for feature names and values from $___CONFIG\n";
-    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn";
+    my $cmd;
+    if ($___CACHE_MODEL) {
+      $cmd = "MOSES_INI=`$SCRIPTS_ROOTDIR/ems/support/cache-model.perl $configfn $___CACHE_MODEL` && ";
+      $configfn = "\$MOSES_INI";
+    }
+    $cmd .= "$___DECODER $___DECODER_FLAGS -config $configfn";
     $cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
     $cmd .= " -show-weights";
     print STDERR "Executing: $cmd\n";
