@@ -152,7 +152,7 @@ run_as_server()
   bool isSerial;
   params.SetParameter(isSerial, "serial", false);
   string logfile;
-  params.SetParameter(logfile, "server-log", string(""));
+  params.SetParameter(logfile, "server-log", string("/dev/null"));
   size_t num_threads;
   params.SetParameter(num_threads, "threads", size_t(10));
   if (isSerial) VERBOSE(1,"Running server in serial mode." << endl);
