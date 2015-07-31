@@ -18,6 +18,7 @@ namespace Moses {
     {
     public:
 
+      virtual ~PScoreProvenance() {}
       PScoreProvenance(string const& spec)
       {
 	this->m_tag = "prov";

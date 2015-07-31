@@ -18,6 +18,7 @@ namespace Moses {
 
     public:
 
+      virtual ~PScorePfwd(){};
       PScorePfwd(float const c, string d)
       {
 	this->m_index = -1;

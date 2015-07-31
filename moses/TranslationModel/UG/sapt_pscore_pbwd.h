@@ -17,6 +17,7 @@ namespace Moses {
       string denom;
 
     public:
+      virtual ~PScorePbwd(){};
       PScorePbwd(float const c, string d)
       {
 	this->m_index = -1;

@@ -22,6 +22,8 @@ namespace Moses {
       vector<string> m_feature_names;
     public:
 
+
+      virtual ~PhraseScorer() {}
       virtual
       void
       operator()(Bitext<Token> const& pt,
