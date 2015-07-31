@@ -22,17 +22,21 @@ namespace Moses
     using ugdiss::id_type;
 
     std::string 
-    query_bias_server(std::string const& server, std::string const& context) 
+    query_bias_server(std::string const& server, 
+		      std::string const& context, 
+		      ostream* log) 
     {
       std::string query = server+uri_encode(context);
       boost::asio::io_service io_service;
       Moses::http_client c(io_service, query);
       io_service.run();
-
-      // std::string response = c.content();
-      // std::cerr << "SERVER RESPONSE: " << response << std::endl;
+      
+      if (log)
+	{
+	  std::string response = c.content();
+	  *log << "SERVER RESPONSE: " << response << std::endl;
+	}
       UTIL_THROW_IF2(c.content().size() == 0, "No response from bias server!");
-
       return c.content();
     }
     // #endif
@@ -62,7 +66,8 @@ namespace Moses
       Timer timer;
       if (_log) timer.start(NULL);
 #endif
-      std::string json = query_bias_server(server_url, text);
+      std::string json = query_bias_server(server_url, text, _log);
+      
       // std::cerr << "SERVER RESPONSE " << json << std::endl;
       init_from_json(json, docname2docid, log);
 #ifndef NO_MOSES

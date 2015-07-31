@@ -13,7 +13,10 @@ namespace Moses
   {
     using ugdiss::id_type;
 
-    std::string query_bias_server(std::string const& url, std::string const& text);
+    std::string 
+    query_bias_server(std::string const& url, 
+		      std::string const& text, 
+		      ostream* log);
 
     class SamplingBias
     {
