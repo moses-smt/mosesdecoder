@@ -275,6 +275,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   si = params.find("context");
   if (si != params.end()) {
     string context = xmlrpc_c::value_string(si->second);
+    VERBOSE(1,"CONTEXT " << context);
     m_context.reset(new std::vector<std::string>(1,context));
   }
   // // biased sampling for suffix-array-based sampling phrase table?
