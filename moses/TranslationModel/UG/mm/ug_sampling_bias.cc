@@ -24,11 +24,11 @@ namespace Moses
     std::string 
     query_bias_server(std::string const& server, 
 		      std::string const& context, 
-		      ostream* log) 
+		      std::ostream* log) 
     {
       std::string query = server+uri_encode(context);
       boost::asio::io_service io_service;
-      Moses::http_client c(io_service, query);
+      Moses::http_client c(io_service, query, log);
       io_service.run();
       
       if (log)
@@ -36,7 +36,11 @@ namespace Moses
 	  std::string response = c.content();
 	  *log << "SERVER RESPONSE: " << response << std::endl;
 	}
-      UTIL_THROW_IF2(c.content().size() == 0, "No response from bias server!");
+      if (c.content().size() == 0)
+	{
+	  if (log) *log << "BIAS SERVER ERROR: " << c.error_msg() << std::endl;
+	  // UTIL_THROW_IF2(c.content().size() == 0, "No response from bias server!");
+	}
       return c.content();
     }
     // #endif

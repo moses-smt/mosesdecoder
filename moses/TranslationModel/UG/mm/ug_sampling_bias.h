@@ -16,7 +16,7 @@ namespace Moses
     std::string 
     query_bias_server(std::string const& url, 
 		      std::string const& text, 
-		      ostream* log);
+		      std::ostream* log);
 
     class SamplingBias
     {
