@@ -66,6 +66,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "server/Translator.h"
 #include "server/Optimizer.h"
 #include "server/Updater.h"
+#include "moses/parameters/ServerOptions.h"
 #endif
 
 using namespace std;
@@ -147,21 +148,15 @@ int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
-  int port;
-  params.SetParameter(port, "server-port", 8080);
-  bool isSerial;
-  params.SetParameter(isSerial, "serial", false);
-  string logfile;
-  params.SetParameter(logfile, "server-log", string("/dev/null"));
-  size_t num_threads;
-  params.SetParameter(num_threads, "threads", size_t(10));
-  if (isSerial) VERBOSE(1,"Running server in serial mode." << endl);
+  ServerOptions sopts(params);
+  if (sopts.is_serial) VERBOSE(1,"Running server in serial mode." << endl);
 
   xmlrpc_c::registry myRegistry;
 
-  xmlrpc_c::methodPtr const translator(new MosesServer::Translator(num_threads));
-  xmlrpc_c::methodPtr const updater(new MosesServer::Updater);
-  xmlrpc_c::methodPtr const optimizer(new MosesServer::Optimizer);
+  xmlrpc_c::methodPtr const 
+    translator(new MosesServer::Translator(sopts.num_threads)),
+    updater(new MosesServer::Updater),
+    optimizer(new MosesServer::Optimizer);
 
   myRegistry.addMethod("translate", translator);
   myRegistry.addMethod("updater", updater);
@@ -170,16 +165,18 @@ run_as_server()
   xmlrpc_c::serverAbyss myAbyssServer(
     xmlrpc_c::serverAbyss::constrOpt()
     .registryP(&myRegistry)
-    .portNumber(port)              // TCP port on which to listen
-    .logFileName(logfile)
+    .portNumber(sopts.port) // TCP port on which to listen
+    .logFileName(sopts.logfile)
     .allowOrigin("*")
-    .maxConn((unsigned int)num_threads)
+    .maxConn(sopts.num_threads)
   );
 
-  XVERBOSE(1,"Listening on port " << port << endl);
-  if (isSerial) {
-    while(1) myAbyssServer.runOnce();
-  } else myAbyssServer.run();
+  XVERBOSE(1,"Listening on port " << sopts.port << endl);
+  if (sopts.is_serial) 
+    {
+      while(true) myAbyssServer.runOnce();
+    }
+  else myAbyssServer.run();
 
   std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
   // #pragma message("BUILDING MOSES WITH SERVER SUPPORT")
@@ -188,7 +185,6 @@ run_as_server()
   std::cerr << "Moses was compiled without server support." << endl;
 #endif
   return 1;
-
 }
 
 int

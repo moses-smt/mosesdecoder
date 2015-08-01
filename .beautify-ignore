@@ -22,6 +22,7 @@ mingw/MosesGUI/Ui_credits.py
 mingw/MosesGUI/Ui_mainWindow.py
 moses/TranslationModel/UG
 moses/server
+moses/parameters
 phrase-extract/pcfg-common
 phrase-extract/syntax-common
 randlm
