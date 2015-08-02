@@ -24,17 +24,14 @@ using Moses::Sentence;
 
 boost::shared_ptr<TranslationRequest>
 TranslationRequest::
-create(Translator& translator, xmlrpc_c::paramList const& paramList,
+create(Translator* translator, xmlrpc_c::paramList const& paramList,
        boost::condition_variable& cond,
        boost::mutex& mut)
 {
   boost::shared_ptr<TranslationRequest> ret;
   ret.reset(new TranslationRequest(paramList,cond, mut));
   ret->m_self = ret;
-  if (ret->m_session_id)
-    ret->m_scope = translator.get_session(ret->m_session_id).scope;
-  else 
-    ret->m_scope.reset(new Moses::ContextScope);
+  ret->m_translator = translator;
   return ret;
 }
 
@@ -43,6 +40,16 @@ TranslationRequest::
 Run()
 {
   parse_request(m_paramList.getStruct(0));
+  // cerr << "SESSION ID" << ret->m_session_id << endl;
+  if (m_session_id)
+    {
+      Session const& S = m_translator->get_session(m_session_id);
+      m_scope = S.scope;
+      m_session_id = S.id;
+      // cerr << "SESSION ID" << m_session_id << endl;
+    }
+  else 
+    m_scope.reset(new Moses::ContextScope);
 
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
@@ -378,7 +385,9 @@ run_phrase_decoder()
   manager.Decode();
 
   pack_hypothesis(manager.GetBestHypothesis(), "text", m_retData);
-
+  if (m_session_id)
+    m_retData["session_id"] = xmlrpc_c::value_int(m_session_id);
+  
   if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
   if (m_withTopts) insertTranslationOptions(manager,m_retData);
   if (m_nbestSize) outputNBest(manager, m_retData);

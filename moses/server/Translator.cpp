@@ -27,7 +27,7 @@ execute(xmlrpc_c::paramList const& paramList,
   boost::condition_variable cond;
   boost::mutex mut;
   boost::shared_ptr<TranslationRequest> task;
-  task = TranslationRequest::create(*this, paramList,cond,mut);
+  task = TranslationRequest::create(this, paramList,cond,mut);
   m_threadPool.Submit(task);
   boost::unique_lock<boost::mutex> lock(mut);
   while (!task->IsDone())

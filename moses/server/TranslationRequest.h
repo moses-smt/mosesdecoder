@@ -36,6 +36,7 @@ TranslationRequest : public virtual Moses::TranslationTask
   std::map<std::string, xmlrpc_c::value> m_retData;
   std::map<uint32_t,float> m_bias; // for biased sampling
 
+  Translator* m_translator;
   std::string m_source_string, m_target_string;
   bool m_withAlignInfo;
   bool m_withWordAlignInfo;
@@ -103,7 +104,7 @@ public:
 
   static
   boost::shared_ptr<TranslationRequest>
-  create(Translator& translator,
+  create(Translator* translator,
 	 xmlrpc_c::paramList const& paramList,
          boost::condition_variable& cond,
          boost::mutex& mut);
