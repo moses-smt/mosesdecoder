@@ -154,7 +154,7 @@ run_as_server()
   xmlrpc_c::registry myRegistry;
 
   xmlrpc_c::methodPtr const 
-    translator(new MosesServer::Translator(sopts.num_threads)),
+    translator(new MosesServer::Translator(sopts)),
     updater(new MosesServer::Updater),
     optimizer(new MosesServer::Optimizer);
 

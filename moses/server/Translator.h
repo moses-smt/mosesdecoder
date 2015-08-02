@@ -2,6 +2,8 @@
 #pragma once
 
 #include "moses/ThreadPool.h"
+#include "moses/parameters/ServerOptions.h"
+#include "session.h"
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>
@@ -11,16 +13,19 @@
 namespace MosesServer
 {
 class
-  // MosesServer::
-  Translator : public xmlrpc_c::method
+Translator : public xmlrpc_c::method
 {
+  Moses::ServerOptions m_server_options;
 public:
-  Translator(size_t numThreads = 10);
-
+  Translator(Moses::ServerOptions const& sopts);
+  
   void execute(xmlrpc_c::paramList const& paramList,
                xmlrpc_c::value *   const  retvalP);
+
+  Session const& get_session(uint64_t session_id);
 private:
   Moses::ThreadPool m_threadPool;
+  SessionCache   m_session_cache;
 };
 
 }
