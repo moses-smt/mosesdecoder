@@ -181,7 +181,7 @@ namespace ugdiss
       return this->size();
     }
 
-    sptr<std::vector<typename ttrack::Position> >
+    SPTR<std::vector<typename ttrack::Position> >
     randomSample(int level, size_t N) const;
 
   };
@@ -899,14 +899,14 @@ namespace ugdiss
 
   /// randomly select up to N occurrences of the sequence
   template<typename Token>
-  sptr<std::vector<typename ttrack::Position> >
+  SPTR<std::vector<typename ttrack::Position> >
   TSA_tree_iterator<Token>::
   randomSample(int level, size_t N) const
   {
     if (level < 0) level += lower.size();
     assert(level >=0);
 
-    sptr<std::vector<typename ttrack::Position> >
+    SPTR<std::vector<typename ttrack::Position> >
       ret(new std::vector<typename ttrack::Position>(N));
 
     size_t m=0; // number of samples selected so far

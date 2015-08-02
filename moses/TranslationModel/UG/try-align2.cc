@@ -70,7 +70,7 @@ namespace stats
 
 struct SinglePhrase
 {
-  typedef map<uint64_t,sptr<SinglePhrase> > cache_t;
+  typedef map<uint64_t,SPTR<SinglePhrase> > cache_t;
   uint64_t pid; // phrase id
   vector<ttrack::Position> occs; // occurrences
 };
@@ -85,7 +85,7 @@ struct PhrasePair2
 
   struct stats_t
   {
-    typedef map<pair<uint64_t,uint64_t>, sptr<stats_t> > cache_t;
+    typedef map<pair<uint64_t,uint64_t>, SPTR<stats_t> > cache_t;
     size_t m1,m2,j;
     float  npmi; // normalized point-wise mutual information
     float   pmi; // point-wise mutual information
@@ -183,7 +183,7 @@ void
 lookup_phrases(vector<id_type> const& snt,
 	       TokenIndex& V, ttrack_t const& T,
 	       tsa_t const& I, SinglePhrase::cache_t& cache,
-	       vector<vector<sptr<SinglePhrase> > >& dest)
+	       vector<vector<SPTR<SinglePhrase> > >& dest)
 {
   dest.resize(snt.size());
   for (size_t i = 0; i < snt.size(); ++i)
@@ -194,7 +194,7 @@ lookup_phrases(vector<id_type> const& snt,
 	{
 	  if (m.approxOccurrenceCount() < 3) break;
 	  // if (k - i > 0) break;
-	  sptr<SinglePhrase>& o = cache[m.getPid()];
+	  SPTR<SinglePhrase>& o = cache[m.getPid()];
 	  if (!o)
 	    {
 	      o.reset(new SinglePhrase());
@@ -655,7 +655,7 @@ int main(int argc, char* argv[])
       vector<Token> snt1,snt2;
       fill_token_seq(*BT.V1,line1,snt1);
       fill_token_seq(*BT.V2,line2,snt2);
-      vector<vector<sptr<vector<PhrasePair<Token> > > > > pt1,pt2;
+      vector<vector<SPTR<vector<PhrasePair<Token> > > > > pt1,pt2;
       vector<vector<uint64_t> > pm1,pm2;
       BT.lookup(snt1,*BT.I1,pt1,&pm1,&scorer);
       BT.lookup(snt2,*BT.I2,pt2,&pm2,&scorer);
@@ -672,7 +672,7 @@ int main(int argc, char* argv[])
 	for (ushort k = 0; k < pm2[i].size(); ++k)
 	  p2s2[pm2[i][k]].push_back(make_pair(i,i+k+1));
 
-      boost::unordered_map<uint64_t,sptr<vector<PhrasePair<Token> > > > all1,all2;
+      boost::unordered_map<uint64_t,SPTR<vector<PhrasePair<Token> > > > all1,all2;
       vector<PhrasePair<Token> > pp_all;
       for (size_t i = 0; i < pt2.size(); ++i)
 	for (size_t k = 0; k < pt2[i].size(); ++k)

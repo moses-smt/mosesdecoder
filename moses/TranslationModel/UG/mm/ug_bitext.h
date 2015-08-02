@@ -93,8 +93,8 @@ namespace Moses {
       // ttasksptr const m_ttask;
       // size_t max_samples;
       boost::shared_mutex lock;
-      sptr<SamplingBias> bias;
-      sptr<pstats::cache_t> cache1, cache2;
+      SPTR<SamplingBias> bias;
+      SPTR<pstats::cache_t> cache1, cache2;
       std::ostream* bias_log;
       ContextForQuery() : bias_log(NULL) { }
     };
@@ -114,29 +114,29 @@ namespace Moses {
       mutable boost::shared_mutex m_lock; // for thread-safe operation
 
       class agenda; // for parallel sampling see ug_bitext_agenda.h
-      mutable sptr<agenda> ag;
+      mutable SPTR<agenda> ag;
       size_t m_num_workers; // number of workers available to the agenda
 
       size_t m_default_sample_size;
       size_t m_pstats_cache_threshold; // threshold for caching sampling results
-      sptr<pstats::cache_t> m_cache1, m_cache2; // caches for sampling results
+      SPTR<pstats::cache_t> m_cache1, m_cache2; // caches for sampling results
 
       std::vector<string> m_docname;
       map<string,id_type>  m_docname2docid; // maps from doc names to ids
-      sptr<std::vector<id_type> >   m_sid2docid; // maps from sentences to docs (ids)
+      SPTR<std::vector<id_type> >   m_sid2docid; // maps from sentences to docs (ids)
 
       mutable pplist_cache_t m_pplist_cache1, m_pplist_cache2;
       // caches for unbiased sampling; biased sampling uses the caches that
       // are stored locally on the translation task
 
     public:
-      sptr<Ttrack<char> >  Tx; // word alignments
-      sptr<Ttrack<Token> > T1; // token track
-      sptr<Ttrack<Token> > T2; // token track
-      sptr<TokenIndex>     V1; // vocab
-      sptr<TokenIndex>     V2; // vocab
-      sptr<TSA<Token> >    I1; // indices
-      sptr<TSA<Token> >    I2; // indices
+      SPTR<Ttrack<char> >  Tx; // word alignments
+      SPTR<Ttrack<Token> > T1; // token track
+      SPTR<Ttrack<Token> > T2; // token track
+      SPTR<TokenIndex>     V1; // vocab
+      SPTR<TokenIndex>     V2; // vocab
+      SPTR<TSA<Token> >    I1; // indices
+      SPTR<TSA<Token> >    I2; // indices
 
       /// given the source phrase sid[start:stop]
       //  find the possible start (s1 .. s2) and end (e1 .. e2)
@@ -156,11 +156,11 @@ namespace Moses {
 
       // prep2 launches sampling and returns immediately.
       // lookup (below) waits for the job to finish before it returns
-      sptr<pstats>
+      SPTR<pstats>
       prep2(iter const& phrase, int max_sample = -1) const;
 
 #ifndef NO_MOSES
-      sptr<pstats>
+      SPTR<pstats>
       prep2(ttasksptr const& ttask, iter const& phrase, int max_sample = -1) const;
 #endif 
 
@@ -177,12 +177,12 @@ namespace Moses {
       virtual void
       open(string const base, string const L1, string const L2) = 0;
 
-      sptr<pstats>
+      SPTR<pstats>
       lookup(iter const& phrase, int max_sample = -1) const;
       void prep(iter const& phrase) const;
 
 #ifndef NO_MOSES
-      sptr<pstats>
+      SPTR<pstats>
       lookup(ttasksptr const& ttask, iter const& phrase, int max_sample = -1) const;
       void prep(ttasksptr const& ttask, iter const& phrase) const;
 #endif
@@ -195,13 +195,13 @@ namespace Moses {
 
       virtual size_t revision() const { return 0; }
 
-      sptr<SentenceBias>
+      SPTR<SentenceBias>
       loadSentenceBias(string const& fname) const;
 
-      sptr<DocumentBias>
+      SPTR<DocumentBias>
       SetupDocumentBias(string const& bserver, string const& text, std::ostream* log) const;
 
-      sptr<DocumentBias>
+      SPTR<DocumentBias>
       SetupDocumentBias(map<string,float> context_weights, std::ostream* log) const;
 
       void
@@ -229,11 +229,11 @@ namespace Moses {
     }
 
     template<typename Token>
-    sptr<SentenceBias>
+    SPTR<SentenceBias>
     Bitext<Token>::
     loadSentenceBias(string const& fname) const
     {
-      sptr<SentenceBias> ret(new SentenceBias(T1->size()));
+      SPTR<SentenceBias> ret(new SentenceBias(T1->size()));
       ifstream in(fname.c_str());
       size_t i = 0;
       float v; while (in>>v) (*ret)[i++] = v;
@@ -320,11 +320,11 @@ namespace Moses {
       typedef L2R_Token<SimpleWordId> TKN;
       std::vector<string> const & snt;
       TokenIndex           & V;
-      sptr<imTtrack<TKN> > & track;
-      sptr<imTSA<TKN > >   & index;
+      SPTR<imTtrack<TKN> > & track;
+      SPTR<imTSA<TKN > >   & index;
     public:
       snt_adder(std::vector<string> const& s, TokenIndex& v,
-    		sptr<imTtrack<TKN> >& t, sptr<imTSA<TKN> >& i);
+    		SPTR<imTtrack<TKN> >& t, SPTR<imTSA<TKN> >& i);
 
       void operator()();
     };
@@ -431,12 +431,12 @@ namespace Moses {
     }
 
     template<typename Token>
-    sptr<DocumentBias>
+    SPTR<DocumentBias>
     Bitext<Token>::
     SetupDocumentBias
     ( string const& bserver, string const& text, std::ostream* log ) const
     {
-      sptr<DocumentBias> ret;
+      SPTR<DocumentBias> ret;
       UTIL_THROW_IF2(m_sid2docid == NULL,
 		     "Document bias requested but no document map loaded.");
       ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid,
@@ -445,12 +445,12 @@ namespace Moses {
     }
 
     template<typename Token>
-    sptr<DocumentBias>
+    SPTR<DocumentBias>
     Bitext<Token>::
     SetupDocumentBias
     ( map<string,float> context_weights, std::ostream* log ) const
     {
-      sptr<DocumentBias> ret;
+      SPTR<DocumentBias> ret;
       UTIL_THROW_IF2(m_sid2docid == NULL,
                      "Document bias requested but no document map loaded.");
       ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid,
@@ -473,14 +473,14 @@ namespace Moses {
     // and waits until the sampling is finished before it returns.
     // This allows sampling in the background
     template<typename Token>
-    sptr<pstats>
+    SPTR<pstats>
     Bitext<Token>
     ::prep2
     (iter const& phrase, int max_sample) const
     {
       if (max_sample < 0) max_sample = m_default_sample_size;
-      sptr<SamplingBias> bias;
-      sptr<pstats::cache_t> cache;
+      SPTR<SamplingBias> bias;
+      SPTR<pstats::cache_t> cache;
       // - no caching for rare phrases and special requests (max_sample)
       //   (still need to test what a good caching threshold is ...)
       // - use the task-specific cache when there is a sampling bias
@@ -490,8 +490,8 @@ namespace Moses {
 	  cache = (phrase.root == I1.get() ? m_cache1 : m_cache2);
 	}
 
-      sptr<pstats> ret;
-      sptr<pstats> const* cached;
+      SPTR<pstats> ret;
+      SPTR<pstats> const* cached;
 
       if (cache && (cached = cache->get(phrase.getPid(), ret)) && *cached)
 	return *cached;
@@ -513,7 +513,7 @@ namespace Moses {
     class pstats2pplist
     {
       Ttrack<Token> const& m_other;
-      sptr<pstats> m_pstats;
+      SPTR<pstats> m_pstats;
       std::vector<PhrasePair<Token> >& m_pplist;
       typename PhrasePair<Token>::Scorer const* m_scorer;
       PhrasePair<Token> m_pp;
@@ -526,7 +526,7 @@ namespace Moses {
       // CONSTRUCTOR
       pstats2pplist(typename TSA<Token>::tree_iterator const& m,
 		    Ttrack<Token> const& other,
-		    sptr<pstats> const& ps,
+		    SPTR<pstats> const& ps,
 		    std::vector<PhrasePair<Token> >& dest,
 		    typename PhrasePair<Token>::Scorer const* scorer)
 	: m_other(other)

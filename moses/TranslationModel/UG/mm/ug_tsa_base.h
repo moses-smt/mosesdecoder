@@ -317,11 +317,11 @@ namespace ugdiss
 
   public:
     // virtual
-    sptr<TSA_tree_iterator<TKN> >
+    SPTR<TSA_tree_iterator<TKN> >
     find(TKN const* start, size_t len) const
     {
       typedef TSA_tree_iterator<TKN> iter;
-      sptr<iter> ret(new iter(this));
+      SPTR<iter> ret(new iter(this));
       size_t i = 0;
       while (i < len && ret->extend(start[i])) ++i;
       if (i < len) ret.reset();
@@ -333,12 +333,12 @@ namespace ugdiss
   // ======================================================================
 
   // template<typename TOKEN>
-  // sptr<TSA_tree_iterator<TOKEN> >
+  // SPTR<TSA_tree_iterator<TOKEN> >
   // TSA<TOKEN>::
   // find(TOKEN const* start, size_t len) const
   // {
   //   typedef TSA_tree_iterator<TOKEN> iter;
-  //   sptr<iter> ret(new iter(this));
+  //   SPTR<iter> ret(new iter(this));
   //   size_t i = 0;
   //   while (i < len && ret->extend(start[i])) ++i;
   //   if (i < len) ret.reset();
