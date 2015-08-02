@@ -19,12 +19,14 @@
 #include "moses/TreeInput.h"
 #include "moses/TranslationTask.h"
 #include <boost/shared_ptr.hpp>
-
 #include <xmlrpc-c/base.hpp>
+
+#include "Translator.h"
+
 namespace MosesServer
 {
 class
-  TranslationRequest : public virtual Moses::TranslationTask
+TranslationRequest : public virtual Moses::TranslationTask
 {
   boost::condition_variable& m_cond;
   boost::mutex& m_mutex;
@@ -43,6 +45,8 @@ class
   bool m_nbestDistinct;
   bool m_withScoreBreakdown;
   size_t m_nbestSize;
+
+  uint64_t m_session_id; // 0 means none, 1 means new
 
   void
   parse_request();
@@ -99,7 +103,8 @@ public:
 
   static
   boost::shared_ptr<TranslationRequest>
-  create(xmlrpc_c::paramList const& paramList,
+  create(Translator& translator,
+	 xmlrpc_c::paramList const& paramList,
          boost::condition_variable& cond,
          boost::mutex& mut);
 
