@@ -2783,7 +2783,7 @@ sub define_interpolated_lm_interpolate {
         my $weight_list = "";
         foreach my $id_set (@{$$ILM_SETS{$factor}{$order}}) {
           my ($id,$set) = split(/ /,$id_set,2);
-          $lm_list .= $LM[$id].",";
+          $lm_list .= $LM[$id]."," if $LM[$id];
           if (defined($weights)) {
             die("ERROR: no interpolation weight set for $factor:$order:$set (factor:order:set)")
               unless defined($WEIGHT{"$factor:$order:$set"});

@@ -186,7 +186,7 @@ train-nplm
   in: stripped-corpus
   out: binlm
   ignore-unless: nplm
-  rerun-on-change: stripped-corpus
+  rerun-on-change: stripped-corpus nplm-settings
   default-name: lm/nplm
 get-corpus
 	in: get-corpus-script
