@@ -30,7 +30,7 @@ namespace ugdiss
   typedef std::vector<int_3d_table>      int_4d_table;
 }
 
-#define sptr   boost::shared_ptr
+#define SPTR   boost::shared_ptr
 #define scoptr boost::scoped_ptr
 #define rcast  reinterpret_cast
 #endif

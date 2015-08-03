@@ -147,7 +147,7 @@
 //     prep2(phrase);
 //   }
 
-//   sptr<mmbitext::pstats>
+//   SPTR<mmbitext::pstats>
 //   mmbitext::
 //   prep2(iter const& phrase)
 //   {
@@ -156,20 +156,20 @@
 // 	ag = new agenda(*this);
 // 	ag->add_workers(20);
 //       }
-//     typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
+//     typedef boost::unordered_map<uint64_t,SPTR<pstats> > pcache_t;
 //     uint64_t pid = phrase.getPid();
 //     pcache_t & cache(phrase.root == &this->I1 ? cache1 : cache2);
-//     pcache_t::value_type entry(pid,sptr<pstats>());
+//     pcache_t::value_type entry(pid,SPTR<pstats>());
 //     pair<pcache_t::iterator,bool> foo = cache.emplace(entry);
 //     if (foo.second) foo.first->second = ag->add_job(phrase, 1000);
 //     return foo.first->second;
 //   }
 
-//   sptr<mmbitext::pstats>
+//   SPTR<mmbitext::pstats>
 //   mmbitext::
 //   lookup(iter const& phrase)
 //   {
-//     sptr<pstats> ret = prep2(phrase);
+//     SPTR<pstats> ret = prep2(phrase);
 //     boost::unique_lock<boost::mutex> lock(ret->lock);
 //     while (ret->in_progress)
 //       ret->ready.wait(lock);
@@ -184,7 +184,7 @@
 //   {
 //     uint64_t sid=0, offset=0, len=0; // of the source phrase
 //     bool     fwd=false;              // source phrase is L1
-//     sptr<mmbitext::pstats> stats;
+//     SPTR<mmbitext::pstats> stats;
 //     size_t s1=0, s2=0, e1=0, e2=0;
 //     for (; ag.get_task(sid,offset,len,fwd,stats); )
 //       {
@@ -260,7 +260,7 @@
 //     if (ag) delete ag;
 //   }
 
-//   sptr<mmbitext::pstats>
+//   SPTR<mmbitext::pstats>
 //   mmbitext::
 //   agenda::
 //   add_job(mmbitext::iter const& phrase, size_t const max_samples)
@@ -286,7 +286,7 @@
 // 	  {
 // 	    if (workers[i]->timed_join(nodelay))
 // 	      {
-// 		workers[i] = sptr<boost::thread>(new boost::thread(worker(*this)));
+// 		workers[i] = SPTR<boost::thread>(new boost::thread(worker(*this)));
 // 	      }
 // 	  }
 //       }
@@ -297,7 +297,7 @@
 //   mmbitext::
 //   agenda::
 //   get_task(uint64_t & sid, uint64_t & offset, uint64_t & len,
-// 	   bool & fwd, sptr<mmbitext::pstats> & stats)
+// 	   bool & fwd, SPTR<mmbitext::pstats> & stats)
 //   {
 //     boost::unique_lock<boost::mutex> lock(this->lock);
 //     if (this->doomed || this->shutdown)
@@ -385,7 +385,7 @@
 //       {
 //   	for (int i = 0; i < n; ++i)
 // 	  {
-// 	    sptr<boost::thread> w(new boost::thread(worker(*this)));
+// 	    SPTR<boost::thread> w(new boost::thread(worker(*this)));
 // 	    workers.push_back(w);
 // 	  }
 //       }

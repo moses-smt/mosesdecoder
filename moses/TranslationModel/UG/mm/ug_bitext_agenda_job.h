@@ -23,7 +23,7 @@ job
 
 public:
   size_t         workers; // how many workers are working on this job?
-  sptr<TSA<Token> const> root; // root of the underlying suffix array
+  SPTR<TSA<Token> const> root; // root of the underlying suffix array
   char const*       next; // next position to read from
   char const*       stop; // end of index range
   size_t     max_samples; // how many samples to extract at most
@@ -32,8 +32,8 @@ public:
 			   */
   size_t             len; // phrase length
   bool               fwd; // if true, source phrase is L1
-  sptr<pstats>     stats; // stores statistics collected during sampling
-  sptr<SamplingBias const> const m_bias; // sentence-level bias for sampling
+  SPTR<pstats>     stats; // stores statistics collected during sampling
+  SPTR<SamplingBias const> const m_bias; // sentence-level bias for sampling
   float bias_total;
   bool nextSample(uint64_t & sid, uint64_t & offset); // select next occurrence
 
@@ -45,8 +45,8 @@ public:
   bool done() const;
   job(Bitext<Token> const* const theBitext,
       typename TSA<Token>::tree_iterator const& m,
-      sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd,
-      sptr<SamplingBias const> const& bias);
+      SPTR<TSA<Token> > const& r, size_t maxsmpl, bool isfwd,
+      SPTR<SamplingBias const> const& bias);
   ~job();
 };
 
@@ -65,8 +65,8 @@ template<typename Token>
 Bitext<Token>::agenda::job
 ::job(Bitext<Token> const* const theBitext,
       typename TSA<Token>::tree_iterator const& m,
-      sptr<TSA<Token> > const& r, size_t maxsmpl,
-      bool isfwd, sptr<SamplingBias const> const& bias)
+      SPTR<TSA<Token> > const& r, size_t maxsmpl,
+      bool isfwd, SPTR<SamplingBias const> const& bias)
   : m_bitext(theBitext)
   , rnd(0)
   , rnddenom(rnd.max() + 1.)

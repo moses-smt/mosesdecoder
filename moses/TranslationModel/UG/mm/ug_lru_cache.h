@@ -8,8 +8,8 @@
 #include <sys/time.h>
 
 
-#ifndef sptr
-#define sptr boost::shared_ptr
+#ifndef SPTR
+#define SPTR boost::shared_ptr
 #endif
 
 namespace lru_cache
@@ -65,14 +65,14 @@ namespace lru_cache
     size_t capacity() const { return m_recs.capacity(); }
     void reserve(size_t s) { m_recs.reserve(s); }
 
-    sptr<VAL>
+    SPTR<VAL>
     get(KEY const& key)
     {
       uint32_t p;
       { // brackets needed for lock scoping
 	boost::shared_lock<boost::shared_mutex> rlock(m_lock);
 	typename map_t::const_iterator i = m_idx.find(key);
-	if (i == m_idx.end()) return sptr<VAL>();
+	if (i == m_idx.end()) return SPTR<VAL>();
 	p = i->second;
       }
       boost::lock_guard<boost::shared_mutex> guard(m_lock);
@@ -81,7 +81,7 @@ namespace lru_cache
     }
 
     void
-    set(KEY const& key, sptr<VAL> const& ptr)
+    set(KEY const& key, SPTR<VAL> const& ptr)
     {
       boost::lock_guard<boost::shared_mutex> lock(m_lock);
       std::pair<typename map_t::iterator,bool> foo;

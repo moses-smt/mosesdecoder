@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
       exit(1);
     }
   bg.open(argv[1],argv[2],argv[3]);
-  sptr<imbitext> fg(new imbitext(bg.V1,bg.V2));
+  SPTR<imbitext> fg(new imbitext(bg.V1,bg.V2));
   string base = argv[4];
   if (*base.rbegin() != '.') base += '.';
   string srcfile = base + argv[2];
@@ -124,10 +124,10 @@ int main(int argc, char* argv[])
       // show_pair(sid);
       vector<Token> snt;
       fill_token_seq(*bg.V1,src[sid],snt);
-      vector<vector<sptr<vector<PhrasePair<Token> > > > > FG,BG;
+      vector<vector<SPTR<vector<PhrasePair<Token> > > > > FG,BG;
       fg->lookup(snt,*fg->I1,FG,NULL,NULL,&bias,true);
       bg.lookup(snt,*bg.I1,BG,NULL,NULL,NULL,true);
-      set<sptr<vector<PhrasePair<Token> > > > seen;
+      set<SPTR<vector<PhrasePair<Token> > > > seen;
       for (size_t i = 0; i < snt.size(); ++i)
 	{
 	  Bitext<Token>::iter m0(fg->I1.get());
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 	      BOOST_FOREACH(PhrasePair<Token> const& pp, *FG[i][k])
 		{
 		  if (pp.joint < 2) continue;
-		  sptr<pstats> bgstats;
+		  SPTR<pstats> bgstats;
 		  jstats const* bgjstats = NULL;
 		  Bitext<Token>::iter m2(bg.I2.get(), pp.start2, pp.len2);
 		  if (m1.approxOccurrenceCount() > 5000 ||

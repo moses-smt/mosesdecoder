@@ -62,9 +62,9 @@ namespace Moses
     typedef TSA<Token>           tsa;
     typedef PhraseScorer<Token> pscorer;
   private:
-    // vector<sptr<bitext> > shards;
+    // vector<SPTR<bitext> > shards;
     mmbitext btfix;
-    sptr<imbitext> btdyn;
+    SPTR<imbitext> btdyn;
     std::string m_bname, m_extra_data, m_bias_file,m_bias_server;
     std::string L1;
     std::string L2;
@@ -96,27 +96,27 @@ namespace Moses
     std::vector<bool> m_is_logval;  // keeps track of which features are log valued
     std::vector<bool> m_is_integer; // keeps track of which features are integer valued
 
-    std::vector<sptr<pscorer > > m_active_ff_fix; // activated feature functions (fix)
-    std::vector<sptr<pscorer > > m_active_ff_dyn; // activated feature functions (dyn)
-    std::vector<sptr<pscorer > > m_active_ff_common;
+    std::vector<SPTR<pscorer > > m_active_ff_fix; // activated feature functions (fix)
+    std::vector<SPTR<pscorer > > m_active_ff_dyn; // activated feature functions (dyn)
+    std::vector<SPTR<pscorer > > m_active_ff_common;
     // activated feature functions (dyn)
 
     void
-    register_ff(sptr<pscorer> const& ff, std::vector<sptr<pscorer> > & registry);
+    register_ff(SPTR<pscorer> const& ff, std::vector<SPTR<pscorer> > & registry);
 
     template<typename fftype>
     void
-    check_ff(std::string const ffname,std::vector<sptr<pscorer> >* registry = NULL);
+    check_ff(std::string const ffname,std::vector<SPTR<pscorer> >* registry = NULL);
     // add feature function if specified
 
     template<typename fftype>
     void
     check_ff(std::string const ffname, float const xtra,
-	     std::vector<sptr<pscorer> >* registry = NULL);
+	     std::vector<SPTR<pscorer> >* registry = NULL);
     // add feature function if specified
 
     void
-    add_corpus_specific_features(std::vector<sptr<pscorer > >& ffvec);
+    add_corpus_specific_features(std::vector<SPTR<pscorer > >& ffvec);
 
     // built-in feature functions
     // PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
@@ -153,7 +153,7 @@ namespace Moses
               Phrase const& src,
 	      Moses::bitext::PhrasePair<Token>* fix,
 	      Moses::bitext::PhrasePair<Token>* dyn,
-	      sptr<Bitext<Token> > const& dynbt) const;
+	      SPTR<Bitext<Token> > const& dynbt) const;
 
     void
     process_pstats
@@ -233,13 +233,13 @@ namespace Moses
     void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
 
     // align two new sentences
-    sptr<std::vector<int> >
+    SPTR<std::vector<int> >
     align(std::string const& src, std::string const& trg) const;
 
     std::vector<std::string> const&
     GetFeatureNames() const;
 
-    sptr<DocumentBias>
+    SPTR<DocumentBias>
     setupDocumentBias(std::map<std::string,float> const& bias) const;
 
     vector<float> DefaultWeights() const;

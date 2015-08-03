@@ -57,7 +57,7 @@ namespace stats
 
 struct SinglePhrase
 {
-  typedef map<uint64_t,sptr<SinglePhrase> > cache_t;
+  typedef map<uint64_t,SPTR<SinglePhrase> > cache_t;
   uint64_t pid; // phrase id
   vector<ttrack::Position> occs; // occurrences
 };
@@ -72,7 +72,7 @@ struct PhrasePair
 
   struct stats_t
   {
-    typedef map<pair<uint64_t,uint64_t>, sptr<stats_t> > cache_t;
+    typedef map<pair<uint64_t,uint64_t>, SPTR<stats_t> > cache_t;
     size_t m1,m2,j;
     float  npmi; // normalized point-wise mutual information
     float   pmi; // point-wise mutual information
@@ -170,7 +170,7 @@ void
 lookup_phrases(vector<id_type> const& snt,
 	       TokenIndex& V, ttrack_t const& T,
 	       tsa_t const& I, SinglePhrase::cache_t& cache,
-	       vector<vector<sptr<SinglePhrase> > >& dest)
+	       vector<vector<SPTR<SinglePhrase> > >& dest)
 {
   dest.resize(snt.size());
   for (size_t i = 0; i < snt.size(); ++i)
@@ -181,7 +181,7 @@ lookup_phrases(vector<id_type> const& snt,
 	{
 	  if (m.approxOccurrenceCount() < 3) break;
 	  // if (k - i > 0) break;
-	  sptr<SinglePhrase>& o = cache[m.getPid()];
+	  SPTR<SinglePhrase>& o = cache[m.getPid()];
 	  if (!o)
 	    {
 	      o.reset(new SinglePhrase());
@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
   while (getline(cin,line1) and getline(cin,line2))
     {
       cout << "\n" << line1 << "\n" << line2 << endl;
-      vector<vector<sptr<SinglePhrase> > > M1,M2;
+      vector<vector<SPTR<SinglePhrase> > > M1,M2;
       vector<id_type> snt1,snt2;
       V1.fillIdSeq(line1,snt1);
       V2.fillIdSeq(line2,snt2);
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
 		  for (size_t k2 = 0; k2 < M2[i2].size(); ++k2)
 		    {
 		      pp.e2 = i2 + k2 + 1;
-		      sptr<PhrasePair::stats_t> & s
+		      SPTR<PhrasePair::stats_t> & s
 			= ppcache[make_pair(M1[i1][k1]->pid,M2[i2][k2]->pid)];
 		      if (!s)
 			{

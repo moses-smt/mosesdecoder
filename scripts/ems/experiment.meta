@@ -259,7 +259,7 @@ post-split-factorize
         default-name: lm/split-factored
         rerun-on-change: TRAINING:input-factors TRAINING:output-factors
         pass-unless: factorize-after-split
-        ignore-if: concatenate-files concatenate-files-split
+        ignore-if: concatenate-files
         parallelizable: yes
         error: can't open
         error: incompatible number of words in factor

@@ -105,7 +105,7 @@
 //     vector<id_type> s,t;
 //     pidmap_t   sspan2pid, tspan2pid; // span -> phrase ID
 //     pid2span_t spid2span,tpid2span;
-//     vector<vector<sptr<pstats> > > spstats;
+//     vector<vector<SPTR<pstats> > > spstats;
 
 //     vector<PhrasePair> PP;
 //     // position-independent phrase pair info
@@ -115,7 +115,7 @@
 //     // maps from target start positions to PhraseAlnHyps starting at
 //     // that position
 
-//     sptr<pstats> getPstats(span const& sspan);
+//     SPTR<pstats> getPstats(span const& sspan);
 //     void fill_tspan_maps();
 //     void fill_sspan_maps();
 //   public:
@@ -183,14 +183,14 @@
 //       }
 //   }
 
-//   sptr<pstats>
+//   SPTR<pstats>
 //   Alignment::
 //   getPstats(span const& sspan)
 //   {
 //     size_t k = sspan.second - sspan.first - 1;
 //     if (k < spstats[sspan.first].size())
 //       return spstats[sspan.first][k];
-//     else return sptr<pstats>();
+//     else return SPTR<pstats>();
 //   }
 
 //   void
@@ -278,7 +278,7 @@
 // 	if (!L->second.size()) continue; // should never happen anyway
 // 	int i = L->second[0].first;
 // 	int k = L->second[0].second - i -1;
-// 	sptr<pstats> ps = spstats[i][k];
+// 	SPTR<pstats> ps = spstats[i][k];
 // 	PhrasePair pp; pp.init(L->first,*ps, PT.m_numScoreComponents);
 // 	jStatsTable & J = ps->trg;
 // 	for (jStatsTable::iterator y = J.begin(); y != J.end(); ++y)
@@ -318,7 +318,7 @@
 //     return ret;
 //   }
 
-//   sptr<vector<int> >
+//   SPTR<vector<int> >
 //   Mmsapt::
 //   align(string const& src, string const& trg) const
 //   {
@@ -328,7 +328,7 @@
 //     VectorIndexSorter<PhraseAlnHyp> foo(A.PAH);
 //     vector<size_t> o; foo.GetOrder(o);
 //     BOOST_FOREACH(int i, o) A.show(cout,A.PAH[i]);
-//     sptr<vector<int> > aln;
+//     SPTR<vector<int> > aln;
 //     return aln;
 // }
 // }

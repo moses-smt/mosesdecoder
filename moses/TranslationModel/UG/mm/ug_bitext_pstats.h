@@ -15,8 +15,8 @@ namespace Moses
     struct
     pstats
     {
-      typedef boost::unordered_map<uint64_t, sptr<pstats> > map_t;
-      typedef ThreadSafeContainer<uint64_t, sptr<pstats>, map_t> cache_t;
+      typedef boost::unordered_map<uint64_t, SPTR<pstats> > map_t;
+      typedef ThreadSafeContainer<uint64_t, SPTR<pstats>, map_t> cache_t;
       typedef std::vector<unsigned char> alnvec;
 #if UG_BITEXT_TRACK_ACTIVE_THREADS
       static ThreadSafeCounter active;

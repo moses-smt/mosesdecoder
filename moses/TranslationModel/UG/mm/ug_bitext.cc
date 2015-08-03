@@ -45,8 +45,8 @@ namespace Moses
 
     snt_adder<L2R_Token<SimpleWordId> >::
     snt_adder(vector<string> const& s, TokenIndex& v,
-     	      sptr<imTtrack<L2R_Token<SimpleWordId> > >& t,
-	      sptr<imTSA<L2R_Token<SimpleWordId> > >& i)
+     	      SPTR<imTtrack<L2R_Token<SimpleWordId> > >& t,
+	      SPTR<imTSA<L2R_Token<SimpleWordId> > >& i)
       : snt(s), V(v), track(t), index(i)
     { }
 

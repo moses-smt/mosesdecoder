@@ -51,7 +51,7 @@ namespace Moses {
       class job;
       class worker;
       list<job> joblist;
-      std::vector<sptr<boost::thread> > workers;
+      std::vector<SPTR<boost::thread> > workers;
       bool shutdown;
       size_t doomed;
     public:
@@ -59,10 +59,10 @@ namespace Moses {
       agenda(mmbitext const& bitext);
       ~agenda();
       void add_workers(int n);
-      sptr<pstats> add_job(mmbitext::iter const& phrase,
+      SPTR<pstats> add_job(mmbitext::iter const& phrase,
 			   size_t const max_samples);
       bool get_task(uint64_t & sid, uint64_t & offset, uint64_t & len,
-		    bool & fwd, sptr<mmbitext::pstats> & stats);
+		    bool & fwd, SPTR<mmbitext::pstats> & stats);
     };
 
     // stores the list of unfinished jobs;
@@ -85,9 +85,9 @@ namespace Moses {
      size_t & s1, size_t & s2, size_t & e1, size_t & e2,
      std::vector<uchar> * core_alignment, bool const flip) const;
 
-    boost::unordered_map<uint64_t,sptr<pstats> > cache1,cache2;
+    boost::unordered_map<uint64_t,SPTR<pstats> > cache1,cache2;
   private:
-    sptr<pstats>
+    SPTR<pstats>
     prep2(iter const& phrase);
   public:
     mmbitext();
@@ -95,7 +95,7 @@ namespace Moses {
 
     void open(string const base, string const L1, string const L2);
 
-    sptr<pstats> lookup(iter const& phrase);
+    SPTR<pstats> lookup(iter const& phrase);
     void prep(iter const& phrase);
   };
 
@@ -182,7 +182,7 @@ namespace Moses {
     size_t         ctr;
     size_t         len;
     bool           fwd;
-    sptr<mmbitext::pstats> stats;
+    SPTR<mmbitext::pstats> stats;
     bool step(uint64_t & sid, uint64_t & offset);
   };
 
