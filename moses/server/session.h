@@ -49,7 +49,7 @@ namespace MosesServer{
             }
         }
       boost::upgrade_to_unique_lock<boost::shared_mutex> xlock(lock);
-      if (id==1) id = ++m_session_counter;
+      id = ++m_session_counter;
       std::pair<uint64_t, Session> foo(id, Session(id));
       return m_cache.insert(foo).first->second;
     }
