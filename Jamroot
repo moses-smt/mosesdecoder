@@ -134,6 +134,7 @@ if [ option.get "filter-warnings" : : "yes" ] {
   requirements += <cxxflags>-Wno-unused-result ;
   requirements += <cxxflags>-Wno-unused-variable ;
   requirements += <cxxflags>-Wcomment ;
+  requirements += <cxxflags>-Wstrict-aliasing ;
 }
 
 if [ option.get "debug-build" : : "yes" ] {
