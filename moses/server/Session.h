@@ -4,6 +4,7 @@
 #include "moses/ContextScope.h"
 #include <sys/time.h>
 #include <boost/unordered_map.hpp>
+
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
@@ -16,6 +17,8 @@ namespace MosesServer{
     time_t start_time;
     time_t last_access;
     boost::shared_ptr<Moses::ContextScope> const scope; // stores local info
+
+
 
     Session(uint64_t const session_id) 
       : id(session_id), scope(new Moses::ContextScope) 
@@ -53,6 +56,15 @@ namespace MosesServer{
       std::pair<uint64_t, Session> foo(id, Session(id));
       return m_cache.insert(foo).first->second;
     }
+
+    void
+    erase(uint32_t const id)
+    {
+      boost::unique_lock<boost::shared_mutex> lock(m_lock);
+      m_cache.erase(id);
+    }
+
+
   };
 
 

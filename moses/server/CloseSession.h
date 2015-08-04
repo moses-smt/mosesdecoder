@@ -1,9 +1,5 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: -*-
 #pragma once
-
-#include "moses/ThreadPool.h"
-#include "moses/parameters/ServerOptions.h"
-#include "Session.h"
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>
@@ -12,23 +8,17 @@
 #endif
 namespace MosesServer
 {
-
   class Server;
-
   class
-  Translator : public xmlrpc_c::method
+  CloseSession : public xmlrpc_c::method
   {
     Server& m_server;
-    // Moses::ServerOptions m_server_options;
   public:
-    Translator(Server& server);
-    
+    CloseSession(Server& server);
+
     void execute(xmlrpc_c::paramList const& paramList,
 		 xmlrpc_c::value *   const  retvalP);
     
-    Session const& get_session(uint64_t session_id);
-  private:
-    Moses::ThreadPool m_threadPool;
   };
-
+  
 }

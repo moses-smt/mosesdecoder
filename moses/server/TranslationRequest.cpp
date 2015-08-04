@@ -39,7 +39,8 @@ void
 TranslationRequest::
 Run()
 {
-  parse_request(m_paramList.getStruct(0));
+  std::map<std::string,xmlrpc_c::value>const& params = m_paramList.getStruct(0);
+  parse_request(params);
   // cerr << "SESSION ID" << ret->m_session_id << endl;
   if (m_session_id)
     {
@@ -253,7 +254,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   m_source_string = xmlrpc_c::value_string(si->second);
   XVERBOSE(1,"Input: " << m_source_string << endl);
 
-  si = params.find("session_id");
+  si = params.find("session-id");
   if (si != params.end())
     m_session_id = xmlrpc_c::value_int(si->second);
   else
@@ -386,7 +387,7 @@ run_phrase_decoder()
 
   pack_hypothesis(manager.GetBestHypothesis(), "text", m_retData);
   if (m_session_id)
-    m_retData["session_id"] = xmlrpc_c::value_int(m_session_id);
+    m_retData["session-id"] = xmlrpc_c::value_int(m_session_id);
   
   if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
   if (m_withTopts) insertTranslationOptions(manager,m_retData);

@@ -63,10 +63,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>
-#include "server/Translator.h"
-#include "server/Optimizer.h"
-#include "server/Updater.h"
-#include "moses/parameters/ServerOptions.h"
+#include "server/Server.h"
 #endif
 
 using namespace std;
@@ -147,44 +144,8 @@ Parameter params;
 int
 run_as_server()
 {
-#ifdef HAVE_XMLRPC_C
-  ServerOptions sopts(params);
-  if (sopts.is_serial) VERBOSE(1,"Running server in serial mode." << endl);
-
-  xmlrpc_c::registry myRegistry;
-
-  xmlrpc_c::methodPtr const 
-    translator(new MosesServer::Translator(sopts)),
-    updater(new MosesServer::Updater),
-    optimizer(new MosesServer::Optimizer);
-
-  myRegistry.addMethod("translate", translator);
-  myRegistry.addMethod("updater", updater);
-  myRegistry.addMethod("optimize", optimizer);
-
-  xmlrpc_c::serverAbyss myAbyssServer(
-    xmlrpc_c::serverAbyss::constrOpt()
-    .registryP(&myRegistry)
-    .portNumber(sopts.port) // TCP port on which to listen
-    .logFileName(sopts.logfile)
-    .allowOrigin("*")
-    .maxConn(sopts.num_threads)
-  );
-
-  XVERBOSE(1,"Listening on port " << sopts.port << endl);
-  if (sopts.is_serial) 
-    {
-      while(true) myAbyssServer.runOnce();
-    }
-  else myAbyssServer.run();
-
-  std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
-  // #pragma message("BUILDING MOSES WITH SERVER SUPPORT")
-#else
-  // #pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT")
-  std::cerr << "Moses was compiled without server support." << endl;
-#endif
-  return 1;
+  MosesServer::Server server(params);
+  return server.run(); // actually: don't return. see Server::run()
 }
 
 int

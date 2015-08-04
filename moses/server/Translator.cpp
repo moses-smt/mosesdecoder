@@ -1,5 +1,6 @@
 #include "Translator.h"
 #include "TranslationRequest.h"
+#include "Server.h"
 
 namespace MosesServer
 {
@@ -8,9 +9,9 @@ using namespace std;
 using namespace Moses;
 
 Translator::
-Translator(Moses::ServerOptions const& sopts)
-  : m_threadPool(sopts.num_threads),
-    m_server_options(sopts)
+Translator(Server& server)
+  : m_threadPool(server.options().num_threads),
+    m_server(server)
 {
   // signature and help strings are documentation -- the client
   // can query this information with a system.methodSignature and
@@ -39,8 +40,7 @@ Session const&
 Translator::
 get_session(uint64_t const id)
 {
-  return m_session_cache[id];
+  return m_server.get_session(id);
 }
-
 
 }
