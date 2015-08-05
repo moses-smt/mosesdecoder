@@ -5,6 +5,7 @@
 
 #include "vw/Classifier.h"
 #include "moses/TypeDef.h"
+#include "moses/TranslationTask.h"
 #include "moses/Util.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 
