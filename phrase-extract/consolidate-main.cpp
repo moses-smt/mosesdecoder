@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
         }
         pos = single_setting.find(":");
         UTIL_THROW_IF2(pos == std::string::npos, "faulty MinScore setting '" << single_setting << "' in '" << argv[i] << "'");
-        unsigned int field = std::atoll( single_setting.substr(0,pos).c_str() );
+        unsigned int field = atoll( single_setting.substr(0,pos).c_str() );
         float threshold = std::atof( single_setting.substr(pos+1).c_str() );
         if (field == 0) {
           minScore0 = threshold;
