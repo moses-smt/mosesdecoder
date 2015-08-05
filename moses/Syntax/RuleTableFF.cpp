@@ -31,14 +31,14 @@ void RuleTableFF::Load()
   SetFeaturesToApply();
 
   const StaticData &staticData = StaticData::Instance();
-  if (staticData.GetSearchAlgorithm() == SyntaxF2S ||
-      staticData.GetSearchAlgorithm() == SyntaxT2S) {
+  if (staticData.options().search.algo == SyntaxF2S ||
+      staticData.options().search.algo == SyntaxT2S) {
     F2S::HyperTree *trie = new F2S::HyperTree(this);
     F2S::HyperTreeLoader loader;
     loader.Load(m_input, m_output, m_filePath, *this, *trie,
                 m_sourceTerminalSet);
     m_table = trie;
-  } else if (staticData.GetSearchAlgorithm() == SyntaxS2T) {
+  } else if (staticData.options().search.algo == SyntaxS2T) {
     S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
     if (algorithm == RecursiveCYKPlus) {
       S2T::RuleTrieCYKPlus *trie = new S2T::RuleTrieCYKPlus(this);
@@ -53,7 +53,7 @@ void RuleTableFF::Load()
     } else {
       UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
     }
-  } else if (staticData.GetSearchAlgorithm() == SyntaxT2S_SCFG) {
+  } else if (staticData.options().search.algo == SyntaxT2S_SCFG) {
     T2S::RuleTrie *trie = new T2S::RuleTrie(this);
     T2S::RuleTrieLoader loader;
     loader.Load(m_input, m_output, m_filePath, *this, *trie);

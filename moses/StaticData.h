@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 
 /***********************************************************************
@@ -44,8 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/Factory.h"
 #include "moses/PP/Factory.h"
 
-#include "moses/parameters/ContextParameters.h"
-#include "moses/parameters/NBestOptions.h"
+#include "moses/parameters/AllOptions.h"
 #include "moses/parameters/BookkeepingOptions.h"
 
 namespace Moses
@@ -70,11 +69,10 @@ class StaticData
   friend class HyperParameterAsWeight;
 
 private:
-  static StaticData									s_instance;
+  static StaticData s_instance;
 protected:
   Parameter *m_parameter;
-
-  ContextParameters m_context_parameters;
+  AllOptions m_options;
 
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
@@ -84,34 +82,29 @@ protected:
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
   float
-  m_beamWidth,
-  m_earlyDiscardingThreshold,
-  m_translationOptionThreshold,
+  // m_beamWidth,
+  // m_earlyDiscardingThreshold,
+  // m_translationOptionThreshold,
   m_wordDeletionWeight;
 
 
   // PhraseTrans, Generation & LanguageModelScore has multiple weights.
-  int				m_maxDistortion;
+  // int				m_maxDistortion;
   // do it differently from old pharaoh
   // -ve	= no limit on distortion
   // 0		= no disortion (monotone in old pharaoh)
   bool m_reorderingConstraint; //! use additional reordering constraints
-  bool m_useEarlyDistortionCost;
-  size_t m_maxHypoStackSize; //! hypothesis-stack size that triggers pruning
-  size_t m_minHypoStackDiversity; //! minimum number of hypothesis in stack for each source word coverage;
-  NBestOptions m_nbest_options;
+  // bool m_useEarlyDistortionCost;
+  // size_t m_maxHypoStackSize; //! hypothesis-stack size that triggers pruning
+  // size_t m_minHypoStackDiversity; //! minimum number of hypothesis in stack for each source word coverage;
   BookkeepingOptions m_bookkeeping_options;
-  // size_t m_nBestSize;
-  // size_t m_nBestFactor;
 
   size_t m_latticeSamplesSize;
-  size_t m_maxNoTransOptPerCoverage;
-  size_t m_maxNoPartTransOpt;
-  size_t m_maxPhraseLength;
+  // size_t m_maxNoTransOptPerCoverage;
+  // size_t m_maxNoPartTransOpt;
+  // size_t m_maxPhraseLength;
 
-  // std::string m_nBestFilePath;
   std::string  m_latticeSamplesFilePath;
-  // bool m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
   std::string m_unknownWordPrefix;
@@ -127,7 +120,7 @@ protected:
   bool m_outputHypoScore;
   bool m_requireSortingAfterSourceContext;
 
-  SearchAlgorithm m_searchAlgorithm;
+  // SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
@@ -135,21 +128,15 @@ protected:
   bool m_reportSegmentation;
   bool m_reportSegmentationEnriched;
   bool m_reportAllFactors;
-  // bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
   std::string m_detailedTreeFragmentsTranslationReportingFilePath;
 
-  //DIMw
   std::string m_detailedAllTranslationReportingFilePath;
 
-  // bool m_onlyDistinctNBest;
   bool m_PrintAlignmentInfo;
-  // bool m_needAlignmentInfo; // => BookkeepingOptions
-  // bool m_PrintAlignmentInfoNbest;
 
   bool m_PrintID;
   bool m_PrintPassthroughInformation;
-  // bool m_PrintPassthroughInformationInNBest;
 
   std::string m_alignmentOutputFile;
 
@@ -174,8 +161,8 @@ protected:
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
   bool m_lmEnableOOVFeature;
 
-  bool m_timeout; //! use timeout
-  size_t m_timeout_threshold; //! seconds after which time out is activated
+  // bool m_timeout; //! use timeout
+  // size_t m_timeout_threshold; //! seconds after which time out is activated
 
   bool m_isAlwaysCreateDirectTranslationOption;
   //! constructor. only the 1 static variable can be created
@@ -192,9 +179,6 @@ protected:
   bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
   std::string m_outputUnknownsFile; //! output unknowns in this file
 
-  size_t m_cubePruningPopLimit;
-  size_t m_cubePruningDiversity;
-  bool m_cubePruningLazyScoring;
   size_t m_ruleLimit;
 
   // Whether to load compact phrase table and reordering table into memory
@@ -221,7 +205,6 @@ protected:
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
   S2TParsingAlgorithm m_s2tParsingAlgorithm;
-  // bool m_printNBestTrees;
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
@@ -260,7 +243,6 @@ protected:
   void ini_lmbr_options();
   void ini_mbr_options();
   void ini_mira_options();
-  bool ini_nbest_options();
   void ini_oov_options();
   bool ini_output_options();
   bool ini_performance_options();
@@ -307,9 +289,14 @@ public:
     return *m_parameter;
   }
 
-  const ContextParameters&
-  GetContextParameters() const {
-    return m_context_parameters;
+  AllOptions const&
+  options() const { 
+    return m_options; 
+  }
+
+  AllOptions& 
+  options() { 
+    return m_options;  
   }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
@@ -338,32 +325,24 @@ public:
     return m_disableDiscarding;
   }
   inline size_t GetMaxNoTransOptPerCoverage() const {
-    return m_maxNoTransOptPerCoverage;
+    return m_options.search.max_trans_opt_per_cov;
   }
   inline size_t GetMaxNoPartTransOpt() const {
-    return m_maxNoPartTransOpt;
+    return m_options.search.max_partial_trans_opt;
   }
   inline size_t GetMaxPhraseLength() const {
-    return m_maxPhraseLength;
+    return m_options.search.max_phrase_length;
   }
   bool IsWordDeletionEnabled() const {
     return m_wordDeletionEnabled;
   }
-  size_t GetMaxHypoStackSize() const {
-    return m_maxHypoStackSize;
-  }
-  size_t GetMinHypoStackDiversity() const {
-    return m_minHypoStackDiversity;
-  }
-  size_t GetCubePruningPopLimit() const {
-    return m_cubePruningPopLimit;
-  }
-  size_t GetCubePruningDiversity() const {
-    return m_cubePruningDiversity;
-  }
-  bool GetCubePruningLazyScoring() const {
-    return m_cubePruningLazyScoring;
-  }
+  // size_t GetMaxHypoStackSize() const {
+  //   return m_options.search.stack_size;
+  // }
+  // size_t GetMinHypoStackDiversity() const {
+  //   return m_options.search.stack_diversity;
+  // }
+
   size_t IsPathRecoveryEnabled() const {
     return m_recoverPath;
   }
@@ -373,30 +352,30 @@ public:
   bool IsPassthroughEnabled() const {
     return m_PrintPassthroughInformation;
   }
-  bool IsPassthroughInNBestEnabled() const {
-    return m_nbest_options.include_passthrough;
-    // return m_PrintPassthroughInformationInNBest;
-  }
+
   int GetMaxDistortion() const {
-    return m_maxDistortion;
+    return m_options.reordering.max_distortion;
   }
   bool UseReorderingConstraint() const {
     return m_reorderingConstraint;
   }
   float GetBeamWidth() const {
-    return m_beamWidth;
+    return m_options.search.beam_width;
   }
   float GetEarlyDiscardingThreshold() const {
-    return m_earlyDiscardingThreshold;
+    return m_options.search.early_discarding_threshold;
   }
+
   bool UseEarlyDiscarding() const {
-    return m_earlyDiscardingThreshold != -std::numeric_limits<float>::infinity();
+    return m_options.search.early_discarding_threshold 
+      != -std::numeric_limits<float>::infinity();
   }
   bool UseEarlyDistortionCost() const {
-    return m_useEarlyDistortionCost;
+    return m_options.reordering.use_early_distortion_cost;
+    // return m_useEarlyDistortionCost;
   }
   float GetTranslationOptionThreshold() const {
-    return m_translationOptionThreshold;
+    return m_options.search.trans_opt_threshold;
   }
 
   size_t GetVerboseLevel() const {
@@ -420,13 +399,11 @@ public:
     else
       std::cerr << "Warning: Invalid value for reportSegmentation (0 - 2)!  Ignoring";
   }
+
   bool GetReportAllFactors() const {
     return m_reportAllFactors;
   }
-  bool GetReportAllFactorsNBest() const {
-    return m_nbest_options.include_all_factors;
-    // return m_reportAllFactorsNBest;
-  }
+
   bool IsDetailedTranslationReportingEnabled() const {
     return !m_detailedTranslationReportingFilePath.empty();
   }
@@ -444,10 +421,10 @@ public:
   const std::string &GetDetailedTreeFragmentsTranslationReportingFilePath() const {
     return m_detailedTreeFragmentsTranslationReportingFilePath;
   }
-  bool IsLabeledNBestList() const {
-    return m_nbest_options.include_feature_labels;
-    // return m_labeledNBestList;
-  }
+
+  // bool IsLabeledNBestList() const {
+  //   return m_options.nbest.include_feature_labels;
+  // }
 
   bool UseMinphrInMemory() const {
     return m_minphrMemory;
@@ -458,26 +435,17 @@ public:
   }
 
   // for mert
-  size_t GetNBestSize() const {
-    return m_nbest_options.nbest_size;
-    // return m_nBestSize;
-  }
+  // size_t GetNBestSize() const {
+  //   return m_options.nbest.nbest_size;
+  // }
 
-  const std::string &GetNBestFilePath() const {
-    return m_nbest_options.output_file_path;
-    // return m_nBestFilePath;
-  }
+  // const std::string &GetNBestFilePath() const {
+  //   return m_options.nbest.output_file_path;
+  // }
 
-  bool IsNBestEnabled() const {
-    return m_nbest_options.enabled;
-    //     return (!m_nBestFilePath.empty() || m_mbr || m_useLatticeMBR || m_mira ||
-    //             m_outputSearchGraph || m_outputSearchGraphSLF ||
-    //             m_outputSearchGraphHypergraph || m_useConsensusDecoding ||
-    // #ifdef HAVE_PROTOBUF
-    //             m_outputSearchGraphPB ||
-    // #endif
-    //             !m_latticeSamplesFilePath.empty());
-  }
+  // bool IsNBestEnabled() const {
+  //   return m_options.nbest.enabled;
+  // }
 
   size_t GetLatticeSamplesSize() const {
     return m_latticeSamplesSize;
@@ -487,10 +455,9 @@ public:
     return m_latticeSamplesFilePath;
   }
 
-  size_t GetNBestFactor() const {
-    return m_nbest_options.factor;
-    // return m_nBestFactor;
-  }
+  // size_t GetNBestFactor() const {
+  //   return m_options.nbest.factor;
+  // }
   bool GetOutputWordGraph() const {
     return m_outputWordGraph;
   }
@@ -499,22 +466,15 @@ public:
   InputTypeEnum GetInputType() const {
     return m_inputType;
   }
-  SearchAlgorithm GetSearchAlgorithm() const {
-    return m_searchAlgorithm;
-  }
 
-  // bool IsSyntax() const {
-  //   return m_searchAlgorithm == CYKPlus ||
-  //          m_searchAlgorithm == ChartIncremental ||
-  //          m_searchAlgorithm == SyntaxS2T ||
-  //          m_searchAlgorithm == SyntaxT2S ||
-  //          m_searchAlgorithm == SyntaxT2S_SCFG ||
-  //          m_searchAlgorithm == SyntaxF2S;
+  // SearchAlgorithm GetSearchAlgorithm() const {
+  //   return m_searchAlgorithm;
   // }
 
   bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
     if (algo == DefaultSearchAlgorithm)
-      algo = m_searchAlgorithm;
+      algo = m_options.search.algo;
+    
     return (algo == CYKPlus   || algo == ChartIncremental ||
             algo == SyntaxS2T || algo == SyntaxT2S ||
             algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
@@ -546,10 +506,9 @@ public:
   //Weights for feature with fixed number of values
   void SetWeights(const FeatureFunction* sp, const std::vector<float>& weights);
 
-  bool GetDistinctNBest() const {
-    return m_nbest_options.only_distinct;
-    // return m_onlyDistinctNBest;
-  }
+  // bool GetDistinctNBest() const {
+  //   return m_options.nbest.only_distinct;
+  // }
   const std::string& GetFactorDelimiter() const {
     return m_factorDelimiter;
   }
@@ -603,12 +562,12 @@ public:
     return m_lmbrMapWeight;
   }
 
-  bool UseTimeout() const {
-    return m_timeout;
-  }
-  size_t GetTimeoutThreshold() const {
-    return m_timeout_threshold;
-  }
+  // bool UseTimeout() const {
+  //   return m_timeout;
+  // }
+  // size_t GetTimeoutThreshold() const {
+  //   return m_timeout_threshold;
+  // }
 
   size_t GetLMCacheCleanupThreshold() const {
     return m_lmcache_cleanup_threshold;
@@ -722,17 +681,9 @@ public:
   bool PrintAlignmentInfo() const {
     return m_PrintAlignmentInfo;
   }
-  bool PrintAlignmentInfoInNbest() const {
-    return m_nbest_options.include_alignment_info;
-    // return m_PrintAlignmentInfoNbest;
-  }
+
   WordAlignmentSort GetWordAlignmentSort() const {
     return m_wordAlignmentSort;
-  }
-
-  bool NBestIncludesSegmentation() const {
-    return m_nbest_options.include_segmentation;
-    // return m_nBestIncludesSegmentation;
   }
 
   bool GetHasAlternateWeightSettings() const {
@@ -870,11 +821,6 @@ public:
 
   S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
     return m_s2tParsingAlgorithm;
-  }
-
-  bool PrintNBestTrees() const {
-    return m_nbest_options.print_trees;
-    // return m_printNBestTrees;
   }
 
   bool RequireSortingAfterSourceContext() const {

@@ -362,8 +362,8 @@ CleanupArcList()
    * so we'll keep all of arc list if nedd distinct n-best list
    */
   const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.GetNBestSize();
-  bool distinctNBest = (staticData.GetDistinctNBest() ||
+  size_t nBestSize = staticData.options().nbest.nbest_size;
+  bool distinctNBest = (staticData.options().nbest.only_distinct ||
                         staticData.GetLatticeSamplesSize() ||
                         staticData.UseMBR() ||
                         staticData.GetOutputSearchGraph() ||

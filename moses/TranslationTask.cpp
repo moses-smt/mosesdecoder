@@ -100,7 +100,9 @@ TranslationTask
 ::TranslationTask(boost::shared_ptr<InputType> const& source,
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
-{ }
+{ 
+  m_options = StaticData::Instance().options();
+}
 
 TranslationTask::~TranslationTask()
 { }
@@ -112,7 +114,7 @@ TranslationTask
 {
   boost::shared_ptr<BaseManager> manager;
   StaticData const& staticData = StaticData::Instance();
-  if (algo == DefaultSearchAlgorithm) algo = staticData.GetSearchAlgorithm();
+  if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
 
   if (!staticData.IsSyntax(algo))
     manager.reset(new Manager(this->self())); // phrase-based
@@ -152,6 +154,13 @@ TranslationTask
     manager.reset(new ChartManager(this->self()));
 
   return manager;
+}
+
+AllOptions const&
+TranslationTask::
+options() const
+{
+  return m_options;
 }
 
 void TranslationTask::Run()

@@ -15,15 +15,21 @@ namespace Moses
  * /param source input sentence
  * /param transOptColl collection of translation options to be used for this sentence
  */
-SearchNormal::SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl)
-  :Search(manager)
-  ,m_source(source)
-  ,m_hypoStackColl(source.GetSize() + 1)
-  ,interrupted_flag(0)
-  ,m_transOptColl(transOptColl)
+SearchNormal::
+SearchNormal(Manager& manager, const InputType &source, 
+	     const TranslationOptionCollection &transOptColl)
+  : Search(manager)
+  , m_source(source)
+  , m_hypoStackColl(source.GetSize() + 1)
+  , m_transOptColl(transOptColl)
 {
   VERBOSE(1, "Translating: " << m_source << endl);
-  const StaticData &staticData = StaticData::Instance();
+
+  // m_beam_width = manager.options().search.beam_width;
+  // m_stack_size = manager.options().search.stack_size;
+  // m_stack_diversity = manager.options().search.stack_diversity;
+  // m_timeout = manager.options().search.timeout;
+  // m_max_distortion = manager.options().reordering.max_distortion;
 
   // only if constraint decoding (having to match a specified output)
   // long sentenceID = source.GetTranslationId();
@@ -32,10 +38,9 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   std::vector < HypothesisStackNormal >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),
-                                        staticData.GetMinHypoStackDiversity());
-    sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
-
+    sourceHypoColl->SetMaxHypoStackSize(this->m_options.search.stack_size, 
+					this->m_options.search.stack_diversity);
+    sourceHypoColl->SetBeamWidth(this->m_options.search.beam_width);
     m_hypoStackColl[ind] = sourceHypoColl;
   }
 }
@@ -45,59 +50,49 @@ SearchNormal::~SearchNormal()
   RemoveAllInColl(m_hypoStackColl);
 }
 
+
+bool 
+SearchNormal::
+ProcessOneStack(HypothesisStack* hstack)
+{
+  if (this->out_of_time()) return false;
+  SentenceStats &stats = m_manager.GetSentenceStats();
+  HypothesisStackNormal &sourceHypoColl 
+    = *static_cast<HypothesisStackNormal*>(hstack);
+
+  // the stack is pruned before processing (lazy pruning):
+  VERBOSE(3,"processing hypothesis from next stack");
+  IFVERBOSE(2) stats.StartTimeStack(); 
+  sourceHypoColl.PruneToSize(m_options.search.stack_size);
+  VERBOSE(3,std::endl);
+  sourceHypoColl.CleanupArcList();
+  IFVERBOSE(2)  stats.StopTimeStack(); 
+
+  // go through each hypothesis on the stack and try to expand it
+  BOOST_FOREACH(Hypothesis* h, sourceHypoColl) 
+    ProcessOneHypothesis(*h); 
+  return true;
+}
+
+
 /**
  * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
  */
 void SearchNormal::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
+  Hypothesis *hypo = Hypothesis::Create(m_manager, m_source, m_initialTransOpt);
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack
-  std::vector < HypothesisStack* >::iterator iterStack;
-  for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
-    // check if decoding ran out of time
-    double _elapsed_time = GetUserTime();
-    if (_elapsed_time > staticData.GetTimeoutThreshold()) {
-      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
-      interrupted_flag = 1;
-      return;
-    }
-    HypothesisStackNormal &sourceHypoColl = *static_cast<HypothesisStackNormal*>(*iterStack);
-
-    // the stack is pruned before processing (lazy pruning):
-    VERBOSE(3,"processing hypothesis from next stack");
-    IFVERBOSE(2) {
-      stats.StartTimeStack();
-    }
-    sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
-    VERBOSE(3,std::endl);
-    sourceHypoColl.CleanupArcList();
-    IFVERBOSE(2) {
-      stats.StopTimeStack();
-    }
-
-    // go through each hypothesis on the stack and try to expand it
-    HypothesisStackNormal::const_iterator iterHypo;
-    for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo) {
-      Hypothesis &hypothesis = **iterHypo;
-      ProcessOneHypothesis(hypothesis); // expand the hypothesis
-    }
-    // some logging
-    IFVERBOSE(2) {
-      OutputHypoStackSize();
-    }
-
-    // this stack is fully expanded;
-    actual_hypoStack = &sourceHypoColl;
-
+  BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
+    if (!ProcessOneStack(hstack)) return;
+    IFVERBOSE(2) OutputHypoStackSize(); 
+    actual_hypoStack = static_cast<HypothesisStackNormal*>(hstack);
   }
-  //OutputHypoStack();
 }
 
 
@@ -111,8 +106,8 @@ SearchNormal::
 ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
   // since we check for reordering limits, its good to have that limit handy
-  int maxDistortion = StaticData::Instance().GetMaxDistortion();
-  bool isWordLattice = StaticData::Instance().GetInputType() == WordLatticeInput;
+  // int maxDistortion  = StaticData::Instance().GetMaxDistortion();
+  bool isWordLattice = m_source.GetType() == WordLatticeInput;
 
   const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
   const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
@@ -122,7 +117,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
   ReoConstraint = m_source.GetReorderingConstraint();
 
   // no limit of reordering: only check for overlap
-  if (maxDistortion < 0) {
+  if (m_options.reordering.max_distortion < 0) {
 
     for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) {
       TranslationOptionList const* tol;
@@ -152,7 +147,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
     if(hypoBitmap.GetValue(startPos)) continue;
 
     size_t maxSize = sourceSize - startPos;
-    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    size_t maxSizePhrase = m_options.search.max_phrase_length;
     maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
     size_t closestLeft = hypoBitmap.GetEdgeToTheLeftOf(startPos);
 
@@ -178,7 +173,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
 
     WordsRange currentStartRange(startPos, startPos);
     if(m_source.ComputeDistortionDistance(prevRange, currentStartRange)
-        > maxDistortion)
+        > m_options.reordering.max_distortion)
       continue;
 
     TranslationOptionList const* tol;
@@ -227,7 +222,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
         WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 
         if (m_source.ComputeDistortionDistance(extRange, bestNextExtension)
-            > maxDistortion) continue;
+            > m_options.reordering.max_distortion) continue;
 
         // everything is fine, we're good to go
         ExpandAllHypotheses(hypothesis, startPos, endPos);
@@ -251,7 +246,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   // early discarding: check if hypothesis is too bad to build
   // this idea is explained in (Moore&Quirk, MT Summit 2007)
   float expectedScore = 0.0f;
-  if (StaticData::Instance().UseEarlyDiscarding()) {
+  if (m_options.search.UseEarlyDiscarding()) {
     // expected score is based on score of current hypothesis
     expectedScore = hypothesis.GetScore();
 
@@ -286,7 +281,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
   SentenceStats &stats = m_manager.GetSentenceStats();
 
   Hypothesis *newHypo;
-  if (! staticData.UseEarlyDiscarding()) {
+  if (! m_options.search.UseEarlyDiscarding()) {
     // simple build, no questions asked
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
@@ -303,7 +298,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
     // worst possible score may have changed -> recompute
     size_t wordsTranslated = hypothesis.GetWordsBitmap().GetNumWordsCovered() + transOpt.GetSize();
     float allowedScore = m_hypoStackColl[wordsTranslated]->GetWorstScore();
-    if (staticData.GetMinHypoStackDiversity()) {
+    if (m_options.search.stack_diversity) {
       WordsBitmapID id = hypothesis.GetWordsBitmap().GetIDPlus(transOpt.GetStartPos(), transOpt.GetEndPos());
       float allowedScoreForBitmap = m_hypoStackColl[wordsTranslated]->GetWorstScoreForBitmap( id );
       allowedScore = std::min( allowedScore, allowedScoreForBitmap );

@@ -96,8 +96,8 @@ IOWrapper::IOWrapper()
   const StaticData &staticData = StaticData::Instance();
 
   // context buffering for context-sensitive decoding
-  m_look_ahead = staticData.GetContextParameters().look_ahead;
-  m_look_back  = staticData.GetContextParameters().look_back;
+  m_look_ahead = staticData.options().context.look_ahead;
+  m_look_back  = staticData.options().context.look_back;
 
   m_inputType = staticData.GetInputType();
 
@@ -108,8 +108,8 @@ IOWrapper::IOWrapper()
 
   m_inputFactorOrder = &staticData.GetInputFactorOrder();
 
-  size_t nBestSize = staticData.GetNBestSize();
-  string nBestFilePath = staticData.GetNBestFilePath();
+  size_t nBestSize = staticData.options().nbest.nbest_size;
+  string nBestFilePath = staticData.options().nbest.output_file_path;
 
   staticData.GetParameter().SetParameter<string>(m_inputFilePath, "input-file", "");
   if (m_inputFilePath.empty()) {

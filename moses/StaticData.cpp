@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 // vim:tabstop=2
 
@@ -63,8 +64,6 @@ StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
   , m_inputType(SentenceInput)
-  // , m_onlyDistinctNBest(false)
-  // , m_needAlignmentInfo(false)
   , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
@@ -80,16 +79,6 @@ StaticData::StaticData()
 StaticData::~StaticData()
 {
   RemoveAllInColl(m_decodeGraphs);
-
-  /*
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
-  for(size_t i=0;i<producers.size();++i) {
-  FeatureFunction *ff = producers[i];
-    delete ff;
-  }
-  */
-
-  // memory pools
   Phrase::FinalizeMemPool();
 }
 
@@ -199,39 +188,19 @@ StaticData
   }
 
   m_parameter->SetParameter(m_outputHypoScore, "output-hypo-score", false );
-
-  //word-to-word alignment
-  // alignments
   m_parameter->SetParameter(m_PrintAlignmentInfo, "print-alignment-info", false );
-
-  // if (m_PrintAlignmentInfo) { // => now in BookkeepingOptions::init()
-  // m_needAlignmentInfo = true;
-  // }
-
   m_parameter->SetParameter(m_wordAlignmentSort, "sort-word-alignment", NoSort);
-
-  // if (m_PrintAlignmentInfoNbest) { // => now in BookkeepingOptions::init()
-  //   m_needAlignmentInfo = true;
-  // }
-
   params = m_parameter->GetParam("alignment-output-file");
   if (params && params->size()) {
     m_alignmentOutputFile = Scan<std::string>(params->at(0));
-    // m_needAlignmentInfo = true; // => now in BookkeepingOptions::init()
   }
 
   m_parameter->SetParameter( m_PrintID, "print-id", false );
   m_parameter->SetParameter( m_PrintPassthroughInformation, "print-passthrough", false );
-  // m_parameter->SetParameter( m_PrintPassthroughInformationInNBest, "print-passthrough-in-n-best", false ); // => now in BookkeepingOptions::init()
 
-  // word graph
   params = m_parameter->GetParam("output-word-graph");
-  if (params && params->size() == 2)
-    m_outputWordGraph = true;
-  else
-    m_outputWordGraph = false;
+  m_outputWordGraph = (params && params->size() == 2);
 
-  // search graph
   params = m_parameter->GetParam("output-search-graph");
   if (params && params->size()) {
     if (params->size() != 1) {
@@ -240,6 +209,7 @@ StaticData
     }
     m_outputSearchGraph = true;
   }
+
   // ... in extended format
   else if (m_parameter->GetParam("output-search-graph-extended") &&
            m_parameter->GetParam("output-search-graph-extended")->size()) {
@@ -298,14 +268,13 @@ StaticData
   m_parameter->SetParameter(m_printAllDerivations , "print-all-derivations", false );
 
   // additional output
-  m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath, "translation-details", "");
-  m_parameter->SetParameter<string>(m_detailedTreeFragmentsTranslationReportingFilePath, "tree-translation-details", "");
-
-  //DIMw
-  m_parameter->SetParameter<string>(m_detailedAllTranslationReportingFilePath, "translation-all-details", "");
-
+  m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath, 
+				    "translation-details", "");
+  m_parameter->SetParameter<string>(m_detailedTreeFragmentsTranslationReportingFilePath,
+				    "tree-translation-details", "");
+  m_parameter->SetParameter<string>(m_detailedAllTranslationReportingFilePath, 
+				    "translation-all-details", "");
   m_parameter->SetParameter<long>(m_startTranslationId, "start-translation-id", 0);
-
 
   //lattice samples
   params = m_parameter->GetParam("lattice-samples");
@@ -321,14 +290,6 @@ StaticData
     m_latticeSamplesSize = 0;
   }
   return true;
-}
-
-
-bool
-StaticData
-::ini_nbest_options()
-{
-  return m_nbest_options.init(*m_parameter);
 }
 
 void
@@ -353,8 +314,8 @@ StaticData
 ::ini_performance_options()
 {
   const PARAM_VEC *params;
-  m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
-  m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
+  // m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
+  // m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
 
   m_threadCount = 1;
   params = m_parameter->GetParam("threads");
@@ -386,18 +347,6 @@ StaticData
     }
   }
   return true;
-}
-
-void
-StaticData
-::ini_cube_pruning_options()
-{
-  m_parameter->SetParameter(m_cubePruningPopLimit, "cube-pruning-pop-limit",
-                            DEFAULT_CUBE_PRUNING_POP_LIMIT);
-  m_parameter->SetParameter(m_cubePruningDiversity, "cube-pruning-diversity",
-                            DEFAULT_CUBE_PRUNING_DIVERSITY);
-  m_parameter->SetParameter(m_cubePruningLazyScoring, "cube-pruning-lazy-scoring",
-                            false);
 }
 
 void
@@ -453,45 +402,42 @@ void
 StaticData
 ::ini_distortion_options()
 {
-  // reordering constraints
-  m_parameter->SetParameter(m_maxDistortion, "distortion-limit", -1);
+  // // reordering constraints
+  // m_parameter->SetParameter(m_maxDistortion, "distortion-limit", -1);
 
-  m_parameter->SetParameter(m_reorderingConstraint, "monotone-at-punctuation", false );
+  // m_parameter->SetParameter(m_reorderingConstraint, "monotone-at-punctuation", false );
 
-  // early distortion cost
-  m_parameter->SetParameter(m_useEarlyDistortionCost, "early-distortion-cost", false );
-
-
-
+  // // early distortion cost
+  // m_parameter->SetParameter(m_useEarlyDistortionCost, "early-distortion-cost", false );
 }
 
 bool
 StaticData
 ::ini_stack_decoding_options()
 {
-  const PARAM_VEC *params;
-  // settings for pruning
-  m_parameter->SetParameter(m_maxHypoStackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
+  // const PARAM_VEC *params;
+  // // settings for pruning
+  // m_parameter->SetParameter(m_maxHypoStackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
 
-  m_minHypoStackDiversity = 0;
-  params = m_parameter->GetParam("stack-diversity");
-  if (params && params->size()) {
-    if (m_maxDistortion > 15) {
-      std::cerr << "stack diversity > 0 is not allowed for distortion limits larger than 15";
-      return false;
-    }
-    if (m_inputType == WordLatticeInput) {
-      std::cerr << "stack diversity > 0 is not allowed for lattice input";
-      return false;
-    }
-    m_minHypoStackDiversity = Scan<size_t>(params->at(0));
-  }
+  // m_minHypoStackDiversity = 0;
+  // params = m_parameter->GetParam("stack-diversity");
+  // if (params && params->size()) {
+  //   if (m_maxDistortion > 15) {
+  //     std::cerr << "stack diversity > 0 is not allowed for distortion limits larger than 15";
+  //     return false;
+  //   }
+  //   if (m_inputType == WordLatticeInput) {
+  //     std::cerr << "stack diversity > 0 is not allowed for lattice input";
+  //     return false;
+  //   }
+  //   m_minHypoStackDiversity = Scan<size_t>(params->at(0));
+  // }
 
-  m_parameter->SetParameter(m_beamWidth, "beam-threshold", DEFAULT_BEAM_WIDTH);
-  m_beamWidth = TransformScore(m_beamWidth);
+  // m_parameter->SetParameter(m_beamWidth, "beam-threshold", DEFAULT_BEAM_WIDTH);
+  // m_beamWidth = TransformScore(m_beamWidth);
 
-  m_parameter->SetParameter(m_earlyDiscardingThreshold, "early-discarding-threshold", DEFAULT_EARLY_DISCARDING_THRESHOLD);
-  m_earlyDiscardingThreshold = TransformScore(m_earlyDiscardingThreshold);
+  // m_parameter->SetParameter(m_earlyDiscardingThreshold, "early-discarding-threshold", DEFAULT_EARLY_DISCARDING_THRESHOLD);
+  // m_earlyDiscardingThreshold = TransformScore(m_earlyDiscardingThreshold);
   return true;
 }
 
@@ -499,12 +445,12 @@ void
 StaticData
 ::ini_phrase_lookup_options()
 {
-  m_parameter->SetParameter(m_translationOptionThreshold, "translation-option-threshold", DEFAULT_TRANSLATION_OPTION_THRESHOLD);
-  m_translationOptionThreshold = TransformScore(m_translationOptionThreshold);
+  // m_parameter->SetParameter(m_translationOptionThreshold, "translation-option-threshold", DEFAULT_TRANSLATION_OPTION_THRESHOLD);
+  // m_translationOptionThreshold = TransformScore(m_translationOptionThreshold);
 
-  m_parameter->SetParameter(m_maxNoTransOptPerCoverage, "max-trans-opt-per-coverage", DEFAULT_MAX_TRANS_OPT_SIZE);
-  m_parameter->SetParameter(m_maxNoPartTransOpt, "max-partial-trans-opt", DEFAULT_MAX_PART_TRANS_OPT_SIZE);
-  m_parameter->SetParameter(m_maxPhraseLength, "max-phrase-length", DEFAULT_MAX_PHRASE_LENGTH);
+  // m_parameter->SetParameter(m_maxNoTransOptPerCoverage, "max-trans-opt-per-coverage", DEFAULT_MAX_TRANS_OPT_SIZE);
+  // m_parameter->SetParameter(m_maxNoPartTransOpt, "max-partial-trans-opt", DEFAULT_MAX_PART_TRANS_OPT_SIZE);
+  // m_parameter->SetParameter(m_maxPhraseLength, "max-phrase-length", DEFAULT_MAX_PHRASE_LENGTH);
 
 }
 
@@ -583,10 +529,11 @@ bool StaticData::LoadData(Parameter *parameter)
 
   const PARAM_VEC *params;
 
-  m_context_parameters.init(*parameter);
+  m_options.init(*parameter);
+  // m_context_parameters.init(*parameter);
 
   // to cube or not to cube
-  m_parameter->SetParameter(m_searchAlgorithm, "search-algorithm", Normal);
+  // m_parameter->SetParameter(m_searchAlgorithm, "search-algorithm", Normal);
 
   if (IsSyntax())
     LoadChartDecodingParameters();
@@ -596,7 +543,7 @@ bool StaticData::LoadData(Parameter *parameter)
   ini_factor_maps();
   ini_input_options();
   m_bookkeeping_options.init(*parameter);
-  m_nbest_options.init(*parameter); // if (!ini_nbest_options()) return false;
+  // m_nbest_options.init(*parameter); 
   if (!ini_output_options()) return false;
 
   // threading etc.
@@ -609,7 +556,7 @@ bool StaticData::LoadData(Parameter *parameter)
   ini_distortion_options();
   if (!ini_stack_decoding_options()) return false;
   ini_phrase_lookup_options();
-  ini_cube_pruning_options();
+  // ini_cube_pruning_options();
 
   ini_oov_options();
   ini_mbr_options();
@@ -625,7 +572,7 @@ bool StaticData::LoadData(Parameter *parameter)
       || m_outputSearchGraphPB
 #endif
       || m_latticeSamplesFilePath.size()) {
-    m_nbest_options.enabled = true;
+    m_options.nbest.enabled = true;
   }
 
   // S2T decoder
@@ -1272,8 +1219,9 @@ StaticData
 
   // FIXME Does this make sense for F2S?  Perhaps it should be changed once
   // FIXME the pipeline uses RuleTable consistently.
-  if (m_searchAlgorithm == SyntaxS2T || m_searchAlgorithm == SyntaxT2S ||
-      m_searchAlgorithm == SyntaxT2S_SCFG || m_searchAlgorithm == SyntaxF2S) {
+  SearchAlgorithm algo = m_options.search.algo;
+  if (algo == SyntaxS2T || algo == SyntaxT2S ||
+      algo == SyntaxT2S_SCFG || algo == SyntaxF2S) {
     // Automatically override PhraseDictionary{Memory,Scope3}.  This will
     // have to change if the FF parameters diverge too much in the future,
     // but for now it makes switching between the old and new decoders much

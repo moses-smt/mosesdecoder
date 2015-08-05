@@ -52,8 +52,8 @@ void Manager::OutputNBest(OutputCollector *collector) const
     long translationId = m_source.GetTranslationId();
 
     KBestExtractor::KBestVec nBestList;
-    ExtractKBest(staticData.GetNBestSize(), nBestList,
-                 staticData.GetDistinctNBest());
+    ExtractKBest(staticData.options().nbest.nbest_size, nBestList,
+                 staticData.options().nbest.only_distinct);
     OutputNBestList(collector, nBestList, translationId);
   }
 }
@@ -90,8 +90,8 @@ void Manager::OutputNBestList(OutputCollector *collector,
     FixPrecision(out);
   }
 
-  bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
-  bool PrintNBestTrees = staticData.PrintNBestTrees();
+  bool includeWordAlignment = staticData.options().nbest.include_alignment_info;
+  bool PrintNBestTrees = staticData.options().nbest.print_trees; // PrintNBestTrees();
 
   for (KBestExtractor::KBestVec::const_iterator p = nBestList.begin();
        p != nBestList.end(); ++p) {

@@ -48,8 +48,8 @@ SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, 
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruning(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
-    sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
+    sourceHypoColl->SetMaxHypoStackSize(m_options.search.stack_size);
+    sourceHypoColl->SetBeamWidth(m_options.search.beam_width);
 
     m_hypoStackColl[ind] = sourceHypoColl;
   }
@@ -66,7 +66,8 @@ SearchCubePruning::~SearchCubePruning()
  */
 void SearchCubePruning::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
+  const StaticData &SD = StaticData::Instance();
+  AllOptions const& opts = SD.options();
 
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
@@ -77,20 +78,22 @@ void SearchCubePruning::Decode()
   firstStack.CleanupArcList();
   CreateForwardTodos(firstStack);
 
-  const size_t PopLimit = StaticData::Instance().GetCubePruningPopLimit();
-  VERBOSE(3,"Cube Pruning pop limit is " << PopLimit << std::endl)
+  const size_t PopLimit = StaticData::Instance().options().cube.pop_limit;
+  VERBOSE(3,"Cube Pruning pop limit is " << PopLimit << std::endl);
 
-  const size_t Diversity = StaticData::Instance().GetCubePruningDiversity();
+  const size_t Diversity = StaticData::Instance().options().cube.diversity;
   VERBOSE(3,"Cube Pruning diversity is " << Diversity << std::endl)
 
   // go through each stack
   size_t stackNo = 1;
+  int timelimit = m_options.search.timeout;
   std::vector < HypothesisStack* >::iterator iterStack;
   for (iterStack = m_hypoStackColl.begin() + 1 ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
     // check if decoding ran out of time
     double _elapsed_time = GetUserTime();
-    if (_elapsed_time > staticData.GetTimeoutThreshold()) {
-      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
+    if (timelimit && _elapsed_time > timelimit) {
+      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," 
+	      << timelimit << ")" << std::endl);
       return;
     }
     HypothesisStackCubePruning &sourceHypoColl = *static_cast<HypothesisStackCubePruning*>(*iterStack);
@@ -144,7 +147,7 @@ void SearchCubePruning::Decode()
     IFVERBOSE(2) {
       m_manager.GetSentenceStats().StartTimeStack();
     }
-    sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
+    sourceHypoColl.PruneToSize(m_options.search.stack_size);
     VERBOSE(3,std::endl);
     sourceHypoColl.CleanupArcList();
     IFVERBOSE(2) {

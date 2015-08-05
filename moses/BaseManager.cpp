@@ -140,6 +140,14 @@ void BaseManager::WriteApplicationContext(std::ostream &out,
   }
 }
 
+AllOptions const&
+BaseManager::
+options() const
+{
+  return GetTtask()->options();
+}
+
+
 } // namespace
 
 
