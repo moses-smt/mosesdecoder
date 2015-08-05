@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 // vim:tabstop=2
 
@@ -62,17 +63,11 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
-  , m_inputType(SentenceInput)
-  // , m_onlyDistinctNBest(false)
-  // , m_needAlignmentInfo(false)
   , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
   , m_treeStructure(NULL)
 {
-  m_xmlBrackets.first="<";
-  m_xmlBrackets.second=">";
-
   // memory pools
   Phrase::InitializeMemPool();
 }
@@ -80,15 +75,6 @@ StaticData::StaticData()
 StaticData::~StaticData()
 {
   RemoveAllInColl(m_decodeGraphs);
-
-  /*
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
-  for(size_t i=0;i<producers.size();++i) {
-  FeatureFunction *ff = producers[i];
-    delete ff;
-  }
-  */
-
   // memory pools
   Phrase::FinalizeMemPool();
 }
@@ -136,52 +122,6 @@ StaticData
 
 }
 
-void
-StaticData
-::ini_input_options()
-{
-  const PARAM_VEC *params;
-
-  // input type has to be specified BEFORE loading the phrase tables!
-  m_parameter->SetParameter(m_inputType, "inputtype", SentenceInput);
-
-  m_parameter->SetParameter(m_continuePartialTranslation,
-                            "continue-partial-translation", false );
-
-  std::string s_it = "text input";
-  if (m_inputType == 1) {
-    s_it = "confusion net";
-  }
-  if (m_inputType == 2) {
-    s_it = "word lattice";
-  }
-  if (m_inputType == 3) {
-    s_it = "tree";
-  }
-  VERBOSE(2,"input type is: "<<s_it<<"\n");
-
-  // use of xml in input
-  m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
-
-  // specify XML tags opening and closing brackets for XML option
-  params = m_parameter->GetParam("xml-brackets");
-  if (params && params->size()) {
-    std::vector<std::string> brackets = Tokenize(params->at(0));
-    if(brackets.size()!=2) {
-      cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
-      exit(1);
-    }
-    m_xmlBrackets.first= brackets[0];
-    m_xmlBrackets.second=brackets[1];
-    VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
-            << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
-  }
-
-  m_parameter->SetParameter(m_defaultNonTermOnlyForEmptyRange,
-                            "default-non-term-for-empty-range-only", false );
-
-}
-
 bool
 StaticData
 ::ini_output_options()
@@ -193,7 +133,7 @@ StaticData
 
 
   m_parameter->SetParameter(m_recoverPath, "recover-input-path", false);
-  if (m_recoverPath && m_inputType == SentenceInput) {
+  if (m_recoverPath && m_options.input.input_type == SentenceInput) {
     TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
     m_recoverPath = false;
   }
@@ -222,14 +162,10 @@ StaticData
 
   m_parameter->SetParameter( m_PrintID, "print-id", false );
   m_parameter->SetParameter( m_PrintPassthroughInformation, "print-passthrough", false );
-  // m_parameter->SetParameter( m_PrintPassthroughInformationInNBest, "print-passthrough-in-n-best", false ); // => now in BookkeepingOptions::init()
 
   // word graph
   params = m_parameter->GetParam("output-word-graph");
-  if (params && params->size() == 2)
-    m_outputWordGraph = true;
-  else
-    m_outputWordGraph = false;
+  m_outputWordGraph = (params && params->size() == 2);
 
   // search graph
   params = m_parameter->GetParam("output-search-graph");
@@ -323,14 +259,6 @@ StaticData
   return true;
 }
 
-
-bool
-StaticData
-::ini_nbest_options()
-{
-  return m_nbest_options.init(*m_parameter);
-}
-
 void
 StaticData
 ::ini_compact_table_options()
@@ -390,18 +318,6 @@ StaticData
 
 void
 StaticData
-::ini_cube_pruning_options()
-{
-  m_parameter->SetParameter(m_cubePruningPopLimit, "cube-pruning-pop-limit",
-                            DEFAULT_CUBE_PRUNING_POP_LIMIT);
-  m_parameter->SetParameter(m_cubePruningDiversity, "cube-pruning-diversity",
-                            DEFAULT_CUBE_PRUNING_DIVERSITY);
-  m_parameter->SetParameter(m_cubePruningLazyScoring, "cube-pruning-lazy-scoring",
-                            false);
-}
-
-void
-StaticData
 ::ini_factor_maps()
 {
   const PARAM_VEC *params;
@@ -447,52 +363,6 @@ StaticData
   m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
 
   m_parameter->SetParameter(m_isAlwaysCreateDirectTranslationOption, "always-create-direct-transopt", false );
-}
-
-void
-StaticData
-::ini_distortion_options()
-{
-  // reordering constraints
-  m_parameter->SetParameter(m_maxDistortion, "distortion-limit", -1);
-
-  m_parameter->SetParameter(m_reorderingConstraint, "monotone-at-punctuation", false );
-
-  // early distortion cost
-  m_parameter->SetParameter(m_useEarlyDistortionCost, "early-distortion-cost", false );
-
-
-
-}
-
-bool
-StaticData
-::ini_stack_decoding_options()
-{
-  const PARAM_VEC *params;
-  // settings for pruning
-  m_parameter->SetParameter(m_maxHypoStackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
-
-  m_minHypoStackDiversity = 0;
-  params = m_parameter->GetParam("stack-diversity");
-  if (params && params->size()) {
-    if (m_maxDistortion > 15) {
-      std::cerr << "stack diversity > 0 is not allowed for distortion limits larger than 15";
-      return false;
-    }
-    if (m_inputType == WordLatticeInput) {
-      std::cerr << "stack diversity > 0 is not allowed for lattice input";
-      return false;
-    }
-    m_minHypoStackDiversity = Scan<size_t>(params->at(0));
-  }
-
-  m_parameter->SetParameter(m_beamWidth, "beam-threshold", DEFAULT_BEAM_WIDTH);
-  m_beamWidth = TransformScore(m_beamWidth);
-
-  m_parameter->SetParameter(m_earlyDiscardingThreshold, "early-discarding-threshold", DEFAULT_EARLY_DISCARDING_THRESHOLD);
-  m_earlyDiscardingThreshold = TransformScore(m_earlyDiscardingThreshold);
-  return true;
 }
 
 void
@@ -582,21 +452,15 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter = parameter;
 
   const PARAM_VEC *params;
+  m_options.init(*parameter);
 
-  m_context_parameters.init(*parameter);
-
-  // to cube or not to cube
-  m_parameter->SetParameter(m_searchAlgorithm, "search-algorithm", Normal);
-
-  if (IsSyntax())
+  if (is_syntax(m_options.search.algo))
     LoadChartDecodingParameters();
 
   // ORDER HERE MATTERS, SO DON'T CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING!
   // input, output
   ini_factor_maps();
-  ini_input_options();
   m_bookkeeping_options.init(*parameter);
-  m_nbest_options.init(*parameter); // if (!ini_nbest_options()) return false;
   if (!ini_output_options()) return false;
 
   // threading etc.
@@ -605,11 +469,8 @@ bool StaticData::LoadData(Parameter *parameter)
   // model loading
   ini_compact_table_options();
 
-  // search
-  ini_distortion_options();
-  if (!ini_stack_decoding_options()) return false;
+
   ini_phrase_lookup_options();
-  ini_cube_pruning_options();
 
   ini_oov_options();
   ini_mbr_options();
@@ -625,7 +486,7 @@ bool StaticData::LoadData(Parameter *parameter)
       || m_outputSearchGraphPB
 #endif
       || m_latticeSamplesFilePath.size()) {
-    m_nbest_options.enabled = true;
+    m_options.nbest.enabled = true;
   }
 
   // S2T decoder
@@ -637,6 +498,24 @@ bool StaticData::LoadData(Parameter *parameter)
 
   m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor", NOT_FOUND);
 
+
+  // sanity checks on parameters
+  // should eventually go into AllOptions.
+  if (m_options.search.stack_diversity)
+    {
+      if (m_options.reordering.max_distortion > 15)
+	{
+	  std::cerr << "stack diversity > 0 is not allowed for distortion limits "
+		    << "larger than 15";
+	  return false;
+	}
+      if (m_options.input.input_type == WordLatticeInput) 
+	{
+	  std::cerr << "stack diversity > 0 is not allowed for lattice input";
+	  return false;
+	}
+    }
+
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   initialize_features();
 
@@ -644,7 +523,7 @@ bool StaticData::LoadData(Parameter *parameter)
     LoadFeatureFunctions();
 
   LoadDecodeGraphs();
-
+  
   // sanity check that there are no weights without an associated FF
   if (!CheckWeights()) return false;
 
@@ -846,7 +725,7 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsSyntax()) {
+      if (is_syntax(m_options.search.algo)) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -913,7 +792,7 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsSyntax()) {
+      if (is_syntax(m_options.search.algo)) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -1259,9 +1138,11 @@ StaticData
 
   const PARAM_VEC *params = m_parameter->GetParam("feature-name-overwrite");
   if (params && params->size()) {
-    UTIL_THROW_IF2(params->size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
+    UTIL_THROW_IF2(params->size() != 1, 
+		   "Only provide 1 line in the section [feature-name-overwrite]");
     vector<string> toks = Tokenize(params->at(0));
-    UTIL_THROW_IF2(toks.size() % 2 != 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
+    UTIL_THROW_IF2(toks.size() % 2 != 0, 
+		   "Format of -feature-name-overwrite must be [old-name new-name]*");
 
     for (size_t i = 0; i < toks.size(); i += 2) {
       const string &oldName = toks[i];
@@ -1272,8 +1153,8 @@ StaticData
 
   // FIXME Does this make sense for F2S?  Perhaps it should be changed once
   // FIXME the pipeline uses RuleTable consistently.
-  if (m_searchAlgorithm == SyntaxS2T || m_searchAlgorithm == SyntaxT2S ||
-      m_searchAlgorithm == SyntaxT2S_SCFG || m_searchAlgorithm == SyntaxF2S) {
+  if (m_options.search.algo == SyntaxS2T || m_options.search.algo == SyntaxT2S ||
+      m_options.search.algo == SyntaxT2S_SCFG || m_options.search.algo == SyntaxF2S) {
     // Automatically override PhraseDictionary{Memory,Scope3}.  This will
     // have to change if the FF parameters diverge too much in the future,
     // but for now it makes switching between the old and new decoders much

@@ -43,7 +43,7 @@ Sentence::
 Sentence() : Phrase(0) , InputType()
 {
   const StaticData& SD = StaticData::Instance();
-  if (SD.IsSyntax())
+  if (is_syntax(SD.GetSearchAlgorithm()))
     m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
 }
 
@@ -153,7 +153,7 @@ aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
 
   using namespace std;
   if (SD.GetXmlInputType() != XmlPassThrough) {
-    int offset = SD.IsSyntax() ? 1 : 0;
+    int offset = is_syntax(SD.GetSearchAlgorithm()) ? 1 : 0;
     bool OK = ProcessAndStripXMLTags(line, m_xmlOptions,
                                      m_reorderingConstraint,
                                      xmlWalls, placeholders, offset,
@@ -181,7 +181,7 @@ init(string line, std::vector<FactorType> const& factorOrder)
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
 
   // if sentences is specified as "<passthrough tag1=""/>"
-  if (SD.IsPassthroughEnabled() || SD.IsPassthroughInNBestEnabled()) {
+  if (SD.IsPassthroughEnabled() || SD.options().nbest.include_passthrough) { 
     string pthru = PassthroughSGML(line,"passthrough");
     this->SetPassthroughInformation(pthru);
   }

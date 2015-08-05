@@ -1,10 +1,11 @@
-// -*- mode: c++; cc-style: gnu -*-
+// -*- mode: c++; cc-style: gnu; indent-tabs-mode: nil; tab-width: 2 -*-
+#pragma once
 #include <string>
-
 namespace Moses
 {
 
-struct NBestOptions {
+struct NBestOptions 
+{
   size_t nbest_size;
   size_t factor;
   bool enabled;

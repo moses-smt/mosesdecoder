@@ -114,7 +114,7 @@ TranslationTask
   StaticData const& staticData = StaticData::Instance();
   if (algo == DefaultSearchAlgorithm) algo = staticData.GetSearchAlgorithm();
 
-  if (!staticData.IsSyntax(algo))
+  if (!is_syntax(algo))
     manager.reset(new Manager(this->self())); // phrase-based
 
   else if (algo == SyntaxF2S || algo == SyntaxT2S) {

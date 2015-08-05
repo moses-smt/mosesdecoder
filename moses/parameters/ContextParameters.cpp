@@ -9,9 +9,9 @@ ContextParameters()
   : look_ahead(0), look_back(0) 
 { }
 
-void
+bool
 ContextParameters::
-init(Parameter& params)
+init(Parameter const& params)
 {
   look_back = look_ahead = 0;
   params.SetParameter(context_string, "context-string", std::string(""));
@@ -19,12 +19,12 @@ init(Parameter& params)
   params.SetParameter(context_window, "context-window", std::string(""));
 
   if (context_window == "")
-    return;
+    return true;
   
   if (context_window.substr(0,3) == "all")
     {
       look_back = look_ahead = std::numeric_limits<size_t>::max();
-      return;
+      return true;
     }
  
   size_t p = context_window.find_first_of("0123456789");
@@ -47,5 +47,6 @@ init(Parameter& params)
     else
       UTIL_THROW2("Invalid specification of context window.");
   }
+  return true;
 }
 }
