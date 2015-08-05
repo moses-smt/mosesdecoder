@@ -1,4 +1,4 @@
-// -*- mode: c++; cc-style: gnu -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #include "SearchOptions.h"
 
 namespace Moses

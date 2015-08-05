@@ -1,4 +1,4 @@
-// -*- mode: c++; cc-style: gnu; indent-tabs-mode: nil; tab-width: 2 -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
 #include <string>
 namespace Moses
