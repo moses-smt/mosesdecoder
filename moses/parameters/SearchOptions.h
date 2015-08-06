@@ -24,6 +24,8 @@ namespace Moses
 
     int timeout;
 
+    bool consensus; //! Use Consensus decoding  (DeNero et al 2009)
+
     // reordering options
     // bool  reorderingConstraint; //! use additional reordering constraints
     // bool  useEarlyDistortionCost;

@@ -1492,7 +1492,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
 
     // MAP decoding: best hypothesis
     const Hypothesis* bestHypo = NULL;
-    if (!staticData.UseMBR()) {
+    if (!options().mbr.enabled) {
       bestHypo = GetBestHypothesis();
       if (bestHypo) {
         if (StaticData::Instance().GetOutputHypoScore()) {
@@ -1534,7 +1534,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
     // MBR decoding (n-best MBR, lattice MBR, consensus)
     else {
       // we first need the n-best translations
-      size_t nBestSize = staticData.GetMBRSize();
+      size_t nBestSize = options().mbr.size;
       if (nBestSize <= 0) {
         cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
         exit(1);
@@ -1547,11 +1547,11 @@ void Manager::OutputBest(OutputCollector *collector)  const
       }
 
       // lattice MBR
-      if (staticData.UseLatticeMBR()) {
+      if (options().lmbr.enabled) {
         if (staticData.options().nbest.enabled) {
           //lattice mbr nbest
           vector<LatticeMBRSolution> solutions;
-          size_t n  = min(nBestSize, staticData.options().nbest.nbest_size);
+          size_t n  = min(nBestSize, options().nbest.nbest_size);
           getLatticeMBRNBest(*this,nBestList,solutions,n);
           OutputLatticeMBRNBest(m_latticeNBestOut, solutions, translationId);
         } else {
@@ -1566,7 +1566,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
       }
 
       // consensus decoding
-      else if (staticData.UseConsensusDecoding()) {
+      else if (options().search.consensus) {
         const TrellisPath &conBestHypo = doConsensusDecoding(*this,nBestList);
         OutputBestHypo(conBestHypo, translationId,
                        staticData.GetReportSegmentation(),
@@ -1608,15 +1608,15 @@ void Manager::OutputNBest(OutputCollector *collector) const
   const StaticData &staticData = StaticData::Instance();
   long translationId = m_source.GetTranslationId();
 
-  if (staticData.UseLatticeMBR()) {
+  if (options().lmbr.enabled) {
     if (staticData.options().nbest.enabled) {
       collector->Write(translationId, m_latticeNBestOut.str());
     }
   } else {
     TrellisPathList nBestList;
     ostringstream out;
-    CalcNBest(staticData.options().nbest.nbest_size, nBestList,
-	      staticData.options().nbest.only_distinct);
+    CalcNBest(options().nbest.nbest_size, nBestList,
+	      options().nbest.only_distinct);
     OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), 
 		m_source.GetTranslationId(),
                 staticData.GetReportSegmentation());

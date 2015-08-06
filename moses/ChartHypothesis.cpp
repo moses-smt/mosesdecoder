@@ -289,7 +289,7 @@ void ChartHypothesis::CleanupArcList()
   const StaticData &staticData = StaticData::Instance();
   size_t nBestSize = staticData.options().nbest.nbest_size;
   bool distinctNBest = (staticData.options().nbest.only_distinct 
-			|| staticData.UseMBR() 
+			|| staticData.options().mbr.enabled 
 			|| staticData.GetOutputSearchGraph() 
 			|| staticData.GetOutputSearchGraphHypergraph());
 

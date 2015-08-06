@@ -463,64 +463,64 @@ StaticData
 
 }
 
-void
-StaticData
-::ini_mbr_options()
-{
-  // minimum Bayes risk decoding
-  m_parameter->SetParameter(m_mbr, "minimum-bayes-risk", false );
-  m_parameter->SetParameter<size_t>(m_mbrSize, "mbr-size", 200);
-  m_parameter->SetParameter(m_mbrScale, "mbr-scale", 1.0f);
-}
+// void
+// StaticData
+// ::ini_mbr_options()
+// {
+//   // minimum Bayes risk decoding
+//   m_parameter->SetParameter(m_mbr, "minimum-bayes-risk", false );
+//   m_parameter->SetParameter<size_t>(m_mbrSize, "mbr-size", 200);
+//   m_parameter->SetParameter(m_mbrScale, "mbr-scale", 1.0f);
+// }
 
 
-void
-StaticData
-::ini_lmbr_options()
-{
-  const PARAM_VEC *params;
-  //lattice mbr
-  m_parameter->SetParameter(m_useLatticeMBR, "lminimum-bayes-risk", false );
-  if (m_useLatticeMBR && m_mbr) {
-    cerr << "Error: Cannot use both n-best mbr and lattice mbr together" << endl;
-    exit(1);
-  }
-  // lattice MBR
-  if (m_useLatticeMBR) m_mbr = true;
+// void
+// StaticData
+// ::ini_lmbr_options()
+// {
+//   const PARAM_VEC *params;
+//   //lattice mbr
+//   // m_parameter->SetParameter(m_useLatticeMBR, "lminimum-bayes-risk", false );
+//   // if (m_useLatticeMBR && m_mbr) {
+//   //   cerr << "Error: Cannot use both n-best mbr and lattice mbr together" << endl;
+//   //   exit(1);
+//   // }
+//   // // lattice MBR
+//   // if (m_useLatticeMBR) m_mbr = true;
 
-  m_parameter->SetParameter<size_t>(m_lmbrPruning, "lmbr-pruning-factor", 30);
-  m_parameter->SetParameter(m_lmbrPrecision, "lmbr-p", 0.8f);
-  m_parameter->SetParameter(m_lmbrPRatio, "lmbr-r", 0.6f);
-  m_parameter->SetParameter(m_lmbrMapWeight, "lmbr-map-weight", 0.0f);
-  m_parameter->SetParameter(m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
+//   m_parameter->SetParameter<size_t>(m_lmbrPruning, "lmbr-pruning-factor", 30);
+//   m_parameter->SetParameter(m_lmbrPrecision, "lmbr-p", 0.8f);
+//   m_parameter->SetParameter(m_lmbrPRatio, "lmbr-r", 0.6f);
+//   m_parameter->SetParameter(m_lmbrMapWeight, "lmbr-map-weight", 0.0f);
+//   m_parameter->SetParameter(m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
 
-  params = m_parameter->GetParam("lmbr-thetas");
-  if (params) {
-    m_lmbrThetas = Scan<float>(*params);
-  }
+//   params = m_parameter->GetParam("lmbr-thetas");
+//   if (params) {
+//     m_lmbrThetas = Scan<float>(*params);
+//   }
 
-}
+// }
 
-void
-StaticData
-::ini_consensus_decoding_options()
-{
-  //consensus decoding
-  m_parameter->SetParameter(m_useConsensusDecoding, "consensus-decoding", false );
-  if (m_useConsensusDecoding && m_mbr) {
-    cerr<< "Error: Cannot use consensus decoding together with mbr" << endl;
-    exit(1);
-  }
-  if (m_useConsensusDecoding) m_mbr=true;
-}
+// void
+// StaticData
+// ::ini_consensus_decoding_options()
+// {
+//   //consensus decoding
+//   m_parameter->SetParameter(m_useConsensusDecoding, "consensus-decoding", false );
+//   if (m_useConsensusDecoding && m_mbr) {
+//     cerr<< "Error: Cannot use consensus decoding together with mbr" << endl;
+//     exit(1);
+//   }
+//   if (m_useConsensusDecoding) m_mbr=true;
+// }
 
-void
-StaticData
-::ini_mira_options()
-{
-  //mira training
-  m_parameter->SetParameter(m_mira, "mira", false );
-}
+// void
+// StaticData
+// ::ini_mira_options()
+// {
+//   //mira training
+//   m_parameter->SetParameter(m_mira, "mira", false );
+// }
 
 bool StaticData::LoadData(Parameter *parameter)
 {
@@ -559,15 +559,19 @@ bool StaticData::LoadData(Parameter *parameter)
   // ini_cube_pruning_options();
 
   ini_oov_options();
-  ini_mbr_options();
-  ini_lmbr_options();
-  ini_consensus_decoding_options();
+  // ini_mbr_options();
+  // ini_lmbr_options();
+  // ini_consensus_decoding_options();
 
-  ini_mira_options();
+  // ini_mira_options();
 
   // set m_nbest_options.enabled = true if necessary:
-  if (m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_outputSearchGraphSLF
-      || m_mira || m_outputSearchGraphHypergraph || m_useConsensusDecoding
+  if (m_options.mbr.enabled        
+      || m_options.mira 
+      || m_options.search.consensus
+      || m_outputSearchGraph 
+      || m_outputSearchGraphSLF
+      || m_outputSearchGraphHypergraph 
 #ifdef HAVE_PROTOBUF
       || m_outputSearchGraphPB
 #endif

@@ -8,6 +8,8 @@
 #include "ReorderingOptions.h"
 #include "ContextParameters.h"
 #include "InputOptions.h"
+#include "MBR_Options.h"
+#include "LMBR_Options.h"
 
 namespace Moses
 {
@@ -20,6 +22,11 @@ namespace Moses
     ReorderingOptions reordering;
     ContextParameters    context;
     InputOptions           input;
+    MBR_Options              mbr;
+    LMBR_Options            lmbr;
+
+    bool mira;
+
     // StackOptions      stack;
     // BeamSearchOptions  beam;
     bool init(Parameter const& param);

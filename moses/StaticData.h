@@ -145,18 +145,18 @@ protected:
   XmlInputType m_xmlInputType; //! method for handling sentence XML input
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
-  bool m_mbr; //! use MBR decoder
-  bool m_useLatticeMBR; //! use MBR decoder
-  bool m_mira; // do mira training
-  bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
-  size_t m_mbrSize; //! number of translation candidates considered
-  float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
-  size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
-  std::vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
-  bool m_useLatticeHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
-  float m_lmbrPrecision; //! unigram precision theta - see Tromble et al 08 for more details
-  float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
-  float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
+  // bool m_mbr; //! use MBR decoder
+  // bool m_useLatticeMBR; //! use MBR decoder
+  // bool m_mira; // do mira training
+  // bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
+  // size_t m_mbrSize; //! number of translation candidates considered
+  // float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
+  // size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
+  // std::vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
+  // bool m_useLatticeHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
+  // float m_lmbrPrecision; //! unigram precision theta - see Tromble et al 08 for more details
+  // float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
+  // float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
   bool m_lmEnableOOVFeature;
@@ -512,55 +512,55 @@ public:
   const std::string& GetFactorDelimiter() const {
     return m_factorDelimiter;
   }
-  bool UseMBR() const {
-    return m_mbr;
-  }
-  bool UseLatticeMBR() const {
-    return m_useLatticeMBR ;
-  }
-  bool UseConsensusDecoding() const {
-    return m_useConsensusDecoding;
-  }
-  void SetUseLatticeMBR(bool flag) {
-    m_useLatticeMBR = flag;
-  }
-  size_t GetMBRSize() const {
-    return m_mbrSize;
-  }
-  float GetMBRScale() const {
-    return m_mbrScale;
-  }
-  void SetMBRScale(float scale) {
-    m_mbrScale = scale;
-  }
-  size_t GetLatticeMBRPruningFactor() const {
-    return m_lmbrPruning;
-  }
-  void SetLatticeMBRPruningFactor(size_t prune) {
-    m_lmbrPruning = prune;
-  }
-  const std::vector<float>& GetLatticeMBRThetas() const {
-    return m_lmbrThetas;
-  }
-  bool  UseLatticeHypSetForLatticeMBR() const {
-    return m_useLatticeHypSetForLatticeMBR;
-  }
-  float GetLatticeMBRPrecision() const {
-    return m_lmbrPrecision;
-  }
-  void SetLatticeMBRPrecision(float p) {
-    m_lmbrPrecision = p;
-  }
-  float GetLatticeMBRPRatio() const {
-    return m_lmbrPRatio;
-  }
-  void SetLatticeMBRPRatio(float r) {
-    m_lmbrPRatio = r;
-  }
+  // bool UseMBR() const {
+  //   return m_mbr;
+  // }
+  // bool UseLatticeMBR() const {
+  //   return m_useLatticeMBR ;
+  // }
+  // bool UseConsensusDecoding() const {
+  //   return m_useConsensusDecoding;
+  // }
+  // void SetUseLatticeMBR(bool flag) {
+  //   m_useLatticeMBR = flag;
+  // }
+  // size_t GetMBRSize() const {
+  //   return m_mbrSize;
+  // }
+  // float GetMBRScale() const {
+  //   return m_mbrScale;
+  // }
+  // void SetMBRScale(float scale) {
+  //   m_mbrScale = scale;
+  // }
+  // size_t GetLatticeMBRPruningFactor() const {
+  //   return m_lmbrPruning;
+  // }
+  // void SetLatticeMBRPruningFactor(size_t prune) {
+  //   m_lmbrPruning = prune;
+  // }
+  // const std::vector<float>& GetLatticeMBRThetas() const {
+  //   return m_lmbrThetas;
+  // }
+  // bool  UseLatticeHypSetForLatticeMBR() const {
+  //   return m_useLatticeHypSetForLatticeMBR;
+  // }
+  // float GetLatticeMBRPrecision() const {
+  //   return m_lmbrPrecision;
+  // }
+  // void SetLatticeMBRPrecision(float p) {
+  //   m_lmbrPrecision = p;
+  // }
+  // float GetLatticeMBRPRatio() const {
+  //   return m_lmbrPRatio;
+  // }
+  // void SetLatticeMBRPRatio(float r) {
+  //   m_lmbrPRatio = r;
+  // }
 
-  float GetLatticeMBRMapWeight() const {
-    return m_lmbrMapWeight;
-  }
+  // float GetLatticeMBRMapWeight() const {
+  //   return m_lmbrMapWeight;
+  // }
 
   // bool UseTimeout() const {
   //   return m_timeout;
