@@ -678,6 +678,14 @@ int main(int argc, char** argv)
   bool isSerial = false;
   size_t numThreads = 10; //for translation tasks
 
+  //Abyss server configuration: initial values reflect hard-coded default
+  //-> http://xmlrpc-c.sourceforge.net/doc/libxmlrpc_server_abyss.html#max_conn
+  size_t maxConn = 15;
+  size_t maxConnBacklog = 15;
+  size_t keepaliveTimeout = 15;
+  size_t keepaliveMaxConn = 30;
+  size_t timeout = 15;
+
   for (int i = 0; i < argc; ++i) {
     if (!strcmp(argv[i],"--server-port")) {
       ++i;
@@ -694,6 +702,46 @@ int main(int argc, char** argv)
         exit(1);
       } else {
         logfile = argv[i];
+      }
+    } else if (!strcmp(argv[i],"--server-maxconn")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-maxconn" << endl;
+        exit(1);
+      } else {
+        maxConn = atoi(argv[i]);
+      }
+    } else if (!strcmp(argv[i],"--server-maxconn-backlog")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-maxconn-backlog" << endl;
+        exit(1);
+      } else {
+        maxConnBacklog = atoi(argv[i]);
+      }
+    } else if (!strcmp(argv[i],"--server-keepalive-timeout")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-keepalive-timeout" << endl;
+        exit(1);
+      } else {
+        keepaliveTimeout = atoi(argv[i]);
+      }
+    } else if (!strcmp(argv[i],"--server-keepalive-maxconn")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-keepalive-maxconn" << endl;
+        exit(1);
+      } else {
+        keepaliveMaxConn = atoi(argv[i]);
+      }
+    } else if (!strcmp(argv[i],"--server-timeout")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-timeout" << endl;
+        exit(1);
+      } else {
+        timeout = atoi(argv[i]);
       }
     } else if (!strcmp(argv[i], "--threads")) {
       ++i;
@@ -755,7 +803,11 @@ int main(int argc, char** argv)
     .portNumber(port)              // TCP port on which to listen
     .logFileName(logfile)
     .allowOrigin("*")
-    .maxConn((unsigned int)numThreads)
+    .maxConn((unsigned int)maxConn)
+    .maxConnBacklog((unsigned int)maxConnBacklog)
+    .keepaliveTimeout((unsigned int)keepaliveTimeout)
+    .keepaliveMaxConn((unsigned int)keepaliveMaxConn)
+    .timeout((unsigned int)timeout)
   );
 
   XVERBOSE(1,"Listening on port " << port << endl);
