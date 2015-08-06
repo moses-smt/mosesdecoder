@@ -143,7 +143,7 @@ enum SearchAlgorithm {
   CubePruning	= 1,
   //,CubeGrowing = 2
   CYKPlus = 3,
-  NormalBatch  = 4,
+  //NormalBatch  = 4,
   ChartIncremental = 5,
   SyntaxS2T = 6,
   SyntaxT2S = 7,
