@@ -53,4 +53,23 @@ namespace Moses
 
     return true;
   }
+
+#ifdef HAVE_XMLRPC_C
+  bool 
+  AllOptions::
+  update(std::map<std::string,xmlrpc_c::value>const& param)
+  {
+    if (!search.update(param))     return false;
+    if (!cube.update(param))       return false;
+    if (!nbest.update(param))      return false;
+    if (!reordering.update(param)) return false;
+    if (!context.update(param))    return false;
+    if (!input.update(param))      return false;
+    if (!mbr.update(param))        return false;
+    if (!lmbr.update(param))       return false;
+    return sanity_check();
+  }
+#endif
+
+
 }

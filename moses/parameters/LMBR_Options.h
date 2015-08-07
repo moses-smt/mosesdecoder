@@ -3,12 +3,13 @@
 #include <string>
 #include <vector>
 #include "moses/Parameter.h"
+#include "OptionsBaseClass.h"
 namespace Moses
 {
 
   // Options for mimum bayes risk decoding
   struct 
-  LMBR_Options 
+  LMBR_Options : public OptionsBaseClass
   {
     bool enabled;
     bool use_lattice_hyp_set; //! to use nbest as hypothesis set during lattice MBR

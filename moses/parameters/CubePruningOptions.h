@@ -2,11 +2,12 @@
 #pragma once
 #include <string>
 #include "moses/Parameter.h"
+#include "OptionsBaseClass.h"
 namespace Moses
 {
 
   struct 
-  CubePruningOptions 
+  CubePruningOptions : public OptionsBaseClass
   {
     size_t  pop_limit;
     size_t  diversity;
@@ -15,6 +16,11 @@ namespace Moses
     bool init(Parameter const& param);
     CubePruningOptions(Parameter const& param);
     CubePruningOptions() {};
+
+#ifdef HAVE_XMLRPC_C
+    bool 
+    update(std::map<std::string,xmlrpc_c::value>const& params);
+#endif
   };
 
 }

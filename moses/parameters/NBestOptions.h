@@ -1,10 +1,11 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
 #include <string>
+#include "OptionsBaseClass.h"
 namespace Moses
 {
 
-struct NBestOptions 
+struct NBestOptions : public OptionsBaseClass
 {
   size_t nbest_size;
   size_t factor;

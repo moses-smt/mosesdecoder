@@ -2,6 +2,7 @@
 #pragma once
 #include <string>
 #include "moses/Parameter.h"
+#include "OptionsBaseClass.h"
 #include "SearchOptions.h"
 #include "CubePruningOptions.h"
 #include "NBestOptions.h"
@@ -10,11 +11,10 @@
 #include "InputOptions.h"
 #include "MBR_Options.h"
 #include "LMBR_Options.h"
-
 namespace Moses
 {
   struct 
-  AllOptions 
+  AllOptions : public OptionsBaseClass
   {
     SearchOptions         search;
     CubePruningOptions      cube;
@@ -33,6 +33,11 @@ namespace Moses
     bool sanity_check();
     AllOptions() {}
     AllOptions(Parameter const& param);
+
+#ifdef HAVE_XMLRPC_C
+    bool update(std::map<std::string,xmlrpc_c::value>const& param);
+#endif 
+
   };
 
 }

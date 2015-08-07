@@ -2,11 +2,12 @@
 #pragma once
 #include <string>
 #include "moses/Parameter.h"
+#include "OptionsBaseClass.h"
 namespace Moses
 {
 
   struct 
-  ReorderingOptions 
+  ReorderingOptions : public OptionsBaseClass
   {
     int max_distortion;
     bool monotone_at_punct;

@@ -246,6 +246,8 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   // params_t const params = m_paramList.getStruct(0);
   m_paramList.verifyEnd(1); // ??? UG
 
+  m_options.update(params);
+
   // source text must be given, or we don't know what to translate
   typedef std::map<std::string, xmlrpc_c::value> params_t;
   params_t::const_iterator si = params.find("text");

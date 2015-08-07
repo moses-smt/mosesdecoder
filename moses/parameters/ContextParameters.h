@@ -4,11 +4,12 @@
 #include "moses/Parameter.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
+#include "OptionsBaseClass.h"
 
 namespace Moses
 {
 
-class ContextParameters
+class ContextParameters : public OptionsBaseClass
 {
 public:
   ContextParameters();

@@ -2,11 +2,12 @@
 #pragma once
 #include <string>
 #include "moses/Parameter.h"
+#include "OptionsBaseClass.h"
 namespace Moses
 {
 
   struct 
-  BeamSearchOptions 
+  BeamSearchOptions : public OptionsBaseClass
   {
     bool init(Parameter const& param);
     BeamSearchOptions(Parameter const& param);

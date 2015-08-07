@@ -2,12 +2,13 @@
 #pragma once
 #include <string>
 #include "moses/Parameter.h"
+#include "OptionsBaseClass.h"
 namespace Moses
 {
 
   // Options for mimum bayes risk decoding
   struct 
-  MBR_Options 
+  MBR_Options : public OptionsBaseClass
   {
     bool enabled;
     size_t size; //! number of translation candidates considered

@@ -1,16 +1,17 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
+#pragma once
+#include <string>
 #include "moses/Parameter.h"
 #include "OptionsBaseClass.h"
-
 namespace Moses
 {
 
-  struct BookkeepingOptions : public OptionsBaseClass 
+  struct 
+  LookupOptions : public OptionsBaseClass
   {
-    bool need_alignment_info;
     bool init(Parameter const& param);
+    ReorderingOptions() {}
   };
-  
-
 
 }
+

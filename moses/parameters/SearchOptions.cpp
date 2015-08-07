@@ -30,7 +30,6 @@ namespace Moses
     param.SetParameter(max_partial_trans_opt, "max-partial-trans-opt", 
                        DEFAULT_MAX_PART_TRANS_OPT_SIZE);
 
-
     param.SetParameter(consensus, "consensus-decoding", false);
 
     // transformation to log of a few scores
@@ -47,6 +46,44 @@ namespace Moses
             algo == SyntaxS2T || algo == SyntaxT2S ||
             algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
   }
+
+#ifdef HAVE_XMLRPC_C
+    bool 
+    SearchOptions::
+    update(std::map<std::string,xmlrpc_c::value>const& params)
+    {
+      typedef std::map<std::string, xmlrpc_c::value> params_t;
+
+      params_t::const_iterator si = params.find("search-algoritm");
+      if (si != params.end()) 
+        {
+          // use named parameters
+          std::string spec = xmlrpc_c::value_string(si->second);
+          if      (spec == "normal" || spec == "0") algo = Normal;
+          else if (spec == "cube"   || spec == "1") algo = CubePruning;
+          else throw xmlrpc_c::fault("Unsupported search algorithm", 
+                                     xmlrpc_c::fault::CODE_PARSE);
+        }
+
+      si = params.find("stack");
+      if (si != params.end()) stack_size = xmlrpc_c::value_int(si->second);
+
+      si = params.find("stack-diversity");
+      if (si != params.end()) stack_diversity = xmlrpc_c::value_int(si->second);
+
+      si = params.find("beam-threshold");
+      if (si != params.end()) beam_width = xmlrpc_c::value_double(si->second);
+
+      si = params.find("time-out");
+      if (si != params.end()) timeout = xmlrpc_c::value_int(si->second);
+      
+      si = params.find("max-phrase-length");
+      if (si != params.end()) max_phrase_length = xmlrpc_c::value_int(si->second);
+      
+      return true;
+    }
+#endif
+
 
 
 }

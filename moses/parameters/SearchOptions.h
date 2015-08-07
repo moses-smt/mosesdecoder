@@ -2,13 +2,14 @@
 #pragma once
 #include <string>
 #include "moses/Parameter.h"
+#include "OptionsBaseClass.h"
 namespace Moses
 {
 
   bool is_syntax(SearchAlgorithm algo);
   
   struct 
-  SearchOptions 
+  SearchOptions : public OptionsBaseClass
   {
     SearchAlgorithm algo;
     
@@ -37,9 +38,15 @@ namespace Moses
     SearchOptions(Parameter const& param);
     SearchOptions() {}
 
-    bool UseEarlyDiscarding() const {
+    bool 
+    UseEarlyDiscarding() const {
       return early_discarding_threshold != -std::numeric_limits<float>::infinity();
     }
+
+#ifdef HAVE_XMLRPC_C
+    bool 
+    update(std::map<std::string,xmlrpc_c::value>const& params);
+#endif
 
   };
 

@@ -3,10 +3,12 @@
 #include <string>
 #include "moses/Parameter.h"
 #include <string>
+#include "OptionsBaseClass.h"
+
 namespace Moses
 {
   struct 
-  InputOptions 
+  InputOptions : public OptionsBaseClass
   {
     bool continue_partial_translation; 
     bool default_non_term_only_for_empty_range; // whatever that means
