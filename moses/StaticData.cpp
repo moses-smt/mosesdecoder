@@ -267,12 +267,12 @@ StaticData
   m_parameter->SetParameter(m_printAllDerivations , "print-all-derivations", false );
 
   // additional output
-  m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath, 
-				    "translation-details", "");
+  m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath,
+                                    "translation-details", "");
   m_parameter->SetParameter<string>(m_detailedTreeFragmentsTranslationReportingFilePath,
-				    "tree-translation-details", "");
-  m_parameter->SetParameter<string>(m_detailedAllTranslationReportingFilePath, 
-				    "translation-all-details", "");
+                                    "tree-translation-details", "");
+  m_parameter->SetParameter<string>(m_detailedAllTranslationReportingFilePath,
+                                    "translation-all-details", "");
   m_parameter->SetParameter<long>(m_startTranslationId, "start-translation-id", 0);
 
   //lattice samples
@@ -435,12 +435,12 @@ bool StaticData::LoadData(Parameter *parameter)
   ini_oov_options();
 
   // set m_nbest_options.enabled = true if necessary:
-  if (m_options.mbr.enabled        
-      || m_options.mira 
+  if (m_options.mbr.enabled
+      || m_options.mira
       || m_options.search.consensus
-      || m_outputSearchGraph 
+      || m_outputSearchGraph
       || m_outputSearchGraphSLF
-      || m_outputSearchGraphHypergraph 
+      || m_outputSearchGraphHypergraph
 #ifdef HAVE_PROTOBUF
       || m_outputSearchGraphPB
 #endif

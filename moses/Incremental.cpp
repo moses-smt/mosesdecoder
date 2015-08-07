@@ -223,8 +223,8 @@ namespace
 const float log_10 = logf(10);
 }
 
-template <class Model, class Best> 
-search::History 
+template <class Model, class Best>
+search::History
 Manager::
 PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
 {

@@ -177,8 +177,8 @@ batch_run()
 #endif
 
   // using context for adaptation:
-  // e.g., context words / strings from config file / cmd line 
-  std::string context_string; 
+  // e.g., context words / strings from config file / cmd line
+  std::string context_string;
   params.SetParameter(context_string,"context-string",string(""));
 
   // ... or weights for documents/domains from config file / cmd. line
@@ -189,18 +189,18 @@ batch_run()
   size_t size_t_max = std::numeric_limits<size_t>::max();
   bool use_context_window = ioWrapper->GetLookAhead() || ioWrapper->GetLookBack();
   bool use_context = use_context_window || context_string.size();
-  bool use_sliding_context_window = (use_context_window 
-				     && ioWrapper->GetLookAhead() != size_t_max);
+  bool use_sliding_context_window = (use_context_window
+                                     && ioWrapper->GetLookAhead() != size_t_max);
 
   boost::shared_ptr<std::vector<std::string> >  context_window;
   boost::shared_ptr<std::vector<std::string> >* cw;
   cw = use_context_window ? &context_window : NULL;
-  if (!cw && context_string.size()) 
+  if (!cw && context_string.size())
     context_window.reset(new std::vector<std::string>(1,context_string));
 
   // global scope of caches, biases, etc., if any
   boost::shared_ptr<ContextScope> gscope;
-  if (!use_sliding_context_window) 
+  if (!use_sliding_context_window)
     gscope.reset(new ContextScope);
 
   // main loop over set of input sentences
@@ -212,21 +212,20 @@ batch_run()
     boost::shared_ptr<ContextScope>  lscope;
     if (gscope) lscope = gscope;
     else lscope.reset(new ContextScope);
-    
-    boost::shared_ptr<TranslationTask> task; 
+
+    boost::shared_ptr<TranslationTask> task;
     task = TranslationTask::create(source, ioWrapper, lscope);
-    
-    if (cw)
-      {
-	if (context_string.size())
-	  context_window->push_back(context_string);
-	if(!use_sliding_context_window)
-	  cw = NULL;
-      }
+
+    if (cw) {
+      if (context_string.size())
+        context_window->push_back(context_string);
+      if(!use_sliding_context_window)
+        cw = NULL;
+    }
     if (context_window)
       task->SetContextWindow(context_window);
-    
-    if (context_weights != "") 
+
+    if (context_weights != "")
       task->SetContextWeights(context_weights);
 
     // Allow for (sentence-)context-specific processing prior to

@@ -322,8 +322,8 @@ void ChartManager::OutputNBest(OutputCollector *collector) const
   if (nBestSize > 0) {
     const size_t translationId = m_source.GetTranslationId();
 
-    VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " 
-	    << staticData.options().nbest.output_file_path << endl);
+    VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO "
+            << staticData.options().nbest.output_file_path << endl);
     std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
     CalcNBest(nBestSize, nBestList,staticData.options().nbest.only_distinct);
     OutputNBestList(collector, nBestList, translationId);

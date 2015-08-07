@@ -290,13 +290,13 @@ public:
   }
 
   AllOptions const&
-  options() const { 
-    return m_options; 
+  options() const {
+    return m_options;
   }
 
-  AllOptions& 
-  options() { 
-    return m_options;  
+  AllOptions&
+  options() {
+    return m_options;
   }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
@@ -367,8 +367,8 @@ public:
   }
 
   bool UseEarlyDiscarding() const {
-    return m_options.search.early_discarding_threshold 
-      != -std::numeric_limits<float>::infinity();
+    return m_options.search.early_discarding_threshold
+           != -std::numeric_limits<float>::infinity();
   }
   bool UseEarlyDistortionCost() const {
     return m_options.reordering.use_early_distortion_cost;
@@ -474,7 +474,7 @@ public:
   bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
     if (algo == DefaultSearchAlgorithm)
       algo = m_options.search.algo;
-    
+
     return (algo == CYKPlus   || algo == ChartIncremental ||
             algo == SyntaxS2T || algo == SyntaxT2S ||
             algo == SyntaxF2S || algo == SyntaxT2S_SCFG);

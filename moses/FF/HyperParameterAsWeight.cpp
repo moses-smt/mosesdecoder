@@ -21,7 +21,7 @@ HyperParameterAsWeight::HyperParameterAsWeight(const std::string &line)
 
   staticData.m_options.search.stack_size = weights[0] * 1000;
   staticData.m_options.search.beam_width = weights[1] * 10;
-  
+
 }
 
 

@@ -23,7 +23,7 @@ using namespace std;
 namespace Moses
 {
 
-boost::shared_ptr<std::vector<std::string> > 
+boost::shared_ptr<std::vector<std::string> >
 TranslationTask::
 GetContextWindow() const
 {
@@ -88,7 +88,7 @@ boost::shared_ptr<TranslationTask>
 TranslationTask
 ::create(boost::shared_ptr<InputType> const& source,
          boost::shared_ptr<IOWrapper> const& ioWrapper,
-	 boost::shared_ptr<ContextScope> const& scope)
+         boost::shared_ptr<ContextScope> const& scope)
 {
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
   ret->m_self  = ret;
@@ -100,7 +100,7 @@ TranslationTask
 ::TranslationTask(boost::shared_ptr<InputType> const& source,
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
-{ 
+{
   m_options = StaticData::Instance().options();
 }
 

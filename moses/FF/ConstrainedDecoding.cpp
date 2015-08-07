@@ -43,10 +43,10 @@ ConstrainedDecoding::ConstrainedDecoding(const std::string &line)
 void ConstrainedDecoding::Load()
 {
   const StaticData &staticData = StaticData::Instance();
-  bool addBeginEndWord 
-    = ((staticData.options().search.algo == CYKPlus) 
-       || (staticData.options().search.algo == ChartIncremental));
-  
+  bool addBeginEndWord
+  = ((staticData.options().search.algo == CYKPlus)
+     || (staticData.options().search.algo == ChartIncremental));
+
   for(size_t i = 0; i < m_paths.size(); ++i) {
     InputFileStream constraintFile(m_paths[i]);
     std::string line;

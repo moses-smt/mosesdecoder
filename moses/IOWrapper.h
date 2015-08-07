@@ -129,7 +129,7 @@ public:
 
   // Moses::InputType* GetInput(Moses::InputType *inputType);
 
-  boost::shared_ptr<InputType> 
+  boost::shared_ptr<InputType>
   ReadInput(boost::shared_ptr<std::vector<std::string> >* cw = NULL);
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
@@ -184,7 +184,7 @@ public:
   // post editing
   std::ifstream *spe_src, *spe_trg, *spe_aln;
 
-  std::list<boost::shared_ptr<InputType> > const& GetPastInput() const { 
+  std::list<boost::shared_ptr<InputType> > const& GetPastInput() const {
     return m_past_input;
   }
 
@@ -198,7 +198,7 @@ public:
   size_t GetLookBack() const {
     return m_look_back;
   }
-      
+
 private:
   template<class itype>
   boost::shared_ptr<InputType>
@@ -207,7 +207,7 @@ private:
   boost::shared_ptr<InputType>
   GetBufferedInput();
 
-  boost::shared_ptr<std::vector<std::string> > 
+  boost::shared_ptr<std::vector<std::string> >
   GetCurrentContextWindow() const;
 };
 
@@ -230,7 +230,7 @@ BufferInput()
   }
   while (m_buffered_ahead < m_look_ahead) {
     source.reset(new itype);
-    if (!source->Read(*m_inputStream, *m_inputFactorOrder)) 
+    if (!source->Read(*m_inputStream, *m_inputFactorOrder))
       break;
     m_future_input.push_back(source);
     m_buffered_ahead += source->GetSize();

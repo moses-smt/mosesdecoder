@@ -92,8 +92,8 @@ void SearchCubePruning::Decode()
     // check if decoding ran out of time
     double _elapsed_time = GetUserTime();
     if (timelimit && _elapsed_time > timelimit) {
-      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," 
-	      << timelimit << ")" << std::endl);
+      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << ","
+              << timelimit << ")" << std::endl);
       return;
     }
     HypothesisStackCubePruning &sourceHypoColl = *static_cast<HypothesisStackCubePruning*>(*iterStack);
