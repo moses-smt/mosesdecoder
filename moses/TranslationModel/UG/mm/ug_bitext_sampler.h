@@ -104,7 +104,7 @@ check_sample_distribution(uint64_t const& sid, uint64_t const& offset)
   float p = (*m_bias)[sid];
   id_type docid = m_bias->GetClass(sid);
  
-  std::map<uint32_t,uint32_t>::const_iterator m = m_stats->indoc.find(docid);
+  pstats::indoc_map_t::const_iterator m = m_stats->indoc.find(docid);
   uint32_t k = m != m_stats->indoc.end() ? m->second : 0 ;
 
   // always consider candidates from dominating documents and
@@ -128,7 +128,7 @@ check_sample_distribution(uint64_t const& sid, uint64_t const& offset)
         e = m_root->getCorpus()->sntEnd(sid);
       *log << docid << ":" << sid << " " << size_t(k) << "/" << N
            << " @" << p << " => " << d << " [";
-      std::map<uint32_t, uint32_t>::const_iterator m;
+      pstats::indoc_map_t::const_iterator m;
       for (m = m_stats->indoc.begin(); m != m_stats->indoc.end(); ++m)
         {
           if (m != m_stats->indoc.begin()) *log << " ";

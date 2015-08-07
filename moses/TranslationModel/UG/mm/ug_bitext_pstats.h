@@ -18,6 +18,8 @@ namespace Moses
       typedef boost::unordered_map<uint64_t, SPTR<pstats> > map_t;
       typedef ThreadSafeContainer<uint64_t, SPTR<pstats>, map_t> cache_t;
       typedef std::vector<unsigned char> alnvec;
+      typedef boost::unordered_map<uint64_t, jstats> trg_map_t;
+      typedef boost::unordered_map<uint32_t,uint32_t> indoc_map_t; 
 #if UG_BITEXT_TRACK_ACTIVE_THREADS
       static ThreadSafeCounter active;
 #endif
@@ -33,9 +35,7 @@ namespace Moses
       uint32_t ofwd[Moses::LRModel::NONE+1]; // distribution of fwd phrase orientations
       uint32_t obwd[Moses::LRModel::NONE+1]; // distribution of bwd phrase orientations
 
-      // std::vector<uint32_t> indoc; // distribution over where samples came from
-      std::map<uint32_t,uint32_t> indoc; 
-      typedef std::map<uint64_t, jstats> trg_map_t;
+      indoc_map_t indoc;
       trg_map_t trg;
       pstats();
       ~pstats();

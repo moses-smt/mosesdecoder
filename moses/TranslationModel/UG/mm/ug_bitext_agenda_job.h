@@ -139,7 +139,8 @@ int Bitext<Token>::agenda::job
   id_type docid = m_bias->GetClass(sid);
   
   // uint32_t k = docid < stats->indoc.size() ? stats->indoc[docid] : 0;
-  std::map<uint32_t,uint32_t>::const_iterator m = stats->indoc.find(docid);
+  typedef pstats::indoc_map_t::const_iterator id_iter;
+  id_iter m = stats->indoc.find(docid);
   uint32_t k = m != stats->indoc.end() ? m->second : 0 ;
 
   // always consider candidates from dominating documents and
@@ -162,8 +163,7 @@ int Bitext<Token>::agenda::job
 	e = root->getCorpus()->sntEnd(sid);
       *log << docid << ":" << sid << " " << size_t(k) << "/" << N
 	   << " @" << p << " => " << d << " [";
-      for (std::map<uint32_t, uint32_t>::const_iterator m = stats->indoc.begin();
-	   m != stats->indoc.end(); ++m)
+      for (id_iter m = stats->indoc.begin(); m != stats->indoc.end(); ++m)
 	{
 	  if (m != stats->indoc.begin()) *log << " ";
 	  *log << m->first << ":" << m->second;
@@ -208,9 +208,7 @@ bool Bitext<Token>::agenda::job
 ::step(uint64_t & sid, uint64_t & offset)
 { // caller must lock!
   if (next == stop) return false;
-  UTIL_THROW_IF2
-    ( next > stop, "Fatal error at " << HERE << ". How did that happen?" );
-  // boost::lock_guard<boost::mutex> jguard(lock); // caller must lock!
+  UTIL_THROW_IF2(next > stop, "Fatal error at " << HERE << ".");
   next = root->readSid(next, stop, sid);
   next = root->readOffset(next, stop, offset);
   ++ctr;
