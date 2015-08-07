@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 
 /***********************************************************************
@@ -86,11 +86,11 @@ protected:
   Moses::InputFileStream *m_inputFile;
   std::istream *m_inputStream;
   std::ostream *m_nBestStream;
-  std::ostream *m_outputWordGraphStream;
-  std::ostream *m_outputSearchGraphStream;
-  std::ostream *m_detailedTranslationReportingStream;
+  // std::ostream *m_outputWordGraphStream;
+  // std::auto_ptr<std::ostream> m_outputSearchGraphStream;
+  // std::ostream *m_detailedTranslationReportingStream;
   std::ostream *m_unknownsStream;
-  std::ostream *m_detailedTreeFragmentsTranslationReportingStream;
+  // std::ostream *m_detailedTreeFragmentsTranslationReportingStream;
   std::ofstream *m_alignmentInfoStream;
   std::ofstream *m_latticeSamplesStream;
 

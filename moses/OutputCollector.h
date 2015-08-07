@@ -33,7 +33,8 @@
 #include <map>
 #include <ostream>
 #include <string>
-
+#include "Util.h"
+#include "util/exception.hh"
 namespace Moses
 {
 /**
@@ -60,8 +61,8 @@ public:
 	m_isHoldingOutputStream = false;
       } else if (xout.size() && xout != "/dev/stdout" && xout != "-") {
 	m_outStream = new std::ofstream(xout.c_str());
-	UTIL_THROW_IF2(!m_outputStream->good(), "Failed to open output file"
-		       << xout << std::endl);
+	UTIL_THROW_IF2(!m_outStream->good(), "Failed to open output file"
+		       << xout);
 	m_isHoldingOutputStream = true;
       } else { 
 	m_outStream = &std::cout;
@@ -74,7 +75,7 @@ public:
       } else if (xerr.size() && xerr != "/dev/stderr") {
 	m_debugStream = new std::ofstream(xerr.c_str());
 	UTIL_THROW_IF2(!m_debugStream->good(), "Failed to open debug stream"
-		       << xerr << std::endl);
+		       << xerr);
 	m_isHoldingDebugStream = true;
       } else { 
 	m_debugStream = &std::cerr;
