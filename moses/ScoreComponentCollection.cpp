@@ -330,7 +330,7 @@ void ScoreComponentCollection::OutputFeatureScores( std::ostream& out
     , std::string &lastName ) const
 {
   const StaticData &staticData = StaticData::Instance();
-  bool labeledOutput = staticData.IsLabeledNBestList();
+  bool labeledOutput = staticData.options().nbest.include_feature_labels;
 
   // regular features (not sparse)
   if (ff->HasTuneableComponents()) {

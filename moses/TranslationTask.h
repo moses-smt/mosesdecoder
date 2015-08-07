@@ -43,8 +43,8 @@ class TranslationTask : public Moses::Task
   operator=(TranslationTask const& other) {
     return *this;
   }
-
 protected:
+  AllOptions m_options;
   boost::weak_ptr<TranslationTask> m_self; // weak ptr to myself
   boost::shared_ptr<ContextScope> m_scope; // sores local info
   // pointer to ContextScope, which stores context-specific information
@@ -134,6 +134,7 @@ public:
   void SetContextWeights(std::string const& context_weights);
   void ReSetContextWeights(std::map<std::string, float> const& new_weights);
 
+  AllOptions const& options() const;
 
 protected:
   boost::shared_ptr<Moses::InputType> m_source;

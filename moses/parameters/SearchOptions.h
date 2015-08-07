@@ -12,23 +12,35 @@ namespace Moses
   {
     SearchAlgorithm algo;
     
-    // stack options
+    // stack decoding
     size_t stack_size;      // maxHypoStackSize;
     size_t stack_diversity; // minHypoStackDiversity;
 
+    size_t max_phrase_length;
+    size_t max_trans_opt_per_cov; 
+    size_t max_partial_trans_opt;
     // beam search
     float beam_width;
+
+    int timeout;
+
+    bool consensus; //! Use Consensus decoding  (DeNero et al 2009)
 
     // reordering options
     // bool  reorderingConstraint; //! use additional reordering constraints
     // bool  useEarlyDistortionCost;
 
     float early_discarding_threshold;
-    float translationOptionThreshold;
+    float trans_opt_threshold;
 
     bool init(Parameter const& param);
     SearchOptions(Parameter const& param);
     SearchOptions() {}
+
+    bool UseEarlyDiscarding() const {
+      return early_discarding_threshold != -std::numeric_limits<float>::infinity();
+    }
+
   };
 
 }

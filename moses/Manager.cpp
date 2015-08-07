@@ -71,7 +71,7 @@ Manager::Manager(ttasksptr const& ttask)
   m_transOptColl = source->CreateTranslationOptionCollection(ttask);
 
   const StaticData &staticData = StaticData::Instance();
-  SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
+  SearchAlgorithm searchAlgorithm = staticData.options().search.algo;
   m_search = Search::CreateSearch(*this, *source, searchAlgorithm,
                                   *m_transOptColl);
 
@@ -264,7 +264,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
   }
 
   // factor defines stopping point for distinct n-best list if too many candidates identical
-  size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+  size_t nBestFactor = StaticData::Instance().options().nbest.factor;
   if (nBestFactor < 1) nBestFactor = 1000; // 0 = unlimited
 
   // MAIN loop
@@ -288,7 +288,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 
 
     if(onlyDistinct) {
-      const size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+      const size_t nBestFactor = StaticData::Instance().options().nbest.factor;
       if (nBestFactor > 0)
         contenders.Prune(count * nBestFactor);
     } else {
@@ -1492,7 +1492,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
 
     // MAP decoding: best hypothesis
     const Hypothesis* bestHypo = NULL;
-    if (!staticData.UseMBR()) {
+    if (!options().mbr.enabled) {
       bestHypo = GetBestHypothesis();
       if (bestHypo) {
         if (StaticData::Instance().GetOutputHypoScore()) {
@@ -1534,7 +1534,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
     // MBR decoding (n-best MBR, lattice MBR, consensus)
     else {
       // we first need the n-best translations
-      size_t nBestSize = staticData.GetMBRSize();
+      size_t nBestSize = options().mbr.size;
       if (nBestSize <= 0) {
         cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
         exit(1);
@@ -1547,11 +1547,11 @@ void Manager::OutputBest(OutputCollector *collector)  const
       }
 
       // lattice MBR
-      if (staticData.UseLatticeMBR()) {
-        if (staticData.IsNBestEnabled()) {
+      if (options().lmbr.enabled) {
+        if (staticData.options().nbest.enabled) {
           //lattice mbr nbest
           vector<LatticeMBRSolution> solutions;
-          size_t n  = min(nBestSize, staticData.GetNBestSize());
+          size_t n  = min(nBestSize, options().nbest.nbest_size);
           getLatticeMBRNBest(*this,nBestList,solutions,n);
           OutputLatticeMBRNBest(m_latticeNBestOut, solutions, translationId);
         } else {
@@ -1566,7 +1566,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
       }
 
       // consensus decoding
-      else if (staticData.UseConsensusDecoding()) {
+      else if (options().search.consensus) {
         const TrellisPath &conBestHypo = doConsensusDecoding(*this,nBestList);
         OutputBestHypo(conBestHypo, translationId,
                        staticData.GetReportSegmentation(),
@@ -1608,15 +1608,17 @@ void Manager::OutputNBest(OutputCollector *collector) const
   const StaticData &staticData = StaticData::Instance();
   long translationId = m_source.GetTranslationId();
 
-  if (staticData.UseLatticeMBR()) {
-    if (staticData.IsNBestEnabled()) {
+  if (options().lmbr.enabled) {
+    if (staticData.options().nbest.enabled) {
       collector->Write(translationId, m_latticeNBestOut.str());
     }
   } else {
     TrellisPathList nBestList;
     ostringstream out;
-    CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_source.GetTranslationId(),
+    CalcNBest(options().nbest.nbest_size, nBestList,
+	      options().nbest.only_distinct);
+    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), 
+		m_source.GetTranslationId(),
                 staticData.GetReportSegmentation());
     collector->Write(m_source.GetTranslationId(), out.str());
   }
@@ -1630,9 +1632,10 @@ void Manager::OutputNBest(std::ostream& out
                           , char reportSegmentation) const
 {
   const StaticData &staticData = StaticData::Instance();
-  bool reportAllFactors = staticData.GetReportAllFactorsNBest();
-  bool includeSegmentation = staticData.NBestIncludesSegmentation();
-  bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
+  NBestOptions const& nbo = staticData.options().nbest;
+  bool reportAllFactors     = nbo.include_all_factors;
+  bool includeSegmentation  = nbo.include_segmentation;
+  bool includeWordAlignment = nbo.include_alignment_info;
 
   TrellisPathList::const_iterator iter;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {

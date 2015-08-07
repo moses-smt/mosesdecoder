@@ -3,6 +3,7 @@
 #include "Manager.h"
 #include "Hypothesis.h"
 #include "util/exception.hh"
+#include <boost/foreach.hpp>
 
 //#include <google/profiler.h>
 
@@ -14,7 +15,7 @@ SearchNormalBatch::SearchNormalBatch(Manager& manager, const InputType &source, 
   :SearchNormal(manager, source, transOptColl)
   ,m_batch_size(10000)
 {
-  m_max_stack_size = StaticData::Instance().GetMaxHypoStackSize();
+  m_max_stack_size = m_options.search.stack_size;
 
   // Split the feature functions into sets of stateless, stateful
   // distributed lm, and stateful non-distributed.
@@ -50,47 +51,13 @@ void SearchNormalBatch::Decode()
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack
-  std::vector < HypothesisStack* >::iterator iterStack;
-  for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
-    // check if decoding ran out of time
-    double _elapsed_time = GetUserTime();
-    if (_elapsed_time > staticData.GetTimeoutThreshold()) {
-      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
-      interrupted_flag = 1;
-      return;
-    }
-    HypothesisStackNormal &sourceHypoColl = *static_cast<HypothesisStackNormal*>(*iterStack);
-
-    // the stack is pruned before processing (lazy pruning):
-    VERBOSE(3,"processing hypothesis from next stack");
-    IFVERBOSE(2) {
-      stats.StartTimeStack();
-    }
-    sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
-    VERBOSE(3,std::endl);
-    sourceHypoColl.CleanupArcList();
-    IFVERBOSE(2) {
-      stats.StopTimeStack();
-    }
-
-    // go through each hypothesis on the stack and try to expand it
-    HypothesisStackNormal::const_iterator iterHypo;
-    for (iterHypo = sourceHypoColl.begin() ; iterHypo != sourceHypoColl.end() ; ++iterHypo) {
-      Hypothesis &hypothesis = **iterHypo;
-      ProcessOneHypothesis(hypothesis); // expand the hypothesis
-    }
-    EvalAndMergePartialHypos();
-
-    // some logging
-    IFVERBOSE(2) {
-      OutputHypoStackSize();
-    }
-
-    // this stack is fully expanded;
-    actual_hypoStack = &sourceHypoColl;
+  BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
+    if (!ProcessOneStack(hstack)) return;
+    EvalAndMergePartialHypos(); // <= THAT is the difference to SearchNormal!
+    IFVERBOSE(2) OutputHypoStackSize();
+    actual_hypoStack = static_cast<HypothesisStackNormal*>(hstack);
   }
-
-  EvalAndMergePartialHypos();
+  EvalAndMergePartialHypos(); // <= THAT is the difference to SearchNormal!
 }
 
 /**
@@ -106,7 +73,8 @@ void SearchNormalBatch::Decode()
 void
 SearchNormalBatch::
 ExpandHypothesis(const Hypothesis &hypothesis,
-                 const TranslationOption &transOpt, float expectedScore)
+                 const TranslationOption &transOpt, 
+		 float expectedScore)
 {
   // Check if the number of partial hypotheses exceeds the batch size.
   if (m_partial_hypos.size() >= m_batch_size) {

@@ -45,8 +45,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/PP/Factory.h"
 
 #include "moses/parameters/AllOptions.h"
-#include "moses/parameters/ContextParameters.h"
-#include "moses/parameters/NBestOptions.h"
 #include "moses/parameters/BookkeepingOptions.h"
 
 namespace Moses
@@ -75,20 +73,36 @@ private:
 protected:
   Parameter *m_parameter;
   AllOptions m_options;
-  BookkeepingOptions m_bookkeeping_options;
 
-  std::vector<FactorType> m_inputFactorOrder, m_outputFactorOrder;
+  std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
 
-  float  m_translationOptionThreshold;
-  float m_wordDeletionWeight;
+  // Initial	= 0 = can be used when creating poss trans
+  // Other		= 1 = used to calculate LM score once all steps have been processed
+  float
+  // m_beamWidth,
+  // m_earlyDiscardingThreshold,
+  // m_translationOptionThreshold,
+  m_wordDeletionWeight;
+
+
+  // PhraseTrans, Generation & LanguageModelScore has multiple weights.
+  // int				m_maxDistortion;
+  // do it differently from old pharaoh
+  // -ve	= no limit on distortion
+  // 0		= no disortion (monotone in old pharaoh)
+  bool m_reorderingConstraint; //! use additional reordering constraints
+  // bool m_useEarlyDistortionCost;
+  // size_t m_maxHypoStackSize; //! hypothesis-stack size that triggers pruning
+  // size_t m_minHypoStackDiversity; //! minimum number of hypothesis in stack for each source word coverage;
+  BookkeepingOptions m_bookkeeping_options;
 
   size_t m_latticeSamplesSize;
-  size_t m_maxNoTransOptPerCoverage;
-  size_t m_maxNoPartTransOpt;
-  size_t m_maxPhraseLength;
+  // size_t m_maxNoTransOptPerCoverage;
+  // size_t m_maxNoPartTransOpt;
+  // size_t m_maxPhraseLength;
 
   std::string  m_latticeSamplesFilePath;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
@@ -106,6 +120,9 @@ protected:
   bool m_outputHypoScore;
   bool m_requireSortingAfterSourceContext;
 
+  // SearchAlgorithm m_searchAlgorithm;
+  InputTypeEnum m_inputType;
+
   mutable size_t m_verboseLevel;
 
   bool m_reportSegmentation;
@@ -113,9 +130,11 @@ protected:
   bool m_reportAllFactors;
   std::string m_detailedTranslationReportingFilePath;
   std::string m_detailedTreeFragmentsTranslationReportingFilePath;
+
   std::string m_detailedAllTranslationReportingFilePath;
 
   bool m_PrintAlignmentInfo;
+
   bool m_PrintID;
   bool m_PrintPassthroughInformation;
 
@@ -123,26 +142,30 @@ protected:
 
   std::string m_factorDelimiter; //! by default, |, but it can be changed
 
-  bool m_mbr; //! use MBR decoder
-  bool m_useLatticeMBR; //! use MBR decoder
-  bool m_mira; // do mira training
-  bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
-  size_t m_mbrSize; //! number of translation candidates considered
-  float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
-  size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
-  std::vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
-  bool m_useLatticeHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
-  float m_lmbrPrecision; //! unigram precision theta - see Tromble et al 08 for more details
-  float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
-  float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
+  XmlInputType m_xmlInputType; //! method for handling sentence XML input
+  std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
+
+  // bool m_mbr; //! use MBR decoder
+  // bool m_useLatticeMBR; //! use MBR decoder
+  // bool m_mira; // do mira training
+  // bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
+  // size_t m_mbrSize; //! number of translation candidates considered
+  // float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
+  // size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
+  // std::vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
+  // bool m_useLatticeHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
+  // float m_lmbrPrecision; //! unigram precision theta - see Tromble et al 08 for more details
+  // float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
+  // float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
   bool m_lmEnableOOVFeature;
 
-  bool m_timeout; //! use timeout
-  size_t m_timeout_threshold; //! seconds after which time out is activated
+  // bool m_timeout; //! use timeout
+  // size_t m_timeout_threshold; //! seconds after which time out is activated
 
   bool m_isAlwaysCreateDirectTranslationOption;
+  //! constructor. only the 1 static variable can be created
 
   bool m_outputWordGraph; //! whether to output word graph
   bool m_outputSearchGraph; //! whether to output search graph
@@ -185,7 +208,7 @@ protected:
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
-  
+
   StaticData();
 
   void LoadChartDecodingParameters();
@@ -198,6 +221,7 @@ protected:
 
   void NoCache();
 
+  bool m_continuePartialTranslation;
   std::string m_binPath;
 
   // soft NT lookup for chart models
@@ -205,8 +229,14 @@ protected:
 
   const StatefulFeatureFunction* m_treeStructure;
 
+  // number of nonterminal labels
+//   size_t m_nonTerminalSize;
+
+
   void ini_compact_table_options();
   void ini_consensus_decoding_options();
+  void ini_cube_pruning_options();
+  void ini_distortion_options();
   void ini_factor_maps();
   void ini_input_options();
   void ini_lm_options();
@@ -217,6 +247,7 @@ protected:
   bool ini_output_options();
   bool ini_performance_options();
   void ini_phrase_lookup_options();
+  bool ini_stack_decoding_options();
   void ini_zombie_options();
 
   void initialize_features();
@@ -225,7 +256,6 @@ public:
   bool IsAlwaysCreateDirectTranslationOption() const {
     return m_isAlwaysCreateDirectTranslationOption;
   }
-
   //! destructor
   ~StaticData();
 
@@ -240,8 +270,8 @@ public:
   }
 
   /** delete current static instance and replace with another.
-   *  Used by gui front end
-   */
+  	* Used by gui front end
+  	*/
 #ifdef WIN32
   static void Reset() {
     s_instance = StaticData();
@@ -259,9 +289,14 @@ public:
     return *m_parameter;
   }
 
-  const ContextParameters&
-  GetContextParameters() const {
-    return m_options.context;
+  AllOptions const&
+  options() const { 
+    return m_options; 
+  }
+
+  AllOptions& 
+  options() { 
+    return m_options;  
   }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
@@ -290,64 +325,57 @@ public:
     return m_disableDiscarding;
   }
   inline size_t GetMaxNoTransOptPerCoverage() const {
-    return m_maxNoTransOptPerCoverage;
+    return m_options.search.max_trans_opt_per_cov;
   }
   inline size_t GetMaxNoPartTransOpt() const {
-    return m_maxNoPartTransOpt;
+    return m_options.search.max_partial_trans_opt;
   }
   inline size_t GetMaxPhraseLength() const {
-    return m_maxPhraseLength;
+    return m_options.search.max_phrase_length;
   }
   bool IsWordDeletionEnabled() const {
     return m_wordDeletionEnabled;
   }
-  
-  AllOptions const& options() const {
-    return m_options;
+  // size_t GetMaxHypoStackSize() const {
+  //   return m_options.search.stack_size;
+  // }
+  // size_t GetMinHypoStackDiversity() const {
+  //   return m_options.search.stack_diversity;
+  // }
+
+  size_t IsPathRecoveryEnabled() const {
+    return m_recoverPath;
   }
-  
-  SearchOptions const&
-  searchOptions() const {
-    return m_options.search;
+  bool IsIDEnabled() const {
+    return m_PrintID;
+  }
+  bool IsPassthroughEnabled() const {
+    return m_PrintPassthroughInformation;
   }
 
-  size_t GetMaxHypoStackSize() const {
-    return m_options.search.stack_size;
+  int GetMaxDistortion() const {
+    return m_options.reordering.max_distortion;
   }
-
-  size_t GetMinHypoStackDiversity() const {
-    return m_options.search.stack_diversity;
-  }
-
-  size_t GetCubePruningPopLimit() const { return m_options.cube.pop_limit; }
-  size_t GetCubePruningDiversity() const { return m_options.cube.diversity; }
-  size_t IsPathRecoveryEnabled() const { return m_recoverPath; }
-  bool GetCubePruningLazyScoring() const { return m_options.cube.lazy_scoring; }
-  bool IsIDEnabled() const { return m_PrintID; }
-  bool IsPassthroughEnabled() const { return m_PrintPassthroughInformation; }
-
-  int GetMaxDistortion() const { return m_options.reordering.max_distortion; }
-
   bool UseReorderingConstraint() const {
-    return m_options.reordering.monotone_at_punct;
+    return m_reorderingConstraint;
   }
-
-  bool UseEarlyDistortionCost() const {
-    return m_options.reordering.use_early_distortion_cost;
-  }
-
   float GetBeamWidth() const {
     return m_options.search.beam_width;
   }
   float GetEarlyDiscardingThreshold() const {
     return m_options.search.early_discarding_threshold;
   }
+
   bool UseEarlyDiscarding() const {
     return m_options.search.early_discarding_threshold 
       != -std::numeric_limits<float>::infinity();
   }
+  bool UseEarlyDistortionCost() const {
+    return m_options.reordering.use_early_distortion_cost;
+    // return m_useEarlyDistortionCost;
+  }
   float GetTranslationOptionThreshold() const {
-    return m_options.search.translationOptionThreshold;
+    return m_options.search.trans_opt_threshold;
   }
 
   size_t GetVerboseLevel() const {
@@ -371,13 +399,11 @@ public:
     else
       std::cerr << "Warning: Invalid value for reportSegmentation (0 - 2)!  Ignoring";
   }
+
   bool GetReportAllFactors() const {
     return m_reportAllFactors;
   }
-  bool GetReportAllFactorsNBest() const {
-    return m_options.nbest.include_all_factors;
-    // return m_reportAllFactorsNBest;
-  }
+
   bool IsDetailedTranslationReportingEnabled() const {
     return !m_detailedTranslationReportingFilePath.empty();
   }
@@ -395,10 +421,10 @@ public:
   const std::string &GetDetailedTreeFragmentsTranslationReportingFilePath() const {
     return m_detailedTreeFragmentsTranslationReportingFilePath;
   }
-  bool IsLabeledNBestList() const {
-    return m_options.nbest.include_feature_labels;
-    // return m_labeledNBestList;
-  }
+
+  // bool IsLabeledNBestList() const {
+  //   return m_options.nbest.include_feature_labels;
+  // }
 
   bool UseMinphrInMemory() const {
     return m_minphrMemory;
@@ -409,26 +435,17 @@ public:
   }
 
   // for mert
-  size_t GetNBestSize() const {
-    return m_options.nbest.nbest_size;
-    // return m_nBestSize;
-  }
+  // size_t GetNBestSize() const {
+  //   return m_options.nbest.nbest_size;
+  // }
 
-  const std::string &GetNBestFilePath() const {
-    return m_options.nbest.output_file_path;
-    // return m_nBestFilePath;
-  }
+  // const std::string &GetNBestFilePath() const {
+  //   return m_options.nbest.output_file_path;
+  // }
 
-  bool IsNBestEnabled() const {
-    return m_options.nbest.enabled;
-    //     return (!m_nBestFilePath.empty() || m_mbr || m_useLatticeMBR || m_mira ||
-    //             m_outputSearchGraph || m_outputSearchGraphSLF ||
-    //             m_outputSearchGraphHypergraph || m_useConsensusDecoding ||
-    // #ifdef HAVE_PROTOBUF
-    //             m_outputSearchGraphPB ||
-    // #endif
-    //             !m_latticeSamplesFilePath.empty());
-  }
+  // bool IsNBestEnabled() const {
+  //   return m_options.nbest.enabled;
+  // }
 
   size_t GetLatticeSamplesSize() const {
     return m_latticeSamplesSize;
@@ -438,23 +455,30 @@ public:
     return m_latticeSamplesFilePath;
   }
 
-  size_t GetNBestFactor() const {
-    return m_options.nbest.factor;
-    // return m_nBestFactor;
-  }
+  // size_t GetNBestFactor() const {
+  //   return m_options.nbest.factor;
+  // }
   bool GetOutputWordGraph() const {
     return m_outputWordGraph;
   }
 
   //! Sets the global score vector weights for a given FeatureFunction.
   InputTypeEnum GetInputType() const {
-    return m_options.input.input_type;
-  }
-  SearchAlgorithm GetSearchAlgorithm() const {
-    return m_options.search.algo;
+    return m_inputType;
   }
 
-  bool IsSyntax() const { return is_syntax(m_options.search.algo); }
+  // SearchAlgorithm GetSearchAlgorithm() const {
+  //   return m_searchAlgorithm;
+  // }
+
+  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
+    if (algo == DefaultSearchAlgorithm)
+      algo = m_options.search.algo;
+    
+    return (algo == CYKPlus   || algo == ChartIncremental ||
+            algo == SyntaxS2T || algo == SyntaxT2S ||
+            algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
+  }
 
   const ScoreComponentCollection&
   GetAllWeights() const {
@@ -482,68 +506,68 @@ public:
   //Weights for feature with fixed number of values
   void SetWeights(const FeatureFunction* sp, const std::vector<float>& weights);
 
-  bool GetDistinctNBest() const {
-    return m_options.nbest.only_distinct;
-  }
+  // bool GetDistinctNBest() const {
+  //   return m_options.nbest.only_distinct;
+  // }
   const std::string& GetFactorDelimiter() const {
     return m_factorDelimiter;
   }
-  bool UseMBR() const {
-    return m_mbr;
-  }
-  bool UseLatticeMBR() const {
-    return m_useLatticeMBR ;
-  }
-  bool UseConsensusDecoding() const {
-    return m_useConsensusDecoding;
-  }
-  void SetUseLatticeMBR(bool flag) {
-    m_useLatticeMBR = flag;
-  }
-  size_t GetMBRSize() const {
-    return m_mbrSize;
-  }
-  float GetMBRScale() const {
-    return m_mbrScale;
-  }
-  void SetMBRScale(float scale) {
-    m_mbrScale = scale;
-  }
-  size_t GetLatticeMBRPruningFactor() const {
-    return m_lmbrPruning;
-  }
-  void SetLatticeMBRPruningFactor(size_t prune) {
-    m_lmbrPruning = prune;
-  }
-  const std::vector<float>& GetLatticeMBRThetas() const {
-    return m_lmbrThetas;
-  }
-  bool  UseLatticeHypSetForLatticeMBR() const {
-    return m_useLatticeHypSetForLatticeMBR;
-  }
-  float GetLatticeMBRPrecision() const {
-    return m_lmbrPrecision;
-  }
-  void SetLatticeMBRPrecision(float p) {
-    m_lmbrPrecision = p;
-  }
-  float GetLatticeMBRPRatio() const {
-    return m_lmbrPRatio;
-  }
-  void SetLatticeMBRPRatio(float r) {
-    m_lmbrPRatio = r;
-  }
+  // bool UseMBR() const {
+  //   return m_mbr;
+  // }
+  // bool UseLatticeMBR() const {
+  //   return m_useLatticeMBR ;
+  // }
+  // bool UseConsensusDecoding() const {
+  //   return m_useConsensusDecoding;
+  // }
+  // void SetUseLatticeMBR(bool flag) {
+  //   m_useLatticeMBR = flag;
+  // }
+  // size_t GetMBRSize() const {
+  //   return m_mbrSize;
+  // }
+  // float GetMBRScale() const {
+  //   return m_mbrScale;
+  // }
+  // void SetMBRScale(float scale) {
+  //   m_mbrScale = scale;
+  // }
+  // size_t GetLatticeMBRPruningFactor() const {
+  //   return m_lmbrPruning;
+  // }
+  // void SetLatticeMBRPruningFactor(size_t prune) {
+  //   m_lmbrPruning = prune;
+  // }
+  // const std::vector<float>& GetLatticeMBRThetas() const {
+  //   return m_lmbrThetas;
+  // }
+  // bool  UseLatticeHypSetForLatticeMBR() const {
+  //   return m_useLatticeHypSetForLatticeMBR;
+  // }
+  // float GetLatticeMBRPrecision() const {
+  //   return m_lmbrPrecision;
+  // }
+  // void SetLatticeMBRPrecision(float p) {
+  //   m_lmbrPrecision = p;
+  // }
+  // float GetLatticeMBRPRatio() const {
+  //   return m_lmbrPRatio;
+  // }
+  // void SetLatticeMBRPRatio(float r) {
+  //   m_lmbrPRatio = r;
+  // }
 
-  float GetLatticeMBRMapWeight() const {
-    return m_lmbrMapWeight;
-  }
+  // float GetLatticeMBRMapWeight() const {
+  //   return m_lmbrMapWeight;
+  // }
 
-  bool UseTimeout() const {
-    return m_timeout;
-  }
-  size_t GetTimeoutThreshold() const {
-    return m_timeout_threshold;
-  }
+  // bool UseTimeout() const {
+  //   return m_timeout;
+  // }
+  // size_t GetTimeoutThreshold() const {
+  //   return m_timeout_threshold;
+  // }
 
   size_t GetLMCacheCleanupThreshold() const {
     return m_lmcache_cleanup_threshold;
@@ -586,11 +610,11 @@ public:
   }
 
   XmlInputType GetXmlInputType() const {
-    return m_options.input.xml_policy;
+    return m_xmlInputType;
   }
 
   std::pair<std::string,std::string> GetXmlBrackets() const {
-    return m_options.input.xml_brackets;
+    return m_xmlBrackets;
   }
 
   bool PrintTranslationOptions() const {
@@ -627,7 +651,7 @@ public:
   }
 
   bool ContinuePartialTranslation() const {
-    return m_options.input.continue_partial_translation;
+    return m_continuePartialTranslation;
   }
 
   void ReLoadBleuScoreFeatureParameter(float weight);
@@ -657,17 +681,9 @@ public:
   bool PrintAlignmentInfo() const {
     return m_PrintAlignmentInfo;
   }
-  bool PrintAlignmentInfoInNbest() const {
-    return m_options.nbest.include_alignment_info;
-    // return m_PrintAlignmentInfoNbest;
-  }
+
   WordAlignmentSort GetWordAlignmentSort() const {
     return m_wordAlignmentSort;
-  }
-
-  bool NBestIncludesSegmentation() const {
-    return m_options.nbest.include_segmentation;
-    // return m_nBestIncludesSegmentation;
   }
 
   bool GetHasAlternateWeightSettings() const {
@@ -805,10 +821,6 @@ public:
 
   S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
     return m_s2tParsingAlgorithm;
-  }
-
-  bool PrintNBestTrees() const {
-    return m_options.nbest.print_trees;
   }
 
   bool RequireSortingAfterSourceContext() const {

@@ -57,7 +57,7 @@ die "Cannot locate input at $input" unless (-f $input);
 my $local_moses_ini = MosesRegressionTesting::get_localized_moses_ini($conf, $data_dir, $results_dir);
 my ($nbestfile,$nbestsize) = MosesRegressionTesting::get_nbestlist($conf);
 
-if (defined($nbestsize) && $nbestsize > 0){
+if (defined($nbestsize) && $nbestsize > 0) {
   $NBEST=$nbestsize;
 }
 

@@ -19,10 +19,23 @@ namespace Moses
     param.SetParameter(stack_diversity, "stack-diversity", size_t(0));
     param.SetParameter(beam_width, "beam-threshold", DEFAULT_BEAM_WIDTH);
     param.SetParameter(early_discarding_threshold, "early-discarding-threshold", 
-		       DEFAULT_EARLY_DISCARDING_THRESHOLD);
+                       DEFAULT_EARLY_DISCARDING_THRESHOLD);
+    param.SetParameter(timeout, "time-out", 0);
+    param.SetParameter(max_phrase_length, "max-phrase-length", 
+                       DEFAULT_MAX_PHRASE_LENGTH);
+    param.SetParameter(trans_opt_threshold, "translation-option-threshold", 
+                       DEFAULT_TRANSLATION_OPTION_THRESHOLD);
+    param.SetParameter(max_trans_opt_per_cov, "max-trans-opt-per-coverage", 
+                       DEFAULT_MAX_TRANS_OPT_SIZE);
+    param.SetParameter(max_partial_trans_opt, "max-partial-trans-opt", 
+                       DEFAULT_MAX_PART_TRANS_OPT_SIZE);
+
+
+    param.SetParameter(consensus, "consensus-decoding", false);
 
     // transformation to log of a few scores
     beam_width = TransformScore(beam_width);
+    trans_opt_threshold = TransformScore(trans_opt_threshold);
     early_discarding_threshold = TransformScore(early_discarding_threshold);
     return true;
   }
