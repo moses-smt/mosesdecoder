@@ -8,8 +8,8 @@
 #include <sys/time.h>
 
 
-#ifndef sptr
-#define sptr boost::shared_ptr
+#ifndef SPTR
+#define SPTR boost::shared_ptr
 #endif
 
 namespace lru_cache

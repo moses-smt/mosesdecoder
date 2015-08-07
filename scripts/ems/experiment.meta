@@ -118,7 +118,7 @@ post-split-factorize
         out: post-split-factorized-stem
         rerun-on-change: TRAINING:input-factors TRAINING:output-factors
         default-name: corpus/split-factored
-        pass-unless: AND TRAINING:input-factors factorize-after-split
+        pass-unless: factorize-after-split
         parallelizable: yes
         error: can't open
         error: incompatible number of words in factor
@@ -186,7 +186,7 @@ train-nplm
   in: stripped-corpus
   out: binlm
   ignore-unless: nplm
-  rerun-on-change: stripped-corpus
+  rerun-on-change: stripped-corpus nplm-settings
   default-name: lm/nplm
 get-corpus
 	in: get-corpus-script
@@ -257,8 +257,9 @@ post-split-factorize
         in: split-corpus
         out: split-factorized-corpus
         default-name: lm/split-factored
-        pass-unless: AND factors factorize-after-split
-        ignore-if: concatenate-files concatenate-files-split
+        rerun-on-change: TRAINING:input-factors TRAINING:output-factors
+        pass-unless: factorize-after-split
+        ignore-if: concatenate-files
         parallelizable: yes
         error: can't open
         error: incompatible number of words in factor
@@ -390,7 +391,8 @@ post-split-factorize-tuning
         in: split-tuning
         out: post-split-factorized-tuning
         default-name: lm/interpolate-tuning.split-factored
-        pass-unless: AND TRAINING:output-factors factorize-after-split
+        rerun-on-change: TRAINING:input-factors TRAINING:output-factors
+        pass-unless: factorize-after-split
         parallelizable: yes
         error: can't open
         error: incompatible number of words in factor
@@ -602,6 +604,7 @@ symmetrize-fast-align
 	in: fast-alignment fast-alignment-inverse corpus-mml-prefilter=OR=corpus
 	out: word-alignment
 	ignore-unless: fast-align-settings
+	rerun-on-change: alignment-symmetrization-method
 	template: $moses-script-dir/ems/support/symmetrize-fast-align.perl IN IN1 IN2.$input-extension IN2.$output-extension OUT $alignment-symmetrization-method $moses-src-dir/bin/symal
         default-name: model/aligned
 prepare-data
@@ -823,9 +826,9 @@ binarize-config
 	in: config
 	out: bin-config
 	pass-unless: binarize-all
-	rerun-on-change: config
+	rerun-on-change: config 
 	default-name: model/moses.bin.ini
-	template: $binarize-all IN OUT -Binarizer $ttable-binarizer 
+	template: $binarize-all IN OUT -Binarizer "$ttable-binarizer" 
 	final-model: yes
 hiero-compile-source-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus

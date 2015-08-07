@@ -396,7 +396,7 @@ namespace Moses
   {
     Load(true);
   }
-  
+
   void
   Mmsapt
   ::setup_local_feature_functions()

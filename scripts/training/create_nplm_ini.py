@@ -35,10 +35,15 @@ def main():
 
 
   ini_filename = os.path.join(options.working_dir,options.ini_filename)
+  path = "%s/train.model.nplm.%s" % (options.working_dir, "best")
+  if not os.path.exists(path):
+    path = "%s/train.model.nplm.%s" % (options.working_dir, options.epochs)
+
+
   with open(ini_filename,"w") as ifh:
     print>>ifh, "[feature]"
-    print>>ifh,"NeuralLM factor=%s name=NPLM%s order=%s path=%s/train.model.nplm.%s" \
-      % (options.factor,options.name, options.n, options.working_dir, options.epochs)
+    print>>ifh,"NeuralLM factor=%s name=NPLM%s order=%s path=%s" \
+      % (options.factor,options.name, options.n, path)
     print>>ifh
     print>>ifh,"[weight]"
     print>>ifh,"NPLM%s= 0.1" % options.name
