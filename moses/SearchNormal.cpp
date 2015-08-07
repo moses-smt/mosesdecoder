@@ -69,8 +69,10 @@ ProcessOneStack(HypothesisStack* hstack)
   IFVERBOSE(2)  stats.StopTimeStack(); 
 
   // go through each hypothesis on the stack and try to expand it
-  BOOST_FOREACH(Hypothesis* h, sourceHypoColl) 
-    ProcessOneHypothesis(*h); 
+  // BOOST_FOREACH(Hypothesis* h, sourceHypoColl) 
+  HypothesisStackNormal::const_iterator h;
+  for (h = sourceHypoColl.begin(); h != sourceHypoColl.end(); ++h)
+    ProcessOneHypothesis(**h); 
   return true;
 }
 

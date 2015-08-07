@@ -4,7 +4,7 @@
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
-
+#include <boost/foreach.hpp>
 using namespace std;
 
 namespace Moses
@@ -37,11 +37,13 @@ public:
   }
 };
 
-SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl)
-  :Search(manager)
-  ,m_source(source)
-  ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_transOptColl(transOptColl)
+SearchCubePruning::
+SearchCubePruning(Manager& manager, const InputType &source, 
+		  const TranslationOptionCollection &transOptColl)
+  : Search(manager)
+  , m_source(source)
+  , m_hypoStackColl(source.GetSize() + 1)
+  , m_transOptColl(transOptColl)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -72,7 +74,8 @@ void SearchCubePruning::Decode()
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
 
-  HypothesisStackCubePruning &firstStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
+  HypothesisStackCubePruning &firstStack 
+    = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
   firstStack.AddInitial(hypo);
   // Call this here because the loop below starts at the second stack.
   firstStack.CleanupArcList();
@@ -89,17 +92,16 @@ void SearchCubePruning::Decode()
   int timelimit = m_options.search.timeout;
   std::vector < HypothesisStack* >::iterator iterStack;
   for (iterStack = m_hypoStackColl.begin() + 1 ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
-    // check if decoding ran out of time
-    double _elapsed_time = GetUserTime();
-    if (timelimit && _elapsed_time > timelimit) {
-      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," 
-	      << timelimit << ")" << std::endl);
-      return;
-    }
-    HypothesisStackCubePruning &sourceHypoColl = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+    // BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
+    if (this->out_of_time()) return;
 
-    // priority queue which has a single entry for each bitmap container, sorted by score of top hyp
-    std::priority_queue< BitmapContainer*, std::vector< BitmapContainer* >, BitmapContainerOrderer> BCQueue;
+    HypothesisStackCubePruning &sourceHypoColl 
+      = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+
+    // priority queue which has a single entry for each bitmap
+    // container, sorted by score of top hyp
+    std::priority_queue < BitmapContainer*, std::vector< BitmapContainer* >, 
+			  BitmapContainerOrderer > BCQueue;
 
     _BMType::const_iterator bmIter;
     const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
