@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 // vim:tabstop=2
 
