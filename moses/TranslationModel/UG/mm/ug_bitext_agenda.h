@@ -14,8 +14,8 @@ public:
   class worker;
 private:
   boost::mutex lock;
-  std::list<sptr<job> > joblist;
-  std::vector<sptr<boost::thread> > workers;
+  std::list<SPTR<job> > joblist;
+  std::vector<SPTR<boost::thread> > workers;
   bool shutdown;
   size_t doomed;
 
@@ -30,15 +30,15 @@ public:
   void
   add_workers(int n);
 
-  sptr<pstats>
+  SPTR<pstats>
   add_job(Bitext<Token> const* const theBitext,
 	  typename TSA<Token>::tree_iterator const& phrase,
-	  size_t const max_samples, sptr<SamplingBias const> const& bias);
+	  size_t const max_samples, SPTR<SamplingBias const> const& bias);
     // add_job(Bitext<Token> const* const theBitext,
     // 	  typename TSA<Token>::tree_iterator const& phrase,
     // 	  size_t const max_samples, SamplingBias const* const bias);
 
-  sptr<job>
+  SPTR<job>
   get_job();
 };
 
@@ -82,23 +82,23 @@ void Bitext<Token>
   else
     while (int(workers.size()) < target)
       {
-	sptr<boost::thread> w(new boost::thread(worker(*this)));
+	SPTR<boost::thread> w(new boost::thread(worker(*this)));
 	workers.push_back(w);
       }
 }
 
 
 template<typename Token>
-sptr<pstats> Bitext<Token>
+SPTR<pstats> Bitext<Token>
 ::agenda
 ::add_job(Bitext<Token> const* const theBitext,
 	  typename TSA<Token>::tree_iterator const& phrase,
-	  size_t const max_samples, sptr<SamplingBias const> const& bias)
+	  size_t const max_samples, SPTR<SamplingBias const> const& bias)
 {
   boost::unique_lock<boost::mutex> lk(this->lock);
   static boost::posix_time::time_duration nodelay(0,0,0,0);
   bool fwd = phrase.root == bt.I1.get();
-  sptr<job> j(new job(theBitext, phrase, fwd ? bt.I1 : bt.I2,
+  SPTR<job> j(new job(theBitext, phrase, fwd ? bt.I1 : bt.I2,
 		      max_samples, fwd, bias));
   j->stats->register_worker();
 
@@ -118,7 +118,7 @@ sptr<pstats> Bitext<Token>
 		  --doomed;
 		}
 	      else
-		workers[i++] = sptr<boost::thread>(new boost::thread(worker(*this)));
+		workers[i++] = SPTR<boost::thread>(new boost::thread(worker(*this)));
 	    }
 	  else ++i;
 	}
@@ -127,13 +127,13 @@ sptr<pstats> Bitext<Token>
 }
 
 template<typename Token>
-sptr<typename Bitext<Token>::agenda::job>
+SPTR<typename Bitext<Token>::agenda::job>
 Bitext<Token>
 ::agenda
 ::get_job()
 {
   // cerr << workers.size() << " workers on record" << std::endl;
-  sptr<job> ret;
+  SPTR<job> ret;
   if (this->shutdown) return ret;
   boost::unique_lock<boost::mutex> lock(this->lock);
   if (this->doomed)
@@ -142,7 +142,7 @@ Bitext<Token>
       return ret;
     }
 
-  typename list<sptr<job> >::iterator j = joblist.begin();
+  typename list<SPTR<job> >::iterator j = joblist.begin();
   while (j != joblist.end())
     {
       if ((*j)->done())

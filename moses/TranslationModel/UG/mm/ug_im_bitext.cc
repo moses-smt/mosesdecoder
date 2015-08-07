@@ -6,7 +6,7 @@ namespace Moses
   {
 
     template<>
-    sptr<imBitext<L2R_Token<SimpleWordId> > >
+    SPTR<imBitext<L2R_Token<SimpleWordId> > >
     imBitext<L2R_Token<SimpleWordId> >::
     add(vector<string> const& s1,
 	vector<string> const& s2,
@@ -19,7 +19,7 @@ namespace Moses
       size_t first_new_snt = this->T1 ? this->T1->size() : 0;
 #endif
 
-      sptr<imBitext<TKN> > ret;
+      SPTR<imBitext<TKN> > ret;
       {
 	boost::unique_lock<boost::shared_mutex> guard(m_lock);
 	ret.reset(new imBitext<TKN>(*this));

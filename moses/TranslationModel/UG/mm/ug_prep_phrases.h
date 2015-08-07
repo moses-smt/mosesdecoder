@@ -14,20 +14,20 @@ template<typename Token> // , typename BITEXT>
 struct StatsCollector
 {
   typedef    lru_cache::LRU_Cache< uint64_t, pstats  > hcache_t;
-  typedef ThreadSafeContainer<uint64_t, sptr<pstats> > pcache_t;
-  typedef                 map<uint64_t, sptr<pstats> > lcache_t;
+  typedef ThreadSafeContainer<uint64_t, SPTR<pstats> > pcache_t;
+  typedef                 map<uint64_t, SPTR<pstats> > lcache_t;
   iptr<Bitext<Token> const> bitext; // underlying bitext
   sampling_method           method; // sampling method 
   size_t               sample_size; // sample size 
-  sptr<SamplingBias const>    bias; // sampling bias
+  SPTR<SamplingBias const>    bias; // sampling bias
   hcache_t*                 hcache; // "history" cache
   pcache_t*                 pcache; // permanent cache
   size_t                 pcache_th; // threshold for adding items to pcache 
-  sptr<lcache_t>            lcache; // local cache
+  SPTR<lcache_t>            lcache; // local cache
   ug::ThreadPool*            tpool; // thread pool to run jobs on 
   
   StatsCollector(iptr<Bitext<Token> > xbitext, 
-		 sptr<SamplingBias> const xbias) 
+		 SPTR<SamplingBias> const xbias) 
     : method(ranked_sampling)
     , sample_size(100)
     , bias(xbias)
@@ -51,11 +51,11 @@ struct StatsCollector
             if (!r.extend(m.getToken(-1)->id())) continue;
             this->process(m, r);
             uint64_t pid = r.getPid();
-            sptr<pstats> stats;
+            SPTR<pstats> stats;
             if (hcache) stats = hcache->get(pid); 
             if (!stats && pcache)
               {
-                sptr<pstats> const* foo = pcache->get(pid);
+                SPTR<pstats> const* foo = pcache->get(pid);
                 if (foo) stats = *foo; 
               }
             if (!stats) // need to sample

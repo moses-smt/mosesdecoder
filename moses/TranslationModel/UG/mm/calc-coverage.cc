@@ -15,7 +15,7 @@ using namespace ugdiss;
 
 typedef L2R_Token<SimpleWordId> Token;
 TokenIndex V;
-sptr<vector<vector<Token> > > C(new vector<vector<Token> >());
+SPTR<vector<vector<Token> > > C(new vector<vector<Token> >());
 void
 add_file(string fname)
 {
@@ -34,7 +34,7 @@ main(int argc, char* argv[])
 {
   V.setDynamic(true);
   add_file(argv[1]);
-  sptr<imTtrack<Token> > T(new imTtrack<Token>(C));
+  SPTR<imTtrack<Token> > T(new imTtrack<Token>(C));
   imTSA<Token> I(T,NULL,NULL);
   string line;
   while (getline(cin,line))

@@ -9,25 +9,25 @@ namespace Moses
     template<typename TKN>
     class imBitext : public Bitext<TKN>
     {
-      sptr<imTtrack<char> > myTx;
-      sptr<imTtrack<TKN> >  myT1;
-      sptr<imTtrack<TKN> >  myT2;
-      sptr<imTSA<TKN> >     myI1;
-      sptr<imTSA<TKN> >     myI2;
+      SPTR<imTtrack<char> > myTx;
+      SPTR<imTtrack<TKN> >  myT1;
+      SPTR<imTtrack<TKN> >  myT2;
+      SPTR<imTSA<TKN> >     myI1;
+      SPTR<imTSA<TKN> >     myI2;
       static ThreadSafeCounter my_revision;
     public:
       size_t revision() const { return my_revision; }
       void open(string const base, string const L1, string L2);
-      imBitext(sptr<TokenIndex> const& V1,
-	       sptr<TokenIndex> const& V2,
+      imBitext(SPTR<TokenIndex> const& V1,
+	       SPTR<TokenIndex> const& V2,
 	       size_t max_sample = 5000, size_t num_workers=4);
       imBitext(size_t max_sample = 5000, size_t num_workers=4);
       imBitext(imBitext const& other);
 
-      // sptr<imBitext<TKN> >
+      // SPTR<imBitext<TKN> >
       // add(vector<TKN> const& s1, std::vector<TKN> const& s2, vector<ushort> & a);
 
-      sptr<imBitext<TKN> >
+      SPTR<imBitext<TKN> >
       add(vector<string> const& s1,
 	  std::vector<string> const& s2,
 	  std::vector<string> const& a) const;
@@ -53,8 +53,8 @@ namespace Moses
 
     template<typename TKN>
     imBitext<TKN>::
-    imBitext(sptr<TokenIndex> const& v1,
-	     sptr<TokenIndex> const& v2,
+    imBitext(SPTR<TokenIndex> const& v1,
+	     SPTR<TokenIndex> const& v2,
 	     size_t max_sample, size_t num_workers)
       : Bitext<TKN>(max_sample, num_workers)
     {
@@ -89,14 +89,14 @@ namespace Moses
     }
 
     template<>
-    sptr<imBitext<L2R_Token<SimpleWordId> > >
+    SPTR<imBitext<L2R_Token<SimpleWordId> > >
     imBitext<L2R_Token<SimpleWordId> >::
     add(vector<string> const& s1,
 	vector<string> const& s2,
 	vector<string> const& aln) const;
 
     template<typename TKN>
-    sptr<imBitext<TKN> >
+    SPTR<imBitext<TKN> >
     imBitext<TKN>::
     add(vector<string> const& s1,
 	vector<string> const& s2,

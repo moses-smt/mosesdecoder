@@ -106,7 +106,7 @@ namespace Moses
 
   void
   Mmsapt::
-  register_ff(sptr<pscorer> const& ff, vector<sptr<pscorer> > & registry)
+  register_ff(SPTR<pscorer> const& ff, vector<SPTR<pscorer> > & registry)
   {
     registry.push_back(ff);
     ff->setIndex(m_feature_names.size());
@@ -340,25 +340,25 @@ namespace Moses
   template<typename fftype>
   void
   Mmsapt::
-  check_ff(string const ffname, vector<sptr<pscorer> >* registry)
+  check_ff(string const ffname, vector<SPTR<pscorer> >* registry)
   {
     string const& spec = param[ffname];
     if (spec == "" || spec == "0") return;
     if (registry)
       {
-        sptr<fftype> ff(new fftype(spec));
+        SPTR<fftype> ff(new fftype(spec));
         register_ff(ff, *registry);
       }
     else if (spec[spec.size()-1] == '+') // corpus specific
       {
-        sptr<fftype> ff(new fftype(spec));
+        SPTR<fftype> ff(new fftype(spec));
         register_ff(ff, m_active_ff_fix);
         ff.reset(new fftype(spec));
         register_ff(ff, m_active_ff_dyn);
       }
     else
       {
-        sptr<fftype> ff(new fftype(spec));
+        SPTR<fftype> ff(new fftype(spec));
         register_ff(ff, m_active_ff_common);
       }
   }
@@ -367,25 +367,25 @@ namespace Moses
   void
   Mmsapt::
   check_ff(string const ffname, float const xtra,
-           vector<sptr<pscorer> >* registry)
+           vector<SPTR<pscorer> >* registry)
   {
     string const& spec = param[ffname];
     if (spec == "" || spec == "0") return;
     if (registry)
       {
-        sptr<fftype> ff(new fftype(xtra,spec));
+        SPTR<fftype> ff(new fftype(xtra,spec));
         register_ff(ff, *registry);
       }
     else if (spec[spec.size()-1] == '+') // corpus specific
       {
-        sptr<fftype> ff(new fftype(xtra,spec));
+        SPTR<fftype> ff(new fftype(xtra,spec));
         register_ff(ff, m_active_ff_fix);
         ff.reset(new fftype(xtra,spec));
         register_ff(ff, m_active_ff_dyn);
       }
     else
       {
-        sptr<fftype> ff(new fftype(xtra,spec));
+        SPTR<fftype> ff(new fftype(xtra,spec));
         register_ff(ff, m_active_ff_common);
       }
   }
@@ -410,7 +410,7 @@ namespace Moses
           {
             // lexical scores
             string lexfile = m_bname + L1 + "-" + L2 + ".lex";
-            sptr<PScoreLex1<Token> >
+            SPTR<PScoreLex1<Token> >
               ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
             register_ff(ff,m_active_ff_common);
             
@@ -436,9 +436,9 @@ namespace Moses
         // this translation model)
         else if (fsname == "datasource")
           {
-            sptr<PScorePC<Token> > ffpcnt(new PScorePC<Token>("pcnt"));
+            SPTR<PScorePC<Token> > ffpcnt(new PScorePC<Token>("pcnt"));
             register_ff(ffpcnt,m_active_ff_common);
-            sptr<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
+            SPTR<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
             register_ff(ffwcnt,m_active_ff_common);
           }
       }
@@ -453,9 +453,9 @@ namespace Moses
   {
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
     // load feature functions (i.e., load underlying data bases, if any)
-    BOOST_FOREACH(sptr<pscorer>& ff, m_active_ff_fix) ff->load();
-    BOOST_FOREACH(sptr<pscorer>& ff, m_active_ff_dyn) ff->load();
-    BOOST_FOREACH(sptr<pscorer>& ff, m_active_ff_common) ff->load();
+    BOOST_FOREACH(SPTR<pscorer>& ff, m_active_ff_fix) ff->load();
+    BOOST_FOREACH(SPTR<pscorer>& ff, m_active_ff_dyn) ff->load();
+    BOOST_FOREACH(SPTR<pscorer>& ff, m_active_ff_common) ff->load();
 #if 0
     if (with_checks)
       {
@@ -515,7 +515,7 @@ namespace Moses
             Phrase const& src,
             PhrasePair<Token>* fix,
             PhrasePair<Token>* dyn,
-            sptr<Bitext<Token> > const& dynbt) const
+            SPTR<Bitext<Token> > const& dynbt) const
   {
     UTIL_THROW_IF2(!fix && !dyn, HERE <<
                    ": Can't create target phrase from nothing.");
@@ -523,12 +523,12 @@ namespace Moses
     PhrasePair<Token> pool = fix ? *fix : *dyn;
     if (fix)
       {
-        BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
+        BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_fix)
           (*ff)(*btfix, *fix, &fvals);
       }
     if (dyn)
       {
-        BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_dyn)
+        BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_dyn)
           (*ff)(*dynbt, *dyn, &fvals);
       }
 
@@ -540,7 +540,7 @@ namespace Moses
         if (m.size() == fix->len2)
           zilch.raw2 = m.approxOccurrenceCount();
         pool += zilch;
-        BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_dyn)
+        BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_dyn)
           (*ff)(*dynbt, ff->allowPooling() ? pool : zilch, &fvals);
       }
     else if (dyn)
@@ -550,17 +550,17 @@ namespace Moses
         if (m.size() == dyn->len2)
           zilch.raw2 = m.approxOccurrenceCount();
         pool += zilch;
-        BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
+        BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_fix)
           (*ff)(*dynbt, ff->allowPooling() ? pool : zilch, &fvals);
       }
     if (fix)
       {
-        BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
+        BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_common)
           (*ff)(*btfix, pool, &fvals);
       }
     else
       {
-        BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
+        BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_common)
           (*ff)(*dynbt, pool, &fvals);
       }
 
@@ -582,7 +582,7 @@ namespace Moses
       {
         LRModel::ModelType mdl = m_lr_func->GetModel().GetModelType();
         LRModel::Direction dir = m_lr_func->GetModel().GetDirection();
-        sptr<Scores> scores(new Scores());
+        SPTR<Scores> scores(new Scores());
         pool.fill_lr_vec(dir, mdl, *scores);
         tp->SetExtraScores(m_lr_func, scores);
       }
@@ -632,7 +632,7 @@ namespace Moses
     // Reserve a local copy of the dynamic bitext in its current form. /btdyn/
     // is set to a new copy of the dynamic bitext every time a sentence pair
     // is added. /dyn/ keeps the old bitext around as long as we need it.
-    sptr<imBitext<Token> > dyn;
+    SPTR<imBitext<Token> > dyn;
     { // braces are needed for scoping mutex lock guard!
       boost::unique_lock<boost::shared_mutex> guard(m_lock);
       assert(btdyn);
@@ -655,8 +655,8 @@ namespace Moses
                           ? (mfix.getPid()<<1) : (mdyn.getPid()<<1)+1);
 
     // get context-specific cache of items previously looked up
-    sptr<ContextScope> const& scope = ttask->GetScope();
-    sptr<TPCollCache> cache = scope->get<TPCollCache>(cache_key);
+    SPTR<ContextScope> const& scope = ttask->GetScope();
+    SPTR<TPCollCache> cache = scope->get<TPCollCache>(cache_key);
     if (!cache) cache = m_cache;
     TPCollWrapper* ret = cache->get(phrasekey, dyn->revision());
     // TO DO: we should revise the revision mechanism: we take the length
@@ -675,12 +675,12 @@ namespace Moses
     // TO DO: have Bitexts return lists of PhrasePairs instead of pstats
     // no need to expand pstats at every single lookup again, especially
     // for btfix.
-    sptr<pstats> sfix,sdyn;
+    SPTR<pstats> sfix,sdyn;
 
     if (mfix.size() == sphrase.size()) 
       {
-        sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get());
-        sptr<pstats> const* foo = context->cache1->get(mfix.getPid());
+        SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get());
+        SPTR<pstats> const* foo = context->cache1->get(mfix.getPid());
         if (foo) { sfix = *foo; sfix->wait(); }
         else 
           {
@@ -769,8 +769,8 @@ namespace Moses
   Mmsapt::
   set_bias_via_server(ttasksptr const& ttask)
   {
-    sptr<ContextScope> const& scope = ttask->GetScope();
-    sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+    SPTR<ContextScope> const& scope = ttask->GetScope();
+    SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
     if (m_bias_server.size() && context->bias == NULL && ttask->GetContextWindow())
       { // we need to create the bias
         boost::unique_lock<boost::shared_mutex> lock(context->lock);
@@ -823,8 +823,8 @@ namespace Moses
   Mmsapt::
   InitializeForInput(ttasksptr const& ttask)
   {
-    sptr<ContextScope> const& scope = ttask->GetScope();
-    sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+    SPTR<ContextScope> const& scope = ttask->GetScope();
+    SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
 
     // set sampling bias, depending on sampling method specified
     if (m_sampling_method == random_sampling)
@@ -832,7 +832,7 @@ namespace Moses
     else UTIL_THROW2("Unknown sampling method: " << m_sampling_method);
 
     boost::unique_lock<boost::shared_mutex> mylock(m_lock);
-    sptr<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
+    SPTR<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
     if (!localcache)
       {
         if (context->bias) localcache.reset(new TPCollCache(m_cache_size));
@@ -862,7 +862,7 @@ namespace Moses
   PrefixExists(ttasksptr const& ttask, Moses::Phrase const& phrase) const
   {
     if (phrase.GetSize() == 0) return false;
-    sptr<ContextScope> const& scope = ttask->GetScope();
+    SPTR<ContextScope> const& scope = ttask->GetScope();
 
     vector<id_type> myphrase; 
     fillIdSeq(phrase, m_ifactor, *btfix->V1, myphrase);
@@ -870,7 +870,7 @@ namespace Moses
     TSA<Token>::tree_iterator mfix(btfix->I1.get(),&myphrase[0],myphrase.size());
     if (mfix.size() == myphrase.size())
       {
-        sptr<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+        SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
         uint64_t pid = mfix.getPid();
         if (!context->cache1->get(pid))
           {
@@ -884,7 +884,7 @@ namespace Moses
         return true;
       }
 
-    sptr<imBitext<Token> > dyn;
+    SPTR<imBitext<Token> > dyn;
     { // braces are needed for scoping lock!
       boost::unique_lock<boost::shared_mutex> guard(m_lock);
       dyn = btdyn;
@@ -905,7 +905,7 @@ namespace Moses
   Mmsapt
   ::Release(ttasksptr const& ttask, TargetPhraseCollection*& tpc) const
   {
-    sptr<TPCollCache> cache = ttask->GetScope()->get<TPCollCache>(cache_key);
+    SPTR<TPCollCache> cache = ttask->GetScope()->get<TPCollCache>(cache_key);
     TPCollWrapper* foo = static_cast<TPCollWrapper*>(tpc);
     if (cache) cache->release(foo);
     tpc = NULL;
@@ -917,7 +917,7 @@ namespace Moses
   string const& Mmsapt
   ::GetName() const { return m_name; }
 
-  // sptr<DocumentBias>
+  // SPTR<DocumentBias>
   // Mmsapt
   // ::setupDocumentBias(map<string,float> const& bias) const
   // {

@@ -20,7 +20,7 @@ Bitext<Token>::agenda
   uint64_t sid=0, offset=0;       // sid and offset of source phrase
   size_t s1=0, s2=0, e1=0, e2=0;  // soft and hard boundaries of target phrase
   std::vector<unsigned char> aln; // stores phrase-pair-internal alignment
-  while(sptr<job> j = ag.get_job())
+  while(SPTR<job> j = ag.get_job())
     {
       j->stats->register_worker();
       bitvector full_alignment(100*100); // Is full_alignment still needed???
@@ -73,7 +73,7 @@ Bitext<Token>::agenda
 	  for (size_t s = s1; s <= s2; ++s)
 	    {
 	      TSA<Token> const& I = j->fwd ? *ag.bt.I2 : *ag.bt.I1;
-	      sptr<iter> b = I.find(o + s, e1 - s);
+	      SPTR<iter> b = I.find(o + s, e1 - s);
 	      UTIL_THROW_IF2(!b || b->size() < e1-s, "target phrase not found");
 
 	      for (size_t i = e1; i <= e2; ++i)

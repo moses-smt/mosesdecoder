@@ -5,11 +5,11 @@ namespace Moses {
 namespace bitext {
 
 template<typename Token>
-sptr<pstats>
+SPTR<pstats>
 Bitext<Token>::
 lookup(ttasksptr const& ttask, iter const& phrase, int max_sample) const
 {
-  sptr<pstats> ret = prep2(ttask, phrase, max_sample);
+  SPTR<pstats> ret = prep2(ttask, phrase, max_sample);
   UTIL_THROW_IF2(!ret, "Got NULL pointer where I expected a valid pointer.");
   
   // Why were we locking here?
@@ -42,17 +42,17 @@ prep(ttasksptr const& ttask, iter const& phrase) const
 // and waits until the sampling is finished before it returns.
 // This allows sampling in the background
 template<typename Token>
-sptr<pstats>
+SPTR<pstats>
 Bitext<Token>
 ::prep2
 ( ttasksptr const& ttask, iter const& phrase, int max_sample) const
 {
   if (max_sample < 0) max_sample = m_default_sample_size;
-  sptr<SamplingBias> bias;
-  sptr<ContextScope> scope = ttask->GetScope();
-  sptr<ContextForQuery> context = scope->get<ContextForQuery>(this);
+  SPTR<SamplingBias> bias;
+  SPTR<ContextScope> scope = ttask->GetScope();
+  SPTR<ContextForQuery> context = scope->get<ContextForQuery>(this);
   if (context) bias = context->bias;
-  sptr<pstats::cache_t> cache;
+  SPTR<pstats::cache_t> cache;
   // - no caching for rare phrases and special requests (max_sample)
   //   (still need to test what a good caching threshold is ...)
   // - use the task-specific cache when there is a sampling bias
@@ -63,8 +63,8 @@ Bitext<Token>
 	       ? (bias ? context->cache1 : m_cache1)
 	       : (bias ? context->cache2 : m_cache2));
     }
-  sptr<pstats> ret;
-  sptr<pstats> const* cached;
+  SPTR<pstats> ret;
+  SPTR<pstats> const* cached;
   
   if (cache && (cached = cache->get(phrase.getPid(), ret)) && *cached)
     return *cached;

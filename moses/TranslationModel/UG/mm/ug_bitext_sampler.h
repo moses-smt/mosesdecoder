@@ -45,19 +45,19 @@ BitextSampler : public reference_counter
   mutable boost::condition_variable   m_ready; 
   mutable boost::mutex                 m_lock; 
   // const members
-  // sptr<bitext const> const   m_bitext; // keep bitext alive while I am 
+  // SPTR<bitext const> const   m_bitext; // keep bitext alive while I am 
   // should be an 
   iptr<bitext const> const   m_bitext; // keep bitext alive as long as I am 
   size_t             const     m_plen; // length of lookup phrase
   bool               const      m_fwd; // forward or backward direction?
-  sptr<tsa const>    const     m_root; // root of suffix array
+  SPTR<tsa const>    const     m_root; // root of suffix array
   char               const*    m_next; // current position
   char               const*    m_stop; // end of search range
   sampling_method    const   m_method; // look at all/random/ranked samples 
-  sptr<bias const>   const     m_bias; // bias over candidates
+  SPTR<bias const>   const     m_bias; // bias over candidates
   size_t             const  m_samples; // how many samples at most 
   // non-const members
-  sptr<pstats>                m_stats; // destination for phrase stats
+  SPTR<pstats>                m_stats; // destination for phrase stats
   size_t                        m_ctr; // number of samples considered
   float                  m_total_bias; // for random sampling with bias
   bool                     m_finished;
@@ -77,11 +77,11 @@ public:
   BitextSampler(BitextSampler const& other);
   BitextSampler const& operator=(BitextSampler const& other);
   BitextSampler(bitext const*  const bitext, typename bitext::iter const& phrase,
-                sptr<SamplingBias const> const& bias, size_t const max_samples,
+                SPTR<SamplingBias const> const& bias, size_t const max_samples,
                 sampling_method const method); 
   ~BitextSampler();
   bool operator()(); // run sampling
-  sptr<pstats> stats();
+  SPTR<pstats> stats();
   bool done() const;
 };
 
@@ -172,7 +172,7 @@ template<typename Token>
 BitextSampler<Token>::
 BitextSampler(Bitext<Token> const* const bitext, 
               typename bitext::iter const& phrase,
-              sptr<SamplingBias const> const& bias, size_t const max_samples,
+              SPTR<SamplingBias const> const& bias, size_t const max_samples,
               sampling_method const method)
   : m_bitext(bitext)
   , m_plen(phrase.size())
@@ -310,7 +310,7 @@ consider_sample(TokenPosition const& p)
   for (size_t s = rec.s1; s <= rec.s2; ++s)
     {
       TSA<Token> const& I = m_fwd ? *m_bitext->I2 : *m_bitext->I1;
-      sptr<tsa_iter> b = I.find(o + s, rec.e1 - s);
+      SPTR<tsa_iter> b = I.find(o + s, rec.e1 - s);
       UTIL_THROW_IF2(!b || b->size() < rec.e1 - s, "target phrase not found");
 	
       for (size_t i = rec.e1; i <= rec.e2; ++i)
@@ -359,7 +359,7 @@ done() const
 }
 
 template<typename Token>
-sptr<pstats> 
+SPTR<pstats> 
 BitextSampler<Token>::
 stats() 
 {
