@@ -324,7 +324,7 @@ int decoder_main(int argc, char** argv)
     }
 
     if (params.GetParam("server"))
-      	return run_as_server();
+      return run_as_server();
     else
       return batch_run();
 
