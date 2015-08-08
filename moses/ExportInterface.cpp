@@ -144,8 +144,10 @@ Parameter params;
 int
 run_as_server()
 {
+#ifdef HAVE_XMLRPC_C
   MosesServer::Server server(params);
   return server.run(); // actually: don't return. see Server::run()
+#endif
 }
 
 int
@@ -322,7 +324,7 @@ int decoder_main(int argc, char** argv)
     }
 
     if (params.GetParam("server"))
-      return run_as_server();
+      	return run_as_server();
     else
       return batch_run();
 
