@@ -82,14 +82,14 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
 
 TargetPhrase::TargetPhrase(ttasksptr& ttask, const PhraseDictionary *pt)
   :Phrase()
+  , m_ttask(ttask)
+  , m_ttask_flag(true)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_ttask(ttask)
-  , m_ttask_flag(true)
   , m_container(pt)
 {
 }

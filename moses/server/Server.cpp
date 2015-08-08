@@ -30,11 +30,11 @@ namespace MosesServer
        .allowOrigin("*")
        .maxConn(m_server_options.num_threads));
     
-    XVERBOSE(1,"Listening on port " << m_server_options.port << endl);
+    XVERBOSE(1,"Listening on port " << m_server_options.port << std::endl);
     if (m_server_options.is_serial) 
       {
-	VERBOSE(1,"Running server in serial mode." << endl);
-	while(true) myAbyssServer.runOnce();
+        VERBOSE(1,"Running server in serial mode." << std::endl);
+        while(true) myAbyssServer.runOnce();
       }
     else myAbyssServer.run();
 
@@ -42,7 +42,7 @@ namespace MosesServer
     // #pragma message("BUILDING MOSES WITH SERVER SUPPORT")
 #else
     // #pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT")
-    std::cerr << "Moses was compiled without server support." << endl;
+    std::cerr << "Moses was compiled without server support." << std::endl;
 #endif
     return 1;
   }

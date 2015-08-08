@@ -81,7 +81,7 @@ ProcessOneStack(HypothesisStack* hstack)
  */
 void SearchNormal::Decode()
 {
-  SentenceStats &stats = m_manager.GetSentenceStats();
+  // SentenceStats &stats = m_manager.GetSentenceStats();
 
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager, m_source, m_initialTransOpt);
