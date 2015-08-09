@@ -133,8 +133,9 @@ if [ option.get "filter-warnings" : : "yes" ] {
   requirements += <cxxflags>-Wno-unused-but-set-variable ;
   requirements += <cxxflags>-Wno-unused-result ;
   requirements += <cxxflags>-Wno-unused-variable ;
-  requirements += <cxxflags>-Wcomment ;
-  requirements += <cxxflags>-Wstrict-aliasing ;
+  requirements += <cxxflags>-Wno-comment ;
+  requirements += <cxxflags>-Wno-strict-aliasing ;
+  requirements += <cxxflags>-Wno-overloaded-virtual ;
 }
 
 if [ option.get "debug-build" : : "yes" ] {
