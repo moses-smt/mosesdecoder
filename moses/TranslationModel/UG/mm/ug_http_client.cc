@@ -42,9 +42,10 @@ http_client(boost::asio::io_service& io_service, std::string url, std::ostream* 
   if (log)
     {
       *log << HERE << std::endl;
+      // *log << "URL    " << url << std::endl;
       *log << "SERVER " << server << std::endl;
       *log << "PORT   " << port << "" << std::endl;
-      *log << "PATH " << path << std::endl; 
+      *log << "PATH   " << path << std::endl; 
     }
 #endif
   init(server, port, path);
