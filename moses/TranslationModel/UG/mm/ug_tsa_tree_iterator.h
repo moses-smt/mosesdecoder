@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007 - 2010 Ulrich Germann. All rights reserved.
 #ifndef __ug_tsa_tree_iterator_h
 #define __ug_tsa_tree_iterator_h
@@ -14,7 +14,7 @@
 
 // #include "ug_bv_iter.h"
 
-namespace ugdiss
+namespace sapt
 {
 
 #ifndef _DISPLAY_CHAIN

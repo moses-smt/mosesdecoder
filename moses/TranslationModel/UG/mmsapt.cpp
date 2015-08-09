@@ -1,9 +1,4 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
-// #ifdef HAVE_CURLPP
-// #include <curlpp/Options.hpp>
-// #include <curlpp/cURLpp.hpp>
-// #include <curlpp/Easy.hpp>
-// #endif
 
 #include "mmsapt.h"
 #include <boost/foreach.hpp>
@@ -18,7 +13,7 @@
 
 namespace Moses
 {
-  using namespace bitext;
+  using namespace sapt;
   using namespace std;
   using namespace boost;
 
@@ -121,6 +116,19 @@ namespace Moses
   bool Mmsapt::isLogVal(int i) const { return m_is_logval.at(i); }
   bool Mmsapt::isInteger(int i) const { return m_is_integer.at(i); }
 
+  void 
+  Mmsapt::
+  parse_factor_spec(std::vector<FactorType>& flist, std::string const key)
+  {
+    pair<string,string> dflt(key, "0");
+    string factors = this->param.insert(dflt).first->second;
+    size_t p = 0, q = factors.find(',');
+    for (; q < factors.size(); q = factors.find(',', p=q+1))
+      flist.push_back(atoi(factors.substr(p, q-p).c_str()));
+    flist.push_back(atoi(factors.substr(p).c_str()));
+  }
+  
+
   void Mmsapt::init(string const& line)
   {
     map<string,string>::const_iterator m;
@@ -151,20 +159,10 @@ namespace Moses
     UTIL_THROW_IF2(L2.size() == 0, "Missing L2 tag at " << HERE);
 
     // set defaults for all parameters if not specified so far
-    pair<string,string> dflt("input-factor","0");
-    string ifactors = param.insert(dflt).first->second;
-    size_t p = 0;
-    for (size_t q = ifactors.find(','); q < ifactors.size(); q = ifactors.find(',', p=q+1))
-      m_ifactor.push_back(atoi(ifactors.substr(p, q-p).c_str()));
-    m_ifactor.push_back(atoi(ifactors.substr(p).c_str()));
-    
-    dflt = pair<string,string> ("output-factor","0");
-    string ofactors = param.insert(dflt).first->second;
-    for (size_t q = ofactors.find(',', p=0); q < ifactors.size(); q = ifactors.find(',', p=q+1))
-      m_ofactor.push_back(atoi(ifactors.substr(p, q-p).c_str()));
-    m_ofactor.push_back(atoi(ofactors.substr(p).c_str()));
+    parse_factor_spec(m_ifactor,"input-factor");
+    parse_factor_spec(m_ofactor,"output-factor");
 
-    dflt = pair<string,string> ("smooth",".01");
+    pair<string,string> dflt = pair<string,string> ("smooth",".01");
     m_lbop_conf = atof(param.insert(dflt).first->second.c_str());
 
     dflt = pair<string,string> ("lexalpha","0");
@@ -173,10 +171,11 @@ namespace Moses
     dflt = pair<string,string> ("sample","1000");
     m_default_sample_size = atoi(param.insert(dflt).first->second.c_str());
 
-    dflt = pair<string,string>("workers","8");
+    dflt = pair<string,string>("workers","0");
     m_workers = atoi(param.insert(dflt).first->second.c_str());
-    m_workers = min(m_workers,24UL);
-
+    if (m_workers == 0) m_workers = boost::thread::hardware_concurrency();
+    else m_workers = min(m_workers,size_t(boost::thread::hardware_concurrency()));
+    
     dflt = pair<string,string>("bias-loglevel","0");
     m_bias_loglevel = atoi(param.insert(dflt).first->second.c_str());
 

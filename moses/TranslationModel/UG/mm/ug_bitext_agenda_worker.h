@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // to be included from ug_bitext_agenda.h
 
 template<typename Token>

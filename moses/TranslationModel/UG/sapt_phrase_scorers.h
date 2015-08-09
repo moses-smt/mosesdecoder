@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Phrase scoring functions for suffix array-based phrase tables
 // written by Ulrich Germann
 #pragma once

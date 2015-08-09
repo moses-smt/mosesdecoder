@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // program to convert GIZA-style alignments into memory-mapped format
 // (c) 2010 Ulrich Germann
 
@@ -31,6 +31,7 @@
 
 using namespace std;
 using namespace ugdiss;
+using namespace sapt;
 
 ofstream t1out,t2out,mam;
 int len1=0,len2=0;
@@ -119,8 +120,8 @@ procSymalLine(string const& line, ostream& out)
         }
       assert(len1 == 0 || a<len1);
       assert(len2 == 0 || b<len2);
-      binwrite(out,a);
-      binwrite(out,b);
+      tpt::binwrite(out,a);
+      tpt::binwrite(out,b);
     }
   return out.tellp();
 }
@@ -130,11 +131,11 @@ void finiMAM(ofstream& out, vector<id_type>& idx, id_type numTok)
   id_type offset = sizeof(filepos_type)+2*sizeof(id_type);
   filepos_type idxStart = out.tellp();
   for (vector<id_type>::iterator i = idx.begin(); i != idx.end(); ++i)
-    numwrite(out,*i-offset);
+    tpt::numwrite(out,*i-offset);
   out.seekp(0);
-  numwrite(out,idxStart);
-  numwrite(out,id_type(idx.size()-1));
-  numwrite(out,numTok);
+  tpt::numwrite(out,idxStart);
+  tpt::numwrite(out,id_type(idx.size()-1));
+  tpt::numwrite(out,numTok);
   out.close();
 }
 
@@ -144,11 +145,11 @@ finalize(ofstream& out, vector<id_type> const& idx, id_type tokenCount)
   id_type       idxSize = idx.size();
   filepos_type idxStart = out.tellp();
   for (size_t i = 0; i < idx.size(); ++i)
-    numwrite(out,idx[i]);
+    tpt::numwrite(out,idx[i]);
   out.seekp(0);
-  numwrite(out,idxStart);
-  numwrite(out,idxSize-1);
-  numwrite(out,tokenCount);
+  tpt::numwrite(out,idxStart);
+  tpt::numwrite(out,idxSize-1);
+  tpt::numwrite(out,tokenCount);
   out.close();
 }
 
@@ -268,9 +269,9 @@ void
 initialize(ofstream& out, string const& fname)
 {
   out.open(fname.c_str());
-  numwrite(out,filepos_type(0)); // place holder for index start
-  numwrite(out,id_type(0));      // place holder for index size
-  numwrite(out,id_type(0));      // place holder for token count
+  tpt::numwrite(out,filepos_type(0)); // place holder for index start
+  tpt::numwrite(out,id_type(0));      // place holder for index size
+  tpt::numwrite(out,id_type(0));      // place holder for token count
 }
 
 int main(int argc, char* argv[])

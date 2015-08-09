@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Memory-mapped corpus track
 // (c) Ulrich Germann. All rights reserved
 
@@ -6,7 +7,7 @@
 #include "ug_mm_ttrack.h"
 #include "tpt_pickler.h"
 
-namespace ugdiss
+namespace sapt
 {
   using namespace std;
 

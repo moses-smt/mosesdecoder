@@ -17,14 +17,12 @@
 #include "moses/TranslationModel/UG/generic/threading/ug_ref_counter.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
 #include "moses/TranslationModel/UG/generic/sorting/NBestList.h"
-namespace Moses
-{
-namespace bitext 
+namespace sapt
 {
   
 enum sampling_method { full_coverage, random_sampling, ranked_sampling };
 
-typedef ugdiss::ttrack::Position TokenPosition;
+typedef ttrack::Position TokenPosition;
 class CandidateSorter
 {
   SamplingBias const& score;
@@ -36,7 +34,7 @@ public:
   
 template<typename Token>
 class
-BitextSampler : public reference_counter
+BitextSampler : public Moses::reference_counter
 {
   typedef Bitext<Token> bitext;
   typedef TSA<Token>       tsa;
@@ -71,7 +69,7 @@ BitextSampler : public reference_counter
   size_t perform_random_sampling();
 
   int check_sample_distribution(uint64_t const& sid, uint64_t const& offset);
-  bool flip_coin(ugdiss::id_type & sid, ushort & offset);
+  bool flip_coin(id_type & sid, ushort & offset);
     
 public:
   BitextSampler(BitextSampler const& other);
@@ -147,14 +145,14 @@ check_sample_distribution(uint64_t const& sid, uint64_t const& offset)
 template<typename Token>
 bool 
 BitextSampler<Token>::
-flip_coin(ugdiss::id_type & sid, ushort & offset)
+flip_coin(id_type & sid, ushort & offset)
 {
   int no_maybe_yes = m_bias ? check_sample_distribution(sid, offset) : 1;
   if (no_maybe_yes == 0) return false; // no
   if (no_maybe_yes > 1)  return true;  // yes
   // ... maybe: flip a coin
   size_t options_chosen = m_stats->good;
-  size_t options_total  = max(m_stats->raw_cnt, m_ctr);
+  size_t options_total  = std::max(m_stats->raw_cnt, m_ctr);
   size_t options_left   = (options_total - m_ctr);
   size_t random_number  = options_left * (m_rnd()/(m_rnd.max()+1.));
   size_t threshold;
@@ -231,12 +229,12 @@ perform_ranked_sampling()
   if (m_next == m_stop) return m_ctr;
   CandidateSorter sorter(*m_bias);
   // below: nbest size = 4 * m_samples to allow for failed phrase extraction
-  NBestList<TokenPosition, CandidateSorter> nbest(4*m_samples,sorter);
-  ugdiss::tsa::ArrayEntry I(m_next);
+  Moses::NBestList<TokenPosition, CandidateSorter> nbest(4*m_samples, sorter);
+  sapt::tsa::ArrayEntry I(m_next);
   while (I.next < m_stop)
     {
       ++m_ctr;
-      nbest.add(m_root->readEntry(I.next,I));
+      nbest.add(m_root->readEntry(I.next, I));
     }
   for (size_t i = 0; m_stats->good < m_samples && i < nbest.size(); ++i)
     consider_sample(nbest[i]);
@@ -251,18 +249,19 @@ perform_random_sampling()
 {
   if (m_next == m_stop) return m_ctr;
   m_bias_total = 0;
+  sapt::tsa::ArrayEntry I(m_next);
   if (m_bias)
     {
       m_stats->raw_cnt = 0;
-      for (ugdiss::tsa::ArrayEntry I(m_next); I.next < m_stop;)
+      while (I.next < m_stop)
         {
           m_root->readEntry(I.next,I);
           ++m_stats->raw_cnt;
           m_bias_total += (*m_bias)[I.sid];
         }
+      I.next = m_next;
     }
       
-  ugdiss::tsa::ArrayEntry I(m_next);
   while (m_stats->good < m_samples && I.next < m_stop)
     {
       ++m_ctr;
@@ -300,7 +299,7 @@ consider_sample(TokenPosition const& p)
   for (size_t k = 1; k < aln.size(); k += 2) 
     aln[k] += rec.s2 - rec.s1;
     
-  vector<uint64_t> seen; seen.reserve(10);
+  std::vector<uint64_t> seen; seen.reserve(10);
   // It is possible that the phrase extraction extracts the same
   // phrase twice, e.g., when word a co-occurs with sequence b b b but
   // is aligned only to the middle word. We can only count each phrase
@@ -377,5 +376,5 @@ BitextSampler<Token>::
   m_stats->release();
 }
 
-} // end of namespace bitext
-} // end of namespace Moses
+} // end of namespace sapt
+

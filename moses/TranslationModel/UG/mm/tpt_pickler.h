@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2006,2007,2008 Ulrich Germann
 #ifndef __Pickler
 #define __Pickler
@@ -11,7 +11,7 @@
 #include "num_read_write.h"
 #include <cassert>
 
-namespace ugdiss
+namespace tpt
 {
   /// Utility method placed here for lack of a better place
   /// @return the size of file fname.
@@ -209,6 +209,5 @@ namespace ugdiss
     return binread(p,*buf);
   }
 
-
-} // end namespace ugdiss
+} // end namespace sapt
 #endif

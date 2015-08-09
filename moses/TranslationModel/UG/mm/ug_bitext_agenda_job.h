@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // class declaration of template<typename Token> class Bitxt<Token>::agenda::job
 // to be included by ug_bitext.h
 // todo: add check to enforce this
@@ -157,17 +157,17 @@ int Bitext<Token>::agenda::job
   if (log)
     {
       Token const* t = root->getCorpus()->sntStart(sid)+offset;
-      Token const* x = t - min(offset,uint64_t(3));
+      Token const* x = t - std::min(offset,uint64_t(3));
       Token const* e = t+4;
       if (e > root->getCorpus()->sntEnd(sid))
-	e = root->getCorpus()->sntEnd(sid);
+        e = root->getCorpus()->sntEnd(sid);
       *log << docid << ":" << sid << " " << size_t(k) << "/" << N
-	   << " @" << p << " => " << d << " [";
+           << " @" << p << " => " << d << " [";
       for (id_iter m = stats->indoc.begin(); m != stats->indoc.end(); ++m)
-	{
-	  if (m != stats->indoc.begin()) *log << " ";
-	  *log << m->first << ":" << m->second;
-	}
+        {
+          if (m != stats->indoc.begin()) *log << " ";
+          *log << m->first << ":" << m->second;
+        }
       // for (size_t i = 0; i < stats->indoc.size(); ++i)
       // 	{
       // 	  if (i) *log << " ";
@@ -192,7 +192,7 @@ bool Bitext<Token>::agenda::job
   if (no_maybe_yes > 1)  return true;  // yes
   // ... maybe: flip a coin
   size_t options_chosen = stats->good;
-  size_t options_total  = max(stats->raw_cnt, this->ctr);
+  size_t options_total  = std::max(stats->raw_cnt, this->ctr);
   size_t options_left   = (options_total - this->ctr);
   size_t random_number  = options_left * (rnd()/(rnd.max()+1.));
   size_t threshold;

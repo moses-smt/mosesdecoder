@@ -8,7 +8,7 @@
 #include "ug_lru_cache.h"
 
 namespace Moses {
-namespace bitext { 
+namespace sapt { 
 
 template<typename Token> // , typename BITEXT>
 struct StatsCollector
@@ -75,7 +75,7 @@ struct StatsCollector
       }
   }
 };
-} // end of namespace bitext
+} // end of namespace sapt
 } // end of namespace Moses
 
 #if 0

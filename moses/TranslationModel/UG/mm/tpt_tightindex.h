@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007,2008 Ulrich Germann
 /* Functions for writing indices tightly (use only the bytes you need).
  * The first bit indicates whether a byte belongs to a key or a value.
@@ -25,7 +25,7 @@
 
 extern bool debug;
 
-namespace ugdiss
+namespace tpt
 {
   // void tightwritex(iostream& out, size_t data, bool flag);
   void

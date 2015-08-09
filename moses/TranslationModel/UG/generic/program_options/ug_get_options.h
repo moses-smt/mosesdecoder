@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2009 Ulrich Germann
 // boilerplate code to declutter my usual interpret_args() routine
 #ifndef __ug_get_options_h

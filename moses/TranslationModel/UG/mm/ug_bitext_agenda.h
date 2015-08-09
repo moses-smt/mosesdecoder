@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // to be included from ug_bitext.h
 
 // The agenda handles parallel sampling.
@@ -64,16 +64,16 @@ void Bitext<Token>
   static boost::posix_time::time_duration nodelay(0,0,0,0);
   boost::lock_guard<boost::mutex> guard(this->lock);
 
-  int target  = max(1, int(n + workers.size() - this->doomed));
+  int target  = std::max(1, int(n + workers.size() - this->doomed));
   // house keeping: remove all workers that have finished
   for (size_t i = 0; i < workers.size(); )
     {
       if (workers[i]->timed_join(nodelay))
-	{
-	  if (i + 1 < workers.size())
-	    workers[i].swap(workers.back());
-	  workers.pop_back();
-	}
+        {
+          if (i + 1 < workers.size())
+            workers[i].swap(workers.back());
+          workers.pop_back();
+        }
       else ++i;
     }
   // cerr << workers.size() << "/" << target << " active" << std::endl;
@@ -82,8 +82,8 @@ void Bitext<Token>
   else
     while (int(workers.size()) < target)
       {
-	SPTR<boost::thread> w(new boost::thread(worker(*this)));
-	workers.push_back(w);
+        SPTR<boost::thread> w(new boost::thread(worker(*this)));
+        workers.push_back(w);
       }
 }
 
@@ -142,7 +142,7 @@ Bitext<Token>
       return ret;
     }
 
-  typename list<SPTR<job> >::iterator j = joblist.begin();
+  typename std::list<SPTR<job> >::iterator j = joblist.begin();
   while (j != joblist.end())
     {
       if ((*j)->done())

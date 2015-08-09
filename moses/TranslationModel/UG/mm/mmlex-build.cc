@@ -30,6 +30,7 @@
 #include "ug_corpus_token.h"
 
 using namespace std;
+using namespace sapt;
 using namespace ugdiss;
 using namespace boost::math;
 
@@ -119,9 +120,9 @@ void
 writeTableHeader(ostream& out)
 {
   filepos_type idxOffset=0;
-  numwrite(out,idxOffset); // blank for the time being
-  numwrite(out,id_type(V1.ksize()));
-  numwrite(out,id_type(V2.ksize()));
+  tpt::numwrite(out,idxOffset); // blank for the time being
+  tpt::numwrite(out,id_type(V1.ksize()));
+  tpt::numwrite(out,id_type(V2.ksize()));
 }
 
 void writeTable(ostream* aln_out, ostream* coc_out)
@@ -174,16 +175,16 @@ void writeTable(ostream* aln_out, ostream* coc_out)
 	  if (aln_out)
 	    {
 	      ++CellCountA;
-	      numwrite(*aln_out,id2);
-	      numwrite(*aln_out,aln);
+	      tpt::numwrite(*aln_out,id2);
+	      tpt::numwrite(*aln_out,aln);
 	      m1a[id1] += aln;
 	      m2a[id2] += aln;
 	    }
 	  if (coc_out && coc)
 	    {
 	      ++CellCountC;
-	      numwrite(*coc_out,id2);
-	      numwrite(*coc_out,coc);
+	      tpt::numwrite(*coc_out,id2);
+	      tpt::numwrite(*coc_out,coc);
 	      m1c[id1] += coc;
 	      m2c[id2] += coc;
 	    }
@@ -195,21 +196,21 @@ void writeTable(ostream* aln_out, ostream* coc_out)
     {
       filepos_type idxOffsetA = aln_out->tellp();
       BOOST_FOREACH(id_type foo, idxa)
-	numwrite(*aln_out,foo);
+	tpt::numwrite(*aln_out,foo);
       aln_out->write(reinterpret_cast<char const*>(&m1a[0]),m1a.size()*4);
       aln_out->write(reinterpret_cast<char const*>(&m2a[0]),m2a.size()*4);
       aln_out->seekp(0);
-      numwrite(*aln_out,idxOffsetA);
+      tpt::numwrite(*aln_out,idxOffsetA);
     }
   if (coc_out)
     {
       filepos_type idxOffsetC = coc_out->tellp();
       BOOST_FOREACH(id_type foo, idxc)
-	numwrite(*coc_out,foo);
+	tpt::numwrite(*coc_out,foo);
       coc_out->write(reinterpret_cast<char const*>(&m1c[0]),m1c.size()*4);
       coc_out->write(reinterpret_cast<char const*>(&m2c[0]),m2c.size()*4);
       coc_out->seekp(0);
-      numwrite(*coc_out,idxOffsetC);
+      tpt::numwrite(*coc_out,idxOffsetC);
     }
 }
 
@@ -240,8 +241,8 @@ processSentence(id_type sid)
     cerr << sid/1000000 << " M sentences processed" << endl;
   while (p < q)
     {
-      p = binread(p,r);
-      p = binread(p,c);
+      p = tpt::binread(p,r);
+      p = tpt::binread(p,c);
       // cout << sid << " " << r << "-" << c << endl;
       UTIL_THROW_IF2(r >= check1.size(), "out of bounds at line " << sid);
       UTIL_THROW_IF2(c >= check2.size(), "out of bounds at line " << sid);

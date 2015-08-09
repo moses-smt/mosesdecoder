@@ -6,29 +6,28 @@
 #include "boost/format.hpp"
 #include "sapt_pscore_base.h"
 
-namespace Moses {
-  namespace bitext
+namespace sapt
+{
+  template<typename Token>
+  class
+  PScoreWC : public PhraseScorer<Token>
   {
-    template<typename Token>
-    class
-    PScoreWC : public PhraseScorer<Token>
+  public:
+    PScoreWC(std::string const dummy)
     {
-    public:
-      PScoreWC(string const dummy)
-      {
-    this->m_index = -1;
-    this->m_num_feats = 1;
-    this->m_feature_names.push_back(string("wordcount"));
-      }
+      this->m_index = -1;
+      this->m_num_feats = 1;
+      this->m_feature_names.push_back(std::string("wordcount"));
+    }
 
-      void
-      operator()(Bitext<Token> const& bt,
-         PhrasePair<Token>& pp,
-		 vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	(*dest)[this->m_index] = pp.len2;
-      }
-    };
-  }
+    void
+    operator()(Bitext<Token> const& bt,
+	       PhrasePair<Token>& pp,
+	       std::vector<float> * dest = NULL) const
+    {
+      if (!dest) dest = &pp.fvals;
+      (*dest)[this->m_index] = pp.len2;
+    }
+  };
 }
+

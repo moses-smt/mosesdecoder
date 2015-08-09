@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Base class for Token Sequence Arrays
 // (c) 2007-2010 Ulrich Germann. All rights reserved.
 #ifndef _ug_tsa_base_h
@@ -18,7 +18,7 @@
 #include "ug_tsa_bitset_cache.h"
 #include "ug_typedefs.h"
 
-namespace ugdiss
+namespace sapt
 {
 
   // using namespace std;

@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007-2009 Ulrich Germann. All rights reserved.
 #ifndef _ug_im_tsa_h
 #define _ug_im_tsa_h
@@ -22,7 +22,7 @@
 #include "moses/TranslationModel/UG/generic/threading/ug_thread_pool.h"
 #include "util/usage.hh"
 
-namespace ugdiss
+namespace sapt
 {
   // using namespace std;
   // using namespace boost;
@@ -383,32 +383,32 @@ namespace ugdiss
     std::ofstream out(fname.c_str());
     filepos_type idxStart(0);
     id_type idxSize(index.size());
-    numwrite(out,idxStart);
-    numwrite(out,idxSize);
+    tpt::numwrite(out,idxStart);
+    tpt::numwrite(out,idxSize);
     std::vector<filepos_type> mmIndex;
     for (size_t i = 1; i < this->index.size(); i++)
       {
-	mmIndex.push_back(out.tellp());
-	for (size_t k = this->index[i-1]; k < this->index[i]; ++k)
-	  {
-	    tightwrite(out,sufa[k].sid,0);
-	    tightwrite(out,sufa[k].offset,1);
-	  }
+        mmIndex.push_back(out.tellp());
+        for (size_t k = this->index[i-1]; k < this->index[i]; ++k)
+          {
+            tpt::tightwrite(out,sufa[k].sid,0);
+            tpt::tightwrite(out,sufa[k].offset,1);
+          }
       }
     mmIndex.push_back(out.tellp());
     idxStart = out.tellp();
     for (size_t i = 0; i < mmIndex.size(); i++)
-      numwrite(out,mmIndex[i]-mmIndex[0]);
+      tpt::numwrite(out,mmIndex[i]-mmIndex[0]);
     out.seekp(0);
-    numwrite(out,idxStart);
+    tpt::numwrite(out,idxStart);
     out.close();
   }
 
   template<typename TOKEN>
   imTSA<TOKEN>::
   imTSA(imTSA<TOKEN> const& prior,
-  	boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
-  	std::vector<id_type> const& newsids, size_t const vsize)
+        boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
+        std::vector<id_type> const& newsids, size_t const vsize)
   {
     typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(crp.get());
 

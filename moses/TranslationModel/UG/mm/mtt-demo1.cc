@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Demo program for use of single-track suffix arrays
 
 #include <boost/program_options.hpp>
@@ -14,7 +14,7 @@
 using namespace Moses;
 using namespace std;
 using namespace boost;
-using namespace ugdiss;
+using namespace sapt;
 typedef L2R_Token < SimpleWordId >  Token;
 int main(int argc, char* argv[])
 {

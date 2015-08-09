@@ -11,7 +11,7 @@
 
 // using namespace Moses;
 using namespace ugdiss;
-
+using namespace sapt;
 
 typedef L2R_Token<SimpleWordId> Token;
 TokenIndex V;

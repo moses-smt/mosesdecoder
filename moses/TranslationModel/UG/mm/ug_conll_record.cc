@@ -1,5 +1,6 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include "ug_conll_record.h"
-namespace ugdiss
+namespace sapt
 {
   Conll_Record
   Conll_Record::
