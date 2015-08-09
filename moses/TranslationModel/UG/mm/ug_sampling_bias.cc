@@ -20,7 +20,7 @@ namespace sapt
                     std::string const& context, 
                     std::ostream* log) 
   {
-    std::string query = Moses::uri_encode(context);
+    std::string query = server + Moses::uri_encode(context);
     boost::asio::io_service io_service;
     Moses::http_client c(io_service, query, log);
     io_service.run();
