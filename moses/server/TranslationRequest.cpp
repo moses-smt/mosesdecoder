@@ -1,7 +1,7 @@
 #include "TranslationRequest.h"
 #include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
-
+#include "moses/Util.h"
 namespace MosesServer
 {
 using namespace std;
@@ -29,7 +29,7 @@ create(Translator* translator, xmlrpc_c::paramList const& paramList,
        boost::mutex& mut)
 {
   boost::shared_ptr<TranslationRequest> ret;
-  ret.reset(new TranslationRequest(paramList,cond, mut));
+  ret.reset(new TranslationRequest(paramList, cond, mut));
   ret->m_self = ret;
   ret->m_translator = translator;
   return ret;
@@ -49,8 +49,7 @@ Run()
       m_session_id = S.id;
       // cerr << "SESSION ID" << m_session_id << endl;
     }
-  else 
-    m_scope.reset(new Moses::ContextScope);
+  else m_scope.reset(new Moses::ContextScope);
 
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
@@ -59,14 +58,14 @@ Run()
     // why on earth is this a global variable? Is this even thread-safe???? UG
     (const_cast<Moses::StaticData&>(SD)).SetOutputSearchGraph(true);
 
-  std::stringstream out, graphInfo, transCollOpts;
-
+  // std::stringstream out, graphInfo, transCollOpts;
+  
   if (SD.IsSyntax())
     run_chart_decoder();
   else
     run_phrase_decoder();
 
-  XVERBOSE(1,"Output: " << out.str() << endl);
+  // XVERBOSE(1,"Output: " << out.str() << endl);
   {
     boost::lock_guard<boost::mutex> lock(m_mutex);
     m_done = true;
@@ -236,7 +235,9 @@ TranslationRequest(xmlrpc_c::paramList const& paramList,
   : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
   , m_nbestSize(0)
   , m_session_id(0)
-{ }
+{ 
+  m_options = StaticData::Instance().options();
+}
 
 void
 TranslationRequest::
@@ -345,7 +346,8 @@ pack_hypothesis(vector<Hypothesis const* > const& edges, string const& key,
   // target string
   ostringstream target;
   BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
-  output_phrase(target, e->GetCurrTargetPhrase());
+    output_phrase(target, e->GetCurrTargetPhrase());
+  std::cerr << "SERVER TRANSLATION: " << target.str() << std::endl;
   dest[key] = xmlrpc_c::value_string(target.str());
 
   if (m_withAlignInfo) {
