@@ -1,3 +1,5 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
+
 #include "Translator.h"
 #include "TranslationRequest.h"
 #include "Server.h"
