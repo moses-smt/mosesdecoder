@@ -44,7 +44,7 @@ RuleCube::RuleCube(const ChartTranslationOptions &transOpt,
 {
   RuleCubeItem *item = new RuleCubeItem(transOpt, allChartCells);
   m_covered.insert(item);
-  if (StaticData::Instance().options().cube.lazy_scoring) { 
+  if (StaticData::Instance().options().cube.lazy_scoring) {
     item->EstimateScore();
   } else {
     item->CreateHypothesis(transOpt, manager);

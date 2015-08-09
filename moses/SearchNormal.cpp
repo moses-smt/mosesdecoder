@@ -16,8 +16,8 @@ namespace Moses
  * /param transOptColl collection of translation options to be used for this sentence
  */
 SearchNormal::
-SearchNormal(Manager& manager, const InputType &source, 
-	     const TranslationOptionCollection &transOptColl)
+SearchNormal(Manager& manager, const InputType &source,
+             const TranslationOptionCollection &transOptColl)
   : Search(manager)
   , m_source(source)
   , m_hypoStackColl(source.GetSize() + 1)
@@ -38,8 +38,8 @@ SearchNormal(Manager& manager, const InputType &source,
   std::vector < HypothesisStackNormal >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(this->m_options.search.stack_size, 
-					this->m_options.search.stack_diversity);
+    sourceHypoColl->SetMaxHypoStackSize(this->m_options.search.stack_size,
+                                        this->m_options.search.stack_diversity);
     sourceHypoColl->SetBeamWidth(this->m_options.search.beam_width);
     m_hypoStackColl[ind] = sourceHypoColl;
   }
@@ -51,7 +51,7 @@ SearchNormal::~SearchNormal()
 }
 
 
-bool 
+bool
 SearchNormal::
 ProcessOneStack(HypothesisStack* hstack)
 {
@@ -62,11 +62,11 @@ ProcessOneStack(HypothesisStack* hstack)
 
   // the stack is pruned before processing (lazy pruning):
   VERBOSE(3,"processing hypothesis from next stack");
-  IFVERBOSE(2) stats.StartTimeStack(); 
+  IFVERBOSE(2) stats.StartTimeStack();
   sourceHypoColl.PruneToSize(m_options.search.stack_size);
   VERBOSE(3,std::endl);
   sourceHypoColl.CleanupArcList();
-  IFVERBOSE(2)  stats.StopTimeStack(); 
+  IFVERBOSE(2)  stats.StopTimeStack();
 
   // go through each hypothesis on the stack and try to expand it
   // BOOST_FOREACH(Hypothesis* h, sourceHypoColl) 
@@ -83,7 +83,7 @@ ProcessOneStack(HypothesisStack* hstack)
  */
 void SearchNormal::Decode()
 {
-  SentenceStats &stats = m_manager.GetSentenceStats();
+  // SentenceStats &stats = m_manager.GetSentenceStats();
 
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager, m_source, m_initialTransOpt);
@@ -92,7 +92,7 @@ void SearchNormal::Decode()
   // go through each stack
   BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
     if (!ProcessOneStack(hstack)) return;
-    IFVERBOSE(2) OutputHypoStackSize(); 
+    IFVERBOSE(2) OutputHypoStackSize();
     actual_hypoStack = static_cast<HypothesisStackNormal*>(hstack);
   }
 }

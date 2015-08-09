@@ -191,11 +191,11 @@ int main(int argc, char* argv[])
     BOOST_FOREACH(float const& p, pgrid) {
       lmbr.precision = p;
       BOOST_FOREACH(float const& r, rgrid) {
-	lmbr.ratio = r;
+        lmbr.ratio = r;
         BOOST_FOREACH(size_t const prune_i, prune_grid) {
-	  lmbr.pruning_factor = prune_i;
+          lmbr.pruning_factor = prune_i;
           BOOST_FOREACH(float const& scale_i, scale_grid) {
-	    mbr.scale = scale_i;
+            mbr.scale = scale_i;
             size_t lineCount = source->GetTranslationId();
             cout << lineCount << " ||| " << p << " "
                  << r << " " << size_t(prune_i) << " " << scale_i

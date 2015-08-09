@@ -22,30 +22,30 @@ class SearchNormal: public Search
 {
 protected:
   const InputType &m_source;
-  //! stacks to store hypotheses (partial translations) 
+  //! stacks to store hypotheses (partial translations)
   // no of elements = no of words in source + 1
-  std::vector < HypothesisStack* > m_hypoStackColl; 
+  std::vector < HypothesisStack* > m_hypoStackColl;
 
   /** actual (full expanded) stack of hypotheses*/
-  HypothesisStackNormal* actual_hypoStack; 
+  HypothesisStackNormal* actual_hypoStack;
 
   /** pre-computed list of translation options for the phrases in this sentence */
-  const TranslationOptionCollection &m_transOptColl; 
+  const TranslationOptionCollection &m_transOptColl;
 
   // functions for creating hypotheses
 
   virtual bool
   ProcessOneStack(HypothesisStack* hstack);
 
-  virtual void 
+  virtual void
   ProcessOneHypothesis(const Hypothesis &hypothesis);
 
-  virtual void 
+  virtual void
   ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);
 
-  virtual void 
-  ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt, 
-		   float expectedScore);
+  virtual void
+  ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt,
+                   float expectedScore);
 
 public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);

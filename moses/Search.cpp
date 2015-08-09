@@ -20,8 +20,8 @@ Search::Search(Manager& manager)
 Search *
 Search::
 CreateSearch(Manager& manager, const InputType &source,
-	     SearchAlgorithm searchAlgorithm, 
-	     const TranslationOptionCollection &transOptColl)
+             SearchAlgorithm searchAlgorithm,
+             const TranslationOptionCollection &transOptColl)
 {
   switch(searchAlgorithm) {
   case Normal:
@@ -42,8 +42,8 @@ out_of_time()
   if (!timelimit) return false;
   double elapsed_time = GetUserTime();
   if (elapsed_time <= timelimit) return false;
-  VERBOSE(1,"Decoding is out of time (" << elapsed_time << "," 
-	  << timelimit << ")" << std::endl);
+  VERBOSE(1,"Decoding is out of time (" << elapsed_time << ","
+          << timelimit << ")" << std::endl);
   interrupted_flag = 1;
   return true;
 }

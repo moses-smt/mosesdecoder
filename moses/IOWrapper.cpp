@@ -79,12 +79,12 @@ namespace Moses
 
 IOWrapper::IOWrapper()
   : m_nBestStream(NULL)
-    // , m_outputWordGraphStream(NULL)
-    // , m_outputSearchGraphStream(NULL)
-    // , m_detailedTranslationReportingStream(NULL)
-    // , m_unknownsStream(NULL)
-    // , m_alignmentInfoStream(NULL)
-    // , m_latticeSamplesStream(NULL)
+  // , m_outputWordGraphStream(NULL)
+  // , m_outputSearchGraphStream(NULL)
+  // , m_detailedTranslationReportingStream(NULL)
+  // , m_unknownsStream(NULL)
+  // , m_alignmentInfoStream(NULL)
+  // , m_latticeSamplesStream(NULL)
   , m_surpressSingleBestOutput(false)
   , m_look_ahead(0)
   , m_look_back(0)
@@ -142,13 +142,13 @@ IOWrapper::IOWrapper()
 
   P.SetParameter<string>(path, "translation-details", "");
   if (path.size()) m_detailedTranslationCollector.reset(new OutputCollector(path));
-  
+
   P.SetParameter<string>(path, "tree-translation-details", "");
   if (path.size()) m_detailTreeFragmentsOutputCollector.reset(new OutputCollector(path));
-  
+
   P.SetParameter<string>(path, "output-word-graph", "");
   if (path.size()) m_wordGraphCollector.reset(new OutputCollector(path));
-    
+
   size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
   string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
   if (latticeSamplesSize) {
@@ -157,7 +157,7 @@ IOWrapper::IOWrapper()
       m_surpressSingleBestOutput = true;
     }
   }
-  
+
   if (!m_surpressSingleBestOutput) {
     m_singleBestOutputCollector.reset(new Moses::OutputCollector(&std::cout));
   }
@@ -193,8 +193,8 @@ IOWrapper::~IOWrapper()
   if (m_inputFile != NULL)
     delete m_inputFile;
   // if (m_nBestStream != NULL && !m_surpressSingleBestOutput) {
-    // outputting n-best to file, rather than stdout. need to close file and delete obj
-    // delete m_nBestStream;
+  // outputting n-best to file, rather than stdout. need to close file and delete obj
+  // delete m_nBestStream;
   // }
 
   // delete m_detailedTranslationReportingStream;
@@ -251,16 +251,15 @@ ReadInput(boost::shared_ptr<std::vector<std::string> >* cw)
   boost::shared_ptr<InputType> source = GetBufferedInput();
   if (source) {
     source->SetTranslationId(m_currentLine++);
-    
+
     // when using a sliding context window, remove obsolete past input from buffer:
-    if (m_past_input.size() && m_look_back != std::numeric_limits<size_t>::max())
-      { 
-	list<boost::shared_ptr<InputType> >::iterator m = m_past_input.end();
-	for (size_t cnt = 0; cnt < m_look_back && --m != m_past_input.begin();) 
-	  cnt += (*m)->GetSize();
-	while (m_past_input.begin() != m) m_past_input.pop_front();
-      }
-    
+    if (m_past_input.size() && m_look_back != std::numeric_limits<size_t>::max()) {
+      list<boost::shared_ptr<InputType> >::iterator m = m_past_input.end();
+      for (size_t cnt = 0; cnt < m_look_back && --m != m_past_input.begin();)
+        cnt += (*m)->GetSize();
+      while (m_past_input.begin() != m) m_past_input.pop_front();
+    }
+
     if (m_look_back)
       m_past_input.push_back(source);
   }
@@ -268,15 +267,15 @@ ReadInput(boost::shared_ptr<std::vector<std::string> >* cw)
   return source;
 }
 
-boost::shared_ptr<std::vector<std::string> > 
+boost::shared_ptr<std::vector<std::string> >
 IOWrapper::
 GetCurrentContextWindow() const
 {
   boost::shared_ptr<std::vector<string> > context(new std::vector<string>);
   BOOST_FOREACH(boost::shared_ptr<InputType> const& i, m_past_input)
-    context->push_back(i->ToString());
+  context->push_back(i->ToString());
   BOOST_FOREACH(boost::shared_ptr<InputType> const& i, m_future_input)
-    context->push_back(i->ToString());
+  context->push_back(i->ToString());
   return context;
 }
 

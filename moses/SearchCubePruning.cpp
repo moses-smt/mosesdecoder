@@ -201,7 +201,6 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
       size_t maxSize = size - startPos;
       size_t maxSizePhrase = m_manager.options().search.max_phrase_length;
       maxSize = std::min(maxSize, maxSizePhrase);
-      
       for (endPos = startPos+1; endPos < startPos + maxSize; endPos++) {
         if (bitmap.GetValue(endPos))
           break;

@@ -68,8 +68,8 @@ ConfusionNet() : InputType()
 
   const StaticData& SD = StaticData::Instance();
   if (SD.IsSyntax()) {
-      m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
-    }
+    m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
+  }
   UTIL_THROW_IF2(&InputFeature::Instance() == NULL, "Input feature must be specified");
 }
 

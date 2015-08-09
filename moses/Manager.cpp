@@ -1616,9 +1616,9 @@ void Manager::OutputNBest(OutputCollector *collector) const
     TrellisPathList nBestList;
     ostringstream out;
     CalcNBest(options().nbest.nbest_size, nBestList,
-	      options().nbest.only_distinct);
-    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), 
-		m_source.GetTranslationId(),
+              options().nbest.only_distinct);
+    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(),
+                m_source.GetTranslationId(),
                 staticData.GetReportSegmentation());
     collector->Write(m_source.GetTranslationId(), out.str());
   }

@@ -97,7 +97,7 @@ public:
   boost::shared_ptr<TranslationTask>
   create(boost::shared_ptr<Moses::InputType> const& source,
          boost::shared_ptr<Moses::IOWrapper> const& ioWrapper,
-	 boost::shared_ptr<ContextScope>     const& scope);
+         boost::shared_ptr<ContextScope>     const& scope);
 
   ~TranslationTask();
   /** Translate one sentence
@@ -124,10 +124,10 @@ public:
     return m_scope;
   }
 
-  boost::shared_ptr<std::vector<std::string> > 
+  boost::shared_ptr<std::vector<std::string> >
   GetContextWindow() const;
 
-  void 
+  void
   SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw);
 
   std::map<std::string, float> const& GetContextWeights() const;
