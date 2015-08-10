@@ -1,6 +1,11 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
 #ifdef HAVE_XMLRPC_C
+#include "moses/TypeDef.h"
+#ifdef WITH_THREADS
+#include <boost/thread.hpp>
+#include "moses/ThreadPool.h"
+#endif
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>

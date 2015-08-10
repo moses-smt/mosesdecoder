@@ -1,7 +1,7 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: -*-
 #include "CloseSession.h"
+#include "TranslationRequest.h"
 #include "Server.h"
-#include "moses/StaticData.h"
 
 namespace MosesServer
 {

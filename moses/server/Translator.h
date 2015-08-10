@@ -1,7 +1,6 @@
 // -*- c++ -*-
 #pragma once
 
-#include "moses/ThreadPool.h"
 #include "moses/parameters/ServerOptions.h"
 #include "Session.h"
 #include <xmlrpc-c/base.hpp>
@@ -9,6 +8,8 @@
 #include <xmlrpc-c/server_abyss.hpp>
 #ifndef WITH_THREADS
 #pragma message("COMPILING WITHOUT THREADS!")
+#else
+#include "moses/ThreadPool.h"
 #endif
 namespace MosesServer
 {
