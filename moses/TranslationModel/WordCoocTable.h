@@ -13,8 +13,6 @@
 namespace Moses
 {
 
-using namespace std;
-
 #ifndef bitvector
 typedef boost::dynamic_bitset<uint64_t> bitvector;
 #endif
@@ -27,9 +25,9 @@ typedef boost::dynamic_bitset<uint64_t> bitvector;
 class WordCoocTable
 {
   typedef map<wordID_t,uint32_t> my_map_t;
-  vector<my_map_t> m_cooc;
-  vector<uint32_t> m_marg1;
-  vector<uint32_t> m_marg2;
+  std::vector<my_map_t> m_cooc;
+  std::vector<uint32_t> m_marg1;
+  std::vector<uint32_t> m_marg2;
 public:
   WordCoocTable();
   WordCoocTable(wordID_t const VocabSize1, wordID_t const VocabSize2);

@@ -24,12 +24,7 @@
 
 namespace sapt
 {
-  // using namespace std;
-  // using namespace boost;
   namespace bio=boost::iostreams;
-
-  // template<typename TOKEN> class imBitext<TOKEN>;
-
 
   template<typename TOKEN, typename SORTER>
   class TsaSorter
@@ -44,8 +39,8 @@ namespace sapt
   public:
     TsaSorter(SORTER sorter, iter& begin, iter& end)
       : m_sorter(sorter),
-	m_begin(begin),
-	m_end(end) { }
+        m_begin(begin),
+        m_end(end) { }
     
     bool 
     operator()()
@@ -62,7 +57,7 @@ namespace sapt
   class imTSA : public TSA<TOKEN>
   {
     typedef typename Ttrack<TOKEN>::Position cpos;
-    // friend class imBitext<TOKEN>;
+
   public:
     class tree_iterator;
     friend class tree_iterator;

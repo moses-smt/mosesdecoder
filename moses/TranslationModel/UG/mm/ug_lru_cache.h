@@ -14,8 +14,6 @@
 
 namespace lru_cache
 {
-  // using namespace std;
-  // using namespace boost;
 
   template<typename KEY, typename VAL>
   class LRU_Cache

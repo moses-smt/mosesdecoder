@@ -7,7 +7,6 @@
 #include "ug_typedefs.h"
 namespace sapt
 {
-  // using namespace std;
 
   template<typename T>
   class ConllBottomUpToken : public T

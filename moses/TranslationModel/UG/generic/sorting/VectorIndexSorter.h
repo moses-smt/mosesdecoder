@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #ifndef __vector_index_sorter_h
 #define __vector_index_sorter_h
 #include <boost/shared_ptr.hpp>
@@ -5,8 +6,8 @@
 #include <vector>
 // VectorIndexSorter; (c) 2007-2012 Ulrich Germann
 
-// A VectorIndexSorter is a function object for sorting indices into a vector
-// of objects (instead of sorting the vector itself).
+// A VectorIndexSorter is a function object for sorting indices into a
+// vector of objects (instead of sorting the vector itself).
 //
 // typcial use:
 // vector<thingy> my_vector;
@@ -16,13 +17,9 @@
 
 namespace Moses
 {
-  // using namespace std;
-
-
-  using std::greater;
 
   template<typename VAL,
-	   typename COMP = greater<VAL>,
+	   typename COMP = std::greater<VAL>,
 	   typename IDX_T=size_t>
   class
   VectorIndexSorter

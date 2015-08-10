@@ -11,7 +11,6 @@
 #include <boost/unordered_map.hpp>
 #include "tpt_pickler.h"
 
-// using namespace std;
 namespace ugdiss
 {
 

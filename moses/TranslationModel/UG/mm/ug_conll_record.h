@@ -7,7 +7,6 @@
 
 namespace sapt
 {
-  // using namespace std;
   
   using tpt::id_type;
   using tpt::uchar;

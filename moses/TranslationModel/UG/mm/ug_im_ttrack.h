@@ -19,8 +19,6 @@
 #include "util/exception.hh"
 #include "moses/Util.h"
 
-// #include "ug_vocab.h"
-
 // define the corpus buffer size (in sentences) and the
 // for adding additional sentences:
 #define IMTTRACK_INCREMENT_SIZE 100000

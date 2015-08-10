@@ -21,8 +21,6 @@
 namespace sapt
 {
 
-  // using namespace std;
-  // using namespace boost;
   namespace bio=boost::iostreams;
 
   template<typename TKN>

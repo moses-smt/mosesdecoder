@@ -20,11 +20,9 @@
 #include "tpt_typedefs.h"
 #include "tpt_tokenindex.h"
 #include "moses/Util.h"
-// #include "ug_vocab.h"
 
 namespace sapt
 {
-  // using namespace std;
 
   typedef boost::dynamic_bitset<uint64_t> bdBitset;
   using tpt::count_type;

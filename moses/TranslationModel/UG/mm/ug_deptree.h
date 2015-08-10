@@ -15,7 +15,6 @@
 #include "ug_conll_bottom_up_token.h"
 #include "ug_typedefs.h"
 
-// using namespace std;
 namespace sapt
 {
 

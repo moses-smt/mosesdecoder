@@ -130,7 +130,6 @@ int Bitext<Token>::agenda::job
 
   if (!m_bias) return 1;
 
-  // // using namespace boost::math;
   typedef boost::math::binomial_distribution<> binomial;
 
   std::ostream* log = m_bias->loglevel > 1 ? m_bias->log : NULL;
@@ -138,7 +137,6 @@ int Bitext<Token>::agenda::job
   float p = (*m_bias)[sid];
   id_type docid = m_bias->GetClass(sid);
   
-  // uint32_t k = docid < stats->indoc.size() ? stats->indoc[docid] : 0;
   typedef pstats::indoc_map_t::const_iterator id_iter;
   id_iter m = stats->indoc.find(docid);
   uint32_t k = m != stats->indoc.end() ? m->second : 0 ;

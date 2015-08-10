@@ -13,7 +13,6 @@
 #include "moses/TargetPhraseCollection.h"
 #include <map>
 
-using namespace std;
 namespace Moses
 {
 class PhraseDictionaryDynSuffixArray;

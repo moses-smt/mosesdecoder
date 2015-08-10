@@ -18,7 +18,7 @@
 
 namespace sapt
 {
-  // using namespace std;
+
   template<typename TSA>
   class
   BitSetCache

@@ -14,7 +14,7 @@
 #include "tpt_pickler.h"
 #include "ug_mm_2d_table.h"
 #include "util/exception.hh"
-// using namespace std;
+
 namespace sapt
 {
 

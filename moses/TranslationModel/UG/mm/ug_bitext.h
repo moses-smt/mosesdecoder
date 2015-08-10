@@ -77,7 +77,7 @@ namespace sapt
   using Moses::ttaskwptr;
   using tpt::binread;
   using tpt::binwrite;
-  // using namespace ugdiss;
+
   float lbop(size_t const tries, size_t const succ, float const confidence);
   void write_bitvector(bitvector const& v, std::ostream& out);
 

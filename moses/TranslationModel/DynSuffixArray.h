@@ -11,7 +11,7 @@
 
 namespace Moses
 {
-using namespace std;
+
 typedef std::vector<unsigned> vuint_t;
 
 
@@ -25,8 +25,8 @@ class ComparePosition
 
 public:
   ComparePosition(vuint_t const& crp, vuint_t const& sfa);
-  bool operator()(unsigned const& i, vector<wordID_t> const& phrase) const;
-  bool operator()(vector<wordID_t> const& phrase, unsigned const& i) const;
+  bool operator()(unsigned const& i, std::vector<wordID_t> const& phrase) const;
+  bool operator()(std::vector<wordID_t> const& phrase, unsigned const& i) const;
 };
 
 

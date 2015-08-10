@@ -19,7 +19,6 @@
 
 namespace sapt
 {
-  // using namespace std;
   namespace bio=boost::iostreams;
 
   template<typename TOKEN>

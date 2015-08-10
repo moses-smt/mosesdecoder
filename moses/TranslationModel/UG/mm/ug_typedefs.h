@@ -10,7 +10,6 @@
 #include "tpt_typedefs.h"
 namespace sapt
 {
-  // using namespace std;
   typedef boost::dynamic_bitset<uint64_t> bitvector;
 
   typedef std::vector<std::vector<float> > flt_2d_table;

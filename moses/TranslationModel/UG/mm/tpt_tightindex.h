@@ -10,9 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include "tpt_typedefs.h"
-// #include <stdint.h>
 #include <cassert>
-// // using namespace std;
 
 #ifndef uchar
 #endif

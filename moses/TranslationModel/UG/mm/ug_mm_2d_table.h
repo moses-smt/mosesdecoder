@@ -13,7 +13,6 @@
 namespace bio=boost::iostreams;
 namespace sapt
 {
-  // using namespace std;
   template<typename OFFSET, typename ID, typename VAL, typename INIT>
   class
   mm2dTable
