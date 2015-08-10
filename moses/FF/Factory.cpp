@@ -353,7 +353,7 @@ void FeatureRegistry::Construct(const std::string &name, const std::string &line
 
 void FeatureRegistry::PrintFF() const
 {
-  vector<string> ffs;
+  std::vector<std::string> ffs;
   std::cerr << "Available feature functions:" << std::endl;
   Map::const_iterator iter;
   for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
@@ -361,10 +361,10 @@ void FeatureRegistry::PrintFF() const
     ffs.push_back(ffName);
   }
 
-  vector<string>::const_iterator iterVec;
+  std::vector<std::string>::const_iterator iterVec;
   std::sort(ffs.begin(), ffs.end());
   for (iterVec = ffs.begin(); iterVec != ffs.end(); ++iterVec) {
-    const string &ffName = *iterVec;
+    const std::string &ffName = *iterVec;
     std::cerr << ffName << " ";
   }
 

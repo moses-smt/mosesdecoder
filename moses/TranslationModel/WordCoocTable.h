@@ -24,7 +24,7 @@ typedef boost::dynamic_bitset<uint64_t> bitvector;
  */
 class WordCoocTable
 {
-  typedef map<wordID_t,uint32_t> my_map_t;
+  typedef std::map<wordID_t,uint32_t> my_map_t;
   std::vector<my_map_t> m_cooc;
   std::vector<uint32_t> m_marg1;
   std::vector<uint32_t> m_marg2;

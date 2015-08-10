@@ -17,10 +17,10 @@ namespace Moses
   class
   NBestList
   {
-    vector<uint32_t> m_heap;
-    vector<THINGY>   m_list;
+    std::vector<uint32_t> m_heap;
+    std::vector<THINGY>   m_list;
     VectorIndexSorter<THINGY, CMP, uint32_t> m_better;
-    mutable vector<uint32_t> m_order;
+    mutable std::vector<uint32_t> m_order;
     mutable bool m_changed;
   public:
     NBestList(size_t const max_size, CMP const& cmp);

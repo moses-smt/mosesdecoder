@@ -22,7 +22,7 @@ class PhraseDictionaryDynSuffixArray;
 class SAPhrase
 {
 public:
-  vector<wordID_t> words;
+  std::vector<wordID_t> words;
 
   SAPhrase(size_t phraseSize)
     :words(phraseSize) {
@@ -66,18 +66,18 @@ class SentenceAlignment
 public:
   SentenceAlignment(int sntIndex, int sourceSize, int targetSize);
   int m_sntIndex;
-  vector<wordID_t>* trgSnt;
-  vector<wordID_t>* srcSnt;
-  vector<int> numberAligned;
-  vector< vector<int> > alignedList;
-  bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret,
+  std::vector<wordID_t>* trgSnt;
+  std::vector<wordID_t>* srcSnt;
+  std::vector<int> numberAligned;
+  std::vector< std::vector<int> > alignedList;
+  bool Extract(int maxPhraseLength, std::vector<PhrasePair*> &ret,
                int startSource, int endSource) const;
 };
 
 class ScoresComp
 {
 public:
-  ScoresComp(const vector<float>& weights) {
+  ScoresComp(const std::vector<float>& weights) {
   }
   bool operator()(const Scores& s1, const Scores& s2) const {
     return s1[0] < s2[0]; // just p(e|f) as approximation
@@ -98,10 +98,10 @@ public:
 struct BetterPhrase {
   ScoresComp const& cmp;
   BetterPhrase(ScoresComp const& sc);
-  // bool operator()(pair<Scores, TargetPhrase const*> const& a,
-  // pair<Scores, TargetPhrase const*> const& b) const;
-  bool operator()(pair<Scores, SAPhrase const*> const& a,
-                  pair<Scores, SAPhrase const*> const& b) const;
+  // bool operator()(std::pair<Scores, TargetPhrase const*> const& a,
+  // std::pair<Scores, TargetPhrase const*> const& b) const;
+  bool operator()(std::pair<Scores, SAPhrase const*> const& a,
+                  std::pair<Scores, SAPhrase const*> const& b) const;
 };
 
 /** @todo ask Abbey Levenberg
@@ -111,20 +111,20 @@ class BilingualDynSuffixArray
 public:
   BilingualDynSuffixArray();
   ~BilingualDynSuffixArray();
-  bool Load( const vector<FactorType>& inputFactors,
-             const vector<FactorType>& outputTactors,
+  bool Load( const std::vector<FactorType>& inputFactors,
+             const std::vector<FactorType>& outputTactors,
              string source, string target, string alignments,
-             const vector<float> &weight);
-  // bool LoadTM( const vector<FactorType>& inputFactors,
-  // 	     const vector<FactorType>& outputTactors,
+             const std::vector<float> &weight);
+  // bool LoadTM( const std::vector<FactorType>& inputFactors,
+  // 	     const std::vector<FactorType>& outputTactors,
   // 	     string source, string target, string alignments,
-  // 	     const vector<float> &weight);
-  void GetTargetPhrasesByLexicalWeight(const Phrase& src, vector< pair<Scores, TargetPhrase*> >& target) const;
+  // 	     const std::vector<float> &weight);
+  void GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> >& target) const;
 
   void CleanUp(const InputType& source);
   void addSntPair(string& source, string& target, string& alignment);
-  pair<float,float>
-  GatherCands(Phrase const& src, map<SAPhrase, vector<float> >& pstats) const;
+  std::pair<float,float>
+  GatherCands(Phrase const& src, std::map<SAPhrase, std::vector<float> >& pstats) const;
 
   TargetPhrase*
   GetMosesFactorIDs(const SAPhrase&, const Phrase& sourcePhrase, const PhraseDictionary *pt) const;
@@ -135,42 +135,42 @@ private:
   mutable WordCoocTable m_wrd_cooc;
   DynSuffixArray * m_srcSA;
   DynSuffixArray * m_trgSA;
-  vector<wordID_t>* m_srcCorpus;
-  vector<wordID_t>* m_trgCorpus;
-  vector<FactorType> m_inputFactors;
-  vector<FactorType> m_outputFactors;
+  std::vector<wordID_t>* m_srcCorpus;
+  std::vector<wordID_t>* m_trgCorpus;
+  std::vector<FactorType> m_inputFactors;
+  std::vector<FactorType> m_outputFactors;
 
-  vector<unsigned> m_srcSntBreaks, m_trgSntBreaks;
+  std::vector<unsigned> m_srcSntBreaks, m_trgSntBreaks;
 
   Vocab* m_srcVocab, *m_trgVocab;
   ScoresComp* m_scoreCmp;
 
-  vector<SentenceAlignment> m_alignments;
-  vector<vector<short> > m_rawAlignments;
+  std::vector<SentenceAlignment> m_alignments;
+  std::vector<std::vector<short> > m_rawAlignments;
 
-  mutable map<pair<wordID_t, wordID_t>, pair<float, float> > m_wordPairCache;
-  mutable set<wordID_t> m_freqWordsCached;
+  mutable std::map<std::pair<wordID_t, wordID_t>, std::pair<float, float> > m_wordPairCache;
+  mutable std::set<wordID_t> m_freqWordsCached;
   const size_t m_maxPhraseLength, m_maxSampleSize;
   const size_t m_maxPTEntries;
   int LoadCorpus(FactorDirection direction,
-                 InputFileStream&, const vector<FactorType>& factors,
-                 vector<wordID_t>&, vector<wordID_t>&,
+                 InputFileStream&, const std::vector<FactorType>& factors,
+                 std::vector<wordID_t>&, std::vector<wordID_t>&,
                  Vocab*);
   int LoadAlignments(InputFileStream& aligs);
   int LoadRawAlignments(InputFileStream& aligs);
   int LoadRawAlignments(string& aligs);
 
-  bool ExtractPhrases(const int&, const int&, const int&, vector<PhrasePair*>&, bool=false) const;
+  bool ExtractPhrases(const int&, const int&, const int&, std::vector<PhrasePair*>&, bool=false) const;
   SentenceAlignment GetSentenceAlignment(const int, bool=false) const;
-  int SampleSelection(vector<unsigned>&, int = 300) const;
+  int SampleSelection(std::vector<unsigned>&, int = 300) const;
 
-  vector<int> GetSntIndexes(vector<unsigned>&, int, const vector<unsigned>&) const;
+  std::vector<int> GetSntIndexes(std::vector<unsigned>&, int, const std::vector<unsigned>&) const;
   SAPhrase TrgPhraseFromSntIdx(const PhrasePair&) const;
   bool GetLocalVocabIDs(const Phrase&, SAPhrase &) const;
   void CacheWordProbs(wordID_t) const;
   void CacheFreqWords() const;
   void ClearWordInCache(wordID_t);
-  pair<float, float> GetLexicalWeight(const PhrasePair&) const;
+  std::pair<float, float> GetLexicalWeight(const PhrasePair&) const;
 
   int GetSourceSentenceSize(size_t sentenceId) const;
   int GetTargetSentenceSize(size_t sentenceId) const;
