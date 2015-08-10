@@ -5,6 +5,7 @@ namespace MosesServer
 {
   Server::
   Server(Moses::Parameter& params)
+#ifdef HAVE_XMLRPC_C
     : m_server_options(params),
       m_updater(new Updater),
       m_optimizer(new Optimizer),
@@ -16,6 +17,9 @@ namespace MosesServer
     m_registry.addMethod("optimize",  m_optimizer);
     m_registry.addMethod("close_session", m_close_session);
   }
+#else
+  { }
+#endif
 
   int 
   Server::

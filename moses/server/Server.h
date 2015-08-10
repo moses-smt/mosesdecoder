@@ -9,8 +9,8 @@
 #include "Updater.h"
 #include "CloseSession.h"
 #include "Session.h"
-#include "moses/parameters/ServerOptions.h"
 #endif
+#include "moses/parameters/ServerOptions.h"
 
 namespace MosesServer
 {
@@ -18,12 +18,13 @@ namespace MosesServer
   {
     Moses::ServerOptions m_server_options;
     SessionCache   m_session_cache;
+#ifdef HAVE_XMLRPC_C
     xmlrpc_c::registry m_registry;
     xmlrpc_c::methodPtr const m_updater;
     xmlrpc_c::methodPtr const m_optimizer;
     xmlrpc_c::methodPtr const m_translator;
     xmlrpc_c::methodPtr const m_close_session;
-    
+#endif    
   public:
     Server(Moses::Parameter& params);
 
