@@ -67,6 +67,7 @@ namespace Moses
     if (!input.update(param))      return false;
     if (!mbr.update(param))        return false;
     if (!lmbr.update(param))       return false;
+    return true;
   }
 #endif
 
