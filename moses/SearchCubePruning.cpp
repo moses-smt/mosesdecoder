@@ -38,8 +38,8 @@ public:
 };
 
 SearchCubePruning::
-SearchCubePruning(Manager& manager, const InputType &source, 
-		  const TranslationOptionCollection &transOptColl)
+SearchCubePruning(Manager& manager, const InputType &source,
+                  const TranslationOptionCollection &transOptColl)
   : Search(manager)
   , m_source(source)
   , m_hypoStackColl(source.GetSize() + 1)
@@ -69,8 +69,8 @@ void SearchCubePruning::Decode()
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
 
-  HypothesisStackCubePruning &firstStack 
-    = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
+  HypothesisStackCubePruning &firstStack
+  = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
   firstStack.AddInitial(hypo);
   // Call this here because the loop below starts at the second stack.
   firstStack.CleanupArcList();
@@ -81,8 +81,8 @@ void SearchCubePruning::Decode()
 
   const size_t Diversity = m_manager.options().cube.diversity;
   VERBOSE(2,"Cube Pruning diversity is " << Diversity << std::endl);
-  VERBOSE(2,"Max Phrase length is " 
-	  << m_manager.options().search.max_phrase_length << std::endl);
+  VERBOSE(2,"Max Phrase length is "
+          << m_manager.options().search.max_phrase_length << std::endl);
 
   // go through each stack
   size_t stackNo = 1;
@@ -92,13 +92,13 @@ void SearchCubePruning::Decode()
     // BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
     if (this->out_of_time()) return;
 
-    HypothesisStackCubePruning &sourceHypoColl 
-      = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+    HypothesisStackCubePruning &sourceHypoColl
+    = *static_cast<HypothesisStackCubePruning*>(*iterStack);
 
     // priority queue which has a single entry for each bitmap
     // container, sorted by score of top hyp
-    std::priority_queue < BitmapContainer*, std::vector< BitmapContainer* >, 
-			  BitmapContainerOrderer > BCQueue;
+    std::priority_queue < BitmapContainer*, std::vector< BitmapContainer* >,
+        BitmapContainerOrderer > BCQueue;
 
     _BMType::const_iterator bmIter;
     const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();

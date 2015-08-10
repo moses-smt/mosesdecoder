@@ -57,8 +57,8 @@ ProcessOneStack(HypothesisStack* hstack)
 {
   if (this->out_of_time()) return false;
   SentenceStats &stats = m_manager.GetSentenceStats();
-  HypothesisStackNormal &sourceHypoColl 
-    = *static_cast<HypothesisStackNormal*>(hstack);
+  HypothesisStackNormal &sourceHypoColl
+  = *static_cast<HypothesisStackNormal*>(hstack);
 
   // the stack is pruned before processing (lazy pruning):
   VERBOSE(3,"processing hypothesis from next stack");
@@ -69,10 +69,10 @@ ProcessOneStack(HypothesisStack* hstack)
   IFVERBOSE(2)  stats.StopTimeStack();
 
   // go through each hypothesis on the stack and try to expand it
-  // BOOST_FOREACH(Hypothesis* h, sourceHypoColl) 
+  // BOOST_FOREACH(Hypothesis* h, sourceHypoColl)
   HypothesisStackNormal::const_iterator h;
   for (h = sourceHypoColl.begin(); h != sourceHypoColl.end(); ++h)
-    ProcessOneHypothesis(**h); 
+    ProcessOneHypothesis(**h);
   return true;
 }
 
