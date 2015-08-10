@@ -54,7 +54,7 @@ namespace Moses
     {
       typedef std::map<std::string, xmlrpc_c::value> params_t;
 
-      params_t::const_iterator si = params.find("search-algoritm");
+      params_t::const_iterator si = params.find("search-algorithm");
       if (si != params.end()) 
         {
           // use named parameters
