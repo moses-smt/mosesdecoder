@@ -78,11 +78,11 @@ namespace Moses
     size_t m_workers;  // number of worker threads for sampling the bitexts
     std::vector<std::string> m_feature_set_names; // one or more of: standard, datasource
     std::string m_bias_logfile;
-    boost::scoped_ptr<ofstream> m_bias_logger; // for logging to a file
-    ostream* m_bias_log;
+    boost::scoped_ptr<std::ofstream> m_bias_logger; // for logging to a file
+    std::ostream* m_bias_log;
     int m_bias_loglevel;
     LexicalReordering* m_lr_func; // associated lexical reordering function
-    string m_lr_func_name; // name of associated lexical reordering function
+    std::string m_lr_func_name; // name of associated lexical reordering function
     sapt::sampling_method m_sampling_method; // sampling method, see ug_bitext_sampler
     boost::scoped_ptr<ug::ThreadPool> m_thread_pool;
   public:

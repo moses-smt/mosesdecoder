@@ -222,7 +222,7 @@ namespace Moses
           m_bias_log = &std::cout;
         else
           {
-            m_bias_logger.reset(new ofstream(m_bias_logfile.c_str()));
+            m_bias_logger.reset(new std::ofstream(m_bias_logfile.c_str()));
             m_bias_log = m_bias_logger.get();
           }
       }
@@ -319,7 +319,7 @@ namespace Moses
     // - sane word alignment?
     vector<string> text1,text2,symal;
     string line;
-    filtering_istream in1,in2,ina;
+    boost::iostreams::filtering_istream in1,in2,ina;
 
     open_input_stream(bname+L1+".txt.gz",in1);
     open_input_stream(bname+L2+".txt.gz",in2);

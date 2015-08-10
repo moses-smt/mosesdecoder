@@ -198,13 +198,14 @@ go(string t1name, string t2name, string A3filename)
 {
   typedef mmTtrack<TKN> track_t;
   track_t T1(t1name),T2(t2name);
-  filtering_istream A3file; open_input_stream(A3filename,A3file);
+  boost::iostreams::filtering_istream A3file; 
+  open_input_stream(A3filename, A3file);
 
   string line; int check1=-1,check2=-1;
-  vector<id_type> idx1(1,0),idx2(1,0),idxm(1,mam.tellp());
+  vector<id_type> idx1(1,0),idx2(1,0),idxm(1, mam.tellp());
   size_t tokenCount1=0,tokenCount2=0;
   size_t skipCtr=0,lineCtr=0;
-  if (!getCheckValues(A3file,check1,check2))
+  if (!getCheckValues(A3file, check1, check2))
     UTIL_THROW(util::Exception, "Mismatch in input files!");
 
   for (sid = 0; sid < T1.size(); ++sid)
