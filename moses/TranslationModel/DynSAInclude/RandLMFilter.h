@@ -61,7 +61,7 @@ public:
     // mask for bits that make up the address
     address_mask_ = full_mask_ >> first_bit_;
   }
-  Filter(FileHandler* fin, bool loaddata = true) : data_(NULL) {
+  Filter(Moses::FileHandler* fin, bool loaddata = true) : data_(NULL) {
     assert(loadHeader(fin));
     if (loaddata)
       assert(loadData(fin));
@@ -222,7 +222,7 @@ public:
   uint32_t getCells() {
     return cells_;
   }
-  virtual bool save(FileHandler* out) {
+  virtual bool save(Moses::FileHandler* out) {
     assert(out != NULL);
     assert(out->write((char*)&cells_, sizeof(cells_)));
     assert(out->write((char*)&cell_width_, sizeof(cell_width_)));
@@ -247,7 +247,7 @@ public:
     return true;
   }
 protected:
-  bool loadHeader(FileHandler* fin) {
+  bool loadHeader(Moses::FileHandler* fin) {
     assert(fin != NULL);
     assert(fin->read((char*)&cells_, sizeof(cells_)));
     assert(fin->read((char*)&cell_width_, sizeof(cell_width_)));
@@ -260,7 +260,7 @@ protected:
     assert(fin->read((char*)&address_mask_, sizeof(address_mask_)));
     return true;
   }
-  bool loadData(FileHandler* fin) {
+  bool loadData(Moses::FileHandler* fin) {
     // instantiate underlying array
     data_ = new T[cells_];
     assert(data_ != NULL);
@@ -285,7 +285,7 @@ class BitFilter : public Filter<uint8_t>
 {
 public:
   BitFilter(uint64_t bits) : Filter<uint8_t>(bits, 1) {}
-  BitFilter(FileHandler* fin, bool loaddata = true)
+  BitFilter(Moses::FileHandler* fin, bool loaddata = true)
     : Filter<uint8_t>(fin, loaddata) {
     if (loaddata)
       assert(load(fin));
@@ -305,7 +305,7 @@ public:
     data_[(location % addresses_) >> 3] &= 0 << ((location % addresses_) % 8);
     return true;
   }
-  bool save(FileHandler* fout) {
+  bool save(Moses::FileHandler* fout) {
     assert(Filter<uint8_t>::save(fout));
     std::cerr << "Saved BitFilter. Rho = " << rho() << "." << std::endl;;
     return true;
@@ -320,7 +320,7 @@ public:
     return static_cast<float>((range << 3) - ones)/static_cast<float>(range << 3);
   }
 protected:
-  bool load(FileHandler* fin) {
+  bool load(Moses::FileHandler* fin) {
     std::cerr << "Loaded BitFilter. Rho = " << rho() << "." << std::endl;;
     return true;
   }
@@ -332,13 +332,13 @@ protected:
   // to fit a smaller range.
   class ResizedBitFilter : public BitFilter {
   public:
-    ResizedBitFilter(FileHandler* fin) : BitFilter(fin) {
+    ResizedBitFilter(Moses::FileHandler* fin) : BitFilter(fin) {
       assert(load(fin));
     }
-    ResizedBitFilter(FileHandler* fin, uint64_t newsize) : BitFilter(newsize) {
+    ResizedBitFilter(Moses::FileHandler* fin, uint64_t newsize) : BitFilter(newsize) {
       assert(resizeFromFile(fin, newsize));
     }
-    bool resizeFromFile(FileHandler* oldin, uint64_t newsize);
+    bool resizeFromFile(Moses::FileHandler* oldin, uint64_t newsize);
     virtual bool testBit(uint64_t location) {
       // test bit referenced by location
       return BitFilter::testBit((location % old_addresses_) * a_ + b_);
@@ -347,7 +347,7 @@ protected:
       // set bit referenced by location
       return BitFilter::setBit((location % old_addresses_) * a_ + b_);
     }
-    bool save(FileHandler* fout) {
+    bool save(Moses::FileHandler* fout) {
       // re-hashing parameters
       assert(BitFilter::save(fout));
       std::cerr << "Saved ResizedBitFilter. Rho = " << rho() << "." << std::endl;
@@ -356,7 +356,7 @@ protected:
       return fout->write((char*)&b_, sizeof(b_));
     }
   protected:
-    bool load(FileHandler* fin) {
+    bool load(Moses::FileHandler* fin) {
       // re-hashing parameters
       std::cerr << "Loaded ResizedBitFilter. Rho = " << rho() << "." << std::endl;
       CHECK(fin->read((char*)&old_addresses_, sizeof(old_addresses_)));
@@ -376,7 +376,7 @@ protected:
     public:
     CountingFilter(uint64_t addresses, int width, bool wrap_around = true) :
       Filter<T>(addresses, width), wrap_around_(wrap_around) {}
-    CountingFilter(FileHandler* fin) : Filter<T>(fin, true) {
+    CountingFilter(Moses::FileHandler* fin) : Filter<T>(fin, true) {
       CHECK(load(fin));
     }
     ~CountingFilter() {}
@@ -404,12 +404,12 @@ protected:
 	CHECK(this->write(address, this->address_mask_));
       return false; // false to indicate that overflowed
     }
-    bool save(FileHandler* fout) {
+    bool save(Moses::FileHandler* fout) {
       CHECK(Filter<T>::save(fout));
       return fout->write((char*)&wrap_around_, sizeof(wrap_around_));
     }
     private:
-    bool load(FileHandler* fin) {
+    bool load(Moses::FileHandler* fin) {
       return fin->read((char*)&wrap_around_, sizeof(wrap_around_));
     }
     inline bool incrementSubCell(int bit, int len, T* cell) {

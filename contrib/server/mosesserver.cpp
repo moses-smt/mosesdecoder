@@ -58,8 +58,8 @@ int main(int argc, char** argv)
 #include <xmlrpc-c/server_abyss.hpp>
 
 // using namespace Moses;
-using Moses::TreeInput;
 using namespace std;
+using namespace Moses;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
 

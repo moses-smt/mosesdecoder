@@ -26,11 +26,6 @@
 #define MAX_HASH_FUNCS 1000
 //#define PRIME 409
 
-using std::string;
-using std::cout;
-using std::cerr;
-using std::endl;
-
 //typedefs for projects
 typedef std::string word_t;     // word as string
 typedef unsigned int wordID_t;      // word mapped to integer

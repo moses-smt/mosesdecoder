@@ -39,7 +39,7 @@ public:
     }
     std::cerr << "Initialized quantization (size = " << max_code_ + 1 << ")" << std::endl;
   }
-  LogQtizer(FileHandler* fin) {
+  LogQtizer(Moses::FileHandler* fin) {
     UTIL_THROW_IF2(fin == NULL, "Null file handle");
     load(fin);
   }
@@ -70,7 +70,7 @@ public:
     delete[] code_to_value_;
     delete[] code_to_log_value_;
   }
-  void save(FileHandler* fout) {
+  void save(Moses::FileHandler* fout) {
     fout->write((char*)&base_, sizeof(base_));
     fout->write((char*)&max_code_, sizeof(max_code_));
     fout->write((char*)&max_value_, sizeof(max_value_));
@@ -88,7 +88,7 @@ private:
   int max_code_;
   float max_value_;
   float min_value_;
-  void load(FileHandler* fin) {
+  void load(Moses::FileHandler* fin) {
     fin->read((char*)&base_, sizeof(base_));
     fin->read((char*)&max_code_, sizeof(max_code_));
     fin->read((char*)&max_value_, sizeof(max_value_));

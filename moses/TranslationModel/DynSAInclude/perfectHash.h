@@ -14,7 +14,7 @@
  */
 using randlm::Filter;
 using randlm::BitFilter;
-typedef std::map<string, count_t> hpDict_t;
+typedef std::map<std::string, count_t> hpDict_t;
 typedef hpDict_t::iterator hpdEntry_t;
 static count_t collisions_ = 0;
 
@@ -24,7 +24,7 @@ class PerfectHash
 {
 public:
   PerfectHash(uint16_t MBs, int width, int bucketRange, float qBase);
-  PerfectHash(FileHandler* fin) {
+  PerfectHash(Moses::FileHandler* fin) {
     UTIL_THROW_IF2(fin == 0, "Invalid file handle");
   }
   virtual ~PerfectHash();
@@ -49,14 +49,14 @@ protected:
             hpdEntry_t& hpdAddr, uint64_t& filterIdx);
   virtual void remove(const wordID_t* IDs, const int len);
   void remove(uint64_t index);
-  void save(FileHandler* fout);
-  void load(FileHandler* fin);
+  void save(Moses::FileHandler* fout);
+  void load(Moses::FileHandler* fin);
   virtual void markQueried(const uint64_t&)=0;
   //pointer to a specific entry in a hpDict_t
   virtual void markQueried(hpdEntry_t&)=0;
 private:
   T nonZeroSignature(const wordID_t* IDs, const int len, count_t bucket);
-  string hpDictKeyValue(const wordID_t* IDs, const int len);
+  std::string hpDictKeyValue(const wordID_t* IDs, const int len);
   uint64_t memBound_; // total memory bound in bytes
   uint16_t cellWidth_; // in bits
   UnivHash_linear<count_t>* bucketHash_;
@@ -71,12 +71,12 @@ PerfectHash<T>::PerfectHash(uint16_t MBs, int width, int bucketRange,
 {
   bucketRange_ = static_cast<uint8_t>(bucketRange);
   if(bucketRange > 255) {
-    cerr << "ERROR: Max bucket range is > 2^8\n";
+    std::cerr << "ERROR: Max bucket range is > 2^8\n";
     exit(1);
   }
   qtizer_ = new LogQtizer(qBase);
   int valBits = (int)ceil(log2((float)qtizer_->maxcode()));
-  cerr << "BITS FOR VALUES ARRAY = " << valBits << endl;
+  std::cerr << "BITS FOR VALUES ARRAY = " << valBits << std::endl;
   uint64_t totalBits = memBound_ << 3;
   cells_ = (uint64_t) ceil((float)totalBits / (float)(cellWidth_ + valBits)); // upper bound on cells
   cells_ += (cells_ % bucketRange_); // make cells multiple of bucket range
@@ -142,7 +142,7 @@ bool PerfectHash<T>::update(const wordID_t* IDs, const int len,
 {
   // check if key is in high perf. dictionary
   filterIdx = cells_ + 1;
-  string skey = hpDictKeyValue(IDs, len);
+  std::string skey = hpDictKeyValue(IDs, len);
   if((hpdAddr = dict_.find(skey)) != dict_.end()) {
     hpdAddr->second = value;
     return true;
@@ -172,7 +172,7 @@ int PerfectHash<T>::query(const wordID_t* IDs, const int len,
                           hpdEntry_t& hpdAddr, uint64_t& filterIdx)
 {
   // check if key is in high perf. dictionary
-  string skey = hpDictKeyValue(IDs, len);
+  std::string skey = hpDictKeyValue(IDs, len);
   if((hpdAddr = dict_.find(skey)) != dict_.end()) {
     filterIdx = cells_ + 1;
     return(hpdAddr->second);  // returns copy of value
@@ -188,7 +188,7 @@ int PerfectHash<T>::query(const wordID_t* IDs, const int len,
     for(; index < lastrow; ++index) {
       if(filter_->read(index) == fp) {
         //cout << "fp = " << fp << "\tbucket = " << bucket << "\tfilter =" <<
-        //filter_->read(index) << "\tcode = " << code << endl;
+        //filter_->read(index) << "\tcode = " << code << std::endl;
         filterIdx = index;
         hpdAddr = dict_.end();
         return (int)qtizer_->value(values_->read(index));
@@ -202,7 +202,7 @@ template<typename T>
 void PerfectHash<T>::remove(const wordID_t* IDs, const int len)
 {
   // delete key if in high perf. dictionary
-  string skey = hpDictKeyValue(IDs, len);
+  std::string skey = hpDictKeyValue(IDs, len);
   if(dict_.find(skey) != dict_.end())
     dict_.erase(skey);
   else {  // check if key is in filter
@@ -248,14 +248,14 @@ T PerfectHash<T>::nonZeroSignature(const wordID_t* IDs, const int len,
     h += (h < fingerHash_->size() - 1 ? 1 : -h); // wrap around
   } while((fingerprint == 0) && (h != bucket));
   if(fingerprint == 0)
-    cerr << "WARNING: Unable to find non-zero signature for ngram\n" << endl;
+    std::cerr << "WARNING: Unable to find non-zero signature for ngram\n" << std::endl;
   return fingerprint;
 }
 
 template<typename T>
-string PerfectHash<T>::hpDictKeyValue(const wordID_t* IDs, const int len)
+std::string PerfectHash<T>::hpDictKeyValue(const wordID_t* IDs, const int len)
 {
-  string skey(" ");
+  std::string skey(" ");
   for(int i = 0; i < len; ++i)
     skey += Utils::IntToStr(IDs[i]) + "¬";
   Utils::trim(skey);
@@ -277,10 +277,10 @@ count_t PerfectHash<T>::bucketsMemUse()
 }
 
 template<typename T>
-void PerfectHash<T>::save(FileHandler* fout)
+void PerfectHash<T>::save(Moses::FileHandler* fout)
 {
   UTIL_THROW_IF2(fout == 0, "Invalid file handle");
-  cerr << "\tSaving perfect hash parameters...\n";
+  std::cerr << "\tSaving perfect hash parameters...\n";
   fout->write((char*)&hitMask_, sizeof(hitMask_));
   fout->write((char*)&memBound_, sizeof(memBound_));
   fout->write((char*)&cellWidth_, sizeof(cellWidth_));
@@ -289,25 +289,25 @@ void PerfectHash<T>::save(FileHandler* fout)
   fout->write((char*)&bucketRange_, sizeof(bucketRange_));
   fout->write((char*)idxTracker_, totBuckets_ * sizeof(idxTracker_[0]));
   qtizer_->save(fout);
-  cerr << "\tSaving hash functions...\n";
+  std::cerr << "\tSaving hash functions...\n";
   fingerHash_->save(fout);
   bucketHash_->save(fout);
-  cerr << "\tSaving bit filter...\n";
+  std::cerr << "\tSaving bit filter...\n";
   filter_->save(fout);
   values_->save(fout);
-  cerr << "\tSaving high performance dictionary...\n";
+  std::cerr << "\tSaving high performance dictionary...\n";
   count_t size = dict_.size();
   fout->write((char*)&size, sizeof(count_t));
-  *fout << endl;
+  *fout << std::endl;
   iterate(dict_, t)
   *fout << t->first << "\t" << t->second << "\n";
 }
 
 template<typename T>
-void PerfectHash<T>::load(FileHandler* fin)
+void PerfectHash<T>::load(Moses::FileHandler* fin)
 {
   UTIL_THROW_IF2(fin == 0, "Invalid file handle");
-  cerr << "\tLoading perfect hash parameters...\n";
+  std::cerr << "\tLoading perfect hash parameters...\n";
   fin->read((char*)&hitMask_, sizeof(hitMask_));
   fin->read((char*)&memBound_, sizeof(memBound_));
   fin->read((char*)&cellWidth_, sizeof(cellWidth_));
@@ -317,17 +317,17 @@ void PerfectHash<T>::load(FileHandler* fin)
   idxTracker_ = new uint8_t[totBuckets_];
   fin->read((char*)idxTracker_, totBuckets_ * sizeof(idxTracker_[0]));
   qtizer_ = new LogQtizer(fin);
-  cerr << "\tLoading hash functions...\n";
+  std::cerr << "\tLoading hash functions...\n";
   fingerHash_ = new UnivHash_linear<T>(fin);
   bucketHash_ = new UnivHash_linear<count_t>(fin);
-  cerr << "\tLoading bit filter...\n";
+  std::cerr << "\tLoading bit filter...\n";
   filter_ = new Filter<T>(fin);
   values_ = new Filter<T>(fin);
-  cerr << "\tLoading HPD...\n";
+  std::cerr << "\tLoading HPD...\n";
   count_t size = 0;
   fin->read((char*)&size, sizeof(count_t));
   fin->ignore(256, '\n');
-  string line;
+  std::string line;
   hpDict_t::key_type key;
   hpDict_t::mapped_type val;
   for(count_t i=0; i < size; ++i) {
@@ -337,14 +337,14 @@ void PerfectHash<T>::load(FileHandler* fin)
     ss >> key, ss >> val;
     dict_[key] = val;
   }
-  cerr << "\tHPD size=" << dict_.size() << endl;
-  cerr << "Finished loading ORLM." << endl;
+  std::cerr << "\tHPD size=" << dict_.size() << std::endl;
+  std::cerr << "Finished loading ORLM." << std::endl;
 }
 
 template<typename T>
 void PerfectHash<T>::analyze()
 {
-  cerr << "Analyzing Dynamic Bloomier Filter...\n";
+  std::cerr << "Analyzing Dynamic Bloomier Filter...\n";
   // see how many items in each bucket
   uint8_t* bucketCnt = new uint8_t[totBuckets_];
   unsigned largestBucket = 0, totalCellsSet = 0,
@@ -376,27 +376,27 @@ void PerfectHash<T>::analyze()
   }
   for(int i = 0; i < totBuckets_; ++i) {
     if(bucketCnt[i] != idxTracker_[i])
-      cerr << "bucketCnt[" << i << "] = " << (int)bucketCnt[i] <<
-           "\tidxTracker_[" << i << "] = " << (int)idxTracker_[i] << endl;
+      std::cerr << "bucketCnt[" << i << "] = " << (int)bucketCnt[i] <<
+           "\tidxTracker_[" << i << "] = " << (int)idxTracker_[i] << std::endl;
   }
-  cerr << "total cells= " << cells_ << endl;
-  cerr << "total buckets= " << totBuckets_ << endl;
-  cerr << "bucket range= " << (int)bucketRange_ << endl;
-  cerr << "fingerprint bits= " << cellWidth_ << endl;
-  cerr << "total cells set= " << totalCellsSet;
-  cerr << " (idxTracker set = " << trackerCells << ")" << endl;
-  cerr << "total zeroes=" << totalZeroes;
-  cerr << " (idxTracker zeros = " << cells_ - trackerCells << ")" << endl;
-  cerr << "largest bucket (" << bi << ") size= " << largestBucket << endl;
-  cerr << "smallest bucket (" << si << ") size= " << smallestBucket << endl;
-  cerr << "last bucket size= " << (int)bucketCnt[totBuckets_ - 1] <<
-       " (idxTracker last bucket size = " << (int)idxTracker_[totBuckets_ - 1] << ")" << endl;
-  cerr << "total buckets full = " << fullBuckets << endl;
-  cerr << "total collision errors= " << collisions_ << endl;
-  cerr << "high performance dictionary size= " << dict_.size() << endl;
-  cerr << "high performance dictionary MBs= " << hpDictMemUse() << endl;
-  cerr << "filter MBs= " << filter_->size() << endl;
-  cerr << "values MBs= " << values_->size() << endl;
+  std::cerr << "total cells= " << cells_ << std::endl;
+  std::cerr << "total buckets= " << totBuckets_ << std::endl;
+  std::cerr << "bucket range= " << (int)bucketRange_ << std::endl;
+  std::cerr << "fingerprint bits= " << cellWidth_ << std::endl;
+  std::cerr << "total cells set= " << totalCellsSet;
+  std::cerr << " (idxTracker set = " << trackerCells << ")" << std::endl;
+  std::cerr << "total zeroes=" << totalZeroes;
+  std::cerr << " (idxTracker zeros = " << cells_ - trackerCells << ")" << std::endl;
+  std::cerr << "largest bucket (" << bi << ") size= " << largestBucket << std::endl;
+  std::cerr << "smallest bucket (" << si << ") size= " << smallestBucket << std::endl;
+  std::cerr << "last bucket size= " << (int)bucketCnt[totBuckets_ - 1] <<
+       " (idxTracker last bucket size = " << (int)idxTracker_[totBuckets_ - 1] << ")" << std::endl;
+  std::cerr << "total buckets full = " << fullBuckets << std::endl;
+  std::cerr << "total collision errors= " << collisions_ << std::endl;
+  std::cerr << "high performance dictionary size= " << dict_.size() << std::endl;
+  std::cerr << "high performance dictionary MBs= " << hpDictMemUse() << std::endl;
+  std::cerr << "filter MBs= " << filter_->size() << std::endl;
+  std::cerr << "values MBs= " << values_->size() << std::endl;
   delete[] bucketCnt;
 }
 
@@ -406,7 +406,7 @@ bool PerfectHash<T>::update2(const wordID_t* IDs, const int len,
 {
   // check if key is in high perf. dictionary
   filterIdx = cells_ + 1;
-  string skey = hpDictKeyValue(IDs, len);
+  std::string skey = hpDictKeyValue(IDs, len);
   if((hpdAddr = dict_.find(skey)) != dict_.end()) {
     hpdAddr->second += value;
     return true;

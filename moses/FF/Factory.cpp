@@ -152,7 +152,7 @@ FeatureFactory
 ::DefaultSetup(F *feature)
 {
   StaticData &static_data = StaticData::InstanceNonConst();
-  const string &featureName = feature->GetScoreProducerDescription();
+  const std::string &featureName = feature->GetScoreProducerDescription();
   std::vector<float> weights = static_data.GetParameter()->GetWeights(featureName);
 
 
@@ -357,7 +357,7 @@ void FeatureRegistry::PrintFF() const
   std::cerr << "Available feature functions:" << std::endl;
   Map::const_iterator iter;
   for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
-    const string &ffName = iter->first;
+    const std::string &ffName = iter->first;
     ffs.push_back(ffName);
   }
 

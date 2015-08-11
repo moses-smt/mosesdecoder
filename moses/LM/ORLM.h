@@ -39,7 +39,7 @@ public:
     m_lm->clearCache(); // clear caches
   }
 
-  bool UpdateORLM(const std::vector<string>& ngram, const int value);
+  bool UpdateORLM(const std::vector<std::string>& ngram, const int value);
 protected:
   OnlineRLM<T>* m_lm;
   //MultiOnlineRLM<T>* m_lm;

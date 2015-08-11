@@ -12,7 +12,7 @@ void Vocab::InitSpecialWords()
   m_kOOVWord = InitSpecialWord(UNKNOWN_FACTOR);	// UNKNOWN_FACTOR also defined in ../typedef.h
 }
 
-const Word Vocab::InitSpecialWord( const string& word_str)
+const Word Vocab::InitSpecialWord( const std::string& word_str)
 {
   FactorList factors;
   factors.push_back(0); // store the special word string as the first factor

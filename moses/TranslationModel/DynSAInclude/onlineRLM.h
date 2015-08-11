@@ -26,18 +26,18 @@ public:
     vocab_(v), bAdapting_(false), order_(order), corpusSize_(0), alpha_(0) {
     UTIL_THROW_IF2(vocab_ == 0, "Vocab object not set");
     //instantiate quantizer class here
-    cache_ = new Cache<float>(8888.8888, 9999.9999); // unknown_value, null_value
+    cache_ = new randlm::Cache<float>(8888.8888, 9999.9999); // unknown_value, null_value
     alpha_ = new float[order_ + 1];
     for(count_t i = 0; i <= order_; ++i)
       alpha_[i] = i * log10(0.4);
-    cerr << "Initialzing auxillary bit filters...\n";
-    bPrefix_ = new BitFilter(this->cells_);
-    bHit_ = new BitFilter(this->cells_);
+    std::cerr << "Initialzing auxillary bit filters...\n";
+    bPrefix_ = new randlm::BitFilter(this->cells_);
+    bHit_ = new randlm::BitFilter(this->cells_);
   }
-  OnlineRLM(FileHandler* fin, count_t order):
+  OnlineRLM(Moses::FileHandler* fin, count_t order):
     PerfectHash<T>(fin), bAdapting_(true), order_(order), corpusSize_(0) {
     load(fin);
-    cache_ = new Cache<float>(8888.8888, 9999.9999); // unknown_value, null_value
+    cache_ = new randlm::Cache<float>(8888.8888, 9999.9999); // unknown_value, null_value
     alpha_ = new float[order_ + 1];
     for(count_t i = 0; i <= order_; ++i)
       alpha_[i] = i * log10(0.4);
@@ -52,14 +52,14 @@ public:
   }
   float getProb(const wordID_t* ngram, int len, const void** state);
   //float getProb2(const wordID_t* ngram, int len, const void** state);
-  bool insert(const std::vector<string>& ngram, const int value);
-  bool update(const std::vector<string>& ngram, const int value);
+  bool insert(const std::vector<std::string>& ngram, const int value);
+  bool update(const std::vector<std::string>& ngram, const int value);
   int query(const wordID_t* IDs, const int len);
-  int sbsqQuery(const std::vector<string>& ngram, int* len,
+  int sbsqQuery(const std::vector<std::string>& ngram, int* len,
                 bool bStrict = false);
   int sbsqQuery(const wordID_t* IDs, const int len, int* codes,
                 bool bStrict = false);
-  void remove(const std::vector<string>& ngram);
+  void remove(const std::vector<std::string>& ngram);
   count_t heurDelete(count_t num2del, count_t order = 5);
   uint64_t corpusSize() {
     return corpusSize_;
@@ -70,8 +70,8 @@ public:
   void clearCache() {
     if(cache_) cache_->clear();
   }
-  void save(FileHandler* fout);
-  void load(FileHandler* fin);
+  void save(Moses::FileHandler* fout);
+  void load(Moses::FileHandler* fin);
   void randDelete(int num2del);
   int countHits();
   int countPrefixes();
@@ -89,13 +89,13 @@ private:
   const count_t order_; // LM order
   uint64_t corpusSize_; // total training corpus size
   float* alpha_;  // backoff constant
-  Cache<float>* cache_;
-  BitFilter* bPrefix_;
-  BitFilter* bHit_;
+  randlm::Cache<float>* cache_;
+  randlm::BitFilter* bPrefix_;
+  randlm::BitFilter* bHit_;
 };
 
 template<typename T>
-bool OnlineRLM<T>::insert(const std::vector<string>& ngram, const int value)
+bool OnlineRLM<T>::insert(const std::vector<std::string>& ngram, const int value)
 {
   int len = ngram.size();
   wordID_t wrdIDs[len];
@@ -114,7 +114,7 @@ bool OnlineRLM<T>::insert(const std::vector<string>& ngram, const int value)
 }
 
 template<typename T>
-bool OnlineRLM<T>::update(const std::vector<string>& ngram, const int value)
+bool OnlineRLM<T>::update(const std::vector<std::string>& ngram, const int value)
 {
   int len = ngram.size();
   std::vector<wordID_t> wrdIDs(len);
@@ -160,14 +160,14 @@ template<typename T>
 bool OnlineRLM<T>::markPrefix(const wordID_t* IDs, const int len, bool bSet)
 {
   if(len <= 1) return true; // only do this for for ngrams with context
-  static Cache<int> pfCache(-1, -1); // local prefix cache
+  static randlm::Cache<int> pfCache(-1, -1); // local prefix cache
   int code(0);
   if(!pfCache.checkCacheNgram(IDs, len - 1, &code, NULL)) {
     hpdEntry_t hpdItr;
     uint64_t filterIndex(0);
     code = PerfectHash<T>::query(IDs, len - 1, hpdItr, filterIndex); // hash IDs[0..len-1]
     if(code == -1) { // encountered false positive in pipeline
-      cerr << "WARNING: markPrefix(). The O-RLM is *not* well-formed.\n";
+      std::cerr << "WARNING: markPrefix(). The O-RLM is *not* well-formed.\n";
       // add all prefixes or return false;
       return false;
     }
@@ -189,7 +189,7 @@ template<typename T>
 void OnlineRLM<T>::markQueried(const uint64_t& index)
 {
   bHit_->setBit(index);
-  //cerr << "filter[" << index << "] = " << this->filter_->read(index) << endl;
+  //std::cerr << "filter[" << index << "] = " << this->filter_->read(index) << std::endl;
 }
 
 template<typename T>
@@ -200,7 +200,7 @@ void OnlineRLM<T>::markQueried(hpdEntry_t& value)
 }
 
 template<typename T>
-void OnlineRLM<T>::remove(const std::vector<string>& ngram)
+void OnlineRLM<T>::remove(const std::vector<std::string>& ngram)
 {
   wordID_t IDs[ngram.size()];
   for(count_t i = 0; i < ngram.size(); ++i)
@@ -212,7 +212,7 @@ template<typename T>
 count_t OnlineRLM<T>::heurDelete(count_t num2del, count_t order)
 {
   count_t deleted = 0;
-  cout << "Deleting " << num2del << " of order "<< order << endl;
+  std::cout << "Deleting " << num2del << " of order "<< order << std::endl;
   // delete from filter first
   int full = *std::max_element(this->idxTracker_, this->idxTracker_
                                + this->totBuckets_);
@@ -234,14 +234,14 @@ count_t OnlineRLM<T>::heurDelete(count_t num2del, count_t order)
     }
   if(deleted < num2del) {
     // remove from hpd
-    cerr << "TODO! HPD deletions\n";
+    std::cerr << "TODO! HPD deletions\n";
   }
-  cerr << "Total deleted = " << deleted << endl;
+  std::cerr << "Total deleted = " << deleted << std::endl;
   return deleted;
 }
 
 template<typename T>
-int OnlineRLM<T>::sbsqQuery(const std::vector<string>& ngram, int* codes,
+int OnlineRLM<T>::sbsqQuery(const std::vector<std::string>& ngram, int* codes,
                             bool bStrict)
 {
   wordID_t IDs[ngram.size()];
@@ -372,7 +372,7 @@ int OnlineRLM<T>::countHits()
   iterate(this->dict_, itr)
   if((itr->second & this->hitMask_) != 0)
     ++hit;
-  cerr << "Hit count = " << hit << endl;
+  std::cerr << "Hit count = " << hit << std::endl;
   return hit;
 }
 
@@ -383,15 +383,15 @@ int OnlineRLM<T>::countPrefixes()
   for(uint64_t i = 0; i < this->cells_; ++i)
     if(bPrefix_->testBit(i)) ++pfx;
   //TODO::Handle hpdict prefix counts
-  cerr << "Prefix count (in filter) = " << pfx << endl;
+  std::cerr << "Prefix count (in filter) = " << pfx << std::endl;
   return pfx;
 }
 
 template<typename T>
 int OnlineRLM<T>::cleanUpHPD()
 {
-  cerr << "HPD size before = " << this->dict_.size() << endl;
-  std::vector<string> vDel, vtmp;
+  std::cerr << "HPD size before = " << this->dict_.size() << std::endl;
+  std::vector<std::string> vDel, vtmp;
   iterate(this->dict_, itr) {
     if(((itr->second & this->hitMask_) == 0) &&  // if not hit during testing
         (Utils::splitToStr(itr->first, vtmp, "¬") >= 3)) {  // and higher order ngram
@@ -400,14 +400,14 @@ int OnlineRLM<T>::cleanUpHPD()
   }
   iterate(vDel, vitr)
   this->dict_.erase(*vitr);
-  cerr << "HPD size after = " << this->dict_.size() << endl;
+  std::cerr << "HPD size after = " << this->dict_.size() << std::endl;
   return vDel.size();
 }
 
 template<typename T>
 void OnlineRLM<T>::clearMarkings()
 {
-  cerr << "clearing all event hits\n";
+  std::cerr << "clearing all event hits\n";
   bHit_->reset();
   count_t* value(0);
   iterate(this->dict_, itr) {
@@ -417,9 +417,9 @@ void OnlineRLM<T>::clearMarkings()
 }
 
 template<typename T>
-void OnlineRLM<T>::save(FileHandler* fout)
+void OnlineRLM<T>::save(Moses::FileHandler* fout)
 {
-  cerr << "Saving ORLM...\n";
+  std::cerr << "Saving ORLM...\n";
   // save vocab
   vocab_->Save(fout);
   fout->write((char*)&corpusSize_, sizeof(corpusSize_));
@@ -428,22 +428,22 @@ void OnlineRLM<T>::save(FileHandler* fout)
   bHit_->save(fout);
   // save everything else
   PerfectHash<T>::save(fout);
-  cerr << "Finished saving ORLM." << endl;
+  std::cerr << "Finished saving ORLM." << std::endl;
 }
 
 template<typename T>
-void OnlineRLM<T>::load(FileHandler* fin)
+void OnlineRLM<T>::load(Moses::FileHandler* fin)
 {
-  cerr << "Loading ORLM...\n";
+  std::cerr << "Loading ORLM...\n";
   // load vocab first
   vocab_ = new Moses::Vocab(fin);
   UTIL_THROW_IF2(vocab_ == 0, "Vocab object not set");
   fin->read((char*)&corpusSize_, sizeof(corpusSize_));
-  cerr << "\tCorpus size = " << corpusSize_ << endl;
+  std::cerr << "\tCorpus size = " << corpusSize_ << std::endl;
   fin->read((char*)&order_, sizeof(order_));
-  cerr << "\tModel order = " << order_ << endl;
-  bPrefix_ = new BitFilter(fin);
-  bHit_ = new BitFilter(fin);
+  std::cerr << "\tModel order = " << order_ << std::endl;
+  bPrefix_ = new randlm::BitFilter(fin);
+  bHit_ = new randlm::BitFilter(fin);
   // load everything else
   PerfectHash<T>::load(fin);
 }
@@ -451,7 +451,7 @@ void OnlineRLM<T>::load(FileHandler* fin)
 template<typename T>
 void OnlineRLM<T>::removeNonMarked()
 {
-  cerr << "deleting all unused events\n";
+  std::cerr << "deleting all unused events\n";
   int deleted(0);
   for(uint64_t i = 0; i < this->cells_; ++i) {
     if(!(bHit_->testBit(i) || bPrefix_->testBit(i))
@@ -461,7 +461,7 @@ void OnlineRLM<T>::removeNonMarked()
     }
   }
   deleted += cleanUpHPD();
-  cerr << "total removed from ORLM = " << deleted << endl;
+  std::cerr << "total removed from ORLM = " << deleted << std::endl;
 }
 
 /*
@@ -474,13 +474,13 @@ float OnlineRLM<T>::getProb2(const wordID_t* ngram, int len, const void** state)
   int* denom_codes[order_];
   int* num_codes[order_ + 1];
   int denom_found(0);
-  cerr << "length=" << len << endl;
+  std::cerr << "length=" << len << std::endl;
   // constrain cache queries using model assumptions
   int denom_len = cache_->getCache(ngram, len - 1, &denom_codes[0], &denom_found);
-  cerr << "denom_len = " << denom_len << endl;
+  std::cerr << "denom_len = " << denom_len << std::endl;
   int num_len = cache_->getCache(&ngram[len - denom_len - 1], denom_len + 1,
                                           &num_codes[0], &found);
-  cerr << "num_len= " << num_len << endl;
+  std::cerr << "num_len= " << num_len << std::endl;
   // keed reducing ngram size until both denominator and numerator are found
   // allowed to leave kUnknownCode in cache because we check for this.
   found = num_len; // guaranteed to be <= denom_len + 1

@@ -59,7 +59,7 @@ public:
   wordID_t GetWordID(const std::string& word, const FactorDirection& direction,
                      const FactorList& factors, bool isNonTerminal);
   wordID_t GetWordID(const Word& word);
-  wordID_t GetWordID(const string& word);
+  wordID_t GetWordID(const std::string& word);
   Word& GetWord(wordID_t id);
   inline wordID_t GetkOOVWordID() {
     return m_kOOVWordID;
@@ -115,7 +115,7 @@ protected:
   Word m_kEOSWord;	// end of sentence marker
   Word m_kOOVWord;	// <unk>
 
-  const Word InitSpecialWord( const string& type); // initialize special word like kBOS, kEOS
+  const Word InitSpecialWord( const std::string& type); // initialize special word like kBOS, kEOS
   void InitSpecialWords();
 
   Word2Id m_words2ids;	// map from words to word ids

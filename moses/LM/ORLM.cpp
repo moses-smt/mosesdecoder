@@ -8,7 +8,8 @@
 #include "moses/StaticData.h"
 #include "ORLM.h"
 
-using std::map;
+using namespace std;
+
 namespace Moses
 {
 bool LanguageModelORLM::Load(const std::string &filePath, FactorType factorType,

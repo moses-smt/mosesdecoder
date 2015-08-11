@@ -8,7 +8,6 @@
 #include "util/exception.hh"
 #include "util/random.hh"
 
-using namespace Moses;
 typedef uint64_t P;   // largest input range is 2^64
 
 //! @todo ask abby2
@@ -24,7 +23,7 @@ public:
   HashBase(float m, count_t H=1):m_((T)m), H_(H) {
     //cerr << "range = (0..." << m_ << "]" << endl;
   }
-  HashBase(FileHandler* fin) {
+  HashBase(Moses::FileHandler* fin) {
     load(fin);
   }
   virtual ~HashBase() {}
@@ -33,12 +32,12 @@ public:
   count_t size() {
     return H_;
   }
-  virtual void save(FileHandler* fout) {
+  virtual void save(Moses::FileHandler* fout) {
     UTIL_THROW_IF2(fout == 0, "Null file handle");
     fout->write((char*)&m_, sizeof(m_));
     fout->write((char*)&H_, sizeof(H_));
   }
-  virtual void load(FileHandler* fin) {
+  virtual void load(Moses::FileHandler* fin) {
     UTIL_THROW_IF2(fin == 0, "Null file handle");
     fin->read((char*)&m_, sizeof(m_));
     fin->read((char*)&H_, sizeof(H_));
@@ -54,7 +53,7 @@ public:
     HashBase<T>(m, H), pr_(pr) {
     initSeeds();
   }
-  UnivHash_linear(FileHandler* fin):
+  UnivHash_linear(Moses::FileHandler* fin):
     HashBase<T>(fin) {
     load(fin);
   }
@@ -67,8 +66,8 @@ public:
   T hash(const wordID_t* id, const int len, count_t h);
   T hash(const wordID_t id, const count_t pos,
          const T prevValue, count_t h);
-  void save(FileHandler* fout);
-  void load(FileHandler* fin);
+  void save(Moses::FileHandler* fout);
+  void load(Moses::FileHandler* fin);
 private:
   T** a_, **b_;
   P pr_;
@@ -92,7 +91,7 @@ public:
     else p_ = (P) pow(2,l);
     initSeeds();
   }
-  UnivHash_noPrimes(FileHandler* fin):
+  UnivHash_noPrimes(Moses::FileHandler* fin):
     HashBase<T>(fin) {
     load(fin);
   }
@@ -102,8 +101,8 @@ public:
   T hash(const char* s, count_t h);
   T hash(const wordID_t* id, const int len, count_t h);
   T hash(const P x, count_t h);
-  void save(FileHandler* fout);
-  void load(FileHandler* fin);
+  void save(Moses::FileHandler* fout);
+  void load(Moses::FileHandler* fin);
 private:
   count_t d_;  // l-k
   P p_, *a_;   // real-valued input range, storage
@@ -253,7 +252,7 @@ T UnivHash_noPrimes<T>::hash(const char* s, count_t h)
   return value % this->m_;
 }
 template <typename T>
-void UnivHash_noPrimes<T>::save(FileHandler* fout)
+void UnivHash_noPrimes<T>::save(Moses::FileHandler* fout)
 {
   HashBase<T>::save(fout);
   fout->write((char*)&p_, sizeof(p_));
@@ -263,7 +262,7 @@ void UnivHash_noPrimes<T>::save(FileHandler* fout)
   }
 }
 template <typename T>
-void UnivHash_noPrimes<T>::load(FileHandler* fin)
+void UnivHash_noPrimes<T>::load(Moses::FileHandler* fin)
 {
   a_ = new P[this->H_];
   // HashBase<T>::load(fin) already done in constructor
@@ -323,7 +322,7 @@ inline T UnivHash_linear<T>::hash(const wordID_t id, const count_t pos,
   return value % this->m_;
 }
 template <typename T>
-void UnivHash_linear<T>::save(FileHandler* fout)
+void UnivHash_linear<T>::save(Moses::FileHandler* fout)
 {
   // int bytes = sizeof(a_[0][0]);
   HashBase<T>::save(fout);
@@ -338,7 +337,7 @@ void UnivHash_linear<T>::save(FileHandler* fout)
   }
 }
 template <typename T>
-void UnivHash_linear<T>::load(FileHandler* fin)
+void UnivHash_linear<T>::load(Moses::FileHandler* fin)
 {
   // HashBase<T>::load(fin) already done in constructor
   fin->read((char*)&pr_, sizeof(pr_));

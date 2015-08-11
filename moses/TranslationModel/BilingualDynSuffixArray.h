@@ -113,7 +113,7 @@ public:
   ~BilingualDynSuffixArray();
   bool Load( const std::vector<FactorType>& inputFactors,
              const std::vector<FactorType>& outputTactors,
-             string source, string target, string alignments,
+             std::string source, std::string target, std::string alignments,
              const std::vector<float> &weight);
   // bool LoadTM( const std::vector<FactorType>& inputFactors,
   // 	     const std::vector<FactorType>& outputTactors,
@@ -122,7 +122,7 @@ public:
   void GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> >& target) const;
 
   void CleanUp(const InputType& source);
-  void addSntPair(string& source, string& target, string& alignment);
+  void addSntPair(std::string& source, std::string& target, std::string& alignment);
   std::pair<float,float>
   GatherCands(Phrase const& src, std::map<SAPhrase, std::vector<float> >& pstats) const;
 
@@ -158,7 +158,7 @@ private:
                  Vocab*);
   int LoadAlignments(InputFileStream& aligs);
   int LoadRawAlignments(InputFileStream& aligs);
-  int LoadRawAlignments(string& aligs);
+  int LoadRawAlignments(std::string& aligs);
 
   bool ExtractPhrases(const int&, const int&, const int&, std::vector<PhrasePair*>&, bool=false) const;
   SentenceAlignment GetSentenceAlignment(const int, bool=false) const;
