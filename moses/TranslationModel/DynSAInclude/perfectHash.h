@@ -377,7 +377,7 @@ void PerfectHash<T>::analyze()
   for(int i = 0; i < totBuckets_; ++i) {
     if(bucketCnt[i] != idxTracker_[i])
       std::cerr << "bucketCnt[" << i << "] = " << (int)bucketCnt[i] <<
-           "\tidxTracker_[" << i << "] = " << (int)idxTracker_[i] << std::endl;
+                "\tidxTracker_[" << i << "] = " << (int)idxTracker_[i] << std::endl;
   }
   std::cerr << "total cells= " << cells_ << std::endl;
   std::cerr << "total buckets= " << totBuckets_ << std::endl;
@@ -390,7 +390,7 @@ void PerfectHash<T>::analyze()
   std::cerr << "largest bucket (" << bi << ") size= " << largestBucket << std::endl;
   std::cerr << "smallest bucket (" << si << ") size= " << smallestBucket << std::endl;
   std::cerr << "last bucket size= " << (int)bucketCnt[totBuckets_ - 1] <<
-       " (idxTracker last bucket size = " << (int)idxTracker_[totBuckets_ - 1] << ")" << std::endl;
+            " (idxTracker last bucket size = " << (int)idxTracker_[totBuckets_ - 1] << ")" << std::endl;
   std::cerr << "total buckets full = " << fullBuckets << std::endl;
   std::cerr << "total collision errors= " << collisions_ << std::endl;
   std::cerr << "high performance dictionary size= " << dict_.size() << std::endl;
