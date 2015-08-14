@@ -110,8 +110,15 @@ def read_derivations(input):
         yield derivation, start_line_num
 
 
-# Extract the hypothesis components and return a Hypothesis object.
 def parse_line(s):
+    if s.startswith("Trans Opt"):
+        return parse_line_old_format(s)
+    else:
+        return parse_line_new_format(s)
+
+
+# Extract the hypothesis components and return a Hypothesis object.
+def parse_line_old_format(s):
     pattern = r"Trans Opt (\d+) " + \
               r"\[(\d+)\.\.(\d+)\]:" + \
               r"((?: \[\d+\.\.\d+\]=\S+  )+):" + \
@@ -145,6 +152,48 @@ def parse_line(s):
         ai = (int(match.group(1)), int(match.group(2)))
         hypothesis.nt_alignments.append(ai)
     return hypothesis
+
+
+# Extract the hypothesis components and return a Hypothesis object.
+def parse_line_new_format(s):
+    pattern = r"(\d+) \|\|\|" + \
+              r" (\[\S+\]) -> ((?:\S+ )+)\|\|\|" + \
+              r" (\[\S+\]) -> ((?:\S+ )+)\|\|\|" + \
+              r" ((?:\d+-\d+ )*)\|\|\|" + \
+              r"((?: \d+\.\.\d+)*)"
+    regexp = re.compile(pattern)
+    match = regexp.match(s)
+    if not match:
+        sys.stderr.write("%s\n" % s)
+    assert match
+    group = match.groups()
+    hypothesis = Hypothesis()
+    hypothesis.sentence_num = int(group[0]) + 1
+    spans = []
+    for pair in group[6].split():
+        match = re.match(r'(\d+)\.\.(\d+)', pair)
+        assert match
+        span = (int(match.group(1)), int(match.group(2)))
+        spans.append(span)
+    hypothesis.span = (spans[0][0], spans[-1][1])
+    hypothesis.source_symbol_info = []
+    for i, symbol in enumerate(group[2].split()):
+        hypothesis.source_symbol_info.append((spans[i], strip_brackets(symbol)))
+    hypothesis.target_lhs = strip_brackets(group[3])
+    hypothesis.target_rhs = group[4].split()
+    hypothesis.nt_alignments = []
+    for pair in group[5].split():
+        match = re.match(r'(\d+)-(\d+)', pair)
+        assert match
+        ai = (int(match.group(1)), int(match.group(2)))
+        hypothesis.nt_alignments.append(ai)
+    return hypothesis
+
+
+def strip_brackets(symbol):
+    if symbol[0] == '[' and symbol[-1] == ']':
+        return symbol[1:-1]
+    return symbol
 
 
 def tree_to_xml(tree):
