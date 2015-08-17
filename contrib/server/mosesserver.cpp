@@ -39,11 +39,11 @@ int main(int argc, char** argv)
 #include "moses/ThreadPool.h"
 #include "moses/TranslationTask.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 #if PT_UG
 #include "moses/TranslationModel/UG/mmsapt.h"
 #endif
 #include "moses/TreeInput.h"
-#include "moses/LM/ORLM.h"
 #include "moses/IOWrapper.h"
 
 #include <boost/foreach.hpp>
@@ -86,64 +86,11 @@ public:
     msg += "supports updates.";
     throw xmlrpc_c::fault(msg.c_str(), xmlrpc_c::fault::CODE_PARSE);
 #endif
-    if(add2ORLM_) {
-      //updateORLM();
-    }
     XVERBOSE(1,"Done inserting\n");
-    //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy);
-    map<string, xmlrpc_c::value> retData;
-    //*retvalP = xmlrpc_c::value_struct(retData);
-#ifndef PT_UG
-    pdf = 0;
-#endif
-    pdsa = 0;
     *retvalP = xmlrpc_c::value_string("Phrase table updated");
   }
   string source_, target_, alignment_;
-  bool bounded_, add2ORLM_;
-  /*
-  void updateORLM() {
-    // TODO(level101): this belongs in the language model, not in moseserver.cpp
-    vector<string> vl;
-    map<vector<string>, int> ngSet;
-    LMList lms = StaticData::Instance().GetLMList(); // get LM
-    LMList::const_iterator lmIter = lms.begin();
-    LanguageModel *lm = *lmIter;
-    LanguageModelORLM* orlm = static_cast<LanguageModelORLM*>(lm);
-    if(orlm == 0) {
-      cerr << "WARNING: Unable to add target sentence to ORLM\n";
-      return;
-    }
-    // break out new ngrams from sentence
-    const int ngOrder(orlm->GetNGramOrder());
-    const std::string sBOS = orlm->GetSentenceStart()->GetString().as_string();
-    const std::string sEOS = orlm->GetSentenceEnd()->GetString().as_string();
-    Utils::splitToStr(target_, vl, " ");
-    // insert BOS and EOS
-    vl.insert(vl.begin(), sBOS);
-    vl.insert(vl.end(), sEOS);
-    for(int j=0; j < vl.size(); ++j) {
-      int i = (j<ngOrder) ? 0 : j-ngOrder+1;
-      for(int t=j; t >= i; --t) {
-        vector<string> ngVec;
-        for(int s=t; s<=j; ++s) {
-          ngVec.push_back(vl[s]);
-          //cerr << vl[s] << " ";
-        }
-        ngSet[ngVec]++;
-        //cerr << endl;
-      }
-    }
-    // insert into LM in order from 1grams up (for LM well-formedness)
-    cerr << "Inserting " << ngSet.size() << " ngrams into ORLM...\n";
-    for(int i=1; i <= ngOrder; ++i) {
-      iterate(ngSet, it) {
-        if(it->first.size() == i)
-          orlm->UpdateORLM(it->first, it->second);
-      }
-    }
-  }
-  */
+  bool bounded_;
 
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");
@@ -163,8 +110,6 @@ public:
     XVERBOSE(1,"alignment = " << alignment_ << endl);
     si = params.find("bounded");
     bounded_ = (si != params.end());
-    si = params.find("updateORLM");
-    add2ORLM_ = (si != params.end());
   }
 };
 
