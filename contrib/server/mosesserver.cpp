@@ -38,7 +38,6 @@ int main(int argc, char** argv)
 #include "moses/StaticData.h"
 #include "moses/ThreadPool.h"
 #include "moses/TranslationTask.h"
-#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #if PT_UG
 #include "moses/TranslationModel/UG/mmsapt.h"
@@ -82,11 +81,10 @@ public:
     Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(PhraseDictionary::GetColl()[0]);
     pdsa->add(source_,target_,alignment_);
 #else
-    const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
-    PhraseDictionaryDynSuffixArray*
-      pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
-    cerr << "Inserting into address " << pdsa << endl;
-    pdsa->insertSnt(source_, target_, alignment_);
+    std::string msg;
+    msg  = "Server was compiled without a phrase table implementation that ";
+    msg += "supports updates.";
+    throw xmlrpc_c::fault(msg.c_str(), xmlrpc_c::fault::CODE_PARSE);
 #endif
     if(add2ORLM_) {
       //updateORLM();

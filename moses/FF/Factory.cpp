@@ -6,7 +6,6 @@
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
-#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryScope3.h"
 #include "moses/TranslationModel/PhraseDictionaryTransliteration.h"
 #include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
@@ -215,7 +214,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryMultiModel);
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
-  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
+  //  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(PhraseDictionaryTransliteration);
   MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
