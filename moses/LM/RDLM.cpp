@@ -241,9 +241,9 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
     // root of tree: score without context
     if (ancestor_heads.empty() || (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head)) {
       std::vector<int> ngram_head_null (static_head_null);
-      ngram_head_null.back() = lm_head->lookup_output_word(root->GetChildren()[0]->GetLabel().GetString(m_factorType).as_string());
+      ngram_head_null.back() = Factor2ID(root->GetChildren()[0]->GetLabel()[m_factorType], HEAD_OUTPUT);
       if (m_isPretermBackoff && ngram_head_null.back() == 0) {
-        ngram_head_null.back() = lm_head->lookup_output_word(root->GetLabel().GetString(m_factorType).as_string());
+        ngram_head_null.back() = Factor2ID(root->GetLabel()[m_factorType], HEAD_OUTPUT);
       }
       if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head) {
         std::vector<int>::iterator it = ngram_head_null.begin();
@@ -296,7 +296,7 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   }
 
   size_t context_up_nonempty = std::min(m_context_up, ancestor_heads.size());
-  const std::string & head_label = root->GetLabel().GetString(0).as_string();
+  const StringPiece & head_label = root->GetLabel().GetString(0);
   bool virtual_head = false;
   int reached_end = 0;
   int label_idx, label_idx_out;
@@ -308,13 +308,13 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
       reached_end = 2; // indicate that we've seen the last symbol of the RHS
     }
     // with 'full' binarization, direction is encoded in 2nd char
-    std::string clipped_label = (m_binarized == 3) ? head_label.substr(2,head_label.size()-2) : head_label.substr(1,head_label.size()-1);
-    label_idx = lm_label->lookup_input_word(clipped_label);
-    label_idx_out = lm_label->lookup_output_word(clipped_label);
+    StringPiece clipped_label = (m_binarized == 3) ? head_label.substr(2,head_label.size()-2) : head_label.substr(1,head_label.size()-1);
+    label_idx = lm_label->lookup_input_word(clipped_label.as_string());
+    label_idx_out = lm_label->lookup_output_word(clipped_label.as_string());
   } else {
     reached_end = 3; // indicate that we've seen first and last symbol of the RHS
-    label_idx = lm_label->lookup_input_word(head_label);
-    label_idx_out = lm_label->lookup_output_word(head_label);
+    label_idx = Factor2ID(root->GetLabel()[0], LABEL_INPUT);
+    label_idx_out = Factor2ID(root->GetLabel()[0], LABEL_OUTPUT);
   }
 
   int head_idx = (virtual_head && head_ids.first == static_dummy_head) ? static_label_null[offset_up_head+m_context_up-1] : head_ids.first;
@@ -597,8 +597,8 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
       child_ids = std::make_pair(static_dummy_head, static_dummy_head);
     }
 
-    labels[j] = lm_head->lookup_input_word(child->GetLabel().GetString(0).as_string());
-    labels_output[j] = lm_label->lookup_output_word(child->GetLabel().GetString(0).as_string());
+    labels[j] = Factor2ID(child->GetLabel()[0], LABEL_INPUT);
+    labels_output[j] = Factor2ID(child->GetLabel()[0], LABEL_OUTPUT);
     heads[j] = child_ids.first;
     heads_output[j] = child_ids.second;
     j++;
@@ -615,20 +615,77 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
 
 void RDLM::GetIDs(const Word & head, const Word & preterminal, std::pair<int,int> & IDs) const
 {
-  IDs.first = lm_head_base_instance_->lookup_input_word(head.GetString(m_factorType).as_string());
+  IDs.first = Factor2ID(head[m_factorType], HEAD_INPUT);
   if (m_isPretermBackoff && IDs.first == 0) {
-    IDs.first = lm_head_base_instance_->lookup_input_word(preterminal.GetString(0).as_string());
+    IDs.first = Factor2ID(preterminal[0], HEAD_INPUT);
   }
   if (m_sharedVocab) {
     IDs.second = IDs.first;
   } else {
-    IDs.second = lm_head_base_instance_->lookup_output_word(head.GetString(m_factorType).as_string());
+    IDs.second = Factor2ID(head[m_factorType], HEAD_OUTPUT);
     if (m_isPretermBackoff && IDs.second == 0) {
-      IDs.second = lm_head_base_instance_->lookup_output_word(preterminal.GetString(0).as_string());
+      IDs.second = Factor2ID(preterminal[0], HEAD_OUTPUT);
     }
   }
 }
 
+// map from moses factor to NPLM ID; use vectors as cache to avoid hash table lookups
+int RDLM::Factor2ID(const Factor * const factor, int model_type) const
+{
+  size_t ID = factor->GetId();
+  int ret;
+
+  std::vector<int>* cache = NULL;
+  switch(model_type) {
+    case LABEL_INPUT:
+      cache = &factor2id_label_input;
+      break;
+    case LABEL_OUTPUT:
+      cache = &factor2id_label_output;
+      break;
+    case HEAD_INPUT:
+      cache = &factor2id_head_input;
+      break;
+    case HEAD_OUTPUT:
+      cache = &factor2id_head_output;
+      break;
+  }
+
+  try {
+    ret = cache->at(ID);
+  } catch (const std::out_of_range& oor) {
+#ifdef WITH_THREADS //need to resize cache; write lock
+    m_accessLock.unlock_shared();
+    m_accessLock.lock();
+#endif
+    size_t old_size = cache->size();
+    cache->resize(ID*2, -1);
+#ifdef WITH_THREADS //go back to read lock
+    m_accessLock.unlock();
+    m_accessLock.lock_shared();
+#endif
+    ret = -1;
+  }
+  if (ret == -1) {
+    switch(model_type) {
+      case LABEL_INPUT:
+        ret = lm_label_base_instance_->lookup_input_word(factor->GetString().as_string());
+        break;
+      case LABEL_OUTPUT:
+        ret = lm_label_base_instance_->lookup_output_word(factor->GetString().as_string());
+        break;
+      case HEAD_INPUT:
+        ret = lm_head_base_instance_->lookup_input_word(factor->GetString().as_string());
+        break;
+      case HEAD_OUTPUT:
+        ret = lm_head_base_instance_->lookup_output_word(factor->GetString().as_string());
+        break;
+    }
+    (*cache)[ID] = ret;
+  }
+
+  return ret;
+}
 
 void RDLM::PrintInfo(std::vector<int> &ngram, nplm::neuralTM* lm) const
 {
@@ -767,13 +824,31 @@ FFState* RDLM::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
     //hash of all boundary symbols (symbols with incomplete context); trees with same hash share state for cube pruning.
     size_t boundary_hash = 0;
     if (!m_rerank) {
+      { //lock scope
+#ifdef WITH_THREADS
+      //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+      m_accessLock.lock_shared();
+#endif
       Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+#ifdef WITH_THREADS
+      m_accessLock.unlock_shared();
+#endif
+      }
       accumulator->PlusEquals(ff_idx, score[0] + score[1]);
       accumulator->PlusEquals(ff_idx+1, score[2] + score[3]);
     }
     mytree->Combine(previous_trees);
     if (m_rerank && full_sentence) {
+      { //lock scope
+#ifdef WITH_THREADS
+      //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+      m_accessLock.lock_shared();
+#endif
       Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+#ifdef WITH_THREADS
+      m_accessLock.unlock_shared();
+#endif
+      }
       accumulator->PlusEquals(ff_idx, score[0] + score[1]);
       accumulator->PlusEquals(ff_idx+1, score[2] + score[3]);
     }

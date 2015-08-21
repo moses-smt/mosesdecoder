@@ -8,6 +8,11 @@
 #include <boost/thread/tss.hpp>
 #include <boost/array.hpp>
 
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#endif
+
+
 // relational dependency language model, described in:
 // Sennrich, Rico (2015). Modelling and Optimizing on Syntactic N-Grams for Statistical Machine Translation. Transactions of the Association for Computational Linguistics.
 // see 'scripts/training/rdlm' for training scripts
@@ -106,6 +111,20 @@ class RDLM : public StatefulFeatureFunction
 
   FactorType m_factorType;
 
+  static const int LABEL_INPUT = 0;
+  static const int LABEL_OUTPUT = 1;
+  static const int HEAD_INPUT = 2;
+  static const int HEAD_OUTPUT = 3;
+  mutable std::vector<int> factor2id_label_input;
+  mutable std::vector<int> factor2id_label_output;
+  mutable std::vector<int> factor2id_head_input;
+  mutable std::vector<int> factor2id_head_output;
+
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_accessLock;
+#endif
+
 public:
   RDLM(const std::string &line)
     : StatefulFeatureFunction(2, line)
@@ -142,6 +161,7 @@ public:
   bool GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs) const;
   void GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, const nplm::neuralTM *lm_head, const nplm::neuralTM *lm_labels, std::vector<int> & heads, std::vector<int> & labels, std::vector<int> & heads_output, std::vector<int> & labels_output) const;
   void GetIDs(const Word & head, const Word & preterminal, std::pair<int,int> & IDs) const;
+  int Factor2ID(const Factor * const factor, int model_type) const;
   void ScoreFile(std::string &path); //for debugging
   void PrintInfo(std::vector<int> &ngram, nplm::neuralTM* lm) const; //for debugging
 
