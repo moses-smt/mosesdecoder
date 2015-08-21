@@ -637,18 +637,18 @@ int RDLM::Factor2ID(const Factor * const factor, int model_type) const
 
   std::vector<int>* cache = NULL;
   switch(model_type) {
-    case LABEL_INPUT:
-      cache = &factor2id_label_input;
-      break;
-    case LABEL_OUTPUT:
-      cache = &factor2id_label_output;
-      break;
-    case HEAD_INPUT:
-      cache = &factor2id_head_input;
-      break;
-    case HEAD_OUTPUT:
-      cache = &factor2id_head_output;
-      break;
+  case LABEL_INPUT:
+    cache = &factor2id_label_input;
+    break;
+  case LABEL_OUTPUT:
+    cache = &factor2id_label_output;
+    break;
+  case HEAD_INPUT:
+    cache = &factor2id_head_input;
+    break;
+  case HEAD_OUTPUT:
+    cache = &factor2id_head_output;
+    break;
   }
 
   try {
@@ -668,18 +668,18 @@ int RDLM::Factor2ID(const Factor * const factor, int model_type) const
   }
   if (ret == -1) {
     switch(model_type) {
-      case LABEL_INPUT:
-        ret = lm_label_base_instance_->lookup_input_word(factor->GetString().as_string());
-        break;
-      case LABEL_OUTPUT:
-        ret = lm_label_base_instance_->lookup_output_word(factor->GetString().as_string());
-        break;
-      case HEAD_INPUT:
-        ret = lm_head_base_instance_->lookup_input_word(factor->GetString().as_string());
-        break;
-      case HEAD_OUTPUT:
-        ret = lm_head_base_instance_->lookup_output_word(factor->GetString().as_string());
-        break;
+    case LABEL_INPUT:
+      ret = lm_label_base_instance_->lookup_input_word(factor->GetString().as_string());
+      break;
+    case LABEL_OUTPUT:
+      ret = lm_label_base_instance_->lookup_output_word(factor->GetString().as_string());
+      break;
+    case HEAD_INPUT:
+      ret = lm_head_base_instance_->lookup_input_word(factor->GetString().as_string());
+      break;
+    case HEAD_OUTPUT:
+      ret = lm_head_base_instance_->lookup_output_word(factor->GetString().as_string());
+      break;
     }
     (*cache)[ID] = ret;
   }
@@ -824,14 +824,15 @@ FFState* RDLM::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
     //hash of all boundary symbols (symbols with incomplete context); trees with same hash share state for cube pruning.
     size_t boundary_hash = 0;
     if (!m_rerank) {
-      { //lock scope
+      {
+        //lock scope
 #ifdef WITH_THREADS
-      //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
-      m_accessLock.lock_shared();
+        //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+        m_accessLock.lock_shared();
 #endif
-      Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+        Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 #ifdef WITH_THREADS
-      m_accessLock.unlock_shared();
+        m_accessLock.unlock_shared();
 #endif
       }
       accumulator->PlusEquals(ff_idx, score[0] + score[1]);
@@ -839,14 +840,15 @@ FFState* RDLM::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
     }
     mytree->Combine(previous_trees);
     if (m_rerank && full_sentence) {
-      { //lock scope
+      {
+        //lock scope
 #ifdef WITH_THREADS
-      //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
-      m_accessLock.lock_shared();
+        //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+        m_accessLock.lock_shared();
 #endif
-      Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+        Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
 #ifdef WITH_THREADS
-      m_accessLock.unlock_shared();
+        m_accessLock.unlock_shared();
 #endif
       }
       accumulator->PlusEquals(ff_idx, score[0] + score[1]);
