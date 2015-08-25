@@ -25,6 +25,30 @@ class neuralTM;
 namespace Moses
 {
 
+namespace rdlm {
+
+  // we re-use some short-lived objects to reduce the number of allocations;
+  // each thread gets its own instance to prevent collision
+  // [could be replaced with thread_local keyword in C++11]
+  class ThreadLocal
+  {
+  public:
+    std::vector<int> ancestor_heads;
+    std::vector<int> ancestor_labels;
+    std::vector<int> ngram;
+    std::vector<int> heads;
+    std::vector<int> labels;
+    std::vector<int> heads_output;
+    std::vector<int> labels_output;
+    std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > stack;
+    nplm::neuralTM* lm_head;
+    nplm::neuralTM* lm_label;
+
+    ThreadLocal(nplm::neuralTM *lm_head_base_instance_, nplm::neuralTM *lm_label_base_instance_, bool normalizeHeadLM, bool normalizeLabelLM, int cacheSize);
+    ~ThreadLocal();
+  };
+}
+
 class RDLMState : public TreeState
 {
   float m_approx_head; //score that was approximated due to lack of context
@@ -62,10 +86,9 @@ class RDLM : public StatefulFeatureFunction
   typedef std::map<InternalTree*,TreePointer> TreePointerMap;
 
   nplm::neuralTM* lm_head_base_instance_;
-  mutable boost::thread_specific_ptr<nplm::neuralTM> lm_head_backend_;
-
   nplm::neuralTM* lm_label_base_instance_;
-  mutable boost::thread_specific_ptr<nplm::neuralTM> lm_label_backend_;
+
+  mutable boost::thread_specific_ptr<rdlm::ThreadLocal> thread_objects_backend_;
 
   std::string m_glueSymbolString;
   Word dummy_head;
@@ -157,9 +180,9 @@ public:
     return new RDLMState(TreePointer(), 0, 0, 0);
   }
 
-  void Score(InternalTree* root, const TreePointerMap & back_pointers, boost::array<float,4> &score, std::vector<int> &ancestor_heads, std::vector<int> &ancestor_labels, size_t &boundary_hash, int num_virtual = 0, int rescoring_levels = 0) const;
+  void Score(InternalTree* root, const TreePointerMap & back_pointers, boost::array<float,4> &score, size_t &boundary_hash, rdlm::ThreadLocal &thread_objects, int num_virtual = 0, int rescoring_levels = 0) const;
   bool GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs) const;
-  void GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, const nplm::neuralTM *lm_head, const nplm::neuralTM *lm_labels, std::vector<int> & heads, std::vector<int> & labels, std::vector<int> & heads_output, std::vector<int> & labels_output) const;
+  void GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, rdlm::ThreadLocal &thread_objects) const;
   void GetIDs(const Word & head, const Word & preterminal, std::pair<int,int> & IDs) const;
   int Factor2ID(const Factor * const factor, int model_type) const;
   void ScoreFile(std::string &path); //for debugging
@@ -207,14 +230,15 @@ public:
     InternalTree* current;
     const TreePointerMap & back_pointers;
     bool binarized;
-    std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > stack;
+    std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > &stack;
 
   public:
-    UnbinarizedChildren(InternalTree* root, const TreePointerMap & pointers, bool binary):
+    UnbinarizedChildren(InternalTree* root, const TreePointerMap & pointers, bool binary, std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > & persistent_stack):
       current(root),
       back_pointers(pointers),
-      binarized(binary) {
-      stack.reserve(10);
+      binarized(binary),
+      stack(persistent_stack) {
+      stack.resize(0);
       _end = current->GetChildren().end();
       iter = current->GetChildren().begin();
       // expand virtual node
