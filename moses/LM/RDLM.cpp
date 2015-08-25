@@ -421,7 +421,7 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   if (m_binarized) {
     num_children = 0;
     UnbinarizedChildren real_children(root, back_pointers, m_binarized, thread_objects.stack);
-    for (std::vector<TreePointer>::const_iterator it = real_children.begin(); it != real_children.end(); it = ++real_children) {
+    for (std::vector<TreePointer>::const_iterator it = real_children.begin(); !real_children.ended(); it = ++real_children) {
       num_children++;
     }
   }
@@ -590,7 +590,7 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
   UnbinarizedChildren real_children(root, back_pointers, m_binarized, thread_objects.stack);
 
   // extract head words / labels
-  for (std::vector<TreePointer>::const_iterator itx = real_children.begin(); itx != real_children.end(); itx = ++real_children) {
+  for (std::vector<TreePointer>::const_iterator itx = real_children.begin(); !real_children.ended(); itx = ++real_children) {
     if ((*itx)->IsTerminal()) {
       std::cerr << "non-terminal node " << root->GetLabel() << " has a mix of terminal and non-terminal children. This shouldn't happen..." << std::endl;
       std::cerr << "children: ";

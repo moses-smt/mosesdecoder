@@ -226,7 +226,7 @@ public:
   private:
     std::vector<TreePointer>::const_iterator iter;
     std::vector<TreePointer>::const_iterator _begin;
-    std::vector<TreePointer>::const_iterator _end;
+    bool _ended;
     InternalTree* current;
     const TreePointerMap & back_pointers;
     bool binarized;
@@ -239,7 +239,7 @@ public:
       binarized(binary),
       stack(persistent_stack) {
       stack.resize(0);
-      _end = current->GetChildren().end();
+      _ended = current->GetChildren().empty();
       iter = current->GetChildren().begin();
       // expand virtual node
       while (binarized && !(*iter)->GetLabel().GetString(0).empty() && (*iter)->GetLabel().GetString(0).data()[0] == '^') {
@@ -258,8 +258,8 @@ public:
     std::vector<TreePointer>::const_iterator begin() const {
       return _begin;
     }
-    std::vector<TreePointer>::const_iterator end() const {
-      return _end;
+    bool ended() const {
+      return _ended;
     }
 
     std::vector<TreePointer>::const_iterator operator++() {
@@ -274,7 +274,8 @@ public:
             break;
           }
         }
-        if (iter == _end) {
+        if (iter == current->GetChildren().end()) {
+          _ended = true;
           return iter;
         }
       }
