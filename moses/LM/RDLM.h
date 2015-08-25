@@ -25,28 +25,29 @@ class neuralTM;
 namespace Moses
 {
 
-namespace rdlm {
+namespace rdlm
+{
 
-  // we re-use some short-lived objects to reduce the number of allocations;
-  // each thread gets its own instance to prevent collision
-  // [could be replaced with thread_local keyword in C++11]
-  class ThreadLocal
-  {
-  public:
-    std::vector<int> ancestor_heads;
-    std::vector<int> ancestor_labels;
-    std::vector<int> ngram;
-    std::vector<int> heads;
-    std::vector<int> labels;
-    std::vector<int> heads_output;
-    std::vector<int> labels_output;
-    std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > stack;
-    nplm::neuralTM* lm_head;
-    nplm::neuralTM* lm_label;
+// we re-use some short-lived objects to reduce the number of allocations;
+// each thread gets its own instance to prevent collision
+// [could be replaced with thread_local keyword in C++11]
+class ThreadLocal
+{
+public:
+  std::vector<int> ancestor_heads;
+  std::vector<int> ancestor_labels;
+  std::vector<int> ngram;
+  std::vector<int> heads;
+  std::vector<int> labels;
+  std::vector<int> heads_output;
+  std::vector<int> labels_output;
+  std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > stack;
+  nplm::neuralTM* lm_head;
+  nplm::neuralTM* lm_label;
 
-    ThreadLocal(nplm::neuralTM *lm_head_base_instance_, nplm::neuralTM *lm_label_base_instance_, bool normalizeHeadLM, bool normalizeLabelLM, int cacheSize);
-    ~ThreadLocal();
-  };
+  ThreadLocal(nplm::neuralTM *lm_head_base_instance_, nplm::neuralTM *lm_label_base_instance_, bool normalizeHeadLM, bool normalizeLabelLM, int cacheSize);
+  ~ThreadLocal();
+};
 }
 
 class RDLMState : public TreeState

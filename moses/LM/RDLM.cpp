@@ -13,20 +13,21 @@ namespace Moses
 
 namespace rdlm
 {
-  ThreadLocal::ThreadLocal(nplm::neuralTM *lm_head_base_instance_, nplm::neuralTM *lm_label_base_instance_, bool normalizeHeadLM, bool normalizeLabelLM, int cacheSize)
-  {
-    lm_head = new nplm::neuralTM(*lm_head_base_instance_);
-    lm_label = new nplm::neuralTM(*lm_label_base_instance_);
-    lm_head->set_normalization(normalizeHeadLM);
-    lm_label->set_normalization(normalizeLabelLM);
-    lm_head->set_cache(cacheSize);
-    lm_label->set_cache(cacheSize);
-  }
+ThreadLocal::ThreadLocal(nplm::neuralTM *lm_head_base_instance_, nplm::neuralTM *lm_label_base_instance_, bool normalizeHeadLM, bool normalizeLabelLM, int cacheSize)
+{
+  lm_head = new nplm::neuralTM(*lm_head_base_instance_);
+  lm_label = new nplm::neuralTM(*lm_label_base_instance_);
+  lm_head->set_normalization(normalizeHeadLM);
+  lm_label->set_normalization(normalizeLabelLM);
+  lm_head->set_cache(cacheSize);
+  lm_label->set_cache(cacheSize);
+}
 
-  ThreadLocal::~ThreadLocal() {
-    delete lm_head;
-    delete lm_label;
-  }
+ThreadLocal::~ThreadLocal()
+{
+  delete lm_head;
+  delete lm_label;
+}
 
 }
 
@@ -117,18 +118,18 @@ void RDLM::Load()
 //    TreePointer mytree3 (new InternalTree("[ADJA europäische]"));
 //    TreePointer mytree4 (new InternalTree("[pred [det [ART die]] [attr [adv [adv [PTKNEG nicht]] [ADV fast]] [ADJA neue]] [attr [ADJA]] [NN Zeit]]]"));
 //    TreePointer mytree2 (new InternalTree("[vroot [subj [PPER ich]] [VAFIN bin] [pred]]"));
-// 
+//
 //     rdlm::ThreadLocal *thread_objects = thread_objects_backend_.get();
 //     if (!thread_objects) {
 //       thread_objects = new rdlm::ThreadLocal(lm_head_base_instance_, lm_label_base_instance_, m_normalizeHeadLM, m_normalizeLabelLM, m_cacheSize);
 //       thread_objects_backend_.reset(thread_objects);
 //     }
-// 
+//
 // #ifdef WITH_THREADS
 //     //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
 //     m_accessLock.lock_shared();
 // #endif
-// 
+//
 //    size_t boundary_hash(0);
 //    boost::array<float, 4> score;
 //    score.fill(0);
@@ -137,56 +138,56 @@ void RDLM::Load()
 //    TreePointerMap back_pointers = AssociateLeafNTs(mytree3.get(), previous_trees);
 //    Score(mytree3.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    previous_trees.push_back(mytree3);
 //    back_pointers = AssociateLeafNTs(mytree4.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree4->GetString() << std::endl;
 //    Score(mytree4.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    mytree4->Combine(previous_trees);
 //    previous_trees.clear();
 //    previous_trees.push_back(mytree4);
 //    back_pointers = AssociateLeafNTs(mytree2.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree2->GetString() << std::endl;
-// 
+//
 //    score[1] = 0;
 //    score[3] = 0;
 //    Score(mytree2.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    score[0] = 0;
 //    score[1] = 0;
 //    score[2] = 0;
 //    score[3] = 0;
 //    std::cerr << "scoring: " << mytree->GetString() << std::endl;
-// 
+//
 //    Score(mytree.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 // #ifdef WITH_THREADS
 //       m_accessLock.unlock_shared();
 // #endif
 //   }
-// 
+//
 //   {
 //    std::cerr << "BINARIZED\n\n";
 //    TreePointer mytree (new InternalTree("[vroot [subj [PPER ich]] [^vroot [VAFIN bin] [pred [det [ART die]] [^pred [attr [adv [adv [PTKNEG nicht]] [ADV fast]] [ADJA neue]] [^pred [attr [ADJA europäische]] [NN Zeit]]]]]]"));
 //    TreePointer mytree3 (new InternalTree("[ADJA europäische]"));
 //    TreePointer mytree4 (new InternalTree("[^pred [attr [adv [adv [PTKNEG nicht]] [ADV fast]] [ADJA neue]] [^pred [attr [ADJA]] [NN Zeit]]]"));
 //    TreePointer mytree2 (new InternalTree("[vroot [subj [PPER ich]] [^vroot [VAFIN bin] [pred [det [ART die]] [^pred]]]]"));
-// 
+//
 //    rdlm::ThreadLocal *thread_objects = thread_objects_backend_.get();
 //     if (!thread_objects) {
 //       thread_objects = new rdlm::ThreadLocal(lm_head_base_instance_, lm_label_base_instance_, m_normalizeHeadLM, m_normalizeLabelLM, m_cacheSize);
 //       thread_objects_backend_.reset(thread_objects);
 //     }
-// 
+//
 // #ifdef WITH_THREADS
 //     //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
 //     m_accessLock.lock_shared();
 // #endif
-// 
+//
 //    size_t boundary_hash(0);
 //    boost::array<float, 4> score;
 //    score.fill(0);
@@ -195,37 +196,37 @@ void RDLM::Load()
 //    TreePointerMap back_pointers = AssociateLeafNTs(mytree3.get(), previous_trees);
 //    Score(mytree3.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    previous_trees.push_back(mytree3);
 //    back_pointers = AssociateLeafNTs(mytree4.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree4->GetString() << std::endl;
 //    Score(mytree4.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    mytree4->Combine(previous_trees);
 //    previous_trees.clear();
 //    previous_trees.push_back(mytree4);
 //    back_pointers = AssociateLeafNTs(mytree2.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree2->GetString() << std::endl;
-// 
+//
 //    score[1] = 0;
 //    score[3] = 0;
 //    Score(mytree2.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 //    score[0] = 0;
 //    score[1] = 0;
 //    score[2] = 0;
 //    score[3] = 0;
 //    std::cerr << "scoring: " << mytree->GetString() << std::endl;
-// 
+//
 //    Score(mytree.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
-// 
+//
 // #ifdef WITH_THREADS
 //       m_accessLock.unlock_shared();
 // #endif
-// 
+//
 //   }
 //    UTIL_THROW2("Finished");
 
