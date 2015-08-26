@@ -573,7 +573,7 @@ void Manager::OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothe
 void Manager::OutputPassthroughInformation(std::ostream &out, const Hypothesis *hypo) const
 {
   const std::string passthrough = hypo->GetManager().GetSource().GetPassthroughInformation();
-	out << passthrough;
+  out << passthrough;
 }
 // end of put back
 
@@ -1516,12 +1516,12 @@ void Manager::OutputBest(OutputCollector *collector)  const
           out << translationId << " ";
         }
 
-		// VN : I put back the code for OutputPassthroughInformation
+        // VN : I put back the code for OutputPassthroughInformation
         if (staticData.IsPassthroughEnabled()) {
           OutputPassthroughInformation(out, bestHypo);
         }
-		// end of add back
-		
+        // end of add back
+
         if (staticData.GetReportSegmentation() == 2) {
           GetOutputLanguageModelOrder(out, bestHypo);
         }
