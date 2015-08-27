@@ -20,6 +20,9 @@ class ChainPositions : public util::FixedArray<util::stream::ChainPosition> {
   public:
     ChainPositions() {}
 
+    explicit ChainPositions(std::size_t bound) :
+      util::FixedArray<util::stream::ChainPosition>(bound) {}
+
     void Init(Chains &chains);
 
     explicit ChainPositions(Chains &chains) {
@@ -88,16 +91,6 @@ template <class T> class GenericStreams : public util::FixedArray<T> {
   public:
     GenericStreams() {}
 
-    // This puts a dummy T at the beginning (useful to algorithms that need to reference something at the beginning).
-    void InitWithDummy(const ChainPositions &positions) {
-      P::Init(positions.size() + 1);
-      new (P::end()) T(); // use "placement new" syntax to initalize T in an already-allocated memory location
-      P::Constructed();
-      for (const util::stream::ChainPosition *i = positions.begin(); i != positions.end(); ++i) {
-        P::push_back(*i);
-      }
-    }
-
     // Limit restricts to positions[0,limit)
     void Init(const ChainPositions &positions, std::size_t limit) {
       P::Init(limit);
@@ -111,6 +104,10 @@ template <class T> class GenericStreams : public util::FixedArray<T> {
 
     GenericStreams(const ChainPositions &positions) {
       Init(positions);
+    }
+
+    void Init(std::size_t amount) {
+      P::Init(amount);
     }
 };
 

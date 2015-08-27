@@ -92,8 +92,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
         Key got(i->GetKey());
         if (equal_(got, t.GetKey())) { out = i; return true; }
         if (equal_(got, invalid_)) {
-          UTIL_THROW_IF(++entries_ >= buckets_, ProbingSizeException, 
-			"Hash table with " << buckets_ << " buckets is full.");
+          UTIL_THROW_IF(++entries_ >= buckets_, ProbingSizeException, "Hash table with " << buckets_ << " buckets is full.");
           *i = t;
           out = i;
           return false;

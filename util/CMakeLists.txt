@@ -13,34 +13,37 @@ cmake_minimum_required(VERSION 2.8.8)
 # This CMake file was created by Lane Schwartz <dowobeha@gmail.com>
 
 
-set(KENLM_MAX_ORDER 6)
-
-add_definitions(-DKENLM_MAX_ORDER=${KENLM_MAX_ORDER})
-
-
 # Explicitly list the source files for this subdirectory
 #
 # If you add any source files to this subdirectory
 #    that should be included in the kenlm library,
 #        (this excludes any unit test files)
 #    you should add them to the following list:
-set(KENLM_SOURCE 
-	bhiksha.cc
-	binary_format.cc
-	config.cc
-	lm_exception.cc
-	model.cc
-	quantize.cc
-	read_arpa.cc
-	search_hashed.cc
-	search_trie.cc
-	sizes.cc
-	trie.cc
-	trie_sort.cc
-	value_build.cc
-	virtual_interface.cc
-	vocab.cc
-)
+#
+# Because we do not set PARENT_SCOPE in the following definition,
+#    CMake files in the parent directory won't be able to access this variable.
+#
+set(KENLM_UTIL_SOURCE 
+		bit_packing.cc 
+		ersatz_progress.cc 
+		exception.cc 
+		file.cc 
+		file_piece.cc 
+		float_to_string.cc
+		integer_to_string.cc
+		mmap.cc 
+		murmur_hash.cc 
+		parallel_read.cc
+		pool.cc 
+		read_compressed.cc 
+		scoped.cc 
+		string_piece.cc 
+		usage.cc
+	)
+
+# This directory has children that need to be processed
+add_subdirectory(double-conversion)
+add_subdirectory(stream)
 
 
 # Group these objects together for later use. 
@@ -48,57 +51,30 @@ set(KENLM_SOURCE
 # Given add_library(foo OBJECT ${my_foo_sources}),
 # refer to these objects as $<TARGET_OBJECTS:foo>
 #
-add_library(kenlm OBJECT ${KENLM_SOURCE})
-
-# This directory has children that need to be processed
-add_subdirectory(builder)
-add_subdirectory(common)
-add_subdirectory(filter)
+add_library(kenlm_util OBJECT ${KENLM_UTIL_DOUBLECONVERSION_SOURCE} ${KENLM_UTIL_STREAM_SOURCE} ${KENLM_UTIL_SOURCE})
 
 
 
-# Explicitly list the executable files to be compiled
-set(EXE_LIST
-  query
-  fragment
-  build_binary
-)
-
-# Iterate through the executable list   
-foreach(exe ${EXE_LIST})
-
-  # Compile the executable, linking against the requisite dependent object files
-  add_executable(${exe} ${exe}_main.cc $<TARGET_OBJECTS:kenlm> $<TARGET_OBJECTS:kenlm_util>)
-
-  # Link the executable against boost
-  target_link_libraries(${exe} ${Boost_LIBRARIES})
-
-  # Group executables together
-  set_target_properties(${exe} PROPERTIES FOLDER executables)
-
-# End for loop
-endforeach(exe)
-
-
-# Install the executable files
-install(TARGETS ${EXE_LIST} DESTINATION bin)
-
-
-
+# Only compile and run unit tests if tests should be run
 if(BUILD_TESTING)
 
     # Explicitly list the Boost test files to be compiled
     set(KENLM_BOOST_TESTS_LIST
-      left_test
-      model_test
-      partial_test
+      bit_packing_test
+      file_piece_test
+      joint_sort_test
+      multi_intersection_test
+      probing_hash_table_test
+      read_compressed_test
+      sorted_uniform_test
+      tokenize_piece_test
     )
 
     # Iterate through the Boost tests list   
     foreach(test ${KENLM_BOOST_TESTS_LIST})
 
       # Compile the executable, linking against the requisite dependent object files
-      add_executable(${test} ${test}.cc $<TARGET_OBJECTS:kenlm> $<TARGET_OBJECTS:kenlm_util>)
+      add_executable(${test} ${test}.cc $<TARGET_OBJECTS:kenlm_util>)
 
       # Require the following compile flag
       set_target_properties(${test} PROPERTIES COMPILE_FLAGS -DBOOST_TEST_DYN_LINK)
@@ -106,18 +82,16 @@ if(BUILD_TESTING)
       # Link the executable against boost
       target_link_libraries(${test} ${Boost_LIBRARIES})
 
-      # model_test requires an extra command line parameter
-      if ("${test}" STREQUAL "model_test")
+      # file_piece_test requires an extra command line parameter
+      if ("${test}" STREQUAL "file_piece_test")
         set(test_params 
-            ${CMAKE_CURRENT_SOURCE_DIR}/test.arpa 
-            ${CMAKE_CURRENT_SOURCE_DIR}/test_nounk.arpa
+            ${CMAKE_CURRENT_SOURCE_DIR}/file_piece.cc
         )
       else()
         set(test_params 
-            ${CMAKE_CURRENT_SOURCE_DIR}/test.arpa
         )      
       endif()
-      
+            
       # Specify command arguments for how to run each unit test
       #
       # Assuming that foo was defined via add_executable(foo ...),
@@ -128,12 +102,8 @@ if(BUILD_TESTING)
 
       # Group unit tests together
       set_target_properties(${test} PROPERTIES FOLDER "unit_tests")
-      
+
     # End for loop
     endforeach(test)
 
 endif()
-
-
-
-
