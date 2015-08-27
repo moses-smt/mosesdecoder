@@ -507,7 +507,6 @@ bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b)
 void getLatticeMBRNBest(const Manager& manager, const TrellisPathList& nBestList,
                         vector<LatticeMBRSolution>& solutions, size_t n)
 {
-  const StaticData& staticData = StaticData::Instance();
   std::map < int, bool > connected;
   std::vector< const Hypothesis *> connectedList;
   map<Phrase, float> ngramPosteriors;
