@@ -88,9 +88,9 @@ if $(with-ldhtlm) {
 local with-nplm = [ option.get "with-nplm" ] ;
 if $(with-nplm) {
   lib nplm : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
-  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
-  obj BiLM_NPLM.o : bilingual-lm/BiLM_NPLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <cxxflags>-fopenmp ;
-  obj RDLM.o : RDLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
+  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <define>NPLM_DOUBLE_PRECISION=0 ;
+  obj BiLM_NPLM.o : bilingual-lm/BiLM_NPLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <cxxflags>-fopenmp <define>NPLM_DOUBLE_PRECISION=0 ;
+  obj RDLM.o : RDLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <define>NPLM_DOUBLE_PRECISION=0 ;
   alias neural : NeuralLMWrapper.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
   alias bilinguallm : BiLM_NPLM.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
   alias rdlm : RDLM.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
