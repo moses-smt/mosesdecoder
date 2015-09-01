@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Base classes for suffix array-based phrase scorers
 // written by Ulrich Germann
 #pragma once
@@ -6,8 +6,8 @@
 #include "util/exception.hh"
 #include "boost/format.hpp"
 
-namespace Moses {
-  namespace bitext
+// namespace Moses {
+  namespace sapt
   {
 
     // abstract base class that defines the common API for phrase scorers
@@ -18,16 +18,16 @@ namespace Moses {
     protected:
       int m_index;
       int m_num_feats;
-      string m_tag;
-      vector<string> m_feature_names;
+      std::string m_tag;
+      std::vector<std::string> m_feature_names;
     public:
 
-      virtual
-      void
-      operator()(Bitext<Token> const& pt,
-		 PhrasePair<Token>& pp,
-		 vector<float> * dest=NULL)
-	const = 0;
+
+      virtual ~PhraseScorer() {}
+
+      virtual void
+      operator()(Bitext<Token> const& pt, PhrasePair<Token>& pp,
+                 std::vector<float> * dest=NULL) const = 0;
 
       void
       setIndex(int const i) { m_index = i; }
@@ -38,10 +38,10 @@ namespace Moses {
       int
       fcnt() const { return m_num_feats; }
 
-      vector<string> const &
+      std::vector<std::string> const &
       fnames() const { return m_feature_names; }
 
-      string const &
+      std::string const &
       fname(int i) const
       {
 	if (i < 0) i += m_num_feats;
@@ -79,13 +79,12 @@ namespace Moses {
       : public PhraseScorer<Token>
     {
     protected:
-      vector<float> m_x;
+      std::vector<float> m_x;
 
       virtual
       void
-      init(string const specs)
+      init(std::string const specs)
       {
-	using namespace boost;
 	UTIL_THROW_IF2(this->m_tag.size() == 0,
 		       "m_tag must be initialized in constructor");
 	UTIL_THROW_IF2(specs.size() == 0,"empty specification string!");
@@ -93,14 +92,14 @@ namespace Moses {
 		       "PhraseScorer can only be initialized once!");
 	this->m_index = -1;
 	float x; char c;
-	for (istringstream buf(specs); buf>>x; buf>>c)
+	for (std::istringstream buf(specs); buf>>x; buf>>c)
 	  {
 	    this->m_x.push_back(x);
-	    string fname = (format("%s-%.2f") % this->m_tag % x).str();
+	    std::string fname = (boost::format("%s-%.2f") % this->m_tag % x).str();
 	    this->m_feature_names.push_back(fname);
 	  }
 	this->m_num_feats = this->m_x.size();
       }
     };
-  } // namespace bitext
-} // namespace moses
+  } // namespace sapt
+// } // namespace moses

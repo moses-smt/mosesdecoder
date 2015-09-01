@@ -29,6 +29,7 @@
 #include "ug_corpus_token.h"
 
 using namespace std;
+using namespace sapt;
 using namespace ugdiss;
 using namespace boost::math;
 

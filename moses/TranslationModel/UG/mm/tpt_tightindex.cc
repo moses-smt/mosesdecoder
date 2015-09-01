@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007,2008 Ulrich Germann
 
 /* Functions for writing indices tightly (use only the bytes you need).
@@ -20,47 +20,8 @@
 #include <cassert>
 #include "tpt_tightindex.h"
 
-namespace ugdiss
+namespace tpt
 {
-
-//   std::string bitpattern(unsigned int s)
-//   {
-//     std::ostringstream out;
-//     size_t bit=1;
-//     for (size_t i = 31; i > 0; i--)
-//       out << (s&(bit<<i) ? 1 : 0);
-//     out << ((s&1) ? 1 : 0) ;
-//     return out.str();
-//   }
-
-//   std::string bitpattern(char c)
-//   {
-//     std::ostringstream out;
-//     out << ((c&-128) ? 1 : 0);
-//     // out << ".";
-//     out << ((c&64)   ? 1 : 0);
-//     out << ((c&32)   ? 1 : 0);
-//     out << ((c&16)   ? 1 : 0);
-//     out << ((c&8)    ? 1 : 0);
-//     out << ((c&4)    ? 1 : 0);
-//     out << ((c&2)    ? 1 : 0);
-//     out << ((c&1)    ? 1 : 0);
-//     return out.str();
-//   }
-
-//   std::string bitpattern(unsigned char c)
-//   {
-//     std::ostringstream out;
-//     out << ((c&128)  ? 1 : 0);
-//     out << ((c&64)   ? 1 : 0);
-//     out << ((c&32)   ? 1 : 0);
-//     out << ((c&16)   ? 1 : 0);
-//     out << ((c&8)    ? 1 : 0);
-//     out << ((c&4)    ? 1 : 0);
-//     out << ((c&2)    ? 1 : 0);
-//     out << ((c&1)    ? 1 : 0);
-//     return out.str();
-//   }
 
   // #define LOG_WRITE_ACTIVITY
 

@@ -20,6 +20,7 @@
 #include "tree_scorer.h"
 
 #include <cassert>
+#include <sstream>
 
 namespace MosesTraining
 {
@@ -34,30 +35,41 @@ TreeScorer::TreeScorer(const Pcfg &pcfg, const Vocabulary &non_term_vocab)
 {
 }
 
-bool TreeScorer::Score(PcfgTree &root) const
+bool TreeScorer::Score(SyntaxTree &root)
 {
-  if (root.IsPreterminal() || root.IsLeaf()) {
+  scores_.clear();
+  ZeroScores(root);
+  if (!CalcScores(root)) {
+    return false;
+  }
+  SetAttributes(root);
+  return true;
+}
+
+bool TreeScorer::CalcScores(SyntaxTree &root)
+{
+  if (root.IsLeaf() || root.children()[0]->IsLeaf()) {
     return true;
   }
 
-  const std::vector<PcfgTree *> &children = root.children();
+  const std::vector<SyntaxTree *> &children = root.children();
 
   double log_prob = 0.0;
 
   std::vector<std::size_t> key;
   key.reserve(children.size()+1);
-  key.push_back(non_term_vocab_.Lookup(root.label()));
+  key.push_back(non_term_vocab_.Lookup(root.value().label));
 
-  for (std::vector<PcfgTree *>::const_iterator p(children.begin());
+  for (std::vector<SyntaxTree *>::const_iterator p(children.begin());
        p != children.end(); ++p) {
-    PcfgTree *child = *p;
+    SyntaxTree *child = *p;
     assert(!child->IsLeaf());
-    key.push_back(non_term_vocab_.Lookup(child->label()));
-    if (!Score(*child)) {
+    key.push_back(non_term_vocab_.Lookup(child->value().label));
+    if (!CalcScores(*child)) {
       return false;
     }
-    if (!child->IsPreterminal()) {
-      log_prob += child->score();
+    if (!child->children()[0]->IsLeaf()) {
+      log_prob += scores_[child];
     }
   }
   double rule_score;
@@ -66,8 +78,40 @@ bool TreeScorer::Score(PcfgTree &root) const
     return false;
   }
   log_prob += rule_score;
-  root.set_score(log_prob);
+  scores_[&root] = log_prob;
   return true;
+}
+
+void TreeScorer::SetAttributes(SyntaxTree &root)
+{
+  // Terminals don't need attributes.
+  if (root.IsLeaf()) {
+    return;
+  }
+  // Preterminals don't need attributes (they have the implicit score 0.0).
+  if (root.children()[0]->IsLeaf()) {
+    return;
+  }
+  double score = scores_[&root];
+  if (score != 0.0) {
+    std::ostringstream out;
+    out << score;
+    root.value().attributes["pcfg"] = out.str();
+  }
+  for (std::vector<SyntaxTree *>::const_iterator p(root.children().begin());
+       p != root.children().end(); ++p) {
+    SetAttributes(**p);
+  }
+}
+
+void TreeScorer::ZeroScores(SyntaxTree &root)
+{
+  scores_[&root] = 0.0f;
+  const std::vector<SyntaxTree *> &children = root.children();
+  for (std::vector<SyntaxTree *>::const_iterator p(children.begin());
+       p != children.end(); ++p) {
+    ZeroScores(**p);
+  }
 }
 
 }  // namespace PCFG

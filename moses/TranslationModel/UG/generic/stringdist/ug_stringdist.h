@@ -17,10 +17,6 @@
 #include "moses/TranslationModel/UG/mm/tpt_typedefs.h"
 
 
-using namespace std;
-//using namespace boost;
-using namespace ugdiss;
-
 namespace stringdist
 {
   float
@@ -32,7 +28,7 @@ namespace stringdist
   float
   fillAlignmentMatrix(UChar const* a, size_t const lenA,
 		      UChar const* b, size_t const lenB,
-		      vector<vector<float> > & M);
+		      std::vector<std::vector<float> > & M);
 
   class StringDiff
   {
@@ -67,21 +63,21 @@ namespace stringdist
     };
   private:
     UnicodeString a,b;
-    vector<Segment> difflist;
-    vector<int> diffcnt;
+    std::vector<Segment> difflist;
+    std::vector<int> diffcnt;
   public:
-    UnicodeString const& set_a(string const& a);
-    UnicodeString const& set_b(string const& b);
+    UnicodeString const& set_a(std::string const& a);
+    UnicodeString const& set_b(std::string const& b);
     UnicodeString const& get_a() const;
     UnicodeString const& get_b() const;
-    StringDiff(string const& a, string const& b);
+    StringDiff(std::string const& a, std::string const& b);
     StringDiff();
     size_t size();
     size_t align(bool force=false); // returns the levenshtein distance
     void showDiff(std::ostream& out);
     float levenshtein();
     Segment const& operator[](uint32_t i) const;
-    void fillAlignmentMatrix(vector<vector<float> > & M) const;
+    void fillAlignmentMatrix(std::vector<std::vector<float> > & M) const;
     vector<int> const& getFeatures() const;
   };
 }

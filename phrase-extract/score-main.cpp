@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <assert.h>
+#include <cstdlib>
 #include <cstring>
 #include <map>
 #include <set>
@@ -70,6 +71,7 @@ bool nonTermContextTarget = false;
 
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
+float minCount = 0;
 float minCountHierarchical = 0;
 bool phraseOrientationPriorsFlag = false;
 
@@ -130,7 +132,29 @@ int main(int argc, char* argv[])
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PartsOfSpeech] [--PCFG] [--TreeFragments] [--SourceLabels] [--SourceLabelCountsLHS] [--TargetPreferenceLabels] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+    std::cerr <<
+              "syntax: score extract lex phrase-table "
+              "[--Inverse] "
+              "[--Hierarchical] "
+              "[--LogProb] "
+              "[--NegLogProb] "
+              "[--NoLex] "
+              "[--GoodTuring] "
+              "[--KneserNey] "
+              "[--NoWordAlignment] "
+              "[--UnalignedPenalty] "
+              "[--UnalignedFunctionWordPenalty function-word-file] "
+              "[--MinCountHierarchical count] "
+              "[--PartsOfSpeech] "
+              "[--PCFG] "
+              "[--TreeFragments] "
+              "[--SourceLabels] "
+              "[--SourceLabelCountsLHS] "
+              "[--TargetPreferenceLabels] "
+              "[--UnpairedExtractFormat] "
+              "[--ConditionOnTargetLHS] "
+              "[--CrossedNonTerm]"
+              << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }
@@ -147,7 +171,8 @@ int main(int argc, char* argv[])
   std::string fileNameLeftHandSideTargetPreferenceLabelCounts;
   std::string fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts;
   std::string fileNamePhraseOrientationPriors;
-  std::vector<std::string> featureArgs; // all unknown args passed to feature manager
+  // All unknown args are passed to feature manager.
+  std::vector<std::string> featureArgs;
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {
@@ -226,9 +251,13 @@ int main(int argc, char* argv[])
       logProbFlag = true;
       negLogProb = -1;
       std::cerr << "using negative log-probabilities" << std::endl;
+    } else if (strcmp(argv[i],"--MinCount") == 0) {
+      minCount = std::atof( argv[++i] );
+      std::cerr << "dropping all phrase pairs occurring less than " << minCount << " times" << std::endl;
+      minCount -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--MinCountHierarchical") == 0) {
-      minCountHierarchical = Moses::Scan<float>( argv[++i] );
-      std::cerr << "dropping all phrase pairs occurring less than " << minCountHierarchical << " times" << std::endl;
+      minCountHierarchical = std::atof( argv[++i] );
+      std::cerr << "dropping all hierarchical phrase pairs occurring less than " << minCountHierarchical << " times" << std::endl;
       minCountHierarchical -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
       crossedNonTerm = true;
@@ -350,6 +379,7 @@ int main(int argc, char* argv[])
 
   while ( getline(extractFile, line) ) {
 
+    // Print progress dots to stderr.
     if ( ++i % 100000 == 0 ) {
       std::cerr << "." << std::flush;
     }
@@ -440,6 +470,9 @@ int main(int argc, char* argv[])
     }
 
   }
+
+  // We've been printing progress dots to stderr.  End the line.
+  std::cerr << std::endl;
 
   processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
   for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
@@ -537,7 +570,7 @@ void processLine( std::string line,
     } else if (item + (includeSentenceIdFlag?-1:0) == 4) { // count
       sscanf(token[j].c_str(), "%f", &count);
     } else if (item + (includeSentenceIdFlag?-1:0) == 5) { // target syntax PCFG score
-      float pcfgScore = Moses::Scan<float>( token[j] );
+      float pcfgScore = std::atof( token[j].c_str() );
       pcfgSum = pcfgScore * count;
     }
   }
@@ -691,15 +724,14 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
       countOfCounts[ countInt ]++;
   }
 
-  // compute PCFG score
-  float pcfgScore = 0;
-  if (pcfgFlag && !inverseFlag) {
-    pcfgScore = phrasePair.GetPcfgScore() / count;
-  }
-
   // output phrases
   const PHRASE *phraseSource = phrasePair.GetSource();
   const PHRASE *phraseTarget = phrasePair.GetTarget();
+
+  // do not output if count below threshold
+  if (count < minCount) {
+    return;
+  }
 
   // do not output if hierarchical and count below threshold
   if (hierarchicalFlag && count < minCountHierarchical) {
@@ -707,6 +739,12 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
       if (isNonTerminal(vcbS.getWord( phraseSource->at(j) )))
         return;
     }
+  }
+
+  // compute PCFG score
+  float pcfgScore = 0;
+  if (pcfgFlag && !inverseFlag) {
+    pcfgScore = phrasePair.GetPcfgScore() / count;
   }
 
   // source phrase (unless inverse)
@@ -1158,7 +1196,7 @@ void LexicalTable::load( const std::string &fileName )
       continue;
     }
 
-    double prob = Moses::Scan<double>( token[2] );
+    double prob = std::atof( token[2].c_str() );
     WORD_ID wordT = vcbT.storeIfNew( token[0] );
     WORD_ID wordS = vcbS.storeIfNew( token[1] );
     ltable[ wordS ][ wordT ] = prob;

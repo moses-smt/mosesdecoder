@@ -10,7 +10,6 @@
 #include <boost/unordered_set.hpp>
 
 #include "syntax-common/numbered_set.h"
-#include "syntax-common/string_tree.h"
 #include "syntax-common/tree.h"
 #include "syntax-common/tree_fragment_tokenizer.h"
 

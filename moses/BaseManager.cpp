@@ -27,6 +27,12 @@ BaseManager::GetSource() const
   return m_source;
 }
 
+const ttasksptr
+BaseManager::GetTtask() const
+{
+  return m_ttask.lock();
+}
+
 void
 BaseManager::
 OutputSearchGraphAsHypergraph(std::ostream& out) const
@@ -133,6 +139,14 @@ void BaseManager::WriteApplicationContext(std::ostream &out,
     out << " ";
   }
 }
+
+AllOptions const&
+BaseManager::
+options() const
+{
+  return GetTtask()->options();
+}
+
 
 } // namespace
 

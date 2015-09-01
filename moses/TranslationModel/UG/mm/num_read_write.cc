@@ -1,5 +1,5 @@
 #include "num_read_write.h"
-namespace ugdiss {
+namespace tpt {
   typedef unsigned char uchar;
 
   void

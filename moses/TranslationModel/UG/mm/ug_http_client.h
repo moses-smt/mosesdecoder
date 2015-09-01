@@ -33,11 +33,17 @@ class http_client
   std::ostringstream m_error;
 
 public:
-  http_client(boost::asio::io_service& io_service, std::string url);
+  http_client(boost::asio::io_service& io_service, std::string url, std::ostream* log);
   http_client(boost::asio::io_service& io_service,
-	      const std::string& server, const std::string& path);
+	      std::string const& server, 
+	      std::string const& port, 
+	      std::string const& path);
 private:
-  void init(std::string const& server, std::string const& path);
+
+  void init(std::string const& server, 
+	    std::string const& port, 
+	    std::string const& path);
+
   void handle_resolve(const boost::system::error_code& err,
 		      tcp::resolver::iterator endpoint_iterator);
   void handle_connect(const boost::system::error_code& err,
@@ -52,6 +58,7 @@ private:
   boost::asio::streambuf response_;
 public:
   std::string content() const;
+  std::string error_msg() const { return m_error.str(); }
 };
 
 }

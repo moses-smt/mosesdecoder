@@ -86,7 +86,7 @@ detruecaser = $moses-script-dir/recaser/detruecase.perl
 ### multi-core settings
 # when the generic parallelizer is used, the number of cores
 # specified here 
-cores = 8
+cores = 4
 
 #################################################################
 # PARALLEL CORPUS PREPARATION: 
@@ -539,7 +539,7 @@ filter-settings = ""
 
 ### additional flags for the decoder
 #
-decoder-settings = ""
+decoder-settings = "-threads $cores"
 
 ### if tuning should be skipped, specify this here
 # and also point to a configuration file that contains
@@ -608,7 +608,7 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 #   "-drop-unknown" for dropping unknown source words
 #   "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000" for cube pruning
 #
-decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
+decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads $cores"
 
 ### specify size of n-best list, if produced
 #

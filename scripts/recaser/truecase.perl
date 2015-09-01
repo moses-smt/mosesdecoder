@@ -13,11 +13,14 @@ binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
 # apply switches
-my ($MODEL, $UNBUFFERED);
-die("truecase.perl --model MODEL [-b] < in > out")
-    unless &GetOptions('model=s' => \$MODEL,'b|unbuffered' => \$UNBUFFERED)
+# ASR input has no case, make sure it is lowercase, and make sure known are cased eg. 'i' to be uppercased even if i is known
+my ($MODEL, $UNBUFFERED, $ASR);
+die("truecase.perl --model MODEL [-b] [-a] < in > out")
+    unless &GetOptions('model=s' => \$MODEL,'b|unbuffered' => \$UNBUFFERED, 'a|asr' => \$ASR)
     && defined($MODEL);
 if (defined($UNBUFFERED) && $UNBUFFERED) { $|=1; }
+my $asr = 0;
+if (defined($ASR) && $ASR) { $asr = 1; }
 
 my (%BEST,%KNOWN);
 open(MODEL,$MODEL) || die("ERROR: could not open '$MODEL'");
@@ -25,9 +28,11 @@ binmode(MODEL, ":utf8");
 while(<MODEL>) {
   my ($word,@OPTIONS) = split;
   $BEST{ lc($word) } = $word;
-  $KNOWN{ $word } = 1;
-  for(my $i=1;$i<$#OPTIONS;$i+=2) {
-    $KNOWN{ $OPTIONS[$i] } = 1;
+  if ($asr == 0) {
+    $KNOWN{ $word } = 1;
+    for(my $i=1;$i<$#OPTIONS;$i+=2) {
+      $KNOWN{ $OPTIONS[$i] } = 1;
+    }
   }
 }
 close(MODEL);
@@ -53,6 +58,9 @@ while(<STDIN>) {
     {
 	$word = $$WORD[$i];
 	$otherfactors = "";
+    }
+    if ($asr){
+      $word = lc($word); #make sure ASR output is not uc
     }
 
     if ($sentence_start && defined($BEST{lc($word)})) {

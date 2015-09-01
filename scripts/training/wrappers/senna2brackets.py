@@ -24,6 +24,7 @@ import optparse
 import os
 import sys
 
+
 def main():
     usage = "usage: %prog [options]"
     parser = optparse.OptionParser(usage=usage)
@@ -71,6 +72,7 @@ def main():
             word = "-RCB-"
         tree += frag.replace("*", "(%s %s)" % (pos, word))
 
+
 def balanced(s):
     num_left = 0
     num_right = 0
@@ -81,9 +83,11 @@ def balanced(s):
             num_right += 1
     return num_left == num_right
 
+
 def beautify(tree):
     s = tree.replace("(", " (")
     return s.strip()
+
 
 def berkelify(tree):
     if tree == "":
@@ -94,9 +98,11 @@ def berkelify(tree):
     old_root = tree[1:pos]
     return tree.replace(old_root, "TOP")
 
+
 def warn(msg):
     prog_name = os.path.basename(sys.argv[0])
     sys.stderr.write("%s: warning: %s\n" % (prog_name, msg))
+
 
 if __name__ == "__main__":
     main()

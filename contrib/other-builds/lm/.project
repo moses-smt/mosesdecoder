@@ -547,24 +547,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/interpolate.hh</locationURI>
 		</link>
 		<link>
-			<name>builder/joint_order.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/joint_order.hh</locationURI>
-		</link>
-		<link>
 			<name>builder/lmplz_main.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/lmplz_main.cc</locationURI>
-		</link>
-		<link>
-			<name>builder/ngram.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/ngram.hh</locationURI>
-		</link>
-		<link>
-			<name>builder/ngram_stream.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/ngram_stream.hh</locationURI>
 		</link>
 		<link>
 			<name>builder/pipeline.cc</name>
@@ -575,21 +560,6 @@
 			<name>builder/pipeline.hh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/pipeline.hh</locationURI>
-		</link>
-		<link>
-			<name>builder/print.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/print.cc</locationURI>
-		</link>
-		<link>
-			<name>builder/print.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/print.hh</locationURI>
-		</link>
-		<link>
-			<name>builder/sort.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/builder/sort.hh</locationURI>
 		</link>
 		<link>
 			<name>filter/Jamfile</name>

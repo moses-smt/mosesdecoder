@@ -159,13 +159,15 @@ int main(int argc, char* argv[])
   }
 
   StaticData& SD = const_cast<StaticData&>(StaticData::Instance());
-  SD.SetUseLatticeMBR(true);
+  LMBR_Options& lmbr = SD.options().lmbr;
+  MBR_Options&   mbr = SD.options().mbr;
+  lmbr.enabled = true;
 
   boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }
-  size_t nBestSize = SD.GetMBRSize();
+  size_t nBestSize = mbr.size;
 
   if (nBestSize <= 0) {
     throw new runtime_error("Non-positive size specified for n-best list");
@@ -187,13 +189,13 @@ int main(int argc, char* argv[])
     manager.CalcNBest(nBestSize, nBestList,true);
     //grid search
     BOOST_FOREACH(float const& p, pgrid) {
-      SD.SetLatticeMBRPrecision(p);
+      lmbr.precision = p;
       BOOST_FOREACH(float const& r, rgrid) {
-        SD.SetLatticeMBRPRatio(r);
+        lmbr.ratio = r;
         BOOST_FOREACH(size_t const prune_i, prune_grid) {
-          SD.SetLatticeMBRPruningFactor(size_t(prune_i));
+          lmbr.pruning_factor = prune_i;
           BOOST_FOREACH(float const& scale_i, scale_grid) {
-            SD.SetMBRScale(scale_i);
+            mbr.scale = scale_i;
             size_t lineCount = source->GetTranslationId();
             cout << lineCount << " ||| " << p << " "
                  << r << " " << size_t(prune_i) << " " << scale_i

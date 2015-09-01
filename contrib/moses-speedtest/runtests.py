@@ -2,6 +2,7 @@
 import os
 import subprocess
 import time
+import shutil
 from argparse import ArgumentParser
 from testsuite_common import processLogLine
 
@@ -26,14 +27,19 @@ def parse_cmd():
     arguments = parser.parse_args()
     return arguments
 
-def repoinit(testconfig, profiler=True):
+def repoinit(testconfig, profiler=None):
     """Determines revision and sets up the repo. If given the profiler optional
     argument, wil init the profiler repo instead of the default one."""
     revision = ''
     #Update the repo
-    if profiler:
+    if profiler == "gnu-profiler":
         if testconfig.repo_prof is not None:
             os.chdir(testconfig.repo_prof)
+        else:
+            raise ValueError('Profiling repo is not defined')
+    elif profiler == "google-profiler":
+        if testconfig.repo_gprof is not None:
+            os.chdir(testconfig.repo_gprof)
         else:
             raise ValueError('Profiling repo is not defined')
     else:
@@ -61,9 +67,10 @@ def repoinit(testconfig, profiler=True):
 
 class Configuration:
     """A simple class to hold all of the configuration constatns"""
-    def __init__(self, repo, drop_caches, tests, testlogs, basebranch, baserev, repo_prof=None):
+    def __init__(self, repo, drop_caches, tests, testlogs, basebranch, baserev, repo_prof=None, repo_gprof=None):
         self.repo = repo
         self.repo_prof = repo_prof
+        self.repo_gprof = repo_gprof
         self.drop_caches = drop_caches
         self.tests = tests
         self.testlogs = testlogs
@@ -88,16 +95,17 @@ class Configuration:
 
 class Test:
     """A simple class to contain all information about tests"""
-    def __init__(self, name, command, ldopts, permutations, prof_command=None):
+    def __init__(self, name, command, ldopts, permutations, prof_command=None, gprof_command=None):
         self.name = name
         self.command = command
         self.prof_command = prof_command
+        self.gprof_command = gprof_command
         self.ldopts = ldopts.replace(' ', '').split(',') #Not tested yet
         self.permutations = permutations
 
-def parse_configfile(conffile, testdir, moses_repo, moses_prof_repo=None):
+def parse_configfile(conffile, testdir, moses_repo, moses_prof_repo=None, moses_gprof_repo=None):
     """Parses the config file"""
-    command, ldopts, prof_command = '', '', None
+    command, ldopts, prof_command, gprof_command = '', '', None, None
     permutations = []
     fileopen = open(conffile, 'r')
     for line in fileopen:
@@ -108,8 +116,10 @@ def parse_configfile(conffile, testdir, moses_repo, moses_prof_repo=None):
 
         if opt == 'Command:':
             command = args.replace('\n', '')
-            if moses_prof is not None:  # Get optional command for profiling
+            if moses_prof_repo is not None:  # Get optional command for profiling
                 prof_command = moses_prof_repo + '/bin/' + command
+            if moses_gprof_repo is not None: # Get optional command for google-perftools
+                gprof_command = moses_gprof_repo + '/bin/' + command
             command = moses_repo + '/bin/' + command
         elif opt == 'LDPRE:':
             ldopts = args.replace('\n', '')
@@ -118,14 +128,14 @@ def parse_configfile(conffile, testdir, moses_repo, moses_prof_repo=None):
         else:
             raise ValueError('Unrecognized option ' + opt)
     #We use the testdir as the name.
-    testcase = Test(testdir, command, ldopts, permutations, prof_command)
+    testcase = Test(testdir, command, ldopts, permutations, prof_command, gprof_command)
     fileopen.close()
     return testcase
 
 def parse_testconfig(conffile):
     """Parses the config file for the whole testsuite."""
     repo_path, drop_caches, tests_dir, testlog_dir = '', '', '', ''
-    basebranch, baserev, repo_prof_path = '', '', None
+    basebranch, baserev, repo_prof_path, repo_gprof_path = '', '', None, None
     fileopen = open(conffile, 'r')
     for line in fileopen:
         line = line.split('#')[0] # Discard comments
@@ -146,10 +156,12 @@ def parse_testconfig(conffile):
             baserev = args.replace('\n', '')
         elif opt == 'MOSES_PROFILER_REPO:':  # Optional
             repo_prof_path = args.replace('\n', '')
+        elif opt == 'MOSES_GOOGLE_PROFILER_REPO:':  # Optional
+            repo_gprof_path = args.replace('\n', '')
         else:
             raise ValueError('Unrecognized option ' + opt)
     config = Configuration(repo_path, drop_caches, tests_dir, testlog_dir,\
-    basebranch, baserev, repo_prof_path)
+    basebranch, baserev, repo_prof_path, repo_gprof_path)
     fileopen.close()
     return config
 
@@ -160,7 +172,9 @@ def get_config():
     config.additional_args(args.singletestdir, args.revision, args.branch)
     revision = repoinit(config)
     if config.repo_prof is not None:
-        repoinit(config, True)
+        repoinit(config, "gnu-profiler")
+    if config.repo_gprof is not None:
+        repoinit(config, "google-profiler")
     config.set_revision(revision)
     return config
 
@@ -212,16 +226,27 @@ def write_gprof(command, name, variant, config):
     executable_path = command.split(' ')[0]  # Path to the moses binary
     gprof_command = 'gprof ' + executable_path + ' ' + gmon_path + ' > ' + outputfile
     subprocess.call([gprof_command], shell=True)
-    os.remove('gmon_path')  # After we are done discard the gmon file
+    os.remove(gmon_path)  # After we are done discard the gmon file
 
-def execute_test(command, path, name, variant, config, profile=False):
+def write_pprof(name, variant, config):
+    """Copies the google-perftools profiler output to the corresponding test directory"""
+    output_dir = config.testlogs + '/' + name
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    outputfile = output_dir + '/pprof_' + time.strftime("%d.%m.%Y_%H:%M:%S") + '_' + name + '_' + variant
+    shutil.move("/tmp/moses.prof", outputfile)
+
+
+def execute_test(command, path, name, variant, config, profile=None):
     """Executes a testcase given a whole command, path to the test file output,
     name of the test and variant tested. Config is the global configuration"""
     subprocess.Popen([command], stdout=None, stderr=subprocess.PIPE, shell=True).communicate()
-    if not profile:
+    if profile is None:
         write_log(path, name + '_' + variant, config)
-    else:  # Basically produce a gmon output
+    elif profile == "gnu-profiler":  # Basically produce a gmon output
         write_gprof(command, name, variant, config)
+    elif profile == "google-profiler":
+        write_pprof(name, variant, config)        
 
 
 def execute_tests(testcase, cur_directory, config):
@@ -255,7 +280,7 @@ def execute_tests(testcase, cur_directory, config):
             subprocess.call([config.drop_caches], shell=True)
 
             #Create the command for executing moses:
-            whole_command = 'LD_PRELOAD ' + opt + time_command + testcase.command
+            whole_command = 'LD_PRELOAD=' + opt + time_command + testcase.command
             variant = 'ldpre_' + opt
 
             #test normal and cached
@@ -271,9 +296,9 @@ def execute_tests(testcase, cur_directory, config):
 
         if 'vanilla' in testcase.permutations:
             whole_command = testcase.prof_command
-            execute_test(whole_command, time_path, testcase.name, 'profile', config, True)
+            execute_test(whole_command, time_path, testcase.name, 'profile', config, "gnu-profiler")
             if 'cached' in testcase.permutations:
-                execute_test(whole_command, time_path, testcase.name, 'profile_cached', config, True)
+                execute_test(whole_command, time_path, testcase.name, 'profile_cached', config, "gnu-profiler")
 
         if 'ldpre' in testcase.permutations:
             for opt in testcase.ldopts:
@@ -282,13 +307,42 @@ def execute_tests(testcase, cur_directory, config):
                 subprocess.call([config.drop_caches], shell=True)
 
                 #Create the command for executing moses:
-                whole_command = 'LD_PRELOAD ' + opt + testcase.prof_command
+                whole_command = 'LD_PRELOAD=' + opt + " " + testcase.prof_command
                 variant = 'profile_ldpre_' + opt
 
                 #test normal and cached
-                execute_test(whole_command, time_path, testcase.name, variant, config, True)
+                execute_test(whole_command, time_path, testcase.name, variant, config, "gnu-profiler")
                 if 'cached' in testcase.permutations:
-                    execute_test(whole_command, time_path, testcase.name, variant + '_cached', config, True)
+                    execute_test(whole_command, time_path, testcase.name, variant + '_cached', config, "gnu-profiler")
+
+    #Google-perftools profiler
+    if 'google-profiler' in testcase.permutations:
+        subprocess.call(['sync'], shell=True)  # Drop caches first
+        subprocess.call([config.drop_caches], shell=True)
+
+        #Create the command for executing moses
+        whole_command = "CPUPROFILE=/tmp/moses.prof " + testcase.gprof_command
+
+        #test normal and cached
+        execute_test(whole_command, time_path, testcase.name, 'vanilla', config, 'google-profiler')
+        if 'cached' in testcase.permutations:
+            execute_test(whole_command, time_path, testcase.name, 'vanilla_cached', config, 'google-profiler')
+
+    #Now perform LD_PRELOAD tests
+    if 'ldpre' in testcase.permutations:
+        for opt in testcase.ldopts:
+            #Clear caches
+            subprocess.call(['sync'], shell=True)
+            subprocess.call([config.drop_caches], shell=True)
+
+            #Create the command for executing moses:
+            whole_command = 'LD_PRELOAD=' + opt + " " + whole_command
+            variant = 'ldpre_' + opt
+
+            #test normal and cached
+            execute_test(whole_command, time_path, testcase.name, variant, config, 'google-profiler')
+            if 'cached' in testcase.permutations:
+                execute_test(whole_command, time_path, testcase.name, variant + '_cached', config, 'google-profiler')
 
 
 # Go through all the test directories and executes tests
@@ -319,7 +373,7 @@ if __name__ == '__main__':
 
     for logfile in os.listdir(CONFIG.testlogs):
         logfile_name = CONFIG.testlogs + '/' + logfile
-        if not check_for_basever(logfile_name, CONFIG.basebranch):
+        if os.path.isfile(logfile_name) and not check_for_basever(logfile_name, CONFIG.basebranch):
             logfile = logfile.replace('_vanilla', '')
             logfile = logfile.replace('_cached', '')
             logfile = logfile.replace('_ldpre', '')
@@ -330,7 +384,7 @@ if __name__ == '__main__':
         #Create a new configuration for base version tests:
         BASECONFIG = Configuration(CONFIG.repo, CONFIG.drop_caches,\
             CONFIG.tests, CONFIG.testlogs, CONFIG.basebranch,\
-            CONFIG.baserev, CONFIG.repo_prof)
+            CONFIG.baserev, CONFIG.repo_prof, CONFIG.repo_gprof)
         BASECONFIG.additional_args(None, CONFIG.baserev, CONFIG.basebranch)
         #Set up the repository and get its revision:
         REVISION = repoinit(BASECONFIG)
@@ -340,20 +394,28 @@ if __name__ == '__main__':
         subprocess.call(['./previous.sh'], shell=True)
         #If profiler configuration exists also init it
         if BASECONFIG.repo_prof is not None:
-            repoinit(BASECONFIG, True)
+            repoinit(BASECONFIG, "gnu-profiler")
             os.chdir(BASECONFIG.repo_prof)
+            subprocess.call(['./previous.sh'], shell=True)
+
+        if BASECONFIG.repo_gprof is not None:
+            repoinit(BASECONFIG, "google-profiler")
+            os.chdir(BASECONFIG.repo_gprof)
             subprocess.call(['./previous.sh'], shell=True)
 
         #Perform tests
         for directory in FIRSTTIME:
             cur_testcase = parse_configfile(BASECONFIG.tests + '/' + directory +\
-            '/config', directory, BASECONFIG.repo)
+            '/config', directory, BASECONFIG.repo, BASECONFIG.repo_prof, BASECONFIG.repo_gprof)
             execute_tests(cur_testcase, directory, BASECONFIG)
 
         #Reset back the repository to the normal configuration
         repoinit(CONFIG)
         if BASECONFIG.repo_prof is not None:
-            repoinit(CONFIG, True)
+            repoinit(CONFIG, "gnu-profiler")
+
+        if BASECONFIG.repo_gprof is not None:
+            repoinit(CONFIG, "google-profiler")
 
     #Builds moses
     os.chdir(CONFIG.repo)
@@ -362,12 +424,16 @@ if __name__ == '__main__':
         os.chdir(CONFIG.repo_prof)
         subprocess.call(['./previous.sh'], shell=True)
 
+    if CONFIG.repo_gprof is not None:
+        os.chdir(CONFIG.repo_gprof)
+        subprocess.call(['./previous.sh'], shell=True)
+
     if CONFIG.singletest:
         TESTCASE = parse_configfile(CONFIG.tests + '/' +\
-            CONFIG.singletest + '/config', CONFIG.singletest, CONFIG.repo)
+            CONFIG.singletest + '/config', CONFIG.singletest, CONFIG.repo, CONFIG.repo_prof, CONFIG.repo_gprof)
         execute_tests(TESTCASE, CONFIG.singletest, CONFIG)
     else:
         for directory in ALL_DIR:
             cur_testcase = parse_configfile(CONFIG.tests + '/' + directory +\
-            '/config', directory, CONFIG.repo)
+            '/config', directory, CONFIG.repo, CONFIG.repo_prof, CONFIG.repo_gprof)
             execute_tests(cur_testcase, directory, CONFIG)

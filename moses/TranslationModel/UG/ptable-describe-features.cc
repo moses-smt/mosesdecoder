@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include "mmsapt.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include <boost/foreach.hpp>
@@ -8,7 +9,7 @@
 #include <iostream>
 
 using namespace Moses;
-using namespace bitext;
+using namespace sapt;
 using namespace std;
 using namespace boost;
 

@@ -213,7 +213,8 @@ RecombineCompare(const Hypothesis &compare) const
 
   for (unsigned i = 0; i < m_ffStates.size(); ++i) {
     if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) {
-      comp = m_ffStates[i] - compare.m_ffStates[i];
+      // TODO: Can this situation actually occur?
+      comp = int(m_ffStates[i] != NULL) - int(compare.m_ffStates[i] != NULL);
     } else {
       comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
     }
@@ -230,10 +231,12 @@ EvaluateWhenApplied(StatefulFeatureFunction const& sfff,
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( sfff )) {
-    m_ffStates[state_idx]
-    = sfff.EvaluateWhenApplied
-      (*this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-       &m_currScoreBreakdown);
+    Manager& manager = this->GetManager(); //Get the manager and the ttask
+    ttasksptr const& ttask = manager.GetTtask();
+
+    m_ffStates[state_idx] = sfff.EvaluateWhenAppliedWithContext
+                            (ttask, *this, m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+                             &m_currScoreBreakdown);
   }
 }
 
@@ -359,14 +362,14 @@ CleanupArcList()
    * so we'll keep all of arc list if nedd distinct n-best list
    */
   const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.GetNBestSize();
-  bool distinctNBest = (staticData.GetDistinctNBest() ||
+  size_t nBestSize = staticData.options().nbest.nbest_size;
+  bool distinctNBest = (m_manager.options().nbest.only_distinct ||
                         staticData.GetLatticeSamplesSize() ||
-                        staticData.UseMBR() ||
+                        m_manager.options().mbr.enabled ||
                         staticData.GetOutputSearchGraph() ||
                         staticData.GetOutputSearchGraphSLF() ||
                         staticData.GetOutputSearchGraphHypergraph() ||
-                        staticData.UseLatticeMBR());
+                        m_manager.options().lmbr.enabled);
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
@@ -583,7 +586,9 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
       //preface surface form with UNK if marking unknowns
       const Word &word = phrase.GetWord(pos);
       if(markUnknown && word.IsOOV()) {
-        out << "UNK" << *factor;
+        out << StaticData::Instance().GetUnknownWordPrefix()
+            << *factor
+            << StaticData::Instance().GetUnknownWordSuffix();
       } else {
         out << *factor;
       }

@@ -29,6 +29,8 @@
 
 namespace MosesTraining
 {
+namespace Syntax
+{
 namespace GHKM
 {
 
@@ -128,4 +130,5 @@ Subgraph ComposedRule::CreateSubgraph()
 }
 
 }  // namespace GHKM
+}  // namespace Syntax
 }  // namespace MosesTraining

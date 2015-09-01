@@ -16,6 +16,8 @@ class NGramHeader {
     NGramHeader(void *begin, std::size_t order)
       : begin_(static_cast<WordIndex*>(begin)), end_(begin_ + order) {}
 
+    NGramHeader() : begin_(NULL), end_(NULL) {}
+
     const uint8_t *Base() const { return reinterpret_cast<const uint8_t*>(begin_); }
     uint8_t *Base() { return reinterpret_cast<uint8_t*>(begin_); }
 
@@ -32,6 +34,7 @@ class NGramHeader {
     const WordIndex *end() const { return end_; }
     WordIndex *end() { return end_; }
 
+    std::size_t size() const { return end_ - begin_; }
     std::size_t Order() const { return end_ - begin_; }
 
   private:
@@ -41,6 +44,8 @@ class NGramHeader {
 template <class PayloadT> class NGram : public NGramHeader {
   public:
     typedef PayloadT Payload;
+
+    NGram() : NGramHeader(NULL, 0) {}
 
     NGram(void *begin, std::size_t order) : NGramHeader(begin, order) {}
 

@@ -1,13 +1,12 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007-2012 Ulrich Germann
 // Token class for dependency trees, where the linear order
 // of tokens is defined as going up a dependency chain
 #ifndef __ug_conll_bottom_up_token_h
 #define __ug_conll_bottok_up_token_h
 #include "ug_typedefs.h"
-namespace ugdiss
+namespace sapt
 {
-  using namespace std;
 
   template<typename T>
   class ConllBottomUpToken : public T

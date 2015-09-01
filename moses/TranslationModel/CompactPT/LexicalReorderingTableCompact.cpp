@@ -78,9 +78,9 @@ GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
   if(m_hash.GetSize() != index) {
     std::string scoresString;
     if(m_inMemory)
-      scoresString = m_scoresMemory[index];
+      scoresString = m_scoresMemory[index].str();
     else
-      scoresString = m_scoresMapped[index];
+      scoresString = m_scoresMapped[index].str();
 
     BitWrapper<> bitStream(scoresString);
     for(size_t i = 0; i < m_numScoreComponent; i++)

@@ -8,7 +8,7 @@ m4mdir := $(patsubst %modules/,%,\
 # $(info M4MDIR is ${m4mdir})
 
 # m4m modules to be included
-M4M_MODULES := aux init 
+M4M_MODULES := auxiliary init 
 M4M_MODULES += tools moses-parameters prepare-corpus 
 M4M_MODULES += mgiza fastalign mmbitext phrase-table moses-ini 
 M4M_MODULES += tune-moses eval-system kenlm

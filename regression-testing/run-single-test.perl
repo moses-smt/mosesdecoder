@@ -1,7 +1,8 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 # $Id$
 
+use warnings;
 use strict;
 my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir = dirname(abs_path($0)); push @INC, $script_dir; }
 use MosesRegressionTesting;
@@ -57,7 +58,7 @@ die "Cannot locate input at $input" unless (-f $input);
 my $local_moses_ini = MosesRegressionTesting::get_localized_moses_ini($conf, $data_dir, $results_dir);
 my ($nbestfile,$nbestsize) = MosesRegressionTesting::get_nbestlist($conf);
 
-if (defined($nbestsize) && $nbestsize > 0){
+if (defined($nbestsize) && $nbestsize > 0) {
   $NBEST=$nbestsize;
 }
 

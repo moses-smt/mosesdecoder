@@ -10,7 +10,7 @@ namespace Moses {
   filter_arguments(int const argc_in, char const* const* const argv_in,
 		   int & argc_moses, char*** argv_moses,
 		   int & argc_other, char*** argv_other,
-		   vector<pair<string,int> > const& filter)
+		   std::vector<std::pair<std::string,int> > const& filter)
   {
     *argv_moses = new char*[argc_in];
     *argv_other = new char*[argc_in];
@@ -18,7 +18,7 @@ namespace Moses {
     strcpy((*argv_moses)[0], argv_in[0]);
     argc_moses = 1;
     argc_other = 0;
-    typedef pair<string,int> option;
+    typedef std::pair<std::string,int> option;
     int i = 1;
     while (i < argc_in)
       {

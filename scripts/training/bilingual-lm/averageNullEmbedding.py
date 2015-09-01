@@ -6,6 +6,7 @@ import sys
 import numpy
 import argparse
 
+
 parser = argparse.ArgumentParser(
     description=(
         "Set input embedding of <null> token to weighted average "
@@ -28,12 +29,14 @@ def load_model(model_file):
     import nplm
     return nplm.NeuralLM.from_file(model_file)
 
+
 def get_weights(path, length):
     counter = [0] * length
     for line in open(path):
         last_context = int(line.split()[-2])
         counter[last_context] += 1
     return counter
+
 
 def main(options):
 
@@ -49,7 +52,7 @@ def main(options):
         numpy.array(model.input_embeddings), weights=weights, axis=0)
     model.to_file(open(options.output_model, 'w'))
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     options = parser.parse_args()
     main(options)

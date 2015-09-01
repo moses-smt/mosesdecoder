@@ -181,7 +181,7 @@ init(string line, std::vector<FactorType> const& factorOrder)
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
 
   // if sentences is specified as "<passthrough tag1=""/>"
-  if (SD.IsPassthroughEnabled() || SD.IsPassthroughInNBestEnabled()) {
+  if (SD.IsPassthroughEnabled() || SD.options().nbest.include_passthrough) {
     string pthru = PassthroughSGML(line,"passthrough");
     this->SetPassthroughInformation(pthru);
   }

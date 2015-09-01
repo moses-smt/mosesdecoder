@@ -141,8 +141,11 @@ Parameter::Parameter()
   po::options_description oov_opts("OOV Handling Options");
   AddParam(oov_opts,"drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam(oov_opts,"mark-unknown", "mu", "mark unknown words in output");
+  AddParam(oov_opts,"unknown-word-prefix", "prefix to unknwon word when marked (default: 'UNK')");
+  AddParam(oov_opts,"unknown-word-suffix", "suffix to unknwon word when marked (default: '')");
   AddParam(oov_opts,"lmodel-oov-feature", "add language model oov feature, one per model");
   AddParam(oov_opts,"output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
+  AddParam(oov_opts,"always-create-direct-transopt", "Always create a translation that translates the source word ad-verbatim");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // input options
@@ -211,6 +214,10 @@ Parameter::Parameter()
   AddParam(server_opts,"server", "Run moses as a translation server.");
   AddParam(server_opts,"server-port", "Port for moses server");
   AddParam(server_opts,"server-log", "Log destination for moses server");
+  AddParam(server_opts,"session-timeout",
+           "Timeout for sessions, e.g. '2h30m' or 1d (=24h)");
+  AddParam(server_opts,"session-cache-size", string("Max. number of sessions cached.")
+           +"Least recently used session is dumped first.");
   AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
 
   po::options_description irstlm_opts("IRSTLM Options");
@@ -242,6 +249,7 @@ Parameter::Parameter()
   AddParam(misc_opts,"feature", "All the feature functions should be here");
   AddParam(misc_opts,"context-string",
            "A (tokenized) string containing context words for context-sensitive translation.");
+  AddParam(misc_opts,"context-weights", "A key-value map for context-sensitive translation.");
   AddParam(misc_opts,"context-window",
            "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
 

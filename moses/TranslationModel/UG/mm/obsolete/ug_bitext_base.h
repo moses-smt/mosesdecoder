@@ -24,8 +24,6 @@
 #include "ug_corpus_token.h"
 #include "tpt_pickler.h"
 
-using namespace ugdiss;
-using namespace std;
 namespace Moses {
 
   typedef L2R_Token<SimpleWordId>      Token;
@@ -44,7 +42,7 @@ namespace Moses {
       class job;
       class worker;
       list<job> joblist;
-      vector<sptr<boost::thread> > workers;
+      std::vector<SPTR<boost::thread> > workers;
       bool shutdown;
       size_t doomed;
     public:
@@ -52,10 +50,10 @@ namespace Moses {
       agenda(bitext_base const& bitext);
       ~agenda();
       void add_workers(int n);
-      sptr<pstats> add_job(mmbitext::iter const& phrase,
+      SPTR<pstats> add_job(mmbitext::iter const& phrase,
 			   size_t const max_samples);
       bool get_task(uint64_t & sid, uint64_t & offset, uint64_t & len,
-		    bool & fwd, sptr<bitext_base::pstats> & stats);
+		    bool & fwd, SPTR<bitext_base::pstats> & stats);
     };
 
     // stores the list of unfinished jobs;
@@ -76,19 +74,19 @@ namespace Moses {
     find_trg_phr_bounds
     (size_t const sid, size_t const start, size_t const stop,
      size_t & s1, size_t & s2, size_t & e1, size_t & e2,
-     vector<uchar> * core_alignment, bool const flip) const;
+     std::vector<uchar> * core_alignment, bool const flip) const;
 
-    boost::unordered_map<uint64_t,sptr<pstats> > cache1,cache2;
+    boost::unordered_map<uint64_t,SPTR<pstats> > cache1,cache2;
   private:
-    sptr<pstats>
+    SPTR<pstats>
     prep2(iter const& phrase);
   public:
     mmbitext();
     ~mmbitext();
 
-    void open(string const base, string const L1, string const L2);
+    void open(std::string const base, std::string const L1, std::string const L2);
 
-    sptr<pstats> lookup(iter const& phrase);
+    SPTR<pstats> lookup(iter const& phrase);
     void prep(iter const& phrase);
   };
 
@@ -99,15 +97,15 @@ namespace Moses {
   {
     uint32_t my_rcnt; // unweighted count
     float    my_wcnt; // weighted count
-    vector<pair<size_t, vector<uchar> > > my_aln;
+    std::vector<pair<size_t, std::vector<uchar> > > my_aln;
     boost::mutex lock;
   public:
     jstats();
     jstats(jstats const& other);
     uint32_t rcnt() const;
     float    wcnt() const;
-    vector<pair<size_t, vector<uchar> > > const & aln() const;
-    void add(float w, vector<uchar> const& a);
+    std::vector<pair<size_t, std::vector<uchar> > > const & aln() const;
+    void add(float w, std::vector<uchar> const& a);
   };
 
   struct
@@ -126,11 +124,12 @@ namespace Moses {
     size_t in_progress; // keeps track of how many threads are currently working on this
     boost::unordered_map<uint64_t, jstats> trg;
     pstats();
-    // vector<phrase> nbest;
+    // std::vector<phrase> nbest;
     // void select_nbest(size_t const N=10);
     void release();
     void register_worker();
-    void add(mmbitext::iter const& trg_phrase, float const w, vector<uchar> const& a);
+    void add(mmbitext::iter const& trg_phrase, float const w, 
+	     std::vector<uchar> const& a);
   };
 
   class
@@ -157,7 +156,7 @@ namespace Moses {
     size_t         ctr;
     size_t         len;
     bool           fwd;
-    sptr<mmbitext::pstats> stats;
+    SPTR<mmbitext::pstats> stats;
     bool step(uint64_t & sid, uint64_t & offset);
   };
 

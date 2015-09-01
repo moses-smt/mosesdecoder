@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2008-2010 Ulrich Germann
 #include <boost/program_options.hpp>
 #include <iomanip>
@@ -11,7 +11,8 @@
 #include "tpt_pickler.h"
 
 using namespace std;
-using namespace ugdiss;
+using namespace tpt;
+using namespace sapt;
 namespace po = boost::program_options;
 
 typedef L2R_Token<Conll_Sform> Token;

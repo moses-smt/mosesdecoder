@@ -205,11 +205,10 @@ int main(int argc, char* argv[])
     models[i]->score_f(f_current);
   }
 
-  //Zip all files
+  // delete model objects (and close files)
   for (size_t i=0; i<models.size(); ++i) {
-    models[i]->zipFile();
+    delete models[i];
   }
-
   return 0;
 }
 

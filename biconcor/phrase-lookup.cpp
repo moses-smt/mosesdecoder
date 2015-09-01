@@ -1,4 +1,5 @@
 #include "SuffixArray.h"
+#include "../util/tokenize.hh"
 #include <getopt.h>
 
 using namespace std;
@@ -13,10 +14,12 @@ int main(int argc, char* argv[])
   string query;
   string fileNameSuffix;
   string fileNameSource;
-  int loadFlag = false;
-  int saveFlag = false;
-  int createFlag = false;
-  int queryFlag = false;
+  bool loadFlag = false;
+  bool saveFlag = false;
+  bool createFlag = false;
+  bool queryFlag = false;
+  bool querySentenceFlag = false;
+
   int stdioFlag = false;  // receive requests from STDIN, respond to STDOUT
   string info = "usage: biconcor\n\t[--load model-file]\n\t[--save model-file]\n\t[--create corpus]\n\t[--query string]\n\t[--stdio]\n";
   while(1) {
@@ -25,11 +28,14 @@ int main(int argc, char* argv[])
       {"save", required_argument, 0, 's'},
       {"create", required_argument, 0, 'c'},
       {"query", required_argument, 0, 'q'},
+      {"query-sentence", required_argument, 0, 'Q'},
+      {"document", required_argument, 0, 'd'},
       {"stdio", no_argument, 0, 'i'},
+      {"stdio-sentence", no_argument, 0, 'I'},
       {0, 0, 0, 0}
     };
     int option_index = 0;
-    int c = getopt_long (argc, argv, "l:s:c:q:i", long_options, &option_index);
+    int c = getopt_long (argc, argv, "l:s:c:q:Q:iId", long_options, &option_index);
     if (c == -1) break;
     switch (c) {
     case 'l':
@@ -48,16 +54,24 @@ int main(int argc, char* argv[])
       query = string(optarg);
       queryFlag = true;
       break;
+    case 'Q':
+      query = string(optarg);
+      querySentenceFlag = true;
+      break;
     case 'i':
       stdioFlag = true;
+      break;
+    case 'I':
+      stdioFlag = true;
+      querySentenceFlag = true;
+      break;
+    case 'd':
+      suffixArray.UseDocument();
       break;
     default:
       cerr << info;
       exit(1);
     }
-  }
-  if (stdioFlag) {
-    queryFlag = true;
   }
 
   // check if parameter settings are legal
@@ -74,7 +88,7 @@ int main(int argc, char* argv[])
     exit(1);
   }
 
-  // do your thing
+  // get suffix array
   if (createFlag) {
     cerr << "will create\n";
     cerr << "corpus is in " << fileNameSource << endl;
@@ -88,16 +102,26 @@ int main(int argc, char* argv[])
     cerr << "will load from " << fileNameSuffix << endl;
     suffixArray.Load( fileNameSuffix );
   }
+
+  // do something with it
   if (stdioFlag) {
     while(true) {
       string query;
       if (getline(cin, query, '\n').eof()) {
         return 0;
       }
-      cout << lookup( query ) << endl;
+      if (querySentenceFlag) {
+        vector< string > queryString = util::tokenize( query.c_str() );
+        suffixArray.PrintSentenceMatches( queryString );
+      } else {
+        cout << lookup( query ) << endl;
+      }
     }
   } else if (queryFlag) {
     cout << lookup( query ) << endl;
+  } else if (querySentenceFlag) {
+    vector< string > queryString = util::tokenize( query.c_str() );
+    suffixArray.PrintSentenceMatches( queryString );
   }
   return 0;
 }
@@ -105,32 +129,6 @@ int main(int argc, char* argv[])
 size_t lookup( string query )
 {
   cerr << "query is " << query << endl;
-  vector< string > queryString = tokenize( query.c_str() );
+  vector< string > queryString = util::tokenize( query.c_str() );
   return suffixArray.Count( queryString );
 }
-
-// Duplicate of definition in util/tokenize.hh.
-// TODO: Can we de-duplicate this?  At the time of writing biconcor does not
-// use util at all.
-vector<string> tokenize(const char input[])
-{
-  vector< string > token;
-  bool betweenWords = true;
-  int start=0;
-  int i;
-  for(i = 0; input[i] != '\0'; i++) {
-    const bool isSpace = (input[i] == ' ' || input[i] == '\t');
-
-    if (!isSpace && betweenWords) {
-      start = i;
-      betweenWords = false;
-    } else if (isSpace && !betweenWords) {
-      token.push_back( string( input+start, i-start ) );
-      betweenWords = true;
-    }
-  }
-  if (!betweenWords)
-    token.push_back( string( input+start, i-start ) );
-  return token;
-}
-

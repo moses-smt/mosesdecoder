@@ -92,7 +92,7 @@ float calculate_score(const vector< vector<const Factor*> > & sents, int ref, in
 const TrellisPath doMBR(const TrellisPathList& nBestList)
 {
   float marginal = 0;
-
+  float mbr_scale = StaticData::Instance().options().mbr.scale;
   vector<float> joint_prob_vec;
   vector< vector<const Factor*> > translations;
   float joint_prob;
@@ -104,14 +104,13 @@ const TrellisPath doMBR(const TrellisPathList& nBestList)
   float maxScore = -1e20;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
-    float score = StaticData::Instance().GetMBRScale()
-                  * path.GetScoreBreakdown()->GetWeightedScore();
+    float score = mbr_scale * path.GetScoreBreakdown()->GetWeightedScore();
     if (maxScore < score) maxScore = score;
   }
 
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
-    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown()->GetWeightedScore() - maxScore);
+    joint_prob = UntransformScore(mbr_scale * path.GetScoreBreakdown()->GetWeightedScore() - maxScore);
     marginal += joint_prob;
     joint_prob_vec.push_back(joint_prob);
 
