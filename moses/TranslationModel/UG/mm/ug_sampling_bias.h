@@ -72,7 +72,7 @@ namespace Moses
       std::vector<float> m_bias;
     public:
       SentenceBias(std::vector<float> const& bias);
-      SentenceBias(size_t const s);
+      SentenceBias(size_t const s, float const f = 0);
 
       id_type GetClass(id_type idx) const;
 

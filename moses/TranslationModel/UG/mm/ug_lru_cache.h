@@ -63,6 +63,7 @@ namespace lru_cache
   public:
     LRU_Cache(size_t capacity=1) : m_qfront(0), m_qback(0) { reserve(capacity); }
     size_t capacity() const { return m_recs.capacity(); }
+    size_t size() const { return m_idx.size(); }
     void reserve(size_t s) { m_recs.reserve(s); }
 
     sptr<VAL>
@@ -86,7 +87,6 @@ namespace lru_cache
       boost::lock_guard<boost::shared_mutex> lock(m_lock);
       pair<typename map_t::iterator,bool> foo;
       foo = m_idx.insert(make_pair(key,m_recs.size()));
-
       uint32_t p = foo.first->second;
       if (foo.second) // was not in the cache
 	{

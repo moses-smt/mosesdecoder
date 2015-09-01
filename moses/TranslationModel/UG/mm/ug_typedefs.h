@@ -31,6 +31,7 @@ namespace ugdiss
 }
 
 #define sptr   boost::shared_ptr
+#define iptr   boost::intrusive_ptr
 #define scoptr boost::scoped_ptr
 #define rcast  reinterpret_cast
 #endif

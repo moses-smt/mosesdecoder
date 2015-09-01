@@ -155,7 +155,8 @@ namespace ugdiss
       }
     };
 
-    double approxOccurrenceCount(int p=-1) const
+    double 
+    ca(int p=-1) const // approximate occurrence count
     {
       assert(root);
       if (p < 0) p += lower.size();
@@ -165,6 +166,13 @@ namespace ugdiss
 		     << "Word count mismatch.");
       assert(ret <= root->corpus->numTokens());
       return ret;
+    }
+
+    inline
+    double 
+    approxOccurrenceCount(int p=-1) const // deprecated, use ca()
+    {
+      return ca();
     }
 
     size_t grow(Token const* t, Token const* stop)

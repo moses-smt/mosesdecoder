@@ -72,6 +72,7 @@ namespace Moses
   Mmsapt::
   Mmsapt(string const& line)
     : PhraseDictionary(line, false)
+    , btfix(new mmbitext)
     , m_bias_log(NULL)
     , m_bias_loglevel(0)
     , m_lr_func(NULL)
@@ -288,7 +289,7 @@ namespace Moses
   Mmsapt::
   load_bias(string const fname)
   {
-    m_bias = btfix.loadSentenceBias(fname);
+    m_bias = btfix->loadSentenceBias(fname);
   }
 
   void
@@ -457,11 +458,11 @@ namespace Moses
     // corpus and one in-memory dynamic corpus
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
 
-    btfix.m_num_workers = this->m_workers;
-    btfix.open(m_bname, L1, L2);
-    btfix.setDefaultSampleSize(m_default_sample_size);
+    btfix->m_num_workers = this->m_workers;
+    btfix->open(m_bname, L1, L2);
+    btfix->setDefaultSampleSize(m_default_sample_size);
 
-    btdyn.reset(new imbitext(btfix.V1, btfix.V2, m_default_sample_size, m_workers));
+    btdyn.reset(new imbitext(btfix->V1, btfix->V2, m_default_sample_size, m_workers));
     if (m_bias_file.size())
       load_bias(m_bias_file);
 
@@ -530,7 +531,7 @@ namespace Moses
     else if (dyn)
       {
 	PhrasePair<Token> zilch; zilch.init();
-	TSA<Token>::tree_iterator m(btfix.I2.get(), dyn->start2, dyn->len2);
+	TSA<Token>::tree_iterator m(btfix->I2.get(), dyn->start2, dyn->len2);
 	if (m.size() == dyn->len2)
 	  zilch.raw2 = m.approxOccurrenceCount();
 	pool += zilch;
@@ -552,7 +553,7 @@ namespace Moses
     uint32_t len = fix ? fix->len2 : dyn->len2;
     for (uint32_t k = 0; k < len; ++k, x = x->next())
       {
-	StringPiece wrd = (*(btfix.V2))[x->id()];
+	StringPiece wrd = (*(btfix->V2))[x->id()];
 	Word w; w.CreateFromString(Output,ofactor,wrd,false);
 	tp->AddWord(w);
       }
@@ -608,7 +609,7 @@ namespace Moses
   {
     // map from Moses Phrase to internal id sequence
     vector<id_type> sphrase;
-    fillIdSeq(src,input_factor,*(btfix.V1),sphrase);
+    fillIdSeq(src,input_factor,*(btfix->V1),sphrase);
     if (sphrase.size() == 0) return NULL;
 
     // Reserve a local copy of the dynamic bitext in its current form. /btdyn/
@@ -623,7 +624,7 @@ namespace Moses
     assert(dyn);
 
     // lookup phrases in both bitexts
-    TSA<Token>::tree_iterator mfix(btfix.I1.get(), &sphrase[0], sphrase.size());
+    TSA<Token>::tree_iterator mfix(btfix->I1.get(), &sphrase[0], sphrase.size());
     TSA<Token>::tree_iterator mdyn(dyn->I1.get());
     if (dyn->I1.get())
       for (size_t i = 0; mdyn.size() == i && i < sphrase.size(); ++i)
@@ -665,7 +666,7 @@ namespace Moses
     // for btfix.
     sptr<pstats> sfix,sdyn;
 
-    if (mfix.size() == sphrase.size()) sfix = btfix.lookup(ttask, mfix);
+    if (mfix.size() == sphrase.size()) sfix = btfix->lookup(ttask, mfix);
     if (mdyn.size() == sphrase.size()) sdyn = dyn->lookup(ttask, mdyn);
 
     vector<PhrasePair<Token> > ppfix,ppdyn;
@@ -704,7 +705,7 @@ namespace Moses
 	BOOST_FOREACH(PhrasePair<Token> const& pp, ppfix)
 	  {
 	    if (&pp != &ppfix.front() && pp.joint <= 1) break;
-	    pp.print(*m_bias_log,*btfix.V1, *btfix.V2, m_lr_func->GetModel());
+	    pp.print(*m_bias_log,*btfix->V1, *btfix->V2, m_lr_func->GetModel());
 	  }
       }
 #endif
@@ -788,7 +789,7 @@ namespace Moses
 		context->bias_log = m_bias_log;
 	      }
 	    context->bias
-	      = btfix.SetupDocumentBias(m_bias_server, context_words, m_bias_log);
+	      = btfix->SetupDocumentBias(m_bias_server, context_words, m_bias_log);
 	    context->bias->loglevel = m_bias_loglevel;
 	    context->bias->log = m_bias_log;
 	  }
@@ -827,12 +828,12 @@ namespace Moses
   {
     if (phrase.GetSize() == 0) return false;
     vector<id_type> myphrase;
-    fillIdSeq(phrase,input_factor,*btfix.V1,myphrase);
+    fillIdSeq(phrase,input_factor,*btfix->V1,myphrase);
 
-    TSA<Token>::tree_iterator mfix(btfix.I1.get(),&myphrase[0],myphrase.size());
+    TSA<Token>::tree_iterator mfix(btfix->I1.get(),&myphrase[0],myphrase.size());
     if (mfix.size() == myphrase.size())
       {
-	btfix.prep(ttask, mfix);
+	btfix->prep(ttask, mfix);
 	// cerr << phrase << " " << mfix.approxOccurrenceCount() << endl;
 	return true;
       }
@@ -874,7 +875,7 @@ namespace Moses
   // Mmsapt
   // ::setupDocumentBias(map<string,float> const& bias) const
   // {
-  //   return btfix.SetupDocumentBias(bias);
+  //   return btfix->SetupDocumentBias(bias);
   // }
 
   vector<float>
