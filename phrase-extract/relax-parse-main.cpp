@@ -120,8 +120,13 @@ void store( SyntaxNodeCollection &tree, const vector< string > &words )
   for( size_t i=0; i<nodes.size(); i++ ) {
     cout << " <tree span=\"" << nodes[i]->start
          << "-" << nodes[i]->end
-         << "\" label=\"" << nodes[i]->label
-         << "\"/>";
+         << "\" label=\"" << nodes[i]->label << "\"";
+    for (SyntaxNode::AttributeMap::const_iterator
+         p = nodes[i]->attributes.begin();
+         p != nodes[i]->attributes.end(); ++p) {
+      cout << " " << p->first << "=\"" << p->second << "\"";
+    }
+    cout << "/>";
   }
   cout << endl;
 }

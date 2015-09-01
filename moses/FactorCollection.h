@@ -110,7 +110,7 @@ public:
   */
   const Factor *AddFactor(const StringPiece &factorString, bool isNonTerminal = false);
 
-  const size_t GetNumNonTerminals() {
+  size_t GetNumNonTerminals() {
     return m_factorIdNonTerminal;
   }
 

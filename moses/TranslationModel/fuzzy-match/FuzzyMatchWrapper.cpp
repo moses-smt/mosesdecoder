@@ -114,14 +114,14 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
 
   // find match ranges in suffix array
   vector< vector< pair< SuffixArray::INDEX, SuffixArray::INDEX > > > match_range;
-  for(size_t start=0; start<input[sentenceInd].size(); start++) {
+  for(int start=0; start<input[sentenceInd].size(); start++) {
     SuffixArray::INDEX prior_first_match = 0;
     SuffixArray::INDEX prior_last_match = suffixArray->GetSize()-1;
     vector< string > substring;
     bool stillMatched = true;
     vector< pair< SuffixArray::INDEX, SuffixArray::INDEX > > matchedAtThisStart;
     //cerr << "start: " << start;
-    for(int word=start; stillMatched && word<input[sentenceInd].size(); word++) {
+    for(size_t word=start; stillMatched && word<input[sentenceInd].size(); word++) {
       substring.push_back( GetVocabulary().GetWord( input[sentenceInd][word] ) );
 
       // only look up, if needed (i.e. no unnecessary short gram lookups)
@@ -163,7 +163,7 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
         count += range.second - range.first + 1;
 
         for(SuffixArray::INDEX i=range.first; i<=range.second; i++) {
-          int position = suffixArray->GetPosition( i );
+          size_t position = suffixArray->GetPosition( i );
 
           // sentence length mismatch
           size_t sentence_id = suffixArray->GetSentence( position );
@@ -261,7 +261,7 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
 
     // quick look: how many words are matched
     int words_matched = 0;
-    for(int m=0; m<match.size(); m++) {
+    for(size_t m=0; m<match.size(); m++) {
 
       if (match[m].min_cost <= best_cost) // makes no difference
         words_matched += match[m].input_end - match[m].input_start + 1;
@@ -274,7 +274,7 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
     // prune, check again how many words are matched
     vector< Match > pruned = prune_matches( match, best_cost );
     words_matched = 0;
-    for(int p=0; p<pruned.size(); p++) {
+    for(size_t p=0; p<pruned.size(); p++) {
       words_matched += pruned[p].input_end - pruned[p].input_start + 1;
     }
     if (max(input_length,tm_length) - words_matched > best_cost) {
@@ -323,7 +323,7 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
 
   // do not try to find the best ... report multiple matches
   if (multiple_flag) {
-    for(int si=0; si<best_tm.size(); si++) {
+    for(size_t si=0; si<best_tm.size(); si++) {
       int s = best_tm[si];
       string path;
       sed( input[sentenceInd], source[s], path, true );
@@ -776,7 +776,7 @@ void FuzzyMatchWrapper::init_short_matches(WordIndex &wordIndex, long translatio
   wordIndex.clear();
 
   // store input words and their positions in hash map
-  for(int i=0; i<input.size(); i++) {
+  for(size_t i=0; i<input.size(); i++) {
     if (wordIndex.find( input[i] ) == wordIndex.end()) {
       vector< int > position_vector;
       wordIndex[ input[i] ] = position_vector;
@@ -799,7 +799,7 @@ void FuzzyMatchWrapper::add_short_matches(WordIndex &wordIndex, long translation
     input_word_hit = wordIndex.find( tm[t_pos] );
     if (input_word_hit != wordIndex.end()) {
       vector< int > &position_vector = input_word_hit->second;
-      for(int j=0; j<position_vector.size(); j++) {
+      for(size_t j=0; j<position_vector.size(); j++) {
         int &i_pos = position_vector[j];
 
         // before match
@@ -870,7 +870,7 @@ int FuzzyMatchWrapper::parse_matches( vector< Match > &match, int input_length, 
     return input_length+tm_length;
 
   int this_best_cost = input_length + tm_length;
-  for(int i=0; i<match.size(); i++) {
+  for(size_t i=0; i<match.size(); i++) {
     this_best_cost = min( this_best_cost, match[i].max_cost );
   }
   // cerr << "\tthis best cost: " << this_best_cost << endl;
@@ -892,8 +892,8 @@ int FuzzyMatchWrapper::parse_matches( vector< Match > &match, int input_length, 
       vector< Match > &first_match  = multi_match[ first_level ];
       vector< Match > &second_match = multi_match[ second_level ];
 
-      for(int i1 = 0; i1 < first_match.size(); i1++) {
-        for(int i2 = 0; i2 < second_match.size(); i2++) {
+      for(size_t i1 = 0; i1 < first_match.size(); i1++) {
+        for(size_t i2 = 0; i2 < second_match.size(); i2++) {
 
           // do not combine the same pair twice
           if (first_level == second_level && i2 <= i1) {

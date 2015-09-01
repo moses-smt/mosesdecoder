@@ -114,7 +114,8 @@ namespace Moses
     }
 
     encache(m->second);
-    return NULL;
+    // return NULL;
+    return m->second;
   } // TPCollCache::get(...)
 
   void
@@ -136,6 +137,8 @@ namespace Moses
   {
     if (!ptr) return;
 
+    boost::upgrade_lock<boost::shared_mutex> lock(m_cache_lock);
+
     if (--ptr->refCount || ptr->idx >= 0) // tpc is still in use
       {
 	ptr = NULL;
@@ -151,7 +154,6 @@ namespace Moses
 	 << " at " << __FILE__ << ":" << __LINE__ << endl;
 #endif
 
-    boost::upgrade_lock<boost::shared_mutex> lock(m_cache_lock);
     cache_t::iterator m = m_cache.find(ptr->key);
     if (m != m_cache.end() && m->second == ptr)
       { // the cache could have been updated with a new pointer
@@ -161,7 +163,12 @@ namespace Moses
 	boost::upgrade_to_unique_lock<boost::shared_mutex> xlock(lock);
 	m_cache.erase(m);
       }
+
+
     delete ptr;
+
+
+
     ptr = NULL;
   } // TPCollCache::release(...)
 

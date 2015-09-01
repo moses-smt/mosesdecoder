@@ -34,7 +34,7 @@ namespace Moses
 BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
                                size_t threadsNum)
   : m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
-    m_fileHandle(0), m_fileHandleStart(0), m_size(0),
+    m_fileHandle(0), m_fileHandleStart(0), m_landmarks(true), m_size(0),
     m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0),
     m_threadPool(threadsNum)
 {

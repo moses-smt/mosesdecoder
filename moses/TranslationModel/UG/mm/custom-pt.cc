@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
       	  for (size_t k = i; k < snt.size() && m.extend(snt[k]); ++k)
       	    {
 	      uint64_t spid = m.getPid();
-      	      sptr<pstats> s = bt.lookup(m);
+      	      SPTR<pstats> s = bt.lookup(m);
       	      for (size_t j = i; j <= k; ++j)
       		cout << (*bt.V1)[snt[j]] << " ";
       	      cout << s->good << "/"

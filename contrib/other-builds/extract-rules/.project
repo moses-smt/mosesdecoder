@@ -81,9 +81,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SentenceAlignmentWithSyntax.h</locationURI>
 		</link>
 		<link>
-			<name>SyntaxTree.cpp</name>
+			<name>SyntaxNodeCollection.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SyntaxTree.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SyntaxNodeCollection.cpp</locationURI>
+		</link>
+		<link>
+			<name>SyntaxNodeCollection.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SyntaxNodeCollection.h</locationURI>
 		</link>
 		<link>
 			<name>SyntaxTree.h</name>

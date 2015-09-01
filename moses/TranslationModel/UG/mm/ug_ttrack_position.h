@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #ifndef __ug_ttrack_position_h
 #define __ug_ttrack_position_h
 
@@ -10,8 +10,9 @@
 //
 // (c) 2007-2010 Ulrich Germann. All rights reserved.
 
-namespace ugdiss
+namespace sapt
 {
+  using tpt::id_type;
   namespace ttrack
   {
     /** Represents a position in a corpus (sentence Id + offset from beginning
@@ -57,13 +58,13 @@ namespace ugdiss
         cout << "A: " << z->id();
         for (z = next(z); z >= bosA && z < eosA; z = next(z))
           cout << "-" << z->id();
-        cout << endl;
+        cout << std::endl;
 
         z = b;
         cout << "B: " << z->id();
         for (z = next(z);  z >= bosB && z < eosB; z = next(z))
           cout << "-" << z->id();
-        cout << endl;
+        cout << std::endl;
 #endif
         while (*a == *b)
           {
@@ -76,7 +77,7 @@ namespace ugdiss
           }
         int x = a->cmp(*b);
 
-        // cout << " " << (x < 0 ? "YES" : "NO") << endl;
+        // cout << " " << (x < 0 ? "YES" : "NO") << std::endl;
 
         assert (x != 0);
         return x < 0;

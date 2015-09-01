@@ -1,17 +1,17 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2006,2007,2008 Ulrich Germann
 #ifndef __Pickler
 #define __Pickler
 
-#include<iostream>
-#include<string>
-#include<vector>
-#include<map>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
 #include "tpt_typedefs.h"
 #include "num_read_write.h"
 #include <cassert>
 
-namespace ugdiss
+namespace tpt
 {
   /// Utility method placed here for lack of a better place
   /// @return the size of file fname.
@@ -20,7 +20,7 @@ namespace ugdiss
   /**
    * The following functions write and read data in a compact binary
    * representation. Write and read errors can be checked directly
-   * on the ostream object after the function call, so no return value is
+   * on the std::ostream object after the function call, so no return value is
    * necessary.*/
   void binwrite(std::ostream& out, char               data);
   void binwrite(std::ostream& out, unsigned char      data);
@@ -44,7 +44,7 @@ namespace ugdiss
 
   char const *binread(char const* p, uint16_t& buf);
   char const *binread(char const* p, uint32_t& buf);
-  char const *binread(char const* p, filepos_type& buf);
+  char const *binread(char const* p, uint64_t& buf);
   char const *binread(char const* p, float& buf);
 #ifdef __clang__
   char const *binread(char const* p, size_t& buf);
@@ -165,7 +165,7 @@ namespace ugdiss
 	binread(in,k);
 	binread(in,v);
 	data[k] = v;
-	// cerr << "* " << i << " " << k << " " << v << endl;
+	// cerr << "* " << i << " " << k << " " << v << std::endl;
       }
   }
 
@@ -209,6 +209,5 @@ namespace ugdiss
     return binread(p,*buf);
   }
 
-
-} // end namespace ugdiss
+} // end namespace sapt
 #endif

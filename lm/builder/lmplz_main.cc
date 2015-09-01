@@ -1,6 +1,6 @@
 #include "lm/builder/output.hh"
 #include "lm/builder/pipeline.hh"
-#include "lm/builder/print.hh"
+#include "lm/common/size_option.hh"
 #include "lm/lm_exception.hh"
 #include "util/file.hh"
 #include "util/file_piece.hh"
@@ -13,21 +13,6 @@
 #include <vector>
 
 namespace {
-class SizeNotify {
-  public:
-    SizeNotify(std::size_t &out) : behind_(out) {}
-
-    void operator()(const std::string &from) {
-      behind_ = util::ParseSize(from);
-    }
-
-  private:
-    std::size_t &behind_;
-};
-
-boost::program_options::typed_value<std::string> *SizeOption(std::size_t &to, const char *default_value) {
-  return boost::program_options::value<std::string>()->notifier(SizeNotify(to))->default_value(default_value);
-}
 
 // Parse and validate pruning thresholds then return vector of threshold counts
 // for each n-grams order.
@@ -106,17 +91,16 @@ int main(int argc, char *argv[]) {
       ("interpolate_unigrams", po::value<bool>(&pipeline.initial_probs.interpolate_unigrams)->default_value(true)->implicit_value(true), "Interpolate the unigrams (default) as opposed to giving lots of mass to <unk> like SRI.  If you want SRI's behavior with a large <unk> and the old lmplz default, use --interpolate_unigrams 0.")
       ("skip_symbols", po::bool_switch(), "Treat <s>, </s>, and <unk> as whitespace instead of throwing an exception")
       ("temp_prefix,T", po::value<std::string>(&pipeline.sort.temp_prefix)->default_value("/tmp/lm"), "Temporary file prefix")
-      ("memory,S", SizeOption(pipeline.sort.total_memory, util::GuessPhysicalMemory() ? "80%" : "1G"), "Sorting memory")
-      ("minimum_block", SizeOption(pipeline.minimum_block, "8K"), "Minimum block size to allow")
-      ("sort_block", SizeOption(pipeline.sort.buffer_size, "64M"), "Size of IO operations for sort (determines arity)")
+      ("memory,S", lm:: SizeOption(pipeline.sort.total_memory, util::GuessPhysicalMemory() ? "80%" : "1G"), "Sorting memory")
+      ("minimum_block", lm::SizeOption(pipeline.minimum_block, "8K"), "Minimum block size to allow")
+      ("sort_block", lm::SizeOption(pipeline.sort.buffer_size, "64M"), "Size of IO operations for sort (determines arity)")
       ("block_count", po::value<std::size_t>(&pipeline.block_count)->default_value(2), "Block count (per order)")
       ("vocab_estimate", po::value<lm::WordIndex>(&pipeline.vocab_estimate)->default_value(1000000), "Assume this vocabulary size for purposes of calculating memory in step 1 (corpus count) and pre-sizing the hash table")
-      ("vocab_file", po::value<std::string>(&pipeline.vocab_file)->default_value(""), "Location to write a file containing the unique vocabulary strings delimited by null bytes")
       ("vocab_pad", po::value<uint64_t>(&pipeline.vocab_size_for_unk)->default_value(0), "If the vocabulary is smaller than this value, pad with <unk> to reach this size. Requires --interpolate_unigrams")
       ("verbose_header", po::bool_switch(&verbose_header), "Add a verbose header to the ARPA file that includes information such as token count, smoothing type, etc.")
       ("text", po::value<std::string>(&text), "Read text from a file instead of stdin")
       ("arpa", po::value<std::string>(&arpa), "Write ARPA to a file instead of stdout")
-      ("intermediate", po::value<std::string>(&intermediate), "Write ngrams to an intermediate file.  Turns off ARPA output (which can be reactivated by --arpa file).  Forces --renumber on.  Implicitly makes --vocab_file be the provided name + .vocab.")
+      ("intermediate", po::value<std::string>(&intermediate), "Write ngrams to intermediate files.  Turns off ARPA output (which can be reactivated by --arpa file).  Forces --renumber on.")
       ("renumber", po::bool_switch(&pipeline.renumber_vocabulary), "Rrenumber the vocabulary identifiers so that they are monotone with the hash of each string.  This is consistent with the ordering used by the trie data structure.")
       ("collapse_values", po::bool_switch(&pipeline.output_q), "Collapse probability and backoff into a single value, q that yields the same sentence-level probabilities.  See http://kheafield.com/professional/edinburgh/rest_paper.pdf for more details, including a proof.")
       ("prune", po::value<std::vector<std::string> >(&pruning)->multitoken(), "Prune n-grams with count less than or equal to the given threshold.  Specify one value for each order i.e. 0 0 1 to prune singleton trigrams and above.  The sequence of values must be non-decreasing and the last value applies to any remaining orders. Default is to not prune, which is equivalent to --prune 0.")
@@ -217,15 +201,10 @@ int main(int argc, char *argv[]) {
       bool writing_intermediate = vm.count("intermediate");
       if (writing_intermediate) {
         pipeline.renumber_vocabulary = true;
-        if (!pipeline.vocab_file.empty()) {
-          std::cerr << "--intermediate and --vocab_file are incompatible because --intermediate already makes a vocab file." << std::endl;
-          return 1;
-        }
-        pipeline.vocab_file = intermediate + ".vocab";
       }
-      lm::builder::Output output(writing_intermediate ? intermediate : pipeline.sort.temp_prefix, writing_intermediate);
+      lm::builder::Output output(writing_intermediate ? intermediate : pipeline.sort.temp_prefix, writing_intermediate, pipeline.output_q);
       if (!writing_intermediate || vm.count("arpa")) {
-        output.Add(new lm::builder::PrintARPA(out.release(), verbose_header));
+        output.Add(new lm::builder::PrintHook(out.release(), verbose_header));
       }
       lm::builder::Pipeline(pipeline, in.release(), output);
     } catch (const util::MallocException &e) {

@@ -32,6 +32,7 @@
 #include "Util.h"
 #include "AlignmentInfoCollection.h"
 #include "InputPath.h"
+#include "TranslationTask.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include <boost/foreach.hpp>
 
@@ -41,6 +42,27 @@ namespace Moses
 {
 TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   :Phrase(0)
+  , m_ttask_flag(false)
+  , m_fullScore(0.0)
+  , m_futureScore(0.0)
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
+  , m_container(pt)
+{
+  //ACAT
+  const StaticData &staticData = StaticData::Instance();
+  // XXX should this really be InputFactorOrder???
+  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
+                   // staticData.GetFactorDelimiter(), // eliminated [UG]
+                   NULL);
+}
+
+TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const PhraseDictionary *pt)
+  :Phrase(0)
+  , m_ttask(ttask)
+  , m_ttask_flag(true)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -58,6 +80,34 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
                    NULL);
 }
 
+TargetPhrase::TargetPhrase(ttasksptr& ttask, const PhraseDictionary *pt)
+  :Phrase()
+  , m_ttask(ttask)
+  , m_ttask_flag(true)
+  , m_fullScore(0.0)
+  , m_futureScore(0.0)
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
+  , m_container(pt)
+{
+}
+
+TargetPhrase::TargetPhrase(ttasksptr& ttask, const Phrase &phrase, const PhraseDictionary *pt)
+  : Phrase(phrase)
+  , m_fullScore(0.0)
+  , m_futureScore(0.0)
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
+  , m_ttask(ttask)
+  , m_ttask_flag(true)
+  , m_container(pt)
+{
+}
+
 TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
   :Phrase()
   , m_fullScore(0.0)
@@ -66,6 +116,7 @@ TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_ttask_flag(false)
   , m_container(pt)
 {
 }
@@ -78,6 +129,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_ttask_flag(false)
   , m_container(pt)
 {
 }
@@ -91,6 +143,8 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
   , m_properties(copy.m_properties)
+  , m_ttask(copy.m_ttask)
+  , m_ttask_flag(copy.m_ttask_flag)
   , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
@@ -122,6 +176,16 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
     pb->add_trg_words(GetWord(pos)[0]->GetString());
 }
 #endif
+
+bool TargetPhrase::HasTtaskSPtr() const
+{
+  return m_ttask_flag;
+}
+
+const ttasksptr TargetPhrase::GetTtask() const
+{
+  return m_ttask.lock();
+}
 
 void TargetPhrase::EvaluateInIsolation(const Phrase &source)
 {

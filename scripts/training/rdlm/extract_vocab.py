@@ -46,11 +46,6 @@ def create_parser():
     parser.add_argument(
         '--output', '-o', type=str, default='vocab', metavar='PREFIX',
         help="Output prefix (default: 'vocab')")
-    parser.add_argument(
-        '--ptkvz', action="store_true",
-        help=(
-            "Special rule for German dependency trees: attach separable "
-            "verb prefixes to verb."))
 
     return parser
 
@@ -70,16 +65,9 @@ def get_head(xml, args):
     preterminal = None
     for child in xml:
         if not len(child):
-            if head is not None:
-                continue
             preterminal = child.get('label')
             head = escape_text(child.text.strip())
-
-        elif args.ptkvz and head and child.get('label') == 'avz':
-            for grandchild in child:
-                if grandchild.get('label') == 'PTKVZ':
-                    head = escape_text(grandchild.text.strip()) + head
-                    break
+            return head, preterminal
 
     return head, preterminal
 

@@ -7,35 +7,32 @@
 #include "sapt_pscore_base.h"
 #include <boost/dynamic_bitset.hpp>
 
-using namespace std;
-namespace Moses {
-  namespace bitext  {
+namespace sapt  {
 
-    // rareness penalty: x/(n+x)
-    template<typename Token>
-    class
-    PScoreRareness : public SingleRealValuedParameterPhraseScorerFamily<Token>
+  // rareness penalty: x/(n+x)
+  template<typename Token>
+  class
+  PScoreRareness : public SingleRealValuedParameterPhraseScorerFamily<Token>
+  {
+  public:
+    PScoreRareness(std::string const spec)
     {
-    public:
-      PScoreRareness(string const spec)
-      {
-	this->m_tag = "rare";
-	this->init(spec);
-      }
+      this->m_tag = "rare";
+      this->init(spec);
+    }
 
-      bool
-      isLogVal(int i) const { return false; }
+    bool
+    isLogVal(int i) const { return false; }
 
-      void
-      operator()(Bitext<Token> const& bt,
-		 PhrasePair<Token>& pp,
-		 vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	size_t i = this->m_index;
-	BOOST_FOREACH(float const x, this->m_x)
-	  (*dest).at(i++) = x/(x + pp.joint);
-      }
-    };
-  } // namespace bitext
-} // namespace Moses
+    void
+    operator()(Bitext<Token> const& bt,
+	       PhrasePair<Token>& pp,
+	       std::vector<float> * dest = NULL) const
+    {
+      if (!dest) dest = &pp.fvals;
+      size_t i = this->m_index;
+      BOOST_FOREACH(float const x, this->m_x)
+	(*dest).at(i++) = x/(x + pp.joint);
+    }
+  };
+} // namespace sapt

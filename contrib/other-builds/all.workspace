@@ -6,10 +6,11 @@
   <Project Name="lm" Path="lm/lm.project" Active="No"/>
   <Project Name="OnDiskPt" Path="OnDiskPt/OnDiskPt.project" Active="No"/>
   <Project Name="search" Path="search/search.project" Active="No"/>
-  <Project Name="moses-cmd" Path="moses-cmd/moses-cmd.project" Active="Yes"/>
+  <Project Name="moses-cmd" Path="moses-cmd/moses-cmd.project" Active="No"/>
   <Project Name="score" Path="score/score.project" Active="No"/>
   <Project Name="consolidate" Path="consolidate/consolidate.project" Active="No"/>
   <Project Name="moses" Path="moses/moses.project" Active="No"/>
+  <Project Name="pruneGeneration" Path="pruneGeneration/pruneGeneration.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Project Name="manual-label" ConfigName="Debug"/>
@@ -23,6 +24,7 @@
       <Project Name="score" ConfigName="Debug"/>
       <Project Name="consolidate" ConfigName="Debug"/>
       <Project Name="moses" ConfigName="Debug"/>
+      <Project Name="pruneGeneration" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Project Name="manual-label" ConfigName="Release"/>
@@ -36,6 +38,7 @@
       <Project Name="score" ConfigName="Release"/>
       <Project Name="consolidate" ConfigName="Release"/>
       <Project Name="moses" ConfigName="Release"/>
+      <Project Name="pruneGeneration" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

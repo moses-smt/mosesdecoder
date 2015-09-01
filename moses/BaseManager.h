@@ -5,7 +5,7 @@
 #include <string>
 #include "ScoreComponentCollection.h"
 #include "InputType.h"
-
+#include "moses/parameters/AllOptions.h"
 namespace Moses
 {
 class ScoreComponentCollection;
@@ -50,6 +50,8 @@ public:
 
   //! the input sentence being decoded
   const InputType& GetSource() const;
+  const ttasksptr  GetTtask() const;
+  AllOptions const& options() const;
 
   virtual void Decode() = 0;
   // outputs

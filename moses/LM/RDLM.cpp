@@ -11,6 +11,26 @@
 namespace Moses
 {
 
+namespace rdlm
+{
+ThreadLocal::ThreadLocal(nplm::neuralTM *lm_head_base_instance_, nplm::neuralTM *lm_label_base_instance_, bool normalizeHeadLM, bool normalizeLabelLM, int cacheSize)
+{
+  lm_head = new nplm::neuralTM(*lm_head_base_instance_);
+  lm_label = new nplm::neuralTM(*lm_label_base_instance_);
+  lm_head->set_normalization(normalizeHeadLM);
+  lm_label->set_normalization(normalizeLabelLM);
+  lm_head->set_cache(cacheSize);
+  lm_label->set_cache(cacheSize);
+}
+
+ThreadLocal::~ThreadLocal()
+{
+  delete lm_head;
+  delete lm_label;
+}
+
+}
+
 typedef Eigen::Map<Eigen::Matrix<int,Eigen::Dynamic,1> > EigenMap;
 
 RDLM::~RDLM()
@@ -70,7 +90,7 @@ void RDLM::Load()
     static_label_null[i] = lm_label_base_instance_->lookup_input_word(numstr);
   }
 
-  static_dummy_head = lm_head_base_instance_->lookup_input_word(dummy_head);
+  static_dummy_head = lm_head_base_instance_->lookup_input_word(dummy_head.GetString(0).as_string());
 
   static_start_head = lm_head_base_instance_->lookup_input_word("<start_head>");
   static_start_label = lm_head_base_instance_->lookup_input_word("<start_label>");
@@ -99,8 +119,16 @@ void RDLM::Load()
 //    TreePointer mytree4 (new InternalTree("[pred [det [ART die]] [attr [adv [adv [PTKNEG nicht]] [ADV fast]] [ADJA neue]] [attr [ADJA]] [NN Zeit]]]"));
 //    TreePointer mytree2 (new InternalTree("[vroot [subj [PPER ich]] [VAFIN bin] [pred]]"));
 //
-//    std::vector<int> ancestor_heads;
-//    std::vector<int> ancestor_labels;
+//     rdlm::ThreadLocal *thread_objects = thread_objects_backend_.get();
+//     if (!thread_objects) {
+//       thread_objects = new rdlm::ThreadLocal(lm_head_base_instance_, lm_label_base_instance_, m_normalizeHeadLM, m_normalizeLabelLM, m_cacheSize);
+//       thread_objects_backend_.reset(thread_objects);
+//     }
+//
+// #ifdef WITH_THREADS
+//     //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+//     m_accessLock.lock_shared();
+// #endif
 //
 //    size_t boundary_hash(0);
 //    boost::array<float, 4> score;
@@ -108,13 +136,13 @@ void RDLM::Load()
 //    std::cerr << "scoring: " << mytree3->GetString() << std::endl;
 //    std::vector<TreePointer> previous_trees;
 //    TreePointerMap back_pointers = AssociateLeafNTs(mytree3.get(), previous_trees);
-//    Score(mytree3.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+//    Score(mytree3.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
 //
 //    previous_trees.push_back(mytree3);
 //    back_pointers = AssociateLeafNTs(mytree4.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree4->GetString() << std::endl;
-//    Score(mytree4.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+//    Score(mytree4.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
 //
 //    mytree4->Combine(previous_trees);
@@ -125,7 +153,7 @@ void RDLM::Load()
 //
 //    score[1] = 0;
 //    score[3] = 0;
-//    Score(mytree2.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+//    Score(mytree2.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
 //
 //    score[0] = 0;
@@ -134,12 +162,12 @@ void RDLM::Load()
 //    score[3] = 0;
 //    std::cerr << "scoring: " << mytree->GetString() << std::endl;
 //
-//    Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+//    Score(mytree.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
 //
-//   }
-//    UTIL_THROW2("Finished");
-//
+// #ifdef WITH_THREADS
+//       m_accessLock.unlock_shared();
+// #endif
 //   }
 //
 //   {
@@ -149,8 +177,16 @@ void RDLM::Load()
 //    TreePointer mytree4 (new InternalTree("[^pred [attr [adv [adv [PTKNEG nicht]] [ADV fast]] [ADJA neue]] [^pred [attr [ADJA]] [NN Zeit]]]"));
 //    TreePointer mytree2 (new InternalTree("[vroot [subj [PPER ich]] [^vroot [VAFIN bin] [pred [det [ART die]] [^pred]]]]"));
 //
-//    std::vector<int> ancestor_heads;
-//    std::vector<int> ancestor_labels;
+//    rdlm::ThreadLocal *thread_objects = thread_objects_backend_.get();
+//     if (!thread_objects) {
+//       thread_objects = new rdlm::ThreadLocal(lm_head_base_instance_, lm_label_base_instance_, m_normalizeHeadLM, m_normalizeLabelLM, m_cacheSize);
+//       thread_objects_backend_.reset(thread_objects);
+//     }
+//
+// #ifdef WITH_THREADS
+//     //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+//     m_accessLock.lock_shared();
+// #endif
 //
 //    size_t boundary_hash(0);
 //    boost::array<float, 4> score;
@@ -158,13 +194,13 @@ void RDLM::Load()
 //    std::cerr << "scoring: " << mytree3->GetString() << std::endl;
 //    std::vector<TreePointer> previous_trees;
 //    TreePointerMap back_pointers = AssociateLeafNTs(mytree3.get(), previous_trees);
-//    Score(mytree3.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+//    Score(mytree3.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
 //
 //    previous_trees.push_back(mytree3);
 //    back_pointers = AssociateLeafNTs(mytree4.get(), previous_trees);
 //    std::cerr << "scoring: " << mytree4->GetString() << std::endl;
-//    Score(mytree4.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+//    Score(mytree4.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
 //
 //    mytree4->Combine(previous_trees);
@@ -175,7 +211,7 @@ void RDLM::Load()
 //
 //    score[1] = 0;
 //    score[3] = 0;
-//    Score(mytree2.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+//    Score(mytree2.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
 //
 //    score[0] = 0;
@@ -184,8 +220,12 @@ void RDLM::Load()
 //    score[3] = 0;
 //    std::cerr << "scoring: " << mytree->GetString() << std::endl;
 //
-//    Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+//    Score(mytree.get(), back_pointers, score, boundary_hash, *thread_objects);
 //    std::cerr << "head LM: " << score[0] << " label LM: " << score[2] << " approx: " << score[1] << " - " << score[3] << std::endl;
+//
+// #ifdef WITH_THREADS
+//       m_accessLock.unlock_shared();
+// #endif
 //
 //   }
 //    UTIL_THROW2("Finished");
@@ -193,7 +233,7 @@ void RDLM::Load()
 }
 
 
-void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost::array<float, 4> &score, std::vector<int> &ancestor_heads, std::vector<int> &ancestor_labels, size_t &boundary_hash, int num_virtual, int rescoring_levels) const
+void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost::array<float, 4> &score, size_t &boundary_hash, rdlm::ThreadLocal &thread_objects, int num_virtual, int rescoring_levels) const
 {
 
   // ignore terminal nodes
@@ -205,20 +245,23 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   if (root->GetLabel() == m_glueSymbol) {
     // recursion
     for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it) {
-      Score(it->get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash, num_virtual, rescoring_levels);
+      Score(it->get(), back_pointers, score, boundary_hash, thread_objects, num_virtual, rescoring_levels);
     }
     return;
   }
 
+  std::vector<int> &ancestor_heads = thread_objects.ancestor_heads;
+  std::vector<int> &ancestor_labels = thread_objects.ancestor_labels;
+
   // ignore virtual nodes (in binarization; except if it's the root)
-  if (m_binarized && root->GetLabel()[0] == '^' && !ancestor_heads.empty()) {
+  if (m_binarized && root->GetLabel().GetString(0).as_string()[0] == '^' && !ancestor_heads.empty()) {
     // recursion
     if (root->IsLeafNT() && m_context_up > 1 && ancestor_heads.size()) {
       root = back_pointers.find(root)->second.get();
       rescoring_levels = m_context_up-1;
     }
     for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it) {
-      Score(it->get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash, num_virtual, rescoring_levels);
+      Score(it->get(), back_pointers, score, boundary_hash, thread_objects, num_virtual, rescoring_levels);
     }
     return;
   }
@@ -228,25 +271,19 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
     return;
   }
 
-  nplm::neuralTM *lm_head = lm_head_backend_.get();
-  if (!lm_head) {
-    lm_head = new nplm::neuralTM(*lm_head_base_instance_);
-    lm_head->set_normalization(m_normalizeHeadLM);
-    lm_head->set_cache(m_cacheSize);
-    lm_head_backend_.reset(lm_head);
-  }
 
   // ignore preterminal node (except if we're scoring root nodes)
   if (root->GetLength() == 1 && root->GetChildren()[0]->IsTerminal()) {
     // root of tree: score without context
     if (ancestor_heads.empty() || (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head)) {
-      std::vector<int> ngram_head_null (static_head_null);
-      ngram_head_null.back() = lm_head->lookup_output_word(root->GetChildren()[0]->GetLabel());
-      if (m_isPretermBackoff && ngram_head_null.back() == 0) {
-        ngram_head_null.back() = lm_head->lookup_output_word(root->GetLabel());
+      std::vector<int> & ngram = thread_objects.ngram;
+      ngram = static_head_null;
+      ngram.back() = Factor2ID(root->GetChildren()[0]->GetLabel()[m_factorType], HEAD_OUTPUT);
+      if (m_isPretermBackoff && ngram.back() == 0) {
+        ngram.back() = Factor2ID(root->GetLabel()[m_factorType], HEAD_OUTPUT);
       }
       if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head) {
-        std::vector<int>::iterator it = ngram_head_null.begin();
+        std::vector<int>::iterator it = ngram.begin();
         std::fill_n(it, m_context_left, static_start_head);
         it += m_context_left;
         std::fill_n(it, m_context_left, static_start_label);
@@ -260,10 +297,10 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
         it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
       }
       if (ancestor_labels.size() >= m_context_up && !num_virtual) {
-        score[0] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
+        score[0] += FloorScore(thread_objects.lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
       } else {
-        boost::hash_combine(boundary_hash, ngram_head_null.back());
-        score[1] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
+        boost::hash_combine(boundary_hash, ngram.back());
+        score[1] += FloorScore(thread_objects.lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
       }
     }
     return;
@@ -281,22 +318,15 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
     }
   }
 
-  nplm::neuralTM *lm_label = lm_label_backend_.get();
-  if (!lm_label) {
-    lm_label = new nplm::neuralTM(*lm_label_base_instance_);
-    lm_label->set_normalization(m_normalizeLabelLM);
-    lm_label->set_cache(m_cacheSize);
-    lm_label_backend_.reset(lm_label);
-  }
 
   std::pair<int,int> head_ids;
-  InternalTree* found = GetHead(root, back_pointers, head_ids);
-  if (found == NULL) {
+  bool found = GetHead(root, back_pointers, head_ids);
+  if (!found) {
     head_ids = std::make_pair(static_dummy_head, static_dummy_head);
   }
 
   size_t context_up_nonempty = std::min(m_context_up, ancestor_heads.size());
-  const std::string & head_label = root->GetLabel();
+  const StringPiece & head_label = root->GetLabel().GetString(0);
   bool virtual_head = false;
   int reached_end = 0;
   int label_idx, label_idx_out;
@@ -308,45 +338,24 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
       reached_end = 2; // indicate that we've seen the last symbol of the RHS
     }
     // with 'full' binarization, direction is encoded in 2nd char
-    std::string clipped_label = (m_binarized == 3) ? head_label.substr(2,head_label.size()-2) : head_label.substr(1,head_label.size()-1);
-    label_idx = lm_label->lookup_input_word(clipped_label);
-    label_idx_out = lm_label->lookup_output_word(clipped_label);
+    StringPiece clipped_label = (m_binarized == 3) ? head_label.substr(2,head_label.size()-2) : head_label.substr(1,head_label.size()-1);
+    label_idx = lm_label_base_instance_->lookup_input_word(clipped_label.as_string());
+    label_idx_out = lm_label_base_instance_->lookup_output_word(clipped_label.as_string());
   } else {
     reached_end = 3; // indicate that we've seen first and last symbol of the RHS
-    label_idx = lm_label->lookup_input_word(head_label);
-    label_idx_out = lm_label->lookup_output_word(head_label);
+    label_idx = Factor2ID(root->GetLabel()[0], LABEL_INPUT);
+    label_idx_out = Factor2ID(root->GetLabel()[0], LABEL_OUTPUT);
   }
 
   int head_idx = (virtual_head && head_ids.first == static_dummy_head) ? static_label_null[offset_up_head+m_context_up-1] : head_ids.first;
 
   // root of tree: score without context
   if (ancestor_heads.empty() || (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head)) {
-    if (head_idx != static_dummy_head && head_idx != static_head_head) {
-      std::vector<int> ngram_head_null (static_head_null);
-      *(ngram_head_null.end()-2) = label_idx;
-      ngram_head_null.back() = head_ids.second;
-      if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head && !num_virtual) {
-        std::vector<int>::iterator it = ngram_head_null.begin();
-        std::fill_n(it, m_context_left, static_start_head);
-        it += m_context_left;
-        std::fill_n(it, m_context_left, static_start_label);
-        it += m_context_left;
-        std::fill_n(it, m_context_right, static_stop_head);
-        it += m_context_right;
-        std::fill_n(it, m_context_right, static_stop_label);
-        it += m_context_right;
-        it = std::copy(ancestor_heads.end()-context_up_nonempty, ancestor_heads.end(), it);
-        it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
-        score[0] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
-      } else {
-        boost::hash_combine(boundary_hash, ngram_head_null.back());
-        score[1] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram_head_null.data(), ngram_head_null.size())));
-      }
-    }
-    std::vector<int> ngram_label_null (static_label_null);
-    ngram_label_null.back() = label_idx_out;
+    std::vector<int> & ngram = thread_objects.ngram;
+    ngram = static_label_null;
+    ngram.back() = label_idx_out;
     if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head && !num_virtual) {
-      std::vector<int>::iterator it = ngram_label_null.begin();
+      std::vector<int>::iterator it = ngram.begin();
       std::fill_n(it, m_context_left, static_start_head);
       it += m_context_left;
       std::fill_n(it, m_context_left, static_start_label);
@@ -357,10 +366,20 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
       it += m_context_right;
       it = std::copy(ancestor_heads.end()-context_up_nonempty, ancestor_heads.end(), it);
       it = std::copy(ancestor_labels.end()-context_up_nonempty, ancestor_labels.end(), it);
-      score[2] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram_label_null.data(), ngram_label_null.size())));
+      score[2] += FloorScore(thread_objects.lm_label->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
     } else {
-      boost::hash_combine(boundary_hash, ngram_label_null.back());
-      score[3] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram_label_null.data(), ngram_label_null.size())));
+      boost::hash_combine(boundary_hash, ngram.back());
+      score[3] += FloorScore(thread_objects.lm_label->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
+    }
+    if (head_idx != static_dummy_head && head_idx != static_head_head) {
+      ngram.push_back(head_ids.second);
+      *(ngram.end()-2) = label_idx;
+      if (ancestor_heads.size() == m_context_up && ancestor_heads.back() == static_root_head && !num_virtual) {
+        score[0] += FloorScore(thread_objects.lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
+      } else {
+        boost::hash_combine(boundary_hash, ngram.back());
+        score[1] += FloorScore(thread_objects.lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
+      }
     }
   }
 
@@ -380,7 +399,8 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   }
   size_t up_padding = m_context_up - context_up_nonempty;
 
-  std::vector<int> ngram (static_label_null);
+  std::vector<int> & ngram = thread_objects.ngram;
+  ngram = static_label_null;
 
   std::vector<int>::iterator it = ngram.begin() + offset_up_head;
   if (up_padding > 0) {
@@ -401,21 +421,25 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   // get number of children after unbinarization
   if (m_binarized) {
     num_children = 0;
-    UnbinarizedChildren real_children(root, back_pointers, m_binarized);
-    for (std::vector<TreePointer>::const_iterator it = real_children.begin(); it != real_children.end(); it = ++real_children) {
+    UnbinarizedChildren real_children(root, back_pointers, m_binarized, thread_objects.stack);
+    for (std::vector<TreePointer>::const_iterator it = real_children.begin(); !real_children.ended(); it = ++real_children) {
       num_children++;
     }
   }
 
   if (m_context_right && (reached_end == 1 || reached_end == 3)) num_children++; //also predict start label
   if (m_context_left && (reached_end == 2 || reached_end == 3)) num_children++; //also predict end label
+  std::vector<int> & heads = thread_objects.heads;
+  std::vector<int> & labels = thread_objects.labels;
+  std::vector<int> & heads_output = thread_objects.heads_output;
+  std::vector<int> & labels_output = thread_objects.labels_output;
 
-  std::vector<int> heads(num_children);
-  std::vector<int> labels(num_children);
-  std::vector<int> heads_output(num_children);
-  std::vector<int> labels_output(num_children);
+  heads.resize(num_children);
+  labels.resize(num_children);
+  heads_output.resize(num_children);
+  labels_output.resize(num_children);
 
-  GetChildHeadsAndLabels(root, back_pointers, reached_end, lm_head, lm_label, heads, labels, heads_output, labels_output);
+  GetChildHeadsAndLabels(root, back_pointers, reached_end, thread_objects);
 
   //left padding; only need to add this initially
   if (reached_end == 1 || reached_end == 3) {
@@ -469,10 +493,10 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
     ngram.back() = labels_output[i];
 
     if (ancestor_labels.size() >= m_context_up && !num_virtual) {
-      score[2] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
+      score[2] += FloorScore(thread_objects.lm_label->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
     } else {
       boost::hash_combine(boundary_hash, ngram.back());
-      score[3] += FloorScore(lm_label->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
+      score[3] += FloorScore(thread_objects.lm_label->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
     }
 
     // construct context of head model and predict head
@@ -482,10 +506,10 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
       ngram.push_back(heads_output[i]);
 
       if (ancestor_labels.size() >= m_context_up && !num_virtual) {
-        score[0] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
+        score[0] += FloorScore(thread_objects.lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
       } else {
         boost::hash_combine(boundary_hash, ngram.back());
-        score[1] += FloorScore(lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
+        score[1] += FloorScore(thread_objects.lm_head->lookup_ngram(EigenMap(ngram.data(), ngram.size())));
       }
       ngram.pop_back();
     }
@@ -510,13 +534,13 @@ void RDLM::Score(InternalTree* root, const TreePointerMap & back_pointers, boost
   }
   // recursion
   for (std::vector<TreePointer>::const_iterator it = root->GetChildren().begin(); it != root->GetChildren().end(); ++it) {
-    Score(it->get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash, num_virtual, rescoring_levels - 1);
+    Score(it->get(), back_pointers, score, boundary_hash, thread_objects, num_virtual, rescoring_levels - 1);
   }
   ancestor_heads.pop_back();
   ancestor_labels.pop_back();
 }
 
-InternalTree* RDLM::GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs, InternalTree* head_ptr) const
+bool RDLM::GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs) const
 {
   InternalTree *tree;
 
@@ -527,53 +551,34 @@ InternalTree* RDLM::GetHead(InternalTree* root, const TreePointerMap & back_poin
       tree = it->get();
     }
 
-    if (m_binarized && tree->GetLabel()[0] == '^') {
-      head_ptr = GetHead(tree, back_pointers, IDs, head_ptr);
-      if (head_ptr != NULL && !m_isPTKVZ) {
-        return head_ptr;
+    if (m_binarized && tree->GetLabel().GetString(0).as_string()[0] == '^') {
+      bool found = GetHead(tree, back_pointers, IDs);
+      if (found) {
+        return true;
       }
     }
 
     // assumption (only true for dependency parse): each constituent has a preterminal label, and corresponding terminal is head
     // if constituent has multiple preterminals, first one is picked; if it has no preterminals, dummy_head is returned
-    else if (tree->GetLength() == 1 && tree->GetChildren()[0]->IsTerminal() && head_ptr == NULL) {
-      head_ptr = tree;
-      if (!m_isPTKVZ) {
-        GetIDs(head_ptr->GetChildren()[0]->GetLabel(), head_ptr->GetLabel(), IDs);
-        return head_ptr;
-      }
-    }
-
-    // add PTKVZ to lemma of verb
-    else if (m_isPTKVZ && head_ptr && tree->GetLabel() == "avz") {
-      InternalTree *tree2;
-      for (std::vector<TreePointer>::const_iterator it2 = tree->GetChildren().begin(); it2 != tree->GetChildren().end(); ++it2) {
-        if ((*it2)->IsLeafNT()) {
-          tree2 = back_pointers.find(it2->get())->second.get();
-        } else {
-          tree2 = it2->get();
-        }
-        if (tree2->GetLabel() == "PTKVZ" && tree2->GetLength() == 1 && tree2->GetChildren()[0]->IsTerminal()) {
-          std::string verb = tree2->GetChildren()[0]->GetLabel() + head_ptr->GetChildren()[0]->GetLabel();
-          GetIDs(verb, head_ptr->GetLabel(), IDs);
-          return head_ptr;
-        }
-      }
+    else if (tree->GetLength() == 1 && tree->GetChildren()[0]->IsTerminal()) {
+      GetIDs(tree->GetChildren()[0]->GetLabel(), tree->GetLabel(), IDs);
+      return true;
     }
   }
 
-  if (head_ptr != NULL) {
-    GetIDs(head_ptr->GetChildren()[0]->GetLabel(), head_ptr->GetLabel(), IDs);
-  }
-  return head_ptr;
+  return false;
 }
 
 
-void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, const nplm::neuralTM *lm_head, const nplm::neuralTM *lm_label, std::vector<int> & heads, std::vector<int> & labels, std::vector<int> & heads_output, std::vector<int> & labels_output) const
+void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, rdlm::ThreadLocal &thread_objects) const
 {
   std::pair<int,int> child_ids;
-  InternalTree* found;
   size_t j = 0;
+
+  std::vector<int> & heads = thread_objects.heads;
+  std::vector<int> & labels = thread_objects.labels;
+  std::vector<int> & heads_output = thread_objects.heads_output;
+  std::vector<int> & labels_output = thread_objects.labels_output;
 
   // score start label (if enabled) for all nonterminal nodes (but not for terminal or preterminal nodes)
   if (m_context_right && (reached_end == 1 || reached_end == 3)) {
@@ -583,10 +588,10 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
     j++;
   }
 
-  UnbinarizedChildren real_children(root, back_pointers, m_binarized);
+  UnbinarizedChildren real_children(root, back_pointers, m_binarized, thread_objects.stack);
 
   // extract head words / labels
-  for (std::vector<TreePointer>::const_iterator itx = real_children.begin(); itx != real_children.end(); itx = ++real_children) {
+  for (std::vector<TreePointer>::const_iterator itx = real_children.begin(); !real_children.ended(); itx = ++real_children) {
     if ((*itx)->IsTerminal()) {
       std::cerr << "non-terminal node " << root->GetLabel() << " has a mix of terminal and non-terminal children. This shouldn't happen..." << std::endl;
       std::cerr << "children: ";
@@ -616,13 +621,13 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
       continue;
     }
 
-    found = GetHead(child, back_pointers, child_ids);
-    if (found == NULL) {
+    bool found = GetHead(child, back_pointers, child_ids);
+    if (!found) {
       child_ids = std::make_pair(static_dummy_head, static_dummy_head);
     }
 
-    labels[j] = lm_head->lookup_input_word(child->GetLabel());
-    labels_output[j] = lm_label->lookup_output_word(child->GetLabel());
+    labels[j] = Factor2ID(child->GetLabel()[0], LABEL_INPUT);
+    labels_output[j] = Factor2ID(child->GetLabel()[0], LABEL_OUTPUT);
     heads[j] = child_ids.first;
     heads_output[j] = child_ids.second;
     j++;
@@ -637,22 +642,78 @@ void RDLM::GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & bac
 }
 
 
-void RDLM::GetIDs(const std::string & head, const std::string & preterminal, std::pair<int,int> & IDs) const
+void RDLM::GetIDs(const Word & head, const Word & preterminal, std::pair<int,int> & IDs) const
 {
-  IDs.first = lm_head_base_instance_->lookup_input_word(head);
+  IDs.first = Factor2ID(head[m_factorType], HEAD_INPUT);
   if (m_isPretermBackoff && IDs.first == 0) {
-    IDs.first = lm_head_base_instance_->lookup_input_word(preterminal);
+    IDs.first = Factor2ID(preterminal[0], HEAD_INPUT);
   }
   if (m_sharedVocab) {
     IDs.second = IDs.first;
   } else {
-    IDs.second = lm_head_base_instance_->lookup_output_word(head);
+    IDs.second = Factor2ID(head[m_factorType], HEAD_OUTPUT);
     if (m_isPretermBackoff && IDs.second == 0) {
-      IDs.second = lm_head_base_instance_->lookup_output_word(preterminal);
+      IDs.second = Factor2ID(preterminal[0], HEAD_OUTPUT);
     }
   }
 }
 
+// map from moses factor to NPLM ID; use vectors as cache to avoid hash table lookups
+int RDLM::Factor2ID(const Factor * const factor, int model_type) const
+{
+  size_t ID = factor->GetId();
+  int ret;
+
+  std::vector<int>* cache = NULL;
+  switch(model_type) {
+  case LABEL_INPUT:
+    cache = &factor2id_label_input;
+    break;
+  case LABEL_OUTPUT:
+    cache = &factor2id_label_output;
+    break;
+  case HEAD_INPUT:
+    cache = &factor2id_head_input;
+    break;
+  case HEAD_OUTPUT:
+    cache = &factor2id_head_output;
+    break;
+  }
+
+  try {
+    ret = cache->at(ID);
+  } catch (const std::out_of_range& oor) {
+#ifdef WITH_THREADS //need to resize cache; write lock
+    m_accessLock.unlock_shared();
+    m_accessLock.lock();
+#endif
+    cache->resize(ID*2, -1);
+#ifdef WITH_THREADS //go back to read lock
+    m_accessLock.unlock();
+    m_accessLock.lock_shared();
+#endif
+    ret = -1;
+  }
+  if (ret == -1) {
+    switch(model_type) {
+    case LABEL_INPUT:
+      ret = lm_label_base_instance_->lookup_input_word(factor->GetString().as_string());
+      break;
+    case LABEL_OUTPUT:
+      ret = lm_label_base_instance_->lookup_output_word(factor->GetString().as_string());
+      break;
+    case HEAD_INPUT:
+      ret = lm_head_base_instance_->lookup_input_word(factor->GetString().as_string());
+      break;
+    case HEAD_OUTPUT:
+      ret = lm_head_base_instance_->lookup_output_word(factor->GetString().as_string());
+      break;
+    }
+    (*cache)[ID] = ret;
+  }
+
+  return ret;
+}
 
 void RDLM::PrintInfo(std::vector<int> &ngram, nplm::neuralTM* lm) const
 {
@@ -689,18 +750,32 @@ RDLM::TreePointerMap RDLM::AssociateLeafNTs(InternalTree* root, const std::vecto
 void RDLM::ScoreFile(std::string &path)
 {
   InputFileStream inStream(path);
+  rdlm::ThreadLocal *thread_objects = thread_objects_backend_.get();
+  if (!thread_objects) {
+    thread_objects = new rdlm::ThreadLocal(lm_head_base_instance_, lm_label_base_instance_, m_normalizeHeadLM, m_normalizeLabelLM, m_cacheSize);
+    thread_objects_backend_.reset(thread_objects);
+  }
   std::string line, null;
-  std::vector<int> ancestor_heads(m_context_up, static_root_head);
-  std::vector<int> ancestor_labels(m_context_up, static_root_label);
+  thread_objects->ancestor_heads.resize(0);
+  thread_objects->ancestor_labels.resize(0);
+  thread_objects->ancestor_heads.resize(m_context_up, static_root_head);
+  thread_objects->ancestor_labels.resize(m_context_up, static_root_label);
+#ifdef WITH_THREADS
+  //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+  m_accessLock.lock_shared();
+#endif
   while(getline(inStream, line)) {
     TreePointerMap back_pointers;
     boost::array<float, 4> score;
     score.fill(0);
     InternalTree* mytree (new InternalTree(line));
     size_t boundary_hash = 0;
-    Score(mytree, back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+    Score(mytree, back_pointers, score, boundary_hash, *thread_objects);
     std::cerr << "head LM: " << score[0] << "label LM: " << score[2] << std::endl;
   }
+#ifdef WITH_THREADS
+  m_accessLock.unlock_shared();
+#endif
 }
 
 
@@ -714,8 +789,6 @@ void RDLM::SetParameter(const std::string& key, const std::string& value)
     m_path_head_lm = value;
   } else if (key == "path_label_lm") {
     m_path_label_lm = value;
-  } else if (key == "ptkvz") {
-    m_isPTKVZ = Scan<bool>(value);
   } else if (key == "backoff") {
     m_isPretermBackoff = Scan<bool>(value);
   } else if (key == "context_up") {
@@ -744,7 +817,9 @@ void RDLM::SetParameter(const std::string& key, const std::string& value)
     else
       UTIL_THROW(util::Exception, "Unknown value for argument " << key << "=" << value);
   } else if (key == "glue_symbol") {
-    m_glueSymbol = value;
+    m_glueSymbolString = value;
+  } else if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
   } else if (key == "cache_size") {
     m_cacheSize = Scan<int>(value);
   } else {
@@ -780,10 +855,6 @@ FFState* RDLM::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
     accumulator->PlusEquals(ff_idx+1, prev_approx_label);
 
     bool full_sentence = (mytree->GetChildren().back()->GetLabel() == m_endTag || (mytree->GetChildren().back()->GetLabel() == m_endSymbol && mytree->GetChildren().back()->GetChildren().back()->GetLabel() == m_endTag));
-    std::vector<int> ancestor_heads ((full_sentence ? m_context_up : 0), static_root_head);
-    std::vector<int> ancestor_labels ((full_sentence ? m_context_up : 0), static_root_label);
-    ancestor_heads.reserve(10);
-    ancestor_labels.reserve(10);
 
     TreePointerMap back_pointers = AssociateLeafNTs(mytree.get(), previous_trees);
     boost::array<float, 4> score; // score_head, approx_score_head, score_label, approx_score_label
@@ -791,13 +862,45 @@ FFState* RDLM::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
     //hash of all boundary symbols (symbols with incomplete context); trees with same hash share state for cube pruning.
     size_t boundary_hash = 0;
     if (!m_rerank) {
-      Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+#ifdef WITH_THREADS
+      //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+      m_accessLock.lock_shared();
+#endif
+      rdlm::ThreadLocal *thread_objects = thread_objects_backend_.get();
+      if (!thread_objects) {
+        thread_objects = new rdlm::ThreadLocal(lm_head_base_instance_, lm_label_base_instance_, m_normalizeHeadLM, m_normalizeLabelLM, m_cacheSize);
+        thread_objects_backend_.reset(thread_objects);
+      }
+      thread_objects->ancestor_heads.resize(0);
+      thread_objects->ancestor_labels.resize(0);
+      thread_objects->ancestor_heads.resize((full_sentence ? m_context_up : 0), static_root_head);
+      thread_objects->ancestor_labels.resize((full_sentence ? m_context_up : 0), static_root_label);
+      Score(mytree.get(), back_pointers, score, boundary_hash, *thread_objects);
+#ifdef WITH_THREADS
+      m_accessLock.unlock_shared();
+#endif
       accumulator->PlusEquals(ff_idx, score[0] + score[1]);
       accumulator->PlusEquals(ff_idx+1, score[2] + score[3]);
     }
     mytree->Combine(previous_trees);
     if (m_rerank && full_sentence) {
-      Score(mytree.get(), back_pointers, score, ancestor_heads, ancestor_labels, boundary_hash);
+#ifdef WITH_THREADS
+      //read-lock for cache; cache resizes are so rare that we want to minimize number of calls, not scope
+      m_accessLock.lock_shared();
+#endif
+      rdlm::ThreadLocal *thread_objects = thread_objects_backend_.get();
+      if (!thread_objects) {
+        thread_objects = new rdlm::ThreadLocal(lm_head_base_instance_, lm_label_base_instance_, m_normalizeHeadLM, m_normalizeLabelLM, m_cacheSize);
+        thread_objects_backend_.reset(thread_objects);
+      }
+      thread_objects->ancestor_heads.resize(0);
+      thread_objects->ancestor_labels.resize(0);
+      thread_objects->ancestor_heads.resize((full_sentence ? m_context_up : 0), static_root_head);
+      thread_objects->ancestor_labels.resize((full_sentence ? m_context_up : 0), static_root_label);
+      Score(mytree.get(), back_pointers, score, boundary_hash, *thread_objects);
+#ifdef WITH_THREADS
+      m_accessLock.unlock_shared();
+#endif
       accumulator->PlusEquals(ff_idx, score[0] + score[1]);
       accumulator->PlusEquals(ff_idx+1, score[2] + score[3]);
     }

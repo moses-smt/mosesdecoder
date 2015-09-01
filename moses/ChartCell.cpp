@@ -53,7 +53,7 @@ ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
   ChartCellBase(startPos, endPos), m_manager(manager)
 {
   const StaticData &staticData = StaticData::Instance();
-  m_nBestIsEnabled = staticData.IsNBestEnabled();
+  m_nBestIsEnabled = staticData.options().nbest.enabled;
 }
 
 ChartCell::~ChartCell() {}
@@ -100,7 +100,7 @@ void ChartCell::Decode(const ChartTranslationOptionList &transOptList
   }
 
   // pluck things out of queue and add to hypo collection
-  const size_t popLimit = staticData.GetCubePruningPopLimit();
+  const size_t popLimit = staticData.options().cube.pop_limit;
   for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) {
     ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);

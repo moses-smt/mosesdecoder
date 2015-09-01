@@ -1,7 +1,6 @@
 #include "ug_phrasepair.h"
 
-namespace Moses {
-namespace bitext {
+namespace sapt {
 
 void
 fill_lr_vec2
@@ -40,5 +39,5 @@ fill_lr_vec2
 }
 
 
-} // namespace bitext
-} // namespace Moses
+} // namespace sapt
+

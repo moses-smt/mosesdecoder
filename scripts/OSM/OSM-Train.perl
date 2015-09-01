@@ -109,7 +109,7 @@ if (defined($SRILM_DIR)) {
     `$cmd`;
 }
 else {
-  $cmd = "$LMPLZ -S 20% -T $OUT_DIR --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1 2>> /dev/stderr";
+  $cmd = "$LMPLZ -T $OUT_DIR --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1 2>> /dev/stderr";
   print STDERR "Executing: $cmd\n";
   `$cmd`;
 }
@@ -117,7 +117,7 @@ else {
 print STDERR "Binarizing\n";
 $cmd = "$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM $OUT_DIR/$factor_val/operationLM.bin";
 print STDERR "Executing: $cmd\n";
-`$cmd`;
+system($cmd) == 0 or die("system $cmd failed: $?");
 
 }
 

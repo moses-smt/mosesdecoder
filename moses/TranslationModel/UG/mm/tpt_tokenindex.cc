@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007-2013 Ulrich Germann
 #include <sstream>
 #include <cstring>
@@ -9,9 +9,10 @@
 #include <boost/pool/pool_alloc.hpp>
 
 #include "tpt_tokenindex.h"
+#include "ug_typedefs.h"
 
 using namespace std;
-namespace ugdiss
+namespace sapt
 {
 
   TokenIndex::

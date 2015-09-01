@@ -122,10 +122,11 @@ def main(options):
 
     if options.output_dir is None:
         options.output_dir = options.working_dir
-    else:
-        # Create output dir if necessary
-        if not os.path.exists(options.output_dir):
-            os.makedirs(options.output_dir)
+    # Create dirs if necessary
+    if not os.path.exists(options.working_dir):
+        os.makedirs(options.working_dir)
+    if not os.path.exists(options.output_dir):
+        os.makedirs(options.output_dir)
 
     numberized_file = os.path.basename(options.corpus_stem) + '.numberized'
     train_file = numberized_file
@@ -187,12 +188,14 @@ def main(options):
         ret = subprocess.call(extraction_cmd)
         if ret:
             raise Exception("preparing neural LM failed")
+        options.validation_file = os.path.join(
+            options.working_dir, os.path.basename(options.validation_corpus))
 
     else:
         options.validation_file = None
 
-    options.input_words_file = options.words_file
-    options.output_words_file = options.words_file
+    options.input_words_file = os.path.join(options.working_dir, options.words_file)
+    options.output_words_file = os.path.join(options.working_dir, options.words_file)
     options.input_vocab_size = options.vocab_size
     options.output_vocab_size = options.vocab_size
 
@@ -200,10 +203,15 @@ def main(options):
     train_nplm.main(options)
 
     sys.stderr.write('averaging null words\n')
+    output_model_file = os.path.join(
+              options.output_dir,
+              options.output_model + '.model.nplm.best')
+    if not os.path.exists(output_model_file):
+      output_model_file =  os.path.join(
+              options.output_dir,
+              options.output_model + '.model.nplm.' + str(options.epochs))
     average_options = averageNullEmbedding.parser.parse_args([
-        '-i', os.path.join(
-            options.output_dir,
-            options.output_model + '.model.nplm.' + str(options.epochs)),
+        '-i', output_model_file ,
         '-o', os.path.join(
             options.output_dir, options.output_model + '.model.nplm'),
         '-t', os.path.join(options.working_dir, numberized_file),

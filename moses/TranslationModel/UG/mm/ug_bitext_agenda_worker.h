@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // to be included from ug_bitext_agenda.h
 
 template<typename Token>
@@ -17,10 +18,10 @@ Bitext<Token>::agenda
   //   reduce the number of lock / unlock operations we need to do
   //   during sampling.
 
-  uint64_t sid=0, offset=0;      // sid and offset of source phrase
-  size_t s1=0, s2=0, e1=0, e2=0; // soft and hard boundaries of target phrase
-  vector<uchar> aln;             // stores phrase-pair-internal alignment
-  while(sptr<job> j = ag.get_job())
+  uint64_t sid=0, offset=0;       // sid and offset of source phrase
+  size_t s1=0, s2=0, e1=0, e2=0;  // soft and hard boundaries of target phrase
+  std::vector<unsigned char> aln; // stores phrase-pair-internal alignment
+  while(SPTR<job> j = ag.get_job())
     {
       j->stats->register_worker();
       bitvector full_alignment(100*100); // Is full_alignment still needed???
@@ -53,7 +54,7 @@ Bitext<Token>::agenda
 	  Token const* eos = ag.bt.T2->sntEnd(sid);
 	  cerr << "[" << j->stats->good + 1 << "] ";
 	  while (t != eos) cerr << (*ag.bt.V2)[(t++)->id()] << " ";
-	  cerr << "[" << docid << "]" << endl;
+	  cerr << "[" << docid << "]" << std::endl;
 #endif
 
 	  float sample_weight = 1./num_pairs;
@@ -62,18 +63,18 @@ Bitext<Token>::agenda
 	  // adjust offsets in phrase-internal aligment
 	  for (size_t k = 1; k < aln.size(); k += 2) aln[k] += s2 - s1;
 
-	  vector<uint64_t> seen; seen.reserve(10);
+	  std::vector<uint64_t> seen; seen.reserve(10);
 	  // It is possible that the phrase extraction extracts the same
 	  // phrase twice, e.g., when word a co-occurs with sequence b b b
 	  // but is aligned only to the middle word. We can only count
-	  // each phrase pair once per source phrase occurrence, or else
+	  // each phrase std::pair once per source phrase occurrence, or else
 	  // run the risk of having more joint counts than marginal
 	  // counts.
 
 	  for (size_t s = s1; s <= s2; ++s)
 	    {
 	      TSA<Token> const& I = j->fwd ? *ag.bt.I2 : *ag.bt.I1;
-	      sptr<iter> b = I.find(o + s, e1 - s);
+	      SPTR<iter> b = I.find(o + s, e1 - s);
 	      UTIL_THROW_IF2(!b || b->size() < e1-s, "target phrase not found");
 
 	      for (size_t i = e1; i <= e2; ++i)
@@ -87,7 +88,8 @@ Bitext<Token>::agenda
 		  seen.push_back(tpid);
 
 		  size_t raw2 = b->approxOccurrenceCount();
-		  j->stats->add(tpid, sample_weight, aln, raw2,
+		  float bwgt = j->m_bias ? (*j->m_bias)[sid] : 1;
+		  j->stats->add(tpid, sample_weight, bwgt, aln, raw2,
 				po_fwd, po_bwd, docid);
 		  bool ok = (i == e2) || b->extend(o[i].id());
 		  UTIL_THROW_IF2(!ok, "Could not extend target phrase.");

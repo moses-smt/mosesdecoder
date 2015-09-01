@@ -71,7 +71,7 @@ namespace Moses
 #ifdef IFVERBOSE
 #undef IFVERBOSE
 #endif
-#define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
+#define IFVERBOSE(level) if (Moses::StaticData::Instance().GetVerboseLevel() >= level)
 #define XVERBOSE(level,str) VERBOSE(level, "[" << HERE << "] " << str)
 #define HERE __FILE__ << ":" << __LINE__
 #define FEATUREVERBOSE(level,str) FEATUREVERBOSE2(level, "[" << GetScoreProducerDescription() << "] " << str)

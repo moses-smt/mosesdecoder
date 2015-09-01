@@ -61,6 +61,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/AlignmentInfoTest.cpp</locationURI>
 		</link>
 		<link>
+			<name>AllOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>AllOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.h</locationURI>
+		</link>
+		<link>
 			<name>BaseManager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.cpp</locationURI>
@@ -71,6 +81,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.h</locationURI>
 		</link>
 		<link>
+			<name>BeamSearchOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BeamSearchOptions.h</locationURI>
+		</link>
+		<link>
 			<name>BitmapContainer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.cpp</locationURI>
@@ -79,6 +94,16 @@
 			<name>BitmapContainer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.h</locationURI>
+		</link>
+		<link>
+			<name>BookkeepingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>BookkeepingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.h</locationURI>
 		</link>
 		<link>
 			<name>CMakeLists.txt</name>
@@ -229,6 +254,16 @@
 			<name>ContextParameters.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ContextParameters.h</locationURI>
+		</link>
+		<link>
+			<name>CubePruningOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/CubePruningOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>CubePruningOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/CubePruningOptions.h</locationURI>
 		</link>
 		<link>
 			<name>DecodeGraph.cpp</name>
@@ -461,6 +496,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/InputFileStream.h</locationURI>
 		</link>
 		<link>
+			<name>InputOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/InputOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>InputOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/InputOptions.h</locationURI>
+		</link>
+		<link>
 			<name>InputPath.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/InputPath.cpp</locationURI>
@@ -491,6 +536,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>LMBR_Options.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LMBR_Options.cpp</locationURI>
+		</link>
+		<link>
+			<name>LMBR_Options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LMBR_Options.h</locationURI>
+		</link>
+		<link>
 			<name>LVoc.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LVoc.cpp</locationURI>
@@ -509,6 +564,21 @@
 			<name>LatticeMBR.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LatticeMBR.h</locationURI>
+		</link>
+		<link>
+			<name>LookupOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LookupOptions.h</locationURI>
+		</link>
+		<link>
+			<name>MBR_Options.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/MBR_Options.cpp</locationURI>
+		</link>
+		<link>
+			<name>MBR_Options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/MBR_Options.h</locationURI>
 		</link>
 		<link>
 			<name>Manager.cpp</name>
@@ -536,6 +606,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/MosesTest.cpp</locationURI>
 		</link>
 		<link>
+			<name>NBestOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>NBestOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.h</locationURI>
+		</link>
+		<link>
 			<name>NonTerminal.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/NonTerminal.cpp</locationURI>
@@ -549,6 +629,16 @@
 			<name>ObjectPool.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ObjectPool.h</locationURI>
+		</link>
+		<link>
+			<name>OptionsBaseClass.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.cpp</locationURI>
+		</link>
+		<link>
+			<name>OptionsBaseClass.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.h</locationURI>
 		</link>
 		<link>
 			<name>OutputCollector.h</name>
@@ -636,6 +726,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingConstraint.h</locationURI>
 		</link>
 		<link>
+			<name>ReorderingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReorderingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>ReorderingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReorderingOptions.h</locationURI>
+		</link>
+		<link>
+			<name>ReportingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>ReportingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.h</locationURI>
+		</link>
+		<link>
 			<name>RuleCube.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleCube.cpp</locationURI>
@@ -711,14 +821,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SearchNormal.h</locationURI>
 		</link>
 		<link>
-			<name>SearchNormalBatch.cpp</name>
+			<name>SearchOptions.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SearchNormalBatch.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.cpp</locationURI>
 		</link>
 		<link>
-			<name>SearchNormalBatch.h</name>
+			<name>SearchOptions.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SearchNormalBatch.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.h</locationURI>
 		</link>
 		<link>
 			<name>Sentence.cpp</name>
@@ -739,6 +849,16 @@
 			<name>SentenceStats.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SentenceStats.h</locationURI>
+		</link>
+		<link>
+			<name>ServerOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>ServerOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.h</locationURI>
 		</link>
 		<link>
 			<name>SquareMatrix.cpp</name>
@@ -1066,6 +1186,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/mbr.h</locationURI>
 		</link>
 		<link>
+			<name>parameters</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>rule.proto</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/rule.proto</locationURI>
@@ -1359,16 +1484,6 @@
 			<name>FF/SetSourcePhrase.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.h</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonChangeInput.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonChangeInput.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonChangeInput.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonChangeInput.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SkeletonStatefulFF.cpp</name>
@@ -2239,6 +2354,146 @@
 			<name>extract-ghkm/PhraseOrientation.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/AllOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/AllOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/BeamSearchOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BeamSearchOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/BookkeepingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/BookkeepingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/ContextParameters.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ContextParameters.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/ContextParameters.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ContextParameters.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/CubePruningOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/CubePruningOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/CubePruningOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/CubePruningOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/InputOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/InputOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/InputOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/InputOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/LMBR_Options.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LMBR_Options.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/LMBR_Options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LMBR_Options.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/LookupOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LookupOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/MBR_Options.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/MBR_Options.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/MBR_Options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/MBR_Options.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/NBestOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/NBestOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/OptionsBaseClass.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/OptionsBaseClass.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/ReorderingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReorderingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/ReorderingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReorderingOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/ReportingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/ReportingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/SearchOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/SearchOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/ServerOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/ServerOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.h</locationURI>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/LexicalReordering.cpp</name>

@@ -71,7 +71,7 @@ def process_stanford(infile, javacmd, stanfordpath):
             '-textFile', '-',
             'outFile', '-',
         ],
-        stdin=infile, stdout=PIPE, stderr=open('/dev/null', 'w'))
+        stdin=infile, stdout=PIPE)
     return stanford.stdout
 
 

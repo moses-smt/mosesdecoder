@@ -4,7 +4,7 @@
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
-
+#include <boost/foreach.hpp>
 using namespace std;
 
 namespace Moses
@@ -37,19 +37,19 @@ public:
   }
 };
 
-SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl)
-  :Search(manager)
-  ,m_source(source)
-  ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_transOptColl(transOptColl)
+SearchCubePruning::
+SearchCubePruning(Manager& manager, const InputType &source,
+                  const TranslationOptionCollection &transOptColl)
+  : Search(manager)
+  , m_source(source)
+  , m_hypoStackColl(source.GetSize() + 1)
+  , m_transOptColl(transOptColl)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruning(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
-    sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
+    sourceHypoColl->SetMaxHypoStackSize(m_options.search.stack_size);
+    sourceHypoColl->SetBeamWidth(m_options.search.beam_width);
 
     m_hypoStackColl[ind] = sourceHypoColl;
   }
@@ -66,37 +66,39 @@ SearchCubePruning::~SearchCubePruning()
  */
 void SearchCubePruning::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
 
-  HypothesisStackCubePruning &firstStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
+  HypothesisStackCubePruning &firstStack
+  = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
   firstStack.AddInitial(hypo);
   // Call this here because the loop below starts at the second stack.
   firstStack.CleanupArcList();
   CreateForwardTodos(firstStack);
 
-  const size_t PopLimit = StaticData::Instance().GetCubePruningPopLimit();
-  VERBOSE(3,"Cube Pruning pop limit is " << PopLimit << std::endl)
+  const size_t PopLimit = m_manager.options().cube.pop_limit;
+  VERBOSE(2,"Cube Pruning pop limit is " << PopLimit << std::endl);
 
-  const size_t Diversity = StaticData::Instance().GetCubePruningDiversity();
-  VERBOSE(3,"Cube Pruning diversity is " << Diversity << std::endl)
+  const size_t Diversity = m_manager.options().cube.diversity;
+  VERBOSE(2,"Cube Pruning diversity is " << Diversity << std::endl);
+  VERBOSE(2,"Max Phrase length is "
+          << m_manager.options().search.max_phrase_length << std::endl);
 
   // go through each stack
   size_t stackNo = 1;
+  int timelimit = m_options.search.timeout;
   std::vector < HypothesisStack* >::iterator iterStack;
   for (iterStack = m_hypoStackColl.begin() + 1 ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
-    // check if decoding ran out of time
-    double _elapsed_time = GetUserTime();
-    if (_elapsed_time > staticData.GetTimeoutThreshold()) {
-      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
-      return;
-    }
-    HypothesisStackCubePruning &sourceHypoColl = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+    // BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
+    if (this->out_of_time()) return;
 
-    // priority queue which has a single entry for each bitmap container, sorted by score of top hyp
-    std::priority_queue< BitmapContainer*, std::vector< BitmapContainer* >, BitmapContainerOrderer> BCQueue;
+    HypothesisStackCubePruning &sourceHypoColl
+    = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+
+    // priority queue which has a single entry for each bitmap
+    // container, sorted by score of top hyp
+    std::priority_queue < BitmapContainer*, std::vector< BitmapContainer* >,
+        BitmapContainerOrderer > BCQueue;
 
     _BMType::const_iterator bmIter;
     const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
@@ -144,7 +146,7 @@ void SearchCubePruning::Decode()
     IFVERBOSE(2) {
       m_manager.GetSentenceStats().StartTimeStack();
     }
-    sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
+    sourceHypoColl.PruneToSize(m_options.search.stack_size);
     VERBOSE(3,std::endl);
     sourceHypoColl.CleanupArcList();
     IFVERBOSE(2) {
@@ -197,9 +199,8 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
       }
 
       size_t maxSize = size - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+      size_t maxSizePhrase = m_manager.options().search.max_phrase_length;
       maxSize = std::min(maxSize, maxSizePhrase);
-
       for (endPos = startPos+1; endPos < startPos + maxSize; endPos++) {
         if (bitmap.GetValue(endPos))
           break;
@@ -240,7 +241,7 @@ SearchCubePruning::
 CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
-  int maxDistortion = StaticData::Instance().GetMaxDistortion();
+  int maxDistortion = m_manager.options().reordering.max_distortion;
   if (maxDistortion < 0) return true;
 
   // if there are reordering limits, make sure it is not violated

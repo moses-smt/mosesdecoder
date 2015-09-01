@@ -30,7 +30,7 @@ InterpolatedScorer.cpp
 Point.cpp
 PerScorer.cpp
 HwcmScorer.cpp
-../moses/FF/InternalTree.cpp
+InternalTree.cpp
 Scorer.cpp
 ScorerFactory.cpp
 Optimizer.cpp
