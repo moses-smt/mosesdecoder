@@ -14,6 +14,7 @@
 #include <boost/thread/tss.hpp>
 #include <boost/thread.hpp> 
 #include <boost/unordered_map.hpp>
+#include <boost/program_options.hpp>
 
 #ifdef WIN32
 #include "WIN32_functions.h"
@@ -129,18 +130,7 @@ void usage()
 {
   std::cerr << "\nFilter phrase table using significance testing as described\n"
             << "in H. Johnson, et al. (2007) Improving Translation Quality\n"
-            << "by Discarding Most of the Phrasetable. EMNLP 2007.\n"
-            << "\nUsage:\n"
-            << "\n  filter-pt -e english.suf-arr -f french.suf-arr\n"
-            << "      [-c] [-p] [-l threshold] [-n num] [-t num] < PHRASE-TABLE > FILTERED-PHRASE-TABLE\n\n"
-            << "   [-l threshold] >0.0, a+e, or a-e: keep values that have a -log significance > this\n"
-            << "   [-n num      ] 0, 1...: 0=no filtering, >0 sort by P(e|f) and keep the top num elements\n"
-            << "   [-c          ] add the cooccurence counts to the phrase table\n"
-            << "   [-p          ] add -log(significance) to the phrasetable\n"
-            << "   [-h          ] filter hierarchical rule table\n"
-            << "   [-t num      ] use num threads\n"
-            << "   [-m num      ] limit cache to num most recent phrases\n";
-  exit(1);
+            << "by Discarding Most of the Phrasetable. EMNLP 2007.\n";
 }
 
 struct PTEntry {
@@ -511,62 +501,67 @@ void filter_thread(std::istream* in, std::ostream* out, int pfe_index) {
   *out << std::flush;
 }
 
+namespace po = boost::program_options;
+
 int main(int argc, char * argv[])
 {
-  int c;
   std::string efile;
   std::string ffile;
   int pfe_index = 2;
   int threads = 1;
   size_t max_cache = 0;
-  while ((c = getopt(argc, argv, "cpf:e:i:n:t:l:m:h")) != -1) {
-    switch (c) {
-    case 'e':
-      efile = optarg;
-      break;
-    case 'f':
-      ffile = optarg;
-      break;
-    case 'i':  // index of pfe in phrase table
-      pfe_index = atoi(optarg);
-      break;
-    case 'n':  // keep only the top n entries in phrase table sorted by p(f|e) (0=all)
-      pfe_filter_limit = atoi(optarg);
-      std::cerr << "P(f|e) filter limit: " << pfe_filter_limit << std::endl;
-      break;
-    case 't': 
-      threads = atoi(optarg);
-      std::cerr << "Using threads: " << threads << std::endl;
-      break;
-    case 'm': 
-      max_cache = atoi(optarg);
-      std::cerr << "Using max phrases in caches: " << max_cache << std::endl;
-      break;
-    case 'c':
-      print_cooc_counts = true;
-      break;
-    case 'p':
-      print_neglog_significance = true;
-      break;
-    case 'h':
-      hierarchical = true;
-      break;
-    case 'l':
-      std::cerr << "-l = " << optarg << "\n";
-      if (strcmp(optarg,"a+e") == 0) {
-        sig_filter_limit = ALPHA_PLUS_EPS;
-      } else if (strcmp(optarg,"a-e") == 0) {
-        sig_filter_limit = ALPHA_MINUS_EPS;
-      } else {
-        char *x;
-        sig_filter_limit = strtod(optarg, &x);
-        if (sig_filter_limit < 0.0) {
-          std::cerr << "Filter limit (-l) must be either 'a+e', 'a-e' or a real number >= 0.0\n";
-          usage();
-        }
-      }
-      break;
-    default:
+  std::string str_sig_filter_limit;
+   
+  po::options_description general("General options");
+  general.add_options()
+    ("english,e", po::value<std::string>(&efile),
+     "english.suf-arr")
+    ("french,f", po::value<std::string>(&ffile),
+     "french.suf-arr")
+    ("pfe-index,i", po::value(&pfe_index)->default_value(2),
+     "Index of P(f|e) in phrase table")
+    ("pfe-filter-limit,n", po::value(&pfe_filter_limit)->default_value(0),
+     "0, 1...: 0=no filtering, >0 sort by P(e|f) and keep the top num elements")
+    ("threads,t", po::value(&threads)->default_value(1),
+     "number of threads to use")
+    ("max-cache,m", po::value(&max_cache)->default_value(0),
+     "limit cache to  arg  most recent phrases")
+    ("print-cooc,c", po::value(&print_cooc_counts)->zero_tokens()->default_value(false),
+     "add the coocurrence counts to the phrase table")
+    ("print-significance,p", po::value(&print_neglog_significance)->zero_tokens()->default_value(false),
+     "add -log(significance) to the phrase table")
+    ("hierarchical,h", po::value(&hierarchical)->zero_tokens()->default_value(false),
+     "filter hierarchical rule table")
+    ("sig-filter-limit,l", po::value(&str_sig_filter_limit),
+     ">0.0, a+e, or a-e: keep values that have a -log significance > this")
+  ;
+
+  po::options_description cmdline_options("Allowed options");
+  cmdline_options.add(general);
+  po::variables_map vm;
+  
+  try { 
+    po::store(po::command_line_parser(argc,argv).
+              options(cmdline_options).run(), vm);
+    po::notify(vm);
+  }
+  catch (std::exception& e) {
+    std::cout << "Error: " << e.what() << std::endl << std::endl;
+    
+    usage();
+    std::cout << cmdline_options << std::endl;
+    exit(0);
+  }
+    
+  if (strcmp(str_sig_filter_limit.c_str(),"a+e") == 0) {
+    sig_filter_limit = ALPHA_PLUS_EPS;
+  } else if (strcmp(str_sig_filter_limit.c_str(),"a-e") == 0) {
+    sig_filter_limit = ALPHA_MINUS_EPS;
+  } else {
+    char *x;
+    sig_filter_limit = strtod(str_sig_filter_limit.c_str(), &x);
+    if (sig_filter_limit < 0.0) {
+      std::cerr << "Filter limit (-l) must be either 'a+e', 'a-e' or a real number >= 0.0\n";
       usage();
     }
   }
