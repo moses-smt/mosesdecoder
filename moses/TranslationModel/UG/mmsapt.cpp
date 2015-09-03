@@ -237,6 +237,8 @@ namespace Moses
       {
         if (m->second == "random")
           m_sampling_method = random_sampling;
+        else if (m->second == "ranked")
+          m_sampling_method = ranked_sampling;
         else if (m->second == "full")
           m_sampling_method = full_coverage;
         else UTIL_THROW2("unrecognized specification 'method='" << m->second
@@ -826,9 +828,14 @@ namespace Moses
     SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
 
     // set sampling bias, depending on sampling method specified
+#if 0
+    // for the time being, always use the external bias
     if (m_sampling_method == random_sampling)
       set_bias_via_server(ttask);
     else UTIL_THROW2("Unknown sampling method: " << m_sampling_method);
+#else
+    set_bias_via_server(ttask);
+#endif
 
     boost::unique_lock<boost::shared_mutex> mylock(m_lock);
     SPTR<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
