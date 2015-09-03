@@ -154,6 +154,12 @@ if [ option.get "enable-mpi" : : "yes" ] {
   requirements += <library>boost_serialization ;
 }
 
+mmt = [ option.get "mmt" ] ; 
+if $(mmt) {
+  requirements += <define>MMT ;
+  requirements += <include>$(mmt) ; 
+}
+
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
 requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
