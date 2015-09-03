@@ -282,27 +282,25 @@ void lookup_phrase(SentIdSet& ids, const std::string& phrase,
       my_v.fillIdSeq(phrase, snt);
 
       tsa_t::tree_iterator m(&my_sa);
-      for (size_t k = 0; k < snt.size() && m.extend(snt[k]); ++k);
-      
-      ids->reserve(m.approxOccurrenceCount()+10);
-      ugdiss::tsa::ArrayEntry I(m.lower_bound(-1));
-      char const* stop = m.upper_bound(-1);
-      do {
-        m.root->readEntry(I.next,I);
-        ids->push_back(I.sid);
-      } while (I.next != stop);
-      
-      if(ids->size()==0) {
-          cerr<<"No occurrences found!!\n";
+      size_t k = 0;
+      while (k < snt.size() && m.extend(snt[k])) ++k;
+      if(k == snt.size()) {
+        ids->reserve(m.approxOccurrenceCount()+10);
+        ugdiss::tsa::ArrayEntry I(m.lower_bound(-1));
+        char const* stop = m.upper_bound(-1);
+        do {
+          m.root->readEntry(I.next,I);
+          ids->push_back(I.sid);
+        } while (I.next != stop);
+        
+        std::sort(ids->begin(), ids->end());
+        SentIdSet::element_type::iterator it =
+          std::unique(ids->begin(), ids->end());
+        ids->resize(it - ids->begin());
+        
+        if(ids->size() >= MINIMUM_SIZE_TO_KEEP)
+          cache.put(phrase, ids);
       }
-      
-      std::sort(ids->begin(), ids->end());
-      SentIdSet::element_type::iterator it =
-        std::unique(ids->begin(), ids->end());
-      ids->resize(it - ids->begin());
-      
-      if(ids->size() >= MINIMUM_SIZE_TO_KEEP)
-        cache.put(phrase, ids);
     }
 }
 
@@ -393,7 +391,7 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
   
   size_t cf = 0;
   std::vector<SentIdSet> fsets;
-  BOOST_FOREACH(boost::shared_ptr<SA> f_sa, f_sas) {
+  BOOST_FOREACH(boost::shared_ptr<SA>& f_sa, f_sas) {
     fsets.push_back( boost::shared_ptr<SentIdSet::element_type>(new SentIdSet::element_type()) );
     find_occurrences(fsets.back(), options.front()->f_phrase, f_sa->I, f_sa->V, f_sa->cache);
     cf += fsets.back()->size();
@@ -405,7 +403,7 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
     
     size_t ce = 0;
     std::vector<SentIdSet> esets;
-    BOOST_FOREACH(boost::shared_ptr<SA> e_sa,  e_sas) {
+    BOOST_FOREACH(boost::shared_ptr<SA>& e_sa,  e_sas) {
       esets.push_back( boost::shared_ptr<SentIdSet::element_type>(new SentIdSet::element_type()) );
       find_occurrences(esets.back(), e_phrase, e_sa->I, e_sa->V, e_sa->cache);
       ce += esets.back()->size();
