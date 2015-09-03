@@ -15,6 +15,8 @@
 #include <boost/thread.hpp> 
 #include <boost/unordered_map.hpp>
 #include <boost/program_options.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/foreach.hpp>
 
 #ifdef WIN32
 #include "WIN32_functions.h"
@@ -120,8 +122,8 @@ struct SA {
   Cache cache;
 };
 
-std::vector<std::unique_ptr<SA>> e_sas;
-std::vector<std::unique_ptr<SA>> f_sas;
+std::vector<boost::shared_ptr<SA> > e_sas;
+std::vector<boost::shared_ptr<SA> > f_sas;
 
 #undef min
 
@@ -391,8 +393,8 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
   
   size_t cf = 0;
   std::vector<SentIdSet> fsets;
-  for(auto& f_sa : f_sas) {
-    fsets.emplace_back( new SentIdSet::element_type() );
+  BOOST_FOREACH(boost::shared_ptr<SA> f_sa, f_sas) {
+    fsets.push_back( boost::shared_ptr<SentIdSet::element_type>(new SentIdSet::element_type()) );
     find_occurrences(fsets.back(), options.front()->f_phrase, f_sa->I, f_sa->V, f_sa->cache);
     cf += fsets.back()->size();
   }
@@ -403,16 +405,16 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
     
     size_t ce = 0;
     std::vector<SentIdSet> esets;
-    for(auto& e_sa : e_sas) {
-      esets.emplace_back( new SentIdSet::element_type() );
+    BOOST_FOREACH(boost::shared_ptr<SA> e_sa,  e_sas) {
+      esets.push_back( boost::shared_ptr<SentIdSet::element_type>(new SentIdSet::element_type()) );
       find_occurrences(esets.back(), e_phrase, e_sa->I, e_sa->V, e_sa->cache);
       ce += esets.back()->size();
     }
       
     size_t cef = 0;
-    for(size_t i = 0; i < fsets.size(); ++i) {
+    for(size_t j = 0; j < fsets.size(); ++j) {
       SentIdSet efset( new SentIdSet::element_type() );
-      ordered_set_intersect(efset, fsets[i], esets[i]);
+      ordered_set_intersect(efset, fsets[j], esets[j]);
       cef += efset->size();
     }
     
@@ -470,9 +472,9 @@ void filter_thread(std::istream* in, std::ostream* out, int pfe_index) {
       }
       
       if(pt_lines % 10000 == 0) {
-        for(auto& f_sa : f_sas)
+        BOOST_FOREACH(boost::shared_ptr<SA> f_sa, f_sas)
           f_sa->cache.prune();
-        for(auto& e_sa : e_sas)
+        BOOST_FOREACH(boost::shared_ptr<SA> e_sa, e_sas)
           e_sa->cache.prune();
       }
       
@@ -527,9 +529,9 @@ int main(int argc, char * argv[])
    
   po::options_description general("General options");
   general.add_options()
-    ("english,e", po::value<std::vector<std::string>>(&efiles)->multitoken(),
+    ("english,e", po::value<std::vector<std::string> >(&efiles)->multitoken(),
      "english.suf-arr")
-    ("french,f", po::value<std::vector<std::string>>(&ffiles)->multitoken(),
+    ("french,f", po::value<std::vector<std::string> >(&ffiles)->multitoken(),
      "french.suf-arr")
     ("pfe-index,i", po::value(&pfe_index)->default_value(2),
      "Index of P(f|e) in phrase table")
@@ -602,8 +604,8 @@ int main(int argc, char * argv[])
   
   if (!pef_filter_only) {
     size_t elines = 0;
-    for(auto& efile : efiles) {
-      e_sas.emplace_back(new SA());
+    BOOST_FOREACH(std::string& efile, efiles) {
+      e_sas.push_back(boost::shared_ptr<SA>(new SA()));
       e_sas.back()->V.open(efile + ".tdx");
       e_sas.back()->T.reset(new ttrack_t());  
       e_sas.back()->T->open(efile + ".mct");
@@ -612,8 +614,8 @@ int main(int argc, char * argv[])
     }
     
     size_t flines = 0;
-    for(auto& ffile : ffiles) {
-      f_sas.emplace_back(new SA());
+    BOOST_FOREACH(std::string& ffile, ffiles) {
+      f_sas.push_back(boost::shared_ptr<SA>(new SA()));
       f_sas.back()->V.open(ffile + ".tdx");
       f_sas.back()->T.reset(new ttrack_t());  
       f_sas.back()->T->open(ffile + ".mct");
