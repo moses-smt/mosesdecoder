@@ -19,7 +19,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.1846963597" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.1846963597" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1167373278" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.397694981" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
@@ -33,6 +33,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.53427549" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="PT_UG"/>
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
@@ -58,18 +59,21 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1761300858" name="ParallelBackoff.h" rcbsApplicability="disable" resourcePath="LM/ParallelBackoff.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1815042864" name="SRI.h" rcbsApplicability="disable" resourcePath="LM/SRI.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1720439764" name="NeuralLMWrapper.h" rcbsApplicability="disable" resourcePath="LM/NeuralLMWrapper.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1094892289" name="MaxEntSRI.h" rcbsApplicability="disable" resourcePath="LM/MaxEntSRI.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1113398114" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1183410636" name="ORLM.h" rcbsApplicability="disable" resourcePath="LM/ORLM.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1448475064" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1459438132" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1094892289" name="MaxEntSRI.h" rcbsApplicability="disable" resourcePath="LM/MaxEntSRI.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1720439764" name="NeuralLMWrapper.h" rcbsApplicability="disable" resourcePath="LM/NeuralLMWrapper.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1272004353" name="BilingualLM.h" rcbsApplicability="disable" resourcePath="LM/BilingualLM.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1815042864" name="SRI.h" rcbsApplicability="disable" resourcePath="LM/SRI.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1459438132" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.871386239" name="LDHT.h" rcbsApplicability="disable" resourcePath="LM/LDHT.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1761300858" name="ParallelBackoff.h" rcbsApplicability="disable" resourcePath="LM/ParallelBackoff.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.297343039" name="test-http-client.cc" rcbsApplicability="disable" resourcePath="TranslationModel/UG/mm/test-http-client.cc" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1729217620.1689820307">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1729217620.1689820307" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1729217620"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|LM/bilingual-lm|LM/MaxEntSRI.h|LM/MaxEntSRI.cpp|LM/BilingualLM.h|LM/BilingualLM.cpp|TranslationModel/CompactPT|LM/Rand.h|LM/Rand.cpp|LM/LDHT.h|LM/LDHT.cpp|LM/ORLM.h|LM/ORLM.cpp|LM/NeuralLMWrapper.h|LM/NeuralLMWrapper.cpp|LM/SRI.h|LM/SRI.cpp|LM/IRST.h|LM/IRST.cpp|LM/DALMWrapper.h|LM/DALMWrapper.cpp|LM/oxlm|TranslationModel/ProbingPT|TranslationModel/UG|TranslationModel/UG/util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="TranslationModel/UG/mm/test-http-client.cc|TranslationModel/UG/ptable-describe-features.cc|TranslationModel/UG/count-ptable-features.cc|TranslationModel/UG/try-align2.cc|TranslationModel/UG/try-align.cc|TranslationModel/UG/spe-check-coverage3.cc|TranslationModel/UG/spe-check-coverage2.cc|TranslationModel/UG/spe-check-coverage.cc|TranslationModel/UG/sim-pe.cc|TranslationModel/UG/generic/stringdist|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/mtt.count.cc|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|LM/bilingual-lm|LM/MaxEntSRI.h|LM/MaxEntSRI.cpp|LM/BilingualLM.h|LM/BilingualLM.cpp|TranslationModel/CompactPT|LM/Rand.h|LM/Rand.cpp|LM/LDHT.h|LM/LDHT.cpp|LM/ORLM.h|LM/ORLM.cpp|LM/NeuralLMWrapper.h|LM/NeuralLMWrapper.cpp|LM/SRI.h|LM/SRI.cpp|LM/IRST.h|LM/IRST.cpp|LM/DALMWrapper.h|LM/DALMWrapper.cpp|LM/oxlm|TranslationModel/ProbingPT|TranslationModel/UG/util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -88,7 +92,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.release.1911984684" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.release.1911984684" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.release.1911984684." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.1552241309" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.release.332871558" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.release"/>
@@ -141,10 +145,10 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Release">
+		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/moses"/>
 		</configuration>
-		<configuration configurationName="Debug">
+		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/moses"/>
 		</configuration>
 	</storageModule>
