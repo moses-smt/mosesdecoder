@@ -14,6 +14,7 @@
 #include <boost/thread/tss.hpp>
 #include <boost/thread.hpp> 
 #include <boost/unordered_map.hpp>
+#include <boost/program_options.hpp>
 
 #ifdef WIN32
 #include "WIN32_functions.h"
@@ -49,14 +50,6 @@ typedef ugdiss::L2R_Token<ugdiss::SimpleWordId> Token;
 typedef ugdiss::mmTtrack<Token> ttrack_t;
 typedef ugdiss::mmTSA<Token> tsa_t;
 typedef ugdiss::TokenIndex tind_t;
-
-tind_t e_V;
-boost::shared_ptr<ttrack_t> e_T;
-tsa_t e_I;
-  
-tind_t f_V;
-boost::shared_ptr<ttrack_t> f_T;
-tsa_t f_I;
 
 int num_lines;
 
@@ -120,8 +113,15 @@ class Cache {
 
 size_t Cache::s_max_cache = 0;
 
-Cache f_cache;
-Cache e_cache;
+struct SA {
+  tind_t V;
+  boost::shared_ptr<ttrack_t> T;
+  tsa_t I;
+  Cache cache;
+};
+
+std::vector<std::unique_ptr<SA>> e_sas;
+std::vector<std::unique_ptr<SA>> f_sas;
 
 #undef min
 
@@ -129,18 +129,7 @@ void usage()
 {
   std::cerr << "\nFilter phrase table using significance testing as described\n"
             << "in H. Johnson, et al. (2007) Improving Translation Quality\n"
-            << "by Discarding Most of the Phrasetable. EMNLP 2007.\n"
-            << "\nUsage:\n"
-            << "\n  filter-pt -e english.suf-arr -f french.suf-arr\n"
-            << "      [-c] [-p] [-l threshold] [-n num] [-t num] < PHRASE-TABLE > FILTERED-PHRASE-TABLE\n\n"
-            << "   [-l threshold] >0.0, a+e, or a-e: keep values that have a -log significance > this\n"
-            << "   [-n num      ] 0, 1...: 0=no filtering, >0 sort by P(e|f) and keep the top num elements\n"
-            << "   [-c          ] add the cooccurence counts to the phrase table\n"
-            << "   [-p          ] add -log(significance) to the phrasetable\n"
-            << "   [-h          ] filter hierarchical rule table\n"
-            << "   [-t num      ] use num threads\n"
-            << "   [-m num      ] limit cache to num most recent phrases\n";
-  exit(1);
+            << "by Discarding Most of the Phrasetable. EMNLP 2007.\n";
 }
 
 struct PTEntry {
@@ -382,8 +371,7 @@ void find_occurrences(SentIdSet& ids, const std::string& rule,
 
 
 // input: unordered list of translation options for a single source phrase
-void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options,
-                                   Cache& f_cache, Cache& e_cache)
+void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
 {
   if (pfe_filter_limit > 0 && options.size() > pfe_filter_limit) {
     nremoved_pfefilter += (options.size() - pfe_filter_limit);
@@ -401,20 +389,32 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options,
   if (options.empty())
     return;
   
-  SentIdSet fset( new SentIdSet::element_type() );
-  find_occurrences(fset, options.front()->f_phrase, f_I, f_V, f_cache);
-  size_t cf = fset->size();
+  size_t cf = 0;
+  std::vector<SentIdSet> fsets;
+  for(auto& f_sa : f_sas) {
+    fsets.emplace_back( new SentIdSet::element_type() );
+    find_occurrences(fsets.back(), options.front()->f_phrase, f_sa->I, f_sa->V, f_sa->cache);
+    cf += fsets.back()->size();
+  }
   
   for (std::vector<PTEntry*>::iterator i = options.begin();
        i != options.end(); ++i) {
     const std::string& e_phrase = (*i)->e_phrase;
-    SentIdSet eset( new SentIdSet::element_type() );
-    find_occurrences(eset, e_phrase, e_I, e_V, e_cache);
-    size_t ce = eset->size();
     
-    SentIdSet efset( new SentIdSet::element_type() );
-    ordered_set_intersect(efset, fset, eset);
-    size_t cef = efset->size();
+    size_t ce = 0;
+    std::vector<SentIdSet> esets;
+    for(auto& e_sa : e_sas) {
+      esets.emplace_back( new SentIdSet::element_type() );
+      find_occurrences(esets.back(), e_phrase, e_sa->I, e_sa->V, e_sa->cache);
+      ce += esets.back()->size();
+    }
+      
+    size_t cef = 0;
+    for(size_t i = 0; i < fsets.size(); ++i) {
+      SentIdSet efset( new SentIdSet::element_type() );
+      ordered_set_intersect(efset, fsets[i], esets[i]);
+      cef += efset->size();
+    }
     
     double nlp = -log(fisher_exact(cef, cf, ce));
     (*i)->set_cooc_stats(cef, cf, ce, nlp);
@@ -470,8 +470,10 @@ void filter_thread(std::istream* in, std::ostream* out, int pfe_index) {
       }
       
       if(pt_lines % 10000 == 0) {
-        f_cache.prune();
-        e_cache.prune();
+        for(auto& f_sa : f_sas)
+          f_sa->cache.prune();
+        for(auto& e_sa : e_sas)
+          e_sa->cache.prune();
       }
       
       if(it->length() > 0) {
@@ -480,7 +482,7 @@ void filter_thread(std::istream* in, std::ostream* out, int pfe_index) {
           prev = pp->f_phrase;
   
           if (!options.empty()) {  // always true after first line
-            compute_cooc_stats_and_filter(options, f_cache, e_cache);
+            compute_cooc_stats_and_filter(options);
           }
           
           for (std::vector<PTEntry*>::iterator i = options.begin();
@@ -500,7 +502,7 @@ void filter_thread(std::istream* in, std::ostream* out, int pfe_index) {
     boost::mutex::scoped_lock lock(out_mutex);
     *out << out_temp.str() << std::flush;
   }
-  compute_cooc_stats_and_filter(options, f_cache, e_cache);
+  compute_cooc_stats_and_filter(options);
   
   boost::mutex::scoped_lock lock(out_mutex);
   for (std::vector<PTEntry*>::iterator i = options.begin();
@@ -511,90 +513,118 @@ void filter_thread(std::istream* in, std::ostream* out, int pfe_index) {
   *out << std::flush;
 }
 
+namespace po = boost::program_options;
+
 int main(int argc, char * argv[])
 {
-  int c;
-  std::string efile;
-  std::string ffile;
+  bool help;
+  std::vector<std::string> efiles;
+  std::vector<std::string> ffiles;
   int pfe_index = 2;
   int threads = 1;
   size_t max_cache = 0;
-  while ((c = getopt(argc, argv, "cpf:e:i:n:t:l:m:h")) != -1) {
-    switch (c) {
-    case 'e':
-      efile = optarg;
-      break;
-    case 'f':
-      ffile = optarg;
-      break;
-    case 'i':  // index of pfe in phrase table
-      pfe_index = atoi(optarg);
-      break;
-    case 'n':  // keep only the top n entries in phrase table sorted by p(f|e) (0=all)
-      pfe_filter_limit = atoi(optarg);
-      std::cerr << "P(f|e) filter limit: " << pfe_filter_limit << std::endl;
-      break;
-    case 't': 
-      threads = atoi(optarg);
-      std::cerr << "Using threads: " << threads << std::endl;
-      break;
-    case 'm': 
-      max_cache = atoi(optarg);
-      std::cerr << "Using max phrases in caches: " << max_cache << std::endl;
-      break;
-    case 'c':
-      print_cooc_counts = true;
-      break;
-    case 'p':
-      print_neglog_significance = true;
-      break;
-    case 'h':
-      hierarchical = true;
-      break;
-    case 'l':
-      std::cerr << "-l = " << optarg << "\n";
-      if (strcmp(optarg,"a+e") == 0) {
-        sig_filter_limit = ALPHA_PLUS_EPS;
-      } else if (strcmp(optarg,"a-e") == 0) {
-        sig_filter_limit = ALPHA_MINUS_EPS;
-      } else {
-        char *x;
-        sig_filter_limit = strtod(optarg, &x);
-        if (sig_filter_limit < 0.0) {
-          std::cerr << "Filter limit (-l) must be either 'a+e', 'a-e' or a real number >= 0.0\n";
-          usage();
-        }
-      }
-      break;
-    default:
+  std::string str_sig_filter_limit;
+   
+  po::options_description general("General options");
+  general.add_options()
+    ("english,e", po::value<std::vector<std::string>>(&efiles)->multitoken(),
+     "english.suf-arr")
+    ("french,f", po::value<std::vector<std::string>>(&ffiles)->multitoken(),
+     "french.suf-arr")
+    ("pfe-index,i", po::value(&pfe_index)->default_value(2),
+     "Index of P(f|e) in phrase table")
+    ("pfe-filter-limit,n", po::value(&pfe_filter_limit)->default_value(0),
+     "0, 1...: 0=no filtering, >0 sort by P(e|f) and keep the top num elements")
+    ("threads,t", po::value(&threads)->default_value(1),
+     "number of threads to use")
+    ("max-cache,m", po::value(&max_cache)->default_value(0),
+     "limit cache to  arg  most recent phrases")
+    ("print-cooc,c", po::value(&print_cooc_counts)->zero_tokens()->default_value(false),
+     "add the coocurrence counts to the phrase table")
+    ("print-significance,p", po::value(&print_neglog_significance)->zero_tokens()->default_value(false),
+     "add -log(significance) to the phrase table")
+    ("hierarchical,x", po::value(&hierarchical)->zero_tokens()->default_value(false),
+     "filter hierarchical rule table")
+    ("sig-filter-limit,l", po::value(&str_sig_filter_limit),
+     ">0.0, a+e, or a-e: keep values that have a -log significance > this")
+    ("help,h", po::value(&help)->zero_tokens()->default_value(false),
+     "display this message")
+  ;
+
+  po::options_description cmdline_options("Allowed options");
+  cmdline_options.add(general);
+  po::variables_map vm;
+  
+  try { 
+    po::store(po::command_line_parser(argc,argv).
+              options(cmdline_options).run(), vm);
+    po::notify(vm);
+  }
+  catch (std::exception& e) {
+    std::cout << "Error: " << e.what() << std::endl << std::endl;
+    
+    usage();
+    std::cout << cmdline_options << std::endl;
+    exit(0);
+  }
+  
+  if(vm["help"].as<bool>()) {
+    usage();
+    std::cout << cmdline_options << std::endl;
+    exit(0);
+  }
+   
+  if(vm.count("pfe-filter-limit"))
+    std::cerr << "P(f|e) filter limit: " << pfe_filter_limit << std::endl;
+  if(vm.count("threads"))
+    std::cerr << "Using threads: " << threads << std::endl;  
+  if(vm.count("max-cache"))
+    std::cerr << "Using max phrases in caches: " << max_cache << std::endl;
+    
+  if (strcmp(str_sig_filter_limit.c_str(),"a+e") == 0) {
+    sig_filter_limit = ALPHA_PLUS_EPS;
+  } else if (strcmp(str_sig_filter_limit.c_str(),"a-e") == 0) {
+    sig_filter_limit = ALPHA_MINUS_EPS;
+  } else {
+    char *x;
+    sig_filter_limit = strtod(str_sig_filter_limit.c_str(), &x);
+    if (sig_filter_limit < 0.0) {
+      std::cerr << "Filter limit (-l) must be either 'a+e', 'a-e' or a real number >= 0.0\n";
       usage();
     }
   }
     
   if (sig_filter_limit == 0.0) pef_filter_only = true;
   //-----------------------------------------------------------------------------
-  if (optind != argc || ((efile.empty() || ffile.empty()) && !pef_filter_only)) {
+  if (optind != argc || ((efiles.empty() || ffiles.empty()) && !pef_filter_only)) {
     usage();
   }
   
   if (!pef_filter_only) {
-    e_T.reset(new ttrack_t());
-    f_T.reset(new ttrack_t());
-  
-    e_V.open(efile + ".tdx");
-    e_T->open(efile + ".mct");
-    e_I.open(efile + ".sfa", e_T);
+    size_t elines = 0;
+    for(auto& efile : efiles) {
+      e_sas.emplace_back(new SA());
+      e_sas.back()->V.open(efile + ".tdx");
+      e_sas.back()->T.reset(new ttrack_t());  
+      e_sas.back()->T->open(efile + ".mct");
+      e_sas.back()->I.open(efile + ".sfa", e_sas.back()->T);
+      elines += e_sas.back()->T->size(); 
+    }
     
-    f_V.open(ffile + ".tdx");
-    f_T->open(ffile + ".mct");
-    f_I.open(ffile + ".sfa", f_T);
-    
-    size_t elines = e_T->size(); // e_sa.returnTotalSentNumber();
-    size_t flines = f_T->size(); // f_sa.returnTotalSentNumber();
+    size_t flines = 0;
+    for(auto& ffile : ffiles) {
+      f_sas.emplace_back(new SA());
+      f_sas.back()->V.open(ffile + ".tdx");
+      f_sas.back()->T.reset(new ttrack_t());  
+      f_sas.back()->T->open(ffile + ".mct");
+      f_sas.back()->I.open(ffile + ".sfa", f_sas.back()->T);
+      flines += f_sas.back()->T->size(); 
+    }
     
     if (elines != flines) {
       std::cerr << "Number of lines in e-corpus != number of lines in f-corpus!\n";
       usage();
+      exit(1);
     } else {
       std::cerr << "Training corpus: " << elines << " lines\n";
       num_lines = elines;

@@ -17,7 +17,7 @@ $(TOP)//boost_iostreams
 $(TOP)//boost_program_options 
 $(TOP)/moses/TranslationModel/UG/mm//mm 
 $(TOP)/moses/TranslationModel/UG//mmsapt 
-$(TOP)/util//kenutil 
+$(TOP)/util//kenutil :  <cxxflags>-std=c++11
 ; 
 
 exe try-align2 : 
