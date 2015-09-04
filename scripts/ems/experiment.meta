@@ -174,7 +174,7 @@ prepare-bilingual-lm
 	in: TRAINING:corpus TRAINING:word-alignment
 	out: numberized_ngrams
 	ignore-unless: bilingual-lm
-	rerun-on-change: TRAINING:corpus TRAINING:word-alignment
+	rerun-on-change: TRAINING:corpus TRAINING:word-alignment source-window order epochs
 	default-name: lm/blm
 train-bilingual-lm
 	in: numberized_ngrams TRAINING:corpus 
