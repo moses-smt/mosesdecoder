@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // class declaration of template<typename Token> class Bitxt<Token>::agenda::job
 // to be included by ug_bitext.h
 // todo: add check to enforce this
@@ -130,7 +130,6 @@ int Bitext<Token>::agenda::job
 
   if (!m_bias) return 1;
 
-  // // using namespace boost::math;
   typedef boost::math::binomial_distribution<> binomial;
 
   std::ostream* log = m_bias->loglevel > 1 ? m_bias->log : NULL;
@@ -138,8 +137,8 @@ int Bitext<Token>::agenda::job
   float p = (*m_bias)[sid];
   id_type docid = m_bias->GetClass(sid);
   
-  // uint32_t k = docid < stats->indoc.size() ? stats->indoc[docid] : 0;
-  std::map<uint32_t,uint32_t>::const_iterator m = stats->indoc.find(docid);
+  typedef pstats::indoc_map_t::const_iterator id_iter;
+  id_iter m = stats->indoc.find(docid);
   uint32_t k = m != stats->indoc.end() ? m->second : 0 ;
 
   // always consider candidates from dominating documents and
@@ -156,18 +155,17 @@ int Bitext<Token>::agenda::job
   if (log)
     {
       Token const* t = root->getCorpus()->sntStart(sid)+offset;
-      Token const* x = t - min(offset,uint64_t(3));
+      Token const* x = t - std::min(offset,uint64_t(3));
       Token const* e = t+4;
       if (e > root->getCorpus()->sntEnd(sid))
-	e = root->getCorpus()->sntEnd(sid);
+        e = root->getCorpus()->sntEnd(sid);
       *log << docid << ":" << sid << " " << size_t(k) << "/" << N
-	   << " @" << p << " => " << d << " [";
-      for (std::map<uint32_t, uint32_t>::const_iterator m = stats->indoc.begin();
-	   m != stats->indoc.end(); ++m)
-	{
-	  if (m != stats->indoc.begin()) *log << " ";
-	  *log << m->first << ":" << m->second;
-	}
+           << " @" << p << " => " << d << " [";
+      for (id_iter m = stats->indoc.begin(); m != stats->indoc.end(); ++m)
+        {
+          if (m != stats->indoc.begin()) *log << " ";
+          *log << m->first << ":" << m->second;
+        }
       // for (size_t i = 0; i < stats->indoc.size(); ++i)
       // 	{
       // 	  if (i) *log << " ";
@@ -192,7 +190,7 @@ bool Bitext<Token>::agenda::job
   if (no_maybe_yes > 1)  return true;  // yes
   // ... maybe: flip a coin
   size_t options_chosen = stats->good;
-  size_t options_total  = max(stats->raw_cnt, this->ctr);
+  size_t options_total  = std::max(stats->raw_cnt, this->ctr);
   size_t options_left   = (options_total - this->ctr);
   size_t random_number  = options_left * (rnd()/(rnd.max()+1.));
   size_t threshold;
@@ -208,9 +206,7 @@ bool Bitext<Token>::agenda::job
 ::step(uint64_t & sid, uint64_t & offset)
 { // caller must lock!
   if (next == stop) return false;
-  UTIL_THROW_IF2
-    ( next > stop, "Fatal error at " << HERE << ". How did that happen?" );
-  // boost::lock_guard<boost::mutex> jguard(lock); // caller must lock!
+  UTIL_THROW_IF2(next > stop, "Fatal error at " << HERE << ".");
   next = root->readSid(next, stop, sid);
   next = root->readOffset(next, stop, offset);
   ++ctr;

@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // In-memory corpus track
 // (c) 2006-2012 Ulrich Germann.
 
@@ -19,17 +19,13 @@
 #include "util/exception.hh"
 #include "moses/Util.h"
 
-// #include "ug_vocab.h"
-
 // define the corpus buffer size (in sentences) and the
 // for adding additional sentences:
 #define IMTTRACK_INCREMENT_SIZE 100000
 #define IMTSA_INCREMENT_SIZE   1000000
 
-namespace ugdiss
+namespace sapt
 {
-  // using namespace std;
-  // using namespace boost;
   namespace bio=boost::iostreams;
 
   template<typename Token> class imTSA;

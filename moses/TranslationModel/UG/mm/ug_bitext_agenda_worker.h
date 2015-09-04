@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // to be included from ug_bitext_agenda.h
 
 template<typename Token>
@@ -87,7 +88,8 @@ Bitext<Token>::agenda
 		  seen.push_back(tpid);
 
 		  size_t raw2 = b->approxOccurrenceCount();
-		  j->stats->add(tpid, sample_weight, aln, raw2,
+		  float bwgt = j->m_bias ? (*j->m_bias)[sid] : 1;
+		  j->stats->add(tpid, sample_weight, bwgt, aln, raw2,
 				po_fwd, po_bwd, docid);
 		  bool ok = (i == e2) || b->extend(o[i].id());
 		  UTIL_THROW_IF2(!ok, "Could not extend target phrase.");

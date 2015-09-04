@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -113,12 +114,12 @@ enum DistortionOrientationOptions {
 }
 
 enum InputTypeEnum {
-  SentenceInput						= 0,
+  SentenceInput         = 0,
   ConfusionNetworkInput	= 1,
-  WordLatticeInput				= 2,
-  TreeInputType					= 3,
-  //,WordLatticeInput2			= 4,
-  TabbedSentenceInput = 5,
+  WordLatticeInput      = 2,
+  TreeInputType         = 3,
+  //,WordLatticeInput2 = 4,
+  TabbedSentenceInput    = 5,
   ForestInputType        = 6
 };
 
@@ -143,7 +144,7 @@ enum SearchAlgorithm {
   CubePruning	= 1,
   //,CubeGrowing = 2
   CYKPlus = 3,
-  NormalBatch  = 4,
+  //NormalBatch  = 4,
   ChartIncremental = 5,
   SyntaxS2T = 6,
   SyntaxT2S = 7,

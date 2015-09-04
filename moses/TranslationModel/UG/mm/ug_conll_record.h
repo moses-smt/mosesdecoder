@@ -1,12 +1,15 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #ifndef __ug_conll_record_h
 #define __ug_conll_record_h
 #include "ug_typedefs.h"
+#include <stdint.h>
 // Base class for dependency tree corpora with POS and Lemma annotations
 
-namespace ugdiss
+namespace sapt
 {
-  // using namespace std;
-
+  
+  using tpt::id_type;
+  using tpt::uchar;
   class
   Conll_Record
   {

@@ -34,7 +34,7 @@ public:
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {
-    vector<float> newScores(m_numScoreComponents);
+    std::vector<float> newScores(m_numScoreComponents);
     newScores[0] = translationOptionList.size();
 
     TranslationOptionList::const_iterator iterTransOpt;

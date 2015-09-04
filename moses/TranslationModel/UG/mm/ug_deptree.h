@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007-2012 Ulrich Germann
 // Stuff related to dependency trees
 
@@ -15,8 +15,7 @@
 #include "ug_conll_bottom_up_token.h"
 #include "ug_typedefs.h"
 
-// using namespace std;
-namespace ugdiss
+namespace sapt
 {
 
   // Fills the std::vector v with pointers to the internal root r_x for the

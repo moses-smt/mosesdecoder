@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // typedefs for Uli Germann's stuff
 #ifndef __ug_typedefs_h
 #define __ug_typedefs_h
@@ -8,9 +8,8 @@
 #include <vector>
 #include <stdint.h>
 #include "tpt_typedefs.h"
-namespace ugdiss
+namespace sapt
 {
-  // using namespace std;
   typedef boost::dynamic_bitset<uint64_t> bitvector;
 
   typedef std::vector<std::vector<float> > flt_2d_table;
@@ -28,9 +27,14 @@ namespace ugdiss
   typedef std::vector<std::vector<int> > int_2d_table;
   typedef std::vector<int_2d_table>      int_3d_table;
   typedef std::vector<int_3d_table>      int_4d_table;
+
+  typedef tpt::id_type id_type;
+  typedef tpt::uchar uchar;
+  typedef tpt::filepos_type filepos_type;
 }
 
 #define SPTR   boost::shared_ptr
+#define iptr   boost::intrusive_ptr
 #define scoptr boost::scoped_ptr
 #define rcast  reinterpret_cast
 #endif

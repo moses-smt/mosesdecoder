@@ -207,7 +207,7 @@ void ChartManager::CalcNBest(
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
   const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.GetNBestFactor();
+  const std::size_t nBestFactor = staticData.options().nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? n*1000 : n*nBestFactor;
 
   // Extract the derivations.
@@ -318,13 +318,14 @@ void ChartManager::OutputBest(OutputCollector *collector) const
 void ChartManager::OutputNBest(OutputCollector *collector) const
 {
   const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.GetNBestSize();
+  size_t nBestSize = staticData.options().nbest.nbest_size;
   if (nBestSize > 0) {
     const size_t translationId = m_source.GetTranslationId();
 
-    VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+    VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO "
+            << staticData.options().nbest.output_file_path << endl);
     std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
-    CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
+    CalcNBest(nBestSize, nBestList,staticData.options().nbest.only_distinct);
     OutputNBestList(collector, nBestList, translationId);
     IFVERBOSE(2) {
       PrintUserTime("N-Best Hypotheses Generation Time:");
@@ -348,10 +349,9 @@ void ChartManager::OutputNBestList(OutputCollector *collector,
     FixPrecision(out);
   }
 
-  bool includeWordAlignment =
-    StaticData::Instance().PrintAlignmentInfoInNbest();
-
-  bool PrintNBestTrees = StaticData::Instance().PrintNBestTrees();
+  NBestOptions const& nbo = StaticData::Instance().options().nbest;
+  bool includeWordAlignment = nbo.include_alignment_info;
+  bool PrintNBestTrees = nbo.print_trees;
 
   for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
        p != nBestList.end(); ++p) {
@@ -620,9 +620,9 @@ void ChartManager::OutputDetailedTranslationReport(
 
   if (staticData.IsDetailedAllTranslationReportingEnabled()) {
     const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
-    size_t nBestSize = staticData.GetNBestSize();
+    size_t nBestSize = staticData.options().nbest.nbest_size;
     std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
-    CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
+    CalcNBest(nBestSize, nBestList, staticData.options().nbest.nbest_size);
     OutputDetailedAllTranslationReport(collector, nBestList, sentence, translationId);
   }
 

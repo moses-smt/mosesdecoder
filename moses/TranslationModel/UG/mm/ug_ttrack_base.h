@@ -1,9 +1,11 @@
-// -*- c++ -*-
-// Base class for corpus tracks. mmTtrack (memory-mapped Ttrack) and imTtrack (in-memory Ttrack)
-// are derived from this class.
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 
-// This code is part of a refactorization of the earlier Ttrack class as a template class for
-// tokens of arbitrary fixed-length size.
+// Base class for corpus tracks. mmTtrack (memory-mapped Ttrack) and
+// imTtrack (in-memory Ttrack) are derived from this class.
+
+// This code is part of a refactorization of the earlier Ttrack class
+// as a template class for tokens of arbitrary fixed-length size.
+
 // (c) 2007-2009 Ulrich Germann. All rights reserved.
 
 #ifndef __ug_ttrack_base
@@ -18,13 +20,14 @@
 #include "tpt_typedefs.h"
 #include "tpt_tokenindex.h"
 #include "moses/Util.h"
-// #include "ug_vocab.h"
 
-namespace ugdiss
+namespace sapt
 {
-  // using namespace std;
 
   typedef boost::dynamic_bitset<uint64_t> bdBitset;
+  using tpt::count_type;
+
+  size_t len_from_pid(uint64_t pid);
 
   template<typename sid_t, typename off_t, typename len_t>
   void

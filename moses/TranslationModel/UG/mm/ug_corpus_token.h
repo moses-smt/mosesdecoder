@@ -1,6 +1,9 @@
-// -*- c++ -*-
-// This code is part of the re-factorization of the earlier non-template implementation of "corpus tracks"
-// and suffix and prefix arrays over them as template classes.
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
+
+// This code is part of the re-factorization of the earlier
+// non-template implementation of "corpus tracks" and suffix and
+// prefix arrays over them as template classes.  
+
 // (c) 2007-2009 Ulrich Germann
 
 #ifndef __ug_corpus_token_h
@@ -13,9 +16,10 @@
 
 
 #include "tpt_typedefs.h"
+#include "ug_typedefs.h"
 #include "ug_ttrack_base.h"
 
-namespace ugdiss
+namespace sapt
 {
   /** Simple wrapper around id_type for use with the Ttrack/TSA template classes */
 

@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2006,2007,2008 Ulrich Germann
 
 #include "tpt_pickler.h"
@@ -9,9 +9,8 @@
 #define stat64  stat
 #endif
 
-namespace ugdiss
+namespace tpt
 {
-  using namespace std;
 
   uint64_t
   getFileSize(const std::string& fname)
@@ -235,7 +234,7 @@ namespace ugdiss
   binwrite(std::ostream& out, std::string const& s)
   {
     size_t len = s.size();
-    ugdiss::binwrite(out,len);
+    binwrite(out,len);
     out.write(s.c_str(),len);
   }
 
@@ -243,7 +242,7 @@ namespace ugdiss
   binread(std::istream& in, std::string& s)
   {
     size_t len;
-    ugdiss::binread(in,len);
+    binread(in,len);
     if (!in) return;
     char buf[len+1];
     in.read(buf,len);

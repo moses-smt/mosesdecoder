@@ -133,7 +133,9 @@ if [ option.get "filter-warnings" : : "yes" ] {
   requirements += <cxxflags>-Wno-unused-but-set-variable ;
   requirements += <cxxflags>-Wno-unused-result ;
   requirements += <cxxflags>-Wno-unused-variable ;
-  requirements += <cxxflags>-Wcomment ;
+  requirements += <cxxflags>-Wno-comment ;
+  requirements += <cxxflags>-Wno-strict-aliasing ;
+  requirements += <cxxflags>-Wno-overloaded-virtual ;
 }
 
 if [ option.get "debug-build" : : "yes" ] {
@@ -301,5 +303,5 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
 
 #local temp = [ _shell "bash source ./s.sh" ] ;
 local temp = [ _shell "mkdir -p $(TOP)/bin" ] ;
-local temp = [ _shell "rm $(TOP)/bin/moses_chart" ] ;
+local temp = [ _shell "rm -f $(TOP)/bin/moses_chart" ] ;
 local temp = [ _shell "cd $(TOP)/bin && ln -s moses moses_chart" ] ;

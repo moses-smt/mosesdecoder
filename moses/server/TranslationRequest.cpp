@@ -1,7 +1,7 @@
 #include "TranslationRequest.h"
 #include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
-
+#include "moses/Util.h"
 namespace MosesServer
 {
 using namespace std;
@@ -24,14 +24,14 @@ using Moses::Sentence;
 
 boost::shared_ptr<TranslationRequest>
 TranslationRequest::
-create(xmlrpc_c::paramList const& paramList,
+create(Translator* translator, xmlrpc_c::paramList const& paramList,
        boost::condition_variable& cond,
        boost::mutex& mut)
 {
   boost::shared_ptr<TranslationRequest> ret;
-  ret.reset(new TranslationRequest(paramList,cond, mut));
+  ret.reset(new TranslationRequest(paramList, cond, mut));
   ret->m_self = ret;
-  ret->m_scope.reset(new Moses::ContextScope);
+  ret->m_translator = translator;
   return ret;
 }
 
@@ -39,7 +39,17 @@ void
 TranslationRequest::
 Run()
 {
-  parse_request(m_paramList.getStruct(0));
+  std::map<std::string,xmlrpc_c::value>const& params = m_paramList.getStruct(0);
+  parse_request(params);
+  // cerr << "SESSION ID" << ret->m_session_id << endl;
+  if (m_session_id)
+    {
+      Session const& S = m_translator->get_session(m_session_id);
+      m_scope = S.scope;
+      m_session_id = S.id;
+      // cerr << "SESSION ID" << m_session_id << endl;
+    }
+  else m_scope.reset(new Moses::ContextScope);
 
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
@@ -48,14 +58,14 @@ Run()
     // why on earth is this a global variable? Is this even thread-safe???? UG
     (const_cast<Moses::StaticData&>(SD)).SetOutputSearchGraph(true);
 
-  std::stringstream out, graphInfo, transCollOpts;
-
+  // std::stringstream out, graphInfo, transCollOpts;
+  
   if (SD.IsSyntax())
     run_chart_decoder();
   else
     run_phrase_decoder();
 
-  XVERBOSE(1,"Output: " << out.str() << endl);
+  // XVERBOSE(1,"Output: " << out.str() << endl);
   {
     boost::lock_guard<boost::mutex> lock(m_mutex);
     m_done = true;
@@ -224,7 +234,10 @@ TranslationRequest(xmlrpc_c::paramList const& paramList,
                    boost::condition_variable& cond, boost::mutex& mut)
   : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
   , m_nbestSize(0)
-{ }
+  , m_session_id(0)
+{ 
+  m_options = StaticData::Instance().options();
+}
 
 void
 TranslationRequest::
@@ -234,6 +247,8 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   // params_t const params = m_paramList.getStruct(0);
   m_paramList.verifyEnd(1); // ??? UG
 
+  m_options.update(params);
+
   // source text must be given, or we don't know what to translate
   typedef std::map<std::string, xmlrpc_c::value> params_t;
   params_t::const_iterator si = params.find("text");
@@ -241,6 +256,12 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
     throw xmlrpc_c::fault("Missing source text", xmlrpc_c::fault::CODE_PARSE);
   m_source_string = xmlrpc_c::value_string(si->second);
   XVERBOSE(1,"Input: " << m_source_string << endl);
+
+  si = params.find("session-id");
+  if (si != params.end())
+    m_session_id = xmlrpc_c::value_int(si->second);
+  else
+    m_session_id = 0;
 
   m_withAlignInfo       = check(params, "align");
   m_withWordAlignInfo   = check(params, "word-align");
@@ -251,31 +272,36 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   m_withScoreBreakdown  = check(params, "add-score-breakdown");
   m_source.reset(new Sentence(0,m_source_string));
   si = params.find("lambda");
-  if (si != params.end()) {
-    // muMo = multiModel
-    xmlrpc_c::value_array muMoArray = xmlrpc_c::value_array(si->second);
-    vector<xmlrpc_c::value> muMoValVec(muMoArray.vectorValueValue());
-    vector<float> w(muMoValVec.size());
-    for (size_t i = 0; i < muMoValVec.size(); ++i)
-      w[i] = xmlrpc_c::value_double(muMoValVec[i]);
-    if (w.size() && (si = params.find("model_name")) != params.end()) {
-      string const model_name = xmlrpc_c::value_string(si->second);
-      PhraseDictionaryMultiModel* pdmm
-      = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
-      // Moses::PhraseDictionaryMultiModel* pdmm
-      // = FindPhraseDictionary(model_name);
-      pdmm->SetTemporaryMultiModelWeightsVector(w);
+  if (si != params.end()) 
+    {
+      // muMo = multiModel
+      xmlrpc_c::value_array muMoArray = xmlrpc_c::value_array(si->second);
+      vector<xmlrpc_c::value> muMoValVec(muMoArray.vectorValueValue());
+      vector<float> w(muMoValVec.size());
+      for (size_t i = 0; i < muMoValVec.size(); ++i)
+	w[i] = xmlrpc_c::value_double(muMoValVec[i]);
+      if (w.size() && (si = params.find("model_name")) != params.end()) 
+	{
+	  string const model_name = xmlrpc_c::value_string(si->second);
+	  PhraseDictionaryMultiModel* pdmm
+	    = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+	  // Moses::PhraseDictionaryMultiModel* pdmm
+	  // = FindPhraseDictionary(model_name);
+	  pdmm->SetTemporaryMultiModelWeightsVector(w);
+	}
     }
-  }
-
+  
   si = params.find("nbest");
   if (si != params.end())
     m_nbestSize = xmlrpc_c::value_int(si->second);
 
   si = params.find("context");
-  if (si != params.end()) {
-    m_context_string = xmlrpc_c::value_string(si->second);
-  }
+  if (si != params.end()) 
+    {
+      string context = xmlrpc_c::value_string(si->second);
+      VERBOSE(1,"CONTEXT " << context);
+      m_context.reset(new std::vector<std::string>(1,context));
+    }
   // // biased sampling for suffix-array-based sampling phrase table?
   // if ((si = params.find("bias")) != params.end())
   //   {
@@ -320,7 +346,8 @@ pack_hypothesis(vector<Hypothesis const* > const& edges, string const& key,
   // target string
   ostringstream target;
   BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
-  output_phrase(target, e->GetCurrTargetPhrase());
+    output_phrase(target, e->GetCurrTargetPhrase());
+  std::cerr << "SERVER TRANSLATION: " << target.str() << std::endl;
   dest[key] = xmlrpc_c::value_string(target.str());
 
   if (m_withAlignInfo) {
@@ -363,7 +390,9 @@ run_phrase_decoder()
   manager.Decode();
 
   pack_hypothesis(manager.GetBestHypothesis(), "text", m_retData);
-
+  if (m_session_id)
+    m_retData["session-id"] = xmlrpc_c::value_int(m_session_id);
+  
   if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
   if (m_withTopts) insertTranslationOptions(manager,m_retData);
   if (m_nbestSize) outputNBest(manager, m_retData);

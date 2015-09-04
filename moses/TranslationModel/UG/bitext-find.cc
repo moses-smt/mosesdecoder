@@ -4,7 +4,8 @@
 
 using namespace std;
 using namespace Moses;
-using namespace Moses::bitext;
+using namespace sapt;
+
 namespace po=boost::program_options;
 typedef L2R_Token<SimpleWordId> Token;
 typedef mmBitext<Token> mmbitext;

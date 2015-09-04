@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2010 Ulrich Germann. All rights reserved.
 
 #ifndef __ug_tsa_bitset_cache_h
@@ -16,9 +16,9 @@
 // size of the range of entries in the TSA's index in bytes to determine
 // whether or not to store the respective bit std::vector in the cache.
 
-namespace ugdiss
+namespace sapt
 {
-  // using namespace std;
+
   template<typename TSA>
   class
   BitSetCache

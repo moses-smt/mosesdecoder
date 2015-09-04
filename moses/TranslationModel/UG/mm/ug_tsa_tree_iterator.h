@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007 - 2010 Ulrich Germann. All rights reserved.
 #ifndef __ug_tsa_tree_iterator_h
 #define __ug_tsa_tree_iterator_h
@@ -14,7 +14,7 @@
 
 // #include "ug_bv_iter.h"
 
-namespace ugdiss
+namespace sapt
 {
 
 #ifndef _DISPLAY_CHAIN
@@ -155,7 +155,8 @@ namespace ugdiss
       }
     };
 
-    double approxOccurrenceCount(int p=-1) const
+    double 
+    ca(int p=-1) const // approximate occurrence count
     {
       assert(root);
       if (p < 0) p += lower.size();
@@ -165,6 +166,13 @@ namespace ugdiss
 		     << "Word count mismatch.");
       assert(ret <= root->corpus->numTokens());
       return ret;
+    }
+
+    inline
+    double 
+    approxOccurrenceCount(int p=-1) const // deprecated, use ca()
+    {
+      return ca();
     }
 
     size_t grow(Token const* t, Token const* stop)

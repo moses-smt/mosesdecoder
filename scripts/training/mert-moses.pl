@@ -1519,7 +1519,7 @@ sub create_config {
     $___DECODER_FLAGS =~ s/^\s*|\s*$//;
     $___DECODER_FLAGS =~ s/\s+/ /;
     foreach (split(/ /, $___DECODER_FLAGS)) {
-      if (/^\-([^\d].*)$/) {
+      if (/^\--?([^\d].*)$/) {
         $parameter = $1;
       } else {
 				my $value = $_;

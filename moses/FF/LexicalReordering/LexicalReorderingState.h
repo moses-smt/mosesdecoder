@@ -1,6 +1,5 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
-
 #include <vector>
 #include <string>
 
@@ -12,7 +11,6 @@
 #include "moses/WordsBitmap.h"
 #include "moses/TranslationOption.h"
 #include "moses/FF/FFState.h"
-
 #include "ReorderingStack.h"
 
 namespace Moses

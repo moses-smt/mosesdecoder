@@ -38,13 +38,12 @@ int main(int argc, char** argv)
 #include "moses/StaticData.h"
 #include "moses/ThreadPool.h"
 #include "moses/TranslationTask.h"
-#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 #if PT_UG
 #include "moses/TranslationModel/UG/mmsapt.h"
 #endif
 #include "moses/TreeInput.h"
-#include "moses/LM/ORLM.h"
 #include "moses/IOWrapper.h"
 
 #include <boost/foreach.hpp>
@@ -58,8 +57,8 @@ int main(int argc, char** argv)
 #include <xmlrpc-c/server_abyss.hpp>
 
 // using namespace Moses;
-using Moses::TreeInput;
 using namespace std;
+using namespace Moses;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
 
@@ -82,70 +81,16 @@ public:
     Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(PhraseDictionary::GetColl()[0]);
     pdsa->add(source_,target_,alignment_);
 #else
-    const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
-    PhraseDictionaryDynSuffixArray*
-      pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
-    cerr << "Inserting into address " << pdsa << endl;
-    pdsa->insertSnt(source_, target_, alignment_);
+    std::string msg;
+    msg  = "Server was compiled without a phrase table implementation that ";
+    msg += "supports updates.";
+    throw xmlrpc_c::fault(msg.c_str(), xmlrpc_c::fault::CODE_PARSE);
 #endif
-    if(add2ORLM_) {
-      //updateORLM();
-    }
     XVERBOSE(1,"Done inserting\n");
-    //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy);
-    map<string, xmlrpc_c::value> retData;
-    //*retvalP = xmlrpc_c::value_struct(retData);
-#ifndef PT_UG
-    pdf = 0;
-#endif
-    pdsa = 0;
     *retvalP = xmlrpc_c::value_string("Phrase table updated");
   }
   string source_, target_, alignment_;
-  bool bounded_, add2ORLM_;
-  /*
-  void updateORLM() {
-    // TODO(level101): this belongs in the language model, not in moseserver.cpp
-    vector<string> vl;
-    map<vector<string>, int> ngSet;
-    LMList lms = StaticData::Instance().GetLMList(); // get LM
-    LMList::const_iterator lmIter = lms.begin();
-    LanguageModel *lm = *lmIter;
-    LanguageModelORLM* orlm = static_cast<LanguageModelORLM*>(lm);
-    if(orlm == 0) {
-      cerr << "WARNING: Unable to add target sentence to ORLM\n";
-      return;
-    }
-    // break out new ngrams from sentence
-    const int ngOrder(orlm->GetNGramOrder());
-    const std::string sBOS = orlm->GetSentenceStart()->GetString().as_string();
-    const std::string sEOS = orlm->GetSentenceEnd()->GetString().as_string();
-    Utils::splitToStr(target_, vl, " ");
-    // insert BOS and EOS
-    vl.insert(vl.begin(), sBOS);
-    vl.insert(vl.end(), sEOS);
-    for(int j=0; j < vl.size(); ++j) {
-      int i = (j<ngOrder) ? 0 : j-ngOrder+1;
-      for(int t=j; t >= i; --t) {
-        vector<string> ngVec;
-        for(int s=t; s<=j; ++s) {
-          ngVec.push_back(vl[s]);
-          //cerr << vl[s] << " ";
-        }
-        ngSet[ngVec]++;
-        //cerr << endl;
-      }
-    }
-    // insert into LM in order from 1grams up (for LM well-formedness)
-    cerr << "Inserting " << ngSet.size() << " ngrams into ORLM...\n";
-    for(int i=1; i <= ngOrder; ++i) {
-      iterate(ngSet, it) {
-        if(it->first.size() == i)
-          orlm->UpdateORLM(it->first, it->second);
-      }
-    }
-  }
-  */
+  bool bounded_;
 
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");
@@ -165,8 +110,6 @@ public:
     XVERBOSE(1,"alignment = " << alignment_ << endl);
     si = params.find("bounded");
     bounded_ = (si != params.end());
-    si = params.find("updateORLM");
-    add2ORLM_ = (si != params.end());
   }
 };
 
@@ -678,6 +621,14 @@ int main(int argc, char** argv)
   bool isSerial = false;
   size_t numThreads = 10; //for translation tasks
 
+  //Abyss server configuration: initial values reflect hard-coded default
+  //-> http://xmlrpc-c.sourceforge.net/doc/libxmlrpc_server_abyss.html#max_conn
+  size_t maxConn = 15;
+  size_t maxConnBacklog = 15;
+  size_t keepaliveTimeout = 15;
+  size_t keepaliveMaxConn = 30;
+  size_t timeout = 15;
+
   for (int i = 0; i < argc; ++i) {
     if (!strcmp(argv[i],"--server-port")) {
       ++i;
@@ -694,6 +645,46 @@ int main(int argc, char** argv)
         exit(1);
       } else {
         logfile = argv[i];
+      }
+    } else if (!strcmp(argv[i],"--server-maxconn")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-maxconn" << endl;
+        exit(1);
+      } else {
+        maxConn = atoi(argv[i]);
+      }
+    } else if (!strcmp(argv[i],"--server-maxconn-backlog")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-maxconn-backlog" << endl;
+        exit(1);
+      } else {
+        maxConnBacklog = atoi(argv[i]);
+      }
+    } else if (!strcmp(argv[i],"--server-keepalive-timeout")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-keepalive-timeout" << endl;
+        exit(1);
+      } else {
+        keepaliveTimeout = atoi(argv[i]);
+      }
+    } else if (!strcmp(argv[i],"--server-keepalive-maxconn")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-keepalive-maxconn" << endl;
+        exit(1);
+      } else {
+        keepaliveMaxConn = atoi(argv[i]);
+      }
+    } else if (!strcmp(argv[i],"--server-timeout")) {
+      ++i;
+      if (i >= argc) {
+        cerr << "Error: Missing argument to --server-timeout" << endl;
+        exit(1);
+      } else {
+        timeout = atoi(argv[i]);
       }
     } else if (!strcmp(argv[i], "--threads")) {
       ++i;
@@ -755,7 +746,11 @@ int main(int argc, char** argv)
     .portNumber(port)              // TCP port on which to listen
     .logFileName(logfile)
     .allowOrigin("*")
-    .maxConn((unsigned int)numThreads)
+    .maxConn((unsigned int)maxConn)
+    .maxConnBacklog((unsigned int)maxConnBacklog)
+    .keepaliveTimeout((unsigned int)keepaliveTimeout)
+    .keepaliveMaxConn((unsigned int)keepaliveMaxConn)
+    .timeout((unsigned int)timeout)
   );
 
   XVERBOSE(1,"Listening on port " << port << endl);

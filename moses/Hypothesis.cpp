@@ -362,14 +362,14 @@ CleanupArcList()
    * so we'll keep all of arc list if nedd distinct n-best list
    */
   const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.GetNBestSize();
-  bool distinctNBest = (staticData.GetDistinctNBest() ||
+  size_t nBestSize = staticData.options().nbest.nbest_size;
+  bool distinctNBest = (m_manager.options().nbest.only_distinct ||
                         staticData.GetLatticeSamplesSize() ||
-                        staticData.UseMBR() ||
+                        m_manager.options().mbr.enabled ||
                         staticData.GetOutputSearchGraph() ||
                         staticData.GetOutputSearchGraphSLF() ||
                         staticData.GetOutputSearchGraphHypergraph() ||
-                        staticData.UseLatticeMBR());
+                        m_manager.options().lmbr.enabled);
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs

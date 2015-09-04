@@ -1,8 +1,7 @@
-// -*- mode: c++; cc-style: moses-cc-style -*-
+// -*- mode: c++; tab-width: 2; indent-tabs-mode: nil; cc-style: moses-cc-style -*-
 #pragma once
 #ifndef NO_MOSES
-namespace Moses {
-namespace bitext {
+namespace sapt {
 
 template<typename Token>
 SPTR<pstats>
@@ -49,7 +48,7 @@ Bitext<Token>
 {
   if (max_sample < 0) max_sample = m_default_sample_size;
   SPTR<SamplingBias> bias;
-  SPTR<ContextScope> scope = ttask->GetScope();
+  SPTR<Moses::ContextScope> scope = ttask->GetScope();
   SPTR<ContextForQuery> context = scope->get<ContextForQuery>(this);
   if (context) bias = context->bias;
   SPTR<pstats::cache_t> cache;
@@ -83,6 +82,5 @@ Bitext<Token>
 
 
 
-}
 }
 #endif

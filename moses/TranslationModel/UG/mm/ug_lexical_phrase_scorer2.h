@@ -14,24 +14,24 @@
 #include "tpt_pickler.h"
 #include "ug_mm_2d_table.h"
 #include "util/exception.hh"
-// using namespace std;
-namespace ugdiss
+
+namespace sapt
 {
 
   template<typename TKN>
   class
   LexicalPhraseScorer2
   {
-    std::vector<string> ftag;
+    std::vector<std::string> ftag;
   public:
     typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> table_t;
     table_t COOC;
-    void open(string const& fname);
-    template<typename someint>
+    void open(std::string const& fname);
+    template<typename some_int>
     void
     score(TKN const* snt1, size_t const s1, size_t const e1,
 	  TKN const* snt2, size_t const s2, size_t const e2,
-	  std::vector<someint> const & aln, float const alpha,
+	  std::vector<some_int> const & aln, float const alpha,
 	  float & fwd_score, float& bwd_score) const;
 
     void
@@ -53,18 +53,18 @@ namespace ugdiss
   template<typename TKN>
   void
   LexicalPhraseScorer2<TKN>::
-  open(string const& fname)
+  open(std::string const& fname)
   {
     COOC.open(fname);
   }
 
   template<typename TKN>
-  template<typename someint>
+  template<typename some_int>
   void
   LexicalPhraseScorer2<TKN>::
   score(TKN const* snt1, size_t const s1, size_t const e1,
 	TKN const* snt2, size_t const s2, size_t const e2,
-	vector<someint> const & aln, float const alpha,
+	std::vector<some_int> const & aln, float const alpha,
 	float & fwd_score, float& bwd_score) const
   {
     std::vector<float> p1(e1,0), p2(e2,0);
@@ -146,7 +146,7 @@ namespace ugdiss
     size_t i1=0,i2=0;
     for (char const* x = aln_start; x < aln_end;)
       {
-	x = binread(binread(x,i1),i2);
+	x = tpt::binread(tpt::binread(x,i1),i2);
 	if (i1 < s1 || i1 >= e1 || i2 < s2 || i2 >= e2) continue;
 	p1[i1] += plup_fwd(snt1[i1].id(), snt2[i2].id(),alpha);
 	++c1[i1];

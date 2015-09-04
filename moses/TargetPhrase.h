@@ -92,7 +92,7 @@ public:
   TargetPhrase(ttasksptr &ttask, const PhraseDictionary *pt = NULL);
   TargetPhrase(ttasksptr &ttask, std::string out_string, const PhraseDictionary *pt = NULL);
   explicit TargetPhrase(ttasksptr &ttask, const Phrase &targetPhrase, const PhraseDictionary *pt);
-  ttasksptr const GetTtask() const;
+  const ttasksptr GetTtask() const;
   bool HasTtaskSPtr() const;
 
   ~TargetPhrase();

@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #ifndef _ug_mm_tsa_h
 #define _ug_mm_tsa_h
 
@@ -17,9 +17,8 @@
 #include "tpt_pickler.h"
 #include "ug_tsa_base.h"
 
-namespace ugdiss
+namespace sapt
 {
-  // using namespace std;
   namespace bio=boost::iostreams;
 
   template<typename TOKEN>
@@ -134,8 +133,8 @@ namespace ugdiss
     Moses::prime(file);
     char const* p = file.data();
     filepos_type idxOffset;
-    p = numread(p,idxOffset);
-    p = numread(p,this->indexSize);
+    p = tpt::numread(p,idxOffset);
+    p = tpt::numread(p,this->indexSize);
 
     // cerr << fname << ": " << idxOffset << " " << this->indexSize << std::endl;
 
@@ -180,7 +179,7 @@ namespace ugdiss
   mmTSA<TOKEN>::
   readSid(char const* p, char const* q, id_type& sid) const
   {
-    return tightread(p,q,sid);
+    return tpt::tightread(p,q,sid);
   }
 
   // ======================================================================
@@ -190,7 +189,7 @@ namespace ugdiss
   mmTSA<TOKEN>::
   readSid(char const* p, char const* q, ::uint64_t& sid) const
   {
-    return tightread(p,q,sid);
+    return tpt::tightread(p,q,sid);
   }
 
   // ======================================================================
@@ -201,7 +200,7 @@ namespace ugdiss
   mmTSA<TOKEN>::
   readOffset(char const* p, char const* q, uint16_t& offset) const
   {
-    return tightread(p,q,offset);
+    return tpt::tightread(p,q,offset);
   }
 
   // ======================================================================
@@ -212,7 +211,7 @@ namespace ugdiss
   mmTSA<TOKEN>::
   readOffset(char const* p, char const* q, ::uint64_t& offset) const
   {
-    return tightread(p,q,offset);
+    return tpt::tightread(p,q,offset);
   }
 
   // ======================================================================
@@ -226,8 +225,8 @@ namespace ugdiss
     size_t ret=0;
     while (p < q)
       {
-	p = tightread(p,q,sid);
-	p = tightread(p,q,off);
+	p = tpt::tightread(p,q,sid);
+	p = tpt::tightread(p,q,off);
 	ret++;
       }
     return ret;
@@ -246,8 +245,8 @@ namespace ugdiss
     boost::dynamic_bitset<uint64_t> check(this->corpus->size());
     while (p < q)
       {
-	p = tightread(p,q,sid);
-	p = tightread(p,q,off);
+	p = tpt::tightread(p,q,sid);
+	p = tpt::tightread(p,q,off);
 	check.set(sid);
 	raw++;
       }

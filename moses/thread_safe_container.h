@@ -23,7 +23,7 @@ namespace Moses
 
 template<typename KEY, typename VAL, class CONTAINER = std::map<KEY,VAL> >
 class
-  ThreadSafeContainer
+ThreadSafeContainer
 {
 protected:
   mutable boost::shared_mutex m_lock;
@@ -49,28 +49,33 @@ public:
       : m_lock(lock), m_container(container), m_iter(iter)
     { }
 
-    entry_t const& operator->() {
+    entry_t const& operator->() 
+    {
       UTIL_THROW_IF2(m_container == NULL, "This locking iterator is invalid "
                      << "or has not been assigned.");
       return m_iter.operator->();
     }
-
-    // locking operators transfer the lock upon assignment and become invalid
+    
+    // locking operators transfer the lock upon assignment and become
+    // invalid
     locking_iterator const&
-    operator=(locking_iterator& other) {
+    operator=(locking_iterator& other) 
+    {
       m_lock.swap(other.m_lock);
       m_iter = other.m_iter;
       other.m_iter = other.m_container.end();
     }
-
+    
     bool
-    operator==(const_iter_t const& other) {
+    operator==(const_iter_t const& other) 
+    {
       return m_iter == other;
     }
-
+    
     locking_iterator const&
-    operator++() {
-      ++m_iter;
+    operator++() 
+    { 
+      ++m_iter; 
       return *this;
     }
 
@@ -82,15 +87,21 @@ public:
     operator++(int);
   };
 
-  const_iter_t const& end() const {
+  const_iter_t const& 
+  end() const 
+  {
     return m_container.end();
   }
 
-  locking_iterator begin() const {
+  locking_iterator 
+  begin() const 
+  {
     return locking_iterator(m_lock, this, m_container.begin());
   }
 
-  VAL const& set(KEY const& key, VAL const& val) {
+  VAL const& 
+  set(KEY const& key, VAL const& val) 
+  {
     boost::unique_lock< boost::shared_mutex > lock(m_lock);
     entry_t entry(key,val);
     iter_t foo = m_container.insert(entry).first;
@@ -98,21 +109,27 @@ public:
     return foo->second;
   }
 
-  VAL const* get(KEY const& key, VAL const& default_val) {
+  VAL const* 
+  get(KEY const& key, VAL const& default_val) 
+  {
     boost::unique_lock< boost::shared_mutex > lock(m_lock);
     entry_t entry(key, default_val);
     iter_t foo = m_container.insert(entry).first;
     return &(foo->second);
   }
 
-  VAL const* get(KEY const& key) const {
+  VAL const* 
+  get(KEY const& key) const 
+  {
     boost::shared_lock< boost::shared_mutex > lock(m_lock);
     const_iter_t m = m_container.find(key);
     if (m == m_container.end()) return NULL;
     return &m->second;
   }
-
-  size_t erase(KEY const& key) {
+  
+  size_t 
+  erase(KEY const& key) 
+  {
     boost::unique_lock< boost::shared_mutex > lock(m_lock);
     return m_container.erase(key);
   }

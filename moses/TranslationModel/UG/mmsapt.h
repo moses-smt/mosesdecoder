@@ -1,15 +1,18 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Sampling phrase table implementation based on memory-mapped suffix arrays.
 // Design and code by Ulrich Germann.
 #pragma once
+#define PROVIDES_RANKED_SAMPLING 0
 
 #include <boost/thread.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 #include "moses/TypeDef.h"
 #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
 #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
 #include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/threading/ug_thread_pool.h"
 
 #include "moses/TranslationModel/UG/mm/ug_mm_ttrack.h"
 #include "moses/TranslationModel/UG/mm/ug_mm_tsa.h"
@@ -18,6 +21,7 @@
 #include "moses/TranslationModel/UG/mm/ug_typedefs.h"
 #include "moses/TranslationModel/UG/mm/tpt_pickler.h"
 #include "moses/TranslationModel/UG/mm/ug_bitext.h"
+#include "moses/TranslationModel/UG/mm/ug_bitext_sampler.h"
 #include "moses/TranslationModel/UG/mm/ug_lexical_phrase_scorer2.h"
 
 #include "moses/TranslationModel/UG/TargetPhraseCollectionCache.h"
@@ -43,27 +47,25 @@
 
 namespace Moses
 {
-  using namespace bitext;
   class Mmsapt
 #ifndef NO_MOSES
     : public PhraseDictionary
 #endif
   {
-    // using namespace std;
     class TPCOllCache;
     friend class Alignment;
     std::map<std::string,std::string> param;
     std::string m_name;
   public:
-    typedef L2R_Token<SimpleWordId> Token;
-    typedef mmBitext<Token> mmbitext;
-    typedef imBitext<Token> imbitext;
-    typedef Bitext<Token>     bitext;
-    typedef TSA<Token>           tsa;
-    typedef PhraseScorer<Token> pscorer;
+    typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
+    typedef sapt::mmBitext<Token> mmbitext;
+    typedef sapt::imBitext<Token> imbitext;
+    typedef sapt::Bitext<Token>     bitext;
+    typedef sapt::TSA<Token>           tsa;
+    typedef sapt::PhraseScorer<Token> pscorer;
   private:
     // vector<SPTR<bitext> > shards;
-    mmbitext btfix;
+    iptr<mmbitext> btfix;
     SPTR<imbitext> btdyn;
     std::string m_bname, m_extra_data, m_bias_file,m_bias_server;
     std::string L1;
@@ -76,20 +78,27 @@ namespace Moses
     size_t m_workers;  // number of worker threads for sampling the bitexts
     std::vector<std::string> m_feature_set_names; // one or more of: standard, datasource
     std::string m_bias_logfile;
-    boost::scoped_ptr<ofstream> m_bias_logger; // for logging to a file
-    ostream* m_bias_log;
+    boost::scoped_ptr<std::ofstream> m_bias_logger; // for logging to a file
+    std::ostream* m_bias_log;
     int m_bias_loglevel;
     LexicalReordering* m_lr_func; // associated lexical reordering function
-    string m_lr_func_name; // name of associated lexical reordering function
+    std::string m_lr_func_name; // name of associated lexical reordering function
+    sapt::sampling_method m_sampling_method; // sampling method, see ug_bitext_sampler
+    boost::scoped_ptr<ug::ThreadPool> m_thread_pool;
   public:
+    void* const  bias_key;    // for getting bias from ttask
     void* const  cache_key;   // for getting cache from ttask
     void* const  context_key; // for context scope from ttask
   private:
-    boost::shared_ptr<SamplingBias> m_bias; // for global default bias
+    boost::shared_ptr<sapt::SamplingBias> m_bias; // for global default bias
     boost::shared_ptr<TPCollCache> m_cache; // for global default bias
     size_t m_cache_size;  //
-    size_t input_factor;  //
-    size_t output_factor; // we can actually return entire Tokens!
+    // size_t input_factor;  //
+    // size_t output_factor; // we can actually return entire Tokens!
+
+    // std::vector<ushort> m_input_factor;
+    // std::vector<ushort> m_output_factor;
+
 
     // for display for human inspection (ttable dumps):
     std::vector<std::string> m_feature_names; // names of features activated
@@ -100,6 +109,9 @@ namespace Moses
     std::vector<SPTR<pscorer > > m_active_ff_dyn; // activated feature functions (dyn)
     std::vector<SPTR<pscorer > > m_active_ff_common;
     // activated feature functions (dyn)
+
+    void
+    parse_factor_spec(std::vector<FactorType>& flist, std::string const key);
 
     void
     register_ff(SPTR<pscorer> const& ff, std::vector<SPTR<pscorer> > & registry);
@@ -115,8 +127,8 @@ namespace Moses
 	     std::vector<SPTR<pscorer> >* registry = NULL);
     // add feature function if specified
 
-    void
-    add_corpus_specific_features(std::vector<SPTR<pscorer > >& ffvec);
+    // void
+    // add_corpus_specific_features(std::vector<SPTR<pscorer > >& ffvec);
 
     // built-in feature functions
     // PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
@@ -132,10 +144,15 @@ namespace Moses
     // for more complex operations on the cache
     bool withPbwd;
     bool poolCounts;
-    std::vector<FactorType> ofactor;
+    std::vector<FactorType> m_ifactor, m_ofactor;
 
     void setup_local_feature_functions();
+    void set_bias_via_server(ttasksptr const& ttask);
 
+#if PROVIDES_RANKED_SAMPLING
+    void 
+    set_bias_for_ranking(ttasksptr const& ttask, iptr<sapt::Bitext<Token> const> bt);
+#endif
   private:
 
     void read_config_file(std::string fname, std::map<std::string,std::string>& param);
@@ -143,39 +160,39 @@ namespace Moses
     // phrase table feature weights for alignment:
     std::vector<float> feature_weights;
 
-    std::vector<std::vector<id_type> > wlex21;
+    std::vector<std::vector<tpt::id_type> > wlex21;
     // word translation lexicon (without counts, get these from calc_lex.COOC)
-    typedef ugdiss::mm2dTable<id_type,id_type,uint32_t,uint32_t> mm2dtable_t;
+    typedef sapt::mm2dTable<tpt::id_type,tpt::id_type,uint32_t,uint32_t> mm2dtable_t;
     mm2dtable_t COOCraw;
 
     TargetPhrase*
     mkTPhrase(ttasksptr const& ttask,
               Phrase const& src,
-	      Moses::bitext::PhrasePair<Token>* fix,
-	      Moses::bitext::PhrasePair<Token>* dyn,
-	      SPTR<Bitext<Token> > const& dynbt) const;
+              sapt::PhrasePair<Token>* fix,
+              sapt::PhrasePair<Token>* dyn,
+              SPTR<sapt::Bitext<Token> > const& dynbt) const;
 
     void
     process_pstats
     (Phrase   const& src,
      uint64_t const  pid1,
-     pstats   const& stats,
-     Bitext<Token> const & bt,
+     sapt::pstats   const& stats,
+     sapt::Bitext<Token> const & bt,
      TargetPhraseCollection* tpcoll
      ) const;
 
     bool
     pool_pstats
     (Phrase   const& src,
-     uint64_t const  pid1a, pstats * statsa, Bitext<Token> const & bta,
-     uint64_t const  pid1b, pstats const* statsb, Bitext<Token> const & btb,
+     uint64_t const  pid1a, sapt::pstats * statsa, sapt::Bitext<Token> const & bta,
+     uint64_t const  pid1b, sapt::pstats const* statsb, sapt::Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll) const;
 
     bool
     combine_pstats
     (Phrase   const& src,
-     uint64_t const  pid1a, pstats* statsa, Bitext<Token> const & bta,
-     uint64_t const  pid1b, pstats const* statsb, Bitext<Token> const & btb,
+     uint64_t const  pid1a, sapt::pstats* statsa, sapt::Bitext<Token> const & bta,
+     uint64_t const  pid1b, sapt::pstats const* statsb, sapt::Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll) const;
 
     void load_extra_data(std::string bname, bool locking);
@@ -239,10 +256,10 @@ namespace Moses
     std::vector<std::string> const&
     GetFeatureNames() const;
 
-    SPTR<DocumentBias>
+    SPTR<sapt::DocumentBias>
     setupDocumentBias(std::map<std::string,float> const& bias) const;
 
-    vector<float> DefaultWeights() const;
+    std::vector<float> DefaultWeights() const;
   };
 } // end namespace
 

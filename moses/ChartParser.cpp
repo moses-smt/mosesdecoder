@@ -106,7 +106,8 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
       targetPhrase->EvaluateInIsolation(*unksrc);
-      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.PrintNBestTrees() || staticData.GetTreeStructure() != NULL) {
+
+      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.options().nbest.print_trees || staticData.GetTreeStructure() != NULL) {
         targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
       }
 

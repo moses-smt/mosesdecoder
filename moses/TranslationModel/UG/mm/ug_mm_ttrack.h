@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Memory-mapped corpus track. The corpus (each Token occupying a fixed number
 // of bytes (must be compatible with the memory alignment in the OS) is stored
 // as one huge array. The "index" maps from sentence IDs to positions within
@@ -17,15 +17,15 @@
 #include <boost/shared_ptr.hpp>
 
 #include "tpt_typedefs.h"
+#include "ug_typedefs.h"
 #include "tpt_tokenindex.h"
 #include "ug_ttrack_base.h"
 #include "num_read_write.h"
 #include "ug_load_primer.h"
 #include "ug_tsa_base.h"
 
-namespace ugdiss
+namespace sapt
 {
-  // using namespace std;
   namespace bio=boost::iostreams;
 
   template<typename TKN=id_type>
@@ -55,7 +55,7 @@ namespace ugdiss
     // return size of corpus (in number of sentences)
     size_t size() const;
 
-    // return size of corpus (in number of sentences)
+    // return size of corpus (in number of tokens)
     size_t numTokens() const;
 
     // open an mmTtrack file
@@ -93,12 +93,12 @@ namespace ugdiss
     bio::mapped_file myfile(fname);
     assert(myfile.is_open());
     Moses::prime(myfile);
-    filepos_type idxOffset;
+    tpt::filepos_type idxOffset;
     const char* p = myfile.data();
     id_type numSent,numWords;
-    p = numread(p,idxOffset);
-    p = numread(p,numSent);
-    p = numread(p,numWords);
+    p = tpt::numread(p,idxOffset);
+    p = tpt::numread(p,numSent);
+    p = tpt::numread(p,numWords);
     data  = reinterpret_cast<TKN*>(p);
     for (size_t i = 0; i < numWords; ++i)
       data[i] = data[i].remap(f);
@@ -179,11 +179,11 @@ namespace ugdiss
 	std::cerr << "Error opening file " << fname << std::endl;
 	assert(0);
       }
-    filepos_type idxOffset;
+    tpt::filepos_type idxOffset;
     char const* p = file.data();
-    p = numread(p,idxOffset);
-    p = numread(p,this->numSent);
-    p = numread(p,this->numWords);
+    p = tpt::numread(p, idxOffset);
+    p = tpt::numread(p,this->numSent);
+    p = tpt::numread(p,this->numWords);
     data  = reinterpret_cast<Token const*>(p);
     index = reinterpret_cast<id_type const*>(file.data()+idxOffset);
   }
@@ -214,9 +214,9 @@ namespace ugdiss
   mmTtrack<TKN>::
   write_blank_file_header(std::ostream& out) const
   {
-    numwrite(out,filepos_type(0)); // place holder for index start
-    numwrite(out,id_type(0));      // place holder for index size
-    numwrite(out,id_type(0));      // place holder for token count
+    tpt::numwrite(out,filepos_type(0)); // place holder for index start
+    tpt::numwrite(out,id_type(0));      // place holder for index size
+    tpt::numwrite(out,id_type(0));      // place holder for token count
   }
 
   template<typename TKN>
@@ -227,13 +227,13 @@ namespace ugdiss
 			   id_type tokenCount) const
   {
     id_type       idxSize = idx.size();
-    filepos_type idxStart = out.tellp();
+    tpt::filepos_type idxStart = out.tellp();
     for (size_t i = 0; i < idx.size(); ++i)
-      numwrite(out,idx[i]);
+      tpt::numwrite(out,idx[i]);
     out.seekp(0);
-    numwrite(out,idxStart);
-    numwrite(out,idxSize-1);
-    numwrite(out,tokenCount);
+    tpt::numwrite(out,idxStart);
+    tpt::numwrite(out,idxSize-1);
+    tpt::numwrite(out,tokenCount);
   }
 
   template<typename TKN>

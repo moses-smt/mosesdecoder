@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // count words in a memory-mapped corpus
 #include "ug_mm_ttrack.h"
 #include "tpt_tokenindex.h"
@@ -17,6 +18,7 @@
 #include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
 
 using namespace std;
+using namespace sapt;
 using namespace ugdiss;
 using namespace Moses;
 typedef L2R_Token<SimpleWordId> Token;

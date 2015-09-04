@@ -1,8 +1,9 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // TO DO (12.01.2011):
 //
-// - Vocab items should be stored in order of ids, so that we can determine their length
-//   by taking computing V[id+1] - V[id] instead of using strlen.
+// - Vocab items should be stored in order of ids, so that we can
+//   determine their length by taking computing V[id+1] - V[id]
+//   instead of using strlen.
 //
 // (c) 2007,2008 Ulrich Germann
 
@@ -20,13 +21,13 @@
 #include <vector>
 #include <map>
 
-// // using namespace std;
 namespace bio=boost::iostreams;
 
-namespace ugdiss
+namespace sapt
 {
   class TokenIndex
   {
+    typedef tpt::id_type id_type;
     /** Reverse index: maps from ID to char const* */
     mutable std::vector<char const*> ridx;
     /** Label for the UNK token */
@@ -38,7 +39,7 @@ namespace ugdiss
 
     // NEW 2011-01-30: dynamic adding of unknown items
     bool dynamic; // dynamically assign a new word id to unknown items?
-    boost::shared_ptr<std::map<std::string,id_type> >   str2idExtra;
+    boost::shared_ptr<std::map<std::string, tpt::id_type> >   str2idExtra;
     boost::shared_ptr<std::vector<std::string> > newWords;
     // The use of pointers to external items is a bit of a bad hack
     // in terms of the semantic of TokenIndex const: since external items
@@ -53,7 +54,7 @@ namespace ugdiss
     {
     public:
       uint32_t offset;
-      id_type  id;
+      id_type id;
     };
 
     /** Comparison function object used for Entry instances */

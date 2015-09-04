@@ -60,6 +60,14 @@ EndOfFileException::EndOfFileException() throw() {
 }
 EndOfFileException::~EndOfFileException() throw() {}
 
+bool InputFileIsStdin(StringPiece path) {
+  return path == "-" || path == "/dev/stdin";
+}
+
+bool OutputFileIsStdout(StringPiece path) {
+  return path == "-" || path == "/dev/stdout";
+}
+
 int OpenReadOrThrow(const char *name) {
   int ret;
 #if defined(_WIN32) || defined(_WIN64)
@@ -111,7 +119,10 @@ uint64_t SizeOrThrow(int fd) {
 }
 
 void ResizeOrThrow(int fd, uint64_t to) {
-#if defined(_WIN32) || defined(_WIN64)
+#if defined __MINGW32__
+    // Does this handle 64-bit?
+    int ret = ftruncate
+#elif defined(_WIN32) || defined(_WIN64)
     errno_t ret = _chsize_s
 #elif defined(OS_ANDROID)
     int ret = ftruncate64

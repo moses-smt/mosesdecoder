@@ -21,7 +21,6 @@
 #include <assert.h>
 #include <cstdlib>
 #include <cstring>
-#include <list>
 #include <map>
 #include <set>
 #include <vector>
@@ -110,7 +109,7 @@ void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float>
                                    const std::string &fileNameLeftHandSideSourceLabelCounts,
                                    const std::string &fileNameLeftHandSideTargetSourceLabelCounts );
 void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fileName );
-void processPhrasePairs( std::list< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
+void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb );
 void outputPhrasePair(const ExtractionPhrasePair &phrasePair, float, int, std::ostream &phraseTableFile, const ScoreFeatureManager &featureManager, const MaybeLog &maybeLog );
 double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
@@ -346,8 +345,8 @@ int main(int argc, char* argv[])
   // loop through all extracted phrase translations
   std::string line, lastLine;
   ExtractionPhrasePair *phrasePair = NULL;
-  std::list< ExtractionPhrasePair* > phrasePairsWithSameSource;
-  std::list< ExtractionPhrasePair* > phrasePairsWithSameSourceAndTarget; // required for hierarchical rules only, as non-terminal alignments might make the phrases incompatible
+  std::vector< ExtractionPhrasePair* > phrasePairsWithSameSource;
+  std::vector< ExtractionPhrasePair* > phrasePairsWithSameSourceAndTarget; // required for hierarchical rules only, as non-terminal alignments might make the phrases incompatible
 
   int tmpSentenceId;
   PHRASE *tmpPhraseSource, *tmpPhraseTarget;
@@ -411,7 +410,7 @@ int main(int argc, char* argv[])
     // once the first of them has been found to have to be set to false
 
     if ( hierarchicalFlag ) {
-      for ( std::list< ExtractionPhrasePair* >::const_iterator iter = phrasePairsWithSameSourceAndTarget.begin();
+      for ( std::vector< ExtractionPhrasePair* >::const_iterator iter = phrasePairsWithSameSourceAndTarget.begin();
             iter != phrasePairsWithSameSourceAndTarget.end(); ++iter ) {
         if ( (*iter)->Matches( tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment,
                                sourceMatch, targetMatch, alignmentMatch ) ) {
@@ -441,7 +440,7 @@ int main(int argc, char* argv[])
       if ( !phrasePairsWithSameSource.empty() &&
            !sourceMatch ) {
         processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
-        for ( std::list< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+        for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
               iter!=phrasePairsWithSameSource.end(); ++iter) {
           delete *iter;
         }
@@ -476,7 +475,7 @@ int main(int argc, char* argv[])
   std::cerr << std::endl;
 
   processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
-  for ( std::list< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     delete *iter;
   }
@@ -677,7 +676,7 @@ void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fi
 }
 
 
-void processPhrasePairs( std::list< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
+void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, std::ostream &phraseTableFile,
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb )
 {
   if (phrasePairsWithSameSource.size() == 0) {
@@ -689,14 +688,14 @@ void processPhrasePairs( std::list< ExtractionPhrasePair* > &phrasePairsWithSame
   //std::cerr << "phrasePairs.size() = " << phrasePairs.size() << std::endl;
 
   // loop through phrase pairs
-  for ( std::list< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     // add to total count
     totalSource += (*iter)->GetCount();
   }
 
   // output the distinct phrase pairs, one at a time
-  for ( std::list< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin();
         iter!=phrasePairsWithSameSource.end(); ++iter) {
     // add to total count
     outputPhrasePair( **iter, totalSource, phrasePairsWithSameSource.size(), phraseTableFile, featureManager, maybeLogProb );

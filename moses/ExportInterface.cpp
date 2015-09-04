@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id: ExportInterface.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
 
 /***********************************************************************
@@ -63,9 +64,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>
-#include "server/Translator.h"
-#include "server/Optimizer.h"
-#include "server/Updater.h"
+#include "server/Server.h"
 #endif
 
 using namespace std;
@@ -147,48 +146,9 @@ int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
-  int port;
-  params.SetParameter(port, "server-port", 8080);
-  bool isSerial;
-  params.SetParameter(isSerial, "serial", false);
-  string logfile;
-  params.SetParameter(logfile, "server-log", string(""));
-  size_t num_threads;
-  params.SetParameter(num_threads, "threads", size_t(10));
-  if (isSerial) VERBOSE(1,"Running server in serial mode." << endl);
-
-  xmlrpc_c::registry myRegistry;
-
-  xmlrpc_c::methodPtr const translator(new MosesServer::Translator(num_threads));
-  xmlrpc_c::methodPtr const updater(new MosesServer::Updater);
-  xmlrpc_c::methodPtr const optimizer(new MosesServer::Optimizer);
-
-  myRegistry.addMethod("translate", translator);
-  myRegistry.addMethod("updater", updater);
-  myRegistry.addMethod("optimize", optimizer);
-
-  xmlrpc_c::serverAbyss myAbyssServer(
-    xmlrpc_c::serverAbyss::constrOpt()
-    .registryP(&myRegistry)
-    .portNumber(port)              // TCP port on which to listen
-    .logFileName(logfile)
-    .allowOrigin("*")
-    .maxConn((unsigned int)num_threads)
-  );
-
-  XVERBOSE(1,"Listening on port " << port << endl);
-  if (isSerial) {
-    while(1) myAbyssServer.runOnce();
-  } else myAbyssServer.run();
-
-  std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
-  // #pragma message("BUILDING MOSES WITH SERVER SUPPORT")
-#else
-  // #pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT")
-  std::cerr << "Moses was compiled without server support." << endl;
+  MosesServer::Server server(params);
+  return server.run(); // actually: don't return. see Server::run()
 #endif
-  return 1;
-
 }
 
 int
@@ -219,31 +179,58 @@ batch_run()
   ThreadPool pool(staticData.ThreadCount());
 #endif
 
+  // using context for adaptation:
+  // e.g., context words / strings from config file / cmd line
   std::string context_string;
   params.SetParameter(context_string,"context-string",string(""));
 
+  // ... or weights for documents/domains from config file / cmd. line
   std::string context_weights;
   params.SetParameter(context_weights,"context-weights",string(""));
 
-  // main loop over set of input sentences
+  // ... or the surrounding context (--context-window ...)
+  size_t size_t_max = std::numeric_limits<size_t>::max();
+  bool use_context_window = ioWrapper->GetLookAhead() || ioWrapper->GetLookBack();
+  bool use_context = use_context_window || context_string.size();
+  bool use_sliding_context_window = (use_context_window
+                                     && ioWrapper->GetLookAhead() != size_t_max);
 
+  boost::shared_ptr<std::vector<std::string> >  context_window;
+  boost::shared_ptr<std::vector<std::string> >* cw;
+  cw = use_context_window ? &context_window : NULL;
+  if (!cw && context_string.size())
+    context_window.reset(new std::vector<std::string>(1,context_string));
+
+  // global scope of caches, biases, etc., if any
+  boost::shared_ptr<ContextScope> gscope;
+  if (!use_sliding_context_window)
+    gscope.reset(new ContextScope);
+
+  // main loop over set of input sentences
   boost::shared_ptr<InputType> source;
-  while ((source = ioWrapper->ReadInput()) != NULL) {
+  while ((source = ioWrapper->ReadInput(cw)) != NULL) {
     IFVERBOSE(1) ResetUserTime();
 
     // set up task of translating one sentence
-    boost::shared_ptr<TranslationTask>
-    task = TranslationTask::create(source, ioWrapper);
-    if (source->GetContext())
-      task->SetContextString(*source->GetContext());
-    else task->SetContextString(context_string);
+    boost::shared_ptr<ContextScope>  lscope;
+    if (gscope) lscope = gscope;
+    else lscope.reset(new ContextScope);
 
-    //if (source->GetContextWeights().isEmpty())
-    //  task->SetContextWeights(*source->GetContextWeights());
-    /*else //The context_weights will never be passed to the config file.*/
-    if (context_weights != "") {
-      task->SetContextWeights(context_weights);
+    boost::shared_ptr<TranslationTask> task;
+    task = TranslationTask::create(source, ioWrapper, lscope);
+
+    if (cw) {
+      if (context_string.size())
+        context_window->push_back(context_string);
+      if(!use_sliding_context_window)
+        cw = NULL;
     }
+    if (context_window)
+      task->SetContextWindow(context_window);
+
+    if (context_weights != "")
+      task->SetContextWeights(context_weights);
+
     // Allow for (sentence-)context-specific processing prior to
     // decoding. This can be used, for example, for context-sensitive
     // phrase lookup.

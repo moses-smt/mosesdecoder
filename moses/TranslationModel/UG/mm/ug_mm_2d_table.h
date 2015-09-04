@@ -11,9 +11,8 @@
 #include "ug_typedefs.h"
 #include "util/exception.hh"
 namespace bio=boost::iostreams;
-namespace ugdiss
+namespace sapt
 {
-  // using namespace std;
   template<typename OFFSET, typename ID, typename VAL, typename INIT>
   class
   mm2dTable
@@ -186,9 +185,9 @@ namespace ugdiss
       }
 
     filepos_type idxOffset=0;
-    numwrite(out,idxOffset); // place holder, we'll return here at the end
-    numwrite(out,id_type(m1->size())); // number of rows
-    numwrite(out,id_type(m2->size())); // number of columns
+    tpt::numwrite(out,idxOffset); // place holder, we'll return here at the end
+    tpt::numwrite(out,id_type(m1->size())); // number of rows
+    tpt::numwrite(out,id_type(m2->size())); // number of columns
 
     // write actual table
     std::vector<OFFSET> index;
@@ -229,7 +228,7 @@ namespace ugdiss
     out.write(reinterpret_cast<char const*>(&(*m2)[0]),m2->size()*sizeof(VAL));
 
     out.seekp(0);
-    numwrite(out,idxOffset);
+    tpt::numwrite(out,idxOffset);
   }
 }
 #endif

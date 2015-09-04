@@ -1,8 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 #
 # Detokenization tests.
 #
 
+use warnings;
 use strict;
 # This is here to suppress (false) warnings about OLDOUT and OLDERR being used only once.  Maybe there is a less brutish way to suppress that, but I don't know it.
 no warnings 'once';

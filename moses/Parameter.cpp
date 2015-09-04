@@ -214,6 +214,10 @@ Parameter::Parameter()
   AddParam(server_opts,"server", "Run moses as a translation server.");
   AddParam(server_opts,"server-port", "Port for moses server");
   AddParam(server_opts,"server-log", "Log destination for moses server");
+  AddParam(server_opts,"session-timeout",
+           "Timeout for sessions, e.g. '2h30m' or 1d (=24h)");
+  AddParam(server_opts,"session-cache-size", string("Max. number of sessions cached.")
+           +"Least recently used session is dumped first.");
   AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
 
   po::options_description irstlm_opts("IRSTLM Options");

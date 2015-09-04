@@ -75,7 +75,7 @@ void Model1Vocabulary::Load(const std::string& fileName)
     ++i;
     std::vector<std::string> tokens = Tokenize(line);
     UTIL_THROW_IF2(tokens.size()!=3, "Line " << i << " in " << fileName << " has wrong number of tokens.");
-    unsigned id = std::atoll( tokens[0].c_str() );
+    unsigned id = atoll( tokens[0].c_str() );
     if (! ( (id == 1) && (tokens[1] == "UNK") )) {
       const Factor* factor = factorCollection.AddFactor(tokens[1],false); // TODO: can we assume that the vocabulary is know and filter the model on loading?
       bool stored = Store(factor, id);
@@ -86,7 +86,7 @@ void Model1Vocabulary::Load(const std::string& fileName)
     ++i;
     std::vector<std::string> tokens = Tokenize(line);
     UTIL_THROW_IF2(tokens.size()!=3, "Line " << i << " in " << fileName << " has wrong number of tokens.");
-    unsigned id = std::atoll( tokens[0].c_str() );
+    unsigned id = atoll( tokens[0].c_str() );
     const Factor* factor = factorCollection.AddFactor(tokens[1],false); // TODO: can we assume that the vocabulary is know and filter the model on loading?
     bool stored = Store(factor, id);
     UTIL_THROW_IF2(!stored, "Line " << i << " in " << fileName << " overwrites existing vocabulary entry.");
@@ -105,8 +105,8 @@ void Model1LexicalTable::Load(const std::string &fileName, const Model1Vocabular
     ++i;
     std::vector<std::string> tokens = Tokenize(line);
     UTIL_THROW_IF2(tokens.size()!=3, "Line " << i << " in " << fileName << " has wrong number of tokens.");
-    unsigned idS = std::atoll( tokens[0].c_str() );
-    unsigned idT = std::atoll( tokens[1].c_str() );
+    unsigned idS = atoll( tokens[0].c_str() );
+    unsigned idT = atoll( tokens[1].c_str() );
     const Factor* wordS = vcbS.GetWord(idS);
     const Factor* wordT = vcbT.GetWord(idT);
     float prob = std::atof( tokens[2].c_str() );

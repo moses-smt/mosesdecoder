@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2008-2010 Ulrich Germann
 #include <boost/program_options.hpp>
 #include <iomanip>
@@ -11,7 +11,7 @@
 #include "tpt_pickler.h"
 
 using namespace std;
-using namespace ugdiss;
+using namespace sapt;
 namespace po = boost::program_options;
 
 string mamfile;
@@ -68,8 +68,8 @@ printRangeMAM(size_t start, size_t stop)
       ushort s,t;
       while (p < q)
 	{
-	  p = binread(p,s);
-	  p = binread(p,t);
+	  p = tpt::binread(p,s);
+	  p = tpt::binread(p,t);
 	  cout << s << "-" << t << " ";
 	}
       cout << endl;

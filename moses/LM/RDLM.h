@@ -8,6 +8,11 @@
 #include <boost/thread/tss.hpp>
 #include <boost/array.hpp>
 
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#endif
+
+
 // relational dependency language model, described in:
 // Sennrich, Rico (2015). Modelling and Optimizing on Syntactic N-Grams for Statistical Machine Translation. Transactions of the Association for Computational Linguistics.
 // see 'scripts/training/rdlm' for training scripts
@@ -19,6 +24,31 @@ class neuralTM;
 
 namespace Moses
 {
+
+namespace rdlm
+{
+
+// we re-use some short-lived objects to reduce the number of allocations;
+// each thread gets its own instance to prevent collision
+// [could be replaced with thread_local keyword in C++11]
+class ThreadLocal
+{
+public:
+  std::vector<int> ancestor_heads;
+  std::vector<int> ancestor_labels;
+  std::vector<int> ngram;
+  std::vector<int> heads;
+  std::vector<int> labels;
+  std::vector<int> heads_output;
+  std::vector<int> labels_output;
+  std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > stack;
+  nplm::neuralTM* lm_head;
+  nplm::neuralTM* lm_label;
+
+  ThreadLocal(nplm::neuralTM *lm_head_base_instance_, nplm::neuralTM *lm_label_base_instance_, bool normalizeHeadLM, bool normalizeLabelLM, int cacheSize);
+  ~ThreadLocal();
+};
+}
 
 class RDLMState : public TreeState
 {
@@ -57,10 +87,9 @@ class RDLM : public StatefulFeatureFunction
   typedef std::map<InternalTree*,TreePointer> TreePointerMap;
 
   nplm::neuralTM* lm_head_base_instance_;
-  mutable boost::thread_specific_ptr<nplm::neuralTM> lm_head_backend_;
-
   nplm::neuralTM* lm_label_base_instance_;
-  mutable boost::thread_specific_ptr<nplm::neuralTM> lm_label_backend_;
+
+  mutable boost::thread_specific_ptr<rdlm::ThreadLocal> thread_objects_backend_;
 
   std::string m_glueSymbolString;
   Word dummy_head;
@@ -106,6 +135,20 @@ class RDLM : public StatefulFeatureFunction
 
   FactorType m_factorType;
 
+  static const int LABEL_INPUT = 0;
+  static const int LABEL_OUTPUT = 1;
+  static const int HEAD_INPUT = 2;
+  static const int HEAD_OUTPUT = 3;
+  mutable std::vector<int> factor2id_label_input;
+  mutable std::vector<int> factor2id_label_output;
+  mutable std::vector<int> factor2id_head_input;
+  mutable std::vector<int> factor2id_head_output;
+
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_accessLock;
+#endif
+
 public:
   RDLM(const std::string &line)
     : StatefulFeatureFunction(2, line)
@@ -138,10 +181,11 @@ public:
     return new RDLMState(TreePointer(), 0, 0, 0);
   }
 
-  void Score(InternalTree* root, const TreePointerMap & back_pointers, boost::array<float,4> &score, std::vector<int> &ancestor_heads, std::vector<int> &ancestor_labels, size_t &boundary_hash, int num_virtual = 0, int rescoring_levels = 0) const;
+  void Score(InternalTree* root, const TreePointerMap & back_pointers, boost::array<float,4> &score, size_t &boundary_hash, rdlm::ThreadLocal &thread_objects, int num_virtual = 0, int rescoring_levels = 0) const;
   bool GetHead(InternalTree* root, const TreePointerMap & back_pointers, std::pair<int,int> & IDs) const;
-  void GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, const nplm::neuralTM *lm_head, const nplm::neuralTM *lm_labels, std::vector<int> & heads, std::vector<int> & labels, std::vector<int> & heads_output, std::vector<int> & labels_output) const;
+  void GetChildHeadsAndLabels(InternalTree *root, const TreePointerMap & back_pointers, int reached_end, rdlm::ThreadLocal &thread_objects) const;
   void GetIDs(const Word & head, const Word & preterminal, std::pair<int,int> & IDs) const;
+  int Factor2ID(const Factor * const factor, int model_type) const;
   void ScoreFile(std::string &path); //for debugging
   void PrintInfo(std::vector<int> &ngram, nplm::neuralTM* lm) const; //for debugging
 
@@ -183,19 +227,20 @@ public:
   private:
     std::vector<TreePointer>::const_iterator iter;
     std::vector<TreePointer>::const_iterator _begin;
-    std::vector<TreePointer>::const_iterator _end;
+    bool _ended;
     InternalTree* current;
     const TreePointerMap & back_pointers;
     bool binarized;
-    std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > stack;
+    std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > &stack;
 
   public:
-    UnbinarizedChildren(InternalTree* root, const TreePointerMap & pointers, bool binary):
+    UnbinarizedChildren(InternalTree* root, const TreePointerMap & pointers, bool binary, std::vector<std::pair<InternalTree*,std::vector<TreePointer>::const_iterator> > & persistent_stack):
       current(root),
       back_pointers(pointers),
-      binarized(binary) {
-      stack.reserve(10);
-      _end = current->GetChildren().end();
+      binarized(binary),
+      stack(persistent_stack) {
+      stack.resize(0);
+      _ended = current->GetChildren().empty();
       iter = current->GetChildren().begin();
       // expand virtual node
       while (binarized && !(*iter)->GetLabel().GetString(0).empty() && (*iter)->GetLabel().GetString(0).data()[0] == '^') {
@@ -214,8 +259,8 @@ public:
     std::vector<TreePointer>::const_iterator begin() const {
       return _begin;
     }
-    std::vector<TreePointer>::const_iterator end() const {
-      return _end;
+    bool ended() const {
+      return _ended;
     }
 
     std::vector<TreePointer>::const_iterator operator++() {
@@ -230,7 +275,8 @@ public:
             break;
           }
         }
-        if (iter == _end) {
+        if (iter == current->GetChildren().end()) {
+          _ended = true;
           return iter;
         }
       }
