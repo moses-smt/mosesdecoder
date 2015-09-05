@@ -130,7 +130,7 @@ PhraseDictionary::
 SetFeaturesToApply()
 {
   // find out which feature function can be applied in this decode step
-  const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions(0);
   for (size_t i = 0; i < allFeatures.size(); ++i) {
     FeatureFunction *feature = allFeatures[i];
     if (feature->IsUseable(m_outputFactors)) {

@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 
   //Find the phrase table to manage the target phrases
   PhraseDictionary* phraseTable = NULL;
-  const vector<FeatureFunction*>& ffs = FeatureFunction::GetFeatureFunctions();
+  const vector<FeatureFunction*>& ffs = FeatureFunction::GetFeatureFunctions(0);
   for (size_t i = 0; i < ffs.size(); ++i) {
     PhraseDictionary* maybePhraseTable = dynamic_cast< PhraseDictionary*>(ffs[i]);
     if (maybePhraseTable) {

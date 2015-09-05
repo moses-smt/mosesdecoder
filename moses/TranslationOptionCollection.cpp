@@ -513,16 +513,17 @@ EvaluateWithSourceContext()
 void TranslationOptionCollection::EvaluateTranslationOptionListWithSourceContext(
   TranslationOptionList &translationOptionList)
 {
-
-  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   const StaticData &staticData = StaticData::Instance();
-  for (size_t i = 0; i < ffs.size(); ++i) {
-    const FeatureFunction &ff = *ffs[i];
-    if (! staticData.IsFeatureFunctionIgnored(ff)) {
-      ff.EvaluateTranslationOptionListWithSourceContext(m_source, translationOptionList);
-    }
+  size_t numPasses = FeatureFunction::GetNumPasses();
+  for (size_t pass = 0; pass < numPasses; ++pass) {
+	  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
+	  for (size_t i = 0; i < ffs.size(); ++i) {
+		const FeatureFunction &ff = *ffs[i];
+		if (! staticData.IsFeatureFunctionIgnored(ff)) {
+		  ff.EvaluateTranslationOptionListWithSourceContext(m_source, translationOptionList);
+		}
+	  }
   }
-
 }
 
 void

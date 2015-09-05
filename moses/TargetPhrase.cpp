@@ -189,8 +189,11 @@ const ttasksptr TargetPhrase::GetTtask() const
 
 void TargetPhrase::EvaluateInIsolation(const Phrase &source)
 {
-  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-  EvaluateInIsolation(source, ffs);
+  size_t numPasses = FeatureFunction::GetNumPasses();
+  for (size_t pass = 0; pass < numPasses; ++pass) {
+	  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
+	  EvaluateInIsolation(source, ffs);
+  }
 }
 
 void TargetPhrase::EvaluateInIsolation(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
@@ -213,17 +216,22 @@ void TargetPhrase::EvaluateInIsolation(const Phrase &source, const std::vector<F
 
 void TargetPhrase::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
-  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   const StaticData &staticData = StaticData::Instance();
-  ScoreComponentCollection futureScoreBreakdown;
-  for (size_t i = 0; i < ffs.size(); ++i) {
-    const FeatureFunction &ff = *ffs[i];
-    if (! staticData.IsFeatureFunctionIgnored( ff )) {
-      ff.EvaluateWithSourceContext(input, inputPath, *this, NULL, m_scoreBreakdown, &futureScoreBreakdown);
-    }
+
+  size_t numPasses = FeatureFunction::GetNumPasses();
+  for (size_t pass = 0; pass < numPasses; ++pass) {
+	const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
+	ScoreComponentCollection futureScoreBreakdown;
+	for (size_t i = 0; i < ffs.size(); ++i) {
+	  const FeatureFunction &ff = *ffs[i];
+	  if (! staticData.IsFeatureFunctionIgnored( ff )) {
+		ff.EvaluateWithSourceContext(input, inputPath, *this, NULL, m_scoreBreakdown, &futureScoreBreakdown);
+	  }
+	}
+	m_futureScore += futureScoreBreakdown.GetWeightedScore();
   }
+
   float weightedScore = m_scoreBreakdown.GetWeightedScore();
-  m_futureScore += futureScoreBreakdown.GetWeightedScore();
   m_fullScore = weightedScore + m_futureScore;
 }
 

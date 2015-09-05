@@ -841,7 +841,7 @@ namespace Moses
 
     if (m_lr_func_name.size() && m_lr_func == NULL)
       {
-        FeatureFunction* lr = &FeatureFunction::FindFeatureFunction(m_lr_func_name);
+        FeatureFunction* lr = &FeatureFunction::FindFeatureFunction(m_lr_func_name, 0);
         m_lr_func = dynamic_cast<LexicalReordering*>(lr);
         UTIL_THROW_IF2(lr == NULL, "FF " << m_lr_func_name
                        << " does not seem to be a lexical reordering function!");

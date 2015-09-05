@@ -35,7 +35,7 @@ class FeatureFunction
 {
 protected:
   /**< all the score producers in this run */
-  static std::vector<FeatureFunction*> s_staticColl;
+  static std::vector<std::vector<FeatureFunction*> > s_staticColl;
 
   std::string m_description, m_argLine;
   std::vector<std::vector<std::string> > m_args;
@@ -46,6 +46,7 @@ protected:
   size_t m_index; // index into vector covering ALL feature function values
   std::vector<bool> m_tuneableComponents;
   size_t m_numTuneableComponents;
+  size_t m_pass;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
@@ -55,11 +56,15 @@ private:
   void ParseLine(const std::string &line);
 
 public:
-  static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
-    return s_staticColl;
+  static const std::vector<FeatureFunction*>& GetFeatureFunctions(size_t pass) {
+    return s_staticColl[pass];
   }
 
-  static FeatureFunction &FindFeatureFunction(const std::string& name);
+  static size_t GetNumPasses() {
+    return s_staticColl.size();
+  }
+
+  static FeatureFunction &FindFeatureFunction(const std::string& name, size_t pass);
   static void Destroy();
 
   FeatureFunction(const std::string &line, bool initializeNow);

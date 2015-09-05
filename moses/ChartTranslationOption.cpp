@@ -14,11 +14,14 @@ void ChartTranslationOption::EvaluateWithSourceContext(const InputType &input,
     const InputPath &inputPath,
     const StackVec &stackVec)
 {
-  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  size_t numPasses = FeatureFunction::GetNumPasses();
+  for (size_t pass = 0; pass < numPasses; ++pass) {
+	  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
 
-  for (size_t i = 0; i < ffs.size(); ++i) {
-    const FeatureFunction &ff = *ffs[i];
-    ff.EvaluateWithSourceContext(input, inputPath, m_targetPhrase, &stackVec, m_scoreBreakdown);
+	  for (size_t i = 0; i < ffs.size(); ++i) {
+		const FeatureFunction &ff = *ffs[i];
+		ff.EvaluateWithSourceContext(input, inputPath, m_targetPhrase, &stackVec, m_scoreBreakdown);
+	  }
   }
 }
 
