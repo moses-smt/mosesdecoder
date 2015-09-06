@@ -95,6 +95,13 @@ void SearchNormal::Decode()
     IFVERBOSE(2) OutputHypoStackSize();
     actual_hypoStack = static_cast<HypothesisStackNormal*>(hstack);
   }
+
+  // multipass
+  size_t numPasses = FeatureFunction::GetNumPasses();
+  for (size_t pass = 1; pass < numPasses; ++pass) {
+    m_latticeRescorer.Rescore(m_hypoStackColl, pass);
+  }
+
 }
 
 

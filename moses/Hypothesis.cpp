@@ -109,6 +109,39 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   m_manager.GetSentenceStats().AddCreated();
 }
 
+// make a copy of the hypo. Split during 2nd pass
+Hypothesis::
+Hypothesis(const Hypothesis &copyHypo, const Hypothesis &prevHypo)
+  :m_prevHypo(&prevHypo)
+  ,m_sourceCompleted(copyHypo.m_sourceCompleted)
+  ,m_sourceInput(copyHypo.m_sourceInput)
+  ,m_currSourceWordsRange(copyHypo.m_currSourceWordsRange)
+  ,m_currTargetWordsRange(copyHypo.m_currTargetWordsRange)
+  ,m_wordDeleted(copyHypo.m_wordDeleted)
+  ,m_totalScore(copyHypo.m_totalScore)
+  ,m_futureScore(copyHypo.m_futureScore)
+  ,m_ffStates(copyHypo.m_ffStates.size())
+  ,m_arcList(NULL)
+  ,m_transOpt(copyHypo.m_transOpt)
+  ,m_manager(copyHypo.m_manager)
+  ,m_id(m_manager.GetNextHypoId())
+{
+  ScoreComponentCollection *scores = new ScoreComponentCollection(copyHypo.GetScoreBreakdown());
+  m_scoreBreakdown.reset(scores);
+
+  //cerr << "copy hypo " << this << " " << *this << endl;
+  for (size_t i = 0; i < copyHypo.m_ffStates.size(); ++i) {
+    const FFState *origState = copyHypo.m_ffStates[i];
+    FFState *newState;
+    if (origState) {
+      newState = origState->Clone();
+    } else {
+      newState = NULL;
+    }
+    m_ffStates[i] = newState;
+  }
+}
+
 Hypothesis::
 ~Hypothesis()
 {
@@ -267,22 +300,23 @@ EvaluateWhenApplied(const SquareMatrix &futureScore)
 
   // compute values of stateless feature functions that were not
   // cached in the translation option
-  const vector<const StatelessFeatureFunction*>& sfs =
-    StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  for (unsigned i = 0; i < sfs.size(); ++i) {
-    const StatelessFeatureFunction &ff = *sfs[i];
-    EvaluateWhenApplied(ff);
-  }
+  const StaticData &staticData = StaticData::Instance();
 
-  const vector<const StatefulFeatureFunction*>& ffs =
-    StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  for (unsigned i = 0; i < ffs.size(); ++i) {
-    const StatefulFeatureFunction &ff = *ffs[i];
-    const StaticData &staticData = StaticData::Instance();
-    if (! staticData.IsFeatureFunctionIgnored(ff)) {
-      m_ffStates[i] = ff.EvaluateWhenApplied(*this,
-                                             m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                                             &m_currScoreBreakdown);
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(0);
+  BOOST_FOREACH(FeatureFunction *ff, ffs) {
+    if (staticData.IsFeatureFunctionIgnored(*ff)) {
+      continue;
+    }
+
+    if (ff->IsStateless()) {
+      StatelessFeatureFunction &slFF = *static_cast<StatelessFeatureFunction*>(ff);
+      EvaluateWhenApplied(slFF);
+    } else {
+      StatefulFeatureFunction &sfFF = *static_cast<StatefulFeatureFunction*>(ff);
+      size_t sfInd = sfFF.GetStatefulId();
+      m_ffStates[sfInd] = sfFF.EvaluateWhenApplied(*this,
+                          m_prevHypo ? m_prevHypo->m_ffStates[sfInd] : NULL,
+                          &m_currScoreBreakdown);
     }
   }
 
@@ -301,6 +335,14 @@ EvaluateWhenApplied(const SquareMatrix &futureScore)
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StopTimeEstimateScore();
   }
+}
+
+void Hypothesis::CalcTotalScore()
+{
+  // TOTAL
+  m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
+  if (m_prevHypo) m_totalScore += m_prevHypo->GetScore();
+
 }
 
 const Hypothesis* Hypothesis::GetPrevHypo()const

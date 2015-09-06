@@ -140,6 +140,9 @@ public:
   */
   void CleanupArcList();
 
+  std::pair<AddStatus, const Hypothesis*> AddNoPrune(Hypothesis *hypothesis)
+  {}
+
   TO_STRING();
 };
 

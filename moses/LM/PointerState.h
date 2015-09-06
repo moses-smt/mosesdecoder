@@ -16,6 +16,11 @@ struct PointerState : public FFState {
     else if (other.lmstate < lmstate) return -1;
     return 0;
   }
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
 };
 
 } // namespace

@@ -20,6 +20,10 @@ public:
   std::multiset<std::string> m_coveredRef;
 
   int Compare(const FFState& other) const;
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
 };
 
 class CoveredReferenceFeature : public StatefulFeatureFunction

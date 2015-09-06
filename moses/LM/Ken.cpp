@@ -55,6 +55,18 @@ namespace
 
 struct KenLMState : public FFState {
   lm::ngram::State state;
+
+  KenLMState()
+  {}
+
+  KenLMState(const KenLMState &copy)
+    :state(copy.state)
+  {}
+
+  FFState *Clone() const {
+    return new KenLMState(*this);
+  }
+
   int Compare(const FFState &o) const {
     const KenLMState &other = static_cast<const KenLMState &>(o);
     if (state.length < other.state.length) return -1;
@@ -305,6 +317,11 @@ public:
     const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
     int ret = m_state.Compare(other.m_state);
     return ret;
+  }
+
+  FFState *Clone() const {
+    abort();
+    return NULL;
   }
 
 private:

@@ -25,6 +25,11 @@ public:
   }
   virtual int Compare(const FFState& other) const;
 
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
 private:
   std::vector<Word> m_words;
 };
@@ -171,6 +176,12 @@ public:
     }
     return 0;
   }
+
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
 };
 
 /** Sets the features of observed ngrams.

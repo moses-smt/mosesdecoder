@@ -140,6 +140,11 @@ public:
     return 0;
   };
 
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
 protected:
 
   static int CompareLeftBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState, bool useSparseNT) {

@@ -226,6 +226,11 @@ public:
   int
   Compare(const FFState& o) const;
 
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
   virtual
   LRState*
   Expand(const TranslationOption& topt, const InputType& input,
@@ -253,6 +258,11 @@ public:
   int
   Compare(const FFState& o) const;
 
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
   virtual
   LRState*
   Expand(const TranslationOption& topt,const InputType& input,
@@ -278,6 +288,12 @@ public:
                            ReorderingStack reoStack);
 
   virtual int Compare(const FFState& o) const;
+
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
   virtual LRState* Expand(const TranslationOption& hypo, const InputType& input,
                           ScoreComponentCollection*  scores) const;
 
@@ -304,6 +320,12 @@ public:
                           const TranslationOption &topt);
 
   virtual int Compare(const FFState& o) const;
+
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
   virtual LRState* Expand(const TranslationOption& hypo,
                           const InputType& input,
                           ScoreComponentCollection* scores) const;

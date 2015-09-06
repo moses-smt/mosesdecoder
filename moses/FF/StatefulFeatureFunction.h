@@ -15,6 +15,7 @@ class StatefulFeatureFunction: public FeatureFunction
 {
   //All statefull FFs
   static std::vector<const StatefulFeatureFunction*> m_statefulFFs;
+  size_t m_statefulId;
 
 public:
   static const std::vector<const StatefulFeatureFunction*>&
@@ -24,6 +25,13 @@ public:
 
   StatefulFeatureFunction(const std::string &line, bool registerNow);
   StatefulFeatureFunction(size_t numScoreComponents, const std::string &line);
+
+  // use this to refer to the state in the hypo vector.
+  // for the 1st pass, this is the same as the vector index.
+  // but for subsequent passes, you'll need to use this.
+  size_t GetStatefulId() const {
+    return m_statefulId;
+  }
 
   /**
    * \brief This interface should be implemented.

@@ -28,6 +28,8 @@ class InputPath;
 class StackVec;
 class DistortionScoreProducer;
 class TranslationTask;
+class LatticeRescorerGraph;
+
 
 /** base class for all feature functions.
  */
@@ -189,6 +191,10 @@ public:
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();
   virtual void SetTuneableComponents(const std::string& value);
+
+  virtual void ChangeLattice(LatticeRescorerGraph &graph) const {
+  }
+
 };
 
 }

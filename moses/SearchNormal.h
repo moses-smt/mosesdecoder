@@ -6,6 +6,7 @@
 #include "HypothesisStackNormal.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
+#include "LatticeRescorer.h"
 
 namespace Moses
 {
@@ -31,6 +32,8 @@ protected:
 
   /** pre-computed list of translation options for the phrases in this sentence */
   const TranslationOptionCollection &m_transOptColl;
+
+  LatticeRescorer m_latticeRescorer;
 
   // functions for creating hypotheses
 

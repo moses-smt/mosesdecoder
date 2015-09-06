@@ -22,6 +22,11 @@ public:
   }
   virtual int Compare(const FFState& other) const;
 
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
 private:
   Word m_word;
 };

@@ -105,6 +105,7 @@ public:
     return s_objectPool;
   }
 
+  Hypothesis(const Hypothesis &copyHypo, const Hypothesis &prevHypo);
   ~Hypothesis();
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
@@ -153,6 +154,10 @@ public:
   }
 
   const Hypothesis* GetPrevHypo() const;
+
+  void SetPrevHypo(const Hypothesis *prevHypo) {
+    m_prevHypo = prevHypo;
+  }
 
   /** length of the partial translation (from the start of the sentence) */
   inline size_t GetSize() const {
@@ -231,6 +236,9 @@ public:
 
   void AddArc(Hypothesis *loserHypo);
   void CleanupArcList();
+  void ClearArcList() {
+    m_arcList->clear();
+  }
 
   //! returns a list alternative previous hypotheses (or NULL if n-best support is disabled)
   inline const ArcList* GetArcList() const {
@@ -249,6 +257,8 @@ public:
   float GetTotalScore() const {
     return m_totalScore;
   }
+  void CalcTotalScore();
+
   float GetScore() const {
     return m_totalScore-m_futureScore;
   }

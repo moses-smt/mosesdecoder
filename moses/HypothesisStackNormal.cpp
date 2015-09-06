@@ -270,6 +270,51 @@ void HypothesisStackNormal::CleanupArcList()
   }
 }
 
+std::pair<AddStatus, const Hypothesis*> HypothesisStackNormal::AddNoPrune(Hypothesis *hypo)
+{
+  //cerr << "inserting " << hypo << endl;
+  // over threshold, try to add to collection
+  std::pair<iterator, bool> addRet = m_hypos.insert(hypo);
+  if (addRet.second) {
+    // nothing found. add to collection
+    return std::pair<AddStatus, const Hypothesis*>(New, NULL);
+  }
+
+  // equiv hypo exists, recombine with other hypo
+  iterator &iterExisting = addRet.first;
+  Hypothesis *hypoExisting = *iterExisting;
+  assert(iterExisting != m_hypos.end());
+
+  // found existing hypo with same target ending.
+  // keep the best 1
+  if (hypo->GetTotalScore() > hypoExisting->GetTotalScore()) {
+    // incoming hypo is better than the one we have
+    VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
+    if (m_nBestIsEnabled) {
+      hypo->AddArc(hypoExisting);
+      Detach(iterExisting);
+    } else {
+      Remove(iterExisting);
+    }
+
+    bool added = m_hypos.insert(hypo).second;
+    if (!added) {
+      iterExisting = m_hypos.find(hypo);
+      UTIL_THROW2("Offending hypo = " << **iterExisting);
+    }
+    return std::pair<AddStatus, const Hypothesis*>(RecombinedWin, hypoExisting);
+  } else {
+    // already storing the best hypo. discard current hypo
+    VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
+    if (m_nBestIsEnabled) {
+      hypoExisting->AddArc(hypo);
+    } else {
+      FREEHYPO(hypo);
+    }
+    return std::pair<AddStatus, const Hypothesis*>(RecombinedLose, hypoExisting);
+  }
+}
+
 TO_STRING_BODY(HypothesisStackNormal);
 
 

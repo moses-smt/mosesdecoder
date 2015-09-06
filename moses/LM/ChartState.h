@@ -165,6 +165,12 @@ public:
     }
     return 0;
   }
+
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
 };
 
 } // namespace

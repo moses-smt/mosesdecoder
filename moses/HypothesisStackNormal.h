@@ -82,6 +82,8 @@ public:
   */
   bool AddPrune(Hypothesis *hypothesis);
 
+  std::pair<AddStatus, const Hypothesis*> AddNoPrune(Hypothesis *hypothesis);
+
   /** set maximum number of hypotheses in the collection
    * \param maxHypoStackSize maximum number (typical number: 100)
    * \param maxHypoStackSize maximum number (defauly: 0)

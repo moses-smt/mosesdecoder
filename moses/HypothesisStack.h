@@ -56,6 +56,12 @@ public:
   /** destroy Hypothesis pointed to by iterator (object pool version) */
   virtual void Remove(const HypothesisStack::iterator &iter);
 
+  virtual void DetachAll() {
+    m_hypos.clear();
+  }
+
+  virtual std::pair<AddStatus, const Hypothesis*> AddNoPrune(Hypothesis *hypothesis) = 0;
+
 };
 
 }

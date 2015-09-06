@@ -18,6 +18,10 @@ public:
   ConstrainedDecodingState(const ChartHypothesis &hypo);
 
   int Compare(const FFState& other) const;
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
 
   const Phrase &GetPhrase() const {
     return m_outputPhrase;

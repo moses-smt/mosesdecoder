@@ -16,6 +16,12 @@ public:
   }
 
   int Compare(const FFState& other) const;
+
+  FFState *Clone() const {
+    abort();
+    return NULL;
+  }
+
 };
 
 class SkeletonStatefulFF : public StatefulFeatureFunction
