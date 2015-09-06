@@ -25,10 +25,10 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name, s
 {
   std::vector<FeatureFunction*> &coll = s_staticColl[pass];
   for (size_t i = 0; i < coll.size(); ++i) {
-	FeatureFunction &ff = *coll[i];
-	if (ff.GetScoreProducerDescription() == name) {
-	  return ff;
-	}
+    FeatureFunction &ff = *coll[i];
+    if (ff.GetScoreProducerDescription() == name) {
+      return ff;
+    }
   }
 
   throw "Unknown feature " + name;
@@ -37,16 +37,16 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name, s
 void FeatureFunction::Destroy()
 {
   BOOST_FOREACH(std::vector<FeatureFunction*> &coll, s_staticColl ) {
-	RemoveAllInColl(coll);
+    RemoveAllInColl(coll);
   }
 }
 
 void FeatureFunction::SetupAll(TranslationTask const& ttask)
 {
   BOOST_FOREACH(std::vector<FeatureFunction*> &coll, s_staticColl ) {
-	BOOST_FOREACH(FeatureFunction* ff, coll) {
-	  ff->Setup(ttask);
-	}
+    BOOST_FOREACH(FeatureFunction* ff, coll) {
+      ff->Setup(ttask);
+    }
   }
 }
 

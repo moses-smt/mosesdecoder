@@ -360,14 +360,14 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
         else if (tagName == "weight-overwrite") {
 
           // is a name->ff map stored anywhere so we don't have to build it every time?
-            boost::unordered_map<string, FeatureFunction*> map;
-            size_t numPasses = FeatureFunction::GetNumPasses();
-            for (size_t pass = 0; pass < numPasses; ++pass) {
-              const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
-              BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
-                map[ff->GetScoreProducerDescription()] = ff;
-              }
+          boost::unordered_map<string, FeatureFunction*> map;
+          size_t numPasses = FeatureFunction::GetNumPasses();
+          for (size_t pass = 0; pass < numPasses; ++pass) {
+            const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
+            BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
+              map[ff->GetScoreProducerDescription()] = ff;
             }
+          }
 
           // update each weight listed
           ScoreComponentCollection allWeights = StaticData::Instance().GetAllWeights();

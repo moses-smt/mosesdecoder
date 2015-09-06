@@ -820,18 +820,18 @@ StaticData
 {
   size_t numPasses = FeatureFunction::GetNumPasses();
   for (size_t pass = 0; pass < numPasses; ++pass) {
-	  const std::vector<FeatureFunction*> &producers
-	  = FeatureFunction::GetFeatureFunctions(pass);
-	  for(size_t i=0; i<producers.size(); ++i) {
-		FeatureFunction &ff = *producers[i];
-		if (! IsFeatureFunctionIgnored(ff)) {
-		  Timer iTime;
-		  iTime.start();
-		  ff.InitializeForInput(ttask);
-		  VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " )"
-				  << "= " << iTime << endl);
-		}
-	  }
+    const std::vector<FeatureFunction*> &producers
+    = FeatureFunction::GetFeatureFunctions(pass);
+    for(size_t i=0; i<producers.size(); ++i) {
+      FeatureFunction &ff = *producers[i];
+      if (! IsFeatureFunctionIgnored(ff)) {
+        Timer iTime;
+        iTime.start();
+        ff.InitializeForInput(ttask);
+        VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " )"
+                << "= " << iTime << endl);
+      }
+    }
   }
 }
 
@@ -841,14 +841,14 @@ StaticData
 {
   size_t numPasses = FeatureFunction::GetNumPasses();
   for (size_t pass = 0; pass < numPasses; ++pass) {
-	  const std::vector<FeatureFunction*> &producers
-	  = FeatureFunction::GetFeatureFunctions(pass);
-	  for(size_t i=0; i<producers.size(); ++i) {
-		FeatureFunction &ff = *producers[i];
-		if (! IsFeatureFunctionIgnored(ff)) {
-		  ff.CleanUpAfterSentenceProcessing(ttask);
-		}
-	  }
+    const std::vector<FeatureFunction*> &producers
+    = FeatureFunction::GetFeatureFunctions(pass);
+    for(size_t i=0; i<producers.size(); ++i) {
+      FeatureFunction &ff = *producers[i];
+      if (! IsFeatureFunctionIgnored(ff)) {
+        ff.CleanUpAfterSentenceProcessing(ttask);
+      }
+    }
   }
 }
 
@@ -856,26 +856,26 @@ void StaticData::LoadFeatureFunctions()
 {
   size_t numPasses = FeatureFunction::GetNumPasses();
   for (size_t pass = 0; pass < numPasses; ++pass) {
-	  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
-	  std::vector<FeatureFunction*>::const_iterator iter;
-	  for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-		FeatureFunction *ff = *iter;
-		bool doLoad = true;
+    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
+    std::vector<FeatureFunction*>::const_iterator iter;
+    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+      FeatureFunction *ff = *iter;
+      bool doLoad = true;
 
-		if (ff->RequireSortingAfterSourceContext()) {
-		  m_requireSortingAfterSourceContext = true;
-		}
+      if (ff->RequireSortingAfterSourceContext()) {
+        m_requireSortingAfterSourceContext = true;
+      }
 
-		// if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
-		if (dynamic_cast<PhraseDictionary*>(ff)) {
-		  doLoad = false;
-		}
+      // if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+      if (dynamic_cast<PhraseDictionary*>(ff)) {
+        doLoad = false;
+      }
 
-		if (doLoad) {
-		  VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
-		  ff->Load();
-		}
-	  }
+      if (doLoad) {
+        VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
+        ff->Load();
+      }
+    }
   }
 
   const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
@@ -895,19 +895,19 @@ bool StaticData::CheckWeights() const
 
   size_t numPasses = FeatureFunction::GetNumPasses();
   for (size_t pass = 0; pass < numPasses; ++pass) {
-	  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
-	  for (size_t i = 0; i < ffs.size(); ++i) {
-		const FeatureFunction &ff = *ffs[i];
-		const string &descr = ff.GetScoreProducerDescription();
-		featureNames.insert(descr);
+    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
+    for (size_t i = 0; i < ffs.size(); ++i) {
+      const FeatureFunction &ff = *ffs[i];
+      const string &descr = ff.GetScoreProducerDescription();
+      featureNames.insert(descr);
 
-		set<string>::iterator iter = weightNames.find(descr);
-		if (iter == weightNames.end()) {
-		  cerr << "Can't find weights for feature function " << descr << endl;
-		} else {
-		  weightNames.erase(iter);
-		}
-	  }
+      set<string>::iterator iter = weightNames.find(descr);
+      if (iter == weightNames.end()) {
+        cerr << "Can't find weights for feature function " << descr << endl;
+      } else {
+        weightNames.erase(iter);
+      }
+    }
   }
 
   //sparse features
@@ -944,12 +944,12 @@ void StaticData::LoadSparseWeightsFromConfig()
 
   size_t numPasses = FeatureFunction::GetNumPasses();
   for (size_t pass = 0; pass < numPasses; ++pass) {
-	  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
-	  for (size_t i = 0; i < ffs.size(); ++i) {
-		const FeatureFunction &ff = *ffs[i];
-		const string &descr = ff.GetScoreProducerDescription();
-		featureNames.insert(descr);
-	  }
+    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
+    for (size_t i = 0; i < ffs.size(); ++i) {
+      const FeatureFunction &ff = *ffs[i];
+      const string &descr = ff.GetScoreProducerDescription();
+      featureNames.insert(descr);
+    }
   }
 
   std::map<std::string, std::vector<float> > weights = m_parameter->GetAllWeights();
@@ -983,10 +983,10 @@ bool StaticData::LoadAlternateWeightSettings()
   map<string,FeatureFunction*> nameToFF;
   size_t numPasses = FeatureFunction::GetNumPasses();
   for (size_t pass = 0; pass < numPasses; ++pass) {
-	  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
-	  for (size_t i = 0; i < ffs.size(); ++i) {
-		nameToFF[ ffs[i]->GetScoreProducerDescription() ] = ffs[i];
-	  }
+    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions(pass);
+    for (size_t i = 0; i < ffs.size(); ++i) {
+      nameToFF[ ffs[i]->GetScoreProducerDescription() ] = ffs[i];
+    }
   }
 
   // copy main weight setting as default

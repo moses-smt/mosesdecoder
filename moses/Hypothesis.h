@@ -323,7 +323,7 @@ struct CompareHypothesisTotalScore {
 	ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool(); \
 	pool.freeObject(hypo); \
 } \
-
+ 
 #else
 #define FREEHYPO(hypo) delete hypo
 #endif

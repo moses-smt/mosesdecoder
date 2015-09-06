@@ -195,19 +195,19 @@ void ScoreComponentCollection::Save(ostream& out, bool multiline) const
 
   size_t numPasses = FeatureFunction::GetNumPasses();
   for (size_t pass = 0; pass < numPasses; ++pass) {
-	  std::vector<FeatureFunction*> const& all_ff = FeatureFunction::GetFeatureFunctions(pass);
-	  BOOST_FOREACH(FeatureFunction const* ff, all_ff) {
-		string name = ff->GetScoreProducerDescription();
-		size_t i = ff->GetIndex();
-		if (ff->GetNumScoreComponents() == 1)
-		  out << name << sep << m_scores[i] << linesep;
-		else {
-		  size_t stop = i + ff->GetNumScoreComponents();
-		  boost::format fmt("%s_%d");
-		  for (size_t k = 1; i < stop; ++i, ++k)
-			out << fmt % name % k << sep << m_scores[i] << linesep;
-		}
-	  }
+    std::vector<FeatureFunction*> const& all_ff = FeatureFunction::GetFeatureFunctions(pass);
+    BOOST_FOREACH(FeatureFunction const* ff, all_ff) {
+      string name = ff->GetScoreProducerDescription();
+      size_t i = ff->GetIndex();
+      if (ff->GetNumScoreComponents() == 1)
+        out << name << sep << m_scores[i] << linesep;
+      else {
+        size_t stop = i + ff->GetNumScoreComponents();
+        boost::format fmt("%s_%d");
+        for (size_t k = 1; i < stop; ++i, ++k)
+          out << fmt % name % k << sep << m_scores[i] << linesep;
+      }
+    }
   }
   // write sparse features
   m_scores.write(out,sep,linesep);

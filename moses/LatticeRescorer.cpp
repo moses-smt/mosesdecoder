@@ -23,10 +23,10 @@ SameState::SameState(const Hypothesis *bestHypo)
 
 SameState::~SameState()
 {
-	BOOST_FOREACH( const HyposPerPrevHypo::value_type &obj, m_hypos ) {
-		SameStateAndPrev *hypos = obj.second;
-		delete hypos;
-	}
+  BOOST_FOREACH( const HyposPerPrevHypo::value_type &obj, m_hypos ) {
+    SameStateAndPrev *hypos = obj.second;
+    delete hypos;
+  }
 }
 
 SameStateAndPrev &SameState::Add(Hypothesis *hypo)
@@ -36,12 +36,12 @@ SameStateAndPrev &SameState::Add(Hypothesis *hypo)
 
   SameStateAndPrev *hypos;
   if (iter == m_hypos.end()) {
-	  hypos = new SameStateAndPrev;
-	  hypos->m_container = this;
-	  hypos->m_prevHypo = prevHypo;
-	  m_hypos[prevHypo] = hypos;
+    hypos = new SameStateAndPrev;
+    hypos->m_container = this;
+    hypos->m_prevHypo = prevHypo;
+    m_hypos[prevHypo] = hypos;
   } else {
-	  hypos = iter->second;
+    hypos = iter->second;
   }
   /*
   	cerr << "  adding " << hypo << " " << hypo->GetWordsBitmap()
@@ -302,7 +302,7 @@ void LatticeRescorerGraph::Rescore(const std::vector < HypothesisStack* > &stack
 
 std::ostream& operator<<(std::ostream &out, const LatticeRescorerGraph &obj)
 {
-	/*
+  /*
   out << obj.m_nodes.size() << " nodes: ";
   BOOST_FOREACH(const LatticeRescorerGraph::Coll::value_type &objPair, obj.m_nodes) {
     SameState *node = objPair.second;
@@ -312,29 +312,29 @@ std::ostream& operator<<(std::ostream &out, const LatticeRescorerGraph &obj)
 
   out << obj.m_nodes.size() << " nodes: ";
   BOOST_FOREACH(const LatticeRescorerGraph::Coll::value_type &pairGraph, obj.m_nodes) {
-	SameState *node = pairGraph.second;
-	out << "node=" << node << " ";
+    SameState *node = pairGraph.second;
+    out << "node=" << node << " ";
 
-	// list out hypos
-	BOOST_FOREACH(const SameState::HyposPerPrevHypo::value_type &pairNode, node->m_hypos) {
-		SameStateAndPrev *hypos = pairNode.second;
+    // list out hypos
+    BOOST_FOREACH(const SameState::HyposPerPrevHypo::value_type &pairNode, node->m_hypos) {
+      SameStateAndPrev *hypos = pairNode.second;
 
-		out << hypos << "[";
-		BOOST_FOREACH(const Hypothesis *hypo, hypos->m_hypos) {
-			out << hypo << " "
-				<< hypo->GetPrevHypo() << " "
-				<< hypo->GetWordsBitmap() << " "
-				<< (const Phrase&) hypo->GetCurrTargetPhrase() << " ";
-		}
-		out << "] ";
-	}
+      out << hypos << "[";
+      BOOST_FOREACH(const Hypothesis *hypo, hypos->m_hypos) {
+        out << hypo << " "
+            << hypo->GetPrevHypo() << " "
+            << hypo->GetWordsBitmap() << " "
+            << (const Phrase&) hypo->GetCurrTargetPhrase() << " ";
+      }
+      out << "] ";
+    }
 
-	// list of fwd nodes
-	out << "fwd hypos: ";
-	BOOST_FOREACH(const SameStateAndPrev *hypos, node->m_fwdHypos) {
-		out << hypos << " ";
-	}
-	out << endl;
+    // list of fwd nodes
+    out << "fwd hypos: ";
+    BOOST_FOREACH(const SameStateAndPrev *hypos, node->m_fwdHypos) {
+      out << hypos << " ";
+    }
+    out << endl;
   }
 
   return out;
