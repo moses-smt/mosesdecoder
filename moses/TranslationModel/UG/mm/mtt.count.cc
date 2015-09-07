@@ -20,15 +20,15 @@
 using namespace std;
 using namespace ugdiss;
 using namespace Moses;
-typedef L2R_Token<SimpleWordId> Token;
-typedef mmTSA<Token>::tree_iterator iter;
+typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
+typedef sapt::mmTSA<Token>::tree_iterator iter;
 typedef boost::unordered_map<pair<size_t,size_t>,size_t> phrase_counter_t;
 
 #define CACHING_THRESHOLD 1000
 
-mmTtrack<Token> T; // token tracks
-TokenIndex      V; // vocabs
-mmTSA<Token>    I; // suffix arrays
+sapt::mmTtrack<Token> T; // token tracks
+sapt::TokenIndex      V; // vocabs
+sapt::mmTSA<Token>    I; // suffix arrays
 
 void interpret_args(int ac, char* av[]);
 string bname;
