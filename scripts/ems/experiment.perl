@@ -1801,7 +1801,7 @@ sub define_lm_train_bilingual_lm {
     $cmd .= " -e $epochs" if defined($epochs);
 
     my $nplm_settings = backoff_and_get("LM:$set:nplm-settings");
-    $cmd .= " $nplm_settings" if defined($nplm_settings);
+    $cmd .= " --extra-settings \"$nplm_settings\"" if defined($nplm_settings);
 
     # Create the ini file
     $cmd .= "\n";

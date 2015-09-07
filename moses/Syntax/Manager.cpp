@@ -29,6 +29,7 @@ void Manager::OutputBest(OutputCollector *collector) const
     if (StaticData::Instance().GetOutputHypoScore()) {
       out << "0 ";
     }
+    out << '\n';
   } else {
     if (StaticData::Instance().GetOutputHypoScore()) {
       out << best->label.score << " ";
