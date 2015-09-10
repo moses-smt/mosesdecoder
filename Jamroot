@@ -80,6 +80,10 @@ path-constant TOP : . ;
 
 include $(TOP)/jam-files/sanity.jam ;
 
+lib pythonlib : : <name>python2.7 <search>/usr/lib/python2.7/config-x86_64-linux-gnu <link>shared ;
+requirements += <library>pythonlib ;
+requirements += <include>/usr/include/python2.7 ;
+
 home = [ os.environ "HOME" ] ;
 if [ path.exists $(home)/moses-environment.jam ] 
 { 
@@ -198,7 +202,7 @@ if [ option.get "with-vw" ] {
 project : default-build
   <threading>multi
   <warnings>on
-  <debug-symbols>on
+  <debug-symbols>off
   <variant>release
   <link>static
   ;
