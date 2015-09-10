@@ -196,7 +196,7 @@ if [ option.get "with-vw" ] {
 project : default-build
   <threading>multi
   <warnings>on
-  <debug-symbols>on
+  <debug-symbols>off
   <variant>release
   <link>static
   ;
