@@ -21,6 +21,9 @@ mingw/MosesGUI/icons_rc.py
 mingw/MosesGUI/Ui_credits.py
 mingw/MosesGUI/Ui_mainWindow.py
 moses/TranslationModel/UG
+moses/server
+moses/parameters
+moses/thread_safe_container.h
 phrase-extract/pcfg-common
 phrase-extract/syntax-common
 randlm
@@ -32,3 +35,4 @@ srilm
 util
 xmlrpc-c
 .git
+util/ug_cache_with_timeout.h

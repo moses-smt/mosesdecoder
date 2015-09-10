@@ -19,7 +19,7 @@
 
 #include "Alignment.h"
 
-#include "syntax-common/exception.h"
+#include "phrase-extract/syntax-common/exception.h"
 
 #include <algorithm>
 #include <cassert>

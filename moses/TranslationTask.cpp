@@ -23,11 +23,11 @@ using namespace std;
 namespace Moses
 {
 
-std::string const&
-TranslationTask
-::GetContextString() const
+boost::shared_ptr<std::vector<std::string> >
+TranslationTask::
+GetContextWindow() const
 {
-  return m_context_string;
+  return m_context;
 }
 
 std::map<std::string, float> const&
@@ -44,15 +44,15 @@ TranslationTask
 }
 
 void
-TranslationTask
-::SetContextString(std::string const& context)
+TranslationTask::
+SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw)
 {
-  m_context_string = context;
+  m_context = cw;
 }
 
 void
-TranslationTask
-::SetContextWeights(std::string const& context_weights)
+TranslationTask::
+SetContextWeights(std::string const& context_weights)
 {
   std::vector<std::string> tokens = Tokenize(context_weights,":");
   for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
@@ -84,11 +84,25 @@ TranslationTask
   return ret;
 }
 
+boost::shared_ptr<TranslationTask>
+TranslationTask
+::create(boost::shared_ptr<InputType> const& source,
+         boost::shared_ptr<IOWrapper> const& ioWrapper,
+         boost::shared_ptr<ContextScope> const& scope)
+{
+  boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
+  ret->m_self  = ret;
+  ret->m_scope = scope;
+  return ret;
+}
+
 TranslationTask
 ::TranslationTask(boost::shared_ptr<InputType> const& source,
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
-{ }
+{
+  m_options = StaticData::Instance().options();
+}
 
 TranslationTask::~TranslationTask()
 { }
@@ -100,9 +114,9 @@ TranslationTask
 {
   boost::shared_ptr<BaseManager> manager;
   StaticData const& staticData = StaticData::Instance();
-  if (algo == DefaultSearchAlgorithm) algo = staticData.GetSearchAlgorithm();
+  if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
 
-  if (!staticData.IsSyntax(algo))
+  if (!is_syntax(algo))
     manager.reset(new Manager(this->self())); // phrase-based
 
   else if (algo == SyntaxF2S || algo == SyntaxT2S) {
@@ -140,6 +154,13 @@ TranslationTask
     manager.reset(new ChartManager(this->self()));
 
   return manager;
+}
+
+AllOptions const&
+TranslationTask::
+options() const
+{
+  return m_options;
 }
 
 void TranslationTask::Run()

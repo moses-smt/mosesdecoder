@@ -4,6 +4,7 @@
 #include <map>
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
+#include "moses/Word.h"
 #include "InternalTree.h"
 
 namespace Moses
@@ -35,11 +36,18 @@ class TreeStructureFeature : public StatefulFeatureFunction
   SyntaxConstraints* m_constraints;
   LabelSet* m_labelset;
   bool m_binarized;
+  Word m_send;
+  Word m_send_nt;
+
 public:
   TreeStructureFeature(const std::string &line)
     :StatefulFeatureFunction(0, line)
     , m_binarized(false) {
     ReadParameters();
+    std::vector<FactorType> factors;
+    factors.push_back(0);
+    m_send.CreateFromString(Output, factors, "</s>", false);
+    m_send_nt.CreateFromString(Output, factors, "SEND", true);
   }
   ~TreeStructureFeature() {
     delete m_constraints;
@@ -48,8 +56,6 @@ public:
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
     return new TreeState(TreePointer());
   }
-
-  void AddNTLabels(TreePointer root) const;
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

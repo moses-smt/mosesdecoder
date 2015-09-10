@@ -9,59 +9,6 @@
 namespace MosesTraining
 {
 
-
-//! convert string to variable of type T. Used to reading floats, int etc from files
-template<typename T>
-inline T Scan(const std::string &input)
-{
-  std::stringstream stream(input);
-  T ret;
-  stream >> ret;
-  return ret;
-}
-
-
-//! speeded up version of above
-template<typename T>
-inline void Scan(std::vector<T> &output, const std::vector< std::string > &input)
-{
-  output.resize(input.size());
-  for (size_t i = 0 ; i < input.size() ; i++) {
-    output[i] = Scan<T>( input[i] );
-  }
-}
-
-
-inline void Tokenize(std::vector<std::string> &output
-                     , const std::string& str
-                     , const std::string& delimiters = " \t")
-{
-  // Skip delimiters at beginning.
-  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-  // Find first "non-delimiter".
-  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
-
-  while (std::string::npos != pos || std::string::npos != lastPos) {
-    // Found a token, add it to the vector.
-    output.push_back(str.substr(lastPos, pos - lastPos));
-    // Skip delimiters.  Note the "not_of"
-    lastPos = str.find_first_not_of(delimiters, pos);
-    // Find next "non-delimiter"
-    pos = str.find_first_of(delimiters, lastPos);
-  }
-}
-
-// speeded up version of above
-template<typename T>
-inline void Tokenize( std::vector<T> &output
-                      , const std::string &input
-                      , const std::string& delimiters = " \t")
-{
-  std::vector<std::string> stringVector;
-  Tokenize(stringVector, input, delimiters);
-  return Scan<T>(output, stringVector );
-}
-
 class WordCount
 {
   friend std::ostream& operator<<(std::ostream&, const WordCount&);

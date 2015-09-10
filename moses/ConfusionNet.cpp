@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 
 #include "ConfusionNet.h"
@@ -65,9 +66,9 @@ ConfusionNet() : InputType()
 {
   stats.createOne();
 
-  const StaticData& staticData = StaticData::Instance();
-  if (staticData.IsSyntax()) {
-    m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
+  const StaticData& SD = StaticData::Instance();
+  if (SD.IsSyntax()) {
+    m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
   }
   UTIL_THROW_IF2(&InputFeature::Instance() == NULL, "Input feature must be specified");
 }

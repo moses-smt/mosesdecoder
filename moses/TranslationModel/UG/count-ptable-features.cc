@@ -8,7 +8,7 @@
 #include <iostream>
 
 using namespace Moses;
-using namespace bitext;
+using namespace sapt;
 using namespace std;
 using namespace boost;
 

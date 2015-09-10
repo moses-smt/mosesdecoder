@@ -8,20 +8,18 @@
 #include <sys/time.h>
 
 
-#ifndef sptr
-#define sptr boost::shared_ptr
+#ifndef SPTR
+#define SPTR boost::shared_ptr
 #endif
 
 namespace lru_cache
 {
-  using namespace std;
-  using namespace boost;
 
   template<typename KEY, typename VAL>
   class LRU_Cache
   {
   public:
-    typedef unordered_map<KEY,uint32_t> map_t;
+    typedef boost::unordered_map<KEY,uint32_t> map_t;
   private:
     struct Record
     {
@@ -33,7 +31,7 @@ namespace lru_cache
 
     mutable boost::shared_mutex m_lock;
     uint32_t m_qfront, m_qback;
-    vector<Record> m_recs;
+    std::vector<Record> m_recs;
     map_t m_idx;
 
     void
@@ -63,16 +61,17 @@ namespace lru_cache
   public:
     LRU_Cache(size_t capacity=1) : m_qfront(0), m_qback(0) { reserve(capacity); }
     size_t capacity() const { return m_recs.capacity(); }
+    size_t size() const { return m_idx.size(); }
     void reserve(size_t s) { m_recs.reserve(s); }
 
-    sptr<VAL>
+    SPTR<VAL>
     get(KEY const& key)
     {
       uint32_t p;
       { // brackets needed for lock scoping
 	boost::shared_lock<boost::shared_mutex> rlock(m_lock);
 	typename map_t::const_iterator i = m_idx.find(key);
-	if (i == m_idx.end()) return sptr<VAL>();
+	if (i == m_idx.end()) return SPTR<VAL>();
 	p = i->second;
       }
       boost::lock_guard<boost::shared_mutex> guard(m_lock);
@@ -81,12 +80,11 @@ namespace lru_cache
     }
 
     void
-    set(KEY const& key, sptr<VAL> const& ptr)
+    set(KEY const& key, SPTR<VAL> const& ptr)
     {
       boost::lock_guard<boost::shared_mutex> lock(m_lock);
-      pair<typename map_t::iterator,bool> foo;
+      std::pair<typename map_t::iterator,bool> foo;
       foo = m_idx.insert(make_pair(key,m_recs.size()));
-
       uint32_t p = foo.first->second;
       if (foo.second) // was not in the cache
 	{

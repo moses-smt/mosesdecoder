@@ -42,13 +42,13 @@ namespace Moses
 {
 TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   :Phrase(0)
+  , m_ttask_flag(false)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_ttask_flag(false)
   , m_container(pt)
 {
   //ACAT
@@ -61,14 +61,14 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
 
 TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const PhraseDictionary *pt)
   :Phrase(0)
+  , m_ttask(ttask)
+  , m_ttask_flag(true)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_ttask(ttask)
-  , m_ttask_flag(true)
   , m_container(pt)
 {
 
@@ -82,14 +82,14 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
 
 TargetPhrase::TargetPhrase(ttasksptr& ttask, const PhraseDictionary *pt)
   :Phrase()
+  , m_ttask(ttask)
+  , m_ttask_flag(true)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_ttask(ttask)
-  , m_ttask_flag(true)
   , m_container(pt)
 {
 }
@@ -144,7 +144,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_alignNonTerm(copy.m_alignNonTerm)
   , m_properties(copy.m_properties)
   , m_ttask(copy.m_ttask)
-  , m_ttask_flag(true)
+  , m_ttask_flag(copy.m_ttask_flag)
   , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
@@ -182,9 +182,9 @@ bool TargetPhrase::HasTtaskSPtr() const
   return m_ttask_flag;
 }
 
-const ttasksptr& TargetPhrase::GetTtask() const
+const ttasksptr TargetPhrase::GetTtask() const
 {
-  return m_ttask;
+  return m_ttask.lock();
 }
 
 void TargetPhrase::EvaluateInIsolation(const Phrase &source)

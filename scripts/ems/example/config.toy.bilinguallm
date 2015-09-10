@@ -86,7 +86,7 @@ detruecaser = $moses-script-dir/recaser/detruecase.perl
 ### multi-core settings
 # when the generic parallelizer is used, the number of cores
 # specified here 
-cores = 8
+cores = 4
 
 #################################################################
 # PARALLEL CORPUS PREPARATION: 
@@ -192,23 +192,21 @@ raw-corpus = $toy-data/nc-5k.$output-extension
 #
 #lm = 
 
-[LM:bilingual-lm]
+[LM:bilinguallm]
 #bilingual-lm
-exclude-from-interpolation = true
+
+#required settings
 bilingual-lm = "yes"
-bilingual-lm-workdir = "bilingual"
-bilingual-lm-settings = ""
 order = "5"
 source-window = "4"
+nplm-dir = "/mnt/gna0/rsennrich/tools/nplm-0.3-gpu-experimental/"
 
-#actual training
-train_order = "14" #this is equal to order + 2*source-window + 1
-nplm-output-dir = "nplm_out"
-nplm-settings = "-l /mnt/gna0/rsennrich/tools/nplm-0.3-gpu-experimental/"
+# Add extra settings for ngram extraction or nplm training
+#bilingual-lm-settings = ""
+#nplm-settings = ""
 
-#Config file generation:
-config-feature-line = "BilingualNPLM order=$order source_window=$source-window path=$working-dir/$nplm-output-dir/train.10k.model.nplm.10 source_vocab=$working-dir/$bilingual-lm-workdir/vocab.source target_vocab=$working-dir/$bilingual-lm-workdir/vocab.target"
-config-weight-line = "BilingualNPLM0= 0.1"
+# Defaults to 10
+#epochs = 2
 
 #################################################################
 # INTERPOLATING LANGUAGE MODELS
@@ -521,7 +519,7 @@ filter-settings = ""
 
 ### additional flags for the decoder
 #
-decoder-settings = ""
+decoder-settings = "-threads $cores"
 
 ### if tuning should be skipped, specify this here
 # and also point to a configuration file that contains
@@ -586,7 +584,7 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 #   "-drop-unknown" for dropping unknown source words
 #   "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000" for cube pruning
 #
-decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
+decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads $cores"
 
 ### specify size of n-best list, if produced
 #

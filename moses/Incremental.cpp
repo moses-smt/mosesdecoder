@@ -208,7 +208,7 @@ Manager::Manager(ttasksptr const& ttask)
   : BaseManager(ttask)
   , cells_(m_source, ChartCellBaseFactory(), parser_)
   , parser_(ttask, cells_)
-  , n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize()))
+  , n_best_(search::NBestConfig(StaticData::Instance().options().nbest.nbest_size))
 { }
 
 Manager::~Manager()
@@ -223,12 +223,17 @@ namespace
 const float log_10 = logf(10);
 }
 
-template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
+template <class Model, class Best>
+search::History
+Manager::
+PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
 {
   const LanguageModel &abstract = LanguageModel::GetFirstLM();
   const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
-  search::Config config(abstract.GetWeight() * log_10, data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
+  size_t cpl = data.options().cube.pop_limit;
+  size_t nbs = data.options().nbest.nbest_size;
+  search::Config config(abstract.GetWeight() * log_10, cpl, search::NBestConfig(nbs));
   search::Context<Model> context(config, model);
 
   size_t size = m_source.GetSize();
@@ -255,7 +260,7 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
 
 template <class Model> void Manager::LMCallback(const Model &model, const std::vector<lm::WordIndex> &words)
 {
-  std::size_t nbest = StaticData::Instance().GetNBestSize();
+  std::size_t nbest = StaticData::Instance().options().nbest.nbest_size;
   if (nbest <= 1) {
     search::History ret = PopulateBest(model, words, single_best_);
     if (ret) {

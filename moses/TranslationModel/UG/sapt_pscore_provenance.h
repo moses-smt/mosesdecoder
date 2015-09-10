@@ -7,41 +7,40 @@
 #include "sapt_pscore_base.h"
 #include <boost/dynamic_bitset.hpp>
 
-using namespace std;
-namespace Moses {
-  namespace bitext {
+namespace sapt {
 
-    // asymptotic provenance feature n/(n+x)
-    template<typename Token>
-    class
-    PScoreProvenance : public SingleRealValuedParameterPhraseScorerFamily<Token>
+  // asymptotic provenance feature n/(n+x)
+  template<typename Token>
+  class
+  PScoreProvenance : public SingleRealValuedParameterPhraseScorerFamily<Token>
+  {
+  public:
+
+    virtual ~PScoreProvenance() {}
+    PScoreProvenance(std::string const& spec)
     {
-    public:
+      this->m_tag = "prov";
+      this->init(spec);
+    }
 
-      PScoreProvenance(string const& spec)
-      {
-	this->m_tag = "prov";
-	this->init(spec);
-      }
+    bool
+    isLogVal(int i) const { return false; }
 
-      bool
-      isLogVal(int i) const { return false; }
+    void
+    operator()(Bitext<Token> const& bt,
+	       PhrasePair<Token>& pp,
+	       std::vector<float> * dest = NULL) const
+    {
+      if (!dest) dest = &pp.fvals;
+      size_t i = this->m_index;
+      BOOST_FOREACH(float const x, this->m_x)
+	(*dest).at(i++) = pp.joint/(x + pp.joint);
+    }
 
-      void
-      operator()(Bitext<Token> const& bt,
-		 PhrasePair<Token>& pp,
-		 vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	size_t i = this->m_index;
-	BOOST_FOREACH(float const x, this->m_x)
-	  (*dest).at(i++) = pp.joint/(x + pp.joint);
-      }
+    bool
+    allowPooling() const
+    { return false; }
 
-      bool
-      allowPooling() const
-      { return false; }
+  };
+} // namespace sapt
 
-    };
-  } // namespace bitext
-} // namespace Moses

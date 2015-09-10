@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // to be included from ug_bitext.h
 
 // The agenda handles parallel sampling.
@@ -14,8 +14,8 @@ public:
   class worker;
 private:
   boost::mutex lock;
-  std::list<sptr<job> > joblist;
-  std::vector<sptr<boost::thread> > workers;
+  std::list<SPTR<job> > joblist;
+  std::vector<SPTR<boost::thread> > workers;
   bool shutdown;
   size_t doomed;
 
@@ -30,15 +30,15 @@ public:
   void
   add_workers(int n);
 
-  sptr<pstats>
+  SPTR<pstats>
   add_job(Bitext<Token> const* const theBitext,
 	  typename TSA<Token>::tree_iterator const& phrase,
-	  size_t const max_samples, sptr<SamplingBias const> const& bias);
+	  size_t const max_samples, SPTR<SamplingBias const> const& bias);
     // add_job(Bitext<Token> const* const theBitext,
     // 	  typename TSA<Token>::tree_iterator const& phrase,
     // 	  size_t const max_samples, SamplingBias const* const bias);
 
-  sptr<job>
+  SPTR<job>
   get_job();
 };
 
@@ -64,41 +64,41 @@ void Bitext<Token>
   static boost::posix_time::time_duration nodelay(0,0,0,0);
   boost::lock_guard<boost::mutex> guard(this->lock);
 
-  int target  = max(1, int(n + workers.size() - this->doomed));
+  int target  = std::max(1, int(n + workers.size() - this->doomed));
   // house keeping: remove all workers that have finished
   for (size_t i = 0; i < workers.size(); )
     {
       if (workers[i]->timed_join(nodelay))
-	{
-	  if (i + 1 < workers.size())
-	    workers[i].swap(workers.back());
-	  workers.pop_back();
-	}
+        {
+          if (i + 1 < workers.size())
+            workers[i].swap(workers.back());
+          workers.pop_back();
+        }
       else ++i;
     }
-  // cerr << workers.size() << "/" << target << " active" << endl;
+  // cerr << workers.size() << "/" << target << " active" << std::endl;
   if (int(workers.size()) > target)
     this->doomed = workers.size() - target;
   else
     while (int(workers.size()) < target)
       {
-	sptr<boost::thread> w(new boost::thread(worker(*this)));
-	workers.push_back(w);
+        SPTR<boost::thread> w(new boost::thread(worker(*this)));
+        workers.push_back(w);
       }
 }
 
 
 template<typename Token>
-sptr<pstats> Bitext<Token>
+SPTR<pstats> Bitext<Token>
 ::agenda
 ::add_job(Bitext<Token> const* const theBitext,
 	  typename TSA<Token>::tree_iterator const& phrase,
-	  size_t const max_samples, sptr<SamplingBias const> const& bias)
+	  size_t const max_samples, SPTR<SamplingBias const> const& bias)
 {
   boost::unique_lock<boost::mutex> lk(this->lock);
   static boost::posix_time::time_duration nodelay(0,0,0,0);
   bool fwd = phrase.root == bt.I1.get();
-  sptr<job> j(new job(theBitext, phrase, fwd ? bt.I1 : bt.I2,
+  SPTR<job> j(new job(theBitext, phrase, fwd ? bt.I1 : bt.I2,
 		      max_samples, fwd, bias));
   j->stats->register_worker();
 
@@ -118,7 +118,7 @@ sptr<pstats> Bitext<Token>
 		  --doomed;
 		}
 	      else
-		workers[i++] = sptr<boost::thread>(new boost::thread(worker(*this)));
+		workers[i++] = SPTR<boost::thread>(new boost::thread(worker(*this)));
 	    }
 	  else ++i;
 	}
@@ -127,13 +127,13 @@ sptr<pstats> Bitext<Token>
 }
 
 template<typename Token>
-sptr<typename Bitext<Token>::agenda::job>
+SPTR<typename Bitext<Token>::agenda::job>
 Bitext<Token>
 ::agenda
 ::get_job()
 {
-  // cerr << workers.size() << " workers on record" << endl;
-  sptr<job> ret;
+  // cerr << workers.size() << " workers on record" << std::endl;
+  SPTR<job> ret;
   if (this->shutdown) return ret;
   boost::unique_lock<boost::mutex> lock(this->lock);
   if (this->doomed)
@@ -142,7 +142,7 @@ Bitext<Token>
       return ret;
     }
 
-  typename list<sptr<job> >::iterator j = joblist.begin();
+  typename std::list<SPTR<job> >::iterator j = joblist.begin();
   while (j != joblist.end())
     {
       if ((*j)->done())

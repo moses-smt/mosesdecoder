@@ -38,8 +38,8 @@ ChartHypothesisCollection::ChartHypothesisCollection()
   const StaticData &staticData = StaticData::Instance();
 
   m_beamWidth = staticData.GetBeamWidth();
-  m_maxHypoStackSize = staticData.GetMaxHypoStackSize();
-  m_nBestIsEnabled = staticData.IsNBestEnabled();
+  m_maxHypoStackSize = staticData.options().search.stack_size;
+  m_nBestIsEnabled = staticData.options().nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
 }
 

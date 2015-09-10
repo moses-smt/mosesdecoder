@@ -1,10 +1,11 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include <sstream>
 
 #include "ug_deptree.h"
 #include "tpt_tokenindex.h"
 
 using namespace std;
-namespace ugdiss
+namespace sapt
 {
 
   bool

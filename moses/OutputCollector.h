@@ -33,7 +33,8 @@
 #include <map>
 #include <ostream>
 #include <string>
-
+#include "Util.h"
+#include "util/exception.hh"
 namespace Moses
 {
 /**
@@ -42,9 +43,44 @@ namespace Moses
 class OutputCollector
 {
 public:
-  OutputCollector(std::ostream* outStream= &std::cout, std::ostream* debugStream=&std::cerr) :
-    m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream),
-    m_isHoldingOutputStream(false), m_isHoldingDebugStream(false) {}
+  OutputCollector(std::ostream* outStream= &std::cout,
+                  std::ostream* debugStream=&std::cerr)
+    : m_nextOutput(0)
+    , m_outStream(outStream)
+    , m_debugStream(debugStream)
+    , m_isHoldingOutputStream(false)
+    , m_isHoldingDebugStream(false) {}
+
+  OutputCollector(std::string xout, std::string xerr = "")
+    : m_nextOutput(0) {
+    // TO DO open magic streams instead of regular ofstreams! [UG]
+
+    if (xout == "/dev/stderr") {
+      m_outStream = &std::cerr;
+      m_isHoldingOutputStream = false;
+    } else if (xout.size() && xout != "/dev/stdout" && xout != "-") {
+      m_outStream = new std::ofstream(xout.c_str());
+      UTIL_THROW_IF2(!m_outStream->good(), "Failed to open output file"
+                     << xout);
+      m_isHoldingOutputStream = true;
+    } else {
+      m_outStream = &std::cout;
+      m_isHoldingOutputStream = false;
+    }
+
+    if (xerr == "/dev/stdout") {
+      m_debugStream = &std::cout;
+      m_isHoldingDebugStream = false;
+    } else if (xerr.size() && xerr != "/dev/stderr") {
+      m_debugStream = new std::ofstream(xerr.c_str());
+      UTIL_THROW_IF2(!m_debugStream->good(), "Failed to open debug stream"
+                     << xerr);
+      m_isHoldingDebugStream = true;
+    } else {
+      m_debugStream = &std::cerr;
+      m_isHoldingDebugStream = false;
+    }
+  }
 
   ~OutputCollector() {
     if (m_isHoldingOutputStream)

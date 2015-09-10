@@ -88,9 +88,9 @@ if $(with-ldhtlm) {
 local with-nplm = [ option.get "with-nplm" ] ;
 if $(with-nplm) {
   lib nplm : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
-  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
-  obj BiLM_NPLM.o : bilingual-lm/BiLM_NPLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
-  obj RDLM.o : RDLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
+  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <define>NPLM_DOUBLE_PRECISION=0 ;
+  obj BiLM_NPLM.o : bilingual-lm/BiLM_NPLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <cxxflags>-fopenmp <define>NPLM_DOUBLE_PRECISION=0 ;
+  obj RDLM.o : RDLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <define>NPLM_DOUBLE_PRECISION=0 ;
   alias neural : NeuralLMWrapper.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
   alias bilinguallm : BiLM_NPLM.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
   alias rdlm : RDLM.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
@@ -134,11 +134,11 @@ if $(with-dalm) {
 }
 
 #ORLM is always compiled but needs special headers
-obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
+#obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
 
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
-alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp ORLM.o
+alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp 
   ../../lm//kenlm ..//headers $(dependencies) ;
 
 alias macros : : : : <define>$(lmmacros) ;

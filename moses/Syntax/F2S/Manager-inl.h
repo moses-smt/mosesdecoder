@@ -59,9 +59,9 @@ void Manager<RuleMatcher>::Decode()
   const StaticData &staticData = StaticData::Instance();
 
   // Get various pruning-related constants.
-  const std::size_t popLimit = staticData.GetCubePruningPopLimit();
+  const std::size_t popLimit = staticData.options().cube.pop_limit;
   const std::size_t ruleLimit = staticData.GetRuleLimit();
-  const std::size_t stackLimit = staticData.GetMaxHypoStackSize();
+  const std::size_t stackLimit = staticData.options().search.stack_size;
 
   // Initialize the stacks.
   InitializeStacks();
@@ -254,7 +254,7 @@ void Manager<RuleMatcher>::ExtractKBest(
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
   const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.GetNBestFactor();
+  const std::size_t nBestFactor = staticData.options().nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? k*1000 : k*nBestFactor;
 
   // Extract the derivations.

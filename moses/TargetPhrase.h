@@ -61,7 +61,7 @@ public:
 
 private:
   ScoreCache_t m_cached_scores;
-  ttasksptr m_ttask;
+  ttaskwptr m_ttask;
   bool m_ttask_flag;
 
 private:
@@ -92,7 +92,7 @@ public:
   TargetPhrase(ttasksptr &ttask, const PhraseDictionary *pt = NULL);
   TargetPhrase(ttasksptr &ttask, std::string out_string, const PhraseDictionary *pt = NULL);
   explicit TargetPhrase(ttasksptr &ttask, const Phrase &targetPhrase, const PhraseDictionary *pt);
-  const ttasksptr& GetTtask() const;
+  const ttasksptr GetTtask() const;
   bool HasTtaskSPtr() const;
 
   ~TargetPhrase();

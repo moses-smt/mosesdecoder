@@ -61,6 +61,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/AlignmentInfoTest.cpp</locationURI>
 		</link>
 		<link>
+			<name>AllOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>AllOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.h</locationURI>
+		</link>
+		<link>
 			<name>BaseManager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.cpp</locationURI>
@@ -71,6 +81,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.h</locationURI>
 		</link>
 		<link>
+			<name>BeamSearchOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BeamSearchOptions.h</locationURI>
+		</link>
+		<link>
 			<name>BitmapContainer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.cpp</locationURI>
@@ -79,6 +94,16 @@
 			<name>BitmapContainer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.h</locationURI>
+		</link>
+		<link>
+			<name>BookkeepingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>BookkeepingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.h</locationURI>
 		</link>
 		<link>
 			<name>CMakeLists.txt</name>
@@ -229,6 +254,16 @@
 			<name>ContextParameters.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ContextParameters.h</locationURI>
+		</link>
+		<link>
+			<name>CubePruningOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/CubePruningOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>CubePruningOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/CubePruningOptions.h</locationURI>
 		</link>
 		<link>
 			<name>DecodeGraph.cpp</name>
@@ -461,6 +496,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/InputFileStream.h</locationURI>
 		</link>
 		<link>
+			<name>InputOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/InputOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>InputOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/InputOptions.h</locationURI>
+		</link>
+		<link>
 			<name>InputPath.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/InputPath.cpp</locationURI>
@@ -491,6 +536,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>LMBR_Options.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LMBR_Options.cpp</locationURI>
+		</link>
+		<link>
+			<name>LMBR_Options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LMBR_Options.h</locationURI>
+		</link>
+		<link>
 			<name>LVoc.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LVoc.cpp</locationURI>
@@ -509,6 +564,21 @@
 			<name>LatticeMBR.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LatticeMBR.h</locationURI>
+		</link>
+		<link>
+			<name>LookupOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LookupOptions.h</locationURI>
+		</link>
+		<link>
+			<name>MBR_Options.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/MBR_Options.cpp</locationURI>
+		</link>
+		<link>
+			<name>MBR_Options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/MBR_Options.h</locationURI>
 		</link>
 		<link>
 			<name>Manager.cpp</name>
@@ -536,6 +606,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/MosesTest.cpp</locationURI>
 		</link>
 		<link>
+			<name>NBestOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>NBestOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.h</locationURI>
+		</link>
+		<link>
 			<name>NonTerminal.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/NonTerminal.cpp</locationURI>
@@ -549,6 +629,16 @@
 			<name>ObjectPool.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ObjectPool.h</locationURI>
+		</link>
+		<link>
+			<name>OptionsBaseClass.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.cpp</locationURI>
+		</link>
+		<link>
+			<name>OptionsBaseClass.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.h</locationURI>
 		</link>
 		<link>
 			<name>OutputCollector.h</name>
@@ -636,6 +726,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingConstraint.h</locationURI>
 		</link>
 		<link>
+			<name>ReorderingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReorderingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>ReorderingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReorderingOptions.h</locationURI>
+		</link>
+		<link>
+			<name>ReportingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>ReportingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.h</locationURI>
+		</link>
+		<link>
 			<name>RuleCube.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleCube.cpp</locationURI>
@@ -711,14 +821,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SearchNormal.h</locationURI>
 		</link>
 		<link>
-			<name>SearchNormalBatch.cpp</name>
+			<name>SearchOptions.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SearchNormalBatch.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.cpp</locationURI>
 		</link>
 		<link>
-			<name>SearchNormalBatch.h</name>
+			<name>SearchOptions.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SearchNormalBatch.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.h</locationURI>
 		</link>
 		<link>
 			<name>Sentence.cpp</name>
@@ -739,6 +849,16 @@
 			<name>SentenceStats.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SentenceStats.h</locationURI>
+		</link>
+		<link>
+			<name>ServerOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>ServerOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.h</locationURI>
 		</link>
 		<link>
 			<name>SquareMatrix.cpp</name>
@@ -1066,6 +1186,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/mbr.h</locationURI>
 		</link>
 		<link>
+			<name>parameters</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>rule.proto</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/rule.proto</locationURI>
@@ -1359,16 +1484,6 @@
 			<name>FF/SetSourcePhrase.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.h</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonChangeInput.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonChangeInput.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonChangeInput.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonChangeInput.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SkeletonStatefulFF.cpp</name>
@@ -2021,16 +2136,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/BilingualDynSuffixArray.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/BilingualDynSuffixArray.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CYKPlusParser</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2039,21 +2144,6 @@
 			<name>TranslationModel/CompactPT</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSuffixArray.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSuffixArray.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSuffixArray.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSuffixArray.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/PhraseDictionary.cpp</name>
@@ -2069,16 +2159,6 @@
 			<name>TranslationModel/PhraseDictionaryDynSuffixArray.README</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.README</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/PhraseDictionaryDynSuffixArray.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/PhraseDictionaryDynSuffixArray.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/PhraseDictionaryDynamicCacheBased.cpp</name>
@@ -2201,16 +2281,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/WordCoocTable.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/WordCoocTable.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/WordCoocTable.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/WordCoocTable.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/fuzzy-match</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2239,6 +2309,146 @@
 			<name>extract-ghkm/PhraseOrientation.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/AllOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/AllOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/BeamSearchOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BeamSearchOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/BookkeepingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/BookkeepingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/ContextParameters.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ContextParameters.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/ContextParameters.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ContextParameters.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/CubePruningOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/CubePruningOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/CubePruningOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/CubePruningOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/InputOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/InputOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/InputOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/InputOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/LMBR_Options.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LMBR_Options.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/LMBR_Options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LMBR_Options.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/LookupOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/LookupOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/MBR_Options.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/MBR_Options.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/MBR_Options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/MBR_Options.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/NBestOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/NBestOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/OptionsBaseClass.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/OptionsBaseClass.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/ReorderingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReorderingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/ReorderingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReorderingOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/ReportingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/ReportingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/SearchOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/SearchOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/ServerOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/ServerOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.h</locationURI>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/LexicalReordering.cpp</name>
@@ -2936,86 +3146,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/DynSAInclude/FileHandler.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/FileHandler.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/FileHandler.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/FileHandler.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/Jamfile</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/RandLMCache.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/RandLMCache.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/RandLMFilter.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/RandLMFilter.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/fdstream.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/fdstream.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/hash.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/hash.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/onlineRLM.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/onlineRLM.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/params.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/params.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/params.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/params.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/perfectHash.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/perfectHash.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/quantizer.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/quantizer.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/types.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/types.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/utils.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/utils.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/vocab.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/vocab.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/DynSAInclude/vocab.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/vocab.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/ProbingPT/Jamfile</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/Jamfile</locationURI>
@@ -3286,6 +3416,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/Makefile</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/TargetPhraseCollectionCache.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/TargetPhraseCollectionCache.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/TargetPhraseCollectionCache.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/TargetPhraseCollectionCache.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/bin</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -3329,11 +3469,6 @@
 			<name>TranslationModel/UG/ptable-lookup.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/ptable-lookup.cc</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/UG/sapt_phrase_key.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_phrase_key.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/sapt_phrase_scorers.h</name>
@@ -3681,6 +3816,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/test-dynamic-im-tsa.cc</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/mm/test-http-client.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/test-http-client.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/test-xml-escaping.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/test-xml-escaping.cc</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/mm/tpt_pickler.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/tpt_pickler.cc</locationURI>
@@ -3726,6 +3871,56 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_agenda.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_agenda.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_agenda_job.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_agenda_job.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_agenda_worker.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_agenda_worker.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_jstats.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_jstats.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_jstats.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_jstats.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_moses.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_moses.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_phrase_extraction_record.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_phrase_extraction_record.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_pstats.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_pstats.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_pstats.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_pstats.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_bitext_sampler.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_bitext_sampler.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/mm/ug_conll_bottom_up_token.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_conll_bottom_up_token.h</locationURI>
@@ -3761,6 +3956,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_deptree.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/mm/ug_http_client.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_http_client.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_http_client.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_http_client.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_im_bitext.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_im_bitext.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_im_bitext.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_im_bitext.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/mm/ug_im_tsa.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_im_tsa.h</locationURI>
@@ -3779,6 +3994,16 @@
 			<name>TranslationModel/UG/mm/ug_lexical_phrase_scorer2.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_lexical_phrase_scorer2.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_lexical_reordering.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_lexical_reordering.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_lexical_reordering.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_lexical_reordering.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/mm/ug_load_primer.cc</name>
@@ -3801,6 +4026,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_mm_2d_table.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/mm/ug_mm_bitext.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_mm_bitext.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/mm/ug_mm_tsa.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_mm_tsa.h</locationURI>
@@ -3816,16 +4046,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_mm_ttrack.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/UG/mm/ug_mmbitext.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_mmbitext.cc</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/UG/mm/ug_mmbitext.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_mmbitext.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/UG/mm/ug_phrasepair.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_phrasepair.cc</locationURI>
@@ -3834,6 +4054,21 @@
 			<name>TranslationModel/UG/mm/ug_phrasepair.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_phrasepair.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_prep_phrases.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_prep_phrases.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_sampling_bias.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_sampling_bias.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/ug_sampling_bias.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/ug_sampling_bias.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/mm/ug_tsa_array_entry.cc</name>
@@ -4061,6 +4296,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/generic/stringdist/ug_stringdist.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/generic/threading/ug_ref_counter.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/generic/threading/ug_ref_counter.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/generic/threading/ug_thread_pool.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/generic/threading/ug_thread_pool.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/generic/threading/ug_thread_pool.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/generic/threading/ug_thread_pool.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/generic/threading/ug_thread_safe_counter.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.cc</locationURI>
@@ -4069,6 +4319,11 @@
 			<name>TranslationModel/UG/generic/threading/ug_thread_safe_counter.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/mm/bin/gcc-4.8</name>
@@ -4111,6 +4366,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/mm/bin/gcc-4.8/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -4142,6 +4402,11 @@
 		</link>
 		<link>
 			<name>TranslationModel/UG/generic/bin/gcc-4.8/release/debug-symbols-on</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -4717,6 +4982,11 @@
 		</link>
 		<link>
 			<name>TranslationModel/UG/generic/bin/gcc-4.8/release/debug-symbols-on/link-static</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -5316,6 +5586,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/mm/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -5569,6 +5844,201 @@
 			<name>TranslationModel/UG/generic/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ug_thread_safe_counter.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/generic/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ug_thread_safe_counter.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/calc-coverage</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/calc-coverage</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/calc-coverage.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/calc-coverage.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mam2symal</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mam2symal</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mam2symal.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mam2symal.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mam_verify</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mam_verify</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mam_verify.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mam_verify.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mmlex-build</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mmlex-build</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mmlex-build.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mmlex-build.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mmlex-lookup</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mmlex-lookup</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mmlex-lookup.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mmlex-lookup.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-build</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-build</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-build.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-build.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-count-words</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-count-words</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-count-words.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-count-words.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-demo1</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-demo1</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-demo1.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-demo1.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-dump</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-dump</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-dump.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/mtt-dump.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/num_read_write.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/num_read_write.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/symal2mam</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/symal2mam</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/symal2mam.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/symal2mam.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/tpt_pickler.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/tpt_pickler.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/tpt_tightindex.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/tpt_tightindex.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/tpt_tokenindex.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/tpt_tokenindex.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_bitext.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_bitext.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_bitext_jstats.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_bitext_jstats.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_bitext_pstats.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_bitext_pstats.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_conll_record.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_conll_record.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_corpus_token.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_corpus_token.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_deptree.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_deptree.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_http_client.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_http_client.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_im_bitext.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_im_bitext.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_lexical_reordering.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_lexical_reordering.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_load_primer.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_load_primer.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_phrasepair.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_phrasepair.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_sampling_bias.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_sampling_bias.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_tsa_array_entry.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_tsa_array_entry.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_ttrack_base.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_ttrack_base.o</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_ttrack_position.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ug_ttrack_position.o</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/mm/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/calc-coverage</name>

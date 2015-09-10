@@ -1,14 +1,17 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
+#include "ug_typedefs.h"
+#include <stdint.h>
 #include <vector>
 
 #ifndef NO_MOSES
 #include "moses/FF/LexicalReordering/LexicalReorderingState.h"
 #endif
 
-namespace Moses { 
+namespace sapt {
+
 #ifdef NO_MOSES
-namespace LRModel{
+class LRModel{
 
   enum ModelType { Monotonic, MSD, MSLR, LeftRight, None };
   enum Direction { Forward, Backward, Bidirectional };
@@ -26,12 +29,12 @@ namespace LRModel{
     NONE = 4  // largest possible
   };
 
-}
+};
+typedef int PhraseOrientation;
+#else
+  typedef Moses::LRModel LRModel;
+  typedef Moses::LRModel::ReorderingType PhraseOrientation;
 #endif
-
-namespace bitext {
-
-typedef Moses::LRModel::ReorderingType PhraseOrientation;
 
 PhraseOrientation
 find_po_fwd(std::vector<std::vector<ushort> >& a1,
@@ -45,7 +48,4 @@ find_po_bwd(std::vector<std::vector<ushort> >& a1,
 	    size_t b1, size_t e1,
 	    size_t b2, size_t e2);
 
-
-
-
-}} // close namespaces
+} // close namespaces

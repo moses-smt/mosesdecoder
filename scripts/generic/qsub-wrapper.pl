@@ -14,7 +14,7 @@ use strict;
 my $queueparameters="";
 
 # look for the correct pwdcmd
-my $pwdcmd = getPwdCmd();
+my $pwdcmd = &getPwdCmd();
 
 my $workingdir = `$pwdcmd`; chomp $workingdir;
 my $tmpdir="$workingdir/tmp$$";
@@ -109,14 +109,14 @@ else
 fi
 ";
 
-  if (defined $cmdout){
+  if (defined($cmdout) && $cmdout ne "/dev/null") {
     print OUT "mv -f $tmpdir/cmdout$$ $cmdout || echo failed to preserve the log: $tmpdir/cmdout$$\n\n";
   }
   else{
     print OUT "rm -f $tmpdir/cmdout$$\n\n";
   }
 
-  if (defined $cmderr){
+  if (defined($cmderr) && $cmderr ne "/dev/null") {
     print OUT "mv -f $tmpdir/cmderr$$ $cmderr || echo failed to preserve the log: $tmpdir/cmderr$$\n\n";
   }
   else{

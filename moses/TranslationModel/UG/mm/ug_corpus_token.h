@@ -1,6 +1,9 @@
-// -*- c++ -*-
-// This code is part of the re-factorization of the earlier non-template implementation of "corpus tracks"
-// and suffix and prefix arrays over them as template classes.
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
+
+// This code is part of the re-factorization of the earlier
+// non-template implementation of "corpus tracks" and suffix and
+// prefix arrays over them as template classes.  
+
 // (c) 2007-2009 Ulrich Germann
 
 #ifndef __ug_corpus_token_h
@@ -13,9 +16,10 @@
 
 
 #include "tpt_typedefs.h"
+#include "ug_typedefs.h"
 #include "ug_ttrack_base.h"
 
-namespace ugdiss
+namespace sapt
 {
   /** Simple wrapper around id_type for use with the Ttrack/TSA template classes */
 
@@ -27,7 +31,7 @@ namespace ugdiss
     id_type const& id() const;
     int cmp(SimpleWordId const& other) const;
     bool operator==(SimpleWordId const& other) const;
-    id_type remap(vector<id_type const*> const& m) const;
+    id_type remap(std::vector<id_type const*> const& m) const;
   };
 
   /** Token class for suffix arrays */

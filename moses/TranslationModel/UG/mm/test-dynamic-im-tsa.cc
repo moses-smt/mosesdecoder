@@ -37,7 +37,7 @@ typedef L2R_Token<SimpleWordId> L2R;
 
 int main()
 {
-  sptr<imBitext<L2R> > bt(new imBitext<L2R>());
+  SPTR<imBitext<L2R> > bt(new imBitext<L2R>());
   string s1,s2,aln;
   vector<string> S1,S2,ALN;
   while (getline(cin,s1) && getline(cin,s2) && getline(cin,aln))

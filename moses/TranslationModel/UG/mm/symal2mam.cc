@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // program to convert GIZA-style alignments into memory-mapped format
 // (c) 2010 Ulrich Germann
 
@@ -31,6 +31,7 @@
 
 using namespace std;
 using namespace ugdiss;
+using namespace sapt;
 
 ofstream t1out,t2out,mam;
 int len1=0,len2=0;
@@ -119,8 +120,8 @@ procSymalLine(string const& line, ostream& out)
         }
       assert(len1 == 0 || a<len1);
       assert(len2 == 0 || b<len2);
-      binwrite(out,a);
-      binwrite(out,b);
+      tpt::binwrite(out,a);
+      tpt::binwrite(out,b);
     }
   return out.tellp();
 }
@@ -130,11 +131,11 @@ void finiMAM(ofstream& out, vector<id_type>& idx, id_type numTok)
   id_type offset = sizeof(filepos_type)+2*sizeof(id_type);
   filepos_type idxStart = out.tellp();
   for (vector<id_type>::iterator i = idx.begin(); i != idx.end(); ++i)
-    numwrite(out,*i-offset);
+    tpt::numwrite(out,*i-offset);
   out.seekp(0);
-  numwrite(out,idxStart);
-  numwrite(out,id_type(idx.size()-1));
-  numwrite(out,numTok);
+  tpt::numwrite(out,idxStart);
+  tpt::numwrite(out,id_type(idx.size()-1));
+  tpt::numwrite(out,numTok);
   out.close();
 }
 
@@ -144,11 +145,11 @@ finalize(ofstream& out, vector<id_type> const& idx, id_type tokenCount)
   id_type       idxSize = idx.size();
   filepos_type idxStart = out.tellp();
   for (size_t i = 0; i < idx.size(); ++i)
-    numwrite(out,idx[i]);
+    tpt::numwrite(out,idx[i]);
   out.seekp(0);
-  numwrite(out,idxStart);
-  numwrite(out,idxSize-1);
-  numwrite(out,tokenCount);
+  tpt::numwrite(out,idxStart);
+  tpt::numwrite(out,idxSize-1);
+  tpt::numwrite(out,tokenCount);
   out.close();
 }
 
@@ -197,13 +198,14 @@ go(string t1name, string t2name, string A3filename)
 {
   typedef mmTtrack<TKN> track_t;
   track_t T1(t1name),T2(t2name);
-  filtering_istream A3file; open_input_stream(A3filename,A3file);
+  boost::iostreams::filtering_istream A3file; 
+  open_input_stream(A3filename, A3file);
 
   string line; int check1=-1,check2=-1;
-  vector<id_type> idx1(1,0),idx2(1,0),idxm(1,mam.tellp());
+  vector<id_type> idx1(1,0),idx2(1,0),idxm(1, mam.tellp());
   size_t tokenCount1=0,tokenCount2=0;
   size_t skipCtr=0,lineCtr=0;
-  if (!getCheckValues(A3file,check1,check2))
+  if (!getCheckValues(A3file, check1, check2))
     UTIL_THROW(util::Exception, "Mismatch in input files!");
 
   for (sid = 0; sid < T1.size(); ++sid)
@@ -268,9 +270,9 @@ void
 initialize(ofstream& out, string const& fname)
 {
   out.open(fname.c_str());
-  numwrite(out,filepos_type(0)); // place holder for index start
-  numwrite(out,id_type(0));      // place holder for index size
-  numwrite(out,id_type(0));      // place holder for token count
+  tpt::numwrite(out,filepos_type(0)); // place holder for index start
+  tpt::numwrite(out,id_type(0));      // place holder for index size
+  tpt::numwrite(out,id_type(0));      // place holder for token count
 }
 
 int main(int argc, char* argv[])

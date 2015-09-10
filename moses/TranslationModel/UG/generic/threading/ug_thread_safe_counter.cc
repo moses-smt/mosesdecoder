@@ -1,4 +1,7 @@
-#include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
+// #include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
+#include "ug_thread_safe_counter.h"
+// obsolete once <atomic> can be assumed to be available everywhere 
+
 namespace Moses
 {
   ThreadSafeCounter::

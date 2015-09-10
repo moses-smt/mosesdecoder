@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <stack>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 
 #include "moses/Syntax/KBestExtractor.h"
 #include "moses/Syntax/PVertex.h"
@@ -78,12 +79,12 @@ namespace Moses
 
 IOWrapper::IOWrapper()
   : m_nBestStream(NULL)
-  , m_outputWordGraphStream(NULL)
-  , m_outputSearchGraphStream(NULL)
-  , m_detailedTranslationReportingStream(NULL)
-  , m_unknownsStream(NULL)
-  , m_alignmentInfoStream(NULL)
-  , m_latticeSamplesStream(NULL)
+  // , m_outputWordGraphStream(NULL)
+  // , m_outputSearchGraphStream(NULL)
+  // , m_detailedTranslationReportingStream(NULL)
+  // , m_unknownsStream(NULL)
+  // , m_alignmentInfoStream(NULL)
+  // , m_latticeSamplesStream(NULL)
   , m_surpressSingleBestOutput(false)
   , m_look_ahead(0)
   , m_look_back(0)
@@ -93,10 +94,11 @@ IOWrapper::IOWrapper()
   , spe_aln(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
+  Parameter const& P = staticData.GetParameter();
 
   // context buffering for context-sensitive decoding
-  m_look_ahead = staticData.GetContextParameters().look_ahead;
-  m_look_back  = staticData.GetContextParameters().look_back;
+  m_look_ahead = staticData.options().context.look_ahead;
+  m_look_back  = staticData.options().context.look_back;
 
   m_inputType = staticData.GetInputType();
 
@@ -107,8 +109,8 @@ IOWrapper::IOWrapper()
 
   m_inputFactorOrder = &staticData.GetInputFactorOrder();
 
-  size_t nBestSize = staticData.GetNBestSize();
-  string nBestFilePath = staticData.GetNBestFilePath();
+  size_t nBestSize = staticData.options().nbest.nbest_size;
+  string nBestFilePath = staticData.options().nbest.output_file_path;
 
   staticData.GetParameter().SetParameter<string>(m_inputFilePath, "input-file", "");
   if (m_inputFilePath.empty()) {
@@ -121,95 +123,38 @@ IOWrapper::IOWrapper()
   }
 
   if (nBestSize > 0) {
-    if (nBestFilePath == "-" || nBestFilePath == "/dev/stdout") {
-      m_nBestStream = &std::cout;
-      m_nBestOutputCollector.reset(new Moses::OutputCollector(&std::cout));
+    m_nBestOutputCollector.reset(new Moses::OutputCollector(nBestFilePath));
+    if (m_nBestOutputCollector->OutputIsCout()) {
       m_surpressSingleBestOutput = true;
-    } else {
-      std::ofstream *file = new std::ofstream;
-      file->open(nBestFilePath.c_str());
-      m_nBestStream = file;
-
-      m_nBestOutputCollector.reset(new Moses::OutputCollector(file));
-      //m_nBestOutputCollector->HoldOutputStream();
     }
   }
 
-  // search graph output
-  if (staticData.GetOutputSearchGraph()) {
-    string fileName;
-    if (staticData.GetOutputSearchGraphExtended()) {
-      staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph-extended", "");
-    } else {
-      staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph", "");
-    }
-    std::ofstream *file = new std::ofstream;
-    m_outputSearchGraphStream = file;
-    file->open(fileName.c_str());
-  }
+  std::string path;
+  P.SetParameter<std::string>(path, "output-search-graph-extended", "");
+  if (!path.size()) P.SetParameter<std::string>(path, "output-search-graph", "");
+  if (path.size()) m_searchGraphOutputCollector.reset(new OutputCollector(path));
 
-  if (!staticData.GetOutputUnknownsFile().empty()) {
-    m_unknownsStream = new std::ofstream(staticData.GetOutputUnknownsFile().c_str());
-    m_unknownsCollector.reset(new Moses::OutputCollector(m_unknownsStream));
-    UTIL_THROW_IF2(!m_unknownsStream->good(),
-                   "File for unknowns words could not be opened: " <<
-                   staticData.GetOutputUnknownsFile());
-  }
+  P.SetParameter<std::string>(path, "output-unknowns", "");
+  if (path.size()) m_unknownsCollector.reset(new OutputCollector(path));
 
-  if (!staticData.GetAlignmentOutputFile().empty()) {
-    m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
-    m_alignmentInfoCollector.reset(new Moses::OutputCollector(m_alignmentInfoStream));
-    UTIL_THROW_IF2(!m_alignmentInfoStream->good(),
-                   "File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
-  }
+  P.SetParameter<std::string>(path, "alignment-output-file", "");
+  if (path.size()) m_alignmentInfoCollector.reset(new OutputCollector(path));
 
-  if (staticData.GetOutputSearchGraph()) {
-    string fileName;
-    staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph", "");
+  P.SetParameter<string>(path, "translation-details", "");
+  if (path.size()) m_detailedTranslationCollector.reset(new OutputCollector(path));
 
-    std::ofstream *file = new std::ofstream;
-    m_outputSearchGraphStream = file;
-    file->open(fileName.c_str());
-    m_searchGraphOutputCollector.reset(new Moses::OutputCollector(m_outputSearchGraphStream));
-  }
+  P.SetParameter<string>(path, "tree-translation-details", "");
+  if (path.size()) m_detailTreeFragmentsOutputCollector.reset(new OutputCollector(path));
 
-  // detailed translation reporting
-  if (staticData.IsDetailedTranslationReportingEnabled()) {
-    const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
-    m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
-    m_detailedTranslationCollector.reset(new Moses::OutputCollector(m_detailedTranslationReportingStream));
-  }
-
-  if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
-    const std::string &path = staticData.GetDetailedTreeFragmentsTranslationReportingFilePath();
-    m_detailedTreeFragmentsTranslationReportingStream = new std::ofstream(path.c_str());
-    m_detailTreeFragmentsOutputCollector.reset(new Moses::OutputCollector(m_detailedTreeFragmentsTranslationReportingStream));
-  }
-
-  // wordgraph output
-  if (staticData.GetOutputWordGraph()) {
-    string fileName;
-    staticData.GetParameter().SetParameter<string>(fileName, "output-word-graph", "");
-
-    std::ofstream *file = new std::ofstream;
-    m_outputWordGraphStream  = file;
-    file->open(fileName.c_str());
-    m_wordGraphCollector.reset(new OutputCollector(m_outputWordGraphStream));
-  }
+  P.SetParameter<string>(path, "output-word-graph", "");
+  if (path.size()) m_wordGraphCollector.reset(new OutputCollector(path));
 
   size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
   string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
   if (latticeSamplesSize) {
-    if (latticeSamplesFile == "-" || latticeSamplesFile == "/dev/stdout") {
-      m_latticeSamplesCollector.reset(new OutputCollector());
+    m_latticeSamplesCollector.reset(new OutputCollector(latticeSamplesFile));
+    if (m_latticeSamplesCollector->OutputIsCout()) {
       m_surpressSingleBestOutput = true;
-    } else {
-      m_latticeSamplesStream = new ofstream(latticeSamplesFile.c_str());
-      if (!m_latticeSamplesStream->good()) {
-        TRACE_ERR("ERROR: Failed to open " << latticeSamplesFile << " for lattice samples" << endl);
-        exit(1);
-      }
-      m_latticeSamplesCollector.reset(new OutputCollector(m_latticeSamplesStream));
     }
   }
 
@@ -235,6 +180,7 @@ IOWrapper::IOWrapper()
                  << "' for hypergraph output!");
   fmt += string("%d.") + extension;
 
+  // input streams for simulated post-editing
   if (staticData.GetParameter().GetParam("spe-src")) {
     spe_src = new ifstream(staticData.GetParameter().GetParam("spe-src")->at(0).c_str());
     spe_trg = new ifstream(staticData.GetParameter().GetParam("spe-trg")->at(0).c_str());
@@ -246,17 +192,17 @@ IOWrapper::~IOWrapper()
 {
   if (m_inputFile != NULL)
     delete m_inputFile;
-  if (m_nBestStream != NULL && !m_surpressSingleBestOutput) {
-    // outputting n-best to file, rather than stdout. need to close file and delete obj
-    delete m_nBestStream;
-  }
+  // if (m_nBestStream != NULL && !m_surpressSingleBestOutput) {
+  // outputting n-best to file, rather than stdout. need to close file and delete obj
+  // delete m_nBestStream;
+  // }
 
-  delete m_detailedTranslationReportingStream;
-  delete m_alignmentInfoStream;
-  delete m_unknownsStream;
-  delete m_outputSearchGraphStream;
-  delete m_outputWordGraphStream;
-  delete m_latticeSamplesStream;
+  // delete m_detailedTranslationReportingStream;
+  // delete m_alignmentInfoStream;
+  // delete m_unknownsStream;
+  // delete m_outputSearchGraphStream;
+  // delete m_outputWordGraphStream;
+  // delete m_latticeSamplesStream;
 }
 
 // InputType*
@@ -297,7 +243,7 @@ GetBufferedInput()
 
 boost::shared_ptr<InputType>
 IOWrapper::
-ReadInput()
+ReadInput(boost::shared_ptr<std::vector<std::string> >* cw)
 {
 #ifdef WITH_THREADS
   boost::lock_guard<boost::mutex> lock(m_lock);
@@ -305,48 +251,32 @@ ReadInput()
   boost::shared_ptr<InputType> source = GetBufferedInput();
   if (source) {
     source->SetTranslationId(m_currentLine++);
-    if (m_look_ahead || m_look_back)
-      this->set_context_for(*source);
+
+    // when using a sliding context window, remove obsolete past input from buffer:
+    if (m_past_input.size() && m_look_back != std::numeric_limits<size_t>::max()) {
+      list<boost::shared_ptr<InputType> >::iterator m = m_past_input.end();
+      for (size_t cnt = 0; cnt < m_look_back && --m != m_past_input.begin();)
+        cnt += (*m)->GetSize();
+      while (m_past_input.begin() != m) m_past_input.pop_front();
+    }
+
+    if (m_look_back)
+      m_past_input.push_back(source);
   }
-  m_past_input.push_back(source);
+  if (cw) *cw = GetCurrentContextWindow();
   return source;
 }
 
-void
+boost::shared_ptr<std::vector<std::string> >
 IOWrapper::
-set_context_for(InputType& source)
+GetCurrentContextWindow() const
 {
-  boost::shared_ptr<string> context(new string);
-  list<boost::shared_ptr<InputType> >::iterator m = m_past_input.end();
-  // remove obsolete past input from buffer:
-  if (m_past_input.end() != m_past_input.begin()) {
-    for (size_t cnt = 0; cnt < m_look_back && --m != m_past_input.begin();
-         cnt += (*m)->GetSize());
-    while (m_past_input.begin() != m) m_past_input.pop_front();
-  }
-  // cerr << string(80,'=') << endl;
-  if (m_past_input.size()) {
-    m = m_past_input.begin();
-    *context += (*m)->ToString();
-    // cerr << (*m)->ToString() << endl;
-    for (++m; m != m_past_input.end(); ++m) {
-      // cerr << "\n" << (*m)->ToString() << endl;
-      *context += string(" ") + (*m)->ToString();
-    }
-    // cerr << string(80,'-') << endl;
-  }
-  // cerr << source.ToString() << endl;
-  if (m_future_input.size()) {
-    // cerr << string(80,'-') << endl;
-    for (m = m_future_input.begin(); m != m_future_input.end(); ++m) {
-      // if (m != m_future_input.begin()) cerr << "\n";
-      // cerr << (*m)->ToString() << endl;
-      if (context->size()) *context += " ";
-      *context += (*m)->ToString();
-    }
-  }
-  // cerr << string(80,'=') << endl;
-  if (context->size()) source.SetContext(context);
+  boost::shared_ptr<std::vector<string> > context(new std::vector<string>);
+  BOOST_FOREACH(boost::shared_ptr<InputType> const& i, m_past_input)
+  context->push_back(i->ToString());
+  BOOST_FOREACH(boost::shared_ptr<InputType> const& i, m_future_input)
+  context->push_back(i->ToString());
+  return context;
 }
 
 

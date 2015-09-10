@@ -38,9 +38,8 @@ void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::
 
 void SourceWordDeletionFeature::Load()
 {
-  if (m_filename == "") {
+  if (m_filename.empty())
     return;
-  }
 
   FEATUREVERBOSE(1, "Loading source word deletion word list from " << m_filename << std::endl);
   ifstream inFile(m_filename.c_str());

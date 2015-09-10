@@ -61,6 +61,7 @@ factorize
 	rerun-on-change: TRAINING:input-factors TRAINING:output-factors
 	default-name: corpus/factored
 	pass-unless: TRAINING:input-factors
+	pass-if: factorize-after-split
 	parallelizable: yes
 	error: can't open
 	error: incompatible number of words in factor
@@ -112,6 +113,15 @@ post-split-clean-syntax
 	pass-unless: input-splitter output-splitter
 	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 OUT.lines-retained --ignore-xml
 	error: there is a blank factor
+post-split-factorize
+        in: clean-split-stem
+        out: post-split-factorized-stem
+        rerun-on-change: TRAINING:input-factors TRAINING:output-factors
+        default-name: corpus/split-factored
+        pass-unless: factorize-after-split
+        parallelizable: yes
+        error: can't open
+        error: incompatible number of words in factor
 
 [RECASING] single
 tokenize
@@ -160,20 +170,24 @@ train
 	ignore-if: no-splitter-training
 
 [LM] multiple
-prepare-bilingual-nplm
+prepare-bilingual-lm
 	in: TRAINING:corpus TRAINING:word-alignment
 	out: numberized_ngrams
 	ignore-unless: bilingual-lm
-	rerun-on-change: TRAINING:corpus TRAINING:word-alignment
-	template: $moses-script-dir/training/bilingual-lm/extract_training.py -c IN0 -e $output-extension -f $input-extension -a IN1.$TRAINING:alignment-symmetrization-method -w $working-dir/$bilingual-lm-workdir -n $order -m $source-window $bilingual-lm-settings
-	default-name: lm/bilingualLM_prep
+	rerun-on-change: TRAINING:corpus TRAINING:word-alignment source-window order epochs
+	default-name: lm/blm
 train-bilingual-lm
 	in: numberized_ngrams TRAINING:corpus 
 	out: binlm
 	ignore-unless: bilingual-lm
 	rerun-on-change: numberized_ngrams
-	template: $moses-script-dir/training/bilingual-lm/train_nplm.py -w $working-dir/$bilingual-lm-workdir -c IN1 -r $working-dir/$nplm-output-dir -n $train_order $nplm-settings
-	default-name: lm/bilingualLM
+	default-name: lm/blm
+train-nplm
+  in: stripped-corpus
+  out: binlm
+  ignore-unless: nplm
+  rerun-on-change: stripped-corpus nplm-settings
+  default-name: lm/nplm
 get-corpus
 	in: get-corpus-script
 	out: raw-corpus
@@ -207,6 +221,7 @@ factorize
 	out: factorized-corpus
 	default-name: lm/factored
 	pass-unless: factors
+	pass-if: factorize-after-split
 	ignore-if: concatenate-files concatenate-files-split
 	parallelizable: yes
 	error: can't open
@@ -238,8 +253,18 @@ split
 	pass-unless: output-splitter
 	ignore-if: concatenate-files concatenate-files-split
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
-strip
+post-split-factorize
         in: split-corpus
+        out: split-factorized-corpus
+        default-name: lm/split-factored
+        rerun-on-change: TRAINING:input-factors TRAINING:output-factors
+        pass-unless: factorize-after-split
+        ignore-if: concatenate-files
+        parallelizable: yes
+        error: can't open
+        error: incompatible number of words in factor
+strip
+        in: split-factorized-corpus
         out: stripped-corpus
         default-name: lm/stripped
         pass-unless: mock-output-parser-lm
@@ -261,7 +286,7 @@ train
 	in: stripped-corpus
 	out: lm
 	default-name: lm/lm
-	ignore-if: rlm-training custom-training bilingual-lm
+	ignore-if: rlm-training custom-training bilingual-lm nplm
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
@@ -278,7 +303,7 @@ train-custom
 	template: $custom-training -text IN -lm OUT
 	final-model: yes
 train-custom-syntax
-	in: split-corpus
+	in: split-factorized-corpus
 	out: binlm
 	default-name: lm/custom-lm
 	rerun-on-change: custom-training
@@ -337,6 +362,7 @@ factorize-tuning
 	out: factorized-tuning
 	default-name: lm/interpolate-tuning.factored
 	pass-unless: TRAINING:output-factors	
+	pass-if: factorize-after-split
 	parallelizable: yes
 	error: can't open
 	error: incompatible number of words in factor
@@ -361,8 +387,17 @@ split-tuning
 	default-name: lm/interpolate-tuning.split
 	pass-unless: output-splitter
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
+post-split-factorize-tuning
+        in: split-tuning
+        out: post-split-factorized-tuning
+        default-name: lm/interpolate-tuning.split-factored
+        rerun-on-change: TRAINING:input-factors TRAINING:output-factors
+        pass-unless: factorize-after-split
+        parallelizable: yes
+        error: can't open
+        error: incompatible number of words in factor
 strip-tuning
-	in: split-tuning
+	in: post-split-factorized-tuning
 	out: stripped-tuning
 	default-name: lm/interpolate-tuning.stripped
 	pass-unless: mock-output-parser-lm
@@ -490,12 +525,12 @@ train-in-mono
 	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN -in-target IN1 -out-source IN2.$input-extension -out-target IN2.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings
 [TRAINING] single
 consolidate
-	in: CORPUS:clean-split-stem
+	in: CORPUS:post-split-factorized-stem
 	out: corpus
 	default-name: corpus
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 build-domains
-	in: CORPUS:clean-split-stem
+	in: CORPUS:post-split-factorized-stem
 	out: domains
 	default-name: model/domains
 	ignore-unless: domain-features mml-filter-corpora
@@ -523,14 +558,14 @@ fast-align
 	in: prepared-data-fast-align
 	out: fast-alignment
 	rerun-on-change: fast-align-settings
-	ignore-if: fast-align-max-lines
+	ignore-if: fast-align-max-lines fast-align-save-model
 	template: $external-bin-dir/fast_align -i IN $fast-align-settings > OUT
 	default-name: fast-align
 fast-align-inverse
 	in: prepared-data-fast-align
 	out: fast-alignment-inverse
 	rerun-on-change: fast-align-settings
-	ignore-if: fast-align-max-lines
+	ignore-if: fast-align-max-lines fast-align-save-model
 	template: $external-bin-dir/fast_align -i IN -r $fast-align-settings > OUT
 	default-name: fast-align-inverse
 fast-align-in-parts
@@ -539,7 +574,7 @@ fast-align-in-parts
 	rerun-on-change: fast-align-settings fast-align-max-lines
 	ignore-unless: fast-align-max-lines
 	tmp-name: training/tmp.fast-align
-	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' > OUT
+	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' -save-model '$?fast-align-save-model' -o OUT
 	default-name: fast-align
 fast-align-in-parts-inverse
 	in: prepared-data-fast-align
@@ -547,12 +582,29 @@ fast-align-in-parts-inverse
 	rerun-on-change: fast-align-settings fast-align-max-lines
 	ignore-unless: fast-align-max-lines
 	tmp-name: training/tmp.fast-align-inverse
-	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -r -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' > OUT
+	template: $moses-script-dir/ems/support/fast-align-in-parts.perl -bin $external-bin-dir/fast_align -i IN -r -max-lines $fast-align-max-lines -tmp TMP -settings '$fast-align-settings' -save-model '$?fast-align-save-model' -o OUT
+	default-name: fast-align-inverse
+fast-align-save-model
+	in: prepared-data-fast-align
+	out: fast-alignment
+	ignore-unless: fast-align-save-model
+	ignore-if: fast-align-max-lines
 	default-name: fast-align
+	tmp-name: training/tmp.fast-align-inverse
+	template: $external-bin-dir/fast_align -i IN $fast-align-settings -p OUT.parameters > OUT 2> OUT.log
+fast-align-save-model-inverse
+	in: prepared-data-fast-align
+	out: fast-alignment-inverse
+	ignore-unless: fast-align-save-model
+	ignore-if: fast-align-max-lines
+	default-name: fast-align-inverse
+	tmp-name: training/tmp.fast-align-inverse
+	template: $external-bin-dir/fast_align -r -i IN $fast-align-settings -p OUT.parameters > OUT 2> OUT.log
 symmetrize-fast-align
 	in: fast-alignment fast-alignment-inverse corpus-mml-prefilter=OR=corpus
 	out: word-alignment
 	ignore-unless: fast-align-settings
+	rerun-on-change: alignment-symmetrization-method
 	template: $moses-script-dir/ems/support/symmetrize-fast-align.perl IN IN1 IN2.$input-extension IN2.$output-extension OUT $alignment-symmetrization-method $moses-src-dir/bin/symal
         default-name: model/aligned
 prepare-data
@@ -616,7 +668,7 @@ build-biconcor
 	final-model: yes
 build-suffix-array
 	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
-	out: phrase-translation-table
+	out: sigtest-filter-phrase-translation-table
 	default-name: model/suffix-array
 	ignore-unless: suffix-array
 	error: usage
@@ -688,11 +740,18 @@ build-ttable
 	final-model: yes
 build-mmsapt
 	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
-	out: phrase-translation-table
+	out: sigtest-filter-phrase-translation-table
 	ignore-unless: mmsapt
 	default-name: model/phrase-table-mmsapt
 	template: $moses-script-dir/training/build-mmsapt.perl --alignment IN.$alignment-symmetrization-method --corpus IN1 --f $input-extension --e $output-extension --dir OUT --settings '$mmsapt'
 	final-model: yes
+custom-phrase-table-pruning
+	in: phrase-translation-table
+	out: sigtest-filter-phrase-translation-table
+	ignore-unless: custom-phrase-table-pruning
+	ignore-if: mmsapt
+	template: $custom-phrase-table-pruning IN OUT
+	default-name: model/phrase-table-pruned
 sigtest-filter-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: sigtest-filter-suffix-array
@@ -714,7 +773,7 @@ sigtest-filter-ttable
 	out: sigtest-filter-phrase-translation-table
 	default-name: model/phrase-table-sigtest-filter
 	pass-unless: sigtest-filter
-	ignore-if: TRAINING:config
+	ignore-if: TRAINING:config custom-phrase-table-pruning
 	final-model: yes
 sigtest-filter-reordering
 	in: reordering-table sigtest-filter-suffix-array
@@ -761,14 +820,15 @@ create-config
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature
 	default-name: model/moses.ini
 	error: Unknown option
+	error: requires an argument
 	final-model: yes
 binarize-config
 	in: config
 	out: bin-config
 	pass-unless: binarize-all
-	rerun-on-change: config
+	rerun-on-change: config 
 	default-name: model/moses.bin.ini
-	template: $binarize-all IN OUT -Binarizer $ttable-binarizer 
+	template: $binarize-all IN OUT -Binarizer "$ttable-binarizer" 
 	final-model: yes
 hiero-compile-source-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
@@ -880,21 +940,6 @@ parse-input-devtest
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira	
 	template: $input-parser < IN > OUT
-parse-relax-input
-	in: split-input
-	out: input
-	default-name: tuning/input.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-    template: $input-parse-relaxer < IN > OUT
-parse-relax-input-devtest
-	in: split-input-devtest
-	out: input-devtest
-	default-name: tuning/input.devtest.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-	ignore-unless: use-mira
-    template: $input-parse-relaxer < IN > OUT
 factorize-input
 	in: parsed-input
 	out: factorized-input
@@ -956,20 +1001,35 @@ truecase-input-devtest
 	ignore-unless: AND input-truecaser use-mira
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
-	in: truecased-input SPLITTER:splitter-model
+	in: truecased-input
 	out: split-input
-	rerun-on-change: input-splitter
+	rerun-on-change: input-splitter SPLITTER:splitter-model
 	default-name: tuning/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model IN1.$input-extension < IN > OUT
+	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
 split-input-devtest
-	in: truecased-input-devtest SPLITTER:splitter-model
+	in: truecased-input-devtest
 	out: split-input-devtest
 	rerun-on-change: input-splitter
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
 	ignore-unless: use-mira
-	template: $input-splitter -model IN1.$input-extension < IN > OUT
+	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
+parse-relax-input
+	in: split-input
+	out: input
+	default-name: tuning/input.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+    template: $input-parse-relaxer < IN > OUT
+parse-relax-input-devtest
+	in: split-input-devtest
+	out: input-devtest
+	default-name: tuning/input.devtest.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+	ignore-unless: use-mira
+    template: $input-parse-relaxer < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -1209,11 +1269,12 @@ truecase-input
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input
-	in: truecased-input SPLITTER:splitter-model
+	in: truecased-input
 	out: split-input
+	rerun-on-change: input-splitter SPLITTER:splitter-model
 	default-name: evaluation/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model IN1.$input-extension < IN > OUT
+	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
 filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir 

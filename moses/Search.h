@@ -43,6 +43,12 @@ protected:
   Manager& m_manager;
   InputPath m_inputPath; // for initial hypo
   TranslationOption m_initialTransOpt; /**< used to seed 1st hypo */
+  AllOptions const& m_options;
+
+  /** flag indicating that decoder ran out of time (see switch -time-out) */
+  size_t interrupted_flag;
+
+  bool out_of_time();
 };
 
 }

@@ -40,7 +40,7 @@ my $hierarchical = "";
 $hierarchical = "-Hierarchical" if $opt_hierarchical;
 my $targetdir = "$output_config.tables";
 
-safesystem("$RealBin/filter-model-given-input.pl  $targetdir $input_config /dev/null $hierarchical -nofilter -Binarizer $binarizer") || die "binarising failed";
+safesystem("$RealBin/filter-model-given-input.pl  $targetdir $input_config /dev/null $hierarchical -nofilter -Binarizer \"$binarizer\"") || die "binarising failed";
 safesystem("rm -f $output_config; ln -s $targetdir/moses.ini $output_config") || die "failed to link new ini file";
 
 #FIXME: Why isn't this in a module?

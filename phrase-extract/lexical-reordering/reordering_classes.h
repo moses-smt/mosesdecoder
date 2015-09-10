@@ -13,7 +13,7 @@
 #include <fstream>
 
 #include "util/string_piece.hh"
-
+#include "../OutputFileStream.h"
 
 enum ORIENTATION {MONO, SWAP, DRIGHT, DLEFT, OTHER, NOMONO};
 
@@ -122,8 +122,8 @@ private:
   ModelScore* modelscore;
   Scorer* scorer;
 
-  std::FILE* file;
   std::string filename;
+  Moses::OutputFileStream outputFile;
 
   bool fe;
   bool previous;

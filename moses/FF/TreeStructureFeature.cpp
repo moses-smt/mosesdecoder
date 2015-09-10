@@ -13,32 +13,11 @@ void TreeStructureFeature::Load()
 
   // syntactic constraints can be hooked in here.
   m_constraints = NULL;
-  m_labelset = NULL;
 
   StaticData &staticData = StaticData::InstanceNonConst();
   staticData.SetTreeStructure(this);
 }
 
-
-// define NT labels (ints) that are mapped from strings for quicker comparison.
-void TreeStructureFeature::AddNTLabels(TreePointer root) const
-{
-  std::string label = root->GetLabel();
-
-  if (root->IsTerminal()) {
-    return;
-  }
-
-  std::map<std::string, NTLabel>::const_iterator it = m_labelset->string_to_label.find(label);
-  if (it != m_labelset->string_to_label.end()) {
-    root->SetNTLabel(it->second);
-  }
-
-  std::vector<TreePointer> children = root->GetChildren();
-  for (std::vector<TreePointer>::const_iterator it2 = children.begin(); it2 != children.end(); ++it2) {
-    AddNTLabels(*it2);
-  }
-}
 
 FFState* TreeStructureFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
     , int featureID /* used to index the state in the previous hypotheses */
@@ -47,10 +26,6 @@ FFState* TreeStructureFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hy
   if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
     const std::string *tree = property->GetValueString();
     TreePointer mytree (boost::make_shared<InternalTree>(*tree));
-
-    if (m_labelset) {
-      AddNTLabels(mytree);
-    }
 
     //get subtrees (in target order)
     std::vector<TreePointer> previous_trees;
@@ -70,7 +45,7 @@ FFState* TreeStructureFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hy
     }
     mytree->Combine(previous_trees);
 
-    bool full_sentence = (mytree->GetChildren().back()->GetLabel() == "</s>" || (mytree->GetChildren().back()->GetLabel() == "SEND" && mytree->GetChildren().back()->GetChildren().back()->GetLabel() == "</s>"));
+    bool full_sentence = (mytree->GetChildren().back()->GetLabel() == m_send || (mytree->GetChildren().back()->GetLabel() == m_send_nt && mytree->GetChildren().back()->GetChildren().back()->GetLabel() == m_send));
     if (m_binarized && full_sentence) {
       mytree->Unbinarize();
     }

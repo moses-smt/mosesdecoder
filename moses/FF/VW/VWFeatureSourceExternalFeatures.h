@@ -40,7 +40,7 @@ public:
   }
 
   virtual void InitializeForInput(ttasksptr const& ttask) {
-    InputType const& source = ttask->GetSource();
+    InputType const& source = *(ttask->GetSource().get());
     UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
                    "This feature function requires the TabbedSentence input type");
 

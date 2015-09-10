@@ -1,5 +1,7 @@
 #include "ug_http_client.h"
 #include "moses/Util.h"
+#include <iostream>
+
 namespace Moses
 {
 using boost::asio::ip::tcp;
@@ -17,7 +19,7 @@ http_client(boost::asio::io_service& io_service,
 }
   
 http_client::
-http_client(boost::asio::io_service& io_service, std::string url)
+http_client(boost::asio::io_service& io_service, std::string url, std::ostream* log)
   : resolver_(io_service), socket_(io_service)
 {
   std::string server;
@@ -36,11 +38,15 @@ http_client(boost::asio::io_service& io_service, std::string url)
   server = url.substr(0,p);
   if (q < url.size()) 
     path = url.substr(q);
-#if 0
-  std::cerr << HERE << std::endl;
-  std::cerr << "SERVER " << server << std::endl;
-  std::cerr << "PORT   |" << port << "|" << std::endl;
-  std::cerr << "PATH " << path << std::endl; 
+#if 1
+  if (log)
+    {
+      *log << HERE << std::endl;
+      // *log << "URL    " << url << std::endl;
+      *log << "SERVER " << server << std::endl;
+      *log << "PORT   " << port << "" << std::endl;
+      *log << "PATH   " << path << std::endl; 
+    }
 #endif
   init(server, port, path);
 }
@@ -204,12 +210,12 @@ uri_encode(std::string const& in)
       // cout << *c << " " << int(*c) << endl;
       if (*c == ' ') buf[i++] = '+';
       else if (*c == '.' || *c == '~' || *c == '_' || *c == '-') buf[i++] = *c;
-      else if (*c <  '0') i += sprintf(buf+i, "%%%x", int(*c));
+      else if (*c <  '0') i += sprintf(buf+i, "%%%02x", int(*c));
       else if (*c <= '9') buf[i++] = *c;
-      else if (*c <  'A') i += sprintf(buf+i, "%%%x", int(*c));
+      else if (*c <  'A') i += sprintf(buf+i, "%%%02x", int(*c));
       else if (*c <= 'Z') buf[i++] = *c;
-      else if (*c <  'a') i += sprintf(buf+i, "%%%x", int(*c));
-      else if (*c <= 'z') buf[i++] = *c;
+      else if (*c <  'a') i += sprintf(buf+i, "%%%02x", int(*c));
+      else if (*c <= 'z') buf[i++] = *c; 
       else i += sprintf(buf+i, "%%%x", int(*c));
     }
   buf[i] = 0;

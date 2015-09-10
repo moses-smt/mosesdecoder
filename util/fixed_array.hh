@@ -100,33 +100,56 @@ template <class T> class FixedArray {
      *
      * @param i Index of the object to reference
      */
-    T &operator[](std::size_t i) { return begin()[i]; }
+    T &operator[](std::size_t i) {
+      assert(i < size());
+      return begin()[i];
+    }
 
     /**
      * Gets a const reference to the object with index i currently stored in this data structure.
      *
      * @param i Index of the object to reference
      */
-    const T &operator[](std::size_t i) const { return begin()[i]; }
+    const T &operator[](std::size_t i) const {
+      assert(i < size());
+      return begin()[i];
+    }
 
     /**
      * Constructs a new object using the provided parameter,
      * and stores it in this data structure.
      *
      * The memory backing the constructed object is managed by this data structure.
+     * I miss C++11 variadic templates.
      */
-    template <class C> void push_back(const C &c) {
-      new (end()) T(c); // use "placement new" syntax to initalize T in an already-allocated memory location
+    void push_back() {
+      new (end()) T();
       Constructed();
+    }
+    template <class C> void push_back(const C &c) {
+      new (end()) T(c);
+      Constructed();
+    }
+    template <class C> void push_back(C &c) {
+      new (end()) T(c);
+      Constructed();
+    }
+    template <class C, class D> void push_back(const C &c, const D &d) {
+      new (end()) T(c, d);
+      Constructed();
+    }
+
+    void pop_back() {
+      back().~T();
+      --newed_end_;
     }
 
     /**
      * Removes all elements from this array.
      */
     void clear() {
-      for (T *i = begin(); i != end(); ++i)
-        i->~T();
-      newed_end_ = begin();
+      while (newed_end_ != begin())
+        pop_back();
     }
 
   protected:

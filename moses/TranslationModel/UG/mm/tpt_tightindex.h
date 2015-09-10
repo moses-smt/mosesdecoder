@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007,2008 Ulrich Germann
 /* Functions for writing indices tightly (use only the bytes you need).
  * The first bit indicates whether a byte belongs to a key or a value.
@@ -10,9 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include "tpt_typedefs.h"
-// #include <stdint.h>
 #include <cassert>
-using namespace std;
 
 #ifndef uchar
 #endif
@@ -25,11 +23,11 @@ using namespace std;
 
 extern bool debug;
 
-namespace ugdiss
+namespace tpt
 {
   // void tightwritex(iostream& out, size_t data, bool flag);
   void
-  tightwrite(std::ostream& out, ::uint64_t data, bool flag);
+  tightwrite(std::ostream& out, uint64_t data, bool flag);
 
   filepos_type
   tightread(std::istream& in, std::ios::pos_type stop);
@@ -91,7 +89,7 @@ namespace ugdiss
   tightread4(char const* start, char const* stop, uint32_t& dest);
 
   char const*
-  tightread8(char const* start, char const* stop, ::uint64_t& dest);
+  tightread8(char const* start, char const* stop, uint64_t& dest);
 
   template<typename numType>
   char const*
@@ -102,13 +100,13 @@ namespace ugdiss
     if (sizeof(numType)==4)
       return tightread4(start,stop,reinterpret_cast<uint32_t&>(dest));
     else if (sizeof(numType)==8)
-      return tightread8(start,stop,reinterpret_cast<typename ::uint64_t&>(dest));
+      return tightread8(start,stop,reinterpret_cast<uint64_t&>(dest));
     assert(0);
     return NULL;
   }
 
 //   char const*
-//   tightread(char const* start, char const* stop, ::uint64_t& dest);
+//   tightread(char const* start, char const* stop, uint64_t& dest);
 
 //   char const*
 //   tightread(char const* start, char const* stop, filepos_type& dest);

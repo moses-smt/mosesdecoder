@@ -33,7 +33,7 @@ class http_client
   std::ostringstream m_error;
 
 public:
-  http_client(boost::asio::io_service& io_service, std::string url);
+  http_client(boost::asio::io_service& io_service, std::string url, std::ostream* log);
   http_client(boost::asio::io_service& io_service,
 	      std::string const& server, 
 	      std::string const& port, 
@@ -58,6 +58,7 @@ private:
   boost::asio::streambuf response_;
 public:
   std::string content() const;
+  std::string error_msg() const { return m_error.str(); }
 };
 
 }

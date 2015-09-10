@@ -18,20 +18,22 @@
 
 namespace ugdiss
 {
-using namespace std;
-using namespace boost::iostreams;
 
-/** open input file that is possibly compressed
- *  decompression filters are automatically added based on the file name
- *  gzip for .gz; bzip2 for bz2.
- */
-filtering_istream* open_input_stream(string fname);
-void open_input_stream(string fname, filtering_istream& in);
-// filtering_streambuf<input>* open_input_stream(string fname);
+  /** open input file that is possibly compressed
+   *  decompression filters are automatically added based on the file name
+   *  gzip for .gz; bzip2 for bz2.
+   */
+  boost::iostreams::filtering_istream* 
+  open_input_stream(std::string fname);
 
-filtering_ostream* open_output_stream(string fname);
-void open_output_stream(string fname, filtering_ostream& in);
+  void open_input_stream(std::string fname, 
+			 boost::iostreams::filtering_istream& in);
 
+  boost::iostreams::filtering_ostream* 
+  open_output_stream(std::string fname);
+
+  void open_output_stream(std::string fname, 
+			  boost::iostreams::filtering_ostream& in);
 
 }
 #endif

@@ -36,7 +36,7 @@ namespace Moses
 HypothesisStackNormal::HypothesisStackNormal(Manager& manager) :
   HypothesisStack(manager)
 {
-  m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
+  m_nBestIsEnabled = StaticData::Instance().options().nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
 }

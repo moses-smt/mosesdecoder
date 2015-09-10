@@ -41,6 +41,8 @@ parser.add_argument("--input_vocab_size", dest="input_vocab_size", type=int)
 parser.add_argument("--output_vocab_size", dest="output_vocab_size", type=int)
 parser.add_argument("--mmap", dest="mmap", action="store_true",
     help="Use memory-mapped file (for lower memory consumption).")
+parser.add_argument("--extra-settings", dest="extra_settings",
+  help="Extra settings to be passed to NPLM")
 
 parser.set_defaults(
     working_dir="working",
@@ -136,6 +138,7 @@ def main(options):
         "--activation_function", options.activation_fn,
         "--ngram_size", str(options.ngram_size),
     ] + validations_command + vocab_command + mmap_command
+    if options.extra_settings: train_args += options.extra_settings.split()
     print("Train model command: ")
     print(', '.join(train_args))
 
