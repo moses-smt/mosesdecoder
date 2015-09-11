@@ -26,7 +26,7 @@ public:
     const NeuralScoreState &otherState = static_cast<const NeuralScoreState&>(other);
     if(m_lastContext.size() == otherState.m_lastContext.size() &&
         std::equal(m_lastContext.begin(),
-                   otherState.m_lastContext.end(),
+                   m_lastContext.end(),
                    otherState.m_lastContext.begin()))
       return 0;
     return (std::lexicographical_compare(m_lastContext.begin(), m_lastContext.end(),
@@ -34,7 +34,7 @@ public:
                    otherState.m_lastContext.end())) ? -1 : +1;
   }
 
-  void limitLength(size_t length) {
+  void LimitLength(size_t length) {
     while(m_lastContext.size() > length)
       m_lastContext.pop_front();
   }
@@ -106,7 +106,9 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
 {
   NeuralScoreState* prevState = static_cast<NeuralScoreState*>(
                                   const_cast<FFState*>(prev_state));
-    
+  
+  PyObject* context = prevState->GetContext();
+  
   // dense scores
   std::vector<float> newScores(m_numScoreComponents);
   
@@ -116,19 +118,21 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   for(size_t i = 0; i < tp.GetSize(); ++i) {
     std::string word = tp.GetWord(i).GetString(0).as_string();
     double currProb;
-    m_wrapper->GetProb(word, prevState->GetContext(),
+    m_wrapper->GetProb(word, context,
                        prevState->GetLastWord(),
                        prevState->GetState(),
                        currProb, nextState);
     prob += log(currProb);
-    prevState = new NeuralScoreState(prevState.GetContext(), word, nextState);
+    if(prevState != prev_state)
+      delete prevState;
+    prevState = new NeuralScoreState(context, word, nextState);
     nextState = NULL;
   }
   
   newScores[0] = prob;
   accumulator->PlusEquals(this, newScores);
   
-  prevState->limitLength();
+  prevState->LimitLength(4);
   return prevState;
 }
 

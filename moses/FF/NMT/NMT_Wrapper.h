@@ -19,7 +19,7 @@ public:
     bool GetContextVectors(const string& source_sentence, PyObject*& vectors);
 
     bool GetProb(const string& next_word,
-                 PyObject*& source_sentence,
+                 PyObject* source_sentence,
                  const string& last_word,
                  PyObject* input_state,
                  double& prob,

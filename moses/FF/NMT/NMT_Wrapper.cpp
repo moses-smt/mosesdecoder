@@ -66,7 +66,7 @@ bool NMT_Wrapper::Init(const string& state_path, const string& model_path, const
 }
 
 bool NMT_Wrapper::GetProb(const string& next_word,
-                          PyObject*& py_context_vectors,
+                          PyObject* py_context_vectors,
                           const string& last_word,
                           PyObject* input_state,
                           double& output_prob,
