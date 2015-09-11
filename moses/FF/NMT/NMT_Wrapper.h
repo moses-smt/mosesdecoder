@@ -34,7 +34,8 @@ public:
 
 private:
     PyObject* py_wrapper;
-    PyObject* py_get_prob;
+    PyObject* py_get_log_prob;
+    PyObject* py_get_log_probs;
     PyObject* py_get_context_vectors;
     string state_path;
     string model_path;
