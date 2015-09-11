@@ -1,5 +1,6 @@
 import numpy
 import cPickle
+import sys
 
 from encdec import parse_input, RNNEncoderDecoder
 from state import prototype_state
@@ -103,6 +104,7 @@ class NMTWrapper(object):
 
             probs = self.comp_next_probs(c, 0, last_word, *states)[0]
             log_probs = numpy.log(probs)
+            cumulated_score += log_probs[0][next_indx]
 
             best_costs_indices = numpy.array([next_indx])
 
@@ -119,8 +121,7 @@ class NMTWrapper(object):
                     new_states[level][i] = states[level][orig_idx]
                 inputs[i] = next_word
             new_states = self.comp_next_states(c, 0, inputs, *new_states)
-            cumulated_score += probs[0][next_indx]
-            last_word = next_word
+            last_word = [next_word]
             states = [new_states[0]]
 
         return cumulated_score, new_states[0]
