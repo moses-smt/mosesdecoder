@@ -23,9 +23,6 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   :StatefulFeatureFunction(1, line)
 {
   ReadParameters();
-  m_statePath = "/home/tomaszd/work/nmt2moses/nmt_model/state.pkl";
-  m_modelPath = "/home/tomaszd/work/nmt2moses/nmt_model/min_en_de_model.npz";
-  m_wrapperPath = "/home/tomaszd/work/nmt2moses/mosesdecoder/moses/FF/NMT/wrapper";
   NMT_Wrapper* wrapper = new NMT_Wrapper();
   wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
 }
@@ -79,6 +76,8 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     m_statePath = value;
   } else if (key == "model") {
     m_modelPath = value;
+  } else if (key == "wrapper-path") {
+    m_wrapperPath = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
