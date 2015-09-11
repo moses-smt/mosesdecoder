@@ -26,6 +26,43 @@ void NMT_Wrapper::AddPathToSys(const string& path)
     PyList_Append(py_sys_path, PyString_FromString(path.c_str()));
 }
 
+bool NMT_Wrapper::GetProb(const std::vector<std::string>& next_words,
+                PyObject* source_sentence,
+                const string& last_word,
+                PyObject* input_state,
+                double& prob,
+                PyObject*& output_state)
+{
+    PyObject* py_nextWords = PyList_New(0);
+    for (size_t i = 0; i < next_words.size(); ++i) {
+        PyList_Append(py_nextWords, PyString_FromString(next_words[i].c_str()));
+    }
+
+    PyObject* py_response = NULL;
+
+    if (input_state == NULL)
+    {
+        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_log_probs,
+                                                 py_nextWords, py_context_vectors, NULL);
+    }
+    else {
+        PyObject* py_last_word = PyString_FromString(last_word.c_str());
+        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_log_probs, py_nextWords, py_context_vectors,
+                                                 py_last_word, input_state, NULL);
+    }
+
+    if (py_response == NULL) { return false; }
+    if (! PyTuple_Check(py_response)) { return false; }
+
+    PyObject* py_prob = PyTuple_GetItem(py_response, 0);
+    if (py_prob == NULL) { return false; }
+    output_prob = PyFloat_AsDouble(py_prob);
+
+    output_state = PyTuple_GetItem(py_response, 1);
+    if (output_state == NULL) { return 0; }
+
+    return true;
+}
 
 bool NMT_Wrapper::Init(const string& state_path, const string& model_path, const string& wrapper_path)
 {

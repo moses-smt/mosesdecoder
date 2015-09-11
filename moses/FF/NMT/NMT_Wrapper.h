@@ -24,6 +24,12 @@ public:
                  PyObject* input_state,
                  double& prob,
                  PyObject*& output_state);
+    bool GetProb(const std::vector<std::string>& next_words,
+                 PyObject* source_sentence,
+                 const string& last_word,
+                 PyObject* input_state,
+                 double& prob,
+                 PyObject*& output_state);
     virtual ~NMT_Wrapper();
 
 private:
