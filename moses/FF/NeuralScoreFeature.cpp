@@ -2,9 +2,9 @@
 #include <string>
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TargetPhrase.h"
-#include "moses/FF/NeuralScoreFeature.h"
 #include "moses/Hypothesis.h"
 #include "moses/FF/NMT/NMT_Wrapper.h"
+#include "moses/FF/NeuralScoreFeature.h"
 
 namespace Moses
 {
@@ -23,8 +23,8 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   :StatefulFeatureFunction(1, line)
 {
   ReadParameters();
-  NMT_Wrapper* wrapper = new NMT_Wrapper();
-  wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
+  m_wrapper = new NMT_Wrapper();
+  m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
 }
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source

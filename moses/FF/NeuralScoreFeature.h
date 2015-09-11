@@ -4,6 +4,8 @@
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 
+class NMT_Wrapper;
+
 namespace Moses
 {
 
@@ -62,6 +64,7 @@ private:
   std::string m_modelPath;
   std::string m_wrapperPath;
 
+  NMT_Wrapper* m_wrapper;
 };
 
 }
