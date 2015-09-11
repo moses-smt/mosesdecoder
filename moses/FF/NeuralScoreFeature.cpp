@@ -16,10 +16,17 @@ namespace Moses
 class NeuralScoreState : public FFState
 {  
 public:
-  NeuralScoreState(PyObject* context, std::string lastWord, PyObject* state)
+  NeuralScoreState(PyObject* context, const std::string& lastWord, PyObject* state)
   : m_context(context), m_lastWord(lastWord), m_state(state) {
     m_lastContext.push_back(m_lastWord);
   }
+
+  NeuralScoreState(PyObject* context, const std::vector<std::string>& lastPhrase, PyObject* state)
+  : m_context(context), m_lastWord(lastPhrase.back()), m_state(state) {
+    for(size_t i = 0; i < lastPhrase.size(); i++)
+      m_lastContext.push_back(lastPhrase[i]);
+  }
+
     
   int Compare(const FFState& other) const
   {
@@ -113,7 +120,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   // dense scores
   std::vector<float> newScores(m_numScoreComponents);
   
-  float prob = 0;
+  double prob = 0;
   PyObject* nextState = NULL;
   const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
   std::vector<std::string> phrase;
@@ -127,7 +134,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
                      prevState->GetState(),
                      prob, nextState);
   
-  prevState = new NeuralScoreState(context, word, nextState);
+  prevState = new NeuralScoreState(context, phrase, nextState);
   nextState = NULL;
   
   newScores[0] = prob;
