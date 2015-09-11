@@ -3,6 +3,7 @@
 #include <string>
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
+#include <boost/shared_ptr.hpp>
 
 class NMT_Wrapper;
 
@@ -64,7 +65,7 @@ private:
   std::string m_modelPath;
   std::string m_wrapperPath;
 
-  NMT_Wrapper* m_wrapper;
+  boost::shared_ptr<NMT_Wrapper> m_wrapper;
 };
 
 }

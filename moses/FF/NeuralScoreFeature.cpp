@@ -20,10 +20,9 @@ int NeuralScoreState::Compare(const FFState& other) const
 
   
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  :StatefulFeatureFunction(1, line)
+  :StatefulFeatureFunction(1, line), m_wrapper(new NMT_Wrapper())
 {
   ReadParameters();
-  m_wrapper = new NMT_Wrapper();
   m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
 }
 
