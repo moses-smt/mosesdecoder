@@ -13,7 +13,8 @@ class NMT_Wrapper
 public:
     explicit NMT_Wrapper();
     bool Init(const string& state_path,
-              const string& model_path);
+              const string& model_path,
+              const string& wrapper_path);
 
     bool GetContextVectors(const string& source_sentence, PyObject* vectors);
 
@@ -33,11 +34,12 @@ public:
     virtual ~NMT_Wrapper();
 
 private:
-   PyObject* py_wrapper;
-   PyObject* py_get_prob;
-   PyObject* py_get_context_vectors;
-   string state_path;
-   string model_path;
+    PyObject* py_wrapper;
+    PyObject* py_get_prob;
+    PyObject* py_get_context_vectors;
+    string state_path;
+    string model_path;
+    void AddPathToSys(const string& path);
 };
 
 

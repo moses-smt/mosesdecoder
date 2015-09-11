@@ -20,13 +20,43 @@ bool NMT_Wrapper::GetContextVectors(const string& source_sentence, PyObject* vec
     return true;
 }
 
-bool NMT_Wrapper::Init(const string& state_path, const string& model_path)
+void NMT_Wrapper::AddPathToSys(const string& path)
+{
+    PyObject* py_sys_path = PySys_GetObject((char*)"path");
+    PyList_Append(py_sys_path, PyString_FromString(path.c_str()));
+}
+
+// PyObject* NMT_Wrapper::GetWrapper(const string& state_path, const string& model_path)
+// {
+    // PyObject* filename = PyString_FromString((char*) "nmt_wrapper");
+    // PyObject* imp = PyImport_Import(filename);
+    // if (imp == NULL) {
+        // cerr << "No import\n";
+        // return false;
+    // }
+
+    // PyObject* wrapper_name = PyObject_GetAttrString(imp, (char*)"NMTWrapper");
+    // if (wrapper_name == NULL) {
+        // cerr << "No wrapper\n";
+        // return false;
+    // }
+
+    // PyObject* args = PyTuple_Pack(2, PyString_FromString(state_path.c_str()), PyString_FromString(model_path.c_str()));
+    // py_wrapper = PyObject_CallObject(wrapper_name, args);
+    // if (py_wrapper == NULL) {
+        // return false;
+    // }
+// }
+
+bool NMT_Wrapper::Init(const string& state_path, const string& model_path, const string& wrapper_path)
 {
 
     this->state_path = state_path;
     this->model_path = model_path;
 
     Py_Initialize();
+
+    AddPathToSys(wrapper_path);
 
     PyObject* filename = PyString_FromString((char*) "nmt_wrapper");
     PyObject* imp = PyImport_Import(filename);
