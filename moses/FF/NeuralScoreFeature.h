@@ -10,17 +10,6 @@ class NMT_Wrapper;
 namespace Moses
 {
 
-class NeuralScoreState : public FFState
-{
-  int m_targetLen;
-public:
-  NeuralScoreState(int targetLen)
-    :m_targetLen(targetLen) {
-  }
-
-  int Compare(const FFState& other) const;
-};
-
 
 class NeuralScoreFeature : public StatefulFeatureFunction
 {
@@ -31,9 +20,12 @@ public:
     return true;
   }
 
-  virtual const FFState* EmptyHypothesisState(const InputType &input) const {
-    return new NeuralScoreState(0);
-  }
+  /*
+  void InitializeForInput(ttasksptr const& ttask);
+  void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
+  */
+  
+  virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase

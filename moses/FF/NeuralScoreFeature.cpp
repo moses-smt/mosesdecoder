@@ -1,5 +1,9 @@
 #include <vector>
 #include <string>
+#include <sstream>
+#include <deque>
+#include <list>
+#include <algorithm>
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Hypothesis.h"
@@ -8,19 +12,70 @@
 
 namespace Moses
 {
-  
-int NeuralScoreState::Compare(const FFState& other) const
-{
-  const NeuralScoreState &otherState = static_cast<const NeuralScoreState&>(other);
+ 
+class NeuralScoreState : public FFState
+{  
+public:
+  NeuralScoreState(PyObject* context, std::string lastWord, PyObject* state)
+  : m_context(context), m_lastWord(lastWord), m_state(state) {
+    m_lastContext.push_back(m_lastWord);
+  }
+    
+  int Compare(const FFState& other) const
+  {
+    const NeuralScoreState &otherState = static_cast<const NeuralScoreState&>(other);
+    if(m_lastContext.size() == otherState.m_lastContext.size() &&
+        std::equal(m_lastContext.begin(),
+                   otherState.m_lastContext.end(),
+                   otherState.m_lastContext.begin()))
+      return 0;
+    return (std::lexicographical_compare(m_lastContext.begin(), m_lastContext.end(),
+                   otherState.m_lastContext.begin(),
+                   otherState.m_lastContext.end())) ? -1 : +1;
+  }
 
-  if (m_targetLen == otherState.m_targetLen)
-    return 0;
-  return (m_targetLen < otherState.m_targetLen) ? -1 : +1;
+  void limitLength(size_t length) {
+    while(m_lastContext.size() > length)
+      m_lastContext.pop_front();
+  }
+  
+  PyObject* GetContext() {
+    return m_context;
+  }
+  
+  PyObject* GetState() {
+    return m_state;
+  }
+  
+  std::string GetLastWord() {
+    return m_lastWord;
+  }
+  
+private:
+  PyObject* m_context;
+  std::string m_lastWord;
+  std::deque<std::string> m_lastContext;
+  PyObject* m_state;
+};
+
+const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) const {
+  UTIL_THROW_IF2(input.GetType() != SentenceInput,
+                 "This feature function requires the Sentence input type");
+  
+  const Sentence& sentence = static_cast<const Sentence&>(input);
+  std::stringstream ss;
+  for(size_t i = 0; i < sentence.GetSize(); i++)
+    ss << sentence.GetWord(i).GetString(0) << " ";
+  
+  std::string sentenceString = Trim(ss.str());
+  PyObject* pyContextVectors;
+  m_wrapper->GetContextVectors(sentenceString, pyContextVectors);
+  
+  return new NeuralScoreState(pyContextVectors, "", NULL);
 }
 
-  
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  :StatefulFeatureFunction(1, line), m_wrapper(new NMT_Wrapper())
+  : StatefulFeatureFunction(1, line), m_wrapper(new NMT_Wrapper())
 {
   ReadParameters();
   m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
@@ -49,16 +104,32 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
+  NeuralScoreState* prevState = static_cast<NeuralScoreState*>(
+                                  const_cast<FFState*>(prev_state));
+    
   // dense scores
   std::vector<float> newScores(m_numScoreComponents);
-  newScores[0] = 1.5;
+  
+  float prob = 0;
+  PyObject* nextState = NULL;
+  const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
+  for(size_t i = 0; i < tp.GetSize(); ++i) {
+    std::string word = tp.GetWord(i).GetString(0).as_string();
+    double currProb;
+    m_wrapper->GetProb(word, prevState->GetContext(),
+                       prevState->GetLastWord(),
+                       prevState->GetState(),
+                       currProb, nextState);
+    prob += log(currProb);
+    prevState = new NeuralScoreState(prevState.GetContext(), word, nextState);
+    nextState = NULL;
+  }
+  
+  newScores[0] = prob;
   accumulator->PlusEquals(this, newScores);
-
-  // sparse scores
-  accumulator->PlusEquals(this, "sparse-name", 2.4);
-
-  // int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize(); // ??? [UG]
-  return new NeuralScoreState(0);
+  
+  prevState->limitLength();
+  return prevState;
 }
 
 FFState* NeuralScoreFeature::EvaluateWhenApplied(
@@ -66,7 +137,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  return new NeuralScoreState(0);
+  return new NeuralScoreState(NULL, "", NULL);
 }
 
 void NeuralScoreFeature::SetParameter(const std::string& key, const std::string& value)
