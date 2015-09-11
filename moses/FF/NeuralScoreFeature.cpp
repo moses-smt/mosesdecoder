@@ -15,9 +15,9 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   ReadParameters();
   string statePath = "/home/tomaszd/work/nmt2moses/nmt_model/state.pkl";
   string modelPath = "/home/tomaszd/work/nmt2moses/nmt_model/min_en_de_model.npz";
+  string wrapperPath = "/home/tomaszd/work/nmt2moses/mosesdecoder/moses/FF/NMT/wrapper";
   NMT_Wrapper* wrapper = new NMT_Wrapper();
-  wrapper->Init(statePath, modelPath);
-  if (wrapper) delete wrapper;
+  wrapper->Init(statePath, modelPath, wrapperPath);
 }
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source
@@ -64,8 +64,10 @@ void NeuralScoreFeature::EvaluateWhenApplied(const ChartHypothesis &hypo,
 
 void NeuralScoreFeature::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "arg") {
-    // set value here
+  if (key == "state") {
+    statePath = value;
+  } else if (key == "model") {
+      modelPath = value;
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
