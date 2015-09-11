@@ -116,17 +116,19 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   float prob = 0;
   PyObject* nextState = NULL;
   const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
+  std::vector<std::string> phrase;
   for(size_t i = 0; i < tp.GetSize(); ++i) {
     std::string word = tp.GetWord(i).GetString(0).as_string();
-    double currProb;
-    m_wrapper->GetProb(word, context,
-                       prevState->GetLastWord(),
-                       prevState->GetState(),
-                       currProb, nextState);
-    prob += log(currProb);
-    prevState = new NeuralScoreState(context, word, nextState);
-    nextState = NULL;
+    phrase.push_back(word);
   }
+    
+  m_wrapper->GetProb(phrase, context,
+                     prevState->GetLastWord(),
+                     prevState->GetState(),
+                     prob, nextState);
+  
+  prevState = new NeuralScoreState(context, word, nextState);
+  nextState = NULL;
   
   newScores[0] = prob;
   accumulator->PlusEquals(this, newScores);
