@@ -16,10 +16,17 @@ namespace Moses
 class NeuralScoreState : public FFState
 {  
 public:
-  NeuralScoreState(PyObject* context, std::string lastWord, PyObject* state)
+  NeuralScoreState(PyObject* context, const std::string& lastWord, PyObject* state)
   : m_context(context), m_lastWord(lastWord), m_state(state) {
     m_lastContext.push_back(m_lastWord);
   }
+
+  NeuralScoreState(PyObject* context, const std::vector<std::string>& lastPhrase, PyObject* state)
+  : m_context(context), m_lastWord(lastPhrase.back()), m_state(state) {
+    for(size_t i = 0; i < lastPhrase.size(); i++)
+      m_lastContext.push_back(lastPhrase[i]);
+  }
+
     
   int Compare(const FFState& other) const
   {
@@ -113,20 +120,22 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   // dense scores
   std::vector<float> newScores(m_numScoreComponents);
   
-  float prob = 0;
+  double prob = 0;
   PyObject* nextState = NULL;
   const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
+  std::vector<std::string> phrase;
   for(size_t i = 0; i < tp.GetSize(); ++i) {
     std::string word = tp.GetWord(i).GetString(0).as_string();
-    double currProb;
-    m_wrapper->GetProb(word, context,
-                       prevState->GetLastWord(),
-                       prevState->GetState(),
-                       currProb, nextState);
-    prob += log(currProb);
-    prevState = new NeuralScoreState(context, word, nextState);
-    nextState = NULL;
+    phrase.push_back(word);
   }
+    
+  m_wrapper->GetProb(phrase, context,
+                     prevState->GetLastWord(),
+                     prevState->GetState(),
+                     prob, nextState);
+  
+  prevState = new NeuralScoreState(context, phrase, nextState);
+  nextState = NULL;
   
   newScores[0] = prob;
   accumulator->PlusEquals(this, newScores);
