@@ -74,6 +74,12 @@ namespace Moses
   {
     init(line);
     setup_local_feature_functions();
+    // Set features used for scoring extracted phrases:
+    // * Use all features that can operate on input factors and this model's
+    //   output factor
+    // * Don't use features that depend on generation steps that won't be run
+    //   yet at extract time
+    SetFeaturesToApply();
     Register();
   }
 
@@ -161,6 +167,10 @@ namespace Moses
     // set defaults for all parameters if not specified so far
     parse_factor_spec(m_ifactor,"input-factor");
     parse_factor_spec(m_ofactor,"output-factor");
+
+    // Masks for available factors that inform SetFeaturesToApply
+    m_inputFactors = FactorMask(m_ifactor);
+    m_outputFactors = FactorMask(m_ofactor);
 
     pair<string,string> dflt = pair<string,string> ("smooth",".01");
     m_lbop_conf = atof(param.insert(dflt).first->second.c_str());
@@ -575,7 +585,8 @@ namespace Moses
       }
     tp->SetAlignTerm(pool.aln);
     tp->GetScoreBreakdown().Assign(this, fvals);
-    tp->EvaluateInIsolation(src);
+    // Evaluate with all features that can be computed using available factors
+    tp->EvaluateInIsolation(src, m_featuresToApply);
 
     if (m_lr_func)
       {
