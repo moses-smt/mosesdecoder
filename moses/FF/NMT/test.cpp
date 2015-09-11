@@ -1,6 +1,7 @@
 #include "NMT_Wrapper.h"
-#include<iostream>
+#include <iostream>
 #include <string>
+#include <vector>
 #include <boost/python.hpp>
 
 using namespace std;
@@ -30,20 +31,21 @@ int main(int argc, char *argv[])
     getline(cin, source_sentence);
     PyObject* py_context_vectors;
     wrapper->GetContextVectors(source_sentence, py_context_vectors);
+    vector<string> nextWords;
     while (1) {
+        double cum = 0;
         if (source_sentence.size() < 3) return 0;
 
         while (true) {
             cout << "Next word: ";
             getline(cin, next_word);
-            bool res = wrapper->GetProb(next_word, py_context_vectors, last_word,
-                                        current_state, prob, next_state);
-            if (res == false) { cout << "gone wrong.\n"; }
-            cout << "Word: " << next_word << "; Prob: " << prob << endl;
-            cout << next_state << endl;
-            current_state = next_state;
-            last_word = next_word;
             if (next_word.size() < 1 ) {
+                double tmp;
+                wrapper->GetProb(nextWords, py_context_vectors, "",
+                                 NULL, tmp, next_state);
+                nextWords.clear();
+                cout << "PHRASE: " << tmp <<" CUM: "<< cum << endl;
+
                 current_state = NULL;
                 next_state = NULL;
                 last_word = "";
@@ -51,6 +53,16 @@ int main(int argc, char *argv[])
                 getline(cin, source_sentence);
                 wrapper->GetContextVectors(source_sentence, py_context_vectors);
                 break;
+            }
+            else {
+                nextWords.push_back(next_word);
+                wrapper->GetProb(next_word, py_context_vectors, last_word,
+                                            current_state, prob, next_state);
+                cum += prob;
+                cout << "Word: " << next_word << "; Prob: " << prob << endl;
+                cout << next_state << endl;
+                current_state = next_state;
+                last_word = next_word;
             }
         }
     }
