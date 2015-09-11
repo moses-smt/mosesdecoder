@@ -16,21 +16,14 @@ public:
               const string& model_path,
               const string& wrapper_path);
 
-    bool GetContextVectors(const string& source_sentence, PyObject* vectors);
+    bool GetContextVectors(const string& source_sentence, PyObject*& vectors);
 
     bool GetProb(const string& next_word,
-                 const string& source_sentence,
+                 PyObject*& source_sentence,
                  const string& last_word,
                  PyObject* input_state,
                  double& prob,
                  PyObject*& output_state);
-
-    bool GetProb(const string& next_word,
-                 PyObject* source_sentence,
-                 const string& last_word,
-                 PyObject* input_state,
-                 double& prob,
-                 PyObject* output_state);
     virtual ~NMT_Wrapper();
 
 private:

@@ -28,13 +28,15 @@ int main(int argc, char *argv[])
     string last_word = "";
     cout << "Input sentence:";
     getline(cin, source_sentence);
+    PyObject* py_context_vectors;
+    wrapper->GetContextVectors(source_sentence, py_context_vectors);
     while (1) {
         if (source_sentence.size() < 3) return 0;
 
         while (true) {
             cout << "Next word: ";
             getline(cin, next_word);
-            bool res = wrapper->GetProb(next_word, source_sentence, last_word,
+            bool res = wrapper->GetProb(next_word, py_context_vectors, last_word,
                                         current_state, prob, next_state);
             if (res == false) { cout << "gone wrong.\n"; }
             cout << "Word: " << next_word << "; Prob: " << prob << endl;
@@ -47,6 +49,7 @@ int main(int argc, char *argv[])
                 last_word = "";
                 cout << "Input sentence:";
                 getline(cin, source_sentence);
+                wrapper->GetContextVectors(source_sentence, py_context_vectors);
                 break;
             }
         }

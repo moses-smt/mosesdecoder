@@ -45,8 +45,7 @@ class NMTWrapper(object):
         c = self.comp_repr(seq)[0]
         return c
 
-    def get_prob(self, next_word, source_sentence, last_word="", state=None):
-        c = self.get_context_vector(source_sentence)
+    def get_prob(self, next_word, c, last_word="", state=None):
         next_indx = self.word2indx.setdefault(next_word, self.unk_id)
         if not last_word:
             last_words = numpy.zeros(1, dtype="int64")

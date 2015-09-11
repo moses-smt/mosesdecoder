@@ -13,7 +13,7 @@ NMT_Wrapper::NMT_Wrapper()
 {
 }
 
-bool NMT_Wrapper::GetContextVectors(const string& source_sentence, PyObject* vectors)
+bool NMT_Wrapper::GetContextVectors(const string& source_sentence, PyObject*& vectors)
 {
     PyObject* py_source_sentence = PyString_FromString(source_sentence.c_str());
     vectors = PyObject_CallMethodObjArgs(py_wrapper, py_get_context_vectors, py_source_sentence, NULL);
@@ -26,27 +26,6 @@ void NMT_Wrapper::AddPathToSys(const string& path)
     PyList_Append(py_sys_path, PyString_FromString(path.c_str()));
 }
 
-// PyObject* NMT_Wrapper::GetWrapper(const string& state_path, const string& model_path)
-// {
-    // PyObject* filename = PyString_FromString((char*) "nmt_wrapper");
-    // PyObject* imp = PyImport_Import(filename);
-    // if (imp == NULL) {
-        // cerr << "No import\n";
-        // return false;
-    // }
-
-    // PyObject* wrapper_name = PyObject_GetAttrString(imp, (char*)"NMTWrapper");
-    // if (wrapper_name == NULL) {
-        // cerr << "No wrapper\n";
-        // return false;
-    // }
-
-    // PyObject* args = PyTuple_Pack(2, PyString_FromString(state_path.c_str()), PyString_FromString(model_path.c_str()));
-    // py_wrapper = PyObject_CallObject(wrapper_name, args);
-    // if (py_wrapper == NULL) {
-        // return false;
-    // }
-// }
 
 bool NMT_Wrapper::Init(const string& state_path, const string& model_path, const string& wrapper_path)
 {
@@ -87,31 +66,22 @@ bool NMT_Wrapper::Init(const string& state_path, const string& model_path, const
 }
 
 bool NMT_Wrapper::GetProb(const string& next_word,
-                          const string& source_sentence,
+                          PyObject*& py_context_vectors,
                           const string& last_word,
                           PyObject* input_state,
                           double& output_prob,
                           PyObject*& output_state)
 {
     PyObject* py_next_word = PyString_FromString(next_word.c_str());
-    PyObject* py_source_sentence = PyString_FromString(source_sentence.c_str());
     PyObject* py_response = NULL;
 
     if (input_state == NULL)
     {
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word, py_source_sentence, NULL);
+        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word, py_context_vectors, NULL);
     }
     else {
         PyObject* py_last_word = PyString_FromString(last_word.c_str());
-
-        if (py_wrapper == NULL) {cout << "py_wrapper is NULL.\n";}
-        if (py_get_prob == NULL) {cout << "py_get_prob is NULL.\n";}
-        if (py_next_word == NULL) {cout << "py_next_word is NULL.\n";}
-        if (py_source_sentence == NULL) {cout << "py_source_sentence is NULL.\n";}
-        if (py_last_word == NULL) {cout << "py_last_word is NULL.\n";}
-        if (input_state == NULL) {cout << "input_state is NULL.\n";}
-
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word, py_source_sentence,
+        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word, py_context_vectors,
                                                  py_last_word, input_state, NULL);
     }
 
