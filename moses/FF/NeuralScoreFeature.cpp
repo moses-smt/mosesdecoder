@@ -3,37 +3,38 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TargetPhrase.h"
 #include "moses/FF/NeuralScoreFeature.h"
+#include "moses/Hypothesis.h"
 #include "moses/FF/NMT/NMT_Wrapper.h"
-
-using namespace std;
 
 namespace Moses
 {
+  
+int NeuralScoreState::Compare(const FFState& other) const
+{
+  const NeuralScoreState &otherState = static_cast<const NeuralScoreState&>(other);
+
+  if (m_targetLen == otherState.m_targetLen)
+    return 0;
+  return (m_targetLen < otherState.m_targetLen) ? -1 : +1;
+}
+
+  
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  :StatelessFeatureFunction(1, line)
+  :StatefulFeatureFunction(1, line)
 {
   ReadParameters();
-  string statePath = "/home/tomaszd/work/nmt2moses/nmt_model/state.pkl";
-  string modelPath = "/home/tomaszd/work/nmt2moses/nmt_model/min_en_de_model.npz";
-  string wrapperPath = "/home/tomaszd/work/nmt2moses/mosesdecoder/moses/FF/NMT/wrapper";
+  m_statePath = "/home/tomaszd/work/nmt2moses/nmt_model/state.pkl";
+  m_modelPath = "/home/tomaszd/work/nmt2moses/nmt_model/min_en_de_model.npz";
+  m_wrapperPath = "/home/tomaszd/work/nmt2moses/mosesdecoder/moses/FF/NMT/wrapper";
   NMT_Wrapper* wrapper = new NMT_Wrapper();
-  wrapper->Init(statePath, modelPath, wrapperPath);
+  wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
 }
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const
-{
-  // dense scores
-  vector<float> newScores(m_numScoreComponents);
-  newScores[0] = 1.5;
-  scoreBreakdown.PlusEquals(this, newScores);
-
-  // sparse scores
-  scoreBreakdown.PlusEquals(this, "sparse-name", 2.4);
-
-}
+{}
 
 void NeuralScoreFeature::EvaluateWithSourceContext(const InputType &input
     , const InputPath &inputPath
@@ -41,35 +42,45 @@ void NeuralScoreFeature::EvaluateWithSourceContext(const InputType &input
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection *estimatedFutureScore) const
-{
-  if (targetPhrase.GetNumNonTerminals()) {
-    vector<float> newScores(m_numScoreComponents);
-    newScores[0] = - std::numeric_limits<float>::infinity();
-    scoreBreakdown.PlusEquals(this, newScores);
-  }
-}
+{}
 
 void NeuralScoreFeature::EvaluateTranslationOptionListWithSourceContext(const InputType &input
-
     , const TranslationOptionList &translationOptionList) const
 {}
 
-void NeuralScoreFeature::EvaluateWhenApplied(const Hypothesis& hypo,
-    ScoreComponentCollection* accumulator) const
-{}
+FFState* NeuralScoreFeature::EvaluateWhenApplied(
+  const Hypothesis& cur_hypo,
+  const FFState* prev_state,
+  ScoreComponentCollection* accumulator) const
+{
+  // dense scores
+  std::vector<float> newScores(m_numScoreComponents);
+  newScores[0] = 1.5;
+  accumulator->PlusEquals(this, newScores);
 
-void NeuralScoreFeature::EvaluateWhenApplied(const ChartHypothesis &hypo,
-    ScoreComponentCollection* accumulator) const
-{}
+  // sparse scores
+  accumulator->PlusEquals(this, "sparse-name", 2.4);
+
+  // int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize(); // ??? [UG]
+  return new NeuralScoreState(0);
+}
+
+FFState* NeuralScoreFeature::EvaluateWhenApplied(
+  const ChartHypothesis& /* cur_hypo */,
+  int /* featureID - used to index the state in the previous hypotheses */,
+  ScoreComponentCollection* accumulator) const
+{
+  return new NeuralScoreState(0);
+}
 
 void NeuralScoreFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "state") {
-    statePath = value;
+    m_statePath = value;
   } else if (key == "model") {
-      modelPath = value;
+    m_modelPath = value;
   } else {
-    StatelessFeatureFunction::SetParameter(key, value);
+    StatefulFeatureFunction::SetParameter(key, value);
   }
 }
 
