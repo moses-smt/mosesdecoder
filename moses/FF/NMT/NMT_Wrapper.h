@@ -22,7 +22,7 @@ public:
                  const string& last_word,
                  PyObject* input_state,
                  double& prob,
-                 PyObject* output_state);
+                 PyObject*& output_state);
 
     bool GetProb(const string& next_word,
                  PyObject* source_sentence,

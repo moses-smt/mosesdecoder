@@ -61,55 +61,31 @@ bool NMT_Wrapper::GetProb(const string& next_word,
                           const string& last_word,
                           PyObject* input_state,
                           double& output_prob,
-                          PyObject* output_state)
+                          PyObject*& output_state)
 {
     PyObject* py_next_word = PyString_FromString(next_word.c_str());
     PyObject* py_source_sentence = PyString_FromString(source_sentence.c_str());
     PyObject* py_response = NULL;
 
-    if (input_state == NULL )
+    if (input_state == NULL)
     {
-        PyObject* py_last_word = PyString_FromString(last_word.c_str());
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word, py_source_sentence, py_last_word, input_state, NULL);
-    }
-    else {
         py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word, py_source_sentence, NULL);
     }
-
-    if (py_response == NULL) { return false; }
-    if (! PyTuple_Check(py_response)) { return false; }
-
-    PyObject* py_prob = PyTuple_GetItem(py_response, 0);
-    if (py_prob == NULL) { return false; }
-    output_prob = PyFloat_AsDouble(py_prob);
-
-    output_state = PyTuple_GetItem(py_response, 1);
-    if (output_state == NULL) { return 0; }
-
-    return true;
-}
-
-bool NMT_Wrapper::GetProb(const string& next_word,
-                          PyObject* context_vectors,
-                          const string& last_word,
-                          PyObject* input_state,
-                          double& output_prob,
-                          PyObject* output_state)
-{
-    PyObject* py_next_word = PyString_FromString(next_word.c_str());
-    PyObject* py_response = NULL;
-
-    if (input_state == NULL )
-    {
-        PyObject* py_last_word = PyString_FromString(last_word.c_str());
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word,
-                                                 context_vectors, py_last_word, input_state, NULL);
-    }
     else {
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word, context_vectors, NULL);
+        PyObject* py_last_word = PyString_FromString(last_word.c_str());
+
+        if (py_wrapper == NULL) {cout << "py_wrapper is NULL.\n";}
+        if (py_get_prob == NULL) {cout << "py_get_prob is NULL.\n";}
+        if (py_next_word == NULL) {cout << "py_next_word is NULL.\n";}
+        if (py_source_sentence == NULL) {cout << "py_source_sentence is NULL.\n";}
+        if (py_last_word == NULL) {cout << "py_last_word is NULL.\n";}
+        if (input_state == NULL) {cout << "input_state is NULL.\n";}
+
+        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_prob, py_next_word, py_source_sentence,
+                                                 py_last_word, input_state, NULL);
     }
 
-    if (py_response == NULL) { return false; }
+   if (py_response == NULL) { return false; }
     if (! PyTuple_Check(py_response)) { return false; }
 
     PyObject* py_prob = PyTuple_GetItem(py_response, 0);
@@ -121,6 +97,7 @@ bool NMT_Wrapper::GetProb(const string& next_word,
 
     return true;
 }
+
 NMT_Wrapper::~NMT_Wrapper()
 {
     Py_Finalize();
