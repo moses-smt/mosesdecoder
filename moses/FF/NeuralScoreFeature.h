@@ -41,6 +41,7 @@ public:
 private:
   string statePath;
   string modelPath;
+  string wrapperPath;
 
 };
 
