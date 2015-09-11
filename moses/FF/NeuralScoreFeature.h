@@ -56,7 +56,7 @@ private:
   std::string m_statePath;
   std::string m_modelPath;
   std::string m_wrapperPath;
-
+  size_t m_stateLength;
   boost::shared_ptr<NMT_Wrapper> m_wrapper;
 };
 

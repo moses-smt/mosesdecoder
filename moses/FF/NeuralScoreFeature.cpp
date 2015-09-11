@@ -75,7 +75,8 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(1, line), m_wrapper(new NMT_Wrapper())
+  : StatefulFeatureFunction(1, line), m_stateLength(3),
+    m_wrapper(new NMT_Wrapper())
 {
   ReadParameters();
   m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
@@ -123,8 +124,6 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
                        prevState->GetState(),
                        currProb, nextState);
     prob += log(currProb);
-    if(prevState != prev_state)
-      delete prevState;
     prevState = new NeuralScoreState(context, word, nextState);
     nextState = NULL;
   }
@@ -132,7 +131,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   newScores[0] = prob;
   accumulator->PlusEquals(this, newScores);
   
-  prevState->LimitLength(4);
+  prevState->LimitLength(m_stateLength);
   return prevState;
 }
 
@@ -148,6 +147,8 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
 {
   if (key == "state") {
     m_statePath = value;
+  } else if (key == "state-length") {
+    m_stateLength = Scan<size_t>(value);
   } else if (key == "model") {
     m_modelPath = value;
   } else if (key == "wrapper-path") {

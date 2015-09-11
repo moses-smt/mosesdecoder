@@ -138,7 +138,7 @@ bool NMT_Wrapper::GetProb(const string& next_word,
 NMT_Wrapper::~NMT_Wrapper()
 {
     Py_Finalize();
-    if (py_wrapper)  { delete py_wrapper; }
-    if (py_get_prob) { delete py_get_prob; }
+    //if (py_wrapper)  { delete py_wrapper; }
+    //if (py_get_prob) { delete py_get_prob; }
 }
 
