@@ -19,7 +19,7 @@ class NMTWrapper(object):
 
         rng = numpy.random.RandomState(self.state['seed'])
         self.enc_dec = RNNEncoderDecoder(self.state, rng, skip_init=True,
-                                         compute_alignment=True)
+                                         compute_alignment=False)
         self.enc_dec.build()
         self.lm_model = self.enc_dec.create_lm_model()
         self.lm_model.load(self.model_path)
@@ -40,28 +40,12 @@ class NMTWrapper(object):
         self.comp_next_states = self.enc_dec.create_next_states_computer()
 
     def get_context_vector(self, source_sentence):
-        seq, parsed_in = parse_input(self.state, self.indx_word,
-                                     source_sentence, idx2word=self.idict_src)
+        seq = parse_input(self.state, self.indx_word, source_sentence)
         c = self.comp_repr(seq)[0]
         return c
 
     def get_log_prob(self, next_word, c, last_word="", state=None):
-        next_indx = self.word2indx.setdefault(next_word, self.unk_id)
-        if not last_word:
-            last_words = numpy.zeros(1, dtype="int64")
-        else:
-            last_words = [self.word2indx.setdefault(last_word, self.unk_id)]
-
-        if state is None:
-            states = map(lambda x: x[None, :], self.comp_init_states(c))
-        else:
-            states = [state]
-
-        log_probs = numpy.log(self.comp_next_probs(c, 0, last_words, *states)[0])
-        word_indices = numpy.array([next_indx]) % log_probs.shape[1]
-        new_states = self.comp_next_states(c, 0, word_indices, *states)
-
-        return log_probs[0][next_indx], new_states[0]
+        return self.get_log_probs([next_word], c, last_word, state)
 
     def get_log_probs(self, next_words, c, last_word="", state=None):
         cumulated_score = 0.0
@@ -78,7 +62,8 @@ class NMTWrapper(object):
         for next_word in next_words:
             next_indx = self.word2indx.setdefault(next_word, self.unk_id)
 
-            log_probs = numpy.log(self.comp_next_probs(c, 0, last_word, *states)[0])
+            log_probs = numpy.log(self.comp_next_probs(c, 0, last_word,
+                                                       *states)[0])
             cumulated_score += log_probs[0][next_indx]
 
             voc_size = log_probs.shape[1]

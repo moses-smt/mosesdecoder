@@ -1,13 +1,10 @@
 import numpy
 import logging
 import pprint
-import operator
-import itertools
 
 import theano
 import theano.tensor as TT
 from theano.ifelse import ifelse
-from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
 from groundhog.layers import\
         Layer,\
@@ -23,7 +20,6 @@ from groundhog.layers import\
         DropOp,\
         Concatenate
 from groundhog.models import LM_Model
-#  from groundhog.datasets import PytablesBitextIterator
 from groundhog.utils import sample_zeros, sample_weights_orth, init_bias, sample_weights_classic
 import groundhog.utils as utils
 
@@ -1491,26 +1487,18 @@ class RNNEncoderDecoder(object):
                 return probs
         return probs_computer
 
-def parse_input(state, word2idx, line, raise_unk=False, idx2word=None, unk_sym=-1, null_sym=-1):
-    if unk_sym < 0:
-        unk_sym = state['unk_sym_source']
-    if null_sym < 0:
-        null_sym = state['null_sym_source']
-    seqin = line.split()
+
+def parse_input(state, word2idx, line):
+    unk_sym = state['unk_sym_source']
+    null_sym = state['null_sym_source']
+    seqin = line.strip().split()
     seqlen = len(seqin)
     seq = numpy.zeros(seqlen+1, dtype='int64')
-    for idx,sx in enumerate(seqin):
+    for idx, sx in enumerate(seqin):
         seq[idx] = word2idx.get(sx, unk_sym)
         if seq[idx] >= state['n_sym_source']:
             seq[idx] = unk_sym
-        if seq[idx] == unk_sym and raise_unk:
-            raise Exception("Unknown word {}".format(sx))
 
     seq[-1] = null_sym
-    if idx2word:
-        idx2word[null_sym] = '<eos>'
-        idx2word[unk_sym] = state['oov']
-        parsed_in = [idx2word[sx] for sx in seq]
-        return seq, " ".join(parsed_in)
 
-    return seq, seqin
+    return seq
