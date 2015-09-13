@@ -6,40 +6,46 @@
 #include <functional>
 #include <python2.7/Python.h>
 
-using namespace std;
 
 class NMT_Wrapper
 {
 public:
     explicit NMT_Wrapper();
-    bool Init(const string& state_path,
-              const string& model_path,
-              const string& wrapper_path);
+    bool Init(const std::string& state_path,
+              const std::string& model_path,
+              const std::string& wrapper_path);
 
-    bool GetContextVectors(const string& source_sentence, PyObject*& vectors);
+    bool GetContextVectors(const std::string& source_sentence, PyObject*& vectors);
 
-    bool GetProb(const string& next_word,
+    bool GetProb(const std::string& next_word,
                  PyObject* source_sentence,
-                 const string& last_word,
+                 const std::string& last_word,
                  PyObject* input_state,
                  double& prob,
                  PyObject*& output_state);
-    bool GetProb(const std::vector<std::string>& next_words,
+    bool GetProb(const std::vector<std::string>& nextWords,
                  PyObject* source_sentence,
-                 const string& last_word,
+                 const std::string& last_word,
                  PyObject* input_state,
                  double& prob,
                  PyObject*& output_state);
+    bool GetProb(const std::vector<std::string>& nextWords,
+                 PyObject* contextVectors,
+                 const std::vector<std::string>& lastWords,
+                 std::vector<PyObject*>& inputStates,
+                 std::vector<double>& probs,
+                 std::vector<PyObject*>& outputStates);
     virtual ~NMT_Wrapper();
 
 private:
     PyObject* py_wrapper;
     PyObject* py_get_log_prob;
     PyObject* py_get_log_probs;
+    PyObject* py_get_vec_log_probs;
     PyObject* py_get_context_vectors;
-    string state_path;
-    string model_path;
-    void AddPathToSys(const string& path);
+    std::string state_path;
+    std::string model_path;
+    void AddPathToSys(const std::string& path);
 };
 
 

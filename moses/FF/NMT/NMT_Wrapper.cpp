@@ -60,6 +60,7 @@ bool NMT_Wrapper::Init(const string& state_path, const string& model_path, const
 
     py_get_log_prob = PyString_FromString((char*)"get_log_prob");
     py_get_log_probs = PyString_FromString((char*)"get_log_probs");
+    py_get_vec_log_probs = PyString_FromString((char*)"get_vec_log_probs");
     py_get_context_vectors = PyString_FromString((char*)"get_context_vector");
 
     return true;
@@ -72,6 +73,7 @@ bool NMT_Wrapper::GetProb(const string& next_word,
                           double& output_prob,
                           PyObject*& output_state)
 {
+    cout << "lasjskfljasl" << endl;
     PyObject* py_next_word = PyString_FromString(next_word.c_str());
     PyObject* py_response = NULL;
 
@@ -132,6 +134,68 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& next_words,
 
     output_state = PyTuple_GetItem(py_response, 1);
     if (output_state == NULL) { return 0; }
+
+    return true;
+}
+
+bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
+                          PyObject* pyContextVectors,
+                          const std::vector<string>& lastWords,
+                          std::vector<PyObject*>& inputStates,
+                          std::vector<double>& logProbs,
+                          std::vector<PyObject*>& outputStates)
+{
+    PyObject* pyNextWords = PyList_New(0);
+    for (size_t i = 0; i < nextWords.size(); ++i) {
+        PyList_Append(pyNextWords, PyString_FromString(nextWords[i].c_str()));
+    }
+
+    PyObject* pyLastWords = PyList_New(0);
+    for (size_t i = 0; i < lastWords.size(); ++i) {
+        PyList_Append(pyLastWords, PyString_FromString(lastWords[i].c_str()));
+    }
+
+    PyObject* pyResponse = NULL;
+    if (inputStates.size() == 0) {
+        pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
+                                                py_get_vec_log_probs,
+                                                pyNextWords,
+                                                pyContextVectors,
+                                                NULL);
+    } else {
+        PyObject* pyInputStates = PyList_New(0);
+        for (size_t i = 0; i < inputStates.size(); ++i) {
+            PyList_Append(pyInputStates, inputStates[i]);
+        }
+
+        PyObject* pyLastWords = PyList_New(0);
+        for (size_t i = 0; i < lastWords.size(); ++i) {
+            PyList_Append(pyLastWords, PyString_FromString(lastWords[i].c_str()));
+        }
+
+        pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
+                                                py_get_vec_log_probs,
+                                                pyNextWords,
+                                                pyContextVectors,
+                                                pyLastWords,
+                                                pyInputStates,
+                                                NULL);
+    }
+    if (!pyResponse) {
+        cerr << "No answear!" << endl;
+    }
+
+    logProbs.clear();
+    PyObject* pyLogProbs = PyTuple_GetItem(pyResponse, 0);
+    for (size_t i = 0; i < nextWords.size(); ++i) {
+        logProbs.push_back(PyFloat_AsDouble(PyList_GetItem(pyLogProbs, i)));
+    }
+
+    outputStates.clear();
+    PyObject* pyOutputStates = PyTuple_GetItem(pyResponse, 1);
+    for (size_t i = 0; i < nextWords.size(); ++i) {
+        outputStates.push_back(PyList_GetItem(pyOutputStates, i));
+    }
 
     return true;
 }

@@ -7,6 +7,8 @@
 using namespace std;
 using namespace boost::python;
 
+const int NCOPY = 10;
+
 int main(int argc, char *argv[])
 {
     string state_path = string(argv[1]);
@@ -21,50 +23,73 @@ int main(int argc, char *argv[])
     }
 
     double prob;
-    PyObject* next_state = NULL;
-    PyObject* current_state = NULL;
+    vector<PyObject*> nextStates;
+    vector<PyObject*> currentStates;
 
     string source_sentence;
     string next_word;
+    vector<string> lastWords;
     string last_word = "";
-    cout << "Input sentence:";
-    getline(cin, source_sentence);
-    PyObject* py_context_vectors;
+    source_sentence = "this is a test sentence";
+    PyObject* py_context_vectors = NULL;
     wrapper->GetContextVectors(source_sentence, py_context_vectors);
     vector<string> nextWords;
-    while (1) {
-        double cum = 0;
-        if (source_sentence.size() < 3) return 0;
-
-        while (true) {
-            cout << "Next word: ";
-            getline(cin, next_word);
-            if (next_word.size() < 1 ) {
-                double tmp;
-                wrapper->GetProb(nextWords, py_context_vectors, "",
-                                 NULL, tmp, next_state);
-                nextWords.clear();
-                cout << "PHRASE: " << tmp <<" CUM: "<< cum << endl;
-
-                current_state = NULL;
-                next_state = NULL;
-                last_word = "";
-                cout << "Input sentence:";
-                getline(cin, source_sentence);
-                wrapper->GetContextVectors(source_sentence, py_context_vectors);
-                break;
-            }
-            else {
-                nextWords.push_back(next_word);
-                wrapper->GetProb(next_word, py_context_vectors, last_word,
-                                            current_state, prob, next_state);
-                cum += prob;
-                cout << "Word: " << next_word << "; Prob: " << prob << endl;
-                cout << next_state << endl;
-                current_state = next_state;
-                last_word = next_word;
-            }
-        }
+    nextWords.push_back("das");
+    nextWords.push_back("ich");
+    vector<double> logProbs;
+    wrapper->GetProb(nextWords,
+                        py_context_vectors,
+                        lastWords,
+                        currentStates,
+                        logProbs,
+                        nextStates);
+    for (size_t i = 0; i < logProbs.size(); ++i) {
+        cout << "Word: " << nextWords[i] << "; Prob: " << logProbs[i] << endl;
+    }
+    cout << endl;
+    currentStates = nextStates;
+    lastWords = nextWords;
+    nextWords.clear();
+    nextWords.push_back("ist");
+    nextWords.push_back("bin");
+    wrapper->GetProb(nextWords,
+                        py_context_vectors,
+                        lastWords,
+                        currentStates,
+                        logProbs,
+                        nextStates);
+    for (size_t i = 0; i < logProbs.size(); ++i) {
+        cout << "Word: " << nextWords[i] << "; Prob: " << logProbs[i] << endl;
+    }
+    cout << endl;
+    currentStates = nextStates;
+    lastWords = nextWords;
+    nextWords.clear();
+    nextWords.push_back("ein");
+    nextWords.push_back("ein");
+    wrapper->GetProb(nextWords,
+                        py_context_vectors,
+                        lastWords,
+                        currentStates,
+                        logProbs,
+                        nextStates);
+    for (size_t i = 0; i < logProbs.size(); ++i) {
+        cout << "Word: " << nextWords[i] << "; Prob: " << logProbs[i] << endl;
+    }
+    cout << endl;
+    currentStates = nextStates;
+    lastWords = nextWords;
+    nextWords.clear();
+    nextWords.push_back("test");
+    nextWords.push_back("q");
+    wrapper->GetProb(nextWords,
+                        py_context_vectors,
+                        lastWords,
+                        currentStates,
+                        logProbs,
+                        nextStates);
+    for (size_t i = 0; i < logProbs.size(); ++i) {
+        cout << "Word: " << nextWords[i] << "; Prob: " << logProbs[i] << endl;
     }
 
     return 0;
