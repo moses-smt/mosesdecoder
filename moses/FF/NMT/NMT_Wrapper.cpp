@@ -73,6 +73,7 @@ bool NMT_Wrapper::GetProb(const string& next_word,
                           double& output_prob,
                           PyObject*& output_state)
 {
+    cout << "lasjskfljasl" << endl;
     PyObject* py_next_word = PyString_FromString(next_word.c_str());
     PyObject* py_response = NULL;
 
@@ -180,16 +181,19 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                                                 pyInputStates,
                                                 NULL);
     }
+    if (!pyResponse) {
+        cerr << "No answear!" << endl;
+    }
 
     logProbs.clear();
     PyObject* pyLogProbs = PyTuple_GetItem(pyResponse, 0);
-    for (size_t i = 0; i < lastWords.size(); ++i) {
+    for (size_t i = 0; i < nextWords.size(); ++i) {
         logProbs.push_back(PyFloat_AsDouble(PyList_GetItem(pyLogProbs, i)));
     }
 
     outputStates.clear();
     PyObject* pyOutputStates = PyTuple_GetItem(pyResponse, 1);
-    for (size_t i = 0; i < lastWords.size(); ++i) {
+    for (size_t i = 0; i < nextWords.size(); ++i) {
         outputStates.push_back(PyList_GetItem(pyOutputStates, i));
     }
 

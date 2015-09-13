@@ -75,5 +75,36 @@ class NMTWrapper(object):
 
         return cumulated_score, new_states[0]
 
+    def get_vec_log_probs(self, next_words, c, last_words="", states=None):
+        phrase_num = len(next_words)
+        cumulated_score = numpy.zeros(phrase_num, dtype="float32")
+        if not last_words:
+            last_words = numpy.zeros(phrase_num, dtype="int64")
+        else:
+            last_words = numpy.array([self.word2indx.setdefault(last_word, self.unk_id)
+                                      for last_word in last_words], dtype="int64")
+
+        if states is None:
+            states = [numpy.repeat(self.comp_init_states(c)[0][numpy.newaxis, :], phrase_num, 0)]
+        else:
+            states = [numpy.concatenate(states)]
+
+        next_indxs = [self.word2indx.setdefault(next_word, self.unk_id)
+                      for next_word in next_words]
+
+        # print"IN",  states[0]
+        log_probs = numpy.log(self.comp_next_probs(c, 0, last_words,
+                                                   *states)[0])
+        print log_probs
+        cumulated_score += [log_probs[i][next_indxs[i]] for i in range(phrase_num)]
+
+        voc_size = log_probs.shape[1]
+        word_indices = numpy.array([next_indxs]) % voc_size
+
+        new_states = self.comp_next_states(c, 0, word_indices[0], *states)
+        # last_words = word_indices
+        states = [new_states[0]]
+        # print new_states
+        return cumulated_score.tolist(), numpy.split(new_states[0], phrase_num)
     def get_nbest_list(self, state):
         return None
