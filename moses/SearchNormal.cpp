@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include "SearchNormal.h"
 #include "SentenceStats.h"
+#include "FF/NeuralScoreFeature.h"
 
 #include <boost/foreach.hpp>
 
@@ -50,6 +51,15 @@ SearchNormal::~SearchNormal()
   RemoveAllInColl(m_hypoStackColl);
 }
 
+void ProcessStackForNeuro(const HypothesisStackNormal& hstack, const TranslationOptionCollection& to) {
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
+    if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
+      const_cast<NeuralScoreFeature*>(nsf)->ProcessStack(hstack, to);
+  }
+}
 
 bool
 SearchNormal::
@@ -68,6 +78,8 @@ ProcessOneStack(HypothesisStack* hstack)
   sourceHypoColl.CleanupArcList();
   IFVERBOSE(2)  stats.StopTimeStack();
 
+  ProcessStackForNeuro(sourceHypoColl, m_transOptColl);
+  
   // go through each hypothesis on the stack and try to expand it
   // BOOST_FOREACH(Hypothesis* h, sourceHypoColl)
   HypothesisStackNormal::const_iterator h;

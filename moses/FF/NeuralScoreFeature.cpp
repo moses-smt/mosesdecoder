@@ -3,12 +3,14 @@
 #include <sstream>
 #include <deque>
 #include <list>
+#include <set>
 #include <algorithm>
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Hypothesis.h"
 #include "moses/FF/NMT/NMT_Wrapper.h"
 #include "moses/FF/NeuralScoreFeature.h"
+#include "util/string_piece.hh"
 
 namespace Moses
 {
@@ -82,11 +84,54 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(1, line), m_stateLength(3),
+  : StatefulFeatureFunction(1, line), m_stateLength(3), m_factor(0),
     m_wrapper(new NMT_Wrapper())
 {
   ReadParameters();
   m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
+}
+
+void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
+                                      const TranslationOptionCollection& to) {
+  std::vector<const NeuralScoreState*> states;
+  std::vector<std::set<StringPiece> > words;
+  
+  for (HypothesisStackNormal::const_iterator h = hstack.begin();
+       h != hstack.end(); ++h) {
+    Hypothesis& hypothesis = **h;
+    states.push_back(
+      static_cast<const NeuralScoreState*>(hypothesis.GetFFState(GetIndex())));
+    
+    const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
+    const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
+    const size_t sourceSize = hypothesis.GetInput().GetSize();  
+    for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) {
+      TranslationOptionList const* tol;
+      size_t endPos = startPos;
+      for (tol = to.GetTranslationOptionList(startPos, endPos);
+           tol && endPos < sourceSize;
+           tol = to.GetTranslationOptionList(startPos, ++endPos)) {
+       
+        if (tol->size() == 0 || hypoBitmap.Overlap(WordsRange(startPos, endPos)))
+          continue;
+        
+        TranslationOptionList::const_iterator iter;
+        for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
+          const TranslationOption& to = **iter;
+          const TargetPhrase& tp = to.GetTargetPhrase();
+          if(tp.GetSize() > words.size())
+            words.resize(tp.GetSize());
+          for(size_t i = 0; i < tp.GetSize(); ++i)
+            words[i].insert(to.GetTargetPhrase().GetWord(i).GetString(m_factor));
+        }
+      }
+    }
+  }
+  
+  std::cerr << "Collected vocab: " << std::endl;
+  for(size_t i = 0; i < words.size(); ++i) {
+    std::cerr << i << " " << words[i].size() << std::endl;
+  }
 }
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source
@@ -116,8 +161,6 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
                                   const_cast<FFState*>(prev_state));
   
   PyObject* context = prevState->GetContext();
-  
-  // dense scores
   std::vector<float> newScores(m_numScoreComponents);
   
   double prob = 0;
@@ -125,7 +168,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
   std::vector<std::string> phrase;
   for(size_t i = 0; i < tp.GetSize(); ++i) {
-    std::string word = tp.GetWord(i).GetString(0).as_string();
+    std::string word = tp.GetWord(i).GetString(m_factor).as_string();
     phrase.push_back(word);
   }
     
