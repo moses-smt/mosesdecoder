@@ -2,6 +2,8 @@
 #include "util/pcqueue.hh"
 #include <iostream>
 
+#include <iostream>
+
 namespace util {
 namespace stream {
 
