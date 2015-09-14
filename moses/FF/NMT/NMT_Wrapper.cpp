@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <streambuf>
+#include <assert.h>
 
 using namespace std;
 
@@ -73,7 +74,6 @@ bool NMT_Wrapper::GetProb(const string& next_word,
                           double& output_prob,
                           PyObject*& output_state)
 {
-    cout << "lasjskfljasl" << endl;
     PyObject* py_next_word = PyString_FromString(next_word.c_str());
     PyObject* py_response = NULL;
 
@@ -138,13 +138,15 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& next_words,
     return true;
 }
 
+
 bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                           PyObject* pyContextVectors,
-                          const std::vector<string>& lastWords,
-                          std::vector<PyObject*>& inputStates,
-                          std::vector<double>& logProbs,
-                          std::vector<PyObject*>& outputStates)
+                          const std::vector< string >& lastWords,
+                          std::vector< PyObject* >& inputStates,
+                          std::vector< std::vector< double > >& logProbs,
+                          std::vector< std::vector< PyObject* > >& outputStates)
 {
+    assert(lastWords.size() == inputStates.size());
     PyObject* pyNextWords = PyList_New(0);
     for (size_t i = 0; i < nextWords.size(); ++i) {
         PyList_Append(pyNextWords, PyString_FromString(nextWords[i].c_str()));
@@ -183,18 +185,41 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
     }
     if (!pyResponse) {
         cerr << "No answear!" << endl;
+        return false;
     }
 
+    size_t inputSize = 0;
+    if (inputStates.size() == 0) {
+        inputSize = 1;
+    } else {
+        inputSize = inputStates.size();
+    }
+
+    PyObject* pyLogProbMatrix = PyTuple_GetItem(pyResponse, 0);
+    PyObject* pyOutputStateMatrix = PyTuple_GetItem(pyResponse, 1);
     logProbs.clear();
-    PyObject* pyLogProbs = PyTuple_GetItem(pyResponse, 0);
-    for (size_t i = 0; i < nextWords.size(); ++i) {
-        logProbs.push_back(PyFloat_AsDouble(PyList_GetItem(pyLogProbs, i)));
+    outputStates = vector<vector<PyObject*> >(inputSize, vector<PyObject*>(nextWords.size(), NULL));
+    vector<double> hipoProbs;
+    vector<PyObject*> hipoStates;
+    logProbs.clear();
+    for (size_t i = 0; i < inputSize; ++i) {
+        hipoProbs.clear();
+        hipoStates.clear();
+
+        PyObject* pyLogProbColumn = PyList_GetItem(pyLogProbMatrix, i);
+        for (size_t j = 0; j < nextWords.size(); ++j) {
+            hipoProbs.push_back(PyFloat_AsDouble(PyList_GetItem(pyLogProbColumn, j)));
+        }
+        logProbs.push_back(hipoProbs);
     }
 
-    outputStates.clear();
-    PyObject* pyOutputStates = PyTuple_GetItem(pyResponse, 1);
-    for (size_t i = 0; i < nextWords.size(); ++i) {
-        outputStates.push_back(PyList_GetItem(pyOutputStates, i));
+    for (size_t j = 0; j < nextWords.size(); ++j) {
+        PyObject* pyOutputStateColumn = PyList_GetItem(pyOutputStateMatrix, j);
+        for (size_t i = 0; i < inputSize; ++i) {
+            outputStates[i][j]  = PyList_GetItem(pyOutputStateColumn, i);
+        }
+
+        outputStates.push_back(hipoStates);
     }
 
     return true;

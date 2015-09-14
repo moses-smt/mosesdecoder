@@ -30,11 +30,11 @@ public:
                  double& prob,
                  PyObject*& output_state);
     bool GetProb(const std::vector<std::string>& nextWords,
-                 PyObject* contextVectors,
-                 const std::vector<std::string>& lastWords,
-                 std::vector<PyObject*>& inputStates,
-                 std::vector<double>& probs,
-                 std::vector<PyObject*>& outputStates);
+                 PyObject* pyContextVectors,
+                 const std::vector< std::string >& lastWords,
+                 std::vector< PyObject* >& inputStates,
+                 std::vector< std::vector< double > >& logProbs,
+                 std::vector< std::vector< PyObject* > >& outputStates);
     virtual ~NMT_Wrapper();
 
 private:
