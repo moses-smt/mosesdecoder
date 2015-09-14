@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include "moses/HypothesisStackNormal.h"
+#include "moses/TranslationOptionCollection.h"
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 #include <boost/shared_ptr.hpp>
@@ -24,6 +26,8 @@ public:
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
   */
+
+  void ProcessStack(const HypothesisStackNormal& hstack, const TranslationOptionCollection& to);
   
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   
@@ -57,6 +61,7 @@ private:
   std::string m_modelPath;
   std::string m_wrapperPath;
   size_t m_stateLength;
+  size_t m_factor;
   boost::shared_ptr<NMT_Wrapper> m_wrapper;
 };
 
