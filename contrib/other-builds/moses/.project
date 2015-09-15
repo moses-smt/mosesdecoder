@@ -2201,6 +2201,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMultiModelCounts.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryGroup.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryGroup.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryGroup.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryGroup.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryNodeMemory.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNodeMemory.cpp</locationURI>
