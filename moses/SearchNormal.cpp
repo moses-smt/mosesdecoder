@@ -52,12 +52,12 @@ SearchNormal::~SearchNormal()
 }
 
 void ProcessStackForNeuro(const HypothesisStackNormal& hstack, const TranslationOptionCollection& to) {
-  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   const StaticData &staticData = StaticData::Instance();
   for (size_t i = 0; i < ffs.size(); ++i) {
     const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
     if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
-      const_cast<NeuralScoreFeature*>(nsf)->ProcessStack(hstack, to);
+      const_cast<NeuralScoreFeature*>(nsf)->ProcessStack(hstack, to , i);
   }
 }
 

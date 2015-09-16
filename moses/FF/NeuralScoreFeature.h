@@ -27,7 +27,9 @@ public:
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
   */
 
-  void ProcessStack(const HypothesisStackNormal& hstack, const TranslationOptionCollection& to);
+  void ProcessStack(const HypothesisStackNormal& hstack,
+                    const TranslationOptionCollection& to,
+                    size_t index);
   
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   

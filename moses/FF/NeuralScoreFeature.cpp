@@ -48,15 +48,15 @@ public:
       m_lastContext.pop_front();
   }
   
-  PyObject* GetContext() {
+  PyObject* GetContext() const {
     return m_context;
   }
   
-  PyObject* GetState() {
+  PyObject* GetState() const {
     return m_state;
   }
   
-  std::string GetLastWord() {
+  std::string GetLastWord() const {
     return m_lastWord;
   }
   
@@ -92,15 +92,27 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
 }
 
 void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
-                                      const TranslationOptionCollection& to) {
-  std::vector<const NeuralScoreState*> states;
-  std::vector<std::set<StringPiece> > words;
+                                      const TranslationOptionCollection& to,
+                                      size_t index) {
   
+  PyObject* sourceContext = 0;
+  std::vector<PyObject*> states;
+  std::vector<std::string> lastWords;
+
+  std::vector<std::set<std::string> > words;  
   for (HypothesisStackNormal::const_iterator h = hstack.begin();
        h != hstack.end(); ++h) {
     Hypothesis& hypothesis = **h;
-    states.push_back(
-      static_cast<const NeuralScoreState*>(hypothesis.GetFFState(GetIndex())));
+    
+    const FFState* ffstate = hypothesis.GetFFState(index);
+    const NeuralScoreState* state
+      = static_cast<const NeuralScoreState*>(ffstate);
+    
+    states.push_back(state->GetState());
+    lastWords.push_back(state->GetLastWord());
+    
+    if(sourceContext == 0)
+      sourceContext = state->GetContext();
     
     const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
     const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
@@ -122,16 +134,25 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
           if(tp.GetSize() > words.size())
             words.resize(tp.GetSize());
           for(size_t i = 0; i < tp.GetSize(); ++i)
-            words[i].insert(to.GetTargetPhrase().GetWord(i).GetString(m_factor));
+            words[i].insert(to.GetTargetPhrase().GetWord(i).GetString(m_factor).as_string());
         }
       }
     }
   }
   
-  std::cerr << "Collected vocab: " << std::endl;
-  for(size_t i = 0; i < words.size(); ++i) {
-    std::cerr << i << " " << words[i].size() << std::endl;
-  }
+  std::vector<std::string> currWords(words[0].begin(), words[0].end());
+  std::cerr << "Collected vocab test: " << currWords.size() << " " << states.size() << std::endl;
+  
+  std::vector<std::vector<double> > logProbs;
+  std::vector<std::vector<PyObject*> > outputStates;
+  
+  m_wrapper->GetProb(currWords, sourceContext, lastWords, states,
+                     logProbs, outputStates);
+  
+  std::cerr << "done" << std::endl;
+  //for(size_t i = 0; i < words.size(); ++i) {
+  //  std::cerr << i << " " << words[i].size() << std::endl;
+  //}
 }
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source
