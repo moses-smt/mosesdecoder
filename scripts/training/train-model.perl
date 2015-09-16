@@ -415,7 +415,7 @@ else {
 }
 
 my $GZIP_EXEC;
-if(`which pigz`) {
+if(`which pigz 2> /dev/null`) {
   $GZIP_EXEC = 'pigz';
 }
 else {
