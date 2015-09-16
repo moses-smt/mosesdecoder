@@ -171,6 +171,9 @@ namespace Moses
     dflt = pair<string,string> ("sample","1000");
     m_default_sample_size = atoi(param.insert(dflt).first->second.c_str());
 
+    dflt = pair<string,string> ("min-sample","0");
+    m_min_sample_size = atoi(param.insert(dflt).first->second.c_str());
+
     dflt = pair<string,string>("workers","0");
     m_workers = atoi(param.insert(dflt).first->second.c_str());
     if (m_workers == 0) m_workers = boost::thread::hardware_concurrency();
@@ -287,6 +290,7 @@ namespace Moses
     known_parameters.push_back("prov");
     known_parameters.push_back("rare");
     known_parameters.push_back("sample");
+    known_parameters.push_back("min-sample");
     known_parameters.push_back("smooth");
     known_parameters.push_back("table-limit");
     known_parameters.push_back("tuneable");
@@ -686,7 +690,7 @@ namespace Moses
         else 
           {
             BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
-                                   m_default_sample_size, m_sampling_method);
+                                   m_min_sample_size, m_default_sample_size, m_sampling_method);
             s();
             sfix = s.stats();
           }
@@ -881,7 +885,7 @@ namespace Moses
         if (!context->cache1->get(pid))
           {
             BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
-                                   m_default_sample_size, m_sampling_method);
+                                   m_min_sample_size, m_default_sample_size, m_sampling_method);
             if (*context->cache1->get(pid, s.stats()) == s.stats())
               m_thread_pool->add(s);
           }

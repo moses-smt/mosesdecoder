@@ -73,6 +73,8 @@ namespace sapt
 
     size_t
     size() const;
+
+    const std::map<id_type, float>& GetDocumentBiasMap() const;
   };
 
   class

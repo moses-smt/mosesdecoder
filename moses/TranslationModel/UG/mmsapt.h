@@ -75,6 +75,7 @@ namespace Moses
     // alpha parameter for lexical smoothing (joint+alpha)/(marg + alpha)
     // must be > 0 if dynamic
     size_t m_default_sample_size;
+    size_t m_min_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
     std::vector<std::string> m_feature_set_names; // one or more of: standard, datasource
     std::string m_bias_logfile;

@@ -45,15 +45,16 @@ BitextSampler : public Moses::reference_counter
   // const members
   // SPTR<bitext const> const   m_bitext; // keep bitext alive while I am 
   // should be an 
-  iptr<bitext const> const   m_bitext; // keep bitext alive as long as I am 
-  size_t             const     m_plen; // length of lookup phrase
-  bool               const      m_fwd; // forward or backward direction?
-  SPTR<tsa const>    const     m_root; // root of suffix array
-  char               const*    m_next; // current position
-  char               const*    m_stop; // end of search range
-  sampling_method    const   m_method; // look at all/random/ranked samples 
-  SPTR<bias const>   const     m_bias; // bias over candidates
-  size_t             const  m_samples; // how many samples at most 
+  iptr<bitext const> const       m_bitext; // keep bitext alive as long as I am 
+  size_t             const         m_plen; // length of lookup phrase
+  bool               const          m_fwd; // forward or backward direction?
+  SPTR<tsa const>    const         m_root; // root of suffix array
+  char               const*        m_next; // current position
+  char               const*        m_stop; // end of search range
+  sampling_method    const       m_method; // look at all/random/ranked samples 
+  SPTR<bias const>   const         m_bias; // bias over candidates
+  size_t             const      m_samples; // how many samples at most 
+  size_t             const  m_min_samples;
   // non-const members
   SPTR<pstats>                m_stats; // destination for phrase stats
   size_t                        m_ctr; // number of samples considered
@@ -74,7 +75,7 @@ public:
   BitextSampler(BitextSampler const& other);
   BitextSampler const& operator=(BitextSampler const& other);
   BitextSampler(bitext const*  const bitext, typename bitext::iter const& phrase,
-                SPTR<SamplingBias const> const& bias, size_t const max_samples,
+                SPTR<SamplingBias const> const& bias, size_t const min_samples, size_t const max_samples,
                 sampling_method const method); 
   ~BitextSampler();
   SPTR<pstats> stats();
@@ -173,7 +174,7 @@ template<typename Token>
 BitextSampler<Token>::
 BitextSampler(Bitext<Token> const* const bitext, 
               typename bitext::iter const& phrase,
-              SPTR<SamplingBias const> const& bias, size_t const max_samples,
+              SPTR<SamplingBias const> const& bias, size_t const min_samples, size_t const max_samples,
               sampling_method const method)
   : m_bitext(bitext)
   , m_plen(phrase.size())
@@ -184,6 +185,7 @@ BitextSampler(Bitext<Token> const* const bitext,
   , m_method(method)
   , m_bias(bias)
   , m_samples(max_samples)
+  , m_min_samples(min_samples)
   , m_ctr(0)
   , m_total_bias(0)
   , m_finished(false)
@@ -208,6 +210,7 @@ BitextSampler(BitextSampler const& other)
   , m_method(other.m_method)
   , m_bias(other.m_bias)
   , m_samples(other.m_samples)
+  , m_min_samples(other.m_min_samples)
   , m_rnd(0)
     // , m_rnd_denom(m_rnd.max() + 1)
 {
