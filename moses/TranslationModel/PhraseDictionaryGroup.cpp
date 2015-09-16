@@ -31,9 +31,9 @@ namespace Moses
 {
 
 PhraseDictionaryGroup::PhraseDictionaryGroup(const string &line)
-    : PhraseDictionary(line, true),
-      m_numModels(0),
-      m_restrict(false)
+  : PhraseDictionary(line, true),
+    m_numModels(0),
+    m_restrict(false)
 {
   ReadParameters();
 }
@@ -67,14 +67,14 @@ void PhraseDictionaryGroup::Load()
       }
     }
     UTIL_THROW_IF2(!pdFound,
-        "Could not find component phrase table " << pdName);
+                   "Could not find component phrase table " << pdName);
   }
   UTIL_THROW_IF2(componentWeights != m_numScoreComponents,
-      "Total number of component model scores is unequal to specified number of scores");
+                 "Total number of component model scores is unequal to specified number of scores");
 }
 
 void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
-    const ttasksptr& ttask, const InputPathList& inputPathQueue) const
+  const ttasksptr& ttask, const InputPathList& inputPathQueue) const
 {
   // Some implementations (mmsapt) do work in PrefixExists
   BOOST_FOREACH(const InputPath* inputPath, inputPathQueue) {
@@ -87,19 +87,19 @@ void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
   BOOST_FOREACH(InputPath* inputPath, inputPathQueue) {
     const Phrase &phrase = inputPath->GetPhrase();
     const TargetPhraseCollection* targetPhrases =
-        this->GetTargetPhraseCollectionLEGACY(ttask, phrase);
+      this->GetTargetPhraseCollectionLEGACY(ttask, phrase);
     inputPath->SetTargetPhrases(*this, targetPhrases, NULL);
   }
 }
 
 const TargetPhraseCollection* PhraseDictionaryGroup::GetTargetPhraseCollectionLEGACY(
-    const Phrase& src) const
+  const Phrase& src) const
 {
   UTIL_THROW2("Don't call me without the translation task.");
 }
 
 const TargetPhraseCollection* PhraseDictionaryGroup::GetTargetPhraseCollectionLEGACY(
-    const ttasksptr& ttask, const Phrase& src) const
+  const ttasksptr& ttask, const Phrase& src) const
 {
   TargetPhraseCollection* ret = CreateTargetPhraseCollection(ttask, src);
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
@@ -108,12 +108,12 @@ const TargetPhraseCollection* PhraseDictionaryGroup::GetTargetPhraseCollectionLE
 }
 
 TargetPhraseCollection* PhraseDictionaryGroup::CreateTargetPhraseCollection(
-    const ttasksptr& ttask, const Phrase& src) const
+  const ttasksptr& ttask, const Phrase& src) const
 {
   // Aggregation of phrases and the scores that will be applied to them
   vector<TargetPhrase*> allPhrases;
   unordered_map<const TargetPhrase*, vector<float>, PhrasePtrHasher,
-      PhrasePtrComparator> allScores;
+                PhrasePtrComparator> allScores;
 
   // For each model
   size_t offset = 0;
@@ -128,7 +128,7 @@ TargetPhraseCollection* PhraseDictionaryGroup::CreateTargetPhraseCollection(
       // Process each phrase from table
       BOOST_FOREACH(const TargetPhrase* targetPhrase, *ret_raw) {
         vector<float> raw_scores =
-            targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
+          targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
         // Phrase not in collection -> add if unrestricted or first model
         if (allScores.find(targetPhrase) == allScores.end()) {
@@ -175,7 +175,7 @@ TargetPhraseCollection* PhraseDictionaryGroup::CreateTargetPhraseCollection(
 }
 
 ChartRuleLookupManager *PhraseDictionaryGroup::CreateRuleLookupManager(
-    const ChartParser &, const ChartCellCollectionBase&, size_t)
+  const ChartParser &, const ChartCellCollectionBase&, size_t)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
@@ -188,7 +188,7 @@ void PhraseDictionaryGroup::CacheForCleanup(TargetPhraseCollection* tpc)
 }
 
 void PhraseDictionaryGroup::CleanUpAfterSentenceProcessing(
-    const InputType &source)
+  const InputType &source)
 {
   PhraseCache &ref = GetPhraseCache();
   for (PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) {

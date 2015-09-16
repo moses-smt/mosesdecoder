@@ -37,7 +37,8 @@ namespace Moses
  * "restrict" option to restrict phrases to those in the table-limit of the
  * first member table, intended to be a "union" table built on all data.
  */
-class PhraseDictionaryGroup: public PhraseDictionary {
+class PhraseDictionaryGroup: public PhraseDictionary
+{
 
 public:
   PhraseDictionaryGroup(const std::string& line);
@@ -51,13 +52,12 @@ public:
   void CleanUpComponentModels(const InputType& source);
   // functions below override the base class
   void GetTargetPhraseCollectionBatch(const ttasksptr& ttask,
-      const InputPathList &inputPathQueue) const;
+                                      const InputPathList &inputPathQueue) const;
   const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(
-      const Phrase& src) const;
+    const Phrase& src) const;
   const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(
-      const ttasksptr& ttask, const Phrase& src) const;
-  void InitializeForInput(ttasksptr const& ttask)
-  {
+    const ttasksptr& ttask, const Phrase& src) const;
+  void InitializeForInput(ttasksptr const& ttask) {
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
   ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&,
@@ -80,14 +80,13 @@ protected:
 #endif
   SentenceCache m_sentenceCache;
 
-  PhraseCache& GetPhraseCache()
-  {
+  PhraseCache& GetPhraseCache() {
 #ifdef WITH_THREADS
     {
       // first try read-only lock
       boost::shared_lock<boost::shared_mutex> read_lock(m_lock_cache);
       SentenceCache::iterator i = m_sentenceCache.find(
-          boost::this_thread::get_id());
+        boost::this_thread::get_id());
       if (i != m_sentenceCache.end())
         return i->second;
     }
