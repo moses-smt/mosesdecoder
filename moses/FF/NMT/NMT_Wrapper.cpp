@@ -1,5 +1,6 @@
 #include "NMT_Wrapper.h"
 
+#include "util/exception.hh"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -8,7 +9,10 @@
 #include <streambuf>
 #include <assert.h>
 
+
 using namespace std;
+using namespace util;
+
 
 NMT_Wrapper::NMT_Wrapper()
 {
@@ -35,6 +39,7 @@ bool NMT_Wrapper::Init(const string& state_path, const string& model_path, const
     this->model_path = model_path;
 
     Py_Initialize();
+    PyErr_Print();
 
     AddPathToSys(wrapper_path);
 
@@ -137,6 +142,13 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& next_words,
 
     return true;
 }
+void ParseWrapperResponse(
+        PyObject*& pyResponse,
+        std::vector< std::vector< double > >& logProbs,
+        std::vector< std::vector< PyObject* > >& outputStates)
+{
+
+}
 
 
 bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
@@ -146,7 +158,7 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                           std::vector< std::vector< double > >& logProbs,
                           std::vector< std::vector< PyObject* > >& outputStates)
 {
-    assert(lastWords.size() == inputStates.size());
+    // UTIL_THROW_IF2(lastWords.size() != inputStates.size(), "#lastWords != #inputStates");
     PyObject* pyNextWords = PyList_New(0);
     for (size_t i = 0; i < nextWords.size(); ++i) {
         PyList_Append(pyNextWords, PyString_FromString(nextWords[i].c_str()));
@@ -222,6 +234,8 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
         outputStates.push_back(hipoStates);
     }
 
+
+    cerr << "Wychodze z GetProb!" << endl;
     return true;
 }
 
