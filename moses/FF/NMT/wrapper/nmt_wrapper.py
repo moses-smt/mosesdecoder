@@ -116,5 +116,11 @@ class NMTWrapper(object):
         print >> sys.stderr, "Wychodze z Pythona"
         return cumulated_score, new_states
 
+    def get_next_states(self, next_words, c, states):
+        states = [numpy.concatenate(states)]
+        next_indxs = [self.word2indx.setdefault(next_word, self.unk_id)
+                      for next_word in next_words]
+        return numpy.split(self.comp_next_states(c, 0, next_indxs, *states)[0])
+
     def get_nbest_list(self, state):
         return None
