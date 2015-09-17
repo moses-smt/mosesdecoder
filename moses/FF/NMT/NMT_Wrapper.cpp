@@ -21,6 +21,7 @@ NMT_Wrapper::NMT_Wrapper()
     py_get_vec_log_probs = PyString_FromString((char*)"get_vec_log_probs");
     py_get_context_vectors = PyString_FromString((char*)"get_context_vector");
     py_get_next_states = PyString_FromString((char*)"get_next_states");
+    py_get_log_prob_states = PyString_FromString((char*)"get_log_prob_states");
 }
 
 bool NMT_Wrapper::GetContextVectors(const string& source_sentence, PyObject*& vectors)
@@ -271,6 +272,71 @@ void NMT_Wrapper::GetNextStates(
     for (size_t i = 0; i < nextStatesSize; ++i) {
         nextStates.push_back(PyList_GetItem(pyResponse, i));
     }
+}
+void NMT_Wrapper::GetNextLogProbStates(
+    const std::vector<std::string>& nextWords,
+    PyObject* pyContextVectors,
+    const std::vector< std::string >& lastWords,
+    std::vector<PyObject*>& inputStates,
+    std::vector<double>& logProbs,
+    std::vector<PyObject*>& nextStates)
+{
+    UTIL_THROW_IF2(lastWords.size() != inputStates.size(), "#lastWords != #inputStates");
+
+    PyObject* pyNextWords = PyList_New(0);
+    for (size_t i = 0; i < nextWords.size(); ++i) {
+        PyList_Append(pyNextWords, PyString_FromString(nextWords[i].c_str()));
+    }
+
+    PyObject* pyLastWords = PyList_New(0);
+    for (size_t i = 0; i < lastWords.size(); ++i) {
+        PyList_Append(pyLastWords, PyString_FromString(lastWords[i].c_str()));
+    }
+
+    PyObject* pyResponse = NULL;
+    if (inputStates.size() == 0) {
+        pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
+                                                py_get_log_prob_states,
+                                                pyNextWords,
+                                                pyContextVectors,
+                                                NULL);
+    } else {
+        PyObject* pyNextStates = PyList_New(0);
+        for (size_t i = 0; i < inputStates.size(); ++i) {
+            PyList_Append(pyNextStates, inputStates[i]);
+        }
+
+        pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
+                                                py_get_log_prob_states,
+                                                pyNextWords,
+                                                pyContextVectors,
+                                                pyLastWords,
+                                                pyNextStates,
+                                                NULL);
+    }
+    UTIL_THROW_IF2(pyResponse == NULL, "No response from python module.");
+
+    size_t inputSize = 0;
+    if (inputStates.size() == 0) {
+        inputSize = 1;
+    } else {
+        inputSize = inputStates.size();
+    }
+
+    PyObject* pyLogProbs = PyTuple_GetItem(pyResponse, 0);
+    PyObject* pyNextStates = PyTuple_GetItem(pyResponse, 1);
+    logProbs.clear();
+    nextStates.clear();
+
+    for (size_t j = 0; j < inputSize; ++j) {
+        logProbs.push_back(PyFloat_AsDouble(PyList_GetItem(pyLogProbs, j)));
+    }
+
+    for (size_t i = 0; i < inputSize; ++i) {
+        nextStates.push_back(PyList_GetItem(pyNextStates, i));
+    }
+
+    cerr << "Wychodze z GetLogProbStates!" << endl;
 }
 
 NMT_Wrapper::~NMT_Wrapper()

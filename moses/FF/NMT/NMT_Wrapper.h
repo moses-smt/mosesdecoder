@@ -41,6 +41,13 @@ public:
         std::vector<PyObject*>& inputStates,
         std::vector<PyObject*>& outputStates);
 
+    void GetNextLogProbStates(
+        const std::vector<std::string>& nextWords,
+        PyObject* pyContextVectors,
+        const std::vector< std::string >& lastWords,
+        std::vector<PyObject*>& inputStates,
+        std::vector<double>& logProbs,
+        std::vector<PyObject*>& nextStates);
     virtual ~NMT_Wrapper();
 
 private:
@@ -50,6 +57,7 @@ private:
     PyObject* py_get_vec_log_probs;
     PyObject* py_get_context_vectors;
     PyObject* py_get_next_states;
+    PyObject* py_get_log_prob_states;
     std::string state_path;
     std::string model_path;
     void AddPathToSys(const std::string& path);
