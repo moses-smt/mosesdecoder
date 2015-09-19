@@ -65,7 +65,6 @@ BitextSampler : public Moses::reference_counter
   double m_bias_total;
 
   bool   consider_sample(TokenPosition const& p);
-  size_t perform_ranked_sampling();
   size_t perform_random_sampling();
 
   int check_sample_distribution(uint64_t const& sid, uint64_t const& offset);
@@ -78,9 +77,13 @@ public:
                 SPTR<SamplingBias const> const& bias, size_t const max_samples,
                 sampling_method const method); 
   ~BitextSampler();
-  bool operator()(); // run sampling
   SPTR<pstats> stats();
   bool done() const;
+#ifdef MMT
+#include "mmt_bitext_sampler-inc.h"
+#else
+  bool operator()(); // run sampling
+#endif
 };
 
 template<typename Token>
@@ -219,28 +222,6 @@ BitextSampler(BitextSampler const& other)
   m_finished = other.m_finished;
 }
 
-// Ranked sampling sorts all samples by score and then considers the top-ranked 
-// candidates for phrase extraction.
-template<typename Token>
-size_t
-BitextSampler<Token>::
-perform_ranked_sampling()
-{
-  if (m_next == m_stop) return m_ctr;
-  CandidateSorter sorter(*m_bias);
-  // below: nbest size = 4 * m_samples to allow for failed phrase extraction
-  Moses::NBestList<TokenPosition, CandidateSorter> nbest(4*m_samples, sorter);
-  sapt::tsa::ArrayEntry I(m_next);
-  while (I.next < m_stop)
-    {
-      ++m_ctr;
-      nbest.add(m_root->readEntry(I.next, I));
-    }
-  for (size_t i = 0; m_stats->good < m_samples && i < nbest.size(); ++i)
-    consider_sample(nbest[i]);
-  return m_ctr;
-}
-  
 // Uniform sampling 
 template<typename Token>
 size_t
@@ -331,6 +312,7 @@ consider_sample(TokenPosition const& p)
   return true;
 }
   
+#ifndef MMT
 template<typename Token>
 bool
 BitextSampler<Token>::
@@ -338,15 +320,14 @@ operator()()
 {
   if (m_finished) return true;
   boost::unique_lock<boost::mutex> lock(m_lock);
-  if (m_method == ranked_sampling)
-    perform_ranked_sampling(); 
-  else if (m_method == random_sampling)
+  if (m_method == random_sampling)
     perform_random_sampling();
   else UTIL_THROW2("Unsupported sampling method.");
   m_finished = true;
   m_ready.notify_all();
   return true;
 }
+#endif
 
   
 template<typename Token>
