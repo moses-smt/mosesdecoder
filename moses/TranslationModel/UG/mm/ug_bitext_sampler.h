@@ -20,7 +20,7 @@
 namespace sapt
 {
   
-enum sampling_method { full_coverage, random_sampling, ranked_sampling };
+enum sampling_method { full_coverage, random_sampling, ranked_sampling, ranked_sampling2 };
 
 typedef ttrack::Position TokenPosition;
 class CandidateSorter
