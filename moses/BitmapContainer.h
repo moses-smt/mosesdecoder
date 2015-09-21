@@ -61,6 +61,7 @@ private:
   size_t m_hypothesis_pos, m_translation_pos;
   Hypothesis *m_hypothesis;
   BackwardsEdge *m_edge;
+  TargetPhrase m_target_phrase;
 
   HypothesisQueueItem();
 
@@ -72,7 +73,8 @@ public:
     : m_hypothesis_pos(hypothesis_pos)
     , m_translation_pos(translation_pos)
     , m_hypothesis(hypothesis)
-    , m_edge(edge) {
+    , m_edge(edge)
+    , m_target_phrase(hypothesis->GetCurrTargetPhrase()) {
   }
 
   ~HypothesisQueueItem() {
@@ -93,6 +95,10 @@ public:
   BackwardsEdge *GetBackwardsEdge() {
     return m_edge;
   }
+
+  TargetPhrase& GetTargetPhrase() {
+    return m_target_phrase;
+  }
 };
 
 //! Allows comparison of two HypothesisQueueItem objects by the corresponding scores.
@@ -103,20 +109,13 @@ public:
     float scoreA = itemA->GetHypothesis()->GetTotalScore();
     float scoreB = itemB->GetHypothesis()->GetTotalScore();
 
-    return (scoreA < scoreB);
+    if (scoreA != scoreB)
+    {
+      return (scoreA < scoreB);
+    }
 
-    /*
-    {
-    	return true;
-    }
-    else if (scoreA < scoreB)
-    {
-    	return false;
-    }
-    else
-    {
-    	return itemA < itemB;
-    }*/
+    // Equal scores: break ties deterministically by comparing target phrases
+    return (itemA->GetTargetPhrase().Compare(itemB->GetTargetPhrase()) < 0);
   }
 };
 
