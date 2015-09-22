@@ -140,6 +140,8 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
     }
   }
   
+  // construct TRIE that has N states in nodes
+  
   std::vector<std::string> currWords(words[0].begin(), words[0].end());
   std::cerr << "Collected vocab test: " << currWords.size() << " " << states.size() << std::endl;
   
