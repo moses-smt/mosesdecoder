@@ -10,8 +10,8 @@ namespace Moses
 class DeleteRules : public StatelessFeatureFunction
 {
 protected:
-	std::string m_path;
-	boost::unordered_set<size_t> m_ruleHashes;
+  std::string m_path;
+  boost::unordered_set<size_t> m_ruleHashes;
 public:
   DeleteRules(const std::string &line);
 

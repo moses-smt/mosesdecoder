@@ -18,30 +18,30 @@ DeleteRules::DeleteRules(const std::string &line)
 
 void DeleteRules::Load()
 {
-	std::vector<FactorType> factorOrder;
-	factorOrder.push_back(0); // unfactored for now
+  std::vector<FactorType> factorOrder;
+  factorOrder.push_back(0); // unfactored for now
 
-	InputFileStream strme(m_path);
+  InputFileStream strme(m_path);
 
-	string line;
-	while (getline(strme, line)) {
-		vector<string> toks = TokenizeMultiCharSeparator(line, "|||");
-		UTIL_THROW_IF2(toks.size() != 2, "Line must be source ||| target");
-		Phrase source, target;
-		source.CreateFromString(Input, factorOrder, toks[0], NULL);
-		target.CreateFromString(Output, factorOrder, toks[1], NULL);
+  string line;
+  while (getline(strme, line)) {
+    vector<string> toks = TokenizeMultiCharSeparator(line, "|||");
+    UTIL_THROW_IF2(toks.size() != 2, "Line must be source ||| target");
+    Phrase source, target;
+    source.CreateFromString(Input, factorOrder, toks[0], NULL);
+    target.CreateFromString(Output, factorOrder, toks[1], NULL);
 
-		size_t hash = 0;
-		boost::hash_combine(hash, source);
-		boost::hash_combine(hash, target);
-		m_ruleHashes.insert(hash);
-	}
+    size_t hash = 0;
+    boost::hash_combine(hash, source);
+    boost::hash_combine(hash, target);
+    m_ruleHashes.insert(hash);
+  }
 }
 
 void DeleteRules::EvaluateInIsolation(const Phrase &source
-    , const TargetPhrase &target
-    , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+                                      , const TargetPhrase &target
+                                      , ScoreComponentCollection &scoreBreakdown
+                                      , ScoreComponentCollection &estimatedFutureScore) const
 {
   // dense scores
   size_t hash = 0;
@@ -51,7 +51,7 @@ void DeleteRules::EvaluateInIsolation(const Phrase &source
   boost::unordered_set<size_t>::const_iterator iter;
   iter = m_ruleHashes.find(hash);
   if (iter != m_ruleHashes.end()) {
-	  scoreBreakdown.PlusEquals(this, -std::numeric_limits<float>::infinity());
+    scoreBreakdown.PlusEquals(this, -std::numeric_limits<float>::infinity());
   }
 
 }
@@ -70,17 +70,17 @@ void DeleteRules::EvaluateTranslationOptionListWithSourceContext(const InputType
 {}
 
 void DeleteRules::EvaluateWhenApplied(const Hypothesis& hypo,
-    ScoreComponentCollection* accumulator) const
+                                      ScoreComponentCollection* accumulator) const
 {}
 
 void DeleteRules::EvaluateWhenApplied(const ChartHypothesis &hypo,
-    ScoreComponentCollection* accumulator) const
+                                      ScoreComponentCollection* accumulator) const
 {}
 
 void DeleteRules::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "path") {
-	m_path = value;
+    m_path = value;
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
