@@ -298,7 +298,7 @@ sub tokenize
         $text =~ s/([Dd]) 'ye/$1' ye/g;
 
     }
-    elsif (($language eq "fr") or ($language eq "it"))
+    elsif (($language eq "fr") or ($language eq "it") or ($language eq "ga"))
     {
         #split contractions left
         $text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
