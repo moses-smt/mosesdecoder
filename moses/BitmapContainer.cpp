@@ -273,9 +273,11 @@ BackwardsEdge::PushSuccessors(const size_t x, const size_t y)
 ////////////////////////////////////////////////////////////////////////////////
 
 BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
-                                 , HypothesisStackCubePruning &stack)
+                                 , HypothesisStackCubePruning &stack
+                                 , bool deterministic)
   : m_bitmap(bitmap)
   , m_stack(stack)
+  , m_deterministic(deterministic)
   , m_numStackInsertions(0)
 {
   m_hypotheses = HypothesisSet();
@@ -309,10 +311,13 @@ BitmapContainer::Enqueue(int hypothesis_pos
                          , Hypothesis *hypothesis
                          , BackwardsEdge *edge)
 {
+  // Only supply target phrase if running deterministic search mode
+  const TargetPhrase *target_phrase = m_deterministic ? &(hypothesis->GetCurrTargetPhrase()) : NULL;
   HypothesisQueueItem *item = new HypothesisQueueItem(hypothesis_pos
       , translation_pos
       , hypothesis
-      , edge);
+      , edge
+      , target_phrase);
   IFVERBOSE(2) {
     item->GetHypothesis()->GetManager().GetSentenceStats().StartTimeManageCubes();
   }
