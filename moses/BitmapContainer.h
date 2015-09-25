@@ -75,8 +75,7 @@ public:
     , m_translation_pos(translation_pos)
     , m_hypothesis(hypothesis)
     , m_edge(edge) {
-    if (target_phrase != NULL)
-    {
+    if (target_phrase != NULL) {
       m_target_phrase.reset(new TargetPhrase(*target_phrase));
     }
   }
@@ -113,21 +112,15 @@ public:
     float scoreA = itemA->GetHypothesis()->GetTotalScore();
     float scoreB = itemB->GetHypothesis()->GetTotalScore();
 
-    if (scoreA < scoreB)
-    {
+    if (scoreA < scoreB) {
       return true;
-    }
-    else if (scoreA > scoreB)
-    {
+    } else if (scoreA > scoreB) {
       return false;
-    }
-    else
-    {
+    } else {
       // Equal scores: break ties by comparing target phrases (if they exist)
       boost::shared_ptr<TargetPhrase> phrA = itemA->GetTargetPhrase();
       boost::shared_ptr<TargetPhrase> phrB = itemB->GetTargetPhrase();
-      if (!phrA || !phrB)
-      {
+      if (!phrA || !phrB) {
         // Fallback: scoreA < scoreB == false, non-deterministic sort
         return false;
       }
