@@ -8,10 +8,11 @@
 #include <boost/shared_ptr.hpp>
 
 class NMT_Wrapper;
+struct _object;
+typedef _object PyObject;
 
 namespace Moses
 {
-
 
 class NeuralScoreFeature : public StatefulFeatureFunction
 {
@@ -59,12 +60,18 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
 
 private:
+  bool m_preCalc;
   std::string m_statePath;
   std::string m_modelPath;
   std::string m_wrapperPath;
   size_t m_stateLength;
   size_t m_factor;
   boost::shared_ptr<NMT_Wrapper> m_wrapper;
+  
+  std::vector<std::string> currWords_;
+  std::vector<std::vector<double> > logProbs_;
+  std::vector<std::vector<PyObject*> > outputStates_;
+  std::map<int, size_t> prevHypIds_;
 };
 
 }

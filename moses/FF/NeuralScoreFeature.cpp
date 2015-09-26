@@ -84,7 +84,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(1, line), m_stateLength(3), m_factor(0),
+  : StatefulFeatureFunction(1, line), m_preCalc(0), m_stateLength(3), m_factor(0),
     m_wrapper(new NMT_Wrapper())
 {
   ReadParameters();
@@ -94,15 +94,25 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
 void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
                                       const TranslationOptionCollection& to,
                                       size_t index) {
+  if(!m_preCalc)
+    return;
   
   PyObject* sourceContext = 0;
   std::vector<PyObject*> states;
   std::vector<std::string> lastWords;
 
-  std::vector<std::set<std::string> > words;  
+  currWords_.clear();
+  logProbs_.clear();
+  outputStates_.clear();
+  prevHypIds_.clear();
+  
+  std::vector<std::set<std::string> > words;
+  std::size_t hypPos = 0;
   for (HypothesisStackNormal::const_iterator h = hstack.begin();
        h != hstack.end(); ++h) {
     Hypothesis& hypothesis = **h;
+    prevHypIds_[hypothesis.GetId()] = hypPos;
+    hypPos++;
     
     const FFState* ffstate = hypothesis.GetFFState(index);
     const NeuralScoreState* state
@@ -142,19 +152,15 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
   
   // construct TRIE that has N states in nodes
   
-  std::vector<std::string> currWords(words[0].begin(), words[0].end());
-  std::cerr << "Collected vocab test: " << currWords.size() << " " << states.size() << std::endl;
+  // only first word for now
+  if(!words.empty()) {
+    currWords_.insert(currWords_.end(), words[0].begin(), words[0].end());
+    std::cerr << "Collected vocab test: " << currWords_.size() << " " << states.size() << std::endl;
   
-  std::vector<std::vector<double> > logProbs;
-  std::vector<std::vector<PyObject*> > outputStates;
-  
-  m_wrapper->GetProb(currWords, sourceContext, lastWords, states,
-                     logProbs, outputStates);
-  
+    m_wrapper->GetProb(currWords_, sourceContext, lastWords, states,
+                       logProbs_, outputStates_);
+  }
   std::cerr << "done" << std::endl;
-  //for(size_t i = 0; i < words.size(); ++i) {
-  //  std::cerr << i << " " << words[i].size() << std::endl;
-  //}
 }
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source
@@ -194,16 +200,42 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
     std::string word = tp.GetWord(i).GetString(m_factor).as_string();
     phrase.push_back(word);
   }
+  
+  int prevId = cur_hypo.GetPrevHypo()->GetId();
+  size_t prevIndex = const_cast<std::map<int, size_t>&>(prevHypIds_)[prevId];
+  
+  if(!m_preCalc) {
+    m_wrapper->GetProb(phrase, context,
+                       prevState->GetLastWord(),
+                       prevState->GetState(),
+                       prob, nextState);
+    prevState = new NeuralScoreState(context, phrase, nextState);
+    nextState = NULL;
     
-  m_wrapper->GetProb(phrase, context,
-                     prevState->GetLastWord(),
-                     prevState->GetState(),
-                     prob, nextState);
+   newScores[0] = prob;
+  }
+  else {
+    std::vector<std::string>::const_iterator it
+      = std::lower_bound(currWords_.begin(), currWords_.end(), phrase[0]);
+    size_t pos = std::distance(currWords_.begin(), it);
+    if(it == currWords_.end()) {
+      std::cerr << "Error: could not find " << phrase[0] << std::endl; 
+    }
+    else {
+      std::cerr << "Found " << phrase[0] << " at " << pos << std::endl;
+    }
+    
+    
+    std::cerr << "Hypothesis " << prevId << " was in stack at " << prevIndex << std::endl;
+    
+    
+    PyObject* pyState = const_cast<std::vector<std::vector<PyObject*> >&>(outputStates_)[prevIndex][pos];
+    prevState = new NeuralScoreState(context, phrase, pyState);
+    nextState = NULL;
   
-  prevState = new NeuralScoreState(context, phrase, nextState);
-  nextState = NULL;
-  
-  newScores[0] = prob;
+    newScores[0] = const_cast<std::vector<std::vector<double> >&>(logProbs_)[prevIndex][pos];
+    std::cerr << "Got logProb " << newScores[0] << std::endl;
+  }
   accumulator->PlusEquals(this, newScores);
   
   prevState->LimitLength(m_stateLength);
@@ -224,6 +256,8 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     m_statePath = value;
   } else if (key == "state-length") {
     m_stateLength = Scan<size_t>(value);
+  } else if (key == "precalculate") {
+    m_preCalc = Scan<bool>(value);
   } else if (key == "model") {
     m_modelPath = value;
   } else if (key == "wrapper-path") {
