@@ -294,6 +294,10 @@ void NMT_Wrapper::GetNextLogProbStates(
     }
 
     PyObject* pyResponse = NULL;
+    PyObject* pyStates = PyList_New(0);
+    for (size_t i = 0; i < inputStates.size(); ++i) {
+        if (PyList_Append(pyStates, inputStates[i]) == -1); // cerr << i << ": "<< "ARGH! " << inputStates[i] << endl;
+    }
     if (inputStates.size() == 0) {
         pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
                                                 py_get_log_prob_states,
@@ -301,17 +305,13 @@ void NMT_Wrapper::GetNextLogProbStates(
                                                 pyContextVectors,
                                                 NULL);
     } else {
-        PyObject* pyNextStates = PyList_New(0);
-        for (size_t i = 0; i < inputStates.size(); ++i) {
-            PyList_Append(pyNextStates, inputStates[i]);
-        }
-
+        //cerr << "A: " << PyList_Size(pyStates) << endl;
         pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
                                                 py_get_log_prob_states,
                                                 pyNextWords,
                                                 pyContextVectors,
                                                 pyLastWords,
-                                                pyNextStates,
+                                                pyStates,
                                                 NULL);
     }
     UTIL_THROW_IF2(pyResponse == NULL, "No response from python module.");
@@ -331,12 +331,19 @@ void NMT_Wrapper::GetNextLogProbStates(
     for (size_t j = 0; j < inputSize; ++j) {
         logProbs.push_back(PyFloat_AsDouble(PyList_GetItem(pyLogProbs, j)));
     }
-
+    //cerr << "S: " << PyList_Size(pyNextStates) << endl;
     for (size_t i = 0; i < inputSize; ++i) {
-        nextStates.push_back(PyList_GetItem(pyNextStates, i));
+        PyObject* nextState = PyList_GetItem(pyNextStates, i);
+        if (nextState == NULL) cerr << "NULL OUTOUT" << endl;
+        nextStates.push_back(nextState);
+    }
+    for(size_t i = 0; i < nextStates.size(); ++i) {
+        // cerr << "STATES: " << nextStates[i] << endl;
     }
 
     cerr << "Wychodze z GetLogProbStates!" << endl;
+    
+    
 }
 
 NMT_Wrapper::~NMT_Wrapper()

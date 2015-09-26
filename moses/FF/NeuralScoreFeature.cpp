@@ -28,7 +28,6 @@ public:
     for(size_t i = 0; i < lastPhrase.size(); i++)
       m_lastContext.push_back(lastPhrase[i]);
   }
-
     
   int Compare(const FFState& other) const
   {
@@ -119,6 +118,7 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
       = static_cast<const NeuralScoreState*>(ffstate);
     
     states.push_back(state->GetState());
+    //std::cerr << "STATES2 : " << states.back() << std::endl;
     lastWords.push_back(state->GetLastWord());
     
     if(sourceContext == 0)
@@ -150,15 +150,59 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
     }
   }
   
+  //void GetNextLogProbStates(
+  //        const std::vector<std::string>& nextWords,
+  //        PyObject* pyContextVectors,
+  //        const std::vector< std::string >& lastWords,
+  //        std::vector<PyObject*>& inputStates,
+  //        std::vector<double>& logProbs,
+  //        std::vector<PyObject*>& nextStates);
+
+  
   // construct TRIE that has N states in nodes
   
   // only first word for now
-  if(!words.empty()) {
+  if(!words.empty()) {  
     currWords_.insert(currWords_.end(), words[0].begin(), words[0].end());
     std::cerr << "Collected vocab test: " << currWords_.size() << " " << states.size() << std::endl;
   
-    m_wrapper->GetProb(currWords_, sourceContext, lastWords, states,
-                       logProbs_, outputStates_);
+    std::vector<std::string> allWords;
+    std::vector<PyObject*> allStates;
+    
+    std::vector<std::string> allLastWords;
+    for(size_t i = 0; i < currWords_.size(); ++i) {
+      allStates.insert(allStates.end(), states.begin(), states.end());
+      allLastWords.insert(allLastWords.end(), lastWords.begin(), lastWords.end());
+      allWords.insert(allWords.end(), states.size(), currWords_[i]);
+    }
+    
+    size_t M = currWords_.size();
+    size_t N = states.size();
+    logProbs_.resize(N, std::vector<double>(M));
+    outputStates_.resize(N, std::vector<PyObject*>(M));
+    
+    std::vector<double> allProbs;
+    std::vector<PyObject*> allOutStates;
+    
+    m_wrapper->GetNextLogProbStates(allWords,
+                                    sourceContext,
+                                    allLastWords,
+                                    allStates,
+                                    allProbs,
+                                    allOutStates);
+    
+    for(size_t k = 0; k < allProbs.size(); ++k) {
+      size_t i = k / currWords_.size();
+      size_t j = k % currWords_.size();
+      
+      logProbs_[i][j] = allProbs[k];
+      if(allOutStates[k] == 0)
+        std::cerr << "Caught zero!" << std::endl;
+      outputStates_[i][j] = allOutStates[k];
+    }
+    
+    //m_wrapper->GetProb(currWords_, sourceContext, lastWords, states,
+    //                   logProbs_, outputStates_);
   }
   std::cerr << "done" << std::endl;
 }
@@ -224,8 +268,6 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
     else {
       std::cerr << "Found " << phrase[0] << " at " << pos << std::endl;
     }
-    
-    
     std::cerr << "Hypothesis " << prevId << " was in stack at " << prevIndex << std::endl;
     
     

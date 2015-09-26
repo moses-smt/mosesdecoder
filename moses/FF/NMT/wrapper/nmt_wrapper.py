@@ -127,20 +127,31 @@ class NMTWrapper(object):
             phrase_num = 1
         else:
             phrase_num = len(last_words)
-        print >> sys.stderr, "\#PHASE: ", phrase_num, "\#STATES", len(states), "\#NEXT WORDS", len(next_words)
+        print >> sys.stderr, "\#PHRASE: ", phrase_num, "\#STATES", len(states), "\#NEXT WORDS", len(next_words)
 
-        if len(last_words) == 1 and len(last_words[0]) == 0:
+        # print >> sys.stderr, "Last Words", last_words
+        # print >> sys.stderr, "Next Words", next_words
+        if len(last_words) >= 1 and len(last_words[0]) == 0:
             last_words = numpy.zeros(phrase_num)
-            print last_words.astype("int64")
+            # print last_words.astype("int64")
         else:
+            # print >> sys.stderr, "Zameniam"
             tmp = []
             for last_word in last_words:
+                #print >> sys.stderr, last_word
                 if last_word == "":
                     tmp.append(0)
+                    # print >> sys.stderr, "DODAJE"
                 else:
                     tmp.append(self.word2indx.setdefault(last_word, self.unk_id))
-            last_words = numpy.array(tmp, dtype="int64")
-
+                    # print >> sys.stderr, "BLBALBBA"
+            # print >> sys.stderr, "AAAAAAAAAAAAAAAAAAAAAAA!"
+            last_words = numpy.array(tmp)
+            # print >> sys.stderr, "numpy"
+            last_words = last_words.astype("int64")
+            # print >> sys.stderr, "Zamienione"
+            # print >> sys.stderr, "BLBALBBA"
+        # print >> sys.stderr, "Zamienione na ind"     
         if len(states) == 0:
             states = [numpy.repeat(self.comp_init_states(c)[0][numpy.newaxis, :], phrase_num, 0)]
         else:
@@ -148,15 +159,17 @@ class NMTWrapper(object):
 
         next_indxs = [self.word2indx.setdefault(next_word, self.unk_id)
                       for next_word in next_words]
-
+        # print >> sys.stderr, "Oblizam"  
         log_probs = numpy.log(self.comp_next_probs(c, 0, last_words.astype("int64"),
                                                    *states)[0])
+        # print >> sys.stderr, "Obliczone"
         cumulated_score = [log_probs[i][next_indxs[i]] for i in range(phrase_num)]
 
         new_states = numpy.split(self.comp_next_states(c, 0, next_indxs, *states)[0], phrase_num)
-
+        
+        # print >> sys.stderr, new_states
         print >> sys.stderr, "Wychodze z Pythona"
-        return cumulated_score, new_states[0]
+        return cumulated_score, new_states
 
     def get_nbest_list(self, state):
         return None
