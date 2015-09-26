@@ -341,7 +341,7 @@ void NMT_Wrapper::GetNextLogProbStates(
         // cerr << "STATES: " << nextStates[i] << endl;
     }
 
-    cerr << "Wychodze z GetLogProbStates!" << endl;
+    //cerr << "Wychodze z GetLogProbStates!" << endl;
     
     
 }

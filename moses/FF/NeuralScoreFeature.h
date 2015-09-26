@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <set>
+#include <map>
+
 #include "moses/HypothesisStackNormal.h"
 #include "moses/TranslationOptionCollection.h"
 #include "StatefulFeatureFunction.h"
@@ -10,6 +13,22 @@
 class NMT_Wrapper;
 struct _object;
 typedef _object PyObject;
+
+struct Payload {
+  Payload() : state_(0), logProb_(0) {}
+  Payload(PyObject* state, float logProb) : state_(state), logProb_(logProb) {}
+  
+  PyObject* state_;
+  float logProb_;
+};
+
+typedef std::map<size_t, Payload> Payloads;
+typedef std::vector<std::string> Prefix;
+typedef std::map<Prefix, Payloads> Prefixes;
+typedef std::vector<Prefixes> PrefsByLength;
+
+typedef std::pair<const Prefix, Payloads> PP;
+typedef std::pair<const size_t, Payload> SP;
 
 namespace Moses
 {
@@ -67,11 +86,8 @@ private:
   size_t m_stateLength;
   size_t m_factor;
   boost::shared_ptr<NMT_Wrapper> m_wrapper;
-  
-  std::vector<std::string> currWords_;
-  std::vector<std::vector<double> > logProbs_;
-  std::vector<std::vector<PyObject*> > outputStates_;
-  std::map<int, size_t> prevHypIds_;
+    
+  PrefsByLength pbl_;
 };
 
 }

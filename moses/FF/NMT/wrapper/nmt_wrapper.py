@@ -81,7 +81,7 @@ class NMTWrapper(object):
             phrase_num = 1
         else:
             phrase_num = len(last_words)
-        print >> sys.stderr, "\#PHASE: ", phrase_num, "\#STATES", len(states), "\#NEXT WORDS", len(next_words)
+        #print >> sys.stderr, "\#PHASE: ", phrase_num, "\#STATES", len(states), "\#NEXT WORDS", len(next_words)
         if len(last_words) == 1 and len(last_words[0]) == 0:
             last_words = numpy.zeros(phrase_num)
             print last_words.astype("int64")
@@ -113,7 +113,7 @@ class NMTWrapper(object):
             intmp = [val] * phrase_num
             new_states.append(numpy.split(self.comp_next_states(c, 0, intmp, *states)[0], phrase_num))
 
-        print >> sys.stderr, "Wychodze z Pythona"
+        #print >> sys.stderr, "Wychodze z Pythona"
         return cumulated_score, new_states
 
     def get_next_states(self, next_words, c, states):
@@ -127,7 +127,7 @@ class NMTWrapper(object):
             phrase_num = 1
         else:
             phrase_num = len(last_words)
-        print >> sys.stderr, "\#PHRASE: ", phrase_num, "\#STATES", len(states), "\#NEXT WORDS", len(next_words)
+        #print >> sys.stderr, "\#PHRASE: ", phrase_num, "\#STATES", len(states), "\#NEXT WORDS", len(next_words)
 
         # print >> sys.stderr, "Last Words", last_words
         # print >> sys.stderr, "Next Words", next_words
@@ -168,7 +168,7 @@ class NMTWrapper(object):
         new_states = numpy.split(self.comp_next_states(c, 0, next_indxs, *states)[0], phrase_num)
         
         # print >> sys.stderr, new_states
-        print >> sys.stderr, "Wychodze z Pythona"
+        #print >> sys.stderr, "Wychodze z Pythona"
         return cumulated_score, new_states
 
     def get_nbest_list(self, state):
