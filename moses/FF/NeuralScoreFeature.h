@@ -49,7 +49,7 @@ public:
 
   void ProcessStack(const HypothesisStackNormal& hstack,
                     const TranslationOptionCollection& to,
-                    size_t index);
+                    size_t index, AllOptions const& options);
   
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   

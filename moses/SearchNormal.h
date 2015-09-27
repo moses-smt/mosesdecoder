@@ -34,6 +34,9 @@ protected:
 
   // functions for creating hypotheses
 
+  void ProcessStackForNeuro(const HypothesisStackNormal& hstack,
+                            const TranslationOptionCollection& to);
+  
   virtual bool
   ProcessOneStack(HypothesisStack* hstack);
 

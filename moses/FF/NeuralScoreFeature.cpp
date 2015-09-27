@@ -94,7 +94,7 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
 
 void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
                                       const TranslationOptionCollection& to,
-                                      size_t index) {
+                                      size_t index, AllOptions const& options) {
   if(!m_preCalc)
     return;
   
@@ -125,6 +125,7 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
     covered = hypoBitmap.GetNumWordsCovered();
     total = hypoBitmap.GetSize();
     
+    ReorderingConstraint const& ReoConstraint = hypothesis.GetInput().GetReorderingConstraint();
     const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
     const size_t sourceSize = hypothesis.GetInput().GetSize();  
     for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) {
@@ -134,7 +135,8 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
            tol && endPos < sourceSize;
            tol = to.GetTranslationOptionList(startPos, ++endPos)) {
        
-        if (tol->size() == 0 || hypoBitmap.Overlap(WordsRange(startPos, endPos)))
+        if (tol->size() == 0 || hypoBitmap.Overlap(WordsRange(startPos, endPos))
+            || !ReoConstraint.Check(hypoBitmap, startPos, endPos))
           continue;
         
         TranslationOptionList::const_iterator iter;
