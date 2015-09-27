@@ -207,8 +207,8 @@ void NeuralScoreFeature::BatchProcess(
       size_t thisBatchStart = i * m_batchSize;
       size_t thisBatchEnd = std::min(thisBatchStart + m_batchSize, items);
       
-      if(items > m_batchSize)
-        std::cerr << "b:" << i << ":" << thisBatchStart << "-" << thisBatchEnd << " ";
+      //if(items > m_batchSize)
+      //  std::cerr << "b:" << i << ":" << thisBatchStart << "-" << thisBatchEnd << " ";
       
       std::vector<std::string> nextWordsBatch(nextWords.begin() + thisBatchStart,
                                               nextWords.begin() + thisBatchEnd);
