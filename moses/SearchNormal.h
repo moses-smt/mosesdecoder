@@ -14,6 +14,44 @@ class Manager;
 class InputType;
 class TranslationOptionCollection;
 
+class SearchNormal;
+
+class Functor {
+  public:
+    Functor(SearchNormal* search) : m_search(search) {}
+    
+    virtual void operator()(const Hypothesis &hypothesis,
+                       size_t startPos, size_t endPos) = 0;
+  protected:
+    SearchNormal* m_search;
+};
+
+class Expander : public Functor {
+  public:
+    Expander(SearchNormal* search) : Functor(search) {}
+    virtual void operator()(const Hypothesis &hypothesis,
+                       size_t startPos, size_t endPos);
+};
+
+class Collector : public Functor {
+  public:
+    Collector(SearchNormal* search) : Functor(search) {}
+    virtual void operator()(const Hypothesis &hypothesis,
+                       size_t startPos, size_t endPos);
+
+    std::vector<const Hypothesis*> GetHypotheses() {
+      return m_hypotheses;                   
+    }
+    
+    std::vector<const TranslationOptionList*>& GetOptions(int hypId) {
+      return m_options[hypId];
+    }
+    
+  private:
+    std::vector<const Hypothesis*> m_hypotheses;
+    std::map<size_t, std::vector<const TranslationOptionList*> > m_options;
+};
+
 /** Functions and variables you need to decoder an input using the
  *  phrase-based decoder (NO cube-pruning)
  *  Instantiated by the Manager class
@@ -21,6 +59,9 @@ class TranslationOptionCollection;
 class SearchNormal: public Search
 {
 protected:
+  friend Expander;
+  friend Collector;
+    
   const InputType &m_source;
   //! stacks to store hypotheses (partial translations)
   // no of elements = no of words in source + 1
@@ -34,14 +75,13 @@ protected:
 
   // functions for creating hypotheses
 
-  void ProcessStackForNeuro(const HypothesisStackNormal& hstack,
-                            const TranslationOptionCollection& to);
+  void CacheForNeural(Collector& collector);
   
   virtual bool
-  ProcessOneStack(HypothesisStack* hstack);
+  ProcessOneStack(HypothesisStack* hstack, Functor* functor);
 
   virtual void
-  ProcessOneHypothesis(const Hypothesis &hypothesis);
+  ProcessOneHypothesis(const Hypothesis &hypothesis, Functor* functor);
 
   virtual void
   ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);

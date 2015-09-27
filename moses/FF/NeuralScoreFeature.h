@@ -4,6 +4,7 @@
 #include <set>
 #include <map>
 
+#include "moses/SearchNormal.h"
 #include "moses/HypothesisStackNormal.h"
 #include "moses/TranslationOptionCollection.h"
 #include "StatefulFeatureFunction.h"
@@ -47,9 +48,13 @@ public:
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
   */
 
-  void ProcessStack(const HypothesisStackNormal& hstack,
-                    const TranslationOptionCollection& to,
-                    size_t index, AllOptions const& options);
+  void ProcessStack(Collector& collector, size_t index);
+  void BatchProcess( const std::vector<std::string>& nextWords,
+    PyObject* pyContextVectors,
+    const std::vector< std::string >& lastWords,
+    std::vector<PyObject*>& inputStates,
+    std::vector<double>& logProbs,
+    std::vector<PyObject*>& nextStates);
   
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   
@@ -83,11 +88,12 @@ private:
   std::string m_statePath;
   std::string m_modelPath;
   std::string m_wrapperPath;
+  size_t m_batchSize;
   size_t m_stateLength;
   size_t m_factor;
   boost::shared_ptr<NMT_Wrapper> m_wrapper;
     
-  PrefsByLength pbl_;
+  PrefsByLength m_pbl;
 };
 
 }

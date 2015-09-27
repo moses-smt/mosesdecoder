@@ -85,81 +85,63 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(1, line), m_preCalc(0), m_stateLength(3), m_factor(0),
+  : StatefulFeatureFunction(1, line), m_preCalc(0), m_batchSize(1000), m_stateLength(3), m_factor(0),
     m_wrapper(new NMT_Wrapper())
 {
   ReadParameters();
   m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
 }
 
-void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
-                                      const TranslationOptionCollection& to,
-                                      size_t index, AllOptions const& options) {
+void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   if(!m_preCalc)
     return;
   
   PyObject* sourceContext = 0;
   std::map<int, const NeuralScoreState*> states;
   
-  pbl_.clear();
+  m_pbl.clear();
   
   size_t covered = 0;
   size_t total = 0;
   
-  for (HypothesisStackNormal::const_iterator h = hstack.begin();
-       h != hstack.end(); ++h) {
-    Hypothesis& hypothesis = **h;
+  BOOST_FOREACH(const Hypothesis* h, collector.GetHypotheses()) {
+    const Hypothesis& hypothesis = *h;
     
     const FFState* ffstate = hypothesis.GetFFState(index);
     const NeuralScoreState* state
       = static_cast<const NeuralScoreState*>(ffstate);
     
-    states[hypothesis.GetId()] = state;
-    
-    if(sourceContext == 0)
+    if(sourceContext == 0) {
       sourceContext = state->GetContext();
+      const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
+      covered = hypoBitmap.GetNumWordsCovered();
+      total = hypoBitmap.GetSize();
+    }
+   
+    size_t hypId = hypothesis.GetId();
+    states[hypId] = state;
     
-    // @TODO: take reordering distance into account.
-    
-    const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
-    covered = hypoBitmap.GetNumWordsCovered();
-    total = hypoBitmap.GetSize();
-    
-    ReorderingConstraint const& ReoConstraint = hypothesis.GetInput().GetReorderingConstraint();
-    const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
-    const size_t sourceSize = hypothesis.GetInput().GetSize();  
-    for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) {
-      TranslationOptionList const* tol;
-      size_t endPos = startPos;
-      for (tol = to.GetTranslationOptionList(startPos, endPos);
-           tol && endPos < sourceSize;
-           tol = to.GetTranslationOptionList(startPos, ++endPos)) {
-       
-        if (tol->size() == 0 || hypoBitmap.Overlap(WordsRange(startPos, endPos))
-            || !ReoConstraint.Check(hypoBitmap, startPos, endPos))
-          continue;
-        
-        TranslationOptionList::const_iterator iter;
-        for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
-          const TranslationOption& to = **iter;
-          const TargetPhrase& tp = to.GetTargetPhrase();
-
-          Prefix prefix;
-          for(size_t i = 0; i < tp.GetSize(); ++i) {
-            prefix.push_back(to.GetTargetPhrase().GetWord(i).GetString(m_factor).as_string());
-            if(pbl_.size() < prefix.size())
-              pbl_.resize(prefix.size());
-              
-            pbl_[prefix.size() - 1][prefix][hypothesis.GetId()] = Payload();
-          }
+    BOOST_FOREACH(const TranslationOptionList* tol, collector.GetOptions(hypId)) {
+      TranslationOptionList::const_iterator iter;
+      for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
+        const TranslationOption& to = **iter;
+        const TargetPhrase& tp = to.GetTargetPhrase();
+  
+        Prefix prefix;
+        for(size_t i = 0; i < tp.GetSize(); ++i) {
+          prefix.push_back(to.GetTargetPhrase().GetWord(i).GetString(m_factor).as_string());
+          if(m_pbl.size() < prefix.size())
+            m_pbl.resize(prefix.size());
+            
+          m_pbl[prefix.size() - 1][prefix][hypId] = Payload();
         }
       }
     }
   }
   
   std::cerr << "Stack: " << covered << "/" << total << " - ";
-  for(size_t l = 0; l < pbl_.size(); l++) {
-    Prefixes& prefixes = pbl_[l];
+  for(size_t l = 0; l < m_pbl.size(); l++) {
+    Prefixes& prefixes = m_pbl[l];
     
     std::vector<std::string> allWords;
     std::vector<std::string> allLastWords;
@@ -178,7 +160,7 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
         else {
           Prefix prevPrefix = prefix;
           prevPrefix.pop_back();
-          state = pbl_[prevPrefix.size() - 1][prevPrefix][hypId].state_;
+          state = m_pbl[prevPrefix.size() - 1][prevPrefix][hypId].state_;
           allLastWords.push_back(prevPrefix.back());
         }
         allStates.push_back(state);
@@ -186,18 +168,18 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
     }
     
     std::cerr << (l+1) << ":"
-      << pbl_[l].size() << ":" << allStates.size() << " ";
+      << m_pbl[l].size() << ":" << allStates.size() << " ";
     
     std::vector<double> allProbs;
     std::vector<PyObject*> allOutStates;
     
-    m_wrapper->GetNextLogProbStates(allWords,
-                                    sourceContext,
-                                    allLastWords,
-                                    allStates,
-                                    allProbs,
-                                    allOutStates);
-
+    BatchProcess(allWords,
+                sourceContext,
+                allLastWords,
+                allStates,
+                allProbs,
+                allOutStates);
+    
     size_t k = 0;
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
       BOOST_FOREACH(SP& hyp, it->second) {
@@ -208,9 +190,47 @@ void NeuralScoreFeature::ProcessStack(const HypothesisStackNormal& hstack,
       }
     }
   }
-
   std::cerr << "ok" << std::endl;
 }
+
+void NeuralScoreFeature::BatchProcess(
+    const std::vector<std::string>& nextWords,
+    PyObject* pyContextVectors,
+    const std::vector<std::string>& lastWords,
+    std::vector<PyObject*>& inputStates,
+    std::vector<double>& logProbs,
+    std::vector<PyObject*>& nextStates) {
+  
+    size_t items = nextWords.size();
+    size_t batches = items/m_batchSize + 1;
+    for(size_t i = 0; i < batches; ++i) {
+      size_t thisBatchStart = i * m_batchSize;
+      size_t thisBatchEnd = std::min(thisBatchStart + m_batchSize, items);
+      
+      if(items > m_batchSize)
+        std::cerr << "b:" << i << ":" << thisBatchStart << "-" << thisBatchEnd << " ";
+      
+      std::vector<std::string> nextWordsBatch(nextWords.begin() + thisBatchStart,
+                                              nextWords.begin() + thisBatchEnd);
+      std::vector<std::string> lastWordsBatch(lastWords.begin() + thisBatchStart,
+                                              lastWords.begin() + thisBatchEnd);
+      std::vector<PyObject*> inputStatesBatch(inputStates.begin() + thisBatchStart,
+                                              inputStates.begin() + thisBatchEnd);
+      
+      std::vector<double> logProbsBatch;
+      std::vector<PyObject*> nextStatesBatch;
+      m_wrapper->GetNextLogProbStates(nextWordsBatch,
+                                    pyContextVectors,
+                                    lastWordsBatch,
+                                    inputStatesBatch,
+                                    logProbsBatch,
+                                    nextStatesBatch);
+    
+      logProbs.insert(logProbs.end(), logProbsBatch.begin(), logProbsBatch.end());
+      nextStates.insert(nextStates.end(), nextStatesBatch.begin(), nextStatesBatch.end());
+    }
+}
+  
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
@@ -269,7 +289,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
     Prefix prefix;
     for(size_t i = 0; i < phrase.size(); i++) {
       prefix.push_back(phrase[i]);
-      Payload& payload = const_cast<PrefsByLength&>(pbl_)[prefix.size() - 1][prefix][prevId];
+      Payload& payload = const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix][prevId];
       state = payload.state_;
       prob += payload.logProb_;
     }
@@ -300,6 +320,8 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     m_stateLength = Scan<size_t>(value);
   } else if (key == "precalculate") {
     m_preCalc = Scan<bool>(value);
+  } else if (key == "batch-size") {
+    m_batchSize = Scan<size_t>(value);
   } else if (key == "model") {
     m_modelPath = value;
   } else if (key == "wrapper-path") {
