@@ -202,7 +202,7 @@ void NeuralScoreFeature::BatchProcess(
     std::vector<PyObject*>& nextStates) {
   
     size_t items = nextWords.size();
-    size_t batches = items/m_batchSize + 1;
+    size_t batches = ceil(items/(float)m_batchSize);
     for(size_t i = 0; i < batches; ++i) {
       size_t thisBatchStart = i * m_batchSize;
       size_t thisBatchEnd = std::min(thisBatchStart + m_batchSize, items);
