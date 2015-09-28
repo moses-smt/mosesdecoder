@@ -16,9 +16,9 @@ class TranslationOptionCollection;
 
 class SearchNormal;
 
-class Functor {
+class FunctorNormal {
   public:
-    Functor(SearchNormal* search) : m_search(search) {}
+    FunctorNormal(SearchNormal* search) : m_search(search) {}
     
     virtual void operator()(const Hypothesis &hypothesis,
                        size_t startPos, size_t endPos) = 0;
@@ -26,16 +26,16 @@ class Functor {
     SearchNormal* m_search;
 };
 
-class Expander : public Functor {
+class ExpanderNormal : public FunctorNormal {
   public:
-    Expander(SearchNormal* search) : Functor(search) {}
+    ExpanderNormal(SearchNormal* search) : FunctorNormal(search) {}
     virtual void operator()(const Hypothesis &hypothesis,
                        size_t startPos, size_t endPos);
 };
 
-class Collector : public Functor {
+class CollectorNormal : public FunctorNormal, public Collector {
   public:
-    Collector(SearchNormal* search) : Functor(search) {}
+    CollectorNormal(SearchNormal* search) : FunctorNormal(search) {}
     virtual void operator()(const Hypothesis &hypothesis,
                        size_t startPos, size_t endPos);
 
@@ -59,8 +59,8 @@ class Collector : public Functor {
 class SearchNormal: public Search
 {
 protected:
-  friend Expander;
-  friend Collector;
+  friend ExpanderNormal;
+  friend CollectorNormal;
     
   const InputType &m_source;
   //! stacks to store hypotheses (partial translations)
@@ -78,10 +78,10 @@ protected:
   void CacheForNeural(Collector& collector);
   
   virtual bool
-  ProcessOneStack(HypothesisStack* hstack, Functor* functor);
+  ProcessOneStack(HypothesisStack* hstack, FunctorNormal* functor);
 
   virtual void
-  ProcessOneHypothesis(const Hypothesis &hypothesis, Functor* functor);
+  ProcessOneHypothesis(const Hypothesis &hypothesis, FunctorNormal* functor);
 
   virtual void
   ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);

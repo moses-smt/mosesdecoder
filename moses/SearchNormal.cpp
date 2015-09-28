@@ -11,16 +11,17 @@ using namespace std;
 namespace Moses
 {
   
-void Expander::operator()(const Hypothesis &hypothesis, size_t startPos, size_t endPos) {
+void ExpanderNormal::operator()(const Hypothesis &hypothesis, size_t startPos, size_t endPos) {
   m_search->ExpandAllHypotheses(hypothesis, startPos, endPos);
 }  
 
-void Collector::operator()(const Hypothesis &hypothesis, size_t startPos, size_t endPos) {
+void CollectorNormal::operator()(const Hypothesis &hypothesis, size_t startPos, size_t endPos) {
   const TranslationOptionList* tol
     = m_search->m_transOptColl.GetTranslationOptionList(startPos, endPos);
   if (!tol) return;
-  m_hypotheses.push_back(&hypothesis);
-  m_options[hypothesis.GetId()].push_back(tol); 
+  if(m_options.count(hypothesis.GetId()) == 0)
+      m_hypotheses.push_back(&hypothesis);
+  m_options[hypothesis.GetId()].push_back(tol);
 }
 
 /**
@@ -76,7 +77,7 @@ void SearchNormal::CacheForNeural(Collector& collector) {
 
 bool
 SearchNormal::
-ProcessOneStack(HypothesisStack* hstack, Functor* functor)
+ProcessOneStack(HypothesisStack* hstack, FunctorNormal* functor)
 {
   if (this->out_of_time()) return false;
   SentenceStats &stats = m_manager.GetSentenceStats();
@@ -116,11 +117,11 @@ void SearchNormal::Decode()
 
   // go through each stack
   BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
-    Collector collector(this);
+    CollectorNormal collector(this);
     if (!ProcessOneStack(hstack, &collector)) return;
     CacheForNeural(collector);
 
-    Expander expander(this);
+    ExpanderNormal expander(this);
     if (!ProcessOneStack(hstack, &expander)) return;
     IFVERBOSE(2) OutputHypoStackSize();
     actual_hypoStack = static_cast<HypothesisStackNormal*>(hstack);
@@ -135,7 +136,7 @@ void SearchNormal::Decode()
  */
 void
 SearchNormal::
-ProcessOneHypothesis(const Hypothesis &hypothesis, Functor* functor)
+ProcessOneHypothesis(const Hypothesis &hypothesis, FunctorNormal* functor)
 {
   // since we check for reordering limits, its good to have that limit handy
   // int maxDistortion  = StaticData::Instance().GetMaxDistortion();

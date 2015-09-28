@@ -5,6 +5,8 @@
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
 #include <boost/foreach.hpp>
+#include "FF/NeuralScoreFeature.h"
+
 using namespace std;
 
 namespace Moses
@@ -37,6 +39,27 @@ public:
   }
 };
 
+void ExpanderCube::operator()(const WordsBitmap &bitmap,
+                              const WordsRange &range,
+                              BitmapContainer &bitmapContainer) {
+  m_search->CreateForwardTodos(bitmap, range, bitmapContainer);
+}
+
+void CollectorCube::operator()(const WordsBitmap &bitmap,
+                               const WordsRange &range,
+                               BitmapContainer &bitmapContainer) {
+  const TranslationOptionList* transOptList;
+  transOptList = m_search->m_transOptColl.GetTranslationOptionList(range);
+  
+  if (!transOptList) return;
+  
+  BOOST_FOREACH(const Hypothesis* hypothesis, bitmapContainer.GetHypotheses()) {
+    if(m_options.count(hypothesis->GetId()) == 0)
+      m_hypotheses.push_back(hypothesis);
+    m_options[hypothesis->GetId()].push_back(transOptList);
+  }
+}
+
 SearchCubePruning::
 SearchCubePruning(Manager& manager, const InputType &source,
                   const TranslationOptionCollection &transOptColl)
@@ -60,6 +83,16 @@ SearchCubePruning::~SearchCubePruning()
   RemoveAllInColl(m_hypoStackColl);
 }
 
+void SearchCubePruning::CacheForNeural(Collector& collector) {
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
+    if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
+      const_cast<NeuralScoreFeature*>(nsf)->ProcessStack(collector, i);
+  }
+}
+
 /**
  * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
@@ -74,7 +107,8 @@ void SearchCubePruning::Decode()
   firstStack.AddInitial(hypo);
   // Call this here because the loop below starts at the second stack.
   firstStack.CleanupArcList();
-  CreateForwardTodos(firstStack);
+  
+  CreateForwardTodos(firstStack, 0);
 
   const size_t PopLimit = m_manager.options().cube.pop_limit;
   VERBOSE(2,"Cube Pruning pop limit is " << PopLimit << std::endl);
@@ -156,7 +190,9 @@ void SearchCubePruning::Decode()
     IFVERBOSE(2) {
       m_manager.GetSentenceStats().StartTimeSetupCubes();
     }
-    CreateForwardTodos(sourceHypoColl);
+    
+    CreateForwardTodos(sourceHypoColl, 0);
+  
     IFVERBOSE(2) {
       m_manager.GetSentenceStats().StopTimeSetupCubes();
     }
@@ -165,7 +201,7 @@ void SearchCubePruning::Decode()
   }
 }
 
-void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
+void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack, FunctorCube* functor)
 {
   const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
   _BMType::const_iterator iterAccessor;
@@ -184,18 +220,26 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
 
     // Sort the hypotheses inside the Bitmap Container as they are being used by now.
     bitmapContainer.SortHypotheses();
-
+    
     // check bitamp and range doesn't overlap
     size_t startPos, endPos;
     for (startPos = 0 ; startPos < size ; startPos++) {
       if (bitmap.GetValue(startPos))
         continue;
-
+      
       // not yet covered
       WordsRange applyRange(startPos, startPos);
       if (CheckDistortion(bitmap, applyRange)) {
         // apply range
-        CreateForwardTodos(bitmap, applyRange, bitmapContainer);
+        {
+          CollectorCube collector(this);
+          collector(bitmap, applyRange, bitmapContainer);
+          CacheForNeural(collector);
+        }
+        {
+          ExpanderCube expander(this);
+          expander(bitmap, applyRange, bitmapContainer);
+        }
       }
 
       size_t maxSize = size - startPos;
@@ -208,7 +252,15 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
         WordsRange applyRange(startPos, endPos);
         if (CheckDistortion(bitmap, applyRange)) {
           // apply range
-          CreateForwardTodos(bitmap, applyRange, bitmapContainer);
+          {
+            CollectorCube collector(this);
+            collector(bitmap, applyRange, bitmapContainer);
+            CacheForNeural(collector);
+          }
+          {
+            ExpanderCube expander(this);
+            expander(bitmap, applyRange, bitmapContainer);
+          }
         }
       }
     }
@@ -228,13 +280,14 @@ CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range,
   transOptList = m_transOptColl.GetTranslationOptionList(range);
   const SquareMatrix &futureScore = m_transOptColl.GetFutureScore();
 
-  if (transOptList && transOptList->size() > 0) {
+  if (transOptList && transOptList->size() > 0) {    
     HypothesisStackCubePruning& newStack
     = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
     newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer,
                                futureScore, *transOptList);
   }
 }
+
 
 bool
 SearchCubePruning::
