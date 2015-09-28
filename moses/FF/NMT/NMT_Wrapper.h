@@ -10,12 +10,17 @@
 class NMT_Wrapper
 {
 public:
-    explicit NMT_Wrapper();
-    bool Init(const std::string& state_path,
-              const std::string& model_path,
-              const std::string& wrapper_path);
+    NMT_Wrapper();
+    void Init(
+        const std::string& state_path,
+        const std::string& model_path,
+        const std::string& wrapper_path,
+        const std::string& sourceVocabPath,
+        const std::string& targetVocabPath);
 
-    bool GetContextVectors(const std::string& source_sentence, PyObject*& vectors);
+    bool GetContextVectors(
+            const std::string& source_sentence,
+            PyObject*& vectors);
 
     bool GetProb(const std::string& next_word,
                  PyObject* source_sentence,
@@ -58,10 +63,7 @@ private:
     PyObject* py_get_context_vectors;
     PyObject* py_get_next_states;
     PyObject* py_get_log_prob_states;
-    std::string state_path;
-    std::string model_path;
     void AddPathToSys(const std::string& path);
 };
-
 
 #endif  // NMT_WRAPPER_H_

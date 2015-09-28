@@ -89,7 +89,7 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
     m_wrapper(new NMT_Wrapper())
 {
   ReadParameters();
-  m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath);
+  m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath, m_sourceVocabPath, m_targetVocabPath);
 }
 
 void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
@@ -326,6 +326,10 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     m_modelPath = value;
   } else if (key == "wrapper-path") {
     m_wrapperPath = value;
+  } else if (key == "source-vocab") {
+    m_sourceVocabPath = value;
+  } else if (key == "target-vocab") {
+    m_targetVocabPath = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }

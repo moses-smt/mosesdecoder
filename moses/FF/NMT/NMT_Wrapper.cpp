@@ -38,40 +38,35 @@ void NMT_Wrapper::AddPathToSys(const string& path)
 }
 
 
-bool NMT_Wrapper::Init(const string& state_path, const string& model_path, const string& wrapper_path)
+void NMT_Wrapper::Init(
+        const std::string& state_path,
+        const std::string& model_path,
+        const std::string& wrapper_path,
+        const std::string& sourceVocabPath,
+        const std::string& targetVocabPath)
 {
-
-    this->state_path = state_path;
-    this->model_path = model_path;
-
     Py_Initialize();
-    PyErr_Print();
 
     AddPathToSys(wrapper_path);
 
     PyObject* filename = PyString_FromString((char*) "nmt_wrapper");
     PyObject* imp = PyImport_Import(filename);
-    if (imp == NULL) {
-        cerr << "No import\n"; return false;
-    }
+    UTIL_THROW_IF2(imp == NULL, "The wrapper module could not be imported.");
 
     PyObject* wrapper_name = PyObject_GetAttrString(imp, (char*)"NMTWrapper");
-    if (wrapper_name == NULL) {
-        cerr << "No wrapper\n"; return false;
-    }
+    UTIL_THROW_IF2(wrapper_name == NULL, "It could not find NMTWrapper class.");
 
-    PyObject* args = PyTuple_Pack(2, PyString_FromString(state_path.c_str()), PyString_FromString(model_path.c_str()));
+    PyObject* args = PyTuple_Pack(4,
+            PyString_FromString(state_path.c_str()),
+            PyString_FromString(model_path.c_str()),
+            PyString_FromString(sourceVocabPath.c_str()),
+            PyString_FromString(targetVocabPath.c_str()));
+
     py_wrapper = PyObject_CallObject(wrapper_name, args);
-    if (py_wrapper == NULL) {
-        return false;
-    }
+    UTIL_THROW_IF2(py_wrapper == NULL, "Problem with creating NMT_Wrapper.");
 
-    if (PyObject_CallMethod(py_wrapper, (char*)"build", NULL) == NULL) {
-        return false;
-    }
-
-
-    return true;
+    UTIL_THROW_IF2(PyObject_CallMethod(py_wrapper, (char*)"build", NULL) == NULL,
+            "Problem with build NMT_Wrapper");
 }
 
 bool NMT_Wrapper::GetProb(const string& next_word,
@@ -233,7 +228,6 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
         outputStates.push_back(hipoStates);
     }
 
-
     cerr << "Wychodze z GetProb!" << endl;
     return true;
 }
@@ -250,7 +244,6 @@ void NMT_Wrapper::GetNextStates(
     for (size_t i = 0; i < nextWords.size(); ++i) {
         PyList_Append(pyNextWords, PyString_FromString(nextWords[i].c_str()));
     }
-
 
     PyObject* pyInputStates = PyList_New(0);
     for (size_t i = 0; i < inputStates.size(); ++i) {
@@ -296,7 +289,7 @@ void NMT_Wrapper::GetNextLogProbStates(
     PyObject* pyResponse = NULL;
     PyObject* pyStates = PyList_New(0);
     for (size_t i = 0; i < inputStates.size(); ++i) {
-        if (PyList_Append(pyStates, inputStates[i]) == -1); // cerr << i << ": "<< "ARGH! " << inputStates[i] << endl;
+        PyList_Append(pyStates, inputStates[i]);
     }
     if (inputStates.size() == 0) {
         pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
@@ -305,7 +298,6 @@ void NMT_Wrapper::GetNextLogProbStates(
                                                 pyContextVectors,
                                                 NULL);
     } else {
-        //cerr << "A: " << PyList_Size(pyStates) << endl;
         pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
                                                 py_get_log_prob_states,
                                                 pyNextWords,
@@ -338,16 +330,11 @@ void NMT_Wrapper::GetNextLogProbStates(
         nextStates.push_back(nextState);
     }
     for(size_t i = 0; i < nextStates.size(); ++i) {
-        // cerr << "STATES: " << nextStates[i] << endl;
     }
-
     //cerr << "Wychodze z GetLogProbStates!" << endl;
-    
-    
 }
 
 NMT_Wrapper::~NMT_Wrapper()
 {
     Py_Finalize();
 }
-

@@ -88,6 +88,8 @@ private:
   std::string m_statePath;
   std::string m_modelPath;
   std::string m_wrapperPath;
+  std::string m_sourceVocabPath;
+  std::string m_targetVocabPath;
   size_t m_batchSize;
   size_t m_stateLength;
   size_t m_factor;

@@ -16,13 +16,8 @@ int main(int argc, char *argv[])
     string wrapper_path = string(argv[3]);
 
     NMT_Wrapper* wrapper = new NMT_Wrapper();
-    bool res = wrapper->Init(state_path, model_path, wrapper_path);
-    if (res == false) {
-        cout << "No wrapper" << endl;
-        return 1;
-    }
+    wrapper->Init(state_path, model_path, wrapper_path, "", "");
 
-    double prob;
     vector< vector<PyObject*> > nextStates;
     vector<PyObject*> currentStates;
     vector< vector<double> > logProbs;
