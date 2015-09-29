@@ -1,6 +1,5 @@
 #include "util/stream/rewindable_stream.hh"
 #include "util/pcqueue.hh"
-#include <iostream>
 
 #include <iostream>
 
