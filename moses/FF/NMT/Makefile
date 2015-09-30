@@ -1,14 +1,25 @@
 #!/bin/bash -ex
 CC=g++
-SOURCES=NMT_Wrapper.cpp test.cpp ../../../util/exception.cc
-STATEPATH=/home/tomaszd/work/nmt2moses/nmt_model/state.pkl
-MODELPATH=/home/tomaszd/work/nmt2moses/nmt_model/min_en_de_model.npz
+SOURCES=../../../util/exception.o NMT_Wrapper.o test.o
+STATEPATH=/work/nmt_model/state.pkl
+MODELPATH=/work/nmt_model/min_en_de_model.npz
+SOURCEVOCAB=/work/nmt_model/vocab/mini_en_de_.en.pkl
+TARGETVOCAB=/work/nmt_model/vocab/mini_en_de_.de.pkl
 WRAPPERPATH=./wrapper
 
 test: $(SOURCES)
-	$(CC) -I/home/tomaszd/work/nmt2moses/mosesdecoder -I/usr/include/python2.7 -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7 -o $@ -ggdb
+	$(CC) -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7  -o $@ 
+
+../../../util/exception.o:../../../util/exception.cc
+	$(CC) -I/work/mosesdecoder -c $< -o $@
+
+test.o: test.cpp
+	$(CC) -O3 -Wall $< -c -o $@
+
+%.o: %.cpp
+	$(CC) -ftemplate-depth-128 -O3 -finline-functions -Wno-inline -Wall -pthread -I/work/mosesdecoder -I/usr/include/python2.7 -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7 -c -o $@
 
 run:
-	./test $(STATEPATH) $(MODELPATH) $(WRAPPERPATH)
+	./test $(STATEPATH) $(MODELPATH) $(WRAPPERPATH) $(SOURCEVOCAB) $(TARGETVOCAB)
 
 .PHONY: run

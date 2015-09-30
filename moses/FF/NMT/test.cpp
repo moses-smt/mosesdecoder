@@ -2,116 +2,44 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/python.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace std;
-using namespace boost::python;
+
+class NMT_Wrapper;
+struct _object;
+typedef _object PyObject;
 
 const int NCOPY = 10;
 
 int main(int argc, char *argv[])
 {
-    string state_path = string(argv[1]);
-    string model_path = string(argv[2]);
-    string wrapper_path = string(argv[3]);
+    string statePath = string(argv[1]);
+    string modelPath = string(argv[2]);
+    string wrapperPath = string(argv[3]);
+    string sourceVocab = string(argv[4]);
+    string targetVocab = string(argv[5]);
 
-    NMT_Wrapper* wrapper = new NMT_Wrapper();
-    wrapper->Init(state_path, model_path, wrapper_path, "", "");
-
-    vector< vector<PyObject*> > nextStates;
-    vector<PyObject*> currentStates;
-    vector< vector<double> > logProbs;
+    boost::shared_ptr<NMT_Wrapper> wrapper(new NMT_Wrapper());
+    wrapper->Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
+    vector<double> prob;
+    vector<PyObject*> nextStates;
     vector<string> nextWords;
+    for (size_t i = 0; i < 1000; ++i) nextWords.push_back("das");
+
     vector<string> lastWords;
+    for (size_t i = 0; i < 1000; ++i) lastWords.push_back("");
+    vector<PyObject*> inputStates;
+    for (size_t i = 0; i < 1000; ++i) inputStates.push_back(NULL);
+    
 
-    string source_sentence;
-    string next_word;
-    string last_word = "";
-    source_sentence = "this is a test sentence";
-    PyObject* py_context_vectors = NULL;
-    wrapper->GetContextVectors(source_sentence, py_context_vectors);
-    nextWords.push_back("das");
-    nextWords.push_back("ich");
-    nextWords.push_back("ich");
-    wrapper->GetProb(nextWords,
-                        py_context_vectors,
-                        lastWords,
-                        currentStates,
-                        logProbs,
-                        nextStates);
-    cout << "OK" << endl;
-    for (size_t i = 0; i < logProbs.size(); ++i) {
-        cout << "hip: " << i << endl;
-        for (size_t j = 0; j < logProbs[0].size(); ++j) {
-            cout << "Word: " << nextWords[j] << "; Prob: " << logProbs[i][j] << endl;
-        }
-    }
-    currentStates.clear();
-    currentStates.push_back(nextStates[0][0]);
-    currentStates.push_back(nextStates[0][1]);
-    cout << "DONE" <<endl;
+    string sourceSentence = "this is a test sentence";
+    PyObject* pyContextVectors = NULL;
+    wrapper->GetContextVectors(sourceSentence, pyContextVectors);
 
-    lastWords.clear();
-    lastWords.push_back(nextWords[0]);
-    lastWords.push_back(nextWords[1]);
-    nextWords.clear();
-    nextWords.push_back("ist");
-    nextWords.push_back("bin");
-    wrapper->GetProb(nextWords,
-                        py_context_vectors,
-                        lastWords,
-                        currentStates,
-                        logProbs,
-                        nextStates);
-    for (size_t i = 0; i < logProbs.size(); ++i) {
-        cout << "hip: " << i << endl;
-        for (size_t j =0; j < logProbs[0].size(); ++j){
-            cout << "Word: " << nextWords[j] << "; Prob: " << logProbs[i][j] << endl;
-        }
-    }
-    cout << endl;
-    currentStates.clear();
-    currentStates.push_back(nextStates[0][0]);
-    currentStates.push_back(nextStates[1][1]);
-
-    lastWords = nextWords;
-    nextWords.clear();
-    nextWords.push_back("ein");
-    nextWords.push_back("ein");
-    wrapper->GetProb(nextWords,
-                        py_context_vectors,
-                        lastWords,
-                        currentStates,
-                        logProbs,
-                        nextStates);
-    for (size_t i = 0; i < logProbs.size(); ++i) {
-        cout << "hip: " << i << endl;
-        for (size_t j =0; j < logProbs[0].size(); ++j){
-            cout << "Word: " << nextWords[j] << "; Prob: " << logProbs[i][j] << endl;
-        }
-    }
-    cout << endl;
-    currentStates.clear();
-    currentStates.push_back(nextStates[0][0]);
-    currentStates.push_back(nextStates[1][1]);
-
-    lastWords = nextWords;
-    nextWords.clear();
-    nextWords.push_back("test");
-    wrapper->GetProb(nextWords,
-                        py_context_vectors,
-                        lastWords,
-                        currentStates,
-                        logProbs,
-                        nextStates);
-
-    for (size_t i = 0; i < logProbs.size(); ++i) {
-        cout << "hip: " << i << endl;
-        for (size_t j =0; j < logProbs[0].size(); ++j){
-            cout << "Word: " << nextWords[j] << "; Prob: " << logProbs[i][j] << endl;
-        }
-    }
-    cout << endl;
+    wrapper->GetNextLogProbStates(nextWords, pyContextVectors, lastWords,
+                                  inputStates, prob, nextStates);
+    cout << prob.size() << " " << prob[0] << endl;
 
     return 0;
 }
