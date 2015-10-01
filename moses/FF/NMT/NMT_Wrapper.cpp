@@ -46,7 +46,6 @@ void NMT_Wrapper::Init(
         const std::string& targetVocabPath)
 {
     Py_Initialize();
-
     AddPathToSys(wrapper_path);
 
     PyObject* filename = PyString_FromString((char*) "nmt_wrapper");

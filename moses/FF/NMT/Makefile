@@ -7,19 +7,25 @@ SOURCEVOCAB=/work/nmt_model/vocab/mini_en_de_.en.pkl
 TARGETVOCAB=/work/nmt_model/vocab/mini_en_de_.de.pkl
 WRAPPERPATH=./wrapper
 
+
 test: $(SOURCES)
 	$(CC) -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7  -o $@ 
 
 ../../../util/exception.o:../../../util/exception.cc
-	$(CC) -I/work/mosesdecoder -c $< -o $@
+	$(CC) -I/work/mosesdecoder -fPIC -c $< -o $@
 
 test.o: test.cpp
 	$(CC) -O3 -Wall $< -c -o $@
 
 %.o: %.cpp
-	$(CC) -ftemplate-depth-128 -O3 -finline-functions -Wno-inline -Wall -pthread -I/work/mosesdecoder -I/usr/include/python2.7 -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7 -c -o $@
+	$(CC) -fPIC -ftemplate-depth-128 -O3 -finline-functions -Wno-inline -Wall -pthread -I/work/mosesdecoder -I/usr/include/python2.7 -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7 -c -o $@
 
 run:
 	./test $(STATEPATH) $(MODELPATH) $(WRAPPERPATH) $(SOURCEVOCAB) $(TARGETVOCAB)
-
 .PHONY: run
+
+# test2: test.o libwrapper.so
+# 	$(CC) -L/usr/lib/python2.7/config-x86_64-linux-gnu -L. $< -lwrapper -lpython2.7 -o $@
+
+# libwrapper.so: NMT_Wrapper.o ../../../util/exception.o
+#	g++ -L/usr/lib/python2.7/config-x86_64-linux-gnu -fPIC -shared -Wall -o $@ -lpython2.7 $^
