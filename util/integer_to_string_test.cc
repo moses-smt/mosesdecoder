@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(Corners) {
   TestCorners<int16_t>();
   TestCorners<int32_t>();
   TestCorners<int64_t>();
-  TestCorners<const void*>();
+  //TestCorners<const void*>();
 }
 
 template <class T> void TestAll() {
@@ -64,6 +64,7 @@ BOOST_AUTO_TEST_CASE(Tens) {
 }
 
 BOOST_AUTO_TEST_CASE(Pointers) {
+  /*
   for (uintptr_t i = 1; i < std::numeric_limits<uintptr_t>::max() / 10; i *= 10) {
     TestValue((const void*)i);
   }
@@ -71,6 +72,7 @@ BOOST_AUTO_TEST_CASE(Pointers) {
     TestValue((const void*)i);
     TestValue((const void*)(i + 0xf00));
   }
+  */
 }
 
 }} // namespaces
