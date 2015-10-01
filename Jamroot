@@ -17,6 +17,9 @@
 #Note that, like language models, this is the --prefix where the library was
 #installed, not some executable within the library.  
 #
+#--no-xmlrpc-c
+# Don't use xmlrpc-c library, even if it exists. Don't build moses server
+#
 #Compact phrase table and compact lexical reordering table
 #--with-cmph=/path/to/cmph
 #
