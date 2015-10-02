@@ -26,16 +26,13 @@ void PhraseLengthFeature::EvaluateInIsolation(const Phrase &source
   size_t sourceLength = source.GetSize();
 
   // create feature names
-  string nameSourceStr;
-  util::StringStream nameSource(nameSourceStr);
+  util::StringStream nameSource;
   nameSource << "s" << sourceLength;
 
-  string nameTargetStr;
-  util::StringStream nameTarget(nameTargetStr);
+  util::StringStream nameTarget;
   nameTarget << "t" << targetLength;
 
-  string nameBothStr;
-  util::StringStream nameBoth(nameBothStr);
+  util::StringStream nameBoth;
   nameBoth << sourceLength << "," << targetLength;
 
   // increase feature counts

@@ -27,8 +27,7 @@ const std::string& SparseReorderingFeatureKey::Name (const string& wordListId)
 {
   static string kSep = "-";
   static string name;
-  std::string str;
-  util::StringStream buf(str);
+  util::StringStream buf;
   // type side position id word reotype
   if (type == Phrase) {
     buf << "phr";
@@ -56,7 +55,7 @@ const std::string& SparseReorderingFeatureKey::Name (const string& wordListId)
   buf << word->GetString();
   buf << kSep;
   buf << reoType;
-  name = str;
+  name = buf.str();
   return name;
 }
 
@@ -90,10 +89,9 @@ SparseReordering::SparseReordering(const map<string,string>& config, const Lexic
       ReadWeightMap(i->second);
       m_useWeightMap = true;
       for (int reoType=0; reoType<=LRModel::MAX; ++reoType) {
-    	std::string str;
-        util::StringStream buf(str);
+        util::StringStream buf;
         buf << reoType;
-        m_featureMap2.push_back(m_producer->GetFeatureName(str));
+        m_featureMap2.push_back(m_producer->GetFeatureName(buf.str()));
       }
 
     } else if (fields[0] == "phrase") {

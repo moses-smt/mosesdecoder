@@ -11,9 +11,9 @@
 namespace util { namespace {
 
 template <class T> void TestEqual(const T value) {
-  std::string str;
-  StringStream(str) << value;
-  BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(value), str);
+  StringStream strme;
+  strme << value;
+  BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(value), strme.str());
 }
 
 template <class T> void TestCorners() {

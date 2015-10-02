@@ -53,8 +53,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(ttasksptr const& ttask)
 
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
-	string str;
-    util::StringStream strme(str);
+    util::StringStream strme;
     UTIL_THROW2("ERROR: mismatch of number of scaling factors: " << weight.size()
                 << " " << m_numScoreComponents);
   }

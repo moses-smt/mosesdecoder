@@ -205,10 +205,9 @@ void FVector::save(const string& filename) const
 {
   ofstream out(filename.c_str());
   if (!out) {
-    std::string str;
-    util::StringStream msg(str);
+    util::StringStream msg;
     msg << "Unable to open " << filename;
-    throw runtime_error(str);
+    throw runtime_error(msg.str());
   }
   write(out);
   out.close();

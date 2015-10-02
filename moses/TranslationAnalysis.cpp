@@ -41,11 +41,9 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
   if (doLMStats)
     lmAcc.resize((*tpi)->GetLMStats()->size(), 0);
   for (; tpi != translationPath.end(); ++tpi) {
-	std::string smsStr;
-    util::StringStream sms(smsStr);
+    util::StringStream sms;
 
-    std::string tmsStr;
-    util::StringStream tms(tmsStr);
+    util::StringStream tms;
     std::string target = (*tpi)->GetTargetPhraseStringRep();
     std::string source = (*tpi)->GetSourcePhraseStringRep();
     WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
@@ -93,8 +91,8 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
     for (; swr_i <= swr.GetEndPos() && swr.GetEndPos() != NOT_FOUND; swr_i++) {
       tms << '-' << swr_i;
     }
-    if (!epsilon) targetMap.push_back(smsStr);
-    sourceMap.push_back(tmsStr);
+    if (!epsilon) targetMap.push_back(sms.str());
+    sourceMap.push_back(tms.str());
   }
   std::vector<std::string>::iterator si = sourceMap.begin();
   std::vector<std::string>::iterator ti = targetMap.begin();

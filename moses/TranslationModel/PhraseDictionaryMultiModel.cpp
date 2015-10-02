@@ -39,10 +39,9 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
   } else if (m_mode == "all" || m_mode == "all-restrict") {
     UTIL_THROW2("Implementation has moved: use PhraseDictionaryGroup with restrict=true/false");
   } else {
-	string str;
-    util::StringStream msg(str);
+    util::StringStream msg;
     msg << "combination mode unknown: " << m_mode;
-    throw runtime_error(str);
+    throw runtime_error(msg.str());
   }
 }
 
@@ -212,10 +211,9 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
       raw_weights.push_back(1.0/m_numModels); //uniform weights created online
     }
   } else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
-	string str;
-	util::StringStream strme(str);
+	util::StringStream strme;
     strme << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ".";
-    UTIL_THROW(util::Exception, str);
+    UTIL_THROW(util::Exception, strme.str());
   } else {
     raw_weights = *weights_ptr;
   }

@@ -28,13 +28,12 @@ struct SentenceAlignment {
   std::string getTargetString(const Vocabulary &vocab) const;
 
   std::string getAlignmentString() const {
-    std::string str;
-    util::StringStream strme(str);
+    util::StringStream strme;
     for (size_t i = 0; i < alignment.size(); ++i) {
       const std::pair<int,int> &alignPair = alignment[i];
       strme << alignPair.first << "-" << alignPair.second << " ";
     }
-    return str;
+    return strme.str();
   }
 
 };

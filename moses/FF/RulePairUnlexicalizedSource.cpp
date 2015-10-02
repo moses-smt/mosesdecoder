@@ -58,8 +58,7 @@ void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
     }
   }
 
-  string str;
-  util::StringStream namestr(str);
+  util::StringStream namestr;
 
   for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT) {
     const Word &wordT = targetPhrase.GetWord(posT);

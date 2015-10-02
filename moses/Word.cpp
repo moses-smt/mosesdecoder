@@ -80,8 +80,7 @@ void Word::Merge(const Word &sourceWord)
 
 std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
 {
-  string str;
-  util::StringStream strme(str);
+  util::StringStream strme;
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   unsigned int stop = min(max_fax(),factorType.size());
@@ -101,7 +100,7 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
     }
   }
   if(endWithBlank) strme << " ";
-  return str;
+  return strme.str();
 }
 
 StringPiece Word::GetString(FactorType factorType) const
