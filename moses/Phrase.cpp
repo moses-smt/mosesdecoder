@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"  // GetMaxNumFactors
 
 #include "util/string_piece.hh"
+#include "util/string_stream.hh"
 #include "util/tokenize_piece.hh"
 
 using namespace std;
@@ -117,7 +118,8 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
   bool markUnknown = StaticData::Instance().GetMarkUnknown();
 
-  stringstream strme;
+  string str;
+  util::StringStream strme(str);
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
     if (markUnknown && GetWord(pos).IsOOV()) {
       strme << StaticData::Instance().GetUnknownWordPrefix();
@@ -128,7 +130,7 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
     }
   }
 
-  return strme.str();
+  return str;
 }
 
 Word &Phrase::AddWord()

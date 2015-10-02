@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "StaticData.h"  // needed to determine the FactorDelimiter
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 #include "util/tokenize_piece.hh"
 
 using namespace std;
@@ -79,7 +80,8 @@ void Word::Merge(const Word &sourceWord)
 
 std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
 {
-  stringstream strme;
+  string str;
+  util::StringStream strme(str);
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   unsigned int stop = min(max_fax(),factorType.size());
@@ -99,7 +101,7 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
     }
   }
   if(endWithBlank) strme << " ";
-  return strme.str();
+  return str;
 }
 
 StringPiece Word::GetString(FactorType factorType) const

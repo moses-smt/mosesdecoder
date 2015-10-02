@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -84,10 +85,11 @@ void GenerationDictionary::Load()
 
     size_t numFeaturesInFile = token.size() - 2;
     if (numFeaturesInFile < numFeatureValuesInConfig) {
-      stringstream strme;
+      std::string str;
+      util::StringStream strme(str);
       strme << m_filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
-            << " feature values, but found " << numFeaturesInFile << std::endl;
-      throw strme.str();
+            << " feature values, but found " << numFeaturesInFile << "\n";
+      throw str;
     }
     std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
     for (size_t i = 0; i < numFeatureValuesInConfig; i++)

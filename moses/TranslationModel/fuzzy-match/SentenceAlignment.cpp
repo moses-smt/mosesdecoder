@@ -7,18 +7,20 @@
 //
 
 #include <iostream>
+#include "util/string_stream.hh"
 #include "SentenceAlignment.h"
 
 namespace tmmt
 {
 std::string SentenceAlignment::getTargetString(const Vocabulary &vocab) const
 {
-  std::stringstream strme;
+  std::string str;
+  util::StringStream strme(str);
   for (size_t i = 0; i < target.size(); ++i) {
     const WORD &word = vocab.GetWord(target[i]);
     strme << word << " ";
   }
-  return strme.str();
+  return str;
 }
 
 }

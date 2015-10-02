@@ -8,6 +8,7 @@
 
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
+#include "util/string_stream.hh"
 #include "util/tokenize_piece.hh"
 
 #include "LexicalReordering.h"
@@ -26,7 +27,8 @@ const std::string& SparseReorderingFeatureKey::Name (const string& wordListId)
 {
   static string kSep = "-";
   static string name;
-  ostringstream buf;
+  std::string str;
+  util::StringStream buf(str);
   // type side position id word reotype
   if (type == Phrase) {
     buf << "phr";
@@ -54,7 +56,7 @@ const std::string& SparseReorderingFeatureKey::Name (const string& wordListId)
   buf << word->GetString();
   buf << kSep;
   buf << reoType;
-  name = buf.str();
+  name = str;
   return name;
 }
 
@@ -88,9 +90,10 @@ SparseReordering::SparseReordering(const map<string,string>& config, const Lexic
       ReadWeightMap(i->second);
       m_useWeightMap = true;
       for (int reoType=0; reoType<=LRModel::MAX; ++reoType) {
-        ostringstream buf;
+    	std::string str;
+        util::StringStream buf(str);
         buf << reoType;
-        m_featureMap2.push_back(m_producer->GetFeatureName(buf.str()));
+        m_featureMap2.push_back(m_producer->GetFeatureName(str));
       }
 
     } else if (fields[0] == "phrase") {

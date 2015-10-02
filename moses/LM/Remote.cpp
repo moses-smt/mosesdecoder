@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include "Remote.h"
 #include "moses/Factor.h"
+#include "util/string_stream.hh"
 
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <arpa/inet.h>
@@ -96,7 +97,8 @@ LMResult LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFa
   cur->boState = *reinterpret_cast<const State*>(&m_curId);
   ++m_curId;
 
-  std::ostringstream os;
+  std::string out;
+  util::StringStream os(out);
   os << "prob ";
   if (event_word == NULL) {
     os << "</s>";
@@ -111,8 +113,7 @@ LMResult LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFa
       os << ' ' << f->GetString();
     }
   }
-  os << std::endl;
-  std::string out = os.str();
+  os << "\n";
   write(sock, out.c_str(), out.size());
   char res[6];
   int r = read(sock, res, 6);
