@@ -21,6 +21,9 @@ class StringStream : public FakeOStream<StringStream> {
       return *this;
     }
 
+    const std::string &str() const
+    { return out_; }
+
   protected:
     friend class FakeOStream<StringStream>;
     char *Ensure(std::size_t amount) {

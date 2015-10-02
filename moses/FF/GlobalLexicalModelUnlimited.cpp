@@ -5,6 +5,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/TranslationTask.h"
 #include "util/string_piece_hash.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -131,12 +132,13 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
     }
 
     if (m_biasFeature) {
-      stringstream feature;
+      string str;
+      util::StringStream feature(str);
       feature << "glm_";
       feature << targetString;
       feature << "~";
       feature << "**BIAS**";
-      accumulator->SparsePlusEquals(feature.str(), 1);
+      accumulator->SparsePlusEquals(str, 1);
     }
 
     boost::unordered_set<uint64_t> alreadyScored;
@@ -165,13 +167,14 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
           if (m_sourceContext) {
             if (sourceIndex == 0) {
               // add <s> trigger feature for source
-              stringstream feature;
+              string str;
+              util::StringStream feature(str);
               feature << "glm_";
               feature << targetString;
               feature << "~";
               feature << "<s>,";
               feature << sourceString;
-              accumulator->SparsePlusEquals(feature.str(), 1);
+              accumulator->SparsePlusEquals(str, 1);
               alreadyScored.insert(sourceHash);
             }
 
@@ -183,14 +186,15 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
                 contextExists = FindStringPiece(m_vocabSource, contextString ) != m_vocabSource.end();
 
               if (m_unrestricted || contextExists) {
-                stringstream feature;
+                string str;
+                util::StringStream feature(str);
                 feature << "glm_";
                 feature << targetString;
                 feature << "~";
                 feature << sourceString;
                 feature << ",";
                 feature << contextString;
-                accumulator->SparsePlusEquals(feature.str(), 1);
+                accumulator->SparsePlusEquals(str, 1);
                 alreadyScored.insert(sourceHash);
               }
             }
@@ -304,12 +308,13 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
               }
             }
           } else {
-            stringstream feature;
+            string str;
+            util::StringStream feature(str);
             feature << "glm_";
             feature << targetString;
             feature << "~";
             feature << sourceString;
-            accumulator->SparsePlusEquals(feature.str(), 1);
+            accumulator->SparsePlusEquals(str, 1);
             alreadyScored.insert(sourceHash);
 
           }
@@ -323,7 +328,8 @@ void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulat
     StringPiece sourceTrigger, StringPiece sourceWord,
     StringPiece targetTrigger, StringPiece targetWord) const
 {
-  stringstream feature;
+  string str;
+  util::StringStream feature(str);
   feature << "glm_";
   feature << targetTrigger;
   feature << ",";
@@ -332,7 +338,7 @@ void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulat
   feature << sourceTrigger;
   feature << ",";
   feature << sourceWord;
-  accumulator->SparsePlusEquals(feature.str(), 1);
+  accumulator->SparsePlusEquals(str, 1);
 
 }
 
