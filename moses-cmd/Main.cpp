@@ -28,13 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /** main function of the command line version of the decoder **/
 int main(int argc, char** argv)
 {
-	std::string output;
-	util::StringStream strme2(output);
-	strme2 << StringPiece("JJJJ");
-	strme2 << std::string("kkkk");
-
-	std::cout << output;
-
   return decoder_main(argc, argv);
 }
 
