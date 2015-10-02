@@ -22,10 +22,14 @@ test.o: test.cpp
 
 run:
 	./test $(STATEPATH) $(MODELPATH) $(WRAPPERPATH) $(SOURCEVOCAB) $(TARGETVOCAB)
-.PHONY: run
 
-# test2: test.o libwrapper.so
-# 	$(CC) -L/usr/lib/python2.7/config-x86_64-linux-gnu -L. $< -lwrapper -lpython2.7 -o $@
+run2:
+	LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:`pwd` ./test2 $(STATEPATH) $(MODELPATH) $(WRAPPERPATH) $(SOURCEVOCAB) $(TARGETVOCAB)
 
-# libwrapper.so: NMT_Wrapper.o ../../../util/exception.o
-#	g++ -L/usr/lib/python2.7/config-x86_64-linux-gnu -fPIC -shared -Wall -o $@ -lpython2.7 $^
+.PHONY: run run2
+
+test2: test.o libwrapper.so
+	$(CC) -L/usr/lib/python2.7/config-x86_64-linux-gnu -L. $< -lwrapper -lpython2.7 -o $@
+
+libwrapper.so: NMT_Wrapper.o ../../../util/exception.o
+	g++ -L/usr/lib/python2.7/config-x86_64-linux-gnu -fPIC -shared -Wall -o $@ -lpython2.7 $^
