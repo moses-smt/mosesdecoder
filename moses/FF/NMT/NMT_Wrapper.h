@@ -8,6 +8,14 @@
 struct _object;
 typedef _object PyObject;
 
+void testMe(
+    const std::string& statePath,
+    const std::string& modelPath,
+    const std::string& wrapperPath,
+    const std::string& sourceVocab,
+    const std::string& targetVocab);
+
+
 class NMT_Wrapper
 {
 public:
@@ -18,7 +26,7 @@ public:
         const std::string& wrapper_path,
         const std::string& sourceVocabPath,
         const std::string& targetVocabPath);
-
+    
     bool GetContextVectors(
             const std::string& source_sentence,
             PyObject*& vectors);

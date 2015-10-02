@@ -23,10 +23,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * Moses main wrapper for executable for single-threaded and multi-threaded, simply calling decoder_main.
  **/
 #include "moses/ExportInterface.h"
+#include "moses/FF/NMT/NMT_Wrapper.h"
 
 /** main function of the command line version of the decoder **/
 int main(int argc, char** argv)
 {
+  
+  testMe(
+    "/work/nmt_model/state.pkl",
+    "/work/nmt_model/min_en_de_model.npz",
+    "/work/mosesdecoder2/moses/FF/NMT/wrapper",
+    "/work/nmt_model/vocab/mini_en_de_.en.pkl",
+    "/work/nmt_model/vocab/mini_en_de_.de.pkl");
+  
   return decoder_main(argc, argv);
 }
 

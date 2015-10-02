@@ -14,6 +14,35 @@
 using namespace std;
 using namespace util;
 
+void testMe(
+    const std::string& statePath,
+    const std::string& modelPath,
+    const std::string& wrapperPath,
+    const std::string& sourceVocab,
+    const std::string& targetVocab) {
+
+    NMT_Wrapper wrapper;
+    wrapper.Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
+    std::vector<double> prob;
+    std::vector<PyObject*> nextStates;
+    std::vector<string> nextWords;
+    
+    for (size_t i = 0; i < 1000; ++i) nextWords.push_back("das");
+    std::vector<std::string> lastWords;
+    for (size_t i = 0; i < 1000; ++i) lastWords.push_back("");
+    std::vector<PyObject*> inputStates;
+    for (size_t i = 0; i < 1000; ++i) inputStates.push_back(NULL);
+    
+
+    std::string sourceSentence = "this is a test sentence";
+    PyObject* pyContextVectors = NULL;
+    wrapper.GetContextVectors(sourceSentence, pyContextVectors);
+
+    wrapper.GetNextLogProbStates(nextWords, pyContextVectors, lastWords,
+                                  inputStates, prob, nextStates);
+    std::cout << prob.size() << " " << prob[0] << std::endl;    
+}
+    
 
 NMT_Wrapper::NMT_Wrapper()
 {
