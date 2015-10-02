@@ -79,17 +79,16 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
   
   std::string sentenceString = Trim(ss.str());
   PyObject* pyContextVectors;
-  m_wrapper->GetContextVectors(sentenceString, pyContextVectors);
+  NMT_Wrapper::GetNMT().GetContextVectors(sentenceString, pyContextVectors);
   
   return new NeuralScoreState(pyContextVectors, "", NULL);
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(1, line), m_preCalc(0), m_batchSize(1000), m_stateLength(3), m_factor(0),
-    m_wrapper(new NMT_Wrapper())
+  : StatefulFeatureFunction(1, line), m_preCalc(0), m_batchSize(1000), m_stateLength(3), m_factor(0)
 {
   ReadParameters();
-  m_wrapper->Init(m_statePath, m_modelPath, m_wrapperPath, m_sourceVocabPath, m_targetVocabPath);
+  NMT_Wrapper::GetNMT().Init(m_statePath, m_modelPath, m_wrapperPath, m_sourceVocabPath, m_targetVocabPath);
 }
 
 void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
@@ -219,7 +218,7 @@ void NeuralScoreFeature::BatchProcess(
       
       std::vector<double> logProbsBatch;
       std::vector<PyObject*> nextStatesBatch;
-      m_wrapper->GetNextLogProbStates(nextWordsBatch,
+      NMT_Wrapper::GetNMT().GetNextLogProbStates(nextWordsBatch,
                                     pyContextVectors,
                                     lastWordsBatch,
                                     inputStatesBatch,
@@ -274,7 +273,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   
   if(!m_preCalc) {
     double prob = 0;
-    m_wrapper->GetProb(phrase, context,
+    NMT_Wrapper::GetNMT().GetProb(phrase, context,
                        prevState->GetLastWord(),
                        prevState->GetState(),
                        prob, nextState);

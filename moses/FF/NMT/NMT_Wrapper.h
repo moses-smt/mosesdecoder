@@ -8,14 +8,6 @@
 struct _object;
 typedef _object PyObject;
 
-void testMe(
-    const std::string& statePath,
-    const std::string& modelPath,
-    const std::string& wrapperPath,
-    const std::string& sourceVocab,
-    const std::string& targetVocab);
-
-
 class NMT_Wrapper
 {
 public:
@@ -64,7 +56,13 @@ public:
         std::vector<PyObject*>& nextStates);
     virtual ~NMT_Wrapper();
 
+    static NMT_Wrapper& GetNMT() {
+        return s_nmt;
+    }
+    
 private:
+    static NMT_Wrapper s_nmt;
+    
     PyObject* py_wrapper;
     PyObject* py_get_log_prob;
     PyObject* py_get_log_probs;

@@ -93,7 +93,6 @@ private:
   size_t m_batchSize;
   size_t m_stateLength;
   size_t m_factor;
-  boost::shared_ptr<NMT_Wrapper> m_wrapper;
     
   PrefsByLength m_pbl;
 };
