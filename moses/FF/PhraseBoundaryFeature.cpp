@@ -3,6 +3,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/TranslationOption.h"
 #include "moses/InputPath.h"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -61,7 +62,8 @@ void PhraseBoundaryFeature::AddFeatures(
   ScoreComponentCollection* scores) const
 {
   for (size_t i = 0; i < factors.size(); ++i) {
-    ostringstream name;
+    std::string str;
+    util::StringStream name(str);
     name << side << ":";
     name << factors[i];
     name << ":";
