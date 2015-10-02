@@ -15,6 +15,7 @@
 #include "moses/PDTAimp.h"
 #include "moses/TranslationTask.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -52,7 +53,8 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(ttasksptr const& ttask)
 
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
-    std::stringstream strme;
+	string str;
+    util::StringStream strme(str);
     UTIL_THROW2("ERROR: mismatch of number of scaling factors: " << weight.size()
                 << " " << m_numScoreComponents);
   }

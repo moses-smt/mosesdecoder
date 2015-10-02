@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include "Vocabulary.h"
+#include "util/string_stream.hh"
 
 namespace tmmt
 {
@@ -27,12 +28,13 @@ struct SentenceAlignment {
   std::string getTargetString(const Vocabulary &vocab) const;
 
   std::string getAlignmentString() const {
-    std::stringstream strme;
+    std::string str;
+    util::StringStream strme(str);
     for (size_t i = 0; i < alignment.size(); ++i) {
       const std::pair<int,int> &alignPair = alignment[i];
       strme << alignPair.first << "-" << alignPair.second << " ";
     }
-    return strme.str();
+    return str;
   }
 
 };

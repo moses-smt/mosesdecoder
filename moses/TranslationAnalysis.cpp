@@ -10,6 +10,7 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/LM/Base.h"
+#include "util/string_stream.hh"
 
 using namespace Moses;
 
@@ -40,8 +41,11 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
   if (doLMStats)
     lmAcc.resize((*tpi)->GetLMStats()->size(), 0);
   for (; tpi != translationPath.end(); ++tpi) {
-    std::ostringstream sms;
-    std::ostringstream tms;
+	std::string smsStr;
+    util::StringStream sms(smsStr);
+
+    std::string tmsStr;
+    util::StringStream tms(tmsStr);
     std::string target = (*tpi)->GetTargetPhraseStringRep();
     std::string source = (*tpi)->GetSourcePhraseStringRep();
     WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
@@ -89,8 +93,8 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
     for (; swr_i <= swr.GetEndPos() && swr.GetEndPos() != NOT_FOUND; swr_i++) {
       tms << '-' << swr_i;
     }
-    if (!epsilon) targetMap.push_back(sms.str());
-    sourceMap.push_back(tms.str());
+    if (!epsilon) targetMap.push_back(smsStr);
+    sourceMap.push_back(tmsStr);
   }
   std::vector<std::string>::iterator si = sourceMap.begin();
   std::vector<std::string>::iterator ti = targetMap.begin();

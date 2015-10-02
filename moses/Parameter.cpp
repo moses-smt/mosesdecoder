@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "util/string_stream.hh"
 #include "util/exception.hh"
 #include "util/random.hh"
 #include <boost/program_options.hpp>
@@ -701,7 +702,8 @@ ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
     size_t currOldInd = 0;
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      stringstream ptLine;
+      string ptLineStr;
+      util::StringStream ptLine(ptLineStr);
 
       vector<string> token = Tokenize(translationVector[currDict]);
 
@@ -797,7 +799,7 @@ ConvertWeightArgsPhraseModel(const string &oldWeightName)
         ptLine << "alignment-path=" << token[6] << " ";
       }
 
-      AddFeature(ptLine.str());
+      AddFeature(ptLineStr);
     } // for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
   } // if (GetParam("ttable-file").size() > 0) {
 
@@ -860,7 +862,8 @@ ConvertWeightArgsDistortion()
       }
       SetWeight("LexicalReordering", indTable, weights);
 
-      stringstream strme;
+      string str;
+      util::StringStream strme(str);
       strme << "LexicalReordering "
             << "type=" << toks[1] << " ";
 
@@ -874,7 +877,7 @@ ConvertWeightArgsDistortion()
       strme << "num-features=" << toks[2] << " ";
       strme << "path=" << toks[3];
 
-      AddFeature(strme.str());
+      AddFeature(str);
     }
   }
 
@@ -1007,13 +1010,14 @@ ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string 
       }
       SetWeight(newWeightName, indTable, weights);
 
-      stringstream strme;
+      string str;
+      util::StringStream strme(str);
       strme << "Generation "
             << "input-factor=" << modelToks[0] << " "
             << "output-factor=" << modelToks[1] << " "
             << "num-features=" << modelToks[2] << " "
             << "path=" << modelToks[3];
-      AddFeature(strme.str());
+      AddFeature(str);
     }
   }
 

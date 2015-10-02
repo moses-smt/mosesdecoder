@@ -157,11 +157,7 @@ int osmHypothesis :: firstOpenGap(vector <int> & coverageVector)
 
 string osmHypothesis :: intToString(int num)
 {
-
-  std::ostringstream stm;
-  stm<<num;
-
-  return stm.str();
+  return SPrint(num);
 
 }
 

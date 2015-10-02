@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include "util/exception.hh"
 #include "util/tokenize.hh"
+#include "util/string_stream.hh"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 
 using namespace std;
@@ -56,9 +57,10 @@ void PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, cons
     else if (m_mode == "interpolate")
       m_combineFunction = LinearInterpolationFromCounts;
     else {
-      ostringstream msg;
+	  string str;
+	  util::StringStream msg(str);
       msg << "combination mode unknown: " << m_mode;
-      throw runtime_error(msg.str());
+      throw runtime_error(str);
     }
   } else if (key == "lex-e2f") {
     m_lexE2FStr = Tokenize(value, ",");

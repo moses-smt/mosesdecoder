@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StringVector.h"
 #include "PackedArray.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 #ifdef WITH_THREADS
 #include "moses/ThreadPool.h"
@@ -145,11 +146,12 @@ public:
     size_t current = m_landmarks.size();
 
     if(m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
-      std::stringstream strme;
-      strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
-      strme << "1: " << m_landmarks.back().str() << std::endl;
-      strme << "2: " << keys[0] << std::endl;
-      UTIL_THROW2(strme.str());
+  	  std::string str;
+      util::StringStream strme(str);
+      strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort\n";
+      strme << "1: " << m_landmarks.back().str() << "\n";
+      strme << "2: " << keys[0] << "\n";
+      UTIL_THROW2(str);
     }
 
     m_landmarks.push_back(keys[0]);
