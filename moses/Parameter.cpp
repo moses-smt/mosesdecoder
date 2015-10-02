@@ -702,8 +702,7 @@ ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
     size_t currOldInd = 0;
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      string ptLineStr;
-      util::StringStream ptLine(ptLineStr);
+      util::StringStream ptLine;
 
       vector<string> token = Tokenize(translationVector[currDict]);
 
@@ -799,7 +798,7 @@ ConvertWeightArgsPhraseModel(const string &oldWeightName)
         ptLine << "alignment-path=" << token[6] << " ";
       }
 
-      AddFeature(ptLineStr);
+      AddFeature(ptLine.str());
     } // for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
   } // if (GetParam("ttable-file").size() > 0) {
 
@@ -862,8 +861,7 @@ ConvertWeightArgsDistortion()
       }
       SetWeight("LexicalReordering", indTable, weights);
 
-      string str;
-      util::StringStream strme(str);
+      util::StringStream strme;
       strme << "LexicalReordering "
             << "type=" << toks[1] << " ";
 
@@ -877,7 +875,7 @@ ConvertWeightArgsDistortion()
       strme << "num-features=" << toks[2] << " ";
       strme << "path=" << toks[3];
 
-      AddFeature(str);
+      AddFeature(strme.str());
     }
   }
 
@@ -1010,14 +1008,13 @@ ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string 
       }
       SetWeight(newWeightName, indTable, weights);
 
-      string str;
-      util::StringStream strme(str);
+      util::StringStream strme;
       strme << "Generation "
             << "input-factor=" << modelToks[0] << " "
             << "output-factor=" << modelToks[1] << " "
             << "num-features=" << modelToks[2] << " "
             << "path=" << modelToks[3];
-      AddFeature(str);
+      AddFeature(strme.str());
     }
   }
 

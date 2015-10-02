@@ -14,13 +14,12 @@ namespace tmmt
 {
 std::string SentenceAlignment::getTargetString(const Vocabulary &vocab) const
 {
-  std::string str;
-  util::StringStream strme(str);
+  util::StringStream strme;
   for (size_t i = 0; i < target.size(); ++i) {
     const WORD &word = vocab.GetWord(target[i]);
     strme << word << " ";
   }
-  return str;
+  return strme.str();
 }
 
 }

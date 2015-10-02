@@ -640,21 +640,19 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
     switch (decodeType) {
     case Translate:
       if(index>=pts.size()) {
-    	string str;
-        util::StringStream strme(str);
+        util::StringStream strme;
         strme << "No phrase dictionary with index "
               << index << " available!";
-        UTIL_THROW(util::Exception, str);
+        UTIL_THROW(util::Exception, strme.str());
       }
       decodeStep = new DecodeStepTranslation(pts[index], prev, *featuresRemaining);
       break;
     case Generate:
       if(index>=gens.size()) {
-      	string str;
-        util::StringStream strme(str);
+        util::StringStream strme;
         strme << "No generation dictionary with index "
               << index << " available!";
-        UTIL_THROW(util::Exception, str);
+        UTIL_THROW(util::Exception, strme.str());
       }
       decodeStep = new DecodeStepGeneration(gens[index], prev, *featuresRemaining);
       break;

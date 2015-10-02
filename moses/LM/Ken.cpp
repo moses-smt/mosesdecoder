@@ -467,8 +467,7 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
   util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
   ++argument; // KENLM
 
-  string str;
-  util::StringStream line(str);
+  util::StringStream line;
   line << "KENLM";
 
   for (; argument; ++argument) {
@@ -491,7 +490,7 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
     }
   }
 
-  return ConstructKenLM(str, filePath, factorType, lazy);
+  return ConstructKenLM(line.str(), filePath, factorType, lazy);
 }
 
 LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)

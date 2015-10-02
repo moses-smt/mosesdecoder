@@ -97,8 +97,7 @@ LMResult LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFa
   cur->boState = *reinterpret_cast<const State*>(&m_curId);
   ++m_curId;
 
-  std::string out;
-  util::StringStream os(out);
+  util::StringStream os;
   os << "prob ";
   if (event_word == NULL) {
     os << "</s>";
@@ -114,7 +113,7 @@ LMResult LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFa
     }
   }
   os << "\n";
-  write(sock, out.c_str(), out.size());
+  write(sock, os.str().c_str(), os.str().size());
   char res[6];
   int r = read(sock, res, 6);
   int errors = 0;

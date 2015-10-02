@@ -57,10 +57,9 @@ void PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, cons
     else if (m_mode == "interpolate")
       m_combineFunction = LinearInterpolationFromCounts;
     else {
-	  string str;
-	  util::StringStream msg(str);
+	  util::StringStream msg;
       msg << "combination mode unknown: " << m_mode;
-      throw runtime_error(str);
+      throw runtime_error(msg.str());
     }
   } else if (key == "lex-e2f") {
     m_lexE2FStr = Tokenize(value, ",");

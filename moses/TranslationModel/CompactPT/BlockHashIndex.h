@@ -146,12 +146,11 @@ public:
     size_t current = m_landmarks.size();
 
     if(m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
-  	  std::string str;
-      util::StringStream strme(str);
+      util::StringStream strme;
       strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort\n";
       strme << "1: " << m_landmarks.back().str() << "\n";
       strme << "2: " << keys[0] << "\n";
-      UTIL_THROW2(str);
+      UTIL_THROW2(strme.str());
     }
 
     m_landmarks.push_back(keys[0]);

@@ -56,8 +56,7 @@ TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
 
   TargetPhrase *targetPhrase = new TargetPhrase();
 
-  std::string alignmentSSStr;
-  util::StringStream alignmentSS(alignmentSSStr);
+  util::StringStream alignmentSS;
   for (std::size_t i = 0; i < e.tail.size(); ++i) {
     const Word &symbol = e.tail[i]->pvertex.symbol;
     if (symbol.IsNonTerminal()) {
@@ -77,7 +76,7 @@ TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
   targetPhrase->EvaluateInIsolation(m_dummySourcePhrase);
   Word *targetLhs = new Word(staticData.GetOutputDefaultNonTerminal());
   targetPhrase->SetTargetLHS(targetLhs);
-  targetPhrase->SetAlignmentInfo(alignmentSSStr);
+  targetPhrase->SetAlignmentInfo(alignmentSS.str());
 
   return targetPhrase;
 }

@@ -85,11 +85,10 @@ void GenerationDictionary::Load()
 
     size_t numFeaturesInFile = token.size() - 2;
     if (numFeaturesInFile < numFeatureValuesInConfig) {
-      std::string str;
-      util::StringStream strme(str);
+      util::StringStream strme;
       strme << m_filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
             << " feature values, but found " << numFeaturesInFile << "\n";
-      throw str;
+      throw strme.str();
     }
     std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
     for (size_t i = 0; i < numFeatureValuesInConfig; i++)

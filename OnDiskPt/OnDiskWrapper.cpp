@@ -225,8 +225,7 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
   bool isNonTerminal = origWord.IsNonTerminal();
   Word *newWord = new Word(isNonTerminal);
 
-  string str;
-  util::StringStream strme(str);
+  util::StringStream strme;
 
   size_t factorType = factorsVec[0];
   const Moses::Factor *factor = origWord.GetFactor(factorType);
@@ -246,7 +245,7 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
   } // for (size_t factorType
 
   bool found;
-  uint64_t vocabId = m_vocab.GetVocabId(str, found);
+  uint64_t vocabId = m_vocab.GetVocabId(strme.str(), found);
   if (!found) {
     // factor not in phrase table -> phrse definately not in. exit
     delete newWord;

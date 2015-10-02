@@ -126,22 +126,20 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   ReformatHieroRule(1, targetPhraseString, ntAlign);
   ReformateHieroScore(scoreString);
 
-  std::string alignStr;
-  util::StringStream align(alignStr);
+  util::StringStream align;
   map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
   for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign) {
     const pair<size_t, size_t> &alignPoint = iterAlign->second;
     align << alignPoint.first << "-" << alignPoint.second << " ";
   }
 
-  std::string str;
-  util::StringStream ret(str);
+  util::StringStream ret;
   ret << sourcePhraseString << " ||| "
       << targetPhraseString << " ||| "
       << scoreString << " ||| "
-      << alignStr;
+      << align.str();
 
-  out = str;
+  out = ret.str();
 }
 
 bool RuleTableLoaderStandard::Load(FormatType format
