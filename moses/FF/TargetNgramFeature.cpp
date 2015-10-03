@@ -108,7 +108,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
 
   // extract all ngrams from current hypothesis
   vector<Word> prev_words(tnState->GetWords());
-  stringstream curr_ngram;
+  util::StringStream curr_ngram;
   bool skip = false;
 
   // include lower order ngrams?
@@ -166,7 +166,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
 
   if (cur_hypo.GetWordsBitmap().IsComplete()) {
     for (size_t n = m_n; n >= smallest_n; --n) {
-      stringstream last_ngram;
+      util::StringStream last_ngram;
       skip = false;
       for (size_t i = cur_hypo.GetSize() - n + 1; i <  cur_hypo.GetSize() && !skip; ++i)
         appendNgram(cur_hypo.GetWord(i), skip, last_ngram);
@@ -196,7 +196,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
   return new TargetNgramState(new_prev_words);
 }
 
-void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream &ngram) const
+void TargetNgramFeature::appendNgram(const Word& word, bool& skip, util::StringStream &ngram) const
 {
 //	const string& w = word.GetFactor(m_factorType)->GetString();
   const StringPiece w = word.GetString(m_factorType);
