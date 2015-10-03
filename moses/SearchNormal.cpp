@@ -11,6 +11,8 @@ using namespace std;
 namespace Moses
 {
   
+NMT_Wrapper nmt;  
+
 void ExpanderNormal::operator()(const Hypothesis &hypothesis, size_t startPos, size_t endPos) {
   m_search->ExpandAllHypotheses(hypothesis, startPos, endPos);
 }  

@@ -24,6 +24,8 @@ NMT_Wrapper::NMT_Wrapper()
     py_get_context_vectors = PyString_FromString((char*)"get_context_vector");
     py_get_next_states = PyString_FromString((char*)"get_next_states");
     py_get_log_prob_states = PyString_FromString((char*)"get_log_prob_states");
+    
+    SetNMT(this);
 }
 
 bool NMT_Wrapper::GetContextVectors(const string& source_sentence, PyObject*& vectors)
