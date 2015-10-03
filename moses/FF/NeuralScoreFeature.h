@@ -71,6 +71,12 @@ struct Calculator {
       WaitForChild();
     }
 
+    
+    ~Calculator() {
+      NotifyChild();
+      bi::shared_memory_object::remove("NeuralSharedMemory");
+    }
+    
     void SentenceDone(bool status) {
       *m_segment->find<bool>("SentenceIsDone").first = status;
     }
@@ -91,14 +97,18 @@ struct Calculator {
     }
     
     void NotifyChildAndWait() {
-      NotifyChild();
-      WaitForChild();
+      bi::interprocess_mutex* mutex
+        = m_segment->find<bi::interprocess_mutex>("Mutex").first;
+      bi::scoped_lock<bi::interprocess_mutex> lock(*mutex);  
+      m_segment->find<bi::interprocess_condition>("ChildCondition").first->notify_one();      
+      bi::interprocess_condition* parent
+        = m_segment->find<bi::interprocess_condition>("ParentCondition").first;
+      parent->wait(lock);
     }
     
     void* GetEmptyHypothesisState(const std::string& sentence) {
       SentenceDone(false);
       void** state = m_segment->construct<void*>("ContextPtr")((void*)0);            
-      std::cerr << "Ptr: " << *state << std::endl;
       
       CharAllocator charAlloc(m_segment->get_segment_manager());
       ShmemString* shSentence = m_segment->construct<ShmemString>("ContextString")(charAlloc);
@@ -107,8 +117,6 @@ struct Calculator {
       NotifyChildAndWait();
       
       m_segment->destroy_ptr(shSentence);
-      std::cerr << "Ptr: " << *state << std::endl;
-      
       return *state;
     }
     

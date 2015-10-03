@@ -31,13 +31,15 @@ struct _object;
 typedef _object PyObject;
 
 
+bi::interprocess_mutex& GetMutex(bi::managed_shared_memory& segment) {
+    return *segment.find<bi::interprocess_mutex>("Mutex").first;
+}
+
 void NotifyParent(bi::managed_shared_memory& segment) {
     segment.find<bi::interprocess_condition>("ParentCondition").first->notify_one();
 }
 
-void WaitForParent(bi::managed_shared_memory& segment) {
-    std::pair<bi::interprocess_mutex*, size_t > p1 = segment.find<bi::interprocess_mutex>("Mutex");
-    bi::scoped_lock<bi::interprocess_mutex> lock(*p1.first);
+void WaitForParent(bi::managed_shared_memory& segment, bi::scoped_lock<bi::interprocess_mutex>& lock) {
     std::pair<bi::interprocess_condition*, size_t > p2 = segment.find<bi::interprocess_condition>("ChildCondition");
     p2.first->wait(lock);
 }
@@ -65,7 +67,8 @@ void GetPaths(std::string& statePath, std::string& modelPath,
 
 bool HandleEmptyHypothesis(NMT_Wrapper& nmt,
                            bi::managed_shared_memory& segment) {
-    WaitForParent(segment);
+    bi::scoped_lock<bi::interprocess_mutex> lock(GetMutex(segment));
+    WaitForParent(segment, lock);
     std::pair<ShmemString*, size_t> p1 = segment.find<ShmemString>("ContextString");
     if(p1.second == 0)
         return false;
@@ -88,7 +91,8 @@ bool HandleEmptyHypothesis(NMT_Wrapper& nmt,
 void HandleSentence(NMT_Wrapper &nmt,
                     bi::managed_shared_memory& segment) {
     while(1) {
-        WaitForParent(segment);
+        bi::scoped_lock<bi::interprocess_mutex> lock(GetMutex(segment));
+        WaitForParent(segment, lock);
     
         std::pair<bool*, size_t> p1 = segment.find<bool>("SentenceIsDone");
         if(*p1.first)
@@ -126,6 +130,8 @@ void HandleSentence(NMT_Wrapper &nmt,
         
         NotifyParent(segment);
     }
+    
+    std::cerr << "Done with sentence" << std::endl;
 }
 
 int main(int argc, char *argv[])
