@@ -12,6 +12,7 @@
 #include "moses/LM/SingleFactor.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
+#include "util/string_stream.hh"
 
 namespace Moses
 {
@@ -266,7 +267,7 @@ private:
 
   std::string m_baseName;
 
-  void appendNgram(const Word& word, bool& skip, std::stringstream& ngram) const;
+  void appendNgram(const Word& word, bool& skip, util::StringStream& ngram) const;
   void MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,
                         size_t numberOfStartPos = 1, size_t offset = 0) const;
   void MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,

@@ -27,6 +27,10 @@ class StringStream : public FakeOStream<StringStream> {
 
     const std::string &str() const
     { return out_; }
+    void str(const std::string &val)
+    {
+      out_ = val;
+    }
 
   protected:
     friend class FakeOStream<StringStream>;
