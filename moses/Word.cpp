@@ -196,7 +196,7 @@ TO_STRING_BODY(Word);
 // friend
 ostream& operator<<(ostream& out, const Word& word)
 {
-  stringstream strme;
+  util::StringStream strme;
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   unsigned int stop = max_fax();
@@ -209,7 +209,7 @@ ostream& operator<<(ostream& out, const Word& word)
       } else {
         strme << factorDelimiter;
       }
-      strme << *factor;
+      strme << factor->GetString();
     }
   }
   out << strme.str() << " ";

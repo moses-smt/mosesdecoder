@@ -249,7 +249,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
         suffixTerminals++;
       // everything else
       else {
-        stringstream ngram;
+    	util::StringStream ngram;
         ngram << m_baseName;
         if (m_factorType == 0)
           ngram << factorZero;
@@ -360,7 +360,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
             suffixTerminals = 0;
 
             // remove duplicates
-            stringstream curr_ngram;
+            util::StringStream curr_ngram;
             curr_ngram << m_baseName;
             curr_ngram << (*contextFactor[m_n-2]).GetString(m_factorType);
             curr_ngram << ":";
@@ -386,7 +386,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
       // remove duplicates
       size_t size = contextFactor.size();
       if (makePrefix && makeSuffix && (size <= m_n)) {
-        stringstream curr_ngram;
+    	util::StringStream curr_ngram;
         curr_ngram << m_baseName;
         for (size_t i = 0; i < size; ++i) {
           curr_ngram << (*contextFactor[i]).GetString(m_factorType);
@@ -404,7 +404,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
 
 void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfStartPos, size_t offset) const
 {
-  stringstream ngram;
+  util::StringStream ngram;
   size_t size = contextFactor.size();
   for (size_t k = 0; k < numberOfStartPos; ++k) {
     size_t max_end = (size < m_n+k+offset)? size: m_n+k+offset;
@@ -429,7 +429,7 @@ void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFacto
 
 void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfEndPos, size_t offset) const
 {
-  stringstream ngram;
+  util::StringStream ngram;
   for (size_t k = 0; k < numberOfEndPos; ++k) {
     size_t end_pos = contextFactor.size()-1-k-offset;
     for (int start_pos=end_pos-1; (start_pos >= 0) && (end_pos-start_pos < m_n); --start_pos) {
