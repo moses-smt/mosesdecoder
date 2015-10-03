@@ -12,6 +12,8 @@ class NMT_Wrapper
 {
 public:
     NMT_Wrapper();
+    ~NMT_Wrapper();
+    
     void Init(
         const std::string& state_path,
         const std::string& model_path,
@@ -54,7 +56,6 @@ public:
         std::vector<PyObject*>& inputStates,
         std::vector<double>& logProbs,
         std::vector<PyObject*>& nextStates);
-    virtual ~NMT_Wrapper();
 
     static NMT_Wrapper& GetNMT() {
         return *s_nmt;

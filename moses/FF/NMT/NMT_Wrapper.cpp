@@ -28,6 +28,11 @@ NMT_Wrapper::NMT_Wrapper()
     SetNMT(this);
 }
 
+NMT_Wrapper::~NMT_Wrapper () {
+    Py_Finalize();
+}
+
+
 bool NMT_Wrapper::GetContextVectors(const string& source_sentence, PyObject*& vectors)
 {
     PyObject* py_source_sentence = PyString_FromString(source_sentence.c_str());
@@ -40,7 +45,6 @@ void NMT_Wrapper::AddPathToSys(const string& path)
     PyObject* py_sys_path = PySys_GetObject((char*)"path");
     PyList_Append(py_sys_path, PyString_FromString(path.c_str()));
 }
-
 
 void NMT_Wrapper::Init(
         const std::string& state_path,
@@ -335,9 +339,4 @@ void NMT_Wrapper::GetNextLogProbStates(
     for(size_t i = 0; i < nextStates.size(); ++i) {
     }
     //cerr << "Wychodze z GetLogProbStates!" << endl;
-}
-
-NMT_Wrapper::~NMT_Wrapper()
-{
-    Py_Finalize();
 }
