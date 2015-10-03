@@ -61,12 +61,6 @@ void GetPaths(std::string& statePath, std::string& modelPath,
     
     std::pair<ShmemString*, size_t> p5 = segment.find<ShmemString>("TargetVocab");
     targetVocab = p5.first->c_str();
-    
-    std::cerr << statePath << std::endl;
-    std::cerr << modelPath << std::endl;
-    std::cerr << wrapperPath << std::endl;
-    std::cerr << sourceVocab << std::endl;
-    std::cerr << targetVocab << std::endl;
 }
 
 bool HandleEmptyHypothesis(NMT_Wrapper& nmt,
@@ -113,10 +107,6 @@ void HandleSentence(NMT_Wrapper &nmt,
             allWords.push_back(std::string((*v1.first)[i].begin(), (*v1.first)[i].end()));
             allLastWords.push_back(std::string((*v2.first)[i].begin(), (*v2.first)[i].end()));
             allStates.push_back((PyObject*)(*v3.first)[i]);
-        
-            std::cerr << allWords.back() << std::endl;
-            std::cerr << allLastWords.back() << std::endl;
-            std::cerr << allStates.back() << std::endl;
         }
         
         std::vector<double> outProbs;

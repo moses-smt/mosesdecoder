@@ -107,7 +107,6 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   std::map<int, const NeuralScoreState*> states;
   
   m_pbl.clear();
-  m_calculator->Clear();
   
   size_t covered = 0;
   size_t total = 0;
@@ -149,6 +148,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   
   std::cerr << "Stack: " << covered << "/" << total << " - ";
   for(size_t l = 0; l < m_pbl.size(); l++) {
+    m_calculator->Clear();
     Prefixes& prefixes = m_pbl[l];
    
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
