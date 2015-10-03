@@ -8,18 +8,18 @@
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/interprocess_condition.hpp>
-#include <boost/interprocess/sync/named_condition.hpp>
-#include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
 #include "NMT_Wrapper.h"
 
-typedef boost::interprocess::allocator<char, boost::interprocess::managed_shared_memory::segment_manager> CharAllocator;
-typedef boost::interprocess::basic_string<char, std::char_traits<char>, CharAllocator> ShmemString;
-typedef boost::interprocess::allocator<ShmemString, boost::interprocess::managed_shared_memory::segment_manager> ShmemStringAllocator;
+namespace bi = boost::interprocess;
 
-typedef boost::interprocess::allocator<float, boost::interprocess::managed_shared_memory::segment_manager> ShmemFloatAllocator;
-typedef boost::interprocess::allocator<void*, boost::interprocess::managed_shared_memory::segment_manager> ShmemVoidptrAllocator;
+typedef bi::allocator<char, bi::managed_shared_memory::segment_manager> CharAllocator;
+typedef bi::basic_string<char, std::char_traits<char>, CharAllocator> ShmemString;
+typedef bi::allocator<ShmemString, bi::managed_shared_memory::segment_manager> ShmemStringAllocator;
+
+typedef bi::allocator<float, bi::managed_shared_memory::segment_manager> ShmemFloatAllocator;
+typedef bi::allocator<void*, bi::managed_shared_memory::segment_manager> ShmemVoidptrAllocator;
  
 typedef std::vector<ShmemString, ShmemStringAllocator> ShmemStringVector;
 typedef std::vector<float, ShmemFloatAllocator> ShmemFloatVector;
@@ -30,58 +30,80 @@ using namespace std;
 struct _object;
 typedef _object PyObject;
 
-const int NCOPY = 10;
 
-int main(int argc, char *argv[])
-{
-    string statePath = string(argv[1]);
-    string modelPath = string(argv[2]);
-    string wrapperPath = string(argv[3]);
-    string sourceVocab = string(argv[4]);
-    string targetVocab = string(argv[5]);
+void NotifyParent(bi::managed_shared_memory& segment) {
+    segment.find<bi::interprocess_condition>("ParentCondition").first->notify_one();
+}
 
-    std::cerr << "Waiting 1" << std::endl;
-    
-    boost::interprocess::named_mutex m_mutex(boost::interprocess::open_or_create, "MyMutex");
-    std::cerr << "Waiting 2" << std::endl;
-    boost::interprocess::named_condition m_moses(boost::interprocess::open_or_create, "mosesCondition");
-    std::cerr << "Waiting 3" << std::endl;
-    boost::interprocess::named_condition m_neural(boost::interprocess::open_or_create,"neuralCondition");
-    std::cerr << "Waiting 4" << std::endl;
-    
-    boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(m_mutex);
-    std::cerr << "Waiting" << std::endl;
-    m_neural.wait(lock);
-    std::cerr << "Done" << std::endl;
-    
-    boost::interprocess::managed_shared_memory m_segment(boost::interprocess::open_or_create ,"NeuralSharedMemory", 1024*1024*1024);
-    
-    std::pair<void**, size_t> res1 = m_segment.find<void*>("NeuralContextPtr");
-    void** shPyContextVectors = res1.first;
-  
-    CharAllocator charAlloc(m_segment.get_segment_manager());
-    std::pair<ShmemString*, size_t> res2 = m_segment.find<ShmemString>("NeuralContextString");
-    ShmemString* sharedSentence = res2.first;
-    
-    string sourceSentence(sharedSentence->begin(), sharedSentence->end());
-    std::cout << "Received string: " << sourceSentence << std::endl;
-          
-    boost::shared_ptr<NMT_Wrapper> wrapper(new NMT_Wrapper());
-    wrapper->Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
+void WaitForParent(bi::managed_shared_memory& segment) {
+    std::pair<bi::interprocess_mutex*, size_t > p1 = segment.find<bi::interprocess_mutex>("Mutex");
+    bi::scoped_lock<bi::interprocess_mutex> lock(*p1.first);
+    std::pair<bi::interprocess_condition*, size_t > p2 = segment.find<bi::interprocess_condition>("ChildCondition");
+    p2.first->wait(lock);
+}
 
+void GetPaths(std::string& statePath, std::string& modelPath,
+              std::string& wrapperPath, std::string& sourceVocab,
+              std::string& targetVocab, 
+              bi::managed_shared_memory& segment) {
+    
+    std::pair<ShmemString*, size_t> p1 = segment.find<ShmemString>("StatePath");
+    statePath = p1.first->c_str();
+    
+    std::pair<ShmemString*, size_t> p2 = segment.find<ShmemString>("ModelPath");
+    modelPath = p2.first->c_str();
+    
+    std::pair<ShmemString*, size_t> p3 = segment.find<ShmemString>("WrapperPath");
+    wrapperPath = p3.first->c_str();
+    
+    std::pair<ShmemString*, size_t> p4 = segment.find<ShmemString>("SourceVocab");
+    sourceVocab = p4.first->c_str();
+    
+    std::pair<ShmemString*, size_t> p5 = segment.find<ShmemString>("TargetVocab");
+    targetVocab = p5.first->c_str();
+    
+    std::cerr << statePath << std::endl;
+    std::cerr << modelPath << std::endl;
+    std::cerr << wrapperPath << std::endl;
+    std::cerr << sourceVocab << std::endl;
+    std::cerr << targetVocab << std::endl;
+}
+
+bool HandleEmptyHypothesis(NMT_Wrapper& nmt,
+                           bi::managed_shared_memory& segment) {
+    WaitForParent(segment);
+    std::pair<ShmemString*, size_t> p1 = segment.find<ShmemString>("ContextString");
+    if(p1.second == 0)
+        return false;
+    string sourceSentence(p1.first->begin(), p1.first->end());
+    
+    std::cout << "Received source string: " << sourceSentence << std::endl;
+    
     PyObject* pyContextVectors = NULL;
-    wrapper->GetContextVectors(sourceSentence, pyContextVectors);
-
-    *shPyContextVectors = pyContextVectors;
+    nmt.GetContextVectors(sourceSentence, pyContextVectors);
     
+    std::pair<void**, size_t> p2 = segment.find<void*>("ContextPtr");
+    if(p2.second == 0)
+        return false;
+    *p2.first = pyContextVectors;
+    
+    NotifyParent(segment);
+    return true;
+}
+
+void HandleSentence(NMT_Wrapper &nmt,
+                    bi::managed_shared_memory& segment) {
     while(1) {
-        m_moses.notify_one();
-        m_neural.wait(lock);
-      
-        std::cerr << "Calculation" << std::endl;
-        std::pair<ShmemStringVector*, size_t > v1 = m_segment.find<ShmemStringVector>("NeuralAllWords");
-        std::pair<ShmemStringVector*, size_t > v2 = m_segment.find<ShmemStringVector>("NeuralAllLastWords");
-        std::pair<ShmemVoidptrVector*, size_t > v3 = m_segment.find<ShmemVoidptrVector>("NeuralAllStates");
+        WaitForParent(segment);
+    
+        std::pair<bool*, size_t> p1 = segment.find<bool>("SentenceIsDone");
+        if(*p1.first)
+            break;
+        
+        std::pair<void**, size_t> p2 = segment.find<void*>("ContextPtr");
+        std::pair<ShmemStringVector*, size_t > v1 = segment.find<ShmemStringVector>("AllWords");
+        std::pair<ShmemStringVector*, size_t > v2 = segment.find<ShmemStringVector>("AllLastWords");
+        std::pair<ShmemVoidptrVector*, size_t > v3 = segment.find<ShmemVoidptrVector>("AllStates");
         
         std::vector<std::string> allWords;
         std::vector<std::string> allLastWords;
@@ -91,41 +113,47 @@ int main(int argc, char *argv[])
             allWords.push_back(std::string((*v1.first)[i].begin(), (*v1.first)[i].end()));
             allLastWords.push_back(std::string((*v2.first)[i].begin(), (*v2.first)[i].end()));
             allStates.push_back((PyObject*)(*v3.first)[i]);
+        
+            std::cerr << allWords.back() << std::endl;
+            std::cerr << allLastWords.back() << std::endl;
+            std::cerr << allStates.back() << std::endl;
         }
         
         std::vector<double> outProbs;
         std::vector<PyObject*> allOutStates;
         
-        wrapper->GetNextLogProbStates(allWords, pyContextVectors, allLastWords,
-                                      allStates, outProbs, allOutStates);
+        // batching
+        nmt.GetNextLogProbStates(allWords, (PyObject*)*p2.first, allLastWords,
+                                 allStates, outProbs, allOutStates);
         
-        std::pair<ShmemVoidptrVector*, size_t > v4 = m_segment.find<ShmemVoidptrVector>("NeuralAllOutStates");
-        std::pair<ShmemFloatVector*, size_t > v5 = m_segment.find<ShmemFloatVector>("NeuralLogProbs");
+        std::pair<ShmemVoidptrVector*, size_t > v4 = segment.find<ShmemVoidptrVector>("AllOutStates");
+        std::pair<ShmemFloatVector*, size_t > v5 = segment.find<ShmemFloatVector>("AllOutProbs");
         
         for(size_t i = 0; i < outProbs.size(); ++i) {
             v4.first->push_back(allOutStates[i]);
             v5.first->push_back(outProbs[i]);
         }
         
-        std::cerr << "Done" << std::endl;
+        NotifyParent(segment);
     }
-        
-    //vector<double> prob;
-    //vector<PyObject*> nextStates;
-    //vector<string> nextWords;
-    //for (size_t i = 0; i < 1000; ++i) nextWords.push_back("das");
-    //
-    //vector<string> lastWords;
-    //for (size_t i = 0; i < 1000; ++i) lastWords.push_back("");
-    //vector<PyObject*> inputStates;
-    //for (size_t i = 0; i < 1000; ++i) inputStates.push_back(NULL);
-    //
+}
 
-    /*
-    wrapper->GetNextLogProbStates(nextWords, pyContextVectors, lastWords,
-                                  inputStates, prob, nextStates);
-    cout << prob.size() << " " << prob[0] << endl;
-    */
+int main(int argc, char *argv[])
+{
+    std::string memName = "NeuralSharedMemory";
+    if(argc == 2)
+        memName = argv[1];
+    bi::managed_shared_memory segment(bi::open_only, memName.c_str());
     
+    std::string statePath, modelPath, wrapperPath, sourceVocab, targetVocab;
+    GetPaths(statePath, modelPath, wrapperPath, sourceVocab, targetVocab, segment);
+    
+    NMT_Wrapper wrapper;
+    wrapper.Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
+    NotifyParent(segment);
+    
+    while(HandleEmptyHypothesis(wrapper, segment))
+        HandleSentence(wrapper, segment);
+        
     return 0;
 }

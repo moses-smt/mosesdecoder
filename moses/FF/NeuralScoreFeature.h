@@ -20,16 +20,144 @@
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 
-typedef boost::interprocess::allocator<char, boost::interprocess::managed_shared_memory::segment_manager> CharAllocator;
-typedef boost::interprocess::basic_string<char, std::char_traits<char>, CharAllocator> ShmemString;
-typedef boost::interprocess::allocator<ShmemString, boost::interprocess::managed_shared_memory::segment_manager> ShmemStringAllocator;
+namespace bi = boost::interprocess;
 
-typedef boost::interprocess::allocator<float, boost::interprocess::managed_shared_memory::segment_manager> ShmemFloatAllocator;
-typedef boost::interprocess::allocator<void*, boost::interprocess::managed_shared_memory::segment_manager> ShmemVoidptrAllocator;
+typedef bi::allocator<char, bi::managed_shared_memory::segment_manager> CharAllocator;
+typedef bi::basic_string<char, std::char_traits<char>, CharAllocator> ShmemString;
+typedef bi::allocator<ShmemString, bi::managed_shared_memory::segment_manager> ShmemStringAllocator;
+
+typedef bi::allocator<float, bi::managed_shared_memory::segment_manager> ShmemFloatAllocator;
+typedef bi::allocator<void*, bi::managed_shared_memory::segment_manager> ShmemVoidptrAllocator;
  
 typedef std::vector<ShmemString, ShmemStringAllocator> ShmemStringVector;
 typedef std::vector<float, ShmemFloatAllocator> ShmemFloatVector;
 typedef std::vector<void*, ShmemVoidptrAllocator> ShmemVoidptrVector;
+
+struct Calculator {
+  public:
+    Calculator(const std::string& statePath, const std::string& modelPath,
+               const std::string& wrapperPath, const std::string& sourceVocab,
+               const std::string& targetVocab) {
+      
+      bi::shared_memory_object::remove("NeuralSharedMemory");
+      m_segment.reset(new bi::managed_shared_memory(bi::create_only,
+                                                    "NeuralSharedMemory",
+                                                    1024 * 1024 * 500));
+      
+      // construc mutex and conditions
+      m_segment->construct<bi::interprocess_mutex>("Mutex")();
+      m_segment->construct<bi::interprocess_condition>("ParentCondition")();
+      m_segment->construct<bi::interprocess_condition>("ChildCondition")();
+    
+      const CharAllocator charAlloc(m_segment->get_segment_manager());
+      const ShmemStringAllocator stringAlloc(m_segment->get_segment_manager());
+      const ShmemFloatAllocator floatAlloc(m_segment->get_segment_manager());
+      const ShmemVoidptrAllocator voidptrAlloc(m_segment->get_segment_manager());
+      
+      *m_segment->construct<ShmemString>("StatePath")(charAlloc) = statePath.c_str();
+      *m_segment->construct<ShmemString>("ModelPath")(charAlloc) = modelPath.c_str();
+      *m_segment->construct<ShmemString>("WrapperPath")(charAlloc) = wrapperPath.c_str();
+      *m_segment->construct<ShmemString>("SourceVocab")(charAlloc) = sourceVocab.c_str();
+      *m_segment->construct<ShmemString>("TargetVocab")(charAlloc) = targetVocab.c_str();
+      
+      m_segment->construct<bool>("SentenceIsDone")(false);
+      
+      allWords = m_segment->construct<ShmemStringVector>("AllWords")(stringAlloc);
+      allLastWords = m_segment->construct<ShmemStringVector>("AllLastWords")(stringAlloc);
+      allStates = m_segment->construct<ShmemVoidptrVector>("AllStates")(voidptrAlloc);
+      allOutProbs = m_segment->construct<ShmemFloatVector>("AllOutProbs")(floatAlloc);
+      allOutStates = m_segment->construct<ShmemVoidptrVector>("AllOutStates")(voidptrAlloc);
+      
+      WaitForChild();
+    }
+
+    void SentenceDone(bool status) {
+      *m_segment->find<bool>("SentenceIsDone").first = status;
+    }
+    
+    void NotifyChild() {
+      m_segment->find<bi::interprocess_condition>("ChildCondition").first->notify_one();
+    }
+    
+    void WaitForChild() {
+      bi::interprocess_mutex* mutex
+        = m_segment->find<bi::interprocess_mutex>("Mutex").first;
+      bi::scoped_lock<bi::interprocess_mutex> lock(*mutex);
+      
+      bi::interprocess_condition* parent
+        = m_segment->find<bi::interprocess_condition>("ParentCondition").first;
+      
+      parent->wait(lock);
+    }
+    
+    void NotifyChildAndWait() {
+      NotifyChild();
+      WaitForChild();
+    }
+    
+    void* GetEmptyHypothesisState(const std::string& sentence) {
+      SentenceDone(false);
+      void** state = m_segment->construct<void*>("ContextPtr")((void*)0);            
+      std::cerr << "Ptr: " << *state << std::endl;
+      
+      CharAllocator charAlloc(m_segment->get_segment_manager());
+      ShmemString* shSentence = m_segment->construct<ShmemString>("ContextString")(charAlloc);
+      *shSentence = sentence.c_str();
+      
+      NotifyChildAndWait();
+      
+      m_segment->destroy_ptr(shSentence);
+      std::cerr << "Ptr: " << *state << std::endl;
+      
+      return *state;
+    }
+    
+    void AddWord(const std::string& word) {
+      const CharAllocator charAlloc(m_segment->get_segment_manager());
+      ShmemString tempWord(charAlloc);
+      tempWord = word.c_str();
+      allWords->push_back(tempWord);
+    }
+    
+    void AddLastWord(const std::string& word) {
+      const CharAllocator charAlloc(m_segment->get_segment_manager());
+      ShmemString tempWord(charAlloc);
+      tempWord = word.c_str();
+      allLastWords->push_back(tempWord);      
+    }
+    
+    void AddState(void* state) {
+      allStates->push_back(state);  
+    }
+    
+    float GetProb(size_t k) {
+      return (*allOutProbs)[k];
+    }
+    
+    void* GetState(size_t k) {
+      return (*allOutStates)[k];
+    }
+    
+    void Clear() {
+      allWords->clear();
+      allLastWords->clear();
+      allStates->clear();
+      allOutProbs->clear();
+      allOutStates->clear();
+    }
+    
+    size_t GetSize() {
+      return allStates->size();
+    }
+    
+  private:
+    boost::shared_ptr<bi::managed_shared_memory> m_segment;
+    ShmemStringVector *allWords;
+    ShmemStringVector *allLastWords;
+    ShmemVoidptrVector *allStates;
+    ShmemFloatVector *allOutProbs;
+    ShmemVoidptrVector *allOutStates;   
+};
 
 struct Payload {
   Payload() : state_(0), logProb_(0) {}
@@ -61,15 +189,6 @@ public:
 
   void ProcessStack(Collector& collector, size_t index);
   
-  /*
-  void BatchProcess( const std::vector<std::string>& nextWords,
-    PyObject* pyContextVectors,
-    const std::vector< std::string >& lastWords,
-    std::vector<PyObject*>& inputStates,
-    std::vector<double>& logProbs,
-    std::vector<PyObject*>& nextStates);
-  */
-  
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   
   void EvaluateInIsolation(const Phrase &source
@@ -100,11 +219,7 @@ public:
   void Init();
 
 private:
-  boost::shared_ptr<boost::interprocess::managed_shared_memory> m_segment;
-  
-  mutable boost::interprocess::named_mutex m_mutex;
-  mutable boost::interprocess::named_condition m_moses;
-  mutable boost::interprocess::named_condition m_neural;
+  boost::shared_ptr<Calculator> m_calculator;
   
   bool m_preCalc;
   std::string m_statePath;
@@ -112,7 +227,7 @@ private:
   std::string m_wrapperPath;
   std::string m_sourceVocabPath;
   std::string m_targetVocabPath;
-  //size_t m_batchSize;
+  
   size_t m_stateLength;
   size_t m_factor;
     

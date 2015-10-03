@@ -7,8 +7,8 @@ SOURCEVOCAB=/work/nmt_model/vocab/mini_en_de_.en.pkl
 TARGETVOCAB=/work/nmt_model/vocab/mini_en_de_.de.pkl
 WRAPPERPATH=./wrapper
 
-FLAGS=-ftemplate-depth-128 -O3 -finline-functions -Wno-inline -Wall
-#FLAGS=-g -O0 -ggdb
+#FLAGS=-ftemplate-depth-128 -O3 -finline-functions -Wno-inline -Wall
+FLAGS=-g -O0 -ggdb
 
 test: $(SOURCES)
 	$(CC) $(FLAGS) -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7 -lrt -pthread -o $@ 

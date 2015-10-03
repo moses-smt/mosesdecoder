@@ -80,42 +80,23 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
   UTIL_THROW_IF2(input.GetType() != SentenceInput,
                  "This feature function requires the Sentence input type");
   
-  boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(m_mutex);
-
   const Sentence& sentence = static_cast<const Sentence&>(input);
   std::stringstream ss;
   for(size_t i = 0; i < sentence.GetSize(); i++)
     ss << sentence.GetWord(i).GetString(0) << " ";
   
-  void** pyContextVectors = m_segment->construct<void*>("NeuralContextPtr")((void*)0);            
-  std::cerr << "Ptr: " << *pyContextVectors << std::endl;
-  
-  CharAllocator charAlloc(m_segment->get_segment_manager());
-  ShmemString* sentenceString = m_segment->construct<ShmemString>("NeuralContextString")(charAlloc);
-  std::string sentenceStringTemp = Trim(ss.str());
-  sentenceString->insert(sentenceString->end(), sentenceStringTemp.begin(), sentenceStringTemp.end());
-  
-  m_neural.notify_one();
-  m_moses.wait(lock);
-  
-  m_segment->destroy_ptr(sentenceString);
-  
-  std::cerr << "Ptr: " << *pyContextVectors << std::endl;
-  
-  return new NeuralScoreState(*pyContextVectors, "", NULL);
+  std::string sentenceString = Trim(ss.str());
+  void* state = m_calculator->GetEmptyHypothesisState(sentenceString);
+  return new NeuralScoreState(state, "", NULL);  
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   : StatefulFeatureFunction(1, line),
-  m_mutex(boost::interprocess::open_or_create,"MyMutex"), m_moses(boost::interprocess::open_or_create, "mosesCondition"),
-  m_neural(boost::interprocess::open_or_create,"neuralCondition"),
   m_preCalc(0), /*m_batchSize(1000),*/ m_stateLength(3), m_factor(0)
 {
   ReadParameters();
-  boost::interprocess::shared_memory_object::remove("NeuralSharedMemory");
-  m_segment.reset(new boost::interprocess::managed_shared_memory(boost::interprocess::create_only ,"NeuralSharedMemory", 1024 * 1024 * 1024));
-  
-  // Do a wait until the other process has loaded?
+  m_calculator.reset(new Calculator(m_statePath, m_modelPath, m_wrapperPath,
+                                    m_sourceVocabPath, m_targetVocabPath));
 }
 
 void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
@@ -126,6 +107,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   std::map<int, const NeuralScoreState*> states;
   
   m_pbl.clear();
+  m_calculator->Clear();
   
   size_t covered = 0;
   size_t total = 0;
@@ -168,73 +150,47 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   std::cerr << "Stack: " << covered << "/" << total << " - ";
   for(size_t l = 0; l < m_pbl.size(); l++) {
     Prefixes& prefixes = m_pbl[l];
-  
-    const CharAllocator charAlloc(m_segment->get_segment_manager());
-    const ShmemStringAllocator stringAlloc(m_segment->get_segment_manager());
-    const ShmemFloatAllocator floatAlloc(m_segment->get_segment_manager());
-    const ShmemVoidptrAllocator voidptrAlloc(m_segment->get_segment_manager());
-    
-    ShmemStringVector *allWords = m_segment->construct<ShmemStringVector>("NeuralAllWords")(stringAlloc);
-    ShmemStringVector *allLastWords = m_segment->construct<ShmemStringVector>("NeuralAllLastWords")(stringAlloc);
-    ShmemVoidptrVector *allStates = m_segment->construct<ShmemVoidptrVector>("NeuralAllStates")(voidptrAlloc);
-
-    ShmemFloatVector *allProbs = m_segment->construct<ShmemFloatVector>("NeuralLogProbs")(floatAlloc);
-    ShmemVoidptrVector *allOutStates = m_segment->construct<ShmemVoidptrVector>("NeuralAllOutStates")(voidptrAlloc);
-    
+   
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
       const Prefix& prefix = it->first;
       BOOST_FOREACH(SP& hyp, it->second) {
         size_t hypId = hyp.first;
         
-        ShmemString tempWord(charAlloc);
-        tempWord = prefix[l].c_str();
-        allWords->push_back(tempWord);
+        m_calculator->AddWord(prefix[l]);
         void* state;
         if(prefix.size() == 1) {
           state = states[hypId]->GetState();
-          ShmemString tempLastWord(charAlloc);
-          tempLastWord = states[hypId]->GetLastWord().c_str();
-          allLastWords->push_back(tempLastWord);
+          m_calculator->AddLastWord(states[hypId]->GetLastWord());
         }
         else {
           Prefix prevPrefix = prefix;
           prevPrefix.pop_back();
           state = m_pbl[prevPrefix.size() - 1][prevPrefix][hypId].state_;
-          ShmemString tempLastWord(charAlloc);
-          tempLastWord = prevPrefix.back().c_str();
-          allLastWords->push_back(tempLastWord);
+          m_calculator->AddLastWord(prevPrefix.back());
         }
-        allStates->push_back(state);
+        m_calculator->AddState(state);
       }
     }
     
     std::cerr << (l+1) << ":"
-      << m_pbl[l].size() << ":" << allStates->size() << " ";
-        
-    boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(m_mutex);
-    m_neural.notify_one();
-    m_moses.wait(lock);  
+      << m_pbl[l].size() << ":" << m_calculator->GetSize() << " ";
+    
+    m_calculator->NotifyChildAndWait();
     
     size_t k = 0;
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
       BOOST_FOREACH(SP& hyp, it->second) {
         Payload& payload = hyp.second;
-        payload.logProb_ = (*allProbs)[k];
-        payload.state_ = (*allOutStates)[k];
+        payload.logProb_ = m_calculator->GetProb(k);
+        payload.state_ = m_calculator->GetState(k);
         k++;
       }
-    }
-    
-    m_segment->destroy_ptr(allWords);
-    m_segment->destroy_ptr(allLastWords);
-    m_segment->destroy_ptr(allStates);
-    
-    m_segment->destroy_ptr(allProbs);
-    m_segment->destroy_ptr(allOutStates);
-    
+    }    
   }
-  
   std::cerr << "ok" << std::endl;
+  
+  if(covered == total)
+    m_calculator->SentenceDone(true);
 }
 
 /*
@@ -351,8 +307,6 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     m_stateLength = Scan<size_t>(value);
   } else if (key == "precalculate") {
     m_preCalc = Scan<bool>(value);
-  //} else if (key == "batch-size") {
-  //  m_batchSize = Scan<size_t>(value);
   } else if (key == "model") {
     m_modelPath = value;
   } else if (key == "wrapper-path") {
