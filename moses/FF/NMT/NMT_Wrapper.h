@@ -57,11 +57,15 @@ public:
     virtual ~NMT_Wrapper();
 
     static NMT_Wrapper& GetNMT() {
-        return s_nmt;
+        return *s_nmt;
+    }
+
+    static void SetNMT(NMT_Wrapper* ptr) {
+        s_nmt = ptr;
     }
     
 private:
-    static NMT_Wrapper s_nmt;
+    static NMT_Wrapper* s_nmt;
     
     PyObject* py_wrapper;
     PyObject* py_get_log_prob;

@@ -10,10 +10,11 @@
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 #include <boost/shared_ptr.hpp>
+#include "moses/FF/NMT/NMT_Wrapper.h"
 
-class NMT_Wrapper;
-struct _object;
-typedef _object PyObject;
+//class NMT_Wrapper;
+//struct _object;
+//typedef _object PyObject;
 
 struct Payload {
   Payload() : state_(0), logProb_(0) {}
@@ -82,6 +83,8 @@ public:
     ScoreComponentCollection* accumulator) const;
 
   void SetParameter(const std::string& key, const std::string& value);
+  
+  void Init();
 
 private:
   bool m_preCalc;

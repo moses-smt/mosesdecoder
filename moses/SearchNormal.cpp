@@ -111,6 +111,15 @@ void SearchNormal::Decode()
 {
   // SentenceStats &stats = m_manager.GetSentenceStats();
 
+  NMT_Wrapper nmt;
+  NMT_Wrapper::SetNMT(&nmt);
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
+    if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
+      const_cast<NeuralScoreFeature*>(nsf)->Init();
+  }
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager, m_source, m_initialTransOpt);
   m_hypoStackColl[0]->AddPrune(hypo);

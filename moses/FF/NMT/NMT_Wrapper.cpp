@@ -14,7 +14,7 @@
 using namespace std;
 using namespace util;
 
-NMT_Wrapper NMT_Wrapper::s_nmt;
+NMT_Wrapper* NMT_Wrapper::s_nmt;
 
 NMT_Wrapper::NMT_Wrapper()
 {

@@ -84,11 +84,14 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
   return new NeuralScoreState(pyContextVectors, "", NULL);
 }
 
+void NeuralScoreFeature::Init() {
+      NMT_Wrapper::GetNMT().Init(m_statePath, m_modelPath, m_wrapperPath, m_sourceVocabPath, m_targetVocabPath);
+  }
+
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   : StatefulFeatureFunction(1, line), m_preCalc(0), m_batchSize(1000), m_stateLength(3), m_factor(0)
 {
   ReadParameters();
-  NMT_Wrapper::GetNMT().Init(m_statePath, m_modelPath, m_wrapperPath, m_sourceVocabPath, m_targetVocabPath);
 }
 
 void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
