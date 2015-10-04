@@ -54,7 +54,7 @@
 # --static                       forces static linking (the default will fall
 #                                back to shared)
 #
-# debug-symbols=on|off           include (default) or exclude debugging
+# debug-symbols=on|off           include or exclude (default) debugging 
 #                                information also known as -g
 # --notrace                      compiles without TRACE macros
 #

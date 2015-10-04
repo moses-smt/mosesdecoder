@@ -41,7 +41,7 @@ void ExpectedBleuOptimizer::AddTrainingInstance(const size_t nBestSizeCount,
   }
 
   double xBleu = 0.0;
-  assert(nBestSizeCount == overallScore.size());
+  assert(nBestSizeCount == overallScoreUntransformed.size());
   std::vector<double> p;
   for (size_t i=0; i<nBestSizeCount; ++i)
   {
