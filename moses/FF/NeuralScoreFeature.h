@@ -35,6 +35,8 @@ typedef std::vector<void*, ShmemVoidptrAllocator> ShmemVoidptrVector;
 
 struct Calculator {
   public:
+    enum State { EmptyHypothesis, InSentence, Exit };
+    
     Calculator(const std::string& statePath, const std::string& modelPath,
                const std::string& wrapperPath, const std::string& sourceVocab,
                const std::string& targetVocab) {
@@ -44,8 +46,10 @@ struct Calculator {
                                                     "NeuralSharedMemory",
                                                     1024 * 1024 * 500));
       
-      // construc mutex and conditions
       m_segment->construct<bi::interprocess_mutex>("Mutex")();
+      
+      bi::scoped_lock<bi::interprocess_mutex> lock(GetMutex());
+      
       m_segment->construct<bi::interprocess_condition>("ParentCondition")();
       m_segment->construct<bi::interprocess_condition>("ChildCondition")();
     
@@ -60,7 +64,10 @@ struct Calculator {
       *m_segment->construct<ShmemString>("SourceVocab")(charAlloc) = sourceVocab.c_str();
       *m_segment->construct<ShmemString>("TargetVocab")(charAlloc) = targetVocab.c_str();
       
-      m_segment->construct<bool>("SentenceIsDone")(false);
+      m_segment->construct<State>("State")(EmptyHypothesis);
+      
+      m_segment->construct<void*>("ContextPtr")((void*)0);
+      m_segment->construct<ShmemString>("ContextString")(charAlloc);
       
       allWords = m_segment->construct<ShmemStringVector>("AllWords")(stringAlloc);
       allLastWords = m_segment->construct<ShmemStringVector>("AllLastWords")(stringAlloc);
@@ -68,38 +75,37 @@ struct Calculator {
       allOutProbs = m_segment->construct<ShmemFloatVector>("AllOutProbs")(floatAlloc);
       allOutStates = m_segment->construct<ShmemVoidptrVector>("AllOutStates")(voidptrAlloc);
       
-      WaitForChild();
+      WaitForChild(lock);
+    }
+
+    bi::interprocess_mutex& GetMutex() {
+      return *m_segment->find<bi::interprocess_mutex>("Mutex").first;
     }
 
     
-    ~Calculator() {
-      NotifyChild();
-      bi::shared_memory_object::remove("NeuralSharedMemory");
+    void SetState(State state) {
+      *m_segment->find<State>("State").first = state;
     }
     
-    void SentenceDone(bool status) {
-      *m_segment->find<bool>("SentenceIsDone").first = status;
+    ~Calculator() {
+      bi::scoped_lock<bi::interprocess_mutex> lock(GetMutex());
+      SetState(Exit);
+      NotifyChildAndWait(lock);
+      bi::shared_memory_object::remove("NeuralSharedMemory");
     }
     
     void NotifyChild() {
       m_segment->find<bi::interprocess_condition>("ChildCondition").first->notify_one();
     }
     
-    void WaitForChild() {
-      bi::interprocess_mutex* mutex
-        = m_segment->find<bi::interprocess_mutex>("Mutex").first;
-      bi::scoped_lock<bi::interprocess_mutex> lock(*mutex);
-      
+    void WaitForChild(bi::scoped_lock<bi::interprocess_mutex>& lock) {
       bi::interprocess_condition* parent
         = m_segment->find<bi::interprocess_condition>("ParentCondition").first;
       
       parent->wait(lock);
     }
     
-    void NotifyChildAndWait() {
-      bi::interprocess_mutex* mutex
-        = m_segment->find<bi::interprocess_mutex>("Mutex").first;
-      bi::scoped_lock<bi::interprocess_mutex> lock(*mutex);  
+    void NotifyChildAndWait(bi::scoped_lock<bi::interprocess_mutex>& lock) {
       m_segment->find<bi::interprocess_condition>("ChildCondition").first->notify_one();      
       bi::interprocess_condition* parent
         = m_segment->find<bi::interprocess_condition>("ParentCondition").first;
@@ -107,16 +113,16 @@ struct Calculator {
     }
     
     void* GetEmptyHypothesisState(const std::string& sentence) {
-      SentenceDone(false);
-      void** state = m_segment->construct<void*>("ContextPtr")((void*)0);            
+      bi::scoped_lock<bi::interprocess_mutex> lock(GetMutex());
       
-      CharAllocator charAlloc(m_segment->get_segment_manager());
-      ShmemString* shSentence = m_segment->construct<ShmemString>("ContextString")(charAlloc);
-      *shSentence = sentence.c_str();
+      void** state = m_segment->find<void*>("ContextPtr").first; 
+      ShmemString* shSentence = m_segment->find<ShmemString>("ContextString").first;
+      shSentence->clear();
+      shSentence->insert(shSentence->end(), sentence.begin(), sentence.end());
       
-      NotifyChildAndWait();
+      SetState(EmptyHypothesis);
+      NotifyChildAndWait(lock);
       
-      m_segment->destroy_ptr(shSentence);
       return *state;
     }
     

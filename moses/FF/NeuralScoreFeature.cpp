@@ -148,6 +148,8 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   
   std::cerr << "Stack: " << covered << "/" << total << " - ";
   for(size_t l = 0; l < m_pbl.size(); l++) {
+    
+    bi::scoped_lock<bi::interprocess_mutex> lock(m_calculator->GetMutex());
     m_calculator->Clear();
     Prefixes& prefixes = m_pbl[l];
    
@@ -175,7 +177,8 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     std::cerr << (l+1) << ":"
       << m_pbl[l].size() << ":" << m_calculator->GetSize() << " ";
     
-    m_calculator->NotifyChildAndWait();
+    m_calculator->SetState(Calculator::InSentence);
+    m_calculator->NotifyChildAndWait(lock);
     
     size_t k = 0;
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
@@ -188,9 +191,6 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     }    
   }
   std::cerr << "ok" << std::endl;
-  
-  if(covered == total)
-    m_calculator->SentenceDone(true);
 }
 
 /*

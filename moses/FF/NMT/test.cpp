@@ -65,13 +65,16 @@ void GetPaths(std::string& statePath, std::string& modelPath,
     targetVocab = p5.first->c_str();
 }
 
-bool HandleEmptyHypothesis(NMT_Wrapper& nmt,
+enum State { EmptyHypothesis, InSentence, Exit };
+
+State GetState(bi::managed_shared_memory& segment) {
+    std::pair<State*, size_t> p1 = segment.find<State>("State");
+    return *p1.first;
+}
+
+void HandleEmptyHypothesis(NMT_Wrapper& nmt,
                            bi::managed_shared_memory& segment) {
-    bi::scoped_lock<bi::interprocess_mutex> lock(GetMutex(segment));
-    WaitForParent(segment, lock);
     std::pair<ShmemString*, size_t> p1 = segment.find<ShmemString>("ContextString");
-    if(p1.second == 0)
-        return false;
     string sourceSentence(p1.first->begin(), p1.first->end());
     
     std::cout << "Received source string: " << sourceSentence << std::endl;
@@ -80,58 +83,41 @@ bool HandleEmptyHypothesis(NMT_Wrapper& nmt,
     nmt.GetContextVectors(sourceSentence, pyContextVectors);
     
     std::pair<void**, size_t> p2 = segment.find<void*>("ContextPtr");
-    if(p2.second == 0)
-        return false;
     *p2.first = pyContextVectors;
-    
-    NotifyParent(segment);
-    return true;
 }
 
 void HandleSentence(NMT_Wrapper &nmt,
                     bi::managed_shared_memory& segment) {
-    while(1) {
-        bi::scoped_lock<bi::interprocess_mutex> lock(GetMutex(segment));
-        WaitForParent(segment, lock);
     
-        std::pair<bool*, size_t> p1 = segment.find<bool>("SentenceIsDone");
-        if(*p1.first)
-            break;
-        
-        std::pair<void**, size_t> p2 = segment.find<void*>("ContextPtr");
-        std::pair<ShmemStringVector*, size_t > v1 = segment.find<ShmemStringVector>("AllWords");
-        std::pair<ShmemStringVector*, size_t > v2 = segment.find<ShmemStringVector>("AllLastWords");
-        std::pair<ShmemVoidptrVector*, size_t > v3 = segment.find<ShmemVoidptrVector>("AllStates");
-        
-        std::vector<std::string> allWords;
-        std::vector<std::string> allLastWords;
-        std::vector<PyObject*> allStates;
-        
-        for(size_t i = 0; i < v1.first->size(); ++i) {
-            allWords.push_back(std::string((*v1.first)[i].begin(), (*v1.first)[i].end()));
-            allLastWords.push_back(std::string((*v2.first)[i].begin(), (*v2.first)[i].end()));
-            allStates.push_back((PyObject*)(*v3.first)[i]);
-        }
-        
-        std::vector<double> outProbs;
-        std::vector<PyObject*> allOutStates;
-        
-        // batching
-        nmt.GetNextLogProbStates(allWords, (PyObject*)*p2.first, allLastWords,
-                                 allStates, outProbs, allOutStates);
-        
-        std::pair<ShmemVoidptrVector*, size_t > v4 = segment.find<ShmemVoidptrVector>("AllOutStates");
-        std::pair<ShmemFloatVector*, size_t > v5 = segment.find<ShmemFloatVector>("AllOutProbs");
-        
-        for(size_t i = 0; i < outProbs.size(); ++i) {
-            v4.first->push_back(allOutStates[i]);
-            v5.first->push_back(outProbs[i]);
-        }
-        
-        NotifyParent(segment);
+    std::pair<void**, size_t> p2 = segment.find<void*>("ContextPtr");
+    std::pair<ShmemStringVector*, size_t > v1 = segment.find<ShmemStringVector>("AllWords");
+    std::pair<ShmemStringVector*, size_t > v2 = segment.find<ShmemStringVector>("AllLastWords");
+    std::pair<ShmemVoidptrVector*, size_t > v3 = segment.find<ShmemVoidptrVector>("AllStates");
+    
+    std::vector<std::string> allWords;
+    std::vector<std::string> allLastWords;
+    std::vector<PyObject*> allStates;
+    
+    for(size_t i = 0; i < v1.first->size(); ++i) {
+        allWords.push_back(std::string((*v1.first)[i].begin(), (*v1.first)[i].end()));
+        allLastWords.push_back(std::string((*v2.first)[i].begin(), (*v2.first)[i].end()));
+        allStates.push_back((PyObject*)(*v3.first)[i]);
     }
     
-    std::cerr << "Done with sentence" << std::endl;
+    std::vector<double> outProbs;
+    std::vector<PyObject*> allOutStates;
+    
+    // batching
+    nmt.GetNextLogProbStates(allWords, (PyObject*)*p2.first, allLastWords,
+                             allStates, outProbs, allOutStates);
+    
+    std::pair<ShmemVoidptrVector*, size_t > v4 = segment.find<ShmemVoidptrVector>("AllOutStates");
+    std::pair<ShmemFloatVector*, size_t > v5 = segment.find<ShmemFloatVector>("AllOutProbs");
+    
+    for(size_t i = 0; i < outProbs.size(); ++i) {
+        v4.first->push_back(allOutStates[i]);
+        v5.first->push_back(outProbs[i]);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -142,14 +128,36 @@ int main(int argc, char *argv[])
     bi::managed_shared_memory segment(bi::open_only, memName.c_str());
     
     std::string statePath, modelPath, wrapperPath, sourceVocab, targetVocab;
-    GetPaths(statePath, modelPath, wrapperPath, sourceVocab, targetVocab, segment);
-    
     NMT_Wrapper wrapper;
-    wrapper.Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
-    NotifyParent(segment);
     
-    while(HandleEmptyHypothesis(wrapper, segment))
-        HandleSentence(wrapper, segment);
+    bi::interprocess_mutex& mutex = GetMutex(segment);
+    
+    {
+        bi::scoped_lock<bi::interprocess_mutex> lock(mutex);
+        GetPaths(statePath, modelPath, wrapperPath, sourceVocab, targetVocab, segment);
+        wrapper.Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
+        NotifyParent(segment);
+    }
+    
+    while(true) {
+        bi::scoped_lock<bi::interprocess_mutex> lock(mutex);
+        WaitForParent(segment, lock);
+
+        State state = GetState(segment);
+        std::cerr << "Got state " << state << std::endl;
+        switch(state) {
+            case EmptyHypothesis:
+                HandleEmptyHypothesis(wrapper, segment);
+                break;
+            case InSentence:
+                HandleSentence(wrapper, segment);
+                break;
+            case Exit:
+                NotifyParent(segment);
+                return 0;
+        }
         
+        NotifyParent(segment);
+    }
     return 0;
 }
