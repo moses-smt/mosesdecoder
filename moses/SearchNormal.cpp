@@ -248,14 +248,16 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   // early discarding: check if hypothesis is too bad to build
   // this idea is explained in (Moore&Quirk, MT Summit 2007)
   float expectedScore = 0.0f;
+
+  const WordsBitmap &sourceCompleted = hypothesis.GetWordsBitmap();
+  float futureScore = m_transOptColl.GetFutureScore().CalcFutureScore2( sourceCompleted, startPos, endPos );
+
   if (m_options.search.UseEarlyDiscarding()) {
     // expected score is based on score of current hypothesis
     expectedScore = hypothesis.GetScore();
 
     // add new future score estimate
-    expectedScore +=
-      m_transOptColl.GetFutureScore()
-      .CalcFutureScore2(hypothesis.GetWordsBitmap(), startPos, endPos);
+    expectedScore += futureScore;
   }
 
   // loop through all translation options
@@ -264,7 +266,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   if (!tol) return;
   TranslationOptionList::const_iterator iter;
   for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
-    ExpandHypothesis(hypothesis, **iter, expectedScore);
+    ExpandHypothesis(hypothesis, **iter, expectedScore, futureScore);
   }
 }
 
@@ -277,7 +279,10 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
  * \param expectedScore base score for early discarding
  *        (base hypothesis score plus future score estimation)
  */
-void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt, float expectedScore)
+void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
+		const TranslationOption &transOpt,
+		float expectedScore,
+		float futureScore)
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
@@ -293,7 +298,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
       stats.StopTimeBuildHyp();
     }
     if (newHypo==NULL) return;
-    newHypo->EvaluateWhenApplied(m_transOptColl.GetFutureScore());
+    newHypo->EvaluateWhenApplied(futureScore);
   } else
     // early discarding: check if hypothesis is too bad to build
   {
