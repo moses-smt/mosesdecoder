@@ -73,6 +73,7 @@
 #include "moses/FF/VW/VWFeatureSourceBigrams.h"
 #include "moses/FF/VW/VWFeatureSourceIndicator.h"
 #include "moses/FF/VW/VWFeatureSourcePhraseInternal.h"
+#include "moses/FF/VW/VWFeatureSourceSenseWindow.h"
 #include "moses/FF/VW/VWFeatureSourceWindow.h"
 #include "moses/FF/VW/VWFeatureTargetBigrams.h"
 #include "moses/FF/VW/VWFeatureTargetIndicator.h"
@@ -279,6 +280,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(VWFeatureSourceBigrams);
   MOSES_FNAME(VWFeatureSourceIndicator);
   MOSES_FNAME(VWFeatureSourcePhraseInternal);
+  MOSES_FNAME(VWFeatureSourceSenseWindow);
   MOSES_FNAME(VWFeatureSourceWindow);
   MOSES_FNAME(VWFeatureTargetBigrams);
   MOSES_FNAME(VWFeatureTargetPhraseInternal);
