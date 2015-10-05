@@ -161,7 +161,8 @@ private:
   const BitmapContainer &m_prevBitmapContainer;
   BitmapContainer &m_parent;
   const TranslationOptionList &m_translations;
-  const SquareMatrix &m_futurescore;
+  const SquareMatrix &m_futureScores;
+  float m_futureScore;
 
   std::vector< const Hypothesis* > m_hypotheses;
   boost::unordered_set< int > m_seenPosition;
@@ -180,7 +181,7 @@ public:
   BackwardsEdge(const BitmapContainer &prevBitmapContainer
                 , BitmapContainer &parent
                 , const TranslationOptionList &translations
-                , const SquareMatrix &futureScore,
+                , const SquareMatrix &futureScores,
                 const InputType& source);
   ~BackwardsEdge();
 

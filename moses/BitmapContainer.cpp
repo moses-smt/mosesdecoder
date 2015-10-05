@@ -110,13 +110,13 @@ public:
 BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
                              , BitmapContainer &parent
                              , const TranslationOptionList &translations
-                             , const SquareMatrix &futureScore,
+                             , const SquareMatrix &futureScores,
                              const InputType& itype)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
   , m_translations(translations)
-  , m_futurescore(futureScore)
+  , m_futureScores(futureScores)
   , m_seenPosition()
 {
 
@@ -195,6 +195,10 @@ BackwardsEdge::Initialize()
     return;
   }
 
+  const WordsBitmap &bm = m_hypotheses[0]->GetWordsBitmap();
+  const WordsRange &newRange = m_translations.Get(0)->GetSourceWordsRange();
+  m_futureScore = m_futureScores.CalcFutureScore2(bm, newRange.GetStartPos(), newRange.GetEndPos());
+
   Hypothesis *expanded = CreateHypothesis(*m_hypotheses[0], *m_translations.Get(0));
   m_parent.Enqueue(0, 0, expanded, this);
   SetSeenPosition(0, 0);
@@ -211,7 +215,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
-  //newHypo->EvaluateWhenApplied(m_futurescore);
+  newHypo->EvaluateWhenApplied(m_futureScore);
 
   return newHypo;
 }
