@@ -255,7 +255,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
     // add new future score estimate
     expectedScore +=
       m_transOptColl.GetFutureScore()
-      .CalcFutureScore(hypothesis.GetWordsBitmap(), startPos, endPos);
+      .CalcFutureScore2(hypothesis.GetWordsBitmap(), startPos, endPos);
   }
 
   // loop through all translation options
