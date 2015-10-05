@@ -31,9 +31,9 @@ public:
   }
 
   void operator()(const InputType &input
-      , const InputPath &inputPath
-      , const WordsRange &sourceRange
-      , Discriminative::Classifier &classifier) const {
+                  , const InputPath &inputPath
+                  , const WordsRange &sourceRange
+                  , Discriminative::Classifier &classifier) const {
     int begin = sourceRange.GetStartPos();
     int end   = sourceRange.GetEndPos() + 1;
     int inputLen = input.GetSize();

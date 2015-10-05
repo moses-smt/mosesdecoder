@@ -280,9 +280,9 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
  *        (base hypothesis score plus future score estimation)
  */
 void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
-		const TranslationOption &transOpt,
-		float expectedScore,
-		float futureScore)
+                                    const TranslationOption &transOpt,
+                                    float expectedScore,
+                                    float futureScore)
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();

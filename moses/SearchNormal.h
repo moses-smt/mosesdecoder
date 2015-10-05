@@ -45,9 +45,9 @@ protected:
 
   virtual void
   ExpandHypothesis(const Hypothesis &hypothesis,
-		  const TranslationOption &transOpt,
-          float expectedScore,
-		  float futureScore);
+                   const TranslationOption &transOpt,
+                   float expectedScore,
+                   float futureScore);
 
 public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
