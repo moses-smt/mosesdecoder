@@ -4,6 +4,7 @@
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 #include "moses/FF/StatelessFeatureFunction.h"
@@ -213,7 +214,7 @@ void ScoreComponentCollection::Save(const string& filename) const
 {
   ofstream out(filename.c_str());
   if (!out) {
-    ostringstream msg;
+    util::StringStream msg;
     msg << "Unable to open " << filename;
     throw runtime_error(msg.str());
   }
