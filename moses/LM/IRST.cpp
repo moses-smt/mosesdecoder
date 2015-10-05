@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace irstlm;
 
 #include "IRST.h"
+//#include "moses/Incremental.h"
+//#include "Base.h"
 #include "moses/LM/PointerState.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
@@ -64,12 +66,13 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor(line)
   ,m_lmtb_dub(0), m_lmtb_size(0)
 {
+/*
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
   if (threadCount != 1) {
     throw runtime_error("Error: " + SPrint(threadCount) + " number of threads specified but IRST LM is not threadsafe.");
   }
-
+*/
   ReadParameters();
 
   VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
@@ -121,8 +124,21 @@ void LanguageModelIRST::Load()
   m_lmtb->init_caches(m_lmtb_size>2?m_lmtb_size-1:2);
 
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
+  d->incflag(0);
 }
 
+void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
+{
+  m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
+  m_lmtb_sentenceStart = GetLmID(BOS_);
+  m_sentenceStartWord[m_factorType] = m_sentenceStart;
+
+  m_sentenceEnd         = factorCollection.AddFactor(Output, m_factorType, EOS_);
+  m_lmtb_sentenceEnd = GetLmID(EOS_);
+  m_sentenceEndWord[m_factorType] = m_sentenceEnd;
+}
+
+/*
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 {
   // add factors which have srilm id
@@ -164,6 +180,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
     m_lmIdLookup[iterMap->first] = iterMap->second;
   }
 }
+*/
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
 {
@@ -175,6 +192,13 @@ int LanguageModelIRST::GetLmID( const Word &word ) const
   return GetLmID( word.GetFactor(m_factorType) );
 }
 
+int LanguageModelIRST::GetLmID( const Factor *factor ) const
+{
+  std::string s = factor->GetString().as_string();
+  return d->encode(s.c_str());
+}
+
+/*
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
   size_t factorId = factor->GetId();
@@ -230,6 +254,7 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
     return m_lmIdLookup[factorId];
   }
 }
+*/
 
 const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/) const
 {
