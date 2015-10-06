@@ -2,6 +2,8 @@
 
 #include <string>
 #include <algorithm>
+#include <boost/foreach.hpp>
+#include "ThreadLocalByFeatureStorage.h"
 #include "VWFeatureSource.h"
 #include "moses/Util.h"
 
@@ -23,11 +25,29 @@ class VWFeatureSourceSenseWindow : public VWFeatureSource
 {
 public:
   VWFeatureSourceSenseWindow(const std::string &line)
-    : VWFeatureSource(line), m_size(DEFAULT_WINDOW_SIZE) {
+    : VWFeatureSource(line), m_tlsSenses(this), m_tlsForms(this), m_lexicalized(true), m_size(DEFAULT_WINDOW_SIZE) {
     ReadParameters();
 
     // Call this last
     VWFeatureBase::UpdateRegister();
+  }
+
+  // precompute feature strings for each input sentence
+  virtual void InitializeForInput(ttasksptr const& ttask) {
+    InputType const& input = *(ttask->GetSource().get());
+
+    std::vector<WordSenses>& senses = *m_tlsSenses.GetStored();
+    std::vector<std::string>& forms = *m_tlsForms.GetStored();
+    senses.clear();
+    forms.clear();
+
+    senses.resize(input.GetSize());
+    forms.resize(input.GetSize());
+
+    for (size_t i = 0; i < input.GetSize(); i++) {
+      senses[i] = GetSenses(input, i);
+      forms[i] = m_lexicalized ? GetWordForm(input, i) + "^" : "";
+    }
   }
 
   void operator()(const InputType &input
@@ -38,30 +58,30 @@ public:
     int end   = sourceRange.GetEndPos() + 1;
     int inputLen = input.GetSize();
 
+    const std::vector<WordSenses>& senses = *m_tlsSenses.GetStored();
+    const std::vector<std::string>& forms = *m_tlsForms.GetStored();
+
     // before current phrase
     for (int i = std::max(0, begin - m_size); i < begin; i++) {
-      std::vector<Sense> senses = GetSenses(input, i);
-      for (int senseIdx = 0; senseIdx < senses.size(); senseIdx++) {
-        classifier.AddLabelIndependentFeature("snsb^" + GetWordForm(input, i) + "^" + SPrint(i - begin) + "^" + senses[senseIdx].m_word, senses[senseIdx].m_prob);
-        classifier.AddLabelIndependentFeature("snsb^" + GetWordForm(input, i) + "^" + senses[senseIdx].m_word, senses[senseIdx].m_prob);
+      BOOST_FOREACH(const Sense &sense, senses[i]) {
+        classifier.AddLabelIndependentFeature("snsb^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob);
+        classifier.AddLabelIndependentFeature("snsb^" + forms[i] + sense.m_label, sense.m_prob);
       }
     }
 
     // within current phrase
     for (int i = begin; i < end; i++) {
-      std::vector<Sense> senses = GetSenses(input, i);
-      for (int senseIdx = 0; senseIdx < senses.size(); senseIdx++) {
-        classifier.AddLabelIndependentFeature("snsin^" + GetWordForm(input, i) + "^" + SPrint(i) + "^" +senses[senseIdx].m_word, senses[senseIdx].m_prob);
-        classifier.AddLabelIndependentFeature("snsin^" + GetWordForm(input, i) + "^" + senses[senseIdx].m_word, senses[senseIdx].m_prob);
+      BOOST_FOREACH(const Sense &sense, senses[i]) {
+        classifier.AddLabelIndependentFeature("snsin^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob);
+        classifier.AddLabelIndependentFeature("snsin^" + forms[i] + sense.m_label, sense.m_prob);
       }
     }
 
     // after current phrase
     for (int i = end; i < std::min(end + m_size, inputLen); i++) {
-      std::vector<Sense> senses = GetSenses(input, i);
-      for (int senseIdx = 0; senseIdx < senses.size(); senseIdx++) {
-        classifier.AddLabelIndependentFeature("snsa^" + GetWordForm(input, i) + "^" + SPrint(i - end + 1) + "^" + senses[senseIdx].m_word, senses[senseIdx].m_prob);
-        classifier.AddLabelIndependentFeature("snsa^" + GetWordForm(input, i) + "^" + senses[senseIdx].m_word, senses[senseIdx].m_prob);
+      BOOST_FOREACH(const Sense &sense, senses[i]) {
+        classifier.AddLabelIndependentFeature("snsa^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob);
+        classifier.AddLabelIndependentFeature("snsa^" + forms[i] + sense.m_label, sense.m_prob);
       }
     }
   }
@@ -69,6 +89,8 @@ public:
   virtual void SetParameter(const std::string& key, const std::string& value) {
     if (key == "size") {
       m_size = Scan<size_t>(value);
+    } else if (key == "lexicalized") {
+      m_lexicalized = Scan<bool>(value);
     } else {
       VWFeatureSource::SetParameter(key, value);
     }
@@ -78,9 +100,17 @@ private:
   static const int DEFAULT_WINDOW_SIZE = 3;
 
   struct Sense {
-    std::string m_word;
+    std::string m_label;
     float m_prob;
   };
+
+  typedef std::vector<Sense> WordSenses;
+  typedef ThreadLocalByFeatureStorage<std::vector<WordSenses> > TLSSenses;
+  typedef ThreadLocalByFeatureStorage<std::vector<std::string> > TLSWordForms;
+
+  TLSSenses m_tlsSenses; // for each input sentence, contains extracted senses and probs for each word
+  TLSWordForms m_tlsForms; // word forms for each input sentence
+  
 
   std::vector<Sense> GetSenses(const InputType &input, size_t pos) const {
     std::string w = GetWord(input, pos);
@@ -92,7 +122,7 @@ private:
       if (senseColumns.size() != 2) {
         UTIL_THROW2("VW :: bad format of sense distribution: " << senseTokens[i]);
       }
-      out[i].m_word = senseColumns[0];
+      out[i].m_label = senseColumns[0];
       out[i].m_prob = Scan<float>(senseColumns[1]);
     }
 
@@ -104,6 +134,7 @@ private:
     return input.GetWord(pos).GetString(0).as_string();
   }
 
+  bool m_lexicalized;
   int m_size;
 };
 
