@@ -166,6 +166,9 @@ def main(argv):
             i += 1
         else:
             i += 1
+    # Override thread specification in moses.ini
+    cmd.append('-threads')
+    cmd.append('1')
 
     # If mert-moses.pl passes -show-weights, just call moses
     if show_weights:
