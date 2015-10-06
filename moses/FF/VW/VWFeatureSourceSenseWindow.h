@@ -110,7 +110,7 @@ private:
 
   TLSSenses m_tlsSenses; // for each input sentence, contains extracted senses and probs for each word
   TLSWordForms m_tlsForms; // word forms for each input sentence
-  
+
 
   std::vector<Sense> GetSenses(const InputType &input, size_t pos) const {
     std::string w = GetWord(input, pos);
