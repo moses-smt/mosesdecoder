@@ -76,7 +76,7 @@ float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap ) const
  * /param endPos end of the span that is added to the coverage
  */
 
-float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap, size_t startPos, size_t endPos ) const
+float SquareMatrix::CalcFutureScore2( WordsBitmap const &bitmap, size_t startPos, size_t endPos ) const
 {
   const size_t notInGap= numeric_limits<size_t>::max();
   float futureScore = 0.0f;

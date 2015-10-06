@@ -255,7 +255,7 @@ EvaluateWhenApplied(const StatelessFeatureFunction& slff)
  */
 void
 Hypothesis::
-EvaluateWhenApplied(const SquareMatrix &futureScore)
+EvaluateWhenApplied(float futureScore)
 {
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StartTimeOtherScore();
@@ -292,7 +292,7 @@ EvaluateWhenApplied(const SquareMatrix &futureScore)
   }
 
   // FUTURE COST
-  m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
+  m_futureScore = futureScore;
 
   // TOTAL
   m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
