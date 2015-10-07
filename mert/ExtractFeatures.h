@@ -18,14 +18,17 @@ class ExtractFeatures{
 		 ExtractFeatures(const std::string& config="");
 	  //~ExtractFeatures();
 
-	  std::string CallStanfordDep(std::string parsedSentence) const;
-	  vector<vector<string> > MakeTuples(string sentence, string dep);
+	  std::string CallStanfordDep(const std::string& parsedSentence) const;
+	  vector<vector<string> > MakeTuples(const string& sentence, const string& dep);
 	  float GetWBScore(vector<string>& depRel) const;
-	  float ComputeScore(string &sentence, string &depRel);
-	  string GetFeatureStr(string &sentence, string &depRel);
+	  float ComputeScore(const string &sentence, const string &depRel);
+	  string GetFeatureStr(const string &sentence, const string &depRel);
 	  string GetFeatureNames();
 	  void InitConfig(const string& config);
 	  std::string getConfig(const std::string& key) const;
+	  void ReadMIModel(string modelFileMI);
+	  void ReadLemmaMap(string lemmaMapFile);
+	  std::string FilterArg(std::string word);
 
 	  inline string getExtraData(){
 	  	return m_getExtraData;
@@ -37,7 +40,8 @@ class ExtractFeatures{
 	private:
 	  mutable Moses::CreateJavaVM *javaWrapper;
 	  jobject m_workingStanforDepObj;
-
+	  boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap;
+	  boost::shared_ptr< std::map<std::string, std::vector<float> > > m_MIModel;
 	  //models
 	  boost::shared_ptr<lm::ngram::Model> m_WBmodel;
 

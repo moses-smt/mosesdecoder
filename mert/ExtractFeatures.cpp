@@ -1,13 +1,16 @@
 #include "ExtractFeatures.h"
+#include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace MosesTuning{
 
 ExtractFeatures::ExtractFeatures(const std::string& config)
 	: m_allowedRel (new std::map<std::string, bool>()),
     m_getExtraData(""),
-    m_computeExtraFeatures(false)
+    m_computeExtraFeatures(false),
+    m_lemmaMap (new std::map<std::string, std::string>())
 {
-	string javaPath,modelFileARPA;
+	string javaPath,modelFileARPA, modelFileMI, lemmaMapFile;
 	InitConfig(config);
 
 	javaPath=getConfig("javaPath");
@@ -21,6 +24,15 @@ ExtractFeatures::ExtractFeatures(const std::string& config)
 			cerr<<"provide modelFileARPA for extra feature\n";
 			exit(-1);
 		}
+
+	modelFileMI=getConfig("modelFileMI");
+	lemmaMapFile=getConfig("lemmaMapFile");
+	if(lemmaMapFile!="")
+		ReadLemmaMap(lemmaMapFile);
+	if(modelFileMI!=""){
+		ReadMIModel(modelFileMI);
+	}
+
 
 	m_getExtraData=getConfig("getExtraData");
 
@@ -49,7 +61,80 @@ ExtractFeatures::ExtractFeatures(const std::string& config)
 
 }
 
-std::string ExtractFeatures::CallStanfordDep(std::string parsedSentence) const{
+
+
+void ExtractFeatures::ReadMIModel(string modelFileMI){
+	using Moses::Tokenize;
+
+	std::ifstream file(modelFileMI.c_str()); // (fileName);
+	string line;
+	string subcat="";
+	std::vector<std::string> tokens;
+	std::vector<float> scores;
+	if(file.is_open()){
+		while(getline(file,line)){
+			// !!!! SPLIT doesn't work as it should -> problem with delimitors
+			Tokenize(tokens, line);
+			subcat = tokens[0]+" "+tokens[1]+" "+tokens[2];
+			scores.push_back(std::atof(tokens[3].c_str()));
+			scores.push_back(std::atof(tokens[4].c_str()));
+			m_MIModel->insert(std::pair<std::string, vector<float> > (subcat,scores));
+			tokens.clear();
+			scores.clear();
+		}
+	}
+}
+
+void ExtractFeatures::ReadLemmaMap(string lemmaFile){
+	using Moses::Tokenize;
+
+	std::ifstream file(lemmaFile.c_str()); // (fileName);
+	string line,word,lemma;
+	std::vector<std::string> tokens;
+	if(file.is_open()){
+		while(getline(file,line)){
+			// !!!! SPLIT doesn't work as it should -> problem with delimitors
+			Tokenize(tokens, line);
+			if(tokens.size()>1){
+				m_lemmaMap->insert(std::pair<std::string, std::string > (tokens[0],tokens[1]));
+			}
+			tokens.clear();
+		}
+	}
+}
+
+
+
+std::string ExtractFeatures::FilterArg(std::string arg){
+	boost::regex web("^bhttp|^bhttps|^bwww");
+	boost::regex date("([0-9]+[.|-|/]?)+"); //some sort of date or other garbage
+	boost::regex nr("[0-9]+");
+	boost::regex prn("i|he|she|we|you|they|it|me|them");
+	boost::regex par("\\(|\\)");
+	//lowercase in place
+	boost::algorithm::to_lower(arg);
+	if(boost::regex_match(arg,web))
+		return "WWW";
+	if(boost::regex_match(arg,date))
+			return "DDAATTEE";
+	if(boost::regex_match(arg,nr))
+			return "NNRR";
+	if(boost::regex_match(arg,prn))
+			return "PRN";
+	if(boost::regex_match(arg,par))
+			return "-LRB-";
+	std::map<string,string>::iterator it;
+	it = m_lemmaMap->find(arg);
+	if(it!=m_lemmaMap->end()){
+		return it->second;
+	}
+	else
+		return arg; //no filter needed, use the original arg
+
+}
+
+
+std::string ExtractFeatures::CallStanfordDep(const std::string& parsedSentence) const{
 
 	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
 	env->ExceptionDescribe();
@@ -110,7 +195,7 @@ std::string ExtractFeatures::CallStanfordDep(std::string parsedSentence) const{
 	return "exception";
 }
 
-vector<vector<string> > ExtractFeatures::MakeTuples(string sentence, string depRel){
+vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, const string& depRel){
 	using Moses::Tokenize;
 
 	//cout<<ref<<endl;
@@ -135,13 +220,14 @@ vector<vector<string> > ExtractFeatures::MakeTuples(string sentence, string depR
 		//relations from parser -> (dep,gov,rel)
 		//LM model scores: (rel,gov,dep) where rel in (dobj,iobj,nsubj,nsubjpass)
 		if(m_allowedRel->find(rel)!=m_allowedRel->end()){
+			//SHOULD LEMMATIZE
 			dep = strtol (dependencies[i].c_str(),NULL,10);
 			gov = strtol (dependencies[i+1].c_str(),NULL,10);
 
 			vector<string> tuple;
 			tuple.push_back(rel);
-			tuple.push_back(words[gov]);
-			tuple.push_back(words[dep]);
+			tuple.push_back(FilterArg(words[gov]));
+			tuple.push_back(FilterArg(words[dep]));
 			dependencyTuples.push_back(tuple);
 		}
 	}
@@ -169,7 +255,7 @@ float ExtractFeatures::GetWBScore(vector<string>& depRel) const{
 	  return score;
 }
 
-float ExtractFeatures::ComputeScore(string &sentence, string &depRel){
+float ExtractFeatures::ComputeScore(const string &sentence, const string &depRel){
 	stringstream featureStr;
 	vector<vector<string> > dependencyTuples;
 	vector<vector<string> >::iterator tuplesIt;
@@ -183,7 +269,7 @@ float ExtractFeatures::ComputeScore(string &sentence, string &depRel){
 	return scoreWBmodel;
 }
 
-string ExtractFeatures::GetFeatureStr(string &sentence, string &depRel){
+string ExtractFeatures::GetFeatureStr(const string &sentence, const string &depRel){
 	stringstream featureStr;
 	float score = ComputeScore(sentence, depRel);
 	featureStr<<"HeadFeature= "<<score<<" ";
