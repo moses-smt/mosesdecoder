@@ -8,7 +8,8 @@ ExtractFeatures::ExtractFeatures(const std::string& config)
 	: m_allowedRel (new std::map<std::string, bool>()),
     m_getExtraData(""),
     m_computeExtraFeatures(false),
-    m_lemmaMap (new std::map<std::string, std::string>())
+    m_lemmaMap (new std::map<std::string, std::string>()),
+	  m_MIModel (new std::map<std::string, std::vector<float> > ())
 {
 	string javaPath,modelFileARPA, modelFileMI, lemmaMapFile;
 	InitConfig(config);
@@ -255,31 +256,50 @@ float ExtractFeatures::GetWBScore(vector<string>& depRel) const{
 	  return score;
 }
 
-float ExtractFeatures::ComputeScore(const string &sentence, const string &depRel){
+float ExtractFeatures::GetMIScore(vector<string>& depRel) const{
+	  //depRel = rel gov dep -> rel verb arg
+		string tuple = depRel[0]+"\t"+depRel[1]+"\t"+depRel[2];
+		std::map< std::string,std::vector<float> >::iterator it_MI;
+		float score = 0.0;
+		it_MI = m_MIModel->find(tuple);
+			if(it_MI!=m_MIModel->end())
+				score = it_MI->second[0];
+	  return score;
+}
+
+vector<float> ExtractFeatures::ComputeScore(const string &sentence, const string &depRel){
 	stringstream featureStr;
 	vector<vector<string> > dependencyTuples;
 	vector<vector<string> >::iterator tuplesIt;
 	dependencyTuples = MakeTuples(sentence,depRel);
 	float scoreWBmodel=0.0, scoreMImodel=0.0;
+	vector<float> feature_scores;
 
 	for(tuplesIt=dependencyTuples.begin();tuplesIt!=dependencyTuples.end();tuplesIt++){
 		scoreWBmodel+=GetWBScore(*tuplesIt);
+		if (!m_MIModel->empty())
+			scoreMImodel+=GetMIScore(*tuplesIt);
 	}
+	feature_scores.push_back(scoreWBmodel);
+	if (!m_MIModel->empty())
+		feature_scores.push_back(scoreMImodel);
 
-	return scoreWBmodel;
+	return feature_scores;
 }
 
 string ExtractFeatures::GetFeatureStr(const string &sentence, const string &depRel){
 	stringstream featureStr;
-	float score = ComputeScore(sentence, depRel);
-	featureStr<<"HeadFeature= "<<score<<" ";
+	vector<float> feature_scores = ComputeScore(sentence, depRel);
+	for(size_t i=0; i<feature_scores.size(); i++)
+		featureStr<<"HeadFeature= "<<feature_scores[i]<<" ";
+
 	return featureStr.str();
 }
 
 string ExtractFeatures::GetFeatureNames(){
 	stringstream featureNames;
 	//0 means one score?? -> I hate this stupid code!!!
-	featureNames<<"HeadFeature_"<<0; //this should be number of scores
+	featureNames<<"HeadFeature_0 Headfeature_1"; //this should be number of scores
 	return featureNames.str();
 
 }

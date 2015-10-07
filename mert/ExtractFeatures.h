@@ -21,7 +21,8 @@ class ExtractFeatures{
 	  std::string CallStanfordDep(const std::string& parsedSentence) const;
 	  vector<vector<string> > MakeTuples(const string& sentence, const string& dep);
 	  float GetWBScore(vector<string>& depRel) const;
-	  float ComputeScore(const string &sentence, const string &depRel);
+	  float GetMIScore(vector<string>& depRel) const;
+	  vector<float> ComputeScore(const string &sentence, const string &depRel);
 	  string GetFeatureStr(const string &sentence, const string &depRel);
 	  string GetFeatureNames();
 	  void InitConfig(const string& config);
