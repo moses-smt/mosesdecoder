@@ -711,7 +711,6 @@ build-interpolated-osm
 	rerun-on-change: interpolated-operation-sequence-model training-options script giza-settings operation-sequence-model-settings
 	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings --domain IN2
 	default-name: model/OSM
-
 build-transliteration-model
 	in: corpus word-alignment 
 	out: transliteration-model
