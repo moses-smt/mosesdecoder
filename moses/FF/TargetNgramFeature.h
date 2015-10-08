@@ -29,6 +29,10 @@ public:
   {
   	UTIL_THROW2("TODO:Haven't figure this out yet");
   }
+  virtual bool operator==(const FFState& other) const
+  {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
 
 private:
   std::vector<Word> m_words;
