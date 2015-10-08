@@ -127,6 +127,7 @@ void LanguageModelIRST::Load()
   d->incflag(0);
 }
 
+/*
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 {
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
@@ -137,8 +138,8 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
   m_lmtb_sentenceEnd = GetLmID(EOS_);
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 }
+*/
 
-/*
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 {
   // add factors which have srilm id
@@ -159,15 +160,17 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
   factorId = m_sentenceStart->GetId();
-  const std::string bs = BOS_;
-  const std::string es = EOS_;
-  m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
+  d->incflag(1);
+  m_lmtb_sentenceStart = lmIdMap[factorId] = GetLmID(BOS_);
+  d->incflag(0);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceStartWord[m_factorType] = m_sentenceStart;
 
   m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
   factorId = m_sentenceEnd->GetId();
-  m_lmtb_sentenceEnd=lmIdMap[factorId] = GetLmID(EOS_);
+  d->incflag(1);
+  m_lmtb_sentenceEnd = lmIdMap[factorId] = GetLmID(EOS_);
+  d->incflag(0);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
@@ -180,7 +183,6 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
     m_lmIdLookup[iterMap->first] = iterMap->second;
   }
 }
-*/
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
 {
@@ -192,10 +194,24 @@ int LanguageModelIRST::GetLmID( const Word &word ) const
   return GetLmID( word.GetFactor(m_factorType) );
 }
 
+/*
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
   std::string s = factor->GetString().as_string();
   return d->encode(s.c_str());
+}
+*/
+
+int LanguageModelIRST::GetLmID( const Factor *factor ) const
+{
+  //there is no possibility to extend the original dictionary associated to this LM
+  size_t factorId = factor->GetId();
+
+  if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
+    return m_unknownId;
+  } else {
+    return m_lmIdLookup[factorId];
+  }
 }
 
 /*
@@ -218,24 +234,6 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
       ///impostando a    m_empty     tutti i termini che non hanno ancora
       //ricevuto un codice target effettivo
       ///////////
-
-      ///OLD PROBLEM - SOLVED
-////////////
-/// IL PPROBLEMA ERA QUI
-/// m_lmIdLookup.push_back(code);
-/// PERCHE' USANDO PUSH_BACK IN REALTA' INSEREVIVAMO L'ELEMENTO NUOVO
-/// IN POSIZIONE (factorID-1) invece che in posizione factrID dove dopo andiamo a leggerlo (vedi caso C
-/// Cosi' funziona ....
-/// ho un dubbio su cosa c'e' nelle prime posizioni di m_lmIdLookup
-/// quindi
-/// e scopro che rimane vuota una entry ogni due
-/// perche' factorID cresce di due in due (perche' codifica sia source che target) "vuota" la posizione (factorID-1)
-/// non da problemi di correttezza, ma solo di "spreco" di memoria
-/// potremmo sostituirerendere  m_lmIdLookup una std:map invece che un std::vector,
-/// ma si perde in efficienza nell'accesso perche' non e' piu' possibile quello random dei vettori
-/// a te la scelta!!!!
-////////////////
-
 
       if (factorId >= m_lmIdLookup.size()) {
         //resize and fill with m_empty
