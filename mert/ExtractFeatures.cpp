@@ -258,7 +258,7 @@ float ExtractFeatures::GetWBScore(vector<string>& depRel) const{
 
 float ExtractFeatures::GetMIScore(vector<string>& depRel) const{
 	  //depRel = rel gov dep -> rel verb arg
-		string tuple = depRel[0]+"\t"+depRel[1]+"\t"+depRel[2];
+		string tuple = depRel[0]+" "+depRel[1]+" "+depRel[2];
 		std::map< std::string,std::vector<float> >::iterator it_MI;
 		float score = 0.0;
 		it_MI = m_MIModel->find(tuple);
