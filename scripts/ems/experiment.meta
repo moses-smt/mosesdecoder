@@ -533,7 +533,7 @@ build-domains
 	in: CORPUS:post-split-factorized-stem
 	out: domains
 	default-name: model/domains
-	ignore-unless: domain-features mml-filter-corpora operation-sequence-model
+	ignore-unless: domain-features mml-filter-corpora interpolated-operation-sequence-model
 	template: $moses-script-dir/ems/support/build-domain-file-from-subcorpora.perl $input-extension IN > OUT
 	final-model: yes
 mml-score
@@ -698,12 +698,20 @@ pcfg-score
 	pass-unless: use-pcfg-feature
 	template: ln -s IN.$input-extension OUT.$input-extension ; $moses-bin-dir/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
 build-osm
-	in: corpus word-alignment domains
+	in: corpus word-alignment
 	out: osm-model
 	ignore-unless: operation-sequence-model
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings
+	default-name: model/OSM
+build-interpolated-osm
+	in: corpus word-alignment domains
+	out: osm-model
+	ignore-unless: interpolated-operation-sequence-model
+	rerun-on-change: interpolated-operation-sequence-model training-options script giza-settings operation-sequence-model-settings
 	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings --domain IN2
 	default-name: model/OSM
+
 build-transliteration-model
 	in: corpus word-alignment 
 	out: transliteration-model
