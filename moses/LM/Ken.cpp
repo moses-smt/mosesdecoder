@@ -66,6 +66,10 @@ struct KenLMState : public FFState {
   {
   	UTIL_THROW2("TODO:Haven't figure this out yet");
   }
+  virtual bool operator==(const FFState& other) const
+  {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
 
 };
 

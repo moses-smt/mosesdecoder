@@ -59,6 +59,10 @@ public:
   {
   	UTIL_THROW2("TODO:Haven't figure this out yet");
   }
+  virtual bool operator==(const FFState& other) const
+  {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
 
   // Allow BackwardLanguageModel to access the private members of this class
   template <class Model> friend class BackwardLanguageModel;

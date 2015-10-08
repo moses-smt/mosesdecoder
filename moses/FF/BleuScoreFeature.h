@@ -27,6 +27,10 @@ public:
   BleuScoreState();
   virtual int Compare(const FFState& other) const;
   size_t hash() const;
+  virtual bool operator==(const FFState& other) const
+  {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
 
   void print(std::ostream& out) const;
 

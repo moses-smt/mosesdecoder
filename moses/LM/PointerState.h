@@ -20,6 +20,11 @@ struct PointerState : public FFState {
   virtual size_t hash() const {
 	  return (size_t) lmstate;
   }
+  virtual bool operator==(const FFState& other) const
+  {
+    const PointerState& o = static_cast<const PointerState&>(o);
+    return lmstate == o.lmstate;
+  }
 
 };
 

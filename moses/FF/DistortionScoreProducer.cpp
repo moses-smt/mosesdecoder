@@ -25,6 +25,10 @@ struct DistortionState_traditional : public FFState {
   {
 	  size_t ret = range.GetEndPos();
   }
+  virtual bool operator==(const FFState& other) const
+  {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
 
 };
 

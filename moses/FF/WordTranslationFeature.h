@@ -5,7 +5,6 @@
 
 #include "moses/FactorCollection.h"
 #include "moses/Sentence.h"
-#include "FFState.h"
 #include "StatelessFeatureFunction.h"
 
 namespace Moses

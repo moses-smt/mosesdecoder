@@ -42,6 +42,10 @@ public:
   virtual size_t hash() const {
 	  return m_hash;
   }
+  virtual bool operator==(const FFState& other) const
+  {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
 
 };
 
