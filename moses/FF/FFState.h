@@ -2,7 +2,7 @@
 #define moses_FFState_h
 
 #include <vector>
-
+#include <stddef.h>
 
 namespace Moses
 {
