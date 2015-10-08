@@ -674,7 +674,13 @@ namespace Moses
     // newer than the timestamp of the phrase itself we must update
     // the entry.
 
-    if (ret) return ret; // yes, was cached => DONE
+    boost::upgrade_lock<boost::shared_mutex> rlock(ret->lock);
+    if (ret->GetSize()) return ret; 
+
+    // new TPC (not found or old one was not up to date)
+    boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(rlock);
+    if (ret->GetSize()) return ret; 
+    // check again, another thread may have done the work already
 
     // OK: pt entry NOT found or NOT up to date
     // lookup and expansion could be done in parallel threads,
@@ -712,7 +718,6 @@ namespace Moses
         sort(ppdyn.begin(), ppdyn.end(),sort_by_tgt_id);
       }
     // now we have two lists of Phrase Pairs, let's merge them
-    ret = new TPCollWrapper(dyn->revision(), phrasekey);
     PhrasePair<Token>::SortByTargetIdSeq sorter;
     size_t i = 0; size_t k = 0;
     while (i < ppfix.size() && k < ppdyn.size())
@@ -724,6 +729,8 @@ namespace Moses
       }
     while (i < ppfix.size()) ret->Add(mkTPhrase(ttask,src,&ppfix[i++],NULL,dyn));
     while (k < ppdyn.size()) ret->Add(mkTPhrase(ttask,src,NULL,&ppdyn[k++],dyn));
+
+    // Pruning should not be done here but outside!
     if (m_tableLimit) ret->Prune(true, m_tableLimit);
     else ret->Prune(true,ret->GetSize());
 
@@ -739,7 +746,6 @@ namespace Moses
           }
       }
 #endif
-    cache->add(phrasekey, ret);
     return ret;
   }
 
@@ -918,8 +924,7 @@ namespace Moses
   ::Release(ttasksptr const& ttask, TargetPhraseCollection*& tpc) const
   {
     SPTR<TPCollCache> cache = ttask->GetScope()->get<TPCollCache>(cache_key);
-    TPCollWrapper* foo = static_cast<TPCollWrapper*>(tpc);
-    if (cache) cache->release(foo);
+    if (cache) cache->release(static_cast<TPCollWrapper*>(tpc));
     tpc = NULL;
   }
 
