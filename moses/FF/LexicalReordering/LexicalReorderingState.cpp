@@ -331,6 +331,11 @@ Compare(const FFState& o) const
   return 1;
 }
 
+size_t PhraseBasedReorderingState::hash() const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
 LRState*
 PhraseBasedReorderingState::
 Expand(const TranslationOption& topt, const InputType& input,
@@ -375,6 +380,11 @@ Expand(const TranslationOption& topt, const InputType& input,
   return new BidirectionalReorderingState(m_configuration, newbwd, newfwd, m_offset);
 }
 
+size_t BidirectionalReorderingState::hash() const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
 ///////////////////////////
 //HierarchicalReorderingBackwardState
 
@@ -398,6 +408,11 @@ Compare(const FFState& o) const
   const HReorderingBackwardState& other
   = static_cast<const HReorderingBackwardState&>(o);
   return m_reoStack.Compare(other.m_reoStack);
+}
+
+size_t HReorderingBackwardState::hash() const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
 LRState*
@@ -449,6 +464,11 @@ Compare(const FFState& o) const
   return ((m_prevRange == other.m_prevRange)
           ? ComparePrevScores(other.m_prevOption)
           : (m_prevRange < other.m_prevRange) ? -1 : 1);
+}
+
+size_t HReorderingForwardState::hash() const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
 // For compatibility with the phrase-based reordering model, scoring is one

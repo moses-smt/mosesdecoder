@@ -1,6 +1,8 @@
+#include <boost/functional/hash.hpp>
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <boost/foreach.hpp>
 #include "CoveredReferenceFeature.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/Hypothesis.h"
@@ -40,6 +42,19 @@ int CoveredReferenceState::Compare(const FFState& other) const
 //  return (m_coveredRef.size() < otherState.m_coveredRef.size()) ? -1 : +1;
 }
 
+size_t CoveredReferenceState::hash() const
+{
+	size_t ret = 0;
+	boost::hash<string> strHash;
+	BOOST_FOREACH(const string &str, m_coveredRef) {
+		size_t hash = strHash(str);
+		boost::hash_combine(ret, hash);
+	}
+
+	return ret;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CoveredReferenceFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown

@@ -27,6 +27,7 @@ public:
   ControlRecombinationState(const ChartHypothesis &hypo, const ControlRecombination &ff);
 
   int Compare(const FFState& other) const;
+  virtual size_t hash() const;
 
   const Phrase &GetPhrase() const {
     return m_outputPhrase;

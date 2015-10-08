@@ -26,6 +26,8 @@ public:
 
   BleuScoreState();
   virtual int Compare(const FFState& other) const;
+  size_t hash() const;
+
   void print(std::ostream& out) const;
 
 private:

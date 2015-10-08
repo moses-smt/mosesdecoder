@@ -25,6 +25,11 @@ public:
   }
   virtual int Compare(const FFState& other) const;
 
+  size_t hash() const
+  {
+  	UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
+
 private:
   std::vector<Word> m_words;
 };
@@ -171,6 +176,12 @@ public:
     }
     return 0;
   }
+
+  size_t hash() const
+  {
+  	UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
+
 };
 
 /** Sets the features of observed ngrams.

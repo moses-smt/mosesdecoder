@@ -48,6 +48,12 @@ int BleuScoreState::Compare(const FFState& o) const
 
   return 0;
 }
+
+size_t BleuScoreState::hash() const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
 std::ostream& operator<<(std::ostream& out, const BleuScoreState& state)
 {
   state.print(out);

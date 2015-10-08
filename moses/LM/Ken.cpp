@@ -61,6 +61,12 @@ struct KenLMState : public FFState {
     if (state.length > other.state.length) return 1;
     return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
   }
+
+  size_t hash() const
+  {
+  	UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
+
 };
 
 ///*
@@ -305,6 +311,11 @@ public:
     const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
     int ret = m_state.Compare(other.m_state);
     return ret;
+  }
+
+  size_t hash() const
+  {
+  	UTIL_THROW2("TODO:Haven't figure this out yet");
   }
 
 private:

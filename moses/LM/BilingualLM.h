@@ -38,6 +38,11 @@ public:
   }
 
   int Compare(const FFState& other) const;
+
+  virtual size_t hash() const {
+	  return m_hash;
+  }
+
 };
 
 class BilingualLM : public StatefulFeatureFunction

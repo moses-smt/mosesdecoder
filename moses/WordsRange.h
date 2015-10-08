@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_WordsRange_h
 
 #include <iostream>
+#include <boost/functional/hash.hpp>
 #include "TypeDef.h"
 #include "Util.h"
 #include "util/exception.hh"
@@ -94,6 +95,12 @@ public:
   TO_STRING();
 };
 
+inline size_t hash_value(const WordsRange& range)
+{
+  size_t  seed = range.GetStartPos();
+  boost::hash_combine(seed, range.GetEndPos());
+  return seed;
+}
 
 }
 #endif

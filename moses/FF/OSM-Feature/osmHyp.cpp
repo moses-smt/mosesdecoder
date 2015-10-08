@@ -39,6 +39,11 @@ int osmState::Compare(const FFState& otherBase) const
   return 0;
 }
 
+size_t osmState::hash() const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
 
 std::string osmState :: getName() const
 {

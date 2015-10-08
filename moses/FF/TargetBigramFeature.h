@@ -22,6 +22,11 @@ public:
   }
   virtual int Compare(const FFState& other) const;
 
+  size_t hash() const
+  {
+  	UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
+
 private:
   Word m_word;
 };

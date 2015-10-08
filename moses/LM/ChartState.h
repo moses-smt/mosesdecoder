@@ -165,6 +165,12 @@ public:
     }
     return 0;
   }
+
+  size_t hash() const
+  {
+  	UTIL_THROW2("TODO:Haven't figure this out yet");
+  }
+
 };
 
 } // namespace

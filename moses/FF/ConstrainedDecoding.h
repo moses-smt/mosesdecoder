@@ -18,6 +18,7 @@ public:
   ConstrainedDecodingState(const ChartHypothesis &hypo);
 
   int Compare(const FFState& other) const;
+  virtual size_t hash() const;
 
   const Phrase &GetPhrase() const {
     return m_outputPhrase;

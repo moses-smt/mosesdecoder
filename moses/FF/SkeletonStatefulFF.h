@@ -16,6 +16,11 @@ public:
   }
 
   int Compare(const FFState& other) const;
+
+  virtual size_t hash() const {
+	  return (size_t) m_targetLen;
+  }
+
 };
 
 class SkeletonStatefulFF : public StatefulFeatureFunction

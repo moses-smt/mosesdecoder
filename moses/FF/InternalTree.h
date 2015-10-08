@@ -143,7 +143,12 @@ public:
 
   int Compare(const FFState& other) const {
     return 0;
-  };
+  }
+
+  virtual size_t hash() const {
+	  return 0;
+  }
+
 };
 
 }

@@ -48,6 +48,19 @@ int ControlRecombinationState::Compare(const FFState& other) const
   }
 }
 
+size_t ControlRecombinationState::hash() const
+{
+  size_t ret;
+  if (m_ff.GetType() == SameOutput) {
+	  ret = hash_value(m_outputPhrase);
+  }
+  else {
+    // compare hypo address. Won't be equal unless they're actually the same hypo
+	ret = (size_t) m_hypo;
+  }
+  return ret;
+}
+
 std::vector<float> ControlRecombination::DefaultWeights() const
 {
   UTIL_THROW_IF2(m_numScoreComponents,

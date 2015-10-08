@@ -20,6 +20,7 @@ public:
   std::multiset<std::string> m_coveredRef;
 
   int Compare(const FFState& other) const;
+  virtual size_t hash() const;
 };
 
 class CoveredReferenceFeature : public StatefulFeatureFunction

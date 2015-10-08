@@ -21,8 +21,12 @@
 
 namespace Moses
 {
+size_t PhraseOrientationFeatureState::hash() const
+{
+	UTIL_THROW2("TODO:Haven't figure this out yet");
+}
 
-
+////////////////////////////////////////////////////////////////////////////////
 const std::string PhraseOrientationFeature::MORIENT("M");
 const std::string PhraseOrientationFeature::SORIENT("S");
 const std::string PhraseOrientationFeature::DORIENT("D");
