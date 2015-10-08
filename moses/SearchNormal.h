@@ -44,8 +44,10 @@ protected:
   ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);
 
   virtual void
-  ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt,
-                   float expectedScore);
+  ExpandHypothesis(const Hypothesis &hypothesis,
+                   const TranslationOption &transOpt,
+                   float expectedScore,
+                   float futureScore);
 
 public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);

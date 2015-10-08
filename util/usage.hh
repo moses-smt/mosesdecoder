@@ -9,7 +9,11 @@ namespace util {
 // Time in seconds since process started.  Zero on unsupported platforms.
 double WallTime();
 
-double UserTime();
+// User + system time.
+double CPUTime();
+
+// Resident usage in bytes.
+uint64_t RSSMax();
 
 void PrintUsage(std::ostream &to);
 

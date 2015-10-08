@@ -166,6 +166,10 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # and so on
 my $maximum_iterations = 25;
 
+# Multiple instance parallelization
+my $___MULTI_MOSES = "$SCRIPTS_ROOTDIR/generic/multi_moses.py";
+my $___USE_MULTI_MOSES = undef;
+
 # Simulated post-editing
 my $___MOSES_SIM_PE = "$SCRIPTS_ROOTDIR/generic/moses_sim_pe.py";
 my $___DEV_SYMAL = undef;
@@ -227,7 +231,8 @@ GetOptions(
   "promix-training=s" => \$__PROMIX_TRAINING,
   "promix-table=s" => \@__PROMIX_TABLES,
   "threads=i" => \$__THREADS,
-  "spe-symal=s" => \$___DEV_SYMAL
+  "spe-symal=s" => \$___DEV_SYMAL,
+  "multi-moses" => \$___USE_MULTI_MOSES
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -325,6 +330,9 @@ Options:
                                 (parameter sets factor [0;1] given to current weights)
   --spe-symal=SYMAL      ... Use simulated post-editing when decoding.
                              (SYMAL aligns input to refs)
+  --multi-moses          ... Use multiple instances of moses instead of threads for decoding
+                             (Use with --decoder-flags='-threads N' to get N instances, each of
+                              which uses a single thread (overrides threads in moses.ini))
 ";
   exit 1;
 }
@@ -1305,6 +1313,10 @@ sub run_decoder {
       $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG";
       $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
       $decoder_cmd .= " $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F";
+      if (defined $___USE_MULTI_MOSES) {
+        # If requested, prefix full decoder command with multi-moses wrapper
+        $decoder_cmd = "$___MULTI_MOSES $decoder_cmd";
+      }
       if (defined $___DEV_SYMAL) {
         # If simulating post-editing, route command through moses_sim_pe.py
         # Always use single (first) reference.  Simulated post-editing undefined for multiple references.

@@ -32,7 +32,14 @@ public:
     } else if (scoreA > scoreB) {
       return false;
     } else {
-      return A < B;
+      // Equal scores: break ties by comparing target phrases (if they exist)
+      boost::shared_ptr<TargetPhrase> phrA = A->Top()->GetTargetPhrase();
+      boost::shared_ptr<TargetPhrase> phrB = B->Top()->GetTargetPhrase();
+      if (!phrA || !phrB) {
+        // Fallback: compare pointers, non-deterministic sort
+        return A < B;
+      }
+      return (phrA->Compare(*phrB) < 0);
     }
   }
 };

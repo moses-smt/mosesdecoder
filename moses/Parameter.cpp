@@ -116,6 +116,7 @@ Parameter::Parameter()
   AddParam(cube_opts,"cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
   AddParam(cube_opts,"cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
   AddParam(cube_opts,"cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
+  AddParam(cube_opts,"cube-pruning-deterministic-search", "cbds", "Break ties deterministically during search");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // minimum bayes risk decoding
