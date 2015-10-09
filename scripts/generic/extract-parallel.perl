@@ -94,7 +94,7 @@ my $cmd;
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
 $cmd = "mkdir -p $TMPDIR; ls -l $TMPDIR";
 print STDERR "Executing: $cmd \n";
-`$cmd`;
+systemCheck($cmd);
 
 my $totalLines = int(`cat $align | wc -l`);
 my $linesPerSplit = int($totalLines / $numParallel) + 1;
@@ -127,6 +127,11 @@ if ($numParallel > 1)
 	# wait for everything is finished
 	foreach (@children) {
 		waitpid($_, 0);
+		# Stop everything if there's an error in a child:
+		if($? != 0) {
+		    kill("SIGTERM", @children);
+		    exit(1);
+		}
 	}
 
 }
@@ -135,17 +140,17 @@ else
   my $numStr = NumStr(0);
 
   $cmd = "ln -s $target $TMPDIR/target.$numStr";
-	`$cmd`;
+  systemCheck($cmd);
 
   $cmd = "ln -s $source $TMPDIR/source.$numStr";
-	`$cmd`;
+  systemCheck($cmd);
 
   $cmd = "ln -s $align $TMPDIR/align.$numStr";
-	`$cmd`;
+  systemCheck($cmd);
 
   if ($weights) {
     $cmd = "ln -s $weights $TMPDIR/weights.$numStr";
-    `$cmd`;
+    systemCheck($cmd);
   }
 }
 
@@ -170,7 +175,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
     #print STDERR "glueArg=$glueArg \n";
 
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $glueArg $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
-    `$cmd`;
+    systemCheck($cmd);
 
     exit();
   }
@@ -183,10 +188,15 @@ for (my $i = 0; $i < $numParallel; ++$i)
 # wait for everything is finished
 foreach (@children) {
 	waitpid($_, 0);
+	# Stop everything if there's an error in a child:
+	if($? != 0) {
+	    kill("SIGTERM", @children);
+	    exit(1);
+	}
 }
 
 # merge
-my $catCmd = "gunzip -c ";
+my $catCmd = "set -o pipefail; gunzip -c ";
 my $catInvCmd = $catCmd;
 my $catOCmd = $catCmd;
 my $catContextCmd = $catCmd;
@@ -247,13 +257,18 @@ if (-e "$TMPDIR/extract.$numStr.o.gz")
 # wait for all sorting to finish
 foreach (@children) {
 	waitpid($_, 0);
+	# Stop everything if there's an error in a child:
+	if($? != 0) {
+	    kill("SIGTERM", @children);
+	    exit(1);
+	}
 }
 
 # merge glue rules
 if (defined($glueFile)) {
-  my $cmd = "cat $TMPDIR/glue.* | LC_ALL=C sort | uniq > $glueFile";
+  my $cmd = "set -o pipefail; cat $TMPDIR/glue.* | LC_ALL=C sort | uniq > $glueFile";
   print STDERR "Merging glue rules: $cmd \n";
-  print STDERR `$cmd`;
+  systemCheck($cmd);
 }
 
 # merge phrase orientation priors (GHKM extraction)
