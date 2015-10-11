@@ -220,7 +220,9 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 		rel = dependencies[i+2];
 		//relations from parser -> (dep,gov,rel)
 		//LM model scores: (rel,gov,dep) where rel in (dobj,iobj,nsubj,nsubjpass)
-		if(m_allowedRel->find(rel)!=m_allowedRel->end()){
+		if((getConfig("argType") == "prep"  and rel.substr(0,5) == "prep_") or
+				// need to figure out if the head is a verb
+				(getConfig("argType") == "main" and m_allowedRel->find(rel)!=m_allowedRel->end())){
 			//SHOULD LEMMATIZE
 			dep = strtol (dependencies[i].c_str(),NULL,10);
 			gov = strtol (dependencies[i+1].c_str(),NULL,10);
