@@ -336,6 +336,11 @@ size_t PhraseBasedReorderingState::hash() const
   UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
+bool PhraseBasedReorderingState::operator==(const FFState& other) const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
 LRState*
 PhraseBasedReorderingState::
 Expand(const TranslationOption& topt, const InputType& input,
@@ -385,6 +390,11 @@ size_t BidirectionalReorderingState::hash() const
   UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
+bool BidirectionalReorderingState::operator==(const FFState& other) const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
 ///////////////////////////
 //HierarchicalReorderingBackwardState
 
@@ -411,6 +421,11 @@ Compare(const FFState& o) const
 }
 
 size_t HReorderingBackwardState::hash() const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
+bool HReorderingBackwardState::operator==(const FFState& other) const
 {
   UTIL_THROW2("TODO:Haven't figure this out yet");
 }
@@ -467,6 +482,11 @@ Compare(const FFState& o) const
 }
 
 size_t HReorderingForwardState::hash() const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
+bool HReorderingForwardState::operator==(const FFState& other) const
 {
   UTIL_THROW2("TODO:Haven't figure this out yet");
 }

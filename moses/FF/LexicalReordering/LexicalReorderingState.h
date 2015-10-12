@@ -223,10 +223,7 @@ public:
   Compare(const FFState& o) const;
 
   virtual size_t hash() const;
-  virtual bool operator==(const FFState& other) const
-  {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
-  }
+  virtual bool operator==(const FFState& other) const;
 
   LRState*
   Expand(const TranslationOption& topt, const InputType& input,
@@ -255,10 +252,7 @@ public:
   Compare(const FFState& o) const;
 
   virtual size_t hash() const;
-  virtual bool operator==(const FFState& other) const
-  {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
-  }
+  virtual bool operator==(const FFState& other) const;
 
   virtual
   LRState*
@@ -287,10 +281,7 @@ public:
   virtual int Compare(const FFState& o) const;
 
   virtual size_t hash() const;
-  virtual bool operator==(const FFState& other) const
-  {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
-  }
+  virtual bool operator==(const FFState& other) const;
 
   virtual LRState* Expand(const TranslationOption& hypo, const InputType& input,
                           ScoreComponentCollection*  scores) const;
@@ -320,10 +311,7 @@ public:
   virtual int Compare(const FFState& o) const;
 
   virtual size_t hash() const;
-  virtual bool operator==(const FFState& other) const
-  {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
-  }
+  virtual bool operator==(const FFState& other) const;
 
   virtual LRState* Expand(const TranslationOption& hypo,
                           const InputType& input,

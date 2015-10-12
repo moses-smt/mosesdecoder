@@ -197,8 +197,6 @@ public:
     return m_sourceCompleted.IsComplete();
   }
 
-  int RecombineCompare(const Hypothesis &compare) const;
-
   void GetOutputPhrase(Phrase &out) const;
 
   void ToStream(std::ostream& out) const {
@@ -320,23 +318,6 @@ struct CompareHypothesisTotalScore {
 #else
 #define FREEHYPO(hypo) delete hypo
 #endif
-
-/** defines less-than relation on hypotheses.
-* The particular order is not important for us, we need just to figure out
-* which hypothesis are equal based on:
-*   the last n-1 target words are the same
-*   and the covers (source words translated) are the same
-* Directly using RecombineCompare is unreliable because the Compare methods
-* of some states are based on archictecture-dependent pointer comparisons.
-* That's why we use the hypothesis IDs instead.
-*/
-class HypothesisRecombinationOrderer
-{
-public:
-  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
-    return (hypoA->RecombineCompare(*hypoB) < 0);
-  }
-};
 
 class HypothesisRecombinationUnordered
 {
