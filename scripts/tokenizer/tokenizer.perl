@@ -243,9 +243,9 @@ sub tokenize
     my @protected = ();
     foreach my $protected_pattern (@protected_patterns) {
       my $t = $text;
-      while ($t =~ /($protected_pattern)(.*)$/) {
-        push @protected, $1;
-        $t = $2;
+      while ($t =~ /(?<PATTERN>$protected_pattern)(?<TAIL>.*)$/) {
+        push @protected, $+{PATTERN};
+        $t = $+{TAIL};
       }
     }
 
