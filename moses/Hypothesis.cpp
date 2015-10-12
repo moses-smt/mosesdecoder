@@ -620,7 +620,12 @@ GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const
 
 size_t Hypothesis::hash() const
 {
-  size_t seed = 0;
+  size_t seed;
+
+  // coverage
+  seed = m_sourceCompleted.hash();
+
+  // states
   for (size_t i = 0; i < m_ffStates.size(); ++i) {
 	  const FFState *state = m_ffStates[i];
 	  size_t hash = state->hash();
@@ -631,6 +636,12 @@ size_t Hypothesis::hash() const
 
 bool Hypothesis::operator==(const Hypothesis& other) const
 {
+  // coverage
+  if (m_sourceCompleted != other.m_sourceCompleted) {
+	  return false;
+  }
+
+  // states
   for (size_t i = 0; i < m_ffStates.size(); ++i) {
 	  const FFState &thisState = *m_ffStates[i];
 	  const FFState &otherState = *other.m_ffStates[i];
