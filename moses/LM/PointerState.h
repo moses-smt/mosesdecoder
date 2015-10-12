@@ -22,7 +22,7 @@ struct PointerState : public FFState {
   }
   virtual bool operator==(const FFState& other) const
   {
-    const PointerState& o = static_cast<const PointerState&>(o);
+    const PointerState& o = static_cast<const PointerState&>(other);
     return lmstate == o.lmstate;
   }
 

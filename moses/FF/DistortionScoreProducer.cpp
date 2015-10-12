@@ -23,11 +23,13 @@ struct DistortionState_traditional : public FFState {
 
   size_t hash() const
   {
-	  size_t ret = range.GetEndPos();
+	  return range.GetEndPos();
   }
   virtual bool operator==(const FFState& other) const
   {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+    const DistortionState_traditional& o =
+      static_cast<const DistortionState_traditional&>(other);
+    return range.GetEndPos() == o.range.GetEndPos(); 
   }
 
 };

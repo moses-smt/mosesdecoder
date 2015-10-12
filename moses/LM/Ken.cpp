@@ -62,13 +62,21 @@ struct KenLMState : public FFState {
     return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
   }
 
-  size_t hash() const
+  virtual size_t hash() const
   {
-  	UTIL_THROW2("TODO:Haven't figure this out yet");
+	  size_t seed = 0;
+	  for (size_t i = 0; i < state.length; ++i) {
+		  boost::hash_combine(seed, state.words[i]);
+	  }
+	  return seed;
   }
-  virtual bool operator==(const FFState& other) const
+  virtual bool operator==(const FFState& o) const
   {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+	const KenLMState &other = static_cast<const KenLMState &>(o);
+	if (state.length != other.state.length) return false;
+
+    int ret = std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
+    return (ret == 0);
   }
 
 };
