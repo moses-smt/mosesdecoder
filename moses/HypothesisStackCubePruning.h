@@ -52,6 +52,7 @@ protected:
   float m_beamWidth; /**< minimum score due to threashold pruning */
   size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
+  bool m_deterministic; /**< flag to determine whether to sort hypotheses deterministically */
 
   /** add hypothesis to stack. Prune if necessary.
    * Returns false if equiv hypo exists in collection, otherwise returns true

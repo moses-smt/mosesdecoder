@@ -17,6 +17,9 @@
 #Note that, like language models, this is the --prefix where the library was
 #installed, not some executable within the library.  
 #
+#--no-xmlrpc-c
+# Don't use xmlrpc-c library, even if it exists. Don't build moses server
+#
 #Compact phrase table and compact lexical reordering table
 #--with-cmph=/path/to/cmph
 #
@@ -51,7 +54,7 @@
 # --static                       forces static linking (the default will fall
 #                                back to shared)
 #
-# debug-symbols=on|off           include (default) or exclude debugging
+# debug-symbols=on|off           include or exclude (default) debugging 
 #                                information also known as -g
 # --notrace                      compiles without TRACE macros
 #
@@ -143,6 +146,13 @@ if [ option.get "debug-build" : : "yes" ] {
    echo "Building with -Og to enable easier profiling and debugging. Only available on gcc 4.8+." ;
 }
 
+if [ option.get "with-address-sanitizer" : : "yes" ] {
+  requirements += <cxxflags>-fsanitize=address ;
+  requirements += <cxxflags>-fno-omit-frame-pointer ;
+  requirements += <linkflags>-fsanitize=address ;
+  echo "Building with AddressSanitizer to enable debugging of memory errors. Only available on gcc 4.8+." ;
+}
+
 if [ option.get "enable-mpi" : : "yes" ] {
   import mpi ;
   using mpi ;
@@ -152,6 +162,12 @@ if [ option.get "enable-mpi" : : "yes" ] {
   requirements += <library>mpi ;
   requirements += <library>boost_mpi ;
   requirements += <library>boost_serialization ;
+}
+
+mmt = [ option.get "mmt" ] ; 
+if $(mmt) {
+  requirements += <define>MMT ;
+  requirements += <include>$(mmt) ; 
 }
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
@@ -198,7 +214,7 @@ if [ option.get "with-vw" ] {
 project : default-build
   <threading>multi
   <warnings>on
-  <debug-symbols>on
+  <debug-symbols>off
   <variant>release
   <link>static
   ;
@@ -282,6 +298,8 @@ contrib/server//mosesserver
 mm
 rephraser
 contrib/c++tokenizer//tokenizer
+contrib/expected-bleu-training//train-expected-bleu
+contrib/expected-bleu-training//prepare-expected-bleu-training
 ;
 
 

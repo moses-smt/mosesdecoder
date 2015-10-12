@@ -39,6 +39,7 @@ HypothesisStackCubePruning::HypothesisStackCubePruning(Manager& manager) :
   m_nBestIsEnabled = StaticData::Instance().options().nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
+  m_deterministic = manager.options().cube.deterministic_search;
 }
 
 /** remove all hypotheses from the collection */
@@ -148,7 +149,7 @@ void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
                  "Should have added hypothesis " << *hypo);
 
   const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-  m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this);
+  m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this, m_deterministic);
 }
 
 void HypothesisStackCubePruning::PruneToSize(size_t newSize)
@@ -258,7 +259,7 @@ void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
 
   BitmapContainer *bmContainer;
   if (bcExists == m_bitmapAccessor.end()) {
-    bmContainer = new BitmapContainer(newBitmap, stack);
+    bmContainer = new BitmapContainer(newBitmap, stack, m_deterministic);
     m_bitmapAccessor[newBitmap] = bmContainer;
   } else {
     bmContainer = bcExists->second;

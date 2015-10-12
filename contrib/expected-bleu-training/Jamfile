@@ -1,0 +1,2 @@
+exe prepare-expected-bleu-training : PrepareExpectedBleuTraining.cpp ../../util//kenutil ;
+exe train-expected-bleu : TrainExpectedBleu.cpp ExpectedBleuOptimizer.cpp ../../util//kenutil ;

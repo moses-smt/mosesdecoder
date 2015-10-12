@@ -23,5 +23,5 @@ die("ERROR: syntax is --alignment FILE --corpus FILESTEM --f EXT --e EXT --DIR O
 `$RealBin/../../bin/mtt-build < $CORPUS.$F -i -o $DIR/$F`;
 `$RealBin/../../bin/mtt-build < $CORPUS.$E -i -o $DIR/$E`;
 `$RealBin/../../bin/symal2mam < $ALIGNMENT $DIR/$F-$E.mam`;
-`$RealBin/../../bin/mmlex-build $DIR/ $F $E -o $DIR/$F-$E.lex -c $DIR/$F-$E.cooc`;
+`$RealBin/../../bin/mmlex-build $DIR/ $F $E -o $DIR/$F-$E.lex`;
 

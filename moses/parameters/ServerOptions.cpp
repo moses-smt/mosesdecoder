@@ -1,4 +1,4 @@
-// -*- mode: c++; cc-style: gnu -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #include "ServerOptions.h"
 #include <boost/foreach.hpp>
 #include <string>
@@ -48,7 +48,7 @@ init(Parameter const& P)
   P.SetParameter(this->is_serial, "serial", false);
   P.SetParameter(this->logfile, "server-log", std::string("/dev/null"));
   P.SetParameter(this->num_threads, "threads", uint32_t(10));
-  P.SetParameter(this->session_cache_size, "session-cache_size",25UL);
+  P.SetParameter(this->session_cache_size, "session-cache_size", size_t(25));
   std::string timeout_spec;
   P.SetParameter(timeout_spec, "session-timeout",std::string("30m"));
   this->session_timeout = parse_timespec(timeout_spec);

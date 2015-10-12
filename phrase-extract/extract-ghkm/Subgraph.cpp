@@ -137,6 +137,11 @@ void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const
       for (std::vector<Node *>::const_iterator p(children.begin());
            p != children.end(); ++p) {
         Node *child = *p;
+        if (child->GetType() == SOURCE) {
+          // This is possible due to the heuristic for attaching unaligned
+          // source words.
+          continue;
+        }
         out << " ";
         RecursivelyPrintTree(child,out);
       }

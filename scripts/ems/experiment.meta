@@ -174,7 +174,7 @@ prepare-bilingual-lm
 	in: TRAINING:corpus TRAINING:word-alignment
 	out: numberized_ngrams
 	ignore-unless: bilingual-lm
-	rerun-on-change: TRAINING:corpus TRAINING:word-alignment
+	rerun-on-change: TRAINING:corpus TRAINING:word-alignment source-window order epochs
 	default-name: lm/blm
 train-bilingual-lm
 	in: numberized_ngrams TRAINING:corpus 
@@ -533,7 +533,7 @@ build-domains
 	in: CORPUS:post-split-factorized-stem
 	out: domains
 	default-name: model/domains
-	ignore-unless: domain-features mml-filter-corpora
+	ignore-unless: domain-features mml-filter-corpora interpolated-operation-sequence-model
 	template: $moses-script-dir/ems/support/build-domain-file-from-subcorpora.perl $input-extension IN > OUT
 	final-model: yes
 mml-score
@@ -702,7 +702,14 @@ build-osm
 	out: osm-model
 	ignore-unless: operation-sequence-model
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
-	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir $operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings
+	default-name: model/OSM
+build-interpolated-osm
+	in: corpus word-alignment domains
+	out: osm-model
+	ignore-unless: interpolated-operation-sequence-model
+	rerun-on-change: interpolated-operation-sequence-model training-options script giza-settings operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings --domain IN2
 	default-name: model/OSM
 build-transliteration-model
 	in: corpus word-alignment 
