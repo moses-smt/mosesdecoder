@@ -647,6 +647,28 @@ GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const
   return ret;
 }
 
+size_t Hypothesis::hash() const
+{
+  size_t seed = 0;
+  BOOST_FOREACH(const FFState *state, m_ffStates) {
+	  size_t hash = state->hash();
+	  boost::hash_combine(seed ,hash);
+  }
+  return seed;
+}
+
+bool Hypothesis::operator==(const Hypothesis& other) const
+{
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+	  const FFState &thisState = *m_ffStates[i];
+	  const FFState &otherState = *other.m_ffStates[i];
+	  if (thisState != otherState) {
+		  return false;
+	  }
+  }
+  return true;
+}
+
 #ifdef HAVE_XMLRPC_C
 void
 Hypothesis::

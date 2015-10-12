@@ -288,11 +288,14 @@ public:
   // creates a map of TARGET positions which should be replaced by word using placeholder
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
 
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const Hypothesis& other) const;
+
 #ifdef HAVE_XMLRPC_C
   void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
   void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
 #endif
-
 
 
 };
@@ -333,6 +336,19 @@ public:
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
     return (hypoA->RecombineCompare(*hypoB) < 0);
   }
+};
+
+class HypothesisRecombinationUnordered
+{
+public:
+  size_t operator()(const Hypothesis* hypo) const {
+	return hypo->hash();
+  }
+
+  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
+	return (*hypoA) == (*hypoB);
+  }
+
 };
 
 }
