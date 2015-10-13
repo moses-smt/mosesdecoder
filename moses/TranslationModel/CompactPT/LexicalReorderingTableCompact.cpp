@@ -155,6 +155,8 @@ LexicalReorderingTableCompact::
 Load(std::string filePath)
 {
   std::FILE* pFile = std::fopen(filePath.c_str(), "r");
+  UTIL_THROW_IF2(pFile == NULL, "File " << filePath << " could not be opened");
+
   if(m_inMemory)
     m_hash.Load(pFile);
   else
