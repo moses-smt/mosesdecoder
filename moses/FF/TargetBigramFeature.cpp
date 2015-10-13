@@ -17,6 +17,19 @@ int TargetBigramState::Compare(const FFState& other) const
   return Word::Compare(m_word,rhs.m_word);
 }
 
+size_t TargetBigramState::hash() const
+{
+  std::size_t ret = hash_value(m_word);
+  return ret;
+}
+
+bool TargetBigramState::operator==(const FFState& other) const
+{
+  const TargetBigramState& rhs = dynamic_cast<const TargetBigramState&>(other);
+  return m_word == rhs.m_word;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 TargetBigramFeature::TargetBigramFeature(const std::string &line)
   :StatefulFeatureFunction(0, line)
 {

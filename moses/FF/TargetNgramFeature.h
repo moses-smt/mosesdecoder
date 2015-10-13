@@ -177,11 +177,42 @@ public:
 
   size_t hash() const
   {
-  	UTIL_THROW2("TODO:Haven't figure this out yet");
+    // not sure if this is correct
+    size_t ret;
+
+    ret = m_startPos;
+    boost::hash_combine(ret, m_endPos);
+    boost::hash_combine(ret, m_inputSize);
+
+	// prefix
+	if (m_startPos > 0) { // not for "<s> ..."
+		boost::hash_combine(ret, hash_value(GetPrefix()));
+	}
+
+	if (m_endPos < m_inputSize - 1) { // not for "... </s>"
+		boost::hash_combine(ret, hash_value(GetSuffix()));
+	}
+
+	return ret;
   }
-  virtual bool operator==(const FFState& other) const
+  virtual bool operator==(const FFState& o) const
   {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+	const TargetNgramChartState &other =
+	  static_cast<const TargetNgramChartState &>( o );
+
+	// prefix
+	if (m_startPos > 0) { // not for "<s> ..."
+	  int ret = GetPrefix().Compare(other.GetPrefix());
+	  if (ret != 0)
+		return false;
+	}
+
+	if (m_endPos < m_inputSize - 1) { // not for "... </s>"
+	  int ret = GetSuffix().Compare(other.GetSuffix());
+	  if (ret != 0)
+		return false;
+	}
+	return true;
   }
 
 };
