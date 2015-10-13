@@ -512,12 +512,22 @@ Compare(const FFState& o) const
 
 size_t HReorderingForwardState::hash() const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  size_t ret;
+  ret = hash_value(m_prevRange);
+  return ret;
 }
 
-bool HReorderingForwardState::operator==(const FFState& other) const
+bool HReorderingForwardState::operator==(const FFState& o) const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  if (&o == this) return true;
+
+  HReorderingForwardState const& other
+  = static_cast<HReorderingForwardState const&>(o);
+
+  int compareScores = ((m_prevRange == other.m_prevRange)
+		  ? ComparePrevScores(other.m_prevOption)
+		  : (m_prevRange < other.m_prevRange) ? -1 : 1);
+  return compareScores == 0;
 }
 
 // For compatibility with the phrase-based reordering model, scoring is one
