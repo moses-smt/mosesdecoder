@@ -20,6 +20,18 @@ int ReorderingStack::Compare(const ReorderingStack& o)  const
   return 0;
 }
 
+size_t ReorderingStack::hash() const
+{
+  std::size_t ret = boost::hash_range(m_stack.begin(), m_stack.end());
+  return ret;
+}
+
+bool ReorderingStack::operator==(const ReorderingStack& o) const
+{
+  const ReorderingStack& other = static_cast<const ReorderingStack&>(o);
+  return m_stack == other.m_stack;
+}
+
 // Method to push (shift element into the stack and reduce if reqd)
 int ReorderingStack::ShiftReduce(WordsRange input_span)
 {

@@ -333,12 +333,29 @@ Compare(const FFState& o) const
 
 size_t PhraseBasedReorderingState::hash() const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  size_t ret;
+  ret = hash_value(m_prevRange);
+  boost::hash_combine(ret, m_direction);
+
+  return ret;
 }
 
-bool PhraseBasedReorderingState::operator==(const FFState& other) const
+bool PhraseBasedReorderingState::operator==(const FFState& o) const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  if (&o == this) return true;
+
+  const PhraseBasedReorderingState* other = static_cast<const PhraseBasedReorderingState*>(&o);
+  if (m_prevRange == other->m_prevRange) {
+	if (m_direction == LRModel::Forward) {
+	  int compareScore = ComparePrevScores(other->m_prevOption);
+	  return compareScore == 0;
+	} else {
+	  return true;
+	}
+  }
+  else {
+	  return false;
+  }
 }
 
 LRState*
@@ -375,6 +392,24 @@ Compare(FFState const& o) const
   return (cmp < 0) ? -1 : cmp ? 1 : m_forward->Compare(*other.m_forward);
 }
 
+size_t BidirectionalReorderingState::hash() const
+{
+  size_t ret = m_backward->hash();
+  boost::hash_combine(ret, m_forward->hash());
+  return ret;
+}
+
+bool BidirectionalReorderingState::operator==(const FFState& o) const
+{
+  if (&o == this) return 0;
+
+  BidirectionalReorderingState const &other
+  = static_cast<BidirectionalReorderingState const&>(o);
+
+  bool ret = (*m_backward == *other.m_backward) && (*m_forward == *other.m_forward);
+  return ret;
+}
+
 LRState*
 BidirectionalReorderingState::
 Expand(const TranslationOption& topt, const InputType& input,
@@ -383,16 +418,6 @@ Expand(const TranslationOption& topt, const InputType& input,
   LRState *newbwd = m_backward->Expand(topt,input, scores);
   LRState *newfwd = m_forward->Expand(topt, input, scores);
   return new BidirectionalReorderingState(m_configuration, newbwd, newfwd, m_offset);
-}
-
-size_t BidirectionalReorderingState::hash() const
-{
-  UTIL_THROW2("TODO:Haven't figure this out yet");
-}
-
-bool BidirectionalReorderingState::operator==(const FFState& other) const
-{
-  UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
 ///////////////////////////
@@ -422,12 +447,16 @@ Compare(const FFState& o) const
 
 size_t HReorderingBackwardState::hash() const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  size_t ret = m_reoStack.hash();
+  return ret;
 }
 
-bool HReorderingBackwardState::operator==(const FFState& other) const
+bool HReorderingBackwardState::operator==(const FFState& o) const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  const HReorderingBackwardState& other
+	  = static_cast<const HReorderingBackwardState&>(o);
+  bool ret = m_reoStack == other.m_reoStack;
+  return ret;
 }
 
 LRState*
