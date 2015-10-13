@@ -157,10 +157,10 @@ Load(std::string filePath)
   std::FILE* pFile = std::fopen(filePath.c_str(), "r");
   UTIL_THROW_IF2(pFile == NULL, "File " << filePath << " could not be opened");
 
-  if(m_inMemory)
+  //if(m_inMemory)
     m_hash.Load(pFile);
-  else
-    m_hash.LoadIndex(pFile);
+  //else
+    //m_hash.LoadIndex(pFile);
 
   size_t read = 0;
   read += std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, pFile);
