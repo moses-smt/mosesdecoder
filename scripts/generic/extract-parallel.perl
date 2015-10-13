@@ -196,7 +196,7 @@ foreach (@children) {
 }
 
 # merge
-my $catCmd = "set -o pipefail; gunzip -c ";
+my $catCmd = "bash set -o pipefail; gunzip -c ";
 my $catInvCmd = $catCmd;
 my $catOCmd = $catCmd;
 my $catContextCmd = $catCmd;
@@ -266,7 +266,7 @@ foreach (@children) {
 
 # merge glue rules
 if (defined($glueFile)) {
-  my $cmd = "set -o pipefail; cat $TMPDIR/glue.* | LC_ALL=C sort | uniq > $glueFile";
+  my $cmd = "bash set -o pipefail; cat $TMPDIR/glue.* | LC_ALL=C sort | uniq > $glueFile";
   print STDERR "Merging glue rules: $cmd \n";
   systemCheck($cmd);
 }
