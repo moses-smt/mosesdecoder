@@ -79,11 +79,11 @@ void PhraseDictionaryCompact::Load()
 
   size_t indexSize;
   //if(m_inMemory)
-    // Load source phrase index into memory
-    indexSize = m_hash.Load(pFile);
- // else
-    // Keep source phrase index on disk
-    //indexSize = m_hash.LoadIndex(pFile);
+  // Load source phrase index into memory
+  indexSize = m_hash.Load(pFile);
+// else
+  // Keep source phrase index on disk
+  //indexSize = m_hash.LoadIndex(pFile);
 
   size_t coderSize = m_phraseDecoder->Load(pFile);
 
@@ -179,7 +179,7 @@ void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &so
     m_sentenceCache.reset(new PhraseCache());
 
   m_phraseDecoder->PruneCache();
-  for(PhraseCache::iterator it = m_sentenceCache->begin(); 
+  for(PhraseCache::iterator it = m_sentenceCache->begin();
       it != m_sentenceCache->end(); it++)
     delete *it;
 

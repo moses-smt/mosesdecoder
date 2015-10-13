@@ -102,7 +102,7 @@ size_t BlockHashIndex::GetHash(size_t i, const char* key)
 //  boost::mutex::scoped_lock lock(m_mutex);
 //#endif
   //if(m_hashes[i] == 0)
-    //LoadRange(i);
+  //LoadRange(i);
 #ifdef HAVE_CMPH
   size_t idx = cmph_search((cmph_t*)m_hashes[i], key, (cmph_uint32) strlen(key));
 #else
@@ -323,9 +323,9 @@ size_t BlockHashIndex::GetSize() const
 void BlockHashIndex::KeepNLastRanges(float ratio, float tolerance)
 {
   /*
-#ifdef WITH_THREADS
+  #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_mutex);
-#endif
+  #endif
   size_t n = m_hashes.size() * ratio;
   size_t max = n * (1 + tolerance);
   if(m_numLoadedRanges > max) {
