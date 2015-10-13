@@ -344,10 +344,10 @@ bool PhraseBasedReorderingState::operator==(const FFState& o) const
 {
   if (&o == this) return true;
 
-  const PhraseBasedReorderingState* other = static_cast<const PhraseBasedReorderingState*>(&o);
-  if (m_prevRange == other->m_prevRange) {
+  const PhraseBasedReorderingState &other = static_cast<const PhraseBasedReorderingState&>(o);
+  if (m_prevRange == other.m_prevRange) {
 	if (m_direction == LRModel::Forward) {
-	  int compareScore = ComparePrevScores(other->m_prevOption);
+	  int compareScore = ComparePrevScores(other.m_prevOption);
 	  return compareScore == 0;
 	} else {
 	  return true;

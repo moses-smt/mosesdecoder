@@ -41,9 +41,29 @@ int osmState::Compare(const FFState& otherBase) const
 
 size_t osmState::hash() const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  size_t ret = j;
+
+  boost::hash_combine(ret, E);
+  boost::hash_combine(ret, gap);
+  boost::hash_combine(ret, lmState.length);
+
+  return ret;
 }
 
+bool osmState::operator==(const FFState& otherBase) const
+{
+  const osmState &other = static_cast<const osmState&>(otherBase);
+  if (j != other.j)
+	return false;
+  if (E != other.E)
+	return false;
+  if (gap != other.gap)
+	return false;
+  if (lmState.length != other.lmState.length)
+	return false;
+
+  return true;
+}
 
 std::string osmState :: getName() const
 {
