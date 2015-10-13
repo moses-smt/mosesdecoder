@@ -19,7 +19,9 @@ namespace Moses
 class TargetNgramState : public FFState
 {
 public:
-  TargetNgramState(std::vector<Word> &words): m_words(words) {}
+  TargetNgramState() {}
+
+  TargetNgramState(const std::vector<Word> &words): m_words(words) {}
   const std::vector<Word> GetWords() const {
     return m_words;
   }

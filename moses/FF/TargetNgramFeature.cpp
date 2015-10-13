@@ -42,6 +42,7 @@ size_t TargetNgramState::hash() const
   std::size_t ret = boost::hash_range(m_words.begin(), m_words.end());
   return ret;
 }
+
 bool TargetNgramState::operator==(const FFState& other) const
 {
   const TargetNgramState& rhs = dynamic_cast<const TargetNgramState&>(other);
@@ -207,7 +208,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
         accumulator->PlusEquals(this, last_ngram.str(), 1);
       }
     }
-    return NULL;
+    return new TargetNgramState();
   }
 
   // prepare new state
