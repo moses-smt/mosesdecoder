@@ -1,7 +1,5 @@
 #include "SVertex.h"
-
 #include "moses/FF/FFState.h"
-
 #include "SHyperedge.h"
 
 namespace Moses
