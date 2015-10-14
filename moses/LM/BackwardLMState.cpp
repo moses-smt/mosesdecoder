@@ -31,4 +31,16 @@ int BackwardLMState::Compare(const FFState &o) const
   return state.left.Compare(other.state.left);
 }
 
+size_t BackwardLMState::hash() const
+{
+	size_t ret = hash_value(state.left);
+	return ret;
+}
+bool BackwardLMState::operator==(const FFState& o) const
+{
+  const BackwardLMState &other = static_cast<const BackwardLMState &>(o);
+  bool ret = state.left == other.state.left;
+  return ret;
+}
+
 }

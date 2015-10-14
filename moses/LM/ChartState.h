@@ -170,11 +170,44 @@ public:
 
   size_t hash() const
   {
-  	UTIL_THROW2("TODO:Haven't figure this out yet");
+	size_t ret;
+
+	// prefix
+	ret = m_hypo.GetCurrSourceRange().GetStartPos() > 0;
+    if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) { // not for "<s> ..."
+    	size_t hash = hash_value(GetPrefix());
+    	boost::hash_combine(ret, hash);
+    }
+
+	// suffix
+	size_t inputSize = m_hypo.GetManager().GetSource().GetSize();
+    boost::hash_combine(ret, m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1);
+    if (m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1) { // not for "... </s>"
+		size_t hash = m_lmRightContext->hash();
+		boost::hash_combine(ret, hash);
+    }
+
+    return ret;
   }
-  virtual bool operator==(const FFState& other) const
+  virtual bool operator==(const FFState& o) const
   {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+	const LanguageModelChartState &other =
+	  dynamic_cast<const LanguageModelChartState &>( o );
+
+	// prefix
+	if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) { // not for "<s> ..."
+	  bool ret = GetPrefix() == other.GetPrefix();
+	  if (ret == false)
+		return false;
+	}
+
+	// suffix
+	size_t inputSize = m_hypo.GetManager().GetSource().GetSize();
+	if (m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1) { // not for "... </s>"
+	  bool ret = (*other.GetRightContext()) == (*m_lmRightContext);
+  	  return ret;
+	}
+	return true;
   }
 
 };

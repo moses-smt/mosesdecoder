@@ -19,10 +19,7 @@ public:
 
   int Compare(const FFState& other) const;
   virtual size_t hash() const;
-  virtual bool operator==(const FFState& other) const
-  {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
-  }
+  virtual bool operator==(const FFState& other) const;
 
   const Phrase &GetPhrase() const {
     return m_outputPhrase;

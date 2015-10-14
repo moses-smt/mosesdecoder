@@ -44,14 +44,12 @@ int CoveredReferenceState::Compare(const FFState& other) const
 
 size_t CoveredReferenceState::hash() const
 {
-	size_t ret = 0;
-	boost::hash<string> strHash;
-	BOOST_FOREACH(const string &str, m_coveredRef) {
-		size_t hash = strHash(str);
-		boost::hash_combine(ret, hash);
-	}
+	  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
 
-	return ret;
+bool CoveredReferenceState::operator==(const FFState& other) const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

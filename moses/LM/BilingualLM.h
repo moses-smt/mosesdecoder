@@ -44,7 +44,8 @@ public:
   }
   virtual bool operator==(const FFState& other) const
   {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+	  const BilingualLMState &otherState = static_cast<const BilingualLMState&>(other);
+	  return m_hash == otherState.m_hash;
   }
 
 };
