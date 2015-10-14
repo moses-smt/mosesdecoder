@@ -410,7 +410,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
     } else if (word.IsNonTerminal()) {
       // Non-terminal is first so we can copy instead of rescoring.
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->states[featureID])->GetChartState();
       float prob = UntransformLMScore(
                      pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.BeginNonTerminal(prevState, prob);
@@ -422,7 +422,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
     const Word &word = target.GetWord(phrasePos);
     if (word.IsNonTerminal()) {
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->states[featureID])->GetChartState();
       float prob = UntransformLMScore(
                      pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.NonTerminal(prevState, prob);

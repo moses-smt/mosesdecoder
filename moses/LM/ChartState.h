@@ -146,6 +146,7 @@ public:
   }
 
   int Compare(const FFState& o) const {
+	  /*
     const LanguageModelChartState &other =
       dynamic_cast<const LanguageModelChartState &>( o );
 
@@ -164,6 +165,7 @@ public:
         return ret;
     }
     return 0;
+    */
   }
 
   size_t hash() const

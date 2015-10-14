@@ -383,6 +383,7 @@ int
 BidirectionalReorderingState::
 Compare(FFState const& o) const
 {
+	/*
   if (&o == this) return 0;
 
   BidirectionalReorderingState const &other
@@ -390,6 +391,7 @@ Compare(FFState const& o) const
 
   int cmp = m_backward->Compare(*other.m_backward);
   return (cmp < 0) ? -1 : cmp ? 1 : m_forward->Compare(*other.m_forward);
+  */
 }
 
 size_t BidirectionalReorderingState::hash() const

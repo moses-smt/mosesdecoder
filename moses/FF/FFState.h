@@ -12,7 +12,7 @@ class FFState
 {
 public:
   virtual ~FFState();
-  virtual int Compare(const FFState& other) const = 0;
+  //virtual int Compare(const FFState& other) const = 0;
   virtual size_t hash() const = 0;
   virtual bool operator==(const FFState& other) const = 0;
 
