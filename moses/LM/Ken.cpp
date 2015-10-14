@@ -64,19 +64,14 @@ struct KenLMState : public FFState {
 
   virtual size_t hash() const
   {
-	  size_t seed = 0;
-	  for (size_t i = 0; i < state.length; ++i) {
-		  boost::hash_combine(seed, state.words[i]);
-	  }
-	  return seed;
+	  size_t ret = hash_value(state);
+	  return ret;
   }
   virtual bool operator==(const FFState& o) const
   {
 	const KenLMState &other = static_cast<const KenLMState &>(o);
-	if (state.length != other.state.length) return false;
-
-    int ret = std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
-    return (ret == 0);
+	bool ret = state == other.state;
+    return ret;
   }
 
 };
@@ -327,11 +322,14 @@ public:
 
   size_t hash() const
   {
-  	UTIL_THROW2("TODO:Haven't figure this out yet");
+	size_t ret = hash_value(m_state);
+	return ret;
   }
-  virtual bool operator==(const FFState& other) const
+  virtual bool operator==(const FFState& o) const
   {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+	const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM &>(o);
+	bool ret = m_state == other.m_state;
+	return ret;
   }
 
 private:
