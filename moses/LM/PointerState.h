@@ -16,6 +16,16 @@ struct PointerState : public FFState {
     else if (other.lmstate < lmstate) return -1;
     return 0;
   }
+
+  virtual size_t hash() const {
+	  return (size_t) lmstate;
+  }
+  virtual bool operator==(const FFState& other) const
+  {
+    const PointerState& o = static_cast<const PointerState&>(other);
+    return lmstate == o.lmstate;
+  }
+
 };
 
 } // namespace

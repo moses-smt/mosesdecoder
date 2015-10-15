@@ -19,6 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <boost/functional/hash.hpp>
 #include "WordsBitmap.h"
 
 namespace Moses
@@ -34,6 +35,18 @@ bool WordsBitmap::IsAdjacent(size_t startPos, size_t endPos) const
     endPos == GetLastGapPos();
 }
 
+// for unordered_set in stack
+size_t WordsBitmap::hash() const
+{
+	size_t ret = boost::hash_value(m_bitmap);
+	return ret;
+}
+
+bool WordsBitmap::operator==(const WordsBitmap& other) const
+{
+	return m_bitmap == other.m_bitmap;
+}
+
 // friend
 std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap)
 {
@@ -43,4 +56,6 @@ std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap)
   return out;
 }
 
-}
+} // namespace
+
+

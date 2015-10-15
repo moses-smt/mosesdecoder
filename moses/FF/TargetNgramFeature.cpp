@@ -37,6 +37,38 @@ int TargetNgramState::Compare(const FFState& other) const
   }
 }
 
+size_t TargetNgramState::hash() const
+{
+  std::size_t ret = boost::hash_range(m_words.begin(), m_words.end());
+  return ret;
+}
+
+bool TargetNgramState::operator==(const FFState& other) const
+{
+  const TargetNgramState& rhs = dynamic_cast<const TargetNgramState&>(other);
+  int result;
+  if (m_words.size() == rhs.m_words.size()) {
+	for (size_t i = 0; i < m_words.size(); ++i) {
+	  result = Word::Compare(m_words[i],rhs.m_words[i]);
+	  if (result != 0) return false;
+	}
+	return true;
+  } else if (m_words.size() < rhs.m_words.size()) {
+	for (size_t i = 0; i < m_words.size(); ++i) {
+	  result = Word::Compare(m_words[i],rhs.m_words[i]);
+	  if (result != 0) return false;
+	}
+	return true;
+  } else {
+	for (size_t i = 0; i < rhs.m_words.size(); ++i) {
+	  result = Word::Compare(m_words[i],rhs.m_words[i]);
+	  if (result != 0) return false;
+	}
+	return true;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////
 TargetNgramFeature::TargetNgramFeature(const std::string &line)
   :StatefulFeatureFunction(0, line)
 {
@@ -176,7 +208,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
         accumulator->PlusEquals(this, last_ngram.str(), 1);
       }
     }
-    return NULL;
+    return new TargetNgramState();
   }
 
   // prepare new state

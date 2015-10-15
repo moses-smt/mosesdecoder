@@ -20,6 +20,18 @@ struct DistortionState_traditional : public FFState {
     if (range.GetEndPos() > o.range.GetEndPos()) return 1;
     return 0;
   }
+
+  size_t hash() const
+  {
+	  return range.GetEndPos();
+  }
+  virtual bool operator==(const FFState& other) const
+  {
+    const DistortionState_traditional& o =
+      static_cast<const DistortionState_traditional&>(other);
+    return range.GetEndPos() == o.range.GetEndPos(); 
+  }
+
 };
 
 std::vector<const DistortionScoreProducer*> DistortionScoreProducer::s_staticColl;

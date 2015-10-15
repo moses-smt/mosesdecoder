@@ -38,6 +38,16 @@ public:
   }
 
   int Compare(const FFState& other) const;
+
+  virtual size_t hash() const {
+	  return m_hash;
+  }
+  virtual bool operator==(const FFState& other) const
+  {
+	  const BilingualLMState &otherState = static_cast<const BilingualLMState&>(other);
+	  return m_hash == otherState.m_hash;
+  }
+
 };
 
 class BilingualLM : public StatefulFeatureFunction

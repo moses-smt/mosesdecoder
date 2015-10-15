@@ -26,6 +26,9 @@ public:
 
   BleuScoreState();
   virtual int Compare(const FFState& other) const;
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
   void print(std::ostream& out) const;
 
 private:

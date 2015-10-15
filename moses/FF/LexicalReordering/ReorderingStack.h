@@ -28,6 +28,9 @@ private:
 public:
 
   int Compare(const ReorderingStack& o) const;
+  size_t hash() const;
+  bool operator==(const ReorderingStack& other) const;
+
   int ShiftReduce(WordsRange input_span);
 
 private:
