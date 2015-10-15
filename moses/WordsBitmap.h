@@ -264,14 +264,5 @@ public:
   TO_STRING();
 };
 
-// friend
-inline std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap)
-{
-  for (size_t i = 0 ; i < wordsBitmap.m_bitmap.size() ; i++) {
-    out << int(wordsBitmap.GetValue(i));
-  }
-  return out;
-}
-
 }
 #endif
