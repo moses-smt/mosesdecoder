@@ -70,7 +70,7 @@ ConfusionNet() : InputType()
   if (SD.IsSyntax()) {
     m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
   }
-  UTIL_THROW_IF2(&InputFeature::Instance() == NULL, "Input feature must be specified");
+  UTIL_THROW_IF2(InputFeature::InstancePtr() == NULL, "Input feature must be specified");
 }
 
 ConfusionNet::
@@ -140,9 +140,9 @@ ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
   Clear();
 
   // const StaticData   &staticData   = StaticData::Instance();
-  const InputFeature &inputFeature = InputFeature::Instance();
-  size_t numInputScores   = inputFeature.GetNumInputScores();
-  size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
+  size_t numInputScores   = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
 
   size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);

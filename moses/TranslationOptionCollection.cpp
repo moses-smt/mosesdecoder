@@ -483,14 +483,14 @@ SetInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
   const ScorePair* inputScore = inputPath.GetInputScore();
   if (inputScore == NULL) return;
 
-  const InputFeature &inputFeature = InputFeature::Instance();
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
 
   const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
   for (size_t i = 0; i < transOpts.size(); ++i) {
     TranslationOption &transOpt = *transOpts[i];
 
     ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-    scores.PlusEquals(&inputFeature, *inputScore);
+    scores.PlusEquals(inputFeature, *inputScore);
 
   }
 }

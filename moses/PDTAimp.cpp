@@ -11,7 +11,7 @@ PDTAimp::PDTAimp(PhraseDictionaryTreeAdaptor *p)
     distinctE(0)
 {
   m_numInputScores = 0;
-  m_inputFeature = &InputFeature::Instance();
+  m_inputFeature = InputFeature::InstancePtr();
 
   if (m_inputFeature) {
     const PhraseDictionary *firstPt = PhraseDictionary::GetColl()[0];
