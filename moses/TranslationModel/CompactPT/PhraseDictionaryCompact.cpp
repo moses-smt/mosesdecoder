@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <sys/stat.h>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/thread/tss.hpp>
 
 #include "PhraseDictionaryCompact.h"
 #include "moses/FactorCollection.h"
@@ -42,6 +43,8 @@ using namespace boost::algorithm;
 
 namespace Moses
 {
+
+typename PhraseDictionaryCompact::SentenceCache PhraseDictionaryCompact::m_sentenceCache;
 
 PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
   :PhraseDictionary(line, true)
@@ -75,12 +78,12 @@ void PhraseDictionaryCompact::Load()
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
 
   size_t indexSize;
-  if(m_inMemory)
-    // Load source phrase index into memory
-    indexSize = m_hash.Load(pFile);
-  else
-    // Keep source phrase index on disk
-    indexSize = m_hash.LoadIndex(pFile);
+  //if(m_inMemory)
+  // Load source phrase index into memory
+  indexSize = m_hash.Load(pFile);
+// else
+  // Keep source phrase index on disk
+  //indexSize = m_hash.LoadIndex(pFile);
 
   size_t coderSize = m_phraseDecoder->Load(pFile);
 
@@ -162,13 +165,9 @@ PhraseDictionaryCompact::~PhraseDictionaryCompact()
 
 void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection* tpc)
 {
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
-#else
-  PhraseCache &ref = m_sentenceCache;
-#endif
-  ref.push_back(tpc);
+  if(!m_sentenceCache.get())
+    m_sentenceCache.reset(new PhraseCache());
+  m_sentenceCache->push_back(tpc);
 }
 
 void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
@@ -176,23 +175,16 @@ void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
 
 void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &source)
 {
-  if(!m_inMemory)
-    m_hash.KeepNLastRanges(0.01, 0.2);
+  if(!m_sentenceCache.get())
+    m_sentenceCache.reset(new PhraseCache());
 
   m_phraseDecoder->PruneCache();
-
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
-#else
-  PhraseCache &ref = m_sentenceCache;
-#endif
-
-  for(PhraseCache::iterator it = ref.begin(); it != ref.end(); it++)
+  for(PhraseCache::iterator it = m_sentenceCache->begin();
+      it != m_sentenceCache->end(); it++)
     delete *it;
 
   PhraseCache temp;
-  temp.swap(ref);
+  temp.swap(*m_sentenceCache);
 
   ReduceCache();
 }

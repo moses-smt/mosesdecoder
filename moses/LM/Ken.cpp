@@ -62,6 +62,17 @@ struct KenLMState : public FFState {
     if (state.length > other.state.length) return 1;
     return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
   }
+
+  virtual size_t hash() const {
+    size_t ret = hash_value(state);
+    return ret;
+  }
+  virtual bool operator==(const FFState& o) const {
+    const KenLMState &other = static_cast<const KenLMState &>(o);
+    bool ret = state == other.state;
+    return ret;
+  }
+
 };
 
 ///*
@@ -308,6 +319,16 @@ public:
     return ret;
   }
 
+  size_t hash() const {
+    size_t ret = hash_value(m_state);
+    return ret;
+  }
+  virtual bool operator==(const FFState& o) const {
+    const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM &>(o);
+    bool ret = m_state == other.m_state;
+    return ret;
+  }
+
 private:
   lm::ngram::ChartState m_state;
 };
@@ -384,7 +405,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
     } else if (word.IsNonTerminal()) {
       // Non-terminal is first so we can copy instead of rescoring.
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->states[featureID])->GetChartState();
       float prob = UntransformLMScore(
                      pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.BeginNonTerminal(prevState, prob);
@@ -396,7 +417,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
     const Word &word = target.GetWord(phrasePos);
     if (word.IsNonTerminal()) {
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->state[featureID])->GetChartState();
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->states[featureID])->GetChartState();
       float prob = UntransformLMScore(
                      pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
       ruleScore.NonTerminal(prevState, prob);

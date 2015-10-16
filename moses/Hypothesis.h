@@ -146,7 +146,7 @@ public:
     return m_currTargetWordsRange.GetNumWordsCovered();
   }
 
-  void EvaluateWhenApplied(const SquareMatrix &futureScore);
+  void EvaluateWhenApplied(float futureScore);
 
   int GetId()const {
     return m_id;
@@ -196,8 +196,6 @@ public:
   inline bool IsSourceCompleted() const {
     return m_sourceCompleted.IsComplete();
   }
-
-  int RecombineCompare(const Hypothesis &compare) const;
 
   void GetOutputPhrase(Phrase &out) const;
 
@@ -288,11 +286,14 @@ public:
   // creates a map of TARGET positions which should be replaced by word using placeholder
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
 
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const Hypothesis& other) const;
+
 #ifdef HAVE_XMLRPC_C
   void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
   void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
 #endif
-
 
 
 };
@@ -313,26 +314,22 @@ struct CompareHypothesisTotalScore {
 	ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool(); \
 	pool.freeObject(hypo); \
 } \
-
+ 
 #else
 #define FREEHYPO(hypo) delete hypo
 #endif
 
-/** defines less-than relation on hypotheses.
-* The particular order is not important for us, we need just to figure out
-* which hypothesis are equal based on:
-*   the last n-1 target words are the same
-*   and the covers (source words translated) are the same
-* Directly using RecombineCompare is unreliable because the Compare methods
-* of some states are based on archictecture-dependent pointer comparisons.
-* That's why we use the hypothesis IDs instead.
-*/
-class HypothesisRecombinationOrderer
+class HypothesisRecombinationUnordered
 {
 public:
-  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
-    return (hypoA->RecombineCompare(*hypoB) < 0);
+  size_t operator()(const Hypothesis* hypo) const {
+    return hypo->hash();
   }
+
+  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
+    return (*hypoA) == (*hypoB);
+  }
+
 };
 
 }

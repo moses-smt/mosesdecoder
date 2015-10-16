@@ -29,6 +29,19 @@ int ConstrainedDecodingState::Compare(const FFState& other) const
   return ret;
 }
 
+size_t ConstrainedDecodingState::hash() const
+{
+  size_t ret = hash_value(m_outputPhrase);
+  return ret;
+}
+
+bool ConstrainedDecodingState::operator==(const FFState& other) const
+{
+  const ConstrainedDecodingState &otherFF = static_cast<const ConstrainedDecodingState&>(other);
+  bool ret = m_outputPhrase == otherFF.m_outputPhrase;
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////
 ConstrainedDecoding::ConstrainedDecoding(const std::string &line)
   :StatefulFeatureFunction(1, line)

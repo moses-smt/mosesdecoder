@@ -62,7 +62,7 @@ public:
     m_array[startPos * m_size + endPos] = value;
   }
   float CalcFutureScore( WordsBitmap const& ) const;
-  float CalcFutureScore( WordsBitmap const&, size_t startPos, size_t endPos ) const;
+  float CalcFutureScore2( WordsBitmap const&, size_t startPos, size_t endPos ) const;
 
   TO_STRING();
 };

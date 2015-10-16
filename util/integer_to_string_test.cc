@@ -15,7 +15,12 @@ template <class T> void TestValue(const T value) {
   char buf[ToStringBuf<T>::kBytes];
   StringPiece result(buf, ToString(value, buf) - buf);
   BOOST_REQUIRE_GE(static_cast<std::size_t>(ToStringBuf<T>::kBytes), result.size());
-  BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(value), result);
+  if (value) {
+    BOOST_CHECK_EQUAL(boost::lexical_cast<std::string>(value), result);
+  } else {
+    // Platforms can do void * as 0x0 or 0.
+    BOOST_CHECK(result == "0x0" || result == "0");
+  }
 }
 
 template <class T> void TestCorners() {
@@ -33,7 +38,7 @@ BOOST_AUTO_TEST_CASE(Corners) {
   TestCorners<int16_t>();
   TestCorners<int32_t>();
   TestCorners<int64_t>();
-  //TestCorners<const void*>();
+  TestCorners<const void*>();
 }
 
 template <class T> void TestAll() {
@@ -64,7 +69,6 @@ BOOST_AUTO_TEST_CASE(Tens) {
 }
 
 BOOST_AUTO_TEST_CASE(Pointers) {
-  /*
   for (uintptr_t i = 1; i < std::numeric_limits<uintptr_t>::max() / 10; i *= 10) {
     TestValue((const void*)i);
   }
@@ -72,7 +76,6 @@ BOOST_AUTO_TEST_CASE(Pointers) {
     TestValue((const void*)i);
     TestValue((const void*)(i + 0xf00));
   }
-  */
 }
 
 }} // namespaces

@@ -389,8 +389,30 @@ alignment-symmetrization-method = grow-diag-final-and
 # 
 #operation-sequence-model = "yes"
 #operation-sequence-model-order = 5
-#operation-sequence-model-settings = ""
+#operation-sequence-model-settings = "-lmplz '$moses-src-dir/bin/lmplz -S 40% -T $working-dir/model/tmp'"
 #
+# OR if you want to use with SRILM
+#
+#operation-sequence-model-settings = "--srilm-dir /path-to-srilm/bin/i686-m64"
+
+## Class-based Operation Sequence Model  (OSM)
+# if OSM has to be enabled with factors then add factors as below. 
+# Durrani, Koehn, Schmid, Fraser (COLING, 2014).
+#Investigating the Usefulness of Generalized Word Representations in SMT
+#
+#operation-sequence-model-settings = "--factor 0-0+1-1"
+
+## Interpolated Operation Sequence Model  (OSM)
+# if OSM has to be enabled with factors then add factors as below. 
+# Durrani, Sajjad, Joty, Abdelali and Vogel (Mt Summit, 2015).
+# Using Joint Models for Domain Adaptation in Statistical Machine Translation
+#
+#interpolated-operation-sequence-model = "yes"
+#operation-sequence-model-order = 5
+#operation-sequence-model-settings = "--srilm-dir /path-to-srilm/bin/i686-m64 --tune /path-to-tune-folder/tune_file"
+#Interpolated OSM can only be used with SRILM because of the interpolation script
+
+
 # if OSM training should be skipped, point to OSM Model 
 #osm-model =
 

@@ -533,7 +533,7 @@ build-domains
 	in: CORPUS:post-split-factorized-stem
 	out: domains
 	default-name: model/domains
-	ignore-unless: domain-features mml-filter-corpora
+	ignore-unless: domain-features mml-filter-corpora interpolated-operation-sequence-model
 	template: $moses-script-dir/ems/support/build-domain-file-from-subcorpora.perl $input-extension IN > OUT
 	final-model: yes
 mml-score
@@ -702,7 +702,14 @@ build-osm
 	out: osm-model
 	ignore-unless: operation-sequence-model
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
-	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir $operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings
+	default-name: model/OSM
+build-interpolated-osm
+	in: corpus word-alignment domains
+	out: osm-model
+	ignore-unless: interpolated-operation-sequence-model
+	rerun-on-change: interpolated-operation-sequence-model training-options script giza-settings operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings --domain IN2
 	default-name: model/OSM
 build-transliteration-model
 	in: corpus word-alignment 
@@ -940,6 +947,21 @@ parse-input-devtest
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira	
 	template: $input-parser < IN > OUT
+parse-relax-input
+	in: split-input
+	out: input
+	default-name: tuning/input.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+    template: $input-parse-relaxer < IN > OUT
+parse-relax-input-devtest
+	in: split-input-devtest
+	out: input-devtest
+	default-name: tuning/input.devtest.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+	ignore-unless: use-mira
+    template: $input-parse-relaxer < IN > OUT
 factorize-input
 	in: parsed-input
 	out: factorized-input
@@ -1001,35 +1023,20 @@ truecase-input-devtest
 	ignore-unless: AND input-truecaser use-mira
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
-	in: truecased-input
+	in: truecased-input SPLITTER:splitter-model
 	out: split-input
-	rerun-on-change: input-splitter SPLITTER:splitter-model
+	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 split-input-devtest
-	in: truecased-input-devtest
+	in: truecased-input-devtest SPLITTER:splitter-model
 	out: split-input-devtest
 	rerun-on-change: input-splitter
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
 	ignore-unless: use-mira
-	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
-parse-relax-input
-	in: split-input
-	out: input
-	default-name: tuning/input.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-    template: $input-parse-relaxer < IN > OUT
-parse-relax-input-devtest
-	in: split-input-devtest
-	out: input-devtest
-	default-name: tuning/input.devtest.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-	ignore-unless: use-mira
-    template: $input-parse-relaxer < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -1269,12 +1276,11 @@ truecase-input
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input
-	in: truecased-input
+	in: truecased-input SPLITTER:splitter-model
 	out: split-input
-	rerun-on-change: input-splitter SPLITTER:splitter-model
 	default-name: evaluation/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir 

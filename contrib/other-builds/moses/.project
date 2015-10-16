@@ -3146,6 +3146,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CompactPT/StringVector.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/CompactPT/TargetPhraseCollectionCache.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CompactPT/TargetPhraseCollectionCache.h</locationURI>
