@@ -35,8 +35,8 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
   BOOST_FOREACH(PhraseDictionary* pd, PhraseDictionary::GetColl())
   if (pd->ProvidesPrefixCheck()) prefixCheckers.push_back(pd);
 
-  const InputFeature &inputFeature = InputFeature::Instance();
-  UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
+  UTIL_THROW_IF2(inputFeature == NULL, "Input feature must be specified");
 
   size_t inputSize = input.GetSize();
   m_inputPathMatrix.resize(inputSize);
