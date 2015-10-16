@@ -17,7 +17,8 @@ int PhraseBoundaryState::Compare(const FFState& other) const
   return Word::Compare(*m_sourceWord,*(rhs.m_sourceWord));
 }
 
-size_t PhraseBoundaryState::hash() const {
+size_t PhraseBoundaryState::hash() const
+{
   size_t ret = hash_value(*m_targetWord);
   boost::hash_combine(ret, hash_value(*m_sourceWord));
 

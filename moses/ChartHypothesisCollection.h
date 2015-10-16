@@ -46,11 +46,11 @@ class ChartHypothesisRecombinationUnordered
 {
 public:
   size_t operator()(const ChartHypothesis* hypo) const {
-	return hypo->hash();
+    return hypo->hash();
   }
 
   bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
-	return (*hypoA) == (*hypoB);
+    return (*hypoA) == (*hypoB);
   }
 
 };

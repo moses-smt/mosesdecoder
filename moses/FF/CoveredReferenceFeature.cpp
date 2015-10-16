@@ -44,7 +44,7 @@ int CoveredReferenceState::Compare(const FFState& other) const
 
 size_t CoveredReferenceState::hash() const
 {
-	  UTIL_THROW2("TODO:Haven't figure this out yet");
+  UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
 bool CoveredReferenceState::operator==(const FFState& other) const

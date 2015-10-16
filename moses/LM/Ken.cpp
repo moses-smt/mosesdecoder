@@ -62,15 +62,13 @@ struct KenLMState : public FFState {
     return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
   }
 
-  virtual size_t hash() const
-  {
-	  size_t ret = hash_value(state);
-	  return ret;
+  virtual size_t hash() const {
+    size_t ret = hash_value(state);
+    return ret;
   }
-  virtual bool operator==(const FFState& o) const
-  {
-	const KenLMState &other = static_cast<const KenLMState &>(o);
-	bool ret = state == other.state;
+  virtual bool operator==(const FFState& o) const {
+    const KenLMState &other = static_cast<const KenLMState &>(o);
+    bool ret = state == other.state;
     return ret;
   }
 
@@ -320,16 +318,14 @@ public:
     return ret;
   }
 
-  size_t hash() const
-  {
-	size_t ret = hash_value(m_state);
-	return ret;
+  size_t hash() const {
+    size_t ret = hash_value(m_state);
+    return ret;
   }
-  virtual bool operator==(const FFState& o) const
-  {
-	const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM &>(o);
-	bool ret = m_state == other.m_state;
-	return ret;
+  virtual bool operator==(const FFState& o) const {
+    const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM &>(o);
+    bool ret = m_state == other.m_state;
+    return ret;
   }
 
 private:

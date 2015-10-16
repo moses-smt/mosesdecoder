@@ -28,9 +28,9 @@ size_t SVertex::hash() const
 
   // states
   for (size_t i = 0; i < states.size(); ++i) {
-	  const FFState *state = states[i];
-	  size_t hash = state->hash();
-	  boost::hash_combine(seed, hash);
+    const FFState *state = states[i];
+    size_t hash = state->hash();
+    boost::hash_combine(seed, hash);
   }
   return seed;
 
@@ -40,11 +40,11 @@ bool SVertex::operator==(const SVertex& other) const
 {
   // states
   for (size_t i = 0; i < states.size(); ++i) {
-	  const FFState &thisState = *states[i];
-	  const FFState &otherState = *other.states[i];
-	  if (thisState != otherState) {
-		  return false;
-	  }
+    const FFState &thisState = *states[i];
+    const FFState &otherState = *other.states[i];
+    if (thisState != otherState) {
+      return false;
+    }
   }
   return true;
 }

@@ -346,15 +346,14 @@ bool PhraseBasedReorderingState::operator==(const FFState& o) const
 
   const PhraseBasedReorderingState &other = static_cast<const PhraseBasedReorderingState&>(o);
   if (m_prevRange == other.m_prevRange) {
-	if (m_direction == LRModel::Forward) {
-	  int compareScore = ComparePrevScores(other.m_prevOption);
-	  return compareScore == 0;
-	} else {
-	  return true;
-	}
-  }
-  else {
-	  return false;
+    if (m_direction == LRModel::Forward) {
+      int compareScore = ComparePrevScores(other.m_prevOption);
+      return compareScore == 0;
+    } else {
+      return true;
+    }
+  } else {
+    return false;
   }
 }
 
@@ -383,7 +382,7 @@ int
 BidirectionalReorderingState::
 Compare(FFState const& o) const
 {
-	/*
+  /*
   if (&o == this) return 0;
 
   BidirectionalReorderingState const &other
@@ -456,7 +455,7 @@ size_t HReorderingBackwardState::hash() const
 bool HReorderingBackwardState::operator==(const FFState& o) const
 {
   const HReorderingBackwardState& other
-	  = static_cast<const HReorderingBackwardState&>(o);
+  = static_cast<const HReorderingBackwardState&>(o);
   bool ret = m_reoStack == other.m_reoStack;
   return ret;
 }
@@ -527,8 +526,8 @@ bool HReorderingForwardState::operator==(const FFState& o) const
   = static_cast<HReorderingForwardState const&>(o);
 
   int compareScores = ((m_prevRange == other.m_prevRange)
-		  ? ComparePrevScores(other.m_prevOption)
-		  : (m_prevRange < other.m_prevRange) ? -1 : 1);
+                       ? ComparePrevScores(other.m_prevOption)
+                       : (m_prevRange < other.m_prevRange) ? -1 : 1);
   return compareScores == 0;
 }
 

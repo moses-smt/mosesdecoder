@@ -52,7 +52,7 @@ int BleuScoreState::Compare(const FFState& o) const
 size_t BleuScoreState::hash() const
 {
   if (StaticData::Instance().IsSyntax())
-	return 0;
+    return 0;
 
   size_t ret = hash_value(m_words);
   return ret;
@@ -61,15 +61,15 @@ size_t BleuScoreState::hash() const
 bool BleuScoreState::operator==(const FFState& o) const
 {
   if (&o == this)
-	return true;
+    return true;
 
   if (StaticData::Instance().IsSyntax())
-	return true;
+    return true;
 
   const BleuScoreState& other = static_cast<const BleuScoreState&>(o);
   int c = m_words.Compare(other.m_words);
   if (c == 0)
-	return true;
+    return true;
 
   return false;
 }

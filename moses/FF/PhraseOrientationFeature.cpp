@@ -23,7 +23,7 @@ namespace Moses
 {
 size_t PhraseOrientationFeatureState::hash() const
 {
-	UTIL_THROW2("TODO:Haven't figure this out yet");
+  UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
 bool PhraseOrientationFeatureState::operator==(const FFState& other) const

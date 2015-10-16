@@ -14,11 +14,11 @@ class SVertexRecombinationUnordered
 {
 public:
   size_t operator()(const SVertex* hypo) const {
-	return hypo->hash();
+    return hypo->hash();
   }
 
   bool operator()(const SVertex* hypoA, const SVertex* hypoB) const {
-	return (*hypoA) == (*hypoB);
+    return (*hypoA) == (*hypoB);
   }
 
 };

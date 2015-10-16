@@ -146,10 +146,9 @@ public:
   }
 
   virtual size_t hash() const {
-	  return 0;
+    return 0;
   }
-  virtual bool operator==(const FFState& other) const
-  {
+  virtual bool operator==(const FFState& other) const {
     return true;
   }
 

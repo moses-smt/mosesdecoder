@@ -31,8 +31,8 @@ int ConstrainedDecodingState::Compare(const FFState& other) const
 
 size_t ConstrainedDecodingState::hash() const
 {
-	size_t ret = hash_value(m_outputPhrase);
-	return ret;
+  size_t ret = hash_value(m_outputPhrase);
+  return ret;
 }
 
 bool ConstrainedDecodingState::operator==(const FFState& other) const

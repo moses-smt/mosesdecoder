@@ -33,8 +33,8 @@ int BackwardLMState::Compare(const FFState &o) const
 
 size_t BackwardLMState::hash() const
 {
-	size_t ret = hash_value(state.left);
-	return ret;
+  size_t ret = hash_value(state.left);
+  return ret;
 }
 bool BackwardLMState::operator==(const FFState& o) const
 {

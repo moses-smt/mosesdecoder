@@ -54,13 +54,13 @@ bool osmState::operator==(const FFState& otherBase) const
 {
   const osmState &other = static_cast<const osmState&>(otherBase);
   if (j != other.j)
-	return false;
+    return false;
   if (E != other.E)
-	return false;
+    return false;
   if (gap != other.gap)
-	return false;
+    return false;
   if (lmState.length != other.lmState.length)
-	return false;
+    return false;
 
   return true;
 }

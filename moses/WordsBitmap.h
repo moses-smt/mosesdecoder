@@ -264,8 +264,7 @@ public:
   // for unordered_set in stack
   size_t hash() const;
   bool operator==(const WordsBitmap& other) const;
-  bool operator!=(const WordsBitmap& other) const
-  {
+  bool operator!=(const WordsBitmap& other) const {
     return !(*this == other);
   }
 

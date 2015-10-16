@@ -16,9 +16,8 @@ public:
   virtual size_t hash() const = 0;
   virtual bool operator==(const FFState& other) const = 0;
 
-  virtual bool operator!=(const FFState& other) const
-  {
-	  return !(*this == other);
+  virtual bool operator!=(const FFState& other) const {
+    return !(*this == other);
   }
 };
 
@@ -31,11 +30,10 @@ public:
   }
 
   virtual size_t hash() const {
-	  return 0;
+    return 0;
   }
 
-  virtual bool operator==(const FFState& other) const
-  {
+  virtual bool operator==(const FFState& other) const {
     return true;
   }
 
