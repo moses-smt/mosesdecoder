@@ -148,7 +148,7 @@ inline OFF_T fTell(FILE* f)
 inline void fSeek(FILE* f,OFF_T o)
 {
   if(FSEEKO(f,o,SEEK_SET)<0) {
-	util::StringStream strme;
+    util::StringStream strme;
     strme << "ERROR: could not fseeko position " << o <<"\n";
     if(o==InvalidOffT) strme << "You tried to seek for 'InvalidOffT'!\n";
     UTIL_THROW2(strme.str());

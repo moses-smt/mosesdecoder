@@ -281,7 +281,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
         suffixTerminals++;
       // everything else
       else {
-    	util::StringStream ngram;
+        util::StringStream ngram;
         ngram << m_baseName;
         if (m_factorType == 0)
           ngram << factorZero;
@@ -418,7 +418,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
       // remove duplicates
       size_t size = contextFactor.size();
       if (makePrefix && makeSuffix && (size <= m_n)) {
-    	util::StringStream curr_ngram;
+        util::StringStream curr_ngram;
         curr_ngram << m_baseName;
         for (size_t i = 0; i < size; ++i) {
           curr_ngram << (*contextFactor[i]).GetString(m_factorType);
