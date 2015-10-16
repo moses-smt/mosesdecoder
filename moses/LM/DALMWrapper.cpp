@@ -68,13 +68,11 @@ public:
     else return state.compare(o.state);
   }
 
-  virtual size_t hash() const
-  {
-	  UTIL_THROW2("TODO:Haven't figure this out yet");
+  virtual size_t hash() const {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
   }
-  virtual bool operator==(const FFState& other) const
-  {
-	  UTIL_THROW2("TODO:Haven't figure this out yet");
+  virtual bool operator==(const FFState& other) const {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
   }
 
   DALM::State &get_state() {
@@ -187,14 +185,12 @@ public:
     if(rightContext.get_count() > o.rightContext.get_count()) return 1;
     return rightContext.compare(o.rightContext);
   }
-  
-  virtual size_t hash() const
-  {
-	  UTIL_THROW2("TODO:Haven't figure this out yet");
+
+  virtual size_t hash() const {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
   }
-  virtual bool operator==(const FFState& other) const
-  {
-	  UTIL_THROW2("TODO:Haven't figure this out yet");
+  virtual bool operator==(const FFState& other) const {
+    UTIL_THROW2("TODO:Haven't figure this out yet");
   }
 
 };
