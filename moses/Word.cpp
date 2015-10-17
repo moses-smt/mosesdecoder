@@ -66,9 +66,10 @@ int Word::Compare(const Word &targetWord, const Word &sourceWord)
   return 0;
 }
 
-bool Word::operator==(const Word &compare) const {
+bool Word::operator==(const Word &compare) const
+{
   if (IsNonTerminal() != compare.IsNonTerminal()) {
-	    return false;
+    return false;
   }
 
   for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++) {

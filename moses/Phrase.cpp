@@ -254,19 +254,20 @@ int Phrase::Compare(const Phrase &other) const
   return 0;
 }
 
-bool Phrase::operator== (const Phrase &other) const {
+bool Phrase::operator== (const Phrase &other) const
+{
   size_t thisSize = GetSize()
-		,compareSize = other.GetSize();
+                    ,compareSize = other.GetSize();
   if (thisSize != compareSize) {
-	return false;
+    return false;
   }
 
   for (size_t pos = 0 ; pos < thisSize ; pos++) {
     const Word &thisWord	= GetWord(pos)
-              ,&otherWord	= other.GetWord(pos);
+                            ,&otherWord	= other.GetWord(pos);
     bool ret = thisWord == otherWord;
     if (!ret) {
-    	return false;
+      return false;
     }
   }
 
