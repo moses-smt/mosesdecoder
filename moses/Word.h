@@ -130,11 +130,6 @@ public:
     return !(*this == compare);
   }
 
-  int Compare(const Word &other) const {
-    return Compare(*this, other);
-  }
-
-
   /* static functions */
 
   /** transitive comparison of 2 word objects. Used by operator<.
@@ -159,10 +154,14 @@ public:
 };
 
 struct WordComparer {
-  //! returns true if hypoA can be recombined with hypoB
-  bool operator()(const Word *a, const Word *b) const {
-    return *a < *b;
+  size_t operator()(const Word* word) const {
+    return word->hash();
   }
+
+  bool operator()(const Word* a, const Word* b) const {
+    return (*a) == (*b);
+  }
+
 };
 
 

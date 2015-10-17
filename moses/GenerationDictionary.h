@@ -44,7 +44,7 @@ typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
  */
 class GenerationDictionary : public DecodeFeature
 {
-  typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
+  typedef boost::unordered_map<const Word* , OutputWordCollection, WordComparer, WordComparer> Collection;
 protected:
   static std::vector<GenerationDictionary*> s_staticColl;
 
