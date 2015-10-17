@@ -55,13 +55,6 @@ namespace
 
 struct KenLMState : public FFState {
   lm::ngram::State state;
-  int Compare(const FFState &o) const {
-    const KenLMState &other = static_cast<const KenLMState &>(o);
-    if (state.length < other.state.length) return -1;
-    if (state.length > other.state.length) return 1;
-    return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
-  }
-
   virtual size_t hash() const {
     size_t ret = hash_value(state);
     return ret;
@@ -310,12 +303,6 @@ public:
   }
   lm::ngram::ChartState &GetChartState() {
     return m_state;
-  }
-
-  int Compare(const FFState& o) const {
-    const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
-    int ret = m_state.Compare(other.m_state);
-    return ret;
   }
 
   size_t hash() const {

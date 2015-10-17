@@ -25,7 +25,6 @@ public:
   const std::vector<Word> GetWords() const {
     return m_words;
   }
-  virtual int Compare(const FFState& other) const;
 
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;
@@ -156,25 +155,6 @@ public:
   }
   const Phrase &GetSuffix() const {
     return m_contextSuffix;
-  }
-
-  int Compare(const FFState& o) const {
-    const TargetNgramChartState &other =
-      static_cast<const TargetNgramChartState &>( o );
-
-    // prefix
-    if (m_startPos > 0) { // not for "<s> ..."
-      int ret = GetPrefix().Compare(other.GetPrefix());
-      if (ret != 0)
-        return ret;
-    }
-
-    if (m_endPos < m_inputSize - 1) { // not for "... </s>"
-      int ret = GetSuffix().Compare(other.GetSuffix());
-      if (ret != 0)
-        return ret;
-    }
-    return 0;
   }
 
   size_t hash() const {

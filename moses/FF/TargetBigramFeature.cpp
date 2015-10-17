@@ -11,12 +11,6 @@ using namespace std;
 namespace Moses
 {
 
-int TargetBigramState::Compare(const FFState& other) const
-{
-  const TargetBigramState& rhs = dynamic_cast<const TargetBigramState&>(other);
-  return Word::Compare(m_word,rhs.m_word);
-}
-
 size_t TargetBigramState::hash() const
 {
   std::size_t ret = hash_value(m_word);

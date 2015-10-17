@@ -7,15 +7,6 @@ using namespace std;
 namespace Moses
 {
 
-int BilingualLMState::Compare(const FFState& other) const
-{
-  const BilingualLMState &otherState = static_cast<const BilingualLMState&>(other);
-
-  if (m_hash == otherState.m_hash)
-    return 0;
-  return (m_hash < otherState.m_hash) ? -1 : +1;
-}
-
 ////////////////////////////////////////////////////////////////
 BilingualLM::BilingualLM(const std::string &line)
   : StatefulFeatureFunction(1, line),

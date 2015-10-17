@@ -192,8 +192,10 @@ public:
     return Compare(compare) < 0;
   }
 
-  bool operator== (const Phrase &compare) const {
-    return Compare(compare) == 0;
+  bool operator==(const Phrase &compare) const;
+  bool operator!=(const Phrase &compare) const
+  {
+	  return ! (*this == compare);
   }
 
   void OnlyTheseFactors(const FactorMask &factors);

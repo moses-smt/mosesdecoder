@@ -22,33 +22,6 @@ BleuScoreState::BleuScoreState(): m_words(1),
 {
 }
 
-int BleuScoreState::Compare(const FFState& o) const
-{
-  if (&o == this)
-    return 0;
-
-  if (StaticData::Instance().IsSyntax())
-    return 0;
-
-  const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
-  int c = m_words.Compare(other.m_words);
-  if (c != 0)
-    return c;
-
-  /*for(size_t i = 0; i < m_ngram_counts.size(); i++) {
-    if (m_ngram_counts[i] < other.m_ngram_counts[i])
-  return -1;
-    if (m_ngram_counts[i] > other.m_ngram_counts[i])
-  return 1;
-    if (m_ngram_matches[i] < other.m_ngram_matches[i])
-  return -1;
-    if (m_ngram_matches[i] > other.m_ngram_matches[i])
-  return 1;
-  }*/
-
-  return 0;
-}
-
 size_t BleuScoreState::hash() const
 {
   if (StaticData::Instance().IsSyntax())

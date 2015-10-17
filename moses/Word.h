@@ -124,15 +124,10 @@ public:
     return Compare(*this, compare) < 0;
   }
 
-  inline bool operator== (const Word &compare) const {
-    // needed to store word in GenerationDictionary map
-    // uses comparison of FactorKey
-    // 'proper' comparison, not address/id comparison
-    return Compare(*this, compare) == 0;
-  }
+  bool operator== (const Word &compare) const;
 
   inline bool operator!= (const Word &compare) const {
-    return Compare(*this, compare) != 0;
+    return !(*this == compare);
   }
 
   int Compare(const Word &other) const {

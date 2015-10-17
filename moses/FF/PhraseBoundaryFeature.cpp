@@ -9,14 +9,6 @@ using namespace std;
 namespace Moses
 {
 
-int PhraseBoundaryState::Compare(const FFState& other) const
-{
-  const PhraseBoundaryState& rhs = dynamic_cast<const PhraseBoundaryState&>(other);
-  int tgt = Word::Compare(*m_targetWord,*(rhs.m_targetWord));
-  if (tgt) return tgt;
-  return Word::Compare(*m_sourceWord,*(rhs.m_sourceWord));
-}
-
 size_t PhraseBoundaryState::hash() const
 {
   size_t ret = hash_value(*m_targetWord);

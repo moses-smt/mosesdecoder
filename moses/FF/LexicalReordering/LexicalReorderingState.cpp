@@ -312,25 +312,6 @@ PhraseBasedReorderingState(const LRModel &config,
 { }
 
 
-int
-PhraseBasedReorderingState::
-Compare(const FFState& o) const
-{
-  if (&o == this) return 0;
-
-  const PhraseBasedReorderingState* other = static_cast<const PhraseBasedReorderingState*>(&o);
-  if (m_prevRange == other->m_prevRange) {
-    if (m_direction == LRModel::Forward) {
-      return ComparePrevScores(other->m_prevOption);
-    } else {
-      return 0;
-    }
-  } else if (m_prevRange < other->m_prevRange) {
-    return -1;
-  }
-  return 1;
-}
-
 size_t PhraseBasedReorderingState::hash() const
 {
   size_t ret;
@@ -378,21 +359,6 @@ Expand(const TranslationOption& topt, const InputType& input,
 ///////////////////////////
 //BidirectionalReorderingState
 
-int
-BidirectionalReorderingState::
-Compare(FFState const& o) const
-{
-  /*
-  if (&o == this) return 0;
-
-  BidirectionalReorderingState const &other
-  = static_cast<BidirectionalReorderingState const&>(o);
-
-  int cmp = m_backward->Compare(*other.m_backward);
-  return (cmp < 0) ? -1 : cmp ? 1 : m_forward->Compare(*other.m_forward);
-  */
-}
-
 size_t BidirectionalReorderingState::hash() const
 {
   size_t ret = m_backward->hash();
@@ -435,16 +401,6 @@ HReorderingBackwardState::
 HReorderingBackwardState(const LRModel &config, size_t offset)
   : LRState(config, LRModel::Backward, offset)
 { }
-
-
-int
-HReorderingBackwardState::
-Compare(const FFState& o) const
-{
-  const HReorderingBackwardState& other
-  = static_cast<const HReorderingBackwardState&>(o);
-  return m_reoStack.Compare(other.m_reoStack);
-}
 
 size_t HReorderingBackwardState::hash() const
 {
@@ -495,20 +451,6 @@ HReorderingForwardState(const HReorderingForwardState *prev,
   , m_coverage(prev->m_coverage)
 {
   m_coverage.SetValue(topt.GetSourceWordsRange(), true);
-}
-
-int
-HReorderingForwardState::
-Compare(const FFState& o) const
-{
-  if (&o == this) return 0;
-
-  HReorderingForwardState const& other
-  = static_cast<HReorderingForwardState const&>(o);
-
-  return ((m_prevRange == other.m_prevRange)
-          ? ComparePrevScores(other.m_prevOption)
-          : (m_prevRange < other.m_prevRange) ? -1 : 1);
 }
 
 size_t HReorderingForwardState::hash() const

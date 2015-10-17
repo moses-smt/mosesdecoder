@@ -19,29 +19,6 @@ using namespace std;
 namespace Moses
 {
 
-int CoveredReferenceState::Compare(const FFState& other) const
-{
-  const CoveredReferenceState &otherState = static_cast<const CoveredReferenceState&>(other);
-
-  if (m_coveredRef.size() != otherState.m_coveredRef.size()) {
-    return (m_coveredRef.size() < otherState.m_coveredRef.size()) ? -1 : +1;
-  } else {
-    multiset<string>::const_iterator thisIt, otherIt;
-    for (thisIt = m_coveredRef.begin(), otherIt = otherState.m_coveredRef.begin();
-         thisIt != m_coveredRef.end();
-         thisIt++, otherIt++) {
-      if (*thisIt != *otherIt) return thisIt->compare(*otherIt);
-    }
-  }
-  return 0;
-
-//  return m_coveredRef == otherState.m_coveredRef;
-
-//  if (m_coveredRef == otherState.m_coveredRef)
-//    return 0;
-//  return (m_coveredRef.size() < otherState.m_coveredRef.size()) ? -1 : +1;
-}
-
 size_t CoveredReferenceState::hash() const
 {
   UTIL_THROW2("TODO:Haven't figure this out yet");

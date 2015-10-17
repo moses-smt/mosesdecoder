@@ -26,7 +26,6 @@ public:
   ControlRecombinationState(const Hypothesis &hypo, const ControlRecombination &ff);
   ControlRecombinationState(const ChartHypothesis &hypo, const ControlRecombination &ff);
 
-  int Compare(const FFState& other) const;
   virtual size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 

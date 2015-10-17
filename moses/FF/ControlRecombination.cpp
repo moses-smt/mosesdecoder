@@ -33,21 +33,6 @@ ControlRecombinationState::ControlRecombinationState(const ChartHypothesis &hypo
   }
 }
 
-int ControlRecombinationState::Compare(const FFState& other) const
-{
-  const ControlRecombinationState &otherFF = static_cast<const ControlRecombinationState&>(other);
-
-  if (m_ff.GetType() == SameOutput) {
-    int ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
-    return ret;
-  } else {
-    // compare hypo address. Won't be equal unless they're actually the same hypo
-    if (m_hypo == otherFF.m_hypo)
-      return 0;
-    return (m_hypo < otherFF.m_hypo) ? -1 : +1;
-  }
-}
-
 size_t ControlRecombinationState::hash() const
 {
   size_t ret;
