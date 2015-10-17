@@ -167,20 +167,6 @@ void ChartHypothesisCollection::Detach(const HCType::iterator &iter)
 void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
 {
   ChartHypothesis *h = *iter;
-
-  /*
-   stringstream strme("");
-   strme << h->GetOutputPhrase();
-   string toFind = "the goal of gene scientists is ";
-   size_t pos = toFind.find(strme.str());
-
-   if (pos == 0)
-   {
-   cerr << pos << " " << strme.str() << *h << endl;
-   cerr << *this << endl;
-   }
-   */
-
   Detach(iter);
   ChartHypothesis::Delete(h);
 }
