@@ -209,7 +209,7 @@ public:
     if (m_prevHypo != NULL) {
       m_prevHypo->ToStream(out);
     }
-    out << (Phrase) GetCurrTargetPhrase();
+    out << (const Phrase&) GetCurrTargetPhrase();
   }
 
   std::string GetOutputString() const {

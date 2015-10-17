@@ -4,6 +4,7 @@
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 #include "moses/FF/StatelessFeatureFunction.h"
@@ -88,9 +89,8 @@ void ScoreComponentCollection::MultiplyEquals(const FeatureFunction* sp, float s
 {
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
-    std::stringstream name;
-    name << i->first;
-    if (starts_with(name.str(), prefix))
+    const std::string &name = i->first.name();
+    if (starts_with(name, prefix))
       m_scores[i->first] = i->second * scalar;
   }
 }
@@ -101,9 +101,8 @@ size_t ScoreComponentCollection::GetNumberWeights(const FeatureFunction* sp)
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   size_t weights = 0;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
-    std::stringstream name;
-    name << i->first;
-    if (starts_with(name.str(), prefix))
+    const std::string &name = i->first.name();
+    if (starts_with(name, prefix))
       weights++;
   }
   return weights;
@@ -215,7 +214,7 @@ void ScoreComponentCollection::Save(const string& filename) const
 {
   ofstream out(filename.c_str());
   if (!out) {
-    ostringstream msg;
+    util::StringStream msg;
     msg << "Unable to open " << filename;
     throw runtime_error(msg.str());
   }

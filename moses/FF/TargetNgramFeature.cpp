@@ -115,7 +115,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
 
   // extract all ngrams from current hypothesis
   vector<Word> prev_words(tnState->GetWords());
-  stringstream curr_ngram;
+  util::StringStream curr_ngram;
   bool skip = false;
 
   // include lower order ngrams?
@@ -173,7 +173,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
 
   if (cur_hypo.GetWordsBitmap().IsComplete()) {
     for (size_t n = m_n; n >= smallest_n; --n) {
-      stringstream last_ngram;
+      util::StringStream last_ngram;
       skip = false;
       for (size_t i = cur_hypo.GetSize() - n + 1; i <  cur_hypo.GetSize() && !skip; ++i)
         appendNgram(cur_hypo.GetWord(i), skip, last_ngram);
@@ -203,7 +203,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
   return new TargetNgramState(new_prev_words);
 }
 
-void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream &ngram) const
+void TargetNgramFeature::appendNgram(const Word& word, bool& skip, util::StringStream &ngram) const
 {
 //	const string& w = word.GetFactor(m_factorType)->GetString();
   const StringPiece w = word.GetString(m_factorType);
@@ -256,7 +256,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
         suffixTerminals++;
       // everything else
       else {
-        stringstream ngram;
+        util::StringStream ngram;
         ngram << m_baseName;
         if (m_factorType == 0)
           ngram << factorZero;
@@ -367,7 +367,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
             suffixTerminals = 0;
 
             // remove duplicates
-            stringstream curr_ngram;
+            util::StringStream curr_ngram;
             curr_ngram << m_baseName;
             curr_ngram << (*contextFactor[m_n-2]).GetString(m_factorType);
             curr_ngram << ":";
@@ -393,7 +393,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
       // remove duplicates
       size_t size = contextFactor.size();
       if (makePrefix && makeSuffix && (size <= m_n)) {
-        stringstream curr_ngram;
+        util::StringStream curr_ngram;
         curr_ngram << m_baseName;
         for (size_t i = 0; i < size; ++i) {
           curr_ngram << (*contextFactor[i]).GetString(m_factorType);
@@ -411,7 +411,7 @@ FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
 
 void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfStartPos, size_t offset) const
 {
-  stringstream ngram;
+  util::StringStream ngram;
   size_t size = contextFactor.size();
   for (size_t k = 0; k < numberOfStartPos; ++k) {
     size_t max_end = (size < m_n+k+offset)? size: m_n+k+offset;
@@ -436,7 +436,7 @@ void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFacto
 
 void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfEndPos, size_t offset) const
 {
-  stringstream ngram;
+  util::StringStream ngram;
   for (size_t k = 0; k < numberOfEndPos; ++k) {
     size_t end_pos = contextFactor.size()-1-k-offset;
     for (int start_pos=end_pos-1; (start_pos >= 0) && (end_pos-start_pos < m_n); --start_pos) {

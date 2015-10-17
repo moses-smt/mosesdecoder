@@ -47,7 +47,7 @@ TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
 
   TargetPhrase *targetPhrase = new TargetPhrase();
 
-  std::ostringstream alignmentSS;
+  util::StringStream alignmentSS;
   for (std::size_t i = 0; i < node.children.size(); ++i) {
     const Word &symbol = node.children[i]->pvertex.symbol;
     if (symbol.IsNonTerminal()) {

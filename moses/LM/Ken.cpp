@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "lm/model.hh"
 #include "util/exception.hh"
 #include "util/tokenize_piece.hh"
+#include "util/string_stream.hh"
 
 #include "Ken.h"
 #include "Base.h"
@@ -474,7 +475,7 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
   util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
   ++argument; // KENLM
 
-  stringstream line;
+  util::StringStream line;
   line << "KENLM";
 
   for (; argument; ++argument) {

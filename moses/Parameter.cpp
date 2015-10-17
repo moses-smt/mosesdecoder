@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "util/string_stream.hh"
 #include "util/exception.hh"
 #include "util/random.hh"
 #include <boost/program_options.hpp>
@@ -701,7 +702,7 @@ ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
     size_t currOldInd = 0;
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      stringstream ptLine;
+      util::StringStream ptLine;
 
       vector<string> token = Tokenize(translationVector[currDict]);
 
@@ -860,7 +861,7 @@ ConvertWeightArgsDistortion()
       }
       SetWeight("LexicalReordering", indTable, weights);
 
-      stringstream strme;
+      util::StringStream strme;
       strme << "LexicalReordering "
             << "type=" << toks[1] << " ";
 
@@ -1007,7 +1008,7 @@ ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string 
       }
       SetWeight(newWeightName, indTable, weights);
 
-      stringstream strme;
+      util::StringStream strme;
       strme << "Generation "
             << "input-factor=" << modelToks[0] << " "
             << "output-factor=" << modelToks[1] << " "

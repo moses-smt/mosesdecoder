@@ -11,14 +11,25 @@ namespace util {
 class StringStream : public FakeOStream<StringStream> {
   public:
     // Semantics: appends to string.  Remember to clear first!
-    explicit StringStream(std::string &out)
-      : out_(out) {}
 
+	explicit StringStream()
+	{}
+	/*
+	explicit StringStream(std::string &out)
+      : out_(out) {}
+	*/
     StringStream &flush() { return *this; }
 
     StringStream &write(const void *data, std::size_t length) {
       out_.append(static_cast<const char*>(data), length);
       return *this;
+    }
+
+    const std::string &str() const
+    { return out_; }
+    void str(const std::string &val)
+    {
+      out_ = val;
     }
 
   protected:
@@ -36,7 +47,7 @@ class StringStream : public FakeOStream<StringStream> {
     }
 
   private:
-    std::string &out_;
+    std::string out_;
 };
 
 } // namespace

@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "BlockHashIndex.h"
 #include "CmphStringVectorAdapter.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 #ifdef HAVE_CMPH
 #include "cmph.h"
@@ -367,10 +368,10 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
 
     if(lastKey > temp) {
       if(source->nkeys != 2 || temp != "###DUMMY_KEY###") {
-        std::stringstream strme;
-        strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
-        strme << "1: " << lastKey << std::endl;
-        strme << "2: " << temp << std::endl;
+        util::StringStream strme;
+        strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort\n";
+        strme << "1: " << lastKey << "\n";
+        strme << "2: " << temp << "\n";
         UTIL_THROW2(strme.str());
       }
     }

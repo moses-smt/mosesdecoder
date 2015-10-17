@@ -56,6 +56,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/exception.hh"
 #include "util/random.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -1971,7 +1972,7 @@ void Manager::OutputSearchGraphSLF() const
   // Output search graph in HTK standard lattice format (SLF)
   bool slf = staticData.GetOutputSearchGraphSLF();
   if (slf) {
-    stringstream fileName;
+    util::StringStream fileName;
 
     string dir;
     staticData.GetParameter().SetParameter<string>(dir, "output-search-graph-slf", "");

@@ -6,6 +6,7 @@
 #include "moses/Sentence.h"
 
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 #include "SparseHieroReorderingFeature.h"
 
@@ -202,7 +203,7 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
           targetLeftRulePos < targetRightRulePos))) {
       isMonotone = false;
     }
-    stringstream buf;
+    util::StringStream buf;
     buf << "h_"; //sparse reordering, Huck
     if (m_type == SourceLeft || m_type == SourceCombined) {
       buf << GetFactor(sourceLeftBoundaryWord,m_sourceVocab,m_sourceFactor)->GetString();

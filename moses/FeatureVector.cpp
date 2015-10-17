@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FeatureVector.h"
 #include "util/string_piece_hash.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -204,7 +205,7 @@ void FVector::save(const string& filename) const
 {
   ofstream out(filename.c_str());
   if (!out) {
-    ostringstream msg;
+    util::StringStream msg;
     msg << "Unable to open " << filename;
     throw runtime_error(msg.str());
   }

@@ -126,14 +126,14 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   ReformatHieroRule(1, targetPhraseString, ntAlign);
   ReformateHieroScore(scoreString);
 
-  stringstream align;
+  util::StringStream align;
   map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
   for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign) {
     const pair<size_t, size_t> &alignPoint = iterAlign->second;
     align << alignPoint.first << "-" << alignPoint.second << " ";
   }
 
-  stringstream ret;
+  util::StringStream ret;
   ret << sourcePhraseString << " ||| "
       << targetPhraseString << " ||| "
       << scoreString << " ||| "
