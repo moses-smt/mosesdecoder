@@ -209,7 +209,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
           // use topic probabilities
           const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
           if (atol(topicid_prob[0].c_str()) == -1) {
-        	util::StringStream feature;
+            util::StringStream feature;
             feature << m_description << "_unk_";
             feature << sourceWord;
             feature << "~";
@@ -248,7 +248,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
       size_t globalSourceIndex = inputPath.GetWordsRange().GetStartPos() + sourceIndex;
       if (!m_domainTrigger && globalSourceIndex == 0) {
         // add <s> trigger feature for source
-    	util::StringStream feature;
+        util::StringStream feature;
         feature << m_description << "_";
         feature << "<s>,";
         feature << sourceWord;
@@ -278,7 +278,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
 
         if (m_domainTrigger) {
           if (sourceTriggerExists) {
-        	util::StringStream feature;
+            util::StringStream feature;
             feature << m_description << "_";
             feature << sourceTrigger;
             feature << "_";

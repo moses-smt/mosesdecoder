@@ -211,7 +211,7 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
       raw_weights.push_back(1.0/m_numModels); //uniform weights created online
     }
   } else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
-	util::StringStream strme;
+    util::StringStream strme;
     strme << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ".";
     UTIL_THROW(util::Exception, strme.str());
   } else {

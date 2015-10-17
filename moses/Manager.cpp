@@ -1972,7 +1972,7 @@ void Manager::OutputSearchGraphSLF() const
   // Output search graph in HTK standard lattice format (SLF)
   bool slf = staticData.GetOutputSearchGraphSLF();
   if (slf) {
-	util::StringStream fileName;
+    util::StringStream fileName;
 
     string dir;
     staticData.GetParameter().SetParameter<string>(dir, "output-search-graph-slf", "");

@@ -57,7 +57,7 @@ void PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, cons
     else if (m_mode == "interpolate")
       m_combineFunction = LinearInterpolationFromCounts;
     else {
-	  util::StringStream msg;
+      util::StringStream msg;
       msg << "combination mode unknown: " << m_mode;
       throw runtime_error(msg.str());
     }
