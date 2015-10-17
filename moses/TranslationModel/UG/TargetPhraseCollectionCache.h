@@ -15,7 +15,9 @@ namespace Moses
     : public TargetPhraseCollection
   {
     friend class TPCollCache;
-    boost::atomic<uint32_t>   refCount; // reference count
+    friend class Mmsapt;
+    mutable boost::atomic<uint32_t> refCount; // reference count
+  public:
     TPCollWrapper*  prev; // ... in queue of TPCollWrappers used recently
     TPCollWrapper*  next; // ... in queue of TPCollWrappers used recently
   public:
@@ -27,7 +29,7 @@ namespace Moses
 #else
     timeval          tstamp; // last use
 #endif
-    TPCollWrapper(size_t r, uint64_t const k);
+    TPCollWrapper(uint64_t const key, size_t const rev);
     ~TPCollWrapper();
   };
 
@@ -53,7 +55,7 @@ namespace Moses
     get(uint64_t key, size_t revision);
 
     void
-    release(TPCollWrapper* tpc);
+    release(TPCollWrapper const* tpc);
   };
 
 
