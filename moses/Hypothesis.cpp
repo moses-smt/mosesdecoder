@@ -195,35 +195,6 @@ Create(Manager& manager, InputType const& m_source,
 #endif
 }
 
-/** check, if two hypothesis can be recombined.
-    this is actually a sorting function that allows us to
-    keep an ordered list of hypotheses. This makes recombination
-    much quicker.
-*/
-int
-Hypothesis::
-RecombineCompare(const Hypothesis &compare) const
-{
-  // -1 = this < compare
-  // +1 = this > compare
-  // 0	= this ==compare
-  int comp = m_sourceCompleted.Compare(compare.m_sourceCompleted);
-  if (comp != 0)
-    return comp;
-
-  for (unsigned i = 0; i < m_ffStates.size(); ++i) {
-    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) {
-      // TODO: Can this situation actually occur?
-      comp = int(m_ffStates[i] != NULL) - int(compare.m_ffStates[i] != NULL);
-    } else {
-      comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
-    }
-    if (comp != 0) return comp;
-  }
-
-  return 0;
-}
-
 void
 Hypothesis::
 EvaluateWhenApplied(StatefulFeatureFunction const& sfff,
@@ -645,6 +616,40 @@ GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const
   }
 
   return ret;
+}
+
+size_t Hypothesis::hash() const
+{
+  size_t seed;
+
+  // coverage
+  seed = m_sourceCompleted.hash();
+
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState *state = m_ffStates[i];
+    size_t hash = state->hash();
+    boost::hash_combine(seed, hash);
+  }
+  return seed;
+}
+
+bool Hypothesis::operator==(const Hypothesis& other) const
+{
+  // coverage
+  if (m_sourceCompleted != other.m_sourceCompleted) {
+    return false;
+  }
+
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState &thisState = *m_ffStates[i];
+    const FFState &otherState = *other.m_ffStates[i];
+    if (thisState != otherState) {
+      return false;
+    }
+  }
+  return true;
 }
 
 #ifdef HAVE_XMLRPC_C

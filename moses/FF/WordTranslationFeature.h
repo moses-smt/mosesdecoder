@@ -5,7 +5,6 @@
 
 #include "moses/FactorCollection.h"
 #include "moses/Sentence.h"
-#include "FFState.h"
 #include "StatelessFeatureFunction.h"
 
 namespace Moses
@@ -42,10 +41,6 @@ public:
   bool IsUseable(const FactorMask &mask) const;
 
   void Load();
-
-  const FFState* EmptyHypothesisState(const InputType &) const {
-    return new DummyState();
-  }
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath

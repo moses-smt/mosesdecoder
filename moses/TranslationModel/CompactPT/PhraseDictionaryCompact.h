@@ -52,13 +52,8 @@ protected:
   bool m_useAlignmentInfo;
 
   typedef std::vector<TargetPhraseCollection*> PhraseCache;
-#ifdef WITH_THREADS
-  boost::mutex m_sentenceMutex;
-  typedef std::map<boost::thread::id, PhraseCache> SentenceCache;
-#else
-  typedef PhraseCache SentenceCache;
-#endif
-  SentenceCache m_sentenceCache;
+  typedef boost::thread_specific_ptr<PhraseCache> SentenceCache;
+  static SentenceCache m_sentenceCache;
 
   BlockHashIndex m_hash;
   PhraseDecoder* m_phraseDecoder;

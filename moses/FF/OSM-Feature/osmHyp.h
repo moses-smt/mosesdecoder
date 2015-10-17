@@ -17,6 +17,9 @@ class osmState : public FFState
 public:
   osmState(const lm::ngram::State & val);
   int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
   void saveState(int jVal, int eVal, std::map <int , std::string> & gapVal);
   int getJ()const {
     return j;

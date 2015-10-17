@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <set>
+#include <boost/unordered_set.hpp>
 #include "Hypothesis.h"
 #include "WordsBitmap.h"
 
@@ -18,7 +19,7 @@ class HypothesisStack
 {
 
 protected:
-  typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
+  typedef boost::unordered_set< Hypothesis*, HypothesisRecombinationUnordered, HypothesisRecombinationUnordered > _HCType;
   _HCType m_hypos; /**< contains hypotheses */
   Manager& m_manager;
 

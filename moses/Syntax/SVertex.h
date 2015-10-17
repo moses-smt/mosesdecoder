@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <stddef.h>
 
 namespace Moses
 {
@@ -23,7 +24,12 @@ struct SVertex {
   SHyperedge *best;
   std::vector<SHyperedge*> recombined;
   const PVertex *pvertex;
-  std::vector<FFState*> state;
+  std::vector<FFState*> states;
+
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const SVertex& other) const;
+
 };
 
 }  // Syntax

@@ -3,6 +3,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/TranslationOption.h"
 #include "moses/InputPath.h"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -17,6 +18,21 @@ int PhraseBoundaryState::Compare(const FFState& other) const
   return Word::Compare(*m_sourceWord,*(rhs.m_sourceWord));
 }
 
+size_t PhraseBoundaryState::hash() const
+{
+  size_t ret = hash_value(*m_targetWord);
+  boost::hash_combine(ret, hash_value(*m_sourceWord));
+
+  return ret;
+}
+bool PhraseBoundaryState::operator==(const FFState& other) const
+{
+  const PhraseBoundaryState& rhs = dynamic_cast<const PhraseBoundaryState&>(other);
+  bool ret = *m_targetWord == *rhs.m_targetWord && *m_sourceWord == *rhs.m_sourceWord;
+  return ret;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
 PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
   : StatefulFeatureFunction(0, line)
 {
@@ -46,7 +62,7 @@ void PhraseBoundaryFeature::AddFeatures(
   ScoreComponentCollection* scores) const
 {
   for (size_t i = 0; i < factors.size(); ++i) {
-    ostringstream name;
+    util::StringStream name;
     name << side << ":";
     name << factors[i];
     name << ":";

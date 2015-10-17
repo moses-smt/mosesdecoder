@@ -25,6 +25,7 @@
 #include "OnDiskWrapper.h"
 #include "moses/Factor.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -223,7 +224,8 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
 {
   bool isNonTerminal = origWord.IsNonTerminal();
   Word *newWord = new Word(isNonTerminal);
-  stringstream strme;
+
+  util::StringStream strme;
 
   size_t factorType = factorsVec[0];
   const Moses::Factor *factor = origWord.GetFactor(factorType);

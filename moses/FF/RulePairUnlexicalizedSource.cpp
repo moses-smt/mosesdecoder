@@ -4,7 +4,7 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/FactorCollection.h"
 #include <sstream>
-
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -58,7 +58,7 @@ void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
     }
   }
 
-  ostringstream namestr;
+  util::StringStream namestr;
 
   for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT) {
     const Word &wordT = targetPhrase.GetWord(posT);

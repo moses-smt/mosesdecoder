@@ -140,6 +140,9 @@ public:
     return 0;
   };
 
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
 protected:
 
   static int CompareLeftBoundaryRecursive(const PhraseOrientationFeatureState& state, const PhraseOrientationFeatureState& otherState, bool useSparseNT) {

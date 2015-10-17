@@ -1,5 +1,5 @@
 // $Id$
-
+// vim:tabstop=2
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -19,28 +19,14 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "moses/LM/BackwardLMState.h"
-#include "lm/state.hh"
+#include "TargetPhraseCollectionCache.h"
 
 namespace Moses
 {
 
-int BackwardLMState::Compare(const FFState &o) const
-{
-  const BackwardLMState &other = static_cast<const BackwardLMState &>(o);
-  return state.left.Compare(other.state.left);
-}
 
-size_t BackwardLMState::hash() const
-{
-  size_t ret = hash_value(state.left);
-  return ret;
-}
-bool BackwardLMState::operator==(const FFState& o) const
-{
-  const BackwardLMState &other = static_cast<const BackwardLMState &>(o);
-  bool ret = state.left == other.state.left;
-  return ret;
-}
+boost::thread_specific_ptr<typename TargetPhraseCollectionCache::CacheMap>
+TargetPhraseCollectionCache::m_phraseCache;
 
 }
+

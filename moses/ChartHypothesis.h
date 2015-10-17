@@ -146,8 +146,6 @@ public:
   // leftRightMost: 1=left, 2=right
   void GetOutputPhrase(size_t leftRightMost, size_t numWords, Phrase &outPhrase) const;
 
-  int RecombineCompare(const ChartHypothesis &compare) const;
-
   void EvaluateWhenApplied();
 
   void AddArc(ChartHypothesis *loserHypo);
@@ -213,6 +211,10 @@ public:
   const ChartHypothesis* GetWinningHypothesis() const {
     return m_winningHypo;
   }
+
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const ChartHypothesis& other) const;
 
   TO_STRING();
 

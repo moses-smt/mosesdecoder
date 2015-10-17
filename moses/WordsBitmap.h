@@ -261,17 +261,15 @@ public:
     return id + (1<<16) * start;
   }
 
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const WordsBitmap& other) const;
+  bool operator!=(const WordsBitmap& other) const {
+    return !(*this == other);
+  }
+
   TO_STRING();
 };
-
-// friend
-inline std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap)
-{
-  for (size_t i = 0 ; i < wordsBitmap.m_bitmap.size() ; i++) {
-    out << int(wordsBitmap.GetValue(i));
-  }
-  return out;
-}
 
 }
 #endif

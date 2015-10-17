@@ -9,26 +9,18 @@ namespace Moses
 namespace Syntax
 {
 
-struct SVertexRecombinationOrderer {
+
+class SVertexRecombinationUnordered
+{
 public:
-  bool operator()(const SVertex &x, const SVertex &y) const {
-    int comp = 0;
-    for (std::size_t i = 0; i < x.state.size(); ++i) {
-      if (x.state[i] == NULL || y.state[i] == NULL) {
-        comp = x.state[i] - y.state[i];
-      } else {
-        comp = x.state[i]->Compare(*y.state[i]);
-      }
-      if (comp != 0) {
-        return comp < 0;
-      }
-    }
-    return false;
+  size_t operator()(const SVertex* hypo) const {
+    return hypo->hash();
   }
 
-  bool operator()(const SVertex *x, const SVertex *y) const {
-    return operator()(*x, *y);
+  bool operator()(const SVertex* hypoA, const SVertex* hypoB) const {
+    return (*hypoA) == (*hypoB);
   }
+
 };
 
 }  // Syntax
