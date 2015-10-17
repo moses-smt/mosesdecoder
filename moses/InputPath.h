@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
 
 #include <map>
@@ -33,6 +34,8 @@ class InputPath
 public:
   typedef std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > TargetPhrases;
 
+public:
+  ttaskwptr const ttask;
 protected:
   const InputPath *m_prevPath;
   Phrase m_phrase;
@@ -57,8 +60,13 @@ public:
     , m_nextNode(NOT_FOUND) {
   }
 
-  InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
-            ,const ScorePair *inputScore);
+  InputPath(ttaskwptr const ttask, 
+	    Phrase const& phrase, 
+	    NonTerminalSet const& sourceNonTerms, 
+	    WordsRange const& range, 
+	    InputPath const* prevNode, 
+	    ScorePair const* inputScore);
+
   ~InputPath();
 
   const Phrase &GetPhrase() const {

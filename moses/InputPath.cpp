@@ -11,16 +11,19 @@ using namespace std;
 namespace Moses
 {
 InputPath::
-InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
-          const WordsRange &range, const InputPath *prevNode,
+InputPath(ttaskwptr const theTask, 
+	  Phrase const& phrase, 
+	  NonTerminalSet const& sourceNonTerms,
+          WordsRange const& range, InputPath const *prevNode,
           const ScorePair *inputScore)
-  :m_prevPath(prevNode)
-  ,m_phrase(phrase)
-  ,m_range(range)
-  ,m_inputScore(inputScore)
-  ,m_nextNode(1)
-  ,m_sourceNonTerms(sourceNonTerms)
-  ,m_sourceNonTermArray(FactorCollection::Instance().GetNumNonTerminals(), false)
+  : ttask(theTask) 
+  , m_prevPath(prevNode)
+  , m_phrase(phrase)
+  , m_range(range)
+  , m_inputScore(inputScore)
+  , m_nextNode(1)
+  , m_sourceNonTerms(sourceNonTerms)
+  , m_sourceNonTermArray(FactorCollection::Instance().GetNumNonTerminals(), false)
 {
   for (NonTerminalSet::const_iterator iter = sourceNonTerms.begin(); iter != sourceNonTerms.end(); ++iter) {
     size_t idx = (*iter)[0]->GetId();
@@ -33,13 +36,20 @@ InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
 
 InputPath::~InputPath()
 {
+ 
+  // std::cerr << "Deconstructing InputPath" << std::endl;
+
   // Since there is no way for the Phrase Dictionaries to tell in
   // which (sentence) context phrases were looked up, we tell them
   // now that the phrase isn't needed any more by this inputPath
   typedef std::pair<const TargetPhraseCollection*, const void* > entry;
-  std::map<const PhraseDictionary*, entry>::const_iterator iter;
+  std::map<const PhraseDictionary*, entry>::iterator iter;
+  ttasksptr theTask = this->ttask.lock();
   for (iter = m_targetPhrases.begin(); iter != m_targetPhrases.end(); ++iter)
-    iter->first->Release(iter->second.first);
+    {
+      // std::cerr << iter->second.first << " decommissioned." << std::endl;
+      iter->first->Release(theTask, iter->second.first);
+    }
 
   delete m_inputScore;
 }

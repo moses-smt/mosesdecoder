@@ -97,7 +97,7 @@ public:
 
   virtual
   void
-  Release(TargetPhraseCollection const* tpc) const;
+  Release(ttasksptr const& ttask, TargetPhraseCollection const*& tpc) const;
 
   /// return true if phrase table entries starting with /phrase/
   //  exist in the table.

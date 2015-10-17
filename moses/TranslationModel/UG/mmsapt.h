@@ -234,7 +234,7 @@ namespace Moses
     void setWeights(std::vector<float> const& w);
 
 
-    void Release(ttasksptr const& ttask, TargetPhraseCollection*& tpc) const;
+    void Release(ttasksptr const& ttask, TargetPhraseCollection const*& tpc) const;
     // some consumer lets me know that *tpc isn't needed any more
 
 

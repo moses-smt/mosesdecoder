@@ -232,11 +232,11 @@ void ChartParser::CreateInputPaths(const InputType &input)
 
       InputPath *node;
       if (range.GetNumWordsCovered() == 1) {
-        node = new InputPath(subphrase, labels, range, NULL, NULL);
+        node = new InputPath(m_ttask, subphrase, labels, range, NULL, NULL);
         vec.push_back(node);
       } else {
         const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-        node = new InputPath(subphrase, labels, range, &prevNode, NULL);
+        node = new InputPath(m_ttask, subphrase, labels, range, &prevNode, NULL);
         vec.push_back(node);
       }
 

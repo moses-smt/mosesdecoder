@@ -143,7 +143,7 @@ SetFeaturesToApply()
 // tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
 void
 PhraseDictionary::
-Release(TargetPhraseCollection const* tpc) const
+Release(ttasksptr const& ttask, TargetPhraseCollection const*& tpc) const
 {
   // do nothing by default
   return;

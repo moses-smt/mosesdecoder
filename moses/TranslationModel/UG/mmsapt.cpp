@@ -197,6 +197,9 @@ namespace Moses
 
     dflt = pair<string,string>("cache","10000");
     m_cache_size = max(1000,atoi(param.insert(dflt).first->second.c_str()));
+
+    m_cache_size = 10;
+
     m_cache.reset(new TPCollCache(m_cache_size));
     // m_history.reserve(hsize);
     // in plain language: cache size is at least 1000, and 10,000 by default
@@ -642,6 +645,7 @@ namespace Moses
   Mmsapt::
   GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) const
   {
+    boost::unique_lock<boost::shared_mutex> xlock(m_lock);
     // map from Moses Phrase to internal id sequence
     vector<id_type> sphrase;
     fillIdSeq(src, m_ifactor, *(btfix->V1), sphrase);
@@ -672,6 +676,8 @@ namespace Moses
     uint64_t phrasekey = (mfix.size() == sphrase.size()
                           ? (mfix.getPid()<<1) : (mdyn.getPid()<<1)+1);
 
+    // std::cerr << "Phrasekey is " << phrasekey << " at " << HERE << std::endl;
+
     // get context-specific cache of items previously looked up
     SPTR<ContextScope> const& scope = ttask->GetScope();
     SPTR<TPCollCache> cache = scope->get<TPCollCache>(cache_key);
@@ -685,6 +691,9 @@ namespace Moses
     // newer than the timestamp of the phrase itself we must update
     // the entry.
 
+    // std::cerr << "Phrasekey is " << ret->key << " at " << HERE << std::endl;
+    std::cerr << ret << " with " << ret->refCount << " references at " 
+              << HERE << std::endl;
     boost::upgrade_lock<boost::shared_mutex> rlock(ret->lock);
     if (ret->GetSize()) return ret; 
 
@@ -932,10 +941,20 @@ namespace Moses
 
   void
   Mmsapt
-  ::Release(ttasksptr const& ttask, TargetPhraseCollection*& tpc) const
+  ::Release(ttasksptr const& ttask, TargetPhraseCollection const*& tpc) const
   {
+    if (!tpc) 
+      {
+        // std::cerr << "NULL pointer at " << HERE << std::endl;
+        return; 
+      }
     SPTR<TPCollCache> cache = ttask->GetScope()->get<TPCollCache>(cache_key);
-    if (cache) cache->release(static_cast<TPCollWrapper*>(tpc));
+
+    TPCollWrapper const* foo = static_cast<TPCollWrapper const*>(tpc);
+
+    // std::cerr << "\nReleasing " << foo->key << "\n" << std::endl;
+
+    if (cache) cache->release(static_cast<TPCollWrapper const*>(tpc));
     tpc = NULL;
   }
 

@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
       	    }
       	  cout << endl;
       	}
-      PT->Release(trg);
+      PT->Release(ttask, trg);
     }
   exit(0);
 }
