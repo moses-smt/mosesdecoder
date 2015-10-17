@@ -116,14 +116,6 @@ public:
   StringPiece  GetString(FactorType factorType) const;
   TO_STRING();
 
-  //! transitive comparison of Word objects
-  inline bool operator< (const Word &compare) const {
-    // needed to store word in GenerationDictionary map
-    // uses comparison of FactorKey
-    // 'proper' comparison, not address/id comparison
-    return Compare(*this, compare) < 0;
-  }
-
   bool operator== (const Word &compare) const;
 
   inline bool operator!= (const Word &compare) const {
@@ -153,6 +145,11 @@ public:
   }
 };
 
+inline size_t hash_value(const Word& word)
+{
+  return word.hash();
+}
+
 struct WordComparer {
   size_t operator()(const Word* word) const {
     return word->hash();
@@ -164,11 +161,6 @@ struct WordComparer {
 
 };
 
-
-inline size_t hash_value(const Word& word)
-{
-  return word.hash();
-}
 
 }
 

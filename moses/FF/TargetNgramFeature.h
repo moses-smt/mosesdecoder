@@ -182,14 +182,12 @@ public:
 
     // prefix
     if (m_startPos > 0) { // not for "<s> ..."
-      int ret = GetPrefix().Compare(other.GetPrefix());
-      if (ret != 0)
+      if (GetPrefix() != other.GetPrefix())
         return false;
     }
 
     if (m_endPos < m_inputSize - 1) { // not for "... </s>"
-      int ret = GetSuffix().Compare(other.GetSuffix());
-      if (ret != 0)
+      if (GetSuffix() != other.GetSuffix())
         return false;
     }
     return true;

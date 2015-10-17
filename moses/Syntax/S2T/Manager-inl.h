@@ -108,7 +108,7 @@ void Manager<Parser>::InitializeParsers(PChart &pchart,
 // Find the set of OOVs for this input.  This function assumes that the
 // PChart argument has already been initialized from the input.
 template<typename Parser>
-void Manager<Parser>::FindOovs(const PChart &pchart, std::set<Word> &oovs,
+void Manager<Parser>::FindOovs(const PChart &pchart, boost::unordered_set<Word> &oovs,
                                std::size_t maxOovWidth)
 {
   // Get the set of RuleTries.

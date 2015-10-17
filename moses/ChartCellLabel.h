@@ -78,15 +78,6 @@ public:
     return m_bestScore;
   }
 
-  bool operator<(const ChartCellLabel &other) const {
-    // m_coverage and m_label uniquely identify a ChartCellLabel, so don't
-    // need to compare m_stack.
-    if (m_coverage == other.m_coverage) {
-      return m_label < other.m_label;
-    }
-    return m_coverage < other.m_coverage;
-  }
-
 private:
   const WordsRange &m_coverage;
   const Word &m_label;

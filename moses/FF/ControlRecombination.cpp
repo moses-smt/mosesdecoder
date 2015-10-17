@@ -50,8 +50,7 @@ bool ControlRecombinationState::operator==(const FFState& other) const
   const ControlRecombinationState &otherFF = static_cast<const ControlRecombinationState&>(other);
 
   if (m_ff.GetType() == SameOutput) {
-    int ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
-    return ret == 0;
+    return m_outputPhrase == otherFF.m_outputPhrase;
   } else {
     // compare hypo address. Won't be equal unless they're actually the same hypo
     if (m_hypo == otherFF.m_hypo)

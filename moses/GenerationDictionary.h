@@ -23,9 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_GenerationDictionary_h
 
 #include <list>
-#include <map>
 #include <stdexcept>
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 #include "TypeDef.h"
@@ -36,7 +36,7 @@ namespace Moses
 
 class FactorCollection;
 
-typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
+typedef boost::unordered_map < Word , ScoreComponentCollection > OutputWordCollection;
 // 1st = output phrase
 // 2nd = log probability (score)
 

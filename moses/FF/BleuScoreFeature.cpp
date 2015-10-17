@@ -40,11 +40,7 @@ bool BleuScoreState::operator==(const FFState& o) const
     return true;
 
   const BleuScoreState& other = static_cast<const BleuScoreState&>(o);
-  int c = m_words.Compare(other.m_words);
-  if (c == 0)
-    return true;
-
-  return false;
+  return m_words == other.m_words;
 }
 
 std::ostream& operator<<(std::ostream& out, const BleuScoreState& state)
