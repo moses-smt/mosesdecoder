@@ -178,7 +178,7 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
 
   //Iterate through block pairs
   const Sentence& sentence =
-    dynamic_cast<const Sentence&>(cur_hypo.GetManager().GetSource());
+		  static_cast<const Sentence&>(cur_hypo.GetManager().GetSource());
   //const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
   for (size_t i = 0; i < sourceBlocks.size()-1; ++i) {
     Block& leftSourceBlock = sourceBlocks[i];

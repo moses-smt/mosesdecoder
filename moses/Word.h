@@ -150,18 +150,6 @@ inline size_t hash_value(const Word& word)
   return word.hash();
 }
 
-struct WordComparer {
-  size_t operator()(const Word* word) const {
-    return word->hash();
-  }
-
-  bool operator()(const Word* a, const Word* b) const {
-    return (*a) == (*b);
-  }
-
-};
-
-
 }
 
 #endif

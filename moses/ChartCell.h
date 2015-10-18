@@ -120,11 +120,6 @@ public:
   void OutputSizes(std::ostream &out) const;
   size_t GetSize() const;
 
-  //! transitive comparison used for adding objects into set
-  inline bool operator<(const ChartCell &compare) const {
-    return m_coverage < compare.m_coverage;
-  }
-
   void WriteSearchGraph(const ChartSearchGraphWriter& writer, const std::map<unsigned,bool> &reachable) const;
 
 };

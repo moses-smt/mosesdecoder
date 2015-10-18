@@ -19,7 +19,7 @@ size_t PhraseBoundaryState::hash() const
 }
 bool PhraseBoundaryState::operator==(const FFState& other) const
 {
-  const PhraseBoundaryState& rhs = dynamic_cast<const PhraseBoundaryState&>(other);
+  const PhraseBoundaryState& rhs = static_cast<const PhraseBoundaryState&>(other);
   bool ret = *m_targetWord == *rhs.m_targetWord && *m_sourceWord == *rhs.m_sourceWord;
   return ret;
 }
@@ -78,7 +78,7 @@ FFState* PhraseBoundaryFeature::EvaluateWhenApplied
 (const Hypothesis& cur_hypo, const FFState* prev_state,
  ScoreComponentCollection* scores) const
 {
-  const PhraseBoundaryState* pbState = dynamic_cast<const PhraseBoundaryState*>(prev_state);
+  const PhraseBoundaryState* pbState = static_cast<const PhraseBoundaryState*>(prev_state);
   const Phrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
   if (targetPhrase.GetSize() == 0) {
     return new PhraseBoundaryState(*pbState);

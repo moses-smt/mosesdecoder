@@ -192,6 +192,8 @@ public:
     return Compare(compare) < 0;
   }
 
+  size_t hash() const;
+
   bool operator==(const Phrase &compare) const;
   bool operator!=(const Phrase &compare) const {
     return ! (*this == compare);
@@ -203,11 +205,7 @@ public:
 
 inline size_t hash_value(const Phrase& phrase)
 {
-  size_t  seed = 0;
-  for (size_t i = 0; i < phrase.GetSize(); ++i) {
-    boost::hash_combine(seed, phrase.GetWord(i));
-  }
-  return seed;
+	return phrase.hash();
 }
 
 struct PhrasePtrComparator {

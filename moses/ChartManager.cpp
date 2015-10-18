@@ -619,7 +619,7 @@ void ChartManager::OutputDetailedTranslationReport(
   const StaticData &staticData = StaticData::Instance();
 
   if (staticData.IsDetailedAllTranslationReportingEnabled()) {
-    const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+    const Sentence &sentence = static_cast<const Sentence &>(m_source);
     size_t nBestSize = staticData.options().nbest.nbest_size;
     std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
     CalcNBest(nBestSize, nBestList, staticData.options().nbest.nbest_size);
@@ -720,7 +720,7 @@ void ChartManager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector 
   std::ostringstream out;
   ApplicationContext applicationContext;
 
-  const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+  const Sentence &sentence = static_cast<const Sentence &>(m_source);
   const size_t translationId = m_source.GetTranslationId();
 
   OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
@@ -731,7 +731,7 @@ void ChartManager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector 
     const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
     for( size_t i=0; i<sff.size(); i++ ) {
       if (sff[i] == treeStructure) {
-        const TreeState* tree = dynamic_cast<const TreeState*>(hypo->GetFFState(i));
+        const TreeState* tree = static_cast<const TreeState*>(hypo->GetFFState(i));
         out << "Full Tree " << translationId << ": " << tree->GetTree()->GetString() << "\n";
         break;
       }
