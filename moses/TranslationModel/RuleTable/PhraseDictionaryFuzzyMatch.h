@@ -60,11 +60,11 @@ public:
   TO_STRING();
 
 protected:
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
-      , const Phrase &source
-      , const TargetPhrase &target
-      , const Word *sourceLHS);
+                                    , const Phrase &source
+                                    , const TargetPhrase &target
+                                    , const Word *sourceLHS);
 
   PhraseDictionaryNodeMemory &GetOrCreateNode(PhraseDictionaryNodeMemory &rootNode
       , const Phrase &source

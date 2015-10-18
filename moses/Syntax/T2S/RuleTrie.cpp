@@ -76,15 +76,15 @@ GetOrCreateNonTerminalChild(const Word &targetNonTerm)
   return &m_nonTermMap[targetNonTerm];
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 RuleTrie::
 Node::
 GetOrCreateTargetPhraseCollection(const Word &sourceLHS)
 {
   UTIL_THROW_IF2(!sourceLHS.IsNonTerminal(),
                  "Not a non-terminal: " << sourceLHS);
-  TargetPhraseCollection::shared_ptr& foo 
-    = m_targetPhraseCollections[sourceLHS];
+  TargetPhraseCollection::shared_ptr& foo
+  = m_targetPhraseCollections[sourceLHS];
   if (!foo) foo.reset(new TargetPhraseCollection);
   return foo;
 }
@@ -110,7 +110,7 @@ GetNonTerminalChild(const Word &targetNonTerm) const
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 RuleTrie::
 GetOrCreateTargetPhraseCollection
 ( const Word &sourceLHS, const Phrase &sourceRHS )

@@ -238,15 +238,15 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           continue;
 
         TargetPhraseCollection::shared_ptr targetPhraseCollection;
-        const OnDiskPt::PhraseNode *node 
-	  = prevNode.GetChild(*sourceLHSBerkeleyDb, m_dbWrapper);
+        const OnDiskPt::PhraseNode *node
+        = prevNode.GetChild(*sourceLHSBerkeleyDb, m_dbWrapper);
         if (node) {
           uint64_t tpCollFilePos = node->GetValue();
           std::map<uint64_t, TargetPhraseCollection::shared_ptr >::const_iterator iterCache = m_cache.find(tpCollFilePos);
           if (iterCache == m_cache.end()) {
 
             OnDiskPt::TargetPhraseCollection::shared_ptr tpcollBerkeleyDb
-	      = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);
+            = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);
 
             std::vector<float> weightT = staticData.GetWeights(&m_dictionary);
             targetPhraseCollection

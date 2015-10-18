@@ -125,9 +125,9 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
     targetPhrase->GetScoreBreakdown().Assign(&ff, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, ff.GetFeaturesToApply());
 
-    TargetPhraseCollection::shared_ptr phraseColl 
-      = GetOrCreateTargetPhraseCollection(trie, sourcePhrase, 
-					  *targetPhrase, sourceLHS);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(trie, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
     phraseColl->Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now

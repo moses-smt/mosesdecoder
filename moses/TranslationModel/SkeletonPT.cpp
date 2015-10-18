@@ -37,8 +37,8 @@ void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQu
 
     // add target phrase to phrase-table cache
     size_t hash = hash_value(sourcePhrase);
-    std::pair<TargetPhraseCollection::shared_ptr, clock_t> 
-      value(tpColl, clock());
+    std::pair<TargetPhraseCollection::shared_ptr, clock_t>
+    value(tpColl, clock());
     cache[hash] = value;
 
     inputPath.SetTargetPhrases(*this, tpColl, NULL);

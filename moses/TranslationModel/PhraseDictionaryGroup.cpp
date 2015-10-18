@@ -98,18 +98,18 @@ TargetPhraseCollection::shared_ptr  PhraseDictionaryGroup::GetTargetPhraseCollec
   UTIL_THROW2("Don't call me without the translation task.");
 }
 
-TargetPhraseCollection::shared_ptr  
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryGroup::
 GetTargetPhraseCollectionLEGACY(const ttasksptr& ttask, const Phrase& src) const
 {
-  TargetPhraseCollection::shared_ptr ret 
-    = CreateTargetPhraseCollection(ttask, src);
+  TargetPhraseCollection::shared_ptr ret
+  = CreateTargetPhraseCollection(ttask, src);
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
   const_cast<PhraseDictionaryGroup*>(this)->CacheForCleanup(ret);
   return ret;
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryGroup::
 CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
 {
@@ -123,8 +123,8 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
 
     // Collect phrases from this table
     const PhraseDictionary& pd = *m_memberPDs[i];
-    TargetPhraseCollection::shared_ptr  
-      ret_raw = pd.GetTargetPhraseCollectionLEGACY(ttask, src);
+    TargetPhraseCollection::shared_ptr
+    ret_raw = pd.GetTargetPhraseCollectionLEGACY(ttask, src);
 
     if (ret_raw != NULL) {
       // Process each phrase from table
@@ -178,8 +178,8 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
 
 ChartRuleLookupManager*
 PhraseDictionaryGroup::
-CreateRuleLookupManager(const ChartParser &, 
-			const ChartCellCollectionBase&, size_t)
+CreateRuleLookupManager(const ChartParser &,
+                        const ChartCellCollectionBase&, size_t)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
@@ -191,7 +191,7 @@ void PhraseDictionaryGroup::CacheForCleanup(TargetPhraseCollection::shared_ptr  
   ref.push_back(tpc);
 }
 
-void 
+void
 PhraseDictionaryGroup::
 CleanUpAfterSentenceProcessing(const InputType &source)
 {

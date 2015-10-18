@@ -61,7 +61,7 @@ ProvidesPrefixCheck() const
   return false;
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionary::
 GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
@@ -78,7 +78,7 @@ GetTargetPhraseCollectionLEGACY(const Phrase& src) const
     if (iter == cache.end()) {
       // not in cache, need to look up from phrase table
       ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
-      if (ret) { // make a copy 
+      if (ret) { // make a copy
         ret.reset(new TargetPhraseCollection(*ret));
       }
       cache[hash] = entry(ret, clock());
@@ -95,7 +95,7 @@ GetTargetPhraseCollectionLEGACY(const Phrase& src) const
   return ret;
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionary::
 GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 {
@@ -229,8 +229,8 @@ void PhraseDictionary::ReduceCache() const
       cache.erase(iterRemove);
     } else iter++;
   }
-  VERBOSE(2,"Reduced persistent translation option cache in " 
-	  << reduceCacheTime << " seconds." << std::endl);
+  VERBOSE(2,"Reduced persistent translation option cache in "
+          << reduceCacheTime << " seconds." << std::endl);
 }
 
 CacheColl &PhraseDictionary::GetCache() const

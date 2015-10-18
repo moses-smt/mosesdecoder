@@ -149,7 +149,7 @@ PDTAimp::GetTargetPhraseCollection(Phrase const &src) const
     if(useCache) piter.first->second = ret;
     m_tgtColls.push_back(ret);
   }
-    return ret;
+  return ret;
 
 }
 
@@ -387,8 +387,8 @@ void PDTAimp::CacheSource(ConfusionNet const& src)
       //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;
     }
 
-    TargetPhraseCollectionWithSourcePhrase::shared_ptr 
-      rv = PruneTargetCandidates(tCands, costs, sourcePhrases);
+    TargetPhraseCollectionWithSourcePhrase::shared_ptr
+    rv = PruneTargetCandidates(tCands, costs, sourcePhrases);
 
     if(rv->IsEmpty())
       rv.reset();
@@ -430,7 +430,7 @@ void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
   targetPhrase.EvaluateInIsolation(*srcPtr, m_obj->GetFeaturesToApply());
 }
 
-TargetPhraseCollectionWithSourcePhrase::shared_ptr 
+TargetPhraseCollectionWithSourcePhrase::shared_ptr
 PDTAimp::PruneTargetCandidates
 (const std::vector<TargetPhrase> & tCands,
  std::vector<std::pair<float,size_t> >& costs,

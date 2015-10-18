@@ -78,10 +78,10 @@ public:
   virtual void InitializeForInput(ttasksptr const& ttask);
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
 
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
 
   void SetParameter(const std::string& key, const std::string& value);

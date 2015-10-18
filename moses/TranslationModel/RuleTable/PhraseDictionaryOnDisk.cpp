@@ -158,13 +158,13 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
       ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
       if (ptNode) tpc = GetTargetPhraseCollection(ptNode);
       inputPath.SetTargetPhrases(*this, tpc, ptNode);
-      
+
       delete lastWordOnDisk;
     }
   }
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryOnDisk::
 GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
 {
@@ -192,21 +192,21 @@ GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
   return ret;
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryOnDisk::
 GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const
 {
-  OnDiskPt::OnDiskWrapper& wrapper 
-    = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+  OnDiskPt::OnDiskWrapper& wrapper
+  = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
 
   vector<float> weightT = StaticData::Instance().GetWeights(this);
   OnDiskPt::Vocab &vocab = wrapper.GetVocab();
 
-  OnDiskPt::TargetPhraseCollection::shared_ptr targetPhrasesOnDisk 
-    = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
+  OnDiskPt::TargetPhraseCollection::shared_ptr targetPhrasesOnDisk
+  = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
   TargetPhraseCollection::shared_ptr targetPhrases
-    = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, 
-					  weightT, vocab, false);
+  = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this,
+                                        weightT, vocab, false);
 
   // delete targetPhrasesOnDisk;
 

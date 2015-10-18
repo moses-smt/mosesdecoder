@@ -54,7 +54,7 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollectionBatch(const Input
   }
 }
 
-void 
+void
 PhraseDictionaryTransliteration::
 GetTargetPhraseCollection(InputPath &inputPath) const
 {
@@ -92,8 +92,8 @@ GetTargetPhraseCollection(InputPath &inputPath) const
     UTIL_THROW_IF2(ret != 0, "Transliteration script error");
 
     TargetPhraseCollection::shared_ptr tpColl(new TargetPhraseCollection);
-    vector<TargetPhrase*> targetPhrases 
-      = CreateTargetPhrases(sourcePhrase, outDir.path());
+    vector<TargetPhrase*> targetPhrases
+    = CreateTargetPhrases(sourcePhrase, outDir.path());
     vector<TargetPhrase*>::const_iterator iter;
     for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
       TargetPhrase *tp = *iter;

@@ -102,9 +102,9 @@ GetOrCreateTargetPhraseCollection(const TargetPhrase &target)
 
 TargetPhraseCollection::shared_ptr
 RuleTrieScope3::
-GetOrCreateTargetPhraseCollection(const Phrase &source, 
-				  const TargetPhrase &target, 
-				  const Word *sourceLHS)
+GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                  const TargetPhrase &target,
+                                  const Word *sourceLHS)
 {
   Node &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection(target);

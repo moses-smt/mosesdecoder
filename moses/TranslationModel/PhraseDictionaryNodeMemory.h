@@ -134,9 +134,9 @@ private:
 
 
 public:
-  PhraseDictionaryNodeMemory() 
+  PhraseDictionaryNodeMemory()
     : m_targetPhraseCollection(new TargetPhraseCollection) { }
-  
+
   bool IsLeaf() const {
     return m_sourceTermMap.empty() && m_nonTermMap.empty();
   }
@@ -153,11 +153,11 @@ public:
   const PhraseDictionaryNodeMemory *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
 #endif
 
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollection() const {
     return m_targetPhraseCollection;
   }
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollection() {
     return m_targetPhraseCollection;
   }

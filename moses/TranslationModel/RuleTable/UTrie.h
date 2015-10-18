@@ -57,10 +57,10 @@ public:
       const ChartCellCollectionBase &, std::size_t);
 
 private:
-  TargetPhraseCollection::shared_ptr 
-  GetOrCreateTargetPhraseCollection(const Phrase &source, 
-				    const TargetPhrase &target, 
-				    const Word *sourceLHS);
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS);
 
   UTrieNode &GetOrCreateNode(const Phrase &source, const TargetPhrase &target,
                              const Word *sourceLHS);

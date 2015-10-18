@@ -38,7 +38,7 @@ class Sentence;
 class ChartCellCollectionBase;
 class Word;
 class Phrase;
-  // class TargetPhraseCollection;
+// class TargetPhraseCollection;
 class DecodeGraph;
 
 class ChartParserUnknown

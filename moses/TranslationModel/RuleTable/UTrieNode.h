@@ -51,7 +51,7 @@ public:
           TerminalEqualityPred> TerminalMap;
 
   typedef boost::unordered_map<std::vector<int>,
-			       TargetPhraseCollection::shared_ptr> LabelMap;
+          TargetPhraseCollection::shared_ptr> LabelMap;
 #else
   typedef std::map<Word, UTrieNode> TerminalMap;
   typedef std::map<std::vector<int>, TargetPhraseCollection::shared_ptr> LabelMap;
@@ -78,7 +78,7 @@ public:
   UTrieNode *GetOrCreateTerminalChild(const Word &sourceTerm);
   UTrieNode *GetOrCreateNonTerminalChild(const Word &targetNonTerm);
 
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetOrCreateTargetPhraseCollection(const TargetPhrase &);
 
   bool IsLeaf() const {

@@ -111,7 +111,7 @@ public:
   void Load();
   void Load(const std::string files);
 
-  TargetPhraseCollection::shared_ptr  
+  TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollection(const Phrase &src) const;
 
   TargetPhraseCollection::shared_ptr

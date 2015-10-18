@@ -25,8 +25,8 @@ public:
     , m_key(key)
     , m_ranges(ranges) {}
 
-  void Search(const std::vector<int> &labels, 
-	      const TargetPhraseCollection::shared_ptr tpc,
+  void Search(const std::vector<int> &labels,
+              const TargetPhraseCollection::shared_ptr tpc,
               Callback &callback) {
     m_labels = &labels;
     m_matchCB = &callback;

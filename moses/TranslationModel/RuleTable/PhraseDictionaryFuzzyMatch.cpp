@@ -282,9 +282,9 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
     targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
-    TargetPhraseCollection::shared_ptr phraseColl 
-      = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, 
-					  *targetPhrase, sourceLHS);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
     phraseColl->Add(targetPhrase);
 
     count++;
@@ -303,12 +303,12 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
   //removedirectoryrecursively(dirName);
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryFuzzyMatch::
 GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
-    , const Phrase &source
-    , const TargetPhrase &target
-    , const Word *sourceLHS)
+                                  , const Phrase &source
+                                  , const TargetPhrase &target
+                                  , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
   return currNode.GetTargetPhraseCollection();

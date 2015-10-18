@@ -72,29 +72,29 @@ public:
   ~PhraseDictionaryMultiModel();
   void Load();
 
-  virtual void 
+  virtual void
   CollectSufficientStatistics
-  (const Phrase& src, std::map<std::string,multiModelStats*>* allStats) 
-    const;
+  (const Phrase& src, std::map<std::string,multiModelStats*>* allStats)
+  const;
 
-  virtual TargetPhraseCollection::shared_ptr 
+  virtual TargetPhraseCollection::shared_ptr
   CreateTargetPhraseCollectionLinearInterpolation
-  (const Phrase& src, std::map<std::string,multiModelStats*>* allStats, 
+  (const Phrase& src, std::map<std::string,multiModelStats*>* allStats,
    std::vector<std::vector<float> > &multimodelweights) const;
 
-  std::vector<std::vector<float> > 
+  std::vector<std::vector<float> >
   getWeights(size_t numWeights, bool normalize) const;
 
-  std::vector<float> 
+  std::vector<float>
   normalizeWeights(std::vector<float> &weights) const;
 
-  void 
+  void
   CacheForCleanup(TargetPhraseCollection::shared_ptr tpc);
 
-  void 
+  void
   CleanUpAfterSentenceProcessing(const InputType &source);
 
-  virtual void 
+  virtual void
   CleanUpComponentModels(const InputType &source);
 
 #ifdef WITH_DLIB
@@ -103,26 +103,26 @@ public:
 #endif
 
   // functions below required by base class
-  virtual TargetPhraseCollection::shared_ptr  
+  virtual TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
-  virtual void 
+  virtual void
   InitializeForInput(ttasksptr const& ttask) {
     // Don't do anything source specific here as this object is shared
     // between threads.
   }
 
   ChartRuleLookupManager*
-  CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, 
-			  std::size_t);
+  CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&,
+                          std::size_t);
 
-  void 
+  void
   SetParameter(const std::string& key, const std::string& value);
 
-  const std::vector<float>* 
+  const std::vector<float>*
   GetTemporaryMultiModelWeightsVector() const;
 
-  void 
+  void
   SetTemporaryMultiModelWeightsVector(std::vector<float> weights);
 
 protected:

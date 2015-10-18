@@ -167,8 +167,8 @@ void ChartRuleLookupManagerMemoryPerSentence::AddAndExtend(
   size_t endPos)
 {
 
-  TargetPhraseCollection::shared_ptr tpc 
-    = node->GetTargetPhraseCollection();
+  TargetPhraseCollection::shared_ptr tpc
+  = node->GetTargetPhraseCollection();
   // add target phrase collection (except if rule is empty or a unary non-terminal rule)
   if (!tpc->IsEmpty() && (m_stackVec.empty() || endPos != m_unaryPos)) {
     m_completedRules[endPos].Add(*tpc, m_stackVec, m_stackScores, *m_outColl);

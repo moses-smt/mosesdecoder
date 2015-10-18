@@ -107,7 +107,7 @@ void PhraseDictionaryCompact::Load()
 //   }
 // };
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
 {
 

@@ -33,10 +33,10 @@ class InputPath
 
 public:
 
-  typedef std::pair<TargetPhraseCollection::shared_ptr, const void*> 
+  typedef std::pair<TargetPhraseCollection::shared_ptr, const void*>
   TPCollStoreEntry;
 
-  typedef std::map<const PhraseDictionary*, TPCollStoreEntry> 
+  typedef std::map<const PhraseDictionary*, TPCollStoreEntry>
   TargetPhrases;
 
 public:
@@ -65,12 +65,12 @@ public:
     , m_nextNode(NOT_FOUND) {
   }
 
-  InputPath(ttaskwptr const ttask, 
-	    Phrase const& phrase, 
-	    NonTerminalSet const& sourceNonTerms, 
-	    WordsRange const& range, 
-	    InputPath const* prevNode, 
-	    ScorePair const* inputScore);
+  InputPath(ttaskwptr const ttask,
+            Phrase const& phrase,
+            NonTerminalSet const& sourceNonTerms,
+            WordsRange const& range,
+            InputPath const* prevNode,
+            ScorePair const* inputScore);
 
   ~InputPath();
 
@@ -101,9 +101,9 @@ public:
     m_nextNode = nextNode;
   }
 
-  void 
-  SetTargetPhrases(const PhraseDictionary &phraseDictionary, 
-                   TargetPhraseCollection::shared_ptr const& targetPhrases, 
+  void
+  SetTargetPhrases(const PhraseDictionary &phraseDictionary,
+                   TargetPhraseCollection::shared_ptr const& targetPhrases,
                    const void *ptNode);
 
   TargetPhraseCollection::shared_ptr

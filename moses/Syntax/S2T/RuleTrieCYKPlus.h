@@ -50,12 +50,12 @@ public:
     const Node *GetChild(const Word &sourceTerm) const;
     const Node *GetNonTerminalChild(const Word &targetNonTerm) const;
 
-    TargetPhraseCollection::shared_ptr 
+    TargetPhraseCollection::shared_ptr
     GetTargetPhraseCollection() const {
       return m_targetPhraseCollection;
     }
 
-    TargetPhraseCollection::shared_ptr 
+    TargetPhraseCollection::shared_ptr
     GetTargetPhraseCollection() {
       return m_targetPhraseCollection;
     }
