@@ -19,7 +19,7 @@ class HypothesisStack
 {
 
 protected:
-  typedef boost::unordered_set< Hypothesis*, HypothesisRecombinationUnordered, HypothesisRecombinationUnordered > _HCType;
+  typedef boost::unordered_set< Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis> > _HCType;
   _HCType m_hypos; /**< contains hypotheses */
   Manager& m_manager;
 

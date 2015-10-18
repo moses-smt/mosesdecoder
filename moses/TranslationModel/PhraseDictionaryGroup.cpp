@@ -112,8 +112,7 @@ TargetPhraseCollection* PhraseDictionaryGroup::CreateTargetPhraseCollection(
 {
   // Aggregation of phrases and the scores that will be applied to them
   vector<TargetPhrase*> allPhrases;
-  unordered_map<const TargetPhrase*, vector<float>, PhrasePtrHasher,
-                PhrasePtrComparator> allScores;
+  unordered_map<const TargetPhrase*, vector<float>, UnorderedComparer<Phrase>, UnorderedComparer<Phrase> > allScores;
 
   // For each model
   size_t offset = 0;

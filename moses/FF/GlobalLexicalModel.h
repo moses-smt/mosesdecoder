@@ -33,8 +33,10 @@ class InputType;
  */
 class GlobalLexicalModel : public StatelessFeatureFunction
 {
-  typedef boost::unordered_map< const Word*, boost::unordered_map< const Word*, float, WordComparer, WordComparer >, WordComparer, WordComparer > DoubleHash;
-  typedef boost::unordered_map< const Word*, float, WordComparer, WordComparer > SingleHash;
+  typedef boost::unordered_map< const Word*,
+		  	  	  	  	  	  boost::unordered_map< const Word*, float, UnorderedComparer<Word> , UnorderedComparer<Word> >,
+							  UnorderedComparer<Word>, UnorderedComparer<Word> > DoubleHash;
+  typedef boost::unordered_map< const Word*, float, UnorderedComparer<Word>, UnorderedComparer<Word> > SingleHash;
   typedef std::map< const TargetPhrase*, float > LexiconCache;
 
   struct ThreadLocalStorage {

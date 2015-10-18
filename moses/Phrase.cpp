@@ -254,6 +254,15 @@ int Phrase::Compare(const Phrase &other) const
   return 0;
 }
 
+size_t Phrase::hash() const
+{
+  size_t  seed = 0;
+  for (size_t i = 0; i < GetSize(); ++i) {
+	boost::hash_combine(seed, GetWord(i));
+  }
+  return seed;
+}
+
 bool Phrase::operator== (const Phrase &other) const {
   size_t thisSize = GetSize()
 		,compareSize = other.GetSize();
