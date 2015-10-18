@@ -205,7 +205,7 @@ public:
 
 inline size_t hash_value(const Phrase& phrase)
 {
-	return phrase.hash();
+  return phrase.hash();
 }
 
 struct PhrasePtrComparator {

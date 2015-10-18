@@ -43,7 +43,7 @@ GlobalLexicalModel::~GlobalLexicalModel()
   // delete words in the hash data structure
   DoubleHash::const_iterator iter;
   for(iter = m_hash.begin(); iter != m_hash.end(); iter++ ) {
-  	boost::unordered_map< const Word*, float, UnorderedComparer<Word>, UnorderedComparer<Word> >::const_iterator iter2;
+    boost::unordered_map< const Word*, float, UnorderedComparer<Word>, UnorderedComparer<Word> >::const_iterator iter2;
     for(iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++ ) {
       delete iter2->first; // delete input word
     }

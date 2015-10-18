@@ -167,7 +167,7 @@ public:
   }
   virtual bool operator==(const FFState& o) const {
     const LanguageModelChartState &other =
-    		static_cast<const LanguageModelChartState &>( o );
+      static_cast<const LanguageModelChartState &>( o );
 
     // prefix
     if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) { // not for "<s> ..."

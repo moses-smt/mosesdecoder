@@ -9,12 +9,12 @@ namespace Moses
 
 class Bitmaps
 {
-	typedef boost::unordered_set<const WordsBitmap*, UnorderedComparer<WordsBitmap>, UnorderedComparer<WordsBitmap> > Coll;
-	Coll m_coll;
+  typedef boost::unordered_set<const WordsBitmap*, UnorderedComparer<WordsBitmap>, UnorderedComparer<WordsBitmap> > Coll;
+  Coll m_coll;
 
 public:
-	virtual ~Bitmaps();
-	const WordsBitmap &GetBitmap(const WordsBitmap &bm);
+  virtual ~Bitmaps();
+  const WordsBitmap &GetBitmap(const WordsBitmap &bm);
 
 };
 
