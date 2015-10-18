@@ -34,7 +34,7 @@ FFState* TreeStructureFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hy
       if (word.IsNonTerminal()) {
         size_t nonTermInd = cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
         const ChartHypothesis *prevHypo = cur_hypo.GetPrevHypo(nonTermInd);
-        const TreeState* prev = dynamic_cast<const TreeState*>(prevHypo->GetFFState(featureID));
+        const TreeState* prev = static_cast<const TreeState*>(prevHypo->GetFFState(featureID));
         const TreePointer prev_tree = prev->GetTree();
         previous_trees.push_back(prev_tree);
       }

@@ -143,7 +143,7 @@ InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t 
 */
 void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePos)
 {
-  ConfusionNet const& source=dynamic_cast<ConfusionNet const&>(m_source);
+  ConfusionNet const& source=static_cast<ConfusionNet const&>(m_source);
 
   ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
   const InputPathList &inputPathList = GetInputPathList(sourcePos, sourcePos);

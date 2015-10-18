@@ -503,7 +503,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
   if (!m_enabled) return new BleuScoreState();
 
   NGrams::const_iterator reference_ngrams_iter;
-  const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
+  const BleuScoreState& ps = static_cast<const BleuScoreState&>(*prev_state);
   BleuScoreState* new_state = new BleuScoreState(ps);
 
   float old_bleu, new_bleu;
@@ -579,13 +579,13 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, 
     new_state = new BleuScoreState();
   else {
     const FFState* prev_state_zero = cur_hypo.GetPrevHypo(0)->GetFFState(featureID);
-    const BleuScoreState& ps_zero = dynamic_cast<const BleuScoreState&>(*prev_state_zero);
+    const BleuScoreState& ps_zero = static_cast<const BleuScoreState&>(*prev_state_zero);
     new_state = new BleuScoreState(ps_zero);
     num_words_first_prev = ps_zero.m_target_length;
 
     for (size_t i = 0; i < cur_hypo.GetPrevHypos().size(); ++i) {
       const FFState* prev_state = cur_hypo.GetPrevHypo(i)->GetFFState(featureID);
-      const BleuScoreState* ps = dynamic_cast<const BleuScoreState*>(prev_state);
+      const BleuScoreState* ps = static_cast<const BleuScoreState*>(prev_state);
       BleuScoreState* ps_nonConst = const_cast<BleuScoreState*>(ps);
 //  		cerr << "prev phrase: " << cur_hypo.GetPrevHypo(i)->GetOutputPhrase()
 //  				<< " ( " << cur_hypo.GetPrevHypo(i)->GetTargetLHS() << ")" << endl;

@@ -521,7 +521,7 @@ void Manager::OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothe
   const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (size_t i = 0; i < statefulFFs.size(); ++i) {
     const StatefulFeatureFunction *ff = statefulFFs[i];
-    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+    const LanguageModel *lm = static_cast<const LanguageModel*>(ff);
 
     vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lm);
 

@@ -75,7 +75,7 @@ void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos)
  */
 bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const
 {
-  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  Sentence const& source=static_cast<Sentence const&>(m_source);
   return source.XmlOverlap(startPosition,endPosition);
 }
 
@@ -85,7 +85,7 @@ bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t start
 bool TranslationOptionCollectionText::ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const
 {
   // skip if there is no overlap
-  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  Sentence const& source=static_cast<Sentence const&>(m_source);
   if (!source.XmlOverlap(startPosition,endPosition)) {
     return false;
   }
@@ -135,7 +135,7 @@ bool TranslationOptionCollectionText::ViolatesXmlOptionsConstraint(size_t startP
  */
 void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPos, size_t endPos)
 {
-  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  Sentence const& source=static_cast<Sentence const&>(m_source);
   InputPath &inputPath = GetInputPath(startPos,endPos);
 
   vector <TranslationOption*> xmlOptions;

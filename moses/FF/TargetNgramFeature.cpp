@@ -20,7 +20,7 @@ size_t TargetNgramState::hash() const
 
 bool TargetNgramState::operator==(const FFState& other) const
 {
-  const TargetNgramState& rhs = dynamic_cast<const TargetNgramState&>(other);
+  const TargetNgramState& rhs = static_cast<const TargetNgramState&>(other);
   bool result;
   if (m_words.size() == rhs.m_words.size()) {
     for (size_t i = 0; i < m_words.size(); ++i) {
