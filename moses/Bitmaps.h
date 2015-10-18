@@ -4,11 +4,18 @@
 #include "WordsBitmap.h"
 #include "Util.h"
 
+namespace Moses
+{
+
 class Bitmaps
 {
-	typedef boost::unordered_set<WordsBitmap*, UnorderedComparer<WordsBitmap>, UnorderedComparer<WordsBitmap> > Coll;
+	typedef boost::unordered_set<const WordsBitmap*, UnorderedComparer<WordsBitmap>, UnorderedComparer<WordsBitmap> > Coll;
+	Coll m_coll;
 
 public:
-	const WordsBitmap &GetBitmap();
+	virtual ~Bitmaps();
+	const WordsBitmap &GetBitmap(const WordsBitmap &bm);
 
 };
+
+}
