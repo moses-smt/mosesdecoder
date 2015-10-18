@@ -79,11 +79,11 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
       continue;
     }
 
-    TargetPhraseCollection *tpColl = CreateTargetPhrase(sourcePhrase);
+    TargetPhraseCollection::shared_ptr tpColl = CreateTargetPhrase(sourcePhrase);
 
     // add target phrase to phrase-table cache
     size_t hash = hash_value(sourcePhrase);
-    std::pair<const TargetPhraseCollection*, clock_t> value(tpColl, clock());
+    std::pair<TargetPhraseCollection::shared_ptr , clock_t> value(tpColl, clock());
     cache[hash] = value;
 
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
@@ -109,7 +109,7 @@ std::vector<uint64_t> ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sour
   return ret;
 }
 
-TargetPhraseCollection *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
+TargetPhraseCollection::shared_ptr ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 {
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   assert(sourcePhrase.GetSize());
@@ -124,7 +124,7 @@ TargetPhraseCollection *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase
 
   std::pair<bool, std::vector<target_text> > query_result;
 
-  TargetPhraseCollection *tpColl = NULL;
+  TargetPhraseCollection::shared_ptr tpColl = NULL;
 
   //Actual lookup
   query_result = m_engine->query(probingSource);

@@ -224,9 +224,10 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
     // Insert rule into table.
-    TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
-                                     ruleTable, sourcePhrase, *targetPhrase, &sourceLHS);
-    coll.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr coll;
+    coll = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, 
+					     *targetPhrase, &sourceLHS);
+    coll->Add(targetPhrase);
   }
 
   return true;

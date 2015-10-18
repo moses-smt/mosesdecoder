@@ -39,34 +39,40 @@ InputPath::~InputPath()
  
   // std::cerr << "Deconstructing InputPath" << std::endl;
 
-  // Since there is no way for the Phrase Dictionaries to tell in
-  // which (sentence) context phrases were looked up, we tell them
-  // now that the phrase isn't needed any more by this inputPath
-  typedef std::pair<const TargetPhraseCollection*, const void* > entry;
-  std::map<const PhraseDictionary*, entry>::iterator iter;
-  ttasksptr theTask = this->ttask.lock();
-  for (iter = m_targetPhrases.begin(); iter != m_targetPhrases.end(); ++iter)
-    {
-      // std::cerr << iter->second.first << " decommissioned." << std::endl;
-      iter->first->Release(theTask, iter->second.first);
-    }
+
+  // // NOT NEEDED ANY MORE SINCE THE SWITCH TO SHARED POINTERS
+  // // Since there is no way for the Phrase Dictionaries to tell in
+  // // which (sentence) context phrases were looked up, we tell them
+  // // now that the phrase isn't needed any more by this inputPath
+  // typedef std::pair<boost::shared_ptr<TargetPhraseCollection>, const void* > entry;
+  // std::map<const PhraseDictionary*, entry>::iterator iter;
+  // ttasksptr theTask = this->ttask.lock();
+  // for (iter = m_targetPhrases.begin(); iter != m_targetPhrases.end(); ++iter)
+  //   {
+  //     // std::cerr << iter->second.first << " decommissioned." << std::endl;
+  //     iter->first->Release(theTask, iter->second.first);
+  //   }
 
   delete m_inputScore;
 }
 
-const TargetPhraseCollection *InputPath::GetTargetPhrases(const PhraseDictionary &phraseDictionary) const
+TargetPhraseCollection::shared_ptr
+InputPath::
+GetTargetPhrases(const PhraseDictionary &phraseDictionary) const
 {
-  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
+  TargetPhrases::const_iterator iter;
   iter = m_targetPhrases.find(&phraseDictionary);
   if (iter == m_targetPhrases.end()) {
-    return NULL;
+    return TargetPhraseCollection::shared_ptr();
   }
   return iter->second.first;
 }
 
-const void *InputPath::GetPtNode(const PhraseDictionary &phraseDictionary) const
+const void*
+InputPath::
+GetPtNode(const PhraseDictionary &phraseDictionary) const
 {
-  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
+  TargetPhrases::const_iterator iter;
   iter = m_targetPhrases.find(&phraseDictionary);
   if (iter == m_targetPhrases.end()) {
     return NULL;
@@ -74,11 +80,14 @@ const void *InputPath::GetPtNode(const PhraseDictionary &phraseDictionary) const
   return iter->second.second;
 }
 
-void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
-                                 , const TargetPhraseCollection *targetPhrases
-                                 , const void *ptNode)
+void 
+InputPath::
+SetTargetPhrases(const PhraseDictionary &phraseDictionary, 
+		 TargetPhraseCollection::shared_ptr const& targetPhrases,
+		 const void *ptNode)
 {
-  std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
+  std::pair<TargetPhraseCollection::shared_ptr, const void*> 
+    value(targetPhrases, ptNode);
   m_targetPhrases[&phraseDictionary] = value;
 }
 
@@ -93,10 +102,10 @@ const Word &InputPath::GetLastWord() const
 size_t InputPath::GetTotalRuleSize() const
 {
   size_t ret = 0;
-  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
+  TargetPhrases::const_iterator iter;
   for (iter = m_targetPhrases.begin(); iter != m_targetPhrases.end(); ++iter) {
     // const PhraseDictionary *pt = iter->first;
-    const TargetPhraseCollection *tpColl = iter->second.first;
+    TargetPhraseCollection::shared_ptr tpColl = iter->second.first;
 
     if (tpColl) {
       ret += tpColl->GetSize();
@@ -110,10 +119,10 @@ std::ostream& operator<<(std::ostream& out, const InputPath& obj)
 {
   out << &obj << " " << obj.GetWordsRange() << " " << obj.GetPrevPath() << " " << obj.GetPhrase();
 
-  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
+  InputPath::TargetPhrases::const_iterator iter;
   for (iter = obj.m_targetPhrases.begin(); iter != obj.m_targetPhrases.end(); ++iter) {
     const PhraseDictionary *pt = iter->first;
-    const TargetPhraseCollection *tpColl = iter->second.first;
+    boost::shared_ptr<TargetPhraseCollection const> tpColl = iter->second.first;
 
     out << pt << "=";
     if (tpColl) {

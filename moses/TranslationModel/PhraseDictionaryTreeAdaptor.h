@@ -59,7 +59,8 @@ public:
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
-  TargetPhraseCollection const* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
+  TargetPhraseCollection::shared_ptr 
+  GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(InputType const& source);
@@ -73,7 +74,9 @@ public:
   }
 
   // legacy
-  const TargetPhraseCollectionWithSourcePhrase *GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const & srcRange) const;
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr
+  GetTargetPhraseCollectionLEGACY(InputType const& src, 
+				  WordsRange const & srcRange) const;
 
 };
 

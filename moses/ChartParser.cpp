@@ -44,7 +44,7 @@ ChartParserUnknown
 ChartParserUnknown::~ChartParserUnknown()
 {
   RemoveAllInColl(m_unksrcs);
-  RemoveAllInColl(m_cacheTargetPhraseCollection);
+  // RemoveAllInColl(m_cacheTargetPhraseCollection);
 }
 
 void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to)

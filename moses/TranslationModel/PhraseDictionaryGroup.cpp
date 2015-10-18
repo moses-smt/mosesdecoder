@@ -86,29 +86,32 @@ void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
   // Look up each input in each model
   BOOST_FOREACH(InputPath* inputPath, inputPathQueue) {
     const Phrase &phrase = inputPath->GetPhrase();
-    const TargetPhraseCollection* targetPhrases =
+    TargetPhraseCollection::shared_ptr  targetPhrases =
       this->GetTargetPhraseCollectionLEGACY(ttask, phrase);
     inputPath->SetTargetPhrases(*this, targetPhrases, NULL);
   }
 }
 
-const TargetPhraseCollection* PhraseDictionaryGroup::GetTargetPhraseCollectionLEGACY(
+TargetPhraseCollection::shared_ptr  PhraseDictionaryGroup::GetTargetPhraseCollectionLEGACY(
   const Phrase& src) const
 {
   UTIL_THROW2("Don't call me without the translation task.");
 }
 
-const TargetPhraseCollection* PhraseDictionaryGroup::GetTargetPhraseCollectionLEGACY(
-  const ttasksptr& ttask, const Phrase& src) const
+TargetPhraseCollection::shared_ptr  
+PhraseDictionaryGroup::
+GetTargetPhraseCollectionLEGACY(const ttasksptr& ttask, const Phrase& src) const
 {
-  TargetPhraseCollection* ret = CreateTargetPhraseCollection(ttask, src);
+  TargetPhraseCollection::shared_ptr ret 
+    = CreateTargetPhraseCollection(ttask, src);
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
   const_cast<PhraseDictionaryGroup*>(this)->CacheForCleanup(ret);
   return ret;
 }
 
-TargetPhraseCollection* PhraseDictionaryGroup::CreateTargetPhraseCollection(
-  const ttasksptr& ttask, const Phrase& src) const
+TargetPhraseCollection::shared_ptr 
+PhraseDictionaryGroup::
+CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
 {
   // Aggregation of phrases and the scores that will be applied to them
   vector<TargetPhrase*> allPhrases;
@@ -121,8 +124,8 @@ TargetPhraseCollection* PhraseDictionaryGroup::CreateTargetPhraseCollection(
 
     // Collect phrases from this table
     const PhraseDictionary& pd = *m_memberPDs[i];
-    const TargetPhraseCollection* ret_raw = pd.GetTargetPhraseCollectionLEGACY(
-        ttask, src);
+    TargetPhraseCollection::shared_ptr  
+      ret_raw = pd.GetTargetPhraseCollectionLEGACY(ttask, src);
 
     if (ret_raw != NULL) {
       // Process each phrase from table
@@ -162,7 +165,7 @@ TargetPhraseCollection* PhraseDictionaryGroup::CreateTargetPhraseCollection(
   }
 
   // Apply scores to phrases and add them to return collection
-  TargetPhraseCollection* ret = new TargetPhraseCollection();
+  TargetPhraseCollection::shared_ptr ret(new TargetPhraseCollection);
   const vector<FeatureFunction*> pd_feature_const(m_pdFeature);
   BOOST_FOREACH(TargetPhrase* phrase, allPhrases) {
     phrase->GetScoreBreakdown().Assign(this, allScores.find(phrase)->second);
@@ -174,29 +177,33 @@ TargetPhraseCollection* PhraseDictionaryGroup::CreateTargetPhraseCollection(
   return ret;
 }
 
-ChartRuleLookupManager *PhraseDictionaryGroup::CreateRuleLookupManager(
-  const ChartParser &, const ChartCellCollectionBase&, size_t)
+ChartRuleLookupManager*
+PhraseDictionaryGroup::
+CreateRuleLookupManager(const ChartParser &, 
+			const ChartCellCollectionBase&, size_t)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
 
 //copied from PhraseDictionaryCompact; free memory allocated to TargetPhraseCollection (and each TargetPhrase) at end of sentence
-void PhraseDictionaryGroup::CacheForCleanup(TargetPhraseCollection* tpc)
+void PhraseDictionaryGroup::CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc)
 {
   PhraseCache &ref = GetPhraseCache();
   ref.push_back(tpc);
 }
 
-void PhraseDictionaryGroup::CleanUpAfterSentenceProcessing(
-  const InputType &source)
+void 
+PhraseDictionaryGroup::
+CleanUpAfterSentenceProcessing(const InputType &source)
 {
-  PhraseCache &ref = GetPhraseCache();
-  for (PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) {
-    delete *it;
-  }
+  GetPhraseCache().clear();
+  // PhraseCache &ref = GetPhraseCache();
+  // for (PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) {
+  //   delete *it;
+  // }
 
-  PhraseCache temp;
-  temp.swap(ref);
+  // PhraseCache temp;
+  // temp.swap(ref);
 
   CleanUpComponentModels(source);
 }

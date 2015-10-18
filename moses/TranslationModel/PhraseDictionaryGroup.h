@@ -43,19 +43,20 @@ class PhraseDictionaryGroup: public PhraseDictionary
 public:
   PhraseDictionaryGroup(const std::string& line);
   void Load();
-  TargetPhraseCollection* CreateTargetPhraseCollection(const ttasksptr& ttask,
+  TargetPhraseCollection::shared_ptr 
+    CreateTargetPhraseCollection(const ttasksptr& ttask,
       const Phrase& src) const;
   std::vector<std::vector<float> > getWeights(size_t numWeights,
       bool normalize) const;
-  void CacheForCleanup(TargetPhraseCollection* tpc);
+  void CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc);
   void CleanUpAfterSentenceProcessing(const InputType& source);
   void CleanUpComponentModels(const InputType& source);
   // functions below override the base class
   void GetTargetPhraseCollectionBatch(const ttasksptr& ttask,
                                       const InputPathList &inputPathQueue) const;
-  const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(
+  TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionLEGACY(
     const Phrase& src) const;
-  const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(
+  TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionLEGACY(
     const ttasksptr& ttask, const Phrase& src) const;
   void InitializeForInput(ttasksptr const& ttask) {
     /* Don't do anything source specific here as this object is shared between threads.*/
@@ -71,7 +72,7 @@ protected:
   bool m_restrict;
   std::vector<FeatureFunction*> m_pdFeature;
 
-  typedef std::vector<TargetPhraseCollection*> PhraseCache;
+  typedef std::vector<TargetPhraseCollection::shared_ptr > PhraseCache;
 #ifdef WITH_THREADS
   boost::shared_mutex m_lock_cache;
   typedef std::map<boost::thread::id, PhraseCache> SentenceCache;

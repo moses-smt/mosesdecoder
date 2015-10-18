@@ -80,7 +80,8 @@ int main(int argc, char* argv[])
       Phrase& p = *phrase;
 
       cout << p << endl;
-      TargetPhraseCollection const* trg = PT->GetTargetPhraseCollectionLEGACY(ttask,p);
+      TargetPhraseCollection::shared_ptr trg 
+	= PT->GetTargetPhraseCollectionLEGACY(ttask,p);
       if (!trg) continue;
       vector<size_t> order(trg->GetSize());
       for (size_t i = 0; i < order.size(); ++i) order[i] = i;
@@ -118,7 +119,7 @@ int main(int argc, char* argv[])
       	    }
       	  cout << endl;
       	}
-      PT->Release(ttask, trg);
+      // PT->Release(ttask, trg);
     }
   exit(0);
 }

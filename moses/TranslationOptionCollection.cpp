@@ -410,7 +410,7 @@ CreateTranslationOptionsForRange
     const DecodeStep &dstep = **d;
 
     const PhraseDictionary &pdict = *dstep.GetPhraseDictionaryFeature();
-    const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(pdict);
+    TargetPhraseCollection::shared_ptr targetPhrases = inputPath.GetTargetPhrases(pdict);
 
     static_cast<const Tstep&>(dstep).ProcessInitialTranslation
     (m_source, *oldPtoc, sPos, ePos, adhereTableLimit, inputPath, targetPhrases);
@@ -431,7 +431,7 @@ CreateTranslationOptionsForRange
         TranslationOption &inputPartialTranslOpt = **pto;
         if (const Tstep *tstep = dynamic_cast<const Tstep*>(dstep)) {
           const PhraseDictionary &pdict = *tstep->GetPhraseDictionaryFeature();
-          const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(pdict);
+          TargetPhraseCollection::shared_ptr targetPhrases = inputPath.GetTargetPhrases(pdict);
           tstep->Process(inputPartialTranslOpt, *dstep, *newPtoc,
                          this, adhereTableLimit, targetPhrases);
         } else {

@@ -3,6 +3,7 @@
 #include "StackVec.h"
 
 #include <list>
+#include "TargetPhraseCollection.h"
 
 namespace Moses
 {
@@ -23,7 +24,7 @@ public:
 
   virtual bool Empty() const = 0;
 
-  virtual void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range) = 0;
+  virtual void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &waste_memory, const WordsRange &range) = 0;
 
   virtual void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath) = 0;
 

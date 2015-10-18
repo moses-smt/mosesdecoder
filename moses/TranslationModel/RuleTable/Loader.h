@@ -49,12 +49,14 @@ protected:
 
   // Provide access to RuleTableTrie's private
   // GetOrCreateTargetPhraseCollection function.
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    RuleTableTrie &ruleTable
-    , const Phrase &source
-    , const TargetPhrase &target
-    , const Word *sourceLHS) {
-    return ruleTable.GetOrCreateTargetPhraseCollection(source, target, sourceLHS);
+  TargetPhraseCollection::shared_ptr 
+  GetOrCreateTargetPhraseCollection(RuleTableTrie &ruleTable,
+				    const Phrase &source,
+				    const TargetPhrase &target,
+				    const Word *sourceLHS) 
+  {
+    return ruleTable.GetOrCreateTargetPhraseCollection(source, target, 
+						       sourceLHS);
   }
 };
 

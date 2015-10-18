@@ -66,17 +66,16 @@ private:
   // Define a callback type for use by StackLatticeSearcher.
   struct MatchCallback {
   public:
-    MatchCallback(const WordsRange &range,
-                  ChartParserCallback &out)
-      : m_range(range)
-      , m_out(out)
-      , m_tpc(NULL) {}
+    MatchCallback(const WordsRange &range, ChartParserCallback &out)
+      : m_range(range) , m_out(out) // , m_tpc(NULL) 
+    { }
+
     void operator()(const StackVec &stackVec) {
       m_out.Add(*m_tpc, stackVec, m_range);
     }
     const WordsRange &m_range;
     ChartParserCallback &m_out;
-    const TargetPhraseCollection *m_tpc;
+    TargetPhraseCollection::shared_ptr m_tpc;
   };
 
   void Init();

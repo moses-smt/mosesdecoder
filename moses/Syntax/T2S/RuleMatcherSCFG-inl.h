@@ -61,7 +61,7 @@ void RuleMatcherSCFG<Callback>::Match(const InputTree::Node &inNode,
     if (candidate.pvertex.span.GetEndPos() == inNode.pvertex.span.GetEndPos()) {
       // Check if the trie node has any rules with a LHS that match inNode.
       const Word &lhs = inNode.pvertex.symbol;
-      const TargetPhraseCollection *tpc =
+      TargetPhraseCollection::shared_ptr tpc =
         newTrieNode.GetTargetPhraseCollection(lhs);
       if (tpc) {
         m_hyperedge.label.translations = tpc;

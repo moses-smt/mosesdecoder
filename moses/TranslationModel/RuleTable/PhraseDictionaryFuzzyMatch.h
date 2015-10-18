@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
@@ -59,7 +60,8 @@ public:
   TO_STRING();
 
 protected:
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
+  TargetPhraseCollection::shared_ptr 
+  GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
       , const Phrase &source
       , const TargetPhrase &target
       , const Word *sourceLHS);

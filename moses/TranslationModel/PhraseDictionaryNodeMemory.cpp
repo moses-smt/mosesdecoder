@@ -39,7 +39,7 @@ void PhraseDictionaryNodeMemory::Prune(size_t tableLimit)
   }
 
   // prune TargetPhraseCollection in this node
-  m_targetPhraseCollection.Prune(true, tableLimit);
+  m_targetPhraseCollection->Prune(true, tableLimit);
 }
 
 void PhraseDictionaryNodeMemory::Sort(size_t tableLimit)
@@ -53,10 +53,11 @@ void PhraseDictionaryNodeMemory::Sort(size_t tableLimit)
   }
 
   // prune TargetPhraseCollection in this node
-  m_targetPhraseCollection.Sort(true, tableLimit);
+  m_targetPhraseCollection->Sort(true, tableLimit);
 }
 
-PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const Word &sourceTerm)
+PhraseDictionaryNodeMemory*
+PhraseDictionaryNodeMemory::GetOrCreateChild(const Word &sourceTerm)
 {
   return &m_sourceTermMap[sourceTerm];
 }
@@ -118,7 +119,7 @@ void PhraseDictionaryNodeMemory::Remove()
 {
   m_sourceTermMap.clear();
   m_nonTermMap.clear();
-  m_targetPhraseCollection.Remove();
+  m_targetPhraseCollection->Remove();
 }
 
 std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeMemory &node)

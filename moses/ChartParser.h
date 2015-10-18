@@ -27,7 +27,7 @@
 #include "WordsRange.h"
 #include "StackVec.h"
 #include "InputPath.h"
-
+#include "TargetPhraseCollection.h"
 namespace Moses
 {
 
@@ -38,7 +38,7 @@ class Sentence;
 class ChartCellCollectionBase;
 class Word;
 class Phrase;
-class TargetPhraseCollection;
+  // class TargetPhraseCollection;
 class DecodeGraph;
 
 class ChartParserUnknown
@@ -56,7 +56,7 @@ public:
 
 private:
   std::vector<Phrase*> m_unksrcs;
-  std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
+  std::list<TargetPhraseCollection::shared_ptr> m_cacheTargetPhraseCollection;
 };
 
 class ChartParser

@@ -28,9 +28,9 @@ void GlueRuleSynthesizer::SynthesizeRule(const Forest::Hyperedge &e)
   HyperPath source;
   SynthesizeHyperPath(e, source);
   TargetPhrase *tp = SynthesizeTargetPhrase(e);
-  TargetPhraseCollection &tpc = GetOrCreateTargetPhraseCollection(m_hyperTree,
-                                source);
-  tpc.Add(tp);
+  TargetPhraseCollection::shared_ptr tpc 
+    = GetOrCreateTargetPhraseCollection(m_hyperTree, source);
+  tpc->Add(tp);
 }
 
 void GlueRuleSynthesizer::SynthesizeHyperPath(const Forest::Hyperedge &e,
