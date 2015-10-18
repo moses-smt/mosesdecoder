@@ -12,31 +12,6 @@ namespace Moses
 
 using namespace std;
 
-int TargetNgramState::Compare(const FFState& other) const
-{
-  const TargetNgramState& rhs = dynamic_cast<const TargetNgramState&>(other);
-  int result;
-  if (m_words.size() == rhs.m_words.size()) {
-    for (size_t i = 0; i < m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return result;
-    }
-    return 0;
-  } else if (m_words.size() < rhs.m_words.size()) {
-    for (size_t i = 0; i < m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return result;
-    }
-    return -1;
-  } else {
-    for (size_t i = 0; i < rhs.m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return result;
-    }
-    return 1;
-  }
-}
-
 size_t TargetNgramState::hash() const
 {
   std::size_t ret = boost::hash_range(m_words.begin(), m_words.end());
@@ -45,24 +20,24 @@ size_t TargetNgramState::hash() const
 
 bool TargetNgramState::operator==(const FFState& other) const
 {
-  const TargetNgramState& rhs = dynamic_cast<const TargetNgramState&>(other);
-  int result;
+  const TargetNgramState& rhs = static_cast<const TargetNgramState&>(other);
+  bool result;
   if (m_words.size() == rhs.m_words.size()) {
     for (size_t i = 0; i < m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return false;
+      result = m_words[i] == rhs.m_words[i];
+      if (!result) return false;
     }
     return true;
   } else if (m_words.size() < rhs.m_words.size()) {
     for (size_t i = 0; i < m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return false;
+      result = m_words[i] == rhs.m_words[i];
+      if (!result) return false;
     }
     return true;
   } else {
     for (size_t i = 0; i < rhs.m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return false;
+      result = m_words[i] == rhs.m_words[i];
+      if (!result) return false;
     }
     return true;
   }

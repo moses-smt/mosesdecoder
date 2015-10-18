@@ -64,7 +64,23 @@ int Word::Compare(const Word &targetWord, const Word &sourceWord)
     return (targetFactor<sourceFactor) ? -1 : +1;
   }
   return 0;
+}
 
+bool Word::operator==(const Word &compare) const
+{
+  if (IsNonTerminal() != compare.IsNonTerminal()) {
+    return false;
+  }
+
+  for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++) {
+    const Factor *thisFactor = GetFactor(factorType);
+    const Factor *otherFactor = compare.GetFactor(factorType);
+
+    if (thisFactor != otherFactor) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void Word::Merge(const Word &sourceWord)

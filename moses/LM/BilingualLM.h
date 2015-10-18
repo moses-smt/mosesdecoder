@@ -37,8 +37,6 @@ public:
     return neuralLM_ids;
   }
 
-  int Compare(const FFState& other) const;
-
   virtual size_t hash() const {
     return m_hash;
   }

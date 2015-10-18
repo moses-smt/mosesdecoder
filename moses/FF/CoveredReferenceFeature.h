@@ -19,7 +19,6 @@ class CoveredReferenceState : public FFState
 public:
   std::multiset<std::string> m_coveredRef;
 
-  int Compare(const FFState& other) const;
   virtual size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 

@@ -428,7 +428,7 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
 		out << *this;								\
 		return out.str();						\
 	}															\
-
+ 
 //! delete and remove every element of a collection object such as set, list etc
 template<class COLL>
 void RemoveAllInColl(COLL &coll)
@@ -537,6 +537,19 @@ class FeatureFunction;
 void PrintFeatureWeight(const FeatureFunction* ff);
 void ShowWeights();
 
+template<typename T>
+class UnorderedComparer
+{
+public:
+  size_t operator()(const T* obj) const {
+    return obj->hash();
+  }
+
+  bool operator()(const T* a, const T* b) const {
+    return (*a) == (*b);
+  }
+
+};
 
 } // namespace
 

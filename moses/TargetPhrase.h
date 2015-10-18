@@ -230,29 +230,6 @@ void swap(TargetPhrase &first, TargetPhrase &second);
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 
-/**
- * Hasher that looks at source and target phrase.
- **/
-struct TargetPhraseHasher {
-  inline size_t operator()(const TargetPhrase& targetPhrase) const {
-    size_t seed = 0;
-    boost::hash_combine(seed, targetPhrase);
-    boost::hash_combine(seed, targetPhrase.GetAlignTerm());
-    boost::hash_combine(seed, targetPhrase.GetAlignNonTerm());
-
-    return seed;
-  }
-};
-
-struct TargetPhraseComparator {
-  inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const {
-    return lhs.Compare(rhs) == 0 &&
-           lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
-           lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
-  }
-
-};
-
 }
 
 #endif

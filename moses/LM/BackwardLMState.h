@@ -47,8 +47,6 @@ class BackwardLMState : public FFState
 
 public:
 
-  int Compare(const FFState &o) const;
-
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 

@@ -450,7 +450,7 @@ void Manager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *coll
   }
 
   const search::Applied *applied = &Completed()[0];
-  const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+  const Sentence &sentence = static_cast<const Sentence &>(m_source);
   const size_t translationId = m_source.GetTranslationId();
 
   std::ostringstream out;

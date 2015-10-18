@@ -145,29 +145,6 @@ public:
     return m_contextSuffix;
   }
 
-  int Compare(const FFState& o) const {
-    /*
-    const LanguageModelChartState &other =
-      dynamic_cast<const LanguageModelChartState &>( o );
-
-    // prefix
-    if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) { // not for "<s> ..."
-      int ret = GetPrefix().Compare(other.GetPrefix());
-      if (ret != 0)
-        return ret;
-    }
-
-    // suffix
-    size_t inputSize = m_hypo.GetManager().GetSource().GetSize();
-    if (m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1) { // not for "... </s>"
-      int ret = other.GetRightContext()->Compare(*m_lmRightContext);
-      if (ret != 0)
-        return ret;
-    }
-    return 0;
-    */
-  }
-
   size_t hash() const {
     size_t ret;
 
@@ -190,7 +167,7 @@ public:
   }
   virtual bool operator==(const FFState& o) const {
     const LanguageModelChartState &other =
-      dynamic_cast<const LanguageModelChartState &>( o );
+      static_cast<const LanguageModelChartState &>( o );
 
     // prefix
     if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) { // not for "<s> ..."

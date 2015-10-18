@@ -7,14 +7,6 @@ using namespace std;
 
 namespace Moses
 {
-int SkeletonState::Compare(const FFState& other) const
-{
-  const SkeletonState &otherState = static_cast<const SkeletonState&>(other);
-
-  if (m_targetLen == otherState.m_targetLen)
-    return 0;
-  return (m_targetLen < otherState.m_targetLen) ? -1 : +1;
-}
 
 ////////////////////////////////////////////////////////////////
 SkeletonStatefulFF::SkeletonStatefulFF(const std::string &line)

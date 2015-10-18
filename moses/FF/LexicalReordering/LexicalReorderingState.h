@@ -218,10 +218,6 @@ public:
     delete m_forward;
   }
 
-  virtual
-  int
-  Compare(const FFState& o) const;
-
   virtual size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 
@@ -246,10 +242,6 @@ public:
                              size_t offset);
   PhraseBasedReorderingState(const PhraseBasedReorderingState *prev,
                              const TranslationOption &topt);
-
-  virtual
-  int
-  Compare(const FFState& o) const;
 
   virtual size_t hash() const;
   virtual bool operator==(const FFState& other) const;
@@ -277,9 +269,6 @@ public:
   HReorderingBackwardState(const HReorderingBackwardState *prev,
                            const TranslationOption &topt,
                            ReorderingStack reoStack);
-
-  virtual int Compare(const FFState& o) const;
-
   virtual size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 
@@ -307,8 +296,6 @@ public:
                           size_t offset);
   HReorderingForwardState(const HReorderingForwardState *prev,
                           const TranslationOption &topt);
-
-  virtual int Compare(const FFState& o) const;
 
   virtual size_t hash() const;
   virtual bool operator==(const FFState& other) const;

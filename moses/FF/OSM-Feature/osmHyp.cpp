@@ -22,23 +22,6 @@ void osmState::saveState(int jVal, int eVal, map <int , string> & gapVal)
   E = eVal;
 }
 
-int osmState::Compare(const FFState& otherBase) const
-{
-  const osmState &other = static_cast<const osmState&>(otherBase);
-  if (j != other.j)
-    return (j < other.j) ? -1 : +1;
-  if (E != other.E)
-    return (E < other.E) ? -1 : +1;
-  if (gap != other.gap)
-    return (gap < other.gap) ? -1 : +1;
-
-  if (lmState.length < other.lmState.length) return -1;
-
-  if (lmState.length > other.lmState.length) return 1;
-
-  return 0;
-}
-
 size_t osmState::hash() const
 {
   size_t ret = j;

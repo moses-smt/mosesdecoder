@@ -1,10 +1,10 @@
 #pragma once
 
-#include <set>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "moses/InputType.h"
 #include "moses/Syntax/KBestExtractor.h"

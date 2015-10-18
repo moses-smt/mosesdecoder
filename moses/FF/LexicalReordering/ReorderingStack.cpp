@@ -9,17 +9,6 @@
 
 namespace Moses
 {
-int ReorderingStack::Compare(const ReorderingStack& o)  const
-{
-  const ReorderingStack& other = static_cast<const ReorderingStack&>(o);
-  if (other.m_stack > m_stack) {
-    return 1;
-  } else if (other.m_stack < m_stack) {
-    return -1;
-  }
-  return 0;
-}
-
 size_t ReorderingStack::hash() const
 {
   std::size_t ret = boost::hash_range(m_stack.begin(), m_stack.end());

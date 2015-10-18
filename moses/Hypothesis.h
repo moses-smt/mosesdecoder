@@ -314,23 +314,10 @@ struct CompareHypothesisTotalScore {
 	ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool(); \
 	pool.freeObject(hypo); \
 } \
-
+ 
 #else
 #define FREEHYPO(hypo) delete hypo
 #endif
-
-class HypothesisRecombinationUnordered
-{
-public:
-  size_t operator()(const Hypothesis* hypo) const {
-    return hypo->hash();
-  }
-
-  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
-    return (*hypoA) == (*hypoB);
-  }
-
-};
 
 }
 #endif
