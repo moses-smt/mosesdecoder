@@ -12,7 +12,8 @@ namespace Moses
   class TPCollCache
   {
   public:
-    typedef boost::unordered_map<uint64_t, SPTR<TPCollWrapper> > cache_t;
+    // typedef boost::unordered_map<uint64_t, SPTR<TPCollWrapper> > cache_t;
+    typedef std::map<uint64_t, SPTR<TPCollWrapper> > cache_t;
   private:
     uint32_t m_capacity; // capacity of cache
     cache_t     m_cache; // maps from ids to items

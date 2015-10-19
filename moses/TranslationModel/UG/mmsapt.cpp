@@ -195,10 +195,8 @@ namespace Moses
     dflt = pair<string,string>("table-limit","20");
     m_tableLimit = atoi(param.insert(dflt).first->second.c_str());
 
-    dflt = pair<string,string>("cache","10000");
-    m_cache_size = max(1000,atoi(param.insert(dflt).first->second.c_str()));
-
-    m_cache_size = 10;
+    dflt = pair<string,string>("cache","100000");
+    m_cache_size = max(10000,atoi(param.insert(dflt).first->second.c_str()));
 
     m_cache.reset(new TPCollCache(m_cache_size));
     // m_history.reserve(hsize);
