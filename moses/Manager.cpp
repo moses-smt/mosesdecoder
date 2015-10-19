@@ -67,7 +67,6 @@ Manager::Manager(ttasksptr const& ttask)
   : BaseManager(ttask)
   , interrupted_flag(0)
   , m_hypoId(0)
-  , m_bitmaps(ttask.get()->GetSource().get()->GetSize())
 {
   boost::shared_ptr<InputType> source = ttask->GetSource();
   m_transOptColl = source->CreateTranslationOptionCollection(ttask);

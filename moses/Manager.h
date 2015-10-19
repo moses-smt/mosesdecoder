@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Search.h"
 #include "SearchCubePruning.h"
 #include "BaseManager.h"
-#include "Bitmaps.h"
 
 namespace Moses
 {
@@ -120,7 +119,6 @@ protected:
   size_t interrupted_flag;
   std::auto_ptr<SentenceStats> m_sentenceStats;
   int m_hypoId; //used to number the hypos as they are created.
-  Bitmaps m_bitmaps;
 
   void GetConnectedGraph(
     std::map< int, bool >* pConnected,
@@ -193,10 +191,6 @@ public:
   void CalcDecoderStatistics() const;
   void ResetSentenceStats(const InputType& source);
   SentenceStats& GetSentenceStats() const;
-
-  Bitmaps &GetBitmaps() {
-	  return m_bitmaps;
-  }
 
   /***
    *For Lattice MBR

@@ -72,7 +72,7 @@ class Hypothesis
 
 protected:
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
-  const WordsBitmap				&m_sourceCompleted; /*! keeps track of which words have been translated so far */
+  WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
   InputType const&  m_sourceInput;
   WordsRange				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
   WordsRange        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
