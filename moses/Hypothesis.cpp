@@ -43,11 +43,6 @@ using namespace std;
 
 namespace Moses
 {
-
-#ifdef USE_HYPO_POOL
-ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
-#endif
-
 Hypothesis::
 Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt)
   : m_prevHypo(NULL)
@@ -118,7 +113,7 @@ Hypothesis::
   if (m_arcList) {
     ArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
-      FREEHYPO(*iter);
+    	delete *iter;
     }
     m_arcList->clear();
 
@@ -151,48 +146,6 @@ AddArc(Hypothesis *loserHypo)
     }
   }
   m_arcList->push_back(loserHypo);
-}
-
-/***
- * return the subclass of Hypothesis most appropriate to the given translation option
- */
-Hypothesis*
-Hypothesis::
-CreateNext(const TranslationOption &transOpt) const
-{
-  return Create(*this, transOpt);
-}
-
-/***
- * return the subclass of Hypothesis most appropriate to the given translation option
- */
-Hypothesis*
-Hypothesis::
-Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
-{
-
-#ifdef USE_HYPO_POOL
-  Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(prevHypo, transOpt);
-#else
-  return new Hypothesis(prevHypo, transOpt);
-#endif
-}
-/***
- * return the subclass of Hypothesis most appropriate to the given target phrase
- */
-
-Hypothesis*
-Hypothesis::
-Create(Manager& manager, InputType const& m_source,
-       const TranslationOption &initialTransOpt)
-{
-#ifdef USE_HYPO_POOL
-  Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(manager, m_source, initialTransOpt);
-#else
-  return new Hypothesis(manager, m_source, initialTransOpt);
-#endif
 }
 
 void
@@ -350,7 +303,7 @@ CleanupArcList()
     // delete bad ones
     ArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize; iter != m_arcList->end() ; ++iter)
-      FREEHYPO(*iter);
+    	delete *iter;
     m_arcList->erase(m_arcList->begin() + nBestSize, m_arcList->end());
   }
 

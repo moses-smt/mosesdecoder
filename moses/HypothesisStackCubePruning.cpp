@@ -86,7 +86,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
   if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, constraint" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
@@ -94,7 +94,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
     // too bad for stack. don't bother adding hypo into collection
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, too bad for stack" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
@@ -136,7 +136,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
     } else {
-      FREEHYPO(hypo);
+    	delete hypo;
     }
     return false;
   }

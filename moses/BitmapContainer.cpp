@@ -211,7 +211,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
   }
-  Hypothesis *newHypo = hypothesis.CreateNext(transOpt); // TODO FIXME This is absolutely broken - don't pass null here
+  Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt);
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
@@ -297,7 +297,7 @@ BitmapContainer::~BitmapContainer()
     HypothesisQueueItem *item = m_queue.top();
     m_queue.pop();
 
-    FREEHYPO( item->GetHypothesis() );
+    delete item->GetHypothesis();
     delete item;
   }
 

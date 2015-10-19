@@ -86,7 +86,8 @@ void SearchNormal::Decode()
   // SentenceStats &stats = m_manager.GetSentenceStats();
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager, m_source, m_initialTransOpt);
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt);
+
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack
@@ -293,7 +294,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = hypothesis.CreateNext(transOpt);
+    newHypo = new Hypothesis(hypothesis, transOpt);
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();
     }
@@ -327,7 +328,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = hypothesis.CreateNext(transOpt);
+    newHypo = new Hypothesis(hypothesis, transOpt);
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();
@@ -338,7 +339,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
       IFVERBOSE(2) {
         stats.AddEarlyDiscarded();
       }
-      FREEHYPO( newHypo );
+      delete newHypo;
       return;
     }
 

@@ -92,7 +92,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
   if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, constraint" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
@@ -103,7 +103,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
              && hypo->GetTotalScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) ) {
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, too bad for stack" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
@@ -145,7 +145,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
     } else {
-      FREEHYPO(hypo);
+    	delete hypo;
     }
     return false;
   }
@@ -205,7 +205,7 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
   // delete hypotheses that have not been included
   for(size_t i=0; i<hypos.size(); i++) {
     if (! included[i]) {
-      FREEHYPO( hypos[i] );
+    	delete hypos[i];
       m_manager.GetSentenceStats().AddPruning();
     }
   }

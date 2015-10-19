@@ -74,7 +74,7 @@ SearchCubePruning::~SearchCubePruning()
 void SearchCubePruning::Decode()
 {
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt);
 
   HypothesisStackCubePruning &firstStack
   = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
