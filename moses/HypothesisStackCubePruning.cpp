@@ -48,7 +48,6 @@ void HypothesisStackCubePruning::RemoveAll()
   // delete all bitmap accessors;
   _BMType::iterator iter;
   for (iter = m_bitmapAccessor.begin(); iter != m_bitmapAccessor.end(); ++iter) {
-    delete iter->first;
     delete iter->second;
   }
 }
@@ -150,8 +149,7 @@ void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
                  "Should have added hypothesis " << *hypo);
 
   const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-  WordsBitmap *newBitmap = new WordsBitmap(bitmap);
-  m_bitmapAccessor[newBitmap] = new BitmapContainer(*newBitmap, *this, m_deterministic);
+  m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this, m_deterministic);
 }
 
 void HypothesisStackCubePruning::PruneToSize(size_t newSize)
@@ -257,13 +255,12 @@ void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
     , const SquareMatrix &futureScore
     , const TranslationOptionList &transOptList)
 {
-  _BMType::iterator bcExists = m_bitmapAccessor.find(&newBitmap);
+  _BMType::iterator bcExists = m_bitmapAccessor.find(newBitmap);
 
   BitmapContainer *bmContainer;
   if (bcExists == m_bitmapAccessor.end()) {
-	WordsBitmap *bm = new WordsBitmap(newBitmap);
-    bmContainer = new BitmapContainer(*bm, stack, m_deterministic);
-    m_bitmapAccessor[bm] = bmContainer;
+    bmContainer = new BitmapContainer(newBitmap, stack, m_deterministic);
+    m_bitmapAccessor[newBitmap] = bmContainer;
   } else {
     bmContainer = bcExists->second;
   }
@@ -300,7 +297,7 @@ HypothesisStackCubePruning::AddHypothesesToBitmapContainers()
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *h = *iter;
     const WordsBitmap &bitmap = h->GetWordsBitmap();
-    BitmapContainer *container = m_bitmapAccessor[&bitmap];
+    BitmapContainer *container = m_bitmapAccessor[bitmap];
     container->AddHypothesis(h);
   }
 }

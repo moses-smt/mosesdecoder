@@ -25,11 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <map>
 #include <set>
-#include <boost/unordered_map.hpp>
 #include "Hypothesis.h"
 #include "BitmapContainer.h"
 #include "HypothesisStack.h"
-#include "Util.h"
 
 namespace Moses
 {
@@ -38,7 +36,7 @@ class BitmapContainer;
 class TranslationOptionList;
 class Manager;
 
-typedef boost::unordered_map<const WordsBitmap*, BitmapContainer*, UnorderedComparer<WordsBitmap>, UnorderedComparer<WordsBitmap> > _BMType;
+typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
 
 /** A stack for phrase-based decoding with cube-pruning. */
 class HypothesisStackCubePruning : public HypothesisStack

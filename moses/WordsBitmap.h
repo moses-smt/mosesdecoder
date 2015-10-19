@@ -183,6 +183,26 @@ public:
     return m_bitmap.size();
   }
 
+  //! transitive comparison of WordsBitmap
+  inline int Compare (const WordsBitmap &compare) const {
+    // -1 = less than
+    // +1 = more than
+    // 0	= same
+
+    size_t thisSize = GetSize()
+                      ,compareSize = compare.GetSize();
+
+    if (thisSize != compareSize) {
+      return (thisSize < compareSize) ? -1 : 1;
+    }
+    return std::memcmp(
+             &m_bitmap[0], &compare.m_bitmap[0], thisSize * sizeof(bool));
+  }
+
+  bool operator< (const WordsBitmap &compare) const {
+    return Compare(compare) < 0;
+  }
+
   inline size_t GetEdgeToTheLeftOf(size_t l) const {
     if (l == 0) return l;
     while (l && !m_bitmap[l-1]) {
@@ -250,11 +270,6 @@ public:
 
   TO_STRING();
 };
-
-inline size_t hash_value(const WordsBitmap &bm)
-{
-	return bm.hash();
-}
 
 }
 #endif
