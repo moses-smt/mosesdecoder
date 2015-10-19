@@ -6,6 +6,7 @@
 #include "HypothesisStackNormal.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
+#include "Bitmaps.h"
 
 namespace Moses
 {
@@ -31,6 +32,8 @@ protected:
 
   /** pre-computed list of translation options for the phrases in this sentence */
   const TranslationOptionCollection &m_transOptColl;
+
+  Bitmaps m_bitmaps;
 
   // functions for creating hypotheses
 

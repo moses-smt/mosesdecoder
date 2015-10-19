@@ -86,7 +86,8 @@ void SearchNormal::Decode()
   // SentenceStats &stats = m_manager.GetSentenceStats();
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt);
+  const WordsBitmap &bitmap = m_bitmaps.GetBitmap(WordsBitmap(m_source.GetSize()));
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, bitmap);
 
   m_hypoStackColl[0]->AddPrune(hypo);
 

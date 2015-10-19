@@ -44,9 +44,9 @@ using namespace std;
 namespace Moses
 {
 Hypothesis::
-Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt)
+Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const WordsBitmap &bitmap)
   : m_prevHypo(NULL)
-  , m_sourceCompleted(source.GetSize(), manager.GetSource().m_sourceCompleted)
+  , m_sourceCompleted(bitmap)
   , m_sourceInput(source)
   , m_currSourceWordsRange(
     m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
