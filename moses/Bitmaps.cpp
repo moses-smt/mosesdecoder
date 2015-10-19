@@ -1,4 +1,3 @@
-#include <boost/foreach.hpp>
 #include "Bitmaps.h"
 #include "Util.h"
 
@@ -13,10 +12,7 @@ Bitmaps::Bitmaps(size_t inputSize)
 
 Bitmaps::~Bitmaps()
 {
-	BOOST_FOREACH (const Coll::value_type& myPair, m_coll) {
-		const WordsBitmap *bm = myPair.first;
-		delete bm;
-	}
+  //RemoveAllInColl(m_coll);
 }
 
 const WordsBitmap &Bitmaps::GetNextBitmap(const WordsBitmap &bm, const WordsRange &range)
