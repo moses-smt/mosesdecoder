@@ -227,7 +227,10 @@ public:
   size_t Size();
   bool Empty() const;
 
-  const WordsBitmap &GetWordsBitmap();
+  const WordsBitmap &GetWordsBitmap() const
+  {
+	  return *m_bitmap;
+  }
   void SetWordsBitmap(const WordsBitmap &bitmap)
   {
 	  m_bitmap = &bitmap;

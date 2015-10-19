@@ -363,13 +363,6 @@ BitmapContainer::Empty() const
   return m_queue.empty();
 }
 
-
-const WordsBitmap&
-BitmapContainer::GetWordsBitmap()
-{
-  return *m_bitmap;
-}
-
 const HypothesisSet&
 BitmapContainer::GetHypotheses() const
 {
