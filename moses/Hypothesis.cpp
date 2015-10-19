@@ -46,7 +46,7 @@ namespace Moses
 Hypothesis::
 Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt)
   : m_prevHypo(NULL)
-  , m_sourceCompleted(source.GetSize(), manager.GetSource().m_sourceCompleted)
+  , m_sourceCompleted(manager.GetBitmaps().GetInitialBitmap())
   , m_sourceInput(source)
   , m_currSourceWordsRange(
     m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
@@ -77,7 +77,7 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
 Hypothesis::
 Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   : m_prevHypo(&prevHypo)
-  , m_sourceCompleted(prevHypo.m_sourceCompleted )
+  , m_sourceCompleted(prevHypo.GetManager().GetBitmaps().GetBitmap(prevHypo.GetWordsBitmap(), transOpt.GetSourceWordsRange()) )
   , m_sourceInput(prevHypo.m_sourceInput)
   , m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   , m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
@@ -98,8 +98,6 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   // that this hypothesis has already translated!
   assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
 
-  //_hash_computed = false;
-  m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
   m_manager.GetSentenceStats().AddCreated();
 }

@@ -538,6 +538,15 @@ void PrintFeatureWeight(const FeatureFunction* ff);
 void ShowWeights();
 
 template<typename T>
+class OrderedComparer
+{
+public:
+  bool operator()(const T* a, const T* b) const {
+	return (*a) < (*b);
+  }
+};
+
+template<typename T>
 class UnorderedComparer
 {
 public:
