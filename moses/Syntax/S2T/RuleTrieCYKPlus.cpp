@@ -86,11 +86,11 @@ const RuleTrieCYKPlus::Node *RuleTrieCYKPlus::Node::GetNonTerminalChild(
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 RuleTrieCYKPlus::
-GetOrCreateTargetPhraseCollection(const Phrase &source, 
-				  const TargetPhrase &target, 
-				  const Word *sourceLHS)
+GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                  const TargetPhrase &target,
+                                  const Word *sourceLHS)
 {
   Node &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetTargetPhraseCollection();

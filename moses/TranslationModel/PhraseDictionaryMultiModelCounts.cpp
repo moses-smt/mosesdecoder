@@ -134,8 +134,8 @@ TargetPhraseCollection::shared_ptr PhraseDictionaryMultiModelCounts::GetTargetPh
 
   CollectSufficientStats(src, fs, allStats);
 
-  TargetPhraseCollection::shared_ptr ret 
-    = CreateTargetPhraseCollectionCounts(src, fs, allStats, multimodelweights);
+  TargetPhraseCollection::shared_ptr ret
+  = CreateTargetPhraseCollectionCounts(src, fs, allStats, multimodelweights);
 
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
   const_cast<PhraseDictionaryMultiModelCounts*>(this)->CacheForCleanup(ret);
@@ -149,8 +149,8 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStats(const Phrase& src,
   for(size_t i = 0; i < m_numModels; ++i) {
     const PhraseDictionary &pd = *m_pd[i];
 
-    TargetPhraseCollection::shared_ptr ret_raw 
-      = pd.GetTargetPhraseCollectionLEGACY(src);
+    TargetPhraseCollection::shared_ptr ret_raw
+    = pd.GetTargetPhraseCollectionLEGACY(src);
     if (ret_raw != NULL) {
 
       TargetPhraseCollection::const_iterator iterTargetPhrase;
@@ -202,7 +202,7 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStats(const Phrase& src,
   }
 }
 
-  TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryMultiModelCounts::
 CreateTargetPhraseCollectionCounts(const Phrase &src, vector<float> &fs, map<string,multiModelCountsStats*>* allStats, vector<vector<float> > &multimodelweights) const
 {

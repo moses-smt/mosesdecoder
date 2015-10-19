@@ -33,7 +33,7 @@ boost::shared_ptr<RuleTrie> OovHandler<RuleTrie>::SynthesizeRuleTrie(
       Word *tgtLHS = SynthesizeTargetLhs(targetLhsStr);
       TargetPhrase *tp = SynthesizeTargetPhrase(oov, *srcPhrase, *tgtLHS, prob);
       TargetPhraseCollection::shared_ptr tpc;
-      tpc= GetOrCreateTargetPhraseCollection(*trie, *srcPhrase, *tp, NULL);  
+      tpc= GetOrCreateTargetPhraseCollection(*trie, *srcPhrase, *tp, NULL);
       // TODO Check NULL is valid argument
       tpc->Add(tp);
     }

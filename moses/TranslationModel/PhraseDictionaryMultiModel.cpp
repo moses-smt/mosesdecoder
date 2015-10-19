@@ -59,7 +59,7 @@ PhraseDictionaryMultiModel(int type, const std::string &line)
   }
 }
 
-void 
+void
 PhraseDictionaryMultiModel::
 SetParameter(const std::string& key, const std::string& value)
 {
@@ -93,7 +93,7 @@ void PhraseDictionaryMultiModel::Load()
   }
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryMultiModel::
 GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
@@ -107,7 +107,7 @@ GetTargetPhraseCollectionLEGACY(const Phrase& src) const
   CollectSufficientStatistics(src, allStats);
   ret = CreateTargetPhraseCollectionLinearInterpolation(src, allStats, multimodelweights);
   RemoveAllInMap(*allStats);
-  delete allStats; // ??? Why the detour through malloc? UG 
+  delete allStats; // ??? Why the detour through malloc? UG
 
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
   const_cast<PhraseDictionaryMultiModel*>(this)->CacheForCleanup(ret);
@@ -115,7 +115,7 @@ GetTargetPhraseCollectionLEGACY(const Phrase& src) const
   return ret;
 }
 
-void 
+void
 PhraseDictionaryMultiModel::
 CollectSufficientStatistics
 (const Phrase& src, std::map<std::string, multiModelStats*>* allStats) const
@@ -172,11 +172,11 @@ CollectSufficientStatistics
   }
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryMultiModel::
 CreateTargetPhraseCollectionLinearInterpolation
-( const Phrase& src, 
-  std::map<std::string,multiModelStats*>* allStats, 
+( const Phrase& src,
+  std::map<std::string,multiModelStats*>* allStats,
   std::vector<std::vector<float> > &multimodelweights) const
 {
   TargetPhraseCollection::shared_ptr ret(new TargetPhraseCollection);
@@ -204,7 +204,7 @@ CreateTargetPhraseCollectionLinearInterpolation
 }
 
 //TODO: is it worth caching the results as long as weights don't change?
-std::vector<std::vector<float> > 
+std::vector<std::vector<float> >
 PhraseDictionaryMultiModel::
 getWeights(size_t numWeights, bool normalize) const
 {
@@ -255,7 +255,7 @@ getWeights(size_t numWeights, bool normalize) const
   return multimodelweights;
 }
 
-std::vector<float> 
+std::vector<float>
 PhraseDictionaryMultiModel::
 normalizeWeights(std::vector<float> &weights) const
 {
@@ -270,15 +270,15 @@ normalizeWeights(std::vector<float> &weights) const
 
 ChartRuleLookupManager *
 PhraseDictionaryMultiModel::
-CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, 
-			std::size_t)
+CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&,
+                        std::size_t)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
 
 
 //copied from PhraseDictionaryCompact; free memory allocated to TargetPhraseCollection (and each TargetPhrase) at end of sentence
-void 
+void
 PhraseDictionaryMultiModel::
 CacheForCleanup(TargetPhraseCollection::shared_ptr tpc)
 {
@@ -286,7 +286,7 @@ CacheForCleanup(TargetPhraseCollection::shared_ptr tpc)
 }
 
 
-void 
+void
 PhraseDictionaryMultiModel::
 CleanUpAfterSentenceProcessing(const InputType &source)
 {
@@ -306,7 +306,7 @@ CleanUpAfterSentenceProcessing(const InputType &source)
 }
 
 
-void  
+void
 PhraseDictionaryMultiModel::
 CleanUpComponentModels(const InputType &source)
 {
@@ -315,7 +315,7 @@ CleanUpComponentModels(const InputType &source)
   }
 }
 
-const std::vector<float>* 
+const std::vector<float>*
 PhraseDictionaryMultiModel::
 GetTemporaryMultiModelWeightsVector() const
 {
@@ -331,7 +331,7 @@ GetTemporaryMultiModelWeightsVector() const
 #endif
 }
 
-void 
+void
 PhraseDictionaryMultiModel::
 SetTemporaryMultiModelWeightsVector(std::vector<float> weights)
 {
@@ -344,7 +344,7 @@ SetTemporaryMultiModelWeightsVector(std::vector<float> weights)
 }
 
 #ifdef WITH_DLIB
-vector<float> 
+vector<float>
 PhraseDictionaryMultiModel::
 MinimizePerplexity(vector<pair<string, string> > &phrase_pair_vector)
 {
@@ -418,7 +418,7 @@ MinimizePerplexity(vector<pair<string, string> > &phrase_pair_vector)
 
 }
 
-vector<float> 
+vector<float>
 PhraseDictionaryMultiModel::
 Optimize(OptimizationObjective *ObjectiveFunction, size_t numModels)
 {

@@ -59,7 +59,7 @@ public:
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   void InitializeForInput(ttasksptr const& ttask);
@@ -75,8 +75,8 @@ public:
 
   // legacy
   TargetPhraseCollectionWithSourcePhrase::shared_ptr
-  GetTargetPhraseCollectionLEGACY(InputType const& src, 
-				  WordsRange const & srcRange) const;
+  GetTargetPhraseCollectionLEGACY(InputType const& src,
+                                  WordsRange const & srcRange) const;
 
 };
 

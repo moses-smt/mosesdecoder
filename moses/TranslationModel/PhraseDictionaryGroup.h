@@ -43,9 +43,9 @@ class PhraseDictionaryGroup: public PhraseDictionary
 public:
   PhraseDictionaryGroup(const std::string& line);
   void Load();
-  TargetPhraseCollection::shared_ptr 
-    CreateTargetPhraseCollection(const ttasksptr& ttask,
-      const Phrase& src) const;
+  TargetPhraseCollection::shared_ptr
+  CreateTargetPhraseCollection(const ttasksptr& ttask,
+                               const Phrase& src) const;
   std::vector<std::vector<float> > getWeights(size_t numWeights,
       bool normalize) const;
   void CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc);

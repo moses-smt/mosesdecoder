@@ -11,12 +11,12 @@ using namespace std;
 namespace Moses
 {
 InputPath::
-InputPath(ttaskwptr const theTask, 
-	  Phrase const& phrase, 
-	  NonTerminalSet const& sourceNonTerms,
+InputPath(ttaskwptr const theTask,
+          Phrase const& phrase,
+          NonTerminalSet const& sourceNonTerms,
           WordsRange const& range, InputPath const *prevNode,
           const ScorePair *inputScore)
-  : ttask(theTask) 
+  : ttask(theTask)
   , m_prevPath(prevNode)
   , m_phrase(phrase)
   , m_range(range)
@@ -36,7 +36,7 @@ InputPath(ttaskwptr const theTask,
 
 InputPath::~InputPath()
 {
- 
+
   // std::cerr << "Deconstructing InputPath" << std::endl;
 
 
@@ -80,14 +80,14 @@ GetPtNode(const PhraseDictionary &phraseDictionary) const
   return iter->second.second;
 }
 
-void 
+void
 InputPath::
-SetTargetPhrases(const PhraseDictionary &phraseDictionary, 
-		 TargetPhraseCollection::shared_ptr const& targetPhrases,
-		 const void *ptNode)
+SetTargetPhrases(const PhraseDictionary &phraseDictionary,
+                 TargetPhraseCollection::shared_ptr const& targetPhrases,
+                 const void *ptNode)
 {
-  std::pair<TargetPhraseCollection::shared_ptr, const void*> 
-    value(targetPhrases, ptNode);
+  std::pair<TargetPhraseCollection::shared_ptr, const void*>
+  value(targetPhrases, ptNode);
   m_targetPhrases[&phraseDictionary] = value;
 }
 

@@ -225,8 +225,8 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
     // Insert rule into table.
     TargetPhraseCollection::shared_ptr coll;
-    coll = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, 
-					     *targetPhrase, &sourceLHS);
+    coll = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase,
+           *targetPhrase, &sourceLHS);
     coll->Add(targetPhrase);
   }
 

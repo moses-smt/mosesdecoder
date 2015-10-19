@@ -130,8 +130,8 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
                                       ff.GetFeaturesToApply());
 
     // Add rule to trie.
-    TargetPhraseCollection::shared_ptr phraseColl 
-      = GetOrCreateTargetPhraseCollection(trie, sourceFragment);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(trie, sourceFragment);
     phraseColl->Add(targetPhrase);
 
     count++;

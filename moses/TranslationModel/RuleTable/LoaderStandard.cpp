@@ -242,9 +242,9 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
-    TargetPhraseCollection::shared_ptr phraseColl 
-      = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, 
-					  *targetPhrase, sourceLHS);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
     phraseColl->Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now

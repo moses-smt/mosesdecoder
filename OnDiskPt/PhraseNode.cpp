@@ -249,7 +249,7 @@ size_t PhraseNode::ReadChild(Word &wordFound, uint64_t &childFilePos, const char
   return memRead;
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseNode::
 GetTargetPhraseCollection(size_t tableLimit, OnDiskWrapper &onDiskWrapper) const
 {

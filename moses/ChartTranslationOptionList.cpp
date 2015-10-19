@@ -115,11 +115,11 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   }
 }
 
-void 
+void
 ChartTranslationOptionList::
-AddPhraseOOV(TargetPhrase &phrase, 
-	     std::list<TargetPhraseCollection::shared_ptr > &waste_memory, 
-	     const WordsRange &range)
+AddPhraseOOV(TargetPhrase &phrase,
+             std::list<TargetPhraseCollection::shared_ptr > &waste_memory,
+             const WordsRange &range)
 {
   TargetPhraseCollection::shared_ptr tpc(new TargetPhraseCollection);
   tpc->Add(&phrase);

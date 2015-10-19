@@ -54,7 +54,7 @@ protected:
 public:
   typedef boost::shared_ptr<TargetPhraseCollection const> shared_const_ptr;
   typedef boost::shared_ptr<TargetPhraseCollection> shared_ptr;
-  
+
   static size_t s_sortScoreInd;
 
   TargetPhraseCollection();

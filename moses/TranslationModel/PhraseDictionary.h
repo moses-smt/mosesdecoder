@@ -114,13 +114,12 @@ public:
   //! find list of translations that can translates src. Only for phrase input
 
 public:
-  virtual TargetPhraseCollection::shared_ptr 
+  virtual TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
   virtual TargetPhraseCollection::shared_ptr
-  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, 
-				  Phrase const& src) const 
-  {
+  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask,
+                                  Phrase const& src) const {
     return GetTargetPhraseCollectionLEGACY(src);
   }
 
@@ -129,8 +128,7 @@ public:
 
   virtual void
   GetTargetPhraseCollectionBatch
-  (ttasksptr const& ttask, InputPathList const& inputPathQueue) const 
-  {
+  (ttasksptr const& ttask, InputPathList const& inputPathQueue) const {
     GetTargetPhraseCollectionBatch(inputPathQueue);
   }
 
@@ -159,7 +157,7 @@ public:
 
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
-  virtual 
+  virtual
   TargetPhraseCollectionWithSourcePhrase::shared_ptr
   GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
 
@@ -188,10 +186,10 @@ protected:
   mutable boost::scoped_ptr<CacheColl> m_cache;
 #endif
 
-  virtual 
+  virtual
   TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const;
-  
+
   void ReduceCache() const;
 
 protected:

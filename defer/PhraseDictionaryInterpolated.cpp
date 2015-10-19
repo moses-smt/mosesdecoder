@@ -116,7 +116,7 @@ typedef
 boost::unordered_set<TargetPhrase*,PhrasePtrHasher,PhrasePtrComparator> PhraseSet;
 
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryInterpolated::GetTargetPhraseCollection(const Phrase& src) const
 {
 

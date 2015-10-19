@@ -56,8 +56,8 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
   StringPiece line;
 
   int noflags = double_conversion::StringToDoubleConverter::NO_FLAGS;
-  double_conversion::StringToDoubleConverter 
-    converter(noflags, NAN, NAN, "inf", "nan");
+  double_conversion::StringToDoubleConverter
+  converter(noflags, NAN, NAN, "inf", "nan");
 
   while(true) {
     try {
@@ -134,8 +134,8 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
     targetPhrase->GetScoreBreakdown().Assign(&ff, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, ff.GetFeaturesToApply());
 
-    TargetPhraseCollection::shared_ptr phraseColl 
-      = GetOrCreateTargetPhraseCollection(trie, *sourceLHS, sourcePhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(trie, *sourceLHS, sourcePhrase);
     phraseColl->Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now

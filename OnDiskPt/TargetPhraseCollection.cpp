@@ -127,9 +127,9 @@ Moses::TargetPhraseCollection::shared_ptr TargetPhraseCollection::ConvertToMoses
   CollType::const_iterator iter;
   for (iter = m_coll.begin(); iter != m_coll.end(); ++iter) {
     const TargetPhrase &tp = **iter;
-    Moses::TargetPhrase *mosesPhrase 
-      = tp.ConvertToMoses(inputFactors, outputFactors, vocab,
-			  phraseDict, weightT, isSyntax);
+    Moses::TargetPhrase *mosesPhrase
+    = tp.ConvertToMoses(inputFactors, outputFactors, vocab,
+                        phraseDict, weightT, isSyntax);
 
     /*
     // debugging output

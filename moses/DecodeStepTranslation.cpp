@@ -147,8 +147,8 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const WordsRange wordsRange(startPos, endPos);
-  TargetPhraseCollectionWithSourcePhrase::shared_ptr phraseColl 
-    = phraseDictionary->GetTargetPhraseCollectionLEGACY(source,wordsRange);
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr phraseColl
+  = phraseDictionary->GetTargetPhraseCollectionLEGACY(source,wordsRange);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
@@ -239,7 +239,7 @@ ProcessLEGACY(TranslationOption const& in,
   size_t const tableLimit = pdict->GetTableLimit();
 
   TargetPhraseCollectionWithSourcePhrase::shared_ptr phraseColl
-    = pdict->GetTargetPhraseCollectionLEGACY(toc->GetSource(),srcRange);
+  = pdict->GetTargetPhraseCollectionLEGACY(toc->GetSource(),srcRange);
 
   if (phraseColl != NULL) {
     TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;

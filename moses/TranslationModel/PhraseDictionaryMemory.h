@@ -56,10 +56,10 @@ public:
     std::size_t);
 
   // only used by multi-model phrase table, and other meta-features
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
-  void 
+  void
   GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   TO_STRING();
@@ -70,9 +70,9 @@ protected:
   (const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
 
   PhraseDictionaryNodeMemory &
-  GetOrCreateNode(const Phrase &source, const TargetPhrase &target, 
-		  const Word *sourceLHS);
-  
+  GetOrCreateNode(const Phrase &source, const TargetPhrase &target,
+                  const Word *sourceLHS);
+
   void SortAndPrune();
 
   PhraseDictionaryNodeMemory m_collection;

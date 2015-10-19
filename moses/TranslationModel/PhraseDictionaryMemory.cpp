@@ -49,17 +49,17 @@ PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
 
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryMemory::
 GetOrCreateTargetPhraseCollection(const Phrase &source,
-				  const TargetPhrase &target,
-				  const Word *sourceLHS)
+                                  const TargetPhrase &target,
+                                  const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetTargetPhraseCollection();
 }
 
-TargetPhraseCollection::shared_ptr 
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryMemory::
 GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
 {
@@ -74,7 +74,7 @@ GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
     const Word& word = source.GetWord(pos);
     currNode = currNode->GetChild(word);
     if (currNode == NULL)
-      return TargetPhraseCollection::shared_ptr(); 
+      return TargetPhraseCollection::shared_ptr();
   }
 
   return currNode->GetTargetPhraseCollection();
@@ -171,8 +171,8 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
       const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
       TargetPhraseCollection::shared_ptr targetPhrases;
       if (ptNode) {
-	targetPhrases = ptNode->GetTargetPhraseCollection();
-      } 
+        targetPhrases = ptNode->GetTargetPhraseCollection();
+      }
       inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
     }
   }

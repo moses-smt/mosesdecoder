@@ -67,7 +67,7 @@ private:
   struct MatchCallback {
   public:
     MatchCallback(const WordsRange &range, ChartParserCallback &out)
-      : m_range(range) , m_out(out) // , m_tpc(NULL) 
+      : m_range(range) , m_out(out) // , m_tpc(NULL)
     { }
 
     void operator()(const StackVec &stackVec) {

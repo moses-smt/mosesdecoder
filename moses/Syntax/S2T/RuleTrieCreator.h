@@ -21,9 +21,9 @@ protected:
 
   // Provide access to RuleTrie's private GetOrCreateTargetPhraseCollection
   // function.
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetOrCreateTargetPhraseCollection
-  ( RuleTrie &trie, const Phrase &source, const TargetPhrase &target, 
+  ( RuleTrie &trie, const Phrase &source, const TargetPhrase &target,
     const Word *sourceLHS) {
     return trie.GetOrCreateTargetPhraseCollection(source, target, sourceLHS);
   }

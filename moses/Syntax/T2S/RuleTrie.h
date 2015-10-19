@@ -53,13 +53,13 @@ public:
     const Node *GetChild(const Word &sourceTerm) const;
     const Node *GetNonTerminalChild(const Word &targetNonTerm) const;
 
-    TargetPhraseCollection::shared_ptr 
+    TargetPhraseCollection::shared_ptr
     GetTargetPhraseCollection(const Word &sourceLHS) const {
       TPCMap::const_iterator p = m_targetPhraseCollections.find(sourceLHS);
-      if (p != m_targetPhraseCollections.end()) 
-	return p->second;
+      if (p != m_targetPhraseCollections.end())
+        return p->second;
       else
-	return TargetPhraseCollection::shared_ptr();
+        return TargetPhraseCollection::shared_ptr();
     }
 
     // FIXME IS there any reason to distinguish these two for T2S?
@@ -86,7 +86,7 @@ public:
 private:
   friend class RuleTrieCreator;
 
-  TargetPhraseCollection::shared_ptr 
+  TargetPhraseCollection::shared_ptr
   GetOrCreateTargetPhraseCollection
   (const Word &sourceLHS, const Phrase &sourceRHS);
 
