@@ -276,11 +276,9 @@ BackwardsEdge::PushSuccessors(const size_t x, const size_t y)
 // BitmapContainer Code
 ////////////////////////////////////////////////////////////////////////////////
 
-BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
-                                 , HypothesisStackCubePruning &stack
+BitmapContainer::BitmapContainer(HypothesisStackCubePruning &stack
                                  , bool deterministic)
-  : m_bitmap(bitmap)
-  , m_stack(stack)
+  : m_stack(stack)
   , m_deterministic(deterministic)
   , m_numStackInsertions(0)
 {
@@ -369,7 +367,7 @@ BitmapContainer::Empty() const
 const WordsBitmap&
 BitmapContainer::GetWordsBitmap()
 {
-  return m_bitmap;
+  return *m_bitmap;
 }
 
 const HypothesisSet&

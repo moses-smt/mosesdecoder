@@ -299,14 +299,14 @@ BitmapContainer *HypothesisStackCubePruning::AddBitmapContainer(const WordsBitma
 
   BitmapContainer *bmContainer;
   if (iter == m_bitmapAccessor.end()) {
-	_BMType::value_type element(bitmap, NULL);
+    bmContainer = new BitmapContainer(stack, m_deterministic);
+	_BMType::value_type element(bitmap, bmContainer);
 	pair<_BMType::iterator,bool> retPair = m_bitmapAccessor.insert(element);
 
-	_BMType::iterator iterRetPair = retPair.first;
+	_BMType::iterator &iterRetPair = retPair.first;
 	const WordsBitmap &storedBitmap = iterRetPair->first;
 
-    bmContainer = new BitmapContainer(storedBitmap, stack, m_deterministic);
-    retPair.second = bmContainer;
+	bmContainer->SetWordsBitmap(storedBitmap);
   } else {
     bmContainer = iter->second;
   }
