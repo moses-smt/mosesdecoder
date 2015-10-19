@@ -48,7 +48,6 @@ void HypothesisStackCubePruning::RemoveAll()
   // delete all bitmap accessors;
   _BMType::iterator iter;
   for (iter = m_bitmapAccessor.begin(); iter != m_bitmapAccessor.end(); ++iter) {
-    delete iter->first;
     delete iter->second;
   }
 }
@@ -150,8 +149,7 @@ void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
                  "Should have added hypothesis " << *hypo);
 
   const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-  const WordsBitmap *newBM = new WordsBitmap(bitmap);
-  m_bitmapAccessor[newBM] = new BitmapContainer(*newBM, *this, m_deterministic);
+  AddBitmapContainer(bitmap, *this);
 }
 
 void HypothesisStackCubePruning::PruneToSize(size_t newSize)
@@ -257,17 +255,7 @@ void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
     , const SquareMatrix &futureScore
     , const TranslationOptionList &transOptList)
 {
-  _BMType::iterator bcExists = m_bitmapAccessor.find(&newBitmap);
-
-  BitmapContainer *bmContainer;
-  if (bcExists == m_bitmapAccessor.end()) {
-	WordsBitmap *newBM = new WordsBitmap(newBitmap);
-    bmContainer = new BitmapContainer(*newBM, stack, m_deterministic);
-    m_bitmapAccessor[newBM] = bmContainer;
-  } else {
-    bmContainer = bcExists->second;
-  }
-
+  BitmapContainer *bmContainer =   AddBitmapContainer(newBitmap, stack);
   BackwardsEdge *edge = new BackwardsEdge(bitmapContainer
                                           , *bmContainer
                                           , transOptList
@@ -300,9 +288,24 @@ HypothesisStackCubePruning::AddHypothesesToBitmapContainers()
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *h = *iter;
     const WordsBitmap &bitmap = h->GetWordsBitmap();
-    BitmapContainer *container = m_bitmapAccessor[&bitmap];
+    BitmapContainer *container = m_bitmapAccessor[bitmap];
     container->AddHypothesis(h);
   }
+}
+
+BitmapContainer *HypothesisStackCubePruning::AddBitmapContainer(const WordsBitmap &bitmap, HypothesisStackCubePruning &stack)
+{
+  _BMType::iterator iter = m_bitmapAccessor.find(bitmap);
+
+  BitmapContainer *bmContainer;
+  if (iter == m_bitmapAccessor.end()) {
+    bmContainer = new BitmapContainer(bitmap, stack, m_deterministic);
+    m_bitmapAccessor[bitmap] = bmContainer;
+  } else {
+    bmContainer = iter->second;
+  }
+
+  return bmContainer;
 }
 
 }
