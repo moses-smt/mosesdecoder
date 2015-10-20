@@ -72,7 +72,7 @@ class Hypothesis
 
 protected:
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
-  WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
+  const WordsBitmap	&m_sourceCompleted; /*! keeps track of which words have been translated so far */
   InputType const&  m_sourceInput;
   WordsRange				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
   WordsRange        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
@@ -94,7 +94,7 @@ public:
   /*! used by initial seeding of the translation process */
   Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const WordsBitmap &bitmap);
   /*! used when creating a new hypothesis using a translation option (phrase translation) */
-  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
+  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const WordsBitmap &bitmap);
   ~Hypothesis();
 
   void PrintHypothesis() const;

@@ -295,7 +295,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = new Hypothesis(hypothesis, transOpt);
+    newHypo = new Hypothesis(hypothesis, transOpt, WordsBitmap(44));
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();
     }
@@ -329,7 +329,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = new Hypothesis(hypothesis, transOpt);
+    newHypo = new Hypothesis(hypothesis, transOpt, WordsBitmap(44));
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();

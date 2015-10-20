@@ -45,8 +45,9 @@ MockHypothesisGuard
   m_manager.reset(new Manager(m_ttask));
 
   //Initial empty hypothesis
+  WordsBitmap bitmap(m_sentence.get()->GetSize());
   m_manager->ResetSentenceStats(*m_sentence);
-  m_hypothesis = new Hypothesis(*m_manager, *m_sentence, m_initialTransOpt);
+  m_hypothesis = new Hypothesis(*m_manager, *m_sentence, m_initialTransOpt, bitmap);
 
   //create the chain
   vector<Alignment>::const_iterator ai = alignments.begin();
@@ -59,7 +60,7 @@ MockHypothesisGuard
     m_targetPhrases.back().CreateFromString(Input, factors, *ti, NULL);
     m_toptions.push_back(new TranslationOption
                          (wordsRange,m_targetPhrases.back()));
-    m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back());
+    m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back(), WordsBitmap(44));
 
   }
 

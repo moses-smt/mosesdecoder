@@ -75,9 +75,9 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
  * continue prevHypo by appending the phrases in transOpt
  */
 Hypothesis::
-Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
+Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const WordsBitmap &bitmap)
   : m_prevHypo(&prevHypo)
-  , m_sourceCompleted(prevHypo.m_sourceCompleted )
+  , m_sourceCompleted(bitmap)
   , m_sourceInput(prevHypo.m_sourceInput)
   , m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   , m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
@@ -98,8 +98,6 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   // that this hypothesis has already translated!
   assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
 
-  //_hash_computed = false;
-  m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
   m_manager.GetSentenceStats().AddCreated();
 }
