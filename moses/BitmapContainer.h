@@ -202,7 +202,7 @@ public:
 class BitmapContainer
 {
 private:
-  const WordsBitmap *m_bitmap;
+  const WordsBitmap m_bitmap;
   HypothesisStackCubePruning &m_stack;
   HypothesisSet m_hypotheses;
   BackwardsEdgeSet m_edges;
@@ -214,7 +214,8 @@ private:
   BitmapContainer();
   BitmapContainer(const BitmapContainer &);
 public:
-  BitmapContainer(HypothesisStackCubePruning &stack
+  BitmapContainer(const WordsBitmap &bitmap
+		  	  	  , HypothesisStackCubePruning &stack
                   , bool deterministic_sort = false);
 
   // The destructor will also delete all the edges that are
@@ -229,11 +230,7 @@ public:
 
   const WordsBitmap &GetWordsBitmap() const
   {
-	  return *m_bitmap;
-  }
-  void SetWordsBitmap(const WordsBitmap &bitmap)
-  {
-	  m_bitmap = &bitmap;
+	  return m_bitmap;
   }
 
   const HypothesisSet &GetHypotheses() const;
