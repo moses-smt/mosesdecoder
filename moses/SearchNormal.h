@@ -6,6 +6,7 @@
 #include "HypothesisStackNormal.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
+#include "Bitmaps.h"
 
 namespace Moses
 {
@@ -32,6 +33,8 @@ protected:
   /** pre-computed list of translation options for the phrases in this sentence */
   const TranslationOptionCollection &m_transOptColl;
 
+  Bitmaps m_bitmaps;
+
   // functions for creating hypotheses
 
   virtual bool
@@ -47,7 +50,8 @@ protected:
   ExpandHypothesis(const Hypothesis &hypothesis,
                    const TranslationOption &transOpt,
                    float expectedScore,
-                   float futureScore);
+                   float futureScore,
+                   const WordsBitmap &bitmap);
 
 public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);

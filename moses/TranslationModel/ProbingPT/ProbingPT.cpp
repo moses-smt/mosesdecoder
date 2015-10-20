@@ -2,6 +2,7 @@
 #include "ProbingPT.h"
 #include "moses/StaticData.h"
 #include "moses/FactorCollection.h"
+#include "moses/TargetPhraseCollection.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "quering.hh"
 
@@ -114,24 +115,23 @@ TargetPhraseCollection::shared_ptr ProbingPT::CreateTargetPhrase(const Phrase &s
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   assert(sourcePhrase.GetSize());
 
+  TargetPhraseCollection::shared_ptr tpColl;
   bool ok;
   vector<uint64_t> probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok);
   if (!ok) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
-    return NULL;
+    return tpColl;
   }
 
   std::pair<bool, std::vector<target_text> > query_result;
-
-  TargetPhraseCollection::shared_ptr tpColl = NULL;
 
   //Actual lookup
   query_result = m_engine->query(probingSource);
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
-    tpColl = new TargetPhraseCollection();
+    tpColl.reset(new TargetPhraseCollection());
 
     const std::vector<target_text> &probingTargetPhrases = query_result.second;
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {

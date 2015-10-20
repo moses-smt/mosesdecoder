@@ -22,6 +22,7 @@ SearchNormal(Manager& manager, const InputType &source,
   , m_source(source)
   , m_hypoStackColl(source.GetSize() + 1)
   , m_transOptColl(transOptColl)
+  , m_bitmaps(source.GetSize(), source.m_sourceCompleted)
 {
   VERBOSE(1, "Translating: " << m_source << endl);
 
@@ -86,7 +87,9 @@ void SearchNormal::Decode()
   // SentenceStats &stats = m_manager.GetSentenceStats();
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager, m_source, m_initialTransOpt);
+  const WordsBitmap &bitmap = m_bitmaps.GetInitialBitmap();
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, bitmap);
+
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack
@@ -263,10 +266,17 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   // loop through all translation options
   const TranslationOptionList* tol
   = m_transOptColl.GetTranslationOptionList(startPos, endPos);
-  if (!tol) return;
+  if (!tol || tol->size() == 0) return;
+
+  // Create new bitmap
+  const TranslationOption &transOpt = **tol->begin();
+  const WordsRange &nextRange = transOpt.GetSourceWordsRange();
+  const WordsBitmap &nextBitmap = m_bitmaps.GetBitmap(sourceCompleted, nextRange);
+
   TranslationOptionList::const_iterator iter;
   for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
-    ExpandHypothesis(hypothesis, **iter, expectedScore, futureScore);
+    const TranslationOption &transOpt = **iter;
+    ExpandHypothesis(hypothesis, transOpt, expectedScore, futureScore, nextBitmap);
   }
 }
 
@@ -282,7 +292,8 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
 void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
                                     const TranslationOption &transOpt,
                                     float expectedScore,
-                                    float futureScore)
+                                    float futureScore,
+                                    const WordsBitmap &bitmap)
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
@@ -293,7 +304,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = hypothesis.CreateNext(transOpt);
+    newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();
     }
@@ -327,7 +338,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = hypothesis.CreateNext(transOpt);
+    newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();
@@ -338,7 +349,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
       IFVERBOSE(2) {
         stats.AddEarlyDiscarded();
       }
-      FREEHYPO( newHypo );
+      delete newHypo;
       return;
     }
 

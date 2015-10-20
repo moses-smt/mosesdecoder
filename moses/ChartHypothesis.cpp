@@ -37,10 +37,6 @@ using namespace std;
 namespace Moses
 {
 
-#ifdef USE_HYPO_POOL
-ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
-#endif
-
 /** Create a hypothesis from a rule
  * \param transOpt wrapper around the rule
  * \param item @todo dunno
@@ -93,7 +89,7 @@ ChartHypothesis::~ChartHypothesis()
     ChartArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
       ChartHypothesis *hypo = *iter;
-      Delete(hypo);
+      delete hypo;
     }
     m_arcList->clear();
 
@@ -278,7 +274,7 @@ void ChartHypothesis::CleanupArcList()
     ChartArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) {
       ChartHypothesis *arc = *iter;
-      ChartHypothesis::Delete(arc);
+      delete arc;
     }
     m_arcList->erase(m_arcList->begin() + nBestSize
                      , m_arcList->end());
