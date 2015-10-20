@@ -30,6 +30,7 @@ const WordsBitmap &Bitmaps::GetNextBitmap(const WordsBitmap &bm, const WordsRang
     m_coll[newBM] = NextBitmaps();
     return *newBM;
   } else {
+	delete newBM;
 	return *iter->first;
   }
 }
