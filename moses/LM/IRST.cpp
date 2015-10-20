@@ -247,7 +247,9 @@ void LanguageModelIRST::CalcScoreWithContext(ttasksptr const& ttasks, const Phra
   if ( !phrase.GetSize() ) return;
 
   //get the context_weight map here
-  std::map<std::string, float> context_weight = ttasks->GetContextWeights();
+  SPTR<std::map<std::string, float> const> context_weight = ttasks->GetContextWeights();
+  UTIL_THROW_IF2(!context_weight, "No context weights available");
+
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
@@ -290,7 +292,8 @@ FFState* LanguageModelIRST::EvaluateWhenAppliedWithContext(ttasksptr const& ttas
   }
 
   //get the context_weight map here
-  std::map<std::string, float> context_weight = ttasks->GetContextWeights();
+  SPTR<std::map<std::string, float> const> context_weight = ttasks->GetContextWeights();
+  UTIL_THROW_IF2(!context_weight, "No context weights available");
 
   //[begin, end) in STL-like fashion.
   const int begin = (const int) hypo.GetCurrTargetWordsRange().GetStartPos();

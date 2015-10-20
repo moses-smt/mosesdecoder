@@ -148,7 +148,7 @@ namespace Moses
     std::vector<FactorType> m_ifactor, m_ofactor;
 
     void setup_local_feature_functions();
-    void set_bias_via_server(ttasksptr const& ttask);
+    void setup_bias(ttasksptr const& ttask);
 
 #if PROVIDES_RANKED_SAMPLING
     void 

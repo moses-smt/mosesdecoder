@@ -805,14 +805,27 @@ namespace Moses
 
   void
   Mmsapt::
-  set_bias_via_server(ttasksptr const& ttask)
+  setup_bias(ttasksptr const& ttask)
   {
+
+    std::cerr << "Setting up bias at " << HERE << std::endl;
+
     SPTR<ContextScope> const& scope = ttask->GetScope();
     SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
-    if (m_bias_server.size() && context->bias == NULL && ttask->GetContextWindow())
-      { // we need to create the bias
-        boost::unique_lock<boost::shared_mutex> lock(context->lock);
-        // string const& context_words = ttask->GetContextString();
+    if (context->bias) return; 
+    // boost::unique_lock<boost::shared_mutex> ctxlock(context->lock);
+    
+    // bias weights specified with the session?
+    SPTR<std::map<std::string, float> const> w = ttask->GetContextWeights();
+    if (w && !w->empty()) 
+      {
+        if (m_bias_log) 
+          *m_bias_log << "BIAS WEIGHTS GIVEN WITH INPUT at " << HERE << endl;
+        context->bias = btfix->SetupDocumentBias(*w, m_bias_log);
+      }
+    else if (m_bias_server.size() && ttask->GetContextWindow())
+      {
+        std::cerr << "via server at " << HERE << std::endl;
         string context_words;
         BOOST_FOREACH(string const& line, *ttask->GetContextWindow())
           {
@@ -822,67 +835,50 @@ namespace Moses
         if (context_words.size())
           {
             if (m_bias_log)
-              {
-                *m_bias_log << HERE << endl << "BIAS LOOKUP CONTEXT: " 
-                            << context_words << endl;
-                context->bias_log = m_bias_log;
-              }
+              *m_bias_log << "GETTING BIAS FROM SERVER at " << HERE << endl
+                          << "BIAS LOOKUP CONTEXT: " << context_words << endl;
             context->bias
               = btfix->SetupDocumentBias(m_bias_server, context_words, m_bias_log);
-            context->bias->loglevel = m_bias_loglevel;
-            context->bias->log = m_bias_log;
             //Reset the bias in the ttaskptr so that other functions
             //so that other functions can utilize the biases;
             ttask->ReSetContextWeights(context->bias->getBiasMap());
           }
-        // if (!context->cache1) context->cache1.reset(new pstats::cache_t);
-        // if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       } 
-    else if (!ttask->GetContextWeights().empty()) 
+    if (context->bias)
       {
-        if (m_bias_log)
-          {
-            *m_bias_log << HERE << endl
-                        << "BIAS FROM MAP LOOKUP" << endl;
-            context->bias_log = m_bias_log;
-          }
-        context->bias
-          = btfix->SetupDocumentBias(ttask->GetContextWeights(), m_bias_log);
+        context->bias_log = m_bias_log;
         context->bias->loglevel = m_bias_loglevel;
-        context->bias->log = m_bias_log;
-        // if (!context->cache1) context->cache1.reset(new pstats::cache_t);
-        // if (!context->cache2) context->cache2.reset(new pstats::cache_t);
       }
-    if (!context->cache1) context->cache1.reset(new pstats::cache_t);
-    if (!context->cache2) context->cache2.reset(new pstats::cache_t);
   }
   
   void
   Mmsapt::
   InitializeForInput(ttasksptr const& ttask)
   {
-    SPTR<ContextScope> const& scope = ttask->GetScope();
-    SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
-
-    // set sampling bias, depending on sampling method specified
-#if 0
-    // for the time being, always use the external bias
-    if (m_sampling_method == random_sampling)
-      set_bias_via_server(ttask);
-    else UTIL_THROW2("Unknown sampling method: " << m_sampling_method);
-#else
-    set_bias_via_server(ttask);
-#endif
-
     boost::unique_lock<boost::shared_mutex> mylock(m_lock);
+    
+    SPTR<ContextScope> const& scope = ttask->GetScope();
     SPTR<TPCollCache> localcache = scope->get<TPCollCache>(cache_key);
+    SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+    boost::unique_lock<boost::shared_mutex> ctxlock(context->lock);
+
+    if (localcache) std::cerr << "have local cache " << std::endl;
+    std::cerr << "BOO at " << HERE << std::endl;
     if (!localcache)
       {
-        if (context->bias) localcache.reset(new TPCollCache(m_cache_size));
+        std::cerr << "no local cache at " << HERE << std::endl;
+        setup_bias(ttask);
+        if (context->bias) 
+          {
+            localcache.reset(new TPCollCache(m_cache_size));
+          }
         else localcache = m_cache;
         scope->set<TPCollCache>(cache_key, localcache);
       }
 
+    if (!context->cache1) context->cache1.reset(new pstats::cache_t);
+    if (!context->cache2) context->cache2.reset(new pstats::cache_t);
+    
     if (m_lr_func_name.size() && m_lr_func == NULL)
       {
         FeatureFunction* lr = &FeatureFunction::FindFeatureFunction(m_lr_func_name);
@@ -892,13 +888,6 @@ namespace Moses
         // todo: verify that lr_func implements a hierarchical reordering model
       }
   }
-
-  // bool
-  // Mmsapt::
-  // PrefixExists(Moses::Phrase const& phrase) const
-  // {
-  //   return PrefixExists(phrase,NULL);
-  // }
 
   bool
   Mmsapt::
