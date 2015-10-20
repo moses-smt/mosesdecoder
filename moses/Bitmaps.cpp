@@ -8,16 +8,16 @@ namespace Moses
 {
 Bitmaps::Bitmaps(size_t inputSize, const std::vector<bool> &initSourceCompleted)
 {
-	m_initBitmap = new WordsBitmap(inputSize, initSourceCompleted);
-	m_coll[m_initBitmap];
+  m_initBitmap = new WordsBitmap(inputSize, initSourceCompleted);
+  m_coll[m_initBitmap];
 }
 
 Bitmaps::~Bitmaps()
 {
-	BOOST_FOREACH (const Coll::value_type& myPair, m_coll) {
-		const WordsBitmap *bm = myPair.first;
-		delete bm;
-	}
+  BOOST_FOREACH (const Coll::value_type& myPair, m_coll) {
+    const WordsBitmap *bm = myPair.first;
+    delete bm;
+  }
 }
 
 const WordsBitmap &Bitmaps::GetNextBitmap(const WordsBitmap &bm, const WordsRange &range)
@@ -30,8 +30,8 @@ const WordsBitmap &Bitmaps::GetNextBitmap(const WordsBitmap &bm, const WordsRang
     m_coll[newBM] = NextBitmaps();
     return *newBM;
   } else {
-	delete newBM;
-	return *iter->first;
+    delete newBM;
+    return *iter->first;
   }
 }
 
@@ -44,14 +44,13 @@ const WordsBitmap &Bitmaps::GetBitmap(const WordsBitmap &bm, const WordsRange &r
   NextBitmaps &next = iter->second;
   NextBitmaps::const_iterator iterNext = next.find(range);
   if (iterNext == next.end()) {
-	  // not seen the link yet.
-	  newBM = &GetNextBitmap(bm, range);
-	  next[range] = newBM;
-  }
-  else {
-	  // link exist
-	  //std::cerr << "link exists" << endl;
-	  newBM = iterNext->second;
+    // not seen the link yet.
+    newBM = &GetNextBitmap(bm, range);
+    next[range] = newBM;
+  } else {
+    // link exist
+    //std::cerr << "link exists" << endl;
+    newBM = iterNext->second;
   }
   return *newBM;
 }

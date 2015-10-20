@@ -22,8 +22,9 @@ public:
   Bitmaps(size_t inputSize, const std::vector<bool> &initSourceCompleted);
   virtual ~Bitmaps();
 
-  const WordsBitmap &GetInitialBitmap() const
-  { return *m_initBitmap; }
+  const WordsBitmap &GetInitialBitmap() const {
+    return *m_initBitmap;
+  }
   const WordsBitmap &GetBitmap(const WordsBitmap &bm, const WordsRange &range);
 
 };

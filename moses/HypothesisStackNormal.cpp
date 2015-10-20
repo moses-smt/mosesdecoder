@@ -145,7 +145,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
     } else {
-    	delete hypo;
+      delete hypo;
     }
     return false;
   }
@@ -205,7 +205,7 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
   // delete hypotheses that have not been included
   for(size_t i=0; i<hypos.size(); i++) {
     if (! included[i]) {
-    	delete hypos[i];
+      delete hypos[i];
       m_manager.GetSentenceStats().AddPruning();
     }
   }

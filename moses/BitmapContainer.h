@@ -215,7 +215,7 @@ private:
   BitmapContainer(const BitmapContainer &);
 public:
   BitmapContainer(const WordsBitmap &bitmap
-		  	  	  , HypothesisStackCubePruning &stack
+                  , HypothesisStackCubePruning &stack
                   , bool deterministic_sort = false);
 
   // The destructor will also delete all the edges that are
@@ -228,9 +228,8 @@ public:
   size_t Size();
   bool Empty() const;
 
-  const WordsBitmap &GetWordsBitmap() const
-  {
-	  return m_bitmap;
+  const WordsBitmap &GetWordsBitmap() const {
+    return m_bitmap;
   }
 
   const HypothesisSet &GetHypotheses() const;

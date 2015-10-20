@@ -136,7 +136,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
     } else {
-    	delete hypo;
+      delete hypo;
     }
     return false;
   }

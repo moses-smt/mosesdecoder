@@ -275,7 +275,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
 
   TranslationOptionList::const_iterator iter;
   for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
-	const TranslationOption &transOpt = **iter;
+    const TranslationOption &transOpt = **iter;
     ExpandHypothesis(hypothesis, transOpt, expectedScore, futureScore, nextBitmap);
   }
 }
@@ -293,7 +293,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
                                     const TranslationOption &transOpt,
                                     float expectedScore,
                                     float futureScore,
-									const WordsBitmap &bitmap)
+                                    const WordsBitmap &bitmap)
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
