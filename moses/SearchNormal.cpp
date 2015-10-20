@@ -338,7 +338,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = new Hypothesis(hypothesis, transOpt, WordsBitmap(44));
+    newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();
