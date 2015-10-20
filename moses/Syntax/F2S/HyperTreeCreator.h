@@ -21,7 +21,7 @@ protected:
 
   // Provide access to HyperTree's private GetOrCreateTargetPhraseCollection
   // function.
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
+  TargetPhraseCollection::shared_ptr GetOrCreateTargetPhraseCollection(
     HyperTree &trie, const HyperPath &fragment) {
     return trie.GetOrCreateTargetPhraseCollection(fragment);
   }

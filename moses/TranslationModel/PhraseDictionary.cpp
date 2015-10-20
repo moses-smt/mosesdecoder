@@ -35,14 +35,15 @@ namespace Moses
 {
 std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
-CacheColl::~CacheColl()
-{
-  for (iterator iter = begin(); iter != end(); ++iter) {
-    std::pair<const TargetPhraseCollection*, clock_t> &key = iter->second;
-    const TargetPhraseCollection *tps = key.first;
-    delete tps;
-  }
-}
+// CacheColl::~CacheColl()
+// {
+//   // not needed any more since the switch to shared pointers
+//   // for (iterator iter = begin(); iter != end(); ++iter) {
+//   //   std::pair<TargetPhraseCollection::shared_ptr , clock_t> &key = iter->second;
+//   //   TargetPhraseCollection::shared_ptr tps = key.first;
+//   //   delete tps;
+//   // }
+// }
 
 PhraseDictionary::PhraseDictionary(const std::string &line, bool registerNow)
   : DecodeFeature(line, registerNow)
@@ -60,9 +61,12 @@ ProvidesPrefixCheck() const
   return false;
 }
 
-const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
+TargetPhraseCollection::shared_ptr
+PhraseDictionary::
+GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
-  const TargetPhraseCollection *ret;
+  TargetPhraseCollection::shared_ptr ret;
+  typedef std::pair<TargetPhraseCollection::shared_ptr , clock_t> entry;
   if (m_maxCacheSize) {
     CacheColl &cache = GetCache();
 
@@ -74,18 +78,14 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
     if (iter == cache.end()) {
       // not in cache, need to look up from phrase table
       ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
-      if (ret) {
-        ret = new TargetPhraseCollection(*ret);
+      if (ret) { // make a copy
+        ret.reset(new TargetPhraseCollection(*ret));
       }
-
-      std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
-      cache[hash] = value;
+      cache[hash] = entry(ret, clock());
     } else {
       // in cache. just use it
-      std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
-      value.second = clock();
-
-      ret = value.first;
+      iter->second.second = clock();
+      ret = iter->second.first;
     }
   } else {
     // don't use cache. look up from phrase table
@@ -95,7 +95,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
   return ret;
 }
 
-TargetPhraseCollection const *
+TargetPhraseCollection::shared_ptr
 PhraseDictionary::
 GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 {
@@ -103,7 +103,7 @@ GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 }
 
 
-TargetPhraseCollectionWithSourcePhrase const*
+TargetPhraseCollectionWithSourcePhrase::shared_ptr
 PhraseDictionary::
 GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
 {
@@ -140,14 +140,14 @@ SetFeaturesToApply()
 }
 
 
-// tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
-void
-PhraseDictionary::
-Release(TargetPhraseCollection const* tpc) const
-{
-  // do nothing by default
-  return;
-}
+// // tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
+// void
+// PhraseDictionary::
+// Release(ttasksptr const& ttask, TargetPhraseCollection const*& tpc) const
+// {
+//   // do nothing by default
+//   return;
+// }
 
 bool
 PhraseDictionary::
@@ -170,7 +170,7 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
     }
 
     const Phrase &phrase = inputPath.GetPhrase();
-    const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollectionLEGACY(phrase);
+    TargetPhraseCollection::shared_ptr targetPhrases = this->GetTargetPhraseCollectionLEGACY(phrase);
     inputPath.SetTargetPhrases(*this, targetPhrases, NULL);
   }
 }
@@ -180,7 +180,7 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 //void PhraseDictionary::SaveCache() const
 //{
 //  CacheColl &cache = GetCache();
-//  for( std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter,
+//  for( std::map<size_t, std::pair<TargetPhraseCollection::shared_ptr ,clock_t> >::iterator iter,
 //       iter != cache.end(),
 //       iter++ ) {
 //
@@ -191,10 +191,10 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 //void PhraseDictionary::LoadCache() const
 //{
 //  CacheColl &cache = GetCache();
-//  std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
+//  std::map<size_t, std::pair<TargetPhraseCollection::shared_ptr ,clock_t> >::iterator iter;
 //  iter = cache.begin();
 //  while( iter != cache.end() ) {
-//    std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
+//    std::map<size_t, std::pair<TargetPhraseCollection::shared_ptr ,clock_t> >::iterator iterRemove = iter++;
 //    delete iterRemove->second.first;
 //    cache.erase(iterRemove);
 //  }
@@ -225,11 +225,12 @@ void PhraseDictionary::ReduceCache() const
   while( iter != cache.end() ) {
     if (iter->second.second < cutoffLastUsedTime) {
       CacheColl::iterator iterRemove = iter++;
-      delete iterRemove->second.first;
+      // delete iterRemove->second.first;
       cache.erase(iterRemove);
     } else iter++;
   }
-  VERBOSE(2,"Reduced persistent translation option cache in " << reduceCacheTime << " seconds." << std::endl);
+  VERBOSE(2,"Reduced persistent translation option cache in "
+          << reduceCacheTime << " seconds." << std::endl);
 }
 
 CacheColl &PhraseDictionary::GetCache() const
@@ -265,8 +266,8 @@ bool PhraseDictionary::SatisfyBackoff(const InputPath &inputPath) const
   // lookup translation only if no other translations
   InputPath::TargetPhrases::const_iterator iter;
   for (iter = inputPath.GetTargetPhrases().begin(); iter != inputPath.GetTargetPhrases().end(); ++iter) {
-    const std::pair<const TargetPhraseCollection*, const void*> &temp = iter->second;
-    const TargetPhraseCollection *tpCollPrev = temp.first;
+    const std::pair<TargetPhraseCollection::shared_ptr , const void*> &temp = iter->second;
+    TargetPhraseCollection::shared_ptr tpCollPrev = temp.first;
 
     if (tpCollPrev && tpCollPrev->GetSize()) {
       // already have translation from another pt. Don't create translations

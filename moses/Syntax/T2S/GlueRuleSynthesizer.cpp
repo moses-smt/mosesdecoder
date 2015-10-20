@@ -17,9 +17,9 @@ void GlueRuleSynthesizer::SynthesizeRule(const InputTree::Node &node)
   const Word &sourceLhs = node.pvertex.symbol;
   boost::scoped_ptr<Phrase> sourceRhs(SynthesizeSourcePhrase(node));
   TargetPhrase *tp = SynthesizeTargetPhrase(node, *sourceRhs);
-  TargetPhraseCollection &tpc = GetOrCreateTargetPhraseCollection(
-                                  m_ruleTrie, sourceLhs, *sourceRhs);
-  tpc.Add(tp);
+  TargetPhraseCollection::shared_ptr tpc
+  = GetOrCreateTargetPhraseCollection(m_ruleTrie, sourceLhs, *sourceRhs);
+  tpc->Add(tp);
 }
 
 Phrase *GlueRuleSynthesizer::SynthesizeSourcePhrase(const InputTree::Node &node)

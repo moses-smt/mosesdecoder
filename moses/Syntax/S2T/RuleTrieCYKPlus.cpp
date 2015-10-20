@@ -33,7 +33,7 @@ void RuleTrieCYKPlus::Node::Prune(std::size_t tableLimit)
   }
 
   // prune TargetPhraseCollection in this node
-  m_targetPhraseCollection.Prune(true, tableLimit);
+  m_targetPhraseCollection->Prune(true, tableLimit);
 }
 
 void RuleTrieCYKPlus::Node::Sort(std::size_t tableLimit)
@@ -49,7 +49,7 @@ void RuleTrieCYKPlus::Node::Sort(std::size_t tableLimit)
   }
 
   // prune TargetPhraseCollection in this node
-  m_targetPhraseCollection.Sort(true, tableLimit);
+  m_targetPhraseCollection->Sort(true, tableLimit);
 }
 
 RuleTrieCYKPlus::Node *RuleTrieCYKPlus::Node::GetOrCreateChild(
@@ -86,8 +86,11 @@ const RuleTrieCYKPlus::Node *RuleTrieCYKPlus::Node::GetNonTerminalChild(
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
-TargetPhraseCollection &RuleTrieCYKPlus::GetOrCreateTargetPhraseCollection(
-  const Phrase &source, const TargetPhrase &target, const Word *sourceLHS)
+TargetPhraseCollection::shared_ptr
+RuleTrieCYKPlus::
+GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                  const TargetPhrase &target,
+                                  const Word *sourceLHS)
 {
   Node &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetTargetPhraseCollection();

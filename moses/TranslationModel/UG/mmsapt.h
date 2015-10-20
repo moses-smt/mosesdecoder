@@ -75,6 +75,7 @@ namespace Moses
     // alpha parameter for lexical smoothing (joint+alpha)/(marg + alpha)
     // must be > 0 if dynamic
     size_t m_default_sample_size;
+    size_t m_min_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
     std::vector<std::string> m_feature_set_names; // one or more of: standard, datasource
     std::string m_bias_logfile;
@@ -178,7 +179,7 @@ namespace Moses
      uint64_t const  pid1,
      sapt::pstats   const& stats,
      sapt::Bitext<Token> const & bt,
-     TargetPhraseCollection* tpcoll
+     TargetPhraseCollection::shared_ptr  tpcoll
      ) const;
 
     bool
@@ -186,14 +187,14 @@ namespace Moses
     (Phrase   const& src,
      uint64_t const  pid1a, sapt::pstats * statsa, sapt::Bitext<Token> const & bta,
      uint64_t const  pid1b, sapt::pstats const* statsb, sapt::Bitext<Token> const & btb,
-     TargetPhraseCollection* tpcoll) const;
+     TargetPhraseCollection::shared_ptr  tpcoll) const;
 
     bool
     combine_pstats
     (Phrase   const& src,
      uint64_t const  pid1a, sapt::pstats* statsa, sapt::Bitext<Token> const & bta,
      uint64_t const  pid1b, sapt::pstats const* statsb, sapt::Bitext<Token> const & btb,
-     TargetPhraseCollection* tpcoll) const;
+     TargetPhraseCollection::shared_ptr  tpcoll) const;
 
     void load_extra_data(std::string bname, bool locking);
     void load_bias(std::string bname);
@@ -208,15 +209,15 @@ namespace Moses
     std::string const& GetName() const;
 
 #ifndef NO_MOSES
-    TargetPhraseCollection const*
+    TargetPhraseCollection::shared_ptr
     GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) const;
 
-    TargetPhraseCollection const*
-    GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+    // TargetPhraseCollection::shared_ptr
+    // GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
     void
-    GetTargetPhraseCollectionBatch(ttasksptr const& ttask,
-				   const InputPathList &inputPathQueue) const;
+    GetTargetPhraseCollectionBatch
+    (ttasksptr const& ttask, InputPathList const& inputPathQueue) const;
 
     //! Create a sentence-specific manager for SCFG rule lookup.
     ChartRuleLookupManager*
@@ -233,7 +234,8 @@ namespace Moses
     void setWeights(std::vector<float> const& w);
 
 
-    void Release(ttasksptr const& ttask, TargetPhraseCollection*& tpc) const;
+    // void Release(ttasksptr const& ttask, 
+    // TargetPhraseCollection const*& tpc) const;
     // some consumer lets me know that *tpc isn't needed any more
 
 

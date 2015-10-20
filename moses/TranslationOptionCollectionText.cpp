@@ -48,11 +48,11 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(ttasksptr const
 
       InputPath *path;
       if (range.GetNumWordsCovered() == 1) {
-        path = new InputPath(subphrase, labels, range, NULL, NULL);
+        path = new InputPath(ttask, subphrase, labels, range, NULL, NULL);
         vec.push_back(path);
       } else {
         const InputPath &prevPath = GetInputPath(startPos, endPos - 1);
-        path = new InputPath(subphrase, labels, range, &prevPath, NULL);
+        path = new InputPath(ttask, subphrase, labels, range, &prevPath, NULL);
         vec.push_back(path);
       }
 

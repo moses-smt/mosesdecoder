@@ -107,14 +107,15 @@ void PhraseDictionaryCompact::Load()
 //   }
 // };
 
-const TargetPhraseCollection*
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
 {
 
+  TargetPhraseCollection::shared_ptr ret;
   // There is no souch source phrase if source phrase is longer than longest
   // observed source phrase during compilation
   if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())
-    return NULL;
+    return ret;
 
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
@@ -122,7 +123,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));
-    TargetPhraseCollection* phraseColl = new TargetPhraseCollection();
+    TargetPhraseCollection::shared_ptr  phraseColl(new TargetPhraseCollection);
 
     // Score phrases and if possible apply ttable_limit
     TargetPhraseVector::iterator nth =
@@ -139,7 +140,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
 
     return phraseColl;
   } else
-    return NULL;
+    return ret;
 }
 
 TargetPhraseVectorPtr
@@ -163,7 +164,7 @@ PhraseDictionaryCompact::~PhraseDictionaryCompact()
 
 //TO_STRING_BODY(PhraseDictionaryCompact)
 
-void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection* tpc)
+void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc)
 {
   if(!m_sentenceCache.get())
     m_sentenceCache.reset(new PhraseCache());
@@ -179,12 +180,13 @@ void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &so
     m_sentenceCache.reset(new PhraseCache());
 
   m_phraseDecoder->PruneCache();
-  for(PhraseCache::iterator it = m_sentenceCache->begin();
-      it != m_sentenceCache->end(); it++)
-    delete *it;
+  // for(PhraseCache::iterator it = m_sentenceCache->begin();
+  //     it != m_sentenceCache->end(); it++)
+  //   it->reset();
 
-  PhraseCache temp;
-  temp.swap(*m_sentenceCache);
+  // PhraseCache temp;
+  // temp.swap(*m_sentenceCache);
+  m_sentenceCache->clear();
 
   ReduceCache();
 }

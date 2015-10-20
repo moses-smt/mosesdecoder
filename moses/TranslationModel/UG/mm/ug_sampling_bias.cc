@@ -89,6 +89,12 @@ namespace sapt
     return m_bias_map;
   }
 
+  const std::map<id_type, float>&
+  DocumentBias::
+  GetDocumentBiasMap() const {
+    return m_bias;
+  }
+
   void
   DocumentBias::
   init_from_json

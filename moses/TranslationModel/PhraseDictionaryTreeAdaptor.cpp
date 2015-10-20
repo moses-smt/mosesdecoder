@@ -74,11 +74,10 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
   obj.CleanUp();
 }
 
-TargetPhraseCollection const*
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
-  return ret;
+  return GetImplementation().GetTargetPhraseCollection(src);
 }
 
 void PhraseDictionaryTreeAdaptor::EnableCache()
@@ -107,16 +106,17 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 }
 
 // legacy
-const TargetPhraseCollectionWithSourcePhrase*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
+TargetPhraseCollectionWithSourcePhrase::shared_ptr
+PhraseDictionaryTreeAdaptor::
+GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
 {
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr ret;
   if(GetImplementation().m_rangeCache.empty()) {
-    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
-    return tpColl;
+    ret = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
   } else {
-    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-    return tpColl;
+    ret = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
   }
+  return ret;
 }
 
 }

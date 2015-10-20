@@ -181,6 +181,9 @@ namespace Moses
     dflt = pair<string,string> ("sample","1000");
     m_default_sample_size = atoi(param.insert(dflt).first->second.c_str());
 
+    dflt = pair<string,string> ("min-sample","0");
+    m_min_sample_size = atoi(param.insert(dflt).first->second.c_str());
+
     dflt = pair<string,string>("workers","0");
     m_workers = atoi(param.insert(dflt).first->second.c_str());
     if (m_workers == 0) m_workers = boost::thread::hardware_concurrency();
@@ -192,8 +195,9 @@ namespace Moses
     dflt = pair<string,string>("table-limit","20");
     m_tableLimit = atoi(param.insert(dflt).first->second.c_str());
 
-    dflt = pair<string,string>("cache","10000");
-    m_cache_size = max(1000,atoi(param.insert(dflt).first->second.c_str()));
+    dflt = pair<string,string>("cache","100000");
+    m_cache_size = max(10000,atoi(param.insert(dflt).first->second.c_str()));
+
     m_cache.reset(new TPCollCache(m_cache_size));
     // m_history.reserve(hsize);
     // in plain language: cache size is at least 1000, and 10,000 by default
@@ -249,6 +253,8 @@ namespace Moses
           m_sampling_method = random_sampling;
         else if (m->second == "ranked")
           m_sampling_method = ranked_sampling;
+        else if (m->second == "ranked2")
+          m_sampling_method = ranked_sampling2;
         else if (m->second == "full")
           m_sampling_method = full_coverage;
         else UTIL_THROW2("unrecognized specification 'method='" << m->second
@@ -297,6 +303,7 @@ namespace Moses
     known_parameters.push_back("prov");
     known_parameters.push_back("rare");
     known_parameters.push_back("sample");
+    known_parameters.push_back("min-sample");
     known_parameters.push_back("smooth");
     known_parameters.push_back("table-limit");
     known_parameters.push_back("tuneable");
@@ -618,29 +625,32 @@ namespace Moses
       {
         InputPath &inputPath = **iter;
         const Phrase &phrase = inputPath.GetPhrase();
-        const TargetPhraseCollection *targetPhrases
+        TargetPhraseCollection::shared_ptr targetPhrases
           = this->GetTargetPhraseCollectionLEGACY(ttask,phrase);
         inputPath.SetTargetPhrases(*this, targetPhrases, NULL);
       }
   }
   
-  TargetPhraseCollection const*
-  Mmsapt::
-  GetTargetPhraseCollectionLEGACY(const Phrase& src) const
-  {
-    UTIL_THROW2("Don't call me without the translation task.");
-  }
+  // TargetPhraseCollection::shared_ptr
+  // Mmsapt::
+  // GetTargetPhraseCollectionLEGACY(const Phrase& src) const
+  // {
+  //   UTIL_THROW2("Don't call me without the translation task.");
+  // }
 
   // This is not the most efficient way of phrase lookup!
-  TargetPhraseCollection const*
+  TargetPhraseCollection::shared_ptr
   Mmsapt::
   GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) const
   {
+    SPTR<TPCollWrapper> ret;
+    // boost::unique_lock<boost::shared_mutex> xlock(m_lock);
+
     // map from Moses Phrase to internal id sequence
     vector<id_type> sphrase;
     fillIdSeq(src, m_ifactor, *(btfix->V1), sphrase);
-    if (sphrase.size() == 0) return NULL;
-
+    if (sphrase.size() == 0) return ret;
+    
     // Reserve a local copy of the dynamic bitext in its current form. /btdyn/
     // is set to a new copy of the dynamic bitext every time a sentence pair
     // is added. /dyn/ keeps the old bitext around as long as we need it.
@@ -655,31 +665,42 @@ namespace Moses
     // lookup phrases in both bitexts
     TSA<Token>::tree_iterator mfix(btfix->I1.get(), &sphrase[0], sphrase.size());
     TSA<Token>::tree_iterator mdyn(dyn->I1.get());
-    if (dyn->I1.get())
+    if (dyn->I1.get()) // we have a dynamic bitext
       for (size_t i = 0; mdyn.size() == i && i < sphrase.size(); ++i)
         mdyn.extend(sphrase[i]);
 
     if (mdyn.size() != sphrase.size() && mfix.size() != sphrase.size())
-      return NULL; // phrase not found in either bitext
+      return ret; // phrase not found in either bitext
 
     // do we have cached results for this phrase?
     uint64_t phrasekey = (mfix.size() == sphrase.size()
-                          ? (mfix.getPid()<<1) : (mdyn.getPid()<<1)+1);
+                          ? (mfix.getPid()<<1) 
+                          : (mdyn.getPid()<<1)+1);
 
     // get context-specific cache of items previously looked up
     SPTR<ContextScope> const& scope = ttask->GetScope();
     SPTR<TPCollCache> cache = scope->get<TPCollCache>(cache_key);
-    if (!cache) cache = m_cache;
-    TPCollWrapper* ret = cache->get(phrasekey, dyn->revision());
-    // TO DO: we should revise the revision mechanism: we take the length
-    // of the dynamic bitext (in sentences) at the time the PT entry
-    // was stored as the time stamp. For each word in the
+    if (!cache) cache = m_cache; // no context-specific cache, use global one
+      
+    ret = cache->get(phrasekey, dyn->revision());
+    // TO DO: we should revise the revision mechanism: we take the
+    // length of the dynamic bitext (in sentences) at the time the PT
+    // entry was stored as the time stamp. For each word in the
     // vocabulary, we also store its most recent occurrence in the
     // bitext. Only if the timestamp of each word in the phrase is
     // newer than the timestamp of the phrase itself we must update
     // the entry.
 
-    if (ret) return ret; // yes, was cached => DONE
+    // std::cerr << "Phrasekey is " << ret->key << " at " << HERE << std::endl;
+    // std::cerr << ret << " with " << ret->refCount << " references at " 
+    // << HERE << std::endl;
+    boost::upgrade_lock<boost::shared_mutex> rlock(ret->lock);
+    if (ret->GetSize()) return ret; 
+
+    // new TPC (not found or old one was not up to date)
+    boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(rlock);
+    // maybe another thread did the work while we waited for the lock ?
+    if (ret->GetSize()) return ret; 
 
     // OK: pt entry NOT found or NOT up to date
     // lookup and expansion could be done in parallel threads,
@@ -697,12 +718,16 @@ namespace Moses
         else 
           {
             BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
-                                   m_default_sample_size, m_sampling_method);
+                                   m_min_sample_size, 
+                                   m_default_sample_size, 
+                                   m_sampling_method);
             s();
             sfix = s.stats();
           }
       }
-    if (mdyn.size() == sphrase.size()) sdyn = dyn->lookup(ttask, mdyn);
+
+    if (mdyn.size() == sphrase.size()) 
+      sdyn = dyn->lookup(ttask, mdyn);
 
     vector<PhrasePair<Token> > ppfix,ppdyn;
     PhrasePair<Token>::SortByTargetIdSeq sort_by_tgt_id;
@@ -716,8 +741,8 @@ namespace Moses
         expand(mdyn, *dyn, *sdyn, ppdyn, m_bias_log);
         sort(ppdyn.begin(), ppdyn.end(),sort_by_tgt_id);
       }
+
     // now we have two lists of Phrase Pairs, let's merge them
-    ret = new TPCollWrapper(dyn->revision(), phrasekey);
     PhrasePair<Token>::SortByTargetIdSeq sorter;
     size_t i = 0; size_t k = 0;
     while (i < ppfix.size() && k < ppdyn.size())
@@ -729,6 +754,8 @@ namespace Moses
       }
     while (i < ppfix.size()) ret->Add(mkTPhrase(ttask,src,&ppfix[i++],NULL,dyn));
     while (k < ppdyn.size()) ret->Add(mkTPhrase(ttask,src,NULL,&ppdyn[k++],dyn));
+
+    // Pruning should not be done here but outside!
     if (m_tableLimit) ret->Prune(true, m_tableLimit);
     else ret->Prune(true,ret->GetSize());
 
@@ -744,7 +771,6 @@ namespace Moses
           }
       }
 #endif
-    cache->add(phrasekey, ret);
     return ret;
   }
 
@@ -892,7 +918,7 @@ namespace Moses
         if (!context->cache1->get(pid))
           {
             BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
-                                   m_default_sample_size, m_sampling_method);
+                                   m_min_sample_size, m_default_sample_size, m_sampling_method);
             if (*context->cache1->get(pid, s.stats()) == s.stats())
               m_thread_pool->add(s);
           }
@@ -918,15 +944,26 @@ namespace Moses
     return mdyn.size() == myphrase.size();
   }
 
+#if 0
   void
   Mmsapt
-  ::Release(ttasksptr const& ttask, TargetPhraseCollection*& tpc) const
+  ::Release(ttasksptr const& ttask, TargetPhraseCollection::shared_ptr*& tpc) const
   {
+    if (!tpc) 
+      {
+        // std::cerr << "NULL pointer at " << HERE << std::endl;
+        return; 
+      }
     SPTR<TPCollCache> cache = ttask->GetScope()->get<TPCollCache>(cache_key);
-    TPCollWrapper* foo = static_cast<TPCollWrapper*>(tpc);
-    if (cache) cache->release(foo);
+
+    TPCollWrapper const* foo = static_cast<TPCollWrapper const*>(tpc);
+
+    // std::cerr << "\nReleasing " << foo->key << "\n" << std::endl;
+
+    if (cache) cache->release(static_cast<TPCollWrapper const*>(tpc));
     tpc = NULL;
   }
+#endif
 
   bool Mmsapt
   ::ProvidesPrefixCheck() const { return true; }

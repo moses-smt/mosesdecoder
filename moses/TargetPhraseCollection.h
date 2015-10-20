@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "TargetPhrase.h"
 #include "Util.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
@@ -43,6 +44,8 @@ public:
   // iters
   typedef CollType::iterator iterator;
   typedef CollType::const_iterator const_iterator;
+  typedef boost::shared_ptr<TargetPhraseCollection> shared_ptr;
+  typedef boost::shared_ptr<TargetPhraseCollection const> shared_const_ptr;
 
   TargetPhrase const*
   operator[](size_t const i) const {
@@ -127,6 +130,9 @@ protected:
   std::vector<Phrase> m_sourcePhrases;
 
 public:
+  typedef boost::shared_ptr<TargetPhraseCollectionWithSourcePhrase> shared_ptr;
+  typedef boost::shared_ptr<TargetPhraseCollectionWithSourcePhrase const> shared_const_ptr;
+
   const std::vector<Phrase> &GetSourcePhrases() const {
     return m_sourcePhrases;
   }

@@ -61,7 +61,8 @@ TranslationOptionCollectionLattice
       const ScorePair &scores = col[i].second;
       ScorePair *inputScore = new ScorePair(scores);
 
-      InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
+      InputPath *path
+      = new InputPath(ttask, subphrase, labels, range, NULL, inputScore);
 
       path->SetNextNode(nextNode);
       m_inputPathQueue.push_back(path);
@@ -113,7 +114,8 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
     ScorePair *inputScore = new ScorePair(*prevInputScore);
     inputScore->PlusEquals(scores);
 
-    InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+    InputPath *path = new InputPath(prevPath.ttask, subphrase, labels,
+                                    range, &prevPath, inputScore);
 
     path->SetNextNode(nextNode);
     m_inputPathQueue.push_back(path);
@@ -140,7 +142,8 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
   for (size_t i = 0; i < m_inputPathQueue.size(); ++i) {
     const InputPath &path = *m_inputPathQueue[i];
 
-    const TargetPhraseCollection *tpColl = path.GetTargetPhrases(phraseDictionary);
+    TargetPhraseCollection::shared_ptr tpColl
+    = path.GetTargetPhrases(phraseDictionary);
     const WordsRange &range = path.GetWordsRange();
 
     if (tpColl && tpColl->GetSize()) {

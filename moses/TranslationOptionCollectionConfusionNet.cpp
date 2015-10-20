@@ -62,7 +62,7 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
       const ScorePair &scores = col[i].second;
       ScorePair *inputScore = new ScorePair(scores);
 
-      InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
+      InputPath *path = new InputPath(ttask, subphrase, labels, range, NULL, inputScore);
       list.push_back(path);
 
       m_inputPathQueue.push_back(path);
@@ -113,7 +113,7 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
           ScorePair *inputScore = new ScorePair(*prevInputScore);
           inputScore->PlusEquals(scores);
 
-          InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+          InputPath *path = new InputPath(ttask, subphrase, labels, range, &prevPath, inputScore);
           list.push_back(path);
 
           m_inputPathQueue.push_back(path);

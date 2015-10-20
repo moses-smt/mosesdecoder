@@ -32,7 +32,7 @@ public:
     typedef boost::unordered_map<Word, Node, SymbolHasher,
             SymbolEqualityPred> SymbolMap;
 
-    typedef boost::unordered_map<Word, TargetPhraseCollection,
+    typedef boost::unordered_map<Word, TargetPhraseCollection::shared_ptr,
             SymbolHasher, SymbolEqualityPred> TPCMap;
 
     bool IsLeaf() const {
@@ -48,15 +48,18 @@ public:
 
     Node *GetOrCreateChild(const Word &sourceTerm);
     Node *GetOrCreateNonTerminalChild(const Word &targetNonTerm);
-    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Word &);
+    TargetPhraseCollection::shared_ptr GetOrCreateTargetPhraseCollection(const Word &);
 
     const Node *GetChild(const Word &sourceTerm) const;
     const Node *GetNonTerminalChild(const Word &targetNonTerm) const;
 
-    const TargetPhraseCollection *GetTargetPhraseCollection(
-      const Word &sourceLHS) const {
+    TargetPhraseCollection::shared_ptr
+    GetTargetPhraseCollection(const Word &sourceLHS) const {
       TPCMap::const_iterator p = m_targetPhraseCollections.find(sourceLHS);
-      return p == m_targetPhraseCollections.end() ? 0 : &(p->second);
+      if (p != m_targetPhraseCollections.end())
+        return p->second;
+      else
+        return TargetPhraseCollection::shared_ptr();
     }
 
     // FIXME IS there any reason to distinguish these two for T2S?
@@ -83,8 +86,9 @@ public:
 private:
   friend class RuleTrieCreator;
 
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Word &sourceLHS, const Phrase &sourceRHS);
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection
+  (const Word &sourceLHS, const Phrase &sourceRHS);
 
   Node &GetOrCreateNode(const Phrase &sourceRHS);
 

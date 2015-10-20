@@ -14,7 +14,7 @@ void HyperTree::Node::Prune(std::size_t tableLimit)
     p->second.Prune(tableLimit);
   }
   // Prune TargetPhraseCollection at this node.
-  m_targetPhraseCollection.Prune(true, tableLimit);
+  m_targetPhraseCollection->Prune(true, tableLimit);
 }
 
 void HyperTree::Node::Sort(std::size_t tableLimit)
@@ -24,7 +24,7 @@ void HyperTree::Node::Sort(std::size_t tableLimit)
     p->second.Sort(tableLimit);
   }
   // Sort TargetPhraseCollection at this node.
-  m_targetPhraseCollection.Sort(true, tableLimit);
+  m_targetPhraseCollection->Sort(true, tableLimit);
 }
 
 HyperTree::Node *HyperTree::Node::GetOrCreateChild(
@@ -40,7 +40,7 @@ const HyperTree::Node *HyperTree::Node::GetChild(
   return (p == m_map.end()) ? NULL : &p->second;
 }
 
-TargetPhraseCollection &HyperTree::GetOrCreateTargetPhraseCollection(
+TargetPhraseCollection::shared_ptr HyperTree::GetOrCreateTargetPhraseCollection(
   const HyperPath &hyperPath)
 {
   Node &node = GetOrCreateNode(hyperPath);

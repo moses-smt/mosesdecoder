@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
 
 #include <map>
@@ -7,12 +8,12 @@
 #include "WordsRange.h"
 #include "NonTerminal.h"
 #include "moses/FactorCollection.h"
-
+#include <boost/shared_ptr.hpp>
+#include "TargetPhraseCollection.h"
 namespace Moses
 {
 
 class PhraseDictionary;
-class TargetPhraseCollection;
 class ScoreComponentCollection;
 class TargetPhrase;
 class InputPath;
@@ -31,8 +32,15 @@ class InputPath
   friend std::ostream& operator<<(std::ostream& out, const InputPath &obj);
 
 public:
-  typedef std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > TargetPhrases;
 
+  typedef std::pair<TargetPhraseCollection::shared_ptr, const void*>
+  TPCollStoreEntry;
+
+  typedef std::map<const PhraseDictionary*, TPCollStoreEntry>
+  TargetPhrases;
+
+public:
+  ttaskwptr const ttask;
 protected:
   const InputPath *m_prevPath;
   Phrase m_phrase;
@@ -57,8 +65,13 @@ public:
     , m_nextNode(NOT_FOUND) {
   }
 
-  InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
-            ,const ScorePair *inputScore);
+  InputPath(ttaskwptr const ttask,
+            Phrase const& phrase,
+            NonTerminalSet const& sourceNonTerms,
+            WordsRange const& range,
+            InputPath const* prevNode,
+            ScorePair const* inputScore);
+
   ~InputPath();
 
   const Phrase &GetPhrase() const {
@@ -88,10 +101,14 @@ public:
     m_nextNode = nextNode;
   }
 
-  void SetTargetPhrases(const PhraseDictionary &phraseDictionary
-                        , const TargetPhraseCollection *targetPhrases
-                        , const void *ptNode);
-  const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
+  void
+  SetTargetPhrases(const PhraseDictionary &phraseDictionary,
+                   TargetPhraseCollection::shared_ptr const& targetPhrases,
+                   const void *ptNode);
+
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
+
   const TargetPhrases &GetTargetPhrases() const {
     return m_targetPhrases;
   }
