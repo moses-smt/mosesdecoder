@@ -196,7 +196,7 @@ std::string ExtractFeatures::CallStanfordDep(const std::string& parsedSentence) 
 	return "exception";
 }
 
-vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, const string& depRel){
+vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, const string& depRel, const string& pos_string){
 	using Moses::Tokenize;
 
 	//cout<<ref<<endl;
@@ -209,10 +209,24 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 
 	vector<string> words;
 	vector<string> dependencies;
+	vector<string> pos; // part-of-speech tags for each word -> this could come from the dependencies string
 	vector<vector<string> > dependencyTuples;
 	Tokenize(words,sentence);
 	Tokenize(dependencies,depRel);
+	Tokenize(pos,pos_string);
 	words.insert(words.begin(),"ROOT");
+	pos.insert(pos.begin(),"ROOT");
+
+	// model scores main arguments, prepositional arguments attached to verb or noun
+	// should be extended to allow all types -> for now I will just extract the scores and concatenate them in the features.dat file
+	int modelType=0;
+	if(getConfig("argType") == "main")
+			modelType=0;
+	if(getConfig("argType") == "prepV")
+		modelType=1;
+	if(getConfig("argType") == "prepN")
+			modelType=2;
+
 
 	int dep,gov;
 	string rel;
@@ -220,9 +234,9 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 		rel = dependencies[i+2];
 		//relations from parser -> (dep,gov,rel)
 		//LM model scores: (rel,gov,dep) where rel in (dobj,iobj,nsubj,nsubjpass)
-		if((getConfig("argType") == "prep"  and rel.substr(0,5) == "prep_") or
+		if((modelType !=0  and rel.substr(0,5) == "prep_") or
 				// need to figure out if the head is a verb
-				(getConfig("argType") == "main" and m_allowedRel->find(rel)!=m_allowedRel->end())){
+				(modelType == 0 and m_allowedRel->find(rel)!=m_allowedRel->end())){
 			//SHOULD LEMMATIZE
 			dep = strtol (dependencies[i].c_str(),NULL,10);
 			gov = strtol (dependencies[i+1].c_str(),NULL,10);
@@ -231,7 +245,12 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 			tuple.push_back(rel);
 			tuple.push_back(FilterArg(words[gov]));
 			tuple.push_back(FilterArg(words[dep]));
-			dependencyTuples.push_back(tuple);
+
+			if((modelType == 1 and pos.size() > gov and pos[gov].substr(0,1) == "V") or
+					(modelType == 2 and pos.size() > gov and pos[gov].substr(0,1) == "N")) //prep argument of verb
+				dependencyTuples.push_back(tuple);
+
+
 		}
 	}
 	return dependencyTuples;
@@ -269,11 +288,11 @@ float ExtractFeatures::GetMIScore(vector<string>& depRel) const{
 	  return score;
 }
 
-vector<float> ExtractFeatures::ComputeScore(const string &sentence, const string &depRel){
+vector<float> ExtractFeatures::ComputeScore(const string &sentence, const string &depRel, const string &pos){
 	stringstream featureStr;
 	vector<vector<string> > dependencyTuples;
 	vector<vector<string> >::iterator tuplesIt;
-	dependencyTuples = MakeTuples(sentence,depRel);
+	dependencyTuples = MakeTuples(sentence,depRel,pos);
 	float scoreWBmodel=0.0, scoreMImodel=0.0;
 	vector<float> feature_scores;
 
@@ -289,9 +308,9 @@ vector<float> ExtractFeatures::ComputeScore(const string &sentence, const string
 	return feature_scores;
 }
 
-string ExtractFeatures::GetFeatureStr(const string &sentence, const string &depRel){
+string ExtractFeatures::GetFeatureStr(const string &sentence, const string &depRel, const string &pos){
 	stringstream featureStr;
-	vector<float> feature_scores = ComputeScore(sentence, depRel);
+	vector<float> feature_scores = ComputeScore(sentence, depRel, pos);
 	for(size_t i=0; i<feature_scores.size(); i++)
 		featureStr<<"HeadFeature= "<<feature_scores[i]<<" ";
 

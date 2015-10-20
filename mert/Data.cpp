@@ -193,6 +193,7 @@ void Data::loadNBest(const string &file, ExtractFeatures &depFeatures)
       //MARIA
       //compute extra data or read from file
       string depRel="";
+      string pos="";
       if(outExtraData.is_open()){
       	depRel = depFeatures.CallStanfordDep(sentence);
      		outExtraData<<sentence_index<<" ||| "<<depRel<<endl;
@@ -207,6 +208,8 @@ void Data::loadNBest(const string &file, ExtractFeatures &depFeatures)
       		cerr<<"Sentence index in extra data file doesn't align with nbest file sentence index\n";
       	++it;
       	depRel = it->as_string();
+      	if(++it)
+      		pos = it->as_string();
       }
 
       //TODO check alignment exists if scorers need it
@@ -243,7 +246,7 @@ void Data::loadNBest(const string &file, ExtractFeatures &depFeatures)
 			//compute extra features
       //I hate this code with the feature data and feature array all to copy a bunch of numbers from one file to another
       if(depFeatures.ComputeExtraFeatures()){
-      	string extraFeatureStr = depFeatures.GetFeatureStr(sentence,depRel);
+      	string extraFeatureStr = depFeatures.GetFeatureStr(sentence,depRel,pos);
 				//cout<<"New Feature Score: "<<extraFeatureStr<<endl;
 				feature_str += " "+extraFeatureStr;
 			}

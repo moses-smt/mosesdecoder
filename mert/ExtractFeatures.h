@@ -19,11 +19,11 @@ class ExtractFeatures{
 	  //~ExtractFeatures();
 
 	  std::string CallStanfordDep(const std::string& parsedSentence) const;
-	  vector<vector<string> > MakeTuples(const string& sentence, const string& dep);
+	  vector<vector<string> > MakeTuples(const string& sentence, const string& dep, const string& pos);
 	  float GetWBScore(vector<string>& depRel) const;
 	  float GetMIScore(vector<string>& depRel) const;
-	  vector<float> ComputeScore(const string &sentence, const string &depRel);
-	  string GetFeatureStr(const string &sentence, const string &depRel);
+	  vector<float> ComputeScore(const string &sentence, const string &depRel, const string& pos);
+	  string GetFeatureStr(const string &sentence, const string &depRel, const string &pos);
 	  string GetFeatureNames();
 	  void InitConfig(const string& config);
 	  std::string getConfig(const std::string& key) const;
