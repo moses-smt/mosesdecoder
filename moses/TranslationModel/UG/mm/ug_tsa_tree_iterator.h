@@ -161,6 +161,9 @@ namespace sapt
       assert(root);
       if (p < 0) p += lower.size();
       double ret = arrayByteSpanSize(p)/root->aveIndexEntrySize();
+      // for larger numbers, the estimate is reasonably accurate.
+      // if the estimate is small, scan the index range and perform
+      // an exact count
       if (ret < 25) ret = rawCnt(p);
       UTIL_THROW_IF2(ret > root->corpus->numTokens(), "[" << HERE << "] "
 		     << "Word count mismatch.");
@@ -185,7 +188,7 @@ namespace sapt
     {
       size_t x = cov.find_first();
       while (x < cov.size() && extend(snt[x]))
-	x = cov.find_next(x);
+        x = cov.find_next(x);
       return this->size();
     }
 

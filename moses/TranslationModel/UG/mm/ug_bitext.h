@@ -594,6 +594,9 @@ namespace sapt
           m_pp.update(a->first, m_other.sntStart(sid)+off, len, a->second);
           m_pp.good2 = max(uint32_t(m_pp.raw2 * float(m_pp.good1)/m_pp.raw1),
                            m_pp.joint);
+          // Poor man's early pruning: if p(f|e) or p(e|f) < 1/128, don't
+          // even consider the phrase pair, as it is unlikely to ever be 
+          // considered as a valid translation. 
           size_t J = m_pp.joint<<7; // hard coded threshold of 1/128
           if (m_pp.good1 > J || m_pp.good2 > J) continue;
           if (m_scorer)
