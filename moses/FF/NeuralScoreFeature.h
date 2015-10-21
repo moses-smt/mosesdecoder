@@ -16,11 +16,12 @@ struct _object;
 typedef _object PyObject;
 
 struct Payload {
-  Payload() : state_(0), logProb_(0) {}
+  Payload() : state_(0), logProb_(0), known_(true) {}
   Payload(PyObject* state, float logProb) : state_(state), logProb_(logProb) {}
   
   PyObject* state_;
   float logProb_;
+  bool known_;
 };
 
 typedef std::map<size_t, Payload> Payloads;
@@ -54,7 +55,7 @@ public:
     const std::vector< std::string >& lastWords,
     std::vector<PyObject*>& inputStates,
     std::vector<double>& logProbs,
-    std::vector<PyObject*>& nextStates);
+    std::vector<PyObject*>& nextStates, std::vector<bool>& unks);
   
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   

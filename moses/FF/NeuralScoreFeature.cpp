@@ -85,7 +85,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(1, line), m_preCalc(0), m_batchSize(1000), m_stateLength(3), m_factor(0),
+  : StatefulFeatureFunction(2, line), m_preCalc(0), m_batchSize(1000), m_stateLength(3), m_factor(0),
     m_wrapper(new NMT_Wrapper())
 {
   ReadParameters();
@@ -172,13 +172,15 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     
     std::vector<double> allProbs;
     std::vector<PyObject*> allOutStates;
-    
+    std::vector<bool> unks;
+
     BatchProcess(allWords,
                 sourceContext,
                 allLastWords,
                 allStates,
                 allProbs,
-                allOutStates);
+                allOutStates,
+                unks);
     
     size_t k = 0;
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
@@ -186,6 +188,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
         Payload& payload = hyp.second;
         payload.logProb_ = allProbs[k];
         payload.state_ = allOutStates[k];
+        payload.known_ = unks[k];
         k++;
       }
     }
@@ -199,7 +202,8 @@ void NeuralScoreFeature::BatchProcess(
     const std::vector<std::string>& lastWords,
     std::vector<PyObject*>& inputStates,
     std::vector<double>& logProbs,
-    std::vector<PyObject*>& nextStates) {
+    std::vector<PyObject*>& nextStates,
+    std::vector<bool>& unks) {
   
     size_t items = nextWords.size();
     size_t batches = ceil(items/(float)m_batchSize);
@@ -216,7 +220,7 @@ void NeuralScoreFeature::BatchProcess(
                                               lastWords.begin() + thisBatchEnd);
       std::vector<PyObject*> inputStatesBatch(inputStates.begin() + thisBatchStart,
                                               inputStates.begin() + thisBatchEnd);
-      
+      std::vector<bool> unksBatch;
       std::vector<double> logProbsBatch;
       std::vector<PyObject*> nextStatesBatch;
       m_wrapper->GetNextLogProbStates(nextWordsBatch,
@@ -224,10 +228,12 @@ void NeuralScoreFeature::BatchProcess(
                                     lastWordsBatch,
                                     inputStatesBatch,
                                     logProbsBatch,
-                                    nextStatesBatch);
+                                    nextStatesBatch, 
+                                    unksBatch);
     
       logProbs.insert(logProbs.end(), logProbsBatch.begin(), logProbsBatch.end());
       nextStates.insert(nextStates.end(), nextStatesBatch.begin(), nextStatesBatch.end());
+      unks.insert(unks.end(), unksBatch.begin(), unksBatch.end());
     }
 }
   
@@ -282,20 +288,24 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
     nextState = NULL;
     
     newScores[0] = prob;
+    newScores[1] = 0;
   }
   else {
     double prob = 0;
+    size_t unks = 0;
     PyObject* state = 0;
     Prefix prefix;
     for(size_t i = 0; i < phrase.size(); i++) {
       prefix.push_back(phrase[i]);
       Payload& payload = const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix][prevId];
       state = payload.state_;
+      unks += payload.known_ ? 0 : 1;
       prob += payload.logProb_;
     }
     prevState = new NeuralScoreState(context, phrase, state);
     nextState = NULL;
     newScores[0] = prob;
+    newScores[1] = unks;
   }
   accumulator->PlusEquals(this, newScores);
   
