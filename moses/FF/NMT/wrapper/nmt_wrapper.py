@@ -46,6 +46,9 @@ class NMTWrapper(object):
         self.comp_next_probs = self.enc_dec.create_next_probs_computer()
         self.comp_next_states = self.enc_dec.create_next_states_computer()
 
+    def get_target_vocab(self):
+        return self.target_vocab.keys()
+
     def get_context_vector(self, source_sentence):
         seq = parse_input(self.state, self.source_vocab, source_sentence)
         c = self.comp_repr(seq)[0]
@@ -87,7 +90,6 @@ class NMTWrapper(object):
             phrase_num = 1
         else:
             phrase_num = len(last_words)
-        #print >> sys.stderr, "\#PHASE: ", phrase_num, "\#STATES", len(states), "\#NEXT WORDS", len(next_words)
         if len(last_words) == 1 and len(last_words[0]) == 0:
             last_words = numpy.zeros(phrase_num)
             print last_words.astype("int64")
@@ -97,7 +99,8 @@ class NMTWrapper(object):
                 if last_word == "":
                     tmp.append(0)
                 else:
-                    tmp.append(self.target_vocab.setdefault(last_word, self.unk_id))
+                    tmp.append(self.target_vocab.setdefault(last_word,
+                                                            self.unk_id))
             last_words = numpy.array(tmp, dtype="int64")
 
         if len(states) == 0:
@@ -118,7 +121,7 @@ class NMTWrapper(object):
             intmp = [val] * phrase_num
             new_states.append(numpy.split(self.comp_next_states(c, 0, intmp, *states)[0], phrase_num))
 
-        #print >> sys.stderr, "Wychodze z Pythona"
+        # print >> sys.stderr, "Wychodze z Pythona"
         return cumulated_score, new_states
 
     def get_next_states(self, next_words, c, states):
