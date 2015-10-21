@@ -9,6 +9,7 @@
 #include <streambuf>
 #include <assert.h>
 
+#include <python2.7/Python.h>
 
 using namespace std;
 using namespace util;

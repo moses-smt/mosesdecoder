@@ -4,8 +4,9 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <python2.7/Python.h>
 
+struct _object;
+typedef _object PyObject;
 
 class NMT_Wrapper
 {

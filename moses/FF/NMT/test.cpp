@@ -1,12 +1,11 @@
-#include "NMT_Wrapper.h"
 #include <iostream>
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include "NMT_Wrapper.h"
 
 using namespace std;
 
-class NMT_Wrapper;
 struct _object;
 typedef _object PyObject;
 
