@@ -38,13 +38,13 @@ public:
                  PyObject* input_state,
                  double& prob,
                  PyObject*& output_state);
-    bool GetProb(const std::vector<std::string>& nextWords,
+    void GetProb(const std::vector<std::string>& nextWords,
                  PyObject* pyContextVectors,
                  const std::vector< std::string >& lastWords,
                  std::vector<PyObject*>& inputStates,
                  std::vector< std::vector< double > >& logProbs,
                  std::vector< std::vector< PyObject* > >& outputStates);
-    bool GetProb(const std::vector<std::string>& nextWords,
+    void GetProb(const std::vector<std::string>& nextWords,
                  PyObject* pyContextVectors,
                  const std::vector< std::string >& lastWords,
                  std::vector<PyObject*>& inputStates,

@@ -10,7 +10,6 @@
 #include <assert.h>
 
 #include <python2.7/Python.h>
-:A
 
 using namespace std;
 using namespace util;
@@ -174,24 +173,8 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& next_words,
     return true;
 }
 
-bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
-                          PyObject* pyContextVectors,
-                          const std::vector< string >& lastWords,
-                          std::vector< PyObject* >& inputStates,
-                          std::vector< std::vector< double > >& logProbs,
-                          std::vector< std::vector< PyObject* > >& outputStates)
-{
-    std::vector<bool> unks;
-    GetProb(nextWords,
-            pyContextVectors,
-            lastWords,
-            inputStates,
-            logProbs,
-            outputStates,
-            unks);
-}
 
-bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
+void NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                           PyObject* pyContextVectors,
                           const std::vector< string >& lastWords,
                           std::vector< PyObject* >& inputStates,
@@ -271,8 +254,23 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
         outputStates.push_back(hipoStates);
     }
     unks = IsUnk(nextWords);
+}
 
-    return true;
+void NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
+                          PyObject* pyContextVectors,
+                          const std::vector< string >& lastWords,
+                          std::vector< PyObject* >& inputStates,
+                          std::vector< std::vector< double > >& logProbs,
+                          std::vector< std::vector< PyObject* > >& outputStates)
+{
+    std::vector<bool> unks;
+    GetProb(nextWords,
+            pyContextVectors,
+            lastWords,
+            inputStates,
+            logProbs,
+            outputStates,
+            unks);
 }
 void NMT_Wrapper::GetNextStates(
         const std::vector<std::string>& nextWords,
@@ -310,28 +308,11 @@ void NMT_Wrapper::GetNextStates(
     }
 }
 
-void NMT_Wrapper::GetNextLogProbStates(
-    const std::vector<std::string>& nextWords,
-    PyObject* pyContextVectors,
-    const std::vector< std::string >& lastWords,
-    std::vector<PyObject*>& inputStates,
-    std::vector<double>& logProbs,
-    std::vector<PyObject*>& nextStates)
-{
-    std::vector<bool> unks;
-    GetNextLogProbStates(nextWords,
-                         pyContextVectors,
-                         lastWords,
-                         inputStates,
-                         logProbs,
-                         nextWords,
-                         unks);
-}
 
 inline PyObject* StringVector2Python(std::vector<std::string> inputVector)
 {
     PyObject* pyList = PyList_New(0);
-    for (size_t i = 0; i < nextWords.size(); ++i) {
+    for (size_t i = 0; i < inputVector.size(); ++i) {
         PyList_Append(pyList, PyString_FromString(inputVector[i].c_str()));
     }
     return pyList;
@@ -340,7 +321,7 @@ inline PyObject* StringVector2Python(std::vector<std::string> inputVector)
 inline PyObject* PyObjectVector2Python(std::vector<PyObject*> inputVector)
 {
     PyObject* pyList = PyList_New(0);
-    for (size_t i = 0; i < nextWords.size(); ++i) {
+    for (size_t i = 0; i < inputVector.size(); ++i) {
         PyList_Append(pyList, inputVector[i]);
     }
     return pyList;
@@ -402,4 +383,22 @@ void NMT_Wrapper::GetNextLogProbStates(
         nextStates.push_back(nextState);
     }
     unks = IsUnk(nextWords);
+}
+
+void NMT_Wrapper::GetNextLogProbStates(
+    const std::vector<std::string>& nextWords,
+    PyObject* pyContextVectors,
+    const std::vector< std::string >& lastWords,
+    std::vector<PyObject*>& inputStates,
+    std::vector<double>& logProbs,
+    std::vector<PyObject*>& nextStates)
+{
+    std::vector<bool> unks;
+    GetNextLogProbStates(nextWords,
+                         pyContextVectors,
+                         lastWords,
+                         inputStates,
+                         logProbs,
+                         nextStates,
+                         unks);
 }
