@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include <python2.7/Python.h>
+:A
 
 using namespace std;
 using namespace util;
@@ -178,7 +179,7 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                           const std::vector< string >& lastWords,
                           std::vector< PyObject* >& inputStates,
                           std::vector< std::vector< double > >& logProbs,
-                          std::vector< std::vector< PyObject* > >& outputStates,
+                          std::vector< std::vector< PyObject* > >& outputStates)
 {
     std::vector<bool> unks;
     GetProb(nextWords,
@@ -196,7 +197,7 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                           std::vector< PyObject* >& inputStates,
                           std::vector< std::vector< double > >& logProbs,
                           std::vector< std::vector< PyObject* > >& outputStates,
-                          std::vector<bool> unks)
+                          std::vector<bool>& unks)
 {
     PyObject* pyNextWords = PyList_New(0);
     for (size_t i = 0; i < nextWords.size(); ++i) {
@@ -336,6 +337,15 @@ inline PyObject* StringVector2Python(std::vector<std::string> inputVector)
     return pyList;
 }
 
+inline PyObject* PyObjectVector2Python(std::vector<PyObject*> inputVector)
+{
+    PyObject* pyList = PyList_New(0);
+    for (size_t i = 0; i < nextWords.size(); ++i) {
+        PyList_Append(pyList, inputVector[i]);
+    }
+    return pyList;
+}
+
 void NMT_Wrapper::GetNextLogProbStates(
     const std::vector<std::string>& nextWords,
     PyObject* pyContextVectors,
@@ -345,15 +355,13 @@ void NMT_Wrapper::GetNextLogProbStates(
     std::vector<PyObject*>& nextStates,
     std::vector<bool>& unks)
 {
-    UTIL_THROW_IF2(lastWords.size() != inputStates.size(), "#lastWords != #inputStates");
+    UTIL_THROW_IF2(lastWords.size() != inputStates.size(),
+                   "#lastWords != #inputStates");
 
     PyObject* pyNextWords = StringVector2Python(nextWords);
     PyObject* pyLastWords = StringVector2Python(lastWords);
+    PyObject* pyStates = PyObjectVector2Python(inputStates);
 
-    PyObject* pyStates = PyList_New(0);
-    for (size_t i = 0; i < inputStates.size(); ++i) {
-        PyList_Append(pyStates, inputStates[i]);
-    }
     PyObject* pyResponse = NULL;
 
     if (inputStates.size() == 0) {

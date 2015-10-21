@@ -50,7 +50,7 @@ public:
                  std::vector<PyObject*>& inputStates,
                  std::vector< std::vector< double > >& logProbs,
                  std::vector< std::vector< PyObject* > >& outputStates,
-                 std::vector<bool> unks);
+                 std::vector<bool>& unks);
     void GetNextStates(
         const std::vector<std::string>& nextWords,
         PyObject* pyContextVectors,
