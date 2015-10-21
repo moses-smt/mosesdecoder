@@ -30,7 +30,7 @@ GetContextWindow() const
   return m_context;
 }
 
-SPTR<std::map<std::string, float> const> 
+SPTR<std::map<std::string, float> const>
 TranslationTask::GetContextWeights() const
 {
   return m_context_weights;

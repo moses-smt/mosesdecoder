@@ -12,7 +12,7 @@
 #include <boost/foreach.hpp>
 #endif
 
-// for some reason, the xmlrpc_c headers must be included AFTER the 
+// for some reason, the xmlrpc_c headers must be included AFTER the
 // boost thread-related ones ...
 #ifdef HAVE_XMLRPC_C
 #include <xmlrpc-c/base.hpp>
@@ -111,18 +111,16 @@ public:
 
 #ifdef HAVE_XMLRPC_C
   SPTR<std::map<std::string,float> >
-  GetContextWeights(xmlrpc_c::value const* spec = NULL)
-  {
-    if (spec && m_context_weights == NULL)
-      { 
-	boost::unique_lock<boost::shared_mutex> lock(m_lock);
-	m_context_weights.reset(new std::map<std::string, float>);
+  GetContextWeights(xmlrpc_c::value const* spec = NULL) {
+    if (spec && m_context_weights == NULL) {
+      boost::unique_lock<boost::shared_mutex> lock(m_lock);
+      m_context_weights.reset(new std::map<std::string, float>);
 
-	typedef std::map<std::string,xmlrpc_c::value> tmap;
-	tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(*spec));
-	for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m)
-	  (*m_context_weights)[m->first] = xmlrpc_c::value_double(m->second);
-      }
+      typedef std::map<std::string,xmlrpc_c::value> tmap;
+      tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(*spec));
+      for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m)
+        (*m_context_weights)[m->first] = xmlrpc_c::value_double(m->second);
+    }
     return m_context_weights;
   }
 #endif
