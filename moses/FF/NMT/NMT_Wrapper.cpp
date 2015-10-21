@@ -14,6 +14,24 @@
 using namespace std;
 using namespace util;
 
+inline PyObject* StringVector2Python(std::vector<std::string> inputVector)
+{
+    PyObject* pyList = PyList_New(0);
+    for (size_t i = 0; i < inputVector.size(); ++i) {
+        PyList_Append(pyList, PyString_FromString(inputVector[i].c_str()));
+    }
+    return pyList;
+}
+
+inline PyObject* PyObjectVector2Python(std::vector<PyObject*> inputVector)
+{
+    PyObject* pyList = PyList_New(0);
+    for (size_t i = 0; i < inputVector.size(); ++i) {
+        PyList_Append(pyList, inputVector[i]);
+    }
+    return pyList;
+}
+
 NMT_Wrapper* NMT_Wrapper::s_nmt;
 
 NMT_Wrapper::NMT_Wrapper()
@@ -35,10 +53,9 @@ NMT_Wrapper::~NMT_Wrapper () {
 void NMT_Wrapper::LoadTargetVocab()
 {
     PyObject* py_response = PyObject_CallMethodObjArgs(
-                                py_wrapper,
                                 PyString_FromString("get_target_vocab"),
                                 NULL);
-    const size_t vocabSize = PyList_Size(py_response);
+    size_t vocabSize = PyList_Size(py_response);
     for (size_t i = 0; i < vocabSize; ++i) {
         m_targetVocab.insert(PyString_AsString(PyList_GetItem(py_response, i)));
     }
@@ -98,8 +115,6 @@ void NMT_Wrapper::Init(
 
     UTIL_THROW_IF2(PyObject_CallMethod(py_wrapper, (char*)"build", NULL) == NULL,
             "Problem with build NMT_Wrapper");
-
-    LoadTargetVocab();
 }
 
 bool NMT_Wrapper::GetProb(const string& next_word,
@@ -114,12 +129,20 @@ bool NMT_Wrapper::GetProb(const string& next_word,
 
     if (input_state == NULL)
     {
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_log_prob, py_next_word, py_context_vectors, NULL);
+        py_response = PyObject_CallMethodObjArgs(py_wrapper,
+                                                 py_get_log_prob,
+                                                 py_next_word,
+                                                 py_context_vectors,
+                                                 NULL);
     }
     else {
         PyObject* py_last_word = PyString_FromString(last_word.c_str());
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_log_prob, py_next_word, py_context_vectors,
-                                                 py_last_word, input_state, NULL);
+        py_response = PyObject_CallMethodObjArgs(py_wrapper,
+                                                 py_get_log_prob,
+                                                 py_next_word,
+                                                 py_context_vectors,
+                                                 py_last_word,
+                                                 input_state, NULL);
     }
 
    if (py_response == NULL) { return false; }
@@ -142,22 +165,27 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& next_words,
                           double& logProb,
                           PyObject*& output_state)
 {
-    PyObject* py_nextWords = PyList_New(0);
-    for (size_t i = 0; i < next_words.size(); ++i) {
-        PyList_Append(py_nextWords, PyString_FromString(next_words[i].c_str()));
-    }
+    PyObject* py_nextWords = StringVector2Python(next_words);
 
     PyObject* py_response = NULL;
 
     if (input_state == NULL)
     {
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_log_probs,
-                                                 py_nextWords, py_context_vectors, NULL);
+        py_response = PyObject_CallMethodObjArgs(py_wrapper,
+                                                 py_get_log_probs,
+                                                 py_nextWords,
+                                                 py_context_vectors,
+                                                 NULL);
     }
     else {
         PyObject* py_last_word = PyString_FromString(last_word.c_str());
-        py_response = PyObject_CallMethodObjArgs(py_wrapper, py_get_log_probs, py_nextWords, py_context_vectors,
-                                                 py_last_word, input_state, NULL);
+        py_response = PyObject_CallMethodObjArgs(py_wrapper,
+                                                 py_get_log_probs,
+                                                 py_nextWords,
+                                                 py_context_vectors,
+                                                 py_last_word,
+                                                 input_state,
+                                                 NULL);
     }
 
     if (py_response == NULL) { return false; }
@@ -182,15 +210,9 @@ void NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                           std::vector< std::vector< PyObject* > >& outputStates,
                           std::vector<bool>& unks)
 {
-    PyObject* pyNextWords = PyList_New(0);
-    for (size_t i = 0; i < nextWords.size(); ++i) {
-        PyList_Append(pyNextWords, PyString_FromString(nextWords[i].c_str()));
-    }
-
-    PyObject* pyLastWords = PyList_New(0);
-    for (size_t i = 0; i < lastWords.size(); ++i) {
-        PyList_Append(pyLastWords, PyString_FromString(lastWords[i].c_str()));
-    }
+    PyObject* pyNextWords = StringVector2Python(nextWords);
+    PyObject* pyLastWords = StringVector2Python(lastWords);
+    PyObject* pyInputStates = PyObjectVector2Python(inputStates);
 
     PyObject* pyResponse = NULL;
     if (inputStates.size() == 0) {
@@ -200,16 +222,6 @@ void NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                                                 pyContextVectors,
                                                 NULL);
     } else {
-        PyObject* pyInputStates = PyList_New(0);
-        for (size_t i = 0; i < inputStates.size(); ++i) {
-            PyList_Append(pyInputStates, inputStates[i]);
-        }
-
-        PyObject* pyLastWords = PyList_New(0);
-        for (size_t i = 0; i < lastWords.size(); ++i) {
-            PyList_Append(pyLastWords, PyString_FromString(lastWords[i].c_str()));
-        }
-
         pyResponse = PyObject_CallMethodObjArgs(py_wrapper,
                                                 py_get_vec_log_probs,
                                                 pyNextWords,
@@ -229,6 +241,7 @@ void NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
 
     PyObject* pyLogProbMatrix = PyTuple_GetItem(pyResponse, 0);
     PyObject* pyOutputStateMatrix = PyTuple_GetItem(pyResponse, 1);
+    PyObject* pyUnks = PyTuple_GetItem(pyResponse, 2);
     logProbs.clear();
     outputStates = vector<vector<PyObject*> >(inputSize, vector<PyObject*>(nextWords.size(), NULL));
     vector<double> hipoProbs;
@@ -253,7 +266,15 @@ void NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
 
         outputStates.push_back(hipoStates);
     }
-    unks = IsUnk(nextWords);
+
+    for (size_t i = 0; i < inputSize; ++i) {
+        long res  = PyInt_AsLong(PyList_GetItem(pyUnks, i));
+        if (res) {
+            unks.push_back(true);
+        } else {
+            unks.push_back(false);
+        }
+    }
 }
 
 void NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
@@ -309,23 +330,6 @@ void NMT_Wrapper::GetNextStates(
 }
 
 
-inline PyObject* StringVector2Python(std::vector<std::string> inputVector)
-{
-    PyObject* pyList = PyList_New(0);
-    for (size_t i = 0; i < inputVector.size(); ++i) {
-        PyList_Append(pyList, PyString_FromString(inputVector[i].c_str()));
-    }
-    return pyList;
-}
-
-inline PyObject* PyObjectVector2Python(std::vector<PyObject*> inputVector)
-{
-    PyObject* pyList = PyList_New(0);
-    for (size_t i = 0; i < inputVector.size(); ++i) {
-        PyList_Append(pyList, inputVector[i]);
-    }
-    return pyList;
-}
 
 void NMT_Wrapper::GetNextLogProbStates(
     const std::vector<std::string>& nextWords,
@@ -371,18 +375,26 @@ void NMT_Wrapper::GetNextLogProbStates(
 
     PyObject* pyLogProbs = PyTuple_GetItem(pyResponse, 0);
     PyObject* pyNextStates = PyTuple_GetItem(pyResponse, 1);
+    PyObject* pyUnks = PyTuple_GetItem(pyResponse, 2);
     logProbs.clear();
     nextStates.clear();
+    unks.clear();
 
     for (size_t j = 0; j < inputSize; ++j) {
         logProbs.push_back(PyFloat_AsDouble(PyList_GetItem(pyLogProbs, j)));
     }
     for (size_t i = 0; i < inputSize; ++i) {
         PyObject* nextState = PyList_GetItem(pyNextStates, i);
-        if (nextState == NULL) cerr << "NULL OUTOUT" << endl;
         nextStates.push_back(nextState);
     }
-    unks = IsUnk(nextWords);
+    for (size_t i = 0; i < inputSize; ++i) {
+        long res  = PyInt_AsLong(PyList_GetItem(pyUnks, i));
+        if (res) {
+            unks.push_back(true);
+        } else {
+            unks.push_back(false);
+        }
+    }
 }
 
 void NMT_Wrapper::GetNextLogProbStates(
