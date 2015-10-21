@@ -172,23 +172,32 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& next_words,
 
     return true;
 }
-void ParseWrapperResponse(
-        PyObject*& pyResponse,
-        std::vector< std::vector< double > >& logProbs,
-        std::vector< std::vector< PyObject* > >& outputStates)
-{
-
-}
-
 
 bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
                           PyObject* pyContextVectors,
                           const std::vector< string >& lastWords,
                           std::vector< PyObject* >& inputStates,
                           std::vector< std::vector< double > >& logProbs,
-                          std::vector< std::vector< PyObject* > >& outputStates)
+                          std::vector< std::vector< PyObject* > >& outputStates,
 {
-    // UTIL_THROW_IF2(lastWords.size() != inputStates.size(), "#lastWords != #inputStates");
+    std::vector<bool> unks;
+    GetProb(nextWords,
+            pyContextVectors,
+            lastWords,
+            inputStates,
+            logProbs,
+            outputStates,
+            unks);
+}
+
+bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
+                          PyObject* pyContextVectors,
+                          const std::vector< string >& lastWords,
+                          std::vector< PyObject* >& inputStates,
+                          std::vector< std::vector< double > >& logProbs,
+                          std::vector< std::vector< PyObject* > >& outputStates,
+                          std::vector<bool> unks)
+{
     PyObject* pyNextWords = PyList_New(0);
     for (size_t i = 0; i < nextWords.size(); ++i) {
         PyList_Append(pyNextWords, PyString_FromString(nextWords[i].c_str()));
@@ -260,8 +269,8 @@ bool NMT_Wrapper::GetProb(const std::vector<std::string>& nextWords,
 
         outputStates.push_back(hipoStates);
     }
+    unks = IsUnk(nextWords);
 
-    cerr << "Wychodze z GetProb!" << endl;
     return true;
 }
 void NMT_Wrapper::GetNextStates(
@@ -299,6 +308,7 @@ void NMT_Wrapper::GetNextStates(
         nextStates.push_back(PyList_GetItem(pyResponse, i));
     }
 }
+
 void NMT_Wrapper::GetNextLogProbStates(
     const std::vector<std::string>& nextWords,
     PyObject* pyContextVectors,
@@ -306,6 +316,25 @@ void NMT_Wrapper::GetNextLogProbStates(
     std::vector<PyObject*>& inputStates,
     std::vector<double>& logProbs,
     std::vector<PyObject*>& nextStates)
+{
+    std::vector<bool> unks;
+    GetNextLogProbStates(nextWords,
+                         pyContextVectors,
+                         lastWords,
+                         inputStates,
+                         logProbs,
+                         nextWords,
+                         unks);
+}
+
+void NMT_Wrapper::GetNextLogProbStates(
+    const std::vector<std::string>& nextWords,
+    PyObject* pyContextVectors,
+    const std::vector< std::string >& lastWords,
+    std::vector<PyObject*>& inputStates,
+    std::vector<double>& logProbs,
+    std::vector<PyObject*>& nextStates,
+    std::vector<bool>& unks)
 {
     UTIL_THROW_IF2(lastWords.size() != inputStates.size(), "#lastWords != #inputStates");
 
@@ -356,12 +385,10 @@ void NMT_Wrapper::GetNextLogProbStates(
     for (size_t j = 0; j < inputSize; ++j) {
         logProbs.push_back(PyFloat_AsDouble(PyList_GetItem(pyLogProbs, j)));
     }
-    //cerr << "S: " << PyList_Size(pyNextStates) << endl;
     for (size_t i = 0; i < inputSize; ++i) {
         PyObject* nextState = PyList_GetItem(pyNextStates, i);
         if (nextState == NULL) cerr << "NULL OUTOUT" << endl;
         nextStates.push_back(nextState);
     }
-    for(size_t i = 0; i < nextStates.size(); ++i) {
-    }
+    unks = IsUnk(nextWords);
 }

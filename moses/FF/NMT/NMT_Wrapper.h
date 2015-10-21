@@ -23,8 +23,8 @@ public:
         const std::string& targetVocabPath);
 
     bool GetContextVectors(
-            const std::string& source_sentence,
-            PyObject*& vectors);
+                const std::string& source_sentence,
+                PyObject*& vectors);
 
     bool GetProb(const std::string& next_word,
                  PyObject* source_sentence,
@@ -44,6 +44,13 @@ public:
                  std::vector<PyObject*>& inputStates,
                  std::vector< std::vector< double > >& logProbs,
                  std::vector< std::vector< PyObject* > >& outputStates);
+    bool GetProb(const std::vector<std::string>& nextWords,
+                 PyObject* pyContextVectors,
+                 const std::vector< std::string >& lastWords,
+                 std::vector<PyObject*>& inputStates,
+                 std::vector< std::vector< double > >& logProbs,
+                 std::vector< std::vector< PyObject* > >& outputStates,
+                 std::vector<bool> unks);
     void GetNextStates(
         const std::vector<std::string>& nextWords,
         PyObject* pyContextVectors,
@@ -57,6 +64,15 @@ public:
         std::vector<PyObject*>& inputStates,
         std::vector<double>& logProbs,
         std::vector<PyObject*>& nextStates);
+
+    void GetNextLogProbStates(
+        const std::vector<std::string>& nextWords,
+        PyObject* pyContextVectors,
+        const std::vector< std::string >& lastWords,
+        std::vector<PyObject*>& inputStates,
+        std::vector<double>& logProbs,
+        std::vector<PyObject*>& nextStates,
+        std::vector<bool>& unks);
 
     static NMT_Wrapper& GetNMT() {
         return *s_nmt;
