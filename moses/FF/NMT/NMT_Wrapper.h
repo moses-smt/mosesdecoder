@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <functional>
 
 struct _object;
@@ -13,14 +14,14 @@ class NMT_Wrapper
 public:
     NMT_Wrapper();
     ~NMT_Wrapper();
-    
+
     void Init(
         const std::string& state_path,
         const std::string& model_path,
         const std::string& wrapper_path,
         const std::string& sourceVocabPath,
         const std::string& targetVocabPath);
-    
+
     bool GetContextVectors(
             const std::string& source_sentence,
             PyObject*& vectors);
@@ -64,10 +65,12 @@ public:
     static void SetNMT(NMT_Wrapper* ptr) {
         s_nmt = ptr;
     }
-    
+
+    std::vector<bool> IsUnk(const std::vector<std::string>& words);
+
 private:
     static NMT_Wrapper* s_nmt;
-    
+
     PyObject* py_wrapper;
     PyObject* py_get_log_prob;
     PyObject* py_get_log_probs;
@@ -75,7 +78,9 @@ private:
     PyObject* py_get_context_vectors;
     PyObject* py_get_next_states;
     PyObject* py_get_log_prob_states;
+    std::set<std::string> m_targetVocab;
     void AddPathToSys(const std::string& path);
+    void LoadTargetVocab();
 };
 
 #endif  // NMT_WRAPPER_H_
