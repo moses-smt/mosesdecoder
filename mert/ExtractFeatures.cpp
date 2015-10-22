@@ -246,8 +246,9 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 			tuple.push_back(FilterArg(words[gov]));
 			tuple.push_back(FilterArg(words[dep]));
 
-			if((modelType == 1 and pos.size() > gov and pos[gov].substr(0,1) == "V") or
-					(modelType == 2 and pos.size() > gov and pos[gov].substr(0,1) == "N")) //prep argument of verb
+			if((modelType == 1 and pos.size() > gov and pos[gov].substr(0,1) == "V") or //prep argument of verb
+					(modelType == 2 and pos.size() > gov and pos[gov].substr(0,1) == "N") or //prep argument of noun
+					modelType == 0) //main argument
 				dependencyTuples.push_back(tuple);
 
 
