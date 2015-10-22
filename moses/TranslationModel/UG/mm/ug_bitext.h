@@ -68,6 +68,9 @@
 #include "ug_bitext_phrase_extraction_record.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_ref_counter.h"
 
+// Minimum source count for caching phrase lookup statistics.
+// If source phrase occurs less frequently, never cache; 
+// always re-compute.
 #define PSTATS_CACHE_THRESHOLD 50
 
 namespace Moses { class Mmsapt; }
