@@ -93,11 +93,6 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const 
   , m_id(m_manager.GetNextHypoId())
 {
   m_currScoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
-
-  // assert that we are not extending our hypothesis by retranslating something
-  // that this hypothesis has already translated!
-  assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
-
   m_wordDeleted = transOpt.IsDeletionOption();
   m_manager.GetSentenceStats().AddCreated();
 }
