@@ -1,0 +1,1 @@
+g++ -I../../.. -I../../../boost/include StaticData.cpp Factor.cpp Word.cpp 
