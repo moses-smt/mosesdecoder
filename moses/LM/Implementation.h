@@ -87,7 +87,7 @@ public:
   virtual const FFState *GetBeginSentenceState() const = 0;
   virtual FFState *NewState(const FFState *from = NULL) const = 0;
 
-  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
   FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
