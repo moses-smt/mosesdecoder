@@ -226,6 +226,8 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 		modelType=1;
 	if(getConfig("argType") == "prepN")
 			modelType=2;
+	if(getConfig("argType") == "prepAll")
+			modelType=3;
 
 
 	int dep,gov;
@@ -248,6 +250,7 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 
 			if((modelType == 1 and pos.size() > gov and pos[gov].substr(0,1) == "V") or //prep argument of verb
 					(modelType == 2 and pos.size() > gov and pos[gov].substr(0,1) == "N") or //prep argument of noun
+					modelType == 3 or // prep argument of any gov
 					modelType == 0) //main argument
 				dependencyTuples.push_back(tuple);
 
