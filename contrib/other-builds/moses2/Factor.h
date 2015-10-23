@@ -5,8 +5,7 @@
  *      Author: hieu
  */
 
-#ifndef FACTOR_H_
-#define FACTOR_H_
+#pragma once
 
 #include "util/string_piece.hh"
 #include "util/string_piece_hash.hh"
@@ -23,7 +22,7 @@ public:
   }
 
   inline bool operator==(const Factor &compare) const {
-	return m_string == &compare.m_string;
+	return m_string == compare.m_string;
   }
 
 protected:
@@ -31,4 +30,3 @@ protected:
 
 };
 
-#endif /* FACTOR_H_ */
