@@ -7,10 +7,12 @@
 
 #include "Manager.h"
 
-Manager::Manager(const StaticData &staticData)
+Manager::Manager(const StaticData &staticData, Phrase &input)
 :m_staticData(staticData)
+,m_input(input)
+,m_inputPaths(input)
 {
-	// TODO Auto-generated constructor stub
+	m_pt.Load();
 
 }
 

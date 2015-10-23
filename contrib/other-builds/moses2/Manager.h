@@ -8,12 +8,15 @@
 #pragma once
 
 #include <cstddef>
+#include "PhraseTable.h"
+#include "InputPaths.h"
 
 class StaticData;
+class Phrase;
 
 class Manager {
 public:
-	Manager(const StaticData &staticData);
+	Manager(const StaticData &staticData, Phrase &input);
 	virtual ~Manager();
 
 	size_t GetNumScores() const
@@ -21,5 +24,8 @@ public:
 
 protected:
 	const StaticData &m_staticData;
+	PhraseTable m_pt;
+	Phrase &m_input;
+	InputPaths m_inputPaths;
 };
 

@@ -15,3 +15,5 @@ Word::~Word() {
 	// TODO Auto-generated destructor stub
 }
 
+//size_t hash() const;
+//bool operator==(const Factor &compare) const;
