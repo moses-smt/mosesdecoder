@@ -131,16 +131,13 @@ int main(int argc, char *argv[])
     NMT_Wrapper wrapper;
     
     bi::interprocess_mutex& mutex = GetMutex(segment);
-    
-    {
-        bi::scoped_lock<bi::interprocess_mutex> lock(mutex);
-        GetPaths(statePath, modelPath, wrapperPath, sourceVocab, targetVocab, segment);
-        wrapper.Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
-        NotifyParent(segment);
-    }
-    
+    bi::scoped_lock<bi::interprocess_mutex> lock(mutex);
+        
+    GetPaths(statePath, modelPath, wrapperPath, sourceVocab, targetVocab, segment);
+    wrapper.Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
+    NotifyParent(segment);
+
     while(true) {
-        bi::scoped_lock<bi::interprocess_mutex> lock(mutex);
         WaitForParent(segment, lock);
 
         State state = GetState(segment);
