@@ -17,11 +17,8 @@ protected:
   bool m_legacy;
 
 public:
-  static const InputFeature& Instance() {
-    return *s_instance;
-  }
-  static InputFeature& InstanceNonConst() {
-    return *s_instance;
+  static const InputFeature *InstancePtr() {
+    return s_instance;
   }
 
   InputFeature(const std::string &line);

@@ -5,6 +5,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/TranslationTask.h"
 #include "util/string_piece_hash.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -131,7 +132,7 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
     }
 
     if (m_biasFeature) {
-      stringstream feature;
+      util::StringStream feature;
       feature << "glm_";
       feature << targetString;
       feature << "~";
@@ -165,7 +166,7 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
           if (m_sourceContext) {
             if (sourceIndex == 0) {
               // add <s> trigger feature for source
-              stringstream feature;
+              util::StringStream feature;
               feature << "glm_";
               feature << targetString;
               feature << "~";
@@ -183,7 +184,7 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
                 contextExists = FindStringPiece(m_vocabSource, contextString ) != m_vocabSource.end();
 
               if (m_unrestricted || contextExists) {
-                stringstream feature;
+                util::StringStream feature;
                 feature << "glm_";
                 feature << targetString;
                 feature << "~";
@@ -304,7 +305,7 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
               }
             }
           } else {
-            stringstream feature;
+            util::StringStream feature;
             feature << "glm_";
             feature << targetString;
             feature << "~";
@@ -323,7 +324,7 @@ void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulat
     StringPiece sourceTrigger, StringPiece sourceWord,
     StringPiece targetTrigger, StringPiece targetWord) const
 {
-  stringstream feature;
+  util::StringStream feature;
   feature << "glm_";
   feature << targetTrigger;
   feature << ",";

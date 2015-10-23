@@ -23,7 +23,8 @@ public:
   const Word* GetTargetWord() const {
     return m_targetWord;
   }
-  virtual int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 
 private:

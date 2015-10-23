@@ -47,13 +47,8 @@ class BackwardLMState : public FFState
 
 public:
 
-  /*
-    int Compare(const FFState &o) const {
-      const BackwardLMState &other = static_cast<const BackwardLMState &>(o);
-      return state.left.Compare(other.state.left);
-    }
-  */
-  int Compare(const FFState &o) const;
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
   // Allow BackwardLanguageModel to access the private members of this class
   template <class Model> friend class BackwardLanguageModel;

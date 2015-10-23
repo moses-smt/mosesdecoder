@@ -51,9 +51,10 @@ public:
 private:
   friend class RuleTableLoader;
 
-  virtual TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target,
-    const Word *sourceLHS) = 0;
+  virtual TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS) = 0;
 
   virtual void SortAndPrune() = 0;
 

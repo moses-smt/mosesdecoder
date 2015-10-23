@@ -9,7 +9,7 @@ namespace Syntax
 
 struct PLabel {
   float inputWeight;
-  const TargetPhraseCollection *translations;
+  TargetPhraseCollection::shared_ptr translations;
 };
 
 }  // Syntax

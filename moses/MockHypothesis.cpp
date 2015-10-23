@@ -17,12 +17,11 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <boost/test/unit_test.hpp>
 #include "MockHypothesis.h"
 #include "TranslationOption.h"
 #include "TranslationTask.h"
-
-#include <boost/test/unit_test.hpp>
-
+#include "Bitmaps.h"
 
 using namespace Moses;
 using namespace std;
@@ -45,8 +44,11 @@ MockHypothesisGuard
   m_manager.reset(new Manager(m_ttask));
 
   //Initial empty hypothesis
+  Bitmaps bitmaps(m_sentence.get()->GetSize(), m_sentence.get()->m_sourceCompleted);
   m_manager->ResetSentenceStats(*m_sentence);
-  m_hypothesis = Hypothesis::Create(*m_manager, *m_sentence, m_initialTransOpt);
+
+  const WordsBitmap &initBitmap = bitmaps.GetInitialBitmap();
+  m_hypothesis = new Hypothesis(*m_manager, *m_sentence, m_initialTransOpt, initBitmap);
 
   //create the chain
   vector<Alignment>::const_iterator ai = alignments.begin();
@@ -54,12 +56,15 @@ MockHypothesisGuard
   for (; ti != targetSegments.end() && ai != alignments.end(); ++ti,++ai) {
     Hypothesis* prevHypo = m_hypothesis;
     WordsRange wordsRange(ai->first,ai->second);
+    const WordsBitmap &newBitmap = bitmaps.GetBitmap(prevHypo->GetWordsBitmap(), wordsRange);
+
     m_targetPhrases.push_back(TargetPhrase(NULL));
     // m_targetPhrases.back().CreateFromString(Input, factors, *ti, "|", NULL);
     m_targetPhrases.back().CreateFromString(Input, factors, *ti, NULL);
     m_toptions.push_back(new TranslationOption
                          (wordsRange,m_targetPhrases.back()));
-    m_hypothesis =  Hypothesis::Create(*prevHypo,*m_toptions.back());
+    m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back(), newBitmap);
+
   }
 
 

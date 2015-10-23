@@ -13,13 +13,16 @@ struct DistortionState_traditional : public FFState {
   WordsRange range;
   int first_gap;
   DistortionState_traditional(const WordsRange& wr, int fg) : range(wr), first_gap(fg) {}
-  int Compare(const FFState& other) const {
+
+  size_t hash() const {
+    return range.GetEndPos();
+  }
+  virtual bool operator==(const FFState& other) const {
     const DistortionState_traditional& o =
       static_cast<const DistortionState_traditional&>(other);
-    if (range.GetEndPos() < o.range.GetEndPos()) return -1;
-    if (range.GetEndPos() > o.range.GetEndPos()) return 1;
-    return 0;
+    return range.GetEndPos() == o.range.GetEndPos();
   }
+
 };
 
 std::vector<const DistortionScoreProducer*> DistortionScoreProducer::s_staticColl;

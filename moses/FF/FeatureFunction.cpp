@@ -112,12 +112,10 @@ void FeatureFunction::ParseLine(const std::string &line)
   if (m_description == "") {
     size_t index = description_counts.count(nameStub);
 
-    ostringstream dstream;
-    dstream << nameStub;
-    dstream << index;
+    string descr = SPrint(nameStub) + SPrint(index);
 
     description_counts.insert(nameStub);
-    m_description = dstream.str();
+    m_description = descr;
   }
 
 }

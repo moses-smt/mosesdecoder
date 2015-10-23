@@ -21,6 +21,8 @@
 
 #include "TargetPhrase.h"
 #include "Vocab.h"
+#include "moses/TargetPhraseCollection.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
@@ -50,6 +52,9 @@ protected:
   std::string m_debugStr;
 
 public:
+  typedef boost::shared_ptr<TargetPhraseCollection const> shared_const_ptr;
+  typedef boost::shared_ptr<TargetPhraseCollection> shared_ptr;
+
   static size_t s_sortScoreInd;
 
   TargetPhraseCollection();
@@ -69,7 +74,7 @@ public:
 
   uint64_t GetFilePos() const;
 
-  Moses::TargetPhraseCollection *ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
+  Moses::TargetPhraseCollection::shared_ptr ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
       , const std::vector<Moses::FactorType> &outputFactors
       , const Moses::PhraseDictionary &phraseDict
       , const std::vector<float> &weightT

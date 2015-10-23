@@ -23,11 +23,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_HypothesisStackCubePruning_h
 
 #include <limits>
-#include <map>
 #include <set>
+#include <boost/unordered_map.hpp>
 #include "Hypothesis.h"
 #include "BitmapContainer.h"
 #include "HypothesisStack.h"
+#include "Util.h"
 
 namespace Moses
 {
@@ -36,7 +37,7 @@ class BitmapContainer;
 class TranslationOptionList;
 class Manager;
 
-typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
+typedef boost::unordered_map<WordsBitmap, BitmapContainer*, UnorderedComparer<WordsBitmap>, UnorderedComparer<WordsBitmap> > _BMType;
 
 /** A stack for phrase-based decoding with cube-pruning. */
 class HypothesisStackCubePruning : public HypothesisStack
@@ -52,6 +53,7 @@ protected:
   float m_beamWidth; /**< minimum score due to threashold pruning */
   size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
+  bool m_deterministic; /**< flag to determine whether to sort hypotheses deterministically */
 
   /** add hypothesis to stack. Prune if necessary.
    * Returns false if equiv hypo exists in collection, otherwise returns true
@@ -60,6 +62,8 @@ protected:
 
   /** destroy all instances of Hypothesis in this collection */
   void RemoveAll();
+
+  BitmapContainer *AddBitmapContainer(const WordsBitmap &bitmap, HypothesisStackCubePruning &stack);
 
 public:
   HypothesisStackCubePruning(Manager& manager);

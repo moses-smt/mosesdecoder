@@ -43,15 +43,10 @@ using namespace std;
 
 namespace Moses
 {
-
-#ifdef USE_HYPO_POOL
-ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
-#endif
-
 Hypothesis::
-Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt)
+Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const WordsBitmap &bitmap)
   : m_prevHypo(NULL)
-  , m_sourceCompleted(source.GetSize(), manager.GetSource().m_sourceCompleted)
+  , m_sourceCompleted(bitmap)
   , m_sourceInput(source)
   , m_currSourceWordsRange(
     m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
@@ -80,9 +75,9 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
  * continue prevHypo by appending the phrases in transOpt
  */
 Hypothesis::
-Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
+Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const WordsBitmap &bitmap)
   : m_prevHypo(&prevHypo)
-  , m_sourceCompleted(prevHypo.m_sourceCompleted )
+  , m_sourceCompleted(bitmap)
   , m_sourceInput(prevHypo.m_sourceInput)
   , m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   , m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
@@ -98,13 +93,6 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   , m_id(m_manager.GetNextHypoId())
 {
   m_currScoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
-
-  // assert that we are not extending our hypothesis by retranslating something
-  // that this hypothesis has already translated!
-  assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
-
-  //_hash_computed = false;
-  m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
   m_manager.GetSentenceStats().AddCreated();
 }
@@ -118,7 +106,7 @@ Hypothesis::
   if (m_arcList) {
     ArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
-      FREEHYPO(*iter);
+      delete *iter;
     }
     m_arcList->clear();
 
@@ -153,77 +141,6 @@ AddArc(Hypothesis *loserHypo)
   m_arcList->push_back(loserHypo);
 }
 
-/***
- * return the subclass of Hypothesis most appropriate to the given translation option
- */
-Hypothesis*
-Hypothesis::
-CreateNext(const TranslationOption &transOpt) const
-{
-  return Create(*this, transOpt);
-}
-
-/***
- * return the subclass of Hypothesis most appropriate to the given translation option
- */
-Hypothesis*
-Hypothesis::
-Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
-{
-
-#ifdef USE_HYPO_POOL
-  Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(prevHypo, transOpt);
-#else
-  return new Hypothesis(prevHypo, transOpt);
-#endif
-}
-/***
- * return the subclass of Hypothesis most appropriate to the given target phrase
- */
-
-Hypothesis*
-Hypothesis::
-Create(Manager& manager, InputType const& m_source,
-       const TranslationOption &initialTransOpt)
-{
-#ifdef USE_HYPO_POOL
-  Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(manager, m_source, initialTransOpt);
-#else
-  return new Hypothesis(manager, m_source, initialTransOpt);
-#endif
-}
-
-/** check, if two hypothesis can be recombined.
-    this is actually a sorting function that allows us to
-    keep an ordered list of hypotheses. This makes recombination
-    much quicker.
-*/
-int
-Hypothesis::
-RecombineCompare(const Hypothesis &compare) const
-{
-  // -1 = this < compare
-  // +1 = this > compare
-  // 0	= this ==compare
-  int comp = m_sourceCompleted.Compare(compare.m_sourceCompleted);
-  if (comp != 0)
-    return comp;
-
-  for (unsigned i = 0; i < m_ffStates.size(); ++i) {
-    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) {
-      // TODO: Can this situation actually occur?
-      comp = int(m_ffStates[i] != NULL) - int(compare.m_ffStates[i] != NULL);
-    } else {
-      comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
-    }
-    if (comp != 0) return comp;
-  }
-
-  return 0;
-}
-
 void
 Hypothesis::
 EvaluateWhenApplied(StatefulFeatureFunction const& sfff,
@@ -255,7 +172,7 @@ EvaluateWhenApplied(const StatelessFeatureFunction& slff)
  */
 void
 Hypothesis::
-EvaluateWhenApplied(const SquareMatrix &futureScore)
+EvaluateWhenApplied(float futureScore)
 {
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StartTimeOtherScore();
@@ -292,7 +209,7 @@ EvaluateWhenApplied(const SquareMatrix &futureScore)
   }
 
   // FUTURE COST
-  m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
+  m_futureScore = futureScore;
 
   // TOTAL
   m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
@@ -379,7 +296,7 @@ CleanupArcList()
     // delete bad ones
     ArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize; iter != m_arcList->end() ; ++iter)
-      FREEHYPO(*iter);
+      delete *iter;
     m_arcList->erase(m_arcList->begin() + nBestSize, m_arcList->end());
   }
 
@@ -645,6 +562,40 @@ GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const
   }
 
   return ret;
+}
+
+size_t Hypothesis::hash() const
+{
+  size_t seed;
+
+  // coverage
+  seed = m_sourceCompleted.hash();
+
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState *state = m_ffStates[i];
+    size_t hash = state->hash();
+    boost::hash_combine(seed, hash);
+  }
+  return seed;
+}
+
+bool Hypothesis::operator==(const Hypothesis& other) const
+{
+  // coverage
+  if (m_sourceCompleted != other.m_sourceCompleted) {
+    return false;
+  }
+
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState &thisState = *m_ffStates[i];
+    const FFState &otherState = *other.m_ffStates[i];
+    if (thisState != otherState) {
+      return false;
+    }
+  }
+  return true;
 }
 
 #ifdef HAVE_XMLRPC_C

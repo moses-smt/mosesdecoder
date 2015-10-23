@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"  // GetMaxNumFactors
 
 #include "util/string_piece.hh"
+#include "util/string_stream.hh"
 #include "util/tokenize_piece.hh"
 
 using namespace std;
@@ -117,7 +118,7 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
   bool markUnknown = StaticData::Instance().GetMarkUnknown();
 
-  stringstream strme;
+  util::StringStream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
     if (markUnknown && GetWord(pos).IsOOV()) {
       strme << StaticData::Instance().GetUnknownWordPrefix();
@@ -251,6 +252,35 @@ int Phrase::Compare(const Phrase &other) const
   }
 
   return 0;
+}
+
+size_t Phrase::hash() const
+{
+  size_t  seed = 0;
+  for (size_t i = 0; i < GetSize(); ++i) {
+    boost::hash_combine(seed, GetWord(i));
+  }
+  return seed;
+}
+
+bool Phrase::operator== (const Phrase &other) const
+{
+  size_t thisSize = GetSize()
+                    ,compareSize = other.GetSize();
+  if (thisSize != compareSize) {
+    return false;
+  }
+
+  for (size_t pos = 0 ; pos < thisSize ; pos++) {
+    const Word &thisWord	= GetWord(pos)
+                            ,&otherWord	= other.GetWord(pos);
+    bool ret = thisWord == otherWord;
+    if (!ret) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 

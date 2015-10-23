@@ -108,7 +108,7 @@ void Manager<Parser>::InitializeParsers(PChart &pchart,
 // Find the set of OOVs for this input.  This function assumes that the
 // PChart argument has already been initialized from the input.
 template<typename Parser>
-void Manager<Parser>::FindOovs(const PChart &pchart, std::set<Word> &oovs,
+void Manager<Parser>::FindOovs(const PChart &pchart, boost::unordered_set<Word> &oovs,
                                std::size_t maxOovWidth)
 {
   // Get the set of RuleTries.
@@ -349,7 +349,7 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
   // head pointers are updated to point to the vertex instances in the map and
   // any 'duplicate' vertices are deleted.
 // TODO Set?
-  typedef std::map<SVertex *, SVertex *, SVertexRecombinationOrderer> Map;
+  typedef boost::unordered_map<SVertex *, SVertex *, SVertexRecombinationUnordered, SVertexRecombinationUnordered> Map;
   Map map;
   for (std::vector<SHyperedge*>::const_iterator p = buffer.begin();
        p != buffer.end(); ++p) {

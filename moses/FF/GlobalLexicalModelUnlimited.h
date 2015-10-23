@@ -16,8 +16,6 @@
 #include "moses/FactorTypeSet.h"
 #include "moses/Sentence.h"
 
-#include "moses/FF/FFState.h"
-
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
 #endif
@@ -75,10 +73,6 @@ public:
   bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
   void InitializeForInput(ttasksptr const& ttask);
-
-  const FFState* EmptyHypothesisState(const InputType &) const {
-    return new DummyState();
-  }
 
   //TODO: This implements the old interface, but cannot be updated because
   //it appears to be stateful

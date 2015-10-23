@@ -17,7 +17,7 @@ namespace MosesServer{
     time_t start_time;
     time_t last_access;
     boost::shared_ptr<Moses::ContextScope> const scope; // stores local info
-
+    SPTR<std::map<std::string,float> > m_context_weights;
 
 
     Session(uint64_t const session_id) 
@@ -27,6 +27,8 @@ namespace MosesServer{
     }
 
     bool is_new() const { return last_access == start_time; }
+
+    void setup(std::map<std::string, xmlrpc_c::value> const& params);
   };
 
   class SessionCache

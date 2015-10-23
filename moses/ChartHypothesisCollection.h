@@ -39,23 +39,6 @@ public:
   }
 };
 
-/** functor to compare (chart) hypotheses by feature function states.
- *  If 2 hypos are equal, according to this functor, then they can be recombined.
- */
-class ChartHypothesisRecombinationOrderer
-{
-public:
-  bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
-    // assert in same cell
-    assert(hypoA->GetCurrSourceRange() == hypoB->GetCurrSourceRange());
-
-    // shouldn't be mixing hypos with different lhs
-    assert(hypoA->GetTargetLHS() == hypoB->GetTargetLHS());
-
-    return (hypoA->RecombineCompare(*hypoB) < 0);
-  }
-};
-
 /** Contains a set of unique hypos that have the same HS non-term.
   * ie. 1 of these for each target LHS in each cell
   */
@@ -64,7 +47,8 @@ class ChartHypothesisCollection
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesisCollection&);
 
 protected:
-  typedef std::set<ChartHypothesis*, ChartHypothesisRecombinationOrderer> HCType;
+  //typedef std::set<ChartHypothesis*, ChartHypothesisRecombinationOrderer> HCType;
+  typedef boost::unordered_set< ChartHypothesis*, UnorderedComparer<ChartHypothesis>, UnorderedComparer<ChartHypothesis> > HCType;
   HCType m_hypos;
   HypoList m_hyposOrdered;
 

@@ -35,8 +35,8 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
   BOOST_FOREACH(PhraseDictionary* pd, PhraseDictionary::GetColl())
   if (pd->ProvidesPrefixCheck()) prefixCheckers.push_back(pd);
 
-  const InputFeature &inputFeature = InputFeature::Instance();
-  UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
+  UTIL_THROW_IF2(inputFeature == NULL, "Input feature must be specified");
 
   size_t inputSize = input.GetSize();
   m_inputPathMatrix.resize(inputSize);
@@ -62,7 +62,7 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
       const ScorePair &scores = col[i].second;
       ScorePair *inputScore = new ScorePair(scores);
 
-      InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
+      InputPath *path = new InputPath(ttask, subphrase, labels, range, NULL, inputScore);
       list.push_back(path);
 
       m_inputPathQueue.push_back(path);
@@ -113,7 +113,7 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
           ScorePair *inputScore = new ScorePair(*prevInputScore);
           inputScore->PlusEquals(scores);
 
-          InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+          InputPath *path = new InputPath(ttask, subphrase, labels, range, &prevPath, inputScore);
           list.push_back(path);
 
           m_inputPathQueue.push_back(path);
@@ -143,7 +143,7 @@ InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t 
 */
 void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePos)
 {
-  ConfusionNet const& source=dynamic_cast<ConfusionNet const&>(m_source);
+  ConfusionNet const& source=static_cast<ConfusionNet const&>(m_source);
 
   ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
   const InputPathList &inputPathList = GetInputPathList(sourcePos, sourcePos);

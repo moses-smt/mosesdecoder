@@ -37,10 +37,6 @@ using namespace std;
 namespace Moses
 {
 
-#ifdef USE_HYPO_POOL
-ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
-#endif
-
 /** Create a hypothesis from a rule
  * \param transOpt wrapper around the rule
  * \param item @todo dunno
@@ -93,7 +89,7 @@ ChartHypothesis::~ChartHypothesis()
     ChartArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
       ChartHypothesis *hypo = *iter;
-      Delete(hypo);
+      delete hypo;
     }
     m_arcList->clear();
 
@@ -179,32 +175,6 @@ void ChartHypothesis::GetOutputPhrase(size_t leftRightMost, size_t numWords, Phr
       return;
     }
   }
-}
-
-/** check, if two hypothesis can be recombined.
-    this is actually a sorting function that allows us to
-    keep an ordered list of hypotheses. This makes recombination
-    much quicker. Returns one of 3 possible values:
-      -1 = this < compare
-      +1 = this > compare
-      0	= this ==compare
- \param compare the other hypo to compare to
-*/
-int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
-{
-  int comp = 0;
-
-  for (unsigned i = 0; i < m_ffStates.size(); ++i) {
-    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL)
-      comp = m_ffStates[i] - compare.m_ffStates[i];
-    else
-      comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
-
-    if (comp != 0)
-      return comp;
-  }
-
-  return 0;
 }
 
 /** calculate total score */
@@ -304,7 +274,7 @@ void ChartHypothesis::CleanupArcList()
     ChartArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) {
       ChartHypothesis *arc = *iter;
-      ChartHypothesis::Delete(arc);
+      delete arc;
     }
     m_arcList->erase(m_arcList->begin() + nBestSize
                      , m_arcList->end());
@@ -323,6 +293,33 @@ void ChartHypothesis::CleanupArcList()
 void ChartHypothesis::SetWinningHypo(const ChartHypothesis *hypo)
 {
   m_winningHypo = hypo;
+}
+
+size_t ChartHypothesis::hash() const
+{
+  size_t seed;
+
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState *state = m_ffStates[i];
+    size_t hash = state->hash();
+    boost::hash_combine(seed, hash);
+  }
+  return seed;
+
+}
+
+bool ChartHypothesis::operator==(const ChartHypothesis& other) const
+{
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState &thisState = *m_ffStates[i];
+    const FFState &otherState = *other.m_ffStates[i];
+    if (thisState != otherState) {
+      return false;
+    }
+  }
+  return true;
 }
 
 TO_STRING_BODY(ChartHypothesis)

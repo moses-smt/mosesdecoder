@@ -49,7 +49,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
                                     , PartialTranslOptColl &outputPartialTranslOptColl
                                     , TranslationOptionCollection *toc
                                     , bool adhereTableLimit
-                                    , const TargetPhraseCollection *phraseColl) const
+                                    , TargetPhraseCollection::shared_ptr phraseColl) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion
@@ -105,7 +105,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
   ,PartialTranslOptColl &outputPartialTranslOptColl
   , size_t startPos, size_t endPos, bool adhereTableLimit
   , const InputPath &inputPath
-  , const TargetPhraseCollection *phraseColl) const
+  , TargetPhraseCollection::shared_ptr phraseColl) const
 {
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
@@ -147,7 +147,8 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const WordsRange wordsRange(startPos, endPos);
-  const TargetPhraseCollectionWithSourcePhrase *phraseColl =	phraseDictionary->GetTargetPhraseCollectionLEGACY(source,wordsRange);
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr phraseColl
+  = phraseDictionary->GetTargetPhraseCollectionLEGACY(source,wordsRange);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
@@ -237,8 +238,8 @@ ProcessLEGACY(TranslationOption const& in,
   size_t const currSize = inPhrase.GetSize();
   size_t const tableLimit = pdict->GetTableLimit();
 
-  TargetPhraseCollectionWithSourcePhrase const* phraseColl;
-  phraseColl = pdict->GetTargetPhraseCollectionLEGACY(toc->GetSource(),srcRange);
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr phraseColl
+  = pdict->GetTargetPhraseCollectionLEGACY(toc->GetSource(),srcRange);
 
   if (phraseColl != NULL) {
     TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;

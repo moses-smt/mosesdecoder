@@ -305,7 +305,7 @@ sub tokenize
         #special case for "1990's"
         $text =~ s/([\p{IsN}])[']([s])/$1 '$2/g;
     }
-    elsif (($language eq "fr") or ($language eq "it"))
+    elsif (($language eq "fr") or ($language eq "it") or ($language eq "ga"))
     {
         #split contractions left
         $text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;

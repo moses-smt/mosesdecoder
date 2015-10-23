@@ -6,6 +6,7 @@
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
+#include "moses/TranslationModel/PhraseDictionaryGroup.h"
 #include "moses/TranslationModel/PhraseDictionaryScope3.h"
 #include "moses/TranslationModel/PhraseDictionaryTransliteration.h"
 #include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
@@ -55,6 +56,7 @@
 #include "NieceTerminal.h"
 #include "SpanLength.h"
 #include "SyntaxRHS.h"
+#include "DeleteRules.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -71,6 +73,7 @@
 #include "moses/FF/VW/VWFeatureSourceBigrams.h"
 #include "moses/FF/VW/VWFeatureSourceIndicator.h"
 #include "moses/FF/VW/VWFeatureSourcePhraseInternal.h"
+#include "moses/FF/VW/VWFeatureSourceSenseWindow.h"
 #include "moses/FF/VW/VWFeatureSourceWindow.h"
 #include "moses/FF/VW/VWFeatureTargetBigrams.h"
 #include "moses/FF/VW/VWFeatureTargetIndicator.h"
@@ -213,6 +216,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryScope3);
   MOSES_FNAME(PhraseDictionaryMultiModel);
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
+  MOSES_FNAME(PhraseDictionaryGroup);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
   //  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(PhraseDictionaryTransliteration);
@@ -262,6 +266,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SyntaxRHS);
   MOSES_FNAME(PhraseOrientationFeature);
   MOSES_FNAME(UnalignedWordCountFeature);
+  MOSES_FNAME(DeleteRules);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
@@ -275,6 +280,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(VWFeatureSourceBigrams);
   MOSES_FNAME(VWFeatureSourceIndicator);
   MOSES_FNAME(VWFeatureSourcePhraseInternal);
+  MOSES_FNAME(VWFeatureSourceSenseWindow);
   MOSES_FNAME(VWFeatureSourceWindow);
   MOSES_FNAME(VWFeatureTargetBigrams);
   MOSES_FNAME(VWFeatureTargetPhraseInternal);

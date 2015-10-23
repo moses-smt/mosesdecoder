@@ -10,7 +10,6 @@
 #include "moses/Sentence.h"
 
 #include "StatelessFeatureFunction.h"
-#include "FFState.h"
 
 namespace Moses
 {

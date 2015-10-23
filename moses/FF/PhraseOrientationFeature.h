@@ -99,46 +99,8 @@ public:
     return m_rightBoundaryNonTerminalR2LScores[2];
   }
 
-
-  int Compare(const FFState& other) const {
-    if (!m_distinguishStates) {
-      return 0;
-    }
-
-    const PhraseOrientationFeatureState &otherState = static_cast<const PhraseOrientationFeatureState&>(other);
-
-    if (!m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet &&
-        !m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) {
-      return 0;
-    }
-    if (m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet) {
-      return 1;
-    }
-    if (!m_leftBoundaryIsSet && otherState.m_leftBoundaryIsSet) {
-      return -1;
-    }
-    if (m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) {
-      return 1;
-    }
-    if (!m_rightBoundaryIsSet && otherState.m_rightBoundaryIsSet) {
-      return -1;
-    }
-
-    if (m_leftBoundaryIsSet) {
-      int compareLeft = CompareLeftBoundaryRecursive(*this, otherState, m_useSparseNT);
-      if (compareLeft != 0) {
-        return compareLeft;
-      }
-    }
-    if (m_rightBoundaryIsSet) {
-      int compareRight = CompareRightBoundaryRecursive(*this, otherState, m_useSparseNT);
-      if (compareRight != 0) {
-        return compareRight;
-      }
-    }
-
-    return 0;
-  };
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 protected:
 

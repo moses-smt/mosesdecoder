@@ -92,6 +92,15 @@ parser.add_argument(
 parser.add_argument(
     "--mmap", dest="mmap", action="store_true",
     help="Use memory-mapped file (for lower memory consumption).")
+parser.add_argument(
+    "--dropout", dest="dropout", action="store",
+    help="Pass dropout to nplm")
+parser.add_argument(
+  "--input-dropout", dest="input_dropout", action="store",
+    help="Pass input dropout to nplm")
+parser.add_argument(
+    "--extra-settings", dest="extra_settings",
+    help="Extra settings for nplm")
 
 parser.set_defaults(
     working_dir="working",
@@ -129,6 +138,7 @@ def main(options):
         os.makedirs(options.output_dir)
 
     numberized_file = os.path.basename(options.corpus_stem) + '.numberized'
+    vocab_file =os.path.join(options.working_dir, options.words_file) 
     train_file = numberized_file
     if options.mmap:
         train_file += '.mmap'
@@ -139,16 +149,34 @@ def main(options):
         '--ngramize', '1',
         '--ngram_size', str(options.ngram_size),
         '--vocab_size', str(options.vocab_size),
-        '--write_words_file', os.path.join(
-            options.working_dir, options.words_file),
+        '--write_words_file', vocab_file,
         '--train_file', os.path.join(options.working_dir, numberized_file)
         ]
 
     sys.stderr.write('extracting n-grams\n')
     sys.stderr.write('executing: ' + ', '.join(extraction_cmd) + '\n')
-    ret = subprocess.call(extraction_cmd)
-    if ret:
-        raise Exception("preparing neural LM failed")
+    subprocess.check_call(extraction_cmd)
+
+    # if dropout enabled, need to check which is the <null> vocab id
+    null_id = None
+    if options.dropout or options.input_dropout:
+      with open(vocab_file) as vfh:
+        for i,line in enumerate(vfh):
+          if line[:-1].decode("utf8") == "<null>":
+            null_id = i
+            break
+      if null_id == None:
+        sys.stderr.write("WARN: could not identify null token, cannot enable dropout\n")
+      else:
+        if not options.extra_settings:
+          options.extra_settings = ""
+        if options.dropout or options.input_dropout:
+          options.extra_settings += " --null_index %d " % null_id
+        if options.dropout:
+          options.extra_settings += " --dropout %s " % options.dropout
+        if options.input_dropout:
+          options.extra_settings += " --input_dropout %s " % options.input_dropout
+
 
     if options.mmap:
         try:
@@ -176,8 +204,7 @@ def main(options):
             '--ngramize', '1',
             '--ngram_size', str(options.ngram_size),
             '--vocab_size', str(options.vocab_size),
-            '--words_file', os.path.join(
-                options.working_dir, options.words_file),
+            '--words_file', vocab_file,
             '--train_file', os.path.join(
                 options.working_dir,
                 os.path.basename(options.validation_corpus) + '.numberized')
@@ -194,8 +221,8 @@ def main(options):
     else:
         options.validation_file = None
 
-    options.input_words_file = os.path.join(options.working_dir, options.words_file)
-    options.output_words_file = os.path.join(options.working_dir, options.words_file)
+    options.input_words_file = vocab_file
+    options.output_words_file = vocab_file
     options.input_vocab_size = options.vocab_size
     options.output_vocab_size = options.vocab_size
 

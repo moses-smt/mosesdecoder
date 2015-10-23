@@ -61,6 +61,7 @@ private:
   size_t m_hypothesis_pos, m_translation_pos;
   Hypothesis *m_hypothesis;
   BackwardsEdge *m_edge;
+  boost::shared_ptr<TargetPhrase> m_target_phrase;
 
   HypothesisQueueItem();
 
@@ -68,11 +69,15 @@ public:
   HypothesisQueueItem(const size_t hypothesis_pos
                       , const size_t translation_pos
                       , Hypothesis *hypothesis
-                      , BackwardsEdge *edge)
+                      , BackwardsEdge *edge
+                      , const TargetPhrase *target_phrase = NULL)
     : m_hypothesis_pos(hypothesis_pos)
     , m_translation_pos(translation_pos)
     , m_hypothesis(hypothesis)
     , m_edge(edge) {
+    if (target_phrase != NULL) {
+      m_target_phrase.reset(new TargetPhrase(*target_phrase));
+    }
   }
 
   ~HypothesisQueueItem() {
@@ -93,6 +98,10 @@ public:
   BackwardsEdge *GetBackwardsEdge() {
     return m_edge;
   }
+
+  boost::shared_ptr<TargetPhrase> GetTargetPhrase() {
+    return m_target_phrase;
+  }
 };
 
 //! Allows comparison of two HypothesisQueueItem objects by the corresponding scores.
@@ -103,20 +112,20 @@ public:
     float scoreA = itemA->GetHypothesis()->GetTotalScore();
     float scoreB = itemB->GetHypothesis()->GetTotalScore();
 
-    return (scoreA < scoreB);
-
-    /*
-    {
-    	return true;
+    if (scoreA < scoreB) {
+      return true;
+    } else if (scoreA > scoreB) {
+      return false;
+    } else {
+      // Equal scores: break ties by comparing target phrases (if they exist)
+      boost::shared_ptr<TargetPhrase> phrA = itemA->GetTargetPhrase();
+      boost::shared_ptr<TargetPhrase> phrB = itemB->GetTargetPhrase();
+      if (!phrA || !phrB) {
+        // Fallback: scoreA < scoreB == false, non-deterministic sort
+        return false;
+      }
+      return (phrA->Compare(*phrB) < 0);
     }
-    else if (scoreA < scoreB)
-    {
-    	return false;
-    }
-    else
-    {
-    	return itemA < itemB;
-    }*/
   }
 };
 
@@ -134,18 +143,6 @@ public:
     float scoreB = hypoB->GetTotalScore();
 
     return (scoreA > scoreB);
-    /*
-    {
-    	return true;
-    }
-    else if (scoreA < scoreB)
-    	{
-    		return false;
-    	}
-    else
-    	{
-    		return hypoA < hypoB;
-    	}*/
   }
 };
 
@@ -164,7 +161,8 @@ private:
   const BitmapContainer &m_prevBitmapContainer;
   BitmapContainer &m_parent;
   const TranslationOptionList &m_translations;
-  const SquareMatrix &m_futurescore;
+  const SquareMatrix &m_futureScores;
+  float m_futureScore;
 
   std::vector< const Hypothesis* > m_hypotheses;
   boost::unordered_set< int > m_seenPosition;
@@ -183,7 +181,7 @@ public:
   BackwardsEdge(const BitmapContainer &prevBitmapContainer
                 , BitmapContainer &parent
                 , const TranslationOptionList &translations
-                , const SquareMatrix &futureScore,
+                , const SquareMatrix &futureScores,
                 const InputType& source);
   ~BackwardsEdge();
 
@@ -204,19 +202,21 @@ public:
 class BitmapContainer
 {
 private:
-  WordsBitmap m_bitmap;
+  const WordsBitmap m_bitmap;
   HypothesisStackCubePruning &m_stack;
   HypothesisSet m_hypotheses;
   BackwardsEdgeSet m_edges;
   HypothesisQueue m_queue;
   size_t m_numStackInsertions;
+  bool m_deterministic;
 
   // We always require a corresponding bitmap to be supplied.
   BitmapContainer();
   BitmapContainer(const BitmapContainer &);
 public:
   BitmapContainer(const WordsBitmap &bitmap
-                  , HypothesisStackCubePruning &stack);
+                  , HypothesisStackCubePruning &stack
+                  , bool deterministic_sort = false);
 
   // The destructor will also delete all the edges that are
   // connected to this BitmapContainer.
@@ -228,7 +228,10 @@ public:
   size_t Size();
   bool Empty() const;
 
-  const WordsBitmap &GetWordsBitmap();
+  const WordsBitmap &GetWordsBitmap() const {
+    return m_bitmap;
+  }
+
   const HypothesisSet &GetHypotheses() const;
   size_t GetHypothesesSize() const;
   const BackwardsEdgeSet &GetBackwardsEdges();

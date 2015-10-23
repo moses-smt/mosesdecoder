@@ -48,11 +48,11 @@ public:
 
     const Node *GetChild(const HyperPath::NodeSeq &) const;
 
-    const TargetPhraseCollection &GetTargetPhraseCollection() const
+    const TargetPhraseCollection::shared_ptr GetTargetPhraseCollection() const
     return m_targetPhraseCollection;
   }
 
-  TargetPhraseCollection &GetTargetPhraseCollection()
+  TargetPhraseCollection::shared_ptr GetTargetPhraseCollection()
   return m_targetPhraseCollection;
 }
 
@@ -76,7 +76,7 @@ const Node &GetRootNode() const
 private:
 friend class RuleTrieCreator;
 
-TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
+TargetPhraseCollection::shared_ptr GetOrCreateTargetPhraseCollection(
   const Word &sourceLHS, const Phrase &sourceRHS);
 
 Node &GetOrCreateNode(const Phrase &sourceRHS);

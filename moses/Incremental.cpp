@@ -83,7 +83,7 @@ public:
 
   void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
 
-  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
+  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &waste_memory, const WordsRange &range);
 
   float GetBestScore(const ChartCellLabel *chartCell) const;
 
@@ -160,7 +160,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   }
 }
 
-template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &range)
+template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &, const WordsRange &range)
 {
   std::vector<lm::WordIndex> words;
   UTIL_THROW_IF2(phrase.GetSize() > 1,
@@ -450,7 +450,7 @@ void Manager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *coll
   }
 
   const search::Applied *applied = &Completed()[0];
-  const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+  const Sentence &sentence = static_cast<const Sentence &>(m_source);
   const size_t translationId = m_source.GetTranslationId();
 
   std::ostringstream out;

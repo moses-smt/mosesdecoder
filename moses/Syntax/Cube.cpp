@@ -93,7 +93,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
   SVertex *head = new SVertex();
   head->best = hyperedge;
   head->pvertex = 0;  // FIXME???
-  head->state.resize(
+  head->states.resize(
     StatefulFeatureFunction::GetStatefulFeatureFunctions().size());
   hyperedge->head = head;
 
@@ -131,7 +131,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     if (!staticData.IsFeatureFunctionIgnored(*ffs[i])) {
-      head->state[i] =
+      head->states[i] =
         ffs[i]->EvaluateWhenApplied(*hyperedge, i,
                                     &hyperedge->label.scoreBreakdown);
     }

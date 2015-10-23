@@ -22,32 +22,27 @@ BleuScoreState::BleuScoreState(): m_words(1),
 {
 }
 
-int BleuScoreState::Compare(const FFState& o) const
+size_t BleuScoreState::hash() const
 {
-  if (&o == this)
-    return 0;
-
   if (StaticData::Instance().IsSyntax())
     return 0;
 
-  const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
-  int c = m_words.Compare(other.m_words);
-  if (c != 0)
-    return c;
-
-  /*for(size_t i = 0; i < m_ngram_counts.size(); i++) {
-    if (m_ngram_counts[i] < other.m_ngram_counts[i])
-  return -1;
-    if (m_ngram_counts[i] > other.m_ngram_counts[i])
-  return 1;
-    if (m_ngram_matches[i] < other.m_ngram_matches[i])
-  return -1;
-    if (m_ngram_matches[i] > other.m_ngram_matches[i])
-  return 1;
-  }*/
-
-  return 0;
+  size_t ret = hash_value(m_words);
+  return ret;
 }
+
+bool BleuScoreState::operator==(const FFState& o) const
+{
+  if (&o == this)
+    return true;
+
+  if (StaticData::Instance().IsSyntax())
+    return true;
+
+  const BleuScoreState& other = static_cast<const BleuScoreState&>(o);
+  return m_words == other.m_words;
+}
+
 std::ostream& operator<<(std::ostream& out, const BleuScoreState& state)
 {
   state.print(out);
@@ -508,7 +503,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
   if (!m_enabled) return new BleuScoreState();
 
   NGrams::const_iterator reference_ngrams_iter;
-  const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
+  const BleuScoreState& ps = static_cast<const BleuScoreState&>(*prev_state);
   BleuScoreState* new_state = new BleuScoreState(ps);
 
   float old_bleu, new_bleu;
@@ -584,13 +579,13 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, 
     new_state = new BleuScoreState();
   else {
     const FFState* prev_state_zero = cur_hypo.GetPrevHypo(0)->GetFFState(featureID);
-    const BleuScoreState& ps_zero = dynamic_cast<const BleuScoreState&>(*prev_state_zero);
+    const BleuScoreState& ps_zero = static_cast<const BleuScoreState&>(*prev_state_zero);
     new_state = new BleuScoreState(ps_zero);
     num_words_first_prev = ps_zero.m_target_length;
 
     for (size_t i = 0; i < cur_hypo.GetPrevHypos().size(); ++i) {
       const FFState* prev_state = cur_hypo.GetPrevHypo(i)->GetFFState(featureID);
-      const BleuScoreState* ps = dynamic_cast<const BleuScoreState*>(prev_state);
+      const BleuScoreState* ps = static_cast<const BleuScoreState*>(prev_state);
       BleuScoreState* ps_nonConst = const_cast<BleuScoreState*>(ps);
 //  		cerr << "prev phrase: " << cur_hypo.GetPrevHypo(i)->GetOutputPhrase()
 //  				<< " ( " << cur_hypo.GetPrevHypo(i)->GetTargetLHS() << ")" << endl;

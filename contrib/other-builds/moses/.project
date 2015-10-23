@@ -96,6 +96,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.h</locationURI>
 		</link>
 		<link>
+			<name>Bitmaps.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Bitmaps.cpp</locationURI>
+		</link>
+		<link>
+			<name>Bitmaps.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Bitmaps.h</locationURI>
+		</link>
+		<link>
 			<name>BookkeepingOptions.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BookkeepingOptions.cpp</locationURI>
@@ -1256,6 +1266,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DecodeFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/DeleteRules.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DeleteRules.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/DeleteRules.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DeleteRules.h</locationURI>
+		</link>
+		<link>
 			<name>FF/DistortionScoreProducer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.cpp</locationURI>
@@ -2169,6 +2189,16 @@
 			<name>TranslationModel/PhraseDictionaryDynamicCacheBased.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryGroup.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryGroup.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryGroup.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryGroup.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/PhraseDictionaryMemory.cpp</name>
@@ -3124,6 +3154,11 @@
 			<name>TranslationModel/CompactPT/StringVector.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CompactPT/StringVector.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CompactPT/TargetPhraseCollectionCache.h</name>

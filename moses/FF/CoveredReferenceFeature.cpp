@@ -1,6 +1,8 @@
+#include <boost/functional/hash.hpp>
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <boost/foreach.hpp>
 #include "CoveredReferenceFeature.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/Hypothesis.h"
@@ -17,29 +19,17 @@ using namespace std;
 namespace Moses
 {
 
-int CoveredReferenceState::Compare(const FFState& other) const
+size_t CoveredReferenceState::hash() const
 {
-  const CoveredReferenceState &otherState = static_cast<const CoveredReferenceState&>(other);
-
-  if (m_coveredRef.size() != otherState.m_coveredRef.size()) {
-    return (m_coveredRef.size() < otherState.m_coveredRef.size()) ? -1 : +1;
-  } else {
-    multiset<string>::const_iterator thisIt, otherIt;
-    for (thisIt = m_coveredRef.begin(), otherIt = otherState.m_coveredRef.begin();
-         thisIt != m_coveredRef.end();
-         thisIt++, otherIt++) {
-      if (*thisIt != *otherIt) return thisIt->compare(*otherIt);
-    }
-  }
-  return 0;
-
-//  return m_coveredRef == otherState.m_coveredRef;
-
-//  if (m_coveredRef == otherState.m_coveredRef)
-//    return 0;
-//  return (m_coveredRef.size() < otherState.m_coveredRef.size()) ? -1 : +1;
+  UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
+bool CoveredReferenceState::operator==(const FFState& other) const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CoveredReferenceFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown

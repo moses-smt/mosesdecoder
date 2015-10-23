@@ -17,7 +17,7 @@ struct PVertex;
 struct SHyperedgeBundle {
   float inputWeight;
   std::vector<const SVertexStack*> stacks;
-  const TargetPhraseCollection *translations;
+  TargetPhraseCollection::shared_ptr translations;
 
   friend void swap(SHyperedgeBundle &x, SHyperedgeBundle &y) {
     using std::swap;

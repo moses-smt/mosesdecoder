@@ -1,6 +1,6 @@
 #pragma once
 
-#include <set>
+#include <boost/unordered_set.hpp>
 #include <string>
 #include "StatelessFeatureFunction.h"
 
@@ -46,7 +46,7 @@ protected:
   bool m_hardConstraint;
   bool ContainTerm(const InputType &input,
                    const WordsRange &ntRange,
-                   const std::set<Word> &terms) const;
+                   const boost::unordered_set<Word> &terms) const;
 };
 
 }

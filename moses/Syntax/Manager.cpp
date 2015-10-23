@@ -65,7 +65,7 @@ void Manager::OutputUnknowns(OutputCollector *collector) const
     long translationId = m_source.GetTranslationId();
 
     std::ostringstream out;
-    for (std::set<Moses::Word>::const_iterator p = m_oovs.begin();
+    for (boost::unordered_set<Moses::Word>::const_iterator p = m_oovs.begin();
          p != m_oovs.end(); ++p) {
       out << *p;
     }

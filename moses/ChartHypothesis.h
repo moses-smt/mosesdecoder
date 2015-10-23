@@ -49,9 +49,6 @@ class ChartHypothesis
 //  friend class ChartKBestExtractor;
 
 protected:
-#ifdef USE_HYPO_POOL
-  static ObjectPool<ChartHypothesis> s_objectPool;
-#endif
 
   boost::shared_ptr<ChartTranslationOption> m_transOpt;
 
@@ -81,23 +78,6 @@ protected:
   ChartHypothesis(const ChartHypothesis &copy);
 
 public:
-#ifdef USE_HYPO_POOL
-  void *operator new(size_t /* num_bytes */) {
-    void *ptr = s_objectPool.getPtr();
-    return ptr;
-  }
-
-  //! delete \param hypo. Works with object pool too
-  static void Delete(ChartHypothesis *hypo) {
-    s_objectPool.freeObject(hypo);
-  }
-#else
-  //! delete \param hypo. Works with object pool too
-  static void Delete(ChartHypothesis *hypo) {
-    delete hypo;
-  }
-#endif
-
   ChartHypothesis(const ChartTranslationOptions &, const RuleCubeItem &item,
                   ChartManager &manager);
 
@@ -145,8 +125,6 @@ public:
   // get leftmost/rightmost words only
   // leftRightMost: 1=left, 2=right
   void GetOutputPhrase(size_t leftRightMost, size_t numWords, Phrase &outPhrase) const;
-
-  int RecombineCompare(const ChartHypothesis &compare) const;
 
   void EvaluateWhenApplied();
 
@@ -213,6 +191,10 @@ public:
   const ChartHypothesis* GetWinningHypothesis() const {
     return m_winningHypo;
   }
+
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const ChartHypothesis& other) const;
 
   TO_STRING();
 

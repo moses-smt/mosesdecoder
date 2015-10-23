@@ -144,10 +144,6 @@ public:
   typedef LRModel::ReorderingType ReorderingType;
 
   virtual
-  int
-  Compare(const FFState& o) const = 0;
-
-  virtual
   LRState*
   Expand(const TranslationOption& hypo, const InputType& input,
          ScoreComponentCollection* scores) const = 0;
@@ -222,11 +218,9 @@ public:
     delete m_forward;
   }
 
-  virtual
-  int
-  Compare(const FFState& o) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
-  virtual
   LRState*
   Expand(const TranslationOption& topt, const InputType& input,
          ScoreComponentCollection*  scores) const;
@@ -249,9 +243,8 @@ public:
   PhraseBasedReorderingState(const PhraseBasedReorderingState *prev,
                              const TranslationOption &topt);
 
-  virtual
-  int
-  Compare(const FFState& o) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
   virtual
   LRState*
@@ -276,8 +269,9 @@ public:
   HReorderingBackwardState(const HReorderingBackwardState *prev,
                            const TranslationOption &topt,
                            ReorderingStack reoStack);
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
-  virtual int Compare(const FFState& o) const;
   virtual LRState* Expand(const TranslationOption& hypo, const InputType& input,
                           ScoreComponentCollection*  scores) const;
 
@@ -303,7 +297,9 @@ public:
   HReorderingForwardState(const HReorderingForwardState *prev,
                           const TranslationOption &topt);
 
-  virtual int Compare(const FFState& o) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
   virtual LRState* Expand(const TranslationOption& hypo,
                           const InputType& input,
                           ScoreComponentCollection* scores) const;

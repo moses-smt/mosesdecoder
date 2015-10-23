@@ -285,7 +285,7 @@ void Manager<RuleMatcher>::RecombineAndSort(
   // head pointers are updated to point to the vertex instances in the map and
   // any 'duplicate' vertices are deleted.
 // TODO Set?
-  typedef std::map<SVertex *, SVertex *, SVertexRecombinationOrderer> Map;
+  typedef boost::unordered_map<SVertex *, SVertex *, SVertexRecombinationUnordered, SVertexRecombinationUnordered> Map;
   Map map;
   for (std::vector<SHyperedge*>::const_iterator p = buffer.begin();
        p != buffer.end(); ++p) {

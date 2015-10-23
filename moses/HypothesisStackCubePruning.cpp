@@ -39,6 +39,7 @@ HypothesisStackCubePruning::HypothesisStackCubePruning(Manager& manager) :
   m_nBestIsEnabled = StaticData::Instance().options().nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
+  m_deterministic = manager.options().cube.deterministic_search;
 }
 
 /** remove all hypotheses from the collection */
@@ -85,7 +86,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
   if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, constraint" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
@@ -93,7 +94,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
     // too bad for stack. don't bother adding hypo into collection
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, too bad for stack" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
@@ -135,7 +136,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
     } else {
-      FREEHYPO(hypo);
+      delete hypo;
     }
     return false;
   }
@@ -148,7 +149,7 @@ void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
                  "Should have added hypothesis " << *hypo);
 
   const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-  m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this);
+  AddBitmapContainer(bitmap, *this);
 }
 
 void HypothesisStackCubePruning::PruneToSize(size_t newSize)
@@ -254,16 +255,7 @@ void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
     , const SquareMatrix &futureScore
     , const TranslationOptionList &transOptList)
 {
-  _BMType::iterator bcExists = m_bitmapAccessor.find(newBitmap);
-
-  BitmapContainer *bmContainer;
-  if (bcExists == m_bitmapAccessor.end()) {
-    bmContainer = new BitmapContainer(newBitmap, stack);
-    m_bitmapAccessor[newBitmap] = bmContainer;
-  } else {
-    bmContainer = bcExists->second;
-  }
-
+  BitmapContainer *bmContainer =   AddBitmapContainer(newBitmap, stack);
   BackwardsEdge *edge = new BackwardsEdge(bitmapContainer
                                           , *bmContainer
                                           , transOptList
@@ -299,6 +291,21 @@ HypothesisStackCubePruning::AddHypothesesToBitmapContainers()
     BitmapContainer *container = m_bitmapAccessor[bitmap];
     container->AddHypothesis(h);
   }
+}
+
+BitmapContainer *HypothesisStackCubePruning::AddBitmapContainer(const WordsBitmap &bitmap, HypothesisStackCubePruning &stack)
+{
+  _BMType::iterator iter = m_bitmapAccessor.find(bitmap);
+
+  BitmapContainer *bmContainer;
+  if (iter == m_bitmapAccessor.end()) {
+    bmContainer = new BitmapContainer(bitmap, stack, m_deterministic);
+    m_bitmapAccessor[bitmap] = bmContainer;
+  } else {
+    bmContainer = iter->second;
+  }
+
+  return bmContainer;
 }
 
 }
