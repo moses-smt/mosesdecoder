@@ -202,7 +202,7 @@ public:
 class BitmapContainer
 {
 private:
-  WordsBitmap m_bitmap;
+  const WordsBitmap m_bitmap;
   HypothesisStackCubePruning &m_stack;
   HypothesisSet m_hypotheses;
   BackwardsEdgeSet m_edges;
@@ -228,7 +228,10 @@ public:
   size_t Size();
   bool Empty() const;
 
-  const WordsBitmap &GetWordsBitmap();
+  const WordsBitmap &GetWordsBitmap() const {
+    return m_bitmap;
+  }
+
   const HypothesisSet &GetHypotheses() const;
   size_t GetHypothesesSize() const;
   const BackwardsEdgeSet &GetBackwardsEdges();

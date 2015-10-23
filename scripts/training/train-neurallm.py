@@ -170,11 +170,12 @@ def main(options):
       else:
         if not options.extra_settings:
           options.extra_settings = ""
-        options.extra_settings += "--null_index %d " % null_id
+        if options.dropout or options.input_dropout:
+          options.extra_settings += " --null_index %d " % null_id
         if options.dropout:
-          options.extra_settings += "--dropout %s " % options.dropout
+          options.extra_settings += " --dropout %s " % options.dropout
         if options.input_dropout:
-          options.extra_settings += "--input_dropout %s " % options.input_dropout
+          options.extra_settings += " --input_dropout %s " % options.input_dropout
 
 
     if options.mmap:

@@ -39,9 +39,11 @@ void
 TranslationRequest::
 Run()
 {
-  std::map<std::string,xmlrpc_c::value>const& params = m_paramList.getStruct(0);
+  typedef std::map<std::string,xmlrpc_c::value> param_t;
+  param_t const& params = m_paramList.getStruct(0);
   parse_request(params);
   // cerr << "SESSION ID" << ret->m_session_id << endl;
+
   if (m_session_id)
     {
       Session const& S = m_translator->get_session(m_session_id);
@@ -50,6 +52,11 @@ Run()
       // cerr << "SESSION ID" << m_session_id << endl;
     }
   else m_scope.reset(new Moses::ContextScope);
+
+  // settings within the session scope
+  param_t::const_iterator si = params.find("context-weights");
+  if (si != params.end()) 
+    m_context_weights = m_scope->GetContextWeights(&si->second);
 
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
@@ -239,6 +246,7 @@ TranslationRequest(xmlrpc_c::paramList const& paramList,
   m_options = StaticData::Instance().options();
 }
 
+
 void
 TranslationRequest::
 parse_request(std::map<std::string, xmlrpc_c::value> const& params)
@@ -262,7 +270,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
     m_session_id = xmlrpc_c::value_int(si->second);
   else
     m_session_id = 0;
-
+  
   m_withAlignInfo       = check(params, "align");
   m_withWordAlignInfo   = check(params, "word-align");
   m_withGraphInfo       = check(params, "sg");
@@ -347,7 +355,8 @@ pack_hypothesis(vector<Hypothesis const* > const& edges, string const& key,
   ostringstream target;
   BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
     output_phrase(target, e->GetCurrTargetPhrase());
-  std::cerr << "SERVER TRANSLATION: " << target.str() << std::endl;
+  XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
+  
   dest[key] = xmlrpc_c::value_string(target.str());
 
   if (m_withAlignInfo) {

@@ -43,15 +43,10 @@ using namespace std;
 
 namespace Moses
 {
-
-#ifdef USE_HYPO_POOL
-ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
-#endif
-
 Hypothesis::
-Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt)
+Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const WordsBitmap &bitmap)
   : m_prevHypo(NULL)
-  , m_sourceCompleted(source.GetSize(), manager.GetSource().m_sourceCompleted)
+  , m_sourceCompleted(bitmap)
   , m_sourceInput(source)
   , m_currSourceWordsRange(
     m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
@@ -80,9 +75,9 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
  * continue prevHypo by appending the phrases in transOpt
  */
 Hypothesis::
-Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
+Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const WordsBitmap &bitmap)
   : m_prevHypo(&prevHypo)
-  , m_sourceCompleted(prevHypo.m_sourceCompleted )
+  , m_sourceCompleted(bitmap)
   , m_sourceInput(prevHypo.m_sourceInput)
   , m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   , m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
@@ -98,13 +93,6 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   , m_id(m_manager.GetNextHypoId())
 {
   m_currScoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
-
-  // assert that we are not extending our hypothesis by retranslating something
-  // that this hypothesis has already translated!
-  assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
-
-  //_hash_computed = false;
-  m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
   m_manager.GetSentenceStats().AddCreated();
 }
@@ -118,7 +106,7 @@ Hypothesis::
   if (m_arcList) {
     ArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
-      FREEHYPO(*iter);
+      delete *iter;
     }
     m_arcList->clear();
 
@@ -151,48 +139,6 @@ AddArc(Hypothesis *loserHypo)
     }
   }
   m_arcList->push_back(loserHypo);
-}
-
-/***
- * return the subclass of Hypothesis most appropriate to the given translation option
- */
-Hypothesis*
-Hypothesis::
-CreateNext(const TranslationOption &transOpt) const
-{
-  return Create(*this, transOpt);
-}
-
-/***
- * return the subclass of Hypothesis most appropriate to the given translation option
- */
-Hypothesis*
-Hypothesis::
-Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
-{
-
-#ifdef USE_HYPO_POOL
-  Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(prevHypo, transOpt);
-#else
-  return new Hypothesis(prevHypo, transOpt);
-#endif
-}
-/***
- * return the subclass of Hypothesis most appropriate to the given target phrase
- */
-
-Hypothesis*
-Hypothesis::
-Create(Manager& manager, InputType const& m_source,
-       const TranslationOption &initialTransOpt)
-{
-#ifdef USE_HYPO_POOL
-  Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(manager, m_source, initialTransOpt);
-#else
-  return new Hypothesis(manager, m_source, initialTransOpt);
-#endif
 }
 
 void
@@ -350,7 +296,7 @@ CleanupArcList()
     // delete bad ones
     ArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize; iter != m_arcList->end() ; ++iter)
-      FREEHYPO(*iter);
+      delete *iter;
     m_arcList->erase(m_arcList->begin() + nBestSize, m_arcList->end());
   }
 

@@ -211,7 +211,8 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
   }
-  Hypothesis *newHypo = hypothesis.CreateNext(transOpt); // TODO FIXME This is absolutely broken - don't pass null here
+  const WordsBitmap &bitmap = m_parent.GetWordsBitmap();
+  Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
@@ -297,7 +298,7 @@ BitmapContainer::~BitmapContainer()
     HypothesisQueueItem *item = m_queue.top();
     m_queue.pop();
 
-    FREEHYPO( item->GetHypothesis() );
+    delete item->GetHypothesis();
     delete item;
   }
 
@@ -363,13 +364,6 @@ bool
 BitmapContainer::Empty() const
 {
   return m_queue.empty();
-}
-
-
-const WordsBitmap&
-BitmapContainer::GetWordsBitmap()
-{
-  return m_bitmap;
 }
 
 const HypothesisSet&

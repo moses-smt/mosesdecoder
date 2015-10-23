@@ -71,13 +71,8 @@ class Hypothesis
   friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
 
 protected:
-  static ObjectPool<Hypothesis> s_objectPool;
-
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
-//	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
-  WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
-  //TODO: how to integrate this into confusion network framework; what if
-  //it's a confusion network in the end???
+  const WordsBitmap	&m_sourceCompleted; /*! keeps track of which words have been translated so far */
   InputType const&  m_sourceInput;
   WordsRange				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
   WordsRange        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
@@ -95,28 +90,12 @@ protected:
 
   int m_id; /*! numeric ID of this hypothesis, used for logging */
 
-  /*! used by initial seeding of the translation process */
-  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
-  /*! used when creating a new hypothesis using a translation option (phrase translation) */
-  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
-
 public:
-  static ObjectPool<Hypothesis> &GetObjectPool() {
-    return s_objectPool;
-  }
-
+  /*! used by initial seeding of the translation process */
+  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const WordsBitmap &bitmap);
+  /*! used when creating a new hypothesis using a translation option (phrase translation) */
+  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const WordsBitmap &bitmap);
   ~Hypothesis();
-
-  /** return the subclass of Hypothesis most appropriate to the given translation option */
-  static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
-
-  static Hypothesis* Create(Manager& manager, const WordsBitmap &initialCoverage);
-
-  /** return the subclass of Hypothesis most appropriate to the given target phrase */
-  static Hypothesis* Create(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
-
-  /** return the subclass of Hypothesis most appropriate to the given translation option */
-  Hypothesis* CreateNext(const TranslationOption &transOpt) const;
 
   void PrintHypothesis() const;
 
@@ -306,18 +285,6 @@ struct CompareHypothesisTotalScore {
     return hypo1->GetTotalScore() > hypo2->GetTotalScore();
   }
 };
-
-#ifdef USE_HYPO_POOL
-
-#define FREEHYPO(hypo) \
-{ \
-	ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool(); \
-	pool.freeObject(hypo); \
-} \
-
-#else
-#define FREEHYPO(hypo) delete hypo
-#endif
 
 }
 #endif

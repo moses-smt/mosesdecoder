@@ -49,6 +49,7 @@ SearchCubePruning(Manager& manager, const InputType &source,
                   const TranslationOptionCollection &transOptColl)
   : Search(manager)
   , m_source(source)
+  , m_initBitmap(source.GetSize())
   , m_hypoStackColl(source.GetSize() + 1)
   , m_transOptColl(transOptColl)
 {
@@ -74,7 +75,7 @@ SearchCubePruning::~SearchCubePruning()
 void SearchCubePruning::Decode()
 {
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, m_initBitmap);
 
   HypothesisStackCubePruning &firstStack
   = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
