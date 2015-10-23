@@ -129,7 +129,14 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   
         Prefix prefix;
         for(size_t i = 0; i < tp.GetSize(); ++i) {
-          prefix.push_back(to.GetTargetPhrase().GetWord(i).GetString(m_factor).as_string());
+          prefix.push_back(tp.GetWord(i).GetString(m_factor).as_string());
+          if(m_pbl.size() < prefix.size())
+            m_pbl.resize(prefix.size());
+            
+          m_pbl[prefix.size() - 1][prefix][hypId] = Payload();
+        }
+        if(total - covered == to.GetSize()) {
+          prefix.push_back("</s>");
           if(m_pbl.size() < prefix.size())
             m_pbl.resize(prefix.size());
             
@@ -275,6 +282,10 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
     std::string word = tp.GetWord(i).GetString(m_factor).as_string();
     phrase.push_back(word);
   }
+  if(cur_hypo.IsSourceCompleted()) {
+    phrase.push_back("</s>");
+  }
+  
   
   int prevId = cur_hypo.GetPrevHypo()->GetId();
   
@@ -297,6 +308,14 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
     Prefix prefix;
     for(size_t i = 0; i < phrase.size(); i++) {
       prefix.push_back(phrase[i]);
+      //std::cerr << "p3:" << const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix].count(prevId) << std::endl;
+      if(!const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix].count(prevId)) {
+        BOOST_FOREACH(std::string s, prefix) {
+          std::cerr << s << " ";
+        }
+        std::cerr << std::endl;
+      }
+      
       Payload& payload = const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix][prevId];
       state = payload.state_;
       unks += payload.known_ ? 0 : 1;
