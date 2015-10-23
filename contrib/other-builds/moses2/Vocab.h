@@ -9,25 +9,20 @@
 #define VOCAB_H_
 
 #include <boost/unordered_set.hpp>
-//#include "util/string_piece.hh"
-//#include "moses/Util.h"
+#include "util/string_piece.hh"
+#include "moses/Util.h"
+#include "Factor.h"
 
 class Vocab {
 public:
-  static Vocab& Instance() {
-	return s_instance;
-  }
-
   Vocab();
   virtual ~Vocab();
 
-  //const Factor *AddFactor(const StringPiece &factorString);
+  const Factor *AddFactor(const StringPiece &string);
 
 protected:
-  static Vocab s_instance;
-
-  //typedef boost::unordered_set<Factor*, Moses::UnorderedComparer<Factor>, Moses::UnorderedComparer<Factor>> Set;
-  //Set m_set;
+  typedef boost::unordered_set<Factor, Moses::UnorderedComparer<Factor>, Moses::UnorderedComparer<Factor> > Set;
+  Set m_set;
 
 
 };

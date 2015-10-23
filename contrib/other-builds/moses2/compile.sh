@@ -1,2 +1,12 @@
-#g++ -I../../.. -I../../../boost/include Factor.cpp Word.cpp StaticData.cpp Main.cpp
-g++ -I../../.. -I../../../boost/include StaticData.cpp Main.cpp
+g++ -I../../.. -I../../../boost/include -L../../../lib -lmoses -o moses2 \
+   Factor.cpp \
+ 	 Main.cpp \
+ 	 Manager.cpp \
+   Phrase.cpp \
+ 	 Scores.cpp \
+ 	 StaticData.cpp \
+   TargetPhrase.cpp \
+	Vocab.cpp \
+	Word.cpp \
+    	 
+    	 

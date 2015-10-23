@@ -13,7 +13,12 @@
 class Factor {
 public:
 	Factor();
-	virtual ~Factor();
+
+  Factor(const StringPiece &string)
+  :m_string(string)
+  {}
+
+  virtual ~Factor();
 
   size_t hash() const
   {

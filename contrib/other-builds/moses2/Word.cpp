@@ -8,7 +8,6 @@
 #include "Word.h"
 
 Word::Word() {
-	// TODO Auto-generated constructor stub
 
 }
 

@@ -16,3 +16,11 @@ Vocab::~Vocab() {
 	// TODO Auto-generated destructor stub
 }
 
+const Factor *Vocab::AddFactor(const StringPiece &string)
+{
+	Factor in(string);
+	std::pair<Set::iterator, bool> ret = m_set.insert(in);
+	const Factor &out = *ret.first;
+	return &out;
+}
+

@@ -1,6 +1,6 @@
 #include <iostream>
-#include "StaticData.cpp"
-#include "Word.h"
+#include "StaticData.h"
+#include "Manager.h"
 
 using namespace std;
 
@@ -8,8 +8,8 @@ int main()
 {
 	cerr << "Starting..." << endl;
 
-	//StaticData sd;
-	//Word w;
+	StaticData staticData;
+	Manager mgr(staticData);
 
 	cerr << "Finished" << endl;
 }

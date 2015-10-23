@@ -1,5 +1,5 @@
 /*
- * Word.h
+ * Scores.h
  *
  *  Created on: 23 Oct 2015
  *      Author: hieu
@@ -7,15 +7,14 @@
 
 #pragma once
 
-#include "Factor.h"
 #include "TypeDef.h"
 
-class Word {
+class Scores {
 public:
-	Word();
-	virtual ~Word();
+	Scores(size_t numScores);
+	virtual ~Scores();
 
 protected:
-  Factor *m_factors[NUM_FACTOR];
+	SCORE *m_scores;
 };
 

@@ -25,6 +25,14 @@ class Pool {
       }
     }
 
+    /*
+    template<typename T>
+    void *Allocate() {
+    	void *ret = Allocate(sizeof(T));
+    	return ret;
+    }
+	*/
+
     void FreeAll();
 
   private:

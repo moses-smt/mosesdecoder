@@ -7,9 +7,14 @@
 
 #pragma once
 
+#include "Vocab.h"
+
 class StaticData {
 public:
 	StaticData();
 	virtual ~StaticData();
+
+protected:
+  Vocab m_vocab;
 };
 
