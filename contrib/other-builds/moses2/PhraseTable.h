@@ -19,6 +19,7 @@ class Node
 {
 public:
 	void AddRule(Phrase &source, TargetPhrase *target);
+	const TargetPhrases *Find(const PhraseBase &source, size_t pos = 0) const;
 protected:
 	typedef boost::unordered_map<Word, Node, Moses::UnorderedComparer<Word>, Moses::UnorderedComparer<Word> > Children;
 	Children m_children;

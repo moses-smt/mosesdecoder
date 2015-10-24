@@ -4,7 +4,7 @@
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
-
+#include <cassert>
 #include "PhraseTable.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
@@ -32,6 +32,26 @@ Node &Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
 		return child.AddRule(source, target, pos + 1);
 	}
 }
+
+const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
+{
+	assert(source.GetSize());
+	if (pos == source.GetSize() - 1) {
+		return &m_targetPhrases;
+	}
+	else {
+		const Word &word = source[pos];
+		Children::const_iterator iter = m_children.find(word);
+		if (iter == m_children.end()) {
+			return NULL;
+		}
+		else {
+			const Node &child = iter->second;
+			return child.Find(source, pos + 1);
+		}
+	}
+}
+
 ////////////////////////////////////
 PhraseTable::PhraseTable(size_t startInd)
 :FeatureFunction(startInd)
@@ -64,6 +84,12 @@ void PhraseTable::Load(StaticData &staticData)
 
 void PhraseTable::Lookups(InputPaths &inputPaths) const
 {
-
+	InputPaths::iterator iter;
+	for (iter = inputPaths.begin(); iter != inputPaths.end(); ++iter) {
+		InputPath &path = *iter;
+		const SubPhrase &phrase = path.GetSubPhrase();
+		const TargetPhrases *tps = m_root.Find(phrase);
+	}
 }
+
 

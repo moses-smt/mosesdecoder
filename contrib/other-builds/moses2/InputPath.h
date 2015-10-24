@@ -16,6 +16,9 @@ public:
 	InputPath(const SubPhrase &subPhrase, const Moses::WordsRange &range);
 	virtual ~InputPath();
 
+	const SubPhrase &GetSubPhrase() const
+	{ return m_subPhrase; }
+
 protected:
 	SubPhrase m_subPhrase;
 	Moses::WordsRange m_range;
