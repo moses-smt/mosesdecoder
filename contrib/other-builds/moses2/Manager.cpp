@@ -20,6 +20,8 @@ Manager::Manager(const StaticData &staticData, const std::string &inputStr)
 		const PhraseTable &pt = *pts[i];
 		pt.Lookups(m_inputPaths);
 	}
+
+	m_stacks.resize(m_input->GetSize());
 }
 
 void Manager::Decode()

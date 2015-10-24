@@ -1,6 +1,7 @@
 g++ -I../../.. -I../../../boost/include -L../../../lib -lmoses -lz -o moses2 \
    Factor.cpp \
    FeatureFunction.cpp \
+   Hypothesis.cpp \
  	 InputPath.cpp \
  	 InputPaths.cpp \
  	 Main.cpp \
@@ -8,6 +9,9 @@ g++ -I../../.. -I../../../boost/include -L../../../lib -lmoses -lz -o moses2 \
    Phrase.cpp \
    PhraseTable.cpp \
  	 Scores.cpp \
+ 	 Stack.cpp \
+ 	 StatefulFeatureFunction.cpp \
+ 	 StatelessFeatureFunction.cpp \
  	 StaticData.cpp \
    TargetPhrase.cpp \
    TargetPhrases.cpp \

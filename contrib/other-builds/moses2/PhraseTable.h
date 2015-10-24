@@ -9,7 +9,7 @@
 #include <boost/unordered_map.hpp>
 #include "TargetPhrases.h"
 #include "Word.h"
-#include "FeatureFunction.h"
+#include "StatelessFeatureFunction.h"
 #include "moses/Util.h"
 
 class StaticData;
@@ -18,20 +18,22 @@ class InputPaths;
 class Node
 {
 public:
+	Node();
+	~Node();
 	void AddRule(Phrase &source, TargetPhrase *target);
 	const TargetPhrases *Find(const PhraseBase &source, size_t pos = 0) const;
 
 protected:
 	typedef boost::unordered_map<Word, Node, Moses::UnorderedComparer<Word>, Moses::UnorderedComparer<Word> > Children;
 	Children m_children;
-	TargetPhrases m_targetPhrases;
+	TargetPhrases *m_targetPhrases;
 
 	Node &AddRule(Phrase &source, TargetPhrase *target, size_t pos);
 
 };
 
 ////////////////////////////////////////////////////////////////////////
-class PhraseTable : public FeatureFunction
+class PhraseTable : public StatelessFeatureFunction
 {
 public:
 	PhraseTable(size_t startInd);

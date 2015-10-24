@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <string>
 #include "InputPaths.h"
+#include "Stack.h"
 #include "util/pool.hh"
 
 class StaticData;
@@ -23,7 +24,7 @@ public:
 	const StaticData &GetStaticData() const
 	{ return m_staticData; }
 
-	util::Pool &GetPool()
+	util::Pool &GetPool() const
 	{ return m_pool; }
 
 	void Decode();
@@ -31,6 +32,8 @@ protected:
 	const StaticData &m_staticData;
 	Phrase *m_input;
 	InputPaths m_inputPaths;
-    util::Pool m_pool;
+    mutable util::Pool m_pool;
+
+    std::vector<Stack> m_stacks;
 };
 

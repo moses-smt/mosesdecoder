@@ -15,6 +15,15 @@
 
 using namespace std;
 
+Node::Node()
+:m_targetPhrases(NULL)
+{}
+
+Node::~Node()
+{
+	delete m_targetPhrases;
+}
+
 void Node::AddRule(Phrase &source, TargetPhrase *target)
 {
 	AddRule(source, target, 0);
@@ -23,7 +32,10 @@ void Node::AddRule(Phrase &source, TargetPhrase *target)
 Node &Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
 {
 	if (pos == source.GetSize()) {
-		m_targetPhrases.AddTargetPhrase(*target);
+		if (m_targetPhrases == NULL) {
+			m_targetPhrases = new TargetPhrases();
+		}
+		m_targetPhrases->AddTargetPhrase(*target);
 		return *this;
 	}
 	else {
@@ -37,7 +49,7 @@ const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
 {
 	assert(source.GetSize());
 	if (pos == source.GetSize() - 1) {
-		return &m_targetPhrases;
+		return m_targetPhrases;
 	}
 	else {
 		const Word &word = source[pos];
@@ -54,7 +66,7 @@ const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
 
 ////////////////////////////////////////////////////////////////////////
 PhraseTable::PhraseTable(size_t startInd)
-:FeatureFunction(startInd)
+:StatelessFeatureFunction(startInd)
 {
 }
 
