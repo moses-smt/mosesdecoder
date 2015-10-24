@@ -140,6 +140,7 @@ protected:
   boost::shared_ptr<Moses::InputType> m_source;
   boost::shared_ptr<Moses::IOWrapper> m_ioWrapper;
 
+  void interpret_dlt();
 };
 
 
