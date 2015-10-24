@@ -60,6 +60,8 @@ protected:
 
   void ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders);
 
+  // "Document Level Translation" instructions, see aux_interpret_dlt
+  std::vector<std::map<std::string,std::string> > m_dlt_meta; 
 
 public:
   Sentence();
@@ -113,6 +115,11 @@ public:
 
   void
   init(std::string line, std::vector<FactorType> const& factorOrder);
+
+  std::vector<std::map<std::string,std::string> > const&
+  GetDltMeta() const {
+    return m_dlt_meta;
+  }
 
 private:
   // auxliliary functions for Sentence initialization
