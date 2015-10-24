@@ -19,6 +19,8 @@ public:
 
 	size_t GetStartInd() const
 	{ return m_startInd; }
+	size_t GetNumScores() const
+	{ return m_numScores; }
 
 protected:
 	size_t m_startInd;

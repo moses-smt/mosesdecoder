@@ -8,6 +8,7 @@
 #pragma once
 #include <vector>
 #include "Vocab.h"
+#include "Weights.h"
 #include "util/pool.hh"
 
 class FeatureFunction;
@@ -21,6 +22,9 @@ public:
 	size_t GetNumScores() const
 	{ return 55; }
 
+	const Weights &GetWeights() const
+	{ return m_weights; }
+
 	util::Pool &GetPool()
 	{ return m_pool; }
 
@@ -33,5 +37,6 @@ protected:
   std::vector<const PhraseTable*> m_phraseTables;
   util::Pool m_pool;
   size_t m_ffStartInd;
+  Weights m_weights;
 };
 

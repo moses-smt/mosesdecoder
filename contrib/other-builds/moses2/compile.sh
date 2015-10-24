@@ -12,6 +12,7 @@ g++ -I../../.. -I../../../boost/include -L../../../lib -lmoses -lz -o moses2 \
    TargetPhrase.cpp \
    TargetPhrases.cpp \
 	Vocab.cpp \
+	Weights.cpp \
 	Word.cpp \
     	 
     	 

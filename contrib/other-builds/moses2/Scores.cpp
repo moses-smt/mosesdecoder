@@ -10,11 +10,14 @@
 #include "Scores.h"
 #include "FeatureFunction.h"
 #include "Util.h"
+#include "Weights.h"
+#include "StaticData.h"
 #include "moses/Util.h"
 
 using namespace std;
 
 Scores::Scores(util::Pool &pool, size_t numScores)
+:m_total(0)
 {
 	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
 	Init<SCORE>(m_scores, numScores, 0);
@@ -24,11 +27,24 @@ Scores::~Scores() {
 	delete m_scores;
 }
 
+void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const StaticData &staticData)
+{
+	assert(scores.size() == featureFunction.GetNumScores());
+
+	const Weights &weights = staticData.GetWeights();
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+	for (size_t i = 0; i < scores.size(); ++i) {
+		SCORE incrScore = scores[i];
+		m_scores[ffStartInd + i] += incrScore;
+
+		SCORE weight = weights[ffStartInd + i];
+		m_total += incrScore * weight;
+	}
+}
+
 void Scores::CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const StaticData &staticData)
 {
-	size_t ffStartInd = featureFunction.GetStartInd();
-	vector<SCORE> toks = Moses::Tokenize<SCORE>(str);
-	for (size_t i = 0; i < toks.size(); ++i) {
-		m_scores[ffStartInd + i] = toks[i];
-	}
+	vector<SCORE> scores = Moses::Tokenize<SCORE>(str);
+	PlusEquals(scores, featureFunction, staticData);
 }
