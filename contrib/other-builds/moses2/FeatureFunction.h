@@ -1,0 +1,28 @@
+/*
+ * FeatureFunction.h
+ *
+ *  Created on: 23 Oct 2015
+ *      Author: hieu
+ */
+
+#ifndef FEATUREFUNCTION_H_
+#define FEATUREFUNCTION_H_
+
+#include <cstddef>
+
+class FeatureFunction {
+public:
+	FeatureFunction();
+	virtual ~FeatureFunction();
+	virtual void Load()
+	{}
+
+	size_t GetStartInd() const
+	{ return m_startInd; }
+
+protected:
+	size_t m_startInd;
+	size_t m_numScores;
+};
+
+#endif /* FEATUREFUNCTION_H_ */

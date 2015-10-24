@@ -12,12 +12,17 @@
 
 class Scores;
 class Manager;
+class StaticData;
 
 class TargetPhrase : public Phrase
 {
 public:
-	TargetPhrase(util::Pool *pool, Manager &manager, size_t size);
-	virtual ~TargetPhrase();
+  static TargetPhrase *CreateFromString(util::Pool *pool, StaticData &staticData, const std::string &str);
+  TargetPhrase(util::Pool *pool, StaticData &staticData, size_t size);
+  virtual ~TargetPhrase();
+
+  Scores &GetScores()
+  { return *m_scores; }
 
 protected:
 	Scores *m_scores;

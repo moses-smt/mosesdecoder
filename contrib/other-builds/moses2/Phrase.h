@@ -42,6 +42,9 @@ public:
 protected:
   size_t m_size;
   Word *m_words;
+
+  void CreateFromString(const std::vector<std::string> &toks);
+
 };
 
 class SubPhrase : public PhraseBase

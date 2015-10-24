@@ -1,5 +1,6 @@
-g++ -I../../.. -I../../../boost/include -L../../../lib -lmoses -o moses2 \
+g++ -I../../.. -I../../../boost/include -L../../../lib -lmoses -lz -o moses2 \
    Factor.cpp \
+   FeatureFunction.cpp \
  	 InputPath.cpp \
  	 InputPaths.cpp \
  	 Main.cpp \

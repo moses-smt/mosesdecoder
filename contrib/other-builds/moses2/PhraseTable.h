@@ -5,10 +5,14 @@
  *      Author: hieu
  */
 #pragma once
+#include <string>
 #include <boost/unordered_map.hpp>
 #include "TargetPhrases.h"
 #include "Word.h"
+#include "FeatureFunction.h"
 #include "moses/Util.h"
+
+class StaticData;
 
 class Node
 {
@@ -20,14 +24,15 @@ protected:
 	TargetPhrases m_targetPhrases;
 };
 
-class PhraseTable
+class PhraseTable : public FeatureFunction
 {
 public:
 	PhraseTable();
 	virtual ~PhraseTable();
-	void Load();
+	void Load(StaticData &staticData);
 
 protected:
 	Node m_root;
+	std::string m_path;
 };
 

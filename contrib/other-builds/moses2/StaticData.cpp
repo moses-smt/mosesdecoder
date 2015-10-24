@@ -6,13 +6,16 @@
  */
 
 #include "StaticData.h"
+#include "PhraseTable.h"
+#include "moses/Util.h"
 
 StaticData::StaticData() {
-	// TODO Auto-generated constructor stub
-
+	PhraseTable *pt = new PhraseTable();
+	pt->Load(*this);
+	m_featureFunctions.push_back(pt);
 }
 
 StaticData::~StaticData() {
-	// TODO Auto-generated destructor stub
+	Moses::RemoveAllInColl(m_featureFunctions);
 }
 

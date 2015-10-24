@@ -2,6 +2,7 @@
 #include "StaticData.h"
 #include "Manager.h"
 #include "Phrase.h"
+#include "moses/InputFileStream.h"
 
 using namespace std;
 

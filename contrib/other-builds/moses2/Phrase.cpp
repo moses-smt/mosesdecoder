@@ -7,6 +7,7 @@
 #include <vector>
 #include "Phrase.h"
 #include "Word.h"
+#include "Vocab.h"
 #include "moses/Util.h"
 
 using namespace std;
@@ -16,22 +17,27 @@ Phrase *Phrase::CreateFromString(const std::string &str)
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
 	Phrase *ret = new Phrase(size);
-
-	for (size_t i = 0; i < size; ++i) {
-		Word &word = (*ret)[i];
-	}
+	ret->CreateFromString(toks);
 
 	return ret;
 }
 
+void Phrase::CreateFromString(const std::vector<std::string> &toks)
+{
+	for (size_t i = 0; i < m_size; ++i) {
+		Word &word = (*this)[i];
+	}
+}
+
 Phrase::Phrase(size_t size)
+:m_size(size)
 {
   m_words = new Word[size];
 
 }
 
 Phrase::~Phrase() {
-	delete m_words;
+	delete[] m_words;
 }
 
 SubPhrase Phrase::GetSubPhrase(size_t start, size_t end) const
