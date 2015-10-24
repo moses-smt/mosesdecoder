@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
 
 #include "FeatureFunction.h"
@@ -37,13 +38,13 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const = 0;
 
-  virtual FFState* EvaluateWhenAppliedWithContext(
-    ttasksptr const& ttasks,
-    const Hypothesis& cur_hypo,
-    const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const {
-    return EvaluateWhenApplied(cur_hypo, prev_state, accumulator);
-  }
+  // virtual FFState* EvaluateWhenAppliedWithContext(
+  //   ttasksptr const& ttasks,
+  //   const Hypothesis& cur_hypo,
+  //   const FFState* prev_state,
+  //   ScoreComponentCollection* accumulator) const {
+  //   return EvaluateWhenApplied(cur_hypo, prev_state, accumulator);
+  // }
 
   virtual FFState* EvaluateWhenApplied(
     const ChartHypothesis& /* cur_hypo */,
