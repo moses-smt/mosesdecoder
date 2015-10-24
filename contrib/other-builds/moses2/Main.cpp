@@ -16,7 +16,7 @@ int main()
 	while (getline(cin, line)) {
 
 		Manager mgr(staticData, line);
-
+		mgr.Decode();
 	}
 
 	cerr << "Finished" << endl;

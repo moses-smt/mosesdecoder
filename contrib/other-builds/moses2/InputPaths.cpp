@@ -7,12 +7,14 @@
 #include <iostream>
 #include "InputPaths.h"
 #include "Phrase.h"
+#include "StaticData.h"
 #include "moses/WordsRange.h"
 
 using namespace std;
 
-void InputPaths::Init(const Phrase &input)
+void InputPaths::Init(const Phrase &input, const StaticData &staticData)
 {
+  size_t numPt = staticData.GetPhraseTables().size();
   size_t size = input.GetSize();
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
 	for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
@@ -21,7 +23,7 @@ void InputPaths::Init(const Phrase &input)
 	  SubPhrase subPhrase = input.GetSubPhrase(startPos, endPos);
 	  Moses::WordsRange range(startPos, endPos);
 
-	  InputPath path(subPhrase, range);
+	  InputPath path(subPhrase, range, numPt);
 	  m_inputPaths.push_back(path);
 	}
   }

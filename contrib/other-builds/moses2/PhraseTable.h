@@ -21,11 +21,6 @@ public:
 	void AddRule(Phrase &source, TargetPhrase *target);
 	const TargetPhrases *Find(const PhraseBase &source, size_t pos = 0) const;
 
-	void SetPtInd(size_t ind)
-	{ m_ptInd = ind; }
-	size_t GetPtInd() const
-	{ return m_ptInd; }
-
 protected:
 	typedef boost::unordered_map<Word, Node, Moses::UnorderedComparer<Word>, Moses::UnorderedComparer<Word> > Children;
 	Children m_children;
@@ -35,6 +30,7 @@ protected:
 
 };
 
+////////////////////////////////////////////////////////////////////////
 class PhraseTable : public FeatureFunction
 {
 public:
@@ -42,6 +38,11 @@ public:
 	virtual ~PhraseTable();
 	void Load(StaticData &staticData);
 	void Lookups(InputPaths &inputPaths) const;
+
+	void SetPtInd(size_t ind)
+	{ m_ptInd = ind; }
+	size_t GetPtInd() const
+	{ return m_ptInd; }
 
 protected:
 	Node m_root;

@@ -21,9 +21,6 @@ public:
 	size_t GetNumScores() const
 	{ return 55; }
 
-	const  std::vector<const PhraseTable*> &GetPhraseTables() const
-	{ return m_phraseTables; }
-
 	util::Pool &GetPool()
 	{ return m_pool; }
 

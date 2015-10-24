@@ -26,6 +26,7 @@ public:
 	util::Pool &GetPool()
 	{ return m_pool; }
 
+	void Decode();
 protected:
 	const StaticData &m_staticData;
 	Phrase *m_input;

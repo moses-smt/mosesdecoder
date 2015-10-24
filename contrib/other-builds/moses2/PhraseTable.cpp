@@ -52,7 +52,7 @@ const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
 	}
 }
 
-////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 PhraseTable::PhraseTable(size_t startInd)
 :FeatureFunction(startInd)
 {

@@ -12,12 +12,13 @@
 #include "InputPath.h"
 
 class Phrase;
+class StaticData;
 
 class InputPaths {
 	typedef std::vector<InputPath> Coll;
 public:
 	InputPaths() {}
-	void Init(const Phrase &input);
+	void Init(const Phrase &input, const StaticData &staticData);
 	virtual ~InputPaths();
 
   //! iterators
