@@ -12,7 +12,7 @@
 
 class FeatureFunction {
 public:
-	FeatureFunction();
+	FeatureFunction(size_t startInd);
 	virtual ~FeatureFunction();
 	virtual void Load()
 	{}

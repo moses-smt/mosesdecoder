@@ -7,9 +7,10 @@
 
 #include "FeatureFunction.h"
 
-FeatureFunction::FeatureFunction() {
-	// TODO Auto-generated constructor stub
-
+FeatureFunction::FeatureFunction(size_t startInd)
+:m_startInd(startInd)
+,m_numScores(1)
+{
 }
 
 FeatureFunction::~FeatureFunction() {

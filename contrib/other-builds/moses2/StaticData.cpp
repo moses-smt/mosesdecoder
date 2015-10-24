@@ -9,10 +9,13 @@
 #include "PhraseTable.h"
 #include "moses/Util.h"
 
-StaticData::StaticData() {
-	PhraseTable *pt = new PhraseTable();
+StaticData::StaticData()
+:m_ffStartInd(0)
+{
+	PhraseTable *pt = new PhraseTable(m_ffStartInd);
 	pt->Load(*this);
 	m_featureFunctions.push_back(pt);
+	m_phraseTables.push_back(pt);
 }
 
 StaticData::~StaticData() {

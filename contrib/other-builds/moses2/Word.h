@@ -16,7 +16,7 @@ public:
   virtual ~Word();
 
   size_t hash() const;
-  bool operator==(const Factor &compare) const;
+  bool operator==(const Word &compare) const;
 
 protected:
   Factor *m_factors[NUM_FACTOR];

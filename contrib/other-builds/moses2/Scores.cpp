@@ -9,6 +9,7 @@
 #include <cstddef>
 #include "Scores.h"
 #include "FeatureFunction.h"
+#include "Util.h"
 #include "moses/Util.h"
 
 using namespace std;
@@ -16,6 +17,7 @@ using namespace std;
 Scores::Scores(util::Pool &pool, size_t numScores)
 {
 	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
+	Init<SCORE>(m_scores, numScores, 0);
 }
 
 Scores::~Scores() {
