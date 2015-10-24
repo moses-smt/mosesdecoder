@@ -2,7 +2,9 @@
 // $Id$
 
 // for debugging: context dependent IRSTLM appears to break regression tests
-#ifndef IRSTLM_CONTEXT_DEPENDENT 
+#ifndef MMT
+#define IRSTLM_CONTEXT_DEPENDENT 0
+#else
 #define IRSTLM_CONTEXT_DEPENDENT 0
 #endif
 
@@ -293,13 +295,11 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
   for (; position < _min; ++position) {
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
-#ifdef MMT
 #if IRSTLM_CONTEXT_DEPENDENT    
     if (context_weights)
       before_boundary += m_lmtb->clprob(codes,idx+1,*context_weights,NULL,NULL,&msp);
     else
       before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
-#endif
 #else
     before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
 #endif
@@ -315,13 +315,11 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
     }
     codes[idx-1] = GetLmID(phrase.GetWord(position));
     if (codes[idx-1] == m_unknownId) ++oovCount;
-#ifdef MMT
 #if IRSTLM_CONTEXT_DEPENDENT    
     if (context_weights)
       ngramScore += m_lmtb->clprob(codes,idx,*context_weights,NULL,NULL,&msp);
     else
       ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
-#endif
 #else
     ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
 #endif
@@ -365,16 +363,16 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
 
   char* msp = NULL;
   float score;
-#if MMT
+#if IRSTLM_CONTEXT_DEPENDENT    
   if (context_weights)
-    score = m_lmtb->clprob(codes,m_lmtb_size,*context_weights,NULL,NULL,&msp);
+    score = m_lmtb->clprob(codes,m_lmtb_size,*context_weights, NULL,NULL,&msp);
   else
-    score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+    score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp));
 #else
   score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
 #endif
 
-  position = (const int) begin+1;
+  position = (const int) begin + 1;
   while (position < adjust_end) {
     for (idx=1; idx<m_lmtb_size; idx++) {
       codes[idx-1] = codes[idx];
@@ -400,7 +398,7 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
-#if MMT
+#if IRSTLM_CONTEXT_DEPENDENT
   if (context_weights)
     score += m_lmtb->clprob(codes,m_lmtb_size,*context_weights,NULL,NULL,&msp);
   else
