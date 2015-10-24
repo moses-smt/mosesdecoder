@@ -297,7 +297,7 @@ void ChartHypothesis::SetWinningHypo(const ChartHypothesis *hypo)
 
 size_t ChartHypothesis::hash() const
 {
-  size_t seed;
+  size_t seed = 0;
 
   // states
   for (size_t i = 0; i < m_ffStates.size(); ++i) {
