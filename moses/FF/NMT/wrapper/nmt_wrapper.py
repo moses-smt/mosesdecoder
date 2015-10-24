@@ -49,7 +49,7 @@ class NMTWrapper(object):
     def get_unk(self, words):
         unks = []
         for next_word in words:
-            if next_word in self.target_vocab:
+            if next_word in self.target_vocab.keys():
                 unks.append(1)
             else:
                 unks.append(0)
@@ -68,7 +68,7 @@ class NMTWrapper(object):
         if not last_word:
             last_word = numpy.zeros(1, dtype="int64")
         else:
-            last_word = [self.target_vocab.setdefault(last_word, self.unk_id)]
+            last_word = [self.target_vocab.get(last_word, self.unk_id)]
 
         if state is None:
             states = map(lambda x: x[None, :], self.comp_init_states(c))
@@ -76,7 +76,7 @@ class NMTWrapper(object):
             states = [state]
 
         for next_word in next_words:
-            next_indx = self.target_vocab.setdefault(next_word, self.unk_id)
+            next_indx = self.target_vocab.get(next_word, self.unk_id)
 
             log_probs = numpy.log(self.comp_next_probs(c, 0, last_word,
                                                        *states)[0])
@@ -105,8 +105,8 @@ class NMTWrapper(object):
                 if last_word == "":
                     tmp.append(0)
                 else:
-                    tmp.append(self.target_vocab.setdefault(last_word,
-                                                            self.unk_id))
+                    tmp.append(self.target_vocab.get(last_word,
+                                                     self.unk_id))
             last_words = numpy.array(tmp, dtype="int64")
 
         if len(states) == 0:
@@ -114,7 +114,7 @@ class NMTWrapper(object):
         else:
             states = [numpy.concatenate(states)]
 
-        next_indxs = [self.target_vocab.setdefault(next_word, self.unk_id)
+        next_indxs = [self.target_vocab.get(next_word, self.unk_id)
                       for next_word in next_words]
 
         log_probs = numpy.log(self.comp_next_probs(c, 0, last_words.astype("int64"),
@@ -132,7 +132,7 @@ class NMTWrapper(object):
 
     def get_next_states(self, next_words, c, states):
         states = [numpy.concatenate(states)]
-        next_indxs = [self.target_vocab.setdefault(next_word, self.unk_id)
+        next_indxs = [self.target_vocab.get(next_word, self.unk_id)
                       for next_word in next_words]
         return numpy.split(self.comp_next_states(c, 0, next_indxs, *states)[0])
 
@@ -150,7 +150,7 @@ class NMTWrapper(object):
                 if last_word == "":
                     tmp.append(0)
                 else:
-                    tmp.append(self.target_vocab.setdefault(last_word, self.unk_id))
+                    tmp.append(self.target_vocab.get(last_word, self.unk_id))
             last_words = numpy.array(tmp)
             last_words = last_words.astype("int64")
         if len(states) == 0:
@@ -158,7 +158,7 @@ class NMTWrapper(object):
         else:
             states = [numpy.concatenate(states)]
 
-        next_indxs = [self.target_vocab.setdefault(next_word, self.unk_id)
+        next_indxs = [self.target_vocab.get(next_word, self.unk_id)
                       for next_word in next_words]
         log_probs = numpy.log(self.comp_next_probs(c, 0, last_words.astype("int64"),
                                                    *states)[0])
