@@ -15,7 +15,8 @@ class Phrase;
 
 class InputPaths {
 public:
-	InputPaths(const Phrase &input);
+	InputPaths() {}
+	void Init(const Phrase &input);
 	virtual ~InputPaths();
 
 protected:

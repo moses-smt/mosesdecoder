@@ -15,7 +15,7 @@ class StaticData;
 
 class Scores {
 public:
-	Scores(util::Pool *pool, size_t numScores);
+	Scores(util::Pool &pool, size_t numScores);
 	virtual ~Scores();
 
 	  void CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const StaticData &staticData);

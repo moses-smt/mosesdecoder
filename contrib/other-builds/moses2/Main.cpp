@@ -14,11 +14,9 @@ int main()
 
 	string line;
 	while (getline(cin, line)) {
-		Phrase *input = Phrase::CreateFromString(NULL, line);
 
-		Manager mgr(staticData, *input);
+		Manager mgr(staticData, line);
 
-		delete input;
 	}
 
 	cerr << "Finished" << endl;

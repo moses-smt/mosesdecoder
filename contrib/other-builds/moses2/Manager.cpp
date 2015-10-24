@@ -7,11 +7,11 @@
 
 #include "Manager.h"
 
-Manager::Manager(const StaticData &staticData, const Phrase &input)
+Manager::Manager(const StaticData &staticData, const std::string &inputStr)
 :m_staticData(staticData)
-,m_input(input)
-,m_inputPaths(input)
 {
+	m_input = Phrase::CreateFromString(m_pool, inputStr);
+	m_inputPaths.Init(*m_input);
 }
 
 Manager::~Manager() {

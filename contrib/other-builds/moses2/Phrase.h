@@ -24,9 +24,9 @@ class SubPhrase;
 class Phrase : public PhraseBase
 {
 public:
-  static Phrase *CreateFromString(util::Pool *pool, const std::string &str);
+  static Phrase *CreateFromString(util::Pool &pool, const std::string &str);
 
-  Phrase(util::Pool *pool, size_t size);
+  Phrase(util::Pool &pool, size_t size);
   virtual ~Phrase();
 
   const Word& operator[](size_t pos) const {

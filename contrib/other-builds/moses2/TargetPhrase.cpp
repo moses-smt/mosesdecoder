@@ -14,32 +14,20 @@
 
 using namespace std;
 
-TargetPhrase *TargetPhrase::CreateFromString(util::Pool *pool, StaticData &staticData, const std::string &str)
+TargetPhrase *TargetPhrase::CreateFromString(util::Pool &pool, StaticData &staticData, const std::string &str)
 {
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
-	TargetPhrase *ret;
-
-	if (pool) {
-		ret = new (pool->Allocate<TargetPhrase>()) TargetPhrase(pool, staticData, size);
-	}
-	else {
-		ret = new TargetPhrase(pool, staticData, size);
-	}
+	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, staticData, size);
 	ret->Phrase::CreateFromString(toks);
 
 	return ret;
 }
 
-TargetPhrase::TargetPhrase(util::Pool *pool, StaticData &staticData, size_t size)
+TargetPhrase::TargetPhrase(util::Pool &pool, StaticData &staticData, size_t size)
 :Phrase(pool, size)
 {
-	if (pool) {
-		m_scores = new (pool->Allocate<Scores>()) Scores(pool, staticData.GetNumScores());
-	}
-	else {
-		m_scores = new Scores(pool, staticData.GetNumScores());
-	}
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, staticData.GetNumScores());
 }
 
 TargetPhrase::~TargetPhrase() {

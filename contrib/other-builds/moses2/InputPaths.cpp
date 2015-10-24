@@ -11,7 +11,7 @@
 
 using namespace std;
 
-InputPaths::InputPaths(const Phrase &input)
+void InputPaths::Init(const Phrase &input)
 {
   size_t size = input.GetSize();
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
