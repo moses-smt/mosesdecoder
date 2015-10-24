@@ -26,8 +26,8 @@ class Pool {
     }
 
     template<typename T>
-    void *Allocate() {
-    	void *ret = Allocate(sizeof(T));
+    void *Allocate(size_t num = 1) {
+    	void *ret = Allocate(sizeof(T) * num);
     	return ret;
     }
 

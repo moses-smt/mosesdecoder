@@ -12,11 +12,11 @@
 
 using namespace std;
 
-Phrase *Phrase::CreateFromString(const std::string &str)
+Phrase *Phrase::CreateFromString(util::Pool *pool, const std::string &str)
 {
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
-	Phrase *ret = new Phrase(size);
+	Phrase *ret = new Phrase(pool, size);
 	ret->CreateFromString(toks);
 
 	return ret;
@@ -29,10 +29,15 @@ void Phrase::CreateFromString(const std::vector<std::string> &toks)
 	}
 }
 
-Phrase::Phrase(size_t size)
+Phrase::Phrase(util::Pool *pool, size_t size)
 :m_size(size)
 {
-  m_words = new Word[size];
+  if (pool) {
+	  m_words = new (pool->Allocate<Word>()) Word[size];
+  }
+  else {
+	  m_words = new Word[size];
+  }
 
 }
 

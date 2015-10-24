@@ -32,7 +32,7 @@ TargetPhrase *TargetPhrase::CreateFromString(util::Pool *pool, StaticData &stati
 }
 
 TargetPhrase::TargetPhrase(util::Pool *pool, StaticData &staticData, size_t size)
-:Phrase(size)
+:Phrase(pool, size)
 {
 	if (pool) {
 		m_scores = new (pool->Allocate<Scores>()) Scores(staticData.GetNumScores());

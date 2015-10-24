@@ -35,7 +35,7 @@ void PhraseTable::Load(StaticData &staticData)
 		Moses::TokenizeMultiCharSeparator(toks, line, "|||");
 		assert(toks.size() >= 3);
 
-		Phrase *source = Phrase::CreateFromString(toks[0]);
+		Phrase *source = Phrase::CreateFromString(&staticData.GetPool(), toks[0]);
 		TargetPhrase *target = TargetPhrase::CreateFromString(&staticData.GetPool(), staticData, toks[1]);
 		target->GetScores().CreateFromString(toks[2], *this, staticData);
 	}

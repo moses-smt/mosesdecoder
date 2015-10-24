@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <string>
 #include "Word.h"
+#include "util/pool.hh"
 
 class PhraseBase
 {
@@ -23,8 +24,9 @@ class SubPhrase;
 class Phrase : public PhraseBase
 {
 public:
-  static Phrase *CreateFromString(const std::string &str);
-  Phrase(size_t size);
+  static Phrase *CreateFromString(util::Pool *pool, const std::string &str);
+
+  Phrase(util::Pool *pool, size_t size);
   virtual ~Phrase();
 
   const Word& operator[](size_t pos) const {

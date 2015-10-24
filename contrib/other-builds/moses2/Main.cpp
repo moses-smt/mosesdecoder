@@ -14,7 +14,7 @@ int main()
 
 	string line;
 	while (getline(cin, line)) {
-		Phrase *input = Phrase::CreateFromString(line);
+		Phrase *input = Phrase::CreateFromString(NULL, line);
 
 		Manager mgr(staticData, *input);
 
