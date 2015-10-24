@@ -142,6 +142,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
             
           m_pbl[prefix.size() - 1][prefix][hypId] = Payload();
         }
+        
       }
     }
   }
@@ -285,7 +286,6 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   if(cur_hypo.IsSourceCompleted()) {
     phrase.push_back("</s>");
   }
-  
   
   int prevId = cur_hypo.GetPrevHypo()->GetId();
   

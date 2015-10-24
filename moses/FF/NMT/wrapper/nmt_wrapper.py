@@ -28,6 +28,8 @@ class NMTWrapper(object):
         self.source_vocab = cPickle.load(open(self.state['word_indx']))
         self.target_vocab = cPickle.load(open(self.state['word_indx_trgt']))
 
+        self.target_vocab["</s>"] = 30000
+
         rng = numpy.random.RandomState(self.state['seed'])
         self.enc_dec = RNNEncoderDecoder(self.state, rng, skip_init=True)
         self.enc_dec.build()
@@ -114,7 +116,7 @@ class NMTWrapper(object):
         else:
             states = [numpy.concatenate(states)]
 
-        next_indxs = [self.target_vocab.get(next_word, self.unk_id)
+        next_indxs = [self.target_vocab.get(next_word, self.unk_id) # if next_word != "</s>" else 30000
                       for next_word in next_words]
 
         log_probs = numpy.log(self.comp_next_probs(c, 0, last_words.astype("int64"),
@@ -158,7 +160,7 @@ class NMTWrapper(object):
         else:
             states = [numpy.concatenate(states)]
 
-        next_indxs = [self.target_vocab.get(next_word, self.unk_id)
+        next_indxs = [self.target_vocab.get(next_word, self.unk_id) # if next_word != "</s>" else 30000
                       for next_word in next_words]
         log_probs = numpy.log(self.comp_next_probs(c, 0, last_words.astype("int64"),
                                                    *states)[0])
