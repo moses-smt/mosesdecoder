@@ -1,5 +1,4 @@
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -32,6 +31,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TypeDef.h"
 
 #include "moses/Util.h"
+
+#include <boost/thread.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/recursive_mutex.hpp>
+// #include <boost/thread/shared_mutex.hpp>
 
 //this is required because:
 //- IRSTLM package uses the namespace irstlm
@@ -69,7 +73,7 @@ protected:
   int m_lmtb_dub;           //dictionary upperboud
   int m_lmtb_size;          //max ngram stored in the table
 
-  dictionary* d;
+  dictionary* m_dict;
 
   std::string m_mapFilePath;
 
@@ -79,6 +83,8 @@ protected:
   int GetLmID( const std::string &str ) const;
   int GetLmID( const Factor *factor ) const;
 
+  // recursive mutex for multi-threading
+  mutable boost::recursive_mutex m_rlock; 
 
 public:
   LanguageModelIRST(const std::string &line);
@@ -109,6 +115,7 @@ public:
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
   void set_dictionary_upperbound(int dub) {
+    boost::recursive_mutex::scoped_lock lock(m_rlock);
     m_lmtb_size=dub ;
   };
 };
