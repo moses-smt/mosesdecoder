@@ -35,10 +35,10 @@ TargetPhrase::TargetPhrase(util::Pool *pool, StaticData &staticData, size_t size
 :Phrase(pool, size)
 {
 	if (pool) {
-		m_scores = new (pool->Allocate<Scores>()) Scores(staticData.GetNumScores());
+		m_scores = new (pool->Allocate<Scores>()) Scores(pool, staticData.GetNumScores());
 	}
 	else {
-		m_scores = new Scores(staticData.GetNumScores());
+		m_scores = new Scores(pool, staticData.GetNumScores());
 	}
 }
 

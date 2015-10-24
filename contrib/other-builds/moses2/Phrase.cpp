@@ -9,6 +9,7 @@
 #include "Word.h"
 #include "Vocab.h"
 #include "moses/Util.h"
+#include "util/pool.hh"
 
 using namespace std;
 
@@ -16,9 +17,16 @@ Phrase *Phrase::CreateFromString(util::Pool *pool, const std::string &str)
 {
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
-	Phrase *ret = new Phrase(pool, size);
-	ret->CreateFromString(toks);
+	Phrase *ret;
 
+	if (pool) {
+		ret = new (pool->Allocate<Phrase>()) Phrase(pool, size);
+	}
+	else {
+		ret = new Phrase(pool, size);
+	}
+
+	ret->CreateFromString(toks);
 	return ret;
 }
 
@@ -33,7 +41,7 @@ Phrase::Phrase(util::Pool *pool, size_t size)
 :m_size(size)
 {
   if (pool) {
-	  m_words = new (pool->Allocate<Word>()) Word[size];
+	  m_words = new (pool->Allocate<Word>(size)) Word[size];
   }
   else {
 	  m_words = new Word[size];

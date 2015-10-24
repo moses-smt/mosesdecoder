@@ -13,10 +13,14 @@
 
 using namespace std;
 
-Scores::Scores(size_t numScores)
+Scores::Scores(util::Pool *pool, size_t numScores)
 {
-	m_scores = new SCORE[numScores];
-
+	if (pool) {
+		m_scores = new (pool->Allocate<SCORE>(numScores)) SCORE[numScores];
+	}
+	else {
+		m_scores = new SCORE[numScores];
+	}
 }
 
 Scores::~Scores() {
