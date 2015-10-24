@@ -1,4 +1,10 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // $Id$
+
+// for debugging: context dependent IRSTLM appears to break regression tests
+#ifndef IRSTLM_CONTEXT_DEPENDENT 
+#define IRSTLM_CONTEXT_DEPENDENT 0
+#endif
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -261,7 +267,7 @@ const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*
   return ret.release();
 }
 
-void LanguageModelIRST::CalcScoreWithContext(ttasksptr const& ttasks, const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
+void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
   fullScore = 0;
   ngramScore = 0;
@@ -270,9 +276,9 @@ void LanguageModelIRST::CalcScoreWithContext(ttasksptr const& ttasks, const Phra
   if ( !phrase.GetSize() ) return;
 
   //get the context_weight map here
-  SPTR<std::map<std::string, float> const> context_weight = ttasks->GetContextWeights();
-  UTIL_THROW_IF2(!context_weight, "No context weights available");
-
+  SPTR<std::map<std::string, float> const> context_weights;
+  if (phrase.HasTtaskSPtr())
+    context_weights =  phrase.GetTtask()->GetContextWeights();
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
@@ -287,7 +293,16 @@ void LanguageModelIRST::CalcScoreWithContext(ttasksptr const& ttasks, const Phra
   for (; position < _min; ++position) {
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
+#ifdef MMT
+#if IRSTLM_CONTEXT_DEPENDENT    
+    if (context_weights)
+      before_boundary += m_lmtb->clprob(codes,idx+1,*context_weights,NULL,NULL,&msp);
+    else
+      before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
+#endif
+#else
     before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
+#endif
     ++idx;
   }
 
@@ -300,23 +315,32 @@ void LanguageModelIRST::CalcScoreWithContext(ttasksptr const& ttasks, const Phra
     }
     codes[idx-1] = GetLmID(phrase.GetWord(position));
     if (codes[idx-1] == m_unknownId) ++oovCount;
+#ifdef MMT
+#if IRSTLM_CONTEXT_DEPENDENT    
+    if (context_weights)
+      ngramScore += m_lmtb->clprob(codes,idx,*context_weights,NULL,NULL,&msp);
+    else
+      ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+#endif
+#else
     ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+#endif
   }
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
   fullScore = ngramScore + before_boundary;
 }
 
-FFState* LanguageModelIRST::EvaluateWhenAppliedWithContext(ttasksptr const& ttasks, const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
+FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   if (!hypo.GetCurrTargetLength()) {
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
     return ret.release();
   }
 
-  //get the context_weight map here
-  SPTR<std::map<std::string, float> const> context_weight = ttasks->GetContextWeights();
-  UTIL_THROW_IF2(!context_weight, "No context weights available");
+  //get the map of context weights, if any
+  ttasksptr const& ttask = hypo.GetManager().GetTtask();
+  SPTR<std::map<std::string, float> const> context_weights = ttask->GetContextWeights();
 
   //[begin, end) in STL-like fashion.
   const int begin = (const int) hypo.GetCurrTargetWordsRange().GetStartPos();
@@ -340,7 +364,15 @@ FFState* LanguageModelIRST::EvaluateWhenAppliedWithContext(ttasksptr const& ttas
   }
 
   char* msp = NULL;
-  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+  float score;
+#if MMT
+  if (context_weights)
+    score = m_lmtb->clprob(codes,m_lmtb_size,*context_weights,NULL,NULL,&msp);
+  else
+    score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+#else
+  score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+#endif
 
   position = (const int) begin+1;
   while (position < adjust_end) {
@@ -368,7 +400,14 @@ FFState* LanguageModelIRST::EvaluateWhenAppliedWithContext(ttasksptr const& ttas
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
+#if MMT
+  if (context_weights)
+    score += m_lmtb->clprob(codes,m_lmtb_size,*context_weights,NULL,NULL,&msp);
+  else
     score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+#else
+  score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+#endif
   } else {
     // need to set the LM state
 
