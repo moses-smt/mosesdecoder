@@ -20,6 +20,12 @@ class Node
 public:
 	void AddRule(Phrase &source, TargetPhrase *target);
 	const TargetPhrases *Find(const PhraseBase &source, size_t pos = 0) const;
+
+	void SetPtInd(size_t ind)
+	{ m_ptInd = ind; }
+	size_t GetPtInd() const
+	{ return m_ptInd; }
+
 protected:
 	typedef boost::unordered_map<Word, Node, Moses::UnorderedComparer<Word>, Moses::UnorderedComparer<Word> > Children;
 	Children m_children;
@@ -40,7 +46,7 @@ public:
 protected:
 	Node m_root;
 	std::string m_path;
-
+	size_t m_ptInd;
 
 };
 
