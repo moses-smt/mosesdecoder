@@ -1,0 +1,33 @@
+# If you get compilation errors here, make sure you have xmlrpc-c
+# installed properly, including the abyss server option.
+
+import option ;
+import path ;
+
+ exe moses2 :
+    Factor.cpp 
+   FeatureFunction.cpp 
+   Hypothesis.cpp 
+ 	 InputPath.cpp 
+ 	 InputPaths.cpp
+ 	 Main.cpp 
+ 	 Manager.cpp 
+   Phrase.cpp 
+   PhraseTable.cpp 
+ 	 Scores.cpp 
+ 	 SearchNormal.cpp 
+ 	 Stack.cpp 
+ 	 StatefulFeatureFunction.cpp 
+ 	 StatelessFeatureFunction.cpp 
+ 	 StaticData.cpp 
+   TargetPhrase.cpp 
+   TargetPhrases.cpp 
+	Vocab.cpp 
+	Weights.cpp 
+	Word.cpp 
+    	 
+ ../../../moses//moses 
+ ../../../OnDiskPt//OnDiskPt 
+ ../../..//boost_filesystem  
+ : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
+

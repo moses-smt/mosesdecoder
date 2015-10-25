@@ -32,7 +32,7 @@ Manager::Manager(const StaticData &staticData, const std::string &inputStr)
 
 void Manager::Decode()
 {
-	const Moses::WordsBitmap &initBitmap = m_bitmaps->GetInitialBitmap();
+	const Moses::Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
 	Hypothesis *iniHypo = new (GetPool().Allocate<Hypothesis>()) Hypothesis(*this, initBitmap, m_initRange);
 
 	for (size_t i = 0; i < m_stacks.size(); ++i) {

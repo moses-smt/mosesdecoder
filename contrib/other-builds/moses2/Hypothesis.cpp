@@ -9,7 +9,7 @@
 #include "Manager.h"
 #include "StaticData.h"
 
-Hypothesis::Hypothesis(const Manager &mgr, const Moses::WordsBitmap &bitmap, const Moses::WordsRange &range)
+Hypothesis::Hypothesis(const Manager &mgr, const Moses::Bitmap &bitmap, const Moses::Range &range)
 :m_mgr(mgr)
 ,m_bitmap(bitmap)
 ,m_range(range)

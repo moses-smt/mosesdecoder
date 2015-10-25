@@ -7,7 +7,7 @@
 
 #include "InputPath.h"
 
-InputPath::InputPath(const SubPhrase &subPhrase, const Moses::WordsRange &range, size_t numPt)
+InputPath::InputPath(const SubPhrase &subPhrase, const Moses::Range &range, size_t numPt)
 :m_subPhrase(subPhrase)
 ,m_range(range)
 ,m_targetPhrases(numPt)

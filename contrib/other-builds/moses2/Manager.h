@@ -44,7 +44,7 @@ protected:
 	Phrase *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;
-	Moses::WordsRange m_initRange;
+	Moses::Range m_initRange;
 
     std::vector<Stack> m_stacks;
 	SearchNormal *m_search;

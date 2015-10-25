@@ -9,7 +9,7 @@
 #include "Stack.h"
 #include "Manager.h"
 #include "InputPaths.h"
-#include "moses/WordsBitmap.h"
+#include "moses/Bitmap.h"
 
 SearchNormal::SearchNormal(const Manager &mgr, std::vector<Stack> &stacks)
 :m_mgr(mgr)
@@ -46,9 +46,9 @@ void SearchNormal::Extend(const Hypothesis &hypo)
 
 void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 {
-	const Moses::WordsBitmap &bitmap = hypo.GetBitmap();
-	const Moses::WordsRange &hypoRange = hypo.GetRange();
-	const Moses::WordsRange &pathRange = path.GetRange();
+	const Moses::Bitmap &bitmap = hypo.GetBitmap();
+	const Moses::Range &hypoRange = hypo.GetRange();
+	const Moses::Range &pathRange = path.GetRange();
 
 	if (bitmap.Overlap(pathRange)) {
 		return;

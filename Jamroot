@@ -300,6 +300,7 @@ rephraser
 contrib/c++tokenizer//tokenizer
 contrib/expected-bleu-training//train-expected-bleu
 contrib/expected-bleu-training//prepare-expected-bleu-training
+contrib/other-builds/moses2
 ;
 
 
