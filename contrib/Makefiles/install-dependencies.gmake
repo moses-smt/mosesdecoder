@@ -10,6 +10,11 @@
 #
 #    make -f /path/to/this/file PREFIX=/where/to/install/things
 #
+
+# by default, we install in ./opt and build in ./build
+PREFIX ?= $(CWD)/opt
+BUILD_DIR = $(CWD)/opt/build/${URL}
+
 # you can also specify specific prefixes for different packages:
 XMLRPC_PREFIX ?= ${PREFIX}
 CMPH_PREFIX   ?= ${PREFIX}
@@ -27,9 +32,6 @@ SHELL = /bin/bash -e -o pipefail
 # OPT: installation destination for 3-rd party libraries
 CWD := $(shell cd . && pwd)
 
-# by default, we install in ./opt and build in ./build
-PREFIX ?= $(CWD)/opt
-BUILD_DIR = $(CWD)/opt/build/${URL}
 
 # evaluate prefixes now to avoid recursive evaluation problems later ...
 XMLRPC_PREFIX := ${XMLRPC_PREFIX}
@@ -51,7 +53,7 @@ configure-make-install += && make -j$(nproc) && make install
 xmlrpc: URL=$(sourceforge)/xmlrpc-c/Xmlrpc-c%20Super%20Stable/1.33.17/xmlrpc-c-1.33.17.tgz
 xmlrpc: TMP=$(CWD)/build/xmlrpc
 xmlrpc: PREFIX=${XMLRPC_PREFIX}
-xmlrpc: | ${PREFIX}/bin/xmlrpc-c-config
+xmlrpc: | ${XMLRPC_PREFIX}/bin/xmlrpc-c-config
 ${XMLRPC_PREFIX}/bin/xmlrpc-c-config:
 	$(sfget)
 	$(call configure-make-install,${TMP}/xmlrpc-c-1.33.17)
