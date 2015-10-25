@@ -1,0 +1,90 @@
+# -*- mode: makefile; tab-width: 4; -*-
+# Makefile for installing 3rd-party software required to build Moses.
+# author: Ulrich Germann
+#
+# run as 
+#    make -f /path/to/this/file 
+#
+# By default, everything will be installed in ./opt.
+# If you want an alternative destination specify PREFIX=... with the make call
+#
+#    make -f /path/to/this/file PREFIX=/where/to/install/things
+#
+# you can also specify specific prefixes for different packages:
+XMLRPC_PREFIX ?= ${PREFIX}
+CMPH_PREFIX   ?= ${PREFIX}
+IRSTLM_PREFIX ?= ${PREFIX}
+BOOST_PREFIX  ?= ${PREFIX}
+
+# currently, the full enchilada means xmlrpc-c, cmph, irstlm, boost
+all: xmlrpc cmph irstlm boost
+
+# we use bash and fail when pipelines fail
+SHELL = /bin/bash -e -o pipefail
+
+# DIRECTORIES
+# CWD: bit of a hack to get the nfs-accessible path instead of the local real path
+# OPT: installation destination for 3-rd party libraries
+CWD := $(shell cd . && pwd)
+
+# by default, we install in ./opt and build in ./build
+PREFIX ?= $(CWD)/opt
+BUILD_DIR = $(CWD)/opt/build/${URL}
+
+# evaluate prefixes now to avoid recursive evaluation problems later ...
+XMLRPC_PREFIX := ${XMLRPC_PREFIX}
+CMPH_PREFIX   := ${CMPH_PREFIX}
+IRSTLM_PREFIX := ${IRSTLM_PREFIX}
+BOOST_PREFIX  := ${BOOST_PREFIX}
+
+# Code repositories:
+github      = https://github.com/
+sourceforge = http://downloads.sourceforge.net/project
+
+# functions for building software from sourceforge
+nproc := $(shell nproc)
+sfget  = mkdir -p ${TMP} && cd ${TMP} && wget -qO- ${URL} | tar xz 
+configure-make-install  = cd $1 && ./configure --prefix=${PREFIX} 
+configure-make-install += && make -j$(nproc) && make install
+
+# XMLRPC-C for moses server
+xmlrpc: URL=$(sourceforge)/xmlrpc-c/Xmlrpc-c%20Super%20Stable/1.33.17/xmlrpc-c-1.33.17.tgz
+xmlrpc: TMP=$(CWD)/build/xmlrpc
+xmlrpc: PREFIX=${XMLRPC_PREFIX}
+xmlrpc: | ${PREFIX}/bin/xmlrpc-c-config
+${XMLRPC_PREFIX}/bin/xmlrpc-c-config:
+	$(sfget)
+	$(call configure-make-install,${TMP}/xmlrpc-c-1.33.17)
+	rm -rf ${TMP}
+
+# CMPH for CompactPT
+cmph: URL=$(sourceforge)/cmph/cmph/cmph-2.0.tar.gz
+cmph: TMP=$(CWD)/build/cmph
+cmph: PREFIX=${CMPH_PREFIX}
+cmph: | ${CMPH_PREFIX}/bin/cmph
+${CMPH_PREFIX}/bin/cmph:
+	$(sfget)
+	$(call configure-make-install, ${TMP}/cmph-2.0)
+	rm -rf ${TMP}
+
+# irstlm for irstlm
+irstlm: URL=$(sourceforge)/irstlm/irstlm/irstlm-5.80/irstlm-5.80.08.tgz
+irstlm: TMP=$(CWD)/build/irstlm
+irstlm: VERSION=$(basename $(notdir $(irstlm_url)))
+irstlm: PREFIX=${IRSTLM_PREFIX}
+irstlm: | $(IRSTLM_PREFIX)/bin/build-lm.sh
+$(IRSTLM_PREFIX)/bin/build-lm.sh:
+	$(sfget)
+	cd $$(find ${TMP} -name trunk) && ./regenerate-makefiles.sh \
+	&& ./configure --prefix=${PREFIX} && make -j${nproc} && make install -j$(nproc)
+	rm -rf ${TMP}
+
+# boost 
+boost: URL=http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz/download
+boost: TMP=$(CWD)/build/boost
+boost: PREFIX=${BOOST_PREFIX}
+boost: | ${BOOST_PREFIX}/include/boost
+${BOOST_PREFIX}/include/boost:
+	$(sfget)
+	cd ${TMP}/boost_1_59_0 && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(nproc) install
+	rm -rf ${TMP}
