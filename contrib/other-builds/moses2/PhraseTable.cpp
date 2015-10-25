@@ -89,7 +89,7 @@ void PhraseTable::Load(System &system)
 		assert(toks.size() >= 3);
 
 		Phrase *source = Phrase::CreateFromString(tmpPool, toks[0]);
-		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetPool(), system, toks[1]);
+		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetSystemPool(), system, toks[1]);
 		target->GetScores().CreateFromString(toks[2], *this, system);
 		m_root.AddRule(*source, target);
 	}
