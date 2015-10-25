@@ -1,12 +1,4 @@
-// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // $Id$
-
-// for debugging: context dependent IRSTLM appears to break regression tests
-#ifndef MMT
-#define IRSTLM_CONTEXT_DEPENDENT 0
-#else
-#define IRSTLM_CONTEXT_DEPENDENT 0
-#endif
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -37,8 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace irstlm;
 
 #include "IRST.h"
-//#include "moses/Incremental.h"
-//#include "Base.h"
 #include "moses/LM/PointerState.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
@@ -74,13 +64,12 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor(line)
   ,m_lmtb_dub(0), m_lmtb_size(0)
 {
-/*
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
   if (threadCount != 1) {
     throw runtime_error("Error: " + SPrint(threadCount) + " number of threads specified but IRST LM is not threadsafe.");
   }
-*/
+
   ReadParameters();
 
   VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
@@ -91,6 +80,7 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
 
 LanguageModelIRST::~LanguageModelIRST()
 {
+
 #ifndef WIN32
   TRACE_ERR( "reset mmap\n");
   if (m_lmtb) m_lmtb->reset_mmap();
@@ -102,27 +92,25 @@ LanguageModelIRST::~LanguageModelIRST()
 
 bool LanguageModelIRST::IsUseable(const FactorMask &mask) const
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   bool ret = mask[m_factorType];
   return ret;
 }
 
 void LanguageModelIRST::Load()
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_lmtb = m_lmtb->CreateLanguageModel(m_filePath);
   if (m_lmtb_size > 0) m_lmtb->setMaxLoadedLevel(m_lmtb_size);
   m_lmtb->load(m_filePath);
-  m_dict = m_lmtb->getDict();
-  m_dict->incflag(1);
+  d=m_lmtb->getDict();
+  d->incflag(1);
 
   m_nGramOrder = m_lmtb_size = m_lmtb->maxlevel();
 
   // LM can be ok, just outputs warnings
   // Mauro: in the original, the following two instructions are wrongly switched:
-  m_unknownId = m_dict->oovcode(); // at the level of micro tags
+  m_unknownId = d->oovcode(); // at the level of micro tags
   m_empty = -1; // code for an empty position
 
   CreateFactors(factorCollection);
@@ -133,25 +121,10 @@ void LanguageModelIRST::Load()
   m_lmtb->init_caches(m_lmtb_size>2?m_lmtb_size-1:2);
 
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
-  m_dict->incflag(0);
 }
-
-/*
-void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
-{
-  m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
-  m_lmtb_sentenceStart = GetLmID(BOS_);
-  m_sentenceStartWord[m_factorType] = m_sentenceStart;
-
-  m_sentenceEnd         = factorCollection.AddFactor(Output, m_factorType, EOS_);
-  m_lmtb_sentenceEnd = GetLmID(EOS_);
-  m_sentenceEndWord[m_factorType] = m_sentenceEnd;
-}
-*/
 
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   // add factors which have srilm id
   // code copied & paste from SRI LM class. should do template function
   std::map<size_t, int> lmIdMap;
@@ -159,7 +132,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
   m_empty = -1; // code for an empty position
 
   dict_entry *entry;
-  dictionary_iter iter(m_dict); // at the level of micro tags
+  dictionary_iter iter(d); // at the level of micro tags
   while ( (entry = iter.next()) != NULL) {
     size_t factorId = factorCollection.AddFactor(Output, m_factorType, entry->word)->GetId();
     lmIdMap[factorId] = entry->code;
@@ -170,17 +143,15 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
   factorId = m_sentenceStart->GetId();
-  m_dict->incflag(1);
-  m_lmtb_sentenceStart = lmIdMap[factorId] = GetLmID(BOS_);
-  m_dict->incflag(0);
+  const std::string bs = BOS_;
+  const std::string es = EOS_;
+  m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceStartWord[m_factorType] = m_sentenceStart;
 
   m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
   factorId = m_sentenceEnd->GetId();
-  m_dict->incflag(1);
-  m_lmtb_sentenceEnd = lmIdMap[factorId] = GetLmID(EOS_);
-  m_dict->incflag(0);
+  m_lmtb_sentenceEnd=lmIdMap[factorId] = GetLmID(EOS_);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
@@ -196,46 +167,22 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
-  return m_dict->encode( str.c_str() ); // at the level of micro tags
+  return d->encode( str.c_str() ); // at the level of micro tags
 }
 
 int LanguageModelIRST::GetLmID( const Word &word ) const
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   return GetLmID( word.GetFactor(m_factorType) );
 }
 
-/*
-int LanguageModelIRST::GetLmID( const Factor *factor ) const
-{
-  std::string s = factor->GetString().as_string();
-  return m_dict->encode(s.c_str());
-}
-*/
-
-int LanguageModelIRST::GetLmID( const Factor *factor ) const
-{
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
-  //there is no possibility to extend the original dictionary associated to this LM
-  size_t factorId = factor->GetId();
-
-  if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
-    return m_unknownId;
-  } else {
-    return m_lmIdLookup[factorId];
-  }
-}
-
-/*
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
   size_t factorId = factor->GetId();
 
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
-    if (m_dict->incflag()==1) {
+    if (d->incflag()==1) {
       std::string s = factor->GetString().as_string();
-      int code = m_dict->encode(s.c_str());
+      int code = d->encode(s.c_str());
 
       //////////
       ///poiche' non c'e' distinzione tra i factorIDs delle parole sorgenti
@@ -247,6 +194,24 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
       ///impostando a    m_empty     tutti i termini che non hanno ancora
       //ricevuto un codice target effettivo
       ///////////
+
+      ///OLD PROBLEM - SOLVED
+////////////
+/// IL PPROBLEMA ERA QUI
+/// m_lmIdLookup.push_back(code);
+/// PERCHE' USANDO PUSH_BACK IN REALTA' INSEREVIVAMO L'ELEMENTO NUOVO
+/// IN POSIZIONE (factorID-1) invece che in posizione factrID dove dopo andiamo a leggerlo (vedi caso C
+/// Cosi' funziona ....
+/// ho un dubbio su cosa c'e' nelle prime posizioni di m_lmIdLookup
+/// quindi
+/// e scopro che rimane vuota una entry ogni due
+/// perche' factorID cresce di due in due (perche' codifica sia source che target) "vuota" la posizione (factorID-1)
+/// non da problemi di correttezza, ma solo di "spreco" di memoria
+/// potremmo sostituirerendere  m_lmIdLookup una std:map invece che un std::vector,
+/// ma si perde in efficienza nell'accesso perche' non e' piu' possibile quello random dei vettori
+/// a te la scelta!!!!
+////////////////
+
 
       if (factorId >= m_lmIdLookup.size()) {
         //resize and fill with m_empty
@@ -265,11 +230,9 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
     return m_lmIdLookup[factorId];
   }
 }
-*/
 
 const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/) const
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   std::auto_ptr<IRSTLMState> ret(new IRSTLMState());
 
   return ret.release();
@@ -277,7 +240,6 @@ const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*
 
 void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   fullScore = 0;
   ngramScore = 0;
   oovCount = 0;
@@ -285,9 +247,9 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
   if ( !phrase.GetSize() ) return;
 
   //get the context_weight map here
-  SPTR<std::map<std::string, float> const> context_weights;
-  if (phrase.HasTtaskSPtr())
-    context_weights =  phrase.GetTtask()->GetContextWeights();
+  ttasksptr ttask = phrase.GetTtask();
+  SPTR<std::map<std::string, float> const> CW;
+  if (ttask) CW = ttask->GetContextWeights();
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
@@ -302,14 +264,7 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
   for (; position < _min; ++position) {
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
-#if IRSTLM_CONTEXT_DEPENDENT    
-    if (context_weights)
-      before_boundary += m_lmtb->clprob(codes,idx+1,*context_weights,NULL,NULL,&msp);
-    else
-      before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
-#else
     before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
-#endif
     ++idx;
   }
 
@@ -322,14 +277,7 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
     }
     codes[idx-1] = GetLmID(phrase.GetWord(position));
     if (codes[idx-1] == m_unknownId) ++oovCount;
-#if IRSTLM_CONTEXT_DEPENDENT    
-    if (context_weights)
-      ngramScore += m_lmtb->clprob(codes,idx,*context_weights,NULL,NULL,&msp);
-    else
-      ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
-#else
     ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
-#endif
   }
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
@@ -338,15 +286,15 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
 
 FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   if (!hypo.GetCurrTargetLength()) {
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
     return ret.release();
   }
 
-  //get the map of context weights, if any
-  ttasksptr const& ttask = hypo.GetManager().GetTtask();
-  SPTR<std::map<std::string, float> const> context_weights = ttask->GetContextWeights();
+  //get the context_weight map here
+  ttasksptr ttask = hypo.GetManager().GetTtask();
+  SPTR<std::map<std::string, float> const> CW;
+  if (ttask) CW = ttask->GetContextWeights();
 
   //[begin, end) in STL-like fashion.
   const int begin = (const int) hypo.GetCurrTargetWordsRange().GetStartPos();
@@ -370,17 +318,9 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
   }
 
   char* msp = NULL;
-  float score;
-#if IRSTLM_CONTEXT_DEPENDENT    
-  if (context_weights)
-    score = m_lmtb->clprob(codes,m_lmtb_size,*context_weights, NULL,NULL,&msp);
-  else
-    score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp));
-#else
-  score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
-#endif
+  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
 
-  position = (const int) begin + 1;
+  position = (const int) begin+1;
   while (position < adjust_end) {
     for (idx=1; idx<m_lmtb_size; idx++) {
       codes[idx-1] = codes[idx];
@@ -406,14 +346,7 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
-#if IRSTLM_CONTEXT_DEPENDENT
-  if (context_weights)
-    score += m_lmtb->clprob(codes,m_lmtb_size,*context_weights,NULL,NULL,&msp);
-  else
     score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
-#else
-  score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
-#endif
   } else {
     // need to set the LM state
 
@@ -437,7 +370,6 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
 
 LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   // set up context
   size_t count = contextFactor.size();
   if (count < 0) {
@@ -483,7 +415,6 @@ bool LMCacheCleanup(const int sentences_done, const size_t m_lmcache_cleanup_thr
 
 void LanguageModelIRST::InitializeForInput(ttasksptr const& ttask)
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   //nothing to do
 #ifdef TRACE_CACHE
   m_lmtb->sentence_id++;
@@ -492,7 +423,6 @@ void LanguageModelIRST::InitializeForInput(ttasksptr const& ttask)
 
 void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   const StaticData &staticData = StaticData::Instance();
   static int sentenceCount = 0;
   sentenceCount++;
@@ -507,7 +437,6 @@ void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
 
 void LanguageModelIRST::SetParameter(const std::string& key, const std::string& value)
 {
-  boost::recursive_mutex::scoped_lock lock(m_rlock);
   if (key == "dub") {
     m_lmtb_dub = Scan<unsigned int>(value);
   } else {
