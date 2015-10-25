@@ -13,8 +13,10 @@
 using namespace std;
 
 Manager::Manager(const System &system, const std::string &inputStr)
-:m_staticData(system)
+:m_pool(m_staticData.GetManagerPool())
+,m_staticData(system)
 ,m_initRange(NOT_FOUND, NOT_FOUND)
+//,m_initPhrase(m_staticData.GetManagerPool(), system, 0)
 {
 	m_input = Phrase::CreateFromString(m_pool, inputStr);
 	m_inputPaths.Init(*m_input, system);

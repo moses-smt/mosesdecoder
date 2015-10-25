@@ -12,6 +12,7 @@
 #include <vector>
 #include "InputPaths.h"
 #include "Stack.h"
+#include "TargetPhrase.h"
 #include "moses/Bitmaps.h"
 #include "util/pool.hh"
 
@@ -38,13 +39,14 @@ public:
 
 	void Decode();
 protected:
-	util::Pool m_pool;
+	util::Pool &m_pool;
 
 	const System &m_staticData;
 	Phrase *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;
 	Moses::Range m_initRange;
+//	TargetPhrase m_initPhrase;
 
     std::vector<Stack> m_stacks;
 	SearchNormal *m_search;
