@@ -41,6 +41,7 @@ protected:
   const TargetPhrase &m_targetPhrase;
   const Moses::Bitmap &m_bitmap;
   const Moses::Range &m_range;
+  const Hypothesis *m_prevHypo;
 
   Moses::FFState **m_ffStates;
 };

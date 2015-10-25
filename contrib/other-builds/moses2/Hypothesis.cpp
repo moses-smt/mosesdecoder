@@ -17,6 +17,7 @@ Hypothesis::Hypothesis(Manager &mgr,
 ,m_targetPhrase(tp)
 ,m_bitmap(bitmap)
 ,m_range(range)
+,m_prevHypo(NULL)
 {
 	util::Pool &pool = mgr.GetPool();
 	size_t numStatefulFFs = mgr.GetSystem().GetStatefulFeatureFunctions().size();
@@ -31,6 +32,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 ,m_targetPhrase(tp)
 ,m_bitmap(bitmap)
 ,m_range(pathRange)
+,m_prevHypo(&prevHypo)
 {
 
 }
