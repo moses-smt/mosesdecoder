@@ -190,7 +190,7 @@ void ForestInput::ParseHyperedgeLine(
     if (!v->pvertex.symbol.IsNonTerminal()) {
       // Egret does not give start/end for terminals.
       v->pvertex.span = Range(e->head->pvertex.span.GetStartPos(),
-                                   e->head->pvertex.span.GetStartPos());
+                              e->head->pvertex.span.GetStartPos());
     }
     e->tail.push_back(AddOrDeleteVertex(v));
   }
