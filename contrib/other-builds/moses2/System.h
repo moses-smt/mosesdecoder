@@ -29,7 +29,7 @@ public:
 	util::Pool &GetSystemPool()
 	{ return m_systemPool; }
 
-	util::Pool &GetManagerPool() const
+	util::Pool &GetManagerPool()
 	{ return m_managerPool; }
 
 	const std::vector<const PhraseTable*> &GetPhraseTables() const
@@ -44,7 +44,7 @@ protected:
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
   std::vector<const PhraseTable*> m_phraseTables;
   util::Pool m_systemPool;
-  mutable util::Pool m_managerPool;
+  util::Pool m_managerPool;
   size_t m_ffStartInd;
   Weights m_weights;
 };

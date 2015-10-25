@@ -22,14 +22,14 @@ class SearchNormal;
 
 class Manager {
 public:
-	Manager(const System &system, const std::string &inputStr);
+	Manager(System &system, const std::string &inputStr);
 	virtual ~Manager();
 
 	util::Pool &GetPool()
 	{ return m_pool; }
 
-	const System &GetStaticData() const
-	{ return m_staticData; }
+	const System &GetSystem() const
+	{ return m_system; }
 
 	Moses::Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
@@ -41,12 +41,12 @@ public:
 protected:
 	util::Pool &m_pool;
 
-	const System &m_staticData;
+	const System &m_system;
 	Phrase *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;
 	Moses::Range m_initRange;
-//	TargetPhrase m_initPhrase;
+	TargetPhrase m_initPhrase;
 
     std::vector<Stack> m_stacks;
 	SearchNormal *m_search;

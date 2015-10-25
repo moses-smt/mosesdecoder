@@ -15,7 +15,7 @@ Hypothesis::Hypothesis(Manager &mgr, const Moses::Bitmap &bitmap, const Moses::R
 ,m_range(range)
 {
 	util::Pool &pool = mgr.GetPool();
-	size_t numStatefulFFs = mgr.GetStaticData().GetStatefulFeatureFunctions().size();
+	size_t numStatefulFFs = mgr.GetSystem().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 }
 
@@ -36,7 +36,7 @@ Hypothesis::~Hypothesis() {
 
 size_t Hypothesis::hash() const
 {
-  size_t numStatefulFFs = m_mgr.GetStaticData().GetStatefulFeatureFunctions().size();
+  size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
   size_t seed;
 
   // coverage
@@ -54,7 +54,7 @@ size_t Hypothesis::hash() const
 
 bool Hypothesis::operator==(const Hypothesis &other) const
 {
-	size_t numStatefulFFs = m_mgr.GetStaticData().GetStatefulFeatureFunctions().size();
+	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
   // coverage
 //  if (m_sourceCompleted != other.m_sourceCompleted) {
 //	return false;
