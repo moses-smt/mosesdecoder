@@ -75,7 +75,7 @@ cmph: PREFIX=${CMPH_PREFIX}
 cmph: | $(call safepath,${CMPH_PREFIX}/bin/cmph)
 $(call safepath,${CMPH_PREFIX}/bin/cmph):
 	$(sfget)
-	$(call configure-make-install, ${TMP}/cmph-2.0)
+	$(call configure-make-install,${TMP}/cmph-2.0)
 	rm -rf ${TMP}
 
 # irstlm for irstlm
