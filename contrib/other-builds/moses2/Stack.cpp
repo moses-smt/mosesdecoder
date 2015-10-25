@@ -18,6 +18,7 @@ Stack::~Stack() {
 
 bool Stack::AddPrune(Hypothesis *hypo)
 {
-	  std::pair<iterator, bool> ret = m_hypos.insert(hypo);
+  std::pair<iterator, bool> ret = m_hypos.insert(hypo);
+  return ret.second;
 }
 

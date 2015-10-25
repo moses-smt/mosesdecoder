@@ -9,6 +9,7 @@ g++ -I../../.. -I../../../boost/include -L../../../lib -lmoses -lz -o moses2 \
    Phrase.cpp \
    PhraseTable.cpp \
  	 Scores.cpp \
+ 	 SearchNormal.cpp \
  	 Stack.cpp \
  	 StatefulFeatureFunction.cpp \
  	 StatelessFeatureFunction.cpp \

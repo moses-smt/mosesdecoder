@@ -10,12 +10,13 @@
 
 #include <cstddef>
 #include "moses/FF/FFState.h"
+#include "moses/WordsBitmap.h"
 
 class Manager;
 
 class Hypothesis {
 public:
-  Hypothesis(const Manager &mgr);
+  Hypothesis(const Manager &mgr, const Moses::WordsBitmap &bitmap);
   virtual ~Hypothesis();
 
   size_t hash() const;
@@ -23,6 +24,8 @@ public:
 
 protected:
   const Manager &m_mgr;
+  const Moses::WordsBitmap &m_bitmap;
+
   Moses::FFState **m_ffStates;
 };
 

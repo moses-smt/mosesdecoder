@@ -8,6 +8,9 @@
 #include "Manager.h"
 #include "PhraseTable.h"
 #include "StaticData.h"
+#include "SearchNormal.h"
+
+using namespace std;
 
 Manager::Manager(const StaticData &staticData, const std::string &inputStr)
 :m_staticData(staticData)
@@ -22,14 +25,22 @@ Manager::Manager(const StaticData &staticData, const std::string &inputStr)
 	}
 
 	m_stacks.resize(m_input->GetSize());
+	m_bitmaps = new Moses::Bitmaps(m_input->GetSize(), vector<bool>(0));
+	m_search = new SearchNormal(*this, m_stacks);
 }
 
 void Manager::Decode()
 {
+	const Moses::WordsBitmap &initBitmap = m_bitmaps->GetInitialBitmap();
+	Hypothesis *iniHypo = new (GetPool().Allocate<Hypothesis>()) Hypothesis(*this, initBitmap);
 
+	for (size_t i = 0; i < m_stacks.size(); ++i) {
+		m_search->Decode(i);
+	}
 }
 
 Manager::~Manager() {
-	// TODO Auto-generated destructor stub
+	delete m_bitmaps;
+	delete m_search;
 }
 
