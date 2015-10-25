@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include <boost/functional/hash.hpp>
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "WordsRange.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"

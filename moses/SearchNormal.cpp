@@ -87,7 +87,7 @@ void SearchNormal::Decode()
   // SentenceStats &stats = m_manager.GetSentenceStats();
 
   // initial seed hypothesis: nothing translated, no words produced
-  const WordsBitmap &bitmap = m_bitmaps.GetInitialBitmap();
+  const Bitmap &bitmap = m_bitmaps.GetInitialBitmap();
   Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, bitmap);
 
   m_hypoStackColl[0]->AddPrune(hypo);
@@ -114,7 +114,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
   // int maxDistortion  = StaticData::Instance().GetMaxDistortion();
   bool isWordLattice = m_source.GetType() == WordLatticeInput;
 
-  const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
+  const Bitmap hypoBitmap = hypothesis.GetWordsBitmap();
   const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
   size_t const sourceSize = m_source.GetSize();
 
@@ -252,7 +252,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   // this idea is explained in (Moore&Quirk, MT Summit 2007)
   float expectedScore = 0.0f;
 
-  const WordsBitmap &sourceCompleted = hypothesis.GetWordsBitmap();
+  const Bitmap &sourceCompleted = hypothesis.GetWordsBitmap();
   float futureScore = m_transOptColl.GetFutureScore().CalcFutureScore2( sourceCompleted, startPos, endPos );
 
   if (m_options.search.UseEarlyDiscarding()) {
@@ -271,7 +271,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   // Create new bitmap
   const TranslationOption &transOpt = **tol->begin();
   const WordsRange &nextRange = transOpt.GetSourceWordsRange();
-  const WordsBitmap &nextBitmap = m_bitmaps.GetBitmap(sourceCompleted, nextRange);
+  const Bitmap &nextBitmap = m_bitmaps.GetBitmap(sourceCompleted, nextRange);
 
   TranslationOptionList::const_iterator iter;
   for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
@@ -293,7 +293,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
                                     const TranslationOption &transOpt,
                                     float expectedScore,
                                     float futureScore,
-                                    const WordsBitmap &bitmap)
+                                    const Bitmap &bitmap)
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();

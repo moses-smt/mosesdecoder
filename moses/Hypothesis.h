@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "TypeDef.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "Sentence.h"
 #include "Phrase.h"
 #include "GenerationDictionary.h"
@@ -72,7 +72,7 @@ class Hypothesis
 
 protected:
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
-  const WordsBitmap	&m_sourceCompleted; /*! keeps track of which words have been translated so far */
+  const Bitmap	&m_sourceCompleted; /*! keeps track of which words have been translated so far */
   InputType const&  m_sourceInput;
   WordsRange				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
   WordsRange        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
@@ -92,9 +92,9 @@ protected:
 
 public:
   /*! used by initial seeding of the translation process */
-  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const WordsBitmap &bitmap);
+  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap);
   /*! used when creating a new hypothesis using a translation option (phrase translation) */
-  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const WordsBitmap &bitmap);
+  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap);
   ~Hypothesis();
 
   void PrintHypothesis() const;
@@ -168,7 +168,7 @@ public:
   /***
    * \return The bitmap of source words we cover
    */
-  inline const WordsBitmap &GetWordsBitmap() const {
+  inline const Bitmap &GetWordsBitmap() const {
     return m_sourceCompleted;
   }
 

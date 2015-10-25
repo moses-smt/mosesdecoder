@@ -20,14 +20,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <boost/functional/hash.hpp>
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 
 namespace Moses
 {
 
-TO_STRING_BODY(WordsBitmap);
+TO_STRING_BODY(Bitmap);
 
-bool WordsBitmap::IsAdjacent(size_t startPos, size_t endPos) const
+bool Bitmap::IsAdjacent(size_t startPos, size_t endPos) const
 {
   return
     GetNumWordsCovered() == 0 ||
@@ -36,22 +36,22 @@ bool WordsBitmap::IsAdjacent(size_t startPos, size_t endPos) const
 }
 
 // for unordered_set in stack
-size_t WordsBitmap::hash() const
+size_t Bitmap::hash() const
 {
   size_t ret = boost::hash_value(m_bitmap);
   return ret;
 }
 
-bool WordsBitmap::operator==(const WordsBitmap& other) const
+bool Bitmap::operator==(const Bitmap& other) const
 {
   return m_bitmap == other.m_bitmap;
 }
 
 // friend
-std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap)
+std::ostream& operator<<(std::ostream& out, const Bitmap& bitmap)
 {
-  for (size_t i = 0 ; i < wordsBitmap.m_bitmap.size() ; i++) {
-    out << int(wordsBitmap.GetValue(i));
+  for (size_t i = 0 ; i < bitmap.m_bitmap.size() ; i++) {
+    out << int(bitmap.GetValue(i));
   }
   return out;
 }

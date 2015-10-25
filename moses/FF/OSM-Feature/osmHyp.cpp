@@ -169,7 +169,7 @@ string osmHypothesis :: intToString(int num)
 
 }
 
-void osmHypothesis :: generateOperations(int & startIndex , int j1 , int contFlag , WordsBitmap & coverageVector , string english , string german , set <int> & targetNullWords , vector <string> & currF)
+void osmHypothesis :: generateOperations(int & startIndex , int j1 , int contFlag , Bitmap & coverageVector , string english , string german , set <int> & targetNullWords , vector <string> & currF)
 {
 
   int gFlag = 0;
@@ -362,7 +362,7 @@ void osmHypothesis :: generateDeleteOperations(std::string english, int currTarg
 
 }
 
-void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageVector)
+void osmHypothesis :: computeOSMFeature(int startIndex , Bitmap & coverageVector)
 {
 
   set <int> doneTargetIndexes;

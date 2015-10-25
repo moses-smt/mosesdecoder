@@ -44,7 +44,7 @@ using namespace std;
 namespace Moses
 {
 Hypothesis::
-Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const WordsBitmap &bitmap)
+Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap)
   : m_prevHypo(NULL)
   , m_sourceCompleted(bitmap)
   , m_sourceInput(source)
@@ -75,7 +75,7 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
  * continue prevHypo by appending the phrases in transOpt
  */
 Hypothesis::
-Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const WordsBitmap &bitmap)
+Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap)
   : m_prevHypo(&prevHypo)
   , m_sourceCompleted(bitmap)
   , m_sourceInput(prevHypo.m_sourceInput)

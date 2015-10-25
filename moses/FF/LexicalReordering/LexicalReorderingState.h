@@ -8,7 +8,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/WordsRange.h"
-#include "moses/WordsBitmap.h"
+#include "moses/Bitmap.h"
 #include "moses/TranslationOption.h"
 #include "moses/FF/FFState.h"
 #include "ReorderingStack.h"
@@ -66,7 +66,7 @@ public:
 
   ReorderingType // for HReorderingForwardState
   GetOrientation(WordsRange const& prev, WordsRange const& cur,
-                 WordsBitmap const& cov) const;
+                 Bitmap const& cov) const;
 
   ReorderingType // for HReorderingBackwarddState
   GetOrientation(int const reoDistance) const;
@@ -289,7 +289,7 @@ class HReorderingForwardState : public LRState
 private:
   bool m_first;
   WordsRange m_prevRange;
-  WordsBitmap m_coverage;
+  Bitmap m_coverage;
 
 public:
   HReorderingForwardState(const LRModel &config, size_t sentenceLength,

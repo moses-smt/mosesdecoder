@@ -3,7 +3,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 #include <set>
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "Util.h"
 
 namespace Moses
@@ -11,21 +11,21 @@ namespace Moses
 
 class Bitmaps
 {
-  typedef boost::unordered_map<WordsRange, const WordsBitmap*> NextBitmaps;
-  typedef boost::unordered_map<const WordsBitmap*, NextBitmaps, UnorderedComparer<WordsBitmap>, UnorderedComparer<WordsBitmap> > Coll;
-  //typedef std::set<const WordsBitmap*, OrderedComparer<WordsBitmap> > Coll;
+  typedef boost::unordered_map<WordsRange, const Bitmap*> NextBitmaps;
+  typedef boost::unordered_map<const Bitmap*, NextBitmaps, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > Coll;
+  //typedef std::set<const Bitmap*, OrderedComparer<Bitmap> > Coll;
   Coll m_coll;
-  const WordsBitmap *m_initBitmap;
+  const Bitmap *m_initBitmap;
 
-  const WordsBitmap &GetNextBitmap(const WordsBitmap &bm, const WordsRange &range);
+  const Bitmap &GetNextBitmap(const Bitmap &bm, const WordsRange &range);
 public:
   Bitmaps(size_t inputSize, const std::vector<bool> &initSourceCompleted);
   virtual ~Bitmaps();
 
-  const WordsBitmap &GetInitialBitmap() const {
+  const Bitmap &GetInitialBitmap() const {
     return *m_initBitmap;
   }
-  const WordsBitmap &GetBitmap(const WordsBitmap &bm, const WordsRange &range);
+  const Bitmap &GetBitmap(const Bitmap &bm, const WordsRange &range);
 
 };
 

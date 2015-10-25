@@ -18,7 +18,7 @@ namespace Moses
 bool
 IsMonotonicStep(WordsRange  const& prev, // words range of last source phrase
                 WordsRange  const& cur,  // words range of current source phrase
-                WordsBitmap const& cov)  // coverage bitmap
+                Bitmap const& cov)  // coverage bitmap
 {
   size_t e = prev.GetEndPos() + 1;
   size_t s = cur.GetStartPos();
@@ -26,7 +26,7 @@ IsMonotonicStep(WordsRange  const& prev, // words range of last source phrase
 }
 
 bool
-IsSwap(WordsRange const& prev, WordsRange const& cur, WordsBitmap const& cov)
+IsSwap(WordsRange const& prev, WordsRange const& cur, Bitmap const& cov)
 {
   size_t s = prev.GetStartPos();
   size_t e = cur.GetEndPos();
@@ -111,7 +111,7 @@ GetOrientation(int const reoDistance) const
 LRModel::ReorderingType
 LRModel::
 GetOrientation(WordsRange const& prev, WordsRange const& cur,
-               WordsBitmap const& cov) const
+               Bitmap const& cov) const
 {
   return ((m_modelType == LeftRight)
           ? cur.GetStartPos() > prev.GetEndPos() ? R : L
@@ -494,7 +494,7 @@ Expand(TranslationOption const& topt, InputType const& input,
 {
   const WordsRange cur = topt.GetSourceWordsRange();
   // keep track of the current coverage ourselves so we don't need the hypothesis
-  WordsBitmap cov = m_coverage;
+  Bitmap cov = m_coverage;
   cov.SetValue(cur, true);
   if (!m_first) {
     LRModel::ReorderingType reoType;

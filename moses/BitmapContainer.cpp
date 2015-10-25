@@ -195,7 +195,7 @@ BackwardsEdge::Initialize()
     return;
   }
 
-  const WordsBitmap &bm = m_hypotheses[0]->GetWordsBitmap();
+  const Bitmap &bm = m_hypotheses[0]->GetWordsBitmap();
   const WordsRange &newRange = m_translations.Get(0)->GetSourceWordsRange();
   m_futureScore = m_futureScores.CalcFutureScore2(bm, newRange.GetStartPos(), newRange.GetEndPos());
 
@@ -211,7 +211,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
   }
-  const WordsBitmap &bitmap = m_parent.GetWordsBitmap();
+  const Bitmap &bitmap = m_parent.GetWordsBitmap();
   Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
@@ -277,7 +277,7 @@ BackwardsEdge::PushSuccessors(const size_t x, const size_t y)
 // BitmapContainer Code
 ////////////////////////////////////////////////////////////////////////////////
 
-BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
+BitmapContainer::BitmapContainer(const Bitmap &bitmap
                                  , HypothesisStackCubePruning &stack
                                  , bool deterministic)
   : m_bitmap(bitmap)

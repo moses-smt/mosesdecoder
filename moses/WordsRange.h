@@ -36,7 +36,7 @@ namespace Moses
 {
 
 /***
- * Efficient version of WordsBitmap for contiguous ranges
+ * Efficient version of Bitmap for contiguous ranges
  */
 class WordsRange
 {

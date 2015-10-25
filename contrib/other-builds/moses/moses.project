@@ -769,8 +769,8 @@
     <File Name="../../../moses/Word.h"/>
     <File Name="../../../moses/WordLattice.cpp"/>
     <File Name="../../../moses/WordLattice.h"/>
-    <File Name="../../../moses/WordsBitmap.cpp"/>
-    <File Name="../../../moses/WordsBitmap.h"/>
+    <File Name="../../../moses/Bitmap.cpp"/>
+    <File Name="../../../moses/Bitmap.h"/>
     <File Name="../../../moses/WordsRange.cpp"/>
     <File Name="../../../moses/WordsRange.h"/>
     <File Name="../../../moses/XmlOption.cpp"/>

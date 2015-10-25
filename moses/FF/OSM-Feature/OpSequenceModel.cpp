@@ -50,7 +50,7 @@ void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
 
   osmHypothesis obj;
   obj.setState(OSM->NullContextState());
-  WordsBitmap myBitmap(source.GetSize());
+  Bitmap myBitmap(source.GetSize());
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
   vector<float> scores;
@@ -93,8 +93,8 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   ScoreComponentCollection* accumulator) const
 {
   const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
-  const WordsBitmap &bitmap = cur_hypo.GetWordsBitmap();
-  WordsBitmap myBitmap = bitmap;
+  const Bitmap &bitmap = cur_hypo.GetWordsBitmap();
+  Bitmap myBitmap = bitmap;
   const Manager &manager = cur_hypo.GetManager();
   const InputType &source = manager.GetSource();
   // const Sentence &sourceSentence = static_cast<const Sentence&>(source);

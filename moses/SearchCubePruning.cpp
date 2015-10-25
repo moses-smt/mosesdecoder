@@ -182,7 +182,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
   stack.AddHypothesesToBitmapContainers();
 
   for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor) {
-    const WordsBitmap &bitmap = iterAccessor->first;
+    const Bitmap &bitmap = iterAccessor->first;
     BitmapContainer &bitmapContainer = *iterAccessor->second;
 
     if (bitmapContainer.GetHypothesesSize() == 0) {
@@ -225,10 +225,10 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
 
 void
 SearchCubePruning::
-CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range,
+CreateForwardTodos(Bitmap const& bitmap, WordsRange const& range,
                    BitmapContainer& bitmapContainer)
 {
-  WordsBitmap newBitmap = bitmap;
+  Bitmap newBitmap = bitmap;
   newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
 
   size_t numCovered = newBitmap.GetNumWordsCovered();
@@ -246,7 +246,7 @@ CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range,
 
 bool
 SearchCubePruning::
-CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
+CheckDistortion(const Bitmap &hypoBitmap, const WordsRange &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
   int maxDistortion = m_manager.options().reordering.max_distortion;

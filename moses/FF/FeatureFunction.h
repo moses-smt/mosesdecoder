@@ -21,7 +21,7 @@ class Hypothesis;
 class ChartHypothesis;
 class InputType;
 class ScoreComponentCollection;
-class WordsBitmap;
+class Bitmap;
 class WordsRange;
 class FactorMask;
 class InputPath;
