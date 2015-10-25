@@ -10,12 +10,19 @@
 #
 #    make -f /path/to/this/file PREFIX=/where/to/install/things
 #
+# The name of the current directory must not contain spaces! The build scripts for 
+# at least some of the external software can't handle them.
 
-# current working directory: bit of a hack to get the nfs-accessible
-# path instead of the local real path; also, we need to escape spaces
 space :=
 space +=
-CWD := $(subst $(space),\$(space),$(shell cd . && pwd))
+# $(CWD) may contain space, safepath escapes them
+# Update: doesn't work, because the build scripts for some of the external packages
+# can't handle spaces in path names.
+safepath=$(subst $(space),\$(space),$1)
+
+# current working directory: bit of a hack to get the nfs-accessible
+# path instead of the local real path
+CWD := $(shell cd . && pwd)
 
 # by default, we install in ./opt and build in ./build
 PREFIX ?= $(CWD)/opt
@@ -47,16 +54,16 @@ sourceforge = http://downloads.sourceforge.net/project
 
 # functions for building software from sourceforge
 nproc := $(shell nproc)
-sfget  = mkdir -p ${TMP} && cd ${TMP} && wget -qO- ${URL} | tar xz 
-configure-make-install  = cd $1 && ./configure --prefix=${PREFIX} 
+sfget  = mkdir -p '${TMP}' && cd '${TMP}' && wget -qO- ${URL} | tar xz 
+configure-make-install  = cd '$1' && ./configure --prefix='${PREFIX}' 
 configure-make-install += && make -j$(nproc) && make install
 
 # XMLRPC-C for moses server
 xmlrpc: URL=$(sourceforge)/xmlrpc-c/Xmlrpc-c%20Super%20Stable/1.33.17/xmlrpc-c-1.33.17.tgz
 xmlrpc: TMP=$(CWD)/build/xmlrpc
 xmlrpc: PREFIX=${XMLRPC_PREFIX}
-xmlrpc: | ${XMLRPC_PREFIX}/bin/xmlrpc-c-config
-${XMLRPC_PREFIX}/bin/xmlrpc-c-config:
+xmlrpc: | $(call safepath,${XMLRPC_PREFIX}/bin/xmlrpc-c-config)
+$(call safepath,${XMLRPC_PREFIX}/bin/xmlrpc-c-config):
 	$(sfget)
 	$(call configure-make-install,${TMP}/xmlrpc-c-1.33.17)
 	rm -rf ${TMP}
@@ -65,8 +72,8 @@ ${XMLRPC_PREFIX}/bin/xmlrpc-c-config:
 cmph: URL=$(sourceforge)/cmph/cmph/cmph-2.0.tar.gz
 cmph: TMP=$(CWD)/build/cmph
 cmph: PREFIX=${CMPH_PREFIX}
-cmph: | ${CMPH_PREFIX}/bin/cmph
-${CMPH_PREFIX}/bin/cmph:
+cmph: | $(call safepath,${CMPH_PREFIX}/bin/cmph)
+$(call safepath,${CMPH_PREFIX}/bin/cmph):
 	$(sfget)
 	$(call configure-make-install, ${TMP}/cmph-2.0)
 	rm -rf ${TMP}
@@ -76,19 +83,19 @@ irstlm: URL=$(sourceforge)/irstlm/irstlm/irstlm-5.80/irstlm-5.80.08.tgz
 irstlm: TMP=$(CWD)/build/irstlm
 irstlm: VERSION=$(basename $(notdir $(irstlm_url)))
 irstlm: PREFIX=${IRSTLM_PREFIX}
-irstlm: | $(IRSTLM_PREFIX)/bin/build-lm.sh
-$(IRSTLM_PREFIX)/bin/build-lm.sh:
+irstlm: | $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh)
+$(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh):
 	$(sfget)
-	cd $$(find ${TMP} -name trunk) && ./regenerate-makefiles.sh \
-	&& ./configure --prefix=${PREFIX} && make -j${nproc} && make install -j$(nproc)
+	cd $$(find '${TMP}' -name trunk) && ./regenerate-makefiles.sh \
+	&& ./configure --prefix='${PREFIX}' && make -j${nproc} && make install -j$(nproc)
 	rm -rf ${TMP}
 
 # boost 
 boost: URL=http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz/download
 boost: TMP=$(CWD)/build/boost
 boost: PREFIX=${BOOST_PREFIX}
-boost: | ${BOOST_PREFIX}/include/boost
-${BOOST_PREFIX}/include/boost:
+boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
+$(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd ${TMP}/boost_1_59_0 && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(nproc) install
+	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(nproc) install
 	rm -rf ${TMP}
