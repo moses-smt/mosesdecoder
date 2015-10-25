@@ -14,6 +14,7 @@ class Stack;
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
+class TargetPhrase;
 
 class SearchNormal {
 public:
@@ -29,6 +30,7 @@ protected:
 	void Extend(const Hypothesis &hypo);
 	void Extend(const Hypothesis &hypo, const InputPath &path);
 	void Extend(const Hypothesis &hypo, const TargetPhrases &tps);
+	void Extend(const Hypothesis &hypo, const TargetPhrase &tp);
 };
 
 #endif /* SEARCHNORMAL_H_ */

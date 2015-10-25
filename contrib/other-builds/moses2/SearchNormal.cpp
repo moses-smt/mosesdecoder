@@ -5,10 +5,13 @@
  *      Author: hieu
  */
 
+#include <boost/foreach.hpp>
 #include "SearchNormal.h"
 #include "Stack.h"
 #include "Manager.h"
 #include "InputPaths.h"
+#include "TargetPhrases.h"
+#include "TargetPhrase.h"
 #include "moses/Bitmap.h"
 
 SearchNormal::SearchNormal(Manager &mgr, std::vector<Stack> &stacks)
@@ -27,19 +30,16 @@ void SearchNormal::Decode(size_t stackInd)
 {
 	Stack &stack = m_stacks[stackInd];
 
-	Stack::const_iterator iter;
-	for (iter = stack.begin(); iter != stack.end(); ++iter) {
-		const Hypothesis &hypo = **iter;
-		Extend(hypo);
-	}
+  BOOST_FOREACH(const Hypothesis *hypo, stack) {
+		Extend(*hypo);
+  }
 }
 
 void SearchNormal::Extend(const Hypothesis &hypo)
 {
 	const InputPaths &paths = m_mgr.GetInputPaths();
-	InputPaths::const_iterator iter;
-	for (iter = paths.begin(); iter != paths.end(); ++iter) {
-		const InputPath &path = *iter;
+
+	BOOST_FOREACH(const InputPath &path, paths) {
 		Extend(hypo, path);
 	}
 }
@@ -72,6 +72,12 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 
 void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrases &tps)
 {
-	//Hypothesis *newHypo = new
+  BOOST_FOREACH(const TargetPhrase *tp, tps) {
+	  Extend(hypo, *tp);
+  }
+}
 
+void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrase &tp)
+{
+	//Hypothesis *newHypo = new
 }

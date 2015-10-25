@@ -16,7 +16,7 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-bool Stack::AddPrune(Hypothesis *hypo)
+bool Stack::Add(Hypothesis *hypo)
 {
   std::pair<iterator, bool> ret = m_hypos.insert(hypo);
   return ret.second;

@@ -29,7 +29,7 @@ public:
 	Stack();
 	virtual ~Stack();
 
-	bool AddPrune(Hypothesis *hypo);
+	bool Add(Hypothesis *hypo);
 };
 
 #endif /* STACK_H_ */

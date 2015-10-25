@@ -10,7 +10,18 @@
 #include "TargetPhrase.h"
 
 class TargetPhrases {
+	typedef std::vector<const TargetPhrase*> Coll;
 public:
+  typedef Coll::iterator iterator;
+  typedef Coll::const_iterator const_iterator;
+  //! iterators
+  const_iterator begin() const {
+	return m_coll.begin();
+  }
+  const_iterator end() const {
+	return m_coll.end();
+  }
+
 	TargetPhrases();
 	virtual ~TargetPhrases();
 
@@ -19,7 +30,7 @@ public:
 		m_coll.push_back(&targetPhrase);
 	}
 protected:
-	std::vector<const TargetPhrase*> m_coll;
+	Coll m_coll;
 
 };
 

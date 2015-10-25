@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #include <cassert>
+#include <boost/foreach.hpp>
 #include "PhraseTable.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
@@ -96,12 +97,10 @@ void PhraseTable::Load(StaticData &staticData)
 
 void PhraseTable::Lookups(InputPaths &inputPaths) const
 {
-	InputPaths::iterator iter;
-	for (iter = inputPaths.begin(); iter != inputPaths.end(); ++iter) {
-		InputPath &path = *iter;
+  BOOST_FOREACH(InputPath &path, inputPaths) {
 		const SubPhrase &phrase = path.GetSubPhrase();
 		const TargetPhrases *tps = m_root.Find(phrase);
-	}
+  }
 }
 
 
