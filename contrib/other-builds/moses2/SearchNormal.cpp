@@ -12,7 +12,6 @@
 #include "InputPaths.h"
 #include "TargetPhrases.h"
 #include "TargetPhrase.h"
-#include "moses/Bitmap.h"
 
 SearchNormal::SearchNormal(Manager &mgr, std::vector<Stack> &stacks)
 :m_mgr(mgr)
@@ -65,19 +64,25 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 	for (size_t i = 0; i < tpsAllPt.size(); ++i) {
 		const TargetPhrases *tps = tpsAllPt[i];
 		if (tps) {
-			Extend(hypo, *tps);
+			Extend(hypo, *tps, pathRange, newBitmap);
 		}
 	}
 }
 
-void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrases &tps)
+void SearchNormal::Extend(const Hypothesis &hypo,
+		const TargetPhrases &tps,
+		const Moses::Range &pathRange,
+		const Moses::Bitmap &newBitmap)
 {
   BOOST_FOREACH(const TargetPhrase *tp, tps) {
-	  Extend(hypo, *tp);
+	  Extend(hypo, *tp, pathRange, newBitmap);
   }
 }
 
-void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrase &tp)
+void SearchNormal::Extend(const Hypothesis &hypo,
+		const TargetPhrase &tp,
+		const Moses::Range &pathRange,
+		const Moses::Bitmap &newBitmap)
 {
-	//Hypothesis *newHypo = new
+	Hypothesis *newHypo = new (m_mgr.GetPool().Allocate<Hypothesis>()) Hypothesis(hypo, tp, pathRange, newBitmap);
 }

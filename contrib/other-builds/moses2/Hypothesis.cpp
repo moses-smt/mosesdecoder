@@ -19,6 +19,17 @@ Hypothesis::Hypothesis(Manager &mgr, const Moses::Bitmap &bitmap, const Moses::R
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 }
 
+Hypothesis::Hypothesis(const Hypothesis &prevHypo,
+		const TargetPhrase &tp,
+		const Moses::Range &pathRange,
+		const Moses::Bitmap &bitmap)
+:m_mgr(prevHypo.m_mgr)
+,m_bitmap(bitmap)
+,m_range(pathRange)
+{
+
+}
+
 Hypothesis::~Hypothesis() {
 	// TODO Auto-generated destructor stub
 }

@@ -8,6 +8,8 @@
 #ifndef SEARCHNORMAL_H_
 #define SEARCHNORMAL_H_
 #include <vector>
+#include "moses/Range.h"
+#include "moses/Bitmap.h"
 
 class Manager;
 class Stack;
@@ -29,8 +31,14 @@ protected:
 
 	void Extend(const Hypothesis &hypo);
 	void Extend(const Hypothesis &hypo, const InputPath &path);
-	void Extend(const Hypothesis &hypo, const TargetPhrases &tps);
-	void Extend(const Hypothesis &hypo, const TargetPhrase &tp);
+	void Extend(const Hypothesis &hypo,
+			const TargetPhrases &tps,
+			const Moses::Range &pathRange,
+			const Moses::Bitmap &newBitmap);
+	void Extend(const Hypothesis &hypo,
+			const TargetPhrase &tp,
+			const Moses::Range &pathRange,
+			const Moses::Bitmap &newBitmap);
 };
 
 #endif /* SEARCHNORMAL_H_ */

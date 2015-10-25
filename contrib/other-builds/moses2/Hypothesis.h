@@ -13,10 +13,12 @@
 #include "moses/Bitmap.h"
 
 class Manager;
+class TargetPhrase;
 
 class Hypothesis {
 public:
   Hypothesis(Manager &mgr, const Moses::Bitmap &bitmap, const Moses::Range &range);
+  Hypothesis(const Hypothesis &prevHypo, const TargetPhrase &tp, const Moses::Range &pathRange, const Moses::Bitmap &bitmap);
   virtual ~Hypothesis();
 
   size_t hash() const;
