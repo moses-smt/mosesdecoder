@@ -21,8 +21,6 @@ CWD := $(subst $(space),\$(space),$(shell cd . && pwd))
 PREFIX ?= $(CWD)/opt
 BUILD_DIR = $(CWD)/opt/build/${URL}
 
-
-PREFIX
 # you can also specify specific prefixes for different packages:
 XMLRPC_PREFIX ?= ${PREFIX}
 CMPH_PREFIX   ?= ${PREFIX}
