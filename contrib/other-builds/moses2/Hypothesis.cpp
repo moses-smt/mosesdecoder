@@ -9,9 +9,10 @@
 #include "Manager.h"
 #include "StaticData.h"
 
-Hypothesis::Hypothesis(const Manager &mgr, const Moses::WordsBitmap &bitmap)
+Hypothesis::Hypothesis(const Manager &mgr, const Moses::WordsBitmap &bitmap, const Moses::WordsRange &range)
 :m_mgr(mgr)
 ,m_bitmap(bitmap)
+,m_range(range)
 {
 	util::Pool &pool = mgr.GetPool();
 	size_t numStatefulFFs = mgr.GetStaticData().GetStatefulFeatureFunctions().size();

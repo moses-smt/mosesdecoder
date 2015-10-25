@@ -16,15 +16,22 @@ class Manager;
 
 class Hypothesis {
 public:
-  Hypothesis(const Manager &mgr, const Moses::WordsBitmap &bitmap);
+  Hypothesis(const Manager &mgr, const Moses::WordsBitmap &bitmap, const Moses::WordsRange &range);
   virtual ~Hypothesis();
 
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
 
+  const Moses::WordsBitmap &GetBitmap() const
+  { return m_bitmap; }
+
+  const Moses::WordsRange &GetRange() const
+  { return m_range; }
+
 protected:
   const Manager &m_mgr;
   const Moses::WordsBitmap &m_bitmap;
+  const Moses::WordsRange &m_range;
 
   Moses::FFState **m_ffStates;
 };

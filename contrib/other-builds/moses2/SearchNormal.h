@@ -12,6 +12,7 @@
 class Manager;
 class Stack;
 class Hypothesis;
+class InputPath;
 
 class SearchNormal {
 public:
@@ -25,6 +26,7 @@ protected:
 	std::vector<Stack> &m_stacks;
 
 	void Extend(const Hypothesis &hypo);
+	void Extend(const Hypothesis &hypo, const InputPath &path);
 };
 
 #endif /* SEARCHNORMAL_H_ */

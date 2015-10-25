@@ -14,6 +14,7 @@ using namespace std;
 
 Manager::Manager(const StaticData &staticData, const std::string &inputStr)
 :m_staticData(staticData)
+,m_initRange(NOT_FOUND, NOT_FOUND)
 {
 	m_input = Phrase::CreateFromString(m_pool, inputStr);
 	m_inputPaths.Init(*m_input, staticData);
@@ -32,7 +33,7 @@ Manager::Manager(const StaticData &staticData, const std::string &inputStr)
 void Manager::Decode()
 {
 	const Moses::WordsBitmap &initBitmap = m_bitmaps->GetInitialBitmap();
-	Hypothesis *iniHypo = new (GetPool().Allocate<Hypothesis>()) Hypothesis(*this, initBitmap);
+	Hypothesis *iniHypo = new (GetPool().Allocate<Hypothesis>()) Hypothesis(*this, initBitmap, m_initRange);
 
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
 		m_search->Decode(i);

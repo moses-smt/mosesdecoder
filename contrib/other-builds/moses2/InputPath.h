@@ -21,6 +21,8 @@ public:
 	const SubPhrase &GetSubPhrase() const
 	{ return m_subPhrase; }
 
+	const Moses::WordsRange &GetRange() const
+	{ return m_range; }
 protected:
 	SubPhrase m_subPhrase;
 	Moses::WordsRange m_range;

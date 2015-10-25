@@ -24,14 +24,17 @@ public:
 	Manager(const StaticData &staticData, const std::string &inputStr);
 	virtual ~Manager();
 
+	util::Pool &GetPool() const
+	{ return m_pool; }
+
 	const StaticData &GetStaticData() const
 	{ return m_staticData; }
 
 	const Moses::Bitmaps &GetBitmaps() const
 	{ return *m_bitmaps; }
 
-	util::Pool &GetPool() const
-	{ return m_pool; }
+	const InputPaths &GetInputPaths() const
+	{ return m_inputPaths; }
 
 	void Decode();
 protected:
@@ -41,6 +44,7 @@ protected:
 	Phrase *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;
+	Moses::WordsRange m_initRange;
 
     std::vector<Stack> m_stacks;
 	SearchNormal *m_search;
