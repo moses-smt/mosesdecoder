@@ -9,8 +9,12 @@
 #include "Manager.h"
 #include "System.h"
 
-Hypothesis::Hypothesis(Manager &mgr, const Moses::Bitmap &bitmap, const Moses::Range &range)
+Hypothesis::Hypothesis(Manager &mgr,
+		const TargetPhrase &tp,
+		const Moses::Range &range,
+		const Moses::Bitmap &bitmap)
 :m_mgr(mgr)
+,m_targetPhrase(tp)
 ,m_bitmap(bitmap)
 ,m_range(range)
 {
@@ -24,6 +28,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 		const Moses::Range &pathRange,
 		const Moses::Bitmap &bitmap)
 :m_mgr(prevHypo.m_mgr)
+,m_targetPhrase(tp)
 ,m_bitmap(bitmap)
 ,m_range(pathRange)
 {

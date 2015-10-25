@@ -17,8 +17,14 @@ class TargetPhrase;
 
 class Hypothesis {
 public:
-  Hypothesis(Manager &mgr, const Moses::Bitmap &bitmap, const Moses::Range &range);
-  Hypothesis(const Hypothesis &prevHypo, const TargetPhrase &tp, const Moses::Range &pathRange, const Moses::Bitmap &bitmap);
+  Hypothesis(Manager &mgr,
+		  const TargetPhrase &tp,
+		  const Moses::Range &range,
+		  const Moses::Bitmap &bitmap);
+  Hypothesis(const Hypothesis &prevHypo,
+		  const TargetPhrase &tp,
+		  const Moses::Range &pathRange,
+		  const Moses::Bitmap &bitmap);
   virtual ~Hypothesis();
 
   size_t hash() const;
@@ -32,6 +38,7 @@ public:
 
 protected:
   Manager &m_mgr;
+  const TargetPhrase &m_targetPhrase;
   const Moses::Bitmap &m_bitmap;
   const Moses::Range &m_range;
 
