@@ -246,7 +246,7 @@ PrintHypothesis() const
     TRACE_ERR( "... ");
   }
   if (end>=0) {
-    WordsRange range(start, end);
+    Range range(start, end);
     TRACE_ERR( m_prevHypo->GetCurrTargetPhrase().GetSubString(range) << " ");
   }
   TRACE_ERR( ")"<<endl);
@@ -523,7 +523,7 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
 
   // trace ("report segmentation") option "-t" / "-tt"
   if (reportSegmentation > 0 && phrase.GetSize() > 0) {
-    const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+    const Range &sourceRange = edge.GetCurrSourceWordsRange();
     const int sourceStart = sourceRange.GetStartPos();
     const int sourceEnd = sourceRange.GetEndPos();
     out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
@@ -604,8 +604,8 @@ Hypothesis::
 OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const
 {
   using namespace std;
-  WordsRange const& src = this->GetCurrSourceWordsRange();
-  WordsRange const& trg = this->GetCurrTargetWordsRange();
+  Range const& src = this->GetCurrSourceWordsRange();
+  Range const& trg = this->GetCurrTargetWordsRange();
 
   vector<pair<size_t,size_t> const* > a
   = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments();

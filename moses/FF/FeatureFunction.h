@@ -22,7 +22,7 @@ class ChartHypothesis;
 class InputType;
 class ScoreComponentCollection;
 class Bitmap;
-class WordsRange;
+class Range;
 class FactorMask;
 class InputPath;
 class StackVec;

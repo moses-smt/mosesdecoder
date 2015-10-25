@@ -169,7 +169,7 @@ public:
 
   //! list of trans opt for a particular span
   TranslationOptionList const*
-  GetTranslationOptionList(const WordsRange &coverage) const {
+  GetTranslationOptionList(const Range &coverage) const {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 

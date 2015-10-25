@@ -39,11 +39,11 @@ TranslationOption::TranslationOption()
 { }
 
 //TODO this should be a factory function!
-TranslationOption::TranslationOption(const WordsRange &wordsRange
+TranslationOption::TranslationOption(const Range &range
                                      , const TargetPhrase &targetPhrase)
   : m_targetPhrase(targetPhrase)
   , m_inputPath(NULL)
-  , m_sourceWordsRange(wordsRange)
+  , m_sourceWordsRange(range)
   , m_futureScore(targetPhrase.GetFutureScore())
 {
 }

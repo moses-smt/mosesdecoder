@@ -32,7 +32,7 @@ namespace Moses
 {
 
 class ChartParserCallback;
-class WordsRange;
+class Range;
 
 //! Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus

@@ -46,8 +46,8 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
     util::StringStream tms;
     std::string target = (*tpi)->GetTargetPhraseStringRep();
     std::string source = (*tpi)->GetSourcePhraseStringRep();
-    WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
-    WordsRange swr = (*tpi)->GetCurrSourceWordsRange();
+    Range twr = (*tpi)->GetCurrTargetWordsRange();
+    Range swr = (*tpi)->GetCurrSourceWordsRange();
     const AlignmentInfo &alignmentInfo = (*tpi)->GetCurrTargetPhrase().GetAlignTerm();
     // language model backoff stats,
     if (doLMStats) {

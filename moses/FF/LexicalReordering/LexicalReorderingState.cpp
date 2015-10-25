@@ -4,7 +4,7 @@
 
 #include "moses/FF/FFState.h"
 #include "moses/Hypothesis.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/TranslationOption.h"
 #include "moses/Util.h"
 
@@ -16,8 +16,8 @@ namespace Moses
 {
 
 bool
-IsMonotonicStep(WordsRange  const& prev, // words range of last source phrase
-                WordsRange  const& cur,  // words range of current source phrase
+IsMonotonicStep(Range  const& prev, // words range of last source phrase
+                Range  const& cur,  // words range of current source phrase
                 Bitmap const& cov)  // coverage bitmap
 {
   size_t e = prev.GetEndPos() + 1;
@@ -26,7 +26,7 @@ IsMonotonicStep(WordsRange  const& prev, // words range of last source phrase
 }
 
 bool
-IsSwap(WordsRange const& prev, WordsRange const& cur, Bitmap const& cov)
+IsSwap(Range const& prev, Range const& cur, Bitmap const& cov)
 {
   size_t s = prev.GetStartPos();
   size_t e = cur.GetEndPos();
@@ -71,7 +71,7 @@ SetAdditionalScoreComponents(size_t number)
 /// return orientation for the first phrase
 LRModel::ReorderingType
 LRModel::
-GetOrientation(WordsRange const& cur) const
+GetOrientation(Range const& cur) const
 {
   UTIL_THROW_IF2(m_modelType == None, "Reordering Model Type is None");
   return ((m_modelType == LeftRight) ? R :
@@ -82,7 +82,7 @@ GetOrientation(WordsRange const& cur) const
 
 LRModel::ReorderingType
 LRModel::
-GetOrientation(WordsRange const& prev, WordsRange const& cur) const
+GetOrientation(Range const& prev, Range const& cur) const
 {
   UTIL_THROW_IF2(m_modelType == None, "No reordering model type specified");
   return ((m_modelType == LeftRight)
@@ -110,7 +110,7 @@ GetOrientation(int const reoDistance) const
 
 LRModel::ReorderingType
 LRModel::
-GetOrientation(WordsRange const& prev, WordsRange const& cur,
+GetOrientation(Range const& prev, Range const& cur,
                Bitmap const& cov) const
 {
   return ((m_modelType == LeftRight)
@@ -347,7 +347,7 @@ Expand(const TranslationOption& topt, const InputType& input,
 
   if ((m_direction != LRModel::Forward && m_useFirstBackwardScore) || !m_first) {
     LRModel const& lrmodel = m_configuration;
-    WordsRange const cur = topt.GetSourceWordsRange();
+    Range const cur = topt.GetSourceWordsRange();
     LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
                                        : lrmodel.GetOrientation(m_prevRange,cur));
     CopyScores(scores, topt, input, reoType);
@@ -423,7 +423,7 @@ Expand(const TranslationOption& topt, const InputType& input,
 {
   HReorderingBackwardState* nextState;
   nextState = new HReorderingBackwardState(this, topt, m_reoStack);
-  WordsRange swrange = topt.GetSourceWordsRange();
+  Range swrange = topt.GetSourceWordsRange();
   int reoDistance = nextState->m_reoStack.ShiftReduce(swrange);
   ReorderingType reoType = m_configuration.GetOrientation(reoDistance);
   CopyScores(scores, topt, input, reoType);
@@ -492,7 +492,7 @@ HReorderingForwardState::
 Expand(TranslationOption const& topt, InputType const& input,
        ScoreComponentCollection* scores) const
 {
-  const WordsRange cur = topt.GetSourceWordsRange();
+  const Range cur = topt.GetSourceWordsRange();
   // keep track of the current coverage ourselves so we don't need the hypothesis
   Bitmap cov = m_coverage;
   cov.SetValue(cur, true);

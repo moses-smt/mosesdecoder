@@ -131,7 +131,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
            tol && endPos < sourceSize;
            tol = m_transOptColl.GetTranslationOptionList(startPos, ++endPos)) {
         if (tol->size() == 0
-            || hypoBitmap.Overlap(WordsRange(startPos, endPos))
+            || hypoBitmap.Overlap(Range(startPos, endPos))
             || !ReoConstraint.Check(hypoBitmap, startPos, endPos)) {
           continue;
         }
@@ -145,7 +145,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
 
   // There are reordering limits. Make sure they are not violated.
 
-  WordsRange prevRange = hypothesis.GetCurrSourceWordsRange();
+  Range prevRange = hypothesis.GetCurrSourceWordsRange();
   for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos) {
 
     // don't bother expanding phrases if the first position is already taken
@@ -176,7 +176,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
         continue;
     }
 
-    WordsRange currentStartRange(startPos, startPos);
+    Range currentStartRange(startPos, startPos);
     if(m_source.ComputeDistortionDistance(prevRange, currentStartRange)
         > m_options.reordering.max_distortion)
       continue;
@@ -186,7 +186,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
     for (tol = m_transOptColl.GetTranslationOptionList(startPos, endPos);
          tol && endPos < sourceSize;
          tol = m_transOptColl.GetTranslationOptionList(startPos, ++endPos)) {
-      WordsRange extRange(startPos, endPos);
+      Range extRange(startPos, endPos);
       if (tol->size() == 0
           || hypoBitmap.Overlap(extRange)
           || !ReoConstraint.Check(hypoBitmap, startPos, endPos)
@@ -224,7 +224,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
         // be (which will always be the value of the hypothesis starting
         // at the left-most edge).  If this value is less than the
         // distortion limit, we don't allow this extension to be made.
-        WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+        Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 
         if (m_source.ComputeDistortionDistance(extRange, bestNextExtension)
             > m_options.reordering.max_distortion) continue;
@@ -270,7 +270,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
 
   // Create new bitmap
   const TranslationOption &transOpt = **tol->begin();
-  const WordsRange &nextRange = transOpt.GetSourceWordsRange();
+  const Range &nextRange = transOpt.GetSourceWordsRange();
   const Bitmap &nextBitmap = m_bitmaps.GetBitmap(sourceCompleted, nextRange);
 
   TranslationOptionList::const_iterator iter;

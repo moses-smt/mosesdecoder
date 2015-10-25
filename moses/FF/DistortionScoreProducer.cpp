@@ -1,7 +1,7 @@
 
 #include "DistortionScoreProducer.h"
 #include "FFState.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/StaticData.h"
 #include "moses/Hypothesis.h"
 
@@ -10,9 +10,9 @@ using namespace std;
 namespace Moses
 {
 struct DistortionState_traditional : public FFState {
-  WordsRange range;
+  Range range;
   int first_gap;
-  DistortionState_traditional(const WordsRange& wr, int fg) : range(wr), first_gap(fg) {}
+  DistortionState_traditional(const Range& wr, int fg) : range(wr), first_gap(fg) {}
 
   size_t hash() const {
     return range.GetEndPos();
@@ -45,12 +45,12 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
     end = input.m_frontSpanCoveredLength -1;
   }
   return new DistortionState_traditional(
-           WordsRange(start, end),
+           Range(start, end),
            NOT_FOUND);
 }
 
 float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
-    const WordsRange &prev, const WordsRange &curr, const int FirstGap)
+    const Range &prev, const Range &curr, const int FirstGap)
 {
   if(!StaticData::Instance().UseEarlyDistortionCost()) {
     return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);

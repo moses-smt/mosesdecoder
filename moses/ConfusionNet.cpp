@@ -261,7 +261,7 @@ void ConfusionNet::Print(std::ostream& out) const
 #endif
 Phrase
 ConfusionNet::
-GetSubString(const WordsRange&) const
+GetSubString(const Range&) const
 {
   UTIL_THROW2("ERROR: call to ConfusionNet::GetSubString\n");
   //return Phrase(Input);

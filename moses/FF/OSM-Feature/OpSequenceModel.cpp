@@ -120,7 +120,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   //const Sentence &sentence = static_cast<const Sentence&>(curr_hypo.GetManager().GetSource());
 
 
-  const WordsRange & sourceRange = cur_hypo.GetCurrSourceWordsRange();
+  const Range & sourceRange = cur_hypo.GetCurrSourceWordsRange();
   int startIndex  = sourceRange.GetStartPos();
   int endIndex = sourceRange.GetEndPos();
   const AlignmentInfo &align = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();

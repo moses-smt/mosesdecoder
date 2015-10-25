@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cmath>
 #include <cstdlib>
 #include "TypeDef.h"
-#include "WordsRange.h"
+#include "Range.h"
 
 namespace Moses
 {
@@ -162,7 +162,7 @@ public:
   }
 
   void
-  SetValue(WordsRange const& range, bool val) {
+  SetValue(Range const& range, bool val) {
     SetValue(range.GetStartPos(), range.GetEndPos(), val);
   }
 
@@ -171,7 +171,7 @@ public:
     return GetSize() == GetNumWordsCovered();
   }
   //! whether the wordrange overlaps with any translated word in this bitmap
-  bool Overlap(const WordsRange &compare) const {
+  bool Overlap(const Range &compare) const {
     for (size_t pos = compare.GetStartPos() ; pos <= compare.GetEndPos() ; pos++) {
       if (m_bitmap[pos])
         return true;

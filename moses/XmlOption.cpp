@@ -29,7 +29,7 @@
 #include <boost/unordered_map.hpp>
 #include "Util.h"
 #include "StaticData.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "TargetPhrase.h"
 #include "ReorderingConstraint.h"
 #include "FactorCollection.h"
@@ -451,7 +451,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               // convert from prob to log-prob
               float scoreValue = FloorScore(TransformScore(probValue));
 
-              WordsRange range(startPos + offset,endPos-1 + offset); // span covered by phrase
+              Range range(startPos + offset,endPos-1 + offset); // span covered by phrase
               TargetPhrase targetPhrase(firstPt);
               // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);

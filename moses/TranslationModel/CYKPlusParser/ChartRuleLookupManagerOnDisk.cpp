@@ -82,7 +82,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 {
   const StaticData &staticData = StaticData::Instance();
   const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal();
-  const WordsRange &range = inputPath.GetWordsRange();
+  const Range &range = inputPath.GetWordsRange();
 
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();

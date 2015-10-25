@@ -108,7 +108,7 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 // legacy
 TargetPhraseCollectionWithSourcePhrase::shared_ptr
 PhraseDictionaryTreeAdaptor::
-GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
+GetTargetPhraseCollectionLEGACY(InputType const& src,Range const &range) const
 {
   TargetPhraseCollectionWithSourcePhrase::shared_ptr ret;
   if(GetImplementation().m_rangeCache.empty()) {

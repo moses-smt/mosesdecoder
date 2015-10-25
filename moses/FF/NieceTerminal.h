@@ -6,7 +6,7 @@
 
 namespace Moses
 {
-class WordsRange;
+class Range;
 class Word;
 
 // 1 of the non-term covers the same word as 1 of the terminals
@@ -45,7 +45,7 @@ public:
 protected:
   bool m_hardConstraint;
   bool ContainTerm(const InputType &input,
-                   const WordsRange &ntRange,
+                   const Range &ntRange,
                    const boost::unordered_set<Word> &terms) const;
 };
 

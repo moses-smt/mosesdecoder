@@ -39,7 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 class FactorMask;
-class WordsRange;
+class Range;
 
 /** Representation of a phrase, ie. a contiguous number of words.
  *  Wrapper for vector of words
@@ -174,8 +174,8 @@ public:
   void InitStartEndWord();
 
   //! create new phrase class that is a substring of this phrase
-  Phrase GetSubString(const WordsRange &wordsRange) const;
-  Phrase GetSubString(const WordsRange &wordsRange, FactorType factorType) const;
+  Phrase GetSubString(const Range &range) const;
+  Phrase GetSubString(const Range &range, FactorType factorType) const;
 
   //! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
   std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const;

@@ -200,7 +200,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
         continue;
 
       // not yet covered
-      WordsRange applyRange(startPos, startPos);
+      Range applyRange(startPos, startPos);
       if (CheckDistortion(bitmap, applyRange)) {
         // apply range
         CreateForwardTodos(bitmap, applyRange, bitmapContainer);
@@ -213,7 +213,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
         if (bitmap.GetValue(endPos))
           break;
 
-        WordsRange applyRange(startPos, endPos);
+        Range applyRange(startPos, endPos);
         if (CheckDistortion(bitmap, applyRange)) {
           // apply range
           CreateForwardTodos(bitmap, applyRange, bitmapContainer);
@@ -225,7 +225,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
 
 void
 SearchCubePruning::
-CreateForwardTodos(Bitmap const& bitmap, WordsRange const& range,
+CreateForwardTodos(Bitmap const& bitmap, Range const& range,
                    BitmapContainer& bitmapContainer)
 {
   Bitmap newBitmap = bitmap;
@@ -246,7 +246,7 @@ CreateForwardTodos(Bitmap const& bitmap, WordsRange const& range,
 
 bool
 SearchCubePruning::
-CheckDistortion(const Bitmap &hypoBitmap, const WordsRange &range) const
+CheckDistortion(const Bitmap &hypoBitmap, const Range &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
   int maxDistortion = m_manager.options().reordering.max_distortion;
@@ -274,7 +274,7 @@ CheckDistortion(const Bitmap &hypoBitmap, const WordsRange &range) const
   // its maximum value will be (which will always be the value of the
   // hypothesis starting at the left-most edge).  If this vlaue is than
   // the distortion limit, we don't allow this extension to be made.
-  WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+  Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
   return (m_source.ComputeDistortionDistance(range, bestNextExtension)
           <= maxDistortion);
 }

@@ -28,7 +28,7 @@ namespace Moses
 class TargetPhraseCollection;
 class ChartParserCallback;
 class DottedRuleColl;
-class WordsRange;
+class Range;
 class SkeletonPT;
 
 class ChartRuleLookupManagerSkeleton : public ChartRuleLookupManager

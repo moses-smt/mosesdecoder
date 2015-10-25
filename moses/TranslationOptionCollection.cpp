@@ -237,7 +237,7 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
   // source phrase
   const Phrase &sourcePhrase = inputPath.GetPhrase();
   m_unksrcs.push_back(&sourcePhrase);
-  WordsRange range(sourcePos, sourcePos + length - 1);
+  Range range(sourcePos, sourcePos + length - 1);
 
   targetPhrase.EvaluateInIsolation(sourcePhrase);
 
@@ -588,7 +588,7 @@ void
 TranslationOptionCollection::
 Add(TranslationOption *translationOption)
 {
-  const WordsRange &coverage = translationOption->GetSourceWordsRange();
+  const Range &coverage = translationOption->GetSourceWordsRange();
   size_t const s = coverage.GetStartPos();
   size_t const e = coverage.GetEndPos();
   size_t const i = e - s;

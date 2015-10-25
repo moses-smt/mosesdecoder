@@ -50,7 +50,7 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
     vec.push_back(InputPathList());
     InputPathList &list = vec.back();
 
-    WordsRange range(startPos, startPos);
+    Range range(startPos, startPos);
     const NonTerminalSet &labels = input.GetLabelSet(startPos, startPos);
 
     const ConfusionNet::Column &col = input.GetColumn(startPos);
@@ -74,7 +74,7 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
     for (size_t startPos = 0; startPos < inputSize - phraseSize + 1; ++startPos) {
       size_t endPos = startPos + phraseSize -1;
 
-      WordsRange range(startPos, endPos);
+      Range range(startPos, endPos);
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       vector<InputPathList> &vec = m_inputPathMatrix[startPos];

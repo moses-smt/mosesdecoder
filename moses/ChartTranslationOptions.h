@@ -22,7 +22,7 @@
 #include "StackVec.h"
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
-#include "WordsRange.h"
+#include "Range.h"
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -47,12 +47,12 @@ public:
   /** Constructor
       \param targetPhraseColl @todo dunno
       \param stackVec @todo dunno
-      \param wordsRange the range in the source sentence this translation option covers
+      \param range the range in the source sentence this translation option covers
       \param score @todo dunno
    */
   ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
                           const StackVec &stackVec,
-                          const WordsRange &wordsRange,
+                          const Range &range,
                           float score);
   ~ChartTranslationOptions();
 
@@ -74,7 +74,7 @@ public:
   }
 
   //! the range in the source sentence this translation option covers
-  const WordsRange &GetSourceWordsRange() const {
+  const Range &GetSourceWordsRange() const {
     return *m_wordsRange;
   }
 
@@ -97,7 +97,7 @@ private:
   StackVec m_stackVec; //! vector of hypothesis list!
   CollType m_collection;
 
-  const WordsRange *m_wordsRange;
+  const Range *m_wordsRange;
   float m_estimateOfBestScore;
 };
 

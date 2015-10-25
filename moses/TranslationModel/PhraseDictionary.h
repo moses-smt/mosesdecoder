@@ -50,7 +50,7 @@ namespace Moses
 
 class StaticData;
 class InputType;
-class WordsRange;
+class Range;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
 class ChartParser;
@@ -159,7 +159,7 @@ public:
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
   virtual
   TargetPhraseCollectionWithSourcePhrase::shared_ptr
-  GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
+  GetTargetPhraseCollectionLEGACY(InputType const& src,Range const& range) const;
 
 protected:
   static std::vector<PhraseDictionary*> s_staticColl;

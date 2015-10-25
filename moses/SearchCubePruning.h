@@ -27,8 +27,8 @@ protected:
   //! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
   void CreateForwardTodos(HypothesisStackCubePruning &stack);
   //! create a back pointer to this bitmap, with edge that has this words range translation
-  void CreateForwardTodos(const Bitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer);
-  bool CheckDistortion(const Bitmap &bitmap, const WordsRange &range) const;
+  void CreateForwardTodos(const Bitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
+  bool CheckDistortion(const Bitmap &bitmap, const Range &range) const;
 
   void PrintBitmapContainerGraph();
 

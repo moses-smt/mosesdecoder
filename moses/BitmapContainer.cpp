@@ -52,7 +52,7 @@ public:
 class HypothesisScoreOrdererWithDistortion
 {
 public:
-  HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange) :
+  HypothesisScoreOrdererWithDistortion(const Range* transOptRange) :
     m_transOptRange(transOptRange) {
     m_totalWeightDistortion = 0;
     const StaticData &staticData = StaticData::Instance();
@@ -67,7 +67,7 @@ public:
     }
   }
 
-  const WordsRange* m_transOptRange;
+  const Range* m_transOptRange;
   float m_totalWeightDistortion;
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
@@ -136,7 +136,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
     return;
   }
 
-  const WordsRange &transOptRange = translations.Get(0)->GetSourceWordsRange();
+  const Range &transOptRange = translations.Get(0)->GetSourceWordsRange();
 
   HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin();
   HypothesisSet::const_iterator iterEnd = m_prevBitmapContainer.GetHypotheses().end();
@@ -196,7 +196,7 @@ BackwardsEdge::Initialize()
   }
 
   const Bitmap &bm = m_hypotheses[0]->GetWordsBitmap();
-  const WordsRange &newRange = m_translations.Get(0)->GetSourceWordsRange();
+  const Range &newRange = m_translations.Get(0)->GetSourceWordsRange();
   m_futureScore = m_futureScores.CalcFutureScore2(bm, newRange.GetStartPos(), newRange.GetEndPos());
 
   Hypothesis *expanded = CreateHypothesis(*m_hypotheses[0], *m_translations.Get(0));

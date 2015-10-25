@@ -20,7 +20,7 @@ Bitmaps::~Bitmaps()
   }
 }
 
-const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const WordsRange &range)
+const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
 {
   Bitmap *newBM = new Bitmap(bm);
   newBM->SetValue(range, true);
@@ -35,7 +35,7 @@ const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const WordsRange &range)
   }
 }
 
-const Bitmap &Bitmaps::GetBitmap(const Bitmap &bm, const WordsRange &range)
+const Bitmap &Bitmaps::GetBitmap(const Bitmap &bm, const Range &range)
 {
   Coll::iterator iter = m_coll.find(&bm);
   assert(iter != m_coll.end());

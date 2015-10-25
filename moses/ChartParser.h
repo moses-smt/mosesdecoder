@@ -24,7 +24,7 @@
 
 #include <list>
 #include <vector>
-#include "WordsRange.h"
+#include "Range.h"
 #include "StackVec.h"
 #include "InputPath.h"
 #include "TargetPhraseCollection.h"
@@ -48,7 +48,7 @@ public:
   ChartParserUnknown(ttasksptr const& ttask);
   ~ChartParserUnknown();
 
-  void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
+  void Process(const Word &sourceWord, const Range &range, ChartParserCallback &to);
 
   const std::vector<Phrase*> &GetUnknownSources() const {
     return m_unksrcs;
@@ -66,14 +66,14 @@ public:
   ChartParser(ttasksptr const& ttask, ChartCellCollectionBase &cells);
   ~ChartParser();
 
-  void Create(const WordsRange &range, ChartParserCallback &to);
+  void Create(const Range &range, ChartParserCallback &to);
 
   //! the sentence being decoded
   //const Sentence &GetSentence() const;
   long GetTranslationId() const;
   size_t GetSize() const;
   const InputPath &GetInputPath(size_t startPos, size_t endPos) const;
-  const InputPath &GetInputPath(const WordsRange &range) const;
+  const InputPath &GetInputPath(const Range &range) const;
   const std::vector<Phrase*> &GetUnknownSources() const {
     return m_unknown.GetUnknownSources();
   }

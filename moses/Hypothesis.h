@@ -49,7 +49,7 @@ namespace Moses
 class SquareMatrix;
 class StaticData;
 class TranslationOption;
-class WordsRange;
+class Range;
 class Hypothesis;
 class FFState;
 class StatelessFeatureFunction;
@@ -74,8 +74,8 @@ protected:
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
   const Bitmap	&m_sourceCompleted; /*! keeps track of which words have been translated so far */
   InputType const&  m_sourceInput;
-  WordsRange				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
-  WordsRange        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
+  Range				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
+  Range        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
   bool							m_wordDeleted;
   float							m_totalScore;  /*! score so far */
   float							m_futureScore; /*! estimated future cost to translate rest of sentence */
@@ -108,11 +108,11 @@ public:
   const TargetPhrase &GetCurrTargetPhrase() const;
 
   /** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
-  inline const WordsRange &GetCurrSourceWordsRange() const {
+  inline const Range &GetCurrSourceWordsRange() const {
     return m_currSourceWordsRange;
   }
 
-  inline const WordsRange &GetCurrTargetWordsRange() const {
+  inline const Range &GetCurrTargetWordsRange() const {
     return m_currTargetWordsRange;
   }
 

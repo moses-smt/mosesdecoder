@@ -94,7 +94,7 @@ public:
   const boost::shared_ptr<ScoreComponentCollection> GetScoreBreakdown() const;
 
   //! get target words range of the hypo within n-best trellis. not necessarily the same as hypo.GetCurrTargetWordsRange()
-  WordsRange GetTargetWordsRange(const Hypothesis &hypo) const;
+  Range GetTargetWordsRange(const Hypothesis &hypo) const;
 
   Phrase GetTargetPhrase() const;
   Phrase GetSurfacePhrase() const;
@@ -109,7 +109,7 @@ inline std::ostream& operator<<(std::ostream& out, const TrellisPath& path)
   const size_t sizePath = path.m_path.size();
   for (int pos = (int) sizePath - 1 ; pos >= 0 ; pos--) {
     const Hypothesis *edge = path.m_path[pos];
-    const WordsRange &sourceRange = edge->GetCurrSourceWordsRange();
+    const Range &sourceRange = edge->GetCurrSourceWordsRange();
     out << edge->GetId() << " " << sourceRange.GetStartPos() << "-" << sourceRange.GetEndPos() << ", ";
   }
   // scores

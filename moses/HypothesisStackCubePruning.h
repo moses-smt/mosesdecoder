@@ -121,7 +121,7 @@ public:
 
   void SetBitmapAccessor(const Bitmap &newBitmap
                          , HypothesisStackCubePruning &stack
-                         , const WordsRange &range
+                         , const Range &range
                          , BitmapContainer &bitmapContainer
                          , const SquareMatrix &futureScore
                          , const TranslationOptionList &transOptList);

@@ -166,7 +166,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
         // specified label
         if (translation.length() == 0 && label.length() > 0) {
-          WordsRange range(startPos,endPos-1); // really?
+          Range range(startPos,endPos-1); // really?
           XMLParseOutput item(label, range);
           sourceLabels.push_back(item);
         }
@@ -199,7 +199,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             targetPhrase.SetTargetLHS(targetLHS);
 
             // not tested
-            Phrase sourcePhrase = this->GetSubString(WordsRange(startPos,endPos-1));
+            Phrase sourcePhrase = this->GetSubString(Range(startPos,endPos-1));
 
             // get probability
             float probValue = 1;
@@ -212,7 +212,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             targetPhrase.EvaluateInIsolation(sourcePhrase);
 
             // set span and create XmlOption
-            WordsRange range(startPos+1,endPos);
+            Range range(startPos+1,endPos);
             XmlOption *option = new XmlOption(range,targetPhrase);
             assert(option);
             xmlOptions.push_back(option);
@@ -268,7 +268,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   vector<XMLParseOutput>::const_iterator iterLabel;
   for (iterLabel = m_labelledSpans.begin(); iterLabel != m_labelledSpans.end(); ++iterLabel) {
     const XMLParseOutput &labelItem = *iterLabel;
-    const WordsRange &range = labelItem.m_range;
+    const Range &range = labelItem.m_range;
     const string &label = labelItem.m_label;
     AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label, factorOrder);
   }

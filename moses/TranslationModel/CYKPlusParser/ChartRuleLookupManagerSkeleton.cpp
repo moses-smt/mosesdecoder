@@ -61,7 +61,7 @@ void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
   TargetPhraseCollection::shared_ptr tpColl(new TargetPhraseCollection);
   m_tpColl.push_back(tpColl);
 
-  const WordsRange &range = inputPath.GetWordsRange();
+  const Range &range = inputPath.GetWordsRange();
 
   if (range.GetNumWordsCovered() == 1) {
     const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());

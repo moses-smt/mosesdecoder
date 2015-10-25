@@ -31,10 +31,10 @@ namespace Moses
 
 ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
     const StackVec &stackVec,
-    const WordsRange &wordsRange,
+    const Range &range,
     float score)
   : m_stackVec(stackVec)
-  , m_wordsRange(&wordsRange)
+  , m_wordsRange(&range)
   , m_estimateOfBestScore(score)
 {
   TargetPhraseCollection::const_iterator iter;

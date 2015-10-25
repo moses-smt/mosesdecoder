@@ -10,7 +10,7 @@ class FFState;
 class ScoreComponentCollection;
 class Hypothesis;
 class ChartHypothesis;
-class WordsRange;
+class Range;
 
 /** Calculates Distortion scores
  */
@@ -31,7 +31,7 @@ public:
   }
 
   static float CalculateDistortionScore(const Hypothesis& hypo,
-                                        const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
+                                        const Range &prev, const Range &curr, const int FirstGapPosition);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 

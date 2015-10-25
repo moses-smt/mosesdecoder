@@ -23,7 +23,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include "InputType.h"
 #include "ChartCell.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "InputPath.h"
 
 namespace Moses
@@ -51,7 +51,7 @@ public:
        * gets it from there :-(.  The span is actually stored as a reference,
        * which needs to point somewhere, so I have it refer to the ChartCell.
        */
-      const WordsRange &range = inner[0]->GetCoverage();
+      const Range &range = inner[0]->GetCoverage();
 
       m_source.push_back(new ChartCellLabel(range, input.GetWord(startPos)));
     }
@@ -60,11 +60,11 @@ public:
   virtual ~ChartCellCollectionBase();
 
 
-  const ChartCellBase &GetBase(const WordsRange &coverage) const {
+  const ChartCellBase &GetBase(const Range &coverage) const {
     return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
   }
 
-  ChartCellBase &MutableBase(const WordsRange &coverage) {
+  ChartCellBase &MutableBase(const Range &coverage) {
     return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
   }
 
@@ -88,12 +88,12 @@ public:
   ChartCellCollection(const InputType &input, ChartManager &manager);
 
   //! get a chart cell for a particular range
-  ChartCell &Get(const WordsRange &coverage) {
+  ChartCell &Get(const Range &coverage) {
     return static_cast<ChartCell&>(MutableBase(coverage));
   }
 
   //! get a chart cell for a particular range
-  const ChartCell &Get(const WordsRange &coverage) const {
+  const ChartCell &Get(const Range &coverage) const {
     return static_cast<const ChartCell&>(GetBase(coverage));
   }
 };

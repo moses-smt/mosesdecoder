@@ -14,7 +14,7 @@ InputPath::
 InputPath(ttaskwptr const theTask,
           Phrase const& phrase,
           NonTerminalSet const& sourceNonTerms,
-          WordsRange const& range, InputPath const *prevNode,
+          Range const& range, InputPath const *prevNode,
           const ScorePair *inputScore)
   : ttask(theTask)
   , m_prevPath(prevNode)
