@@ -13,7 +13,7 @@ g++ -I../../.. -I../../../boost/include -L../../../lib -lmoses -lz -o moses2 \
  	 Stack.cpp \
  	 StatefulFeatureFunction.cpp \
  	 StatelessFeatureFunction.cpp \
- 	 StaticData.cpp \
+ 	 System.cpp \
    TargetPhrase.cpp \
    TargetPhrases.cpp \
 	Vocab.cpp \

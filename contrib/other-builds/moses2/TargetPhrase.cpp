@@ -9,25 +9,25 @@
 #include "TargetPhrase.h"
 #include "Scores.h"
 #include "Manager.h"
-#include "StaticData.h"
+#include "System.h"
 #include "util/pool.hh"
 
 using namespace std;
 
-TargetPhrase *TargetPhrase::CreateFromString(util::Pool &pool, StaticData &staticData, const std::string &str)
+TargetPhrase *TargetPhrase::CreateFromString(util::Pool &pool, System &system, const std::string &str)
 {
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
-	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, staticData, size);
+	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, size);
 	ret->Phrase::CreateFromString(toks);
 
 	return ret;
 }
 
-TargetPhrase::TargetPhrase(util::Pool &pool, StaticData &staticData, size_t size)
+TargetPhrase::TargetPhrase(util::Pool &pool, System &system, size_t size)
 :Phrase(pool, size)
 {
-	m_scores = new (pool.Allocate<Scores>()) Scores(pool, staticData.GetNumScores());
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, system.GetNumScores());
 }
 
 TargetPhrase::~TargetPhrase() {

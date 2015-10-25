@@ -7,14 +7,14 @@
 #include <iostream>
 #include "InputPaths.h"
 #include "Phrase.h"
-#include "StaticData.h"
+#include "System.h"
 #include "moses/Range.h"
 
 using namespace std;
 
-void InputPaths::Init(const Phrase &input, const StaticData &staticData)
+void InputPaths::Init(const Phrase &input, const System &system)
 {
-  size_t numPt = staticData.GetPhraseTables().size();
+  size_t numPt = system.GetPhraseTables().size();
   size_t size = input.GetSize();
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
 	for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {

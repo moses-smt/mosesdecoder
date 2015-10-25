@@ -9,7 +9,7 @@
 #include "PhraseTable.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
-#include "StaticData.h"
+#include "System.h"
 #include "Scores.h"
 #include "InputPaths.h"
 #include "moses/InputFileStream.h"
@@ -75,7 +75,7 @@ PhraseTable::~PhraseTable() {
 	// TODO Auto-generated destructor stub
 }
 
-void PhraseTable::Load(StaticData &staticData)
+void PhraseTable::Load(System &system)
 {
 	m_path = "/Users/hieu/workspace/experiment/issues/sample-models/phrase-model/phrase-table";
 
@@ -89,8 +89,8 @@ void PhraseTable::Load(StaticData &staticData)
 		assert(toks.size() >= 3);
 
 		Phrase *source = Phrase::CreateFromString(tmpPool, toks[0]);
-		TargetPhrase *target = TargetPhrase::CreateFromString(staticData.GetPool(), staticData, toks[1]);
-		target->GetScores().CreateFromString(toks[2], *this, staticData);
+		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetPool(), system, toks[1]);
+		target->GetScores().CreateFromString(toks[2], *this, system);
 		m_root.AddRule(*source, target);
 	}
 }

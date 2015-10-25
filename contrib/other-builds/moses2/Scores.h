@@ -11,16 +11,16 @@
 #include "util/pool.hh"
 
 class FeatureFunction;
-class StaticData;
+class System;
 
 class Scores {
 public:
   Scores(util::Pool &pool, size_t numScores);
   virtual ~Scores();
 
-  void CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const StaticData &staticData);
+  void CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const System &system);
 
-  void PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const StaticData &staticData);
+  void PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const System &system);
 protected:
 	SCORE *m_scores;
 	SCORE m_total;

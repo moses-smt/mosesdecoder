@@ -1,5 +1,5 @@
 /*
- * StaticData.h
+ * System.h
  *
  *  Created on: 23 Oct 2015
  *      Author: hieu
@@ -15,10 +15,10 @@ class FeatureFunction;
 class StatefulFeatureFunction;
 class PhraseTable;
 
-class StaticData {
+class System {
 public:
-	StaticData();
-	virtual ~StaticData();
+	System();
+	virtual ~System();
 
 	size_t GetNumScores() const
 	{ return 55; }

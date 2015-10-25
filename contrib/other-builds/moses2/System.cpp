@@ -1,15 +1,15 @@
 /*
- * StaticData.cpp
+ * System.cpp
  *
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
 
-#include "StaticData.h"
+#include "System.h"
 #include "PhraseTable.h"
 #include "moses/Util.h"
 
-StaticData::StaticData()
+System::System()
 :m_ffStartInd(0)
 {
 	PhraseTable *pt = new PhraseTable(m_ffStartInd);
@@ -20,7 +20,7 @@ StaticData::StaticData()
 	m_phraseTables.push_back(pt);
 }
 
-StaticData::~StaticData() {
+System::~System() {
 	Moses::RemoveAllInColl(m_featureFunctions);
 }
 

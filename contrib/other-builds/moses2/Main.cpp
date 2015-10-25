@@ -1,5 +1,5 @@
 #include <iostream>
-#include "StaticData.h"
+#include "System.h"
 #include "Manager.h"
 #include "Phrase.h"
 #include "moses/InputFileStream.h"
@@ -10,12 +10,12 @@ int main(int argc, char** argv)
 {
 	cerr << "Starting..." << endl;
 
-	StaticData staticData;
+	System system;
 
 	string line;
 	while (getline(cin, line)) {
 
-		Manager mgr(staticData, line);
+		Manager mgr(system, line);
 		mgr.Decode();
 	}
 

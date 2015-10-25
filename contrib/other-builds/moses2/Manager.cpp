@@ -7,19 +7,19 @@
 
 #include "Manager.h"
 #include "PhraseTable.h"
-#include "StaticData.h"
+#include "System.h"
 #include "SearchNormal.h"
 
 using namespace std;
 
-Manager::Manager(const StaticData &staticData, const std::string &inputStr)
-:m_staticData(staticData)
+Manager::Manager(const System &system, const std::string &inputStr)
+:m_staticData(system)
 ,m_initRange(NOT_FOUND, NOT_FOUND)
 {
 	m_input = Phrase::CreateFromString(m_pool, inputStr);
-	m_inputPaths.Init(*m_input, staticData);
+	m_inputPaths.Init(*m_input, system);
 
-	const std::vector<const PhraseTable*> &pts = staticData.GetPhraseTables();
+	const std::vector<const PhraseTable*> &pts = system.GetPhraseTables();
 	for (size_t i = 0; i < pts.size(); ++i) {
 		const PhraseTable &pt = *pts[i];
 		pt.Lookups(m_inputPaths);

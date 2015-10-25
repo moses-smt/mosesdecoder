@@ -12,7 +12,7 @@
 #include "StatelessFeatureFunction.h"
 #include "moses/Util.h"
 
-class StaticData;
+class System;
 class InputPaths;
 
 class Node
@@ -38,7 +38,7 @@ class PhraseTable : public StatelessFeatureFunction
 public:
 	PhraseTable(size_t startInd);
 	virtual ~PhraseTable();
-	void Load(StaticData &staticData);
+	void Load(System &system);
 	void Lookups(InputPaths &inputPaths) const;
 
 	void SetPtInd(size_t ind)

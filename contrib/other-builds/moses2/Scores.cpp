@@ -11,7 +11,7 @@
 #include "FeatureFunction.h"
 #include "Util.h"
 #include "Weights.h"
-#include "StaticData.h"
+#include "System.h"
 #include "moses/Util.h"
 
 using namespace std;
@@ -27,11 +27,11 @@ Scores::~Scores() {
 	delete m_scores;
 }
 
-void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const StaticData &staticData)
+void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const System &system)
 {
 	assert(scores.size() == featureFunction.GetNumScores());
 
-	const Weights &weights = staticData.GetWeights();
+	const Weights &weights = system.GetWeights();
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 	for (size_t i = 0; i < scores.size(); ++i) {
@@ -43,8 +43,8 @@ void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction 
 	}
 }
 
-void Scores::CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const StaticData &staticData)
+void Scores::CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const System &system)
 {
 	vector<SCORE> scores = Moses::Tokenize<SCORE>(str);
-	PlusEquals(scores, featureFunction, staticData);
+	PlusEquals(scores, featureFunction, system);
 }

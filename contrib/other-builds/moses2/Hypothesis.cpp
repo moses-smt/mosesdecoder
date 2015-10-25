@@ -7,7 +7,7 @@
 
 #include "Hypothesis.h"
 #include "Manager.h"
-#include "StaticData.h"
+#include "System.h"
 
 Hypothesis::Hypothesis(Manager &mgr, const Moses::Bitmap &bitmap, const Moses::Range &range)
 :m_mgr(mgr)
