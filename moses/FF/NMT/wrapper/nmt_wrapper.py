@@ -49,12 +49,7 @@ class NMTWrapper(object):
         self.comp_next_states = self.enc_dec.create_next_states_computer()
 
     def get_unk(self, words):
-        unks = []
-        for next_word in words:
-            if next_word in self.target_vocab.keys():
-                unks.append(1)
-            else:
-                unks.append(0)
+        unks = [1 if word in self.target_vocab.keys() else 0 for word in words]
         return unks
 
     def get_context_vector(self, source_sentence):
@@ -116,7 +111,7 @@ class NMTWrapper(object):
         else:
             states = [numpy.concatenate(states)]
 
-        next_indxs = [self.target_vocab.get(next_word, self.unk_id) # if next_word != "</s>" else 30000
+        next_indxs = [self.target_vocab.get(next_word, self.unk_id)
                       for next_word in next_words]
 
         log_probs = numpy.log(self.comp_next_probs(c, 0, last_words.astype("int64"),
@@ -129,7 +124,6 @@ class NMTWrapper(object):
             intmp = [val] * phrase_num
             new_states.append(numpy.split(self.comp_next_states(c, 0, intmp, *states)[0], phrase_num))
 
-        # print >> sys.stderr, "Wychodze z Pythona"
         return cumulated_score, new_states, self.get_unk(next_words)
 
     def get_next_states(self, next_words, c, states):
@@ -160,7 +154,7 @@ class NMTWrapper(object):
         else:
             states = [numpy.concatenate(states)]
 
-        next_indxs = [self.target_vocab.get(next_word, self.unk_id) # if next_word != "</s>" else 30000
+        next_indxs = [self.target_vocab.get(next_word, self.unk_id)
                       for next_word in next_words]
         log_probs = numpy.log(self.comp_next_probs(c, 0, last_words.astype("int64"),
                                                    *states)[0])
