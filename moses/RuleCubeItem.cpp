@@ -23,7 +23,7 @@
 #include "ChartManager.h"
 #include "RuleCubeItem.h"
 #include "RuleCubeQueue.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "Util.h"
 #include "util/exception.hh"
 

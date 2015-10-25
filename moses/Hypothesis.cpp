@@ -44,7 +44,7 @@ using namespace std;
 namespace Moses
 {
 Hypothesis::
-Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const WordsBitmap &bitmap)
+Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap)
   : m_prevHypo(NULL)
   , m_sourceCompleted(bitmap)
   , m_sourceInput(source)
@@ -75,7 +75,7 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
  * continue prevHypo by appending the phrases in transOpt
  */
 Hypothesis::
-Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const WordsBitmap &bitmap)
+Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap)
   : m_prevHypo(&prevHypo)
   , m_sourceCompleted(bitmap)
   , m_sourceInput(prevHypo.m_sourceInput)
@@ -246,7 +246,7 @@ PrintHypothesis() const
     TRACE_ERR( "... ");
   }
   if (end>=0) {
-    WordsRange range(start, end);
+    Range range(start, end);
     TRACE_ERR( m_prevHypo->GetCurrTargetPhrase().GetSubString(range) << " ");
   }
   TRACE_ERR( ")"<<endl);
@@ -523,7 +523,7 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
 
   // trace ("report segmentation") option "-t" / "-tt"
   if (reportSegmentation > 0 && phrase.GetSize() > 0) {
-    const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+    const Range &sourceRange = edge.GetCurrSourceWordsRange();
     const int sourceStart = sourceRange.GetStartPos();
     const int sourceEnd = sourceRange.GetEndPos();
     out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
@@ -604,8 +604,8 @@ Hypothesis::
 OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const
 {
   using namespace std;
-  WordsRange const& src = this->GetCurrSourceWordsRange();
-  WordsRange const& trg = this->GetCurrTargetWordsRange();
+  Range const& src = this->GetCurrSourceWordsRange();
+  Range const& trg = this->GetCurrTargetWordsRange();
 
   vector<pair<size_t,size_t> const* > a
   = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments();

@@ -132,7 +132,7 @@ public:
     :m_contextPrefix(order - 1),
      m_contextSuffix(order - 1) {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();
-    const WordsRange range = hypo.GetCurrSourceRange();
+    const Range range = hypo.GetCurrSourceRange();
     m_startPos = range.GetStartPos();
     m_endPos = range.GetEndPos();
     m_inputSize = hypo.GetManager().GetSource().GetSize();

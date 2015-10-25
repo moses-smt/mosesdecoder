@@ -81,9 +81,9 @@ public:
   Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, search::Score oov_weight)
     : context_(context), vocab_mapping_(vocab_mapping), oov_weight_(oov_weight) {}
 
-  void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
+  void Add(const TargetPhraseCollection &targets, const StackVec &nts, const Range &ignored);
 
-  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &waste_memory, const WordsRange &range);
+  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &waste_memory, const Range &range);
 
   float GetBestScore(const ChartCellLabel *chartCell) const;
 
@@ -119,7 +119,7 @@ private:
   const search::Score oov_weight_;
 };
 
-template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &range)
+template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const Range &range)
 {
   std::vector<search::PartialVertex> vertices;
   vertices.reserve(nts.size());
@@ -160,7 +160,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   }
 }
 
-template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &, const WordsRange &range)
+template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &, const Range &range)
 {
   std::vector<lm::WordIndex> words;
   UTIL_THROW_IF2(phrase.GetSize() > 1,
@@ -245,14 +245,14 @@ PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &
       if (startPos == 0 && startPos + width == size) {
         break;
       }
-      WordsRange range(startPos, startPos + width - 1);
+      Range range(startPos, startPos + width - 1);
       Fill<Model> filler(context, words, oov_weight);
       parser_.Create(range, filler);
       filler.Search(out, cells_.MutableBase(range).MutableTargetLabelSet(), vertex_pool);
     }
   }
 
-  WordsRange range(0, size - 1);
+  Range range(0, size - 1);
   Fill<Model> filler(context, words, oov_weight);
   parser_.Create(range, filler);
   return filler.RootSearch(out);
@@ -420,7 +420,7 @@ void Manager::ReconstructApplicationContext(const search::Applied *applied,
     ApplicationContext &context) const
 {
   context.clear();
-  const WordsRange &span = applied->GetRange();
+  const Range &span = applied->GetRange();
   const search::Applied *child = applied->Children();
   size_t i = span.GetStartPos();
   size_t j = 0;
@@ -429,12 +429,12 @@ void Manager::ReconstructApplicationContext(const search::Applied *applied,
     if (j == applied->GetArity() || i < child->GetRange().GetStartPos()) {
       // Symbol is a terminal.
       const Word &symbol = sentence.GetWord(i);
-      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
+      context.push_back(std::make_pair(symbol, Range(i, i)));
       ++i;
     } else {
       // Symbol is a non-terminal.
       const Word &symbol = static_cast<const TargetPhrase*>(child->GetNote().vp)->GetTargetLHS();
-      const WordsRange &range = child->GetRange();
+      const Range &range = child->GetRange();
       context.push_back(std::make_pair(symbol, range));
       i = range.GetEndPos()+1;
       ++child;

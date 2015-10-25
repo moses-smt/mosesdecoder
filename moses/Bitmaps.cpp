@@ -8,21 +8,21 @@ namespace Moses
 {
 Bitmaps::Bitmaps(size_t inputSize, const std::vector<bool> &initSourceCompleted)
 {
-  m_initBitmap = new WordsBitmap(inputSize, initSourceCompleted);
+  m_initBitmap = new Bitmap(inputSize, initSourceCompleted);
   m_coll[m_initBitmap];
 }
 
 Bitmaps::~Bitmaps()
 {
   BOOST_FOREACH (const Coll::value_type& myPair, m_coll) {
-    const WordsBitmap *bm = myPair.first;
+    const Bitmap *bm = myPair.first;
     delete bm;
   }
 }
 
-const WordsBitmap &Bitmaps::GetNextBitmap(const WordsBitmap &bm, const WordsRange &range)
+const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
 {
-  WordsBitmap *newBM = new WordsBitmap(bm);
+  Bitmap *newBM = new Bitmap(bm);
   newBM->SetValue(range, true);
 
   Coll::const_iterator iter = m_coll.find(newBM);
@@ -35,12 +35,12 @@ const WordsBitmap &Bitmaps::GetNextBitmap(const WordsBitmap &bm, const WordsRang
   }
 }
 
-const WordsBitmap &Bitmaps::GetBitmap(const WordsBitmap &bm, const WordsRange &range)
+const Bitmap &Bitmaps::GetBitmap(const Bitmap &bm, const Range &range)
 {
   Coll::iterator iter = m_coll.find(&bm);
   assert(iter != m_coll.end());
 
-  const WordsBitmap *newBM;
+  const Bitmap *newBM;
   NextBitmaps &next = iter->second;
   NextBitmaps::const_iterator iterNext = next.find(range);
   if (iterNext == next.end()) {

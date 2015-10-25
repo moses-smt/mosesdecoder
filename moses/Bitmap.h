@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cmath>
 #include <cstdlib>
 #include "TypeDef.h"
-#include "WordsRange.h"
+#include "Range.h"
 
 namespace Moses
 {
@@ -47,15 +47,15 @@ typedef unsigned long WordsBitmapID;
  * still be a dramatic improvement, if we flip the meaning of the bits around
  * so we can use its find_first() and find_next() for the most common searches.
  */
-class WordsBitmap
+class Bitmap
 {
-  friend std::ostream& operator<<(std::ostream& out, const WordsBitmap& wordsBitmap);
+  friend std::ostream& operator<<(std::ostream& out, const Bitmap& bitmap);
 private:
   std::vector<char> m_bitmap; //! Ticks of words in sentence that have been done.
   size_t m_firstGap; //! Cached position of first gap, or NOT_FOUND.
 
-  WordsBitmap(); // not implemented
-  WordsBitmap& operator= (const WordsBitmap& other);
+  Bitmap(); // not implemented
+  Bitmap& operator= (const Bitmap& other);
 
   /** Update the first gap, when bits are flipped */
   void UpdateFirstGap(size_t startPos, size_t endPos, bool value) {
@@ -81,8 +81,8 @@ private:
 
 
 public:
-  //! Create WordsBitmap of length size, and initialise with vector.
-  WordsBitmap(size_t size, const std::vector<bool>& initializer)
+  //! Create Bitmap of length size, and initialise with vector.
+  Bitmap(size_t size, const std::vector<bool>& initializer)
     :m_bitmap(initializer.begin(), initializer.end()), m_firstGap(0) {
 
     // The initializer may not be of the same length.  Change to the desired
@@ -97,13 +97,13 @@ public:
                    NOT_FOUND : first_gap - m_bitmap.begin());
   }
 
-  //! Create WordsBitmap of length size and initialise.
-  WordsBitmap(size_t size)
+  //! Create Bitmap of length size and initialise.
+  Bitmap(size_t size)
     :m_bitmap(size, false), m_firstGap(0) {
   }
 
   //! Deep copy.
-  WordsBitmap(const WordsBitmap &copy)
+  Bitmap(const Bitmap &copy)
     :m_bitmap(copy.m_bitmap), m_firstGap(copy.m_firstGap) {
   }
 
@@ -162,7 +162,7 @@ public:
   }
 
   void
-  SetValue(WordsRange const& range, bool val) {
+  SetValue(Range const& range, bool val) {
     SetValue(range.GetStartPos(), range.GetEndPos(), val);
   }
 
@@ -171,7 +171,7 @@ public:
     return GetSize() == GetNumWordsCovered();
   }
   //! whether the wordrange overlaps with any translated word in this bitmap
-  bool Overlap(const WordsRange &compare) const {
+  bool Overlap(const Range &compare) const {
     for (size_t pos = compare.GetStartPos() ; pos <= compare.GetEndPos() ; pos++) {
       if (m_bitmap[pos])
         return true;
@@ -243,8 +243,8 @@ public:
 
   // for unordered_set in stack
   size_t hash() const;
-  bool operator==(const WordsBitmap& other) const;
-  bool operator!=(const WordsBitmap& other) const {
+  bool operator==(const Bitmap& other) const;
+  bool operator!=(const Bitmap& other) const {
     return !(*this == other);
   }
 

@@ -51,7 +51,7 @@ protected:
                    const TranslationOption &transOpt,
                    float expectedScore,
                    float futureScore,
-                   const WordsBitmap &bitmap);
+                   const Bitmap &bitmap);
 
 public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);

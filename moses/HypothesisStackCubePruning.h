@@ -37,7 +37,7 @@ class BitmapContainer;
 class TranslationOptionList;
 class Manager;
 
-typedef boost::unordered_map<WordsBitmap, BitmapContainer*, UnorderedComparer<WordsBitmap>, UnorderedComparer<WordsBitmap> > _BMType;
+typedef boost::unordered_map<Bitmap, BitmapContainer*, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > _BMType;
 
 /** A stack for phrase-based decoding with cube-pruning. */
 class HypothesisStackCubePruning : public HypothesisStack
@@ -63,7 +63,7 @@ protected:
   /** destroy all instances of Hypothesis in this collection */
   void RemoveAll();
 
-  BitmapContainer *AddBitmapContainer(const WordsBitmap &bitmap, HypothesisStackCubePruning &stack);
+  BitmapContainer *AddBitmapContainer(const Bitmap &bitmap, HypothesisStackCubePruning &stack);
 
 public:
   HypothesisStackCubePruning(Manager& manager);
@@ -119,9 +119,9 @@ public:
     return m_bitmapAccessor;
   }
 
-  void SetBitmapAccessor(const WordsBitmap &newBitmap
+  void SetBitmapAccessor(const Bitmap &newBitmap
                          , HypothesisStackCubePruning &stack
-                         , const WordsRange &range
+                         , const Range &range
                          , BitmapContainer &bitmapContainer
                          , const SquareMatrix &futureScore
                          , const TranslationOptionList &transOptList);

@@ -45,7 +45,7 @@ void Manager<Parser>::InitializeCharts()
     const Word &terminal = m_source.GetWord(i);
 
     // PVertex
-    PVertex tmp(WordsRange(i,i), terminal);
+    PVertex tmp(Range(i,i), terminal);
     PVertex &pvertex = m_pchart.AddVertex(tmp);
 
     // SVertex
@@ -184,7 +184,7 @@ void Manager<Parser>::Decode()
       //PChart::Cell &pcell = m_pchart.GetCell(start, end);
       SChart::Cell &scell = m_schart.GetCell(start, end);
 
-      WordsRange range(start, end);
+      Range range(start, end);
 
       // Call the parsers to generate PHyperedges for this span and convert
       // each one to a SHyperedgeBundle (via the callback).  The callback

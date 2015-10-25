@@ -19,7 +19,7 @@ namespace Moses
 
 class Phrase;
 class PDTAimp;
-class WordsRange;
+class Range;
 class InputType;
 
 /*** Implementation of a phrase table in a trie that is binarized and
@@ -76,7 +76,7 @@ public:
   // legacy
   TargetPhraseCollectionWithSourcePhrase::shared_ptr
   GetTargetPhraseCollectionLEGACY(InputType const& src,
-                                  WordsRange const & srcRange) const;
+                                  Range const & srcRange) const;
 
 };
 

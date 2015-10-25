@@ -46,7 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/Hypothesis.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/TrellisPathList.h"
 #include "moses/StaticData.h"
 #include "moses/FeatureVector.h"

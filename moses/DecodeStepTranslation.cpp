@@ -58,7 +58,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
   }
 
   // normal trans step
-  const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
+  const Range &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
   const InputPath &inputPath = inputPartialTranslOpt.GetInputPath();
   const PhraseDictionary* phraseDictionary  =
     decodeStep.GetPhraseDictionaryFeature();
@@ -110,12 +110,12 @@ void DecodeStepTranslation::ProcessInitialTranslation(
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
-  const WordsRange wordsRange(startPos, endPos);
+  const Range range(startPos, endPos);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
       if(StaticData::Instance().GetInputType() == SentenceInput)
-        TRACE_ERR("[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+        TRACE_ERR("[" << source.GetSubString(range) << "; " << startPos << "-" << endPos << "]\n");
       else
         TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
     }
@@ -125,7 +125,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 
     for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
-      TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
+      TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
 
       transOpt->SetInputPath(inputPath);
 
@@ -146,14 +146,14 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
-  const WordsRange wordsRange(startPos, endPos);
+  const Range range(startPos, endPos);
   TargetPhraseCollectionWithSourcePhrase::shared_ptr phraseColl
-  = phraseDictionary->GetTargetPhraseCollectionLEGACY(source,wordsRange);
+  = phraseDictionary->GetTargetPhraseCollectionLEGACY(source,range);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
       if(StaticData::Instance().GetInputType() == SentenceInput)
-        TRACE_ERR("[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+        TRACE_ERR("[" << source.GetSubString(range) << "; " << startPos << "-" << endPos << "]\n");
       else
         TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
     }
@@ -174,7 +174,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
 
       const InputPath &inputPath = GetInputPathLEGACY(targetPhrase, sourcePhrase, inputPathList);
 
-      TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
+      TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
       transOpt->SetInputPath(inputPath);
 
       outputPartialTranslOptColl.Add (transOpt);
@@ -206,7 +206,7 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
       }
     }
 
-    // const WordsRange &range = inputPath.GetWordsRange();
+    // const Range &range = inputPath.GetWordsRange();
 
     if (wordIP && *wordIP == wordFromPt) {
       return inputPath;
@@ -231,7 +231,7 @@ ProcessLEGACY(TranslationOption const& in,
   }
 
   // normal trans step
-  WordsRange const& srcRange = in.GetSourceWordsRange();
+  Range const& srcRange = in.GetSourceWordsRange();
   InputPath const& inputPath = in.GetInputPath();
   PhraseDictionary const* pdict  = decodeStep.GetPhraseDictionaryFeature();
   TargetPhrase const& inPhrase = in.GetTargetPhrase();

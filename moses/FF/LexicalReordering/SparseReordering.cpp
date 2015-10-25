@@ -237,9 +237,9 @@ void SparseReordering::CopyScores(
     //NB: Using a static cast for speed, but could be nasty if
     //using non-sentence input
     const Sentence& sentence = static_cast<const Sentence&>(input);
-    const WordsRange& currentRange = currentOpt.GetSourceWordsRange();
+    const Range& currentRange = currentOpt.GetSourceWordsRange();
     if (previousOpt) {
-      const WordsRange& previousRange = previousOpt->GetSourceWordsRange();
+      const Range& previousRange = previousOpt->GetSourceWordsRange();
       if (previousRange < currentRange) {
         gapStart = previousRange.GetEndPos() + 1;
         gapEnd = currentRange.GetStartPos();

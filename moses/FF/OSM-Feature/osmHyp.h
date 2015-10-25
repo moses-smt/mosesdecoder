@@ -80,10 +80,10 @@ public:
 
   osmHypothesis();
   ~osmHypothesis() {};
-  void generateOperations(int & startIndex, int j1 , int contFlag , WordsBitmap & coverageVector , std::string english , std::string german , std::set <int> & targetNullWords , std::vector <std::string> & currF);
+  void generateOperations(int & startIndex, int j1 , int contFlag , Bitmap & coverageVector , std::string english , std::string german , std::set <int> & targetNullWords , std::vector <std::string> & currF);
   void generateDeleteOperations(std::string english, int currTargetIndex, std::set <int> doneTargetIndexes);
   void calculateOSMProb(OSMLM& ptrOp);
-  void computeOSMFeature(int startIndex , WordsBitmap & coverageVector);
+  void computeOSMFeature(int startIndex , Bitmap & coverageVector);
   void constructCepts(std::vector <int> & align , int startIndex , int endIndex, int targetPhraseLength);
   void setPhrases(std::vector <std::string> & val1 , std::vector <std::string> & val2) {
     currF = val1;

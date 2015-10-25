@@ -20,7 +20,7 @@ public:
 
   virtual ~Parser() {}
 
-  virtual void EnumerateHyperedges(const WordsRange &, Callback &) = 0;
+  virtual void EnumerateHyperedges(const Range &, Callback &) = 0;
 protected:
   PChart &m_chart;
 };

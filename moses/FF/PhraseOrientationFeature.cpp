@@ -762,7 +762,7 @@ void PhraseOrientationFeature::SparseWordL2RScore(const ChartHypothesis* hypo,
 
   // source word
 
-  WordsRange sourceSpan = hypo->GetCurrSourceRange();
+  Range sourceSpan = hypo->GetCurrSourceRange();
   const InputType& input = hypo->GetManager().GetSource();
   const Sentence& sourceSentence = static_cast<const Sentence&>(input);
   const Word& sourceWord = sourceSentence.GetWord(sourceSpan.GetStartPos());
@@ -821,7 +821,7 @@ void PhraseOrientationFeature::SparseWordR2LScore(const ChartHypothesis* hypo,
 
   // source word
 
-  WordsRange sourceSpan = hypo->GetCurrSourceRange();
+  Range sourceSpan = hypo->GetCurrSourceRange();
   const InputType& input = hypo->GetManager().GetSource();
   const Sentence& sourceSentence = static_cast<const Sentence&>(input);
   const Word& sourceWord = sourceSentence.GetWord(sourceSpan.GetEndPos());

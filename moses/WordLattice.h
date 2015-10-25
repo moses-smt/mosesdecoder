@@ -33,7 +33,7 @@ public:
   void Print(std::ostream&) const;
   /** Get shortest path between two nodes
    */
-  virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
+  virtual int ComputeDistortionDistance(const Range& prev, const Range& current) const;
   // is it possible to get from the edge of the previous word range to the current word range
   virtual bool CanIGetFromAToB(size_t start, size_t end) const;
 

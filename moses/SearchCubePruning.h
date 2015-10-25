@@ -19,7 +19,7 @@ class SearchCubePruning: public Search
 {
 protected:
   const InputType &m_source;
-  WordsBitmap m_initBitmap;
+  Bitmap m_initBitmap;
   std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */
   // no of elements = no of words in source + 1
   const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
@@ -27,8 +27,8 @@ protected:
   //! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
   void CreateForwardTodos(HypothesisStackCubePruning &stack);
   //! create a back pointer to this bitmap, with edge that has this words range translation
-  void CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer);
-  bool CheckDistortion(const WordsBitmap &bitmap, const WordsRange &range) const;
+  void CreateForwardTodos(const Bitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
+  bool CheckDistortion(const Bitmap &bitmap, const Range &range) const;
 
   void PrintBitmapContainerGraph();
 

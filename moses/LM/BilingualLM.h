@@ -64,7 +64,7 @@ private:
     const TargetPhrase &targetPhrase,
     int targetWordIdx,
     const Sentence &source_sent,
-    const WordsRange &sourceWordRange,
+    const Range &sourceWordRange,
     std::vector<int> &words) const;
 
   void appendSourceWordsToVector(const Sentence &source_sent, std::vector<int> &words, int source_word_mid_idx) const;

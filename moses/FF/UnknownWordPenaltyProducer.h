@@ -7,7 +7,7 @@
 namespace Moses
 {
 
-class WordsRange;
+class Range;
 
 
 /** unknown word penalty */

@@ -47,7 +47,7 @@ std::ostream& operator<<(std::ostream& out,InputType const& x)
 }
 
 // default implementation is one column equals one word
-int InputType::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
+int InputType::ComputeDistortionDistance(const Range& prev, const Range& current) const
 {
   int dist = 0;
   if (prev.GetNumWordsCovered() == 0) {

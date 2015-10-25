@@ -226,7 +226,7 @@ Phrase TrellisPath::GetSurfacePhrase() const
   return ret;
 }
 
-WordsRange TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
+Range TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
 {
   size_t startPos = 0;
 
@@ -235,14 +235,14 @@ WordsRange TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
     size_t endPos = startPos + currHypo->GetCurrTargetLength() - 1;
 
     if (currHypo == &hypo) {
-      return WordsRange(startPos, endPos);
+      return Range(startPos, endPos);
     }
     startPos = endPos + 1;
   }
 
   // have to give a hypo in the trellis path, but u didn't.
   UTIL_THROW(util::Exception, "Hypothesis not found");
-  return WordsRange(NOT_FOUND, NOT_FOUND);
+  return Range(NOT_FOUND, NOT_FOUND);
 }
 
 TO_STRING_BODY(TrellisPath);

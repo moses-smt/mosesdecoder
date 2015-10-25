@@ -8,7 +8,7 @@
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/TranslationOption.h"
 
 #include "moses/FF/StatefulFeatureFunction.h"

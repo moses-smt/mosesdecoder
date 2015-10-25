@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class WordsRange;
+class Range;
 class PhraseDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
@@ -73,7 +73,7 @@ public:
   }
 
   //! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
-  Phrase GetSubString(const WordsRange& r) const {
+  Phrase GetSubString(const Range& r) const {
     return Phrase::GetSubString(r);
   }
 

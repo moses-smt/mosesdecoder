@@ -82,7 +82,7 @@ void ChartManager::Decode()
   for (int startPos = size-1; startPos >= 0; --startPos) {
     for (size_t width = 1; width <= size-startPos; ++width) {
       size_t endPos = startPos + width - 1;
-      WordsRange range(startPos, endPos);
+      Range range(startPos, endPos);
 
       // create trans opt
       m_translationOptionList.Clear();
@@ -115,7 +115,7 @@ void ChartManager::Decode()
         cerr << "  ";
       }
       for (size_t startPos = 0; startPos <= size-width; ++startPos) {
-        WordsRange range(startPos, startPos+width-1);
+        Range range(startPos, startPos+width-1);
         cerr.width(3);
         cerr << m_hypoStackColl.Get(range).GetSize() << " ";
       }
@@ -142,7 +142,7 @@ void ChartManager::AddXmlChartOptions()
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    const WordsRange &range = opt->GetSourceWordsRange();
+    const Range &range = opt->GetSourceWordsRange();
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
@@ -162,7 +162,7 @@ const ChartHypothesis *ChartManager::GetBestHypothesis() const
   if (size == 0) // empty source
     return NULL;
   else {
-    WordsRange range(0, size-1);
+    Range range(0, size-1);
     const ChartCell &lastCell = m_hypoStackColl.Get(range);
     return lastCell.GetBestHypothesis();
   }
@@ -185,7 +185,7 @@ void ChartManager::CalcNBest(
   }
 
   // Get the list of top-level hypotheses, sorted by score.
-  WordsRange range(0, m_source.GetSize()-1);
+  Range range(0, m_source.GetSize()-1);
   const ChartCell &lastCell = m_hypoStackColl.Get(range);
   boost::scoped_ptr<const std::vector<const ChartHypothesis*> > topLevelHypos(
     lastCell.GetAllSortedHypotheses());
@@ -234,7 +234,7 @@ void ChartManager::WriteSearchGraph(const ChartSearchGraphWriter& writer) const
 
   // which hypotheses are reachable?
   std::map<unsigned,bool> reachable;
-  WordsRange fullRange(0, size-1);
+  Range fullRange(0, size-1);
   const ChartCell &lastCell = m_hypoStackColl.Get(fullRange);
   const ChartHypothesis *hypo = lastCell.GetBestHypothesis();
 
@@ -251,7 +251,7 @@ void ChartManager::WriteSearchGraph(const ChartSearchGraphWriter& writer) const
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       size_t endPos = startPos + width - 1;
-      WordsRange range(startPos, endPos);
+      Range range(startPos, endPos);
       TRACE_ERR(" " << range << "=");
 
       const ChartCell &cell = m_hypoStackColl.Get(range);
@@ -674,18 +674,18 @@ void ChartManager::ReconstructApplicationContext(const ChartHypothesis &hypo,
   const std::vector<const ChartHypothesis*> &prevHypos = hypo.GetPrevHypos();
   std::vector<const ChartHypothesis*>::const_iterator p = prevHypos.begin();
   std::vector<const ChartHypothesis*>::const_iterator end = prevHypos.end();
-  const WordsRange &span = hypo.GetCurrSourceRange();
+  const Range &span = hypo.GetCurrSourceRange();
   size_t i = span.GetStartPos();
   while (i <= span.GetEndPos()) {
     if (p == end || i < (*p)->GetCurrSourceRange().GetStartPos()) {
       // Symbol is a terminal.
       const Word &symbol = sentence.GetWord(i);
-      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
+      context.push_back(std::make_pair(symbol, Range(i, i)));
       ++i;
     } else {
       // Symbol is a non-terminal.
       const Word &symbol = (*p)->GetTargetLHS();
-      const WordsRange &range = (*p)->GetCurrSourceRange();
+      const Range &range = (*p)->GetCurrSourceRange();
       context.push_back(std::make_pair(symbol, range));
       i = range.GetEndPos()+1;
       ++p;
@@ -797,7 +797,7 @@ void ChartManager::OutputDetailedAllTranslationReport(
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       size_t endPos = startPos + width - 1;
-      WordsRange range(startPos, endPos);
+      Range range(startPos, endPos);
       const ChartCell& cell = cells.Get(range);
       const HypoList* hyps = cell.GetAllSortedHypotheses();
       out << "Chart Cell [" << startPos << ".." << endPos << "]" << endl;

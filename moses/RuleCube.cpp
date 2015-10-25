@@ -26,7 +26,7 @@
 #include "RuleCubeQueue.h"
 #include "StaticData.h"
 #include "Util.h"
-#include "WordsRange.h"
+#include "Range.h"
 
 #include <boost/functional/hash.hpp>
 

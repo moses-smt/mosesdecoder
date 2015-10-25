@@ -26,8 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include <boost/functional/hash.hpp>
-#include "WordsBitmap.h"
-#include "WordsRange.h"
+#include "Bitmap.h"
+#include "Range.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
@@ -67,7 +67,7 @@ protected:
 
   TargetPhrase 		m_targetPhrase; /*< output phrase when using this translation option */
   const InputPath		*m_inputPath;
-  const WordsRange	m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
+  const Range	m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float             m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
   // typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
@@ -91,7 +91,7 @@ public:
   explicit TranslationOption(); // For initial hypo that does translate nothing
 
   /** constructor. Used by initial translation step */
-  TranslationOption(const WordsRange &wordsRange
+  TranslationOption(const Range &range
                     , const TargetPhrase &targetPhrase);
 
   /** returns true if all feature types in featuresToCheck are compatible between the two phrases */
@@ -103,7 +103,7 @@ public:
   }
 
   /** returns source word range */
-  inline const WordsRange &GetSourceWordsRange() const {
+  inline const Range &GetSourceWordsRange() const {
     return m_sourceWordsRange;
   }
 

@@ -89,11 +89,11 @@ void Phrase::MergeFactors(const Phrase &copy, const std::vector<FactorType>& fac
 }
 
 
-Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
+Phrase Phrase::GetSubString(const Range &range) const
 {
-  Phrase retPhrase(wordsRange.GetNumWordsCovered());
+  Phrase retPhrase(range.GetNumWordsCovered());
 
-  for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++) {
+  for (size_t currPos = range.GetStartPos() ; currPos <= range.GetEndPos() ; currPos++) {
     Word &word = retPhrase.AddWord();
     word = GetWord(currPos);
   }
@@ -101,11 +101,11 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
   return retPhrase;
 }
 
-Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType) const
+Phrase Phrase::GetSubString(const Range &range, FactorType factorType) const
 {
-  Phrase retPhrase(wordsRange.GetNumWordsCovered());
+  Phrase retPhrase(range.GetNumWordsCovered());
 
-  for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++) {
+  for (size_t currPos = range.GetStartPos() ; currPos <= range.GetEndPos() ; currPos++) {
     const Factor* f = GetFactor(currPos, factorType);
     Word &word = retPhrase.AddWord();
     word.SetFactor(factorType, f);

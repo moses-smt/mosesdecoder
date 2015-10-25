@@ -47,7 +47,7 @@ TranslationOptionCollectionLattice
       size_t nextNode = nextNodes[i];
       size_t endPos = startPos + nextNode - 1;
 
-      WordsRange range(startPos, endPos);
+      Range range(startPos, endPos);
 
       if (range.GetNumWordsCovered() > maxPhraseLength) {
         continue;
@@ -98,7 +98,7 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
     size_t nextNode = nextNodes[i];
     size_t endPos = nextPos + nextNode - 1;
 
-    WordsRange range(startPos, endPos);
+    Range range(startPos, endPos);
 
     size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
     if (range.GetNumWordsCovered() > maxPhraseLength) {
@@ -144,7 +144,7 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
 
     TargetPhraseCollection::shared_ptr tpColl
     = path.GetTargetPhrases(phraseDictionary);
-    const WordsRange &range = path.GetWordsRange();
+    const Range &range = path.GetWordsRange();
 
     if (tpColl && tpColl->GetSize()) {
       TargetPhraseCollection::const_iterator iter;

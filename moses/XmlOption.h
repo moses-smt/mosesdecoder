@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "WordsRange.h"
+#include "Range.h"
 #include "TargetPhrase.h"
 
 namespace Moses
@@ -16,10 +16,10 @@ class ReorderingConstraint;
  */
 struct XmlOption {
 
-  WordsRange range;
+  Range range;
   TargetPhrase targetPhrase;
 
-  XmlOption(const WordsRange &r, const TargetPhrase &tp)
+  XmlOption(const Range &r, const TargetPhrase &tp)
     : range(r), targetPhrase(tp) {
   }
 
