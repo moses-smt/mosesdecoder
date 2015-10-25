@@ -16,7 +16,7 @@ class Manager;
 
 class Hypothesis {
 public:
-  Hypothesis(const Manager &mgr, const Moses::Bitmap &bitmap, const Moses::Range &range);
+  Hypothesis(Manager &mgr, const Moses::Bitmap &bitmap, const Moses::Range &range);
   virtual ~Hypothesis();
 
   size_t hash() const;
@@ -29,7 +29,7 @@ public:
   { return m_range; }
 
 protected:
-  const Manager &m_mgr;
+  Manager &m_mgr;
   const Moses::Bitmap &m_bitmap;
   const Moses::Range &m_range;
 

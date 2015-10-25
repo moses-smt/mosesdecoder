@@ -11,7 +11,7 @@
 #include "InputPaths.h"
 #include "moses/Bitmap.h"
 
-SearchNormal::SearchNormal(const Manager &mgr, std::vector<Stack> &stacks)
+SearchNormal::SearchNormal(Manager &mgr, std::vector<Stack> &stacks)
 :m_mgr(mgr)
 ,m_stacks(stacks)
 {
@@ -56,6 +56,22 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 
 	int distortion = abs((int)pathRange.GetStartPos() - (int)hypoRange.GetEndPos() - 1);
 	if (distortion > 5) {
-
+		return;
 	}
+
+	const Moses::Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
+	const std::vector<const TargetPhrases*> &tpsAllPt = path.GetTargetPhrases();
+
+	for (size_t i = 0; i < tpsAllPt.size(); ++i) {
+		const TargetPhrases *tps = tpsAllPt[i];
+		if (tps) {
+			Extend(hypo, *tps);
+		}
+	}
+}
+
+void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrases &tps)
+{
+	//Hypothesis *newHypo = new
+
 }

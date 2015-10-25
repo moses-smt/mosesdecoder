@@ -23,6 +23,10 @@ public:
 
 	const Moses::Range &GetRange() const
 	{ return m_range; }
+
+	const std::vector<const TargetPhrases*> &GetTargetPhrases() const
+	{ return m_targetPhrases; }
+
 protected:
 	SubPhrase m_subPhrase;
 	Moses::Range m_range;

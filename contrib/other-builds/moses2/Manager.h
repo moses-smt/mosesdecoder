@@ -24,13 +24,13 @@ public:
 	Manager(const StaticData &staticData, const std::string &inputStr);
 	virtual ~Manager();
 
-	util::Pool &GetPool() const
+	util::Pool &GetPool()
 	{ return m_pool; }
 
 	const StaticData &GetStaticData() const
 	{ return m_staticData; }
 
-	const Moses::Bitmaps &GetBitmaps() const
+	Moses::Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
 
 	const InputPaths &GetInputPaths() const
@@ -38,7 +38,7 @@ public:
 
 	void Decode();
 protected:
-	mutable util::Pool m_pool;
+	util::Pool m_pool;
 
 	const StaticData &m_staticData;
 	Phrase *m_input;
