@@ -128,10 +128,10 @@ BOOST_AUTO_TEST_CASE(positions)
   Range wr2(5,8);
   wbm.SetValue(wr2,true);
   BOOST_CHECK_EQUAL(wbm.GetFirstGapPos(),9);
-  
+
   wbm.SetValue(9,true);
   BOOST_CHECK_EQUAL(wbm.GetFirstGapPos(),NOT_FOUND);
-  
+
   wbm.SetValue(wr,false);
   BOOST_CHECK_EQUAL(wbm.GetFirstGapPos(),2);
   */
