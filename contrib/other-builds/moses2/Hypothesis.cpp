@@ -94,9 +94,12 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 {
   if (m_prevHypo) {
 	  m_prevHypo->OutputToStream(out);
+  }
+
+  if (m_targetPhrase.GetSize()) {
+	  out << (const Phrase&) m_targetPhrase;
 	  out << " ";
   }
-  out << (const Phrase&) m_targetPhrase;
 }
 
 std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)

@@ -20,6 +20,7 @@ int main(int argc, char** argv)
 
 		const Hypothesis *bestHypo = mgr.GetBestHypothesis();
 		bestHypo->OutputToStream(cout);
+		cout << endl;
 	}
 
 	cerr << "Finished" << endl;
