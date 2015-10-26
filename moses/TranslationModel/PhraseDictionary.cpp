@@ -105,7 +105,7 @@ GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 
 TargetPhraseCollectionWithSourcePhrase::shared_ptr
 PhraseDictionary::
-GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
+GetTargetPhraseCollectionLEGACY(InputType const& src,Range const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }

@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStep.h"
 #include "DecodeStepTranslation.h"
 #include "FactorCollection.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include <list>
 
 using namespace std;
@@ -42,8 +42,8 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(ttasksptr const
       size_t endPos = startPos + phaseSize -1;
       vector<InputPath*> &vec = m_inputPathMatrix[startPos];
 
-      WordsRange range(startPos, endPos);
-      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+      Range range(startPos, endPos);
+      Phrase subphrase(input.GetSubString(Range(startPos, endPos)));
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       InputPath *path;
@@ -92,7 +92,7 @@ bool TranslationOptionCollectionText::ViolatesXmlOptionsConstraint(size_t startP
   vector <TranslationOption*> xmlOptions;
   source.GetXmlTranslationOptions(xmlOptions);
   for(size_t i=0; i<xmlOptions.size(); i++) {
-    const WordsRange &range = xmlOptions[i]->GetSourceWordsRange();
+    const Range &range = xmlOptions[i]->GetSourceWordsRange();
     // if transOpt is a subphrase of a xml specification, do not use it
     if (range.GetStartPos() <= startPosition && range.GetEndPos() >= endPosition &&
         (range.GetStartPos() < startPosition || range.GetEndPos() > endPosition)) {

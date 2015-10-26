@@ -56,7 +56,7 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
   size_t lastPos,
   ChartParserCallback &outColl)
 {
-  const WordsRange &range = inputPath.GetWordsRange();
+  const Range &range = inputPath.GetWordsRange();
   size_t startPos = range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
 

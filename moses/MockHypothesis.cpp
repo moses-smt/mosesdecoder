@@ -47,7 +47,7 @@ MockHypothesisGuard
   Bitmaps bitmaps(m_sentence.get()->GetSize(), m_sentence.get()->m_sourceCompleted);
   m_manager->ResetSentenceStats(*m_sentence);
 
-  const WordsBitmap &initBitmap = bitmaps.GetInitialBitmap();
+  const Bitmap &initBitmap = bitmaps.GetInitialBitmap();
   m_hypothesis = new Hypothesis(*m_manager, *m_sentence, m_initialTransOpt, initBitmap);
 
   //create the chain
@@ -55,14 +55,14 @@ MockHypothesisGuard
   vector<string>::const_iterator ti = targetSegments.begin();
   for (; ti != targetSegments.end() && ai != alignments.end(); ++ti,++ai) {
     Hypothesis* prevHypo = m_hypothesis;
-    WordsRange wordsRange(ai->first,ai->second);
-    const WordsBitmap &newBitmap = bitmaps.GetBitmap(prevHypo->GetWordsBitmap(), wordsRange);
+    Range range(ai->first,ai->second);
+    const Bitmap &newBitmap = bitmaps.GetBitmap(prevHypo->GetWordsBitmap(), range);
 
     m_targetPhrases.push_back(TargetPhrase(NULL));
     // m_targetPhrases.back().CreateFromString(Input, factors, *ti, "|", NULL);
     m_targetPhrases.back().CreateFromString(Input, factors, *ti, NULL);
     m_toptions.push_back(new TranslationOption
-                         (wordsRange,m_targetPhrases.back()));
+                         (range,m_targetPhrases.back()));
     m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back(), newBitmap);
 
   }

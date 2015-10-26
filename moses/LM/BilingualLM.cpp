@@ -108,7 +108,7 @@ void BilingualLM::getSourceWords(
   const TargetPhrase &targetPhrase,
   int targetWordIdx,
   const Sentence &source_sent,
-  const WordsRange &sourceWordRange,
+  const Range &sourceWordRange,
   std::vector<int> &words) const
 {
   //Get source context
@@ -220,7 +220,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   float value = 0;
   const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
-  const WordsRange& sourceWordRange = cur_hypo.GetCurrSourceWordsRange(); //Source words range to calculate offsets
+  const Range& sourceWordRange = cur_hypo.GetCurrSourceWordsRange(); //Source words range to calculate offsets
 
   // For each word in the current target phrase get its LM score.
   for (int i = 0; i < currTargetPhrase.GetSize(); i++) {

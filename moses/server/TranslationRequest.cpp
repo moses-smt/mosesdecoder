@@ -7,7 +7,7 @@ namespace MosesServer
 using namespace std;
 using Moses::Hypothesis;
 using Moses::StaticData;
-using Moses::WordsRange;
+using Moses::Range;
 using Moses::ChartHypothesis;
 using Moses::Phrase;
 using Moses::Manager;
@@ -87,8 +87,8 @@ TranslationRequest::
 add_phrase_aln_info(Hypothesis const& h, vector<xmlrpc_c::value>& aInfo) const
 {
   if (!m_withAlignInfo) return;
-  WordsRange const& trg = h.GetCurrTargetWordsRange();
-  WordsRange const& src = h.GetCurrSourceWordsRange();
+  Range const& trg = h.GetCurrTargetWordsRange();
+  Range const& src = h.GetCurrSourceWordsRange();
 
   std::map<std::string, xmlrpc_c::value> pAlnInfo;
   pAlnInfo["tgt-start"] = xmlrpc_c::value_int(trg.GetStartPos());

@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "TrellisPathList.h"
 #include "SquareMatrix.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "Search.h"
 #include "SearchCubePruning.h"
 #include "BaseManager.h"

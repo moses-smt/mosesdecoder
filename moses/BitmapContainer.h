@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SquareMatrix.h"
 #include "TranslationOption.h"
 #include "TypeDef.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 
 #include <boost/unordered_set.hpp>
 
@@ -202,7 +202,7 @@ public:
 class BitmapContainer
 {
 private:
-  const WordsBitmap m_bitmap;
+  const Bitmap &m_bitmap;
   HypothesisStackCubePruning &m_stack;
   HypothesisSet m_hypotheses;
   BackwardsEdgeSet m_edges;
@@ -214,7 +214,7 @@ private:
   BitmapContainer();
   BitmapContainer(const BitmapContainer &);
 public:
-  BitmapContainer(const WordsBitmap &bitmap
+  BitmapContainer(const Bitmap &bitmap
                   , HypothesisStackCubePruning &stack
                   , bool deterministic_sort = false);
 
@@ -228,7 +228,7 @@ public:
   size_t Size();
   bool Empty() const;
 
-  const WordsBitmap &GetWordsBitmap() const {
+  const Bitmap &GetWordsBitmap() const {
     return m_bitmap;
   }
 

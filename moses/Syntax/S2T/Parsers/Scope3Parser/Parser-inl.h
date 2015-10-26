@@ -39,7 +39,7 @@ Scope3Parser<Callback>::~Scope3Parser()
 
 template<typename Callback>
 void Scope3Parser<Callback>::
-EnumerateHyperedges(const WordsRange &range, Callback &callback)
+EnumerateHyperedges(const Range &range, Callback &callback)
 {
   const std::size_t start = range.GetStartPos();
   const std::size_t end = range.GetEndPos();

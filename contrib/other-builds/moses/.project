@@ -1136,24 +1136,24 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/WordLattice.h</locationURI>
 		</link>
 		<link>
-			<name>WordsBitmap.cpp</name>
+			<name>Bitmap.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/WordsBitmap.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Bitmap.cpp</locationURI>
 		</link>
 		<link>
-			<name>WordsBitmap.h</name>
+			<name>Bitmap.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/WordsBitmap.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Bitmap.h</locationURI>
 		</link>
 		<link>
-			<name>WordsRange.cpp</name>
+			<name>Range.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/WordsRange.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Range.cpp</locationURI>
 		</link>
 		<link>
-			<name>WordsRange.h</name>
+			<name>Range.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/WordsRange.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Range.h</locationURI>
 		</link>
 		<link>
 			<name>XmlOption.cpp</name>
@@ -4951,14 +4951,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/WordLattice.o</locationURI>
 		</link>
 		<link>
-			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/WordsBitmap.o</name>
+			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Bitmap.o</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/WordsBitmap.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Bitmap.o</locationURI>
 		</link>
 		<link>
-			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/WordsRange.o</name>
+			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Range.o</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/WordsRange.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Range.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/XmlOption.o</name>

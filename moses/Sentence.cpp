@@ -205,7 +205,7 @@ init(string line, std::vector<FactorType> const& factorOrder)
   if (SD.GetXmlInputType() != XmlPassThrough) {
     m_xmlCoverageMap.assign(GetSize(), false);
     BOOST_FOREACH(XmlOption* o, m_xmlOptions) {
-      WordsRange const& r = o->range;
+      Range const& r = o->range;
       for(size_t j = r.GetStartPos(); j <= r.GetEndPos(); ++j)
         m_xmlCoverageMap[j]=true;
     }
@@ -216,7 +216,7 @@ init(string line, std::vector<FactorType> const& factorOrder)
 
   // set reordering walls, if "-monotone-at-punction" is set
   if (SD.UseReorderingConstraint() && GetSize()) {
-    WordsRange r(0, GetSize()-1);
+    Range r(0, GetSize()-1);
     m_reorderingConstraint.SetMonotoneAtPunctuation(GetSubString(r));
   }
 
@@ -290,7 +290,7 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list) 
   for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
        iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
     const XmlOption &xmlOption = **iterXMLOpts;
-    const WordsRange &range = xmlOption.range;
+    const Range &range = xmlOption.range;
     const TargetPhrase &targetPhrase = xmlOption.targetPhrase;
     TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
     list.push_back(transOpt);
@@ -304,7 +304,7 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
   for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
        iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
     const XmlOption &xmlOption = **iterXMLOpts;
-    const WordsRange &range = xmlOption.range;
+    const Range &range = xmlOption.range;
 
     if (startPos == range.GetStartPos()
         && endPos == range.GetEndPos()) {
@@ -339,7 +339,7 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
       const XmlOption &xmlOption = **iterXmlOpts;
       TargetPhrase *targetPhrase = new TargetPhrase(xmlOption.targetPhrase);
 
-      WordsRange *range = new WordsRange(xmlOption.range);
+      Range *range = new Range(xmlOption.range);
       StackVec emptyStackVec; // hmmm... maybe dangerous, but it is never consulted
 
       TargetPhraseCollection *tpc = new TargetPhraseCollection;

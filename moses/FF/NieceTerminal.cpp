@@ -54,7 +54,7 @@ void NieceTerminal::EvaluateWithSourceContext(const InputType &input
 
   for (size_t i = 0; i < stackVec->size(); ++i) {
     const ChartCellLabel &cell = *stackVec->at(i);
-    const WordsRange &ntRange = cell.GetCoverage();
+    const Range &ntRange = cell.GetCoverage();
     bool containTerm = ContainTerm(input, ntRange, terms);
 
     if (containTerm) {
@@ -79,7 +79,7 @@ void NieceTerminal::EvaluateWhenApplied(const ChartHypothesis &hypo,
 {}
 
 bool NieceTerminal::ContainTerm(const InputType &input,
-                                const WordsRange &ntRange,
+                                const Range &ntRange,
                                 const boost::unordered_set<Word> &terms) const
 {
   boost::unordered_set<Word>::const_iterator iter;

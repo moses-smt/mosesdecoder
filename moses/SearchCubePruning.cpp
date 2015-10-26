@@ -47,9 +47,7 @@ public:
 SearchCubePruning::
 SearchCubePruning(Manager& manager, const InputType &source,
                   const TranslationOptionCollection &transOptColl)
-  : Search(manager)
-  , m_source(source)
-  , m_initBitmap(source.GetSize())
+  : Search(manager, source)
   , m_hypoStackColl(source.GetSize() + 1)
   , m_transOptColl(transOptColl)
 {
@@ -75,7 +73,8 @@ SearchCubePruning::~SearchCubePruning()
 void SearchCubePruning::Decode()
 {
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, m_initBitmap);
+  const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap);
 
   HypothesisStackCubePruning &firstStack
   = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
@@ -182,7 +181,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
   stack.AddHypothesesToBitmapContainers();
 
   for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor) {
-    const WordsBitmap &bitmap = iterAccessor->first;
+    const Bitmap &bitmap = *iterAccessor->first;
     BitmapContainer &bitmapContainer = *iterAccessor->second;
 
     if (bitmapContainer.GetHypothesesSize() == 0) {
@@ -200,7 +199,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
         continue;
 
       // not yet covered
-      WordsRange applyRange(startPos, startPos);
+      Range applyRange(startPos, startPos);
       if (CheckDistortion(bitmap, applyRange)) {
         // apply range
         CreateForwardTodos(bitmap, applyRange, bitmapContainer);
@@ -213,7 +212,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
         if (bitmap.GetValue(endPos))
           break;
 
-        WordsRange applyRange(startPos, endPos);
+        Range applyRange(startPos, endPos);
         if (CheckDistortion(bitmap, applyRange)) {
           // apply range
           CreateForwardTodos(bitmap, applyRange, bitmapContainer);
@@ -225,11 +224,10 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
 
 void
 SearchCubePruning::
-CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range,
+CreateForwardTodos(Bitmap const& bitmap, Range const& range,
                    BitmapContainer& bitmapContainer)
 {
-  WordsBitmap newBitmap = bitmap;
-  newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
+  const Bitmap &newBitmap = m_bitmaps.GetBitmap(bitmap, range);
 
   size_t numCovered = newBitmap.GetNumWordsCovered();
   const TranslationOptionList* transOptList;
@@ -246,7 +244,7 @@ CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range,
 
 bool
 SearchCubePruning::
-CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
+CheckDistortion(const Bitmap &hypoBitmap, const Range &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
   int maxDistortion = m_manager.options().reordering.max_distortion;
@@ -274,7 +272,7 @@ CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
   // its maximum value will be (which will always be the value of the
   // hypothesis starting at the left-most edge).  If this vlaue is than
   // the distortion limit, we don't allow this extension to be made.
-  WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+  Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
   return (m_source.ComputeDistortionDistance(range, bestNextExtension)
           <= maxDistortion);
 }

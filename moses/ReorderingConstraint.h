@@ -38,7 +38,7 @@ namespace Moses
 {
 
 class InputType;
-class WordsBitmap;
+class Bitmap;
 
 #define NOT_A_ZONE 999999999
 /** A list of zones and walls to limit which reordering can occur
@@ -96,7 +96,7 @@ public:
   void SetMonotoneAtPunctuation( const Phrase & sentence );
 
   //! check if all constraints are fulfilled -> all find
-  bool Check( const WordsBitmap &bitmap, size_t start, size_t end ) const;
+  bool Check( const Bitmap &bitmap, size_t start, size_t end ) const;
 
   //! checks if reordering constraints will be enforced
   bool IsActive() const {

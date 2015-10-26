@@ -5,7 +5,7 @@
 #include "moses/InputPath.h"
 #include "moses/TargetPhrase.h"
 #include "moses/StackVec.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/ChartCellLabel.h"
 #include "moses/FactorCollection.h"
 

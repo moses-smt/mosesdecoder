@@ -70,7 +70,7 @@ GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
     key = MakeKey(f, e, c);
   else
     for(size_t i = 0; i <= c.GetSize(); ++i) {
-      Phrase sub_c(c.GetSubString(WordsRange(i,c.GetSize()-1)));
+      Phrase sub_c(c.GetSubString(Range(i,c.GetSize()-1)));
       key = MakeKey(f,e,sub_c);
     }
 

@@ -24,7 +24,7 @@
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptions.h"
 #include "ChartCellCollection.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "InputType.h"
 #include "InputPath.h"
 
@@ -61,7 +61,7 @@ public:
 
 void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
                                      const StackVec &stackVec,
-                                     const WordsRange &range)
+                                     const Range &range)
 {
   if (tpc.IsEmpty()) {
     return;
@@ -119,7 +119,7 @@ void
 ChartTranslationOptionList::
 AddPhraseOOV(TargetPhrase &phrase,
              std::list<TargetPhraseCollection::shared_ptr > &waste_memory,
-             const WordsRange &range)
+             const Range &range)
 {
   TargetPhraseCollection::shared_ptr tpc(new TargetPhraseCollection);
   tpc->Add(&phrase);

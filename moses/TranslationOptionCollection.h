@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "TranslationOptionList.h"
 #include "SquareMatrix.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
 #include "InputPath.h"
@@ -169,7 +169,7 @@ public:
 
   //! list of trans opt for a particular span
   TranslationOptionList const*
-  GetTranslationOptionList(const WordsRange &coverage) const {
+  GetTranslationOptionList(const Range &coverage) const {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 

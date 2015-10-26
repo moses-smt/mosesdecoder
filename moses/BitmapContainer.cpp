@@ -52,7 +52,7 @@ public:
 class HypothesisScoreOrdererWithDistortion
 {
 public:
-  HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange) :
+  HypothesisScoreOrdererWithDistortion(const Range* transOptRange) :
     m_transOptRange(transOptRange) {
     m_totalWeightDistortion = 0;
     const StaticData &staticData = StaticData::Instance();
@@ -67,7 +67,7 @@ public:
     }
   }
 
-  const WordsRange* m_transOptRange;
+  const Range* m_transOptRange;
   float m_totalWeightDistortion;
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
@@ -136,7 +136,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
     return;
   }
 
-  const WordsRange &transOptRange = translations.Get(0)->GetSourceWordsRange();
+  const Range &transOptRange = translations.Get(0)->GetSourceWordsRange();
 
   HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin();
   HypothesisSet::const_iterator iterEnd = m_prevBitmapContainer.GetHypotheses().end();
@@ -195,8 +195,8 @@ BackwardsEdge::Initialize()
     return;
   }
 
-  const WordsBitmap &bm = m_hypotheses[0]->GetWordsBitmap();
-  const WordsRange &newRange = m_translations.Get(0)->GetSourceWordsRange();
+  const Bitmap &bm = m_hypotheses[0]->GetWordsBitmap();
+  const Range &newRange = m_translations.Get(0)->GetSourceWordsRange();
   m_futureScore = m_futureScores.CalcFutureScore2(bm, newRange.GetStartPos(), newRange.GetEndPos());
 
   Hypothesis *expanded = CreateHypothesis(*m_hypotheses[0], *m_translations.Get(0));
@@ -211,7 +211,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
   }
-  const WordsBitmap &bitmap = m_parent.GetWordsBitmap();
+  const Bitmap &bitmap = m_parent.GetWordsBitmap();
   Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
@@ -277,7 +277,7 @@ BackwardsEdge::PushSuccessors(const size_t x, const size_t y)
 // BitmapContainer Code
 ////////////////////////////////////////////////////////////////////////////////
 
-BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
+BitmapContainer::BitmapContainer(const Bitmap &bitmap
                                  , HypothesisStackCubePruning &stack
                                  , bool deterministic)
   : m_bitmap(bitmap)

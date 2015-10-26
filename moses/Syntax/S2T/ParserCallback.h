@@ -31,7 +31,7 @@ public:
     m_container.SwapIn(m_tmpBundle, score);
   }
 
-  void InitForRange(const WordsRange &range) {
+  void InitForRange(const Range &range) {
     m_container.LazyClear();
   }
 
@@ -62,7 +62,7 @@ public:
     m_containers[end].SwapIn(m_tmpBundle, score);
   }
 
-  void InitForRange(const WordsRange &range) {
+  void InitForRange(const Range &range) {
     const std::size_t start = range.GetStartPos();
     m_end = range.GetEndPos();
     if (start != m_prevStart) {

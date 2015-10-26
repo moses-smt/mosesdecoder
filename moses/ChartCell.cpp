@@ -25,7 +25,7 @@
 #include "HypergraphOutput.h"
 #include "RuleCubeQueue.h"
 #include "RuleCube.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "Util.h"
 #include "StaticData.h"
 #include "ChartTranslationOptions.h"

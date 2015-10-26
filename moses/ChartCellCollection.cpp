@@ -21,7 +21,7 @@
 
 #include "ChartCellCollection.h"
 #include "InputType.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "ChartManager.h"
 
 namespace Moses

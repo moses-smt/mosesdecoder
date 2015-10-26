@@ -148,7 +148,7 @@ void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
   UTIL_THROW_IF2(!addRet.second,
                  "Should have added hypothesis " << *hypo);
 
-  const WordsBitmap &bitmap = hypo->GetWordsBitmap();
+  const Bitmap &bitmap = hypo->GetWordsBitmap();
   AddBitmapContainer(bitmap, *this);
 }
 
@@ -248,9 +248,9 @@ void HypothesisStackCubePruning::CleanupArcList()
   }
 }
 
-void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
+void HypothesisStackCubePruning::SetBitmapAccessor(const Bitmap &newBitmap
     , HypothesisStackCubePruning &stack
-    , const WordsRange &/*range*/
+    , const Range &/*range*/
     , BitmapContainer &bitmapContainer
     , const SquareMatrix &futureScore
     , const TranslationOptionList &transOptList)
@@ -287,20 +287,20 @@ HypothesisStackCubePruning::AddHypothesesToBitmapContainers()
   HypothesisStackCubePruning::const_iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *h = *iter;
-    const WordsBitmap &bitmap = h->GetWordsBitmap();
-    BitmapContainer *container = m_bitmapAccessor[bitmap];
+    const Bitmap &bitmap = h->GetWordsBitmap();
+    BitmapContainer *container = m_bitmapAccessor[&bitmap];
     container->AddHypothesis(h);
   }
 }
 
-BitmapContainer *HypothesisStackCubePruning::AddBitmapContainer(const WordsBitmap &bitmap, HypothesisStackCubePruning &stack)
+BitmapContainer *HypothesisStackCubePruning::AddBitmapContainer(const Bitmap &bitmap, HypothesisStackCubePruning &stack)
 {
-  _BMType::iterator iter = m_bitmapAccessor.find(bitmap);
+  _BMType::iterator iter = m_bitmapAccessor.find(&bitmap);
 
   BitmapContainer *bmContainer;
   if (iter == m_bitmapAccessor.end()) {
     bmContainer = new BitmapContainer(bitmap, stack, m_deterministic);
-    m_bitmapAccessor[bitmap] = bmContainer;
+    m_bitmapAccessor[&bitmap] = bmContainer;
   } else {
     bmContainer = iter->second;
   }

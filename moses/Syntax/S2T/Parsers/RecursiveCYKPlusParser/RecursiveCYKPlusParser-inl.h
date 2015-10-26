@@ -24,7 +24,7 @@ RecursiveCYKPlusParser<Callback>::RecursiveCYKPlusParser(
 
 template<typename Callback>
 void RecursiveCYKPlusParser<Callback>::EnumerateHyperedges(
-  const WordsRange &range,
+  const Range &range,
   Callback &callback)
 {
   const std::size_t start = range.GetStartPos();

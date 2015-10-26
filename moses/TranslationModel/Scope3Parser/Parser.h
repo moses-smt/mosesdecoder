@@ -40,7 +40,7 @@ namespace Moses
 class InputType;
 class ChartCellCollectionBase;
 class ChartHypothesisCollection;
-class WordsRange;
+class Range;
 
 /** @todo what is this?
  */
@@ -66,14 +66,14 @@ private:
   // Define a callback type for use by StackLatticeSearcher.
   struct MatchCallback {
   public:
-    MatchCallback(const WordsRange &range, ChartParserCallback &out)
+    MatchCallback(const Range &range, ChartParserCallback &out)
       : m_range(range) , m_out(out) // , m_tpc(NULL)
     { }
 
     void operator()(const StackVec &stackVec) {
       m_out.Add(*m_tpc, stackVec, m_range);
     }
-    const WordsRange &m_range;
+    const Range &m_range;
     ChartParserCallback &m_out;
     TargetPhraseCollection::shared_ptr m_tpc;
   };

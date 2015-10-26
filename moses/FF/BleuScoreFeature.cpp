@@ -380,7 +380,7 @@ void BleuScoreFeature::GetNgramMatchCounts(Phrase& phrase,
       ngram_end_idx = end_idx;
       ngram_start_idx = end_idx - order;
 
-      Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
+      Phrase ngram = phrase.GetSubString(Range(ngram_start_idx, ngram_end_idx), 0);
       ret_counts[order]++;
 
       ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -409,7 +409,7 @@ void BleuScoreFeature::GetNgramMatchCounts_prefix(Phrase& phrase,
       if (order > ngram_end_idx) break;
       if (ngram_end_idx > last_end_index) break;
 
-      Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
+      Phrase ngram = phrase.GetSubString(Range(ngram_start_idx, ngram_end_idx), 0);
       ret_counts[order]++;
 
       ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -439,7 +439,7 @@ void BleuScoreFeature::GetNgramMatchCounts_overlap(Phrase& phrase,
       ngram_start_idx = end_idx - order;
       if (ngram_start_idx >= overlap_index) continue; // only score ngrams that span the overlap point
 
-      Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
+      Phrase ngram = phrase.GetSubString(Range(ngram_start_idx, ngram_end_idx), 0);
       ret_counts[order]++;
 
       ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -466,7 +466,7 @@ void BleuScoreFeature::GetClippedNgramMatchesAndCounts(Phrase& phrase,
       ngram_end_idx = end_idx;
       ngram_start_idx = end_idx - order;
 
-      Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
+      Phrase ngram = phrase.GetSubString(Range(ngram_start_idx, ngram_end_idx), 0);
       ret_counts[order]++;
 
       ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -538,10 +538,10 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
     ctx_start_idx = 0;
   }
 
-  WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
+  const Bitmap &coverageVector = cur_hypo.GetWordsBitmap();
   new_state->m_source_length = coverageVector.GetNumWordsCovered();
 
-  new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
+  new_state->m_words = new_words.GetSubString(Range(ctx_start_idx,
                        ctx_end_idx));
   new_state->m_target_length += cur_hypo.GetCurrTargetLength();
 
@@ -672,7 +672,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, 
   }
 
   new_state->m_source_length = cur_hypo.GetCurrSourceRange().GetNumWordsCovered();
-  new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx, ctx_end_idx));
+  new_state->m_words = new_words.GetSubString(Range(ctx_start_idx, ctx_end_idx));
   new_state->m_target_length = cur_hypo.GetOutputPhrase().GetSize();
 
   // we need a scaled reference length to compare the current target phrase to the corresponding
@@ -699,7 +699,7 @@ float BleuScoreFeature::CalculateBleu(Phrase translation) const
   Phrase normTranslation = translation;
   // remove start and end symbol for chart decoding
   if (m_cur_source_length != m_cur_norm_source_length) {
-    WordsRange* range = new WordsRange(1, translation.GetSize()-2);
+    Range* range = new Range(1, translation.GetSize()-2);
     normTranslation = translation.GetSubString(*range);
   }
 

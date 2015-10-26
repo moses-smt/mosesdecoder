@@ -37,7 +37,7 @@ namespace Moses
  * /param bitmap coverage bitmap
  */
 
-float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap ) const
+float SquareMatrix::CalcFutureScore( Bitmap const &bitmap ) const
 {
   const size_t notInGap= numeric_limits<size_t>::max();
   size_t startGap = notInGap;
@@ -76,7 +76,7 @@ float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap ) const
  * /param endPos end of the span that is added to the coverage
  */
 
-float SquareMatrix::CalcFutureScore2( WordsBitmap const &bitmap, size_t startPos, size_t endPos ) const
+float SquareMatrix::CalcFutureScore2( Bitmap const &bitmap, size_t startPos, size_t endPos ) const
 {
   const size_t notInGap= numeric_limits<size_t>::max();
   float futureScore = 0.0f;

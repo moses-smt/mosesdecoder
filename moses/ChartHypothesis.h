@@ -23,7 +23,7 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 #include "Util.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 #include "ChartTranslationOptions.h"
@@ -52,7 +52,7 @@ protected:
 
   boost::shared_ptr<ChartTranslationOption> m_transOpt;
 
-  WordsRange					m_currSourceWordsRange;
+  Range					m_currSourceWordsRange;
   std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   /*! sum of scores of this hypothesis, and previous hypotheses. Lazily initialised.  */
   mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown;
@@ -100,7 +100,7 @@ public:
   }
 
   //! the source range that this hypothesis spans
-  const WordsRange &GetCurrSourceRange() const {
+  const Range &GetCurrSourceRange() const {
     return m_currSourceWordsRange;
   }
 

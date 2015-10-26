@@ -31,7 +31,7 @@ typedef std::map<std::string, decaying_cache_value_t > decaying_cache_t;
 namespace Moses
 {
 
-class WordsRange;
+class Range;
 
 /** Calculates score for the Dynamic Cache-Based pseudo LM
  */

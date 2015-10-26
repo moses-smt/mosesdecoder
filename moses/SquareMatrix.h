@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "TypeDef.h"
 #include "Util.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 
 namespace Moses
 {
@@ -61,8 +61,8 @@ public:
   inline void SetScore(size_t startPos, size_t endPos, float value) {
     m_array[startPos * m_size + endPos] = value;
   }
-  float CalcFutureScore( WordsBitmap const& ) const;
-  float CalcFutureScore2( WordsBitmap const&, size_t startPos, size_t endPos ) const;
+  float CalcFutureScore( Bitmap const& ) const;
+  float CalcFutureScore2( Bitmap const&, size_t startPos, size_t endPos ) const;
 
   TO_STRING();
 };

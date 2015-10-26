@@ -69,7 +69,7 @@ public:
 
   int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 
-  Phrase GetSubString(const WordsRange&) const; //TODO not defined
+  Phrase GetSubString(const Range&) const; //TODO not defined
   std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined
   const Word& GetWord(size_t pos) const;
 

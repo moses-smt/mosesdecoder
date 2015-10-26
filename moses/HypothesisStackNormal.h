@@ -26,11 +26,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <set>
 #include "Hypothesis.h"
 #include "HypothesisStack.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 
 namespace Moses
 {
-// class WordsBitmap;
+// class Bitmap;
 // typedef size_t WordsBitmapID;
 
 /** A stack for standard phrase-based decoding. */
@@ -66,7 +66,7 @@ public:
       return -std::numeric_limits<float>::infinity();
     return m_diversityWorstScore[ id ];
   }
-  virtual float GetWorstScoreForBitmap( const WordsBitmap &coverage ) {
+  virtual float GetWorstScoreForBitmap( const Bitmap &coverage ) {
     return GetWorstScoreForBitmap( coverage.GetID() );
   }
 

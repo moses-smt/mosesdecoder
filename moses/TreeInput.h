@@ -14,9 +14,9 @@ class XMLParseOutput
 {
 public:
   std::string m_label;
-  WordsRange m_range;
+  Range m_range;
 
-  XMLParseOutput(const std::string &label, const WordsRange &range)
+  XMLParseOutput(const std::string &label, const Range &range)
     : m_label(label)
     , m_range(range) {
   }

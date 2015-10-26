@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 #include "Phrase.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "NonTerminal.h"
 #include "moses/FactorCollection.h"
 #include <boost/shared_ptr.hpp>
@@ -44,7 +44,7 @@ public:
 protected:
   const InputPath *m_prevPath;
   Phrase m_phrase;
-  WordsRange m_range;
+  Range m_range;
   const ScorePair *m_inputScore;
   size_t m_nextNode; // distance to next node. For lattices
 
@@ -68,7 +68,7 @@ public:
   InputPath(ttaskwptr const ttask,
             Phrase const& phrase,
             NonTerminalSet const& sourceNonTerms,
-            WordsRange const& range,
+            Range const& range,
             InputPath const* prevNode,
             ScorePair const* inputScore);
 
@@ -83,7 +83,7 @@ public:
   const std::vector<bool> &GetNonTerminalArray() const {
     return m_sourceNonTermArray;
   }
-  const WordsRange &GetWordsRange() const {
+  const Range &GetWordsRange() const {
     return m_range;
   }
   const Word &GetLastWord() const;

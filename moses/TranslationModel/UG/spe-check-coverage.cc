@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 	{
 	  for (size_t k = i; k < snt.GetSize(); ++k)
 	    {
-	      Phrase p = snt.GetSubString(WordsRange(i,k));
+	      Phrase p = snt.GetSubString(Range(i,k));
 	      if (!mmsapt->PrefixExists(p)) break;
 	      TargetPhraseCollection const* trg = PT->GetTargetPhraseCollectionLEGACY(p);
 	      if (!trg || !trg->GetSize()) continue;

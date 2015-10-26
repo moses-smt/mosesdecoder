@@ -7,8 +7,8 @@
 
 #include "moses/Hypothesis.h"
 #include "moses/ScoreComponentCollection.h"
-#include "moses/WordsRange.h"
-#include "moses/WordsBitmap.h"
+#include "moses/Range.h"
+#include "moses/Bitmap.h"
 #include "moses/TranslationOption.h"
 #include "moses/FF/FFState.h"
 #include "ReorderingStack.h"
@@ -59,14 +59,14 @@ public:
 
 
   ReorderingType // for first phrase in phrase-based
-  GetOrientation(WordsRange const& cur) const;
+  GetOrientation(Range const& cur) const;
 
   ReorderingType // for non-first phrases in phrase-based
-  GetOrientation(WordsRange const& prev, WordsRange const& cur) const;
+  GetOrientation(Range const& prev, Range const& cur) const;
 
   ReorderingType // for HReorderingForwardState
-  GetOrientation(WordsRange const& prev, WordsRange const& cur,
-                 WordsBitmap const& cov) const;
+  GetOrientation(Range const& prev, Range const& cur,
+                 Bitmap const& cov) const;
 
   ReorderingType // for HReorderingBackwarddState
   GetOrientation(int const reoDistance) const;
@@ -233,7 +233,7 @@ class PhraseBasedReorderingState
   : public LRState
 {
 private:
-  WordsRange m_prevRange;
+  Range m_prevRange;
   bool m_first;
 public:
   static bool m_useFirstBackwardScore;
@@ -251,10 +251,10 @@ public:
   Expand(const TranslationOption& topt,const InputType& input,
          ScoreComponentCollection*  scores) const;
 
-  ReorderingType GetOrientationTypeMSD(WordsRange currRange) const;
-  ReorderingType GetOrientationTypeMSLR(WordsRange currRange) const;
-  ReorderingType GetOrientationTypeMonotonic(WordsRange currRange) const;
-  ReorderingType GetOrientationTypeLeftRight(WordsRange currRange) const;
+  ReorderingType GetOrientationTypeMSD(Range currRange) const;
+  ReorderingType GetOrientationTypeMSLR(Range currRange) const;
+  ReorderingType GetOrientationTypeMonotonic(Range currRange) const;
+  ReorderingType GetOrientationTypeLeftRight(Range currRange) const;
 };
 
 //! State for a hierarchical reordering model (see Galley and Manning, A
@@ -288,8 +288,8 @@ class HReorderingForwardState : public LRState
 {
 private:
   bool m_first;
-  WordsRange m_prevRange;
-  WordsBitmap m_coverage;
+  Range m_prevRange;
+  Bitmap m_coverage;
 
 public:
   HReorderingForwardState(const LRModel &config, size_t sentenceLength,

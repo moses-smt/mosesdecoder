@@ -1676,8 +1676,8 @@ void Manager::OutputNBest(std::ostream& out
       out << " |||";
       for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
         const Hypothesis &edge = *edges[currEdge];
-        const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
-        WordsRange targetRange = path.GetTargetWordsRange(edge);
+        const Range &sourceRange = edge.GetCurrSourceWordsRange();
+        Range targetRange = path.GetTargetWordsRange(edge);
         out << " " << sourceRange.GetStartPos();
         if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
           out << "-" << sourceRange.GetEndPos();
@@ -1693,8 +1693,8 @@ void Manager::OutputNBest(std::ostream& out
       out << " ||| ";
       for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
         const Hypothesis &edge = *edges[currEdge];
-        const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
-        WordsRange targetRange = path.GetTargetWordsRange(edge);
+        const Range &sourceRange = edge.GetCurrSourceWordsRange();
+        Range targetRange = path.GetTargetWordsRange(edge);
         const int sourceOffset = sourceRange.GetStartPos();
         const int targetOffset = targetRange.GetStartPos();
         const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
@@ -1775,7 +1775,7 @@ void Manager::OutputSurface(std::ostream &out, const Hypothesis &edge, const std
 
   // trace ("report segmentation") option "-t" / "-tt"
   if (reportSegmentation > 0 && phrase.GetSize() > 0) {
-    const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+    const Range &sourceRange = edge.GetCurrSourceWordsRange();
     const int sourceStart = sourceRange.GetStartPos();
     const int sourceEnd = sourceRange.GetEndPos();
     out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"

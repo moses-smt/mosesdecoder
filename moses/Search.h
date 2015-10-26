@@ -6,6 +6,7 @@
 #include "TranslationOption.h"
 #include "Phrase.h"
 #include "InputPath.h"
+#include "Bitmaps.h"
 
 namespace Moses
 {
@@ -32,7 +33,7 @@ public:
   //! Decode the sentence according to the specified search algorithm.
   virtual void Decode() = 0;
 
-  explicit Search(Manager& manager);
+  explicit Search(Manager& manager, const InputType &source);
   virtual ~Search() {}
 
   // Factory method
@@ -41,9 +42,12 @@ public:
 
 protected:
   Manager& m_manager;
+  const InputType &m_source;
+  AllOptions const& m_options;
+
   InputPath m_inputPath; // for initial hypo
   TranslationOption m_initialTransOpt; /**< used to seed 1st hypo */
-  AllOptions const& m_options;
+  Bitmaps m_bitmaps;
 
   /** flag indicating that decoder ran out of time (see switch -time-out) */
   size_t interrupted_flag;

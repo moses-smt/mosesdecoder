@@ -171,7 +171,7 @@ void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
   }
 }
 
-int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
+int WordLattice::ComputeDistortionDistance(const Range& prev, const Range& current) const
 {
   int result;
 

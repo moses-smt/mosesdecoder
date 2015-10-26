@@ -73,7 +73,7 @@ int ForestInput::Read(std::istream &in,
   {
     Word symbol;
     symbol.CreateFromString(Input, factorOrder, "<s>", false);
-    Syntax::PVertex pvertex(WordsRange(0, 0), symbol);
+    Syntax::PVertex pvertex(Range(0, 0), symbol);
     startSymbol = new Forest::Vertex(pvertex);
     m_forest->vertices.push_back(startSymbol);
   }
@@ -83,7 +83,7 @@ int ForestInput::Read(std::istream &in,
   {
     Word symbol;
     symbol.CreateFromString(Input, factorOrder, "</s>", false);
-    Syntax::PVertex pvertex(WordsRange(maxEnd+1, maxEnd+1), symbol);
+    Syntax::PVertex pvertex(Range(maxEnd+1, maxEnd+1), symbol);
     endSymbol = new Forest::Vertex(pvertex);
     m_forest->vertices.push_back(endSymbol);
   }
@@ -92,7 +92,7 @@ int ForestInput::Read(std::istream &in,
   {
     Word symbol;
     symbol.CreateFromString(Input, factorOrder, "Q", true);
-    Syntax::PVertex pvertex(WordsRange(0, maxEnd+1), symbol);
+    Syntax::PVertex pvertex(Range(0, maxEnd+1), symbol);
     m_rootVertex = new Forest::Vertex(pvertex);
     m_forest->vertices.push_back(m_rootVertex);
   }
@@ -189,8 +189,8 @@ void ForestInput::ParseHyperedgeLine(
     v = ParseVertex(*p, factorOrder);
     if (!v->pvertex.symbol.IsNonTerminal()) {
       // Egret does not give start/end for terminals.
-      v->pvertex.span = WordsRange(e->head->pvertex.span.GetStartPos(),
-                                   e->head->pvertex.span.GetStartPos());
+      v->pvertex.span = Range(e->head->pvertex.span.GetStartPos(),
+                              e->head->pvertex.span.GetStartPos());
     }
     e->tail.push_back(AddOrDeleteVertex(v));
   }
@@ -211,7 +211,7 @@ Syntax::F2S::Forest::Vertex *ForestInput::ParseVertex(
   if (pos == std::string::npos) {
     symbol.CreateFromString(Input, factorOrder, s, false);
     // Create vertex: caller will fill in span.
-    WordsRange span(0, 0);
+    Range span(0, 0);
     return new Forest::Vertex(Syntax::PVertex(span, symbol));
   }
   symbol.CreateFromString(Input, factorOrder, s.substr(0, pos), true);
@@ -223,7 +223,7 @@ Syntax::F2S::Forest::Vertex *ForestInput::ParseVertex(
   s.substr(pos+1, s.size()-pos-2).CopyToString(&tmp);
   std::size_t end = std::atoi(tmp.c_str());
   // Create vertex: offset span by 1 to allow for <s> in first position.
-  WordsRange span(start+1, end+1);
+  Range span(start+1, end+1);
   return new Forest::Vertex(Syntax::PVertex(span, symbol));
 }
 

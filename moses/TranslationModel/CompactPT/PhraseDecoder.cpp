@@ -358,7 +358,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
             // if range smaller than source phrase retrieve subphrase
             if(unsigned(srcEnd - srcStart + 1) != srcSize) {
-              Phrase subPhrase = sourcePhrase.GetSubString(WordsRange(srcStart, srcEnd));
+              Phrase subPhrase = sourcePhrase.GetSubString(Range(srcStart, srcEnd));
               subTpv = CreateTargetPhraseCollection(subPhrase, false);
             } else {
               // false positive consistency check

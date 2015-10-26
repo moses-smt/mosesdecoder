@@ -6,13 +6,11 @@
 #include "HypothesisStackNormal.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
-#include "Bitmaps.h"
 
 namespace Moses
 {
 
 class Manager;
-class InputType;
 class TranslationOptionCollection;
 
 /** Functions and variables you need to decoder an input using the
@@ -22,7 +20,6 @@ class TranslationOptionCollection;
 class SearchNormal: public Search
 {
 protected:
-  const InputType &m_source;
   //! stacks to store hypotheses (partial translations)
   // no of elements = no of words in source + 1
   std::vector < HypothesisStack* > m_hypoStackColl;
@@ -32,8 +29,6 @@ protected:
 
   /** pre-computed list of translation options for the phrases in this sentence */
   const TranslationOptionCollection &m_transOptColl;
-
-  Bitmaps m_bitmaps;
 
   // functions for creating hypotheses
 
@@ -51,7 +46,7 @@ protected:
                    const TranslationOption &transOpt,
                    float expectedScore,
                    float futureScore,
-                   const WordsBitmap &bitmap);
+                   const Bitmap &bitmap);
 
 public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
