@@ -10,7 +10,7 @@
 #include "util/murmur_hash.hh"
 
 Word::Word() {
-	Init<Factor*>(m_factors, NUM_FACTOR, NULL);
+	Init<Factor*>(m_factors, MAX_NUM_FACTORS, NULL);
 }
 
 Word::~Word() {
@@ -20,12 +20,12 @@ Word::~Word() {
 size_t Word::hash() const
 {
 	uint64_t seed = 0;
-	size_t ret = util::MurmurHashNative(m_factors, sizeof(Factor*) * NUM_FACTOR, seed);
+	size_t ret = util::MurmurHashNative(m_factors, sizeof(Factor*) * MAX_NUM_FACTORS, seed);
 	return ret;
 }
 
 bool Word::operator==(const Word &compare) const
 {
-	int cmp = memcmp(m_factors, compare.m_factors, sizeof(Factor*) * NUM_FACTOR);
+	int cmp = memcmp(m_factors, compare.m_factors, sizeof(Factor*) * MAX_NUM_FACTORS);
 	return cmp == 0;
 }

@@ -19,6 +19,6 @@ public:
   bool operator==(const Word &compare) const;
 
 protected:
-  Factor *m_factors[NUM_FACTOR];
+  Factor *m_factors[MAX_NUM_FACTORS];
 };
 

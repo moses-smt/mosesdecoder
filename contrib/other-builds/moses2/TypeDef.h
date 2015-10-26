@@ -9,7 +9,7 @@
 #include <cstddef>
 
 typedef float SCORE;
-const size_t NUM_FACTOR = 4;
+
 
 
 
