@@ -51,11 +51,13 @@ SubPhrase Phrase::GetSubPhrase(size_t start, size_t end) const
 
 std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 {
-	for (size_t i = 0; i < obj.GetSize(); ++i) {
-		const Word &word = obj[i];
-		out << word;
+	if (obj.GetSize()) {
+		out << obj[0];
+		for (size_t i = 1; i < obj.GetSize(); ++i) {
+			const Word &word = obj[i];
+			out << " " << word;
+		}
 	}
-
 	return out;
 }
 
@@ -72,10 +74,12 @@ SubPhrase::SubPhrase(const Phrase &origPhrase, size_t start, size_t end)
 
 std::ostream& operator<<(std::ostream &out, const SubPhrase &obj)
 {
-	for (size_t i = 0; i < obj.GetSize(); ++i) {
-		const Word &word = obj[i];
-		out << word;
+	if (obj.GetSize()) {
+		out << obj[0];
+		for (size_t i = 1; i < obj.GetSize(); ++i) {
+			const Word &word = obj[i];
+			out << " " << word;
+		}
 	}
-
 	return out;
 }

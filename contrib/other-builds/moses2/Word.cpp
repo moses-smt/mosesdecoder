@@ -46,9 +46,16 @@ bool Word::operator==(const Word &compare) const
 
 std::ostream& operator<<(std::ostream &out, const Word &obj)
 {
+	bool outputAlready = false;
 	for (size_t i = 0; i < MAX_NUM_FACTORS; ++i) {
 		const Moses::Factor *factor = obj.m_factors[i];
-		out << *factor;
+		if (factor) {
+			if (outputAlready) {
+				out << "|";
+			}
+			out << *factor;
+			outputAlready = true;
+		}
 	}
 	return out;
 }

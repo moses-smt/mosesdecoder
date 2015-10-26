@@ -10,6 +10,7 @@
 #include "TargetPhrase.h"
 
 class TargetPhrases {
+	friend std::ostream& operator<<(std::ostream &, const TargetPhrases &);
 	typedef std::vector<const TargetPhrase*> Coll;
 public:
   typedef Coll::iterator iterator;

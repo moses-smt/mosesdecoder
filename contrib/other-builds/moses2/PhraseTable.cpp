@@ -49,11 +49,12 @@ Node &Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
 const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
 {
 	assert(source.GetSize());
-	if (pos == source.GetSize() - 1) {
+	if (pos == source.GetSize()) {
 		return m_targetPhrases;
 	}
 	else {
 		const Word &word = source[pos];
+		cerr << "word=" << word << endl;
 		Children::const_iterator iter = m_children.find(word);
 		if (iter == m_children.end()) {
 			return NULL;
@@ -93,6 +94,7 @@ void PhraseTable::Load(System &system)
 		Phrase *source = Phrase::CreateFromString(tmpPool, vocab, toks[0]);
 		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetSystemPool(), system, toks[1]);
 		target->GetScores().CreateFromString(toks[2], *this, system);
+
 		m_root.AddRule(*source, target);
 	}
 }
@@ -102,6 +104,13 @@ void PhraseTable::Lookups(InputPaths &inputPaths) const
   BOOST_FOREACH(InputPath &path, inputPaths) {
 		const SubPhrase &phrase = path.GetSubPhrase();
 		const TargetPhrases *tps = m_root.Find(phrase);
+		cerr << "path=" << path << endl;
+		cerr << "tps=" << tps << endl;
+		if (tps) {
+			cerr << *tps << endl;
+		}
+
+		path.AddTargetPhrases(*this, tps);
   }
 }
 

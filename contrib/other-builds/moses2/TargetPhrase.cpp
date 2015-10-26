@@ -38,6 +38,6 @@ TargetPhrase::~TargetPhrase() {
 
 std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
 {
-	out << (const Phrase&) obj << "Scores:" << obj.GetScores();
+	out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
 	return out;
 }

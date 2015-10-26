@@ -28,6 +28,6 @@ void InputPath::AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps
 
 std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 {
-
+	out << obj.m_range << " " << obj.m_subPhrase;
 	return out;
 }
