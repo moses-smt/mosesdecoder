@@ -3,6 +3,7 @@
 	<name>moses2</name>
 	<comment></comment>
 	<projects>
+		<project>moses</project>
 		<project>util</project>
 	</projects>
 	<buildSpec>
