@@ -181,7 +181,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
   stack.AddHypothesesToBitmapContainers();
 
   for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor) {
-    const Bitmap &bitmap = iterAccessor->first;
+    const Bitmap &bitmap = *iterAccessor->first;
     BitmapContainer &bitmapContainer = *iterAccessor->second;
 
     if (bitmapContainer.GetHypothesesSize() == 0) {
