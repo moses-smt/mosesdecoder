@@ -11,7 +11,8 @@
 #include "moses/Syntax/RuleTableFF.h"
 #include "moses/Syntax/SHyperedgeBundle.h"
 #include "moses/Syntax/SVertex.h"
-#include "moses/Syntax/SVertexRecombinationOrderer.h"
+#include "moses/Syntax/SVertexRecombinationEqualityPred.h"
+#include "moses/Syntax/SVertexRecombinationHasher.h"
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
 #include "moses/Syntax/T2S/InputTree.h"
@@ -285,7 +286,9 @@ void Manager<RuleMatcher>::RecombineAndSort(
   // head pointers are updated to point to the vertex instances in the map and
   // any 'duplicate' vertices are deleted.
 // TODO Set?
-  typedef boost::unordered_map<SVertex *, SVertex *, SVertexRecombinationUnordered, SVertexRecombinationUnordered> Map;
+  typedef boost::unordered_map<SVertex *, SVertex *,
+                               SVertexRecombinationHasher,
+                               SVertexRecombinationEqualityPred> Map;
   Map map;
   for (std::vector<SHyperedge*>::const_iterator p = buffer.begin();
        p != buffer.end(); ++p) {
