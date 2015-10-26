@@ -48,3 +48,13 @@ void Scores::CreateFromString(const std::string &str, const FeatureFunction &fea
 	vector<SCORE> scores = Moses::Tokenize<SCORE>(str);
 	PlusEquals(scores, featureFunction, system);
 }
+
+std::ostream& operator<<(std::ostream &out, const Scores &obj)
+{
+	out << obj.m_total;
+
+	if (obj.m_scores) {
+		// don't know num of scores
+	}
+	return out;
+}

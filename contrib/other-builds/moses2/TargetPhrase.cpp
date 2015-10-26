@@ -36,3 +36,8 @@ TargetPhrase::~TargetPhrase() {
 	// TODO Auto-generated destructor stub
 }
 
+std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
+{
+	out << (const Phrase&) obj << "Scores:" << obj.GetScores();
+	return out;
+}

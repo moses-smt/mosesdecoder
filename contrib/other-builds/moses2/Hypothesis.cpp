@@ -78,3 +78,9 @@ bool Hypothesis::operator==(const Hypothesis &other) const
   return true;
 
 }
+
+std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
+{
+
+	return out;
+}

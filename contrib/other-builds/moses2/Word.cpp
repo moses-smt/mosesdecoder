@@ -43,3 +43,12 @@ bool Word::operator==(const Word &compare) const
 	int cmp = memcmp(m_factors, compare.m_factors, sizeof(Moses::Factor*) * MAX_NUM_FACTORS);
 	return cmp == 0;
 }
+
+std::ostream& operator<<(std::ostream &out, const Word &obj)
+{
+	for (size_t i = 0; i < MAX_NUM_FACTORS; ++i) {
+		const Moses::Factor *factor = obj.m_factors[i];
+		out << *factor;
+	}
+	return out;
+}

@@ -7,13 +7,16 @@
 
 #ifndef INPUTPATH_H_
 #define INPUTPATH_H_
+#include <iostream>
 #include <vector>
 #include "Phrase.h"
 #include "moses/Range.h"
 
 class TargetPhrases;
+class PhraseTable;
 
 class InputPath {
+	  friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
 	InputPath(const SubPhrase &subPhrase, const Moses::Range &range, size_t numPt);
 	virtual ~InputPath();
@@ -27,7 +30,7 @@ public:
 	const std::vector<const TargetPhrases*> &GetTargetPhrases() const
 	{ return m_targetPhrases; }
 
-	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *pts);
+	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);
 
 protected:
 	SubPhrase m_subPhrase;

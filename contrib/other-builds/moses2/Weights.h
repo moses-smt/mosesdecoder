@@ -8,9 +8,11 @@
 #ifndef WEIGHTS_H_
 #define WEIGHTS_H_
 
+#include <iostream>
 #include "TypeDef.h"
 
 class Weights {
+	  friend std::ostream& operator<<(std::ostream &, const Weights &);
 public:
 	Weights();
 	virtual ~Weights();

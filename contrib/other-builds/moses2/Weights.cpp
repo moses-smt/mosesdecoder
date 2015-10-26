@@ -16,3 +16,8 @@ Weights::~Weights() {
 	// TODO Auto-generated destructor stub
 }
 
+std::ostream& operator<<(std::ostream &out, const Weights &obj)
+{
+
+	return out;
+}

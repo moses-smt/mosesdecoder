@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <string>
+#include <iostream>
 #include "Word.h"
 #include "util/pool.hh"
 #include "moses/FactorCollection.h"
@@ -24,6 +25,7 @@ class SubPhrase;
 
 class Phrase : public PhraseBase
 {
+	  friend std::ostream& operator<<(std::ostream &, const Phrase &);
 public:
   static Phrase *CreateFromString(util::Pool &pool, Moses::FactorCollection &vocab, const std::string &str);
 
@@ -52,6 +54,7 @@ protected:
 
 class SubPhrase : public PhraseBase
 {
+  friend std::ostream& operator<<(std::ostream &, const SubPhrase &);
 public:
   SubPhrase(const Phrase &origPhrase, size_t start, size_t size);
   virtual const Word& operator[](size_t pos) const

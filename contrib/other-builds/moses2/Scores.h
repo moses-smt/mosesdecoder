@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <iostream>
 #include <string>
 #include "TypeDef.h"
 #include "util/pool.hh"
@@ -14,6 +15,7 @@ class FeatureFunction;
 class System;
 
 class Scores {
+	  friend std::ostream& operator<<(std::ostream &, const Scores &);
 public:
   Scores(util::Pool &pool, size_t numScores);
   virtual ~Scores();

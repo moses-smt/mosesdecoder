@@ -7,11 +7,13 @@
 
 #pragma once
 
+#include <iostream>
 #include "TypeDef.h"
 #include "moses/Factor.h"
 #include "moses/FactorCollection.h"
 
 class Word {
+	  friend std::ostream& operator<<(std::ostream &, const Word &);
 public:
   Word();
   virtual ~Word();

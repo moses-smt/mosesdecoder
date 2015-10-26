@@ -16,6 +16,7 @@ class Manager;
 class TargetPhrase;
 
 class Hypothesis {
+	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
 public:
   Hypothesis(Manager &mgr,
 		  const TargetPhrase &tp,
