@@ -40,7 +40,7 @@ Phrase::Phrase(util::Pool &pool, size_t size)
 }
 
 Phrase::~Phrase() {
-	delete[] m_words;
+
 }
 
 SubPhrase Phrase::GetSubPhrase(size_t start, size_t end) const

@@ -24,7 +24,9 @@ void Word::CreateFromString(Moses::FactorCollection &vocab, const std::string &s
 {
 	vector<string> toks = Moses::Tokenize(str, "|");
 	for (size_t i = 0; i < toks.size(); ++i) {
-		const Moses::Factor *factor = vocab.AddFactor(toks[i], false);
+		const string &tok = toks[i];
+		//cerr << "tok=" << tok << endl;
+		const Moses::Factor *factor = vocab.AddFactor(tok, false);
 		m_factors[i] = factor;
 	}
 }
