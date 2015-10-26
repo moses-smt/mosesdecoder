@@ -37,7 +37,9 @@ class BitmapContainer;
 class TranslationOptionList;
 class Manager;
 
-typedef boost::unordered_map<Bitmap, BitmapContainer*, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > _BMType;
+//typedef boost::unordered_map<Bitmap, BitmapContainer*, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > _BMType;
+typedef boost::unordered_map<const Bitmap*, BitmapContainer*> _BMType;
+// can compare Bitmap* 'cos all bitmaps are created from bitmaps factory class. MUST ensure this is the case
 
 /** A stack for phrase-based decoding with cube-pruning. */
 class HypothesisStackCubePruning : public HypothesisStack

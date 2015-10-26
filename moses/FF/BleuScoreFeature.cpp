@@ -538,7 +538,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
     ctx_start_idx = 0;
   }
 
-  Bitmap coverageVector = cur_hypo.GetWordsBitmap();
+  const Bitmap &coverageVector = cur_hypo.GetWordsBitmap();
   new_state->m_source_length = coverageVector.GetNumWordsCovered();
 
   new_state->m_words = new_words.GetSubString(Range(ctx_start_idx,

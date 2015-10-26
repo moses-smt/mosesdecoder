@@ -448,9 +448,8 @@ HReorderingForwardState(const HReorderingForwardState *prev,
   : LRState(prev, topt)
   , m_first(false)
   , m_prevRange(topt.GetSourceWordsRange())
-  , m_coverage(prev->m_coverage)
+  , m_coverage(prev->m_coverage, topt.GetSourceWordsRange())
 {
-  m_coverage.SetValue(topt.GetSourceWordsRange(), true);
 }
 
 size_t HReorderingForwardState::hash() const
@@ -494,8 +493,7 @@ Expand(TranslationOption const& topt, InputType const& input,
 {
   const Range cur = topt.GetSourceWordsRange();
   // keep track of the current coverage ourselves so we don't need the hypothesis
-  Bitmap cov = m_coverage;
-  cov.SetValue(cur, true);
+  Bitmap cov(m_coverage, cur);
   if (!m_first) {
     LRModel::ReorderingType reoType;
     reoType = m_configuration.GetOrientation(m_prevRange,cur,cov);

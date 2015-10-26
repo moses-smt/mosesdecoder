@@ -53,6 +53,7 @@ class Bitmap
 private:
   std::vector<char> m_bitmap; //! Ticks of words in sentence that have been done.
   size_t m_firstGap; //! Cached position of first gap, or NOT_FOUND.
+  size_t m_numWordsCovered;
 
   Bitmap(); // not implemented
   Bitmap& operator= (const Bitmap& other);
@@ -79,37 +80,35 @@ private:
     }
   }
 
+  //! set value between 2 positions, inclusive
+  void
+  SetValueNonOverlap(Range const& range) {
+    size_t startPos = range.GetStartPos();
+    size_t endPos = range.GetEndPos();
+
+    for(size_t pos = startPos ; pos <= endPos ; pos++) {
+      m_bitmap[pos] = true;
+    }
+
+    m_numWordsCovered += range.GetNumWordsCovered();
+    UpdateFirstGap(startPos, endPos, true);
+  }
 
 public:
   //! Create Bitmap of length size, and initialise with vector.
-  Bitmap(size_t size, const std::vector<bool>& initializer)
-    :m_bitmap(initializer.begin(), initializer.end()), m_firstGap(0) {
-
-    // The initializer may not be of the same length.  Change to the desired
-    // length.  If we need to add any elements, initialize them to false.
-    m_bitmap.resize(size, false);
-
-    // Find the first gap, and cache it.
-    std::vector<char>::const_iterator first_gap = std::find(
-          m_bitmap.begin(), m_bitmap.end(), false);
-    m_firstGap = (
-                   (first_gap == m_bitmap.end()) ?
-                   NOT_FOUND : first_gap - m_bitmap.begin());
-  }
+  explicit Bitmap(size_t size, const std::vector<bool>& initializer);
 
   //! Create Bitmap of length size and initialise.
-  Bitmap(size_t size)
-    :m_bitmap(size, false), m_firstGap(0) {
-  }
+  explicit Bitmap(size_t size);
 
   //! Deep copy.
-  Bitmap(const Bitmap &copy)
-    :m_bitmap(copy.m_bitmap), m_firstGap(copy.m_firstGap) {
-  }
+  explicit Bitmap(const Bitmap &copy);
+
+  explicit Bitmap(const Bitmap &copy, const Range &range);
 
   //! Count of words translated.
   size_t GetNumWordsCovered() const {
-    return std::count(m_bitmap.begin(), m_bitmap.end(), true);
+    return m_numWordsCovered;
   }
 
   //! position of 1st word not yet translated, or NOT_FOUND if everything already translated
@@ -141,29 +140,24 @@ public:
     return NOT_FOUND;
   }
 
-  bool IsAdjacent(size_t startPos, size_t endPos) const;
-
   //! whether a word has been translated at a particular position
   bool GetValue(size_t pos) const {
     return bool(m_bitmap[pos]);
   }
   //! set value at a particular position
   void SetValue( size_t pos, bool value ) {
-    m_bitmap[pos] = value;
-    UpdateFirstGap(pos, pos, value);
-  }
-  //! set value between 2 positions, inclusive
-  void
-  SetValue( size_t startPos, size_t endPos, bool value ) {
-    for(size_t pos = startPos ; pos <= endPos ; pos++) {
+    bool origValue = m_bitmap[pos];
+    if (origValue == value) {
+      // do nothing
+    } else {
       m_bitmap[pos] = value;
+      UpdateFirstGap(pos, pos, value);
+      if (value) {
+        ++m_numWordsCovered;
+      } else {
+        --m_numWordsCovered;
+      }
     }
-    UpdateFirstGap(startPos, endPos, value);
-  }
-
-  void
-  SetValue(Range const& range, bool val) {
-    SetValue(range.GetStartPos(), range.GetEndPos(), val);
   }
 
   //! whether every word has been translated

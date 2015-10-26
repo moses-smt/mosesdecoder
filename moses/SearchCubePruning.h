@@ -18,8 +18,6 @@ class TranslationOptionCollection;
 class SearchCubePruning: public Search
 {
 protected:
-  const InputType &m_source;
-  Bitmap m_initBitmap;
   std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */
   // no of elements = no of words in source + 1
   const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
