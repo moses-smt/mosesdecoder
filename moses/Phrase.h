@@ -52,6 +52,19 @@ protected:
   std::vector<Word>			m_words;
 
 public:
+
+  /// return shared pointer to ttask
+  //  only TargetPhrases have non-NULL ttaskptrs!
+  virtual ttasksptr GetTtask() const {
+    return ttasksptr(); 
+  }
+
+  /// check if this phrase belongs to a valid ttask
+  //  only TargetPhrases have non-NULL ttaskptrs!
+  virtual bool HasTtaskSPtr() const {
+    return false;
+  }
+
   /** No longer does anything as not using mem pool for Phrase class anymore */
   static void InitializeMemPool();
   static void FinalizeMemPool();

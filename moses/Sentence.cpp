@@ -122,8 +122,9 @@ aux_interpret_dlt(string& line) // whatever DLT means ... --- UG
 {
   using namespace std;
   typedef map<string, string> str2str_map;
-  vector<str2str_map> meta = ProcessAndStripDLT(line);
-  BOOST_FOREACH(str2str_map const& M, meta) {
+  m_dlt_meta = ProcessAndStripDLT(line);
+  // what's happening below is most likely not thread-safe! UG
+  BOOST_FOREACH(str2str_map const& M, m_dlt_meta) {
     str2str_map::const_iterator i,j;
     if ((i = M.find("type")) != M.end()) {
       j = M.find("id");

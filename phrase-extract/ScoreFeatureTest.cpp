@@ -83,6 +83,7 @@ static void checkDomainConfigured(
   BOOST_CHECK(manager.includeSentenceId());
 }
 
+/*
 template<typename T>
 T adder(T v)
 {
@@ -94,6 +95,7 @@ T adder(T first, Args... args)
 {
   return first + adder(args...);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(manager_config_domain)
 {
