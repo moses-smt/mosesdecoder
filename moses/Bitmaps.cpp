@@ -22,8 +22,7 @@ Bitmaps::~Bitmaps()
 
 const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
 {
-  Bitmap *newBM = new Bitmap(bm);
-  newBM->SetValue(range, true);
+  Bitmap *newBM = new Bitmap(bm, range);
 
   Coll::const_iterator iter = m_coll.find(newBM);
   if (iter == m_coll.end()) {

@@ -202,7 +202,7 @@ public:
 class BitmapContainer
 {
 private:
-  const Bitmap m_bitmap;
+  const Bitmap &m_bitmap;
   HypothesisStackCubePruning &m_stack;
   HypothesisSet m_hypotheses;
   BackwardsEdgeSet m_edges;

@@ -37,7 +37,7 @@ class BitmapContainer;
 class TranslationOptionList;
 class Manager;
 
-typedef boost::unordered_map<Bitmap, BitmapContainer*, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > _BMType;
+typedef boost::unordered_map<const Bitmap*, BitmapContainer*, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > _BMType;
 
 /** A stack for phrase-based decoding with cube-pruning. */
 class HypothesisStackCubePruning : public HypothesisStack

@@ -18,11 +18,9 @@ namespace Moses
 SearchNormal::
 SearchNormal(Manager& manager, const InputType &source,
              const TranslationOptionCollection &transOptColl)
-  : Search(manager)
-  , m_source(source)
+  : Search(manager, source)
   , m_hypoStackColl(source.GetSize() + 1)
   , m_transOptColl(transOptColl)
-  , m_bitmaps(source.GetSize(), source.m_sourceCompleted)
 {
   VERBOSE(1, "Translating: " << m_source << endl);
 
@@ -87,8 +85,8 @@ void SearchNormal::Decode()
   // SentenceStats &stats = m_manager.GetSentenceStats();
 
   // initial seed hypothesis: nothing translated, no words produced
-  const Bitmap &bitmap = m_bitmaps.GetInitialBitmap();
-  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, bitmap);
+  const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap);
 
   m_hypoStackColl[0]->AddPrune(hypo);
 

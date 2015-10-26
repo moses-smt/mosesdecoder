@@ -47,9 +47,7 @@ public:
 SearchCubePruning::
 SearchCubePruning(Manager& manager, const InputType &source,
                   const TranslationOptionCollection &transOptColl)
-  : Search(manager)
-  , m_source(source)
-  , m_initBitmap(source.GetSize())
+  : Search(manager, source)
   , m_hypoStackColl(source.GetSize() + 1)
   , m_transOptColl(transOptColl)
 {
@@ -75,7 +73,8 @@ SearchCubePruning::~SearchCubePruning()
 void SearchCubePruning::Decode()
 {
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, m_initBitmap);
+  const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap);
 
   HypothesisStackCubePruning &firstStack
   = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
@@ -182,7 +181,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
   stack.AddHypothesesToBitmapContainers();
 
   for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor) {
-    const Bitmap &bitmap = iterAccessor->first;
+    const Bitmap &bitmap = *iterAccessor->first;
     BitmapContainer &bitmapContainer = *iterAccessor->second;
 
     if (bitmapContainer.GetHypothesesSize() == 0) {
@@ -228,8 +227,7 @@ SearchCubePruning::
 CreateForwardTodos(Bitmap const& bitmap, Range const& range,
                    BitmapContainer& bitmapContainer)
 {
-  Bitmap newBitmap = bitmap;
-  newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
+  const Bitmap &newBitmap = m_bitmaps.GetBitmap(bitmap, range);
 
   size_t numCovered = newBitmap.GetNumWordsCovered();
   const TranslationOptionList* transOptList;

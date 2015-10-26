@@ -27,12 +27,11 @@ namespace Moses
 
 TO_STRING_BODY(Bitmap);
 
-bool Bitmap::IsAdjacent(size_t startPos, size_t endPos) const
+Bitmap::Bitmap(const Bitmap &copy, const Range &range)
+:m_bitmap(copy.m_bitmap)
+,m_firstGap(copy.m_firstGap)
 {
-  return
-    GetNumWordsCovered() == 0 ||
-    startPos == GetFirstGapPos() ||
-    endPos == GetLastGapPos();
+	SetValue(range, true);
 }
 
 // for unordered_set in stack

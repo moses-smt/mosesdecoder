@@ -1,17 +1,20 @@
 #include "Manager.h"
 #include "SearchCubePruning.h"
 #include "SearchNormal.h"
+#include "InputType.h"
 #include "util/exception.hh"
 
 namespace Moses
 {
 
-Search::Search(Manager& manager)
+Search::Search(Manager& manager, const InputType &source)
   : m_manager(manager)
+  , m_source(source)
   , m_inputPath()
   , m_initialTransOpt()
   , m_options(manager.options())
   , interrupted_flag(0)
+  , m_bitmaps(source.GetSize(), source.m_sourceCompleted)
 {
   m_initialTransOpt.SetInputPath(m_inputPath);
 }
