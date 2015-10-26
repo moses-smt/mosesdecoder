@@ -19,3 +19,8 @@ InputPath::~InputPath() {
 	// TODO Auto-generated destructor stub
 }
 
+void InputPath::AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *pts)
+{
+	size_t ptInd = pt.GetPtInd();
+	m_targetPhrases[ptInd] = tps;
+}

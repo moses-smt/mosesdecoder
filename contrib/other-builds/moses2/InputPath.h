@@ -27,6 +27,8 @@ public:
 	const std::vector<const TargetPhrases*> &GetTargetPhrases() const
 	{ return m_targetPhrases; }
 
+	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *pts);
+
 protected:
 	SubPhrase m_subPhrase;
 	Moses::Range m_range;
