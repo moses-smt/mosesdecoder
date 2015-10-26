@@ -90,7 +90,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	Hypothesis *newHypo = new (m_mgr.GetPool().Allocate<Hypothesis>()) Hypothesis(hypo, tp, pathRange, newBitmap);
 
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
-	m_stacks[numWordsCovered].Add(newHypo);
+	StackAdd stackAdded = m_stacks[numWordsCovered].Add(newHypo);
 }
 
 void SearchNormal::DebugStacks() const

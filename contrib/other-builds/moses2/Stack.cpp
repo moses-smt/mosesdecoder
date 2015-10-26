@@ -6,6 +6,8 @@
  */
 
 #include "Stack.h"
+#include "Hypothesis.h"
+#include "Scores.h"
 
 Stack::Stack() {
 	// TODO Auto-generated constructor stub
@@ -16,9 +18,24 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-bool Stack::Add(Hypothesis *hypo)
+StackAdd Stack::Add(const Hypothesis *hypo)
 {
-  std::pair<iterator, bool> ret = m_hypos.insert(hypo);
-  return ret.second;
+  std::pair<iterator, bool> addRet = m_hypos.insert(hypo);
+  if (addRet.second) {
+    // equiv hypo doesn't exists
+	return StackAdd(true, NULL);
+  }
+  else {
+	  const Hypothesis *hypoExisting = *addRet.first;
+	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
+		  // incoming hypo is better than the one we have
+		  m_hypos.erase(addRet.first);
+		  return StackAdd(true, hypoExisting);
+	  }
+	  else {
+		  // already storing the best hypo. discard incoming hypo
+		  return StackAdd(false, hypo);
+	  }
+  }
 }
 

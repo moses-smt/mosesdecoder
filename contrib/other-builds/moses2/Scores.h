@@ -21,6 +21,9 @@ public:
   Scores(util::Pool &pool, size_t numScores, const Scores &origScores);
   virtual ~Scores();
 
+  SCORE GetTotalScore() const
+  { return m_total; }
+
   void CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const System &system);
 
   void PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const System &system);
