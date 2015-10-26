@@ -9,6 +9,7 @@
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "System.h"
+#include "Scores.h"
 
 Hypothesis::Hypothesis(Manager &mgr,
 		const TargetPhrase &tp,
@@ -21,8 +22,11 @@ Hypothesis::Hypothesis(Manager &mgr,
 ,m_prevHypo(NULL)
 {
 	util::Pool &pool = m_mgr.GetPool();
+
 	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
+
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetNumScores());
 }
 
 Hypothesis::Hypothesis(const Hypothesis &prevHypo,
@@ -38,6 +42,9 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 	util::Pool &pool = m_mgr.GetPool();
 	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
+
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetNumScores(), prevHypo.GetScores());
+	m_scores->PlusEquals(m_targetPhrase.GetScores(), m_mgr.GetSystem());
 }
 
 Hypothesis::~Hypothesis() {
@@ -81,6 +88,15 @@ bool Hypothesis::operator==(const Hypothesis &other) const
   }
   return true;
 
+}
+
+void Hypothesis::OutputToStream(std::ostream &out) const
+{
+  if (m_prevHypo) {
+	  m_prevHypo->OutputToStream(out);
+	  out << " ";
+  }
+  out << (const Phrase&) m_targetPhrase;
 }
 
 std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)

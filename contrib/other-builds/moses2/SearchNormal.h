@@ -25,6 +25,7 @@ public:
 
 	void Decode(size_t stackInd);
 
+	const Hypothesis *GetBestHypothesis() const;
 
 protected:
 	Manager &m_mgr;

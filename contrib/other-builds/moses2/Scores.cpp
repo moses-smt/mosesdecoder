@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <cstddef>
+#include <stdio.h>
 #include "Scores.h"
 #include "FeatureFunction.h"
 #include "Util.h"
@@ -23,8 +24,15 @@ Scores::Scores(util::Pool &pool, size_t numScores)
 	Init<SCORE>(m_scores, numScores, 0);
 }
 
+Scores::Scores(util::Pool &pool, size_t numScores, const Scores &origScores)
+:m_total(origScores.m_total)
+{
+	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
+	memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
+}
+
 Scores::~Scores() {
-	delete m_scores;
+
 }
 
 void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const System &system)
@@ -41,6 +49,16 @@ void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction 
 		SCORE weight = weights[ffStartInd + i];
 		m_total += incrScore * weight;
 	}
+}
+
+void Scores::PlusEquals(const Scores &scores, const System &system)
+{
+	size_t numScores = system.GetNumScores();
+	for (size_t i = 0; i < numScores; ++i) {
+		m_scores[i] = scores.m_scores[i];
+	}
+	m_total += scores.m_total;
+
 }
 
 void Scores::CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const System &system)

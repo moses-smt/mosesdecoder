@@ -17,6 +17,9 @@ int main(int argc, char** argv)
 
 		Manager mgr(system, line);
 		mgr.Decode();
+
+		const Hypothesis *bestHypo = mgr.GetBestHypothesis();
+		bestHypo->OutputToStream(cout);
 	}
 
 	cerr << "Finished" << endl;

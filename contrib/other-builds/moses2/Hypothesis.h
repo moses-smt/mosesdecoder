@@ -8,12 +8,14 @@
 #ifndef HYPOTHESIS_H_
 #define HYPOTHESIS_H_
 
+#include <iostream>
 #include <cstddef>
 #include "moses/FF/FFState.h"
 #include "moses/Bitmap.h"
 
 class Manager;
 class TargetPhrase;
+class Scores;
 
 class Hypothesis {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
@@ -37,6 +39,11 @@ public:
   const Moses::Range &GetRange() const
   { return m_range; }
 
+  const Scores &GetScores() const
+  { return *m_scores; }
+
+  void OutputToStream(std::ostream &out) const;
+
 protected:
   Manager &m_mgr;
   const TargetPhrase &m_targetPhrase;
@@ -45,6 +52,7 @@ protected:
   const Hypothesis *m_prevHypo;
 
   Moses::FFState **m_ffStates;
+  Scores *m_scores;
 };
 
 #endif /* HYPOTHESIS_H_ */

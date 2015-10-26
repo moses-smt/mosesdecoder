@@ -100,3 +100,17 @@ void SearchNormal::DebugStacks() const
 	  }
 	  cerr << endl;
 }
+
+const Hypothesis *SearchNormal::GetBestHypothesis() const
+{
+	const Stack &lastStack = m_stacks.back();
+	std::vector<const Hypothesis*> hypos(lastStack.begin(), lastStack.end());
+
+	//sort
+
+
+	const Hypothesis *best = hypos[0];
+	return best;
+}
+
+

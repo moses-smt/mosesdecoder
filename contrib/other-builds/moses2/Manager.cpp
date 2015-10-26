@@ -34,6 +34,16 @@ Manager::Manager(System &system, const std::string &inputStr)
 	m_search = new SearchNormal(*this, m_stacks);
 }
 
+Manager::~Manager() {
+	delete m_bitmaps;
+	delete m_search;
+}
+
+const Hypothesis *Manager::GetBestHypothesis() const
+{
+	return m_search->GetBestHypothesis();
+}
+
 void Manager::Decode()
 {
 	const Moses::Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
@@ -44,9 +54,3 @@ void Manager::Decode()
 		m_search->Decode(i);
 	}
 }
-
-Manager::~Manager() {
-	delete m_bitmaps;
-	delete m_search;
-}
-

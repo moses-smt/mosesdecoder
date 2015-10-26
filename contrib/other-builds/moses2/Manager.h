@@ -37,6 +37,8 @@ public:
 	const InputPaths &GetInputPaths() const
 	{ return m_inputPaths; }
 
+	const Hypothesis *GetBestHypothesis() const;
+
 	void Decode();
 protected:
 	util::Pool &m_pool;
