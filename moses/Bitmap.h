@@ -83,15 +83,15 @@ private:
   //! set value between 2 positions, inclusive
   void
   SetValueNonOverlap(Range const& range) {
-	  size_t startPos = range.GetStartPos();
-	  size_t endPos = range.GetEndPos();
+    size_t startPos = range.GetStartPos();
+    size_t endPos = range.GetEndPos();
 
-	  for(size_t pos = startPos ; pos <= endPos ; pos++) {
-	      m_bitmap[pos] = true;
-	  }
+    for(size_t pos = startPos ; pos <= endPos ; pos++) {
+      m_bitmap[pos] = true;
+    }
 
-	  m_numWordsCovered += range.GetNumWordsCovered();
-	  UpdateFirstGap(startPos, endPos, true);
+    m_numWordsCovered += range.GetNumWordsCovered();
+    UpdateFirstGap(startPos, endPos, true);
   }
 
 public:
@@ -148,17 +148,15 @@ public:
   void SetValue( size_t pos, bool value ) {
     bool origValue = m_bitmap[pos];
     if (origValue == value) {
-    	// do nothing
-    }
-    else {
-		m_bitmap[pos] = value;
-		UpdateFirstGap(pos, pos, value);
-		if (value) {
-			++m_numWordsCovered;
-		}
-		else {
-			--m_numWordsCovered;
-		}
+      // do nothing
+    } else {
+      m_bitmap[pos] = value;
+      UpdateFirstGap(pos, pos, value);
+      if (value) {
+        ++m_numWordsCovered;
+      } else {
+        --m_numWordsCovered;
+      }
     }
   }
 

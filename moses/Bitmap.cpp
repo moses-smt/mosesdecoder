@@ -48,8 +48,8 @@ Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer)
 //! Create Bitmap of length size and initialise.
 Bitmap::Bitmap(size_t size)
   :m_bitmap(size, false)
-   ,m_firstGap(0)
-   ,m_numWordsCovered(0)
+  ,m_firstGap(0)
+  ,m_numWordsCovered(0)
 
 {
 }
@@ -63,11 +63,11 @@ Bitmap::Bitmap(const Bitmap &copy)
 }
 
 Bitmap::Bitmap(const Bitmap &copy, const Range &range)
-:m_bitmap(copy.m_bitmap)
-,m_firstGap(copy.m_firstGap)
-,m_numWordsCovered(copy.m_numWordsCovered)
+  :m_bitmap(copy.m_bitmap)
+  ,m_firstGap(copy.m_firstGap)
+  ,m_numWordsCovered(copy.m_numWordsCovered)
 {
-	SetValueNonOverlap(range);
+  SetValueNonOverlap(range);
 }
 
 // for unordered_set in stack
