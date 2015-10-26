@@ -33,6 +33,11 @@ public:
       return false;
     } else {
       // Equal scores: break ties by comparing target phrases (if they exist)
+      // *Important*: these are pointers to copies of the target phrases from the
+      // hypotheses.  This class is used to keep priority queues ordered in the
+      // background, so comparisons made as those data structures are cleaned up
+      // may occur *after* the target phrases in hypotheses have been cleaned up,
+      // leading to segfaults if relying on hypotheses to provide target phrases.
       boost::shared_ptr<TargetPhrase> phrA = A->Top()->GetTargetPhrase();
       boost::shared_ptr<TargetPhrase> phrB = B->Top()->GetTargetPhrase();
       if (!phrA || !phrB) {

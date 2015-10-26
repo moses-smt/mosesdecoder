@@ -51,9 +51,14 @@ public:
 
 class HypothesisScoreOrdererWithDistortion
 {
+private:
+  bool m_deterministic;
+
 public:
-  HypothesisScoreOrdererWithDistortion(const Range* transOptRange) :
-    m_transOptRange(transOptRange) {
+  HypothesisScoreOrdererWithDistortion(const Range* transOptRange,
+                                       const bool deterministic = false)
+    : m_transOptRange(transOptRange)
+    , m_deterministic(deterministic) {
     m_totalWeightDistortion = 0;
     const StaticData &staticData = StaticData::Instance();
 
@@ -97,6 +102,11 @@ public:
     } else if (scoreA < scoreB) {
       return false;
     } else {
+      if (m_deterministic) {
+        // Equal scores: break ties by comparing target phrases
+        return (hypoA->GetCurrTargetPhrase().Compare(hypoB->GetCurrTargetPhrase()) < 0);
+      }
+      // Fallback: non-deterministic sort
       return hypoA < hypoB;
     }
   }
@@ -111,13 +121,15 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
                              , BitmapContainer &parent
                              , const TranslationOptionList &translations
                              , const SquareMatrix &futureScores,
-                             const InputType& itype)
+                             const InputType& itype,
+                             const bool deterministic)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
   , m_translations(translations)
   , m_futureScores(futureScores)
   , m_seenPosition()
+  , m_deterministic(deterministic)
 {
 
   // If either dimension is empty, we haven't got anything to do.
@@ -174,7 +186,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
                    << m_hypotheses[1]->GetTotalScore());
   }
 
-  HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
+  HypothesisScoreOrdererWithDistortion orderer (&transOptRange, m_deterministic);
   std::sort(m_hypotheses.begin(), m_hypotheses.end(), orderer);
 
   // std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererNoDistortion());
@@ -478,7 +490,7 @@ BitmapContainer::ProcessBestHypothesis()
 void
 BitmapContainer::SortHypotheses()
 {
-  std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrderer());
+  std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrderer(m_deterministic));
 }
 
 }
