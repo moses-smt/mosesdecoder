@@ -112,7 +112,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
   // int maxDistortion  = StaticData::Instance().GetMaxDistortion();
   bool isWordLattice = m_source.GetType() == WordLatticeInput;
 
-  const Bitmap hypoBitmap = hypothesis.GetWordsBitmap();
+  const Bitmap &hypoBitmap = hypothesis.GetWordsBitmap();
   const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
   size_t const sourceSize = m_source.GetSize();
 

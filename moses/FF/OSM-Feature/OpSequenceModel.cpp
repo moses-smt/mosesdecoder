@@ -94,7 +94,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
 {
   const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
   const Bitmap &bitmap = cur_hypo.GetWordsBitmap();
-  Bitmap myBitmap = bitmap;
+  Bitmap myBitmap(bitmap);
   const Manager &manager = cur_hypo.GetManager();
   const InputType &source = manager.GetSource();
   // const Sentence &sourceSentence = static_cast<const Sentence&>(source);
