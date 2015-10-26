@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // $Id$
 
 /***********************************************************************
@@ -91,7 +92,9 @@ public:
   void Load();
   const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
+protected:
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
+public:
 
   virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
