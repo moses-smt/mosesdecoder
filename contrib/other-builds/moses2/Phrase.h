@@ -64,6 +64,6 @@ public:
   { return m_end - m_start + 1; }
 
 protected:
-  size_t m_start, m_end;
   const Phrase &m_origPhrase;
+  size_t m_start, m_end;
 };
