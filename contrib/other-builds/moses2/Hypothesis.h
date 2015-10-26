@@ -32,7 +32,7 @@ public:
   bool operator==(const Hypothesis &other) const;
 
   const Moses::Bitmap &GetBitmap() const
-  { return m_bitmap; }
+  { return m_sourceCompleted; }
 
   const Moses::Range &GetRange() const
   { return m_range; }
@@ -40,7 +40,7 @@ public:
 protected:
   Manager &m_mgr;
   const TargetPhrase &m_targetPhrase;
-  const Moses::Bitmap &m_bitmap;
+  const Moses::Bitmap &m_sourceCompleted;
   const Moses::Range &m_range;
   const Hypothesis *m_prevHypo;
 

@@ -13,6 +13,8 @@
 #include "TargetPhrases.h"
 #include "TargetPhrase.h"
 
+using namespace std;
+
 SearchNormal::SearchNormal(Manager &mgr, std::vector<Stack> &stacks)
 :m_mgr(mgr)
 ,m_stacks(stacks)
@@ -27,11 +29,12 @@ SearchNormal::~SearchNormal() {
 
 void SearchNormal::Decode(size_t stackInd)
 {
-	Stack &stack = m_stacks[stackInd];
+  Stack &stack = m_stacks[stackInd];
 
   BOOST_FOREACH(const Hypothesis *hypo, stack) {
 		Extend(*hypo);
   }
+  DebugStacks();
 }
 
 void SearchNormal::Extend(const Hypothesis &hypo)
@@ -85,4 +88,15 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 		const Moses::Bitmap &newBitmap)
 {
 	Hypothesis *newHypo = new (m_mgr.GetPool().Allocate<Hypothesis>()) Hypothesis(hypo, tp, pathRange, newBitmap);
+
+	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
+	m_stacks[numWordsCovered].Add(newHypo);
+}
+
+void SearchNormal::DebugStacks() const
+{
+	  BOOST_FOREACH(const Stack &stack, m_stacks) {
+		  cerr << stack.GetSize() << " ";
+	  }
+	  cerr << endl;
 }

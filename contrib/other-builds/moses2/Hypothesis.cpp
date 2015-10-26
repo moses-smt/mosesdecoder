@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <stdlib.h>
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "System.h"
@@ -15,12 +16,12 @@ Hypothesis::Hypothesis(Manager &mgr,
 		const Moses::Bitmap &bitmap)
 :m_mgr(mgr)
 ,m_targetPhrase(tp)
-,m_bitmap(bitmap)
+,m_sourceCompleted(bitmap)
 ,m_range(range)
 ,m_prevHypo(NULL)
 {
-	util::Pool &pool = mgr.GetPool();
-	size_t numStatefulFFs = mgr.GetSystem().GetStatefulFeatureFunctions().size();
+	util::Pool &pool = m_mgr.GetPool();
+	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 }
 
@@ -30,11 +31,13 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 		const Moses::Bitmap &bitmap)
 :m_mgr(prevHypo.m_mgr)
 ,m_targetPhrase(tp)
-,m_bitmap(bitmap)
+,m_sourceCompleted(bitmap)
 ,m_range(pathRange)
 ,m_prevHypo(&prevHypo)
 {
-
+	util::Pool &pool = m_mgr.GetPool();
+	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
+	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 }
 
 Hypothesis::~Hypothesis() {
@@ -47,7 +50,8 @@ size_t Hypothesis::hash() const
   size_t seed;
 
   // coverage
-  //seed = m_sourceCompleted.hash();
+  seed = m_sourceCompleted.hash();
+  seed = rand();
 
   // states
   for (size_t i = 0; i < numStatefulFFs; ++i) {
@@ -63,9 +67,9 @@ bool Hypothesis::operator==(const Hypothesis &other) const
 {
 	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
   // coverage
-//  if (m_sourceCompleted != other.m_sourceCompleted) {
-//	return false;
-// }
+  if (m_sourceCompleted != other.m_sourceCompleted) {
+	return false;
+ }
 
   // states
   for (size_t i = 0; i < numStatefulFFs; ++i) {

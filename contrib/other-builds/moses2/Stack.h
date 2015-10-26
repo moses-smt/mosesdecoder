@@ -29,6 +29,9 @@ public:
 	Stack();
 	virtual ~Stack();
 
+	size_t GetSize() const
+	{ return m_hypos.size(); }
+
 	bool Add(Hypothesis *hypo);
 };
 

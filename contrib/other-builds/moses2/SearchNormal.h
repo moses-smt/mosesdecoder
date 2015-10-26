@@ -25,6 +25,7 @@ public:
 
 	void Decode(size_t stackInd);
 
+
 protected:
 	Manager &m_mgr;
 	std::vector<Stack> &m_stacks;
@@ -39,6 +40,8 @@ protected:
 			const TargetPhrase &tp,
 			const Moses::Range &pathRange,
 			const Moses::Bitmap &newBitmap);
+
+	void DebugStacks() const;
 };
 
 #endif /* SEARCHNORMAL_H_ */

@@ -29,7 +29,7 @@ Manager::Manager(System &system, const std::string &inputStr)
 		pt.Lookups(m_inputPaths);
 	}
 
-	m_stacks.resize(m_input->GetSize());
+	m_stacks.resize(m_input->GetSize() + 1);
 	m_bitmaps = new Moses::Bitmaps(m_input->GetSize(), vector<bool>(0));
 	m_search = new SearchNormal(*this, m_stacks);
 }
@@ -37,7 +37,8 @@ Manager::Manager(System &system, const std::string &inputStr)
 void Manager::Decode()
 {
 	const Moses::Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
-	Hypothesis *iniHypo = new (GetPool().Allocate<Hypothesis>()) Hypothesis(*this, m_initPhrase, m_initRange, initBitmap);
+	Hypothesis *initHypo = new (GetPool().Allocate<Hypothesis>()) Hypothesis(*this, m_initPhrase, m_initRange, initBitmap);
+	m_stacks[0].Add(initHypo);
 
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
 		m_search->Decode(i);
