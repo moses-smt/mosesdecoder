@@ -7,18 +7,22 @@
 
 #pragma once
 
-#include "Factor.h"
 #include "TypeDef.h"
+#include "moses/Factor.h"
+#include "moses/FactorCollection.h"
 
 class Word {
 public:
   Word();
   virtual ~Word();
 
+  void CreateFromString(Moses::FactorCollection &vocab, const std::string &str);
+
   size_t hash() const;
   bool operator==(const Word &compare) const;
 
 protected:
-  Factor *m_factors[MAX_NUM_FACTORS];
+  const Moses::Factor *m_factors[MAX_NUM_FACTORS];
+
 };
 

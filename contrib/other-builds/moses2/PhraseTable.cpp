@@ -79,6 +79,8 @@ void PhraseTable::Load(System &system)
 {
 	m_path = "/Users/hieu/workspace/experiment/issues/sample-models/phrase-model/phrase-table";
 
+	Moses::FactorCollection &vocab = system.GetVocab();
+
 	util::Pool tmpPool;
 	vector<string> toks;
 	Moses::InputFileStream strme(m_path);
@@ -88,7 +90,7 @@ void PhraseTable::Load(System &system)
 		Moses::TokenizeMultiCharSeparator(toks, line, "|||");
 		assert(toks.size() >= 3);
 
-		Phrase *source = Phrase::CreateFromString(tmpPool, toks[0]);
+		Phrase *source = Phrase::CreateFromString(tmpPool, vocab, toks[0]);
 		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetSystemPool(), system, toks[1]);
 		target->GetScores().CreateFromString(toks[2], *this, system);
 		m_root.AddRule(*source, target);

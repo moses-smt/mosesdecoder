@@ -11,6 +11,7 @@
 #include <string>
 #include "Word.h"
 #include "util/pool.hh"
+#include "moses/FactorCollection.h"
 
 class PhraseBase
 {
@@ -24,7 +25,7 @@ class SubPhrase;
 class Phrase : public PhraseBase
 {
 public:
-  static Phrase *CreateFromString(util::Pool &pool, const std::string &str);
+  static Phrase *CreateFromString(util::Pool &pool, Moses::FactorCollection &vocab, const std::string &str);
 
   Phrase(util::Pool &pool, size_t size);
   virtual ~Phrase();
@@ -45,7 +46,7 @@ protected:
   size_t m_size;
   Word *m_words;
 
-  void CreateFromString(const std::vector<std::string> &toks);
+  void CreateFromString(Moses::FactorCollection &vocab, const std::vector<std::string> &toks);
 
 };
 

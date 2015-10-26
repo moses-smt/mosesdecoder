@@ -7,13 +7,12 @@
 #include <vector>
 #include "Phrase.h"
 #include "Word.h"
-#include "Vocab.h"
 #include "moses/Util.h"
 #include "util/pool.hh"
 
 using namespace std;
 
-Phrase *Phrase::CreateFromString(util::Pool &pool, const std::string &str)
+Phrase *Phrase::CreateFromString(util::Pool &pool, Moses::FactorCollection &vocab, const std::string &str)
 {
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
@@ -21,14 +20,15 @@ Phrase *Phrase::CreateFromString(util::Pool &pool, const std::string &str)
 
 	ret = new (pool.Allocate<Phrase>()) Phrase(pool, size);
 
-	ret->CreateFromString(toks);
+	ret->CreateFromString(vocab, toks);
 	return ret;
 }
 
-void Phrase::CreateFromString(const std::vector<std::string> &toks)
+void Phrase::CreateFromString(Moses::FactorCollection &vocab, const std::vector<std::string> &toks)
 {
 	for (size_t i = 0; i < m_size; ++i) {
 		Word &word = (*this)[i];
+		word.CreateFromString(vocab, toks[i]);
 	}
 }
 

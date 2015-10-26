@@ -16,10 +16,12 @@ using namespace std;
 
 TargetPhrase *TargetPhrase::CreateFromString(util::Pool &pool, System &system, const std::string &str)
 {
+	Moses::FactorCollection &vocab = system.GetVocab();
+
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
 	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, size);
-	ret->Phrase::CreateFromString(toks);
+	ret->Phrase::CreateFromString(vocab, toks);
 
 	return ret;
 }

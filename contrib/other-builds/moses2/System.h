@@ -7,7 +7,6 @@
 
 #pragma once
 #include <vector>
-#include "Vocab.h"
 #include "Weights.h"
 #include "util/pool.hh"
 #include "moses/FactorCollection.h"
@@ -39,9 +38,11 @@ public:
 	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
 	{ return m_statefulFeatureFunctions; }
 
+	Moses::FactorCollection &GetVocab() const
+	{ return m_vocab; }
+
 protected:
-  Vocab m_vocab;
-  Moses::FactorCollection m_factors;
+  mutable Moses::FactorCollection m_vocab;
   std::vector<const FeatureFunction*> m_featureFunctions;
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
   std::vector<const PhraseTable*> m_phraseTables;

@@ -5,7 +5,6 @@ import option ;
 import path ;
 
  exe moses2 :
-    Factor.cpp 
    FeatureFunction.cpp 
    Hypothesis.cpp 
  	 InputPath.cpp 
@@ -22,7 +21,6 @@ import path ;
  	 System.cpp 
    TargetPhrase.cpp 
    TargetPhrases.cpp 
-	Vocab.cpp 
 	Weights.cpp 
 	Word.cpp 
     	 
