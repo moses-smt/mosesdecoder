@@ -10,6 +10,7 @@
 #include "Vocab.h"
 #include "Weights.h"
 #include "util/pool.hh"
+#include "moses/FactorCollection.h"
 
 class FeatureFunction;
 class StatefulFeatureFunction;
@@ -40,6 +41,7 @@ public:
 
 protected:
   Vocab m_vocab;
+  Moses::FactorCollection m_factors;
   std::vector<const FeatureFunction*> m_featureFunctions;
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
   std::vector<const PhraseTable*> m_phraseTables;
