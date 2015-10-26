@@ -288,19 +288,19 @@ HypothesisStackCubePruning::AddHypothesesToBitmapContainers()
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *h = *iter;
     const Bitmap &bitmap = h->GetWordsBitmap();
-    BitmapContainer *container = m_bitmapAccessor[&bitmap];
+    BitmapContainer *container = m_bitmapAccessor[bitmap];
     container->AddHypothesis(h);
   }
 }
 
 BitmapContainer *HypothesisStackCubePruning::AddBitmapContainer(const Bitmap &bitmap, HypothesisStackCubePruning &stack)
 {
-  _BMType::iterator iter = m_bitmapAccessor.find(&bitmap);
+  _BMType::iterator iter = m_bitmapAccessor.find(bitmap);
 
   BitmapContainer *bmContainer;
   if (iter == m_bitmapAccessor.end()) {
     bmContainer = new BitmapContainer(bitmap, stack, m_deterministic);
-    m_bitmapAccessor[&bitmap] = bmContainer;
+    m_bitmapAccessor[bitmap] = bmContainer;
   } else {
     bmContainer = iter->second;
   }
