@@ -65,8 +65,9 @@ public:
 
   virtual LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
+protected:
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const = 0;
-
+public:
   std::string DebugContextFactor(const std::vector<const Word*> &contextFactor) const;
 };
 
