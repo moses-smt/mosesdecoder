@@ -22,9 +22,6 @@ public:
 	System(const Moses::Parameter &params);
 	virtual ~System();
 
-	size_t GetNumScores() const
-	{ return 55; }
-
 	const Weights &GetWeights() const
 	{ return m_weights; }
 

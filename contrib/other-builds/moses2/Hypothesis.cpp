@@ -26,7 +26,7 @@ Hypothesis::Hypothesis(Manager &mgr,
 	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 
-	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetNumScores());
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetFeatureFunctions().GetNumScores());
 }
 
 Hypothesis::Hypothesis(const Hypothesis &prevHypo,
@@ -43,7 +43,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 
-	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetNumScores(), prevHypo.GetScores());
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetFeatureFunctions().GetNumScores(), prevHypo.GetScores());
 	m_scores->PlusEquals(m_targetPhrase.GetScores(), m_mgr.GetSystem());
 }
 

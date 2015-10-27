@@ -27,7 +27,7 @@ public:
 	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
 	{ return m_statefulFeatureFunctions; }
 
-	size_t GetFFStartInd() const
+	size_t GetNumScores() const
 	{ return m_ffStartInd; }
 
     void LoadFeatureFunctions();

@@ -53,7 +53,7 @@ void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction 
 
 void Scores::PlusEquals(const Scores &scores, const System &system)
 {
-	size_t numScores = system.GetNumScores();
+	size_t numScores = system.GetFeatureFunctions().GetNumScores();
 	for (size_t i = 0; i < numScores; ++i) {
 		m_scores[i] = scores.m_scores[i];
 	}
