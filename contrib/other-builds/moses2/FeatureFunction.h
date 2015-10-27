@@ -25,10 +25,13 @@ public:
 	{ return m_startInd; }
 	size_t GetNumScores() const
 	{ return m_numScores; }
+	const std::string &GetName() const
+	{ return m_name; }
 
 protected:
 	size_t m_startInd;
 	size_t m_numScores;
+	std::string m_name;
 };
 
 #endif /* FEATUREFUNCTION_H_ */

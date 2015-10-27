@@ -85,3 +85,15 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 
 	m_ffStartInd += ret->GetNumScores();
 }
+
+const FeatureFunction &FeatureFunctions::FindFeatureFunction(const std::string &name)
+{
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+	  if (ff->GetName() == name) {
+		  return *ff;
+	  }
+  }
+  UTIL_THROW2(name << " not found");
+
+}
+

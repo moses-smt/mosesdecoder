@@ -31,7 +31,7 @@ void System::LoadWeights()
   UTIL_THROW_IF2(weightParams == NULL, "Must have [weight] section");
 
   BOOST_FOREACH(const std::string &line, *weightParams) {
-
+	  m_weights.CreateFromString(m_featureFunctions, line);
   }
 }
 

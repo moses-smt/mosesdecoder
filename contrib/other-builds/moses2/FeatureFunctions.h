@@ -9,6 +9,7 @@
 #define FEATUREFUNCTIONS_H_
 
 #include <vector>
+#include <string>
 #include "moses/Parameter.h"
 
 class System;
@@ -31,6 +32,8 @@ public:
 	{ return m_ffStartInd; }
 
     void LoadFeatureFunctions();
+
+    const FeatureFunction &FindFeatureFunction(const std::string &name);
 
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
