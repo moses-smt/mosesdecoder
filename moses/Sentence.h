@@ -61,7 +61,7 @@ protected:
   void ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders);
 
   // "Document Level Translation" instructions, see aux_interpret_dlt
-  std::vector<std::map<std::string,std::string> > m_dlt_meta; 
+  std::vector<std::map<std::string,std::string> > m_dlt_meta;
 
 public:
   Sentence();

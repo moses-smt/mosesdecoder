@@ -150,8 +150,8 @@ EvaluateWhenApplied(StatefulFeatureFunction const& sfff, int state_idx)
     // Manager& manager = this->GetManager(); //Get the manager and the ttask
     // ttasksptr const& ttask = manager.GetTtask();
     FFState const* prev = m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL;
-    m_ffStates[state_idx] 
-      = sfff.EvaluateWhenApplied(*this, prev, &m_currScoreBreakdown);
+    m_ffStates[state_idx]
+    = sfff.EvaluateWhenApplied(*this, prev, &m_currScoreBreakdown);
   }
 }
 
