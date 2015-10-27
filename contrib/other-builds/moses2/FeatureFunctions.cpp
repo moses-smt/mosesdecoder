@@ -11,6 +11,7 @@
 #include "System.h"
 
 #include "PhraseTable.h"
+#include "SkeletonStatefulFF.h"
 
 using namespace std;
 
@@ -81,9 +82,12 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	if (toks[0] == "PhraseDictionaryMemory") {
 		ret = new PhraseTable(m_ffStartInd, line);
 	}
-
+	else {
+		ret = new SkeletonStatefulFF(m_ffStartInd, line);
+	}
 
 	m_ffStartInd += ret->GetNumScores();
+	return ret;
 }
 
 const FeatureFunction &FeatureFunctions::FindFeatureFunction(const std::string &name)

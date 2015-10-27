@@ -16,7 +16,8 @@ import path ;
    Phrase.cpp 
    PhraseTable.cpp 
  	 Scores.cpp 
- 	 SearchNormal.cpp 
+ 	 SearchNormal.cpp
+ 	 SkeletonStatefulFF.cpp 
  	 Stack.cpp 
  	 StatefulFeatureFunction.cpp 
  	 StatelessFeatureFunction.cpp 
