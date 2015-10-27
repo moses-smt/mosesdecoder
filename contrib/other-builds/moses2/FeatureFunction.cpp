@@ -10,8 +10,6 @@
 #include "System.h"
 #include "moses/Util.h"
 
-#include "PhraseTable.h"
-
 using namespace std;
 
 FeatureFunction::FeatureFunction(size_t startInd, const std::string &line)
@@ -24,12 +22,3 @@ FeatureFunction::~FeatureFunction() {
 	// TODO Auto-generated destructor stub
 }
 
-FeatureFunction *FeatureFunction::Create(System &system, const std::string &line)
-{
-	vector<string> toks = Moses::Tokenize(line);
-
-	FeatureFunction *ret;
-	if (toks[0] == "PhraseDictionaryMemory") {
-		ret = new PhraseTable(system.GetFFStartInd(), line);
-	}
-}

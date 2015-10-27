@@ -23,7 +23,7 @@ Manager::Manager(System &system, const std::string &inputStr)
 	m_input = Phrase::CreateFromString(m_pool, vocab, inputStr);
 	m_inputPaths.Init(*m_input, system);
 
-	const std::vector<const PhraseTable*> &pts = system.GetPhraseTables();
+	const std::vector<const PhraseTable*> &pts = system.GetFeatureFunctions().GetPhraseTables();
 	for (size_t i = 0; i < pts.size(); ++i) {
 		const PhraseTable &pt = *pts[i];
 		pt.Lookups(m_inputPaths);

@@ -23,7 +23,7 @@ Hypothesis::Hypothesis(Manager &mgr,
 {
 	util::Pool &pool = m_mgr.GetPool();
 
-	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
+	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 
 	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetNumScores());
@@ -40,7 +40,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 ,m_prevHypo(&prevHypo)
 {
 	util::Pool &pool = m_mgr.GetPool();
-	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
+	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 
 	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetNumScores(), prevHypo.GetScores());
@@ -53,7 +53,7 @@ Hypothesis::~Hypothesis() {
 
 size_t Hypothesis::hash() const
 {
-  size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
+  size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
   size_t seed;
 
   // coverage
@@ -72,7 +72,7 @@ size_t Hypothesis::hash() const
 
 bool Hypothesis::operator==(const Hypothesis &other) const
 {
-	size_t numStatefulFFs = m_mgr.GetSystem().GetStatefulFeatureFunctions().size();
+	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
   // coverage
   if (m_sourceCompleted != other.m_sourceCompleted) {
 	return false;

@@ -7,6 +7,7 @@
 
 #pragma once
 #include <vector>
+#include "FeatureFunctions.h"
 #include "Weights.h"
 #include "util/pool.hh"
 #include "moses/FactorCollection.h"
@@ -24,11 +25,11 @@ public:
 	size_t GetNumScores() const
 	{ return 55; }
 
-	size_t GetFFStartInd() const
-	{ return m_ffStartInd; }
-
 	const Weights &GetWeights() const
 	{ return m_weights; }
+
+	const FeatureFunctions &GetFeatureFunctions() const
+	{ return m_featureFunctions; }
 
 	util::Pool &GetSystemPool()
 	{ return m_systemPool; }
@@ -36,27 +37,21 @@ public:
 	util::Pool &GetManagerPool()
 	{ return m_managerPool; }
 
-	const std::vector<const PhraseTable*> &GetPhraseTables() const
-	{ return m_phraseTables; }
-
-	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
-	{ return m_statefulFeatureFunctions; }
-
 	Moses::FactorCollection &GetVocab() const
 	{ return m_vocab; }
+
+	const Moses::Parameter &GetParameter() const
+	{ return m_params; }
 
 protected:
   const Moses::Parameter &m_params;
 
   mutable Moses::FactorCollection m_vocab;
-  std::vector<const FeatureFunction*> m_featureFunctions;
-  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
-  std::vector<const PhraseTable*> m_phraseTables;
   util::Pool m_systemPool;
   util::Pool m_managerPool;
-  size_t m_ffStartInd;
+  FeatureFunctions m_featureFunctions;
   Weights m_weights;
 
-  void LoadFeatureFunctions();
+  void LoadWeights();
 };
 

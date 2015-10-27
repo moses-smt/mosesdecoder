@@ -15,7 +15,6 @@ class System;
 
 class FeatureFunction {
 public:
-	static FeatureFunction *Create(System &system, const std::string &line);
 
 	FeatureFunction(size_t startInd, const std::string &line);
 	virtual ~FeatureFunction();
