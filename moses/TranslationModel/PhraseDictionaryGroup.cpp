@@ -33,7 +33,8 @@ namespace Moses
 PhraseDictionaryGroup::PhraseDictionaryGroup(const string &line)
   : PhraseDictionary(line, true),
     m_numModels(0),
-    m_restrict(false)
+    m_restrict(false),
+    m_specifiedZeros(false)
 {
   ReadParameters();
 }
@@ -45,6 +46,9 @@ void PhraseDictionaryGroup::SetParameter(const string& key, const string& value)
     m_numModels = m_memberPDStrs.size();
   } else if (key == "restrict") {
     m_restrict = Scan<bool>(value);
+  } else if (key == "zeros") {
+    m_specifiedZeros = true;
+    m_zeros = Scan<float>(Tokenize(value, ","));
   } else {
     PhraseDictionary::SetParameter(key, value);
   }
@@ -67,10 +71,20 @@ void PhraseDictionaryGroup::Load()
       }
     }
     UTIL_THROW_IF2(!pdFound,
-                   "Could not find component phrase table " << pdName);
+                   "Could not find member phrase table " << pdName);
   }
   UTIL_THROW_IF2(componentWeights != m_numScoreComponents,
-                 "Total number of component model scores is unequal to specified number of scores");
+                 "Total number of member model scores is unequal to specified number of scores");
+
+  // Determine "zero" scores for features
+  if (m_specifiedZeros) {
+    UTIL_THROW_IF2(m_zeros.size() != m_numScoreComponents,
+                   "Number of specified zeros is unequal to number of member model scores");
+  } else {
+    // Default is all 0 (as opposed to e.g. -99 or similar to approximate log(0)
+    // or a smoothed "not in model" score)
+    m_zeros = vector<float>(m_numScoreComponents, 0);
+  }
 }
 
 void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
@@ -150,7 +164,7 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           phrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
           // Add phrase entry
           allPhrases.push_back(phrase);
-          allScores[targetPhrase] = vector<float>(m_numScoreComponents, 0);
+          allScores[targetPhrase] = vector<float>(m_zeros);
         }
         vector<float>& scores = allScores.find(targetPhrase)->second;
 
