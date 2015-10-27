@@ -5,6 +5,7 @@ import option ;
 import path ;
 
  exe moses2 :
+   ArcLists.cpp
    FeatureFunction.cpp 
    Hypothesis.cpp 
  	 InputPath.cpp 

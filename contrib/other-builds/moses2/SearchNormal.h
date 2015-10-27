@@ -10,6 +10,7 @@
 #include <vector>
 #include "moses/Range.h"
 #include "moses/Bitmap.h"
+#include "ArcLists.h"
 
 class Manager;
 class Stack;
@@ -30,6 +31,7 @@ public:
 protected:
 	Manager &m_mgr;
 	std::vector<Stack> &m_stacks;
+	ArcLists m_arcLists;
 
 	void Extend(const Hypothesis &hypo);
 	void Extend(const Hypothesis &hypo, const InputPath &path);

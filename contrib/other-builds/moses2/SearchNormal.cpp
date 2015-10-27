@@ -91,6 +91,8 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
 	StackAdd stackAdded = m_stacks[numWordsCovered].Add(newHypo);
+
+	m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 }
 
 void SearchNormal::DebugStacks() const
