@@ -39,3 +39,9 @@ StackAdd Stack::Add(const Hypothesis *hypo)
   }
 }
 
+std::vector<const Hypothesis*> Stack::GetSortedHypos() const
+{
+	std::vector<const Hypothesis*> ret(m_hypos.begin(), m_hypos.end());
+	std::sort(ret.begin(), ret.end(), HypothesisScoreOrderer());
+	return ret;
+}

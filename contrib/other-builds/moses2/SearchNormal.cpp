@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <algorithm>
 #include <boost/foreach.hpp>
 #include "SearchNormal.h"
 #include "Stack.h"
@@ -106,12 +107,9 @@ void SearchNormal::DebugStacks() const
 const Hypothesis *SearchNormal::GetBestHypothesis() const
 {
 	const Stack &lastStack = m_stacks.back();
-	std::vector<const Hypothesis*> hypos(lastStack.begin(), lastStack.end());
+	std::vector<const Hypothesis*> sortedHypos = lastStack.GetSortedHypos();
 
-	//sort
-
-
-	const Hypothesis *best = hypos[0];
+	const Hypothesis *best = sortedHypos[0];
 	return best;
 }
 

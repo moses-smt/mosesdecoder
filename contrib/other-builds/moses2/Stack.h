@@ -47,6 +47,8 @@ public:
 	{ return m_hypos.size(); }
 
 	StackAdd Add(const Hypothesis *hypo);
+
+	std::vector<const Hypothesis*> GetSortedHypos() const;
 };
 
 #endif /* STACK_H_ */

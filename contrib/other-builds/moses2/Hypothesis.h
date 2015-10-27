@@ -12,6 +12,7 @@
 #include <cstddef>
 #include "moses/FF/FFState.h"
 #include "moses/Bitmap.h"
+#include "Scores.h"
 
 class Manager;
 class TargetPhrase;
@@ -53,6 +54,15 @@ protected:
 
   Moses::FFState **m_ffStates;
   Scores *m_scores;
+};
+
+
+class HypothesisScoreOrderer
+{
+public:
+  bool operator()(const Hypothesis* a, const Hypothesis* b) const {
+    return a->GetScores().GetTotalScore() > b->GetScores().GetTotalScore();
+  }
 };
 
 #endif /* HYPOTHESIS_H_ */
