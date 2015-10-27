@@ -7,6 +7,18 @@
 
 using namespace std;
 
+istream &GetInputStream(Moses::Parameter &params)
+{
+	const Moses::PARAM_VEC *vec = params.GetParam("input-file");
+	if (vec) {
+		Moses::InputFileStream *stream = new Moses::InputFileStream(vec->at(0));
+		return *stream;
+	}
+	else {
+		return cin;
+	}
+}
+
 int main(int argc, char** argv)
 {
 	cerr << "Starting..." << endl;
@@ -15,8 +27,10 @@ int main(int argc, char** argv)
 	params.LoadParam(argc, argv);
 	System system(params);
 
+	istream &inStream = GetInputStream(params);
+
 	string line;
-	while (getline(cin, line)) {
+	while (getline(inStream, line)) {
 
 		Manager mgr(system, line);
 		mgr.Decode();
@@ -24,6 +38,10 @@ int main(int argc, char** argv)
 		const Hypothesis *bestHypo = mgr.GetBestHypothesis();
 		bestHypo->OutputToStream(cout);
 		cout << endl;
+	}
+
+	if (inStream != cin) {
+		delete &inStream;
 	}
 
 	cerr << "Finished" << endl;

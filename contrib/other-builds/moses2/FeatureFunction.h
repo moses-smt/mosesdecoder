@@ -10,6 +10,7 @@
 
 #include <cstddef>
 #include <string>
+#include <vector>
 
 class System;
 
@@ -32,6 +33,12 @@ protected:
 	size_t m_startInd;
 	size_t m_numScores;
 	std::string m_name;
+	std::vector<std::vector<std::string> > m_args;
+	bool m_tuneable;
+
+	virtual void SetParameter(const std::string& key, const std::string& value);
+	virtual void ReadParameters();
+	void ParseLine(const std::string &line);
 };
 
 #endif /* FEATUREFUNCTION_H_ */
