@@ -9,12 +9,17 @@
 #define FEATUREFUNCTION_H_
 
 #include <cstddef>
+#include <string>
+
+class System;
 
 class FeatureFunction {
 public:
-	FeatureFunction(size_t startInd);
+	static FeatureFunction *Create(System &system, const std::string &line);
+
+	FeatureFunction(size_t startInd, const std::string &line);
 	virtual ~FeatureFunction();
-	virtual void Load()
+	virtual void Load(System &system)
 	{}
 
 	size_t GetStartInd() const

@@ -13,7 +13,7 @@
 class StatefulFeatureFunction : public FeatureFunction
 {
 public:
-	StatefulFeatureFunction(size_t startInd);
+	StatefulFeatureFunction(size_t startInd, const std::string &line);
 	virtual ~StatefulFeatureFunction();
 };
 

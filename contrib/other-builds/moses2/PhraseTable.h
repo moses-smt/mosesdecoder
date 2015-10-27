@@ -36,7 +36,7 @@ protected:
 class PhraseTable : public StatelessFeatureFunction
 {
 public:
-	PhraseTable(size_t startInd);
+	PhraseTable(size_t startInd, const std::string &line);
 	virtual ~PhraseTable();
 	void Load(System &system);
 	void Lookups(InputPaths &inputPaths) const;

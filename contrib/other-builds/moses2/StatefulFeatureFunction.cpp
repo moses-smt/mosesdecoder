@@ -7,8 +7,8 @@
 
 #include "StatefulFeatureFunction.h"
 
-StatefulFeatureFunction::StatefulFeatureFunction(size_t startInd)
-:FeatureFunction(startInd)
+StatefulFeatureFunction::StatefulFeatureFunction(size_t startInd, const std::string &line)
+:FeatureFunction(startInd, line)
 {
 	// TODO Auto-generated constructor stub
 

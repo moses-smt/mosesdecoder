@@ -67,8 +67,8 @@ const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
 }
 
 ////////////////////////////////////////////////////////////////////////
-PhraseTable::PhraseTable(size_t startInd)
-:StatelessFeatureFunction(startInd)
+PhraseTable::PhraseTable(size_t startInd, const std::string &line)
+:StatelessFeatureFunction(startInd, line)
 {
 }
 

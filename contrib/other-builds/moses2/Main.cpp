@@ -3,6 +3,7 @@
 #include "Manager.h"
 #include "Phrase.h"
 #include "moses/InputFileStream.h"
+#include "moses/Parameter.h"
 
 using namespace std;
 
@@ -10,7 +11,9 @@ int main(int argc, char** argv)
 {
 	cerr << "Starting..." << endl;
 
-	System system;
+	Moses::Parameter params;
+	params.LoadParam(argc, argv);
+	System system(params);
 
 	string line;
 	while (getline(cin, line)) {
