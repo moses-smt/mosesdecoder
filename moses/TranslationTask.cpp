@@ -166,21 +166,20 @@ options() const
 }
 
 /// parse document-level translation info stored on the input
-void 
+void
 TranslationTask::
 interpret_dlt()
 {
   if (m_source->GetType() != SentenceInput) return;
   Sentence const& snt = static_cast<Sentence const&>(*m_source);
   typedef std::map<std::string,std::string> dltmap_t;
-  BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta())
-    {
-      dltmap_t::const_iterator i = M.find("type");
-      if (i == M.end() || i->second != "adaptive-lm") continue;
-      dltmap_t::const_iterator j = M.find("context-weights");
-      if (j == M.end()) continue;
-      SetContextWeights(j->second);
-    }
+  BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
+    dltmap_t::const_iterator i = M.find("type");
+    if (i == M.end() || i->second != "adaptive-lm") continue;
+    dltmap_t::const_iterator j = M.find("context-weights");
+    if (j == M.end()) continue;
+    SetContextWeights(j->second);
+  }
 }
 
 
@@ -191,14 +190,14 @@ void TranslationTask::Run()
                  << " input and iowrapper.");
 
   const size_t translationId = m_source->GetTranslationId();
-  
+
 
   // report wall time spent on translation
   Timer translationTime;
   translationTime.start();
 
   interpret_dlt(); // parse document-level translation info stored on the input
-  
+
   // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
   VERBOSE(2, "Translating line " << translationId << "  in thread id " << pthread_self() << endl);

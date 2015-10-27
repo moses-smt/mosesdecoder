@@ -56,7 +56,7 @@ public:
   /// return shared pointer to ttask
   //  only TargetPhrases have non-NULL ttaskptrs!
   virtual ttasksptr GetTtask() const {
-    return ttasksptr(); 
+    return ttasksptr();
   }
 
   /// check if this phrase belongs to a valid ttask
