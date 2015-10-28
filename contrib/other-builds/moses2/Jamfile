@@ -13,6 +13,7 @@ import path ;
  	 InputPaths.cpp
  	 Main.cpp 
  	 Manager.cpp 
+ 	 MemPool.cpp
    Phrase.cpp 
    PhraseTable.cpp 
  	 Scores.cpp 
