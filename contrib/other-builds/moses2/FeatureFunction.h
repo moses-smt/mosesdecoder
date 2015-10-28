@@ -13,6 +13,10 @@
 #include <vector>
 
 class System;
+class Phrase;
+class TargetPhrase;
+class Scores;
+class Manager;
 
 class FeatureFunction {
 public:
@@ -28,6 +32,15 @@ public:
 	{ return m_numScores; }
 	const std::string &GetName() const
 	{ return m_name; }
+
+	  // may have more factors than actually need, but not guaranteed.
+	  // For SCFG decoding, the source contains non-terminals, NOT the raw
+	  // source from the input sentence
+	  virtual void
+	  EvaluateInIsolation(const Manager &mgr,
+			  const Phrase &source, const TargetPhrase &targetPhrase,
+	          Scores& scores,
+	          Scores& estimatedFutureScores) const = 0;
 
 protected:
 	size_t m_startInd;

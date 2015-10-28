@@ -33,6 +33,12 @@ public:
 	size_t GetPtInd() const
 	{ return m_ptInd; }
 
+	  virtual void
+	  EvaluateInIsolation(const Manager &mgr,
+			  const Phrase &source, const TargetPhrase &targetPhrase,
+			  Scores& scores,
+			  Scores& estimatedFutureScores) const;
+
 protected:
 	std::string m_path;
 	size_t m_ptInd;

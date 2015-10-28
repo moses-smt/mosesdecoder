@@ -60,3 +60,11 @@ TargetPhrases::shared_const_ptr PhraseTable::Lookup(const Manager &mgr, InputPat
   UTIL_THROW2("Not implemented");
 }
 
+void
+PhraseTable::EvaluateInIsolation(const Manager &mgr,
+		const Phrase &source, const TargetPhrase &targetPhrase,
+		Scores& scores,
+		Scores& estimatedFutureScores) const
+{
+
+}

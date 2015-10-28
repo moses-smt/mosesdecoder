@@ -14,4 +14,11 @@ class SkeletonStatelessFF : public StatelessFeatureFunction
 public:
 	SkeletonStatelessFF(size_t startInd, const std::string &line);
 	virtual ~SkeletonStatelessFF();
+
+	  virtual void
+	  EvaluateInIsolation(const Manager &mgr,
+			  const Phrase &source, const TargetPhrase &targetPhrase,
+			  Scores& scores,
+			  Scores& estimatedFutureScores) const;
+
 };

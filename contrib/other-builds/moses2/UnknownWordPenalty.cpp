@@ -52,3 +52,12 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 
 	return ret;
 }
+
+void
+UnknownWordPenalty::EvaluateInIsolation(const Manager &mgr,
+		const Phrase &source, const TargetPhrase &targetPhrase,
+		Scores& scores,
+		Scores& estimatedFutureScores) const
+{
+
+}

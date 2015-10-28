@@ -25,7 +25,9 @@ Scores::Scores(MemPool &pool, size_t numScores)
 	Init<SCORE>(m_scores, numScores, 0);
 }
 
-Scores::Scores(MemPool &pool, size_t numScores, const Scores &origScores)
+Scores::Scores(MemPool &pool,
+		size_t numScores,
+		const Scores &origScores)
 :m_total(origScores.m_total)
 {
 	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
@@ -36,7 +38,9 @@ Scores::~Scores() {
 
 }
 
-void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const System &system)
+void Scores::PlusEquals(const System &system,
+		const FeatureFunction &featureFunction,
+		const std::vector<SCORE> &scores)
 {
 	assert(scores.size() == featureFunction.GetNumScores());
 
@@ -52,7 +56,23 @@ void Scores::PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction 
 	}
 }
 
-void Scores::PlusEquals(const Scores &scores, const System &system)
+void Scores::PlusEquals(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const SCORE &score)
+{
+	assert(featureFunction.GetNumScores() = 1);
+
+	const Weights &weights = system.GetWeights();
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+	m_scores[ffStartInd] += score;
+
+	SCORE weight = weights[ffStartInd];
+	m_total += score * weight;
+
+}
+
+void Scores::PlusEquals(const System &system, const Scores &scores)
 {
 	size_t numScores = system.GetFeatureFunctions().GetNumScores();
 	for (size_t i = 0; i < numScores; ++i) {
@@ -65,7 +85,7 @@ void Scores::PlusEquals(const Scores &scores, const System &system)
 void Scores::CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const System &system)
 {
 	vector<SCORE> scores = Moses::Tokenize<SCORE>(str);
-	PlusEquals(scores, featureFunction, system);
+	PlusEquals(system, featureFunction, scores);
 }
 
 void Scores::Debug(std::ostream &out, const FeatureFunctions &ffs)

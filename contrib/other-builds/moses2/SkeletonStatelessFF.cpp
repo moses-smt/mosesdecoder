@@ -18,3 +18,11 @@ SkeletonStatelessFF::~SkeletonStatelessFF() {
 	// TODO Auto-generated destructor stub
 }
 
+void
+SkeletonStatelessFF::EvaluateInIsolation(const Manager &mgr,
+		const Phrase &source, const TargetPhrase &targetPhrase,
+		Scores& scores,
+		Scores& estimatedFutureScores) const
+{
+
+}

@@ -15,6 +15,7 @@
 #include "PhraseTableMemory.h"
 #include "UnknownWordPenalty.h"
 #include "WordPenalty.h"
+#include "Distortion.h"
 
 using namespace std;
 
@@ -94,6 +95,9 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	}
 	else if (toks[0] == "WordPenalty") {
 		ret = new WordPenalty(m_ffStartInd, line);
+	}
+	else if (toks[0] == "Distortion") {
+		ret = new Distortion(m_ffStartInd, line);
 	}
 	else {
 		//ret = new SkeletonStatefulFF(m_ffStartInd, line);

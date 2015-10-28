@@ -10,11 +10,18 @@
 SkeletonStatefulFF::SkeletonStatefulFF(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
 {
-	// TODO Auto-generated constructor stub
-
+	ReadParameters();
 }
 
 SkeletonStatefulFF::~SkeletonStatefulFF() {
 	// TODO Auto-generated destructor stub
 }
 
+void
+SkeletonStatefulFF::EvaluateInIsolation(const Manager &mgr,
+		const Phrase &source, const TargetPhrase &targetPhrase,
+		Scores& scores,
+		Scores& estimatedFutureScores) const
+{
+
+}

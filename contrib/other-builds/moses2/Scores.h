@@ -27,8 +27,13 @@ public:
 
   void CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const System &system);
 
-  void PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const System &system);
-  void PlusEquals(const Scores &scores, const System &system);
+  void PlusEquals(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const SCORE &score);
+  void PlusEquals(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const std::vector<SCORE> &scores);
+  void PlusEquals(const System &system, const Scores &scores);
 
   void Debug(std::ostream &out, const FeatureFunctions &ffs);
 

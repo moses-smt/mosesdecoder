@@ -6,6 +6,7 @@ import path ;
 
  exe moses2 :
    ArcLists.cpp
+   Distortion.cpp
    FeatureFunction.cpp 
    FeatureFunctions.cpp 
    Hypothesis.cpp 
