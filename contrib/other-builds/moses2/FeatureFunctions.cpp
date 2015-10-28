@@ -13,6 +13,7 @@
 #include "SkeletonStatelessFF.h"
 #include "SkeletonStatefulFF.h"
 #include "PhraseTableMemory.h"
+#include "UnknownWordPenalty.h"
 #include "WordPenalty.h"
 
 using namespace std;
@@ -49,6 +50,7 @@ void FeatureFunctions::LoadFeatureFunctions()
 
 	  PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
 	  if (pt) {
+		  pt->SetPtInd(m_phraseTables.size());
 		  m_phraseTables.push_back(pt);
 	  }
 
@@ -86,6 +88,9 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	FeatureFunction *ret;
 	if (toks[0] == "PhraseDictionaryMemory") {
 		ret = new PhraseTableMemory(m_ffStartInd, line);
+	}
+	else if (toks[0] == "UnknownWordPenalty") {
+		ret = new UnknownWordPenalty(m_ffStartInd, line);
 	}
 	else if (toks[0] == "WordPenalty") {
 		ret = new WordPenalty(m_ffStartInd, line);

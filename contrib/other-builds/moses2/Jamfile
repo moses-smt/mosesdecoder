@@ -26,7 +26,8 @@ import path ;
  	 StatelessFeatureFunction.cpp 
  	 System.cpp 
    TargetPhrase.cpp 
-   TargetPhrases.cpp 
+   TargetPhrases.cpp
+   UnknownWordPenalty.cpp 
 		Weights.cpp 
 		Word.cpp 
     WordPenalty.cpp

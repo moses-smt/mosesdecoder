@@ -26,7 +26,7 @@ Manager::Manager(System &system, const std::string &inputStr)
 	const std::vector<const PhraseTable*> &pts = system.GetFeatureFunctions().GetPhraseTables();
 	for (size_t i = 0; i < pts.size(); ++i) {
 		const PhraseTable &pt = *pts[i];
-		pt.Lookups(m_inputPaths);
+		pt.Lookup(m_inputPaths);
 	}
 
 	m_stacks.resize(m_input->GetSize() + 1);
