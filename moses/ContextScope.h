@@ -142,6 +142,14 @@ public:
     return true;
   }
   
+  bool
+  SetContextWeights(SPTR<std::map<std::string,float> > const& w) {
+    if (m_context_weights) return false;
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+    m_context_weights = w;
+    return true;
+  }
+
 };
 
 };

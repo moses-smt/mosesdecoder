@@ -816,7 +816,8 @@ namespace Moses
     // boost::unique_lock<boost::shared_mutex> ctxlock(context->lock);
     
     // bias weights specified with the session?
-    SPTR<std::map<std::string, float> const> w = ttask->GetContextWeights();
+    SPTR<std::map<std::string, float> const> w;
+    w = ttask->GetScope()->GetContextWeights();
     if (w && !w->empty()) 
       {
         if (m_bias_log) 
@@ -841,7 +842,7 @@ namespace Moses
               = btfix->SetupDocumentBias(m_bias_server, context_words, m_bias_log);
             //Reset the bias in the ttaskptr so that other functions
             //so that other functions can utilize the biases;
-            ttask->ReSetContextWeights(context->bias->getBiasMap());
+            ttask->GetScope()->SetContextWeights(context->bias->getBiasMap());
           }
       } 
     if (context->bias)
