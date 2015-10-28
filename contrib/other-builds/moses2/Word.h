@@ -23,6 +23,14 @@ public:
   size_t hash() const;
   bool operator==(const Word &compare) const;
 
+  const Moses::Factor* operator[](size_t ind) const {
+	return m_factors[ind];
+  }
+
+  const Moses::Factor*& operator[](size_t ind) {
+	return m_factors[ind];
+  }
+
 protected:
   const Moses::Factor *m_factors[MAX_NUM_FACTORS];
 

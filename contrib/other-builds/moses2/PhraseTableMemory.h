@@ -34,7 +34,7 @@ public:
 	virtual ~PhraseTableMemory();
 
 	virtual void Load(System &system);
-	virtual const TargetPhrases *Lookup(InputPath &inputPath) const;
+	virtual const TargetPhrases *Lookup(const Manager &mgr, InputPath &inputPath) const;
 
 protected:
 	Node m_root;

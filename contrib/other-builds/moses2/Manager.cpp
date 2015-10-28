@@ -26,6 +26,7 @@ Manager::Manager(System &system, const std::string &inputStr)
 	const std::vector<const PhraseTable*> &pts = system.GetFeatureFunctions().GetPhraseTables();
 	for (size_t i = 0; i < pts.size(); ++i) {
 		const PhraseTable &pt = *pts[i];
+		cerr << "Looking up from " << pt.GetName() << endl;
 		pt.Lookup(*this, m_inputPaths);
 	}
 
