@@ -567,6 +567,10 @@ size_t Hypothesis::hash() const
   size_t seed;
 
   // coverage
+  // NOTE from Hieu - we could make bitmap comparison here and in operator== compare the pointers since the bitmaps come from a factory.
+  // Same coverage is guaranteed to have the same bitmap. However, this make the decoding algorithm non-deterministic as the order
+  // of hypo extension can be different. This causes several regression tests to break. Since the speedup is minimal, I'm gonna leave
+  // it comparing the actual bitmaps
   seed = m_sourceCompleted.hash();
 
   // states
