@@ -86,3 +86,5 @@ contrib/m4m/merge-sorted
 mert/hgdecode
 .bash_history*
 doxygen.conf
+doxy
+opt

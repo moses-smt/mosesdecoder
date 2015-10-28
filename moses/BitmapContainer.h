@@ -129,7 +129,7 @@ public:
         // Fallback: scoreA < scoreB == false, non-deterministic sort
         return false;
       }
-      return (phrA->Compare(*phrB) < 0);
+      return (phrA->Compare(*phrB) > 0);
     }
   }
 };
