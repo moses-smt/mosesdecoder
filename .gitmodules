@@ -7,6 +7,3 @@
 [submodule "regtest"]
 	path = regtest
 	url = http://github.com/moses-smt/moses-regression-tests
-[submodule "mmt"]
-	path = mmt
-	url = https://github.com/modernmt/moses-submodule
