@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <boost/foreach.hpp>
 #include "MemPool.h"
 #include "util/scoped.hh"
 
@@ -17,7 +18,6 @@ MemPool::Page::Page(std::size_t vSize)
 
 MemPool::Page::~Page()
 {
-
 }
 ////////////////////////////////////////////////////
 MemPool::MemPool(size_t initSize)
@@ -28,8 +28,11 @@ MemPool::MemPool(size_t initSize)
 	current_ = m_pages.back().mem;
 }
 
-MemPool::~MemPool() {
-
+MemPool::~MemPool()
+{
+  BOOST_FOREACH(const Page &page, m_pages) {
+	  delete page.mem;
+  }
 }
 
 
