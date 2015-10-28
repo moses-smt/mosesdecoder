@@ -13,20 +13,20 @@
 using namespace std;
 
 Manager::Manager(System &system, const std::string &inputStr)
-:m_pool(system.GetManagerPool())
+:m_pool(&system.GetManagerPool())
 ,m_system(system)
 ,m_initRange(NOT_FOUND, NOT_FOUND)
 ,m_initPhrase(system.GetManagerPool(), system, 0)
 {
 	Moses::FactorCollection &vocab = system.GetVocab();
 
-	m_input = Phrase::CreateFromString(m_pool, vocab, inputStr);
+	m_input = Phrase::CreateFromString(GetPool(), vocab, inputStr);
 	m_inputPaths.Init(*m_input, system);
 
 	const std::vector<const PhraseTable*> &pts = system.GetFeatureFunctions().GetPhraseTables();
 	for (size_t i = 0; i < pts.size(); ++i) {
 		const PhraseTable &pt = *pts[i];
-		pt.Lookup(m_inputPaths);
+		pt.Lookup(*this, m_inputPaths);
 	}
 
 	m_stacks.resize(m_input->GetSize() + 1);

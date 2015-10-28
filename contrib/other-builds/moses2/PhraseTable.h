@@ -15,6 +15,7 @@
 class System;
 class InputPaths;
 class InputPath;
+class Manager;
 
 ////////////////////////////////////////////////////////////////////////
 class PhraseTable : public StatelessFeatureFunction
@@ -24,8 +25,8 @@ public:
 	virtual ~PhraseTable();
 
 	virtual void SetParameter(const std::string& key, const std::string& value);
-	virtual void Lookup(InputPaths &inputPaths) const;
-	virtual const TargetPhrases *Lookup(InputPath &inputPath) const;
+	virtual void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
+	virtual const TargetPhrases *Lookup(const Manager &mgr, InputPath &inputPath) const;
 
 	void SetPtInd(size_t ind)
 	{ m_ptInd = ind; }

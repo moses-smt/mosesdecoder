@@ -5,7 +5,8 @@
  *      Author: hieu
  */
 
-#include <contrib/other-builds/moses2/UnknownWordPenalty.h>
+#include "UnknownWordPenalty.h"
+#include "Manager.h"
 
 UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line)
 :PhraseTable(startInd, line)
@@ -18,7 +19,13 @@ UnknownWordPenalty::~UnknownWordPenalty() {
 	// TODO Auto-generated destructor stub
 }
 
-const TargetPhrases *UnknownWordPenalty::Lookup(InputPath &inputPath) const
+const TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, InputPath &inputPath) const
 {
+	TargetPhrases *tps = new TargetPhrases();
+
+	MemPool &pool = mgr.GetPool();
+	const System &system = mgr.GetSystem();
+
+	//TargetPhrase *tp = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
 	return NULL;
 }

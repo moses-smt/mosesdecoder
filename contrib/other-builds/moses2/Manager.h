@@ -25,8 +25,8 @@ public:
 	Manager(System &system, const std::string &inputStr);
 	virtual ~Manager();
 
-	MemPool &GetPool()
-	{ return m_pool; }
+	MemPool &GetPool() const
+	{ return *m_pool; }
 
 	const System &GetSystem() const
 	{ return m_system; }
@@ -41,7 +41,7 @@ public:
 
 	void Decode();
 protected:
-	MemPool &m_pool;
+	mutable MemPool *m_pool;
 
 	const System &m_system;
 	Phrase *m_input;

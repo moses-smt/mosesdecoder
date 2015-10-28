@@ -39,11 +39,11 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
   }
 }
 
-void PhraseTable::Lookup(InputPaths &inputPaths) const
+void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
 	  BOOST_FOREACH(InputPath &path, inputPaths) {
 			const SubPhrase &phrase = path.GetSubPhrase();
-			const TargetPhrases *tps = Lookup(path);
+			const TargetPhrases *tps = Lookup(mgr, path);
 			cerr << "path=" << path << endl;
 			cerr << "tps=" << tps << endl;
 			if (tps) {
@@ -55,7 +55,7 @@ void PhraseTable::Lookup(InputPaths &inputPaths) const
 
 }
 
-const TargetPhrases *PhraseTable::Lookup(InputPath &inputPath) const
+const TargetPhrases *PhraseTable::Lookup(const Manager &mgr, InputPath &inputPath) const
 {
   UTIL_THROW2("Not implemented");
 }

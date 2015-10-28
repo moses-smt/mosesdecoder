@@ -16,7 +16,7 @@ public:
 	UnknownWordPenalty(size_t startInd, const std::string &line);
 	virtual ~UnknownWordPenalty();
 
-	virtual const TargetPhrases *Lookup(InputPath &inputPath) const;
+	virtual const TargetPhrases *Lookup(const Manager &mgr, InputPath &inputPath) const;
 
 };
 

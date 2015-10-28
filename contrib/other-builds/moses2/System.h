@@ -31,7 +31,7 @@ public:
 	MemPool &GetSystemPool()
 	{ return m_systemPool; }
 
-	MemPool &GetManagerPool()
+	MemPool &GetManagerPool() const
 	{ return m_managerPool; }
 
 	Moses::FactorCollection &GetVocab() const
@@ -45,7 +45,7 @@ protected:
 
   mutable Moses::FactorCollection m_vocab;
   MemPool m_systemPool;
-  MemPool m_managerPool;
+  mutable MemPool m_managerPool;
   FeatureFunctions m_featureFunctions;
   Weights m_weights;
 
