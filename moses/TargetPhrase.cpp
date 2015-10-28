@@ -1,5 +1,4 @@
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2006 University of Edinburgh
@@ -60,7 +59,6 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
 
 TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const PhraseDictionary *pt)
   :Phrase(0)
-  , m_ttask(ttask)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -69,7 +67,8 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
   , m_ruleSource(NULL)
   , m_container(pt)
 {
-
+  if (ttask) m_scope = ttask->GetScope();
+  
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   // XXX should this really be InputFactorOrder???
@@ -79,8 +78,7 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
 }
 
 TargetPhrase::TargetPhrase(ttasksptr& ttask, const PhraseDictionary *pt)
-  :Phrase()
-  , m_ttask(ttask)
+  : Phrase()
   , m_fullScore(0.0)
   , m_futureScore(0.0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -89,6 +87,7 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, const PhraseDictionary *pt)
   , m_ruleSource(NULL)
   , m_container(pt)
 {
+  if (ttask) m_scope = ttask->GetScope();
 }
 
 TargetPhrase::TargetPhrase(ttasksptr& ttask, const Phrase &phrase, const PhraseDictionary *pt)
@@ -99,9 +98,9 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, const Phrase &phrase, const PhraseD
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_ttask(ttask)
   , m_container(pt)
 {
+  if (ttask) m_scope = ttask->GetScope();
 }
 
 TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
@@ -137,7 +136,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
   , m_properties(copy.m_properties)
-  , m_ttask(copy.m_ttask)
+  , m_scope(copy.m_scope)
   , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
@@ -170,14 +169,14 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
-bool TargetPhrase::HasTtaskSPtr() const
+bool TargetPhrase::HasScope() const
 {
-  return !m_ttask.expired();
+  return !m_scope.expired(); // should actually never happen
 }
 
-ttasksptr TargetPhrase::GetTtask() const
+SPTR<ContextScope> TargetPhrase::GetScope() const
 {
-  return m_ttask.lock();
+  return m_scope.lock();
 }
 
 void TargetPhrase::EvaluateInIsolation(const Phrase &source)

@@ -130,9 +130,9 @@ public:
   void
   SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw);
 
-  SPTR<std::map<std::string, float> const> GetContextWeights() const;
-  void SetContextWeights(std::string const& context_weights);
-  void ReSetContextWeights(std::map<std::string, float> const& new_weights);
+  // SPTR<std::map<std::string, float> const> GetContextWeights() const;
+  // void SetContextWeights(std::string const& context_weights);
+  // void ReSetContextWeights(std::map<std::string, float> const& new_weights);
 
   AllOptions const& options() const;
 

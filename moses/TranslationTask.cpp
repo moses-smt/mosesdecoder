@@ -30,18 +30,18 @@ GetContextWindow() const
   return m_context;
 }
 
-SPTR<std::map<std::string, float> const>
-TranslationTask::GetContextWeights() const
-{
-  return m_context_weights;
-}
+// SPTR<std::map<std::string, float> const>
+// TranslationTask::GetContextWeights() const
+// {
+//   return m_context_weights;
+// }
 
-void
-TranslationTask
-::ReSetContextWeights(std::map<std::string, float> const& new_weights)
-{
-  m_context_weights.reset(new std::map<string,float>(new_weights));
-}
+// void
+// TranslationTask
+// ::ReSetContextWeights(std::map<std::string, float> const& new_weights)
+// {
+//   m_context_weights.reset(new std::map<string,float>(new_weights));
+// }
 
 void
 TranslationTask::
@@ -49,20 +49,6 @@ SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw)
 {
   m_context = cw;
 }
-
-void
-TranslationTask::
-SetContextWeights(std::string const& context_weights)
-{
-  SPTR<std::map<string,float> > foo(new std::map<string,float>);
-  std::vector<std::string> tokens = Tokenize(context_weights,":");
-  for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-    std::vector<std::string> key_and_value = Tokenize(*it, ",");
-    foo->insert(std::pair<std::string, float>(key_and_value[0], atof(key_and_value[1].c_str())));
-  }
-  m_context_weights = foo;
-}
-
 
 boost::shared_ptr<TranslationTask>
 TranslationTask
@@ -178,10 +164,10 @@ interpret_dlt()
     if (i == M.end() || i->second != "adaptive-lm") continue;
     dltmap_t::const_iterator j = M.find("context-weights");
     if (j == M.end()) continue;
-    SetContextWeights(j->second);
+    m_scope->SetContextWeights(j->second);
   }
 }
-
+  
 
 void TranslationTask::Run()
 {

@@ -225,12 +225,13 @@ batch_run()
       if(!use_sliding_context_window)
         cw = NULL;
     }
+
     if (context_window)
       task->SetContextWindow(context_window);
-
-    if (context_weights != "")
-      task->SetContextWeights(context_weights);
-
+    
+    if (context_weights != "" && !task->GetScope()->GetContextWeights())
+      task->GetScope()->SetContextWeights(context_weights);
+    
     // Allow for (sentence-)context-specific processing prior to
     // decoding. This can be used, for example, for context-sensitive
     // phrase lookup.

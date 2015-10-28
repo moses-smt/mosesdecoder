@@ -124,7 +124,24 @@ public:
     return m_context_weights;
   }
 #endif
-
+  
+  bool
+  SetContextWeights(std::string const& spec) {
+    if (m_context_weights) return false;
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+    m_context_weights.reset(new std::map<std::string, float>);
+    
+    // TO DO; This needs to be done with StringPiece.find, not Tokenize
+    // PRIORITY: low
+    std::vector<std::string> tokens = Tokenize(spec,":");
+    for (std::vector<std::string>::iterator it = tokens.begin(); 
+	 it != tokens.end(); it++) {
+      std::vector<std::string> key_and_value = Tokenize(*it, ",");
+      (*m_context_weights)[key_and_value[0]] = atof(key_and_value[1].c_str());
+    }
+    return true;
+  }
+  
 };
 
 };
