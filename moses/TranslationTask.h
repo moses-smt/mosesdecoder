@@ -67,7 +67,7 @@ protected:
   // task stays alive till it's done with it.
 
   boost::shared_ptr<std::vector<std::string> > m_context;
-  SPTR<std::map<std::string, float> > m_context_weights;
+  // SPTR<std::map<std::string, float> const> m_context_weights;
 public:
 
   boost::shared_ptr<TranslationTask>
