@@ -1,4 +1,3 @@
-// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // $Id$
 
 /***********************************************************************
@@ -92,20 +91,17 @@ public:
   void Load();
   const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
-protected:
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
-public:
 
-  virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
-  /*
-    virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+  virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+/*  
+  virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
 
-    virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const;
-  */
-
+  virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const;
+*/
 
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(const InputType& source);
