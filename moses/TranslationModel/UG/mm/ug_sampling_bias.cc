@@ -147,7 +147,7 @@ namespace sapt
         BOOST_FOREACH(bias_record const& b, biasmap)
           {
             std::map<std::string, id_type>::const_iterator m;
-            m = = docname2docid.find(b.first);
+            m = docname2docid.find(b.first);
             if (m != docname2docid.end()) 
               *log << "BIAS " << b.first << " " << m_bias[m->second] 
                    << std::endl;
