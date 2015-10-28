@@ -12,7 +12,7 @@
 
 #include "SkeletonStatelessFF.h"
 #include "SkeletonStatefulFF.h"
-#include "PhraseTable.h"
+#include "PhraseTableMemory.h"
 #include "WordPenalty.h"
 
 using namespace std;
@@ -85,7 +85,7 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 
 	FeatureFunction *ret;
 	if (toks[0] == "PhraseDictionaryMemory") {
-		ret = new PhraseTable(m_ffStartInd, line);
+		ret = new PhraseTableMemory(m_ffStartInd, line);
 	}
 	else if (toks[0] == "WordPenalty") {
 		ret = new WordPenalty(m_ffStartInd, line);

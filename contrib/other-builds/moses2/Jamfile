@@ -16,6 +16,7 @@ import path ;
  	 MemPool.cpp
    Phrase.cpp 
    PhraseTable.cpp 
+ 	 PhraseTableMemory.cpp 
  	 Scores.cpp 
  	 SearchNormal.cpp
  	 SkeletonStatefulFF.cpp 
