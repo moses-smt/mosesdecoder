@@ -14,8 +14,7 @@
 WordPenalty::WordPenalty(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
 {
-	// TODO Auto-generated constructor stub
-
+	ReadParameters();
 }
 
 WordPenalty::~WordPenalty() {

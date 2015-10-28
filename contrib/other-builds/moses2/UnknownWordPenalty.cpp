@@ -12,8 +12,7 @@
 UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line)
 :PhraseTable(startInd, line)
 {
-	// TODO Auto-generated constructor stub
-
+	ReadParameters();
 }
 
 UnknownWordPenalty::~UnknownWordPenalty() {
