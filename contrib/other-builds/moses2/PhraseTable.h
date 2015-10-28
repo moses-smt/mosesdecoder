@@ -38,6 +38,8 @@ class PhraseTable : public StatelessFeatureFunction
 public:
 	PhraseTable(size_t startInd, const std::string &line);
 	virtual ~PhraseTable();
+
+	virtual void SetParameter(const std::string& key, const std::string& value);
 	void Load(System &system);
 	void Lookups(InputPaths &inputPaths) const;
 

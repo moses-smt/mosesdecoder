@@ -70,16 +70,34 @@ const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
 PhraseTable::PhraseTable(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
 {
+	ReadParameters();
 }
 
 PhraseTable::~PhraseTable() {
 	// TODO Auto-generated destructor stub
 }
 
+void PhraseTable::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "path") {
+	  m_path = value;
+  }
+  else if (key == "input-factor") {
+
+  }
+  else if (key == "output-factor") {
+
+  }
+  else if (key == "table-limit") {
+
+  }
+  else {
+	  StatelessFeatureFunction::SetParameter(key, value);
+  }
+}
+
 void PhraseTable::Load(System &system)
 {
-	m_path = "/Users/hieu/workspace/experiment/issues/sample-models/phrase-model/phrase-table";
-
 	Moses::FactorCollection &vocab = system.GetVocab();
 
 	MemPool tmpPool;
@@ -102,6 +120,7 @@ void PhraseTable::Load(System &system)
 		m_root.AddRule(*source, target);
 	}
 }
+
 
 void PhraseTable::Lookups(InputPaths &inputPaths) const
 {

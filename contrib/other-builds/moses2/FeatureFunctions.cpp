@@ -29,7 +29,6 @@ FeatureFunctions::~FeatureFunctions() {
 	Moses::RemoveAllInColl(m_featureFunctions);
 }
 
-
 void FeatureFunctions::LoadFeatureFunctions()
 {
   const Moses::Parameter &params = m_system.GetParameter();
