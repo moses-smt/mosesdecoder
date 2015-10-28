@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "Scores.h"
 #include "FeatureFunction.h"
+#include "FeatureFunctions.h"
 #include "Util.h"
 #include "Weights.h"
 #include "System.h"
@@ -65,6 +66,15 @@ void Scores::CreateFromString(const std::string &str, const FeatureFunction &fea
 {
 	vector<SCORE> scores = Moses::Tokenize<SCORE>(str);
 	PlusEquals(scores, featureFunction, system);
+}
+
+void Scores::Debug(std::ostream &out, const FeatureFunctions &ffs)
+{
+	out << m_total << " = ";
+	size_t numScores = ffs.GetNumScores();
+	for (size_t i = 0; i < numScores; ++i) {
+		out << m_scores[i] << " ";
+	}
 }
 
 std::ostream& operator<<(std::ostream &out, const Scores &obj)

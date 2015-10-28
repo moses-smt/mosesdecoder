@@ -90,10 +90,14 @@ void PhraseTable::Load(System &system)
 		toks.clear();
 		Moses::TokenizeMultiCharSeparator(toks, line, "|||");
 		assert(toks.size() >= 3);
+		//cerr << "line=" << line << endl;
 
 		Phrase *source = Phrase::CreateFromString(tmpPool, vocab, toks[0]);
+		//cerr << "created soure" << endl;
 		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetSystemPool(), system, toks[1]);
+		//cerr << "created target" << endl;
 		target->GetScores().CreateFromString(toks[2], *this, system);
+		//cerr << "created scores" << endl;
 
 		m_root.AddRule(*source, target);
 	}

@@ -13,6 +13,7 @@
 #include "SkeletonStatelessFF.h"
 #include "SkeletonStatefulFF.h"
 #include "PhraseTable.h"
+#include "WordPenalty.h"
 
 using namespace std;
 
@@ -64,14 +65,18 @@ void FeatureFunctions::LoadFeatureFunctions()
 		  // do nothing. load pt last
 	  }
 	  else {
+		  cerr << "Loading " << nonConstFF->GetName() << endl;
 		  nonConstFF->Load(m_system);
+		  cerr << "Finished loading " << nonConstFF->GetName() << endl;
 	  }
   }
 
   // load pt
   BOOST_FOREACH(const PhraseTable *pt, m_phraseTables) {
 	  PhraseTable *nonConstPT = const_cast<PhraseTable*>(pt);
+	  cerr << "Loading " << nonConstPT->GetName() << endl;
 	  nonConstPT->Load(m_system);
+	  cerr << "Finished loading " << nonConstPT->GetName() << endl;
   }
 }
 
@@ -82,6 +87,9 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	FeatureFunction *ret;
 	if (toks[0] == "PhraseDictionaryMemory") {
 		ret = new PhraseTable(m_ffStartInd, line);
+	}
+	else if (toks[0] == "WordPenalty") {
+		ret = new WordPenalty(m_ffStartInd, line);
 	}
 	else {
 		//ret = new SkeletonStatefulFF(m_ffStartInd, line);

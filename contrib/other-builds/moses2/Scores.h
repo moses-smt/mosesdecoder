@@ -12,6 +12,7 @@
 #include "MemPool.h"
 
 class FeatureFunction;
+class FeatureFunctions;
 class System;
 
 class Scores {
@@ -28,6 +29,9 @@ public:
 
   void PlusEquals(const std::vector<SCORE> &scores, const FeatureFunction &featureFunction, const System &system);
   void PlusEquals(const Scores &scores, const System &system);
+
+  void Debug(std::ostream &out, const FeatureFunctions &ffs);
+
 protected:
 	SCORE *m_scores;
 	SCORE m_total;

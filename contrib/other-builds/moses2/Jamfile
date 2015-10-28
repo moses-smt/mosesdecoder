@@ -26,8 +26,9 @@ import path ;
  	 System.cpp 
    TargetPhrase.cpp 
    TargetPhrases.cpp 
-	Weights.cpp 
-	Word.cpp 
+		Weights.cpp 
+		Word.cpp 
+    WordPenalty.cpp
     	 
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 
