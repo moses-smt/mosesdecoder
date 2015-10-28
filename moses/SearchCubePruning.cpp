@@ -44,7 +44,7 @@ public:
         // Fallback: compare pointers, non-deterministic sort
         return A < B;
       }
-      return (phrA->Compare(*phrB) < 0);
+      return (phrA->Compare(*phrB) > 0);
     }
   }
 };

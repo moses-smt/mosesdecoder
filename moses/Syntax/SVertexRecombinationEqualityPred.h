@@ -11,7 +11,7 @@ namespace Syntax
 
 class SVertexRecombinationEqualityPred
 {
- public:
+public:
   bool operator()(const SVertex *v1, const SVertex *v2) const {
     assert(v1->states.size() == v2->states.size());
     for (std::size_t i = 0; i < v1->states.size(); ++i) {

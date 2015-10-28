@@ -93,12 +93,12 @@ LanguageModelIRST::
   TRACE_ERR( "reset mmap\n");
   if (m_lmtb) m_lmtb->reset_mmap();
 #endif
-  
+
   delete m_lmtb;
 }
 
 
-bool 
+bool
 LanguageModelIRST::
 IsUseable(const FactorMask &mask) const
 {
@@ -106,7 +106,7 @@ IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-void 
+void
 LanguageModelIRST::
 Load()
 {
@@ -135,7 +135,7 @@ Load()
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
 }
 
-void 
+void
 LanguageModelIRST::
 CreateFactors(FactorCollection &factorCollection)
 {
@@ -179,31 +179,31 @@ CreateFactors(FactorCollection &factorCollection)
   }
 }
 
-int 
+int
 LanguageModelIRST::
 GetLmID( const std::string &str ) const
 {
   return d->encode( str.c_str() ); // at the level of micro tags
 }
 
-int 
+int
 LanguageModelIRST::
 GetLmID( const Word &word ) const
 {
   return GetLmID( word.GetFactor(m_factorType) );
 }
 
-int 
+int
 LanguageModelIRST::
 GetLmID( const Factor *factor ) const
 {
   size_t factorId = factor->GetId();
-  
+
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
     if (d->incflag()==1) {
       std::string s = factor->GetString().as_string();
       int code = d->encode(s.c_str());
-      
+
       //////////
       ///poiche' non c'e' distinzione tra i factorIDs delle parole sorgenti
       ///e delle parole target in Moses, puo' accadere che una parola target
@@ -231,7 +231,7 @@ GetLmID( const Factor *factor ) const
       /// ma si perde in efficienza nell'accesso perche' non e' piu' possibile quello random dei vettori
       /// a te la scelta!!!!
       ////////////////
-      
+
 
       if (factorId >= m_lmIdLookup.size()) {
         //resize and fill with m_empty
@@ -242,7 +242,7 @@ GetLmID( const Factor *factor ) const
       //insert new code
       m_lmIdLookup[factorId] = code;
       return code;
-      
+
     } else {
       return m_unknownId;
     }
@@ -251,7 +251,7 @@ GetLmID( const Factor *factor ) const
   }
 }
 
-FFState const* 
+FFState const*
 LanguageModelIRST::
 EmptyHypothesisState(const InputType &/*input*/) const
 {
@@ -260,12 +260,12 @@ EmptyHypothesisState(const InputType &/*input*/) const
   return ret.release();
 }
 
-void 
+void
 LanguageModelIRST::
 CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
-  bool isContextAdaptive 
-    = m_lmtb->getLanguageModelType() == _IRSTLM_LMCONTEXTDEPENDENT;
+  bool isContextAdaptive
+  = m_lmtb->getLanguageModelType() == _IRSTLM_LMCONTEXTDEPENDENT;
 
   fullScore = 0;
   ngramScore = 0;
@@ -308,7 +308,7 @@ CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oov
       ++idx;
     }
 #ifdef IRSTLM_CONTEXT_DEPENDENT
-  }    
+  }
 #endif
   ngramScore = 0.0;
   int end_loop = (int) phrase.GetSize();
@@ -334,20 +334,20 @@ CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oov
       ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
     }
 #ifdef IRSTLM_CONTEXT_DEPENDENT
-  }    
-#endif  
+  }
+#endif
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
   fullScore = ngramScore + before_boundary;
 }
 
-FFState* 
+FFState*
 LanguageModelIRST::
-EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, 
+EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
                     ScoreComponentCollection *out) const
 {
-  bool isContextAdaptive 
-    = m_lmtb->getLanguageModelType() == _IRSTLM_LMCONTEXTDEPENDENT;
+  bool isContextAdaptive
+  = m_lmtb->getLanguageModelType() == _IRSTLM_LMCONTEXTDEPENDENT;
 
   if (!hypo.GetCurrTargetLength()) {
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
@@ -387,18 +387,17 @@ EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
   position = (const int) begin+1;
   float score;
 #ifdef IRSTLM_CONTEXT_DEPENDENT
-  if (CW)
-    {
-      score = m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp);
-      while (position < adjust_end) {
-	for (idx=1; idx<m_lmtb_size; idx++) {
-	  codes[idx-1] = codes[idx];
-	}
-	codes[idx-1] =  GetLmID(hypo.GetWord(position));
-	score += m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp);
-	++position;
+  if (CW) {
+    score = m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp);
+    while (position < adjust_end) {
+      for (idx=1; idx<m_lmtb_size; idx++) {
+        codes[idx-1] = codes[idx];
       }
-    } else { 
+      codes[idx-1] =  GetLmID(hypo.GetWord(position));
+      score += m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp);
+      ++position;
+    }
+  } else {
 #endif
     score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
     position = (const int) begin+1;
@@ -430,12 +429,12 @@ EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
       --idx;
     }
 #ifdef IRSTLM_CONTEXT_DEPENDENT
-    if (CW) score += m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp); 
+    if (CW) score += m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp);
     else
 #else
-      score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp); 
+    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
 #endif
-  } else {
+    } else {
     // need to set the LM state
 
     if (adjust_end < end)   { //the LMstate of this target phrase refers to the last m_lmtb_size-1 words
@@ -447,16 +446,16 @@ EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
       msp = (char *) m_lmtb->cmaxsuffptr(codes,m_lmtb_size);
     }
   }
-  
+
   score = TransformLMScore(score);
   out->PlusEquals(this, score);
-  
+
   std::auto_ptr<IRSTLMState> ret(new IRSTLMState(msp));
-  
+
   return ret.release();
 }
 
-LMResult 
+LMResult
 LanguageModelIRST::
 GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
@@ -494,7 +493,7 @@ GetValue(const vector<const Word*> &contextFactor, State* finalState) const
   return result;
 }
 
-bool 
+bool
 LMCacheCleanup(const int sentences_done, const size_t m_lmcache_cleanup_threshold)
 {
   if (sentences_done==-1) return true;
@@ -512,7 +511,7 @@ void LanguageModelIRST::InitializeForInput(ttasksptr const& ttask)
 #endif
 }
 
-void 
+void
 LanguageModelIRST::
 CleanUpAfterSentenceProcessing(const InputType& source)
 {
@@ -528,7 +527,7 @@ CleanUpAfterSentenceProcessing(const InputType& source)
   }
 }
 
-void 
+void
 LanguageModelIRST::
 SetParameter(const std::string& key, const std::string& value)
 {
@@ -539,6 +538,6 @@ SetParameter(const std::string& key, const std::string& value)
   }
   m_lmtb_size = m_nGramOrder;
 }
-  
+
 }
 
