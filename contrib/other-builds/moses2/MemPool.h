@@ -41,12 +41,22 @@ class MemPool {
     }
 
     template<typename T>
-    T *Allocate(size_t num = 1) {
+    T *Allocate() {
+    	void *ret = Allocate(sizeof(T));
+    	return (T*) ret;
+    }
+
+    template<typename T>
+    T *Allocate(size_t num) {
     	void *ret = Allocate(sizeof(T) * num);
     	return (T*) ret;
     }
 
-
+    void Reset()
+    {
+    	m_currPage = 0;
+    	current_ = m_pages[0].mem;
+    }
   private:
     void *More(std::size_t size);
 

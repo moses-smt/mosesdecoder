@@ -38,6 +38,8 @@ Manager::Manager(System &system, const std::string &inputStr)
 Manager::~Manager() {
 	delete m_bitmaps;
 	delete m_search;
+
+	GetPool().Reset();
 }
 
 const Hypothesis *Manager::GetBestHypothesis() const
