@@ -18,12 +18,10 @@
 using namespace std;
 
 Node::Node()
-:m_targetPhrases(NULL)
 {}
 
 Node::~Node()
 {
-	delete m_targetPhrases;
 }
 
 void Node::AddRule(Phrase &source, TargetPhrase *target)
@@ -34,10 +32,13 @@ void Node::AddRule(Phrase &source, TargetPhrase *target)
 Node &Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
 {
 	if (pos == source.GetSize()) {
-		if (m_targetPhrases == NULL) {
-			m_targetPhrases = new TargetPhrases();
+		TargetPhrases *tp = m_targetPhrases.get();
+		if (tp == NULL) {
+			tp = new TargetPhrases();
+			m_targetPhrases.reset(tp);
 		}
-		m_targetPhrases->AddTargetPhrase(*target);
+
+		tp->AddTargetPhrase(*target);
 		return *this;
 	}
 	else {
@@ -47,7 +48,7 @@ Node &Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
 	}
 }
 
-const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
+TargetPhrases::shared_const_ptr Node::Find(const PhraseBase &source, size_t pos) const
 {
 	assert(source.GetSize());
 	if (pos == source.GetSize()) {
@@ -58,7 +59,7 @@ const TargetPhrases *Node::Find(const PhraseBase &source, size_t pos) const
 		cerr << "word=" << word << endl;
 		Children::const_iterator iter = m_children.find(word);
 		if (iter == m_children.end()) {
-			return NULL;
+			return TargetPhrases::shared_const_ptr();
 		}
 		else {
 			const Node &child = iter->second;
@@ -107,6 +108,6 @@ void PhraseTableMemory::Load(System &system)
 TargetPhrases::shared_const_ptr PhraseTableMemory::Lookup(const Manager &mgr, InputPath &inputPath) const
 {
 	const SubPhrase &phrase = inputPath.GetSubPhrase();
-	const TargetPhrases *tps = m_root.Find(phrase);
-	return TargetPhrases::shared_const_ptr(tps);
+	TargetPhrases::shared_const_ptr tps = m_root.Find(phrase);
+	return tps;
 }

@@ -47,7 +47,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 			cerr << "path=" << path << endl;
 			cerr << "tps=" << tps << endl;
 			if (tps.get()) {
-				cerr << *tps << endl;
+				cerr << *tps.get() << endl;
 			}
 
 			path.AddTargetPhrases(*this, tps);

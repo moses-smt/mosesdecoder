@@ -15,12 +15,12 @@ public:
 	Node();
 	~Node();
 	void AddRule(Phrase &source, TargetPhrase *target);
-	const TargetPhrases *Find(const PhraseBase &source, size_t pos = 0) const;
+	TargetPhrases::shared_const_ptr Find(const PhraseBase &source, size_t pos = 0) const;
 
 protected:
 	typedef boost::unordered_map<Word, Node, Moses::UnorderedComparer<Word>, Moses::UnorderedComparer<Word> > Children;
 	Children m_children;
-	TargetPhrases *m_targetPhrases;
+	TargetPhrases::shared_ptr m_targetPhrases;
 
 	Node &AddRule(Phrase &source, TargetPhrase *target, size_t pos);
 
