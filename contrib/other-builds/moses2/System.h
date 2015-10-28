@@ -9,7 +9,7 @@
 #include <vector>
 #include "FeatureFunctions.h"
 #include "Weights.h"
-#include "util/pool.hh"
+#include "MemPool.h"
 #include "moses/FactorCollection.h"
 #include "moses/Parameter.h"
 
@@ -28,10 +28,10 @@ public:
 	const FeatureFunctions &GetFeatureFunctions() const
 	{ return m_featureFunctions; }
 
-	util::Pool &GetSystemPool()
+	MemPool &GetSystemPool()
 	{ return m_systemPool; }
 
-	util::Pool &GetManagerPool()
+	MemPool &GetManagerPool()
 	{ return m_managerPool; }
 
 	Moses::FactorCollection &GetVocab() const
@@ -44,8 +44,8 @@ protected:
   const Moses::Parameter &m_params;
 
   mutable Moses::FactorCollection m_vocab;
-  util::Pool m_systemPool;
-  util::Pool m_managerPool;
+  MemPool m_systemPool;
+  MemPool m_managerPool;
   FeatureFunctions m_featureFunctions;
   Weights m_weights;
 

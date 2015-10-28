@@ -11,7 +11,7 @@
 #include <string>
 #include <iostream>
 #include "Word.h"
-#include "util/pool.hh"
+#include "MemPool.h"
 #include "moses/FactorCollection.h"
 
 class PhraseBase
@@ -27,9 +27,9 @@ class Phrase : public PhraseBase
 {
 	  friend std::ostream& operator<<(std::ostream &, const Phrase &);
 public:
-  static Phrase *CreateFromString(util::Pool &pool, Moses::FactorCollection &vocab, const std::string &str);
+  static Phrase *CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str);
 
-  Phrase(util::Pool &pool, size_t size);
+  Phrase(MemPool &pool, size_t size);
   virtual ~Phrase();
 
   const Word& operator[](size_t pos) const {

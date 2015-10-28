@@ -10,11 +10,11 @@
 #include "Scores.h"
 #include "Manager.h"
 #include "System.h"
-#include "util/pool.hh"
+#include "MemPool.h"
 
 using namespace std;
 
-TargetPhrase *TargetPhrase::CreateFromString(util::Pool &pool, System &system, const std::string &str)
+TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, System &system, const std::string &str)
 {
 	Moses::FactorCollection &vocab = system.GetVocab();
 
@@ -26,7 +26,7 @@ TargetPhrase *TargetPhrase::CreateFromString(util::Pool &pool, System &system, c
 	return ret;
 }
 
-TargetPhrase::TargetPhrase(util::Pool &pool, System &system, size_t size)
+TargetPhrase::TargetPhrase(MemPool &pool, System &system, size_t size)
 :Phrase(pool, size)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(pool, system.GetFeatureFunctions().GetNumScores());

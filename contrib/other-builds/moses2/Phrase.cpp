@@ -8,11 +8,11 @@
 #include "Phrase.h"
 #include "Word.h"
 #include "moses/Util.h"
-#include "util/pool.hh"
+#include "MemPool.h"
 
 using namespace std;
 
-Phrase *Phrase::CreateFromString(util::Pool &pool, Moses::FactorCollection &vocab, const std::string &str)
+Phrase *Phrase::CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str)
 {
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
@@ -32,7 +32,7 @@ void Phrase::CreateFromString(Moses::FactorCollection &vocab, const std::vector<
 	}
 }
 
-Phrase::Phrase(util::Pool &pool, size_t size)
+Phrase::Phrase(MemPool &pool, size_t size)
 :m_size(size)
 {
   m_words = new (pool.Allocate<Word>(size)) Word[size];

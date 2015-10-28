@@ -14,7 +14,7 @@
 #include "Stack.h"
 #include "TargetPhrase.h"
 #include "moses/Bitmaps.h"
-#include "util/pool.hh"
+#include "MemPool.h"
 
 class System;
 class Phrase;
@@ -25,7 +25,7 @@ public:
 	Manager(System &system, const std::string &inputStr);
 	virtual ~Manager();
 
-	util::Pool &GetPool()
+	MemPool &GetPool()
 	{ return m_pool; }
 
 	const System &GetSystem() const
@@ -41,7 +41,7 @@ public:
 
 	void Decode();
 protected:
-	util::Pool &m_pool;
+	MemPool &m_pool;
 
 	const System &m_system;
 	Phrase *m_input;

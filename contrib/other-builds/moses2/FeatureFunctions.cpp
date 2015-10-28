@@ -10,8 +10,9 @@
 #include "StatefulFeatureFunction.h"
 #include "System.h"
 
-#include "PhraseTable.h"
+#include "SkeletonStatelessFF.h"
 #include "SkeletonStatefulFF.h"
+#include "PhraseTable.h"
 
 using namespace std;
 
@@ -83,7 +84,8 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 		ret = new PhraseTable(m_ffStartInd, line);
 	}
 	else {
-		ret = new SkeletonStatefulFF(m_ffStartInd, line);
+		//ret = new SkeletonStatefulFF(m_ffStartInd, line);
+		ret = new SkeletonStatelessFF(m_ffStartInd, line);
 	}
 
 	m_ffStartInd += ret->GetNumScores();

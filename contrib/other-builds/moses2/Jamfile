@@ -19,6 +19,7 @@ import path ;
  	 Scores.cpp 
  	 SearchNormal.cpp
  	 SkeletonStatefulFF.cpp 
+ 	 SkeletonStatelessFF.cpp 
  	 Stack.cpp 
  	 StatefulFeatureFunction.cpp 
  	 StatelessFeatureFunction.cpp 

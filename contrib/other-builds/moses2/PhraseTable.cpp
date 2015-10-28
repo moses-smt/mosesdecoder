@@ -82,7 +82,7 @@ void PhraseTable::Load(System &system)
 
 	Moses::FactorCollection &vocab = system.GetVocab();
 
-	util::Pool tmpPool;
+	MemPool tmpPool;
 	vector<string> toks;
 	Moses::InputFileStream strme(m_path);
 	string line;

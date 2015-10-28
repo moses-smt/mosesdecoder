@@ -17,14 +17,14 @@
 
 using namespace std;
 
-Scores::Scores(util::Pool &pool, size_t numScores)
+Scores::Scores(MemPool &pool, size_t numScores)
 :m_total(0)
 {
 	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
 	Init<SCORE>(m_scores, numScores, 0);
 }
 
-Scores::Scores(util::Pool &pool, size_t numScores, const Scores &origScores)
+Scores::Scores(MemPool &pool, size_t numScores, const Scores &origScores)
 :m_total(origScores.m_total)
 {
 	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];

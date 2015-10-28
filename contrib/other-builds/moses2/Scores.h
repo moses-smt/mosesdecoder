@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 #include "TypeDef.h"
-#include "util/pool.hh"
+#include "MemPool.h"
 
 class FeatureFunction;
 class System;
@@ -17,8 +17,8 @@ class System;
 class Scores {
 	  friend std::ostream& operator<<(std::ostream &, const Scores &);
 public:
-  Scores(util::Pool &pool, size_t numScores);
-  Scores(util::Pool &pool, size_t numScores, const Scores &origScores);
+  Scores(MemPool &pool, size_t numScores);
+  Scores(MemPool &pool, size_t numScores, const Scores &origScores);
   virtual ~Scores();
 
   SCORE GetTotalScore() const

@@ -21,7 +21,7 @@ Hypothesis::Hypothesis(Manager &mgr,
 ,m_range(range)
 ,m_prevHypo(NULL)
 {
-	util::Pool &pool = m_mgr.GetPool();
+	MemPool &pool = m_mgr.GetPool();
 
 	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
@@ -39,7 +39,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 ,m_range(pathRange)
 ,m_prevHypo(&prevHypo)
 {
-	util::Pool &pool = m_mgr.GetPool();
+	MemPool &pool = m_mgr.GetPool();
 	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 
