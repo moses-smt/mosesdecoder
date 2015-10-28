@@ -26,7 +26,7 @@ public:
 
 	virtual void SetParameter(const std::string& key, const std::string& value);
 	virtual void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
-	virtual const TargetPhrases *Lookup(const Manager &mgr, InputPath &inputPath) const;
+	virtual TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, InputPath &inputPath) const;
 
 	void SetPtInd(size_t ind)
 	{ m_ptInd = ind; }

@@ -43,10 +43,10 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
 	  BOOST_FOREACH(InputPath &path, inputPaths) {
 			const SubPhrase &phrase = path.GetSubPhrase();
-			const TargetPhrases *tps = Lookup(mgr, path);
+			TargetPhrases::shared_const_ptr tps = Lookup(mgr, path);
 			cerr << "path=" << path << endl;
 			cerr << "tps=" << tps << endl;
-			if (tps) {
+			if (tps.get()) {
 				cerr << *tps << endl;
 			}
 
@@ -55,7 +55,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 }
 
-const TargetPhrases *PhraseTable::Lookup(const Manager &mgr, InputPath &inputPath) const
+TargetPhrases::shared_const_ptr PhraseTable::Lookup(const Manager &mgr, InputPath &inputPath) const
 {
   UTIL_THROW2("Not implemented");
 }

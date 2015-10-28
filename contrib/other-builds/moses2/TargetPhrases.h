@@ -13,6 +13,9 @@ class TargetPhrases {
 	friend std::ostream& operator<<(std::ostream &, const TargetPhrases &);
 	typedef std::vector<const TargetPhrase*> Coll;
 public:
+  typedef boost::shared_ptr<TargetPhrases> shared_ptr;
+  typedef boost::shared_ptr<TargetPhrases const> shared_const_ptr;
+
   typedef Coll::iterator iterator;
   typedef Coll::const_iterator const_iterator;
   //! iterators

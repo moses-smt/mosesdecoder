@@ -63,10 +63,10 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 	}
 
 	const Moses::Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
-	const std::vector<const TargetPhrases*> &tpsAllPt = path.GetTargetPhrases();
+	const std::vector<TargetPhrases::shared_const_ptr> &tpsAllPt = path.GetTargetPhrases();
 
 	for (size_t i = 0; i < tpsAllPt.size(); ++i) {
-		const TargetPhrases *tps = tpsAllPt[i];
+		const TargetPhrases *tps = tpsAllPt[i].get();
 		if (tps) {
 			Extend(hypo, *tps, pathRange, newBitmap);
 		}

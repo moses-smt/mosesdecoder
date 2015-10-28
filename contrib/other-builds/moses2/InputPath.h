@@ -10,9 +10,9 @@
 #include <iostream>
 #include <vector>
 #include "Phrase.h"
+#include "TargetPhrases.h"
 #include "moses/Range.h"
-
-class TargetPhrases;
+;
 class PhraseTable;
 
 class InputPath {
@@ -27,15 +27,15 @@ public:
 	const Moses::Range &GetRange() const
 	{ return m_range; }
 
-	const std::vector<const TargetPhrases*> &GetTargetPhrases() const
+	const std::vector<TargetPhrases::shared_const_ptr> &GetTargetPhrases() const
 	{ return m_targetPhrases; }
 
-	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);
+	void AddTargetPhrases(const PhraseTable &pt, TargetPhrases::shared_const_ptr tps);
 
 protected:
 	SubPhrase m_subPhrase;
 	Moses::Range m_range;
-	std::vector<const TargetPhrases*> m_targetPhrases;
+	std::vector<TargetPhrases::shared_const_ptr> m_targetPhrases;
 };
 
 #endif /* INPUTPATH_H_ */

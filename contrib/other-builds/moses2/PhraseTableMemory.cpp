@@ -104,9 +104,9 @@ void PhraseTableMemory::Load(System &system)
 	}
 }
 
-const TargetPhrases *PhraseTableMemory::Lookup(const Manager &mgr, InputPath &inputPath) const
+TargetPhrases::shared_const_ptr PhraseTableMemory::Lookup(const Manager &mgr, InputPath &inputPath) const
 {
 	const SubPhrase &phrase = inputPath.GetSubPhrase();
 	const TargetPhrases *tps = m_root.Find(phrase);
-	return tps;
+	return TargetPhrases::shared_const_ptr(tps);
 }
