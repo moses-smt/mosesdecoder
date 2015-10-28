@@ -44,7 +44,7 @@ using namespace boost::algorithm;
 namespace Moses
 {
 
-typename PhraseDictionaryCompact::SentenceCache PhraseDictionaryCompact::m_sentenceCache;
+PhraseDictionaryCompact::SentenceCache PhraseDictionaryCompact::m_sentenceCache;
 
 PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
   :PhraseDictionary(line, true)
