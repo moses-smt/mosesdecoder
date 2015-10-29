@@ -181,6 +181,8 @@ vector <map <string,int> > HwcmSScorer::MakeTuples(string sentence, string dep, 
 
 	int child,head;
 	for(size_t i=0; i<dependencies.size();i=i+3){
+		if (i+2 >= dependencies.size())
+			continue;
 		child = strtol (dependencies[i].c_str(),NULL,10);
 		head = strtol (dependencies[i+1].c_str(),NULL,10);
 		itTuples = dependencyTuples.insert(pair<int, pair<int,string> >(child,pair<int,string>(head,dependencies[i+2])));

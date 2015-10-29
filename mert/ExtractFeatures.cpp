@@ -233,6 +233,8 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 	int dep,gov;
 	string rel;
 	for(size_t i=0; i<dependencies.size();i=i+3){
+		if(i+2 >= dependencies.size())
+			continue;
 		rel = dependencies[i+2];
 		//relations from parser -> (dep,gov,rel)
 		//LM model scores: (rel,gov,dep) where rel in (dobj,iobj,nsubj,nsubjpass)
