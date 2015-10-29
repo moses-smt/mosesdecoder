@@ -76,15 +76,25 @@ void Scores::PlusEquals(const System &system, const Scores &scores)
 {
 	size_t numScores = system.GetFeatureFunctions().GetNumScores();
 	for (size_t i = 0; i < numScores; ++i) {
-		m_scores[i] = scores.m_scores[i];
+		m_scores[i] += scores.m_scores[i];
 	}
 	m_total += scores.m_total;
 
 }
 
-void Scores::CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const System &system)
+void Scores::CreateFromString(const std::string &str,
+		const FeatureFunction &featureFunction,
+		const System &system,
+		bool transformScores)
 {
 	vector<SCORE> scores = Moses::Tokenize<SCORE>(str);
+	if (transformScores) {
+	    std::transform(scores.begin(), scores.end(), scores.begin(), Moses::TransformScore);
+	}
+
+	std::copy(scores.begin(),scores.end(),
+	              std::ostream_iterator<SCORE>(cerr," "));
+
 	PlusEquals(system, featureFunction, scores);
 }
 

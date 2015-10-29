@@ -55,8 +55,6 @@ void FeatureFunctions::LoadFeatureFunctions()
 		  pt->SetPtInd(m_phraseTables.size());
 		  m_phraseTables.push_back(pt);
 	  }
-
-	  m_ffStartInd += ff->GetNumScores();
   }
 
   // load, everything but pts

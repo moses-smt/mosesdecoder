@@ -44,12 +44,13 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 	  BOOST_FOREACH(InputPath &path, inputPaths) {
 			const SubPhrase &phrase = path.GetSubPhrase();
 			TargetPhrases::shared_const_ptr tps = Lookup(mgr, path);
+			/*
 			cerr << "path=" << path << endl;
 			cerr << "tps=" << tps << endl;
 			if (tps.get()) {
 				cerr << *tps.get() << endl;
 			}
-
+			*/
 			path.AddTargetPhrases(*this, tps);
 	  }
 

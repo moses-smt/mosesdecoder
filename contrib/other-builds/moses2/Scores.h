@@ -25,7 +25,10 @@ public:
   SCORE GetTotalScore() const
   { return m_total; }
 
-  void CreateFromString(const std::string &str, const FeatureFunction &featureFunction, const System &system);
+  void CreateFromString(const std::string &str,
+		  const FeatureFunction &featureFunction,
+		  const System &system,
+		  bool transformScores);
 
   void PlusEquals(const System &system,
 		  const FeatureFunction &featureFunction,

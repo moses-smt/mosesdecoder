@@ -56,7 +56,7 @@ TargetPhrases::shared_const_ptr Node::Find(const PhraseBase &source, size_t pos)
 	}
 	else {
 		const Word &word = source[pos];
-		cerr << "word=" << word << endl;
+		//cerr << "word=" << word << endl;
 		Children::const_iterator iter = m_children.find(word);
 		if (iter == m_children.end()) {
 			return TargetPhrases::shared_const_ptr();
@@ -98,7 +98,7 @@ void PhraseTableMemory::Load(System &system)
 		//cerr << "created soure" << endl;
 		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetSystemPool(), system, toks[1]);
 		//cerr << "created target" << endl;
-		target->GetScores().CreateFromString(toks[2], *this, system);
+		target->GetScores().CreateFromString(toks[2], *this, system, true);
 		//cerr << "created scores" << endl;
 
 		system.GetFeatureFunctions().EvaluateInIsolation(system, *source, *target, target->GetScores(), NULL);

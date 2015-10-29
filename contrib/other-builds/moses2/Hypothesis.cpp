@@ -62,7 +62,7 @@ size_t Hypothesis::hash() const
   size_t seed;
 
   // coverage
-  seed = m_sourceCompleted.hash();
+  seed = (size_t) &m_sourceCompleted;
 
   // states
   for (size_t i = 0; i < numStatefulFFs; ++i) {
@@ -78,7 +78,7 @@ bool Hypothesis::operator==(const Hypothesis &other) const
 {
 	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
   // coverage
-  if (m_sourceCompleted != other.m_sourceCompleted) {
+  if (&m_sourceCompleted != &other.m_sourceCompleted) {
 	return false;
  }
 
