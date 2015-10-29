@@ -88,7 +88,7 @@ void Scores::CreateFromString(const std::string &str, const FeatureFunction &fea
 	PlusEquals(system, featureFunction, scores);
 }
 
-void Scores::Debug(std::ostream &out, const FeatureFunctions &ffs)
+void Scores::Debug(std::ostream &out, const FeatureFunctions &ffs) const
 {
 	out << m_total << " = ";
 	size_t numScores = ffs.GetNumScores();

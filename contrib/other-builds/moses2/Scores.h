@@ -38,7 +38,7 @@ public:
   void PlusEquals(const System &system,
 		  const Scores &scores);
 
-  void Debug(std::ostream &out, const FeatureFunctions &ffs);
+  void Debug(std::ostream &out, const FeatureFunctions &ffs) const;
 
 protected:
 	SCORE *m_scores;

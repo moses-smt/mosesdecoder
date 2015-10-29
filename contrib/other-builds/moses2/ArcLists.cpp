@@ -4,10 +4,12 @@
  *  Created on: 26 Oct 2015
  *      Author: hieu
  */
-
+#include <iostream>
 #include <boost/foreach.hpp>
 #include "ArcLists.h"
 #include "util/exception.hh"
+
+using namespace std;
 
 ArcLists::ArcLists() {
 	// TODO Auto-generated constructor stub
@@ -23,6 +25,7 @@ ArcLists::~ArcLists() {
 
 void ArcLists::AddArc(bool added, const Hypothesis *currHypo,const Hypothesis *otherHypo)
 {
+	//cerr << added << " " << currHypo << " " << otherHypo << endl;
 	if (added) {
 		// we're winners!
 		ArcList *arcList;

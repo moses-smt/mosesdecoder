@@ -30,11 +30,16 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
 		  // incoming hypo is better than the one we have
 		  m_hypos.erase(addRet.first);
+
+		  // re-add. It better go in
+		  std::pair<iterator, bool> addRet = m_hypos.insert(hypo);
+		  assert(addRet.second);
+
 		  return StackAdd(true, hypoExisting);
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
-		  return StackAdd(false, hypo);
+		  return StackAdd(false, hypoExisting);
 	  }
   }
 }

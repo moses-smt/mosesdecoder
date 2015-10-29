@@ -63,7 +63,6 @@ size_t Hypothesis::hash() const
 
   // coverage
   seed = m_sourceCompleted.hash();
-  seed = rand();
 
   // states
   for (size_t i = 0; i < numStatefulFFs; ++i) {
@@ -109,7 +108,9 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 
 std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 {
-
+	obj.OutputToStream(out);
+	out << " ";
+	obj.GetScores().Debug(out, obj.m_mgr.GetSystem().GetFeatureFunctions());
 	return out;
 }
 

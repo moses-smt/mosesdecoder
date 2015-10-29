@@ -63,6 +63,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 	}
 
 	const Moses::Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
+
 	const std::vector<TargetPhrases::shared_const_ptr> &tpsAllPt = path.GetTargetPhrases();
 
 	for (size_t i = 0; i < tpsAllPt.size(); ++i) {
@@ -92,7 +93,8 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	newHypo->EvaluateWhenApplied();
 
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
-	StackAdd stackAdded = m_stacks[numWordsCovered].Add(newHypo);
+	Stack &stack = m_stacks[numWordsCovered];
+	StackAdd stackAdded = stack.Add(newHypo);
 
 	m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 }
@@ -110,7 +112,10 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
 	const Stack &lastStack = m_stacks.back();
 	std::vector<const Hypothesis*> sortedHypos = lastStack.GetSortedHypos();
 
-	const Hypothesis *best = sortedHypos[0];
+	const Hypothesis *best = NULL;
+	if (sortedHypos.size()) {
+		best = sortedHypos[0];
+	}
 	return best;
 }
 

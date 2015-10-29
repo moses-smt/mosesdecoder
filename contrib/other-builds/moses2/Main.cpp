@@ -36,7 +36,13 @@ int main(int argc, char** argv)
 		mgr.Decode();
 
 		const Hypothesis *bestHypo = mgr.GetBestHypothesis();
-		bestHypo->OutputToStream(cout);
+		if (bestHypo) {
+			cerr << *bestHypo << endl;
+			bestHypo->OutputToStream(cout);
+		}
+		else {
+			cout << "NO TRANSLATION";
+		}
 		cout << endl;
 	}
 
