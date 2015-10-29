@@ -13,6 +13,8 @@
 #include "Scores.h"
 #include "StatefulFeatureFunction.h"
 
+using namespace std;
+
 Hypothesis::Hypothesis(Manager &mgr,
 		const TargetPhrase &tp,
 		const Moses::Range &range,
@@ -135,5 +137,6 @@ void Hypothesis::EvaluateWhenApplied()
 	  m_ffStates[statefulInd] = state;
   }
 
+  cerr << *this << endl;
 }
 

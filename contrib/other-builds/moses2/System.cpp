@@ -18,8 +18,9 @@ System::System(const Moses::Parameter &params)
 :m_featureFunctions(*this)
 ,m_params(params)
 {
-	m_featureFunctions.LoadFeatureFunctions();
+	m_featureFunctions.Create();
 	LoadWeights();
+	m_featureFunctions.Load();
 }
 
 System::~System() {
@@ -30,6 +31,7 @@ void System::LoadWeights()
   const Moses::PARAM_VEC *weightParams = m_params.GetParam("weight");
   UTIL_THROW_IF2(weightParams == NULL, "Must have [weight] section");
 
+  m_weights.Init(m_featureFunctions);
   BOOST_FOREACH(const std::string &line, *weightParams) {
 	  m_weights.CreateFromString(m_featureFunctions, line);
   }

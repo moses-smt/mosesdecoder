@@ -51,6 +51,7 @@ void Scores::PlusEquals(const System &system,
 		SCORE incrScore = scores[i];
 		m_scores[ffStartInd + i] += incrScore;
 
+		cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
 		SCORE weight = weights[ffStartInd + i];
 		m_total += incrScore * weight;
 	}
@@ -72,13 +73,13 @@ void Scores::PlusEquals(const System &system,
 
 }
 
-void Scores::PlusEquals(const System &system, const Scores &scores)
+void Scores::PlusEquals(const System &system, const Scores &other)
 {
 	size_t numScores = system.GetFeatureFunctions().GetNumScores();
 	for (size_t i = 0; i < numScores; ++i) {
-		m_scores[i] += scores.m_scores[i];
+		m_scores[i] += other.m_scores[i];
 	}
-	m_total += scores.m_total;
+	m_total += other.m_total;
 
 }
 

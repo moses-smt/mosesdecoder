@@ -31,7 +31,7 @@ FeatureFunctions::~FeatureFunctions() {
 	Moses::RemoveAllInColl(m_featureFunctions);
 }
 
-void FeatureFunctions::LoadFeatureFunctions()
+void FeatureFunctions::Create()
 {
   const Moses::Parameter &params = m_system.GetParameter();
 
@@ -56,7 +56,10 @@ void FeatureFunctions::LoadFeatureFunctions()
 		  m_phraseTables.push_back(pt);
 	  }
   }
+}
 
+void FeatureFunctions::Load()
+{
   // load, everything but pts
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
 	  FeatureFunction *nonConstFF = const_cast<FeatureFunction*>(ff);
@@ -107,7 +110,7 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	return ret;
 }
 
-const FeatureFunction &FeatureFunctions::FindFeatureFunction(const std::string &name)
+const FeatureFunction &FeatureFunctions::FindFeatureFunction(const std::string &name) const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
 	  if (ff->GetName() == name) {

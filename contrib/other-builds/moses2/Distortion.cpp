@@ -11,6 +11,8 @@
 #include "moses/Range.h"
 #include "moses/Bitmap.h"
 
+using namespace std;
+
 struct DistortionState_traditional : public Moses::FFState {
   Moses::Range range;
   int first_gap;
@@ -79,6 +81,7 @@ Moses::FFState* Distortion::EvaluateWhenApplied(const Manager &mgr,
             prev.range,
             hypo.GetRange(),
             prev.first_gap);
+	//cerr << "distortionScore=" << distortionScore << endl;
 
 	score.PlusEquals(mgr.GetSystem(), *this, distortionScore);
 

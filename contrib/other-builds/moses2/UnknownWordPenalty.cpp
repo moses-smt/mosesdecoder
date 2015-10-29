@@ -45,7 +45,8 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 		//const Moses::Factor *factor = fc.AddFactor("SSS", false);
 		word[0] = factor;
 
-		// TODO - set score
+		Scores &scores = target->GetScores();
+		scores.PlusEquals(mgr.GetSystem(), *this, -100);
 
 		system.GetFeatureFunctions().EvaluateInIsolation(system, source, *target, target->GetScores(), NULL);
 

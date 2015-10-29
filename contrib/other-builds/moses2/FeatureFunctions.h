@@ -36,9 +36,10 @@ public:
 	size_t GetNumScores() const
 	{ return m_ffStartInd; }
 
-    void LoadFeatureFunctions();
+	void Create();
+    void Load();
 
-    const FeatureFunction &FindFeatureFunction(const std::string &name);
+    const FeatureFunction &FindFeatureFunction(const std::string &name) const;
 
 	  virtual void
 	  EvaluateInIsolation(const System &system,
