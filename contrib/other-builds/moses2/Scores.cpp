@@ -60,7 +60,7 @@ void Scores::PlusEquals(const System &system,
 		  const FeatureFunction &featureFunction,
 		  const SCORE &score)
 {
-	assert(featureFunction.GetNumScores() = 1);
+	assert(featureFunction.GetNumScores() == 1);
 
 	const Weights &weights = system.GetWeights();
 
