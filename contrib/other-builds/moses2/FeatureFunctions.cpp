@@ -119,3 +119,14 @@ const FeatureFunction &FeatureFunctions::FindFeatureFunction(const std::string &
 
 }
 
+void
+FeatureFunctions::EvaluateInIsolation(const System &system,
+		  const Phrase &source, const TargetPhrase &targetPhrase,
+        Scores& scores,
+        Scores *estimatedFutureScores) const
+{
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+	  ff->EvaluateInIsolation(system, source, targetPhrase, scores, estimatedFutureScores);
+  }
+
+}

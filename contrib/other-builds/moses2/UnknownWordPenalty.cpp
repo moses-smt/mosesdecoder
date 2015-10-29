@@ -53,10 +53,10 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 }
 
 void
-UnknownWordPenalty::EvaluateInIsolation(const Manager &mgr,
+UnknownWordPenalty::EvaluateInIsolation(const System &system,
 		const Phrase &source, const TargetPhrase &targetPhrase,
-		Scores& scores,
-		Scores& estimatedFutureScores) const
+		Scores &scores,
+		Scores *estimatedFutureScores) const
 {
 
 }

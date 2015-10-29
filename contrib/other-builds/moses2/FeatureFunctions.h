@@ -16,6 +16,10 @@ class System;
 class FeatureFunction;
 class StatefulFeatureFunction;
 class PhraseTable;
+class Manager;
+class Phrase;
+class TargetPhrase;
+class Scores;
 
 class FeatureFunctions {
 public:
@@ -34,6 +38,12 @@ public:
     void LoadFeatureFunctions();
 
     const FeatureFunction &FindFeatureFunction(const std::string &name);
+
+	  virtual void
+	  EvaluateInIsolation(const System &system,
+			  const Phrase &source, const TargetPhrase &targetPhrase,
+	          Scores &scores,
+	          Scores *estimatedFutureScores) const;
 
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;

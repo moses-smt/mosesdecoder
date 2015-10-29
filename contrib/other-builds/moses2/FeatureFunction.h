@@ -37,10 +37,10 @@ public:
 	  // For SCFG decoding, the source contains non-terminals, NOT the raw
 	  // source from the input sentence
 	  virtual void
-	  EvaluateInIsolation(const Manager &mgr,
+	  EvaluateInIsolation(const System &system,
 			  const Phrase &source, const TargetPhrase &targetPhrase,
-	          Scores& scores,
-	          Scores& estimatedFutureScores) const = 0;
+	          Scores &scores,
+	          Scores *estimatedFutureScores) const = 0;
 
 protected:
 	size_t m_startInd;

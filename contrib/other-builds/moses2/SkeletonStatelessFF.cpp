@@ -18,10 +18,10 @@ SkeletonStatelessFF::~SkeletonStatelessFF() {
 }
 
 void
-SkeletonStatelessFF::EvaluateInIsolation(const Manager &mgr,
+SkeletonStatelessFF::EvaluateInIsolation(const System &system,
 		const Phrase &source, const TargetPhrase &targetPhrase,
-		Scores& scores,
-		Scores& estimatedFutureScores) const
+		Scores &scores,
+		Scores *estimatedFutureScores) const
 {
 
 }

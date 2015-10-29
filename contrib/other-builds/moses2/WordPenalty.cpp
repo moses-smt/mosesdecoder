@@ -22,15 +22,14 @@ WordPenalty::~WordPenalty() {
 }
 
 void
-WordPenalty::EvaluateInIsolation(const Manager &mgr,
+WordPenalty::EvaluateInIsolation(const System &system,
 		const Phrase &source,
 		const TargetPhrase &targetPhrase,
-		Scores& scores,
-		Scores& estimatedFutureScores) const
+		Scores &scores,
+		Scores *estimatedFutureScores) const
 {
   SCORE score = - (SCORE) targetPhrase.GetSize();
-  scores.PlusEquals(mgr.GetSystem(), *this, score);
-
+  scores.PlusEquals(system, *this, score);
 }
 
 

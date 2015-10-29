@@ -17,11 +17,11 @@ public:
 	virtual ~WordPenalty();
 
 	  virtual void
-	  EvaluateInIsolation(const Manager &mgr,
+	  EvaluateInIsolation(const System &system,
 			  const Phrase &source,
 			  const TargetPhrase &targetPhrase,
-			  Scores& scores,
-			  Scores& estimatedFutureScores) const;
+			  Scores &scores,
+			  Scores *estimatedFutureScores) const;
 
 };
 
