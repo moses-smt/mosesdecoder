@@ -32,6 +32,8 @@ PerScorer.cpp
 HwcmSScorer.cpp
 HwcmScorer.cpp
 ../moses/FF/InternalTree.cpp
+../moses/FF/CreateJavaVM.cpp
+ExtractFeatures.cpp
 Scorer.cpp
 ScorerFactory.cpp
 Optimizer.cpp
