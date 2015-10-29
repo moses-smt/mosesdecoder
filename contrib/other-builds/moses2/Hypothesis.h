@@ -15,6 +15,7 @@
 #include "Scores.h"
 
 class Manager;
+class Phrase;
 class TargetPhrase;
 class Scores;
 
@@ -45,6 +46,8 @@ public:
 
   void OutputToStream(std::ostream &out) const;
 
+  void EmptyHypothesisState(const Phrase &input);
+
 protected:
   Manager &m_mgr;
   const TargetPhrase &m_targetPhrase;
@@ -52,7 +55,7 @@ protected:
   const Moses::Range &m_range;
   const Hypothesis *m_prevHypo;
 
-  Moses::FFState **m_ffStates;
+  const Moses::FFState **m_ffStates;
   Scores *m_scores;
 };
 

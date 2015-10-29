@@ -5,11 +5,13 @@
  *      Author: hieu
  */
 
+#include <boost/foreach.hpp>
 #include <stdlib.h>
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "System.h"
 #include "Scores.h"
+#include "StatefulFeatureFunction.h"
 
 Hypothesis::Hypothesis(Manager &mgr,
 		const TargetPhrase &tp,
@@ -24,7 +26,7 @@ Hypothesis::Hypothesis(Manager &mgr,
 	MemPool &pool = m_mgr.GetPool();
 
 	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
-	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
+	m_ffStates = (const Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 
 	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().GetFeatureFunctions().GetNumScores());
 }
@@ -41,7 +43,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 {
 	MemPool &pool = m_mgr.GetPool();
 	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
-	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
+	m_ffStates = (const Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 
 	m_scores = new (pool.Allocate<Scores>())
 			Scores(pool,
@@ -110,3 +112,15 @@ std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 
 	return out;
 }
+
+void Hypothesis::EmptyHypothesisState(const Phrase &input)
+{
+	const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions();
+	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
+		  size_t statefulInd = sfff->GetStatefulInd();
+		  const Moses::FFState *state = sfff->EmptyHypothesisState(m_mgr, input);
+		  m_ffStates[statefulInd] = state;
+	  }
+}
+
+

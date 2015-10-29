@@ -46,6 +46,7 @@ void FeatureFunctions::LoadFeatureFunctions()
 
 	  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
 	  if (sfff) {
+		  sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
 		  m_statefulFeatureFunctions.push_back(sfff);
 	  }
 

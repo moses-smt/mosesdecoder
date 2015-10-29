@@ -51,6 +51,8 @@ void Manager::Decode()
 {
 	const Moses::Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
 	Hypothesis *initHypo = new (GetPool().Allocate<Hypothesis>()) Hypothesis(*this, m_initPhrase, m_initRange, initBitmap);
+	initHypo->EmptyHypothesisState(*m_input);
+
 	StackAdd stackAdded = m_stacks[0].Add(initHypo);
 	assert(stackAdded.added);
 

@@ -30,10 +30,13 @@ public:
   void PlusEquals(const System &system,
 		  const FeatureFunction &featureFunction,
 		  const SCORE &score);
+
   void PlusEquals(const System &system,
 		  const FeatureFunction &featureFunction,
 		  const std::vector<SCORE> &scores);
-  void PlusEquals(const System &system, const Scores &scores);
+
+  void PlusEquals(const System &system,
+		  const Scores &scores);
 
   void Debug(std::ostream &out, const FeatureFunctions &ffs);
 

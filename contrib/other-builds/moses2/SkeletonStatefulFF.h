@@ -16,11 +16,18 @@ public:
 	SkeletonStatefulFF(size_t startInd, const std::string &line);
 	virtual ~SkeletonStatefulFF();
 
+  virtual const Moses::FFState* EmptyHypothesisState(const Manager &mgr, const Phrase &input) const;
+
   virtual void
   EvaluateInIsolation(const System &system,
 		  const PhraseBase &source, const TargetPhrase &targetPhrase,
 		  Scores &scores,
 		  Scores *estimatedFutureScores) const;
+
+  virtual Moses::FFState* EvaluateWhenApplied(const Manager &mgr,
+    const Hypothesis &hypo,
+    const Moses::FFState &prevState,
+    Scores &score) const;
 
 };
 
