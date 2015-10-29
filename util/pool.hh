@@ -25,12 +25,6 @@ class Pool {
       }
     }
 
-    template<typename T>
-    T *Allocate(size_t num = 1) {
-    	void *ret = Allocate(sizeof(T) * num);
-    	return (T*) ret;
-    }
-
     void FreeAll();
 
   private:
