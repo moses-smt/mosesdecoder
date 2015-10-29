@@ -17,6 +17,7 @@ class FeatureFunction;
 class StatefulFeatureFunction;
 class PhraseTable;
 class Manager;
+class PhraseBase;
 class Phrase;
 class TargetPhrase;
 class Scores;
@@ -41,7 +42,7 @@ public:
 
 	  virtual void
 	  EvaluateInIsolation(const System &system,
-			  const Phrase &source, const TargetPhrase &targetPhrase,
+			  const PhraseBase &source, const TargetPhrase &targetPhrase,
 	          Scores &scores,
 	          Scores *estimatedFutureScores) const;
 

@@ -29,8 +29,8 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 		ret.reset(tps);
 	}
 	else {
-		const SubPhrase &phrase = inputPath.GetSubPhrase();
-		const Word &sourceWord = phrase[0];
+		const SubPhrase &source = inputPath.GetSubPhrase();
+		const Word &sourceWord = source[0];
 		const Moses::Factor *factor = sourceWord[0];
 
 		tps = new TargetPhrases();
@@ -38,14 +38,18 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 		MemPool &pool = mgr.GetPool();
 		const System &system = mgr.GetSystem();
 
-		TargetPhrase *tp = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
-		Word &word = (*tp)[0];
+		TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
+		Word &word = (*target)[0];
 
 		//Moses::FactorCollection &fc = system.GetVocab();
 		//const Moses::Factor *factor = fc.AddFactor("SSS", false);
 		word[0] = factor;
 
-		tps->AddTargetPhrase(*tp);
+		// TODO - set score
+
+		system.GetFeatureFunctions().EvaluateInIsolation(system, source, *target, target->GetScores(), NULL);
+
+		tps->AddTargetPhrase(*target);
 		ret.reset(tps);
 	}
 
@@ -54,7 +58,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 
 void
 UnknownWordPenalty::EvaluateInIsolation(const System &system,
-		const Phrase &source, const TargetPhrase &targetPhrase,
+		const PhraseBase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedFutureScores) const
 {

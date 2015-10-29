@@ -18,7 +18,7 @@ public:
 
 	  virtual void
 	  EvaluateInIsolation(const System &system,
-			  const Phrase &source,
+			  const PhraseBase &source,
 			  const TargetPhrase &targetPhrase,
 			  Scores &scores,
 			  Scores *estimatedFutureScores) const;
