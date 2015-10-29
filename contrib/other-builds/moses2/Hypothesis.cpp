@@ -123,4 +123,16 @@ void Hypothesis::EmptyHypothesisState(const Phrase &input)
 	  }
 }
 
+void Hypothesis::EvaluateWhenApplied()
+{
+  const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
+	  size_t statefulInd = sfff->GetStatefulInd();
+	  const Moses::FFState *prevState = m_prevHypo->GetState(statefulInd);
+	  assert(prevState);
+	  const Moses::FFState *state = sfff->EvaluateWhenApplied(m_mgr, *this, *prevState, *m_scores);
+	  m_ffStates[statefulInd] = state;
+  }
+
+}
 

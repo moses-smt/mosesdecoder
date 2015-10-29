@@ -44,9 +44,14 @@ public:
   const Scores &GetScores() const
   { return *m_scores; }
 
+  const Moses::FFState *GetState(size_t ind) const
+  { return m_ffStates[ind]; }
+
   void OutputToStream(std::ostream &out) const;
 
   void EmptyHypothesisState(const Phrase &input);
+
+  void EvaluateWhenApplied();
 
 protected:
   Manager &m_mgr;
