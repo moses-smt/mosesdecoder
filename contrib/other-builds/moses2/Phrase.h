@@ -58,12 +58,12 @@ class SubPhrase : public PhraseBase
 public:
   SubPhrase(const Phrase &origPhrase, size_t start, size_t size);
   virtual const Word& operator[](size_t pos) const
-  { return m_origPhrase[pos + m_start]; }
+  { return (*m_origPhrase)[pos + m_start]; }
 
   virtual size_t GetSize() const
   { return m_end - m_start + 1; }
 
 protected:
-  const Phrase &m_origPhrase;
+  const Phrase *m_origPhrase;
   size_t m_start, m_end;
 };

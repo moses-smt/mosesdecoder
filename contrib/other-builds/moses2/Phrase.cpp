@@ -64,7 +64,7 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 
 ////////////////////////////////////////////////////////////
 SubPhrase::SubPhrase(const Phrase &origPhrase, size_t start, size_t end)
-:m_origPhrase(origPhrase)
+:m_origPhrase(&origPhrase)
 ,m_start(start)
 ,m_end(end)
 {
