@@ -33,6 +33,9 @@ public:
 	{
 		m_coll.push_back(&targetPhrase);
 	}
+
+	size_t GetSize() const
+	{ return m_coll.size(); }
 protected:
 	Coll m_coll;
 

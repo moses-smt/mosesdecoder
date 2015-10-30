@@ -43,6 +43,7 @@ struct LMState : public Moses::PointerState
 ////////////////////////////////////////////////////////////////////////////////////////
 LanguageModel::LanguageModel(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
+,m_oov(-100)
 {
 	ReadParameters();
 }
@@ -142,6 +143,7 @@ Moses::FFState* LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 	for (size_t i = 0; i < numWords; ++i) {
 		context[i] = prevLMState.lastWords[i];
 	}
+	//DebugContext(context);
 
 	SCORE score = 0;
 	std::pair<SCORE, void*> fromScoring;
@@ -166,12 +168,15 @@ Moses::FFState* LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 	}
 	else {
 		assert(context.size());
-		context.resize(context.size() - 1);
+		if (context.size() == m_order) {
+			context.resize(context.size() - 1);
+		}
 	}
 
 	scores.PlusEquals(mgr.GetSystem(), *this, score);
 
 	// return state
+	//DebugContext(context);
 
 	MemPool &pool = mgr.GetPool();
 	return new (pool.Allocate<LMState>()) LMState(pool, fromScoring.second, context);
@@ -193,8 +198,8 @@ void LanguageModel::ShiftOrPush(std::vector<const Moses::Factor*> &context, cons
 
 std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Factor*> &context) const
 {
-	cerr << "context=";
-	DebugContext(context);
+	//cerr << "context=";
+	//DebugContext(context);
 
 	std::pair<SCORE, void*> ret;
 	size_t stoppedAtInd;
@@ -210,19 +215,21 @@ std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Fact
 		ret.second = (void*) &node;
 
 		// get backoff score
+		/*
 		std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd - 1, context.end());
+		cerr << "stoppedAtInd=" << stoppedAtInd << " " << context.size() << endl;
 		BackoffScore(backoff);
+		*/
 	}
 
-	cerr << "score=" << ret.first << endl;
-
+	//cerr << "score=" << ret.first << endl;
 	return ret;
 }
 
 SCORE LanguageModel::BackoffScore(const std::vector<const Moses::Factor*> &context) const
 {
-	cerr << "backoff=";
-	DebugContext(context);
+	//cerr << "backoff=";
+	//DebugContext(context);
 
 	SCORE ret;
 	size_t stoppedAtInd;
@@ -233,10 +240,17 @@ SCORE LanguageModel::BackoffScore(const std::vector<const Moses::Factor*> &conte
 		ret =  node.getValue().backoff;
 	}
 	else {
+		if (stoppedAtInd == 0) {
+			ret = m_oov;
+			stoppedAtInd = 1;
+		}
+		else {
+			ret = node.getValue().backoff;
+		}
 
-		// get backoff score
+		// recursive
 		std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd, context.end());
-		BackoffScore(backoff);
+		ret += BackoffScore(backoff);
 	}
 
 }
