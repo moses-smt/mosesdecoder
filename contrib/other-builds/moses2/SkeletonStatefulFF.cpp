@@ -52,7 +52,7 @@ SkeletonStatefulFF::EvaluateInIsolation(const System &system,
 Moses::FFState* SkeletonStatefulFF::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const Moses::FFState &prevState,
-  Scores &score) const
+  Scores &scores) const
 {
 
 }

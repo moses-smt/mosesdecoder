@@ -72,7 +72,7 @@ Distortion::EvaluateInIsolation(const System &system,
 Moses::FFState* Distortion::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const Moses::FFState &prevState,
-  Scores &score) const
+  Scores &scores) const
 {
 	MemPool &pool = mgr.GetPool();
 
@@ -83,7 +83,7 @@ Moses::FFState* Distortion::EvaluateWhenApplied(const Manager &mgr,
             prev.first_gap);
 	//cerr << "distortionScore=" << distortionScore << endl;
 
-	score.PlusEquals(mgr.GetSystem(), *this, distortionScore);
+	scores.PlusEquals(mgr.GetSystem(), *this, distortionScore);
 
 	DistortionState_traditional* res = new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional(
 	    hypo.GetRange(),

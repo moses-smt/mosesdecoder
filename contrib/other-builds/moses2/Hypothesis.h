@@ -44,6 +44,9 @@ public:
   const Scores &GetScores() const
   { return *m_scores; }
 
+  const TargetPhrase &GetTargetPhrase() const
+  { return m_targetPhrase; }
+
   const Moses::FFState *GetState(size_t ind) const
   { return m_ffStates[ind]; }
 

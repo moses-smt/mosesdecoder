@@ -27,7 +27,7 @@ public:
   virtual Moses::FFState* EvaluateWhenApplied(const Manager &mgr,
     const Hypothesis &hypo,
     const Moses::FFState &prevState,
-    Scores &score) const;
+    Scores &scores) const;
 
 };
 

@@ -12,7 +12,6 @@
 #include "TypeDef.h"
 #include "moses/Factor.h"
 #include "moses/TypeDef.h"
-#include "moses/LM/PointerState.h"
 #include "MorphoTrie/MorphTrie.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +61,7 @@ public:
 	  virtual Moses::FFState* EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,
 	    const Moses::FFState &prevState,
-	    Scores &score) const;
+	    Scores &scores) const;
 
 protected:
 	std::string m_path;
@@ -71,7 +70,12 @@ protected:
 
     MorphTrie<const Moses::Factor*, LMScores> m_root;
     SCORE m_oov;
+    const Moses::Factor *m_sos;
+    const Moses::Factor *m_eos;
 
+    void ShiftOrPush(std::vector<const Moses::Factor*> &context, const Moses::Factor *factor) const;
+    std::pair<SCORE, void*> Score(const std::vector<const Moses::Factor*> &context) const;
+    SCORE BackoffScore(const std::vector<const Moses::Factor*> &context) const;
 };
 
 #endif /* LANGUAGEMODEL_H_ */
