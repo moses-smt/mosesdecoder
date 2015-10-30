@@ -27,7 +27,7 @@ Weights::~Weights() {
 void Weights::Init(const FeatureFunctions &ffs)
 {
 	size_t totalNumScores = ffs.GetNumScores();
-	cerr << "totalNumScores=" << totalNumScores << endl;
+	//cerr << "totalNumScores=" << totalNumScores << endl;
 	m_weights.resize(totalNumScores, 1);
 }
 
@@ -55,7 +55,7 @@ void Weights::CreateFromString(const FeatureFunctions &ffs, const std::string &l
 	assert(ffName.back() == '=');
 
 	ffName = ffName.substr(0, ffName.size() - 1);
-	cerr << "ffName=" << ffName << endl;
+	//cerr << "ffName=" << ffName << endl;
 
 	const FeatureFunction &ff = ffs.FindFeatureFunction(ffName);
 	size_t startInd = ff.GetStartInd();

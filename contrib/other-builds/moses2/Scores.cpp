@@ -93,8 +93,10 @@ void Scores::CreateFromString(const std::string &str,
 	    std::transform(scores.begin(), scores.end(), scores.begin(), Moses::TransformScore);
 	}
 
+	/*
 	std::copy(scores.begin(),scores.end(),
 	              std::ostream_iterator<SCORE>(cerr," "));
+	*/
 
 	PlusEquals(system, featureFunction, scores);
 }

@@ -117,7 +117,7 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
 const Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, const Phrase &input) const
 {
 	MemPool &pool = mgr.GetPool();
-	return new (pool.Allocate<LMState>()) LMState(pool, m_eos);
+	return new (pool.Allocate<LMState>()) LMState(pool, m_sos);
 }
 
 void
@@ -184,8 +184,8 @@ void LanguageModel::ShiftOrPush(std::vector<const Moses::Factor*> &context, cons
 	}
 
 	if (context.size()) {
-		for (size_t i = 0; i < context.size() - 1; ++i) {
-			context[i] = context[i + 1];
+		for (size_t i = context.size() - 1; i > 0; --i) {
+			context[i] = context[i - 1];
 		}
 	}
 
@@ -194,6 +194,8 @@ void LanguageModel::ShiftOrPush(std::vector<const Moses::Factor*> &context, cons
 
 std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Factor*> &context) const
 {
+	DebugContext(context);
+
 	std::pair<SCORE, void*> ret;
 	size_t stoppedAtInd;
 	const Node<const Moses::Factor*, LMScores> *node = m_root.getNode(context, stoppedAtInd);
@@ -211,6 +213,8 @@ std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Fact
 		//std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd, context.end());
 		//BackoffScore(backoff);
 	}
+
+	cerr << "score=" << ret.first << endl;
 
 	return ret;
 }
@@ -233,4 +237,13 @@ SCORE LanguageModel::BackoffScore(const std::vector<const Moses::Factor*> &conte
 		BackoffScore(backoff);
 	}
 	*/
+}
+
+void LanguageModel::DebugContext(const std::vector<const Moses::Factor*> &context) const
+{
+	cerr << "context=";
+	for (size_t i = 0; i < context.size(); ++i) {
+		cerr << context[i]->ToString() << " ";
+	}
+	cerr << endl;
 }

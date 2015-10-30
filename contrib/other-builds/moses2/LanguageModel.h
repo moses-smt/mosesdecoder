@@ -76,6 +76,8 @@ protected:
     void ShiftOrPush(std::vector<const Moses::Factor*> &context, const Moses::Factor *factor) const;
     std::pair<SCORE, void*> Score(const std::vector<const Moses::Factor*> &context) const;
     SCORE BackoffScore(const std::vector<const Moses::Factor*> &context) const;
+
+    void DebugContext(const std::vector<const Moses::Factor*> &context) const;
 };
 
 #endif /* LANGUAGEMODEL_H_ */
