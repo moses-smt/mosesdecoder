@@ -203,17 +203,19 @@ std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Fact
 
 	std::pair<SCORE, void*> ret;
 	size_t stoppedAtInd;
-	const Node<const Moses::Factor*, LMScores> &node = m_root.getNode(context, stoppedAtInd);
+
+	typedef Node<const Moses::Factor*, LMScores> LMNode;
+	vector<const LMNode*> nodes = m_root.getNodes(context, stoppedAtInd);
+
+	const LMNode &lastNode = *nodes.back();
+
+	ret.first =  lastNode.getValue().prob;
+	ret.second = (void*) &lastNode;
 
 	if (stoppedAtInd == context.size()) {
 		// found entire ngram
-		ret.first =  node.getValue().prob;
-		ret.second = (void*) &node;
 	}
 	else {
-		ret.first =  node.getValue().prob;
-		ret.second = (void*) &node;
-
 		// get backoff score
 		/*
 		std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd - 1, context.end());

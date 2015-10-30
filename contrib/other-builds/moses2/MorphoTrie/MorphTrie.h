@@ -12,6 +12,7 @@ class MorphTrie
         Node<KeyClass, ValueClass>* insert(const std::vector<KeyClass>& word, const ValueClass& value);
         const Node<KeyClass, ValueClass>* getNode(const std::vector<KeyClass>& words) const;
         const Node<KeyClass, ValueClass> &getNode(const std::vector<KeyClass>& words, size_t &stoppedAtInd) const;
+        std::vector<const Node<KeyClass, ValueClass>* > getNodes(const std::vector<KeyClass>& words, size_t &stoppedAtInd) const;
     private:
         Node<KeyClass, ValueClass> root;
 };
@@ -59,6 +60,32 @@ const Node<KeyClass, ValueClass> &MorphTrie<KeyClass, ValueClass>::getNode(const
 
     stoppedAtInd = words.size();
     return *newNode;
+}
+
+template<class KeyClass, class ValueClass>
+std::vector<const Node<KeyClass, ValueClass>* > MorphTrie<KeyClass, ValueClass>::getNodes(const std::vector<KeyClass>& words, size_t &stoppedAtInd) const
+{
+	std::vector<const Node<KeyClass, ValueClass>* > ret;
+    const Node<KeyClass, ValueClass> *prevNode = &root, *newNode;
+	ret.push_back(prevNode);
+
+	for (size_t i = 0; i < words.size(); ++i)
+    {
+        const KeyClass &cKey = words[i];
+        newNode = prevNode->findSub(cKey);
+        if (newNode == NULL)
+        {
+        	stoppedAtInd = i;
+            return ret;
+        }
+        else {
+        	ret.push_back(newNode);
+        }
+        prevNode = newNode;
+    }
+
+    stoppedAtInd = words.size();
+    return ret;
 }
 
 
