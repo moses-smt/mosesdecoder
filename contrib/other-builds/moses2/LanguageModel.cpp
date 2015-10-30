@@ -182,11 +182,10 @@ void LanguageModel::ShiftOrPush(std::vector<const Moses::Factor*> &context, cons
 	if (context.size() < m_order) {
 		context.resize(context.size() + 1);
 	}
+	assert(context.size());
 
-	if (context.size()) {
-		for (size_t i = context.size() - 1; i > 0; --i) {
-			context[i] = context[i - 1];
-		}
+	for (size_t i = context.size() - 1; i > 0; --i) {
+		context[i] = context[i - 1];
 	}
 
 	context[0] = factor;

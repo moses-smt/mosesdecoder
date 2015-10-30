@@ -47,13 +47,14 @@ const Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::getNode(const
     const Node<KeyClass, ValueClass> *prevNode = &root, *newNode;
     for (size_t i = 0; i < words.size(); ++i)
     {
-        KeyClass cKey = words[i];
+        const KeyClass &cKey = words[i];
         newNode = prevNode->findSub(cKey);
         if (newNode == NULL)
         {
         	stoppedAtInd = i;
             return prevNode;
         }
+        prevNode = newNode;
     }
 
     stoppedAtInd = words.size();
