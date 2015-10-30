@@ -1,5 +1,5 @@
 #BUILDING MOSES
-#
+
 #PACKAGES
 #Language models (optional):
 #--with-irstlm=/path/to/irstlm 
@@ -245,7 +245,7 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG//ptable-describe-features 
   moses/TranslationModel/UG//count-ptable-features 
   moses/TranslationModel/UG//ptable-lookup 
-  # moses/TranslationModel/UG//spe-check-coverage 
+  moses/TranslationModel/UG//check-coverage 
   moses/TranslationModel/UG/mm//mtt-demo1 
   moses/TranslationModel/UG/mm//mtt-build 
   moses/TranslationModel/UG/mm//mtt-dump 
@@ -256,6 +256,7 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG/mm//mmlex-lookup 
   moses/TranslationModel/UG/mm//mtt-count-words 
   moses/TranslationModel/UG/mm//calc-coverage 
+  moses/TranslationModel/UG//check-coverage 
   moses/TranslationModel/UG//try-align 
   ;
 }

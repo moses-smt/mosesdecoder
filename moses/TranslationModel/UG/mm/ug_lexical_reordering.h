@@ -12,7 +12,7 @@ namespace sapt {
 
 #ifdef NO_MOSES
 class LRModel{
-
+public:
   enum ModelType { Monotonic, MSD, MSLR, LeftRight, None };
   enum Direction { Forward, Backward, Bidirectional };
 
