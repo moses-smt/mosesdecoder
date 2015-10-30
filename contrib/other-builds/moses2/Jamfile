@@ -12,6 +12,7 @@ import path ;
    Hypothesis.cpp 
  	 InputPath.cpp 
  	 InputPaths.cpp
+ 	 LanguageModel.cpp
  	 Main.cpp 
  	 Manager.cpp 
  	 MemPool.cpp

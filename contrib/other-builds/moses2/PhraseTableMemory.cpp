@@ -17,19 +17,19 @@
 
 using namespace std;
 
-Node::Node()
+PhraseTableMemory::Node::Node()
 {}
 
-Node::~Node()
+PhraseTableMemory::Node::~Node()
 {
 }
 
-void Node::AddRule(Phrase &source, TargetPhrase *target)
+void PhraseTableMemory::Node::AddRule(Phrase &source, TargetPhrase *target)
 {
 	AddRule(source, target, 0);
 }
 
-Node &Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
+PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
 {
 	if (pos == source.GetSize()) {
 		TargetPhrases *tp = m_targetPhrases.get();
@@ -48,7 +48,7 @@ Node &Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
 	}
 }
 
-TargetPhrases::shared_const_ptr Node::Find(const PhraseBase &source, size_t pos) const
+TargetPhrases::shared_const_ptr PhraseTableMemory::Node::Find(const PhraseBase &source, size_t pos) const
 {
 	assert(source.GetSize());
 	if (pos == source.GetSize()) {

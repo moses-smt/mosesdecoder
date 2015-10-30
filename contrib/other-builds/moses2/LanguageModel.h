@@ -9,13 +9,45 @@
 #define LANGUAGEMODEL_H_
 
 #include "StatefulFeatureFunction.h"
+#include "TypeDef.h"
+#include "moses/Factor.h"
 #include "moses/TypeDef.h"
+#include "moses/LM/PointerState.h"
+#include "MorphoTrie/MorphTrie.h"
 
+////////////////////////////////////////////////////////////////////////////////////////
+struct LMScores
+{
+	LMScores()
+	{}
+
+	LMScores(const LMScores &copy)
+	:prob(copy.prob)
+	,backoff(copy.backoff)
+	{}
+
+	LMScores(float inProb, float inBackoff)
+	:prob(inProb)
+	,backoff(inBackoff)
+	{}
+
+	float prob, backoff;
+};
+
+inline std::ostream& operator<<(std::ostream &out, const LMScores &obj)
+{
+	out << "(" << obj.prob << "," << obj.backoff << ")" << std::flush;
+	return out;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 class LanguageModel : public StatefulFeatureFunction
 {
 public:
 	LanguageModel(size_t startInd, const std::string &line);
 	virtual ~LanguageModel();
+
+	virtual void Load(System &system);
 
 	virtual void SetParameter(const std::string& key, const std::string& value);
 
@@ -35,6 +67,11 @@ public:
 protected:
 	std::string m_path;
 	Moses::FactorType m_factorType;
+	size_t m_order;
+
+    MorphTrie<const Moses::Factor*, LMScores> m_root;
+    SCORE m_oov;
+
 };
 
 #endif /* LANGUAGEMODEL_H_ */
