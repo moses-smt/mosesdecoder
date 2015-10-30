@@ -193,24 +193,25 @@ void LanguageModel::ShiftOrPush(std::vector<const Moses::Factor*> &context, cons
 
 std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Factor*> &context) const
 {
+	cerr << "context=";
 	DebugContext(context);
 
 	std::pair<SCORE, void*> ret;
 	size_t stoppedAtInd;
-	const Node<const Moses::Factor*, LMScores> *node = m_root.getNode(context, stoppedAtInd);
+	const Node<const Moses::Factor*, LMScores> &node = m_root.getNode(context, stoppedAtInd);
 
 	if (stoppedAtInd == context.size()) {
 		// found entire ngram
-		ret.first =  node->getValue().prob;
-		ret.second = (void*) node;
+		ret.first =  node.getValue().prob;
+		ret.second = (void*) &node;
 	}
 	else {
-		ret.first =  node->getValue().prob;
-		ret.second = (void*) node;
+		ret.first =  node.getValue().prob;
+		ret.second = (void*) &node;
 
 		// get backoff score
-		//std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd, context.end());
-		//BackoffScore(backoff);
+		std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd - 1, context.end());
+		BackoffScore(backoff);
 	}
 
 	cerr << "score=" << ret.first << endl;
@@ -220,14 +221,16 @@ std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Fact
 
 SCORE LanguageModel::BackoffScore(const std::vector<const Moses::Factor*> &context) const
 {
-	/*
+	cerr << "backoff=";
+	DebugContext(context);
+
 	SCORE ret;
 	size_t stoppedAtInd;
-	const Node<const Moses::Factor*, LMScores> *node = m_root.getNode(context, stoppedAtInd);
+	const Node<const Moses::Factor*, LMScores> &node = m_root.getNode(context, stoppedAtInd);
 
 	if (stoppedAtInd == context.size()) {
 		// found entire ngram
-		ret =  node->getValue().backoff;
+		ret =  node.getValue().backoff;
 	}
 	else {
 
@@ -235,12 +238,11 @@ SCORE LanguageModel::BackoffScore(const std::vector<const Moses::Factor*> &conte
 		std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd, context.end());
 		BackoffScore(backoff);
 	}
-	*/
+
 }
 
 void LanguageModel::DebugContext(const std::vector<const Moses::Factor*> &context) const
 {
-	cerr << "context=";
 	for (size_t i = 0; i < context.size(); ++i) {
 		cerr << context[i]->ToString() << " ";
 	}
