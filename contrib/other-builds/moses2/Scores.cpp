@@ -51,7 +51,7 @@ void Scores::PlusEquals(const System &system,
 		SCORE incrScore = scores[i];
 		m_scores[ffStartInd + i] += incrScore;
 
-		cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
+		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
 		SCORE weight = weights[ffStartInd + i];
 		m_total += incrScore * weight;
 	}

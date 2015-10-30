@@ -137,6 +137,6 @@ void Hypothesis::EvaluateWhenApplied()
 	  m_ffStates[statefulInd] = state;
   }
 
-  cerr << *this << endl;
+  //cerr << *this << endl;
 }
 
