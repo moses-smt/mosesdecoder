@@ -16,6 +16,7 @@
 #include "UnknownWordPenalty.h"
 #include "WordPenalty.h"
 #include "Distortion.h"
+#include "LanguageModel.h"
 
 using namespace std;
 
@@ -100,6 +101,9 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	}
 	else if (toks[0] == "Distortion") {
 		ret = new Distortion(m_ffStartInd, line);
+	}
+	else if (toks[0] == "KENLM") {
+		ret = new LanguageModel(m_ffStartInd, line);
 	}
 	else {
 		//ret = new SkeletonStatefulFF(m_ffStartInd, line);
