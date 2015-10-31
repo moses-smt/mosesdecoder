@@ -808,15 +808,15 @@ namespace Moses
   setup_bias(ttasksptr const& ttask)
   {
 
-    std::cerr << "Setting up bias at " << HERE << std::endl;
-
+    // VERBOSE(2,"Setting up bias at " << HERE << std::endl);
+    
     SPTR<ContextScope> const& scope = ttask->GetScope();
     SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
     if (context->bias) return; 
-    // boost::unique_lock<boost::shared_mutex> ctxlock(context->lock);
     
     // bias weights specified with the session?
-    SPTR<std::map<std::string, float> const> w = ttask->GetContextWeights();
+    SPTR<std::map<std::string, float> const> w;
+    w = ttask->GetScope()->GetContextWeights();
     if (w && !w->empty()) 
       {
         if (m_bias_log) 
@@ -825,7 +825,7 @@ namespace Moses
       }
     else if (m_bias_server.size() && ttask->GetContextWindow())
       {
-        std::cerr << "via server at " << HERE << std::endl;
+        // std::cerr << "via server at " << HERE << std::endl;
         string context_words;
         BOOST_FOREACH(string const& line, *ttask->GetContextWindow())
           {
@@ -838,10 +838,10 @@ namespace Moses
               *m_bias_log << "GETTING BIAS FROM SERVER at " << HERE << endl
                           << "BIAS LOOKUP CONTEXT: " << context_words << endl;
             context->bias
-              = btfix->SetupDocumentBias(m_bias_server, context_words, m_bias_log);
+              = btfix->SetupDocumentBias(m_bias_server,context_words,m_bias_log);
             //Reset the bias in the ttaskptr so that other functions
             //so that other functions can utilize the biases;
-            ttask->ReSetContextWeights(context->bias->getBiasMap());
+            ttask->GetScope()->SetContextWeights(context->bias->getBiasMap());
           }
       } 
     if (context->bias)

@@ -1,6 +1,4 @@
-// -*- c++ -*-
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -61,7 +59,7 @@ public:
 
 private:
   ScoreCache_t m_cached_scores;
-  ttaskwptr m_ttask;
+  WPTR<ContextScope> m_scope;
 
 private:
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
@@ -91,8 +89,12 @@ public:
   TargetPhrase(ttasksptr &ttask, const PhraseDictionary *pt = NULL);
   TargetPhrase(ttasksptr &ttask, std::string out_string, const PhraseDictionary *pt = NULL);
   explicit TargetPhrase(ttasksptr &ttask, const Phrase &targetPhrase, const PhraseDictionary *pt);
-  ttasksptr GetTtask() const;
-  bool HasTtaskSPtr() const;
+
+  // ttasksptr GetTtask() const;
+  // bool HasTtaskSPtr() const;
+
+  bool HasScope() const;
+  SPTR<ContextScope> GetScope() const;
 
   ~TargetPhrase();
 

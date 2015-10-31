@@ -275,11 +275,10 @@ CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oov
 
   //get the context_weight map here
   SPTR<std::map<std::string, float> const> CW;
-  if (isContextAdaptive) {
-    ttasksptr ttask = phrase.GetTtask();
-    if (ttask) CW = ttask->GetContextWeights();
+  if (isContextAdaptive && phrase.HasScope()) {
+    CW = phrase.GetScope()->GetContextWeights();
   }
-
+  
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
   int codes[m_lmtb_size];
@@ -358,7 +357,7 @@ EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
   SPTR<std::map<std::string, float> const> CW;
   if (isContextAdaptive) {
     ttasksptr ttask = hypo.GetManager().GetTtask();
-    if (ttask) CW = ttask->GetContextWeights();
+    if (ttask) CW = ttask->GetScope()->GetContextWeights();
   }
 
 

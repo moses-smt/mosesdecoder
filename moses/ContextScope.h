@@ -38,7 +38,7 @@ protected:
 #ifdef WITH_THREADS
   mutable boost::shared_mutex m_lock;
 #endif
-  SPTR<std::map<std::string,float> > m_context_weights;
+  SPTR<std::map<std::string,float> const> m_context_weights;
 public:
   // class write_access
   // {
@@ -110,20 +110,47 @@ public:
   }
 
 #ifdef HAVE_XMLRPC_C
-  SPTR<std::map<std::string,float> >
+  SPTR<std::map<std::string,float> const>
   GetContextWeights(xmlrpc_c::value const* spec = NULL) {
     if (spec && m_context_weights == NULL) {
       boost::unique_lock<boost::shared_mutex> lock(m_lock);
-      m_context_weights.reset(new std::map<std::string, float>);
+      SPTR<std::map<std::string,float> > M(new std::map<std::string, float>);
 
       typedef std::map<std::string,xmlrpc_c::value> tmap;
       tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(*spec));
       for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m)
-        (*m_context_weights)[m->first] = xmlrpc_c::value_double(m->second);
+        (*M)[m->first] = xmlrpc_c::value_double(m->second);
+      m_context_weights = M;
     }
     return m_context_weights;
   }
 #endif
+  
+  bool
+  SetContextWeights(std::string const& spec) {
+    if (m_context_weights) return false;
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+    SPTR<std::map<std::string,float> > M(new std::map<std::string, float>);
+    
+    // TO DO; This needs to be done with StringPiece.find, not Tokenize
+    // PRIORITY: low
+    std::vector<std::string> tokens = Tokenize(spec,":");
+    for (std::vector<std::string>::iterator it = tokens.begin(); 
+	 it != tokens.end(); it++) {
+      std::vector<std::string> key_and_value = Tokenize(*it, ",");
+      (*M)[key_and_value[0]] = atof(key_and_value[1].c_str());
+    }
+    m_context_weights = M;
+    return true;
+  }
+  
+  bool
+  SetContextWeights(SPTR<std::map<std::string,float> const> const& w) {
+    if (m_context_weights) return false;
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+    m_context_weights = w;
+    return true;
+  }
 
 };
 

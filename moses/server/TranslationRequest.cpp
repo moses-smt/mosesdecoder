@@ -55,8 +55,7 @@ Run()
 
   // settings within the session scope
   param_t::const_iterator si = params.find("context-weights");
-  if (si != params.end()) 
-    m_context_weights = m_scope->GetContextWeights(&si->second);
+  if (si != params.end()) m_scope->GetContextWeights(&si->second);
 
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 

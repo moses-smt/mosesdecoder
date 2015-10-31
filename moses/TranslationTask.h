@@ -67,7 +67,7 @@ protected:
   // task stays alive till it's done with it.
 
   boost::shared_ptr<std::vector<std::string> > m_context;
-  SPTR<std::map<std::string, float> > m_context_weights;
+  // SPTR<std::map<std::string, float> const> m_context_weights;
 public:
 
   boost::shared_ptr<TranslationTask>
@@ -130,9 +130,9 @@ public:
   void
   SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw);
 
-  SPTR<std::map<std::string, float> const> GetContextWeights() const;
-  void SetContextWeights(std::string const& context_weights);
-  void ReSetContextWeights(std::map<std::string, float> const& new_weights);
+  // SPTR<std::map<std::string, float> const> GetContextWeights() const;
+  // void SetContextWeights(std::string const& context_weights);
+  // void ReSetContextWeights(std::map<std::string, float> const& new_weights);
 
   AllOptions const& options() const;
 

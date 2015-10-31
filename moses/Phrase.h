@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
 
 /***********************************************************************
@@ -40,6 +40,7 @@ namespace Moses
 {
 class FactorMask;
 class Range;
+class ContextScope;
 
 /** Representation of a phrase, ie. a contiguous number of words.
  *  Wrapper for vector of words
@@ -53,17 +54,26 @@ protected:
 
 public:
 
-  /// return shared pointer to ttask
-  //  only TargetPhrases have non-NULL ttaskptrs!
-  virtual ttasksptr GetTtask() const {
-    return ttasksptr();
-  }
+  // /// return shared pointer to ttask
+  // //  only TargetPhrases have non-NULL ttaskptrs!
+  // virtual ttasksptr GetTtask() const {
+  //   return ttasksptr();
+  // }
 
-  /// check if this phrase belongs to a valid ttask
-  //  only TargetPhrases have non-NULL ttaskptrs!
-  virtual bool HasTtaskSPtr() const {
+  // /// check if this phrase belongs to a valid ttask
+  // //  only TargetPhrases have non-NULL ttaskptrs!
+  // virtual bool HasTtaskSPtr() const {
+  //   return false;
+  // }
+
+  virtual bool HasScope() const {
     return false;
   }
+  
+  virtual SPTR<ContextScope> GetScope() const {
+    return SPTR<ContextScope>();
+  }
+  
 
   /** No longer does anything as not using mem pool for Phrase class anymore */
   static void InitializeMemPool();
