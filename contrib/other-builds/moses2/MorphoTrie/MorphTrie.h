@@ -35,9 +35,9 @@ template<class KeyClass, class ValueClass>
 const Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::getNode(const std::vector<KeyClass>& words) const
 {
 	size_t stoppedAtInd;
-	Node<KeyClass, ValueClass> &ret = getNode(words, stoppedAtInd);
+	const Node<KeyClass, ValueClass> &ret = getNode(words, stoppedAtInd);
 	if (stoppedAtInd < words.size()) {
-		ret = NULL;
+		return NULL;
 	}
 	return &ret;
 }

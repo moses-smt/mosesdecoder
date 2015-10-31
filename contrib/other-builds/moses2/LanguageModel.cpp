@@ -75,15 +75,16 @@ void LanguageModel::Load(System &system)
 
 	  assert(substrings.size() == 2 || substrings.size() == 3);
 
-	  SCORE prob = Moses::Scan<SCORE>(substrings[0]);
+	  SCORE prob = Moses::TransformLMScore(Moses::Scan<SCORE>(substrings[0]));
 	  if (substrings[1] == "<unk>") {
 		  m_oov = prob;
 		  continue;
 	  }
 
 	  SCORE backoff = 0.f;
-	  if (substrings.size() == 3)
-		backoff = Moses::Scan<SCORE>(substrings[2]);
+	  if (substrings.size() == 3) {
+		backoff = Moses::TransformLMScore(Moses::Scan<SCORE>(substrings[2]));
+	  }
 
 	  // ngram
 	  vector<string> key;
@@ -202,41 +203,26 @@ std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Fact
 	//DebugContext(context);
 
 	std::pair<SCORE, void*> ret;
-	size_t stoppedAtInd;
 
 	typedef Node<const Moses::Factor*, LMScores> LMNode;
-	vector<const LMNode*> nodes = m_root.getNodes(context, stoppedAtInd);
-
-	const LMNode *lastNode = nodes.back();
-	assert(lastNode);
-
-	ret.first =  lastNode->getValue().prob;
-
-	if (m_order == 1) {
-		// no state
-		ret.second = NULL;
-	}
-	else if (nodes.size() == m_order) {
-		// found entire ngram
-		const LMNode *state = nodes[nodes.size() - 2];
-		assert(state);
-		ret.second = (void*) state;
+	const LMNode *node = m_root.getNode(context);
+	if (node) {
+		ret.first = node->getValue().prob;
+		ret.second = (void*) node;
 	}
 	else {
-		// backed off
-		ret.second = (void*) lastNode;
-	}
+	  SCORE backoff = 0;
+	  std::vector<const Moses::Factor*> backOffContext(context.begin() + 1, context.end());
+	  node = m_root.getNode(backOffContext);
+	  if (node) {
+		  backoff = node->getValue().backoff;
+	  }
 
-	if (stoppedAtInd == context.size()) {
-		// found entire ngram
-	}
-	else {
-		// get backoff score
-		/*
-		std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd - 1, context.end());
-		cerr << "stoppedAtInd=" << stoppedAtInd << " " << context.size() << endl;
-		BackoffScore(backoff);
-		*/
+	  std::vector<const Moses::Factor*> newContext(context.begin(), context.end() - 1);
+	  std::pair<SCORE, void*> newRet = Score(newContext);
+
+	  ret.first = backoff + newRet.first;
+	  ret.second = newRet.second;
 	}
 
 	//cerr << "score=" << ret.first << endl;
