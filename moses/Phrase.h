@@ -69,11 +69,11 @@ public:
   virtual bool HasScope() const {
     return false;
   }
-  
+
   virtual SPTR<ContextScope> GetScope() const {
     return SPTR<ContextScope>();
   }
-  
+
 
   /** No longer does anything as not using mem pool for Phrase class anymore */
   static void InitializeMemPool();

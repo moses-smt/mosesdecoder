@@ -167,7 +167,7 @@ interpret_dlt()
     m_scope->SetContextWeights(j->second);
   }
 }
-  
+
 
 void TranslationTask::Run()
 {
