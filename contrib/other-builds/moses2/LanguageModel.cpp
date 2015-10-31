@@ -207,10 +207,25 @@ std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Fact
 	typedef Node<const Moses::Factor*, LMScores> LMNode;
 	vector<const LMNode*> nodes = m_root.getNodes(context, stoppedAtInd);
 
-	const LMNode &lastNode = *nodes.back();
+	const LMNode *lastNode = nodes.back();
+	assert(lastNode);
 
-	ret.first =  lastNode.getValue().prob;
-	ret.second = (void*) &lastNode;
+	ret.first =  lastNode->getValue().prob;
+
+	if (m_order == 1) {
+		// no state
+		ret.second = NULL;
+	}
+	else if (nodes.size() == m_order) {
+		// found entire ngram
+		const LMNode *state = nodes[nodes.size() - 2];
+		assert(state);
+		ret.second = (void*) state;
+	}
+	else {
+		// backed off
+		ret.second = (void*) lastNode;
+	}
 
 	if (stoppedAtInd == context.size()) {
 		// found entire ngram
