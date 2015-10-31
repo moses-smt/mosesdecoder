@@ -125,6 +125,24 @@ const FeatureFunction &FeatureFunctions::FindFeatureFunction(const std::string &
 
 }
 
+const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd)
+{
+	// assume only 1 unk wp
+	std::vector<const PhraseTable*> tmpVec(m_phraseTables);
+	std::vector<const PhraseTable*>::iterator iter;
+	for (iter = tmpVec.begin(); iter != tmpVec.end(); ++iter) {
+		const PhraseTable *pt = *iter;
+		  const UnknownWordPenalty *unkWP = dynamic_cast<const UnknownWordPenalty *>(pt);
+		  if (unkWP) {
+			  tmpVec.erase(iter);
+			  break;
+		  }
+	}
+
+	const PhraseTable *pt = tmpVec[ptInd];
+	return pt;
+}
+
 void
 FeatureFunctions::EvaluateInIsolation(const System &system,
 		  const PhraseBase &source, const TargetPhrase &targetPhrase,

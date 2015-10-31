@@ -40,6 +40,9 @@ public:
 	const Moses::Parameter &GetParameter() const
 	{ return m_params; }
 
+	const std::vector<const PhraseTable*> &GetMapping() const
+	{ return m_mappings; }
+
 protected:
   const Moses::Parameter &m_params;
 
@@ -48,7 +51,9 @@ protected:
   mutable MemPool m_managerPool;
   FeatureFunctions m_featureFunctions;
   Weights m_weights;
+  std::vector<const PhraseTable*> m_mappings;
 
   void LoadWeights();
+  void LoadMappings();
 };
 

@@ -27,9 +27,6 @@ public:
 	FeatureFunctions(System &system);
 	virtual ~FeatureFunctions();
 
-	const std::vector<const PhraseTable*> &GetPhraseTables() const
-	{ return m_phraseTables; }
-
 	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
 	{ return m_statefulFeatureFunctions; }
 
@@ -40,6 +37,7 @@ public:
     void Load();
 
     const FeatureFunction &FindFeatureFunction(const std::string &name) const;
+    const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
 
 	  virtual void
 	  EvaluateInIsolation(const System &system,
