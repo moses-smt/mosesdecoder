@@ -180,7 +180,7 @@ init(string line, std::vector<FactorType> const& factorOrder)
   line = Trim(line);
   aux_interpret_sgml_markup(line); // for "<seg id=..." markup
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
-
+VERBOSE(1,"Sentence::init(string line, std::vector<FactorType> const& factorOrder) line:|" << line << "|" << std::endl);
   // if sentences is specified as "<passthrough tag1=""/>"
   if (SD.IsPassthroughEnabled() || SD.options().nbest.include_passthrough) {
     string pthru = PassthroughSGML(line,"passthrough");
@@ -226,6 +226,7 @@ init(string line, std::vector<FactorType> const& factorOrder)
       m_reorderingConstraint.SetWall(xmlWalls[i], true);
   m_reorderingConstraint.FinalizeWalls();
 
+VERBOSE(1,"Sentence::init(string line, std::vector<FactorType> const& factorOrder) END" << std::endl);
 }
 
 int
