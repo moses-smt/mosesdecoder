@@ -45,7 +45,11 @@ void TabbedSentence::CreateFromString(const std::vector<FactorType> &factorOrder
   }
 }
 
-int TabbedSentence::Read(std::istream& in, const std::vector<FactorType>& factorOrder)
+int 
+TabbedSentence::
+Read(std::istream& in, 
+     std::vector<FactorType> const& factorOrder,
+     AllOptions const& opts)
 {
   TabbedColumns allColumns;
 
@@ -58,14 +62,14 @@ int TabbedSentence::Read(std::istream& in, const std::vector<FactorType>& factor
   if(allColumns.size() < 2) {
     std::stringstream dummyStream;
     dummyStream << line << std::endl;
-    return Sentence::Read(dummyStream, factorOrder);
+    return Sentence::Read(dummyStream, factorOrder, opts);
   } else {
     m_columns.resize(allColumns.size() - 1);
     std::copy(allColumns.begin() + 1, allColumns.end(), m_columns.begin());
 
     std::stringstream dummyStream;
     dummyStream << allColumns[0] << std::endl;
-    return Sentence::Read(dummyStream, factorOrder);
+    return Sentence::Read(dummyStream, factorOrder, opts);
   }
 }
 

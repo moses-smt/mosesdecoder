@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 
 #include <list>
 #include <vector>
@@ -12,7 +12,7 @@
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "util/exception.hh"
 #include <boost/foreach.hpp>
-
+#include "TranslationTask.h"
 using namespace std;
 
 namespace Moses
@@ -41,7 +41,7 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
   size_t inputSize = input.GetSize();
   m_inputPathMatrix.resize(inputSize);
 
-  size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+  size_t maxSizePhrase = ttask->options().search.max_phrase_length;
   maxSizePhrase = std::min(inputSize, maxSizePhrase);
 
   // 1-word phrases
@@ -234,8 +234,10 @@ CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph, size_t st
     list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
     const DecodeStep &decodeStep = **iterStep;
 
-    static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslationLEGACY
-    (m_source, *oldPtoc, startPos, endPos, adhereTableLimit, inputPathList);
+    DecodeStepTranslation const& dstep 
+      = static_cast<const DecodeStepTranslation&>(decodeStep);
+    dstep.ProcessInitialTransLEGACY(m_source, *oldPtoc, startPos, endPos, 
+				    adhereTableLimit, inputPathList);
 
     // do rest of decode steps
     int indexStep = 0;

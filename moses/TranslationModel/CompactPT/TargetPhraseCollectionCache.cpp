@@ -25,7 +25,7 @@ namespace Moses
 {
 
 
-boost::thread_specific_ptr<typename TargetPhraseCollectionCache::CacheMap>
+boost::thread_specific_ptr<TargetPhraseCollectionCache::CacheMap>
 TargetPhraseCollectionCache::m_phraseCache;
 
 }

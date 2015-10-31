@@ -107,8 +107,13 @@ void ChartParserUnknown::Process(const Word &sourceWord, const Range &range, Cha
       targetPhrase->SetAlignmentInfo("0-0");
       targetPhrase->EvaluateInIsolation(*unksrc);
 
-      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.options().nbest.print_trees || staticData.GetTreeStructure() != NULL) {
-        targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
+      AllOptions const& opts = staticData.options();
+      if (!opts.output.detailed_tree_transrep_filepath.empty() || 
+	  opts.nbest.print_trees || staticData.GetTreeStructure() != NULL) {
+	std::string prop = "[ "; 
+	prop += (*targetLHS)[0]->GetString().as_string() + " ";
+	prop += sourceWord[0]->GetString().as_string() + " ]";
+	targetPhrase->SetProperty("Tree", prop);
       }
 
       // chart rule

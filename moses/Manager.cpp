@@ -1,6 +1,5 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -48,6 +47,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/HypergraphOutput.h"
 #include "moses/mbr.h"
 #include "moses/LatticeMBR.h"
+
+#include <boost/foreach.hpp>
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -98,6 +99,10 @@ Manager::GetSource() const
  */
 void Manager::Decode()
 {
+
+  std::cerr << options().nbest.nbest_size << " " 
+	    << options().nbest.enabled << " " << std::endl;
+
   // initialize statistics
   ResetSentenceStats(m_source);
   IFVERBOSE(2) {
@@ -123,7 +128,8 @@ void Manager::Decode()
   // some reporting on how long this took
   IFVERBOSE(1) {
     GetSentenceStats().StopTimeCollectOpts();
-    TRACE_ERR("Line "<< m_source.GetTranslationId() << ": Collecting options took "
+    TRACE_ERR("Line "<< m_source.GetTranslationId() 
+	      << ": Collecting options took "
               << GetSentenceStats().GetTimeCollectOpts() << " seconds at "
               << __FILE__ << ":" << __LINE__ << endl);
   }
@@ -1112,11 +1118,13 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
 
 }
 
-void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
-                      const SearchGraphNode& searchNode)
+void 
+OutputSearchNode(AllOptions const& opts, long translationId, 
+		 std::ostream &outputSearchGraphStream,
+		 SearchGraphNode const& searchNode)
 {
   const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-  bool extendedFormat = StaticData::Instance().GetOutputSearchGraphExtended();
+  bool extendedFormat = opts.output.SearchGraphExtended.size();
   outputSearchGraphStream << translationId;
 
   // special case: initial hypothesis
@@ -1369,24 +1377,32 @@ void Manager::SerializeSearchGraphPB(
 }
 #endif
 
-void Manager::OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+void 
+Manager::
+OutputSearchGraph(long translationId, std::ostream &out) const
 {
   vector<SearchGraphNode> searchGraph;
   GetSearchGraph(searchGraph);
   for (size_t i = 0; i < searchGraph.size(); ++i) {
-    OutputSearchNode(translationId,outputSearchGraphStream,searchGraph[i]);
+    OutputSearchNode(options(),translationId,out,searchGraph[i]);
   }
 }
 
-void Manager::GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
-    std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, set< const Hypothesis* > >* pOutgoingHyps, vector< float>* pFwdBwdScores) const
+void 
+Manager::
+GetForwardBackwardSearchGraph
+( std::map< int, bool >* pConnected,
+  std::vector<Hypothesis const* >* pConnectedList, 
+  std::map<Hypothesis const*, set<Hypothesis const*> >* pOutgoingHyps, 
+  vector< float>* pFwdBwdScores) const
 {
   std::map < int, bool > &connected = *pConnected;
   std::vector< const Hypothesis *>& connectedList = *pConnectedList;
   std::map < int, int > forward;
   std::map < int, double > forwardScore;
 
-  std::map < const Hypothesis*, set <const Hypothesis*> > & outgoingHyps = *pOutgoingHyps;
+  std::map < const Hypothesis*, set <const Hypothesis*> > & outgoingHyps 
+    = *pOutgoingHyps;
   vector< float> & estimatedScores = *pFwdBwdScores;
 
   // *** find connected hypotheses ***
@@ -1395,7 +1411,8 @@ void Manager::GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
   // ** compute best forward path for each hypothesis *** //
 
   // forward cost of hypotheses on final stack is 0
-  const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
+  const std::vector < HypothesisStack* > &hypoStackColl 
+    = m_search->GetHypothesisStacks();
   const HypothesisStack &finalStack = *hypoStackColl.back();
   HypothesisStack::const_iterator iterHypo;
   for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo) {
@@ -1504,34 +1521,34 @@ void Manager::OutputBest(OutputCollector *collector)  const
     if (!options().mbr.enabled) {
       bestHypo = GetBestHypothesis();
       if (bestHypo) {
-        if (StaticData::Instance().GetOutputHypoScore()) {
+        if (options().output.ReportHypoScore) {
           out << bestHypo->GetTotalScore() << ' ';
         }
-        if (staticData.IsPathRecoveryEnabled()) {
+        if (options().output.RecoverPath) {
           bestHypo->OutputInput(out);
           out << "||| ";
         }
 
-        const PARAM_VEC *params = staticData.GetParameter().GetParam("print-id");
-        if (params && params->size() && Scan<bool>(params->at(0)) ) {
-          out << translationId << " ";
-        }
-
-        // VN : I put back the code for OutputPassthroughInformation
-        if (staticData.IsPassthroughEnabled()) {
-          OutputPassthroughInformation(out, bestHypo);
+        // const PARAM_VEC *params = staticData.GetParameter().GetParam("print-id");
+        if (options().output.PrintID) {
+	  out << translationId << " ";
+	}
+	
+	// VN : I put back the code for OutputPassthroughInformation
+	if (options().output.PrintPassThrough) {
+	  OutputPassthroughInformation(out, bestHypo);
         }
         // end of add back
 
-        if (staticData.GetReportSegmentation() == 2) {
+        if (options().output.ReportSegmentation == 2) {
           GetOutputLanguageModelOrder(out, bestHypo);
         }
         bestHypo->OutputBestSurface(
           out,
           staticData.GetOutputFactorOrder(),
-          staticData.GetReportSegmentation(),
-          staticData.GetReportAllFactors());
-        if (staticData.PrintAlignmentInfo()) {
+          options().output.ReportSegmentation,
+          options().output.ReportAllFactors);
+        if (options().output.PrintAlignmentInfo) {
           out << "||| ";
           bestHypo->OutputAlignment(out);
         }
@@ -1572,8 +1589,9 @@ void Manager::OutputBest(OutputCollector *collector)  const
         } else {
           //Lattice MBR decoding
           vector<Word> mbrBestHypo = doLatticeMBR(*this,nBestList);
-          OutputBestHypo(mbrBestHypo, translationId, staticData.GetReportSegmentation(),
-                         staticData.GetReportAllFactors(),out);
+          OutputBestHypo(mbrBestHypo, translationId, 
+			 options().output.ReportSegmentation,
+                         options().output.ReportAllFactors, out);
           IFVERBOSE(2) {
             PrintUserTime("finished Lattice MBR decoding");
           }
@@ -1584,8 +1602,8 @@ void Manager::OutputBest(OutputCollector *collector)  const
       else if (options().search.consensus) {
         const TrellisPath &conBestHypo = doConsensusDecoding(*this,nBestList);
         OutputBestHypo(conBestHypo, translationId,
-                       staticData.GetReportSegmentation(),
-                       staticData.GetReportAllFactors(),out);
+                       options().output.ReportSegmentation,
+                       options().output.ReportAllFactors, out);
         OutputAlignment(m_alignmentOut, conBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished Consensus decoding");
@@ -1596,8 +1614,8 @@ void Manager::OutputBest(OutputCollector *collector)  const
       else {
         const TrellisPath &mbrBestHypo = doMBR(nBestList);
         OutputBestHypo(mbrBestHypo, translationId,
-                       staticData.GetReportSegmentation(),
-                       staticData.GetReportAllFactors(),out);
+		       options().output.ReportSegmentation,
+                       options().output.ReportAllFactors, out);
         OutputAlignment(m_alignmentOut, mbrBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished MBR decoding");
@@ -1624,7 +1642,7 @@ void Manager::OutputNBest(OutputCollector *collector) const
   long translationId = m_source.GetTranslationId();
 
   if (options().lmbr.enabled) {
-    if (staticData.options().nbest.enabled) {
+    if (options().nbest.enabled) {
       collector->Write(translationId, m_latticeNBestOut.str());
     }
   } else {
@@ -1632,22 +1650,24 @@ void Manager::OutputNBest(OutputCollector *collector) const
     ostringstream out;
     CalcNBest(options().nbest.nbest_size, nBestList,
               options().nbest.only_distinct);
-    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(),
+    OutputNBest(out, nBestList, 
+		staticData.GetOutputFactorOrder(),
                 m_source.GetTranslationId(),
-                staticData.GetReportSegmentation());
+                options().output.ReportSegmentation);
     collector->Write(m_source.GetTranslationId(), out.str());
   }
 
 }
 
-void Manager::OutputNBest(std::ostream& out
-                          , const Moses::TrellisPathList &nBestList
-                          , const std::vector<Moses::FactorType>& outputFactorOrder
-                          , long translationId
-                          , char reportSegmentation) const
+void 
+Manager::
+OutputNBest(std::ostream& out,
+	    const Moses::TrellisPathList &nBestList,
+	    const std::vector<Moses::FactorType>& outputFactorOrder,
+	    long translationId, char reportSegmentation) const
 {
   const StaticData &staticData = StaticData::Instance();
-  NBestOptions const& nbo = staticData.options().nbest;
+  NBestOptions const& nbo = options().nbest;
   bool reportAllFactors     = nbo.include_all_factors;
   bool includeSegmentation  = nbo.include_segmentation;
   bool includeWordAlignment = nbo.include_alignment_info;
@@ -1661,12 +1681,14 @@ void Manager::OutputNBest(std::ostream& out
     out << translationId << " ||| ";
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
-      OutputSurface(out, edge, outputFactorOrder, reportSegmentation, reportAllFactors);
+      OutputSurface(out, edge, outputFactorOrder, reportSegmentation, 
+		    reportAllFactors);
     }
     out << " |||";
 
     // print scores with feature names
-    path.GetScoreBreakdown()->OutputAllFeatureScores(out);
+    bool with_labels = options().nbest.include_feature_labels;
+    path.GetScoreBreakdown()->OutputAllFeatureScores(out, with_labels);
 
     // total
     out << " ||| " << path.GetTotalScore();
@@ -1704,7 +1726,7 @@ void Manager::OutputNBest(std::ostream& out
       }
     }
 
-    if (StaticData::Instance().IsPathRecoveryEnabled()) {
+    if (options().output.RecoverPath) {
       out << " ||| ";
       OutputInput(out, edges[0]);
     }
@@ -1719,8 +1741,11 @@ void Manager::OutputNBest(std::ostream& out
 /***
  * print surface factor only for the given phrase
  */
-void Manager::OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                            char reportSegmentation, bool reportAllFactors) const
+void 
+Manager::
+OutputSurface(std::ostream &out, const Hypothesis &edge, 
+	      const std::vector<FactorType> &outputFactorOrder,
+	      char reportSegmentation, bool reportAllFactors) const
 {
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
                  "Must specific at least 1 output factor");
@@ -1788,26 +1813,33 @@ void Manager::OutputSurface(std::ostream &out, const Hypothesis &edge, const std
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      scoreBreakdown.OutputAllFeatureScores(out);
+      bool with_labels = options().nbest.include_feature_labels;
+      scoreBreakdown.OutputAllFeatureScores(out, with_labels);
     }
     out << "| ";
   }
 }
 
-void Manager::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset) const
+void 
+Manager::
+OutputAlignment(ostream &out, const AlignmentInfo &ai, 
+		size_t sourceOffset, size_t targetOffset) const
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
-  AlignVec alignments = ai.GetSortedAlignments();
+  AlignVec alignments = ai.GetSortedAlignments(options().output.WA_SortOrder);
 
   AlignVec::const_iterator it;
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignment = **it;
-    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+    out << alignment.first  + sourceOffset << "-" 
+	<< alignment.second + targetOffset << " ";
   }
-
+  
 }
 
-void Manager::OutputInput(std::ostream& os, const Hypothesis* hypo) const
+void 
+Manager::
+OutputInput(std::ostream& os, const Hypothesis* hypo) const
 {
   size_t len = hypo->GetInput().GetSize();
   std::vector<const Phrase*> inp_phrases(len, 0);
@@ -1851,8 +1883,10 @@ void Manager::OutputLatticeSamples(OutputCollector *collector) const
     TrellisPathList latticeSamples;
     ostringstream out;
     CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-    OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_source.GetTranslationId(),
-                staticData.GetReportSegmentation());
+    OutputNBest(out,latticeSamples, 
+		staticData.GetOutputFactorOrder(), 
+		m_source.GetTranslationId(),
+                options().output.ReportSegmentation);
     collector->Write(m_source.GetTranslationId(), out.str());
   }
 
@@ -1970,14 +2004,10 @@ void Manager::OutputSearchGraphSLF() const
   long translationId = m_source.GetTranslationId();
 
   // Output search graph in HTK standard lattice format (SLF)
-  bool slf = staticData.GetOutputSearchGraphSLF();
-  if (slf) {
+  std::string const& slf = options().output.SearchGraphSLF;
+  if (slf.size()) {
     util::StringStream fileName;
-
-    string dir;
-    staticData.GetParameter().SetParameter<string>(dir, "output-search-graph-slf", "");
-
-    fileName << dir << "/" << translationId << ".slf";
+    fileName << slf << "/" << translationId << ".slf";
     ofstream *file = new ofstream;
     file->open(fileName.str().c_str());
     if (file->is_open() && file->good()) {
@@ -2045,7 +2075,11 @@ void Manager::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*trans
   out << endl;
 }
 
-void Manager::OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/, char reportSegmentation, bool reportAllFactors, std::ostream &out) const
+void 
+Manager::
+OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/, 
+	       char reportSegmentation, bool reportAllFactors, 
+	       std::ostream &out) const
 {
   const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
@@ -2056,9 +2090,12 @@ void Manager::OutputBestHypo(const Moses::TrellisPath &path, long /*translationI
   out << endl;
 }
 
-void Manager::OutputAlignment(std::ostringstream &out, const TrellisPath &path) const
+void
+Manager::
+OutputAlignment(std::ostringstream &out, const TrellisPath &path) const
 {
-  Hypothesis::OutputAlignment(out, path.GetEdges());
+  WordAlignmentSort waso = options().output.WA_SortOrder;
+  Hypothesis::OutputAlignment(out, path.GetEdges(), waso);
   // Used by --alignment-output-file so requires endl
   out << std::endl;
 }

@@ -29,7 +29,7 @@ HOST     ?= $(shell hostname)
 HOSTTYPE ?= $(shell uname -m)
 KERNEL    = $(shell uname -r)
 
-MOSES_ROOT  = ${HOME}/code/mosesdecoder
+MOSES_ROOT ?= ${HOME}/code/mosesdecoder
 WDIR        = build/${HOSTTYPE}/${KERNEL}/${OPTI}
 VPATH       = ${HOME}/code/mosesdecoder/
 CXXFLAGS    = ${PROF} -ggdb -Wall -O${OPTI} ${INCLUDES} 

@@ -79,12 +79,6 @@ namespace Moses
 
 IOWrapper::IOWrapper()
   : m_nBestStream(NULL)
-  // , m_outputWordGraphStream(NULL)
-  // , m_outputSearchGraphStream(NULL)
-  // , m_detailedTranslationReportingStream(NULL)
-  // , m_unknownsStream(NULL)
-  // , m_alignmentInfoStream(NULL)
-  // , m_latticeSamplesStream(NULL)
   , m_surpressSingleBestOutput(false)
   , m_look_ahead(0)
   , m_look_back(0)
@@ -100,8 +94,8 @@ IOWrapper::IOWrapper()
   m_look_ahead = staticData.options().context.look_ahead;
   m_look_back  = staticData.options().context.look_back;
 
-  m_inputType = staticData.GetInputType();
-
+  m_inputType = staticData.options().input.input_type;
+  
   UTIL_THROW_IF2((m_look_ahead || m_look_back) && m_inputType != SentenceInput,
                  "Context-sensitive decoding currently works only with sentence input.");
 

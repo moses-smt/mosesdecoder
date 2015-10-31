@@ -12,6 +12,10 @@ namespace Moses
 #ifdef HAVE_XMLRPC_C
     virtual bool   
     update(std::map<std::string,xmlrpc_c::value>const& params);
+
+    bool 
+    check(std::map<std::string, xmlrpc_c::value> const& param, 
+          std::string const key);
 #endif
   };
 }

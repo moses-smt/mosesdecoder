@@ -227,7 +227,9 @@ namespace sapt
 
     // Now sort the array
     if (log) *log << "sorting .... with " << threads << " threads." << std::endl;
+#ifndef NO_MOSES
     double start_time = util::WallTime();
+#endif
     boost::scoped_ptr<ug::ThreadPool> tpool;
     tpool.reset(new ug::ThreadPool(threads));
     
@@ -252,8 +254,10 @@ namespace sapt
 	  }
       }
     tpool.reset();
+#ifndef NO_MOSES
     if (log) *log << "Done sorting after " << util::WallTime() - start_time
 		  << " seconds." << std::endl;
+#endif
     this->startArray = reinterpret_cast<char const*>(&(*sufa.begin()));
     this->endArray   = reinterpret_cast<char const*>(&(*sufa.end()));
     this->numTokens  = sufa.size();

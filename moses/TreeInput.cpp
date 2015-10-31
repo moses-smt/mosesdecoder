@@ -237,7 +237,10 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 }
 
 //! populate this InputType with data from in stream
-int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+int 
+TreeInput::
+Read(std::istream& in, const std::vector<FactorType>& factorOrder,
+     AllOptions const& opts)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -254,8 +257,8 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   stringstream strme;
   strme << line << endl;
 
-  Sentence::Read(strme, factorOrder);
-
+  Sentence::Read(strme, factorOrder, opts);
+  
   // size input chart
   size_t sourceSize = GetSize();
   m_sourceChart.resize(sourceSize);
