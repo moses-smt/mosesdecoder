@@ -278,7 +278,7 @@ CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oov
   if (isContextAdaptive && phrase.HasScope()) {
     CW = phrase.GetScope()->GetContextWeights();
   }
-  
+
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
   int codes[m_lmtb_size];
