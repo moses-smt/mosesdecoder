@@ -110,28 +110,13 @@ ReadF(std::istream& in, const std::vector<FactorType>& factorOrder, int format)
 int
 ConfusionNet::
 Read(std::istream& in,
-     const std::vector<FactorType>& factorOrder)
+     const std::vector<FactorType>& factorOrder,
+     AllOptions const& opts)
 {
   int rv=ReadF(in,factorOrder,0);
   if(rv) stats.collect(*this);
   return rv;
 }
-
-#if 0
-// Deprecated due to code duplication;
-// use Word::CreateFromString() instead
-void
-ConfusionNet::
-String2Word(const std::string& s,Word& w,
-            const std::vector<FactorType>& factorOrder)
-{
-  std::vector<std::string> factorStrVector = Tokenize(s, "|");
-  for(size_t i=0; i<factorOrder.size(); ++i)
-    w.SetFactor(factorOrder[i],
-                FactorCollection::Instance().AddFactor
-                (Input,factorOrder[i], factorStrVector[i]));
-}
-#endif
 
 bool
 ConfusionNet::
@@ -161,7 +146,8 @@ ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
       for(size_t i=0; i < numInputScores; i++) {
         double prob;
         if (!(is>>prob)) {
-          TRACE_ERR("ERROR: unable to parse CN input - bad link probability, or wrong number of scores\n");
+          TRACE_ERR("ERROR: unable to parse CN input - bad link probability, "
+                    << "or wrong number of scores\n");
           return false;
         }
         if(prob<0.0) {
@@ -174,7 +160,8 @@ ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
         probs[i] = (std::max(static_cast<float>(log(prob)),LOWEST_SCORE));
 
       }
-      //store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
+      // store 'real' word count in last feature if we have one more
+      // weight than we do arc scores and not epsilon
       if (addRealWordCount && word!=EPSILON && word!="")
         probs.back() = -1.0;
 

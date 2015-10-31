@@ -867,10 +867,10 @@ namespace Moses
     boost::unique_lock<boost::shared_mutex> ctxlock(context->lock);
 
     if (localcache) std::cerr << "have local cache " << std::endl;
-    std::cerr << "BOO at " << HERE << std::endl;
+    // std::cerr << "BOO at " << HERE << std::endl;
     if (!localcache)
       {
-        std::cerr << "no local cache at " << HERE << std::endl;
+        // std::cerr << "no local cache at " << HERE << std::endl;
         setup_bias(ttask);
         if (context->bias) 
           {

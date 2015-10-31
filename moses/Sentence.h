@@ -1,6 +1,4 @@
-// -*- c++ -*-
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -28,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Phrase.h"
 #include "InputType.h"
+#include "parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -66,7 +65,8 @@ protected:
 public:
   Sentence();
   Sentence(size_t const transId, std::string const& stext,
-           std::vector<FactorType> const* IFO = NULL);
+	   AllOptions const& opts, 
+	   std::vector<FactorType> const* IFO = NULL);
   // Sentence(size_t const transId, std::string const& stext);
   ~Sentence();
 
@@ -97,7 +97,10 @@ public:
   void GetXmlTranslationOptions(std::vector<TranslationOption*> &list, size_t startPos, size_t endPos) const;
   std::vector<ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  virtual int 
+  Read(std::istream& in, const std::vector<FactorType>& factorOrder,
+       AllOptions const& opts);
+
   void Print(std::ostream& out) const;
 
   TranslationOptionCollection*
@@ -114,7 +117,8 @@ public:
 
 
   void
-  init(std::string line, std::vector<FactorType> const& factorOrder);
+  init(std::string line, std::vector<FactorType> const& factorOrder,
+       AllOptions const& opts);
 
   std::vector<std::map<std::string,std::string> > const&
   GetDltMeta() const {

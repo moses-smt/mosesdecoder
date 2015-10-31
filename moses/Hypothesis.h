@@ -251,9 +251,18 @@ public:
     return m_transOpt;
   }
 
-  void OutputAlignment(std::ostream &out) const;
-  static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
-  static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
+  void 
+  OutputAlignment(std::ostream &out) const;
+
+  static void 
+  OutputAlignment(std::ostream &out, 
+		  const std::vector<const Hypothesis *> &edges,
+		  WordAlignmentSort waso);
+
+  static void 
+  OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, 
+		  size_t sourceOffset, size_t targetOffset,
+		  WordAlignmentSort waso);
 
   void OutputInput(std::ostream& os) const;
   static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);

@@ -1,5 +1,4 @@
-// -*- c++ -*-
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // vim:tabstop=2
 
 /***********************************************************************
@@ -31,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ReorderingConstraint.h"
 #include "NonTerminal.h"
 #include "Range.h"
+#include "parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -184,7 +184,10 @@ public:
   }
 
   //! populate this InputType with data from in stream
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder) =0;
+  virtual int 
+  Read(std::istream& in, 
+       std::vector<FactorType> const& factorOrder,
+       AllOptions const& opts) =0;
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const =0;

@@ -305,35 +305,38 @@ void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const Score
   }
 }
 
-void ScoreComponentCollection::OutputAllFeatureScores(std::ostream &out) const
+void 
+ScoreComponentCollection::
+OutputAllFeatureScores(std::ostream &out, bool with_labels) const
 {
   std::string lastName = "";
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ ) {
     const StatefulFeatureFunction *ff = sff[i];
     if (ff->IsTuneable()) {
-      OutputFeatureScores( out, ff, lastName );
+      OutputFeatureScores(out, ff, lastName, with_labels);
     }
   }
   const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ ) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
-      OutputFeatureScores( out, ff, lastName );
+      OutputFeatureScores(out, ff, lastName, with_labels);
     }
   }
 }
 
-void ScoreComponentCollection::OutputFeatureScores( std::ostream& out
-    , const FeatureFunction *ff
-    , std::string &lastName ) const
+void 
+ScoreComponentCollection::
+OutputFeatureScores(std::ostream& out, FeatureFunction const* ff,
+		    std::string &lastName, bool with_labels) const
 {
-  const StaticData &staticData = StaticData::Instance();
-  bool labeledOutput = staticData.options().nbest.include_feature_labels;
+  // const StaticData &staticData = StaticData::Instance();
+  // bool labeledOutput = staticData.options().nbest.include_feature_labels;
 
   // regular features (not sparse)
   if (ff->HasTuneableComponents()) {
-    if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
+    if( with_labels && lastName != ff->GetScoreProducerDescription() ) {
       lastName = ff->GetScoreProducerDescription();
       out << " " << lastName << "=";
     }

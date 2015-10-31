@@ -216,6 +216,7 @@ boost::shared_ptr<InputType>
 IOWrapper::
 BufferInput()
 {
+  AllOptions const& opts = StaticData::Instance().options();
   boost::shared_ptr<itype>  source;
   boost::shared_ptr<InputType> ret;
   if (m_future_input.size()) {
@@ -224,13 +225,13 @@ BufferInput()
     m_buffered_ahead -= ret->GetSize();
   } else {
     source.reset(new itype);
-    if (!source->Read(*m_inputStream, *m_inputFactorOrder))
+    if (!source->Read(*m_inputStream, *m_inputFactorOrder, opts))
       return ret;
     ret = source;
   }
   while (m_buffered_ahead < m_look_ahead) {
     source.reset(new itype);
-    if (!source->Read(*m_inputStream, *m_inputFactorOrder))
+    if (!source->Read(*m_inputStream, *m_inputFactorOrder, opts))
       break;
     m_future_input.push_back(source);
     m_buffered_ahead += source->GetSize();

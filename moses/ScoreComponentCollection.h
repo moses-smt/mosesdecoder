@@ -433,10 +433,9 @@ public:
     m_scores.merge(other.m_scores);
   }
 
-  void OutputAllFeatureScores(std::ostream &out) const;
-  void OutputFeatureScores( std::ostream& out
-                            , const Moses::FeatureFunction *ff
-                            , std::string &lastName ) const;
+  void OutputAllFeatureScores(std::ostream &out, bool with_labels) const;
+  void OutputFeatureScores(std::ostream& out, Moses::FeatureFunction const* ff,
+			   std::string &lastName, bool with_labels) const;
 
 #ifdef MPI_ENABLE
 public:

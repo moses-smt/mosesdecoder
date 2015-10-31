@@ -26,12 +26,12 @@ void Manager::OutputBest(OutputCollector *collector) const
   const SHyperedge *best = GetBestSHyperedge();
   if (best == NULL) {
     VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
-    if (StaticData::Instance().GetOutputHypoScore()) {
+    if (options().output.ReportHypoScore) {
       out << "0 ";
     }
     out << '\n';
   } else {
-    if (StaticData::Instance().GetOutputHypoScore()) {
+    if (options().output.ReportHypoScore) {
       out << best->label.score << " ";
     }
     Phrase yield = GetOneBestTargetYield(*best);
@@ -49,12 +49,10 @@ void Manager::OutputBest(OutputCollector *collector) const
 void Manager::OutputNBest(OutputCollector *collector) const
 {
   if (collector) {
-    const StaticData &staticData = StaticData::Instance();
     long translationId = m_source.GetTranslationId();
-
     KBestExtractor::KBestVec nBestList;
-    ExtractKBest(staticData.options().nbest.nbest_size, nBestList,
-                 staticData.options().nbest.only_distinct);
+    ExtractKBest(options().nbest.nbest_size, nBestList,
+                 options().nbest.only_distinct);
     OutputNBestList(collector, nBestList, translationId);
   }
 }
@@ -111,7 +109,8 @@ void Manager::OutputNBestList(OutputCollector *collector,
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, outputFactorOrder, false);
     out << " ||| ";
-    derivation.scoreBreakdown.OutputAllFeatureScores(out);
+    bool with_labels = options().nbest.include_feature_labels;
+    derivation.scoreBreakdown.OutputAllFeatureScores(out, with_labels);
     out << " ||| " << derivation.score;
 
     // optionally, print word alignments

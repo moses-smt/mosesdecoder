@@ -29,6 +29,7 @@ namespace Moses
 {
 
 class ChartSearchGraphWriter;
+ class AllOptions;
 
 //! functor to compare (chart) hypotheses by (descending) score
 class ChartHypothesisScoreOrderer
@@ -70,7 +71,7 @@ public:
     return m_hypos.end();
   }
 
-  ChartHypothesisCollection();
+  ChartHypothesisCollection(AllOptions const& opts);
   ~ChartHypothesisCollection();
   bool AddHypothesis(ChartHypothesis *hypo, ChartManager &manager);
 

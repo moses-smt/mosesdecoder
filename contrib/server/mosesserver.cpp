@@ -257,9 +257,9 @@ public:
     const StaticData &staticData = StaticData::Instance();
 
     //Make sure alternative paths are retained, if necessary
-    if (addGraphInfo || nbest_size>0) {
-      (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
-    }
+    // if (addGraphInfo || nbest_size>0) {
+    //   (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
+    // }
 
 
     stringstream out, graphInfo, transCollOpts;
@@ -269,7 +269,7 @@ public:
 	boost::shared_ptr<TreeInput> tinput(new TreeInput);
         const vector<FactorType>& IFO = staticData.GetInputFactorOrder();
         istringstream in(source + "\n");
-        tinput->Read(in,IFO);
+        tinput->Read(in,IFO,staticData.options());
 	ttasksptr task = Moses::TranslationTask::create(tinput);
         ChartManager manager(task);
         manager.Decode();
@@ -285,7 +285,8 @@ public:
     else
       {
         // size_t lineNumber = 0; // TODO: Include sentence request number here?
-	boost::shared_ptr<Sentence> sentence(new Sentence(0,source));
+	boost::shared_ptr<Sentence> sentence;
+	sentence.reset(new Sentence(0,source,staticData.options()));
 	ttasksptr task = Moses::TranslationTask::create(sentence);
         Manager manager(task);
 	manager.Decode();
@@ -320,7 +321,7 @@ public:
 	    outputNBest(manager, m_retData, nbest_size, nbest_distinct,
 			reportAllFactors, addAlignInfo, addScoreBreakdown);
 	  }
-        (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
+        // (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
       }
     m_retData["text"] = value_string(out.str());
     XVERBOSE(1,"Output: " << out.str() << endl);
@@ -479,7 +480,9 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  path.GetScoreBreakdown()->OutputAllFeatureScores(buf);
+	  bool with_labels 
+	    = StaticData::Instance().options().nbest.include_feature_labels;
+	  path.GetScoreBreakdown()->OutputAllFeatureScores(buf, with_labels);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 
