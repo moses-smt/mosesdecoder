@@ -1,4 +1,5 @@
-// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
+// $Id$
+
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -24,14 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "dictionary.h"
 #include "n_gram.h"
 #include "lmContainer.h"
-
-// should be defined in lmContainer.h, if the version of IRSTLM used provides
-// context-dependent functionality
-#ifndef _IRSTLM_LMCONTEXTDEPENDENT
-#define _IRSTLM_LMCONTEXTDEPENDENT 5
-#else
-#define IRSTLM_CONTEXT_DEPENDENT
-#endif
 
 using namespace irstlm;
 
@@ -67,10 +60,9 @@ public:
   }
 };
 
-LanguageModelIRST::
-LanguageModelIRST(const std::string &line)
-  : LanguageModelSingleFactor(line)
-  , m_lmtb_dub(0), m_lmtb_size(0)
+LanguageModelIRST::LanguageModelIRST(const std::string &line)
+  :LanguageModelSingleFactor(line)
+  ,m_lmtb_dub(0), m_lmtb_size(0)
 {
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
@@ -86,9 +78,9 @@ LanguageModelIRST(const std::string &line)
   VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
 }
 
-LanguageModelIRST::
-~LanguageModelIRST()
+LanguageModelIRST::~LanguageModelIRST()
 {
+
 #ifndef WIN32
   TRACE_ERR( "reset mmap\n");
   if (m_lmtb) m_lmtb->reset_mmap();
@@ -98,17 +90,13 @@ LanguageModelIRST::
 }
 
 
-bool
-LanguageModelIRST::
-IsUseable(const FactorMask &mask) const
+bool LanguageModelIRST::IsUseable(const FactorMask &mask) const
 {
   bool ret = mask[m_factorType];
   return ret;
 }
 
-void
-LanguageModelIRST::
-Load()
+void LanguageModelIRST::Load()
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -135,9 +123,7 @@ Load()
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
 }
 
-void
-LanguageModelIRST::
-CreateFactors(FactorCollection &factorCollection)
+void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 {
   // add factors which have srilm id
   // code copied & paste from SRI LM class. should do template function
@@ -179,23 +165,17 @@ CreateFactors(FactorCollection &factorCollection)
   }
 }
 
-int
-LanguageModelIRST::
-GetLmID( const std::string &str ) const
+int LanguageModelIRST::GetLmID( const std::string &str ) const
 {
   return d->encode( str.c_str() ); // at the level of micro tags
 }
 
-int
-LanguageModelIRST::
-GetLmID( const Word &word ) const
+int LanguageModelIRST::GetLmID( const Word &word ) const
 {
   return GetLmID( word.GetFactor(m_factorType) );
 }
 
-int
-LanguageModelIRST::
-GetLmID( const Factor *factor ) const
+int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
   size_t factorId = factor->GetId();
 
@@ -216,21 +196,21 @@ GetLmID( const Factor *factor ) const
       ///////////
 
       ///OLD PROBLEM - SOLVED
-      ////////////
-      /// IL PPROBLEMA ERA QUI
-      /// m_lmIdLookup.push_back(code);
-      /// PERCHE' USANDO PUSH_BACK IN REALTA' INSEREVIVAMO L'ELEMENTO NUOVO
-      /// IN POSIZIONE (factorID-1) invece che in posizione factrID dove dopo andiamo a leggerlo (vedi caso C
-      /// Cosi' funziona ....
-      /// ho un dubbio su cosa c'e' nelle prime posizioni di m_lmIdLookup
-      /// quindi
-      /// e scopro che rimane vuota una entry ogni due
-      /// perche' factorID cresce di due in due (perche' codifica sia source che target) "vuota" la posizione (factorID-1)
-      /// non da problemi di correttezza, ma solo di "spreco" di memoria
-      /// potremmo sostituirerendere  m_lmIdLookup una std:map invece che un std::vector,
-      /// ma si perde in efficienza nell'accesso perche' non e' piu' possibile quello random dei vettori
-      /// a te la scelta!!!!
-      ////////////////
+////////////
+/// IL PPROBLEMA ERA QUI
+/// m_lmIdLookup.push_back(code);
+/// PERCHE' USANDO PUSH_BACK IN REALTA' INSEREVIVAMO L'ELEMENTO NUOVO
+/// IN POSIZIONE (factorID-1) invece che in posizione factrID dove dopo andiamo a leggerlo (vedi caso C
+/// Cosi' funziona ....
+/// ho un dubbio su cosa c'e' nelle prime posizioni di m_lmIdLookup
+/// quindi
+/// e scopro che rimane vuota una entry ogni due
+/// perche' factorID cresce di due in due (perche' codifica sia source che target) "vuota" la posizione (factorID-1)
+/// non da problemi di correttezza, ma solo di "spreco" di memoria
+/// potremmo sostituirerendere  m_lmIdLookup una std:map invece che un std::vector,
+/// ma si perde in efficienza nell'accesso perche' non e' piu' possibile quello random dei vettori
+/// a te la scelta!!!!
+////////////////
 
 
       if (factorId >= m_lmIdLookup.size()) {
@@ -251,34 +231,21 @@ GetLmID( const Factor *factor ) const
   }
 }
 
-FFState const*
-LanguageModelIRST::
-EmptyHypothesisState(const InputType &/*input*/) const
+const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/) const
 {
   std::auto_ptr<IRSTLMState> ret(new IRSTLMState());
 
   return ret.release();
 }
 
-void
-LanguageModelIRST::
-CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
+void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
-  bool isContextAdaptive
-  = m_lmtb->getLanguageModelType() == _IRSTLM_LMCONTEXTDEPENDENT;
-
   fullScore = 0;
   ngramScore = 0;
   oovCount = 0;
 
   if ( !phrase.GetSize() ) return;
 
-  //get the context_weight map here
-  SPTR<std::map<std::string, float> const> CW;
-  if (isContextAdaptive && phrase.HasScope()) {
-    CW = phrase.GetScope()->GetContextWeights();
-  }
-  
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
   int codes[m_lmtb_size];
@@ -289,77 +256,35 @@ CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oov
 
   char* msp = NULL;
   float before_boundary = 0.0;
-
-#ifdef IRSTLM_CONTEXT_DEPENDENT
-  if (CW) {
-    for (; position < _min; ++position) {
-      codes[idx] = GetLmID(phrase.GetWord(position));
-      if (codes[idx] == m_unknownId) ++oovCount;
-      before_boundary += m_lmtb->clprob(codes,idx+1,*CW,NULL,NULL,&msp);
-      ++idx;
-    }
-  } else {
-#endif
-    for (; position < _min; ++position) {
-      codes[idx] = GetLmID(phrase.GetWord(position));
-      if (codes[idx] == m_unknownId) ++oovCount;
-      before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
-      ++idx;
-    }
-#ifdef IRSTLM_CONTEXT_DEPENDENT
+  for (; position < _min; ++position) {
+    codes[idx] = GetLmID(phrase.GetWord(position));
+    if (codes[idx] == m_unknownId) ++oovCount;
+    before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
+    ++idx;
   }
-#endif
+
   ngramScore = 0.0;
   int end_loop = (int) phrase.GetSize();
 
-#ifdef IRSTLM_CONTEXT_DEPENDENT
-  if (CW) {
-    for (; position < end_loop; ++position) {
-      for (idx = 1; idx < m_lmtb_size; ++idx) {
-        codes[idx-1] = codes[idx];
-      }
-      codes[idx-1] = GetLmID(phrase.GetWord(position));
-      if (codes[idx-1] == m_unknownId) ++oovCount;
-      ngramScore += m_lmtb->clprob(codes,idx,*CW,NULL,NULL,&msp);
+  for (; position < end_loop; ++position) {
+    for (idx = 1; idx < m_lmtb_size; ++idx) {
+      codes[idx-1] = codes[idx];
     }
-  } else {
-#endif
-    for (; position < end_loop; ++position) {
-      for (idx = 1; idx < m_lmtb_size; ++idx) {
-        codes[idx-1] = codes[idx];
-      }
-      codes[idx-1] = GetLmID(phrase.GetWord(position));
-      if (codes[idx-1] == m_unknownId) ++oovCount;
-      ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
-    }
-#ifdef IRSTLM_CONTEXT_DEPENDENT
+    codes[idx-1] = GetLmID(phrase.GetWord(position));
+    if (codes[idx-1] == m_unknownId) ++oovCount;
+    ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
   }
-#endif
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
   fullScore = ngramScore + before_boundary;
 }
 
-FFState*
-LanguageModelIRST::
-EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
-                    ScoreComponentCollection *out) const
+FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
-  bool isContextAdaptive
-  = m_lmtb->getLanguageModelType() == _IRSTLM_LMCONTEXTDEPENDENT;
-
   if (!hypo.GetCurrTargetLength()) {
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
     return ret.release();
   }
-
-  //get the context_weight map here
-  SPTR<std::map<std::string, float> const> CW;
-  if (isContextAdaptive) {
-    ttasksptr ttask = hypo.GetManager().GetTtask();
-    if (ttask) CW = ttask->GetScope()->GetContextWeights();
-  }
-
 
   //[begin, end) in STL-like fashion.
   const int begin = (const int) hypo.GetCurrTargetWordsRange().GetStartPos();
@@ -383,34 +308,18 @@ EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
   }
 
   char* msp = NULL;
+  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+
   position = (const int) begin+1;
-  float score;
-#ifdef IRSTLM_CONTEXT_DEPENDENT
-  if (CW) {
-    score = m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp);
-    while (position < adjust_end) {
-      for (idx=1; idx<m_lmtb_size; idx++) {
-        codes[idx-1] = codes[idx];
-      }
-      codes[idx-1] =  GetLmID(hypo.GetWord(position));
-      score += m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp);
-      ++position;
+  while (position < adjust_end) {
+    for (idx=1; idx<m_lmtb_size; idx++) {
+      codes[idx-1] = codes[idx];
     }
-  } else {
-#endif
-    score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
-    position = (const int) begin+1;
-    while (position < adjust_end) {
-      for (idx=1; idx<m_lmtb_size; idx++) {
-        codes[idx-1] = codes[idx];
-      }
-      codes[idx-1] =  GetLmID(hypo.GetWord(position));
-      score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
-      ++position;
-    }
-#ifdef IRSTLM_CONTEXT_DEPENDENT
+    codes[idx-1] =  GetLmID(hypo.GetWord(position));
+    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+    ++position;
   }
-#endif
+
   //adding probability of having sentenceEnd symbol, after this phrase;
   //this could happen only when all source words are covered
   if (hypo.IsSourceCompleted()) {
@@ -427,13 +336,8 @@ EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
-#ifdef IRSTLM_CONTEXT_DEPENDENT
-    if (CW) score += m_lmtb->clprob(codes,m_lmtb_size,*CW,NULL,NULL,&msp);
-    else
-#else
     score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
-#endif
-    } else {
+  } else {
     // need to set the LM state
 
     if (adjust_end < end)   { //the LMstate of this target phrase refers to the last m_lmtb_size-1 words
@@ -454,9 +358,7 @@ EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps,
   return ret.release();
 }
 
-LMResult
-LanguageModelIRST::
-GetValue(const vector<const Word*> &contextFactor, State* finalState) const
+LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
   // set up context
   size_t count = contextFactor.size();
@@ -492,8 +394,7 @@ GetValue(const vector<const Word*> &contextFactor, State* finalState) const
   return result;
 }
 
-bool
-LMCacheCleanup(const int sentences_done, const size_t m_lmcache_cleanup_threshold)
+bool LMCacheCleanup(const int sentences_done, const size_t m_lmcache_cleanup_threshold)
 {
   if (sentences_done==-1) return true;
   if (m_lmcache_cleanup_threshold)
@@ -510,9 +411,7 @@ void LanguageModelIRST::InitializeForInput(ttasksptr const& ttask)
 #endif
 }
 
-void
-LanguageModelIRST::
-CleanUpAfterSentenceProcessing(const InputType& source)
+void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
 {
   const StaticData &staticData = StaticData::Instance();
   static int sentenceCount = 0;
@@ -526,9 +425,7 @@ CleanUpAfterSentenceProcessing(const InputType& source)
   }
 }
 
-void
-LanguageModelIRST::
-SetParameter(const std::string& key, const std::string& value)
+void LanguageModelIRST::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "dub") {
     m_lmtb_dub = Scan<unsigned int>(value);
