@@ -64,18 +64,19 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor(line)
   ,m_lmtb_dub(0), m_lmtb_size(0)
 {
+/*
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
   if (threadCount != 1) {
     throw runtime_error("Error: " + SPrint(threadCount) + " number of threads specified but IRST LM is not threadsafe.");
   }
+*/
 
   ReadParameters();
 
   VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
   VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" << m_filePath << "|" << std::endl);
   VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" << m_factorType << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -116,15 +117,18 @@ void LanguageModelIRST::Load()
   CreateFactors(factorCollection);
 
   VERBOSE(1, GetScoreProducerDescription() << "  LanguageModelIRST::Load() m_unknownId=" << m_unknownId << std::endl);
+  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
 
   //install caches to save time (only if PS_CACHE_ENABLE is defined through compilation flags)
   m_lmtb->init_caches(m_lmtb_size>2?m_lmtb_size-1:2);
 
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
+  d->incflag(0);
 }
 
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 {
+VERBOSE(1,"void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection) START" << std::endl);
   // add factors which have srilm id
   // code copied & paste from SRI LM class. should do template function
   std::map<size_t, int> lmIdMap;
@@ -143,15 +147,17 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
   factorId = m_sentenceStart->GetId();
-  const std::string bs = BOS_;
-  const std::string es = EOS_;
-  m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
+  d->incflag(1);
+  m_lmtb_sentenceStart = lmIdMap[factorId] = GetLmID(BOS_);
+  d->incflag(0);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceStartWord[m_factorType] = m_sentenceStart;
 
-  m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
+  m_sentenceEnd         = factorCollection.AddFactor(Output, m_factorType, EOS_);
   factorId = m_sentenceEnd->GetId();
-  m_lmtb_sentenceEnd=lmIdMap[factorId] = GetLmID(EOS_);
+  d->incflag(1);
+  m_lmtb_sentenceEnd = lmIdMap[factorId] = GetLmID(EOS_);
+  d->incflag(0);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
@@ -163,6 +169,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
   for (iterMap = lmIdMap.begin() ; iterMap != lmIdMap.end() ; ++iterMap) {
     m_lmIdLookup[iterMap->first] = iterMap->second;
   }
+VERBOSE(1,"void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection) END" << std::endl);
 }
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
@@ -175,10 +182,42 @@ int LanguageModelIRST::GetLmID( const Word &word ) const
   return GetLmID( word.GetFactor(m_factorType) );
 }
 
+/*
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
+VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version B" << std::endl;);
+  //there is no possibility to extend the original dictionary associated to this LM
   size_t factorId = factor->GetId();
+int c;  
+  if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
+    c=m_unknownId;
+//    return m_unknownId;
+  } else {
+    c=m_lmIdLookup[factorId];
+//    return m_lmIdLookup[factorId];
+  }
+VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version B: s:|" << factor->GetString().as_string() << "| code:|" << c << "|" << std::endl);
+  return c;
+}
+*/
 
+int LanguageModelIRST::GetLmID( const Factor *factor ) const
+{
+VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version C" << std::endl;);
+  //there is no possibility to extend the original dictionary associated to this LM
+  std::string s = factor->GetString().as_string();
+int c=d->encode(s.c_str());
+VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version C: word:|" << s << "| code:|" << c << "|" << std::endl;);
+  return d->encode(s.c_str());
+}
+
+
+/*
+int LanguageModelIRST::GetLmID( const Factor *factor ) const
+{
+VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version A" << std::endl;);
+  size_t factorId = factor->GetId();
+int c;
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
     if (d->incflag()==1) {
       std::string s = factor->GetString().as_string();
@@ -221,15 +260,21 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 
       //insert new code
       m_lmIdLookup[factorId] = code;
-      return code;
+      c=code;
+//      return code;
 
     } else {
-      return m_unknownId;
+      c=m_unknownId;
+//      return m_unknownId;
     }
   } else {
-    return m_lmIdLookup[factorId];
+    c=m_lmIdLookup[factorId];
+//    return m_lmIdLookup[factorId];
   }
+VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version A: word:|" << s << "| code:|" << c << "|" << std::endl;);
+  return c;
 }
+*/
 
 const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/) const
 {
@@ -238,8 +283,10 @@ const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*
   return ret.release();
 }
 
+/*
 void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
+VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...)"<< std::endl);
   fullScore = 0;
   ngramScore = 0;
   oovCount = 0;
@@ -278,9 +325,12 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
   ngramScore = TransformLMScore(ngramScore);
   fullScore = ngramScore + before_boundary;
 }
+*/
 
+/*
 FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
+VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...)"<< std::endl);
   if (!hypo.GetCurrTargetLength()) {
     std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
     return ret.release();
@@ -357,9 +407,11 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
 
   return ret.release();
 }
+*/
 
 LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
+VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...)"<< std::endl);
   // set up context
   size_t count = contextFactor.size();
   if (count < 0) {
