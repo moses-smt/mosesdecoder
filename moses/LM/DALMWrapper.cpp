@@ -41,6 +41,18 @@ void read_ini(const char *inifile, string &model, string &words, string &wordstx
 namespace Moses
 {
 
+class Murmur: public DALM::State::HashFunction 
+{
+public:
+	Murmur(std::size_t seed=0): seed(seed){
+	}
+	virtual std::size_t operator()(const DALM::VocabId *words, std::size_t size) const{
+  		return util::MurmurHashNative(words, sizeof(DALM::VocabId) * size, seed);
+	}
+private:
+	std::size_t seed;
+};
+
 class DALMState : public FFState
 {
 private:
@@ -69,10 +81,12 @@ public:
   }
 
   virtual size_t hash() const {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+    // imitate KenLM
+    return state.hash(Murmur());
   }
   virtual bool operator==(const FFState& other) const {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+    const DALMState &o = static_cast<const DALMState &>(other);
+    return state.compare(o.state) == 0;
   }
 
   DALM::State &get_state() {
@@ -187,10 +201,26 @@ public:
   }
 
   virtual size_t hash() const {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+    // imitate KenLM
+    unsigned char add[2];
+    add[0] = prefixLength;
+    add[1] = isLarge;
+    std::size_t seed = util::MurmurHashNative(add, 2, prefixLength ? prefixFragments[prefixLength-1].sid : 0);
+    return rightContext.hash(Murmur(seed));
   }
+
   virtual bool operator==(const FFState& other) const {
-    UTIL_THROW2("TODO:Haven't figure this out yet");
+    const DALMChartState &o = static_cast<const DALMChartState &>(other);
+    
+    // check left state.
+    if(prefixLength != o.prefixLength) return false;
+    const DALM::Fragment &f = prefixFragments[prefixLength-1];
+    const DALM::Fragment &of = o.prefixFragments[prefixLength-1];
+    if(DALM::compare_fragments(f, of) != 0) return false;
+	    
+    // check right state.
+    if(rightContext.get_count() != o.rightContext.get_count()) return false;
+    return rightContext.compare(o.rightContext) == 0;
   }
 
 };
