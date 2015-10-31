@@ -182,7 +182,6 @@ int LanguageModelIRST::GetLmID( const Word &word ) const
   return GetLmID( word.GetFactor(m_factorType) );
 }
 
-/*
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
 VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version B" << std::endl;);
@@ -199,8 +198,8 @@ int c;
 VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version B: s:|" << factor->GetString().as_string() << "| code:|" << c << "|" << std::endl);
   return c;
 }
-*/
 
+/*
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
 VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version C" << std::endl;);
@@ -210,7 +209,7 @@ int c=d->encode(s.c_str());
 VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version C: word:|" << s << "| code:|" << c << "|" << std::endl;);
   return d->encode(s.c_str());
 }
-
+*/
 
 /*
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
@@ -438,11 +437,12 @@ VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &conte
 
   char* msp = NULL;
   result.score = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...) untransformed result.score:|" << result.score << "|" << std::endl);
 
   if (finalState) *finalState=(State *) msp;
 
   result.score = TransformLMScore(result.score);
-
+VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...)   transformed result.score:|" << result.score << "|" << std::endl);
   return result;
 }
 
