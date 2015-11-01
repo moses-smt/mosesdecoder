@@ -138,8 +138,9 @@ LanguageModel::EvaluateInIsolation(const System &system,
 		ShiftOrPush(context, factor);
 
 		if (context.size() == m_order) {
-			//std::pair<SCORE, void*> fromScoring = Score(context);
+			std::pair<SCORE, void*> fromScoring = Score(context);
 			//score += fromScoring.first;
+			estimatedFutureScores += fromScoring.first;
 		}
 		else if (estimatedFutureScores) {
 			std::pair<SCORE, void*> fromScoring = Score(context);
