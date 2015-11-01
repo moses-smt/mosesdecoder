@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /*
    Moses - statistical machine translation system
    Copyright (C) 2005-2015 University of Edinburgh

@@ -1,6 +1,4 @@
-// -*- c++ -*-
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -90,7 +88,7 @@ class ScoreComponentCollection
 {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
   friend void swap(ScoreComponentCollection &first, ScoreComponentCollection &second);
-
+  
 private:
   FVector m_scores;
 

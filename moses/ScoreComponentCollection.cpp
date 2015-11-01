@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include <vector>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
@@ -280,7 +280,9 @@ void ScoreComponentCollection::ZeroDenseFeatures(const FeatureFunction* sp)
 }
 
 //! get subset of scores that belong to a certain sparse ScoreProducer
-FVector ScoreComponentCollection::GetVectorForProducer(const FeatureFunction* sp) const
+FVector 
+ScoreComponentCollection::
+GetVectorForProducer(const FeatureFunction* sp) const
 {
   FVector fv(s_denseVectorSize);
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
@@ -310,14 +312,16 @@ ScoreComponentCollection::
 OutputAllFeatureScores(std::ostream &out, bool with_labels) const
 {
   std::string lastName = "";
-  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff 
+    = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ ) {
     const StatefulFeatureFunction *ff = sff[i];
     if (ff->IsTuneable()) {
       OutputFeatureScores(out, ff, lastName, with_labels);
     }
   }
-  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf 
+    = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ ) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {

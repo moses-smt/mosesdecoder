@@ -1,4 +1,5 @@
 #include "TranslationRequest.h"
+#include "PackScores.h"
 #include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
 #include "moses/Util.h"
@@ -188,6 +189,8 @@ outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
       bool with_labels = m_options.nbest.include_feature_labels;
       path->GetScoreBreakdown()->OutputAllFeatureScores(buf, with_labels);
       nBestXmlItem["fvals"] = xmlrpc_c::value_string(buf.str());
+
+      nBestXmlItem["scores"] = PackScores(*path->GetScoreBreakdown());
     }
 
     // weighted score
