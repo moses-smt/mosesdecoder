@@ -39,16 +39,16 @@ void read_ini(const char *inifile, string &model, string &words, string &wordstx
 namespace Moses
 {
 
-class Murmur: public DALM::State::HashFunction 
+class Murmur: public DALM::State::HashFunction
 {
 public:
-	Murmur(std::size_t seed=0): seed(seed){
-	}
-	virtual std::size_t operator()(const DALM::VocabId *words, std::size_t size) const{
-		return util::MurmurHashNative(words, sizeof(DALM::VocabId) * size, seed);
-	}
+  Murmur(std::size_t seed=0): seed(seed) {
+  }
+  virtual std::size_t operator()(const DALM::VocabId *words, std::size_t size) const {
+    return util::MurmurHashNative(words, sizeof(DALM::VocabId) * size, seed);
+  }
 private:
-	std::size_t seed;
+  std::size_t seed;
 };
 
 class DALMState : public FFState
@@ -173,13 +173,13 @@ public:
 
   virtual bool operator==(const FFState& other) const {
     const DALMChartState &o = static_cast<const DALMChartState &>(other);
-    
+
     // check left state.
     if(prefixLength != o.prefixLength) return false;
     const DALM::Fragment &f = prefixFragments[prefixLength-1];
     const DALM::Fragment &of = o.prefixFragments[prefixLength-1];
     if(DALM::compare_fragments(f, of) != 0) return false;
-           
+
     // check right state.
     if(rightContext.get_count() != o.rightContext.get_count()) return false;
     return rightContext.compare(o.rightContext) == 0;
@@ -301,7 +301,7 @@ void LanguageModelDALM::CalcScore(const Phrase &phrase, float &fullScore, float 
     }
 
     currPos++;
-    if (currPos >= m_ContextSize){
+    if (currPos >= m_ContextSize) {
       break;
     }
   }
@@ -564,7 +564,7 @@ void LanguageModelDALM::EvaluateTerminal(
     } else {
       hypoScore += score;
       prefixLength++;
-      if(state.get_count() < std::min(prevLen+1, (int)m_ContextSize)){
+      if(state.get_count() < std::min(prevLen+1, (int)m_ContextSize)) {
         newState->SetAsLarge();
       }
       if(prefixLength >= m_ContextSize) newState->SetAsLarge();
@@ -626,8 +626,8 @@ void LanguageModelDALM::EvaluateNonTerminal(
         state = prevState->GetRightContext();
         return;
       } else if(state.get_count() <= prefixPos+1) {
-        if(state.get_count() == prefixPos+1 && !gap.is_finalized()){
-            prefixLength++;
+        if(state.get_count() == prefixPos+1 && !gap.is_finalized()) {
+          prefixLength++;
         }
         newState->SetAsLarge();
         state = prevState->GetRightContext();
@@ -636,10 +636,10 @@ void LanguageModelDALM::EvaluateNonTerminal(
         newState->SetAsLarge();
       } else {
         prefixLength++;
-        if(state.get_count() < std::min(prevLen+1, (int)m_ContextSize)){
+        if(state.get_count() < std::min(prevLen+1, (int)m_ContextSize)) {
           newState->SetAsLarge();
         }
-        
+
         if(prefixLength >= m_ContextSize) newState->SetAsLarge();
       }
     }
@@ -651,7 +651,7 @@ void LanguageModelDALM::EvaluateNonTerminal(
   if (prevState->LargeEnough()) {
     newState->SetAsLarge();
     //if(prevPrefixLength < prevState->GetHypoSize()) {
-      hypoScore += m_lm->sum_bows(state, prevPrefixLength, state.get_count());
+    hypoScore += m_lm->sum_bows(state, prevPrefixLength, state.get_count());
     //}
     // copy language model state
     state = prevState->GetRightContext();

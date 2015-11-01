@@ -68,7 +68,7 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
   , m_container(pt)
 {
   if (ttask) m_scope = ttask->GetScope();
-  
+
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   // XXX should this really be InputFactorOrder???
