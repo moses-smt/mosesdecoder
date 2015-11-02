@@ -175,9 +175,9 @@ namespace sapt
     bdBitset  filter2;
     if (!filter)
       {
-	filter2.resize(c->size());
-	filter2.set();
-	filter = &filter2;
+        filter2.resize(c->size());
+        filter2.set();
+        filter = &filter2;
       }
     assert(filter);
     // In the first iteration over the corpus, we obtain word counts.
