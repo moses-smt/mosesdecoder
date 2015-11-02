@@ -184,8 +184,8 @@ public:
   }
 
   //! populate this InputType with data from in stream
-  virtual int 
-  Read(std::istream& in, 
+  virtual int
+  Read(std::istream& in,
        std::vector<FactorType> const& factorOrder,
        AllOptions const& opts) =0;
 

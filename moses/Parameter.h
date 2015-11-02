@@ -155,14 +155,13 @@ public:
     // issues a warning if format is wrong
     const PARAM_VEC *params = GetParam(name);
     val = (params && params->size());
-    if (val && params->size() != 1)
-      {
-	TRACE_ERR("ERROR: wrong format for switch -" << name);
-	return false;
-      }
+    if (val && params->size() != 1) {
+      TRACE_ERR("ERROR: wrong format for switch -" << name);
+      return false;
+    }
     return true;
   }
-    
+
 };
 
 template<>

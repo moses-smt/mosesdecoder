@@ -280,7 +280,7 @@ void ScoreComponentCollection::ZeroDenseFeatures(const FeatureFunction* sp)
 }
 
 //! get subset of scores that belong to a certain sparse ScoreProducer
-FVector 
+FVector
 ScoreComponentCollection::
 GetVectorForProducer(const FeatureFunction* sp) const
 {
@@ -307,21 +307,21 @@ void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const Score
   }
 }
 
-void 
+void
 ScoreComponentCollection::
 OutputAllFeatureScores(std::ostream &out, bool with_labels) const
 {
   std::string lastName = "";
-  const vector<const StatefulFeatureFunction*>& sff 
-    = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff
+  = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ ) {
     const StatefulFeatureFunction *ff = sff[i];
     if (ff->IsTuneable()) {
       OutputFeatureScores(out, ff, lastName, with_labels);
     }
   }
-  const vector<const StatelessFeatureFunction*>& slf 
-    = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf
+  = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ ) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
@@ -330,10 +330,10 @@ OutputAllFeatureScores(std::ostream &out, bool with_labels) const
   }
 }
 
-void 
+void
 ScoreComponentCollection::
 OutputFeatureScores(std::ostream& out, FeatureFunction const* ff,
-		    std::string &lastName, bool with_labels) const
+                    std::string &lastName, bool with_labels) const
 {
   // const StaticData &staticData = StaticData::Instance();
   // bool labeledOutput = staticData.options().nbest.include_feature_labels;

@@ -320,15 +320,15 @@ void Manager::OutputNBest(OutputCollector *collector)  const
   OutputNBestList(collector, *completed_nbest_, m_source.GetTranslationId());
 }
 
-void 
+void
 Manager::
-OutputNBestList(OutputCollector *collector, 
-		std::vector<search::Applied> const& nbest, 
-		long translationId) const
+OutputNBestList(OutputCollector *collector,
+                std::vector<search::Applied> const& nbest,
+                long translationId) const
 {
   const StaticData &staticData = StaticData::Instance();
-  const std::vector<Moses::FactorType> &outputFactorOrder 
-    = staticData.GetOutputFactorOrder();
+  const std::vector<Moses::FactorType> &outputFactorOrder
+  = staticData.GetOutputFactorOrder();
 
   std::ostringstream out;
   // wtf? copied from the original OutputNBestList
@@ -337,13 +337,13 @@ OutputNBestList(OutputCollector *collector,
   }
   Phrase outputPhrase;
   ScoreComponentCollection features;
-  for (std::vector<search::Applied>::const_iterator i = nbest.begin(); 
+  for (std::vector<search::Applied>::const_iterator i = nbest.begin();
        i != nbest.end(); ++i) {
     Incremental::PhraseAndFeatures(*i, outputPhrase, features);
     // <s> and </s>
     UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
                    "Output phrase should have contained at least 2 words "
-		   << "(beginning and end-of-sentence)");
+                   << "(beginning and end-of-sentence)");
 
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
@@ -359,7 +359,7 @@ OutputNBestList(OutputCollector *collector,
   collector->Write(translationId, out.str());
 }
 
-void 
+void
 Manager::
 OutputDetailedTranslationReport(OutputCollector *collector) const
 {
@@ -525,7 +525,7 @@ void Manager::OutputBestHypo(OutputCollector *collector, search::Applied applied
   VERBOSE(1,"BEST TRANSLATION: " << outPhrase << "[total=" << applied.GetScore() << "]" << std::endl);
 }
 
-void 
+void
 Manager::
 OutputBestNone(OutputCollector *collector, long translationId) const
 {

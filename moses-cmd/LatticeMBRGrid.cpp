@@ -202,8 +202,8 @@ int main(int argc, char* argv[])
                  << " ||| ";
             vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
             manager.OutputBestHypo(mbrBestHypo, lineCount,
-				   manager.options().output.ReportSegmentation,
-				   manager.options().output.ReportAllFactors,
+                                   manager.options().output.ReportSegmentation,
+                                   manager.options().output.ReportAllFactors,
                                    cout);
           }
         }

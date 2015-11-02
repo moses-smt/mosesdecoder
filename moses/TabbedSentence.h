@@ -67,7 +67,7 @@ public:
   virtual void CreateFromString(const std::vector<FactorType> &factorOrder
                                 , const std::string &tabbedString);
 
-  virtual int 
+  virtual int
   Read(std::istream& in,const std::vector<FactorType>& factorOrder,
        AllOptions const& opts);
 

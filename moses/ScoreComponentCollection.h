@@ -88,7 +88,7 @@ class ScoreComponentCollection
 {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
   friend void swap(ScoreComponentCollection &first, ScoreComponentCollection &second);
-  
+
 private:
   FVector m_scores;
 
@@ -433,7 +433,7 @@ public:
 
   void OutputAllFeatureScores(std::ostream &out, bool with_labels) const;
   void OutputFeatureScores(std::ostream& out, Moses::FeatureFunction const* ff,
-			   std::string &lastName, bool with_labels) const;
+                           std::string &lastName, bool with_labels) const;
 
 #ifdef MPI_ENABLE
 public:

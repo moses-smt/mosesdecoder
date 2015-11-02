@@ -83,7 +83,7 @@ public:
     return m_collection.size();
   }
 
-  std::vector< const std::pair<size_t,size_t>* > 
+  std::vector< const std::pair<size_t,size_t>* >
   GetSortedAlignments(WordAlignmentSort SortOrder) const;
 
   std::vector<size_t> GetSourceIndex2PosMap() const;

@@ -380,16 +380,16 @@ OutputAlignment(std::ostream &out) const
     edges.push_back(currentHypo);
     currentHypo = currentHypo->GetPrevHypo();
   }
-  
+
   OutputAlignment(out, edges, m_manager.options().output.WA_SortOrder);
 
 }
 
 void
 Hypothesis::
-OutputAlignment(ostream &out, 
-		vector<const Hypothesis *> const& edges, 
-		WordAlignmentSort waso)
+OutputAlignment(ostream &out,
+                vector<const Hypothesis *> const& edges,
+                WordAlignmentSort waso)
 {
   size_t targetOffset = 0;
 
@@ -409,7 +409,7 @@ void
 Hypothesis::
 OutputAlignment(ostream &out, const AlignmentInfo &ai,
                 size_t sourceOffset, size_t targetOffset,
-		WordAlignmentSort waso)
+                WordAlignmentSort waso)
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
   AlignVec alignments = ai.GetSortedAlignments(waso);
@@ -417,8 +417,8 @@ OutputAlignment(ostream &out, const AlignmentInfo &ai,
   AlignVec::const_iterator it;
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignment = **it;
-    out << alignment.first  + sourceOffset << "-" 
-	<< alignment.second + targetOffset << " ";
+    out << alignment.first  + sourceOffset << "-"
+        << alignment.second + targetOffset << " ";
   }
 
 }
@@ -608,7 +608,7 @@ OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const
   using namespace std;
   Range const& src = this->GetCurrSourceWordsRange();
   Range const& trg = this->GetCurrTargetWordsRange();
-  
+
   WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
   vector<pair<size_t,size_t> const* > a
   = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments(waso);

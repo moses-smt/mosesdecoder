@@ -106,9 +106,9 @@ std::set<size_t> AlignmentInfo::GetAlignmentsForTarget(size_t targetPos) const
 }
 
 
-bool 
-compare_target(std::pair<size_t,size_t> const* a, 
-	       std::pair<size_t,size_t> const* b)
+bool
+compare_target(std::pair<size_t,size_t> const* a,
+               std::pair<size_t,size_t> const* b)
 {
   if(a->second < b->second)  return true;
   if(a->second == b->second) return (a->first < b->first);
@@ -116,29 +116,29 @@ compare_target(std::pair<size_t,size_t> const* a,
 }
 
 
-std::vector< const std::pair<size_t,size_t>* > 
+std::vector< const std::pair<size_t,size_t>* >
 AlignmentInfo::
 GetSortedAlignments(WordAlignmentSort SortOrder) const
 {
   std::vector< const std::pair<size_t,size_t>* > ret;
-  
+
   CollType::const_iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
     const std::pair<size_t,size_t> &alignPair = *iter;
     ret.push_back(&alignPair);
   }
-  
+
   switch (SortOrder) {
   case NoSort:
     break;
-    
+
   case TargetOrder:
     std::sort(ret.begin(), ret.end(), compare_target);
     break;
-    
+
   default:
-    UTIL_THROW(util::Exception, "Unknown word alignment sort option: " 
-	       << SortOrder);
+    UTIL_THROW(util::Exception, "Unknown word alignment sort option: "
+               << SortOrder);
   }
 
   return ret;

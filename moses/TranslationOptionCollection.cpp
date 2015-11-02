@@ -257,15 +257,10 @@ TranslationOptionCollection::
 CalcFutureScore()
 {
   // setup the matrix (ignore lower triangle, set upper triangle to -inf
-  size_t size = m_source.GetSize(); // the width of the matrix
-
-  for(size_t row=0; row < size; row++) {
-    for(size_t col=row; col<size; col++) {
-      m_futureScore.SetScore(row, col, -numeric_limits<float>::infinity());
-    }
-  }
+  m_futureScore.InitTriangle(-numeric_limits<float>::infinity());
 
   // walk all the translation options and record the cheapest option for each span
+  size_t size = m_source.GetSize(); // the width of the matrix
   for (size_t sPos = 0 ; sPos < size ; ++sPos) {
     size_t ePos = sPos;
     BOOST_FOREACH(TranslationOptionList& tol, m_collection[sPos]) {

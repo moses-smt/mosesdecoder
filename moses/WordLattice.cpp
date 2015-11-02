@@ -147,9 +147,9 @@ InitializeFromPCNDataType
   return !cn.empty();
 }
 
-int 
+int
 WordLattice::
-Read(std::istream& in, 
+Read(std::istream& in,
      std::vector<FactorType> const& factorOrder,
      AllOptions const& opts)
 {

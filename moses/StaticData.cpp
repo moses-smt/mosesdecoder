@@ -63,7 +63,7 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
-    // , m_inputType(SentenceInput)
+  // , m_inputType(SentenceInput)
   , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
@@ -169,21 +169,21 @@ StaticData
   m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
 
 
-  m_parameter->SetParameter(m_includeLHSInSearchGraph, 
+  m_parameter->SetParameter(m_includeLHSInSearchGraph,
                             "include-lhs-in-search-graph", false );
 
-  m_parameter->SetParameter<string>(m_outputUnknownsFile, 
+  m_parameter->SetParameter<string>(m_outputUnknownsFile,
                                     "output-unknowns", "");
 
   //Print Translation Options
-  m_parameter->SetParameter(m_printTranslationOptions, 
+  m_parameter->SetParameter(m_printTranslationOptions,
                             "print-translation-option", false );
-  
+
   //Print All Derivations
-  m_parameter->SetParameter(m_printAllDerivations , 
+  m_parameter->SetParameter(m_printAllDerivations ,
                             "print-all-derivations", false );
-  
-  m_parameter->SetParameter<long>(m_startTranslationId, 
+
+  m_parameter->SetParameter<long>(m_startTranslationId,
                                   "start-translation-id", 0);
 
   //lattice samples
@@ -340,9 +340,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
   ini_zombie_options(); // probably dead, or maybe not
 
-  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor", 
+  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
                             NOT_FOUND);
-  
+
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   initialize_features();
 
@@ -393,7 +393,7 @@ void StaticData::SetWeight(const FeatureFunction* sp, float weight)
   m_allWeights.Assign(sp,weight);
 }
 
-void StaticData::SetWeights(const FeatureFunction* sp, 
+void StaticData::SetWeights(const FeatureFunction* sp,
                             const std::vector<float>& weights)
 {
   m_allWeights.Resize();
@@ -444,9 +444,9 @@ void StaticData::LoadChartDecodingParameters()
   LoadNonTerminals();
 
   // source label overlap
-  m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap", 
+  m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap",
                             SourceLabelOverlapAdd);
-  m_parameter->SetParameter(m_ruleLimit, "rule-limit", 
+  m_parameter->SetParameter(m_ruleLimit, "rule-limit",
                             DEFAULT_MAX_TRANS_OPT_SIZE);
 
 }
@@ -485,16 +485,16 @@ void StaticData::LoadDecodeGraphs()
   }
 }
 
-void 
+void
 StaticData::
-LoadDecodeGraphsOld(const vector<string> &mappingVector, 
+LoadDecodeGraphsOld(const vector<string> &mappingVector,
                     const vector<size_t> &maxChartSpans)
 {
   const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
   const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
-  const std::vector<FeatureFunction*> *featuresRemaining 
-    = &FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> *featuresRemaining
+  = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
   size_t prevDecodeGraphInd = 0;
 
@@ -513,7 +513,7 @@ LoadDecodeGraphsOld(const vector<string> &mappingVector,
       // For specifying multiple translation model
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
-      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd 
+      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd
                      && decodeGraphInd != prevDecodeGraphInd + 1,
                      "Malformed mapping");
       if (decodeGraphInd > prevDecodeGraphInd) {
@@ -601,7 +601,7 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
 
     decodeGraphInd = Scan<size_t>(token[0]);
     //the vectorList index can only increment by one
-    UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd 
+    UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd
                    && decodeGraphInd != prevDecodeGraphInd + 1,
                    "Malformed mapping");
     if (decodeGraphInd > prevDecodeGraphInd) {
@@ -702,14 +702,14 @@ StaticData::
 InitializeForInput(ttasksptr const& ttask) const
 {
   const std::vector<FeatureFunction*> &producers
-    = FeatureFunction::GetFeatureFunctions();
+  = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
       Timer iTime;
       iTime.start();
       ff.InitializeForInput(ttask);
-      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() 
+      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription()
               << " )" << "= " << iTime << endl);
     }
   }
@@ -720,7 +720,7 @@ StaticData::
 CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
 {
   const std::vector<FeatureFunction*> &producers
-    = FeatureFunction::GetFeatureFunctions();
+  = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {

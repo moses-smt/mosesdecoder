@@ -28,9 +28,9 @@ public:
   }
 
   //! populate this InputType with data from in stream
-  virtual int 
+  virtual int
   Read(std::istream& in,
-       std::vector<FactorType> const& factorOrder, 
+       std::vector<FactorType> const& factorOrder,
        AllOptions const& opts);
 
   //! Output debugging info to stream out
