@@ -38,6 +38,12 @@ Scores::~Scores() {
 
 }
 
+void Scores::Reset(size_t numScores)
+{
+	Init<SCORE>(m_scores, numScores, 0);
+	m_total = 0;
+}
+
 void Scores::PlusEquals(const System &system,
 		const FeatureFunction &featureFunction,
 		const std::vector<SCORE> &scores)

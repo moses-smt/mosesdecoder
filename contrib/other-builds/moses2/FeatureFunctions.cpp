@@ -17,6 +17,8 @@
 #include "WordPenalty.h"
 #include "Distortion.h"
 #include "LanguageModel.h"
+#include "Scores.h"
+#include "MemPool.h"
 
 using namespace std;
 
@@ -144,13 +146,19 @@ const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(si
 }
 
 void
-FeatureFunctions::EvaluateInIsolation(const System &system,
-		  const PhraseBase &source, const TargetPhrase &targetPhrase,
-        Scores& scores,
-        Scores *estimatedFutureScores) const
+FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
+		  const PhraseBase &source, TargetPhrase &targetPhrase) const
 {
+  size_t numScores = system.GetFeatureFunctions().GetNumScores();
+  Scores *estimatedFutureScores = new (pool.Allocate<Scores>()) Scores(pool, numScores);
+
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+	  Scores& scores = targetPhrase.GetScores();
 	  ff->EvaluateInIsolation(system, source, targetPhrase, scores, estimatedFutureScores);
+
+	  if (estimatedFutureScores) {
+		  estimatedFutureScores->Reset(numScores);
+	  }
   }
 
 }

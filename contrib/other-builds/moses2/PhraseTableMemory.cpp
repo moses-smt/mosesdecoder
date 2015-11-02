@@ -101,7 +101,8 @@ void PhraseTableMemory::Load(System &system)
 		target->GetScores().CreateFromString(toks[2], *this, system, true);
 		//cerr << "created scores" << endl;
 
-		system.GetFeatureFunctions().EvaluateInIsolation(system, *source, *target, target->GetScores(), NULL);
+		MemPool tmpPool;
+		system.GetFeatureFunctions().EvaluateInIsolation(tmpPool, system, *source, *target);
 		m_root.AddRule(*source, target);
 	}
 }

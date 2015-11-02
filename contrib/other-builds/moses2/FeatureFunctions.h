@@ -17,6 +17,7 @@ class FeatureFunction;
 class StatefulFeatureFunction;
 class PhraseTable;
 class Manager;
+class MemPool;
 class PhraseBase;
 class Phrase;
 class TargetPhrase;
@@ -40,10 +41,8 @@ public:
     const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
 
 	  virtual void
-	  EvaluateInIsolation(const System &system,
-			  const PhraseBase &source, const TargetPhrase &targetPhrase,
-	          Scores &scores,
-	          Scores *estimatedFutureScores) const;
+	  EvaluateInIsolation(MemPool &pool, const System &system,
+			  const PhraseBase &source, TargetPhrase &targetPhrase) const;
 
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;

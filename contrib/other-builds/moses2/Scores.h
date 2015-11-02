@@ -25,6 +25,8 @@ public:
   SCORE GetTotalScore() const
   { return m_total; }
 
+  void Reset(size_t numScores);
+
   void CreateFromString(const std::string &str,
 		  const FeatureFunction &featureFunction,
 		  const System &system,

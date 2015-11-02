@@ -58,7 +58,8 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 	Scores &scores = target->GetScores();
 	scores.PlusEquals(mgr.GetSystem(), *this, -100);
 
-	system.GetFeatureFunctions().EvaluateInIsolation(system, source, *target, target->GetScores(), NULL);
+	MemPool &memPool = mgr.GetPool();
+	system.GetFeatureFunctions().EvaluateInIsolation(memPool, system, source, *target);
 
 	tps->AddTargetPhrase(*target);
 	ret.reset(tps);

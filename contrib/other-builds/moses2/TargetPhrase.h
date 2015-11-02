@@ -31,5 +31,8 @@ public:
 
 protected:
 	Scores *m_scores;
+	SCORE m_futureScore;
 };
+
+
 
