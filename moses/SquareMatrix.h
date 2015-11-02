@@ -49,6 +49,10 @@ public:
   ~SquareMatrix() {
     free(m_array);
   }
+
+  // set upper triangle
+  void InitTriangle(float val);
+
   /** Returns length of the square: typically the sentence length */
   inline size_t GetSize() const {
     return m_size;
