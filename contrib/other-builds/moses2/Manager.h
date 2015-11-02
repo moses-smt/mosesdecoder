@@ -13,8 +13,9 @@
 #include "InputPaths.h"
 #include "Stack.h"
 #include "TargetPhrase.h"
-#include "moses/Bitmaps.h"
 #include "MemPool.h"
+#include "moses/Bitmaps.h"
+#include "moses/SquareMatrix.h"
 
 class System;
 class Phrase;
@@ -47,10 +48,13 @@ protected:
 	Phrase *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;
+	Moses::SquareMatrix *m_futureScore;
 	Moses::Range m_initRange;
 	TargetPhrase m_initPhrase;
 
     std::vector<Stack> m_stacks;
 	SearchNormal *m_search;
+
+	void CalcFutureScore();
 };
 

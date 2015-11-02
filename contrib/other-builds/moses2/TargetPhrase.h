@@ -29,6 +29,9 @@ public:
   const Scores &GetScores() const
   { return *m_scores; }
 
+  SCORE GetFutureScore() const
+  { return m_futureScore; }
+
 protected:
 	Scores *m_scores;
 	SCORE m_futureScore;
