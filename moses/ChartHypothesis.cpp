@@ -256,12 +256,13 @@ void ChartHypothesis::CleanupArcList()
    * However, may not be enough if only unique candidates are needed,
    * so we'll keep all of arc list if nedd distinct n-best list
    */
+  AllOptions const& opts = StaticData::Instance().options();
   const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.options().nbest.nbest_size;
-  bool distinctNBest = (staticData.options().nbest.only_distinct
-                        || staticData.options().mbr.enabled
-                        || staticData.GetOutputSearchGraph()
-                        || staticData.GetOutputSearchGraphHypergraph());
+  size_t nBestSize = opts.nbest.nbest_size;
+  bool distinctNBest = (opts.nbest.only_distinct
+                        || opts.mbr.enabled
+                        || opts.output.NeedSearchGraph()
+                        || !opts.output.SearchGraphHG.empty());
 
   if (!distinctNBest && m_arcList->size() > nBestSize) {
     // prune arc list only if there too many arcs

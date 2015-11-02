@@ -74,8 +74,11 @@ BitextSampler : public Moses::reference_counter
 public:
   BitextSampler(BitextSampler const& other);
   BitextSampler const& operator=(BitextSampler const& other);
-  BitextSampler(bitext const*  const bitext, typename bitext::iter const& phrase,
-                SPTR<SamplingBias const> const& bias, size_t const min_samples, size_t const max_samples,
+  BitextSampler(bitext const*  const bitext, 
+                typename bitext::iter const& phrase,
+                SPTR<SamplingBias const> const& bias, 
+                size_t const min_samples, 
+                size_t const max_samples,
                 sampling_method const method); 
   ~BitextSampler();
   SPTR<pstats> stats();

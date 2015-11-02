@@ -12,7 +12,7 @@ namespace sapt
   pstats::
   pstats() : raw_cnt(0), sample_cnt(0), good(0), sum_pairs(0), in_progress(0)
   {
-    for (int i = 0; i <= Moses::LRModel::NONE; ++i)
+    for (int i = 0; i <= LRModel::NONE; ++i)
       ofwd[i] = obwd[i] = 0;
   }
 

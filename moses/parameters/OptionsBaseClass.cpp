@@ -10,6 +10,16 @@ namespace Moses
   {
     return true;
   }
+
+  bool 
+  OptionsBaseClass::
+  check(std::map<std::string, xmlrpc_c::value> const& param, 
+        std::string const key)
+  {
+    std::map<std::string, xmlrpc_c::value>::const_iterator m;
+    return (param.find(key) != param.end());
+  }
+
 #endif
 
 }

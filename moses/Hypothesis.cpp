@@ -195,9 +195,8 @@ EvaluateWhenApplied(float futureScore)
     const StatefulFeatureFunction &ff = *ffs[i];
     const StaticData &staticData = StaticData::Instance();
     if (! staticData.IsFeatureFunctionIgnored(ff)) {
-      m_ffStates[i] = ff.EvaluateWhenApplied(*this,
-                                             m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                                             &m_currScoreBreakdown);
+      FFState const* s = m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL;
+      m_ffStates[i] = ff.EvaluateWhenApplied(*this, s, &m_currScoreBreakdown);
     }
   }
 
@@ -276,15 +275,11 @@ CleanupArcList()
    * However, may not be enough if only unique candidates are needed,
    * so we'll keep all of arc list if nedd distinct n-best list
    */
+
   const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.options().nbest.nbest_size;
-  bool distinctNBest = (m_manager.options().nbest.only_distinct ||
-                        staticData.GetLatticeSamplesSize() ||
-                        m_manager.options().mbr.enabled ||
-                        staticData.GetOutputSearchGraph() ||
-                        staticData.GetOutputSearchGraphSLF() ||
-                        staticData.GetOutputSearchGraphHypergraph() ||
-                        m_manager.options().lmbr.enabled);
+  AllOptions const& opts = m_manager.options();
+  size_t nBestSize = opts.nbest.nbest_size;
+  bool distinctNBest = opts.NBestDistinct();
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
@@ -292,9 +287,8 @@ CleanupArcList()
                  m_arcList->end(), CompareHypothesisTotalScore());
 
     // delete bad ones
-    ArcList::iterator iter;
-    for (iter = m_arcList->begin() + nBestSize; iter != m_arcList->end() ; ++iter)
-      delete *iter;
+    ArcList::iterator i = m_arcList->begin() + nBestSize;
+    while (i != m_arcList->end()) delete *i++;
     m_arcList->erase(m_arcList->begin() + nBestSize, m_arcList->end());
   }
 
@@ -387,13 +381,15 @@ OutputAlignment(std::ostream &out) const
     currentHypo = currentHypo->GetPrevHypo();
   }
 
-  OutputAlignment(out, edges);
+  OutputAlignment(out, edges, m_manager.options().output.WA_SortOrder);
 
 }
 
 void
 Hypothesis::
-OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
+OutputAlignment(ostream &out,
+                vector<const Hypothesis *> const& edges,
+                WordAlignmentSort waso)
 {
   size_t targetOffset = 0;
 
@@ -402,7 +398,7 @@ OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
     const TargetPhrase &tp = edge.GetCurrTargetPhrase();
     size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
 
-    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset, waso);
 
     targetOffset += tp.GetSize();
   }
@@ -412,15 +408,17 @@ OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
 void
 Hypothesis::
 OutputAlignment(ostream &out, const AlignmentInfo &ai,
-                size_t sourceOffset, size_t targetOffset)
+                size_t sourceOffset, size_t targetOffset,
+                WordAlignmentSort waso)
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
-  AlignVec alignments = ai.GetSortedAlignments();
+  AlignVec alignments = ai.GetSortedAlignments(waso);
 
   AlignVec::const_iterator it;
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignment = **it;
-    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+    out << alignment.first  + sourceOffset << "-"
+        << alignment.second + targetOffset << " ";
   }
 
 }
@@ -526,15 +524,17 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
     const int sourceEnd = sourceRange.GetEndPos();
     out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
     if (reportSegmentation == 2) {
+      WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
       out << ",wa=";
       const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-      Hypothesis::OutputAlignment(out, ai, 0, 0);
+      Hypothesis::OutputAlignment(out, ai, 0, 0, waso);
       out << ",total=";
       out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      scoreBreakdown.OutputAllFeatureScores(out);
+      bool with_labels = m_manager.options().nbest.include_feature_labels;
+      scoreBreakdown.OutputAllFeatureScores(out, with_labels);
     }
     out << "| ";
   }
@@ -609,8 +609,9 @@ OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const
   Range const& src = this->GetCurrSourceWordsRange();
   Range const& trg = this->GetCurrTargetWordsRange();
 
+  WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
   vector<pair<size_t,size_t> const* > a
-  = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments();
+  = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments(waso);
   typedef pair<size_t,size_t> item;
   map<string, xmlrpc_c::value> M;
   BOOST_FOREACH(item const* p, a) {

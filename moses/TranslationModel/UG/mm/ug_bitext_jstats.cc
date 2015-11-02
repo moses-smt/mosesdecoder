@@ -17,7 +17,7 @@ namespace sapt
   jstats()
     : my_rcnt(0), my_cnt2(0), my_wcnt(0), my_bcnt(0)
   {
-    for (int i = 0; i <= Moses::LRModel::NONE; ++i)
+    for (int i = 0; i <= LRModel::NONE; ++i)
       ofwd[i] = obwd[i] = 0;
     my_aln.reserve(1);
   }
@@ -30,7 +30,7 @@ namespace sapt
     my_bcnt = other.bcnt();
     my_aln  = other.aln();
     indoc   = other.indoc;
-    for (int i = 0; i <= Moses::LRModel::NONE; i++)
+    for (int i = 0; i <= LRModel::NONE; i++)
       {
 	ofwd[i] = other.ofwd[i];
 	obwd[i] = other.obwd[i];
@@ -41,7 +41,7 @@ namespace sapt
   jstats::
   dcnt_fwd(PhraseOrientation const idx) const
   {
-    assert(idx <= Moses::LRModel::NONE);
+    assert(idx <= LRModel::NONE);
     return ofwd[idx];
   }
 
@@ -49,7 +49,7 @@ namespace sapt
   jstats::
   dcnt_bwd(PhraseOrientation const idx) const
   {
-    assert(idx <= Moses::LRModel::NONE);
+    assert(idx <= LRModel::NONE);
     return obwd[idx];
   }
 

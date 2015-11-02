@@ -4,7 +4,7 @@ namespace sapt
 {
   using namespace std;
 
-  Moses::LRModel::ReorderingType po_other = Moses::LRModel::NONE;
+  LRModel::ReorderingType po_other = LRModel::NONE;
   // check if min and max in the aligmnet vector v are within the
   // bounds LFT and RGT and update the actual bounds L and R; update
   // the total count of alignment links in the underlying phrase
@@ -83,54 +83,56 @@ namespace sapt
     return ret;
   }
 
-  Moses::LRModel::ReorderingType
+  // LRModel::ReorderingType
+  sapt::PhraseOrientation
   find_po_fwd(vector<vector<ushort> >& a1,
 	      vector<vector<ushort> >& a2,
 	      size_t s1, size_t e1,
 	      size_t s2, size_t e2)
   {
     if (e2 == a2.size()) // end of target sentence
-      return Moses::LRModel::M;
+      return LRModel::M;
     size_t y = e2, L = e2, R = a2.size()-1; // won't change
     size_t x = e1, T = e1, B = a1.size()-1;
     if (e1 < a1.size() && expand_block(a1,a2,x,y,T,L,B,R) >= 0)
-      return Moses::LRModel::M;
+      return LRModel::M;
     B = x = s1-1; T = 0;
     if (s1 && expand_block(a1,a2,x,y,T,L,B,R) >= 0)
-      return Moses::LRModel::S;
+      return LRModel::S;
     while (e2 < a2.size() && a2[e2].size() == 0) ++e2;
     if (e2 == a2.size()) // should never happen, actually
-      return Moses::LRModel::NONE;
+      return LRModel::NONE;
     if (a2[e2].back() < s1)
-      return Moses::LRModel::DL;
+      return LRModel::DL;
     if (a2[e2].front() >= e1)
-      return Moses::LRModel::DR;
-    return Moses::LRModel::NONE;
+      return LRModel::DR;
+    return LRModel::NONE;
   }
 
 
-  Moses::LRModel::ReorderingType
+  // LRModel::ReorderingType
+  PhraseOrientation
   find_po_bwd(vector<vector<ushort> >& a1,
 	      vector<vector<ushort> >& a2,
 	      size_t s1, size_t e1,
 	      size_t s2, size_t e2)
   {
-    if (s1 == 0 && s2 == 0) return Moses::LRModel::M;
-    if (s2 == 0) return Moses::LRModel::DR;
-    if (s1 == 0) return Moses::LRModel::DL;
+    if (s1 == 0 && s2 == 0) return LRModel::M;
+    if (s2 == 0) return LRModel::DR;
+    if (s1 == 0) return LRModel::DL;
     size_t y = s2-1, L = 0, R = s2-1; // won't change
     size_t x = s1-1, T = 0, B = s1-1;
     if (expand_block(a1,a2,x,y,T,L,B,R) >= 0)
-      return Moses::LRModel::M;
+      return LRModel::M;
     T = x = e1; B = a1.size()-1;
     if (expand_block(a1,a2,x,y,T,L,B,R) >= 0)
-      return Moses::LRModel::S;
+      return LRModel::S;
     while (s2-- && a2[s2].size() == 0);
 
-    Moses::LRModel::ReorderingType ret;
+    LRModel::ReorderingType ret;
     ret = (a2[s2].size()  ==  0 ? po_other :
-	   a2[s2].back()   < s1 ? Moses::LRModel::DR :
-	   a2[s2].front() >= e1 ? Moses::LRModel::DL :
+	   a2[s2].back()   < s1 ? LRModel::DR :
+	   a2[s2].front() >= e1 ? LRModel::DL :
 	   po_other);
 #if 0
     cout << "s1=" << s1 << endl;

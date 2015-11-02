@@ -106,7 +106,9 @@ std::set<size_t> AlignmentInfo::GetAlignmentsForTarget(size_t targetPos) const
 }
 
 
-bool compare_target(const std::pair<size_t,size_t> *a, const std::pair<size_t,size_t> *b)
+bool
+compare_target(std::pair<size_t,size_t> const* a,
+               std::pair<size_t,size_t> const* b)
 {
   if(a->second < b->second)  return true;
   if(a->second == b->second) return (a->first < b->first);
@@ -114,7 +116,9 @@ bool compare_target(const std::pair<size_t,size_t> *a, const std::pair<size_t,si
 }
 
 
-std::vector< const std::pair<size_t,size_t>* > AlignmentInfo::GetSortedAlignments() const
+std::vector< const std::pair<size_t,size_t>* >
+AlignmentInfo::
+GetSortedAlignments(WordAlignmentSort SortOrder) const
 {
   std::vector< const std::pair<size_t,size_t>* > ret;
 
@@ -124,10 +128,7 @@ std::vector< const std::pair<size_t,size_t>* > AlignmentInfo::GetSortedAlignment
     ret.push_back(&alignPair);
   }
 
-  const StaticData &staticData = StaticData::Instance();
-  WordAlignmentSort wordAlignmentSort = staticData.GetWordAlignmentSort();
-
-  switch (wordAlignmentSort) {
+  switch (SortOrder) {
   case NoSort:
     break;
 
@@ -136,7 +137,8 @@ std::vector< const std::pair<size_t,size_t>* > AlignmentInfo::GetSortedAlignment
     break;
 
   default:
-    UTIL_THROW(util::Exception, "Unknown alignment sort option: " << wordAlignmentSort);
+    UTIL_THROW(util::Exception, "Unknown word alignment sort option: "
+               << SortOrder);
   }
 
   return ret;

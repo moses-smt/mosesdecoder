@@ -17,8 +17,10 @@ namespace Moses
 {
 
 //! populate this InputType with data from in stream
-int ForestInput::Read(std::istream &in,
-                      const std::vector<FactorType>& factorOrder)
+int ForestInput::
+Read(std::istream &in,
+     std::vector<FactorType> const& factorOrder,
+     AllOptions const& opts)
 {
   using Syntax::F2S::Forest;
 
@@ -56,7 +58,7 @@ int ForestInput::Read(std::istream &in,
   // not sure ForestInput needs to.
   std::stringstream strme;
   strme << "<s> " << sentence << " </s>" << std::endl;
-  Sentence::Read(strme, factorOrder);
+  Sentence::Read(strme, factorOrder, opts);
 
   // Find the maximum end position of any vertex (0 if forest is empty).
   std::size_t maxEnd = FindMaxEnd(*m_forest);

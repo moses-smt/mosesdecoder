@@ -26,7 +26,9 @@
 
 #include "moses/TranslationModel/UG/TargetPhraseCollectionCache.h"
 
+#ifndef NO_MOSES
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
+#endif
 
 #include "moses/InputFileStream.h"
 #include "moses/FactorTypeSet.h"
@@ -82,7 +84,9 @@ namespace Moses
     boost::scoped_ptr<std::ofstream> m_bias_logger; // for logging to a file
     std::ostream* m_bias_log;
     int m_bias_loglevel;
+#ifndef NO_MOSES
     LexicalReordering* m_lr_func; // associated lexical reordering function
+#endif
     std::string m_lr_func_name; // name of associated lexical reordering function
     sapt::sampling_method m_sampling_method; // sampling method, see ug_bitext_sampler
     boost::scoped_ptr<ug::ThreadPool> m_thread_pool;

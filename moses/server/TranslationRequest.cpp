@@ -1,4 +1,5 @@
 #include "TranslationRequest.h"
+#include "PackScores.h"
 #include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
 #include "moses/Util.h"
@@ -25,8 +26,7 @@ using Moses::Sentence;
 boost::shared_ptr<TranslationRequest>
 TranslationRequest::
 create(Translator* translator, xmlrpc_c::paramList const& paramList,
-       boost::condition_variable& cond,
-       boost::mutex& mut)
+       boost::condition_variable& cond, boost::mutex& mut)
 {
   boost::shared_ptr<TranslationRequest> ret;
   ret.reset(new TranslationRequest(paramList, cond, mut));
@@ -60,10 +60,9 @@ Run()
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
   //Make sure alternative paths are retained, if necessary
-  if (m_withGraphInfo || m_nbestSize>0)
-    // why on earth is this a global variable? Is this even thread-safe???? UG
-    (const_cast<Moses::StaticData&>(SD)).SetOutputSearchGraph(true);
-
+  // if (m_withGraphInfo || m_nbestSize>0)
+  // why on earth is this a global variable? Is this even thread-safe???? UG
+  // (const_cast<Moses::StaticData&>(SD)).SetOutputSearchGraph(true);
   // std::stringstream out, graphInfo, transCollOpts;
   
   if (SD.IsSyntax())
@@ -170,7 +169,14 @@ outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
 {
   TrellisPathList nBestList;
   vector<xmlrpc_c::value> nBestXml;
-  manager.CalcNBest(m_nbestSize, nBestList, m_nbestDistinct);
+  manager.CalcNBest(m_options.nbest.nbest_size, nBestList, 
+		    m_options.nbest.only_distinct);
+  
+  StaticData const& SD = StaticData::Instance();
+  manager.OutputNBest(cout, nBestList, 
+		      SD.GetOutputFactorOrder(),
+		      m_source->GetTranslationId(),
+		      options().output.ReportSegmentation);
 
   BOOST_FOREACH(Moses::TrellisPath const* path, nBestList) {
     vector<const Hypothesis *> const& E = path->GetEdges();
@@ -180,8 +186,11 @@ outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
     if (m_withScoreBreakdown) {
       // should the score breakdown be reported in a more structured manner?
       ostringstream buf;
-      path->GetScoreBreakdown()->OutputAllFeatureScores(buf);
+      bool with_labels = m_options.nbest.include_feature_labels;
+      path->GetScoreBreakdown()->OutputAllFeatureScores(buf, with_labels);
       nBestXmlItem["fvals"] = xmlrpc_c::value_string(buf.str());
+
+      nBestXmlItem["scores"] = PackScores(*path->GetScoreBreakdown());
     }
 
     // weighted score
@@ -228,23 +237,23 @@ insertTranslationOptions(Moses::Manager& manager,
   retData["topt"] = xmlrpc_c::value_array(toptsXml);
 }
 
-bool
-check(std::map<std::string, xmlrpc_c::value> const& params, std::string const key)
-{
-  std::map<std::string, xmlrpc_c::value>::const_iterator m;
-  return (params.find(key) != params.end());
-}
-
 TranslationRequest::
 TranslationRequest(xmlrpc_c::paramList const& paramList,
                    boost::condition_variable& cond, boost::mutex& mut)
   : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
-  , m_nbestSize(0)
+    // , m_nbestSize(0)
   , m_session_id(0)
 { 
   m_options = StaticData::Instance().options();
 }
 
+bool
+check(std::map<std::string, xmlrpc_c::value> const& param, 
+      std::string const key)
+{
+  std::map<std::string, xmlrpc_c::value>::const_iterator m;
+  return (param.find(key) != param.end());
+}
 
 void
 TranslationRequest::
@@ -274,10 +283,9 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   m_withWordAlignInfo   = check(params, "word-align");
   m_withGraphInfo       = check(params, "sg");
   m_withTopts           = check(params, "topt");
-  m_reportAllFactors    = check(params, "report-all-factors");
-  m_nbestDistinct       = check(params, "nbest-distinct");
+  // m_reportAllFactors    = check(params, "report-all-factors");
+  // m_nbestDistinct       = check(params, "nbest-distinct");
   m_withScoreBreakdown  = check(params, "add-score-breakdown");
-  m_source.reset(new Sentence(0,m_source_string));
   si = params.find("lambda");
   if (si != params.end()) 
     {
@@ -298,9 +306,9 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
 	}
     }
   
-  si = params.find("nbest");
-  if (si != params.end())
-    m_nbestSize = xmlrpc_c::value_int(si->second);
+  // si = params.find("nbest");
+  // if (si != params.end())
+  //   m_nbestSize = xmlrpc_c::value_int(si->second);
 
   si = params.find("context");
   if (si != params.end()) 
@@ -309,6 +317,8 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
       VERBOSE(1,"CONTEXT " << context);
       m_context.reset(new std::vector<std::string>(1,context));
     }
+
+
   // // biased sampling for suffix-array-based sampling phrase table?
   // if ((si = params.find("bias")) != params.end())
   //   {
@@ -317,6 +327,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   // 	for (size_t i = 1; i < tmp.size(); i += 2)
   // 	  m_bias[xmlrpc_c::value_int(tmp[i-1])] = xmlrpc_c::value_double(tmp[i]);
   //   }
+  m_source.reset(new Sentence(0,m_source_string,m_options));
 } // end of Translationtask::parse_request()
 
 
@@ -326,8 +337,8 @@ run_chart_decoder()
 {
   Moses::TreeInput tinput;
   istringstream buf(m_source_string + "\n");
-  tinput.Read(buf, StaticData::Instance().GetInputFactorOrder());
-
+  tinput.Read(buf, StaticData::Instance().GetInputFactorOrder(), m_options);
+  
   Moses::ChartManager manager(this->self());
   manager.Decode();
 
@@ -393,8 +404,13 @@ void
 TranslationRequest::
 run_phrase_decoder()
 {
+  if (m_withGraphInfo || m_options.nbest.nbest_size>0)
+    m_options.output.SearchGraph = "true";
+
   Manager manager(this->self());
   // if (m_bias.size()) manager.SetBias(&m_bias);
+
+    
   manager.Decode();
 
   pack_hypothesis(manager.GetBestHypothesis(), "text", m_retData);
@@ -403,10 +419,10 @@ run_phrase_decoder()
   
   if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
   if (m_withTopts) insertTranslationOptions(manager,m_retData);
-  if (m_nbestSize) outputNBest(manager, m_retData);
+  if (m_options.nbest.nbest_size) outputNBest(manager, m_retData);
 
-  (const_cast<StaticData&>(Moses::StaticData::Instance()))
-  .SetOutputSearchGraph(false);
+  // (const_cast<StaticData&>(Moses::StaticData::Instance()))
+  // .SetOutputSearchGraph(false);
   // WTF? one more reason not to have this as global variable! --- UG
 
 }

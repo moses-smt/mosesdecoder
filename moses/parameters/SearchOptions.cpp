@@ -36,6 +36,7 @@ namespace Moses
     beam_width = TransformScore(beam_width);
     trans_opt_threshold = TransformScore(trans_opt_threshold);
     early_discarding_threshold = TransformScore(early_discarding_threshold);
+
     return true;
   }
 

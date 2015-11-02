@@ -131,7 +131,7 @@ protected:
   // nbest
   mutable std::ostringstream m_latticeNBestOut;
   mutable std::ostringstream m_alignmentOut;
-
+public:
   void OutputNBest(std::ostream& out
                    , const Moses::TrellisPathList &nBestList
                    , const std::vector<Moses::FactorType>& outputFactorOrder

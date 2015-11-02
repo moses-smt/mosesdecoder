@@ -100,12 +100,14 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
   }
 }
 
-void DecodeStepTranslation::ProcessInitialTranslation(
-  const InputType &source
-  ,PartialTranslOptColl &outputPartialTranslOptColl
-  , size_t startPos, size_t endPos, bool adhereTableLimit
-  , const InputPath &inputPath
-  , TargetPhraseCollection::shared_ptr phraseColl) const
+void
+DecodeStepTranslation::
+ProcessInitialTranslation(InputType const& source,
+                          PartialTranslOptColl &outputPartialTranslOptColl,
+                          size_t startPos, size_t endPos,
+                          bool adhereTableLimit,
+                          InputPath const& inputPath,
+                          TargetPhraseCollection::shared_ptr phraseColl) const
 {
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
@@ -114,8 +116,9 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
-      if(StaticData::Instance().GetInputType() == SentenceInput)
-        TRACE_ERR("[" << source.GetSubString(range) << "; " << startPos << "-" << endPos << "]\n");
+      if(source.GetType() == SentenceInput)
+        TRACE_ERR("[" << source.GetSubString(range) << "; "
+                  << startPos << "-" << endPos << "]\n");
       else
         TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
     }
@@ -137,11 +140,13 @@ void DecodeStepTranslation::ProcessInitialTranslation(
   }
 }
 
-void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
-  const InputType &source
-  ,PartialTranslOptColl &outputPartialTranslOptColl
-  , size_t startPos, size_t endPos, bool adhereTableLimit
-  , const InputPathList &inputPathList) const
+void
+DecodeStepTranslation::
+ProcessInitialTransLEGACY(InputType const& source,
+                          PartialTranslOptColl &outputPartialTranslOptColl,
+                          size_t startPos, size_t endPos,
+                          bool adhereTableLimit,
+                          InputPathList const& inputPathList) const
 {
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
@@ -152,8 +157,9 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
-      if(StaticData::Instance().GetInputType() == SentenceInput)
-        TRACE_ERR("[" << source.GetSubString(range) << "; " << startPos << "-" << endPos << "]\n");
+      if(source.GetType() == SentenceInput)
+        TRACE_ERR("[" << source.GetSubString(range) << "; "
+                  << startPos << "-" << endPos << "]\n");
       else
         TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
     }

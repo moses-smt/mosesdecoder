@@ -166,7 +166,8 @@ aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
 
 void
 Sentence::
-init(string line, std::vector<FactorType> const& factorOrder)
+init(string line, std::vector<FactorType> const& factorOrder,
+     AllOptions const& opts)
 {
   using namespace std;
   const StaticData &SD = StaticData::Instance();
@@ -182,7 +183,8 @@ init(string line, std::vector<FactorType> const& factorOrder)
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
 
   // if sentences is specified as "<passthrough tag1=""/>"
-  if (SD.IsPassthroughEnabled() || SD.options().nbest.include_passthrough) {
+  if (SD.options().output.PrintPassThrough ||
+      SD.options().nbest.include_passthrough) {
     string pthru = PassthroughSGML(line,"passthrough");
     this->SetPassthroughInformation(pthru);
   }
@@ -230,12 +232,14 @@ init(string line, std::vector<FactorType> const& factorOrder)
 
 int
 Sentence::
-Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+Read(std::istream& in,
+     const std::vector<FactorType>& factorOrder,
+     AllOptions const& opts)
 {
   std::string line;
   if (getline(in, line, '\n').eof())
     return 0;
-  init(line, factorOrder);
+  init(line, factorOrder, opts);
   return 1;
 }
 
@@ -366,12 +370,14 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(size_t const transId, string const& stext,
+Sentence(size_t const transId,
+         string const& stext,
+         AllOptions const& opts,
          vector<FactorType> const* IFO)
   : InputType(transId)
 {
-  if (IFO) init(stext, *IFO);
-  else init(stext, StaticData::Instance().GetInputFactorOrder());
+  if (IFO) init(stext, *IFO, opts);
+  else init(stext, StaticData::Instance().GetInputFactorOrder(), opts);
 }
 
 }
