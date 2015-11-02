@@ -68,7 +68,7 @@ public:
   virtual void Print(std::ostream&) const;
 
   int Read(std::istream& in,const std::vector<FactorType>& factorOrder,
-	   AllOptions const& opts);
+           AllOptions const& opts);
 
   Phrase GetSubString(const Range&) const; //TODO not defined
   std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined

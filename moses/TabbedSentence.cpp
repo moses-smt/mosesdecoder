@@ -45,9 +45,9 @@ void TabbedSentence::CreateFromString(const std::vector<FactorType> &factorOrder
   }
 }
 
-int 
+int
 TabbedSentence::
-Read(std::istream& in, 
+Read(std::istream& in,
      std::vector<FactorType> const& factorOrder,
      AllOptions const& opts)
 {

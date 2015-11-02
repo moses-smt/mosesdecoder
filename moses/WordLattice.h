@@ -43,10 +43,10 @@ public:
   int InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line = "");
   /** Read from PLF format (1 lattice per line)
    */
-  int Read(std::istream& in, 
-	   std::vector<FactorType> const& factorOrder,
-	   AllOptions const& opts);
-  
+  int Read(std::istream& in,
+           std::vector<FactorType> const& factorOrder,
+           AllOptions const& opts);
+
   /** Convert internal representation into an edge matrix
    * @note edges[1][2] means there is an edge from 1 to 2
    */

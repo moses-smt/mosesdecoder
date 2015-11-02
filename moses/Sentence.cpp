@@ -183,7 +183,7 @@ init(string line, std::vector<FactorType> const& factorOrder,
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
 
   // if sentences is specified as "<passthrough tag1=""/>"
-  if (SD.options().output.PrintPassThrough || 
+  if (SD.options().output.PrintPassThrough ||
       SD.options().nbest.include_passthrough) {
     string pthru = PassthroughSGML(line,"passthrough");
     this->SetPassthroughInformation(pthru);
@@ -232,7 +232,7 @@ init(string line, std::vector<FactorType> const& factorOrder,
 
 int
 Sentence::
-Read(std::istream& in, 
+Read(std::istream& in,
      const std::vector<FactorType>& factorOrder,
      AllOptions const& opts)
 {
@@ -370,9 +370,9 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(size_t const transId, 
-	 string const& stext,
-	 AllOptions const& opts,
+Sentence(size_t const transId,
+         string const& stext,
+         AllOptions const& opts,
          vector<FactorType> const* IFO)
   : InputType(transId)
 {

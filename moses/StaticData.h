@@ -470,15 +470,15 @@ public:
   //   m_outputSearchGraph = outputSearchGraph;
   // }
 
- //  bool GetOutputSearchGraphExtended() const {
- //    return m_outputSearchGraphExtended;
- //  }
- // GetOutputSearchGraphSLF() const {
- //    return m_outputSearchGraphSLF;
- //  }
- //  bool GetOutputSearchGraphHypergraph() const {
- //    return m_outputSearchGraphHypergraph;
- //  }
+//  bool GetOutputSearchGraphExtended() const {
+//    return m_outputSearchGraphExtended;
+//  }
+// GetOutputSearchGraphSLF() const {
+//    return m_outputSearchGraphSLF;
+//  }
+//  bool GetOutputSearchGraphHypergraph() const {
+//    return m_outputSearchGraphHypergraph;
+//  }
 
 // #ifdef HAVE_PROTOBUF
 //   bool GetOutputSearchGraphPB() const {

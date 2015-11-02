@@ -186,8 +186,8 @@ void TranslationTask::Run()
 
   // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
-  VERBOSE(2, "Translating line " << translationId << "  in thread id " 
-	  << pthread_self() << endl);
+  VERBOSE(2, "Translating line " << translationId << "  in thread id "
+          << pthread_self() << endl);
 #endif
 
 

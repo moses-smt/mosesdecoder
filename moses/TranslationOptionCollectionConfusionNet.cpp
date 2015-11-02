@@ -234,10 +234,10 @@ CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph, size_t st
     list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
     const DecodeStep &decodeStep = **iterStep;
 
-    DecodeStepTranslation const& dstep 
-      = static_cast<const DecodeStepTranslation&>(decodeStep);
-    dstep.ProcessInitialTransLEGACY(m_source, *oldPtoc, startPos, endPos, 
-				    adhereTableLimit, inputPathList);
+    DecodeStepTranslation const& dstep
+    = static_cast<const DecodeStepTranslation&>(decodeStep);
+    dstep.ProcessInitialTransLEGACY(m_source, *oldPtoc, startPos, endPos,
+                                    adhereTableLimit, inputPathList);
 
     // do rest of decode steps
     int indexStep = 0;

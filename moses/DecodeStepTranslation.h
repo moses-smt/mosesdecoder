@@ -61,12 +61,12 @@ public:
                                  , TargetPhraseCollection::shared_ptr phraseColl) const;
 
   // legacy
-  void 
+  void
   ProcessInitialTransLEGACY(InputType const& source,
-			    PartialTranslOptColl &outputPartialTranslOptColl,
-			    size_t startPos, size_t endPos, 
-			    bool adhereTableLimit,
-			    InputPathList const& inputPathList) const;
+                            PartialTranslOptColl &outputPartialTranslOptColl,
+                            size_t startPos, size_t endPos,
+                            bool adhereTableLimit,
+                            InputPathList const& inputPathList) const;
 
   void ProcessLEGACY(const TranslationOption &inputPartialTranslOpt
                      , const DecodeStep &decodeStep

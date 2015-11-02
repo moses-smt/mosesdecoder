@@ -65,12 +65,11 @@ bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 {
   const Word &targetLHS = hypo->GetTargetLHS();
   MapType::iterator m = m_hypoColl.find(targetLHS);
-  if (m == m_hypoColl.end()) 
-    {
-      std::pair<Word, ChartHypothesisCollection> 
-	e(targetLHS, ChartHypothesisCollection(m_manager.options()));
-      m = m_hypoColl.insert(e).first;
-    }
+  if (m == m_hypoColl.end()) {
+    std::pair<Word, ChartHypothesisCollection>
+    e(targetLHS, ChartHypothesisCollection(m_manager.options()));
+    m = m_hypoColl.insert(e).first;
+  }
   return m->second.AddHypothesis(hypo, m_manager);
 }
 

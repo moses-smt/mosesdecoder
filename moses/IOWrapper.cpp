@@ -95,7 +95,7 @@ IOWrapper::IOWrapper()
   m_look_back  = staticData.options().context.look_back;
 
   m_inputType = staticData.options().input.input_type;
-  
+
   UTIL_THROW_IF2((m_look_ahead || m_look_back) && m_inputType != SentenceInput,
                  "Context-sensitive decoding currently works only with sentence input.");
 
