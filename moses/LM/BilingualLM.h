@@ -123,7 +123,7 @@ public:
     const Phrase &source,
     const TargetPhrase &targetPhrase,
     ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection &estimatedFutureScore) const;
+    ScoreComponentCollection &estimatedScore) const;
 
   void EvaluateWithSourceContext(
     const InputType &input,
@@ -131,7 +131,7 @@ public:
     const TargetPhrase &targetPhrase,
     const StackVec *stackVec,
     ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection *estimatedFutureScore = NULL) const;
+    ScoreComponentCollection *estimatedScore = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {};

@@ -118,7 +118,7 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScore) const
 {
   const Phrase& source = inputPath.GetPhrase();
   if (m_domainTrigger) {
@@ -237,7 +237,7 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
 void PhrasePairFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScore) const
 {
   if (m_simple) {
     util::StringStream namestr;

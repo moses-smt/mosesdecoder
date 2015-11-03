@@ -109,7 +109,7 @@ void PhraseOrientationFeature::LoadWordList(const std::string& filename,
 void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
     const TargetPhrase &targetPhrase,
     ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection &estimatedFutureScore) const
+    ScoreComponentCollection &estimatedScore) const
 {
   targetPhrase.SetRuleSource(source);
 

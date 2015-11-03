@@ -24,7 +24,7 @@ SpanLength::SpanLength(const std::string &line)
 void SpanLength::EvaluateInIsolation(const Phrase &source
                                      , const TargetPhrase &targetPhrase
                                      , ScoreComponentCollection &scoreBreakdown
-                                     , ScoreComponentCollection &estimatedFutureScore) const
+                                     , ScoreComponentCollection &estimatedScore) const
 {
   targetPhrase.SetRuleSource(source);
 }
@@ -34,7 +34,7 @@ void SpanLength::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScore) const
 {
   assert(stackVec);
 
