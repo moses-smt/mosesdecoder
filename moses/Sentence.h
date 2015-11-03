@@ -95,7 +95,7 @@ public:
   //! populates vector argument with XML force translation options for the specific range passed
   void GetXmlTranslationOptions(std::vector<TranslationOption*> &list) const;
   void GetXmlTranslationOptions(std::vector<TranslationOption*> &list, size_t startPos, size_t endPos) const;
-  std::vector<ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
+  std::vector<ChartTranslationOptions*> GetXmlChartTranslationOptions(AllOptions const& opts) const;
 
   virtual int
   Read(std::istream& in, const std::vector<FactorType>& factorOrder,
@@ -140,7 +140,7 @@ private:
 
   void
   aux_interpret_xml
-  (std::string& line, std::vector<size_t> & xmlWalls,
+  (AllOptions const& opts, std::string& line, std::vector<size_t> & xmlWalls,
    std::vector<std::pair<size_t, std::string> >& placeholders);
 
   void

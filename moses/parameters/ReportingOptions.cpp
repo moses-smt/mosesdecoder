@@ -62,6 +62,11 @@ namespace Moses {
     } else {
       lattice_sample_size = 0;
     }
+
+    params= param.GetParam("output-factors");
+    if (params) factor_order = Scan<FactorType>(*params);
+    if (factor_order.empty()) factor_order.assign(1,0);
+
     return true;
   }
 
