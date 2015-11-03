@@ -8,17 +8,17 @@
 #include <boost/foreach.hpp>
 #include "FeatureFunctions.h"
 #include "StatefulFeatureFunction.h"
-#include "System.h"
+#include "../System.h"
+#include "../Scores.h"
+#include "../MemPool.h"
 
 #include "SkeletonStatelessFF.h"
 #include "SkeletonStatefulFF.h"
-#include "PhraseTableMemory.h"
-#include "UnknownWordPenalty.h"
 #include "WordPenalty.h"
 #include "Distortion.h"
-#include "LanguageModel.h"
-#include "Scores.h"
-#include "MemPool.h"
+#include "TranslationModel/PhraseTableMemory.h"
+#include "TranslationModel/UnknownWordPenalty.h"
+#include "LM/LanguageModel.h"
 
 using namespace std;
 

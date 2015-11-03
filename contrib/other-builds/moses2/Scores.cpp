@@ -9,11 +9,11 @@
 #include <cstddef>
 #include <stdio.h>
 #include "Scores.h"
-#include "FeatureFunction.h"
-#include "FeatureFunctions.h"
 #include "Util.h"
 #include "Weights.h"
 #include "System.h"
+#include "FF/FeatureFunction.h"
+#include "FF/FeatureFunctions.h"
 #include "moses/Util.h"
 
 using namespace std;

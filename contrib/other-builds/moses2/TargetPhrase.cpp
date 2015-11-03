@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include "TargetPhrase.h"
 #include "Scores.h"
-#include "Manager.h"
 #include "System.h"
 #include "MemPool.h"
+#include "Search/Manager.h"
 
 using namespace std;
 

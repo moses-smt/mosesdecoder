@@ -7,8 +7,8 @@
 #include <cassert>
 #include <string>
 #include <vector>
-#include "FeatureFunction.h"
-#include "FeatureFunctions.h"
+#include "FF/FeatureFunction.h"
+#include "FF/FeatureFunctions.h"
 #include "Weights.h"
 #include "moses/Util.h"
 

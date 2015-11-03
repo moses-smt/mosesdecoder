@@ -6,10 +6,9 @@
  */
 
 #include "WordPenalty.h"
-#include "TypeDef.h"
-#include "Scores.h"
-#include "TargetPhrase.h"
-#include "Manager.h"
+#include "../TypeDef.h"
+#include "../Scores.h"
+#include "../TargetPhrase.h"
 
 WordPenalty::WordPenalty(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)

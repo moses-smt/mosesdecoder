@@ -7,9 +7,9 @@
 #pragma once
 #include <string>
 #include <boost/unordered_map.hpp>
-#include "TargetPhrases.h"
-#include "Word.h"
-#include "StatelessFeatureFunction.h"
+#include "../../TargetPhrases.h"
+#include "../../Word.h"
+#include "../StatelessFeatureFunction.h"
 #include "moses/Util.h"
 
 class System;

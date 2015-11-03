@@ -8,8 +8,8 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 #include "System.h"
-#include "FeatureFunction.h"
-#include "UnknownWordPenalty.h"
+#include "FF/FeatureFunction.h"
+#include "FF/TranslationModel/UnknownWordPenalty.h"
 #include "moses/Util.h"
 #include "util/exception.hh"
 

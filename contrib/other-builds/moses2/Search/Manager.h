@@ -10,10 +10,10 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include "InputPaths.h"
+#include "../InputPaths.h"
+#include "../TargetPhrase.h"
+#include "../MemPool.h"
 #include "Stack.h"
-#include "TargetPhrase.h"
-#include "MemPool.h"
 #include "moses/Bitmaps.h"
 #include "moses/SquareMatrix.h"
 

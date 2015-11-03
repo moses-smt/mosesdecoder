@@ -8,11 +8,11 @@
 #ifndef LANGUAGEMODEL_H_
 #define LANGUAGEMODEL_H_
 
-#include "StatefulFeatureFunction.h"
-#include "TypeDef.h"
+#include "../StatefulFeatureFunction.h"
+#include "../../TypeDef.h"
 #include "moses/Factor.h"
 #include "moses/TypeDef.h"
-#include "MorphoTrie/MorphTrie.h"
+#include "../../MorphoTrie/MorphTrie.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 struct LMScores

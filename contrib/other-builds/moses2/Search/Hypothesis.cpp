@@ -9,9 +9,9 @@
 #include <stdlib.h>
 #include "Hypothesis.h"
 #include "Manager.h"
-#include "System.h"
-#include "Scores.h"
-#include "StatefulFeatureFunction.h"
+#include "../System.h"
+#include "../Scores.h"
+#include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
 

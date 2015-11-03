@@ -7,7 +7,7 @@
 
 #include "Stack.h"
 #include "Hypothesis.h"
-#include "Scores.h"
+#include "../Scores.h"
 
 Stack::Stack() {
 	// TODO Auto-generated constructor stub

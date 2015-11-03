@@ -5,35 +5,36 @@ import option ;
 import path ;
 
  exe moses2 :
-   ArcLists.cpp
-   Distortion.cpp
-   FeatureFunction.cpp 
-   FeatureFunctions.cpp 
-   Hypothesis.cpp 
  	 InputPath.cpp 
  	 InputPaths.cpp
- 	 LanguageModel.cpp
  	 Main.cpp 
- 	 Manager.cpp 
  	 MemPool.cpp
    Phrase.cpp 
-   PhraseTable.cpp 
- 	 PhraseTableMemory.cpp 
- 	 Scores.cpp 
- 	 SearchNormal.cpp
- 	 SkeletonStatefulFF.cpp 
- 	 SkeletonStatelessFF.cpp 
- 	 Stack.cpp 
- 	 StatefulFeatureFunction.cpp 
- 	 StatelessFeatureFunction.cpp 
+   Scores.cpp 
  	 System.cpp 
    TargetPhrase.cpp 
    TargetPhrases.cpp
-   UnknownWordPenalty.cpp 
-		Weights.cpp 
+   Weights.cpp 
 		Word.cpp 
-    WordPenalty.cpp
-    	 
+		FF/Distortion.cpp
+   	FF/FeatureFunction.cpp 
+   	FF/FeatureFunctions.cpp 
+    FF/SkeletonStatefulFF.cpp
+    FF/SkeletonStatelessFF.cpp
+    FF/StatefulFeatureFunction.cpp
+    FF/StatelessFeatureFunction.cpp
+    FF/WordPenalty.cpp
+    FF/LM/LanguageModel.cpp
+ 	 	FF/TranslationModel/PhraseTable.cpp 
+ 	 	FF/TranslationModel/PhraseTableMemory.cpp 
+ 	 	FF/TranslationModel/UnknownWordPenalty.cpp 
+   	Search/ArcLists.cpp
+		Search/Hypothesis.cpp 
+ 	 	Search/Manager.cpp 
+ 	 	Search/SearchNormal.cpp
+ 	 	Search/Stack.cpp 
+
+    
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 
  ../../..//boost_filesystem  

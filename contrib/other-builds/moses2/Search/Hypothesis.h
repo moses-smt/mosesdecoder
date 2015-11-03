@@ -12,7 +12,7 @@
 #include <cstddef>
 #include "moses/FF/FFState.h"
 #include "moses/Bitmap.h"
-#include "Scores.h"
+#include "../Scores.h"
 
 class Manager;
 class Phrase;

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "System.h"
-#include "Manager.h"
 #include "Phrase.h"
+#include "Search/Manager.h"
 #include "moses/InputFileStream.h"
 #include "moses/Parameter.h"
 

@@ -6,8 +6,9 @@
  */
 
 #include "UnknownWordPenalty.h"
-#include "System.h"
-#include "Manager.h"
+#include "../../System.h"
+#include "../../InputPath.h"
+#include "../../Search/Manager.h"
 
 UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line)
 :PhraseTable(startInd, line)

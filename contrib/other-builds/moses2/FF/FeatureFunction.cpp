@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include "FeatureFunction.h"
-#include "System.h"
+#include "../System.h"
 #include "moses/Util.h"
 
 using namespace std;

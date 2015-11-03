@@ -10,9 +10,9 @@
 #include "SearchNormal.h"
 #include "Stack.h"
 #include "Manager.h"
-#include "InputPaths.h"
-#include "TargetPhrases.h"
-#include "TargetPhrase.h"
+#include "../InputPaths.h"
+#include "../TargetPhrases.h"
+#include "../TargetPhrase.h"
 
 using namespace std;
 

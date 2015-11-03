@@ -6,13 +6,13 @@
  */
 #include <boost/foreach.hpp>
 #include "Manager.h"
-#include "PhraseTable.h"
-#include "System.h"
 #include "SearchNormal.h"
-#include "TargetPhrases.h"
-#include "TargetPhrase.h"
-#include "InputPaths.h"
-#include "InputPath.h"
+#include "../System.h"
+#include "../TargetPhrases.h"
+#include "../TargetPhrase.h"
+#include "../InputPaths.h"
+#include "../InputPath.h"
+#include "../FF/TranslationModel/PhraseTable.h"
 #include "moses/Range.h"
 
 using namespace std;

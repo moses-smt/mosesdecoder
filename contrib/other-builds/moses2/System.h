@@ -7,7 +7,7 @@
 
 #pragma once
 #include <vector>
-#include "FeatureFunctions.h"
+#include "FF/FeatureFunctions.h"
 #include "Weights.h"
 #include "MemPool.h"
 #include "moses/FactorCollection.h"
