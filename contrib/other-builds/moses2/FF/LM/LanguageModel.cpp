@@ -116,7 +116,7 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
   }
 }
 
-const Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, const Phrase &input) const
+const Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
 	MemPool &pool = mgr.GetPool();
 	return new (pool.Allocate<LMState>()) LMState(pool, m_sos);
@@ -124,7 +124,7 @@ const Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, co
 
 void
 LanguageModel::EvaluateInIsolation(const System &system,
-		  const PhraseBase &source, const TargetPhrase &targetPhrase,
+		  const Phrase &source, const TargetPhrase &targetPhrase,
         Scores &scores,
         Scores *estimatedScore) const
 {
@@ -175,7 +175,7 @@ Moses::FFState* LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 
 	SCORE score = 0;
 	std::pair<SCORE, void*> fromScoring;
-	const Phrase &tp = hypo.GetTargetPhrase();
+	const PhraseImpl &tp = hypo.GetTargetPhrase();
 	for (size_t i = 0; i < tp.GetSize(); ++i) {
 		const Word &word = tp[i];
 		const Moses::Factor *factor = word[m_factorType];

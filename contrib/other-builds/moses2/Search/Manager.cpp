@@ -25,7 +25,7 @@ Manager::Manager(System &system, const std::string &inputStr)
 {
 	Moses::FactorCollection &vocab = system.GetVocab();
 
-	m_input = Phrase::CreateFromString(GetPool(), vocab, inputStr);
+	m_input = PhraseImpl::CreateFromString(GetPool(), vocab, inputStr);
 	m_inputPaths.Init(*m_input, system);
 
 	const std::vector<const PhraseTable*> &pts = system.GetMapping();

@@ -18,15 +18,15 @@ class PhraseTableMemory : public PhraseTable
 	public:
 		Node();
 		~Node();
-		void AddRule(Phrase &source, TargetPhrase *target);
-		TargetPhrases::shared_const_ptr Find(const PhraseBase &source, size_t pos = 0) const;
+		void AddRule(PhraseImpl &source, TargetPhrase *target);
+		TargetPhrases::shared_const_ptr Find(const Phrase &source, size_t pos = 0) const;
 
 	protected:
 		typedef boost::unordered_map<Word, Node, Moses::UnorderedComparer<Word>, Moses::UnorderedComparer<Word> > Children;
 		Children m_children;
 		TargetPhrases::shared_ptr m_targetPhrases;
 
-		Node &AddRule(Phrase &source, TargetPhrase *target, size_t pos);
+		Node &AddRule(PhraseImpl &source, TargetPhrase *target, size_t pos);
 
 	};
 //////////////////////////////////////

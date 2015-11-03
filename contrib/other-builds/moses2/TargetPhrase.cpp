@@ -21,13 +21,13 @@ TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
 	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, size);
-	ret->Phrase::CreateFromString(vocab, toks);
+	ret->PhraseImpl::CreateFromString(vocab, toks);
 
 	return ret;
 }
 
 TargetPhrase::TargetPhrase(MemPool &pool, const System &system, size_t size)
-:Phrase(pool, size)
+:PhraseImpl(pool, size)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(pool, system.GetFeatureFunctions().GetNumScores());
 }
@@ -41,6 +41,6 @@ SCORE TargetPhrase::GetFutureScore() const
 
 std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
 {
-	out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
+	out << (const PhraseImpl&) obj << " SCORES:" << obj.GetScores();
 	return out;
 }

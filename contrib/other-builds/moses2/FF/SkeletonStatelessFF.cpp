@@ -19,7 +19,7 @@ SkeletonStatelessFF::~SkeletonStatelessFF() {
 
 void
 SkeletonStatelessFF::EvaluateInIsolation(const System &system,
-		const PhraseBase &source, const TargetPhrase &targetPhrase,
+		const Phrase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScore) const
 {

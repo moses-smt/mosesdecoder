@@ -70,7 +70,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 
 void
 UnknownWordPenalty::EvaluateInIsolation(const System &system,
-		const PhraseBase &source, const TargetPhrase &targetPhrase,
+		const Phrase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScore) const
 {

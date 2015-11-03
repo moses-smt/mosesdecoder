@@ -15,7 +15,7 @@
 #include "../Scores.h"
 
 class Manager;
-class Phrase;
+class PhraseImpl;
 class TargetPhrase;
 class Scores;
 
@@ -52,7 +52,7 @@ public:
 
   void OutputToStream(std::ostream &out) const;
 
-  void EmptyHypothesisState(const Phrase &input);
+  void EmptyHypothesisState(const PhraseImpl &input);
 
   void EvaluateWhenApplied();
 

@@ -11,14 +11,14 @@
 #include <vector>
 #include "InputPath.h"
 
-class Phrase;
+class PhraseImpl;
 class System;
 
 class InputPaths {
 	typedef std::vector<InputPath> Coll;
 public:
 	InputPaths() {}
-	void Init(const Phrase &input, const System &system);
+	void Init(const PhraseImpl &input, const System &system);
 	virtual ~InputPaths();
 
   //! iterators

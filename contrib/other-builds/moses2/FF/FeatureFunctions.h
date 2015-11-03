@@ -18,8 +18,8 @@ class StatefulFeatureFunction;
 class PhraseTable;
 class Manager;
 class MemPool;
-class PhraseBase;
 class Phrase;
+class PhraseImpl;
 class TargetPhrase;
 class Scores;
 
@@ -42,7 +42,7 @@ public:
 
 	  virtual void
 	  EvaluateInIsolation(MemPool &pool, const System &system,
-			  const PhraseBase &source, TargetPhrase &targetPhrase) const;
+			  const Phrase &source, TargetPhrase &targetPhrase) const;
 
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;

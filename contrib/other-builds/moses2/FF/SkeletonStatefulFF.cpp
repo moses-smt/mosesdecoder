@@ -36,14 +36,14 @@ SkeletonStatefulFF::~SkeletonStatefulFF() {
 	// TODO Auto-generated destructor stub
 }
 
-const Moses::FFState* SkeletonStatefulFF::EmptyHypothesisState(const Manager &mgr, const Phrase &input) const
+const Moses::FFState* SkeletonStatefulFF::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
     return new SkeletonState(0);
 }
 
 void
 SkeletonStatefulFF::EvaluateInIsolation(const System &system,
-		const PhraseBase &source, const TargetPhrase &targetPhrase,
+		const Phrase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScore) const
 {

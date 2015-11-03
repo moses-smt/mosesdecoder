@@ -24,12 +24,12 @@ PhraseTableMemory::Node::~Node()
 {
 }
 
-void PhraseTableMemory::Node::AddRule(Phrase &source, TargetPhrase *target)
+void PhraseTableMemory::Node::AddRule(PhraseImpl &source, TargetPhrase *target)
 {
 	AddRule(source, target, 0);
 }
 
-PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
+PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(PhraseImpl &source, TargetPhrase *target, size_t pos)
 {
 	if (pos == source.GetSize()) {
 		TargetPhrases *tp = m_targetPhrases.get();
@@ -48,7 +48,7 @@ PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(Phrase &source, Target
 	}
 }
 
-TargetPhrases::shared_const_ptr PhraseTableMemory::Node::Find(const PhraseBase &source, size_t pos) const
+TargetPhrases::shared_const_ptr PhraseTableMemory::Node::Find(const Phrase &source, size_t pos) const
 {
 	assert(source.GetSize());
 	if (pos == source.GetSize()) {
@@ -94,7 +94,7 @@ void PhraseTableMemory::Load(System &system)
 		assert(toks.size() >= 3);
 		//cerr << "line=" << line << endl;
 
-		Phrase *source = Phrase::CreateFromString(tmpPool, vocab, toks[0]);
+		PhraseImpl *source = PhraseImpl::CreateFromString(tmpPool, vocab, toks[0]);
 		//cerr << "created soure" << endl;
 		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetSystemPool(), system, toks[1]);
 		//cerr << "created target" << endl;

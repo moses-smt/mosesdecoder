@@ -63,7 +63,7 @@ TargetPhrases::shared_const_ptr PhraseTable::Lookup(const Manager &mgr, InputPat
 
 void
 PhraseTable::EvaluateInIsolation(const System &system,
-		const PhraseBase &source, const TargetPhrase &targetPhrase,
+		const Phrase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScore) const
 {

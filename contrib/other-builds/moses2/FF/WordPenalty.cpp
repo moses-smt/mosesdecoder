@@ -22,7 +22,7 @@ WordPenalty::~WordPenalty() {
 
 void
 WordPenalty::EvaluateInIsolation(const System &system,
-		const PhraseBase &source,
+		const Phrase &source,
 		const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScore) const

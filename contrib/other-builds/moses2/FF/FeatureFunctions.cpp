@@ -147,7 +147,7 @@ const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(si
 
 void
 FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
-		  const PhraseBase &source, TargetPhrase &targetPhrase) const
+		  const Phrase &source, TargetPhrase &targetPhrase) const
 {
   size_t numScores = system.GetFeatureFunctions().GetNumScores();
   Scores *estimatedScore = new (pool.Allocate<Scores>()) Scores(pool, numScores);

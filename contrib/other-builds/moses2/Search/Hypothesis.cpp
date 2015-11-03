@@ -103,7 +103,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   }
 
   if (m_targetPhrase.GetSize()) {
-	  out << (const Phrase&) m_targetPhrase;
+	  out << (const PhraseImpl&) m_targetPhrase;
 	  out << " ";
   }
 }
@@ -116,7 +116,7 @@ std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 	return out;
 }
 
-void Hypothesis::EmptyHypothesisState(const Phrase &input)
+void Hypothesis::EmptyHypothesisState(const PhraseImpl &input)
 {
 	const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions();
 	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {

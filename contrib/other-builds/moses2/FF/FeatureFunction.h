@@ -13,8 +13,8 @@
 #include <vector>
 
 class System;
-class PhraseBase;
 class Phrase;
+class PhraseImpl;
 class TargetPhrase;
 class Scores;
 class Manager;
@@ -39,7 +39,7 @@ public:
 	  // source from the input sentence
 	  virtual void
 	  EvaluateInIsolation(const System &system,
-			  const PhraseBase &source, const TargetPhrase &targetPhrase,
+			  const Phrase &source, const TargetPhrase &targetPhrase,
 	          Scores &scores,
 	          Scores *estimatedScore) const = 0;
 

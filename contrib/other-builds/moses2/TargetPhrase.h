@@ -15,7 +15,7 @@ class Scores;
 class Manager;
 class System;
 
-class TargetPhrase : public Phrase
+class TargetPhrase : public PhraseImpl
 {
 	  friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
 public:

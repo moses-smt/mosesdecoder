@@ -1,5 +1,5 @@
 /*
- * Phrase.cpp
+ * PhraseImpl.cpp
  *
  *  Created on: 23 Oct 2015
  *      Author: hieu
@@ -12,19 +12,19 @@
 
 using namespace std;
 
-Phrase *Phrase::CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str)
+PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str)
 {
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
-	Phrase *ret;
+	PhraseImpl *ret;
 
-	ret = new (pool.Allocate<Phrase>()) Phrase(pool, size);
+	ret = new (pool.Allocate<PhraseImpl>()) PhraseImpl(pool, size);
 
 	ret->CreateFromString(vocab, toks);
 	return ret;
 }
 
-void Phrase::CreateFromString(Moses::FactorCollection &vocab, const std::vector<std::string> &toks)
+void PhraseImpl::CreateFromString(Moses::FactorCollection &vocab, const std::vector<std::string> &toks)
 {
 	for (size_t i = 0; i < m_size; ++i) {
 		Word &word = (*this)[i];
@@ -32,24 +32,24 @@ void Phrase::CreateFromString(Moses::FactorCollection &vocab, const std::vector<
 	}
 }
 
-Phrase::Phrase(MemPool &pool, size_t size)
+PhraseImpl::PhraseImpl(MemPool &pool, size_t size)
 :m_size(size)
 {
   m_words = new (pool.Allocate<Word>(size)) Word[size];
 
 }
 
-Phrase::~Phrase() {
+PhraseImpl::~PhraseImpl() {
 
 }
 
-SubPhrase Phrase::GetSubPhrase(size_t start, size_t end) const
+SubPhrase PhraseImpl::GetSubPhrase(size_t start, size_t end) const
 {
 	SubPhrase ret(*this, start, end);
 	return ret;
 }
 
-std::ostream& operator<<(std::ostream &out, const Phrase &obj)
+std::ostream& operator<<(std::ostream &out, const PhraseImpl &obj)
 {
 	if (obj.GetSize()) {
 		out << obj[0];
@@ -63,7 +63,7 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 
 
 ////////////////////////////////////////////////////////////
-SubPhrase::SubPhrase(const Phrase &origPhrase, size_t start, size_t end)
+SubPhrase::SubPhrase(const PhraseImpl &origPhrase, size_t start, size_t end)
 :m_origPhrase(&origPhrase)
 ,m_start(start)
 ,m_end(end)

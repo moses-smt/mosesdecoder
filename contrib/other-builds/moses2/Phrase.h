@@ -1,5 +1,5 @@
 /*
- * Phrase.h
+ * PhraseImpl.h
  *
  *  Created on: 23 Oct 2015
  *      Author: hieu
@@ -14,23 +14,23 @@
 #include "MemPool.h"
 #include "moses/FactorCollection.h"
 
-class PhraseBase
+class SubPhrase;
+
+class Phrase
 {
 public:
   virtual const Word& operator[](size_t pos) const = 0;
   virtual size_t GetSize() const = 0;
 };
 
-class SubPhrase;
-
-class Phrase : public PhraseBase
+class PhraseImpl : public Phrase
 {
-	  friend std::ostream& operator<<(std::ostream &, const Phrase &);
+	  friend std::ostream& operator<<(std::ostream &, const PhraseImpl &);
 public:
-  static Phrase *CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str);
+  static PhraseImpl *CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str);
 
-  Phrase(MemPool &pool, size_t size);
-  virtual ~Phrase();
+  PhraseImpl(MemPool &pool, size_t size);
+  virtual ~PhraseImpl();
 
   const Word& operator[](size_t pos) const {
 	return m_words[pos];
@@ -52,11 +52,11 @@ protected:
 
 };
 
-class SubPhrase : public PhraseBase
+class SubPhrase : public Phrase
 {
   friend std::ostream& operator<<(std::ostream &, const SubPhrase &);
 public:
-  SubPhrase(const Phrase &origPhrase, size_t start, size_t size);
+  SubPhrase(const PhraseImpl &origPhrase, size_t start, size_t size);
   virtual const Word& operator[](size_t pos) const
   { return (*m_origPhrase)[pos + m_start]; }
 
@@ -64,6 +64,6 @@ public:
   { return m_end - m_start + 1; }
 
 protected:
-  const Phrase *m_origPhrase;
+  const PhraseImpl *m_origPhrase;
   size_t m_start, m_end;
 };

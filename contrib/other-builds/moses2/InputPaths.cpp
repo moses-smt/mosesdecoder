@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void InputPaths::Init(const Phrase &input, const System &system)
+void InputPaths::Init(const PhraseImpl &input, const System &system)
 {
   size_t numPt = system.GetMapping().size();
   size_t size = input.GetSize();

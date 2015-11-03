@@ -18,7 +18,7 @@
 #include "moses/SquareMatrix.h"
 
 class System;
-class Phrase;
+class PhraseImpl;
 class SearchNormal;
 
 class Manager {
@@ -45,7 +45,7 @@ protected:
 	mutable MemPool *m_pool;
 
 	const System &m_system;
-	Phrase *m_input;
+	PhraseImpl *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;
 	Moses::SquareMatrix *m_futureScore;
