@@ -191,14 +191,14 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const
 void BilingualLM::EvaluateInIsolation(const Phrase &source
                                       , const TargetPhrase &targetPhrase
                                       , ScoreComponentCollection &scoreBreakdown
-                                      , ScoreComponentCollection &estimatedFutureScore) const {}
+                                      , ScoreComponentCollection &estimatedScore) const {}
 
 void BilingualLM::EvaluateWithSourceContext(const InputType &input
     , const InputPath &inputPath
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScore) const
 {
 
 }

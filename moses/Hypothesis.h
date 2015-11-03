@@ -1,6 +1,4 @@
-// $Id$
-// vim:tabstop=2
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -69,7 +67,6 @@ typedef std::vector<Hypothesis*> ArcList;
 class Hypothesis
 {
   friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
-
 protected:
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
   const Bitmap	&m_sourceCompleted; /*! keeps track of which words have been translated so far */
@@ -283,6 +280,8 @@ public:
   void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
 #endif
 
+  bool beats(Hypothesis const& b) const;
+  
 
 };
 
@@ -290,8 +289,8 @@ std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
 
 // sorting helper
 struct CompareHypothesisTotalScore {
-  bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const {
-    return hypo1->GetTotalScore() > hypo2->GetTotalScore();
+  bool operator()(const Hypothesis* a, const Hypothesis* b) const {
+    return a->beats(*b);
   }
 };
 

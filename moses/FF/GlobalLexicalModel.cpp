@@ -171,7 +171,7 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
 void GlobalLexicalModel::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScore) const
 {
   scoreBreakdown.PlusEquals( this, GetFromCacheOrScorePhrase(targetPhrase) );
 }

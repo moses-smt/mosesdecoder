@@ -18,7 +18,7 @@ PhrasePenalty::PhrasePenalty(const std::string &line)
 void PhrasePenalty::EvaluateInIsolation(const Phrase &source
                                         , const TargetPhrase &targetPhrase
                                         , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedFutureScore) const
+                                        , ScoreComponentCollection &estimatedScore) const
 {
   if (m_perPhraseTable) {
     const PhraseDictionary *pt = targetPhrase.GetContainer();

@@ -72,7 +72,7 @@ void LanguageModel::ReportHistoryOrder(std::ostream &out,const Phrase &phrase) c
 void LanguageModel::EvaluateInIsolation(const Phrase &source
                                         , const TargetPhrase &targetPhrase
                                         , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedFutureScore) const
+                                        , ScoreComponentCollection &estimatedScore) const
 {
   // contains factors used by this LM
   float fullScore, nGramScore;
@@ -90,10 +90,10 @@ void LanguageModel::EvaluateInIsolation(const Phrase &source
 
     estimateScores[0] = estimateScore;
     estimateScores[1] = 0;
-    estimatedFutureScore.Assign(this, estimateScores);
+    estimatedScore.Assign(this, estimateScores);
   } else {
     scoreBreakdown.Assign(this, nGramScore);
-    estimatedFutureScore.Assign(this, estimateScore);
+    estimatedScore.Assign(this, estimateScore);
   }
 }
 

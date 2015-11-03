@@ -183,7 +183,7 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScore) const
 {
   const Sentence& sentence = static_cast<const Sentence&>(input);
   float score = 0.0;

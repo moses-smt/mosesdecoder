@@ -33,9 +33,9 @@ namespace Moses
 void SquareMatrix::InitTriangle(float val)
 {
   for(size_t row=0; row < m_size; row++) {
-	for(size_t col=row; col<m_size; col++) {
-	  SetScore(row, col, -numeric_limits<float>::infinity());
-	}
+    for(size_t col=row; col<m_size; col++) {
+      SetScore(row, col, -numeric_limits<float>::infinity());
+    }
   }
 }
 
