@@ -811,9 +811,9 @@ namespace Moses
   Mmsapt::
   setup_bias(ttasksptr const& ttask)
   {
+#ifdef HAVE_XMLRPC_C
 
     // VERBOSE(2,"Setting up bias at " << HERE << std::endl);
-    
     SPTR<ContextScope> const& scope = ttask->GetScope();
     SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
     if (context->bias) return; 
@@ -853,6 +853,7 @@ namespace Moses
         context->bias_log = m_bias_log;
         context->bias->loglevel = m_bias_loglevel;
       }
+#endif
   }
   
   void
