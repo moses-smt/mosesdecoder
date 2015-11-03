@@ -151,7 +151,7 @@ public:
   virtual void
   EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase,
                       ScoreComponentCollection& scoreBreakdown,
-                      ScoreComponentCollection& estimatedFutureScore) const = 0;
+                      ScoreComponentCollection& estimatedScore) const = 0;
 
   // for context-dependent processing
   static void SetupAll(TranslationTask const& task);
@@ -163,13 +163,13 @@ public:
   // 'stackVec' is a vector of chart cells that the RHS non-terms cover.
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
-  // No FF should set estimatedFutureScore in both overloads!
+  // No FF should set estimatedScore in both overloads!
   virtual void EvaluateWithSourceContext(const InputType &input
                                          , const InputPath &inputPath
                                          , const TargetPhrase &targetPhrase
                                          , const StackVec *stackVec
                                          , ScoreComponentCollection &scoreBreakdown
-                                         , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
+                                         , ScoreComponentCollection *estimatedScore = NULL) const = 0;
 
   // This method is called once all the translation options are retrieved from the phrase table, and
   // just before search.
@@ -177,7 +177,7 @@ public:
   // 'stackVec' is a vector of chart cells that the RHS non-terms cover.
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
-  // No FF should set estimatedFutureScore in both overloads!
+  // No FF should set estimatedScore in both overloads!
   virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const = 0;
 

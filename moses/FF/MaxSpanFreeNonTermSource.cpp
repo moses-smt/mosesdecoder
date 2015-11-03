@@ -30,7 +30,7 @@ MaxSpanFreeNonTermSource::MaxSpanFreeNonTermSource(const std::string &line)
 void MaxSpanFreeNonTermSource::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScore) const
 {
   targetPhrase.SetRuleSource(source);
 }
@@ -40,7 +40,7 @@ void MaxSpanFreeNonTermSource::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScore) const
 {
   const Word &targetLHS = targetPhrase.GetTargetLHS();
 

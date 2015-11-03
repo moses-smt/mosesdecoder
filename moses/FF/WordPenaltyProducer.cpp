@@ -20,7 +20,7 @@ WordPenaltyProducer::WordPenaltyProducer(const std::string &line)
 void WordPenaltyProducer::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScore) const
 {
   float score = - (float) targetPhrase.GetNumTerminals();
   scoreBreakdown.Assign(this, score);

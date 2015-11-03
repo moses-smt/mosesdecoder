@@ -33,7 +33,7 @@ bool CoveredReferenceState::operator==(const FFState& other) const
 void CoveredReferenceFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScore) const
 {}
 
 void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
@@ -41,7 +41,7 @@ void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScore) const
 {
   long id = input.GetTranslationId();
   boost::unordered_map<long, std::multiset<string> >::const_iterator refIt = m_refs.find(id);
@@ -54,7 +54,7 @@ void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
   scores.push_back(covered.size());
 
   scoreBreakdown.Assign(this, scores);
-  estimatedFutureScore->Assign(this, scores);
+  estimatedScore->Assign(this, scores);
 }
 
 void CoveredReferenceFeature::Load()
