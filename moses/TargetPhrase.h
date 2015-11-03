@@ -65,7 +65,7 @@ private:
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
   friend void swap(TargetPhrase &first, TargetPhrase &second);
 
-  float m_fullScore, m_futureScore;
+  float m_futureScore, m_estimatedScore;
   ScoreComponentCollection m_scoreBreakdown;
 
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
@@ -126,7 +126,7 @@ public:
    *
    */
   inline float GetFutureScore() const {
-    return m_fullScore;
+    return m_futureScore;
   }
 
   inline const ScoreComponentCollection &GetScoreBreakdown() const {
