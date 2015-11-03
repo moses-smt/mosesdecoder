@@ -14,6 +14,8 @@
 class Phrase;
 class QueryEngine;
 class target_text;
+class MemPool;
+class System;
 
 class ProbingPT : public PhraseTable
 {
@@ -21,6 +23,8 @@ public:
   ProbingPT(size_t startInd, const std::string &line);
   virtual ~ProbingPT();
   void Load(System &system);
+
+  TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, InputPath &inputPath) const;
 
 protected:
   typedef boost::bimap<const Moses::Factor *, uint64_t> SourceVocabMap;
@@ -32,8 +36,8 @@ protected:
   uint64_t m_unkId;
   QueryEngine *m_engine;
 
-  TargetPhrases::shared_ptr CreateTargetPhrase(const Phrase &sourcePhrase) const;
-  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
+  TargetPhrases::shared_ptr CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const;
+  TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
 
   std::vector<uint64_t> ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const;
 

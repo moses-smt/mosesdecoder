@@ -7,6 +7,9 @@
 
 #include "ProbingPT.h"
 #include "../../System.h"
+#include "../../Scores.h"
+#include "../../FF/FeatureFunctions.h"
+#include "../../Search/Manager.h"
 #include "moses/FactorCollection.h"
 #include "moses/TranslationModel/ProbingPT/quering.hh"
 
@@ -84,13 +87,19 @@ uint64_t ProbingPT::GetSourceProbingId(const Moses::Factor *factor) const
   }
 }
 
-TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
+TargetPhrases::shared_const_ptr ProbingPT::Lookup(const Manager &mgr, InputPath &inputPath) const
 {
-	/*
+	const Phrase &sourcePhrase = inputPath.GetSubPhrase();
+	TargetPhrases::shared_const_ptr ret = CreateTargetPhrase(mgr.GetPool(), mgr.GetSystem(), sourcePhrase);
+}
+
+TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const
+{
+
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   assert(sourcePhrase.GetSize());
 
-  TargetPhraseCollection::shared_ptr tpColl;
+  TargetPhrases::shared_ptr tpColl;
   bool ok;
   vector<uint64_t> probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok);
   if (!ok) {
@@ -106,46 +115,46 @@ TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(const Phrase &sourcePhra
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
-    tpColl.reset(new TargetPhraseCollection());
+    tpColl.reset(new TargetPhrases());
 
     const std::vector<target_text> &probingTargetPhrases = query_result.second;
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
       const target_text &probingTargetPhrase = probingTargetPhrases[i];
-      TargetPhrase *tp = CreateTargetPhrase(sourcePhrase, probingTargetPhrase);
+      TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, probingTargetPhrase);
 
-      tpColl->Add(tp);
+      tpColl->AddTargetPhrase(*tp);
     }
 
-    tpColl->Prune(true, m_tableLimit);
+    //tpColl->Prune(true, m_tableLimit);
   }
 
   return tpColl;
-  */
+
 }
 
-TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const
+TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const
 {
-//
-//  const std::vector<unsigned int> &probingPhrase = probingTargetPhrase.target_phrase;
-//  size_t size = probingPhrase.size();
-//
-//  TargetPhrase *tp = new TargetPhrase(this);
-//
-//  // words
-//  for (size_t i = 0; i < size; ++i) {
-//    uint64_t probingId = probingPhrase[i];
-//    const Factor *factor = GetTargetFactor(probingId);
-//    assert(factor);
-//
-//    Word &word = tp->AddWord();
-//    word.SetFactor(m_output[0], factor);
-//  }
-//
-//  // score for this phrase table
-//  vector<float> scores = probingTargetPhrase.prob;
-//  std::transform(scores.begin(), scores.end(), scores.begin(),TransformScore);
-//  tp->GetScoreBreakdown().PlusEquals(this, scores);
-//
+
+  const std::vector<unsigned int> &probingPhrase = probingTargetPhrase.target_phrase;
+  size_t size = probingPhrase.size();
+
+  TargetPhrase *tp = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, size);
+
+  // words
+  for (size_t i = 0; i < size; ++i) {
+    uint64_t probingId = probingPhrase[i];
+    const Moses::Factor *factor = GetTargetFactor(probingId);
+    assert(factor);
+
+    Word &word = (*tp)[i];
+    word[0] = factor;
+  }
+
+  // score for this phrase table
+  vector<SCORE> scores = probingTargetPhrase.prob;
+  std::transform(scores.begin(), scores.end(), scores.begin(), Moses::TransformScore);
+  tp->GetScores().PlusEquals(system, *this, scores);
+
 //  // alignment
 //  /*
 //  const std::vector<unsigned char> &alignments = probingTargetPhrase.word_all1;
@@ -155,10 +164,11 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
 //    aligns.Add((size_t) alignments[i], (size_t) alignments[i+1]);
 //  }
 //  */
-//
-//  // score of all other ff when this rule is being loaded
-//  tp->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
-//  return tp;
+
+  // score of all other ff when this rule is being loaded
+  const FeatureFunctions &ffs = system.GetFeatureFunctions();
+  ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
+  return tp;
 
 }
 
