@@ -27,6 +27,7 @@ import path ;
     FF/LM/LanguageModel.cpp
  	 	FF/TranslationModel/PhraseTable.cpp 
  	 	FF/TranslationModel/PhraseTableMemory.cpp 
+ 	 	FF/TranslationModel/ProbingPT.cpp 
  	 	FF/TranslationModel/UnknownWordPenalty.cpp 
    	Search/ArcLists.cpp
 		Search/Hypothesis.cpp 

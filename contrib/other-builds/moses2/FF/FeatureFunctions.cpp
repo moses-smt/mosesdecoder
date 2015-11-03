@@ -17,6 +17,7 @@
 #include "WordPenalty.h"
 #include "Distortion.h"
 #include "TranslationModel/PhraseTableMemory.h"
+#include "TranslationModel/ProbingPT.h"
 #include "TranslationModel/UnknownWordPenalty.h"
 #include "LM/LanguageModel.h"
 
@@ -94,6 +95,9 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	FeatureFunction *ret;
 	if (toks[0] == "PhraseDictionaryMemory") {
 		ret = new PhraseTableMemory(m_ffStartInd, line);
+	}
+	else if (toks[0] == "ProbingPT") {
+		ret = new ProbingPT(m_ffStartInd, line);
 	}
 	else if (toks[0] == "UnknownWordPenalty") {
 		ret = new UnknownWordPenalty(m_ffStartInd, line);
