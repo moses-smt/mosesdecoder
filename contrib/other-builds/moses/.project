@@ -86,6 +86,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/BeamSearchOptions.h</locationURI>
 		</link>
 		<link>
+			<name>Bitmap.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Bitmap.cpp</locationURI>
+		</link>
+		<link>
+			<name>Bitmap.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Bitmap.h</locationURI>
+		</link>
+		<link>
 			<name>BitmapContainer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.cpp</locationURI>
@@ -726,6 +736,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PrefixTreeMap.h</locationURI>
 		</link>
 		<link>
+			<name>Range.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Range.cpp</locationURI>
+		</link>
+		<link>
+			<name>Range.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Range.h</locationURI>
+		</link>
+		<link>
 			<name>ReorderingConstraint.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingConstraint.cpp</locationURI>
@@ -1134,26 +1154,6 @@
 			<name>WordLattice.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/WordLattice.h</locationURI>
-		</link>
-		<link>
-			<name>Bitmap.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Bitmap.cpp</locationURI>
-		</link>
-		<link>
-			<name>Bitmap.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Bitmap.h</locationURI>
-		</link>
-		<link>
-			<name>Range.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Range.cpp</locationURI>
-		</link>
-		<link>
-			<name>Range.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Range.h</locationURI>
 		</link>
 		<link>
 			<name>XmlOption.cpp</name>
@@ -3256,11 +3256,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/storing.hh</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT/tests</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/ProbingPT/vocabid.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/vocabid.cpp</locationURI>
@@ -3699,16 +3694,6 @@
 			<name>TranslationModel/CompactPT/bin/gcc-4.8</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/tests/tokenization_tests.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/tests/tokenization_tests.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/tests/vocabid_test.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/tests/vocabid_test.cpp</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/bin/gcc-4.8</name>
@@ -4486,6 +4471,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/BilingualLM.o</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Bitmap.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Bitmap.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/BitmapContainer.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/BitmapContainer.o</locationURI>
@@ -4761,6 +4751,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/PrefixTreeMap.o</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Range.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Range.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Remote.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Remote.o</locationURI>
@@ -4949,16 +4944,6 @@
 			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/WordLattice.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/WordLattice.o</locationURI>
-		</link>
-		<link>
-			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Bitmap.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Bitmap.o</locationURI>
-		</link>
-		<link>
-			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Range.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/Range.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/XmlOption.o</name>
