@@ -228,6 +228,8 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 			modelType=2;
 	if(getConfig("argType") == "prepAll")
 			modelType=3;
+	if(getConfig("argType") == "prepGeneric")
+			modelType=4;
 
 
 	int dep,gov;
@@ -245,6 +247,12 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 			dep = strtol (dependencies[i].c_str(),NULL,10);
 			gov = strtol (dependencies[i+1].c_str(),NULL,10);
 
+			if(modelType == 4 and pos.size() > gov and pos[gov].substr(0,1) == "V")
+				rel = "prep_V";
+			if(modelType == 4 and pos.size() > gov and pos[gov].substr(0,1) == "N")
+				rel = "prep_N";
+
+
 			vector<string> tuple;
 			tuple.push_back(rel);
 			tuple.push_back(FilterArg(words[gov]));
@@ -253,6 +261,7 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 			if((modelType == 1 and pos.size() > gov and pos[gov].substr(0,1) == "V") or //prep argument of verb
 					(modelType == 2 and pos.size() > gov and pos[gov].substr(0,1) == "N") or //prep argument of noun
 					modelType == 3 or // prep argument of any gov
+					modelType == 4 or // generic prep argument of any gov
 					modelType == 0) //main argument
 				dependencyTuples.push_back(tuple);
 
