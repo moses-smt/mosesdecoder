@@ -21,7 +21,7 @@ public:
 			  const PhraseBase &source,
 			  const TargetPhrase &targetPhrase,
 			  Scores &scores,
-			  Scores *estimatedFutureScores) const;
+			  Scores *estimatedScore) const;
 
 };
 

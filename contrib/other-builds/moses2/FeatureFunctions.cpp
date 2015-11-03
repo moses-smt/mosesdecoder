@@ -150,15 +150,15 @@ FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 		  const PhraseBase &source, TargetPhrase &targetPhrase) const
 {
   size_t numScores = system.GetFeatureFunctions().GetNumScores();
-  Scores *estimatedFutureScores = new (pool.Allocate<Scores>()) Scores(pool, numScores);
+  Scores *estimatedScore = new (pool.Allocate<Scores>()) Scores(pool, numScores);
 
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
 	  Scores& scores = targetPhrase.GetScores();
-	  ff->EvaluateInIsolation(system, source, targetPhrase, scores, estimatedFutureScores);
+	  ff->EvaluateInIsolation(system, source, targetPhrase, scores, estimatedScore);
 
   }
 
-  if (estimatedFutureScores) {
-	  targetPhrase.SetEstimatedScore(estimatedFutureScores->GetTotalScore());
+  if (estimatedScore) {
+	  targetPhrase.SetEstimatedScore(estimatedScore->GetTotalScore());
   }
 }

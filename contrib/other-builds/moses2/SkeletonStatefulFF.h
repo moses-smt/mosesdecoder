@@ -22,7 +22,7 @@ public:
   EvaluateInIsolation(const System &system,
 		  const PhraseBase &source, const TargetPhrase &targetPhrase,
 		  Scores &scores,
-		  Scores *estimatedFutureScores) const;
+		  Scores *estimatedScore) const;
 
   virtual Moses::FFState* EvaluateWhenApplied(const Manager &mgr,
     const Hypothesis &hypo,

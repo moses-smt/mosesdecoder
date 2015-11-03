@@ -37,7 +37,7 @@ public:
 	  EvaluateInIsolation(const System &system,
 			  const PhraseBase &source, const TargetPhrase &targetPhrase,
 			  Scores &scores,
-			  Scores *estimatedFutureScores) const;
+			  Scores *estimatedScore) const;
 
 protected:
 	std::string m_path;

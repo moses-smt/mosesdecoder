@@ -71,7 +71,7 @@ void
 UnknownWordPenalty::EvaluateInIsolation(const System &system,
 		const PhraseBase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
-		Scores *estimatedFutureScores) const
+		Scores *estimatedScore) const
 {
 
 }
