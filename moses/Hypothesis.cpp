@@ -600,6 +600,22 @@ bool Hypothesis::operator==(const Hypothesis& other) const
   return true;
 }
 
+bool
+Hypothesis::
+beats(Hypothesis const& b) const
+{
+  if (m_totalScore != b.m_totalScore)
+    return m_totalScore > b.m_totalScore;
+  else if (m_futureScore != b.m_futureScore)
+    return m_futureScore > b.m_futureScore;
+  else if (m_prevHypo)
+    return b.m_prevHypo ? m_prevHypo->beats(*b.m_prevHypo) : true;
+  else return false;
+  // TO DO: add more tie breaking here
+  // results. We should compare other property of the hypos here.
+  // On the other hand, how likely is this going to happen?
+}
+
 #ifdef HAVE_XMLRPC_C
 void
 Hypothesis::
@@ -631,23 +647,6 @@ OutputWordAlignment(vector<xmlrpc_c::value>& out) const
   for (size_t i = tmp.size(); i-- > 0;)
     tmp[i]->OutputLocalWordAlignment(out);
 }
-
-bool
-Hypothesis::
-beats(Hypothesis const& b) const 
-{
-  if (m_totalScore != b.m_totalScore) 
-    return m_totalScore > b.m_totalScore;
-  else if (m_futureScore != b.m_futureScore)
-    return m_futureScore > b.m_futureScore;
-  else if (m_prevHypo) 
-    return b.m_prevHypo ? m_prevHypo->beats(*b.m_prevHypo) : true;
-  else return false;
-  // TO DO: add more tie breaking here
-  // results. We should compare other property of the hypos here. 
-  // On the other hand, how likely is this going to happen?
-}
-
 
 #endif
 

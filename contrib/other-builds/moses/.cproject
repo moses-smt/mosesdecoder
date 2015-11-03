@@ -35,6 +35,7 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.53427549" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="PT_UG"/>
+									<listOptionValue builtIn="false" value="HAVE_PROBINGPT"/>
 									<listOptionValue builtIn="false" value="HAVE_CMPH"/>
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
@@ -71,16 +72,6 @@
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1272004353" name="BilingualLM.h" rcbsApplicability="disable" resourcePath="LM/BilingualLM.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1459438132" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.871386239" name="LDHT.h" rcbsApplicability="disable" resourcePath="LM/LDHT.h" toolsToInvoke=""/>
-					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1794213083" name="/" resourcePath="TranslationModel/ProbingPT">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.82859340" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
-							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1921366786" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1097285966"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.134968597" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1729217620"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1710850362" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1313249282"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1196753099" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1471271407"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1604515781" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1144959654"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.903919080" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.1362368838"/>
-						</toolChain>
-					</folderInfo>
 					<sourceEntries>
 						<entry excluding="TranslationModel/UG/mm/test-http-client.cc|TranslationModel/UG/ptable-describe-features.cc|TranslationModel/UG/count-ptable-features.cc|TranslationModel/UG/try-align2.cc|TranslationModel/UG/try-align.cc|TranslationModel/UG/spe-check-coverage3.cc|TranslationModel/UG/spe-check-coverage2.cc|TranslationModel/UG/spe-check-coverage.cc|TranslationModel/UG/sim-pe.cc|TranslationModel/UG/generic/stringdist|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/mtt.count.cc|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|LM/bilingual-lm|LM/MaxEntSRI.h|LM/MaxEntSRI.cpp|LM/BilingualLM.h|LM/BilingualLM.cpp|LM/Rand.h|LM/Rand.cpp|LM/LDHT.h|LM/LDHT.cpp|LM/ORLM.h|LM/ORLM.cpp|LM/NeuralLMWrapper.h|LM/NeuralLMWrapper.cpp|LM/SRI.h|LM/SRI.cpp|LM/IRST.h|LM/IRST.cpp|LM/DALMWrapper.h|LM/DALMWrapper.cpp|LM/oxlm|TranslationModel/UG/util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
