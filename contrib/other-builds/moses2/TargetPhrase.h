@@ -29,12 +29,14 @@ public:
   const Scores &GetScores() const
   { return *m_scores; }
 
-  SCORE GetFutureScore() const
-  { return m_futureScore; }
+  SCORE GetFutureScore() const;
+
+  void SetEstimatedScore(const SCORE &value)
+  { m_estimatedScore = value; }
 
 protected:
 	Scores *m_scores;
-	SCORE m_futureScore;
+	SCORE m_estimatedScore;
 };
 
 

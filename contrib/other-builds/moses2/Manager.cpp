@@ -35,6 +35,8 @@ Manager::Manager(System &system, const std::string &inputStr)
 		pt.Lookup(*this, m_inputPaths);
 	}
 
+	CalcFutureScore();
+
 	m_stacks.resize(m_input->GetSize() + 1);
 	m_bitmaps = new Moses::Bitmaps(m_input->GetSize(), vector<bool>(0));
 	m_search = new SearchNormal(*this, m_stacks);
@@ -119,6 +121,9 @@ void Manager::CalcFutureScore()
 	      }
 	    }
 	  }
+
+	  cerr << "Square matrix:" << endl;
+	  cerr << *m_futureScore << endl;
 
 }
 

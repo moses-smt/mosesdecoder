@@ -36,6 +36,9 @@ TargetPhrase::~TargetPhrase() {
 	// TODO Auto-generated destructor stub
 }
 
+SCORE TargetPhrase::GetFutureScore() const
+{ return m_scores->GetTotalScore() + m_estimatedScore; }
+
 std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
 {
 	out << (const Phrase&) obj << " SCORES:" << obj.GetScores();

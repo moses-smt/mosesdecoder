@@ -128,19 +128,23 @@ LanguageModel::EvaluateInIsolation(const System &system,
         Scores &scores,
         Scores *estimatedFutureScores) const
 {
+	if (targetPhrase.GetSize() == 0) {
+		return;
+	}
+
 	SCORE score = 0;
 	SCORE nonFullScore = 0;
 	vector<const Moses::Factor*> context;
+//	context.push_back(m_sos);
+
 	context.reserve(m_order);
 	for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-		const Word &word = targetPhrase[i];
-		const Moses::Factor *factor = word[m_factorType];
+		const Moses::Factor *factor = targetPhrase[i][m_factorType];
 		ShiftOrPush(context, factor);
 
 		if (context.size() == m_order) {
 			std::pair<SCORE, void*> fromScoring = Score(context);
-			//score += fromScoring.first;
-			nonFullScore += fromScoring.first;
+			score += fromScoring.first;
 		}
 		else if (estimatedFutureScores) {
 			std::pair<SCORE, void*> fromScoring = Score(context);
@@ -148,7 +152,7 @@ LanguageModel::EvaluateInIsolation(const System &system,
 		}
 	}
 
-	//scores.PlusEquals(system, *this, score);
+	scores.PlusEquals(system, *this, score);
 	if (estimatedFutureScores) {
 		estimatedFutureScores->PlusEquals(system, *this, nonFullScore);
 	}

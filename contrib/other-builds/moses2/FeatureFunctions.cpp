@@ -156,9 +156,9 @@ FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 	  Scores& scores = targetPhrase.GetScores();
 	  ff->EvaluateInIsolation(system, source, targetPhrase, scores, estimatedFutureScores);
 
-	  if (estimatedFutureScores) {
-		  estimatedFutureScores->Reset(numScores);
-	  }
   }
 
+  if (estimatedFutureScores) {
+	  targetPhrase.SetEstimatedScore(estimatedFutureScores->GetTotalScore());
+  }
 }
