@@ -36,10 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "InputType.h"
 #include "ObjectPool.h"
-
-#ifdef HAVE_XMLRPC_C
-#include <xmlrpc-c/base.hpp>
-#endif
+#include "xmlrpc-c.h"
 
 namespace Moses
 {
@@ -276,6 +273,7 @@ public:
   bool operator==(const Hypothesis& other) const;
 
 #ifdef HAVE_XMLRPC_C
+  // these are implemented in moses/server/Hypothesis_4server.cpp !
   void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
   void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
 #endif
