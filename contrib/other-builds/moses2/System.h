@@ -43,6 +43,7 @@ public:
 	const std::vector<const PhraseTable*> &GetMapping() const
 	{ return m_mappings; }
 
+	size_t stackSize;
 protected:
   const Moses::Parameter &m_params;
 

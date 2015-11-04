@@ -32,6 +32,8 @@ protected:
 	Manager &m_mgr;
 	std::vector<Stack> &m_stacks;
 	ArcLists m_arcLists;
+	size_t m_stackSize;
+
 
 	void Extend(const Hypothesis &hypo);
 	void Extend(const Hypothesis &hypo, const InputPath &path);

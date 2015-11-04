@@ -44,6 +44,20 @@ StackAdd Stack::Add(const Hypothesis *hypo)
   }
 }
 
+std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
+{
+	std::vector<const Hypothesis*> ret(m_hypos.begin(), m_hypos.end());
+
+	if (ret.size() > num) {
+		NTH_ELEMENT3(ret.begin(),
+				ret.begin() + num,
+				ret.end());
+		ret.resize(num);
+	}
+
+    return ret;
+}
+
 std::vector<const Hypothesis*> Stack::GetSortedHypos() const
 {
 	std::vector<const Hypothesis*> ret(m_hypos.begin(), m_hypos.end());

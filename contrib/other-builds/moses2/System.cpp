@@ -19,6 +19,8 @@ System::System(const Moses::Parameter &params)
 :m_featureFunctions(*this)
 ,m_params(params)
 {
+    params.SetParameter(stackSize, "stack", Moses::DEFAULT_MAX_HYPOSTACK_SIZE);
+
 	m_featureFunctions.Create();
 	LoadWeights();
 	m_featureFunctions.Load();

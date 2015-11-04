@@ -13,12 +13,14 @@
 #include "../InputPaths.h"
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
+#include "../System.h"
 
 using namespace std;
 
 SearchNormal::SearchNormal(Manager &mgr, std::vector<Stack> &stacks)
 :m_mgr(mgr)
 ,m_stacks(stacks)
+,m_stackSize(mgr.GetSystem().stackSize)
 {
 	// TODO Auto-generated constructor stub
 
@@ -32,7 +34,8 @@ void SearchNormal::Decode(size_t stackInd)
 {
   Stack &stack = m_stacks[stackInd];
 
-  BOOST_FOREACH(const Hypothesis *hypo, stack) {
+  std::vector<const Hypothesis*> hypos = stack.GetBestHypos(m_stackSize);
+  BOOST_FOREACH(const Hypothesis *hypo, hypos) {
 		Extend(*hypo);
   }
   DebugStacks();

@@ -43,12 +43,16 @@ public:
 	Stack();
 	virtual ~Stack();
 
+
 	size_t GetSize() const
 	{ return m_hypos.size(); }
 
 	StackAdd Add(const Hypothesis *hypo);
 
+	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	std::vector<const Hypothesis*> GetSortedHypos() const;
+
+protected:
 };
 
 #endif /* STACK_H_ */

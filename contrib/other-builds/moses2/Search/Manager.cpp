@@ -37,7 +37,9 @@ Manager::Manager(System &system, const std::string &inputStr)
 
 	CalcFutureScore();
 
+	// init stacks
 	m_stacks.resize(m_input->GetSize() + 1);
+
 	m_bitmaps = new Moses::Bitmaps(m_input->GetSize(), vector<bool>(0));
 	m_search = new SearchNormal(*this, m_stacks);
 }
