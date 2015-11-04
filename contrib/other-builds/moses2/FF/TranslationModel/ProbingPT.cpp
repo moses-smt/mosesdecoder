@@ -21,8 +21,9 @@ ProbingPT::ProbingPT(size_t startInd, const std::string &line)
 	  ReadParameters();
 }
 
-ProbingPT::~ProbingPT() {
-	// TODO Auto-generated destructor stub
+ProbingPT::~ProbingPT()
+{
+  delete m_engine;
 }
 
 void ProbingPT::Load(System &system)
@@ -91,6 +92,7 @@ TargetPhrases::shared_const_ptr ProbingPT::Lookup(const Manager &mgr, InputPath 
 {
 	const Phrase &sourcePhrase = inputPath.GetSubPhrase();
 	TargetPhrases::shared_const_ptr ret = CreateTargetPhrase(mgr.GetPool(), mgr.GetSystem(), sourcePhrase);
+	return ret;
 }
 
 TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const
