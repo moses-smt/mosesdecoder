@@ -13,6 +13,7 @@
 #include "moses/FF/FFState.h"
 #include "moses/Bitmap.h"
 #include "../Scores.h"
+#include "../TargetPhrase.h"
 
 class Manager;
 class PhraseImpl;
@@ -35,11 +36,15 @@ public:
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
 
-  const Moses::Bitmap &GetBitmap() const
+  inline const Moses::Bitmap &GetBitmap() const
   { return m_sourceCompleted; }
 
-  const Moses::Range &GetRange() const
+  inline const Moses::Range &GetRange() const
   { return m_range; }
+
+  inline const Moses::Range &GetCurrTargetWordsRange() const {
+    return m_currTargetWordsRange;
+  }
 
   const Scores &GetScores() const
   { return *m_scores; }
@@ -56,6 +61,19 @@ public:
 
   void EvaluateWhenApplied();
 
+  const Hypothesis* GetPrevHypo() const
+  { return m_prevHypo; }
+
+  /** curr - pos is relative from CURRENT hypothesis's starting index
+   * (ie, start of sentence would be some negative number, which is
+   * not allowed- USE WITH CAUTION) */
+  inline const Word &GetCurrWord(size_t pos) const {
+    return m_targetPhrase[pos];
+  }
+
+  /** recursive - pos is relative from start of sentence */
+  const Word &GetWord(size_t pos) const;
+
 protected:
   Manager &m_mgr;
   const TargetPhrase &m_targetPhrase;
@@ -65,6 +83,7 @@ protected:
 
   const Moses::FFState **m_ffStates;
   Scores *m_scores;
+  Moses::Range m_currTargetWordsRange;
 };
 
 

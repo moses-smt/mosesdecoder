@@ -10,6 +10,8 @@
 #include "../TargetPhrase.h"
 #include "../Scores.h"
 #include "../System.h"
+#include "../Search/Hypothesis.h"
+#include "../Search/Manager.h"
 #include "lm/state.hh"
 #include "lm/left.hh"
 #include "moses/FactorCollection.h"
@@ -141,10 +143,61 @@ Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
   const Moses::FFState &prevState,
   Scores &scores) const
 {
+  const System &system = mgr.GetSystem();
 
-  KenLMState *ret = new KenLMState();
-  ret->state = m_ngram->BeginSentenceState();
-  return ret;
+  const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
+
+  std::auto_ptr<KenLMState> ret(new KenLMState());
+
+  if (!hypo.GetTargetPhrase().GetSize()) {
+	ret->state = in_state;
+	return ret.release();
+  }
+
+  const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
+  //[begin, end) in STL-like fashion.
+  const std::size_t end = hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
+  const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
+
+  std::size_t position = begin;
+  typename Model::State aux_state;
+  typename Model::State *state0 = &ret->state, *state1 = &aux_state;
+
+  float score = m_ngram->Score(in_state, TranslateID(hypo.GetWord(position)), *state0);
+  ++position;
+  for (; position < adjust_end; ++position) {
+	score += m_ngram->Score(*state0, TranslateID(hypo.GetWord(position)), *state1);
+	std::swap(state0, state1);
+  }
+
+  if (hypo.GetBitmap().IsComplete()) {
+	// Score end of sentence.
+	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
+	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
+	score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), ret->state).prob;
+  } else if (adjust_end < end) {
+	// Get state after adding a long phrase.
+	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
+	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
+	m_ngram->GetState(&indices.front(), last, ret->state);
+  } else if (state0 != &ret->state) {
+	// Short enough phrase that we can just reuse the state.
+	ret->state = *state0;
+  }
+
+  score = Moses::TransformLMScore(score);
+
+  bool OOVFeatureEnabled = false;
+  if (OOVFeatureEnabled) {
+	std::vector<float> scoresVec(2);
+	scoresVec[0] = score;
+	scoresVec[1] = 0.0;
+	scores.PlusEquals(system, *this, scoresVec);
+  } else {
+	scores.PlusEquals(system, *this, score);
+  }
+
+  return ret.release();
 }
 
 void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const
@@ -191,4 +244,19 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 lm::WordIndex KENLM::TranslateID(const Word &word) const {
   std::size_t factor = word[m_factorType]->GetId();
   return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+}
+
+// Convert last words of hypothesis into vocab ids, returning an end pointer.
+lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
+  lm::WordIndex *index = indices;
+  lm::WordIndex *end = indices + m_ngram->Order() - 1;
+  int position = hypo.GetCurrTargetWordsRange().GetEndPos();
+  for (; ; ++index, --position) {
+    if (index == end) return index;
+    if (position == -1) {
+      *index = m_ngram->GetVocabulary().BeginSentence();
+      return index + 1;
+    }
+    *index = TranslateID(hypo.GetWord(position));
+  }
 }

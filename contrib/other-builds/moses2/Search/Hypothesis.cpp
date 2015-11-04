@@ -24,6 +24,7 @@ Hypothesis::Hypothesis(Manager &mgr,
 ,m_sourceCompleted(bitmap)
 ,m_range(range)
 ,m_prevHypo(NULL)
+,m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 {
 	MemPool &pool = m_mgr.GetPool();
 
@@ -42,6 +43,10 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 ,m_sourceCompleted(bitmap)
 ,m_range(pathRange)
 ,m_prevHypo(&prevHypo)
+,m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
+                         prevHypo.m_currTargetWordsRange.GetEndPos()
+                         + tp.GetSize())
+
 {
 	MemPool &pool = m_mgr.GetPool();
 	size_t numStatefulFFs = m_mgr.GetSystem().GetFeatureFunctions().GetStatefulFeatureFunctions().size();
@@ -140,3 +145,12 @@ void Hypothesis::EvaluateWhenApplied()
   //cerr << *this << endl;
 }
 
+/** recursive - pos is relative from start of sentence */
+const Word &Hypothesis::GetWord(size_t pos) const {
+  const Hypothesis *hypo = this;
+  while (pos < hypo->GetCurrTargetWordsRange().GetStartPos()) {
+    hypo = hypo->GetPrevHypo();
+    UTIL_THROW_IF2(hypo == NULL, "Previous hypothesis should not be NULL");
+  }
+  return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
+}

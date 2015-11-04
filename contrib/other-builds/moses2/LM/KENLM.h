@@ -52,6 +52,7 @@ protected:
   void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const;
 
   lm::WordIndex TranslateID(const Word &word) const;
+  lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
 
 };
 

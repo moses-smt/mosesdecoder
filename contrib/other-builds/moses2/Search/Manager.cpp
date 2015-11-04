@@ -122,8 +122,7 @@ void Manager::CalcFutureScore()
 	    }
 	  }
 
-	  cerr << "Square matrix:" << endl;
-	  cerr << *m_futureScore << endl;
-
+	  //cerr << "Square matrix:" << endl;
+	  //cerr << *m_futureScore << endl;
 }
 
