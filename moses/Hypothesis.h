@@ -279,7 +279,7 @@ public:
 #endif
 
   bool beats(Hypothesis const& b) const;
-  
+
 
 };
 
