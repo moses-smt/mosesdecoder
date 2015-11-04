@@ -457,6 +457,8 @@ void StaticData::LoadDecodeGraphs()
   params = m_parameter->GetParam("mapping");
   if (params && params->size()) {
     mappingVector = *params;
+  } else {
+    mappingVector.assign(1,"0 T 0");
   }
 
   params = m_parameter->GetParam("max-chart-span");
