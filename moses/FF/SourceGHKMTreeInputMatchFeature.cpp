@@ -37,7 +37,7 @@ void SourceGHKMTreeInputMatchFeature::EvaluateWithSourceContext(const InputType 
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   const Range& range = inputPath.GetWordsRange();
   size_t startPos = range.GetStartPos();

@@ -13,7 +13,7 @@ SetSourcePhrase::SetSourcePhrase(const std::string &line)
 void SetSourcePhrase::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   targetPhrase.SetRuleSource(source);
 }

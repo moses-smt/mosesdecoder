@@ -27,7 +27,7 @@ std::vector<float> NieceTerminal::DefaultWeights() const
 void NieceTerminal::EvaluateInIsolation(const Phrase &source
                                         , const TargetPhrase &targetPhrase
                                         , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedScore) const
+                                        , ScoreComponentCollection &estimatedScores) const
 {
   targetPhrase.SetRuleSource(source);
 }
@@ -37,7 +37,7 @@ void NieceTerminal::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   assert(stackVec);
 

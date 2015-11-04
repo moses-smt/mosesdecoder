@@ -19,7 +19,7 @@ PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
 void PhraseLengthFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   // get length of source and target phrase
   size_t targetLength = targetPhrase.GetSize();
