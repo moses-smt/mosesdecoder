@@ -41,7 +41,7 @@ void DeleteRules::Load()
 void DeleteRules::EvaluateInIsolation(const Phrase &source
                                       , const TargetPhrase &target
                                       , ScoreComponentCollection &scoreBreakdown
-                                      , ScoreComponentCollection &estimatedScore) const
+                                      , ScoreComponentCollection &estimatedScores) const
 {
   // dense scores
   size_t hash = 0;
@@ -61,7 +61,7 @@ void DeleteRules::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {}
 
 void DeleteRules::EvaluateTranslationOptionListWithSourceContext(const InputType &input

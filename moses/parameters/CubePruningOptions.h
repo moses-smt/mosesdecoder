@@ -18,10 +18,8 @@ namespace Moses
     CubePruningOptions(Parameter const& param);
     CubePruningOptions() {};
 
-#ifdef HAVE_XMLRPC_C
     bool 
     update(std::map<std::string,xmlrpc_c::value>const& params);
-#endif
   };
 
 }

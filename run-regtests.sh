@@ -6,4 +6,9 @@ set -e -o pipefail
 
 git submodule init
 git submodule update regtest
-./bjam -j$(nproc) --with-irstlm=./opt --with-boost=./opt --with-cmph=./opt --with-xmlrpc-c=./opt --with-regtest=./regtest $@
+
+# test compilation without xmlrpc-c
+./bjam -j$(nproc) --with-irstlm=./opt --with-boost=./opt --with-cmph=./opt --no-xmlrpc-c --with-regtest=./regtest -a -q $@ || exit $?
+
+# test compilation with xmlrpc-c
+./bjam -j$(nproc) --with-irstlm=./opt --with-boost=./opt --with-cmph=./opt --with-xmlrpc-c=./opt --with-regtest=./regtest -a -q $@

@@ -1,8 +1,7 @@
-// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include "OptionsBaseClass.h"
+namespace Moses {
 
-namespace Moses
-{
 #ifdef HAVE_XMLRPC_C
   bool   
   OptionsBaseClass::
@@ -10,7 +9,9 @@ namespace Moses
   {
     return true;
   }
+#endif
 
+#ifdef HAVE_XMLRPC_C
   bool 
   OptionsBaseClass::
   check(std::map<std::string, xmlrpc_c::value> const& param, 
@@ -19,7 +20,5 @@ namespace Moses
     std::map<std::string, xmlrpc_c::value>::const_iterator m;
     return (param.find(key) != param.end());
   }
-
 #endif
-
 }

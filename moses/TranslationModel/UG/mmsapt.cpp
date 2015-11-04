@@ -811,11 +811,9 @@ namespace Moses
   Mmsapt::
   setup_bias(ttasksptr const& ttask)
   {
-
-    // VERBOSE(2,"Setting up bias at " << HERE << std::endl);
-    
     SPTR<ContextScope> const& scope = ttask->GetScope();
-    SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+    SPTR<ContextForQuery> context;
+    context = scope->get<ContextForQuery>(btfix.get(), true);
     if (context->bias) return; 
     
     // bias weights specified with the session?

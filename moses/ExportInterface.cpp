@@ -60,13 +60,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "ExportInterface.h"
-#ifdef HAVE_XMLRPC_C
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/registry.hpp>
-#include <xmlrpc-c/server_abyss.hpp>
-#include "server/Server.h"
-#endif
-
+#include "moses/server/Server.h"
 using namespace std;
 using namespace Moses;
 
@@ -148,6 +142,9 @@ run_as_server()
 #ifdef HAVE_XMLRPC_C
   MosesServer::Server server(params);
   return server.run(); // actually: don't return. see Server::run()
+#else
+  UTIL_THROW2("Moses was compiled without xmlrpc-c. "
+              << "No server functionality available.");
 #endif
 }
 

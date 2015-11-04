@@ -288,7 +288,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   assert(stackVec);
 

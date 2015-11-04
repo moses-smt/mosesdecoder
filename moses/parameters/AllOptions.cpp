@@ -90,7 +90,6 @@ namespace Moses
     if (!output.update(param))     return false;
     return sanity_check();
   }
-
 #endif
 
   bool
