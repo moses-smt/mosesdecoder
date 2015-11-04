@@ -585,7 +585,7 @@ size_t Hypothesis::hash() const
 bool Hypothesis::operator==(const Hypothesis& other) const
 {
   // coverage
-  if (m_sourceCompleted != other.m_sourceCompleted) {
+  if (&m_sourceCompleted != &other.m_sourceCompleted) {
     return false;
   }
 
