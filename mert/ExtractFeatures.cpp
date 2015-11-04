@@ -230,6 +230,8 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 			modelType=3;
 	if(getConfig("argType") == "prepGeneric")
 			modelType=4;
+	if(getConfig("argType") == "mainPrepGeneric")
+			modelType=5;
 
 
 	int dep,gov;
@@ -242,14 +244,14 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 		//LM model scores: (rel,gov,dep) where rel in (dobj,iobj,nsubj,nsubjpass)
 		if((modelType !=0  and rel.substr(0,5) == "prep_") or
 				// need to figure out if the head is a verb
-				(modelType == 0 and m_allowedRel->find(rel)!=m_allowedRel->end())){
+				((modelType == 0 or modelType==5) and m_allowedRel->find(rel)!=m_allowedRel->end())){
 			//SHOULD LEMMATIZE
 			dep = strtol (dependencies[i].c_str(),NULL,10);
 			gov = strtol (dependencies[i+1].c_str(),NULL,10);
 
-			if(modelType == 4 and pos.size() > gov and pos[gov].substr(0,1) == "V")
+			if((modelType == 4 or modelType == 5) and pos.size() > gov and pos[gov].substr(0,1) == "V")
 				rel = "prep_V";
-			if(modelType == 4 and pos.size() > gov and pos[gov].substr(0,1) == "N")
+			if((modelType == 4 or modelType == 5) and pos.size() > gov and pos[gov].substr(0,1) == "N")
 				rel = "prep_N";
 
 
@@ -261,7 +263,8 @@ vector<vector<string> > ExtractFeatures::MakeTuples(const string& sentence, cons
 			if((modelType == 1 and pos.size() > gov and pos[gov].substr(0,1) == "V") or //prep argument of verb
 					(modelType == 2 and pos.size() > gov and pos[gov].substr(0,1) == "N") or //prep argument of noun
 					modelType == 3 or // prep argument of any gov
-					modelType == 4 or // generic prep argument of any gov
+					modelType == 4 or // generic prep argument of any gov (V or N)
+					modelType == 5 or // main and generic prep argument of any gov (V or N)
 					modelType == 0) //main argument
 				dependencyTuples.push_back(tuple);
 
