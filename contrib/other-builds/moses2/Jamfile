@@ -25,6 +25,7 @@ import path ;
     FF/StatelessFeatureFunction.cpp
     FF/WordPenalty.cpp
     FF/LM/LanguageModel.cpp
+    FF/LM/KENLM.cpp
  	 	FF/TranslationModel/PhraseTable.cpp 
  	 	FF/TranslationModel/PhraseTableMemory.cpp 
  	 	FF/TranslationModel/ProbingPT.cpp 

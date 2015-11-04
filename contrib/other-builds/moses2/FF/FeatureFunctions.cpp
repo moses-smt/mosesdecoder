@@ -20,6 +20,7 @@
 #include "TranslationModel/ProbingPT.h"
 #include "TranslationModel/UnknownWordPenalty.h"
 #include "LM/LanguageModel.h"
+#include "LM/KENLM.h"
 
 using namespace std;
 
@@ -108,8 +109,11 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	else if (toks[0] == "Distortion") {
 		ret = new Distortion(m_ffStartInd, line);
 	}
-	else if (toks[0] == "KENLM") {
+	else if (toks[0] == "LanguageModel") {
 		ret = new LanguageModel(m_ffStartInd, line);
+	}
+	else if (toks[0] == "KENLM") {
+		ret = new KENLM(m_ffStartInd, line);
 	}
 	else {
 		//ret = new SkeletonStatefulFF(m_ffStartInd, line);
