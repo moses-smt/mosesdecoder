@@ -16,11 +16,11 @@
 #include "SkeletonStatefulFF.h"
 #include "WordPenalty.h"
 #include "Distortion.h"
-#include "TranslationModel/PhraseTableMemory.h"
-#include "TranslationModel/ProbingPT.h"
-#include "TranslationModel/UnknownWordPenalty.h"
-#include "LM/LanguageModel.h"
-#include "LM/KENLM.h"
+#include "../TranslationModel/PhraseTableMemory.h"
+#include "../TranslationModel/ProbingPT.h"
+#include "../TranslationModel/UnknownWordPenalty.h"
+#include "../LM/LanguageModel.h"
+#include "../LM/KENLM.h"
 
 using namespace std;
 

@@ -6,7 +6,7 @@
  */
 #include <boost/foreach.hpp>
 #include "PhraseTable.h"
-#include "../../InputPaths.h"
+#include "../InputPaths.h"
 
 using namespace std;
 

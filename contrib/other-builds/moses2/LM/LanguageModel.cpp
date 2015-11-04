@@ -6,9 +6,9 @@
  */
 #include <vector>
 #include "LanguageModel.h"
-#include "../../System.h"
-#include "../../Search/Manager.h"
-#include "../../Search/Hypothesis.h"
+#include "../System.h"
+#include "../Search/Manager.h"
+#include "../Search/Hypothesis.h"
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/LM/PointerState.h"

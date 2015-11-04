@@ -6,10 +6,10 @@
  */
 
 #include "ProbingPT.h"
-#include "../../System.h"
-#include "../../Scores.h"
-#include "../../FF/FeatureFunctions.h"
-#include "../../Search/Manager.h"
+#include "../System.h"
+#include "../Scores.h"
+#include "../FF/FeatureFunctions.h"
+#include "../Search/Manager.h"
 #include "moses/FactorCollection.h"
 #include "moses/TranslationModel/ProbingPT/quering.hh"
 

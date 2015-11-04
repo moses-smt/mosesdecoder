@@ -6,7 +6,7 @@
  */
 
 #include "InputPath.h"
-#include "FF/TranslationModel/PhraseTable.h"
+#include "TranslationModel/PhraseTable.h"
 
 InputPath::InputPath(const SubPhrase &subPhrase, const Moses::Range &range, size_t numPt)
 :m_subPhrase(subPhrase)

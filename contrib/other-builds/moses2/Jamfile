@@ -24,12 +24,12 @@ import path ;
     FF/StatefulFeatureFunction.cpp
     FF/StatelessFeatureFunction.cpp
     FF/WordPenalty.cpp
-    FF/LM/LanguageModel.cpp
-    FF/LM/KENLM.cpp
- 	 	FF/TranslationModel/PhraseTable.cpp 
- 	 	FF/TranslationModel/PhraseTableMemory.cpp 
- 	 	FF/TranslationModel/ProbingPT.cpp 
- 	 	FF/TranslationModel/UnknownWordPenalty.cpp 
+    LM/LanguageModel.cpp
+    LM/KENLM.cpp
+ 	 	TranslationModel/PhraseTable.cpp 
+ 	 	TranslationModel/PhraseTableMemory.cpp 
+ 	 	TranslationModel/ProbingPT.cpp 
+ 	 	TranslationModel/UnknownWordPenalty.cpp 
    	Search/ArcLists.cpp
 		Search/Hypothesis.cpp 
  	 	Search/Manager.cpp 

@@ -9,7 +9,7 @@
 #define FF_LM_KENLM_H_
 
 #include <boost/shared_ptr.hpp>
-#include "../StatefulFeatureFunction.h"
+#include "../FF/StatefulFeatureFunction.h"
 #include "lm/model.hh"
 #include "moses/Factor.h"
 

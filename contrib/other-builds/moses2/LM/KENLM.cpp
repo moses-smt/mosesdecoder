@@ -6,7 +6,7 @@
  */
 
 #include "KENLM.h"
-#include "../../System.h"
+#include "../System.h"
 #include "lm/state.hh"
 #include "moses/FactorCollection.h"
 

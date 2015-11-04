@@ -8,11 +8,11 @@
 #include <cassert>
 #include <boost/foreach.hpp>
 #include "PhraseTableMemory.h"
-#include "../../Phrase.h"
-#include "../../TargetPhrase.h"
-#include "../../System.h"
-#include "../../Scores.h"
-#include "../../InputPaths.h"
+#include "../Phrase.h"
+#include "../TargetPhrase.h"
+#include "../System.h"
+#include "../Scores.h"
+#include "../InputPaths.h"
 #include "moses/InputFileStream.h"
 
 using namespace std;

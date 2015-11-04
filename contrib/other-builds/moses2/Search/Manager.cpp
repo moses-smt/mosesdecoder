@@ -12,7 +12,7 @@
 #include "../TargetPhrase.h"
 #include "../InputPaths.h"
 #include "../InputPath.h"
-#include "../FF/TranslationModel/PhraseTable.h"
+#include "../TranslationModel/PhraseTable.h"
 #include "moses/Range.h"
 
 using namespace std;
