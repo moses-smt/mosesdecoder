@@ -78,7 +78,7 @@ sub get_nbestlist
 
   open MI, "<$moses_ini" or die "Couldn't read $moses_ini";
   while (my $l = <MI>) {
-    if ($l =~ /\[n-best-list\]/i){
+    if ($l =~ /^\[n-best-list\]/i){
       chomp($nbestfile = <MI>);
       chomp($nbestsize = <MI>);
     }
