@@ -45,6 +45,22 @@ void Scores::Reset(size_t numScores)
 }
 
 void Scores::PlusEquals(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const SCORE &score)
+{
+	assert(featureFunction.GetNumScores() == 1);
+
+	const Weights &weights = system.GetWeights();
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+	m_scores[ffStartInd] += score;
+
+	SCORE weight = weights[ffStartInd];
+	m_total += score * weight;
+
+}
+
+void Scores::PlusEquals(const System &system,
 		const FeatureFunction &featureFunction,
 		const std::vector<SCORE> &scores)
 {
@@ -63,22 +79,6 @@ void Scores::PlusEquals(const System &system,
 	}
 }
 
-void Scores::PlusEquals(const System &system,
-		  const FeatureFunction &featureFunction,
-		  const SCORE &score)
-{
-	assert(featureFunction.GetNumScores() == 1);
-
-	const Weights &weights = system.GetWeights();
-
-	size_t ffStartInd = featureFunction.GetStartInd();
-	m_scores[ffStartInd] += score;
-
-	SCORE weight = weights[ffStartInd];
-	m_total += score * weight;
-
-}
-
 void Scores::PlusEquals(const System &system, const Scores &other)
 {
 	size_t numScores = system.GetFeatureFunctions().GetNumScores();
@@ -87,6 +87,45 @@ void Scores::PlusEquals(const System &system, const Scores &other)
 	}
 	m_total += other.m_total;
 
+}
+
+void Scores::Assign(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const SCORE &score)
+{
+	assert(featureFunction.GetNumScores() == 1);
+
+	const Weights &weights = system.GetWeights();
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+
+	assert(m_scores[ffStartInd] == 0);
+	m_scores[ffStartInd] = score;
+
+	SCORE weight = weights[ffStartInd];
+	m_total += score * weight;
+
+}
+
+void Scores::Assign(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const std::vector<SCORE> &scores)
+{
+	assert(scores.size() == featureFunction.GetNumScores());
+
+	const Weights &weights = system.GetWeights();
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+	for (size_t i = 0; i < scores.size(); ++i) {
+		SCORE incrScore = scores[i];
+
+		assert(m_scores[ffStartInd + i] == 0);
+		m_scores[ffStartInd + i] = incrScore;
+
+		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
+		SCORE weight = weights[ffStartInd + i];
+		m_total += incrScore * weight;
+	}
 }
 
 void Scores::CreateFromString(const std::string &str,

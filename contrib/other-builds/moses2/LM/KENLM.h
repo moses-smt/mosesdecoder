@@ -13,6 +13,8 @@
 #include "lm/model.hh"
 #include "moses/Factor.h"
 
+class Word;
+
 class KENLM : public StatefulFeatureFunction
 {
 public:
@@ -40,10 +42,17 @@ public:
 protected:
   std::string m_path;
   Moses::FactorType m_factorType;
+  const Moses::Factor *m_sos;
+  const Moses::Factor *m_eos;
 
   typedef lm::ngram::ProbingModel Model;
   boost::shared_ptr<Model> m_ngram;
   std::vector<lm::WordIndex> m_lmIdLookup;
+
+  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const;
+
+  lm::WordIndex TranslateID(const Word &word) const;
+
 };
 
 #endif /* FF_LM_KENLM_H_ */

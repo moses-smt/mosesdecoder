@@ -43,6 +43,14 @@ public:
   void PlusEquals(const System &system,
 		  const Scores &scores);
 
+  void Assign(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const SCORE &score);
+
+  void Assign(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const std::vector<SCORE> &scores);
+
   void Debug(std::ostream &out, const FeatureFunctions &ffs) const;
 
 protected:
