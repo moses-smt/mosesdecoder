@@ -52,9 +52,8 @@ namespace Moses
     }
 
 #ifdef HAVE_XMLRPC_C
-    bool update(std::map<std::string,xmlrpc_c::value>const& param);
+    bool update(std::map<std::string, xmlrpc_c::value>const& param);
 #endif
-
   };
 
 }
