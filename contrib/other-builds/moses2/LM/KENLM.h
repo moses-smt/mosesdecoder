@@ -42,7 +42,7 @@ public:
 protected:
   std::string m_path;
   Moses::FactorType m_factorType;
-  const Moses::Factor *m_sos;
+  const Moses::Factor *m_bos;
   const Moses::Factor *m_eos;
 
   typedef lm::ngram::ProbingModel Model;

@@ -57,7 +57,7 @@ void LanguageModel::Load(System &system)
 {
   Moses::FactorCollection &fc = system.GetVocab();
 
-  m_sos = fc.AddFactor("<s>", false);
+  m_bos = fc.AddFactor("<s>", false);
   m_eos = fc.AddFactor("</s>", false);
 
   Moses::InputFileStream infile(m_path);
@@ -120,7 +120,7 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
 const Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
 	MemPool &pool = mgr.GetPool();
-	return new (pool.Allocate<LMState>()) LMState(pool, m_sos);
+	return new (pool.Allocate<LMState>()) LMState(pool, m_bos);
 }
 
 void
@@ -136,7 +136,7 @@ LanguageModel::EvaluateInIsolation(const System &system,
 	SCORE score = 0;
 	SCORE nonFullScore = 0;
 	vector<const Moses::Factor*> context;
-//	context.push_back(m_sos);
+//	context.push_back(m_bos);
 
 	context.reserve(m_order);
 	for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {

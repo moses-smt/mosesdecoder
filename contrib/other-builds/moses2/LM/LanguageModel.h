@@ -70,7 +70,7 @@ protected:
 
     MorphTrie<const Moses::Factor*, LMScores> m_root;
     SCORE m_oov;
-    const Moses::Factor *m_sos;
+    const Moses::Factor *m_bos;
     const Moses::Factor *m_eos;
 
     void ShiftOrPush(std::vector<const Moses::Factor*> &context, const Moses::Factor *factor) const;

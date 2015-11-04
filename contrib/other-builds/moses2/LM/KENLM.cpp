@@ -67,7 +67,7 @@ void KENLM::Load(System &system)
 {
   Moses::FactorCollection &fc = system.GetVocab();
 
-  m_sos = fc.AddFactor("<s>", false);
+  m_bos = fc.AddFactor("<s>", false);
   m_eos = fc.AddFactor("</s>", false);
 
   lm::ngram::Config config;
@@ -160,7 +160,7 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 	  lm::ngram::RuleScore<Model> scorer(*m_ngram, discarded_sadly);
 
 	  size_t position;
-	  if (m_sos == phrase[0][m_factorType]) {
+	  if (m_bos == phrase[0][m_factorType]) {
 	    scorer.BeginSentence();
 	    position = 1;
 	  } else {
