@@ -64,7 +64,7 @@ bool SourceWordDeletionFeature::IsUseable(const FactorMask &mask) const
 void SourceWordDeletionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);

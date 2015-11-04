@@ -189,16 +189,16 @@ void TargetPhrase::EvaluateInIsolation(const Phrase &source, const std::vector<F
 {
   if (ffs.size()) {
     const StaticData &staticData = StaticData::Instance();
-    ScoreComponentCollection estimatedScore;
+    ScoreComponentCollection estimatedScores;
     for (size_t i = 0; i < ffs.size(); ++i) {
       const FeatureFunction &ff = *ffs[i];
       if (! staticData.IsFeatureFunctionIgnored( ff )) {
-        ff.EvaluateInIsolation(source, *this, m_scoreBreakdown, estimatedScore);
+        ff.EvaluateInIsolation(source, *this, m_scoreBreakdown, estimatedScores);
       }
     }
 
     float weightedScore = m_scoreBreakdown.GetWeightedScore();
-    m_estimatedScore += estimatedScore.GetWeightedScore();
+    m_estimatedScore += estimatedScores.GetWeightedScore();
     m_futureScore = weightedScore + m_estimatedScore;
   }
 }
