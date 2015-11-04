@@ -41,7 +41,7 @@ public:
 	  EvaluateInIsolation(const System &system,
 			  const Phrase &source, const TargetPhrase &targetPhrase,
 	          Scores &scores,
-	          Scores *estimatedScore) const = 0;
+	          Scores *estimatedScores) const = 0;
 
 protected:
 	size_t m_startInd;

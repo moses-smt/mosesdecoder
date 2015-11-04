@@ -111,30 +111,29 @@ KENLM::EvaluateInIsolation(const System &system,
         Scores &scores,
         Scores *estimatedScores) const
 {
-	  // contains factors used by this LM
-	  float fullScore, nGramScore;
-	  size_t oovCount;
+  // contains factors used by this LM
+  float fullScore, nGramScore;
+  size_t oovCount;
 
-	  CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
+  CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
 
-	  float estimateScore = fullScore - nGramScore;
+  float estimateScore = fullScore - nGramScore;
 
-	  bool GetLMEnableOOVFeature = false;
-	  if (GetLMEnableOOVFeature) {
-	    vector<float> scoresVec(2), estimateScoresVec(2);
-	    scoresVec[0] = nGramScore;
-	    scoresVec[1] = oovCount;
-	    scores.Assign(system, *this, scoresVec);
+  bool GetLMEnableOOVFeature = false;
+  if (GetLMEnableOOVFeature) {
+	vector<float> scoresVec(2), estimateScoresVec(2);
+	scoresVec[0] = nGramScore;
+	scoresVec[1] = oovCount;
+	scores.Assign(system, *this, scoresVec);
 
-	    estimateScoresVec[0] = estimateScore;
-	    estimateScoresVec[1] = 0;
-	    estimatedScores->Assign(system, *this, estimateScoresVec);
-	  }
-	  else {
-	    scores.Assign(system, *this, nGramScore);
-	    estimatedScores->Assign(system, *this, estimateScore);
-	  }
-
+	estimateScoresVec[0] = estimateScore;
+	estimateScoresVec[1] = 0;
+	estimatedScores->Assign(system, *this, estimateScoresVec);
+  }
+  else {
+	scores.Assign(system, *this, nGramScore);
+	estimatedScores->Assign(system, *this, estimateScore);
+  }
 }
 
 Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
@@ -143,7 +142,7 @@ Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
   Scores &scores) const
 {
 
- KenLMState *ret = new KenLMState();
+  KenLMState *ret = new KenLMState();
   ret->state = m_ngram->BeginSentenceState();
   return ret;
 }

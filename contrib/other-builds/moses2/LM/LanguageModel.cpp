@@ -127,7 +127,7 @@ void
 LanguageModel::EvaluateInIsolation(const System &system,
 		  const Phrase &source, const TargetPhrase &targetPhrase,
         Scores &scores,
-        Scores *estimatedScore) const
+        Scores *estimatedScores) const
 {
 	if (targetPhrase.GetSize() == 0) {
 		return;
@@ -147,15 +147,15 @@ LanguageModel::EvaluateInIsolation(const System &system,
 			std::pair<SCORE, void*> fromScoring = Score(context);
 			score += fromScoring.first;
 		}
-		else if (estimatedScore) {
+		else if (estimatedScores) {
 			std::pair<SCORE, void*> fromScoring = Score(context);
 			nonFullScore += fromScoring.first;
 		}
 	}
 
 	scores.PlusEquals(system, *this, score);
-	if (estimatedScore) {
-		estimatedScore->PlusEquals(system, *this, nonFullScore);
+	if (estimatedScores) {
+		estimatedScores->PlusEquals(system, *this, nonFullScore);
 	}
 }
 

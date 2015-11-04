@@ -65,7 +65,7 @@ void
 PhraseTable::EvaluateInIsolation(const System &system,
 		const Phrase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
-		Scores *estimatedScore) const
+		Scores *estimatedScores) const
 {
 
 }
