@@ -102,7 +102,8 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
 //! return the state associated with the empty hypothesis for a given sentence
 const Moses::FFState* KENLM::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
-  KenLMState *ret = new KenLMState();
+  MemPool &pool = mgr.GetPool();
+  KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
   ret->state = m_ngram->BeginSentenceState();
   return ret;
 }
@@ -144,14 +145,15 @@ Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
   Scores &scores) const
 {
   const System &system = mgr.GetSystem();
+  MemPool &pool = mgr.GetPool();
 
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
 
-  std::auto_ptr<KenLMState> ret(new KenLMState());
+  KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
 
   if (!hypo.GetTargetPhrase().GetSize()) {
 	ret->state = in_state;
-	return ret.release();
+	return ret;
   }
 
   const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
@@ -197,7 +199,7 @@ Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
 	scores.PlusEquals(system, *this, score);
   }
 
-  return ret.release();
+  return ret;
 }
 
 void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const

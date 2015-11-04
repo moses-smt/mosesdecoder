@@ -108,8 +108,8 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   }
 
   if (m_targetPhrase.GetSize()) {
-	  out << (const PhraseImpl&) m_targetPhrase;
-	  out << " ";
+	  const Phrase &phrase = m_targetPhrase;
+	  out << phrase << " ";
   }
 }
 

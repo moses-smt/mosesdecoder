@@ -49,7 +49,7 @@ SubPhrase PhraseImpl::GetSubPhrase(size_t start, size_t end) const
 	return ret;
 }
 
-std::ostream& operator<<(std::ostream &out, const PhraseImpl &obj)
+std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 {
 	if (obj.GetSize()) {
 		out << obj[0];

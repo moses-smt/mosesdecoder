@@ -18,6 +18,7 @@ class SubPhrase;
 
 class Phrase
 {
+	  friend std::ostream& operator<<(std::ostream &, const Phrase &);
 public:
   virtual const Word& operator[](size_t pos) const = 0;
   virtual size_t GetSize() const = 0;
@@ -25,7 +26,6 @@ public:
 
 class PhraseImpl : public Phrase
 {
-	  friend std::ostream& operator<<(std::ostream &, const PhraseImpl &);
 public:
   static PhraseImpl *CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str);
 
