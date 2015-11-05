@@ -53,10 +53,10 @@ github      = https://github.com/
 sourceforge = http://downloads.sourceforge.net/project
 
 # functions for building software from sourceforge
-nproc := $(shell nproc)
+nproc := $(shell getconf _NPROCESSORS_ONLN)
 sfget  = mkdir -p '${TMP}' && cd '${TMP}' && wget -qO- ${URL} | tar xz 
 configure-make-install  = cd '$1' && ./configure --prefix='${PREFIX}' 
-configure-make-install += && make -j$(nproc) && make install
+configure-make-install += && make -j$(getconf _NPROCESSORS_ONLN) && make install
 
 # XMLRPC-C for moses server
 xmlrpc: URL=$(sourceforge)/xmlrpc-c/Xmlrpc-c%20Super%20Stable/1.33.17/xmlrpc-c-1.33.17.tgz
@@ -87,7 +87,7 @@ irstlm: | $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh)
 $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh):
 	$(sfget)
 	cd $$(find '${TMP}' -name trunk) && ./regenerate-makefiles.sh \
-	&& ./configure --prefix='${PREFIX}' && make -j${nproc} && make install -j$(nproc)
+	&& ./configure --prefix='${PREFIX}' && make -j${shell getconf _NPROCESSORS_ONLN} && make install -j$(shell getconf _NPROCESSORS_ONLN)
 	rm -rf ${TMP}
 
 # boost 
@@ -97,5 +97,5 @@ boost: PREFIX=${BOOST_PREFIX}
 boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
 $(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(nproc) install
+	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(shell getconf _NPROCESSORS_ONLN) install
 	rm -rf ${TMP}
