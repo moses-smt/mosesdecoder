@@ -4,10 +4,13 @@
  *  Created on: 24 Oct 2015
  *      Author: hieu
  */
-
+#include <algorithm>
+#include <boost/foreach.hpp>
 #include "Stack.h"
 #include "Hypothesis.h"
 #include "../Scores.h"
+
+using namespace std;
 
 Stack::Stack() {
 	// TODO Auto-generated constructor stub
@@ -49,9 +52,21 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 	std::vector<const Hypothesis*> ret(m_hypos.begin(), m_hypos.end());
 
 	if (ret.size() > num) {
-		NTH_ELEMENT3(ret.begin(),
+
+		NTH_ELEMENT4(ret.begin(),
 				ret.begin() + num,
-				ret.end());
+				ret.end(),
+				HypothesisScoreOrderer());
+		/*
+		std::sort(ret.begin(),
+				ret.begin() + num,
+				HypothesisScoreOrderer());
+		cerr << "hypos:" << endl;
+		BOOST_FOREACH(const Hypothesis *hypo, ret) {
+			cerr << *hypo << endl;
+		}
+		*/
+
 		ret.resize(num);
 	}
 
