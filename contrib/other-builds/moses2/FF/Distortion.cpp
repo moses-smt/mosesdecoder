@@ -56,9 +56,9 @@ Moses::FFState* Distortion::BlankState(const Manager &mgr, const PhraseImpl &inp
   return new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional();
 }
 
-Moses::FFState* Distortion::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
+void Distortion::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const
 {
-	MemPool &pool = mgr.GetPool();
+    DistortionState_traditional &stateCast = static_cast<DistortionState_traditional&>(state);
 
 	  // fake previous translated phrase start and end
 	  size_t start = NOT_FOUND;
@@ -70,10 +70,9 @@ Moses::FFState* Distortion::EmptyHypothesisState(const Manager &mgr, const Phras
 	    end = input.m_frontSpanCoveredLength -1;
 	  }
 	  */
-	  return new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional(
-	           Moses::Range(start, end),
-	           NOT_FOUND);
 
+	    stateCast.range = Moses::Range(start, end);
+	    stateCast.first_gap = NOT_FOUND;
 }
 
 void

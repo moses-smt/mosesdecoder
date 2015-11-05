@@ -135,8 +135,8 @@ void Hypothesis::EmptyHypothesisState(const PhraseImpl &input)
 	const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions();
 	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 		  size_t statefulInd = sfff->GetStatefulInd();
-		  Moses::FFState *state = sfff->EmptyHypothesisState(m_mgr, input);
-		  m_ffStates[statefulInd] = state;
+		  Moses::FFState *state = m_ffStates[statefulInd];
+		  sfff->EmptyHypothesisState(*state, m_mgr, input);
 	  }
 }
 

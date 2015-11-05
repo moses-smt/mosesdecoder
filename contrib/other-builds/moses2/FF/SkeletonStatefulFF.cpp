@@ -10,23 +10,20 @@
 
 class SkeletonState : public Moses::FFState
 {
-  int m_targetLen;
 public:
+  int targetLen;
+
   SkeletonState()
   {
 	  // uninitialised
   }
 
-  SkeletonState(int targetLen)
-    :m_targetLen(targetLen) {
-  }
-
   virtual size_t hash() const {
-    return (size_t) m_targetLen;
+    return (size_t) targetLen;
   }
   virtual bool operator==(const Moses::FFState& o) const {
     const SkeletonState& other = static_cast<const SkeletonState&>(o);
-    return m_targetLen == other.m_targetLen;
+    return targetLen == other.targetLen;
   }
 
 };
@@ -48,10 +45,10 @@ Moses::FFState* SkeletonStatefulFF::BlankState(const Manager &mgr, const PhraseI
     return new (pool.Allocate<SkeletonState>()) SkeletonState();
 }
 
-Moses::FFState* SkeletonStatefulFF::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
+void SkeletonStatefulFF::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const
 {
-	MemPool &pool = mgr.GetPool();
-    return new (pool.Allocate<SkeletonState>()) SkeletonState(0);
+	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
+	stateCast.targetLen = 0;
 }
 
 void

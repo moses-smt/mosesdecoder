@@ -107,12 +107,10 @@ Moses::FFState* KENLM::BlankState(const Manager &mgr, const PhraseImpl &input) c
 }
 
 //! return the state associated with the empty hypothesis for a given sentence
-Moses::FFState* KENLM::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
+void KENLM::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const
 {
-  MemPool &pool = mgr.GetPool();
-  KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
-  ret->state = m_ngram->BeginSentenceState();
-  return ret;
+  KenLMState &stateCast = static_cast<KenLMState&>(state);
+  stateCast.state = m_ngram->BeginSentenceState();
 }
 
 void

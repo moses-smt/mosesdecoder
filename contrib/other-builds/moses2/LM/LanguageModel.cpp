@@ -25,14 +25,6 @@ struct LMState : public Moses::PointerState
 	  // uninitialised
   }
 
-  LMState(MemPool &pool, const Moses::Factor *eos)
-  :PointerState(NULL)
-  {
-	  numWords = 1;
-	  lastWords = (const Moses::Factor**) pool.Allocate(sizeof(const Moses::Factor*));
-	  lastWords[0] = eos;
-  }
-
   LMState(MemPool &pool, void *lms, const std::vector<const Moses::Factor*> &context)
   :PointerState(lms)
   {
@@ -41,6 +33,14 @@ struct LMState : public Moses::PointerState
 	  for (size_t i = 0; i < numWords; ++i) {
 		  lastWords[i] = context[i];
 	  }
+  }
+
+  void Init(MemPool &pool, const Moses::Factor *factor)
+  {
+	  lmstate = NULL;
+	  numWords = 1;
+	  lastWords = (const Moses::Factor**) pool.Allocate(sizeof(const Moses::Factor*));
+	  lastWords[0] = factor;
   }
 
   size_t numWords;
@@ -129,10 +129,12 @@ Moses::FFState* LanguageModel::BlankState(const Manager &mgr, const PhraseImpl &
 	return new (pool.Allocate<LMState>()) LMState();
 }
 
-Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
+void LanguageModel::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const
 {
+	LMState &stateCast = static_cast<LMState&>(state);
+
 	MemPool &pool = mgr.GetPool();
-	return new (pool.Allocate<LMState>()) LMState(pool, m_bos);
+	stateCast.Init(pool, m_bos);
 }
 
 void

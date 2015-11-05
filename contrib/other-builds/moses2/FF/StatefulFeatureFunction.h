@@ -28,7 +28,7 @@ public:
 	  virtual Moses::FFState* BlankState(const Manager &mgr, const PhraseImpl &input) const = 0;
 
 	  //! return the state associated with the empty hypothesis for a given sentence
-	  virtual Moses::FFState* EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const = 0;
+	  virtual void EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const = 0;
 
 	  virtual Moses::FFState* EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,

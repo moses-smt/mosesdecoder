@@ -51,7 +51,7 @@ public:
 	virtual void SetParameter(const std::string& key, const std::string& value);
 
     virtual Moses::FFState* BlankState(const Manager &mgr, const PhraseImpl &input) const;
-    virtual Moses::FFState* EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const;
+    virtual void EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const;
 
 	  virtual void
 	  EvaluateInIsolation(const System &system,
