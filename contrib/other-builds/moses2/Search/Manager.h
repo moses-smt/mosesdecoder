@@ -35,6 +35,9 @@ public:
 	Moses::Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
 
+	const PhraseImpl &GetInput() const
+	{ return *m_input; }
+
 	const InputPaths &GetInputPaths() const
 	{ return m_inputPaths; }
 

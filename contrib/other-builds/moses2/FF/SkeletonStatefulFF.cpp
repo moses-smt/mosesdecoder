@@ -36,7 +36,12 @@ SkeletonStatefulFF::~SkeletonStatefulFF() {
 	// TODO Auto-generated destructor stub
 }
 
-const Moses::FFState* SkeletonStatefulFF::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
+Moses::FFState* SkeletonStatefulFF::BlankState(const Manager &mgr, const PhraseImpl &input) const
+{
+
+}
+
+Moses::FFState* SkeletonStatefulFF::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
     return new SkeletonState(0);
 }

@@ -99,8 +99,13 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
   }
 }
 
+Moses::FFState* KENLM::BlankState(const Manager &mgr, const PhraseImpl &input) const
+{
+
+}
+
 //! return the state associated with the empty hypothesis for a given sentence
-const Moses::FFState* KENLM::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
+Moses::FFState* KENLM::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
   MemPool &pool = mgr.GetPool();
   KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();

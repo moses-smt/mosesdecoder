@@ -24,8 +24,11 @@ public:
 	size_t GetStatefulInd() const
 	{ return m_statefulInd; }
 
+	  //! return uninitialise state
+	  virtual Moses::FFState* BlankState(const Manager &mgr, const PhraseImpl &input) const = 0;
+
 	  //! return the state associated with the empty hypothesis for a given sentence
-	  virtual const Moses::FFState* EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const = 0;
+	  virtual Moses::FFState* EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const = 0;
 
 	  virtual Moses::FFState* EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,

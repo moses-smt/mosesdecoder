@@ -23,8 +23,10 @@ public:
 
   virtual void Load(System &system);
 
+  virtual Moses::FFState* BlankState(const Manager &mgr, const PhraseImpl &input) const;
+
   //! return the state associated with the empty hypothesis for a given sentence
-  virtual const Moses::FFState* EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const;
+  virtual Moses::FFState* EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const;
 
   virtual void
   EvaluateInIsolation(const System &system,

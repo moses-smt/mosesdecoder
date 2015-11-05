@@ -21,10 +21,18 @@ Hypothesis::Hypothesis(Manager &mgr)
 {
 	MemPool &pool = m_mgr.GetPool();
 
-	size_t numStatefulFFs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions().size();
-	m_ffStates = (const Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
-
 	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().featureFunctions.GetNumScores());
+
+	// FF states
+	const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions();
+	size_t numStatefulFFs = sfffs.size();
+	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
+
+    BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
+    	size_t statefulInd = sfff->GetStatefulInd();
+    	Moses::FFState *state = sfff->BlankState(mgr, mgr.GetInput());
+    	m_ffStates[statefulInd] = state;
+    }
 }
 
 Hypothesis::~Hypothesis() {
@@ -127,7 +135,7 @@ void Hypothesis::EmptyHypothesisState(const PhraseImpl &input)
 	const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions();
 	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 		  size_t statefulInd = sfff->GetStatefulInd();
-		  const Moses::FFState *state = sfff->EmptyHypothesisState(m_mgr, input);
+		  Moses::FFState *state = sfff->EmptyHypothesisState(m_mgr, input);
 		  m_ffStates[statefulInd] = state;
 	  }
 }
@@ -139,7 +147,7 @@ void Hypothesis::EvaluateWhenApplied()
 	  size_t statefulInd = sfff->GetStatefulInd();
 	  const Moses::FFState *prevState = m_prevHypo->GetState(statefulInd);
 	  assert(prevState);
-	  const Moses::FFState *state = sfff->EvaluateWhenApplied(m_mgr, *this, *prevState, *m_scores);
+	  Moses::FFState *state = sfff->EvaluateWhenApplied(m_mgr, *this, *prevState, *m_scores);
 	  m_ffStates[statefulInd] = state;
   }
 

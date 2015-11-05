@@ -84,7 +84,7 @@ protected:
   const Moses::Range *m_range;
   const Hypothesis *m_prevHypo;
 
-  const Moses::FFState **m_ffStates;
+  Moses::FFState **m_ffStates;
   Scores *m_scores;
   Moses::Range m_currTargetWordsRange;
 };

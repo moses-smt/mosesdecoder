@@ -117,7 +117,12 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
   }
 }
 
-const Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
+Moses::FFState* LanguageModel::BlankState(const Manager &mgr, const PhraseImpl &input) const
+{
+
+}
+
+Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
 	MemPool &pool = mgr.GetPool();
 	return new (pool.Allocate<LMState>()) LMState(pool, m_bos);

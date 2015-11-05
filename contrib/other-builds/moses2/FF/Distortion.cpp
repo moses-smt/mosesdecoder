@@ -41,7 +41,12 @@ Distortion::~Distortion() {
 	// TODO Auto-generated destructor stub
 }
 
-const Moses::FFState* Distortion::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
+Moses::FFState* Distortion::BlankState(const Manager &mgr, const PhraseImpl &input) const
+{
+
+}
+
+Moses::FFState* Distortion::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
 	MemPool &pool = mgr.GetPool();
 
