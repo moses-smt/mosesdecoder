@@ -20,9 +20,9 @@ Hypothesis::Hypothesis(Manager &mgr,
 		const Moses::Range &range,
 		const Moses::Bitmap &bitmap)
 :m_mgr(mgr)
-,m_targetPhrase(&tp)
-,m_sourceCompleted(&bitmap)
-,m_range(&range)
+,m_targetPhrase(tp)
+,m_sourceCompleted(bitmap)
+,m_range(range)
 ,m_prevHypo(NULL)
 ,m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 {
@@ -39,9 +39,9 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 		const Moses::Range &pathRange,
 		const Moses::Bitmap &bitmap)
 :m_mgr(prevHypo.m_mgr)
-,m_targetPhrase(&tp)
-,m_sourceCompleted(&bitmap)
-,m_range(&pathRange)
+,m_targetPhrase(tp)
+,m_sourceCompleted(bitmap)
+,m_range(pathRange)
 ,m_prevHypo(&prevHypo)
 ,m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
                          prevHypo.m_currTargetWordsRange.GetEndPos()
@@ -56,7 +56,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo,
 			Scores(pool,
 					m_mgr.GetSystem().featureFunctions.GetNumScores(),
 					prevHypo.GetScores());
-	m_scores->PlusEquals(m_mgr.GetSystem(), GetTargetPhrase().GetScores());
+	m_scores->PlusEquals(m_mgr.GetSystem(), m_targetPhrase.GetScores());
 }
 
 Hypothesis::~Hypothesis() {
@@ -107,8 +107,8 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 	  m_prevHypo->OutputToStream(out);
   }
 
-  if (GetTargetPhrase().GetSize()) {
-	  const Phrase &phrase = GetTargetPhrase();
+  if (m_targetPhrase.GetSize()) {
+	  const Phrase &phrase = m_targetPhrase;
 	  out << phrase << " ";
   }
 }
