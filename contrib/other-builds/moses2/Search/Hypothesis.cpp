@@ -15,6 +15,22 @@
 
 using namespace std;
 
+Hypothesis *Hypothesis::Create(Manager &mgr)
+{
+	Hypothesis *ret;
+
+	std::queue<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+	if (recycler.empty()) {
+		MemPool &pool = mgr.GetPool();
+		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(mgr);
+	}
+	else {
+		ret = recycler.front();
+		recycler.pop();
+	}
+	return ret;
+}
+
 Hypothesis::Hypothesis(Manager &mgr)
 :m_mgr(mgr)
 ,m_currTargetWordsRange()

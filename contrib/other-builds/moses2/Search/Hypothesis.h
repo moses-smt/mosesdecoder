@@ -22,8 +22,11 @@ class Scores;
 
 class Hypothesis {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
+
+	  Hypothesis(Manager &mgr);
+
 public:
-  Hypothesis(Manager &mgr);
+  static Hypothesis *Create(Manager &mgr);
   virtual ~Hypothesis();
 
   // initial, empty hypo

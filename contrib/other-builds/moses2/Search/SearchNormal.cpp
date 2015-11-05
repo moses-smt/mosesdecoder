@@ -92,7 +92,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 		const Moses::Range &pathRange,
 		const Moses::Bitmap &newBitmap)
 {
-	Hypothesis *newHypo = new (m_mgr.GetPool().Allocate<Hypothesis>()) Hypothesis(m_mgr);
+	Hypothesis *newHypo = Hypothesis::Create(m_mgr);
 	newHypo->Init(hypo, tp, pathRange, newBitmap);
 	newHypo->EvaluateWhenApplied();
 
