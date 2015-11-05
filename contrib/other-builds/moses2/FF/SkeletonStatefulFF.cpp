@@ -6,11 +6,17 @@
  */
 
 #include "SkeletonStatefulFF.h"
+#include "../Search/Manager.h"
 
 class SkeletonState : public Moses::FFState
 {
   int m_targetLen;
 public:
+  SkeletonState()
+  {
+	  // uninitialised
+  }
+
   SkeletonState(int targetLen)
     :m_targetLen(targetLen) {
   }
@@ -38,12 +44,14 @@ SkeletonStatefulFF::~SkeletonStatefulFF() {
 
 Moses::FFState* SkeletonStatefulFF::BlankState(const Manager &mgr, const PhraseImpl &input) const
 {
-
+	MemPool &pool = mgr.GetPool();
+    return new (pool.Allocate<SkeletonState>()) SkeletonState();
 }
 
 Moses::FFState* SkeletonStatefulFF::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
 {
-    return new SkeletonState(0);
+	MemPool &pool = mgr.GetPool();
+    return new (pool.Allocate<SkeletonState>()) SkeletonState(0);
 }
 
 void

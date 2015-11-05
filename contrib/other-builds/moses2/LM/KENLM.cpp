@@ -101,7 +101,9 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
 
 Moses::FFState* KENLM::BlankState(const Manager &mgr, const PhraseImpl &input) const
 {
-
+  MemPool &pool = mgr.GetPool();
+  KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
+  return ret;
 }
 
 //! return the state associated with the empty hypothesis for a given sentence

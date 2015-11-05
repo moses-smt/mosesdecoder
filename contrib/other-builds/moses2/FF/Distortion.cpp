@@ -16,7 +16,16 @@ using namespace std;
 struct DistortionState_traditional : public Moses::FFState {
   Moses::Range range;
   int first_gap;
-  DistortionState_traditional(const Moses::Range& wr, int fg) : range(wr), first_gap(fg) {}
+
+  DistortionState_traditional()
+  :range()
+  {
+	  // uninitialised
+  }
+
+  DistortionState_traditional(const Moses::Range& wr, int fg)
+  : range(wr), first_gap(fg)
+  {}
 
   size_t hash() const {
     return range.GetEndPos();
@@ -43,7 +52,8 @@ Distortion::~Distortion() {
 
 Moses::FFState* Distortion::BlankState(const Manager &mgr, const PhraseImpl &input) const
 {
-
+  MemPool &pool = mgr.GetPool();
+  return new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional();
 }
 
 Moses::FFState* Distortion::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const

@@ -19,6 +19,12 @@ using namespace std;
 
 struct LMState : public Moses::PointerState
 {
+  LMState()
+  :PointerState()
+  {
+	  // uninitialised
+  }
+
   LMState(MemPool &pool, const Moses::Factor *eos)
   :PointerState(NULL)
   {
@@ -119,7 +125,8 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
 
 Moses::FFState* LanguageModel::BlankState(const Manager &mgr, const PhraseImpl &input) const
 {
-
+	MemPool &pool = mgr.GetPool();
+	return new (pool.Allocate<LMState>()) LMState();
 }
 
 Moses::FFState* LanguageModel::EmptyHypothesisState(const Manager &mgr, const PhraseImpl &input) const
