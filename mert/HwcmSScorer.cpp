@@ -26,7 +26,7 @@ HwcmSScorer::HwcmSScorer(const string& config)
 	using Moses::TokenizeMultiCharSeparator;
 	m_currentRefId = -1;
 	m_includeRel = false;
-	m_order = 3;
+	m_order = 4;
 	m_totalRef.assign(m_order,0);
 
 
@@ -190,13 +190,20 @@ vector <map <string,int> > HwcmSScorer::MakeTuples(string sentence, string dep, 
 	for(map <int,pair<int,string> >::iterator it=dependencyTuples.begin();it!=dependencyTuples.end();it++){
 		map <int,pair<int,string> >::iterator itHistory = it;
 		string key = words[itHistory->first];
+		itChains = dependencyChains[0].insert(pair<string,int> (key,1));
+					if(itChains.second==false){
+						//tuple already seen -> increase count
+						itChains.first->second+=1;
+					}
+					totals[0]++;
+					//cout<<endl<<itChains.first->first<<" "<<itChains.first->second<<" ";
 		vector<string> depRel;
 		depRel.push_back(key);
 		depRel.push_back(words[itHistory->second.first]);
 		depRel.push_back(itHistory->second.second);
 		m_currentDepRel.push_back(depRel);
 		//m_currentDepRel.push_back(key+" "+words[itHistory->second.first]+" "+itHistory->second.second);
-		for(size_t i=0;i<order;i++){
+		for(size_t i=1;i<order;i++){
 			key += " " + words[itHistory->second.first];
 			if(m_includeRel)
 				key += " " +itHistory->second.second;
@@ -206,7 +213,7 @@ vector <map <string,int> > HwcmSScorer::MakeTuples(string sentence, string dep, 
 				itChains.first->second+=1;
 			}
 			totals[i]++;
-			//cout<<itChains.first->first<<" "<<itChains.first->second<<" ";
+			//cout<<endl<<itChains.first->first<<" "<<itChains.first->second<<" ";
 			itHistory=dependencyTuples.find(itHistory->second.first);
 			if(itHistory==dependencyTuples.end())
 				break;
@@ -220,6 +227,7 @@ vector <map <string,int> > HwcmSScorer::MakeTuples(string sentence, string dep, 
 
 void HwcmSScorer::prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry){
 	using Moses::TokenizeMultiCharSeparator;
+	//cout<<"BLAAA"<<endl;
   if (sid >= m_ref.size()) {
     stringstream msg;
     msg << "Sentence id (" << sid << ") not found in reference set";
@@ -232,7 +240,7 @@ void HwcmSScorer::prepareStats(std::size_t sid, const std::string& text, ScoreSt
   //this function eliminates ||| since it searches for factors separated by | ??
   //string sentence = this->preprocessSentence(text);
   vector<string> nbestEntry = TokenizeMultiCharSeparator(text,"|||");
-  if(nbestEntry.size()!=2){
+  if(nbestEntry.size()<2){
   	cerr<<"expecting sentence and extra Data -> dependency tuples\n";
   	exit(-1);
   }
