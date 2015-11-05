@@ -6,11 +6,11 @@
  */
 
 #pragma once
-#include <queue>
 #include <vector>
 #include "FF/FeatureFunctions.h"
 #include "Weights.h"
 #include "MemPool.h"
+#include "Recycler.h"
 #include "moses/FactorCollection.h"
 #include "moses/Parameter.h"
 
@@ -27,7 +27,7 @@ public:
 	MemPool &GetManagerPool() const
 	{ return m_managerPool; }
 
-	std::queue<Hypothesis*> &GetHypoRecycle() const
+	Recycler<Hypothesis*> &GetHypoRecycle() const
 	{ return m_hypoRecycle; }
 
     const Moses::Parameter &params;
@@ -42,7 +42,7 @@ public:
 protected:
 
   mutable MemPool m_managerPool;
-  mutable std::queue<Hypothesis*> m_hypoRecycle;
+  mutable Recycler<Hypothesis*> m_hypoRecycle;
 
   void LoadWeights();
   void LoadMappings();

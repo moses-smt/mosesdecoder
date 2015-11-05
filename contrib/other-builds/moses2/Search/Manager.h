@@ -14,6 +14,7 @@
 #include "../InputPaths.h"
 #include "../TargetPhrase.h"
 #include "../MemPool.h"
+#include "../Recycler.h"
 #include "Stack.h"
 #include "moses/Bitmaps.h"
 #include "moses/SquareMatrix.h"
@@ -30,7 +31,7 @@ public:
 	MemPool &GetPool() const
 	{ return *m_pool; }
 
-	std::queue<Hypothesis*> &GetHypoRecycle() const
+	Recycler<Hypothesis*> &GetHypoRecycle() const
 	{ return *m_hypoRecycle; }
 
 	const System &GetSystem() const
@@ -50,7 +51,7 @@ public:
 	void Decode();
 protected:
 	mutable MemPool *m_pool;
-    mutable std::queue<Hypothesis*> *m_hypoRecycle;
+    mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
 	const System &m_system;
 	PhraseImpl *m_input;

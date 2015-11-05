@@ -100,7 +100,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	Stack &stack = m_stacks[numWordsCovered];
 	StackAdd added = stack.Add(newHypo);
 
-	std::queue<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
+	Recycler<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
 
 	if (added.added) {
 		// we're winners!
