@@ -35,10 +35,7 @@ namespace Moses
     AllOptions() {}
     AllOptions(Parameter const& param);
 
-#ifdef HAVE_XMLRPC_C
     bool update(std::map<std::string,xmlrpc_c::value>const& param);
-#endif 
-
     bool NBestDistinct() const;
     
   };

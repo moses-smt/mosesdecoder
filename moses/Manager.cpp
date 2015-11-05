@@ -100,8 +100,8 @@ Manager::GetSource() const
 void Manager::Decode()
 {
 
-  std::cerr << options().nbest.nbest_size << " "
-            << options().nbest.enabled << " " << std::endl;
+  //std::cerr << options().nbest.nbest_size << " "
+  //          << options().nbest.enabled << " " << std::endl;
 
   // initialize statistics
   ResetSentenceStats(m_source);

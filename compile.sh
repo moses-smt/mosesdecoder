@@ -3,5 +3,5 @@
 # you can install all 3rd-party dependencies by running make -f contrib/Makefiles/install-dependencies.gmake
 
 set -e -o pipefail
-./bjam --with-irstlm=./opt --with-boost=./opt --with-cmph=./opt --with-xmlrpc-c=./opt -j$(nproc) $@
+./bjam --with-irstlm=./opt --with-boost=./opt --with-cmph=./opt --with-xmlrpc-c=./opt --with-mm --with-probing-pt -j$(getconf _NPROCESSORS_ONLN) $@
 

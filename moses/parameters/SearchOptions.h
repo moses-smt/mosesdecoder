@@ -43,10 +43,8 @@ namespace Moses
       return early_discarding_threshold != -std::numeric_limits<float>::infinity();
     }
 
-#ifdef HAVE_XMLRPC_C
     bool 
     update(std::map<std::string,xmlrpc_c::value>const& params);
-#endif
 
   };
 

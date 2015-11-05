@@ -68,10 +68,11 @@ namespace Moses {
 #ifdef HAVE_XMLRPC_C
   bool 
   ReportingOptions::
-  update(std::map<std::string,xmlrpc_c::value>const& param)
+  update(std::map<std::string, xmlrpc_c::value>const& param)
   {
     ReportAllFactors = check(param, "report-all-factors");
     return true;
   }
 #endif
+
 }

@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -566,11 +566,14 @@ size_t Hypothesis::hash() const
 {
   size_t seed;
 
-  // coverage
-  // NOTE from Hieu - we could make bitmap comparison here and in operator== compare the pointers since the bitmaps come from a factory.
-  // Same coverage is guaranteed to have the same bitmap. However, this make the decoding algorithm non-deterministic as the order
-  // of hypo extension can be different. This causes several regression tests to break. Since the speedup is minimal, I'm gonna leave
-  // it comparing the actual bitmaps
+  // coverage NOTE from Hieu - we could make bitmap comparison here
+  // and in operator== compare the pointers since the bitmaps come
+  // from a factory.  Same coverage is guaranteed to have the same
+  // bitmap. However, this make the decoding algorithm
+  // non-deterministic as the order of hypo extension can be
+  // different. This causes several regression tests to break. Since
+  // the speedup is minimal, I'm gonna leave it comparing the actual
+  // bitmaps
   seed = m_sourceCompleted.hash();
 
   // states
@@ -615,41 +618,6 @@ beats(Hypothesis const& b) const
   // results. We should compare other property of the hypos here.
   // On the other hand, how likely is this going to happen?
 }
-
-#ifdef HAVE_XMLRPC_C
-void
-Hypothesis::
-OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const
-{
-  using namespace std;
-  Range const& src = this->GetCurrSourceWordsRange();
-  Range const& trg = this->GetCurrTargetWordsRange();
-
-  WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
-  vector<pair<size_t,size_t> const* > a
-  = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments(waso);
-  typedef pair<size_t,size_t> item;
-  map<string, xmlrpc_c::value> M;
-  BOOST_FOREACH(item const* p, a) {
-    M["source-word"] = xmlrpc_c::value_int(src.GetStartPos() + p->first);
-    M["target-word"] = xmlrpc_c::value_int(trg.GetStartPos() + p->second);
-    dest.push_back(xmlrpc_c::value_struct(M));
-  }
-}
-
-void
-Hypothesis::
-OutputWordAlignment(vector<xmlrpc_c::value>& out) const
-{
-  vector<Hypothesis const*> tmp;
-  for (Hypothesis const* h = this; h; h = h->GetPrevHypo())
-    tmp.push_back(h);
-  for (size_t i = tmp.size(); i-- > 0;)
-    tmp[i]->OutputLocalWordAlignment(out);
-}
-
-#endif
-
 
 }
 

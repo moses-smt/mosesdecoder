@@ -1,8 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
-#ifdef HAVE_XMLRPC_C
-#include <xmlrpc-c/base.hpp>
-#endif
+#include "moses/xmlrpc-c.h"
 #include <string>
 #include <map>
 namespace Moses
@@ -12,10 +10,9 @@ namespace Moses
 #ifdef HAVE_XMLRPC_C
     virtual bool   
     update(std::map<std::string,xmlrpc_c::value>const& params);
-
+#endif
     bool 
     check(std::map<std::string, xmlrpc_c::value> const& param, 
           std::string const key);
-#endif
   };
 }

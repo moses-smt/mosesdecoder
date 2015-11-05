@@ -1,5 +1,4 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
-#ifdef HAVE_XMLRPC_C
 #include "PackScores.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
@@ -44,5 +43,3 @@ PackScores(ScoreComponentCollection const& S)
   return xmlrpc_c::value_struct(M);
 }
 }
-#endif
-
