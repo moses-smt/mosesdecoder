@@ -24,15 +24,16 @@ class Hypothesis {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
 public:
   Hypothesis(Manager &mgr);
-  Hypothesis(const Hypothesis &prevHypo,
-		  const TargetPhrase &tp,
-		  const Moses::Range &pathRange,
-		  const Moses::Bitmap &bitmap);
   virtual ~Hypothesis();
 
   // initial, empty hypo
   void Init(const TargetPhrase &tp,
   		const Moses::Range &range,
+  		const Moses::Bitmap &bitmap);
+
+  void Init(const Hypothesis &prevHypo,
+  		const TargetPhrase &tp,
+  		const Moses::Range &pathRange,
   		const Moses::Bitmap &bitmap);
 
   size_t hash() const;

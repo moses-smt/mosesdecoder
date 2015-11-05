@@ -27,33 +27,41 @@ Hypothesis::Hypothesis(Manager &mgr)
 	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().featureFunctions.GetNumScores());
 }
 
-Hypothesis::Hypothesis(const Hypothesis &prevHypo,
+Hypothesis::~Hypothesis() {
+	// TODO Auto-generated destructor stub
+}
+
+void Hypothesis::Init(const TargetPhrase &tp,
+		const Moses::Range &range,
+		const Moses::Bitmap &bitmap)
+{
+	m_targetPhrase = &tp;
+	m_sourceCompleted = &bitmap;
+	m_range = &range;
+	m_prevHypo = NULL;
+	m_currTargetWordsRange = Moses::Range(NOT_FOUND, NOT_FOUND);
+
+	size_t numScores = m_mgr.GetSystem().featureFunctions.GetNumScores();
+	m_scores->Reset(numScores);
+}
+
+void Hypothesis::Init(const Hypothesis &prevHypo,
 		const TargetPhrase &tp,
 		const Moses::Range &pathRange,
 		const Moses::Bitmap &bitmap)
-:m_mgr(prevHypo.m_mgr)
-,m_targetPhrase(&tp)
-,m_sourceCompleted(&bitmap)
-,m_range(&pathRange)
-,m_prevHypo(&prevHypo)
-,m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
-                         prevHypo.m_currTargetWordsRange.GetEndPos()
-                         + tp.GetSize())
-
 {
-	MemPool &pool = m_mgr.GetPool();
-	size_t numStatefulFFs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions().size();
-	m_ffStates = (const Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
+	m_targetPhrase = &tp;
+	m_sourceCompleted = &bitmap;
+	m_range = &pathRange;
+	m_prevHypo = &prevHypo;
+	m_currTargetWordsRange = Moses::Range(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
+	                         prevHypo.m_currTargetWordsRange.GetEndPos()
+	                         + tp.GetSize());
 
-	m_scores = new (pool.Allocate<Scores>())
-			Scores(pool,
-					m_mgr.GetSystem().featureFunctions.GetNumScores(),
-					prevHypo.GetScores());
+	size_t numScores = m_mgr.GetSystem().featureFunctions.GetNumScores();
+	m_scores->Reset(numScores);
+	m_scores->PlusEquals(m_mgr.GetSystem(), prevHypo.GetScores());
 	m_scores->PlusEquals(m_mgr.GetSystem(), GetTargetPhrase().GetScores());
-}
-
-Hypothesis::~Hypothesis() {
-	// TODO Auto-generated destructor stub
 }
 
 size_t Hypothesis::hash() const
@@ -72,20 +80,6 @@ size_t Hypothesis::hash() const
   }
   return seed;
 
-}
-
-void Hypothesis::Init(const TargetPhrase &tp,
-		const Moses::Range &range,
-		const Moses::Bitmap &bitmap)
-{
-	m_targetPhrase = &tp;
-	m_sourceCompleted = &bitmap;
-	m_range = &range;
-	m_prevHypo = NULL;
-	m_currTargetWordsRange = Moses::Range(NOT_FOUND, NOT_FOUND);
-
-	size_t numScores = m_mgr.GetSystem().featureFunctions.GetNumScores();
-	m_scores->Reset(numScores);
 }
 
 bool Hypothesis::operator==(const Hypothesis &other) const

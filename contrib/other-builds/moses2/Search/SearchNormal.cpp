@@ -92,7 +92,8 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 		const Moses::Range &pathRange,
 		const Moses::Bitmap &newBitmap)
 {
-	Hypothesis *newHypo = new (m_mgr.GetPool().Allocate<Hypothesis>()) Hypothesis(hypo, tp, pathRange, newBitmap);
+	Hypothesis *newHypo = new (m_mgr.GetPool().Allocate<Hypothesis>()) Hypothesis(m_mgr);
+	newHypo->Init(hypo, tp, pathRange, newBitmap);
 	newHypo->EvaluateWhenApplied();
 
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
