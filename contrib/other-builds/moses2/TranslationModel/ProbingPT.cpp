@@ -32,7 +32,7 @@ void ProbingPT::Load(System &system)
 
   m_unkId = 456456546456;
 
-  Moses::FactorCollection &vocab = system.GetVocab();
+  Moses::FactorCollection &vocab = system.vocab;
 
   // source vocab
   const std::map<uint64_t, std::string> &sourceVocab = m_engine->getSourceVocab();
@@ -168,7 +168,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
 //  */
 
   // score of all other ff when this rule is being loaded
-  const FeatureFunctions &ffs = system.GetFeatureFunctions();
+  const FeatureFunctions &ffs = system.featureFunctions;
   ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
   return tp;
 

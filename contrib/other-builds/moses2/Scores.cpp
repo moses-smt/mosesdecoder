@@ -50,7 +50,7 @@ void Scores::PlusEquals(const System &system,
 {
 	assert(featureFunction.GetNumScores() == 1);
 
-	const Weights &weights = system.GetWeights();
+	const Weights &weights = system.weights;
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 	m_scores[ffStartInd] += score;
@@ -66,7 +66,7 @@ void Scores::PlusEquals(const System &system,
 {
 	assert(scores.size() == featureFunction.GetNumScores());
 
-	const Weights &weights = system.GetWeights();
+	const Weights &weights = system.weights;
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 	for (size_t i = 0; i < scores.size(); ++i) {
@@ -81,7 +81,7 @@ void Scores::PlusEquals(const System &system,
 
 void Scores::PlusEquals(const System &system, const Scores &other)
 {
-	size_t numScores = system.GetFeatureFunctions().GetNumScores();
+	size_t numScores = system.featureFunctions.GetNumScores();
 	for (size_t i = 0; i < numScores; ++i) {
 		m_scores[i] += other.m_scores[i];
 	}
@@ -95,7 +95,7 @@ void Scores::Assign(const System &system,
 {
 	assert(featureFunction.GetNumScores() == 1);
 
-	const Weights &weights = system.GetWeights();
+	const Weights &weights = system.weights;
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 
@@ -113,7 +113,7 @@ void Scores::Assign(const System &system,
 {
 	assert(scores.size() == featureFunction.GetNumScores());
 
-	const Weights &weights = system.GetWeights();
+	const Weights &weights = system.weights;
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 	for (size_t i = 0; i < scores.size(); ++i) {

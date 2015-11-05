@@ -15,15 +15,16 @@
 
 using namespace std;
 
-System::System(const Moses::Parameter &params)
-:m_featureFunctions(*this)
-,m_params(params)
+System::System(const Moses::Parameter &paramsArg)
+:params(paramsArg)
+,featureFunctions(*this)
+
 {
     params.SetParameter(stackSize, "stack", Moses::DEFAULT_MAX_HYPOSTACK_SIZE);
 
-	m_featureFunctions.Create();
+	featureFunctions.Create();
 	LoadWeights();
-	m_featureFunctions.Load();
+	featureFunctions.Load();
 	LoadMappings();
 }
 
@@ -32,32 +33,32 @@ System::~System() {
 
 void System::LoadWeights()
 {
-  const Moses::PARAM_VEC *params = m_params.GetParam("weight");
-  UTIL_THROW_IF2(params == NULL, "Must have [weight] section");
+  const Moses::PARAM_VEC *vec = params.GetParam("weight");
+  UTIL_THROW_IF2(vec == NULL, "Must have [weight] section");
 
-  m_weights.Init(m_featureFunctions);
-  BOOST_FOREACH(const std::string &line, *params) {
-	  m_weights.CreateFromString(m_featureFunctions, line);
+  weights.Init(featureFunctions);
+  BOOST_FOREACH(const std::string &line, *vec) {
+	  weights.CreateFromString(featureFunctions, line);
   }
 }
 
 void System::LoadMappings()
 {
-  const Moses::PARAM_VEC *params = m_params.GetParam("mapping");
-  UTIL_THROW_IF2(params == NULL, "Must have [mapping] section");
+  const Moses::PARAM_VEC *vec = params.GetParam("mapping");
+  UTIL_THROW_IF2(vec == NULL, "Must have [mapping] section");
 
-  BOOST_FOREACH(const std::string &line, *params) {
+  BOOST_FOREACH(const std::string &line, *vec) {
 	  vector<string> toks = Moses::Tokenize(line);
 	  assert(toks.size() == 2);
 	  assert(toks[0] == "T");
 	  size_t ptInd = Moses::Scan<size_t>(toks[1]);
-	  const PhraseTable *pt = m_featureFunctions.GetPhraseTablesExcludeUnknownWordPenalty(ptInd);
-	  m_mappings.push_back(pt);
+	  const PhraseTable *pt = featureFunctions.GetPhraseTablesExcludeUnknownWordPenalty(ptInd);
+	  mappings.push_back(pt);
   }
 
   // unk pt
-  const UnknownWordPenalty &unkWP = dynamic_cast<const UnknownWordPenalty&>(m_featureFunctions.FindFeatureFunction("UnknownWordPenalty0"));
-  m_mappings.push_back(&unkWP);
+  const UnknownWordPenalty &unkWP = dynamic_cast<const UnknownWordPenalty&>(featureFunctions.FindFeatureFunction("UnknownWordPenalty0"));
+  mappings.push_back(&unkWP);
 
 }
 

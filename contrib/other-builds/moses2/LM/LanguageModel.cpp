@@ -55,7 +55,7 @@ LanguageModel::~LanguageModel() {
 
 void LanguageModel::Load(System &system)
 {
-  Moses::FactorCollection &fc = system.GetVocab();
+  Moses::FactorCollection &fc = system.vocab;
 
   m_bos = fc.AddFactor("<s>", false);
   m_eos = fc.AddFactor("</s>", false);

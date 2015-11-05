@@ -82,7 +82,7 @@ PhraseTableMemory::~PhraseTableMemory() {
 
 void PhraseTableMemory::Load(System &system)
 {
-	Moses::FactorCollection &vocab = system.GetVocab();
+	Moses::FactorCollection &vocab = system.vocab;
 
 	MemPool tmpPool;
 	vector<string> toks;
@@ -96,13 +96,13 @@ void PhraseTableMemory::Load(System &system)
 
 		PhraseImpl *source = PhraseImpl::CreateFromString(tmpPool, vocab, toks[0]);
 		//cerr << "created soure" << endl;
-		TargetPhrase *target = TargetPhrase::CreateFromString(system.GetSystemPool(), system, toks[1]);
+		TargetPhrase *target = TargetPhrase::CreateFromString(system.systemPool, system, toks[1]);
 		//cerr << "created target" << endl;
 		target->GetScores().CreateFromString(toks[2], *this, system, true);
 		//cerr << "created scores" << endl;
 
 		MemPool tmpPool;
-		system.GetFeatureFunctions().EvaluateInIsolation(tmpPool, system, *source, *target);
+		system.featureFunctions.EvaluateInIsolation(tmpPool, system, *source, *target);
 		m_root.AddRule(*source, target);
 	}
 }

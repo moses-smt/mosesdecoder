@@ -16,7 +16,7 @@ using namespace std;
 
 TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system, const std::string &str)
 {
-	Moses::FactorCollection &vocab = system.GetVocab();
+	Moses::FactorCollection &vocab = system.vocab;
 
 	vector<string> toks = Moses::Tokenize(str);
 	size_t size = toks.size();
@@ -29,7 +29,7 @@ TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system
 TargetPhrase::TargetPhrase(MemPool &pool, const System &system, size_t size)
 :PhraseImpl(pool, size)
 {
-	m_scores = new (pool.Allocate<Scores>()) Scores(pool, system.GetFeatureFunctions().GetNumScores());
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, system.featureFunctions.GetNumScores());
 }
 
 TargetPhrase::~TargetPhrase() {

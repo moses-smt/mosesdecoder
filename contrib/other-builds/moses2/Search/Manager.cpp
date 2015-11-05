@@ -23,12 +23,12 @@ Manager::Manager(System &system, const std::string &inputStr)
 ,m_initRange(NOT_FOUND, NOT_FOUND)
 ,m_initPhrase(system.GetManagerPool(), system, 0)
 {
-	Moses::FactorCollection &vocab = system.GetVocab();
+	Moses::FactorCollection &vocab = system.vocab;
 
 	m_input = PhraseImpl::CreateFromString(GetPool(), vocab, inputStr);
 	m_inputPaths.Init(*m_input, system);
 
-	const std::vector<const PhraseTable*> &pts = system.GetMapping();
+	const std::vector<const PhraseTable*> &pts = system.mappings;
 	for (size_t i = 0; i < pts.size(); ++i) {
 		const PhraseTable &pt = *pts[i];
 		//cerr << "Looking up from " << pt.GetName() << endl;

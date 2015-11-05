@@ -14,7 +14,7 @@ using namespace std;
 
 void InputPaths::Init(const PhraseImpl &input, const System &system)
 {
-  size_t numPt = system.GetMapping().size();
+  size_t numPt = system.mappings.size();
   size_t size = input.GetSize();
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
 	for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {

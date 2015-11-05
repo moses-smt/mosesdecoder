@@ -67,7 +67,7 @@ KENLM::~KENLM()
 
 void KENLM::Load(System &system)
 {
-  Moses::FactorCollection &fc = system.GetVocab();
+  Moses::FactorCollection &fc = system.vocab;
 
   m_bos = fc.AddFactor("<s>", false);
   m_eos = fc.AddFactor("</s>", false);
@@ -75,7 +75,7 @@ void KENLM::Load(System &system)
   lm::ngram::Config config;
   config.messages = NULL;
 
-  Moses::FactorCollection &collection = system.GetVocab();
+  Moses::FactorCollection &collection = system.vocab;
   MappingBuilder builder(collection, m_lmIdLookup);
   config.enumerate_vocab = &builder;
   //config.load_method = lazy ? util::LAZY : util::POPULATE_OR_READ;

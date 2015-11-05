@@ -52,7 +52,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 	TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
 	Word &word = (*target)[0];
 
-	//Moses::FactorCollection &fc = system.GetVocab();
+	//Moses::FactorCollection &fc = system.vocab;
 	//const Moses::Factor *factor = fc.AddFactor("SSS", false);
 	word[0] = factor;
 
@@ -60,7 +60,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 	scores.PlusEquals(mgr.GetSystem(), *this, -100);
 
 	MemPool &memPool = mgr.GetPool();
-	system.GetFeatureFunctions().EvaluateInIsolation(memPool, system, source, *target);
+	system.featureFunctions.EvaluateInIsolation(memPool, system, source, *target);
 
 	tps->AddTargetPhrase(*target);
 	ret.reset(tps);

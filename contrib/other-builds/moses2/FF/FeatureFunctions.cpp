@@ -38,7 +38,7 @@ FeatureFunctions::~FeatureFunctions() {
 
 void FeatureFunctions::Create()
 {
-  const Moses::Parameter &params = m_system.GetParameter();
+  const Moses::Parameter &params = m_system.params;
 
   const Moses::PARAM_VEC *ffParams = params.GetParam("feature");
   UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
@@ -157,7 +157,7 @@ void
 FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 		  const Phrase &source, TargetPhrase &targetPhrase) const
 {
-  size_t numScores = system.GetFeatureFunctions().GetNumScores();
+  size_t numScores = system.featureFunctions.GetNumScores();
   Scores *estimatedScores = new (pool.Allocate<Scores>()) Scores(pool, numScores);
 
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
