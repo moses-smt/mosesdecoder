@@ -29,7 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace irstlm;
 
 #include "IRST.h"
-#include "moses/LM/PointerState.h"
+#include "SingleFactor.h"
+#include "moses/FF/FFState.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/FactorCollection.h"
@@ -42,8 +43,45 @@ using namespace std;
 
 namespace Moses
 {
+typedef unsigned int  ngram_state_t; //type for pointing to a full ngram in the table; must be equal to that define in IRSTLM toolkit
 
-class IRSTLMState : public PointerState
+class IRSTLMState : public FFState
+{
+  // Allow LanguageModelIRST to access the private members of this class
+  friend class LanguageModelIRST;
+  friend ostream& operator<<(ostream& out, const IRSTLMState& obj);
+
+ public:
+  size_t hash() const
+  {
+    boost::hash<size_t> hasher;
+    return hasher(state);
+  }
+
+  bool operator==(const FFState& o) const
+  {
+    const IRSTLMState &other = static_cast<const IRSTLMState &>(o);
+    return (state == other.state);
+  }
+
+  IRSTLMState():state(0) {}
+
+  IRSTLMState(ngram_state_t st):state(st) {}  
+
+ private:
+  ngram_state_t state;
+};
+
+// friend
+ostream& operator<<(ostream& out, const IRSTLMState& obj)
+{
+  out << " obj.state:|" << obj.state << "|";
+  return out;
+}
+
+
+/*
+ * class IRSTLMState : public PointerState
 {
 public:
   IRSTLMState():PointerState(NULL)  {}
@@ -59,11 +97,13 @@ public:
     return lmstate;
   }
 };
+*/
 
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor(line)
-  ,m_lmtb_dub(0), m_lmtb_size(0)
+  ,m_lmtb_dub(IRSTLM_DUB_DEFAULT), m_lmtb_size(0)
 {
+//  ,m_lmtb_dub(0), m_lmtb_size(0)
 /*
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
@@ -74,9 +114,9 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
 
   ReadParameters();
 
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" << m_filePath << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" << m_factorType << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" << m_filePath << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" << m_factorType << "|" << std::endl);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -102,12 +142,17 @@ void LanguageModelIRST::Load()
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_lmtb = m_lmtb->CreateLanguageModel(m_filePath);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() type:|" << m_lmtb->getLanguageModelType() << "|" << std::endl);
+
   if (m_lmtb_size > 0) m_lmtb->setMaxLoadedLevel(m_lmtb_size);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
+
   m_lmtb->load(m_filePath);
   d=m_lmtb->getDict();
   d->incflag(1);
 
   m_nGramOrder = m_lmtb_size = m_lmtb->maxlevel();
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
 
   // LM can be ok, just outputs warnings
   // Mauro: in the original, the following two instructions are wrongly switched:
@@ -116,13 +161,14 @@ void LanguageModelIRST::Load()
 
   CreateFactors(factorCollection);
 
-  VERBOSE(1, GetScoreProducerDescription() << "  LanguageModelIRST::Load() m_unknownId=" << m_unknownId << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() m_unknownId=" << m_unknownId << std::endl);
 
   //install caches to save time (only if PS_CACHE_ENABLE is defined through compilation flags)
   m_lmtb->init_caches(m_lmtb_size>2?m_lmtb_size-1:2);
 
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() m_lmtb_dub:" << m_lmtb_dub << "|" << std::endl);
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() oovpenalty:" << m_lmtb->getlogOOVpenalty() << "|" << std::endl);
   d->incflag(0);
 }
 
@@ -184,32 +230,13 @@ int LanguageModelIRST::GetLmID( const Word &word ) const
 
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
-VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version B" << std::endl;);
-  //there is no possibility to extend the original dictionary associated to this LM
   size_t factorId = factor->GetId();
-int c;  
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
-    c=m_unknownId;
-//    return m_unknownId;
-  } else {
-    c=m_lmIdLookup[factorId];
-//    return m_lmIdLookup[factorId];
+    return m_unknownId;
+  }else {
+    return m_lmIdLookup[factorId];
   }
-VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version B: s:|" << factor->GetString().as_string() << "| code:|" << c << "|" << std::endl);
-  return c;
 }
-
-/*
-int LanguageModelIRST::GetLmID( const Factor *factor ) const
-{
-VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version C" << std::endl;);
-  //there is no possibility to extend the original dictionary associated to this LM
-  std::string s = factor->GetString().as_string();
-int c=d->encode(s.c_str());
-VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version C: word:|" << s << "| code:|" << c << "|" << std::endl;);
-  return d->encode(s.c_str());
-}
-*/
 
 /*
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
@@ -277,15 +304,16 @@ VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version 
 
 const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/) const
 {
+  VERBOSE(2,"const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/)"<< std::endl);
   std::auto_ptr<IRSTLMState> ret(new IRSTLMState());
 
   return ret.release();
 }
 
-/*
+
 void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
-VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...)"<< std::endl);
+VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) phrase:|"<< phrase << "|" << std::endl);
   fullScore = 0;
   ngramScore = 0;
   oovCount = 0;
@@ -301,11 +329,14 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...)"<< std::
   int position = 0;
 
   char* msp = NULL;
+  ngram_state_t  msidx = 0;
   float before_boundary = 0.0;
   for (; position < _min; ++position) {
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
-    before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
+//    before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
+    before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msidx,&msp);
+
     ++idx;
   }
 
@@ -318,20 +349,21 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...)"<< std::
     }
     codes[idx-1] = GetLmID(phrase.GetWord(position));
     if (codes[idx-1] == m_unknownId) ++oovCount;
-    ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+//    ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+    ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msidx,&msp);
   }
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
   fullScore = ngramScore + before_boundary;
 }
-*/
 
-/*
+
 FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
 VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...)"<< std::endl);
   if (!hypo.GetCurrTargetLength()) {
-    std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
+//    std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
+    std::auto_ptr<IRSTLMState> ret(new IRSTLMState(*((IRSTLMState*)ps)));
     return ret.release();
   }
 
@@ -356,8 +388,11 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
     --idx;
   }
 
+
   char* msp = NULL;
-  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+  ngram_state_t msidx = 0;
+//  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
 
   position = (const int) begin+1;
   while (position < adjust_end) {
@@ -365,7 +400,9 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx-1] = codes[idx];
     }
     codes[idx-1] =  GetLmID(hypo.GetWord(position));
-    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+//    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+
     ++position;
   }
 
@@ -385,7 +422,8 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
-    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+//    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
   } else {
     // need to set the LM state
 
@@ -395,22 +433,39 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
         codes[idx] =  GetLmID(hypo.GetWord(position));
       }
       codes[idx] = m_lmtb_sentenceStart;
-      msp = (char *) m_lmtb->cmaxsuffptr(codes,m_lmtb_size);
+//      msp = (char *) m_lmtb->cmaxsuffptr(codes,m_lmtb_size);
+//      msidx = m_lmtb->cmaxsuffptr(codes,m_lmtb_size);
+      m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+      for (int i=0; i<m_lmtb_size; ++i){ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...) i:|" << i << " code:|" << codes[i] << "| word[i]:|" << m_lmtb->getDict()->decode(codes[i]) << "|" << std::endl); }
+      VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...) score:|unused| msp:|" << (void*) msp << "|  msidx:|" << msidx << "|" << std::endl);
+
     }
   }
 
   score = TransformLMScore(score);
   out->PlusEquals(this, score);
 
-  std::auto_ptr<IRSTLMState> ret(new IRSTLMState(msp));
+//  std::auto_ptr<IRSTLMState> ret(new IRSTLMState(msp));
+  std::auto_ptr<IRSTLMState> ret(new IRSTLMState(msidx));
 
   return ret.release();
 }
-*/
 
 LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
+{ //dummy version
+  VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState)"<< std::endl);
+  if (finalState) *finalState=NULL;
+  LMResult result;
+  result.unknown = 0.0;
+  result.score = 0.0;
+  
+  return result;
+}
+
+/*
+LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
-VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...)"<< std::endl);
+VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState)"<< std::endl);
   // set up context
   size_t count = contextFactor.size();
   if (count < 0) {
@@ -436,15 +491,28 @@ VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &conte
   result.unknown = (codes[idx - 1] == m_unknownId);
 
   char* msp = NULL;
-  result.score = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+  ngram_state_t msidx = 0;
+//  result.score = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+  result.score = m_lmtb->clprob(codes,idx,NULL,NULL,&msidx,&msp);
+  VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...) msp:|" << (void*) msp << "|" << std::endl);
+  VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...) msidx:|" << msidx << "|" << std::endl);
+
+  if (finalState){
+    ((IRSTLMState*) finalState)->state = msidx;
+    VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...) TT2 finalState:|" << (void*) finalState << "|" << std::endl);
+    VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...) TT2 *finalState:|" << *((IRSTLMState*) finalState) << "|" << std::endl);
+    VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...) TT2 ((IRSTLMState*) finalState)->state:|" << ((IRSTLMState*) finalState)->state <<
+ "|" << std::endl);
+  }
+
+//ORIGINAL:  if (finalState) *finalState=(State *) msp;
+
 VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...) untransformed result.score:|" << result.score << "|" << std::endl);
-
-  if (finalState) *finalState=(State *) msp;
-
   result.score = TransformLMScore(result.score);
 VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, ...)   transformed result.score:|" << result.score << "|" << std::endl);
   return result;
 }
+*/
 
 bool LMCacheCleanup(const int sentences_done, const size_t m_lmcache_cleanup_threshold)
 {
@@ -484,6 +552,7 @@ void LanguageModelIRST::SetParameter(const std::string& key, const std::string& 
   } else {
     LanguageModelSingleFactor::SetParameter(key, value);
   }
+  //m_nGramOrder   is set though LanguageModelImplementation::SetParameter   using "order" attribute 
   m_lmtb_size = m_nGramOrder;
 }
 
