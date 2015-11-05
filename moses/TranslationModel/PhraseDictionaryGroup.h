@@ -58,9 +58,7 @@ public:
     const Phrase& src) const;
   TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionLEGACY(
     const ttasksptr& ttask, const Phrase& src) const;
-  void InitializeForInput(ttasksptr const& ttask) {
-    /* Don't do anything source specific here as this object is shared between threads.*/
-  }
+  void InitializeForInput(ttasksptr const& ttask);
   ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&,
       const ChartCellCollectionBase&, std::size_t);
   void SetParameter(const std::string& key, const std::string& value);

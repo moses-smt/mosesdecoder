@@ -87,6 +87,11 @@ void PhraseDictionaryGroup::Load()
   }
 }
 
+void PhraseDictionaryGroup::InitializeForInput(const ttasksptr& ttask)
+{
+  // Member models are registered as FFs and should already be initialized
+}
+
 void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
   const ttasksptr& ttask, const InputPathList& inputPathQueue) const
 {
@@ -129,7 +134,9 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
 {
   // Aggregation of phrases and the scores that will be applied to them
   vector<TargetPhrase*> allPhrases;
-  unordered_map<const TargetPhrase*, vector<float>, UnorderedComparer<Phrase>, UnorderedComparer<Phrase> > allScores;
+  // Maps phrase from member model to <phrase copy, scores>
+  typedef unordered_map<const TargetPhrase*, pair<TargetPhrase*, vector<float> >, UnorderedComparer<Phrase>, UnorderedComparer<Phrase> > PhraseMap;
+  PhraseMap allScores;
 
   // For each model
   size_t offset = 0;
@@ -147,7 +154,8 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
         // Phrase not in collection -> add if unrestricted or first model
-        if (allScores.find(targetPhrase) == allScores.end()) {
+        PhraseMap::iterator iter = allScores.find(targetPhrase);
+        if (iter == allScores.end()) {
           if (m_restrict && i > 0) {
             continue;
           }
@@ -164,9 +172,15 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           phrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
           // Add phrase entry
           allPhrases.push_back(phrase);
-          allScores[targetPhrase] = vector<float>(m_zeros);
+          allScores[targetPhrase] = make_pair(phrase, vector<float>(m_zeros));
+        } else {
+          // For existing phrases: merge extra scores (such as lr-func scores for mmsapt)
+          TargetPhrase* phrase = iter->second.first;
+          BOOST_FOREACH(const TargetPhrase::ScoreCache_t::value_type pair, targetPhrase->GetExtraScores()) {
+            phrase->SetExtraScores(pair.first, pair.second);
+          }
         }
-        vector<float>& scores = allScores.find(targetPhrase)->second;
+        vector<float>& scores = allScores.find(targetPhrase)->second.second;
 
         // Copy scores from this model
         for (size_t j = 0; j < pd.GetNumScoreComponents(); ++j) {
@@ -181,7 +195,7 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
   TargetPhraseCollection::shared_ptr ret(new TargetPhraseCollection);
   const vector<FeatureFunction*> pd_feature_const(m_pdFeature);
   BOOST_FOREACH(TargetPhrase* phrase, allPhrases) {
-    phrase->GetScoreBreakdown().Assign(this, allScores.find(phrase)->second);
+    phrase->GetScoreBreakdown().Assign(this, allScores.find(phrase)->second.second);
     // Correct future cost estimates and total score
     phrase->EvaluateInIsolation(src, pd_feature_const);
     ret->Add(phrase);
