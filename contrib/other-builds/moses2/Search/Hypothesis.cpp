@@ -15,6 +15,17 @@
 
 using namespace std;
 
+Hypothesis::Hypothesis(Manager &mgr)
+:m_mgr(mgr)
+{
+	MemPool &pool = m_mgr.GetPool();
+
+	size_t numStatefulFFs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions().size();
+	m_ffStates = (const Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
+
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().featureFunctions.GetNumScores());
+}
+
 Hypothesis::Hypothesis(Manager &mgr,
 		const TargetPhrase &tp,
 		const Moses::Range &range,
