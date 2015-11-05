@@ -8,7 +8,7 @@
 #ifndef RECYCLER_H_
 #define RECYCLER_H_
 
-#include <queue>
+#include <stack>
 
 template<typename T>
 class Recycler {
@@ -24,7 +24,7 @@ public:
 	{ return m_coll.empty(); }
 
 	T &front()
-	{ return m_coll.front(); }
+	{ return m_coll.top(); }
 
 	void pop()
 	{ m_coll.pop(); }
@@ -33,7 +33,7 @@ public:
 	{ m_coll.push(obj); }
 
 protected:
-	std::queue<T> m_coll;
+	std::stack<T> m_coll;
 };
 
 #endif /* RECYCLER_H_ */
