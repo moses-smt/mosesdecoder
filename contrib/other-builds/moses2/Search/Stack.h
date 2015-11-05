@@ -15,10 +15,10 @@ class StackAdd
 {
 public:
 	bool added;
-	const Hypothesis *other;
+	Hypothesis *other;
 
 	StackAdd(bool vadded,
-			const Hypothesis *vother)
+			Hypothesis *vother)
 	:added(vadded)
 	,other(vother)
 	{

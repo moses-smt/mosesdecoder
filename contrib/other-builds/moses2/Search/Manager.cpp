@@ -19,6 +19,7 @@ using namespace std;
 
 Manager::Manager(System &system, const std::string &inputStr)
 :m_pool(&system.GetManagerPool())
+,m_hypoRecycle(&system.GetHypoRecycle())
 ,m_system(system)
 ,m_initRange(NOT_FOUND, NOT_FOUND)
 ,m_initPhrase(system.GetManagerPool(), system, 0)

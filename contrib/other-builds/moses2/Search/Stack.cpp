@@ -38,11 +38,11 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 		  std::pair<iterator, bool> addRet = m_hypos.insert(hypo);
 		  assert(addRet.second);
 
-		  return StackAdd(true, hypoExisting);
+		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
-		  return StackAdd(false, hypoExisting);
+		  return StackAdd(false, const_cast<Hypothesis*>(hypoExisting));
 	  }
   }
 }

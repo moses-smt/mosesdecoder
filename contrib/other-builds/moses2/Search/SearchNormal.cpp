@@ -98,9 +98,25 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
 	Stack &stack = m_stacks[numWordsCovered];
-	StackAdd stackAdded = stack.Add(newHypo);
+	StackAdd added = stack.Add(newHypo);
 
-	m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
+	std::queue<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
+
+	if (added.added) {
+		// we're winners!
+		if (added.other) {
+			// there was a existing losing hypo
+			hypoRecycle.push(added.other);
+		}
+	}
+	else {
+		// we're losers!
+		// there should be a winner, we're not doing beam pruning
+		UTIL_THROW_IF2(added.other == NULL, "There must have been a winning hypo");
+		hypoRecycle.push(newHypo);
+	}
+
+	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 }
 
 void SearchNormal::DebugStacks() const

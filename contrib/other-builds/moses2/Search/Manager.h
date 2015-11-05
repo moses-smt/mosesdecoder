@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <queue>
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -29,6 +30,9 @@ public:
 	MemPool &GetPool() const
 	{ return *m_pool; }
 
+	std::queue<Hypothesis*> &GetHypoRecycle() const
+	{ return *m_hypoRecycle; }
+
 	const System &GetSystem() const
 	{ return m_system; }
 
@@ -46,6 +50,7 @@ public:
 	void Decode();
 protected:
 	mutable MemPool *m_pool;
+    mutable std::queue<Hypothesis*> *m_hypoRecycle;
 
 	const System &m_system;
 	PhraseImpl *m_input;

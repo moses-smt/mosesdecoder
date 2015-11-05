@@ -31,7 +31,7 @@ public:
 protected:
 	Manager &m_mgr;
 	std::vector<Stack> &m_stacks;
-	ArcLists m_arcLists;
+	//ArcLists m_arcLists;
 	size_t m_stackSize;
 
 
