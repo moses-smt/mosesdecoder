@@ -37,10 +37,10 @@ public:
   bool operator==(const Hypothesis &other) const;
 
   inline const Moses::Bitmap &GetBitmap() const
-  { return m_sourceCompleted; }
+  { return *m_sourceCompleted; }
 
   inline const Moses::Range &GetRange() const
-  { return m_range; }
+  { return *m_range; }
 
   inline const Moses::Range &GetCurrTargetWordsRange() const {
     return m_currTargetWordsRange;
@@ -50,7 +50,7 @@ public:
   { return *m_scores; }
 
   const TargetPhrase &GetTargetPhrase() const
-  { return m_targetPhrase; }
+  { return *m_targetPhrase; }
 
   const Moses::FFState *GetState(size_t ind) const
   { return m_ffStates[ind]; }
@@ -68,7 +68,7 @@ public:
    * (ie, start of sentence would be some negative number, which is
    * not allowed- USE WITH CAUTION) */
   inline const Word &GetCurrWord(size_t pos) const {
-    return m_targetPhrase[pos];
+    return GetTargetPhrase()[pos];
   }
 
   /** recursive - pos is relative from start of sentence */
@@ -76,9 +76,9 @@ public:
 
 protected:
   Manager &m_mgr;
-  const TargetPhrase &m_targetPhrase;
-  const Moses::Bitmap &m_sourceCompleted;
-  const Moses::Range &m_range;
+  const TargetPhrase *m_targetPhrase;
+  const Moses::Bitmap *m_sourceCompleted;
+  const Moses::Range *m_range;
   const Hypothesis *m_prevHypo;
 
   const Moses::FFState **m_ffStates;
