@@ -23,9 +23,11 @@ struct DistortionState_traditional : public Moses::FFState {
 	  // uninitialised
   }
 
-  DistortionState_traditional(const Moses::Range& wr, int fg)
-  : range(wr), first_gap(fg)
-  {}
+  void Set(const Moses::Range& wr, int fg)
+  {
+	 range = wr;
+	 first_gap = fg;
+  }
 
   size_t hash() const {
     return range.GetEndPos();
@@ -83,10 +85,11 @@ Distortion::EvaluateInIsolation(const System &system,
 {
 }
 
-Moses::FFState* Distortion::EvaluateWhenApplied(const Manager &mgr,
+void Distortion::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const Moses::FFState &prevState,
-  Scores &scores) const
+  Scores &scores,
+  Moses::FFState &state) const
 {
 	MemPool &pool = mgr.GetPool();
 
@@ -99,11 +102,8 @@ Moses::FFState* Distortion::EvaluateWhenApplied(const Manager &mgr,
 
 	scores.PlusEquals(mgr.GetSystem(), *this, distortionScore);
 
-	DistortionState_traditional* res = new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional(
-	    hypo.GetRange(),
-	    hypo.GetBitmap().GetFirstGapPos());
-	  return res;
-
+    DistortionState_traditional &stateCast = static_cast<DistortionState_traditional&>(state);
+    stateCast.Set(hypo.GetRange(), hypo.GetBitmap().GetFirstGapPos());
 }
 
 SCORE Distortion::CalculateDistortionScore(const Moses::Range &prev, const Moses::Range &curr, const int FirstGap) const

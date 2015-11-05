@@ -30,10 +30,11 @@ public:
 	  //! return the state associated with the empty hypothesis for a given sentence
 	  virtual void EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const = 0;
 
-	  virtual Moses::FFState* EvaluateWhenApplied(const Manager &mgr,
+	  virtual void EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,
 	    const Moses::FFState &prevState,
-	    Scores &scores) const = 0;
+	    Scores &scores,
+		Moses::FFState &state) const = 0;
 
 protected:
 	  size_t m_statefulInd;

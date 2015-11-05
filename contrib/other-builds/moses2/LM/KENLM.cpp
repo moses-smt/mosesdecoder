@@ -144,21 +144,22 @@ KENLM::EvaluateInIsolation(const System &system,
   }
 }
 
-Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
+void KENLM::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const Moses::FFState &prevState,
-  Scores &scores) const
+  Scores &scores,
+  Moses::FFState &state) const
 {
+  KenLMState &stateCast = static_cast<KenLMState&>(state);
+
   const System &system = mgr.GetSystem();
   MemPool &pool = mgr.GetPool();
 
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
 
-  KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
-
   if (!hypo.GetTargetPhrase().GetSize()) {
-	ret->state = in_state;
-	return ret;
+    stateCast.state = in_state;
+	return;
   }
 
   const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
@@ -168,7 +169,7 @@ Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
 
   std::size_t position = begin;
   typename Model::State aux_state;
-  typename Model::State *state0 = &ret->state, *state1 = &aux_state;
+  typename Model::State *state0 = &stateCast.state, *state1 = &aux_state;
 
   float score = m_ngram->Score(in_state, TranslateID(hypo.GetWord(position)), *state0);
   ++position;
@@ -181,15 +182,15 @@ Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
 	// Score end of sentence.
 	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
 	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
-	score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), ret->state).prob;
+	score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), stateCast.state).prob;
   } else if (adjust_end < end) {
 	// Get state after adding a long phrase.
 	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
 	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
-	m_ngram->GetState(&indices.front(), last, ret->state);
-  } else if (state0 != &ret->state) {
+	m_ngram->GetState(&indices.front(), last, stateCast.state);
+  } else if (state0 != &stateCast.state) {
 	// Short enough phrase that we can just reuse the state.
-	ret->state = *state0;
+	  stateCast.state = *state0;
   }
 
   score = Moses::TransformLMScore(score);
@@ -203,8 +204,6 @@ Moses::FFState* KENLM::EvaluateWhenApplied(const Manager &mgr,
   } else {
 	scores.PlusEquals(system, *this, score);
   }
-
-  return ret;
 }
 
 void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const

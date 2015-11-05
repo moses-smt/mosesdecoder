@@ -34,10 +34,11 @@ public:
 		  Scores &scores,
 		  Scores *estimatedScores) const;
 
-  virtual Moses::FFState* EvaluateWhenApplied(const Manager &mgr,
+  virtual void EvaluateWhenApplied(const Manager &mgr,
 	const Hypothesis &hypo,
 	const Moses::FFState &prevState,
-	Scores &scores) const;
+	Scores &scores,
+	Moses::FFState &state) const;
 
   void SetParameter(const std::string& key, const std::string& value);
 

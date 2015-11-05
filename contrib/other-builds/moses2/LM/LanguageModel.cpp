@@ -25,9 +25,10 @@ struct LMState : public Moses::PointerState
 	  // uninitialised
   }
 
-  LMState(MemPool &pool, void *lms, const std::vector<const Moses::Factor*> &context)
-  :PointerState(lms)
+  void Set(MemPool &pool, void *lms, const std::vector<const Moses::Factor*> &context)
   {
+	  lmstate = lms;
+
 	  numWords = context.size();
 	  lastWords = (const Moses::Factor**) pool.Allocate(sizeof(const Moses::Factor*) * numWords);
 	  for (size_t i = 0; i < numWords; ++i) {
@@ -173,10 +174,11 @@ LanguageModel::EvaluateInIsolation(const System &system,
 	}
 }
 
-Moses::FFState* LanguageModel::EvaluateWhenApplied(const Manager &mgr,
+void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const Moses::FFState &prevState,
-  Scores &scores) const
+  Scores &scores,
+  Moses::FFState &state) const
 {
 	const LMState &prevLMState = static_cast<const LMState &>(prevState);
 	size_t numWords = prevLMState.numWords;
@@ -220,8 +222,9 @@ Moses::FFState* LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 	// return state
 	//DebugContext(context);
 
+	LMState &stateCast = static_cast<LMState&>(state);
 	MemPool &pool = mgr.GetPool();
-	return new (pool.Allocate<LMState>()) LMState(pool, fromScoring.second, context);
+	stateCast.Set(pool, fromScoring.second, context);
 }
 
 void LanguageModel::ShiftOrPush(std::vector<const Moses::Factor*> &context, const Moses::Factor *factor) const

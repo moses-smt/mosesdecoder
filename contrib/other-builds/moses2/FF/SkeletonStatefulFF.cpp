@@ -59,10 +59,12 @@ SkeletonStatefulFF::EvaluateInIsolation(const System &system,
 {
 }
 
-Moses::FFState* SkeletonStatefulFF::EvaluateWhenApplied(const Manager &mgr,
+void SkeletonStatefulFF::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const Moses::FFState &prevState,
-  Scores &scores) const
+  Scores &scores,
+  Moses::FFState &state) const
 {
-
+	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
+	stateCast.targetLen = hypo.GetTargetPhrase().GetSize();
 }

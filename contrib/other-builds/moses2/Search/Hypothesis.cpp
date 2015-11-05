@@ -146,9 +146,9 @@ void Hypothesis::EvaluateWhenApplied()
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 	  size_t statefulInd = sfff->GetStatefulInd();
 	  const Moses::FFState *prevState = m_prevHypo->GetState(statefulInd);
+	  Moses::FFState *thisState = m_ffStates[statefulInd];
 	  assert(prevState);
-	  Moses::FFState *state = sfff->EvaluateWhenApplied(m_mgr, *this, *prevState, *m_scores);
-	  m_ffStates[statefulInd] = state;
+	  sfff->EvaluateWhenApplied(m_mgr, *this, *prevState, *m_scores, *thisState);
   }
 
   //cerr << *this << endl;
