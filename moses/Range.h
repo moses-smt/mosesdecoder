@@ -45,7 +45,7 @@ class Range
   // m_endPos is inclusive
   size_t m_startPos, m_endPos;
 public:
-  inline Range() {}
+  inline explicit Range() {}
   inline Range(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
   inline Range(const Range &copy)
     : m_startPos(copy.GetStartPos())
