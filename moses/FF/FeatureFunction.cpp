@@ -57,9 +57,7 @@ FeatureFunction(const std::string& line, bool registerNow)
   if (registerNow) Register();
 }
 
-FeatureFunction::
-FeatureFunction(size_t numScoreComponents,
-                const std::string& line)
+FeatureFunction::FeatureFunction(size_t numScoreComponents, const std::string& line, bool registerNow)
   : m_tuneable(true)
   , m_requireSortingAfterSourceContext(false)
   , m_verbosity(std::numeric_limits<std::size_t>::max())
@@ -68,7 +66,7 @@ FeatureFunction(size_t numScoreComponents,
 {
   m_numTuneableComponents = m_numScoreComponents;
   ParseLine(line);
-  Register();
+  if (registerNow) Register();
 }
 
 void

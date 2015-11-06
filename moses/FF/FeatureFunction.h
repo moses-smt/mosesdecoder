@@ -62,8 +62,8 @@ public:
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 
-  FeatureFunction(const std::string &line, bool initializeNow);
-  FeatureFunction(size_t numScoreComponents, const std::string &line);
+  FeatureFunction(const std::string &line, bool registerNow);
+  FeatureFunction(size_t numScoreComponents, const std::string &line, bool registerNow = true);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
 
