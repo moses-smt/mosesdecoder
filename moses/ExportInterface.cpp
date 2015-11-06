@@ -324,6 +324,8 @@ int decoder_main(int argc, char** argv)
       exit(0);
     }
 
+    cerr << "g_numHypos=" << Moses::g_numHypos << endl;
+
     if (params.GetParam("server"))
       return run_as_server();
     else
@@ -336,8 +338,5 @@ int decoder_main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 #endif
-
-  cerr << "g_numHypos=" << Moses::g_numHypos << endl;
-
 }
 
