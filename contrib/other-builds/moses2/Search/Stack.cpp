@@ -49,28 +49,21 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 
 std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 {
-	std::vector<const Hypothesis*> ret(m_hypos.begin(), m_hypos.end());
+  std::vector<const Hypothesis*> ret(m_hypos.begin(), m_hypos.end());
 
-	if (ret.size() > num) {
+  std::vector<const Hypothesis*>::iterator iterMiddle;
+  iterMiddle = (num == 0 || ret.size() < num)
+			   ? ret.end()
+			   : ret.begin()+num;
 
-		NTH_ELEMENT4(ret.begin(),
-				ret.begin() + num,
-				ret.end(),
-				HypothesisScoreOrderer());
-		/*
-		std::sort(ret.begin(),
-				ret.begin() + num,
-				HypothesisScoreOrderer());
-		cerr << "hypos:" << endl;
-		BOOST_FOREACH(const Hypothesis *hypo, ret) {
-			cerr << *hypo << endl;
-		}
-		*/
+  std::partial_sort(ret.begin(), iterMiddle, ret.end(),
+		  HypothesisScoreOrderer());
 
-		ret.resize(num);
-	}
+  if (num && ret.size() > num) {
+	  ret.resize(num);
+  }
 
-    return ret;
+  return ret;
 }
 
 std::vector<const Hypothesis*> Stack::GetSortedHypos() const
