@@ -20,8 +20,9 @@ void InputPaths::Init(const PhraseImpl &input, const System &system)
 {
   size_t numPt = system.mappings.size();
   size_t size = input.GetSize();
-  for (size_t phaseSize = 1; phaseSize <= min(size, system.maxPhraseLength) ; ++phaseSize) {
-  //for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
+  size_t maxLength = min(size, system.maxPhraseLength);
+
+  for (size_t phaseSize = 1; phaseSize <= maxLength; ++phaseSize) {
 	for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
 	  size_t endPos = startPos + phaseSize -1;
 
