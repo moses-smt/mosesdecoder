@@ -32,6 +32,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../..&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../cmph/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../xmlrpc-c/include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.53427549" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="PT_UG"/>
