@@ -46,12 +46,14 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 			const SubPhrase &phrase = path.GetSubPhrase();
 			TargetPhrases::shared_const_ptr tps = Lookup(mgr, path);
 
+			/*
 			cerr << "path=" << path.GetRange() << " ";
 			cerr << "tps=" << tps << " ";
 			if (tps.get()) {
 				cerr << tps.get()->GetSize();
 			}
 			cerr << endl;
+			*/
 
 			path.AddTargetPhrases(*this, tps);
 	  }

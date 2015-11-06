@@ -47,6 +47,8 @@ protected:
 			const Moses::Range &pathRange,
 			const Moses::Bitmap &newBitmap);
 
+	int ComputeDistortionDistance(const Moses::Range& prev, const Moses::Range& current) const;
+
 };
 
 #endif /* SEARCHNORMAL_H_ */

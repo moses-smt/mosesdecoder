@@ -39,13 +39,14 @@ int main(int argc, char** argv)
 
 		const Hypothesis *bestHypo = mgr.GetBestHypothesis();
 		if (bestHypo) {
-			cerr << *bestHypo << endl;
 			bestHypo->OutputToStream(cout);
+			cerr << *bestHypo;
 		}
 		else {
-			cout << "NO TRANSLATION";
+			cerr << "NO TRANSLATION";
 		}
 		cout << endl;
+		cerr << endl;
 	}
 
 	if (inStream != cin) {
