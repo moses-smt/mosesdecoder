@@ -65,7 +65,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 	}
 
 	int distortion = abs((int)pathRange.GetStartPos() - (int)hypoRange.GetEndPos() - 1);
-	if (distortion > 5) {
+	if (distortion > m_mgr.GetSystem().maxDistortion) {
 		return;
 	}
 

@@ -39,6 +39,7 @@ public:
     MemPool systemPool;
 
     size_t stackSize;
+    int maxDistortion;
 protected:
 
   mutable MemPool m_managerPool;
