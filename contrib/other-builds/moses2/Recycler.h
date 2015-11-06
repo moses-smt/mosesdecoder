@@ -8,7 +8,7 @@
 #ifndef RECYCLER_H_
 #define RECYCLER_H_
 
-#include <stack>
+#include <vector>
 
 template<typename T>
 class Recycler {
@@ -24,16 +24,22 @@ public:
 	{ return m_coll.empty(); }
 
 	T &front()
-	{ return m_coll.top(); }
+	{ return m_coll.back(); }
 
 	void pop()
-	{ m_coll.pop(); }
+	{
+		if (m_coll.size()) {
+			m_coll.resize(m_coll.size() - 1);
+		}
+	}
 
 	void push(T &obj)
-	{ m_coll.push(obj); }
+	{ m_coll.push_back(obj); }
 
+	void clear()
+	{ m_coll.clear(); }
 protected:
-	std::stack<T> m_coll;
+	std::vector<T> m_coll;
 };
 
 #endif /* RECYCLER_H_ */

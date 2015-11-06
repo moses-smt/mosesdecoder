@@ -51,6 +51,7 @@ Manager::~Manager() {
 	delete m_futureScore;
 
 	GetPool().Reset();
+	GetHypoRecycle().clear();
 }
 
 const Hypothesis *Manager::GetBestHypothesis() const
