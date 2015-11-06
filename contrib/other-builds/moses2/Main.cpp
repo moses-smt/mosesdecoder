@@ -7,6 +7,8 @@
 
 using namespace std;
 
+extern size_t g_numHypos;
+
 istream &GetInputStream(Moses::Parameter &params)
 {
 	const Moses::PARAM_VEC *vec = params.GetParam("input-file");
@@ -50,5 +52,6 @@ int main(int argc, char** argv)
 		delete &inStream;
 	}
 
+	cerr << "g_numHypos=" << g_numHypos << endl;
 	cerr << "Finished" << endl;
 }

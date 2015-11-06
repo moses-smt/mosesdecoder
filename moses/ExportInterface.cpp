@@ -66,6 +66,8 @@ using namespace Moses;
 
 namespace Moses
 {
+extern size_t g_numHypos;
+
 void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
 {
   outputSearchGraphStream.setf(std::ios::fixed);
@@ -334,5 +336,8 @@ int decoder_main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 #endif
+
+  cerr << "g_numHypos=" << Moses::g_numHypos << endl;
+
 }
 
