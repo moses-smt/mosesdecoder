@@ -26,7 +26,7 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
 		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(mgr);
 	}
 	else {
-		ret = recycler.front();
+		ret = recycler.get();
 		recycler.pop();
 	}
 	return ret;

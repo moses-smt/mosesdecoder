@@ -24,7 +24,7 @@ public:
 	bool empty() const
 	{ return m_coll.empty(); }
 
-	T &front()
+	T &get()
 	{ return m_coll.back(); }
 
 	void pop()

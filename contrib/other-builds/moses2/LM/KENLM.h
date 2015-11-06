@@ -45,6 +45,7 @@ public:
 protected:
   std::string m_path;
   Moses::FactorType m_factorType;
+  bool m_lazy;
   const Moses::Factor *m_bos;
   const Moses::Factor *m_eos;
 

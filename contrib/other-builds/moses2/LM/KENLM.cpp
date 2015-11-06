@@ -56,6 +56,7 @@ private:
 /////////////////////////////////////////////////////////////////
 KENLM::KENLM(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
+,m_lazy(false)
 {
 	ReadParameters();
 }
@@ -78,7 +79,7 @@ void KENLM::Load(System &system)
   Moses::FactorCollection &collection = system.vocab;
   MappingBuilder builder(collection, m_lmIdLookup);
   config.enumerate_vocab = &builder;
-  //config.load_method = lazy ? util::LAZY : util::POPULATE_OR_READ;
+  config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 
   m_ngram.reset(new Model(m_path.c_str(), config));
 }
@@ -90,6 +91,9 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
   }
   else if (key == "factor") {
 	  m_factorType = Moses::Scan<Moses::FactorType>(value);
+  }
+  else if (key == "lazyken") {
+	  m_lazy = Moses::Scan<bool>(value);
   }
   else if (key == "order") {
 	  // don't need to store it
@@ -153,7 +157,6 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   KenLMState &stateCast = static_cast<KenLMState&>(state);
 
   const System &system = mgr.GetSystem();
-  MemPool &pool = mgr.GetPool();
 
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
 
