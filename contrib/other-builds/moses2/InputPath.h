@@ -18,25 +18,19 @@ class PhraseTable;
 class InputPath {
 	  friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
-	InputPath(const SubPhrase &subPhrase, const Moses::Range &range, size_t numPt);
+	const InputPath *prefixPath;
+	SubPhrase subPhrase;
+	Moses::Range range;
+	std::vector<TargetPhrases::shared_const_ptr> targetPhrases;
+
+	InputPath(const SubPhrase &subPhrase, const Moses::Range &range, size_t numPt, const InputPath *prefixPath);
 	virtual ~InputPath();
-
-	const SubPhrase &GetSubPhrase() const
-	{ return m_subPhrase; }
-
-	const Moses::Range &GetRange() const
-	{ return m_range; }
-
-	const std::vector<TargetPhrases::shared_const_ptr> &GetTargetPhrases() const
-	{ return m_targetPhrases; }
 
 	void AddTargetPhrases(const PhraseTable &pt, TargetPhrases::shared_const_ptr tps);
 
 	bool IsUsed() const;
+
 protected:
-	SubPhrase m_subPhrase;
-	Moses::Range m_range;
-	std::vector<TargetPhrases::shared_const_ptr> m_targetPhrases;
 };
 
 #endif /* INPUTPATH_H_ */

@@ -90,7 +90,7 @@ uint64_t ProbingPT::GetSourceProbingId(const Moses::Factor *factor) const
 
 TargetPhrases::shared_const_ptr ProbingPT::Lookup(const Manager &mgr, InputPath &inputPath) const
 {
-	const Phrase &sourcePhrase = inputPath.GetSubPhrase();
+	const Phrase &sourcePhrase = inputPath.subPhrase;
 	TargetPhrases::shared_const_ptr ret = CreateTargetPhrase(mgr.GetPool(), mgr.GetSystem(), sourcePhrase);
 	return ret;
 }

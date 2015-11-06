@@ -58,7 +58,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 {
 	const Moses::Bitmap &bitmap = hypo.GetBitmap();
 	const Moses::Range &hypoRange = hypo.GetRange();
-	const Moses::Range &pathRange = path.GetRange();
+	const Moses::Range &pathRange = path.range;
 
   const size_t hypoFirstGapPos = bitmap.GetFirstGapPos();
 
@@ -133,7 +133,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
     // extend this hypo
 	const Moses::Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
 
-	const std::vector<TargetPhrases::shared_const_ptr> &tpsAllPt = path.GetTargetPhrases();
+	const std::vector<TargetPhrases::shared_const_ptr> &tpsAllPt = path.targetPhrases;
 
 	for (size_t i = 0; i < tpsAllPt.size(); ++i) {
 		const TargetPhrases *tps = tpsAllPt[i].get();

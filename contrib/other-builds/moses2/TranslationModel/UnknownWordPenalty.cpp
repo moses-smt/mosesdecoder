@@ -24,14 +24,14 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 {
 	TargetPhrases::shared_const_ptr ret;
 
-	size_t numWords = inputPath.GetRange().GetNumWordsCovered();
+	size_t numWords = inputPath.range.GetNumWordsCovered();
 	if (numWords > 1) {
 		// only create 1 word phrases
 		return ret;
 	}
 
 	// any other pt translate this?
-	const std::vector<TargetPhrases::shared_const_ptr> &allTPS = inputPath.GetTargetPhrases();
+	const std::vector<TargetPhrases::shared_const_ptr> &allTPS = inputPath.targetPhrases;
 	for (size_t i = 0; i < allTPS.size(); ++i) {
 		const TargetPhrases::shared_const_ptr &tps = allTPS[i];
 
@@ -40,7 +40,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 		}
 	}
 
-	const SubPhrase &source = inputPath.GetSubPhrase();
+	const SubPhrase &source = inputPath.subPhrase;
 	const Word &sourceWord = source[0];
 	const Moses::Factor *factor = sourceWord[0];
 

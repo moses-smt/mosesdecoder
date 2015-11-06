@@ -8,10 +8,14 @@
 #include "InputPath.h"
 #include "TranslationModel/PhraseTable.h"
 
-InputPath::InputPath(const SubPhrase &subPhrase, const Moses::Range &range, size_t numPt)
-:m_subPhrase(subPhrase)
-,m_range(range)
-,m_targetPhrases(numPt)
+InputPath::InputPath(const SubPhrase &subPhrase,
+		const Moses::Range &range,
+		size_t numPt,
+		const InputPath *prefixPath)
+:subPhrase(subPhrase)
+,range(range)
+,targetPhrases(numPt)
+,prefixPath(prefixPath)
 {
 
 }
@@ -23,12 +27,12 @@ InputPath::~InputPath() {
 void InputPath::AddTargetPhrases(const PhraseTable &pt, TargetPhrases::shared_const_ptr tps)
 {
 	size_t ptInd = pt.GetPtInd();
-	m_targetPhrases[ptInd] = tps;
+	targetPhrases[ptInd] = tps;
 }
 
 bool InputPath::IsUsed() const
 {
-  BOOST_FOREACH(const TargetPhrases::shared_const_ptr &sharedPtr, m_targetPhrases) {
+  BOOST_FOREACH(const TargetPhrases::shared_const_ptr &sharedPtr, targetPhrases) {
 	  const TargetPhrases *tps = sharedPtr.get();
 	  if (tps && tps->GetSize()) {
 		  return false;
@@ -39,6 +43,6 @@ bool InputPath::IsUsed() const
 
 std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 {
-	out << obj.m_range << " " << obj.m_subPhrase;
+	out << obj.range << " " << obj.subPhrase;
 	return out;
 }

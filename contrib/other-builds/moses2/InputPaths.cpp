@@ -22,15 +22,23 @@ void InputPaths::Init(const PhraseImpl &input, const System &system)
   size_t size = input.GetSize();
   size_t maxLength = min(size, system.maxPhraseLength);
 
-  for (size_t phaseSize = 1; phaseSize <= maxLength; ++phaseSize) {
-	for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
-	  size_t endPos = startPos + phaseSize -1;
+  for (size_t startPos = 0; startPos < size; ++startPos) {
+	const InputPath *prefixPath = NULL;
+
+    for (size_t phaseSize = 1; phaseSize <= maxLength; ++phaseSize) {
+	  size_t endPos = startPos + phaseSize - 1;
+
+	  if (endPos >= size) {
+		  break;
+	  }
 
 	  SubPhrase subPhrase = input.GetSubPhrase(startPos, endPos);
 	  Moses::Range range(startPos, endPos);
 
-	  InputPath path(subPhrase, range, numPt);
+	  InputPath path(subPhrase, range, numPt, prefixPath);
 	  m_inputPaths.push_back(path);
+
+	  prefixPath = &m_inputPaths.back();
 	}
   }
 
