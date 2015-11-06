@@ -38,7 +38,11 @@ void SearchNormal::Decode(size_t stackInd)
   BOOST_FOREACH(const Hypothesis *hypo, hypos) {
 		Extend(*hypo);
   }
-  DebugStacks();
+
+  //DebugStacks();
+
+  // delete stack to save mem
+  m_stacks.Delete(stackInd);
 }
 
 void SearchNormal::Extend(const Hypothesis &hypo)

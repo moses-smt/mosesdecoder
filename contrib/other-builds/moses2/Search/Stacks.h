@@ -22,14 +22,17 @@ public:
 	{ return m_stacks.size(); }
 
     Stack &Back()
-    { return m_stacks.back(); }
+    { return *m_stacks.back(); }
 
     Stack &operator[](size_t ind)
-    { return m_stacks[ind]; }
+    { return *m_stacks[ind]; }
 
-
+    void Delete(size_t ind) {
+    	delete m_stacks[ind];
+    	m_stacks[ind] = NULL;
+    }
 protected:
-	std::vector<Stack> m_stacks;
+	std::vector<Stack*> m_stacks;
 };
 
 #endif /* SEARCH_STACKS_H_ */
