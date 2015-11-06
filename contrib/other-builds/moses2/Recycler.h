@@ -15,8 +15,9 @@ class Recycler {
 public:
 	Recycler()
 	{
-
+		m_coll.reserve(10000);
 	}
+
 	virtual ~Recycler()
 	{}
 
