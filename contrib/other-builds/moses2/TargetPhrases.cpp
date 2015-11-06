@@ -42,5 +42,5 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
 	  m_coll.resize(tableLimit);
   }
 
-  cerr << "TargetPhrases=" << GetSize() << endl;
+  //cerr << "TargetPhrases=" << GetSize() << endl;
 }

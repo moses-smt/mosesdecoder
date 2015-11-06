@@ -9,6 +9,7 @@
 #define STACK_H_
 #include <boost/unordered_set.hpp>
 #include "Hypothesis.h"
+#include "../Recycler.h"
 #include "moses/Util.h"
 
 class StackAdd
@@ -49,8 +50,8 @@ public:
 
 	StackAdd Add(const Hypothesis *hypo);
 
+	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const;
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
-	std::vector<const Hypothesis*> GetSortedHypos() const;
 
 protected:
 };

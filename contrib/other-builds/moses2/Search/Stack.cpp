@@ -47,6 +47,19 @@ StackAdd Stack::Add(const Hypothesis *hypo)
   }
 }
 
+std::vector<const Hypothesis*> Stack::GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const
+{
+  std::vector<const Hypothesis*> ret = GetBestHypos(num);
+  if (num && ret.size() > num) {
+	  for (size_t i = num; i < ret.size(); ++i) {
+		  Hypothesis *hypo = const_cast<Hypothesis*>(ret[i]);
+		  recycler.push(hypo);
+	  }
+	  ret.resize(num);
+  }
+  return ret;
+}
+
 std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 {
   std::vector<const Hypothesis*> ret(m_hypos.begin(), m_hypos.end());
@@ -59,16 +72,5 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
   std::partial_sort(ret.begin(), iterMiddle, ret.end(),
 		  HypothesisScoreOrderer());
 
-  if (num && ret.size() > num) {
-	  ret.resize(num);
-  }
-
   return ret;
-}
-
-std::vector<const Hypothesis*> Stack::GetSortedHypos() const
-{
-	std::vector<const Hypothesis*> ret(m_hypos.begin(), m_hypos.end());
-	std::sort(ret.begin(), ret.end(), HypothesisScoreOrderer());
-	return ret;
 }

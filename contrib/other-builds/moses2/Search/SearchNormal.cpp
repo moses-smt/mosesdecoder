@@ -34,7 +34,7 @@ void SearchNormal::Decode(size_t stackInd)
 {
   Stack &stack = m_stacks[stackInd];
 
-  std::vector<const Hypothesis*> hypos = stack.GetBestHypos(m_stackSize);
+  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_stackSize, m_mgr.GetHypoRecycle());
   BOOST_FOREACH(const Hypothesis *hypo, hypos) {
 		Extend(*hypo);
   }
@@ -130,7 +130,7 @@ void SearchNormal::DebugStacks() const
 const Hypothesis *SearchNormal::GetBestHypothesis() const
 {
 	const Stack &lastStack = m_stacks.back();
-	std::vector<const Hypothesis*> sortedHypos = lastStack.GetSortedHypos();
+	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
 
 	const Hypothesis *best = NULL;
 	if (sortedHypos.size()) {
