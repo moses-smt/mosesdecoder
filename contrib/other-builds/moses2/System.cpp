@@ -22,6 +22,8 @@ System::System(const Moses::Parameter &paramsArg)
 {
     params.SetParameter(stackSize, "stack", Moses::DEFAULT_MAX_HYPOSTACK_SIZE);
     params.SetParameter(maxDistortion, "distortion-limit", -1);
+    params.SetParameter(maxPhraseLength, "max-phrase-length",
+    		Moses::DEFAULT_MAX_PHRASE_LENGTH);
 
 	featureFunctions.Create();
 	LoadWeights();

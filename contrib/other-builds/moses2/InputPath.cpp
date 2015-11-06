@@ -4,7 +4,7 @@
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
-
+#include <boost/foreach.hpp>
 #include "InputPath.h"
 #include "TranslationModel/PhraseTable.h"
 
@@ -24,6 +24,17 @@ void InputPath::AddTargetPhrases(const PhraseTable &pt, TargetPhrases::shared_co
 {
 	size_t ptInd = pt.GetPtInd();
 	m_targetPhrases[ptInd] = tps;
+}
+
+bool InputPath::IsUsed() const
+{
+  BOOST_FOREACH(const TargetPhrases::shared_const_ptr &sharedPtr, m_targetPhrases) {
+	  const TargetPhrases *tps = sharedPtr.get();
+	  if (tps && tps->GetSize()) {
+		  return false;
+	  }
+  }
+  return true;
 }
 
 std::ostream& operator<<(std::ostream &out, const InputPath &obj)

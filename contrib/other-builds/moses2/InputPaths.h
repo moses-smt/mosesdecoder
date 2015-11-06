@@ -39,6 +39,8 @@ public:
 	return m_inputPaths.end();
   }
 
+  void DeleteUnusedPaths();
+
 protected:
 	Coll m_inputPaths;
 };

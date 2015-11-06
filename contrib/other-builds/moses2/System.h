@@ -40,6 +40,7 @@ public:
 
     size_t stackSize;
     int maxDistortion;
+    size_t maxPhraseLength;
 protected:
 
   mutable MemPool m_managerPool;

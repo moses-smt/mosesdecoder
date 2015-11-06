@@ -37,6 +37,8 @@ Manager::Manager(System &system, const std::string &inputStr)
 		pt.Lookup(*this, m_inputPaths);
 	}
 
+	m_inputPaths.DeleteUnusedPaths();
+
 	CalcFutureScore();
 
 	// init stacks

@@ -39,7 +39,7 @@ void SearchNormal::Decode(size_t stackInd)
 		Extend(*hypo);
   }
 
-  cerr << m_stacks << endl;
+  //cerr << m_stacks << endl;
 
   // delete stack to save mem
   m_stacks.Delete(stackInd);

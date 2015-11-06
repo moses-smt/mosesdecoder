@@ -32,6 +32,7 @@ public:
 
 	void AddTargetPhrases(const PhraseTable &pt, TargetPhrases::shared_const_ptr tps);
 
+	bool IsUsed() const;
 protected:
 	SubPhrase m_subPhrase;
 	Moses::Range m_range;
