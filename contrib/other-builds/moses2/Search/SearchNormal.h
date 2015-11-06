@@ -47,7 +47,6 @@ protected:
 			const Moses::Range &pathRange,
 			const Moses::Bitmap &newBitmap);
 
-	void DebugStacks() const;
 };
 
 #endif /* SEARCHNORMAL_H_ */

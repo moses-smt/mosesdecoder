@@ -49,9 +49,15 @@ void System::LoadMappings()
 
   BOOST_FOREACH(const std::string &line, *vec) {
 	  vector<string> toks = Moses::Tokenize(line);
-	  assert(toks.size() == 2);
-	  assert(toks[0] == "T");
-	  size_t ptInd = Moses::Scan<size_t>(toks[1]);
+	  assert( (toks.size() == 2 && toks[0] == "T") || (toks.size() == 3 && toks[1] == "T") );
+
+	  size_t ptInd;
+	  if (toks.size() == 2) {
+		  ptInd = Moses::Scan<size_t>(toks[1]);
+	  }
+	  else {
+		  ptInd = Moses::Scan<size_t>(toks[2]);
+	  }
 	  const PhraseTable *pt = featureFunctions.GetPhraseTablesExcludeUnknownWordPenalty(ptInd);
 	  mappings.push_back(pt);
   }

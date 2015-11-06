@@ -39,7 +39,7 @@ void SearchNormal::Decode(size_t stackInd)
 		Extend(*hypo);
   }
 
-  //DebugStacks();
+  cerr << m_stacks << endl;
 
   // delete stack to save mem
   m_stacks.Delete(stackInd);
@@ -121,15 +121,6 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	}
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
-}
-
-void SearchNormal::DebugStacks() const
-{
-	  for (size_t i = 0; i < m_stacks.GetSize(); ++i) {
-		  const Stack &stack = m_stacks[i];
-		  cerr << stack.GetSize() << " ";
-	  }
-	  cerr << endl;
 }
 
 const Hypothesis *SearchNormal::GetBestHypothesis() const

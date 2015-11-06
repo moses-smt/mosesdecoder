@@ -12,6 +12,7 @@
 #include "Stack.h"
 
 class Stacks {
+	  friend std::ostream& operator<<(std::ostream &, const Stacks &);
 public:
 	Stacks();
 	virtual ~Stacks();

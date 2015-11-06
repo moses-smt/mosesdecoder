@@ -7,6 +7,8 @@
 
 #include "Stacks.h"
 
+using namespace std;
+
 Stacks::Stacks() {
 	// TODO Auto-generated constructor stub
 
@@ -24,4 +26,19 @@ void Stacks::Init(size_t numStacks)
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
 		m_stacks[i] = new Stack();
 	}
+}
+
+std::ostream& operator<<(std::ostream &out, const Stacks &obj)
+{
+  for (size_t i = 0; i < obj.GetSize(); ++i) {
+	  const Stack *stack = obj.m_stacks[i];
+	  if (stack) {
+		  out << stack->GetSize() << " ";
+	  }
+	  else {
+		  out << "N ";
+	  }
+  }
+
+  return out;
 }
