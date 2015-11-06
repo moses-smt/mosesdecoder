@@ -35,6 +35,7 @@ import path ;
  	 	Search/Manager.cpp 
  	 	Search/SearchNormal.cpp
  	 	Search/Stack.cpp 
+ 	 	Search/Stacks.cpp 
 
     
  ../../../moses//moses 

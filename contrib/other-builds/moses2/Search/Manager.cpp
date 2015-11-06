@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #include <boost/foreach.hpp>
+#include <vector>
 #include "Manager.h"
 #include "SearchNormal.h"
 #include "../System.h"
@@ -39,7 +40,7 @@ Manager::Manager(System &system, const std::string &inputStr)
 	CalcFutureScore();
 
 	// init stacks
-	m_stacks.resize(m_input->GetSize() + 1);
+	m_stacks.Init(m_input->GetSize() + 1);
 
 	m_bitmaps = new Moses::Bitmaps(m_input->GetSize(), vector<bool>(0));
 	m_search = new SearchNormal(*this, m_stacks);
@@ -69,7 +70,7 @@ void Manager::Decode()
 	StackAdd stackAdded = m_stacks[0].Add(initHypo);
 	assert(stackAdded.added);
 
-	for (size_t i = 0; i < m_stacks.size(); ++i) {
+	for (size_t i = 0; i < m_stacks.GetSize() - 1; ++i) {
 		m_search->Decode(i);
 	}
 }

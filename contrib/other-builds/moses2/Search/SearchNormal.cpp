@@ -17,7 +17,7 @@
 
 using namespace std;
 
-SearchNormal::SearchNormal(Manager &mgr, std::vector<Stack> &stacks)
+SearchNormal::SearchNormal(Manager &mgr, Stacks &stacks)
 :m_mgr(mgr)
 ,m_stacks(stacks)
 ,m_stackSize(mgr.GetSystem().stackSize)
@@ -121,7 +121,8 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 
 void SearchNormal::DebugStacks() const
 {
-	  BOOST_FOREACH(const Stack &stack, m_stacks) {
+	  for (size_t i = 0; i < m_stacks.GetSize(); ++i) {
+		  const Stack &stack = m_stacks[i];
 		  cerr << stack.GetSize() << " ";
 	  }
 	  cerr << endl;
@@ -129,7 +130,7 @@ void SearchNormal::DebugStacks() const
 
 const Hypothesis *SearchNormal::GetBestHypothesis() const
 {
-	const Stack &lastStack = m_stacks.back();
+	const Stack &lastStack = m_stacks.Back();
 	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
 
 	const Hypothesis *best = NULL;

@@ -18,10 +18,11 @@ class Hypothesis;
 class InputPath;
 class TargetPhrases;
 class TargetPhrase;
+class Stacks;
 
 class SearchNormal {
 public:
-	SearchNormal(Manager &mgr, std::vector<Stack> &stacks);
+	SearchNormal(Manager &mgr, Stacks &stacks);
 	virtual ~SearchNormal();
 
 	void Decode(size_t stackInd);
@@ -30,7 +31,7 @@ public:
 
 protected:
 	Manager &m_mgr;
-	std::vector<Stack> &m_stacks;
+	Stacks &m_stacks;
 	//ArcLists m_arcLists;
 	size_t m_stackSize;
 

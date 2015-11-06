@@ -268,4 +268,5 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
     }
     *index = TranslateID(hypo.GetWord(position));
   }
+  return NULL;
 }

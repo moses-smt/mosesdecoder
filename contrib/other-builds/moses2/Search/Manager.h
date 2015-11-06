@@ -10,12 +10,11 @@
 #include <queue>
 #include <cstddef>
 #include <string>
-#include <vector>
 #include "../InputPaths.h"
 #include "../TargetPhrase.h"
 #include "../MemPool.h"
 #include "../Recycler.h"
-#include "Stack.h"
+#include "Stacks.h"
 #include "moses/Bitmaps.h"
 #include "moses/SquareMatrix.h"
 
@@ -61,7 +60,7 @@ protected:
 	Moses::Range m_initRange;
 	TargetPhrase m_initPhrase;
 
-    std::vector<Stack> m_stacks;
+    Stacks m_stacks;
 	SearchNormal *m_search;
 
 	void CalcFutureScore();
