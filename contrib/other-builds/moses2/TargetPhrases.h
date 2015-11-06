@@ -36,6 +36,9 @@ public:
 
 	size_t GetSize() const
 	{ return m_coll.size(); }
+
+	void SortAndPrune(size_t tableLimit);
+
 protected:
 	Coll m_coll;
 

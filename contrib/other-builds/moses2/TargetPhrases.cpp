@@ -27,3 +27,20 @@ std::ostream& operator<<(std::ostream &out, const TargetPhrases &obj)
 
 	return out;
 }
+
+void TargetPhrases::SortAndPrune(size_t tableLimit)
+{
+  iterator iterMiddle;
+  iterMiddle = (tableLimit == 0 || m_coll.size() < tableLimit)
+               ? m_coll.end()
+               : m_coll.begin()+tableLimit;
+
+  std::partial_sort(m_coll.begin(), iterMiddle, m_coll.end(),
+		  CompareFutureScore());
+
+  if (tableLimit && m_coll.size() > tableLimit) {
+	  m_coll.resize(tableLimit);
+  }
+
+  cerr << "TargetPhrases=" << GetSize() << endl;
+}

@@ -101,13 +101,13 @@ TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(MemPool &pool, const Sys
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   assert(sourcePhrase.GetSize());
 
-  TargetPhrases::shared_ptr tpColl;
+  TargetPhrases::shared_ptr tpSharedPtr;
   bool ok;
   vector<uint64_t> probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok);
   if (!ok) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
-    return tpColl;
+    return tpSharedPtr;
   }
 
   std::pair<bool, std::vector<target_text> > query_result;
@@ -117,20 +117,20 @@ TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(MemPool &pool, const Sys
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
-    tpColl.reset(new TargetPhrases());
+    tpSharedPtr.reset(new TargetPhrases());
 
     const std::vector<target_text> &probingTargetPhrases = query_result.second;
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
       const target_text &probingTargetPhrase = probingTargetPhrases[i];
       TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, probingTargetPhrase);
 
-      tpColl->AddTargetPhrase(*tp);
+      tpSharedPtr->AddTargetPhrase(*tp);
     }
 
-    //tpColl->Prune(true, m_tableLimit);
+    tpSharedPtr->SortAndPrune(m_tableLimit);
   }
 
-  return tpColl;
+  return tpSharedPtr;
 
 }
 

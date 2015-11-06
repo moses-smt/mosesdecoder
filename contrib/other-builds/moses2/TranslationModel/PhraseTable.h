@@ -40,8 +40,9 @@ public:
 			  Scores *estimatedScores) const;
 
 protected:
-	std::string m_path;
-	size_t m_ptInd;
+  std::string m_path;
+  size_t m_ptInd;
+  size_t m_tableLimit;
 
 };
 

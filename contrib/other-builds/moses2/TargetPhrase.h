@@ -39,5 +39,16 @@ protected:
 	SCORE m_estimatedScore;
 };
 
+//////////////////////////////////////////
+struct CompareFutureScore {
+  bool operator() (const TargetPhrase *a, const TargetPhrase *b) const
+  {
+	  return a->GetFutureScore() > b->GetFutureScore();
+  }
 
+  bool operator() (const TargetPhrase &a, const TargetPhrase &b) const
+  {
+	  return a.GetFutureScore() > b.GetFutureScore();
+  }
+};
 

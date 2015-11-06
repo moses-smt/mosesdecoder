@@ -68,6 +68,20 @@ TargetPhrases::shared_const_ptr PhraseTableMemory::Node::Find(const Phrase &sour
 	}
 }
 
+void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit)
+{
+  BOOST_FOREACH(Children::value_type &val, m_children) {
+	  Node &child = val.second;
+	  child.SortAndPrune(tableLimit);
+  }
+
+  // prune target phrases in this node
+  TargetPhrases *tps = m_targetPhrases.get();
+  if (tps) {
+	  tps->SortAndPrune(tableLimit);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 PhraseTableMemory::PhraseTableMemory(size_t startInd, const std::string &line)
@@ -105,6 +119,8 @@ void PhraseTableMemory::Load(System &system)
 		system.featureFunctions.EvaluateInIsolation(tmpPool, system, *source, *target);
 		m_root.AddRule(*source, target);
 	}
+
+	m_root.SortAndPrune(m_tableLimit);
 }
 
 TargetPhrases::shared_const_ptr PhraseTableMemory::Lookup(const Manager &mgr, InputPath &inputPath) const
@@ -113,3 +129,4 @@ TargetPhrases::shared_const_ptr PhraseTableMemory::Lookup(const Manager &mgr, In
 	TargetPhrases::shared_const_ptr tps = m_root.Find(phrase);
 	return tps;
 }
+
