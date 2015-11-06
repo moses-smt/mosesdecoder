@@ -278,6 +278,8 @@ batch_run()
 
   IFVERBOSE(1) util::PrintUsage(std::cerr);
 
+  cerr << "g_numHypos=" << Moses::g_numHypos << endl;
+
 #ifndef EXIT_RETURN
   //This avoids that destructors are called (it can take a long time)
   exit(EXIT_SUCCESS);
@@ -323,8 +325,6 @@ int decoder_main(int argc, char** argv)
       ShowWeights();
       exit(0);
     }
-
-    cerr << "g_numHypos=" << Moses::g_numHypos << endl;
 
     if (params.GetParam("server"))
       return run_as_server();
