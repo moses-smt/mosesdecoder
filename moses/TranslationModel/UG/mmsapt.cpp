@@ -864,7 +864,7 @@ namespace Moses
     SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
     boost::unique_lock<boost::shared_mutex> ctxlock(context->lock);
 
-    if (localcache) std::cerr << "have local cache " << std::endl;
+    // if (localcache) std::cerr << "have local cache " << std::endl;
     // std::cerr << "BOO at " << HERE << std::endl;
     if (!localcache)
       {
