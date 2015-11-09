@@ -72,7 +72,7 @@ protected:
   Range        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
   bool							m_wordDeleted;
   float							m_totalScore;  /*! score so far */
-  float							m_futureScore; /*! estimated future cost to translate rest of sentence */
+  float							m_estimatedScore; /*! estimated future cost to translate rest of sentence */
   /*! sum of scores of this hypothesis, and previous hypotheses. Lazily initialised.  */
   mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown;
   ScoreComponentCollection m_currScoreBreakdown; /*! scores for this hypothesis only */
@@ -221,7 +221,7 @@ public:
     return m_totalScore;
   }
   float GetScore() const {
-    return m_totalScore-m_futureScore;
+    return m_totalScore-m_estimatedScore;
   }
   const FFState* GetFFState(int idx) const {
     return m_ffStates[idx];
