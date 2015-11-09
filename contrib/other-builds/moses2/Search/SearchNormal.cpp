@@ -140,7 +140,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
     // extend this hypo
 	const Moses::Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
     //SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcFutureScore2(bitmap, pathRange.GetStartPos(), pathRange.GetEndPos());
-    SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcFutureScore(newBitmap);
+    SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
 
 	const std::vector<TargetPhrases::shared_const_ptr> &tpsAllPt = path.targetPhrases;
 	for (size_t i = 0; i < tpsAllPt.size(); ++i) {

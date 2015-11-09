@@ -50,7 +50,7 @@ Manager::Manager(System &system, const std::string &inputStr)
 Manager::~Manager() {
 	delete m_bitmaps;
 	delete m_search;
-	delete m_futureScore;
+	delete m_estimatedScores;
 
 	GetPool().Reset();
 	GetHypoRecycle().clear();
@@ -79,8 +79,8 @@ void Manager::Decode()
 void Manager::CalcFutureScore()
 {
 	size_t size = m_input->GetSize();
-	m_futureScore = new Moses::SquareMatrix(size);
-	m_futureScore->InitTriangle(-numeric_limits<SCORE>::infinity());
+	m_estimatedScores = new Moses::SquareMatrix(size);
+	m_estimatedScores->InitTriangle(-numeric_limits<SCORE>::infinity());
 
     // walk all the translation options and record the cheapest option for each span
 	BOOST_FOREACH(const InputPath &path, m_inputPaths) {
@@ -99,7 +99,7 @@ void Manager::CalcFutureScore()
      		 }
      	  }
 	    }
-	    m_futureScore->SetScore(range.GetStartPos(), range.GetEndPos(), bestScore);
+	    m_estimatedScores->SetScore(range.GetStartPos(), range.GetEndPos(), bestScore);
 	}
 
 	  // now fill all the cells in the strictly upper triangle
@@ -114,8 +114,8 @@ void Manager::CalcFutureScore()
 	      size_t sPos = diagshift;
 	      size_t ePos = colstart+diagshift;
 	      for(size_t joinAt = sPos; joinAt < ePos ; joinAt++)  {
-	        float joinedScore = m_futureScore->GetScore(sPos, joinAt)
-	                            + m_futureScore->GetScore(joinAt+1, ePos);
+	        float joinedScore = m_estimatedScores->GetScore(sPos, joinAt)
+	                            + m_estimatedScores->GetScore(joinAt+1, ePos);
 	        // uncomment to see the cell filling scheme
 	        // TRACE_ERR("[" << sPos << "," << ePos << "] <-? ["
 	        // 	  << sPos << "," << joinAt << "]+["
@@ -123,13 +123,13 @@ void Manager::CalcFutureScore()
 	        // 	  << colstart << ", diagshift: " << diagshift << ")"
 	        // 	  << endl);
 
-	        if (joinedScore > m_futureScore->GetScore(sPos, ePos))
-	          m_futureScore->SetScore(sPos, ePos, joinedScore);
+	        if (joinedScore > m_estimatedScores->GetScore(sPos, ePos))
+	          m_estimatedScores->SetScore(sPos, ePos, joinedScore);
 	      }
 	    }
 	  }
 
 	  //cerr << "Square matrix:" << endl;
-	  //cerr << *m_futureScore << endl;
+	  //cerr << *m_estimatedScores << endl;
 }
 

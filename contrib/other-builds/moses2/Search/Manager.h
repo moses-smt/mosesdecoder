@@ -42,7 +42,7 @@ public:
 	{ return *m_input; }
 
 	const Moses::SquareMatrix &GetEstimatedScores() const
-	{ return *m_futureScore; }
+	{ return *m_estimatedScores; }
 
 	const InputPaths &GetInputPaths() const
 	{ return m_inputPaths; }
@@ -57,7 +57,7 @@ protected:
 	PhraseImpl *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;
-	Moses::SquareMatrix *m_futureScore;
+	Moses::SquareMatrix *m_estimatedScores;
 	Moses::Range m_initRange;
 	TargetPhrase m_initPhrase;
 
