@@ -251,7 +251,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   float expectedScore = 0.0f;
 
   const Bitmap &sourceCompleted = hypothesis.GetWordsBitmap();
-  float futureScore = m_transOptColl.GetFutureScore().CalcFutureScore2( sourceCompleted, startPos, endPos );
+  float estimatedScore = m_transOptColl.GetEstimatedScores().CalcEstimatedScore( sourceCompleted, startPos, endPos );
 
   const Range &hypoRange = hypothesis.GetCurrSourceWordsRange();
   //cerr << "DOING " << sourceCompleted << " [" << hypoRange.GetStartPos() << " " << hypoRange.GetEndPos() << "]"
@@ -262,7 +262,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
     expectedScore = hypothesis.GetScore();
 
     // add new future score estimate
-    expectedScore += futureScore;
+    expectedScore += estimatedScore;
   }
 
   // loop through all translation options
@@ -278,7 +278,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   TranslationOptionList::const_iterator iter;
   for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
     const TranslationOption &transOpt = **iter;
-    ExpandHypothesis(hypothesis, transOpt, expectedScore, futureScore, nextBitmap);
+    ExpandHypothesis(hypothesis, transOpt, expectedScore, estimatedScore, nextBitmap);
   }
 }
 
@@ -294,7 +294,7 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
 void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
                                     const TranslationOption &transOpt,
                                     float expectedScore,
-                                    float futureScore,
+                                    float estimatedScore,
                                     const Bitmap &bitmap)
 {
   const StaticData &staticData = StaticData::Instance();
@@ -311,7 +311,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
       stats.StopTimeBuildHyp();
     }
     if (newHypo==NULL) return;
-    newHypo->EvaluateWhenApplied(futureScore);
+    newHypo->EvaluateWhenApplied(estimatedScore);
   } else
     // early discarding: check if hypothesis is too bad to build
   {

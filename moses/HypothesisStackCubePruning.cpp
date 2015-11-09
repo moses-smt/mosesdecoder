@@ -252,14 +252,14 @@ void HypothesisStackCubePruning::SetBitmapAccessor(const Bitmap &newBitmap
     , HypothesisStackCubePruning &stack
     , const Range &/*range*/
     , BitmapContainer &bitmapContainer
-    , const SquareMatrix &futureScore
+    , const SquareMatrix &estimatedScores
     , const TranslationOptionList &transOptList)
 {
   BitmapContainer *bmContainer =   AddBitmapContainer(newBitmap, stack);
   BackwardsEdge *edge = new BackwardsEdge(bitmapContainer
                                           , *bmContainer
                                           , transOptList
-                                          , futureScore
+                                          , estimatedScores
                                           , m_manager.GetSource()
                                           , m_deterministic);
   bmContainer->AddBackwardsEdge(edge);

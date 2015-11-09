@@ -120,14 +120,14 @@ public:
 BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
                              , BitmapContainer &parent
                              , const TranslationOptionList &translations
-                             , const SquareMatrix &futureScores,
+                             , const SquareMatrix &estimatedScores,
                              const InputType& itype,
                              const bool deterministic)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
   , m_translations(translations)
-  , m_futureScores(futureScores)
+  , m_estimatedScores(estimatedScores)
   , m_seenPosition()
   , m_deterministic(deterministic)
 {
@@ -209,7 +209,7 @@ BackwardsEdge::Initialize()
 
   const Bitmap &bm = m_hypotheses[0]->GetWordsBitmap();
   const Range &newRange = m_translations.Get(0)->GetSourceWordsRange();
-  m_futureScore = m_futureScores.CalcFutureScore2(bm, newRange.GetStartPos(), newRange.GetEndPos());
+  m_estimatedScore = m_estimatedScores.CalcEstimatedScore(bm, newRange.GetStartPos(), newRange.GetEndPos());
 
   Hypothesis *expanded = CreateHypothesis(*m_hypotheses[0], *m_translations.Get(0));
   m_parent.Enqueue(0, 0, expanded, this);
@@ -228,7 +228,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
-  newHypo->EvaluateWhenApplied(m_futureScore);
+  newHypo->EvaluateWhenApplied(m_estimatedScore);
 
   return newHypo;
 }

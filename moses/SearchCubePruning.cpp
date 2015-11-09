@@ -237,13 +237,13 @@ CreateForwardTodos(Bitmap const& bitmap, Range const& range,
   size_t numCovered = newBitmap.GetNumWordsCovered();
   const TranslationOptionList* transOptList;
   transOptList = m_transOptColl.GetTranslationOptionList(range);
-  const SquareMatrix &futureScore = m_transOptColl.GetFutureScore();
+  const SquareMatrix &estimatedScores = m_transOptColl.GetEstimatedScores();
 
   if (transOptList && transOptList->size() > 0) {
     HypothesisStackCubePruning& newStack
     = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
     newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer,
-                               futureScore, *transOptList);
+    		estimatedScores, *transOptList);
   }
 }
 
