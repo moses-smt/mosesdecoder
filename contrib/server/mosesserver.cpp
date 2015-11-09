@@ -487,7 +487,7 @@ public:
 	}
 
       // weighted score
-      nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetTotalScore());
+      nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetFutureScore());
       nBestXml.push_back(xmlrpc_c::value_struct(nBestXMLItem));
     }
     retData.insert(pair<string, xmlrpc_c::value>("nbest", xmlrpc_c::value_array(nBestXml)));

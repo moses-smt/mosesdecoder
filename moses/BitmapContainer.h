@@ -109,8 +109,8 @@ class QueueItemOrderer
 {
 public:
   bool operator()(HypothesisQueueItem* itemA, HypothesisQueueItem* itemB) const {
-    float scoreA = itemA->GetHypothesis()->GetTotalScore();
-    float scoreB = itemB->GetHypothesis()->GetTotalScore();
+    float scoreA = itemA->GetHypothesis()->GetFutureScore();
+    float scoreB = itemB->GetHypothesis()->GetFutureScore();
 
     if (scoreA < scoreB) {
       return true;
@@ -151,8 +151,8 @@ public:
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
 
-    float scoreA = hypoA->GetTotalScore();
-    float scoreB = hypoB->GetTotalScore();
+    float scoreA = hypoA->GetFutureScore();
+    float scoreB = hypoB->GetFutureScore();
 
     if (scoreA > scoreB) {
       return true;

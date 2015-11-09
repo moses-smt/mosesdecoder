@@ -55,8 +55,8 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
     m_sourceCompleted.GetFirstGapPos()>0 ? m_sourceCompleted.GetFirstGapPos()-1 : NOT_FOUND)
   , m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
   , m_wordDeleted(false)
-  , m_totalScore(0.0f)
   , m_futureScore(0.0f)
+  , m_estimatedScore(0.0f)
   , m_ffStates(StatefulFeatureFunction::GetStatefulFeatureFunctions().size())
   , m_arcList(NULL)
   , m_transOpt(initialTransOpt)
@@ -87,8 +87,8 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const 
                            prevHypo.m_currTargetWordsRange.GetEndPos()
                            + transOpt.GetTargetPhrase().GetSize())
   , m_wordDeleted(false)
-  , m_totalScore(0.0f)
   , m_futureScore(0.0f)
+  , m_estimatedScore(0.0f)
   , m_ffStates(prevHypo.m_ffStates.size())
   , m_arcList(NULL)
   , m_transOpt(transOpt)
@@ -211,11 +211,11 @@ EvaluateWhenApplied(float futureScore)
   }
 
   // FUTURE COST
-  m_futureScore = futureScore;
+  m_estimatedScore = futureScore;
 
   // TOTAL
-  m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
-  if (m_prevHypo) m_totalScore += m_prevHypo->GetScore();
+  m_futureScore = m_currScoreBreakdown.GetWeightedScore() + m_estimatedScore;
+  if (m_prevHypo) m_futureScore += m_prevHypo->GetScore();
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StopTimeEstimateScore();
@@ -252,7 +252,7 @@ PrintHypothesis() const
     TRACE_ERR( m_prevHypo->GetCurrTargetPhrase().GetSubString(range) << " ");
   }
   TRACE_ERR( ")"<<endl);
-  TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
+  TRACE_ERR( "\tbase score "<< (m_prevHypo->m_futureScore - m_prevHypo->m_estimatedScore) <<endl);
   TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()
              <<": " << m_transOpt.GetInputPath().GetPhrase() << endl);
 
@@ -262,7 +262,7 @@ PrintHypothesis() const
   //	TRACE_ERR( "\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
   //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
   //	TRACE_ERR( "\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
-  TRACE_ERR( "\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
+  TRACE_ERR( "\tscore "<<m_futureScore - m_estimatedScore<<" + future cost "<<m_estimatedScore<<" = "<<m_futureScore<<endl);
   TRACE_ERR(  "\tunweighted feature scores: " << m_currScoreBreakdown << endl);
   //PrintLMScores();
 }
@@ -331,7 +331,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
   out << "[" << hypo.m_sourceCompleted << "] ";
 
   // scores
-  out << " [total=" << hypo.GetTotalScore() << "]";
+  out << " [total=" << hypo.GetFutureScore() << "]";
   out << " " << hypo.GetScoreBreakdown();
 
   // alignment
@@ -612,10 +612,10 @@ bool
 Hypothesis::
 beats(Hypothesis const& b) const
 {
-  if (m_totalScore != b.m_totalScore)
-    return m_totalScore > b.m_totalScore;
-  else if (m_futureScore != b.m_futureScore)
+  if (m_futureScore != b.m_futureScore)
     return m_futureScore > b.m_futureScore;
+  else if (m_estimatedScore != b.m_estimatedScore)
+    return m_estimatedScore > b.m_estimatedScore;
   else if (m_prevHypo)
     return b.m_prevHypo ? m_prevHypo->beats(*b.m_prevHypo) : true;
   else return false;

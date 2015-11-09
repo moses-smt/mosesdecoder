@@ -71,7 +71,7 @@ void RuleCubeItem::EstimateScore()
   std::vector<HypothesisDimension>::const_iterator p;
   for (p = m_hypothesisDimensions.begin();
        p != m_hypothesisDimensions.end(); ++p) {
-    m_score += p->GetHypothesis()->GetTotalScore();
+    m_score += p->GetHypothesis()->GetFutureScore();
   }
 }
 
@@ -80,7 +80,7 @@ void RuleCubeItem::CreateHypothesis(const ChartTranslationOptions &transOpt,
 {
   m_hypothesis = new ChartHypothesis(transOpt, *this, manager);
   m_hypothesis->EvaluateWhenApplied();
-  m_score = m_hypothesis->GetTotalScore();
+  m_score = m_hypothesis->GetFutureScore();
 }
 
 ChartHypothesis *RuleCubeItem::ReleaseHypothesis()

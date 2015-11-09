@@ -143,7 +143,7 @@ public:
 
   void AddRecombination(const Hypothesis& worseHypo, const Hypothesis& betterHypo) {
     m_recombinationInfos.push_back(RecombinationInfo(worseHypo.GetWordsBitmap().GetNumWordsCovered(),
-                                   betterHypo.GetTotalScore(), worseHypo.GetTotalScore()));
+                                   betterHypo.GetFutureScore(), worseHypo.GetFutureScore()));
   }
   void AddCreated() {
     m_numHyposCreated++;

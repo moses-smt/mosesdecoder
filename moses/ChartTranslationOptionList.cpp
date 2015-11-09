@@ -169,7 +169,7 @@ float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) 
   assert(stack);
   assert(!stack->empty());
   const ChartHypothesis &bestHypo = **(stack->begin());
-  return bestHypo.GetTotalScore();
+  return bestHypo.GetFutureScore();
 }
 
 void ChartTranslationOptionList::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)

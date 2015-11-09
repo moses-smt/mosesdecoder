@@ -24,8 +24,8 @@ public:
     }
 
     // Compare the top hypothesis of each bitmap container using the TotalScore, which includes future cost
-    const float scoreA = A->Top()->GetHypothesis()->GetTotalScore();
-    const float scoreB = B->Top()->GetHypothesis()->GetTotalScore();
+    const float scoreA = A->Top()->GetHypothesis()->GetFutureScore();
+    const float scoreB = B->Top()->GetHypothesis()->GetFutureScore();
 
     if (scoreA < scoreB) {
       return true;

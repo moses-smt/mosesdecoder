@@ -60,7 +60,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "ExportInterface.h"
+
+#ifdef HAVE_XMLRPC_C
 #include "moses/server/Server.h"
+#endif
+
 using namespace std;
 using namespace Moses;
 
