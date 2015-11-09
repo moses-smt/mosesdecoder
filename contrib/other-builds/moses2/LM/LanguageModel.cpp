@@ -300,6 +300,7 @@ SCORE LanguageModel::BackoffScore(const std::vector<const Moses::Factor*> &conte
 		ret += BackoffScore(backoff);
 	}
 
+	return ret;
 }
 
 void LanguageModel::DebugContext(const std::vector<const Moses::Factor*> &context) const
