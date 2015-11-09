@@ -68,6 +68,7 @@ void Hypothesis::Init(const TargetPhrase &tp,
 	m_range = &range;
 	m_prevHypo = NULL;
 	m_currTargetWordsRange = Moses::Range(NOT_FOUND, NOT_FOUND);
+	m_estimatedScore = 0;
 
 	size_t numScores = m_mgr.system.featureFunctions.GetNumScores();
 	m_scores->Reset(numScores);
@@ -76,7 +77,8 @@ void Hypothesis::Init(const TargetPhrase &tp,
 void Hypothesis::Init(const Hypothesis &prevHypo,
 		const TargetPhrase &tp,
 		const Moses::Range &pathRange,
-		const Moses::Bitmap &bitmap)
+		const Moses::Bitmap &bitmap,
+		SCORE estimatedScore)
 {
 	m_targetPhrase = &tp;
 	m_sourceCompleted = &bitmap;
@@ -85,6 +87,7 @@ void Hypothesis::Init(const Hypothesis &prevHypo,
 	m_currTargetWordsRange = Moses::Range(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
 	                         prevHypo.m_currTargetWordsRange.GetEndPos()
 	                         + tp.GetSize());
+	m_estimatedScore = estimatedScore;
 
 	size_t numScores = m_mgr.system.featureFunctions.GetNumScores();
 	m_scores->Reset(numScores);

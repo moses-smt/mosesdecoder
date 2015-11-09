@@ -254,8 +254,8 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   float futureScore = m_transOptColl.GetFutureScore().CalcFutureScore2( sourceCompleted, startPos, endPos );
 
   const Range &hypoRange = hypothesis.GetCurrSourceWordsRange();
-  cerr << "DOING " << sourceCompleted << " [" << hypoRange.GetStartPos() << " " << hypoRange.GetEndPos() << "]"
-		  " [" << startPos << " " << endPos << "]" << endl;
+  //cerr << "DOING " << sourceCompleted << " [" << hypoRange.GetStartPos() << " " << hypoRange.GetEndPos() << "]"
+  //		  " [" << startPos << " " << endPos << "]" << endl;
 
   if (m_options.search.UseEarlyDiscarding()) {
     // expected score is based on score of current hypothesis

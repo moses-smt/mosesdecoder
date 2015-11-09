@@ -11,6 +11,7 @@
 #include "moses/Range.h"
 #include "moses/Bitmap.h"
 #include "ArcLists.h"
+#include "../TypeDef.h"
 
 class Manager;
 class Stack;
@@ -41,11 +42,13 @@ protected:
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrases &tps,
 			const Moses::Range &pathRange,
-			const Moses::Bitmap &newBitmap);
+			const Moses::Bitmap &newBitmap,
+			SCORE estimatedScore);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrase &tp,
 			const Moses::Range &pathRange,
-			const Moses::Bitmap &newBitmap);
+			const Moses::Bitmap &newBitmap,
+			SCORE estimatedScore);
 
 	int ComputeDistortionDistance(const Moses::Range& prev, const Moses::Range& current) const;
 

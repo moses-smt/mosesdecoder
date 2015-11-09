@@ -41,6 +41,9 @@ public:
 	const PhraseImpl &GetInput() const
 	{ return *m_input; }
 
+	const Moses::SquareMatrix &GetEstimatedScores() const
+	{ return *m_futureScore; }
+
 	const InputPaths &GetInputPaths() const
 	{ return m_inputPaths; }
 

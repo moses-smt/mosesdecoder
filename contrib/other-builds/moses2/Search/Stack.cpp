@@ -70,7 +70,7 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 			   : ret.begin()+num;
 
   std::partial_sort(ret.begin(), iterMiddle, ret.end(),
-		  HypothesisScoreOrderer());
+		  HypothesisFutureScoreOrderer());
 
   return ret;
 }

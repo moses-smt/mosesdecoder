@@ -60,9 +60,13 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 	const Moses::Range &hypoRange = hypo.GetRange();
 	const Moses::Range &pathRange = path.range;
 
-  const size_t hypoFirstGapPos = bitmap.GetFirstGapPos();
+    const size_t hypoFirstGapPos = bitmap.GetFirstGapPos();
+
+    //cerr << "DOING " << bitmap << " [" << hypoRange.GetStartPos() << " " << hypoRange.GetEndPos() << "]"
+	//		  " [" << pathRange.GetStartPos() << " " << pathRange.GetEndPos() << "]";
 
 	if (bitmap.Overlap(pathRange)) {
+		//cerr << " NO" << endl;
 		return;
 	}
 
@@ -70,6 +74,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 		// distortion limit
 		int distortion = ComputeDistortionDistance(hypoRange, pathRange);
 		if (distortion > m_mgr.system.maxDistortion) {
+			//cerr << " NO" << endl;
 			return;
 		}
 	}
@@ -123,25 +128,25 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 
       if (ComputeDistortionDistance(pathRange, bestNextExtension)
           > m_mgr.system.maxDistortion) {
+    	  //cerr << " NO" << endl;
     	  return;
       }
 
       // everything is fine, we're good to go
     }
 
+	//cerr << " YES" << endl;
 
     // extend this hypo
 	const Moses::Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
-
-	  cerr << "DOING " << bitmap << " [" << hypoRange.GetStartPos() << " " << hypoRange.GetEndPos() << "]"
-			  " [" << pathRange.GetStartPos() << " " << pathRange.GetEndPos() << "]" << endl;
+    //SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcFutureScore2(bitmap, pathRange.GetStartPos(), pathRange.GetEndPos());
+    SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcFutureScore(newBitmap);
 
 	const std::vector<TargetPhrases::shared_const_ptr> &tpsAllPt = path.targetPhrases;
-
 	for (size_t i = 0; i < tpsAllPt.size(); ++i) {
 		const TargetPhrases *tps = tpsAllPt[i].get();
 		if (tps) {
-			Extend(hypo, *tps, pathRange, newBitmap);
+			Extend(hypo, *tps, pathRange, newBitmap, estimatedScore);
 		}
 	}
 }
@@ -149,20 +154,22 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 void SearchNormal::Extend(const Hypothesis &hypo,
 		const TargetPhrases &tps,
 		const Moses::Range &pathRange,
-		const Moses::Bitmap &newBitmap)
+		const Moses::Bitmap &newBitmap,
+		SCORE estimatedScore)
 {
   BOOST_FOREACH(const TargetPhrase *tp, tps) {
-	  Extend(hypo, *tp, pathRange, newBitmap);
+	  Extend(hypo, *tp, pathRange, newBitmap, estimatedScore);
   }
 }
 
 void SearchNormal::Extend(const Hypothesis &hypo,
 		const TargetPhrase &tp,
 		const Moses::Range &pathRange,
-		const Moses::Bitmap &newBitmap)
+		const Moses::Bitmap &newBitmap,
+		SCORE estimatedScore)
 {
 	Hypothesis *newHypo = Hypothesis::Create(m_mgr);
-	newHypo->Init(hypo, tp, pathRange, newBitmap);
+	newHypo->Init(hypo, tp, pathRange, newBitmap, estimatedScore);
 	newHypo->EvaluateWhenApplied();
 
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();

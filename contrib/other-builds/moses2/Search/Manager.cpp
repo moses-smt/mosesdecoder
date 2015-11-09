@@ -36,7 +36,6 @@ Manager::Manager(System &system, const std::string &inputStr)
 		//cerr << "Looking up from " << pt.GetName() << endl;
 		pt.Lookup(*this, m_inputPaths);
 	}
-
 	m_inputPaths.DeleteUnusedPaths();
 
 	CalcFutureScore();

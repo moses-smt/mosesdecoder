@@ -37,7 +37,8 @@ public:
   void Init(const Hypothesis &prevHypo,
   		const TargetPhrase &tp,
   		const Moses::Range &pathRange,
-  		const Moses::Bitmap &bitmap);
+  		const Moses::Bitmap &bitmap,
+		SCORE estimatedScore);
 
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
@@ -54,6 +55,9 @@ public:
 
   const Scores &GetScores() const
   { return *m_scores; }
+
+  SCORE GetFutureScore() const
+  { return GetScores().GetTotalScore() + m_estimatedScore; }
 
   const TargetPhrase &GetTargetPhrase() const
   { return *m_targetPhrase; }
@@ -89,15 +93,16 @@ protected:
 
   Moses::FFState **m_ffStates;
   Scores *m_scores;
+  SCORE m_estimatedScore;
   Moses::Range m_currTargetWordsRange;
 };
 
 
-class HypothesisScoreOrderer
+class HypothesisFutureScoreOrderer
 {
 public:
   bool operator()(const Hypothesis* a, const Hypothesis* b) const {
-    return a->GetScores().GetTotalScore() > b->GetScores().GetTotalScore();
+    return a->GetFutureScore() > b->GetFutureScore();
   }
 };
 
