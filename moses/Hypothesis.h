@@ -119,7 +119,7 @@ public:
     return m_currTargetWordsRange.GetNumWordsCovered();
   }
 
-  void EvaluateWhenApplied(float futureScore);
+  void EvaluateWhenApplied(float estimatedScore);
 
   int GetId()const {
     return m_id;

@@ -68,7 +68,7 @@ protected:
   ttaskwptr m_ttask; // that is and must be a weak pointer!
   std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
   InputType const			&m_source; /*< reference to the input */
-  SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
+  SquareMatrix				m_estimatedScores; /*< matrix of future costs for contiguous parts (span) of the input */
   const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<const Phrase*> m_unksrcs;
@@ -78,7 +78,7 @@ protected:
                               InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
 
-  void CalcFutureScore();
+  void CalcEstimatedScore();
 
   //! Force a creation of a translation option where there are none for a particular source position.
   void ProcessUnknownWord();
@@ -163,8 +163,8 @@ public:
 
 
   //! returns future cost matrix for sentence
-  inline virtual const SquareMatrix &GetFutureScore() const {
-    return m_futureScore;
+  inline virtual const SquareMatrix &GetEstimatedScores() const {
+    return m_estimatedScores;
   }
 
   //! list of trans opt for a particular span
