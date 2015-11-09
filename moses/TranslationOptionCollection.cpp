@@ -257,7 +257,7 @@ TranslationOptionCollection::
 CalcEstimatedScore()
 {
   // setup the matrix (ignore lower triangle, set upper triangle to -inf
-	m_estimatedScores.InitTriangle(-numeric_limits<float>::infinity());
+  m_estimatedScores.InitTriangle(-numeric_limits<float>::infinity());
 
   // walk all the translation options and record the cheapest option for each span
   size_t size = m_source.GetSize(); // the width of the matrix
@@ -269,7 +269,7 @@ CalcEstimatedScore()
         const TranslationOption& to = **toi;
         float score = to.GetFutureScore();
         if (score > m_estimatedScores.GetScore(sPos, ePos))
-        	m_estimatedScores.SetScore(sPos, ePos, score);
+          m_estimatedScores.SetScore(sPos, ePos, score);
       }
       ++ePos;
     }

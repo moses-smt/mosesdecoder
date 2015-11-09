@@ -57,13 +57,13 @@ float SquareMatrix::CalcEstimatedScore( Bitmap const &bitmap ) const
     }
     // end of a gap?
     else if(bitmap.GetValue(currPos) == true && startGap != notInGap) {
-    	estimatedScore += GetScore(startGap, currPos - 1);
+      estimatedScore += GetScore(startGap, currPos - 1);
       startGap = notInGap;
     }
   }
   // coverage ending with gap?
   if (startGap != notInGap) {
-	  estimatedScore += GetScore(startGap, bitmap.GetSize() - 1);
+    estimatedScore += GetScore(startGap, bitmap.GetSize() - 1);
   }
 
   return estimatedScore;
@@ -108,13 +108,13 @@ float SquareMatrix::CalcEstimatedScore( Bitmap const &bitmap, size_t startPos, s
     }
     // end of a gap?
     else if(startGap != notInGap && (bitmap.GetValue(currPos) == true || (startPos <= currPos && currPos <= endPos))) {
-    	estimatedScore += GetScore(startGap, currPos - 1);
+      estimatedScore += GetScore(startGap, currPos - 1);
       startGap = notInGap;
     }
   }
   // coverage ending with gap?
   if (lastCovered != bitmap.GetSize() - 1) {
-	  estimatedScore += GetScore(lastCovered+1, bitmap.GetSize() - 1);
+    estimatedScore += GetScore(lastCovered+1, bitmap.GetSize() - 1);
   }
 
   return estimatedScore;
