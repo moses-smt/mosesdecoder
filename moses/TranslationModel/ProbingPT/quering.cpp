@@ -70,7 +70,7 @@ QueryEngine::QueryEngine(const char * filepath) : decoder(filepath)
   binary_mmaped = read_binary_file(path_to_data_bin.c_str(), binary_filesize);
 
   //Read hashtable
-  size_t table_filesize = Table::Size(tablesize, 1.2);
+  table_filesize = Table::Size(tablesize, 1.2);
   mem = readTable(path_to_hashtable.c_str(), table_filesize);
   Table table_init(mem, table_filesize);
   table = table_init;
