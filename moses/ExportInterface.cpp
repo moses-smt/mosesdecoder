@@ -274,11 +274,11 @@ batch_run()
   pool.Stop(true); //flush remaining jobs
 #endif
 
+  cerr << "g_numHypos=" << Moses::g_numHypos << endl;
+
   FeatureFunction::Destroy();
 
   IFVERBOSE(1) util::PrintUsage(std::cerr);
-
-  cerr << "g_numHypos=" << Moses::g_numHypos << endl;
 
 #ifndef EXIT_RETURN
   //This avoids that destructors are called (it can take a long time)
