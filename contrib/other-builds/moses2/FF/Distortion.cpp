@@ -100,7 +100,7 @@ void Distortion::EvaluateWhenApplied(const Manager &mgr,
             prev.first_gap);
 	//cerr << "distortionScore=" << distortionScore << endl;
 
-	scores.PlusEquals(mgr.GetSystem(), *this, distortionScore);
+	scores.PlusEquals(mgr.system, *this, distortionScore);
 
     DistortionState_traditional &stateCast = static_cast<DistortionState_traditional&>(state);
     stateCast.Set(hypo.GetRange(), hypo.GetBitmap().GetFirstGapPos());

@@ -20,7 +20,7 @@ using namespace std;
 SearchNormal::SearchNormal(Manager &mgr, Stacks &stacks)
 :m_mgr(mgr)
 ,m_stacks(stacks)
-,m_stackSize(mgr.GetSystem().stackSize)
+,m_stackSize(mgr.system.stackSize)
 {
 	// TODO Auto-generated constructor stub
 
@@ -66,10 +66,10 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 		return;
 	}
 
-	if (m_mgr.GetSystem().maxDistortion >= 0) {
+	if (m_mgr.system.maxDistortion >= 0) {
 		// distortion limit
 		int distortion = ComputeDistortionDistance(hypoRange, pathRange);
-		if (distortion > m_mgr.GetSystem().maxDistortion) {
+		if (distortion > m_mgr.system.maxDistortion) {
 			return;
 		}
 	}
@@ -122,7 +122,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
       Moses::Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 
       if (ComputeDistortionDistance(pathRange, bestNextExtension)
-          > m_mgr.GetSystem().maxDistortion) {
+          > m_mgr.system.maxDistortion) {
     	  return;
       }
 
@@ -133,7 +133,8 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
     // extend this hypo
 	const Moses::Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
 
-	  cerr << "DOING " << bitmap << " [" << pathRange.GetStartPos() << " " << pathRange.GetEndPos() << "]" << endl;
+	  cerr << "DOING " << bitmap << " [" << hypoRange.GetStartPos() << " " << hypoRange.GetEndPos() << "]"
+			  " [" << pathRange.GetStartPos() << " " << pathRange.GetEndPos() << "]" << endl;
 
 	const std::vector<TargetPhrases::shared_const_ptr> &tpsAllPt = path.targetPhrases;
 

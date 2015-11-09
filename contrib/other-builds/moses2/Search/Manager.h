@@ -24,6 +24,8 @@ class SearchNormal;
 
 class Manager {
 public:
+	const System &system;
+
 	Manager(System &system, const std::string &inputStr);
 	virtual ~Manager();
 
@@ -32,9 +34,6 @@ public:
 
 	Recycler<Hypothesis*> &GetHypoRecycle() const
 	{ return *m_hypoRecycle; }
-
-	const System &GetSystem() const
-	{ return m_system; }
 
 	Moses::Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
@@ -52,7 +51,6 @@ protected:
 	mutable MemPool *m_pool;
     mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
-	const System &m_system;
 	PhraseImpl *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;

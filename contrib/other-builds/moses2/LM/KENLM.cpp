@@ -156,7 +156,7 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
 {
   KenLMState &stateCast = static_cast<KenLMState&>(state);
 
-  const System &system = mgr.GetSystem();
+  const System &system = mgr.system;
 
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
 

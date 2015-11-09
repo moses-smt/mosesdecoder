@@ -41,10 +41,10 @@ Hypothesis::Hypothesis(Manager &mgr)
 {
 	MemPool &pool = m_mgr.GetPool();
 
-	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.GetSystem().featureFunctions.GetNumScores());
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, m_mgr.system.featureFunctions.GetNumScores());
 
 	// FF states
-	const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions();
+	const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
 	size_t numStatefulFFs = sfffs.size();
 	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
 
@@ -69,7 +69,7 @@ void Hypothesis::Init(const TargetPhrase &tp,
 	m_prevHypo = NULL;
 	m_currTargetWordsRange = Moses::Range(NOT_FOUND, NOT_FOUND);
 
-	size_t numScores = m_mgr.GetSystem().featureFunctions.GetNumScores();
+	size_t numScores = m_mgr.system.featureFunctions.GetNumScores();
 	m_scores->Reset(numScores);
 }
 
@@ -86,15 +86,15 @@ void Hypothesis::Init(const Hypothesis &prevHypo,
 	                         prevHypo.m_currTargetWordsRange.GetEndPos()
 	                         + tp.GetSize());
 
-	size_t numScores = m_mgr.GetSystem().featureFunctions.GetNumScores();
+	size_t numScores = m_mgr.system.featureFunctions.GetNumScores();
 	m_scores->Reset(numScores);
-	m_scores->PlusEquals(m_mgr.GetSystem(), prevHypo.GetScores());
-	m_scores->PlusEquals(m_mgr.GetSystem(), GetTargetPhrase().GetScores());
+	m_scores->PlusEquals(m_mgr.system, prevHypo.GetScores());
+	m_scores->PlusEquals(m_mgr.system, GetTargetPhrase().GetScores());
 }
 
 size_t Hypothesis::hash() const
 {
-  size_t numStatefulFFs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions().size();
+  size_t numStatefulFFs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions().size();
   size_t seed;
 
   // coverage
@@ -112,7 +112,7 @@ size_t Hypothesis::hash() const
 
 bool Hypothesis::operator==(const Hypothesis &other) const
 {
-	size_t numStatefulFFs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions().size();
+	size_t numStatefulFFs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions().size();
   // coverage
   if (m_sourceCompleted != other.m_sourceCompleted) {
 	return false;
@@ -146,13 +146,13 @@ std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 {
 	obj.OutputToStream(out);
 	out << " ";
-	obj.GetScores().Debug(out, obj.m_mgr.GetSystem().featureFunctions);
+	obj.GetScores().Debug(out, obj.m_mgr.system.featureFunctions);
 	return out;
 }
 
 void Hypothesis::EmptyHypothesisState(const PhraseImpl &input)
 {
-	const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions();
+	const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
 	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 		  size_t statefulInd = sfff->GetStatefulInd();
 		  Moses::FFState *state = m_ffStates[statefulInd];
@@ -162,7 +162,7 @@ void Hypothesis::EmptyHypothesisState(const PhraseImpl &input)
 
 void Hypothesis::EvaluateWhenApplied()
 {
-  const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.GetSystem().featureFunctions.GetStatefulFeatureFunctions();
+  const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 	  size_t statefulInd = sfff->GetStatefulInd();
 	  const Moses::FFState *prevState = m_prevHypo->GetState(statefulInd);

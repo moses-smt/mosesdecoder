@@ -47,7 +47,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 	TargetPhrases *tps = new TargetPhrases();
 
 	MemPool &pool = mgr.GetPool();
-	const System &system = mgr.GetSystem();
+	const System &system = mgr.system;
 
 	TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
 	Word &word = (*target)[0];
@@ -57,7 +57,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 	word[0] = factor;
 
 	Scores &scores = target->GetScores();
-	scores.PlusEquals(mgr.GetSystem(), *this, -100);
+	scores.PlusEquals(mgr.system, *this, -100);
 
 	MemPool &memPool = mgr.GetPool();
 	system.featureFunctions.EvaluateInIsolation(memPool, system, source, *target);

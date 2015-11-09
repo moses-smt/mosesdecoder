@@ -217,7 +217,7 @@ void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 		}
 	}
 
-	scores.PlusEquals(mgr.GetSystem(), *this, score);
+	scores.PlusEquals(mgr.system, *this, score);
 
 	// return state
 	//DebugContext(context);
