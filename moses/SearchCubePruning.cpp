@@ -243,7 +243,7 @@ CreateForwardTodos(Bitmap const& bitmap, Range const& range,
     HypothesisStackCubePruning& newStack
     = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
     newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer,
-    		estimatedScores, *transOptList);
+                               estimatedScores, *transOptList);
   }
 }
 
