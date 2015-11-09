@@ -90,7 +90,7 @@ LatticeMBRSolution::LatticeMBRSolution(const TrellisPath& path, bool isMap) :
     }
   }
   if (isMap) {
-    m_mapScore = path.GetTotalScore();
+    m_mapScore = path.GetFutureScore();
   } else {
     m_mapScore = 0;
   }

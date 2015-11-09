@@ -31,7 +31,7 @@ namespace Moses
 TrellisPath::TrellisPath(const Hypothesis *hypo)
   :	m_prevEdgeChanged(NOT_FOUND)
 {
-  m_totalScore = hypo->GetTotalScore();
+  m_totalScore = hypo->GetFutureScore();
 
   // enumerate path using prevHypo
   while (hypo != NULL) {
@@ -42,7 +42,7 @@ TrellisPath::TrellisPath(const Hypothesis *hypo)
 
 void TrellisPath::InitTotalScore()
 {
-  m_totalScore		= m_path[0]->GetWinningHypo()->GetTotalScore();
+  m_totalScore		= m_path[0]->GetWinningHypo()->GetFutureScore();
 
   //calc score
   size_t sizePath = m_path.size();
@@ -50,7 +50,7 @@ void TrellisPath::InitTotalScore()
     const Hypothesis *hypo = m_path[pos];
     const Hypothesis *winningHypo = hypo->GetWinningHypo();
     if (hypo != winningHypo) {
-      m_totalScore = m_totalScore - winningHypo->GetTotalScore() + hypo->GetTotalScore();
+      m_totalScore = m_totalScore - winningHypo->GetFutureScore() + hypo->GetFutureScore();
     }
   }
 }
@@ -167,7 +167,7 @@ void TrellisPath::CreateDeviantPaths(TrellisPathList &pathColl) const
 const boost::shared_ptr<ScoreComponentCollection> TrellisPath::GetScoreBreakdown() const
 {
   if (!m_scoreBreakdown) {
-    float totalScore = m_path[0]->GetWinningHypo()->GetTotalScore(); // calculated for sanity check only
+    float totalScore = m_path[0]->GetWinningHypo()->GetFutureScore(); // calculated for sanity check only
 
     m_scoreBreakdown = boost::shared_ptr<ScoreComponentCollection>(new ScoreComponentCollection());
     m_scoreBreakdown->PlusEquals(ScoreComponentCollection(m_path[0]->GetWinningHypo()->GetScoreBreakdown()));
@@ -178,7 +178,7 @@ const boost::shared_ptr<ScoreComponentCollection> TrellisPath::GetScoreBreakdown
       const Hypothesis *hypo = m_path[pos];
       const Hypothesis *winningHypo = hypo->GetWinningHypo();
       if (hypo != winningHypo) {
-        totalScore = totalScore - winningHypo->GetTotalScore() + hypo->GetTotalScore();
+        totalScore = totalScore - winningHypo->GetFutureScore() + hypo->GetFutureScore();
         m_scoreBreakdown->MinusEquals(winningHypo->GetScoreBreakdown());
         m_scoreBreakdown->PlusEquals(hypo->GetScoreBreakdown());
       }

@@ -36,7 +36,7 @@ class ChartHypothesisScoreOrderer
 {
 public:
   bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
-    return hypoA->GetTotalScore() > hypoB->GetTotalScore();
+    return hypoA->GetFutureScore() > hypoB->GetFutureScore();
   }
 };
 

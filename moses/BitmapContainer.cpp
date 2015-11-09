@@ -180,10 +180,10 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   if (m_hypotheses.size() > 1) {
-    UTIL_THROW_IF2(m_hypotheses[0]->GetTotalScore() < m_hypotheses[1]->GetTotalScore(),
+    UTIL_THROW_IF2(m_hypotheses[0]->GetFutureScore() < m_hypotheses[1]->GetFutureScore(),
                    "Non-monotonic total score"
-                   << m_hypotheses[0]->GetTotalScore() << " vs. "
-                   << m_hypotheses[1]->GetTotalScore());
+                   << m_hypotheses[0]->GetFutureScore() << " vs. "
+                   << m_hypotheses[1]->GetFutureScore());
   }
 
   HypothesisScoreOrdererWithDistortion orderer (&transOptRange, m_deterministic);
@@ -460,10 +460,10 @@ BitmapContainer::ProcessBestHypothesis()
   // check we are pulling things off of priority queue in right order
   if (!Empty()) {
     HypothesisQueueItem *check = Dequeue(true);
-    UTIL_THROW_IF2(item->GetHypothesis()->GetTotalScore() < check->GetHypothesis()->GetTotalScore(),
+    UTIL_THROW_IF2(item->GetHypothesis()->GetFutureScore() < check->GetHypothesis()->GetFutureScore(),
                    "Non-monotonic total score: "
-                   << item->GetHypothesis()->GetTotalScore() << " vs. "
-                   << check->GetHypothesis()->GetTotalScore());
+                   << item->GetHypothesis()->GetFutureScore() << " vs. "
+                   << check->GetHypothesis()->GetFutureScore());
   }
 
   // Logging for the criminally insane
