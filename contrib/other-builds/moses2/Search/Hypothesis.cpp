@@ -12,6 +12,7 @@
 #include "../System.h"
 #include "../Scores.h"
 #include "../Recycler.h"
+#include "../Util.h"
 #include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
@@ -186,3 +187,17 @@ const Word &Hypothesis::GetWord(size_t pos) const {
   }
   return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
 }
+
+void Hypothesis::Swap(Hypothesis &other)
+{
+	::Swap(m_targetPhrase, other.m_targetPhrase);
+	assert(m_sourceCompleted == other.m_sourceCompleted);
+	//::Swap(m_sourceCompleted, other.m_sourceCompleted);
+	::Swap(m_range, other.m_range);
+	::Swap(m_prevHypo, other.m_prevHypo);
+	::Swap(m_ffStates, other.m_ffStates);
+	::Swap(m_scores, other.m_scores);
+	::Swap(m_estimatedScore, other.m_estimatedScore);
+	::Swap(m_currTargetWordsRange, other.m_currTargetWordsRange);
+}
+

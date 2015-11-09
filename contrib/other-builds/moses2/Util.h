@@ -6,3 +6,10 @@ void Init(T arr[], size_t size, const T &val) {
 		arr[i] = val;
 	}
 }
+
+template<typename T>
+void Swap(T &a, T &b) {
+  T &tmp = a;
+  a = b;
+  b = tmp;
+}

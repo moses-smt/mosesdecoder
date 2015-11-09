@@ -16,12 +16,12 @@ class StackAdd
 {
 public:
 	bool added;
-	Hypothesis *other;
+	Hypothesis *recycle;
 
 	StackAdd(bool vadded,
-			Hypothesis *vother)
+			Hypothesis *vrecycle)
 	:added(vadded)
-	,other(vother)
+	,recycle(vrecycle)
 	{
 	}
 };
@@ -48,7 +48,7 @@ public:
 	size_t GetSize() const
 	{ return m_hypos.size(); }
 
-	StackAdd Add(const Hypothesis *hypo);
+	StackAdd Add(Hypothesis *hypo);
 
 	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const;
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
