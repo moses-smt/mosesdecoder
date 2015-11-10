@@ -332,7 +332,7 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) phrase:|
   for (; position < _min; ++position) {
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
-      before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,NULL,NULL,NULL,NULL);
+      before_boundary += m_lmtb->clprob(codes,idx+1);
 
     ++idx;
   }
@@ -346,7 +346,7 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) phrase:|
     }
     codes[idx-1] = GetLmID(phrase.GetWord(position));
     if (codes[idx-1] == m_unknownId) ++oovCount;
-    ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,NULL,NULL,NULL,NULL);
+    ngramScore += m_lmtb->clprob(codes,idx);
   }
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
@@ -389,7 +389,7 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
 VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...) HERE 1"<< std::endl);
   char* msp = NULL;
   ngram_state_t msidx = 0;
-  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp,NULL,NULL);
+  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
 
   position = (const int) begin+1;
   while (position < adjust_end) {
@@ -397,7 +397,7 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx-1] = codes[idx];
     }
     codes[idx-1] =  GetLmID(hypo.GetWord(position));
-    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp,NULL,NULL);
+    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
 
     ++position;
   }
@@ -418,7 +418,7 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
-    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp,NULL,NULL);
+    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
   } else {
     // need to set the LM state
 
