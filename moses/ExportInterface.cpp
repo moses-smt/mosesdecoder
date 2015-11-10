@@ -289,7 +289,7 @@ batch_run()
 }
 
 /** Called by main function of the command line version of the decoder **/
-int decoder_main(int argc, char** argv)
+int decoder_main(int argc, char const** argv)
 {
 #ifdef NDEBUG
   try

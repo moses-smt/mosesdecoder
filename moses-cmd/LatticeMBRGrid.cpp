@@ -76,8 +76,8 @@ public:
   }
 
   /** Parse the arguments, removing those that define the grid and returning a copy of the rest */
-  void parseArgs(int& argc, char**& argv) {
-    char** newargv = new char*[argc+1]; //Space to add mbr parameter
+  void parseArgs(int& argc, char const**& argv) {
+    char const** newargv = new char const*[argc+1]; //Space to add mbr parameter
     int newargc = 0;
     for (int i = 0; i < argc; ++i) {
       bool consumed = false;
@@ -113,8 +113,9 @@ public:
         }
       }
       if (!consumed) {
-        newargv[newargc] = new char[strlen(argv[i]) + 1];
-        strcpy(newargv[newargc],argv[i]);
+        // newargv[newargc] = new char[strlen(argv[i]) + 1];
+        // strcpy(newargv[newargc],argv[i]);
+	newargv[newargc] = argv[i];
         ++newargc;
       }
     }
@@ -137,7 +138,7 @@ private:
 
 } // namespace
 
-int main(int argc, char* argv[])
+int main(int argc, char const* argv[])
 {
   cerr << "Lattice MBR Grid search" << endl;
 

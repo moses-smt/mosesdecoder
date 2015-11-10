@@ -444,17 +444,17 @@ Parameter::
 LoadParam(const string &filePath)
 {
   const char *argv[] = {"executable", "-f", filePath.c_str() };
-  return LoadParam(3, (char**) argv);
+  return LoadParam(3, (char const**) argv);
 }
 
 /** load all parameters from the configuration file and the command line switches */
 bool
 Parameter::
-LoadParam(int argc, char* xargv[])
+LoadParam(int argc, char const* xargv[])
 {
   // legacy parameter handling: all parameters are expected
   // to start with a single dash
-  char* argv[argc+1];
+  char const* argv[argc+1];
   for (int i = 0; i < argc; ++i) {
     argv[i] = xargv[i];
     if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
@@ -1330,7 +1330,7 @@ FilesExist(const string &paramName, int fieldNo,
 // in moses-cmd
 string
 Parameter::
-FindParam(const string &paramSwitch, int argc, char* argv[])
+FindParam(const string &paramSwitch, int argc, char const* argv[])
 {
   for (int i = 0 ; i < argc ; i++) {
     if (string(argv[i]) == paramSwitch) {
@@ -1352,7 +1352,8 @@ FindParam(const string &paramSwitch, int argc, char* argv[])
  * \param argv values of paramters on command line */
 void
 Parameter::
-OverwriteParam(const string &paramSwitch, const string &paramName, int argc, char* argv[])
+OverwriteParam(const string &paramSwitch, const string &paramName, 
+	       int argc, char const* argv[])
 {
   int startPos = -1;
   for (int i = 0 ; i < argc ; i++) {
