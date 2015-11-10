@@ -39,11 +39,15 @@ public:
     size_t stackSize;
     int maxDistortion;
     size_t maxPhraseLength;
+    int numThreads;
+
 protected:
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
   mutable boost::thread_specific_ptr<Recycler<Hypothesis*> > m_hypoRecycle;
 
   void LoadWeights();
   void LoadMappings();
+
+  void ini_performance_options();
 };
 

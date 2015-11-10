@@ -32,9 +32,6 @@ public:
 	,m_initRange(NOT_FOUND, NOT_FOUND)
 	{}
 
-	// must be run in same thread as Decode()
-	void Init();
-
 	virtual ~Manager();
 
 	MemPool &GetPool() const
@@ -72,6 +69,9 @@ protected:
 
     Stacks m_stacks;
 	SearchNormal *m_search;
+
+	// must be run in same thread as Decode()
+	void Init();
 
 	void CalcFutureScore();
 };

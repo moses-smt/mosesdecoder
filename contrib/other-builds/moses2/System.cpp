@@ -7,6 +7,8 @@
 #include <string>
 #include <iostream>
 #include <boost/foreach.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 #include "System.h"
 #include "FF/FeatureFunction.h"
 #include "TranslationModel/UnknownWordPenalty.h"
@@ -20,7 +22,8 @@ System::System(const Moses::Parameter &paramsArg)
 ,featureFunctions(*this)
 
 {
-    params.SetParameter(stackSize, "stack", Moses::DEFAULT_MAX_HYPOSTACK_SIZE);
+	ini_performance_options();
+	params.SetParameter(stackSize, "stack", Moses::DEFAULT_MAX_HYPOSTACK_SIZE);
     params.SetParameter(maxDistortion, "distortion-limit", -1);
     params.SetParameter(maxPhraseLength, "max-phrase-length",
     		Moses::DEFAULT_MAX_PHRASE_LENGTH);
@@ -95,3 +98,42 @@ Recycler<Hypothesis*> &System::GetHypoRecycle() const
   return *pool;
 }
 
+void
+System
+::ini_performance_options()
+{
+	  const Moses::PARAM_VEC *paramsVec;
+	  // m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
+	  // m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
+
+	  numThreads = 1;
+	  paramsVec = params.GetParam("threads");
+	  if (paramsVec && paramsVec->size()) {
+	    if (paramsVec->at(0) == "all") {
+	#ifdef WITH_THREADS
+	      numThreads = boost::thread::hardware_concurrency();
+	      if (!numThreads) {
+	        std::cerr << "-threads all specified but Boost doesn't know how many cores there are";
+	        throw;
+	      }
+	#else
+	      std::cerr << "-threads all specified but moses not built with thread support";
+	      return false;
+	#endif
+	    } else {
+	    	numThreads = Moses::Scan<int>(paramsVec->at(0));
+	      if (numThreads < 1) {
+	        std::cerr << "Specify at least one thread.";
+	        throw;
+	      }
+	#ifndef WITH_THREADS
+	      if (numThreads > 1) {
+	        std::cerr << "Error: Thread count of " << params->at(0)
+	                  << " but moses not built with thread support";
+	        throw
+	      }
+	#endif
+	    }
+	  }
+	  return;
+}

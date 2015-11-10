@@ -33,15 +33,19 @@ int main(int argc, char** argv)
 
 	istream &inStream = GetInputStream(params);
 
-	Moses::ThreadPool pool(4);
+	cerr << "system.numThreads=" << system.numThreads << endl;
+
+	Moses::ThreadPool pool(system.numThreads);
 
 	string line;
 	while (getline(inStream, line)) {
 	    boost::shared_ptr<TranslationTask> task(new TranslationTask(system, line));
 
-		//pool.Submit(task);
-		task->Run();
+		pool.Submit(task);
+		//task->Run();
 	}
+
+	pool.Stop(true);
 
 	if (inStream != cin) {
 		delete &inStream;

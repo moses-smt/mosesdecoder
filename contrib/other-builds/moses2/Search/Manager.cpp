@@ -64,6 +64,8 @@ const Hypothesis *Manager::GetBestHypothesis() const
 
 void Manager::Decode()
 {
+	Init();
+
 	const Moses::Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(*this);
 	initHypo->Init(*m_initPhrase, m_initRange, initBitmap);
