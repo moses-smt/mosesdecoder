@@ -45,19 +45,19 @@ namespace Moses {
     pspec = param.GetParam("xml-brackets");
     if (pspec && pspec->size()) 
       {
-	std::vector<std::string> brackets = Tokenize(pspec->at(0));
-	if(brackets.size()!=2) 
-	  {
-	    std::cerr << "invalid xml-brackets value, "
-		      << "must specify exactly 2 blank-delimited strings "
-		      << "for XML tags opening and closing brackets" << std::endl;
-	    exit(1);
-	  }
-	xml_brackets.first= brackets[0];
-	xml_brackets.second=brackets[1];
-	VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
-		<< xml_brackets.first << " and " 
-		<< xml_brackets.second << std::endl);
+        std::vector<std::string> brackets = Tokenize(pspec->at(0));
+        if(brackets.size()!=2) 
+          {
+            std::cerr << "invalid xml-brackets value, "
+                      << "must specify exactly 2 blank-delimited strings "
+                      << "for XML tags opening and closing brackets" << std::endl;
+            exit(1);
+          }
+        xml_brackets.first= brackets[0];
+        xml_brackets.second=brackets[1];
+        VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
+                << xml_brackets.first << " and " 
+                << xml_brackets.second << std::endl);
       }
     return true;
   }
