@@ -243,11 +243,12 @@ CopyScores(ScoreComponentCollection*  accum,
   size_t off_remote = m_offset + reoType;
   size_t off_local  = m_configuration.CollapseScores() ? m_offset : off_remote;
 
-  UTIL_THROW_IF2(off_remote >= producer->GetNumScoreComponents(),
+  UTIL_THROW_IF2(off_local >= producer->GetNumScoreComponents(),
                  "offset out of vector bounds!");
 
   // look up applicable score from vectore of scores
   if(cached) {
+    UTIL_THROW_IF2(off_remote >= cached->size(), "offset out of vector bounds!");
     Scores scores(producer->GetNumScoreComponents(),0);
     scores[off_local ] = (*cached)[off_remote];
     accum->PlusEquals(producer, scores);

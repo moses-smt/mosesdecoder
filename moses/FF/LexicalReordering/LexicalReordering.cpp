@@ -145,8 +145,8 @@ SetCache(TranslationOption& to) const
     Phrase const& tphrase = to.GetTargetPhrase();
     to.CacheLexReorderingScores(*this, this->GetProb(sphrase,tphrase));
   } else { // e.g. OOV with Mmsapt
-    Scores vals(GetNumScoreComponents(), 0);
-    to.CacheLexReorderingScores(*this, vals);
+    // Scores vals(GetNumScoreComponents(), 0);
+    // to.CacheLexReorderingScores(*this, vals);
   }
 }
 
