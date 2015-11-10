@@ -21,7 +21,7 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-StackAdd Stack::Add(Hypothesis *hypo)
+StackAdd Stack::Add(const Hypothesis *hypo)
 {
   std::pair<iterator, bool> addRet = m_hypos.insert(hypo);
   if (addRet.second) {
@@ -32,13 +32,17 @@ StackAdd Stack::Add(Hypothesis *hypo)
 	  const Hypothesis *hypoExisting = *addRet.first;
 	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
 		  // incoming hypo is better than the one we have
-		  hypo->Swap(const_cast<Hypothesis&>(*hypoExisting));
+		  m_hypos.erase(addRet.first);
 
-		  return StackAdd(true, hypo);
+		  // re-add. It better go in
+		  std::pair<iterator, bool> addRet = m_hypos.insert(hypo);
+		  assert(addRet.second);
+
+		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
-		  return StackAdd(false, hypo);
+		  return StackAdd(false, const_cast<Hypothesis*>(hypoExisting));
 	  }
   }
 }
