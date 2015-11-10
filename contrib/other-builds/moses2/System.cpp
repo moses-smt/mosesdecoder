@@ -71,3 +71,27 @@ void System::LoadMappings()
 
 }
 
+MemPool &System::GetManagerPool() const
+{
+  MemPool *pool;
+  pool = m_managerPool.get();
+  if (pool == NULL) {
+	pool = new MemPool;
+	m_managerPool.reset(pool);
+  }
+  assert(pool);
+  return *pool;
+}
+
+Recycler<Hypothesis*> &System::GetHypoRecycle() const
+{
+  Recycler<Hypothesis*> *pool;
+  pool = m_hypoRecycle.get();
+  if (pool == NULL) {
+	pool = new Recycler<Hypothesis*>;
+	m_hypoRecycle.reset(pool);
+  }
+  assert(pool);
+  return *pool;
+}
+

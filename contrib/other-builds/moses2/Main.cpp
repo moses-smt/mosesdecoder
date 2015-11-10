@@ -1,9 +1,11 @@
 #include <iostream>
 #include "System.h"
 #include "Phrase.h"
+#include "TranslationTask.h"
 #include "Search/Manager.h"
 #include "moses/InputFileStream.h"
 #include "moses/Parameter.h"
+#include "moses/ThreadPool.h"
 
 using namespace std;
 
@@ -31,22 +33,14 @@ int main(int argc, char** argv)
 
 	istream &inStream = GetInputStream(params);
 
+	Moses::ThreadPool pool(1);
+
 	string line;
 	while (getline(inStream, line)) {
+	    boost::shared_ptr<TranslationTask> task(new TranslationTask(system, line));
 
-		Manager mgr(system, line);
-		mgr.Decode();
-
-		const Hypothesis *bestHypo = mgr.GetBestHypothesis();
-		if (bestHypo) {
-			bestHypo->OutputToStream(cout);
-			cerr << "BEST TRANSLATION: " << *bestHypo;
-		}
-		else {
-			cerr << "NO TRANSLATION";
-		}
-		cout << endl;
-		cerr << endl;
+		//pool.Submit(task);
+		task->Run();
 	}
 
 	if (inStream != cin) {

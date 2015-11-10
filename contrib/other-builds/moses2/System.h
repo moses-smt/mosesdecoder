@@ -7,6 +7,7 @@
 
 #pragma once
 #include <vector>
+#include <boost/thread/tss.hpp>
 #include "FF/FeatureFunctions.h"
 #include "Weights.h"
 #include "MemPool.h"
@@ -24,11 +25,8 @@ public:
 	System(const Moses::Parameter &paramsArg);
 	virtual ~System();
 
-	MemPool &GetManagerPool() const
-	{ return m_managerPool; }
-
-	Recycler<Hypothesis*> &GetHypoRecycle() const
-	{ return m_hypoRecycle; }
+	MemPool &GetManagerPool() const;
+	Recycler<Hypothesis*> &GetHypoRecycle() const;
 
     const Moses::Parameter &params;
     mutable Moses::FactorCollection vocab;
@@ -42,9 +40,8 @@ public:
     int maxDistortion;
     size_t maxPhraseLength;
 protected:
-
-  mutable MemPool m_managerPool;
-  mutable Recycler<Hypothesis*> m_hypoRecycle;
+  mutable boost::thread_specific_ptr<MemPool> m_managerPool;
+  mutable boost::thread_specific_ptr<Recycler<Hypothesis*> > m_hypoRecycle;
 
   void LoadWeights();
   void LoadMappings();
