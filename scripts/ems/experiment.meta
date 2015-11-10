@@ -741,7 +741,7 @@ build-reordering
 build-ttable
 	in: extracted-phrases lexical-translation-table corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains
 	out: phrase-translation-table
-	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
+	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
 	ignore-if: suffix-array mmsapt
 	final-model: yes
