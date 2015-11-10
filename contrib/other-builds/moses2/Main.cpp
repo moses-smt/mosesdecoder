@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 		const Hypothesis *bestHypo = mgr.GetBestHypothesis();
 		if (bestHypo) {
 			bestHypo->OutputToStream(cout);
-			cerr << *bestHypo;
+			cerr << "BEST TRANSLATION: " << *bestHypo;
 		}
 		else {
 			cerr << "NO TRANSLATION";
