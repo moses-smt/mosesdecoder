@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
 	istream &inStream = GetInputStream(params);
 
-	Moses::ThreadPool pool(1);
+	Moses::ThreadPool pool(4);
 
 	string line;
 	while (getline(inStream, line)) {

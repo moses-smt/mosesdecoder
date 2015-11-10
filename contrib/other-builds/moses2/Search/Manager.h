@@ -26,7 +26,15 @@ class Manager {
 public:
 	const System &system;
 
-	Manager(System &system, const std::string &inputStr);
+	Manager(System &sys, const std::string &inputStr)
+	:system(sys)
+	,m_inputStr(inputStr)
+	,m_initRange(NOT_FOUND, NOT_FOUND)
+	{}
+
+	// must be run in same thread as Decode()
+	void Init();
+
 	virtual ~Manager();
 
 	MemPool &GetPool() const
@@ -54,12 +62,13 @@ protected:
 	mutable MemPool *m_pool;
     mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
+    std::string m_inputStr;
 	PhraseImpl *m_input;
 	InputPaths m_inputPaths;
 	Moses::Bitmaps *m_bitmaps;
 	Moses::SquareMatrix *m_estimatedScores;
 	Moses::Range m_initRange;
-	TargetPhrase m_initPhrase;
+	TargetPhrase *m_initPhrase;
 
     Stacks m_stacks;
 	SearchNormal *m_search;

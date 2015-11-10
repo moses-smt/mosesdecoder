@@ -18,16 +18,26 @@
 
 using namespace std;
 
-Manager::Manager(System &system, const std::string &inputStr)
-:m_pool(&system.GetManagerPool())
-,m_hypoRecycle(&system.GetHypoRecycle())
-,system(system)
-,m_initRange(NOT_FOUND, NOT_FOUND)
-,m_initPhrase(system.GetManagerPool(), system, 0)
+Manager::~Manager() {
+	delete m_bitmaps;
+	delete m_search;
+	delete m_estimatedScores;
+
+	GetPool().Reset();
+	GetHypoRecycle().clear();
+}
+
+void Manager::Init()
 {
+	// init pools etc
+	m_pool = &system.GetManagerPool();
+	m_hypoRecycle = &system.GetHypoRecycle();
+	m_initPhrase = new TargetPhrase(GetPool(), system, 0);
+
+	// create input phrase obj
 	Moses::FactorCollection &vocab = system.vocab;
 
-	m_input = PhraseImpl::CreateFromString(GetPool(), vocab, inputStr);
+	m_input = PhraseImpl::CreateFromString(GetPool(), vocab, m_inputStr);
 	m_inputPaths.Init(*m_input, system);
 
 	const std::vector<const PhraseTable*> &pts = system.mappings;
@@ -47,15 +57,6 @@ Manager::Manager(System &system, const std::string &inputStr)
 	m_search = new SearchNormal(*this, m_stacks);
 }
 
-Manager::~Manager() {
-	delete m_bitmaps;
-	delete m_search;
-	delete m_estimatedScores;
-
-	GetPool().Reset();
-	GetHypoRecycle().clear();
-}
-
 const Hypothesis *Manager::GetBestHypothesis() const
 {
 	return m_search->GetBestHypothesis();
@@ -65,7 +66,7 @@ void Manager::Decode()
 {
 	const Moses::Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(*this);
-	initHypo->Init(m_initPhrase, m_initRange, initBitmap);
+	initHypo->Init(*m_initPhrase, m_initRange, initBitmap);
 	initHypo->EmptyHypothesisState(*m_input);
 
 	StackAdd stackAdded = m_stacks[0].Add(initHypo);

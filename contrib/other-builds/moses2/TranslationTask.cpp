@@ -15,6 +15,7 @@ TranslationTask::~TranslationTask()
 
 void TranslationTask::Run()
 {
+	m_mgr->Init();
 	m_mgr->Decode();
 
 	const Hypothesis *bestHypo = m_mgr->GetBestHypothesis();
