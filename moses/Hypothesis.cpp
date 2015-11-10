@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -195,9 +195,8 @@ EvaluateWhenApplied(float futureScore)
     const StatefulFeatureFunction &ff = *ffs[i];
     const StaticData &staticData = StaticData::Instance();
     if (! staticData.IsFeatureFunctionIgnored(ff)) {
-      m_ffStates[i] = ff.EvaluateWhenApplied(*this,
-                                             m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                                             &m_currScoreBreakdown);
+      FFState const* s = m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL;
+      m_ffStates[i] = ff.EvaluateWhenApplied(*this, s, &m_currScoreBreakdown);
     }
   }
 
@@ -276,15 +275,11 @@ CleanupArcList()
    * However, may not be enough if only unique candidates are needed,
    * so we'll keep all of arc list if nedd distinct n-best list
    */
+
   const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.options().nbest.nbest_size;
-  bool distinctNBest = (m_manager.options().nbest.only_distinct ||
-                        staticData.GetLatticeSamplesSize() ||
-                        m_manager.options().mbr.enabled ||
-                        staticData.GetOutputSearchGraph() ||
-                        staticData.GetOutputSearchGraphSLF() ||
-                        staticData.GetOutputSearchGraphHypergraph() ||
-                        m_manager.options().lmbr.enabled);
+  AllOptions const& opts = m_manager.options();
+  size_t nBestSize = opts.nbest.nbest_size;
+  bool distinctNBest = opts.NBestDistinct();
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
@@ -292,9 +287,8 @@ CleanupArcList()
                  m_arcList->end(), CompareHypothesisTotalScore());
 
     // delete bad ones
-    ArcList::iterator iter;
-    for (iter = m_arcList->begin() + nBestSize; iter != m_arcList->end() ; ++iter)
-      delete *iter;
+    ArcList::iterator i = m_arcList->begin() + nBestSize;
+    while (i != m_arcList->end()) delete *i++;
     m_arcList->erase(m_arcList->begin() + nBestSize, m_arcList->end());
   }
 
@@ -387,13 +381,15 @@ OutputAlignment(std::ostream &out) const
     currentHypo = currentHypo->GetPrevHypo();
   }
 
-  OutputAlignment(out, edges);
+  OutputAlignment(out, edges, m_manager.options().output.WA_SortOrder);
 
 }
 
 void
 Hypothesis::
-OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
+OutputAlignment(ostream &out,
+                vector<const Hypothesis *> const& edges,
+                WordAlignmentSort waso)
 {
   size_t targetOffset = 0;
 
@@ -402,7 +398,7 @@ OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
     const TargetPhrase &tp = edge.GetCurrTargetPhrase();
     size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
 
-    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset, waso);
 
     targetOffset += tp.GetSize();
   }
@@ -412,15 +408,17 @@ OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
 void
 Hypothesis::
 OutputAlignment(ostream &out, const AlignmentInfo &ai,
-                size_t sourceOffset, size_t targetOffset)
+                size_t sourceOffset, size_t targetOffset,
+                WordAlignmentSort waso)
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
-  AlignVec alignments = ai.GetSortedAlignments();
+  AlignVec alignments = ai.GetSortedAlignments(waso);
 
   AlignVec::const_iterator it;
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignment = **it;
-    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+    out << alignment.first  + sourceOffset << "-"
+        << alignment.second + targetOffset << " ";
   }
 
 }
@@ -526,15 +524,17 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
     const int sourceEnd = sourceRange.GetEndPos();
     out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
     if (reportSegmentation == 2) {
+      WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
       out << ",wa=";
       const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-      Hypothesis::OutputAlignment(out, ai, 0, 0);
+      Hypothesis::OutputAlignment(out, ai, 0, 0, waso);
       out << ",total=";
       out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      scoreBreakdown.OutputAllFeatureScores(out);
+      bool with_labels = m_manager.options().nbest.include_feature_labels;
+      scoreBreakdown.OutputAllFeatureScores(out, with_labels);
     }
     out << "| ";
   }
@@ -566,7 +566,14 @@ size_t Hypothesis::hash() const
 {
   size_t seed;
 
-  // coverage
+  // coverage NOTE from Hieu - we could make bitmap comparison here
+  // and in operator== compare the pointers since the bitmaps come
+  // from a factory.  Same coverage is guaranteed to have the same
+  // bitmap. However, this make the decoding algorithm
+  // non-deterministic as the order of hypo extension can be
+  // different. This causes several regression tests to break. Since
+  // the speedup is minimal, I'm gonna leave it comparing the actual
+  // bitmaps
   seed = m_sourceCompleted.hash();
 
   // states
@@ -581,7 +588,7 @@ size_t Hypothesis::hash() const
 bool Hypothesis::operator==(const Hypothesis& other) const
 {
   // coverage
-  if (m_sourceCompleted != other.m_sourceCompleted) {
+  if (&m_sourceCompleted != &other.m_sourceCompleted) {
     return false;
   }
 
@@ -596,39 +603,21 @@ bool Hypothesis::operator==(const Hypothesis& other) const
   return true;
 }
 
-#ifdef HAVE_XMLRPC_C
-void
+bool
 Hypothesis::
-OutputLocalWordAlignment(vector<xmlrpc_c::value>& dest) const
+beats(Hypothesis const& b) const
 {
-  using namespace std;
-  Range const& src = this->GetCurrSourceWordsRange();
-  Range const& trg = this->GetCurrTargetWordsRange();
-
-  vector<pair<size_t,size_t> const* > a
-  = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments();
-  typedef pair<size_t,size_t> item;
-  map<string, xmlrpc_c::value> M;
-  BOOST_FOREACH(item const* p, a) {
-    M["source-word"] = xmlrpc_c::value_int(src.GetStartPos() + p->first);
-    M["target-word"] = xmlrpc_c::value_int(trg.GetStartPos() + p->second);
-    dest.push_back(xmlrpc_c::value_struct(M));
-  }
+  if (m_totalScore != b.m_totalScore)
+    return m_totalScore > b.m_totalScore;
+  else if (m_futureScore != b.m_futureScore)
+    return m_futureScore > b.m_futureScore;
+  else if (m_prevHypo)
+    return b.m_prevHypo ? m_prevHypo->beats(*b.m_prevHypo) : true;
+  else return false;
+  // TO DO: add more tie breaking here
+  // results. We should compare other property of the hypos here.
+  // On the other hand, how likely is this going to happen?
 }
-
-void
-Hypothesis::
-OutputWordAlignment(vector<xmlrpc_c::value>& out) const
-{
-  vector<Hypothesis const*> tmp;
-  for (Hypothesis const* h = this; h; h = h->GetPrevHypo())
-    tmp.push_back(h);
-  for (size_t i = tmp.size(); i-- > 0;)
-    tmp[i]->OutputLocalWordAlignment(out);
-}
-
-#endif
-
 
 }
 

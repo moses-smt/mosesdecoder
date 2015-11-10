@@ -45,7 +45,7 @@ void OpSequenceModel::Load()
 void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
 
   osmHypothesis obj;
@@ -82,7 +82,7 @@ void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
   obj.computeOSMFeature(startIndex,myBitmap);
   obj.calculateOSMProb(*OSM);
   obj.populateScores(scores,numFeatures);
-  estimatedFutureScore.PlusEquals(this, scores);
+  estimatedScores.PlusEquals(this, scores);
 
 }
 

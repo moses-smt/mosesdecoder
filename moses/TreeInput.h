@@ -43,8 +43,10 @@ protected:
     return m_sourceChart[startPos][endPos - startPos];
   }
 
-  bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
-
+  bool ProcessAndStripXMLTags(AllOptions const& opts, std::string &line, 
+			      std::vector<XMLParseOutput> &sourceLabels, 
+			      std::vector<XmlOption*> &res);
+  
 public:
   TreeInput() : Sentence() { }
 
@@ -53,7 +55,10 @@ public:
   }
 
   //! populate this InputType with data from in stream
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  virtual int
+  Read(std::istream& in,
+       const std::vector<FactorType>& factorOrder,
+       AllOptions const& opts);
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const;

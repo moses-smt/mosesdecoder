@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
   while (true)
     {
       boost::shared_ptr<Sentence> phrase(new Sentence);
-      if (!phrase->Read(cin,ifo)) break;
+      if (!phrase->Read(cin,ifo, StaticData::Instance().options())) break;
       boost::shared_ptr<TranslationTask> ttask;
       ttask = TranslationTask::create(phrase);
       if (pdta)

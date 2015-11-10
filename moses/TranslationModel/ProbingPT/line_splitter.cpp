@@ -16,10 +16,10 @@ line_text splitLine(StringPiece textin)
   //Get probabilities
   output.prob = *it;
   it++;
-  //Get WordAllignment 1
+  //Get WordAllignment
   output.word_all1 = *it;
   it++;
-  //Get WordAllignment 2
+  //Get count
   output.word_all2 = *it;
 
   return output;

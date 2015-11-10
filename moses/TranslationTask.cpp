@@ -171,7 +171,7 @@ interpret_dlt()
     m_scope->SetContextWeights(j->second);
   }
 }
-  
+
 
 void TranslationTask::Run()
 {
@@ -191,7 +191,8 @@ VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
 
   // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
-  VERBOSE(2, "Translating line " << translationId << "  in thread id " << pthread_self() << endl);
+  VERBOSE(2, "Translating line " << translationId << "  in thread id "
+          << pthread_self() << endl);
 #endif
 
 
@@ -219,8 +220,8 @@ VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
   OutputCollector* ocoll;
   Timer additionalReportingTime;
   additionalReportingTime.start();
-
   boost::shared_ptr<IOWrapper> const& io = m_ioWrapper;
+
   manager->OutputBest(io->GetSingleBestOutputCollector());
 
   // output word graph
@@ -234,7 +235,7 @@ VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
 
   // Output search graph in hypergraph format for Kenneth Heafield's
   // lazy hypergraph decoder; writes to stderr
-  if (StaticData::Instance().GetOutputSearchGraphHypergraph()) {
+  if (options().output.SearchGraphHG.size()) {
     size_t transId = manager->GetSource().GetTranslationId();
     string fname = io->GetHypergraphOutputFileName(transId);
     manager->OutputSearchGraphAsHypergraph(fname, PRECISION);

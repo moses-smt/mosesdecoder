@@ -72,7 +72,7 @@ void LanguageModel::ReportHistoryOrder(std::ostream &out,const Phrase &phrase) c
 void LanguageModel::EvaluateInIsolation(const Phrase &source
                                         , const TargetPhrase &targetPhrase
                                         , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedFutureScore) const
+                                        , ScoreComponentCollection &estimatedScores) const
 {
 VERBOSE(2,"void LanguageModel::EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase, ...)" << std::endl);
   // contains factors used by this LM
@@ -94,10 +94,10 @@ VERBOSE(2,"pthread_self():" << pthread_self() << endl);
 
     estimateScores[0] = estimateScore;
     estimateScores[1] = 0;
-    estimatedFutureScore.Assign(this, estimateScores);
+    estimatedScores.Assign(this, estimateScores);
   } else {
     scoreBreakdown.Assign(this, nGramScore);
-    estimatedFutureScore.Assign(this, estimateScore);
+    estimatedScores.Assign(this, estimateScore);
   }
 }
 

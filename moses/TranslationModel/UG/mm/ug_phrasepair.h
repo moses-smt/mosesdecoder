@@ -26,8 +26,8 @@ namespace sapt
     uint32_t raw1, raw2, sample1, sample2, good1, good2, joint;
     float  cum_bias;
     std::vector<float> fvals;
-    float dfwd[Moses::LRModel::NONE+1]; // distortion counts // counts or probs?
-    float dbwd[Moses::LRModel::NONE+1]; // distortion counts
+    float dfwd[LRModel::NONE+1]; // distortion counts // counts or probs?
+    float dbwd[LRModel::NONE+1]; // distortion counts
     std::vector<unsigned char> aln;
     float score;
     bool inverse;
@@ -125,7 +125,7 @@ namespace sapt
     // 	}
 
     // should we do that here or leave the raw counts?
-    for (int i = 0; i <= Moses::LRModel::NONE; i++)
+    for (int i = 0; i <= LRModel::NONE; i++)
       {
 	PhraseOrientation po = static_cast<PhraseOrientation>(i);
 	dfwd[i] = js.dcnt_fwd(po);
@@ -201,7 +201,7 @@ namespace sapt
     , inverse(o.inverse)
     , indoc(o.indoc)
   {
-    for (int i = 0; i <= Moses::LRModel::NONE; ++i)
+    for (int i = 0; i <= LRModel::NONE; ++i)
       {
 	dfwd[i] = o.dfwd[i];
 	dbwd[i] = o.dbwd[i];

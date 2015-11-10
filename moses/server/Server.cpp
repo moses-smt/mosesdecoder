@@ -1,11 +1,9 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #include "Server.h"
-
 namespace MosesServer
 {
   Server::
   Server(Moses::Parameter& params)
-#ifdef HAVE_XMLRPC_C
     : m_server_options(params),
       m_updater(new Updater),
       m_optimizer(new Optimizer),
@@ -17,15 +15,11 @@ namespace MosesServer
     m_registry.addMethod("optimize",  m_optimizer);
     m_registry.addMethod("close_session", m_close_session);
   }
-#else
-  { }
-#endif
 
   int 
   Server::
   run()
   {
-#ifdef HAVE_XMLRPC_C
     xmlrpc_c::serverAbyss myAbyssServer
       (xmlrpc_c::serverAbyss::constrOpt()
        .registryP(&m_registry)
@@ -42,12 +36,8 @@ namespace MosesServer
       }
     else myAbyssServer.run();
     
-    std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
-    // #pragma message("BUILDING MOSES WITH SERVER SUPPORT")
-#else
-    // #pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT")
-    std::cerr << "Moses was compiled without server support." << std::endl;
-#endif
+    std::cerr << "xmlrpc_c::serverAbyss.run() returned but it should not." 
+              << std::endl;
     return 1;
   }
 
@@ -71,6 +61,4 @@ namespace MosesServer
   {
     return m_session_cache.erase(session_id);
   }
-
-
 }

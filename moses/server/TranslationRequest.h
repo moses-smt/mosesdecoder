@@ -43,9 +43,9 @@ TranslationRequest : public virtual Moses::TranslationTask
   bool m_withGraphInfo;
   bool m_withTopts;
   bool m_reportAllFactors;
-  bool m_nbestDistinct;
+  // bool m_nbestDistinct;
   bool m_withScoreBreakdown;
-  size_t m_nbestSize;
+  // size_t m_nbestSize;
 
   uint64_t m_session_id; // 0 means none, 1 means new
 

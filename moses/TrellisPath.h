@@ -1,5 +1,4 @@
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -34,10 +33,12 @@ namespace Moses
 class TrellisPathCollection;
 class TrellisPathList;
 
-/** Encapsulate the set of hypotheses/arcs that goes from decoding 1 phrase to all the source phrases
- *	to reach a final translation. For the best translation, this consist of all hypotheses, for the other
- *	n-best paths, the node on the path can consist of hypotheses or arcs.
- *  Used by phrase-based decoding
+/** Encapsulate the set of hypotheses/arcs that goes from decoding 1
+ *	phrase to all the source phrases to reach a final
+ *	translation. For the best translation, this consist of all
+ *	hypotheses, for the other n-best paths, the node on the path
+ *	can consist of hypotheses or arcs.  Used by phrase-based
+ *	decoding
  */
 class TrellisPath
 {
@@ -46,9 +47,10 @@ class TrellisPath
 
 protected:
   std::vector<const Hypothesis *> m_path; //< list of hypotheses/arcs
-  size_t		m_prevEdgeChanged; /**< the last node that was wiggled to create this path
-																	, or NOT_FOUND if this path is the best trans so consist of only hypos
-															 */
+  size_t m_prevEdgeChanged; 
+  /**< the last node that was wiggled to create this path
+     , or NOT_FOUND if this path is the best trans so consist of only hypos
+  */
 
   float m_totalScore;
   mutable boost::shared_ptr<ScoreComponentCollection> m_scoreBreakdown;
@@ -57,6 +59,11 @@ protected:
   explicit TrellisPath(const std::vector<const Hypothesis*> edges);
 
   void InitTotalScore();
+
+  Manager const& manager() const { 
+    UTIL_THROW_IF2(m_path.size() == 0, "zero-length trellis path");
+    return m_path[0]->GetManager();
+  }
 
 public:
   TrellisPath(); // not implemented

@@ -1620,6 +1620,13 @@ SetParameter<bool>(bool &parameter, std::string const& parameterName,
   }
 }
 
+void
+Parameter::
+SetParameter(bool& var, std::string const& name)
+{
+  SetParameter(var,name,false);
+}
+
 } // namespace
 
 

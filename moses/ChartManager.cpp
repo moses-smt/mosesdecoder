@@ -371,7 +371,8 @@ void ChartManager::OutputNBestList(OutputCollector *collector,
     OutputSurface(out, outputPhrase, outputFactorOrder, false);
     out << " ||| ";
     boost::shared_ptr<ScoreComponentCollection> scoreBreakdown = ChartKBestExtractor::GetOutputScoreBreakdown(derivation);
-    scoreBreakdown->OutputAllFeatureScores(out);
+    bool with_labels = options().nbest.include_feature_labels;
+    scoreBreakdown->OutputAllFeatureScores(out, with_labels);
     out << " ||| " << derivation.score;
 
     // optionally, print word alignments
@@ -618,7 +619,7 @@ void ChartManager::OutputDetailedTranslationReport(
   //DIMw
   const StaticData &staticData = StaticData::Instance();
 
-  if (staticData.IsDetailedAllTranslationReportingEnabled()) {
+  if (options().output.detailed_all_transrep_filepath.size()) {
     const Sentence &sentence = static_cast<const Sentence &>(m_source);
     size_t nBestSize = staticData.options().nbest.nbest_size;
     std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
@@ -835,11 +836,11 @@ void ChartManager::OutputBestHypo(OutputCollector *collector, const ChartHypothe
     Backtrack(hypo);
     VERBOSE(3,"0" << std::endl);
 
-    if (StaticData::Instance().GetOutputHypoScore()) {
+    if (options().output.ReportHypoScore) {
       out << hypo->GetTotalScore() << " ";
     }
 
-    if (StaticData::Instance().IsPathRecoveryEnabled()) {
+    if (options().output.RecoverPath) {
       out << "||| ";
     }
     Phrase outPhrase(ARRAY_SIZE_INCR);
@@ -858,7 +859,7 @@ void ChartManager::OutputBestHypo(OutputCollector *collector, const ChartHypothe
   } else {
     VERBOSE(1, "NO BEST TRANSLATION" << endl);
 
-    if (StaticData::Instance().GetOutputHypoScore()) {
+    if (options().output.ReportHypoScore) {
       out << "0 ";
     }
 

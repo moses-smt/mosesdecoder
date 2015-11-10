@@ -319,7 +319,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
       float allowedScoreForBitmap = m_hypoStackColl[wordsTranslated]->GetWorstScoreForBitmap( id );
       allowedScore = std::min( allowedScore, allowedScoreForBitmap );
     }
-    allowedScore += staticData.GetEarlyDiscardingThreshold();
+    allowedScore += m_options.search.early_discarding_threshold;
 
     // add expected score of translation option
     expectedScore += transOpt.GetFutureScore();

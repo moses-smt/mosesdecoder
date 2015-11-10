@@ -1,4 +1,4 @@
-// -*- mode: c++; cc-style: gnu -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #include "moses/Parameter.h"
 #include "NBestOptions.h"
 
@@ -33,4 +33,21 @@ init(Parameter const& P)
   enabled = output_file_path.size();
   return true;
 }
+  
+#ifdef HAVE_XMLRPC_C
+bool 
+NBestOptions::
+update(std::map<std::string,xmlrpc_c::value>const& param)
+{
+  typedef std::map<std::string, xmlrpc_c::value> params_t;
+  params_t::const_iterator si = param.find("nbest");
+  if (si != param.end())
+    nbest_size = xmlrpc_c::value_int(si->second);
+  only_distinct = check(param, "nbest-distinct");
+  enabled = (nbest_size > 0);
+  return true;
+}
+#endif
+
+
 } // namespace Moses

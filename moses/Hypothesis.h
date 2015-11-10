@@ -1,6 +1,4 @@
-// $Id$
-// vim:tabstop=2
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -38,10 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "InputType.h"
 #include "ObjectPool.h"
-
-#ifdef HAVE_XMLRPC_C
-#include <xmlrpc-c/base.hpp>
-#endif
+#include "xmlrpc-c.h"
 
 namespace Moses
 {
@@ -69,7 +64,6 @@ typedef std::vector<Hypothesis*> ArcList;
 class Hypothesis
 {
   friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
-
 protected:
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
   const Bitmap	&m_sourceCompleted; /*! keeps track of which words have been translated so far */
@@ -251,9 +245,18 @@ public:
     return m_transOpt;
   }
 
-  void OutputAlignment(std::ostream &out) const;
-  static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
-  static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
+  void
+  OutputAlignment(std::ostream &out) const;
+
+  static void
+  OutputAlignment(std::ostream &out,
+                  const std::vector<const Hypothesis *> &edges,
+                  WordAlignmentSort waso);
+
+  static void
+  OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai,
+                  size_t sourceOffset, size_t targetOffset,
+                  WordAlignmentSort waso);
 
   void OutputInput(std::ostream& os) const;
   static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
@@ -270,9 +273,12 @@ public:
   bool operator==(const Hypothesis& other) const;
 
 #ifdef HAVE_XMLRPC_C
+  // these are implemented in moses/server/Hypothesis_4server.cpp !
   void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
   void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
 #endif
+
+  bool beats(Hypothesis const& b) const;
 
 
 };
@@ -281,8 +287,8 @@ std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
 
 // sorting helper
 struct CompareHypothesisTotalScore {
-  bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const {
-    return hypo1->GetTotalScore() > hypo2->GetTotalScore();
+  bool operator()(const Hypothesis* a, const Hypothesis* b) const {
+    return a->beats(*b);
   }
 };
 

@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // A class to store "local" information (such as task-specific caches).
 // The idea is for each translation task to have a scope, which stores
 // shared pointers to task-specific objects such as caches and priors.
@@ -14,16 +14,12 @@
 
 // for some reason, the xmlrpc_c headers must be included AFTER the
 // boost thread-related ones ...
-#ifdef HAVE_XMLRPC_C
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/registry.hpp>
-#include <xmlrpc-c/server_abyss.hpp>
-#endif
-
+#include "xmlrpc-c.h"
 
 #include <map>
 #include <boost/shared_ptr.hpp>
-// #include "thread_safe_container.h"
+#include "TypeDef.h"
+#include "Util.h"
 
 namespace Moses
 {
@@ -40,25 +36,6 @@ protected:
 #endif
   SPTR<std::map<std::string,float> const> m_context_weights;
 public:
-  // class write_access
-  // {
-  //   boost::unique_lock<boost::shared_mutex> m_lock;
-  // public:
-
-  //   write_access(boost::shared_mutex& lock)
-  // 	: m_lock(lock)
-  //   { }
-
-  //   write_access(write_access& other)
-  //   {
-  // 	swap(m_lock, other.m_lock);
-  //   }
-  // };
-
-  // write_access lock() const
-  // {
-  //   return write_access(m_lock);
-  // }
 
   template<typename T>
   boost::shared_ptr<void> const&
@@ -109,45 +86,35 @@ public:
     m_scratchpad = other.m_scratchpad;
   }
 
-#ifdef HAVE_XMLRPC_C
   SPTR<std::map<std::string,float> const>
-  GetContextWeights(xmlrpc_c::value const* spec = NULL) {
-    if (spec && m_context_weights == NULL) {
-      boost::unique_lock<boost::shared_mutex> lock(m_lock);
-      SPTR<std::map<std::string,float> > M(new std::map<std::string, float>);
-
-      typedef std::map<std::string,xmlrpc_c::value> tmap;
-      tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(*spec));
-      for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m)
-        (*M)[m->first] = xmlrpc_c::value_double(m->second);
-      m_context_weights = M;
-    }
+  GetContextWeights() {
     return m_context_weights;
   }
-#endif
-  
+
   bool
   SetContextWeights(std::string const& spec) {
     if (m_context_weights) return false;
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
     SPTR<std::map<std::string,float> > M(new std::map<std::string, float>);
-    
+
     // TO DO; This needs to be done with StringPiece.find, not Tokenize
     // PRIORITY: low
     std::vector<std::string> tokens = Tokenize(spec,":");
-    for (std::vector<std::string>::iterator it = tokens.begin(); 
-	 it != tokens.end(); it++) {
+    for (std::vector<std::string>::iterator it = tokens.begin();
+         it != tokens.end(); it++) {
       std::vector<std::string> key_and_value = Tokenize(*it, ",");
       (*M)[key_and_value[0]] = atof(key_and_value[1].c_str());
     }
     m_context_weights = M;
     return true;
   }
-  
+
   bool
   SetContextWeights(SPTR<std::map<std::string,float> const> const& w) {
     if (m_context_weights) return false;
+#ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
+#endif
     m_context_weights = w;
     return true;
   }

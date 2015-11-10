@@ -41,7 +41,7 @@ void RulePairUnlexicalizedSource::SetParameter(const std::string& key, const std
 void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   const Factor* targetPhraseLHS = targetPhrase.GetTargetLHS()[0];
   if ( !m_glueRules && (targetPhraseLHS == m_glueTargetLHS) ) {

@@ -17,7 +17,7 @@ SyntaxRHS::SyntaxRHS(const std::string &line)
 void SyntaxRHS::EvaluateInIsolation(const Phrase &source
                                     , const TargetPhrase &targetPhrase
                                     , ScoreComponentCollection &scoreBreakdown
-                                    , ScoreComponentCollection &estimatedFutureScore) const
+                                    , ScoreComponentCollection &estimatedScores) const
 {
 }
 
@@ -26,7 +26,7 @@ void SyntaxRHS::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   assert(stackVec);
 

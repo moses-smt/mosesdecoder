@@ -63,7 +63,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
-  , m_inputType(SentenceInput)
   , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
@@ -131,26 +130,11 @@ StaticData
 {
   const PARAM_VEC *params;
 
-  // input type has to be specified BEFORE loading the phrase tables!
-  m_parameter->SetParameter(m_inputType, "inputtype", SentenceInput);
-
   m_parameter->SetParameter(m_continuePartialTranslation,
                             "continue-partial-translation", false );
 
-  std::string s_it = "text input";
-  if (m_inputType == 1) {
-    s_it = "confusion net";
-  }
-  if (m_inputType == 2) {
-    s_it = "word lattice";
-  }
-  if (m_inputType == 3) {
-    s_it = "tree";
-  }
-  VERBOSE(2,"input type is: "<<s_it<<"\n");
-
   // use of xml in input
-  m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
+  // m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
 
   // specify XML tags opening and closing brackets for XML option
   params = m_parameter->GetParam("xml-brackets");
@@ -181,119 +165,30 @@ StaticData
   m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
 
 
-  m_parameter->SetParameter(m_recoverPath, "recover-input-path", false);
-  if (m_recoverPath && m_inputType == SentenceInput) {
-    TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
-    m_recoverPath = false;
-  }
+  m_parameter->SetParameter(m_includeLHSInSearchGraph,
+                            "include-lhs-in-search-graph", false );
 
-  m_parameter->SetParameter(m_outputHypoScore, "output-hypo-score", false );
-  m_parameter->SetParameter(m_PrintAlignmentInfo, "print-alignment-info", false );
-  m_parameter->SetParameter(m_wordAlignmentSort, "sort-word-alignment", NoSort);
-  params = m_parameter->GetParam("alignment-output-file");
-  if (params && params->size()) {
-    m_alignmentOutputFile = Scan<std::string>(params->at(0));
-  }
-
-  m_parameter->SetParameter( m_PrintID, "print-id", false );
-  m_parameter->SetParameter( m_PrintPassthroughInformation, "print-passthrough", false );
-
-  params = m_parameter->GetParam("output-word-graph");
-  m_outputWordGraph = (params && params->size() == 2);
-
-  params = m_parameter->GetParam("output-search-graph");
-  if (params && params->size()) {
-    if (params->size() != 1) {
-      std::cerr << "ERROR: wrong format for switch -output-search-graph file";
-      return false;
-    }
-    m_outputSearchGraph = true;
-  }
-  // ... in extended format
-  else if (m_parameter->GetParam("output-search-graph-extended") &&
-           m_parameter->GetParam("output-search-graph-extended")->size()) {
-    if (m_parameter->GetParam("output-search-graph-extended")->size() != 1) {
-      std::cerr << "ERROR: wrong format for switch -output-search-graph-extended file";
-      return false;
-    }
-    m_outputSearchGraph = true;
-    m_outputSearchGraphExtended = true;
-  } else {
-    m_outputSearchGraph = false;
-  }
-
-  params = m_parameter->GetParam("output-search-graph-slf");
-  if (params && params->size()) {
-    m_outputSearchGraphSLF = true;
-  } else {
-    m_outputSearchGraphSLF = false;
-  }
-
-  params = m_parameter->GetParam("output-search-graph-hypergraph");
-  if (params && params->size()) {
-    m_outputSearchGraphHypergraph = true;
-  } else {
-    m_outputSearchGraphHypergraph = false;
-  }
-
-#ifdef HAVE_PROTOBUF
-  params = m_parameter->GetParam("output-search-graph-pb");
-  if (params && params->size()) {
-    if (params->size() != 1) {
-      cerr << "ERROR: wrong format for switch -output-search-graph-pb path";
-      return false;
-    }
-    m_outputSearchGraphPB = true;
-  } else
-    m_outputSearchGraphPB = false;
-#endif
-
-  m_parameter->SetParameter( m_unprunedSearchGraph, "unpruned-search-graph", false );
-  m_parameter->SetParameter( m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
-
-  m_parameter->SetParameter<string>(m_outputUnknownsFile, "output-unknowns", "");
-
-  // printing source phrase spans
-  m_parameter->SetParameter( m_reportSegmentation, "report-segmentation", false );
-  m_parameter->SetParameter( m_reportSegmentationEnriched, "report-segmentation-enriched", false );
-
-  // print all factors of output translations
-  m_parameter->SetParameter( m_reportAllFactors, "report-all-factors", false );
+  m_parameter->SetParameter<string>(m_outputUnknownsFile,
+                                    "output-unknowns", "");
 
   //Print Translation Options
-  m_parameter->SetParameter(m_printTranslationOptions, "print-translation-option", false );
+  m_parameter->SetParameter(m_printTranslationOptions,
+                            "print-translation-option", false );
 
   //Print All Derivations
-  m_parameter->SetParameter(m_printAllDerivations , "print-all-derivations", false );
+  m_parameter->SetParameter(m_printAllDerivations ,
+                            "print-all-derivations", false );
 
-  // additional output
-  m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath,
-                                    "translation-details", "");
-  m_parameter->SetParameter<string>(m_detailedTreeFragmentsTranslationReportingFilePath,
-                                    "tree-translation-details", "");
-  m_parameter->SetParameter<string>(m_detailedAllTranslationReportingFilePath,
-                                    "translation-all-details", "");
-  m_parameter->SetParameter<long>(m_startTranslationId, "start-translation-id", 0);
+  m_parameter->SetParameter<long>(m_startTranslationId,
+                                  "start-translation-id", 0);
 
   //lattice samples
-  params = m_parameter->GetParam("lattice-samples");
-  if (params) {
-    if (params->size() ==2 ) {
-      m_latticeSamplesFilePath = params->at(0);
-      m_latticeSamplesSize = Scan<size_t>(params->at(1));
-    } else {
-      std::cerr <<"wrong format for switch -lattice-samples file size";
-      return false;
-    }
-  } else {
-    m_latticeSamplesSize = 0;
-  }
   return true;
 }
 
 void
-StaticData
-::ini_compact_table_options()
+StaticData::
+ini_compact_table_options()
 {
   // Compact phrase table and reordering model
   m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
@@ -301,8 +196,8 @@ StaticData
 }
 
 void
-StaticData
-::ini_lm_options()
+StaticData::
+ini_lm_options()
 {
   m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
 }
@@ -349,8 +244,8 @@ StaticData
 }
 
 void
-StaticData
-::ini_factor_maps()
+StaticData::
+ini_factor_maps()
 {
   const PARAM_VEC *params;
   // factor delimiter
@@ -359,29 +254,29 @@ StaticData
     m_factorDelimiter = "";
   }
 
-  //input factors
-  params = m_parameter->GetParam("input-factors");
-  if (params) {
-    m_inputFactorOrder = Scan<FactorType>(*params);
-  }
-  if(m_inputFactorOrder.empty()) {
-    m_inputFactorOrder.push_back(0);
-  }
+  // //input factors
+  // params = m_parameter->GetParam("input-factors");
+  // if (params) {
+  //   m_inputFactorOrder = Scan<FactorType>(*params);
+  // }
+  // if(m_inputFactorOrder.empty()) {
+  //   m_inputFactorOrder.push_back(0);
+  // }
 
   //output factors
-  params = m_parameter->GetParam("output-factors");
-  if (params) {
-    m_outputFactorOrder = Scan<FactorType>(*params);
-  }
-  if(m_outputFactorOrder.empty()) {
-    // default. output factor 0
-    m_outputFactorOrder.push_back(0);
-  }
+  // params = m_parameter->GetParam("output-factors");
+  // if (params) {
+  //   m_outputFactorOrder = Scan<FactorType>(*params);
+  // }
+  // if(m_outputFactorOrder.empty()) {
+  //   // default. output factor 0
+  //   m_outputFactorOrder.push_back(0);
+  // }
 }
 
 void
-StaticData
-::ini_oov_options()
+StaticData::
+ini_oov_options()
 {
   // unknown word processing
   m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
@@ -398,8 +293,8 @@ StaticData
 }
 
 void
-StaticData
-::ini_zombie_options()
+StaticData::
+ini_zombie_options()
 {
   //Disable discarding
   m_parameter->SetParameter(m_disableDiscarding, "disable-discarding", false);
@@ -434,20 +329,6 @@ bool StaticData::LoadData(Parameter *parameter)
   // search
   ini_oov_options();
 
-  // set m_nbest_options.enabled = true if necessary:
-  if (m_options.mbr.enabled
-      || m_options.mira
-      || m_options.search.consensus
-      || m_outputSearchGraph
-      || m_outputSearchGraphSLF
-      || m_outputSearchGraphHypergraph
-#ifdef HAVE_PROTOBUF
-      || m_outputSearchGraphPB
-#endif
-      || m_latticeSamplesFilePath.size()) {
-    m_options.nbest.enabled = true;
-  }
-
   // S2T decoder
   m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",
                             RecursiveCYKPlus);
@@ -455,7 +336,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   ini_zombie_options(); // probably dead, or maybe not
 
-  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor", NOT_FOUND);
+  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
+                            NOT_FOUND);
 
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   initialize_features();
@@ -507,7 +389,8 @@ void StaticData::SetWeight(const FeatureFunction* sp, float weight)
   m_allWeights.Assign(sp,weight);
 }
 
-void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>& weights)
+void StaticData::SetWeights(const FeatureFunction* sp,
+                            const std::vector<float>& weights)
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weights);
@@ -557,8 +440,10 @@ void StaticData::LoadChartDecodingParameters()
   LoadNonTerminals();
 
   // source label overlap
-  m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap", SourceLabelOverlapAdd);
-  m_parameter->SetParameter(m_ruleLimit, "rule-limit", DEFAULT_MAX_TRANS_OPT_SIZE);
+  m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap",
+                            SourceLabelOverlapAdd);
+  m_parameter->SetParameter(m_ruleLimit, "rule-limit",
+                            DEFAULT_MAX_TRANS_OPT_SIZE);
 
 }
 
@@ -596,12 +481,16 @@ void StaticData::LoadDecodeGraphs()
   }
 }
 
-void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const vector<size_t> &maxChartSpans)
+void
+StaticData::
+LoadDecodeGraphsOld(const vector<string> &mappingVector,
+                    const vector<size_t> &maxChartSpans)
 {
   const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
   const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
-  const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> *featuresRemaining
+  = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
   size_t prevDecodeGraphInd = 0;
 
@@ -620,7 +509,8 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
       // For specifying multiple translation model
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
-      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
+      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd
+                     && decodeGraphInd != prevDecodeGraphInd + 1,
                      "Malformed mapping");
       if (decodeGraphInd > prevDecodeGraphInd) {
         prev = NULL;
@@ -707,7 +597,8 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
 
     decodeGraphInd = Scan<size_t>(token[0]);
     //the vectorList index can only increment by one
-    UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
+    UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd
+                   && decodeGraphInd != prevDecodeGraphInd + 1,
                    "Malformed mapping");
     if (decodeGraphInd > prevDecodeGraphInd) {
       prev = NULL;
@@ -783,17 +674,6 @@ void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
 
 void StaticData::SetExecPath(const std::string &path)
 {
-  /*
-   namespace fs = boost::filesystem;
-
-   fs::path full_path( fs::initial_path<fs::path>() );
-
-   full_path = fs::system_complete( fs::path( path ) );
-
-   //Without file name
-   m_binPath = full_path.parent_path().string();
-   */
-
   // NOT TESTED
   size_t pos = path.rfind("/");
   if (pos !=  string::npos) {
@@ -810,13 +690,12 @@ const string &StaticData::GetBinDirectory() const
 float StaticData::GetWeightWordPenalty() const
 {
   float weightWP = GetWeight(&WordPenaltyProducer::Instance());
-  //VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
   return weightWP;
 }
 
 void
-StaticData
-::InitializeForInput(ttasksptr const& ttask) const
+StaticData::
+InitializeForInput(ttasksptr const& ttask) const
 {
   const std::vector<FeatureFunction*> &producers
   = FeatureFunction::GetFeatureFunctions();
@@ -826,15 +705,15 @@ StaticData
       Timer iTime;
       iTime.start();
       ff.InitializeForInput(ttask);
-      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " )"
-              << "= " << iTime << endl);
+      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription()
+              << " )" << "= " << iTime << endl);
     }
   }
 }
 
 void
-StaticData
-::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
+StaticData::
+CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
 {
   const std::vector<FeatureFunction*> &producers
   = FeatureFunction::GetFeatureFunctions();

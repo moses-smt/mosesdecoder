@@ -21,7 +21,7 @@ UnalignedWordCountFeature::UnalignedWordCountFeature(const std::string &line)
 void UnalignedWordCountFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   const size_t sourceLength = source.GetSize();

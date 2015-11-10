@@ -67,7 +67,9 @@ public:
   virtual void CreateFromString(const std::vector<FactorType> &factorOrder
                                 , const std::string &tabbedString);
 
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  virtual int
+  Read(std::istream& in,const std::vector<FactorType>& factorOrder,
+       AllOptions const& opts);
 
   const TabbedColumns& GetColumns() const {
     return m_columns;

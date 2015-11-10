@@ -11,6 +11,7 @@
 #include "InputOptions.h"
 #include "MBR_Options.h"
 #include "LMBR_Options.h"
+#include "ReportingOptions.h"
 namespace Moses
 {
   struct 
@@ -24,7 +25,7 @@ namespace Moses
     InputOptions           input;
     MBR_Options              mbr;
     LMBR_Options            lmbr;
-
+    ReportingOptions      output; 
     bool mira;
 
     // StackOptions      stack;
@@ -34,10 +35,9 @@ namespace Moses
     AllOptions() {}
     AllOptions(Parameter const& param);
 
-#ifdef HAVE_XMLRPC_C
     bool update(std::map<std::string,xmlrpc_c::value>const& param);
-#endif 
-
+    bool NBestDistinct() const;
+    
   };
 
 }

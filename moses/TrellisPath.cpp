@@ -23,13 +23,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TrellisPathList.h"
 #include "TrellisPathCollection.h"
 #include "StaticData.h"
-
+#include "Manager.h"
 using namespace std;
 
 namespace Moses
 {
 TrellisPath::TrellisPath(const Hypothesis *hypo)
-  :	m_prevEdgeChanged(NOT_FOUND)
+  : m_prevEdgeChanged(NOT_FOUND)
 {
   m_totalScore = hypo->GetTotalScore();
 
@@ -208,9 +208,11 @@ Phrase TrellisPath::GetTargetPhrase() const
 
 Phrase TrellisPath::GetSurfacePhrase() const
 {
-  const std::vector<FactorType> &outputFactor = StaticData::Instance().GetOutputFactorOrder();
-  Phrase targetPhrase = GetTargetPhrase()
-                        ,ret(targetPhrase.GetSize());
+  const std::vector<FactorType> &outputFactor 
+    = manager().options().output.factor_order;
+  // = StaticData::Instance().GetOutputFactorOrder();
+  Phrase targetPhrase = GetTargetPhrase();
+  Phrase ret(targetPhrase.GetSize());
 
   for (size_t pos = 0 ; pos < targetPhrase.GetSize() ; ++pos) {
     Word &newWord = ret.AddWord();

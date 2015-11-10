@@ -63,7 +63,9 @@ namespace Moses
     , btfix(new mmbitext)
     , m_bias_log(NULL)
     , m_bias_loglevel(0)
+#ifndef NO_MOSES
     , m_lr_func(NULL)
+#endif
     , m_sampling_method(random_sampling)
     , bias_key(((char*)this)+3)
     , cache_key(((char*)this)+2)
@@ -597,6 +599,7 @@ namespace Moses
     // Evaluate with all features that can be computed using available factors
     tp->EvaluateInIsolation(src, m_featuresToApply);
 
+#ifndef NO_MOSES
     if (m_lr_func)
       {
         LRModel::ModelType mdl = m_lr_func->GetModel().GetModelType();
@@ -605,6 +608,7 @@ namespace Moses
         pool.fill_lr_vec(dir, mdl, *scores);
         tp->SetExtraScores(m_lr_func, scores);
       }
+#endif
 
     return tp;
   }
@@ -807,11 +811,9 @@ namespace Moses
   Mmsapt::
   setup_bias(ttasksptr const& ttask)
   {
-
-    // VERBOSE(2,"Setting up bias at " << HERE << std::endl);
-    
     SPTR<ContextScope> const& scope = ttask->GetScope();
-    SPTR<ContextForQuery> context = scope->get<ContextForQuery>(btfix.get(), true);
+    SPTR<ContextForQuery> context;
+    context = scope->get<ContextForQuery>(btfix.get(), true);
     if (context->bias) return; 
     
     // bias weights specified with the session?
@@ -863,10 +865,10 @@ namespace Moses
     boost::unique_lock<boost::shared_mutex> ctxlock(context->lock);
 
     if (localcache) std::cerr << "have local cache " << std::endl;
-    std::cerr << "BOO at " << HERE << std::endl;
+    // std::cerr << "BOO at " << HERE << std::endl;
     if (!localcache)
       {
-        std::cerr << "no local cache at " << HERE << std::endl;
+        // std::cerr << "no local cache at " << HERE << std::endl;
         setup_bias(ttask);
         if (context->bias) 
           {
@@ -879,6 +881,7 @@ namespace Moses
     if (!context->cache1) context->cache1.reset(new pstats::cache_t);
     if (!context->cache2) context->cache2.reset(new pstats::cache_t);
     
+#ifndef NO_MOSES
     if (m_lr_func_name.size() && m_lr_func == NULL)
       {
         FeatureFunction* lr = &FeatureFunction::FindFeatureFunction(m_lr_func_name);
@@ -887,6 +890,7 @@ namespace Moses
                        << " does not seem to be a lexical reordering function!");
         // todo: verify that lr_func implements a hierarchical reordering model
       }
+#endif
   }
 
   bool

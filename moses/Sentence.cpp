@@ -145,7 +145,7 @@ aux_interpret_dlt(string& line) // whatever DLT means ... --- UG
 
 void
 Sentence::
-aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
+aux_interpret_xml(AllOptions const& opts, std::string& line, std::vector<size_t> & xmlWalls,
                   std::vector<std::pair<size_t, std::string> >& placeholders)
 {
   // parse XML markup in translation line
@@ -153,9 +153,9 @@ aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
   const StaticData &SD = StaticData::Instance();
 
   using namespace std;
-  if (SD.GetXmlInputType() != XmlPassThrough) {
+  if (opts.input.xml_policy != XmlPassThrough) {
     int offset = SD.IsSyntax() ? 1 : 0;
-    bool OK = ProcessAndStripXMLTags(line, m_xmlOptions,
+    bool OK = ProcessAndStripXMLTags(opts, line, m_xmlOptions,
                                      m_reorderingConstraint,
                                      xmlWalls, placeholders, offset,
                                      SD.GetXmlBrackets().first,
@@ -166,7 +166,8 @@ aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
 
 void
 Sentence::
-init(string line, std::vector<FactorType> const& factorOrder)
+init(string line, std::vector<FactorType> const& factorOrder,
+     AllOptions const& opts)
 {
   using namespace std;
   const StaticData &SD = StaticData::Instance();
@@ -182,14 +183,15 @@ init(string line, std::vector<FactorType> const& factorOrder)
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
 VERBOSE(1,"Sentence::init(string line, std::vector<FactorType> const& factorOrder) line:|" << line << "|" << std::endl);
   // if sentences is specified as "<passthrough tag1=""/>"
-  if (SD.IsPassthroughEnabled() || SD.options().nbest.include_passthrough) {
+  if (SD.options().output.PrintPassThrough ||
+      SD.options().nbest.include_passthrough) {
     string pthru = PassthroughSGML(line,"passthrough");
     this->SetPassthroughInformation(pthru);
   }
 
   vector<size_t> xmlWalls;
   vector<pair<size_t, string> >placeholders;
-  aux_interpret_xml(line, xmlWalls, placeholders);
+  aux_interpret_xml(opts, line, xmlWalls, placeholders);
 
   Phrase::CreateFromString(Input, factorOrder, line, NULL);
 
@@ -202,7 +204,7 @@ VERBOSE(1,"Sentence::init(string line, std::vector<FactorType> const& factorOrde
   // our XmlOptions and create TranslationOptions
 
   // only fill the vector if we are parsing XML
-  if (SD.GetXmlInputType() != XmlPassThrough) {
+  if (opts.input.xml_policy != XmlPassThrough) {
     m_xmlCoverageMap.assign(GetSize(), false);
     BOOST_FOREACH(XmlOption* o, m_xmlOptions) {
       Range const& r = o->range;
@@ -231,12 +233,14 @@ VERBOSE(1,"Sentence::init(string line, std::vector<FactorType> const& factorOrde
 
 int
 Sentence::
-Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+Read(std::istream& in,
+     const std::vector<FactorType>& factorOrder,
+     AllOptions const& opts)
 {
   std::string line;
   if (getline(in, line, '\n').eof())
     return 0;
-  init(line, factorOrder);
+  init(line, factorOrder, opts);
   return 1;
 }
 
@@ -317,7 +321,9 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
   }
 }
 
-std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions() const
+std::vector <ChartTranslationOptions*> 
+Sentence::
+GetXmlChartTranslationOptions(AllOptions const& opts) const
 {
   const StaticData &staticData = StaticData::Instance();
   std::vector <ChartTranslationOptions*> ret;
@@ -326,7 +332,7 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
   // this code is a copy of the 1 in Sentence.
 
   //only fill the vector if we are parsing XML
-  if (staticData.GetXmlInputType() != XmlPassThrough ) {
+  if (opts.input.xml_policy != XmlPassThrough ) {
     //TODO: needed to handle exclusive
     //for (size_t i=0; i<GetSize(); i++) {
     //  m_xmlCoverageMap.push_back(false);
@@ -367,12 +373,14 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(size_t const transId, string const& stext,
+Sentence(size_t const transId,
+         string const& stext,
+         AllOptions const& opts,
          vector<FactorType> const* IFO)
   : InputType(transId)
 {
-  if (IFO) init(stext, *IFO);
-  else init(stext, StaticData::Instance().GetInputFactorOrder());
+  if (IFO) init(stext, *IFO, opts);
+  else init(stext, StaticData::Instance().GetInputFactorOrder(), opts);
 }
 
 }

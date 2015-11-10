@@ -26,6 +26,7 @@
 #include "ChartManager.h"
 #include "HypergraphOutput.h"
 #include "util/exception.hh"
+#include "parameters/AllOptions.h"
 
 using namespace std;
 using namespace Moses;
@@ -33,13 +34,13 @@ using namespace Moses;
 namespace Moses
 {
 
-ChartHypothesisCollection::ChartHypothesisCollection()
+ChartHypothesisCollection::ChartHypothesisCollection(AllOptions const& opts)
 {
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
-  m_beamWidth = staticData.GetBeamWidth();
-  m_maxHypoStackSize = staticData.options().search.stack_size;
-  m_nBestIsEnabled = staticData.options().nbest.enabled;
+  m_beamWidth = opts.search.beam_width; // staticData.GetBeamWidth();
+  m_maxHypoStackSize = opts.search.stack_size; // staticData.options().search.stack_size;
+  m_nBestIsEnabled = opts.nbest.enabled; // staticData.options().nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
 }
 
