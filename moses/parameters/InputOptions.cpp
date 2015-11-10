@@ -38,7 +38,6 @@ namespace Moses {
     param.SetParameter(default_non_term_only_for_empty_range,
 		       "default-non-term-for-empty-range-only", false);
 
-    
     param.SetParameter<XmlInputType>(xml_policy, "xml-input", XmlPassThrough);
     
     // specify XML tags opening and closing brackets for XML option
@@ -52,16 +51,22 @@ namespace Moses {
           {
             std::cerr << "invalid xml-brackets value, "
                       << "must specify exactly 2 blank-delimited strings "
-                      << "for XML tags opening and closing brackets" << std::endl;
+                      << "for XML tags opening and closing brackets" 
+                      << std::endl;
             exit(1);
           }
+        
         xml_brackets.first= brackets[0];
         xml_brackets.second=brackets[1];
+        
         VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
                 << xml_brackets.first << " and " 
                 << xml_brackets.second << std::endl);
       }
 
+    pspec = param.GetParam("input-factors");
+    if (pspec) factor_order = Scan<FactorType>(*pspec);
+    if (factor_order.empty()) factor_order.assign(1,0);
     param.SetParameter(placeholder_factor, "placeholder-factor", NOT_FOUND);
 
     return true;

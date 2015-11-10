@@ -14,6 +14,7 @@ namespace Moses
     bool default_non_term_only_for_empty_range; // whatever that means
     InputTypeEnum input_type;
     XmlInputType  xml_policy; // pass through, ignore, exclusive, inclusive
+    std::vector<FactorType> factor_order; // input factor order
 
     FactorType placeholder_factor; // where to store original text for placeholders 
 

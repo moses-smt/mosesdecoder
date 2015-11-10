@@ -74,7 +74,6 @@ protected:
   Parameter *m_parameter;
   AllOptions m_options;
 
-  std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
@@ -107,49 +106,21 @@ protected:
   bool m_printTranslationOptions;
 
   bool m_sourceStartPosMattersForRecombination;
-  // bool m_recoverPath;
-  // bool m_outputHypoScore;
   bool m_requireSortingAfterSourceContext;
-
-  // SearchAlgorithm m_searchAlgorithm;
-  // InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
 
-  // bool m_reportSegmentation;
-  // bool m_reportSegmentationEnriched;
-  // bool m_reportAllFactors;
-  // std::string m_detailedTranslationReportingFilePath;
-  // std::string m_detailedTreeFragmentsTranslationReportingFilePath;
-  // std::string m_detailedAllTranslationReportingFilePath;
-  // bool m_PrintAlignmentInfo;
-  // bool m_PrintID;
-  // bool m_PrintPassthroughInformation;
-  // std::string m_alignmentOutputFile;
-
   std::string m_factorDelimiter; //! by default, |, but it can be changed
 
-  XmlInputType m_xmlInputType; //! method for handling sentence XML input
+  // XmlInputType m_xmlInputType; //! method for handling sentence XML input
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
   bool m_lmEnableOOVFeature;
 
-  // bool m_timeout; //! use timeout
-  // size_t m_timeout_threshold; //! seconds after which time out is activated
-
   bool m_isAlwaysCreateDirectTranslationOption;
   //! constructor. only the 1 static variable can be created
 
-  // bool m_outputWordGraph; //! whether to output word graph
-  // bool m_outputSearchGraph; //! whether to output search graph
-  // bool m_outputSearchGraphExtended; //! ... in extended format
-  // bool m_outputSearchGraphSLF; //! whether to output search graph in HTK standard lattice format (SLF)
-  // bool m_outputSearchGraphHypergraph; //! whether to output search graph in hypergraph
-#ifdef HAVE_PROTOBUF
-  // bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
-#endif
-  // bool m_unprunedSearchGraph; //! do not exclude dead ends (chart decoder only)
   bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
   std::string m_outputUnknownsFile; //! output unknowns in this file
 
@@ -164,7 +135,6 @@ protected:
   Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
   SourceLabelOverlap m_sourceLabelOverlap;
   UnknownLHSList m_unknownLHS;
-  // WordAlignmentSort m_wordAlignmentSort;
 
   int m_threadCount;
   long m_startTranslationId;
@@ -190,8 +160,10 @@ protected:
 
   //! load decoding steps
   void LoadDecodeGraphs();
-  void LoadDecodeGraphsOld(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans);
-  void LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans);
+  void LoadDecodeGraphsOld(const std::vector<std::string> &mappingVector, 
+                           const std::vector<size_t> &maxChartSpans);
+  void LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, 
+                           const std::vector<size_t> &maxChartSpans);
 
   void NoCache();
 
@@ -271,12 +243,13 @@ public:
   }
 
   const std::vector<FactorType> &GetInputFactorOrder() const {
-    return m_inputFactorOrder;
+    return m_options.input.factor_order;
   }
+  
   const std::vector<FactorType> &GetOutputFactorOrder() const {
-    return m_outputFactorOrder;
+    return m_options.output.factor_order;
   }
-
+  
   inline bool GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
   }
@@ -313,12 +286,6 @@ public:
   }
   bool UseReorderingConstraint() const {
     return m_reorderingConstraint;
-  }
-  float GetBeamWidth() const {
-    return m_options.search.beam_width;
-  }
-  float GetEarlyDiscardingThreshold() const {
-    return m_options.search.early_discarding_threshold;
   }
 
   bool UseEarlyDiscarding() const {
@@ -391,68 +358,9 @@ public:
   //Weights for feature with fixed number of values
   void SetWeights(const FeatureFunction* sp, const std::vector<float>& weights);
 
-  // bool GetDistinctNBest() const {
-  //   return m_options.nbest.only_distinct;
-  // }
   const std::string& GetFactorDelimiter() const {
     return m_factorDelimiter;
   }
-  // bool UseMBR() const {
-  //   return m_mbr;
-  // }
-  // bool UseLatticeMBR() const {
-  //   return m_useLatticeMBR ;
-  // }
-  // bool UseConsensusDecoding() const {
-  //   return m_useConsensusDecoding;
-  // }
-  // void SetUseLatticeMBR(bool flag) {
-  //   m_useLatticeMBR = flag;
-  // }
-  // size_t GetMBRSize() const {
-  //   return m_mbrSize;
-  // }
-  // float GetMBRScale() const {
-  //   return m_mbrScale;
-  // }
-  // void SetMBRScale(float scale) {
-  //   m_mbrScale = scale;
-  // }
-  // size_t GetLatticeMBRPruningFactor() const {
-  //   return m_lmbrPruning;
-  // }
-  // void SetLatticeMBRPruningFactor(size_t prune) {
-  //   m_lmbrPruning = prune;
-  // }
-  // const std::vector<float>& GetLatticeMBRThetas() const {
-  //   return m_lmbrThetas;
-  // }
-  // bool  UseLatticeHypSetForLatticeMBR() const {
-  //   return m_useLatticeHypSetForLatticeMBR;
-  // }
-  // float GetLatticeMBRPrecision() const {
-  //   return m_lmbrPrecision;
-  // }
-  // void SetLatticeMBRPrecision(float p) {
-  //   m_lmbrPrecision = p;
-  // }
-  // float GetLatticeMBRPRatio() const {
-  //   return m_lmbrPRatio;
-  // }
-  // void SetLatticeMBRPRatio(float r) {
-  //   m_lmbrPRatio = r;
-  // }
-
-  // float GetLatticeMBRMapWeight() const {
-  //   return m_lmbrMapWeight;
-  // }
-
-  // bool UseTimeout() const {
-  //   return m_timeout;
-  // }
-  // size_t GetTimeoutThreshold() const {
-  //   return m_timeout_threshold;
-  // }
 
   size_t GetLMCacheCleanupThreshold() const {
     return m_lmcache_cleanup_threshold;
@@ -462,44 +370,17 @@ public:
     return m_lmEnableOOVFeature;
   }
 
-  // bool GetOutputSearchGraph() const {
-  //   return m_outputSearchGraph;
-  // }
-
-  // void SetOutputSearchGraph(bool outputSearchGraph) {
-  //   m_outputSearchGraph = outputSearchGraph;
-  // }
-
-//  bool GetOutputSearchGraphExtended() const {
-//    return m_outputSearchGraphExtended;
-//  }
-// GetOutputSearchGraphSLF() const {
-//    return m_outputSearchGraphSLF;
-//  }
-//  bool GetOutputSearchGraphHypergraph() const {
-//    return m_outputSearchGraphHypergraph;
-//  }
-
-// #ifdef HAVE_PROTOBUF
-//   bool GetOutputSearchGraphPB() const {
-//     return m_outputSearchGraphPB;
-//   }
-// #endif
   const std::string& GetOutputUnknownsFile() const {
     return m_outputUnknownsFile;
   }
-
-  // bool GetUnprunedSearchGraph() const {
-  //   return m_unprunedSearchGraph;
-  // }
 
   bool GetIncludeLHSInSearchGraph() const {
     return m_includeLHSInSearchGraph;
   }
 
-  XmlInputType GetXmlInputType() const {
-    return m_xmlInputType;
-  }
+  // XmlInputType GetXmlInputType() const {
+  //   return m_xmlInputType;
+  // }
 
   std::pair<std::string,std::string> GetXmlBrackets() const {
     return m_xmlBrackets;
@@ -528,9 +409,6 @@ public:
     return m_sourceLabelOverlap;
   }
 
-  // bool GetOutputHypoScore() const {
-  //   return m_outputHypoScore;
-  // }
   size_t GetRuleLimit() const {
     return m_ruleLimit;
   }
@@ -561,18 +439,7 @@ public:
 
   bool NeedAlignmentInfo() const {
     return m_bookkeeping_options.need_alignment_info;
-    // return m_needAlignmentInfo;
   }
-  // const std::string &GetAlignmentOutputFile() const {
-  //   return m_alignmentOutputFile;
-  // }
-  // bool PrintAlignmentInfo() const {
-  //   return m_PrintAlignmentInfo;
-  // }
-
-  // WordAlignmentSort GetWordAlignmentSort() const {
-  //   return m_wordAlignmentSort;
-  // }
 
   bool GetHasAlternateWeightSettings() const {
     return m_weightSetting.size() > 0;

@@ -10,6 +10,8 @@ namespace Moses
   struct 
   ReportingOptions : public OptionsBaseClass
   {
+    std::vector<FactorType> factor_order;
+    
     bool ReportAllFactors; // m_reportAllFactors;
 
     int ReportSegmentation; // 0: no 1: m_reportSegmentation 2: ..._enriched 

@@ -1,6 +1,5 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
-
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2006 University of Edinburgh
@@ -159,10 +158,13 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
  * \param lbrackStr xml tag's left bracket string, typically "<"
  * \param rbrackStr xml tag's right bracket string, typically ">"
  */
-bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls,
-                            std::vector< std::pair<size_t, std::string> > &placeholders,
-                            int offset,
-                            const std::string& lbrackStr, const std::string& rbrackStr)
+bool 
+ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption*> &res, 
+		       ReorderingConstraint &reorderingConstraint, 
+		       vector< size_t > &walls, 
+		       std::vector< std::pair<size_t, std::string> > &placeholders,
+		       int offset, const std::string& lbrackStr, 
+		       const std::string& rbrackStr)
 {
   //parse XML markup in translation line
 
@@ -440,7 +442,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
           }
 
           // store translation options into members
-          if (staticData.GetXmlInputType() != XmlIgnore) {
+          if (opts.input.xml_policy != XmlIgnore) {
             // only store options if we aren't ignoring them
             for (size_t i=0; i<altTexts.size(); ++i) {
               Phrase sourcePhrase; // TODO don't know what the source phrase is
