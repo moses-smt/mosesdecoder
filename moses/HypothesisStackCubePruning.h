@@ -125,7 +125,7 @@ public:
                          , HypothesisStackCubePruning &stack
                          , const Range &range
                          , BitmapContainer &bitmapContainer
-                         , const SquareMatrix &futureScore
+                         , const SquareMatrix &estimatedScores
                          , const TranslationOptionList &transOptList);
 
   /** pruning, if too large.

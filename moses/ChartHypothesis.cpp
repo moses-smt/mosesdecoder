@@ -207,7 +207,7 @@ void ChartHypothesis::EvaluateWhenApplied()
   // total scores from prev hypos
   for (std::vector<const ChartHypothesis*>::const_iterator iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
     const ChartHypothesis &prevHypo = **iter;
-    m_totalScore += prevHypo.GetTotalScore();
+    m_totalScore += prevHypo.GetFutureScore();
   }
 }
 
@@ -241,7 +241,7 @@ void ChartHypothesis::AddArc(ChartHypothesis *loserHypo)
 // sorting helper
 struct CompareChartHypothesisTotalScore {
   bool operator()(const ChartHypothesis* hypo1, const ChartHypothesis* hypo2) const {
-    return hypo1->GetTotalScore() > hypo2->GetTotalScore();
+    return hypo1->GetFutureScore() > hypo2->GetFutureScore();
   }
 };
 
@@ -350,7 +350,7 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
     out << " " << prevHypo.GetId();
   }
 
-  out << " [total=" << hypo.GetTotalScore() << "]";
+  out << " [total=" << hypo.GetFutureScore() << "]";
   out << " " << hypo.GetScoreBreakdown();
 
   //out << endl;

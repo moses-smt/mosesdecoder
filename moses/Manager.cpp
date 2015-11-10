@@ -1522,7 +1522,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
       bestHypo = GetBestHypothesis();
       if (bestHypo) {
         if (options().output.ReportHypoScore) {
-          out << bestHypo->GetTotalScore() << ' ';
+          out << bestHypo->GetFutureScore() << ' ';
         }
         if (options().output.RecoverPath) {
           bestHypo->OutputInput(out);
@@ -1691,7 +1691,7 @@ OutputNBest(std::ostream& out,
     path.GetScoreBreakdown()->OutputAllFeatureScores(out, with_labels);
 
     // total
-    out << " ||| " << path.GetTotalScore();
+    out << " ||| " << path.GetFutureScore();
 
     //phrase-to-phrase segmentation
     if (includeSegmentation) {

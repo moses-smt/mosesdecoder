@@ -34,7 +34,7 @@ PhraseDictionaryGroup::PhraseDictionaryGroup(const string &line)
   : PhraseDictionary(line, true),
     m_numModels(0),
     m_restrict(false),
-    m_specifiedZeros(false)
+    m_haveDefaultScores(false)
 {
   ReadParameters();
 }
@@ -46,9 +46,9 @@ void PhraseDictionaryGroup::SetParameter(const string& key, const string& value)
     m_numModels = m_memberPDStrs.size();
   } else if (key == "restrict") {
     m_restrict = Scan<bool>(value);
-  } else if (key == "zeros") {
-    m_specifiedZeros = true;
-    m_zeros = Scan<float>(Tokenize(value, ","));
+  } else if (key =="default-scores") {
+    m_haveDefaultScores = true;
+    m_defaultScores = Scan<float>(Tokenize(value, ","));
   } else {
     PhraseDictionary::SetParameter(key, value);
   }
@@ -77,13 +77,13 @@ void PhraseDictionaryGroup::Load()
                  "Total number of member model scores is unequal to specified number of scores");
 
   // Determine "zero" scores for features
-  if (m_specifiedZeros) {
-    UTIL_THROW_IF2(m_zeros.size() != m_numScoreComponents,
-                   "Number of specified zeros is unequal to number of member model scores");
+  if (m_haveDefaultScores) {
+    UTIL_THROW_IF2(m_defaultScores.size() != m_numScoreComponents,
+                   "Number of specified default scores is unequal to number of member model scores");
   } else {
     // Default is all 0 (as opposed to e.g. -99 or similar to approximate log(0)
     // or a smoothed "not in model" score)
-    m_zeros = vector<float>(m_numScoreComponents, 0);
+    m_defaultScores = vector<float>(m_numScoreComponents, 0);
   }
 }
 
@@ -172,7 +172,7 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           phrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
           // Add phrase entry
           allPhrases.push_back(phrase);
-          allScores[targetPhrase] = make_pair(phrase, vector<float>(m_zeros));
+          allScores[targetPhrase] = make_pair(phrase, vector<float>(m_defaultScores));
         } else {
           // For existing phrases: merge extra scores (such as lr-func scores for mmsapt)
           TargetPhrase* phrase = iter->second.first;

@@ -205,7 +205,7 @@ outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
     }
 
     // weighted score
-    nBestXmlItem["totalScore"] = xmlrpc_c::value_double(path->GetTotalScore());
+    nBestXmlItem["totalScore"] = xmlrpc_c::value_double(path->GetFutureScore());
     nBestXml.push_back(xmlrpc_c::value_struct(nBestXmlItem));
   }
   retData["nbest"] = xmlrpc_c::value_array(nBestXml);

@@ -167,7 +167,7 @@ public:
   }
 
   //! Get the weighted total score
-  float GetTotalScore() const {
+  float GetFutureScore() const {
     // scores from current translation rule. eg. translation models & word penalty
     return m_totalScore;
   }
