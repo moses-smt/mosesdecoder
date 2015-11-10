@@ -16,11 +16,11 @@
 
 using namespace std;
 
-size_t g_numHypos = 0;
+//size_t g_numHypos = 0;
 
 Hypothesis *Hypothesis::Create(Manager &mgr)
 {
-	++g_numHypos;
+//	++g_numHypos;
 	Hypothesis *ret;
 
 	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();

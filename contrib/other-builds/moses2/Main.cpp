@@ -9,7 +9,7 @@
 
 using namespace std;
 
-extern size_t g_numHypos;
+//extern size_t g_numHypos;
 
 istream &GetInputStream(Moses::Parameter &params)
 {
@@ -51,6 +51,6 @@ int main(int argc, char** argv)
 		delete &inStream;
 	}
 
-	cerr << "g_numHypos=" << g_numHypos << endl;
+//	cerr << "g_numHypos=" << g_numHypos << endl;
 	cerr << "Finished" << endl;
 }
