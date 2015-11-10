@@ -74,3 +74,23 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 
   return ret;
 }
+
+void Stack::Prune(Recycler<Hypothesis*> &recycler, size_t size, size_t maxSize)
+{
+  assert(size <= maxSize);
+  if (GetSize() < maxSize) {
+	return;
+  }
+
+  std::vector<const Hypothesis*> hypos = GetBestHypos(size);
+
+  std::vector<const Hypothesis*>::iterator iter, iterNext;
+	for (iter = hypos.begin() + size; iter != hypos.end(); ++iter) {
+		Hypothesis *hypo = const_cast<Hypothesis*>(*iter);
+
+		m_hypos.erase(hypo);
+		recycler.push(hypo);
+
+	}
+}
+

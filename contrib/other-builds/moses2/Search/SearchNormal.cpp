@@ -20,7 +20,6 @@ using namespace std;
 SearchNormal::SearchNormal(Manager &mgr, Stacks &stacks)
 :m_mgr(mgr)
 ,m_stacks(stacks)
-,m_stackSize(mgr.system.stackSize)
 {
 	// TODO Auto-generated constructor stub
 
@@ -34,7 +33,7 @@ void SearchNormal::Decode(size_t stackInd)
 {
   Stack &stack = m_stacks[stackInd];
 
-  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_stackSize, m_mgr.GetHypoRecycle());
+  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoRecycle());
   BOOST_FOREACH(const Hypothesis *hypo, hypos) {
 		Extend(*hypo);
   }
@@ -193,6 +192,8 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	}
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
+	stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);
+
 }
 
 const Hypothesis *SearchNormal::GetBestHypothesis() const
