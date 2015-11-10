@@ -21,8 +21,11 @@ using namespace std;
 Scores::Scores(MemPool &pool, size_t numScores)
 :m_total(0)
 {
+	/*
 	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
 	Init<SCORE>(m_scores, numScores, 0);
+	*/
+	m_scores = NULL;
 }
 
 Scores::Scores(MemPool &pool,
@@ -30,8 +33,11 @@ Scores::Scores(MemPool &pool,
 		const Scores &origScores)
 :m_total(origScores.m_total)
 {
+	/*
 	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
 	memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
+	*/
+	m_scores = NULL;
 }
 
 Scores::~Scores() {
@@ -53,8 +59,9 @@ void Scores::PlusEquals(const System &system,
 	const Weights &weights = system.weights;
 
 	size_t ffStartInd = featureFunction.GetStartInd();
-	m_scores[ffStartInd] += score;
-
+	if (m_scores) {
+		m_scores[ffStartInd] += score;
+	}
 	SCORE weight = weights[ffStartInd];
 	m_total += score * weight;
 
@@ -71,8 +78,9 @@ void Scores::PlusEquals(const System &system,
 	size_t ffStartInd = featureFunction.GetStartInd();
 	for (size_t i = 0; i < scores.size(); ++i) {
 		SCORE incrScore = scores[i];
-		m_scores[ffStartInd + i] += incrScore;
-
+		if (m_scores) {
+			m_scores[ffStartInd + i] += incrScore;
+		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
 		SCORE weight = weights[ffStartInd + i];
 		m_total += incrScore * weight;
@@ -82,8 +90,10 @@ void Scores::PlusEquals(const System &system,
 void Scores::PlusEquals(const System &system, const Scores &other)
 {
 	size_t numScores = system.featureFunctions.GetNumScores();
-	for (size_t i = 0; i < numScores; ++i) {
-		m_scores[i] += other.m_scores[i];
+	if (m_scores) {
+		for (size_t i = 0; i < numScores; ++i) {
+			m_scores[i] += other.m_scores[i];
+		}
 	}
 	m_total += other.m_total;
 
@@ -99,9 +109,10 @@ void Scores::Assign(const System &system,
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 
-	assert(m_scores[ffStartInd] == 0);
-	m_scores[ffStartInd] = score;
-
+	if (m_scores) {
+		assert(m_scores[ffStartInd] == 0);
+		m_scores[ffStartInd] = score;
+	}
 	SCORE weight = weights[ffStartInd];
 	m_total += score * weight;
 
@@ -119,9 +130,10 @@ void Scores::Assign(const System &system,
 	for (size_t i = 0; i < scores.size(); ++i) {
 		SCORE incrScore = scores[i];
 
-		assert(m_scores[ffStartInd + i] == 0);
-		m_scores[ffStartInd + i] = incrScore;
-
+		if (m_scores) {
+			assert(m_scores[ffStartInd + i] == 0);
+			m_scores[ffStartInd + i] = incrScore;
+		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
 		SCORE weight = weights[ffStartInd + i];
 		m_total += incrScore * weight;
@@ -149,9 +161,11 @@ void Scores::CreateFromString(const std::string &str,
 void Scores::Debug(std::ostream &out, const FeatureFunctions &ffs) const
 {
 	out << m_total << " = ";
-	size_t numScores = ffs.GetNumScores();
-	for (size_t i = 0; i < numScores; ++i) {
-		out << m_scores[i] << " ";
+	if (m_scores) {
+		size_t numScores = ffs.GetNumScores();
+		for (size_t i = 0; i < numScores; ++i) {
+			out << m_scores[i] << " ";
+		}
 	}
 }
 
