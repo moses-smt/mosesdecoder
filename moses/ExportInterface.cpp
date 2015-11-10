@@ -84,6 +84,7 @@ SimpleTranslationInterface::SimpleTranslationInterface(const string &mosesIni): 
     cerr << "Error; Cannot load parameters at " << mosesIni<<endl;
     exit(1);
   }
+  ResetUserTime();
   if (!StaticData::LoadDataStatic(&m_params, mosesIni.c_str())) {
     cerr << "Error; Cannot load static data in file " << mosesIni<<endl;
     exit(1);
@@ -317,6 +318,7 @@ int decoder_main(int argc, char const** argv)
 
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
+    ResetUserTime();
     if (!StaticData::LoadDataStatic(&params, argv[0]))
       exit(1);
 

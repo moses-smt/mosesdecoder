@@ -13,6 +13,7 @@
 #include "moses/FactorCollection.h"
 #include "moses/Word.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/Range.h"

@@ -22,6 +22,7 @@
 #include "moses/AlignmentInfoCollection.h"
 #include "moses/InputFileStream.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/Word.h"
 #include "Trie.h"
 

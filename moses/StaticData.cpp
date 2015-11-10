@@ -303,7 +303,6 @@ ini_zombie_options()
 
 bool StaticData::LoadData(Parameter *parameter)
 {
-  ResetUserTime();
   m_parameter = parameter;
 
   const PARAM_VEC *params;
