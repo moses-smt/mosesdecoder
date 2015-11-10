@@ -192,7 +192,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	}
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
-	stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);
+	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);
 
 }
 
