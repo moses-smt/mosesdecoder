@@ -294,7 +294,7 @@ phrase-extract//score-stsg
 phrase-extract//filter-rule-table
 phrase-extract//postprocess-egret-forests
 biconcor 
-#contrib/mira//mira 
+# contrib/mira//mira 
 contrib/server//mosesserver 
 mm
 rephraser
