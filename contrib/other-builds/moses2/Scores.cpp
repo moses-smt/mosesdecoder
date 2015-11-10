@@ -46,7 +46,9 @@ Scores::~Scores() {
 
 void Scores::Reset(size_t numScores)
 {
-	Init<SCORE>(m_scores, numScores, 0);
+	if (m_scores) {
+		Init<SCORE>(m_scores, numScores, 0);
+	}
 	m_total = 0;
 }
 
