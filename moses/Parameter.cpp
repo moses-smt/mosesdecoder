@@ -981,6 +981,9 @@ ConvertWeightArgsLM()
         featureLine += "lazyken=0 ";
       }
 
+      if(oovWeights.size() > lmIndex)
+        featureLine += "oov-feature=1 ";
+
       featureLine += "path=" + modelToks[3]; // file
 
       AddFeature(featureLine);

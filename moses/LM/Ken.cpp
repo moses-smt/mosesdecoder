@@ -154,7 +154,7 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   ReadParameters();
 
   lm::ngram::Config config;
-  IFVERBOSE(1) {
+  if(this->m_verbosity >= 1) {
     config.messages = &std::cerr;
   }
   else {

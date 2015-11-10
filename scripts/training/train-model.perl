@@ -2295,18 +2295,21 @@ sub create_ini {
     }
 
     my $lm_oov_prob = 0.1;
-
+    my $lm_extra_options = "";
+    
     if ($_POST_DECODING_TRANSLIT || $_TRANSLITERATION_PHRASE_TABLE){
 	$lm_oov_prob = -100.0;
 	$_LMODEL_OOV_FEATURE = "yes";
     }
+    
+    if ($_LMODEL_OOV_FEATURE) {
+        # enable language model OOV feature
+        $lm_extra_options = " oov-feature=1";
+    }
 
-    $feature_spec .= "$type name=LM$i factor=$f path=$fn order=$o\n";
+    $feature_spec .= "$type name=LM$i factor=$f path=$fn order=$o$lm_extra_options\n";
     $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
-  }
-  if ($_LMODEL_OOV_FEATURE) {
-    print INI "\n# language model OOV feature enabled\n[lmodel-oov-feature]\n1\n\n";
   }
 
   # hierarchical model settings

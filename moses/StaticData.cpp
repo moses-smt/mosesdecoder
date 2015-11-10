@@ -63,7 +63,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
-  , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
   , m_treeStructure(NULL)
@@ -283,8 +282,6 @@ ini_oov_options()
   // m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
   // m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
   // m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
-
-  m_parameter->SetParameter(m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
   //source word deletion
   m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );

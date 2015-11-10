@@ -116,7 +116,6 @@ protected:
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
-  bool m_lmEnableOOVFeature;
 
   bool m_isAlwaysCreateDirectTranslationOption;
   //! constructor. only the 1 static variable can be created
@@ -364,10 +363,6 @@ public:
 
   size_t GetLMCacheCleanupThreshold() const {
     return m_lmcache_cleanup_threshold;
-  }
-
-  bool GetLMEnableOOVFeature() const {
-    return m_lmEnableOOVFeature;
   }
 
   const std::string& GetOutputUnknownsFile() const {
