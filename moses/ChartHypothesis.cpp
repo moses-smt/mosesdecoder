@@ -102,8 +102,8 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
-
+  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
+  
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {

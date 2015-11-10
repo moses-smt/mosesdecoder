@@ -175,7 +175,7 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  FactorType m_placeHolderFactor;
+  // FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
   S2TParsingAlgorithm m_s2tParsingAlgorithm;
@@ -664,9 +664,9 @@ public:
   std::map<std::string, std::string> OverrideFeatureNames();
   void OverrideFeatures();
 
-  FactorType GetPlaceholderFactor() const {
-    return m_placeHolderFactor;
-  }
+  // FactorType GetPlaceholderFactor() const {
+  //   return m_placeHolderFactor;
+  // }
 
   const FeatureRegistry &GetFeatureRegistry() const {
     return m_registry;

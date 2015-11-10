@@ -247,7 +247,7 @@ void
 Sentence::
 ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
   if (placeholderFactor == NOT_FOUND) {
     return;
   }

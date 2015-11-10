@@ -340,8 +340,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   ini_zombie_options(); // probably dead, or maybe not
 
-  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
-                            NOT_FOUND);
+  // m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
+  // NOT_FOUND);
 
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   initialize_features();

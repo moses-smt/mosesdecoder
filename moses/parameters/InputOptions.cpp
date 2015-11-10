@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include "moses/StaticData.h"
+#include "moses/TypeDef.h"
 
 namespace Moses {
 
@@ -37,6 +38,7 @@ namespace Moses {
     param.SetParameter(default_non_term_only_for_empty_range,
 		       "default-non-term-for-empty-range-only", false);
 
+    
     param.SetParameter<XmlInputType>(xml_policy, "xml-input", XmlPassThrough);
     
     // specify XML tags opening and closing brackets for XML option
@@ -59,7 +61,24 @@ namespace Moses {
                 << xml_brackets.first << " and " 
                 << xml_brackets.second << std::endl);
       }
+
+    param.SetParameter(placeholder_factor, "placeholder-factor", NOT_FOUND);
+
     return true;
   }
+
+
+#ifdef HAVE_XMLRPC_C
+  bool 
+  InputOptions::
+  update(std::map<std::string,xmlrpc_c::value>const& param)
+  {
+    typedef std::map<std::string, xmlrpc_c::value> params_t;
+    params_t::const_iterator si = param.find("xml-input");
+    if (si != param.end())
+      xml_policy = Scan<XmlInputType>(xmlrpc_c::value_string(si->second));
+    return true;
+  }
+#endif
 
 }
