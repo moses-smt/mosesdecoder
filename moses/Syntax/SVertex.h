@@ -23,7 +23,7 @@ struct SVertex {
   SHyperedge *best;
   std::vector<SHyperedge*> recombined;
   const PVertex *pvertex;
-  std::vector<FFState*> state;
+  std::vector<FFState*> states;
 };
 
 }  // Syntax

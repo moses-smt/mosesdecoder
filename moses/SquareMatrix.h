@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "TypeDef.h"
 #include "Util.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 
 namespace Moses
 {
@@ -49,6 +49,10 @@ public:
   ~SquareMatrix() {
     free(m_array);
   }
+
+  // set upper triangle
+  void InitTriangle(float val);
+
   /** Returns length of the square: typically the sentence length */
   inline size_t GetSize() const {
     return m_size;
@@ -61,8 +65,8 @@ public:
   inline void SetScore(size_t startPos, size_t endPos, float value) {
     m_array[startPos * m_size + endPos] = value;
   }
-  float CalcFutureScore( WordsBitmap const& ) const;
-  float CalcFutureScore( WordsBitmap const&, size_t startPos, size_t endPos ) const;
+  float CalcEstimatedScore( Bitmap const& ) const;
+  float CalcEstimatedScore( Bitmap const&, size_t startPos, size_t endPos ) const;
 
   TO_STRING();
 };

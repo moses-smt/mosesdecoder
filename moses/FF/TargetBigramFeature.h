@@ -20,7 +20,8 @@ public:
   const Word& GetWord() const {
     return m_word;
   }
-  virtual int Compare(const FFState& other) const;
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 private:
   Word m_word;
@@ -52,12 +53,12 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input

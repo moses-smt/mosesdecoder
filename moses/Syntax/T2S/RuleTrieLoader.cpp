@@ -15,7 +15,7 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "moses/Syntax/RuleTableFF.h"
@@ -55,7 +55,9 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
   std::vector<float> scoreVector;
   StringPiece line;
 
-  double_conversion::StringToDoubleConverter converter(double_conversion::StringToDoubleConverter::NO_FLAGS, NAN, NAN, "inf", "nan");
+  int noflags = double_conversion::StringToDoubleConverter::NO_FLAGS;
+  double_conversion::StringToDoubleConverter
+  converter(noflags, NAN, NAN, "inf", "nan");
 
   while(true) {
     try {
@@ -132,9 +134,9 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
     targetPhrase->GetScoreBreakdown().Assign(&ff, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, ff.GetFeaturesToApply());
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(
-                                           trie, *sourceLHS, sourcePhrase);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(trie, *sourceLHS, sourcePhrase);
+    phraseColl->Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now
     delete sourceLHS;

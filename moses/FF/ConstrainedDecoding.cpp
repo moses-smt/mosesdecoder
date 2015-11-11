@@ -22,10 +22,16 @@ ConstrainedDecodingState::ConstrainedDecodingState(const ChartHypothesis &hypo)
   hypo.GetOutputPhrase(m_outputPhrase);
 }
 
-int ConstrainedDecodingState::Compare(const FFState& other) const
+size_t ConstrainedDecodingState::hash() const
+{
+  size_t ret = hash_value(m_outputPhrase);
+  return ret;
+}
+
+bool ConstrainedDecodingState::operator==(const FFState& other) const
 {
   const ConstrainedDecodingState &otherFF = static_cast<const ConstrainedDecodingState&>(other);
-  int ret =     m_outputPhrase.Compare(otherFF.m_outputPhrase);
+  bool ret = m_outputPhrase == otherFF.m_outputPhrase;
   return ret;
 }
 
@@ -43,7 +49,9 @@ ConstrainedDecoding::ConstrainedDecoding(const std::string &line)
 void ConstrainedDecoding::Load()
 {
   const StaticData &staticData = StaticData::Instance();
-  bool addBeginEndWord = (staticData.GetSearchAlgorithm() == CYKPlus) || (staticData.GetSearchAlgorithm() == ChartIncremental);
+  bool addBeginEndWord
+  = ((staticData.options().search.algo == CYKPlus)
+     || (staticData.options().search.algo == ChartIncremental));
 
   for(size_t i = 0; i < m_paths.size(); ++i) {
     InputFileStream constraintFile(m_paths[i]);

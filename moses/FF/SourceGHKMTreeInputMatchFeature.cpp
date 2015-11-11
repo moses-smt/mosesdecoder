@@ -37,11 +37,11 @@ void SourceGHKMTreeInputMatchFeature::EvaluateWithSourceContext(const InputType 
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
-  const WordsRange& wordsRange = inputPath.GetWordsRange();
-  size_t startPos = wordsRange.GetStartPos();
-  size_t endPos = wordsRange.GetEndPos();
+  const Range& range = inputPath.GetWordsRange();
+  size_t startPos = range.GetStartPos();
+  size_t endPos = range.GetEndPos();
   const TreeInput& treeInput = static_cast<const TreeInput&>(input);
   const NonTerminalSet& treeInputLabels = treeInput.GetLabelSet(startPos,endPos);
   const Word& lhsLabel = targetPhrase.GetTargetLHS();

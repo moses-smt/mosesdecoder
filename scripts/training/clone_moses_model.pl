@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 # given a moses.ini file, creates a fresh version of it
@@ -136,7 +139,7 @@ sub clone_file_or_die {
         or die "Failed to clone $src into $tgt";
     }
   }
-  
+
   safesystem("echo $src > $tgt.info"); # dump a short information
 }
 

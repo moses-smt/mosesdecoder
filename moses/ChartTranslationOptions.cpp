@@ -23,6 +23,7 @@
 #include "ChartTranslationOption.h"
 #include "InputPath.h"
 #include "StaticData.h"
+#include "TranslationTask.h"
 
 using namespace std;
 
@@ -31,10 +32,10 @@ namespace Moses
 
 ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
     const StackVec &stackVec,
-    const WordsRange &wordsRange,
+    const Range &range,
     float score)
   : m_stackVec(stackVec)
-  , m_wordsRange(&wordsRange)
+  , m_wordsRange(&range)
   , m_estimateOfBestScore(score)
 {
   TargetPhraseCollection::const_iterator iter;
@@ -66,10 +67,11 @@ public:
 void ChartTranslationOptions::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
   SetInputPath(&inputPath);
-  if (StaticData::Instance().GetPlaceholderFactor() != NOT_FOUND) {
+  // if (StaticData::Instance().GetPlaceholderFactor() != NOT_FOUND) {
+  if (inputPath.ttask.lock()->options().input.placeholder_factor != NOT_FOUND) {
     CreateSourceRuleFromInputPath();
   }
-
+  
   CollType::iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
     ChartTranslationOption &transOpt = **iter;

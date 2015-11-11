@@ -26,7 +26,8 @@ public:
   ControlRecombinationState(const Hypothesis &hypo, const ControlRecombination &ff);
   ControlRecombinationState(const ChartHypothesis &hypo, const ControlRecombination &ff);
 
-  int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
   const Phrase &GetPhrase() const {
     return m_outputPhrase;
@@ -60,14 +61,14 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input

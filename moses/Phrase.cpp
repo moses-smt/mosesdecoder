@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
 
 /***********************************************************************
@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"  // GetMaxNumFactors
 
 #include "util/string_piece.hh"
+#include "util/string_stream.hh"
 #include "util/tokenize_piece.hh"
 
 using namespace std;
@@ -88,11 +89,11 @@ void Phrase::MergeFactors(const Phrase &copy, const std::vector<FactorType>& fac
 }
 
 
-Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
+Phrase Phrase::GetSubString(const Range &range) const
 {
-  Phrase retPhrase(wordsRange.GetNumWordsCovered());
+  Phrase retPhrase(range.GetNumWordsCovered());
 
-  for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++) {
+  for (size_t currPos = range.GetStartPos() ; currPos <= range.GetEndPos() ; currPos++) {
     Word &word = retPhrase.AddWord();
     word = GetWord(currPos);
   }
@@ -100,11 +101,11 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
   return retPhrase;
 }
 
-Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType) const
+Phrase Phrase::GetSubString(const Range &range, FactorType factorType) const
 {
-  Phrase retPhrase(wordsRange.GetNumWordsCovered());
+  Phrase retPhrase(range.GetNumWordsCovered());
 
-  for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++) {
+  for (size_t currPos = range.GetStartPos() ; currPos <= range.GetEndPos() ; currPos++) {
     const Factor* f = GetFactor(currPos, factorType);
     Word &word = retPhrase.AddWord();
     word.SetFactor(factorType, f);
@@ -117,12 +118,15 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
   bool markUnknown = StaticData::Instance().GetMarkUnknown();
 
-  stringstream strme;
+  util::StringStream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
-    if(markUnknown && GetWord(pos).IsOOV()) {
-      strme << "UNK";
+    if (markUnknown && GetWord(pos).IsOOV()) {
+      strme << StaticData::Instance().GetUnknownWordPrefix();
     }
     strme << GetWord(pos).GetString(factorsToPrint, (pos != GetSize()-1));
+    if (markUnknown && GetWord(pos).IsOOV()) {
+      strme << StaticData::Instance().GetUnknownWordSuffix();
+    }
   }
 
   return strme.str();
@@ -248,6 +252,35 @@ int Phrase::Compare(const Phrase &other) const
   }
 
   return 0;
+}
+
+size_t Phrase::hash() const
+{
+  size_t  seed = 0;
+  for (size_t i = 0; i < GetSize(); ++i) {
+    boost::hash_combine(seed, GetWord(i));
+  }
+  return seed;
+}
+
+bool Phrase::operator== (const Phrase &other) const
+{
+  size_t thisSize = GetSize()
+                    ,compareSize = other.GetSize();
+  if (thisSize != compareSize) {
+    return false;
+  }
+
+  for (size_t pos = 0 ; pos < thisSize ; pos++) {
+    const Word &thisWord	= GetWord(pos)
+                            ,&otherWord	= other.GetWord(pos);
+    bool ret = thisWord == otherWord;
+    if (!ret) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 

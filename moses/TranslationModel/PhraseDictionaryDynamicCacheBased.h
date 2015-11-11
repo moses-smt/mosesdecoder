@@ -53,7 +53,7 @@ class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
 {
 
   typedef std::vector<unsigned int> AgeCollection;
-  typedef std::pair<TargetPhraseCollection*, AgeCollection*> TargetCollectionAgePair;
+  typedef std::pair<TargetPhraseCollection::shared_ptr , AgeCollection*> TargetCollectionAgePair;
   typedef std::map<Phrase, TargetCollectionAgePair> cacheMap;
 
   // data structure for the cache
@@ -111,9 +111,14 @@ public:
   void Load();
   void Load(const std::string files);
 
-  const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &src) const;
-  const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(Phrase const &src) const;
-  const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollection(const Phrase &src) const;
+
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollectionLEGACY(Phrase const &src) const;
+
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   // for phrase-based model
   //  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
@@ -123,7 +128,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void InitializeForInput(InputType const& source);
+  void InitializeForInput(ttasksptr const& ttask);
 
   //  virtual void InitializeForInput(InputType const&) {
   //    /* Don't do anything source specific here as this object is shared between threads.*/

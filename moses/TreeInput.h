@@ -8,15 +8,15 @@
 
 namespace Moses
 {
-  class TranslationTask;
+class TranslationTask;
 //! @todo what is this?
 class XMLParseOutput
 {
 public:
   std::string m_label;
-  WordsRange m_range;
+  Range m_range;
 
-  XMLParseOutput(const std::string &label, const WordsRange &range)
+  XMLParseOutput(const std::string &label, const Range &range)
     : m_label(label)
     , m_range(range) {
   }
@@ -43,8 +43,10 @@ protected:
     return m_sourceChart[startPos][endPos - startPos];
   }
 
-  bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
-
+  bool ProcessAndStripXMLTags(AllOptions const& opts, std::string &line, 
+			      std::vector<XMLParseOutput> &sourceLabels, 
+			      std::vector<XmlOption*> &res);
+  
 public:
   TreeInput() : Sentence() { }
 
@@ -53,7 +55,10 @@ public:
   }
 
   //! populate this InputType with data from in stream
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  virtual int
+  Read(std::istream& in,
+       const std::vector<FactorType>& factorOrder,
+       AllOptions const& opts);
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const;

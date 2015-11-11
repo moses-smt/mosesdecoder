@@ -11,7 +11,8 @@
 #include "moses/Syntax/RuleTableFF.h"
 #include "moses/Syntax/SHyperedgeBundle.h"
 #include "moses/Syntax/SVertex.h"
-#include "moses/Syntax/SVertexRecombinationOrderer.h"
+#include "moses/Syntax/SVertexRecombinationEqualityPred.h"
+#include "moses/Syntax/SVertexRecombinationHasher.h"
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
 #include "moses/Syntax/T2S/InputTree.h"
@@ -39,7 +40,7 @@ Manager<RuleMatcher>::Manager(ttasksptr const& ttask)
   if (const ForestInput *p = dynamic_cast<const ForestInput*>(&m_source)) {
     m_forest = p->GetForest();
     m_rootVertex = p->GetRootVertex();
-	m_sentenceLength = p->GetSize();
+    m_sentenceLength = p->GetSize();
   } else if (const TreeInput *p = dynamic_cast<const TreeInput*>(&m_source)) {
     T2S::InputTreeBuilder builder;
     T2S::InputTree tmpTree;
@@ -59,9 +60,9 @@ void Manager<RuleMatcher>::Decode()
   const StaticData &staticData = StaticData::Instance();
 
   // Get various pruning-related constants.
-  const std::size_t popLimit = staticData.GetCubePruningPopLimit();
+  const std::size_t popLimit = staticData.options().cube.pop_limit;
   const std::size_t ruleLimit = staticData.GetRuleLimit();
-  const std::size_t stackLimit = staticData.GetMaxHypoStackSize();
+  const std::size_t stackLimit = staticData.options().search.stack_size;
 
   // Initialize the stacks.
   InitializeStacks();
@@ -254,7 +255,7 @@ void Manager<RuleMatcher>::ExtractKBest(
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
   const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.GetNBestFactor();
+  const std::size_t nBestFactor = staticData.options().nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? k*1000 : k*nBestFactor;
 
   // Extract the derivations.
@@ -285,7 +286,9 @@ void Manager<RuleMatcher>::RecombineAndSort(
   // head pointers are updated to point to the vertex instances in the map and
   // any 'duplicate' vertices are deleted.
 // TODO Set?
-  typedef std::map<SVertex *, SVertex *, SVertexRecombinationOrderer> Map;
+  typedef boost::unordered_map<SVertex *, SVertex *,
+          SVertexRecombinationHasher,
+          SVertexRecombinationEqualityPred> Map;
   Map map;
   for (std::vector<SHyperedge*>::const_iterator p = buffer.begin();
        p != buffer.end(); ++p) {

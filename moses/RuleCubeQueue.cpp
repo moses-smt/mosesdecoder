@@ -50,7 +50,7 @@ ChartHypothesis *RuleCubeQueue::Pop()
   // pop the most promising item from the cube and get the corresponding
   // hypothesis
   RuleCubeItem *item = cube->Pop(m_manager);
-  if (StaticData::Instance().GetCubePruningLazyScoring()) {
+  if (StaticData::Instance().options().cube.lazy_scoring) {
     item->CreateHypothesis(cube->GetTranslationOption(), m_manager);
   }
   ChartHypothesis *hypo = item->ReleaseHypothesis();

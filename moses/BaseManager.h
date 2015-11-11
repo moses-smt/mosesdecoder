@@ -5,7 +5,7 @@
 #include <string>
 #include "ScoreComponentCollection.h"
 #include "InputType.h"
-
+#include "moses/parameters/AllOptions.h"
 namespace Moses
 {
 class ScoreComponentCollection;
@@ -17,12 +17,12 @@ class BaseManager
 protected:
   // const InputType &m_source; /**< source sentence to be translated */
   ttaskwptr m_ttask;
-  InputType const& m_source; 
+  InputType const& m_source;
 
-  BaseManager(ttasksptr const& ttask); 
-  
+  BaseManager(ttasksptr const& ttask);
+
   // output
-  typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
+  typedef std::vector<std::pair<Moses::Word, Moses::Range> > ApplicationContext;
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
 
   void OutputSurface(std::ostream &out,
@@ -50,6 +50,8 @@ public:
 
   //! the input sentence being decoded
   const InputType& GetSource() const;
+  const ttasksptr  GetTtask() const;
+  AllOptions const& options() const;
 
   virtual void Decode() = 0;
   // outputs
@@ -63,8 +65,11 @@ public:
   virtual void OutputSearchGraph(OutputCollector *collector) const = 0;
   virtual void OutputUnknowns(OutputCollector *collector) const = 0;
   virtual void OutputSearchGraphSLF() const = 0;
-  virtual void OutputSearchGraphHypergraph() const = 0;
+  // virtual void OutputSearchGraphHypergraph() const = 0;
 
+  virtual void OutputSearchGraphAsHypergraph(std::ostream& out) const;
+  virtual void OutputSearchGraphAsHypergraph(std::string const& fname,
+      size_t const precision) const;
   /***
    * to be called after processing a sentence
    */

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/unordered_set.hpp>
 #include "moses/InputType.h"
 #include "moses/BaseManager.h"
 
@@ -29,7 +30,13 @@ public:
     OutputCollector *collector) const {}
   void OutputLatticeSamples(OutputCollector *collector) const {}
   void OutputSearchGraph(OutputCollector *collector) const {}
-  void OutputSearchGraphHypergraph() const {}
+  // void OutputSearchGraphHypergraph() const {}
+
+  void
+  OutputSearchGraphAsHypergraph
+  ( std::string const& fname, size_t const precision ) const
+  { }
+
   void OutputSearchGraphSLF() const {}
   void OutputWordGraph(OutputCollector *collector) const {}
   void OutputDetailedTranslationReport(OutputCollector *collector) const {}
@@ -44,7 +51,7 @@ public:
   virtual const SHyperedge *GetBestSHyperedge() const = 0;
 
 protected:
-  std::set<Word> m_oovs;
+  boost::unordered_set<Word> m_oovs;
 
 private:
   // Syntax-specific helper functions used to implement OutputNBest.

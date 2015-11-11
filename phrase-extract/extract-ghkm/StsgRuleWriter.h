@@ -2,11 +2,13 @@
 #ifndef EXTRACT_GHKM_STSG_RULE_WRITER_H_
 #define EXTRACT_GHKM_STSG_RULE_WRITER_H_
 
-#include "Subgraph.h"
-
 #include <ostream>
 
-namespace Moses
+#include "Subgraph.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -36,6 +38,7 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

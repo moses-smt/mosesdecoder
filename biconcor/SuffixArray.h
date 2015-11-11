@@ -15,6 +15,12 @@ private:
   INDEX *m_sentence;
   char *m_sentenceLength;
   WORD_ID m_endOfSentence;
+  INDEX *m_document;
+  INDEX *m_documentName;
+  char *m_documentNameBuffer;
+  size_t m_documentNameLength;
+  size_t m_documentCount;
+  bool m_useDocument;
   Vocabulary m_vcb;
   INDEX m_size;
   INDEX m_sentenceCount;
@@ -28,6 +34,7 @@ public:
   ~SuffixArray();
 
   void Create(const std::string& fileName );
+  bool ProcessDocumentLine( const char* const, const size_t );
   void Sort(INDEX start, INDEX end);
   int CompareIndex( INDEX a, INDEX b ) const;
   inline int CompareWord( WORD_ID a, WORD_ID b ) const;
@@ -40,6 +47,7 @@ public:
   INDEX FindLast( const std::vector< WORD > &phrase, INDEX start, INDEX end, int direction );
   int Match( const std::vector< WORD > &phrase, INDEX index );
   void List( INDEX start, INDEX end );
+  void PrintSentenceMatches( const std::vector< WORD > &phrase );
   inline INDEX GetPosition( INDEX index ) const {
     return m_index[ index ];
   }
@@ -58,6 +66,17 @@ public:
   inline WORD GetWord( INDEX position ) const {
     return m_vcb.GetWord( m_array[position] );
   }
+  void UseDocument() {
+    m_useDocument = true;
+  }
+  INDEX GetDocument( INDEX sentence ) const;
+  void PrintDocumentName( INDEX document ) {
+    for(INDEX i=m_documentName[ document ]; m_documentNameBuffer[i] != 0; i++) {
+      std::cout << m_documentNameBuffer[ i ];
+    }
+  }
   void Save(const std::string& fileName ) const;
   void Load(const std::string& fileName );
+  void CheckAllocation(bool, const char *dataStructure) const;
+  bool Error( const char* message, const std::string& fileName) const;
 };

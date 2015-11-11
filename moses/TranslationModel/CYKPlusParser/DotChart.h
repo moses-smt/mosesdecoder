@@ -38,7 +38,7 @@ public:
     : m_cellLabel(&ccl)
     , m_prev(&prev) {}
 
-  const WordsRange &GetWordsRange() const {
+  const Range &GetWordsRange() const {
     return m_cellLabel->GetCoverage();
   }
   const Word &GetSourceWord() const {

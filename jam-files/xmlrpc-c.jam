@@ -2,7 +2,7 @@
 # xmlrpc-c library (including the abyss server) that is needed for 
 # moses server functionality
 
-if [ option.get "no-xmlrpc-c" ] 
+if [ option.get "no-xmlrpc-c" : : "yes" ]
 {
   rule xmlrpc ( what ? ) { } # never return anything
 }

@@ -12,7 +12,7 @@ namespace Moses
 {
 WordLattice::WordLattice()  : ConfusionNet()
 {
-  UTIL_THROW_IF2(&InputFeature::Instance() == NULL,
+  UTIL_THROW_IF2(InputFeature::InstancePtr() == NULL,
                  "Input feature must be specified");
 }
 
@@ -57,9 +57,9 @@ InitializeFromPCNDataType
  const std::string& debug_line)
 {
   // const StaticData &staticData = StaticData::Instance();
-  const InputFeature &inputFeature = InputFeature::Instance();
-  size_t numInputScores = inputFeature.GetNumInputScores();
-  size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
+  size_t numInputScores = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
 
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 
@@ -147,7 +147,11 @@ InitializeFromPCNDataType
   return !cn.empty();
 }
 
-int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+int
+WordLattice::
+Read(std::istream& in,
+     std::vector<FactorType> const& factorOrder,
+     AllOptions const& opts)
 {
   Clear();
   std::string line;
@@ -171,7 +175,7 @@ void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
   }
 }
 
-int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
+int WordLattice::ComputeDistortionDistance(const Range& prev, const Range& current) const
 {
   int result;
 

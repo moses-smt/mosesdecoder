@@ -67,13 +67,14 @@ public:
   bool ReadF(std::istream&,const std::vector<FactorType>& factorOrder,int format=0);
   virtual void Print(std::ostream&) const;
 
-  int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  int Read(std::istream& in,const std::vector<FactorType>& factorOrder,
+           AllOptions const& opts);
 
-  Phrase GetSubString(const WordsRange&) const; //TODO not defined
+  Phrase GetSubString(const Range&) const; //TODO not defined
   std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined
   const Word& GetWord(size_t pos) const;
 
-  TranslationOptionCollection* 
+  TranslationOptionCollection*
   CreateTranslationOptionCollection(ttasksptr const& ttask) const;
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {

@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 # given a list of files, combines them to a single corpus (sent to stdout)
@@ -50,7 +53,7 @@ while (defined $_) {
       if $#toks != $#intokens;
     $lines_of_extratoks[$factor] = \@toks;
   }
-  
+
   # for every token, print the factors in the order as user wished
   for(my $i=0; $i<=$#intokens; $i++) {
     my $token = $intokens[$i];

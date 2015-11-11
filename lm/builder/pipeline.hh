@@ -18,7 +18,6 @@ class Output;
 
 struct PipelineConfig {
   std::size_t order;
-  std::string vocab_file;
   util::stream::SortConfig sort;
   InitialProbabilitiesConfig initial_probs;
   util::stream::ChainConfig read_backoffs;
@@ -39,12 +38,15 @@ struct PipelineConfig {
   bool prune_vocab;
   std::string prune_vocab_file;
 
+  /* Renumber the vocabulary the way the trie likes it? */
+  bool renumber_vocabulary;
+
   // What to do with discount failures.
   DiscountConfig discount;
 
   // Compute collapsed q values instead of probability and backoff
   bool output_q;
-  
+
   /* Computing the perplexity of LMs with different vocabularies is hard.  For
    * example, the lowest perplexity is attained by a unigram model that
    * predicts p(<unk>) = 1 and has no other vocabulary.  Also, linearly

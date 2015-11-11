@@ -11,26 +11,42 @@ namespace Moses
 {
 
 class Manager;
-class InputType;
 class TranslationOptionCollection;
 
-/** Functions and variables you need to decoder an input using the phrase-based decoder (NO cube-pruning)
+/** Functions and variables you need to decoder an input using the
+ *  phrase-based decoder (NO cube-pruning)
  *  Instantiated by the Manager class
  */
 class SearchNormal: public Search
 {
 protected:
-  const InputType &m_source;
-  std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */
+  //! stacks to store hypotheses (partial translations)
   // no of elements = no of words in source + 1
-  size_t interrupted_flag; /**< flag indicating that decoder ran out of time (see switch -time-out) */
-  HypothesisStackNormal* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/
-  const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
+  std::vector < HypothesisStack* > m_hypoStackColl;
+
+  /** actual (full expanded) stack of hypotheses*/
+  HypothesisStackNormal* actual_hypoStack;
+
+  /** pre-computed list of translation options for the phrases in this sentence */
+  const TranslationOptionCollection &m_transOptColl;
 
   // functions for creating hypotheses
-  void ProcessOneHypothesis(const Hypothesis &hypothesis);
-  void ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);
-  virtual void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, float expectedScore);
+
+  virtual bool
+  ProcessOneStack(HypothesisStack* hstack);
+
+  virtual void
+  ProcessOneHypothesis(const Hypothesis &hypothesis);
+
+  virtual void
+  ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);
+
+  virtual void
+  ExpandHypothesis(const Hypothesis &hypothesis,
+                   const TranslationOption &transOpt,
+                   float expectedScore,
+                   float estimatedScore,
+                   const Bitmap &bitmap);
 
 public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);

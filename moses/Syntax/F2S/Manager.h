@@ -1,10 +1,10 @@
 #pragma once
 
-#include <set>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "moses/InputType.h"
 #include "moses/Syntax/KBestExtractor.h"
@@ -38,8 +38,8 @@ public:
   const SHyperedge *GetBestSHyperedge() const;
 
   typedef std::vector<boost::shared_ptr<KBestExtractor::Derivation> > kBestList_t;
-  void ExtractKBest(std::size_t k, kBestList_t& kBestList, 
-		    bool onlyDistinct=false) const;
+  void ExtractKBest(std::size_t k, kBestList_t& kBestList,
+                    bool onlyDistinct=false) const;
 
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
 

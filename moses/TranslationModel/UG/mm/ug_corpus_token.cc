@@ -1,14 +1,16 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include "ug_corpus_token.h"
-// Simple wrapper around integer IDs for use with the Ctrack and TSA template classes.
+// Simple wrapper around integer IDs for use with the Ctrack and TSA
+// template classes.  
 // (c) 2007-2009 Ulrich Germann
 
-namespace ugdiss
+namespace sapt
 {
   id_type const&
   SimpleWordId::
-  id() const 
-  { 
-    return theID; 
+  id() const
+  {
+    return theID;
   }
 
   int
@@ -35,7 +37,7 @@ namespace ugdiss
 
   id_type
   SimpleWordId::
-  remap(vector<id_type const*> const& m) const
+  remap(std::vector<id_type const*> const& m) const
   {
     if (!m[0]) return theID;
     return m[0][theID];

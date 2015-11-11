@@ -30,6 +30,8 @@
     <File Name="../../../util/string_piece.cc"/>
     <File Name="../../../util/tokenize_piece_test.cc" ExcludeProjConfig="Debug"/>
     <File Name="../../../util/usage.cc"/>
+    <File Name="../../../util/random.cc"/>
+    <File Name="../../../util/random.hh"/>
   </VirtualDirectory>
   <VirtualDirectory Name="double-conversion">
     <File Name="../../../util/double-conversion/bignum-dtoa.cc"/>
@@ -60,6 +62,8 @@
     <File Name="../../../util/stream/sort_test.cc" ExcludeProjConfig="Debug"/>
     <File Name="../../../util/stream/stream_test.cc" ExcludeProjConfig="Debug"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -73,8 +77,8 @@
     <Configuration Name="Debug" CompilerType="GCC" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
-        <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder"/>
-        <IncludePath Value="/Users/hieu/workspace/github/mosesdecoder/boost/include"/>
+        <IncludePath Value="../../.."/>
+        <IncludePath Value="../../../boost/include"/>
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
@@ -103,7 +107,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -141,7 +145,7 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
-      <Completion EnableCpp11="no">
+      <Completion EnableCpp11="no" EnableCpp14="no">
         <ClangCmpFlagsC/>
         <ClangCmpFlags/>
         <ClangPP/>
@@ -149,6 +153,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>

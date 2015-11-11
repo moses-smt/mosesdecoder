@@ -23,7 +23,7 @@ public:
 
   void Load();
 
-  void InitializeForInput(InputType const& source);
+  void InitializeForInput(ttasksptr const& ttask);
 
   // for phrase-based model
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
@@ -46,7 +46,7 @@ protected:
   typedef boost::bimap<const Factor *, unsigned int> TargetVocabMap;
   mutable TargetVocabMap m_vocabMap;
 
-  TargetPhraseCollection *CreateTargetPhrase(const Phrase &sourcePhrase) const;
+  TargetPhraseCollection::shared_ptr CreateTargetPhrase(const Phrase &sourcePhrase) const;
   TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
   const Factor *GetTargetFactor(uint64_t probingId) const;
   uint64_t GetSourceProbingId(const Factor *factor) const;

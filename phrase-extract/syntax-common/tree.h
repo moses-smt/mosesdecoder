@@ -61,23 +61,31 @@ class Tree {
   //
   // All iterators are forward iterators.  Example use:
   //
-  //  Tree<int> &root = GetMeATree();
-  //  for (Tree<int>::PreOrderIterator p(root);
-  //       p != Tree<int>::PreOrderIterator(); ++p) {
-  //    std::cout << p->value() << " ";
+  //  const Tree<int> &root = GetMeATree();
+  //  for (Tree<int>::ConstPreOrderIterator p(root);
+  //       p != Tree<int>::ConstPreOrderIterator(); ++p) {
+  //    std::cout << p->value() << "\n";
   //  }
 
+ private:
+  // Use templates to avoid code duplication between const and non-const
+  // iterators.  V is the value type: either Tree<T> or const Tree<T>.
+  template<typename V> class PreOrderIter;
+  // template<typename V> class PostOrderIter; TODO
+  template<typename V> class LeafIter;
+
+ public:
   // Pre-order iterators.
-  class PreOrderIterator;
-  // class ConstPreOrderIterator; TODO
+  typedef PreOrderIter<Tree<T> > PreOrderIterator;
+  typedef PreOrderIter<const Tree<T> > ConstPreOrderIterator;
 
   // Post-order iterators.
-  // class PostOrderIterator; TODO
-  // class ConstPostOrderIterator; TODO
+  // typedef PostOrderIter<Tree<T> > PostOrderIterator; TODO
+  // typedef PostOrderIter<const Tree<T> > ConstPostOrderIterator; TODO
 
   // Leaf iterators (left-to-right).
-  // class LeafIterator; TODO
-  // class ConstLeafIterator; TODO
+  typedef LeafIter<Tree<T> > LeafIterator;
+  typedef LeafIter<const Tree<T> > ConstLeafIterator;
 
  private:
   T value_;

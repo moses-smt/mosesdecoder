@@ -23,7 +23,8 @@ public:
   const Word* GetTargetWord() const {
     return m_targetWord;
   }
-  virtual int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 
 private:
@@ -58,7 +59,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -67,7 +68,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
   void SetParameter(const std::string& key, const std::string& value);

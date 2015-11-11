@@ -4,7 +4,6 @@
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "StatelessFeatureFunction.h"
-#include "FFState.h"
 #include "moses/Factor.h"
 
 namespace Moses
@@ -36,7 +35,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
     targetPhrase.SetRuleSource(source);
   };
 
@@ -45,7 +44,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const

@@ -9,6 +9,8 @@
 #include "ExtractionPhrasePair.h"
 #include "OutputFileStream.h"
 
+#include "syntax-common/tool.h"
+
 #include "LexicalTable.h"
 #include "Options.h"
 #include "RuleSymbol.h"
@@ -25,16 +27,12 @@ namespace ScoreStsg
 class RuleGroup;
 class RuleTableWriter;
 
-class ScoreStsg
+class ScoreStsg : public Tool
 {
 public:
   ScoreStsg();
 
-  const std::string &GetName() const {
-    return m_name;
-  }
-
-  int Main(int argc, char *argv[]);
+  virtual int Main(int argc, char *argv[]);
 
 private:
   static const int kCountOfCountsMax;
@@ -42,10 +40,6 @@ private:
   double ComputeLexProb(const std::vector<RuleSymbol> &,
                         const std::vector<RuleSymbol> &,
                         const ALIGNMENT &);
-
-  void Error(const std::string &) const;
-
-  void OpenOutputFileOrDie(const std::string &, Moses::OutputFileStream &);
 
   void ParseAlignmentString(const std::string &, int,
                             ALIGNMENT &);
@@ -59,7 +53,6 @@ private:
 
   void TokenizeRuleHalf(const std::string &, TokenizedRuleHalf &);
 
-  std::string m_name;
   Options m_options;
   Vocabulary m_srcVocab;
   Vocabulary m_tgtVocab;

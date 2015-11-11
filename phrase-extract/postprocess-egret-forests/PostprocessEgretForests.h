@@ -4,6 +4,8 @@
 #include <ostream>
 #include <string>
 
+#include "syntax-common/tool.h"
+
 namespace MosesTraining
 {
 namespace Syntax
@@ -14,31 +16,21 @@ namespace PostprocessEgretForests
 struct Options;
 class SplitPointFileParser;
 
-class PostprocessEgretForests
+class PostprocessEgretForests : public Tool
 {
 public:
-  PostprocessEgretForests() : m_name("postprocess-egret-forests") {}
+  PostprocessEgretForests() : Tool("postprocess-egret-forests") {}
 
-  void Error(const std::string &) const;
-
-  const std::string &GetName() const {
-    return m_name;
-  }
-
-  int Main(int argc, char *argv[]);
+  virtual int Main(int argc, char *argv[]);
 
 private:
   void OneBestTree(std::istream &, std::ostream &, SplitPointFileParser *,
                    const Options &);
 
-  void OpenInputFileOrDie(const std::string &, std::ifstream &);
-
   void ProcessForest(std::istream &, std::ostream &, SplitPointFileParser *,
                      const Options &);
 
   void ProcessOptions(int, char *[], Options &) const;
-
-  std::string m_name;
 };
 
 }  // namespace PostprocessEgretForests

@@ -22,23 +22,31 @@ void osmState::saveState(int jVal, int eVal, map <int , string> & gapVal)
   E = eVal;
 }
 
-int osmState::Compare(const FFState& otherBase) const
+size_t osmState::hash() const
+{
+  size_t ret = j;
+
+  boost::hash_combine(ret, E);
+  boost::hash_combine(ret, gap);
+  boost::hash_combine(ret, lmState.length);
+
+  return ret;
+}
+
+bool osmState::operator==(const FFState& otherBase) const
 {
   const osmState &other = static_cast<const osmState&>(otherBase);
   if (j != other.j)
-    return (j < other.j) ? -1 : +1;
+    return false;
   if (E != other.E)
-    return (E < other.E) ? -1 : +1;
+    return false;
   if (gap != other.gap)
-    return (gap < other.gap) ? -1 : +1;
+    return false;
+  if (lmState.length != other.lmState.length)
+    return false;
 
-  if (lmState.length < other.lmState.length) return -1;
-
-  if (lmState.length > other.lmState.length) return 1;
-
-  return 0;
+  return true;
 }
-
 
 std::string osmState :: getName() const
 {
@@ -128,7 +136,7 @@ void osmHypothesis :: calculateOSMProb(OSMLM& ptrOp)
   State currState = lmState;
   State temp;
 
-  for (int i = 0; i<operations.size(); i++) {
+  for (size_t i = 0; i<operations.size(); i++) {
     temp = currState;
     opProb += ptrOp.Score(temp,operations[i],currState);
   }
@@ -157,15 +165,11 @@ int osmHypothesis :: firstOpenGap(vector <int> & coverageVector)
 
 string osmHypothesis :: intToString(int num)
 {
-
-  std::ostringstream stm;
-  stm<<num;
-
-  return stm.str();
+  return SPrint(num);
 
 }
 
-void osmHypothesis :: generateOperations(int & startIndex , int j1 , int contFlag , WordsBitmap & coverageVector , string english , string german , set <int> & targetNullWords , vector <string> & currF)
+void osmHypothesis :: generateOperations(int & startIndex , int j1 , int contFlag , Bitmap & coverageVector , string english , string german , set <int> & targetNullWords , vector <string> & currF)
 {
 
   int gFlag = 0;
@@ -358,7 +362,7 @@ void osmHypothesis :: generateDeleteOperations(std::string english, int currTarg
 
 }
 
-void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageVector)
+void osmHypothesis :: computeOSMFeature(int startIndex , Bitmap & coverageVector)
 {
 
   set <int> doneTargetIndexes;
@@ -368,7 +372,6 @@ void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageV
   string english;
   string source;
   int j1;
-  int start = 0;
   int targetIndex = 0;
   doneTargetIndexes.clear();
 
@@ -391,7 +394,7 @@ void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageV
   }
 
 
-  for (int i = 0; i < ceptsInPhrase.size(); i++) {
+  for (size_t i = 0; i < ceptsInPhrase.size(); i++) {
     source = "";
     english = "";
 
@@ -462,7 +465,7 @@ void osmHypothesis :: getMeCepts ( set <int> & eSide , set <int> & fSide , map <
   for (iter = eSide.begin(); iter != eSide.end(); iter++) {
     t = tS[*iter];
 
-    for (int i = 0; i < t.size(); i++) {
+    for (size_t i = 0; i < t.size(); i++) {
       fSide.insert(t[i]);
     }
 
@@ -472,7 +475,7 @@ void osmHypothesis :: getMeCepts ( set <int> & eSide , set <int> & fSide , map <
 
     t = sT[*iter];
 
-    for (int i = 0 ; i<t.size(); i++) {
+    for (size_t i = 0 ; i<t.size(); i++) {
       eSide.insert(t[i]);
     }
 
@@ -498,7 +501,7 @@ void osmHypothesis :: constructCepts(vector <int> & align , int startIndex , int
   int tgt;
 
 
-  for (int i = 0;  i < align.size(); i+=2) {
+  for (size_t i = 0;  i < align.size(); i+=2) {
     src = align[i];
     tgt = align[i+1];
     tS[tgt].push_back(src);

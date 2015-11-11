@@ -60,12 +60,12 @@ static void add(const string& e, const vector<float> scores,
 
 static void finalise(Probs& p_e_given_f, Probs& p_f_given_e) {
   //cerr << "Sizes: p(e|f): " << p_e_given_f.size() << " p(f|e): " << p_f_given_e.size() << endl;
-  for (Probs::const_iterator e1_iter = p_f_given_e.begin() ; 
+  for (Probs::const_iterator e1_iter = p_f_given_e.begin() ;
           e1_iter !=  p_f_given_e.end(); ++e1_iter) {
     for (Probs::const_iterator e2_iter = p_e_given_f.begin() ;
           e2_iter != p_e_given_f.end(); ++e2_iter) {
 
-      if (e1_iter->second == e2_iter->second) continue; 
+      if (e1_iter->second == e2_iter->second) continue;
       cout << e1_iter->second << " ||| " << e2_iter->second << " ||| " <<
         e1_iter->first * e2_iter->first << " |||  " << endl;
     }

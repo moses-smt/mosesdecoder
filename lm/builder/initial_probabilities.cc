@@ -1,9 +1,10 @@
 #include "lm/builder/initial_probabilities.hh"
 
 #include "lm/builder/discount.hh"
-#include "lm/builder/ngram_stream.hh"
-#include "lm/builder/sort.hh"
 #include "lm/builder/hash_gamma.hh"
+#include "lm/builder/payload.hh"
+#include "lm/common/special.hh"
+#include "lm/common/ngram_stream.hh"
 #include "util/murmur_hash.hh"
 #include "util/file.hh"
 #include "util/stream/chain.hh"
@@ -27,22 +28,23 @@ struct HashBufferEntry : public BufferEntry {
   uint64_t hash_value;
 };
 
-// Reads all entries in order like NGramStream does.  
+// Reads all entries in order like NGramStream does.
 // But deletes any entries that have CutoffCount below or equal to pruning
-// threshold.   
+// threshold.
 class PruneNGramStream {
   public:
-    PruneNGramStream(const util::stream::ChainPosition &position) :
-      current_(NULL, NGram::OrderFromSize(position.GetChain().EntrySize())),
-      dest_(NULL, NGram::OrderFromSize(position.GetChain().EntrySize())),
+    PruneNGramStream(const util::stream::ChainPosition &position, const SpecialVocab &specials) :
+      current_(NULL, NGram<BuildingPayload>::OrderFromSize(position.GetChain().EntrySize())),
+      dest_(NULL, NGram<BuildingPayload>::OrderFromSize(position.GetChain().EntrySize())),
       currentCount_(0),
-      block_(position)
-    { 
+      block_(position),
+      specials_(specials)
+    {
       StartBlock();
     }
 
-    NGram &operator*() { return current_; }
-    NGram *operator->() { return &current_; }
+    NGram<BuildingPayload> &operator*() { return current_; }
+    NGram<BuildingPayload> *operator->() { return &current_; }
 
     operator bool() const {
       return block_;
@@ -50,8 +52,7 @@ class PruneNGramStream {
 
     PruneNGramStream &operator++() {
       assert(block_);
-      
-      if(current_.Order() == 1 && *current_.begin() <= 2)
+      if(UTIL_UNLIKELY(current_.Order() == 1 && specials_.IsSpecial(*current_.begin())))
         dest_.NextInMemory();
       else if(currentCount_ > 0) {
         if(dest_.Base() < current_.Base()) {
@@ -59,24 +60,24 @@ class PruneNGramStream {
         }
         dest_.NextInMemory();
       }
-      
+
       current_.NextInMemory();
-      
+
       uint8_t *block_base = static_cast<uint8_t*>(block_->Get());
       if (current_.Base() == block_base + block_->ValidSize()) {
         block_->SetValidSize(dest_.Base() - block_base);
         ++block_;
         StartBlock();
         if (block_) {
-          currentCount_ = current_.CutoffCount();
+          currentCount_ = current_.Value().CutoffCount();
         }
-      } else {                
-        currentCount_ = current_.CutoffCount();
+      } else {
+        currentCount_ = current_.Value().CutoffCount();
       }
-      
+
       return *this;
     }
-    
+
   private:
     void StartBlock() {
       for (; ; ++block_) {
@@ -84,23 +85,25 @@ class PruneNGramStream {
         if (block_->ValidSize()) break;
       }
       current_.ReBase(block_->Get());
-      currentCount_ = current_.CutoffCount();
-      
+      currentCount_ = current_.Value().CutoffCount();
+
       dest_.ReBase(block_->Get());
     }
 
-    NGram current_; // input iterator
-    NGram dest_;    // output iterator
-    
+    NGram<BuildingPayload> current_; // input iterator
+    NGram<BuildingPayload> dest_;    // output iterator
+
     uint64_t currentCount_;
 
     util::stream::Link block_;
+
+    const SpecialVocab specials_;
 };
 
 // Extract an array of HashedGamma from an array of BufferEntry.
 class OnlyGamma {
   public:
-    OnlyGamma(bool pruning) : pruning_(pruning) {}
+    explicit OnlyGamma(bool pruning) : pruning_(pruning) {}
 
     void Run(const util::stream::ChainPosition &position) {
       for (util::stream::Link block_it(position); block_it; ++block_it) {
@@ -143,7 +146,7 @@ class AddRight {
       : discount_(discount), input_(input), pruning_(pruning) {}
 
     void Run(const util::stream::ChainPosition &output) {
-      NGramStream in(input_);
+      NGramStream<BuildingPayload> in(input_);
       util::stream::Stream out(output);
 
       std::vector<WordIndex> previous(in->Order() - 1);
@@ -155,24 +158,24 @@ class AddRight {
         memcpy(previous_raw, in->begin(), size);
         uint64_t denominator = 0;
         uint64_t normalizer = 0;
-        
+
         uint64_t counts[4];
         memset(counts, 0, sizeof(counts));
         do {
-          denominator += in->UnmarkedCount();
-          
+          denominator += in->Value().UnmarkedCount();
+
           // Collect unused probability mass from pruning.
           // Becomes 0 for unpruned ngrams.
-          normalizer += in->UnmarkedCount() - in->CutoffCount();
-          
+          normalizer += in->Value().UnmarkedCount() - in->Value().CutoffCount();
+
           // Chen&Goodman do not mention counting based on cutoffs, but
           // backoff becomes larger than 1 otherwise, so probably needs
           // to count cutoffs. Counts normally without pruning.
-          if(in->CutoffCount() > 0)
-            ++counts[std::min(in->CutoffCount(), static_cast<uint64_t>(3))];
-        
+          if(in->Value().CutoffCount() > 0)
+            ++counts[std::min(in->Value().CutoffCount(), static_cast<uint64_t>(3))];
+
         } while (++in && !memcmp(previous_raw, in->begin(), size));
-        
+
         BufferEntry &entry = *reinterpret_cast<BufferEntry*>(out.Get());
         entry.denominator = static_cast<float>(denominator);
         entry.gamma = 0.0;
@@ -182,9 +185,9 @@ class AddRight {
 
         // Makes model sum to 1 with pruning (I hope).
         entry.gamma += normalizer;
-        
+
         entry.gamma /= entry.denominator;
-        
+
         if(pruning_) {
           // If pruning is enabled the stream actually contains HashBufferEntry, see InitialProbabilities(...),
           // so add a hash value that identifies the current ngram.
@@ -202,15 +205,15 @@ class AddRight {
 
 class MergeRight {
   public:
-    MergeRight(bool interpolate_unigrams, const util::stream::ChainPosition &from_adder, const Discount &discount)
-      : interpolate_unigrams_(interpolate_unigrams), from_adder_(from_adder), discount_(discount) {}
+    MergeRight(bool interpolate_unigrams, const util::stream::ChainPosition &from_adder, const Discount &discount, const SpecialVocab &specials)
+      : interpolate_unigrams_(interpolate_unigrams), from_adder_(from_adder), discount_(discount), specials_(specials) {}
 
     // calculate the initial probability of each n-gram (before order-interpolation)
     // Run() gets invoked once for each order
     void Run(const util::stream::ChainPosition &primary) {
       util::stream::Stream summed(from_adder_);
 
-      PruneNGramStream grams(primary);
+      PruneNGramStream grams(primary, specials_);
 
       // Without interpolation, the interpolation weight goes to <unk>.
       if (grams->Order() == 1) {
@@ -228,32 +231,36 @@ class MergeRight {
           grams->Value().uninterp.prob = sums.gamma;
         }
         grams->Value().uninterp.gamma = gamma_assign;
-        ++grams;
+
+        for (++grams; *grams->begin() != specials_.BOS(); ++grams) {
+          grams->Value().uninterp.prob = discount_.Apply(grams->Value().count) / sums.denominator;
+          grams->Value().uninterp.gamma = gamma_assign;
+        }
 
         // Special case for <s>: probability 1.0.  This allows <s> to be
-        // explicitly scores as part of the sentence without impacting
+        // explicitly scored as part of the sentence without impacting
         // probability and computes q correctly as b(<s>).
-        assert(*grams->begin() == kBOS);
+        assert(*grams->begin() == specials_.BOS());
         grams->Value().uninterp.prob = 1.0;
         grams->Value().uninterp.gamma = 0.0;
 
         while (++grams) {
-          grams->Value().uninterp.prob = discount_.Apply(grams->Count()) / sums.denominator;
+          grams->Value().uninterp.prob = discount_.Apply(grams->Value().count) / sums.denominator;
           grams->Value().uninterp.gamma = gamma_assign;
         }
         ++summed;
         return;
       }
-      
+
       std::vector<WordIndex> previous(grams->Order() - 1);
       const std::size_t size = sizeof(WordIndex) * previous.size();
       for (; grams; ++summed) {
         memcpy(&previous[0], grams->begin(), size);
         const BufferEntry &sums = *static_cast<const BufferEntry*>(summed.Get());
-        
+
         do {
-          Payload &pay = grams->Value();
-          pay.uninterp.prob = discount_.Apply(grams->UnmarkedCount()) / sums.denominator;
+          BuildingPayload &pay = grams->Value();
+          pay.uninterp.prob = discount_.Apply(grams->Value().UnmarkedCount()) / sums.denominator;
           pay.uninterp.gamma = sums.gamma;
         } while (++grams && !memcmp(&previous[0], grams->begin(), size));
       }
@@ -263,6 +270,7 @@ class MergeRight {
     bool interpolate_unigrams_;
     util::stream::ChainPosition from_adder_;
     Discount discount_;
+    const SpecialVocab specials_;
 };
 
 } // namespace
@@ -274,7 +282,8 @@ void InitialProbabilities(
     util::stream::Chains &second_in,
     util::stream::Chains &gamma_out,
     const std::vector<uint64_t> &prune_thresholds,
-    bool prune_vocab) {
+    bool prune_vocab,
+    const SpecialVocab &specials) {
   for (size_t i = 0; i < primary.size(); ++i) {
     util::stream::ChainConfig gamma_config = config.adder_out;
     if(prune_vocab || prune_thresholds[i] > 0)
@@ -287,8 +296,8 @@ void InitialProbabilities(
     gamma_out.push_back(gamma_config);
     gamma_out[i] >> AddRight(discounts[i], second, prune_vocab || prune_thresholds[i] > 0);
 
-    primary[i] >> MergeRight(config.interpolate_unigrams, gamma_out[i].Add(), discounts[i]);
-    
+    primary[i] >> MergeRight(config.interpolate_unigrams, gamma_out[i].Add(), discounts[i], specials);
+
     // Don't bother with the OnlyGamma thread for something to discard.
     if (i) gamma_out[i] >> OnlyGamma(prune_vocab || prune_thresholds[i] > 0);
   }

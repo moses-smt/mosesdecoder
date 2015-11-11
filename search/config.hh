@@ -10,7 +10,7 @@ struct NBestConfig {
     keep = in_size;
     size = in_size;
   }
-  
+
   unsigned int keep, size;
 };
 

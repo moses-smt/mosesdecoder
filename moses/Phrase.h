@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
 
 /***********************************************************************
@@ -39,7 +39,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 class FactorMask;
-class WordsRange;
+class Range;
+class ContextScope;
 
 /** Representation of a phrase, ie. a contiguous number of words.
  *  Wrapper for vector of words
@@ -52,6 +53,28 @@ protected:
   std::vector<Word>			m_words;
 
 public:
+
+  // /// return shared pointer to ttask
+  // //  only TargetPhrases have non-NULL ttaskptrs!
+  // virtual ttasksptr GetTtask() const {
+  //   return ttasksptr();
+  // }
+
+  // /// check if this phrase belongs to a valid ttask
+  // //  only TargetPhrases have non-NULL ttaskptrs!
+  // virtual bool HasTtaskSPtr() const {
+  //   return false;
+  // }
+
+  virtual bool HasScope() const {
+    return false;
+  }
+
+  virtual SPTR<ContextScope> GetScope() const {
+    return SPTR<ContextScope>();
+  }
+
+
   /** No longer does anything as not using mem pool for Phrase class anymore */
   static void InitializeMemPool();
   static void FinalizeMemPool();
@@ -174,8 +197,8 @@ public:
   void InitStartEndWord();
 
   //! create new phrase class that is a substring of this phrase
-  Phrase GetSubString(const WordsRange &wordsRange) const;
-  Phrase GetSubString(const WordsRange &wordsRange, FactorType factorType) const;
+  Phrase GetSubString(const Range &range) const;
+  Phrase GetSubString(const Range &range, FactorType factorType) const;
 
   //! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
   std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const;
@@ -192,8 +215,11 @@ public:
     return Compare(compare) < 0;
   }
 
-  bool operator== (const Phrase &compare) const {
-    return Compare(compare) == 0;
+  size_t hash() const;
+
+  bool operator==(const Phrase &compare) const;
+  bool operator!=(const Phrase &compare) const {
+    return ! (*this == compare);
   }
 
   void OnlyTheseFactors(const FactorMask &factors);
@@ -202,11 +228,7 @@ public:
 
 inline size_t hash_value(const Phrase& phrase)
 {
-  size_t  seed = 0;
-  for (size_t i = 0; i < phrase.GetSize(); ++i) {
-    boost::hash_combine(seed, phrase.GetWord(i));
-  }
-  return seed;
+  return phrase.hash();
 }
 
 struct PhrasePtrComparator {

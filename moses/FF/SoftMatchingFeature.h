@@ -25,13 +25,13 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {};
+                           , ScoreComponentCollection &estimatedScores) const {};
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {};
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {};
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {
@@ -55,6 +55,7 @@ public:
 private:
   mutable std::vector<std::vector<Word> > m_softMatches; // map RHS of new rule to list of possible LHS of old rule (subtree)
   mutable std::vector<std::vector<std::string> > m_nameCache;
+  bool m_scoreIdentical;
 
 #ifdef WITH_THREADS
   //reader-writer lock

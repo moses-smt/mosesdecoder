@@ -99,46 +99,8 @@ public:
     return m_rightBoundaryNonTerminalR2LScores[2];
   }
 
-
-  int Compare(const FFState& other) const {
-    if (!m_distinguishStates) {
-      return 0;
-    }
-
-    const PhraseOrientationFeatureState &otherState = static_cast<const PhraseOrientationFeatureState&>(other);
-
-    if (!m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet &&
-        !m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) {
-      return 0;
-    }
-    if (m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet) {
-      return 1;
-    }
-    if (!m_leftBoundaryIsSet && otherState.m_leftBoundaryIsSet) {
-      return -1;
-    }
-    if (m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) {
-      return 1;
-    }
-    if (!m_rightBoundaryIsSet && otherState.m_rightBoundaryIsSet) {
-      return -1;
-    }
-
-    if (m_leftBoundaryIsSet) {
-      int compareLeft = CompareLeftBoundaryRecursive(*this, otherState, m_useSparseNT);
-      if (compareLeft != 0) {
-        return compareLeft;
-      }
-    }
-    if (m_rightBoundaryIsSet) {
-      int compareRight = CompareRightBoundaryRecursive(*this, otherState, m_useSparseNT);
-      if (compareRight != 0) {
-        return compareRight;
-      }
-    }
-
-    return 0;
-  };
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 protected:
 
@@ -301,15 +263,15 @@ class PhraseOrientationFeature : public StatefulFeatureFunction
 public:
 
   struct ReoClassData {
-    public:
-      std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
-      std::vector<Moses::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
-      bool firstNonTerminalIsBoundary;
-      bool firstNonTerminalPreviousSourceSpanIsAligned;
-      bool firstNonTerminalFollowingSourceSpanIsAligned;
-      bool lastNonTerminalIsBoundary;
-      bool lastNonTerminalPreviousSourceSpanIsAligned;
-      bool lastNonTerminalFollowingSourceSpanIsAligned;
+  public:
+    std::vector<MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
+    std::vector<MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
+    bool firstNonTerminalIsBoundary;
+    bool firstNonTerminalPreviousSourceSpanIsAligned;
+    bool firstNonTerminalFollowingSourceSpanIsAligned;
+    bool lastNonTerminalIsBoundary;
+    bool lastNonTerminalPreviousSourceSpanIsAligned;
+    bool lastNonTerminalFollowingSourceSpanIsAligned;
   };
 
   PhraseOrientationFeature(const std::string &line);
@@ -332,14 +294,14 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const;
+                           , ScoreComponentCollection &estimatedScores) const;
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
+                                 , ScoreComponentCollection *estimatedScores = NULL) const
   {};
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -401,7 +363,7 @@ protected:
                                  ScoreComponentCollection* scoreBreakdown,
                                  const std::string* o) const;
 
-  const std::string* ToString(const Moses::GHKM::PhraseOrientation::REO_CLASS o) const;
+  const std::string* ToString(const MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS o) const;
 
   static const std::string MORIENT;
   static const std::string SORIENT;

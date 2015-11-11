@@ -38,8 +38,8 @@ Scope3Parser<Callback>::~Scope3Parser()
 }
 
 template<typename Callback>
-void Scope3Parser<Callback>::EnumerateHyperedges(const WordsRange &range,
-    Callback &callback)
+void Scope3Parser<Callback>::
+EnumerateHyperedges(const Range &range, Callback &callback)
 {
   const std::size_t start = range.GetStartPos();
   const std::size_t end = range.GetEndPos();
@@ -64,8 +64,7 @@ void Scope3Parser<Callback>::EnumerateHyperedges(const WordsRange &range,
 
     // Ask the grammar for the mapping from label sequences to target phrase
     // collections for this pattern.
-    const RuleTrie::Node::LabelMap &labelMap =
-      patNode->m_node->GetLabelMap();
+    const RuleTrie::Node::LabelMap &labelMap = patNode->m_node->GetLabelMap();
 
     // For each label sequence, search the lattice for the set of PHyperedge
     // tails.
@@ -73,7 +72,7 @@ void Scope3Parser<Callback>::EnumerateHyperedges(const WordsRange &range,
     RuleTrie::Node::LabelMap::const_iterator q = labelMap.begin();
     for (; q != labelMap.end(); ++q) {
       const std::vector<int> &labelSeq = q->first;
-      const TargetPhraseCollection &tpc = q->second;
+      TargetPhraseCollection::shared_ptr tpc = q->second;
       // For many label sequences there won't be any corresponding paths through
       // the lattice.  As an optimisation, we use m_quickCheckTable to test
       // for this and we don't begin a search if there are no paths to find.

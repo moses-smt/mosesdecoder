@@ -28,9 +28,10 @@ public:
 private:
   friend class RuleTrieCreator;
 
-  virtual TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target,
-    const Word *sourceLHS) = 0;
+  virtual TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS) = 0;
 
   virtual void SortAndPrune(std::size_t) = 0;
 };

@@ -18,8 +18,6 @@
  ***********************************************************************/
 
 #pragma once
-#ifndef moses_ChartRuleLookupManagerMemory_h
-#define moses_ChartRuleLookupManagerMemory_h
 
 #include <vector>
 
@@ -34,7 +32,7 @@ namespace Moses
 {
 
 class ChartParserCallback;
-class WordsRange;
+class Range;
 
 //! Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
@@ -97,4 +95,3 @@ private:
 
 }  // namespace Moses
 
-#endif

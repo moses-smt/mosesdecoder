@@ -51,43 +51,44 @@ protected:
   PARAM_STRING m_abbreviation;
   PARAM_STRING m_description;
   PARAM_STRING m_fullname;
-  // std::map<char,std::set<std::string> > m_confusable; 
-  // stores long parameter names that start with a letter that is also a short option. 
+  // std::map<char,std::set<std::string> > m_confusable;
+  // stores long parameter names that start with a letter that is also a short option.
   options_description m_options;
 
   std::map<std::string, std::vector<float> >  m_weights;
 
-  std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
-  void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
+  std::string FindParam(const std::string &paramSwitch, int argc, char const* argv[]);
+  void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, 
+		      int argc, char const* argv[]);
   bool ReadConfigFile(const std::string &filePath );
   bool FilesExist(const std::string &paramName, int fieldNo, std::vector<std::string> const& fileExtension=std::vector<std::string>(1,""));
   bool isOption(const char* token);
   bool Validate();
 
-  void 
+  void
   AddParam(options_description& optgroup,
-	   value_semantic const* optvalue,
-	   std::string const& paramName, 
-	   std::string const& description);
+           value_semantic const* optvalue,
+           std::string const& paramName,
+           std::string const& description);
 
-  void 
+  void
   AddParam(options_description& optgroup,
-	   std::string const &paramName, 
-	   std::string const &description);
+           std::string const &paramName,
+           std::string const &description);
 
-  void 
+  void
   AddParam(options_description& optgroup,
-	   value_semantic const* optvalue,
-	   std::string const& paramName,
-	   std::string const& abbrevName, 
-	   std::string const& description);
+           value_semantic const* optvalue,
+           std::string const& paramName,
+           std::string const& abbrevName,
+           std::string const& description);
 
-  void 
+  void
   AddParam(options_description& optgroup,
-	   std::string const& paramName,
-	   std::string const& abbrevName, 
-	   std::string const& description);
-  
+           std::string const& paramName,
+           std::string const& abbrevName,
+           std::string const& description);
+
   void PrintCredit();
   void PrintFF() const;
 
@@ -113,7 +114,7 @@ protected:
 public:
   Parameter();
   ~Parameter();
-  bool LoadParam(int argc, char* argv[]);
+  bool LoadParam(int argc, char const* argv[]);
   bool LoadParam(const std::string &filePath);
   void Explain();
 
@@ -147,6 +148,19 @@ public:
     } else {
       var = defaultValue;
     }
+  }
+
+  void SetParameter(bool& var, std::string const& name);
+
+  bool SetBooleanSwitch(bool& val, std::string const name) {
+    // issues a warning if format is wrong
+    const PARAM_VEC *params = GetParam(name);
+    val = (params && params->size());
+    if (val && params->size() != 1) {
+      TRACE_ERR("ERROR: wrong format for switch -" << name);
+      return false;
+    }
+    return true;
   }
 
 };

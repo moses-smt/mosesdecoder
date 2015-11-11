@@ -75,11 +75,14 @@ public:
     const ChartCellCollectionBase &,
     std::size_t);
 
-  virtual void InitializeForInput(InputType const& source);
+  virtual void InitializeForInput(ttasksptr const& ttask);
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
-  const TargetPhraseCollection *GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
-  const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
+
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
 
   void SetParameter(const std::string& key, const std::string& value);
 

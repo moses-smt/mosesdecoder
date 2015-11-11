@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 
 #include "ConfusionNet.h"
@@ -65,11 +66,11 @@ ConfusionNet() : InputType()
 {
   stats.createOne();
 
-  const StaticData& staticData = StaticData::Instance();
-  if (staticData.IsSyntax()) {
-    m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
+  const StaticData& SD = StaticData::Instance();
+  if (SD.IsSyntax()) {
+    m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
   }
-  UTIL_THROW_IF2(&InputFeature::Instance() == NULL, "Input feature must be specified");
+  UTIL_THROW_IF2(InputFeature::InstancePtr() == NULL, "Input feature must be specified");
 }
 
 ConfusionNet::
@@ -109,28 +110,13 @@ ReadF(std::istream& in, const std::vector<FactorType>& factorOrder, int format)
 int
 ConfusionNet::
 Read(std::istream& in,
-     const std::vector<FactorType>& factorOrder)
+     const std::vector<FactorType>& factorOrder,
+     AllOptions const& opts)
 {
   int rv=ReadF(in,factorOrder,0);
   if(rv) stats.collect(*this);
   return rv;
 }
-
-#if 0
-// Deprecated due to code duplication;
-// use Word::CreateFromString() instead
-void
-ConfusionNet::
-String2Word(const std::string& s,Word& w,
-            const std::vector<FactorType>& factorOrder)
-{
-  std::vector<std::string> factorStrVector = Tokenize(s, "|");
-  for(size_t i=0; i<factorOrder.size(); ++i)
-    w.SetFactor(factorOrder[i],
-                FactorCollection::Instance().AddFactor
-                (Input,factorOrder[i], factorStrVector[i]));
-}
-#endif
 
 bool
 ConfusionNet::
@@ -139,9 +125,9 @@ ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
   Clear();
 
   // const StaticData   &staticData   = StaticData::Instance();
-  const InputFeature &inputFeature = InputFeature::Instance();
-  size_t numInputScores   = inputFeature.GetNumInputScores();
-  size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
+  size_t numInputScores   = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
 
   size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);
@@ -160,7 +146,8 @@ ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
       for(size_t i=0; i < numInputScores; i++) {
         double prob;
         if (!(is>>prob)) {
-          TRACE_ERR("ERROR: unable to parse CN input - bad link probability, or wrong number of scores\n");
+          TRACE_ERR("ERROR: unable to parse CN input - bad link probability, "
+                    << "or wrong number of scores\n");
           return false;
         }
         if(prob<0.0) {
@@ -173,7 +160,8 @@ ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
         probs[i] = (std::max(static_cast<float>(log(prob)),LOWEST_SCORE));
 
       }
-      //store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
+      // store 'real' word count in last feature if we have one more
+      // weight than we do arc scores and not epsilon
       if (addRealWordCount && word!=EPSILON && word!="")
         probs.back() = -1.0;
 
@@ -260,7 +248,7 @@ void ConfusionNet::Print(std::ostream& out) const
 #endif
 Phrase
 ConfusionNet::
-GetSubString(const WordsRange&) const
+GetSubString(const Range&) const
 {
   UTIL_THROW2("ERROR: call to ConfusionNet::GetSubString\n");
   //return Phrase(Input);
@@ -299,7 +287,7 @@ CreateTranslationOptionCollection(ttasksptr const& ttask) const
   = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
   = new TranslationOptionCollectionConfusionNet
-    (ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  (ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
   assert(rv);
   return rv;
 }

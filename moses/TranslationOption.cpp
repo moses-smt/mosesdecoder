@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "TranslationOption.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "GenerationDictionary.h"
 #include "StaticData.h"
 #include "InputType.h"
@@ -39,11 +39,11 @@ TranslationOption::TranslationOption()
 { }
 
 //TODO this should be a factory function!
-TranslationOption::TranslationOption(const WordsRange &wordsRange
+TranslationOption::TranslationOption(const Range &range
                                      , const TargetPhrase &targetPhrase)
   : m_targetPhrase(targetPhrase)
   , m_inputPath(NULL)
-  , m_sourceWordsRange(wordsRange)
+  , m_sourceWordsRange(range)
   , m_futureScore(targetPhrase.GetFutureScore())
 {
 }
@@ -62,11 +62,11 @@ bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<Fac
 
 bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
-  const WordsBitmap &bitmap = hypothesis.GetWordsBitmap();
+  const Bitmap &bitmap = hypothesis.GetWordsBitmap();
   return bitmap.Overlap(GetSourceWordsRange());
 }
 
-void 
+void
 TranslationOption::
 CacheLexReorderingScores(const LexicalReordering &producer, const Scores &score)
 {
@@ -109,10 +109,10 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
   return out;
 }
 
-  /** returns cached scores */
+/** returns cached scores */
 const Scores*
 TranslationOption::
-GetLexReorderingScores(LexicalReordering const* scoreProducer) const 
+GetLexReorderingScores(LexicalReordering const* scoreProducer) const
 {
   return m_targetPhrase.GetExtraScores(scoreProducer);
   // _ScoreCacheMap::const_iterator it;

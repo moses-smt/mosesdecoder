@@ -4,7 +4,7 @@
 #include "moses/Syntax/PVertex.h"
 #include "moses/Syntax/S2T/Parsers/Parser.h"
 #include "moses/Syntax/S2T/RuleTrieCYKPlus.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 
 namespace Moses
 {
@@ -35,7 +35,7 @@ public:
 
   ~RecursiveCYKPlusParser() {}
 
-  void EnumerateHyperedges(const WordsRange &, Callback &);
+  void EnumerateHyperedges(const Range &, Callback &);
 
 private:
 

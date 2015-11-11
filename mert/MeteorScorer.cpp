@@ -18,7 +18,6 @@
 
 #include "ScoreStats.h"
 #include "Util.h"
-#include "util/unistd.hh"
 
 using namespace std;
 

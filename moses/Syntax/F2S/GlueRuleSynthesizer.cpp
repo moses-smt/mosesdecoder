@@ -4,6 +4,7 @@
 
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/StaticData.h"
+#include "util/string_stream.hh"
 
 namespace Moses
 {
@@ -27,9 +28,9 @@ void GlueRuleSynthesizer::SynthesizeRule(const Forest::Hyperedge &e)
   HyperPath source;
   SynthesizeHyperPath(e, source);
   TargetPhrase *tp = SynthesizeTargetPhrase(e);
-  TargetPhraseCollection &tpc = GetOrCreateTargetPhraseCollection(m_hyperTree,
-                                source);
-  tpc.Add(tp);
+  TargetPhraseCollection::shared_ptr tpc
+  = GetOrCreateTargetPhraseCollection(m_hyperTree, source);
+  tpc->Add(tp);
 }
 
 void GlueRuleSynthesizer::SynthesizeHyperPath(const Forest::Hyperedge &e,
@@ -55,7 +56,7 @@ TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
 
   TargetPhrase *targetPhrase = new TargetPhrase();
 
-  std::ostringstream alignmentSS;
+  util::StringStream alignmentSS;
   for (std::size_t i = 0; i < e.tail.size(); ++i) {
     const Word &symbol = e.tail[i]->pvertex.symbol;
     if (symbol.IsNonTerminal()) {

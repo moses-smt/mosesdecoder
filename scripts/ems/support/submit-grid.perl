@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;
@@ -9,7 +12,7 @@ use File::Basename;
 
 
 my $continue = 0;
-my $args = ""; 
+my $args = "";
 my $config;
 
 GetOptions("continue=i"  => \$continue,

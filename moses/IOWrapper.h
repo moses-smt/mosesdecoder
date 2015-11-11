@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 
 /***********************************************************************
@@ -43,6 +43,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <ostream>
 #include <vector>
+#include <list>
+#include <iomanip>
+#include <limits>
 
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"
@@ -59,7 +62,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartKBestExtractor.h"
 #include "moses/Syntax/KBestExtractor.h"
 
-#include "search/applied.hh"
+#include <boost/format.hpp>
 
 namespace Moses
 {
@@ -83,11 +86,11 @@ protected:
   Moses::InputFileStream *m_inputFile;
   std::istream *m_inputStream;
   std::ostream *m_nBestStream;
-  std::ostream *m_outputWordGraphStream;
-  std::ostream *m_outputSearchGraphStream;
-  std::ostream *m_detailedTranslationReportingStream;
+  // std::ostream *m_outputWordGraphStream;
+  // std::auto_ptr<std::ostream> m_outputSearchGraphStream;
+  // std::ostream *m_detailedTranslationReportingStream;
   std::ostream *m_unknownsStream;
-  std::ostream *m_detailedTreeFragmentsTranslationReportingStream;
+  // std::ostream *m_detailedTreeFragmentsTranslationReportingStream;
   std::ofstream *m_alignmentInfoStream;
   std::ofstream *m_latticeSamplesStream;
 
@@ -110,13 +113,24 @@ protected:
 			 * incremented with every call to ReadInput */
 
   InputTypeEnum m_inputType; // initialized from StaticData at construction
+  std::list<boost::shared_ptr<InputType> > m_past_input;
+  std::list<boost::shared_ptr<InputType> > m_future_input;
+  size_t m_look_ahead; /// for context-sensitive decoding: # of wrds to look ahead
+  size_t m_look_back;  /// for context-sensitive decoding: # of wrds to look back
+  size_t m_buffered_ahead; /// number of words buffered ahead
+  // For context-sensitive decoding:
+  // Number of context words ahead and before the current sentence.
+
+  std::string m_hypergraph_output_filepattern;
 
 public:
   IOWrapper();
   ~IOWrapper();
 
   // Moses::InputType* GetInput(Moses::InputType *inputType);
-  boost::shared_ptr<InputType> ReadInput();
+
+  boost::shared_ptr<InputType>
+  ReadInput(boost::shared_ptr<std::vector<std::string> >* cw = NULL);
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector.get();
@@ -161,15 +175,69 @@ public:
     return m_detailTreeFragmentsOutputCollector.get();
   }
 
-  void SetInputStreamFromString(std::istringstream &input){
+  void SetInputStreamFromString(std::istringstream &input) {
     m_inputStream = &input;
   }
+
+  std::string GetHypergraphOutputFileName(size_t const id) const;
 
   // post editing
   std::ifstream *spe_src, *spe_trg, *spe_aln;
 
+  std::list<boost::shared_ptr<InputType> > const& GetPastInput() const {
+    return m_past_input;
+  }
+
+  std::list<boost::shared_ptr<InputType> > const& GetFutureInput() const {
+    return m_future_input;
+  }
+  size_t GetLookAhead() const {
+    return m_look_ahead;
+  }
+
+  size_t GetLookBack() const {
+    return m_look_back;
+  }
+
+private:
+  template<class itype>
+  boost::shared_ptr<InputType>
+  BufferInput();
+
+  boost::shared_ptr<InputType>
+  GetBufferedInput();
+
+  boost::shared_ptr<std::vector<std::string> >
+  GetCurrentContextWindow() const;
 };
 
+template<class itype>
+boost::shared_ptr<InputType>
+IOWrapper::
+BufferInput()
+{
+  AllOptions const& opts = StaticData::Instance().options();
+  boost::shared_ptr<itype>  source;
+  boost::shared_ptr<InputType> ret;
+  if (m_future_input.size()) {
+    ret = m_future_input.front();
+    m_future_input.pop_front();
+    m_buffered_ahead -= ret->GetSize();
+  } else {
+    source.reset(new itype);
+    if (!source->Read(*m_inputStream, *m_inputFactorOrder, opts))
+      return ret;
+    ret = source;
+  }
+  while (m_buffered_ahead < m_look_ahead) {
+    source.reset(new itype);
+    if (!source->Read(*m_inputStream, *m_inputFactorOrder, opts))
+      break;
+    m_future_input.push_back(source);
+    m_buffered_ahead += source->GetSize();
+  }
+  return ret;
+}
 
 
 }

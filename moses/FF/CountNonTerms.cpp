@@ -8,7 +8,7 @@ using namespace std;
 namespace Moses
 {
 CountNonTerms::CountNonTerms(const std::string &line)
-  :StatelessFeatureFunction(line)
+  :StatelessFeatureFunction(line,true)
   ,m_all(true)
   ,m_sourceSyntax(false)
   ,m_targetSyntax(false)
@@ -19,7 +19,7 @@ CountNonTerms::CountNonTerms(const std::string &line)
 void CountNonTerms::EvaluateInIsolation(const Phrase &sourcePhrase
                                         , const TargetPhrase &targetPhrase
                                         , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedFutureScore) const
+                                        , ScoreComponentCollection &estimatedScores) const
 {
   const StaticData &staticData = StaticData::Instance();
 

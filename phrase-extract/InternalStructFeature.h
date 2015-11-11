@@ -10,10 +10,6 @@
 #include "ScoreFeature.h"
 #include "extract-ghkm/Node.h"
 
-using namespace MosesTraining;
-using namespace Moses;
-using namespace GHKM;
-
 namespace MosesTraining
 {
 

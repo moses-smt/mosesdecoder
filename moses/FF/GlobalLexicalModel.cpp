@@ -3,6 +3,7 @@
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
 #include "moses/TranslationOption.h"
+#include "moses/TranslationTask.h"
 #include "moses/FactorCollection.h"
 #include "util/exception.hh"
 
@@ -42,7 +43,7 @@ GlobalLexicalModel::~GlobalLexicalModel()
   // delete words in the hash data structure
   DoubleHash::const_iterator iter;
   for(iter = m_hash.begin(); iter != m_hash.end(); iter++ ) {
-    map< const Word*, float, WordComparer >::const_iterator iter2;
+    boost::unordered_map< const Word*, float, UnorderedComparer<Word>, UnorderedComparer<Word> >::const_iterator iter2;
     for(iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++ ) {
       delete iter2->first; // delete input word
     }
@@ -108,10 +109,13 @@ void GlobalLexicalModel::Load()
   }
 }
 
-void GlobalLexicalModel::InitializeForInput( Sentence const& in )
+void GlobalLexicalModel::InitializeForInput(ttasksptr const& ttask)
 {
+  UTIL_THROW_IF2(ttask->GetSource()->GetType() != SentenceInput,
+                 "GlobalLexicalModel works only with sentence input.");
+  Sentence const* s = reinterpret_cast<Sentence const*>(ttask->GetSource().get());
   m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
+  m_local->input = s;
 }
 
 float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
@@ -130,7 +134,7 @@ float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
         sum += inputWordHash->second;
       }
 
-      set< const Word*, WordComparer > alreadyScored; // do not score a word twice
+      boost::unordered_set< const Word*, UnorderedComparer<Word>, UnorderedComparer<Word> > alreadyScored; // do not score a word twice
       for(size_t inputIndex = 0; inputIndex < input.GetSize(); inputIndex++ ) {
         const Word& inputWord = input.GetWord( inputIndex );
         if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
@@ -167,7 +171,7 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
 void GlobalLexicalModel::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   scoreBreakdown.PlusEquals( this, GetFromCacheOrScorePhrase(targetPhrase) );
 }

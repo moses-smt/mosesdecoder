@@ -115,7 +115,7 @@ private:
   typedef boost::unordered_map<std::string, float> WeightMap;
   WeightMap m_weightMap;
   bool m_useWeightMap;
-  std::vector<FName> m_featureMap2; 
+  std::vector<FName> m_featureMap2;
 
   void ReadWordList(const std::string& filename, const std::string& id,
                     SparseReorderingFeatureKey::Side side, std::vector<WordList>* pWordLists);

@@ -4,15 +4,15 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/FactorCollection.h"
 #include <sstream>
-
+#include "util/string_stream.hh"
 
 using namespace std;
 
 namespace Moses
 {
-  
+
 RulePairUnlexicalizedSource::RulePairUnlexicalizedSource(const std::string &line)
-  : StatelessFeatureFunction(0, line)
+  : StatelessFeatureFunction(1, line)
   , m_glueRules(false)
   , m_nonGlueRules(true)
   , m_glueTargetLHSStr("Q")
@@ -39,9 +39,9 @@ void RulePairUnlexicalizedSource::SetParameter(const std::string& key, const std
 
 
 void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
-                                                      , const TargetPhrase &targetPhrase
-                                                      , ScoreComponentCollection &scoreBreakdown
-                                                      , ScoreComponentCollection &estimatedFutureScore) const
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedScores) const
 {
   const Factor* targetPhraseLHS = targetPhrase.GetTargetLHS()[0];
   if ( !m_glueRules && (targetPhraseLHS == m_glueTargetLHS) ) {
@@ -51,18 +51,16 @@ void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
     return;
   }
 
-  for (size_t posS=0; posS<source.GetSize(); ++posS) 
-  {
+  for (size_t posS=0; posS<source.GetSize(); ++posS) {
     const Word &wordS = source.GetWord(posS);
     if ( !wordS.IsNonTerminal() ) {
       return;
     }
   }
 
-  ostringstream namestr;
+  util::StringStream namestr;
 
-  for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT) 
-  {
+  for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT) {
     const Word &wordT = targetPhrase.GetWord(posT);
     const Factor* factorT = wordT[0];
     if ( wordT.IsNonTerminal() ) {
@@ -78,12 +76,14 @@ void RulePairUnlexicalizedSource::EvaluateInIsolation(const Phrase &source
   namestr << targetPhraseLHS->GetString() << "|";
 
   for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
-       it!=targetPhrase.GetAlignNonTerm().end(); ++it) 
-  {
+       it!=targetPhrase.GetAlignNonTerm().end(); ++it) {
     namestr << "|" << it->first << "-" << it->second;
   }
 
   scoreBreakdown.PlusEquals(this, namestr.str(), 1);
+  if ( targetPhraseLHS != m_glueTargetLHS ) {
+    scoreBreakdown.PlusEquals(this, 1);
+  }
 }
 
 }

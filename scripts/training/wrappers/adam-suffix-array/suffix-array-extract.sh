@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # execute: ~/workspace/bin/moses-smt/scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $SA_EXEC_DIR $MODEL_DIR $INPUT_FILE $OUTPUT_DIR
 

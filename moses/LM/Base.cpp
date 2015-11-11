@@ -72,13 +72,14 @@ void LanguageModel::ReportHistoryOrder(std::ostream &out,const Phrase &phrase) c
 void LanguageModel::EvaluateInIsolation(const Phrase &source
                                         , const TargetPhrase &targetPhrase
                                         , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedFutureScore) const
+                                        , ScoreComponentCollection &estimatedScores) const
 {
   // contains factors used by this LM
   float fullScore, nGramScore;
   size_t oovCount;
 
   CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
+
   float estimateScore = fullScore - nGramScore;
 
   if (StaticData::Instance().GetLMEnableOOVFeature()) {
@@ -89,10 +90,10 @@ void LanguageModel::EvaluateInIsolation(const Phrase &source
 
     estimateScores[0] = estimateScore;
     estimateScores[1] = 0;
-    estimatedFutureScore.Assign(this, estimateScores);
+    estimatedScores.Assign(this, estimateScores);
   } else {
     scoreBreakdown.Assign(this, nGramScore);
-    estimatedFutureScore.Assign(this, estimateScore);
+    estimatedScores.Assign(this, estimateScore);
   }
 }
 

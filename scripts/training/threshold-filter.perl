@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;
@@ -7,7 +10,7 @@ my %MIN_SCORE;
 # legacy: same threshold for direct and indirect phrase translation probabilities
 if ($ARGV[0] =~ /^[\d\.]+$/) {
   $MIN_SCORE{0} = $ARGV[0];
-  $MIN_SCORE{2} = $ARGV[2];
+  $MIN_SCORE{2} = $ARGV[0];
 }
 # advanced: field:threshold,field:threshold
 # recommended use is "2:0.0001"

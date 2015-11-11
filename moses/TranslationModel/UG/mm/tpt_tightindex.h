@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007,2008 Ulrich Germann
 /* Functions for writing indices tightly (use only the bytes you need).
  * The first bit indicates whether a byte belongs to a key or a value.
@@ -10,9 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include "tpt_typedefs.h"
-// #include <stdint.h>
 #include <cassert>
-using namespace std;
 
 #ifndef uchar
 #endif
@@ -25,49 +23,49 @@ using namespace std;
 
 extern bool debug;
 
-namespace ugdiss
+namespace tpt
 {
   // void tightwritex(iostream& out, size_t data, bool flag);
-  void 
-  tightwrite(std::ostream& out, ::uint64_t data, bool flag);
+  void
+  tightwrite(std::ostream& out, uint64_t data, bool flag);
 
-  filepos_type 
+  filepos_type
   tightread(std::istream& in, std::ios::pos_type stop);
 
   bool
-  tightfind(std::istream& in, 
-	    filepos_type start, 
-	    filepos_type stop, 
+  tightfind(std::istream& in,
+	    filepos_type start,
+	    filepos_type stop,
 	    id_type key,
 	    unsigned char& flags);
 
   bool
-  tightfind_noflags(std::istream& in, 
-                    filepos_type start, 
-                    filepos_type stop, 
+  tightfind_noflags(std::istream& in,
+                    filepos_type start,
+                    filepos_type stop,
                     id_type key);
 
   char const*
-  tightfind(char const* const start, 
+  tightfind(char const* const start,
             char const* const stop,
-            id_type key, 
+            id_type key,
             unsigned char& flags);
 
   char const*
-  tightfind_noflags(char const* const start, 
+  tightfind_noflags(char const* const start,
                     char const* const stop,
                     id_type key);
 
 
 
-  /** move read header in istream /in/ to the first entry after the midpoint of 
-   *  file position range [start,stop) in in a 'tight' index 
+  /** move read header in istream /in/ to the first entry after the midpoint of
+   *  file position range [start,stop) in in a 'tight' index
    *  @param in the data input stream
    *  @param start start of the search range
    *  @param stop  end   of the search range
-   *  @return true if no errors occurred 
-   */ 
-  bool 
+   *  @return true if no errors occurred
+   */
+  bool
   tightfind_midpoint(std::istream& in, filepos_type start, filepos_type stop);
 
   // the bitpattern functions below are for debugging
@@ -91,7 +89,7 @@ namespace ugdiss
   tightread4(char const* start, char const* stop, uint32_t& dest);
 
   char const*
-  tightread8(char const* start, char const* stop, ::uint64_t& dest);
+  tightread8(char const* start, char const* stop, uint64_t& dest);
 
   template<typename numType>
   char const*
@@ -102,21 +100,21 @@ namespace ugdiss
     if (sizeof(numType)==4)
       return tightread4(start,stop,reinterpret_cast<uint32_t&>(dest));
     else if (sizeof(numType)==8)
-      return tightread8(start,stop,reinterpret_cast<typename ::uint64_t&>(dest));
+      return tightread8(start,stop,reinterpret_cast<uint64_t&>(dest));
     assert(0);
     return NULL;
   }
 
 //   char const*
-//   tightread(char const* start, char const* stop, ::uint64_t& dest);
+//   tightread(char const* start, char const* stop, uint64_t& dest);
 
 //   char const*
 //   tightread(char const* start, char const* stop, filepos_type& dest);
 
 #if 0
   template<typename dtype>
-  char const* 
-  tightread(char const* start, 
+  char const*
+  tightread(char const* start,
             char const* stop,
             dtype& dest)
   {

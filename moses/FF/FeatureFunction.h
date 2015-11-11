@@ -21,13 +21,13 @@ class Hypothesis;
 class ChartHypothesis;
 class InputType;
 class ScoreComponentCollection;
-class WordsBitmap;
-class WordsRange;
+class Bitmap;
+class Range;
 class FactorMask;
 class InputPath;
 class StackVec;
 class DistortionScoreProducer;
-class TranslationTask; 
+class TranslationTask;
 
 /** base class for all feature functions.
  */
@@ -43,12 +43,15 @@ protected:
   bool m_requireSortingAfterSourceContext;
   size_t m_verbosity;
   size_t m_numScoreComponents;
+  size_t m_index; // index into vector covering ALL feature function values
   std::vector<bool> m_tuneableComponents;
   size_t m_numTuneableComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
-  void Initialize(const std::string &line);
+  void Register();
+private:
+  // void Initialize(const std::string &line);
   void ParseLine(const std::string &line);
 
 public:
@@ -59,10 +62,7 @@ public:
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 
-  static void CallChangeSource(InputType * const&input);
-  // see my note in FeatureFunction.cpp --- UG
-
-  FeatureFunction(const std::string &line);
+  FeatureFunction(const std::string &line, bool initializeNow);
   FeatureFunction(size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
@@ -114,24 +114,26 @@ public:
 
   virtual std::vector<float> DefaultWeights() const;
 
+  size_t GetIndex() const;
+  size_t SetIndex(size_t const idx);
 
 protected:
-  virtual void
-  InitializeForInput(InputType const& source) { }
   virtual void
   CleanUpAfterSentenceProcessing(InputType const& source) { }
 
 public:
   //! Called before search and collecting of translation options
-  virtual void 
-  InitializeForInput(ttasksptr const& ttask);
+  virtual void
+  InitializeForInput(ttasksptr const& ttask) { };
 
   // clean up temporary memory, called after processing each sentence
-  virtual void 
-  CleanUpAfterSentenceProcessing(ttasksptr const& ttask); 
+  virtual void
+  CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
 
   const std::string &
-  GetArgLine() const { return m_argLine; }
+  GetArgLine() const {
+    return m_argLine;
+  }
 
   // given a target phrase containing only factors specified in mask
   // return true if the feature function can be evaluated
@@ -146,13 +148,10 @@ public:
   // may have more factors than actually need, but not guaranteed.
   // For SCFG decoding, the source contains non-terminals, NOT the raw
   // source from the input sentence
-  virtual void 
+  virtual void
   EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase,
-		      ScoreComponentCollection& scoreBreakdown,
-		      ScoreComponentCollection& estimatedFutureScore) const = 0;
-  
-  // override this method if you want to change the input before decoding
-  virtual void ChangeSource(InputType * const&input) const { }
+                      ScoreComponentCollection& scoreBreakdown,
+                      ScoreComponentCollection& estimatedScores) const = 0;
 
   // for context-dependent processing
   static void SetupAll(TranslationTask const& task);
@@ -164,13 +163,13 @@ public:
   // 'stackVec' is a vector of chart cells that the RHS non-terms cover.
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
-  // No FF should set estimatedFutureScore in both overloads!
+  // No FF should set estimatedScores in both overloads!
   virtual void EvaluateWithSourceContext(const InputType &input
                                          , const InputPath &inputPath
                                          , const TargetPhrase &targetPhrase
                                          , const StackVec *stackVec
                                          , ScoreComponentCollection &scoreBreakdown
-                                         , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
+                                         , ScoreComponentCollection *estimatedScores = NULL) const = 0;
 
   // This method is called once all the translation options are retrieved from the phrase table, and
   // just before search.
@@ -178,7 +177,7 @@ public:
   // 'stackVec' is a vector of chart cells that the RHS non-terms cover.
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
-  // No FF should set estimatedFutureScore in both overloads!
+  // No FF should set estimatedScores in both overloads!
   virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const = 0;
 

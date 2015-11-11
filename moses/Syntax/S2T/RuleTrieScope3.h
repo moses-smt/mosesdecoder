@@ -35,7 +35,7 @@ public:
             SymbolEqualityPred> TerminalMap;
 
     typedef boost::unordered_map<std::vector<int>,
-            TargetPhraseCollection> LabelMap;
+            TargetPhraseCollection::shared_ptr> LabelMap;
 
     ~Node() {
       delete m_gapNode;
@@ -61,8 +61,8 @@ public:
 
     Node *GetOrCreateNonTerminalChild(const Word &targetNonTerm);
 
-    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      const TargetPhrase &);
+    TargetPhraseCollection::shared_ptr
+    GetOrCreateTargetPhraseCollection(const TargetPhrase &);
 
     bool IsLeaf() const {
       return m_terminalMap.empty() && m_gapNode == NULL;
@@ -106,8 +106,10 @@ public:
   bool HasPreterminalRule(const Word &) const;
 
 private:
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS);
 
   Node &GetOrCreateNode(const Phrase &source, const TargetPhrase &target,
                         const Word *sourceLHS);

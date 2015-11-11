@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;
@@ -17,7 +20,7 @@ while(<IN>) {
         if (length($word) > $size) {
 	    $word = substr($word,length($word)-$size);
         }
-	print OUT " " unless $first; 
+	print OUT " " unless $first;
         $first = 0;
 	print OUT lc($word);
     }

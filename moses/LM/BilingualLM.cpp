@@ -7,15 +7,6 @@ using namespace std;
 namespace Moses
 {
 
-int BilingualLMState::Compare(const FFState& other) const
-{
-  const BilingualLMState &otherState = static_cast<const BilingualLMState&>(other);
-
-  if (m_hash == otherState.m_hash)
-    return 0;
-  return (m_hash < otherState.m_hash) ? -1 : +1;
-}
-
 ////////////////////////////////////////////////////////////////
 BilingualLM::BilingualLM(const std::string &line)
   : StatefulFeatureFunction(1, line),
@@ -106,7 +97,7 @@ size_t BilingualLM::selectMiddleAlignment(
 {
 
   set<size_t>::iterator it = alignment_links.begin();
-  for (int i = 0; i < (alignment_links.size() - 1) / 2; ++i) {
+  for (size_t i = 0; i < (alignment_links.size() - 1) / 2; ++i) {
     ++it;
   }
 
@@ -117,7 +108,7 @@ void BilingualLM::getSourceWords(
   const TargetPhrase &targetPhrase,
   int targetWordIdx,
   const Sentence &source_sent,
-  const WordsRange &sourceWordRange,
+  const Range &sourceWordRange,
   std::vector<int> &words) const
 {
   //Get source context
@@ -200,14 +191,14 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const
 void BilingualLM::EvaluateInIsolation(const Phrase &source
                                       , const TargetPhrase &targetPhrase
                                       , ScoreComponentCollection &scoreBreakdown
-                                      , ScoreComponentCollection &estimatedFutureScore) const {}
+                                      , ScoreComponentCollection &estimatedScores) const {}
 
 void BilingualLM::EvaluateWithSourceContext(const InputType &input
     , const InputPath &inputPath
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
 
 }
@@ -229,7 +220,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   float value = 0;
   const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
-  const WordsRange& sourceWordRange = cur_hypo.GetCurrSourceWordsRange(); //Source words range to calculate offsets
+  const Range& sourceWordRange = cur_hypo.GetCurrSourceWordsRange(); //Source words range to calculate offsets
 
   // For each word in the current target phrase get its LM score.
   for (int i = 0; i < currTargetPhrase.GetSize(); i++) {

@@ -15,7 +15,7 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "moses/Syntax/RuleTableFF.h"
@@ -130,9 +130,9 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
                                       ff.GetFeaturesToApply());
 
     // Add rule to trie.
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(
-                                           trie, sourceFragment);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(trie, sourceFragment);
+    phraseColl->Add(targetPhrase);
 
     count++;
   }
@@ -146,7 +146,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
 }
 
 void HyperTreeLoader::ExtractSourceTerminalSetFromHyperPath(
-    const HyperPath &hp, boost::unordered_set<std::size_t> &sourceTerminalSet)
+  const HyperPath &hp, boost::unordered_set<std::size_t> &sourceTerminalSet)
 {
   for (std::vector<HyperPath::NodeSeq>::const_iterator p = hp.nodeSeqs.begin();
        p != hp.nodeSeqs.end(); ++p) {

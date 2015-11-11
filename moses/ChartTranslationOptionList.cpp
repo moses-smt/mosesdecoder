@@ -24,7 +24,7 @@
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptions.h"
 #include "ChartCellCollection.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "InputType.h"
 #include "InputPath.h"
 
@@ -61,7 +61,7 @@ public:
 
 void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
                                      const StackVec &stackVec,
-                                     const WordsRange &range)
+                                     const Range &range)
 {
   if (tpc.IsEmpty()) {
     return;
@@ -115,9 +115,13 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   }
 }
 
-void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range)
+void
+ChartTranslationOptionList::
+AddPhraseOOV(TargetPhrase &phrase,
+             std::list<TargetPhraseCollection::shared_ptr > &waste_memory,
+             const Range &range)
 {
-  TargetPhraseCollection *tpc = new TargetPhraseCollection();
+  TargetPhraseCollection::shared_ptr tpc(new TargetPhraseCollection);
   tpc->Add(&phrase);
   waste_memory.push_back(tpc);
   StackVec empty;
@@ -165,7 +169,7 @@ float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) 
   assert(stack);
   assert(!stack->empty());
   const ChartHypothesis &bestHypo = **(stack->begin());
-  return bestHypo.GetTotalScore();
+  return bestHypo.GetFutureScore();
 }
 
 void ChartTranslationOptionList::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)

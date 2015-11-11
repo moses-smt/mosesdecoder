@@ -1,9 +1,12 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 # given a moses.ini file, checks the translation and generation tables and reports
 # statistics on ambiguity
 # Ondrej Bojar
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;

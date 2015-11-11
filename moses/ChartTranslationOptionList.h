@@ -29,7 +29,7 @@ namespace Moses
 {
 
 class TargetPhraseCollection;
-class WordsRange;
+class Range;
 class InputType;
 class InputPath;
 class ChartCellLabel;
@@ -53,9 +53,9 @@ public:
   }
 
   void Add(const TargetPhraseCollection &, const StackVec &,
-           const WordsRange &);
+           const Range &);
 
-  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
+  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &waste_memory, const Range &range);
 
   bool Empty() const {
     return m_size == 0;

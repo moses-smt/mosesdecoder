@@ -13,7 +13,9 @@
 #include "moses/StaticData.h"
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
+#include "moses/TranslationTask.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -26,7 +28,7 @@ namespace Moses
 
 PhraseDictionaryTreeAdaptor::
 PhraseDictionaryTreeAdaptor(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(line, true)
 {
   ReadParameters();
 }
@@ -40,8 +42,9 @@ void PhraseDictionaryTreeAdaptor::Load()
   SetFeaturesToApply();
 }
 
-void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
+void PhraseDictionaryTreeAdaptor::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& source = *ttask->GetSource();
   const StaticData &staticData = StaticData::Instance();
 
   ReduceCache();
@@ -50,7 +53,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
-    std::stringstream strme;
+    util::StringStream strme;
     UTIL_THROW2("ERROR: mismatch of number of scaling factors: " << weight.size()
                 << " " << m_numScoreComponents);
   }
@@ -71,11 +74,10 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
   obj.CleanUp();
 }
 
-TargetPhraseCollection const*
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
-  return ret;
+  return GetImplementation().GetTargetPhraseCollection(src);
 }
 
 void PhraseDictionaryTreeAdaptor::EnableCache()
@@ -104,16 +106,17 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 }
 
 // legacy
-const TargetPhraseCollectionWithSourcePhrase*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
+TargetPhraseCollectionWithSourcePhrase::shared_ptr
+PhraseDictionaryTreeAdaptor::
+GetTargetPhraseCollectionLEGACY(InputType const& src,Range const &range) const
 {
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr ret;
   if(GetImplementation().m_rangeCache.empty()) {
-    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
-    return tpColl;
+    ret = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
   } else {
-    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-    return tpColl;
+    ret = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
   }
+  return ret;
 }
 
 }

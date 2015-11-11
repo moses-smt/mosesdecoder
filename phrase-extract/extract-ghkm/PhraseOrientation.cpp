@@ -26,7 +26,9 @@
 
 #include <boost/assign/list_of.hpp>
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -469,5 +471,5 @@ void PhraseOrientation::WritePriorCounts(std::ostream& out, const REO_MODEL_TYPE
 }
 
 }  // namespace GHKM
-}  // namespace Moses
-
+}  // namespace Syntax
+}  // namespace MosesTraining

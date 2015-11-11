@@ -116,29 +116,11 @@ public:
   StringPiece  GetString(FactorType factorType) const;
   TO_STRING();
 
-  //! transitive comparison of Word objects
-  inline bool operator< (const Word &compare) const {
-    // needed to store word in GenerationDictionary map
-    // uses comparison of FactorKey
-    // 'proper' comparison, not address/id comparison
-    return Compare(*this, compare) < 0;
-  }
-
-  inline bool operator== (const Word &compare) const {
-    // needed to store word in GenerationDictionary map
-    // uses comparison of FactorKey
-    // 'proper' comparison, not address/id comparison
-    return Compare(*this, compare) == 0;
-  }
+  bool operator== (const Word &compare) const;
 
   inline bool operator!= (const Word &compare) const {
-    return Compare(*this, compare) != 0;
+    return !(*this == compare);
   }
-
-  int Compare(const Word &other) const {
-    return Compare(*this, other);
-  }
-
 
   /* static functions */
 
@@ -162,14 +144,6 @@ public:
     return util::MurmurHashNative(m_factorArray, MAX_NUM_FACTORS*sizeof(Factor*), m_isNonTerminal);
   }
 };
-
-struct WordComparer {
-  //! returns true if hypoA can be recombined with hypoB
-  bool operator()(const Word *a, const Word *b) const {
-    return *a < *b;
-  }
-};
-
 
 inline size_t hash_value(const Word& word)
 {

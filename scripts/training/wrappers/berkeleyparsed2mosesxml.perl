@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;
@@ -22,13 +25,13 @@ while(<STDIN>) {
   s/\"/\&quot;/g;  # xml
   s/\[/\&#91;/g;   # syntax non-terminal
   s/\]/\&#93;/g;   # syntax non-terminal
-  
+
   # escape parentheses that were part of the input text
   s/(\(\S+ )\(\)/$1\&openingparenthesis;\)/g;
   s/(\(\S+ )\)\)/$1\&closingparenthesis;\)/g;
 
 
-  
+
   # convert into tree
   s/\((\S+) /<tree label=\"$1\"> /g;
   s/\)/ <\/tree> /g;
@@ -38,7 +41,7 @@ while(<STDIN>) {
   s/\-RRB\-/\)/g;
   s/ +/ /g;
   s/ $//g;
-  
+
   # de-escape parentheses that were part of the input text
   s/\&openingparenthesis;/\(/g;
   s/\&closingparenthesis;/\)/g;

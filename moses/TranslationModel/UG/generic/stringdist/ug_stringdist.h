@@ -17,29 +17,25 @@
 #include "moses/TranslationModel/UG/mm/tpt_typedefs.h"
 
 
-using namespace std;
-//using namespace boost;
-using namespace ugdiss;
-
-namespace stringdist 
+namespace stringdist
 {
-  float 
+  float
   levenshtein(UChar const* a, size_t const lenA,
 	      UChar const* b, size_t const lenB);
 
   UErrorCode strip_accents(UnicodeString & trg);
 
-  float 
+  float
   fillAlignmentMatrix(UChar const* a, size_t const lenA,
 		      UChar const* b, size_t const lenB,
-		      vector<vector<float> > & M);
+		      std::vector<std::vector<float> > & M);
 
   class StringDiff
   {
   public:
-    enum MATCHTYPE 
+    enum MATCHTYPE
       {
-	same,        // a and b are identical 
+	same,        // a and b are identical
 	cap,         // a and b differ only in capitalization
 	flip,        // two-letter flip
 	permutation, // a and b have same letters but in different order
@@ -48,7 +44,7 @@ namespace stringdist
 	insertion,   // a is empty
 	deletion,    // b is empty
 	mismatch,    // none of the above
-	noinit       // not initialized 
+	noinit       // not initialized
       };
 
     struct Segment
@@ -59,29 +55,29 @@ namespace stringdist
       MATCHTYPE match;
       float      dist;
       Segment();
-      Segment(size_t const as, size_t const ae, 
+      Segment(size_t const as, size_t const ae,
 	      size_t const bs, size_t const be,
-	      UnicodeString const& a, 
+	      UnicodeString const& a,
 	      UnicodeString const& b);
       char const* label() const;
     };
   private:
     UnicodeString a,b;
-    vector<Segment> difflist;
-    vector<int> diffcnt;
+    std::vector<Segment> difflist;
+    std::vector<int> diffcnt;
   public:
-    UnicodeString const& set_a(string const& a);
-    UnicodeString const& set_b(string const& b);
+    UnicodeString const& set_a(std::string const& a);
+    UnicodeString const& set_b(std::string const& b);
     UnicodeString const& get_a() const;
     UnicodeString const& get_b() const;
-    StringDiff(string const& a, string const& b);
+    StringDiff(std::string const& a, std::string const& b);
     StringDiff();
     size_t size();
     size_t align(bool force=false); // returns the levenshtein distance
     void showDiff(std::ostream& out);
     float levenshtein();
     Segment const& operator[](uint32_t i) const;
-    void fillAlignmentMatrix(vector<vector<float> > & M) const;
+    void fillAlignmentMatrix(std::vector<std::vector<float> > & M) const;
     vector<int> const& getFeatures() const;
   };
 }

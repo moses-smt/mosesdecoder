@@ -7,7 +7,7 @@ function.
 Compatible with this frozen version of VW:
 
     https://github.com/moses-smt/vowpal_wabbit
-    
+
 To enable VW, you need to provide a path where VW was installed (using `make install`) to bjam:
 
     ./bjam --with-vw=<path/to/vw/installation>
@@ -17,7 +17,7 @@ Implemented classifier features
 
 * `VWFeatureSourceBagOfWords`: This creates a feature of form bow^token for every
 source sentence token.
-* `VWFeatureSourceExternalFeatures column=0`: when used with -inputtype 5 (`TabbedSentence`) this can be used to supply additional feature to VW. The input is a tab-separated file, the first column is the usual input sentence, all other columns can be used for meta-data. Parameter column=0 counts beginning with the first column that is not the input sentence.  
+* `VWFeatureSourceExternalFeatures column=0`: when used with -inputtype 5 (`TabbedSentence`) this can be used to supply additional feature to VW. The input is a tab-separated file, the first column is the usual input sentence, all other columns can be used for meta-data. Parameter column=0 counts beginning with the first column that is not the input sentence.
 * `VWFeatureSourceIndicator`: Ass a feature for the whole source phrase.
 * `VWFeatureSourcePhraseInternal`: Adds a separate feature for every word of the source phrase.
 * `VWFeatureSourceWindow size=3`: Adds source words in a window of size 3 before and after the source phrase as features. These do not overlap with `VWFeatureSourcePhraseInternal`.
@@ -36,7 +36,7 @@ To use the classifier edit your moses.ini
     VWFeatureTargetIndicator
     VWFeatureSourceIndicator
     ...
-     
+
     [weights]
     ...
     VW0= 0.2
@@ -47,12 +47,12 @@ features which classifier they belong to:
 
     [features]
     ...
-    VW name=bart path=/home/username/vw/classifier1.vw 
+    VW name=bart path=/home/username/vw/classifier1.vw
     VWFeatureSourceBagOfWords used-by=bart
     VWFeatureTargetIndicator used-by=bart
     VWFeatureSourceIndicator used-by=bart
     ...
-    
+
     [weights]
     ...
     bart= 0.2
@@ -62,14 +62,14 @@ You can also use multiple classifiers:
 
     [features]
     ...
-    VW name=bart path=/home/username/vw/classifier1.vw 
+    VW name=bart path=/home/username/vw/classifier1.vw
     VW path=/home/username/vw/classifier2.vw
     VW path=/home/username/vw/classifier3.vw
-    VWFeatureSourceBagOfWords used-by=bart,VW0 
+    VWFeatureSourceBagOfWords used-by=bart,VW0
     VWFeatureTargetIndicator used-by=VW1,VW0,bart
     VWFeatureSourceIndicator used-by=bart,VW1
     ...
-    
+
     [weights]
     ...
     bart= 0.2
@@ -78,7 +78,7 @@ You can also use multiple classifiers:
     ...
 
 Features can use any combination of factors. Provide a comma-delimited list of factors in the `source-factors` or `target-factors` variables to override the default setting (`0`, i.e. the first factor).
-    
+
 Training the classifier
 -----------------------
 
@@ -94,7 +94,7 @@ Use Moses format for the word alignment (`0-0 1-0` etc.). Set the input type to 
 Configure your features in the `moses.ini` file (see above) and set the `train` flag:
 
      [features]
-     ... 
+     ...
      VW name=bart path=/home/username/vw/features.txt train=1
      ...
 

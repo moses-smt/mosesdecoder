@@ -5,7 +5,7 @@
 
 #include "moses/Syntax/S2T/Parsers/Parser.h"
 #include "moses/Syntax/S2T/RuleTrieScope3.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 
 #include "PatternApplicationTrie.h"
 #include "SymbolRangeCalculator.h"
@@ -41,7 +41,7 @@ public:
 
   ~Scope3Parser();
 
-  void EnumerateHyperedges(const WordsRange &, Callback &);
+  void EnumerateHyperedges(const Range &, Callback &);
 
 private:
   void Init();

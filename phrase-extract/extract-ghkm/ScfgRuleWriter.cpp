@@ -19,10 +19,6 @@
 
 #include "ScfgRuleWriter.h"
 
-#include "Alignment.h"
-#include "Options.h"
-#include "ScfgRule.h"
-
 #include <cassert>
 #include <cmath>
 #include <ostream>
@@ -30,7 +26,13 @@
 #include <sstream>
 #include <vector>
 
-namespace Moses
+#include "Alignment.h"
+#include "Options.h"
+#include "ScfgRule.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -229,4 +231,5 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

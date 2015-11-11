@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id: report-experiment-scores.perl 407 2008-11-10 14:43:31Z philipp $
 
@@ -19,6 +22,9 @@ $TYPE{"bolt-bleu"}     = "BLEU";
 $TYPE{"bolt-bleu-c"}   = "BLEU-c";
 $TYPE{"bolt-ter"}      = "TER";
 $TYPE{"bolt-ter-c"}    = "TER-c";
+
+$TYPE{"multi-bleu-detok"}  = "BLEU";
+$TYPE{"multi-bleu-c-detok"}= "BLEU-c";
 
 my %SCORE;
 my %AVERAGE;
@@ -59,7 +65,8 @@ sub process {
     elsif ($type eq 'ibm-bleu' || $type eq 'ibm-bleu-c') {
 	$SCORE{$set} .= &extract_ibm_bleu($file,$type)." ";
     }
-    elsif ($type eq 'multi-bleu' || $type eq 'multi-bleu-c') {
+    elsif ($type eq 'multi-bleu' || $type eq 'multi-bleu-c'
+	|| $type eq 'multi-bleu-detok' || $type eq 'multi-bleu-c-detok') {
 	$SCORE{$set} .= &extract_multi_bleu($file,$type)." ";
     }
     elsif ($type eq 'meteor') {

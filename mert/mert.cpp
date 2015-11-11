@@ -474,7 +474,7 @@ int main(int argc, char **argv)
     // A task for each start point
     for (size_t j = 0; j < startingPoints.size(); ++j) {
       boost::shared_ptr<OptimizationTask>
-	task(new OptimizationTask(optimizer, startingPoints[j]));
+      task(new OptimizationTask(optimizer, startingPoints[j]));
       tasks.push_back(task);
 #ifdef WITH_THREADS
       pool.Submit(task);

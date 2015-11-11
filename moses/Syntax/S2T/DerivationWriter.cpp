@@ -78,7 +78,7 @@ void DerivationWriter::WriteLine(const SHyperedge &shyperedge,
   // Spans covered by source RHS symbols.
   for (std::size_t i = 0; i < shyperedge.tail.size(); ++i) {
     const SVertex *child = shyperedge.tail[i];
-    const WordsRange &span = child->pvertex->span;
+    const Range &span = child->pvertex->span;
     out << " " << span.GetStartPos() << ".." << span.GetEndPos();
   }
 

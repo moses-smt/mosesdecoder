@@ -76,8 +76,8 @@ public:
   }
 
   /** Parse the arguments, removing those that define the grid and returning a copy of the rest */
-  void parseArgs(int& argc, char**& argv) {
-    char** newargv = new char*[argc+1]; //Space to add mbr parameter
+  void parseArgs(int& argc, char const**& argv) {
+    char const** newargv = new char const*[argc+1]; //Space to add mbr parameter
     int newargc = 0;
     for (int i = 0; i < argc; ++i) {
       bool consumed = false;
@@ -113,8 +113,9 @@ public:
         }
       }
       if (!consumed) {
-        newargv[newargc] = new char[strlen(argv[i]) + 1];
-        strcpy(newargv[newargc],argv[i]);
+        // newargv[newargc] = new char[strlen(argv[i]) + 1];
+        // strcpy(newargv[newargc],argv[i]);
+	newargv[newargc] = argv[i];
         ++newargc;
       }
     }
@@ -137,7 +138,7 @@ private:
 
 } // namespace
 
-int main(int argc, char* argv[])
+int main(int argc, char const* argv[])
 {
   cerr << "Lattice MBR Grid search" << endl;
 
@@ -159,13 +160,15 @@ int main(int argc, char* argv[])
   }
 
   StaticData& SD = const_cast<StaticData&>(StaticData::Instance());
-  SD.SetUseLatticeMBR(true);
+  LMBR_Options& lmbr = SD.options().lmbr;
+  MBR_Options&   mbr = SD.options().mbr;
+  lmbr.enabled = true;
 
   boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }
-  size_t nBestSize = SD.GetMBRSize();
+  size_t nBestSize = mbr.size;
 
   if (nBestSize <= 0) {
     throw new runtime_error("Non-positive size specified for n-best list");
@@ -177,39 +180,35 @@ int main(int argc, char* argv[])
   const vector<float>& scale_grid = grid.getGrid(lmbr_scale);
 
   boost::shared_ptr<InputType> source;
-  while((source = ioWrapper->ReadInput()) != NULL)
-    {
-      // set up task of translating one sentence
-      boost::shared_ptr<TranslationTask> ttask;
-      ttask = TranslationTask::create(source, ioWrapper);
-      Manager manager(ttask);
-      manager.Decode();
-      TrellisPathList nBestList;
-      manager.CalcNBest(nBestSize, nBestList,true);
-      //grid search
-      BOOST_FOREACH(float const& p, pgrid)
-	{
-	  SD.SetLatticeMBRPrecision(p);
-	  BOOST_FOREACH(float const& r, rgrid)
-	    {
-	      SD.SetLatticeMBRPRatio(r);
-	      BOOST_FOREACH(size_t const prune_i, prune_grid)
-		{
-		  SD.SetLatticeMBRPruningFactor(size_t(prune_i));
-		  BOOST_FOREACH(float const& scale_i, scale_grid)
-		    {
-		      SD.SetMBRScale(scale_i);
-		      size_t lineCount = source->GetTranslationId();
-		      cout << lineCount << " ||| " << p << " " 
-			   << r << " " << size_t(prune_i) << " " << scale_i
-			   << " ||| ";
-		      vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-		      manager.OutputBestHypo(mbrBestHypo, lineCount, 
-					     SD.GetReportSegmentation(),
-					     SD.GetReportAllFactors(),cout);
-		    }
-		}
-	    }
-	}
+  while((source = ioWrapper->ReadInput()) != NULL) {
+    // set up task of translating one sentence
+    boost::shared_ptr<TranslationTask> ttask;
+    ttask = TranslationTask::create(source, ioWrapper);
+    Manager manager(ttask);
+    manager.Decode();
+    TrellisPathList nBestList;
+    manager.CalcNBest(nBestSize, nBestList,true);
+    //grid search
+    BOOST_FOREACH(float const& p, pgrid) {
+      lmbr.precision = p;
+      BOOST_FOREACH(float const& r, rgrid) {
+        lmbr.ratio = r;
+        BOOST_FOREACH(size_t const prune_i, prune_grid) {
+          lmbr.pruning_factor = prune_i;
+          BOOST_FOREACH(float const& scale_i, scale_grid) {
+            mbr.scale = scale_i;
+            size_t lineCount = source->GetTranslationId();
+            cout << lineCount << " ||| " << p << " "
+                 << r << " " << size_t(prune_i) << " " << scale_i
+                 << " ||| ";
+            vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
+            manager.OutputBestHypo(mbrBestHypo, lineCount,
+                                   manager.options().output.ReportSegmentation,
+                                   manager.options().output.ReportAllFactors,
+                                   cout);
+          }
+        }
+      }
     }
+  }
 }

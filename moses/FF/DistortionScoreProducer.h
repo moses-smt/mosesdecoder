@@ -10,7 +10,7 @@ class FFState;
 class ScoreComponentCollection;
 class Hypothesis;
 class ChartHypothesis;
-class WordsRange;
+class Range;
 
 /** Calculates Distortion scores
  */
@@ -31,7 +31,7 @@ public:
   }
 
   static float CalculateDistortionScore(const Hypothesis& hypo,
-                                        const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
+                                        const Range &prev, const Range &curr, const int FirstGapPosition);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
@@ -52,7 +52,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -62,7 +62,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 };
 }

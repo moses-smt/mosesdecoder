@@ -12,11 +12,9 @@
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/FactorTypeSet.h"
 #include "moses/Sentence.h"
-
-#include "moses/FF/FFState.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
@@ -42,6 +40,7 @@ class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
   typedef std::map< std::string, short > StringHash;
 
   struct ThreadLocalStorage {
+    // const Sentence *input;
     const Sentence *input;
   };
 
@@ -73,11 +72,7 @@ public:
 
   bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
-  void InitializeForInput( Sentence const& in );
-
-  const FFState* EmptyHypothesisState(const InputType &) const {
-    return new DummyState();
-  }
+  void InitializeForInput(ttasksptr const& ttask);
 
   //TODO: This implements the old interface, but cannot be updated because
   //it appears to be stateful
@@ -95,7 +90,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -105,7 +100,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
   void AddFeature(ScoreComponentCollection* accumulator,

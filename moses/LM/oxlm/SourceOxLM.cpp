@@ -3,6 +3,8 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/filesystem.hpp>
+#include "moses/TypeDef.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 using namespace oxlm;
@@ -101,9 +103,10 @@ void SourceOxLM::SetParameter(const string& key, const string& value)
   }
 }
 
-void SourceOxLM::InitializeForInput(const InputType& source)
+void SourceOxLM::InitializeForInput(ttasksptr const& ttask)
 {
-  BilingualLM::InitializeForInput(source);
+  const InputType& source = *ttask->GetSource();
+  BilingualLM::InitializeForInput(ttask);
 
   if (persistentCache) {
     if (!cache.get()) {

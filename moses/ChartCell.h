@@ -26,7 +26,7 @@
 #include <map>
 #include <vector>
 #include "Word.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "NonTerminal.h"
 #include "ChartHypothesis.h"
 #include "ChartHypothesisCollection.h"
@@ -60,12 +60,12 @@ public:
     return m_targetLabelSet;
   }
 
-  const WordsRange &GetCoverage() const {
+  const Range &GetCoverage() const {
     return m_coverage;
   }
 
 protected:
-  const WordsRange m_coverage;
+  const Range m_coverage;
   ChartCellLabelSet m_targetLabelSet;
 };
 
@@ -119,11 +119,6 @@ public:
 
   void OutputSizes(std::ostream &out) const;
   size_t GetSize() const;
-
-  //! transitive comparison used for adding objects into set
-  inline bool operator<(const ChartCell &compare) const {
-    return m_coverage < compare.m_coverage;
-  }
 
   void WriteSearchGraph(const ChartSearchGraphWriter& writer, const std::map<unsigned,bool> &reachable) const;
 

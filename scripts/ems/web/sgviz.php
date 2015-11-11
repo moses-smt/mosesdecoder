@@ -1,4 +1,10 @@
 <?php
+
+/*
+This file is part of moses.  Its use is licensed under the GNU Lesser General
+Public License version 2.1 or, at your option, any later version.
+*/
+
 function sgviz($sentence) {
   global $setup,$dir,$id,$set;
 ?><html><head><title>Search Graph Visualization, Sentence <?php $sentence ?></title>
@@ -39,7 +45,7 @@ new Ajax.Request('?analysis=sgviz_data'
     method: "post"
   });
 </script></body></html>
-<?php 
+<?php
 // read graph
 //$file = get_current_analysis_filename("basic","search-graph")."/graph.$sentence";
 //$handle = fopen($file,"r");
@@ -55,7 +61,7 @@ function sgviz_data($sentence) {
   $file = get_current_analysis_filename("basic","search-graph")."/graph.$sentence";
 
   $handle = fopen($file,"r");
-  while (($line = fgets($handle)) !== false) { 
+  while (($line = fgets($handle)) !== false) {
     $e = explode("\t",addslashes(chop($line)));
     $edge[$e[0]] = array($e[1],$e[2],$e[3],$e[4],$e[5],$e[6],$e[7],$e[8],$e[9],$e[10]);
   }

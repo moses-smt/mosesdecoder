@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 
@@ -18,7 +21,7 @@ while(my $line = <BASEINI>) {
   }
   elsif ($line =~ /\[[a-zA-Z0-9\-]*\]/) {
     $inWeightSection = 0;
-  }  
+  }
 
   if (!$inWeightSection) {
     print OUT "$line\n" unless $line =~ /dense weights for feature functions/;
@@ -48,7 +51,7 @@ while(my $line = <WEIGHTINI>) {
   elsif ($line =~ /\[[a-zA-Z0-9\-]*\]/) {
    print OUT "\n" if $inWeightSection;
    $inWeightSection = 0;
-  }  
+  }
 
   if ($inWeightSection && $line !~ /^\s*$/) {
     print OUT "$line\n";

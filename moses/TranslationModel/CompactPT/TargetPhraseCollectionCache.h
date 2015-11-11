@@ -26,12 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <set>
 #include <vector>
 
-#ifdef WITH_THREADS
-#ifdef BOOST_HAS_PTHREADS
-#include <boost/thread/mutex.hpp>
-#endif
-#endif
-
+#include <boost/thread/tss.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "moses/Phrase.h"
@@ -63,12 +58,7 @@ private:
   };
 
   typedef std::map<Phrase, LastUsed> CacheMap;
-
-  CacheMap m_phraseCache;
-
-#ifdef WITH_THREADS
-  boost::mutex m_mutex;
-#endif
+  static boost::thread_specific_ptr<CacheMap> m_phraseCache;
 
 public:
 
@@ -80,31 +70,37 @@ public:
   }
 
   iterator Begin() {
-    return m_phraseCache.begin();
+    if(!m_phraseCache.get())
+      m_phraseCache.reset(new CacheMap());
+    return m_phraseCache->begin();
   }
 
   const_iterator Begin() const {
-    return m_phraseCache.begin();
+    if(!m_phraseCache.get())
+      m_phraseCache.reset(new CacheMap());
+    return m_phraseCache->begin();
   }
 
   iterator End() {
-    return m_phraseCache.end();
+    if(!m_phraseCache.get())
+      m_phraseCache.reset(new CacheMap());
+    return m_phraseCache->end();
   }
 
   const_iterator End() const {
-    return m_phraseCache.end();
+    if(!m_phraseCache.get())
+      m_phraseCache.reset(new CacheMap());
+    return m_phraseCache->end();
   }
 
   /** retrieve translations for source phrase from persistent cache **/
   void Cache(const Phrase &sourcePhrase, TargetPhraseVectorPtr tpv,
              size_t bitsLeft = 0, size_t maxRank = 0) {
-#ifdef WITH_THREADS
-    boost::mutex::scoped_lock lock(m_mutex);
-#endif
-
+    if(!m_phraseCache.get())
+      m_phraseCache.reset(new CacheMap());
     // check if source phrase is already in cache
-    iterator it = m_phraseCache.find(sourcePhrase);
-    if(it != m_phraseCache.end())
+    iterator it = m_phraseCache->find(sourcePhrase);
+    if(it != m_phraseCache->end())
       // if found, just update clock
       it->second.m_clock = clock();
     else {
@@ -113,19 +109,17 @@ public:
         TargetPhraseVectorPtr tpv_temp(new TargetPhraseVector());
         tpv_temp->resize(maxRank);
         std::copy(tpv->begin(), tpv->begin() + maxRank, tpv_temp->begin());
-        m_phraseCache[sourcePhrase] = LastUsed(clock(), tpv_temp, bitsLeft);
+        (*m_phraseCache)[sourcePhrase] = LastUsed(clock(), tpv_temp, bitsLeft);
       } else
-        m_phraseCache[sourcePhrase] = LastUsed(clock(), tpv, bitsLeft);
+        (*m_phraseCache)[sourcePhrase] = LastUsed(clock(), tpv, bitsLeft);
     }
   }
 
   std::pair<TargetPhraseVectorPtr, size_t> Retrieve(const Phrase &sourcePhrase) {
-#ifdef WITH_THREADS
-    boost::mutex::scoped_lock lock(m_mutex);
-#endif
-
-    iterator it = m_phraseCache.find(sourcePhrase);
-    if(it != m_phraseCache.end()) {
+    if(!m_phraseCache.get())
+      m_phraseCache.reset(new CacheMap());
+    iterator it = m_phraseCache->find(sourcePhrase);
+    if(it != m_phraseCache->end()) {
       LastUsed &lu = it->second;
       lu.m_clock = clock();
       return std::make_pair(lu.m_tpv, lu.m_bitsLeft);
@@ -135,34 +129,31 @@ public:
 
   // if cache full, reduce
   void Prune() {
-#ifdef WITH_THREADS
-    boost::mutex::scoped_lock lock(m_mutex);
-#endif
-
-    if(m_phraseCache.size() > m_max * (1 + m_tolerance)) {
+    if(!m_phraseCache.get())
+      m_phraseCache.reset(new CacheMap());
+    if(m_phraseCache->size() > m_max * (1 + m_tolerance)) {
       typedef std::set<std::pair<clock_t, Phrase> > Cands;
       Cands cands;
-      for(CacheMap::iterator it = m_phraseCache.begin();
-          it != m_phraseCache.end(); it++) {
+      for(CacheMap::iterator it = m_phraseCache->begin();
+          it != m_phraseCache->end(); it++) {
         LastUsed &lu = it->second;
         cands.insert(std::make_pair(lu.m_clock, it->first));
       }
 
       for(Cands::iterator it = cands.begin(); it != cands.end(); it++) {
         const Phrase& p = it->second;
-        m_phraseCache.erase(p);
+        m_phraseCache->erase(p);
 
-        if(m_phraseCache.size() < (m_max * (1 - m_tolerance)))
+        if(m_phraseCache->size() < (m_max * (1 - m_tolerance)))
           break;
       }
     }
   }
 
   void CleanUp() {
-#ifdef WITH_THREADS
-    boost::mutex::scoped_lock lock(m_mutex);
-#endif
-    m_phraseCache.clear();
+    if(!m_phraseCache.get())
+      m_phraseCache.reset(new CacheMap());
+    m_phraseCache->clear();
   }
 
 };

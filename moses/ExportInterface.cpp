@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id: ExportInterface.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
 
 /***********************************************************************
@@ -59,13 +60,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "ExportInterface.h"
+
 #ifdef HAVE_XMLRPC_C
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/registry.hpp>
-#include <xmlrpc-c/server_abyss.hpp>
-#include "server/Translator.h"
-#include "server/Optimizer.h"
-#include "server/Updater.h"
+#include "moses/server/Server.h"
 #endif
 
 using namespace std;
@@ -83,16 +80,16 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
 
 SimpleTranslationInterface::SimpleTranslationInterface(const string &mosesIni): m_staticData(StaticData::Instance())
 {
-    if (!m_params.LoadParam(mosesIni)) {
-      cerr << "Error; Cannot load parameters at " << mosesIni<<endl;
-      exit(1);
-    }
-    if (!StaticData::LoadDataStatic(&m_params, mosesIni.c_str())) {
-      cerr << "Error; Cannot load static data in file " << mosesIni<<endl;
-      exit(1);
-    }
+  if (!m_params.LoadParam(mosesIni)) {
+    cerr << "Error; Cannot load parameters at " << mosesIni<<endl;
+    exit(1);
+  }
+  if (!StaticData::LoadDataStatic(&m_params, mosesIni.c_str())) {
+    cerr << "Error; Cannot load static data in file " << mosesIni<<endl;
+    exit(1);
+  }
 
-    util::rand_init();
+  util::rand_init();
 
 }
 
@@ -114,15 +111,15 @@ string SimpleTranslationInterface::translate(const string &inputString)
 
   boost::shared_ptr<InputType> source = ioWrapper->ReadInput();
   if (!source) return "Error: Source==null!!!";
-  IFVERBOSE(1) { ResetUserTime(); }
-
-  FeatureFunction::CallChangeSource(&*source);
+  IFVERBOSE(1) {
+    ResetUserTime();
+  }
 
   // set up task of translating one sentence
-  boost::shared_ptr<TranslationTask> task 
-    = TranslationTask::create(source, ioWrapper);
+  boost::shared_ptr<TranslationTask> task
+  = TranslationTask::create(source, ioWrapper);
   task->Run();
-  
+
   string output = outputStream.str();
   //now trim the end whitespace
   const string whitespace = " \t\f\v\n\r";
@@ -147,36 +144,12 @@ int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
-  int port; params.SetParameter(port, "server-port", 8080);
-  bool isSerial; params.SetParameter(isSerial, "serial", false);
-  string logfile; params.SetParameter(logfile, "server-log", string(""));
-  size_t num_threads; params.SetParameter(num_threads, "threads", size_t(10));
-  if (isSerial) VERBOSE(1,"Running server in serial mode." << endl);
-  
-  xmlrpc_c::registry myRegistry;
-  
-  xmlrpc_c::methodPtr const translator(new MosesServer::Translator(num_threads));
-  xmlrpc_c::methodPtr const updater(new MosesServer::Updater);
-  xmlrpc_c::methodPtr const optimizer(new MosesServer::Optimizer);
-  
-  myRegistry.addMethod("translate", translator);
-  myRegistry.addMethod("updater", updater);
-  myRegistry.addMethod("optimize", optimizer);
-  
-  xmlrpc_c::serverAbyss myAbyssServer(myRegistry, port, logfile);
-  
-  XVERBOSE(1,"Listening on port " << port << endl);
-  if (isSerial) { while(1) myAbyssServer.runOnce(); } 
-  else myAbyssServer.run();
-
-  std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
-  // #pragma message("BUILDING MOSES WITH SERVER SUPPORT") 
+  MosesServer::Server server(params);
+  return server.run(); // actually: don't return. see Server::run()
 #else
-  // #pragma message("BUILDING MOSES WITHOUT SERVER SUPPORT") 
-  std::cerr << "Moses was compiled without server support." << endl;   
+  UTIL_THROW2("Moses was compiled without xmlrpc-c. "
+              << "No server functionality available.");
 #endif
-  return 1;
-
 }
 
 int
@@ -189,83 +162,115 @@ batch_run()
   util::rand_init();
 
   IFVERBOSE(1) PrintUserTime("Created input-output object");
-    
+
   // set up read/writing class:
-  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper); 
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
   UTIL_THROW_IF2(ioWrapper == NULL, "Error; Failed to create IO object"
-		 << " [" << HERE << "]");
-  
+                 << " [" << HERE << "]");
+
   // check on weights
   const ScoreComponentCollection& weights = staticData.GetAllWeights();
-  IFVERBOSE(2) 
-    {
-      TRACE_ERR("The global weight vector looks like this: ");
-      TRACE_ERR(weights);
-      TRACE_ERR("\n");
-    }
+  IFVERBOSE(2) {
+    TRACE_ERR("The global weight vector looks like this: ");
+    TRACE_ERR(weights);
+    TRACE_ERR("\n");
+  }
 
 #ifdef WITH_THREADS
   ThreadPool pool(staticData.ThreadCount());
 #endif
 
+  // using context for adaptation:
+  // e.g., context words / strings from config file / cmd line
   std::string context_string;
   params.SetParameter(context_string,"context-string",string(""));
 
+  // ... or weights for documents/domains from config file / cmd. line
+  std::string context_weights;
+  params.SetParameter(context_weights,"context-weights",string(""));
+
+  // ... or the surrounding context (--context-window ...)
+  size_t size_t_max = std::numeric_limits<size_t>::max();
+  bool use_context_window = ioWrapper->GetLookAhead() || ioWrapper->GetLookBack();
+  bool use_context = use_context_window || context_string.size();
+  bool use_sliding_context_window = (use_context_window
+                                     && ioWrapper->GetLookAhead() != size_t_max);
+
+  boost::shared_ptr<std::vector<std::string> >  context_window;
+  boost::shared_ptr<std::vector<std::string> >* cw;
+  cw = use_context_window ? &context_window : NULL;
+  if (!cw && context_string.size())
+    context_window.reset(new std::vector<std::string>(1,context_string));
+
+  // global scope of caches, biases, etc., if any
+  boost::shared_ptr<ContextScope> gscope;
+  if (!use_sliding_context_window)
+    gscope.reset(new ContextScope);
+
   // main loop over set of input sentences
-
   boost::shared_ptr<InputType> source;
-  while ((source = ioWrapper->ReadInput()) != NULL)
-    {
-      IFVERBOSE(1) ResetUserTime();
-      
-      FeatureFunction::CallChangeSource(source.get());
-      
-      // set up task of translating one sentence
-      boost::shared_ptr<TranslationTask>
-	task = TranslationTask::create(source, ioWrapper);
-      task->SetContextString(context_string);
+  while ((source = ioWrapper->ReadInput(cw)) != NULL) {
+    IFVERBOSE(1) ResetUserTime();
 
-      // Allow for (sentence-)context-specific processing prior to 
-      // decoding. This can be used, for example, for context-sensitive
-      // phrase lookup.
-      FeatureFunction::SetupAll(*task);
+    // set up task of translating one sentence
+    boost::shared_ptr<ContextScope>  lscope;
+    if (gscope) lscope = gscope;
+    else lscope.reset(new ContextScope);
 
-      // execute task
+    boost::shared_ptr<TranslationTask> task;
+    task = TranslationTask::create(source, ioWrapper, lscope);
+
+    if (cw) {
+      if (context_string.size())
+        context_window->push_back(context_string);
+      if(!use_sliding_context_window)
+        cw = NULL;
+    }
+
+    if (context_window)
+      task->SetContextWindow(context_window);
+
+    if (context_weights != "" && !task->GetScope()->GetContextWeights())
+      task->GetScope()->SetContextWeights(context_weights);
+
+    // Allow for (sentence-)context-specific processing prior to
+    // decoding. This can be used, for example, for context-sensitive
+    // phrase lookup.
+    FeatureFunction::SetupAll(*task);
+
+    // execute task
 #ifdef WITH_THREADS
 #ifdef PT_UG
-      // simulated post-editing requires threads (within the dynamic phrase tables)
-      // but runs all sentences serially, to allow updating of the bitext.
-      bool spe = params.isParamSpecified("spe-src");
-      if (spe) 
-	{
-	  // simulated post-editing: always run single-threaded!
-	  task->Run();
-	  string src,trg,aln;
-	  UTIL_THROW_IF2(!getline(*ioWrapper->spe_src,src), "[" << HERE << "] "
-			 << "missing update data for simulated post-editing.");
-	  UTIL_THROW_IF2(!getline(*ioWrapper->spe_trg,trg), "[" << HERE << "] "
-			 << "missing update data for simulated post-editing.");
-	  UTIL_THROW_IF2(!getline(*ioWrapper->spe_aln,aln), "[" << HERE << "] "
-			 << "missing update data for simulated post-editing.");
-	  BOOST_FOREACH (PhraseDictionary* pd, PhraseDictionary::GetColl()) 
-	    {
-	      Mmsapt* sapt = dynamic_cast<Mmsapt*>(pd);
-	      if (sapt) sapt->add(src,trg,aln);
-	      VERBOSE(1,"[" << HERE << " added src] " << src << endl);
-	      VERBOSE(1,"[" << HERE << " added trg] " << trg << endl);
-	      VERBOSE(1,"[" << HERE << " added aln] " << aln << endl);
-	    }
-	} 
-      else pool.Submit(task);
+    // simulated post-editing requires threads (within the dynamic phrase tables)
+    // but runs all sentences serially, to allow updating of the bitext.
+    bool spe = params.isParamSpecified("spe-src");
+    if (spe) {
+      // simulated post-editing: always run single-threaded!
+      task->Run();
+      string src,trg,aln;
+      UTIL_THROW_IF2(!getline(*ioWrapper->spe_src,src), "[" << HERE << "] "
+                     << "missing update data for simulated post-editing.");
+      UTIL_THROW_IF2(!getline(*ioWrapper->spe_trg,trg), "[" << HERE << "] "
+                     << "missing update data for simulated post-editing.");
+      UTIL_THROW_IF2(!getline(*ioWrapper->spe_aln,aln), "[" << HERE << "] "
+                     << "missing update data for simulated post-editing.");
+      BOOST_FOREACH (PhraseDictionary* pd, PhraseDictionary::GetColl()) {
+        Mmsapt* sapt = dynamic_cast<Mmsapt*>(pd);
+        if (sapt) sapt->add(src,trg,aln);
+        VERBOSE(1,"[" << HERE << " added src] " << src << endl);
+        VERBOSE(1,"[" << HERE << " added trg] " << trg << endl);
+        VERBOSE(1,"[" << HERE << " added aln] " << aln << endl);
+      }
+    } else pool.Submit(task);
 #else
-      pool.Submit(task);
+    pool.Submit(task);
 
 #endif
 #else
-      task->Run();
+    task->Run();
 #endif
-    }
-  
+  }
+
   // we are done, finishing up
 #ifdef WITH_THREADS
   pool.Stop(true); //flush remaining jobs
@@ -274,7 +279,7 @@ batch_run()
   FeatureFunction::Destroy();
 
   IFVERBOSE(1) util::PrintUsage(std::cerr);
-  
+
 #ifndef EXIT_RETURN
   //This avoids that destructors are called (it can take a long time)
   exit(EXIT_SUCCESS);
@@ -284,54 +289,54 @@ batch_run()
 }
 
 /** Called by main function of the command line version of the decoder **/
-int decoder_main(int argc, char** argv)
+int decoder_main(int argc, char const** argv)
 {
-  try 
-    {
-      
-#ifdef HAVE_PROTOBUF
-      GOOGLE_PROTOBUF_VERIFY_VERSION;
+#ifdef NDEBUG
+  try
 #endif
-      
-      // echo command line, if verbose
-      IFVERBOSE(1) 
-	{
-	  TRACE_ERR("command: ");
-	  for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
-	  TRACE_ERR(endl);
-	}
+  {
+#ifdef HAVE_PROTOBUF
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+#endif
 
-      // set number of significant decimals in output
-      FixPrecision(cout);
-      FixPrecision(cerr);
-
-      // load all the settings into the Parameter class
-      // (stores them as strings, or array of strings)
-      if (!params.LoadParam(argc,argv)) 
-	exit(1);
-
-      // initialize all "global" variables, which are stored in StaticData
-      // note: this also loads models such as the language model, etc.
-      if (!StaticData::LoadDataStatic(&params, argv[0])) 
-	exit(1);
-    
-      // setting "-show-weights" -> just dump out weights and exit
-      if (params.isParamSpecified("show-weights")) 
-	{
-	  ShowWeights();
-	  exit(0);
-	}
-    
-      if (params.GetParam("server"))
-	return run_as_server();
-      else
-	return batch_run();
-    
-    } 
-  catch (const std::exception &e) 
-    {
-      std::cerr << "Exception: " << e.what() << std::endl;
-      return EXIT_FAILURE;
+    // echo command line, if verbose
+    IFVERBOSE(1) {
+      TRACE_ERR("command: ");
+      for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
+      TRACE_ERR(endl);
     }
+
+    // set number of significant decimals in output
+    FixPrecision(cout);
+    FixPrecision(cerr);
+
+    // load all the settings into the Parameter class
+    // (stores them as strings, or array of strings)
+    if (!params.LoadParam(argc,argv))
+      exit(1);
+
+    // initialize all "global" variables, which are stored in StaticData
+    // note: this also loads models such as the language model, etc.
+    if (!StaticData::LoadDataStatic(&params, argv[0]))
+      exit(1);
+
+    // setting "-show-weights" -> just dump out weights and exit
+    if (params.isParamSpecified("show-weights")) {
+      ShowWeights();
+      exit(0);
+    }
+
+    if (params.GetParam("server"))
+      return run_as_server();
+    else
+      return batch_run();
+
+  }
+#ifdef NDEBUG
+  catch (const std::exception &e) {
+    std::cerr << "Exception: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+#endif
 }
 

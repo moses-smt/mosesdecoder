@@ -31,7 +31,7 @@ public:
 
 private:
   void ExtractSourceTerminalSetFromHyperPath(
-     const HyperPath &, boost::unordered_set<std::size_t> &);
+    const HyperPath &, boost::unordered_set<std::size_t> &);
 };
 
 }  // namespace F2S

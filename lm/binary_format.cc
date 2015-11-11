@@ -135,7 +135,7 @@ void MatchCheck(ModelType model_type, unsigned int search_version, const Paramet
 
 const std::size_t kInvalidSize = static_cast<std::size_t>(-1);
 
-BinaryFormat::BinaryFormat(const Config &config) 
+BinaryFormat::BinaryFormat(const Config &config)
   : write_method_(config.write_method), write_mmap_(config.write_mmap), load_method_(config.load_method),
     header_size_(kInvalidSize), vocab_size_(kInvalidSize), vocab_string_offset_(kInvalidOffset) {}
 
@@ -169,7 +169,7 @@ void *BinaryFormat::SetupJustVocab(std::size_t memory_size, uint8_t order) {
   vocab_size_ = memory_size;
   if (!write_mmap_) {
     header_size_ = 0;
-    util::MapAnonymous(memory_size, memory_vocab_);
+    util::HugeMalloc(memory_size, true, memory_vocab_);
     return reinterpret_cast<uint8_t*>(memory_vocab_.get());
   }
   header_size_ = TotalHeaderSize(order);
@@ -180,11 +180,12 @@ void *BinaryFormat::SetupJustVocab(std::size_t memory_size, uint8_t order) {
   switch (write_method_) {
     case Config::WRITE_MMAP:
       mapping_.reset(util::MapZeroedWrite(file_.get(), total), total, util::scoped_memory::MMAP_ALLOCATED);
+      util::AdviseHugePages(vocab_base, total);
       vocab_base = mapping_.get();
       break;
     case Config::WRITE_AFTER:
       util::ResizeOrThrow(file_.get(), 0);
-      util::MapAnonymous(total, memory_vocab_);
+      util::HugeMalloc(total, true, memory_vocab_);
       vocab_base = memory_vocab_.get();
       break;
   }
@@ -198,9 +199,10 @@ void *BinaryFormat::GrowForSearch(std::size_t memory_size, std::size_t vocab_pad
   std::size_t new_size = header_size_ + vocab_size_ + vocab_pad_ + memory_size;
   vocab_string_offset_ = new_size;
   if (!write_mmap_ || write_method_ == Config::WRITE_AFTER) {
-    util::MapAnonymous(memory_size, memory_search_);
+    util::HugeMalloc(memory_size, true, memory_search_);
     assert(header_size_ == 0 || write_mmap_);
     vocab_base = reinterpret_cast<uint8_t*>(memory_vocab_.get()) + header_size_;
+    util::AdviseHugePages(memory_search_.get(), memory_size);
     return reinterpret_cast<uint8_t*>(memory_search_.get());
   }
 
@@ -214,6 +216,7 @@ void *BinaryFormat::GrowForSearch(std::size_t memory_size, std::size_t vocab_pad
   util::ResizeOrThrow(file_.get(), new_size);
   void *ret;
   MapFile(vocab_base, ret);
+  util::AdviseHugePages(ret, new_size);
   return ret;
 }
 

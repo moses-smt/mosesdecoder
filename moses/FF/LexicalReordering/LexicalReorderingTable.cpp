@@ -7,6 +7,7 @@
 #include "moses/GenerationDictionary.h"
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
+#include "moses/TranslationTask.h"
 
 #if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
@@ -99,7 +100,7 @@ LexicalReorderingTableMemory::GetScore(const Phrase& f,
   } else {
     //right try from large to smaller context
     for(size_t i = 0; i <= c.GetSize(); ++i) {
-      Phrase sub_c(c.GetSubString(WordsRange(i,c.GetSize()-1)));
+      Phrase sub_c(c.GetSubString(Range(i,c.GetSize()-1)));
       key = MakeKey(f,e,sub_c);
       r = m_Table.find(key);
       if(m_Table.end() != r) {
@@ -290,8 +291,9 @@ auxFindScoreForContext(const Candidates& cands, const Phrase& context)
 
 void
 LexicalReorderingTableTree::
-InitializeForInput(const InputType& input)
+InitializeForInput(ttasksptr const& ttask)
 {
+  const InputType& input = *ttask->GetSource();
   ClearCache();
   if(ConfusionNet const* cn = dynamic_cast<ConfusionNet const*>(&input)) {
     Cache(*cn);
@@ -580,7 +582,7 @@ Cache(const Sentence& input)
   size_t max_phrase_length = input.GetSize();
   for(size_t len = 0; len <= max_phrase_length; ++len) {
     for(size_t start = 0; start+len <= input.GetSize(); ++start) {
-      Phrase f    = input.GetSubString(WordsRange(start, start+len));
+      Phrase f    = input.GetSubString(Range(start, start+len));
       auxCacheForSrcPhrase(f);
     }
   }

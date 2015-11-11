@@ -20,16 +20,16 @@ namespace Moses
 /** constructor; just initialize the base class */
 TranslationOptionCollectionLattice
 ::TranslationOptionCollectionLattice
-( ttasksptr const& ttask,   const WordLattice &input, 
+( ttasksptr const& ttask,   const WordLattice &input,
   size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(ttask, input, maxNoTransOptPerCoverage, 
-				translationOptionThreshold)
+  : TranslationOptionCollection(ttask, input, maxNoTransOptPerCoverage,
+                                translationOptionThreshold)
 {
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
                  "Not for models using the legqacy binary phrase table");
 
-  const InputFeature &inputFeature = InputFeature::Instance();
-  UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
+  UTIL_THROW_IF2(inputFeature == NULL, "Input feature must be specified");
 
   size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
   size_t size = input.GetSize();
@@ -47,7 +47,7 @@ TranslationOptionCollectionLattice
       size_t nextNode = nextNodes[i];
       size_t endPos = startPos + nextNode - 1;
 
-      WordsRange range(startPos, endPos);
+      Range range(startPos, endPos);
 
       if (range.GetNumWordsCovered() > maxPhraseLength) {
         continue;
@@ -61,7 +61,8 @@ TranslationOptionCollectionLattice
       const ScorePair &scores = col[i].second;
       ScorePair *inputScore = new ScorePair(scores);
 
-      InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
+      InputPath *path
+      = new InputPath(ttask, subphrase, labels, range, NULL, inputScore);
 
       path->SetNextNode(nextNode);
       m_inputPathQueue.push_back(path);
@@ -97,7 +98,7 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
     size_t nextNode = nextNodes[i];
     size_t endPos = nextPos + nextNode - 1;
 
-    WordsRange range(startPos, endPos);
+    Range range(startPos, endPos);
 
     size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
     if (range.GetNumWordsCovered() > maxPhraseLength) {
@@ -113,7 +114,8 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
     ScorePair *inputScore = new ScorePair(*prevInputScore);
     inputScore->PlusEquals(scores);
 
-    InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+    InputPath *path = new InputPath(prevPath.ttask, subphrase, labels,
+                                    range, &prevPath, inputScore);
 
     path->SetNextNode(nextNode);
     m_inputPathQueue.push_back(path);
@@ -140,8 +142,9 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
   for (size_t i = 0; i < m_inputPathQueue.size(); ++i) {
     const InputPath &path = *m_inputPathQueue[i];
 
-    const TargetPhraseCollection *tpColl = path.GetTargetPhrases(phraseDictionary);
-    const WordsRange &range = path.GetWordsRange();
+    TargetPhraseCollection::shared_ptr tpColl
+    = path.GetTargetPhrases(phraseDictionary);
+    const Range &range = path.GetWordsRange();
 
     if (tpColl && tpColl->GetSize()) {
       TargetPhraseCollection::const_iterator iter;
@@ -165,7 +168,7 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
   Sort();
 
   // future score matrix
-  CalcFutureScore();
+  CalcEstimatedScore();
 
   // Cached lex reodering costs
   CacheLexReordering();

@@ -13,8 +13,9 @@ namespace Syntax
 namespace PostprocessEgretForests
 {
 
-class SplitPointFileParser {
- public:
+class SplitPointFileParser
+{
+public:
   struct Entry {
     std::vector<SplitPoint> splitPoints;
   };
@@ -22,8 +23,12 @@ class SplitPointFileParser {
   SplitPointFileParser();
   SplitPointFileParser(std::istream &);
 
-  const Entry &operator*() const { return m_entry; }
-  const Entry *operator->() const { return &m_entry; }
+  const Entry &operator*() const {
+    return m_entry;
+  }
+  const Entry *operator->() const {
+    return &m_entry;
+  }
 
   SplitPointFileParser &operator++();
 
@@ -33,7 +38,7 @@ class SplitPointFileParser {
   friend bool operator!=(const SplitPointFileParser &,
                          const SplitPointFileParser &);
 
- private:
+private:
   void ParseLine(const std::string &, std::vector<SplitPoint> &);
 
   Entry m_entry;

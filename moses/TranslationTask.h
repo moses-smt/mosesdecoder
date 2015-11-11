@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -36,20 +36,22 @@ class OutputCollector;
   **/
 class TranslationTask : public Moses::Task
 {
-  // no copying, no assignment 
+  // no copying, no assignment
   TranslationTask(TranslationTask const& other) { }
 
-  TranslationTask const& 
-  operator=(TranslationTask const& other) { return *this; }
-
+  TranslationTask const&
+  operator=(TranslationTask const& other) {
+    return *this;
+  }
 protected:
+  AllOptions m_options;
   boost::weak_ptr<TranslationTask> m_self; // weak ptr to myself
   boost::shared_ptr<ContextScope> m_scope; // sores local info
   // pointer to ContextScope, which stores context-specific information
   TranslationTask() { } ;
-  TranslationTask(boost::shared_ptr<Moses::InputType> const& source, 
-		  boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
-  // Yes, the constructor is protected. 
+  TranslationTask(boost::shared_ptr<Moses::InputType> const& source,
+                  boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
+  // Yes, the constructor is protected.
   //
   // TranslationTasks can only be created through the creator
   // functions create(...). The creator functions set m_self to a
@@ -64,54 +66,81 @@ protected:
   // task is still live or not, or maintain a shared_ptr to ensure the
   // task stays alive till it's done with it.
 
-  std::string m_context_string;  
+  boost::shared_ptr<std::vector<std::string> > m_context;
+  // SPTR<std::map<std::string, float> const> m_context_weights;
 public:
-  
-  boost::shared_ptr<TranslationTask>  
-  self() { return m_self.lock(); }
+
+  boost::shared_ptr<TranslationTask>
+  self() {
+    return m_self.lock();
+  }
 
   virtual
-  boost::shared_ptr<TranslationTask const>  
-  self() const { return m_self.lock(); }
+  boost::shared_ptr<TranslationTask const>
+  self() const {
+    return m_self.lock();
+  }
 
   // creator functions
-  static boost::shared_ptr<TranslationTask> create(); 
+  static boost::shared_ptr<TranslationTask> create();
 
   static
-  boost::shared_ptr<TranslationTask> 
+  boost::shared_ptr<TranslationTask>
   create(boost::shared_ptr<Moses::InputType> const& source);
 
   static
-  boost::shared_ptr<TranslationTask> 
-  create(boost::shared_ptr<Moses::InputType> const& source, 
-	 boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
-  
+  boost::shared_ptr<TranslationTask>
+  create(boost::shared_ptr<Moses::InputType> const& source,
+         boost::shared_ptr<Moses::IOWrapper> const& ioWrapper);
+
+  static
+  boost::shared_ptr<TranslationTask>
+  create(boost::shared_ptr<Moses::InputType> const& source,
+         boost::shared_ptr<Moses::IOWrapper> const& ioWrapper,
+         boost::shared_ptr<ContextScope>     const& scope);
+
   ~TranslationTask();
   /** Translate one sentence
    * gets called by main function implemented at end of this source file */
   virtual void Run();
-  
+
   boost::shared_ptr<Moses::InputType>
-  GetSource() const { return m_source; }
+  GetSource() const {
+    return m_source;
+  }
+
+  boost::shared_ptr<Moses::IOWrapper const>
+  GetIOWrapper() const {
+    return m_ioWrapper;
+  }
 
   boost::shared_ptr<BaseManager>
   SetupManager(SearchAlgorithm algo = DefaultSearchAlgorithm);
 
 
   boost::shared_ptr<ContextScope> const&
-  GetScope() const
-  {
+  GetScope() const {
     UTIL_THROW_IF2(m_scope == NULL, "No context scope!");
     return m_scope;
   }
 
-  std::string const& GetContextString() const;
-  void SetContextString(std::string const& context);
-  
+  boost::shared_ptr<std::vector<std::string> >
+  GetContextWindow() const;
+
+  void
+  SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw);
+
+  // SPTR<std::map<std::string, float> const> GetContextWeights() const;
+  // void SetContextWeights(std::string const& context_weights);
+  // void ReSetContextWeights(std::map<std::string, float> const& new_weights);
+
+  AllOptions const& options() const;
+
 protected:
-  boost::shared_ptr<Moses::InputType> m_source; 
+  boost::shared_ptr<Moses::InputType> m_source;
   boost::shared_ptr<Moses::IOWrapper> m_ioWrapper;
 
+  void interpret_dlt();
 };
 
 

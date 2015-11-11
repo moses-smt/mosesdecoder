@@ -134,7 +134,7 @@ LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
   return ret;
 }
 
-void LanguageModelRandLM::InitializeForInput(InputType const& source)
+void LanguageModelRandLM::InitializeForInput(ttasksptr const& ttask)
 {
   m_lm->initThreadSpecificData(); // Creates thread specific data iff                                    // compiled with multithreading.
 }

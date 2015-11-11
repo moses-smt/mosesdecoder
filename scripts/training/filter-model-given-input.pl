@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 # Given a moses.ini file and an input text prepare minimized translation
@@ -33,6 +36,12 @@ my $MAX_LENGTH = 10;
 
 # utilities
 my $ZCAT = "gzip -cd";
+
+# sometimes you just have to do the right thing without asking
+my $sort_option = "";
+if (`echo 'youcandoit' | sort --compress-program gzip 2>/dev/null` =~ /youcandoit/) {
+  $sort_option = "--compress-program gzip ";
+}
 
 # get optional parameters
 my $opt_hierarchical = 0;
@@ -96,8 +105,8 @@ if (-d $dir && ! -e "$dir/info") {
 if (-d $dir) {
     my @INFO = `cat $dir/info`;
     chop(@INFO);
-    if($INFO[0] ne $config 
-       || ($INFO[1] ne $input && 
+    if($INFO[0] ne $config
+       || ($INFO[1] ne $input &&
 	   $INFO[1].".tagged" ne $input)) {
       print STDERR "WARNING: directory exists but does not match parameters:\n";
       print STDERR "  ($INFO[0] ne $config || $INFO[1] ne $input)\n";
@@ -140,7 +149,7 @@ while(my $line = <INI>) {
     $table_flag = "";
     $phrase_table_impl = $toks[0];
     $skip = 0;
-    
+
     for (my $i = 1; $i < scalar(@toks); ++$i) {
       my @args = split(/=/, $toks[$i]);
       chomp($args[0]);
@@ -162,7 +171,7 @@ while(my $line = <INI>) {
 			  $skip = 1;
 			}
     } #for (my $i = 1; $i < scalar(@toks); ++$i) {
-    
+
 		if (($phrase_table_impl ne "PhraseDictionaryMemory" && $phrase_table_impl ne "PhraseDictionarySCFG" && $phrase_table_impl ne "RuleTable") || $file =~ /glue-grammar/ || $skip) {
 				# Only Memory ("0") and NewFormat ("6") can be filtered.
 				print INI_OUT "$line\n";
@@ -210,7 +219,7 @@ while(my $line = <INI>) {
 		$CONSIDER_FACTORS{$source_factor} = 1;
 			print STDERR "Considering factor $source_factor\n";
 		push @TABLE_FACTORS, $source_factor;
-		
+
   } #if (/PhraseModel /) {
   elsif ($line =~ /LexicalReordering /) {
     print STDERR "ro:$line\n";
@@ -220,7 +229,7 @@ while(my $line = <INI>) {
       my @args = split(/=/, $toks[$i]);
       chomp($args[0]);
       chomp($args[1]);
-      
+
 			if ($args[0] eq "num-features") {
 			  $w = $args[1];
 			}
@@ -238,14 +247,14 @@ while(my $line = <INI>) {
 			}
 
 		} # for (my $i = 1; $i < scalar(@toks); ++$i) {
-		
+
   	push @TABLE, $file;
 	push @TABLE_WEIGHTS,$w;
-		
+
 		$file =~ s/^.*\/+([^\/]+)/$1/g;
 		my $new_name = "$dir/$file";
 		$new_name =~ s/\.gz//;
-		
+
 		#print INI_OUT "$source_factor $t $w $new_name\n";
 	  @toks = set_value(\@toks, "path", "$new_name");
 	  print INI_OUT join_array(\@toks)."\n";
@@ -256,10 +265,10 @@ while(my $line = <INI>) {
 			print STDERR "Considering factor $source_factor\n";
 		push @TABLE_FACTORS,$source_factor;
 
-		
+
   } #elsif (/LexicalReordering /) {
   else {
-    print INI_OUT "$line\n";  
+    print INI_OUT "$line\n";
   }
 } # while(<INI>) {
 close(INI);
@@ -407,13 +416,13 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         # ... phrase translation model
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
-          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads && rm $mid_file.sorted";
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort $sort_option -T $tempdir | gzip - > $mid_file.sorted.gz && $binarizer -in $mid_file.sorted.gz -out $new_file -nscores $TABLE_WEIGHTS[$i] -threads $threads && rm $mid_file.sorted.gz";
           safesystem($cmd) or die "Can't binarize";
         } elsif ($binarizer =~ /CreateOnDiskPt/) {
       	  my $cmd = "$binarizer $mid_file $new_file.bin";
           safesystem($cmd) or die "Can't binarize";
-        } else { 
-          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+        } else {
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort $sort_option -T $tempdir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
           safesystem($cmd) or die "Can't binarize";
         }
       }
@@ -428,7 +437,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
-          $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir > $mid_file.sorted && $lexbin -in $mid_file.sorted -out $new_file -threads $threads && rm $mid_file.sorted";
+          $cmd = "$catcmd $mid_file | LC_ALL=C sort $sort_option -T $tempdir | gzip - > $mid_file.sorted.gz && $lexbin -in $mid_file.sorted.gz -out $new_file -threads $threads && rm $mid_file.sorted.gz";
         } else {
           $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
           $cmd = "$lexbin -in $mid_file -out $new_file";
@@ -507,13 +516,13 @@ sub ensure_full_path {
 
 sub join_array {
   my @outside = @{$_[0]};
-   
+
   my $ret = "";
   for (my $i = 0; $i < scalar(@outside); ++$i) {
-    my $tok = $outside[$i];    
+    my $tok = $outside[$i];
     $ret .= "$tok ";
   }
-  
+
   return $ret;
 }
 

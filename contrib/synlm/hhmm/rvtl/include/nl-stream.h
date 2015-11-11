@@ -86,7 +86,7 @@ class IStream {
   friend ostream& operator<< ( ostream& os, const IStream& is ) { return os<<is.iIndex<<","<<is.psrc<<","<<*is.psrc; }
 
   // Match single char...
-  friend IStream operator>> ( IStream is, char& c ) { 
+  friend IStream operator>> ( IStream is, char& c ) {
     // Propagate fail...
     if (IStream()==is) return IStream();
     c=is.get(is.iIndex);
@@ -106,7 +106,7 @@ class IStream {
 
   // Match anything else followed by zero-terminated string delimiter...
   template<class X> friend pair<IStream,X*> operator>> ( IStream is, X& x ) { return pair<IStream,X*>(is,&x); }
-  template<class X> friend IStream          operator>> ( pair<IStream,X*> is_x, const char* psDlm ) { 
+  template<class X> friend IStream          operator>> ( pair<IStream,X*> is_x, const char* psDlm ) {
     IStream& is =  is_x.first;
     X&       x  = *is_x.second;
     // Propagate fail...
@@ -129,7 +129,7 @@ class IStream {
   }
 
   // Match integer followed by zero-terminated string delimiter...
-  friend IStream operator>> ( pair<IStream,int*> is_x, const char* psDlm ) { 
+  friend IStream operator>> ( pair<IStream,int*> is_x, const char* psDlm ) {
     IStream& is =  is_x.first;
     int&     x  = *is_x.second;
     // Propagate fail...
@@ -151,7 +151,7 @@ class IStream {
   }
 
   // Match unsigned int followed by zero-terminated string delimiter...
-  friend IStream operator>> ( pair<IStream,unsigned int*> is_x, const char* psDlm ) { 
+  friend IStream operator>> ( pair<IStream,unsigned int*> is_x, const char* psDlm ) {
     IStream& is     =  is_x.first;
     unsigned int& x = *is_x.second;
     // Propagate fail...
@@ -173,7 +173,7 @@ class IStream {
   }
 
   // Match float followed by zero-terminated string delimiter...
-  friend IStream operator>> ( pair<IStream,float*> is_x, const char* psDlm ) { 
+  friend IStream operator>> ( pair<IStream,float*> is_x, const char* psDlm ) {
     IStream& is =  is_x.first;
     float&  x  = *is_x.second;
     // Propagate fail...
@@ -195,7 +195,7 @@ class IStream {
   }
 
   // Match double followed by zero-terminated string delimiter...
-  friend IStream operator>> ( pair<IStream,double*> is_x, const char* psDlm ) { 
+  friend IStream operator>> ( pair<IStream,double*> is_x, const char* psDlm ) {
     IStream& is =  is_x.first;
     double&  x  = *is_x.second;
     // Propagate fail...
@@ -217,7 +217,7 @@ class IStream {
   }
 
   // Match void pointer followed by zero-terminated string delimiter...
-  friend IStream operator>> ( pair<IStream,void**> is_x, const char* psDlm ) { 
+  friend IStream operator>> ( pair<IStream,void**> is_x, const char* psDlm ) {
     IStream& is =  is_x.first;
     // Propagate fail...
     if (IStream()==is) return IStream();

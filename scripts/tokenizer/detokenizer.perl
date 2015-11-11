@@ -1,9 +1,12 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id: detokenizer.perl 4134 2011-08-08 15:30:54Z bgottesman $
 # Sample De-Tokenizer
 # written by Josh Schroeder, based on code by Philipp Koehn
 # further modifications by Ondrej Bojar
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
@@ -309,7 +312,7 @@ sub charIsCJK {
     my ($char) = @_;
     # $char should be a string of length 1
     my $codepoint = &codepoint_dec($char);
-    
+
     # The following is based on http://en.wikipedia.org/wiki/Basic_Multilingual_Plane#Basic_Multilingual_Plane
 
     # Hangul Jamo (1100–11FF)

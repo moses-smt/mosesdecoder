@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "TranslationOptionList.h"
 #include "SquareMatrix.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
 #include "InputPath.h"
@@ -68,17 +68,17 @@ protected:
   ttaskwptr m_ttask; // that is and must be a weak pointer!
   std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
   InputType const			&m_source; /*< reference to the input */
-  SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
+  SquareMatrix				m_estimatedScores; /*< matrix of future costs for contiguous parts (span) of the input */
   const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<const Phrase*> m_unksrcs;
   InputPathList m_inputPathQueue;
 
-  TranslationOptionCollection(ttasksptr const& ttask, 
-			      InputType const& src, size_t maxNoTransOptPerCoverage,
+  TranslationOptionCollection(ttasksptr const& ttask,
+                              InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
 
-  void CalcFutureScore();
+  void CalcEstimatedScore();
 
   //! Force a creation of a translation option where there are none for a particular source position.
   void ProcessUnknownWord();
@@ -163,13 +163,13 @@ public:
 
 
   //! returns future cost matrix for sentence
-  inline virtual const SquareMatrix &GetFutureScore() const {
-    return m_futureScore;
+  inline virtual const SquareMatrix &GetEstimatedScores() const {
+    return m_estimatedScores;
   }
 
   //! list of trans opt for a particular span
   TranslationOptionList const*
-  GetTranslationOptionList(const WordsRange &coverage) const {
+  GetTranslationOptionList(const Range &coverage) const {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 
@@ -177,8 +177,7 @@ public:
     return m_inputPathQueue;
   }
 
-  ttasksptr GetTranslationTask() const
-  {
+  ttasksptr GetTranslationTask() const {
     return m_ttask.lock();
   }
   TO_STRING();

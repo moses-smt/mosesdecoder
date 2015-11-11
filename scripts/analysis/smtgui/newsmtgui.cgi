@@ -1,4 +1,7 @@
 #!/usr/bin/perl -w
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 use strict;
@@ -23,7 +26,7 @@ my $FOREIGN = 'f';
 
 #FILEDESC: textual descriptions associated with specific filenames; to be displayed on the single-corpus view
 my %FILEDESC = (); &load_descriptions();
-my %factorData = loadFactorData('file-factors'); 
+my %factorData = loadFactorData('file-factors');
 my %MEMORY;        &load_memory();
 my (@mBLEU,@NIST);
 @mBLEU=`cat mbleu-memory.dat` if -e "mbleu-memory.dat"; chop(@mBLEU);
@@ -60,13 +63,13 @@ print "</BODY></HTML>\n";
 
 sub show_corpora {
   my %CORPUS = ();
-  
+
   # find corpora in evaluation directory: see the factor-index file, which was already read in
   foreach my $corpusName (keys %factorData)
   {
   	$CORPUS{$corpusName} = 1;
   }
-  
+
   # list corpora
   &htmlhead("All Corpora");
   print "<UL>\n";
@@ -81,11 +84,11 @@ sub show_corpora {
 sub view_corpus {
   my @TABLE;
   &htmlhead("View Corpus $in{CORPUS}");
-  
+
   # find corpora in evaluation directory
   my $corpus = new Corpus('-name' => "$in{CORPUS}", '-descriptions' => \%FILEDESC, '-info_line' => $factorData{$in{CORPUS}});
 #  $corpus->printDetails(); #debugging info
-  
+
   my ($sentence_count, $lineInfo);
   if(-e "$in{CORPUS}.f")
   {
@@ -99,7 +102,7 @@ sub view_corpus {
 	  $lineInfo =~ /^\s*(\d+)\s+/;
 	  $sentence_count = 0 + $1;
 	}
-  
+
   print "Corpus '$in{CORPUS}' consists of $sentence_count sentences\n";
   print "(<A HREF=?ACTION=VIEW_CORPUS&CORPUS=" . CGI::escape($in{CORPUS})."&mBLEU=1>with mBLEU</A>)" if ((!defined($in{mBLEU})) && (scalar keys %MEMORY) && -e "$in{CORPUS}.e" && -e "$in{CORPUS}.f");
   print "<P>\n";
@@ -162,16 +165,16 @@ sub view_corpus {
     # filename
     $row .= "$file</A>";
     # description (hard-coded)
-    my @TRANSLATION_SENTENCE = `cat $in{CORPUS}.$file`; 
+    my @TRANSLATION_SENTENCE = `cat $in{CORPUS}.$file`;
     chop(@TRANSLATION_SENTENCE);
-    
+
 	 #count sentences that contain null words
 	 my $null_count = 0;
     foreach (@TRANSLATION_SENTENCE)
 	 {
       $null_count++ if /^NULL$/ || /^NONE$/;
     }
-    if ($null_count > 0) { 
+    if ($null_count > 0) {
       $row .= "$null_count NULL ";
     }
 
@@ -200,8 +203,8 @@ sub view_corpus {
       $no_bleu=1;
     }
     # NIST score
-    if (-e "$in{CORPUS}.ref.sgm" && -e "$in{CORPUS}.src.sgm" 
-	&& !$DONTSCORE{$file}) {    
+    if (-e "$in{CORPUS}.ref.sgm" && -e "$in{CORPUS}.src.sgm"
+	&& !$DONTSCORE{$file}) {
       $row .= "<TD>";
       print "$DONTSCORE{$file}+";
       my ($nist,$nist_bleu);
@@ -230,7 +233,7 @@ sub view_corpus {
       }
       $row .= "</TD>\n";
     }
-	 
+
 	 my $isSystemOutput = ($file ne 'e' && $file ne 'f' && $file !~ /^pt/);
 	 # misc stats (note the unknown words should come first so the total word count is available for WER)
 	 $row .= "<TD align=\"center\">";
@@ -284,7 +287,7 @@ sub view_corpus {
 		else
 		{
 			my ($lemmaBLEU, $p1, $p2, $p3, $p4, $brevity) = $corpus->calcBLEU($file, 'lemma');
-			$row .= sprintf("surface = %.3lf<br>lemma = %.3lf<br><b>lemma BLEU = %.04f</b> %.01f/%.01f/%.01f/%.01f *%.03f", 
+			$row .= sprintf("surface = %.3lf<br>lemma = %.3lf<br><b>lemma BLEU = %.04f</b> %.01f/%.01f/%.01f/%.01f *%.03f",
 									$surfPWER, $lemmaPWER, $lemmaBLEU, $p1, $p2, $p3, $p4, $brevity);
 		}
 	}
@@ -315,7 +318,7 @@ sub view_corpus {
       $row .= "/<FONT COLOR=ORANGE>$just_syn</FONT>";
       $row .= "/<FONT COLOR=ORANGE>$just_sem</FONT>";
       $row .= "/<FONT COLOR=RED>$wrong</FONT> ($unknown)</TD>\n";
-      if ($in{SORT} eq 'SCORE') { 
+      if ($in{SORT} eq 'SCORE') {
 	$sort = sprintf("%03d %04d",$correct,$just_syn+$just_sem);
       }
     }
@@ -324,7 +327,7 @@ sub view_corpus {
 	 	$row .= "</TD>\n";
 	}
 
-    $row .= "</TR>\n"; 
+    $row .= "</TR>\n";
     push @TABLE, "<!-- $sort -->\n$row";
   }
   close(DIR);
@@ -408,7 +411,7 @@ sub score_file {
   for(my $i=0;$i<=$#SENTENCES;$i++) {
     my $evaluation = &get_from_memory($REFERENCE{$FOREIGN}[$i],$SENTENCES[$i]);
     next if ($in{ACTION} eq 'SCORE_FILE' &&
-	     ! $in{VIEW} && 
+	     ! $in{VIEW} &&
 	     $evaluation ne '' && $evaluation ne 'wrong');
     print "<P>Sentence ".($i+1).":<BR>\n";
     # color coding
@@ -419,7 +422,7 @@ sub score_file {
 	}
     }
 
-    # all sentences 
+    # all sentences
     print "$SENTENCES[$i] (System output)<BR>\n";
     foreach my $ref (@SHOW) {
       if (-e "$in{CORPUS}.$ref") {
@@ -576,7 +579,7 @@ sub get_nist_score {
   my $current_timestamp = $STAT[9];
   foreach (@NIST) {
     my ($file,$time,$nist,$bleu) = split;
-    return ($nist,$bleu) 
+    return ($nist,$bleu)
       if ($file eq $translation_file && $current_timestamp == $time);
   }
 
@@ -668,7 +671,7 @@ sub get_multi_bleu_score {
 	  $REF_NGRAM_N{$ngram}++;
 	}
 	foreach my $ngram (keys %REF_NGRAM_N) {
-	  if (!defined($REF_NGRAM{$ngram}) || 
+	  if (!defined($REF_NGRAM{$ngram}) ||
 	      $REF_NGRAM{$ngram} < $REF_NGRAM_N{$ngram}) {
 	    $REF_NGRAM{$ngram} = $REF_NGRAM_N{$ngram};
 	  }
@@ -716,7 +719,7 @@ sub get_multi_bleu_score {
   @STAT = stat($translation_file);
   printf BLEU "$translation_file $STAT[9] %f %f %f %f %f %f\n",$bleu,$CORRECT[1]/$TOTAL[1],$CORRECT[2]/$TOTAL[2],$CORRECT[3]/$TOTAL[3],$CORRECT[4]/$TOTAL[4],$brevity_penalty;
   close(BLEU);
-  
+
   return ($bleu,
 	  100*$CORRECT[1]/$TOTAL[1],
 	  100*$CORRECT[2]/$TOTAL[2],

@@ -43,7 +43,7 @@ Sentence::
 Sentence() : Phrase(0) , InputType()
 {
   const StaticData& SD = StaticData::Instance();
-  if (SD.IsSyntax()) 
+  if (SD.IsSyntax())
     m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
 }
 
@@ -60,28 +60,23 @@ aux_init_partial_translation(string& line)
   string sourceCompletedStr;
   int loc1 = line.find( "|||", 0 );
   int loc2 = line.find( "|||", loc1 + 3 );
-  if (loc1 > -1 && loc2 > -1) 
-    {
-      m_initialTargetPhrase = Trim(line.substr(0, loc1));
-      string scov = Trim(line.substr(loc1 + 3, loc2 - loc1 - 3));
-      line = line.substr(loc2 + 3);
+  if (loc1 > -1 && loc2 > -1) {
+    m_initialTargetPhrase = Trim(line.substr(0, loc1));
+    string scov = Trim(line.substr(loc1 + 3, loc2 - loc1 - 3));
+    line = line.substr(loc2 + 3);
 
-      m_sourceCompleted.resize(scov.size());
-      int contiguous = 1;
-      for (size_t i = 0; i < scov.size(); ++i) 
-	{
-	  if (sourceCompletedStr.at(i) == '1') 
-	    {
-	      m_sourceCompleted[i] = true;
-	      if (contiguous) m_frontSpanCoveredLength++;
-	    } 
-	  else 
-	    {
-	      m_sourceCompleted[i] = false;
-	      contiguous = 0;
-	    }
-	}
+    m_sourceCompleted.resize(scov.size());
+    int contiguous = 1;
+    for (size_t i = 0; i < scov.size(); ++i) {
+      if (sourceCompletedStr.at(i) == '1') {
+        m_sourceCompleted[i] = true;
+        if (contiguous) m_frontSpanCoveredLength++;
+      } else {
+        m_sourceCompleted[i] = false;
+        contiguous = 0;
+      }
     }
+  }
 }
 
 void
@@ -92,96 +87,87 @@ aux_interpret_sgml_markup(string& line)
   typedef std::map<std::string, std::string> metamap;
   metamap meta = ProcessAndStripSGML(line);
   metamap::const_iterator i;
-  if ((i = meta.find("id")) != meta.end()) 
+  if ((i = meta.find("id")) != meta.end())
     this->SetTranslationId(atol(i->second.c_str()));
-  if ((i = meta.find("docid")) != meta.end()) 
-    {
-      this->SetDocumentId(atol(i->second.c_str()));
-      this->SetUseTopicId(false);
+  if ((i = meta.find("docid")) != meta.end()) {
+    this->SetDocumentId(atol(i->second.c_str()));
+    this->SetUseTopicId(false);
+    this->SetUseTopicIdAndProb(false);
+  }
+  if ((i = meta.find("topic")) != meta.end()) {
+    vector<string> topic_params;
+    boost::split(topic_params, i->second, boost::is_any_of("\t "));
+    if (topic_params.size() == 1) {
+      this->SetTopicId(atol(topic_params[0].c_str()));
+      this->SetUseTopicId(true);
       this->SetUseTopicIdAndProb(false);
+    } else {
+      this->SetTopicIdAndProb(topic_params);
+      this->SetUseTopicId(false);
+      this->SetUseTopicIdAndProb(true);
     }
-  if ((i = meta.find("topic")) != meta.end()) 
-    {
-      vector<string> topic_params;
-      boost::split(topic_params, i->second, boost::is_any_of("\t "));
-      if (topic_params.size() == 1) 
-	{
-	  this->SetTopicId(atol(topic_params[0].c_str()));
-	  this->SetUseTopicId(true);
-	  this->SetUseTopicIdAndProb(false);
-	} 
-      else 
-	{
-	  this->SetTopicIdAndProb(topic_params);
-	  this->SetUseTopicId(false);
-	  this->SetUseTopicIdAndProb(true);
-	}
-    }
-  if ((i = meta.find("weight-setting")) != meta.end()) 
-    {
-      this->SetWeightSetting(i->second);
-      this->SetSpecifiesWeightSetting(true);
-      StaticData::Instance().SetWeightSetting(i->second); 
-      // oh this is so horrible! Why does this have to be propagated globally?
-      // --- UG
-    } 
-  else this->SetSpecifiesWeightSetting(false);
-}
-
-void 
-Sentence::
-aux_interpret_dlt(string& line) // whatever DLT means ... --- UG
-{
-  using namespace std;
-  typedef map<string, string> str2str_map; 
-  vector<str2str_map> meta = ProcessAndStripDLT(line);
-  BOOST_FOREACH(str2str_map const& M, meta)
-    {
-      str2str_map::const_iterator i,j;
-      if ((i = M.find("type")) != M.end())
-	{
-	  j = M.find("id");
-	  string id = j == M.end() ? "default" : j->second;
-	  if (i->second == "cbtm")
-	    {
-	      PhraseDictionaryDynamicCacheBased* cbtm;
-	      cbtm = PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
-	      if (cbtm) cbtm->ExecuteDlt(M);
-	    }
-	  if (i->second == "cblm") 
-	    {
-	      DynamicCacheBasedLanguageModel* cblm;
-	      cblm = DynamicCacheBasedLanguageModel::InstanceNonConst(id);
-	      if (cblm) cblm->ExecuteDlt(M);
-	    }
-	}
-    }
+  }
+  if ((i = meta.find("weight-setting")) != meta.end()) {
+    this->SetWeightSetting(i->second);
+    this->SetSpecifiesWeightSetting(true);
+    StaticData::Instance().SetWeightSetting(i->second);
+    // oh this is so horrible! Why does this have to be propagated globally?
+    // --- UG
+  } else this->SetSpecifiesWeightSetting(false);
 }
 
 void
 Sentence::
-aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
-		  std::vector<std::pair<size_t, std::string> >& placeholders)
-{ // parse XML markup in translation line
+aux_interpret_dlt(string& line) // whatever DLT means ... --- UG
+{
+  using namespace std;
+  typedef map<string, string> str2str_map;
+  m_dlt_meta = ProcessAndStripDLT(line);
+  // what's happening below is most likely not thread-safe! UG
+  BOOST_FOREACH(str2str_map const& M, m_dlt_meta) {
+    str2str_map::const_iterator i,j;
+    if ((i = M.find("type")) != M.end()) {
+      j = M.find("id");
+      string id = j == M.end() ? "default" : j->second;
+      if (i->second == "cbtm") {
+        PhraseDictionaryDynamicCacheBased* cbtm;
+        cbtm = PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
+        if (cbtm) cbtm->ExecuteDlt(M);
+      }
+      if (i->second == "cblm") {
+        DynamicCacheBasedLanguageModel* cblm;
+        cblm = DynamicCacheBasedLanguageModel::InstanceNonConst(id);
+        if (cblm) cblm->ExecuteDlt(M);
+      }
+    }
+  }
+}
+
+void
+Sentence::
+aux_interpret_xml(AllOptions const& opts, std::string& line, std::vector<size_t> & xmlWalls,
+                  std::vector<std::pair<size_t, std::string> >& placeholders)
+{
+  // parse XML markup in translation line
 
   const StaticData &SD = StaticData::Instance();
 
   using namespace std;
-  if (SD.GetXmlInputType() != XmlPassThrough) 
-    {
-      int offset = SD.IsSyntax() ? 1 : 0;
-      bool OK = ProcessAndStripXMLTags(line, m_xmlOptions, 
-				       m_reorderingConstraint, 
-				       xmlWalls, placeholders, offset,
-				       SD.GetXmlBrackets().first,
-				       SD.GetXmlBrackets().second);
-      UTIL_THROW_IF2(!OK, "Unable to parse XML in line: " << line);
-    }
+  if (opts.input.xml_policy != XmlPassThrough) {
+    int offset = SD.IsSyntax() ? 1 : 0;
+    bool OK = ProcessAndStripXMLTags(opts, line, m_xmlOptions,
+                                     m_reorderingConstraint,
+                                     xmlWalls, placeholders, offset,
+                                     SD.GetXmlBrackets().first,
+                                     SD.GetXmlBrackets().second);
+    UTIL_THROW_IF2(!OK, "Unable to parse XML in line: " << line);
+  }
 }
 
-void 
+void
 Sentence::
-init(string line, std::vector<FactorType> const& factorOrder)
+init(string line, std::vector<FactorType> const& factorOrder,
+     AllOptions const& opts)
 {
   using namespace std;
   const StaticData &SD = StaticData::Instance();
@@ -189,80 +175,79 @@ init(string line, std::vector<FactorType> const& factorOrder)
   m_frontSpanCoveredLength = 0;
   m_sourceCompleted.resize(0);
 
-  if (SD.ContinuePartialTranslation()) 
+  if (SD.ContinuePartialTranslation())
     aux_init_partial_translation(line);
 
   line = Trim(line);
   aux_interpret_sgml_markup(line); // for "<seg id=..." markup
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
-  
+
   // if sentences is specified as "<passthrough tag1=""/>"
-  if (SD.IsPassthroughEnabled() || SD.IsPassthroughInNBestEnabled()) 
-    {
-      string pthru = PassthroughSGML(line,"passthrough");
-      this->SetPassthroughInformation(pthru);
-    }
+  if (SD.options().output.PrintPassThrough ||
+      SD.options().nbest.include_passthrough) {
+    string pthru = PassthroughSGML(line,"passthrough");
+    this->SetPassthroughInformation(pthru);
+  }
 
   vector<size_t> xmlWalls;
   vector<pair<size_t, string> >placeholders;
-  aux_interpret_xml(line, xmlWalls, placeholders);
+  aux_interpret_xml(opts, line, xmlWalls, placeholders);
 
   Phrase::CreateFromString(Input, factorOrder, line, NULL);
 
   ProcessPlaceholders(placeholders);
 
   if (SD.IsSyntax()) InitStartEndWord();
-  
+
   // now that we have final word positions in phrase (from
   // CreateFromString), we can make input phrase objects to go with
   // our XmlOptions and create TranslationOptions
 
   // only fill the vector if we are parsing XML
-  if (SD.GetXmlInputType() != XmlPassThrough) 
-    {
-      m_xmlCoverageMap.assign(GetSize(), false);
-      BOOST_FOREACH(XmlOption* o, m_xmlOptions)
-	{
-	  WordsRange const& r = o->range;
-	  for(size_t j = r.GetStartPos(); j <= r.GetEndPos(); ++j) 
-	    m_xmlCoverageMap[j]=true;
-	}
+  if (opts.input.xml_policy != XmlPassThrough) {
+    m_xmlCoverageMap.assign(GetSize(), false);
+    BOOST_FOREACH(XmlOption* o, m_xmlOptions) {
+      Range const& r = o->range;
+      for(size_t j = r.GetStartPos(); j <= r.GetEndPos(); ++j)
+        m_xmlCoverageMap[j]=true;
     }
+  }
 
   // reordering walls and zones
   m_reorderingConstraint.InitializeWalls(GetSize());
 
   // set reordering walls, if "-monotone-at-punction" is set
-  if (SD.UseReorderingConstraint() && GetSize()) 
-    {
-      WordsRange r(0, GetSize()-1);
-      m_reorderingConstraint.SetMonotoneAtPunctuation(GetSubString(r));
-    }
+  if (SD.UseReorderingConstraint() && GetSize()) {
+    Range r(0, GetSize()-1);
+    m_reorderingConstraint.SetMonotoneAtPunctuation(GetSubString(r));
+  }
 
   // set walls obtained from xml
   for(size_t i=0; i<xmlWalls.size(); i++)
     if(xmlWalls[i] < GetSize()) // no buggy walls, please
       m_reorderingConstraint.SetWall(xmlWalls[i], true);
   m_reorderingConstraint.FinalizeWalls();
-  
+
 }
 
-int 
+int
 Sentence::
-Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+Read(std::istream& in,
+     const std::vector<FactorType>& factorOrder,
+     AllOptions const& opts)
 {
   std::string line;
   if (getline(in, line, '\n').eof())
     return 0;
-  init(line, factorOrder);
+  init(line, factorOrder, opts);
   return 1;
 }
 
-void 
+void
 Sentence::
 ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
   if (placeholderFactor == NOT_FOUND) {
     return;
   }
@@ -282,9 +267,9 @@ CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-  TranslationOptionCollection *rv 
-    = new TranslationOptionCollectionText(ttask, *this, maxNoTransOptPerCoverage, 
-					  transOptThreshold);
+  TranslationOptionCollection *rv
+  = new TranslationOptionCollectionText(ttask, *this, maxNoTransOptPerCoverage,
+                                        transOptThreshold);
   assert(rv);
   return rv;
 }
@@ -309,7 +294,7 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list) 
   for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
        iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
     const XmlOption &xmlOption = **iterXMLOpts;
-    const WordsRange &range = xmlOption.range;
+    const Range &range = xmlOption.range;
     const TargetPhrase &targetPhrase = xmlOption.targetPhrase;
     TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
     list.push_back(transOpt);
@@ -323,7 +308,7 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
   for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
        iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
     const XmlOption &xmlOption = **iterXMLOpts;
-    const WordsRange &range = xmlOption.range;
+    const Range &range = xmlOption.range;
 
     if (startPos == range.GetStartPos()
         && endPos == range.GetEndPos()) {
@@ -335,7 +320,9 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
   }
 }
 
-std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions() const
+std::vector <ChartTranslationOptions*> 
+Sentence::
+GetXmlChartTranslationOptions(AllOptions const& opts) const
 {
   const StaticData &staticData = StaticData::Instance();
   std::vector <ChartTranslationOptions*> ret;
@@ -344,7 +331,7 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
   // this code is a copy of the 1 in Sentence.
 
   //only fill the vector if we are parsing XML
-  if (staticData.GetXmlInputType() != XmlPassThrough ) {
+  if (opts.input.xml_policy != XmlPassThrough ) {
     //TODO: needed to handle exclusive
     //for (size_t i=0; i<GetSize(); i++) {
     //  m_xmlCoverageMap.push_back(false);
@@ -358,7 +345,7 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
       const XmlOption &xmlOption = **iterXmlOpts;
       TargetPhrase *targetPhrase = new TargetPhrase(xmlOption.targetPhrase);
 
-      WordsRange *range = new WordsRange(xmlOption.range);
+      Range *range = new Range(xmlOption.range);
       StackVec emptyStackVec; // hmmm... maybe dangerous, but it is never consulted
 
       TargetPhraseCollection *tpc = new TargetPhraseCollection;
@@ -385,12 +372,14 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(size_t const transId, string const& stext, 
-	 vector<FactorType> const* IFO) 
+Sentence(size_t const transId,
+         string const& stext,
+         AllOptions const& opts,
+         vector<FactorType> const* IFO)
   : InputType(transId)
 {
-  if (IFO) init(stext, *IFO);
-  else init(stext, StaticData::Instance().GetInputFactorOrder());
+  if (IFO) init(stext, *IFO, opts);
+  else init(stext, StaticData::Instance().GetInputFactorOrder(), opts);
 }
 
 }

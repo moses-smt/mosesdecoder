@@ -1,4 +1,4 @@
-#include "lm/builder/print.hh"
+#include "lm/common/print.hh"
 #include "lm/word_index.hh"
 #include "util/file.hh"
 #include "util/read_compressed.hh"
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   }
   util::ReadCompressed counts(util::OpenReadOrThrow(argv[1]));
   util::scoped_fd vocab_file(util::OpenReadOrThrow(argv[2]));
-  lm::builder::VocabReconstitute vocab(vocab_file.get());
+  lm::VocabReconstitute vocab(vocab_file.get());
   unsigned int order = boost::lexical_cast<unsigned int>(argv[3]);
   std::vector<char> record(sizeof(uint32_t) * order + sizeof(uint64_t));
   while (std::size_t got = counts.ReadOrEOF(&*record.begin(), record.size())) {
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
       UTIL_THROW_IF(*i >= vocab.Size(), util::Exception, "Vocab ID " << *i << " is larger than the vocab file's maximum of " << vocab.Size() << ".  Are you sure you have the right order and vocab file for these counts?");
       std::cout << vocab.Lookup(*i) << ' ';
     }
-    // TODO don't use std::cout because it is slow.  Add fast uint64_t printing support to FakeOFStream.
+    // TODO don't use std::cout because it is slow.  Add fast uint64_t printing support to FileStream.
     std::cout << *reinterpret_cast<const uint64_t*>(words + order) << '\n';
   }
 }

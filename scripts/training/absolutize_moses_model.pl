@@ -1,10 +1,13 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # $Id$
 # given a moses.ini file, prints a copy to stdout but replaces all relative
 # paths with absolute paths.
 #
 # Ondrej Bojar.
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 
@@ -48,14 +51,14 @@ while (<$inih>) {
 		  $abs = ensure_absolute($fn, $ini);
 		  die "File not found or empty: $fn (searched for $abs.minphr)"
 		    if ! -s $abs.".minphr"; # accept compact binarized ttables
-		  $_ = "$type $b $c $d $abs\n";                    
+		  $_ = "$type $b $c $d $abs\n";
                 }
 		else {
 		  $abs = ensure_absolute($fn, $ini);
 		  die "File not found or empty: $fn (searched for $abs or $abs.binphr.idx)"
 		    if ! -s $abs && ! -s $abs.".binphr.idx"; # accept binarized ttables
 		  $_ = "$type $b $c $d $abs\n";
-		}	
+		}
     }
     if ($section eq "generation-file" || $section eq "lmodel-file") {
       chomp;

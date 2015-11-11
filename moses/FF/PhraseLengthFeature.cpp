@@ -3,6 +3,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
+#include "util/string_stream.hh"
 
 namespace Moses
 {
@@ -18,20 +19,20 @@ PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
 void PhraseLengthFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   // get length of source and target phrase
   size_t targetLength = targetPhrase.GetSize();
   size_t sourceLength = source.GetSize();
 
   // create feature names
-  stringstream nameSource;
+  util::StringStream nameSource;
   nameSource << "s" << sourceLength;
 
-  stringstream nameTarget;
+  util::StringStream nameTarget;
   nameTarget << "t" << targetLength;
 
-  stringstream nameBoth;
+  util::StringStream nameBoth;
   nameBoth << sourceLength << "," << targetLength;
 
   // increase feature counts

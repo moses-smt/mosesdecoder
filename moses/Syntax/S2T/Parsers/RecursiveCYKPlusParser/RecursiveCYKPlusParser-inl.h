@@ -24,7 +24,7 @@ RecursiveCYKPlusParser<Callback>::RecursiveCYKPlusParser(
 
 template<typename Callback>
 void RecursiveCYKPlusParser<Callback>::EnumerateHyperedges(
-  const WordsRange &range,
+  const Range &range,
   Callback &callback)
 {
   const std::size_t start = range.GetStartPos();
@@ -132,9 +132,9 @@ void RecursiveCYKPlusParser<Callback>::AddAndExtend(
   m_hyperedge.tail.push_back(const_cast<PVertex *>(&vertex));
 
   // Add target phrase collection (except if rule is empty or unary).
-  const TargetPhraseCollection &tpc = node.GetTargetPhraseCollection();
-  if (!tpc.IsEmpty() && !IsNonLexicalUnary(m_hyperedge)) {
-    m_hyperedge.label.translations = &tpc;
+  TargetPhraseCollection::shared_ptr tpc = node.GetTargetPhraseCollection();
+  if (!tpc->IsEmpty() && !IsNonLexicalUnary(m_hyperedge)) {
+    m_hyperedge.label.translations = tpc;
     (*m_callback)(m_hyperedge, end);
   }
 

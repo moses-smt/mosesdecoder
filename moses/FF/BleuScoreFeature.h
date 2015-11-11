@@ -25,7 +25,9 @@ public:
   static size_t bleu_order;
 
   BleuScoreState();
-  virtual int Compare(const FFState& other) const;
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
   void print(std::ostream& out) const;
 
 private:
@@ -126,7 +128,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -135,7 +137,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
   bool Enabled() const {

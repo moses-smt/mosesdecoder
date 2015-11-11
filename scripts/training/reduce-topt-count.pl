@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # given a moses.ini, filter the phrase tables to contain
 # only ttable-limit options per source phrase
@@ -155,7 +158,7 @@ sub filter_table
     push @tgt_phrases, {
       str => $line,
       score => sum(map { $weights[$_] * log $scores[$_] } (0 .. $#weights))
-    };    
+    };
   }
   printf STDERR "Finished, kept %d%% of phrases\n", $kept / $total * 100;
   close $in;

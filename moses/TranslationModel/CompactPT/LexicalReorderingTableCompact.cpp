@@ -70,7 +70,7 @@ GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
     key = MakeKey(f, e, c);
   else
     for(size_t i = 0; i <= c.GetSize(); ++i) {
-      Phrase sub_c(c.GetSubString(WordsRange(i,c.GetSize()-1)));
+      Phrase sub_c(c.GetSubString(Range(i,c.GetSize()-1)));
       key = MakeKey(f,e,sub_c);
     }
 
@@ -78,9 +78,9 @@ GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
   if(m_hash.GetSize() != index) {
     std::string scoresString;
     if(m_inMemory)
-      scoresString = m_scoresMemory[index];
+      scoresString = m_scoresMemory[index].str();
     else
-      scoresString = m_scoresMapped[index];
+      scoresString = m_scoresMapped[index].str();
 
     BitWrapper<> bitStream(scoresString);
     for(size_t i = 0; i < m_numScoreComponent; i++)
@@ -155,10 +155,12 @@ LexicalReorderingTableCompact::
 Load(std::string filePath)
 {
   std::FILE* pFile = std::fopen(filePath.c_str(), "r");
-  if(m_inMemory)
-    m_hash.Load(pFile);
-  else
-    m_hash.LoadIndex(pFile);
+  UTIL_THROW_IF2(pFile == NULL, "File " << filePath << " could not be opened");
+
+  //if(m_inMemory)
+  m_hash.Load(pFile);
+  //else
+  //m_hash.LoadIndex(pFile);
 
   size_t read = 0;
   read += std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, pFile);

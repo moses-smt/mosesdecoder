@@ -88,7 +88,7 @@ void DynamicCacheBasedLanguageModel::SetParameter(const std::string& key, const 
 void DynamicCacheBasedLanguageModel::EvaluateInIsolation(const Phrase &sp
     , const TargetPhrase &tp
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   float score = m_lower_score;
   switch(m_query_type) {

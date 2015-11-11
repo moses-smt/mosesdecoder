@@ -40,7 +40,7 @@ class DecodeFeature : public StatelessFeatureFunction
 {
 
 public:
-  DecodeFeature(const std::string &line);
+  DecodeFeature(const std::string &line, bool registerNow);
 
   DecodeFeature(size_t numScoreComponents
                 , const std::string &line);
@@ -76,7 +76,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {
@@ -85,7 +85,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
   void SetContainer(const DecodeStep *container) {

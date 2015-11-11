@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;
@@ -8,7 +11,7 @@ $step = "*" unless defined($step);
 
 die("fix-info.perl file [step]") unless defined($file);
 die("file not found") unless -e $file;
-die("full path!") unless $file =~ /^\//; 
+die("full path!") unless $file =~ /^\//;
 my @filestat = stat($file);
 my $newtime = $filestat[9];
 
@@ -21,7 +24,7 @@ while(my $info = <LS>) {
 	if (/$file .*\[/) {
 	    $changed++;
 	    s/($file) (.*\[)\d+/$1 $2$newtime/g;
-	}  
+	}
     }
     if ($changed) {
 	print "updating $info\n";

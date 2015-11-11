@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
 
 #include <string>
@@ -8,7 +8,7 @@
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/TranslationOption.h"
 
 #include "moses/FF/StatefulFeatureFunction.h"
@@ -44,8 +44,8 @@ public:
   EmptyHypothesisState(const InputType &input) const;
 
   void
-  InitializeForInput(const InputType& i) {
-    if (m_table) m_table->InitializeForInput(i);
+  InitializeForInput(ttasksptr const& ttask) {
+    if (m_table) m_table->InitializeForInput(ttask);
   }
 
   Scores
@@ -71,7 +71,7 @@ public:
    const TargetPhrase &targetPhrase,
    const StackVec *stackVec,
    ScoreComponentCollection& scoreBreakdown,
-   ScoreComponentCollection* estimatedFutureScore = NULL) const
+   ScoreComponentCollection* estimatedScores = NULL) const
   { }
 
   void
@@ -83,7 +83,7 @@ public:
   EvaluateInIsolation(const Phrase &source,
                       const TargetPhrase &targetPhrase,
                       ScoreComponentCollection &scoreBreakdown,
-                      ScoreComponentCollection &estimatedFutureScore) const
+                      ScoreComponentCollection &estimatedScores) const
   { }
 
   bool

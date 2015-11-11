@@ -39,10 +39,11 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
+#include "moses/TranslationTask.h"
 #include "util/file.hh"
 #include "util/exception.hh"
 #include "util/random.hh"
@@ -80,7 +81,7 @@ namespace Moses
 {
 
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
-  :PhraseDictionary(line)
+  :PhraseDictionary(line, true)
   ,m_config(3)
   ,m_FuzzyMatchWrapper(NULL)
 {
@@ -172,8 +173,9 @@ int removedirectoryrecursively(const char *dirname)
   return 1;
 }
 
-void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSentence)
+void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& inputSentence = *ttask->GetSource();
 #if defined __MINGW32__
   char dirName[] = "moses.XXXXXX";
 #else
@@ -280,8 +282,10 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
+    phraseColl->Add(targetPhrase);
 
     count++;
 
@@ -299,10 +303,12 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
   //removedirectoryrecursively(dirName);
 }
 
-TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
-    , const Phrase &source
-    , const TargetPhrase &target
-    , const Word *sourceLHS)
+TargetPhraseCollection::shared_ptr
+PhraseDictionaryFuzzyMatch::
+GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
+                                  , const Phrase &source
+                                  , const TargetPhrase &target
+                                  , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
   return currNode.GetTargetPhraseCollection();

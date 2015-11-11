@@ -49,7 +49,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
                                     , PartialTranslOptColl &outputPartialTranslOptColl
                                     , TranslationOptionCollection *toc
                                     , bool adhereTableLimit
-                                    , const TargetPhraseCollection *phraseColl) const
+                                    , TargetPhraseCollection::shared_ptr phraseColl) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion
@@ -58,7 +58,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
   }
 
   // normal trans step
-  const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
+  const Range &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
   const InputPath &inputPath = inputPartialTranslOpt.GetInputPath();
   const PhraseDictionary* phraseDictionary  =
     decodeStep.GetPhraseDictionaryFeature();
@@ -100,22 +100,25 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
   }
 }
 
-void DecodeStepTranslation::ProcessInitialTranslation(
-  const InputType &source
-  ,PartialTranslOptColl &outputPartialTranslOptColl
-  , size_t startPos, size_t endPos, bool adhereTableLimit
-  , const InputPath &inputPath
-  , const TargetPhraseCollection *phraseColl) const
+void
+DecodeStepTranslation::
+ProcessInitialTranslation(InputType const& source,
+                          PartialTranslOptColl &outputPartialTranslOptColl,
+                          size_t startPos, size_t endPos,
+                          bool adhereTableLimit,
+                          InputPath const& inputPath,
+                          TargetPhraseCollection::shared_ptr phraseColl) const
 {
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
-  const WordsRange wordsRange(startPos, endPos);
+  const Range range(startPos, endPos);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
-      if(StaticData::Instance().GetInputType() == SentenceInput)
-        TRACE_ERR("[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+      if(source.GetType() == SentenceInput)
+        TRACE_ERR("[" << source.GetSubString(range) << "; "
+                  << startPos << "-" << endPos << "]\n");
       else
         TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
     }
@@ -125,7 +128,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 
     for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
-      TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
+      TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
 
       transOpt->SetInputPath(inputPath);
 
@@ -137,22 +140,26 @@ void DecodeStepTranslation::ProcessInitialTranslation(
   }
 }
 
-void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
-  const InputType &source
-  ,PartialTranslOptColl &outputPartialTranslOptColl
-  , size_t startPos, size_t endPos, bool adhereTableLimit
-  , const InputPathList &inputPathList) const
+void
+DecodeStepTranslation::
+ProcessInitialTransLEGACY(InputType const& source,
+                          PartialTranslOptColl &outputPartialTranslOptColl,
+                          size_t startPos, size_t endPos,
+                          bool adhereTableLimit,
+                          InputPathList const& inputPathList) const
 {
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
-  const WordsRange wordsRange(startPos, endPos);
-  const TargetPhraseCollectionWithSourcePhrase *phraseColl =	phraseDictionary->GetTargetPhraseCollectionLEGACY(source,wordsRange);
+  const Range range(startPos, endPos);
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr phraseColl
+  = phraseDictionary->GetTargetPhraseCollectionLEGACY(source,range);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
-      if(StaticData::Instance().GetInputType() == SentenceInput)
-        TRACE_ERR("[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+      if(source.GetType() == SentenceInput)
+        TRACE_ERR("[" << source.GetSubString(range) << "; "
+                  << startPos << "-" << endPos << "]\n");
       else
         TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
     }
@@ -173,7 +180,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
 
       const InputPath &inputPath = GetInputPathLEGACY(targetPhrase, sourcePhrase, inputPathList);
 
-      TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
+      TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
       transOpt->SetInputPath(inputPath);
 
       outputPartialTranslOptColl.Add (transOpt);
@@ -205,7 +212,7 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
       }
     }
 
-    // const WordsRange &range = inputPath.GetWordsRange();
+    // const Range &range = inputPath.GetWordsRange();
 
     if (wordIP && *wordIP == wordFromPt) {
       return inputPath;
@@ -215,60 +222,57 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
   UTIL_THROW(util::Exception, "Input path not found");
 }
 
-void 
+void
 DecodeStepTranslation::
 ProcessLEGACY(TranslationOption const& in,
-	      DecodeStep const& decodeStep, 
-	      PartialTranslOptColl &out, 
-	      TranslationOptionCollection *toc, 
-	      bool adhereTableLimit) const
+              DecodeStep const& decodeStep,
+              PartialTranslOptColl &out,
+              TranslationOptionCollection *toc,
+              bool adhereTableLimit) const
 {
-  if (in.GetTargetPhrase().GetSize() == 0) 
-    {
-      // word deletion
-      out.Add(new TranslationOption(in));
-      return;
-    }
+  if (in.GetTargetPhrase().GetSize() == 0) {
+    // word deletion
+    out.Add(new TranslationOption(in));
+    return;
+  }
 
   // normal trans step
-  WordsRange const& srcRange = in.GetSourceWordsRange();
+  Range const& srcRange = in.GetSourceWordsRange();
   InputPath const& inputPath = in.GetInputPath();
   PhraseDictionary const* pdict  = decodeStep.GetPhraseDictionaryFeature();
   TargetPhrase const& inPhrase = in.GetTargetPhrase();
   size_t const currSize = inPhrase.GetSize();
   size_t const tableLimit = pdict->GetTableLimit();
 
-  TargetPhraseCollectionWithSourcePhrase const* phraseColl;
-  phraseColl = pdict->GetTargetPhraseCollectionLEGACY(toc->GetSource(),srcRange);
-  
-  if (phraseColl != NULL) 
-    {
-      TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
-      iterEnd = ((adhereTableLimit && tableLimit && phraseColl->GetSize() >= tableLimit)
-		 ? phraseColl->begin() + tableLimit : phraseColl->end()); 
-      
-      for (iterTargetPhrase = phraseColl->begin(); 
-	   iterTargetPhrase != iterEnd; 
-	   ++iterTargetPhrase) 
-	{
-	  TargetPhrase const& targetPhrase = **iterTargetPhrase;
-	  if (targetPhrase.GetSize() != currSize ||
-	      (IsFilteringStep() && !in.IsCompatible(targetPhrase, m_conflictFactors)))
-	    continue;
-	  
-	  TargetPhrase outPhrase(inPhrase);
-	  outPhrase.Merge(targetPhrase, m_newOutputFactors);
-	  outPhrase.EvaluateInIsolation(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
-	  
-	  TranslationOption *newTransOpt = new TranslationOption(srcRange, outPhrase);
-	  assert(newTransOpt != NULL);
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr phraseColl
+  = pdict->GetTargetPhraseCollectionLEGACY(toc->GetSource(),srcRange);
 
-	  newTransOpt->SetInputPath(inputPath);
-	  
-	  out.Add(newTransOpt);
-	  
-	}
-    } 
+  if (phraseColl != NULL) {
+    TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
+    iterEnd = ((adhereTableLimit && tableLimit && phraseColl->GetSize() >= tableLimit)
+               ? phraseColl->begin() + tableLimit : phraseColl->end());
+
+    for (iterTargetPhrase = phraseColl->begin();
+         iterTargetPhrase != iterEnd;
+         ++iterTargetPhrase) {
+      TargetPhrase const& targetPhrase = **iterTargetPhrase;
+      if (targetPhrase.GetSize() != currSize ||
+          (IsFilteringStep() && !in.IsCompatible(targetPhrase, m_conflictFactors)))
+        continue;
+
+      TargetPhrase outPhrase(inPhrase);
+      outPhrase.Merge(targetPhrase, m_newOutputFactors);
+      outPhrase.EvaluateInIsolation(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
+
+      TranslationOption *newTransOpt = new TranslationOption(srcRange, outPhrase);
+      assert(newTransOpt != NULL);
+
+      newTransOpt->SetInputPath(inputPath);
+
+      out.Add(newTransOpt);
+
+    }
+  }
 }
 }
 

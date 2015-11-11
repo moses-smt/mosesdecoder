@@ -1,9 +1,10 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // TO DO (12.01.2011):
 //
-// - Vocab items should be stored in order of ids, so that we can determine their length
-//   by taking computing V[id+1] - V[id] instead of using strlen.
-// 
+// - Vocab items should be stored in order of ids, so that we can
+//   determine their length by taking computing V[id+1] - V[id]
+//   instead of using strlen.
+//
 // (c) 2007,2008 Ulrich Germann
 
 #ifndef __ugTokenIndex_hh
@@ -20,17 +21,17 @@
 #include <vector>
 #include <map>
 
-using namespace std;
 namespace bio=boost::iostreams;
 
-namespace ugdiss
+namespace sapt
 {
   class TokenIndex
   {
+    typedef tpt::id_type id_type;
     /** Reverse index: maps from ID to char const* */
-    mutable vector<char const*> ridx;
+    mutable std::vector<char const*> ridx;
     /** Label for the UNK token */
-    string unkLabel; 
+    std::string unkLabel;
     id_type unkId,numTokens;
 
     /// New 2013-09-02: thread-safe
@@ -38,22 +39,22 @@ namespace ugdiss
 
     // NEW 2011-01-30: dynamic adding of unknown items
     bool dynamic; // dynamically assign a new word id to unknown items?
-    boost::shared_ptr<map<string,id_type> >   str2idExtra;
-    boost::shared_ptr<vector<string> > newWords;
+    boost::shared_ptr<std::map<std::string, tpt::id_type> >   str2idExtra;
+    boost::shared_ptr<std::vector<std::string> > newWords;
     // The use of pointers to external items is a bit of a bad hack
     // in terms of the semantic of TokenIndex const: since external items
-    // are changed, the TokenIndex instance remains unchanged and const works, 
-    // even though in reality the underlying object on the coceptual level 
-    // *IS* changed. This means that dynamic TokenIndex instances are not 
+    // are changed, the TokenIndex instance remains unchanged and const works,
+    // even though in reality the underlying object on the coceptual level
+    // *IS* changed. This means that dynamic TokenIndex instances are not
     // thread-safe!
 
   public:
-    /** string->ID lookup works via binary search in a vector of Entry instances */
+    /** string->ID lookup works via binary search in a std::vector of Entry instances */
     class Entry
     {
     public:
       uint32_t offset;
-      id_type  id; 
+      id_type id;
     };
 
     /** Comparison function object used for Entry instances */
@@ -69,26 +70,26 @@ namespace ugdiss
     Entry const* startIdx;
     Entry const* endIdx;
     CompFunc comp;
-    TokenIndex(string unkToken="UNK");
-    // TokenIndex(string fname,string unkToken="UNK",bool dyna=false);
-    void open(string fname,string unkToken="UNK",bool dyna=false);
+    TokenIndex(std::string unkToken="UNK");
+    // TokenIndex(std::string fname,std::string unkToken="UNK",bool dyna=false);
+    void open(std::string fname,std::string unkToken="UNK",bool dyna=false);
     void close();
     // id_type unkId,numTokens;
     id_type operator[](char const* w)  const;
-    id_type operator[](string const& w)  const;
+    id_type operator[](std::string const& w)  const;
     char const* const operator[](id_type id) const;
     char const* const operator[](id_type id);
-    vector<char const*> reverseIndex() const;
+    std::vector<char const*> reverseIndex() const;
 
-    string toString(vector<id_type> const& v);
-    string toString(vector<id_type> const& v) const;
+    std::string toString(std::vector<id_type> const& v);
+    std::string toString(std::vector<id_type> const& v) const;
 
-    string toString(id_type const* start, id_type const* const stop);
-    string toString(id_type const* start, id_type const* const stop) const;
+    std::string toString(id_type const* start, id_type const* const stop);
+    std::string toString(id_type const* start, id_type const* const stop) const;
 
-    vector<id_type> toIdSeq(string const& line) const;
+    std::vector<id_type> toIdSeq(std::string const& line) const;
 
-    bool fillIdSeq(string const& line, vector<id_type> & v) const;
+    bool fillIdSeq(std::string const& line, std::vector<id_type> & v) const;
 
     void iniReverseIndex();
     id_type getNumTokens() const;
@@ -104,27 +105,27 @@ namespace ugdiss
 
     char const* const getUnkToken() const;
 
-    void write(string fname); // write TokenIndex to a new file
+    void write(std::string fname); // write TokenIndex to a new file
     bool isDynamic() const;
     bool setDynamic(bool onoff);
 
-    void setUnkLabel(string unk);
+    void setUnkLabel(std::string unk);
   };
 
-  void 
-  write_tokenindex_to_disk(vector<pair<string,uint32_t> > const& tok, 
-                           string const& ofile, string const& unkToken);
+  void
+  write_tokenindex_to_disk(std::vector<std::pair<std::string,uint32_t> > const& tok,
+                           std::string const& ofile, std::string const& unkToken);
 
   /** for sorting words by frequency */
   class compWords
   {
-    string unk;
-  public: 
-    compWords(string _unk) : unk(_unk) {};
-    
+    std::string unk;
+  public:
+    compWords(std::string _unk) : unk(_unk) {};
+
     bool
-    operator()(pair<string,size_t> const& A, 
-               pair<string,size_t> const& B) const
+    operator()(std::pair<std::string,size_t> const& A,
+               std::pair<std::string,size_t> const& B) const
     {
       if (A.first == unk) return false;// do we still need this special treatment?
       if (B.first == unk) return true; // do we still need this special treatment?
@@ -136,39 +137,39 @@ namespace ugdiss
 
   template<class MYMAP>
   void
-  mkTokenIndex(string ofile,MYMAP const& M,string unkToken)
+  mkTokenIndex(std::string ofile,MYMAP const& M,std::string unkToken)
   {
-    // typedef pair<uint32_t,id_type> IndexEntry; // offset and id
-    typedef pair<string,uint32_t>  Token;      // token and id
+    // typedef std::pair<uint32_t,id_type> IndexEntry; // offset and id
+    typedef std::pair<std::string,uint32_t>  Token;      // token and id
 
 
-    // first, sort the word list in decreasing order of frequency, so that we 
+    // first, sort the word list in decreasing order of frequency, so that we
     // can assign IDs in an encoding-efficient manner (high frequency. low ID)
-    vector<pair<string,size_t> > wcounts(M.size()); // for sorting by frequency
+    std::vector<std::pair<std::string,size_t> > wcounts(M.size()); // for sorting by frequency
     typedef typename MYMAP::const_iterator myIter;
     size_t z=0;
     for (myIter m = M.begin(); m != M.end(); m++)
       {
-	// cout << m->first << " " << m->second << endl;
-	wcounts[z++] = pair<string,size_t>(m->first,m->second);
+	// cout << m->first << " " << m->second << std::endl;
+	wcounts[z++] = std::pair<std::string,size_t>(m->first,m->second);
       }
     compWords compFunc(unkToken);
     sort(wcounts.begin(),wcounts.end(),compFunc);
 
     // Assign IDs ...
-    vector<Token> tok(wcounts.size()); 
+    std::vector<Token> tok(wcounts.size());
     for (size_t i = 0; i < wcounts.size(); i++)
       tok[i] = Token(wcounts[i].first,i);
     // and re-sort in alphabetical order
-    sort(tok.begin(),tok.end()); 
+    sort(tok.begin(),tok.end());
     write_tokenindex_to_disk(tok,ofile,unkToken);
   }
 
   template<typename Token>
-  void 
-  fill_token_seq(TokenIndex& V, string const& line, vector<Token>& dest)
+  void
+  fill_token_seq(TokenIndex& V, std::string const& line, std::vector<Token>& dest)
   {
-    istringstream buf(line); string w;
+    std::istringstream buf(line); std::string w;
     while (buf>>w) dest.push_back(Token(V[w]));
   }
 }

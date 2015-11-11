@@ -288,7 +288,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   assert(stackVec);
 
@@ -297,7 +297,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     FEATUREVERBOSE(3, inputPath << std::endl);
     for (size_t i = 0; i < stackVec->size(); ++i) {
       const ChartCellLabel &cell = *stackVec->at(i);
-      const WordsRange &ntRange = cell.GetCoverage();
+      const Range &ntRange = cell.GetCoverage();
       FEATUREVERBOSE(3, "stackVec[ " << i << " ] : " << ntRange.GetStartPos() << " - " << ntRange.GetEndPos() << std::endl);
     }
 
@@ -339,9 +339,9 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     boost::unordered_set<size_t> treeInputLabelsLHS;
 
     // get index map for underlying hypotheses
-    const WordsRange& wordsRange = inputPath.GetWordsRange();
-    size_t startPos = wordsRange.GetStartPos();
-    size_t endPos = wordsRange.GetEndPos();
+    const Range& range = inputPath.GetWordsRange();
+    size_t startPos = range.GetStartPos();
+    size_t endPos = range.GetEndPos();
     const Phrase *sourcePhrase = targetPhrase.GetRuleSource();
 
     if (nNTs > 1) { // rule has right-hand side non-terminals, i.e. it's a hierarchical rule
@@ -356,7 +356,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
         if ( word.IsNonTerminal() ) {
           // retrieve information that is required for input tree label matching (RHS)
           const ChartCellLabel &cell = *stackVec->at(nonTerminalNumber);
-          const WordsRange& prevWordsRange = cell.GetCoverage();
+          const Range& prevWordsRange = cell.GetCoverage();
           symbolStartPos = prevWordsRange.GetStartPos();
           symbolEndPos = prevWordsRange.GetEndPos();
         }
@@ -556,8 +556,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       for (boost::unordered_set<size_t>::const_iterator treeInputLabelsLHSIt = treeInputLabelsLHS.begin();
            treeInputLabelsLHSIt != treeInputLabelsLHS.end(); ++treeInputLabelsLHSIt) {
 
-        scoreBreakdown.PlusEquals(this, 
-                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + m_sourceLabelsByIndex[*treeInputLabelsLHSIt], 
+        scoreBreakdown.PlusEquals(this,
+                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + m_sourceLabelsByIndex[*treeInputLabelsLHSIt],
                                   (float)1/treeInputLabelsLHS.size());
 
         if (!m_targetSourceLHSJointCountFile.empty()) {
@@ -567,8 +567,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
         }
       }
       if ( treeInputLabelsLHS.size() == 0 ) {
-        scoreBreakdown.PlusEquals(this, 
-                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + outputDefaultNonTerminal[0]->GetString().as_string(), 
+        scoreBreakdown.PlusEquals(this,
+                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + outputDefaultNonTerminal[0]->GetString().as_string(),
                                   1);
         if (!m_targetSourceLHSJointCountFile.empty()) {
           t2sLabelsScore = TransformScore(m_floor);

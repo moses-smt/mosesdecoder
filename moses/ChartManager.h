@@ -25,7 +25,7 @@
 #include <boost/unordered_map.hpp>
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "SentenceStats.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartParser.h"
@@ -154,7 +154,7 @@ public:
   void OutputSearchGraph(OutputCollector *collector) const;
   void OutputSearchGraphSLF() const {
   }
-  void OutputSearchGraphHypergraph() const;
+  // void OutputSearchGraphHypergraph() const;
 
 };
 

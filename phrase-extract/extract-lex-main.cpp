@@ -4,6 +4,7 @@
 #include <vector>
 #include "extract-lex.h"
 #include "InputFileStream.h"
+#include "moses/Util.h"
 
 using namespace std;
 using namespace MosesTraining;
@@ -53,9 +54,9 @@ int main(int argc, char* argv[])
     assert(isAlign);
 
     vector<string> toksTarget, toksSource, toksAlign;
-    Tokenize(toksTarget, lineTarget);
-    Tokenize(toksSource, lineSource);
-    Tokenize(toksAlign, lineAlign);
+    Moses::Tokenize(toksTarget, lineTarget);
+    Moses::Tokenize(toksSource, lineSource);
+    Moses::Tokenize(toksAlign, lineAlign);
 
     /*
     cerr  << endl
@@ -99,7 +100,7 @@ void ExtractLex::Process(vector<string> &toksTarget, vector<string> &toksSource,
     const string &alignTok = *iterAlign;
 
     vector<size_t> alignPos;
-    Tokenize(alignPos, alignTok, "-");
+    Moses::Tokenize(alignPos, alignTok, "-");
     assert(alignPos.size() == 2);
 
     if (alignPos[0] >= toksSource.size()) {

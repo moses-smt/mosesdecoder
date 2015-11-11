@@ -36,7 +36,7 @@ namespace Moses
 HypothesisStackNormal::HypothesisStackNormal(Manager& manager) :
   HypothesisStack(manager)
 {
-  m_nBestIsEnabled = StaticData::Instance().IsNBestEnabled();
+  m_nBestIsEnabled = manager.options().nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
 }
@@ -57,17 +57,17 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
     VERBOSE(3,"added hyp to stack");
 
     // Update best score, if this hypothesis is new best
-    if (hypo->GetTotalScore() > m_bestScore) {
+    if (hypo->GetFutureScore() > m_bestScore) {
       VERBOSE(3,", best on stack");
-      m_bestScore = hypo->GetTotalScore();
+      m_bestScore = hypo->GetFutureScore();
       // this may also affect the worst score
       if ( m_bestScore + m_beamWidth > m_worstScore )
         m_worstScore = m_bestScore + m_beamWidth;
     }
     // update best/worst score for stack diversity 1
     if ( m_minHypoStackDiversity == 1 &&
-         hypo->GetTotalScore() > GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) {
-      SetWorstScoreForBitmap( hypo->GetWordsBitmap().GetID(), hypo->GetTotalScore() );
+         hypo->GetFutureScore() > GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) {
+      SetWorstScoreForBitmap( hypo->GetWordsBitmap().GetID(), hypo->GetFutureScore() );
     }
 
     VERBOSE(3,", now size " << m_hypos.size());
@@ -89,21 +89,21 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 
 bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 {
-  if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
+  if (hypo->GetFutureScore() == - std::numeric_limits<float>::infinity()) {
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, constraint" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
   // too bad for stack. don't bother adding hypo into collection
   if (!StaticData::Instance().GetDisableDiscarding() &&
-      hypo->GetTotalScore() < m_worstScore
+      hypo->GetFutureScore() < m_worstScore
       && ! ( m_minHypoStackDiversity > 0
-             && hypo->GetTotalScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) ) {
+             && hypo->GetFutureScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) ) {
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, too bad for stack" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
@@ -123,7 +123,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 
   // found existing hypo with same target ending.
   // keep the best 1
-  if (hypo->GetTotalScore() > hypoExisting->GetTotalScore()) {
+  if (hypo->GetFutureScore() > hypoExisting->GetFutureScore()) {
     // incoming hypo is better than the one we have
     VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
     if (m_nBestIsEnabled) {
@@ -145,7 +145,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
     } else {
-      FREEHYPO(hypo);
+      delete hypo;
     }
     return false;
   }
@@ -181,7 +181,7 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
         included[i] = true;
         diversityCount[ coverage ]++;
         if (diversityCount[ coverage ] == m_minHypoStackDiversity)
-          SetWorstScoreForBitmap( coverage, hyp->GetTotalScore());
+          SetWorstScoreForBitmap( coverage, hyp->GetFutureScore());
       }
     }
   }
@@ -192,12 +192,12 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
     // add best remaining hypotheses
     for(size_t i=0; i<hypos.size()
         && size() < newSize
-        && hypos[i]->GetTotalScore() > m_bestScore+m_beamWidth; i++) {
+        && hypos[i]->GetFutureScore() > m_bestScore+m_beamWidth; i++) {
       if (! included[i]) {
         m_hypos.insert( hypos[i] );
         included[i] = true;
         if (size() == newSize)
-          m_worstScore = hypos[i]->GetTotalScore();
+          m_worstScore = hypos[i]->GetFutureScore();
       }
     }
   }
@@ -205,7 +205,7 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
   // delete hypotheses that have not been included
   for(size_t i=0; i<hypos.size(); i++) {
     if (! included[i]) {
-      FREEHYPO( hypos[i] );
+      delete hypos[i];
       m_manager.GetSentenceStats().AddPruning();
     }
   }
@@ -217,7 +217,7 @@ void HypothesisStackNormal::PruneToSize(size_t newSize)
     TRACE_ERR("stack now contains: ");
     for(iterator iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
       Hypothesis *hypo = *iter;
-      TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
+      TRACE_ERR( hypo->GetId() << " (" << hypo->GetFutureScore() << ") ");
     }
     TRACE_ERR( endl);
   }
@@ -230,7 +230,7 @@ const Hypothesis *HypothesisStackNormal::GetBestHypothesis() const
     Hypothesis *bestHypo = *iter;
     while (++iter != m_hypos.end()) {
       Hypothesis *hypo = *iter;
-      if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
+      if (hypo->GetFutureScore() > bestHypo->GetFutureScore())
         bestHypo = hypo;
     }
     return bestHypo;

@@ -90,7 +90,7 @@ LatticeMBRSolution::LatticeMBRSolution(const TrellisPath& path, bool isMap) :
     }
   }
   if (isMap) {
-    m_mapScore = path.GetTotalScore();
+    m_mapScore = path.GetFutureScore();
   } else {
     m_mapScore = 0;
   }
@@ -490,34 +490,43 @@ bool Edge::operator< (const Edge& compare ) const
 
 ostream& operator<< (ostream& out, const Edge& edge)
 {
-  out << "Head: " << edge.m_headNode->GetId() << ", Tail: " << edge.m_tailNode->GetId() << ", Score: " << edge.m_score << ", Phrase: " << edge.m_targetPhrase << endl;
+  out << "Head: " << edge.m_headNode->GetId()
+      << ", Tail: " << edge.m_tailNode->GetId()
+      << ", Score: " << edge.m_score
+      << ", Phrase: " << edge.m_targetPhrase << endl;
   return out;
 }
 
 bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b)
 {
-  return a->GetWordsBitmap().GetNumWordsCovered() <  b->GetWordsBitmap().GetNumWordsCovered();
+  return (a->GetWordsBitmap().GetNumWordsCovered()
+          <
+          b->GetWordsBitmap().GetNumWordsCovered());
 }
 
 void getLatticeMBRNBest(const Manager& manager, const TrellisPathList& nBestList,
                         vector<LatticeMBRSolution>& solutions, size_t n)
 {
-  const StaticData& staticData = StaticData::Instance();
   std::map < int, bool > connected;
   std::vector< const Hypothesis *> connectedList;
   map<Phrase, float> ngramPosteriors;
   std::map < const Hypothesis*, set <const Hypothesis*> > outgoingHyps;
   map<const Hypothesis*, vector<Edge> > incomingEdges;
   vector< float> estimatedScores;
-  manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
-  pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, manager.GetBestHypothesis(), staticData.GetLatticeMBRPruningFactor(),staticData.GetMBRScale());
+  manager.GetForwardBackwardSearchGraph(&connected, &connectedList,
+                                        &outgoingHyps, &estimatedScores);
+  LMBR_Options const& lmbr = manager.options().lmbr;
+  MBR_Options  const& mbr  = manager.options().mbr;
+  pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores,
+                 manager.GetBestHypothesis(), lmbr.pruning_factor, mbr.scale);
   calcNgramExpectations(connectedList, incomingEdges, ngramPosteriors,true);
 
-  vector<float> mbrThetas = staticData.GetLatticeMBRThetas();
-  float p = staticData.GetLatticeMBRPrecision();
-  float r = staticData.GetLatticeMBRPRatio();
-  float mapWeight = staticData.GetLatticeMBRMapWeight();
-  if (mbrThetas.size() == 0) { //thetas not specified on the command line, use p and r instead
+  vector<float> mbrThetas = lmbr.theta;
+  float p = lmbr.precision;
+  float r = lmbr.ratio;
+  float mapWeight = lmbr.map_weight;
+  if (mbrThetas.size() == 0) {
+    // thetas were not specified on the command line, so use p and r instead
     mbrThetas.push_back(-1); //Theta 0
     mbrThetas.push_back(1/(bleu_order*p));
     for (size_t i = 2; i <= bleu_order; ++i) {
@@ -537,7 +546,7 @@ void getLatticeMBRNBest(const Manager& manager, const TrellisPathList& nBestList
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter, ++ctr) {
     const TrellisPath &path = **iter;
     solutions.push_back(LatticeMBRSolution(path,iter==nBestList.begin()));
-    solutions.back().CalcScore(ngramPosteriors,mbrThetas,mapWeight);
+    solutions.back().CalcScore(ngramPosteriors, mbrThetas, mapWeight);
     sort(solutions.begin(), solutions.end(), comparator);
     while (solutions.size() > n) {
       solutions.pop_back();
@@ -568,7 +577,10 @@ const TrellisPath doConsensusDecoding(const Manager& manager, const TrellisPathL
   map<const Hypothesis*, vector<Edge> > incomingEdges;
   vector< float> estimatedScores;
   manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
-  pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, manager.GetBestHypothesis(), staticData.GetLatticeMBRPruningFactor(),staticData.GetMBRScale());
+  LMBR_Options const& lmbr = manager.options().lmbr;
+  MBR_Options  const&  mbr = manager.options().mbr;
+  pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores,
+                 manager.GetBestHypothesis(), lmbr.pruning_factor, mbr.scale);
   calcNgramExpectations(connectedList, incomingEdges, ngramExpectations,false);
 
   //expected length is sum of expected unigram counts

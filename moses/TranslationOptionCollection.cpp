@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 #include "moses/FF/InputFeature.h"
+#include "TranslationTask.h"
 #include "util/exception.hh"
 
 #include <boost/foreach.hpp>
@@ -46,23 +47,17 @@ using namespace std;
 namespace Moses
 {
 
-/** helper for pruning */
-// bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
-// {
-//   return a->GetFutureScore() > b->GetFutureScore();
-// }
-
 /** constructor; since translation options are indexed by coverage span, the
  * corresponding data structure is initialized here This fn should be
  * called by inherited classe */
 TranslationOptionCollection::
 TranslationOptionCollection(ttasksptr const& ttask,
-			    InputType const& src,
+                            InputType const& src,
                             size_t maxNoTransOptPerCoverage,
                             float translationOptionThreshold)
   : m_ttask(ttask)
   , m_source(src)
-  , m_futureScore(src.GetSize())
+  , m_estimatedScores(src.GetSize())
   , m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
   , m_translationOptionThreshold(translationOptionThreshold)
 {
@@ -237,7 +232,7 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
   // source phrase
   const Phrase &sourcePhrase = inputPath.GetPhrase();
   m_unksrcs.push_back(&sourcePhrase);
-  WordsRange range(sourcePos, sourcePos + length - 1);
+  Range range(sourcePos, sourcePos + length - 1);
 
   targetPhrase.EvaluateInIsolation(sourcePhrase);
 
@@ -254,18 +249,13 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
  */
 void
 TranslationOptionCollection::
-CalcFutureScore()
+CalcEstimatedScore()
 {
   // setup the matrix (ignore lower triangle, set upper triangle to -inf
-  size_t size = m_source.GetSize(); // the width of the matrix
-
-  for(size_t row=0; row < size; row++) {
-    for(size_t col=row; col<size; col++) {
-      m_futureScore.SetScore(row, col, -numeric_limits<float>::infinity());
-    }
-  }
+  m_estimatedScores.InitTriangle(-numeric_limits<float>::infinity());
 
   // walk all the translation options and record the cheapest option for each span
+  size_t size = m_source.GetSize(); // the width of the matrix
   for (size_t sPos = 0 ; sPos < size ; ++sPos) {
     size_t ePos = sPos;
     BOOST_FOREACH(TranslationOptionList& tol, m_collection[sPos]) {
@@ -273,8 +263,8 @@ CalcFutureScore()
       for(toi = tol.begin() ; toi != tol.end() ; ++toi) {
         const TranslationOption& to = **toi;
         float score = to.GetFutureScore();
-        if (score > m_futureScore.GetScore(sPos, ePos))
-          m_futureScore.SetScore(sPos, ePos, score);
+        if (score > m_estimatedScores.GetScore(sPos, ePos))
+          m_estimatedScores.SetScore(sPos, ePos, score);
       }
       ++ePos;
     }
@@ -292,8 +282,8 @@ CalcFutureScore()
       size_t sPos = diagshift;
       size_t ePos = colstart+diagshift;
       for(size_t joinAt = sPos; joinAt < ePos ; joinAt++)  {
-        float joinedScore = m_futureScore.GetScore(sPos, joinAt)
-                            + m_futureScore.GetScore(joinAt+1, ePos);
+        float joinedScore = m_estimatedScores.GetScore(sPos, joinAt)
+                            + m_estimatedScores.GetScore(joinAt+1, ePos);
         // uncomment to see the cell filling scheme
         // TRACE_ERR("[" << sPos << "," << ePos << "] <-? ["
         // 	  << sPos << "," << joinAt << "]+["
@@ -301,8 +291,8 @@ CalcFutureScore()
         // 	  << colstart << ", diagshift: " << diagshift << ")"
         // 	  << endl);
 
-        if (joinedScore > m_futureScore.GetScore(sPos, ePos))
-          m_futureScore.SetScore(sPos, ePos, joinedScore);
+        if (joinedScore > m_estimatedScores.GetScore(sPos, ePos))
+          m_estimatedScores.SetScore(sPos, ePos, joinedScore);
       }
     }
   }
@@ -330,7 +320,7 @@ CalcFutureScore()
     for(size_t row=0; row<size; row++)
       for(size_t col=row; col<size; col++)
         TRACE_ERR( "future cost from "<< row <<" to "<< col <<" is "
-                   << m_futureScore.GetScore(row, col) <<endl);
+                   << m_estimatedScores.GetScore(row, col) <<endl);
   }
 }
 
@@ -385,7 +375,7 @@ CreateTranslationOptions()
   VERBOSE(3,"Translation Option Collection\n " << *this << endl);
   Prune();
   Sort();
-  CalcFutureScore(); // future score matrix
+  CalcEstimatedScore(); // future score matrix
   CacheLexReordering(); // Cached lex reodering costs
 }
 
@@ -398,7 +388,8 @@ CreateTranslationOptionsForRange
 {
   typedef DecodeStepTranslation Tstep;
   typedef DecodeStepGeneration Gstep;
-  if ((StaticData::Instance().GetXmlInputType() != XmlExclusive)
+  XmlInputType xml_policy = m_ttask.lock()->options().input.xml_policy;
+  if ((xml_policy != XmlExclusive)
       || !HasXmlOptionsOverlappingRange(sPos,ePos)) {
 
     // partial trans opt stored in here
@@ -410,7 +401,7 @@ CreateTranslationOptionsForRange
     const DecodeStep &dstep = **d;
 
     const PhraseDictionary &pdict = *dstep.GetPhraseDictionaryFeature();
-    const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(pdict);
+    TargetPhraseCollection::shared_ptr targetPhrases = inputPath.GetTargetPhrases(pdict);
 
     static_cast<const Tstep&>(dstep).ProcessInitialTranslation
     (m_source, *oldPtoc, sPos, ePos, adhereTableLimit, inputPath, targetPhrases);
@@ -431,7 +422,7 @@ CreateTranslationOptionsForRange
         TranslationOption &inputPartialTranslOpt = **pto;
         if (const Tstep *tstep = dynamic_cast<const Tstep*>(dstep)) {
           const PhraseDictionary &pdict = *tstep->GetPhraseDictionaryFeature();
-          const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(pdict);
+          TargetPhraseCollection::shared_ptr targetPhrases = inputPath.GetTargetPhrases(pdict);
           tstep->Process(inputPartialTranslOpt, *dstep, *newPtoc,
                          this, adhereTableLimit, targetPhrases);
         } else {
@@ -457,8 +448,8 @@ CreateTranslationOptionsForRange
     vector<TranslationOption*>::const_iterator c;
     for (c = partTransOptList.begin() ; c != partTransOptList.end() ; ++c) {
       TranslationOption *transOpt = *c;
-      if (StaticData::Instance().GetXmlInputType() != XmlConstraint
-          || !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
+      if (xml_policy != XmlConstraint || 
+	  !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
         Add(transOpt);
       }
     }
@@ -466,9 +457,9 @@ CreateTranslationOptionsForRange
     totalEarlyPruned += oldPtoc->GetPrunedCount();
     delete oldPtoc;
     // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
-  } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(sPos,ePos))
+  } // if ((xml_policy != XmlExclusive) || !HasXmlOptionsOverlappingRange(sPos,ePos))
 
-  if (gidx == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough
+  if (gidx == 0 && xml_policy != XmlPassThrough
       && HasXmlOptionsOverlappingRange(sPos,ePos)) {
     CreateXmlOptionsForRange(sPos, ePos);
   }
@@ -483,14 +474,14 @@ SetInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
   const ScorePair* inputScore = inputPath.GetInputScore();
   if (inputScore == NULL) return;
 
-  const InputFeature &inputFeature = InputFeature::Instance();
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
 
   const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
   for (size_t i = 0; i < transOpts.size(); ++i) {
     TranslationOption &transOpt = *transOpts[i];
 
     ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-    scores.PlusEquals(&inputFeature, *inputScore);
+    scores.PlusEquals(inputFeature, *inputScore);
 
   }
 }
@@ -588,7 +579,7 @@ void
 TranslationOptionCollection::
 Add(TranslationOption *translationOption)
 {
-  const WordsRange &coverage = translationOption->GetSourceWordsRange();
+  const Range &coverage = translationOption->GetSourceWordsRange();
   size_t const s = coverage.GetStartPos();
   size_t const e = coverage.GetEndPos();
   size_t const i = e - s;
@@ -626,14 +617,13 @@ CacheLexReordering()
 {
   size_t const stop = m_source.GetSize();
   typedef StatefulFeatureFunction sfFF;
-  BOOST_FOREACH(sfFF const* ff, sfFF::GetStatefulFeatureFunctions()) 
-    {
-      if (typeid(*ff) != typeid(LexicalReordering)) continue;
-      LexicalReordering const& lr = static_cast<const LexicalReordering&>(*ff);
-      for (size_t s = 0 ; s < stop ; s++) 
-	BOOST_FOREACH(TranslationOptionList& tol, m_collection[s]) 
-	  lr.SetCache(tol);
-    }
+  BOOST_FOREACH(sfFF const* ff, sfFF::GetStatefulFeatureFunctions()) {
+    if (typeid(*ff) != typeid(LexicalReordering)) continue;
+    LexicalReordering const& lr = static_cast<const LexicalReordering&>(*ff);
+    for (size_t s = 0 ; s < stop ; s++)
+      BOOST_FOREACH(TranslationOptionList& tol, m_collection[s])
+      lr.SetCache(tol);
+  }
 }
 
 //! list of trans opt for a particular span

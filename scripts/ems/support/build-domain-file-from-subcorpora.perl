@@ -1,4 +1,7 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use warnings;
 use strict;
@@ -7,7 +10,7 @@ use strict;
 # (helper for domain adatpation)
 
 # Creates a file with domain names and end line numbers for different domains
-# within the cleaned training corpus. This file is used by various domain 
+# within the cleaned training corpus. This file is used by various domain
 # adaptation methods.
 
 my ($extension,@SUBCORPORA) = @ARGV;

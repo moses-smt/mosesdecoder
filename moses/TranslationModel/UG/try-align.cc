@@ -3,6 +3,7 @@
 using namespace std;
 using namespace Moses;
 using namespace ugdiss;
+using namespace sapt;
 
 typedef L2R_Token<SimpleWordId> Token;
 typedef mmTtrack<Token> ttrack_t;
@@ -16,8 +17,9 @@ float lbop_level = .05;
 #define smooth 1
 namespace stats
 {
-  using namespace Moses::bitext;
-  float 
+  using namespace Moses;
+  using namespace sapt;
+  float
   pmi(size_t j,size_t m1, size_t m2, size_t N)
   {
 #if smooth
@@ -29,8 +31,8 @@ namespace stats
     return log(j) + log(N) - log(m1) - log(m2);
 #endif
   }
-  
-  float 
+
+  float
   npmi(size_t j,size_t m1, size_t m2, size_t N)
   {
 #if smooth
@@ -39,11 +41,11 @@ namespace stats
     float p12 = lbop(N,j,lbop_level);
     return (log(p12) - log(p1) - log(p2)) / -log(p12);
 #else
-    return pmi(j,m1,m2,N) / (log(N) - log(j)); 
+    return pmi(j,m1,m2,N) / (log(N) - log(j));
 #endif
   }
 
-  float 
+  float
   mi(size_t j,size_t m1, size_t m2, size_t N)
   {
     float ret = 0;
@@ -57,13 +59,13 @@ namespace stats
 
 struct SinglePhrase
 {
-  typedef map<uint64_t,sptr<SinglePhrase> > cache_t;
+  typedef map<uint64_t,SPTR<SinglePhrase> > cache_t;
   uint64_t pid; // phrase id
   vector<ttrack::Position> occs; // occurrences
 };
 
 
-struct PhrasePair
+struct PPair
 {
   struct score_t;
   uint64_t p1,p2;
@@ -72,14 +74,14 @@ struct PhrasePair
 
   struct stats_t
   {
-    typedef map<pair<uint64_t,uint64_t>, sptr<stats_t> > cache_t;
+    typedef map<pair<uint64_t,uint64_t>, SPTR<stats_t> > cache_t;
     size_t m1,m2,j;
     float  npmi; // normalized point-wise mutual information
     float   pmi; // point-wise mutual information
     float    mi; // mutual information
     float score;
 
-    void 
+    void
     set(vector<ttrack::Position> const& o1,
 	vector<ttrack::Position> const& o2,
 	size_t const N)
@@ -90,7 +92,7 @@ struct PhrasePair
 	{
 	  if (i1 && o1[i1].sid == o1[i1-1].sid) { ++i1; continue; }
 	  if (i2 && o2[i2].sid == o2[i2-1].sid) { ++i2; continue; }
-	  
+
 	  if (o1[i1].sid == o2[i2].sid) { ++j; ++i1; ++i2; ++m1; ++m2; }
 	  else if (o1[i1].sid < o2[i2].sid) { ++i1; ++m1; }
 	  else { ++i2; ++m2; }
@@ -114,22 +116,22 @@ struct PhrasePair
       this->score = npmi; // npmi; // hmean; // /sqrt(z);
     }
   } stats;
-  
-  PhrasePair(ushort s1_=0, ushort e1_=0, ushort s2_=0, ushort e2_=0)
+
+  PPair(ushort s1_=0, ushort e1_=0, ushort s2_=0, ushort e2_=0)
     : s1(s1_), e1(e1_), s2(s2_), e2(e2_), parent(-1) { }
 
 
-  bool 
-  operator<(PhrasePair const& other) const
-  { 
-    return (this->stats.score == other.stats.score 
+  bool
+  operator<(PPair const& other) const
+  {
+    return (this->stats.score == other.stats.score
 	    ? (e1-s1 + e2-s2 > other.e1-other.s1 + other.e2-other.s2)
-	    : (this->stats.score > other.stats.score)); 
+	    : (this->stats.score > other.stats.score));
   }
-  
+
   size_t len1() const { return e1 - s1; }
   size_t len2() const { return e2 - s2; }
-  bool includes(PhrasePair const& o) const
+  bool includes(PPair const& o) const
   {
     return s1 <= o.s1 && e1 >= o.e1 && s2 <= o.s2 && e2 >= o.e2;
   }
@@ -137,13 +139,13 @@ struct PhrasePair
 };
 
 SinglePhrase::cache_t cache1,cache2;
-PhrasePair::stats_t::cache_t ppcache;
+PPair::stats_t::cache_t ppcache;
 
 
 struct SortByPositionInCorpus
 {
-  bool 
-  operator()(ttrack::Position const& a, 
+  bool
+  operator()(ttrack::Position const& a,
 	     ttrack::Position const& b) const
   {
     return a.sid != b.sid ? a.sid < b.sid : a.offset < b.offset;
@@ -151,8 +153,8 @@ struct SortByPositionInCorpus
 };
 
 
-void 
-getoccs(tsa_t::tree_iterator const& m, 
+void
+getoccs(tsa_t::tree_iterator const& m,
 	vector<ttrack::Position>& occs)
 {
   occs.clear();
@@ -166,11 +168,11 @@ getoccs(tsa_t::tree_iterator const& m,
   sort(occs.begin(),occs.end(),SortByPositionInCorpus());
 }
 
-void 
-lookup_phrases(vector<id_type> const& snt, 
-	       TokenIndex& V, ttrack_t const& T, 
+void
+lookup_phrases(vector<id_type> const& snt,
+	       TokenIndex& V, ttrack_t const& T,
 	       tsa_t const& I, SinglePhrase::cache_t& cache,
-	       vector<vector<sptr<SinglePhrase> > >& dest)
+	       vector<vector<SPTR<SinglePhrase> > >& dest)
 {
   dest.resize(snt.size());
   for (size_t i = 0; i < snt.size(); ++i)
@@ -181,8 +183,8 @@ lookup_phrases(vector<id_type> const& snt,
 	{
 	  if (m.approxOccurrenceCount() < 3) break;
 	  // if (k - i > 0) break;
-	  sptr<SinglePhrase>& o = cache[m.getPid()];
-	  if (!o) 
+	  SPTR<SinglePhrase>& o = cache[m.getPid()];
+	  if (!o)
 	    {
 	      o.reset(new SinglePhrase());
 	      o->pid = m.getPid();
@@ -193,7 +195,7 @@ lookup_phrases(vector<id_type> const& snt,
     }
 }
 
-struct 
+struct
 RowIndexSorter
 {
   vector<vector<float> > const& M;
@@ -202,14 +204,14 @@ RowIndexSorter
     : M(m), my_col(c) { }
 
   template<typename T>
-  bool 
-  operator()(T const& a, T const& b) const 
-  { 
+  bool
+  operator()(T const& a, T const& b) const
+  {
     return M.at(a).at(my_col) > M.at(b).at(my_col);
   }
 };
 
-struct 
+struct
 ColIndexSorter
 {
   vector<vector<float> > const& M;
@@ -218,9 +220,9 @@ ColIndexSorter
     : M(m), my_row(r) { }
 
   template<typename T>
-  bool 
-  operator()(T const& a, T const& b) const 
-  { 
+  bool
+  operator()(T const& a, T const& b) const
+  {
     return M.at(my_row).at(a) > M[my_row].at(b);
   }
 
@@ -234,7 +236,7 @@ int main(int argc, char* argv[])
 
   T1.reset(new ttrack_t());
   T2.reset(new ttrack_t());
-  
+
   V1.open(base + L1 + ".tdx");
   T1->open(base + L1 + ".mct");
   I1.open(base + L1 + ".sfa", T1);
@@ -249,25 +251,25 @@ int main(int argc, char* argv[])
   while (getline(cin,line1) and getline(cin,line2))
     {
       cout << "\n" << line1 << "\n" << line2 << endl;
-      vector<vector<sptr<SinglePhrase> > > M1,M2;
+      vector<vector<SPTR<SinglePhrase> > > M1,M2;
       vector<id_type> snt1,snt2;
       V1.fillIdSeq(line1,snt1);
       V2.fillIdSeq(line2,snt2);
       lookup_phrases(snt1,V1,*T1,I1,cache1,M1);
       lookup_phrases(snt2,V2,*T2,I2,cache2,M2);
 
-      vector<PhrasePair> pp_all,pp_good;
+      vector<PPair> pp_all, pp_good;
       vector<int> a1(snt1.size(),-1);
       vector<int> a2(snt2.size(),-1);
-      
+
       vector<vector<int> > z1(snt1.size(),vector<int>(snt1.size(),-1));
       vector<vector<int> > z2(snt2.size(),vector<int>(snt2.size(),-1));
-      vector<vector<vector<PhrasePair> > >ppm1(M1.size()),ppm2(M2.size());
+      vector<vector<vector<PPair> > >ppm1(M1.size()),ppm2(M2.size());
       vector<vector<float> >  M(snt1.size(), vector<float>(snt2.size(),0));
       vector<vector<size_t> > best1(snt1.size()), best2(snt2.size());
       for (size_t i1 = 0; i1 < M1.size(); ++i1)
 	{
-	  PhrasePair pp;
+	  PPair pp;
 	  pp.s1 = i1;
 	  ppm1[i1].resize(M1[i1].size());
 	  for (size_t i2 = 0; i2 < M2.size(); ++i2)
@@ -282,11 +284,11 @@ int main(int argc, char* argv[])
 		  for (size_t k2 = 0; k2 < M2[i2].size(); ++k2)
 		    {
 		      pp.e2 = i2 + k2 + 1;
-		      sptr<PhrasePair::stats_t> & s 
+		      SPTR<PPair::stats_t> & s
 			= ppcache[make_pair(M1[i1][k1]->pid,M2[i2][k2]->pid)];
-		      if (!s) 
+		      if (!s)
 			{
-			  s.reset(new PhrasePair::stats_t());
+			  s.reset(new PPair::stats_t());
 			  s->set(M1[i1][k1]->occs,M2[i2][k2]->occs,T1->size());
 			}
 		      pp.stats = *s;
@@ -294,8 +296,8 @@ int main(int argc, char* argv[])
 		      // ppm1[i1][k1].push_back(pp);
 		      // ppm2[i2][k2].push_back(pp);
 		      size_t J = pp.stats.j * 100;
-		      if (pp.stats.score > 0 
-			  && J >= pp.stats.m1 
+		      if (pp.stats.score > 0
+			  && J >= pp.stats.m1
 			  && J > pp.stats.m2)
 			{ pp_all.push_back(pp); }
 		    }
@@ -304,13 +306,13 @@ int main(int argc, char* argv[])
 	}
       sort(pp_all.begin(),pp_all.end());
 #if 0
-      BOOST_FOREACH(PhrasePair const& pp,pp_all)
+      BOOST_FOREACH(PPair const& pp,pp_all)
 	{
 	  if (pp.stats.npmi < 0) continue;
 	  for (size_t r = pp.s1; r < pp.e1; ++r)
 	    for (size_t c = pp.s2; c < pp.e2; ++c)
 	      {
-		// M[r][c] += log(1-pp.stats.npmi); 
+		// M[r][c] += log(1-pp.stats.npmi);
 		M[r][c] += log(1-pp.stats.mi);
 	      }
 	}
@@ -342,11 +344,11 @@ int main(int argc, char* argv[])
 	    }
 	  cout << endl;
 	}
-#endif 
+#endif
 #if 0
       for (size_t k = 1; k < pp_all.size(); ++k)
 	for (size_t i = k; i--;)
-	  if (pp_all[i].s1 >= pp_all[k].s1 && 
+	  if (pp_all[i].s1 >= pp_all[k].s1 &&
 	      pp_all[i].e1 <= pp_all[k].e1 &&
 	      pp_all[i].s2 >= pp_all[k].s2 &&
 	      pp_all[i].e2 <= pp_all[k].e2)
@@ -358,37 +360,37 @@ int main(int argc, char* argv[])
       vector<int> assoc1(snt1.size(),-1), assoc2(snt2.size(),-1);
       for (size_t p = 0; p < pp_all.size(); ++p)
 	{
-	  PhrasePair const& x = pp_all[p];
+	  PPair const& x = pp_all[p];
 	  // if (x.stats.npmi < .7) break;
-	  // if (z1[x.s1][x.e1-1] >= 0 || z2[x.s2][x.e2-1] >=0) 
+	  // if (z1[x.s1][x.e1-1] >= 0 || z2[x.s2][x.e2-1] >=0)
 	  // continue;
-	  for (size_t i = x.s1; i < x.e1; ++i) 
+	  for (size_t i = x.s1; i < x.e1; ++i)
 	    {
-	      if (assoc1[i] < 0) 
+	      if (assoc1[i] < 0)
 		assoc1[i] = p;
 	      else
 		{
-		  // PhrasePair& y = pp_all[assoc1[i]];
-		  // if (y.includes(x)) 
+		  // PPair& y = pp_all[assoc1[i]];
+		  // if (y.includes(x))
 		  // assoc1[i] = p;
 		}
 	    }
-	  for (size_t i = x.s2; i < x.e2; ++i) 
+	  for (size_t i = x.s2; i < x.e2; ++i)
 	    {
-	      if (assoc2[i] < 0) 
+	      if (assoc2[i] < 0)
 		assoc2[i] = p;
 	      else
 		{
-		  // PhrasePair& y = pp_all[assoc2[i]];
-		  // if (y.includes(x)) 
+		  // PPair& y = pp_all[assoc2[i]];
+		  // if (y.includes(x))
 		    // assoc2[i] = p;
 		}
 	    }
 	  z1[x.s1][x.e1-1] = p;
 	  z2[x.s2][x.e2-1] = p;
 	  continue;
-	  cout << (boost::format("%.4f %.8f %.4f") 
-		   % x.stats.score 
+	  cout << (boost::format("%.4f %.8f %.4f")
+		   % x.stats.score
 		   % x.stats.mi
 		   % x.stats.npmi);
 	  for (size_t z = x.s1; z < x.e1; ++z)
@@ -396,8 +398,8 @@ int main(int argc, char* argv[])
 	  cout << " :::";
 	  for (size_t z = x.s2; z < x.e2; ++z)
 	    cout << " " << V2[snt2[z]];
-	  cout << " [" 
-	       << x.stats.m1 << "/" << x.stats.j << "/" << x.stats.m2 
+	  cout << " ["
+	       << x.stats.m1 << "/" << x.stats.j << "/" << x.stats.m2
 	       << "]" << endl;
 	}
       vector<bool> done(pp_all.size(),false);
@@ -409,14 +411,14 @@ int main(int argc, char* argv[])
 	    // if (assoc1[i] == assoc2[k])
 	      {
 		done[assoc1[i]] = true;
-		PhrasePair& p = pp_all[assoc1[i]];
+		PPair& p = pp_all[assoc1[i]];
 		for (size_t j = p.s1; j < p.e1; ++j)
 		  cout << j << ":" << V1[snt1[j]] << " ";
 		cout << " ::: ";
 		for (size_t j = p.s2; j < p.e2; ++j)
 		  cout << j << ":" << V2[snt2[j]] << " ";
-		cout << "[" 
-		     << p.stats.m1 << "/" << p.stats.j << "/" << p.stats.m2 
+		cout << "["
+		     << p.stats.m1 << "/" << p.stats.j << "/" << p.stats.m2
 		     << "] "<< p.stats.score << endl;
 		// break;
 	      }
@@ -427,40 +429,40 @@ int main(int argc, char* argv[])
 	  if (assoc2[i] < 0 || done[assoc2[i]])
 	    continue;
 	  done[assoc2[i]] = true;
-	  PhrasePair& p = pp_all[assoc2[i]];
+	  PPair& p = pp_all[assoc2[i]];
 	  for (size_t j = p.s1; j < p.e1; ++j)
 	    cout << j << ":" << V1[snt1[j]] << " ";
 	  cout << " ::: ";
 	  for (size_t j = p.s2; j < p.e2; ++j)
 	    cout << j << ":" << V2[snt2[j]] << " ";
-	  cout << "[" 
-	       << p.stats.m1 << "/" << p.stats.j << "/" << p.stats.m2 
+	  cout << "["
+	       << p.stats.m1 << "/" << p.stats.j << "/" << p.stats.m2
 	       << "] "<< p.stats.score << endl;
 	}
-#endif      
+#endif
       // sort(pp_all.begin(),pp_all.end());
-      // BOOST_FOREACH(PhrasePair const& pp, pp_all)
+      // BOOST_FOREACH(PPair const& pp, pp_all)
       // 	{
-      // 	  while (ppm1[pp.s1].size() < pp.e1 - pp.s1) 
-      // 	    ppm1[pp.s1].push_back(vector<PhrasePair>());
-      // 	  vector<PhrasePair>& v1 = ppm1[pp.s1][pp.e1-pp.s1-1];
+      // 	  while (ppm1[pp.s1].size() < pp.e1 - pp.s1)
+      // 	    ppm1[pp.s1].push_back(vector<PPair>());
+      // 	  vector<PPair>& v1 = ppm1[pp.s1][pp.e1-pp.s1-1];
       // 	  if (v1.size() && v1[0].stats.score > pp.stats.score)
       // 	    continue;
-      // 	  while (ppm2[pp.s2].size() < pp.e2 - pp.s2) 
-      // 	    ppm2[pp.s2].push_back(vector<PhrasePair>());
-      // 	  vector<PhrasePair>& v2 = ppm2[pp.s2][pp.e2-pp.s2-1];
+      // 	  while (ppm2[pp.s2].size() < pp.e2 - pp.s2)
+      // 	    ppm2[pp.s2].push_back(vector<PPair>());
+      // 	  vector<PPair>& v2 = ppm2[pp.s2][pp.e2-pp.s2-1];
       // 	  if (v2.size() && v2[0].stats.score > pp.stats.score)
       // 	    continue;
       // 	  v1.push_back(pp);
       // 	  v2.push_back(pp);
       // 	}
 
-      
-      // BOOST_FOREACH(vector<vector<PhrasePair> >& vv, ppm1)
-      // 	{ 
-      // 	  BOOST_FOREACH(vector<PhrasePair>& v, vv) 
-      // 	    { 
-      // 	      sort(v.begin(),v.end()); 
+
+      // BOOST_FOREACH(vector<vector<PPair> >& vv, ppm1)
+      // 	{
+      // 	  BOOST_FOREACH(vector<PPair>& v, vv)
+      // 	    {
+      // 	      sort(v.begin(),v.end());
       // 	      if (v.size() > 1 && v[0].stats.score == v[1].stats.score)
       // 		v.clear();
       // 	    }
@@ -468,25 +470,25 @@ int main(int argc, char* argv[])
       // for (size_t i2 = 0; i2 < ppm2.size(); ++i2)
       // 	{
       // 	  for (size_t k2 = 0; k2 < ppm2[i2].size(); ++k2)
-      // 	    { 
-      // 	      vector<PhrasePair>& v2 = ppm2[i2][k2];
+      // 	    {
+      // 	      vector<PPair>& v2 = ppm2[i2][k2];
       // 	      sort(v2.begin(),v2.end());
-      // 	      if (v2.size() > 1 && v2[0].stats.score == v2[1].stats.score) 
+      // 	      if (v2.size() > 1 && v2[0].stats.score == v2[1].stats.score)
       // 		{
       // 		  v2.clear();
       // 		  continue;
       // 		}
       // 	      ushort i1 = v2[0].s1;
       // 	      ushort k1 = v2[0].e1 - i1 -1;
-	      
-      // 	      if (ppm1[i1][k1].size() == 0 || 
-      // 		  ppm1[i1][k1][0].s2 != i2 || 
+
+      // 	      if (ppm1[i1][k1].size() == 0 ||
+      // 		  ppm1[i1][k1][0].s2 != i2 ||
       // 		  ppm1[i1][k1][0].e2 != i2 + k2 + 1)
       // 		{ v2.clear(); }
       // 	      else pp_good.push_back(ppm2[i2][k2][0]);
       // 	    }
       // 	}
-      // BOOST_FOREACH(PhrasePair const& pp, pp_good)
+      // BOOST_FOREACH(PPair const& pp, pp_good)
       // 	{
       // 	  cout << pp.stats.mi << " ";
       // 	  for (size_t z = pp.s1; z < pp.e1; ++z)
@@ -498,7 +500,7 @@ int main(int argc, char* argv[])
       // 	}
       // // cout << string(80,'=') << endl;
       // // sort(pp_all.begin(),pp_all.end());
-      // // BOOST_FOREACH(PhrasePair const& pp, pp_all)
+      // // BOOST_FOREACH(PPair const& pp, pp_all)
       // // 	{
       // // 	  cout << pp.mi << " ";
       // // 	  for (size_t z = pp.s1; z < pp.e1; ++z)
@@ -508,7 +510,7 @@ int main(int argc, char* argv[])
       // // 	    cout << V2[snt2[z]] << " ";
       // // 	  cout << pp.m1 << "/" << pp.j << "/" << pp.m2 << endl;
       // // 	}
-      
+
     }
 }
 

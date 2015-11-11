@@ -249,16 +249,12 @@ size_t PhraseNode::ReadChild(Word &wordFound, uint64_t &childFilePos, const char
   return memRead;
 }
 
-const TargetPhraseCollection *PhraseNode::GetTargetPhraseCollection(size_t tableLimit, OnDiskWrapper &onDiskWrapper) const
+TargetPhraseCollection::shared_ptr
+PhraseNode::
+GetTargetPhraseCollection(size_t tableLimit, OnDiskWrapper &onDiskWrapper) const
 {
-  TargetPhraseCollection *ret = new TargetPhraseCollection();
-
-  if (m_value > 0)
-    ret->ReadFromFile(tableLimit, m_value, onDiskWrapper);
-  else {
-
-  }
-
+  TargetPhraseCollection::shared_ptr ret(new TargetPhraseCollection);
+  if (m_value > 0) ret->ReadFromFile(tableLimit, m_value, onDiskWrapper);
   return ret;
 }
 

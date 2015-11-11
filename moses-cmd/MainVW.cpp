@@ -74,7 +74,7 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
 } //namespace
 
 /** main function of the command line version of the decoder **/
-int main(int argc, char** argv)
+int main(int argc, char const** argv)
 {
   try {
 
@@ -144,26 +144,24 @@ int main(int argc, char** argv)
 #endif
 
     // main loop over set of input sentences
-    
+
     boost::shared_ptr<InputType> source;
-    while ((source = ioWrapper->ReadInput()) != NULL)
-      {
-	IFVERBOSE(1) { ResetUserTime(); }
-
-	InputType* foo = source.get();
-	FeatureFunction::CallChangeSource(foo);
-
-	// set up task of training one sentence
-	boost::shared_ptr<TrainingTask> task;
-	task = TrainingTask::create(source, ioWrapper);
-
-	// execute task
-#ifdef WITH_THREADS
-	pool.Submit(task);
-#else
-	task->Run();
-#endif
+    while ((source = ioWrapper->ReadInput()) != NULL) {
+      IFVERBOSE(1) {
+        ResetUserTime();
       }
+
+      // set up task of training one sentence
+      boost::shared_ptr<TrainingTask> task;
+      task = TrainingTask::create(source, ioWrapper);
+
+      // execute task
+#ifdef WITH_THREADS
+      pool.Submit(task);
+#else
+      task->Run();
+#endif
+    }
 
     // we are done, finishing up
 #ifdef WITH_THREADS

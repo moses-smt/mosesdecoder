@@ -1,6 +1,5 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
-
 #include <vector>
 #include <string>
 
@@ -8,11 +7,10 @@
 
 #include "moses/Hypothesis.h"
 #include "moses/ScoreComponentCollection.h"
-#include "moses/WordsRange.h"
-#include "moses/WordsBitmap.h"
+#include "moses/Range.h"
+#include "moses/Bitmap.h"
 #include "moses/TranslationOption.h"
 #include "moses/FF/FFState.h"
-
 #include "ReorderingStack.h"
 
 namespace Moses
@@ -44,32 +42,31 @@ public:
   static const ReorderingType L   = 1; // left
   static const ReorderingType MAX = 3; // largest possible
 #else
-  enum ReorderingType 
-    {
-      M    = 0, // monotonic
-      NM   = 1, // non-monotonic
-      S    = 1, // swap
-      D    = 2, // discontinuous
-      DL   = 2, // discontinuous, left
-      DR   = 3, // discontinuous, right
-      R    = 0, // right
-      L    = 1, // left
-      MAX  = 3, // largest possible
-      NONE = 4  // largest possible
-    };
+  enum ReorderingType {
+    M    = 0, // monotonic
+    NM   = 1, // non-monotonic
+    S    = 1, // swap
+    D    = 2, // discontinuous
+    DL   = 2, // discontinuous, left
+    DR   = 3, // discontinuous, right
+    R    = 0, // right
+    L    = 1, // left
+    MAX  = 3, // largest possible
+    NONE = 4  // largest possible
+  };
 #endif
   // determine orientation, depending on model:
 
 
   ReorderingType // for first phrase in phrase-based
-  GetOrientation(WordsRange const& cur) const;
+  GetOrientation(Range const& cur) const;
 
   ReorderingType // for non-first phrases in phrase-based
-  GetOrientation(WordsRange const& prev, WordsRange const& cur) const;
+  GetOrientation(Range const& prev, Range const& cur) const;
 
   ReorderingType // for HReorderingForwardState
-  GetOrientation(WordsRange const& prev, WordsRange const& cur,
-                 WordsBitmap const& cov) const;
+  GetOrientation(Range const& prev, Range const& cur,
+                 Bitmap const& cov) const;
 
   ReorderingType // for HReorderingBackwarddState
   GetOrientation(int const reoDistance) const;
@@ -147,10 +144,6 @@ public:
   typedef LRModel::ReorderingType ReorderingType;
 
   virtual
-  int
-  Compare(const FFState& o) const = 0;
-
-  virtual
   LRState*
   Expand(const TranslationOption& hypo, const InputType& input,
          ScoreComponentCollection* scores) const = 0;
@@ -225,11 +218,9 @@ public:
     delete m_forward;
   }
 
-  virtual
-  int
-  Compare(const FFState& o) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
-  virtual
   LRState*
   Expand(const TranslationOption& topt, const InputType& input,
          ScoreComponentCollection*  scores) const;
@@ -242,7 +233,7 @@ class PhraseBasedReorderingState
   : public LRState
 {
 private:
-  WordsRange m_prevRange;
+  Range m_prevRange;
   bool m_first;
 public:
   static bool m_useFirstBackwardScore;
@@ -252,19 +243,18 @@ public:
   PhraseBasedReorderingState(const PhraseBasedReorderingState *prev,
                              const TranslationOption &topt);
 
-  virtual
-  int
-  Compare(const FFState& o) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
   virtual
   LRState*
   Expand(const TranslationOption& topt,const InputType& input,
          ScoreComponentCollection*  scores) const;
 
-  ReorderingType GetOrientationTypeMSD(WordsRange currRange) const;
-  ReorderingType GetOrientationTypeMSLR(WordsRange currRange) const;
-  ReorderingType GetOrientationTypeMonotonic(WordsRange currRange) const;
-  ReorderingType GetOrientationTypeLeftRight(WordsRange currRange) const;
+  ReorderingType GetOrientationTypeMSD(Range currRange) const;
+  ReorderingType GetOrientationTypeMSLR(Range currRange) const;
+  ReorderingType GetOrientationTypeMonotonic(Range currRange) const;
+  ReorderingType GetOrientationTypeLeftRight(Range currRange) const;
 };
 
 //! State for a hierarchical reordering model (see Galley and Manning, A
@@ -279,8 +269,9 @@ public:
   HReorderingBackwardState(const HReorderingBackwardState *prev,
                            const TranslationOption &topt,
                            ReorderingStack reoStack);
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
-  virtual int Compare(const FFState& o) const;
   virtual LRState* Expand(const TranslationOption& hypo, const InputType& input,
                           ScoreComponentCollection*  scores) const;
 
@@ -297,8 +288,8 @@ class HReorderingForwardState : public LRState
 {
 private:
   bool m_first;
-  WordsRange m_prevRange;
-  WordsBitmap m_coverage;
+  Range m_prevRange;
+  Bitmap m_coverage;
 
 public:
   HReorderingForwardState(const LRModel &config, size_t sentenceLength,
@@ -306,7 +297,9 @@ public:
   HReorderingForwardState(const HReorderingForwardState *prev,
                           const TranslationOption &topt);
 
-  virtual int Compare(const FFState& o) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
   virtual LRState* Expand(const TranslationOption& hypo,
                           const InputType& input,
                           ScoreComponentCollection* scores) const;

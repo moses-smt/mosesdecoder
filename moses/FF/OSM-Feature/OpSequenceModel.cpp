@@ -45,12 +45,12 @@ void OpSequenceModel::Load()
 void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
 
   osmHypothesis obj;
   obj.setState(OSM->NullContextState());
-  WordsBitmap myBitmap(source.GetSize());
+  Bitmap myBitmap(source.GetSize());
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
   vector<float> scores;
@@ -82,7 +82,7 @@ void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
   obj.computeOSMFeature(startIndex,myBitmap);
   obj.calculateOSMProb(*OSM);
   obj.populateScores(scores,numFeatures);
-  estimatedFutureScore.PlusEquals(this, scores);
+  estimatedScores.PlusEquals(this, scores);
 
 }
 
@@ -93,8 +93,8 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   ScoreComponentCollection* accumulator) const
 {
   const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
-  const WordsBitmap &bitmap = cur_hypo.GetWordsBitmap();
-  WordsBitmap myBitmap = bitmap;
+  const Bitmap &bitmap = cur_hypo.GetWordsBitmap();
+  Bitmap myBitmap(bitmap);
   const Manager &manager = cur_hypo.GetManager();
   const InputType &source = manager.GetSource();
   // const Sentence &sourceSentence = static_cast<const Sentence&>(source);
@@ -120,7 +120,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   //const Sentence &sentence = static_cast<const Sentence&>(curr_hypo.GetManager().GetSource());
 
 
-  const WordsRange & sourceRange = cur_hypo.GetCurrSourceWordsRange();
+  const Range & sourceRange = cur_hypo.GetCurrSourceWordsRange();
   int startIndex  = sourceRange.GetStartPos();
   int endIndex = sourceRange.GetEndPos();
   const AlignmentInfo &align = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();

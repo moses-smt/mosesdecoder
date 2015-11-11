@@ -21,14 +21,16 @@
 #ifndef EXTRACT_GHKM_NODE_H_
 #define EXTRACT_GHKM_NODE_H_
 
-#include "Span.h"
-
 #include <cassert>
 #include <iterator>
 #include <string>
 #include <vector>
 
-namespace Moses
+#include "Span.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -215,6 +217,7 @@ Node *Node::LowestCommonAncestor(InputIterator first, InputIterator last)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

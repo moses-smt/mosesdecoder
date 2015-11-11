@@ -7,6 +7,7 @@
 #include "moses/TranslationOption.h"
 #include "moses/InputPath.h"
 #include "util/string_piece_hash.hh"
+#include "util/string_stream.hh"
 #include "util/exception.hh"
 
 using namespace std;
@@ -16,21 +17,29 @@ namespace Moses
 
 PhrasePairFeature::PhrasePairFeature(const std::string &line)
   :StatelessFeatureFunction(0, line)
+  ,m_unrestricted(false)
+  ,m_simple(true)
+  ,m_sourceContext(false)
+  ,m_domainTrigger(false)
+  ,m_ignorePunctuation(false)
 {
-  std::cerr << "Initializing PhrasePairFeature.." << std::endl;
+  VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
 
-  if (m_simple == 1) std::cerr << "using simple phrase pairs.. ";
-  if (m_sourceContext == 1) std::cerr << "using source context.. ";
-  if (m_domainTrigger == 1) std::cerr << "using domain triggers.. ";
+  if (m_simple == 1) VERBOSE(1, " Using simple phrase pairs.");
+  if (m_sourceContext == 1) VERBOSE(1, " Using source context.");
+  if (m_domainTrigger == 1) VERBOSE(1, " Using domain triggers.");
 
   // compile a list of punctuation characters
   if (m_ignorePunctuation) {
-    std::cerr << "ignoring punctuation for triggers.. ";
+    VERBOSE(1, " Ignoring punctuation for triggers.");
     char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
-    for (size_t i=0; i < sizeof(punctuation)-1; ++i)
+    for (size_t i=0; i < sizeof(punctuation)-1; ++i) {
       m_punctuationHash[punctuation[i]] = 1;
+    }
   }
+
+  VERBOSE(1, " Done." << std::endl);
 }
 
 void PhrasePairFeature::SetParameter(const std::string& key, const std::string& value)
@@ -76,7 +85,7 @@ void PhrasePairFeature::Load()
     }
 
     inFileSource.close();
-  } else {
+  } else if (!m_unrestricted) {
     // restricted source word vocabulary
     ifstream inFileSource(m_filePathSource.c_str());
     UTIL_THROW_IF2(!inFileSource, "could not open file " << m_filePathSource);
@@ -101,8 +110,6 @@ void PhrasePairFeature::Load()
     }
 
     inFileTarget.close();*/
-
-    m_unrestricted = false;
   }
 }
 
@@ -111,55 +118,38 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   const Phrase& source = inputPath.GetPhrase();
-  if (m_simple) {
-    ostringstream namestr;
-    namestr << "pp_";
-    namestr << source.GetWord(0).GetFactor(m_sourceFactorId)->GetString();
-    for (size_t i = 1; i < source.GetSize(); ++i) {
-      const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
-      namestr << ",";
-      namestr << sourceFactor->GetString();
-    }
-    namestr << "~";
-    namestr << targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString();
-    for (size_t i = 1; i < targetPhrase.GetSize(); ++i) {
-      const Factor* targetFactor = targetPhrase.GetWord(i).GetFactor(m_targetFactorId);
-      namestr << ",";
-      namestr << targetFactor->GetString();
-    }
-
-    scoreBreakdown.SparsePlusEquals(namestr.str(),1);
-  }
   if (m_domainTrigger) {
-    const Sentence& input = static_cast<const Sentence&>(input);
-    const bool use_topicid = input.GetUseTopicId();
-    const bool use_topicid_prob = input.GetUseTopicIdAndProb();
+    const Sentence& isnt = static_cast<const Sentence&>(input);
+    const bool use_topicid = isnt.GetUseTopicId();
+    const bool use_topicid_prob = isnt.GetUseTopicIdAndProb();
 
     // compute pair
-    ostringstream pair;
-    pair << source.GetWord(0).GetFactor(m_sourceFactorId)->GetString();
+    util::StringStream pair;
+
+    pair << ReplaceTilde( source.GetWord(0).GetFactor(m_sourceFactorId)->GetString() );
     for (size_t i = 1; i < source.GetSize(); ++i) {
       const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
-      pair << ",";
-      pair << sourceFactor->GetString();
+      pair << "~";
+      pair << ReplaceTilde( sourceFactor->GetString() );
     }
-    pair << "~";
-    pair << targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString();
+    pair << "~~";
+    pair << ReplaceTilde( targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString() );
     for (size_t i = 1; i < targetPhrase.GetSize(); ++i) {
       const Factor* targetFactor = targetPhrase.GetWord(i).GetFactor(m_targetFactorId);
-      pair << ",";
-      pair << targetFactor->GetString();
+      pair << "~";
+      pair << ReplaceTilde( targetFactor->GetString() );
     }
 
     if (use_topicid || use_topicid_prob) {
       if(use_topicid) {
         // use topicid as trigger
-        const long topicid = input.GetTopicId();
-        stringstream feature;
-        feature << "pp_";
+        const long topicid = isnt.GetTopicId();
+        util::StringStream feature;
+
+        feature << m_description << "_";
         if (topicid == -1)
           feature << "unk";
         else
@@ -170,16 +160,16 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
         scoreBreakdown.SparsePlusEquals(feature.str(), 1);
       } else {
         // use topic probabilities
-        const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
+        const vector<string> &topicid_prob = *(isnt.GetTopicIdAndProb());
         if (atol(topicid_prob[0].c_str()) == -1) {
-          stringstream feature;
-          feature << "pp_unk_";
+          util::StringStream feature;
+          feature << m_description << "_unk_";
           feature << pair.str();
           scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         } else {
           for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
-            stringstream feature;
-            feature << "pp_";
+            util::StringStream feature;
+            feature << m_description << "_";
             feature << topicid_prob[i];
             feature << "_";
             feature << pair.str();
@@ -189,11 +179,11 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
       }
     } else {
       // range over domain trigger words
-      const long docid = input.GetDocumentId();
+      const long docid = isnt.GetDocumentId();
       for (set<string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
         string sourceTrigger = *p;
-        ostringstream namestr;
-        namestr << "pp_";
+        util::StringStream namestr;
+        namestr << m_description << "_";
         namestr << sourceTrigger;
         namestr << "_";
         namestr << pair.str();
@@ -202,11 +192,11 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
     }
   }
   if (m_sourceContext) {
-    const Sentence& input = static_cast<const Sentence&>(input);
+    const Sentence& isnt = static_cast<const Sentence&>(input);
 
     // range over source words to get context
-    for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
-      StringPiece sourceTrigger = input.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
+    for(size_t contextIndex = 0; contextIndex < isnt.GetSize(); contextIndex++ ) {
+      StringPiece sourceTrigger = isnt.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
       if (m_ignorePunctuation) {
         // check if trigger is punctuation
         char firstChar = sourceTrigger[0];
@@ -220,27 +210,52 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
         sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger ) != m_vocabSource.end();
 
       if (m_unrestricted || sourceTriggerExists) {
-        ostringstream namestr;
-        namestr << "pp_";
+        util::StringStream namestr;
+        namestr << m_description << "_";
         namestr << sourceTrigger;
         namestr << "~";
-        namestr << source.GetWord(0).GetFactor(m_sourceFactorId)->GetString();
+        namestr << ReplaceTilde( source.GetWord(0).GetFactor(m_sourceFactorId)->GetString() );
         for (size_t i = 1; i < source.GetSize(); ++i) {
           const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
-          namestr << ",";
-          namestr << sourceFactor->GetString();
+          namestr << "~";
+          namestr << ReplaceTilde( sourceFactor->GetString() );
         }
-        namestr << "~";
-        namestr << targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString();
+        namestr << "~~";
+        namestr << ReplaceTilde( targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString() );
         for (size_t i = 1; i < targetPhrase.GetSize(); ++i) {
           const Factor* targetFactor = targetPhrase.GetWord(i).GetFactor(m_targetFactorId);
-          namestr << ",";
-          namestr << targetFactor->GetString();
+          namestr << "~";
+          namestr << ReplaceTilde( targetFactor->GetString() );
         }
 
         scoreBreakdown.SparsePlusEquals(namestr.str(),1);
       }
     }
+  }
+}
+
+void PhrasePairFeature::EvaluateInIsolation(const Phrase &source
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedScores) const
+{
+  if (m_simple) {
+    util::StringStream namestr;
+    namestr << m_description << "_";
+    namestr << ReplaceTilde( source.GetWord(0).GetFactor(m_sourceFactorId)->GetString() );
+    for (size_t i = 1; i < source.GetSize(); ++i) {
+      const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
+      namestr << "~";
+      namestr << ReplaceTilde( sourceFactor->GetString() );
+    }
+    namestr << "~~";
+    namestr << ReplaceTilde( targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString() );
+    for (size_t i = 1; i < targetPhrase.GetSize(); ++i) {
+      const Factor* targetFactor = targetPhrase.GetWord(i).GetFactor(m_targetFactorId);
+      namestr << "~";
+      namestr << ReplaceTilde( targetFactor->GetString() );
+    }
+    scoreBreakdown.SparsePlusEquals(namestr.str(),1);
   }
 }
 

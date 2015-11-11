@@ -1,4 +1,8 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
+
 # runs Moses many times changing the values of one weight, all others fixed
 # nbest lists are always produced to allow for comparison of real and
 # 'projected' BLEU (BLEU estimated from n-best lists collected at a neighouring
@@ -20,7 +24,7 @@ my $jobs = 0;
 my $workdir = "weight-scan";
 my $range = "0.0,0.1,1.0";
 my $input_type = 0;
-my $normalize = 0; # normalize 
+my $normalize = 0; # normalize
 my $nbestsize = 100;
 my $decoderflags = "";
 my $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl";
@@ -110,7 +114,7 @@ die "Failed to find weights of the name '$weightname' in moses config."
 
 
 #store current directory and create the working directory (if needed)
-my $cwd = `pawd 2>/dev/null`; 
+my $cwd = `pawd 2>/dev/null`;
 if(!$cwd){$cwd = `pwd`;}
 chomp($cwd);
 
@@ -136,7 +140,7 @@ sub run_decoder {
     my $filebase = sprintf("%${prec}f", $weightvalue);
     my $nbestfilename = "best$nbestsize.$filebase";
     my $filename = "out.$filebase";
-    
+
     # user-supplied parameters
     print STDERR "params = $decoderflags\n";
 
@@ -240,7 +244,7 @@ sub ensure_full_path {
     my $PATH = shift;
 $PATH =~ s/\/nfsmnt//;
     return $PATH if $PATH =~ /^\//;
-    my $dir = `pawd 2>/dev/null`; 
+    my $dir = `pawd 2>/dev/null`;
     if(!$dir){$dir = `pwd`;}
     chomp($dir);
     $PATH = $dir."/".$PATH;

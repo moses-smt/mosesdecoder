@@ -13,7 +13,7 @@ namespace Moses
 InputFeature *InputFeature::s_instance = NULL;
 
 InputFeature::InputFeature(const std::string &line)
-  : StatelessFeatureFunction(line)
+  : StatelessFeatureFunction(line,true)
   , m_numRealWordCount(0)
 {
   m_numInputScores = this->m_numScoreComponents;
@@ -49,7 +49,7 @@ void InputFeature::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   if (m_legacy) {
     //binary phrase-table does input feature itself

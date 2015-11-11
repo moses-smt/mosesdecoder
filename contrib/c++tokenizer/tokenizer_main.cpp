@@ -10,8 +10,8 @@ using namespace TOKENIZER_NAMESPACE ;
 #endif
 
 
-void 
-usage(const char *path) 
+void
+usage(const char *path)
 {
     std::cerr << "Usage: " << path << "[-{v|x|p|a|e|s|u|n|N]* [LL] [-{c|o} PATH]* INFILE*" << std::endl;
     std::cerr << " -a -- aggressive hyphenization" << std::endl;
@@ -89,7 +89,7 @@ copy_words(Tokenizer& tize, std::istream& ifs, std::ostream& ofs) {
     int nlines = 0;
     std::string line;
     while (ifs.good() && std::getline(ifs,line)) {
-        if (line.empty()) 
+        if (line.empty())
             continue;
         std::vector<std::string> tokens(tize.tokens(line));
         int count = 0;
@@ -127,7 +127,7 @@ copy_words(Tokenizer& tize, std::istream& ifs, std::ostream& ofs) {
 }
 
 
-int main(int ac, char **av) 
+int main(int ac, char **av)
 {
     int rc = 0;
     Parameters params;
@@ -140,7 +140,7 @@ int main(int ac, char **av)
     if (!detokenize_p)
         params.split_p = std::strstr(av[0],"splitter") != 0;
 
-    while (++av,--ac) { 
+    while (++av,--ac) {
         if (**av == '-') {
             switch (av[0][1]) {
             case 'a':
@@ -244,7 +244,7 @@ int main(int ac, char **av)
             if (comma) {
                 *comma++ = 0;
                 params.chunksize = std::strtoul(comma,0,0);
-            } 
+            }
             params.nthreads = std::strtoul(*av,0,0);
         } else {
             params.args.push_back(std::string(*av));
@@ -275,7 +275,7 @@ int main(int ac, char **av)
                 cfg_mos_str.append("/moses");
                 if (!::access(cfg_mos_str.c_str(),X_OK)) {
                     params.cfg_path = strdup(cfg_mos_str.c_str());
-                } else if (!::access(cfg_shr_str.c_str(),X_OK)) { 
+                } else if (!::access(cfg_shr_str.c_str(),X_OK)) {
                     params.cfg_path = strdup(cfg_shr_str.c_str());
                 } else if (!::access(cfg_dir_str.c_str(),X_OK)) {
                     params.cfg_path = strdup(cfg_dir_str.c_str());
@@ -287,7 +287,7 @@ int main(int ac, char **av)
         if (params.verbose_p) {
             std::cerr << "config path: " << params.cfg_path << std::endl;
         }
-    } 
+    }
 
     std::unique_ptr<std::ofstream> pofs = 0;
     if (!params.out_path.empty()) {
@@ -345,7 +345,7 @@ int main(int ac, char **av)
         if (plines.second) {
             std::cerr << "%%% " << plines.second << " sentences." << std::endl;
         }
-    }    
+    }
     return rc;
 }
 

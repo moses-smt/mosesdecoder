@@ -128,10 +128,10 @@
     </Configuration>
   </Settings>
   <Dependencies Name="Debug">
-    <Project Name="moses"/>
     <Project Name="util"/>
     <Project Name="lm"/>
     <Project Name="search"/>
     <Project Name="OnDiskPt"/>
   </Dependencies>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

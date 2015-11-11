@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Rico Sennrich
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
-# convert trees in moses XML format to PTB-style bracketed format
+"""Convert trees in moses XML format to PTB-style bracketed format."""
 
 from __future__ import print_function, unicode_literals
 import sys
@@ -10,17 +13,21 @@ import codecs
 
 from lxml import etree as ET
 
+
 def escape(word):
-    word = word.replace('|','&#124;') # factor separator
-    word = word.replace('[','&#91;') # syntax non-terminal
-    word = word.replace(']','&#93;') # syntax non-terminal
-    word = word.replace('\'','&apos;')
-    word = word.replace('\"','&quot;')
+    # Factor separator:
+    word = word.replace('|', '&#124;')
+    # Syntax non-terminal:
+    word = word.replace('[', '&#91;')
+    # Syntax non-terminal:
+    word = word.replace(']', '&#93;')
+    word = word.replace('\'', '&apos;')
+    word = word.replace('\"', '&quot;')
 
     return word
 
-def make_brackets(xml):
 
+def make_brackets(xml):
     out = ' [' + xml.get('label')
 
     if xml.text and xml.text.strip():

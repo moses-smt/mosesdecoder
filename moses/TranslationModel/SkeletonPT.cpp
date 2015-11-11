@@ -7,7 +7,7 @@ using namespace std;
 namespace Moses
 {
 SkeletonPT::SkeletonPT(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(line, true)
 {
   ReadParameters();
 }
@@ -17,7 +17,7 @@ void SkeletonPT::Load()
   SetFeaturesToApply();
 }
 
-void SkeletonPT::InitializeForInput(InputType const& source)
+void SkeletonPT::InitializeForInput(ttasksptr const& ttask)
 {
   ReduceCache();
 }
@@ -32,12 +32,13 @@ void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQu
     const Phrase &sourcePhrase = inputPath.GetPhrase();
 
     TargetPhrase *tp = CreateTargetPhrase(sourcePhrase);
-    TargetPhraseCollection *tpColl = new TargetPhraseCollection();
+    TargetPhraseCollection::shared_ptr tpColl(new TargetPhraseCollection);
     tpColl->Add(tp);
 
     // add target phrase to phrase-table cache
     size_t hash = hash_value(sourcePhrase);
-    std::pair<const TargetPhraseCollection*, clock_t> value(tpColl, clock());
+    std::pair<TargetPhraseCollection::shared_ptr, clock_t>
+    value(tpColl, clock());
     cache[hash] = value;
 
     inputPath.SetTargetPhrases(*this, tpColl, NULL);

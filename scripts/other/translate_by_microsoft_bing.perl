@@ -1,7 +1,10 @@
-#!/usr/bin/env perl 
+#!/usr/bin/env perl
 
 # Script implemented by Pranava Swaroop Madhyastha (a student at Charles
 # University, UFAL)
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 use strict;
 use warnings;

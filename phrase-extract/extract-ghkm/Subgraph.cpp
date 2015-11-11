@@ -18,10 +18,13 @@
 ***********************************************************************/
 
 #include <iostream>
-#include "Subgraph.h"
-#include "Node.h"
 
-namespace Moses
+#include "Node.h"
+#include "Subgraph.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -134,6 +137,11 @@ void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const
       for (std::vector<Node *>::const_iterator p(children.begin());
            p != children.end(); ++p) {
         Node *child = *p;
+        if (child->GetType() == SOURCE) {
+          // This is possible due to the heuristic for attaching unaligned
+          // source words.
+          continue;
+        }
         out << " ";
         RecursivelyPrintTree(child,out);
       }
@@ -193,5 +201,6 @@ void Subgraph::RecursivelyGetPartsOfSpeech(const Node *n, std::vector<std::strin
   }
 }
 
-}  // namespace Moses
+}  // namespace MosesTraining
+}  // namespace Syntax
 }  // namespace GHKM

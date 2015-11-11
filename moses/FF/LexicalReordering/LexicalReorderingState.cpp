@@ -4,7 +4,7 @@
 
 #include "moses/FF/FFState.h"
 #include "moses/Hypothesis.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/TranslationOption.h"
 #include "moses/Util.h"
 
@@ -16,9 +16,9 @@ namespace Moses
 {
 
 bool
-IsMonotonicStep(WordsRange  const& prev, // words range of last source phrase
-                WordsRange  const& cur,  // words range of current source phrase
-                WordsBitmap const& cov)  // coverage bitmap
+IsMonotonicStep(Range  const& prev, // words range of last source phrase
+                Range  const& cur,  // words range of current source phrase
+                Bitmap const& cov)  // coverage bitmap
 {
   size_t e = prev.GetEndPos() + 1;
   size_t s = cur.GetStartPos();
@@ -26,7 +26,7 @@ IsMonotonicStep(WordsRange  const& prev, // words range of last source phrase
 }
 
 bool
-IsSwap(WordsRange const& prev, WordsRange const& cur, WordsBitmap const& cov)
+IsSwap(Range const& prev, Range const& cur, Bitmap const& cov)
 {
   size_t s = prev.GetStartPos();
   size_t e = cur.GetEndPos();
@@ -71,7 +71,7 @@ SetAdditionalScoreComponents(size_t number)
 /// return orientation for the first phrase
 LRModel::ReorderingType
 LRModel::
-GetOrientation(WordsRange const& cur) const
+GetOrientation(Range const& cur) const
 {
   UTIL_THROW_IF2(m_modelType == None, "Reordering Model Type is None");
   return ((m_modelType == LeftRight) ? R :
@@ -82,7 +82,7 @@ GetOrientation(WordsRange const& cur) const
 
 LRModel::ReorderingType
 LRModel::
-GetOrientation(WordsRange const& prev, WordsRange const& cur) const
+GetOrientation(Range const& prev, Range const& cur) const
 {
   UTIL_THROW_IF2(m_modelType == None, "No reordering model type specified");
   return ((m_modelType == LeftRight)
@@ -101,7 +101,7 @@ GetOrientation(int const reoDistance) const
   // this one is for HierarchicalReorderingBackwardState
   return ((m_modelType == LeftRight)
           ? (reoDistance >= 1) ? R : L
-	  : (reoDistance == 1) ? M 
+        : (reoDistance == 1) ? M
           : (m_modelType == Monotonic) ? NM
           : (reoDistance == -1)  ? S
           : (m_modelType == MSD) ? D
@@ -110,12 +110,12 @@ GetOrientation(int const reoDistance) const
 
 LRModel::ReorderingType
 LRModel::
-GetOrientation(WordsRange const& prev, WordsRange const& cur,
-               WordsBitmap const& cov) const
+GetOrientation(Range const& prev, Range const& cur,
+               Bitmap const& cov) const
 {
   return ((m_modelType == LeftRight)
           ? cur.GetStartPos() > prev.GetEndPos() ? R : L
-	  : IsMonotonicStep(prev,cur,cov) ? M
+        : IsMonotonicStep(prev,cur,cov) ? M
           : (m_modelType == Monotonic) ? NM
           : IsSwap(prev,cur,cov) ? S
           : (m_modelType == MSD) ? D
@@ -263,7 +263,7 @@ CopyScores(ScoreComponentCollection*  accum,
 
   const SparseReordering* sparse = m_configuration.GetSparseReordering();
   if (sparse) sparse->CopyScores(*relevantOpt, m_prevOption, input, reoType,
-				 m_direction, accum);
+                                   m_direction, accum);
 }
 
 
@@ -312,23 +312,30 @@ PhraseBasedReorderingState(const LRModel &config,
 { }
 
 
-int
-PhraseBasedReorderingState::
-Compare(const FFState& o) const
+size_t PhraseBasedReorderingState::hash() const
 {
-  if (&o == this) return 0;
+  size_t ret;
+  ret = hash_value(m_prevRange);
+  boost::hash_combine(ret, m_direction);
 
-  const PhraseBasedReorderingState* other = static_cast<const PhraseBasedReorderingState*>(&o);
-  if (m_prevRange == other->m_prevRange) {
+  return ret;
+}
+
+bool PhraseBasedReorderingState::operator==(const FFState& o) const
+{
+  if (&o == this) return true;
+
+  const PhraseBasedReorderingState &other = static_cast<const PhraseBasedReorderingState&>(o);
+  if (m_prevRange == other.m_prevRange) {
     if (m_direction == LRModel::Forward) {
-      return ComparePrevScores(other->m_prevOption);
+      int compareScore = ComparePrevScores(other.m_prevOption);
+      return compareScore == 0;
     } else {
-      return 0;
+      return true;
     }
-  } else if (m_prevRange < other->m_prevRange) {
-    return -1;
+  } else {
+    return false;
   }
-  return 1;
 }
 
 LRState*
@@ -340,9 +347,9 @@ Expand(const TranslationOption& topt, const InputType& input,
 
   if ((m_direction != LRModel::Forward && m_useFirstBackwardScore) || !m_first) {
     LRModel const& lrmodel = m_configuration;
-    WordsRange const cur = topt.GetSourceWordsRange();
+    Range const cur = topt.GetSourceWordsRange();
     LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
-				       : lrmodel.GetOrientation(m_prevRange,cur));
+                                       : lrmodel.GetOrientation(m_prevRange,cur));
     CopyScores(scores, topt, input, reoType);
   }
   return new PhraseBasedReorderingState(this, topt);
@@ -352,17 +359,22 @@ Expand(const TranslationOption& topt, const InputType& input,
 ///////////////////////////
 //BidirectionalReorderingState
 
-int
-BidirectionalReorderingState::
-Compare(FFState const& o) const
+size_t BidirectionalReorderingState::hash() const
+{
+  size_t ret = m_backward->hash();
+  boost::hash_combine(ret, m_forward->hash());
+  return ret;
+}
+
+bool BidirectionalReorderingState::operator==(const FFState& o) const
 {
   if (&o == this) return 0;
 
   BidirectionalReorderingState const &other
   = static_cast<BidirectionalReorderingState const&>(o);
 
-  int cmp = m_backward->Compare(*other.m_backward);
-  return (cmp < 0) ? -1 : cmp ? 1 : m_forward->Compare(*other.m_forward);
+  bool ret = (*m_backward == *other.m_backward) && (*m_forward == *other.m_forward);
+  return ret;
 }
 
 LRState*
@@ -390,14 +402,18 @@ HReorderingBackwardState(const LRModel &config, size_t offset)
   : LRState(config, LRModel::Backward, offset)
 { }
 
+size_t HReorderingBackwardState::hash() const
+{
+  size_t ret = m_reoStack.hash();
+  return ret;
+}
 
-int
-HReorderingBackwardState::
-Compare(const FFState& o) const
+bool HReorderingBackwardState::operator==(const FFState& o) const
 {
   const HReorderingBackwardState& other
   = static_cast<const HReorderingBackwardState&>(o);
-  return m_reoStack.Compare(other.m_reoStack);
+  bool ret = m_reoStack == other.m_reoStack;
+  return ret;
 }
 
 LRState*
@@ -407,7 +423,7 @@ Expand(const TranslationOption& topt, const InputType& input,
 {
   HReorderingBackwardState* nextState;
   nextState = new HReorderingBackwardState(this, topt, m_reoStack);
-  WordsRange swrange = topt.GetSourceWordsRange();
+  Range swrange = topt.GetSourceWordsRange();
   int reoDistance = nextState->m_reoStack.ShiftReduce(swrange);
   ReorderingType reoType = m_configuration.GetOrientation(reoDistance);
   CopyScores(scores, topt, input, reoType);
@@ -432,23 +448,28 @@ HReorderingForwardState(const HReorderingForwardState *prev,
   : LRState(prev, topt)
   , m_first(false)
   , m_prevRange(topt.GetSourceWordsRange())
-  , m_coverage(prev->m_coverage)
+  , m_coverage(prev->m_coverage, topt.GetSourceWordsRange())
 {
-  m_coverage.SetValue(topt.GetSourceWordsRange(), true);
 }
 
-int
-HReorderingForwardState::
-Compare(const FFState& o) const
+size_t HReorderingForwardState::hash() const
 {
-  if (&o == this) return 0;
+  size_t ret;
+  ret = hash_value(m_prevRange);
+  return ret;
+}
+
+bool HReorderingForwardState::operator==(const FFState& o) const
+{
+  if (&o == this) return true;
 
   HReorderingForwardState const& other
   = static_cast<HReorderingForwardState const&>(o);
 
-  return ((m_prevRange == other.m_prevRange)
-          ? ComparePrevScores(other.m_prevOption)
-          : (m_prevRange < other.m_prevRange) ? -1 : 1);
+  int compareScores = ((m_prevRange == other.m_prevRange)
+                       ? ComparePrevScores(other.m_prevOption)
+                       : (m_prevRange < other.m_prevRange) ? -1 : 1);
+  return compareScores == 0;
 }
 
 // For compatibility with the phrase-based reordering model, scoring is one
@@ -470,10 +491,9 @@ HReorderingForwardState::
 Expand(TranslationOption const& topt, InputType const& input,
        ScoreComponentCollection* scores) const
 {
-  const WordsRange cur = topt.GetSourceWordsRange();
+  const Range cur = topt.GetSourceWordsRange();
   // keep track of the current coverage ourselves so we don't need the hypothesis
-  WordsBitmap cov = m_coverage;
-  cov.SetValue(cur, true);
+  Bitmap cov(m_coverage, cur);
   if (!m_first) {
     LRModel::ReorderingType reoType;
     reoType = m_configuration.GetOrientation(m_prevRange,cur,cov);

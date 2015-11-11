@@ -33,7 +33,7 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "util/file_piece.hh"
@@ -126,14 +126,14 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   ReformatHieroRule(1, targetPhraseString, ntAlign);
   ReformateHieroScore(scoreString);
 
-  stringstream align;
+  util::StringStream align;
   map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
   for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign) {
     const pair<size_t, size_t> &alignPoint = iterAlign->second;
     align << alignPoint.first << "-" << alignPoint.second << " ";
   }
 
-  stringstream ret;
+  util::StringStream ret;
   ret << sourcePhraseString << " ||| "
       << targetPhraseString << " ||| "
       << scoreString << " ||| "
@@ -242,8 +242,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
+    phraseColl->Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now
     delete sourceLHS;

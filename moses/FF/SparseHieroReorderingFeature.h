@@ -10,7 +10,6 @@
 #include "moses/Sentence.h"
 
 #include "StatelessFeatureFunction.h"
-#include "FFState.h"
 
 namespace Moses
 {
@@ -35,14 +34,14 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
   virtual void EvaluateWithSourceContext(const InputType &input
                                          , const InputPath &inputPath
                                          , const TargetPhrase &targetPhrase
                                          , const StackVec *stackVec
                                          , ScoreComponentCollection &scoreBreakdown
-                                         , ScoreComponentCollection *estimatedFutureScore = NULL)  const {
+                                         , ScoreComponentCollection *estimatedScores = NULL)  const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -61,7 +60,7 @@ private:
   typedef boost::unordered_set<const Factor*> Vocab;
 
   void AddNonTerminalPairFeatures(
-    const Sentence& sentence, const WordsRange& nt1, const WordsRange& nt2,
+    const Sentence& sentence, const Range& nt1, const Range& nt2,
     bool isMonotone, ScoreComponentCollection* accumulator) const;
 
   void LoadVocabulary(const std::string& filename, Vocab& vocab);

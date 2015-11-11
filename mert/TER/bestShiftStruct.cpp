@@ -6,7 +6,7 @@ Contact: christophe.servan@lium.univ-lemans.fr
 
 The tercpp tool and library are free software: you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the licence, or
+the Free Software Foundation, either version 2.1 of the licence, or
 (at your option) any later version.
 
 This program and library are distributed in the hope that it will be useful, but WITHOUT
@@ -53,6 +53,7 @@ string bestShiftStruct::toString()
   s << m_best_shift->toString() << endl;
   s << m_best_align->toString() << endl;
 //	    s << (*m_empty) << endl;
+  return s.str();
 }
 bool bestShiftStruct::getEmpty()
 {

@@ -51,14 +51,9 @@ protected:
   bool m_inMemory;
   bool m_useAlignmentInfo;
 
-  typedef std::vector<TargetPhraseCollection*> PhraseCache;
-#ifdef WITH_THREADS
-  boost::mutex m_sentenceMutex;
-  typedef std::map<boost::thread::id, PhraseCache> SentenceCache;
-#else
-  typedef PhraseCache SentenceCache;
-#endif
-  SentenceCache m_sentenceCache;
+  typedef std::vector<TargetPhraseCollection::shared_ptr > PhraseCache;
+  typedef boost::thread_specific_ptr<PhraseCache> SentenceCache;
+  static SentenceCache m_sentenceCache;
 
   BlockHashIndex m_hash;
   PhraseDecoder* m_phraseDecoder;
@@ -74,12 +69,12 @@ public:
 
   void Load();
 
-  const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const;
+  TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
 
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 
-  void CacheForCleanup(TargetPhraseCollection* tpc);
+  void CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc);
   void CleanUpAfterSentenceProcessing(const InputType &source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(

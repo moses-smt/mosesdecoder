@@ -21,9 +21,12 @@ obj file_piece_test.o : file_piece_test.cc /top//boost_unit_test_framework : $(c
 
 fakelib parallel_read : parallel_read.cc : <threading>multi:<source>/top//boost_thread <threading>multi:<define>WITH_THREADS : : <include>.. ;
 
-fakelib kenutil : bit_packing.cc ersatz_progress.cc exception.cc file.cc file_piece.cc mmap.cc murmur_hash.cc parallel_read pool.cc random.cc read_compressed scoped.cc string_piece.cc usage.cc double-conversion//double-conversion : <include>.. <os>LINUX,<threading>single:<source>rt : : <include>.. ;
+fakelib kenutil : [ glob *.cc : parallel_read.cc read_compressed.cc *_main.cc *_test.cc ] read_compressed parallel_read double-conversion//double-conversion : <include>.. <os>LINUX,<threading>single:<source>rt : : <include>.. ;
 
 exe cat_compressed : cat_compressed_main.cc kenutil ;
+
+#Does not install this
+exe probing_hash_table_benchmark : probing_hash_table_benchmark_main.cc kenutil ;
 
 alias programs : cat_compressed ;
 
@@ -34,3 +37,5 @@ for local t in [ glob *_test.cc : file_piece_test.cc read_compressed_test.cc ] {
     local name = [ MATCH "(.*)\.cc" : $(t) ] ;
     unit-test $(name) : $(t) kenutil /top//boost_unit_test_framework /top//boost_filesystem /top//boost_system ;
 }
+
+build-project stream ;

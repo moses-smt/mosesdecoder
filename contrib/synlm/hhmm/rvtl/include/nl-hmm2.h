@@ -269,7 +269,7 @@ void HMM<MH,MO,X,B>::updateRanked ( const typename MO::RandVarType& o ) {
     // Add best transition (top of queue)...
     //mo.getProb(o,mh.setTrellDat(axhpiQueue.getTop().first,axhpiQueue.getTop().second));
     if ( axhpiQueue.getSize() > 0 ) {
-      X x; mh.setTrellDat(x,axhpiQueue.getTop().second); 
+      X x; mh.setTrellDat(x,axhpiQueue.getTop().second);
       bFull |= btn.tryAdd ( x, IB(axhpiQueue.getTop().first,mh.setBackDat(axhpiQueue.getTop().second)), axhpiQueue.getTop().third );
       //cerr<<axhpiQueue.getSize()<<" queue elems A "<<axhpiQueue.getTop()<<"\n";
       //cerr<<"/-----A-----\\\n + bFull: "<<bFull<<"\naxhpiQueue: \n"<<axhpiQueue<<"\\-----A-----/\n";
@@ -341,7 +341,7 @@ void HMM<MH,MO,X,B>::updateSerial ( const typename MO::RandVarType& o ) {
         // Incorporate into trellis...
         btn.tryAdd ( x, IB(i,mh.setBackDat(h)), lgprFull );
         //if(OUTPUT_VERYNOISY)
-        //  fprintf ( stderr,"            (X_t-1:[e^%0.6f] * H:e^%0.6f * O:e^%0.6f = X_t:[e^%0.6f])\n", 
+        //  fprintf ( stderr,"            (X_t-1:[e^%0.6f] * H:e^%0.6f * O:e^%0.6f = X_t:[e^%0.6f])\n",
         //            float(aatnTrellis.get(frameLast-1,i).getLogProb().toInt())/100.0,
         //            float(lgprH.toInt())/100.0,
         //            float(lgprO.toInt())/100.0,
@@ -351,7 +351,7 @@ void HMM<MH,MO,X,B>::updateSerial ( const typename MO::RandVarType& o ) {
   }
 
 //  for(int i=0;i<BEAM_WIDTH;i++) {
-//    fprintf(stderr,"> "); btn.get(i)->first.write(stderr); fprintf(stderr,"\n");  
+//    fprintf(stderr,"> "); btn.get(i)->first.write(stderr); fprintf(stderr,"\n");
 //  }
 
   btn.sort(atnSorted);
@@ -390,8 +390,8 @@ void HMM<MH,MO,X,B>::each ( const typename MO::RandVarType& o, Beam<LogProb,X,IB
     const TrellNode<X,B>& tnxbPrev = aatnTrellis.get(frameLast-1,i);
     // If prob still not below beam minimum...
     if ( tnxbPrev.getLogProb() > btn.getMin().getScore() ) {
-      //if (OUTPUT_VERYNOISY) { fprintf(stderr,"FROM: "); tnxbPrev.getId().write(stderr); fprintf(stderr,"\n"); }      
-    
+      //if (OUTPUT_VERYNOISY) { fprintf(stderr,"FROM: "); tnxbPrev.getId().write(stderr); fprintf(stderr,"\n"); }
+
       // For each possible transition...
       const X& xPrev = tnxbPrev.getId();
       typename MH::IterVal h;
@@ -408,7 +408,7 @@ void HMM<MH,MO,X,B>::each ( const typename MO::RandVarType& o, Beam<LogProb,X,IB
         lgprO = mo.getProb(o,mh.setTrellDat(x,h)); if ( !OUTPUT_VERYNOISY && LogProb()==lgprO ) continue;
         #endif /////////////////////////////////////////////////////////////////
         lgprFull = tnxbPrev.getLogProb() * lgprH * lgprO;
-        if (OUTPUT_VERYNOISY) { 
+        if (OUTPUT_VERYNOISY) {
           boost::mutex::scoped_lock lock1(mutexHmmParanoiaLock);
           //fprintf(stderr,"  TO: "); h.write(stderr); fprintf(stderr,"\n");
           cout<<"  "<<tnxbPrev.getId()<<"  ==("<<tnxbPrev.getLogProb().toInt()<<"*"<<lgprH.toInt()<<"*"<<lgprO.toInt()<<"="<<lgprFull.toInt()<<")==>  "<<h<<"\n";
@@ -420,7 +420,7 @@ void HMM<MH,MO,X,B>::each ( const typename MO::RandVarType& o, Beam<LogProb,X,IB
         // Incorporate into trellis...
         btn.tryAdd ( x, IB(i,mh.setBackDat(h)), lgprFull );
 //        if(OUTPUT_VERYNOISY)
-//          fprintf ( stderr,"            (X_t-1:[e^%0.6f] * H:e^%0.6f * O:e^%0.6f = X_t:[e^%0.6f])\n", 
+//          fprintf ( stderr,"            (X_t-1:[e^%0.6f] * H:e^%0.6f * O:e^%0.6f = X_t:[e^%0.6f])\n",
 //                    float(aatnTrellis.get(frameLast-1,i).getLogProb().toInt())/100.0,
 //                    float(lgprH.toInt())/100.0,
 //                    float(lgprO.toInt())/100.0,
@@ -656,7 +656,7 @@ std::list<string> HMM<MH,MO,X,B>::getMLS(const X& xLast) const {
 ////    sprintf(tmp,"HYPOTH %04d> ", fr-1);
 ////    string tString(tmp);
 ////    tString +=
-    string tString = 
+    string tString =
 ////      aatnTrellis.get(fr,iBest).getId().getString() + " " +
       aatnTrellis.get(fr,iBest).getBackData().getString()
 ////      + "\n"
@@ -697,7 +697,7 @@ template <class MH, class MO, class X, class B>
 void HMM<MH,MO,X,B>::writeCurr ( FILE* pf, int f=-1 ) const {
   if ( -1==f ) f=frameLast;
   if ( 0<=f && f<=frameLast )
-    for ( int i=0; i<BEAM_WIDTH; i++ ) 
+    for ( int i=0; i<BEAM_WIDTH; i++ )
       if(!(aatnTrellis.get(f,i).getLogProb() == LogProb())){
         fprintf(pf,"at f=%04d b=%04d: ",f,i);
         String str; str<<aatnTrellis.get(f,i).getId(); //.write(pf);
@@ -721,7 +721,7 @@ void HMM<MH,MO,X,B>::writeCurrSum ( FILE* pf, int f=-1 ) const {
   if ( 0<=f && f<=frameLast ) {
     LogProb sum = 0.0;
 	LogProb logtop = 0.0;
-	for ( int i=0; i<BEAM_WIDTH; i++ ) 
+	for ( int i=0; i<BEAM_WIDTH; i++ )
       if(!(aatnTrellis.get(f,i).getLogProb() == LogProb())){
 		if(i==0) { logtop=aatnTrellis.get(f,i).getLogProb(); }
 		LogProb big1 = sum - logtop;
@@ -741,7 +741,7 @@ void HMM<MH,MO,X,B>::writeCurrEntropy ( FILE* pf, int f=-1 ) const {
   if ( 0<=f && f<=frameLast ) {
     LogProb logh = 0.0;
 	LogProb logtop = 0.0;
-	  for ( int i=0; i<BEAM_WIDTH; i++ ) 
+	  for ( int i=0; i<BEAM_WIDTH; i++ )
       if(!(aatnTrellis.get(f,i).getLogProb() == LogProb())){
 		if(i==0) { logtop=aatnTrellis.get(f,i).getLogProb(); }
 		LogProb big1 = logh - logtop;
@@ -768,12 +768,12 @@ void HMM<MH,MO,X,B>::writeCurrDepths ( FILE* pf, int f=-1 ) const {
 	Array<int> depths = Array<int>();
 	Array<LogProb> logprobs = Array<LogProb>();
 	double avgdepth = 0.0;
-	  for ( int i=0; i<BEAM_WIDTH; i++ ) 
+	  for ( int i=0; i<BEAM_WIDTH; i++ )
       if(!(aatnTrellis.get(f,i).getLogProb() == LogProb())){
 
 		if(i==0) { logtop=aatnTrellis.get(f,i).getLogProb(); }
 		logprobs.set(i) = aatnTrellis.get(f,i).getLogProb();
-		
+
 		// loop over values in S node to find lowest meaningful depth
 		for ( int j=0; j<aatnTrellis.get(f,i).getId().first.getSize(); j++) {
 		  // store the depth, if it's equal to G_BOT/G_BOT
@@ -900,7 +900,7 @@ int HMM<MH,MO,X,B>::getBeamUsed ( int f=-1 ) const {
   if ( -1==f ) f=frameLast;
   int ctr=0;
   if ( 0<=f && f<=frameLast )
-    for ( int i=0; i<BEAM_WIDTH; i++ ) 
+    for ( int i=0; i<BEAM_WIDTH; i++ )
       if(!(aatnTrellis.get(f,i).getLogProb() == LogProb())){
         ctr++;
       }

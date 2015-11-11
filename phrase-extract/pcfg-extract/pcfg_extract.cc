@@ -1,37 +1,23 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2012 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "pcfg_extract.h"
-
-#include "options.h"
-#include "rule_collection.h"
-#include "rule_extractor.h"
-
-#include "syntax-common/exception.h"
-
-#include "pcfg-common/pcfg.h"
-#include "pcfg-common/pcfg_tree.h"
-#include "pcfg-common/syntax_tree.h"
-#include "pcfg-common/typedef.h"
-#include "pcfg-common/xml_tree_parser.h"
-
-#include <boost/program_options.hpp>
 
 #include <cassert>
 #include <cstdlib>
@@ -43,11 +29,28 @@
 #include <string>
 #include <vector>
 
-namespace MosesTraining {
-namespace Syntax {
-namespace PCFG {
+#include <boost/program_options.hpp>
 
-int PcfgExtract::Main(int argc, char *argv[]) {
+#include "syntax-common/exception.h"
+#include "syntax-common/pcfg.h"
+#include "syntax-common/vocabulary.h"
+#include "syntax-common/xml_tree_parser.h"
+
+#include "SyntaxTree.h"
+
+#include "options.h"
+#include "rule_collection.h"
+#include "rule_extractor.h"
+
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace PCFG
+{
+
+int PcfgExtract::Main(int argc, char *argv[])
+{
   // Process command-line options.
   Options options;
   ProcessOptions(argc, argv, options);
@@ -59,7 +62,7 @@ int PcfgExtract::Main(int argc, char *argv[]) {
   XmlTreeParser parser;
   std::string line;
   std::size_t line_num = 0;
-  std::auto_ptr<PcfgTree> tree;
+  std::auto_ptr<MosesTraining::SyntaxTree> tree;
   while (std::getline(std::cin, line)) {
     ++line_num;
     try {
@@ -87,7 +90,8 @@ int PcfgExtract::Main(int argc, char *argv[]) {
 }
 
 void PcfgExtract::ProcessOptions(int argc, char *argv[],
-                                 Options &options) const {
+                                 Options &options) const
+{
   namespace po = boost::program_options;
 
   std::ostringstream usage_top;
@@ -96,7 +100,7 @@ void PcfgExtract::ProcessOptions(int argc, char *argv[],
   // Declare the command line options that are visible to the user.
   po::options_description visible(usage_top.str());
   visible.add_options()
-    ("help", "print help message and exit")
+  ("help", "print help message and exit")
   ;
 
   // Declare the command line options that are hidden from the user
@@ -114,7 +118,7 @@ void PcfgExtract::ProcessOptions(int argc, char *argv[],
   // Process the command-line.
   po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).style(CommonOptionStyle()).
+    po::store(po::command_line_parser(argc, argv).style(MosesOptionStyle()).
               options(cmd_line_options).positional(p).run(), vm);
     po::notify(vm);
   } catch (const std::exception &e) {

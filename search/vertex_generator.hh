@@ -15,7 +15,7 @@ namespace search {
 
 class ContextBase;
 
-// Output makes the single-best or n-best list.   
+// Output makes the single-best or n-best list.
 template <class Output> class VertexGenerator {
   public:
     VertexGenerator(ContextBase &context, Vertex &gen, Output &nbest) : context_(context), gen_(gen), nbest_(nbest) {}
@@ -49,7 +49,7 @@ template <class Output> class VertexGenerator {
 // Special case for root vertex: everything should come together into the root
 // node.  In theory, this should happen naturally due to state collapsing with
 // <s> and </s>.  If that's the case, VertexGenerator is fine, though it will
-// make one connection.  
+// make one connection.
 template <class Output> class RootVertexGenerator {
   public:
     RootVertexGenerator(Vertex &gen, Output &out) : gen_(gen), out_(out) {}
@@ -66,7 +66,7 @@ template <class Output> class RootVertexGenerator {
 
   private:
     Vertex &gen_;
-    
+
     typename Output::Combine combine_;
     Output &out_;
 };

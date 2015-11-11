@@ -90,8 +90,8 @@ class Vector : public X {
   Vector<X>        operator- ( ElementType d ) const               { Vector<X> vO;      for(uint i=0;i<SIZE;i++) vO[i] = X::get(i)-d; return vO; }
   friend Vector<X> operator* ( ElementType d, const Vector<X>& v ) { Vector<X> vO;      for(uint i=0;i<SIZE;i++) vO[i] = d*v[i]; return vO; }
   friend Vector<X> operator/ ( ElementType d, const Vector<X>& v ) { Vector<X> vO;      for(uint i=0;i<SIZE;i++) vO[i] = d/v[i]; return vO; }
-  friend Vector<X> operator+ ( ElementType d, const Vector<X>& v ) { Vector<X> vO;      for(uint i=0;i<SIZE;i++) vO[i] = d+v[i]; return vO; }    
-  friend Vector<X> operator- ( ElementType d, const Vector<X>& v ) { Vector<X> vO;      for(uint i=0;i<SIZE;i++) vO[i] = d-v[i]; return vO; }    
+  friend Vector<X> operator+ ( ElementType d, const Vector<X>& v ) { Vector<X> vO;      for(uint i=0;i<SIZE;i++) vO[i] = d+v[i]; return vO; }
+  friend Vector<X> operator- ( ElementType d, const Vector<X>& v ) { Vector<X> vO;      for(uint i=0;i<SIZE;i++) vO[i] = d-v[i]; return vO; }
   Vector<X>&       operator*= ( ElementType d )                    { for(uint i=0;i<SIZE;i++) X::set(i)*=d; return *this; }
   Vector<X>&       operator/= ( ElementType d )                    { for(uint i=0;i<SIZE;i++) X::set(i)/=d; return *this; }
   Vector<X>&       operator+= ( ElementType d )                    { for(uint i=0;i<SIZE;i++) X::set(i)+=d; return *this; }
