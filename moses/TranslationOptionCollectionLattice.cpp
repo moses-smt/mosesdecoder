@@ -168,7 +168,7 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
   Sort();
 
   // future score matrix
-  CalcFutureScore();
+  CalcEstimatedScore();
 
   // Cached lex reodering costs
   CacheLexReordering();

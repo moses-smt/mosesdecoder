@@ -447,7 +447,7 @@ void ExtractTask::extract(SentenceAlignment &sentence)
                   wordNextOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopN, connectedRightTopN, endF, startF, endE, startE, 0, countF, -1, &lt, &ge);
                   orientationInfo += getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType());
                   // if(m_options.isAllModelsOutputFlag())
-		  // " | | ";
+                  // " | | ";
                 }
                 addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
               }
@@ -561,12 +561,12 @@ REO_POS getOrientPhraseModel (SentenceAlignment & sentence, REO_MODEL_TYPE model
   connectedLeftTop = false;
   for(int indexF=startF-2*unit; (*ge)(indexF, zero) && !connectedLeftTop; indexF=indexF-unit)
     if ((connectedLeftTop = ((it = inBottomRight.find(startE - unit)) != inBottomRight.end() &&
-			   it->second.find(indexF) != it->second.end())))
+                             it->second.find(indexF) != it->second.end())))
       return DRIGHT;
   connectedRightTop = false;
   for(int indexF=endF+2*unit; (*lt)(indexF, countF) && !connectedRightTop; indexF=indexF+unit)
     if ((connectedRightTop = ((it = inBottomLeft.find(startE - unit)) != inBottomLeft.end() &&
-			      it->second.find(indexF) != it->second.end())))
+                              it->second.find(indexF) != it->second.end())))
       return DLEFT;
   return UNKNOWN;
 }

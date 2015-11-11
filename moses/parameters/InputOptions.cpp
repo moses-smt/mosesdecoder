@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include "moses/StaticData.h"
+#include "moses/TypeDef.h"
 
 namespace Moses {
 
@@ -66,8 +67,23 @@ namespace Moses {
     pspec = param.GetParam("input-factors");
     if (pspec) factor_order = Scan<FactorType>(*pspec);
     if (factor_order.empty()) factor_order.assign(1,0);
+    param.SetParameter(placeholder_factor, "placeholder-factor", NOT_FOUND);
 
     return true;
   }
-  
+
+
+#ifdef HAVE_XMLRPC_C
+  bool 
+  InputOptions::
+  update(std::map<std::string,xmlrpc_c::value>const& param)
+  {
+    typedef std::map<std::string, xmlrpc_c::value> params_t;
+    params_t::const_iterator si = param.find("xml-input");
+    if (si != param.end())
+      xml_policy = Scan<XmlInputType>(xmlrpc_c::value_string(si->second));
+    return true;
+  }
+#endif
+
 }

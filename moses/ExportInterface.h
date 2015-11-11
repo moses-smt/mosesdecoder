@@ -55,5 +55,5 @@ private:
   const Moses::StaticData& m_staticData;
 };
 
-int decoder_main(int argc, char* argv[]);
+int decoder_main(int argc, char const* argv[]);
 

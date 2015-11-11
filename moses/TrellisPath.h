@@ -77,7 +77,7 @@ public:
   TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc);
 
   //! get score for this path throught trellis
-  inline float GetTotalScore() const {
+  inline float GetFutureScore() const {
     return m_totalScore;
   }
 
@@ -120,7 +120,7 @@ inline std::ostream& operator<<(std::ostream& out, const TrellisPath& path)
     out << edge->GetId() << " " << sourceRange.GetStartPos() << "-" << sourceRange.GetEndPos() << ", ";
   }
   // scores
-  out << " total=" << path.GetTotalScore()
+  out << " total=" << path.GetFutureScore()
       << " " << path.GetScoreBreakdown()
       << std::endl;
 

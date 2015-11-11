@@ -60,7 +60,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "ExportInterface.h"
+
+#ifdef HAVE_XMLRPC_C
 #include "moses/server/Server.h"
+#endif
+
 using namespace std;
 using namespace Moses;
 
@@ -285,7 +289,7 @@ batch_run()
 }
 
 /** Called by main function of the command line version of the decoder **/
-int decoder_main(int argc, char** argv)
+int decoder_main(int argc, char const** argv)
 {
 #ifdef NDEBUG
   try

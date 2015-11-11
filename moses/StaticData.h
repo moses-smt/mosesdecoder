@@ -95,10 +95,10 @@ protected:
   size_t m_latticeSamplesSize;
 
   std::string  m_latticeSamplesFilePath;
-  bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
-  bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
-  std::string m_unknownWordPrefix;
-  std::string m_unknownWordSuffix;
+  // bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
+  // bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
+  // std::string m_unknownWordPrefix;
+  // std::string m_unknownWordSuffix;
   bool m_wordDeletionEnabled;
 
   bool m_disableDiscarding;
@@ -145,7 +145,7 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  FactorType m_placeHolderFactor;
+  // FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
   S2TParsingAlgorithm m_s2tParsingAlgorithm;
@@ -253,18 +253,18 @@ public:
   inline bool GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
   }
-  inline bool GetDropUnknown() const {
-    return m_dropUnknown;
-  }
-  inline bool GetMarkUnknown() const {
-    return m_markUnknown;
-  }
-  inline std::string GetUnknownWordPrefix() const {
-    return m_unknownWordPrefix;
-  }
-  inline std::string GetUnknownWordSuffix() const {
-    return m_unknownWordSuffix;
-  }
+  // inline bool GetDropUnknown() const {
+  //   return m_dropUnknown;
+  // }
+  // inline bool GetMarkUnknown() const {
+  //   return m_markUnknown;
+  // }
+  // inline std::string GetUnknownWordPrefix() const {
+  //   return m_unknownWordPrefix;
+  // }
+  // inline std::string GetUnknownWordSuffix() const {
+  //   return m_unknownWordSuffix;
+  // }
   inline bool GetDisableDiscarding() const {
     return m_disableDiscarding;
   }
@@ -531,9 +531,9 @@ public:
   std::map<std::string, std::string> OverrideFeatureNames();
   void OverrideFeatures();
 
-  FactorType GetPlaceholderFactor() const {
-    return m_placeHolderFactor;
-  }
+  // FactorType GetPlaceholderFactor() const {
+  //   return m_placeHolderFactor;
+  // }
 
   const FeatureRegistry &GetFeatureRegistry() const {
     return m_registry;

@@ -120,14 +120,14 @@ public:
 BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
                              , BitmapContainer &parent
                              , const TranslationOptionList &translations
-                             , const SquareMatrix &futureScores,
+                             , const SquareMatrix &estimatedScores,
                              const InputType& itype,
                              const bool deterministic)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
   , m_translations(translations)
-  , m_futureScores(futureScores)
+  , m_estimatedScores(estimatedScores)
   , m_seenPosition()
   , m_deterministic(deterministic)
 {
@@ -180,10 +180,10 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   if (m_hypotheses.size() > 1) {
-    UTIL_THROW_IF2(m_hypotheses[0]->GetTotalScore() < m_hypotheses[1]->GetTotalScore(),
+    UTIL_THROW_IF2(m_hypotheses[0]->GetFutureScore() < m_hypotheses[1]->GetFutureScore(),
                    "Non-monotonic total score"
-                   << m_hypotheses[0]->GetTotalScore() << " vs. "
-                   << m_hypotheses[1]->GetTotalScore());
+                   << m_hypotheses[0]->GetFutureScore() << " vs. "
+                   << m_hypotheses[1]->GetFutureScore());
   }
 
   HypothesisScoreOrdererWithDistortion orderer (&transOptRange, m_deterministic);
@@ -209,7 +209,7 @@ BackwardsEdge::Initialize()
 
   const Bitmap &bm = m_hypotheses[0]->GetWordsBitmap();
   const Range &newRange = m_translations.Get(0)->GetSourceWordsRange();
-  m_futureScore = m_futureScores.CalcFutureScore2(bm, newRange.GetStartPos(), newRange.GetEndPos());
+  m_estimatedScore = m_estimatedScores.CalcEstimatedScore(bm, newRange.GetStartPos(), newRange.GetEndPos());
 
   Hypothesis *expanded = CreateHypothesis(*m_hypotheses[0], *m_translations.Get(0));
   m_parent.Enqueue(0, 0, expanded, this);
@@ -228,7 +228,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
-  newHypo->EvaluateWhenApplied(m_futureScore);
+  newHypo->EvaluateWhenApplied(m_estimatedScore);
 
   return newHypo;
 }
@@ -460,10 +460,10 @@ BitmapContainer::ProcessBestHypothesis()
   // check we are pulling things off of priority queue in right order
   if (!Empty()) {
     HypothesisQueueItem *check = Dequeue(true);
-    UTIL_THROW_IF2(item->GetHypothesis()->GetTotalScore() < check->GetHypothesis()->GetTotalScore(),
+    UTIL_THROW_IF2(item->GetHypothesis()->GetFutureScore() < check->GetHypothesis()->GetFutureScore(),
                    "Non-monotonic total score: "
-                   << item->GetHypothesis()->GetTotalScore() << " vs. "
-                   << check->GetHypothesis()->GetTotalScore());
+                   << item->GetHypothesis()->GetFutureScore() << " vs. "
+                   << check->GetHypothesis()->GetFutureScore());
   }
 
   // Logging for the criminally insane

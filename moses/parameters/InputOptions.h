@@ -16,12 +16,18 @@ namespace Moses
     XmlInputType  xml_policy; // pass through, ignore, exclusive, inclusive
     std::vector<FactorType> factor_order; // input factor order
 
+    FactorType placeholder_factor; // where to store original text for placeholders 
+
+    
     std::pair<std::string,std::string> xml_brackets; 
     // strings to use as XML tags' opening and closing brackets. 
     // Default are "<" and ">"
 
-    bool init(Parameter const& param);
     InputOptions();
+
+    bool init(Parameter const& param);
+    bool update(std::map<std::string,xmlrpc_c::value>const& param);
+
   };
 
 }

@@ -26,7 +26,12 @@ namespace MosesServer
        .portNumber(m_server_options.port) // TCP port on which to listen
        .logFileName(m_server_options.logfile)
        .allowOrigin("*")
-       .maxConn(m_server_options.num_threads));
+       .maxConn(m_server_options.maxConn)
+       .maxConnBacklog(m_server_options.maxConnBacklog)
+       .keepaliveTimeout(m_server_options.keepaliveTimeout)
+       .keepaliveMaxConn(m_server_options.keepaliveMaxConn)
+       .timeout(m_server_options.timeout)
+       );
     
     XVERBOSE(1,"Listening on port " << m_server_options.port << std::endl);
     if (m_server_options.is_serial) 

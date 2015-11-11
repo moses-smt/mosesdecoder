@@ -114,24 +114,26 @@ Phrase Phrase::GetSubString(const Range &range, FactorType factorType) const
   return retPhrase;
 }
 
-std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
+std::string 
+Phrase::
+GetStringRep(vector<FactorType> const& factorsToPrint, 
+             AllOptions const* opts) const
 {
-  bool markUnknown = StaticData::Instance().GetMarkUnknown();
-
+  if (!opts) opts = &StaticData::Instance().options();
+  bool markUnk = opts->unk.mark;
   util::StringStream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
-    if (markUnknown && GetWord(pos).IsOOV()) {
-      strme << StaticData::Instance().GetUnknownWordPrefix();
+    if (markUnk && GetWord(pos).IsOOV()) {
+      strme << opts->unk.prefix;
     }
     strme << GetWord(pos).GetString(factorsToPrint, (pos != GetSize()-1));
-    if (markUnknown && GetWord(pos).IsOOV()) {
-      strme << StaticData::Instance().GetUnknownWordSuffix();
+    if (markUnk && GetWord(pos).IsOOV()) {
+      strme << opts->unk.suffix;
     }
   }
-
   return strme.str();
 }
-
+  
 Word &Phrase::AddWord()
 {
   m_words.push_back(Word());

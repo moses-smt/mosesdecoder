@@ -45,7 +45,7 @@ protected:
   ExpandHypothesis(const Hypothesis &hypothesis,
                    const TranslationOption &transOpt,
                    float expectedScore,
-                   float futureScore,
+                   float estimatedScore,
                    const Bitmap &bitmap);
 
 public:

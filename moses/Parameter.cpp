@@ -216,11 +216,25 @@ Parameter::Parameter()
   AddParam(server_opts,"server", "Run moses as a translation server.");
   AddParam(server_opts,"server-port", "Port for moses server");
   AddParam(server_opts,"server-log", "Log destination for moses server");
+  AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
+
+  AddParam(server_opts,"server-maxconn", 
+	   "Max. No of simultaneous HTTP transactions allowed by the server.");
+  AddParam(server_opts,"server-maxconn-backlog",
+	   "Max. No. of requests the OS will queue if the server is busy.");
+  AddParam(server_opts,"server-keepalive-maxconn", 
+	   "Max. No. of requests the server will accept on a single TCP connection.");
+  AddParam(server_opts,"server-keepalive-timeout", 
+	   "Max. number of seconds the server will keep a persistent connection alive.");
+  AddParam(server_opts,"server-timeout", 
+	   "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
+
+  // session timeout and session cache size are for moses translation session handling
+  // they have nothing to do with the abyss server (but relate to the moses server)
   AddParam(server_opts,"session-timeout",
            "Timeout for sessions, e.g. '2h30m' or 1d (=24h)");
   AddParam(server_opts,"session-cache-size", string("Max. number of sessions cached.")
            +"Least recently used session is dumped first.");
-  AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
 
   po::options_description irstlm_opts("IRSTLM Options");
   AddParam(irstlm_opts,"clean-lm-cache",
@@ -430,17 +444,17 @@ Parameter::
 LoadParam(const string &filePath)
 {
   const char *argv[] = {"executable", "-f", filePath.c_str() };
-  return LoadParam(3, (char**) argv);
+  return LoadParam(3, (char const**) argv);
 }
 
 /** load all parameters from the configuration file and the command line switches */
 bool
 Parameter::
-LoadParam(int argc, char* xargv[])
+LoadParam(int argc, char const* xargv[])
 {
   // legacy parameter handling: all parameters are expected
   // to start with a single dash
-  char* argv[argc+1];
+  char const* argv[argc+1];
   for (int i = 0; i < argc; ++i) {
     argv[i] = xargv[i];
     if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
@@ -1316,7 +1330,7 @@ FilesExist(const string &paramName, int fieldNo,
 // in moses-cmd
 string
 Parameter::
-FindParam(const string &paramSwitch, int argc, char* argv[])
+FindParam(const string &paramSwitch, int argc, char const* argv[])
 {
   for (int i = 0 ; i < argc ; i++) {
     if (string(argv[i]) == paramSwitch) {
@@ -1338,7 +1352,8 @@ FindParam(const string &paramSwitch, int argc, char* argv[])
  * \param argv values of paramters on command line */
 void
 Parameter::
-OverwriteParam(const string &paramSwitch, const string &paramName, int argc, char* argv[])
+OverwriteParam(const string &paramSwitch, const string &paramName, 
+	       int argc, char const* argv[])
 {
   int startPos = -1;
   for (int i = 0 ; i < argc ; i++) {

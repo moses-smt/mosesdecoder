@@ -662,7 +662,7 @@ void ChartManager::OutputTranslationOption(std::ostream &out,
   WriteApplicationContext(out, applicationContext);
   out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
       << "->" << hypo->GetCurrTargetPhrase()
-      << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+      << " " << hypo->GetFutureScore() << hypo->GetScoreBreakdown();
 }
 
 // Given a hypothesis and sentence, reconstructs the 'application context' --
@@ -837,7 +837,7 @@ void ChartManager::OutputBestHypo(OutputCollector *collector, const ChartHypothe
     VERBOSE(3,"0" << std::endl);
 
     if (options().output.ReportHypoScore) {
-      out << hypo->GetTotalScore() << " ";
+      out << hypo->GetFutureScore() << " ";
     }
 
     if (options().output.RecoverPath) {
@@ -853,7 +853,8 @@ void ChartManager::OutputBestHypo(OutputCollector *collector, const ChartHypothe
     outPhrase.RemoveWord(0);
     outPhrase.RemoveWord(outPhrase.GetSize() - 1);
 
-    const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+    const std::vector<FactorType> outputFactorOrder 
+      = StaticData::Instance().GetOutputFactorOrder();
     string output = outPhrase.GetStringRep(outputFactorOrder);
     out << output << endl;
   } else {

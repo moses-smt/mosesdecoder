@@ -44,7 +44,7 @@ public:
   }
 };
 
-int main(int argc, char* argv[])
+int main(int argc, char const* argv[])
 {
   Parameter params;
   if (!params.LoadParam(argc,argv) || !StaticData::LoadDataStatic(&params, argv[0]))

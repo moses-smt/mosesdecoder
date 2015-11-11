@@ -57,7 +57,7 @@ TranslationOptionCollection(ttasksptr const& ttask,
                             float translationOptionThreshold)
   : m_ttask(ttask)
   , m_source(src)
-  , m_futureScore(src.GetSize())
+  , m_estimatedScores(src.GetSize())
   , m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
   , m_translationOptionThreshold(translationOptionThreshold)
 {
@@ -193,9 +193,8 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
   const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
   const StringPiece s = f->GetString();
   bool isEpsilon = (s=="" || s==EPSILON);
-  if (StaticData::Instance().GetDropUnknown()) {
-
-
+  bool dropUnk = GetTranslationTask()->options().unk.drop;
+  if (dropUnk) {
     isDigit = s.find_first_of("0123456789");
     if (isDigit == string::npos)
       isDigit = 0;
@@ -206,7 +205,7 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
 
   TargetPhrase targetPhrase(firstPt);
 
-  if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
+  if (!(dropUnk || isEpsilon) || isDigit) {
     // add to dictionary
 
     Word &targetWord = targetPhrase.AddWord();
@@ -249,10 +248,10 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
  */
 void
 TranslationOptionCollection::
-CalcFutureScore()
+CalcEstimatedScore()
 {
   // setup the matrix (ignore lower triangle, set upper triangle to -inf
-  m_futureScore.InitTriangle(-numeric_limits<float>::infinity());
+  m_estimatedScores.InitTriangle(-numeric_limits<float>::infinity());
 
   // walk all the translation options and record the cheapest option for each span
   size_t size = m_source.GetSize(); // the width of the matrix
@@ -263,8 +262,8 @@ CalcFutureScore()
       for(toi = tol.begin() ; toi != tol.end() ; ++toi) {
         const TranslationOption& to = **toi;
         float score = to.GetFutureScore();
-        if (score > m_futureScore.GetScore(sPos, ePos))
-          m_futureScore.SetScore(sPos, ePos, score);
+        if (score > m_estimatedScores.GetScore(sPos, ePos))
+          m_estimatedScores.SetScore(sPos, ePos, score);
       }
       ++ePos;
     }
@@ -282,8 +281,8 @@ CalcFutureScore()
       size_t sPos = diagshift;
       size_t ePos = colstart+diagshift;
       for(size_t joinAt = sPos; joinAt < ePos ; joinAt++)  {
-        float joinedScore = m_futureScore.GetScore(sPos, joinAt)
-                            + m_futureScore.GetScore(joinAt+1, ePos);
+        float joinedScore = m_estimatedScores.GetScore(sPos, joinAt)
+                            + m_estimatedScores.GetScore(joinAt+1, ePos);
         // uncomment to see the cell filling scheme
         // TRACE_ERR("[" << sPos << "," << ePos << "] <-? ["
         // 	  << sPos << "," << joinAt << "]+["
@@ -291,8 +290,8 @@ CalcFutureScore()
         // 	  << colstart << ", diagshift: " << diagshift << ")"
         // 	  << endl);
 
-        if (joinedScore > m_futureScore.GetScore(sPos, ePos))
-          m_futureScore.SetScore(sPos, ePos, joinedScore);
+        if (joinedScore > m_estimatedScores.GetScore(sPos, ePos))
+          m_estimatedScores.SetScore(sPos, ePos, joinedScore);
       }
     }
   }
@@ -320,7 +319,7 @@ CalcFutureScore()
     for(size_t row=0; row<size; row++)
       for(size_t col=row; col<size; col++)
         TRACE_ERR( "future cost from "<< row <<" to "<< col <<" is "
-                   << m_futureScore.GetScore(row, col) <<endl);
+                   << m_estimatedScores.GetScore(row, col) <<endl);
   }
 }
 
@@ -375,7 +374,7 @@ CreateTranslationOptions()
   VERBOSE(3,"Translation Option Collection\n " << *this << endl);
   Prune();
   Sort();
-  CalcFutureScore(); // future score matrix
+  CalcEstimatedScore(); // future score matrix
   CacheLexReordering(); // Cached lex reodering costs
 }
 

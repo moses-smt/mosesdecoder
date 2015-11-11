@@ -109,8 +109,8 @@ class QueueItemOrderer
 {
 public:
   bool operator()(HypothesisQueueItem* itemA, HypothesisQueueItem* itemB) const {
-    float scoreA = itemA->GetHypothesis()->GetTotalScore();
-    float scoreB = itemB->GetHypothesis()->GetTotalScore();
+    float scoreA = itemA->GetHypothesis()->GetFutureScore();
+    float scoreB = itemB->GetHypothesis()->GetFutureScore();
 
     if (scoreA < scoreB) {
       return true;
@@ -151,8 +151,8 @@ public:
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
 
-    float scoreA = hypoA->GetTotalScore();
-    float scoreB = hypoB->GetTotalScore();
+    float scoreA = hypoA->GetFutureScore();
+    float scoreB = hypoB->GetFutureScore();
 
     if (scoreA > scoreB) {
       return true;
@@ -184,8 +184,8 @@ private:
   const BitmapContainer &m_prevBitmapContainer;
   BitmapContainer &m_parent;
   const TranslationOptionList &m_translations;
-  const SquareMatrix &m_futureScores;
-  float m_futureScore;
+  const SquareMatrix &m_estimatedScores;
+  float m_estimatedScore;
 
   bool m_deterministic;
 
@@ -206,7 +206,7 @@ public:
   BackwardsEdge(const BitmapContainer &prevBitmapContainer
                 , BitmapContainer &parent
                 , const TranslationOptionList &translations
-                , const SquareMatrix &futureScores
+                , const SquareMatrix &estimatedScores
                 , const InputType& source
                 , const bool deterministic = false);
   ~BackwardsEdge();

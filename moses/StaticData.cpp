@@ -279,10 +279,10 @@ StaticData::
 ini_oov_options()
 {
   // unknown word processing
-  m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
-  m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
-  m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
-  m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
+  // m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
+  // m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
+  // m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
+  // m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
 
   m_parameter->SetParameter(m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
@@ -336,8 +336,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   ini_zombie_options(); // probably dead, or maybe not
 
-  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
-                            NOT_FOUND);
+  // m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
+  // NOT_FOUND);
 
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   initialize_features();

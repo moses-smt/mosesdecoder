@@ -6,4 +6,4 @@
 	url = https://github.com/ianj-als/omtc.git
 [submodule "regtest"]
 	path = regtest
-	url = http://github.com/moses-smt/moses-regression-tests
+	url = https://github.com/moses-smt/moses-regression-tests

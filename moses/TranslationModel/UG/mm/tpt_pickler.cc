@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <cassert>
 
-#ifdef CYGWIN
+#ifdef __CYGWIN__
 #define stat64  stat
 #endif
 

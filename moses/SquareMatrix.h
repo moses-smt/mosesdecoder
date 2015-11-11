@@ -65,8 +65,8 @@ public:
   inline void SetScore(size_t startPos, size_t endPos, float value) {
     m_array[startPos * m_size + endPos] = value;
   }
-  float CalcFutureScore( Bitmap const& ) const;
-  float CalcFutureScore2( Bitmap const&, size_t startPos, size_t endPos ) const;
+  float CalcEstimatedScore( Bitmap const& ) const;
+  float CalcEstimatedScore( Bitmap const&, size_t startPos, size_t endPos ) const;
 
   TO_STRING();
 };
