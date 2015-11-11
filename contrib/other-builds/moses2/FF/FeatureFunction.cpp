@@ -8,7 +8,7 @@
 #include <vector>
 #include "FeatureFunction.h"
 #include "../System.h"
-#include "moses/Util.h"
+#include "../legacy/Util2.h"
 
 using namespace std;
 

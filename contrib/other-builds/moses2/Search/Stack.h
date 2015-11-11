@@ -10,7 +10,7 @@
 #include <boost/unordered_set.hpp>
 #include "Hypothesis.h"
 #include "../Recycler.h"
-#include "moses/Util.h"
+#include "../legacy/Util2.h"
 
 class StackAdd
 {

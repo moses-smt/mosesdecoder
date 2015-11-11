@@ -7,7 +7,7 @@
 
 #include <vector>
 #include "Word.h"
-#include "Util.h"
+#include "legacy/Util2.h"
 #include "util/murmur_hash.hh"
 
 using namespace std;

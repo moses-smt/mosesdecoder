@@ -3,7 +3,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
-#include "moses/Util.h"
+#include "legacy/Util2.h"
 #include "moses/Factor.h"
 #include "moses/InputFileStream.h"
 

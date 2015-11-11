@@ -7,7 +7,7 @@
 #include <vector>
 #include "Phrase.h"
 #include "Word.h"
-#include "moses/Util.h"
+#include "legacy/Util2.h"
 #include "MemPool.h"
 
 using namespace std;

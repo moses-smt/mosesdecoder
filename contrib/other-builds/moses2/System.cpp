@@ -12,7 +12,7 @@
 #include "System.h"
 #include "FF/FeatureFunction.h"
 #include "TranslationModel/UnknownWordPenalty.h"
-#include "moses/Util.h"
+#include "legacy/Util2.h"
 #include "util/exception.hh"
 
 using namespace std;

@@ -10,7 +10,7 @@
 #include "FF/FeatureFunction.h"
 #include "FF/FeatureFunctions.h"
 #include "Weights.h"
-#include "moses/Util.h"
+#include "legacy/Util2.h"
 
 using namespace std;
 

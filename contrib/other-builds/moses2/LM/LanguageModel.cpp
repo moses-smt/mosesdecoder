@@ -10,7 +10,7 @@
 #include "../System.h"
 #include "../Search/Manager.h"
 #include "../Search/Hypothesis.h"
-#include "moses/Util.h"
+#include "../legacy/Util2.h"
 #include "moses/InputFileStream.h"
 #include "moses/LM/PointerState.h"
 #include "../legacy/Bitmap.h"

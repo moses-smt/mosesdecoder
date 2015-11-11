@@ -10,7 +10,7 @@
 #include "../TargetPhrases.h"
 #include "../Word.h"
 #include "../FF/StatelessFeatureFunction.h"
-#include "moses/Util.h"
+#include "../legacy/Util2.h"
 
 class System;
 class InputPaths;
