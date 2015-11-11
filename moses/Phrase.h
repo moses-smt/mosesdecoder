@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/string_piece.hh"
 #include "util/exception.hh"
+#include "parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -200,9 +201,12 @@ public:
   Phrase GetSubString(const Range &range) const;
   Phrase GetSubString(const Range &range, FactorType factorType) const;
 
-  //! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
-  std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const;
-
+  //! return a string rep of the phrase; 
+  // w/ factors delimited by FactorDelimiter 
+  std::string 
+  GetStringRep(std::vector<FactorType> const& factorsToPrint, 
+               AllOptions const* opts=NULL) const;
+  
   TO_STRING();
 
 

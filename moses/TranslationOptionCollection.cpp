@@ -193,9 +193,8 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
   const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
   const StringPiece s = f->GetString();
   bool isEpsilon = (s=="" || s==EPSILON);
-  if (StaticData::Instance().GetDropUnknown()) {
-
-
+  bool dropUnk = GetTranslationTask()->options().unk.drop;
+  if (dropUnk) {
     isDigit = s.find_first_of("0123456789");
     if (isDigit == string::npos)
       isDigit = 0;
@@ -206,7 +205,7 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
 
   TargetPhrase targetPhrase(firstPt);
 
-  if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
+  if (!(dropUnk || isEpsilon) || isDigit) {
     // add to dictionary
 
     Word &targetWord = targetPhrase.AddWord();

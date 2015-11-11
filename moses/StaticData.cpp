@@ -279,10 +279,10 @@ StaticData::
 ini_oov_options()
 {
   // unknown word processing
-  m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
-  m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
-  m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
-  m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
+  // m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
+  // m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
+  // m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
+  // m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
 
   m_parameter->SetParameter(m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 

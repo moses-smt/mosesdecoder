@@ -111,11 +111,10 @@ int main(int argc, char** argv)
     table->InitializeForInputPhrase(f);
   }
   
-  OOVHandlingOptions unk;
   std::cerr << "Querying: "
-	    << "f='" << f.GetStringRep(f_mask, unk) <<"' "
-	    << "e='" << e.GetStringRep(e_mask, unk) << "' "
-	    << "c='" << c.GetStringRep(c_mask, unk) << "'\n";
+	    << "f='" << f.GetStringRep(f_mask) <<"' "
+	    << "e='" << e.GetStringRep(e_mask) << "' "
+	    << "c='" << c.GetStringRep(c_mask) << "'\n";
   std::cerr << table->GetScore(f,e,c) << "\n";
   //table->DbgDump(&std::cerr);
   delete table;

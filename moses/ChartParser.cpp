@@ -54,7 +54,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const Range &range, Cha
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer = UnknownWordPenaltyProducer::Instance();
 
   size_t isDigit = 0;
-  if (staticData.GetDropUnknown()) {
+  if (staticData.options().unk.drop) {
     const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
     const StringPiece s = f->GetString();
     isDigit = s.find_first_of("0123456789");
@@ -79,7 +79,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const Range &range, Cha
   }
 
   //TranslationOption *transOpt;
-  if (! staticData.GetDropUnknown() || isDigit) {
+  if (! staticData.options().unk.drop || isDigit) {
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
     UnknownLHSList::const_iterator iterLHS;

@@ -1750,11 +1750,11 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
                  "Must specific at least 1 output factor");
   const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
-  bool markUnknown = StaticData::Instance().GetMarkUnknown();
+  bool markUnknown = options().unk.mark;
   if (reportAllFactors == true) {
     out << phrase;
   } else {
-    FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
+    FactorType placeholderFactor = options().input.placeholder_factor;
 
     std::map<size_t, const Factor*> placeholders;
     if (placeholderFactor != NOT_FOUND) {
@@ -1774,24 +1774,19 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
         }
       }
 
-      UTIL_THROW_IF2(factor == NULL,
-                     "No factor 0 at position " << pos);
+      UTIL_THROW_IF2(factor == NULL, "No factor 0 at position " << pos);
 
       //preface surface form with UNK if marking unknowns
       const Word &word = phrase.GetWord(pos);
       if(markUnknown && word.IsOOV()) {
-        out << StaticData::Instance().GetUnknownWordPrefix()
-            << *factor
-            << StaticData::Instance().GetUnknownWordSuffix();
+        out << options().unk.prefix << *factor << options().unk.suffix;
       } else {
         out << *factor;
       }
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        UTIL_THROW_IF2(factor == NULL,
-                       "No factor " << i << " at position " << pos);
-
+        UTIL_THROW_IF2(factor==NULL,"No factor "<<i<<" at position "<< pos);
         out << "|" << *factor;
       }
       out << " ";

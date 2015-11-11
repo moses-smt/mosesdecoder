@@ -347,7 +347,9 @@ std::string
 Hypothesis::
 GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const
 {
-  return (m_prevHypo ? GetCurrTargetPhrase().GetStringRep(factorsToPrint) : "");
+  return (m_prevHypo 
+          ? GetCurrTargetPhrase().GetStringRep(factorsToPrint) 
+          : "");
 }
 
 std::string
@@ -469,11 +471,13 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
                  "Must specific at least 1 output factor");
   const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
-  bool markUnknown = StaticData::Instance().GetMarkUnknown();
+  bool markUnknown = GetManager().options().unk.mark; 
+  // = StaticData::Instance().GetMarkUnknown();
   if (reportAllFactors == true) {
     out << phrase;
   } else {
-    FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
+    FactorType placeholderFactor 
+      = StaticData::Instance().options().input.placeholder_factor;
     
     std::map<size_t, const Factor*> placeholders;
     if (placeholderFactor != NOT_FOUND) {
@@ -499,9 +503,8 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
       //preface surface form with UNK if marking unknowns
       const Word &word = phrase.GetWord(pos);
       if(markUnknown && word.IsOOV()) {
-        out << StaticData::Instance().GetUnknownWordPrefix()
-            << *factor
-            << StaticData::Instance().GetUnknownWordSuffix();
+        out << GetManager().options().unk.prefix << *factor
+            << GetManager().options().unk.suffix;
       } else {
         out << *factor;
       }
