@@ -15,8 +15,8 @@
 #include "../MemPool.h"
 #include "../Recycler.h"
 #include "Stacks.h"
-#include "moses/Bitmaps.h"
-#include "moses/SquareMatrix.h"
+#include "../legacy/Bitmaps.h"
+#include "../legacy/SquareMatrix.h"
 
 class System;
 class PhraseImpl;
@@ -40,13 +40,13 @@ public:
 	Recycler<Hypothesis*> &GetHypoRecycle() const
 	{ return *m_hypoRecycle; }
 
-	Moses::Bitmaps &GetBitmaps()
+	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
 
 	const PhraseImpl &GetInput() const
 	{ return *m_input; }
 
-	const Moses::SquareMatrix &GetEstimatedScores() const
+	const SquareMatrix &GetEstimatedScores() const
 	{ return *m_estimatedScores; }
 
 	const InputPaths &GetInputPaths() const
@@ -62,9 +62,9 @@ protected:
     std::string m_inputStr;
 	PhraseImpl *m_input;
 	InputPaths m_inputPaths;
-	Moses::Bitmaps *m_bitmaps;
-	Moses::SquareMatrix *m_estimatedScores;
-	Moses::Range m_initRange;
+	Bitmaps *m_bitmaps;
+	SquareMatrix *m_estimatedScores;
+	Range m_initRange;
 	TargetPhrase *m_initPhrase;
 
     Stacks m_stacks;

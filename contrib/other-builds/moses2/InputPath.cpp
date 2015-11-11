@@ -9,7 +9,7 @@
 #include "TranslationModel/PhraseTable.h"
 
 InputPath::InputPath(const SubPhrase &subPhrase,
-		const Moses::Range &range,
+		const Range &range,
 		size_t numPt,
 		const InputPath *prefixPath)
 :subPhrase(subPhrase)

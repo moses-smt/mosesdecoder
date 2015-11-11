@@ -55,9 +55,9 @@ void SearchNormal::Extend(const Hypothesis &hypo)
 
 void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 {
-	const Moses::Bitmap &bitmap = hypo.GetBitmap();
-	const Moses::Range &hypoRange = hypo.GetRange();
-	const Moses::Range &pathRange = path.range;
+	const Bitmap &bitmap = hypo.GetBitmap();
+	const Range &hypoRange = hypo.GetRange();
+	const Range &pathRange = path.range;
 
     const size_t hypoFirstGapPos = bitmap.GetFirstGapPos();
 
@@ -123,7 +123,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
       // be (which will always be the value of the hypothesis starting
       // at the left-most edge).  If this value is less than the
       // distortion limit, we don't allow this extension to be made.
-      Moses::Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+      Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 
       if (ComputeDistortionDistance(pathRange, bestNextExtension)
           > m_mgr.system.maxDistortion) {
@@ -137,7 +137,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 	//cerr << " YES" << endl;
 
     // extend this hypo
-	const Moses::Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
+	const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(bitmap, pathRange);
     //SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcFutureScore2(bitmap, pathRange.GetStartPos(), pathRange.GetEndPos());
     SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
 
@@ -152,8 +152,8 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 
 void SearchNormal::Extend(const Hypothesis &hypo,
 		const TargetPhrases &tps,
-		const Moses::Range &pathRange,
-		const Moses::Bitmap &newBitmap,
+		const Range &pathRange,
+		const Bitmap &newBitmap,
 		SCORE estimatedScore)
 {
   BOOST_FOREACH(const TargetPhrase *tp, tps) {
@@ -163,8 +163,8 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 
 void SearchNormal::Extend(const Hypothesis &hypo,
 		const TargetPhrase &tp,
-		const Moses::Range &pathRange,
-		const Moses::Bitmap &newBitmap,
+		const Range &pathRange,
+		const Bitmap &newBitmap,
 		SCORE estimatedScore)
 {
 	Hypothesis *newHypo = Hypothesis::Create(m_mgr);
@@ -208,7 +208,7 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
 	return best;
 }
 
-int SearchNormal::ComputeDistortionDistance(const Moses::Range& prev, const Moses::Range& current) const
+int SearchNormal::ComputeDistortionDistance(const Range& prev, const Range& current) const
 {
   int dist = 0;
   if (prev.GetNumWordsCovered() == 0) {

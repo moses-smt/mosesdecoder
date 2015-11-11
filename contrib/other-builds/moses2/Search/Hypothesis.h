@@ -11,9 +11,10 @@
 #include <iostream>
 #include <cstddef>
 #include "moses/FF/FFState.h"
-#include "moses/Bitmap.h"
+#include "../legacy/Bitmap.h"
 #include "../Scores.h"
 #include "../TargetPhrase.h"
+#include "../legacy/Range.h"
 
 class Manager;
 class PhraseImpl;
@@ -31,25 +32,25 @@ public:
 
   // initial, empty hypo
   void Init(const TargetPhrase &tp,
-  		const Moses::Range &range,
-  		const Moses::Bitmap &bitmap);
+  		const Range &range,
+  		const Bitmap &bitmap);
 
   void Init(const Hypothesis &prevHypo,
   		const TargetPhrase &tp,
-  		const Moses::Range &pathRange,
-  		const Moses::Bitmap &bitmap,
+  		const Range &pathRange,
+  		const Bitmap &bitmap,
 		SCORE estimatedScore);
 
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
 
-  inline const Moses::Bitmap &GetBitmap() const
+  inline const Bitmap &GetBitmap() const
   { return *m_sourceCompleted; }
 
-  inline const Moses::Range &GetRange() const
+  inline const Range &GetRange() const
   { return *m_range; }
 
-  inline const Moses::Range &GetCurrTargetWordsRange() const {
+  inline const Range &GetCurrTargetWordsRange() const {
     return m_currTargetWordsRange;
   }
 
@@ -87,14 +88,14 @@ public:
 protected:
   Manager &m_mgr;
   const TargetPhrase *m_targetPhrase;
-  const Moses::Bitmap *m_sourceCompleted;
-  const Moses::Range *m_range;
+  const Bitmap *m_sourceCompleted;
+  const Range *m_range;
   const Hypothesis *m_prevHypo;
 
   Moses::FFState **m_ffStates;
   Scores *m_scores;
   SCORE m_estimatedScore;
-  Moses::Range m_currTargetWordsRange;
+  Range m_currTargetWordsRange;
 };
 
 

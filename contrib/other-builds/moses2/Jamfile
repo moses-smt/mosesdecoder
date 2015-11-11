@@ -37,7 +37,10 @@ import path ;
  	 	Search/SearchNormal.cpp
  	 	Search/Stack.cpp 
  	 	Search/Stacks.cpp 
-
+		legacy/Bitmap.cpp
+		legacy/Bitmaps.cpp
+		legacy/Range.cpp
+		legacy/SquareMatrix.cpp
     
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 

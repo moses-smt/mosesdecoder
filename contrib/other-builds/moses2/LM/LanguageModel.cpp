@@ -13,7 +13,7 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/LM/PointerState.h"
-#include "moses/Bitmap.h"
+#include "../legacy/Bitmap.h"
 
 using namespace std;
 
@@ -201,7 +201,7 @@ void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 		score += fromScoring.first;
 	}
 
-	const Moses::Bitmap &bm = hypo.GetBitmap();
+	const Bitmap &bm = hypo.GetBitmap();
 	if (bm.IsComplete()) {
 		// everything translated
 		ShiftOrPush(context, m_eos);

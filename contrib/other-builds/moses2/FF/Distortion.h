@@ -9,7 +9,7 @@
 #define DISTORTION_H_
 
 #include "StatefulFeatureFunction.h"
-#include "moses/Range.h"
+#include "../legacy/Range.h"
 #include "../TypeDef.h"
 
 class Distortion : public StatefulFeatureFunction
@@ -35,9 +35,9 @@ public:
 	Moses::FFState &state) const;
 
 protected:
-  SCORE CalculateDistortionScore(const Moses::Range &prev, const Moses::Range &curr, const int FirstGap) const;
+  SCORE CalculateDistortionScore(const Range &prev, const Range &curr, const int FirstGap) const;
 
-  int ComputeDistortionDistance(const Moses::Range& prev, const Moses::Range& current) const;
+  int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 
 };
 

@@ -8,8 +8,8 @@
 #ifndef SEARCHNORMAL_H_
 #define SEARCHNORMAL_H_
 #include <vector>
-#include "moses/Range.h"
-#include "moses/Bitmap.h"
+#include "../legacy/Range.h"
+#include "../legacy/Bitmap.h"
 #include "ArcLists.h"
 #include "../TypeDef.h"
 
@@ -40,16 +40,16 @@ protected:
 	void Extend(const Hypothesis &hypo, const InputPath &path);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrases &tps,
-			const Moses::Range &pathRange,
-			const Moses::Bitmap &newBitmap,
+			const Range &pathRange,
+			const Bitmap &newBitmap,
 			SCORE estimatedScore);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrase &tp,
-			const Moses::Range &pathRange,
-			const Moses::Bitmap &newBitmap,
+			const Range &pathRange,
+			const Bitmap &newBitmap,
 			SCORE estimatedScore);
 
-	int ComputeDistortionDistance(const Moses::Range& prev, const Moses::Range& current) const;
+	int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 
 };
 

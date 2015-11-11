@@ -14,7 +14,7 @@
 #include "../InputPaths.h"
 #include "../InputPath.h"
 #include "../TranslationModel/PhraseTable.h"
-#include "moses/Range.h"
+#include "../legacy/Range.h"
 
 using namespace std;
 
@@ -53,7 +53,7 @@ void Manager::Init()
 	// init stacks
 	m_stacks.Init(m_input->GetSize() + 1);
 
-	m_bitmaps = new Moses::Bitmaps(m_input->GetSize(), vector<bool>(0));
+	m_bitmaps = new Bitmaps(m_input->GetSize(), vector<bool>(0));
 	m_search = new SearchNormal(*this, m_stacks);
 }
 
@@ -66,7 +66,7 @@ void Manager::Decode()
 {
 	Init();
 
-	const Moses::Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
+	const Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(*this);
 	initHypo->Init(*m_initPhrase, m_initRange, initBitmap);
 	initHypo->EmptyHypothesisState(*m_input);
@@ -82,12 +82,12 @@ void Manager::Decode()
 void Manager::CalcFutureScore()
 {
 	size_t size = m_input->GetSize();
-	m_estimatedScores = new Moses::SquareMatrix(size);
+	m_estimatedScores = new SquareMatrix(size);
 	m_estimatedScores->InitTriangle(-numeric_limits<SCORE>::infinity());
 
     // walk all the translation options and record the cheapest option for each span
 	BOOST_FOREACH(const InputPath &path, m_inputPaths) {
-		const Moses::Range &range = path.range;
+		const Range &range = path.range;
 		const std::vector<TargetPhrases::shared_const_ptr> &allTps = path.targetPhrases;
 		SCORE bestScore = -numeric_limits<SCORE>::infinity();
 

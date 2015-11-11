@@ -8,13 +8,13 @@
 #include "Distortion.h"
 #include "../Search/Hypothesis.h"
 #include "../Search/Manager.h"
-#include "moses/Range.h"
-#include "moses/Bitmap.h"
+#include "../legacy/Range.h"
+#include "../legacy/Bitmap.h"
 
 using namespace std;
 
 struct DistortionState_traditional : public Moses::FFState {
-  Moses::Range range;
+  Range range;
   int first_gap;
 
   DistortionState_traditional()
@@ -23,7 +23,7 @@ struct DistortionState_traditional : public Moses::FFState {
 	  // uninitialised
   }
 
-  void Set(const Moses::Range& wr, int fg)
+  void Set(const Range& wr, int fg)
   {
 	 range = wr;
 	 first_gap = fg;
@@ -73,7 +73,7 @@ void Distortion::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr,
 	  }
 	  */
 
-	    stateCast.range = Moses::Range(start, end);
+	    stateCast.range = Range(start, end);
 	    stateCast.first_gap = NOT_FOUND;
 }
 
@@ -106,7 +106,7 @@ void Distortion::EvaluateWhenApplied(const Manager &mgr,
     stateCast.Set(hypo.GetRange(), hypo.GetBitmap().GetFirstGapPos());
 }
 
-SCORE Distortion::CalculateDistortionScore(const Moses::Range &prev, const Moses::Range &curr, const int FirstGap) const
+SCORE Distortion::CalculateDistortionScore(const Range &prev, const Range &curr, const int FirstGap) const
 {
   bool useEarlyDistortionCost = false;
   if(!useEarlyDistortionCost) {
@@ -149,7 +149,7 @@ SCORE Distortion::CalculateDistortionScore(const Moses::Range &prev, const Moses
   }
 }
 
-int Distortion::ComputeDistortionDistance(const Moses::Range& prev, const Moses::Range& current) const
+int Distortion::ComputeDistortionDistance(const Range& prev, const Range& current) const
 {
   int dist = 0;
   if (prev.GetNumWordsCovered() == 0) {

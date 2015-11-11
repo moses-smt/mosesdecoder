@@ -8,7 +8,7 @@
 #include "InputPaths.h"
 #include "Phrase.h"
 #include "System.h"
-#include "moses/Range.h"
+#include "legacy/Range.h"
 
 using namespace std;
 
@@ -33,7 +33,7 @@ void InputPaths::Init(const PhraseImpl &input, const System &system)
 	  }
 
 	  SubPhrase subPhrase = input.GetSubPhrase(startPos, endPos);
-	  Moses::Range range(startPos, endPos);
+	  Range range(startPos, endPos);
 
 	  InputPath path(subPhrase, range, numPt, prefixPath);
 	  m_inputPaths.push_back(path);
