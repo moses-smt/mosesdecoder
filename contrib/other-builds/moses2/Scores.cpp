@@ -146,7 +146,7 @@ void Scores::CreateFromString(const std::string &str,
 		const System &system,
 		bool transformScores)
 {
-	vector<SCORE> scores = Moses::Tokenize<SCORE>(str);
+	vector<SCORE> scores = Tokenize<SCORE>(str);
 	if (transformScores) {
 	    std::transform(scores.begin(), scores.end(), scores.begin(), Moses::TransformScore);
 	}

@@ -14,6 +14,7 @@
 #include "moses/InputFileStream.h"
 #include "moses/LM/PointerState.h"
 #include "../legacy/Bitmap.h"
+#include "../legacy/Util2.h"
 
 using namespace std;
 
@@ -75,8 +76,7 @@ void LanguageModel::Load(System &system)
 		  cerr << lineNum << " ";
 	  }
 
-	  vector<string> substrings;
-	  Moses::Tokenize(substrings, line, "\t");
+	  vector<string> substrings = Tokenize(line, "\t");
 
 	  if (substrings.size() < 2)
 		   continue;
@@ -95,8 +95,7 @@ void LanguageModel::Load(System &system)
 	  }
 
 	  // ngram
-	  vector<string> key;
-	  Moses::Tokenize(key, substrings[1], " ");
+	  vector<string> key = Tokenize(substrings[1], " ");
 
 	  vector<const Moses::Factor*> factorKey(key.size());
 	  for (size_t i = 0; i < key.size(); ++i) {

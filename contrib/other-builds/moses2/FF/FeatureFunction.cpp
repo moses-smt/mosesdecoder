@@ -26,7 +26,7 @@ FeatureFunction::~FeatureFunction() {
 
 void FeatureFunction::ParseLine(const std::string &line)
 {
-  vector<string> toks = Moses::Tokenize(line);
+  vector<string> toks = Tokenize(line);
   UTIL_THROW_IF2(toks.empty(), "Empty line");
 
   string nameStub = toks[0];
@@ -34,7 +34,7 @@ void FeatureFunction::ParseLine(const std::string &line)
   set<string> keys;
 
   for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Moses::TokenizeFirstOnly(toks[i], "=");
+    vector<string> args = TokenizeFirstOnly(toks[i], "=");
     UTIL_THROW_IF2(args.size() != 2,
                    "Incorrect format for feature function arg: " << toks[i]);
 

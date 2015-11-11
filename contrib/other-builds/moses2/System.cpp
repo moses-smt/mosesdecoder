@@ -54,7 +54,7 @@ void System::LoadMappings()
   UTIL_THROW_IF2(vec == NULL, "Must have [mapping] section");
 
   BOOST_FOREACH(const std::string &line, *vec) {
-	  vector<string> toks = Moses::Tokenize(line);
+	  vector<string> toks = Tokenize(line);
 	  assert( (toks.size() == 2 && toks[0] == "T") || (toks.size() == 3 && toks[1] == "T") );
 
 	  size_t ptInd;

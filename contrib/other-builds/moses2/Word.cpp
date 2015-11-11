@@ -22,7 +22,7 @@ Word::~Word() {
 
 void Word::CreateFromString(Moses::FactorCollection &vocab, const std::string &str)
 {
-	vector<string> toks = Moses::Tokenize(str, "|");
+	vector<string> toks = Tokenize(str, "|");
 	for (size_t i = 0; i < toks.size(); ++i) {
 		const string &tok = toks[i];
 		//cerr << "tok=" << tok << endl;

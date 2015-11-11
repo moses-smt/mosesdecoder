@@ -14,7 +14,7 @@ using namespace std;
 
 PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str)
 {
-	vector<string> toks = Moses::Tokenize(str);
+	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();
 	PhraseImpl *ret;
 

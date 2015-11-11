@@ -91,7 +91,7 @@ void FeatureFunctions::Load()
 
 FeatureFunction *FeatureFunctions::Create(const std::string &line)
 {
-	vector<string> toks = Moses::Tokenize(line);
+	vector<string> toks = Tokenize(line);
 
 	FeatureFunction *ret;
 	if (toks[0] == "PhraseDictionaryMemory") {

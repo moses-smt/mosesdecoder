@@ -104,7 +104,7 @@ void PhraseTableMemory::Load(System &system)
 	string line;
 	while (getline(strme, line)) {
 		toks.clear();
-		Moses::TokenizeMultiCharSeparator(toks, line, "|||");
+		TokenizeMultiCharSeparator(toks, line, "|||");
 		assert(toks.size() >= 3);
 		//cerr << "line=" << line << endl;
 

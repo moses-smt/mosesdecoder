@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream &out, const Weights &obj)
 
 void Weights::CreateFromString(const FeatureFunctions &ffs, const std::string &line)
 {
-	std::vector<std::string> toks = Moses::Tokenize(line);
+	std::vector<std::string> toks = Tokenize(line);
 	assert(toks.size());
 
 	string ffName = toks[0];
