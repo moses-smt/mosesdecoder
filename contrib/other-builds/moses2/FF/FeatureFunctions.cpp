@@ -38,9 +38,9 @@ FeatureFunctions::~FeatureFunctions() {
 
 void FeatureFunctions::Create()
 {
-  const Moses::Parameter &params = m_system.params;
+  const Parameter &params = m_system.params;
 
-  const Moses::PARAM_VEC *ffParams = params.GetParam("feature");
+  const PARAM_VEC *ffParams = params.GetParam("feature");
   UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
 
   BOOST_FOREACH(const std::string &line, *ffParams) {

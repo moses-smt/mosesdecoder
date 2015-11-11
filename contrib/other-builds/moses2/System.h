@@ -13,7 +13,7 @@
 #include "MemPool.h"
 #include "Recycler.h"
 #include "moses/FactorCollection.h"
-#include "moses/Parameter.h"
+#include "legacy/Parameter.h"
 
 class FeatureFunction;
 class StatefulFeatureFunction;
@@ -22,13 +22,13 @@ class Hypothesis;
 
 class System {
 public:
-	System(const Moses::Parameter &paramsArg);
+	System(const Parameter &paramsArg);
 	virtual ~System();
 
 	MemPool &GetManagerPool() const;
 	Recycler<Hypothesis*> &GetHypoRecycle() const;
 
-    const Moses::Parameter &params;
+    const Parameter &params;
     mutable Moses::FactorCollection vocab;
     FeatureFunctions featureFunctions;
     Weights weights;

@@ -39,8 +39,10 @@ import path ;
  	 	Search/Stacks.cpp 
 		legacy/Bitmap.cpp
 		legacy/Bitmaps.cpp
+		legacy/Parameter.cpp
 		legacy/Range.cpp
 		legacy/SquareMatrix.cpp
+		legacy/Util2.cpp
     
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 

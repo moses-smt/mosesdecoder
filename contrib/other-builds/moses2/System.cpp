@@ -17,7 +17,7 @@
 
 using namespace std;
 
-System::System(const Moses::Parameter &paramsArg)
+System::System(const Parameter &paramsArg)
 :params(paramsArg)
 ,featureFunctions(*this)
 
@@ -39,7 +39,7 @@ System::~System() {
 
 void System::LoadWeights()
 {
-  const Moses::PARAM_VEC *vec = params.GetParam("weight");
+  const PARAM_VEC *vec = params.GetParam("weight");
   UTIL_THROW_IF2(vec == NULL, "Must have [weight] section");
 
   weights.Init(featureFunctions);

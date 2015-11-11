@@ -4,16 +4,16 @@
 #include "TranslationTask.h"
 #include "Search/Manager.h"
 #include "moses/InputFileStream.h"
-#include "moses/Parameter.h"
+#include "legacy/Parameter.h"
 #include "moses/ThreadPool.h"
 
 using namespace std;
 
 //extern size_t g_numHypos;
 
-istream &GetInputStream(Moses::Parameter &params)
+istream &GetInputStream(Parameter &params)
 {
-	const Moses::PARAM_VEC *vec = params.GetParam("input-file");
+	const PARAM_VEC *vec = params.GetParam("input-file");
 	if (vec) {
 		Moses::InputFileStream *stream = new Moses::InputFileStream(vec->at(0));
 		return *stream;
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 {
 	cerr << "Starting..." << endl;
 
-	Moses::Parameter params;
+	Parameter params;
 	params.LoadParam(argc, argv);
 	System system(params);
 
