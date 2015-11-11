@@ -1076,9 +1076,4 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
   }
 }
 
-void StaticData::PrintFF() const
-{
-  GetFeatureRegistry().PrintFF();
-}
-
 } // namespace

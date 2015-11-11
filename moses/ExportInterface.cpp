@@ -316,10 +316,8 @@ int decoder_main(int argc, char** argv)
 
     // load all the settings into the Parameter class
     // (stores them as strings, or array of strings)
-    if (!params.LoadParam(argc,argv)) {
-    	StaticData::Instance().PrintFF();
-        exit(1);
-    }
+    if (!params.LoadParam(argc,argv))
+      exit(1);
 
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.

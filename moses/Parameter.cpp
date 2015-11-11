@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Parameter.h"
 #include "Util.h"
 #include "InputFileStream.h"
+#include "StaticData.h"
 #include "util/string_stream.hh"
 #include "util/exception.hh"
 #include "util/random.hh"
@@ -452,6 +453,7 @@ LoadParam(int argc, char* xargv[])
        && (configPath = FindParam("-config", argc, argv)) == "") {
     PrintCredit();
     Explain();
+    PrintFF();
 
     cerr << endl;
     cerr << "No configuration file was specified.  Use -config or -f";
@@ -1545,6 +1547,13 @@ OverwriteParam(const string &paramName, PARAM_VEC values)
     VERBOSE(2, " " << *iter);
   }
   VERBOSE(2, std::endl);
+}
+
+void
+Parameter::
+PrintFF() const
+{
+  StaticData::Instance().GetFeatureRegistry().PrintFF();
 }
 
 std::set<std::string>
