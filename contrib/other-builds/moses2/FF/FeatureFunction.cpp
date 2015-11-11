@@ -42,7 +42,7 @@ void FeatureFunction::ParseLine(const std::string &line)
     UTIL_THROW_IF2(!ret.second, "Duplicate key in line " << line);
 
     if (args[0] == "num-features") {
-    	m_numScores = Moses::Scan<size_t>(args[1]);
+    	m_numScores = Scan<size_t>(args[1]);
     }
     else if (args[0] == "name") {
       m_name = args[1];
@@ -71,7 +71,7 @@ void FeatureFunction::ReadParameters()
 void FeatureFunction::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "tuneable") {
-    m_tuneable = Moses::Scan<bool>(value);
+    m_tuneable = Scan<bool>(value);
   }
   else {
     UTIL_THROW2(GetName() << ": Unknown argument " << key << "=" << value);

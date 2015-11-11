@@ -33,7 +33,7 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 
   }
   else if (key == "table-limit") {
-	  m_tableLimit = Moses::Scan<size_t>(value);
+	  m_tableLimit = Scan<size_t>(value);
   }
   else {
 	  StatelessFeatureFunction::SetParameter(key, value);

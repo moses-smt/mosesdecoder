@@ -59,10 +59,10 @@ void System::LoadMappings()
 
 	  size_t ptInd;
 	  if (toks.size() == 2) {
-		  ptInd = Moses::Scan<size_t>(toks[1]);
+		  ptInd = Scan<size_t>(toks[1]);
 	  }
 	  else {
-		  ptInd = Moses::Scan<size_t>(toks[2]);
+		  ptInd = Scan<size_t>(toks[2]);
 	  }
 	  const PhraseTable *pt = featureFunctions.GetPhraseTablesExcludeUnknownWordPenalty(ptInd);
 	  mappings.push_back(pt);
@@ -121,7 +121,7 @@ System
 	      return false;
 	#endif
 	    } else {
-	    	numThreads = Moses::Scan<int>(paramsVec->at(0));
+	    	numThreads = Scan<int>(paramsVec->at(0));
 	      if (numThreads < 1) {
 	        std::cerr << "Specify at least one thread.";
 	        throw;

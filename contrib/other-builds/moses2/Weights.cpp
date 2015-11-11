@@ -63,7 +63,7 @@ void Weights::CreateFromString(const FeatureFunctions &ffs, const std::string &l
 	assert(numScores == toks.size() -1);
 
 	for (size_t i = 0; i < numScores; ++i) {
-		SCORE score = Moses::Scan<SCORE>(toks[i+1]);
+		SCORE score = Scan<SCORE>(toks[i+1]);
 		m_weights[i + startInd] = score;
 	}
 }

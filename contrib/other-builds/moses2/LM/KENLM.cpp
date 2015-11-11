@@ -90,10 +90,10 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
 	  m_path = value;
   }
   else if (key == "factor") {
-	  m_factorType = Moses::Scan<Moses::FactorType>(value);
+	  m_factorType = Scan<Moses::FactorType>(value);
   }
   else if (key == "lazyken") {
-	  m_lazy = Moses::Scan<bool>(value);
+	  m_lazy = Scan<bool>(value);
   }
   else if (key == "order") {
 	  // don't need to store it

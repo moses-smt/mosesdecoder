@@ -83,7 +83,7 @@ void LanguageModel::Load(System &system)
 
 	  assert(substrings.size() == 2 || substrings.size() == 3);
 
-	  SCORE prob = Moses::TransformLMScore(Moses::Scan<SCORE>(substrings[0]));
+	  SCORE prob = Moses::TransformLMScore(Scan<SCORE>(substrings[0]));
 	  if (substrings[1] == "<unk>") {
 		  m_oov = prob;
 		  continue;
@@ -91,7 +91,7 @@ void LanguageModel::Load(System &system)
 
 	  SCORE backoff = 0.f;
 	  if (substrings.size() == 3) {
-		backoff = Moses::TransformLMScore(Moses::Scan<SCORE>(substrings[2]));
+		backoff = Moses::TransformLMScore(Scan<SCORE>(substrings[2]));
 	  }
 
 	  // ngram
@@ -113,10 +113,10 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
 	  m_path = value;
   }
   else if (key == "factor") {
-	  m_factorType = Moses::Scan<Moses::FactorType>(value);
+	  m_factorType = Scan<Moses::FactorType>(value);
   }
   else if (key == "order") {
-	  m_order = Moses::Scan<size_t>(value);
+	  m_order = Scan<size_t>(value);
   }
   else {
 	  StatefulFeatureFunction::SetParameter(key, value);
