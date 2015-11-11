@@ -89,7 +89,6 @@ protected:
            std::string const& description);
 
   void PrintCredit();
-  void PrintFF() const;
 
   void SetWeight(const std::string &name, size_t ind, float weight);
   void SetWeight(const std::string &name, size_t ind, const std::vector<float> &weights);

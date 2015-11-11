@@ -715,6 +715,7 @@ public:
     return m_requireSortingAfterSourceContext;
   }
 
+  void PrintFF() const;
 };
 
 }
