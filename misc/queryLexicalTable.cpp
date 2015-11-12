@@ -110,11 +110,11 @@ int main(int argc, char** argv)
     std::cerr << "Caching for f\n";
     table->InitializeForInputPhrase(f);
   }
-  
+
   std::cerr << "Querying: "
-	    << "f='" << f.GetStringRep(f_mask) <<"' "
-	    << "e='" << e.GetStringRep(e_mask) << "' "
-	    << "c='" << c.GetStringRep(c_mask) << "'\n";
+            << "f='" << f.GetStringRep(f_mask) <<"' "
+            << "e='" << e.GetStringRep(e_mask) << "' "
+            << "c='" << c.GetStringRep(c_mask) << "'\n";
   std::cerr << table->GetScore(f,e,c) << "\n";
   //table->DbgDump(&std::cerr);
   delete table;

@@ -347,8 +347,8 @@ std::string
 Hypothesis::
 GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const
 {
-  return (m_prevHypo 
-          ? GetCurrTargetPhrase().GetStringRep(factorsToPrint) 
+  return (m_prevHypo
+          ? GetCurrTargetPhrase().GetStringRep(factorsToPrint)
           : "");
 }
 
@@ -471,14 +471,14 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
                  "Must specific at least 1 output factor");
   const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
-  bool markUnknown = GetManager().options().unk.mark; 
+  bool markUnknown = GetManager().options().unk.mark;
   // = StaticData::Instance().GetMarkUnknown();
   if (reportAllFactors == true) {
     out << phrase;
   } else {
-    FactorType placeholderFactor 
-      = StaticData::Instance().options().input.placeholder_factor;
-    
+    FactorType placeholderFactor
+    = StaticData::Instance().options().input.placeholder_factor;
+
     std::map<size_t, const Factor*> placeholders;
     if (placeholderFactor != NOT_FOUND) {
       // creates map of target position -> factor for placeholders

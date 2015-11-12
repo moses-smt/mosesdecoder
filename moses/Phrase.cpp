@@ -114,9 +114,9 @@ Phrase Phrase::GetSubString(const Range &range, FactorType factorType) const
   return retPhrase;
 }
 
-std::string 
+std::string
 Phrase::
-GetStringRep(vector<FactorType> const& factorsToPrint, 
+GetStringRep(vector<FactorType> const& factorsToPrint,
              AllOptions const* opts) const
 {
   if (!opts) opts = &StaticData::Instance().options();
@@ -133,7 +133,7 @@ GetStringRep(vector<FactorType> const& factorsToPrint,
   }
   return strme.str();
 }
-  
+
 Word &Phrase::AddWord()
 {
   m_words.push_back(Word());

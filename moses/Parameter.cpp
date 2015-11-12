@@ -218,16 +218,16 @@ Parameter::Parameter()
   AddParam(server_opts,"server-log", "Log destination for moses server");
   AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
 
-  AddParam(server_opts,"server-maxconn", 
-	   "Max. No of simultaneous HTTP transactions allowed by the server.");
+  AddParam(server_opts,"server-maxconn",
+           "Max. No of simultaneous HTTP transactions allowed by the server.");
   AddParam(server_opts,"server-maxconn-backlog",
-	   "Max. No. of requests the OS will queue if the server is busy.");
-  AddParam(server_opts,"server-keepalive-maxconn", 
-	   "Max. No. of requests the server will accept on a single TCP connection.");
-  AddParam(server_opts,"server-keepalive-timeout", 
-	   "Max. number of seconds the server will keep a persistent connection alive.");
-  AddParam(server_opts,"server-timeout", 
-	   "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
+           "Max. No. of requests the OS will queue if the server is busy.");
+  AddParam(server_opts,"server-keepalive-maxconn",
+           "Max. No. of requests the server will accept on a single TCP connection.");
+  AddParam(server_opts,"server-keepalive-timeout",
+           "Max. number of seconds the server will keep a persistent connection alive.");
+  AddParam(server_opts,"server-timeout",
+           "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
 
   // session timeout and session cache size are for moses translation session handling
   // they have nothing to do with the abyss server (but relate to the moses server)
@@ -1352,8 +1352,8 @@ FindParam(const string &paramSwitch, int argc, char const* argv[])
  * \param argv values of paramters on command line */
 void
 Parameter::
-OverwriteParam(const string &paramSwitch, const string &paramName, 
-	       int argc, char const* argv[])
+OverwriteParam(const string &paramSwitch, const string &paramName,
+               int argc, char const* argv[])
 {
   int startPos = -1;
   for (int i = 0 ; i < argc ; i++) {
