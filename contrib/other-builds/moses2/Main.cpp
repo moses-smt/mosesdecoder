@@ -14,7 +14,7 @@ using namespace std;
 istream &GetInputStream(Parameter &params)
 {
 	const PARAM_VEC *vec = params.GetParam("input-file");
-	if (vec) {
+	if (vec && vec->size()) {
 		Moses::InputFileStream *stream = new Moses::InputFileStream(vec->at(0));
 		return *stream;
 	}
