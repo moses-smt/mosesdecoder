@@ -208,8 +208,8 @@ Phrase TrellisPath::GetTargetPhrase() const
 
 Phrase TrellisPath::GetSurfacePhrase() const
 {
-  const std::vector<FactorType> &outputFactor 
-    = manager().options().output.factor_order;
+  const std::vector<FactorType> &outputFactor
+  = manager().options().output.factor_order;
   // = StaticData::Instance().GetOutputFactorOrder();
   Phrase targetPhrase = GetTargetPhrase();
   Phrase ret(targetPhrase.GetSize());

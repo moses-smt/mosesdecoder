@@ -160,9 +160,9 @@ protected:
 
   //! load decoding steps
   void LoadDecodeGraphs();
-  void LoadDecodeGraphsOld(const std::vector<std::string> &mappingVector, 
+  void LoadDecodeGraphsOld(const std::vector<std::string> &mappingVector,
                            const std::vector<size_t> &maxChartSpans);
-  void LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, 
+  void LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector,
                            const std::vector<size_t> &maxChartSpans);
 
   void NoCache();
@@ -245,11 +245,11 @@ public:
   const std::vector<FactorType> &GetInputFactorOrder() const {
     return m_options.input.factor_order;
   }
-  
+
   const std::vector<FactorType> &GetOutputFactorOrder() const {
     return m_options.output.factor_order;
   }
-  
+
   inline bool GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
   }

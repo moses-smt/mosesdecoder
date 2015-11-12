@@ -158,13 +158,13 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
  * \param lbrackStr xml tag's left bracket string, typically "<"
  * \param rbrackStr xml tag's right bracket string, typically ">"
  */
-bool 
-ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption*> &res, 
-		       ReorderingConstraint &reorderingConstraint, 
-		       vector< size_t > &walls, 
-		       std::vector< std::pair<size_t, std::string> > &placeholders,
-		       int offset, const std::string& lbrackStr, 
-		       const std::string& rbrackStr)
+bool
+ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption*> &res,
+                       ReorderingConstraint &reorderingConstraint,
+                       vector< size_t > &walls,
+                       std::vector< std::pair<size_t, std::string> > &placeholders,
+                       int offset, const std::string& lbrackStr,
+                       const std::string& rbrackStr)
 {
   //parse XML markup in translation line
 

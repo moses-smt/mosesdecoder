@@ -43,10 +43,10 @@ protected:
     return m_sourceChart[startPos][endPos - startPos];
   }
 
-  bool ProcessAndStripXMLTags(AllOptions const& opts, std::string &line, 
-			      std::vector<XMLParseOutput> &sourceLabels, 
-			      std::vector<XmlOption*> &res);
-  
+  bool ProcessAndStripXMLTags(AllOptions const& opts, std::string &line,
+                              std::vector<XMLParseOutput> &sourceLabels,
+                              std::vector<XmlOption*> &res);
+
 public:
   TreeInput() : Sentence() { }
 

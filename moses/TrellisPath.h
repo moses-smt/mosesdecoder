@@ -47,7 +47,7 @@ class TrellisPath
 
 protected:
   std::vector<const Hypothesis *> m_path; //< list of hypotheses/arcs
-  size_t m_prevEdgeChanged; 
+  size_t m_prevEdgeChanged;
   /**< the last node that was wiggled to create this path
      , or NOT_FOUND if this path is the best trans so consist of only hypos
   */
@@ -60,7 +60,7 @@ protected:
 
   void InitTotalScore();
 
-  Manager const& manager() const { 
+  Manager const& manager() const {
     UTIL_THROW_IF2(m_path.size() == 0, "zero-length trellis path");
     return m_path[0]->GetManager();
   }
