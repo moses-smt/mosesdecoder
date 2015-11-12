@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include "Parameter.h"
-#include "moses/InputFileStream.h"
+#include "InputFileStream.h"
 #include "util/string_stream.hh"
 #include "util/exception.hh"
 #include "util/random.hh"
@@ -1363,7 +1363,7 @@ bool
 Parameter::
 ReadConfigFile(const string &filePath )
 {
-  Moses::InputFileStream inFile(filePath);
+  InputFileStream inFile(filePath);
   string line, paramName;
   while(getline(inFile, line)) {
     // comments

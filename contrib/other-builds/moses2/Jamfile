@@ -39,6 +39,7 @@ import path ;
  	 	Search/Stacks.cpp 
 		legacy/Bitmap.cpp
 		legacy/Bitmaps.cpp
+		legacy/InputFileStream.cpp
 		legacy/Parameter.cpp
 		legacy/Range.cpp
 		legacy/SquareMatrix.cpp

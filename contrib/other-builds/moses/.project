@@ -2431,6 +2431,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/NBestOptions.h</locationURI>
 		</link>
 		<link>
+			<name>parameters/OOVHandlingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OOVHandlingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/OOVHandlingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OOVHandlingOptions.h</locationURI>
+		</link>
+		<link>
 			<name>parameters/OptionsBaseClass.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OptionsBaseClass.cpp</locationURI>

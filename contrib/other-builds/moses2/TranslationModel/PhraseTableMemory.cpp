@@ -13,7 +13,7 @@
 #include "../System.h"
 #include "../Scores.h"
 #include "../InputPaths.h"
-#include "moses/InputFileStream.h"
+#include "../legacy/InputFileStream.h"
 
 using namespace std;
 
@@ -100,7 +100,7 @@ void PhraseTableMemory::Load(System &system)
 
 	MemPool tmpPool;
 	vector<string> toks;
-	Moses::InputFileStream strme(m_path);
+	InputFileStream strme(m_path);
 	string line;
 	while (getline(strme, line)) {
 		toks.clear();
