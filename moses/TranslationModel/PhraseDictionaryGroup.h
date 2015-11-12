@@ -31,11 +31,24 @@
 namespace Moses
 {
 
+struct PDGroupPhrase {
+  TargetPhrase* m_targetPhrase;
+  std::vector<float> m_scores;
+  std::vector<bool> m_seenBy;
+
+  PDGroupPhrase() : m_targetPhrase(NULL) { }
+
+  PDGroupPhrase(TargetPhrase* targetPhrase, const std::vector<float>& scores, const size_t nModels)
+    : m_targetPhrase(targetPhrase),
+      m_scores(scores),
+      m_seenBy(nModels, false) { }
+};
+
 /** Combines multiple phrase tables into a single interface.  Each member phrase
  * table scores each phrase and a single set of translations/scores is returned.
- * If a phrase is not in one of the tables, its scores are zero-filled.  Use the
- * "restrict" option to restrict phrases to those in the table-limit of the
- * first member table, intended to be a "union" table built on all data.
+ * If a phrase is not in one of the tables, its scores are zero-filled unless
+ * otherwise specified.  See model combination section of Moses advanced feature
+ * documentation.
  */
 class PhraseDictionaryGroup: public PhraseDictionary
 {
@@ -66,11 +79,17 @@ public:
 protected:
   std::vector<std::string> m_memberPDStrs;
   std::vector<PhraseDictionary*> m_memberPDs;
+  std::vector<FeatureFunction*> m_pdFeature;
   size_t m_numModels;
+  // restrict option
   bool m_restrict;
+  // default-scores option
   bool m_haveDefaultScores;
   std::vector<float> m_defaultScores;
-  std::vector<FeatureFunction*> m_pdFeature;
+  // default-average-others option
+  bool m_defaultAverageOthers;
+  size_t m_scoresToAverage;
+  size_t m_scoresPerModel;
 
   typedef std::vector<TargetPhraseCollection::shared_ptr > PhraseCache;
 #ifdef WITH_THREADS

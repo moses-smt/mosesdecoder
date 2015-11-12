@@ -34,7 +34,10 @@ PhraseDictionaryGroup::PhraseDictionaryGroup(const string &line)
   : PhraseDictionary(line, true),
     m_numModels(0),
     m_restrict(false),
-    m_haveDefaultScores(false)
+    m_haveDefaultScores(false),
+    m_defaultAverageOthers(false),
+    m_scoresToAverage(0),
+    m_scoresPerModel(0)
 {
   ReadParameters();
 }
@@ -49,6 +52,9 @@ void PhraseDictionaryGroup::SetParameter(const string& key, const string& value)
   } else if (key =="default-scores") {
     m_haveDefaultScores = true;
     m_defaultScores = Scan<float>(Tokenize(value, ","));
+  } else if (key =="default-average-others") {
+    m_defaultAverageOthers = true;
+    m_scoresToAverage = Scan<size_t>(value);
   } else {
     PhraseDictionary::SetParameter(key, value);
   }
@@ -67,7 +73,14 @@ void PhraseDictionaryGroup::Load()
       if (pd->GetScoreProducerDescription() == pdName) {
         pdFound = true;
         m_memberPDs.push_back(pd);
-        componentWeights += pd->GetNumScoreComponents();
+        size_t nScores = pd->GetNumScoreComponents();
+        componentWeights += nScores;
+        if (m_scoresPerModel == 0) {
+          m_scoresPerModel = nScores;
+        } else if (m_defaultAverageOthers) {
+          UTIL_THROW_IF2(nScores != m_scoresPerModel,
+                         "Member models must have the same number of scores when using default-average-others");
+        }
       }
     }
     UTIL_THROW_IF2(!pdFound,
@@ -132,11 +145,10 @@ TargetPhraseCollection::shared_ptr
 PhraseDictionaryGroup::
 CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
 {
-  // Aggregation of phrases and the scores that will be applied to them
-  vector<TargetPhrase*> allPhrases;
-  // Maps phrase from member model to <phrase copy, scores>
-  typedef unordered_map<const TargetPhrase*, pair<TargetPhrase*, vector<float> >, UnorderedComparer<Phrase>, UnorderedComparer<Phrase> > PhraseMap;
-  PhraseMap allScores;
+  // Aggregation of phrases and corresponding statistics (scores, models seen by)
+  vector<TargetPhrase*> phraseList;
+  typedef unordered_map<const TargetPhrase*, PDGroupPhrase, UnorderedComparer<Phrase>, UnorderedComparer<Phrase> > PhraseMap;
+  PhraseMap phraseMap;
 
   // For each model
   size_t offset = 0;
@@ -154,8 +166,8 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
         // Phrase not in collection -> add if unrestricted or first model
-        PhraseMap::iterator iter = allScores.find(targetPhrase);
-        if (iter == allScores.end()) {
+        PhraseMap::iterator iter = phraseMap.find(targetPhrase);
+        if (iter == phraseMap.end()) {
           if (m_restrict && i > 0) {
             continue;
           }
@@ -171,31 +183,81 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           // Zero out scores from original phrase table
           phrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
           // Add phrase entry
-          allPhrases.push_back(phrase);
-          allScores[targetPhrase] = make_pair(phrase, vector<float>(m_defaultScores));
+          phraseList.push_back(phrase);
+          phraseMap[targetPhrase] = PDGroupPhrase(phrase, m_defaultScores, m_numModels);
         } else {
           // For existing phrases: merge extra scores (such as lr-func scores for mmsapt)
-          TargetPhrase* phrase = iter->second.first;
+          TargetPhrase* phrase = iter->second.m_targetPhrase;
           BOOST_FOREACH(const TargetPhrase::ScoreCache_t::value_type pair, targetPhrase->GetExtraScores()) {
             phrase->SetExtraScores(pair.first, pair.second);
           }
         }
-        vector<float>& scores = allScores.find(targetPhrase)->second.second;
+        // Don't repeat lookup if phrase already found
+        PDGroupPhrase& pdgPhrase = (iter == phraseMap.end()) ? phraseMap.find(targetPhrase)->second : iter->second;
 
         // Copy scores from this model
         for (size_t j = 0; j < pd.GetNumScoreComponents(); ++j) {
-          scores[offset + j] = raw_scores[j];
+          pdgPhrase.m_scores[offset + j] = raw_scores[j];
         }
+
+        // Phrase seen by this model
+        pdgPhrase.m_seenBy[i] = true;
       }
     }
     offset += pd.GetNumScoreComponents();
   }
 
-  // Apply scores to phrases and add them to return collection
+  // Finalize scores and add phrases to return collection
   TargetPhraseCollection::shared_ptr ret(new TargetPhraseCollection);
   const vector<FeatureFunction*> pd_feature_const(m_pdFeature);
-  BOOST_FOREACH(TargetPhrase* phrase, allPhrases) {
-    phrase->GetScoreBreakdown().Assign(this, allScores.find(phrase)->second.second);
+  BOOST_FOREACH(TargetPhrase* phrase, phraseList) {
+    PDGroupPhrase& pdgPhrase = phraseMap.find(phrase)->second;
+
+    // Average other-model scores to fill in defaults when models have not seen
+    // this phrase
+    if (m_defaultAverageOthers) {
+      bool seenByAll = true;
+      for (size_t i = 0; i < m_numModels; ++i) {
+        if (!pdgPhrase.m_seenBy[i]) {
+          seenByAll = false;
+          break;
+        }
+      }
+      // Average seen scores, limited to specified number (e.g. model can have
+      // 10 scores but you only want to average 8, leaving the last 2 as 0s)
+      if (!seenByAll) {
+        vector<float> avgScores(m_scoresToAverage, 0);
+        size_t seenBy = 0;
+        size_t offset = 0;
+        // sum
+        for (size_t i = 0; i < m_numModels; ++i) {
+          if (pdgPhrase.m_seenBy[i]) {
+            for (size_t j = 0; j < m_scoresToAverage; ++j) {
+              avgScores[j] += pdgPhrase.m_scores[offset + j];
+            }
+            seenBy += 1;
+          }
+          offset += m_scoresPerModel;
+        }
+        // divide
+        for (size_t j = 0; j < m_scoresToAverage; ++j) {
+          avgScores[j] /= seenBy;
+        }
+        // copy
+        offset = 0;
+        for (size_t i = 0; i < m_numModels; ++i) {
+          if (!pdgPhrase.m_seenBy[i]) {
+            for (size_t j = 0; j < m_scoresToAverage; ++j) {
+              pdgPhrase.m_scores[offset + j] = avgScores[j];
+            }
+          }
+          offset += m_scoresPerModel;
+        }
+      }
+    }
+
+    // Assign scores
+    phrase->GetScoreBreakdown().Assign(this, pdgPhrase.m_scores);
     // Correct future cost estimates and total score
     phrase->EvaluateInIsolation(src, pd_feature_const);
     ret->Add(phrase);
@@ -224,14 +286,6 @@ PhraseDictionaryGroup::
 CleanUpAfterSentenceProcessing(const InputType &source)
 {
   GetPhraseCache().clear();
-  // PhraseCache &ref = GetPhraseCache();
-  // for (PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) {
-  //   delete *it;
-  // }
-
-  // PhraseCache temp;
-  // temp.swap(ref);
-
   CleanUpComponentModels(source);
 }
 
