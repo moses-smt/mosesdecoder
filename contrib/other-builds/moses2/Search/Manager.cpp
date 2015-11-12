@@ -33,7 +33,7 @@ void Manager::Init()
 	// init pools etc
 	m_pool = &system.GetManagerPool();
 	m_hypoRecycle = &system.GetHypoRecycle();
-	m_initPhrase = new TargetPhrase(GetPool(), system, 0);
+	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), system, 0);
 
 	// create input phrase obj
 	FactorCollection &vocab = system.vocab;
