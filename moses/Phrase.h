@@ -97,16 +97,17 @@ public:
   /** destructor */
   virtual ~Phrase();
 
-  /** Fills phrase with words from format string, typically from phrase table or sentence input
-  	* \param factorOrder factor types of each element in 2D string vector
-  	* \param phraseString formatted input string to parse
-  	*	\param factorDelimiter delimiter between factors.
+  /**
+   * Fills phrase with words from format string, typically from phrase table or sentence input
+   *
+   * \param factorOrder  factor types of each element in 2D string vector
+   * \param phraseString formatted input string to parse
+   * \param lhs          returns the non-terminal Word for the left-hand side of an SCFG rule, may be NULL for phrase-based
   */
-  void CreateFromString(FactorDirection direction
-                        , const std::vector<FactorType> &factorOrder
-                        , const StringPiece &phraseString
-                        // , const StringPiece &factorDelimiter // never used [UG]
-                        , Word **lhs);
+  void CreateFromString(FactorDirection direction,
+                        const std::vector<FactorType> &factorOrder,
+                        const StringPiece &phraseString,
+                        Word **lhs);
 
   /**	copy factors from the other phrase to this phrase.
   	IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
