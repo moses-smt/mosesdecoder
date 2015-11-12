@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <ostream>
 #include <string>
-#include "Util.h"
 #include "util/string_piece.hh"
 
 struct FactorFriend;
