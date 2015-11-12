@@ -12,7 +12,7 @@
 
 using namespace std;
 
-PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str)
+PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab, const std::string &str)
 {
 	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();
@@ -24,7 +24,7 @@ PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, Moses::FactorCollection 
 	return ret;
 }
 
-void PhraseImpl::CreateFromString(Moses::FactorCollection &vocab, const std::vector<std::string> &toks)
+void PhraseImpl::CreateFromString(FactorCollection &vocab, const std::vector<std::string> &toks)
 {
 	for (size_t i = 0; i < m_size; ++i) {
 		Word &word = (*this)[i];

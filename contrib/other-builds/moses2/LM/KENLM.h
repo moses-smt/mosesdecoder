@@ -11,7 +11,8 @@
 #include <boost/shared_ptr.hpp>
 #include "../FF/StatefulFeatureFunction.h"
 #include "lm/model.hh"
-#include "moses/Factor.h"
+#include "../legacy/Factor.h"
+#include "moses/TypeDef.h"
 
 class Word;
 
@@ -46,8 +47,8 @@ protected:
   std::string m_path;
   Moses::FactorType m_factorType;
   bool m_lazy;
-  const Moses::Factor *m_bos;
-  const Moses::Factor *m_eos;
+  const Factor *m_bos;
+  const Factor *m_eos;
 
   typedef lm::ngram::ProbingModel Model;
   boost::shared_ptr<Model> m_ngram;

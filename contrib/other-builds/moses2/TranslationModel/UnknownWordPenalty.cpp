@@ -42,7 +42,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 
 	const SubPhrase &source = inputPath.subPhrase;
 	const Word &sourceWord = source[0];
-	const Moses::Factor *factor = sourceWord[0];
+	const Factor *factor = sourceWord[0];
 
 	TargetPhrases *tps = new TargetPhrases();
 
@@ -52,8 +52,8 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 	TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
 	Word &word = (*target)[0];
 
-	//Moses::FactorCollection &fc = system.vocab;
-	//const Moses::Factor *factor = fc.AddFactor("SSS", false);
+	//FactorCollection &fc = system.vocab;
+	//const Factor *factor = fc.AddFactor("SSS", false);
 	word[0] = factor;
 
 	Scores &scores = target->GetScores();

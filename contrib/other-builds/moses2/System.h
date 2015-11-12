@@ -12,7 +12,7 @@
 #include "Weights.h"
 #include "MemPool.h"
 #include "Recycler.h"
-#include "moses/FactorCollection.h"
+#include "legacy/FactorCollection.h"
 #include "legacy/Parameter.h"
 
 class FeatureFunction;
@@ -29,7 +29,7 @@ public:
 	Recycler<Hypothesis*> &GetHypoRecycle() const;
 
     const Parameter &params;
-    mutable Moses::FactorCollection vocab;
+    mutable FactorCollection vocab;
     FeatureFunctions featureFunctions;
     Weights weights;
     std::vector<const PhraseTable*> mappings;

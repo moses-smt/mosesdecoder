@@ -11,7 +11,7 @@
 #include "../FF/StatefulFeatureFunction.h"
 #include "../TypeDef.h"
 #include "../MorphoTrie/MorphTrie.h"
-#include "moses/Factor.h"
+#include "../legacy/Factor.h"
 #include "moses/TypeDef.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -70,16 +70,16 @@ protected:
 	Moses::FactorType m_factorType;
 	size_t m_order;
 
-    MorphTrie<const Moses::Factor*, LMScores> m_root;
+    MorphTrie<const Factor*, LMScores> m_root;
     SCORE m_oov;
-    const Moses::Factor *m_bos;
-    const Moses::Factor *m_eos;
+    const Factor *m_bos;
+    const Factor *m_eos;
 
-    void ShiftOrPush(std::vector<const Moses::Factor*> &context, const Moses::Factor *factor) const;
-    std::pair<SCORE, void*> Score(const std::vector<const Moses::Factor*> &context) const;
-    SCORE BackoffScore(const std::vector<const Moses::Factor*> &context) const;
+    void ShiftOrPush(std::vector<const Factor*> &context, const Factor *factor) const;
+    std::pair<SCORE, void*> Score(const std::vector<const Factor*> &context) const;
+    SCORE BackoffScore(const std::vector<const Factor*> &context) const;
 
-    void DebugContext(const std::vector<const Moses::Factor*> &context) const;
+    void DebugContext(const std::vector<const Factor*> &context) const;
 };
 
 #endif /* LANGUAGEMODEL_H_ */

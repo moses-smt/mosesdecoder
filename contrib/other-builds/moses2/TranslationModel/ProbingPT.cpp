@@ -32,14 +32,14 @@ void ProbingPT::Load(System &system)
 
   m_unkId = 456456546456;
 
-  Moses::FactorCollection &vocab = system.vocab;
+  FactorCollection &vocab = system.vocab;
 
   // source vocab
   const std::map<uint64_t, std::string> &sourceVocab = m_engine->getSourceVocab();
   std::map<uint64_t, std::string>::const_iterator iterSource;
   for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end(); ++iterSource) {
 	const string &wordStr = iterSource->second;
-	const Moses::Factor *factor = vocab.AddFactor(wordStr);
+	const Factor *factor = vocab.AddFactor(wordStr);
 
 	uint64_t probingId = iterSource->first;
 
@@ -53,7 +53,7 @@ void ProbingPT::Load(System &system)
   std::map<unsigned int, std::string>::const_iterator iter;
   for (iter = probingVocab.begin(); iter != probingVocab.end(); ++iter) {
 	const string &wordStr = iter->second;
-	const Moses::Factor *factor = vocab.AddFactor(wordStr);
+	const Factor *factor = vocab.AddFactor(wordStr);
 
 	unsigned int probingId = iter->first;
 
@@ -64,7 +64,7 @@ void ProbingPT::Load(System &system)
 }
 
 
-const Moses::Factor *ProbingPT::GetTargetFactor(uint64_t probingId) const
+const Factor *ProbingPT::GetTargetFactor(uint64_t probingId) const
 {
   TargetVocabMap::right_map::const_iterator iter;
   iter = m_vocabMap.right.find(probingId);
@@ -76,7 +76,7 @@ const Moses::Factor *ProbingPT::GetTargetFactor(uint64_t probingId) const
   }
 }
 
-uint64_t ProbingPT::GetSourceProbingId(const Moses::Factor *factor) const
+uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
 {
   SourceVocabMap::left_map::const_iterator iter;
   iter = m_sourceVocabMap.left.find(factor);
@@ -145,7 +145,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
   // words
   for (size_t i = 0; i < size; ++i) {
     uint64_t probingId = probingPhrase[i];
-    const Moses::Factor *factor = GetTargetFactor(probingId);
+    const Factor *factor = GetTargetFactor(probingId);
     assert(factor);
 
     Word &word = (*tp)[i];
@@ -180,7 +180,7 @@ std::vector<uint64_t> ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sour
   size_t size = sourcePhrase.GetSize();
   std::vector<uint64_t> ret(size);
   for (size_t i = 0; i < size; ++i) {
-    const Moses::Factor *factor = sourcePhrase[i][0];
+    const Factor *factor = sourcePhrase[i][0];
     uint64_t probingId = GetSourceProbingId(factor);
     if (probingId == m_unkId) {
       ok = false;

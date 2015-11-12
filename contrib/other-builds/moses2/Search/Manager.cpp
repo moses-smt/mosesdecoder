@@ -35,7 +35,7 @@ void Manager::Init()
 	m_initPhrase = new TargetPhrase(GetPool(), system, 0);
 
 	// create input phrase obj
-	Moses::FactorCollection &vocab = system.vocab;
+	FactorCollection &vocab = system.vocab;
 
 	m_input = PhraseImpl::CreateFromString(GetPool(), vocab, m_inputStr);
 	m_inputPaths.Init(*m_input, system);

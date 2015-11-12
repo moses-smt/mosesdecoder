@@ -27,7 +27,7 @@ public:
 class PhraseImpl : public Phrase
 {
 public:
-  static PhraseImpl *CreateFromString(MemPool &pool, Moses::FactorCollection &vocab, const std::string &str);
+  static PhraseImpl *CreateFromString(MemPool &pool, FactorCollection &vocab, const std::string &str);
 
   PhraseImpl(MemPool &pool, size_t size);
   virtual ~PhraseImpl();
@@ -48,7 +48,7 @@ protected:
   size_t m_size;
   Word *m_words;
 
-  void CreateFromString(Moses::FactorCollection &vocab, const std::vector<std::string> &toks);
+  void CreateFromString(FactorCollection &vocab, const std::vector<std::string> &toks);
 
 };
 

@@ -36,7 +36,7 @@ struct KenLMState : public FFState {
 class MappingBuilder : public lm::EnumerateVocab
 {
 public:
-  MappingBuilder(Moses::FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping)
+  MappingBuilder(FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping)
     : m_factorCollection(factorCollection), m_mapping(mapping) {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
@@ -49,7 +49,7 @@ public:
   }
 
 private:
-  Moses::FactorCollection &m_factorCollection;
+  FactorCollection &m_factorCollection;
   std::vector<lm::WordIndex> &m_mapping;
 };
 
@@ -68,7 +68,7 @@ KENLM::~KENLM()
 
 void KENLM::Load(System &system)
 {
-  Moses::FactorCollection &fc = system.vocab;
+  FactorCollection &fc = system.vocab;
 
   m_bos = fc.AddFactor("<s>", false);
   m_eos = fc.AddFactor("</s>", false);
@@ -76,7 +76,7 @@ void KENLM::Load(System &system)
   lm::ngram::Config config;
   config.messages = NULL;
 
-  Moses::FactorCollection &collection = system.vocab;
+  FactorCollection &collection = system.vocab;
   MappingBuilder builder(collection, m_lmIdLookup);
   config.enumerate_vocab = &builder;
   config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
@@ -90,7 +90,7 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
 	  m_path = value;
   }
   else if (key == "factor") {
-	  m_factorType = Scan<Moses::FactorType>(value);
+	  m_factorType = Scan<FactorType>(value);
   }
   else if (key == "lazyken") {
 	  m_lazy = Scan<bool>(value);

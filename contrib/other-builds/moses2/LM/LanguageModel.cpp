@@ -26,27 +26,27 @@ struct LMState : public PointerState
 	  // uninitialised
   }
 
-  void Set(MemPool &pool, void *lms, const std::vector<const Moses::Factor*> &context)
+  void Set(MemPool &pool, void *lms, const std::vector<const Factor*> &context)
   {
 	  lmstate = lms;
 
 	  numWords = context.size();
-	  lastWords = (const Moses::Factor**) pool.Allocate(sizeof(const Moses::Factor*) * numWords);
+	  lastWords = (const Factor**) pool.Allocate(sizeof(const Factor*) * numWords);
 	  for (size_t i = 0; i < numWords; ++i) {
 		  lastWords[i] = context[i];
 	  }
   }
 
-  void Init(MemPool &pool, const Moses::Factor *factor)
+  void Init(MemPool &pool, const Factor *factor)
   {
 	  lmstate = NULL;
 	  numWords = 1;
-	  lastWords = (const Moses::Factor**) pool.Allocate(sizeof(const Moses::Factor*));
+	  lastWords = (const Factor**) pool.Allocate(sizeof(const Factor*));
 	  lastWords[0] = factor;
   }
 
   size_t numWords;
-  const Moses::Factor** lastWords;
+  const Factor** lastWords;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ LanguageModel::~LanguageModel() {
 
 void LanguageModel::Load(System &system)
 {
-  Moses::FactorCollection &fc = system.vocab;
+  FactorCollection &fc = system.vocab;
 
   m_bos = fc.AddFactor("<s>", false);
   m_eos = fc.AddFactor("</s>", false);
@@ -97,7 +97,7 @@ void LanguageModel::Load(System &system)
 	  // ngram
 	  vector<string> key = Tokenize(substrings[1], " ");
 
-	  vector<const Moses::Factor*> factorKey(key.size());
+	  vector<const Factor*> factorKey(key.size());
 	  for (size_t i = 0; i < key.size(); ++i) {
 		  factorKey[factorKey.size() - i - 1] = fc.AddFactor(key[i], false);
 	  }
@@ -113,7 +113,7 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
 	  m_path = value;
   }
   else if (key == "factor") {
-	  m_factorType = Scan<Moses::FactorType>(value);
+	  m_factorType = Scan<FactorType>(value);
   }
   else if (key == "order") {
 	  m_order = Scan<size_t>(value);
@@ -149,12 +149,12 @@ LanguageModel::EvaluateInIsolation(const System &system,
 
 	SCORE score = 0;
 	SCORE nonFullScore = 0;
-	vector<const Moses::Factor*> context;
+	vector<const Factor*> context;
 //	context.push_back(m_bos);
 
 	context.reserve(m_order);
 	for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-		const Moses::Factor *factor = targetPhrase[i][m_factorType];
+		const Factor *factor = targetPhrase[i][m_factorType];
 		ShiftOrPush(context, factor);
 
 		if (context.size() == m_order) {
@@ -183,7 +183,7 @@ void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 	size_t numWords = prevLMState.numWords;
 
 	// context is held backwards
-	vector<const Moses::Factor*> context(numWords);
+	vector<const Factor*> context(numWords);
 	for (size_t i = 0; i < numWords; ++i) {
 		context[i] = prevLMState.lastWords[i];
 	}
@@ -194,7 +194,7 @@ void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 	const PhraseImpl &tp = hypo.GetTargetPhrase();
 	for (size_t i = 0; i < tp.GetSize(); ++i) {
 		const Word &word = tp[i];
-		const Moses::Factor *factor = word[m_factorType];
+		const Factor *factor = word[m_factorType];
 		ShiftOrPush(context, factor);
 		fromScoring = Score(context);
 		score += fromScoring.first;
@@ -226,7 +226,7 @@ void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 	stateCast.Set(pool, fromScoring.second, context);
 }
 
-void LanguageModel::ShiftOrPush(std::vector<const Moses::Factor*> &context, const Moses::Factor *factor) const
+void LanguageModel::ShiftOrPush(std::vector<const Factor*> &context, const Factor *factor) const
 {
 	if (context.size() < m_order) {
 		context.resize(context.size() + 1);
@@ -240,14 +240,14 @@ void LanguageModel::ShiftOrPush(std::vector<const Moses::Factor*> &context, cons
 	context[0] = factor;
 }
 
-std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Factor*> &context) const
+std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Factor*> &context) const
 {
 	//cerr << "context=";
 	//DebugContext(context);
 
 	std::pair<SCORE, void*> ret;
 
-	typedef Node<const Moses::Factor*, LMScores> LMNode;
+	typedef Node<const Factor*, LMScores> LMNode;
 	const LMNode *node = m_root.getNode(context);
 	if (node) {
 		ret.first = node->getValue().prob;
@@ -255,13 +255,13 @@ std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Fact
 	}
 	else {
 	  SCORE backoff = 0;
-	  std::vector<const Moses::Factor*> backOffContext(context.begin() + 1, context.end());
+	  std::vector<const Factor*> backOffContext(context.begin() + 1, context.end());
 	  node = m_root.getNode(backOffContext);
 	  if (node) {
 		  backoff = node->getValue().backoff;
 	  }
 
-	  std::vector<const Moses::Factor*> newContext(context.begin(), context.end() - 1);
+	  std::vector<const Factor*> newContext(context.begin(), context.end() - 1);
 	  std::pair<SCORE, void*> newRet = Score(newContext);
 
 	  ret.first = backoff + newRet.first;
@@ -272,14 +272,14 @@ std::pair<SCORE, void*> LanguageModel::Score(const std::vector<const Moses::Fact
 	return ret;
 }
 
-SCORE LanguageModel::BackoffScore(const std::vector<const Moses::Factor*> &context) const
+SCORE LanguageModel::BackoffScore(const std::vector<const Factor*> &context) const
 {
 	//cerr << "backoff=";
 	//DebugContext(context);
 
 	SCORE ret;
 	size_t stoppedAtInd;
-	const Node<const Moses::Factor*, LMScores> &node = m_root.getNode(context, stoppedAtInd);
+	const Node<const Factor*, LMScores> &node = m_root.getNode(context, stoppedAtInd);
 
 	if (stoppedAtInd == context.size()) {
 		// found entire ngram
@@ -295,17 +295,17 @@ SCORE LanguageModel::BackoffScore(const std::vector<const Moses::Factor*> &conte
 		}
 
 		// recursive
-		std::vector<const Moses::Factor*> backoff(context.begin() + stoppedAtInd, context.end());
+		std::vector<const Factor*> backoff(context.begin() + stoppedAtInd, context.end());
 		ret += BackoffScore(backoff);
 	}
 
 	return ret;
 }
 
-void LanguageModel::DebugContext(const std::vector<const Moses::Factor*> &context) const
+void LanguageModel::DebugContext(const std::vector<const Factor*> &context) const
 {
 	for (size_t i = 0; i < context.size(); ++i) {
-		cerr << context[i]->ToString() << " ";
+		cerr << context[i]->GetString() << " ";
 	}
 	cerr << endl;
 }

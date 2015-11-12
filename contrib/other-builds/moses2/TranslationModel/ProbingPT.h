@@ -27,10 +27,10 @@ public:
   TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, InputPath &inputPath) const;
 
 protected:
-  typedef boost::bimap<const Moses::Factor *, uint64_t> SourceVocabMap;
+  typedef boost::bimap<const Factor *, uint64_t> SourceVocabMap;
   mutable SourceVocabMap m_sourceVocabMap;
 
-  typedef boost::bimap<const Moses::Factor *, unsigned int> TargetVocabMap;
+  typedef boost::bimap<const Factor *, unsigned int> TargetVocabMap;
   mutable TargetVocabMap m_vocabMap;
 
   uint64_t m_unkId;
@@ -41,8 +41,8 @@ protected:
 
   std::vector<uint64_t> ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const;
 
-  const Moses::Factor *GetTargetFactor(uint64_t probingId) const;
-  uint64_t GetSourceProbingId(const Moses::Factor *factor) const;
+  const Factor *GetTargetFactor(uint64_t probingId) const;
+  uint64_t GetSourceProbingId(const Factor *factor) const;
 
 };
 
