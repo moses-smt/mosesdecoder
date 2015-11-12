@@ -22,7 +22,6 @@ Manager::~Manager() {
 	delete m_bitmaps;
 	delete m_search;
 	delete m_estimatedScores;
-	delete m_initPhrase;
 
 	GetPool().Reset();
 	GetHypoRecycle().clear();
