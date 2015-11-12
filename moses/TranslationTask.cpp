@@ -54,6 +54,7 @@ boost::shared_ptr<TranslationTask>
 TranslationTask
 ::create(boost::shared_ptr<InputType> const& source)
 {
+VERBOSE(3,"TranslationTask::create(boost::shared_ptr<InputType> const& source)" << std::endl);
   boost::shared_ptr<IOWrapper> nix;
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, nix));
   ret->m_self = ret;
@@ -66,6 +67,7 @@ TranslationTask
 ::create(boost::shared_ptr<InputType> const& source,
          boost::shared_ptr<IOWrapper> const& ioWrapper)
 {
+VERBOSE(3,"TranslationTask::create(boost::shared_ptr<InputType> const& source, boost::shared_ptr<IOWrapper> const& ioWrapper)" << std::endl);
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
   ret->m_self = ret;
   ret->m_scope.reset(new ContextScope);
@@ -78,6 +80,7 @@ TranslationTask
          boost::shared_ptr<IOWrapper> const& ioWrapper,
          boost::shared_ptr<ContextScope> const& scope)
 {
+VERBOSE(3,"TranslationTask::create(boost::shared_ptr<InputType> const& source, boost::shared_ptr<IOWrapper> const& ioWrapper,boost::shared_ptr<ContextScope> const& scope)" << std::endl);
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
   ret->m_self  = ret;
   ret->m_scope = scope;
@@ -89,6 +92,7 @@ TranslationTask
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
 {
+VERBOSE(3,"TranslationTask::TranslationTask(boost::shared_ptr<InputType> const& source, boost::shared_ptr<IOWrapper> const& ioWrapper)" << std::endl);
   m_options = StaticData::Instance().options();
 }
 
@@ -171,12 +175,13 @@ interpret_dlt()
 
 void TranslationTask::Run()
 {
+VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
   UTIL_THROW_IF2(!m_source || !m_ioWrapper,
                  "Base Instances of TranslationTask must be initialized with"
                  << " input and iowrapper.");
 
   const size_t translationId = m_source->GetTranslationId();
-
+VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
 
   // report wall time spent on translation
   Timer translationTime;
