@@ -11,7 +11,7 @@
 #include "../Search/Manager.h"
 #include "../Search/Hypothesis.h"
 #include "../legacy/Util2.h"
-#include "moses/InputFileStream.h"
+#include "../legacy/InputFileStream.h"
 #include "../legacy/PointerState.h"
 #include "../legacy/Bitmap.h"
 #include "../legacy/Util2.h"
@@ -68,7 +68,7 @@ void LanguageModel::Load(System &system)
   m_bos = fc.AddFactor("<s>", false);
   m_eos = fc.AddFactor("</s>", false);
 
-  Moses::InputFileStream infile(m_path);
+  InputFileStream infile(m_path);
   size_t lineNum = 0;
   string line;
   while (getline(infile, line)) {

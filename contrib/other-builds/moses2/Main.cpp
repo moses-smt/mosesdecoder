@@ -3,7 +3,7 @@
 #include "Phrase.h"
 #include "TranslationTask.h"
 #include "Search/Manager.h"
-#include "moses/InputFileStream.h"
+#include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"
 
@@ -15,7 +15,7 @@ istream &GetInputStream(Parameter &params)
 {
 	const PARAM_VEC *vec = params.GetParam("input-file");
 	if (vec && vec->size()) {
-		Moses::InputFileStream *stream = new Moses::InputFileStream(vec->at(0));
+		InputFileStream *stream = new InputFileStream(vec->at(0));
 		return *stream;
 	}
 	else {
