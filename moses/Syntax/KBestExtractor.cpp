@@ -75,7 +75,7 @@ void KBestExtractor::Extract(
 Phrase KBestExtractor::GetOutputPhrase(const Derivation &d)
 {
   FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
-  
+
   Phrase ret(ARRAY_SIZE_INCR);
 
   const TargetPhrase &phrase = *(d.edge->shyperedge.label.translation);

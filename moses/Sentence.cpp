@@ -320,7 +320,7 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
   }
 }
 
-std::vector <ChartTranslationOptions*> 
+std::vector <ChartTranslationOptions*>
 Sentence::
 GetXmlChartTranslationOptions(AllOptions const& opts) const
 {

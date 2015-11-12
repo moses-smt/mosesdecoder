@@ -447,8 +447,8 @@ CreateTranslationOptionsForRange
     vector<TranslationOption*>::const_iterator c;
     for (c = partTransOptList.begin() ; c != partTransOptList.end() ; ++c) {
       TranslationOption *transOpt = *c;
-      if (xml_policy != XmlConstraint || 
-	  !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
+      if (xml_policy != XmlConstraint ||
+          !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
         Add(transOpt);
       }
     }

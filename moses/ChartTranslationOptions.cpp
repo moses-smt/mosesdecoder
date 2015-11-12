@@ -71,7 +71,7 @@ void ChartTranslationOptions::EvaluateWithSourceContext(const InputType &input, 
   if (inputPath.ttask.lock()->options().input.placeholder_factor != NOT_FOUND) {
     CreateSourceRuleFromInputPath();
   }
-  
+
   CollType::iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
     ChartTranslationOption &transOpt = **iter;

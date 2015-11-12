@@ -201,12 +201,12 @@ public:
   Phrase GetSubString(const Range &range) const;
   Phrase GetSubString(const Range &range, FactorType factorType) const;
 
-  //! return a string rep of the phrase; 
-  // w/ factors delimited by FactorDelimiter 
-  std::string 
-  GetStringRep(std::vector<FactorType> const& factorsToPrint, 
+  //! return a string rep of the phrase;
+  // w/ factors delimited by FactorDelimiter
+  std::string
+  GetStringRep(std::vector<FactorType> const& factorsToPrint,
                AllOptions const* opts=NULL) const;
-  
+
   TO_STRING();
 
 

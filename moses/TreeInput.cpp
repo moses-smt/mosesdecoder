@@ -22,11 +22,11 @@ namespace Moses
  * \param reorderingConstraint reordering constraint zones specified by xml
  * \param walls reordering constraint walls specified by xml
  */
-bool 
+bool
 TreeInput::
-ProcessAndStripXMLTags(AllOptions const& opts, string &line, 
-		       std::vector<XMLParseOutput> &sourceLabels, 
-		       std::vector<XmlOption*> &xmlOptions)
+ProcessAndStripXMLTags(AllOptions const& opts, string &line,
+                       std::vector<XMLParseOutput> &sourceLabels,
+                       std::vector<XmlOption*> &xmlOptions)
 {
   //parse XML markup in translation line
 
