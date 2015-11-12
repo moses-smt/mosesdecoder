@@ -359,7 +359,7 @@ void save_vocabs()
 }
 
 template<typename Token>
-size_t
+void
 build_mmTSA(string infile, string outfile)
 {
   // size_t mypid = fork();

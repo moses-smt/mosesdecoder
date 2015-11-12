@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include "moses/StaticData.h"
+#include "moses/TypeDef.h"
 
 namespace Moses {
 
@@ -45,21 +46,44 @@ namespace Moses {
     pspec = param.GetParam("xml-brackets");
     if (pspec && pspec->size()) 
       {
-	std::vector<std::string> brackets = Tokenize(pspec->at(0));
-	if(brackets.size()!=2) 
-	  {
-	    std::cerr << "invalid xml-brackets value, "
-		      << "must specify exactly 2 blank-delimited strings "
-		      << "for XML tags opening and closing brackets" << std::endl;
-	    exit(1);
-	  }
-	xml_brackets.first= brackets[0];
-	xml_brackets.second=brackets[1];
-	VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
-		<< xml_brackets.first << " and " 
-		<< xml_brackets.second << std::endl);
+        std::vector<std::string> brackets = Tokenize(pspec->at(0));
+        if(brackets.size()!=2) 
+          {
+            std::cerr << "invalid xml-brackets value, "
+                      << "must specify exactly 2 blank-delimited strings "
+                      << "for XML tags opening and closing brackets" 
+                      << std::endl;
+            exit(1);
+          }
+        
+        xml_brackets.first= brackets[0];
+        xml_brackets.second=brackets[1];
+        
+        VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
+                << xml_brackets.first << " and " 
+                << xml_brackets.second << std::endl);
       }
+
+    pspec = param.GetParam("input-factors");
+    if (pspec) factor_order = Scan<FactorType>(*pspec);
+    if (factor_order.empty()) factor_order.assign(1,0);
+    param.SetParameter(placeholder_factor, "placeholder-factor", NOT_FOUND);
+
     return true;
   }
+
+
+#ifdef HAVE_XMLRPC_C
+  bool 
+  InputOptions::
+  update(std::map<std::string,xmlrpc_c::value>const& param)
+  {
+    typedef std::map<std::string, xmlrpc_c::value> params_t;
+    params_t::const_iterator si = param.find("xml-input");
+    if (si != param.end())
+      xml_policy = Scan<XmlInputType>(xmlrpc_c::value_string(si->second));
+    return true;
+  }
+#endif
 
 }

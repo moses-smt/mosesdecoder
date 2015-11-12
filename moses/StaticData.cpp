@@ -63,7 +63,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
-  // , m_inputType(SentenceInput)
   , m_lmEnableOOVFeature(false)
   , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
@@ -131,14 +130,11 @@ StaticData
 {
   const PARAM_VEC *params;
 
-  // input type has to be specified BEFORE loading the phrase tables!
-  // m_parameter->SetParameter(m_inputType, "inputtype", SentenceInput);
-
   m_parameter->SetParameter(m_continuePartialTranslation,
                             "continue-partial-translation", false );
 
   // use of xml in input
-  m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
+  // m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
 
   // specify XML tags opening and closing brackets for XML option
   params = m_parameter->GetParam("xml-brackets");
@@ -258,24 +254,24 @@ ini_factor_maps()
     m_factorDelimiter = "";
   }
 
-  //input factors
-  params = m_parameter->GetParam("input-factors");
-  if (params) {
-    m_inputFactorOrder = Scan<FactorType>(*params);
-  }
-  if(m_inputFactorOrder.empty()) {
-    m_inputFactorOrder.push_back(0);
-  }
+  // //input factors
+  // params = m_parameter->GetParam("input-factors");
+  // if (params) {
+  //   m_inputFactorOrder = Scan<FactorType>(*params);
+  // }
+  // if(m_inputFactorOrder.empty()) {
+  //   m_inputFactorOrder.push_back(0);
+  // }
 
   //output factors
-  params = m_parameter->GetParam("output-factors");
-  if (params) {
-    m_outputFactorOrder = Scan<FactorType>(*params);
-  }
-  if(m_outputFactorOrder.empty()) {
-    // default. output factor 0
-    m_outputFactorOrder.push_back(0);
-  }
+  // params = m_parameter->GetParam("output-factors");
+  // if (params) {
+  //   m_outputFactorOrder = Scan<FactorType>(*params);
+  // }
+  // if(m_outputFactorOrder.empty()) {
+  //   // default. output factor 0
+  //   m_outputFactorOrder.push_back(0);
+  // }
 }
 
 void
@@ -283,10 +279,10 @@ StaticData::
 ini_oov_options()
 {
   // unknown word processing
-  m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
-  m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
-  m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
-  m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
+  // m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
+  // m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
+  // m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
+  // m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
 
   m_parameter->SetParameter(m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
@@ -340,8 +336,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   ini_zombie_options(); // probably dead, or maybe not
 
-  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
-                            NOT_FOUND);
+  // m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
+  // NOT_FOUND);
 
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   initialize_features();

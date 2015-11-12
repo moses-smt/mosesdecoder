@@ -12,6 +12,8 @@
 #include "MBR_Options.h"
 #include "LMBR_Options.h"
 #include "ReportingOptions.h"
+#include "OOVHandlingOptions.h"
+
 namespace Moses
 {
   struct 
@@ -26,6 +28,7 @@ namespace Moses
     MBR_Options              mbr;
     LMBR_Options            lmbr;
     ReportingOptions      output; 
+    OOVHandlingOptions       unk;
     bool mira;
 
     // StackOptions      stack;

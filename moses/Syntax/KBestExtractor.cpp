@@ -74,7 +74,7 @@ void KBestExtractor::Extract(
 // Generate the target-side yield of the derivation d.
 Phrase KBestExtractor::GetOutputPhrase(const Derivation &d)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
 
   Phrase ret(ARRAY_SIZE_INCR);
 

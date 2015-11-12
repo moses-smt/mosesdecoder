@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 #include "moses/FF/InputFeature.h"
+#include "TranslationTask.h"
 #include "util/exception.hh"
 
 #include <boost/foreach.hpp>
@@ -45,12 +46,6 @@ using namespace std;
 
 namespace Moses
 {
-
-/** helper for pruning */
-// bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
-// {
-//   return a->GetFutureScore() > b->GetFutureScore();
-// }
 
 /** constructor; since translation options are indexed by coverage span, the
  * corresponding data structure is initialized here This fn should be
@@ -198,9 +193,8 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
   const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
   const StringPiece s = f->GetString();
   bool isEpsilon = (s=="" || s==EPSILON);
-  if (StaticData::Instance().GetDropUnknown()) {
-
-
+  bool dropUnk = GetTranslationTask()->options().unk.drop;
+  if (dropUnk) {
     isDigit = s.find_first_of("0123456789");
     if (isDigit == string::npos)
       isDigit = 0;
@@ -211,7 +205,7 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
 
   TargetPhrase targetPhrase(firstPt);
 
-  if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
+  if (!(dropUnk || isEpsilon) || isDigit) {
     // add to dictionary
 
     Word &targetWord = targetPhrase.AddWord();
@@ -393,7 +387,8 @@ CreateTranslationOptionsForRange
 {
   typedef DecodeStepTranslation Tstep;
   typedef DecodeStepGeneration Gstep;
-  if ((StaticData::Instance().GetXmlInputType() != XmlExclusive)
+  XmlInputType xml_policy = m_ttask.lock()->options().input.xml_policy;
+  if ((xml_policy != XmlExclusive)
       || !HasXmlOptionsOverlappingRange(sPos,ePos)) {
 
     // partial trans opt stored in here
@@ -452,8 +447,8 @@ CreateTranslationOptionsForRange
     vector<TranslationOption*>::const_iterator c;
     for (c = partTransOptList.begin() ; c != partTransOptList.end() ; ++c) {
       TranslationOption *transOpt = *c;
-      if (StaticData::Instance().GetXmlInputType() != XmlConstraint
-          || !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
+      if (xml_policy != XmlConstraint ||
+          !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
         Add(transOpt);
       }
     }
@@ -461,9 +456,9 @@ CreateTranslationOptionsForRange
     totalEarlyPruned += oldPtoc->GetPrunedCount();
     delete oldPtoc;
     // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
-  } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(sPos,ePos))
+  } // if ((xml_policy != XmlExclusive) || !HasXmlOptionsOverlappingRange(sPos,ePos))
 
-  if (gidx == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough
+  if (gidx == 0 && xml_policy != XmlPassThrough
       && HasXmlOptionsOverlappingRange(sPos,ePos)) {
     CreateXmlOptionsForRange(sPos, ePos);
   }

@@ -853,7 +853,8 @@ void ChartManager::OutputBestHypo(OutputCollector *collector, const ChartHypothe
     outPhrase.RemoveWord(0);
     outPhrase.RemoveWord(outPhrase.GetSize() - 1);
 
-    const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+    const std::vector<FactorType> outputFactorOrder
+    = StaticData::Instance().GetOutputFactorOrder();
     string output = outPhrase.GetStringRep(outputFactorOrder);
     out << output << endl;
   } else {

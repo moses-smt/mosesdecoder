@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/string_stream.hh"
 
 /** main function of the command line version of the decoder **/
-int main(int argc, char** argv)
+int main(int argc, char const** argv)
 {
   return decoder_main(argc, argv);
 }

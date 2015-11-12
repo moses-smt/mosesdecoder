@@ -68,8 +68,8 @@ protected:
   std::vector<PhraseDictionary*> m_memberPDs;
   size_t m_numModels;
   bool m_restrict;
-  bool m_specifiedZeros;
-  std::vector<float> m_zeros;
+  bool m_haveDefaultScores;
+  std::vector<float> m_defaultScores;
   std::vector<FeatureFunction*> m_pdFeature;
 
   typedef std::vector<TargetPhraseCollection::shared_ptr > PhraseCache;
