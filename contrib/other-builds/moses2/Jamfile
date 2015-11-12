@@ -43,6 +43,7 @@ import path ;
 		legacy/Parameter.cpp
 		legacy/Range.cpp
 		legacy/SquareMatrix.cpp
+		legacy/ThreadPool.cpp
 		legacy/Util2.cpp
     
  ../../../moses//moses 

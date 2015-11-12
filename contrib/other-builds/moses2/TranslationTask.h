@@ -1,11 +1,11 @@
 #pragma once
 #include <string>
-#include "moses/ThreadPool.h"
+#include "legacy/ThreadPool.h"
 
 class System;
 class Manager;
 
-class TranslationTask : public Moses::Task
+class TranslationTask : public Task
 {
 public:
 	TranslationTask(System &system, const std::string &line);

@@ -5,7 +5,7 @@
 #include "Search/Manager.h"
 #include "moses/InputFileStream.h"
 #include "legacy/Parameter.h"
-#include "moses/ThreadPool.h"
+#include "legacy/ThreadPool.h"
 
 using namespace std;
 
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 
 	cerr << "system.numThreads=" << system.numThreads << endl;
 
-	Moses::ThreadPool pool(system.numThreads);
+	ThreadPool pool(system.numThreads);
 
 	string line;
 	while (getline(inStream, line)) {
