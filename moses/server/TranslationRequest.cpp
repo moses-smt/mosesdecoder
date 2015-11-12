@@ -168,7 +168,7 @@ void
 TranslationRequest::
 output_phrase(ostream& out, Phrase const& phrase) const
 {
-  if (!m_reportAllFactors) {
+  if (!m_options.output.ReportAllFactors) {
     for (size_t i = 0 ; i < phrase.GetSize(); ++i)
       out << *phrase.GetFactor(i, 0) << " ";
   } else out << phrase;
@@ -294,8 +294,6 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   m_withWordAlignInfo   = check(params, "word-align");
   m_withGraphInfo       = check(params, "sg");
   m_withTopts           = check(params, "topt");
-  // m_reportAllFactors    = check(params, "report-all-factors");
-  // m_nbestDistinct       = check(params, "nbest-distinct");
   m_withScoreBreakdown  = check(params, "add-score-breakdown");
   si = params.find("lambda");
   if (si != params.end()) 
