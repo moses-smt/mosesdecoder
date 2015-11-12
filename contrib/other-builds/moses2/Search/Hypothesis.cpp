@@ -46,11 +46,11 @@ Hypothesis::Hypothesis(Manager &mgr)
 	// FF states
 	const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
 	size_t numStatefulFFs = sfffs.size();
-	m_ffStates = (Moses::FFState **) pool.Allocate(sizeof(Moses::FFState*) * numStatefulFFs);
+	m_ffStates = (FFState **) pool.Allocate(sizeof(FFState*) * numStatefulFFs);
 
     BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
     	size_t statefulInd = sfff->GetStatefulInd();
-    	Moses::FFState *state = sfff->BlankState(mgr, mgr.GetInput());
+    	FFState *state = sfff->BlankState(mgr, mgr.GetInput());
     	m_ffStates[statefulInd] = state;
     }
 }
@@ -105,7 +105,7 @@ size_t Hypothesis::hash() const
 
   // states
   for (size_t i = 0; i < numStatefulFFs; ++i) {
-	const Moses::FFState *state = m_ffStates[i];
+	const FFState *state = m_ffStates[i];
 	size_t hash = state->hash();
 	boost::hash_combine(seed, hash);
   }
@@ -123,8 +123,8 @@ bool Hypothesis::operator==(const Hypothesis &other) const
 
   // states
   for (size_t i = 0; i < numStatefulFFs; ++i) {
-	const Moses::FFState &thisState = *m_ffStates[i];
-	const Moses::FFState &otherState = *other.m_ffStates[i];
+	const FFState &thisState = *m_ffStates[i];
+	const FFState &otherState = *other.m_ffStates[i];
 	if (thisState != otherState) {
 	  return false;
 	}
@@ -158,7 +158,7 @@ void Hypothesis::EmptyHypothesisState(const PhraseImpl &input)
 	const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
 	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 		  size_t statefulInd = sfff->GetStatefulInd();
-		  Moses::FFState *state = m_ffStates[statefulInd];
+		  FFState *state = m_ffStates[statefulInd];
 		  sfff->EmptyHypothesisState(*state, m_mgr, input);
 	  }
 }
@@ -168,8 +168,8 @@ void Hypothesis::EvaluateWhenApplied()
   const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 	  size_t statefulInd = sfff->GetStatefulInd();
-	  const Moses::FFState *prevState = m_prevHypo->GetState(statefulInd);
-	  Moses::FFState *thisState = m_ffStates[statefulInd];
+	  const FFState *prevState = m_prevHypo->GetState(statefulInd);
+	  FFState *thisState = m_ffStates[statefulInd];
 	  assert(prevState);
 	  sfff->EvaluateWhenApplied(m_mgr, *this, *prevState, *m_scores, *thisState);
   }

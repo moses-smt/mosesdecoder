@@ -9,7 +9,7 @@
 #define STATEFULFEATUREFUNCTION_H_
 
 #include "FeatureFunction.h"
-#include "moses/FF/FFState.h"
+#include "../legacy/FFState.h"
 
 class Hypothesis;
 
@@ -25,16 +25,16 @@ public:
 	{ return m_statefulInd; }
 
 	  //! return uninitialise state
-	  virtual Moses::FFState* BlankState(const Manager &mgr, const PhraseImpl &input) const = 0;
+	  virtual FFState* BlankState(const Manager &mgr, const PhraseImpl &input) const = 0;
 
 	  //! return the state associated with the empty hypothesis for a given sentence
-	  virtual void EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const = 0;
+	  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const = 0;
 
 	  virtual void EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,
-	    const Moses::FFState &prevState,
+	    const FFState &prevState,
 	    Scores &scores,
-		Moses::FFState &state) const = 0;
+		FFState &state) const = 0;
 
 protected:
 	  size_t m_statefulInd;

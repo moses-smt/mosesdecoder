@@ -13,7 +13,7 @@
 
 using namespace std;
 
-struct DistortionState_traditional : public Moses::FFState {
+struct DistortionState_traditional : public FFState {
   Range range;
   int first_gap;
 
@@ -52,13 +52,13 @@ Distortion::~Distortion() {
 	// TODO Auto-generated destructor stub
 }
 
-Moses::FFState* Distortion::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* Distortion::BlankState(const Manager &mgr, const PhraseImpl &input) const
 {
   MemPool &pool = mgr.GetPool();
   return new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional();
 }
 
-void Distortion::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void Distortion::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
 {
     DistortionState_traditional &stateCast = static_cast<DistortionState_traditional&>(state);
 
@@ -87,9 +87,9 @@ Distortion::EvaluateInIsolation(const System &system,
 
 void Distortion::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
-  const Moses::FFState &prevState,
+  const FFState &prevState,
   Scores &scores,
-  Moses::FFState &state) const
+  FFState &state) const
 {
 	MemPool &pool = mgr.GetPool();
 

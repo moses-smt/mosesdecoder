@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <cstddef>
-#include "moses/FF/FFState.h"
+#include "../legacy/FFState.h"
 #include "../legacy/Bitmap.h"
 #include "../Scores.h"
 #include "../TargetPhrase.h"
@@ -63,7 +63,7 @@ public:
   const TargetPhrase &GetTargetPhrase() const
   { return *m_targetPhrase; }
 
-  const Moses::FFState *GetState(size_t ind) const
+  const FFState *GetState(size_t ind) const
   { return m_ffStates[ind]; }
 
   void OutputToStream(std::ostream &out) const;
@@ -92,7 +92,7 @@ protected:
   const Range *m_range;
   const Hypothesis *m_prevHypo;
 
-  Moses::FFState **m_ffStates;
+  FFState **m_ffStates;
   Scores *m_scores;
   SCORE m_estimatedScore;
   Range m_currTargetWordsRange;

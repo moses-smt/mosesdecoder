@@ -18,13 +18,13 @@
 
 using namespace std;
 
-struct KenLMState : public Moses::FFState {
+struct KenLMState : public FFState {
   lm::ngram::State state;
   virtual size_t hash() const {
     size_t ret = hash_value(state);
     return ret;
   }
-  virtual bool operator==(const Moses::FFState& o) const {
+  virtual bool operator==(const FFState& o) const {
     const KenLMState &other = static_cast<const KenLMState &>(o);
     bool ret = state == other.state;
     return ret;
@@ -103,7 +103,7 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
   }
 }
 
-Moses::FFState* KENLM::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* KENLM::BlankState(const Manager &mgr, const PhraseImpl &input) const
 {
   MemPool &pool = mgr.GetPool();
   KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
@@ -111,7 +111,7 @@ Moses::FFState* KENLM::BlankState(const Manager &mgr, const PhraseImpl &input) c
 }
 
 //! return the state associated with the empty hypothesis for a given sentence
-void KENLM::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void KENLM::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
 {
   KenLMState &stateCast = static_cast<KenLMState&>(state);
   stateCast.state = m_ngram->BeginSentenceState();
@@ -150,9 +150,9 @@ KENLM::EvaluateInIsolation(const System &system,
 
 void KENLM::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
-  const Moses::FFState &prevState,
+  const FFState &prevState,
   Scores &scores,
-  Moses::FFState &state) const
+  FFState &state) const
 {
   KenLMState &stateCast = static_cast<KenLMState&>(state);
 

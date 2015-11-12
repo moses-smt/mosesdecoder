@@ -8,7 +8,7 @@
 #include "SkeletonStatefulFF.h"
 #include "../Search/Manager.h"
 
-class SkeletonState : public Moses::FFState
+class SkeletonState : public FFState
 {
 public:
   int targetLen;
@@ -21,7 +21,7 @@ public:
   virtual size_t hash() const {
     return (size_t) targetLen;
   }
-  virtual bool operator==(const Moses::FFState& o) const {
+  virtual bool operator==(const FFState& o) const {
     const SkeletonState& other = static_cast<const SkeletonState&>(o);
     return targetLen == other.targetLen;
   }
@@ -39,13 +39,13 @@ SkeletonStatefulFF::~SkeletonStatefulFF() {
 	// TODO Auto-generated destructor stub
 }
 
-Moses::FFState* SkeletonStatefulFF::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* SkeletonStatefulFF::BlankState(const Manager &mgr, const PhraseImpl &input) const
 {
 	MemPool &pool = mgr.GetPool();
     return new (pool.Allocate<SkeletonState>()) SkeletonState();
 }
 
-void SkeletonStatefulFF::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void SkeletonStatefulFF::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
 {
 	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
 	stateCast.targetLen = 0;
@@ -61,9 +61,9 @@ SkeletonStatefulFF::EvaluateInIsolation(const System &system,
 
 void SkeletonStatefulFF::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
-  const Moses::FFState &prevState,
+  const FFState &prevState,
   Scores &scores,
-  Moses::FFState &state) const
+  FFState &state) const
 {
 	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
 	stateCast.targetLen = hypo.GetTargetPhrase().GetSize();

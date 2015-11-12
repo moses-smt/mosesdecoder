@@ -12,13 +12,13 @@
 #include "../Search/Hypothesis.h"
 #include "../legacy/Util2.h"
 #include "moses/InputFileStream.h"
-#include "moses/LM/PointerState.h"
+#include "../legacy/PointerState.h"
 #include "../legacy/Bitmap.h"
 #include "../legacy/Util2.h"
 
 using namespace std;
 
-struct LMState : public Moses::PointerState
+struct LMState : public PointerState
 {
   LMState()
   :PointerState()
@@ -123,13 +123,13 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
   }
 }
 
-Moses::FFState* LanguageModel::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* LanguageModel::BlankState(const Manager &mgr, const PhraseImpl &input) const
 {
 	MemPool &pool = mgr.GetPool();
 	return new (pool.Allocate<LMState>()) LMState();
 }
 
-void LanguageModel::EmptyHypothesisState(Moses::FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void LanguageModel::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
 {
 	LMState &stateCast = static_cast<LMState&>(state);
 
@@ -175,9 +175,9 @@ LanguageModel::EvaluateInIsolation(const System &system,
 
 void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
-  const Moses::FFState &prevState,
+  const FFState &prevState,
   Scores &scores,
-  Moses::FFState &state) const
+  FFState &state) const
 {
 	const LMState &prevLMState = static_cast<const LMState &>(prevState);
 	size_t numWords = prevLMState.numWords;
