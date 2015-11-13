@@ -230,13 +230,6 @@ public:
     m_ffStates[idx] = state;
   }
 
-  // Added by oliver.wilson@ed.ac.uk for async lm stuff.
-  void EvaluateWhenApplied(const StatefulFeatureFunction &sfff, int state_idx);
-  void EvaluateWhenApplied(const StatelessFeatureFunction &slff);
-
-  //! target span that trans opt would populate if applied to this hypo. Used for alignment check
-  size_t GetNextStartPos(const TranslationOption &transOpt) const;
-
   std::vector<std::vector<unsigned int> > *GetLMStats() const {
     return NULL;
   }

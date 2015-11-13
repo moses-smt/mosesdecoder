@@ -141,30 +141,6 @@ AddArc(Hypothesis *loserHypo)
   m_arcList->push_back(loserHypo);
 }
 
-void
-Hypothesis::
-EvaluateWhenApplied(StatefulFeatureFunction const& sfff, int state_idx)
-{
-  const StaticData &staticData = StaticData::Instance();
-  if (! staticData.IsFeatureFunctionIgnored( sfff )) {
-    // Manager& manager = this->GetManager(); //Get the manager and the ttask
-    // ttasksptr const& ttask = manager.GetTtask();
-    FFState const* prev = m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL;
-    m_ffStates[state_idx]
-    = sfff.EvaluateWhenApplied(*this, prev, &m_currScoreBreakdown);
-  }
-}
-
-void
-Hypothesis::
-EvaluateWhenApplied(const StatelessFeatureFunction& slff)
-{
-  const StaticData &staticData = StaticData::Instance();
-  if (! staticData.IsFeatureFunctionIgnored( slff )) {
-    slff.EvaluateWhenApplied(*this, &m_currScoreBreakdown);
-  }
-}
-
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
@@ -172,6 +148,8 @@ void
 Hypothesis::
 EvaluateWhenApplied(float estimatedScore)
 {
+  const StaticData &staticData = StaticData::Instance();
+
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StartTimeOtherScore();
   }
@@ -186,15 +164,16 @@ EvaluateWhenApplied(float estimatedScore)
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     const StatelessFeatureFunction &ff = *sfs[i];
-    EvaluateWhenApplied(ff);
+    if(!staticData.IsFeatureFunctionIgnored(ff)) {
+      ff.EvaluateWhenApplied(*this, &m_currScoreBreakdown);
+    }
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     const StatefulFeatureFunction &ff = *ffs[i];
-    const StaticData &staticData = StaticData::Instance();
-    if (! staticData.IsFeatureFunctionIgnored(ff)) {
+    if(!staticData.IsFeatureFunctionIgnored(ff)) {
       FFState const* s = m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL;
       m_ffStates[i] = ff.EvaluateWhenApplied(*this, s, &m_currScoreBreakdown);
     }
