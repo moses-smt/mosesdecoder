@@ -391,7 +391,7 @@ pack_hypothesis(vector<Hypothesis const* > const& edges, string const& key,
     // word alignment, if requested
     vector<xmlrpc_c::value> w_aln;
     BOOST_FOREACH(Hypothesis const* e, edges)
-    e->OutputLocalWordAlignment(w_aln);
+    e->OutputLocalWordAlignment(w_aln, m_options.output);
     dest["word-align"] = xmlrpc_c::value_array(w_aln);
   }
 }

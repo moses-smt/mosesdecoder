@@ -1547,11 +1547,10 @@ void Manager::OutputBest(OutputCollector *collector)  const
         bestHypo->OutputBestSurface(
           out,
           staticData.GetOutputFactorOrder(),
-          options().output.ReportSegmentation,
-          options().output.ReportAllFactors);
+          options().output);
         if (options().output.PrintAlignmentInfo) {
           out << "||| ";
-          bestHypo->OutputAlignment(out);
+          bestHypo->OutputAlignment(out, options().output.WA_SortOrder);
         }
 
         IFVERBOSE(1) {

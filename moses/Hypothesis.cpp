@@ -241,7 +241,7 @@ PrintHypothesis() const
 
 void
 Hypothesis::
-CleanupArcList()
+CleanupArcList(size_t nBestSize, bool distinctNBest)
 {
   // point this hypo's main hypo to itself
   SetWinningHypo(this);
@@ -252,11 +252,6 @@ CleanupArcList()
    * However, may not be enough if only unique candidates are needed,
    * so we'll keep all of arc list if nedd distinct n-best list
    */
-
-  const StaticData &staticData = StaticData::Instance();
-  AllOptions const& opts = m_manager.options();
-  size_t nBestSize = opts.nbest.nbest_size;
-  bool distinctNBest = opts.NBestDistinct();
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
@@ -351,7 +346,7 @@ GetTargetPhraseStringRep() const
 
 void
 Hypothesis::
-OutputAlignment(std::ostream &out) const
+OutputAlignment(std::ostream &out, WordAlignmentSort sortOrder) const
 {
   std::vector<const Hypothesis *> edges;
   const Hypothesis *currentHypo = this;
@@ -360,7 +355,7 @@ OutputAlignment(std::ostream &out) const
     currentHypo = currentHypo->GetPrevHypo();
   }
 
-  OutputAlignment(out, edges, m_manager.options().output.WA_SortOrder);
+  OutputAlignment(out, edges, sortOrder);
 
 }
 
@@ -426,13 +421,13 @@ OutputInput(std::ostream& os) const
 void
 Hypothesis::
 OutputBestSurface(std::ostream &out, const std::vector<FactorType> &outputFactorOrder,
-                  char reportSegmentation, bool reportAllFactors) const
+                  const ReportingOptions &options) const
 {
   if (m_prevHypo) {
     // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
-    m_prevHypo->OutputBestSurface(out, outputFactorOrder, reportSegmentation, reportAllFactors);
+    m_prevHypo->OutputBestSurface(out, outputFactorOrder, options);
   }
-  OutputSurface(out, *this, outputFactorOrder, reportSegmentation, reportAllFactors);
+  OutputSurface(out, *this, outputFactorOrder, options);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -443,14 +438,15 @@ void
 Hypothesis::
 OutputSurface(std::ostream &out, const Hypothesis &edge,
               const std::vector<FactorType> &outputFactorOrder,
-              char reportSegmentation, bool reportAllFactors) const
+              const ReportingOptions &options) const
 {
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
                  "Must specific at least 1 output factor");
   const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
+  // TODO: slay the rest of StaticData here and move stuff into ReportingOptions
   bool markUnknown = GetManager().options().unk.mark;
-  // = StaticData::Instance().GetMarkUnknown();
-  if (reportAllFactors == true) {
+  bool featureLabels = StaticData::Instance().options().nbest.include_feature_labels;
+  if (options.ReportAllFactors == true) {
     out << phrase;
   } else {
     FactorType placeholderFactor
@@ -498,23 +494,21 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
   }
 
   // trace ("report segmentation") option "-t" / "-tt"
-  if (reportSegmentation > 0 && phrase.GetSize() > 0) {
+  if (options.ReportSegmentation > 0 && phrase.GetSize() > 0) {
     const Range &sourceRange = edge.GetCurrSourceWordsRange();
     const int sourceStart = sourceRange.GetStartPos();
     const int sourceEnd = sourceRange.GetEndPos();
     out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
-    if (reportSegmentation == 2) {
-      WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
+    if (options.ReportSegmentation == 2) {
       out << ",wa=";
       const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-      Hypothesis::OutputAlignment(out, ai, 0, 0, waso);
+      Hypothesis::OutputAlignment(out, ai, 0, 0, options.WA_SortOrder);
       out << ",total=";
       out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      bool with_labels = m_manager.options().nbest.include_feature_labels;
-      scoreBreakdown.OutputAllFeatureScores(out, with_labels);
+      scoreBreakdown.OutputAllFeatureScores(out, featureLabels);
     }
     out << "| ";
   }

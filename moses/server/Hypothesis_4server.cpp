@@ -5,15 +5,14 @@
 namespace Moses {
   void
   Hypothesis::
-  OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const
+  OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest, const ReportingOptions &options) const
   {
     using namespace std;
     Range const& src = this->GetCurrSourceWordsRange();
     Range const& trg = this->GetCurrTargetWordsRange();
 
-    WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
     vector<pair<size_t,size_t> const* > a
-      = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments(waso);
+      = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments(options.WA_SortOrder);
     typedef pair<size_t,size_t> item;
     map<string, xmlrpc_c::value> M;
     BOOST_FOREACH(item const* p, a) {
@@ -25,13 +24,13 @@ namespace Moses {
 
   void
   Hypothesis::
-  OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const
+  OutputWordAlignment(std::vector<xmlrpc_c::value>& out, const ReportingOptions &options) const
   {
     std::vector<Hypothesis const*> tmp;
     for (Hypothesis const* h = this; h; h = h->GetPrevHypo())
       tmp.push_back(h);
     for (size_t i = tmp.size(); i-- > 0;)
-      tmp[i]->OutputLocalWordAlignment(out);
+      tmp[i]->OutputLocalWordAlignment(out, options);
   }
 
 }

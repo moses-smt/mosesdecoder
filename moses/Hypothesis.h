@@ -50,6 +50,7 @@ class FFState;
 class StatelessFeatureFunction;
 class StatefulFeatureFunction;
 class Manager;
+class ReportingOptions;
 
 typedef std::vector<Hypothesis*> ArcList;
 
@@ -201,7 +202,7 @@ public:
   }
 
   void AddArc(Hypothesis *loserHypo);
-  void CleanupArcList();
+  void CleanupArcList(size_t nBestSize, bool distinctNBest);
 
   //! returns a list alternative previous hypotheses (or NULL if n-best support is disabled)
   inline const ArcList* GetArcList() const {
@@ -239,7 +240,7 @@ public:
   }
 
   void
-  OutputAlignment(std::ostream &out) const;
+  OutputAlignment(std::ostream &out, WordAlignmentSort sortOrder) const;
 
   static void
   OutputAlignment(std::ostream &out,
@@ -254,9 +255,9 @@ public:
   void OutputInput(std::ostream& os) const;
   static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
 
-  void OutputBestSurface(std::ostream &out, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors) const;
+  void OutputBestSurface(std::ostream &out, const std::vector<Moses::FactorType> &outputFactorOrder, const ReportingOptions &options) const;
   void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                     char reportSegmentation, bool reportAllFactors) const;
+                     const ReportingOptions &options) const;
 
   // creates a map of TARGET positions which should be replaced by word using placeholder
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
@@ -267,8 +268,8 @@ public:
 
 #ifdef HAVE_XMLRPC_C
   // these are implemented in moses/server/Hypothesis_4server.cpp !
-  void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
-  void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
+  void OutputWordAlignment(std::vector<xmlrpc_c::value>& out, const ReportingOptions &options) const;
+  void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest, const ReportingOptions &options) const;
 #endif
 
   bool beats(Hypothesis const& b) const;
