@@ -88,6 +88,11 @@ protected:
   std::vector<PhraseDictionary*> m_memberPDs;
   std::vector<FeatureFunction*> m_pdFeature;
   size_t m_numModels;
+  size_t m_totalModelScores;
+  // phrase-counts option
+  bool m_phraseCounts;
+  // word-counts option
+  bool m_wordCounts;
   // restrict option
   bool m_restrict;
   // default-scores option
@@ -95,7 +100,6 @@ protected:
   std::vector<float> m_defaultScores;
   // default-average-others option
   bool m_defaultAverageOthers;
-  size_t m_scoresToAverage;
   size_t m_scoresPerModel;
   // mmsapt-lr-func options
   bool m_haveMmsaptLrFunc;

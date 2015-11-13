@@ -33,10 +33,12 @@ namespace Moses
 PhraseDictionaryGroup::PhraseDictionaryGroup(const string &line)
   : PhraseDictionary(line, true),
     m_numModels(0),
+    m_totalModelScores(0),
+    m_phraseCounts(false),
+    m_wordCounts(false),
     m_restrict(false),
     m_haveDefaultScores(false),
     m_defaultAverageOthers(false),
-    m_scoresToAverage(0),
     m_scoresPerModel(0),
     m_haveMmsaptLrFunc(false)
 {
@@ -50,12 +52,15 @@ void PhraseDictionaryGroup::SetParameter(const string& key, const string& value)
     m_numModels = m_memberPDStrs.size();
   } else if (key == "restrict") {
     m_restrict = Scan<bool>(value);
+  } else if (key == "phrase-counts") {
+    m_phraseCounts = Scan<bool>(value);
+  } else if (key == "word-counts") {
+    m_wordCounts = Scan<bool>(value);
   } else if (key =="default-scores") {
     m_haveDefaultScores = true;
     m_defaultScores = Scan<float>(Tokenize(value, ","));
   } else if (key =="default-average-others") {
-    m_defaultAverageOthers = true;
-    m_scoresToAverage = Scan<size_t>(value);
+    m_defaultAverageOthers = Scan<bool>(value);
   } else if (key =="mmsapt-lr-func") {
     m_haveMmsaptLrFunc = true;
   } else {
@@ -67,9 +72,9 @@ void PhraseDictionaryGroup::Load()
 {
   SetFeaturesToApply();
   m_pdFeature.push_back(const_cast<PhraseDictionaryGroup*>(this));
+  size_t numScoreComponents = 0;
 
   // Locate/check component phrase tables
-  size_t componentWeights = 0;
   BOOST_FOREACH(const string& pdName, m_memberPDStrs) {
     bool pdFound = false;
     BOOST_FOREACH(PhraseDictionary* pd, PhraseDictionary::GetColl()) {
@@ -77,7 +82,7 @@ void PhraseDictionaryGroup::Load()
         pdFound = true;
         m_memberPDs.push_back(pd);
         size_t nScores = pd->GetNumScoreComponents();
-        componentWeights += nScores;
+        numScoreComponents += nScores;
         if (m_scoresPerModel == 0) {
           m_scoresPerModel = nScores;
         } else if (m_defaultAverageOthers) {
@@ -89,8 +94,7 @@ void PhraseDictionaryGroup::Load()
     UTIL_THROW_IF2(!pdFound,
                    "Could not find member phrase table " << pdName);
   }
-  UTIL_THROW_IF2(componentWeights != m_numScoreComponents,
-                 "Total number of member model scores is unequal to specified number of scores");
+  m_totalModelScores = numScoreComponents;
 
 #if PT_UG
   // Locate mmsapt lexical reordering functions if specified
@@ -221,11 +225,36 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
     offset += pd.GetNumScoreComponents();
   }
 
-  // Finalize scores and add phrases to return collection
+  // Compute additional scores as phrases are added to return collection
   TargetPhraseCollection::shared_ptr ret(new TargetPhraseCollection);
   const vector<FeatureFunction*> pd_feature_const(m_pdFeature);
   BOOST_FOREACH(TargetPhrase* phrase, phraseList) {
     PDGroupPhrase& pdgPhrase = phraseMap.find(phrase)->second;
+
+    // Score order (example with 2 models)
+    // member1_scores member2_scores [m1_pc m2_pc] [m1_wc m2_wc]
+
+    // Extra scores added after member model scores
+    size_t offset = m_totalModelScores;
+    // Phrase count (per member model)
+    if (m_phraseCounts) {
+      for (size_t i = 0; i < m_numModels; ++i) {
+        if (pdgPhrase.m_seenBy[i]) {
+          pdgPhrase.m_scores[offset + i] = 1;
+        }
+      }
+      offset += m_numModels;
+    }
+    // Word count (per member model)
+    if (m_wordCounts) {
+      size_t wc = pdgPhrase.m_targetPhrase->GetSize();
+      for (size_t i = 0; i < m_numModels; ++i) {
+        if (pdgPhrase.m_seenBy[i]) {
+          pdgPhrase.m_scores[offset + i] = wc;
+        }
+      }
+      // offset += m_numModels; // if more features are added
+    }
 
     // Average other-model scores to fill in defaults when models have not seen
     // this phrase
@@ -237,16 +266,15 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           break;
         }
       }
-      // Average seen scores, limited to specified number (e.g. model can have
-      // 10 scores but you only want to average 8, leaving the last 2 as 0s)
+      // Average seen scores
       if (!seenByAll) {
-        vector<float> avgScores(m_scoresToAverage, 0);
+        vector<float> avgScores(m_scoresPerModel, 0);
         size_t seenBy = 0;
-        size_t offset = 0;
+        offset = 0;
         // sum
         for (size_t i = 0; i < m_numModels; ++i) {
           if (pdgPhrase.m_seenBy[i]) {
-            for (size_t j = 0; j < m_scoresToAverage; ++j) {
+            for (size_t j = 0; j < m_scoresPerModel; ++j) {
               avgScores[j] += pdgPhrase.m_scores[offset + j];
             }
             seenBy += 1;
@@ -254,14 +282,14 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           offset += m_scoresPerModel;
         }
         // divide
-        for (size_t j = 0; j < m_scoresToAverage; ++j) {
+        for (size_t j = 0; j < m_scoresPerModel; ++j) {
           avgScores[j] /= seenBy;
         }
         // copy
         offset = 0;
         for (size_t i = 0; i < m_numModels; ++i) {
           if (!pdgPhrase.m_seenBy[i]) {
-            for (size_t j = 0; j < m_scoresToAverage; ++j) {
+            for (size_t j = 0; j < m_scoresPerModel; ++j) {
               pdgPhrase.m_scores[offset + j] = avgScores[j];
             }
           }
