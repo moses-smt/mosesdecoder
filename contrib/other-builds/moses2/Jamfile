@@ -44,9 +44,16 @@ import path ;
 		legacy/InputFileStream.cpp
 		legacy/Parameter.cpp
 		legacy/Range.cpp
+		legacy/Range.cpp
 		legacy/SquareMatrix.cpp
 		legacy/ThreadPool.cpp
 		legacy/Util2.cpp
+    legacy/ProbingPT/hash.cpp
+    legacy/ProbingPT/huffmanish.cpp
+    legacy/ProbingPT/line_splitter.cpp
+    legacy/ProbingPT/probing_hash_utils.cpp
+    legacy/ProbingPT/quering.cpp
+    legacy/ProbingPT/vocabid.cpp
     
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 
