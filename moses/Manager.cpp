@@ -1480,6 +1480,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
 
 int Manager::GetNextHypoId()
 {
+  GetSentenceStats().AddCreated(); // count created hypotheses
   return m_hypoId++;
 }
 

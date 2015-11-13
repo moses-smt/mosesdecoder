@@ -44,7 +44,7 @@ using namespace std;
 namespace Moses
 {
 Hypothesis::
-Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap)
+Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap, int id)
   : m_prevHypo(NULL)
   , m_sourceCompleted(bitmap)
   , m_sourceInput(source)
@@ -59,7 +59,7 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
   , m_arcList(NULL)
   , m_transOpt(initialTransOpt)
   , m_manager(manager)
-  , m_id(m_manager.GetNextHypoId())
+  , m_id(id)
 {
   // used for initial seeding of trans process
   // initialize scores
@@ -68,14 +68,13 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
   const vector<const StatefulFeatureFunction*>& ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i)
     m_ffStates[i] = ffs[i]->EmptyHypothesisState(source);
-  m_manager.GetSentenceStats().AddCreated();
 }
 
 /***
  * continue prevHypo by appending the phrases in transOpt
  */
 Hypothesis::
-Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap)
+Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap, int id)
   : m_prevHypo(&prevHypo)
   , m_sourceCompleted(bitmap)
   , m_sourceInput(prevHypo.m_sourceInput)
@@ -90,11 +89,10 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const 
   , m_arcList(NULL)
   , m_transOpt(transOpt)
   , m_manager(prevHypo.GetManager())
-  , m_id(m_manager.GetNextHypoId())
+  , m_id(id)
 {
   m_currScoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
   m_wordDeleted = transOpt.IsDeletionOption();
-  m_manager.GetSentenceStats().AddCreated();
 }
 
 Hypothesis::

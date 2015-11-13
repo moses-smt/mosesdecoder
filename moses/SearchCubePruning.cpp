@@ -79,7 +79,7 @@ void SearchCubePruning::Decode()
 {
   // initial seed hypothesis: nothing translated, no words produced
   const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
-  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap);
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap, m_manager.GetNextHypoId());
 
   HypothesisStackCubePruning &firstStack
   = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());

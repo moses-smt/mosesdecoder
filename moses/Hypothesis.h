@@ -86,9 +86,9 @@ protected:
 
 public:
   /*! used by initial seeding of the translation process */
-  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap);
+  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap, int id);
   /*! used when creating a new hypothesis using a translation option (phrase translation) */
-  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap);
+  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap, int id);
   ~Hypothesis();
 
   void PrintHypothesis() const;

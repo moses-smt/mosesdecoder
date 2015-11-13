@@ -224,7 +224,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
     hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
   }
   const Bitmap &bitmap = m_parent.GetWordsBitmap();
-  Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
+  Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt, bitmap, hypothesis.GetManager().GetNextHypoId());
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
