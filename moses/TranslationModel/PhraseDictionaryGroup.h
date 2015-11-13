@@ -20,13 +20,20 @@
 #ifndef moses_PhraseDictionaryGroup_h
 #define moses_PhraseDictionaryGroup_h
 
-#include "moses/TranslationModel/PhraseDictionary.h"
-
 #include <boost/unordered_map.hpp>
 #include <boost/thread/shared_mutex.hpp>
+
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Util.h"
+
+#include "moses/FF/LexicalReordering/LexicalReordering.h"
+
+#include "moses/TranslationModel/PhraseDictionary.h"
+
+#if PT_UG
+#include "moses/TranslationModel/UG/mmsapt.h"
+#endif
 
 namespace Moses
 {
@@ -90,6 +97,10 @@ protected:
   bool m_defaultAverageOthers;
   size_t m_scoresToAverage;
   size_t m_scoresPerModel;
+  // mmsapt-lr-func options
+  bool m_haveMmsaptLrFunc;
+  // pointers to pointers since member mmsapts may not load these until later
+  std::vector<LexicalReordering**> m_mmsaptLrFuncs;
 
   typedef std::vector<TargetPhraseCollection::shared_ptr > PhraseCache;
 #ifdef WITH_THREADS

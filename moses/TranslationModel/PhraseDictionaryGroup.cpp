@@ -37,7 +37,8 @@ PhraseDictionaryGroup::PhraseDictionaryGroup(const string &line)
     m_haveDefaultScores(false),
     m_defaultAverageOthers(false),
     m_scoresToAverage(0),
-    m_scoresPerModel(0)
+    m_scoresPerModel(0),
+    m_haveMmsaptLrFunc(false)
 {
   ReadParameters();
 }
@@ -55,6 +56,8 @@ void PhraseDictionaryGroup::SetParameter(const string& key, const string& value)
   } else if (key =="default-average-others") {
     m_defaultAverageOthers = true;
     m_scoresToAverage = Scan<size_t>(value);
+  } else if (key =="mmsapt-lr-func") {
+    m_haveMmsaptLrFunc = true;
   } else {
     PhraseDictionary::SetParameter(key, value);
   }
@@ -88,6 +91,17 @@ void PhraseDictionaryGroup::Load()
   }
   UTIL_THROW_IF2(componentWeights != m_numScoreComponents,
                  "Total number of member model scores is unequal to specified number of scores");
+
+#if PT_UG
+  // Locate mmsapt lexical reordering functions if specified
+  if (m_haveMmsaptLrFunc) {
+    BOOST_FOREACH(PhraseDictionary* pd, m_memberPDs) {
+      // pointer to pointer, all start as NULL and some may be populated prior
+      // to translation
+      m_mmsaptLrFuncs.push_back(&(static_cast<Mmsapt*>(pd)->m_lr_func));
+    }
+  }
+#endif
 
   // Determine "zero" scores for features
   if (m_haveDefaultScores) {
@@ -253,6 +267,44 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           }
           offset += m_scoresPerModel;
         }
+#if PT_UG
+        // Also average LexicalReordering scores if specified
+        // We don't necessarily have a lr-func for each model
+        if (m_haveMmsaptLrFunc) {
+          SPTR<Scores> avgLRScores;
+          seenBy = 0;
+          // For each model
+          for (size_t i = 0; i < m_numModels; ++i) {
+            const LexicalReordering* lrFunc = *m_mmsaptLrFuncs[i];
+            // Add if phrase seen and model has lr-func
+            if (pdgPhrase.m_seenBy[i] && lrFunc != NULL) {
+              const Scores* scores = pdgPhrase.m_targetPhrase->GetExtraScores(lrFunc);
+              if (!avgLRScores) {
+                avgLRScores.reset(new Scores(*scores));
+              } else {
+                for (size_t j = 0; j < scores->size(); ++j) {
+                  (*avgLRScores)[j] += (*scores)[j];
+                }
+              }
+              seenBy += 1;
+            }
+          }
+          // Make sure we have at least one lr-func
+          if (avgLRScores) {
+            // divide
+            for (size_t j = 0; j < avgLRScores->size(); ++j) {
+              (*avgLRScores)[j] /= seenBy;
+            }
+            // set
+            for (size_t i = 0; i < m_numModels; ++i) {
+              const LexicalReordering* lrFunc = *m_mmsaptLrFuncs[i];
+              if (!pdgPhrase.m_seenBy[i] && lrFunc != NULL) {
+                pdgPhrase.m_targetPhrase->SetExtraScores(lrFunc, avgLRScores);
+              }
+            }
+          }
+        }
+#endif
       }
     }
 

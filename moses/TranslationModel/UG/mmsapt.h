@@ -58,6 +58,10 @@ namespace Moses
     friend class Alignment;
     std::map<std::string,std::string> param;
     std::string m_name;
+#ifndef NO_MOSES
+    // Allows PhraseDictionaryGroup to get &m_lr_func
+    friend class PhraseDictionaryGroup;
+#endif
   public:
     typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
     typedef sapt::mmBitext<Token> mmbitext;
