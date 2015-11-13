@@ -8,7 +8,7 @@
 #ifndef PHRASETABLEMEMORY_H_
 #define PHRASETABLEMEMORY_H_
 #include "PhraseTable.h"
-
+#include "../legacy/Util2.h"
 
 class PhraseTableMemory : public PhraseTable
 {
@@ -24,7 +24,7 @@ class PhraseTableMemory : public PhraseTable
 		void SortAndPrune(size_t tableLimit);
 
 	protected:
-		typedef boost::unordered_map<Word, Node, Moses::UnorderedComparer<Word>, Moses::UnorderedComparer<Word> > Children;
+		typedef boost::unordered_map<Word, Node, UnorderedComparer<Word>, UnorderedComparer<Word> > Children;
 		Children m_children;
 		TargetPhrases::shared_ptr m_targetPhrases;
 

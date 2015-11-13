@@ -12,6 +12,7 @@
 #include "../Search/Manager.h"
 #include "../legacy/FactorCollection.h"
 #include "../legacy/ProbingPT/quering.hh"
+#include "../legacy/Util2.h"
 
 using namespace std;
 
@@ -154,7 +155,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
 
   // score for this phrase table
   vector<SCORE> scores = probingTargetPhrase.prob;
-  std::transform(scores.begin(), scores.end(), scores.begin(), Moses::TransformScore);
+  std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
   tp->GetScores().PlusEquals(system, *this, scores);
 
 //  // alignment

@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <string>
-#include "moses/Parameter.h"
+#include "../legacy/Parameter.h"
 
 class System;
 class FeatureFunction;

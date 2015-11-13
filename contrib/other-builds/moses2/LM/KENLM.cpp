@@ -14,7 +14,7 @@
 #include "../Search/Manager.h"
 #include "lm/state.hh"
 #include "lm/left.hh"
-#include "moses/FactorCollection.h"
+#include "../legacy/FactorCollection.h"
 
 using namespace std;
 
@@ -196,7 +196,7 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
 	  stateCast.state = *state0;
   }
 
-  score = Moses::TransformLMScore(score);
+  score = TransformLMScore(score);
 
   bool OOVFeatureEnabled = false;
   if (OOVFeatureEnabled) {
@@ -246,8 +246,8 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 	  }
 	  fullScore += scorer.Finish();
 
-	  ngramScore = Moses::TransformLMScore(fullScore - before_boundary);
-	  fullScore = Moses::TransformLMScore(fullScore);
+	  ngramScore = TransformLMScore(fullScore - before_boundary);
+	  fullScore = TransformLMScore(fullScore);
 }
 
 lm::WordIndex KENLM::TranslateID(const Word &word) const {

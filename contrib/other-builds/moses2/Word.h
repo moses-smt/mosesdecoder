@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include "TypeDef.h"
-#include "moses/Factor.h"
+#include "legacy/Factor.h"
 #include "legacy/FactorCollection.h"
 
 class Word {

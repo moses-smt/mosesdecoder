@@ -6,9 +6,12 @@
 #include <limits>
 #include <sstream>
 #include <vector>
+#include <cmath>
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 typedef size_t FactorType;
+const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
+const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 
 template<typename T>
 class UnorderedComparer
@@ -208,3 +211,24 @@ inline bool FileExists(const std::string& filePath)
 
 const std::string ToLower(const std::string& str);
 
+//! delete and remove every element of a collection object such as set, list etc
+template<class COLL>
+void RemoveAllInColl(COLL &coll)
+{
+  for (typename COLL::const_iterator iter = coll.begin() ; iter != coll.end() ; ++iter) {
+    delete (*iter);
+  }
+  coll.clear();
+}
+
+//! irst number are in log 10, transform to natural log
+inline float TransformLMScore(float irstScore)
+{
+  return irstScore * 2.30258509299405f;
+}
+
+//! transform prob to natural log score
+inline float TransformScore(float prob)
+{
+  return log(prob);
+}

@@ -12,7 +12,7 @@
 #include <iostream>
 #include "Word.h"
 #include "MemPool.h"
-#include "moses/FactorCollection.h"
+#include "legacy/FactorCollection.h"
 
 class SubPhrase;
 

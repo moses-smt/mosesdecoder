@@ -12,7 +12,7 @@
 #include "../FF/StatefulFeatureFunction.h"
 #include "lm/model.hh"
 #include "../legacy/Factor.h"
-#include "moses/TypeDef.h"
+#include "../legacy/Util2.h"
 
 class Word;
 
@@ -45,7 +45,7 @@ public:
 
 protected:
   std::string m_path;
-  Moses::FactorType m_factorType;
+  FactorType m_factorType;
   bool m_lazy;
   const Factor *m_bos;
   const Factor *m_eos;

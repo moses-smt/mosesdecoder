@@ -83,7 +83,7 @@ void LanguageModel::Load(System &system)
 
 	  assert(substrings.size() == 2 || substrings.size() == 3);
 
-	  SCORE prob = Moses::TransformLMScore(Scan<SCORE>(substrings[0]));
+	  SCORE prob = TransformLMScore(Scan<SCORE>(substrings[0]));
 	  if (substrings[1] == "<unk>") {
 		  m_oov = prob;
 		  continue;
@@ -91,7 +91,7 @@ void LanguageModel::Load(System &system)
 
 	  SCORE backoff = 0.f;
 	  if (substrings.size() == 3) {
-		backoff = Moses::TransformLMScore(Scan<SCORE>(substrings[2]));
+		backoff = TransformLMScore(Scan<SCORE>(substrings[2]));
 	  }
 
 	  // ngram

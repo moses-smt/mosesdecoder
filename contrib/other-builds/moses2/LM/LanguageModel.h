@@ -12,7 +12,7 @@
 #include "../TypeDef.h"
 #include "../MorphoTrie/MorphTrie.h"
 #include "../legacy/Factor.h"
-#include "moses/TypeDef.h"
+#include "../legacy/Util2.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 struct LMScores
@@ -67,7 +67,7 @@ public:
 
 protected:
 	std::string m_path;
-	Moses::FactorType m_factorType;
+	FactorType m_factorType;
 	size_t m_order;
 
     MorphTrie<const Factor*, LMScores> m_root;

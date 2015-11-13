@@ -9,6 +9,7 @@
 #include "FeatureFunction.h"
 #include "../System.h"
 #include "../legacy/Util2.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -54,7 +55,7 @@ void FeatureFunction::ParseLine(const std::string &line)
 
   // name
   if (m_name == "") {
-	  m_name = Moses::SPrint(nameStub) + Moses::SPrint(0);
+	  m_name = SPrint(nameStub) + SPrint(0);
   }
 }
 

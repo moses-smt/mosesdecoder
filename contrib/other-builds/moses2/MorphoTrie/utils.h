@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 #include "legacy/Util2.h"
-#include "moses/Factor.h"
-#include "moses/InputFileStream.h"
+#include "../legacy/Factor.h"
+#include "../legacy/InputFileStream.h"
 
 using namespace std;
 

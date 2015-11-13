@@ -21,6 +21,7 @@
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../LM/LanguageModel.h"
 #include "../LM/KENLM.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -33,7 +34,7 @@ FeatureFunctions::FeatureFunctions(System &system)
 }
 
 FeatureFunctions::~FeatureFunctions() {
-	Moses::RemoveAllInColl(m_featureFunctions);
+	RemoveAllInColl(m_featureFunctions);
 }
 
 void FeatureFunctions::Create()

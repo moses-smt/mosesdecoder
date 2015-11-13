@@ -23,10 +23,10 @@ System::System(const Parameter &paramsArg)
 
 {
 	ini_performance_options();
-	params.SetParameter(stackSize, "stack", Moses::DEFAULT_MAX_HYPOSTACK_SIZE);
+	params.SetParameter(stackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
     params.SetParameter(maxDistortion, "distortion-limit", -1);
     params.SetParameter(maxPhraseLength, "max-phrase-length",
-    		Moses::DEFAULT_MAX_PHRASE_LENGTH);
+    		DEFAULT_MAX_PHRASE_LENGTH);
 
 	featureFunctions.Create();
 	LoadWeights();
@@ -50,7 +50,7 @@ void System::LoadWeights()
 
 void System::LoadMappings()
 {
-  const Moses::PARAM_VEC *vec = params.GetParam("mapping");
+  const PARAM_VEC *vec = params.GetParam("mapping");
   UTIL_THROW_IF2(vec == NULL, "Must have [mapping] section");
 
   BOOST_FOREACH(const std::string &line, *vec) {
@@ -102,7 +102,7 @@ void
 System
 ::ini_performance_options()
 {
-	  const Moses::PARAM_VEC *paramsVec;
+	  const PARAM_VEC *paramsVec;
 	  // m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
 	  // m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
 
