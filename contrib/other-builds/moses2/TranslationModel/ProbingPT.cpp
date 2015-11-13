@@ -10,8 +10,8 @@
 #include "../Scores.h"
 #include "../FF/FeatureFunctions.h"
 #include "../Search/Manager.h"
-#include "moses/FactorCollection.h"
-#include "moses/TranslationModel/ProbingPT/quering.hh"
+#include "../legacy/FactorCollection.h"
+#include "../legacy/ProbingPT/quering.hh"
 
 using namespace std;
 
