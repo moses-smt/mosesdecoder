@@ -97,7 +97,7 @@ class Mixture3DModel : public Generic2DModel<Y,X,Prob> {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template <template <class MY> class M,class Y,class C> 
+template <template <class MY> class M,class Y,class C>
 class TrainableMixture2DModel : public Mixture2DModel<M,Y,C> {
 // private:
 //  LogPDFVal logpdfPrevDataAvg;
@@ -110,7 +110,7 @@ class TrainableMixture2DModel : public Mixture2DModel<M,Y,C> {
 };
 
 ////////////////////////////////////////
-template <template <class MY> class M,class Y,class C> 
+template <template <class MY> class M,class Y,class C>
 void TrainableMixture2DModel<M,Y,C>::updateFields ( const List<Joint2DRV<Y,Prob> >& lyp, const PDFVal WEIGHT_LIMIT, bool& bShouldStop ) {
   LogPDFVal logpdfData = 0.0;
   CPT1DModel<C,Prob>                             mprPseudoEmpC;        // pseudo-empirical prob marginal
@@ -178,7 +178,7 @@ void TrainableMixture2DModel<M,Y,C>::updateFields ( const List<Joint2DRV<Y,Prob>
 }
 
 ////////////////////////////////////////
-template <template <class MY> class M,class Y,class C> 
+template <template <class MY> class M,class Y,class C>
 void TrainableMixture2DModel<M,Y,C>::train ( List<Joint2DRV<Y,Prob> >& lyp, const int EPOCH_LIMIT, const PDFVal WEIGHT_LIMIT ) {
 
   // Normalize model...
@@ -204,7 +204,7 @@ void TrainableMixture2DModel<M,Y,C>::train ( List<Joint2DRV<Y,Prob> >& lyp, cons
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-template <template <class MY> class M,class Y,class X,class C> 
+template <template <class MY> class M,class Y,class X,class C>
 class TrainableMixture3DModel : public Generic2DModel<Y,X,C> {
  private:
   string sId;
@@ -225,7 +225,7 @@ class TrainableMixture3DModel : public Generic2DModel<Y,X,C> {
 };
 
 ////////////////////////////////////////
-template <template <class MY> class M,class Y,class X,class C> 
+template <template <class MY> class M,class Y,class X,class C>
 void TrainableMixture3DModel<M,Y,X,C>::train ( const int EPOCH_LIMIT, const PDFVal WEIGHT_LIMIT ) {
   // Update each subphone from list...
   int ctr = 0;
@@ -237,7 +237,7 @@ void TrainableMixture3DModel<M,Y,X,C>::train ( const int EPOCH_LIMIT, const PDFV
 }
 
 ////////////////////////////////////////
-template <template <class MY> class M,class Y,class X,class C> 
+template <template <class MY> class M,class Y,class X,class C>
 void TrainableMixture3DModel<M,Y,X,C>::train ( const List<Joint3DRV<X,Y,Prob> >& lxyp, const int EPOCH_LIMIT, const PDFVal WEIGHT_LIMIT ) {
   // Chop list into phone-specific sub-lists...
   ListedObject<Joint3DRV<X,Y,Prob> >* pxyp;
@@ -248,7 +248,7 @@ void TrainableMixture3DModel<M,Y,X,C>::train ( const List<Joint3DRV<X,Y,Prob> >&
 }
 
 ////////////////////////////////////////
-template <template <class MY> class M,class Y,class X,class C> 
+template <template <class MY> class M,class Y,class X,class C>
 bool TrainableMixture3DModel<M,Y,X,C>::readData ( char* as[], int numFields ) {
   if ( /*as[0]!=sId+"dat" ||*/ numFields!=3 ) return false;
   alyp.set(X(as[1])).add() = Joint2DRV<Y,Prob>(Y(as[2]),Prob(1.0));
@@ -256,7 +256,7 @@ bool TrainableMixture3DModel<M,Y,X,C>::readData ( char* as[], int numFields ) {
 }
 
 ////////////////////////////////////////
-template <template <class MY> class M,class Y,class X,class C> 
+template <template <class MY> class M,class Y,class X,class C>
 void TrainableMixture3DModel<M,Y,X,C>::writeFields  ( FILE* pf, string sPref ) {
   X x; for ( bool b=x.setFirst(); b; b=x.setNext() ) {
     am.get(x).writeFields(pf,sPref+" "+x.getString());

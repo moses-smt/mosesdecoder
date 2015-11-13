@@ -21,7 +21,7 @@ class RuleTable;
 // anything except provide somewhere to store the weights and parameter values.
 class RuleTableFF : public PhraseDictionary
 {
- public:
+public:
   RuleTableFF(const std::string &);
 
   // FIXME Delete m_table?
@@ -29,21 +29,31 @@ class RuleTableFF : public PhraseDictionary
 
   void Load();
 
-  const RuleTable *GetTable() const { return m_table; }
+  const RuleTable *GetTable() const {
+    return m_table;
+  }
 
-  static const std::vector<RuleTableFF*> &Instances() { return s_instances; }
+  static const std::vector<RuleTableFF*> &Instances() {
+    return s_instances;
+  }
 
   ChartRuleLookupManager *CreateRuleLookupManager(
-    const ChartParser &, const ChartCellCollectionBase &, std::size_t)
-  {
+    const ChartParser &, const ChartCellCollectionBase &, std::size_t) {
     assert(false);
     return 0;
   }
 
- private:
+  // Get the source terminal vocabulary for this table's grammar (as a set of
+  // factor IDs)
+  const boost::unordered_set<std::size_t> &GetSourceTerminalSet() const {
+    return m_sourceTerminalSet;
+  }
+
+private:
   static std::vector<RuleTableFF*> s_instances;
 
   const RuleTable *m_table;
+  boost::unordered_set<std::size_t> m_sourceTerminalSet;
 };
 
 }  // Syntax

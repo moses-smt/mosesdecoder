@@ -17,11 +17,8 @@ protected:
   bool m_legacy;
 
 public:
-  static const InputFeature& Instance() {
-    return *s_instance;
-  }
-  static InputFeature& InstanceNonConst() {
-    return *s_instance;
+  static const InputFeature *InstancePtr() {
+    return s_instance;
   }
 
   InputFeature(const std::string &line);
@@ -42,24 +39,28 @@ public:
   }
 
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {
+  }
 
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
 
   void EvaluateWhenApplied(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const
-  {}
+                           ScoreComponentCollection* accumulator) const {
+  }
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
-                     ScoreComponentCollection* accumulator) const
-  {}
+                           ScoreComponentCollection* accumulator) const {
+  }
 
 
 };

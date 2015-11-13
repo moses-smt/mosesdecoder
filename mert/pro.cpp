@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreDataIterator.h"
 #include "BleuScorer.h"
 #include "Util.h"
+#include "util/random.hh"
 
 using namespace std;
 using namespace MosesTuning;
@@ -141,10 +142,10 @@ int main(int argc, char** argv)
 
   if (vm.count("random-seed")) {
     cerr << "Initialising random seed to " << seed << endl;
-    srand(seed);
+    util::rand_init(seed);
   } else {
     cerr << "Initialising random seed from system clock" << endl;
-    srand(time(NULL));
+    util::rand_init();
   }
 
   if (scoreFiles.size() == 0 || featureFiles.size() == 0) {
@@ -211,11 +212,11 @@ int main(int argc, char** argv)
     vector<float> scores;
     size_t n_translations = hypotheses.size();
     for(size_t  i=0; i<n_candidates; i++) {
-      size_t rand1 = rand() % n_translations;
+      size_t rand1 = util::rand_excl(n_translations);
       pair<size_t,size_t> translation1 = hypotheses[rand1];
       float bleu1 = smoothedSentenceBleu(scoreDataIters[translation1.first]->operator[](translation1.second), bleuSmoothing, smoothBP);
 
-      size_t rand2 = rand() % n_translations;
+      size_t rand2 = util::rand_excl(n_translations);
       pair<size_t,size_t> translation2 = hypotheses[rand2];
       float bleu2 = smoothedSentenceBleu(scoreDataIters[translation2.first]->operator[](translation2.second), bleuSmoothing, smoothBP);
 

@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 # handle switches
@@ -22,7 +26,7 @@ my $MODEL = undef;
 $MODEL = "english" if $LANGUAGE eq "en";
 $MODEL = "french-utf8" if $LANGUAGE eq "fr";
 $MODEL = "spanish" if $LANGUAGE eq "es";
-$MODEL = "german" if $LANGUAGE eq "de";
+$MODEL = "german-utf8" if $LANGUAGE eq "de";
 $MODEL = "italian-utf8" if $LANGUAGE eq "it";
 $MODEL = "dutch" if $LANGUAGE eq "nl";
 $MODEL = "bulgarian-utf8" if $LANGUAGE eq "bg";
@@ -30,12 +34,12 @@ $MODEL = "greek" if $LANGUAGE eq "el";
 die("Unknown language '$LANGUAGE'") unless defined($MODEL);
 $MODEL = $TREE_TAGGER."/lib/".$MODEL.".par";
 
-# define encoding conversion into Latin1 or Greek if required 
+# define encoding conversion into Latin1 or Greek if required
 my $CONV = "";
-#$CONV = "iconv --unicode-subst=X -f utf8 -t iso-8859-1|" 
-$CONV = "perl -ne 'use Encode; print encode(\"iso-8859-1\", decode(\"utf8\", \$_));' |" 
+#$CONV = "iconv --unicode-subst=X -f utf8 -t iso-8859-1|"
+$CONV = "perl -ne 'use Encode; print encode(\"iso-8859-1\", decode(\"utf8\", \$_));' |"
 	unless $MODEL =~ /utf8/ || $LANGUAGE eq "bg";
-$CONV = "perl -ne 'use Encode; print encode(\"iso-8859-7\", decode(\"utf8\", \$_));' |" 
+$CONV = "perl -ne 'use Encode; print encode(\"iso-8859-7\", decode(\"utf8\", \$_));' |"
 	if $LANGUAGE eq "el";
 
 # pipe in data into tagger, process its output

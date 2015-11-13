@@ -23,7 +23,8 @@ public:
   const Word* GetTargetWord() const {
     return m_targetWord;
   }
-  virtual int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 
 private:
@@ -45,26 +46,30 @@ public:
   virtual const FFState* EmptyHypothesisState(const InputType &) const;
 
   virtual FFState* EvaluateWhenApplied(const Hypothesis& cur_hypo, const FFState* prev_state,
-                            ScoreComponentCollection* accumulator) const;
+                                       ScoreComponentCollection* accumulator) const;
 
   virtual FFState* EvaluateWhenApplied( const ChartHypothesis& /* cur_hypo */,
-                                  int /* featureID */,
-                                  ScoreComponentCollection* ) const {
+                                        int /* featureID */,
+                                        ScoreComponentCollection* ) const {
     throw std::logic_error("PhraseBoundaryState not supported in chart decoder, yet");
   }
 
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
+  }
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {
+  }
 
   void SetParameter(const std::string& key, const std::string& value);
 

@@ -16,24 +16,27 @@ class NonTerm : public RuleSymbol
 {
 public:
 
-	NonTerm(const ConsistentPhrase &consistentPhrase,
-			const std::string &source,
-			const std::string &target);
-	virtual ~NonTerm();
+  NonTerm(const ConsistentPhrase &consistentPhrase,
+          const std::string &source,
+          const std::string &target);
+  virtual ~NonTerm();
 
-	const ConsistentPhrase &GetConsistentPhrase() const
-	{ return *m_consistentPhrase; }
+  const ConsistentPhrase &GetConsistentPhrase() const {
+    return *m_consistentPhrase;
+  }
 
-	int GetWidth(Moses::FactorDirection direction) const;
+  int GetWidth(Moses::FactorDirection direction) const;
 
-	virtual bool IsNonTerm() const
-	{ return true; }
+  virtual bool IsNonTerm() const {
+    return true;
+  }
 
-	std::string GetString() const
-	{ return m_source + m_target; }
+  std::string GetString() const {
+    return m_source + m_target;
+  }
 
-	virtual std::string Debug() const;
-	virtual void Output(std::ostream &out) const;
+  virtual std::string Debug() const;
+  virtual void Output(std::ostream &out) const;
   void Output(std::ostream &out, Moses::FactorDirection direction) const;
 
   const std::string &GetLabel(Moses::FactorDirection direction) const;
@@ -41,7 +44,7 @@ public:
   bool IsHiero(const Parameter &params) const;
 
 protected:
-	const ConsistentPhrase *m_consistentPhrase;
-	std::string m_source, m_target;
+  const ConsistentPhrase *m_consistentPhrase;
+  std::string m_source, m_target;
 };
 

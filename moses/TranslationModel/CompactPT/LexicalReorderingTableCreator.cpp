@@ -53,12 +53,11 @@ LexicalReorderingTableCreator::LexicalReorderingTableCreator(
   std::cerr << "Pass 1/2: Creating phrase index + Counting scores" << std::endl;
   m_hash.BeginSave(m_outFile);
 
-
   if(tempfilePath.size()) {
     MmapAllocator<unsigned char> allocEncoded(util::FMakeTemp(tempfilePath));
     m_encodedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
   } else {
-    m_encodedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+    m_encodedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(true);
   }
 
   EncodeScores();
@@ -73,7 +72,7 @@ LexicalReorderingTableCreator::LexicalReorderingTableCreator(
     MmapAllocator<unsigned char> allocCompressed(util::FMakeTemp(tempfilePath));
     m_compressedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocCompressed);
   } else {
-    m_compressedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+    m_compressedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(true);
   }
   CompressScores();
 
@@ -206,7 +205,7 @@ std::string LexicalReorderingTableCreator::EncodeLine(std::vector<std::string>& 
   if(m_numScoreComponent != scores.size()) {
     std::stringstream strme;
     strme << "Error: Wrong number of scores detected ("
-              << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
+          << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
     strme << "Line: " << tokens[0] << " ||| ... ||| " << scoresString << std::endl;
     UTIL_THROW2(strme.str());
   }
@@ -258,8 +257,10 @@ void LexicalReorderingTableCreator::FlushEncodedQueue(bool force)
   if(force) {
     m_lastFlushedLine = -1;
 
-    m_hash.AddRange(m_lastRange);
-    m_lastRange.clear();
+    if(!m_lastRange.empty()) {
+      m_hash.AddRange(m_lastRange);
+      m_lastRange.clear();
+    }
 
 #ifdef WITH_THREADS
     m_hash.WaitAll();
@@ -377,7 +378,6 @@ void EncodingTaskReordering::operator()()
                             encodedLine, i);
       result.push_back(packedItem);
     }
-    lines.clear();
 
     {
 #ifdef WITH_THREADS
@@ -388,6 +388,7 @@ void EncodingTaskReordering::operator()()
       m_creator.FlushEncodedQueue();
     }
 
+    lines.clear();
     result.clear();
     lines.reserve(max_lines);
     result.reserve(max_lines);

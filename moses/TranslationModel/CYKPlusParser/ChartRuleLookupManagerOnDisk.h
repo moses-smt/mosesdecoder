@@ -45,7 +45,7 @@ public:
 
   ~ChartRuleLookupManagerOnDisk();
 
-  virtual void GetChartRuleCollection(const WordsRange &range,
+  virtual void GetChartRuleCollection(const InputPath &inputPath,
                                       size_t last,
                                       ChartParserCallback &outColl);
 
@@ -55,7 +55,7 @@ private:
   const std::vector<FactorType> &m_inputFactorsVec;
   const std::vector<FactorType> &m_outputFactorsVec;
   std::vector<DottedRuleStackOnDisk*> m_expandableDottedRuleListVec;
-  std::map<UINT64, const TargetPhraseCollection*> m_cache;
+  std::map<uint64_t, TargetPhraseCollection::shared_ptr > m_cache;
   std::list<const OnDiskPt::PhraseNode*> m_sourcePhraseNode;
 };
 

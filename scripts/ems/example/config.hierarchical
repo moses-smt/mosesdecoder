@@ -59,6 +59,10 @@ input-truecaser = $moses-script-dir/recaser/truecase.perl
 output-truecaser = $moses-script-dir/recaser/truecase.perl
 detruecaser = $moses-script-dir/recaser/detruecase.perl
 
+# lowercaser - comment out if you use truecasing
+#input-lowercaser = $moses-script-dir/tokenizer/lowercase.perl
+#output-lowercaser = $moses-script-dir/tokenizer/lowercase.perl
+
 ### generic parallelizer for cluster and multi-core machines
 # you may specify a script that allows the parallel execution
 # parallizable steps (see meta file). you also need specify 
@@ -85,7 +89,7 @@ detruecaser = $moses-script-dir/recaser/detruecase.perl
 ### multi-core settings
 # when the generic parallelizer is used, the number of cores
 # specified here 
-cores = 8
+cores = 4
 
 #################################################################
 # PARALLEL CORPUS PREPARATION: 
@@ -435,7 +439,7 @@ hierarchical-rule-set = true
 
 ### settings for rule scoring
 #
-score-settings = "--GoodTuring"
+score-settings = "--GoodTuring --MinScore 2:0.0001"
 
 ### include word alignment in phrase table
 #
@@ -517,20 +521,18 @@ filter-settings = ""
 
 ### additional flags for the decoder
 #
-decoder-settings = ""
+decoder-settings = "-threads $cores"
 
 ### if tuning should be skipped, specify this here
 # and also point to a configuration file that contains
 # pointers to all relevant model files
 #
-#config = 
+#config-with-reused-weights = 
 
 #########################################################
 ## RECASER: restore case, this part only trains the model
 
-[RECASING]
-
-#decoder = $moses-bin-dir/moses
+[RECASING] IGNORE
 
 ### training data
 # raw input needs to be still tokenized,
@@ -538,9 +540,14 @@ decoder-settings = ""
 #
 #tokenized = [LM:europarl:tokenized-corpus]
 
-# recase-config = 
-
+### additinal settings
+#
+recasing-settings = ""
 #lm-training = $srilm-dir/ngram-count
+decoder = $moses-bin-dir/moses
+
+# already a trained recaser? point to config file
+#recase-config = 
 
 #######################################################
 ## TRUECASER: train model to truecase corpora and input
@@ -583,7 +590,7 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 #   "-drop-unknown" for dropping unknown source words
 #   "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000" for cube pruning
 #
-#decoder-settings = ""
+decoder-settings = "-threads $cores"
 
 ### specify size of n-best list, if produced
 #

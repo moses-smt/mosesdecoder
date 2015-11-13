@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <queue>
 #include <algorithm>
 #include <sys/stat.h>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/thread/tss.hpp>
 
 #include "PhraseDictionaryCompact.h"
 #include "moses/FactorCollection.h"
@@ -32,18 +34,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
+#include "moses/Range.h"
 #include "moses/ThreadPool.h"
 #include "util/exception.hh"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
 
+PhraseDictionaryCompact::SentenceCache PhraseDictionaryCompact::m_sentenceCache;
+
 PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
-  :PhraseDictionary(line)
+  :PhraseDictionary(line, true)
   ,m_inMemory(true)
   ,m_useAlignmentInfo(true)
   ,m_hash(10, 16)
@@ -64,18 +68,9 @@ void PhraseDictionaryCompact::Load()
   std::string tFilePath = m_filePath;
 
   std::string suffix = ".minphr";
-  if(tFilePath.substr(tFilePath.length() - suffix.length(), suffix.length()) == suffix) {
-    if(!FileExists(tFilePath)) {
-      throw runtime_error("Error: File " + tFilePath + " does not exit.");
-      exit(1);
-    }
-  } else {
-    if(FileExists(tFilePath + suffix)) {
-      tFilePath += suffix;
-    } else {
-      throw runtime_error("Error: File " + tFilePath + ".minphr does not exit.");
-    }
-  }
+  if (!ends_with(tFilePath, suffix)) tFilePath += suffix;
+  if (!FileExists(tFilePath))
+    throw runtime_error("Error: File " + tFilePath + " does not exist.");
 
   m_phraseDecoder = new PhraseDecoder(*this, &m_input, &m_output,
                                       m_numScoreComponents, &m_weight);
@@ -83,12 +78,12 @@ void PhraseDictionaryCompact::Load()
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
 
   size_t indexSize;
-  if(m_inMemory)
-    // Load source phrase index into memory
-    indexSize = m_hash.Load(pFile);
-  else
-    // Keep source phrase index on disk
-    indexSize = m_hash.LoadIndex(pFile);
+  //if(m_inMemory)
+  // Load source phrase index into memory
+  indexSize = m_hash.Load(pFile);
+// else
+  // Keep source phrase index on disk
+  //indexSize = m_hash.LoadIndex(pFile);
 
   size_t coderSize = m_phraseDecoder->Load(pFile);
 
@@ -101,7 +96,7 @@ void PhraseDictionaryCompact::Load()
     phraseSize = m_targetPhrasesMapped.load(pFile, true);
 
   UTIL_THROW_IF2(indexSize == 0 || coderSize == 0 || phraseSize == 0,
-		  "Not successfully loaded");
+                 "Not successfully loaded");
 }
 
 // now properly declared in TargetPhraseCollection.h
@@ -112,14 +107,15 @@ void PhraseDictionaryCompact::Load()
 //   }
 // };
 
-const TargetPhraseCollection*
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
 {
 
+  TargetPhraseCollection::shared_ptr ret;
   // There is no souch source phrase if source phrase is longer than longest
   // observed source phrase during compilation
   if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())
-    return NULL;
+    return ret;
 
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
@@ -127,7 +123,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));
-    TargetPhraseCollection* phraseColl = new TargetPhraseCollection();
+    TargetPhraseCollection::shared_ptr  phraseColl(new TargetPhraseCollection);
 
     // Score phrases and if possible apply ttable_limit
     TargetPhraseVector::iterator nth =
@@ -144,7 +140,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
 
     return phraseColl;
   } else
-    return NULL;
+    return ret;
 }
 
 TargetPhraseVectorPtr
@@ -168,15 +164,11 @@ PhraseDictionaryCompact::~PhraseDictionaryCompact()
 
 //TO_STRING_BODY(PhraseDictionaryCompact)
 
-void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection* tpc)
+void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc)
 {
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
-#else
-  PhraseCache &ref = m_sentenceCache;
-#endif
-  ref.push_back(tpc);
+  if(!m_sentenceCache.get())
+    m_sentenceCache.reset(new PhraseCache());
+  m_sentenceCache->push_back(tpc);
 }
 
 void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
@@ -184,23 +176,17 @@ void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
 
 void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &source)
 {
-  if(!m_inMemory)
-    m_hash.KeepNLastRanges(0.01, 0.2);
+  if(!m_sentenceCache.get())
+    m_sentenceCache.reset(new PhraseCache());
 
   m_phraseDecoder->PruneCache();
+  // for(PhraseCache::iterator it = m_sentenceCache->begin();
+  //     it != m_sentenceCache->end(); it++)
+  //   it->reset();
 
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
-#else
-  PhraseCache &ref = m_sentenceCache;
-#endif
-
-  for(PhraseCache::iterator it = ref.begin(); it != ref.end(); it++)
-    delete *it;
-
-  PhraseCache temp;
-  temp.swap(ref);
+  // PhraseCache temp;
+  // temp.swap(*m_sentenceCache);
+  m_sentenceCache->clear();
 
   ReduceCache();
 }

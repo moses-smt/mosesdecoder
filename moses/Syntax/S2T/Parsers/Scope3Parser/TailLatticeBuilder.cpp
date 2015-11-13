@@ -25,7 +25,7 @@ void TailLatticeBuilder::Build(
   const RuleTrieScope3::Node *utrieNode = key.back()->m_node;
 
   const RuleTrieScope3::Node::LabelTable &labelTable =
-      utrieNode->GetLabelTable();
+    utrieNode->GetLabelTable();
 
   std::size_t nonTermIndex = 0;
 
@@ -52,7 +52,7 @@ void TailLatticeBuilder::Build(
              p != labelVec.end(); ++p, ++q) {
           const Word &label = *p;
           const PVertex *v =
-              m_chart.GetCell(s, e).nonTerminalVertices.Find(label);
+            m_chart.GetCell(s, e).nonTerminalVertices.Find(label);
           lattice[offset][nonTermIndex+1][width].push_back(v);
           *q = (*q || static_cast<bool>(v));
         }
@@ -81,7 +81,7 @@ void TailLatticeBuilder::ExtendAndClear(
 
   const RuleTrieScope3::Node *utrieNode = key.back()->m_node;
   const RuleTrieScope3::Node::LabelTable &labelTable =
-      utrieNode->GetLabelTable();
+    utrieNode->GetLabelTable();
 
   std::size_t nonTermIndex = 0;
 

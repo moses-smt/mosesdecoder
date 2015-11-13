@@ -44,10 +44,10 @@ public:
   virtual bool processSourceSentence(const char *, int, bool boundaryRules);
 
   bool create(const char targetString[],
-		  	  const char sourceString[],
-		  	  const char alignmentString[],
-		  	  const char weightString[],
-		  	  int sentenceID, bool boundaryRules);
+              const char sourceString[],
+              const char alignmentString[],
+              const char weightString[],
+              int sentenceID, bool boundaryRules);
 
   void invertAlignment();
 

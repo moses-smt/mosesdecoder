@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <string>
 #include <vector>
-#include <time.h>
+#include <ctime>
 #include "Timer.h"
 #include "Phrase.h"
 #include "Hypothesis.h"
@@ -143,7 +143,7 @@ public:
 
   void AddRecombination(const Hypothesis& worseHypo, const Hypothesis& betterHypo) {
     m_recombinationInfos.push_back(RecombinationInfo(worseHypo.GetWordsBitmap().GetNumWordsCovered(),
-                                   betterHypo.GetTotalScore(), worseHypo.GetTotalScore()));
+                                   betterHypo.GetFutureScore(), worseHypo.GetFutureScore()));
   }
   void AddCreated() {
     m_numHyposCreated++;

@@ -9,8 +9,8 @@
 #include <cstddef>
 #include <new>
 
-#include <assert.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdlib>
 
 namespace util { namespace stream {
 
@@ -19,6 +19,9 @@ class Chains;
 class ChainPositions : public util::FixedArray<util::stream::ChainPosition> {
   public:
     ChainPositions() {}
+
+    explicit ChainPositions(std::size_t bound) :
+      util::FixedArray<util::stream::ChainPosition>(bound) {}
 
     void Init(Chains &chains);
 
@@ -50,7 +53,7 @@ class Chains : public util::FixedArray<util::stream::Chain> {
     }
 
     Chains &operator>>(const util::stream::Recycler &recycler) {
-      for (util::stream::Chain *i = begin(); i != end(); ++i) 
+      for (util::stream::Chain *i = begin(); i != end(); ++i)
         *i >> recycler;
       return *this;
     }
@@ -88,16 +91,6 @@ template <class T> class GenericStreams : public util::FixedArray<T> {
   public:
     GenericStreams() {}
 
-    // This puts a dummy T at the beginning (useful to algorithms that need to reference something at the beginning).
-    void InitWithDummy(const ChainPositions &positions) {
-      P::Init(positions.size() + 1);
-      new (P::end()) T(); // use "placement new" syntax to initalize T in an already-allocated memory location
-      P::Constructed();
-      for (const util::stream::ChainPosition *i = positions.begin(); i != positions.end(); ++i) {
-        P::push_back(*i);
-      }
-    }
-
     // Limit restricts to positions[0,limit)
     void Init(const ChainPositions &positions, std::size_t limit) {
       P::Init(limit);
@@ -111,6 +104,10 @@ template <class T> class GenericStreams : public util::FixedArray<T> {
 
     GenericStreams(const ChainPositions &positions) {
       Init(positions);
+    }
+
+    void Init(std::size_t amount) {
+      P::Init(amount);
     }
 };
 

@@ -1,7 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 
+use warnings;
 use strict;
 
 my @LINE = <STDIN>;
@@ -48,7 +52,7 @@ for(my $i=$header;$i<=$#LINE;$i++) {
 	my @DUMMY;
 	$i = &read(\@DUMMY,$i);
     }
-    # 
+    #
 		elsif ($LINE[$i] =~ /^\[distortion-type\]/) {
 				my @DISTORTION_TYPE;
 				$i = &read(\@DISTORTION_TYPE,$i);
@@ -57,11 +61,11 @@ for(my $i=$header;$i<=$#LINE;$i++) {
 						s/orientation/msd/;
                                                 s/monotonicity/monotone/;
                                                 s/unidirectional/backward/;
-				} 
+				}
     }
     # parameters to be changed
     elsif ($LINE[$i] =~ /^\[lmodel-file\]/) {
-	print $LINE[$i];	
+	print $LINE[$i];
 	# add language model type, factors
 	my @LMODEL_FILE;
 	$i = &read(\@LMODEL_FILE,$i);
@@ -84,7 +88,7 @@ for(my $i=$header;$i<=$#LINE;$i++) {
 	$i = &read(\@TTABLE_FILE,$i);
 	my $first_line;
 	if (-e $TTABLE_FILE[0]) {
-	    if ($TTABLE_FILE[0] =~ /\.gz$/) { 
+	    if ($TTABLE_FILE[0] =~ /\.gz$/) {
 		$first_line = `zcat $TTABLE_FILE[0] | head -1`;
 	    }
 	    else {
@@ -138,7 +142,7 @@ sub read {
     $i++;
     while($i<=$#LINE && $LINE[$i] !~ /^\[/) {
 	if ($LINE[$i] !~ /^\s*$/ && # ignore comments and empty lines
-	    $LINE[$i] !~ /^\#/) { 
+	    $LINE[$i] !~ /^\#/) {
 	    # store value
 	    my $line = $LINE[$i];
 	    chop($line);

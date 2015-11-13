@@ -10,8 +10,11 @@
 #include "moses/Incremental.h"
 #include "mbr.h"
 
+#include "moses/Syntax/F2S/RuleMatcherCallback.h"
+#include "moses/Syntax/F2S/RuleMatcherHyperTree.h"
 #include "moses/Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser.h"
 #include "moses/Syntax/S2T/Parsers/Scope3Parser/Parser.h"
+#include "moses/Syntax/T2S/RuleMatcherSCFG.h"
 
 #include "util/exception.hh"
 
@@ -20,59 +23,171 @@ using namespace std;
 namespace Moses
 {
 
-TranslationTask::TranslationTask(InputType* source, Moses::IOWrapper &ioWrapper,
-                bool outputSearchGraphSLF,
-                boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput)
-: m_source(source)
-, m_ioWrapper(ioWrapper)
-, m_outputSearchGraphSLF(outputSearchGraphSLF)
-, m_hypergraphOutput(hypergraphOutput)
-, m_pbOrChart(1)
-{}
-
-TranslationTask::TranslationTask(InputType *source, IOWrapper &ioWrapper,
-boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutputChart)
-: m_source(source)
-, m_ioWrapper(ioWrapper)
-, m_hypergraphOutputChart(hypergraphOutputChart)
-, m_pbOrChart(2)
-{}
-
-TranslationTask::~TranslationTask() {
-  delete m_source;
+boost::shared_ptr<std::vector<std::string> >
+TranslationTask::
+GetContextWindow() const
+{
+  return m_context;
 }
+
+// SPTR<std::map<std::string, float> const>
+// TranslationTask::GetContextWeights() const
+// {
+//   return m_context_weights;
+// }
+
+// void
+// TranslationTask
+// ::ReSetContextWeights(std::map<std::string, float> const& new_weights)
+// {
+//   m_context_weights.reset(new std::map<string,float>(new_weights));
+// }
+
+void
+TranslationTask::
+SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw)
+{
+  m_context = cw;
+}
+
+boost::shared_ptr<TranslationTask>
+TranslationTask
+::create(boost::shared_ptr<InputType> const& source)
+{
+  boost::shared_ptr<IOWrapper> nix;
+  boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, nix));
+  ret->m_self = ret;
+  ret->m_scope.reset(new ContextScope);
+  return ret;
+}
+
+boost::shared_ptr<TranslationTask>
+TranslationTask
+::create(boost::shared_ptr<InputType> const& source,
+         boost::shared_ptr<IOWrapper> const& ioWrapper)
+{
+  boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
+  ret->m_self = ret;
+  ret->m_scope.reset(new ContextScope);
+  return ret;
+}
+
+boost::shared_ptr<TranslationTask>
+TranslationTask
+::create(boost::shared_ptr<InputType> const& source,
+         boost::shared_ptr<IOWrapper> const& ioWrapper,
+         boost::shared_ptr<ContextScope> const& scope)
+{
+  boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
+  ret->m_self  = ret;
+  ret->m_scope = scope;
+  return ret;
+}
+
+TranslationTask
+::TranslationTask(boost::shared_ptr<InputType> const& source,
+                  boost::shared_ptr<IOWrapper> const& ioWrapper)
+  : m_source(source) , m_ioWrapper(ioWrapper)
+{
+  m_options = StaticData::Instance().options();
+}
+
+TranslationTask::~TranslationTask()
+{ }
+
+
+boost::shared_ptr<BaseManager>
+TranslationTask
+::SetupManager(SearchAlgorithm algo)
+{
+  boost::shared_ptr<BaseManager> manager;
+  StaticData const& staticData = StaticData::Instance();
+  if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
+
+  if (!is_syntax(algo))
+    manager.reset(new Manager(this->self())); // phrase-based
+
+  else if (algo == SyntaxF2S || algo == SyntaxT2S) {
+    // STSG-based tree-to-string / forest-to-string decoding (ask Phil Williams)
+    typedef Syntax::F2S::RuleMatcherCallback Callback;
+    typedef Syntax::F2S::RuleMatcherHyperTree<Callback> RuleMatcher;
+    manager.reset(new Syntax::F2S::Manager<RuleMatcher>(this->self()));
+  }
+
+  else if (algo == SyntaxS2T) {
+    // new-style string-to-tree decoding (ask Phil Williams)
+    S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+    if (algorithm == RecursiveCYKPlus) {
+      typedef Syntax::S2T::EagerParserCallback Callback;
+      typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
+      manager.reset(new Syntax::S2T::Manager<Parser>(this->self()));
+    } else if (algorithm == Scope3) {
+      typedef Syntax::S2T::StandardParserCallback Callback;
+      typedef Syntax::S2T::Scope3Parser<Callback> Parser;
+      manager.reset(new Syntax::S2T::Manager<Parser>(this->self()));
+    } else UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
+  }
+
+  else if (algo == SyntaxT2S_SCFG) {
+    // SCFG-based tree-to-string decoding (ask Phil Williams)
+    typedef Syntax::F2S::RuleMatcherCallback Callback;
+    typedef Syntax::T2S::RuleMatcherSCFG<Callback> RuleMatcher;
+    manager.reset(new Syntax::T2S::Manager<RuleMatcher>(this->self()));
+  }
+
+  else if (algo == ChartIncremental) // Ken's incremental decoding
+    manager.reset(new Incremental::Manager(this->self()));
+
+  else // original SCFG manager
+    manager.reset(new ChartManager(this->self()));
+
+  return manager;
+}
+
+AllOptions const&
+TranslationTask::
+options() const
+{
+  return m_options;
+}
+
+/// parse document-level translation info stored on the input
+void
+TranslationTask::
+interpret_dlt()
+{
+  if (m_source->GetType() != SentenceInput) return;
+  Sentence const& snt = static_cast<Sentence const&>(*m_source);
+  typedef std::map<std::string,std::string> dltmap_t;
+  BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
+    dltmap_t::const_iterator i = M.find("type");
+    if (i == M.end() || i->second != "adaptive-lm") continue;
+    dltmap_t::const_iterator j = M.find("context-weights");
+    if (j == M.end()) continue;
+    m_scope->SetContextWeights(j->second);
+  }
+}
+
 
 void TranslationTask::Run()
 {
-	switch (m_pbOrChart)
-	{
-	case 1:
-		RunPb();
-		break;
-	case 2:
-		RunChart();
-		break;
-	default:
-	    UTIL_THROW(util::Exception, "Unknown value: " << m_pbOrChart);
-	}
-}
+  UTIL_THROW_IF2(!m_source || !m_ioWrapper,
+                 "Base Instances of TranslationTask must be initialized with"
+                 << " input and iowrapper.");
 
+  const size_t translationId = m_source->GetTranslationId();
 
-void TranslationTask::RunPb()
-{
-  // shorthand for "global data"
-  const StaticData &staticData = StaticData::Instance();
-
-  // input sentence
-  Sentence sentence;
 
   // report wall time spent on translation
   Timer translationTime;
   translationTime.start();
 
+  interpret_dlt(); // parse document-level translation info stored on the input
+
   // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
-  TRACE_ERR("Translating line " << m_source->GetTranslationId() << "  in thread id " << pthread_self() << endl);
+  VERBOSE(2, "Translating line " << translationId << "  in thread id "
+          << pthread_self() << endl);
 #endif
 
 
@@ -81,354 +196,77 @@ void TranslationTask::RunPb()
   //       we still need to apply the decision rule (MAP, MBR, ...)
   Timer initTime;
   initTime.start();
-  Manager manager(*m_source,staticData.GetSearchAlgorithm());
-  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Initialize search took " << initTime << " seconds total" << endl);
-  manager.ProcessSentence();
+
+  boost::shared_ptr<BaseManager> manager = SetupManager();
+
+  VERBOSE(1, "Line " << translationId << ": Initialize search took "
+          << initTime << " seconds total" << endl);
+
+  manager->Decode();
+
+  // new: stop here if m_ioWrapper is NULL. This means that the
+  // owner of the TranslationTask will take care of the output
+  // oh, and by the way, all the output should be handled by the
+  // output wrapper along the lines of *m_iwWrapper << *manager;
+  // Just sayin' ...
+  if (m_ioWrapper == NULL) return;
 
   // we are done with search, let's look what we got
+  OutputCollector* ocoll;
   Timer additionalReportingTime;
   additionalReportingTime.start();
+  boost::shared_ptr<IOWrapper> const& io = m_ioWrapper;
+
+  manager->OutputBest(io->GetSingleBestOutputCollector());
 
   // output word graph
-  if (m_ioWrapper.GetWordGraphCollector()) {
-    ostringstream out;
-    fix(out,PRECISION);
-    manager.GetWordGraph(m_source->GetTranslationId(), out);
-    m_ioWrapper.GetWordGraphCollector()->Write(m_source->GetTranslationId(), out.str());
-  }
+  manager->OutputWordGraph(io->GetWordGraphCollector());
 
   // output search graph
-  if (m_ioWrapper.GetSearchGraphOutputCollector()) {
-    ostringstream out;
-    fix(out,PRECISION);
-    manager.OutputSearchGraph(m_source->GetTranslationId(), out);
-    m_ioWrapper.GetSearchGraphOutputCollector()->Write(m_source->GetTranslationId(), out.str());
+  manager->OutputSearchGraph(io->GetSearchGraphOutputCollector());
 
-#ifdef HAVE_PROTOBUF
-    if (staticData.GetOutputSearchGraphPB()) {
-      ostringstream sfn;
-      sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << m_source->GetTranslationId() << ".pb" << ends;
-      string fn = sfn.str();
-      VERBOSE(2, "Writing search graph to " << fn << endl);
-      fstream output(fn.c_str(), ios::trunc | ios::binary | ios::out);
-      manager.SerializeSearchGraphPB(m_source->GetTranslationId(), output);
-    }
-#endif
-  }
+  // ???
+  manager->OutputSearchGraphSLF();
 
-  // Output search graph in HTK standard lattice format (SLF)
-  if (m_outputSearchGraphSLF) {
-    stringstream fileName;
-    fileName << staticData.GetParam("output-search-graph-slf")[0] << "/" << m_source->GetTranslationId() << ".slf";
-    ofstream *file = new ofstream;
-    file->open(fileName.str().c_str());
-    if (file->is_open() && file->good()) {
-      ostringstream out;
-      fix(out,PRECISION);
-      manager.OutputSearchGraphAsSLF(m_source->GetTranslationId(), out);
-      *file << out.str();
-      file -> flush();
-    } else {
-      TRACE_ERR("Cannot output HTK standard lattice for line " << m_source->GetTranslationId() << " because the output file is not open or not ready for writing" << endl);
-    }
-    delete file;
-  }
-
-  // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
-  if (m_hypergraphOutput.get()) {
-    m_hypergraphOutput->Write(manager);
+  // Output search graph in hypergraph format for Kenneth Heafield's
+  // lazy hypergraph decoder; writes to stderr
+  if (options().output.SearchGraphHG.size()) {
+    size_t transId = manager->GetSource().GetTranslationId();
+    string fname = io->GetHypergraphOutputFileName(transId);
+    manager->OutputSearchGraphAsHypergraph(fname, PRECISION);
   }
 
   additionalReportingTime.stop();
 
-  // apply decision rule and output best translation(s)
-  if (m_ioWrapper.GetSingleBestOutputCollector()) {
-    ostringstream out;
-    ostringstream debug;
-    fix(debug,PRECISION);
-
-    // all derivations - send them to debug stream
-    if (staticData.PrintAllDerivations()) {
-      additionalReportingTime.start();
-      manager.PrintAllDerivations(m_source->GetTranslationId(), debug);
-      additionalReportingTime.stop();
-    }
-
-    Timer decisionRuleTime;
-    decisionRuleTime.start();
-
-    // MAP decoding: best hypothesis
-    const Hypothesis* bestHypo = NULL;
-    if (!staticData.UseMBR()) {
-      bestHypo = manager.GetBestHypothesis();
-      if (bestHypo) {
-        if (StaticData::Instance().GetOutputHypoScore()) {
-          out << bestHypo->GetTotalScore() << ' ';
-        }
-        if (staticData.IsPathRecoveryEnabled()) {
-          m_ioWrapper.OutputInput(out, bestHypo);
-          out << "||| ";
-        }
-        if (staticData.GetParam("print-id").size() && Scan<bool>(staticData.GetParam("print-id")[0]) ) {
-          out << m_source->GetTranslationId() << " ";
-        }
-
-	  if (staticData.GetReportSegmentation() == 2) {
-	    manager.GetOutputLanguageModelOrder(out, bestHypo);
-	  }
-        m_ioWrapper.OutputBestSurface(
-          out,
-          bestHypo,
-          staticData.GetOutputFactorOrder(),
-          staticData.GetReportSegmentation(),
-          staticData.GetReportAllFactors());
-        if (staticData.PrintAlignmentInfo()) {
-          out << "||| ";
-          m_ioWrapper.OutputAlignment(out, bestHypo);
-        }
-
-        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), bestHypo);
-        IFVERBOSE(1) {
-          debug << "BEST TRANSLATION: " << *bestHypo << endl;
-        }
-      } else {
-        VERBOSE(1, "NO BEST TRANSLATION" << endl);
-      }
-
-      out << endl;
-    }
-
-    // MBR decoding (n-best MBR, lattice MBR, consensus)
-    else {
-      // we first need the n-best translations
-      size_t nBestSize = staticData.GetMBRSize();
-      if (nBestSize <= 0) {
-        cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
-        exit(1);
-      }
-      TrellisPathList nBestList;
-      manager.CalcNBest(nBestSize, nBestList,true);
-      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
-      IFVERBOSE(2) {
-        PrintUserTime("calculated n-best list for (L)MBR decoding");
-      }
-
-      // lattice MBR
-      if (staticData.UseLatticeMBR()) {
-        if (m_ioWrapper.GetNBestOutputCollector()) {
-          //lattice mbr nbest
-          vector<LatticeMBRSolution> solutions;
-          size_t n  = min(nBestSize, staticData.GetNBestSize());
-          getLatticeMBRNBest(manager,nBestList,solutions,n);
-          ostringstream out;
-          m_ioWrapper.OutputLatticeMBRNBest(out, solutions,m_source->GetTranslationId());
-          m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
-        } else {
-          //Lattice MBR decoding
-          vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-          m_ioWrapper.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
-                         staticData.GetReportAllFactors(),out);
-          IFVERBOSE(2) {
-            PrintUserTime("finished Lattice MBR decoding");
-          }
-        }
-      }
-
-      // consensus decoding
-      else if (staticData.UseConsensusDecoding()) {
-        const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
-        m_ioWrapper.OutputBestHypo(conBestHypo, m_source->GetTranslationId(),
-                       staticData.GetReportSegmentation(),
-                       staticData.GetReportAllFactors(),out);
-        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), conBestHypo);
-        IFVERBOSE(2) {
-          PrintUserTime("finished Consensus decoding");
-        }
-      }
-
-      // n-best MBR decoding
-      else {
-        const TrellisPath &mbrBestHypo = doMBR(nBestList);
-        m_ioWrapper.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(),
-                       staticData.GetReportSegmentation(),
-                       staticData.GetReportAllFactors(),out);
-        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), mbrBestHypo);
-        IFVERBOSE(2) {
-          PrintUserTime("finished MBR decoding");
-        }
-      }
-    }
-
-    // report best translation to output collector
-    m_ioWrapper.GetSingleBestOutputCollector()->Write(m_source->GetTranslationId(),out.str(),debug.str());
-
-    decisionRuleTime.stop();
-    VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
-  }
-
   additionalReportingTime.start();
 
   // output n-best list
-  if (m_ioWrapper.GetNBestOutputCollector() && !staticData.UseLatticeMBR()) {
-    TrellisPathList nBestList;
-    ostringstream out;
-    manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-    m_ioWrapper.OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
-                staticData.GetReportSegmentation());
-    m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
-  }
+  manager->OutputNBest(io->GetNBestOutputCollector());
 
   //lattice samples
-  if (m_ioWrapper.GetLatticeSamplesCollector()) {
-    TrellisPathList latticeSamples;
-    ostringstream out;
-    manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-    m_ioWrapper.OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
-                staticData.GetReportSegmentation());
-    m_ioWrapper.GetLatticeSamplesCollector()->Write(m_source->GetTranslationId(), out.str());
-  }
+  manager->OutputLatticeSamples(io->GetLatticeSamplesCollector());
 
   // detailed translation reporting
-  if (m_ioWrapper.GetDetailedTranslationCollector()) {
-    ostringstream out;
-    fix(out,PRECISION);
-    TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
-    m_ioWrapper.GetDetailedTranslationCollector()->Write(m_source->GetTranslationId(),out.str());
-  }
+  ocoll = io->GetDetailedTranslationCollector();
+  manager->OutputDetailedTranslationReport(ocoll);
+
+  ocoll = io->GetDetailTreeFragmentsOutputCollector();
+  manager->OutputDetailedTreeFragmentsTranslationReport(ocoll);
 
   //list of unknown words
-  if (m_ioWrapper.GetUnknownsCollector()) {
-    const vector<const Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
-    ostringstream out;
-    for (size_t i = 0; i < unknowns.size(); ++i) {
-      out << *(unknowns[i]);
-    }
-    out << endl;
-    m_ioWrapper.GetUnknownsCollector()->Write(m_source->GetTranslationId(), out.str());
-  }
+  manager->OutputUnknowns(io->GetUnknownsCollector());
+
+  manager->OutputAlignment(io->GetAlignmentInfoCollector());
 
   // report additional statistics
-  manager.CalcDecoderStatistics();
-  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
-  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Translation took " << translationTime << " seconds total" << endl);
+  manager->CalcDecoderStatistics();
+  VERBOSE(1, "Line " << translationId << ": Additional reporting took "
+          << additionalReportingTime << " seconds total" << endl);
+  VERBOSE(1, "Line " << translationId << ": Translation took "
+          << translationTime << " seconds total" << endl);
   IFVERBOSE(2) {
     PrintUserTime("Sentence Decoding Time:");
   }
-}
-
-
-void TranslationTask::RunChart()
-{
-	const StaticData &staticData = StaticData::Instance();
-	const size_t translationId = m_source->GetTranslationId();
-
-	VERBOSE(2,"\nTRANSLATING(" << translationId << "): " << *m_source);
-
-    if (staticData.UseS2TDecoder()) {
-      S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
-      if (algorithm == RecursiveCYKPlus) {
-        typedef Syntax::S2T::EagerParserCallback Callback;
-        typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
-        DecodeS2T<Parser>();
-      } else if (algorithm == Scope3) {
-        typedef Syntax::S2T::StandardParserCallback Callback;
-        typedef Syntax::S2T::Scope3Parser<Callback> Parser;
-        DecodeS2T<Parser>();
-      } else {
-        UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
-      }
-      return;
-    }
-
-	if (staticData.GetSearchAlgorithm() == ChartIncremental) {
-	  Incremental::Manager manager(*m_source);
-	  const std::vector<search::Applied> &nbest = manager.ProcessSentence();
-	  if (!nbest.empty()) {
-		m_ioWrapper.OutputBestHypo(nbest[0], translationId);
-		if (staticData.IsDetailedTranslationReportingEnabled()) {
-		  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-		  m_ioWrapper.OutputDetailedTranslationReport(&nbest[0], sentence, translationId);
-		}
-		if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
-		  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-		  m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(&nbest[0], sentence, translationId);
-		}
-	  } else {
-		m_ioWrapper.OutputBestNone(translationId);
-	  }
-	  if (staticData.GetNBestSize() > 0)
-		m_ioWrapper.OutputNBestList(nbest, translationId);
-	  return;
-	}
-
-	ChartManager manager(*m_source);
-	manager.ProcessSentence();
-
-	UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
-
-	// Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
-	if (m_hypergraphOutputChart.get()) {
-	  m_hypergraphOutputChart->Write(manager);
-	}
-
-
-	// 1-best
-	const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
-	m_ioWrapper.OutputBestHypo(bestHypo, translationId);
-	IFVERBOSE(2) {
-	  PrintUserTime("Best Hypothesis Generation Time:");
-	}
-
-	if (!staticData.GetAlignmentOutputFile().empty()) {
-	  m_ioWrapper.OutputAlignment(translationId, bestHypo);
-	}
-
-	if (staticData.IsDetailedTranslationReportingEnabled()) {
-	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-	  m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
-	}
-	if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
-	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-	  m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
-	}
-	if (!staticData.GetOutputUnknownsFile().empty()) {
-	  m_ioWrapper.OutputUnknowns(manager.GetParser().GetUnknownSources(),
-								 translationId);
-	}
-
-	//DIMw
-	if (staticData.IsDetailedAllTranslationReportingEnabled()) {
-	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-	  size_t nBestSize = staticData.GetNBestSize();
-	  std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
-	  manager.CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
-	  m_ioWrapper.OutputDetailedAllTranslationReport(nBestList, manager, sentence, translationId);
-	}
-
-	// n-best
-	size_t nBestSize = staticData.GetNBestSize();
-	if (nBestSize > 0) {
-	  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-	  std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
-	  manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-	  m_ioWrapper.OutputNBestList(nBestList, translationId);
-	  IFVERBOSE(2) {
-		PrintUserTime("N-Best Hypotheses Generation Time:");
-	  }
-	}
-
-	if (staticData.GetOutputSearchGraph()) {
-	  std::ostringstream out;
-	  manager.OutputSearchGraphMoses( out);
-	  OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
-	  UTIL_THROW_IF2(oc == NULL, "File for search graph output not specified");
-	  oc->Write(translationId, out.str());
-	}
-
-	IFVERBOSE(2) {
-	  PrintUserTime("Sentence Decoding Time:");
-	}
-	manager.CalcDecoderStatistics();
 }
 
 }

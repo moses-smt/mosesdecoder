@@ -6,7 +6,6 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
-#include "moses/UserMessage.h"
 #include "moses/Util.h"
 
 #include "util/string_piece_hash.hh"
@@ -21,8 +20,9 @@ SourceWordDeletionFeature::SourceWordDeletionFeature(const std::string &line)
   :StatelessFeatureFunction(0, line),
    m_unrestricted(true)
 {
-  std::cerr << "Initializing source word deletion feature.." << std::endl;
+  VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
+  VERBOSE(1, " Done." << std::endl);
 }
 
 void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::string& value)
@@ -38,12 +38,10 @@ void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::
 
 void SourceWordDeletionFeature::Load()
 {
-  if (m_filename == "") {
+  if (m_filename.empty())
     return;
-  }
 
-  cerr << "loading source word deletion word list from " << m_filename << endl;
-
+  FEATUREVERBOSE(1, "Loading source word deletion word list from " << m_filename << std::endl);
   ifstream inFile(m_filename.c_str());
   UTIL_THROW_IF2(!inFile, "Can't open file " << m_filename);
 
@@ -66,7 +64,7 @@ bool SourceWordDeletionFeature::IsUseable(const FactorMask &mask) const
 void SourceWordDeletionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);

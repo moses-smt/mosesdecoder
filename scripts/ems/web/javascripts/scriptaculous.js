@@ -49,9 +49,10 @@ var Scriptaculous = {
        (typeof Element == 'undefined') ||
        (typeof Element.Methods=='undefined') ||
        (convertVersionString(Prototype.Version) <
-        convertVersionString(Scriptaculous.REQUIRED_PROTOTYPE)))
+        convertVersionString(Scriptaculous.REQUIRED_PROTOTYPE))) {
        throw("script.aculo.us requires the Prototype JavaScript framework >= " +
         Scriptaculous.REQUIRED_PROTOTYPE);
+    }
 
     var js = /scriptaculous\.js(\?.*)?$/;
     $$('head script[src]').findAll(function(s) {
@@ -60,7 +61,7 @@ var Scriptaculous = {
       var path = s.src.replace(js, ''),
       includes = s.src.match(/\?.*load=([a-z,]*)/);
       (includes ? includes[1] : 'builder,effects,dragdrop,controls,slider,sound').split(',').each(
-       function(include) { Scriptaculous.require(path+include+'.js') });
+       function(include) { Scriptaculous.require(path+include+'.js'); });
     });
   }
 };

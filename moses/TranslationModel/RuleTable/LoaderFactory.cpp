@@ -19,7 +19,6 @@
 
 #include "LoaderFactory.h"
 
-#include "moses/UserMessage.h"
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "LoaderCompact.h"
@@ -41,18 +40,15 @@ std::auto_ptr<RuleTableLoader> RuleTableLoaderFactory::Create(
 {
   InputFileStream input(path);
   std::string line;
-  bool cont = std::getline(input, line);
 
-  if (cont) {
+  if (std::getline(input, line)) {
     std::vector<std::string> tokens;
     Tokenize(tokens, line);
     if (tokens.size() == 1) {
       if (tokens[0] == "1") {
         return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderCompact());
       }
-      std::stringstream msg;
-      msg << "Unsupported compact rule table format: " << tokens[0];
-      UserMessage::Add(msg.str());
+      std::cerr << "Unsupported compact rule table format: " << tokens[0];
       return std::auto_ptr<RuleTableLoader>();
     } else if (tokens[0] == "[X]" && tokens[1] == "|||") {
       return std::auto_ptr<RuleTableLoader>(new

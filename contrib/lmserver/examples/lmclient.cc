@@ -5,13 +5,13 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <string.h>
+#include <cstring>
 #include <map>
 
 struct Cache {
@@ -45,8 +45,8 @@ struct LMClient {
 	    exit(1);
     }
 
-    bzero((char *)&server, sizeof(server));
-    bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
+    memset(&server, '\0', sizeof(server));
+    memcpy((char *)&server.sin_addr, hp->h_addr, hp->h_length);
     server.sin_family = hp->h_addrtype;
     server.sin_port = htons(port);
 

@@ -22,6 +22,14 @@ rule shell_or_fail ( cmd ) {
   }
 }
 
+rule shell_or_die ( cmd ) {
+  local ret = [ SHELL $(cmd) : exit-status ] ;
+  if $(ret[2]) != 0 {
+    exit $(cmd) failed : 1 ;
+  }
+  return [ trim-nl $(ret[1]) ] ;
+}
+
 cxxflags = [ os.environ "CXXFLAGS" ] ;
 cflags = [ os.environ "CFLAGS" ] ;
 ldflags = [ os.environ "LDFLAGS" ] ;
@@ -84,6 +92,7 @@ while $(argv) {
 
 #Determine if a library can be compiled statically.  
 rule auto-shared ( name : additional * ) {
+
   additional ?= "" ;
   if $(shared-command-line) = "<link>shared" {
     return "<link>shared" ;
@@ -131,30 +140,13 @@ if $(with-macports) {
  
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost-lib ( name macro : deps * ) {
-  flags = $(L-boost-search)" -lboost_"$(name)"$(boost-lib-version)" ;
-  local main ;
-  if $(name) = "unit_test_framework" {
-    main = "BOOST_AUTO_TEST_CASE(foo) {}" ;
-    flags += " -DBOOST_TEST_MODULE=CompileTest $(I-boost-include) -include boost/test/unit_test.hpp" ;
-  }
-  if $(boost-auto-shared) = "<link>shared" {
-    flags += " -DBOOST_$(macro)" ;
-  } else {
-    flags = " -Wl,-Bstatic $(flags) -Wl,-Bdynamic " ;
-  }
-  if [ test_flags $(flags) : $(main) ] {
-    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name)$(boost-lib-version) : <link>static : <library>$(deps) ;
-    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)$(boost-lib-version) : <link>static : <library>$(deps) ;
-  } else {
-    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name)$(boost-lib-version) : : <library>$(deps) ;
-  }
+  lib boost_$(name)_static : $(deps) : $(boost-search) <name>boost_$(name)$(boost-lib-version) <link>static ;
+  lib boost_$(name)_shared : $(deps) : $(boost-search) <name>boost_$(name)$(boost-lib-version) <link>shared : : <define>BOOST_$(macro) ;
 
-  if $(boost-auto-shared) = "<link>shared" {
-    alias boost_$(name) : inner_boost_$(name) : <link>shared ;
-    requirements += <define>BOOST_$(macro) ;
-  } else {
-    alias boost_$(name) : inner_boost_$(name) : <link>static ;
-  }
+  alias boost_$(name)_default : $(deps) : <link>static:<source>boost_$(name)_static <link>shared:<source>boost_$(name)_shared ;
+
+  alias boost_$(name)_static_works : $(deps) : [ check-target-builds empty_test_shared "Shared Boost" : <source>boost_$(name)_default : <source>boost_$(name)_static ] ;
+  alias boost_$(name) : $(deps) : [ check-target-builds empty_test_static "Static Boost" : <source>boost_$(name)_static_works : <source>boost_$(name)_shared ] ;
 }
 
 #Argument is e.g. 103600
@@ -177,16 +169,25 @@ rule boost ( min-version ) {
     boost-lib-version = "" ;
   }
 
-  #Are we linking static binaries against shared boost?
-  boost-auto-shared = [ auto-shared "boost_program_options"$(boost-lib-version) : $(L-boost-search) ] ;
+  #Crazy amount of testing to make sure that BOOST_TEST_DYN_LINK is defined properly.
+  lib boost_unit_test_framework_static_test : : $(boost-search) <name>boost_unit_test_framework$(boost-lib-version) <link>static ;
+  obj empty_test_static.o : jam-files/empty_test_main.cc boost_unit_test_framework_static_test : $(boost-include) ;
+  exe empty_test_static : empty_test_static.o boost_unit_test_framework_static_test ;
+
+  lib boost_unit_test_framework_shared_test : : $(boost-search) <name>boost_unit_test_framework$(boost-lib-version) <link>shared : : <define>BOOST_TEST_DYN_LINK ;
+  obj empty_test_shared.o : jam-files/empty_test_main.cc boost_unit_test_framework_shared_test : $(boost-include) ;
+  exe empty_test_shared : empty_test_shared.o boost_unit_test_framework_shared_test ;
+
+  explicit empty_test_static.o empty_test_static empty_test_shared.o empty_test_shared ;
+
 
   #See tools/build/v2/contrib/boost.jam in a boost distribution for a table of macros to define.   
   boost-lib system SYSTEM_DYN_LINK ;
   boost-lib thread THREAD_DYN_DLL : boost_system ;
   boost-lib program_options PROGRAM_OPTIONS_DYN_LINK ;
-  boost-lib unit_test_framework TEST_DYN_LINK ;
   boost-lib iostreams IOSTREAMS_DYN_LINK ;
   boost-lib filesystem FILE_SYSTEM_DYN_LINK ;
+  boost-lib unit_test_framework TEST_DYN_LINK ;
 #  if $(BOOST-VERSION) >= 104800 {
 #    boost-lib chrono CHRONO_DYN_LINK ;
 #    boost-lib timer TIMER_DYN_LINK : boost_chrono ;

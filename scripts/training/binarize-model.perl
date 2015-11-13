@@ -1,9 +1,13 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 #
 # Binarize a Moses model
 #
 
+use warnings;
 use strict;
 
 use Getopt::Long "GetOptions";
@@ -36,7 +40,7 @@ my $hierarchical = "";
 $hierarchical = "-Hierarchical" if $opt_hierarchical;
 my $targetdir = "$output_config.tables";
 
-safesystem("$RealBin/filter-model-given-input.pl  $targetdir $input_config /dev/null $hierarchical -nofilter -Binarizer $binarizer") || die "binarising failed"; 
+safesystem("$RealBin/filter-model-given-input.pl  $targetdir $input_config /dev/null $hierarchical -nofilter -Binarizer \"$binarizer\"") || die "binarising failed";
 safesystem("rm -f $output_config; ln -s $targetdir/moses.ini $output_config") || die "failed to link new ini file";
 
 #FIXME: Why isn't this in a module?

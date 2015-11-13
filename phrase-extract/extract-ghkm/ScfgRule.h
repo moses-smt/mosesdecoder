@@ -18,11 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_SCFG_RULE_H_
-#define EXTRACT_GHKM_SCFG_RULE_H_
-
-#include "Alignment.h"
-#include "SyntaxTree.h"
 
 #include <string>
 #include <vector>
@@ -30,7 +25,13 @@
 #include <memory>
 #include <iostream>
 
-namespace Moses
+#include "Alignment.h"
+#include "Rule.h"
+#include "SyntaxNodeCollection.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -38,30 +39,15 @@ namespace GHKM
 class Node;
 class Subgraph;
 
-enum SymbolType { Terminal, NonTerminal };
-
-class Symbol {
-public:
-  Symbol(const std::string &v, SymbolType t) : m_value(v) , m_type(t) {}
-
-  const std::string &GetValue() const {
-    return m_value;
-  }
-  SymbolType GetType() const {
-    return m_type;
-  }
-
-private:
-  std::string m_value;
-  SymbolType m_type;
-};
-
-class ScfgRule
+class ScfgRule : public Rule
 {
 public:
-  ScfgRule(const Subgraph &fragment, 
-           const MosesTraining::SyntaxTree *sourceSyntaxTree = 0);
+  ScfgRule(const Subgraph &fragment,
+           const SyntaxNodeCollection *sourceNodeCollection = 0);
 
+  const Subgraph &GetGraphFragment() const {
+    return m_graphFragment;
+  }
   const Symbol &GetSourceLHS() const {
     return m_sourceLHS;
   }
@@ -74,9 +60,6 @@ public:
   const std::vector<Symbol> &GetTargetRHS() const {
     return m_targetRHS;
   }
-  const Alignment &GetAlignment() const {
-    return m_alignment;
-  }
   float GetPcfgScore() const {
     return m_pcfgScore;
   }
@@ -86,26 +69,25 @@ public:
   void PrintSourceLabels(std::ostream &out) const {
     for (std::vector<std::string>::const_iterator it = m_sourceLabels.begin();
          it != m_sourceLabels.end(); ++it) {
-        out << " " << (*it);
+      out << " " << (*it);
     }
   }
   void UpdateSourceLabelCoocCounts(std::map< std::string, std::map<std::string,float>* > &coocCounts,
                                    float count) const;
 
-  int Scope() const;
+  int Scope() const {
+    return Rule::Scope(m_sourceRHS);
+  }
 
 private:
-  static bool PartitionOrderComp(const Node *, const Node *);
+  void PushSourceLabel(const SyntaxNodeCollection *sourceNodeCollection,
+                       const Node *node, const std::string &nonMatchingLabel);
 
-  void PushSourceLabel(const MosesTraining::SyntaxTree *sourceSyntaxTree,
-                       const Node *node,
-                       const std::string &nonMatchingLabel);
-
+  const Subgraph& m_graphFragment;
   Symbol m_sourceLHS;
   Symbol m_targetLHS;
   std::vector<Symbol> m_sourceRHS;
   std::vector<Symbol> m_targetRHS;
-  Alignment m_alignment;
   float m_pcfgScore;
   bool m_hasSourceLabels;
   std::vector<std::string> m_sourceLabels;
@@ -113,6 +95,5 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
-
-#endif
+}  // namespace Syntax
+}  // namespace MosesTraining

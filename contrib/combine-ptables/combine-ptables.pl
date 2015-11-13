@@ -17,7 +17,7 @@ sub main {
 my $usage = "
 USAGE
 -----
-combine-ptables.pl --mode=(interp|union|fillup|intersect1|stats) ptable1 ptable2 ... ptableN > combined-ptable
+combine-ptables.pl --mode=(interp|union|fillup|backoff|intersect1|stats) ptable1 ptable2 ... ptableN > combined-ptable
 combine-ptables.pl --mode=intersect1 reotable-unpruned ptable-pruned > reotable-pruned
 -----
 #
@@ -32,6 +32,8 @@ combine-ptables.pl --mode=intersect1 reotable-unpruned ptable-pruned > reotable-
 # Required:
 # --mode			fillup:	    Each entry is taken only from the first table that contains it.
 #		                            A binary feature is added from each table except the first.
+# 				backoff:    Each entry is taken only from the first table that contains it.
+#		                            NO binary feature is added.
 #				interp:     Linear interpolation.
 #				union:	    Union of entries, feature vectors are concatenated.
 #                               intersect1: Intersection of entries, feature vectors taken from the first table.
@@ -49,6 +51,9 @@ combine-ptables.pl --mode=intersect1 reotable-unpruned ptable-pruned > reotable-
 #
 #
 # Options for 'fillup':
+# --newSourceMaxLength=INT      Don't include \"new\" source phrases if longer than INT words.
+#
+# Options for 'backoff':
 # --newSourceMaxLength=INT      Don't include \"new\" source phrases if longer than INT words.
 #
 # Options for 'interp':
@@ -85,7 +90,7 @@ GetOptions ('debug' => \$debug,
 
 if($help) { die "$usage\n\n"; }
 
-if($combination_mode!~/(interp|union|fillup|intersect1|stats)/) {die "$usage\nUnknown combination mode!\n"}; 
+if($combination_mode!~/(interp|union|fillup|backoff|intersect1|stats)/) {die "$usage\nUnknown combination mode!\n"}; 
 
 if(@ARGV < 2) {die "$usage\n\n Please provide at least 2 tables to combine \n\n";}
 
@@ -103,7 +108,7 @@ my $nbtables = scalar(@tables);
 
 # The newSourceMaxLength option requires reading all the first PT before starting the combination
 my %sourcePhrasesPT1; 
-if($combination_mode eq "fillup" && $newSourceMaxLength>-1) {
+if((($combination_mode eq "fillup") || ($combination_mode eq "backoff")) && $newSourceMaxLength>-1) {
     my $table1=$tables[0];
     $table1 =~ s/(.*\.gz)\s*$/gzip -dc < $1|/;
     open(TABLE1, "$table1") or die "Cannot open $table1: ($!)\n";
@@ -280,6 +285,25 @@ sub combine_ppair(PPAIRS_REFARRAY, TABLE_INDICES_REFARRAY) {
 	    }
 	}
 	push(@scores, @bin_feats);
+    }
+    ### Backoff
+    elsif($combination_mode eq "backoff") {
+        #my @bin_feats=(($exp_zero) x ($nbtables-1));
+        for(my $i=0; $i<$nbtables; $i++) {
+            if($ra_toRead->[$i]) {
+                $ppair= shift(@{$ra_ppairs->[$i]});
+                # pruning criteria are applied here:
+                if($i>0 && $newSourceMaxLength>-1) {
+                    $ppair=~m/^(.*?)$delim_RE/;
+                    if(scalar(split(/ +/, $1)) > $newSourceMaxLength &&
+                        !defined($sourcePhrasesPT1{$1}))
+                       { $to_print=0; }
+                }
+		@scores = @{shift(@{$ra_ppairs->[$i]})};
+ 		$additional_info=shift(@{$ra_ppairs->[$i]});
+                last;
+            }
+	}
     }
     ### Linear interpolation
     elsif($combination_mode eq "interp") {

@@ -14,18 +14,19 @@
 using namespace std;
 
 NonTerm::NonTerm(const ConsistentPhrase &consistentPhrase,
-				const std::string &source,
-				const std::string &target)
-:m_consistentPhrase(&consistentPhrase)
-,m_source(source)
-,m_target(target)
+                 const std::string &source,
+                 const std::string &target)
+  :m_consistentPhrase(&consistentPhrase)
+  ,m_source(source)
+  ,m_target(target)
 {
-	// TODO Auto-generated constructor stub
+  // TODO Auto-generated constructor stub
 
 }
 
-NonTerm::~NonTerm() {
-	// TODO Auto-generated destructor stub
+NonTerm::~NonTerm()
+{
+  // TODO Auto-generated destructor stub
 }
 
 std::string NonTerm::Debug() const
@@ -43,7 +44,7 @@ void NonTerm::Output(std::ostream &out) const
 
 void NonTerm::Output(std::ostream &out, Moses::FactorDirection direction) const
 {
-	out << GetLabel(direction);
+  out << GetLabel(direction);
 }
 
 const std::string &NonTerm::GetLabel(Moses::FactorDirection direction) const
@@ -53,14 +54,16 @@ const std::string &NonTerm::GetLabel(Moses::FactorDirection direction) const
 
 bool NonTerm::IsHiero(Moses::FactorDirection direction, const Parameter &params) const
 {
-	const std::string &label = NonTerm::GetLabel(direction);
-	return label == params.hieroNonTerm;
+  const std::string &label = NonTerm::GetLabel(direction);
+  return label == params.hieroNonTerm;
 }
 
 bool NonTerm::IsHiero(const Parameter &params) const
 {
- return IsHiero(Moses::Input, params) && IsHiero(Moses::Output, params);
+  return IsHiero(Moses::Input, params) && IsHiero(Moses::Output, params);
 }
 
 int NonTerm::GetWidth(Moses::FactorDirection direction) const
-{ return GetConsistentPhrase().GetWidth(direction); }
+{
+  return GetConsistentPhrase().GetWidth(direction);
+}

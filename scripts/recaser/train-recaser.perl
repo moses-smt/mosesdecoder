@@ -1,6 +1,10 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
+use warnings;
 use strict;
 use FindBin qw($Bin);
 use Getopt::Long "GetOptions";
@@ -13,8 +17,12 @@ my ($DIR,$CORPUS,$SCRIPTS_ROOT_DIR,$CONFIG,$HELP,$ERROR);
 my $LM = "KENLM"; # KENLM is default.
 my $BUILD_LM = "build-lm.sh";
 my $BUILD_KENLM = "$Bin/../../bin/lmplz";
+my $BUILD_BINARY = "$Bin/../../bin/build_binary";
+my $EXTRACT = "$Bin/../../bin/extract";
+my $SCORE = "$Bin/../../bin/score";
+my $CONSOLIDATE_DIRECT = "$Bin/../../bin/consolidate-direct";
 my $NGRAM_COUNT = "ngram-count";
-my $TRAIN_SCRIPT = "train-factored-phrase-model.perl";
+my $TRAIN_SCRIPT = "$Bin/../training/train-model.perl";
 my $MAX_LEN = 1;
 my $FIRST_STEP = 1;
 my $LAST_STEP = 11;
@@ -35,7 +43,7 @@ $ERROR = "training Aborted."
 
 # check and set default to unset parameters
 $ERROR = "please specify working dir --dir" unless defined($DIR) || defined($HELP);
-$ERROR = "please specify --corpus" if !defined($CORPUS) && !defined($HELP) 
+$ERROR = "please specify --corpus" if !defined($CORPUS) && !defined($HELP)
                                   && $FIRST_STEP <= 2 && $LAST_STEP >= 1;
 
 if ($HELP || $ERROR) {
@@ -65,7 +73,7 @@ if ($HELP || $ERROR) {
   (1) Truecasing;
   (2) Language Model Training;
   (3) Data Preparation
-  (4-10) Recaser Model Training; 
+  (4-10) Recaser Model Training;
   (11) Cleanup.
   --first-step=[1-11]       ... step where script starts (default: 1).
   --last-step=[1-11]        ... step where script ends (default: 11).
@@ -118,11 +126,14 @@ sub train_lm {
     }
     else {
         $LM = "KENLM";
-        $cmd = "$BUILD_KENLM --prune 0 0 1 -S 5% -T $DIR/lmtmp --order 3 --text $CORPUS --arpa $DIR/cased.kenlm.gz";
+        $cmd = "$BUILD_KENLM --prune 0 0 1 -S 5% -T $DIR/lmtmp --order 3 --text $CORPUS --arpa $DIR/cased.kenlm.arpa.gz";
     }
     print STDERR "** Using $LM **" . "\n";
     print STDERR $cmd."\n";
     system($cmd) == 0 || die("Language model training failed with error " . ($? >> 8) . "\n");
+    if ($LM eq "KENLM") {
+      system("$BUILD_BINARY $DIR/cased.kenlm.arpa.gz $DIR/cased.kenlm ; rm $DIR/cased.kenlm.arpa.gz");
+    }
 }
 
 sub prepare_data {
@@ -159,10 +170,29 @@ sub prepare_data {
 }
 
 sub train_recase_model {
+    print STDERR "\n(4) Training recasing model @ ".`date`;
     my $first = $FIRST_STEP;
     $first = 4 if $first < 4;
-    print STDERR "\n(4) Training recasing model @ ".`date`;
+    if ($MAX_LEN == 1) {
+       my $cmd = "$EXTRACT $DIR/aligned.cased $DIR/aligned.lowercased $DIR/aligned.a $DIR/extract 1";
+       system($cmd) == 0 || die("ERROR: extract (special case max-len 1) failed: $cmd");
+       $cmd = "sort -S 2G $DIR/extract > $DIR/extract.sorted";
+       system($cmd) == 0 || die("ERROR: sort extract (special case max-len 1) failed: $cmd");
+       $cmd = "$SCORE $DIR/extract.sorted /dev/null $DIR/phrase-table-half --NoLex";
+       system($cmd) == 0 || die("ERROR: score (special case max-len 1) failed: $cmd");
+       $cmd = "$CONSOLIDATE_DIRECT $DIR/phrase-table-half $DIR/phrase-table";
+       system($cmd) == 0 || die("ERROR: consolidate-direct (special case max-len 1) failed: $cmd");
+       system("rm $DIR/phrase-table-half");
+       system("gzip $DIR/phrase-table");
+       $first = 9;
+    }
     my $cmd = "$TRAIN_SCRIPT --root-dir $DIR --model-dir $DIR --first-step $first --alignment a --corpus $DIR/aligned --f lowercased --e cased --max-phrase-length $MAX_LEN";
+    if ($MAX_LEN == 1) {
+      $cmd .= " --score-options='--NoLex --OnlyDirect'";
+    }
+    else {
+      $cmd .= " --score-options='--OnlyDirect'";
+    }
     if (uc $LM eq "IRSTLM") {
         $cmd .= " --lm 0:3:$DIR/cased.irstlm.gz:1";
     }
@@ -170,7 +200,7 @@ sub train_recase_model {
         $cmd .= " --lm 0:3:$DIR/cased.srilm.gz:8";
     }
     else {
-        $cmd .= " --lm 0:3:$DIR/cased.kenlm.gz:8";
+        $cmd .= " --lm 0:3:$DIR/cased.kenlm:8";
     }
     $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";

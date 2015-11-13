@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "TargetPhrase.h"
 #include "Util.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
@@ -43,12 +44,13 @@ public:
   // iters
   typedef CollType::iterator iterator;
   typedef CollType::const_iterator const_iterator;
+  typedef boost::shared_ptr<TargetPhraseCollection> shared_ptr;
+  typedef boost::shared_ptr<TargetPhraseCollection const> shared_const_ptr;
 
-  TargetPhrase const* 
-  operator[](size_t const i) const
-  {
+  TargetPhrase const*
+  operator[](size_t const i) const {
     return m_collection.at(i);
-  }  
+  }
 
   iterator begin() {
     return m_collection.begin();
@@ -63,8 +65,8 @@ public:
     return m_collection.end();
   }
 
-  TargetPhraseCollection()
-  {}
+  TargetPhraseCollection() {
+  }
 
   TargetPhraseCollection(const TargetPhraseCollection &copy);
 
@@ -74,6 +76,18 @@ public:
 
   const CollType &GetCollection() const {
     return m_collection;
+  }
+
+  //! delete an entry from the collection
+  void Remove(const size_t pos) {
+    if (pos < m_collection.size()) {
+      m_collection.erase(begin() + pos);
+    }
+  }
+
+  //! return an entry of the collection
+  const TargetPhrase* GetTargetPhrase(const size_t pos) const {
+    return m_collection[pos];
   }
 
   //! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
@@ -116,6 +130,9 @@ protected:
   std::vector<Phrase> m_sourcePhrases;
 
 public:
+  typedef boost::shared_ptr<TargetPhraseCollectionWithSourcePhrase> shared_ptr;
+  typedef boost::shared_ptr<TargetPhraseCollectionWithSourcePhrase const> shared_const_ptr;
+
   const std::vector<Phrase> &GetSourcePhrases() const {
     return m_sourcePhrases;
   }

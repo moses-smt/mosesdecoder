@@ -15,7 +15,7 @@ use strict;
 use vars qw($VERSION);
 use 5.004;
 
-$VERSION = "0.15"; 
+$VERSION = "0.15";
 
 use overload (
 	'""'	   =>	'stringify',
@@ -146,7 +146,7 @@ sub throw {
 
     # if we are not rethrow-ing then create the object to throw
     $self = $self->new(@_) unless ref($self);
-    
+
     die $Error::THROWN = $self;
 }
 
@@ -429,7 +429,7 @@ sub except (&;$) {
     my $code = shift;
     my $clauses = shift || {};
     my $catch = $clauses->{'catch'} ||= [];
-    
+
     my $sub = sub {
 	my $ref;
 	my(@array) = $code->($_[0]);
@@ -481,7 +481,7 @@ Error - Error/exception handling in an OO-ish way
 	record Error::Simple("A simple error")
 	    and return;
     }
- 
+
     unlink($file) or throw Error::Simple("$file: $!",$!);
 
     try {

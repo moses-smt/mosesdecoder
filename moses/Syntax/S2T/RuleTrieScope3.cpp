@@ -33,7 +33,7 @@ void RuleTrieScope3::Node::Prune(std::size_t tableLimit)
 
   // Prune TargetPhraseCollections at this node.
   for (LabelMap::iterator p = m_labelMap.begin(); p != m_labelMap.end(); ++p) {
-    p->second.Prune(true, tableLimit);
+    p->second->Prune(true, tableLimit);
   }
 }
 
@@ -50,12 +50,12 @@ void RuleTrieScope3::Node::Sort(std::size_t tableLimit)
 
   // Sort TargetPhraseCollections at this node.
   for (LabelMap::iterator p = m_labelMap.begin(); p != m_labelMap.end(); ++p) {
-    p->second.Sort(true, tableLimit);
+    p->second->Sort(true, tableLimit);
   }
 }
 
 RuleTrieScope3::Node *RuleTrieScope3::Node::GetOrCreateTerminalChild(
-    const Word &sourceTerm)
+  const Word &sourceTerm)
 {
   assert(!sourceTerm.IsNonTerminal());
   std::pair<TerminalMap::iterator, bool> result;
@@ -66,7 +66,7 @@ RuleTrieScope3::Node *RuleTrieScope3::Node::GetOrCreateTerminalChild(
 }
 
 RuleTrieScope3::Node *RuleTrieScope3::Node::GetOrCreateNonTerminalChild(
-    const Word &targetNonTerm)
+  const Word &targetNonTerm)
 {
   assert(targetNonTerm.IsNonTerminal());
   if (m_gapNode == NULL) {
@@ -75,9 +75,10 @@ RuleTrieScope3::Node *RuleTrieScope3::Node::GetOrCreateNonTerminalChild(
   return m_gapNode;
 }
 
-TargetPhraseCollection &
-RuleTrieScope3::Node::GetOrCreateTargetPhraseCollection(
-    const TargetPhrase &target)
+TargetPhraseCollection::shared_ptr
+RuleTrieScope3::
+Node::
+GetOrCreateTargetPhraseCollection(const TargetPhrase &target)
 {
   const AlignmentInfo &alignmentInfo = target.GetAlignNonTerm();
   const std::size_t rank = alignmentInfo.GetSize();
@@ -94,19 +95,23 @@ RuleTrieScope3::Node::GetOrCreateTargetPhraseCollection(
     const Word &targetNonTerm = target.GetWord(targetNonTermIndex);
     vec.push_back(InsertLabel(i++, targetNonTerm));
   }
-
-  return m_labelMap[vec];
+  TargetPhraseCollection::shared_ptr& ret = m_labelMap[vec];
+  if (!ret) ret.reset(new TargetPhraseCollection);
+  return ret;
 }
 
-TargetPhraseCollection &RuleTrieScope3::GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target, const Word *sourceLHS)
+TargetPhraseCollection::shared_ptr
+RuleTrieScope3::
+GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                  const TargetPhrase &target,
+                                  const Word *sourceLHS)
 {
   Node &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection(target);
 }
 
 RuleTrieScope3::Node &RuleTrieScope3::GetOrCreateNode(
-    const Phrase &source, const TargetPhrase &target, const Word */*sourceLHS*/)
+  const Phrase &source, const TargetPhrase &target, const Word */*sourceLHS*/)
 {
   const std::size_t size = source.GetSize();
 

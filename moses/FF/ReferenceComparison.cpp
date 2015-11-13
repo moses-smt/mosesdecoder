@@ -3,7 +3,7 @@
 namespace Moses
 {
 ReferenceComparison::ReferenceComparison(const std::string &line)
-:StatelessFeatureFunction(0, line)
+  :StatelessFeatureFunction(0, line)
 {
 }
 

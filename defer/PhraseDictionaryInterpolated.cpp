@@ -105,10 +105,10 @@ bool PhraseDictionaryInterpolated::Load(
   return true;
 }
 
-void PhraseDictionaryInterpolated::InitializeForInput(InputType const& source)
+void PhraseDictionaryInterpolated::InitializeForInput(ttasksptr const& ttask)
 {
   for (size_t i = 0; i < m_dictionaries.size(); ++i) {
-    m_dictionaries[i]->InitializeForInput(source);
+    m_dictionaries[i]->InitializeForInput(ttask);
   }
 }
 
@@ -116,7 +116,7 @@ typedef
 boost::unordered_set<TargetPhrase*,PhrasePtrHasher,PhrasePtrComparator> PhraseSet;
 
 
-const TargetPhraseCollection*
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryInterpolated::GetTargetPhraseCollection(const Phrase& src) const
 {
 
@@ -125,7 +125,7 @@ PhraseDictionaryInterpolated::GetTargetPhraseCollection(const Phrase& src) const
   PhraseSet allPhrases;
   vector<PhraseSet> phrasesByTable(m_dictionaries.size());
   for (size_t i = 0; i < m_dictionaries.size(); ++i) {
-    const TargetPhraseCollection* phrases = m_dictionaries[i]->GetTargetPhraseCollection(src);
+    TargetPhraseCollection::shared_ptr  phrases = m_dictionaries[i]->GetTargetPhraseCollection(src);
     if (phrases) {
       for (TargetPhraseCollection::const_iterator j = phrases->begin();
            j != phrases->end(); ++j) {

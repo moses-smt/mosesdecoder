@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // Memory-mapped corpus track
 // (c) Ulrich Germann. All rights reserved
 
@@ -6,15 +7,15 @@
 #include "ug_mm_ttrack.h"
 #include "tpt_pickler.h"
 
-namespace ugdiss
+namespace sapt
 {
   using namespace std;
-  
+
 #if 0
   template<>
   id_type
   Ttrack<id_type>::
-  toID(id_type const& t) 
+  toID(id_type const& t)
   {
     return t;
   }
@@ -34,6 +35,13 @@ namespace ugdiss
     while (++strt < stop)
       buf << " " << T[*strt];
     return buf.str();
+  }
+
+  size_t 
+  len_from_pid(uint64_t pid)
+  {
+    static uint64_t two16 = uint64_t(1)<<16;
+    return pid%two16;
   }
 
 #if 0

@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // count words in a memory-mapped corpus
 #include "ug_mm_ttrack.h"
 #include "tpt_tokenindex.h"
@@ -17,6 +18,7 @@
 #include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
 
 using namespace std;
+using namespace sapt;
 using namespace ugdiss;
 using namespace Moses;
 typedef L2R_Token<SimpleWordId> Token;
@@ -36,7 +38,7 @@ int main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
   T.open(bname+".mct");
-  V.open(bname+".tdx"); 
+  V.open(bname+".tdx");
   vector<size_t> cnt(V.ksize(),0);
   for (size_t sid = 0; sid < T.size(); ++sid)
     {
@@ -48,7 +50,7 @@ int main(int argc, char* argv[])
   exit(0);
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   namespace po=boost::program_options;
@@ -60,7 +62,7 @@ interpret_args(int ac, char* av[])
   o.add_options()
     ("help,h",    "print this message")
     ;
-  
+
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
     ;

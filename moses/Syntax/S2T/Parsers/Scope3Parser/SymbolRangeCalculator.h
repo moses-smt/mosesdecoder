@@ -14,11 +14,11 @@ namespace S2T
 
 class SymbolRangeCalculator
 {
- public:
+public:
   void Calc(const PatternApplicationKey &, int, int,
             std::vector<SymbolRange> &);
 
- private:
+private:
   // Provides contextual information used in determining a symbol's range.
   struct AuxSymbolInfo {
     int distanceToNextTerminal;

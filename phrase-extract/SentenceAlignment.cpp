@@ -24,6 +24,7 @@
 #include <string>
 
 #include "tables-core.h"
+#include "util/tokenize.hh"
 
 using namespace std;
 
@@ -40,7 +41,7 @@ void addBoundaryWords(vector<string> &phrase)
 
 bool SentenceAlignment::processTargetSentence(const char * targetString, int, bool boundaryRules)
 {
-  target = tokenize(targetString);
+  target = util::tokenize(targetString);
   if (boundaryRules)
     addBoundaryWords(target);
   return true;
@@ -48,17 +49,17 @@ bool SentenceAlignment::processTargetSentence(const char * targetString, int, bo
 
 bool SentenceAlignment::processSourceSentence(const char * sourceString, int, bool boundaryRules)
 {
-  source = tokenize(sourceString);
+  source = util::tokenize(sourceString);
   if (boundaryRules)
     addBoundaryWords(source);
   return true;
 }
 
 bool SentenceAlignment::create(const char targetString[],
-							const char sourceString[],
-							const char alignmentString[],
-							const char weightString[],
-							int sentenceID, bool boundaryRules)
+                               const char sourceString[],
+                               const char alignmentString[],
+                               const char weightString[],
+                               int sentenceID, bool boundaryRules)
 {
   using namespace std;
   this->sentenceID = sentenceID;
@@ -89,7 +90,7 @@ bool SentenceAlignment::create(const char targetString[],
   }
 
   // reading in alignments
-  vector<string> alignmentSequence = tokenize( alignmentString );
+  vector<string> alignmentSequence = util::tokenize( alignmentString );
   for(size_t i=0; i<alignmentSequence.size(); i++) {
     int s,t;
     // cout << "scaning " << alignmentSequence[i].c_str() << endl;

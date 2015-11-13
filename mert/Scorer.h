@@ -1,5 +1,4 @@
-#ifndef MERT_SCORER_H_
-#define MERT_SCORER_H_
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -187,12 +186,12 @@ protected:
    * Tokenise line and encode.
    * Note: We assume that all tokens are separated by whitespaces.
    */
-  void TokenizeAndEncode(const std::string& line, std::vector<int>& encoded);
+  void TokenizeAndEncode(const std::string& line, std::vector<int>& encoded) const;
 
   /*
    * Tokenize functions for testing only.
    */
-  void TokenizeAndEncodeTesting(const std::string& line, std::vector<int>& encoded);
+  void TokenizeAndEncodeTesting(const std::string& line, std::vector<int>& encoded) const;
 
   /**
    * Every inherited scorer should call this function for each sentence
@@ -236,4 +235,3 @@ inline float score_average(const statscores_t& scores, size_t start, size_t end)
 
 }
 
-#endif // MERT_SCORER_H_

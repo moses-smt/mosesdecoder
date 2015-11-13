@@ -18,8 +18,6 @@
  ***********************************************************************/
 
 #pragma once
-#ifndef moses_ChartRuleLookupManagerMemory_h
-#define moses_ChartRuleLookupManagerMemory_h
 
 #include <vector>
 
@@ -34,7 +32,7 @@ namespace Moses
 {
 
 class ChartParserCallback;
-class WordsRange;
+class Range;
 
 //! Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
@@ -51,7 +49,7 @@ public:
   ~ChartRuleLookupManagerMemory() {};
 
   virtual void GetChartRuleCollection(
-    const WordsRange &range,
+    const InputPath &inputPath,
     size_t lastPos, // last position to consider if using lookahead
     ChartParserCallback &outColl);
 
@@ -70,8 +68,8 @@ private:
     size_t endPos);
 
   void UpdateCompressedMatrix(size_t startPos,
-    size_t endPos,
-    size_t lastPos);
+                              size_t endPos,
+                              size_t lastPos);
 
   const PhraseDictionaryMemory &m_ruleTable;
 
@@ -97,4 +95,3 @@ private:
 
 }  // namespace Moses
 
-#endif

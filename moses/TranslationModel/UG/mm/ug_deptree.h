@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007-2012 Ulrich Germann
 // Stuff related to dependency trees
 
@@ -15,30 +15,29 @@
 #include "ug_conll_bottom_up_token.h"
 #include "ug_typedefs.h"
 
-using namespace std;
-namespace ugdiss
+namespace sapt
 {
 
-  // Fills the vector v with pointers to the internal root r_x for the 
-  // stretch [start,x] for all x: start <= x < stop. If the stretch 
+  // Fills the std::vector v with pointers to the internal root r_x for the
+  // stretch [start,x] for all x: start <= x < stop. If the stretch
   // is incoherent, r_x is NULL
   template<typename T>
   void
-  fill_L2R_roots(T const* start,T const* stop, vector<T const*>& v)
+  fill_L2R_roots(T const* start,T const* stop, std::vector<T const*>& v)
   {
     assert(stop>start);
     v.resize(stop-start);
     v[0] = start;
     bitvector isR(v.size());
-    vector<T const*> root(v.size());
+    std::vector<T const*> root(v.size());
     isR.set(0);
     root[0] = start+start->parent;
     for (T const* x = start+1; x < stop; ++x)
       {
         size_t p = x-start;
         root[p] = x+x->parent;
-        for (size_t i = isR.find_first(); i < isR.size(); i = isR.find_next(i)) 
-          if (root[i]==x) 
+        for (size_t i = isR.find_first(); i < isR.size(); i = isR.find_next(i))
+          if (root[i]==x)
             isR.reset(i);
         if (root[p] < start || root[p] >= stop)
           isR.set(x-start);
@@ -46,7 +45,7 @@ namespace ugdiss
       }
   }
 
-  // return the root of the tree if the span [start,stop) constitutes a 
+  // return the root of the tree if the span [start,stop) constitutes a
   // tree, NULL otherwise
   template<typename T>
   T const*
@@ -66,7 +65,7 @@ namespace ugdiss
     assert(outOfRange);
     return outOfRange == 1 ? root : NULL;
   }
-  
+
   // return the governor of the tree given by [start,stop) if the span
   // constitutes a tree, NULL otherwise
   template<typename T>
@@ -82,7 +81,7 @@ namespace ugdiss
 	  {
 	    if (root && n != root)
 	      numRoots++;
-	    else 
+	    else
                 {
                   root = n;
                   if (!numRoots) numRoots++;
@@ -95,29 +94,29 @@ namespace ugdiss
 
   template<typename T>
   T const*
-  findInternalRoot(vector<T> const& v)
+  findInternalRoot(std::vector<T> const& v)
   {
     T const* a = as<T>(&(*v.begin()));
     T const* b = as<T>(&(*v.end()));
     return (a==b) ? NULL : findInternalRoot<T>(a,b);
   }
-  
+
 #if 1
   class DTNode
   {
   public:
     Conll_Record const*        rec; // pointer to the record (see below) for this node
     DTNode*           parent; // pointer to my parent
-    vector<DTNode*> children; // children (in the order they appear in the sentence)
+    std::vector<DTNode*> children; // children (in the order they appear in the sentence)
     DTNode(Conll_Record const* p);
   };
 
   /** A parsed sentence */
-  class 
+  class
   DependencyTree
   {
   public:
-    vector<DTNode> w;
+    std::vector<DTNode> w;
     DependencyTree(Conll_Record const* first, Conll_Record const* last);
   };
 #endif
@@ -189,13 +188,13 @@ namespace ugdiss
     int cmp(Conll_Record const& other) const;
   };
 
-  /** @return true if the linear sequence of /Conll_Record/s is coherent, 
+  /** @return true if the linear sequence of /Conll_Record/s is coherent,
    *  i.e., a proper connected tree structure */
   bool
   isCoherent(Conll_Record const* start, Conll_Record const* const stop);
 
 
-  /** @return the root node of the tree covering the span [start,stop), if the span is coherent; 
+  /** @return the root node of the tree covering the span [start,stop), if the span is coherent;
    *  NULL otherwise */
   template<typename T>
   T const* topNode(T const* start , T const* stop)
@@ -204,9 +203,9 @@ namespace ugdiss
     for (T const* x = start; x < stop; ++x)
       {
         T const* n = reinterpret_cast<T const*>(x->up());
-        if (!n || n < start || n >= stop) 
+        if (!n || n < start || n >= stop)
           {
-            if (ret) return NULL; 
+            if (ret) return NULL;
             else ret = x;
           }
       }

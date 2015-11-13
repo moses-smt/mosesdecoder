@@ -27,8 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
-#include "UserMessage.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -37,7 +37,7 @@ namespace Moses
 std::vector<GenerationDictionary*> GenerationDictionary::s_staticColl;
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
-  : DecodeFeature(line)
+  : DecodeFeature(line, true)
 {
   s_staticColl.push_back(this);
 
@@ -85,9 +85,9 @@ void GenerationDictionary::Load()
 
     size_t numFeaturesInFile = token.size() - 2;
     if (numFeaturesInFile < numFeatureValuesInConfig) {
-      stringstream strme;
+      util::StringStream strme;
       strme << m_filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
-            << " feature values, but found " << numFeaturesInFile << std::endl;
+            << " feature values, but found " << numFeaturesInFile << "\n";
       throw strme.str();
     }
     std::vector<float> scores(numFeatureValuesInConfig, 0.0f);

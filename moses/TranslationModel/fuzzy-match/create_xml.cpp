@@ -47,11 +47,13 @@ void create_xml(const string &inPath)
     //cout << inLine << endl;
     switch (step) {
     case 0:
-      /*setenceId = */ Scan<int>(inLine);
+      /*setenceId = */
+      Scan<int>(inLine);
       ++step;
       break;
     case 1:
-      /*score = */ Scan<float>(inLine);
+      /*score = */
+      Scan<float>(inLine);
       ++step;
       break;
     case 2:

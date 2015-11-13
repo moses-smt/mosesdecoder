@@ -20,15 +20,15 @@
 using namespace std;
 using namespace ugdiss;
 using namespace Moses;
-typedef L2R_Token<SimpleWordId> Token;
-typedef mmTSA<Token>::tree_iterator iter;
+typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
+typedef sapt::mmTSA<Token>::tree_iterator iter;
 typedef boost::unordered_map<pair<size_t,size_t>,size_t> phrase_counter_t;
 
 #define CACHING_THRESHOLD 1000
 
-mmTtrack<Token> T; // token tracks
-TokenIndex      V; // vocabs
-mmTSA<Token>    I; // suffix arrays
+sapt::mmTtrack<Token> T; // token tracks
+sapt::TokenIndex      V; // vocabs
+sapt::mmTSA<Token>    I; // suffix arrays
 
 void interpret_args(int ac, char* av[]);
 string bname;
@@ -36,14 +36,14 @@ bool   echo;
 int main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
-  
+
   T.open(bname+".mct");
   V.open(bname+".tdx"); V.iniReverseIndex();
   I.open(bname+".sfa",&T);
   string line;
   while (getline(cin,line))
     {
-      vector<id_type> phr; 
+      vector<id_type> phr;
       V.fillIdSeq(line,phr);
       TSA<Token>::tree_iterator m(&I);
       size_t i = 0;
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   exit(0);
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   namespace po=boost::program_options;
@@ -68,7 +68,7 @@ interpret_args(int ac, char* av[])
     ("help,h",    "print this message")
     ("echo,e", po::bool_switch(&echo), "repeat lookup phrases")
     ;
-  
+
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
     ;

@@ -23,42 +23,56 @@ namespace Syntax
 template<typename T>
 class NonTerminalMap
 {
- private:
+private:
   typedef boost::unordered_map<Word, T, SymbolHasher, SymbolEqualityPred> Map;
   typedef std::vector<T*> Vec;
 
- public:
+public:
   typedef typename Map::iterator Iterator;
   typedef typename Map::const_iterator ConstIterator;
 
   NonTerminalMap()
-      : m_vec(FactorCollection::Instance().GetNumNonTerminals(), NULL) {}
+    : m_vec(FactorCollection::Instance().GetNumNonTerminals(), NULL) {}
 
-  Iterator Begin() { return m_map.begin(); }
-  Iterator End() { return m_map.end(); }
+  Iterator Begin() {
+    return m_map.begin();
+  }
+  Iterator End() {
+    return m_map.end();
+  }
 
-  ConstIterator Begin() const { return m_map.begin(); }
-  ConstIterator End() const { return m_map.end(); }
+  ConstIterator Begin() const {
+    return m_map.begin();
+  }
+  ConstIterator End() const {
+    return m_map.end();
+  }
 
-  std::size_t Size() const { return m_map.size(); }
+  std::size_t Size() const {
+    return m_map.size();
+  }
 
-  bool IsEmpty() const { return m_map.empty(); }
+  bool IsEmpty() const {
+    return m_map.empty();
+  }
 
   std::pair<Iterator, bool> Insert(const Word &, const T &);
 
-  T *Find(const Word &w) const { return m_vec[w[0]->GetId()]; }
+  T *Find(const Word &w) const {
+    return m_vec[w[0]->GetId()];
+  }
 
- private:
+private:
   Map m_map;
   Vec m_vec;
 };
 
 template<typename T>
 std::pair<typename NonTerminalMap<T>::Iterator, bool> NonTerminalMap<T>::Insert(
-    const Word &key, const T &value)
+  const Word &key, const T &value)
 {
   std::pair<typename Map::iterator, bool> result =
-      m_map.insert(typename Map::value_type(key, value));
+    m_map.insert(typename Map::value_type(key, value));
   if (result.second) {
     T *p = &(result.first->second);
     std::size_t i = key[0]->GetId();

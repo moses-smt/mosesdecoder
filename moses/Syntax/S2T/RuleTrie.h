@@ -20,17 +20,18 @@ namespace S2T
 // Base class for parser-specific trie types.
 class RuleTrie : public RuleTable
 {
- public:
+public:
   RuleTrie(const RuleTableFF *ff) : RuleTable(ff) {}
 
   virtual bool HasPreterminalRule(const Word &) const = 0;
 
- private:
+private:
   friend class RuleTrieCreator;
 
-  virtual TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target,
-    const Word *sourceLHS) = 0;
+  virtual TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS) = 0;
 
   virtual void SortAndPrune(std::size_t) = 0;
 };

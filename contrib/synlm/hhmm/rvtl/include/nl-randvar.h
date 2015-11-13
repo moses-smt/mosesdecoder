@@ -129,7 +129,7 @@ class DiscreteDomainRV : public Id<T> {
   friend pair<StringInput,DiscreteDomainRV<T,domain>*> operator>> ( const StringInput ps, DiscreteDomainRV<T,domain>& rv ) { return pair<StringInput,DiscreteDomainRV<T,domain>*>(ps,&rv); }
   friend StringInput operator>> ( pair<StringInput,DiscreteDomainRV<T,domain>*> delimbuff, const char* psDlm ) {
     if (StringInput(NULL)==delimbuff.first) return delimbuff.first;
-    ////assert(*delimbuff.second<domain.getSize()); 
+    ////assert(*delimbuff.second<domain.getSize());
     int j=0;
     StringInput psIn = delimbuff.first;
     if(psDlm[0]=='\0') { *delimbuff.second=psIn.c_str(); return psIn+strlen(psIn.c_str()); }
@@ -203,7 +203,7 @@ template <class T> const T RefRV<T>::DUMMY;
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
-template<class V1,class V2> 
+template<class V1,class V2>
 class Joint2DRV {
 
  public:
@@ -216,7 +216,7 @@ class Joint2DRV {
   Joint2DRV ( const V1& v1, const V2& v2 ) { first=v1; second=v2; }
 
   // Extraction methods...
-  size_t getHashKey ( ) const { size_t k=rotLeft(first.getHashKey(),3); k^=second.getHashKey(); 
+  size_t getHashKey ( ) const { size_t k=rotLeft(first.getHashKey(),3); k^=second.getHashKey();
                                 /*fprintf(stderr,"  (%d) %d ^& %d = %d\n",sizeof(*this),x1.getHashKey(),x2.getHashKey(),k);*/ return k; }
   bool      operator< ( const Joint2DRV<V1,V2>& j )  const { return ( (first<j.first) ||
                                                                       (first==j.first && second<j.second) ); }
@@ -276,7 +276,7 @@ class DelimitedJoint2DRV : public Joint2DRV<V1,V2> {
   friend pair<StringInput,DelimitedJoint2DRV<SD1,V1,SD2,V2,SD3>*> operator>> ( StringInput ps, DelimitedJoint2DRV<SD1,V1,SD2,V2,SD3>& rv ) { return pair<StringInput,DelimitedJoint2DRV<SD1,V1,SD2,V2,SD3>*>(ps,&rv); }
   friend StringInput    operator>> ( pair<StringInput,DelimitedJoint2DRV<SD1,V1,SD2,V2,SD3>*> delimbuff, const char* psDlm ) {
     if (StringInput(NULL)==delimbuff.first) return delimbuff.first;
-    return ( (SD3[0]=='\0') ? delimbuff.first>>SD1>>delimbuff.second->first>>SD2>>delimbuff.second->second>>psDlm 
+    return ( (SD3[0]=='\0') ? delimbuff.first>>SD1>>delimbuff.second->first>>SD2>>delimbuff.second->second>>psDlm
                             : delimbuff.first>>SD1>>delimbuff.second->first>>SD2>>delimbuff.second->second>>SD3>>psDlm );
   }
 };
@@ -290,7 +290,7 @@ class DelimitedJoint2DRV : public Joint2DRV<V1,V2> {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template<class V1,class V2,class V3> 
+template<class V1,class V2,class V3>
 class Joint3DRV {
 
  public:
@@ -361,7 +361,7 @@ class DelimitedJoint3DRV : public Joint3DRV<V1,V2,V3> {
     return pair<StringInput,DelimitedJoint3DRV<SD1,V1,SD2,V2,SD3,V3,SD4>*>(ps,&rv); }
   friend StringInput    operator>> ( pair<StringInput,DelimitedJoint3DRV<SD1,V1,SD2,V2,SD3,V3,SD4>*> delimbuff, const char* psDlm ) {
     if (StringInput(NULL)==delimbuff.first) return delimbuff.first;
-    return ( (SD4[0]=='\0') ? delimbuff.first>>SD1>>delimbuff.second->first>>SD2>>delimbuff.second->second>>SD3>>delimbuff.second->third>>psDlm 
+    return ( (SD4[0]=='\0') ? delimbuff.first>>SD1>>delimbuff.second->first>>SD2>>delimbuff.second->second>>SD3>>delimbuff.second->third>>psDlm
                             : delimbuff.first>>SD1>>delimbuff.second->first>>SD2>>delimbuff.second->second>>SD3>>delimbuff.second->third>>SD4>>psDlm );
   }
 };
@@ -453,7 +453,7 @@ class DelimitedJoint4DRV : public Joint4DRV<V1,V2,V3,V4> {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template <int I, class T> 
+template <int I, class T>
 class JointArrayRV {
  private:
   // Data members...
@@ -491,7 +491,7 @@ class JointArrayRV {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <int I, char* SD, class T> 
+template <int I, char* SD, class T>
 class DelimitedJointArrayRV : public JointArrayRV<I,T> {
  public:
 
@@ -569,7 +569,7 @@ class History {
   /*
   void read ( char* ps, const ReaderContext& rc=ReaderContext() ) { char* psT; for(int i=0;i<N;i++){char* z=strtok_r((0==i)?ps:NULL,";",&psT); assert(z); at.set(i).read(z);} }
   //at.set(i).read(strtok_r((0==i)?ps:NULL,";",&psT)); }
-  */                                                                 
+  */
 
   friend ostream& operator<< ( ostream& os, const History<N,T>& a ) { for(int i=0;i<N;i++)os<<((i==0)?"":";")<<a.getBack(i); return os; }
   friend pair<StringInput,History<N,T>*> operator>> ( StringInput ps, History<N,T>& a ) { return pair<StringInput,History<N,T>*>(ps,&a); }

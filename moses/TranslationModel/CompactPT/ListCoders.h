@@ -175,6 +175,9 @@ private:
 
     uint i = 0;
     while(it != end) {
+      UTIL_THROW_IF2(*it > 268435455, "You are trying to encode " << *it
+                     << " with Simple9. Cannot encode numbers larger than 268435455 (2^28-1)");
+
       uint l = bitlength * (length-i-1);
       output |= *it << l;
       it++;

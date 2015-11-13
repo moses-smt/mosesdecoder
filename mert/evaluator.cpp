@@ -1,13 +1,14 @@
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <getopt.h>
-#include <math.h>
+#include <cmath>
 
 #if defined __MINGW32__
-#include <time.h>
+#include <ctime>
 #endif // defined
 
 #include "Scorer.h"
@@ -15,6 +16,7 @@
 #include "Timer.h"
 #include "Util.h"
 #include "Data.h"
+#include "util/random.hh"
 
 using namespace std;
 using namespace MosesTuning;
@@ -43,7 +45,8 @@ private:
 };
 
 // load hypothesis from candidate output
-vector<ScoreStats> EvaluatorUtil::loadCand(const string& candFile) {
+vector<ScoreStats> EvaluatorUtil::loadCand(const string& candFile)
+{
 
   ifstream cand(candFile.c_str());
   if (!cand.good()) throw runtime_error("Error opening candidate file");
@@ -61,7 +64,8 @@ vector<ScoreStats> EvaluatorUtil::loadCand(const string& candFile) {
 }
 
 // load 1-best hypothesis from n-best file (useful if relying on alignment/tree information)
-vector<ScoreStats> EvaluatorUtil::loadNBest(const string& nBestFile) {
+vector<ScoreStats> EvaluatorUtil::loadNBest(const string& nBestFile)
+{
   vector<ScoreStats> entries;
 
   Data data(g_scorer);
@@ -81,8 +85,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap, bool nbest_i
 
   if (nbest_input) {
     entries = loadNBest(candFile);
-  }
-  else {
+  } else {
     entries = loadCand(candFile);
   }
 
@@ -90,17 +93,15 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap, bool nbest_i
   if (bootstrap) {
     vector<float> scores;
     for (int i = 0; i < bootstrap; ++i) {
-      // TODO: Use smart pointer for exceptional-safety.
-      ScoreData* scoredata = new ScoreData(g_scorer);
+      ScoreData scoredata(g_scorer);
       for (int j = 0; j < n; ++j) {
-        int randomIndex = random() % n;
-        scoredata->add(entries[randomIndex], j);
+        const int randomIndex = util::rand_excl(n);
+        scoredata.add(entries[randomIndex], j);
       }
-      g_scorer->setScoreData(scoredata);
+      g_scorer->setScoreData(&scoredata);
       candidates_t candidates(n, 0);
       float score = g_scorer->score(candidates);
       scores.push_back(score);
-      delete scoredata;
     }
 
     float avg = average(scores);
@@ -120,15 +121,13 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap, bool nbest_i
     cout.precision(4);
     cout << avg << "\t[" << lb << "," << rb << "]" << endl;
   } else {
-    // TODO: Use smart pointer for exceptional-safety.
-    ScoreData* scoredata = new ScoreData(g_scorer);
+    ScoreData scoredata(g_scorer);
     for (int sid = 0; sid < n; ++sid) {
-      scoredata->add(entries[sid], sid);
+      scoredata.add(entries[sid], sid);
     }
-    g_scorer->setScoreData(scoredata);
+    g_scorer->setScoreData(&scoredata);
     candidates_t candidates(n, 0);
     float score = g_scorer->score(candidates);
-    delete scoredata;
 
     if (g_has_more_files) cout << candFile << "\t";
     if (g_has_more_scorers) cout << g_scorer->getName() << "\t";
@@ -286,10 +285,10 @@ void InitSeed(const ProgramOption *opt)
 {
   if (opt->has_seed) {
     cerr << "Seeding random numbers with " << opt->seed << endl;
-    srandom(opt->seed);
+    util::rand_init(opt->seed);
   } else {
     cerr << "Seeding random numbers with system clock " << endl;
-    srandom(time(NULL));
+    util::rand_init();
   }
 }
 

@@ -18,14 +18,14 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_RULE_WRITER_H_
-#define EXTRACT_GHKM_RULE_WRITER_H_
-
-#include "Subgraph.h"
 
 #include <ostream>
 
-namespace Moses
+#include "Subgraph.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -42,9 +42,7 @@ public:
     , m_inv(inv)
     , m_options(options) {}
 
-  void Write(const ScfgRule &rule, bool printEndl=true);
-
-  void Write(const ScfgRule &rule, const Subgraph &g, bool printEndl=true); 
+  void Write(const ScfgRule &rule, size_t lineNum, bool printEndl=true);
 
 private:
   // Disallow copying
@@ -61,6 +59,5 @@ private:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
-
-#endif
+}  // namespace Syntax
+}  // namespace MosesTraining

@@ -19,8 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_Util_h
-#define moses_Util_h
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -34,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdlib>
 #include <cstring>
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 #include "TypeDef.h"
 
 namespace Moses
@@ -48,6 +48,11 @@ namespace Moses
  * when compiling for a gui front-end so that running gui won't generate
  * output on command line
  * */
+
+// TRACE_ERR might have been defined by IRSTLM
+#ifdef TRACE_ERR
+#undef TRACE_ERR
+#endif
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) do { std::cerr << str; } while (false)
 #else
@@ -57,10 +62,22 @@ namespace Moses
 /** verbose macros
  * */
 
-#define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
-#define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
-#define XVERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR("[" << __FILE__ << ":" << __LINE__ << "] ");TRACE_ERR(str); } }
+// VERBOSE might have been defined by IRSTLM
+#ifdef VERBOSE
+#undef VERBOSE
+#endif
+#define VERBOSE(level,str) { IFVERBOSE(level) { TRACE_ERR(str); } }
+
+// VERBOSE might have been defined by IRSTLM
+#ifdef IFVERBOSE
+#undef IFVERBOSE
+#endif
+#define IFVERBOSE(level) if (Moses::StaticData::Instance().GetVerboseLevel() >= level)
+#define XVERBOSE(level,str) VERBOSE(level, "[" << HERE << "] " << str)
 #define HERE __FILE__ << ":" << __LINE__
+#define FEATUREVERBOSE(level,str) FEATUREVERBOSE2(level, "[" << GetScoreProducerDescription() << "] " << str)
+#define FEATUREVERBOSE2(level,str) { IFFEATUREVERBOSE(level) { TRACE_ERR(str); } }
+#define IFFEATUREVERBOSE(level) if ((m_verbosity == std::numeric_limits<std::size_t>::max() && StaticData::Instance().GetVerboseLevel() >= level) || (m_verbosity != std::numeric_limits<std::size_t>::max() && m_verbosity >= level))
 
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)
@@ -72,9 +89,16 @@ namespace Moses
 #define NTH_ELEMENT4(begin, middle, end, orderer) std::nth_element(begin, middle, end, orderer)
 #endif
 
-//! delete white spaces at beginning and end of string
-const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
+
 const std::string ToLower(const std::string& str);
+
+//! delete white spaces at beginning and end of string
+inline std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r")
+{
+  std::string res = str;
+  res.erase(str.find_last_not_of(dropChars)+1);
+  return res.erase(0, res.find_first_not_of(dropChars));
+}
 
 //! get string representation of any object/variable, as long as it can pipe to a stream
 template<typename T>
@@ -100,6 +124,52 @@ template<>
 inline std::string Scan<std::string>(const std::string &input)
 {
   return input;
+}
+
+template<>
+inline WordAlignmentSort Scan<WordAlignmentSort>(const std::string &input)
+{
+  return (WordAlignmentSort) Scan<size_t>(input);
+}
+
+template<>
+inline InputTypeEnum Scan<InputTypeEnum>(const std::string &input)
+{
+  return (InputTypeEnum) Scan<size_t>(input);
+}
+
+template<>
+inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
+{
+  return (SearchAlgorithm) Scan<size_t>(input);
+}
+
+template<>
+inline S2TParsingAlgorithm Scan<S2TParsingAlgorithm>(const std::string &input)
+{
+  return (S2TParsingAlgorithm) Scan<size_t>(input);
+}
+
+template<>
+inline SourceLabelOverlap Scan<SourceLabelOverlap>(const std::string &input)
+{
+  return (SourceLabelOverlap) Scan<size_t>(input);
+}
+
+template<>
+inline XmlInputType Scan<XmlInputType>(const std::string &input)
+{
+  XmlInputType ret;
+  if (input=="exclusive") ret = XmlExclusive;
+  else if (input=="inclusive") ret = XmlInclusive;
+  else if (input=="constraint") ret = XmlConstraint;
+  else if (input=="ignore") ret = XmlIgnore;
+  else if (input=="pass-through") ret = XmlPassThrough;
+  else {
+    UTIL_THROW2("Unknown XML input type");
+  }
+
+  return ret;
 }
 
 //! Specialisation to understand yes/no y/n true/false 0/1
@@ -274,11 +344,25 @@ inline std::vector<std::string> TokenizeFirstOnly(const std::string& str,
 template <typename T>
 std::string Join(const std::string& delimiter, const std::vector<T>& items)
 {
-  std::ostringstream outstr;
+  util::StringStream outstr;
   if(items.size() == 0) return "";
   outstr << items[0];
   for(unsigned int i = 1; i < items.size(); i++)
     outstr << delimiter << items[i];
+  return outstr.str();
+}
+
+/*
+ * Convert any container to string
+ */
+template<typename It>
+std::string Join(const std::string &delim, It begin, It end)
+{
+  util::StringStream outstr;
+  if (begin != end)
+    outstr << *begin++;
+  for ( ; begin != end; ++begin)
+    outstr << delim << *begin;
   return outstr.str();
 }
 
@@ -320,7 +404,7 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
                                   const std::vector<float> &weightT)
 {
   UTIL_THROW_IF2(weightT.size() != probVector.size(),
-		  "Weight and score vector sizes not the same");
+                 "Weight and score vector sizes not the same");
   float rv=0.0;
   for(float const *sb=&probVector[0],*se=sb+probVector.size(),*wb=&weightT[0];
       sb!=se; ++sb, ++wb)
@@ -344,7 +428,7 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
 		out << *this;								\
 		return out.str();						\
 	}															\
- 
+
 //! delete and remove every element of a collection object such as set, list etc
 template<class COLL>
 void RemoveAllInColl(COLL &coll)
@@ -387,6 +471,9 @@ void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
 
+// dump SGML parser for <dlt> tags
+std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string &line);
+
 // dump SGML parser for <seg> tags
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
 
@@ -422,17 +509,24 @@ inline std::string GetFirstString(const std::string& str, int& first_pos,  const
 template<class T>
 T log_sum (T log_a, T log_b)
 {
-  T v;
   if (log_a < log_b) {
-    v = log_b+log ( 1 + exp ( log_a-log_b ));
+    return log_b + log1p(exp(log_a - log_b));
   } else {
-    v = log_a+log ( 1 + exp ( log_b-log_a ));
+    return log_a + log1p(exp(log_b - log_a));
   }
-  return ( v );
 }
 
+/**
+ * Compare floats for equality with some tolerance.
+ */
+inline bool Equals(float a, float b)
+{
+  return fabs(a - b) < FLOAT_EPSILON;
+}
+
+
 /** Enforce rounding */
-inline void fix(std::ostream& stream, size_t size)
+inline void FixPrecision(std::ostream& stream, size_t size = 3)
 {
   stream.setf(std::ios::fixed);
   stream.precision(size);
@@ -443,7 +537,27 @@ class FeatureFunction;
 void PrintFeatureWeight(const FeatureFunction* ff);
 void ShowWeights();
 
+template<typename T>
+class UnorderedComparer
+{
+public:
+  size_t operator()(const T& obj) const {
+    return obj.hash();
+  }
+
+  bool operator()(const T& a, const T& b) const {
+    return a == b;
+  }
+
+  size_t operator()(const T* obj) const {
+    return obj->hash();
+  }
+
+  bool operator()(const T* a, const T* b) const {
+    return (*a) == (*b);
+  }
+
+};
 
 } // namespace
 
-#endif

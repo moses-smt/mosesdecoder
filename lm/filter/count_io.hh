@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include "util/fake_ofstream.hh"
+#include "util/file_stream.hh"
 #include "util/file.hh"
 #include "util/file_piece.hh"
 
@@ -28,12 +28,12 @@ class CountOutput : boost::noncopyable {
     }
 
   private:
-    util::FakeOFStream file_;
+    util::FileStream file_;
 };
 
 class CountBatch {
   public:
-    explicit CountBatch(std::streamsize initial_read) 
+    explicit CountBatch(std::streamsize initial_read)
       : initial_read_(initial_read) {
       buffer_.reserve(initial_read);
     }
@@ -66,7 +66,7 @@ class CountBatch {
   private:
     std::streamsize initial_read_;
 
-    // This could have been a std::string but that's less happy with raw writes.  
+    // This could have been a std::string but that's less happy with raw writes.
     std::vector<char> buffer_;
 };
 

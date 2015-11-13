@@ -29,12 +29,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 * Manage the output of hypergraphs.
 **/
 
-namespace Moses {
+namespace Moses
+{
 
 class ChartHypothesisCollection;
 
 template<class M>
-class HypergraphOutput {
+class HypergraphOutput
+{
 
 public:
   /** Initialise output directory and create weights file */
@@ -51,42 +53,47 @@ private:
 };
 
 
-/** 
+/**
  * ABC for different types of search graph output for chart Moses.
 **/
-class ChartSearchGraphWriter {
+class ChartSearchGraphWriter
+{
 public:
   virtual void WriteHeader(size_t winners, size_t losers) const = 0;
   virtual void WriteHypos(const ChartHypothesisCollection& hypos,
-       const std::map<unsigned, bool> &reachable) const = 0;
+                          const std::map<unsigned, bool> &reachable) const = 0;
 
 };
 
 /** "Moses" format (osg style) */
-class ChartSearchGraphWriterMoses : public virtual ChartSearchGraphWriter {
+class ChartSearchGraphWriterMoses : public virtual ChartSearchGraphWriter
+{
 public:
-  ChartSearchGraphWriterMoses(std::ostream* out, size_t lineNumber) : 
-      m_out(out), m_lineNumber(lineNumber) {}
-  virtual void WriteHeader(size_t, size_t) const {/* do nothing */}
+  ChartSearchGraphWriterMoses(std::ostream* out, size_t lineNumber) :
+    m_out(out), m_lineNumber(lineNumber) {}
+  virtual void WriteHeader(size_t, size_t) const {
+    /* do nothing */
+  }
   virtual void WriteHypos(const ChartHypothesisCollection& hypos,
-       const std::map<unsigned, bool> &reachable) const;
-  
+                          const std::map<unsigned, bool> &reachable) const;
+
 private:
-  std::ostream* m_out;   
+  std::ostream* m_out;
   size_t m_lineNumber;
 };
 
 /** Modified version of Kenneth's lazy hypergraph format */
-class ChartSearchGraphWriterHypergraph : public virtual ChartSearchGraphWriter {
+class ChartSearchGraphWriterHypergraph : public virtual ChartSearchGraphWriter
+{
 public:
-  ChartSearchGraphWriterHypergraph(std::ostream* out) : 
-      m_out(out), m_nodeId(0) {}
+  ChartSearchGraphWriterHypergraph(std::ostream* out) :
+    m_out(out), m_nodeId(0) {}
   virtual void WriteHeader(size_t winners, size_t losers) const;
   virtual void WriteHypos(const ChartHypothesisCollection& hypos,
-       const std::map<unsigned, bool> &reachable) const;
-  
+                          const std::map<unsigned, bool> &reachable) const;
+
 private:
-  std::ostream* m_out;   
+  std::ostream* m_out;
   mutable size_t m_nodeId;
   mutable std::map<size_t,size_t> m_hypoIdToNodeId;
 };

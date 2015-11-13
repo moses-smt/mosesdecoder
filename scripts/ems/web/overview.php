@@ -1,6 +1,9 @@
 <?php
 
-date_default_timezone_set('Europe/London');
+/*
+This file is part of moses.  Its use is licensed under the GNU Lesser General
+Public License version 2.1 or, at your option, any later version.
+*/
 
 function setup() {
   $setup = file("setup");
@@ -13,7 +16,7 @@ function setup() {
     print "<TR><TD><A HREF=\"?setup=$dir[0]\">$dir[0]</A></TD><TD>$dir[1]</TD><TD>$dir[2]</TD><TD>$dir[3]</TD></TR>\n";
   }
   print "</TABLE>\n";
-  print "<P>To add experiment, edit /fs/thor4/html/experiment/setup";
+  print "<p>To add experiment, edit the \"setup\" file.</p>";
 }
 
 function overview() {
@@ -26,7 +29,7 @@ function overview() {
 
   head("Task: $task ($user)");
   print "<a href=\"http://www.statmt.org/wiki/?n=Experiment.$setup\">Wiki Notes</a>";
-  print " &nbsp; &nbsp; | &nbsp; &nbsp; <a href=\"/\">Overview of experiments</a> &nbsp; &nbsp; | &nbsp; &nbsp; <code>$dir</code><p>";
+  print " &nbsp; &nbsp; | &nbsp; &nbsp; <a href=\"?\">Overview of experiments</a> &nbsp; &nbsp; | &nbsp; &nbsp; <code>$dir</code><p>";
   reset($experiment);
 
   print "<form action=\"\" method=get>\n";
@@ -40,7 +43,7 @@ function overview() {
       $report_info = "$dir/steps/$id/REPORTING_report.$id.INFO";
       // does the analysis file exist?
       if (file_exists($analysis)) {
-	if (!array_key_exists($set,$has_analysis)) { 
+	if (!array_key_exists($set,$has_analysis)) {
 	  $has_analysis[$set] = 0;
         }
         $has_analysis[$set]++;
@@ -139,7 +142,7 @@ new Ajax.Updater("<?php print "$module_step[0]-$module_step[1]-$id"; ?>", '?setS
 		}
 	      }
 	  }
-	  else { $score = ""; }  
+	  else { $score = ""; }
       }
   }
   print "var best_score = [];\n";
@@ -159,9 +162,9 @@ function getHTTPObject(){
     alert("Your browser does not support AJAX.");
     return null;
   }
-} 
+}
 function createCommentBox( runID ) {
-  document.getElementById("run-" + runID).innerHTML = "<form onsubmit=\"return false;\"><input id=\"comment-" + runID + "\" name=\"comment-" + runID + "\" size=30><br><input type=submit onClick=\"addComment('" + runID + "');\" value=\"Add Comment\"></form>"; 
+  document.getElementById("run-" + runID).innerHTML = "<form onsubmit=\"return false;\"><input id=\"comment-" + runID + "\" name=\"comment-" + runID + "\" size=30><br><input type=submit onClick=\"addComment('" + runID + "');\" value=\"Add Comment\"></form>";
   if (currentComment[runID]) {
     document.getElementById("comment-" + runID).value = currentComment[runID];
   }
@@ -197,7 +200,7 @@ function highlightBest() {
 	for (run in score) {
 	    var column = "score-"+run+"-"+set;
 	    if ($(column)) {
-	        if (score[run][set] == best_score[set]) {		
+	        if (score[run][set] == best_score[set]) {
 		   $(column).setStyle({ backgroundColor: '#a0ffa0'});
 		}
 	        else if (score[run][set]+1 >= best_score[set]) {
@@ -220,7 +223,7 @@ function highlightLine( id ) {
           $(column).setStyle({ backgroundColor: '#ffffff'});
         }
         else {
-	  if (score[run][set] < score[id][set]-1) {		
+	  if (score[run][set] < score[id][set]-1) {
 	    $(column).setStyle({ backgroundColor: '#ffa0a0'});
 	  }
 	  else if (score[run][set] < score[id][set]) {
@@ -235,7 +238,7 @@ function highlightLine( id ) {
 	}
       }
     }
-  }   
+  }
 }
 function lowlightAll() {
   for (run in score) {
@@ -299,13 +302,13 @@ function output_score($id,$info) {
           preg_match('/([\d\(\)\.\s]+) (METEOR[\-c]*)/',$each_score[$i],$match)) {
         if ($i>0) { print "<BR>"; }
 	$opened_a_tag = 0;
-        if ($set != "avg") { 
+        if ($set != "avg") {
 	  if (file_exists("$dir/evaluation/$set.cleaned.$id")) {
-	    print "<a href=\"?$state&show=evaluation/$set.cleaned.$id\">"; 
+	    print "<a href=\"?$state&show=evaluation/$set.cleaned.$id\">";
             $opened_a_tag = 1;
 	  }
           else if (file_exists("$dir/evaluation/$set.output.$id")) {
-            print "<a href=\"?$state&show=evaluation/$set.output.$id\">"; 
+            print "<a href=\"?$state&show=evaluation/$set.output.$id\">";
 	    $opened_a_tag = 1;
           }
         }
@@ -337,7 +340,7 @@ function tune_status($id) {
   if (! file_exists($dir."/tuning/tmp.".$id)) { return ""; }
   $d = dir($dir."/tuning/tmp.".$id);
   while (false !== ($entry = $d->read())) {
-    if (preg_match('/run(\d+).moses.ini/',$entry,$match) 
+    if (preg_match('/run(\d+).moses.ini/',$entry,$match)
         && $match[1] > $max_iteration) {
       $max_iteration = $match[1];
     }
@@ -384,7 +387,7 @@ function show() {
   }
 
   $fullname = $dir."/steps/".$extra.$_GET["show"];
-  if (preg_match("/\//",$_GET["show"])) { 
+  if (preg_match("/\//",$_GET["show"])) {
     $fullname = $dir."/".$_GET["show"];
   }
   if (preg_match("/graph/",$fullname)) {

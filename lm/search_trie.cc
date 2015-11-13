@@ -517,7 +517,7 @@ template <class Quant, class Bhiksha> void BuildTrie(SortedFiles &files, std::ve
   {
     WriteEntries<Quant, Bhiksha> writer(contexts, quant, unigrams, out.middle_begin_, out.longest_, counts.size(), sri);
     RecursiveInsert(counts.size(), counts[0], inputs, config.ProgressMessages(), "Writing trie", writer);
-    // Write the last unigram entry, which is the end pointer for the bigrams.  
+    // Write the last unigram entry, which is the end pointer for the bigrams.
     writer.Unigram(counts[0]);
   }
 
@@ -577,7 +577,7 @@ template <class Quant, class Bhiksha> uint8_t *TrieSearch<Quant, Bhiksha>::Setup
 
 template <class Quant, class Bhiksha> void TrieSearch<Quant, Bhiksha>::InitializeFromARPA(const char *file, util::FilePiece &f, std::vector<uint64_t> &counts, const Config &config, SortedVocabulary &vocab, BinaryFormat &backing) {
   std::string temporary_prefix;
-  if (config.temporary_directory_prefix) {
+  if (!config.temporary_directory_prefix.empty()) {
     temporary_prefix = config.temporary_directory_prefix;
   } else if (config.write_mmap) {
     temporary_prefix = config.write_mmap;

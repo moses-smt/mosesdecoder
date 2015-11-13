@@ -11,8 +11,8 @@
 #include "moses/InputType.h"
 #include "moses/InputFileStream.h"
 #include "moses/TypeDef.h"
+#include "moses/TranslationTask.h"
 #include "moses/StaticData.h"
-#include "moses/UserMessage.h"
 #include "Loader.h"
 #include "LoaderFactory.h"
 #include "util/exception.hh"
@@ -37,8 +37,9 @@ void PhraseDictionaryALSuffixArray::Load()
   SetFeaturesToApply();
 }
 
-void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
+void PhraseDictionaryALSuffixArray::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& source = *ttask->GetSource();
   // populate with rules for this sentence
   long translationId = source.GetTranslationId();
 
@@ -50,7 +51,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
                           *this);
 
   UTIL_THROW_IF2(!ret,
-		  "Rules not successfully loaded for sentence id " << translationId);
+                 "Rules not successfully loaded for sentence id " << translationId);
 }
 
 void PhraseDictionaryALSuffixArray::CleanUpAfterSentenceProcessing(const InputType &source)

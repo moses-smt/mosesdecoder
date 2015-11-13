@@ -37,8 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
+#include "moses/Range.h"
 
 #include "PhraseDictionaryCompact.h"
 #include "StringVector.h"

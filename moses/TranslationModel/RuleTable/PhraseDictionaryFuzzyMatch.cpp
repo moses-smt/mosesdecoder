@@ -19,10 +19,10 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -39,20 +39,22 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
+#include "moses/Range.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
+#include "moses/TranslationTask.h"
 #include "util/file.hh"
 #include "util/exception.hh"
+#include "util/random.hh"
 
 using namespace std;
 
 #if defined __MINGW32__ && !defined mkdtemp
 #include <windows.h>
-#include <errno.h>
-char *mkdtemp(char *tempbuf) {
+#include <cerrno>
+char *mkdtemp(char *tempbuf)
+{
   int rand_value = 0;
   char* tempbase = NULL;
   char tempbasebuf[MAX_PATH] = "";
@@ -62,8 +64,8 @@ char *mkdtemp(char *tempbuf) {
     return NULL;
   }
 
-  srand((unsigned)time(0));
-  rand_value = (int)((rand() / ((double)RAND_MAX+1.0)) * 1e6);
+  util::rand_init();
+  rand_value = util::rand_excl(1e6);
   tempbase = strrchr(tempbuf, '/');
   tempbase = tempbase ? tempbase+1 : tempbuf;
   strcpy(tempbasebuf, tempbase);
@@ -79,7 +81,7 @@ namespace Moses
 {
 
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
-  :PhraseDictionary(line)
+  :PhraseDictionary(line, true)
   ,m_config(3)
   ,m_FuzzyMatchWrapper(NULL)
 {
@@ -111,29 +113,25 @@ PhraseDictionaryFuzzyMatch::
 SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source") {
-	  m_config[0] = value;
+    m_config[0] = value;
   } else if (key == "target") {
-	  m_config[1] = value;
+    m_config[1] = value;
   } else if (key == "alignment") {
-	  m_config[2] = value;
+    m_config[2] = value;
   } else {
-	PhraseDictionary::SetParameter(key, value);
+    PhraseDictionary::SetParameter(key, value);
   }
 }
 
 int removedirectoryrecursively(const char *dirname)
 {
 #if defined __MINGW32__
-    //TODO(jie): replace this function with boost implementation
+  //TODO(jie): replace this function with boost implementation
 #else
   DIR *dir;
   struct dirent *entry;
   char path[PATH_MAX];
 
-  if (path == NULL) {
-    fprintf(stderr, "Out of memory error\n");
-    return 0;
-  }
   dir = opendir(dirname);
   if (dir == NULL) {
     perror("Error opendir()");
@@ -175,8 +173,9 @@ int removedirectoryrecursively(const char *dirname)
   return 1;
 }
 
-void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSentence)
+void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& inputSentence = *ttask->GetSource();
 #if defined __MINGW32__
   char dirName[] = "moses.XXXXXX";
 #else
@@ -184,7 +183,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
 #endif // defined
   char *temp = mkdtemp(dirName);
   UTIL_THROW_IF2(temp == NULL,
-		  "Couldn't create temporary directory " << dirName);
+                 "Couldn't create temporary directory " << dirName);
 
   string dirNameStr(dirName);
 
@@ -251,11 +250,11 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     const size_t numScoreComponents = GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
-            << numScoreComponents << ") of score components on line " << count);
+                  << numScoreComponents << ") of score components on line " << count);
     }
 
     UTIL_THROW_IF2(scoreVector.size() != numScoreComponents,
-    		"Number of scores incorrectly specified");
+                   "Number of scores incorrectly specified");
 
     // parse source & find pt node
 
@@ -283,8 +282,10 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
+    phraseColl->Add(targetPhrase);
 
     count++;
 
@@ -302,10 +303,12 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
   //removedirectoryrecursively(dirName);
 }
 
-TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
-    , const Phrase &source
-    , const TargetPhrase &target
-    , const Word *sourceLHS)
+TargetPhraseCollection::shared_ptr
+PhraseDictionaryFuzzyMatch::
+GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
+                                  , const Phrase &source
+                                  , const TargetPhrase &target
+                                  , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
   return currNode.GetTargetPhraseCollection();
@@ -331,9 +334,9 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       const Word &sourceNonTerm = word;
 
       UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
-    		  "No alignment for non-term at position " << pos);
+                     "No alignment for non-term at position " << pos);
       UTIL_THROW_IF2(iterAlign->first != pos,
-    		  "Alignment info incorrect at position " << pos);
+                     "Alignment info incorrect at position " << pos);
 
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
@@ -349,7 +352,7 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
     }
 
     UTIL_THROW_IF2(currNode == NULL,
-    		"Node not found at position " << pos);
+                   "Node not found at position " << pos);
 
   }
 
@@ -375,7 +378,7 @@ const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(long t
 {
   std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(translationId);
   UTIL_THROW_IF2(iter == m_collection.end(),
-		  "Couldn't find root node for input: " << translationId);
+                 "Couldn't find root node for input: " << translationId);
   return iter->second;
 }
 PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source)
@@ -383,7 +386,7 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputT
   long transId = source.GetTranslationId();
   std::map<long, PhraseDictionaryNodeMemory>::iterator iter = m_collection.find(transId);
   UTIL_THROW_IF2(iter == m_collection.end(),
-		  "Couldn't find root node for input: " << transId);
+                 "Couldn't find root node for input: " << transId);
   return iter->second;
 }
 
@@ -392,10 +395,10 @@ TO_STRING_BODY(PhraseDictionaryFuzzyMatch);
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionaryFuzzyMatch& phraseDict)
 {
+  /*
   typedef PhraseDictionaryNodeMemory::TerminalMap TermMap;
   typedef PhraseDictionaryNodeMemory::NonTerminalMap NonTermMap;
 
-  /*
   const PhraseDictionaryNodeMemory &coll = phraseDict.m_collection;
   for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p) {
     const Word &sourceNonTerm = p->first.first;

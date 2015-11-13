@@ -137,15 +137,15 @@ void pruneLatticeFB(Lattice & connectedHyp, std::map < const Moses::Hypothesis*,
                     const std::vector< float> & estimatedScores, const Moses::Hypothesis*, size_t edgeDensity,float scale);
 
 //Use the ngram scores to rerank the nbest list, return at most n solutions
-void getLatticeMBRNBest(Moses::Manager& manager, Moses::TrellisPathList& nBestList, std::vector<LatticeMBRSolution>& solutions, size_t n);
+void getLatticeMBRNBest(const Moses::Manager& manager, const Moses::TrellisPathList& nBestList, std::vector<LatticeMBRSolution>& solutions, size_t n);
 //calculate expectated ngram counts, clipping at 1 (ie calculating posteriors) if posteriors==true.
 void calcNgramExpectations(Lattice & connectedHyp, std::map<const Moses::Hypothesis*, std::vector<Edge> >& incomingEdges, std::map<Moses::Phrase,
                            float>& finalNgramScores, bool posteriors);
 void GetOutputFactors(const Moses::TrellisPath &path, std::vector <Moses::Word> &translation);
 void extract_ngrams(const std::vector<Moses::Word >& sentence, std::map < Moses::Phrase, int >  & allngrams);
 bool ascendingCoverageCmp(const Moses::Hypothesis* a, const Moses::Hypothesis* b);
-std::vector<Moses::Word> doLatticeMBR(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
-const Moses::TrellisPath doConsensusDecoding(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
+std::vector<Moses::Word> doLatticeMBR(const Moses::Manager& manager, const Moses::TrellisPathList& nBestList);
+const Moses::TrellisPath doConsensusDecoding(const Moses::Manager& manager, const Moses::TrellisPathList& nBestList);
 //std::vector<Moses::Word> doConsensusDecoding(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
 
 }

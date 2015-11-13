@@ -17,14 +17,13 @@ struct SHyperedge;
 //
 // Important: a SVertex owns its incoming SHyperedge objects and its FFState
 // objects and will delete them on destruction.
-struct SVertex
-{
+struct SVertex {
   ~SVertex();
 
   SHyperedge *best;
   std::vector<SHyperedge*> recombined;
   const PVertex *pvertex;
-  std::vector<FFState*> state;
+  std::vector<FFState*> states;
 };
 
 }  // Syntax

@@ -3,46 +3,53 @@
 
 #include "lm/enumerate_vocab.hh"
 #include "lm/model.hh"
+#include "util/file_stream.hh"
 #include "util/file_piece.hh"
 #include "util/usage.hh"
 
 #include <cstdlib>
-#include <iostream>
-#include <ostream>
-#include <istream>
 #include <string>
-
-#include <math.h>
+#include <cmath>
 
 namespace lm {
 namespace ngram {
 
-struct BasicPrint {
-  void Word(StringPiece, WordIndex, const FullScoreReturn &) const {}
-  void Line(uint64_t oov, float total) const {
-    std::cout << "Total: " << total << " OOV: " << oov << '\n';
-  }
-  void Summary(double, double, uint64_t, uint64_t) {}
-  
+class QueryPrinter {
+  public:
+    QueryPrinter(int fd, bool print_word, bool print_line, bool print_summary, bool flush)
+      : out_(fd), print_word_(print_word), print_line_(print_line), print_summary_(print_summary), flush_(flush) {}
+
+    void Word(StringPiece surface, WordIndex vocab, const FullScoreReturn &ret) {
+      if (!print_word_) return;
+      out_ << surface << '=' << vocab << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << '\t';
+      if (flush_) out_.flush();
+    }
+
+    void Line(uint64_t oov, float total) {
+      if (!print_line_) return;
+      out_ << "Total: " << total << " OOV: " << oov << '\n';
+      if (flush_) out_.flush();
+    }
+
+    void Summary(double ppl_including_oov, double ppl_excluding_oov, uint64_t corpus_oov, uint64_t corpus_tokens) {
+      if (!print_summary_) return;
+      out_ <<
+        "Perplexity including OOVs:\t" << ppl_including_oov << "\n"
+        "Perplexity excluding OOVs:\t" << ppl_excluding_oov << "\n"
+        "OOVs:\t" << corpus_oov << "\n"
+        "Tokens:\t" << corpus_tokens << '\n';
+      out_.flush();
+    }
+
+  private:
+    util::FileStream out_;
+    bool print_word_;
+    bool print_line_;
+    bool print_summary_;
+    bool flush_;
 };
 
-struct FullPrint : public BasicPrint {
-  void Word(StringPiece surface, WordIndex vocab, const FullScoreReturn &ret) const {
-    std::cout << surface << '=' << vocab << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << '\t';
-  }
-
-  void Summary(double ppl_including_oov, double ppl_excluding_oov, uint64_t corpus_oov, uint64_t corpus_tokens) {
-    std::cout << 
-      "Perplexity including OOVs:\t" << ppl_including_oov << "\n"
-      "Perplexity excluding OOVs:\t" << ppl_excluding_oov << "\n"
-      "OOVs:\t" << corpus_oov << "\n"
-      "Tokens:\t" << corpus_tokens << '\n'
-      ;
-  }
-};
-
-template <class Model, class Printer> void Query(const Model &model, bool sentence_context) {
-  Printer printer;
+template <class Model, class Printer> void Query(const Model &model, bool sentence_context, Printer &printer) {
   typename Model::State state, out;
   lm::FullScoreReturn ret;
   StringPiece word;
@@ -93,13 +100,9 @@ template <class Model, class Printer> void Query(const Model &model, bool senten
       corpus_tokens);
 }
 
-template <class Model> void Query(const char *file, const Config &config, bool sentence_context, bool show_words) {
+template <class Model> void Query(const char *file, const Config &config, bool sentence_context, QueryPrinter &printer) {
   Model model(file, config);
-  if (show_words) {
-    Query<Model, FullPrint>(model, sentence_context);
-  } else {
-    Query<Model, BasicPrint>(model, sentence_context);
-  }
+  Query<Model, QueryPrinter>(model, sentence_context, printer);
 }
 
 } // namespace ngram

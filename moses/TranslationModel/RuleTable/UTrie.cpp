@@ -38,8 +38,11 @@
 namespace Moses
 {
 
-TargetPhraseCollection &RuleTableUTrie::GetOrCreateTargetPhraseCollection(
-  const Phrase &source, const TargetPhrase &target, const Word *sourceLHS)
+TargetPhraseCollection::shared_ptr
+RuleTableUTrie::
+GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                  const TargetPhrase &target,
+                                  const Word *sourceLHS)
 {
   UTrieNode &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection(target);

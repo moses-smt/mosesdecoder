@@ -25,20 +25,22 @@
 #include <map>
 #include <boost/unordered_map.hpp>
 
-namespace MosesTraining {
+namespace MosesTraining
+{
 
 
 typedef std::vector< std::set<size_t> > ALIGNMENT;
 
 
-class ExtractionPhrasePair {
+class ExtractionPhrasePair
+{
 
 protected:
 
   typedef std::map<std::string,float> PROPERTY_VALUES;
   typedef std::map<std::string,float>::iterator LAST_PROPERTY_VALUE;
 
-  
+
   bool m_isValid;
 
   const PHRASE *m_phraseSource;
@@ -48,8 +50,8 @@ protected:
   float m_pcfgSum;
 
   std::map<ALIGNMENT*,float> m_targetToSourceAlignments;
-  std::map<std::string, 
-           std::pair< PROPERTY_VALUES*, LAST_PROPERTY_VALUE* > > m_properties;
+  std::map<std::string,
+      std::pair< PROPERTY_VALUES*, LAST_PROPERTY_VALUE* > > m_properties;
 
   float m_lastCount;
   float m_lastPcfgSum;
@@ -57,14 +59,14 @@ protected:
 
 public:
 
-  ExtractionPhrasePair( const PHRASE *phraseSource, 
-                        const PHRASE *phraseTarget, 
-                        ALIGNMENT *targetToSourceAlignment, 
+  ExtractionPhrasePair( const PHRASE *phraseSource,
+                        const PHRASE *phraseTarget,
+                        ALIGNMENT *targetToSourceAlignment,
                         float count, float pcfgSum );
 
   ~ExtractionPhrasePair();
 
-  bool Add( ALIGNMENT *targetToSourceAlignment, 
+  bool Add( ALIGNMENT *targetToSourceAlignment,
             float count, float pcfgSum );
 
   void IncrementPrevious( float count, float pcfgSum );
@@ -92,7 +94,7 @@ public:
   const PHRASE *GetSource() const {
     return m_phraseSource;
   }
-  
+
   const PHRASE *GetTarget() const {
     return m_phraseTarget;
   }
@@ -126,23 +128,25 @@ public:
   std::string CollectAllPropertyValues(const std::string &key) const;
 
   std::string CollectAllLabelsSeparateLHSAndRHS(const std::string& propertyKey,
-                                                std::set<std::string>& sourceLabelSet,
-                                                boost::unordered_map<std::string,float>& sourceLHSCounts,
-                                                boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& sourceRHSAndLHSJointCounts, 
-                                                Vocabulary &vcbT) const;
+      std::set<std::string>& sourceLabelSet,
+      boost::unordered_map<std::string,float>& sourceLHSCounts,
+      boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& sourceRHSAndLHSJointCounts,
+      Vocabulary &vcbT) const;
 
-  void CollectAllPhraseOrientations(const std::string &key, 
-                                    const std::vector<float> &orientationClassPriorsL2R, 
-                                    const std::vector<float> &orientationClassPriorsR2L, 
-                                    double smoothingFactor, 
+  void CollectAllPhraseOrientations(const std::string &key,
+                                    const std::vector<float> &orientationClassPriorsL2R,
+                                    const std::vector<float> &orientationClassPriorsR2L,
+                                    double smoothingFactor,
                                     std::ostream &out) const;
 
-  void AddProperties( const std::string &str, float count );
+  void UpdateVocabularyFromValueTokens(const std::string& propertyKey,
+                                       std::set<std::string>& vocabulary) const;
 
-  void AddProperty( const std::string &key, const std::string &value, float count ) 
-  {
+  void AddProperties(const std::string &str, float count);
+
+  void AddProperty(const std::string &key, const std::string &value, float count) {
     std::map<std::string,
-             std::pair< PROPERTY_VALUES*, LAST_PROPERTY_VALUE* > >::iterator iter = m_properties.find(key);
+        std::pair< PROPERTY_VALUES*, LAST_PROPERTY_VALUE* > >::iterator iter = m_properties.find(key);
     if ( iter == m_properties.end() ) {
       // key not found: insert property key and value
       PROPERTY_VALUES *propertyValues = new PROPERTY_VALUES();

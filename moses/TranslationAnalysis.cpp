@@ -10,6 +10,7 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/LM/Base.h"
+#include "util/string_stream.hh"
 
 using namespace Moses;
 
@@ -40,12 +41,13 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
   if (doLMStats)
     lmAcc.resize((*tpi)->GetLMStats()->size(), 0);
   for (; tpi != translationPath.end(); ++tpi) {
-    std::ostringstream sms;
-    std::ostringstream tms;
+    util::StringStream sms;
+
+    util::StringStream tms;
     std::string target = (*tpi)->GetTargetPhraseStringRep();
     std::string source = (*tpi)->GetSourcePhraseStringRep();
-    WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
-    WordsRange swr = (*tpi)->GetCurrSourceWordsRange();
+    Range twr = (*tpi)->GetCurrTargetWordsRange();
+    Range swr = (*tpi)->GetCurrSourceWordsRange();
     const AlignmentInfo &alignmentInfo = (*tpi)->GetCurrTargetPhrase().GetAlignTerm();
     // language model backoff stats,
     if (doLMStats) {

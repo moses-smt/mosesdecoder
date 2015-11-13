@@ -11,7 +11,7 @@ namespace S2T
 {
 
 /* Lattice in which a full path corresponds to the tail of a PHyperedge.
- * For an entry x[i][j][k][l] in a TailLattice x: 
+ * For an entry x[i][j][k][l] in a TailLattice x:
  *
  *  i = offset from start of rule pattern
  *
@@ -23,9 +23,9 @@ namespace S2T
  *  l = label index (zero for terminals, otherwise as in RuleTrieScope3::Node)
  */
 typedef std::vector<
-          std::vector<
-            std::vector<
-              std::vector<const PVertex *> > > > TailLattice;
+std::vector<
+std::vector<
+std::vector<const PVertex *> > > > TailLattice;
 
 }  // namespace S2T
 }  // namespace Syntax

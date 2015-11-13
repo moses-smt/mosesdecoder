@@ -33,7 +33,8 @@ DecodeGraph::~DecodeGraph()
 }
 
 //! Add another decode step to the graph
-void DecodeGraph::Add(DecodeStep *decodeStep) {
+void DecodeGraph::Add(DecodeStep *decodeStep)
+{
   m_steps.push_back(decodeStep);
   decodeStep->SetContainer(this);
 }

@@ -18,8 +18,8 @@ SVertex::~SVertex()
     delete *p;
   }
   // Delete FFState objects.
-  for (std::vector<FFState*>::iterator p = state.begin();
-       p != state.end(); ++p) {
+  for (std::vector<FFState*>::iterator p = states.begin();
+       p != states.end(); ++p) {
     delete *p;
   }
 }

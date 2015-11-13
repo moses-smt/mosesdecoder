@@ -1,4 +1,7 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 #extract-factors.pl: extract only the desired factors from a factored corpus
@@ -6,6 +9,7 @@
 #factor indices start at 0
 #factor indices too large ought to be ignored
 
+use warnings;
 use strict;
 
 my ($filename, @factors) = @ARGV;

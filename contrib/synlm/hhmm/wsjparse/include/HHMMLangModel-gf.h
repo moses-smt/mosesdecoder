@@ -136,7 +136,7 @@ class Rd : public DiscreteDomainRV<int,domRd> {
     }
     if (!hToG.contains(*this)) {
       size_t i=s.find(',');
-      assert(i!=string::npos); 
+      assert(i!=string::npos);
       hToG.set(*this) = G(s.substr(i+1).c_str());
       if ( '1'==s[0] )
         hFromG.set(G(s.substr(i+1).c_str())) = *this;

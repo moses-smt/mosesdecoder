@@ -18,12 +18,12 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_OPTIONS_H_
-#define EXTRACT_GHKM_OPTIONS_H_
 
 #include <string>
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -34,15 +34,20 @@ public:
     : allowUnary(false)
     , conditionOnTargetLhs(false)
     , gzOutput(false)
+    , includeSentenceId(false)
     , maxNodes(15)
     , maxRuleDepth(3)
     , maxRuleSize(3)
     , maxScope(3)
     , minimal(false)
+    , partsOfSpeech(false)
+    , partsOfSpeechFactor(false)
     , pcfg(false)
     , phraseOrientation(false)
     , sentenceOffset(0)
     , sourceLabels(false)
+    , stripBitParLabels(false)
+    , stsg(false)
     , t2s(false)
     , treeFragments(false)
     , unknownWordMinRelFreq(0.03f)
@@ -60,17 +65,22 @@ public:
   bool conditionOnTargetLhs;
   std::string glueGrammarFile;
   bool gzOutput;
+  bool includeSentenceId;
   int maxNodes;
   int maxRuleDepth;
   int maxRuleSize;
   int maxScope;
   bool minimal;
+  bool partsOfSpeech;
+  bool partsOfSpeechFactor;
   bool pcfg;
   bool phraseOrientation;
   int sentenceOffset;
   bool sourceLabels;
   std::string sourceLabelSetFile;
   std::string sourceUnknownWordFile;
+  bool stripBitParLabels;
+  bool stsg;
   bool t2s;
   std::string targetUnknownWordFile;
   bool treeFragments;
@@ -81,6 +91,5 @@ public:
 };
 
 }  // namespace GHKM
-}  // namespace Moses
-
-#endif
+}  // namespace Syntax
+}  // namespace MosesTraining

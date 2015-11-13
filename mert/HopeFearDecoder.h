@@ -16,8 +16,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
-#ifndef MERT_HOPEFEARDECODER_H
-#define MERT_HOPEFEARDECODER_H
+#pragma once
 
 #include <vector>
 
@@ -35,7 +34,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // the n-best list and lattice/hypergraph implementations
 //
 
-namespace MosesTuning {
+namespace MosesTuning
+{
+
+
+/** Initialise weights from files. Returns weight vector and number of dense features */
+std::pair<MiraWeightVector*,size_t>
+InitialiseWeights(const std::string& denseInitFile, const std::string& sparseInitFile,
+                  const std::string& type, bool verbose);
 
 class Scorer;
 
@@ -44,7 +50,7 @@ struct HopeFearData {
   MiraFeatureVector modelFeatures;
   MiraFeatureVector hopeFeatures;
   MiraFeatureVector fearFeatures;
-  
+
   std::vector<float> modelStats;
   std::vector<float> hopeStats;
 
@@ -55,7 +61,8 @@ struct HopeFearData {
 };
 
 //Abstract base class
-class HopeFearDecoder {
+class HopeFearDecoder
+{
 public:
   //iterator methods
   virtual void reset() = 0;
@@ -68,14 +75,14 @@ public:
     * Calculate hope, fear and model hypotheses
     **/
   virtual void HopeFear(
-              const std::vector<ValType>& backgroundBleu,
-              const MiraWeightVector& wv,
-              HopeFearData* hopeFear
-              ) = 0;
+    const std::vector<ValType>& backgroundBleu,
+    const MiraWeightVector& wv,
+    HopeFearData* hopeFear
+  ) = 0;
 
   /** Max score decoding */
   virtual void MaxModel(const AvgWeightVector& wv, std::vector<ValType>* stats)
-    = 0;
+  = 0;
 
   /** Calculate bleu on training set */
   ValType Evaluate(const AvgWeightVector& wv);
@@ -86,25 +93,26 @@ protected:
 
 
 /** Gets hope-fear from nbest lists */
-class NbestHopeFearDecoder : public virtual HopeFearDecoder {
+class NbestHopeFearDecoder : public virtual HopeFearDecoder
+{
 public:
   NbestHopeFearDecoder(const std::vector<std::string>& featureFiles,
-                         const std::vector<std::string>&  scoreFiles,
-                         bool streaming,
-                         bool  no_shuffle,
-                         bool safe_hope,
-                         Scorer* scorer
-                         );
+                       const std::vector<std::string>&  scoreFiles,
+                       bool streaming,
+                       bool  no_shuffle,
+                       bool safe_hope,
+                       Scorer* scorer
+                      );
 
   virtual void reset();
   virtual void next();
   virtual bool finished();
 
   virtual void HopeFear(
-              const std::vector<ValType>& backgroundBleu,
-              const MiraWeightVector& wv,
-              HopeFearData* hopeFear
-              );
+    const std::vector<ValType>& backgroundBleu,
+    const MiraWeightVector& wv,
+    HopeFearData* hopeFear
+  );
 
   virtual void MaxModel(const AvgWeightVector& wv, std::vector<ValType>* stats);
 
@@ -117,29 +125,30 @@ private:
 
 
 /** Gets hope-fear from hypergraphs */
-class HypergraphHopeFearDecoder : public virtual HopeFearDecoder {
+class HypergraphHopeFearDecoder : public virtual HopeFearDecoder
+{
 public:
   HypergraphHopeFearDecoder(
-                            const std::string& hypergraphDir,
-                            const std::vector<std::string>& referenceFiles,
-                            size_t num_dense,
-                            bool streaming,
-                            bool no_shuffle,
-                            bool safe_hope,
-                            size_t hg_pruning,
-                            const MiraWeightVector& wv,
-                            Scorer* scorer_
-                            );
+    const std::string& hypergraphDir,
+    const std::vector<std::string>& referenceFiles,
+    size_t num_dense,
+    bool streaming,
+    bool no_shuffle,
+    bool safe_hope,
+    size_t hg_pruning,
+    const MiraWeightVector& wv,
+    Scorer* scorer_
+  );
 
   virtual void reset();
   virtual void next();
   virtual bool finished();
 
   virtual void HopeFear(
-              const std::vector<ValType>& backgroundBleu,
-              const MiraWeightVector& wv,
-              HopeFearData* hopeFear
-              );
+    const std::vector<ValType>& backgroundBleu,
+    const MiraWeightVector& wv,
+    HopeFearData* hopeFear
+  );
 
   virtual void MaxModel(const AvgWeightVector& wv, std::vector<ValType>* stats);
 
@@ -155,6 +164,4 @@ private:
 };
 
 };
-
-#endif
 

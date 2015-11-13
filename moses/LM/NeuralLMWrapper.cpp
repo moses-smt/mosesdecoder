@@ -10,7 +10,7 @@ using namespace std;
 namespace Moses
 {
 NeuralLMWrapper::NeuralLMWrapper(const std::string &line)
-:LanguageModelSingleFactor(line)
+  :LanguageModelSingleFactor(line)
 {
   ReadParameters();
 }
@@ -32,9 +32,13 @@ void NeuralLMWrapper::Load()
   m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
-  m_neuralLM_shared = new nplm::neuralLM(m_filePath, true);
+  m_neuralLM_shared = new nplm::neuralLM();
+  m_neuralLM_shared->read(m_filePath);
+  m_neuralLM_shared->premultiply();
   //TODO: config option?
   m_neuralLM_shared->set_cache(1000000);
+
+  m_unk = m_neuralLM_shared->lookup_word("<unk>");
 
   UTIL_THROW_IF2(m_nGramOrder != m_neuralLM_shared->get_order(),
                  "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
@@ -67,7 +71,7 @@ LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, Sta
   // Create a new struct to hold the result
   LMResult ret;
   ret.score = FloorScore(value);
-  ret.unknown = false;
+  ret.unknown = (words.back() == m_unk);
 
   (*finalState) = (State*) hashCode;
 

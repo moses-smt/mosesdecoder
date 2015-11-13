@@ -28,7 +28,7 @@ namespace Moses
 class TargetPhraseCollection;
 class ChartParserCallback;
 class DottedRuleColl;
-class WordsRange;
+class Range;
 class SkeletonPT;
 
 class ChartRuleLookupManagerSkeleton : public ChartRuleLookupManager
@@ -41,7 +41,7 @@ public:
   ~ChartRuleLookupManagerSkeleton();
 
   virtual void GetChartRuleCollection(
-    const WordsRange &range,
+    const InputPath &inputPath,
     size_t last,
     ChartParserCallback &outColl);
 
@@ -49,7 +49,7 @@ private:
   TargetPhrase *CreateTargetPhrase(const Word &sourceWord) const;
 
   StackVec m_stackVec;
-  std::vector<TargetPhraseCollection*> m_tpColl;
+  std::vector<TargetPhraseCollection::shared_ptr > m_tpColl;
   const SkeletonPT &m_skeletonPT;
 };
 

@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -32,30 +32,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 #include "Manager.h"
+#include "IOWrapper.h"
 #include "moses/FF/FFState.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
+
+#include <boost/foreach.hpp>
 
 using namespace std;
 
 namespace Moses
 {
-
-#ifdef USE_HYPO_POOL
-ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
-#endif
-
-Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt)
+Hypothesis::
+Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap)
   : m_prevHypo(NULL)
-  , m_sourceCompleted(source.GetSize(), manager.m_source.m_sourceCompleted)
+  , m_sourceCompleted(bitmap)
   , m_sourceInput(source)
   , m_currSourceWordsRange(
     m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
     m_sourceCompleted.GetFirstGapPos()>0 ? m_sourceCompleted.GetFirstGapPos()-1 : NOT_FOUND)
   , m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
   , m_wordDeleted(false)
-  , m_totalScore(0.0f)
   , m_futureScore(0.0f)
+  , m_estimatedScore(0.0f)
   , m_ffStates(StatefulFeatureFunction::GetStatefulFeatureFunctions().size())
   , m_arcList(NULL)
   , m_transOpt(initialTransOpt)
@@ -75,16 +74,18 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const Translat
 /***
  * continue prevHypo by appending the phrases in transOpt
  */
-Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
+Hypothesis::
+Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap)
   : m_prevHypo(&prevHypo)
-  , m_sourceCompleted				(prevHypo.m_sourceCompleted )
-  , m_sourceInput						(prevHypo.m_sourceInput)
-  , m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
-  , m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
-                              ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
+  , m_sourceCompleted(bitmap)
+  , m_sourceInput(prevHypo.m_sourceInput)
+  , m_currSourceWordsRange(transOpt.GetSourceWordsRange())
+  , m_currTargetWordsRange(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
+                           prevHypo.m_currTargetWordsRange.GetEndPos()
+                           + transOpt.GetTargetPhrase().GetSize())
   , m_wordDeleted(false)
-  , m_totalScore(0.0f)
   , m_futureScore(0.0f)
+  , m_estimatedScore(0.0f)
   , m_ffStates(prevHypo.m_ffStates.size())
   , m_arcList(NULL)
   , m_transOpt(transOpt)
@@ -92,18 +93,12 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   , m_id(m_manager.GetNextHypoId())
 {
   m_currScoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
-
-  // assert that we are not extending our hypothesis by retranslating something
-  // that this hypothesis has already translated!
-  assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
-
-  //_hash_computed = false;
-  m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
   m_manager.GetSentenceStats().AddCreated();
 }
 
-Hypothesis::~Hypothesis()
+Hypothesis::
+~Hypothesis()
 {
   for (unsigned i = 0; i < m_ffStates.size(); ++i)
     delete m_ffStates[i];
@@ -111,7 +106,7 @@ Hypothesis::~Hypothesis()
   if (m_arcList) {
     ArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
-      FREEHYPO(*iter);
+      delete *iter;
     }
     m_arcList->clear();
 
@@ -120,7 +115,9 @@ Hypothesis::~Hypothesis()
   }
 }
 
-void Hypothesis::AddArc(Hypothesis *loserHypo)
+void
+Hypothesis::
+AddArc(Hypothesis *loserHypo)
 {
   if (!m_arcList) {
     if (loserHypo->m_arcList) { // we don't have an arcList, but loser does
@@ -144,80 +141,23 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
   m_arcList->push_back(loserHypo);
 }
 
-/***
- * return the subclass of Hypothesis most appropriate to the given translation option
- */
-Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
-{
-  return Create(*this, transOpt);
-}
-
-/***
- * return the subclass of Hypothesis most appropriate to the given translation option
- */
-Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
-{
-
-#ifdef USE_HYPO_POOL
-  Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(prevHypo, transOpt);
-#else
-  return new Hypothesis(prevHypo, transOpt);
-#endif
-}
-/***
- * return the subclass of Hypothesis most appropriate to the given target phrase
- */
-
-Hypothesis* Hypothesis::Create(Manager& manager, InputType const& m_source, const TranslationOption &initialTransOpt)
-{
-#ifdef USE_HYPO_POOL
-  Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(manager, m_source, initialTransOpt);
-#else
-  return new Hypothesis(manager, m_source, initialTransOpt);
-#endif
-}
-
-/** check, if two hypothesis can be recombined.
-    this is actually a sorting function that allows us to
-    keep an ordered list of hypotheses. This makes recombination
-    much quicker.
-*/
-int Hypothesis::RecombineCompare(const Hypothesis &compare) const
-{
-  // -1 = this < compare
-  // +1 = this > compare
-  // 0	= this ==compare
-  int comp = m_sourceCompleted.Compare(compare.m_sourceCompleted);
-  if (comp != 0)
-    return comp;
-
-  for (unsigned i = 0; i < m_ffStates.size(); ++i) {
-    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) {
-      comp = m_ffStates[i] - compare.m_ffStates[i];
-    } else {
-      comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
-    }
-    if (comp != 0) return comp;
-  }
-
-  return 0;
-}
-
-void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff,
-                              int state_idx)
+void
+Hypothesis::
+EvaluateWhenApplied(StatefulFeatureFunction const& sfff, int state_idx)
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( sfff )) {
-    m_ffStates[state_idx] = sfff.EvaluateWhenApplied(
-                              *this,
-                              m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-                              &m_currScoreBreakdown);
+    // Manager& manager = this->GetManager(); //Get the manager and the ttask
+    // ttasksptr const& ttask = manager.GetTtask();
+    FFState const* prev = m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL;
+    m_ffStates[state_idx]
+    = sfff.EvaluateWhenApplied(*this, prev, &m_currScoreBreakdown);
   }
 }
 
-void Hypothesis::EvaluateWhenApplied(const StatelessFeatureFunction& slff)
+void
+Hypothesis::
+EvaluateWhenApplied(const StatelessFeatureFunction& slff)
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( slff )) {
@@ -228,7 +168,9 @@ void Hypothesis::EvaluateWhenApplied(const StatelessFeatureFunction& slff)
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::EvaluateWhenApplied(const SquareMatrix &futureScore)
+void
+Hypothesis::
+EvaluateWhenApplied(float estimatedScore)
 {
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StartTimeOtherScore();
@@ -253,9 +195,8 @@ void Hypothesis::EvaluateWhenApplied(const SquareMatrix &futureScore)
     const StatefulFeatureFunction &ff = *ffs[i];
     const StaticData &staticData = StaticData::Instance();
     if (! staticData.IsFeatureFunctionIgnored(ff)) {
-      m_ffStates[i] = ff.EvaluateWhenApplied(*this,
-                                  m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                                  &m_currScoreBreakdown);
+      FFState const* s = m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL;
+      m_ffStates[i] = ff.EvaluateWhenApplied(*this, s, &m_currScoreBreakdown);
     }
   }
 
@@ -265,11 +206,11 @@ void Hypothesis::EvaluateWhenApplied(const SquareMatrix &futureScore)
   }
 
   // FUTURE COST
-  m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
+  m_estimatedScore = estimatedScore;
 
   // TOTAL
-  m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
-  if (m_prevHypo) m_totalScore += m_prevHypo->GetScore();
+  m_futureScore = m_currScoreBreakdown.GetWeightedScore() + m_estimatedScore;
+  if (m_prevHypo) m_futureScore += m_prevHypo->GetScore();
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StopTimeEstimateScore();
@@ -284,7 +225,9 @@ const Hypothesis* Hypothesis::GetPrevHypo()const
 /**
  * print hypothesis information for pharaoh-style logging
  */
-void Hypothesis::PrintHypothesis() const
+void
+Hypothesis::
+PrintHypothesis() const
 {
   if (!m_prevHypo) {
     TRACE_ERR(endl << "NULL hypo" << endl);
@@ -300,11 +243,11 @@ void Hypothesis::PrintHypothesis() const
     TRACE_ERR( "... ");
   }
   if (end>=0) {
-    WordsRange range(start, end);
+    Range range(start, end);
     TRACE_ERR( m_prevHypo->GetCurrTargetPhrase().GetSubString(range) << " ");
   }
   TRACE_ERR( ")"<<endl);
-  TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
+  TRACE_ERR( "\tbase score "<< (m_prevHypo->m_futureScore - m_prevHypo->m_estimatedScore) <<endl);
   TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()
              <<": " << m_transOpt.GetInputPath().GetPhrase() << endl);
 
@@ -314,12 +257,14 @@ void Hypothesis::PrintHypothesis() const
   //	TRACE_ERR( "\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
   //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
   //	TRACE_ERR( "\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
-  TRACE_ERR( "\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
+  TRACE_ERR( "\tscore "<<m_futureScore - m_estimatedScore<<" + future cost "<<m_estimatedScore<<" = "<<m_futureScore<<endl);
   TRACE_ERR(  "\tunweighted feature scores: " << m_currScoreBreakdown << endl);
   //PrintLMScores();
 }
 
-void Hypothesis::CleanupArcList()
+void
+Hypothesis::
+CleanupArcList()
 {
   // point this hypo's main hypo to itself
   SetWinningHypo(this);
@@ -330,25 +275,21 @@ void Hypothesis::CleanupArcList()
    * However, may not be enough if only unique candidates are needed,
    * so we'll keep all of arc list if nedd distinct n-best list
    */
+
   const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.GetNBestSize();
-  bool distinctNBest = staticData.GetDistinctNBest() || staticData.GetLatticeSamplesSize() ||  staticData.UseMBR() || staticData.GetOutputSearchGraph() || staticData.GetOutputSearchGraphSLF() || staticData.GetOutputSearchGraphHypergraph() || staticData.UseLatticeMBR() ;
+  AllOptions const& opts = m_manager.options();
+  size_t nBestSize = opts.nbest.nbest_size;
+  bool distinctNBest = opts.NBestDistinct();
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
-	NTH_ELEMENT4(m_arcList->begin()
-                , m_arcList->begin() + nBestSize - 1
-                , m_arcList->end()
-                , CompareHypothesisTotalScore());
+    NTH_ELEMENT4(m_arcList->begin(), m_arcList->begin() + nBestSize - 1,
+                 m_arcList->end(), CompareHypothesisTotalScore());
 
     // delete bad ones
-    ArcList::iterator iter;
-    for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) {
-      Hypothesis *arc = *iter;
-      FREEHYPO(arc);
-    }
-    m_arcList->erase(m_arcList->begin() + nBestSize
-                     , m_arcList->end());
+    ArcList::iterator i = m_arcList->begin() + nBestSize;
+    while (i != m_arcList->end()) delete *i++;
+    m_arcList->erase(m_arcList->begin() + nBestSize, m_arcList->end());
   }
 
   // set all arc's main hypo variable to this hypo
@@ -359,16 +300,19 @@ void Hypothesis::CleanupArcList()
   }
 }
 
-const TargetPhrase &Hypothesis::GetCurrTargetPhrase() const
+TargetPhrase const&
+Hypothesis::
+GetCurrTargetPhrase() const
 {
   return m_transOpt.GetTargetPhrase();
 }
 
-void Hypothesis::GetOutputPhrase(Phrase &out) const
+void
+Hypothesis::
+GetOutputPhrase(Phrase &out) const
 {
-  if (m_prevHypo != NULL) {
+  if (m_prevHypo != NULL)
     m_prevHypo->GetOutputPhrase(out);
-  }
   out.Append(GetCurrTargetPhrase());
 }
 
@@ -382,50 +326,300 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
   out << "[" << hypo.m_sourceCompleted << "] ";
 
   // scores
-  out << " [total=" << hypo.GetTotalScore() << "]";
+  out << " [total=" << hypo.GetFutureScore() << "]";
   out << " " << hypo.GetScoreBreakdown();
 
   // alignment
   out << " " << hypo.GetCurrTargetPhrase().GetAlignNonTerm();
 
-  /*
-  const Hypothesis *prevHypo = hypo.GetPrevHypo();
-  if (prevHypo)
-  	out << endl << *prevHypo;
-  */
-
   return out;
 }
 
 
-std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const
+std::string
+Hypothesis::
+GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const
 {
   return m_transOpt.GetInputPath().GetPhrase().GetStringRep(factorsToPrint);
 }
 
-std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const
+std::string
+Hypothesis::
+GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const
 {
-  if (!m_prevHypo) {
-    return "";
-  }
-  return GetCurrTargetPhrase().GetStringRep(factorsToPrint);
+  return (m_prevHypo
+          ? GetCurrTargetPhrase().GetStringRep(factorsToPrint)
+          : "");
 }
 
-std::string Hypothesis::GetSourcePhraseStringRep() const
+std::string
+Hypothesis::
+GetSourcePhraseStringRep() const
 {
-  vector<FactorType> allFactors;
-  for(size_t i=0; i < MAX_NUM_FACTORS; i++) {
-    allFactors.push_back(i);
-  }
+  vector<FactorType> allFactors(MAX_NUM_FACTORS);
+  for(size_t i=0; i < MAX_NUM_FACTORS; i++)
+    allFactors[i] = i;
   return GetSourcePhraseStringRep(allFactors);
 }
-std::string Hypothesis::GetTargetPhraseStringRep() const
+
+std::string
+Hypothesis::
+GetTargetPhraseStringRep() const
 {
-  vector<FactorType> allFactors;
-  for(size_t i=0; i < MAX_NUM_FACTORS; i++) {
-    allFactors.push_back(i);
-  }
+  vector<FactorType> allFactors(MAX_NUM_FACTORS);
+  for(size_t i=0; i < MAX_NUM_FACTORS; i++)
+    allFactors[i] = i;
   return GetTargetPhraseStringRep(allFactors);
+}
+
+void
+Hypothesis::
+OutputAlignment(std::ostream &out) const
+{
+  std::vector<const Hypothesis *> edges;
+  const Hypothesis *currentHypo = this;
+  while (currentHypo) {
+    edges.push_back(currentHypo);
+    currentHypo = currentHypo->GetPrevHypo();
+  }
+
+  OutputAlignment(out, edges, m_manager.options().output.WA_SortOrder);
+
+}
+
+void
+Hypothesis::
+OutputAlignment(ostream &out,
+                vector<const Hypothesis *> const& edges,
+                WordAlignmentSort waso)
+{
+  size_t targetOffset = 0;
+
+  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+    const Hypothesis &edge = *edges[currEdge];
+    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
+    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
+
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset, waso);
+
+    targetOffset += tp.GetSize();
+  }
+  // Used by --print-alignment-info, so no endl
+}
+
+void
+Hypothesis::
+OutputAlignment(ostream &out, const AlignmentInfo &ai,
+                size_t sourceOffset, size_t targetOffset,
+                WordAlignmentSort waso)
+{
+  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
+  AlignVec alignments = ai.GetSortedAlignments(waso);
+
+  AlignVec::const_iterator it;
+  for (it = alignments.begin(); it != alignments.end(); ++it) {
+    const std::pair<size_t,size_t> &alignment = **it;
+    out << alignment.first  + sourceOffset << "-"
+        << alignment.second + targetOffset << " ";
+  }
+
+}
+
+void
+Hypothesis::
+OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
+{
+  if (!hypo->GetPrevHypo()) return;
+  OutputInput(map, hypo->GetPrevHypo());
+  map[hypo->GetCurrSourceWordsRange().GetStartPos()]
+  = &hypo->GetTranslationOption().GetInputPath().GetPhrase();
+}
+
+void
+Hypothesis::
+OutputInput(std::ostream& os) const
+{
+  size_t len = this->GetInput().GetSize();
+  std::vector<const Phrase*> inp_phrases(len, 0);
+  OutputInput(inp_phrases, this);
+  for (size_t i=0; i<len; ++i)
+    if (inp_phrases[i]) os << *inp_phrases[i];
+}
+
+void
+Hypothesis::
+OutputBestSurface(std::ostream &out, const std::vector<FactorType> &outputFactorOrder,
+                  char reportSegmentation, bool reportAllFactors) const
+{
+  if (m_prevHypo) {
+    // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
+    m_prevHypo->OutputBestSurface(out, outputFactorOrder, reportSegmentation, reportAllFactors);
+  }
+  OutputSurface(out, *this, outputFactorOrder, reportSegmentation, reportAllFactors);
+}
+
+//////////////////////////////////////////////////////////////////////////
+/***
+ * print surface factor only for the given phrase
+ */
+void
+Hypothesis::
+OutputSurface(std::ostream &out, const Hypothesis &edge,
+              const std::vector<FactorType> &outputFactorOrder,
+              char reportSegmentation, bool reportAllFactors) const
+{
+  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
+                 "Must specific at least 1 output factor");
+  const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
+  bool markUnknown = GetManager().options().unk.mark;
+  // = StaticData::Instance().GetMarkUnknown();
+  if (reportAllFactors == true) {
+    out << phrase;
+  } else {
+    FactorType placeholderFactor
+    = StaticData::Instance().options().input.placeholder_factor;
+
+    std::map<size_t, const Factor*> placeholders;
+    if (placeholderFactor != NOT_FOUND) {
+      // creates map of target position -> factor for placeholders
+      placeholders = GetPlaceholders(edge, placeholderFactor);
+    }
+
+    size_t size = phrase.GetSize();
+    for (size_t pos = 0 ; pos < size ; pos++) {
+      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+
+      if (placeholders.size()) {
+        // do placeholders
+        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
+        if (iter != placeholders.end()) {
+          factor = iter->second;
+        }
+      }
+
+      UTIL_THROW_IF2(factor == NULL,
+                     "No factor 0 at position " << pos);
+
+      //preface surface form with UNK if marking unknowns
+      const Word &word = phrase.GetWord(pos);
+      if(markUnknown && word.IsOOV()) {
+        out << GetManager().options().unk.prefix << *factor
+            << GetManager().options().unk.suffix;
+      } else {
+        out << *factor;
+      }
+
+      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
+        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+        UTIL_THROW_IF2(factor == NULL,
+                       "No factor " << i << " at position " << pos);
+
+        out << "|" << *factor;
+      }
+      out << " ";
+    }
+  }
+
+  // trace ("report segmentation") option "-t" / "-tt"
+  if (reportSegmentation > 0 && phrase.GetSize() > 0) {
+    const Range &sourceRange = edge.GetCurrSourceWordsRange();
+    const int sourceStart = sourceRange.GetStartPos();
+    const int sourceEnd = sourceRange.GetEndPos();
+    out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
+    if (reportSegmentation == 2) {
+      WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
+      out << ",wa=";
+      const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
+      Hypothesis::OutputAlignment(out, ai, 0, 0, waso);
+      out << ",total=";
+      out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
+      out << ",";
+      ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
+      scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
+      bool with_labels = m_manager.options().nbest.include_feature_labels;
+      scoreBreakdown.OutputAllFeatureScores(out, with_labels);
+    }
+    out << "| ";
+  }
+}
+
+std::map<size_t, const Factor*>
+Hypothesis::
+GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const
+{
+  const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
+  const Phrase &inputPhrase = inputPath.GetPhrase();
+
+  std::map<size_t, const Factor*> ret;
+
+  for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
+    const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
+    if (factor) {
+      std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
+      UTIL_THROW_IF2(targetPos.size() != 1,
+                     "Placeholder should be aligned to 1, and only 1, word");
+      ret[*targetPos.begin()] = factor;
+    }
+  }
+
+  return ret;
+}
+
+size_t Hypothesis::hash() const
+{
+  size_t seed;
+
+  // coverage NOTE from Hieu - we could make bitmap comparison here
+  // and in operator== compare the pointers since the bitmaps come
+  // from a factory.  Same coverage is guaranteed to have the same
+  // bitmap. However, this make the decoding algorithm
+  // non-deterministic as the order of hypo extension can be
+  // different. This causes several regression tests to break. Since
+  // the speedup is minimal, I'm gonna leave it comparing the actual
+  // bitmaps
+  seed = m_sourceCompleted.hash();
+
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState *state = m_ffStates[i];
+    size_t hash = state->hash();
+    boost::hash_combine(seed, hash);
+  }
+  return seed;
+}
+
+bool Hypothesis::operator==(const Hypothesis& other) const
+{
+  // coverage
+  if (&m_sourceCompleted != &other.m_sourceCompleted) {
+    return false;
+  }
+
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState &thisState = *m_ffStates[i];
+    const FFState &otherState = *other.m_ffStates[i];
+    if (thisState != otherState) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool
+Hypothesis::
+beats(Hypothesis const& b) const
+{
+  if (m_futureScore != b.m_futureScore)
+    return m_futureScore > b.m_futureScore;
+  else if (m_estimatedScore != b.m_estimatedScore)
+    return m_estimatedScore > b.m_estimatedScore;
+  else if (m_prevHypo)
+    return b.m_prevHypo ? m_prevHypo->beats(*b.m_prevHypo) : true;
+  else return false;
+  // TO DO: add more tie breaking here
+  // results. We should compare other property of the hypos here.
+  // On the other hand, how likely is this going to happen?
 }
 
 }

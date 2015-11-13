@@ -5,10 +5,7 @@
 #include <vector>
 
 #include "StatisticsBasedScorer.h"
-#include "moses/FF/InternalTree.h"
-
-using Moses::TreePointer;
-using Moses::InternalTree;
+#include "InternalTree.h"
 
 namespace MosesTuning
 {

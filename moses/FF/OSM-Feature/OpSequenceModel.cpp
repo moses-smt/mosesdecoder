@@ -19,15 +19,16 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
   ReadParameters();
 }
 
-OpSequenceModel::~OpSequenceModel() {
-  delete OSM;    
+OpSequenceModel::~OpSequenceModel()
+{
+  delete OSM;
 }
 
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
   string unkOp = "_TRANS_SLF_";
   OSM = ConstructOSMLM(m_lmPath);
-  
+
   State startState = OSM->NullContextState();
   State endState;
   unkOpProb = OSM->Score(startState,unkOp,endState);
@@ -42,14 +43,14 @@ void OpSequenceModel::Load()
 
 
 void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
-                                , const TargetPhrase &targetPhrase
-                                , ScoreComponentCollection &scoreBreakdown
-                                , ScoreComponentCollection &estimatedFutureScore) const
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedScores) const
 {
 
   osmHypothesis obj;
   obj.setState(OSM->NullContextState());
-  WordsBitmap myBitmap(source.GetSize());
+  Bitmap myBitmap(source.GetSize());
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
   vector<float> scores;
@@ -65,14 +66,14 @@ void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
     alignments.push_back(iter->second);
   }
 
-  for (int i = 0; i < targetPhrase.GetSize(); i++) {
+  for (size_t i = 0; i < targetPhrase.GetSize(); i++) {
     if (targetPhrase.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
     else
       myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(tFactor)->GetString().as_string());
   }
 
-  for (int i = 0; i < source.GetSize(); i++) {
+  for (size_t i = 0; i < source.GetSize(); i++) {
     mySourcePhrase.push_back(source.GetWord(i).GetFactor(sFactor)->GetString().as_string());
   }
 
@@ -81,7 +82,7 @@ void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
   obj.computeOSMFeature(startIndex,myBitmap);
   obj.calculateOSMProb(*OSM);
   obj.populateScores(scores,numFeatures);
-  estimatedFutureScore.PlusEquals(this, scores);
+  estimatedScores.PlusEquals(this, scores);
 
 }
 
@@ -92,11 +93,11 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   ScoreComponentCollection* accumulator) const
 {
   const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
-  const WordsBitmap &bitmap = cur_hypo.GetWordsBitmap();
-  WordsBitmap myBitmap = bitmap;
+  const Bitmap &bitmap = cur_hypo.GetWordsBitmap();
+  Bitmap myBitmap(bitmap);
   const Manager &manager = cur_hypo.GetManager();
   const InputType &source = manager.GetSource();
-  const Sentence &sourceSentence = static_cast<const Sentence&>(source);
+  // const Sentence &sourceSentence = static_cast<const Sentence&>(source);
   osmHypothesis obj;
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
@@ -119,11 +120,11 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   //const Sentence &sentence = static_cast<const Sentence&>(curr_hypo.GetManager().GetSource());
 
 
-  const WordsRange & sourceRange = cur_hypo.GetCurrSourceWordsRange();
+  const Range & sourceRange = cur_hypo.GetCurrSourceWordsRange();
   int startIndex  = sourceRange.GetStartPos();
   int endIndex = sourceRange.GetEndPos();
   const AlignmentInfo &align = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();
-  osmState * statePtr;
+  // osmState * statePtr;
 
   vector <int> alignments;
 
@@ -148,7 +149,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
     // cerr<<mySourcePhrase[i]<<endl;
   }
 
-  for (int i = 0; i < target.GetSize(); i++) {
+  for (size_t i = 0; i < target.GetSize(); i++) {
 
     if (target.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
@@ -198,7 +199,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-	UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
+  UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
 
 }
 

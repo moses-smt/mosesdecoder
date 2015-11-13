@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
+#include "util/tokenize.hh"
 
 using namespace std;
 
@@ -54,13 +55,12 @@ bool getLine( istream &fileP, vector< string > &item )
 {
   if (fileP.eof())
     return false;
-  
+
   string line;
   if (getline(fileP, line)) {
     item = splitLine(line.c_str());
-    return false;
-  }
-  else {
+    return true;
+  } else {
     return false;
   }
 }
@@ -108,17 +108,17 @@ int main(int argc, char* argv[])
     if (! getLine(fileDirectP,  itemDirect  ))
       break;
 
-    (*fileConsolidated) << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
+    const vector< string > count = util::tokenize( itemDirect[4] );
+    float countEF = atof(count[0].c_str());
+    float countF = atof(count[1].c_str());
+    float prob = countF/countEF;
 
-    // output alignment and probabilities
-    (*fileConsolidated)	<< itemDirect[2]						// prob direct
-                        << " 2.718" // phrase count feature
-                        << " ||| " << itemDirect[3];	// alignment
-
-    // counts
-    (*fileConsolidated) << "||| 0 " << itemDirect[4]; // indirect
-    (*fileConsolidated) << endl;
-
+    (*fileConsolidated) << itemDirect[0] << " ||| "        // source
+                        << itemDirect[1] << " ||| "        // target
+                        << prob << " ||| "                 // prob
+                        << itemDirect[2] << "||| "        // alignment
+                        << itemDirect[4] << " " << countEF // counts
+                        << " ||| " << endl;
   }
 
   fileConsolidated->flush();

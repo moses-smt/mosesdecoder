@@ -1,8 +1,8 @@
 // -*- c++ -*-
 // Program to extract word cooccurrence counts from a memory-mapped
 // word-aligned bitext stores the counts lexicon in the format for
-// mm2dTable<uint32_t> (ug_mm_2d_table.h) 
-// 
+// mm2dTable<uint32_t> (ug_mm_2d_table.h)
+//
 // (c) 2010-2012 Ulrich Germann
 
 // to do: multi-threading
@@ -20,22 +20,24 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 #include <boost/math/distributions/binomial.hpp>
-#include <boost/unordered_map.hpp> 
-#include <boost/unordered_set.hpp> 
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 
 #include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
+#include "moses/Util.h"
 #include "ug_mm_2d_table.h"
 #include "ug_mm_ttrack.h"
 #include "ug_corpus_token.h"
 
 using namespace std;
+using namespace sapt;
 using namespace ugdiss;
 using namespace boost::math;
 
 typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> LEX_t;
 typedef SimpleWordId Token;
 
-// DECLARATIONS 
+// DECLARATIONS
 void interpret_args(int ac, char* av[]);
 
 mmTtrack<Token> T1,T2;
@@ -51,7 +53,7 @@ struct Count
   Count(uint32_t ax, uint32_t cx) : a(ax), c(cx) {}
 };
 
-bool 
+bool
 operator<(pair<id_type,Count> const& a,
 	  pair<id_type,Count> const& b)
 {
@@ -71,7 +73,7 @@ public:
   countlist_t & LEX;
   size_t  offset;
   size_t    skip;
-  Counter(countlist_t& lex, size_t o, size_t s) 
+  Counter(countlist_t& lex, size_t o, size_t s)
     : LEX(lex), offset(o), skip(s) {}
   void processSentence(id_type sid);
   void operator()();
@@ -82,7 +84,7 @@ int    verbose;
 size_t truncat;
 size_t num_threads;
 
-void 
+void
 Counter::
 operator()()
 {
@@ -104,23 +106,23 @@ struct lexsorter
 {
   vector<countlist_t> const& v;
   id_type wid;
-  lexsorter(vector<countlist_t> const& vx, id_type widx) 
+  lexsorter(vector<countlist_t> const& vx, id_type widx)
     : v(vx),wid(widx) {}
   bool operator()(pair<uint32_t,uint32_t> const& a,
 		  pair<uint32_t,uint32_t> const& b) const
   {
-    return (v.at(a.first).at(wid).at(a.second).first > 
+    return (v.at(a.first).at(wid).at(a.second).first >
 	    v.at(b.first).at(wid).at(b.second).first);
   }
 };
 
-void 
+void
 writeTableHeader(ostream& out)
 {
   filepos_type idxOffset=0;
-  numwrite(out,idxOffset); // blank for the time being
-  numwrite(out,id_type(V1.ksize()));
-  numwrite(out,id_type(V2.ksize()));
+  tpt::numwrite(out,idxOffset); // blank for the time being
+  tpt::numwrite(out,id_type(V1.ksize()));
+  tpt::numwrite(out,id_type(V2.ksize()));
 }
 
 void writeTable(ostream* aln_out, ostream* coc_out)
@@ -158,7 +160,7 @@ void writeTable(ostream* aln_out, ostream* coc_out)
 	    H.pop_back();
 	  else
 	    push_heap(H.begin(),H.end(),sorter);
-	  while (H.size() && 
+	  while (H.size() &&
 		 XLEX[H[0].first][id1].at(H[0].second).first == id2)
 	    {
 	      aln += XLEX[H[0].first][id1][H[0].second].second.a;
@@ -173,16 +175,16 @@ void writeTable(ostream* aln_out, ostream* coc_out)
 	  if (aln_out)
 	    {
 	      ++CellCountA;
-	      numwrite(*aln_out,id2);
-	      numwrite(*aln_out,aln);
+	      tpt::numwrite(*aln_out,id2);
+	      tpt::numwrite(*aln_out,aln);
 	      m1a[id1] += aln;
 	      m2a[id2] += aln;
-	    }	      
+	    }
 	  if (coc_out && coc)
 	    {
 	      ++CellCountC;
-	      numwrite(*coc_out,id2);
-	      numwrite(*coc_out,coc);
+	      tpt::numwrite(*coc_out,id2);
+	      tpt::numwrite(*coc_out,coc);
 	      m1c[id1] += coc;
 	      m2c[id2] += coc;
 	    }
@@ -190,25 +192,25 @@ void writeTable(ostream* aln_out, ostream* coc_out)
     }
   idxa.back() = CellCountA;
   idxc.back() = CellCountC;
-  if (aln_out) 
+  if (aln_out)
     {
       filepos_type idxOffsetA = aln_out->tellp();
       BOOST_FOREACH(id_type foo, idxa)
-	numwrite(*aln_out,foo);
+	tpt::numwrite(*aln_out,foo);
       aln_out->write(reinterpret_cast<char const*>(&m1a[0]),m1a.size()*4);
       aln_out->write(reinterpret_cast<char const*>(&m2a[0]),m2a.size()*4);
       aln_out->seekp(0);
-      numwrite(*aln_out,idxOffsetA);
+      tpt::numwrite(*aln_out,idxOffsetA);
     }
-  if (coc_out) 
+  if (coc_out)
     {
       filepos_type idxOffsetC = coc_out->tellp();
       BOOST_FOREACH(id_type foo, idxc)
-	numwrite(*coc_out,foo);
+	tpt::numwrite(*coc_out,foo);
       coc_out->write(reinterpret_cast<char const*>(&m1c[0]),m1c.size()*4);
       coc_out->write(reinterpret_cast<char const*>(&m2c[0]),m2c.size()*4);
       coc_out->seekp(0);
-      numwrite(*coc_out,idxOffsetC);
+      tpt::numwrite(*coc_out,idxOffsetC);
     }
 }
 
@@ -220,14 +222,14 @@ processSentence(id_type sid)
   Token const* e1 = T1.sntEnd(sid);
   Token const* s2 = T2.sntStart(sid);
   Token const* e2 = T2.sntEnd(sid);
-  vector<ushort> cnt1(V1.ksize(),0);
-  vector<ushort> cnt2(V2.ksize(),0);
-  for (Token const* x = s1; x < e1; ++x) 
-    ++cnt1.at(x->id());
-  for (Token const* x = s2; x < e2; ++x) 
-    ++cnt2.at(x->id());
+  // vector<ushort> cnt1(V1.ksize(),0);
+  // vector<ushort> cnt2(V2.ksize(),0);
+  // for (Token const* x = s1; x < e1; ++x)
+  // ++cnt1.at(x->id());
+  // for (Token const* x = s2; x < e2; ++x)
+  // ++cnt2.at(x->id());
 
-  boost::unordered_set<wpair> seen;
+  // boost::unordered_set<wpair> seen;
   bitvector check1(T1.sntLen(sid)); check1.set();
   bitvector check2(T2.sntLen(sid)); check2.set();
 
@@ -235,16 +237,21 @@ processSentence(id_type sid)
   char const*   p = Tx.sntStart(sid);
   char const*   q = Tx.sntEnd(sid);
   ushort r,c;
-  // cout << sid << " " << q-p << endl;
+  if (verbose && sid % 1000000 == 0)
+    cerr << sid/1000000 << " M sentences processed" << endl;
   while (p < q)
     {
-      p = binread(p,r);
-      p = binread(p,c);
+      p = tpt::binread(p,r);
+      p = tpt::binread(p,c);
       // cout << sid << " " << r << "-" << c << endl;
-      assert(r < check1.size());
-      assert(c < check2.size());
-      assert(s1+r < e1);
-      assert(s2+c < e2);
+      UTIL_THROW_IF2(r >= check1.size(), "out of bounds at line " << sid);
+      UTIL_THROW_IF2(c >= check2.size(), "out of bounds at line " << sid);
+      // assert(r < check1.size());
+      // assert(c < check2.size());
+      UTIL_THROW_IF2(s1+r >= e1, "out of bounds at line " << sid);
+      UTIL_THROW_IF2(s2+c >= e2, "out of bounds at line " << sid);
+      // assert(s1+r < e1);
+      // assert(s2+c < e2);
       check1.reset(r);
       check2.reset(c);
       id_type id1 = (s1+r)->id();
@@ -252,81 +259,21 @@ processSentence(id_type sid)
       wpair k(id1,id2);
       Count& cnt = CNT[k];
       cnt.a++;
-      if (seen.insert(k).second) 
-	cnt.c += cnt1[id1] * cnt2[id2];
+      // if (seen.insert(k).second)
+      // cnt.c += cnt1[id1] * cnt2[id2];
     }
   // count unaliged words
-  for (size_t i = check1.find_first(); 
-       i < check1.size(); 
+  for (size_t i = check1.find_first();
+       i < check1.size();
        i = check1.find_next(i))
     CNT[wpair((s1+i)->id(),0)].a++;
-  for (size_t i = check2.find_first(); 
-       i < check2.size(); 
+  for (size_t i = check2.find_first();
+       i < check2.size();
        i = check2.find_next(i))
     CNT[wpair(0,(s2+i)->id())].a++;
 }
 
-// void
-// writeTable(string ofname, 
-// 	   vector<vector<uint32_t> >& FREQ,
-// 	   vector<map<id_type,uint32_t> >& RARE)
-// {
-//   ofstream out(ofname.c_str());
-//   filepos_type idxOffset=0;
-
-//   vector<uint32_t> m1; // marginals L1
-//   vector<uint32_t> m2; // marginals L2
-//   m1.resize(max(first_rare_id,V1.getNumTokens()),0);
-//   m2.resize(V2.getNumTokens(),0);
-//   vector<id_type> index(V1.getNumTokens()+1,0);
-//   numwrite(out,idxOffset); // blank for the time being
-//   numwrite(out,id_type(m1.size()));
-//   numwrite(out,id_type(m2.size()));
-
-//   id_type cellCount=0;
-//   id_type stop = min(first_rare_id,id_type(m1.size()));
-//   for (id_type id1 = 0; id1 < stop; ++id1)
-//     {
-//       index[id1]  = cellCount;
-//       vector<uint32_t> const& v = FREQ[id1];
-//       for (id_type id2 = 0; id2 < id_type(v.size()); ++id2)
-//         {
-//           if (!v[id2]) continue;
-//           cellCount++;
-//           numwrite(out,id2);
-//           out.write(reinterpret_cast<char const*>(&v[id2]),sizeof(uint32_t));
-//           m1[id1] += v[id2];
-//           m2[id2] += v[id2];
-//         }
-//     }
-//   for (id_type id1 = stop; id1 < id_type(m1.size()); ++id1)
-//     {
-//       index[id1]  = cellCount;
-//       map<id_type,uint32_t> const& M = RARE[id1];
-//       for (map<id_type,uint32_t>::const_iterator m = M.begin(); m != M.end(); ++m)
-//         {
-//           if (m->second == 0) continue;
-//           cellCount++;
-//           numwrite(out,m->first);
-//           out.write(reinterpret_cast<char const*>(&m->second),sizeof(float));
-//           m1[id1] += m->second;
-//           m2[m->first] += m->second;
-//         }
-//     }
-//   index[m1.size()] = cellCount;
-//   idxOffset    = out.tellp();
-//   for (size_t i = 0; i < index.size(); ++i)
-//     numwrite(out,index[i]);
-//   out.write(reinterpret_cast<char const*>(&m1[0]),m1.size()*sizeof(float));
-//   out.write(reinterpret_cast<char const*>(&m2[0]),m2.size()*sizeof(float));
-  
-//   // re-write the file header
-//   out.seekp(0);
-//   numwrite(out,idxOffset);
-//   out.close();
-// }
-
-int 
+int
 main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
@@ -347,14 +294,14 @@ main(int argc, char* argv[])
   // cerr << "done counting" << endl;
   ofstream aln_out,coc_out;
   if (oname.size()) aln_out.open(oname.c_str());
-  if (cooc.size())  coc_out.open(cooc.c_str());
+  // if (cooc.size())  coc_out.open(cooc.c_str());
   writeTable(oname.size() ? &aln_out : NULL,
 	     cooc.size()  ? &coc_out : NULL);
   if (oname.size()) aln_out.close();
-  if (cooc.size())  coc_out.close();
+  // if (cooc.size())  coc_out.close();
 }
 
-void 
+void
 interpret_args(int ac, char* av[])
 {
   namespace po=boost::program_options;
@@ -367,8 +314,8 @@ interpret_args(int ac, char* av[])
     ("help,h",    "print this message")
     ("cfg,f", po::value<string>(&cfgFile),"config file")
     ("oname,o", po::value<string>(&oname),"output file name")
-    ("cooc,c", po::value<string>(&cooc),
-     "file name for raw co-occurrence counts")
+    // ("cooc,c", po::value<string>(&cooc),
+    // "file name for raw co-occurrence counts")
     ("verbose,v", po::value<int>(&verbose)->default_value(0)->implicit_value(1),
      "verbosity level")
     ("threads,t", po::value<size_t>(&num_threads)->default_value(4),
@@ -376,7 +323,7 @@ interpret_args(int ac, char* av[])
     ("truncate,n", po::value<size_t>(&truncat)->default_value(0),
      "truncate corpus to <N> sentences (for debugging)")
     ;
-  
+
   h.add_options()
     ("bname", po::value<string>(&bname), "base name")
     ("L1",    po::value<string>(&L1),"L1 tag")
@@ -394,7 +341,8 @@ interpret_args(int ac, char* av[])
       cout << o << endl;
       exit(0);
     }
-  num_threads = min(num_threads,24UL);
+  size_t num_cores = boost::thread::hardware_concurrency();
+  num_threads = min(num_threads,num_cores);
 }
 
 

@@ -19,7 +19,9 @@ class CoveredReferenceState : public FFState
 public:
   std::multiset<std::string> m_coveredRef;
 
-  int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
 };
 
 class CoveredReferenceFeature : public StatefulFeatureFunction
@@ -37,8 +39,7 @@ class CoveredReferenceFeature : public StatefulFeatureFunction
 
 public:
   CoveredReferenceFeature(const std::string &line)
-    :StatefulFeatureFunction(1, line)
-  {
+    :StatefulFeatureFunction(1, line) {
     m_tuneable = true;
     ReadParameters();
   }
@@ -53,15 +54,20 @@ public:
   }
 
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const;
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const;
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

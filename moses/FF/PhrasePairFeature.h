@@ -1,5 +1,4 @@
-#ifndef moses_PhrasePairFeature_h
-#define moses_PhrasePairFeature_h
+#pragma once
 
 #include <stdexcept>
 #include <boost/unordered_set.hpp>
@@ -32,6 +31,16 @@ class PhrasePairFeature: public StatelessFeatureFunction
   CharHash m_punctuationHash;
   std::string m_filePathSource;
 
+  inline std::string ReplaceTilde(const StringPiece &str) const {
+    std::string out = str.as_string();
+    size_t pos = out.find('~');
+    while ( pos != std::string::npos ) {
+      out.replace(pos,1,"<TILDE>");
+      pos = out.find('~',pos);
+    }
+    return out;
+  };
+
 public:
   PhrasePairFeature(const std::string &line);
 
@@ -41,30 +50,30 @@ public:
   bool IsUseable(const FactorMask &mask) const;
 
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const;
 
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
 
   void EvaluateWhenApplied(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const
-  {}
+                           ScoreComponentCollection* accumulator) const {
+  }
 
   void EvaluateWhenApplied(const ChartHypothesis& hypo,
-                     ScoreComponentCollection*) const
-  {}
+                           ScoreComponentCollection*) const {
+  }
 
 
 };
 
 }
 
-
-#endif

@@ -10,23 +10,23 @@
 
 //Hash table entry
 struct Entry {
-    uint64_t key;
-    typedef uint64_t Key;
-    unsigned int bytes_toread;
+  uint64_t key;
+  typedef uint64_t Key;
+  unsigned int bytes_toread;
 
-    uint64_t GetKey() const {
-        return key;
-    }
+  uint64_t GetKey() const {
+    return key;
+  }
 
-    void SetKey(uint64_t to) {
-        key = to;
-    }
+  void SetKey(uint64_t to) {
+    key = to;
+  }
 
-    uint64_t GetValue() const {
-        return value;
-    }
+  uint64_t GetValue() const {
+    return value;
+  }
 
-    uint64_t value;
+  uint64_t value;
 };
 
 //Define table

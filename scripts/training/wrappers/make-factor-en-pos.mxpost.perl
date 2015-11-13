@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use FindBin qw($RealBin);
 
@@ -21,7 +25,7 @@ while(<TAGGER>) {
     foreach my $word_pos (split) {
 	$word_pos =~ s/\/([^\/]+)$/_$1/;
 	$word_pos = "//_:" if $word_pos eq "//";
-	print STDERR "faulty POS tag: $word_pos\n" 
+	print STDERR "faulty POS tag: $word_pos\n"
 	    unless $word_pos =~ /^.+_([^_]+)$/;
 	print OUT "$1 ";
     }

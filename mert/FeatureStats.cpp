@@ -61,7 +61,8 @@ void SparseVector::set(const string& name, FeatureStatsType value)
   m_fvector[id] = value;
 }
 
-void SparseVector::set(size_t id, FeatureStatsType value) {
+void SparseVector::set(size_t id, FeatureStatsType value)
+{
   assert(m_id_to_name.size() > id);
   m_fvector[id] = value;
 }
@@ -204,7 +205,7 @@ FeatureStats::FeatureStats(const size_t size)
 
 FeatureStats::~FeatureStats()
 {
-   delete [] m_array;
+  delete [] m_array;
 }
 
 void FeatureStats::Copy(const FeatureStats &stats)

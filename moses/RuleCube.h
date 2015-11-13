@@ -74,7 +74,7 @@ class RuleCubeItemEqualityPred
 public:
   bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
     bool ret = p->GetHypothesisDimensions() == q->GetHypothesisDimensions() &&
-            p->GetTranslationDimension() == q->GetTranslationDimension();
+               p->GetTranslationDimension() == q->GetTranslationDimension();
     return ret;
   }
 };
@@ -92,7 +92,7 @@ public:
   ~RuleCube();
 
   float GetTopScore() const {
-	UTIL_THROW_IF2(m_queue.empty(), "Empty queue, nothing to pop");
+    UTIL_THROW_IF2(m_queue.empty(), "Empty queue, nothing to pop");
     RuleCubeItem *item = m_queue.top();
     return item->GetScore();
   }
@@ -107,8 +107,9 @@ public:
     return m_transOpt;
   }
 
-  size_t GetItemSetSize() const
-  { return m_covered.size(); }
+  size_t GetItemSetSize() const {
+    return m_covered.size();
+  }
 
 private:
   typedef boost::unordered_set<RuleCubeItem*,

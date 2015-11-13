@@ -11,12 +11,14 @@
 
 #include "OxLMMapper.h"
 
-namespace Moses {
+namespace Moses
+{
 
 template<class Model>
-class OxLM : public LanguageModelSingleFactor {
- public:
-	OxLM(const std::string &line);
+class OxLM : public LanguageModelSingleFactor
+{
+public:
+  OxLM(const std::string &line);
 
   ~OxLM();
 
@@ -24,17 +26,22 @@ class OxLM : public LanguageModelSingleFactor {
 
   void Load();
 
-  double GetScore(int word, const std::vector<int>& context) const;
-
   virtual LMResult GetValue(
-      const std::vector<const Word*> &contextFactor,
-      State* finalState = 0) const;
+    const std::vector<const Word*> &contextFactor,
+    State* finalState = 0) const;
 
-  virtual void InitializeForInput(const InputType& source);
+  virtual void InitializeForInput(ttasksptr const& ttask);
 
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 
- protected:
+private:
+  double GetScore(int word, const vector<int>& context) const;
+
+  void loadPersistentCache(const string& cache_file) const;
+
+  void savePersistentCache(const string& cache_file) const;
+
+protected:
   Model model;
   boost::shared_ptr<OxLMMapper> mapper;
 
@@ -43,6 +50,9 @@ class OxLM : public LanguageModelSingleFactor {
   int kUNKNOWN;
 
   bool normalized;
+
+  bool posBackOff;
+  FactorType posFactorType;
 
   bool persistentCache;
   mutable boost::thread_specific_ptr<oxlm::QueryCache> cache;

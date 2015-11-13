@@ -13,7 +13,12 @@ text = u"il a souhaité que la présidence trace à nice le chemin pour l' aveni
 params = {"text":text, "align":"true", "report-all-factors":"true"}
 
 result = proxy.translate(params)
+
 print result['text']
+
+if 'id' in result:
+    print "Segment ID:%s" % (result['id'])
+
 if 'align' in result:
     print "Phrase alignments:"
     aligns = result['align']

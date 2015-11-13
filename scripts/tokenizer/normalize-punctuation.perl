@@ -1,13 +1,20 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 my $language = "en";
+my $PENN = 0;
+
 while (@ARGV) {
     $_ = shift;
     /^-b$/ && ($| = 1, next); # not buffered (flush each line)
     /^-l$/ && ($language = shift, next);
     /^[^\-]/ && ($language = $_, next);
+  	/^-penn$/ && ($PENN = 1, next);
 }
 
 while(<STDIN>) {
@@ -22,6 +29,11 @@ while(<STDIN>) {
     s/ :/:/g;
     s/ ;/;/g;
     # normalize unicode punctuation
+    if ($PENN == 0) {
+      s/\`/\'/g;
+      s/\'\'/ \" /g;
+    }
+
     s/„/\"/g;
     s/“/\"/g;
     s/”/\"/g;
@@ -67,7 +79,6 @@ while(<STDIN>) {
 	s/(\.+)\"(\s*[^<])/\"$1$2/g; # don't fix period at end of sentence
     }
 
-    print STDERR $_ if /﻿/;
 
     if ($language eq "de" || $language eq "es" || $language eq "cz" || $language eq "cs" || $language eq "fr") {
 	s/(\d) (\d)/$1,$2/g;

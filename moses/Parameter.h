@@ -27,10 +27,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include "TypeDef.h"
+#include "Util.h"
+#include <boost/program_options.hpp>
 
 namespace Moses
 {
-
 typedef std::vector<std::string>            PARAM_VEC;
 typedef std::map<std::string, PARAM_VEC >   PARAM_MAP;
 typedef std::map<std::string, bool>         PARAM_BOOL;
@@ -42,24 +43,51 @@ typedef std::map<std::string, std::string > PARAM_STRING;
  */
 class Parameter
 {
+  typedef boost::program_options::options_description options_description;
+  typedef boost::program_options::value_semantic value_semantic;
 protected:
   PARAM_MAP m_setting;
   PARAM_BOOL m_valid;
   PARAM_STRING m_abbreviation;
   PARAM_STRING m_description;
   PARAM_STRING m_fullname;
+  // std::map<char,std::set<std::string> > m_confusable;
+  // stores long parameter names that start with a letter that is also a short option.
+  options_description m_options;
 
   std::map<std::string, std::vector<float> >  m_weights;
 
-  std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
-  void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
+  std::string FindParam(const std::string &paramSwitch, int argc, char const* argv[]);
+  void OverwriteParam(const std::string &paramSwitch, const std::string &paramName,
+                      int argc, char const* argv[]);
   bool ReadConfigFile(const std::string &filePath );
   bool FilesExist(const std::string &paramName, int fieldNo, std::vector<std::string> const& fileExtension=std::vector<std::string>(1,""));
   bool isOption(const char* token);
   bool Validate();
 
-  void AddParam(const std::string &paramName, const std::string &description);
-  void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
+  void
+  AddParam(options_description& optgroup,
+           value_semantic const* optvalue,
+           std::string const& paramName,
+           std::string const& description);
+
+  void
+  AddParam(options_description& optgroup,
+           std::string const &paramName,
+           std::string const &description);
+
+  void
+  AddParam(options_description& optgroup,
+           value_semantic const* optvalue,
+           std::string const& paramName,
+           std::string const& abbrevName,
+           std::string const& description);
+
+  void
+  AddParam(options_description& optgroup,
+           std::string const& paramName,
+           std::string const& abbrevName,
+           std::string const& description);
 
   void PrintCredit();
   void PrintFF() const;
@@ -73,6 +101,7 @@ protected:
   void ConvertWeightArgsLM();
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsPhrasePenalty();
   void ConvertWeightArgsWordPenalty();
   void ConvertPhrasePenalty();
   void CreateWeightsMap();
@@ -85,39 +114,23 @@ protected:
 public:
   Parameter();
   ~Parameter();
-  bool LoadParam(int argc, char* argv[]);
+  bool LoadParam(int argc, char const* argv[]);
   bool LoadParam(const std::string &filePath);
   void Explain();
 
   /** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */
-  const PARAM_VEC &GetParam(const std::string &paramName) {
-    return m_setting[paramName];
-  }
+  const PARAM_VEC *GetParam(const std::string &paramName) const;
+
   /** check if parameter is defined (either in moses.ini or as switch) */
-  bool isParamSpecified(const std::string &paramName) {
+  bool isParamSpecified(const std::string &paramName) const {
     return  m_setting.find( paramName ) != m_setting.end();
-  }
-
-  const std::string GetFullName(std::string abbr) {
-    return m_fullname[abbr];
-  }
-
-  const std::string GetAbbreviation(std::string full) {
-    return m_abbreviation[full];
-  }
-  const PARAM_VEC &GetParamShortName(const std::string &paramName) {
-    return GetParam(GetFullName(paramName));
   }
 
   void OverwriteParam(const std::string &paramName, PARAM_VEC values);
 
-  void OverwriteParamShortName(const std::string &paramShortName, PARAM_VEC values) {
-    OverwriteParam(GetFullName(paramShortName),values);
-  }
-
   std::vector<float> GetWeights(const std::string &name);
   std::map<std::string, std::vector<float> > GetAllWeights() const {
-      return m_weights;
+    return m_weights;
   }
   std::set<std::string> GetWeightNames() const;
 
@@ -126,7 +139,34 @@ public:
   }
 
   void Save(const std::string path);
+
+  template<typename T>
+  void SetParameter(T &var, const std::string &name, const T &defaultValue) const {
+    const PARAM_VEC *params = GetParam(name);
+    if (params && params->size()) {
+      var = Scan<T>( params->at(0));
+    } else {
+      var = defaultValue;
+    }
+  }
+
+  void SetParameter(bool& var, std::string const& name);
+
+  bool SetBooleanSwitch(bool& val, std::string const name) {
+    // issues a warning if format is wrong
+    const PARAM_VEC *params = GetParam(name);
+    val = (params && params->size());
+    if (val && params->size() != 1) {
+      TRACE_ERR("ERROR: wrong format for switch -" << name);
+      return false;
+    }
+    return true;
+  }
+
 };
+
+template<>
+void Parameter::SetParameter<bool>(bool &var, const std::string &name, const bool &defaultValue) const;
 
 }
 

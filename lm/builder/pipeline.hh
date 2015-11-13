@@ -14,15 +14,13 @@
 
 namespace lm { namespace builder {
 
+class Output;
+
 struct PipelineConfig {
   std::size_t order;
-  std::string vocab_file;
   util::stream::SortConfig sort;
   InitialProbabilitiesConfig initial_probs;
   util::stream::ChainConfig read_backoffs;
-
-  // Include a header in the ARPA with some statistics?
-  bool verbose_header;
 
   // Estimated vocabulary size.  Used for sizing CorpusCount memory and
   // initial probing hash table sizing, also in CorpusCount.
@@ -37,13 +35,18 @@ struct PipelineConfig {
   // n-gram count thresholds for pruning. 0 values means no pruning for
   // corresponding n-gram order
   std::vector<uint64_t> prune_thresholds; //mjd
+  bool prune_vocab;
+  std::string prune_vocab_file;
+
+  /* Renumber the vocabulary the way the trie likes it? */
+  bool renumber_vocabulary;
 
   // What to do with discount failures.
   DiscountConfig discount;
 
   // Compute collapsed q values instead of probability and backoff
   bool output_q;
-  
+
   /* Computing the perplexity of LMs with different vocabularies is hard.  For
    * example, the lowest perplexity is attained by a unigram model that
    * predicts p(<unk>) = 1 and has no other vocabulary.  Also, linearly
@@ -67,7 +70,7 @@ struct PipelineConfig {
 };
 
 // Takes ownership of text_file and out_arpa.
-void Pipeline(PipelineConfig config, int text_file, int out_arpa);
+void Pipeline(PipelineConfig &config, int text_file, Output &output);
 
 }} // namespaces
 #endif // LM_BUILDER_PIPELINE_H

@@ -4,7 +4,6 @@
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "StatelessFeatureFunction.h"
-#include "FFState.h"
 #include "moses/Factor.h"
 
 namespace Moses
@@ -13,7 +12,9 @@ namespace Moses
 
 class SoftSourceSyntacticConstraintsFeature : public StatelessFeatureFunction
 {
+
 public:
+
   SoftSourceSyntacticConstraintsFeature(const std::string &line);
 
   ~SoftSourceSyntacticConstraintsFeature() {
@@ -29,19 +30,25 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  void Load();
+
   void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {};
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {
+    targetPhrase.SetRuleSource(source);
+  };
 
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {};
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const
+  {}
 
   void EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
@@ -50,17 +57,29 @@ public:
 
   void EvaluateWhenApplied(
     const ChartHypothesis& cur_hypo,
-    ScoreComponentCollection* accumulator) const;
+    ScoreComponentCollection* accumulator) const
+  {};
 
-private:
+
+protected:
+
   std::string m_sourceLabelSetFile;
   std::string m_coreSourceLabelSetFile;
   std::string m_targetSourceLHSJointCountFile;
   std::string m_unknownLeftHandSideFile;
-  size_t m_featureVariant;
+  bool m_useCoreSourceLabels;
+  bool m_useLogprobs;
+  bool m_useSparse;
+  bool m_useSparseLabelPairs;
+  bool m_noMismatches;
+  float m_floor;
 
   boost::unordered_map<std::string,size_t> m_sourceLabels;
   std::vector<std::string> m_sourceLabelsByIndex;
+  std::vector<std::string> m_sourceLabelsByIndex_RHS_1;
+  std::vector<std::string> m_sourceLabelsByIndex_RHS_0;
+  std::vector<std::string> m_sourceLabelsByIndex_LHS_1;
+  std::vector<std::string> m_sourceLabelsByIndex_LHS_0;
   boost::unordered_set<size_t> m_coreSourceLabels;
   boost::unordered_map<const Factor*,size_t> m_sourceLabelIndexesByFactor;
   size_t m_GlueTopLabel;
@@ -72,13 +91,14 @@ private:
   float m_smoothingWeight;
   float m_unseenLHSSmoothingFactorForUnknowns;
 
-  void Load();
   void LoadSourceLabelSet();
   void LoadCoreSourceLabelSet();
   void LoadTargetSourceLeftHandSideJointCountFile();
 
-  std::pair<float,float> GetLabelPairProbabilities(const Factor* target, 
-                                                   const size_t source) const;
+  void LoadLabelSet(std::string &filename, boost::unordered_set<size_t> &labelSet);
+
+  std::pair<float,float> GetLabelPairProbabilities(const Factor* target,
+      const size_t source) const;
 
 };
 

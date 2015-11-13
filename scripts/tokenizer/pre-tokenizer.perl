@@ -1,8 +1,13 @@
-#!/usr/bin/perl -W
+#!/usr/bin/env perl
+
 # script for preprocessing language data prior to tokenization
 # Start by Ulrich Germann, after noticing systematic preprocessing errors
 # in some of the English Europarl data.
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use Getopt::Std;
 

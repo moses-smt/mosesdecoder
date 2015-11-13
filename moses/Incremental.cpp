@@ -1,3 +1,4 @@
+#include <cmath>
 #include <stdexcept>
 
 #include "moses/Incremental.h"
@@ -8,6 +9,7 @@
 #include "moses/StaticData.h"
 #include "moses/Util.h"
 #include "moses/LM/Base.h"
+#include "moses/OutputCollector.h"
 
 #include "lm/model.hh"
 #include "search/applied.hh"
@@ -79,9 +81,9 @@ public:
   Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, search::Score oov_weight)
     : context_(context), vocab_mapping_(vocab_mapping), oov_weight_(oov_weight) {}
 
-  void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
+  void Add(const TargetPhraseCollection &targets, const StackVec &nts, const Range &ignored);
 
-  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
+  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &waste_memory, const Range &range);
 
   float GetBestScore(const ChartCellLabel *chartCell) const;
 
@@ -117,7 +119,7 @@ private:
   const search::Score oov_weight_;
 };
 
-template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &range)
+template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const Range &range)
 {
   std::vector<search::PartialVertex> vertices;
   vertices.reserve(nts.size());
@@ -158,11 +160,11 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   }
 }
 
-template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &range)
+template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection::shared_ptr > &, const Range &range)
 {
   std::vector<lm::WordIndex> words;
   UTIL_THROW_IF2(phrase.GetSize() > 1,
-		  "OOV target phrase should be 0 or 1 word in length");
+                 "OOV target phrase should be 0 or 1 word in length");
   if (phrase.GetSize())
     words.push_back(Convert(phrase.GetWord(0)));
 
@@ -182,9 +184,9 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
 // for pruning
 template <class Model> float Fill<Model>::GetBestScore(const ChartCellLabel *chartCell) const
 {
-    search::PartialVertex vertex = chartCell->GetStack().incr->RootAlternate();
-    UTIL_THROW_IF2(vertex.Empty(), "hypothesis with empty stack");
-    return vertex.Bound();
+  search::PartialVertex vertex = chartCell->GetStack().incr->RootAlternate();
+  UTIL_THROW_IF2(vertex.Empty(), "hypothesis with empty stack");
+  return vertex.Bound();
 }
 
 // TODO: factors (but chart doesn't seem to support factors anyway).
@@ -202,25 +204,39 @@ struct ChartCellBaseFactory {
 
 } // namespace
 
-Manager::Manager(const InputType &source) :
-  source_(source),
-  cells_(source, ChartCellBaseFactory()),
-  parser_(source, cells_),
-  n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
+Manager::Manager(ttasksptr const& ttask)
+  : BaseManager(ttask)
+  , cells_(m_source, ChartCellBaseFactory(), parser_)
+  , parser_(ttask, cells_)
+  , n_best_(search::NBestConfig(StaticData::Instance().options().nbest.nbest_size))
+{ }
 
 Manager::~Manager()
+{ }
+
+
+namespace
 {
+// Natural logarithm of 10.
+//
+// Some implementations of <cmath> define M_LM10, but not all.
+const float log_10 = logf(10);
 }
 
-template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
+template <class Model, class Best>
+search::History
+Manager::
+PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
 {
   const LanguageModel &abstract = LanguageModel::GetFirstLM();
   const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
-  search::Config config(abstract.GetWeight() * M_LN10, data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
+  size_t cpl = data.options().cube.pop_limit;
+  size_t nbs = data.options().nbest.nbest_size;
+  search::Config config(abstract.GetWeight() * log_10, cpl, search::NBestConfig(nbs));
   search::Context<Model> context(config, model);
 
-  size_t size = source_.GetSize();
+  size_t size = m_source.GetSize();
   boost::object_pool<search::Vertex> vertex_pool(std::max<size_t>(size * size / 2, 32));
 
   for (int startPos = size-1; startPos >= 0; --startPos) {
@@ -229,14 +245,14 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
       if (startPos == 0 && startPos + width == size) {
         break;
       }
-      WordsRange range(startPos, startPos + width - 1);
+      Range range(startPos, startPos + width - 1);
       Fill<Model> filler(context, words, oov_weight);
       parser_.Create(range, filler);
       filler.Search(out, cells_.MutableBase(range).MutableTargetLabelSet(), vertex_pool);
     }
   }
 
-  WordsRange range(0, size - 1);
+  Range range(0, size - 1);
   Fill<Model> filler(context, words, oov_weight);
   parser_.Create(range, filler);
   return filler.RootSearch(out);
@@ -244,7 +260,7 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
 
 template <class Model> void Manager::LMCallback(const Model &model, const std::vector<lm::WordIndex> &words)
 {
-  std::size_t nbest = StaticData::Instance().GetNBestSize();
+  std::size_t nbest = StaticData::Instance().options().nbest.nbest_size;
   if (nbest <= 1) {
     search::History ret = PopulateBest(model, words, single_best_);
     if (ret) {
@@ -272,10 +288,253 @@ template void Manager::LMCallback<lm::ngram::QuantTrieModel>(const lm::ngram::Qu
 template void Manager::LMCallback<lm::ngram::ArrayTrieModel>(const lm::ngram::ArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 template void Manager::LMCallback<lm::ngram::QuantArrayTrieModel>(const lm::ngram::QuantArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 
-const std::vector<search::Applied> &Manager::ProcessSentence()
+void Manager::Decode()
 {
   LanguageModel::GetFirstLM().IncrementalCallback(*this);
+}
+
+const std::vector<search::Applied> &Manager::GetNBest() const
+{
   return *completed_nbest_;
+}
+
+void Manager::OutputBest(OutputCollector *collector) const
+{
+  const long translationId = m_source.GetTranslationId();
+  const std::vector<search::Applied> &nbest = GetNBest();
+  if (!nbest.empty()) {
+    OutputBestHypo(collector, nbest[0], translationId);
+  } else {
+    OutputBestNone(collector, translationId);
+  }
+
+}
+
+
+void Manager::OutputNBest(OutputCollector *collector)  const
+{
+  if (collector == NULL) {
+    return;
+  }
+
+  OutputNBestList(collector, *completed_nbest_, m_source.GetTranslationId());
+}
+
+void
+Manager::
+OutputNBestList(OutputCollector *collector,
+                std::vector<search::Applied> const& nbest,
+                long translationId) const
+{
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<Moses::FactorType> &outputFactorOrder
+  = staticData.GetOutputFactorOrder();
+
+  std::ostringstream out;
+  // wtf? copied from the original OutputNBestList
+  if (collector->OutputIsCout()) {
+    FixPrecision(out);
+  }
+  Phrase outputPhrase;
+  ScoreComponentCollection features;
+  for (std::vector<search::Applied>::const_iterator i = nbest.begin();
+       i != nbest.end(); ++i) {
+    Incremental::PhraseAndFeatures(*i, outputPhrase, features);
+    // <s> and </s>
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
+                   "Output phrase should have contained at least 2 words "
+                   << "(beginning and end-of-sentence)");
+
+    outputPhrase.RemoveWord(0);
+    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
+    out << translationId << " ||| ";
+    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    out << " ||| ";
+    bool with_labels = options().nbest.include_feature_labels;
+    features.OutputAllFeatureScores(out, with_labels);
+    out << " ||| " << i->GetScore() << '\n';
+  }
+  out << std::flush;
+  assert(collector);
+  collector->Write(translationId, out.str());
+}
+
+void
+Manager::
+OutputDetailedTranslationReport(OutputCollector *collector) const
+{
+  if (collector && !completed_nbest_->empty()) {
+    const search::Applied &applied = completed_nbest_->at(0);
+    OutputDetailedTranslationReport(collector,
+                                    &applied,
+                                    static_cast<const Sentence&>(m_source),
+                                    m_source.GetTranslationId());
+  }
+
+}
+
+void Manager::OutputDetailedTranslationReport(
+  OutputCollector *collector,
+  const search::Applied *applied,
+  const Sentence &sentence,
+  long translationId) const
+{
+  if (applied == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTranslationOptions(out, applicationContext, applied, sentence, translationId);
+  collector->Write(translationId, out.str());
+}
+
+void Manager::OutputTranslationOptions(std::ostream &out,
+                                       ApplicationContext &applicationContext,
+                                       const search::Applied *applied,
+                                       const Sentence &sentence, long translationId) const
+{
+  if (applied != NULL) {
+    OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
+    out << std::endl;
+  }
+
+  // recursive
+  const search::Applied *child = applied->Children();
+  for (size_t i = 0; i < applied->GetArity(); i++) {
+    OutputTranslationOptions(out, applicationContext, child++, sentence, translationId);
+  }
+}
+
+void Manager::OutputTranslationOption(std::ostream &out,
+                                      ApplicationContext &applicationContext,
+                                      const search::Applied *applied,
+                                      const Sentence &sentence,
+                                      long translationId) const
+{
+  ReconstructApplicationContext(applied, sentence, applicationContext);
+  const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
+  out << "Trans Opt " << translationId
+      << " " << applied->GetRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << phrase.GetTargetLHS()
+      << "->" << phrase
+      << " " << applied->GetScore(); // << hypo->GetScoreBreakdown() TODO: missing in incremental search hypothesis
+}
+
+// Given a hypothesis and sentence, reconstructs the 'application context' --
+// the source RHS symbols of the SCFG rule that was applied, plus their spans.
+void Manager::ReconstructApplicationContext(const search::Applied *applied,
+    const Sentence &sentence,
+    ApplicationContext &context) const
+{
+  context.clear();
+  const Range &span = applied->GetRange();
+  const search::Applied *child = applied->Children();
+  size_t i = span.GetStartPos();
+  size_t j = 0;
+
+  while (i <= span.GetEndPos()) {
+    if (j == applied->GetArity() || i < child->GetRange().GetStartPos()) {
+      // Symbol is a terminal.
+      const Word &symbol = sentence.GetWord(i);
+      context.push_back(std::make_pair(symbol, Range(i, i)));
+      ++i;
+    } else {
+      // Symbol is a non-terminal.
+      const Word &symbol = static_cast<const TargetPhrase*>(child->GetNote().vp)->GetTargetLHS();
+      const Range &range = child->GetRange();
+      context.push_back(std::make_pair(symbol, range));
+      i = range.GetEndPos()+1;
+      ++child;
+      ++j;
+    }
+  }
+}
+
+void Manager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
+{
+  if (collector == NULL || Completed().empty()) {
+    return;
+  }
+
+  const search::Applied *applied = &Completed()[0];
+  const Sentence &sentence = static_cast<const Sentence &>(m_source);
+  const size_t translationId = m_source.GetTranslationId();
+
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, applied, sentence, translationId);
+
+  //Tree of full sentence
+  //TODO: incremental search doesn't support stateful features
+
+  collector->Write(translationId, out.str());
+
+}
+
+void Manager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
+    ApplicationContext &applicationContext,
+    const search::Applied *applied,
+    const Sentence &sentence,
+    long translationId) const
+{
+
+  if (applied != NULL) {
+    OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
+
+    const TargetPhrase &currTarPhr = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
+
+    out << " ||| ";
+    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
+      out << " " << *property->GetValueString();
+    } else {
+      out << " " << "noTreeInfo";
+    }
+    out << std::endl;
+  }
+
+  // recursive
+  const search::Applied *child = applied->Children();
+  for (size_t i = 0; i < applied->GetArity(); i++) {
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, child++, sentence, translationId);
+  }
+}
+
+void Manager::OutputBestHypo(OutputCollector *collector, search::Applied applied, long translationId) const
+{
+  if (collector == NULL) return;
+  std::ostringstream out;
+  FixPrecision(out);
+  if (options().output.ReportHypoScore) {
+    out << applied.GetScore() << ' ';
+  }
+  Phrase outPhrase;
+  Incremental::ToPhrase(applied, outPhrase);
+  // delete 1st & last
+  UTIL_THROW_IF2(outPhrase.GetSize() < 2,
+                 "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+  outPhrase.RemoveWord(0);
+  outPhrase.RemoveWord(outPhrase.GetSize() - 1);
+  out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
+  out << '\n';
+  collector->Write(translationId, out.str());
+
+  VERBOSE(1,"BEST TRANSLATION: " << outPhrase << "[total=" << applied.GetScore() << "]" << std::endl);
+}
+
+void
+Manager::
+OutputBestNone(OutputCollector *collector, long translationId) const
+{
+  if (collector == NULL) return;
+  if (options().output.ReportHypoScore) {
+    collector->Write(translationId, "0 \n");
+  } else {
+    collector->Write(translationId, "\n");
+  }
 }
 
 namespace

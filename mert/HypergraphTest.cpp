@@ -8,12 +8,12 @@
 using namespace std;
 using namespace MosesTuning;
 
-BOOST_AUTO_TEST_CASE(prune) 
+BOOST_AUTO_TEST_CASE(prune)
 {
   Vocab vocab;
   WordVec words;
   string wordStrings[] =
-    {"<s>", "</s>", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"};
+  {"<s>", "</s>", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"};
   for (size_t i = 0; i < 13; ++i) {
     words.push_back(&(vocab.FindOrAdd((wordStrings[i]))));
   }
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(prune)
 
   BOOST_CHECK_EQUAL(5, pruned.EdgeSize());
   BOOST_CHECK_EQUAL(4, pruned.VertexSize());
-  
+
   //edges retained should be best path (<s> ab jk </s>) and hi
   BOOST_CHECK_EQUAL(1, pruned.GetVertex(0).GetIncoming().size());
   BOOST_CHECK_EQUAL(2, pruned.GetVertex(1).GetIncoming().size());
@@ -115,37 +115,37 @@ BOOST_AUTO_TEST_CASE(prune)
   const Edge* edge;
 
   edge =  pruned.GetVertex(0).GetIncoming()[0];
-  BOOST_CHECK_EQUAL(1, edge->Words().size()); 
-  BOOST_CHECK_EQUAL(words[0], edge->Words()[0]); 
+  BOOST_CHECK_EQUAL(1, edge->Words().size());
+  BOOST_CHECK_EQUAL(words[0], edge->Words()[0]);
 
   edge =  pruned.GetVertex(1).GetIncoming()[0];
-  BOOST_CHECK_EQUAL(3, edge->Words().size()); 
-  BOOST_CHECK_EQUAL((Vocab::Entry*)NULL, edge->Words()[0]); 
-  BOOST_CHECK_EQUAL(words[2]->first, edge->Words()[1]->first); 
-  BOOST_CHECK_EQUAL(words[3]->first, edge->Words()[2]->first); 
+  BOOST_CHECK_EQUAL(3, edge->Words().size());
+  BOOST_CHECK_EQUAL((Vocab::Entry*)NULL, edge->Words()[0]);
+  BOOST_CHECK_EQUAL(words[2]->first, edge->Words()[1]->first);
+  BOOST_CHECK_EQUAL(words[3]->first, edge->Words()[2]->first);
 
   edge =  pruned.GetVertex(1).GetIncoming()[1];
   BOOST_CHECK_EQUAL(3, edge->Words().size());
   BOOST_CHECK_EQUAL((Vocab::Entry*)NULL, edge->Words()[0]);
-  BOOST_CHECK_EQUAL(words[9]->first, edge->Words()[1]->first); 
+  BOOST_CHECK_EQUAL(words[9]->first, edge->Words()[1]->first);
   BOOST_CHECK_EQUAL(words[10]->first, edge->Words()[2]->first);
 
   edge =  pruned.GetVertex(2).GetIncoming()[0];
   BOOST_CHECK_EQUAL(3, edge->Words().size());
   BOOST_CHECK_EQUAL((Vocab::Entry*)NULL, edge->Words()[0]);
-  BOOST_CHECK_EQUAL(words[11]->first, edge->Words()[1]->first); 
+  BOOST_CHECK_EQUAL(words[11]->first, edge->Words()[1]->first);
   BOOST_CHECK_EQUAL(words[12]->first, edge->Words()[2]->first);
 
   edge =  pruned.GetVertex(3).GetIncoming()[0];
   BOOST_CHECK_EQUAL(2, edge->Words().size());
   BOOST_CHECK_EQUAL((Vocab::Entry*)NULL, edge->Words()[0]);
-  BOOST_CHECK_EQUAL(words[1]->first, edge->Words()[1]->first); 
+  BOOST_CHECK_EQUAL(words[1]->first, edge->Words()[1]->first);
 
 
 
-  
 
-//  BOOST_CHECK_EQUAL(words[0], pruned.GetVertex(0).GetIncoming()[0].Words()[0]);   
-  
+
+//  BOOST_CHECK_EQUAL(words[0], pruned.GetVertex(0).GetIncoming()[0].Words()[0]);
+
 
 }

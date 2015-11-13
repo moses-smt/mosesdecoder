@@ -1,21 +1,20 @@
-/*
- * Copyright (C) 2009 Felipe Sánchez-Martínez
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
- */
+/***********************************************************************
+Copyright (C) 2009 Felipe Sánchez-Martínez
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+***********************************************************************/
 
 #include <string>
 #include <vector>
@@ -31,29 +30,31 @@ using namespace std;
 using namespace Moses;
 
 //Delete white spaces from the end and the begining of the string
-string trim(string str) {
+string trim(string str)
+{
   string::iterator it;
-  
+
   while ((str.length()>0)&&((*(it=str.begin()))==' ')) {
     str.erase(it);
   }
-           
+
   while ((str.length()>0)&&((*(it=(str.end()-1)))==' ')) {
     str.erase(it);
   }
-                    
+
   for(unsigned i=0; i<str.length(); i++) {
     if ((str[i]==' ') && ((i+1)<str.length()) && (str[i+1]==' ')) {
       str=str.erase(i,1);
       i--;
     }
   }
-                                            
+
   return str;
 }
-                                              
 
-int main (int argc, char *argv[]) {
+
+int main (int argc, char *argv[])
+{
   vector<FactorType> input, output;
   vector<float> weight;
   int numScoreComponent=5;
@@ -64,12 +65,12 @@ int main (int argc, char *argv[]) {
 
   input.push_back(0);
   output.push_back(0);
-  
+
   weight.push_back(0);
   weight.push_back(0);
   weight.push_back(0);
   weight.push_back(0);
-  weight.push_back(0);				
+  weight.push_back(0);
 
   if (argc<3) {
     cerr<<"Error: Wrong number of parameters."<<endl;
@@ -86,19 +87,19 @@ int main (int argc, char *argv[]) {
   }
 
   cerr<<"numScoreComponent: "<<numScoreComponent<<endl;
-  cerr<<"numInputScores: "<<numInputScores<<endl;  
+  cerr<<"numInputScores: "<<numInputScores<<endl;
 
   PhraseDictionaryTreeAdaptor *pd=new PhraseDictionaryTreeAdaptor(numScoreComponent, numInputScores);
-				
+
   cerr<<"Table limit: "<<tableLimit<<endl;
   cerr<<"WeightWordPenalty: "<<weightWP<<endl;
   cerr<<"Source phrase: ___"<<source_str<<"___"<<endl;
-  
+
   if (!pd->Load(input, output, filePath, weight, tableLimit, lmList, weightWP)) {
     delete pd;
     return false;
   }
-				
+
   cerr<<"-------------------------------------------------"<<endl;
   FactorDirection direction;
   Phrase phrase(direction);
@@ -106,15 +107,15 @@ int main (int argc, char *argv[]) {
   phrase.CreateFromString(input, source_str, "|");
   TargetPhraseCollection *tpc = (TargetPhraseCollection*) pd->GetTargetPhraseCollection(phrase);
 
-  if (tpc == NULL) 
+  if (tpc == NULL)
     cerr<<"Not found."<<endl;
-  else {				
+  else {
     TargetPhraseCollection::iterator iterTargetPhrase;
     for (iterTargetPhrase = tpc->begin(); iterTargetPhrase != tpc->end();  ++iterTargetPhrase) {
       //cerr<<(*(*iterTargetPhrase))<<endl;
-    
+
       stringstream strs;
-      strs<<static_cast<const Phrase&>(*(*iterTargetPhrase));   
+      strs<<static_cast<const Phrase&>(*(*iterTargetPhrase));
       cerr<<source_str<<" => ___"<<trim(strs.str())<<"___ ";
       ScoreComponentCollection scc = (*iterTargetPhrase)->GetScoreBreakdown();
       cerr<<"Scores: ";
@@ -123,6 +124,6 @@ int main (int argc, char *argv[]) {
       }
       cerr<<endl;
     }
-  }				                                                                        
-  cerr<<"-------------------------------------------------"<<endl;				
+  }
+  cerr<<"-------------------------------------------------"<<endl;
 }

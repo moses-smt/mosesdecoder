@@ -18,7 +18,7 @@ namespace S2T
 
 class RuleTrieLoader : public RuleTrieCreator
 {
- public:
+public:
   bool Load(const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,

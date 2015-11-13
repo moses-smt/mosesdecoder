@@ -1,4 +1,7 @@
-#! /usr/bin/perl
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 #######################
@@ -15,10 +18,12 @@
 #             added checks for existence of decoder and configuration file
 # 26 Jul 2006 fix a bug related to the use of absolute path for srcfile and nbestfile
 
+use warnings;
 use strict;
+use FindBin qw($RealBin);
 
 #######################
-#Customizable parameters 
+#Customizable parameters
 
 #parameters for submiiting processes through Sun GridEngine
 my $queueparameters="";
@@ -28,8 +33,8 @@ my $queueparameters="";
 # my $queueparameters="-l q1dm -pe pe_mth 2 -hard";
 # etc.
 
-# look for the correct pwdcmd 
-my $pwdcmd = getPwdCmd();
+# look for the correct pwdcmd
+my $pwdcmd = &getPwdCmd();
 
 my $workingdir = `$pwdcmd`; chomp $workingdir;
 my $tmpdir="$workingdir/tmp$$";
@@ -38,7 +43,7 @@ my $splitpfx="split$$";
 $SIG{'INT'} = \&kill_all_and_quit; # catch exception for CTRL-C
 
 #######################
-#Default parameters 
+#Default parameters
 my $jobscript="$workingdir/job$$";
 my $qsubout="$workingdir/out.job$$";
 my $qsuberr="$workingdir/err.job$$";
@@ -53,6 +58,7 @@ my $version=undef;
 my $help=0;
 my $dbg=0;
 my $jobs=4;
+my $cache_model=undef;
 my $mosescmd="$ENV{MOSESBIN}/moses"; #decoder in use
 my $inputlist=undef;
 my $inputfile=undef;
@@ -63,6 +69,9 @@ my $nbestfile=undef;
 my $oldnbestfile=undef;
 my $oldnbest=undef;
 my $nbestflag=0;
+my $oovlist=undef;
+my $oovfile=undef;
+my $oovflag=0;
 my @wordgraphlist=();
 my $wordgraphlist=undef;
 my $wordgraphfile=undef;
@@ -90,6 +99,7 @@ sub init(){
 	     'help'=>\$help,
 	     'debug'=>\$dbg,
 	     'jobs=i'=>\$jobs,
+	     'cache-model=s'=>\$cache_model,
 	     'decoder=s'=> \$mosescmd,
 	     'robust=i' => \$robust,
              'decoder-parameters=s'=> \$mosesparameters,
@@ -101,6 +111,7 @@ sub init(){
              'n-best-size=i'=> \$oldnbest,
 	     'output-search-graph|osg=s'=> \$searchgraphlist,
              'output-word-graph|owg=s'=> \$wordgraphlist,
+             'output-unknowns=s'=> \$oovlist,
              'alignment-output-file=s'=> \$alifile,
              'translation-details|T=s'=> \$detailsfile,
 	     'qsub-prefix=s'=> \$qsubname,
@@ -115,7 +126,9 @@ sub init(){
   getSearchGraphParameters();
 
   getWordGraphParameters();
-  
+
+  getOOVParameters();
+
   getLogParameters();
 
 #print_parameters();
@@ -126,7 +139,7 @@ print STDERR "wordgraphflag:$wordgraphflag\n";
 
   chomp($inputfile=`basename $inputlist`) if defined($inputlist);
 
-  $mosesparameters.="@ARGV -config $cfgfile -inputtype $inputtype";
+  $mosesparameters.="@ARGV -inputtype $inputtype";
 }
 
 
@@ -158,6 +171,7 @@ sub usage(){
   print STDERR "*  -decoder <file> Moses decoder to use\n";
   print STDERR "*  -i|inputfile|input-file <file>   the input text to translate\n";
   print STDERR "*  -jobs <N> number of required jobs\n";
+  print STDERR "   -cache-model <dir> local directory for copying model files\n";
   print STDERR "   -logfile <file> file where storing log files of all jobs\n";
   print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
   print STDERR "   -queue-parameters <string> specific requirements for queue\n";
@@ -195,17 +209,19 @@ sub print_parameters(){
   print STDERR "Configuration file: $cfgfile\n";
   print STDERR "Decoder in use: $mosescmd\n";
   print STDERR "Number of jobs:$jobs\n";
+  print STDERR "Model cache directory: $cache_model\n" if ($cache_model);
   print STDERR "Nbest list: $nbestlist\n" if ($nbestflag);
   print STDERR "Output Search Graph: $searchgraphlist\n" if ($searchgraphflag);
   print STDERR "Output Word Graph: $wordgraphlist\n" if ($wordgraphflag);
+  print STDERR "Output OOV: $oovlist\n" if ($oovflag);
   print STDERR "LogFile:$logfile\n" if ($logflag);
   print STDERR "Qsub name: $qsubname\n";
   print STDERR "Queue parameters: $queueparameters\n";
   print STDERR "Inputtype: text\n" if $inputtype == 0;
   print STDERR "Inputtype: confusion network\n" if $inputtype == 1;
   print STDERR "Inputtype: lattices\n" if $inputtype == 2;
-  
-  print STDERR "parameters directly passed to Moses: $mosesparameters\n";
+
+  print STDERR "parameters directly passed to Moses: $mosesparameters -config $cfgfile\n";
 }
 
 #get parameters for log file
@@ -306,6 +322,19 @@ sub getWordGraphParameters(){
   }
 }
 
+sub getOOVParameters {
+  # only on command line 
+  if ($oovlist) {
+    if ($oovlist eq "-") {
+      $oovfile = "oov";
+    }
+    else {
+      chomp($oovfile = `basename $oovlist`);
+    }
+    $oovflag = 1;
+  }
+}
+
 #######################
 #Script starts here
 
@@ -394,7 +423,7 @@ elsif ($inputtype==1){ #confusion network input
 
   $cmd="split $decimal -a 2 -l $splitN $tmpfile $tmpfile-";
   safesystem("$cmd") or die;
- 
+
   my @idxlist=();
   chomp(@idxlist=`ls $tmpfile-*`);
   grep(s/.+(\-\S+)$/$1/e,@idxlist);
@@ -432,7 +461,7 @@ grep(s/.+(\-\S+)$/$1/e,@idxlist);
 
 safesystem("mkdir -p $tmpdir") or die;
 
-preparing_script();
+&preparing_script();
 
 #launching process through the queue
 my @sgepids =();
@@ -455,7 +484,7 @@ while ($robust && scalar @idx_todo) {
     $batch_and_join = "-b no -j yes";
   }
   $cmd="qsub $queueparameters $batch_and_join -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash > ${jobscript}${idx}.log 2>&1";
-  print STDERR "$cmd\n" if $dbg; 
+  print STDERR "$cmd\n" if $dbg;
 
   safesystem($cmd) or die;
 
@@ -479,19 +508,19 @@ while ($robust && scalar @idx_todo) {
  if ($old_sge) {
   # we need to implement our own waiting script
   my $syncscript = "${jobscript}.sync_workaround_script.sh";
-  safesystem("echo 'date' > $syncscript") or kill_all_and_quit();
+  safesystem("echo 'date' > $syncscript") or &kill_all_and_quit();
 
   my $pwd = `$pwdcmd`; chomp $pwd;
 
   my $checkpointfile = "${jobscript}.sync_workaround_checkpoint";
 
   # delete previous checkpoint, if left from previous runs
-  safesystem("\\rm -f $checkpointfile") or kill_all_and_quit();
+  safesystem("\\rm -f $checkpointfile") or &kill_all_and_quit();
 
   # start the 'hold' job, i.e. the job that will wait
   $cmd="qsub -cwd $queueparameters $hj -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript 2> $qsubname.W.log";
-  safesystem($cmd) or kill_all_and_quit();
-  
+  safesystem($cmd) or &kill_all_and_quit();
+
   # and wait for checkpoint file to appear
   my $nr=0;
   while (!-e $checkpointfile) {
@@ -500,15 +529,15 @@ while ($robust && scalar @idx_todo) {
     print STDERR "w" if $nr % 3 == 0;
   }
   print STDERR "End of waiting.\n";
-  safesystem("\\rm -f $checkpointfile $syncscript") or kill_all_and_quit();
-  
+  safesystem("\\rm -f $checkpointfile $syncscript") or &kill_all_and_quit();
+
   my $failure = 1;
-  my $nr = 0;
+  $nr = 0;
   while ($nr < 60 && $failure) {
     $nr ++;
     $failure=&check_exit_status();
     if (!$failure) {
-      $failure = check_translation_old_sge();
+      $failure = &check_translation_old_sge();
     }
     last if !$failure;
     print STDERR "Extra wait ($nr) for possibly unfinished processes.\n";
@@ -517,55 +546,65 @@ while ($robust && scalar @idx_todo) {
  } else {
   # use the -sync option for qsub
   $cmd="qsub $queueparameters -sync y $hj -j y -o /dev/null -e /dev/null -N $qsubname.W -b y /bin/ls > $qsubname.W.log";
-  safesystem($cmd) or kill_all_and_quit();
+  safesystem($cmd) or &kill_all_and_quit();
 
   $failure=&check_exit_status();
  }
 
- kill_all_and_quit() if $failure && !$robust;
+ &kill_all_and_quit() if $failure && !$robust;
 
  # check if some translations failed
- my @idx_still_todo = check_translation();
+ my @idx_still_todo = &check_translation();
  if ($robust) {
      # if robust, redo crashed jobs
      if ((scalar @idx_still_todo) == (scalar @idxlist)) {
 	 # ... but not if all crashed
 	 print STDERR "everything crashed, not trying to resubmit jobs\n";
          $robust = 0;
-	 kill_all_and_quit();
+	 &kill_all_and_quit();
      }
      @idx_todo = @idx_still_todo;
  }
  else {
      if (scalar (@idx_still_todo)) {
 	 print STDERR "some jobs crashed: ".join(" ",@idx_still_todo)."\n";
-	 kill_all_and_quit();
+	 &kill_all_and_quit();
      }
-     
+
  }
 }
 
 #concatenating translations and removing temporary files
-concatenate_1best();
-concatenate_logs() if $logflag;
-concatenate_ali() if defined $alifile;  
-concatenate_details() if defined $detailsfile;  
-concatenate_nbest() if $nbestflag;  
+&concatenate_1best();
+&concatenate_logs() if $logflag;
+&concatenate_ali() if defined $alifile;
+&concatenate_details() if defined $detailsfile;
+&concatenate_nbest() if $nbestflag;
 safesystem("cat nbest$$ >> /dev/stdout") if $nbestlist[0] eq '-';
 
-concatenate_searchgraph() if $searchgraphflag;  
+&concatenate_searchgraph() if $searchgraphflag;
 safesystem("cat searchgraph$$ >> /dev/stdout") if $searchgraphlist eq '-';
 
-concatenate_wordgraph() if $wordgraphflag;  
+&concatenate_wordgraph() if $wordgraphflag;
 safesystem("cat wordgraph$$ >> /dev/stdout") if $wordgraphlist[0] eq '-';
 
-remove_temporary_files();
+&concatenate_oov() if $oovflag;
+safesystem("cat oov$$ >> /dev/stdout") if $oovlist eq '-';
+
+&remove_temporary_files();
 
 
 #script creation
 sub preparing_script(){
   my $currStartTranslationId = 0;
-  
+
+  my $possibly_modified_cfgfile = $cfgfile;
+  my $cache_model_cmd = "";
+  if ($cache_model) { 
+    $cache_model_cmd = "MOSES_INI=`$RealBin/../ems/support/cache-model.perl $cfgfile $cache_model`\n";
+    $possibly_modified_cfgfile = "\$MOSES_INI";
+  }
+
   foreach my $idx (@idxlist){
     my $scriptheader="";
     $scriptheader.="\#\! /bin/bash\n\n";
@@ -590,6 +629,10 @@ sub preparing_script(){
 
     open (OUT, "> ${jobscript}${idx}.bash");
     print OUT $scriptheader;
+
+    # copy model files into local directory
+    print OUT $cache_model_cmd;
+
     my $inputmethod = $feed_moses_via_stdin ? "<" : "-input-file";
 
     my $tmpnbestlist="";
@@ -619,9 +662,14 @@ sub preparing_script(){
       $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx$idx $wordgraphlist[1]";
     }
 
+    my $tmpoovlist="";
+    if ($oovflag){
+      $tmpoovlist="-output-unknowns $tmpdir/$oovfile.$splitpfx$idx";
+    }
+
 	my $tmpStartTranslationId = ""; # "-start-translation-id $currStartTranslationId";
 
-    print OUT "$mosescmd $mosesparameters $tmpStartTranslationId $tmpalioutfile $tmpdetailsoutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
+    print OUT "$mosescmd $mosesparameters -config $possibly_modified_cfgfile $tmpStartTranslationId $tmpalioutfile $tmpdetailsoutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpoovlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
     print OUT "echo exit status \$\?\n\n";
 
     if (defined $alifile){
@@ -640,9 +688,12 @@ sub preparing_script(){
       print OUT "\\mv -f $tmpdir/${searchgraphfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
-
     if ($wordgraphflag){
       print OUT "\\mv -f $tmpdir/${wordgraphfile}.$splitpfx$idx .\n\n";
+      print OUT "echo exit status \$\?\n\n";
+    }
+    if ($oovflag){
+      print OUT "\\mv -f $tmpdir/${oovfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
 
@@ -652,7 +703,7 @@ sub preparing_script(){
 
     #setting permissions of each script
     chmod(oct(755),"${jobscript}${idx}.bash");
-    
+
     $currStartTranslationId += $splitN;
   }
 }
@@ -682,8 +733,8 @@ sub concatenate_wordgraph(){
       my $code="";
       if (/^UTTERANCE=/){
         ($code)=($_=~/^UTTERANCE=(\d+)/);
-     
-	print STDERR "code:$code offset:$offset\n"; 
+
+	print STDERR "code:$code offset:$offset\n";
         $code += $offset;
         if ($code ne $oldcode){
 
@@ -694,11 +745,11 @@ sub concatenate_wordgraph(){
           while ($code - $oldcode > 1){
              $oldcode++;
              print OUT "UTTERANCE=$oldcode\n";
-	print STDERR " to OUT -> code:$oldcode\n"; 
+	print STDERR " to OUT -> code:$oldcode\n";
              print OUT "_EMPTYWORDGRAPH_\n";
           }
         }
-      
+
         $oldcode=$code;
         print OUT "UTTERANCE=$oldcode\n";
         next;
@@ -771,14 +822,14 @@ sub concatenate_nbest(){
   my $newcode=-1;
   my %inplength = ();
   my $offset = 0;
- 
+
 # get the list of feature and set a fictitious string with zero scores
   open (IN, "${nbestfile}.${splitpfx}$idxlist[0]");
   my $str = <IN>;
   chomp($str);
   close(IN);
   my ($code,$trans,$featurescores,$globalscore)=split(/\|\|\|/,$str);
-  
+
   my $emptytrans = "  ";
   my $emptyglobalscore = " 0.0";
   my $emptyfeaturescores = $featurescores;
@@ -834,6 +885,20 @@ sub concatenate_1best(){
     print STDOUT "@in";
     close(IN);
   }
+}
+
+sub concatenate_oov(){
+  my $outoov=$oovlist;
+  if ($oovlist eq '-'){ $outoov="oov$$"; }
+  open (OUT, "> $outoov");
+  foreach my $idx (@idxlist){
+    my @in=();
+    open (IN, "${oovfile}.${splitpfx}${idx}");
+    @in=<IN>;
+    print OUT "@in";
+    close(IN);
+  }
+  close(OUT);
 }
 
 sub concatenate_logs(){
@@ -922,7 +987,7 @@ sub check_translation(){
       die "INPUTTYPE:$inputtype is unknown!\n";
     }
     chomp($outputN=`wc -l ${inputfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
-    
+
     if ($inputN != $outputN){
       print STDERR "Split ($idx) were not entirely translated\n";
       print STDERR "outputN=$outputN inputN=$inputN\n";
@@ -959,9 +1024,9 @@ sub check_translation_old_sge(){
       print STDERR "outputfile=${inputfile}.$splitpfx$idx.trans inputfile=${inputfile}.$splitpfx$idx\n";
       return 1;
     }
-		
+
   }
-  return 0; 
+  return 0;
 }
 
 sub remove_temporary_files(){
@@ -974,6 +1039,7 @@ sub remove_temporary_files(){
     if ($nbestflag){ unlink("${nbestfile}.${splitpfx}${idx}"); }
     if ($searchgraphflag){ unlink("${searchgraphfile}.${splitpfx}${idx}"); }
     if ($wordgraphflag){ unlink("${wordgraphfile}.${splitpfx}${idx}"); }
+    if ($oovfile){ unlink("${oovfile}.${splitpfx}${idx}"); }
     unlink("${jobscript}${idx}.bash");
     unlink("${jobscript}${idx}.log");
     unlink("$qsubname.W.log");
@@ -984,6 +1050,7 @@ sub remove_temporary_files(){
   if ($nbestflag && $nbestlist[0] eq '-'){ unlink("${nbestfile}$$"); };
   if ($searchgraphflag  && $searchgraphlist eq '-'){ unlink("${searchgraphfile}$$"); };
   if ($wordgraphflag  && $wordgraphlist eq '-'){ unlink("${wordgraphfile}$$"); };
+  if ($oovflag && $oovlist eq '-'){ unlink("oov$$"); };
 }
 
 sub safesystem {

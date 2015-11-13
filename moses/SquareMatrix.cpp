@@ -30,18 +30,26 @@ using namespace std;
 
 namespace Moses
 {
+void SquareMatrix::InitTriangle(float val)
+{
+  for(size_t row=0; row < m_size; row++) {
+    for(size_t col=row; col<m_size; col++) {
+      SetScore(row, col, -numeric_limits<float>::infinity());
+    }
+  }
+}
 
 /**
- * Calculare future score estimate for a given coverage bitmap
+ * Calculate future score estimate for a given coverage bitmap
  *
  * /param bitmap coverage bitmap
  */
 
-float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap ) const
+float SquareMatrix::CalcEstimatedScore( Bitmap const &bitmap ) const
 {
   const size_t notInGap= numeric_limits<size_t>::max();
   size_t startGap = notInGap;
-  float futureScore = 0.0f;
+  float estimatedScore = 0.0f;
   for(size_t currPos = 0 ; currPos < bitmap.GetSize() ; currPos++) {
     // start of a new gap?
     if(bitmap.GetValue(currPos) == false && startGap == notInGap) {
@@ -49,16 +57,16 @@ float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap ) const
     }
     // end of a gap?
     else if(bitmap.GetValue(currPos) == true && startGap != notInGap) {
-      futureScore += GetScore(startGap, currPos - 1);
+      estimatedScore += GetScore(startGap, currPos - 1);
       startGap = notInGap;
     }
   }
   // coverage ending with gap?
   if (startGap != notInGap) {
-    futureScore += GetScore(startGap, bitmap.GetSize() - 1);
+    estimatedScore += GetScore(startGap, bitmap.GetSize() - 1);
   }
 
-  return futureScore;
+  return estimatedScore;
 }
 
 /**
@@ -76,12 +84,12 @@ float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap ) const
  * /param endPos end of the span that is added to the coverage
  */
 
-float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap, size_t startPos, size_t endPos ) const
+float SquareMatrix::CalcEstimatedScore( Bitmap const &bitmap, size_t startPos, size_t endPos ) const
 {
   const size_t notInGap= numeric_limits<size_t>::max();
-  float futureScore = 0.0f;
+  float estimatedScore = 0.0f;
   size_t startGap = bitmap.GetFirstGapPos();
-  if (startGap == NOT_FOUND) return futureScore; // everything filled
+  if (startGap == NOT_FOUND) return estimatedScore; // everything filled
 
   // start loop at first gap
   size_t startLoop = startGap+1;
@@ -100,16 +108,16 @@ float SquareMatrix::CalcFutureScore( WordsBitmap const &bitmap, size_t startPos,
     }
     // end of a gap?
     else if(startGap != notInGap && (bitmap.GetValue(currPos) == true || (startPos <= currPos && currPos <= endPos))) {
-      futureScore += GetScore(startGap, currPos - 1);
+      estimatedScore += GetScore(startGap, currPos - 1);
       startGap = notInGap;
     }
   }
   // coverage ending with gap?
   if (lastCovered != bitmap.GetSize() - 1) {
-    futureScore += GetScore(lastCovered+1, bitmap.GetSize() - 1);
+    estimatedScore += GetScore(lastCovered+1, bitmap.GetSize() - 1);
   }
 
-  return futureScore;
+  return estimatedScore;
 }
 
 TO_STRING_BODY(SquareMatrix);

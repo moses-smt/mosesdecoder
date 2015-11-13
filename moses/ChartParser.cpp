@@ -28,6 +28,7 @@
 #include "DecodeGraph.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 using namespace Moses;
@@ -35,22 +36,25 @@ using namespace Moses;
 namespace Moses
 {
 
-ChartParserUnknown::ChartParserUnknown() {}
+ChartParserUnknown
+::ChartParserUnknown(ttasksptr const& ttask)
+  : m_ttask(ttask)
+{ }
 
 ChartParserUnknown::~ChartParserUnknown()
 {
   RemoveAllInColl(m_unksrcs);
-  RemoveAllInColl(m_cacheTargetPhraseCollection);
+  // RemoveAllInColl(m_cacheTargetPhraseCollection);
 }
 
-void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to)
+void ChartParserUnknown::Process(const Word &sourceWord, const Range &range, ChartParserCallback &to)
 {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer = UnknownWordPenaltyProducer::Instance();
 
   size_t isDigit = 0;
-  if (staticData.GetDropUnknown()) {
+  if (staticData.options().unk.drop) {
     const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
     const StringPiece s = f->GetString();
     isDigit = s.find_first_of("0123456789");
@@ -75,7 +79,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   }
 
   //TranslationOption *transOpt;
-  if (! staticData.GetDropUnknown() || isDigit) {
+  if (! staticData.options().unk.drop || isDigit) {
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
     UnknownLHSList::const_iterator iterLHS;
@@ -99,11 +103,17 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       float unknownScore = FloorScore(TransformScore(prob));
 
       targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->EvaluateInIsolation(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
-      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.PrintNBestTrees() || staticData.GetTreeStructure() != NULL) {
-        targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
+      targetPhrase->EvaluateInIsolation(*unksrc);
+
+      AllOptions const& opts = staticData.options();
+      if (!opts.output.detailed_tree_transrep_filepath.empty() ||
+          opts.nbest.print_trees || staticData.GetTreeStructure() != NULL) {
+        std::string prop = "[ ";
+        prop += (*targetLHS)[0]->GetString().as_string() + " ";
+        prop += sourceWord[0]->GetString().as_string() + " ]";
+        targetPhrase->SetProperty("Tree", prop);
       }
 
       // chart rule
@@ -136,13 +146,16 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   }
 }
 
-ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells) :
-  m_decodeGraphList(StaticData::Instance().GetDecodeGraphs()),
-  m_source(source)
+ChartParser
+::ChartParser(ttasksptr const& ttask, ChartCellCollectionBase &cells)
+  : m_ttask(ttask)
+  , m_unknown(ttask)
+  , m_decodeGraphList(StaticData::Instance().GetDecodeGraphs())
+  , m_source(*(ttask->GetSource().get()))
 {
   const StaticData &staticData = StaticData::Instance();
 
-  staticData.InitializeForInput(source);
+  staticData.InitializeForInput(ttask);
   CreateInputPaths(m_source);
 
   const std::vector<PhraseDictionary*> &dictionaries = PhraseDictionary::GetColl();
@@ -161,7 +174,7 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
 ChartParser::~ChartParser()
 {
   RemoveAllInColl(m_ruleLookupManagers);
-  StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
+  StaticData::Instance().CleanUpAfterSentenceProcessing(m_ttask.lock());
 
   InputPathMatrix::const_iterator iterOuter;
   for (iterOuter = m_inputPathMatrix.begin(); iterOuter != m_inputPathMatrix.end(); ++iterOuter) {
@@ -175,7 +188,7 @@ ChartParser::~ChartParser()
   }
 }
 
-void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
+void ChartParser::Create(const Range &range, ChartParserCallback &to)
 {
   assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
 
@@ -188,19 +201,20 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
     size_t maxSpan = decodeGraph.GetMaxChartSpan();
     size_t last = m_source.GetSize()-1;
     if (maxSpan != 0) {
-        last = min(last, wordsRange.GetStartPos()+maxSpan);
+      last = min(last, range.GetStartPos()+maxSpan);
     }
-    if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, last, to);
+    if (maxSpan == 0 || range.GetNumWordsCovered() <= maxSpan) {
+      const InputPath &inputPath = GetInputPath(range);
+      ruleLookupManager.GetChartRuleCollection(inputPath, last, to);
     }
   }
 
-  if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
+  if (range.GetNumWordsCovered() == 1 && range.GetStartPos() != 0 && range.GetStartPos() != m_source.GetSize()-1) {
     bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
     if (to.Empty() || alwaysCreateDirectTranslationOption) {
       // create unknown words for 1 word coverage where we don't have any trans options
-      const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
-      m_unknown.Process(sourceWord, wordsRange, to);
+      const Word &sourceWord = m_source.GetWord(range.GetStartPos());
+      m_unknown.Process(sourceWord, range, to);
     }
   }
 }
@@ -211,23 +225,23 @@ void ChartParser::CreateInputPaths(const InputType &input)
   m_inputPathMatrix.resize(size);
 
   UTIL_THROW_IF2(input.GetType() != SentenceInput && input.GetType() != TreeInputType,
-		  "Input must be a sentence or a tree, not lattice or confusion networks");
+                 "Input must be a sentence or a tree, not lattice or confusion networks");
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
       vector<InputPath*> &vec = m_inputPathMatrix[startPos];
 
-      WordsRange range(startPos, endPos);
-      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+      Range range(startPos, endPos);
+      Phrase subphrase(input.GetSubString(Range(startPos, endPos)));
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       InputPath *node;
       if (range.GetNumWordsCovered() == 1) {
-        node = new InputPath(subphrase, labels, range, NULL, NULL);
+        node = new InputPath(m_ttask, subphrase, labels, range, NULL, NULL);
         vec.push_back(node);
       } else {
         const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-        node = new InputPath(subphrase, labels, range, &prevNode, NULL);
+        node = new InputPath(m_ttask, subphrase, labels, range, &prevNode, NULL);
         vec.push_back(node);
       }
 
@@ -236,7 +250,7 @@ void ChartParser::CreateInputPaths(const InputType &input)
   }
 }
 
-const InputPath &ChartParser::GetInputPath(WordsRange &range) const
+const InputPath &ChartParser::GetInputPath(const Range &range) const
 {
   return GetInputPath(range.GetStartPos(), range.GetEndPos());
 }
@@ -245,7 +259,7 @@ const InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos) const
 {
   size_t offset = endPos - startPos;
   UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
-		  "Out of bound: " << offset);
+                 "Out of bound: " << offset);
   return *m_inputPathMatrix[startPos][offset];
 }
 
@@ -253,7 +267,7 @@ InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
   UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
-		  "Out of bound: " << offset);
+                 "Out of bound: " << offset);
   return *m_inputPathMatrix[startPos][offset];
 }
 /*

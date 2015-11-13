@@ -23,7 +23,7 @@ namespace MosesTuning
  */
 class StatisticsBasedScorer : public Scorer
 {
-friend class HopeFearDecoder;
+  friend class HopeFearDecoder;
 
 public:
   StatisticsBasedScorer(const std::string& name, const std::string& config);

@@ -1,6 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id: train-recaser.perl 1326 2007-03-26 05:44:27Z bojar $
+
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 
@@ -8,11 +13,14 @@ binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
 # apply switches
-my ($MODEL, $UNBUFFERED);
-die("truecase.perl --model MODEL [-b] < in > out")
-    unless &GetOptions('model=s' => \$MODEL,'b|unbuffered' => \$UNBUFFERED)
+# ASR input has no case, make sure it is lowercase, and make sure known are cased eg. 'i' to be uppercased even if i is known
+my ($MODEL, $UNBUFFERED, $ASR);
+die("truecase.perl --model MODEL [-b] [-a] < in > out")
+    unless &GetOptions('model=s' => \$MODEL,'b|unbuffered' => \$UNBUFFERED, 'a|asr' => \$ASR)
     && defined($MODEL);
 if (defined($UNBUFFERED) && $UNBUFFERED) { $|=1; }
+my $asr = 0;
+if (defined($ASR) && $ASR) { $asr = 1; }
 
 my (%BEST,%KNOWN);
 open(MODEL,$MODEL) || die("ERROR: could not open '$MODEL'");
@@ -20,9 +28,11 @@ binmode(MODEL, ":utf8");
 while(<MODEL>) {
   my ($word,@OPTIONS) = split;
   $BEST{ lc($word) } = $word;
-  $KNOWN{ $word } = 1;
-  for(my $i=1;$i<$#OPTIONS;$i+=2) {
-    $KNOWN{ $OPTIONS[$i] } = 1;
+  if ($asr == 0) {
+    $KNOWN{ $word } = 1;
+    for(my $i=1;$i<$#OPTIONS;$i+=2) {
+      $KNOWN{ $OPTIONS[$i] } = 1;
+    }
   }
 }
 close(MODEL);
@@ -48,6 +58,9 @@ while(<STDIN>) {
     {
 	$word = $$WORD[$i];
 	$otherfactors = "";
+    }
+    if ($asr){
+      $word = lc($word); #make sure ASR output is not uc
     }
 
     if ($sentence_start && defined($BEST{lc($word)})) {
@@ -80,8 +93,20 @@ sub split_xml {
   while($line =~ /\S/) {
     # XML tag
     if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
-      $MARKUP[$i] .= $1." ";
-      $line = $2;
+      my $potential_xml = $1;
+      my $line_next = $2;
+      # exception for factor that is an XML tag
+      if ($line =~ /^\S/ && scalar(@WORD)>0 && $WORD[$i-1] =~ /\|$/) {
+	$WORD[$i-1] .= $potential_xml;
+	if ($line_next =~ /^(\|+)(.*)$/) {
+	  $WORD[$i-1] .= $1;
+	  $line_next = $2;
+	}
+      }
+      else {
+        $MARKUP[$i] .= $potential_xml." ";
+      }
+      $line = $line_next;
     }
     # non-XML text
     elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {

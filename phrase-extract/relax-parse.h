@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "SyntaxTree.h"
+#include "SyntaxNodeCollection.h"
 #include "XmlTree.h"
 
 #define LINE_MAX_LENGTH 1000000
@@ -37,10 +37,14 @@ bool leftBinarizeFlag = false;
 bool rightBinarizeFlag = false;
 char SAMTLevel = 0;
 
+typedef std::vector< int > SplitPoints;
+typedef std::vector< SplitPoints > ParentNodes;
+
 // functions
 void init(int argc, char* argv[]);
-void store( MosesTraining::SyntaxTree &tree, std::vector<std::string> &words );
-void LeftBinarize( MosesTraining::SyntaxTree &tree, MosesTraining::ParentNodes &parents );
-void RightBinarize( MosesTraining::SyntaxTree &tree, MosesTraining::ParentNodes &parents );
-void SAMT( MosesTraining::SyntaxTree &tree, MosesTraining::ParentNodes &parents );
+ParentNodes determineSplitPoints(const MosesTraining::SyntaxNodeCollection &);
+void store( MosesTraining::SyntaxNodeCollection &tree, const std::vector<std::string> &words );
+void LeftBinarize( MosesTraining::SyntaxNodeCollection &tree, ParentNodes &parents );
+void RightBinarize( MosesTraining::SyntaxNodeCollection &tree, ParentNodes &parents );
+void SAMT( MosesTraining::SyntaxNodeCollection &tree, ParentNodes &parents );
 

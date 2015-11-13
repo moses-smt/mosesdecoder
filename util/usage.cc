@@ -7,13 +7,12 @@
 #include <sstream>
 #include <set>
 #include <string>
-
-#include <string.h>
-#include <ctype.h>
-#include <time.h>
+#include <cstring>
+#include <cctype>
+#include <ctime>
 #if defined(_WIN32) || defined(_WIN64)
 // This code lifted from physmem.c in gnulib.  See the copyright statement
-// below.  
+// below.
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
 /*  MEMORYSTATUSEX is missing from older windows headers, so define
@@ -66,6 +65,18 @@ Wall GetWall() {
   clock_gettime(CLOCK_MONOTONIC, &ret);
   return ret;
 }
+#endif
+
+// gcc possible-unused function flags
+#ifdef __GNUC__
+double Subtract(time_t first, time_t second) __attribute__ ((unused));
+double DoubleSec(time_t tv) __attribute__ ((unused));
+#if !defined(_WIN32) && !defined(_WIN64)
+double Subtract(const struct timeval &first, const struct timeval &second) __attribute__ ((unused));
+double Subtract(const struct timespec &first, const struct timespec &second) __attribute__ ((unused));
+double DoubleSec(const struct timeval &tv) __attribute__ ((unused));
+double DoubleSec(const struct timespec &tv) __attribute__ ((unused));
+#endif
 #endif
 
 // Some of these functions are only used on some platforms.
@@ -122,6 +133,28 @@ const char *SkipSpaces(const char *at) {
 
 double WallTime() {
   return Subtract(GetWall(), kRecordStart.Started());
+}
+
+double CPUTime() {
+#if defined(_WIN32) || defined(_WIN64)
+  return 0.0;
+#else
+  struct rusage usage;
+  if (getrusage(RUSAGE_SELF, &usage))
+    return 0.0;
+  return DoubleSec(usage.ru_utime) + DoubleSec(usage.ru_stime);
+#endif
+}
+
+uint64_t RSSMax() {
+#if defined(_WIN32) || defined(_WIN64)
+  return 0;
+#else
+  struct rusage usage;
+  if (getrusage(RUSAGE_SELF, &usage))
+    return 0;
+  return static_cast<uint64_t>(usage.ru_maxrss) * 1024;
+#endif
 }
 
 void PrintUsage(std::ostream &out) {
@@ -245,14 +278,15 @@ template <class Num> uint64_t ParseNum(const std::string &arg) {
   std::string throwaway;
   UTIL_THROW_IF_ARG(stream >> throwaway, SizeParseError, (arg), "because there was more cruft " << throwaway << " after the number.");
 
-  // Silly sort, using kilobytes as your default unit.  
+  // Silly sort, using kilobytes as your default unit.
   if (after.empty()) after = "K";
   if (after == "%") {
     uint64_t mem = GuessPhysicalMemory();
     UTIL_THROW_IF_ARG(!mem, SizeParseError, (arg), "because % was specified but the physical memory size could not be determined.");
     return static_cast<uint64_t>(static_cast<double>(value) * static_cast<double>(mem) / 100.0);
   }
-  
+
+  if (after == "k") after = "K";
   std::string units("bKMGTPEZY");
   std::string::size_type index = units.find(after[0]);
   UTIL_THROW_IF_ARG(index == std::string::npos, SizeParseError, (arg), "the allowed suffixes are " << units << "%.");

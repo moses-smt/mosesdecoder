@@ -1,0 +1,1 @@
+exe score-stsg : [ glob *.cpp ] ..//syntax-common ..//deps ../..//boost_iostreams ../..//boost_program_options ../..//z : <include>.. ;

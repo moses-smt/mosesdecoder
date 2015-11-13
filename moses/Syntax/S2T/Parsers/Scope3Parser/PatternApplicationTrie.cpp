@@ -9,7 +9,8 @@ namespace Syntax
 namespace S2T
 {
 
-int PatternApplicationTrie::Depth() const {
+int PatternApplicationTrie::Depth() const
+{
   if (m_parent) {
     return m_parent->Depth() + 1;
   }
@@ -77,8 +78,8 @@ PatternApplicationTrie::GetLowestTerminalNode() const
 // may be unknown).  This function determines the range of possible start
 // values for the partially-applied pattern.
 void PatternApplicationTrie::DetermineStartRange(int sentenceLength,
-                                                 int &minStart,
-                                                 int &maxStart) const
+    int &minStart,
+    int &maxStart) const
 {
   // Find the leftmost terminal symbol, if any.
   const PatternApplicationTrie *n = GetHighestTerminalNode();
@@ -108,8 +109,8 @@ void PatternApplicationTrie::DetermineStartRange(int sentenceLength,
 // may be unknown).  This function determines the range of possible end values
 // for the partially-applied pattern.
 void PatternApplicationTrie::DetermineEndRange(int sentenceLength,
-                                               int &minEnd,
-                                               int &maxEnd) const
+    int &minEnd,
+    int &maxEnd) const
 {
   // Find the rightmost terminal symbol, if any.
   const PatternApplicationTrie *n = GetLowestTerminalNode();
@@ -154,7 +155,7 @@ void PatternApplicationTrie::Extend(const RuleTrieScope3::Node &node,
           (followsGap && start > (std::size_t)minPos) ||
           minPos == -1) {
         PatternApplicationTrie *subTrie =
-            new PatternApplicationTrie(start, end, child, v, this);
+          new PatternApplicationTrie(start, end, child, v, this);
         subTrie->Extend(child, end+1, sentMap, false);
         m_children.push_back(subTrie);
       }
@@ -174,7 +175,8 @@ void PatternApplicationTrie::Extend(const RuleTrieScope3::Node &node,
 }
 
 void PatternApplicationTrie::ReadOffPatternApplicationKey(
-    PatternApplicationKey &key) const {
+  PatternApplicationKey &key) const
+{
   const int depth = Depth();
   key.resize(depth);
   const PatternApplicationTrie *p = this;

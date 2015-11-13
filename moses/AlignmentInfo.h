@@ -26,7 +26,7 @@
 #include <cstdlib>
 
 #include <boost/functional/hash.hpp>
-
+#include "TypeDef.h"
 namespace Moses
 {
 
@@ -41,6 +41,7 @@ class AlignmentInfo
   friend struct AlignmentInfoOrderer;
   friend struct AlignmentInfoHasher;
   friend class AlignmentInfoCollection;
+  friend class VW;
 
 public:
   typedef std::set<std::pair<size_t,size_t> > CollType;
@@ -82,7 +83,8 @@ public:
     return m_collection.size();
   }
 
-  std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
+  std::vector< const std::pair<size_t,size_t>* >
+  GetSortedAlignments(WordAlignmentSort SortOrder) const;
 
   std::vector<size_t> GetSourceIndex2PosMap() const;
 
@@ -95,6 +97,10 @@ private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection
   explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs);
   explicit AlignmentInfo(const std::vector<unsigned char> &aln);
+
+  // used only by VW to load word alignment between sentences
+  explicit AlignmentInfo(const std::string &str);
+
   void BuildNonTermIndexMaps();
 
   CollType m_collection;

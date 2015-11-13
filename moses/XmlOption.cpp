@@ -1,6 +1,5 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
-
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2006 University of Edinburgh
@@ -24,11 +23,12 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
 #include <boost/unordered_map.hpp>
 #include "Util.h"
 #include "StaticData.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "TargetPhrase.h"
 #include "ReorderingConstraint.h"
 #include "FactorCollection.h"
@@ -40,6 +40,7 @@
 namespace Moses
 {
 using namespace std;
+using namespace boost::algorithm;
 
 string ParseXmlTagAttribute(const string& tag,const string& attributeName)
 {
@@ -73,7 +74,7 @@ string TrimXml(const string& str, const std::string& lbrackStr, const std::strin
   if (str.size() < lbrackStr.length()+rbrackStr.length() ) return str;
 
   // strip first and last character
-  if (str.substr(0,lbrackStr.length()) == lbrackStr  &&  str.substr(str.size()-rbrackStr.length()) == rbrackStr) {
+  if (starts_with(str, lbrackStr) && ends_with(str, rbrackStr)) {
     return str.substr(lbrackStr.length(), str.size()-lbrackStr.length()-rbrackStr.length());
   }
   // not an xml token -> do nothing
@@ -157,10 +158,13 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
  * \param lbrackStr xml tag's left bracket string, typically "<"
  * \param rbrackStr xml tag's right bracket string, typically ">"
  */
-bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls,
-                            std::vector< std::pair<size_t, std::string> > &placeholders,
-                            int offset,
-                            const std::string& lbrackStr, const std::string& rbrackStr)
+bool
+ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption*> &res,
+                       ReorderingConstraint &reorderingConstraint,
+                       vector< size_t > &walls,
+                       std::vector< std::pair<size_t, std::string> > &placeholders,
+                       int offset, const std::string& lbrackStr,
+                       const std::string& rbrackStr)
 {
   //parse XML markup in translation line
 
@@ -321,32 +325,32 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
         // update: add new aligned sentence pair to Mmsapt identified by name
         else if (tagName == "update") {
 #if PT_UG
-            // get model name and aligned sentence pair
-            string pdName = ParseXmlTagAttribute(tagContent,"name");
-            string source = ParseXmlTagAttribute(tagContent,"source");
-            string target = ParseXmlTagAttribute(tagContent,"target");
-            string alignment = ParseXmlTagAttribute(tagContent,"alignment");
-            // find PhraseDictionary by name
-            const vector<PhraseDictionary*> &pds = PhraseDictionary::GetColl();
-            PhraseDictionary* pd = NULL;
-            for (vector<PhraseDictionary*>::const_iterator i = pds.begin(); i != pds.end(); ++i) {
-                PhraseDictionary* curPd = *i;
-                if (curPd->GetScoreProducerDescription() == pdName) {
-                    pd = curPd;
-                    break;
-                }
+          // get model name and aligned sentence pair
+          string pdName = ParseXmlTagAttribute(tagContent,"name");
+          string source = ParseXmlTagAttribute(tagContent,"source");
+          string target = ParseXmlTagAttribute(tagContent,"target");
+          string alignment = ParseXmlTagAttribute(tagContent,"alignment");
+          // find PhraseDictionary by name
+          const vector<PhraseDictionary*> &pds = PhraseDictionary::GetColl();
+          PhraseDictionary* pd = NULL;
+          for (vector<PhraseDictionary*>::const_iterator i = pds.begin(); i != pds.end(); ++i) {
+            PhraseDictionary* curPd = *i;
+            if (curPd->GetScoreProducerDescription() == pdName) {
+              pd = curPd;
+              break;
             }
-            if (pd == NULL) {
-                TRACE_ERR("ERROR: No PhraseDictionary with name " << pdName << ", no update" << endl);
-                return false;
-            }
-            // update model
-            VERBOSE(3,"Updating " << pdName << " ||| " << source << " ||| " << target << " ||| " << alignment << endl);
-            Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(pd);
-            pdsa->add(source, target, alignment);
-#else
-            TRACE_ERR("ERROR: recompile with --with-mm to update PhraseDictionary at runtime" << endl);
+          }
+          if (pd == NULL) {
+            TRACE_ERR("ERROR: No PhraseDictionary with name " << pdName << ", no update" << endl);
             return false;
+          }
+          // update model
+          VERBOSE(3,"Updating " << pdName << " ||| " << source << " ||| " << target << " ||| " << alignment << endl);
+          Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(pd);
+          pdsa->add(source, target, alignment);
+#else
+          TRACE_ERR("ERROR: recompile with --with-mm to update PhraseDictionary at runtime" << endl);
+          return false;
 #endif
         }
 
@@ -356,44 +360,44 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
         // for PhraseDictionaryBitextSampling (Mmsapt) models:
         // <update name="TranslationModelName" source=" " target=" " alignment=" " />
         else if (tagName == "weight-overwrite") {
-            
-            // is a name->ff map stored anywhere so we don't have to build it every time?
-            const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-            boost::unordered_map<string, FeatureFunction*> map;
-            BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
-                map[ff->GetScoreProducerDescription()] = ff;
-            }
 
-            // update each weight listed
-            ScoreComponentCollection allWeights = StaticData::Instance().GetAllWeights();
-            boost::unordered_map<string, FeatureFunction*>::iterator ffi;
-            string ffName("");
-            vector<float> ffWeights;
-            vector<string> toks = Tokenize(ParseXmlTagAttribute(tagContent,"weights"));
-            BOOST_FOREACH(string const& tok, toks) {
-                if (tok.substr(tok.size() - 1, 1) == "=") {
-                    // start new feature
-                    if (ffName != "") {
-                        // set previous feature weights
-                        if (ffi != map.end()) {
-                            allWeights.Assign(ffi->second, ffWeights);
-                        }
-                        ffWeights.clear();
-                    }
-                    ffName = tok.substr(0, tok.size() - 1);
-                    ffi = map.find(ffName);
-                    if (ffi == map.end()) {
-                        TRACE_ERR("ERROR: No FeatureFunction with name " << ffName << ", no weight update" << endl);
-                    }
-                } else {
-                    // weight for current feature
-                    ffWeights.push_back(Scan<float>(tok));
+          // is a name->ff map stored anywhere so we don't have to build it every time?
+          const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+          boost::unordered_map<string, FeatureFunction*> map;
+          BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
+            map[ff->GetScoreProducerDescription()] = ff;
+          }
+
+          // update each weight listed
+          ScoreComponentCollection allWeights = StaticData::Instance().GetAllWeights();
+          boost::unordered_map<string, FeatureFunction*>::iterator ffi;
+          string ffName("");
+          vector<float> ffWeights;
+          vector<string> toks = Tokenize(ParseXmlTagAttribute(tagContent,"weights"));
+          BOOST_FOREACH(string const& tok, toks) {
+            if (ends_with(tok, "=")) {
+              // start new feature
+              if (ffName != "") {
+                // set previous feature weights
+                if (ffi != map.end()) {
+                  allWeights.Assign(ffi->second, ffWeights);
                 }
+                ffWeights.clear();
+              }
+              ffName = tok.substr(0, tok.size() - 1);
+              ffi = map.find(ffName);
+              if (ffi == map.end()) {
+                TRACE_ERR("ERROR: No FeatureFunction with name " << ffName << ", no weight update" << endl);
+              }
+            } else {
+              // weight for current feature
+              ffWeights.push_back(Scan<float>(tok));
             }
-            if (ffi != map.end()) {
-                allWeights.Assign(ffi->second, ffWeights);
-            }
-            StaticData::InstanceNonConst().SetAllWeights(allWeights);
+          }
+          if (ffi != map.end()) {
+            allWeights.Assign(ffi->second, ffWeights);
+          }
+          StaticData::InstanceNonConst().SetAllWeights(allWeights);
         }
 
         // default: opening tag that specifies translation options
@@ -401,8 +405,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
           if (startPos > endPos) {
             TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
             return false;
-          }
-          else if (startPos == endPos) {
+          } else if (startPos == endPos) {
             TRACE_ERR("WARNING: tag " << tagName << " 0 span: " << line << endl);
             continue;
           }
@@ -439,7 +442,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
           }
 
           // store translation options into members
-          if (staticData.GetXmlInputType() != XmlIgnore) {
+          if (opts.input.xml_policy != XmlIgnore) {
             // only store options if we aren't ignoring them
             for (size_t i=0; i<altTexts.size(); ++i) {
               Phrase sourcePhrase; // TODO don't know what the source phrase is
@@ -450,7 +453,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               // convert from prob to log-prob
               float scoreValue = FloorScore(TransformScore(probValue));
 
-              WordsRange range(startPos + offset,endPos-1 + offset); // span covered by phrase
+              Range range(startPos + offset,endPos-1 + offset); // span covered by phrase
               TargetPhrase targetPhrase(firstPt);
               // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);

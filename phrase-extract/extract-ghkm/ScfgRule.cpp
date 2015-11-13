@@ -19,23 +19,27 @@
 
 #include "ScfgRule.h"
 
-#include "Node.h"
-#include "Subgraph.h"
-#include "SyntaxTree.h"
-
 #include <algorithm>
 
-namespace Moses
+#include "Node.h"
+#include "Subgraph.h"
+#include "SyntaxNode.h"
+#include "SyntaxNodeCollection.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
 
-ScfgRule::ScfgRule(const Subgraph &fragment, 
-                   const MosesTraining::SyntaxTree *sourceSyntaxTree)
-  : m_sourceLHS("X", NonTerminal)
+ScfgRule::ScfgRule(const Subgraph &fragment,
+                   const SyntaxNodeCollection *sourceNodeCollection)
+  : m_graphFragment(fragment)
+  , m_sourceLHS("X", NonTerminal)
   , m_targetLHS(fragment.GetRoot()->GetLabel(), NonTerminal)
   , m_pcfgScore(fragment.GetPcfgScore())
-  , m_hasSourceLabels(sourceSyntaxTree)
+  , m_hasSourceLabels(sourceNodeCollection)
 {
 
   // Source RHS
@@ -68,10 +72,6 @@ ScfgRule::ScfgRule(const Subgraph &fragment,
       m_sourceRHS.push_back(Symbol("X", NonTerminal));
       sourceOrder[&sinkNode].push_back(srcIndex);
       ++m_numberOfNonTerminals;
-      if (sourceSyntaxTree) {
-        // Source syntax label
-        PushSourceLabel(sourceSyntaxTree,&sinkNode,"XRHS");
-      }
     } else {
       assert(sinkNode.GetType() == SOURCE);
       m_sourceRHS.push_back(Symbol(sinkNode.GetLabel(), Terminal));
@@ -83,6 +83,10 @@ ScfgRule::ScfgRule(const Subgraph &fragment,
           sourceOrder[*q].push_back(srcIndex);
         }
       }
+    }
+    if (sourceNodeCollection) {
+      // Source syntax label
+      PushSourceLabel(sourceNodeCollection,&sinkNode,"XRHS");
     }
   }
 
@@ -123,27 +127,27 @@ ScfgRule::ScfgRule(const Subgraph &fragment,
     }
   }
 
-  if (sourceSyntaxTree) {
-      // Source syntax label for root node (if sourceSyntaxTree available)
-      PushSourceLabel(sourceSyntaxTree,fragment.GetRoot(),"XLHS");
-      // All non-terminal spans (including the LHS) should have obtained a label
-      // (a source-side syntactic constituent label if the span matches, "XLHS" otherwise)
-      assert(m_sourceLabels.size() == m_numberOfNonTerminals+1);
+  if (sourceNodeCollection) {
+    // Source syntax label for root node (if sourceNodeCollection available)
+    PushSourceLabel(sourceNodeCollection,fragment.GetRoot(),"XLHS");
+    // All non-terminal spans (including the LHS) should have obtained a label
+    // (a source-side syntactic constituent label if the span matches, "XLHS" otherwise)
+//    assert(m_sourceLabels.size() == m_numberOfNonTerminals+1);
   }
 }
 
-void ScfgRule::PushSourceLabel(const MosesTraining::SyntaxTree *sourceSyntaxTree,
+void ScfgRule::PushSourceLabel(const SyntaxNodeCollection *sourceNodeCollection,
                                const Node *node,
-                               const std::string &nonMatchingLabel) 
+                               const std::string &nonMatchingLabel)
 {
   ContiguousSpan span = Closure(node->GetSpan());
-  if (sourceSyntaxTree->HasNode(span.first,span.second)) { // does a source constituent match the span?
-      std::vector<MosesTraining::SyntaxNode*> sourceLabels = 
-          sourceSyntaxTree->GetNodes(span.first,span.second);
-      if (!sourceLabels.empty()) {
-        // store the topmost matching label from the source syntax tree
-        m_sourceLabels.push_back(sourceLabels.back()->GetLabel());
-      }
+  if (sourceNodeCollection->HasNode(span.first,span.second)) { // does a source constituent match the span?
+    std::vector<SyntaxNode*> sourceLabels =
+      sourceNodeCollection->GetNodes(span.first,span.second);
+    if (!sourceLabels.empty()) {
+      // store the topmost matching label from the source syntax tree
+      m_sourceLabels.push_back(sourceLabels.back()->label);
+    }
   } else {
     // no matching source-side syntactic constituent: store nonMatchingLabel
     m_sourceLabels.push_back(nonMatchingLabel);
@@ -178,7 +182,7 @@ void ScfgRule::UpdateSourceLabelCoocCounts(std::map< std::string, std::map<std::
       std::map< std::string, std::map<std::string,float>* >::iterator iter = coocCounts.find(sourceLabel);
       if ( iter == coocCounts.end() ) {
         std::map<std::string,float> *newCountMap = new std::map<std::string,float>();
-        std::pair< std::map< std::string, std::map<std::string,float>* >::iterator, bool > inserted = 
+        std::pair< std::map< std::string, std::map<std::string,float>* >::iterator, bool > inserted =
           coocCounts.insert( std::pair< std::string, std::map<std::string,float>* >(sourceLabel, newCountMap) );
         assert(inserted.second);
         countMap = (inserted.first)->second;
@@ -194,34 +198,6 @@ void ScfgRule::UpdateSourceLabelCoocCounts(std::map< std::string, std::map<std::
   }
 }
 
-int ScfgRule::Scope() const
-{
-  int scope = 0;
-  bool predIsNonTerm = false;
-  if (m_sourceRHS[0].GetType() == NonTerminal) {
-    ++scope;
-    predIsNonTerm = true;
-  }
-  for (size_t i = 1; i < m_sourceRHS.size(); ++i) {
-    bool isNonTerm = m_sourceRHS[i].GetType() == NonTerminal;
-    if (isNonTerm && predIsNonTerm) {
-      ++scope;
-    }
-    predIsNonTerm = isNonTerm;
-  }
-  if (predIsNonTerm) {
-    ++scope;
-  }
-  return scope;
-}
-
-bool ScfgRule::PartitionOrderComp(const Node *a, const Node *b)
-{
-  const Span &aSpan = a->GetSpan();
-  const Span &bSpan = b->GetSpan();
-  assert(!aSpan.empty() && !bSpan.empty());
-  return *(aSpan.begin()) < *(bSpan.begin());
-}
-
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

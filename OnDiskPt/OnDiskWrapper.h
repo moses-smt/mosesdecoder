@@ -43,7 +43,7 @@ protected:
   size_t m_defaultNodeSize;
   PhraseNode *m_rootSourceNode;
 
-  std::map<std::string, UINT64> m_miscInfo;
+  std::map<std::string, uint64_t> m_miscInfo;
 
   void SaveMisc();
   bool OpenForLoad(const std::string &filePath);
@@ -61,10 +61,12 @@ public:
                  , int numSourceFactors, int	numTargetFactors, int numScores);
   void EndSave();
 
-  Vocab &GetVocab()
-  { return m_vocab; }
-  const Vocab &GetVocab() const
-  { return m_vocab; }
+  Vocab &GetVocab() {
+    return m_vocab;
+  }
+  const Vocab &GetVocab() const {
+    return m_vocab;
+  }
 
   size_t GetSourceWordSize() const;
   size_t GetTargetWordSize() const;
@@ -103,7 +105,7 @@ public:
     return *m_rootSourceNode;
   }
 
-  UINT64 GetMisc(const std::string &key) const;
+  uint64_t GetMisc(const std::string &key) const;
 
   Word *ConvertFromMoses(const std::vector<Moses::FactorType> &factorsVec
                          , const Moses::Word &origWord) const;

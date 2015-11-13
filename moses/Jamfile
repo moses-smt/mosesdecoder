@@ -1,3 +1,4 @@
+# -*- jam -*-
 max-factors = [ option.get "max-factors" : 4 : 4 ] ;
 path-constant FACTOR-LOG : bin/factor.log ;
 update-if-changed $(FACTOR-LOG) $(max-factors) ;
@@ -10,14 +11,19 @@ if $(with-dlib) {
   dlib = ;
 }
 
-with-oxlm = [ option.get "with-oxlm" ] ;
+with-oxlm = [ option.get "with-oxlm" ] ; 
 if $(with-oxlm) {
-  oxlm2 = <cxxflags>-std=c++0x <define>LM_OXLM <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  oxlm = <cxxflags>-std=c++0x <define>LM_OXLM <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
 } else {
-  oxlm2 = ;
+  oxlm = ;
 }
 
-alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(oxlm2) ; 
+local classifier = ;
+if [ option.get "with-vw" ] {
+  classifier += ..//vw//classifier ;
+}
+
+alias headers : ../util//kenutil $(classifier) : : : $(max-factors) $(dlib) $(oxlm) ; 
 alias ThreadPool : ThreadPool.cpp ;
 alias Util : Util.cpp Timer.cpp ;
 
@@ -49,6 +55,21 @@ update-if-changed $(LM-LOG) $(current) ;
 
 obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <dependency>$(LM-LOG) ;
 
+# check if we have xmlrpc-c's abyss server available
+# if yes, include server capabilities in the moses executable
+# include $(TOP)/jam-files/server.jam ;
+
+if [ xmlrpc ] 
+{
+  echo "BUILDING MOSES SERVER!" ;
+  alias mserver : [ glob server/*.cpp ] ;
+}
+else 
+{
+  echo "NOT BUILDING MOSES SERVER!" ;
+  alias mserver ;
+}
+
 if [ option.get "with-mm" : no : yes ] = yes
 {
   alias mmlib : 
@@ -60,14 +81,24 @@ if [ option.get "with-mm" : no : yes ] = yes
   alias mmlib ;
 }
 
+local with-vw = [ option.get "with-vw" ] ;
+if $(with-vw) {
+  alias vwfiles : [ glob FF/VW/*.cpp ] ;
+} else {
+  alias vwfiles ;
+}
+
 lib moses :
 [ glob 
   *.cpp
+  parameters/*.cpp
   Syntax/*.cpp
+  Syntax/F2S/*.cpp
   Syntax/S2T/*.cpp
   Syntax/S2T/Parsers/*.cpp
   Syntax/S2T/Parsers/RecursiveCYKPlusParser/*.cpp
   Syntax/S2T/Parsers/Scope3Parser/*.cpp
+  Syntax/T2S/*.cpp
   TranslationModel/*.cpp
   TranslationModel/fuzzy-match/*.cpp
   TranslationModel/DynSAInclude/*.cpp
@@ -76,6 +107,7 @@ lib moses :
   TranslationModel/CYKPlusParser/*.cpp
   ../phrase-extract/extract-ghkm/PhraseOrientation.cpp
   FF/*.cpp
+  FF/bilingual-lm/*.cpp
   FF/OSM-Feature/*.cpp
   FF/LexicalReordering/*.cpp
   PP/*.cpp
@@ -84,11 +116,19 @@ lib moses :
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
-]
-headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
-
-..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-$(TOP)//boost_iostreams mmlib
+] 
+vwfiles synlm mmlib mserver headers 
+FF_Factory.o 
+LM//LM 
+TranslationModel/CompactPT//CompactPT 
+TranslationModel/ProbingPT//ProbingPT 
+ThreadPool
+..//search 
+../util/double-conversion//double-conversion 
+..//z 
+../OnDiskPt//OnDiskPt 
+$(TOP)//boost_filesystem 
+$(TOP)//boost_iostreams 
 :
 <threading>single:<source>../util//rt
 ;
@@ -98,5 +138,5 @@ alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] ..//boost_filesystem moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
 

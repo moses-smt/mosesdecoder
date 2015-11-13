@@ -1,7 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 
+use warnings;
 use strict;
 
 use utf8;
@@ -25,7 +29,7 @@ while (my $l =<STDIN>) {
   foreach my $w (@ws) {
 		$wc++;
     my ($surface, $morph, $lemma);
-		
+
 		if ($w =~ /^(.+)_([^_]+)_(.+)$/o) {
       ($surface, $morph, $lemma) = ($1, $2, $3);
 		} else {
@@ -73,7 +77,7 @@ while (my $l =<STDIN>) {
 		$morph = join '.', @xs;
     if (!defined $morph || $morph eq '') {
 			$morph = '-';
-		} 
+		}
 #    if (defined($lemma) && defined($morph) && defined($surface)) {
 			push @js, "$surface|$morph|$lemma";
 			push @ls, $lemma;

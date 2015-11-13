@@ -2,9 +2,10 @@
 #include <fstream>
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
-#include "moses/UserMessage.h"
 #include "moses/Hypothesis.h"
+#include "moses/TranslationTask.h"
 #include "util/string_piece_hash.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -14,7 +15,7 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
   :StatelessFeatureFunction(0, line)
 {
   UTIL_THROW(util::Exception,
-		  "GlobalLexicalModelUnlimited hasn't been refactored for new feature function framework yet"); // TODO need to update arguments to key=value
+             "GlobalLexicalModelUnlimited hasn't been refactored for new feature function framework yet"); // TODO need to update arguments to key=value
 
   const vector<string> modelSpec = Tokenize(line);
 
@@ -28,8 +29,8 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
     // read optional punctuation and bias specifications
     if (spec.size() > 0) {
       if (spec.size() != 2 && spec.size() != 3 && spec.size() != 4 && spec.size() != 6) {
-        UserMessage::Add("Format of glm feature is <factor-src>-<factor-tgt> [ignore-punct] [use-bias] "
-                         "[context-type] [filename-src filename-tgt]");
+        std::cerr << "Format of glm feature is <factor-src>-<factor-tgt> [ignore-punct] [use-bias] "
+                  <<  "[context-type] [filename-src filename-tgt]";
         //return false;
       }
 
@@ -49,7 +50,7 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
       factors = Tokenize(modelSpec[i],"-");
 
     if ( factors.size() != 2 ) {
-      UserMessage::Add("Wrong factor definition for global lexical model unlimited: " + modelSpec[i]);
+      std::cerr << "Wrong factor definition for global lexical model unlimited: " << modelSpec[i];
       //return false;
     }
 
@@ -61,7 +62,10 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
     if (restricted) {
       cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
       if (!glmu->Load(filenameSource, filenameTarget)) {
-        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+        std::cerr << "Unable to load word lists for word translation feature from files "
+                  << filenameSource
+                  << " and "
+                  << filenameTarget;
         //return false;
       }
     }
@@ -102,10 +106,13 @@ bool GlobalLexicalModelUnlimited::Load(const std::string &filePathSource,
   return true;
 }
 
-void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
+void GlobalLexicalModelUnlimited::InitializeForInput(ttasksptr const& ttask)
 {
+  UTIL_THROW_IF2(ttask->GetSource()->GetType() != SentenceInput,
+                 "GlobalLexicalModel works only with sentence input.");
+  Sentence const* s = reinterpret_cast<Sentence const*>(ttask->GetSource().get());
   m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
+  m_local->input = s;
 }
 
 void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const
@@ -125,7 +132,7 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
     }
 
     if (m_biasFeature) {
-      stringstream feature;
+      util::StringStream feature;
       feature << "glm_";
       feature << targetString;
       feature << "~";
@@ -159,7 +166,7 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
           if (m_sourceContext) {
             if (sourceIndex == 0) {
               // add <s> trigger feature for source
-              stringstream feature;
+              util::StringStream feature;
               feature << "glm_";
               feature << targetString;
               feature << "~";
@@ -177,7 +184,7 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
                 contextExists = FindStringPiece(m_vocabSource, contextString ) != m_vocabSource.end();
 
               if (m_unrestricted || contextExists) {
-                stringstream feature;
+                util::StringStream feature;
                 feature << "glm_";
                 feature << targetString;
                 feature << "~";
@@ -298,7 +305,7 @@ void GlobalLexicalModelUnlimited::EvaluateWhenApplied(const Hypothesis& cur_hypo
               }
             }
           } else {
-            stringstream feature;
+            util::StringStream feature;
             feature << "glm_";
             feature << targetString;
             feature << "~";
@@ -317,7 +324,7 @@ void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulat
     StringPiece sourceTrigger, StringPiece sourceWord,
     StringPiece targetTrigger, StringPiece targetWord) const
 {
-  stringstream feature;
+  util::StringStream feature;
   feature << "glm_";
   feature << targetTrigger;
   feature << ",";

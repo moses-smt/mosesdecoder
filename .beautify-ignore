@@ -1,0 +1,38 @@
+# Files and directories that beautify.py should not clean up.
+#
+# This file is not as advanced as, say, .gitignore.  It only supports files
+# and directory paths relative to the project root, one per line, no globs,
+# no quotes.
+#
+# Leading and trailing whitespace is stripped from filenames, but internal
+# whitespace is preserved.
+#
+# Lines starting with a hash mark, such as this one, are comments.  The hash
+# mark must be the first character on the line.  Blank lines are ignored.
+#
+# The .beautify-ignore file must be encoded in UTF-8.
+
+boost
+contrib
+irstlm
+jam-files
+lm
+mingw/MosesGUI/icons_rc.py
+mingw/MosesGUI/Ui_credits.py
+mingw/MosesGUI/Ui_mainWindow.py
+moses/TranslationModel/UG
+moses/server
+moses/parameters
+moses/thread_safe_container.h
+phrase-extract/pcfg-common
+phrase-extract/syntax-common
+randlm
+# Filename suffixes in here are language codes, so e.g. ".pl" means
+# Polish, not Perl.
+scripts/share/nonbreaking_prefixes
+search
+srilm
+util
+xmlrpc-c
+.git
+util/ug_cache_with_timeout.h

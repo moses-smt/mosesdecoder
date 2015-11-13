@@ -18,7 +18,7 @@
 
 #define FORCE_INLINE	__forceinline
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #define ROTL32(x,y)	_rotl(x,y)
 #define ROTL64(x,y)	_rotl64(x,y)
@@ -29,7 +29,7 @@
 
 #else	// defined(_MSC_VER)
 
-#define	FORCE_INLINE __attribute__((always_inline))
+#define	FORCE_INLINE inline __attribute__((always_inline))
 
 inline uint32_t rotl32 ( uint32_t x, int8_t r )
 {

@@ -35,8 +35,8 @@ namespace PCN
 {
 
 struct CNAlt {
-  CNAlt()
-  {}
+  CNAlt() {
+  }
   CNAlt(const std::string &word,
         const std::vector<float> &denseFeatures,
         const std::map<std::string, float> &sparseFeatures,
@@ -44,8 +44,8 @@ struct CNAlt {
     :m_word(word)
     ,m_denseFeatures(denseFeatures)
     ,m_sparseFeatures(sparseFeatures)
-    ,m_next(next)
-  {}
+    ,m_next(next) {
+  }
 
   std::string m_word;
   std::vector<float> m_denseFeatures;

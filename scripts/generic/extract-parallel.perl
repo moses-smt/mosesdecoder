@@ -1,14 +1,24 @@
-#! /usr/bin/perl -w 
+#!/usr/bin/env perl 
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # example
 #  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation --GZOutput
 
+use warnings;
 use strict;
 use File::Basename;
 
 sub RunFork($);
 sub systemCheck($);
 sub NumStr($);
+sub DigitStr($);
+sub CharStr($);
+sub GetSplitVersion($);
+
+my $alph = "abcdefghijklmnopqrstuvwxyz";
+my @alph = (split(//,$alph));
 
 print "Started ".localtime() ."\n";
 
@@ -31,6 +41,25 @@ my $baselineExtract;
 my $glueFile;
 my $phraseOrientation = 0;
 my $phraseOrientationPriorsFile;
+my $splitCmdOption = "";
+
+my $GZIP_EXEC;
+if(`which pigz 2> /dev/null`) {
+  $GZIP_EXEC = 'pigz';
+}
+else {
+  $GZIP_EXEC = 'gzip';
+}
+print STDERR "using $GZIP_EXEC \n";
+
+my $isBSDSplit = GetSplitVersion($splitCmd);
+print STDERR "isBSDSplit=$isBSDSplit \n";
+
+if ($isBSDSplit == 0) {
+	$splitCmdOption .= "-d";
+}
+
+my $gzOut = 0; 
 
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
@@ -52,13 +81,19 @@ for (my $i = 8; $i < $#ARGV + 1; ++$i)
     $phraseOrientationPriorsFile = $ARGV[++$i];
     next;
   }
+  if ($ARGV[$i] eq '--GZOutput') {
+  	$gzOut = 1;
+  }
 
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
+die("Need to specify --GZOutput for parallel extract") if ($gzOut == 0);
+
 my $cmd;
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
-$cmd = "mkdir -p $TMPDIR";
+$cmd = "mkdir -p $TMPDIR; ls -l $TMPDIR";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 my $totalLines = int(`cat $align | wc -l`);
@@ -71,24 +106,24 @@ my $pid;
 
 if ($numParallel > 1)
 {
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $target $TMPDIR/target.";
-	$pid = RunFork($cmd);
-	push(@children, $pid);
-	
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $source $TMPDIR/source.";
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $target $TMPDIR/target.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $align $TMPDIR/align.";
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $source $TMPDIR/source.";
+	$pid = RunFork($cmd);
+	push(@children, $pid);
+
+	$cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $align $TMPDIR/align.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
   if ($weights) {
-    $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
+    $cmd = "$splitCmd $splitCmdOption -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
     $pid = RunFork($cmd);
     push(@children, $pid);
   }
-	
+
 	# wait for everything is finished
 	foreach (@children) {
 		waitpid($_, 0);
@@ -100,20 +135,16 @@ else
   my $numStr = NumStr(0);
 
   $cmd = "ln -s $target $TMPDIR/target.$numStr";
-	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
   $cmd = "ln -s $source $TMPDIR/source.$numStr";
-	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
   $cmd = "ln -s $align $TMPDIR/align.$numStr";
-	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
   if ($weights) {
     $cmd = "ln -s $weights $TMPDIR/weights.$numStr";
-    print STDERR "Executing: $cmd \n";
     `$cmd`;
   }
 }
@@ -123,7 +154,7 @@ else
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
-  
+
   if ($pid == 0)
   { # child
     my $numStr = NumStr($i);
@@ -136,10 +167,9 @@ for (my $i = 0; $i < $numParallel; ++$i)
     if (defined($glueFile)) {
       $glueArg = "--GlueGrammar $TMPDIR/glue.$numStr";
     }
-    print "glueArg=$glueArg \n";
+    #print STDERR "glueArg=$glueArg \n";
 
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $glueArg $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
-    print STDERR $cmd;
     `$cmd`;
 
     exit();
@@ -178,11 +208,11 @@ if (defined($baselineExtract)) {
 		$catOCmd .= "$baselineExtract.o$sorted.gz ";
 }
 
-$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.sorted.gz 2>> /dev/stderr \n";
-$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
-$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
-$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
-$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
+$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP_EXEC -c > $extract.sorted.gz 2>> /dev/stderr \n";
+$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP_EXEC -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
+$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP_EXEC -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
+$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | $GZIP_EXEC -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
+$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | $GZIP_EXEC -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
 
 
 @children = ();
@@ -236,8 +266,8 @@ if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
   foreach my $filenamePhraseOrientationPriors (@orientationPriorsCountFiles) {
     if (-f $filenamePhraseOrientationPriors) {
       open my $infilePhraseOrientationPriors, '<', $filenamePhraseOrientationPriors or die "cannot open $filenamePhraseOrientationPriors: $!";
-      while (my $line = <$infilePhraseOrientationPriors>) { 
-        print $line; 
+      while (my $line = <$infilePhraseOrientationPriors>) {
+        print $line;
         my ($key, $value) = split / /, $line;
         $priorCounts{$key} += $value;
       }
@@ -254,8 +284,7 @@ if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
-print STDERR $cmd;
-`$cmd`;
+systemCheck($cmd);
 
 print STDERR "Finished ".localtime() ."\n";
 
@@ -267,7 +296,7 @@ sub RunFork($)
   my $cmd = shift;
 
   my $pid = fork();
-  
+
   if ($pid == 0)
   { # child
     print STDERR $cmd;
@@ -287,7 +316,7 @@ sub systemCheck($)
   }
 }
 
-sub NumStr($)
+sub DigitStr($)
 {
     my $i = shift;
     my $numStr;
@@ -313,5 +342,44 @@ sub NumStr($)
 	$numStr = $i;
     }
     return $numStr;
+}
+
+sub CharStr($)
+{
+    my $i = shift;
+    my $charStr;
+    my @bit=();
+
+    while ($i>0){
+        push @bit, $i%26;
+        $i=int($i/26);
+    }
+    my $offset=scalar(@bit);
+    my $h;
+    for ($h=6;$h>=$offset;--$h) { $charStr.="a"; }
+    for ($h=$offset-1;$h>=0;--$h) { $charStr.="$alph[$bit[$h]]"; }
+    return $charStr;
+}
+
+sub NumStr($)
+{
+    my $i = shift;
+    if ($isBSDSplit){
+        return CharStr($i);
+    }else{
+        return DigitStr($i);
+    }
+}
+
+sub GetSplitVersion($)
+{
+	my $splitCmd = shift;
+	my $retVal = system("$splitCmd --help > /dev/null");
+	if ($retVal != 0) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 

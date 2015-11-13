@@ -105,13 +105,12 @@ void constructCepts(vector < pair < set <int> , set <int> > > & ceptsInPhrase, s
   int tgt;
   ceptsInPhrase.clear();
   int res;
-	
-  for (int j=0; j<alignment.size(); j+=1)
-  {
- 	res = alignment[j].find("-");
-       mAlign.push_back(alignment[j].substr(0,res));
-       mAlign.push_back(alignment[j].substr(res+1));
-  } 	
+
+  for (int j=0; j<alignment.size(); j+=1) {
+    res = alignment[j].find("-");
+    mAlign.push_back(alignment[j].substr(0,res));
+    mAlign.push_back(alignment[j].substr(res+1));
+  }
 
   for (int j=0; j<mAlign.size(); j+=2) {
     align.push_back(stringToInteger(mAlign[j+1]));
@@ -166,29 +165,26 @@ void constructCepts(vector < pair < set <int> , set <int> > > & ceptsInPhrase, s
 
 void getOneToOne(vector < pair < set <int> , set <int> > > & ceptsInPhrase , vector <string> & currF , vector <string> & currE, set <string> & one)
 {
-	string temp;
-	
-	for (int i = 0; i< ceptsInPhrase.size(); i++)
-	{	
-		if (ceptsInPhrase[i].first.size() == 1 && ceptsInPhrase[i].second.size() == 1)
-		{
-			temp = currF[(*ceptsInPhrase[i].second.begin())] + "\t" + currE[(*ceptsInPhrase[i].first.begin())];
-			
-			if (one.find(temp) == one.end())
-			  one.insert(temp);
-		}
-	}	
-	
+  string temp;
+
+  for (int i = 0; i< ceptsInPhrase.size(); i++) {
+    if (ceptsInPhrase[i].first.size() == 1 && ceptsInPhrase[i].second.size() == 1) {
+      temp = currF[(*ceptsInPhrase[i].second.begin())] + "\t" + currE[(*ceptsInPhrase[i].first.begin())];
+
+      if (one.find(temp) == one.end())
+        one.insert(temp);
+    }
+  }
+
 }
 
 void printOneToOne ( set <string> & one)
 {
-	set <string> :: iterator iter;
+  set <string> :: iterator iter;
 
-	for (iter = one.begin(); iter != one.end(); iter++)
-	{
-		cout<<*iter<<endl;
-	}
+  for (iter = one.begin(); iter != one.end(); iter++) {
+    cout<<*iter<<endl;
+  }
 }
 
 int main(int argc, char * argv[])
@@ -219,11 +215,11 @@ int main(int argc, char * argv[])
     getWords(e[i],currE);
     getWords(f[i],currF);
     getWords(a[i],currA);
-    
+
     cerr<<"Processing "<<i<<endl;
     constructCepts(ceptsInPhrase, sourceNullWords , targetNullWords, currA , currE.size(), currF.size());
     getOneToOne(ceptsInPhrase , currF , currE, one);
- 	
+
     /*
     cout<<"________________________________________"<<endl;
 
@@ -234,7 +230,7 @@ int main(int argc, char * argv[])
 
   }
 
-    printOneToOne(one);
+  printOneToOne(one);
 
 
   return 0;

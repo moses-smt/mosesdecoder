@@ -13,14 +13,14 @@ void GenericCandidate::readBin(FILE* f)
 {
   m_PhraseList.clear();
   m_ScoreList.clear();
-  UINT32 num_phrases;  // on older compilers, <stdint.h> may need to be included
+  uint32_t num_phrases;  // on older compilers, <stdint.h> may need to be included
   fRead(f, num_phrases);
   for(unsigned int i = 0; i < num_phrases; ++i) {
     IPhrase phrase;
     fReadVector(f, phrase);
     m_PhraseList.push_back(phrase);
   };
-  UINT32 num_scores;
+  uint32_t num_scores;
   fRead(f, num_scores);
   for(unsigned int j = 0; j < num_scores; ++j) {
     std::vector<float> score;
@@ -32,11 +32,11 @@ void GenericCandidate::readBin(FILE* f)
 void GenericCandidate::writeBin(FILE* f) const
 {
   // cast is necessary to ensure compatibility between 32- and 64-bit platforms
-  fWrite(f, static_cast<UINT32>(m_PhraseList.size()));
+  fWrite(f, static_cast<uint32_t>(m_PhraseList.size()));
   for(size_t i = 0; i < m_PhraseList.size(); ++i) {
     fWriteVector(f, m_PhraseList[i]);
   }
-  fWrite(f, static_cast<UINT32>(m_ScoreList.size()));
+  fWrite(f, static_cast<uint32_t>(m_ScoreList.size()));
   for(size_t j = 0; j < m_ScoreList.size(); ++j) {
     fWriteVector(f, m_ScoreList[j]);
   }
@@ -45,7 +45,7 @@ void GenericCandidate::writeBin(FILE* f) const
 
 void Candidates::writeBin(FILE* f) const
 {
-  UINT32 s = this->size();
+  uint32_t s = this->size();
   fWrite(f,s);
   for(size_t i = 0; i < s; ++i) {
     MyBase::operator[](i).writeBin(f);
@@ -54,7 +54,7 @@ void Candidates::writeBin(FILE* f) const
 
 void Candidates::readBin(FILE* f)
 {
-  UINT32 s;
+  uint32_t s;
   fRead(f,s);
   this->resize(s);
   for(size_t i = 0; i<s; ++i) {
@@ -65,7 +65,8 @@ void Candidates::readBin(FILE* f)
 const LabelId PrefixTreeMap::MagicWord = std::numeric_limits<LabelId>::max() - 1;
 
 //////////////////////////////////////////////////////////////////
-PrefixTreeMap::~PrefixTreeMap() {
+PrefixTreeMap::~PrefixTreeMap()
+{
   if(m_FileSrc) {
     fClose(m_FileSrc);
   }
@@ -99,8 +100,7 @@ WordVoc &ReadVoc(std::map<std::string,WordVoc> &vocs, const std::string& filenam
     WordVoc &voc = vocs[filename];
     voc.Read(filename);
     return voc;
-  }
-  else {
+  } else {
     return vi->second;
   }
 }
@@ -162,7 +162,7 @@ void PrefixTreeMap::GetCandidates(const IPhrase& key, Candidates* cands)
     return;
   }
   UTIL_THROW_IF2(m_Data[key[0]]->findKey(key[0]) >= m_Data[key[0]]->size(),
-		  "Key not found: " << key[0]);
+                 "Key not found: " << key[0]);
 
   OFF_T candOffset = m_Data[key[0]]->find(key);
   if(candOffset == InvalidOffT) {
@@ -189,7 +189,7 @@ void PrefixTreeMap::GetCandidates(const PPimp& p, Candidates* cands)
 std::vector< std::string const * > PrefixTreeMap::ConvertPhrase(const IPhrase& p, unsigned int voc) const
 {
   UTIL_THROW_IF2(voc >= m_Voc.size() || m_Voc[voc] == 0,
-		  "Invalid vocab id: " << voc);
+                 "Invalid vocab id: " << voc);
   std::vector< std::string const * > result;
   result.reserve(p.size());
   for(IPhrase::const_iterator i = p.begin(); i != p.end(); ++i) {
@@ -201,7 +201,7 @@ std::vector< std::string const * > PrefixTreeMap::ConvertPhrase(const IPhrase& p
 IPhrase PrefixTreeMap::ConvertPhrase(const std::vector< std::string >& p, unsigned int voc) const
 {
   UTIL_THROW_IF2(voc >= m_Voc.size() || m_Voc[voc] == 0,
-		  "Invalid vocab id: " << voc);
+                 "Invalid vocab id: " << voc);
   IPhrase result;
   result.reserve(p.size());
   for(size_t i = 0; i < p.size(); ++i) {
@@ -213,14 +213,14 @@ IPhrase PrefixTreeMap::ConvertPhrase(const std::vector< std::string >& p, unsign
 LabelId PrefixTreeMap::ConvertWord(const std::string& w, unsigned int voc) const
 {
   UTIL_THROW_IF2(voc >= m_Voc.size() || m_Voc[voc] == 0,
-		  "Invalid vocab id: " << voc);
+                 "Invalid vocab id: " << voc);
   return m_Voc[voc]->index(w);
 }
 
 std::string PrefixTreeMap::ConvertWord(LabelId w, unsigned int voc) const
 {
   UTIL_THROW_IF2(voc >= m_Voc.size() || m_Voc[voc] == 0,
-		  "Invalid vocab id: " << voc);
+                 "Invalid vocab id: " << voc);
   if(w == PrefixTreeMap::MagicWord) {
     return "|||";
   } else if (w == InvalidLabelId) {

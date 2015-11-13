@@ -1,6 +1,9 @@
 #include <iostream>
 
+#include "util/tokenize_piece.hh"
+
 #include "ForestRescore.h"
+#include "MiraFeatureVector.h"
 
 #define BOOST_TEST_MODULE MertForestRescore
 #include <boost/test/unit_test.hpp>
@@ -15,7 +18,7 @@ BOOST_AUTO_TEST_CASE(viterbi_simple_lattice)
   Vocab vocab;
   WordVec words;
   string wordStrings[] =
-    {"<s>", "</s>", "a", "b", "c", "d", "e", "f", "g"};
+  {"<s>", "</s>", "a", "b", "c", "d", "e", "f", "g"};
   for (size_t i = 0; i < 9; ++i) {
     words.push_back(&(vocab.FindOrAdd((wordStrings[i]))));
   }
@@ -102,7 +105,7 @@ BOOST_AUTO_TEST_CASE(viterbi_3branch_lattice)
   Vocab vocab;
   WordVec words;
   string wordStrings[] =
-    {"<s>", "</s>", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"};
+  {"<s>", "</s>", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"};
   for (size_t i = 0; i < 13; ++i) {
     words.push_back(&(vocab.FindOrAdd((wordStrings[i]))));
   }
@@ -241,6 +244,4 @@ BOOST_AUTO_TEST_CASE(viterbi_3branch_lattice)
   BOOST_CHECK_EQUAL(3, hopeHypo.bleuStats[7]);
   BOOST_CHECK_EQUAL(6, hopeHypo.bleuStats[8]);
 }
-
-
 

@@ -30,9 +30,10 @@ struct Config {
     return show_progress ? messages : 0;
   }
 
-  // This will be called with every string in the vocabulary.  See
-  // enumerate_vocab.hh for more detail.  Config does not take ownership; you
-  // are still responsible for deleting it (or stack allocating).
+  // This will be called with every string in the vocabulary by the
+  // constructor; it need only exist for the lifetime of the constructor.
+  // See enumerate_vocab.hh for more detail.  Config does not take ownership;
+  // just delete/let it go out of scope after the constructor exits.
   EnumerateVocab *enumerate_vocab;
 
 
@@ -66,9 +67,9 @@ struct Config {
 
   // Template for temporary directory appropriate for passing to mkdtemp.
   // The characters XXXXXX are appended before passing to mkdtemp.  Only
-  // applies to trie.  If NULL, defaults to write_mmap.  If that's NULL,
+  // applies to trie.  If empty, defaults to write_mmap.  If that's NULL,
   // defaults to input file name.
-  const char *temporary_directory_prefix;
+  std::string temporary_directory_prefix;
 
   // Level of complaining to do when loading from ARPA instead of binary format.
   enum ARPALoadComplain {ALL, EXPENSIVE, NONE};

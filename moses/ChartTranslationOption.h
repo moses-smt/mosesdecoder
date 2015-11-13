@@ -29,6 +29,7 @@ public:
   const InputPath *GetInputPath() const {
     return m_inputPath;
   }
+
   void SetInputPath(const InputPath *inputPath) {
     m_inputPath = inputPath;
   }
@@ -45,8 +46,8 @@ public:
   }
 
   void EvaluateWithSourceContext(const InputType &input,
-		  const InputPath &inputPath,
-		  const StackVec &stackVec);
+                                 const InputPath &inputPath,
+                                 const StackVec &stackVec);
 };
 
 }

@@ -6,9 +6,8 @@
 #include <algorithm>
 #include <functional>
 #include <queue>
-
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
 
 namespace search {
 
@@ -41,7 +40,7 @@ const std::vector<Applied> &NBestList::Extract(util::Pool &pool, std::size_t n) 
 Score NBestList::Visit(util::Pool &pool, std::size_t index) {
   if (index + 1 < revealed_.size())
     return revealed_[index + 1].GetScore() - revealed_[index].GetScore();
-  if (queue_.empty()) 
+  if (queue_.empty())
     return -INFINITY;
   if (index + 1 == revealed_.size())
     return queue_.top().GetScore() - revealed_[index].GetScore();
@@ -82,7 +81,7 @@ void NBestList::MoveTop(util::Pool &pool) {
     if (child->index_) break;
   }
 
-  // Convert QueueEntry to Applied.  This leaves some unused memory.  
+  // Convert QueueEntry to Applied.  This leaves some unused memory.
   void *overwrite = entry.Children();
   for (unsigned int i = 0; i < entry.GetArity(); ++i) {
     RevealedRef from(*(static_cast<const RevealedRef*>(overwrite) + i));

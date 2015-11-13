@@ -172,7 +172,8 @@ public:
     ptr.clear();
     ptr.resize(keys.size());
     std::vector<OFF_T> rawOffs(keys.size());
-    fread(&rawOffs[0], sizeof(OFF_T), keys.size(), f);
+    size_t bytes_read = fread(&rawOffs[0], sizeof(OFF_T), keys.size(), f);
+    UTIL_THROW_IF2(bytes_read != keys.size(), "Read error at " << HERE);
     for(size_t i=0; i<ptr.size(); ++i)
       if (rawOffs[i]) ptr[i].set(f, rawOffs[i]);
   }

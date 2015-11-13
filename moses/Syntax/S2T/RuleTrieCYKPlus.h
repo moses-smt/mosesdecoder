@@ -26,18 +26,20 @@ namespace S2T
 
 class RuleTrieCYKPlus : public RuleTrie
 {
- public:
+public:
   class Node
   {
-   public:
+  public:
     typedef boost::unordered_map<Word, Node, SymbolHasher,
-                                 SymbolEqualityPred> SymbolMap;
+            SymbolEqualityPred> SymbolMap;
 
     bool IsLeaf() const {
       return m_sourceTermMap.empty() && m_nonTermMap.empty();
     }
 
-    bool HasRules() const { return !m_targetPhraseCollection.IsEmpty(); }
+    bool HasRules() const {
+      return !m_targetPhraseCollection->IsEmpty();
+    }
 
     void Prune(std::size_t tableLimit);
     void Sort(std::size_t tableLimit);
@@ -48,33 +50,44 @@ class RuleTrieCYKPlus : public RuleTrie
     const Node *GetChild(const Word &sourceTerm) const;
     const Node *GetNonTerminalChild(const Word &targetNonTerm) const;
 
-    const TargetPhraseCollection &GetTargetPhraseCollection() const {
+    TargetPhraseCollection::shared_ptr
+    GetTargetPhraseCollection() const {
       return m_targetPhraseCollection;
     }
 
-    TargetPhraseCollection &GetTargetPhraseCollection() {
+    TargetPhraseCollection::shared_ptr
+    GetTargetPhraseCollection() {
       return m_targetPhraseCollection;
     }
 
-    const SymbolMap &GetTerminalMap() const { return m_sourceTermMap; }
+    const SymbolMap &GetTerminalMap() const {
+      return m_sourceTermMap;
+    }
 
-    const SymbolMap &GetNonTerminalMap() const { return m_nonTermMap; }
+    const SymbolMap &GetNonTerminalMap() const {
+      return m_nonTermMap;
+    }
 
-   private:
+    Node() : m_targetPhraseCollection(new TargetPhraseCollection) {}
+
+  private:
     SymbolMap m_sourceTermMap;
     SymbolMap m_nonTermMap;
-    TargetPhraseCollection m_targetPhraseCollection;
+    TargetPhraseCollection::shared_ptr m_targetPhraseCollection;
   };
 
   RuleTrieCYKPlus(const RuleTableFF *ff) : RuleTrie(ff) {}
 
-  const Node &GetRootNode() const { return m_root; }
+  const Node &GetRootNode() const {
+    return m_root;
+  }
 
   bool HasPreterminalRule(const Word &) const;
 
- private:
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
+private:
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection
+  (const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
 
   Node &GetOrCreateNode(const Phrase &source, const TargetPhrase &target,
                         const Word *sourceLHS);

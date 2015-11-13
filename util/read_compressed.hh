@@ -5,7 +5,6 @@
 #include "util/scoped.hh"
 
 #include <cstddef>
-
 #include <stdint.h>
 
 namespace util {
@@ -39,10 +38,10 @@ class ReadBase;
 class ReadCompressed {
   public:
     static const std::size_t kMagicSize = 6;
-    // Must have at least kMagicSize bytes.  
+    // Must have at least kMagicSize bytes.
     static bool DetectCompressedMagic(const void *from);
 
-    // Takes ownership of fd.   
+    // Takes ownership of fd.
     explicit ReadCompressed(int fd);
 
     // Try to avoid using this.  Use the fd instead.
@@ -54,7 +53,7 @@ class ReadCompressed {
 
     ~ReadCompressed();
 
-    // Takes ownership of fd.  
+    // Takes ownership of fd.
     void Reset(int fd);
 
     // Same advice as the constructor.
@@ -75,7 +74,7 @@ class ReadCompressed {
 
     uint64_t raw_amount_;
 
-    // No copying.  
+    // No copying.
     ReadCompressed(const ReadCompressed &);
     void operator=(const ReadCompressed &);
 };

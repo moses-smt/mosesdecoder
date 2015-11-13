@@ -17,6 +17,7 @@
 #include "util/exception.hh"
 
 #include "util/file_piece.hh"
+#include "util/random.hh"
 #include "util/tokenize_piece.hh"
 #include "util/string_piece.hh"
 #include "FeatureDataIterator.h"
@@ -263,13 +264,13 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
 {
   UTIL_THROW_IF(shard_count == 0, util::Exception, "Must have at least 1 shard");
   UTIL_THROW_IF(shard_size < 0 || shard_size > 1,
-		  util::Exception,
-		  "Shard size must be between 0 and 1, inclusive. Currently " << shard_size);
+                util::Exception,
+                "Shard size must be between 0 and 1, inclusive. Currently " << shard_size);
 
   size_t data_size = m_score_data->size();
   UTIL_THROW_IF(data_size != m_feature_data->size(),
-  	  	  util::Exception,
-  	  	  "Error");
+                util::Exception,
+                "Error");
 
   shard_size *= data_size;
   const float coeff = static_cast<float>(data_size) / shard_count;
@@ -286,7 +287,7 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     } else {
       //create shards by randomly sampling
       for (size_t i = 0; i < floor(shard_size+0.5); ++i) {
-        shard_contents.push_back(rand() % data_size);
+        shard_contents.push_back(util::rand_excl(data_size));
       }
     }
 

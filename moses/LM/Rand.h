@@ -41,7 +41,7 @@ public:
 
   void Load();
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
-  void InitializeForInput(InputType const& source);
+  void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
 protected:

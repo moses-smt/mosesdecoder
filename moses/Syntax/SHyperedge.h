@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "moses/Phrase.h"
-#include "moses/ScoreComponentCollection.h"
-#include "moses/TargetPhrase.h"
+
+#include "SLabel.h"
 
 namespace Moses
 {
@@ -13,13 +13,10 @@ namespace Syntax
 
 struct SVertex;
 
-struct SHyperedge
-{
+struct SHyperedge {
   SVertex *head;
   std::vector<SVertex*> tail;
-  float score;
-  ScoreComponentCollection scoreBreakdown;
-  const TargetPhrase *translation;
+  SLabel label;
 };
 
 Phrase GetOneBestTargetYield(const SHyperedge &h);

@@ -1,8 +1,12 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
-die("ERROR syntax: reference-from-sgm.perl ref src out") 
+die("ERROR syntax: reference-from-sgm.perl ref src out")
     unless scalar @ARGV == 3;
 my ($ref,$src,$txt) = @ARGV;
 

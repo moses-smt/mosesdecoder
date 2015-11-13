@@ -1,6 +1,9 @@
+#if 0
+// temporarily disabled; needs to be adapted to changes in the API
 #include "mmsapt.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.h"
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
@@ -9,9 +12,10 @@
 #include <iostream>
 
 using namespace Moses;
-using namespace bitext;
+using namespace sapt;
 using namespace std;
 using namespace boost;
+using namespace boost::algorithm;
 
 vector<FactorType> fo(1,FactorType(0));
 
@@ -20,13 +24,13 @@ class SimplePhrase : public Moses::Phrase
   vector<FactorType> const m_fo; // factor order
 public:
   SimplePhrase(): m_fo(1,FactorType(0)) {}
-  
-  void init(string const& s) 
+
+  void init(string const& s)
   {
     istringstream buf(s); string w;
-    while (buf >> w) 
+    while (buf >> w)
       {
-	Word wrd; 
+	Word wrd;
 	this->AddWord().CreateFromString(Input,m_fo,StringPiece(w),false,false);
       }
   }
@@ -41,7 +45,7 @@ public:
   bool operator()(size_t a, size_t b) const
   {
     // return cmp(*my_tpc[a], *my_tpc[b]);
-    return (my_tpc[a]->GetScoreBreakdown().GetWeightedScore() >  
+    return (my_tpc[a]->GetScoreBreakdown().GetWeightedScore() >
 	    my_tpc[b]->GetScoreBreakdown().GetWeightedScore());
   }
 };
@@ -55,7 +59,7 @@ int main(int argc, char* argv[])
   argfilter[1] = std::make_pair(string("--spe-trg"),1);
   argfilter[2] = std::make_pair(string("--spe-aln"),1);
   argfilter[3] = std::make_pair(string("--spe-show"),1);
-  
+
   char** my_args; int my_acnt;
   char** mo_args; int mo_acnt;
   filter_arguments(argc, argv, mo_acnt, &mo_args, my_acnt, &my_args, argfilter);
@@ -73,9 +77,9 @@ int main(int argc, char* argv[])
       else if (!strcmp(my_args[i],"--spe-show"))
 	vlevel = my_args[i+1];
     }
-  
+
   Parameter params;
-  if (!params.LoadParam(mo_acnt,mo_args) || 
+  if (!params.LoadParam(mo_acnt,mo_args) ||
       !StaticData::LoadDataStatic(&params, mo_args[0]))
     exit(1);
 
@@ -91,15 +95,15 @@ int main(int argc, char* argv[])
       exit(1);
     }
   mmsapt->SetTableLimit(0);
-  
+
   string srcline,trgline,alnline;
   cout.precision(2);
   vector<string> fname = mmsapt->GetFeatureNames();
   while (getline(spe_src,srcline))
     {
-      UTIL_THROW_IF2(!getline(spe_trg,trgline), HERE 
+      UTIL_THROW_IF2(!getline(spe_trg,trgline), HERE
 		     << ": missing data for online updates.");
-      UTIL_THROW_IF2(!getline(spe_aln,alnline), HERE 
+      UTIL_THROW_IF2(!getline(spe_aln,alnline), HERE
 		     << ": missing data for online updates.");
       cout << string(80,'-') << "\n" << srcline << "\n" << trgline << "\n" << endl;
 
@@ -111,7 +115,7 @@ int main(int argc, char* argv[])
       int dynprovidx = -1;
       for (size_t i = 0; i < fname.size(); ++i)
 	{
-	  if (fname[i].substr(0,7) == "prov-1.") 
+	  if (starts_with(fname[i], "prov-1."))
 	    dynprovidx = i;
 	}
       cout << endl;
@@ -119,33 +123,33 @@ int main(int argc, char* argv[])
 	{
 	  for (size_t k = i; k < snt.GetSize(); ++k)
 	    {
-	      Phrase p = snt.GetSubString(WordsRange(i,k));
+	      Phrase p = snt.GetSubString(Range(i,k));
 	      if (!mmsapt->PrefixExists(p)) break;
 	      TargetPhraseCollection const* trg = PT->GetTargetPhraseCollectionLEGACY(p);
 	      if (!trg || !trg->GetSize()) continue;
-	      
+
 	      bool header_done = false;
 	      bool has_dynamic_match = vlevel == "all" || vlevel == "ALL";
-	      vector<size_t> order; order.reserve(trg->GetSize()); 
+	      vector<size_t> order; order.reserve(trg->GetSize());
 	      size_t stop = trg->GetSize();
 
 	      vector<size_t> o2(trg->GetSize());
 	      for (size_t i = 0; i < stop; ++i) o2[i] = i;
 	      sort(o2.begin(),o2.end(),TargetPhraseIndexSorter(*trg));
-		
+
 	      for (size_t r = 0; r < stop; ++r) // r for rank
 		{
 		  if (vlevel != "ALL")
 		    {
 		      Phrase const& phr = static_cast<Phrase const&>(*(*trg)[o2[r]]);
-		      ostringstream buf; buf << phr; 
-		      string tphrase = buf.str(); 
+		      ostringstream buf; buf << phr;
+		      string tphrase = buf.str();
 		      tphrase.erase(tphrase.size()-1);
 		      size_t s = trgline.find(tphrase);
 		      if (s == string::npos) continue;
 		      size_t e = s + tphrase.size();
 		      if ((s && trgline[s-1] != ' ') || (e < trgline.size() && trgline[e] != ' '))
-			continue; 
+			continue;
 		    }
 		  order.push_back(r);
 		  if (!has_dynamic_match)
@@ -166,7 +170,7 @@ int main(int argc, char* argv[])
 		  ScoreComponentCollection::IndexPair idx = scc.GetIndexes(PT);
 		  FVector const& scores = scc.GetScoresVector();
 		  float wscore = scc.GetWeightedScore();
-		  if (vlevel == "new" && scores[idx.first + dynprovidx] == 0) 
+		  if (vlevel == "new" && scores[idx.first + dynprovidx] == 0)
 		    continue;
 		  if (!header_done)
 		    {
@@ -189,15 +193,15 @@ int main(int argc, char* argv[])
 		      size_t j = x-idx.first;
 		      float f = (mmsapt && mmsapt->isLogVal(j)) ? exp(scores[x]) : scores[x];
 		      string fmt = (mmsapt && mmsapt->isInteger(j)) ? "%10d" : "%10.8f";
-		      if (fname[j].substr(0,3) == "lex") fmt = "%10.3e";
-		      if (fname[j].substr(0,7) == "prov-1.") 
+		      if (starts_with(fname[j], "lex")) fmt = "%10.3e";
+		      else if (starts_with(fname[j], "prov-1."))
 			{
 			  f = round(f/(1-f));
 			  fmt = "%10d";
 			}
 		      cout << " " << format(fmt) % (mmsapt->isInteger(j) ? round(f) : f);
 		    }
-		  cout << " " << format("%10.3e") % exp(wscore) 
+		  cout << " " << format("%10.3e") % exp(wscore)
 		       << " " << format("%10.3e") % exp((*trg)[o2[r]]->GetFutureScore()) << endl;
 		}
 	      mmsapt->Release(trg);
@@ -209,6 +213,6 @@ int main(int argc, char* argv[])
   // }
   exit(0);
 }
-  
-  
+#endif
+
 

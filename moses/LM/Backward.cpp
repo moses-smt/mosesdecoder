@@ -131,8 +131,8 @@ template <class Model> void BackwardLanguageModel<Model>::CalcScore(const Phrase
   lm::ngram::RuleScore<Model> scorer(*m_ngram, discarded_sadly);
 
   UTIL_THROW_IF2(m_beginSentenceFactor == phrase.GetWord(0).GetFactor(m_factorType),
-    "BackwardLanguageModel does not currently support rules that include <s>"
-  );
+                 "BackwardLanguageModel does not currently support rules that include <s>"
+                );
 
   float before_boundary = 0.0f;
 
@@ -144,8 +144,8 @@ template <class Model> void BackwardLanguageModel<Model>::CalcScore(const Phrase
   for (position = lastWord; position >= 0; position-=1) {
     const Word &word = phrase.GetWord(position);
     UTIL_THROW_IF2(word.IsNonTerminal(),
-      "BackwardLanguageModel does not currently support rules that include non-terminals "
-    );
+                   "BackwardLanguageModel does not currently support rules that include non-terminals "
+                  );
 
     lm::WordIndex index = TranslateID(word);
     scorer.Terminal(index);
@@ -259,8 +259,8 @@ template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Phr
   for (int position=std::min( lastWord,  ngramBoundary - 1); position >= 0; position-=1) {
     const Word &word = phrase.GetWord(position);
     UTIL_THROW_IF2(word.IsNonTerminal(),
-      "BackwardLanguageModel does not currently support rules that include non-terminals "
-    );
+                   "BackwardLanguageModel does not currently support rules that include non-terminals "
+                  );
 
     lm::WordIndex index = TranslateID(word);
     scorer.Terminal(index);
@@ -285,27 +285,27 @@ template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Phr
 
 LanguageModel *ConstructBackwardLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
 {
-    lm::ngram::ModelType model_type;
-    if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
-      switch(model_type) {
-      case lm::ngram::PROBING:
-        return new BackwardLanguageModel<lm::ngram::ProbingModel>(line, file,  factorType, lazy);
-      case lm::ngram::REST_PROBING:
-        return new BackwardLanguageModel<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
-      case lm::ngram::TRIE:
-        return new BackwardLanguageModel<lm::ngram::TrieModel>(line, file, factorType, lazy);
-      case lm::ngram::QUANT_TRIE:
-        return new BackwardLanguageModel<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
-      case lm::ngram::ARRAY_TRIE:
-        return new BackwardLanguageModel<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
-      case lm::ngram::QUANT_ARRAY_TRIE:
-        return new BackwardLanguageModel<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
-      default:
-        UTIL_THROW2("Unrecognized kenlm model type " << model_type);
-      }
-    } else {
-      return new BackwardLanguageModel<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+  lm::ngram::ModelType model_type;
+  if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+    switch(model_type) {
+    case lm::ngram::PROBING:
+      return new BackwardLanguageModel<lm::ngram::ProbingModel>(line, file,  factorType, lazy);
+    case lm::ngram::REST_PROBING:
+      return new BackwardLanguageModel<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
+    case lm::ngram::TRIE:
+      return new BackwardLanguageModel<lm::ngram::TrieModel>(line, file, factorType, lazy);
+    case lm::ngram::QUANT_TRIE:
+      return new BackwardLanguageModel<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
+    case lm::ngram::ARRAY_TRIE:
+      return new BackwardLanguageModel<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
+    case lm::ngram::QUANT_ARRAY_TRIE:
+      return new BackwardLanguageModel<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
+    default:
+      UTIL_THROW2("Unrecognized kenlm model type " << model_type);
     }
+  } else {
+    return new BackwardLanguageModel<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+  }
 }
 
 } // namespace Moses

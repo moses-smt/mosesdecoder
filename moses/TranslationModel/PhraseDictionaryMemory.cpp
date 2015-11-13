@@ -29,8 +29,7 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
+#include "moses/Range.h"
 #include "moses/TranslationModel/RuleTable/LoaderFactory.h"
 #include "moses/TranslationModel/RuleTable/Loader.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.h"
@@ -50,16 +49,17 @@ PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
 
 }
 
-TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollection(
-  const Phrase &source
-  , const TargetPhrase &target
-  , const Word *sourceLHS)
+TargetPhraseCollection::shared_ptr
+PhraseDictionaryMemory::
+GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                  const TargetPhrase &target,
+                                  const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetTargetPhraseCollection();
 }
 
-const TargetPhraseCollection*
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryMemory::
 GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
 {
@@ -74,10 +74,10 @@ GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
     const Word& word = source.GetWord(pos);
     currNode = currNode->GetChild(word);
     if (currNode == NULL)
-      return NULL;
+      return TargetPhraseCollection::shared_ptr();
   }
 
-  return &currNode->GetTargetPhraseCollection();
+  return currNode->GetTargetPhraseCollection();
 }
 
 PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase &source
@@ -98,9 +98,9 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       const Word &sourceNonTerm = word;
 
       UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
-    		  "No alignment for non-term at position " << pos);
+                     "No alignment for non-term at position " << pos);
       UTIL_THROW_IF2(iterAlign->first != pos,
-    		  "Alignment info incorrect at position " << pos);
+                     "Alignment info incorrect at position " << pos);
 
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
@@ -115,7 +115,7 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
     }
 
     UTIL_THROW_IF2(currNode == NULL,
-    		"Node not found at position " << pos);
+                   "Node not found at position " << pos);
   }
 
   // finally, the source LHS
@@ -161,7 +161,7 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 
     // backoff
     if (!SatisfyBackoff(inputPath)) {
-    	continue;
+      continue;
     }
 
     if (prevPtNode) {
@@ -169,12 +169,11 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
       lastWord.OnlyTheseFactors(m_inputFactors);
 
       const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
+      TargetPhraseCollection::shared_ptr targetPhrases;
       if (ptNode) {
-        const TargetPhraseCollection &targetPhrases = ptNode->GetTargetPhraseCollection();
-        inputPath.SetTargetPhrases(*this, &targetPhrases, ptNode);
-      } else {
-    	  inputPath.SetTargetPhrases(*this, NULL, NULL);
+        targetPhrases = ptNode->GetTargetPhraseCollection();
       }
+      inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
     }
   }
 }

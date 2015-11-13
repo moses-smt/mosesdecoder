@@ -1,4 +1,7 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 #by Philipp Koehn, de-augmented by Evan Herbst
@@ -9,6 +12,7 @@
 #similar function to filter-model-given-input.pl, but only operates
 #on the phrase table and doesn't require that any subdirectories exist
 
+use warnings;
 use strict;
 
 my $MAX_LENGTH = 10;

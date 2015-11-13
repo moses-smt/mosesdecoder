@@ -157,12 +157,14 @@ private:
     }
   }
 
-  boost::dynamic_bitset<>& Encode(Data data) {
-    return m_encodeMap[data];
+  const boost::dynamic_bitset<>& Encode(Data data) const {
+    typename EncodeMap::const_iterator it = m_encodeMap.find(data);
+    UTIL_THROW_IF2(it == m_encodeMap.end(), "Cannot find symbol in encoding map");
+    return it->second;
   }
 
   template <class BitWrapper>
-  void PutCode(BitWrapper& bitWrapper, boost::dynamic_bitset<>& code) {
+  void PutCode(BitWrapper& bitWrapper, const boost::dynamic_bitset<>& code) {
     for(int j = code.size()-1; j >= 0; j--)
       bitWrapper.Put(code[j]);
   }

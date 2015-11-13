@@ -5,7 +5,7 @@
 
 #include "moses/Syntax/S2T/Parsers/Parser.h"
 #include "moses/Syntax/S2T/RuleTrieScope3.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 
 #include "PatternApplicationTrie.h"
 #include "SymbolRangeCalculator.h"
@@ -33,13 +33,15 @@ public:
   typedef RuleTrieScope3 RuleTrie;
 
   // TODO Make this configurable?
-  static bool RequiresCompressedChart() { return false; }
+  static bool RequiresCompressedChart() {
+    return false;
+  }
 
   Scope3Parser(PChart &, const RuleTrie &, std::size_t);
 
   ~Scope3Parser();
 
-  void EnumerateHyperedges(const WordsRange &, Callback &);
+  void EnumerateHyperedges(const Range &, Callback &);
 
 private:
   void Init();
@@ -60,7 +62,7 @@ private:
   /* m_patSpans[i][j] records the set of all PAT nodes for span [i,i+j]
      i.e. j is the width of the span */
   std::vector<std::vector<
-    std::vector<const PatternApplicationTrie *> > > m_patSpans;
+  std::vector<const PatternApplicationTrie *> > > m_patSpans;
 };
 
 }  // namespace S2T

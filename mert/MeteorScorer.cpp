@@ -6,7 +6,7 @@
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -25,7 +25,7 @@ namespace MosesTuning
 {
 
 // Meteor supported
-#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
+#if (defined(__GLIBCXX__) || defined(__GLIBCPP__)) && !defined(_WIN32)
 
 // for clarity
 #define CHILD_STDIN_READ pipefds_input[0]
@@ -34,7 +34,8 @@ namespace MosesTuning
 #define CHILD_STDOUT_WRITE pipefds_output[1]
 
 MeteorScorer::MeteorScorer(const string& config)
-  : StatisticsBasedScorer("METEOR",config) {
+  : StatisticsBasedScorer("METEOR",config)
+{
   meteor_jar = getConfig("jar", "");
   meteor_lang = getConfig("lang", "en");
   meteor_task = getConfig("task", "tune");
@@ -88,7 +89,8 @@ MeteorScorer::MeteorScorer(const string& config)
   m_from_meteor = new ifdstream(CHILD_STDOUT_READ);
 }
 
-MeteorScorer::~MeteorScorer() {
+MeteorScorer::~MeteorScorer()
+{
   // Cleanup IO
   delete m_to_meteor;
   delete m_from_meteor;
@@ -171,7 +173,8 @@ float MeteorScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 // Meteor unsupported, throw error if used
 
 MeteorScorer::MeteorScorer(const string& config)
-  : StatisticsBasedScorer("METEOR",config) {
+  : StatisticsBasedScorer("METEOR",config)
+{
   throw runtime_error("Meteor unsupported, requires GLIBCXX");
 }
 

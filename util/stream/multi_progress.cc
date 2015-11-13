@@ -6,7 +6,7 @@
 #include <iostream>
 #include <limits>
 
-#include <string.h>
+#include <cstring>
 
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <unistd.h>
@@ -31,9 +31,9 @@ MultiProgress::~MultiProgress() {
 }
 
 void MultiProgress::Activate() {
-  active_ = 
+  active_ =
 #if !defined(_WIN32) && !defined(_WIN64)
-    // Is stderr a terminal?  
+    // Is stderr a terminal?
     (isatty(2) == 1)
 #else
     true

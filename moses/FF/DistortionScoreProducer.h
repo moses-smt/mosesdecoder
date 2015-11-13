@@ -10,13 +10,20 @@ class FFState;
 class ScoreComponentCollection;
 class Hypothesis;
 class ChartHypothesis;
-class WordsRange;
+class Range;
 
 /** Calculates Distortion scores
  */
 class DistortionScoreProducer : public StatefulFeatureFunction
 {
+protected:
+  static std::vector<const DistortionScoreProducer*> s_staticColl;
+
 public:
+  static const std::vector<const DistortionScoreProducer*>& GetDistortionFeatureFunctions() {
+    return s_staticColl;
+  }
+
   DistortionScoreProducer(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
@@ -24,7 +31,7 @@ public:
   }
 
   static float CalculateDistortionScore(const Hypothesis& hypo,
-                                        const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
+                                        const Range &prev, const Range &curr, const int FirstGapPosition);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
@@ -41,18 +48,22 @@ public:
   }
 
   void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
+  }
 
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
+  void EvaluateInIsolation(const Phrase &source
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {
+  }
 };
 }
 

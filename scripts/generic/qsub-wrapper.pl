@@ -1,16 +1,20 @@
-#! /usr/bin/perl
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
+use warnings;
 use strict;
 
 #######################
-#Default parameters 
+#Default parameters
 #parameters for submiiting processes through SGE
 #NOTE: group name is ws06ossmt (with 2 's') and not ws06osmt (with 1 's')
 my $queueparameters="";
 
-# look for the correct pwdcmd 
-my $pwdcmd = getPwdCmd();
+# look for the correct pwdcmd
+my $pwdcmd = &getPwdCmd();
 
 my $workingdir = `$pwdcmd`; chomp $workingdir;
 my $tmpdir="$workingdir/tmp$$";
@@ -44,7 +48,7 @@ sub init(){
              'old-sge' => \$old_sge,
             ) or exit(1);
   $parameters="@ARGV";
-  
+
   version() if $version;
   usage() if $help;
   print_parameters() if $dbg;
@@ -93,7 +97,7 @@ sub preparing_script(){
   $scriptheader.="uname -a\n\n";
 
   $scriptheader.="cd $workingdir\n\n";
-    
+
   open (OUT, "> $jobscript");
   print OUT $scriptheader;
 
@@ -105,14 +109,14 @@ else
 fi
 ";
 
-  if (defined $cmdout){
+  if (defined($cmdout) && $cmdout ne "/dev/null") {
     print OUT "mv -f $tmpdir/cmdout$$ $cmdout || echo failed to preserve the log: $tmpdir/cmdout$$\n\n";
   }
   else{
     print OUT "rm -f $tmpdir/cmdout$$\n\n";
   }
 
-  if (defined $cmderr){
+  if (defined($cmderr) && $cmderr ne "/dev/null") {
     print OUT "mv -f $tmpdir/cmderr$$ $cmderr || echo failed to preserve the log: $tmpdir/cmderr$$\n\n";
   }
   else{
@@ -141,7 +145,7 @@ my $maysync = $old_sge ? "" : "-sync y";
 # create the qsubcmd to submit to the queue with the parameter "-b yes"
 my $qsubcmd="qsub $queueparameters $maysync -V -o $qsubout -e $qsuberr -N $qsubname -b yes $jobscript > $jobscript.log 2>&1";
 
-#run the qsubcmd 
+#run the qsubcmd
 safesystem($qsubcmd) or die;
 
 #getting id of submitted job
@@ -171,7 +175,7 @@ if ($old_sge) {
   # start the 'hold' job, i.e. the job that will wait
   $cmd="qsub -cwd $queueparameters -hold_jid $id -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript >& $qsubname.W.log";
   safesystem($cmd) or die;
-  
+
   # and wait for checkpoint file to appear
   my $nr=0;
   while (!-e $checkpointfile) {

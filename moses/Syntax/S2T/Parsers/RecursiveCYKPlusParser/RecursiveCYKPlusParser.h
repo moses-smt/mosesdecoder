@@ -4,7 +4,7 @@
 #include "moses/Syntax/PVertex.h"
 #include "moses/Syntax/S2T/Parsers/Parser.h"
 #include "moses/Syntax/S2T/RuleTrieCYKPlus.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 
 namespace Moses
 {
@@ -22,20 +22,22 @@ namespace S2T
 template<typename Callback>
 class RecursiveCYKPlusParser : public Parser<Callback>
 {
- public:
+public:
   typedef Parser<Callback> Base;
   typedef RuleTrieCYKPlus RuleTrie;
 
   // TODO Make this configurable?
-  static bool RequiresCompressedChart() { return true; }
+  static bool RequiresCompressedChart() {
+    return true;
+  }
 
   RecursiveCYKPlusParser(PChart &, const RuleTrie &, std::size_t);
 
   ~RecursiveCYKPlusParser() {}
 
-  void EnumerateHyperedges(const WordsRange &, Callback &);
+  void EnumerateHyperedges(const Range &, Callback &);
 
- private:
+private:
 
   void GetTerminalExtension(const RuleTrie::Node &, std::size_t, std::size_t);
 

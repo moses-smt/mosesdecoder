@@ -1,9 +1,13 @@
 #include "RuleTableFF.h"
 
 #include "moses/StaticData.h"
+#include "moses/Syntax/F2S/HyperTree.h"
+#include "moses/Syntax/F2S/HyperTreeLoader.h"
 #include "moses/Syntax/S2T/RuleTrieCYKPlus.h"
 #include "moses/Syntax/S2T/RuleTrieLoader.h"
 #include "moses/Syntax/S2T/RuleTrieScope3.h"
+#include "moses/Syntax/T2S/RuleTrie.h"
+#include "moses/Syntax/T2S/RuleTrieLoader.h"
 
 namespace Moses
 {
@@ -13,7 +17,7 @@ namespace Syntax
 std::vector<RuleTableFF*> RuleTableFF::s_instances;
 
 RuleTableFF::RuleTableFF(const std::string &line)
-  : PhraseDictionary(line)
+  : PhraseDictionary(line, true)
 {
   ReadParameters();
   // caching for memory pt is pointless
@@ -27,9 +31,14 @@ void RuleTableFF::Load()
   SetFeaturesToApply();
 
   const StaticData &staticData = StaticData::Instance();
-  if (!staticData.UseS2TDecoder()) {
-    UTIL_THROW2("ERROR: RuleTableFF currently only supports S2T decoder");
-  } else {
+  if (staticData.options().search.algo == SyntaxF2S ||
+      staticData.options().search.algo == SyntaxT2S) {
+    F2S::HyperTree *trie = new F2S::HyperTree(this);
+    F2S::HyperTreeLoader loader;
+    loader.Load(m_input, m_output, m_filePath, *this, *trie,
+                m_sourceTerminalSet);
+    m_table = trie;
+  } else if (staticData.options().search.algo == SyntaxS2T) {
     S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
     if (algorithm == RecursiveCYKPlus) {
       S2T::RuleTrieCYKPlus *trie = new S2T::RuleTrieCYKPlus(this);
@@ -44,6 +53,14 @@ void RuleTableFF::Load()
     } else {
       UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
     }
+  } else if (staticData.options().search.algo == SyntaxT2S_SCFG) {
+    T2S::RuleTrie *trie = new T2S::RuleTrie(this);
+    T2S::RuleTrieLoader loader;
+    loader.Load(m_input, m_output, m_filePath, *this, *trie);
+    m_table = trie;
+  } else {
+    UTIL_THROW2(
+      "ERROR: RuleTableFF currently only supports the S2T, T2S, T2S_SCFG, and F2S search algorithms");
   }
 }
 

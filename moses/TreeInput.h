@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #ifndef moses_TreeInput_h
 #define moses_TreeInput_h
 
@@ -7,14 +8,15 @@
 
 namespace Moses
 {
+class TranslationTask;
 //! @todo what is this?
 class XMLParseOutput
 {
 public:
   std::string m_label;
-  WordsRange m_range;
+  Range m_range;
 
-  XMLParseOutput(const std::string &label, const WordsRange &range)
+  XMLParseOutput(const std::string &label, const Range &range)
     : m_label(label)
     , m_range(range) {
   }
@@ -31,6 +33,7 @@ class TreeInput : public Sentence
 
 protected:
   std::vector<std::vector<NonTerminalSet> > m_sourceChart;
+  std::vector<XMLParseOutput> m_labelledSpans;
 
   void AddChartLabel(size_t startPos, size_t endPos, const std::string &label
                      ,const std::vector<FactorType>& factorOrder);
@@ -40,18 +43,22 @@ protected:
     return m_sourceChart[startPos][endPos - startPos];
   }
 
-  bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
+  bool ProcessAndStripXMLTags(AllOptions const& opts, std::string &line,
+                              std::vector<XMLParseOutput> &sourceLabels,
+                              std::vector<XmlOption*> &res);
 
 public:
-  TreeInput() {
-  }
+  TreeInput() : Sentence() { }
 
   InputTypeEnum GetType() const {
     return TreeInputType;
   }
 
   //! populate this InputType with data from in stream
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  virtual int
+  Read(std::istream& in,
+       const std::vector<FactorType>& factorOrder,
+       AllOptions const& opts);
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const;
@@ -61,6 +68,11 @@ public:
 
   virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const {
     return m_sourceChart[startPos][endPos - startPos];
+  }
+
+  //! Get the XMLParseOutput objects in the order they were created.
+  const std::vector<XMLParseOutput> &GetLabelledSpans() const {
+    return m_labelledSpans;
   }
 };
 

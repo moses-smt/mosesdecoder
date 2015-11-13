@@ -12,7 +12,7 @@ namespace Syntax
 // *not* work in moses_chart unless this is changed (among other things).
 class SymbolEqualityPred
 {
- public:
+public:
   bool operator()(const Word &s1, const Word &s2) const {
     const Factor *f1 = s1[0];
     const Factor *f2 = s2[0];

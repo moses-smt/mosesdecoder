@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include <stddef.h>
+#include <cstddef>
 
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"

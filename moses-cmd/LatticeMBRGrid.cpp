@@ -52,6 +52,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/StaticData.h"
 #include "util/exception.hh"
 
+#include <boost/foreach.hpp>
+#include "moses/TranslationTask.h"
 
 using namespace std;
 using namespace Moses;
@@ -69,13 +71,13 @@ public:
   void addParam(gridkey key, const string& arg, float defaultValue) {
     m_args[arg] = key;
     UTIL_THROW_IF2(m_grid.find(key) != m_grid.end(),
-    		  "Couldn't find value for key " << (int) key);
+                   "Couldn't find value for key " << (int) key);
     m_grid[key].push_back(defaultValue);
   }
 
   /** Parse the arguments, removing those that define the grid and returning a copy of the rest */
-  void parseArgs(int& argc, char**& argv) {
-    char** newargv = new char*[argc+1]; //Space to add mbr parameter
+  void parseArgs(int& argc, char const**& argv) {
+    char const** newargv = new char const*[argc+1]; //Space to add mbr parameter
     int newargc = 0;
     for (int i = 0; i < argc; ++i) {
       bool consumed = false;
@@ -111,8 +113,9 @@ public:
         }
       }
       if (!consumed) {
-        newargv[newargc] = new char[strlen(argv[i]) + 1];
-        strcpy(newargv[newargc],argv[i]);
+        // newargv[newargc] = new char[strlen(argv[i]) + 1];
+        // strcpy(newargv[newargc],argv[i]);
+        newargv[newargc] = argv[i];
         ++newargc;
       }
     }
@@ -135,7 +138,7 @@ private:
 
 } // namespace
 
-int main(int argc, char* argv[])
+int main(int argc, char const* argv[])
 {
   cerr << "Lattice MBR Grid search" << endl;
 
@@ -156,59 +159,56 @@ int main(int argc, char* argv[])
     exit(1);
   }
 
-  StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
-  staticData.SetUseLatticeMBR(true);
-  IOWrapper* ioWrapper = IOWrapper::GetIOWrapper(staticData);
+  StaticData& SD = const_cast<StaticData&>(StaticData::Instance());
+  LMBR_Options& lmbr = SD.options().lmbr;
+  MBR_Options&   mbr = SD.options().mbr;
+  lmbr.enabled = true;
 
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }
-  size_t nBestSize = staticData.GetMBRSize();
+  size_t nBestSize = mbr.size;
 
   if (nBestSize <= 0) {
     throw new runtime_error("Non-positive size specified for n-best list");
   }
-
-  size_t lineCount = 0;
-  InputType* source = NULL;
 
   const vector<float>& pgrid = grid.getGrid(lmbr_p);
   const vector<float>& rgrid = grid.getGrid(lmbr_r);
   const vector<float>& prune_grid = grid.getGrid(lmbr_prune);
   const vector<float>& scale_grid = grid.getGrid(lmbr_scale);
 
-  while(ioWrapper->ReadInput(staticData.GetInputType(),source)) {
-    ++lineCount;
-    source->SetTranslationId(lineCount);
-
-    Manager manager(*source, staticData.GetSearchAlgorithm());
-    manager.ProcessSentence();
+  boost::shared_ptr<InputType> source;
+  while((source = ioWrapper->ReadInput()) != NULL) {
+    // set up task of translating one sentence
+    boost::shared_ptr<TranslationTask> ttask;
+    ttask = TranslationTask::create(source, ioWrapper);
+    Manager manager(ttask);
+    manager.Decode();
     TrellisPathList nBestList;
     manager.CalcNBest(nBestSize, nBestList,true);
     //grid search
-    for (vector<float>::const_iterator pi = pgrid.begin(); pi != pgrid.end(); ++pi) {
-      float p = *pi;
-      staticData.SetLatticeMBRPrecision(p);
-      for (vector<float>::const_iterator ri = rgrid.begin(); ri != rgrid.end(); ++ri) {
-        float r = *ri;
-        staticData.SetLatticeMBRPRatio(r);
-        for (vector<float>::const_iterator prune_i = prune_grid.begin(); prune_i != prune_grid.end(); ++prune_i) {
-          size_t prune = (size_t)(*prune_i);
-          staticData.SetLatticeMBRPruningFactor(prune);
-          for (vector<float>::const_iterator scale_i = scale_grid.begin(); scale_i != scale_grid.end(); ++scale_i) {
-            float scale = *scale_i;
-            staticData.SetMBRScale(scale);
-            cout << lineCount << " ||| " << p << " " << r << " " << prune << " " << scale << " ||| ";
+    BOOST_FOREACH(float const& p, pgrid) {
+      lmbr.precision = p;
+      BOOST_FOREACH(float const& r, rgrid) {
+        lmbr.ratio = r;
+        BOOST_FOREACH(size_t const prune_i, prune_grid) {
+          lmbr.pruning_factor = prune_i;
+          BOOST_FOREACH(float const& scale_i, scale_grid) {
+            mbr.scale = scale_i;
+            size_t lineCount = source->GetTranslationId();
+            cout << lineCount << " ||| " << p << " "
+                 << r << " " << size_t(prune_i) << " " << scale_i
+                 << " ||| ";
             vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-            ioWrapper->OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
-                           staticData.GetReportAllFactors(),cout);
+            manager.OutputBestHypo(mbrBestHypo, lineCount,
+                                   manager.options().output.ReportSegmentation,
+                                   manager.options().output.ReportAllFactors,
+                                   cout);
           }
         }
-
       }
     }
-
-
   }
-
 }

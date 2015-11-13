@@ -17,7 +17,7 @@ namespace S2T
 
 class TailLatticeBuilder
 {
- public:
+public:
   TailLatticeBuilder(PChart &chart) : m_chart(chart) {}
 
   // Given a key from a PatternApplicationTrie and the valid ranges of its
@@ -26,7 +26,7 @@ class TailLatticeBuilder
              const std::vector<SymbolRange> &,
              TailLattice &, std::vector<std::vector<bool> > &);
 
- private:
+private:
   // Auxiliary function used by Build.  Enlarges a TailLattice, if necessary,
   // and clears the innermost vectors.
   void ExtendAndClear(const std::vector<const PatternApplicationTrie *> &,

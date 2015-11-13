@@ -23,16 +23,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TrellisPathList.h"
 #include "TrellisPathCollection.h"
 #include "StaticData.h"
-
+#include "Manager.h"
 using namespace std;
 
 namespace Moses
 {
 TrellisPath::TrellisPath(const Hypothesis *hypo)
-  :	m_prevEdgeChanged(NOT_FOUND)
+  : m_prevEdgeChanged(NOT_FOUND)
 {
-  m_scoreBreakdown					= hypo->GetScoreBreakdown();
-  m_totalScore = hypo->GetTotalScore();
+  m_totalScore = hypo->GetFutureScore();
 
   // enumerate path using prevHypo
   while (hypo != NULL) {
@@ -41,10 +40,9 @@ TrellisPath::TrellisPath(const Hypothesis *hypo)
   }
 }
 
-void TrellisPath::InitScore()
+void TrellisPath::InitTotalScore()
 {
-  m_totalScore		= m_path[0]->GetWinningHypo()->GetTotalScore();
-  m_scoreBreakdown= m_path[0]->GetWinningHypo()->GetScoreBreakdown();
+  m_totalScore		= m_path[0]->GetWinningHypo()->GetFutureScore();
 
   //calc score
   size_t sizePath = m_path.size();
@@ -52,13 +50,9 @@ void TrellisPath::InitScore()
     const Hypothesis *hypo = m_path[pos];
     const Hypothesis *winningHypo = hypo->GetWinningHypo();
     if (hypo != winningHypo) {
-      m_totalScore = m_totalScore - winningHypo->GetTotalScore() + hypo->GetTotalScore();
-      m_scoreBreakdown.MinusEquals(winningHypo->GetScoreBreakdown());
-      m_scoreBreakdown.PlusEquals(hypo->GetScoreBreakdown());
+      m_totalScore = m_totalScore - winningHypo->GetFutureScore() + hypo->GetFutureScore();
     }
   }
-
-
 }
 
 TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc)
@@ -80,7 +74,7 @@ TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypoth
     prevHypo = prevHypo->GetPrevHypo();
   }
 
-  InitScore();
+  InitTotalScore();
 }
 
 TrellisPath::TrellisPath(const vector<const Hypothesis*> edges)
@@ -88,9 +82,7 @@ TrellisPath::TrellisPath(const vector<const Hypothesis*> edges)
 {
   m_path.resize(edges.size());
   copy(edges.rbegin(),edges.rend(),m_path.begin());
-  InitScore();
-
-
+  InitTotalScore();
 }
 
 
@@ -172,6 +164,32 @@ void TrellisPath::CreateDeviantPaths(TrellisPathList &pathColl) const
   }
 }
 
+const boost::shared_ptr<ScoreComponentCollection> TrellisPath::GetScoreBreakdown() const
+{
+  if (!m_scoreBreakdown) {
+    float totalScore = m_path[0]->GetWinningHypo()->GetFutureScore(); // calculated for sanity check only
+
+    m_scoreBreakdown = boost::shared_ptr<ScoreComponentCollection>(new ScoreComponentCollection());
+    m_scoreBreakdown->PlusEquals(ScoreComponentCollection(m_path[0]->GetWinningHypo()->GetScoreBreakdown()));
+
+    //calc score
+    size_t sizePath = m_path.size();
+    for (size_t pos = 0 ; pos < sizePath ; pos++) {
+      const Hypothesis *hypo = m_path[pos];
+      const Hypothesis *winningHypo = hypo->GetWinningHypo();
+      if (hypo != winningHypo) {
+        totalScore = totalScore - winningHypo->GetFutureScore() + hypo->GetFutureScore();
+        m_scoreBreakdown->MinusEquals(winningHypo->GetScoreBreakdown());
+        m_scoreBreakdown->PlusEquals(hypo->GetScoreBreakdown());
+      }
+    }
+
+    assert(totalScore == m_totalScore);
+  }
+
+  return m_scoreBreakdown;
+}
+
 Phrase TrellisPath::GetTargetPhrase() const
 {
   Phrase targetPhrase(ARRAY_SIZE_INCR);
@@ -190,9 +208,11 @@ Phrase TrellisPath::GetTargetPhrase() const
 
 Phrase TrellisPath::GetSurfacePhrase() const
 {
-  const std::vector<FactorType> &outputFactor = StaticData::Instance().GetOutputFactorOrder();
-  Phrase targetPhrase = GetTargetPhrase()
-                        ,ret(targetPhrase.GetSize());
+  const std::vector<FactorType> &outputFactor
+  = manager().options().output.factor_order;
+  // = StaticData::Instance().GetOutputFactorOrder();
+  Phrase targetPhrase = GetTargetPhrase();
+  Phrase ret(targetPhrase.GetSize());
 
   for (size_t pos = 0 ; pos < targetPhrase.GetSize() ; ++pos) {
     Word &newWord = ret.AddWord();
@@ -200,7 +220,7 @@ Phrase TrellisPath::GetSurfacePhrase() const
       FactorType factorType = outputFactor[i];
       const Factor *factor = targetPhrase.GetFactor(pos, factorType);
       UTIL_THROW_IF2(factor == NULL,
-    		  "No factor " << factorType << " at position " << pos);
+                     "No factor " << factorType << " at position " << pos);
       newWord[factorType] = factor;
     }
   }
@@ -208,7 +228,7 @@ Phrase TrellisPath::GetSurfacePhrase() const
   return ret;
 }
 
-WordsRange TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
+Range TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
 {
   size_t startPos = 0;
 
@@ -217,14 +237,14 @@ WordsRange TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
     size_t endPos = startPos + currHypo->GetCurrTargetLength() - 1;
 
     if (currHypo == &hypo) {
-      return WordsRange(startPos, endPos);
+      return Range(startPos, endPos);
     }
     startPos = endPos + 1;
   }
 
   // have to give a hypo in the trellis path, but u didn't.
   UTIL_THROW(util::Exception, "Hypothesis not found");
-  return WordsRange(NOT_FOUND, NOT_FOUND);
+  return Range(NOT_FOUND, NOT_FOUND);
 }
 
 TO_STRING_BODY(TrellisPath);

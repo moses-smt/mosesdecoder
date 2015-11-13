@@ -83,9 +83,9 @@ void PartialTranslOptColl::Prune()
 
   // find nth element
   NTH_ELEMENT4(m_list.begin(),
-              m_list.begin() + m_maxSize,
-              m_list.end(),
-              ComparePartialTranslationOption);
+               m_list.begin() + m_maxSize,
+               m_list.end(),
+               ComparePartialTranslationOption);
 
   m_worstScore = m_list[ m_maxSize-1 ]->GetFutureScore();
   // delete the rest

@@ -1,6 +1,6 @@
 #include "moses/PP/CountsPhraseProperty.h"
 #include <sstream>
-#include <assert.h>
+#include <cassert>
 
 namespace Moses
 {
@@ -27,11 +27,11 @@ void CountsPhraseProperty::ProcessValue(const std::string &value)
 
 std::ostream& operator<<(std::ostream &out, const CountsPhraseProperty &obj)
 {
-	out << "Count property="
-			<< obj.GetTargetMarginal() << " "
-			<< obj.GetSourceMarginal() << " "
-			<< obj.GetJointCount();
-	return out;
+  out << "Count property="
+      << obj.GetTargetMarginal() << " "
+      << obj.GetSourceMarginal() << " "
+      << obj.GetJointCount();
+  return out;
 }
 
 } // namespace Moses

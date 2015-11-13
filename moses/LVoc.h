@@ -44,7 +44,7 @@ public:
     return p.first->second;
   }
   Key const& symbol(LabelId i) const {
-	assert(static_cast<size_t>(i)<data.size());
+    assert(static_cast<size_t>(i)<data.size());
     return data[i];
   }
 

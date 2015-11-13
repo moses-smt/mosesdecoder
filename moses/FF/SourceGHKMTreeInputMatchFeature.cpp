@@ -1,6 +1,6 @@
 #include <map>
 #include <vector>
-#include <assert.h>
+#include <cassert>
 #include "SourceGHKMTreeInputMatchFeature.h"
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
@@ -33,15 +33,15 @@ void SourceGHKMTreeInputMatchFeature::SetParameter(const std::string& key, const
 
 // assumes that source-side syntax labels are stored in the target non-terminal field of the rules
 void SourceGHKMTreeInputMatchFeature::EvaluateWithSourceContext(const InputType &input
-                                               , const InputPath &inputPath
-                                               , const TargetPhrase &targetPhrase
-                                               , const StackVec *stackVec
-                                               , ScoreComponentCollection &scoreBreakdown
-                                               , ScoreComponentCollection *estimatedFutureScore) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedScores) const
 {
-  const WordsRange& wordsRange = inputPath.GetWordsRange();
-  size_t startPos = wordsRange.GetStartPos();
-  size_t endPos = wordsRange.GetEndPos();
+  const Range& range = inputPath.GetWordsRange();
+  size_t startPos = range.GetStartPos();
+  size_t endPos = range.GetEndPos();
   const TreeInput& treeInput = static_cast<const TreeInput&>(input);
   const NonTerminalSet& treeInputLabels = treeInput.GetLabelSet(startPos,endPos);
   const Word& lhsLabel = targetPhrase.GetTargetLHS();

@@ -1,12 +1,17 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 # $Id: detokenizer.perl 4134 2011-08-08 15:30:54Z bgottesman $
 # Sample De-Tokenizer
 # written by Josh Schroeder, based on code by Philipp Koehn
 # further modifications by Ondrej Bojar
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
+
+use warnings;
 use strict;
 use utf8; # tell perl this script file is in UTF-8 (see all funny punct below)
 
@@ -36,7 +41,7 @@ if ($HELP) {
 	exit;
 }
 
-if ($language !~ /^(cs|en|fr|it)$/) {
+if ($language !~ /^(cs|en|fr|it|fi)$/) {
   print STDERR "Warning: No built-in rules for language $language.\n"
 }
 
@@ -176,6 +181,11 @@ sub detokenize {
 
 			}
 			
+        } elsif (($language eq "fi") && ($words[$i-1] =~ /:$/) && ($words[$i] =~ /^(N|n|A|a|Ä|ä|ssa|Ssa|ssä|Ssä|sta|stä|Sta|Stä|hun|Hun|hyn|Hyn|han|Han|hän|Hän|hön|Hön|un|Un|yn|Yn|an|An|än|Än|ön|Ön|seen|Seen|lla|Lla|llä|Llä|lta|Lta|ltä|Ltä|lle|Lle|ksi|Ksi|kse|Kse|tta|Tta|ine|Ine)(ni|si|mme|nne|nsa)?(ko|kö|han|hän|pa|pä|kaan|kään|kin)?$/)) {
+            # Finnish : without intervening space if followed by case suffix
+            # EU:N EU:n EU:ssa EU:sta EU:hun EU:iin ...
+            $text=$text. lc $words[$i];
+            $prependSpace = " ";
 		} else {
 			$text=$text.$prependSpace.$words[$i];
 			$prependSpace = " ";
@@ -302,7 +312,7 @@ sub charIsCJK {
     my ($char) = @_;
     # $char should be a string of length 1
     my $codepoint = &codepoint_dec($char);
-    
+
     # The following is based on http://en.wikipedia.org/wiki/Basic_Multilingual_Plane#Basic_Multilingual_Plane
 
     # Hangul Jamo (1100–11FF)

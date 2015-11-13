@@ -20,7 +20,7 @@ namespace S2T
 
 // FIXME Check SymbolHasher does the right thing here
 typedef boost::unordered_map<Word, std::vector<const PVertex *>, SymbolHasher,
-                             SymbolEqualityPred> SentenceMap;
+        SymbolEqualityPred> SentenceMap;
 
 } // namespace S2T
 } // namespace Syntax

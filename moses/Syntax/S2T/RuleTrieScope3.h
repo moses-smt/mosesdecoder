@@ -25,43 +25,57 @@ namespace S2T
 
 class RuleTrieScope3 : public RuleTrie
 {
- public:
+public:
   class Node
   {
-   public:
+  public:
     typedef std::vector<std::vector<Word> > LabelTable;
 
     typedef boost::unordered_map<Word, Node, SymbolHasher,
-                                 SymbolEqualityPred> TerminalMap;
+            SymbolEqualityPred> TerminalMap;
 
     typedef boost::unordered_map<std::vector<int>,
-            TargetPhraseCollection> LabelMap;
+            TargetPhraseCollection::shared_ptr> LabelMap;
 
-    ~Node() { delete m_gapNode; }
+    ~Node() {
+      delete m_gapNode;
+    }
 
-    const LabelTable &GetLabelTable() const { return m_labelTable; }
+    const LabelTable &GetLabelTable() const {
+      return m_labelTable;
+    }
 
-    const LabelMap &GetLabelMap() const { return m_labelMap; }
+    const LabelMap &GetLabelMap() const {
+      return m_labelMap;
+    }
 
-    const TerminalMap &GetTerminalMap() const { return m_terminalMap; }
+    const TerminalMap &GetTerminalMap() const {
+      return m_terminalMap;
+    }
 
-    const Node *GetNonTerminalChild() const { return m_gapNode; }
+    const Node *GetNonTerminalChild() const {
+      return m_gapNode;
+    }
 
     Node *GetOrCreateTerminalChild(const Word &sourceTerm);
 
     Node *GetOrCreateNonTerminalChild(const Word &targetNonTerm);
 
-    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      const TargetPhrase &);
+    TargetPhraseCollection::shared_ptr
+    GetOrCreateTargetPhraseCollection(const TargetPhrase &);
 
-    bool IsLeaf() const { return m_terminalMap.empty() && m_gapNode == NULL; }
+    bool IsLeaf() const {
+      return m_terminalMap.empty() && m_gapNode == NULL;
+    }
 
-    bool HasRules() const { return !m_labelMap.empty(); }
+    bool HasRules() const {
+      return !m_labelMap.empty();
+    }
 
     void Prune(std::size_t tableLimit);
     void Sort(std::size_t tableLimit);
 
-   private:
+  private:
     friend class RuleTrieScope3;
 
     Node() : m_gapNode(NULL) {}
@@ -85,13 +99,17 @@ class RuleTrieScope3 : public RuleTrie
 
   RuleTrieScope3(const RuleTableFF *ff) : RuleTrie(ff) {}
 
-  const Node &GetRootNode() const { return m_root; }
+  const Node &GetRootNode() const {
+    return m_root;
+  }
 
   bool HasPreterminalRule(const Word &) const;
 
- private:
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
+private:
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS);
 
   Node &GetOrCreateNode(const Phrase &source, const TargetPhrase &target,
                         const Word *sourceLHS);

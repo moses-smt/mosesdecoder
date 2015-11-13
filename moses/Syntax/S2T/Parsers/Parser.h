@@ -13,15 +13,15 @@ class PChart;
 template<typename Callback>
 class Parser
 {
- public:
+public:
   typedef Callback CallbackType;
 
   Parser(PChart &chart) : m_chart(chart) {}
 
   virtual ~Parser() {}
 
-  virtual void EnumerateHyperedges(const WordsRange &, Callback &) = 0;
- protected:
+  virtual void EnumerateHyperedges(const Range &, Callback &) = 0;
+protected:
   PChart &m_chart;
 };
 

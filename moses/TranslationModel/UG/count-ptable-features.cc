@@ -8,7 +8,7 @@
 #include <iostream>
 
 using namespace Moses;
-using namespace bitext;
+using namespace sapt;
 using namespace std;
 using namespace boost;
 
@@ -17,8 +17,10 @@ int main()
   string line;
   getline(cin,line);
   Mmsapt PT(line);
+  PT.Load(false);
+  cout << PT.GetFeatureNames().size() << endl;
   exit(0);
 }
-  
-  
+
+
 
