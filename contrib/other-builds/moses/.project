@@ -646,6 +646,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/NonTerminal.h</locationURI>
 		</link>
 		<link>
+			<name>OOVHandlingOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OOVHandlingOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>OOVHandlingOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/OOVHandlingOptions.h</locationURI>
+		</link>
+		<link>
 			<name>ObjectPool.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ObjectPool.h</locationURI>
