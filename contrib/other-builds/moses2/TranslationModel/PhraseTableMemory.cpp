@@ -100,9 +100,13 @@ void PhraseTableMemory::Load(System &system)
 
 	MemPool tmpPool;
 	vector<string> toks;
+	size_t lineNum = 0;
 	InputFileStream strme(m_path);
 	string line;
 	while (getline(strme, line)) {
+		if (++lineNum % 10000) {
+			cerr << lineNum << " ";
+		}
 		toks.clear();
 		TokenizeMultiCharSeparator(toks, line, "|||");
 		assert(toks.size() >= 3);

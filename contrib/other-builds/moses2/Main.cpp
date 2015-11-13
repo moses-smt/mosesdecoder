@@ -6,6 +6,7 @@
 #include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"
+#include "legacy/Timer.h"
 
 using namespace std;
 
@@ -34,6 +35,8 @@ int main(int argc, char** argv)
 	istream &inStream = GetInputStream(params);
 
 	cerr << "system.numThreads=" << system.numThreads << endl;
+	Timer timer;
+	timer.start();
 
 	ThreadPool pool(system.numThreads);
 
@@ -51,6 +54,8 @@ int main(int argc, char** argv)
 		delete &inStream;
 	}
 
+
+	cerr << "Decoding took " << timer.get_elapsed_time() << endl;
 //	cerr << "g_numHypos=" << g_numHypos << endl;
 	cerr << "Finished" << endl;
 }

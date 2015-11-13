@@ -47,6 +47,7 @@ import path ;
 		legacy/Range.cpp
 		legacy/SquareMatrix.cpp
 		legacy/ThreadPool.cpp
+		legacy/Timer.cpp
 		legacy/Util2.cpp
     legacy/ProbingPT/hash.cpp
     legacy/ProbingPT/huffmanish.cpp
