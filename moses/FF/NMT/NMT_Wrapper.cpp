@@ -90,6 +90,7 @@ void NMT_Wrapper::AddPathToSys(const string& path)
 void NMT_Wrapper::Init(
         const std::string& state_path,
         const std::string& model_path,
+        const std::string& topn,
         const std::string& wrapper_path,
         const std::string& sourceVocabPath,
         const std::string& targetVocabPath)
@@ -104,9 +105,10 @@ void NMT_Wrapper::Init(
     PyObject* wrapper_name = PyObject_GetAttrString(imp, (char*)"NMTWrapper");
     UTIL_THROW_IF2(wrapper_name == NULL, "It could not find NMTWrapper class.");
 
-    PyObject* args = PyTuple_Pack(4,
+    PyObject* args = PyTuple_Pack(5,
             PyString_FromString(state_path.c_str()),
             PyString_FromString(model_path.c_str()),
+            PyString_FromString(topn.c_str()),
             PyString_FromString(sourceVocabPath.c_str()),
             PyString_FromString(targetVocabPath.c_str()));
 

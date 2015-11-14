@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
     {
         bi::scoped_lock<bi::interprocess_mutex> lock(mutex);
         GetPaths(statePath, modelPath, wrapperPath, sourceVocab, targetVocab, segment);
-        wrapper.Init(statePath, modelPath, wrapperPath, sourceVocab, targetVocab);
+        wrapper.Init(statePath, modelPath, wrapperPath, "", sourceVocab, targetVocab);
         NotifyParent(segment);
     }
     

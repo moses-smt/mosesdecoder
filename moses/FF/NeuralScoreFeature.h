@@ -88,6 +88,7 @@ private:
   bool m_preCalc;
   std::string m_statePath;
   std::string m_modelPath;
+  std::string m_topnPath;
   std::string m_wrapperPath;
   std::string m_sourceVocabPath;
   std::string m_targetVocabPath;

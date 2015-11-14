@@ -5,13 +5,12 @@ import pprint
 import theano
 import theano.tensor as TT
 from theano.ifelse import ifelse
+from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
 from groundhog.layers import\
         Layer,\
         MultiLayer,\
         SoftmaxLayer,\
-        HierarchicalSoftmaxLayer,\
-        LSTMLayer, \
         RecurrentLayer,\
         RecursiveConvolutionalLayer,\
         UnaryOp,\
@@ -21,165 +20,10 @@ from groundhog.layers import\
         Concatenate
 from groundhog.models import LM_Model
 from groundhog.utils import sample_zeros, sample_weights_orth, init_bias, sample_weights_classic
+from groundhog.utils import name2pos
 import groundhog.utils as utils
 
 logger = logging.getLogger(__name__)
-
-def create_padded_batch(state, x, y, return_dict=False):
-    """A callback given to the iterator to transform data in suitable format
-
-    :type x: list
-    :param x: list of numpy.array's, each array is a batch of phrases
-        in some of source languages
-
-    :type y: list
-    :param y: same as x but for target languages
-
-    :param new_format: a wrapper to be applied on top of returned value
-
-    :returns: a tuple (X, Xmask, Y, Ymask) where
-        - X is a matrix, each column contains a source sequence
-        - Xmask is 0-1 matrix, each column marks the sequence positions in X
-        - Y and Ymask are matrices of the same format for target sequences
-        OR new_format applied to the tuple
-
-    Notes:
-    * actually works only with x[0] and y[0]
-    * len(x[0]) thus is just the minibatch size
-    * len(x[0][idx]) is the size of sequence idx
-    """
-
-    mx = state['seqlen']
-    my = state['seqlen']
-    if state['trim_batches']:
-        # Similar length for all source sequences
-        mx = numpy.minimum(state['seqlen'], max([len(xx) for xx in x[0]]))+1
-        # Similar length for all target sequences
-        my = numpy.minimum(state['seqlen'], max([len(xx) for xx in y[0]]))+1
-
-    # Batch size
-    n = x[0].shape[0]
-
-    X = numpy.zeros((mx, n), dtype='int64')
-    Y = numpy.zeros((my, n), dtype='int64')
-    Xmask = numpy.zeros((mx, n), dtype='float32')
-    Ymask = numpy.zeros((my, n), dtype='float32')
-
-    # Fill X and Xmask
-    for idx in xrange(len(x[0])):
-        # Insert sequence idx in a column of matrix X
-        if mx < len(x[0][idx]):
-            X[:mx, idx] = x[0][idx][:mx]
-        else:
-            X[:len(x[0][idx]), idx] = x[0][idx][:mx]
-
-        # Mark the end of phrase
-        if len(x[0][idx]) < mx:
-            X[len(x[0][idx]):, idx] = state['null_sym_source']
-
-        # Initialize Xmask column with ones in all positions that
-        # were just set in X
-        Xmask[:len(x[0][idx]), idx] = 1.
-        if len(x[0][idx]) < mx:
-            Xmask[len(x[0][idx]), idx] = 1.
-
-    # Fill Y and Ymask in the same way as X and Xmask in the previous loop
-    for idx in xrange(len(y[0])):
-        Y[:len(y[0][idx]), idx] = y[0][idx][:my]
-        if len(y[0][idx]) < my:
-            Y[len(y[0][idx]):, idx] = state['null_sym_target']
-        Ymask[:len(y[0][idx]), idx] = 1.
-        if len(y[0][idx]) < my:
-            Ymask[len(y[0][idx]), idx] = 1.
-
-    null_inputs = numpy.zeros(X.shape[1])
-
-    # We say that an input pair is valid if both:
-    # - either source sequence or target sequence is non-empty
-    # - source sequence and target sequence have null_sym ending
-    # Why did not we filter them earlier?
-    for idx in xrange(X.shape[1]):
-        if numpy.sum(Xmask[:,idx]) == 0 and numpy.sum(Ymask[:,idx]) == 0:
-            null_inputs[idx] = 1
-        if Xmask[-1,idx] and X[-1,idx] != state['null_sym_source']:
-            null_inputs[idx] = 1
-        if Ymask[-1,idx] and Y[-1,idx] != state['null_sym_target']:
-            null_inputs[idx] = 1
-
-    valid_inputs = 1. - null_inputs
-
-    # Leave only valid inputs
-    X = X[:,valid_inputs.nonzero()[0]]
-    Y = Y[:,valid_inputs.nonzero()[0]]
-    Xmask = Xmask[:,valid_inputs.nonzero()[0]]
-    Ymask = Ymask[:,valid_inputs.nonzero()[0]]
-    if len(valid_inputs.nonzero()[0]) <= 0:
-        return None
-
-    # Unknown words
-    X[X >= state['n_sym_source']] = state['unk_sym_source']
-    Y[Y >= state['n_sym_target']] = state['unk_sym_target']
-
-    if return_dict:
-        return {'x' : X, 'x_mask' : Xmask, 'y': Y, 'y_mask' : Ymask}
-    else:
-        return X, Xmask, Y, Ymask
-
-#  def get_batch_iterator(state):
-
-    #  class Iterator(PytablesBitextIterator):
-
-        #  def __init__(self, *args, **kwargs):
-            #  PytablesBitextIterator.__init__(self, *args, **kwargs)
-            #  self.batch_iter = None
-            #  self.peeked_batch = None
-
-        #  def get_homogenous_batch_iter(self):
-            #  while True:
-                #  k_batches = state['sort_k_batches']
-                #  batch_size = state['bs']
-                #  data = [PytablesBitextIterator.next(self) for k in range(k_batches)]
-                #  x = numpy.asarray(list(itertools.chain(*map(operator.itemgetter(0), data))))
-                #  y = numpy.asarray(list(itertools.chain(*map(operator.itemgetter(1), data))))
-                #  lens = numpy.asarray([map(len, x), map(len, y)])
-                #  order = numpy.argsort(lens.max(axis=0)) if state['sort_k_batches'] > 1 \
-                        #  else numpy.arange(len(x))
-                #  for k in range(k_batches):
-                    #  indices = order[k * batch_size:(k + 1) * batch_size]
-                    #  batch = create_padded_batch(state, [x[indices]], [y[indices]],
-                            #  return_dict=True)
-                    #  if batch:
-                        #  yield batch
-
-        #  def next(self, peek=False):
-            #  if not self.batch_iter:
-                #  self.batch_iter = self.get_homogenous_batch_iter()
-
-            #  if self.peeked_batch:
-                #  # Only allow to peek one batch
-                #  assert not peek
-                #  logger.debug("Use peeked batch")
-                #  batch = self.peeked_batch
-                #  self.peeked_batch = None
-                #  return batch
-
-            #  if not self.batch_iter:
-                #  raise StopIteration
-            #  batch = next(self.batch_iter)
-            #  if peek:
-                #  self.peeked_batch = batch
-            #  return batch
-
-    #  train_data = Iterator(
-        #  batch_size=int(state['bs']),
-        #  target_file=state['target'][0],
-        #  source_file=state['source'][0],
-        #  can_fit=False,
-        #  queue_size=1000,
-        #  shuffle=state['shuffle'],
-        #  use_infinite_loop=state['use_infinite_loop'],
-        #  max_len=state['seqlen'])
-    #  return train_data
 
 class RecurrentLayerWithSearch(Layer):
     """A copy of RecurrentLayer from groundhog"""
@@ -234,6 +78,7 @@ class RecurrentLayerWithSearch(Layer):
         super(RecurrentLayerWithSearch, self).__init__(self.n_hids,
                 self.n_hids, rng, name)
 
+        self.trng = RandomStreams(self.rng.randint(int(1e6)))
         self.params = []
         self._init_params()
 
@@ -283,6 +128,7 @@ class RecurrentLayerWithSearch(Layer):
                 name="D_%s"%self.name)
         self.params.append(self.D_pe)
         self.params_grad_scale = [self.grad_scale for x in self.params]
+        self.restricted_params = [x for x in self.params]
 
     def set_decoding_layers(self, c_inputer, c_reseter, c_updater):
         self.c_inputer = c_inputer
@@ -348,9 +194,8 @@ class RecurrentLayerWithSearch(Layer):
         if cndim == 2:
             c = c[:, None, :]
 
-        # Warning: either source_num or target_num should be equal,
-        #          or on of them sould be 1 (they have to broadcast)
-        #          for the following code to make any sense.
+        # Warning: either source_num or target_num should be 1
+        # for the following code to make any sense.
         source_len = c.shape[0]
         source_num = c.shape[1]
         target_num = state_before.shape[0]
@@ -455,27 +300,26 @@ class RecurrentLayerWithSearch(Layer):
             else:
                 init_state = TT.alloc(floatX(0), self.n_hids)
 
-        p_from_c =  utils.dot(c, self.A_cp).reshape(
-                (c.shape[0], c.shape[1], self.n_hids))
-
         if mask:
             sequences = [state_below, mask, updater_below, reseter_below]
-            non_sequences = [c, c_mask, p_from_c]
-            #              seqs    | out |  non_seqs
-            fn = lambda x, m, g, r,   h,   c1, cm, pc : self.step_fprop(x, h, mask=m,
+            non_sequences = [c_mask]
+            fn = lambda x, m, g, r, h, c1, cm, pc : self.step_fprop(x, h, mask=m,
                     gater_below=g, reseter_below=r,
                     c=c1, p_from_c=pc, c_mask=cm,
                     use_noise=use_noise, no_noise_bias=no_noise_bias,
                     return_alignment=return_alignment)
         else:
             sequences = [state_below, updater_below, reseter_below]
-            non_sequences = [c, p_from_c]
-            #            seqs   | out | non_seqs
-            fn = lambda x, g, r,   h,    c1, pc : self.step_fprop(x, h,
+            non_sequences = []
+            fn = lambda x, g, r, h, c1, pc : self.step_fprop(x, h,
                     gater_below=g, reseter_below=r,
                     c=c1, p_from_c=pc,
                     use_noise=use_noise, no_noise_bias=no_noise_bias,
                     return_alignment=return_alignment)
+
+        p_from_c =  utils.dot(c, self.A_cp).reshape(
+                (c.shape[0], c.shape[1], self.n_hids))
+        non_sequences = [c] + non_sequences + [p_from_c]
 
         outputs_info = [init_state, None]
         if return_alignment:
@@ -891,9 +735,6 @@ class Decoder(EncoderDecoderBase):
                         **decoding_kwargs)
 
     def _create_readout_layers(self):
-        softmax_layer = self.state['softmax_layer'] if 'softmax_layer' in self.state \
-                        else 'SoftmaxLayer'
-
         logger.debug("_create_readout_layers")
 
         readout_kwargs = dict(self.default_kwargs)
@@ -934,7 +775,7 @@ class Decoder(EncoderDecoderBase):
             act_layer = UnaryOp(activation=eval(self.state['unary_activ']))
             drop_layer = DropOp(rng=self.rng, dropout=self.state['dropout'])
             self.output_nonlinearities = [act_layer, drop_layer]
-            self.output_layer = eval(softmax_layer)(
+            self.output_layer = SoftmaxLayer(
                     self.rng,
                     self.state['dim'] / self.state['maxout_part'],
                     self.state['n_sym_target'],
@@ -945,7 +786,7 @@ class Decoder(EncoderDecoderBase):
                     **self.default_kwargs)
         else:
             self.output_nonlinearities = []
-            self.output_layer = eval(softmax_layer)(
+            self.output_layer = SoftmaxLayer(
                     self.rng,
                     self.state['dim'],
                     self.state['n_sym_target'],
@@ -1029,7 +870,6 @@ class Decoder(EncoderDecoderBase):
         # to input, reset and update signals.
         # All the shapes if mode == evaluation:
         #   (n_words, dim)
-        # where: n_words = max_seq_len * batch_size
         # All the shape if mode != evaluation:
         #   (n_samples, dim)
         input_signals = []
@@ -1095,14 +935,10 @@ class Decoder(EncoderDecoderBase):
                     **add_kwargs)
             if self.state['search']:
                 if self.compute_alignment:
-                    #This implicitly wraps each element of result.out with a Layer to keep track of the parameters.
-                    #It is equivalent to h=result[0], ctx=result[1] etc.
                     h, ctx, alignment = result
                     if mode == Decoder.EVALUATION:
                         alignment = alignment.out
                 else:
-                    #This implicitly wraps each element of result.out with a Layer to keep track of the parameters.
-                    #It is equivalent to h=result[0], ctx=result[1]
                     h, ctx = result
             else:
                 h = result
@@ -1165,7 +1001,10 @@ class Decoder(EncoderDecoderBase):
                         (y.shape[0], y.shape[1], self.state['dim']))).reshape(
                                 readout.out.shape)
         for fun in self.output_nonlinearities:
-            readout = fun(readout)
+            if isinstance(fun, DropOp):
+                readout = fun(readout, use_noise= mode == Decoder.EVALUATION)
+            else:
+                readout = fun(readout)
 
         if mode == Decoder.SAMPLING:
             sample = self.output_layer.get_sample(
@@ -1398,6 +1237,7 @@ class RNNEncoderDecoder(object):
             indx_word_src=self.state['indx_word'],
             rng=self.rng)
         self.lm_model.load_dict(self.state)
+        self.lm_model.name2pos = name2pos(self.lm_model.params)
         logger.debug("Model params:\n{}".format(
             pprint.pformat(sorted([p.name for p in self.lm_model.params]))))
         return self.lm_model
@@ -1487,18 +1327,13 @@ class RNNEncoderDecoder(object):
                 return probs
         return probs_computer
 
-
 def parse_input(state, word2idx, line):
-    unk_sym = state['unk_sym_source']
-    null_sym = state['null_sym_source']
-    seqin = line.strip().split()
+    seqin = line.split()
     seqlen = len(seqin)
     seq = numpy.zeros(seqlen+1, dtype='int64')
-    for idx, sx in enumerate(seqin):
+    unk_sym = state['unk_sym_source']
+
+    for idx,sx in enumerate(seqin):
         seq[idx] = word2idx.get(sx, unk_sym)
-        if seq[idx] >= state['n_sym_source']:
-            seq[idx] = unk_sym
-
-    seq[-1] = null_sym
-
+    seq[-1] = state['null_sym_source']
     return seq

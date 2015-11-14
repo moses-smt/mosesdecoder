@@ -18,6 +18,7 @@ public:
     void Init(
         const std::string& state_path,
         const std::string& model_path,
+        const std::string& topn,
         const std::string& wrapper_path,
         const std::string& sourceVocabPath,
         const std::string& targetVocabPath);
