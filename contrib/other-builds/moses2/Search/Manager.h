@@ -21,6 +21,7 @@
 class System;
 class PhraseImpl;
 class SearchNormal;
+class Search;
 
 class Manager {
 public:
@@ -68,7 +69,7 @@ protected:
 	TargetPhrase *m_initPhrase;
 
     Stacks m_stacks;
-	SearchNormal *m_search;
+	Search *m_search;
 
 	// must be run in same thread as Decode()
 	void Init();

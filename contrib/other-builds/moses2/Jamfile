@@ -34,6 +34,8 @@ import path ;
    	Search/ArcLists.cpp
 		Search/Hypothesis.cpp 
  	 	Search/Manager.cpp 
+ 	 	Search/Search.cpp
+ 	 	Search/SearchCubePruning.cpp
  	 	Search/SearchNormal.cpp
  	 	Search/Stack.cpp 
  	 	Search/Stacks.cpp 

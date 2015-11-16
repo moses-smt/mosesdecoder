@@ -10,8 +10,9 @@
 #include <vector>
 #include "../legacy/Range.h"
 #include "../legacy/Bitmap.h"
-#include "ArcLists.h"
 #include "../TypeDef.h"
+#include "ArcLists.h"
+#include "Search.h"
 
 class Manager;
 class Stack;
@@ -21,7 +22,8 @@ class TargetPhrases;
 class TargetPhrase;
 class Stacks;
 
-class SearchNormal {
+class SearchNormal : public Search
+{
 public:
 	SearchNormal(Manager &mgr, Stacks &stacks);
 	virtual ~SearchNormal();
