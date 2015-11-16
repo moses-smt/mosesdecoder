@@ -148,65 +148,21 @@ KENLMBatch::EvaluateInIsolation(const System &system,
   }
 }
 
+void KENLMBatch::EvaluateBeforeApplied(const Manager &mgr,
+  const Hypothesis &hypo,
+  const FFState &prevState,
+  Scores &scores,
+	FFState &state) const
+{
+
+}
+
 void KENLMBatch::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
   Scores &scores,
   FFState &state) const
 {
-  KENLMBatchState &stateCast = static_cast<KENLMBatchState&>(state);
-
-  const System &system = mgr.system;
-
-  const lm::ngram::State &in_state = static_cast<const KENLMBatchState&>(prevState).state;
-
-  if (!hypo.GetTargetPhrase().GetSize()) {
-    stateCast.state = in_state;
-	return;
-  }
-
-  const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
-  //[begin, end) in STL-like fashion.
-  const std::size_t end = hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
-  const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
-
-  std::size_t position = begin;
-  typename Model::State aux_state;
-  typename Model::State *state0 = &stateCast.state, *state1 = &aux_state;
-
-  float score = m_ngram->Score(in_state, TranslateID(hypo.GetWord(position)), *state0);
-  ++position;
-  for (; position < adjust_end; ++position) {
-	score += m_ngram->Score(*state0, TranslateID(hypo.GetWord(position)), *state1);
-	std::swap(state0, state1);
-  }
-
-  if (hypo.GetBitmap().IsComplete()) {
-	// Score end of sentence.
-	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
-	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
-	score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), stateCast.state).prob;
-  } else if (adjust_end < end) {
-	// Get state after adding a long phrase.
-	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
-	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
-	m_ngram->GetState(&indices.front(), last, stateCast.state);
-  } else if (state0 != &stateCast.state) {
-	// Short enough phrase that we can just reuse the state.
-	  stateCast.state = *state0;
-  }
-
-  score = TransformLMScore(score);
-
-  bool OOVFeatureEnabled = false;
-  if (OOVFeatureEnabled) {
-	std::vector<float> scoresVec(2);
-	scoresVec[0] = score;
-	scoresVec[1] = 0.0;
-	scores.PlusEquals(system, *this, scoresVec);
-  } else {
-	scores.PlusEquals(system, *this, score);
-  }
 }
 
 void KENLMBatch::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const

@@ -8,6 +8,7 @@
 #include <vector>
 #include "Manager.h"
 #include "SearchNormal.h"
+#include "SearchNormalBatch.h"
 #include "SearchCubePruning.h"
 #include "../System.h"
 #include "../TargetPhrases.h"
@@ -58,7 +59,8 @@ void Manager::Init()
 
 	switch (system.searchAlgorithm) {
 	case Normal:
-		m_search = new SearchNormal(*this, m_stacks);
+		//m_search = new SearchNormal(*this, m_stacks);
+		m_search = new SearchNormalBatch(*this, m_stacks);
 		break;
 	case CubePruning:
 		m_search = new SearchCubePruning(*this, m_stacks);

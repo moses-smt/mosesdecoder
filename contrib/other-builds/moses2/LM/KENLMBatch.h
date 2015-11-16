@@ -34,6 +34,12 @@ public:
 		  Scores &scores,
 		  Scores *estimatedScores) const;
 
+  virtual void EvaluateBeforeApplied(const Manager &mgr,
+    const Hypothesis &hypo,
+    const FFState &prevState,
+    Scores &scores,
+	FFState &state) const;
+
   virtual void EvaluateWhenApplied(const Manager &mgr,
 	const Hypothesis &hypo,
 	const FFState &prevState,
