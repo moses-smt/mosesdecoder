@@ -36,6 +36,7 @@ PhraseDictionaryGroup::PhraseDictionaryGroup(const string &line)
     m_totalModelScores(0),
     m_phraseCounts(false),
     m_wordCounts(false),
+    m_modelBitmapCounts(false),
     m_restrict(false),
     m_haveDefaultScores(false),
     m_defaultAverageOthers(false),
@@ -50,12 +51,16 @@ void PhraseDictionaryGroup::SetParameter(const string& key, const string& value)
   if (key == "members") {
     m_memberPDStrs = Tokenize(value, ",");
     m_numModels = m_memberPDStrs.size();
+    m_seenByAll = dynamic_bitset<>(m_numModels);
+    m_seenByAll.set();
   } else if (key == "restrict") {
     m_restrict = Scan<bool>(value);
   } else if (key == "phrase-counts") {
     m_phraseCounts = Scan<bool>(value);
   } else if (key == "word-counts") {
     m_wordCounts = Scan<bool>(value);
+  } else if (key == "model-bitmap-counts") {
+    m_modelBitmapCounts = Scan<bool>(value);
   } else if (key =="default-scores") {
     m_haveDefaultScores = true;
     m_defaultScores = Scan<float>(Tokenize(value, ","));
@@ -87,16 +92,29 @@ void PhraseDictionaryGroup::Load()
           m_scoresPerModel = nScores;
         } else if (m_defaultAverageOthers) {
           UTIL_THROW_IF2(nScores != m_scoresPerModel,
-                         "Member models must have the same number of scores when using default-average-others");
+              m_description << ": member models must have the same number of scores when using default-average-others");
         }
       }
     }
     UTIL_THROW_IF2(!pdFound,
-                   "Could not find member phrase table " << pdName);
+        m_description << ": could not find member phrase table " << pdName);
   }
   m_totalModelScores = numScoreComponents;
 
-#if PT_UG
+  // Check feature total
+  if (m_phraseCounts) {
+    numScoreComponents += m_numModels;
+  }
+  if (m_wordCounts) {
+    numScoreComponents += m_numModels;
+  }
+  if (m_modelBitmapCounts) {
+    numScoreComponents += (pow(2, m_numModels) - 1);
+  }
+  UTIL_THROW_IF2(numScoreComponents != m_numScoreComponents,
+      m_description << ": feature count mismatch: specify \"num-features=" << numScoreComponents << "\" and supply " << numScoreComponents << " weights");
+
+#ifdef PT_UG
   // Locate mmsapt lexical reordering functions if specified
   if (m_haveMmsaptLrFunc) {
     BOOST_FOREACH(PhraseDictionary* pd, m_memberPDs) {
@@ -110,7 +128,7 @@ void PhraseDictionaryGroup::Load()
   // Determine "zero" scores for features
   if (m_haveDefaultScores) {
     UTIL_THROW_IF2(m_defaultScores.size() != m_numScoreComponents,
-                   "Number of specified default scores is unequal to number of member model scores");
+        m_description << ": number of specified default scores is unequal to number of member model scores");
   } else {
     // Default is all 0 (as opposed to e.g. -99 or similar to approximate log(0)
     // or a smoothed "not in model" score)
@@ -253,21 +271,22 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           pdgPhrase.m_scores[offset + i] = wc;
         }
       }
-      // offset += m_numModels; // if more features are added
+      offset += m_numModels;
+    }
+
+    // Model bitmap features (one feature per possible bitmap)
+    // e.g. seen by models 1 and 3 but not 2 -> "101" fires
+    if (m_modelBitmapCounts) {
+      // Throws exception if someone tries to combine more than 64 models
+      pdgPhrase.m_scores[offset + (pdgPhrase.m_seenBy.to_ulong() - 1)] = 1;
+      offset += m_seenByAll.to_ulong();
     }
 
     // Average other-model scores to fill in defaults when models have not seen
     // this phrase
     if (m_defaultAverageOthers) {
-      bool seenByAll = true;
-      for (size_t i = 0; i < m_numModels; ++i) {
-        if (!pdgPhrase.m_seenBy[i]) {
-          seenByAll = false;
-          break;
-        }
-      }
       // Average seen scores
-      if (!seenByAll) {
+      if (pdgPhrase.m_seenBy != m_seenByAll) {
         vector<float> avgScores(m_scoresPerModel, 0);
         size_t seenBy = 0;
         offset = 0;
@@ -295,12 +314,12 @@ CreateTargetPhraseCollection(const ttasksptr& ttask, const Phrase& src) const
           }
           offset += m_scoresPerModel;
         }
-#if PT_UG
+#ifdef PT_UG
         // Also average LexicalReordering scores if specified
         // We don't necessarily have a lr-func for each model
         if (m_haveMmsaptLrFunc) {
           SPTR<Scores> avgLRScores;
-          seenBy = 0;
+          size_t seenBy = 0;
           // For each model
           for (size_t i = 0; i < m_numModels; ++i) {
             const LexicalReordering* lrFunc = *m_mmsaptLrFuncs[i];

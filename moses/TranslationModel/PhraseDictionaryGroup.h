@@ -20,6 +20,7 @@
 #ifndef moses_PhraseDictionaryGroup_h
 #define moses_PhraseDictionaryGroup_h
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
@@ -31,7 +32,7 @@
 
 #include "moses/TranslationModel/PhraseDictionary.h"
 
-#if PT_UG
+#ifdef PT_UG
 #include "moses/TranslationModel/UG/mmsapt.h"
 #endif
 
@@ -41,14 +42,14 @@ namespace Moses
 struct PDGroupPhrase {
   TargetPhrase* m_targetPhrase;
   std::vector<float> m_scores;
-  std::vector<bool> m_seenBy;
+  boost::dynamic_bitset<> m_seenBy;
 
   PDGroupPhrase() : m_targetPhrase(NULL) { }
 
   PDGroupPhrase(TargetPhrase* targetPhrase, const std::vector<float>& scores, const size_t nModels)
     : m_targetPhrase(targetPhrase),
       m_scores(scores),
-      m_seenBy(nModels, false) { }
+      m_seenBy(nModels) { }
 };
 
 /** Combines multiple phrase tables into a single interface.  Each member phrase
@@ -89,10 +90,13 @@ protected:
   std::vector<FeatureFunction*> m_pdFeature;
   size_t m_numModels;
   size_t m_totalModelScores;
+  boost::dynamic_bitset<> m_seenByAll;
   // phrase-counts option
   bool m_phraseCounts;
   // word-counts option
   bool m_wordCounts;
+  // model-bitmap-counts option
+  bool m_modelBitmapCounts;
   // restrict option
   bool m_restrict;
   // default-scores option
