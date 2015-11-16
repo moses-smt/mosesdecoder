@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/Incremental.h"
+#include "moses/Syntax/SHyperedge.h"
 #include "moses/Syntax/SVertex.h"
 
 using namespace std;
