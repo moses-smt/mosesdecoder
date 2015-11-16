@@ -8,7 +8,7 @@
 #ifndef SEARCH_SEARCH_H_
 #define SEARCH_SEARCH_H_
 
-#include <vector>
+#include <stddef.h>
 
 class Manager;
 class Stack;
