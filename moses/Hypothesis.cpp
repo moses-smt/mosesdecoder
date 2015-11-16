@@ -148,9 +148,6 @@ EvaluateWhenApplied(float estimatedScore)
 {
   const StaticData &staticData = StaticData::Instance();
 
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().StartTimeOtherScore();
-  }
   // some stateless score producers cache their values in the translation
   // option: add these here
   // language model scores for n-grams completely contained within a target
@@ -177,21 +174,12 @@ EvaluateWhenApplied(float estimatedScore)
     }
   }
 
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().StopTimeOtherScore();
-    m_manager.GetSentenceStats().StartTimeEstimateScore();
-  }
-
   // FUTURE COST
   m_estimatedScore = estimatedScore;
 
   // TOTAL
   m_futureScore = m_currScoreBreakdown.GetWeightedScore() + m_estimatedScore;
   if (m_prevHypo) m_futureScore += m_prevHypo->GetScore();
-
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().StopTimeEstimateScore();
-  }
 }
 
 const Hypothesis* Hypothesis::GetPrevHypo()const
