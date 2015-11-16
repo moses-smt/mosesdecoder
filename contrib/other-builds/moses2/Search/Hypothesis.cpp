@@ -175,6 +175,18 @@ void Hypothesis::EvaluateBeforeApplied()
 	  }
 }
 
+void Hypothesis::EvaluateBeforeAppliedBatch()
+{
+	  const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
+	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
+		  size_t statefulInd = sfff->GetStatefulInd();
+		  const FFState *prevState = m_prevHypo->GetState(statefulInd);
+		  FFState *thisState = m_ffStates[statefulInd];
+		  assert(prevState);
+		  sfff->EvaluateBeforeAppliedBatch();
+	  }
+}
+
 void Hypothesis::EvaluateWhenApplied()
 {
   const std::vector<const StatefulFeatureFunction*>  &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();

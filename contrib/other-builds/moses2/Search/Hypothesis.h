@@ -71,6 +71,7 @@ public:
   void EmptyHypothesisState(const PhraseImpl &input);
 
   void EvaluateBeforeApplied();
+  void EvaluateBeforeAppliedBatch();
   void EvaluateWhenApplied();
 
   const Hypothesis* GetPrevHypo() const

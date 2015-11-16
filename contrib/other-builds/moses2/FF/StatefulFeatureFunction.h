@@ -36,6 +36,8 @@ public:
 	    Scores &scores,
 		FFState &state) const = 0;
 
+	  virtual void EvaluateBeforeAppliedBatch() const = 0;
+
 	  virtual void EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,
 	    const FFState &prevState,

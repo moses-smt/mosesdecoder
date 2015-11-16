@@ -157,6 +157,11 @@ void KENLMBatch::EvaluateBeforeApplied(const Manager &mgr,
 
 }
 
+void KENLMBatch::EvaluateBeforeAppliedBatch() const
+{
+
+}
+
 void KENLMBatch::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,

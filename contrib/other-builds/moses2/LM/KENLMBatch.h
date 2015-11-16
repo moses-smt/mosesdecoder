@@ -40,6 +40,8 @@ public:
     Scores &scores,
 	FFState &state) const;
 
+  virtual void EvaluateBeforeAppliedBatch() const;
+
   virtual void EvaluateWhenApplied(const Manager &mgr,
 	const Hypothesis &hypo,
 	const FFState &prevState,
