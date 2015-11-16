@@ -21,6 +21,7 @@
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../LM/LanguageModel.h"
 #include "../LM/KENLM.h"
+#include "../LM/KENLMBatch.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -114,7 +115,8 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 		ret = new LanguageModel(m_ffStartInd, line);
 	}
 	else if (toks[0] == "KENLM") {
-		ret = new KENLM(m_ffStartInd, line);
+		//ret = new KENLM(m_ffStartInd, line);
+		ret = new KENLMBatch(m_ffStartInd, line);
 	}
 	else {
 		//ret = new SkeletonStatefulFF(m_ffStartInd, line);

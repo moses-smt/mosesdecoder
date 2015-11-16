@@ -27,6 +27,7 @@ import path ;
     FF/WordPenalty.cpp
     LM/LanguageModel.cpp
     LM/KENLM.cpp
+    LM/KENLMBatch.cpp
  	 	TranslationModel/PhraseTable.cpp 
  	 	TranslationModel/PhraseTableMemory.cpp 
  	 	TranslationModel/ProbingPT.cpp 
