@@ -19,7 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-
+#include <pthread.h>
 #include "ThreadPool.h"
 
 using namespace std;
@@ -28,7 +28,19 @@ ThreadPool::ThreadPool( size_t numThreads )
   : m_stopped(false), m_stopping(false), m_queueLimit(0)
 {
   for (size_t i = 0; i < numThreads; ++i) {
-    m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
+    boost::thread *thread = m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
+
+#ifdef __linux
+    cpu_set_t cpuset;
+    boost::thread::native_handle_type handle = thread->native_handle();
+    s = pthread_getaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+    printf("Set returned by pthread_getaffinity_np() contained:\n");
+    for (j = 0; j < CPU_SETSIZE; j++) {
+	   if (CPU_ISSET(j, &cpuset)) {
+		   printf("    CPU %d\n", j);
+	   }
+    }
+#endif
   }
 }
 
