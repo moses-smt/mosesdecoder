@@ -18,11 +18,20 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
-
+#include <stdio.h>
 #include <pthread.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+
 #include "ThreadPool.h"
 
 using namespace std;
+
+#define handle_error_en(en, msg) \
+  do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
 
 ThreadPool::ThreadPool( size_t numThreads )
   : m_stopped(false), m_stopping(false), m_queueLimit(0)
@@ -31,15 +40,32 @@ ThreadPool::ThreadPool( size_t numThreads )
     boost::thread *thread = m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
 
 #ifdef __linux
-    cpu_set_t cpuset;
+    int s;
+    size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
+
     boost::thread::native_handle_type handle = thread->native_handle();
-    s = pthread_getaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
-    printf("Set returned by pthread_getaffinity_np() contained:\n");
-    for (j = 0; j < CPU_SETSIZE; j++) {
-	   if (CPU_ISSET(j, &cpuset)) {
-		   printf("    CPU %d\n", j);
-	   }
+
+    //cerr << "numCPU=" << numCPU << endl;
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(i % numCPU, &cpuset);
+    
+    s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset); 
+    if (s != 0) {      
+      handle_error_en(s, "pthread_setaffinity_np");
+      //cerr << "affinity error with thread " << i << endl;
     }
+
+    // get affini
+    CPU_ZERO(&cpuset);
+    s = pthread_getaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
+    printf("Set returned by pthread_getaffinity_np() contained:\n");
+    for (int j = 0; j < CPU_SETSIZE; j++) {
+      if (CPU_ISSET(j, &cpuset)) {
+	   printf("    CPU %d\n", j);
+      }
+    }
+    
 #endif
   }
 }
