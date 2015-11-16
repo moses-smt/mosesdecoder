@@ -18,8 +18,7 @@
 using namespace std;
 
 SearchNormal::SearchNormal(Manager &mgr, Stacks &stacks)
-:m_mgr(mgr)
-,m_stacks(stacks)
+:Search(mgr, stacks)
 {
 	// TODO Auto-generated constructor stub
 

@@ -27,6 +27,7 @@ System::System(const Parameter &paramsArg)
     params.SetParameter(maxDistortion, "distortion-limit", -1);
     params.SetParameter(maxPhraseLength, "max-phrase-length",
     		DEFAULT_MAX_PHRASE_LENGTH);
+    params.SetParameter(searchAlgorithm, "search-algorithm", Normal);
 
 	featureFunctions.Create();
 	LoadWeights();

@@ -14,8 +14,6 @@
 #include "ArcLists.h"
 #include "Search.h"
 
-class Manager;
-class Stack;
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
@@ -33,10 +31,6 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
-	Manager &m_mgr;
-	Stacks &m_stacks;
-	//ArcLists m_arcLists;
-
 
 	void Extend(const Hypothesis &hypo);
 	void Extend(const Hypothesis &hypo, const InputPath &path);

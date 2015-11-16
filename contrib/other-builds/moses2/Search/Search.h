@@ -10,16 +10,24 @@
 
 #include <vector>
 
+class Manager;
+class Stack;
+class Stacks;
 class Hypothesis;
 
 class Search {
 public:
-	Search();
+	Search(Manager &mgr, Stacks &stacks);
 	virtual ~Search();
 
 	virtual void Decode(size_t stackInd) = 0;
 
 	virtual const Hypothesis *GetBestHypothesis() const = 0;
+
+protected:
+	Manager &m_mgr;
+	Stacks &m_stacks;
+	//ArcLists m_arcLists;
 
 };
 

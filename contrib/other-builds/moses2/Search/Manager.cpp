@@ -8,6 +8,7 @@
 #include <vector>
 #include "Manager.h"
 #include "SearchNormal.h"
+#include "SearchCubePruning.h"
 #include "../System.h"
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
@@ -54,7 +55,14 @@ void Manager::Init()
 	m_stacks.Init(m_input->GetSize() + 1);
 
 	m_bitmaps = new Bitmaps(m_input->GetSize(), vector<bool>(0));
-	m_search = new SearchNormal(*this, m_stacks);
+
+	switch (system.searchAlgorithm) {
+	case Normal:
+		m_search = new SearchNormal(*this, m_stacks);
+		break;
+	case CubePruning:
+		m_search = new SearchCubePruning(*this, m_stacks);
+	}
 }
 
 const Hypothesis *Manager::GetBestHypothesis() const

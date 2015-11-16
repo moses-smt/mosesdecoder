@@ -5,9 +5,11 @@
  *      Author: hieu
  */
 
-#include <contrib/other-builds/moses2/Search/SearchCubePruning.h>
+#include "SearchCubePruning.h"
 
-SearchCubePruning::SearchCubePruning() {
+SearchCubePruning::SearchCubePruning(Manager &mgr, Stacks &stacks)
+:Search(mgr, stacks)
+{
 	// TODO Auto-generated constructor stub
 
 }

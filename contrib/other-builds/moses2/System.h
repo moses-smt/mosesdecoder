@@ -14,6 +14,7 @@
 #include "Recycler.h"
 #include "legacy/FactorCollection.h"
 #include "legacy/Parameter.h"
+#include "TypeDef.h"
 
 class FeatureFunction;
 class StatefulFeatureFunction;
@@ -40,6 +41,7 @@ public:
     int maxDistortion;
     size_t maxPhraseLength;
     int numThreads;
+    SearchAlgorithm searchAlgorithm;
 
 protected:
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;

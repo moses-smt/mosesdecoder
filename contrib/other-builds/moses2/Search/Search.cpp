@@ -5,9 +5,12 @@
  *      Author: hieu
  */
 
-#include <contrib/other-builds/moses2/Search/Search.h>
+#include "Search.h"
 
-Search::Search() {
+Search::Search(Manager &mgr, Stacks &stacks)
+:m_mgr(mgr)
+,m_stacks(stacks)
+{
 	// TODO Auto-generated constructor stub
 
 }

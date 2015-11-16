@@ -10,6 +10,11 @@
 
 typedef float SCORE;
 
+enum SearchAlgorithm {
+  Normal = 0,
+  CubePruning	= 1,
+};
+
 
 
 

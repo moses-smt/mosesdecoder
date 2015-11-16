@@ -13,7 +13,7 @@
 class SearchCubePruning : public Search
 {
 public:
-	SearchCubePruning();
+	SearchCubePruning(Manager &mgr, Stacks &stacks);
 	virtual ~SearchCubePruning();
 
 	void Decode(size_t stackInd);
