@@ -18,7 +18,7 @@ StatefulFeatureFunction::~StatefulFeatureFunction() {
 	// TODO Auto-generated destructor stub
 }
 
-void StatefulFeatureFunction::EvaluateWhenApplied(const std::vector<Hypothesis*> &hypos) const
+void StatefulFeatureFunction::EvaluateWhenApplied(const std::vector<Hypothesis*, MemPoolAllocator<Hypothesis*> > &hypos) const
 {
 	 BOOST_FOREACH(Hypothesis *hypo, hypos) {
 		 hypo->EvaluateWhenApplied(*this);

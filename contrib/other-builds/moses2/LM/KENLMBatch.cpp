@@ -148,7 +148,7 @@ KENLMBatch::EvaluateInIsolation(const System &system,
   }
 }
 
-void KENLMBatch::EvaluateWhenApplied(const std::vector<Hypothesis*> &hypos) const
+void KENLMBatch::EvaluateWhenApplied(const std::vector<Hypothesis*, MemPoolAllocator<Hypothesis*> > &hypos) const
 {
 
 }
