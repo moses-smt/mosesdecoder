@@ -264,8 +264,11 @@ bool
 check(std::map<std::string, xmlrpc_c::value> const& param, 
       std::string const key)
 {
-  std::map<std::string, xmlrpc_c::value>::const_iterator m;
-  return (param.find(key) != param.end());
+  std::map<std::string, xmlrpc_c::value>::const_iterator m = param.find(key);
+  if(m == param.end()) return false;
+  std::string val = string(xmlrpc_c::value_string(m->second));
+  if(val == "true" || val == "True" || val == "TRUE" || val == "1") return true;
+  return false;
 }
 
 void
@@ -369,7 +372,7 @@ run_chart_decoder()
 
 void
 TranslationRequest::
-pack_hypothesis(Moses::Manager& manager, vector<Hypothesis const* > const& edges, string const& key,
+pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const& edges, string const& key,
                 map<string, xmlrpc_c::value> & dest) const
 {
   // target string
@@ -402,14 +405,14 @@ pack_hypothesis(Moses::Manager& manager, vector<Hypothesis const* > const& edges
 
 void
 TranslationRequest::
-pack_hypothesis(Moses::Manager& manager, Hypothesis const* h, string const& key,
+pack_hypothesis(const Moses::Manager& manager, Hypothesis const* h, string const& key,
                 map<string, xmlrpc_c::value>& dest) const
 {
   using namespace std;
   vector<Hypothesis const*> edges;
   for (; h; h = h->GetPrevHypo())
     edges.push_back(h);
-  pack_hypothesis(edges, key, dest);
+  pack_hypothesis(manager, edges, key, dest);
 }
 
 
