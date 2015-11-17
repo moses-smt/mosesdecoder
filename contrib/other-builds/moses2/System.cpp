@@ -87,18 +87,6 @@ MemPool &System::GetManagerPool() const
   return *pool;
 }
 
-Recycler<Hypothesis*> &System::GetHypoRecycle() const
-{
-  Recycler<Hypothesis*> *pool;
-  pool = m_hypoRecycle.get();
-  if (pool == NULL) {
-	pool = new Recycler<Hypothesis*>;
-	m_hypoRecycle.reset(pool);
-  }
-  assert(pool);
-  return *pool;
-}
-
 void
 System
 ::ini_performance_options()

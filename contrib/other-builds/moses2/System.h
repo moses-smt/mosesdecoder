@@ -27,7 +27,6 @@ public:
 	virtual ~System();
 
 	MemPool &GetManagerPool() const;
-	Recycler<Hypothesis*> &GetHypoRecycle() const;
 
     const Parameter &params;
     mutable FactorCollection vocab;
@@ -45,7 +44,6 @@ public:
 
 protected:
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
-  mutable boost::thread_specific_ptr<Recycler<Hypothesis*> > m_hypoRecycle;
 
   void LoadWeights();
   void LoadMappings();
