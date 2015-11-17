@@ -28,6 +28,8 @@ class Hypothesis {
 	  Hypothesis(Manager &mgr);
 
 public:
+  Manager &mgr;
+
   static Hypothesis *Create(Manager &mgr);
   virtual ~Hypothesis();
 
@@ -89,7 +91,6 @@ public:
 
   void Swap(Hypothesis &other);
 protected:
-  Manager &m_mgr;
   const TargetPhrase *m_targetPhrase;
   const Bitmap *m_sourceCompleted;
   const Range *m_range;
