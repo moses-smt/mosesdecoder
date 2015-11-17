@@ -393,9 +393,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
       // Non-terminal is first so we can copy instead of rescoring.
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->states[featureID])->GetChartState();
-      float prob = UntransformLMScore(
-                     pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
-      ruleScore.BeginNonTerminal(prevState, prob);
+      ruleScore.BeginNonTerminal(prevState);
       phrasePos++;
     }
   }
@@ -405,9 +403,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
     if (word.IsNonTerminal()) {
       const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->states[featureID])->GetChartState();
-      float prob = UntransformLMScore(
-                     pred->best->label.scoreBreakdown.GetScoresForProducer(this)[0]);
-      ruleScore.NonTerminal(prevState, prob);
+      ruleScore.NonTerminal(prevState);
     } else {
       ruleScore.Terminal(TranslateID(word));
     }
@@ -415,7 +411,16 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
 
   float score = ruleScore.Finish();
   score = TransformLMScore(score);
-  accumulator->Assign(this, score);
+  score -= target.GetScoreBreakdown().GetScoresForProducer(this)[0];
+
+  if (OOVFeatureEnabled()) {
+    std::vector<float> scores(2);
+    scores[0] = score;
+    scores[1] = 0.0;
+    accumulator->PlusEquals(this, scores);
+  } else {
+    accumulator->PlusEquals(this, score);
+  }
   return newState;
 }
 
