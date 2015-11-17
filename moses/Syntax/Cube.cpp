@@ -134,7 +134,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
   // Calculate future score.
 
   hyperedge->label.futureScore =
-      hyperedge->label.translation->GetScoreBreakdown().GetWeightedScore();
+    hyperedge->label.translation->GetScoreBreakdown().GetWeightedScore();
 
   hyperedge->label.futureScore += hyperedge->label.deltas.GetWeightedScore();
 

@@ -42,7 +42,7 @@ void KBestExtractor::Extract(
   for (++p; p != topLevelVertices.end(); ++p) {
     // Check that the first item in topLevelVertices really was the best.
     UTIL_THROW_IF2((*p)->best->label.futureScore >
-                      bestTopLevelVertex.best->label.futureScore,
+                   bestTopLevelVertex.best->label.futureScore,
                    "top-level SVertices are not correctly sorted");
     // Note: there's no need for a smart pointer here: supremeVertex will take
     // ownership of altEdge.

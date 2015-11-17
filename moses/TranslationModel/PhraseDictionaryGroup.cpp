@@ -92,12 +92,12 @@ void PhraseDictionaryGroup::Load()
           m_scoresPerModel = nScores;
         } else if (m_defaultAverageOthers) {
           UTIL_THROW_IF2(nScores != m_scoresPerModel,
-              m_description << ": member models must have the same number of scores when using default-average-others");
+                         m_description << ": member models must have the same number of scores when using default-average-others");
         }
       }
     }
     UTIL_THROW_IF2(!pdFound,
-        m_description << ": could not find member phrase table " << pdName);
+                   m_description << ": could not find member phrase table " << pdName);
   }
   m_totalModelScores = numScoreComponents;
 
@@ -112,7 +112,7 @@ void PhraseDictionaryGroup::Load()
     numScoreComponents += (pow(2, m_numModels) - 1);
   }
   UTIL_THROW_IF2(numScoreComponents != m_numScoreComponents,
-      m_description << ": feature count mismatch: specify \"num-features=" << numScoreComponents << "\" and supply " << numScoreComponents << " weights");
+                 m_description << ": feature count mismatch: specify \"num-features=" << numScoreComponents << "\" and supply " << numScoreComponents << " weights");
 
 #ifdef PT_UG
   // Locate mmsapt lexical reordering functions if specified
@@ -128,7 +128,7 @@ void PhraseDictionaryGroup::Load()
   // Determine "zero" scores for features
   if (m_haveDefaultScores) {
     UTIL_THROW_IF2(m_defaultScores.size() != m_numScoreComponents,
-        m_description << ": number of specified default scores is unequal to number of member model scores");
+                   m_description << ": number of specified default scores is unequal to number of member model scores");
   } else {
     // Default is all 0 (as opposed to e.g. -99 or similar to approximate log(0)
     // or a smoothed "not in model" score)
