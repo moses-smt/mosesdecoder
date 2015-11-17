@@ -31,7 +31,6 @@ StackAdd Stack::Add(const Hypothesis *hypo)
   else {
 	  const Hypothesis *hypoExisting = *addRet.first;
 	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
-		  /*
 		  // incoming hypo is better than the one we have
 		  m_hypos.erase(addRet.first);
 
@@ -40,9 +39,10 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 		  assert(addRet.second);
 
 		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
-		  */
+		  /*
 		  const_cast<Hypothesis*>(hypo)->Swap(*const_cast<Hypothesis*>(hypoExisting));
 		  return StackAdd(true, const_cast<Hypothesis*>(hypo));
+		  */
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
