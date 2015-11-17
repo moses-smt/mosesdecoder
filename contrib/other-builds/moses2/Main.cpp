@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 
 	pool.Stop(true);
 
-	if (inStream != cin) {
+	if (&inStream != &cin) {
 		delete &inStream;
 	}
 

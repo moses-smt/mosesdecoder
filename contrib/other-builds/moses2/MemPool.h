@@ -81,9 +81,18 @@ public:
 	typedef T* pointer;
 	typedef const T* const_pointer;
 	typedef T& reference;
-        typedef const T& const_reference;
-
+    typedef const T& const_reference;
 	typedef std::size_t size_type;
+	typedef std::ptrdiff_t difference_type;
+
+	template< class U >
+	struct rebind { typedef MemPoolAllocator<U> other; };
+
+	MemPoolAllocator() {}
+	MemPoolAllocator(const MemPoolAllocator &other) {}
+
+	template< class U >
+	MemPoolAllocator( const MemPoolAllocator<U>& other ) {}
 
 	size_type max_size() const
 	{ return std::numeric_limits<size_type>::max(); }
@@ -100,8 +109,6 @@ public:
 		return ret;
 	}
 
-	template< class U >
-	struct rebind { typedef MemPoolAllocator<U> other; };
 
 protected:
 	MemPool m_pool;
