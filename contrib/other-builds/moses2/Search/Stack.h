@@ -8,6 +8,7 @@
 #ifndef STACK_H_
 #define STACK_H_
 #include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include "Hypothesis.h"
 #include "../Recycler.h"
 #include "../legacy/Util2.h"
@@ -28,7 +29,7 @@ public:
 
 class Stack {
 protected:
-	  typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis> > _HCType;
+	  typedef std::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
 	  _HCType m_hypos;
 public:
   typedef _HCType::iterator iterator;

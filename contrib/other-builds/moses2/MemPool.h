@@ -95,6 +95,11 @@ public:
 		return ret;
 	}
 
+	/*
+	template< class U >
+	struct rebind { typedef MemPoolAllocator<U> other; };
+	*/
+
 protected:
 	MemPool m_pool;
 };
