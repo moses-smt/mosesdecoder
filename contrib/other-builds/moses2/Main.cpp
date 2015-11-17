@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "System.h"
 #include "Phrase.h"
 #include "TranslationTask.h"
@@ -24,9 +25,13 @@ istream &GetInputStream(Parameter &params)
 	}
 }
 
+void Temp();
+
 int main(int argc, char** argv)
 {
 	cerr << "Starting..." << endl;
+
+	//Temp();
 
 	Parameter params;
 	params.LoadParam(argc, argv);
@@ -58,4 +63,14 @@ int main(int argc, char** argv)
 	cerr << "Decoding took " << timer.get_elapsed_time() << endl;
 //	cerr << "g_numHypos=" << g_numHypos << endl;
 	cerr << "Finished" << endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void Temp()
+{
+	vector<int, MemPoolAllocator<int> > v;
+	v.push_back(33);
+
 }

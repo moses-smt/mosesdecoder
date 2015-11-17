@@ -71,4 +71,31 @@ class MemPool {
     MemPool &operator=(const MemPool &);
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+template <typename T>
+class MemPoolAllocator
+{
+public:
+	typedef T value_type;
+	typedef T* pointer;
+	typedef std::size_t size_type;
+
+	size_type max_size() const
+	{ return std::numeric_limits<size_type>::max(); }
+
+	void deallocate( pointer p, size_type n )
+	{
+		//std::cerr << "deallocate " << p << " " << n << std::endl;
+	}
+
+	pointer allocate( size_type n, std::allocator<void>::const_pointer hint = 0 )
+	{
+		//std::cerr << "allocate " << n << " " << hint << std::endl;
+		pointer ret = m_pool.Allocate<T>(n);
+		return ret;
+	}
+
+protected:
+	MemPool m_pool;
+};
 #endif /* MEMPOOL_H_ */
