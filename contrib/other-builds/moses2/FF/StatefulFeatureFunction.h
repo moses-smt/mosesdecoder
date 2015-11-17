@@ -30,13 +30,7 @@ public:
 	  //! return the state associated with the empty hypothesis for a given sentence
 	  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const = 0;
 
-	  virtual void EvaluateBeforeApplied(const Manager &mgr,
-	    const Hypothesis &hypo,
-	    const FFState &prevState,
-	    Scores &scores,
-		FFState &state) const = 0;
-
-	  virtual void EvaluateBeforeAppliedBatch() const = 0;
+	  virtual void EvaluateWhenApplied(const std::vector<Hypothesis*> &hypos) const = 0;
 
 	  virtual void EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,

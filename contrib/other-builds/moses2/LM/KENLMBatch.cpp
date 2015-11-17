@@ -148,27 +148,20 @@ KENLMBatch::EvaluateInIsolation(const System &system,
   }
 }
 
-void KENLMBatch::EvaluateBeforeApplied(const Manager &mgr,
-  const Hypothesis &hypo,
-  const FFState &prevState,
-  Scores &scores,
-	FFState &state) const
-{
-
-}
-
-void KENLMBatch::EvaluateBeforeAppliedBatch() const
+void KENLMBatch::EvaluateWhenApplied(const std::vector<Hypothesis*> &hypos) const
 {
 
 }
 
 void KENLMBatch::EvaluateWhenApplied(const Manager &mgr,
-  const Hypothesis &hypo,
-  const FFState &prevState,
-  Scores &scores,
-  FFState &state) const
+	const Hypothesis &hypo,
+	const FFState &prevState,
+	Scores &scores,
+	FFState &state) const
 {
+
 }
+
 
 void KENLMBatch::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const
 {

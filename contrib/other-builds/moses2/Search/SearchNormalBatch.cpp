@@ -14,6 +14,7 @@
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
 #include "../System.h"
+#include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
 
@@ -35,6 +36,11 @@ void SearchNormalBatch::Decode(size_t stackInd)
   std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoRecycle());
   BOOST_FOREACH(const Hypothesis *hypo, hypos) {
 		Extend(*hypo);
+  }
+
+  const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
+	  sfff->EvaluateWhenApplied(m_hypos);
   }
 
   //cerr << m_stacks << endl;
