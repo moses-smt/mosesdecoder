@@ -68,7 +68,7 @@ TranslationRequest : public virtual Moses::TranslationTask
 
 
   void
-  output_phrase(std::ostream& out, Moses::Phrase const& phrase) const;
+  output_phrase(std::ostream& out, const Moses::Hypothesis* hypo) const;
 
   void
   add_phrase_aln_info(Moses::Hypothesis const& h,

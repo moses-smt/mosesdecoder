@@ -11,6 +11,8 @@ using Moses::StaticData;
 using Moses::Range;
 using Moses::ChartHypothesis;
 using Moses::Phrase;
+using Moses::Factor;
+using Moses::FactorType;
 using Moses::Manager;
 using Moses::SearchGraphNode;
 using Moses::TrellisPathList;
@@ -164,16 +166,43 @@ insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData)
   retData["sg"] = xmlrpc_c::value_array(searchGraphXml);
 }
 
+// void
+// TranslationRequest::
+// output_phrase(ostream& out, Phrase const& phrase) const
+// {
+//   if (!m_options.output.ReportAllFactors) {
+//     for (size_t i = 0 ; i < phrase.GetSize(); ++i)
+//       out << *phrase.GetFactor(i, 0) << " ";
+//   } else out << phrase;
+// }
+
 void
 TranslationRequest::
-output_phrase(ostream& out, Phrase const& phrase) const
+output_phrase(ostream& out, const Hypothesis* hypo) const
 {
+  Phrase phrase = hypo->GetCurrTargetPhrase();
+  
   if (!m_options.output.ReportAllFactors) {
-    for (size_t i = 0 ; i < phrase.GetSize(); ++i)
-      out << *phrase.GetFactor(i, 0) << " ";
+    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+    std::map<size_t, const Factor*> placeholders;
+    if (placeholderFactor != NOT_FOUND) {
+      // creates map of target position -> factor for placeholders
+      placeholders = GetPlaceholders(*hypo, placeholderFactor);
+    }
+    for (size_t i = 0 ; i < phrase.GetSize(); ++i) {
+      const Factor *factor = phrase.GetFactor(i, 0);
+      if (placeholders.size()) {
+        // do placeholders
+        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(i);
+        if (iter != placeholders.end()) {
+          factor = iter->second;
+        }
+      }
+      out << *factor << " ";
+    }
   } else out << phrase;
 }
-
+  
 void
 TranslationRequest::
 outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
