@@ -40,7 +40,7 @@ public:
 	void clear()
 	{ m_coll.clear(); }
 protected:
-	std::vector<T> m_coll;
+	std::vector<T, MemPoolAllocator<T> > m_coll;
 };
 
 #endif /* RECYCLER_H_ */
