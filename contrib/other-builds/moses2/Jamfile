@@ -63,5 +63,5 @@ import path ;
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 
  ../../..//boost_filesystem  
- : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
+ : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) <cxxflags>-std=c++11 ;
 

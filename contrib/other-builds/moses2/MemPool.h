@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <stdint.h>
+#include <limits>
 
 class MemPool {
 	struct Page {
@@ -78,6 +79,10 @@ class MemPoolAllocator
 public:
 	typedef T value_type;
 	typedef T* pointer;
+	typedef const T* const_pointer;
+	typedef T& reference;
+        typedef const T& const_reference;
+
 	typedef std::size_t size_type;
 
 	size_type max_size() const
@@ -95,10 +100,8 @@ public:
 		return ret;
 	}
 
-	/*
 	template< class U >
 	struct rebind { typedef MemPoolAllocator<U> other; };
-	*/
 
 protected:
 	MemPool m_pool;

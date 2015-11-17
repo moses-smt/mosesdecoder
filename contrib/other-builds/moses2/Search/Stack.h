@@ -29,7 +29,7 @@ public:
 
 class Stack {
 protected:
-	  typedef std::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
+  typedef std::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis> > _HCType;
 	  _HCType m_hypos;
 public:
   typedef _HCType::iterator iterator;
