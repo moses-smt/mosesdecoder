@@ -239,3 +239,10 @@ inline float TransformScore(float prob)
 {
   return log(prob);
 }
+
+template<typename T>
+void Swap(T &a, T &b) {
+  T &c = a;
+  a = b;
+  b = c;
+}
