@@ -56,8 +56,6 @@ using namespace boost::algorithm;
 
 namespace Moses
 {
-bool g_mosesDebug = false;
-
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
