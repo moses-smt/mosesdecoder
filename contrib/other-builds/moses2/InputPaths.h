@@ -10,12 +10,13 @@
 
 #include <vector>
 #include "InputPath.h"
+#include "MemPool.h"
 
 class PhraseImpl;
 class System;
 
 class InputPaths {
-	typedef std::vector<InputPath> Coll;
+	typedef std::vector<InputPath, MemPoolAllocator<InputPath> > Coll;
 public:
 	InputPaths() {}
 	void Init(const PhraseImpl &input, const System &system);
