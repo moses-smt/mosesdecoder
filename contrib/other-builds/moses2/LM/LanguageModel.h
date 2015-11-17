@@ -59,9 +59,6 @@ public:
 	          Scores &scores,
 	          Scores *estimatedScores) const;
 
-	  virtual void EvaluateWhenApplied(const std::vector<Hypothesis*> &hypos) const
-	  {}
-
 	  virtual void EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,
 	    const FFState &prevState,

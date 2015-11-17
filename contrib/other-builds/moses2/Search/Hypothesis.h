@@ -20,6 +20,7 @@ class Manager;
 class PhraseImpl;
 class TargetPhrase;
 class Scores;
+class StatefulFeatureFunction;
 
 class Hypothesis {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
@@ -71,6 +72,7 @@ public:
   void EmptyHypothesisState(const PhraseImpl &input);
 
   void EvaluateWhenApplied();
+  void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);
 
   const Hypothesis* GetPrevHypo() const
   { return m_prevHypo; }
