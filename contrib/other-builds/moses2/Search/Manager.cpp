@@ -57,13 +57,20 @@ void Manager::Init()
 
 	m_bitmaps = new Bitmaps(m_input->GetSize(), vector<bool>(0));
 
-	switch (system.searchAlgorithm) {
+		switch (system.searchAlgorithm) {
 	case Normal:
-		//m_search = new SearchNormal(*this, m_stacks);
+		m_search = new SearchNormal(*this, m_stacks);
+		break;
+	case NormalBatch:
+		cerr << "BATCH" << endl;
 		m_search = new SearchNormalBatch(*this, m_stacks);
 		break;
 	case CubePruning:
 		m_search = new SearchCubePruning(*this, m_stacks);
+		break;
+	default:
+		cerr << "Unknown search algorithm" << endl;
+		abort();
 	}
 }
 

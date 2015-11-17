@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <cmath>
+#include "../TypeDef.h"
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 typedef size_t FactorType;
@@ -70,6 +71,12 @@ inline std::string Scan<std::string>(const std::string &input)
 //! Specialisation to understand yes/no y/n true/false 0/1
 template<>
 bool Scan<bool>(const std::string &input);
+
+template<>
+inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
+{
+  return (SearchAlgorithm) Scan<size_t>(input);
+}
 
 //! convert vectors of string to vectors of type T variables
 template<typename T>
