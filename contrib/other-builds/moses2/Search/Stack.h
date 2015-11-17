@@ -16,12 +16,12 @@ class StackAdd
 {
 public:
 	bool added;
-	Hypothesis *other;
+	Hypothesis *toBeDeleted;
 
 	StackAdd(bool vadded,
-			Hypothesis *vother)
+			Hypothesis *vtoBeDeleted)
 	:added(vadded)
-	,other(vother)
+	,toBeDeleted(vtoBeDeleted)
 	{
 	}
 };

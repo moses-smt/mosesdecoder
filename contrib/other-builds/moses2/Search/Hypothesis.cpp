@@ -192,3 +192,24 @@ const Word &Hypothesis::GetWord(size_t pos) const {
   }
   return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
 }
+
+template<typename T>
+void Swap(T &a, T &b) {
+  T &c = a;
+  a = b;
+  b = c;
+}
+
+void Hypothesis::Swap(Hypothesis &other)
+{
+	::Swap(m_targetPhrase, other.m_targetPhrase);
+	::Swap(m_sourceCompleted, other.m_sourceCompleted);
+	::Swap(m_range, other.m_range);
+	::Swap(m_prevHypo, other.m_prevHypo);
+	::Swap(m_ffStates, other.m_ffStates);
+	::Swap(m_estimatedScore, other.m_estimatedScore);
+	::Swap(m_currTargetWordsRange, other.m_currTargetWordsRange);
+
+
+}
+

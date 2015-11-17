@@ -87,6 +87,7 @@ public:
   /** recursive - pos is relative from start of sentence */
   const Word &GetWord(size_t pos) const;
 
+  void Swap(Hypothesis &other);
 protected:
   Manager &m_mgr;
   const TargetPhrase *m_targetPhrase;
