@@ -38,10 +38,14 @@ void SearchNormalBatch::Decode(size_t stackInd)
 		Extend(*hypo);
   }
 
+  // batch FF evaluation
   const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 	  sfff->EvaluateWhenApplied(m_hypos);
   }
+
+  AddHypos();
+  m_hypos.clear();
 
   //cerr << m_stacks << endl;
 
@@ -179,14 +183,13 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo,
 	m_hypos.push_back(newHypo);
 }
 
-void AA()
+void SearchNormalBatch::AddHypos()
 {
-	/*
-	newHypo->EvaluateWhenApplied();
-
-	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
+  BOOST_FOREACH(Hypothesis *hypo, m_hypos) {
+	const Bitmap &bitmap = hypo->GetBitmap();
+	size_t numWordsCovered = bitmap.GetNumWordsCovered();
 	Stack &stack = m_stacks[numWordsCovered];
-	StackAdd added = stack.Add(newHypo);
+	StackAdd added = stack.Add(hypo);
 
 	Recycler<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
 
@@ -201,12 +204,12 @@ void AA()
 		// we're losers!
 		// there should be a winner, we're not doing beam pruning
 		UTIL_THROW_IF2(added.other == NULL, "There must have been a winning hypo");
-		hypoRecycle.push(newHypo);
+		hypoRecycle.push(hypo);
 	}
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);
-*/
+  }
 }
 
 const Hypothesis *SearchNormalBatch::GetBestHypothesis() const

@@ -46,6 +46,8 @@ protected:
 			const Bitmap &newBitmap,
 			SCORE estimatedScore);
 
+	void AddHypos();
+
 	int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 
 };
