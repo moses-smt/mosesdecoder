@@ -3,6 +3,8 @@
 #include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
 #include "moses/Util.h"
+#include "moses/Hypothesis.h"
+
 namespace MosesServer
 {
 using namespace std;
@@ -11,8 +13,6 @@ using Moses::StaticData;
 using Moses::Range;
 using Moses::ChartHypothesis;
 using Moses::Phrase;
-using Moses::Factor;
-using Moses::FactorType;
 using Moses::Manager;
 using Moses::SearchGraphNode;
 using Moses::TrellisPathList;
@@ -175,33 +175,6 @@ insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData)
 //       out << *phrase.GetFactor(i, 0) << " ";
 //   } else out << phrase;
 // }
-
-void
-TranslationRequest::
-output_phrase(ostream& out, const Hypothesis* hypo) const
-{
-  Phrase phrase = hypo->GetCurrTargetPhrase();
-  
-  if (!m_options.output.ReportAllFactors) {
-    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
-    std::map<size_t, const Factor*> placeholders;
-    if (placeholderFactor != NOT_FOUND) {
-      // creates map of target position -> factor for placeholders
-      placeholders = GetPlaceholders(*hypo, placeholderFactor);
-    }
-    for (size_t i = 0 ; i < phrase.GetSize(); ++i) {
-      const Factor *factor = phrase.GetFactor(i, 0);
-      if (placeholders.size()) {
-        // do placeholders
-        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(i);
-        if (iter != placeholders.end()) {
-          factor = iter->second;
-        }
-      }
-      out << *factor << " ";
-    }
-  } else out << phrase;
-}
   
 void
 TranslationRequest::
@@ -222,7 +195,7 @@ outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
     vector<const Hypothesis *> const& E = path->GetEdges();
     if (!E.size()) continue;
     std::map<std::string, xmlrpc_c::value> nBestXmlItem;
-    pack_hypothesis(E, "hyp", nBestXmlItem);
+    pack_hypothesis(manager, E, "hyp", nBestXmlItem);
     if (m_withScoreBreakdown) {
       // should the score breakdown be reported in a more structured manner?
       ostringstream buf;
@@ -396,13 +369,15 @@ run_chart_decoder()
 
 void
 TranslationRequest::
-pack_hypothesis(vector<Hypothesis const* > const& edges, string const& key,
+pack_hypothesis(Moses::Manager& manager, vector<Hypothesis const* > const& edges, string const& key,
                 map<string, xmlrpc_c::value> & dest) const
 {
   // target string
   ostringstream target;
-  BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
-    output_phrase(target, e->GetCurrTargetPhrase());
+  BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)  
+    manager.OutputSurface(target, *e, StaticData::Instance().GetOutputFactorOrder(), 
+                          options().output.ReportSegmentation, m_options.output.ReportAllFactors);
+//  output_phrase(target, e->GetTargetPhrase());
   XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
   
   dest[key] = xmlrpc_c::value_string(target.str());
@@ -427,7 +402,7 @@ pack_hypothesis(vector<Hypothesis const* > const& edges, string const& key,
 
 void
 TranslationRequest::
-pack_hypothesis(Hypothesis const* h, string const& key,
+pack_hypothesis(Moses::Manager& manager, Hypothesis const* h, string const& key,
                 map<string, xmlrpc_c::value>& dest) const
 {
   using namespace std;
@@ -450,8 +425,8 @@ run_phrase_decoder()
 
     
   manager.Decode();
-
-  pack_hypothesis(manager.GetBestHypothesis(), "text", m_retData);
+  
+  pack_hypothesis(manager, manager.GetBestHypothesis(), "text", m_retData);
   if (m_session_id)
     m_retData["session-id"] = xmlrpc_c::value_int(m_session_id);
   
