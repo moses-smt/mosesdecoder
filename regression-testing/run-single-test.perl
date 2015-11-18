@@ -81,10 +81,10 @@ if (!-d $truth) {
 print "RESULTS AVAILABLE IN: $results\n\n";
 my ($o, $elapsed, $ec, $sig);
 if($run_server_test) {
-  ($o, $elapsed, $ec, $sig) = exec_moses($decoder, $local_moses_ini, $input, $results);
+  ($o, $elapsed, $ec, $sig) = exec_moses_server($decoder, $local_moses_ini, $input, $results);
 }
 else {
-  ($o, $elapsed, $ec, $sig) = exec_moses_server($decoder, $local_moses_ini, $input, $results);
+  ($o, $elapsed, $ec, $sig) = exec_moses($decoder, $local_moses_ini, $input, $results);
 }
 my $error = ($sig || $ec > 0);
 if ($error) {
