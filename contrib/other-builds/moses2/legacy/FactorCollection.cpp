@@ -64,9 +64,10 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString, const
   const Factor *factor = &ret.first->in;
 
   // set vocabs for ffs
-  const FeatureFunctions &ffs = system.featureFunctions;
-  MemPool &pool = system.systemPool;
-  factor->ffData = pool.Allocate<void*>(ffs.hasVocabInd.size());
+  size_t numInds = system.featureFunctions.hasVocabInd.size();
+
+  factor->ffData = system.systemPool.Allocate<void*>(numInds);
+  Init<void*>(factor->ffData, numInds, NULL);
 
   return factor;
 }
