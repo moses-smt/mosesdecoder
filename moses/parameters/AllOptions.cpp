@@ -22,6 +22,7 @@ namespace Moses
     if (!mbr.init(param))        return false;
     if (!lmbr.init(param))       return false;
     if (!output.init(param))     return false;
+    if (!unk.init(param))        return false;
 
     param.SetParameter(mira, "mira", false);
 
@@ -88,6 +89,7 @@ namespace Moses
     if (!mbr.update(param))        return false;
     if (!lmbr.update(param))       return false;
     if (!output.update(param))     return false;
+    if (!unk.update(param))        return false;
     return sanity_check();
   }
 #endif

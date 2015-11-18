@@ -145,7 +145,7 @@ aux_interpret_dlt(string& line) // whatever DLT means ... --- UG
 
 void
 Sentence::
-aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
+aux_interpret_xml(AllOptions const& opts, std::string& line, std::vector<size_t> & xmlWalls,
                   std::vector<std::pair<size_t, std::string> >& placeholders)
 {
   // parse XML markup in translation line
@@ -153,9 +153,9 @@ aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
   const StaticData &SD = StaticData::Instance();
 
   using namespace std;
-  if (SD.GetXmlInputType() != XmlPassThrough) {
+  if (opts.input.xml_policy != XmlPassThrough) {
     int offset = SD.IsSyntax() ? 1 : 0;
-    bool OK = ProcessAndStripXMLTags(line, m_xmlOptions,
+    bool OK = ProcessAndStripXMLTags(opts, line, m_xmlOptions,
                                      m_reorderingConstraint,
                                      xmlWalls, placeholders, offset,
                                      SD.GetXmlBrackets().first,
@@ -191,7 +191,7 @@ init(string line, std::vector<FactorType> const& factorOrder,
 
   vector<size_t> xmlWalls;
   vector<pair<size_t, string> >placeholders;
-  aux_interpret_xml(line, xmlWalls, placeholders);
+  aux_interpret_xml(opts, line, xmlWalls, placeholders);
 
   Phrase::CreateFromString(Input, factorOrder, line, NULL);
 
@@ -204,7 +204,7 @@ init(string line, std::vector<FactorType> const& factorOrder,
   // our XmlOptions and create TranslationOptions
 
   // only fill the vector if we are parsing XML
-  if (SD.GetXmlInputType() != XmlPassThrough) {
+  if (opts.input.xml_policy != XmlPassThrough) {
     m_xmlCoverageMap.assign(GetSize(), false);
     BOOST_FOREACH(XmlOption* o, m_xmlOptions) {
       Range const& r = o->range;
@@ -247,7 +247,7 @@ void
 Sentence::
 ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
   if (placeholderFactor == NOT_FOUND) {
     return;
   }
@@ -320,7 +320,9 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
   }
 }
 
-std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions() const
+std::vector <ChartTranslationOptions*>
+Sentence::
+GetXmlChartTranslationOptions(AllOptions const& opts) const
 {
   const StaticData &staticData = StaticData::Instance();
   std::vector <ChartTranslationOptions*> ret;
@@ -329,7 +331,7 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
   // this code is a copy of the 1 in Sentence.
 
   //only fill the vector if we are parsing XML
-  if (staticData.GetXmlInputType() != XmlPassThrough ) {
+  if (opts.input.xml_policy != XmlPassThrough ) {
     //TODO: needed to handle exclusive
     //for (size_t i=0; i<GetSize(); i++) {
     //  m_xmlCoverageMap.push_back(false);

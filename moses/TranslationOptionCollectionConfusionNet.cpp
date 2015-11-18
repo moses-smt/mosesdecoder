@@ -222,7 +222,7 @@ CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph, size_t st
                                        size_t endPos, bool adhereTableLimit, size_t graphInd)
 {
   bool retval = true;
-  XmlInputType intype = StaticData::Instance().GetXmlInputType();
+  XmlInputType intype = m_ttask.lock()->options().input.xml_policy;
   if ((intype != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     InputPathList &inputPathList = GetInputPathList(startPos, endPos);
 

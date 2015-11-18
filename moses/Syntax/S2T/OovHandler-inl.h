@@ -95,7 +95,7 @@ TargetPhrase *OovHandler<RuleTrie>::SynthesizeTargetPhrase(
 template<typename RuleTrie>
 bool OovHandler<RuleTrie>::ShouldDrop(const Word &oov)
 {
-  if (!StaticData::Instance().GetDropUnknown()) {
+  if (!StaticData::Instance().options().unk.drop) {
     return false;
   }
   const Factor *f = oov[0]; // TODO hack. shouldn't know which factor is surface

@@ -12,7 +12,7 @@ using namespace Moses;
 
 Translator::
 Translator(Server& server)
-  : m_threadPool(server.options().num_threads),
+  : m_threadPool(server.options().numThreads),
     m_server(server)
 {
   // signature and help strings are documentation -- the client

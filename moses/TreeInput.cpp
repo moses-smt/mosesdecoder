@@ -22,7 +22,11 @@ namespace Moses
  * \param reorderingConstraint reordering constraint zones specified by xml
  * \param walls reordering constraint walls specified by xml
  */
-bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &xmlOptions)
+bool
+TreeInput::
+ProcessAndStripXMLTags(AllOptions const& opts, string &line,
+                       std::vector<XMLParseOutput> &sourceLabels,
+                       std::vector<XmlOption*> &xmlOptions)
 {
   //parse XML markup in translation line
 
@@ -172,7 +176,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
         }
 
         // specified translations -> vector of phrases, separated by "||"
-        if (translation.length() > 0 && StaticData::Instance().GetXmlInputType() != XmlIgnore) {
+        if (translation.length() > 0 && opts.input.xml_policy != XmlIgnore) {
           vector<string> altTexts = TokenizeMultiCharSeparator(translation, "||");
           vector<string> altLabel = TokenizeMultiCharSeparator(label, "||");
           vector<string> altProbs = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"prob"), "||");
@@ -251,7 +255,7 @@ Read(std::istream& in, const std::vector<FactorType>& factorOrder,
   //line = Trim(line);
 
   m_labelledSpans.clear();
-  ProcessAndStripXMLTags(line, m_labelledSpans, m_xmlOptions);
+  ProcessAndStripXMLTags(opts, line, m_labelledSpans, m_xmlOptions);
 
   // do words 1st - hack
   stringstream strme;

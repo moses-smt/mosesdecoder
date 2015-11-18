@@ -20,22 +20,43 @@
 #ifndef moses_PhraseDictionaryGroup_h
 #define moses_PhraseDictionaryGroup_h
 
-#include "moses/TranslationModel/PhraseDictionary.h"
-
+#include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/thread/shared_mutex.hpp>
+
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Util.h"
 
+#include "moses/FF/LexicalReordering/LexicalReordering.h"
+
+#include "moses/TranslationModel/PhraseDictionary.h"
+
+#ifdef PT_UG
+#include "moses/TranslationModel/UG/mmsapt.h"
+#endif
+
 namespace Moses
 {
 
+struct PDGroupPhrase {
+  TargetPhrase* m_targetPhrase;
+  std::vector<float> m_scores;
+  boost::dynamic_bitset<> m_seenBy;
+
+  PDGroupPhrase() : m_targetPhrase(NULL) { }
+
+  PDGroupPhrase(TargetPhrase* targetPhrase, const std::vector<float>& scores, const size_t nModels)
+    : m_targetPhrase(targetPhrase),
+      m_scores(scores),
+      m_seenBy(nModels) { }
+};
+
 /** Combines multiple phrase tables into a single interface.  Each member phrase
  * table scores each phrase and a single set of translations/scores is returned.
- * If a phrase is not in one of the tables, its scores are zero-filled.  Use the
- * "restrict" option to restrict phrases to those in the table-limit of the
- * first member table, intended to be a "union" table built on all data.
+ * If a phrase is not in one of the tables, its scores are zero-filled unless
+ * otherwise specified.  See model combination section of Moses advanced feature
+ * documentation.
  */
 class PhraseDictionaryGroup: public PhraseDictionary
 {
@@ -66,11 +87,28 @@ public:
 protected:
   std::vector<std::string> m_memberPDStrs;
   std::vector<PhraseDictionary*> m_memberPDs;
+  std::vector<FeatureFunction*> m_pdFeature;
   size_t m_numModels;
+  size_t m_totalModelScores;
+  boost::dynamic_bitset<> m_seenByAll;
+  // phrase-counts option
+  bool m_phraseCounts;
+  // word-counts option
+  bool m_wordCounts;
+  // model-bitmap-counts option
+  bool m_modelBitmapCounts;
+  // restrict option
   bool m_restrict;
+  // default-scores option
   bool m_haveDefaultScores;
   std::vector<float> m_defaultScores;
-  std::vector<FeatureFunction*> m_pdFeature;
+  // default-average-others option
+  bool m_defaultAverageOthers;
+  size_t m_scoresPerModel;
+  // mmsapt-lr-func options
+  bool m_haveMmsaptLrFunc;
+  // pointers to pointers since member mmsapts may not load these until later
+  std::vector<LexicalReordering**> m_mmsaptLrFuncs;
 
   typedef std::vector<TargetPhraseCollection::shared_ptr > PhraseCache;
 #ifdef WITH_THREADS
