@@ -165,16 +165,6 @@ insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData)
   }
   retData["sg"] = xmlrpc_c::value_array(searchGraphXml);
 }
-
-// void
-// TranslationRequest::
-// output_phrase(ostream& out, Phrase const& phrase) const
-// {
-//   if (!m_options.output.ReportAllFactors) {
-//     for (size_t i = 0 ; i < phrase.GetSize(); ++i)
-//       out << *phrase.GetFactor(i, 0) << " ";
-//   } else out << phrase;
-// }
   
 void
 TranslationRequest::
@@ -380,7 +370,7 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
   BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)  
     manager.OutputSurface(target, *e, StaticData::Instance().GetOutputFactorOrder(), 
                           options().output.ReportSegmentation, m_options.output.ReportAllFactors);
-//  output_phrase(target, e->GetTargetPhrase());
+
   XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
   
   dest[key] = xmlrpc_c::value_string(target.str());
@@ -390,7 +380,7 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
 
     vector<xmlrpc_c::value> p_aln;
     BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
-    add_phrase_aln_info(*e, p_aln);
+      add_phrase_aln_info(*e, p_aln);
     dest["align"] = xmlrpc_c::value_array(p_aln);
   }
 
@@ -398,7 +388,7 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
     // word alignment, if requested
     vector<xmlrpc_c::value> w_aln;
     BOOST_FOREACH(Hypothesis const* e, edges)
-    e->OutputLocalWordAlignment(w_aln);
+      e->OutputLocalWordAlignment(w_aln);
     dest["word-align"] = xmlrpc_c::value_array(w_aln);
   }
 }

@@ -66,10 +66,6 @@ TranslationRequest : public virtual Moses::TranslationTask
   pack_hypothesis(const Moses::Manager& manager, Moses::Hypothesis const* h, std::string const& key,
                   std::map<std::string, xmlrpc_c::value> & dest) const;
 
-
-//   void
-//   output_phrase(std::ostream& out, Moses::Phrase const& phrase) const;
-
   void
   add_phrase_aln_info(Moses::Hypothesis const& h,
                       std::vector<xmlrpc_c::value>& aInfo) const;

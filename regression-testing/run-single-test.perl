@@ -2,6 +2,9 @@
 
 # $Id$
 
+use Encode;
+use XMLRPC::Lite;
+use utf8;
 use warnings;
 use strict;
 my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir = dirname(abs_path($0)); push @INC, $script_dir; }
@@ -17,12 +20,16 @@ my $data_dir;
 my $BIN_TEST = $script_dir;
 my $results_dir;
 my $NBEST = 0;
+my $run_server_test = 0;
+my $serverport = 16531;
+my $url = "http://localhost:$serverport/RPC2";
 
 GetOptions("decoder=s" => \$decoder,
            "test=s"    => \$test_name,
            "data-dir=s"=> \$data_dir,
            "test-dir=s"=> \$test_dir,
            "results-dir=s"=> \$results_dir,
+           "server"=> \$run_server_test,
           ) or exit 1;
 
 die "Please specify a decoder with --decoder\n" unless $decoder;
@@ -72,8 +79,13 @@ if (!-d $truth) {
 }
 
 print "RESULTS AVAILABLE IN: $results\n\n";
-
-my ($o, $elapsed, $ec, $sig) = exec_moses($decoder, $local_moses_ini, $input, $results);
+my ($o, $elapsed, $ec, $sig);
+if($run_server_test) {
+  ($o, $elapsed, $ec, $sig) = exec_moses($decoder, $local_moses_ini, $input, $results);
+}
+else {
+  ($o, $elapsed, $ec, $sig) = exec_moses_server($decoder, $local_moses_ini, $input, $results);
+}
 my $error = ($sig || $ec > 0);
 if ($error) {
   open OUT, ">$results/Summary";
@@ -135,6 +147,42 @@ sub exec_moses {
   close CMD;
 
   ($o, $ec, $sig) = run_command($cmd);
+  my $elapsed = time - $start_time;
+  return ($o, $elapsed, $ec, $sig);
+}
+
+sub exec_moses_server {
+  my ($decoder, $conf, $input, $results) = @_;
+  my $start_time = time;
+  my ($o, $ec, $sig);
+  my $pid = fork();
+  if (not defined $pid) {
+      warn "resources not avilable to fork Moses server\n";
+      $ec = 1; # to generate error
+      $sig = 'SIGABRT';
+  } elsif ($pid == 0) {
+      warn "Starting Moses server...\n";
+      ($o, $ec, $sig) = run_command("$decoder --server --server-port $serverport -f $conf --server-log $results/run.stderr");
+      # this should not be reached unless the server fails to start
+  }
+  else {
+    sleep 10;
+    my $proxy = XMLRPC::Lite->proxy($url);
+    open(TEXTIN, "$input") or die "Can not open the input file to translate with Moses server\n";
+    binmode TEXTIN, ':utf8';
+    open(TEXTOUT, ">$results/run.stdout");
+    binmode TEXTOUT, ':utf8';
+    while(<TEXTIN>)
+    {
+      chop;
+      my $encoded = SOAP::Data->type(string => Encode::encode("utf8", $_));
+      my %param = ("text" => $encoded);
+      my $result = $proxy->call("translate",\%param)->result;
+      print TEXTOUT $result->{'text'} . "\n";
+    }
+    close(TEXTOUT);
+    kill('-SIGTERM', $pid);    
+  }
   my $elapsed = time - $start_time;
   return ($o, $elapsed, $ec, $sig);
 }
