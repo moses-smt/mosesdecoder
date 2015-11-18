@@ -49,6 +49,7 @@
 #include "moses/FF/SetSourcePhrase.h"
 #include "moses/FF/PhraseOrientationFeature.h"
 #include "moses/FF/UnalignedWordCountFeature.h"
+#include "moses/FF/SelPrefFeature.h"
 #include "CountNonTerms.h"
 #include "ReferenceComparison.h"
 #include "RuleScope.h"
@@ -266,6 +267,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SyntaxRHS);
   MOSES_FNAME(PhraseOrientationFeature);
   MOSES_FNAME(UnalignedWordCountFeature);
+  MOSES_FNAME(SelPrefFeature);
   MOSES_FNAME(DeleteRules);
 
   MOSES_FNAME(SkeletonStatelessFF);
