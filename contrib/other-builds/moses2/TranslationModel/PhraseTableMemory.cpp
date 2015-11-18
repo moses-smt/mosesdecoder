@@ -112,7 +112,7 @@ void PhraseTableMemory::Load(System &system)
 		assert(toks.size() >= 3);
 		//cerr << "line=" << line << endl;
 
-		PhraseImpl *source = PhraseImpl::CreateFromString(tmpPool, vocab, toks[0]);
+		PhraseImpl *source = PhraseImpl::CreateFromString(tmpPool, vocab, system, toks[0]);
 		//cerr << "created soure" << endl;
 		TargetPhrase *target = TargetPhrase::CreateFromString(system.systemPool, system, toks[1]);
 		//cerr << "created target" << endl;

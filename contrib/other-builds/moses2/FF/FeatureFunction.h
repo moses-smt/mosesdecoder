@@ -34,6 +34,13 @@ public:
 	const std::string &GetName() const
 	{ return m_name; }
 
+	size_t HasVocabInd() const
+	{ return false; }
+	size_t GetVocabInd() const
+	{ return m_vocabInd; }
+	void SetVocabInd(size_t vocabInd)
+	{ m_vocabInd = vocabInd; }
+
 	  // may have more factors than actually need, but not guaranteed.
 	  // For SCFG decoding, the source contains non-terminals, NOT the raw
 	  // source from the input sentence
@@ -46,6 +53,7 @@ public:
 protected:
 	size_t m_startInd;
 	size_t m_numScores;
+	size_t m_vocabInd;
 	std::string m_name;
 	std::vector<std::vector<std::string> > m_args;
 	bool m_tuneable;

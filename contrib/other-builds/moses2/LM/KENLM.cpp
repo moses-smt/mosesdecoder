@@ -36,11 +36,14 @@ struct KenLMState : public FFState {
 class MappingBuilder : public lm::EnumerateVocab
 {
 public:
-  MappingBuilder(FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping)
-    : m_factorCollection(factorCollection), m_mapping(mapping) {}
+  MappingBuilder(FactorCollection &factorCollection, System &system, std::vector<lm::WordIndex> &mapping)
+    : m_factorCollection(factorCollection)
+	, m_system(system)
+	, m_mapping(mapping)
+  {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
-    std::size_t factorId = m_factorCollection.AddFactor(str)->GetId();
+    std::size_t factorId = m_factorCollection.AddFactor(str, m_system.featureFunctions)->GetId();
     if (m_mapping.size() <= factorId) {
       // 0 is <unk> :-)
       m_mapping.resize(factorId + 1);
@@ -50,6 +53,7 @@ public:
 
 private:
   FactorCollection &m_factorCollection;
+  System &m_system;
   std::vector<lm::WordIndex> &m_mapping;
 };
 
@@ -70,14 +74,14 @@ void KENLM::Load(System &system)
 {
   FactorCollection &fc = system.vocab;
 
-  m_bos = fc.AddFactor("<s>", false);
-  m_eos = fc.AddFactor("</s>", false);
+  m_bos = fc.AddFactor("<s>", system.featureFunctions, false);
+  m_eos = fc.AddFactor("</s>", system.featureFunctions, false);
 
   lm::ngram::Config config;
   config.messages = NULL;
 
   FactorCollection &collection = system.vocab;
-  MappingBuilder builder(collection, m_lmIdLookup);
+  MappingBuilder builder(collection, system, m_lmIdLookup);
   config.enumerate_vocab = &builder;
   config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 

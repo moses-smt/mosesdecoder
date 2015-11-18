@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "Word.h"
+#include "System.h"
 #include "legacy/Util2.h"
 #include "util/murmur_hash.hh"
 
@@ -20,13 +21,13 @@ Word::~Word() {
 	// TODO Auto-generated destructor stub
 }
 
-void Word::CreateFromString(FactorCollection &vocab, const std::string &str)
+void Word::CreateFromString(FactorCollection &vocab, const System &system, const std::string &str)
 {
 	vector<string> toks = Tokenize(str, "|");
 	for (size_t i = 0; i < toks.size(); ++i) {
 		const string &tok = toks[i];
 		//cerr << "tok=" << tok << endl;
-		const Factor *factor = vocab.AddFactor(tok, false);
+		const Factor *factor = vocab.AddFactor(tok, system.featureFunctions, false);
 		m_factors[i] = factor;
 	}
 }

@@ -18,7 +18,7 @@ public:
   Word();
   virtual ~Word();
 
-  void CreateFromString(FactorCollection &vocab, const std::string &str);
+  void CreateFromString(FactorCollection &vocab, const System &system, const std::string &str);
 
   size_t hash() const;
   bool operator==(const Word &compare) const;

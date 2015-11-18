@@ -48,6 +48,7 @@ protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
 	  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
 	  std::vector<const PhraseTable*> m_phraseTables;
+	  std::vector<const FeatureFunction*> m_hasVocabInd;
 
 	  System &m_system;
 	  size_t m_ffStartInd;

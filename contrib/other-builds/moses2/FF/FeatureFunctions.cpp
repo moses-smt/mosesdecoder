@@ -124,6 +124,12 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	}
 
 	m_ffStartInd += ret->GetNumScores();
+
+	if (ret->HasVocabInd()) {
+		ret->SetVocabInd(m_hasVocabInd.size());
+		m_hasVocabInd.push_back(ret);
+	}
+
 	return ret;
 }
 

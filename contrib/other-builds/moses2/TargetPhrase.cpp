@@ -21,7 +21,7 @@ TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system
 	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();
 	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, size);
-	ret->PhraseImpl::CreateFromString(vocab, toks);
+	ret->PhraseImpl::CreateFromString(vocab, system, toks);
 
 	return ret;
 }

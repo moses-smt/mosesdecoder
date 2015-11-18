@@ -16,6 +16,7 @@ using namespace std;
 FeatureFunction::FeatureFunction(size_t startInd, const std::string &line)
 :m_startInd(startInd)
 ,m_numScores(1)
+,m_vocabInd(NOT_FOUND)
 {
 	ParseLine(line);
 	cerr << GetName() << " " << m_startInd << "-" << (m_startInd + m_numScores - 1) << endl;

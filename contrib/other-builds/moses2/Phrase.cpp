@@ -12,7 +12,7 @@
 
 using namespace std;
 
-PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab, const std::string &str)
+PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab, const System &system, const std::string &str)
 {
 	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();
@@ -20,15 +20,15 @@ PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab,
 
 	ret = new (pool.Allocate<PhraseImpl>()) PhraseImpl(pool, size);
 
-	ret->CreateFromString(vocab, toks);
+	ret->CreateFromString(vocab, system, toks);
 	return ret;
 }
 
-void PhraseImpl::CreateFromString(FactorCollection &vocab, const std::vector<std::string> &toks)
+void PhraseImpl::CreateFromString(FactorCollection &vocab, const System &system, const std::vector<std::string> &toks)
 {
 	for (size_t i = 0; i < m_size; ++i) {
 		Word &word = (*this)[i];
-		word.CreateFromString(vocab, toks[i]);
+		word.CreateFromString(vocab, system, toks[i]);
 	}
 }
 

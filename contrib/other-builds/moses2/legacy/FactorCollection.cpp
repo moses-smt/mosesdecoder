@@ -28,10 +28,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "util/pool.hh"
 #include "util/exception.hh"
+#include "../FF/FeatureFunctions.h"
 
 using namespace std;
 
-const Factor *FactorCollection::AddFactor(const StringPiece &factorString, bool isNonTerminal)
+const Factor *FactorCollection::AddFactor(const StringPiece &factorString, const FeatureFunctions &ffs, bool isNonTerminal)
 {
   FactorFriend to_ins;
   to_ins.in.m_string = factorString;
@@ -59,7 +60,12 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString, bool 
       m_factorId++;
     }
   }
-  return &ret.first->in;
+
+  const Factor *factor = &ret.first->in;
+
+  // set vocabs for ffs
+
+  return factor;
 }
 
 const Factor *FactorCollection::GetFactor(const StringPiece &factorString, bool isNonTerminal)

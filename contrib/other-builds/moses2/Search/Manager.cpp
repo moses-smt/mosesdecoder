@@ -37,7 +37,7 @@ void Manager::Init()
 	// create input phrase obj
 	FactorCollection &vocab = system.vocab;
 
-	m_input = PhraseImpl::CreateFromString(GetPool(), vocab, m_inputStr);
+	m_input = PhraseImpl::CreateFromString(GetPool(), vocab, system, m_inputStr);
 	m_inputPaths.Init(*m_input, system);
 
 	const std::vector<const PhraseTable*> &pts = system.mappings;
