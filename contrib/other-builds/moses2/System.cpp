@@ -126,3 +126,8 @@ System
 	  }
 	  return;
 }
+
+FactorCollection &System::GetVocab() const
+{
+	return m_vocab;
+}

@@ -23,13 +23,7 @@ class Hypothesis;
 
 class System {
 public:
-	System(const Parameter &paramsArg);
-	virtual ~System();
-
-	MemPool &GetManagerPool() const;
-
     const Parameter &params;
-    mutable FactorCollection vocab;
     FeatureFunctions featureFunctions;
     Weights weights;
     std::vector<const PhraseTable*> mappings;
@@ -41,7 +35,14 @@ public:
     int numThreads;
     SearchAlgorithm searchAlgorithm;
 
+	System(const Parameter &paramsArg);
+	virtual ~System();
+
+	MemPool &GetManagerPool() const;
+	FactorCollection &GetVocab() const;
+
 protected:
+  mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
 
   void LoadWeights();

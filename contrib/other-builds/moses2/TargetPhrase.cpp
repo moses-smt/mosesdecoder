@@ -16,7 +16,7 @@ using namespace std;
 
 TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system, const std::string &str)
 {
-	FactorCollection &vocab = system.vocab;
+	FactorCollection &vocab = system.GetVocab();
 
 	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();

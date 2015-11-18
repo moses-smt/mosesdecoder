@@ -63,7 +63,7 @@ LanguageModel::~LanguageModel() {
 
 void LanguageModel::Load(System &system)
 {
-  FactorCollection &fc = system.vocab;
+  FactorCollection &fc = system.GetVocab();
 
   m_bos = fc.AddFactor("<s>", system, false);
   m_eos = fc.AddFactor("</s>", system, false);

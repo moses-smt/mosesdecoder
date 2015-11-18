@@ -33,7 +33,7 @@ void ProbingPT::Load(System &system)
 
   m_unkId = 456456546456;
 
-  FactorCollection &vocab = system.vocab;
+  FactorCollection &vocab = system.GetVocab();
 
   // source vocab
   const std::map<uint64_t, std::string> &sourceVocab = m_engine->getSourceVocab();

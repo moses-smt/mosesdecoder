@@ -96,7 +96,7 @@ PhraseTableMemory::~PhraseTableMemory() {
 
 void PhraseTableMemory::Load(System &system)
 {
-	FactorCollection &vocab = system.vocab;
+	FactorCollection &vocab = system.GetVocab();
 
 	MemPool tmpPool;
 	vector<string> toks;
