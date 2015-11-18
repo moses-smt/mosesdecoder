@@ -43,7 +43,7 @@ public:
   {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
-	const Factor *factor = m_factorCollection.AddFactor(str, m_system.featureFunctions);
+	const Factor *factor = m_factorCollection.AddFactor(str, m_system);
 	//cerr << "m_vocabInd=" << m_vocabInd << " ffData=" << factor->ffData.size() << endl;
 
 	factor->ffData[m_vocabInd] = (void*) index;
@@ -72,8 +72,8 @@ void KENLM::Load(System &system)
 {
   FactorCollection &fc = system.vocab;
 
-  m_bos = fc.AddFactor("<s>", system.featureFunctions, false);
-  m_eos = fc.AddFactor("</s>", system.featureFunctions, false);
+  m_bos = fc.AddFactor("<s>", system, false);
+  m_eos = fc.AddFactor("</s>", system, false);
 
   lm::ngram::Config config;
   config.messages = NULL;

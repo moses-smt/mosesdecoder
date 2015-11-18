@@ -27,7 +27,7 @@ void Word::CreateFromString(FactorCollection &vocab, const System &system, const
 	for (size_t i = 0; i < toks.size(); ++i) {
 		const string &tok = toks[i];
 		//cerr << "tok=" << tok << endl;
-		const Factor *factor = vocab.AddFactor(tok, system.featureFunctions, false);
+		const Factor *factor = vocab.AddFactor(tok, system, false);
 		m_factors[i] = factor;
 	}
 }

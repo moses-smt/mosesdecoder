@@ -40,7 +40,7 @@ void ProbingPT::Load(System &system)
   std::map<uint64_t, std::string>::const_iterator iterSource;
   for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end(); ++iterSource) {
 	const string &wordStr = iterSource->second;
-	const Factor *factor = vocab.AddFactor(wordStr, system.featureFunctions);
+	const Factor *factor = vocab.AddFactor(wordStr, system);
 
 	uint64_t probingId = iterSource->first;
 
@@ -54,7 +54,7 @@ void ProbingPT::Load(System &system)
   std::map<unsigned int, std::string>::const_iterator iter;
   for (iter = probingVocab.begin(); iter != probingVocab.end(); ++iter) {
 	const string &wordStr = iter->second;
-	const Factor *factor = vocab.AddFactor(wordStr, system.featureFunctions);
+	const Factor *factor = vocab.AddFactor(wordStr, system);
 
 	unsigned int probingId = iter->first;
 

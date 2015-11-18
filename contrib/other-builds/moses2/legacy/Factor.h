@@ -56,7 +56,7 @@ class Factor
   Factor &operator=(const Factor &factor);
 
 public:
-  mutable std::vector<void*> ffData;
+  mutable void** ffData;
 
   //! original string representation of the factor
   StringPiece GetString() const {

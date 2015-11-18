@@ -65,8 +65,8 @@ void LanguageModel::Load(System &system)
 {
   FactorCollection &fc = system.vocab;
 
-  m_bos = fc.AddFactor("<s>", system.featureFunctions, false);
-  m_eos = fc.AddFactor("</s>", system.featureFunctions, false);
+  m_bos = fc.AddFactor("<s>", system, false);
+  m_eos = fc.AddFactor("</s>", system, false);
 
   InputFileStream infile(m_path);
   size_t lineNum = 0;
@@ -99,7 +99,7 @@ void LanguageModel::Load(System &system)
 
 	  vector<const Factor*> factorKey(key.size());
 	  for (size_t i = 0; i < key.size(); ++i) {
-		  factorKey[factorKey.size() - i - 1] = fc.AddFactor(key[i], system.featureFunctions, false);
+		  factorKey[factorKey.size() - i - 1] = fc.AddFactor(key[i], system, false);
 	  }
 
 	  m_root.insert(factorKey, LMScores(prob, backoff));

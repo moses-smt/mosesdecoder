@@ -41,7 +41,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 
 class System;
-class FeatureFunctions;
 
 /** We don't want Factor to be copyable by anybody.  But we also want to store
  * it in an STL container.  The solution is that Factor's copy constructor is
@@ -103,7 +102,7 @@ public:
   /** returns a factor with the same direction, factorType and factorString.
   *	If a factor already exist in the collection, return the existing factor, if not create a new 1
   */
-  const Factor *AddFactor(const StringPiece &factorString, const FeatureFunctions &ffs, bool isNonTerminal = false);
+  const Factor *AddFactor(const StringPiece &factorString, const System &system, bool isNonTerminal = false);
 
   size_t GetNumNonTerminals() {
     return m_factorIdNonTerminal;

@@ -33,8 +33,7 @@ public:
     FeatureFunctions featureFunctions;
     Weights weights;
     std::vector<const PhraseTable*> mappings;
-
-    MemPool systemPool;
+    mutable MemPool systemPool;
 
     size_t stackSize;
     int maxDistortion;

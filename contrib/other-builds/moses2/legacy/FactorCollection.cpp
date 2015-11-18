@@ -28,11 +28,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "util/pool.hh"
 #include "util/exception.hh"
-#include "../FF/FeatureFunctions.h"
+#include "../System.h"
 
 using namespace std;
 
-const Factor *FactorCollection::AddFactor(const StringPiece &factorString, const FeatureFunctions &ffs, bool isNonTerminal)
+const Factor *FactorCollection::AddFactor(const StringPiece &factorString, const System &system, bool isNonTerminal)
 {
   FactorFriend to_ins;
   to_ins.in.m_string = factorString;
@@ -64,7 +64,9 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString, const
   const Factor *factor = &ret.first->in;
 
   // set vocabs for ffs
-  factor->ffData.resize(ffs.hasVocabInd.size(), NULL);
+  const FeatureFunctions &ffs = system.featureFunctions;
+  MemPool &pool = system.systemPool;
+  factor->ffData = pool.Allocate<void*>(ffs.hasVocabInd.size());
 
   return factor;
 }
