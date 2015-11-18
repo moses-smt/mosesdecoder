@@ -52,7 +52,7 @@ BitextSampler : public Moses::reference_counter
   // const members
   // SPTR<bitext const> const   m_bitext; // keep bitext alive while I am 
   // should be an 
-  iptr<bitext const> const       m_bitext; // keep bitext alive as long as I am 
+  SPTR<bitext const> const       m_bitext; // keep bitext alive as long as I am 
   size_t             const         m_plen; // length of lookup phrase
   bool               const          m_fwd; // forward or backward direction?
   SPTR<tsa const>    const         m_root; // root of suffix array
