@@ -34,10 +34,8 @@ public:
 	const std::string &GetName() const
 	{ return m_name; }
 
-	size_t HasVocabInd() const
+	virtual size_t HasVocabInd() const
 	{ return false; }
-	size_t GetVocabInd() const
-	{ return m_vocabInd; }
 	void SetVocabInd(size_t vocabInd)
 	{ m_vocabInd = vocabInd; }
 

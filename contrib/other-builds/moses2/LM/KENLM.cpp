@@ -36,25 +36,23 @@ struct KenLMState : public FFState {
 class MappingBuilder : public lm::EnumerateVocab
 {
 public:
-  MappingBuilder(FactorCollection &factorCollection, System &system, std::vector<lm::WordIndex> &mapping)
+  MappingBuilder(FactorCollection &factorCollection, System &system, size_t vocabInd)
     : m_factorCollection(factorCollection)
 	, m_system(system)
-	, m_mapping(mapping)
+	, m_vocabInd(vocabInd)
   {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
-    std::size_t factorId = m_factorCollection.AddFactor(str, m_system.featureFunctions)->GetId();
-    if (m_mapping.size() <= factorId) {
-      // 0 is <unk> :-)
-      m_mapping.resize(factorId + 1);
-    }
-    m_mapping[factorId] = index;
+	const Factor *factor = m_factorCollection.AddFactor(str, m_system.featureFunctions);
+	//cerr << "m_vocabInd=" << m_vocabInd << " ffData=" << factor->ffData.size() << endl;
+
+	factor->ffData[m_vocabInd] = (void*) index;
   }
 
 private:
   FactorCollection &m_factorCollection;
   System &m_system;
-  std::vector<lm::WordIndex> &m_mapping;
+  size_t m_vocabInd;
 };
 
 /////////////////////////////////////////////////////////////////
@@ -81,7 +79,7 @@ void KENLM::Load(System &system)
   config.messages = NULL;
 
   FactorCollection &collection = system.vocab;
-  MappingBuilder builder(collection, system, m_lmIdLookup);
+  MappingBuilder builder(collection, system, m_vocabInd);
   config.enumerate_vocab = &builder;
   config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 
@@ -255,8 +253,9 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 }
 
 lm::WordIndex KENLM::TranslateID(const Word &word) const {
-  std::size_t factor = word[m_factorType]->GetId();
-  return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+  const Factor *factor = word[m_factorType];
+  lm::WordIndex ret = (lm::WordIndex)(size_t) factor->ffData[m_vocabInd];
+  return ret;
 }
 
 // Convert last words of hypothesis into vocab ids, returning an end pointer.

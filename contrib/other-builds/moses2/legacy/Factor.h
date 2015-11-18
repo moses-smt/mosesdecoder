@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <ostream>
 #include <string>
+#include <vector>
 #include "util/string_piece.hh"
 
 struct FactorFriend;
@@ -44,6 +45,7 @@ class Factor
   mutable StringPiece m_string;
   size_t			m_id;
 
+
   //! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
   Factor() {}
 
@@ -54,6 +56,8 @@ class Factor
   Factor &operator=(const Factor &factor);
 
 public:
+  mutable std::vector<void*> ffData;
+
   //! original string representation of the factor
   StringPiece GetString() const {
     return m_string;

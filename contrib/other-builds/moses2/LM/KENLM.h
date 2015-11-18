@@ -43,6 +43,9 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+	size_t HasVocabInd() const
+	{ return true; }
+
 protected:
   std::string m_path;
   FactorType m_factorType;
@@ -52,7 +55,6 @@ protected:
 
   typedef lm::ngram::ProbingModel Model;
   boost::shared_ptr<Model> m_ngram;
-  std::vector<lm::WordIndex> m_lmIdLookup;
 
   void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const;
 

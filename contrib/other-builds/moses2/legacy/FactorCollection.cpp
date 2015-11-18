@@ -64,6 +64,7 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString, const
   const Factor *factor = &ret.first->in;
 
   // set vocabs for ffs
+  factor->ffData.resize(ffs.hasVocabInd.size(), NULL);
 
   return factor;
 }

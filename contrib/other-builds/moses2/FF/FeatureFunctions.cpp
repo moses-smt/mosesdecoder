@@ -21,7 +21,6 @@
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../LM/LanguageModel.h"
 #include "../LM/KENLM.h"
-#include "../LM/KENLMBatch.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -126,8 +125,8 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	m_ffStartInd += ret->GetNumScores();
 
 	if (ret->HasVocabInd()) {
-		ret->SetVocabInd(m_hasVocabInd.size());
-		m_hasVocabInd.push_back(ret);
+		ret->SetVocabInd(hasVocabInd.size());
+		hasVocabInd.push_back(ret);
 	}
 
 	return ret;
