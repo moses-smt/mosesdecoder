@@ -155,14 +155,17 @@ sub exec_moses_server {
   my ($decoder, $conf, $input, $results) = @_;
   my $start_time = time;
   my ($o, $ec, $sig);
+  $ec = 0; $sig = 0; $o = 0;
   my $pid = fork();
   if (not defined $pid) {
       warn "resources not avilable to fork Moses server\n";
       $ec = 1; # to generate error
-      $sig = 'SIGABRT';
+#      $sig = 'SIGABRT';
   } elsif ($pid == 0) {
+      setpgrp(0, 0);
       warn "Starting Moses server...\n";
-      ($o, $ec, $sig) = run_command("$decoder --server --server-port $serverport -f $conf --server-log $results/run.stderr");
+      ($o, $ec, $sig) = run_command("$decoder --server --server-port $serverport -f $conf -verbose 2 --server-log $results/run.stderr.server 2> $results/run.stderr ");
+      exit;
       # this should not be reached unless the server fails to start
   }
   else {
@@ -175,14 +178,16 @@ sub exec_moses_server {
     while(<TEXTIN>)
     {
       chop;
-      my $encoded = SOAP::Data->type(string => Encode::encode("utf8", $_));
+      my $encoded = SOAP::Data->type(string => $_);
       my %param = ("text" => $encoded);
       my $result = $proxy->call("translate",\%param)->result;
       print TEXTOUT $result->{'text'} . "\n";
     }
     close(TEXTOUT);
-    kill('-SIGTERM', $pid);    
+    kill 9, -$pid;
   }
+  kill 9, -$pid;
+  waitpid $pid, 0;
   my $elapsed = time - $start_time;
   return ($o, $elapsed, $ec, $sig);
 }
