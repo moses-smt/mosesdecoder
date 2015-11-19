@@ -3,7 +3,6 @@
 # $Id$
 
 use Encode;
-use XMLRPC::Lite;
 use utf8;
 use warnings;
 use strict;
@@ -12,6 +11,7 @@ use MosesRegressionTesting;
 use Getopt::Long;
 use File::Temp qw ( tempfile );
 use POSIX qw ( strftime );
+use POSIX ":sys_wait_h";
 my @SIGS = qw ( SIGHUP SIGINT SIGQUIT SIGILL SIGTRAP SIGABRT SIGIOT SIGBUS SIGFPE SIGKILL SIGUSR1 SIGSEGV SIGUSR2 SIGPIPE SIGALRM SIGTERM SIGSTKFLT SIGCHLD SIGCONT SIGSTOP SIGTSTP SIGTTIN SIGTTOU SIGURG SIGXCPU SIGXFSZ SIGVTALRM SIGPROF SIGWINCH SIGIO SIGPWR SIGSYS SIGUNUSED SIGRTMIN );
 my ($decoder, $test_name);
 
@@ -21,16 +21,29 @@ my $BIN_TEST = $script_dir;
 my $results_dir;
 my $NBEST = 0;
 my $run_server_test = 0;
-my $serverport = 16531;
+my $serverport = int(rand(9999)) + 10001;
 my $url = "http://localhost:$serverport/RPC2";
-
+my $startupTest = 0;
 GetOptions("decoder=s" => \$decoder,
            "test=s"    => \$test_name,
            "data-dir=s"=> \$data_dir,
            "test-dir=s"=> \$test_dir,
            "results-dir=s"=> \$results_dir,
            "server"=> \$run_server_test,
+           "startuptest"=> \$startupTest
           ) or exit 1;
+
+if($run_server_test)
+{
+  eval {
+    require XMLRPC::Lite;
+    import XMLRPC::Lite;
+  };
+  if ($@) {
+    die "Error: XMLRPC::Lite not installed, moses server regression tests will not be run. $@";
+  }
+  exit(1) if($startupTest);
+}
 
 die "Please specify a decoder with --decoder\n" unless $decoder;
 die "Please specify a test to run with --test\n" unless $test_name;
@@ -160,35 +173,42 @@ sub exec_moses_server {
   if (not defined $pid) {
       warn "resources not avilable to fork Moses server\n";
       $ec = 1; # to generate error
-#      $sig = 'SIGABRT';
   } elsif ($pid == 0) {
       setpgrp(0, 0);
-      warn "Starting Moses server...\n";
+      warn "Starting Moses server on port $serverport ...\n";
       ($o, $ec, $sig) = run_command("$decoder --server --server-port $serverport -f $conf -verbose 2 --server-log $results/run.stderr.server 2> $results/run.stderr ");
       exit;
       # this should not be reached unless the server fails to start
   }
-  else {
-    sleep 10;
-    my $proxy = XMLRPC::Lite->proxy($url);
-    open(TEXTIN, "$input") or die "Can not open the input file to translate with Moses server\n";
-    binmode TEXTIN, ':utf8';
-    open(TEXTOUT, ">$results/run.stdout");
-    binmode TEXTOUT, ':utf8';
-    while(<TEXTIN>)
-    {
-      chop;
-      my $encoded = SOAP::Data->type(string => $_);
-      my %param = ("text" => $encoded);
-      my $result = $proxy->call("translate",\%param)->result;
-      print TEXTOUT $result->{'text'} . "\n";
-    }
-    close(TEXTOUT);
+  while( 1==1 ) # wait until the server is listening for requests
+  {
+    sleep 5;
+    my $str = `grep "Listening on port $serverport" $results/run.stderr`;
+    last if($str =~ /Listening/);
+  }
+  my $proxy = XMLRPC::Lite->proxy($url);
+  warn "Opening file $input to write to $results\n";
+  open(TEXTIN, "$input") or die "Can not open the input file to translate with Moses server\n";
+  binmode TEXTIN, ':utf8';
+  open(TEXTOUT, ">$results/run.stdout");
+  binmode TEXTOUT, ':utf8';
+  while(<TEXTIN>)
+  {
+    chop;
+    my $encoded = SOAP::Data->type(string => $_); # NOTE: assuming properly encoded UTF-8 input: check tests before adding them!
+    my %param = ("text" => $encoded);
+    my $result = $proxy->call("translate",\%param)->result;
+    print TEXTOUT $result->{'text'} . "\n";
+  }
+  close(TEXTIN);
+  close(TEXTOUT);
+  my $elapsed = time - $start_time;
+  print STDERR "Finished translating file $input\n";
+  if(waitpid($pid, WNOHANG) <= 0)
+  {
+    warn "Killing process group $pid of the $decoder --server ... \n";
     kill 9, -$pid;
   }
-  kill 9, -$pid;
-  waitpid $pid, 0;
-  my $elapsed = time - $start_time;
   return ($o, $elapsed, $ec, $sig);
 }
 

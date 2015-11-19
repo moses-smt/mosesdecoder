@@ -7,11 +7,16 @@ set -e -o pipefail
 git submodule init
 git submodule update regtest
 
-RECOMPILE=${RECOMPILE:-"-a"}
+if [ "$RECOMPILE" == "NO" ] ; then
+  RECOMPILE=
+else
+  RECOMPILE="-a"
+fi
 
 # test compilation without xmlrpc-c
 # ./bjam -j$(nproc) --with-irstlm=./opt --with-boost=./opt --with-cmph=./opt --no-xmlrpc-c --with-regtest=./regtest $RECOMPILE -q $@ || exit $?
 
 # test compilation with xmlrpc-c
-./bjam -j$(nproc) --with-irstlm=./opt --with-boost=./opt --with-cmph=./opt --with-xmlrpc-c=./opt --with-regtest=./regtest $RECOMPILE -q $@
-
+if [ ./regression-testing/run-single-test.perl --server --startuptest ] ; then
+  ./bjam -j$(nproc) --with-irstlm=./opt --with-boost=./opt --with-cmph=./opt --with-xmlrpc-c=./opt --with-regtest=./regtest $RECOMPILE -q $@
+fi
