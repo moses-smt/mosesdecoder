@@ -370,7 +370,7 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
   BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)  
     manager.OutputSurface(target, *e, StaticData::Instance().GetOutputFactorOrder(), 
                           options().output.ReportSegmentation, m_options.output.ReportAllFactors);
-    XVERBOSE(1, *(manager.GetBestHypothesis()) << std::endl);
+    XVERBOSE(1, "BEST TRANLSLATION:" << *(manager.GetBestHypothesis()) << std::endl);
 //  XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
   
   dest[key] = xmlrpc_c::value_string(target.str());
