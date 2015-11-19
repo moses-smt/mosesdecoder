@@ -32,7 +32,7 @@ void Manager::OutputBest(OutputCollector *collector) const
     out << '\n';
   } else {
     if (options().output.ReportHypoScore) {
-      out << best->label.score << " ";
+      out << best->label.futureScore << " ";
     }
     Phrase yield = GetOneBestTargetYield(*best);
     // delete 1st & last

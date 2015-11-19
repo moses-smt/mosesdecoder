@@ -165,7 +165,17 @@ insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData)
   }
   retData["sg"] = xmlrpc_c::value_array(searchGraphXml);
 }
-  
+
+// void
+// TranslationRequest::
+// output_phrase(ostream& out, Phrase const& phrase) const
+// {
+//   if (!m_options.output.ReportAllFactors) {
+//     for (size_t i = 0 ; i < phrase.GetSize(); ++i)
+//       out << *phrase.GetFactor(i, 0) << " ";
+//   } else out << phrase;
+// }
+
 void
 TranslationRequest::
 outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
@@ -367,12 +377,12 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
 {
   // target string
   ostringstream target;
-  BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)  
-    manager.OutputSurface(target, *e, StaticData::Instance().GetOutputFactorOrder(), 
-                          options().output.ReportSegmentation, m_options.output.ReportAllFactors);
-    XVERBOSE(1, "BEST TRANSLATION: " << *(manager.GetBestHypothesis()) << std::endl);
+  BOOST_REVERSE_FOREACH(Hypothesis const* e, edges) {
+    manager.OutputSurface(target, *e, m_options.output.factor_order,
+                          m_options.output.ReportSegmentation, m_options.output.ReportAllFactors);
+  }
+  XVERBOSE(1, "BEST TRANSLATION: " << *(manager.GetBestHypothesis()) << std::endl);
 //  XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
-  
   dest[key] = xmlrpc_c::value_string(target.str());
 
   if (m_withAlignInfo) {
@@ -418,7 +428,7 @@ run_phrase_decoder()
 
     
   manager.Decode();
-  
+
   pack_hypothesis(manager, manager.GetBestHypothesis(), "text", m_retData);
   if (m_session_id)
     m_retData["session-id"] = xmlrpc_c::value_int(m_session_id);

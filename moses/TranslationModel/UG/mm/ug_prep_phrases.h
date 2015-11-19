@@ -16,7 +16,7 @@ struct StatsCollector
   typedef    lru_cache::LRU_Cache< uint64_t, pstats  > hcache_t;
   typedef ThreadSafeContainer<uint64_t, SPTR<pstats> > pcache_t;
   typedef                 map<uint64_t, SPTR<pstats> > lcache_t;
-  iptr<Bitext<Token> const> bitext; // underlying bitext
+  SPTR<Bitext<Token> const> bitext; // underlying bitext
   sampling_method           method; // sampling method 
   size_t               sample_size; // sample size 
   SPTR<SamplingBias const>    bias; // sampling bias
@@ -26,7 +26,7 @@ struct StatsCollector
   SPTR<lcache_t>            lcache; // local cache
   ug::ThreadPool*            tpool; // thread pool to run jobs on 
   
-  StatsCollector(iptr<Bitext<Token> > xbitext, 
+  StatsCollector(SPTR<Bitext<Token> > xbitext, 
 		 SPTR<SamplingBias> const xbias) 
     : method(ranked_sampling)
     , sample_size(100)

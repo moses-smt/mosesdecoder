@@ -188,22 +188,6 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const
   return hashCode;
 }
 
-void BilingualLM::EvaluateInIsolation(const Phrase &source
-                                      , const TargetPhrase &targetPhrase
-                                      , ScoreComponentCollection &scoreBreakdown
-                                      , ScoreComponentCollection &estimatedScores) const {}
-
-void BilingualLM::EvaluateWithSourceContext(const InputType &input
-    , const InputPath &inputPath
-    , const TargetPhrase &targetPhrase
-    , const StackVec *stackVec
-    , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedScores) const
-{
-
-}
-
-
 FFState* BilingualLM::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,

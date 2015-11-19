@@ -20,13 +20,21 @@
 #ifndef moses_PhraseDictionaryGroup_h
 #define moses_PhraseDictionaryGroup_h
 
-#include "moses/TranslationModel/PhraseDictionary.h"
-
+#include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/thread/shared_mutex.hpp>
+
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Util.h"
+
+#include "moses/FF/LexicalReordering/LexicalReordering.h"
+
+#include "moses/TranslationModel/PhraseDictionary.h"
+
+#ifdef PT_UG
+#include "moses/TranslationModel/UG/mmsapt.h"
+#endif
 
 namespace Moses
 {
@@ -34,14 +42,14 @@ namespace Moses
 struct PDGroupPhrase {
   TargetPhrase* m_targetPhrase;
   std::vector<float> m_scores;
-  std::vector<bool> m_seenBy;
+  boost::dynamic_bitset<> m_seenBy;
 
   PDGroupPhrase() : m_targetPhrase(NULL) { }
 
   PDGroupPhrase(TargetPhrase* targetPhrase, const std::vector<float>& scores, const size_t nModels)
     : m_targetPhrase(targetPhrase),
       m_scores(scores),
-      m_seenBy(nModels, false) { }
+      m_seenBy(nModels) { }
 };
 
 /** Combines multiple phrase tables into a single interface.  Each member phrase
@@ -81,6 +89,14 @@ protected:
   std::vector<PhraseDictionary*> m_memberPDs;
   std::vector<FeatureFunction*> m_pdFeature;
   size_t m_numModels;
+  size_t m_totalModelScores;
+  boost::dynamic_bitset<> m_seenByAll;
+  // phrase-counts option
+  bool m_phraseCounts;
+  // word-counts option
+  bool m_wordCounts;
+  // model-bitmap-counts option
+  bool m_modelBitmapCounts;
   // restrict option
   bool m_restrict;
   // default-scores option
@@ -88,8 +104,11 @@ protected:
   std::vector<float> m_defaultScores;
   // default-average-others option
   bool m_defaultAverageOthers;
-  size_t m_scoresToAverage;
   size_t m_scoresPerModel;
+  // mmsapt-lr-func options
+  bool m_haveMmsaptLrFunc;
+  // pointers to pointers since member mmsapts may not load these until later
+  std::vector<LexicalReordering**> m_mmsaptLrFuncs;
 
   typedef std::vector<TargetPhraseCollection::shared_ptr > PhraseCache;
 #ifdef WITH_THREADS

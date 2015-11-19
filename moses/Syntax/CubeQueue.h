@@ -31,7 +31,7 @@ private:
   {
   public:
     bool operator()(const Cube *p, const Cube *q) const {
-      return p->Top()->label.score < q->Top()->label.score;
+      return p->Top()->label.futureScore < q->Top()->label.futureScore;
     }
   };
 
