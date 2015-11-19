@@ -69,10 +69,11 @@ void LanguageModel::ReportHistoryOrder(std::ostream &out,const Phrase &phrase) c
   // out << "ReportHistoryOrder not implemented";
 }
 
-void LanguageModel::EvaluateInIsolation(const Phrase &source
-                                        , const TargetPhrase &targetPhrase
-                                        , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedScores) const
+void 
+LanguageModel::
+EvaluateInIsolation(Phrase const& source, TargetPhrase const& targetPhrase,
+		    ScoreComponentCollection &scoreBreakdown,
+		    ScoreComponentCollection &estimatedScores) const
 {
   // contains factors used by this LM
   float fullScore, nGramScore;

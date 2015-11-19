@@ -37,18 +37,6 @@ public:
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;
 
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedScores = NULL) const {
-  }
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
-
   void  EvaluateInIsolation(const Phrase &source
                             , const TargetPhrase &targetPhrase
                             , ScoreComponentCollection &scoreBreakdown

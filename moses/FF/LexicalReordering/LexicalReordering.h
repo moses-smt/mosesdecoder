@@ -64,28 +64,6 @@ public:
     UTIL_THROW2("LexicalReordering is not valid for chart decoder");
   }
 
-  void
-  EvaluateWithSourceContext
-  (const InputType &input,
-   const InputPath &inputPath,
-   const TargetPhrase &targetPhrase,
-   const StackVec *stackVec,
-   ScoreComponentCollection& scoreBreakdown,
-   ScoreComponentCollection* estimatedScores = NULL) const
-  { }
-
-  void
-  EvaluateTranslationOptionListWithSourceContext
-  (const InputType &input, const TranslationOptionList &transOptList) const
-  { }
-
-  void
-  EvaluateInIsolation(const Phrase &source,
-                      const TargetPhrase &targetPhrase,
-                      ScoreComponentCollection &scoreBreakdown,
-                      ScoreComponentCollection &estimatedScores) const
-  { }
-
   bool
   GetHaveDefaultScores() {
     return m_haveDefaultScores;
