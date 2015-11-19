@@ -4,8 +4,8 @@
 
 set -e -o pipefail
 
-# git submodule init
-# git submodule update regtest
+git submodule init
+git submodule update regtest
 
 if [ "$RECOMPILE" == "NO" ] ; then
   RECOMPILE=
