@@ -4,6 +4,9 @@
 #include <iostream>
 #include <iomanip>
 
+namespace Moses2
+{
+
 /** Wrapper around time_t to time how long things have been running
  *  according to walltime. We avoid CPU time since it is less reliable
  *  in a multi-threaded environment and can spuriously include clock cycles
@@ -31,4 +34,6 @@ public:
   void check(const char* msg = 0);
   double get_elapsed_time() const;
 };
+
+}
 

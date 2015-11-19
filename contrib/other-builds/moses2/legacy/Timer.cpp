@@ -4,6 +4,9 @@
 
 #include "util/usage.hh"
 
+namespace Moses2
+{
+
 Timer::Timer()
 : running(false)
 ,stopped(false)
@@ -95,5 +98,7 @@ std::ostream& operator<<(std::ostream& os, Timer& t)
   //os << std::setprecision(2) << std::setiosflags(std::ios::fixed) << (t.running ? t.elapsed_time() : 0);
   os << (t.running ? t.get_elapsed_time() : 0);
   return os;
+}
+
 }
 

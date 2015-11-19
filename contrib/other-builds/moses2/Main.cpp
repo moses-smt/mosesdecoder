@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	istream &inStream = GetInputStream(params);
 
 	cerr << "system.numThreads=" << system.numThreads << endl;
-	Timer timer;
+	Moses2::Timer timer;
 	timer.start();
 
 	ThreadPool pool(system.numThreads);
