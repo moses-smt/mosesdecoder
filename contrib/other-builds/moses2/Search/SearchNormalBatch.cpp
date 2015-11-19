@@ -180,7 +180,7 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo,
 	newHypo->Init(hypo, tp, pathRange, newBitmap, estimatedScore);
 
 
-	m_hypos.push_back(newHypo);
+	m_hypos.push(newHypo);
 }
 
 void SearchNormalBatch::AddHypos()

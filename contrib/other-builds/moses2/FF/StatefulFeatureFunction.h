@@ -11,6 +11,7 @@
 #include "FeatureFunction.h"
 #include "../legacy/FFState.h"
 #include "../MemPool.h"
+#include "../Recycler.h"
 
 class Hypothesis;
 
@@ -31,7 +32,7 @@ public:
 	  //! return the state associated with the empty hypothesis for a given sentence
 	  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const = 0;
 
-	  virtual void EvaluateWhenApplied(const std::vector<Hypothesis*, MemPoolAllocator<Hypothesis*> > &hypos) const;
+	  virtual void EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const;
 
 	  virtual void EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,

@@ -12,6 +12,7 @@
 #include "../legacy/Bitmap.h"
 #include "../TypeDef.h"
 #include "../MemPool.h"
+#include "../Recycler.h"
 #include "ArcLists.h"
 #include "Search.h"
 
@@ -32,7 +33,7 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
-	std::vector<Hypothesis*, MemPoolAllocator<Hypothesis*> > m_hypos;
+	Recycler<Hypothesis*> m_hypos;
 
 	void Extend(const Hypothesis &hypo);
 	void Extend(const Hypothesis &hypo, const InputPath &path);

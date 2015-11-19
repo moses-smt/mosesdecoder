@@ -12,7 +12,26 @@
 
 template<typename T>
 class Recycler {
+	typedef std::vector<T, MemPoolAllocator<T> > Coll;
+
 public:
+	  typedef typename Coll::iterator iterator;
+	  typedef typename Coll::const_iterator const_iterator;
+	  //! iterators
+	  const_iterator begin() const {
+		return m_coll.begin();
+	  }
+	  const_iterator end() const {
+		return m_coll.end();
+	  }
+
+	  iterator begin() {
+		return m_coll.begin();
+	  }
+	  iterator end() {
+		return m_coll.end();
+	  }
+
 	Recycler()
 	{
 		m_coll.reserve(10000);
@@ -40,7 +59,7 @@ public:
 	void clear()
 	{ m_coll.clear(); }
 protected:
-	std::vector<T, MemPoolAllocator<T> > m_coll;
+	Coll m_coll;
 };
 
 #endif /* RECYCLER_H_ */
