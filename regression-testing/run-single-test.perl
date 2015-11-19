@@ -42,7 +42,7 @@ if($run_server_test)
   if ($@) {
     die "Error: XMLRPC::Lite not installed, moses server regression tests will not be run. $@";
   }
-  exit(1) if($startupTest);
+  exit(0) if($startupTest);
 }
 
 die "Please specify a decoder with --decoder\n" unless $decoder;
