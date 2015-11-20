@@ -275,7 +275,7 @@ consider_sample(TokenPosition const& p)
   bitvector full_aln(100*100);
   PhraseExtractionRecord 
     rec(p.sid, p.offset, p.offset + m_plen, !m_fwd, &aln, &full_aln);
-  int docid = m_bias ? m_bias->GetClass(p.sid) : -1;
+  int docid = m_bias ? m_bias->GetClass(p.sid) : m_bitext->sid2did(p.sid);
   if (!m_bitext->find_trg_phr_bounds(rec))
     { // no good, probably because phrase is not coherent
       m_stats->count_sample(docid, 0, rec.po_fwd, rec.po_bwd);
