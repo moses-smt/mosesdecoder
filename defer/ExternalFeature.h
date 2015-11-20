@@ -52,7 +52,7 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
 
   FFState* EvaluateWhenApplied(const Hypothesis& cur_hypo, const FFState* prev_state,
-			       ScoreComponentCollection* accumulator) const;
+                               ScoreComponentCollection* accumulator) const;
 
   FFState* EvaluateWhenApplied(
     const ChartHypothesis& /* cur_hypo */,

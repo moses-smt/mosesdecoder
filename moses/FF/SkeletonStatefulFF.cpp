@@ -17,7 +17,7 @@ SkeletonStatefulFF::SkeletonStatefulFF(const std::string &line)
 
 
 // An empty implementation of this function is provided by StatefulFeatureFunction.
-// Unless you are actually implementing this, please remove it from your 
+// Unless you are actually implementing this, please remove it from your
 // implementation (and the declaration in the header file to reduce code clutter.
 void SkeletonStatefulFF::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
@@ -26,7 +26,7 @@ void SkeletonStatefulFF::EvaluateInIsolation(const Phrase &source
 {}
 
 // An empty implementation of this function is provided by StatefulFeatureFunction.
-// Unless you are actually implementing this, please remove it from your 
+// Unless you are actually implementing this, please remove it from your
 // implementation (and the declaration in the header file to reduce code clutter.
 void SkeletonStatefulFF::EvaluateWithSourceContext(const InputType &input
     , const InputPath &inputPath
@@ -37,7 +37,7 @@ void SkeletonStatefulFF::EvaluateWithSourceContext(const InputType &input
 {}
 
 // An empty implementation of this function is provided by StatefulFeatureFunction.
-// Unless you are actually implementing this, please remove it from your 
+// Unless you are actually implementing this, please remove it from your
 // implementation (and the declaration in the header file to reduce code clutter.
 void SkeletonStatefulFF::EvaluateTranslationOptionListWithSourceContext
 (const InputType &input, const TranslationOptionList &translationOptionList) const
