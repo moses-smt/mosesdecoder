@@ -3,6 +3,8 @@
 #include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
 #include "moses/Util.h"
+#include "moses/Hypothesis.h"
+
 namespace MosesServer
 {
 using namespace std;
@@ -262,8 +264,11 @@ bool
 check(std::map<std::string, xmlrpc_c::value> const& param, 
       std::string const key)
 {
-  std::map<std::string, xmlrpc_c::value>::const_iterator m;
-  return (param.find(key) != param.end());
+  std::map<std::string, xmlrpc_c::value>::const_iterator m = param.find(key);
+  if(m == param.end()) return false;
+  std::string val = string(xmlrpc_c::value_string(m->second));
+  if(val == "true" || val == "True" || val == "TRUE" || val == "1") return true;
+  return false;
 }
 
 void
@@ -367,21 +372,17 @@ run_chart_decoder()
 
 void
 TranslationRequest::
-pack_hypothesis(Moses::Manager const& manager, 
-		vector<Hypothesis const* > const& edges, 
-		string const& key, map<string, xmlrpc_c::value> & dest) const
+pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const& edges, string const& key,
+                map<string, xmlrpc_c::value> & dest) const
 {
   // target string
   ostringstream target;
-  BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
-    {
-      // output_phrase(target, e->GetCurrTargetPhrase());
-      manager.OutputSurface(target,*e, m_options.output.factor_order, 
-			    m_options.output.ReportSegmentation, 
-			    m_options.output.ReportAllFactors);
-    }
-  XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
-  
+  BOOST_REVERSE_FOREACH(Hypothesis const* e, edges) {
+    manager.OutputSurface(target, *e, m_options.output.factor_order,
+                          m_options.output.ReportSegmentation, m_options.output.ReportAllFactors);
+  }
+  XVERBOSE(1, "BEST TRANSLATION: " << *(manager.GetBestHypothesis()) << std::endl);
+//  XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
   dest[key] = xmlrpc_c::value_string(target.str());
 
   if (m_withAlignInfo) {
@@ -389,7 +390,7 @@ pack_hypothesis(Moses::Manager const& manager,
 
     vector<xmlrpc_c::value> p_aln;
     BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
-    add_phrase_aln_info(*e, p_aln);
+      add_phrase_aln_info(*e, p_aln);
     dest["align"] = xmlrpc_c::value_array(p_aln);
   }
 
@@ -397,15 +398,14 @@ pack_hypothesis(Moses::Manager const& manager,
     // word alignment, if requested
     vector<xmlrpc_c::value> w_aln;
     BOOST_FOREACH(Hypothesis const* e, edges)
-    e->OutputLocalWordAlignment(w_aln);
+      e->OutputLocalWordAlignment(w_aln);
     dest["word-align"] = xmlrpc_c::value_array(w_aln);
   }
 }
 
 void
 TranslationRequest::
-pack_hypothesis(Moses::Manager const& manager, 
-		Hypothesis const* h, string const& key,
+pack_hypothesis(const Moses::Manager& manager, Hypothesis const* h, string const& key,
                 map<string, xmlrpc_c::value>& dest) const
 {
   using namespace std;

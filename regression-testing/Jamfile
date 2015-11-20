@@ -1,6 +1,7 @@
 import option path ;
 
 with-regtest = [ option.get "with-regtest" ] ;
+with-xmlrpc = [ option.get "with-xmlrpc-c" ] ;
 
 if $(with-regtest) {
   with-regtest = [ path.root $(with-regtest) [ path.pwd ] ] ;
@@ -24,6 +25,12 @@ if $(with-regtest) {
   actions reg_test_decode {
     $(TOP)/regression-testing/run-single-test.perl --decoder=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
   }
+
+  if $(with-xmlrpc)  {
+    actions reg_test_decode_server {
+      $(TOP)/regression-testing/run-single-test.perl --server --decoder=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+    }
+    reg_test phrase-server : [ glob $(test-dir)/phrase-server.* ] : ../moses-cmd//moses : @reg_test_decode_server ;
   reg_test phrase : [ glob $(test-dir)/phrase.* : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
   reg_test chart : [ glob $(test-dir)/chart.* : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
   if [ option.get "with-dalm" : : "yes" ] {
