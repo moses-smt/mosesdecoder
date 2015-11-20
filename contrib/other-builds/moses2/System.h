@@ -41,9 +41,12 @@ public:
 	MemPool &GetManagerPool() const;
 	FactorCollection &GetVocab() const;
 
+	Recycler<Hypothesis*> &GetBatchRecycler() const;
+
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
+  mutable boost::thread_specific_ptr< Recycler<Hypothesis*> > m_batchRecycler;
 
   void LoadWeights();
   void LoadMappings();

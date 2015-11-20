@@ -131,3 +131,16 @@ FactorCollection &System::GetVocab() const
 {
 	return m_vocab;
 }
+
+Recycler<Hypothesis*> &System::GetBatchRecycler() const
+{
+	typedef Recycler<Hypothesis*> CLASS;
+	CLASS *pool;
+	  pool = m_batchRecycler.get();
+	  if (pool == NULL) {
+		pool = new CLASS();
+		m_batchRecycler.reset(pool);
+	  }
+	  assert(pool);
+	  return *pool;
+}

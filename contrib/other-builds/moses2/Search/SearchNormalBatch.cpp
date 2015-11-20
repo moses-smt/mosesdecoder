@@ -20,6 +20,7 @@ using namespace std;
 
 SearchNormalBatch::SearchNormalBatch(Manager &mgr, Stacks &stacks)
 :Search(mgr, stacks)
+,m_hypos(&mgr.system.GetBatchRecycler())
 {
 	// TODO Auto-generated constructor stub
 
@@ -41,11 +42,11 @@ void SearchNormalBatch::Decode(size_t stackInd)
   // batch FF evaluation
   const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
-	  sfff->EvaluateWhenApplied(m_hypos);
+	  sfff->EvaluateWhenApplied(*m_hypos);
   }
 
   AddHypos();
-  m_hypos.clear();
+  m_hypos->clear();
 
   //cerr << m_stacks << endl;
 
@@ -180,12 +181,12 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo,
 	newHypo->Init(hypo, tp, pathRange, newBitmap, estimatedScore);
 
 
-	m_hypos.push(newHypo);
+	m_hypos->push(newHypo);
 }
 
 void SearchNormalBatch::AddHypos()
 {
-  BOOST_FOREACH(Hypothesis *hypo, m_hypos) {
+  BOOST_FOREACH(Hypothesis *hypo, *m_hypos) {
 	const Bitmap &bitmap = hypo->GetBitmap();
 	size_t numWordsCovered = bitmap.GetNumWordsCovered();
 	Stack &stack = m_stacks[numWordsCovered];
