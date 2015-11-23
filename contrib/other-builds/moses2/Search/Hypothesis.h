@@ -75,6 +75,7 @@ public:
 
   void EvaluateWhenApplied();
   void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);
+  void EvaluateWhenAppliedNonBatch();
 
   const Hypothesis* GetPrevHypo() const
   { return m_prevHypo; }

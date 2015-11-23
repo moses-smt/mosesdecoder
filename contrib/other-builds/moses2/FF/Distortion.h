@@ -28,11 +28,23 @@ public:
 		  Scores &scores,
 		  Scores *estimatedScores) const;
 
+  virtual void EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const
+  {}
+
   virtual void EvaluateWhenApplied(const Manager &mgr,
     const Hypothesis &hypo,
     const FFState &prevState,
     Scores &scores,
 	FFState &state) const;
+
+  virtual void EvaluateWhenAppliedNonBatch(const Manager &mgr,
+    const Hypothesis &hypo,
+    const FFState &prevState,
+    Scores &scores,
+	FFState &state) const
+  {
+	  EvaluateWhenApplied(mgr, hypo, prevState, scores, state);
+  }
 
 protected:
   SCORE CalculateDistortionScore(const Range &prev, const Range &curr, const int FirstGap) const;

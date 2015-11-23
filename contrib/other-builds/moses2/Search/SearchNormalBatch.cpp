@@ -179,6 +179,7 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo,
 {
 	Hypothesis *newHypo = Hypothesis::Create(m_mgr);
 	newHypo->Init(hypo, tp, pathRange, newBitmap, estimatedScore);
+	newHypo->EvaluateWhenAppliedNonBatch();
 
 
 	m_hypos->push(newHypo);

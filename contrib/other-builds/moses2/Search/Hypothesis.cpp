@@ -169,7 +169,6 @@ void Hypothesis::EvaluateWhenApplied()
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 	  EvaluateWhenApplied(*sfff);
   }
-
   //cerr << *this << endl;
 }
 
@@ -181,6 +180,19 @@ void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
 	  assert(prevState);
 	  sfff.EvaluateWhenApplied(mgr, *this, *prevState, *m_scores, *thisState);
 
+}
+
+void Hypothesis::EvaluateWhenAppliedNonBatch()
+{
+  const std::vector<const StatefulFeatureFunction*>  &sfffs = mgr.system.featureFunctions.GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
+	  size_t statefulInd = sfff->GetStatefulInd();
+	  const FFState *prevState = m_prevHypo->GetState(statefulInd);
+	  FFState *thisState = m_ffStates[statefulInd];
+	  assert(prevState);
+	  sfff->EvaluateWhenAppliedNonBatch(mgr, *this, *prevState, *m_scores, *thisState);
+  }
+  //cerr << *this << endl;
 }
 
 /** recursive - pos is relative from start of sentence */

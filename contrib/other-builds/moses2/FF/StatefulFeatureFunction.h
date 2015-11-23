@@ -40,8 +40,17 @@ public:
 	    Scores &scores,
 		FFState &state) const = 0;
 
+	  virtual void EvaluateWhenAppliedNonBatch(const Manager &mgr,
+	    const Hypothesis &hypo,
+	    const FFState &prevState,
+	    Scores &scores,
+		FFState &state) const
+	  { }
+
 protected:
 	  size_t m_statefulInd;
+
+
 };
 
 #endif /* STATEFULFEATUREFUNCTION_H_ */
