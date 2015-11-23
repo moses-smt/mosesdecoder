@@ -358,7 +358,11 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id
   for (; position < _min; ++position) {
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
-      before_boundary += m_lmtb->clprob(codes,idx+1);
+
+    if (weight_map && weight_map->size()>0)
+      before_boundary += m_lmtb->clprob(codes,idx+1,*weight_map);
+    else
+      before_boundary += m_lmtb->clprob(codes,idx+1); 
 
     ++idx;
   }
@@ -372,7 +376,13 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id
     }
     codes[idx-1] = GetLmID(phrase.GetWord(position));
     if (codes[idx-1] == m_unknownId) ++oovCount;
-    ngramScore += m_lmtb->clprob(codes,idx);
+
+    if (weight_map && weight_map->size()>0)
+      ngramScore += m_lmtb->clprob(codes,idx,*weight_map);
+    else
+      ngramScore += m_lmtb->clprob(codes,idx);
+  }
+
   }
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
@@ -434,7 +444,11 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
 
   char* msp = NULL;
   ngram_state_t msidx = 0;
-  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+  float score;
+  if (weight_map && weight_map->size()==0)
+    score = m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
+  else
+    score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
 
   position = (const int) begin+1;
   while (position < adjust_end) {
@@ -442,7 +456,10 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx-1] = codes[idx];
     }
     codes[idx-1] =  GetLmID(hypo.GetWord(position));
-    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+    if (weight_map && weight_map->size()>0)
+      score += m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
+    else
+      score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
 
     ++position;
   }
@@ -463,7 +480,10 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
-    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+    if (weight_map && weight_map->size()>0)
+      score += m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
+    else
+      score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
   } else {
     // need to set the LM state
 
