@@ -68,6 +68,8 @@ protected:
   int m_lmtb_dub;           //dictionary upperboud
   int m_lmtb_size;          //max ngram stored in the table
 
+  std::string m_id; // internal name to identify this instance of the LanguageModelIRST
+
   dictionary* d;
 
   std::string m_mapFilePath;
@@ -108,6 +110,15 @@ public:
   void set_dictionary_upperbound(int dub) {
     m_lmtb_size=dub ;
   };
+
+  const std::string GetId() const {
+    return m_id;
+  }
+
+  void SetId(const std::string id) {
+    m_id = id;
+  }
+
 };
 
 }

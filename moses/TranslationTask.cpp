@@ -165,7 +165,7 @@ interpret_dlt()
   Sentence const& snt = static_cast<Sentence const&>(*m_source);
   typedef std::map<std::string,std::string> dltmap_t;
 
-  VERBOSE(1,"void TranslationTask::interpret_dlt() *m_source:|" << *m_source <<"|" << std::endl);
+  VERBOSE(1,"void TranslationTask::interpret_dlt() task:|" << this << "| scope:|" << m_scope << "| *m_source:|" << *m_source <<"|" << std::endl);
 
   std::string id;
 
