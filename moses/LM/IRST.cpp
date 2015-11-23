@@ -316,7 +316,7 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
 {
 VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id:|" << m_id << "| phrase:|" << phrase << "|" << std::endl);
 
-  ttasksptr ttask = StaticData::Instance().GetTask();
+  ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
 
   fullScore = 0;
   ngramScore = 0;
@@ -390,7 +390,7 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
     return ret.release();
   }
 
-  ttasksptr ttask = StaticData::Instance().GetTask();
+  ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
   SPTR<ContextScope> scope = ttask->GetScope();
 VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...) after calling ttask->GetScope() pthread:|" << pthread_self() << "| ttask:|" << ttask << "| scope:|" << scope << "|" << std::endl);
 

@@ -22,8 +22,8 @@ BaseManager::BaseManager(ttasksptr const& ttask)
 {
 VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) before calling StaticData::InstanceNonConst().SetTask(ttask)" << std::endl);
   StaticData::InstanceNonConst().SetTask(ttask);
-  ttasksptr current_ttask = StaticData::Instance().GetTask();
-VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) after calling StaticData::Instance().GetTask() pthread:|" << pthread_self() << "| ttask:|" << current_ttask << "| GetTask():|" << StaticData::Instance().GetTask() << "|" << std::endl);
+  ttasksptr current_ttask = StaticData::InstanceNonConst().GetTask();
+VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) after calling StaticData::Instance().GetTask() pthread:|" << pthread_self() << "| ttask:|" << current_ttask << "| GetTask():|" << StaticData::InstanceNonConst().GetTask() << "|" << std::endl);
 }
 
 const InputType&
