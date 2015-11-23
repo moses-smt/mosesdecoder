@@ -69,13 +69,10 @@ Manager::Manager(ttasksptr const& ttask)
   , interrupted_flag(0)
   , m_hypoId(0)
 {
-VERBOSE(1,"Manager::Manager(ttasksptr const& ttask) START" << std::endl);
-VERBOSE(1,"Manager::Manager(ttasksptr const& ttask) ttask:|" << ttask << "|" << std::endl);
-
   boost::shared_ptr<InputType> source = ttask->GetSource();
   m_transOptColl = source->CreateTranslationOptionCollection(ttask);
 
-VERBOSE(1,"Manager::Manager(ttasksptr const& ttask) source:|" << source << "|" << std::endl);
+VERBOSE(1,"Manager::Manager(ttasksptr const& ttask) pthread:|" pthread_self() << "| ttask:|" << ttask " source:|" << source << "|" << std::endl);
 
   const StaticData &staticData = StaticData::Instance();
   SearchAlgorithm searchAlgorithm = staticData.options().search.algo;
