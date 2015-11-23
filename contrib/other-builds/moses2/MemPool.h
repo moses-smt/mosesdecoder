@@ -122,17 +122,19 @@ class ObjectPoolContiguous {
   public:
 	ObjectPoolContiguous(std::size_t initSize = 100000)
   	:m_size(0)
+    ,m_actualSize(initSize)
   	{
-		m_vec.resize(initSize);
+		m_vec = (T*) malloc(sizeof(T) * initSize);
 	}
 
     ~ObjectPoolContiguous()
     {
+    	free (m_vec);
     }
 
     void push(T &obj) {
-    	if (m_size >= m_vec.size()) {
-    		m_vec.resize(m_size * 2);
+    	if (m_size >= m_actualSize) {
+    		m_vec = (T*) realloc(m_vec, m_size * 2);
     	}
     	m_vec[m_size] = obj;
     	++m_size;
@@ -150,8 +152,8 @@ class ObjectPoolContiguous {
     	return m_vec[ind];
     }
   private:
-    std::vector<T> m_vec;
-    size_t m_size;
+    T *m_vec;
+    size_t m_size, m_actualSize;
 
     // no copying
     ObjectPoolContiguous(const ObjectPoolContiguous &);
