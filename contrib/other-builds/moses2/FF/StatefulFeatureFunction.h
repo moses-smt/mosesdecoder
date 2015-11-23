@@ -32,7 +32,7 @@ public:
 	  //! return the state associated with the empty hypothesis for a given sentence
 	  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const = 0;
 
-	  virtual void EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const;
+	  virtual void EvaluateWhenApplied(const ObjectPoolContiguous<Hypothesis*> &hypos) const;
 
 	  virtual void EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,

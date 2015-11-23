@@ -187,7 +187,8 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo,
 
 void SearchNormalBatch::AddHypos()
 {
-  BOOST_FOREACH(Hypothesis *hypo, *m_batchForEval) {
+  for (size_t i = 0; i < m_batchForEval->size(); ++i) {
+	Hypothesis *hypo = m_batchForEval->get(i);
 	const Bitmap &bitmap = hypo->GetBitmap();
 	size_t numWordsCovered = bitmap.GetNumWordsCovered();
 	Stack &stack = m_stacks[numWordsCovered];

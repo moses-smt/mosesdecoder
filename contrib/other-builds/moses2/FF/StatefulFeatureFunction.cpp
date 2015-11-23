@@ -18,9 +18,10 @@ StatefulFeatureFunction::~StatefulFeatureFunction() {
 	// TODO Auto-generated destructor stub
 }
 
-void StatefulFeatureFunction::EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const
+void StatefulFeatureFunction::EvaluateWhenApplied(const ObjectPoolContiguous<Hypothesis*> &hypos) const
 {
-	 BOOST_FOREACH(Hypothesis *hypo, hypos) {
+	for (size_t i = 0; i < hypos.size(); ++i) {
+		Hypothesis *hypo = hypos.get(i);
 		 hypo->EvaluateWhenApplied(*this);
 	 }
 }

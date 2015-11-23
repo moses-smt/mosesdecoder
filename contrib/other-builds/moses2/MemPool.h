@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <stdint.h>
+#include <stdlib.h>
 #include <limits>
 
 class MemPool {
@@ -123,7 +124,7 @@ class ObjectPoolContiguous {
 	:m_maxSize(initSize)
 	{
 		m_ind = 0;
-		current_ = (T*) util::MallocOrThrow(sizeof(T) * initSize);
+		current_ = (T*) malloc(sizeof(T) * initSize);
 	}
 
     ~ObjectPoolContiguous()
@@ -131,18 +132,13 @@ class ObjectPoolContiguous {
     	free(current_);
     }
 
-    T &Allocate() {
-      if (m_ind >= m_maxSize) {
-    	  m_maxSize <<= 1;
-    	  current_ = realloc(current_, m_maxSize);
-      }
-      ++m_ind;
-
-      return current_[m_ind];
-
+    void push(T &obj) {
+    	T &mem = Allocate();
+    	mem = obj;
+    	++m_ind;
     }
 
-    void Reset()
+    void clear()
     {
     	m_ind = 0;
     }
@@ -150,13 +146,23 @@ class ObjectPoolContiguous {
     size_t size() const
     { return m_ind; }
 
-    T &get(size_t ind) {
+    T &get(size_t ind) const {
     	return current_[ind];
     }
   private:
     size_t m_maxSize;
     size_t m_ind;
     T *current_;
+
+    T &Allocate() {
+      if (m_ind >= m_maxSize) {
+    	  m_maxSize <<= 1;
+    	  current_ = (T*) realloc(current_, m_maxSize);
+      }
+      ++m_ind;
+
+      return current_[m_ind];
+    }
 
     // no copying
     ObjectPoolContiguous(const ObjectPoolContiguous &);

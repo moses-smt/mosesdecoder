@@ -132,9 +132,9 @@ FactorCollection &System::GetVocab() const
 	return m_vocab;
 }
 
-Recycler<Hypothesis*> &System::GetBatchRecycler() const
+ObjectPoolContiguous<Hypothesis*> &System::GetBatchRecycler() const
 {
-	typedef Recycler<Hypothesis*> CLASS;
+	typedef ObjectPoolContiguous<Hypothesis*> CLASS;
 	CLASS *pool;
 	  pool = m_batchRecycler.get();
 	  if (pool == NULL) {
