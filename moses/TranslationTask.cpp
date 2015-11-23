@@ -172,32 +172,32 @@ interpret_dlt()
   BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
 
 //checking "type"
-//currently we support only "adaptive-lm" type;
+//currently we support only "lm-context-weights" type;
 //if not defined, do nothing and exit the loop;
-//if different from "adaptive-lm", do nothing and exit the loop; else read the rest of parameter
-   dltmap_t::const_iterator i = M.find("type");
-   if (i == M.end()) break;
-   if (i->second != "adaptive-lm") break;
-   VERBOSE(1,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
+//if different from "lm-context-weights", do nothing and exit the loop; else read the rest of parameter
+    dltmap_t::const_iterator i = M.find("type");
+    if (i == M.end()) break;
+    if (i->second != "lm-context-weights") break;
+    VERBOSE(1,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
 
 //checking "id"
-// if not defined, set id to the default value ("default")
+//if not defined, set id to the default value ("default")
     i = M.find("id");
     if (i == M.end()){
       id="default";
     }else{
       id=i->second;
     }
-  VERBOSE(1,"void TranslationTask::interpret_dlt() id:|" << id << "|" << std::endl);
+    VERBOSE(1,"void TranslationTask::interpret_dlt() id:|" << id << "|" << std::endl);
 
-//checking "context-weights"
+//checking "weight-map"
 // if not defined, do nothing and exit the loop; else set the corresponding weight for the speific LM
-    i = M.find("context-weights");
+    i = M.find("weight-map");
     if (i == M.end()) break;
-  VERBOSE(1,"void TranslationTask::interpret_dlt() i->first:|" << i->first <<"| i->second:|" << i->second << "|" << std::endl);
-  VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetLMContextWeights(i->second,id)|" << std::endl);
+    VERBOSE(1,"void TranslationTask::interpret_dlt() i->first:|" << i->first <<"| i->second:|" << i->second << "|" << std::endl);
+    VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetLMContextWeights(i->second,id)|" << std::endl);
     m_scope->SetLMContextWeights(i->second,id);
-  VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetLMContextWeights(i->second,id)|" << std::endl);
+    VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetLMContextWeights(i->second,id)|" << std::endl);
 
 /*
      dltmap_t::const_iterator i = M.find("type");
