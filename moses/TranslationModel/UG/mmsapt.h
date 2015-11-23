@@ -71,7 +71,7 @@ namespace Moses
     typedef sapt::PhraseScorer<Token> pscorer;
   private:
     // vector<SPTR<bitext> > shards;
-    iptr<mmbitext> btfix;
+    SPTR<mmbitext> btfix;
     SPTR<imbitext> btdyn;
     std::string m_bname, m_extra_data, m_bias_file,m_bias_server;
     std::string L1;
@@ -160,7 +160,7 @@ namespace Moses
 
 #if PROVIDES_RANKED_SAMPLING
     void 
-    set_bias_for_ranking(ttasksptr const& ttask, iptr<sapt::Bitext<Token> const> bt);
+    set_bias_for_ranking(ttasksptr const& ttask, SPTR<sapt::Bitext<Token> const> bt);
 #endif
   private:
 

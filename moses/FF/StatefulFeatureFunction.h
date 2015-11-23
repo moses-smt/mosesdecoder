@@ -66,6 +66,23 @@ public:
     return false;
   }
 
+
+  virtual void
+  EvaluateInIsolation
+  (Phrase const& source, TargetPhrase const& targetPhrase,
+   ScoreComponentCollection &scoreBreakdown,
+   ScoreComponentCollection &estimatedScores) const {}
+
+  virtual void
+  EvaluateWithSourceContext
+  (InputType const&input, InputPath const& inputPath, TargetPhrase const& targetPhrase,
+   StackVec const* stackVec, ScoreComponentCollection &scoreBreakdown,
+   ScoreComponentCollection *estimatedFutureScore = NULL) const {}
+
+  virtual void
+  EvaluateTranslationOptionListWithSourceContext
+  (const InputType &input, const TranslationOptionList &translationOptionList) const {}
+
 };
 
 

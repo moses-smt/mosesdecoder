@@ -58,17 +58,16 @@ TranslationRequest : public virtual Moses::TranslationTask
   run_phrase_decoder();
 
   void
-  pack_hypothesis(std::vector<Moses::Hypothesis const* > const& edges,
+  pack_hypothesis(const Moses::Manager& manager, std::vector<Moses::Hypothesis const* > const& edges,
                   std::string const& key,
                   std::map<std::string, xmlrpc_c::value> & dest) const;
 
   void
-  pack_hypothesis(Moses::Hypothesis const* h, std::string const& key,
+  pack_hypothesis(const Moses::Manager& manager, Moses::Hypothesis const* h, std::string const& key,
                   std::map<std::string, xmlrpc_c::value> & dest) const;
 
-
-  void
-  output_phrase(std::ostream& out, Moses::Phrase const& phrase) const;
+  // void
+  // output_phrase(std::ostream& out, Moses::Phrase const& phrase) const;
 
   void
   add_phrase_aln_info(Moses::Hypothesis const& h,

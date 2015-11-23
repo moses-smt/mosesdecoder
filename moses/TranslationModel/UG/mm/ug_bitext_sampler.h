@@ -52,7 +52,7 @@ BitextSampler : public Moses::reference_counter
   // const members
   // SPTR<bitext const> const   m_bitext; // keep bitext alive while I am 
   // should be an 
-  iptr<bitext const> const       m_bitext; // keep bitext alive as long as I am 
+  SPTR<bitext const> const       m_bitext; // keep bitext alive as long as I am 
   size_t             const         m_plen; // length of lookup phrase
   bool               const          m_fwd; // forward or backward direction?
   SPTR<tsa const>    const         m_root; // root of suffix array
@@ -275,7 +275,7 @@ consider_sample(TokenPosition const& p)
   bitvector full_aln(100*100);
   PhraseExtractionRecord 
     rec(p.sid, p.offset, p.offset + m_plen, !m_fwd, &aln, &full_aln);
-  int docid = m_bias ? m_bias->GetClass(p.sid) : -1;
+  int docid = m_bias ? m_bias->GetClass(p.sid) : m_bitext->sid2did(p.sid);
   if (!m_bitext->find_trg_phr_bounds(rec))
     { // no good, probably because phrase is not coherent
       m_stats->count_sample(docid, 0, rec.po_fwd, rec.po_bwd);

@@ -90,9 +90,10 @@ def run_instance(cmd_base, threads, tasks, n_best=False):
     cmd.append('--threads')
     cmd.append(str(threads))
     try:
-        # Queue of tasks instance is currently working on, limited to the number of
-        # threads.  The queue should be kept full for optimal CPU usage.
-        work = Queue.Queue(maxsize=threads)
+        # Queue of tasks instance is currently working on, limited to the number
+        # of threads * 2 (minimal buffering).  The queue should be kept full for
+        # optimal CPU usage.
+        work = Queue.Queue(maxsize=(threads * 2))
         # Multi-threaded instance
         moses = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
