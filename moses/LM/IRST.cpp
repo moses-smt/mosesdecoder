@@ -118,6 +118,7 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
   VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
   VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" << m_filePath << "|" << std::endl);
   VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" << m_factorType << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_id:|" << m_id << "|" << std::endl);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -325,23 +326,10 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id
   if ( !phrase.GetSize() ) return;
 
   SPTR<ContextScope> scope = ttask->GetScope();
-  VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) after calling ttask->GetScope() pthread:|" << pthread_self() << "| ttask:|" << ttask << "| scope:|" << scope << "|" << std::endl);
   weightmap_t* weight_map = NULL;
   if (scope){
     weight_map = scope->GetLMContextWeights(m_id);
-    VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) scope FOUND weight_map:|" << (void*)weight_map << "|" << std::endl);
-  }else{
-    VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) scope NOT FOUND weight_map:|" << (void*)weight_map << "|" << std::endl);
   }
-
-  if (weight_map){
-//    scope->print_context_weights();
-//    scope->print_lm_context_weights();
-  } 
-  if (weight_map){ for (weightmap_t::const_iterator it=weight_map->begin(); it!=weight_map->end(); ++it){ VERBOSE(2,"CalcScore_1   weight_map --> domain:|" << it->first << "| value:|" << it->second << "|" << std::endl); } }else{ VERBOSE(2,"CalcScore_1     weight_map is NULL|" << std::endl); }
-
-
-  VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) start computation"<< std::endl);
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
@@ -356,7 +344,6 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
 
-    if (weight_map){ for (weightmap_t::const_iterator it=weight_map->begin(); it!=weight_map->end(); ++it){ VERBOSE(2,"CalcScore_2   weight_map --> domain:|" << it->first << "| value:|" << it->second << "|" << std::endl); } }else{ VERBOSE(2,"CalcScore_2     weight_map is NULL|" << std::endl); }
     if (weight_map && weight_map->size()>0)
       before_boundary += m_lmtb->clprob(codes,idx+1,*weight_map);
     else
@@ -384,8 +371,6 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
   fullScore = ngramScore + before_boundary;
-
-  VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) END" << std::endl);
 }
 
 
@@ -399,23 +384,12 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
 
   ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
   SPTR<ContextScope> scope = ttask->GetScope();
-VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...) after calling ttask->GetScope() pthread:|" << pthread_self() << "| ttask:|" << ttask << "| scope:|" << scope << "|" << std::endl);
 
   weightmap_t* weight_map = NULL;
   if (scope){
     weight_map = scope->GetLMContextWeights(m_id);
-    VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...) scope FOUND weight_map:|" << (void*)weight_map << "|" << std::endl);
-  }else{
-    VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...) scope NOT FOUND weight_map:|" << (void*)weight_map << "|" << std::endl);
-  }
-  if (weight_map){
-//    scope->print_context_weights();
-//    scope->print_lm_context_weights();
   }
 
-  if (weight_map){ for (weightmap_t::const_iterator it=weight_map->begin(); it!=weight_map->end(); ++it){ VERBOSE(1,"EvaluateWhenApplied_1    weight_map --> domain:|" << it->first << "| value:|" << it->second << "|" << std::endl); } }else{VERBOSE(2,"EvaluateWhenApplied_1     weight_map is NULL|" << std::endl); }
-
-VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, ...) start computation"<< std::endl);
   //[begin, end) in STL-like fashion.
   const int begin = (const int) hypo.GetCurrTargetWordsRange().GetStartPos();
   const int end = (const int) hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
@@ -440,7 +414,6 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
   char* msp = NULL;
   ngram_state_t msidx = 0;
   float score;
-  if (weight_map){ for (weightmap_t::const_iterator it=weight_map->begin(); it!=weight_map->end(); ++it){ VERBOSE(1,"EvaluateWhenApplied_2    weight_map --> domain:|" << it->first << "| value:|" << it->second << "|" << std::endl); } }else{VERBOSE(2,"EvaluateWhenApplied_2     weight_map is NULL|" << std::endl); }
   if (weight_map && weight_map->size()>0)
     score = m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
   else
@@ -452,7 +425,6 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx-1] = codes[idx];
     }
     codes[idx-1] =  GetLmID(hypo.GetWord(position));
-    if (weight_map){ for (weightmap_t::const_iterator it=weight_map->begin(); it!=weight_map->end(); ++it){ VERBOSE(1,"EvaluateWhenApplied_3   weight_map --> domain:|" << it->first << "| value:|" << it->second << "|" << std::endl); } }else{VERBOSE(2,"EvaluateWhenApplied_3     weight_map is NULL|" << std::endl); }
     if (weight_map && weight_map->size()>0)
       score += m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
     else
