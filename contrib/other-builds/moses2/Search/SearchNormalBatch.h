@@ -33,7 +33,7 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
-	Recycler<Hypothesis*> *m_hypos;
+	Recycler<Hypothesis*> *m_batchForEval;
 
 	void Extend(const Hypothesis &hypo);
 	void Extend(const Hypothesis &hypo, const InputPath &path);
