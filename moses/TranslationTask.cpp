@@ -160,17 +160,57 @@ void
 TranslationTask::
 interpret_dlt()
 {
+  VERBOSE(1,"void TranslationTask::interpret_dlt() START" << std::endl);
   if (m_source->GetType() != SentenceInput) return;
   Sentence const& snt = static_cast<Sentence const&>(*m_source);
   typedef std::map<std::string,std::string> dltmap_t;
+
+  VERBOSE(1,"void TranslationTask::interpret_dlt() *m_source:|" << *m_source <<"|" << std::endl);
+
+  std::string id;
+
   BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
-    dltmap_t::const_iterator i = M.find("type");
-    if (i == M.end() || i->second != "adaptive-lm") continue;
-    dltmap_t::const_iterator j = M.find("context-weights");
-    if (j == M.end()) continue;
-    m_scope->SetContextWeights(j->second);
+
+//checking "type"
+//currently we support only "adaptive-lm" type;
+//if not defined, do nothing and exit the loop;
+//if different from "adaptive-lm", do nothing and exit the loop; else read the rest of parameter
+   dltmap_t::const_iterator i = M.find("type");
+   if (i == M.end()) break;
+   if (i->second != "adaptive-lm") break;
+   VERBOSE(1,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
+
+//checking "id"
+// if not defined, set id to the default value ("default")
+    i = M.find("id");
+    if (i == M.end()){
+      id="default";
+    }else{
+      id=i->second;
+    }
+  VERBOSE(1,"void TranslationTask::interpret_dlt() id:|" << id << "|" << std::endl);
+
+//checking "context-weights"
+// if not defined, do nothing and exit the loop; else set the corresponding weight for the speific LM
+    i = M.find("context-weights");
+    if (i == M.end()) break;
+  VERBOSE(1,"void TranslationTask::interpret_dlt() i->first:|" << i->first <<"| i->second:|" << i->second << "|" << std::endl);
+  VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetLMContextWeights(i->second,id)|" << std::endl);
+    m_scope->SetLMContextWeights(i->second,id);
+  VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetLMContextWeights(i->second,id)|" << std::endl);
+
+/*
+     dltmap_t::const_iterator i = M.find("type");
+     if (i == M.end() || i->second != "adaptive-lm") continue;
+     dltmap_t::const_iterator j = M.find("context-weights");
+     if (j == M.end()) continue;
+     m_scope->SetContextWeights(j->second);
+*/
+
   }
+  VERBOSE(1,"void TranslationTask::interpret_dlt() END" << std::endl);
 }
+
 
 
 void TranslationTask::Run()
