@@ -36,17 +36,6 @@ create(Translator* translator, xmlrpc_c::paramList const& paramList,
 }
 
 void
-SetContextWeights(Moses::ContextScope& s, xmlrpc_c::value const& w)
-{
-  SPTR<std::map<std::string,float> > M(new std::map<std::string, float>);
-  typedef std::map<std::string,xmlrpc_c::value> tmap;
-  tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(w));
-  for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m)
-    (*M)[m->first] = xmlrpc_c::value_double(m->second);
-  s.SetContextWeights(M);
-}
-  
-void
 TranslationRequest::
 Run()
 {
@@ -64,10 +53,22 @@ Run()
     }
   else m_scope.reset(new Moses::ContextScope);
 
+/*
   // settings within the session scope
   param_t::const_iterator si = params.find("context-weights");
   if (si != params.end()) SetContextWeights(*m_scope, si->second);
-  
+*/
+
+  // settings within the session scope
+  param_t::const_iterator si = params.find("context-weights");
+  if (si != params.end()){
+    std::string _cw = xmlrpc_c::value_string(si->second);
+    XVERBOSE(1,"context_weights:|" << _cw << "|" << endl);
+    XVERBOSE(1,"before calling SetContextWeights" << endl);
+    m_scope->SetContextWeights(_cw);
+    XVERBOSE(1,"after calling SetContextWeights" << endl);
+  }
+
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
   //Make sure alternative paths are retained, if necessary
