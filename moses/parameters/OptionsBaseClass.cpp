@@ -1,5 +1,7 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include "OptionsBaseClass.h"
+#include "moses/Util.h"
+
 namespace Moses {
 
 #ifdef HAVE_XMLRPC_C
@@ -15,10 +17,12 @@ namespace Moses {
   bool 
   OptionsBaseClass::
   check(std::map<std::string, xmlrpc_c::value> const& param, 
-        std::string const key)
+        std::string const key, bool dfltval)
   {
     std::map<std::string, xmlrpc_c::value>::const_iterator m;
-    return (param.find(key) != param.end());
+    m = param.find(key);
+    if (m == param.end()) return dfltval;
+    return Scan<bool>(xmlrpc_c::value_string(m->second));
   }
 #endif
 }

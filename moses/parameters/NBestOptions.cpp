@@ -43,7 +43,7 @@ update(std::map<std::string,xmlrpc_c::value>const& param)
   params_t::const_iterator si = param.find("nbest");
   if (si != param.end())
     nbest_size = xmlrpc_c::value_int(si->second);
-  only_distinct = check(param, "nbest-distinct");
+  only_distinct = check(param, "nbest-distinct", only_distinct);
   enabled = (nbest_size > 0);
   return true;
 }
