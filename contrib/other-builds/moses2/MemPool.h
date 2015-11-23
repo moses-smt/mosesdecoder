@@ -120,9 +120,10 @@ template <typename T>
 class ObjectPoolContiguous {
 
   public:
-	ObjectPoolContiguous(std::size_t initSize = 10000)
+	ObjectPoolContiguous(std::size_t initSize = 100000)
+  	:m_size(0)
   	{
-		m_vec.reserve(initSize);
+		m_vec.resize(initSize);
 	}
 
     ~ObjectPoolContiguous()
@@ -130,22 +131,27 @@ class ObjectPoolContiguous {
     }
 
     void push(T &obj) {
-    	m_vec.push_back(obj);
+    	if (m_size >= m_vec.size()) {
+    		m_vec.resize(m_size * 2);
+    	}
+    	m_vec[m_size] = obj;
+    	++m_size;
     }
 
     void clear()
     {
-    	m_vec.clear();
+    	m_size = 0;
     }
 
     size_t size() const
-    { return m_vec.size(); }
+    { return m_size; }
 
     const T &get(size_t ind) const {
     	return m_vec[ind];
     }
   private:
     std::vector<T> m_vec;
+    size_t m_size;
 
     // no copying
     ObjectPoolContiguous(const ObjectPoolContiguous &);
