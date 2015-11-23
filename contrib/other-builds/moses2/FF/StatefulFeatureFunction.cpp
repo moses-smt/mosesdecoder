@@ -25,7 +25,8 @@ StatefulFeatureFunction::~StatefulFeatureFunction() {
 void StatefulFeatureFunction::EvaluateWhenApplied(const ObjectPoolContiguous<Hypothesis*> &hypos) const
 {
 #ifdef __linux
-	pthread_t thread;
+  /*
+	pthread_t handle;
 	handle = pthread_self();
 
     int s;
@@ -39,7 +40,7 @@ void StatefulFeatureFunction::EvaluateWhenApplied(const ObjectPoolContiguous<Hyp
     CPU_SET(core, &cpuset);
 
     s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
-
+*/
 #endif
 
 	for (size_t i = 0; i < hypos.size(); ++i) {
@@ -48,7 +49,6 @@ void StatefulFeatureFunction::EvaluateWhenApplied(const ObjectPoolContiguous<Hyp
 	 }
 
 #ifdef __linux
-
-    s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpusetOrig);
+	//    s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpusetOrig);
 #endif
 }
