@@ -29,8 +29,8 @@ public:
   //! return the state associated with the empty hypothesis for a given sentence
   virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const;
 
-  virtual void EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const
-  {}
+  //virtual void EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const
+  //{}
 
   virtual void
   EvaluateInIsolation(const System &system,
@@ -44,6 +44,7 @@ public:
 	Scores &scores,
 	FFState &state) const;
 
+  /*
   virtual void EvaluateWhenAppliedNonBatch(const Manager &mgr,
     const Hypothesis &hypo,
     const FFState &prevState,
@@ -52,6 +53,7 @@ public:
   {
 	  EvaluateWhenApplied(mgr, hypo, prevState, scores, state);
   }
+  */
 
   void SetParameter(const std::string& key, const std::string& value);
 
