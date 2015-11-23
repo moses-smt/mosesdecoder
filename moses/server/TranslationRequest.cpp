@@ -69,6 +69,26 @@ Run()
     XVERBOSE(1,"after calling SetContextWeights" << endl);
   }
 
+  // settings within the session scope (lm-context-weights)
+  // requires that also a lm-id is set contemporarily; if not defined the default value "default" is used
+  si = params.find("lm-context-weights");
+  if (si != params.end()){
+    std::string _cw = xmlrpc_c::value_string(si->second);
+    param_t::const_iterator si2 = params.find("lm-id");
+    std::string _id;
+    if (si2 != params.end()){
+      std::string _id = xmlrpc_c::value_string(si2->second);
+    }else{
+      _id="default";
+    }
+    XVERBOSE(1,"lm-context_weights:|" << _cw << "|" << endl);
+    XVERBOSE(1,"lm-id:|" << _id << "|" << endl);
+    XVERBOSE(1,"before calling SetLMContextWeights" << endl);
+    m_scope->SetLMContextWeights(_cw,_id);
+    XVERBOSE(1,"after calling SetLMContextWeights" << endl);
+  }
+   
+
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
   //Make sure alternative paths are retained, if necessary
@@ -417,10 +437,11 @@ run_phrase_decoder()
   if (m_withGraphInfo || m_options.nbest.nbest_size>0)
     m_options.output.SearchGraph = "true";
 
+  interpret_dlt(); // parse document-level translation info stored on the input
+
   Manager manager(this->self());
   // if (m_bias.size()) manager.SetBias(&m_bias);
 
-    
   manager.Decode();
 
   pack_hypothesis(manager.GetBestHypothesis(), "text", m_retData);
