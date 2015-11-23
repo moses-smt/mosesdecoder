@@ -59,10 +59,10 @@ ThreadPool::ThreadPool( size_t numThreads )
     // get affini
     CPU_ZERO(&cpuset);
     s = pthread_getaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
-    printf("Set returned by pthread_getaffinity_np() contained:\n");
+    cerr << "Set returned by pthread_getaffinity_np() contained:\n";
     for (int j = 0; j < CPU_SETSIZE; j++) {
       if (CPU_ISSET(j, &cpuset)) {
-	   printf("    CPU %d\n", j);
+	   cerr  << "    CPU " << j << "\n";
       }
     }
     
