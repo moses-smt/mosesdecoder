@@ -19,7 +19,15 @@ namespace Moses
 
 BaseManager::BaseManager(ttasksptr const& ttask)
   : m_ttask(ttask), m_source(*(ttask->GetSource().get()))
-{ }
+{
+VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) before calling StaticData::InstanceNonConst().SetTask(ttask)" << std::endl);
+  StaticData::InstanceNonConst().SetTask(ttask);
+VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) after calling StaticData::InstanceNonConst().SetTask(ttask)" << std::endl);
+
+VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) before calling StaticData::Instance().GetTask()" << std::endl);
+  ttasksptr current_ttask = StaticData::Instance().GetTask();
+VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) after calling StaticData::Instance().GetTask() ttask:|" << current_ttask<< "|" << std::endl);
+}
 
 const InputType&
 BaseManager::GetSource() const
