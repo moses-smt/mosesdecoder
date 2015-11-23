@@ -383,7 +383,6 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id
       ngramScore += m_lmtb->clprob(codes,idx);
   }
 
-  }
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
   fullScore = ngramScore + before_boundary;
