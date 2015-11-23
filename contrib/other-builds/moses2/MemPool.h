@@ -113,4 +113,54 @@ public:
 protected:
 	MemPool m_pool;
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+template <typename T>
+class ObjectPoolContiguous {
+
+  public:
+	ObjectPoolContiguous(std::size_t initSize = 10000)
+	:m_maxSize(initSize)
+	{
+		m_ind = 0;
+		current_ = (T*) util::MallocOrThrow(sizeof(T) * initSize);
+	}
+
+    ~ObjectPoolContiguous()
+    {
+    	free(current_);
+    }
+
+    T &Allocate() {
+      if (m_ind >= m_maxSize) {
+    	  m_maxSize <<= 1;
+    	  current_ = realloc(current_, m_maxSize);
+      }
+      ++m_ind;
+
+      return current_[m_ind];
+
+    }
+
+    void Reset()
+    {
+    	m_ind = 0;
+    }
+
+    size_t size() const
+    { return m_ind; }
+
+    T &get(size_t ind) {
+    	return current_[ind];
+    }
+  private:
+    size_t m_maxSize;
+    size_t m_ind;
+    T *current_;
+
+    // no copying
+    ObjectPoolContiguous(const ObjectPoolContiguous &);
+    ObjectPoolContiguous &operator=(const ObjectPoolContiguous &);
+};
+
 #endif /* MEMPOOL_H_ */
