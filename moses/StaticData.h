@@ -70,6 +70,12 @@ class StaticData
 
 private:
   static StaticData s_instance;
+
+  std::map<pthread_t, ttasksptr> m_ttasks;
+#ifdef WITH_THREADS
+  boost::mutex m_ttasks_lock;
+#endif
+
 protected:
   Parameter *m_parameter;
   AllOptions m_options;
@@ -581,6 +587,36 @@ public:
   bool RequireSortingAfterSourceContext() const {
     return m_requireSortingAfterSourceContext;
   }
+
+//the setting function must be protected wih locks; the reading function does not required protection
+  ttasksptr GetTask() const{
+//    VERBOSE(1, "ttasksptr GetTask() const START" << std::endl);
+#ifdef BOOST_HAS_PTHREADS
+    pthread_t tid = pthread_self();
+#else
+    pthread_t tid = 0;
+#endif
+//    VERBOSE(1, "ttasksptr GetTask() const tid:|" << tid << "| m_ttasks.at(tid):|" << m_ttasks.at(tid) << "|" << std::endl);
+//    VERBOSE(1, "ttasksptr GetTask() const just before return" << std::endl);
+    return m_ttasks.at(tid);
+  }
+
+  void SetTask(ttasksptr ttask){
+//    VERBOSE(1, "void SetTask(ttasksptr ttask) const START" << std::endl);
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_ttasks_lock);
+#endif
+
+#ifdef BOOST_HAS_PTHREADS
+    pthread_t tid = pthread_self();
+#else
+    pthread_t tid = 0;
+#endif
+    m_ttasks[tid] = ttask;
+//    VERBOSE(1, "void SetTask(ttasksptr ttask) tid:|" << tid << "| ttask:|" << ttask << "| m_ttasks.at(tid):|" << m_ttasks.at(tid) << "|" << std::endl);
+//    //    VERBOSE(1, "void SetTask(ttasksptr ttask) const END" << std::endl);
+  }
+
 
 };
 
