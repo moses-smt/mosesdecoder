@@ -13,6 +13,6 @@ namespace Moses
 #endif
     bool 
     check(std::map<std::string, xmlrpc_c::value> const& param, 
-          std::string const key);
+          std::string const key, bool dfltval);
   };
 }

@@ -217,17 +217,42 @@ namespace sapt
     write_yawat_alignment
     ( id_type const sid, iter const* m1, iter const* m2, std::ostream& out ) const;
 
-    std::string docname(id_type const sid) const;
-
+    std::string sid2docname(id_type const sid) const;
+    std::string docid2name(id_type const sid) const;
+    int docname2docid(std::string const& name) const;
+    
     std::vector<id_type> const* sid2did() const;
+    int sid2did(uint32_t sid) const;
   };
 
   #include "ug_bitext_agenda.h"
 
   template<typename Token>
+  int
+  Bitext<Token>::
+  docname2docid(std::string const& name) const
+  {
+    std::map<std::string,id_type>::const_iterator m;
+    m = m_docname2docid.find(name);
+    if (m != m_docname2docid.end()) return m->second;
+    return -1;
+  }
+
+  template<typename Token>
   std::string
   Bitext<Token>::
-  docname(id_type const sid) const
+  docid2name(id_type const did) const
+  {
+    if (did < m_docname.size())
+      return m_docname[did];
+    else
+      return (boost::format("%d") % did).str();
+  }
+
+  template<typename Token>
+  std::string
+  Bitext<Token>::
+  sid2docname(id_type const sid) const
   {
     if (sid < m_sid2docid->size() && (*m_sid2docid)[sid] < m_docname.size())
       return m_docname[(*m_sid2docid)[sid]];
@@ -242,6 +267,17 @@ namespace sapt
   {
     return m_sid2docid.get();
   }
+
+  template<typename Token>
+  int
+  Bitext<Token>::
+  sid2did(uint32_t sid) const
+  {
+    if (m_sid2docid) 
+      return m_sid2docid->at(sid);
+    return -1;
+  }
+
 
   template<typename Token>
   SPTR<SentenceBias>

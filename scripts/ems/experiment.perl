@@ -2571,7 +2571,7 @@ sub get_config_tables {
     $cmd .= ":$numFF" if defined($numFF);
     $cmd .= " ";
 
-    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table) if $reordering_table;
+    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table) if $reordering_table && !defined($mmsapt);
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
 
