@@ -153,6 +153,8 @@ void
 FeatureFactory
 ::DefaultSetup(F *feature)
 {
+  FeatureFunction::Register(feature);
+
   StaticData &static_data = StaticData::InstanceNonConst();
   const std::string &featureName = feature->GetScoreProducerDescription();
   std::vector<float> weights = static_data.GetParameter()->GetWeights(featureName);

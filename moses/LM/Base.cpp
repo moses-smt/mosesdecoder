@@ -38,10 +38,10 @@ LanguageModel::LanguageModel(const std::string &line) :
   m_enableOOVFeature(false)
 {
   // load m_enableOOVFeature via SetParameter() first
-  ReadParameters();
+  // ReadParameters();
   this->m_numScoreComponents = this->m_numTuneableComponents = m_enableOOVFeature ? 2 : 1;
   // register with the correct m_numScoreComponents
-  Register();
+  // Register();
 }
 
 
@@ -112,6 +112,7 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
 {
   if(key == "oov-feature") {
     m_enableOOVFeature = Scan<bool>(value);
+    this->m_numScoreComponents = this->m_numTuneableComponents = m_enableOOVFeature ? 2 : 1;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }

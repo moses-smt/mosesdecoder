@@ -49,7 +49,8 @@ protected:
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
-  void Register();
+public:
+  static void Register(FeatureFunction* ff);
 private:
   // void Initialize(const std::string &line);
   void ParseLine(const std::string &line);

@@ -54,7 +54,8 @@ FeatureFunction(const std::string& line, bool registerNow)
 {
   m_numTuneableComponents = m_numScoreComponents;
   ParseLine(line);
-  if (registerNow) Register();
+  // if (registerNow) Register(); // now done in FeatureFactory::DefaultSetup()
+  // TO DO: eliminate the registerNow parameter 
 }
 
 FeatureFunction::FeatureFunction(size_t numScoreComponents, const std::string& line, bool registerNow)
@@ -66,15 +67,16 @@ FeatureFunction::FeatureFunction(size_t numScoreComponents, const std::string& l
 {
   m_numTuneableComponents = m_numScoreComponents;
   ParseLine(line);
-  if (registerNow) Register();
+  // if (registerNow) Register(); // now done in FeatureFactory::DefaultSetup()
+  // TO DO: eliminate the registerNow parameter 
 }
 
 void
 FeatureFunction::
-Register()
+Register(FeatureFunction* ff)
 {
-  ScoreComponentCollection::RegisterScoreProducer(this);
-  s_staticColl.push_back(this);
+  ScoreComponentCollection::RegisterScoreProducer(ff);
+  s_staticColl.push_back(ff);
 }
 
 FeatureFunction::~FeatureFunction() {}

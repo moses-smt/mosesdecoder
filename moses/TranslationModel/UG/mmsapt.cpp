@@ -82,7 +82,7 @@ namespace Moses
     // * Don't use features that depend on generation steps that won't be run
     //   yet at extract time
     SetFeaturesToApply();
-    Register();
+    // Register();
   }
 
   void
