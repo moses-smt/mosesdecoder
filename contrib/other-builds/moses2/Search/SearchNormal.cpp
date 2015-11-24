@@ -174,7 +174,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	Stack &stack = m_stacks[numWordsCovered];
 	StackAdd added = stack.Add(newHypo);
 
-	Recycler<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
+	ObjectPoolContiguous<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
 
 	if (added.toBeDeleted) {
 		hypoRecycle.push(added.toBeDeleted);

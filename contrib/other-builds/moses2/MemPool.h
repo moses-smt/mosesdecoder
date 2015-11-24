@@ -144,16 +144,30 @@ class ObjectPoolContiguous {
     	++m_size;
     }
 
+    bool empty() const
+    { return m_size == 0; }
+
     void clear()
     {
     	m_size = 0;
     }
 
+    // vector op
     size_t size() const
     { return m_size; }
 
     const T &get(size_t ind) const {
     	return m_vec[ind];
+    }
+
+    // stack op
+    const T &get() const {
+    	return m_vec[m_size - 1];
+    }
+
+    void pop()
+    {
+    	--m_size;
     }
   private:
     T *m_vec;

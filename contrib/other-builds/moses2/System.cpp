@@ -126,9 +126,9 @@ FactorCollection &System::GetVocab() const
 	return m_vocab;
 }
 
-Recycler<Hypothesis*> &System::GetHypoRecycler() const
+ObjectPoolContiguous<Hypothesis*> &System::GetHypoRecycler() const
 {
-	Recycler<Hypothesis*> &ret = GetThreadSpecificObj(m_hypoRecycler);
+	ObjectPoolContiguous<Hypothesis*> &ret = GetThreadSpecificObj(m_hypoRecycler);
 	return ret;
 }
 
