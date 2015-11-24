@@ -20,7 +20,7 @@ using namespace std;
 
 SearchNormalBatch::SearchNormalBatch(Manager &mgr, Stacks &stacks)
 :Search(mgr, stacks)
-,m_batchForEval(&mgr.system.GetBatchRecycler())
+,m_batchForEval(&mgr.system.GetBatchForEval())
 {
 	// TODO Auto-generated constructor stub
 

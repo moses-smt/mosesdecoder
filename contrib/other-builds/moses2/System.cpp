@@ -77,14 +77,8 @@ void System::LoadMappings()
 
 MemPool &System::GetManagerPool() const
 {
-  MemPool *pool;
-  pool = m_managerPool.get();
-  if (pool == NULL) {
-	pool = new MemPool;
-	m_managerPool.reset(pool);
-  }
-  assert(pool);
-  return *pool;
+  MemPool &ret = GetThreadSpecificObj(m_managerPool);
+  return ret;
 }
 
 void
@@ -132,15 +126,8 @@ FactorCollection &System::GetVocab() const
 	return m_vocab;
 }
 
-ObjectPoolContiguous<Hypothesis*> &System::GetBatchRecycler() const
+ObjectPoolContiguous<Hypothesis*> &System::GetBatchForEval() const
 {
-	typedef ObjectPoolContiguous<Hypothesis*> CLASS;
-	CLASS *pool;
-	  pool = m_batchRecycler.get();
-	  if (pool == NULL) {
-		pool = new CLASS();
-		m_batchRecycler.reset(pool);
-	  }
-	  assert(pool);
-	  return *pool;
+  ObjectPoolContiguous<Hypothesis*> &ret = GetThreadSpecificObj(m_batchForEval);
+  return ret;
 }

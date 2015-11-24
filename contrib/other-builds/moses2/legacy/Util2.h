@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -245,4 +247,18 @@ void Swap(T &a, T &b) {
   T &c = a;
   a = b;
   b = c;
+}
+
+template <typename T>
+T &GetThreadSpecificObj(boost::thread_specific_ptr<T> &coll)
+{
+  T *obj;
+  obj = coll.get();
+  if (obj == NULL) {
+    obj = new T;
+	coll.reset(obj);
+  }
+  assert(obj);
+  return *obj;
+
 }
