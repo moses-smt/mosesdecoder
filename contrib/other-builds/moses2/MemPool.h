@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <limits>
+#include <iostream>
 
 class MemPool {
 	struct Page {
@@ -134,7 +135,10 @@ class ObjectPoolContiguous {
 
     void push(T &obj) {
     	if (m_size >= m_actualSize) {
-    		m_vec = (T*) realloc(m_vec, m_size * 2);
+	  //std::cerr << std::endl << "MORE " << m_size << std::endl;
+	  m_actualSize *= 2;
+ 	  m_vec = (T*) realloc(m_vec, sizeof(T) * m_actualSize);
+          
     	}
     	m_vec[m_size] = obj;
     	++m_size;
