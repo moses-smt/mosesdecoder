@@ -148,7 +148,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 		}
 	}
 }
-
+/*
 void SearchNormal::Extend(const Hypothesis &hypo,
 		const TargetPhrases &tps,
 		const Range &pathRange,
@@ -186,8 +186,8 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 		//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);
   }
 }
+*/
 
-/*
 void SearchNormal::Extend(const Hypothesis &hypo,
 		const TargetPhrases &tps,
 		const Range &pathRange,
@@ -198,7 +198,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	  Extend(hypo, *tp, pathRange, newBitmap, estimatedScore);
   }
 }
-*/
+
 void SearchNormal::Extend(const Hypothesis &hypo,
 		const TargetPhrase &tp,
 		const Range &pathRange,
