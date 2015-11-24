@@ -397,7 +397,7 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
   if (m_withWordAlignInfo) {
     // word alignment, if requested
     vector<xmlrpc_c::value> w_aln;
-    BOOST_FOREACH(Hypothesis const* e, edges)
+    BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
       e->OutputLocalWordAlignment(w_aln);
     dest["word-align"] = xmlrpc_c::value_array(w_aln);
   }
