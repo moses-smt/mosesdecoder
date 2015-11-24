@@ -32,7 +32,7 @@ public:
 
 protected:
 
-	void Extend(const Hypothesis &hypo);
+	void Extend(const std::vector<const Hypothesis*> &hypos, const InputPath &path);
 	void Extend(const Hypothesis &hypo, const InputPath &path);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrases &tps,

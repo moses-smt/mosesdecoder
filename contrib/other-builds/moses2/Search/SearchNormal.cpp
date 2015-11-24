@@ -31,11 +31,13 @@ SearchNormal::~SearchNormal() {
 void SearchNormal::Decode(size_t stackInd)
 {
   Stack &stack = m_stacks[stackInd];
-
   std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoRecycle());
-  BOOST_FOREACH(const Hypothesis *hypo, hypos) {
-		Extend(*hypo);
-  }
+
+	const InputPaths &paths = m_mgr.GetInputPaths();
+
+	BOOST_FOREACH(const InputPath &path, paths) {
+		Extend(hypos, path);
+	}
 
   //cerr << m_stacks << endl;
 
@@ -43,13 +45,11 @@ void SearchNormal::Decode(size_t stackInd)
   m_stacks.Delete(stackInd);
 }
 
-void SearchNormal::Extend(const Hypothesis &hypo)
+void SearchNormal::Extend(const std::vector<const Hypothesis*> &hypos, const InputPath &path)
 {
-	const InputPaths &paths = m_mgr.GetInputPaths();
-
-	BOOST_FOREACH(const InputPath &path, paths) {
-		Extend(hypo, path);
-	}
+	  BOOST_FOREACH(const Hypothesis *hypo, hypos) {
+			Extend(*hypo, path);
+	  }
 }
 
 void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
