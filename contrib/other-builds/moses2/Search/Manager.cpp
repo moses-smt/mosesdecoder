@@ -20,12 +20,19 @@
 
 using namespace std;
 
+Manager::Manager(System &sys, const std::string &inputStr)
+:system(sys)
+,m_inputStr(inputStr)
+,m_initRange(NOT_FOUND, NOT_FOUND)
+{}
+
 Manager::~Manager() {
 	delete m_bitmaps;
 	delete m_search;
 	delete m_estimatedScores;
 
 	GetPool().Reset();
+	m_hypoRecycle->clear();
 }
 
 void Manager::Init()
@@ -33,6 +40,8 @@ void Manager::Init()
 	// init pools etc
 	m_pool = &system.GetManagerPool();
 	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), system, 0);
+
+	m_hypoRecycle = &system.GetHypoRecycler();
 
 	// create input phrase obj
 	FactorCollection &vocab = system.GetVocab();

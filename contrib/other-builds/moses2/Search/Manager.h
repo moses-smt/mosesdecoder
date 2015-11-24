@@ -27,11 +27,7 @@ class Manager {
 public:
 	const System &system;
 
-	Manager(System &sys, const std::string &inputStr)
-	:system(sys)
-	,m_inputStr(inputStr)
-	,m_initRange(NOT_FOUND, NOT_FOUND)
-	{}
+	Manager(System &sys, const std::string &inputStr);
 
 	virtual ~Manager();
 
@@ -39,7 +35,7 @@ public:
 	{ return *m_pool; }
 
 	Recycler<Hypothesis*> &GetHypoRecycle() const
-	{ return m_hypoRecycle; }
+	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
@@ -58,7 +54,7 @@ public:
 	void Decode();
 protected:
 	mutable MemPool *m_pool;
-    mutable Recycler<Hypothesis*> m_hypoRecycle;
+    Recycler<Hypothesis*> *m_hypoRecycle;
 
     std::string m_inputStr;
 	PhraseImpl *m_input;
