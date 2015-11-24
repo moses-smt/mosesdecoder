@@ -147,7 +147,7 @@ class ObjectPoolContiguous {
     bool empty() const
     { return m_size == 0; }
 
-    void clear()
+    void Reset()
     {
     	m_size = 0;
     }

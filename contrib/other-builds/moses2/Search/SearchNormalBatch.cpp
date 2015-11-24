@@ -46,7 +46,7 @@ void SearchNormalBatch::Decode(size_t stackInd)
   }
 
   AddHypos();
-  m_batchForEval->clear();
+  m_batchForEval->Reset();
 
   //cerr << m_stacks << endl;
 

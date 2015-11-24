@@ -32,7 +32,7 @@ Manager::~Manager() {
 	delete m_estimatedScores;
 
 	GetPool().Reset();
-	m_hypoRecycle->clear();
+	m_hypoRecycle->Reset();
 }
 
 void Manager::Init()
