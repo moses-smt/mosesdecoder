@@ -196,18 +196,7 @@ public:
   }
 
   void SetParameter(const std::string& key, const std::string& value);
-  void EvaluateInIsolation(const Phrase &source
-                           , const TargetPhrase &targetPhrase
-                           , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {};
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {};
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {};
+
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

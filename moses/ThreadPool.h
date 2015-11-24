@@ -53,9 +53,6 @@ class Task
 {
 public:
   virtual void Run() = 0;
-  virtual bool DeleteAfterExecution() {
-    return true;
-  }
   virtual ~Task() {}
 };
 

@@ -53,16 +53,16 @@ int main(int argc, char* argv[])
   interpret_args(argc, argv);
   if (Q1.empty() && Q2.empty()) exit(0);
 
-  mmbitext B; string w;
-  B.open(bname, L1, L2);
+  boost::shared_ptr<mmbitext> B(new mmbitext); string w;
+  B->open(bname, L1, L2);
 
-  Bitext<Token>::iter m1(B.I1.get(), *B.V1, Q1);
+  Bitext<Token>::iter m1(B->I1.get(), *B->V1, Q1);
   if (Q1.size() && m1.size() == 0) exit(0);
 
-  Bitext<Token>::iter m2(B.I2.get(), *B.V2, Q2);
+  Bitext<Token>::iter m2(B->I2.get(), *B->V2, Q2);
   if (Q2.size() && m2.size() == 0) exit(0);
 
-  bitvector check(B.T1->size());
+  bitvector check(B->T1->size());
   if (Q1.size() == 0 || Q2.size() == 0) check.set();
   else (m2.markSentences(check));
 
@@ -87,23 +87,23 @@ int main(int argc, char* argv[])
 
       size_t s1,s2,e1,e2; int po_fwd=-1,po_bwd=-1;
       std::vector<unsigned char> caln;
-      // cout << sid  << " " << B.docname(sid) << std::endl;
-      if (!B.find_trg_phr_bounds(sid, off, off+m.size(),
+      // cout << sid  << " " << B->docname(sid) << std::endl;
+      if (!B->find_trg_phr_bounds(sid, off, off+m.size(),
 				 s1,s2,e1,e2,po_fwd,po_bwd,
 				 &caln, NULL, &m == &m2))
 	{
 	  // cout << "alignment failure" << std::endl;
 	}
 
-      std::cout << sid  << " " << B.docname(sid)
+      std::cout << sid  << " " << B->sid2docname(sid)
 		<< " dfwd=" << po_fwd << " dbwd=" << po_bwd
 		<< "\n";
       
-      write_sentence(*B.T1, sid, *B.V1, std::cout); std::cout << "\n";
-      write_sentence(*B.T2, sid, *B.V2, std::cout); std::cout << "\n";
-      B.write_yawat_alignment(sid,
-			      m1.size() ? &m1 : NULL,
-			      m2.size() ? &m2 : NULL, std::cout);
+      write_sentence(*B->T1, sid, *B->V1, std::cout); std::cout << "\n";
+      write_sentence(*B->T2, sid, *B->V2, std::cout); std::cout << "\n";
+      B->write_yawat_alignment(sid,
+			       m1.size() ? &m1 : NULL,
+			       m2.size() ? &m2 : NULL, std::cout);
       std::cout << std::endl;
 
     }

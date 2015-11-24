@@ -729,19 +729,21 @@ extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
 	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm domain-features baseline-extract lexicalized-reordering
+	pass-if: mmsapt
         only-existence-matters: domain-features
 	default-name: model/extract
 build-reordering
 	in: extracted-phrases
 	out: reordering-table
 	ignore-unless: lexicalized-reordering
+	pass-if: mmsapt
 	rerun-on-change: lexicalized-reordering reordering-factors
 	default-name: model/reordering-table
 	final-model: yes
 build-ttable
 	in: extracted-phrases lexical-translation-table corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains
 	out: phrase-translation-table
-	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
+	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
 	ignore-if: suffix-array mmsapt
 	final-model: yes

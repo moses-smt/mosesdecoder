@@ -75,7 +75,7 @@ namespace Moses {
   ReportingOptions::
   update(std::map<std::string, xmlrpc_c::value>const& param)
   {
-    ReportAllFactors = check(param, "report-all-factors");
+    ReportAllFactors = check(param, "report-all-factors", ReportAllFactors);
     return true;
   }
 #endif

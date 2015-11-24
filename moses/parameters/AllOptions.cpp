@@ -65,6 +65,7 @@ namespace Moses
     // set m_nbest_options.enabled = true if necessary:
     nbest.enabled = (nbest.enabled || mira || search.consensus 
                      || nbest.nbest_size > 0
+                     || mbr.enabled || lmbr.enabled
                      || !output.SearchGraph.empty()
                      || !output.SearchGraphExtended.empty()
                      || !output.SearchGraphSLF.empty()

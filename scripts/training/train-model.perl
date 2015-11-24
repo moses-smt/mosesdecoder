@@ -2141,7 +2141,8 @@ sub create_ini {
 
      # sum up...
      $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor";
-     $feature_spec .= " L1=$___F L2=$___E " if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
+     $feature_spec .= " L1=$___F L2=$___E" if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
+     $feature_spec .= " lr-func=LexicalReordering0" if defined($_MMSAPT) && $i==0 && $REORDERING_LEXICAL;
      $feature_spec .= "\n";
      unless ($phrase_table_impl==11) { # suffix array provides its weights at first iteration
        $weight_spec .= "TranslationModel$i=";
@@ -2222,7 +2223,7 @@ sub create_ini {
 	    $table_file .= ".";
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
-            $feature_spec .= "LexicalReordering name=LexicalReordering$i num-features=".$model->{"numfeatures"}." type=".$model->{"config"}." input-factor=$input_factor output-factor=$output_factor path=$table_file".(defined($_LEXICAL_REORDERING_DEFAULT_SCORES)?" default-scores=$_LEXICAL_REORDERING_DEFAULT_SCORES":"")."\n";
+            $feature_spec .= "LexicalReordering name=LexicalReordering$i num-features=".$model->{"numfeatures"}." type=".$model->{"config"}." input-factor=$input_factor output-factor=$output_factor".((defined($_MMSAPT)&&$i==0)?"":" path=$table_file").(defined($_LEXICAL_REORDERING_DEFAULT_SCORES)?" default-scores=$_LEXICAL_REORDERING_DEFAULT_SCORES":"")."\n";
             $weight_spec .= "LexicalReordering$i=";
             for(my $j=0;$j<$model->{"numfeatures"};$j++) { $weight_spec .= " 0.3"; }
             $weight_spec .= "\n";

@@ -268,8 +268,8 @@ public:
 
 #ifdef HAVE_XMLRPC_C
   // these are implemented in moses/server/Hypothesis_4server.cpp !
-  void OutputWordAlignment(std::vector<xmlrpc_c::value>& out, const ReportingOptions &options) const;
-  void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest, const ReportingOptions &options) const;
+  void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
+  void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
 #endif
 
   bool beats(Hypothesis const& b) const;
