@@ -40,9 +40,12 @@ void SearchNormalBatch::Decode(size_t stackInd)
 		Extend(*hypo);
   }
 
+  m_batchForEval->Sort(HypothesisTargetPhraseOrderer());
+  /*
   std::sort(m_batchForEval->GetData(),
 		  m_batchForEval->GetData() + m_batchForEval->size(),
 		  HypothesisTargetPhraseOrderer());
+  */
   /*
   cerr << "SORTED:" << endl;
   for (size_t i = 0; i < m_batchForEval->size(); ++i) {

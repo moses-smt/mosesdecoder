@@ -8,6 +8,7 @@
 #ifndef MEMPOOL_H_
 #define MEMPOOL_H_
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <stdint.h>
@@ -176,6 +177,13 @@ class ObjectPoolContiguous {
     {
     	return m_vec;
     }
+
+    template<typename ORDERER>
+    void Sort(const ORDERER &orderer)
+    {
+    	  std::sort(m_vec, m_vec + m_size, orderer);
+    }
+
   private:
     T *m_vec;
     size_t m_size, m_actualSize;
