@@ -315,9 +315,7 @@ const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*
 
 void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
-VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id:|" << m_id << "| phrase:|" << phrase << "|" << std::endl);
-
-  ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
+  VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id:|" << m_id << "| phrase:|" << phrase << "|" << std::endl);
 
   fullScore = 0;
   ngramScore = 0;
@@ -325,10 +323,14 @@ VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id
 
   if ( !phrase.GetSize() ) return;
 
-  SPTR<ContextScope> scope = ttask->GetScope();
+
   weightmap_t* weight_map = NULL;
-  if (scope){
-    weight_map = scope->GetLMContextWeights(m_id);
+  ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
+  if (ttask){
+    SPTR<ContextScope> scope = ttask->GetScope();
+    if (scope){
+      weight_map = scope->GetLMContextWeights(m_id);
+    }
   }
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
@@ -572,4 +574,5 @@ void LanguageModelIRST::SetParameter(const std::string& key, const std::string& 
 }
 
 }
+
 
