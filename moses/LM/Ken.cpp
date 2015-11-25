@@ -157,8 +157,7 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   lm::ngram::Config config;
   if(this->m_verbosity >= 1) {
     config.messages = &std::cerr;
-  }
-  else {
+  } else {
     config.messages = NULL;
   }
   FactorCollection &collection = FactorCollection::Instance();
