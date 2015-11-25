@@ -51,7 +51,7 @@ StackAdd Stack::Add(const Hypothesis *hypo)
   }
 }
 
-std::vector<const Hypothesis*> Stack::GetBestHyposAndPrune(size_t num, ObjectPoolContiguous<Hypothesis*> &recycler) const
+std::vector<const Hypothesis*> Stack::GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const
 {
   std::vector<const Hypothesis*> ret = GetBestHypos(num);
   if (num && ret.size() > num) {

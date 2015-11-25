@@ -34,7 +34,7 @@ public:
 	MemPool &GetPool() const
 	{ return *m_pool; }
 
-	ObjectPoolContiguous<Hypothesis*> &GetHypoRecycle() const
+	Recycler<Hypothesis*> &GetHypoRecycle() const
 	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
@@ -54,7 +54,7 @@ public:
 	void Decode();
 protected:
 	mutable MemPool *m_pool;
-	ObjectPoolContiguous<Hypothesis*> *m_hypoRecycle;
+	Recycler<Hypothesis*> *m_hypoRecycle;
 
     std::string m_inputStr;
 	PhraseImpl *m_input;

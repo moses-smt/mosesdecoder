@@ -56,7 +56,7 @@ public:
 	void push(T &obj)
 	{ m_coll.push_back(obj); }
 
-	void clear()
+	void Reset()
 	{ m_coll.clear(); }
 protected:
 	Coll m_coll;

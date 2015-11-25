@@ -194,7 +194,7 @@ void SearchNormalBatch::AddHypos()
 	Stack &stack = m_stacks[numWordsCovered];
 	StackAdd added = stack.Add(hypo);
 
-	ObjectPoolContiguous<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
+	Recycler<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
 
 	if (added.toBeDeleted) {
 		hypoRecycle.push(added.toBeDeleted);

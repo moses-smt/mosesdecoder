@@ -41,13 +41,13 @@ public:
 	MemPool &GetManagerPool() const;
 	FactorCollection &GetVocab() const;
 
-	ObjectPoolContiguous<Hypothesis*> &GetHypoRecycler() const;
+	Recycler<Hypothesis*> &GetHypoRecycler() const;
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
 
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
-  mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_hypoRecycler;
+  mutable boost::thread_specific_ptr< Recycler<Hypothesis*> > m_hypoRecycler;
   mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_batchForEval;
 
   void LoadWeights();

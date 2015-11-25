@@ -50,7 +50,7 @@ public:
 
 	StackAdd Add(const Hypothesis *hypo);
 
-	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, ObjectPoolContiguous<Hypothesis*> &recycler) const;
+	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const;
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 
 	void Prune(Recycler<Hypothesis*> &recycler, size_t size, size_t maxSize = 0);
