@@ -140,6 +140,9 @@ private:
 
 int main(int argc, char const* argv[])
 {
+  //setting in the Staticdata a link between the thread id of this process and a NULL tasksptr
+  StaticData::InstanceNonConst().SetTask();
+
   cerr << "Lattice MBR Grid search" << endl;
 
   Grid grid;

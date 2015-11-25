@@ -76,6 +76,9 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
 /** main function of the command line version of the decoder **/
 int main(int argc, char const** argv)
 {
+  //setting in the Staticdata a link between the thread id of this process and a NULL tasksptr
+  StaticData::InstanceNonConst().SetTask();
+    
   try {
 
 #ifdef HAVE_PROTOBUF

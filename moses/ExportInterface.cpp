@@ -291,6 +291,9 @@ batch_run()
 /** Called by main function of the command line version of the decoder **/
 int decoder_main(int argc, char const** argv)
 {
+  //setting in the Staticdata a link between the thread id of this process and a NULL tasksptr
+  StaticData::InstanceNonConst().SetTask();
+
 #ifdef NDEBUG
   try
 #endif
