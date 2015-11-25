@@ -33,9 +33,17 @@ public:
 protected:
 
 	void Extend(const std::vector<const Hypothesis*> &hypos, const InputPath &path);
+	void Extend(const Hypothesis &hypo, const InputPath &path);
+	void Extend(const Hypothesis &hypo,
+			const TargetPhrases &tps,
+			const Range &pathRange,
+			const Bitmap &newBitmap,
+			SCORE estimatedScore);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrase &tp,
-			const Range &pathRange);
+			const Range &pathRange,
+			const Bitmap &newBitmap,
+			SCORE estimatedScore);
 
 	int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 
