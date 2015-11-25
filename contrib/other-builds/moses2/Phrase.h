@@ -76,7 +76,9 @@ public:
 	for (size_t i = 0; i < minSize; ++i) {
 		const Word &aWord = a[i];
 		const Word &bWord = b[i];
-		if (aWord < bWord) {
+		bool lessThan = (aWord < bWord);
+		//std::cerr << "WORD: " << aWord << " ||| " << bWord << " ||| " << lessThan << std::endl;
+		if (lessThan) {
 			return true;
 		}
 	}

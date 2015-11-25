@@ -43,12 +43,13 @@ void SearchNormalBatch::Decode(size_t stackInd)
   std::sort(m_batchForEval->GetData(),
 		  m_batchForEval->GetData() + m_batchForEval->size(),
 		  HypothesisTargetPhraseOrderer());
-
+  /*
   cerr << "SORTED:" << endl;
   for (size_t i = 0; i < m_batchForEval->size(); ++i) {
 	  Hypothesis *hypo = m_batchForEval->get(i);
 	  cerr << hypo->GetTargetPhrase() << endl;
   }
+  */
 
   // batch FF evaluation
   const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
