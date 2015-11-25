@@ -67,3 +67,19 @@ protected:
   const PhraseImpl *m_origPhrase;
   size_t m_start, m_end;
 };
+
+class PhraseOrdererLexical
+{
+public:
+  bool operator()(const Phrase &a, const Phrase &b) const {
+	size_t minSize = std::min(a.GetSize(), b.GetSize());
+	for (size_t i = 0; i < minSize; ++i) {
+		const Word &aWord = a[i];
+		const Word &bWord = b[i];
+		if (aWord < bWord) {
+			return true;
+		}
+	}
+	return a.GetSize() < b.GetSize();
+  }
+};

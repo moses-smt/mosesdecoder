@@ -22,6 +22,7 @@ public:
 
   size_t hash() const;
   bool operator==(const Word &compare) const;
+  bool operator<(const Word &compare) const;
 
   const Factor* operator[](size_t ind) const {
 	return m_factors[ind];

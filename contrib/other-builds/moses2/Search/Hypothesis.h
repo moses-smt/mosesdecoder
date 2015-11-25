@@ -4,15 +4,14 @@
  *  Created on: 24 Oct 2015
  *      Author: hieu
  */
-
-#ifndef HYPOTHESIS_H_
-#define HYPOTHESIS_H_
+#pragma once
 
 #include <iostream>
 #include <cstddef>
 #include "../legacy/FFState.h"
 #include "../legacy/Bitmap.h"
 #include "../Scores.h"
+#include "../Phrase.h"
 #include "../TargetPhrase.h"
 #include "../legacy/Range.h"
 
@@ -112,4 +111,13 @@ public:
   }
 };
 
-#endif /* HYPOTHESIS_H_ */
+class HypothesisTargetPhraseOrderer
+{
+public:
+  bool operator()(const Hypothesis* a, const Hypothesis* b) const {
+	PhraseOrdererLexical phraseCmp;
+	bool ret = phraseCmp((const Phrase&) a->GetTargetPhrase(), (const Phrase&) b->GetTargetPhrase());
+    return ret;
+  }
+};
+

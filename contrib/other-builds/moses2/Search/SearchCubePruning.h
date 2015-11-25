@@ -5,10 +5,14 @@
  *      Author: hieu
  */
 
-#ifndef SEARCH_SEARCHCUBEPRUNING_H_
-#define SEARCH_SEARCHCUBEPRUNING_H_
+#pragma once
 
+#include <boost/unordered_map.hpp>
+#include <vector>
 #include "Search.h"
+
+class Bitmap;
+class Hypothesis;
 
 class SearchCubePruning : public Search
 {
@@ -20,6 +24,8 @@ public:
 
 	const Hypothesis *GetBestHypothesis() const;
 
+protected:
+	boost::unordered_map<const Bitmap*, std::vector<const Hypothesis*> > m_hyposPerBM;
+
 };
 
-#endif /* SEARCH_SEARCHCUBEPRUNING_H_ */

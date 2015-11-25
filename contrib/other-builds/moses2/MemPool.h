@@ -169,6 +169,11 @@ class ObjectPoolContiguous {
     {
     	--m_size;
     }
+
+    T *GetData()
+    {
+    	return m_vec;
+    }
   private:
     T *m_vec;
     size_t m_size, m_actualSize;

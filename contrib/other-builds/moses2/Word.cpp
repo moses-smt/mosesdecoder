@@ -45,6 +45,12 @@ bool Word::operator==(const Word &compare) const
 	return cmp == 0;
 }
 
+bool Word::operator<(const Word &compare) const
+{
+	int cmp = memcmp(m_factors, compare.m_factors, sizeof(Factor *) * MAX_NUM_FACTORS);
+	return (cmp < 0);
+}
+
 std::ostream& operator<<(std::ostream &out, const Word &obj)
 {
 	bool outputAlready = false;

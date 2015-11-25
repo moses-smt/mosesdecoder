@@ -10,6 +10,7 @@
 #include "SearchNormalBatch.h"
 #include "Stack.h"
 #include "Manager.h"
+#include "Hypothesis.h"
 #include "../InputPaths.h"
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
@@ -38,6 +39,10 @@ void SearchNormalBatch::Decode(size_t stackInd)
   BOOST_FOREACH(const Hypothesis *hypo, hypos) {
 		Extend(*hypo);
   }
+
+  std::sort(m_batchForEval->GetData(),
+		  m_batchForEval->GetData() + m_batchForEval->size(),
+		  HypothesisTargetPhraseOrderer());
 
   // batch FF evaluation
   const std::vector<const StatefulFeatureFunction*> &sfffs = m_mgr.system.featureFunctions.GetStatefulFeatureFunctions();
