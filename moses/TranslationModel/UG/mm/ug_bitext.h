@@ -102,7 +102,7 @@ namespace sapt
   template<typename Token> class BitextSampler;
   
   template<typename TKN>
-  class Bitext : public Moses::reference_counter
+  class Bitext // : public Moses::reference_counter
   {
   public:
     template<typename Token> friend class BitextSampler;
@@ -167,7 +167,7 @@ namespace sapt
     prep2(ttasksptr const& ttask, iter const& phrase, int max_sample = -1) const;
 #endif 
 
-  public:
+  protected:
     Bitext(size_t const max_sample = 1000, size_t const xnum_workers = 16);
 
     Bitext(Ttrack<Token>* const t1, Ttrack<Token>* const t2,
@@ -176,7 +176,7 @@ namespace sapt
            TSA<Token>*    const i1, TSA<Token>*    const i2,
            size_t const max_sample=1000,
            size_t const xnum_workers=16);
-
+  public:
     virtual void
     open(std::string const base, std::string const L1, std::string const L2) = 0;
 

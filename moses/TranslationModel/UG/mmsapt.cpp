@@ -721,7 +721,7 @@ namespace Moses
         if (foo) { sfix = *foo; sfix->wait(); }
         else 
           {
-            BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
+            BitextSampler<Token> s(btfix, mfix, context->bias, 
                                    m_min_sample_size, 
                                    m_default_sample_size, 
                                    m_sampling_method);
@@ -910,8 +910,9 @@ namespace Moses
         uint64_t pid = mfix.getPid();
         if (!context->cache1->get(pid))
           {
-            BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
-                                   m_min_sample_size, m_default_sample_size, m_sampling_method);
+            BitextSampler<Token> s(btfix, mfix, context->bias, 
+                                   m_min_sample_size, m_default_sample_size, 
+                                   m_sampling_method);
             if (*context->cache1->get(pid, s.stats()) == s.stats())
               m_thread_pool->add(s);
           }

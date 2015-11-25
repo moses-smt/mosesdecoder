@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 	      if (size_t(m.ca()) == num_occurrences) continue;
 	      num_occurrences = m.ca();
 	      SPTR<SamplingBias const> zilch;
-	      BitextSampler<Token> s(B.get(), m, zilch, 1000, 1000, 
+	      BitextSampler<Token> s(B, m, zilch, 1000, 1000, 
 				     sapt::random_sampling);
 	      s();
 	      if (s.stats()->trg.size() == 0) continue;
