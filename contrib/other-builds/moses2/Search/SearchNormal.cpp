@@ -95,13 +95,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
 	Stack &stack = m_stacks[numWordsCovered];
-	StackAdd added = stack.Add(newHypo);
-
-	Recycler<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
-
-	if (added.toBeDeleted) {
-		hypoRecycle.Add(added.toBeDeleted);
-	}
+	stack.Add(newHypo, m_mgr.GetHypoRecycle());
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);

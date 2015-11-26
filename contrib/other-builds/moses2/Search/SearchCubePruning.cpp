@@ -20,7 +20,7 @@ void SearchCubePruning::CubeElement::CreateHypothesis(Manager &mgr)
 	const TargetPhrase &tp = edge.tps[tpIndex];
 
 	hypo = Hypothesis::Create(mgr);
-	//hypo->Init()
+	hypo->Init(prevHypo, tp, edge.path.range, edge.newBitmap, 353);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -36,11 +36,21 @@ SearchCubePruning::~SearchCubePruning() {
 
 void SearchCubePruning::Decode(size_t stackInd)
 {
+	// add top hypo from every edge into queue
 	std::vector<CubeEdge> &edges = m_cubeEdges[stackInd];
 	BOOST_FOREACH(const CubeEdge &edge, edges) {
 		CubeElement *ele = new CubeElement(m_mgr, edge, 0, 0);
 		m_queue.push(ele);
 	}
+
+	// get best hypo from queue, add to stack
+	CubeElement *ele = m_queue.front();
+	Hypothesis *hypo = ele->hypo;
+
+	size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
+
+	Stack &stack = m_stacks[numWordsCovered];
+	stack.Add(hypo, m_mgr.GetHypoRecycle());
 }
 
 void SearchCubePruning::PostDecode(size_t stackInd)

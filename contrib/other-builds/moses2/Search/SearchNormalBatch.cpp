@@ -135,13 +135,7 @@ void SearchNormalBatch::AddHypos()
 	const Bitmap &bitmap = hypo->GetBitmap();
 	size_t numWordsCovered = bitmap.GetNumWordsCovered();
 	Stack &stack = m_stacks[numWordsCovered];
-	StackAdd added = stack.Add(hypo);
-
-	Recycler<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
-
-	if (added.toBeDeleted) {
-		hypoRecycle.Add(added.toBeDeleted);
-	}
+	stack.Add(hypo, m_mgr.GetHypoRecycle());
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);

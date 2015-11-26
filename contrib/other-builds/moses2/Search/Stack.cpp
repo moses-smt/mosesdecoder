@@ -21,6 +21,15 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
+void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
+{
+	StackAdd added = Add(hypo);
+
+	if (added.toBeDeleted) {
+		hypoRecycle.Add(added.toBeDeleted);
+	}
+}
+
 StackAdd Stack::Add(const Hypothesis *hypo)
 {
   std::pair<iterator, bool> addRet = m_hypos.insert(hypo);
