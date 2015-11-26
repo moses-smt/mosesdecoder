@@ -108,15 +108,3 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 
 }
 
-const Hypothesis *SearchNormal::GetBestHypothesis() const
-{
-	const Stack &lastStack = m_stacks.Back();
-	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
-
-	const Hypothesis *best = NULL;
-	if (sortedHypos.size()) {
-		best = sortedHypos[0];
-	}
-	return best;
-}
-

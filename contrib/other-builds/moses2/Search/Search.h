@@ -23,8 +23,9 @@ public:
 	virtual ~Search();
 
 	virtual void Decode(size_t stackInd) = 0;
+	virtual void PostDecode(size_t stackInd) {};
 
-	virtual const Hypothesis *GetBestHypothesis() const = 0;
+	virtual const Hypothesis *GetBestHypothesis() const;
 
 protected:
 	Manager &m_mgr;

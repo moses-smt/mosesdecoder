@@ -97,8 +97,11 @@ void Manager::Decode()
 	StackAdd stackAdded = m_stacks[0].Add(initHypo);
 	assert(stackAdded.added);
 
+	m_search->PostDecode(0);
+
 	for (size_t i = 0; i < m_stacks.GetSize() - 1; ++i) {
 		m_search->Decode(i);
+		m_search->PostDecode(i);
 	}
 }
 

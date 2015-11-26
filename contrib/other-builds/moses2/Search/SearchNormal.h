@@ -28,8 +28,6 @@ public:
 
 	void Decode(size_t stackInd);
 
-	const Hypothesis *GetBestHypothesis() const;
-
 protected:
 
 	void Extend(const Hypothesis &hypo, const InputPath &path);
