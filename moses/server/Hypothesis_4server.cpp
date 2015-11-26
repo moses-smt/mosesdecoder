@@ -15,8 +15,8 @@ namespace Moses {
     vector<pair<size_t,size_t> const* > a
       = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments(waso);
     typedef pair<size_t,size_t> item;
-    map<string, xmlrpc_c::value> M;
     BOOST_FOREACH(item const* p, a) {
+      map<string, xmlrpc_c::value> M;
       M["source-word"] = xmlrpc_c::value_int(src.GetStartPos() + p->first);
       M["target-word"] = xmlrpc_c::value_int(trg.GetStartPos() + p->second);
       dest.push_back(xmlrpc_c::value_struct(M));

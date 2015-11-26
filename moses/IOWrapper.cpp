@@ -30,8 +30,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
  ***********************************************************************/
 
-// example file on how to use moses library
-
 #include <iostream>
 #include <stack>
 #include <boost/algorithm/string.hpp>
@@ -39,33 +37,21 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "moses/Syntax/KBestExtractor.h"
 #include "moses/Syntax/PVertex.h"
-#include "moses/Syntax/SHyperedge.h"
 #include "moses/Syntax/S2T/DerivationWriter.h"
-#include "moses/Syntax/SVertex.h"
 
-#include "moses/TypeDef.h"
-#include "moses/Util.h"
 #include "moses/Hypothesis.h"
-#include "moses/Range.h"
 #include "moses/TrellisPathList.h"
 #include "moses/StaticData.h"
-#include "moses/FeatureVector.h"
 #include "moses/InputFileStream.h"
 #include "moses/FF/StatefulFeatureFunction.h"
-#include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TreeInput.h"
 #include "moses/ForestInput.h"
 #include "moses/ConfusionNet.h"
 #include "moses/WordLattice.h"
-#include "moses/Incremental.h"
 #include "moses/ChartManager.h"
-
-
-#include "util/exception.hh"
 
 #include "IOWrapper.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>

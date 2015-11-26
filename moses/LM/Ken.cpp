@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/Incremental.h"
+#include "moses/Syntax/SHyperedge.h"
 #include "moses/Syntax/SVertex.h"
 
 using namespace std;
@@ -154,10 +155,9 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   ReadParameters();
 
   lm::ngram::Config config;
-  IFVERBOSE(1) {
+  if(this->m_verbosity >= 1) {
     config.messages = &std::cerr;
-  }
-  else {
+  } else {
     config.messages = NULL;
   }
   FactorCollection &collection = FactorCollection::Instance();

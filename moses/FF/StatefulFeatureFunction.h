@@ -3,11 +3,15 @@
 
 #include "FeatureFunction.h"
 
-#include "moses/Syntax/SHyperedge.h"
 
 namespace Moses
 {
 class FFState;
+
+namespace Syntax
+{
+class SHyperedge;
+}
 
 /** base class for all stateful feature functions.
  * eg. LM, distortion penalty

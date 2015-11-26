@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Decoder.h"
 #include "moses/Manager.h"
+#include "moses/Timer.h"
 #include "moses/ChartManager.h"
 #include "moses/Sentence.h"
 #include "moses/InputType.h"
@@ -74,6 +75,7 @@ MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vect
     cerr << "Loading static data failed, exit." << endl;
     exit(1);
   }
+  ResetUserTime();
   StaticData::LoadDataStatic(params, "mira");
   for (int i = 0; i < BASE_ARGC; ++i) {
     delete[] mosesargv[i];

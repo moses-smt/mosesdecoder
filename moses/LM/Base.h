@@ -46,8 +46,6 @@ class LanguageModel : public StatefulFeatureFunction
 protected:
   LanguageModel(const std::string &line);
 
-  // This can't be in the constructor for virual function dispatch reasons
-
   bool m_enableOOVFeature;
 
 public:
@@ -59,9 +57,7 @@ public:
     return m_enableOOVFeature;
   }
 
-  float GetWeight() const;
-  float GetOOVWeight() const;
-
+  virtual void SetParameter(const std::string& key, const std::string& value);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 

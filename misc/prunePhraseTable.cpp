@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputPath.h"
 #include "moses/Parameter.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/Timer.h"
 #include "moses/StaticData.h"
 
 #include "util/file_piece.hh"
@@ -150,6 +151,7 @@ int main(int argc, char const** argv)
     exit(1);
   }
 
+  ResetUserTime();
   if (!StaticData::LoadDataStatic(params.get(),argv[0])) {
     exit(1);
   }

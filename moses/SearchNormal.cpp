@@ -86,7 +86,7 @@ void SearchNormal::Decode()
 
   // initial seed hypothesis: nothing translated, no words produced
   const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
-  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap);
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap, m_manager.GetNextHypoId());
 
   m_hypoStackColl[0]->AddPrune(hypo);
 
@@ -306,12 +306,29 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
+    newHypo = new Hypothesis(hypothesis, transOpt, bitmap, m_manager.GetNextHypoId());
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();
     }
     if (newHypo==NULL) return;
+
+    IFVERBOSE(2) {
+      m_manager.GetSentenceStats().StartTimeOtherScore();
+    }
     newHypo->EvaluateWhenApplied(estimatedScore);
+    IFVERBOSE(2) {
+      m_manager.GetSentenceStats().StopTimeOtherScore();
+
+      // TODO: these have been meaningless for a while.
+      // At least since commit 67fb5c
+      // should now be measured in SearchNormal.cpp:254 instead, around CalcFutureScore2()
+      // CalcFutureScore2() also called in BackwardsEdge::Initialize().
+      //
+      // however, CalcFutureScore2() should be quick
+      // since it uses dynamic programming results in SquareMatrix
+      m_manager.GetSentenceStats().StartTimeEstimateScore();
+      m_manager.GetSentenceStats().StopTimeEstimateScore();
+    }
   } else
     // early discarding: check if hypothesis is too bad to build
   {
@@ -340,7 +357,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
     IFVERBOSE(2) {
       stats.StartTimeBuildHyp();
     }
-    newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
+    newHypo = new Hypothesis(hypothesis, transOpt, bitmap, m_manager.GetNextHypoId());
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
       stats.StopTimeBuildHyp();

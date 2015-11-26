@@ -51,7 +51,7 @@ MockHypothesisGuard
 
   const Bitmap &initBitmap = bitmaps.GetInitialBitmap();
   m_hypothesis = new Hypothesis(*m_manager, *m_sentence, m_initialTransOpt,
-                                initBitmap);
+                                initBitmap, m_manager->GetNextHypoId());
 
   //create the chain
   vector<Alignment>::const_iterator ai = alignments.begin();
@@ -67,7 +67,7 @@ MockHypothesisGuard
     m_targetPhrases.back().CreateFromString(Input, factors, *ti, NULL);
     m_toptions.push_back(new TranslationOption
                          (range,m_targetPhrases.back()));
-    m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back(), newBitmap);
+    m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back(), newBitmap, m_manager->GetNextHypoId());
 
   }
 

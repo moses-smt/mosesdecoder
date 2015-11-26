@@ -81,7 +81,7 @@ BitextSampler : public Moses::reference_counter
 public:
   BitextSampler(BitextSampler const& other);
   BitextSampler const& operator=(BitextSampler const& other);
-  BitextSampler(bitext const*  const bitext, 
+  BitextSampler(SPTR<bitext const> const& bitext, 
                 typename bitext::iter const& phrase,
                 SPTR<SamplingBias const> const& bias, 
                 size_t const min_samples, 
@@ -182,7 +182,7 @@ flip_coin(id_type & sid, ushort & offset)
 
 template<typename Token>
 BitextSampler<Token>::
-BitextSampler(Bitext<Token> const* const bitext, 
+BitextSampler(SPTR<Bitext<Token> const> const& bitext, 
               typename bitext::iter const& phrase,
               SPTR<SamplingBias const> const& bias, size_t const min_samples, size_t const max_samples,
               sampling_method const method)

@@ -49,7 +49,8 @@ protected:
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
-  void Register();
+public:
+  static void Register(FeatureFunction* ff);
 private:
   // void Initialize(const std::string &line);
   void ParseLine(const std::string &line);
@@ -62,8 +63,8 @@ public:
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 
-  FeatureFunction(const std::string &line, bool initializeNow);
-  FeatureFunction(size_t numScoreComponents, const std::string &line);
+  FeatureFunction(const std::string &line, bool registerNow);
+  FeatureFunction(size_t numScoreComponents, const std::string &line, bool registerNow = true);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
 
