@@ -24,13 +24,13 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
 	Hypothesis *ret;
 
 	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
-	if (recycler.empty()) {
+	if (recycler.IsEmpty()) {
 		MemPool &pool = mgr.GetPool();
 		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(mgr);
 	}
 	else {
-		ret = recycler.get();
-		recycler.pop();
+		ret = recycler.Get();
+		recycler.Pop();
 	}
 	return ret;
 }

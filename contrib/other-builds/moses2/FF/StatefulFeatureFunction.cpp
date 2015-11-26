@@ -43,8 +43,8 @@ void StatefulFeatureFunction::EvaluateWhenApplied(const ObjectPoolContiguous<Hyp
 */
 #endif
 
-	for (size_t i = 0; i < hypos.size(); ++i) {
-		Hypothesis *hypo = hypos.get(i);
+	for (size_t i = 0; i < hypos.GetSize(); ++i) {
+		Hypothesis *hypo = hypos[i];
 		 hypo->EvaluateWhenApplied(*this);
 	 }
 

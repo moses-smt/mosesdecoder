@@ -12,7 +12,18 @@
 #include "Hypothesis.h"
 #include "../InputPaths.h"
 #include "../InputPath.h"
+#include "../System.h"
 
+void SearchCubePruning::CubeElement::CreateHypothesis(Manager &mgr)
+{
+	const Hypothesis &prevHypo = *edge.hypos[hypoIndex];
+	const TargetPhrase &tp = edge.tps[tpIndex];
+
+	hypo = Hypothesis::Create(mgr);
+	//hypo->Init()
+}
+
+////////////////////////////////////////////////////////////////////////
 SearchCubePruning::SearchCubePruning(Manager &mgr, Stacks &stacks)
 :Search(mgr, stacks)
 {
@@ -26,7 +37,10 @@ SearchCubePruning::~SearchCubePruning() {
 void SearchCubePruning::Decode(size_t stackInd)
 {
 	std::vector<CubeEdge> &edges = m_cubeEdges[stackInd];
-
+	BOOST_FOREACH(const CubeEdge &edge, edges) {
+		CubeElement *ele = new CubeElement(m_mgr, edge, 0, 0);
+		m_queue.push(ele);
+	}
 }
 
 void SearchCubePruning::PostDecode(size_t stackInd)
@@ -79,27 +93,27 @@ void SearchCubePruning::PostDecode(size_t stackInd)
 
 void SearchCubePruning::SortAndPruneHypos()
 {
-  size_t num = 200;
+  size_t stackSize = m_mgr.system.stackSize;
   Recycler<Hypothesis*> &recycler = m_mgr.GetHypoRecycle();
 
   BOOST_FOREACH(HyposForCube::value_type val, m_hyposForCube) {
 	  Hypotheses &hypos = val.second;
 
 	  std::vector<const Hypothesis*>::iterator iterMiddle;
-	  iterMiddle = (num == 0 || hypos.size() < num)
+	  iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
 				   ? hypos.end()
-				   : hypos.begin()+num;
+				   : hypos.begin() + stackSize;
 
 	  std::partial_sort(hypos.begin(), iterMiddle, hypos.end(),
 			  HypothesisFutureScoreOrderer());
 
 	  // prune
-	  if (num && hypos.size() > num) {
-		  for (size_t i = num; i < hypos.size(); ++i) {
+	  if (stackSize && hypos.size() > stackSize) {
+		  for (size_t i = stackSize; i < hypos.size(); ++i) {
 			  Hypothesis *hypo = const_cast<Hypothesis*>(hypos[i]);
-			  recycler.push(hypo);
+			  recycler.Add(hypo);
 		  }
-		  hypos.resize(num);
+		  hypos.resize(stackSize);
 	  }
   }
 }

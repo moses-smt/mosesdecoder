@@ -136,7 +136,7 @@ class ObjectPoolContiguous {
     	free (m_vec);
     }
 
-    void push(T &obj) {
+    void Add(T &obj) {
     	if (m_size >= m_actualSize) {
 	  //std::cerr << std::endl << "MORE " << m_size << std::endl;
 	  m_actualSize *= 2;
@@ -147,7 +147,7 @@ class ObjectPoolContiguous {
     	++m_size;
     }
 
-    bool empty() const
+    bool IsEmpty() const
     { return m_size == 0; }
 
     void Reset()
@@ -156,19 +156,20 @@ class ObjectPoolContiguous {
     }
 
     // vector op
-    size_t size() const
+    size_t GetSize() const
     { return m_size; }
 
-    const T &get(size_t ind) const {
+
+    const T& operator[](size_t ind) const {
     	return m_vec[ind];
     }
 
     // stack op
-    const T &get() const {
+    const T &Get() const {
     	return m_vec[m_size - 1];
     }
 
-    void pop()
+    void Pop()
     {
     	--m_size;
     }

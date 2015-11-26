@@ -40,20 +40,20 @@ public:
 	virtual ~Recycler()
 	{}
 
-	bool empty() const
+	bool IsEmpty() const
 	{ return m_coll.empty(); }
 
-	T &get()
+	T &Get()
 	{ return m_coll.back(); }
 
-	void pop()
+	void Pop()
 	{
 		if (m_coll.size()) {
 			m_coll.resize(m_coll.size() - 1);
 		}
 	}
 
-	void push(T &obj)
+	void Add(T &obj)
 	{ m_coll.push_back(obj); }
 
 	void Reset()

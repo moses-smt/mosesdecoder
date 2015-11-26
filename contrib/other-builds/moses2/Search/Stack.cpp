@@ -57,7 +57,7 @@ std::vector<const Hypothesis*> Stack::GetBestHyposAndPrune(size_t num, Recycler<
   if (num && ret.size() > num) {
 	  for (size_t i = num; i < ret.size(); ++i) {
 		  Hypothesis *hypo = const_cast<Hypothesis*>(ret[i]);
-		  recycler.push(hypo);
+		  recycler.Add(hypo);
 	  }
 	  ret.resize(num);
   }

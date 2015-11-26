@@ -100,7 +100,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	Recycler<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
 
 	if (added.toBeDeleted) {
-		hypoRecycle.push(added.toBeDeleted);
+		hypoRecycle.Add(added.toBeDeleted);
 	}
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);

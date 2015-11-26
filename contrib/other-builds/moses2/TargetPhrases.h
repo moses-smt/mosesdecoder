@@ -37,6 +37,9 @@ public:
 	size_t GetSize() const
 	{ return m_coll.size(); }
 
+	const TargetPhrase& operator[](size_t ind) const
+	{ return *m_coll[ind]; }
+
 	void SortAndPrune(size_t tableLimit);
 
 protected:

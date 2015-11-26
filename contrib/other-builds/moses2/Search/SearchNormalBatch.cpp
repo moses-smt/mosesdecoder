@@ -125,13 +125,13 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo,
 	newHypo->EvaluateWhenAppliedNonBatch();
 
 
-	m_batchForEval->push(newHypo);
+	m_batchForEval->Add(newHypo);
 }
 
 void SearchNormalBatch::AddHypos()
 {
-  for (size_t i = 0; i < m_batchForEval->size(); ++i) {
-	Hypothesis *hypo = m_batchForEval->get(i);
+  for (size_t i = 0; i < m_batchForEval->GetSize(); ++i) {
+	Hypothesis *hypo = (*m_batchForEval)[i];
 	const Bitmap &bitmap = hypo->GetBitmap();
 	size_t numWordsCovered = bitmap.GetNumWordsCovered();
 	Stack &stack = m_stacks[numWordsCovered];
@@ -140,7 +140,7 @@ void SearchNormalBatch::AddHypos()
 	Recycler<Hypothesis*> &hypoRecycle = m_mgr.GetHypoRecycle();
 
 	if (added.toBeDeleted) {
-		hypoRecycle.push(added.toBeDeleted);
+		hypoRecycle.Add(added.toBeDeleted);
 	}
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);

@@ -47,23 +47,36 @@ protected:
 		,path(path)
 		,tps(tps)
 		,newBitmap(newBitmap)
-		,hypoIndex(0)
-		,tpIndex(0)
 		{}
 
 		const Hypotheses &hypos;
 		const InputPath &path;
 		const TargetPhrases &tps;
 		const Bitmap &newBitmap;
-
-		size_t hypoIndex, tpIndex;
 	};
 
 	std::vector<std::vector<CubeEdge> > m_cubeEdges;
 
 	// CUBE PRUNING
 	// decoding
-	std::queue<Hypotheses*> m_queue;
+	struct CubeElement
+	{
+		CubeElement(Manager &mgr, const CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
+		:edge(edge)
+		,hypoIndex(hypoIndex)
+		,tpIndex(tpIndex)
+		{
+			CreateHypothesis(mgr);
+		}
+
+		const CubeEdge &edge;
+		size_t hypoIndex, tpIndex;
+		Hypothesis *hypo;
+
+		void CreateHypothesis(Manager &mgr);
+};
+
+	std::queue<CubeElement*> m_queue;
 
 	void SortAndPruneHypos();
 };
