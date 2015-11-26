@@ -42,7 +42,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   }
 
   // sort and prune hypos
-  // TODO
+  SortAndPruneHypos();
 
   // create edges to next hypos from existing hypos
   const InputPaths &paths = m_mgr.GetInputPaths();
@@ -72,6 +72,33 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   		std::vector<CubeEdge> &edges = m_cubeEdges[numWords];
   		edges.push_back(edge);
   	  }
+  }
+}
+
+void SearchCubePruning::SortAndPruneHypos()
+{
+  size_t num = 200;
+  Recycler<Hypothesis*> &recycler = m_mgr.GetHypoRecycle();
+
+  BOOST_FOREACH(HyposForCube::value_type val, m_hyposForCube) {
+	  Hypotheses &hypos = val.second;
+
+	  std::vector<const Hypothesis*>::iterator iterMiddle;
+	  iterMiddle = (num == 0 || hypos.size() < num)
+				   ? hypos.end()
+				   : hypos.begin()+num;
+
+	  std::partial_sort(hypos.begin(), iterMiddle, hypos.end(),
+			  HypothesisFutureScoreOrderer());
+
+	  // prune
+	  if (num && hypos.size() > num) {
+		  for (size_t i = num; i < hypos.size(); ++i) {
+			  Hypothesis *hypo = const_cast<Hypothesis*>(hypos[i]);
+			  recycler.push(hypo);
+		  }
+		  hypos.resize(num);
+	  }
   }
 }
 

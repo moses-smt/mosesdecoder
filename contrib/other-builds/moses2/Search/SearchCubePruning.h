@@ -43,5 +43,6 @@ protected:
 
 	std::vector<std::vector<CubeEdge> > m_cubeEdges;
 
+	void SortAndPruneHypos();
 };
 
