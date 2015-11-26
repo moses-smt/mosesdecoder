@@ -9,12 +9,14 @@
 
 #include <boost/unordered_map.hpp>
 #include <vector>
+#include <queue>
 #include "Search.h"
 #include "../legacy/Range.h"
 
 class Bitmap;
 class Hypothesis;
 class InputPath;
+class TargetPhrases;
 
 class SearchCubePruning : public Search
 {
@@ -28,6 +30,7 @@ public:
 protected:
 
 	// CUBE PRUNING VARIABLES
+	// setup
 	typedef std::vector<const Hypothesis*>  Hypotheses;
 	typedef std::pair<const Bitmap*, Range> HypoCoverage;
 	  // bitmap and range of hypos
@@ -36,12 +39,31 @@ protected:
 
 	struct CubeEdge
 	{
-		const Hypotheses *hypos;
-		const InputPath *path;
-		const Bitmap *newBitmap;
+		CubeEdge(const Hypotheses &hypos,
+				const InputPath &path,
+				const TargetPhrases &tps,
+				const Bitmap &newBitmap)
+		:hypos(hypos)
+		,path(path)
+		,tps(tps)
+		,newBitmap(newBitmap)
+		,hypoIndex(0)
+		,tpIndex(0)
+		{}
+
+		const Hypotheses &hypos;
+		const InputPath &path;
+		const TargetPhrases &tps;
+		const Bitmap &newBitmap;
+
+		size_t hypoIndex, tpIndex;
 	};
 
 	std::vector<std::vector<CubeEdge> > m_cubeEdges;
+
+	// CUBE PRUNING
+	// decoding
+	std::queue<Hypotheses*> m_queue;
 
 	void SortAndPruneHypos();
 };

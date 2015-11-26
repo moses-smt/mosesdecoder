@@ -25,6 +25,7 @@ SearchCubePruning::~SearchCubePruning() {
 
 void SearchCubePruning::Decode(size_t stackInd)
 {
+	std::vector<CubeEdge> &edges = m_cubeEdges[stackInd];
 
 }
 
@@ -64,13 +65,14 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
   		size_t numWords = newBitmap.GetNumWordsCovered();
 
-  		CubeEdge edge;
-  		edge.hypos = &hypos;
-  		edge.path = &path;
-  		edge.newBitmap = &newBitmap;
-
-  		std::vector<CubeEdge> &edges = m_cubeEdges[numWords];
-  		edges.push_back(edge);
+  		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
+  			const TargetPhrases *tps = tpsPtr.get();
+  			if (tps && tps->GetSize()) {
+  		  		CubeEdge edge(hypos, path, *tps, newBitmap);
+  		  		std::vector<CubeEdge> &edges = m_cubeEdges[numWords];
+  		  		edges.push_back(edge);
+  			}
+  		}
   	  }
   }
 }
