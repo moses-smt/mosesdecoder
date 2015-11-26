@@ -21,7 +21,14 @@ public:
   void CreateFromString(FactorCollection &vocab, const System &system, const std::string &str);
 
   size_t hash() const;
-  bool operator==(const Word &compare) const;
+  int Compare(const Word &compare) const;
+
+  bool operator==(const Word &compare) const
+  {
+	int cmp = Compare(compare);
+	return cmp == 0;
+  }
+
   bool operator<(const Word &compare) const;
 
   const Factor* operator[](size_t ind) const {

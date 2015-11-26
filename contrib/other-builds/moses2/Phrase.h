@@ -76,10 +76,10 @@ public:
 	for (size_t i = 0; i < minSize; ++i) {
 		const Word &aWord = a[i];
 		const Word &bWord = b[i];
-		bool lessThan = (aWord < bWord);
+		int cmp = aWord.Compare(bWord);
 		//std::cerr << "WORD: " << aWord << " ||| " << bWord << " ||| " << lessThan << std::endl;
-		if (lessThan) {
-			return true;
+		if (cmp) {
+			return (cmp < 0);
 		}
 	}
 	return a.GetSize() < b.GetSize();

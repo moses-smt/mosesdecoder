@@ -39,20 +39,22 @@ size_t Word::hash() const
 	return ret;
 }
 
-bool Word::operator==(const Word &compare) const
+int Word::Compare(const Word &compare) const
 {
+
 	int cmp = memcmp(m_factors, compare.m_factors, sizeof(Factor*) * MAX_NUM_FACTORS);
-	return cmp == 0;
+	return cmp;
+
+/*
+	int ret = m_factors[0]->GetString().compare(compare.m_factors[0]->GetString());
+	return ret;
+*/
 }
 
 bool Word::operator<(const Word &compare) const
 {
-	int cmp = memcmp(m_factors, compare.m_factors, sizeof(Factor *) * MAX_NUM_FACTORS);
+	int cmp = Compare(compare);
 	return (cmp < 0);
-	/*
-	bool ret = m_factors[0]->GetString() < compare.m_factors[0]->GetString();
-	return ret;
-	*/
 }
 
 std::ostream& operator<<(std::ostream &out, const Word &obj)
