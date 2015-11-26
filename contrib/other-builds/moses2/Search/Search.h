@@ -14,6 +14,8 @@ class Manager;
 class Stack;
 class Stacks;
 class Hypothesis;
+class Bitmap;
+class Range;
 
 class Search {
 public:
@@ -28,6 +30,9 @@ protected:
 	Manager &m_mgr;
 	Stacks &m_stacks;
 	//ArcLists m_arcLists;
+
+	bool CanExtend(const Bitmap &hypoBitmap, const Range &hypoRange, const Range &pathRange);
+	int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 
 };
 
