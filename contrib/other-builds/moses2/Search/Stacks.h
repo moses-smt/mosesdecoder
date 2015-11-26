@@ -32,6 +32,9 @@ public:
     	delete m_stacks[ind];
     	m_stacks[ind] = NULL;
     }
+
+	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+
 protected:
 	std::vector<Stack*> m_stacks;
 };

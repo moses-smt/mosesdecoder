@@ -94,8 +94,7 @@ void Manager::Decode()
 	initHypo->Init(*m_initPhrase, m_initRange, initBitmap);
 	initHypo->EmptyHypothesisState(*m_input);
 
-	StackAdd stackAdded = m_stacks[0].Add(initHypo);
-	assert(stackAdded.added);
+	m_stacks.Add(initHypo, GetHypoRecycle());
 
 	m_search->PostDecode(0);
 

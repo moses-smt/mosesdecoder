@@ -93,9 +93,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	newHypo->Init(hypo, tp, pathRange, newBitmap, estimatedScore);
 	newHypo->EvaluateWhenApplied();
 
-	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
-	Stack &stack = m_stacks[numWordsCovered];
-	stack.Add(newHypo, m_mgr.GetHypoRecycle());
+	m_stacks.Add(newHypo, m_mgr.GetHypoRecycle());
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);

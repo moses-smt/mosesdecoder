@@ -46,11 +46,7 @@ void SearchCubePruning::Decode(size_t stackInd)
 	// get best hypo from queue, add to stack
 	CubeElement *ele = m_queue.front();
 	Hypothesis *hypo = ele->hypo;
-
-	size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
-
-	Stack &stack = m_stacks[numWordsCovered];
-	stack.Add(hypo, m_mgr.GetHypoRecycle());
+	m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 }
 
 void SearchCubePruning::PostDecode(size_t stackInd)

@@ -132,10 +132,7 @@ void SearchNormalBatch::AddHypos()
 {
   for (size_t i = 0; i < m_batchForEval->GetSize(); ++i) {
 	Hypothesis *hypo = (*m_batchForEval)[i];
-	const Bitmap &bitmap = hypo->GetBitmap();
-	size_t numWordsCovered = bitmap.GetNumWordsCovered();
-	Stack &stack = m_stacks[numWordsCovered];
-	stack.Add(hypo, m_mgr.GetHypoRecycle());
+	m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);
