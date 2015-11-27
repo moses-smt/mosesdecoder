@@ -173,7 +173,6 @@ TranslationOptionCollection::
 ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
                       size_t length, const ScorePair *inputScores)
 {
-  const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer&
   unknownWordPenaltyProducer = UnknownWordPenaltyProducer::Instance();
   float unknownScore = FloorScore(TransformScore(0));

@@ -9,13 +9,6 @@ namespace Syntax
 namespace F2S
 {
 
-HyperPathLoader::HyperPathLoader(FactorDirection direction,
-                                 const std::vector<FactorType> &factorOrder)
-  : m_direction(direction)
-  , m_factorOrder(factorOrder)
-{
-}
-
 void HyperPathLoader::Load(const StringPiece &s, HyperPath &path)
 {
   path.nodeSeqs.clear();

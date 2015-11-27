@@ -10,11 +10,11 @@ namespace Moses
 Search::Search(Manager& manager, const InputType &source)
   : m_manager(manager)
   , m_source(source)
+  , m_options(manager.options())
   , m_inputPath()
   , m_initialTransOpt()
-  , m_options(manager.options())
-  , interrupted_flag(0)
   , m_bitmaps(source.GetSize(), source.m_sourceCompleted)
+  , interrupted_flag(0)
 {
   m_initialTransOpt.SetInputPath(m_inputPath);
 }

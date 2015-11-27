@@ -29,7 +29,7 @@ namespace Moses
 {
 
 class ChartSearchGraphWriter;
-class AllOptions;
+struct AllOptions;
 
 //! functor to compare (chart) hypotheses by (descending) score
 class ChartHypothesisScoreOrderer

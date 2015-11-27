@@ -293,7 +293,6 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis,
                                     float estimatedScore,
                                     const Bitmap &bitmap)
 {
-  const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
 
   Hypothesis *newHypo;

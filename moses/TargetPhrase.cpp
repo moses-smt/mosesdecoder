@@ -135,8 +135,8 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
-  , m_properties(copy.m_properties)
   , m_scope(copy.m_scope)
+  , m_properties(copy.m_properties)
   , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
