@@ -52,7 +52,7 @@ void Weights::CreateFromString(const FeatureFunctions &ffs, const std::string &l
 	assert(toks.size());
 
 	string ffName = toks[0];
-	assert(ffName.back() == '=');
+	assert(ffName[ffName.size() - 1] == '=');
 
 	ffName = ffName.substr(0, ffName.size() - 1);
 	//cerr << "ffName=" << ffName << endl;
