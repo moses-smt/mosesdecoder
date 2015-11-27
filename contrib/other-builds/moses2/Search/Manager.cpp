@@ -98,9 +98,16 @@ void Manager::Decode()
 
 	m_search->PostDecode(0);
 
-	for (size_t i = 0; i < m_stacks.GetSize() - 1; ++i) {
-		m_search->Decode(i);
-		m_search->PostDecode(i);
+	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+		m_search->Decode(stackInd);
+		m_search->PostDecode(stackInd);
+
+		cerr << m_stacks << endl;
+
+		// delete stack to save mem
+		if (stackInd < m_stacks.GetSize() - 1) {
+			m_stacks.Delete(stackInd);
+		}
 	}
 }
 

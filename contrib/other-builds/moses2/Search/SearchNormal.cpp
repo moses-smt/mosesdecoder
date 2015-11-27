@@ -31,6 +31,11 @@ SearchNormal::~SearchNormal() {
 void SearchNormal::Decode(size_t stackInd)
 {
   Stack &stack = m_stacks[stackInd];
+  if (&stack == &m_stacks.Back()) {
+	  // last stack. don't do anythin
+	  return;
+  }
+
   std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoRecycle());
 
 	const InputPaths &paths = m_mgr.GetInputPaths();
@@ -40,11 +45,6 @@ void SearchNormal::Decode(size_t stackInd)
 			Extend(*hypo, path);
 	  }
 	}
-
-  //cerr << m_stacks << endl;
-
-  // delete stack to save mem
-  m_stacks.Delete(stackInd);
 }
 
 void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)

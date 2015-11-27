@@ -14,6 +14,8 @@
 #include "../InputPath.h"
 #include "../System.h"
 
+using namespace std;
+
 SearchCubePruning::CubeEdge::CubeEdge(
 		Manager &mgr,
 		const Hypotheses &hypos,
@@ -58,10 +60,13 @@ void SearchCubePruning::Decode(size_t stackInd)
 		m_queue.push(ele);
 	}
 
-	// get best hypo from queue, add to stack
-	CubeElement *ele = m_queue.front();
-	Hypothesis *hypo = ele->hypo;
-	m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
+	cerr << "stack " << stackInd << " " << m_queue.size() << endl;
+	if (!m_queue.empty()) {
+		// get best hypo from queue, add to stack
+		CubeElement *ele = m_queue.front();
+		Hypothesis *hypo = ele->hypo;
+		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
+	}
 }
 
 void SearchCubePruning::PostDecode(size_t stackInd)
