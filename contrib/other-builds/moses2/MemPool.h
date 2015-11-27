@@ -113,6 +113,15 @@ public:
 		return ret;
 	}
 
+	void construct( pointer p, const_reference val )
+	{
+		//std::cerr << "construct " << p << " " << n << std::endl;
+	}
+
+	void destroy( pointer p )
+	{
+		//std::cerr << "destroy " << p << " " << n << std::endl;
+	}
 
 protected:
 	MemPool m_pool;

@@ -41,7 +41,7 @@ public:
 ///////////////////////////////////////////
 struct CubeElement
 {
-	CubeElement(Manager &mgr, const CubeEdge::CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
+	CubeElement(Manager &mgr, const CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
 	:edge(edge)
 	,hypoIndex(hypoIndex)
 	,tpIndex(tpIndex)

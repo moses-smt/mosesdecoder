@@ -30,9 +30,9 @@ SearchCubePruning::~SearchCubePruning() {
 void SearchCubePruning::Decode(size_t stackInd)
 {
 	// add top hypo from every edge into queue
-	std::vector<CubeEdge> &edges = m_cubeEdges[stackInd];
-	BOOST_FOREACH(const CubeEdge &edge, edges) {
-		CubeElement *ele = new CubeElement(m_mgr, edge, 0, 0);
+	std::vector<CubeEdge*> &edges = m_cubeEdges[stackInd];
+	BOOST_FOREACH(const CubeEdge *edge, edges) {
+		CubeElement *ele = new CubeElement(m_mgr, *edge, 0, 0);
 		m_queue.push(ele);
 	}
 
@@ -84,8 +84,8 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge edge(m_mgr, hypos, path, *tps, newBitmap);
-  		  		std::vector<CubeEdge> &edges = m_cubeEdges[numWords];
+  		  		CubeEdge *edge = new CubeEdge(m_mgr, hypos, path, *tps, newBitmap);
+  		  		std::vector<CubeEdge*> &edges = m_cubeEdges[numWords];
   		  		edges.push_back(edge);
   			}
   		}

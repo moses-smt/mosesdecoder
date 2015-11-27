@@ -30,7 +30,7 @@ protected:
 	// CUBE PRUNING VARIABLES
 	// setup
 	CubeEdge::HyposForCube m_hyposForCube;
-	std::vector<std::vector<CubeEdge::CubeEdge> > m_cubeEdges;
+	std::vector<std::vector<CubeEdge*> > m_cubeEdges;
 
 	// CUBE PRUNING
 	// decoding
