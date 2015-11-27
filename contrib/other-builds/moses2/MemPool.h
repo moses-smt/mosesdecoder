@@ -116,6 +116,8 @@ public:
 	void construct( pointer p, const_reference val )
 	{
 		//std::cerr << "construct " << p << " " << n << std::endl;
+		new((void *)p) T(val);
+
 	}
 
 	void destroy( pointer p )
