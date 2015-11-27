@@ -39,20 +39,17 @@ protected:
 
 	struct CubeEdge
 	{
-		CubeEdge(const Hypotheses &hypos,
+		CubeEdge(Manager &mgr,
+				const Hypotheses &hypos,
 				const InputPath &path,
 				const TargetPhrases &tps,
-				const Bitmap &newBitmap)
-		:hypos(hypos)
-		,path(path)
-		,tps(tps)
-		,newBitmap(newBitmap)
-		{}
+				const Bitmap &newBitmap);
 
 		const Hypotheses &hypos;
 		const InputPath &path;
 		const TargetPhrases &tps;
 		const Bitmap &newBitmap;
+		SCORE estimatedScore;
 	};
 
 	std::vector<std::vector<CubeEdge> > m_cubeEdges;

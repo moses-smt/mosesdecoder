@@ -14,13 +14,28 @@
 #include "../InputPath.h"
 #include "../System.h"
 
+SearchCubePruning::CubeEdge::CubeEdge(
+		Manager &mgr,
+		const Hypotheses &hypos,
+		const InputPath &path,
+		const TargetPhrases &tps,
+		const Bitmap &newBitmap)
+:hypos(hypos)
+,path(path)
+,tps(tps)
+,newBitmap(newBitmap)
+{
+	estimatedScore = mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
+}
+
+////////////////////////////////////////////////////////////////////////
 void SearchCubePruning::CubeElement::CreateHypothesis(Manager &mgr)
 {
 	const Hypothesis &prevHypo = *edge.hypos[hypoIndex];
 	const TargetPhrase &tp = edge.tps[tpIndex];
 
 	hypo = Hypothesis::Create(mgr);
-	hypo->Init(prevHypo, tp, edge.path.range, edge.newBitmap, 353);
+	hypo->Init(prevHypo, tp, edge.path.range, edge.newBitmap, edge.estimatedScore);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -88,7 +103,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge edge(hypos, path, *tps, newBitmap);
+  		  		CubeEdge edge(m_mgr, hypos, path, *tps, newBitmap);
   		  		std::vector<CubeEdge> &edges = m_cubeEdges[numWords];
   		  		edges.push_back(edge);
   			}
