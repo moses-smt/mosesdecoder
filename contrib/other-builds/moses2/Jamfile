@@ -32,6 +32,7 @@ import path ;
  	 	TranslationModel/ProbingPT.cpp 
  	 	TranslationModel/UnknownWordPenalty.cpp 
    	Search/ArcLists.cpp
+		Search/CubePruning.cpp 
 		Search/Hypothesis.cpp 
  	 	Search/Manager.cpp 
  	 	Search/Search.cpp

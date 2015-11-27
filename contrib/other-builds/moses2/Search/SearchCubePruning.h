@@ -7,10 +7,8 @@
 
 #pragma once
 
-#include <boost/unordered_map.hpp>
-#include <vector>
-#include <queue>
 #include "Search.h"
+#include "CubePruning.h"
 #include "../legacy/Range.h"
 
 class Bitmap;
@@ -31,48 +29,11 @@ protected:
 
 	// CUBE PRUNING VARIABLES
 	// setup
-	typedef std::vector<const Hypothesis*>  Hypotheses;
-	typedef std::pair<const Bitmap*, Range> HypoCoverage;
-	  // bitmap and range of hypos
-	typedef boost::unordered_map<HypoCoverage, Hypotheses> HyposForCube;
-	HyposForCube m_hyposForCube;
-
-	struct CubeEdge
-	{
-		CubeEdge(Manager &mgr,
-				const Hypotheses &hypos,
-				const InputPath &path,
-				const TargetPhrases &tps,
-				const Bitmap &newBitmap);
-
-		const Hypotheses &hypos;
-		const InputPath &path;
-		const TargetPhrases &tps;
-		const Bitmap &newBitmap;
-		SCORE estimatedScore;
-	};
-
-	std::vector<std::vector<CubeEdge> > m_cubeEdges;
+	CubeEdge::HyposForCube m_hyposForCube;
+	std::vector<std::vector<CubeEdge::CubeEdge> > m_cubeEdges;
 
 	// CUBE PRUNING
 	// decoding
-	struct CubeElement
-	{
-		CubeElement(Manager &mgr, const CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
-		:edge(edge)
-		,hypoIndex(hypoIndex)
-		,tpIndex(tpIndex)
-		{
-			CreateHypothesis(mgr);
-		}
-
-		const CubeEdge &edge;
-		size_t hypoIndex, tpIndex;
-		Hypothesis *hypo;
-
-		void CreateHypothesis(Manager &mgr);
-};
-
 	std::queue<CubeElement*> m_queue;
 
 	void SortAndPruneHypos();

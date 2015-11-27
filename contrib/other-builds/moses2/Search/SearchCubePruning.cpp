@@ -16,30 +16,6 @@
 
 using namespace std;
 
-SearchCubePruning::CubeEdge::CubeEdge(
-		Manager &mgr,
-		const Hypotheses &hypos,
-		const InputPath &path,
-		const TargetPhrases &tps,
-		const Bitmap &newBitmap)
-:hypos(hypos)
-,path(path)
-,tps(tps)
-,newBitmap(newBitmap)
-{
-	estimatedScore = mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
-}
-
-////////////////////////////////////////////////////////////////////////
-void SearchCubePruning::CubeElement::CreateHypothesis(Manager &mgr)
-{
-	const Hypothesis &prevHypo = *edge.hypos[hypoIndex];
-	const TargetPhrase &tp = edge.tps[tpIndex];
-
-	hypo = Hypothesis::Create(mgr);
-	hypo->Init(prevHypo, tp, edge.path.range, edge.newBitmap, edge.estimatedScore);
-}
-
 ////////////////////////////////////////////////////////////////////////
 SearchCubePruning::SearchCubePruning(Manager &mgr, Stacks &stacks)
 :Search(mgr, stacks)
@@ -78,7 +54,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
 	  const Bitmap &hypoBitmap = hypo->GetBitmap();
 	  const Range &hypoRange = hypo->GetRange();
 
-	  Hypotheses &hypos = m_hyposForCube[HypoCoverage(&hypoBitmap, hypoRange)];
+	  CubeEdge::Hypotheses &hypos = m_hyposForCube[CubeEdge::HypoCoverage(&hypoBitmap, hypoRange)];
 	  hypos.push_back(hypo);
   }
 
@@ -88,12 +64,12 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   // create edges to next hypos from existing hypos
   const InputPaths &paths = m_mgr.GetInputPaths();
 
-  BOOST_FOREACH(HyposForCube::value_type val, m_hyposForCube) {
-	  const HypoCoverage &hypoCoverage = val.first;
+  BOOST_FOREACH(CubeEdge::HyposForCube::value_type val, m_hyposForCube) {
+	  const CubeEdge::HypoCoverage &hypoCoverage = val.first;
 	  const Bitmap &hypoBitmap = *hypoCoverage.first;
 	  const Range &hypoRange = hypoCoverage.second;
 
-	  const Hypotheses &hypos = val.second;
+	  const CubeEdge::Hypotheses &hypos = val.second;
 
   	  BOOST_FOREACH(const InputPath &path, paths) {
   		const Range &pathRange = path.range;
@@ -122,8 +98,8 @@ void SearchCubePruning::SortAndPruneHypos()
   size_t stackSize = m_mgr.system.stackSize;
   Recycler<Hypothesis*> &recycler = m_mgr.GetHypoRecycle();
 
-  BOOST_FOREACH(HyposForCube::value_type val, m_hyposForCube) {
-	  Hypotheses &hypos = val.second;
+  BOOST_FOREACH(CubeEdge::HyposForCube::value_type val, m_hyposForCube) {
+	  CubeEdge::Hypotheses &hypos = val.second;
 
 	  std::vector<const Hypothesis*>::iterator iterMiddle;
 	  iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
