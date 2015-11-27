@@ -64,12 +64,13 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   // create edges to next hypos from existing hypos
   const InputPaths &paths = m_mgr.GetInputPaths();
 
-  BOOST_FOREACH(CubeEdge::HyposForCube::value_type val, m_hyposForCube) {
+  BOOST_FOREACH(CubeEdge::HyposForCube::value_type &val, m_hyposForCube) {
 	  const CubeEdge::HypoCoverage &hypoCoverage = val.first;
 	  const Bitmap &hypoBitmap = *hypoCoverage.first;
 	  const Range &hypoRange = hypoCoverage.second;
 
 	  const CubeEdge::Hypotheses &hypos = val.second;
+	  cerr << "hypos=" << hypos.size() << endl;
 
   	  BOOST_FOREACH(const InputPath &path, paths) {
   		const Range &pathRange = path.range;

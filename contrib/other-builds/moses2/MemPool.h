@@ -117,7 +117,6 @@ public:
 	{
 		//std::cerr << "construct " << p << " " << n << std::endl;
 		new((void *)p) T(val);
-
 	}
 
 	void destroy( pointer p )
