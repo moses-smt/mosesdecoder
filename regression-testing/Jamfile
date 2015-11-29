@@ -1,7 +1,8 @@
 import option path ;
 
 with-regtest = [ option.get "with-regtest" ] ;
-with-xmlrpc = [ option.get "with-xmlrpc-c" ] ;
+skip-compact = [ option.get "regtest-skip-compactpt" : : "yes" ] ;
+with-xmlrpc  = [ option.get "with-xmlrpc-c" ] ;
 
 if $(with-regtest) {
   with-regtest = [ path.root $(with-regtest) [ path.pwd ] ] ;
@@ -32,8 +33,15 @@ if $(with-regtest) {
     }
     reg_test phrase-server : [ glob $(test-dir)/phrase-server.* ] : ../moses-cmd//moses : @reg_test_decode_server ;
   }
-  reg_test phrase : [ glob $(test-dir)/phrase.* : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
-  reg_test chart : [ glob $(test-dir)/chart.* : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
+
+  if $(skip-compact) {
+    reg_test phrase : [ glob $(test-dir)/phrase.* : $(test-dir)/*withDALM $(test-dir)/*compactptable ] : ../moses-cmd//moses : @reg_test_decode ;
+    reg_test chart  : [ glob $(test-dir)/chart.*  : $(test-dir)/*withDALM $(test-dir)/*compactptable ] : ../moses-cmd//moses : @reg_test_decode ;
+  } else {
+    reg_test phrase : [ glob $(test-dir)/phrase.* : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
+    reg_test chart  : [ glob $(test-dir)/chart.*  : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
+  }
+
   if [ option.get "with-dalm" : : "yes" ] {
     reg_test dalm : [ glob $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
   } else { 
