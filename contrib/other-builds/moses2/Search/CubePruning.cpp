@@ -106,11 +106,12 @@ CubeEdge::Hypotheses &HyposForCubePruning::GetOrCreate(const Bitmap &bitmap, con
 	Coll::iterator iter = m_coll.find(key);
 
 	if (iter == m_coll.end()) {
-		CubeEdge::Hypotheses &hypos = iter->second;
-		return hypos;
+		CubeEdge::Hypotheses *hypos = new CubeEdge::Hypotheses();
+		m_coll[key] = hypos;
+		return *hypos;
 	}
 	else {
-		CubeEdge::Hypotheses &hypos = m_coll[key];
+		CubeEdge::Hypotheses &hypos = *iter->second;
 		return hypos;
 	}
 }

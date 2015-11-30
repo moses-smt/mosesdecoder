@@ -50,9 +50,6 @@ class CubeEdge
 
 public:
 	typedef std::vector<const Hypothesis*>  Hypotheses;
-	typedef std::pair<const Bitmap*, Range> HypoCoverage;
-	  // bitmap and range of hypos
-	typedef boost::unordered_map<HypoCoverage, Hypotheses> HyposForCube;
 	typedef std::priority_queue<QueueItem*, std::vector< QueueItem* >, QueueItemOrderer> Queue;
 
 	const Hypotheses &hypos;
@@ -82,10 +79,29 @@ protected:
 ///////////////////////////////////////////
 class HyposForCubePruning
 {
-	typedef std::pair<const Bitmap*, const Range> HypoCoverage;
-	  // bitmap and range of hypos
-	typedef boost::unordered_map<HypoCoverage, CubeEdge::Hypotheses> Coll;
 public:
+  typedef std::pair<const Bitmap*, const Range> HypoCoverage;
+	  // bitmap and range of hypos
+  typedef boost::unordered_map<HypoCoverage, CubeEdge::Hypotheses*> Coll;
+
+  typedef Coll::value_type value_type;
+  typedef Coll::iterator iterator;
+  typedef Coll::const_iterator const_iterator;
+
+  //! iterators
+  const_iterator begin() const {
+	return m_coll.begin();
+  }
+  const_iterator end() const {
+	return m_coll.end();
+  }
+  iterator begin() {
+	return m_coll.begin();
+  }
+  iterator end() {
+	return m_coll.end();
+  }
+
 	CubeEdge::Hypotheses &GetOrCreate(const Bitmap &bitmap, const Range &range);
 
 protected:

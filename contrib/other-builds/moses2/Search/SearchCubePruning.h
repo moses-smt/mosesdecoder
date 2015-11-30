@@ -29,7 +29,7 @@ protected:
 
 	// CUBE PRUNING VARIABLES
 	// setup
-	std::vector<CubeEdge::HyposForCube> m_hyposForCube;
+	std::vector<HyposForCubePruning> m_hyposForCube;
 	   // pruned set of hypos, separated by [Bitmap, Range], for ALL stacks
 
 	std::vector<std::vector<CubeEdge*> > m_cubeEdges;
@@ -37,6 +37,6 @@ protected:
 	// CUBE PRUNING
 	// decoding
 
-	void SortAndPruneHypos(CubeEdge::HyposForCube &hyposPerBMAndRange);
+	void SortAndPruneHypos(HyposForCubePruning &hyposPerBMAndRange);
 };
 
