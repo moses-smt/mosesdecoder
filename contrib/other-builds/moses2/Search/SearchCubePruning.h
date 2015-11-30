@@ -36,7 +36,6 @@ protected:
 
 	// CUBE PRUNING
 	// decoding
-	std::queue<CubeElement*> m_queue;
 
 	void SortAndPruneHypos();
 };

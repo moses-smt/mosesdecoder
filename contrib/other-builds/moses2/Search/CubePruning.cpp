@@ -24,6 +24,12 @@ CubeEdge::CubeEdge(
 	estimatedScore = mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
 }
 
+std::ostream& operator<<(std::ostream &out, const CubeEdge &obj)
+{
+	out << obj.newBitmap;
+	return out;
+}
+
 ////////////////////////////////////////////////////////////////////////
 CubeElement::CubeElement(Manager &mgr, const CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
 :edge(edge)
@@ -39,7 +45,7 @@ void CubeElement::CreateHypothesis(Manager &mgr)
 	const TargetPhrase &tp = edge.tps[tpIndex];
 
 	//cerr << "hypoIndex=" << hypoIndex << endl;
-	cerr << "edge.hypos=" << edge.hypos.size() << endl;
+	//cerr << "edge.hypos=" << edge.hypos.size() << endl;
 	//cerr << prevHypo << endl;
 	//cerr << *prevHypo << endl;
 

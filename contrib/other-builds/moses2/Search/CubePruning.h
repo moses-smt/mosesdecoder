@@ -19,6 +19,8 @@ class Bitmap;
 
 struct CubeEdge
 {
+  friend std::ostream& operator<<(std::ostream &, const CubeEdge &);
+
 public:
 	typedef std::vector<const Hypothesis*>  Hypotheses;
 	typedef std::pair<const Bitmap*, Range> HypoCoverage;

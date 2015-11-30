@@ -29,18 +29,22 @@ SearchCubePruning::~SearchCubePruning() {
 
 void SearchCubePruning::Decode(size_t stackInd)
 {
+	//cerr << "stack=" << stackInd << endl;
+
+	std::queue<CubeElement*> queue;
 	// add top hypo from every edge into queue
 	std::vector<CubeEdge*> &edges = m_cubeEdges[stackInd];
 	BOOST_FOREACH(const CubeEdge *edge, edges) {
+		//cerr << "edge=" << *edge << endl;
 		CubeElement *ele = new CubeElement(m_mgr, *edge, 0, 0);
-		m_queue.push(ele);
+		queue.push(ele);
 	}
 
-	cerr << "stack " << stackInd << " " << m_queue.size() << endl;
-	if (!m_queue.empty()) {
+	if (!queue.empty()) {
 		// get best hypo from queue, add to stack
-		CubeElement *ele = m_queue.front();
+		CubeElement *ele = queue.front();
 		Hypothesis *hypo = ele->hypo;
+		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 	}
 }
@@ -70,7 +74,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
 	  const Range &hypoRange = hypoCoverage.second;
 
 	  const CubeEdge::Hypotheses &hypos = val.second;
-	  cerr << "hypos=" << hypos.size() << endl;
+	  //cerr << "hypos=" << hypos.size() << endl;
 
   	  BOOST_FOREACH(const InputPath &path, paths) {
   		const Range &pathRange = path.range;
