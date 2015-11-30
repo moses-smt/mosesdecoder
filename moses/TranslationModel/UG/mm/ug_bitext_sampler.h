@@ -353,7 +353,7 @@ operator()()
   if (m_finished) return true;
   boost::unique_lock<boost::mutex> lock(m_lock);
   if (m_method == full_coverage)
-    preform_full_phrase_extraction(); // consider all occurrences 
+    perform_full_phrase_extraction(); // consider all occurrences 
   else if (m_method == random_sampling)
     perform_random_sampling();
   else UTIL_THROW2("Unsupported sampling method.");
