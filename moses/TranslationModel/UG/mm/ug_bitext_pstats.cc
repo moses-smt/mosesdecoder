@@ -63,7 +63,7 @@ namespace sapt
       }
   }
 
-  bool
+  size_t
   pstats::
   add(uint64_t pid, float const w, float const b,
       std::vector<unsigned char> const& a,
@@ -73,13 +73,13 @@ namespace sapt
   {
     boost::lock_guard<boost::mutex> guard(this->lock);
     jstats& entry = this->trg[pid];
-    entry.add(w, b, a, cnt2, fwd_o, bwd_o, docid);
+    size_t ret = entry.add(w, b, a, cnt2, fwd_o, bwd_o, docid);
     if (this->good < entry.rcnt())
       {
-	UTIL_THROW(util::Exception, "more joint counts than good counts:"
-		   << entry.rcnt() << "/" << this->good << "!");
+        UTIL_THROW(util::Exception, "more joint counts than good counts:"
+                   << entry.rcnt() << "/" << this->good << "!");
       }
-    return true;
+    return ret;
   }
 
   void 

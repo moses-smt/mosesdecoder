@@ -19,8 +19,8 @@ namespace Moses
     using namespace boost;
     unique_lock<shared_mutex> lock(m_lock);
 
-    size_t ctr=0;
 #if 0
+    size_t ctr=0;
     std::cerr << "BEFORE" << std::endl;
     for (cache_t::iterator m = m_qfirst; m != m_cache.end(); m = m->second->next)
       {

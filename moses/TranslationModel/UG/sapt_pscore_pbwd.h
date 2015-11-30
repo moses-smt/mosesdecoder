@@ -26,7 +26,7 @@ namespace sapt
       BOOST_FOREACH(char const& x, denom)
 	{
 	  if (x == '+') { --checksum; continue; }
-	  if (x != 'g' && x != 's' && x != 'r') continue;
+	  if (x != 'g' && x != 's' && x != 'r' && x != 'b') continue;
 	  std::string s = (boost::format("pbwd-%c%.3f") % x % c).str();
 	  this->m_feature_names.push_back(s);
 	}
@@ -48,9 +48,12 @@ namespace sapt
       BOOST_FOREACH(char const& x, denom)
 	{
 	  uint32_t m2 = pp.raw2;
-	  if      (x == 'g') m2 = round(m2 * float(pp.good1)   / pp.raw1);
+	  if (x == 'g' || x == 'b') m2 = round(m2 * float(pp.good1) / pp.raw1);
 	  else if (x == 's') m2 = round(m2 * float(pp.sample1) / pp.raw1);
-	  (*dest)[i++] = log(lbop(std::max(m2, pp.joint), pp.joint,conf));
+
+	  (*dest)[i] = log(lbop(std::max(m2, pp.joint), pp.joint,conf));
+	  if (x == 'b') (*dest)[i] += log(pp.cum_bias) - log(pp.joint);
+	  ++i;
 	}
     }
   };

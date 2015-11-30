@@ -193,7 +193,7 @@ batch_run()
   // ... or the surrounding context (--context-window ...)
   size_t size_t_max = std::numeric_limits<size_t>::max();
   bool use_context_window = ioWrapper->GetLookAhead() || ioWrapper->GetLookBack();
-  bool use_context = use_context_window || context_string.size();
+  // bool use_context = use_context_window || context_string.size();
   bool use_sliding_context_window = (use_context_window
                                      && ioWrapper->GetLookAhead() != size_t_max);
 
