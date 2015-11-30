@@ -70,6 +70,7 @@ public:
   bool SeenPosition(const size_t x, const size_t y) const;
   void SetSeenPosition(const size_t x, const size_t y);
 
+  void CreateFirst(Manager &mgr, Queue &queue);
   void CreateNext(Manager &mgr, const QueueItem &ele, Queue &queue);
 
 

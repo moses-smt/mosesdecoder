@@ -71,20 +71,31 @@ CubeEdge::SetSeenPosition(const size_t x, const size_t y)
   m_seenPosition.insert((x<<16) + y);
 }
 
+void CubeEdge::CreateFirst(Manager &mgr, Queue &queue)
+{
+	assert(hypos.size());
+	assert(tps.GetSize());
+	QueueItem *newEle = new QueueItem(mgr, *this, 0, 0);
+	queue.push(newEle);
+	SetSeenPosition(0, 0);
+}
+
 void CubeEdge::CreateNext(Manager &mgr, const QueueItem &ele, Queue &queue)
 {
-	SetSeenPosition(ele.hypoIndex, ele.tpIndex);
-
 	size_t hypoIndex = ele.hypoIndex + 1;
 	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele.tpIndex)) {
 		QueueItem *newEle = new QueueItem(mgr, *this, hypoIndex, ele.tpIndex);
 		queue.push(newEle);
+
+		SetSeenPosition(hypoIndex, ele.tpIndex);
 	}
 
 	size_t tpIndex = ele.tpIndex + 1;
 	if (tpIndex < tps.GetSize() && !SeenPosition(ele.hypoIndex, tpIndex)) {
 		QueueItem *newEle = new QueueItem(mgr, *this, ele.hypoIndex, tpIndex);
 		queue.push(newEle);
+
+		SetSeenPosition(ele.hypoIndex, tpIndex);
 	}
 }
 
