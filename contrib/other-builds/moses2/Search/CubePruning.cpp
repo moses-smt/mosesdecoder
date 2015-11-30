@@ -10,6 +10,31 @@
 
 using namespace std;
 
+////////////////////////////////////////////////////////////////////////
+CubeElement::CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
+:edge(edge)
+,hypoIndex(hypoIndex)
+,tpIndex(tpIndex)
+{
+	CreateHypothesis(mgr);
+}
+
+void CubeElement::CreateHypothesis(Manager &mgr)
+{
+	const Hypothesis *prevHypo = edge.hypos[hypoIndex];
+	const TargetPhrase &tp = edge.tps[tpIndex];
+
+	//cerr << "hypoIndex=" << hypoIndex << endl;
+	//cerr << "edge.hypos=" << edge.hypos.size() << endl;
+	//cerr << prevHypo << endl;
+	//cerr << *prevHypo << endl;
+
+	hypo = Hypothesis::Create(mgr);
+	hypo->Init(*prevHypo, tp, edge.path.range, edge.newBitmap, edge.estimatedScore);
+	hypo->EvaluateWhenApplied();
+}
+
+////////////////////////////////////////////////////////////////////////
 CubeEdge::CubeEdge(
 		Manager &mgr,
 		const Hypotheses &hypos,
@@ -63,26 +88,4 @@ void CubeEdge::CreateNext(Manager &mgr, const CubeElement &ele, Queue &queue)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-CubeElement::CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
-:edge(edge)
-,hypoIndex(hypoIndex)
-,tpIndex(tpIndex)
-{
-	CreateHypothesis(mgr);
-}
 
-void CubeElement::CreateHypothesis(Manager &mgr)
-{
-	const Hypothesis *prevHypo = edge.hypos[hypoIndex];
-	const TargetPhrase &tp = edge.tps[tpIndex];
-
-	//cerr << "hypoIndex=" << hypoIndex << endl;
-	//cerr << "edge.hypos=" << edge.hypos.size() << endl;
-	//cerr << prevHypo << endl;
-	//cerr << *prevHypo << endl;
-
-	hypo = Hypothesis::Create(mgr);
-	hypo->Init(*prevHypo, tp, edge.path.range, edge.newBitmap, edge.estimatedScore);
-	hypo->EvaluateWhenApplied();
-}

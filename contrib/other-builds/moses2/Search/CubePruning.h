@@ -9,17 +9,42 @@
 #include <boost/unordered_set.hpp>
 #include <vector>
 #include <queue>
+#include "Hypothesis.h"
 #include "../TypeDef.h"
 #include "../legacy/Range.h"
 
 class Manager;
-class Hypothesis;
 class InputPath;
 class TargetPhrases;
 class Bitmap;
-class CubeElement;
+class CubeEdge;
 
-struct CubeEdge
+///////////////////////////////////////////
+class CubeElement
+{
+public:
+	CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
+
+	CubeEdge &edge;
+	size_t hypoIndex, tpIndex;
+	Hypothesis *hypo;
+
+protected:
+	void CreateHypothesis(Manager &mgr);
+};
+
+///////////////////////////////////////////
+class QueueItemOrderer
+{
+public:
+  bool operator()(CubeElement* itemA, CubeElement* itemB) const {
+	  HypothesisFutureScoreOrderer orderer;
+	  return orderer(itemA->hypo, itemB->hypo);
+  }
+};
+
+///////////////////////////////////////////
+class CubeEdge
 {
   friend std::ostream& operator<<(std::ostream &, const CubeEdge &);
 
@@ -28,7 +53,7 @@ public:
 	typedef std::pair<const Bitmap*, Range> HypoCoverage;
 	  // bitmap and range of hypos
 	typedef boost::unordered_map<HypoCoverage, Hypotheses> HyposForCube;
-	typedef std::queue<CubeElement*> Queue;
+	typedef std::priority_queue<CubeElement*, std::vector< CubeElement* >, QueueItemOrderer> Queue;
 
 	const Hypotheses &hypos;
 	const InputPath &path;
@@ -53,14 +78,3 @@ protected:
 
 };
 
-///////////////////////////////////////////
-struct CubeElement
-{
-	CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
-
-	CubeEdge &edge;
-	size_t hypoIndex, tpIndex;
-	Hypothesis *hypo;
-
-	void CreateHypothesis(Manager &mgr);
-};

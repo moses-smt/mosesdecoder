@@ -29,7 +29,6 @@ SearchCubePruning::~SearchCubePruning() {
 
 void SearchCubePruning::Decode(size_t stackInd)
 {
-	//cerr << "stack=" << stackInd << endl;
 
 	CubeEdge::Queue queue;
 
@@ -41,11 +40,16 @@ void SearchCubePruning::Decode(size_t stackInd)
 		queue.push(ele);
 	}
 
+	cerr << "stack=" << stackInd << " " << edges.size() << endl;
+	if (stackInd == 20) {
+		cerr << endl;
+	}
+
 	size_t pops = 0;
 	while (!queue.empty() && pops < m_mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
-		CubeElement *ele = queue.front();
+		CubeElement *ele = queue.top();
 		queue.pop();
 
 		Hypothesis *hypo = ele->hypo;
