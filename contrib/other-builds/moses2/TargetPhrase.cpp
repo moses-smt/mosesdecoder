@@ -29,7 +29,7 @@ TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system
 TargetPhrase::TargetPhrase(MemPool &pool, const System &system, size_t size)
 :PhraseImpl(pool, size)
 {
-	m_scores = new (pool.Allocate<Scores>()) Scores(pool, system.featureFunctions.GetNumScores());
+	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 }
 
 TargetPhrase::~TargetPhrase() {

@@ -31,6 +31,21 @@ System::System(const Parameter &paramsArg)
     params.SetParameter(popLimit, "cube-pruning-pop-limit",
 		       DEFAULT_CUBE_PRUNING_POP_LIMIT);
 
+    const PARAM_VEC *section;
+
+    section = params.GetParam("n-best-list");
+    if (section) {
+      if (section->size() >= 2) {
+        outputFilePath = section->at(0);
+        nbestSize = Scan<size_t>( section->at(1) );
+        onlyDistinct = (section->size()>2 && section->at(2)=="distinct");
+      } else {
+        throw "wrong format for switch -n-best-list file size [disinct]";
+      }
+    } else {
+    	nbestSize = 0;
+    }
+
 	featureFunctions.Create();
 	LoadWeights();
 	featureFunctions.Load();

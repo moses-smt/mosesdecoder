@@ -15,6 +15,7 @@
 #include "SkeletonStatelessFF.h"
 #include "SkeletonStatefulFF.h"
 #include "WordPenalty.h"
+#include "PhrasePenalty.h"
 #include "Distortion.h"
 #include "../TranslationModel/PhraseTableMemory.h"
 #include "../TranslationModel/ProbingPT.h"
@@ -117,6 +118,10 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 		ret = new KENLM(m_ffStartInd, line);
 		//ret = new KENLMBatch(m_ffStartInd, line);
 	}
+	else if (toks[0] == "PhrasePenalty") {
+		ret = new PhrasePenalty(m_ffStartInd, line);
+		//ret = new KENLMBatch(m_ffStartInd, line);
+	}
 	else {
 		//ret = new SkeletonStatefulFF(m_ffStartInd, line);
 		ret = new SkeletonStatelessFF(m_ffStartInd, line);
@@ -166,7 +171,7 @@ FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 		  const Phrase &source, TargetPhrase &targetPhrase) const
 {
   size_t numScores = system.featureFunctions.GetNumScores();
-  Scores *estimatedScores = new (pool.Allocate<Scores>()) Scores(pool, numScores);
+  Scores *estimatedScores = new (pool.Allocate<Scores>()) Scores(system, pool, numScores);
 
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
 	  Scores& scores = targetPhrase.GetScores();

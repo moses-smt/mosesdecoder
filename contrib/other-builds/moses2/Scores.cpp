@@ -17,14 +17,16 @@
 
 using namespace std;
 
-Scores::Scores(MemPool &pool, size_t numScores)
+Scores::Scores(const System &system, MemPool &pool, size_t numScores)
 :m_total(0)
 {
-	/*
-	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
-	Init<SCORE>(m_scores, numScores, 0);
-	*/
-	m_scores = NULL;
+	if (system.nbestSize) {
+		m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
+		Init<SCORE>(m_scores, numScores, 0);
+	}
+	else {
+		m_scores = NULL;
+	}
 }
 
 Scores::Scores(MemPool &pool,
@@ -32,11 +34,13 @@ Scores::Scores(MemPool &pool,
 		const Scores &origScores)
 :m_total(origScores.m_total)
 {
-	/*
-	m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
-	memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
-	*/
-	m_scores = NULL;
+	if (origScores.m_scores) {
+		m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
+		memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
+	}
+	else {
+		m_scores = NULL;
+	}
 }
 
 Scores::~Scores() {

@@ -36,6 +36,10 @@ public:
     SearchAlgorithm searchAlgorithm;
     size_t popLimit;
 
+    std::string outputFilePath;
+    size_t nbestSize;
+    bool onlyDistinct;
+
 	System(const Parameter &paramsArg);
 	virtual ~System();
 

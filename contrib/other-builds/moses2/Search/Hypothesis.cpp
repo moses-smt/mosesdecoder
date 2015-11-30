@@ -41,7 +41,7 @@ Hypothesis::Hypothesis(Manager &mgr)
 {
 	MemPool &pool = mgr.GetPool();
 
-	m_scores = new (pool.Allocate<Scores>()) Scores(pool, mgr.system.featureFunctions.GetNumScores());
+	m_scores = new (pool.Allocate<Scores>()) Scores(mgr.system, pool, mgr.system.featureFunctions.GetNumScores());
 
 	// FF states
 	const std::vector<const StatefulFeatureFunction*> &sfffs = mgr.system.featureFunctions.GetStatefulFeatureFunctions();

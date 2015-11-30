@@ -4,25 +4,25 @@
  *  Created on: 27 Oct 2015
  *      Author: hieu
  */
+
+#include "PhrasePenalty.h"
 #include "../Scores.h"
 
-#include "SkeletonStatelessFF.h"
-
-SkeletonStatelessFF::SkeletonStatelessFF(size_t startInd, const std::string &line)
+PhrasePenalty::PhrasePenalty(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
 {
 	ReadParameters();
 }
 
-SkeletonStatelessFF::~SkeletonStatelessFF() {
+PhrasePenalty::~PhrasePenalty() {
 	// TODO Auto-generated destructor stub
 }
 
 void
-SkeletonStatelessFF::EvaluateInIsolation(const System &system,
+PhrasePenalty::EvaluateInIsolation(const System &system,
 		const Phrase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScores) const
 {
-
+  scores.PlusEquals(system, *this, 1);
 }

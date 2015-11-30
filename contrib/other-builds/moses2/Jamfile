@@ -20,6 +20,7 @@ import path ;
 		FF/Distortion.cpp
    	FF/FeatureFunction.cpp 
    	FF/FeatureFunctions.cpp 
+    FF/PhrasePenalty.cpp
     FF/SkeletonStatefulFF.cpp
     FF/SkeletonStatelessFF.cpp
     FF/StatefulFeatureFunction.cpp
