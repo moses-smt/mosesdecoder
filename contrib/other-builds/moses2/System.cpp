@@ -28,6 +28,8 @@ System::System(const Parameter &paramsArg)
     params.SetParameter(maxPhraseLength, "max-phrase-length",
     		DEFAULT_MAX_PHRASE_LENGTH);
     params.SetParameter(searchAlgorithm, "search-algorithm", Normal);
+    params.SetParameter(popLimit, "cube-pruning-pop-limit",
+		       DEFAULT_CUBE_PRUNING_POP_LIMIT);
 
 	featureFunctions.Create();
 	LoadWeights();

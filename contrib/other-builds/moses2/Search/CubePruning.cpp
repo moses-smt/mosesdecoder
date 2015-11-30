@@ -30,8 +30,41 @@ std::ostream& operator<<(std::ostream &out, const CubeEdge &obj)
 	return out;
 }
 
+bool
+CubeEdge::SeenPosition(const size_t x, const size_t y) const
+{
+  boost::unordered_set< int >::iterator iter = m_seenPosition.find((x<<16) + y);
+  return (iter != m_seenPosition.end());
+}
+
+void
+CubeEdge::SetSeenPosition(const size_t x, const size_t y)
+{
+  UTIL_THROW_IF2(x >= (1<<17), "Error");
+  UTIL_THROW_IF2(y >= (1<<17), "Error");
+
+  m_seenPosition.insert((x<<16) + y);
+}
+
+void CubeEdge::CreateNext(Manager &mgr, const CubeElement &ele, Queue &queue)
+{
+	SetSeenPosition(ele.hypoIndex, ele.tpIndex);
+
+	size_t hypoIndex = ele.hypoIndex + 1;
+	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele.tpIndex)) {
+		CubeElement *newEle = new CubeElement(mgr, *this, hypoIndex, ele.tpIndex);
+		queue.push(newEle);
+	}
+
+	size_t tpIndex = ele.tpIndex + 1;
+	if (tpIndex < tps.GetSize() && !SeenPosition(ele.hypoIndex, tpIndex)) {
+		CubeElement *newEle = new CubeElement(mgr, *this, ele.hypoIndex, tpIndex);
+		queue.push(newEle);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////
-CubeElement::CubeElement(Manager &mgr, const CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
+CubeElement::CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
 :edge(edge)
 ,hypoIndex(hypoIndex)
 ,tpIndex(tpIndex)
@@ -51,4 +84,5 @@ void CubeElement::CreateHypothesis(Manager &mgr)
 
 	hypo = Hypothesis::Create(mgr);
 	hypo->Init(*prevHypo, tp, edge.path.range, edge.newBitmap, edge.estimatedScore);
+	hypo->EvaluateWhenApplied();
 }

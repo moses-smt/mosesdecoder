@@ -6,6 +6,7 @@
  */
 #pragma once
 #include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 #include <vector>
 #include <queue>
 #include "../TypeDef.h"
@@ -16,6 +17,7 @@ class Hypothesis;
 class InputPath;
 class TargetPhrases;
 class Bitmap;
+class CubeElement;
 
 struct CubeEdge
 {
@@ -26,6 +28,13 @@ public:
 	typedef std::pair<const Bitmap*, Range> HypoCoverage;
 	  // bitmap and range of hypos
 	typedef boost::unordered_map<HypoCoverage, Hypotheses> HyposForCube;
+	typedef std::queue<CubeElement*> Queue;
+
+	const Hypotheses &hypos;
+	const InputPath &path;
+	const TargetPhrases &tps;
+	const Bitmap &newBitmap;
+	SCORE estimatedScore;
 
 	CubeEdge(Manager &mgr,
 			const Hypotheses &hypos,
@@ -33,19 +42,23 @@ public:
 			const TargetPhrases &tps,
 			const Bitmap &newBitmap);
 
-	const Hypotheses &hypos;
-	const InputPath &path;
-	const TargetPhrases &tps;
-	const Bitmap &newBitmap;
-	SCORE estimatedScore;
+  bool SeenPosition(const size_t x, const size_t y) const;
+  void SetSeenPosition(const size_t x, const size_t y);
+
+  void CreateNext(Manager &mgr, const CubeElement &ele, Queue &queue);
+
+
+protected:
+    boost::unordered_set< int > m_seenPosition;
+
 };
 
 ///////////////////////////////////////////
 struct CubeElement
 {
-	CubeElement(Manager &mgr, const CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
+	CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
 
-	const CubeEdge &edge;
+	CubeEdge &edge;
 	size_t hypoIndex, tpIndex;
 	Hypothesis *hypo;
 

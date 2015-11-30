@@ -34,6 +34,7 @@ public:
     size_t maxPhraseLength;
     int numThreads;
     SearchAlgorithm searchAlgorithm;
+    size_t popLimit;
 
 	System(const Parameter &paramsArg);
 	virtual ~System();
