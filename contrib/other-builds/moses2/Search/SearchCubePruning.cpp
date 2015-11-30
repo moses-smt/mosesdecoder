@@ -36,7 +36,7 @@ void SearchCubePruning::Decode(size_t stackInd)
 	std::vector<CubeEdge*> &edges = m_cubeEdges[stackInd];
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		CubeElement *ele = new CubeElement(m_mgr, *edge, 0, 0);
+		QueueItem *ele = new QueueItem(m_mgr, *edge, 0, 0);
 		queue.push(ele);
 	}
 
@@ -49,7 +49,7 @@ void SearchCubePruning::Decode(size_t stackInd)
 	while (!queue.empty() && pops < m_mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
-		CubeElement *ele = queue.top();
+		QueueItem *ele = queue.top();
 		queue.pop();
 
 		Hypothesis *hypo = ele->hypo;

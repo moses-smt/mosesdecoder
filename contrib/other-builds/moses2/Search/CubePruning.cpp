@@ -11,7 +11,7 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////
-CubeElement::CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
+QueueItem::QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
 :edge(edge)
 ,hypoIndex(hypoIndex)
 ,tpIndex(tpIndex)
@@ -19,7 +19,7 @@ CubeElement::CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t 
 	CreateHypothesis(mgr);
 }
 
-void CubeElement::CreateHypothesis(Manager &mgr)
+void QueueItem::CreateHypothesis(Manager &mgr)
 {
 	const Hypothesis *prevHypo = edge.hypos[hypoIndex];
 	const TargetPhrase &tp = edge.tps[tpIndex];
@@ -71,19 +71,19 @@ CubeEdge::SetSeenPosition(const size_t x, const size_t y)
   m_seenPosition.insert((x<<16) + y);
 }
 
-void CubeEdge::CreateNext(Manager &mgr, const CubeElement &ele, Queue &queue)
+void CubeEdge::CreateNext(Manager &mgr, const QueueItem &ele, Queue &queue)
 {
 	SetSeenPosition(ele.hypoIndex, ele.tpIndex);
 
 	size_t hypoIndex = ele.hypoIndex + 1;
 	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele.tpIndex)) {
-		CubeElement *newEle = new CubeElement(mgr, *this, hypoIndex, ele.tpIndex);
+		QueueItem *newEle = new QueueItem(mgr, *this, hypoIndex, ele.tpIndex);
 		queue.push(newEle);
 	}
 
 	size_t tpIndex = ele.tpIndex + 1;
 	if (tpIndex < tps.GetSize() && !SeenPosition(ele.hypoIndex, tpIndex)) {
-		CubeElement *newEle = new CubeElement(mgr, *this, ele.hypoIndex, tpIndex);
+		QueueItem *newEle = new QueueItem(mgr, *this, ele.hypoIndex, tpIndex);
 		queue.push(newEle);
 	}
 }

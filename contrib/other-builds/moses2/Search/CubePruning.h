@@ -20,10 +20,10 @@ class Bitmap;
 class CubeEdge;
 
 ///////////////////////////////////////////
-class CubeElement
+class QueueItem
 {
 public:
-	CubeElement(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
+	QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
 
 	CubeEdge &edge;
 	size_t hypoIndex, tpIndex;
@@ -37,7 +37,7 @@ protected:
 class QueueItemOrderer
 {
 public:
-  bool operator()(CubeElement* itemA, CubeElement* itemB) const {
+  bool operator()(QueueItem* itemA, QueueItem* itemB) const {
 	  HypothesisFutureScoreOrderer orderer;
 	  return orderer(itemA->hypo, itemB->hypo);
   }
@@ -53,7 +53,7 @@ public:
 	typedef std::pair<const Bitmap*, Range> HypoCoverage;
 	  // bitmap and range of hypos
 	typedef boost::unordered_map<HypoCoverage, Hypotheses> HyposForCube;
-	typedef std::priority_queue<CubeElement*, std::vector< CubeElement* >, QueueItemOrderer> Queue;
+	typedef std::priority_queue<QueueItem*, std::vector< QueueItem* >, QueueItemOrderer> Queue;
 
 	const Hypotheses &hypos;
 	const InputPath &path;
@@ -70,7 +70,7 @@ public:
   bool SeenPosition(const size_t x, const size_t y) const;
   void SetSeenPosition(const size_t x, const size_t y);
 
-  void CreateNext(Manager &mgr, const CubeElement &ele, Queue &queue);
+  void CreateNext(Manager &mgr, const QueueItem &ele, Queue &queue);
 
 
 protected:
