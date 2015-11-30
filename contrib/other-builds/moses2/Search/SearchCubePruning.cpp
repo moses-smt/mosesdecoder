@@ -86,7 +86,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
 	  const Bitmap &hypoBitmap = *hypoCoverage.first;
 	  const Range &hypoRange = hypoCoverage.second;
 
-	  const CubeEdge::Hypotheses &hypos = *val.second;
+	  const CubeEdge::Hypotheses &hypos = val.second;
 	  //cerr << "hypos=" << hypos.size() << endl;
 
   	  BOOST_FOREACH(const InputPath &path, paths) {
@@ -117,7 +117,7 @@ void SearchCubePruning::SortAndPruneHypos(HyposForCubePruning &hyposPerBMAndRang
   Recycler<Hypothesis*> &recycler = m_mgr.GetHypoRecycle();
 
   BOOST_FOREACH(HyposForCubePruning::value_type &val, hyposPerBMAndRange) {
-	  CubeEdge::Hypotheses &hypos = *val.second;
+	  CubeEdge::Hypotheses &hypos = val.second;
 
 	  std::vector<const Hypothesis*>::iterator iterMiddle;
 	  iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
