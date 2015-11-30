@@ -79,3 +79,17 @@ protected:
 
 };
 
+///////////////////////////////////////////
+class HyposForCubePruning
+{
+	typedef std::pair<const Bitmap*, const Range> HypoCoverage;
+	  // bitmap and range of hypos
+	typedef boost::unordered_map<HypoCoverage, CubeEdge::Hypotheses> Coll;
+public:
+	CubeEdge::Hypotheses &GetOrCreate(const Bitmap &bitmap, const Range &range);
+
+protected:
+	Coll m_coll;
+};
+
+
