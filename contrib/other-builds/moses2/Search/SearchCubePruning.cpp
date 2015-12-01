@@ -84,7 +84,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   BOOST_FOREACH(HyposForCubePruning::value_type &val, hyposPerBMAndRange) {
 	  const HyposForCubePruning::HypoCoverage &hypoCoverage = val.first;
 	  const Bitmap &hypoBitmap = *hypoCoverage.first;
-	  const Range &hypoRange = hypoCoverage.second;
+	  const Range &hypoRange = *hypoCoverage.second;
 
 	  const CubeEdge::Hypotheses &hypos = val.second;
 	  //cerr << "hypos=" << hypos.size() << endl;

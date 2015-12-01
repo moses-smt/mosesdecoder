@@ -1,5 +1,5 @@
 /*
- * Stacks.h
+ * StacksCubePruning.h
  *
  *  Created on: 6 Nov 2015
  *      Author: hieu
@@ -8,23 +8,23 @@
 #pragma once
 
 #include <vector>
-#include "Stack.h"
+#include "StackCubePruning.h"
 
-class Stacks {
-	  friend std::ostream& operator<<(std::ostream &, const Stacks &);
+class StacksCubePruning {
+	  friend std::ostream& operator<<(std::ostream &, const StacksCubePruning &);
 public:
-	Stacks();
-	virtual ~Stacks();
+	StacksCubePruning();
+	virtual ~StacksCubePruning();
 
 	void Init(size_t numStacks);
 
 	size_t GetSize() const
 	{ return m_stacks.size(); }
 
-    Stack &Back()
+	StackCubePruning &Back()
     { return *m_stacks.back(); }
 
-    Stack &operator[](size_t ind)
+    StackCubePruning &operator[](size_t ind)
     { return *m_stacks[ind]; }
 
     void Delete(size_t ind) {
@@ -35,6 +35,6 @@ public:
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 protected:
-	std::vector<Stack*> m_stacks;
+	std::vector<StackCubePruning*> m_stacks;
 };
 

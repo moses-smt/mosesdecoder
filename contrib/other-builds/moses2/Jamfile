@@ -42,6 +42,8 @@ import path ;
  	 	Search/SearchNormalBatch.cpp
  	 	Search/Stack.cpp 
  	 	Search/Stacks.cpp 
+ 	 	Search/StackCubePruning.cpp 
+ 	 	Search/StacksCubePruning.cpp 
 		legacy/Bitmap.cpp
 		legacy/Bitmaps.cpp
 		legacy/Factor.cpp

@@ -1,5 +1,5 @@
 /*
- * Stack.h
+ * StackCubePruning.h
  *
  *  Created on: 24 Oct 2015
  *      Author: hieu
@@ -25,7 +25,7 @@ public:
 	}
 };
 
-class Stack {
+class StackCubePruning {
 protected:
   typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
 	  _HCType m_hypos;
@@ -40,8 +40,8 @@ public:
 	return m_hypos.end();
   }
 
-	Stack();
-	virtual ~Stack();
+	StackCubePruning();
+	virtual ~StackCubePruning();
 
 
 	size_t GetSize() const
