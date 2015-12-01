@@ -17,8 +17,8 @@
 
 using namespace std;
 
-SearchNormal::SearchNormal(Manager &mgr, Stacks &stacks)
-:Search(mgr, stacks)
+SearchNormal::SearchNormal(Manager &mgr)
+:Search(mgr)
 {
 	// TODO Auto-generated constructor stub
 
@@ -26,6 +26,30 @@ SearchNormal::SearchNormal(Manager &mgr, Stacks &stacks)
 
 SearchNormal::~SearchNormal() {
 	// TODO Auto-generated destructor stub
+}
+
+void SearchNormal::Decode()
+{
+	// init stacks
+	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
+
+	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
+	Hypothesis *initHypo = Hypothesis::Create(m_mgr);
+	initHypo->Init(m_mgr.GetInitPhrase(), m_mgr.GetInitRange(), initBitmap);
+	initHypo->EmptyHypothesisState(m_mgr.GetInput());
+
+	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
+
+	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+		Decode(stackInd);
+		cerr << m_stacks << endl;
+
+		// delete stack to save mem
+		if (stackInd < m_stacks.GetSize() - 1) {
+			m_stacks.Delete(stackInd);
+		}
+		//cerr << m_stacks << endl;
+	}
 }
 
 void SearchNormal::Decode(size_t stackInd)
@@ -98,5 +122,17 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);
 
+}
+
+const Hypothesis *SearchNormal::GetBestHypothesis() const
+{
+	const Stack &lastStack = m_stacks.Back();
+	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
+
+	const Hypothesis *best = NULL;
+	if (sortedHypos.size()) {
+		best = sortedHypos[0];
+	}
+	return best;
 }
 

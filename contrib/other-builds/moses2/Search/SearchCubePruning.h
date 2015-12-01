@@ -9,6 +9,7 @@
 
 #include "Search.h"
 #include "CubePruning.h"
+#include "StacksCubePruning.h"
 #include "../legacy/Range.h"
 
 class Bitmap;
@@ -19,13 +20,14 @@ class TargetPhrases;
 class SearchCubePruning : public Search
 {
 public:
-	SearchCubePruning(Manager &mgr, Stacks &stacks);
+	SearchCubePruning(Manager &mgr);
 	virtual ~SearchCubePruning();
 
-	void Decode(size_t stackInd);
-	void PostDecode(size_t stackInd);
+	virtual void Decode();
+	const Hypothesis *GetBestHypothesis() const;
 
 protected:
+	StacksCubePruning m_stacks;
 
 	// CUBE PRUNING VARIABLES
 	// setup
@@ -36,6 +38,8 @@ protected:
 
 	// CUBE PRUNING
 	// decoding
+	void Decode(size_t stackInd);
+	void PostDecode(size_t stackInd);
 
 	void SortAndPruneHypos(HyposForCubePruning &hyposPerBMAndRange);
 };

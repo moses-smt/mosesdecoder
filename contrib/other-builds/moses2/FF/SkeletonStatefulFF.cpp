@@ -7,6 +7,7 @@
 
 #include "SkeletonStatefulFF.h"
 #include "../Search/Manager.h"
+#include "../Search/Hypothesis.h"
 
 class SkeletonState : public FFState
 {

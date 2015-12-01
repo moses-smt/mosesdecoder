@@ -1,5 +1,6 @@
 #include "TranslationTask.h"
 #include "Search/Manager.h"
+#include "Search/Hypothesis.h"
 
 using namespace std;
 

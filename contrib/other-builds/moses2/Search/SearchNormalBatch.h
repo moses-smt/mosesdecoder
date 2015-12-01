@@ -15,6 +15,7 @@
 #include "../Recycler.h"
 #include "ArcLists.h"
 #include "Search.h"
+#include "Stacks.h"
 
 class Hypothesis;
 class InputPath;
@@ -25,16 +26,18 @@ class Stacks;
 class SearchNormalBatch : public Search
 {
 public:
-	SearchNormalBatch(Manager &mgr, Stacks &stacks);
+	SearchNormalBatch(Manager &mgr);
 	virtual ~SearchNormalBatch();
 
-	void Decode(size_t stackInd);
+	virtual void Decode();
 
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
+    Stacks m_stacks;
 	ObjectPoolContiguous<Hypothesis*> *m_batchForEval;
 
+	void Decode(size_t stackInd);
 	void Extend(const Hypothesis &hypo);
 	void Extend(const Hypothesis &hypo, const InputPath &path);
 	void Extend(const Hypothesis &hypo,
@@ -49,8 +52,6 @@ protected:
 			SCORE estimatedScore);
 
 	void AddHypos();
-
-	int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 
 };
 

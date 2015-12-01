@@ -13,6 +13,7 @@
 #include "../TypeDef.h"
 #include "ArcLists.h"
 #include "Search.h"
+#include "Stacks.h"
 
 class Hypothesis;
 class InputPath;
@@ -23,13 +24,16 @@ class Stacks;
 class SearchNormal : public Search
 {
 public:
-	SearchNormal(Manager &mgr, Stacks &stacks);
+	SearchNormal(Manager &mgr);
 	virtual ~SearchNormal();
 
-	void Decode(size_t stackInd);
+	virtual void Decode();
+	const Hypothesis *GetBestHypothesis() const;
 
 protected:
+    Stacks m_stacks;
 
+	void Decode(size_t stackInd);
 	void Extend(const Hypothesis &hypo, const InputPath &path);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrases &tps,

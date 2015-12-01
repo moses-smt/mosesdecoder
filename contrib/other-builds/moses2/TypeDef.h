@@ -8,6 +8,8 @@
 
 #include <cstddef>
 
+class Hypothesis;
+
 typedef float SCORE;
 
 // Note: StaticData uses SearchAlgorithm to determine whether the translation
@@ -27,6 +29,19 @@ enum SearchAlgorithm {
   DefaultSearchAlgorithm = 777 // means: use StaticData.m_searchAlgorithm
 };
 
+class StackAdd
+{
+public:
+	bool added;
+	Hypothesis *toBeDeleted;
+
+	StackAdd(bool vadded,
+			Hypothesis *vtoBeDeleted)
+	:added(vadded)
+	,toBeDeleted(vtoBeDeleted)
+	{
+	}
+};
 
 
 

@@ -59,20 +59,17 @@ void Manager::Init()
 
 	CalcFutureScore();
 
-	// init stacks
-	m_stacks.Init(m_input->GetSize() + 1);
-
 	m_bitmaps = new Bitmaps(m_input->GetSize(), vector<bool>(0));
 
 	switch (system.searchAlgorithm) {
 	case Normal:
-		m_search = new SearchNormal(*this, m_stacks);
+		m_search = new SearchNormal(*this);
 		break;
 	case NormalBatch:
-		m_search = new SearchNormalBatch(*this, m_stacks);
+		m_search = new SearchNormalBatch(*this);
 		break;
 	case CubePruning:
-		m_search = new SearchCubePruning(*this, m_stacks);
+		m_search = new SearchCubePruning(*this);
 		break;
 	default:
 		cerr << "Unknown search algorithm" << endl;
@@ -88,28 +85,7 @@ const Hypothesis *Manager::GetBestHypothesis() const
 void Manager::Decode()
 {
 	Init();
-
-	const Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
-	Hypothesis *initHypo = Hypothesis::Create(*this);
-	initHypo->Init(*m_initPhrase, m_initRange, initBitmap);
-	initHypo->EmptyHypothesisState(*m_input);
-
-	m_stacks.Add(initHypo, GetHypoRecycle());
-
-	m_search->PostDecode(0);
-
-	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
-		m_search->Decode(stackInd);
-		m_search->PostDecode(stackInd);
-
-		cerr << m_stacks << endl;
-
-		// delete stack to save mem
-		if (stackInd < m_stacks.GetSize() - 1) {
-			m_stacks.Delete(stackInd);
-		}
-		//cerr << m_stacks << endl;
-	}
+	m_search->Decode();
 }
 
 void Manager::CalcFutureScore()

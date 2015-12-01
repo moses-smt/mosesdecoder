@@ -21,7 +21,7 @@ public:
 	size_t GetSize() const
 	{ return m_stacks.size(); }
 
-    Stack &Back()
+    const Stack &Back() const
     { return *m_stacks.back(); }
 
     Stack &operator[](size_t ind)

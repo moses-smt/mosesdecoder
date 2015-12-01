@@ -14,7 +14,6 @@
 #include "../TargetPhrase.h"
 #include "../MemPool.h"
 #include "../Recycler.h"
-#include "Stacks.h"
 #include "../legacy/Bitmaps.h"
 #include "../legacy/SquareMatrix.h"
 
@@ -22,6 +21,7 @@ class System;
 class PhraseImpl;
 class SearchNormal;
 class Search;
+class Hypothesis;
 
 class Manager {
 public:
@@ -49,6 +49,12 @@ public:
 	const InputPaths &GetInputPaths() const
 	{ return m_inputPaths; }
 
+	const TargetPhrase &GetInitPhrase() const
+	{ return *m_initPhrase; }
+
+	const Range &GetInitRange() const
+	{ return m_initRange; }
+
 	const Hypothesis *GetBestHypothesis() const;
 
 	void Decode();
@@ -64,7 +70,6 @@ protected:
 	Range m_initRange;
 	TargetPhrase *m_initPhrase;
 
-    Stacks m_stacks;
 	Search *m_search;
 
 	// must be run in same thread as Decode()

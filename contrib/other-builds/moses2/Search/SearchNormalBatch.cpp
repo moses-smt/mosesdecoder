@@ -19,8 +19,8 @@
 
 using namespace std;
 
-SearchNormalBatch::SearchNormalBatch(Manager &mgr, Stacks &stacks)
-:Search(mgr, stacks)
+SearchNormalBatch::SearchNormalBatch(Manager &mgr)
+:Search(mgr)
 ,m_batchForEval(&mgr.system.GetBatchForEval())
 {
 	// TODO Auto-generated constructor stub
@@ -29,6 +29,31 @@ SearchNormalBatch::SearchNormalBatch(Manager &mgr, Stacks &stacks)
 
 SearchNormalBatch::~SearchNormalBatch() {
 	// TODO Auto-generated destructor stub
+}
+
+void SearchNormalBatch::Decode()
+{
+	// init stacks
+	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
+
+	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
+	Hypothesis *initHypo = Hypothesis::Create(m_mgr);
+	initHypo->Init(m_mgr.GetInitPhrase(), m_mgr.GetInitRange(), initBitmap);
+	initHypo->EmptyHypothesisState(m_mgr.GetInput());
+
+	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
+
+	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+		Decode(stackInd);
+
+		cerr << m_stacks << endl;
+
+		// delete stack to save mem
+		if (stackInd < m_stacks.GetSize() - 1) {
+			m_stacks.Delete(stackInd);
+		}
+		//cerr << m_stacks << endl;
+	}
 }
 
 void SearchNormalBatch::Decode(size_t stackInd)
@@ -149,16 +174,5 @@ const Hypothesis *SearchNormalBatch::GetBestHypothesis() const
 		best = sortedHypos[0];
 	}
 	return best;
-}
-
-int SearchNormalBatch::ComputeDistortionDistance(const Range& prev, const Range& current) const
-{
-  int dist = 0;
-  if (prev.GetNumWordsCovered() == 0) {
-    dist = current.GetStartPos();
-  } else {
-    dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
-  }
-  return abs(dist);
 }
 

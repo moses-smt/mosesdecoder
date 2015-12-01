@@ -17,15 +17,44 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////
-SearchCubePruning::SearchCubePruning(Manager &mgr, Stacks &stacks)
-:Search(mgr, stacks)
+SearchCubePruning::SearchCubePruning(Manager &mgr)
+:Search(mgr)
 {
-	m_hyposForCube.resize(stacks.GetSize() + 1);
-	m_cubeEdges.resize(stacks.GetSize() + 1);
 }
 
 SearchCubePruning::~SearchCubePruning() {
 	// TODO Auto-generated destructor stub
+}
+
+void SearchCubePruning::Decode()
+{
+	// init stacks
+	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
+	m_hyposForCube.resize(m_stacks.GetSize() + 1);
+	m_cubeEdges.resize(m_stacks.GetSize() + 1);
+
+	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
+	Hypothesis *initHypo = Hypothesis::Create(m_mgr);
+	initHypo->Init(m_mgr.GetInitPhrase(), m_mgr.GetInitRange(), initBitmap);
+	initHypo->EmptyHypothesisState(m_mgr.GetInput());
+
+	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
+
+	PostDecode(0);
+
+	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+		Decode(stackInd);
+		PostDecode(stackInd);
+
+		cerr << m_stacks << endl;
+
+		// delete stack to save mem
+		if (stackInd < m_stacks.GetSize() - 1) {
+			m_stacks.Delete(stackInd);
+		}
+		//cerr << m_stacks << endl;
+	}
+
 }
 
 void SearchCubePruning::Decode(size_t stackInd)
@@ -63,7 +92,7 @@ void SearchCubePruning::Decode(size_t stackInd)
 
 void SearchCubePruning::PostDecode(size_t stackInd)
 {
-  Stack &stack = m_stacks[stackInd];
+  StackCubePruning &stack = m_stacks[stackInd];
   HyposForCubePruning &hyposPerBMAndRange = m_hyposForCube[stackInd];
 
   // create list of hypos in this stack, sorted by bitmap and range
@@ -138,3 +167,14 @@ void SearchCubePruning::SortAndPruneHypos(HyposForCubePruning &hyposPerBMAndRang
   }
 }
 
+const Hypothesis *SearchCubePruning::GetBestHypothesis() const
+{
+	const StackCubePruning &lastStack = m_stacks.Back();
+	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
+
+	const Hypothesis *best = NULL;
+	if (sortedHypos.size()) {
+		best = sortedHypos[0];
+	}
+	return best;
+}

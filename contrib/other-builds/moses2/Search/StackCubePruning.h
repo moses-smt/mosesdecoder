@@ -9,21 +9,8 @@
 #include <boost/unordered_set.hpp>
 #include "Hypothesis.h"
 #include "../Recycler.h"
+#include "../TypeDef.h"
 #include "../legacy/Util2.h"
-
-class StackAdd
-{
-public:
-	bool added;
-	Hypothesis *toBeDeleted;
-
-	StackAdd(bool vadded,
-			Hypothesis *vtoBeDeleted)
-	:added(vadded)
-	,toBeDeleted(vtoBeDeleted)
-	{
-	}
-};
 
 class StackCubePruning {
 protected:

@@ -21,7 +21,7 @@ public:
 	size_t GetSize() const
 	{ return m_stacks.size(); }
 
-	StackCubePruning &Back()
+	const StackCubePruning &Back() const
     { return *m_stacks.back(); }
 
     StackCubePruning &operator[](size_t ind)

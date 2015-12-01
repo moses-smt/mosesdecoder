@@ -11,9 +11,8 @@
 #include "../legacy/Bitmap.h"
 #include "../legacy/Range.h"
 
-Search::Search(Manager &mgr, Stacks &stacks)
+Search::Search(Manager &mgr)
 :m_mgr(mgr)
-,m_stacks(stacks)
 {
 	// TODO Auto-generated constructor stub
 
@@ -21,18 +20,6 @@ Search::Search(Manager &mgr, Stacks &stacks)
 
 Search::~Search() {
 	// TODO Auto-generated destructor stub
-}
-
-const Hypothesis *Search::GetBestHypothesis() const
-{
-	const Stack &lastStack = m_stacks.Back();
-	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
-
-	const Hypothesis *best = NULL;
-	if (sortedHypos.size()) {
-		best = sortedHypos[0];
-	}
-	return best;
 }
 
 int Search::ComputeDistortionDistance(const Range& prev, const Range& current) const

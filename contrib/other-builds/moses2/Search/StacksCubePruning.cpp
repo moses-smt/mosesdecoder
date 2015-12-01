@@ -28,6 +28,7 @@ void StacksCubePruning::Init(size_t numStacks)
 	}
 }
 
+
 std::ostream& operator<<(std::ostream &out, const StacksCubePruning &obj)
 {
   for (size_t i = 0; i < obj.GetSize(); ++i) {
