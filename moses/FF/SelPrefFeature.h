@@ -4,9 +4,15 @@
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 #include "moses/Word.h"
+#include "InternalTree.h"
+//#include "moses/LM/Ken.h"
+//#include "lm/model.hh"
 
+#include <unordered_map>
 
 namespace Moses{
+
+typedef std::shared_ptr<std::unordered_map<InternalTree*, const Word*>> HeadsPointer;
 
 class SelPrefFeature : public StatefulFeatureFunction{
 
@@ -24,6 +30,9 @@ public:
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
       return NULL;
     }
+
+  bool FindHeadRecursively(TreePointer tree, const std::vector<TreePointer> &previous_trees, const std::vector<HeadsPointer> &previous_heads, std::unordered_map<InternalTree*, const Word*> &childrenHeadWords, size_t &childId) const;
+  void MakeTuples(TreePointer tree, std::unordered_map<InternalTree*,const Word*> &childrenHeadWords, std::vector<std::vector<std::string>> &depRelTuples) const;
 
   void EvaluateInIsolation(const Phrase &source
                   , const TargetPhrase &targetPhrase
@@ -54,7 +63,24 @@ public:
 
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
+protected:
 
+};
+
+
+class SelPrefState : public TreeState{
+public:
+	SelPrefState(TreePointer tree, HeadsPointer heads)
+		: TreeState(tree)
+		, m_heads(heads)
+	{}
+	HeadsPointer GetHeads() const{
+		return m_heads;
+	}
+protected:
+	// head words of non-terminal in pre-order traversal of non-terminals
+	// maybe I should map to the TreePointer correspondong to the terminal node so not to save another Word
+	HeadsPointer m_heads;
 
 };
 
