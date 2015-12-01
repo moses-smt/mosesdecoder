@@ -325,12 +325,18 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
 
 
   weightmap_t* weight_map = NULL;
-  ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
-  if (ttask){
-    SPTR<ContextScope> scope = ttask->GetScope();
-    if (scope){
-      weight_map = scope->GetLMContextWeights(m_id);
+  
+  SPTR<ContextScope> scope;
+  if (phrase.HasScope()){
+    scope = phrase.GetScope();
+  }else{
+    ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
+    if (ttask){
+      scope = ttask->GetScope();
     }
+  }
+  if (scope){
+    weight_map = scope->GetLMContextWeights(m_id);
   }
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
@@ -384,9 +390,17 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
     return ret.release();
   }
 
-  ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
-  SPTR<ContextScope> scope = ttask->GetScope();
-
+  SPTR<ContextScope> scope;
+  const TargetPhrase& currTargetPhrase = hypo->GetCurrTargetPhrase();
+  if (currTargetPhrase.HasScope()){
+    scope = currTargetPhrase.GetScope();
+  }else{
+    ttasksptr ttask = StaticData::InstanceNonConst().GetTask();
+    if (ttask){
+      scope = ttask->GetScope();
+    }
+  }
+  
   weightmap_t* weight_map = NULL;
   if (scope){
     weight_map = scope->GetLMContextWeights(m_id);
