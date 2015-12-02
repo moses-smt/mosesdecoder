@@ -19,10 +19,11 @@ protected:
   typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
   _HCType m_hypos;
 
- typedef boost::unordered_map<HyposForCubePruning::HypoCoverage, _HCType> Coll;
- Coll m_coll;
 
 public:
+  typedef boost::unordered_map<HyposForCubePruning::HypoCoverage, _HCType> Coll;
+  Coll m_coll;
+
   typedef _HCType::iterator iterator;
   typedef _HCType::const_iterator const_iterator;
   //! iterators
@@ -40,9 +41,9 @@ public:
 
 	size_t GetSize() const
 	{
-		size_t innerSize = GetInnerSize();
+		//size_t innerSize = GetInnerSize();
 		size_t ret = m_hypos.size();
-		assert(innerSize == ret);
+		//assert(innerSize == ret);
 		return ret;
 	}
 
@@ -54,6 +55,7 @@ public:
 protected:
 	StackAdd Add(const Hypothesis *hypo);
 
+	_HCType &GetColl(const HyposForCubePruning::HypoCoverage &key);
 
 };
 
