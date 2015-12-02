@@ -9,7 +9,7 @@
 #include "Manager.h"
 #include "SearchNormal.h"
 #include "SearchNormalBatch.h"
-#include "SearchCubePruning.h"
+#include "CubePruning/SearchCubePruning.h"
 #include "../System.h"
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"

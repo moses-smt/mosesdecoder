@@ -6,13 +6,11 @@
  */
 #include <boost/foreach.hpp>
 #include "SearchCubePruning.h"
-#include "Stacks.h"
-#include "Stack.h"
-#include "Manager.h"
-#include "Hypothesis.h"
-#include "../InputPaths.h"
-#include "../InputPath.h"
-#include "../System.h"
+#include "../Manager.h"
+#include "../Hypothesis.h"
+#include "../../InputPaths.h"
+#include "../../InputPath.h"
+#include "../../System.h"
 
 using namespace std;
 

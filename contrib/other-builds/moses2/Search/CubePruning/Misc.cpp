@@ -5,8 +5,8 @@
  *      Author: hieu
  */
 
-#include "CubePruning.h"
-#include "Manager.h"
+#include "Misc.h"
+#include "../Manager.h"
 
 using namespace std;
 

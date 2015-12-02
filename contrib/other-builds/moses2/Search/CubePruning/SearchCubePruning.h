@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include "Search.h"
-#include "CubePruning.h"
+#include "../Search.h"
+#include "Misc.h"
 #include "StacksCubePruning.h"
-#include "../legacy/Range.h"
+#include "../../legacy/Range.h"
 
 class Bitmap;
 class Hypothesis;

@@ -33,17 +33,17 @@ import path ;
  	 	TranslationModel/ProbingPT.cpp 
  	 	TranslationModel/UnknownWordPenalty.cpp 
    	Search/ArcLists.cpp
-		Search/CubePruning.cpp 
 		Search/Hypothesis.cpp 
  	 	Search/Manager.cpp 
  	 	Search/Search.cpp
- 	 	Search/SearchCubePruning.cpp
  	 	Search/SearchNormal.cpp
  	 	Search/SearchNormalBatch.cpp
  	 	Search/Stack.cpp 
  	 	Search/Stacks.cpp 
- 	 	Search/StackCubePruning.cpp 
- 	 	Search/StacksCubePruning.cpp 
+		Search/CubePruning/Misc.cpp
+ 	 	Search/CubePruning/SearchCubePruning.cpp
+ 	 	Search/CubePruning/StackCubePruning.cpp 
+ 	 	Search/CubePruning/StacksCubePruning.cpp 
 		legacy/Bitmap.cpp
 		legacy/Bitmaps.cpp
 		legacy/Factor.cpp

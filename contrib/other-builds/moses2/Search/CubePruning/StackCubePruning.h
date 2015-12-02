@@ -8,11 +8,11 @@
 
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
-#include "Hypothesis.h"
-#include "CubePruning.h"
-#include "../Recycler.h"
-#include "../TypeDef.h"
-#include "../legacy/Util2.h"
+#include "../Hypothesis.h"
+#include "Misc.h"
+#include "../../Recycler.h"
+#include "../../TypeDef.h"
+#include "../../legacy/Util2.h"
 
 class StackCubePruning {
 protected:

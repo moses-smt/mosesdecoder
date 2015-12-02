@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <boost/foreach.hpp>
 #include "StackCubePruning.h"
-#include "Hypothesis.h"
-#include "../Scores.h"
+#include "../Hypothesis.h"
+#include "../../Scores.h"
 
 using namespace std;
 

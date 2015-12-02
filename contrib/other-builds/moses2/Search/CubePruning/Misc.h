@@ -9,9 +9,9 @@
 #include <boost/unordered_set.hpp>
 #include <vector>
 #include <queue>
-#include "Hypothesis.h"
-#include "../TypeDef.h"
-#include "../legacy/Range.h"
+#include "../Hypothesis.h"
+#include "../../TypeDef.h"
+#include "../../legacy/Range.h"
 
 class Manager;
 class InputPath;
