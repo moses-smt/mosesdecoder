@@ -101,9 +101,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
 	  const StackCubePruning::_HCType &unsortedHypos = val.second;
 
 	  // sort hypo for a particular bitmap and hypoEndPos
-	  CubeEdge::Hypotheses &sortedHypos = hyposPerBMAndRange.GetOrCreate(hypoBitmap, hypoEndPos);
-	  std::copy(unsortedHypos.begin(), unsortedHypos.end(), sortedHypos.end());
-	  SortAndPruneHypos(sortedHypos);
+	  CubeEdge::Hypotheses *sortedHypos = NULL;
 
 	  // create edges to next hypos from existing hypos
 	  const InputPaths &paths = m_mgr.GetInputPaths();
@@ -121,7 +119,14 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
+  				if (sortedHypos == NULL) {
+  				  // create sortedHypos first
+    			  sortedHypos = &hyposPerBMAndRange.GetOrCreate(hypoBitmap, hypoEndPos);
+    			  std::copy(unsortedHypos.begin(), unsortedHypos.end(), sortedHypos->end());
+  	  			  SortAndPruneHypos(*sortedHypos);
+  				}
+
+  		  		CubeEdge *edge = new CubeEdge(m_mgr, *sortedHypos, path, *tps, newBitmap);
   		  		std::vector<CubeEdge*> &edges = m_cubeEdges[numWords];
   		  		edges.push_back(edge);
   			}
