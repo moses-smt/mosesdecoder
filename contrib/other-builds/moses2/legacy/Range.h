@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <cassert>
 #include <iostream>
 #include <boost/functional/hash.hpp>
 #include "Util2.h"
@@ -56,6 +57,8 @@ public:
 
   //! count of words translated
   inline size_t GetNumWordsCovered() const {
+	assert((m_startPos == NOT_FOUND && m_endPos == NOT_FOUND)
+			|| (m_startPos != NOT_FOUND && m_endPos != NOT_FOUND));
     return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
   }
 

@@ -28,8 +28,8 @@ protected:
 	Manager &m_mgr;
 	//ArcLists m_arcLists;
 
-	bool CanExtend(const Bitmap &hypoBitmap, const Range &hypoRange, const Range &pathRange);
-	int ComputeDistortionDistance(const Range& prev, const Range& current) const;
+	bool CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const Range &pathRange);
+	int ComputeDistortionDistance(size_t prevEndPos, size_t currStartPos) const;
 
 };
 

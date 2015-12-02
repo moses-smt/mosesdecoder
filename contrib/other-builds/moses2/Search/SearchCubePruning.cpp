@@ -95,9 +95,11 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   StackCubePruning &stack = m_stacks[stackInd];
   HyposForCubePruning &hyposPerBMAndRange = m_hyposForCube[stackInd];
 
+  /*
   BOOST_FOREACH(const StackCubePruning::Coll &val, stack.m_coll) {
 
   }
+  */
 
   // create list of hypos in this stack, sorted by bitmap and range
   BOOST_FOREACH(const Hypothesis *hypo, stack) {
@@ -125,7 +127,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   	  BOOST_FOREACH(const InputPath &path, paths) {
   		const Range &pathRange = path.range;
 
-  		if (!CanExtend(hypoBitmap, hypoRange, pathRange)) {
+  		if (!CanExtend(hypoBitmap, hypoRange.GetEndPos(), pathRange)) {
   			continue;
   		}
 

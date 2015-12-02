@@ -22,18 +22,18 @@ Search::~Search() {
 	// TODO Auto-generated destructor stub
 }
 
-int Search::ComputeDistortionDistance(const Range& prev, const Range& current) const
+int Search::ComputeDistortionDistance(size_t prevEndPos, size_t currStartPos) const
 {
   int dist = 0;
-  if (prev.GetNumWordsCovered() == 0) {
-    dist = current.GetStartPos();
+  if (prevEndPos == NOT_FOUND) {
+    dist = currStartPos;
   } else {
-    dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
+    dist = (int)prevEndPos - (int)currStartPos + 1 ;
   }
   return abs(dist);
 }
 
-bool Search::CanExtend(const Bitmap &hypoBitmap, const Range &hypoRange, const Range &pathRange)
+bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const Range &pathRange)
 {
     const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
 
@@ -47,7 +47,7 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, const Range &hypoRange, const R
 
 	if (m_mgr.system.maxDistortion >= 0) {
 		// distortion limit
-		int distortion = ComputeDistortionDistance(hypoRange, pathRange);
+		int distortion = ComputeDistortionDistance(hypoRangeEndPos, pathRange.GetStartPos());
 		if (distortion > m_mgr.system.maxDistortion) {
 			//cerr << " NO" << endl;
 			return false;
@@ -101,7 +101,7 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, const Range &hypoRange, const R
       // distortion limit, we don't allow this extension to be made.
       Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 
-      if (ComputeDistortionDistance(pathRange, bestNextExtension)
+      if (ComputeDistortionDistance(pathRange.GetEndPos(), bestNextExtension.GetStartPos())
           > m_mgr.system.maxDistortion) {
     	  //cerr << " NO" << endl;
     	  return false;

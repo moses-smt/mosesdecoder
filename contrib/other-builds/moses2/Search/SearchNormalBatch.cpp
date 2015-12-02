@@ -108,7 +108,7 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo, const InputPath &path)
 	const Range &hypoRange = hypo.GetRange();
 	const Range &pathRange = path.range;
 
-	if (!CanExtend(hypoBitmap, hypoRange, pathRange)) {
+	if (!CanExtend(hypoBitmap, hypoRange.GetEndPos(), pathRange)) {
 		return;
 	}
 
