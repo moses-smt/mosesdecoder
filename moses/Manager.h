@@ -137,8 +137,9 @@ public:
                    , const std::vector<Moses::FactorType>& outputFactorOrder
                    , long translationId
                    , char reportSegmentation) const;
-  void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                     char reportSegmentation, bool reportAllFactors) const;
+
+  void OutputSurface(std::ostream &out, const Hypothesis &edge) const;
+
   void OutputAlignment(std::ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset) const;
   void OutputInput(std::ostream& os, const Hypothesis* hypo) const;
   void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo) const;

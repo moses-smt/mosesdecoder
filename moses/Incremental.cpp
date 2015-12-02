@@ -349,7 +349,7 @@ OutputNBestList(OutputCollector *collector,
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    OutputSurface(out, outputPhrase); // , outputFactorOrder, false);
     out << " ||| ";
     bool with_labels = options().nbest.include_feature_labels;
     features.OutputAllFeatureScores(out, with_labels);
