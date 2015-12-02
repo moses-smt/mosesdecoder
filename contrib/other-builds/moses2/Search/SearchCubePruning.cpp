@@ -122,7 +122,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   				if (sortedHypos == NULL) {
   				  // create sortedHypos first
     			  sortedHypos = &hyposPerBMAndRange.GetOrCreate(hypoBitmap, hypoEndPos);
-    			  std::copy(unsortedHypos.begin(), unsortedHypos.end(), sortedHypos->end());
+    			  sortedHypos->insert(sortedHypos->end(), unsortedHypos.begin(), unsortedHypos.end());
   	  			  SortAndPruneHypos(*sortedHypos);
   				}
 

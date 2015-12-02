@@ -70,7 +70,7 @@ std::vector<const Hypothesis*> StackCubePruning::GetBestHypos(size_t num) const
   std::vector<const Hypothesis*> ret;
   BOOST_FOREACH(const Coll::value_type &val, m_coll) {
 		const _HCType &hypos = val.second;
-		std::copy(hypos.begin(), hypos.end(), ret.end());
+		ret.insert(ret.end(), hypos.begin(), hypos.end());
   }
 
   std::vector<const Hypothesis*>::iterator iterMiddle;
