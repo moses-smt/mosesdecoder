@@ -46,7 +46,7 @@ void SearchCubePruning::Decode()
 		Decode(stackInd);
 		PostDecode(stackInd);
 
-		cerr << m_stacks << endl;
+		//cerr << m_stacks << endl;
 
 		// delete stack to save mem
 		if (stackInd < m_stacks.GetSize() - 1) {
