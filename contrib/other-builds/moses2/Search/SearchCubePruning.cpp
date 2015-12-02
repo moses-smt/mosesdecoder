@@ -95,7 +95,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   StackCubePruning &stack = m_stacks[stackInd];
   HyposForCubePruning &hyposPerBMAndRange = m_hyposForCube[stackInd];
 
-  BOOST_FOREACH(const StackCubePruning::Coll::value_type &val, stack.m_coll) {
+  BOOST_FOREACH(const StackCubePruning::Coll::value_type &val, stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
 	  size_t hypoEndPos = val.first.second;
 	  const StackCubePruning::_HCType &unsortedHypos = val.second;

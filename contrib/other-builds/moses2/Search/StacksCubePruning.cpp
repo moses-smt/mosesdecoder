@@ -34,7 +34,7 @@ std::ostream& operator<<(std::ostream &out, const StacksCubePruning &obj)
   for (size_t i = 0; i < obj.GetSize(); ++i) {
 	  const StackCubePruning *stack = obj.m_stacks[i];
 	  if (stack) {
-		  out << stack->GetSize() << " ";
+		  out << stack->GetHypoSize() << " ";
 	  }
 	  else {
 		  out << "N ";
