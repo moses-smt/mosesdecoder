@@ -4,7 +4,7 @@
  *  Created on: 4 Nov 2015
  *      Author: hieu
  */
-
+#include <sstream>
 #include <vector>
 #include "KENLM.h"
 #include "../TargetPhrase.h"
@@ -28,6 +28,15 @@ struct KenLMState : public FFState {
     const KenLMState &other = static_cast<const KenLMState &>(o);
     bool ret = state == other.state;
     return ret;
+  }
+
+  virtual std::string ToString() const
+  {
+	  stringstream ss;
+	  for (size_t i = 0; i < state.Length(); ++i) {
+		  ss << state.words[i] << " ";
+	  }
+	  return ss.str();
   }
 
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sstream>
 #include "FFState.h"
 
 struct PointerState : public FFState {
@@ -19,6 +20,13 @@ struct PointerState : public FFState {
   virtual bool operator==(const FFState& other) const {
     const PointerState& o = static_cast<const PointerState&>(other);
     return lmstate == o.lmstate;
+  }
+
+  virtual std::string ToString() const
+  {
+	  std::stringstream sb;
+	  sb << lmstate;
+	  return sb.str();
   }
 
 };

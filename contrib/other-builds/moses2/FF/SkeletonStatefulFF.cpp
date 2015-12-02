@@ -4,10 +4,12 @@
  *  Created on: 27 Oct 2015
  *      Author: hieu
  */
-
+#include <sstream>
 #include "SkeletonStatefulFF.h"
 #include "../Search/Manager.h"
 #include "../Search/Hypothesis.h"
+
+using namespace std;
 
 class SkeletonState : public FFState
 {
@@ -25,6 +27,13 @@ public:
   virtual bool operator==(const FFState& o) const {
     const SkeletonState& other = static_cast<const SkeletonState&>(o);
     return targetLen == other.targetLen;
+  }
+
+  virtual std::string ToString() const
+  {
+	  stringstream sb;
+	  sb << targetLen;
+	  return sb.str();
   }
 
 };

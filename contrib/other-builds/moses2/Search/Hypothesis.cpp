@@ -147,7 +147,18 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 
 std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 {
+	// coverage
 	out << obj.GetBitmap() << " " << obj.GetRange() << " ";
+
+	// states
+	const std::vector<const StatefulFeatureFunction*> &sfffs = obj.mgr.system.featureFunctions.GetStatefulFeatureFunctions();
+	size_t numStatefulFFs = sfffs.size();
+	for (size_t i = 0; i < numStatefulFFs; ++i) {
+		const FFState &state = *obj.GetState(i);
+		out << "(" << state << ") ";
+	}
+
+	// string
 	obj.OutputToStream(out);
 	out << " ";
 	obj.GetScores().Debug(out, obj.mgr.system.featureFunctions);

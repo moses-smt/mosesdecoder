@@ -4,7 +4,7 @@
  *  Created on: 28 Oct 2015
  *      Author: hieu
  */
-
+#include <sstream>
 #include "Distortion.h"
 #include "../Search/Hypothesis.h"
 #include "../Search/Manager.h"
@@ -36,6 +36,13 @@ struct DistortionState_traditional : public FFState {
     const DistortionState_traditional& o =
       static_cast<const DistortionState_traditional&>(other);
     return range.GetEndPos() == o.range.GetEndPos();
+  }
+
+  virtual std::string ToString() const
+  {
+	  stringstream sb;
+	  sb << first_gap << " " << range;
+	  return sb.str();
   }
 
 };
