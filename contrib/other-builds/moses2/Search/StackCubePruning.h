@@ -6,8 +6,10 @@
  */
 #pragma once
 
+#include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "Hypothesis.h"
+#include "CubePruning.h"
 #include "../Recycler.h"
 #include "../TypeDef.h"
 #include "../legacy/Util2.h"
@@ -15,7 +17,11 @@
 class StackCubePruning {
 protected:
   typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
-	  _HCType m_hypos;
+  _HCType m_hypos;
+
+ typedef boost::unordered_map<HyposForCubePruning::HypoCoverage, _HCType> Coll;
+ Coll m_coll;
+
 public:
   typedef _HCType::iterator iterator;
   typedef _HCType::const_iterator const_iterator;
@@ -30,9 +36,16 @@ public:
 	StackCubePruning();
 	virtual ~StackCubePruning();
 
+	size_t GetInnerSize() const;
 
 	size_t GetSize() const
-	{ return m_hypos.size(); }
+	{
+		size_t innerSize = GetInnerSize();
+		size_t ret = m_hypos.size();
+		assert(innerSize == ret);
+		return ret;
+	}
+
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 

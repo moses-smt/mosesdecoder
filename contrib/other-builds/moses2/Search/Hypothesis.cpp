@@ -147,6 +147,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 
 std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 {
+	out << obj.GetBitmap() << " " << obj.GetRange() << " ";
 	obj.OutputToStream(out);
 	out << " ";
 	obj.GetScores().Debug(out, obj.mgr.system.featureFunctions);
