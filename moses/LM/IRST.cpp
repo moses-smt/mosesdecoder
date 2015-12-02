@@ -391,7 +391,7 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
   }
 
   SPTR<ContextScope> scope;
-  const TargetPhrase& currTargetPhrase = hypo->GetCurrTargetPhrase();
+  const TargetPhrase& currTargetPhrase = hypo.GetCurrTargetPhrase();
   if (currTargetPhrase.HasScope()){
     scope = currTargetPhrase.GetScope();
   }else{
