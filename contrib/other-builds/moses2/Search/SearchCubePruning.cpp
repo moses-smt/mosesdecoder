@@ -95,39 +95,23 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   StackCubePruning &stack = m_stacks[stackInd];
   HyposForCubePruning &hyposPerBMAndRange = m_hyposForCube[stackInd];
 
-  /*
-  BOOST_FOREACH(const StackCubePruning::Coll &val, stack.m_coll) {
+  BOOST_FOREACH(const StackCubePruning::Coll::value_type &val, stack.m_coll) {
+	  const Bitmap &hypoBitmap = *val.first.first;
+	  size_t hypoEndPos = val.first.second;
+	  const StackCubePruning::_HCType &unsortedHypos = val.second;
 
-  }
-  */
+	  // sort hypo for a particular bitmap and hypoEndPos
+	  CubeEdge::Hypotheses &sortedHypos = hyposPerBMAndRange.GetOrCreate(hypoBitmap, hypoEndPos);
+	  std::copy(unsortedHypos.begin(), unsortedHypos.end(), sortedHypos.end());
+	  SortAndPruneHypos(sortedHypos);
 
-  // create list of hypos in this stack, sorted by bitmap and range
-  BOOST_FOREACH(const Hypothesis *hypo, stack) {
-	  const Bitmap &hypoBitmap = hypo->GetBitmap();
-	  const Range &hypoRange = hypo->GetRange();
+	  // create edges to next hypos from existing hypos
+	  const InputPaths &paths = m_mgr.GetInputPaths();
 
-	  CubeEdge::Hypotheses &hypos = hyposPerBMAndRange.GetOrCreate(hypoBitmap, hypoRange);
-	  hypos.push_back(hypo);
-  }
-
-  // sort and prune hypos
-  SortAndPruneHypos(hyposPerBMAndRange);
-
-  // create edges to next hypos from existing hypos
-  const InputPaths &paths = m_mgr.GetInputPaths();
-
-  BOOST_FOREACH(HyposForCubePruning::value_type &val, hyposPerBMAndRange) {
-	  const HyposForCubePruning::HypoCoverage &hypoCoverage = val.first;
-	  const Bitmap &hypoBitmap = *hypoCoverage.first;
-	  size_t currEndPos = hypoCoverage.second;
-
-	  const CubeEdge::Hypotheses &hypos = val.second;
-	  //cerr << "hypos=" << hypos.size() << endl;
-
-  	  BOOST_FOREACH(const InputPath &path, paths) {
+	  BOOST_FOREACH(const InputPath &path, paths) {
   		const Range &pathRange = path.range;
 
-  		if (!CanExtend(hypoBitmap,currEndPos, pathRange)) {
+  		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
   			continue;
   		}
 
@@ -137,7 +121,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new CubeEdge(m_mgr, hypos, path, *tps, newBitmap);
+  		  		CubeEdge *edge = new CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		std::vector<CubeEdge*> &edges = m_cubeEdges[numWords];
   		  		edges.push_back(edge);
   			}
@@ -146,30 +130,26 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   }
 }
 
-void SearchCubePruning::SortAndPruneHypos(HyposForCubePruning &hyposPerBMAndRange)
+void SearchCubePruning::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
 {
   size_t stackSize = m_mgr.system.stackSize;
   Recycler<Hypothesis*> &recycler = m_mgr.GetHypoRecycle();
 
-  BOOST_FOREACH(HyposForCubePruning::value_type &val, hyposPerBMAndRange) {
-	  CubeEdge::Hypotheses &hypos = val.second;
+  std::vector<const Hypothesis*>::iterator iterMiddle;
+  iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
+			   ? hypos.end()
+			   : hypos.begin() + stackSize;
 
-	  std::vector<const Hypothesis*>::iterator iterMiddle;
-	  iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
-				   ? hypos.end()
-				   : hypos.begin() + stackSize;
+  std::partial_sort(hypos.begin(), iterMiddle, hypos.end(),
+		  HypothesisFutureScoreOrderer());
 
-	  std::partial_sort(hypos.begin(), iterMiddle, hypos.end(),
-			  HypothesisFutureScoreOrderer());
-
-	  // prune
-	  if (stackSize && hypos.size() > stackSize) {
-		  for (size_t i = stackSize; i < hypos.size(); ++i) {
-			  Hypothesis *hypo = const_cast<Hypothesis*>(hypos[i]);
-			  recycler.Add(hypo);
-		  }
-		  hypos.resize(stackSize);
+  // prune
+  if (stackSize && hypos.size() > stackSize) {
+	  for (size_t i = stackSize; i < hypos.size(); ++i) {
+		  Hypothesis *hypo = const_cast<Hypothesis*>(hypos[i]);
+		  recycler.Add(hypo);
 	  }
+	  hypos.resize(stackSize);
   }
 }
 

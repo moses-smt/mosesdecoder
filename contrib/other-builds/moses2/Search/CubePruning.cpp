@@ -100,9 +100,9 @@ void CubeEdge::CreateNext(Manager &mgr, const QueueItem &ele, Queue &queue)
 }
 
 ////////////////////////////////////////////////////////////////////////
-CubeEdge::Hypotheses &HyposForCubePruning::GetOrCreate(const Bitmap &bitmap, const Range &range)
+CubeEdge::Hypotheses &HyposForCubePruning::GetOrCreate(const Bitmap &bitmap, size_t endPos)
 {
-	HypoCoverage key(&bitmap, range.GetEndPos());
+	HypoCoverage key(&bitmap, endPos);
 	/*
 	Coll::iterator iter = m_coll.find(key);
 

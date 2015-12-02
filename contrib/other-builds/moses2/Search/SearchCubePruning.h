@@ -41,6 +41,7 @@ protected:
 	void Decode(size_t stackInd);
 	void PostDecode(size_t stackInd);
 
-	void SortAndPruneHypos(HyposForCubePruning &hyposPerBMAndRange);
+	void SortAndPruneHypos(CubeEdge::Hypotheses &hypos);
+
 };
 

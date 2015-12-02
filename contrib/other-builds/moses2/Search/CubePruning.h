@@ -102,7 +102,7 @@ public:
 	return m_coll.end();
   }
 
-	CubeEdge::Hypotheses &GetOrCreate(const Bitmap &bitmap, const Range &range);
+	CubeEdge::Hypotheses &GetOrCreate(const Bitmap &bitmap, size_t endPos);
 
 protected:
 	Coll m_coll;

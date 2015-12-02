@@ -16,11 +16,12 @@
 
 class StackCubePruning {
 protected:
-  typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
-  _HCType m_hypos;
 
 
 public:
+  typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
+  _HCType m_hypos;
+
   typedef boost::unordered_map<HyposForCubePruning::HypoCoverage, _HCType> Coll;
   Coll m_coll;
 
