@@ -34,7 +34,7 @@ void StackCubePruning::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRe
 StackAdd StackCubePruning::Add(const Hypothesis *hypo)
 {
   // NEW
-  HyposForCubePruning::HypoCoverage key(&hypo->GetBitmap(), &hypo->GetRange());
+  HyposForCubePruning::HypoCoverage key(&hypo->GetBitmap(), hypo->GetRange().GetEndPos());
   _HCType &innerColl = GetColl(key);
   std::pair<iterator, bool> addInner = innerColl.insert(hypo);
   if (addInner.second) {
