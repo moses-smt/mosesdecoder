@@ -55,8 +55,6 @@ public:
 	const Range &GetInitRange() const
 	{ return m_initRange; }
 
-	const Hypothesis *GetBestHypothesis() const;
-
 	void Decode();
 
     void OutputBest(std::ostream &out) const;

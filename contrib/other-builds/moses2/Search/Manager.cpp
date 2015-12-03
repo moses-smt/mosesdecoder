@@ -77,11 +77,6 @@ void Manager::Init()
 	}
 }
 
-const Hypothesis *Manager::GetBestHypothesis() const
-{
-	return m_search->GetBestHypothesis();
-}
-
 void Manager::Decode()
 {
 	Init();
