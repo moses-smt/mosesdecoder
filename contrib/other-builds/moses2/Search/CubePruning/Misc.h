@@ -42,7 +42,7 @@ class QueueItemOrderer
 public:
   bool operator()(QueueItem* itemA, QueueItem* itemB) const {
 	  HypothesisFutureScoreOrderer orderer;
-	  return orderer(itemA->hypo, itemB->hypo);
+	  return !orderer(itemA->hypo, itemB->hypo);
   }
 };
 

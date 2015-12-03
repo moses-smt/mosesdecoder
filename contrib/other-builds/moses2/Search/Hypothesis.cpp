@@ -161,6 +161,7 @@ std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 	// string
 	obj.OutputToStream(out);
 	out << " ";
+	out << "fc=" << obj.GetFutureScore() << " ";
 	obj.GetScores().Debug(out, obj.mgr.system.featureFunctions);
 	return out;
 }

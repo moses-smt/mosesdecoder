@@ -42,7 +42,7 @@ void Search::Decode()
 	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
-		cerr << "stackInd=" << stackInd << endl;
+		//cerr << "stackInd=" << stackInd << endl;
 		Decode(stackInd);
 		PostDecode(stackInd);
 
@@ -57,6 +57,19 @@ void Search::Decode()
 
 }
 
+// grab the underlying contain of priority queue
+/////////////////////////////////////////////////
+template <class T, class S, class C>
+    S& Container(priority_queue<T, S, C>& q) {
+        struct HackedQueue : private priority_queue<T, S, C> {
+            static S& Container(priority_queue<T, S, C>& q) {
+                return q.*&HackedQueue::c;
+            }
+        };
+    return HackedQueue::Container(q);
+}
+/////////////////////////////////////////////////
+
 void Search::Decode(size_t stackInd)
 {
 
@@ -68,6 +81,17 @@ void Search::Decode(size_t stackInd)
 		//cerr << "edge=" << *edge << endl;
 		edge->CreateFirst(m_mgr, queue);
 	}
+
+	/*
+	cerr << "queue:" << endl;
+	vector<QueueItem*> &queueContainer = Container(queue);
+	for (size_t i = 0; i < queueContainer.size(); ++i) {
+		QueueItem *item = queueContainer[i];
+		Hypothesis *hypo = item->hypo;
+		cerr << *hypo << endl;
+	}
+	cerr << endl;
+	*/
 
 	size_t pops = 0;
 	while (!queue.empty() && pops < m_mgr.system.popLimit) {
@@ -99,7 +123,7 @@ void Search::PostDecode(size_t stackInd)
 	  const Bitmap &hypoBitmap = *val.first.first;
 	  size_t hypoEndPos = val.first.second;
 	  const NSCubePruning::Stack::_HCType &unsortedHypos = val.second;
-	  cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
+	  //cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
 
 	  // sort hypo for a particular bitmap and hypoEndPos
 	  CubeEdge::Hypotheses *sortedHypos = NULL;
@@ -109,6 +133,7 @@ void Search::PostDecode(size_t stackInd)
 
 	  BOOST_FOREACH(const InputPath &path, paths) {
   		const Range &pathRange = path.range;
+  		//cerr << "pathRange=" << pathRange << endl;
 
   		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
   			continue;
@@ -143,13 +168,14 @@ void Search::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
   size_t stackSize = m_mgr.system.stackSize;
   Recycler<Hypothesis*> &recycler = m_mgr.GetHypoRecycle();
 
+  /*
   cerr << "UNSORTED hypos:" << endl;
   for (size_t i = 0; i < hypos.size(); ++i) {
 	  const Hypothesis *hypo = hypos[i];
 	  cerr << *hypo << endl;
   }
   cerr << endl;
-
+  */
   std::vector<const Hypothesis*>::iterator iterMiddle;
   iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
 			   ? hypos.end()
@@ -167,12 +193,14 @@ void Search::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
 	  hypos.resize(stackSize);
   }
 
+  /*
   cerr << "sorted hypos:" << endl;
   for (size_t i = 0; i < hypos.size(); ++i) {
 	  const Hypothesis *hypo = hypos[i];
 	  cerr << hypo << " " << *hypo << endl;
   }
   cerr << endl;
+  */
 
 }
 
