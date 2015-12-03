@@ -69,7 +69,7 @@ void Manager::Init()
 		m_search = new SearchNormalBatch(*this);
 		break;
 	case CubePruning:
-		m_search = new NSCubePruning::SearchCubePruning(*this);
+		m_search = new NSCubePruning::Search(*this);
 		break;
 	default:
 		cerr << "Unknown search algorithm" << endl;

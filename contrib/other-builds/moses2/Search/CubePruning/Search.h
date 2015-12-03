@@ -1,5 +1,5 @@
 /*
- * SearchCubePruning.h
+ * Search.h
  *
  *  Created on: 16 Nov 2015
  *      Author: hieu
@@ -20,11 +20,11 @@ class TargetPhrases;
 namespace NSCubePruning
 {
 
-class SearchCubePruning : public Search
+class Search : public ::Search
 {
 public:
-	SearchCubePruning(Manager &mgr);
-	virtual ~SearchCubePruning();
+	Search(Manager &mgr);
+	virtual ~Search();
 
 	virtual void Decode();
 	const Hypothesis *GetBestHypothesis() const;

@@ -1,5 +1,5 @@
 /*
- * SearchCubePruning.cpp
+ * Search.cpp
  *
  *  Created on: 16 Nov 2015
  *      Author: hieu
@@ -18,16 +18,16 @@ namespace NSCubePruning
 {
 
 ////////////////////////////////////////////////////////////////////////
-SearchCubePruning::SearchCubePruning(Manager &mgr)
-:Search(mgr)
+Search::Search(Manager &mgr)
+: ::Search(mgr)
 {
 }
 
-SearchCubePruning::~SearchCubePruning() {
+Search::~Search() {
 	// TODO Auto-generated destructor stub
 }
 
-void SearchCubePruning::Decode()
+void Search::Decode()
 {
 	// init stacks
 	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
@@ -58,7 +58,7 @@ void SearchCubePruning::Decode()
 
 }
 
-void SearchCubePruning::Decode(size_t stackInd)
+void Search::Decode(size_t stackInd)
 {
 
 	CubeEdge::Queue queue;
@@ -91,7 +91,7 @@ void SearchCubePruning::Decode(size_t stackInd)
 	RemoveAllInColl(edges);
 }
 
-void SearchCubePruning::PostDecode(size_t stackInd)
+void Search::PostDecode(size_t stackInd)
 {
   NSCubePruning::Stack &stack = m_stacks[stackInd];
   HyposForCubePruning &hyposPerBMAndRange = m_hyposForCube[stackInd];
@@ -136,7 +136,7 @@ void SearchCubePruning::PostDecode(size_t stackInd)
   }
 }
 
-void SearchCubePruning::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
+void Search::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
 {
   size_t stackSize = m_mgr.system.stackSize;
   Recycler<Hypothesis*> &recycler = m_mgr.GetHypoRecycle();
@@ -159,7 +159,7 @@ void SearchCubePruning::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
   }
 }
 
-const Hypothesis *SearchCubePruning::GetBestHypothesis() const
+const Hypothesis *Search::GetBestHypothesis() const
 {
 	const NSCubePruning::Stack &lastStack = m_stacks.Back();
 	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
