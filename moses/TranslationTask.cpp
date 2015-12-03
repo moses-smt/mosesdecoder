@@ -5,6 +5,7 @@
 #include "moses/TranslationAnalysis.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/InputType.h"
 #include "moses/OutputCollector.h"
 #include "moses/Incremental.h"

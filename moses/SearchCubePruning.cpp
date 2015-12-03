@@ -79,7 +79,7 @@ void SearchCubePruning::Decode()
 {
   // initial seed hypothesis: nothing translated, no words produced
   const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
-  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap);
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap, m_manager.GetNextHypoId());
 
   HypothesisStackCubePruning &firstStack
   = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
@@ -117,7 +117,13 @@ void SearchCubePruning::Decode()
 
     for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
       // build the first hypotheses
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       bmIter->second->InitializeEdges();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
+      }
       m_manager.GetSentenceStats().StartTimeManageCubes();
       BCQueue.push(bmIter->second);
       m_manager.GetSentenceStats().StopTimeManageCubes();
@@ -137,7 +143,13 @@ void SearchCubePruning::Decode()
         m_manager.GetSentenceStats().AddPopped();
       }
       // push on stack and create successors
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       bc->ProcessBestHypothesis();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
+      }
       // if there are any hypothesis left in this specific container, add back to queue
       m_manager.GetSentenceStats().StartTimeManageCubes();
       if (!bc->Empty())
@@ -148,8 +160,14 @@ void SearchCubePruning::Decode()
     // ensure diversity, a minimum number of inserted hyps for each bitmap container;
     //    NOTE: diversity doesn't ensure they aren't pruned at some later point
     if (Diversity > 0) {
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
         bmIter->second->EnsureMinStackHyps(Diversity);
+      }
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
       }
     }
 

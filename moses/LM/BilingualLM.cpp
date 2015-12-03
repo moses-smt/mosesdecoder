@@ -188,22 +188,6 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const
   return hashCode;
 }
 
-void BilingualLM::EvaluateInIsolation(const Phrase &source
-                                      , const TargetPhrase &targetPhrase
-                                      , ScoreComponentCollection &scoreBreakdown
-                                      , ScoreComponentCollection &estimatedScores) const {}
-
-void BilingualLM::EvaluateWithSourceContext(const InputType &input
-    , const InputPath &inputPath
-    , const TargetPhrase &targetPhrase
-    , const StackVec *stackVec
-    , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedScores) const
-{
-
-}
-
-
 FFState* BilingualLM::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
@@ -264,8 +248,6 @@ void BilingualLM::getAllAlignments(const ChartHypothesis& cur_hypo, size_t featu
   int source_word_mid_idx; //The word alignment
 
   //Get source sent
-  const ChartManager& manager = cur_hypo.GetManager();
-  const Sentence& source_sent = static_cast<const Sentence&>(manager.GetSource());
   const AlignmentInfo& alignments = targetPhrase.GetAlignTerm();
 
   // get absolute position in source sentence for each source word in rule

@@ -229,11 +229,12 @@ Manager::
 PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
 {
   const LanguageModel &abstract = LanguageModel::GetFirstLM();
-  const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
+  const float lm_weight = data.GetWeights(&abstract)[0];
+  const float oov_weight = abstract.OOVFeatureEnabled() ? data.GetWeights(&abstract)[1] : 0.0;
   size_t cpl = data.options().cube.pop_limit;
   size_t nbs = data.options().nbest.nbest_size;
-  search::Config config(abstract.GetWeight() * log_10, cpl, search::NBestConfig(nbs));
+  search::Config config(lm_weight * log_10, cpl, search::NBestConfig(nbs));
   search::Context<Model> context(config, model);
 
   size_t size = m_source.GetSize();
@@ -348,7 +349,7 @@ OutputNBestList(OutputCollector *collector,
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    OutputSurface(out, outputPhrase); // , outputFactorOrder, false);
     out << " ||| ";
     bool with_labels = options().nbest.include_feature_labels;
     features.OutputAllFeatureScores(out, with_labels);

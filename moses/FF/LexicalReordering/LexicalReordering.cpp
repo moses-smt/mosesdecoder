@@ -75,7 +75,7 @@ LexicalReordering(const std::string &line)
                  << m_configuration->GetNumScoreComponents() << ")");
 
   m_configuration->ConfigureSparse(sparseArgs, this);
-  this->Register();
+  // this->Register();
 }
 
 LexicalReordering::

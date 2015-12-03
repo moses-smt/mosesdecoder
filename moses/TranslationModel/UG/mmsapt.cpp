@@ -82,7 +82,7 @@ namespace Moses
     // * Don't use features that depend on generation steps that won't be run
     //   yet at extract time
     SetFeaturesToApply();
-    Register();
+    // Register();
   }
 
   void
@@ -245,6 +245,10 @@ namespace Moses
 
     if ((m = param.find("lr-func")) != param.end())
       m_lr_func_name = m->second;
+    // accommodate typo in Germann, 2015: Sampling Phrase Tables for
+    // the Moses SMT System (PBML):
+    if ((m = param.find("lrfunc")) != param.end())
+      m_lr_func_name = m->second;
 
     if ((m = param.find("extra")) != param.end())
       m_extra_data = m->second;
@@ -295,6 +299,7 @@ namespace Moses
     // known_parameters.push_back("limit"); // replaced by "table-limit"
     known_parameters.push_back("logcnt");
     known_parameters.push_back("lr-func"); // associated lexical reordering function
+    known_parameters.push_back("lrfunc");  // associated lexical reordering function
     known_parameters.push_back("method");
     known_parameters.push_back("name");
     known_parameters.push_back("num-features");
@@ -721,7 +726,7 @@ namespace Moses
         if (foo) { sfix = *foo; sfix->wait(); }
         else 
           {
-            BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
+            BitextSampler<Token> s(btfix, mfix, context->bias, 
                                    m_min_sample_size, 
                                    m_default_sample_size, 
                                    m_sampling_method);
@@ -910,8 +915,9 @@ namespace Moses
         uint64_t pid = mfix.getPid();
         if (!context->cache1->get(pid))
           {
-            BitextSampler<Token> s(btfix.get(), mfix, context->bias, 
-                                   m_min_sample_size, m_default_sample_size, m_sampling_method);
+            BitextSampler<Token> s(btfix, mfix, context->bias, 
+                                   m_min_sample_size, m_default_sample_size, 
+                                   m_sampling_method);
             if (*context->cache1->get(pid, s.stats()) == s.stats())
               m_thread_pool->add(s);
           }

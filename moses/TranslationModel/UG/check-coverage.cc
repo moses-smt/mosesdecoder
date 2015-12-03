@@ -41,8 +41,8 @@ basename(string const path, string const suffix)
 
 int main(int argc, char* argv[])
 {
-  bitext_t B;
-  B.open(argv[1],argv[2],argv[3]);
+  boost::shared_ptr<bitext_t> B(new bitext_t);
+  B->open(argv[1],argv[2],argv[3]);
   string line;
   string ifile = argv[4];
   string docname = basename(ifile, string(".") + argv[2] + ".gz");
@@ -52,10 +52,10 @@ int main(int argc, char* argv[])
     {
       cout << line << " [" << docname << "]" << endl;
       vector<id_type> snt;
-      B.V1->fillIdSeq(line,snt);
+      B->V1->fillIdSeq(line,snt);
       for (size_t i = 0; i < snt.size(); ++i)
 	{
-	  bitext_t::iter m(B.I1.get());
+	  bitext_t::iter m(B->I1.get());
 	  for (size_t k = i; k < snt.size() && m.extend(snt[k]); ++k)
 	    {
 	      if (m.ca() > 500) continue;
@@ -65,9 +65,10 @@ int main(int argc, char* argv[])
 	      while (I.next != stop)
 		{
 		  m.root->readEntry(I.next,I);
-		  ++cnt[B.docname(I.sid)];
+		  ++cnt[B->sid2docname(I.sid)];
 		}
-	      cout << setw(8) << int(m.ca()) << " " << B.V1->toString(&snt[i],&snt[k+1]) << endl;
+	      cout << setw(8) << int(m.ca()) << " " 
+		   << B->V1->toString(&snt[i],&snt[k+1]) << endl;
 	      typedef pair<string,uint32_t> entry;
 	      vector<entry> ranked; ranked.reserve(cnt.size());
 	      BOOST_FOREACH(entry const& e, cnt) ranked.push_back(e);

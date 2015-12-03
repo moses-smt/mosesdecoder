@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 import math
 import os
 from random import randint
-import sys
+import sys, gzip
 
 
 def count_ngrams(snt, max_n):
@@ -92,8 +92,13 @@ class Document:
     def __init__(self, fname=None):
         self.fname = fname
         if fname:
-            self.snt = [line.strip().split() for line in open(fname)]
+            if fname[-3:] == ".gz":
+                self.snt = [line.strip().split() for line in gzip.open(fname).readlines()]
+            else:
+                self.snt = [line.strip().split() for line in open(fname)]
+                pass
             self.ngrams = [count_ngrams(snt, 4) for snt in self.snt]
+            # print self.snt
         else:
             self.snt = None
             self.ngrams = None

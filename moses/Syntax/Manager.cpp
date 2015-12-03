@@ -32,7 +32,7 @@ void Manager::OutputBest(OutputCollector *collector) const
     out << '\n';
   } else {
     if (options().output.ReportHypoScore) {
-      out << best->label.score << " ";
+      out << best->label.futureScore << " ";
     }
     Phrase yield = GetOneBestTargetYield(*best);
     // delete 1st & last
@@ -107,7 +107,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
 
     // print the translation ID, surface factors, and scores
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    OutputSurface(out, outputPhrase); // , outputFactorOrder, false);
     out << " ||| ";
     bool with_labels = options().nbest.include_feature_labels;
     derivation.scoreBreakdown.OutputAllFeatureScores(out, with_labels);

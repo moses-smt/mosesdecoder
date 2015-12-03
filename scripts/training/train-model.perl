@@ -2141,7 +2141,8 @@ sub create_ini {
 
      # sum up...
      $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor";
-     $feature_spec .= " L1=$___F L2=$___E " if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
+     $feature_spec .= " L1=$___F L2=$___E" if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
+     $feature_spec .= " lr-func=LexicalReordering0" if defined($_MMSAPT) && $i==0 && $REORDERING_LEXICAL;
      $feature_spec .= "\n";
      unless ($phrase_table_impl==11) { # suffix array provides its weights at first iteration
        $weight_spec .= "TranslationModel$i=";
@@ -2222,7 +2223,7 @@ sub create_ini {
 	    $table_file .= ".";
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
-            $feature_spec .= "LexicalReordering name=LexicalReordering$i num-features=".$model->{"numfeatures"}." type=".$model->{"config"}." input-factor=$input_factor output-factor=$output_factor path=$table_file".(defined($_LEXICAL_REORDERING_DEFAULT_SCORES)?" default-scores=$_LEXICAL_REORDERING_DEFAULT_SCORES":"")."\n";
+            $feature_spec .= "LexicalReordering name=LexicalReordering$i num-features=".$model->{"numfeatures"}." type=".$model->{"config"}." input-factor=$input_factor output-factor=$output_factor".((defined($_MMSAPT)&&$i==0)?"":" path=$table_file").(defined($_LEXICAL_REORDERING_DEFAULT_SCORES)?" default-scores=$_LEXICAL_REORDERING_DEFAULT_SCORES":"")."\n";
             $weight_spec .= "LexicalReordering$i=";
             for(my $j=0;$j<$model->{"numfeatures"};$j++) { $weight_spec .= " 0.3"; }
             $weight_spec .= "\n";
@@ -2295,18 +2296,21 @@ sub create_ini {
     }
 
     my $lm_oov_prob = 0.1;
-
+    my $lm_extra_options = "";
+    
     if ($_POST_DECODING_TRANSLIT || $_TRANSLITERATION_PHRASE_TABLE){
 	$lm_oov_prob = -100.0;
 	$_LMODEL_OOV_FEATURE = "yes";
     }
+    
+    if ($_LMODEL_OOV_FEATURE) {
+        # enable language model OOV feature
+        $lm_extra_options = " oov-feature=1";
+    }
 
-    $feature_spec .= "$type name=LM$i factor=$f path=$fn order=$o\n";
+    $feature_spec .= "$type name=LM$i factor=$f path=$fn order=$o$lm_extra_options\n";
     $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
-  }
-  if ($_LMODEL_OOV_FEATURE) {
-    print INI "\n# language model OOV feature enabled\n[lmodel-oov-feature]\n1\n\n";
   }
 
   # hierarchical model settings

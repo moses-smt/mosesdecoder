@@ -30,11 +30,6 @@ bool CoveredReferenceState::operator==(const FFState& other) const
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void CoveredReferenceFeature::EvaluateInIsolation(const Phrase &source
-    , const TargetPhrase &targetPhrase
-    , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedScores) const
-{}
 
 void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
     , const InputPath &inputPath

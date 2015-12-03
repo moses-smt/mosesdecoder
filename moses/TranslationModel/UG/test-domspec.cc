@@ -100,7 +100,7 @@ show(Bitext<Token> const& B, iter const& m, pstats& stats)
 
 
 void 
-process(Bitext<Token> const* bitext, TSA<Token>::tree_iterator& m)
+process(SPTR<Bitext<Token> const> const& bitext, TSA<Token>::tree_iterator& m)
 {
   static boost::shared_ptr<SamplingBias> nil(new SamplingBiasAlways(bitext->sid2did()));
   static Moses::bitext::sampling_method random = Moses::bitext::random_sampling;
@@ -126,7 +126,7 @@ process(Bitext<Token> const* bitext, TSA<Token>::tree_iterator& m)
 int main(int argc, char* argv[])
 {
   interpret_args(argc, argv);
-  iptr<mmbitext> B(new mmbitext); 
+  SPTR<mmbitext> B(new mmbitext); 
   B->open(bname, L1, L2);
   TSA<Token>::tree_iterator m(B->I1.get());
   // m.extend((*B.V1)["job"]);

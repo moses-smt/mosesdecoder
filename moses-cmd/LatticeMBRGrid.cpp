@@ -49,6 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/IOWrapper.h"
 #include "moses/LatticeMBR.h"
 #include "moses/Manager.h"
+#include "moses/Timer.h"
 #include "moses/StaticData.h"
 #include "util/exception.hh"
 
@@ -158,6 +159,8 @@ int main(int argc, char const* argv[])
     params->Explain();
     exit(1);
   }
+
+  ResetUserTime();
   if (!StaticData::LoadDataStatic(params, argv[0])) {
     exit(1);
   }

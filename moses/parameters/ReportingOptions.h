@@ -19,7 +19,8 @@ namespace Moses
     bool PrintAlignmentInfo; // m_PrintAlignmentInfo
     WordAlignmentSort WA_SortOrder; // 0: no, 1: target order
     std::string AlignmentOutputFile; 
-
+    std::string FactorDelimiter;
+    
     bool WordGraph;
 
     std::string SearchGraph;

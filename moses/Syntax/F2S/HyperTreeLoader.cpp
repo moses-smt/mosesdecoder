@@ -13,6 +13,7 @@
 #include "moses/FactorCollection.h"
 #include "moses/Word.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/Range.h"
@@ -59,7 +60,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
 
   double_conversion::StringToDoubleConverter converter(double_conversion::StringToDoubleConverter::NO_FLAGS, NAN, NAN, "inf", "nan");
 
-  HyperPathLoader hyperPathLoader(Input, input);
+  HyperPathLoader hyperPathLoader;
 
   Phrase dummySourcePhrase;
   {
@@ -86,9 +87,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
       alignString = temp;
     }
 
-    if (++pipes) {
-      StringPiece str(*pipes); //counts
-    }
+    ++pipes;  // counts
 
     scoreVector.clear();
     for (util::TokenIter<util::AnyCharacter, true> s(scoreString, " \t"); s; ++s) {

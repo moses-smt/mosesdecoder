@@ -49,6 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "IOWrapper.h"
 #include "LatticeMBR.h"
 #include "Manager.h"
+#include "Timer.h"
 #include "StaticData.h"
 
 #include "util/exception.hh"
@@ -152,6 +153,7 @@ int main(int argc, char* argv[])
     params->Explain();
     exit(1);
   }
+  ResetUserTime();
   if (!StaticData::LoadDataStatic(params, argv[0])) {
     exit(1);
   }

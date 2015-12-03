@@ -113,6 +113,10 @@ external-lib z ;
 #requirements += <library>dl ;
 #requirements += <cxxflags>-std=c++0x ;
 
+# Allow moses to report the git commit hash of the version used for compilation
+moses_githash = [ _shell "git describe --dirty" ] ;
+requirements += <define>MOSES_VERSION_ID=\\\"$(moses_githash)\\\" ;
+
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
   if [ option.get "full-tcmalloc" : : "yes" ] {
     external-lib unwind ;
@@ -168,6 +172,8 @@ mmt = [ option.get "mmt" ] ;
 if $(mmt) {
   requirements += <define>MMT ;
   requirements += <include>$(mmt) ; 
+  mmt_githash = [ _shell "cd $(mmt) && git describe --dirty" ] ;
+  requirements += <define>MMT_VERSION_ID=\\\"$(mmt_githash)\\\" ;
 }
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
@@ -238,26 +244,35 @@ project : requirements
 build-projects lm util phrase-extract phrase-extract/syntax-common search moses moses/LM mert moses-cmd scripts regression-testing ;
 # contrib/mira
 
-if [ option.get "with-mm" : : "yes" ]
+if [ option.get "with-mm-extras" : : "yes" ]
 {
- alias mm :  
+  alias mm-extras :
   moses/TranslationModel/UG//bitext-find 
   moses/TranslationModel/UG//ptable-describe-features 
   moses/TranslationModel/UG//count-ptable-features 
   moses/TranslationModel/UG//ptable-lookup 
   moses/TranslationModel/UG//check-coverage 
   moses/TranslationModel/UG/mm//mtt-demo1 
-  moses/TranslationModel/UG/mm//mtt-build 
   moses/TranslationModel/UG/mm//mtt-dump 
-  moses/TranslationModel/UG/mm//symal2mam 
   moses/TranslationModel/UG/mm//mam2symal 
   moses/TranslationModel/UG/mm//mam_verify 
-  moses/TranslationModel/UG/mm//mmlex-build 
   moses/TranslationModel/UG/mm//mmlex-lookup 
   moses/TranslationModel/UG/mm//mtt-count-words 
   moses/TranslationModel/UG/mm//calc-coverage 
-  moses/TranslationModel/UG//check-coverage 
   moses/TranslationModel/UG//try-align 
+  ;
+} 
+else
+{
+  alias mm-extras ;
+}
+
+if [ option.get "with-mm" : : "yes" ]
+{
+ alias mm :  
+  moses/TranslationModel/UG/mm//mtt-build 
+  moses/TranslationModel/UG/mm//symal2mam 
+  moses/TranslationModel/UG/mm//mmlex-build 
   ;
 }
 else
@@ -297,6 +312,7 @@ biconcor
 # contrib/mira//mira 
 contrib/server//mosesserver 
 mm
+mm-extras
 rephraser
 contrib/c++tokenizer//tokenizer
 contrib/expected-bleu-training//train-expected-bleu

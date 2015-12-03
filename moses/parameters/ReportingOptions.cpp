@@ -67,6 +67,14 @@ namespace Moses {
     if (params) factor_order = Scan<FactorType>(*params);
     if (factor_order.empty()) factor_order.assign(1,0);
 
+    if (ReportAllFactors) {
+      for (size_t i = 1; i < MAX_NUM_FACTORS; ++i)
+        factor_order.push_back(i);
+    }
+
+    param.SetParameter(FactorDelimiter, "factor-delimiter", std::string("|"));
+    param.SetParameter(FactorDelimiter, "output-factor-delimiter", FactorDelimiter);
+    
     return true;
   }
 
@@ -75,7 +83,25 @@ namespace Moses {
   ReportingOptions::
   update(std::map<std::string, xmlrpc_c::value>const& param)
   {
-    ReportAllFactors = check(param, "report-all-factors");
+    ReportAllFactors = check(param, "report-all-factors", ReportAllFactors);
+    
+    
+    std::map<std::string, xmlrpc_c::value>::const_iterator m;
+    m = param.find("output-factors");
+    if (m  != param.end()) 
+      factor_order = Tokenize<FactorType>(xmlrpc_c::value_string(m->second), ",");
+    
+    if (ReportAllFactors) {
+      factor_order.clear();
+      for (size_t i = 0; i < MAX_NUM_FACTORS; ++i)
+        factor_order.push_back(i);
+    }
+
+    m = param.find("factor-delimiter");
+    if (m != param.end()) FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
+    m = param.find("output-factor-delimiter");
+    if (m != param.end()) FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
+
     return true;
   }
 #endif

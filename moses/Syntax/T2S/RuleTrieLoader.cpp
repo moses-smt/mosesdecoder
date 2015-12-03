@@ -77,9 +77,7 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
       alignString = temp;
     }
 
-    if (++pipes) {
-      StringPiece str(*pipes); //counts
-    }
+    ++pipes;  // counts
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == std::string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {

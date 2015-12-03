@@ -89,7 +89,11 @@ public:
 
 
 struct MockProducers {
-  MockProducers() {}
+  MockProducers() {
+    FeatureFunction::Register(&single);
+    FeatureFunction::Register(&multi);
+    FeatureFunction::Register(&sparse);
+  }
 
   MockSingleFeature single;
   MockMultiFeature multi;

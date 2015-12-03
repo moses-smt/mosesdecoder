@@ -244,7 +244,7 @@ void HypothesisStackCubePruning::CleanupArcList()
   iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *mainHypo = *iter;
-    mainHypo->CleanupArcList();
+    mainHypo->CleanupArcList(this->m_manager.options().nbest.nbest_size, this->m_manager.options().NBestDistinct());
   }
 }
 

@@ -57,8 +57,8 @@ private:
 public:
   HypothesisScoreOrdererWithDistortion(const Range* transOptRange,
                                        const bool deterministic = false)
-    : m_transOptRange(transOptRange)
-    , m_deterministic(deterministic) {
+    : m_deterministic(deterministic)
+    , m_transOptRange(transOptRange) {
     m_totalWeightDistortion = 0;
     const StaticData &staticData = StaticData::Instance();
 
@@ -128,8 +128,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   , m_parent(parent)
   , m_translations(translations)
   , m_estimatedScores(estimatedScores)
-  , m_seenPosition()
   , m_deterministic(deterministic)
+  , m_seenPosition()
 {
 
   // If either dimension is empty, we haven't got anything to do.
@@ -224,7 +224,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
     hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
   }
   const Bitmap &bitmap = m_parent.GetWordsBitmap();
-  Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt, bitmap);
+  Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt, bitmap, hypothesis.GetManager().GetNextHypoId());
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
@@ -294,8 +294,8 @@ BitmapContainer::BitmapContainer(const Bitmap &bitmap
                                  , bool deterministic)
   : m_bitmap(bitmap)
   , m_stack(stack)
-  , m_deterministic(deterministic)
   , m_numStackInsertions(0)
+  , m_deterministic(deterministic)
 {
   m_hypotheses = HypothesisSet();
   m_edges = BackwardsEdgeSet();

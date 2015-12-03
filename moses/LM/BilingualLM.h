@@ -119,23 +119,6 @@ public:
 
   void Load();
 
-  void EvaluateInIsolation(
-    const Phrase &source,
-    const TargetPhrase &targetPhrase,
-    ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection &estimatedScores) const;
-
-  void EvaluateWithSourceContext(
-    const InputType &input,
-    const InputPath &inputPath,
-    const TargetPhrase &targetPhrase,
-    const StackVec *stackVec,
-    ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection *estimatedScores = NULL) const;
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {};
-
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

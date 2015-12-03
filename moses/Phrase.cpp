@@ -161,11 +161,10 @@ void Phrase::PrependWord(const Word &newWord)
   m_words[0] = newWord;
 }
 
-void Phrase::CreateFromString(FactorDirection direction
-                              ,const std::vector<FactorType> &factorOrder
-                              ,const StringPiece &phraseString
-                              // ,const StringPiece &factorDelimiter // eliminated [UG]
-                              ,Word **lhs)
+void Phrase::CreateFromString(FactorDirection direction,
+                              const std::vector<FactorType> &factorOrder,
+                              const StringPiece &phraseString,
+                              Word **lhs)
 {
   // parse
   vector<StringPiece> annotatedWordVector;

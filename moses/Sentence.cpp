@@ -325,7 +325,6 @@ std::vector <ChartTranslationOptions*>
 Sentence::
 GetXmlChartTranslationOptions(AllOptions const& opts) const
 {
-  const StaticData &staticData = StaticData::Instance();
   std::vector <ChartTranslationOptions*> ret;
 
   // XML Options

@@ -98,6 +98,8 @@ private:
 
   std::vector<lm::WordIndex> m_lmIdLookup;
 
+protected:
+  //bool m_oovFeatureEnabled; /// originally from LanguageModel, copied here to separate the interfaces. Called m_enableOOVFeature there
 };
 
 } // namespace Moses
