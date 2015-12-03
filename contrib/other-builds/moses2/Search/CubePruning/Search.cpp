@@ -31,7 +31,6 @@ void Search::Decode()
 {
 	// init stacks
 	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
-	m_hyposForCube.resize(m_stacks.GetSize() + 1);
 	m_cubeEdges.resize(m_stacks.GetSize() + 1);
 
 	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
@@ -50,7 +49,7 @@ void Search::Decode()
 
 		// delete stack to save mem
 		if (stackInd < m_stacks.GetSize() - 1) {
-			m_stacks.Delete(stackInd);
+			//m_stacks.Delete(stackInd);
 		}
 		//cerr << m_stacks << endl;
 	}
@@ -116,16 +115,15 @@ void Search::Decode(size_t stackInd)
 void Search::PostDecode(size_t stackInd)
 {
   NSCubePruning::Stack &stack = m_stacks[stackInd];
-  HyposForCubePruning &hyposPerBMAndRange = m_hyposForCube[stackInd];
 
-  BOOST_FOREACH(const NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
+  BOOST_FOREACH(NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
 	  size_t hypoEndPos = val.first.second;
-	  const NSCubePruning::Stack::_HCType &unsortedHypos = val.second;
+	  const NSCubePruning::Stack::_HCType &unsortedHypos = val.second.first;
 	  //cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
 
 	  // sort hypo for a particular bitmap and hypoEndPos
-	  CubeEdge::Hypotheses *sortedHypos = NULL;
+	  CubeEdge::Hypotheses &sortedHypos = val.second.second;
 
 	  // create edges to next hypos from existing hypos
 	  const InputPaths &paths = m_mgr.GetInputPaths();
@@ -144,16 +142,13 @@ void Search::PostDecode(size_t stackInd)
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  				if (sortedHypos == NULL) {
+  				if (unsortedHypos.size() && sortedHypos.size() == 0) {
   				  // create sortedHypos first
-    			  sortedHypos = &hyposPerBMAndRange.GetOrCreate(hypoBitmap, hypoEndPos);
-    			  assert(sortedHypos->size() == 0);
-
-    			  sortedHypos->insert(sortedHypos->end(), unsortedHypos.begin(), unsortedHypos.end());
-  	  			  SortAndPruneHypos(*sortedHypos);
+    			  sortedHypos.insert(sortedHypos.end(), unsortedHypos.begin(), unsortedHypos.end());
+  	  			  SortAndPruneHypos(sortedHypos);
   				}
 
-  		  		CubeEdge *edge = new CubeEdge(m_mgr, *sortedHypos, path, *tps, newBitmap);
+  		  		CubeEdge *edge = new CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		std::vector<CubeEdge*> &edges = m_cubeEdges[numWords];
   		  		edges.push_back(edge);
   			}

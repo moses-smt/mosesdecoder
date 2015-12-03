@@ -79,40 +79,6 @@ protected:
 
 };
 
-///////////////////////////////////////////
-class HyposForCubePruning
-{
-public:
-  typedef std::pair<const Bitmap*, size_t> HypoCoverage;
-	  // bitmap and current endPos of hypos
-  typedef boost::unordered_map<HypoCoverage, CubeEdge::Hypotheses,
-		  boost::hash<HypoCoverage>, std::equal_to<HypoCoverage>,
-		  MemPoolAllocator<std::pair<HypoCoverage const, CubeEdge::Hypotheses> >
-  	  	  	  > Coll;
-
-  typedef Coll::value_type value_type;
-  typedef Coll::iterator iterator;
-  typedef Coll::const_iterator const_iterator;
-
-  //! iterators
-  const_iterator begin() const {
-	return m_coll.begin();
-  }
-  const_iterator end() const {
-	return m_coll.end();
-  }
-  iterator begin() {
-	return m_coll.begin();
-  }
-  iterator end() {
-	return m_coll.end();
-  }
-
-	CubeEdge::Hypotheses &GetOrCreate(const Bitmap &bitmap, size_t endPos);
-
-protected:
-	Coll m_coll;
-};
 
 }
 

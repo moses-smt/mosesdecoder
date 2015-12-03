@@ -36,7 +36,7 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 
 StackAdd Stack::Add(const Hypothesis *hypo)
 {
-  HyposForCubePruning::HypoCoverage key(&hypo->GetBitmap(), hypo->GetRange().GetEndPos());
+  HypoCoverage key(&hypo->GetBitmap(), hypo->GetRange().GetEndPos());
   _HCType &innerColl = GetColl(key);
   std::pair<_HCType::iterator, bool> addRet = innerColl.insert(hypo);
 
@@ -72,7 +72,7 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 {
   std::vector<const Hypothesis*> ret;
   BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		const _HCType &hypos = val.second;
+		const _HCType &hypos = val.second.first;
 		ret.insert(ret.end(), hypos.begin(), hypos.end());
   }
 
@@ -91,13 +91,13 @@ size_t Stack::GetHypoSize() const
 {
 	size_t ret = 0;
 	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		const _HCType &hypos = val.second;
+		const _HCType &hypos = val.second.first;
 		ret += hypos.size();
 	}
 	return ret;
 }
 
-Stack::_HCType &Stack::GetColl(const HyposForCubePruning::HypoCoverage &key)
+Stack::_HCType &Stack::GetColl(const HypoCoverage &key)
 {
 	/*
 	_HCType *ret;
@@ -111,7 +111,7 @@ Stack::_HCType &Stack::GetColl(const HyposForCubePruning::HypoCoverage &key)
 	}
 	return *ret;
 	*/
-	return m_coll[key];
+	return m_coll[key].first;
 }
 
 }

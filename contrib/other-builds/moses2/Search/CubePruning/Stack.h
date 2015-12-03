@@ -22,8 +22,17 @@ protected:
 
 
 public:
-  typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
-  typedef boost::unordered_map<HyposForCubePruning::HypoCoverage, _HCType> Coll;
+  typedef std::pair<const Bitmap*, size_t> HypoCoverage;
+		  // bitmap and current endPos of hypos
+
+  typedef boost::unordered_set<const Hypothesis*,
+		  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>,
+		  MemPoolAllocator<const Hypothesis*> > _HCType;
+  typedef boost::unordered_map<HypoCoverage,
+		  std::pair<_HCType, CubeEdge::Hypotheses>,
+		  boost::hash<HypoCoverage>, std::equal_to<HypoCoverage>,
+		  MemPoolAllocator<std::pair<HypoCoverage const, std::pair<_HCType, CubeEdge::Hypotheses> > >
+  	  	  	  > Coll;
 
 
 	Stack();
@@ -31,7 +40,7 @@ public:
 
 	size_t GetHypoSize() const;
 
-	const Coll &GetColl() const
+	Coll &GetColl()
 	{ return m_coll; }
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
@@ -42,7 +51,7 @@ protected:
 
 	StackAdd Add(const Hypothesis *hypo);
 
-	_HCType &GetColl(const HyposForCubePruning::HypoCoverage &key);
+	_HCType &GetColl(const HypoCoverage &key);
 
 };
 
