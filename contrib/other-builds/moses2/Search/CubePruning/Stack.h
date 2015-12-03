@@ -38,7 +38,7 @@ public:
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 protected:
-	  Coll m_coll;
+	Coll m_coll;
 
 	StackAdd Add(const Hypothesis *hypo);
 
