@@ -42,7 +42,7 @@ void SearchNormal::Decode()
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
 		Decode(stackInd);
-		cerr << m_stacks << endl;
+		//cerr << m_stacks << endl;
 
 		// delete stack to save mem
 		if (stackInd < m_stacks.GetSize() - 1) {

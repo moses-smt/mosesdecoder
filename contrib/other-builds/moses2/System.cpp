@@ -31,6 +31,9 @@ System::System(const Parameter &paramsArg)
     params.SetParameter(popLimit, "cube-pruning-pop-limit",
 		       DEFAULT_CUBE_PRUNING_POP_LIMIT);
 
+    params.SetParameter(outputHypoScore, "output-hypo-score",
+		       false);
+
     const PARAM_VEC *section;
 
     section = params.GetParam("n-best-list");

@@ -9,7 +9,7 @@
 #include "Manager.h"
 #include "SearchNormal.h"
 #include "SearchNormalBatch.h"
-#include "CubePruning/SearchCubePruning.h"
+#include "CubePruning/Search.h"
 #include "../System.h"
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
@@ -69,7 +69,7 @@ void Manager::Init()
 		m_search = new SearchNormalBatch(*this);
 		break;
 	case CubePruning:
-		m_search = new SearchCubePruning(*this);
+		m_search = new NSCubePruning::SearchCubePruning(*this);
 		break;
 	default:
 		cerr << "Unknown search algorithm" << endl;
@@ -143,5 +143,25 @@ void Manager::CalcFutureScore()
 
 	  //cerr << "Square matrix:" << endl;
 	  //cerr << *m_estimatedScores << endl;
+}
+
+void Manager::OutputBest(std::ostream &out) const
+{
+    const Hypothesis *bestHypo = m_search->GetBestHypothesis();
+	if (bestHypo) {
+		if (system.outputHypoScore) {
+			out << bestHypo->GetScores().GetTotalScore() << " ";
+		}
+
+		bestHypo->OutputToStream(out);
+		cerr << "BEST TRANSLATION: " << *bestHypo;
+	}
+	else {
+		cerr << "NO TRANSLATION";
+	}
+	out << endl;
+	cerr << endl;
+
+
 }
 

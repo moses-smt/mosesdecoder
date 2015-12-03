@@ -9,13 +9,16 @@
 
 #include "../Search.h"
 #include "Misc.h"
-#include "StacksCubePruning.h"
+#include "Stacks.h"
 #include "../../legacy/Range.h"
 
 class Bitmap;
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
+
+namespace NSCubePruning
+{
 
 class SearchCubePruning : public Search
 {
@@ -27,7 +30,7 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
-	StacksCubePruning m_stacks;
+	NSCubePruning::Stacks m_stacks;
 
 	// CUBE PRUNING VARIABLES
 	// setup
@@ -44,4 +47,7 @@ protected:
 	void SortAndPruneHypos(CubeEdge::Hypotheses &hypos);
 
 };
+
+}
+
 

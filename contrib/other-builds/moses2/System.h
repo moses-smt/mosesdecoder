@@ -29,16 +29,20 @@ public:
     std::vector<const PhraseTable*> mappings;
     mutable MemPool systemPool;
 
+    // moses.ini params
     size_t stackSize;
     int maxDistortion;
     size_t maxPhraseLength;
     int numThreads;
+
     SearchAlgorithm searchAlgorithm;
     size_t popLimit;
 
     std::string outputFilePath;
     size_t nbestSize;
     bool onlyDistinct;
+
+    bool outputHypoScore;
 
 	System(const Parameter &paramsArg);
 	virtual ~System();

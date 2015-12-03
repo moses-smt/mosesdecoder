@@ -1,5 +1,5 @@
 /*
- * StackCubePruning.h
+ * Stack.h
  *
  *  Created on: 24 Oct 2015
  *      Author: hieu
@@ -14,7 +14,10 @@
 #include "../../TypeDef.h"
 #include "../../legacy/Util2.h"
 
-class StackCubePruning {
+namespace NSCubePruning
+{
+
+class Stack {
 protected:
 
 
@@ -23,8 +26,8 @@ public:
   typedef boost::unordered_map<HyposForCubePruning::HypoCoverage, _HCType> Coll;
 
 
-	StackCubePruning();
-	virtual ~StackCubePruning();
+	Stack();
+	virtual ~Stack();
 
 	size_t GetHypoSize() const;
 
@@ -42,4 +45,7 @@ protected:
 	_HCType &GetColl(const HyposForCubePruning::HypoCoverage &key);
 
 };
+
+}
+
 

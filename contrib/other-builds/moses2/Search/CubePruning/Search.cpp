@@ -5,7 +5,7 @@
  *      Author: hieu
  */
 #include <boost/foreach.hpp>
-#include "SearchCubePruning.h"
+#include "Search.h"
 #include "../Manager.h"
 #include "../Hypothesis.h"
 #include "../../InputPaths.h"
@@ -13,6 +13,9 @@
 #include "../../System.h"
 
 using namespace std;
+
+namespace NSCubePruning
+{
 
 ////////////////////////////////////////////////////////////////////////
 SearchCubePruning::SearchCubePruning(Manager &mgr)
@@ -90,13 +93,13 @@ void SearchCubePruning::Decode(size_t stackInd)
 
 void SearchCubePruning::PostDecode(size_t stackInd)
 {
-  StackCubePruning &stack = m_stacks[stackInd];
+  NSCubePruning::Stack &stack = m_stacks[stackInd];
   HyposForCubePruning &hyposPerBMAndRange = m_hyposForCube[stackInd];
 
-  BOOST_FOREACH(const StackCubePruning::Coll::value_type &val, stack.GetColl()) {
+  BOOST_FOREACH(const NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
 	  size_t hypoEndPos = val.first.second;
-	  const StackCubePruning::_HCType &unsortedHypos = val.second;
+	  const NSCubePruning::Stack::_HCType &unsortedHypos = val.second;
 
 	  // sort hypo for a particular bitmap and hypoEndPos
 	  CubeEdge::Hypotheses *sortedHypos = NULL;
@@ -158,7 +161,7 @@ void SearchCubePruning::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
 
 const Hypothesis *SearchCubePruning::GetBestHypothesis() const
 {
-	const StackCubePruning &lastStack = m_stacks.Back();
+	const NSCubePruning::Stack &lastStack = m_stacks.Back();
 	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
 
 	const Hypothesis *best = NULL;
@@ -167,3 +170,7 @@ const Hypothesis *SearchCubePruning::GetBestHypothesis() const
 	}
 	return best;
 }
+
+}
+
+

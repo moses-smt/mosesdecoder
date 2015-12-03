@@ -10,6 +10,9 @@
 
 using namespace std;
 
+namespace NSCubePruning
+{
+
 ////////////////////////////////////////////////////////////////////////
 QueueItem::QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
 :edge(edge)
@@ -118,6 +121,8 @@ CubeEdge::Hypotheses &HyposForCubePruning::GetOrCreate(const Bitmap &bitmap, siz
 	*/
 	CubeEdge::Hypotheses &hypos = m_coll[key];
 	return hypos;
+}
+
 }
 
 

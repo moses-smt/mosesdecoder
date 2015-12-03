@@ -1,38 +1,41 @@
 /*
- * StacksCubePruning.cpp
+ * Stacks.cpp
  *
  *  Created on: 6 Nov 2015
  *      Author: hieu
  */
 
-#include "StacksCubePruning.h"
+#include "Stacks.h"
 
 using namespace std;
 
-StacksCubePruning::StacksCubePruning() {
+namespace NSCubePruning
+{
+
+Stacks::Stacks() {
 	// TODO Auto-generated constructor stub
 
 }
 
-StacksCubePruning::~StacksCubePruning() {
+Stacks::~Stacks() {
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
 		delete m_stacks[i];
 	}
 }
 
-void StacksCubePruning::Init(size_t numStacks)
+void Stacks::Init(size_t numStacks)
 {
 	m_stacks.resize(numStacks);
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
-		m_stacks[i] = new StackCubePruning();
+		m_stacks[i] = new Stack();
 	}
 }
 
 
-std::ostream& operator<<(std::ostream &out, const StacksCubePruning &obj)
+std::ostream& operator<<(std::ostream &out, const Stacks &obj)
 {
   for (size_t i = 0; i < obj.GetSize(); ++i) {
-	  const StackCubePruning *stack = obj.m_stacks[i];
+	  const Stack *stack = obj.m_stacks[i];
 	  if (stack) {
 		  out << stack->GetHypoSize() << " ";
 	  }
@@ -44,12 +47,15 @@ std::ostream& operator<<(std::ostream &out, const StacksCubePruning &obj)
   return out;
 }
 
-void StacksCubePruning::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
+void Stacks::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
 	size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
 	//cerr << "numWordsCovered=" << numWordsCovered << endl;
-	StackCubePruning &stack = *m_stacks[numWordsCovered];
+	Stack &stack = *m_stacks[numWordsCovered];
 	stack.Add(hypo, hypoRecycle);
 
 }
+
+}
+
 

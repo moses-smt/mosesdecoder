@@ -17,6 +17,9 @@ class Manager;
 class InputPath;
 class TargetPhrases;
 class Bitmap;
+
+namespace NSCubePruning
+{
 class CubeEdge;
 
 ///////////////////////////////////////////
@@ -107,5 +110,7 @@ public:
 protected:
 	Coll m_coll;
 };
+
+}
 
 

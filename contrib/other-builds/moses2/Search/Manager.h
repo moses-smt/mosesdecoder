@@ -58,6 +58,9 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 	void Decode();
+
+    void OutputBest(std::ostream &out) const;
+
 protected:
 	mutable MemPool *m_pool;
 	Recycler<Hypothesis*> *m_hypoRecycle;

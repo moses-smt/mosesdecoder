@@ -1,27 +1,30 @@
 /*
- * StackCubePruning.cpp
+ * Stack.cpp
  *
  *  Created on: 24 Oct 2015
  *      Author: hieu
  */
 #include <algorithm>
 #include <boost/foreach.hpp>
-#include "StackCubePruning.h"
+#include "Stack.h"
 #include "../Hypothesis.h"
 #include "../../Scores.h"
 
 using namespace std;
 
-StackCubePruning::StackCubePruning() {
+namespace NSCubePruning
+{
+
+Stack::Stack() {
 	// TODO Auto-generated constructor stub
 
 }
 
-StackCubePruning::~StackCubePruning() {
+Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-void StackCubePruning::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
+void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
 	StackAdd added = Add(hypo);
 
@@ -31,7 +34,7 @@ void StackCubePruning::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRe
 
 }
 
-StackAdd StackCubePruning::Add(const Hypothesis *hypo)
+StackAdd Stack::Add(const Hypothesis *hypo)
 {
   HyposForCubePruning::HypoCoverage key(&hypo->GetBitmap(), hypo->GetRange().GetEndPos());
   _HCType &innerColl = GetColl(key);
@@ -65,7 +68,7 @@ StackAdd StackCubePruning::Add(const Hypothesis *hypo)
   }
 }
 
-std::vector<const Hypothesis*> StackCubePruning::GetBestHypos(size_t num) const
+std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 {
   std::vector<const Hypothesis*> ret;
   BOOST_FOREACH(const Coll::value_type &val, m_coll) {
@@ -84,7 +87,7 @@ std::vector<const Hypothesis*> StackCubePruning::GetBestHypos(size_t num) const
   return ret;
 }
 
-size_t StackCubePruning::GetHypoSize() const
+size_t Stack::GetHypoSize() const
 {
 	size_t ret = 0;
 	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
@@ -94,7 +97,7 @@ size_t StackCubePruning::GetHypoSize() const
 	return ret;
 }
 
-StackCubePruning::_HCType &StackCubePruning::GetColl(const HyposForCubePruning::HypoCoverage &key)
+Stack::_HCType &Stack::GetColl(const HyposForCubePruning::HypoCoverage &key)
 {
 	/*
 	_HCType *ret;
@@ -109,5 +112,7 @@ StackCubePruning::_HCType &StackCubePruning::GetColl(const HyposForCubePruning::
 	return *ret;
 	*/
 	return m_coll[key];
+}
+
 }
 

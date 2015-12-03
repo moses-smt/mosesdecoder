@@ -17,16 +17,5 @@ TranslationTask::~TranslationTask()
 void TranslationTask::Run()
 {
 	m_mgr->Decode();
-
-	const Hypothesis *bestHypo = m_mgr->GetBestHypothesis();
-	if (bestHypo) {
-		bestHypo->OutputToStream(cout);
-		cerr << "BEST TRANSLATION: " << *bestHypo;
-	}
-	else {
-		cerr << "NO TRANSLATION";
-	}
-	cout << endl;
-	cerr << endl;
-
+	m_mgr->OutputBest(cout);
 }
