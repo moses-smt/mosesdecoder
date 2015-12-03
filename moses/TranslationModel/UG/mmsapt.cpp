@@ -245,6 +245,10 @@ namespace Moses
 
     if ((m = param.find("lr-func")) != param.end())
       m_lr_func_name = m->second;
+    // accommodate typo in Germann, 2015: Sampling Phrase Tables for
+    // the Moses SMT System (PBML):
+    if ((m = param.find("lrfunc")) != param.end())
+      m_lr_func_name = m->second;
 
     if ((m = param.find("extra")) != param.end())
       m_extra_data = m->second;
@@ -295,6 +299,7 @@ namespace Moses
     // known_parameters.push_back("limit"); // replaced by "table-limit"
     known_parameters.push_back("logcnt");
     known_parameters.push_back("lr-func"); // associated lexical reordering function
+    known_parameters.push_back("lrfunc");  // associated lexical reordering function
     known_parameters.push_back("method");
     known_parameters.push_back("name");
     known_parameters.push_back("num-features");
