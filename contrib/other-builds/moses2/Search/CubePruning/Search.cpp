@@ -105,9 +105,8 @@ void Search::Decode(size_t stackInd)
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
 		CubeEdge &edge = ele->edge;
-		edge.CreateNext(m_mgr, *ele, queue);
+		edge.CreateNext(m_mgr, ele, queue);
 
-		delete ele;
 		++pops;
 	}
 

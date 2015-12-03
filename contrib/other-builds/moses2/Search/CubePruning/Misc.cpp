@@ -7,6 +7,7 @@
 
 #include "Misc.h"
 #include "../Manager.h"
+#include "../../MemPool.h"
 
 using namespace std;
 
@@ -78,27 +79,32 @@ void CubeEdge::CreateFirst(Manager &mgr, Queue &queue)
 {
 	assert(hypos.size());
 	assert(tps.GetSize());
-	QueueItem *newEle = new QueueItem(mgr, *this, 0, 0);
+
+    MemPool &pool = mgr.GetPool();
+
+	QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, 0, 0);
 	queue.push(newEle);
 	SetSeenPosition(0, 0);
 }
 
-void CubeEdge::CreateNext(Manager &mgr, const QueueItem &ele, Queue &queue)
+void CubeEdge::CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue)
 {
-	size_t hypoIndex = ele.hypoIndex + 1;
-	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele.tpIndex)) {
-		QueueItem *newEle = new QueueItem(mgr, *this, hypoIndex, ele.tpIndex);
+    MemPool &pool = mgr.GetPool();
+
+    size_t hypoIndex = ele->hypoIndex + 1;
+	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele->tpIndex)) {
+		QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, ele->tpIndex);
 		queue.push(newEle);
 
-		SetSeenPosition(hypoIndex, ele.tpIndex);
+		SetSeenPosition(hypoIndex, ele->tpIndex);
 	}
 
-	size_t tpIndex = ele.tpIndex + 1;
-	if (tpIndex < tps.GetSize() && !SeenPosition(ele.hypoIndex, tpIndex)) {
-		QueueItem *newEle = new QueueItem(mgr, *this, ele.hypoIndex, tpIndex);
+	size_t tpIndex = ele->tpIndex + 1;
+	if (tpIndex < tps.GetSize() && !SeenPosition(ele->hypoIndex, tpIndex)) {
+		QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, ele->hypoIndex, tpIndex);
 		queue.push(newEle);
 
-		SetSeenPosition(ele.hypoIndex, tpIndex);
+		SetSeenPosition(ele->hypoIndex, tpIndex);
 	}
 }
 

@@ -25,9 +25,9 @@ class CubeEdge;
 ///////////////////////////////////////////
 class QueueItem
 {
+	~QueueItem(); // NOT IMPLEMENTED. Use MemPool
 public:
 	QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
-
 	CubeEdge &edge;
 	size_t hypoIndex, tpIndex;
 	Hypothesis *hypo;
@@ -71,7 +71,7 @@ public:
   void SetSeenPosition(const size_t x, const size_t y);
 
   void CreateFirst(Manager &mgr, Queue &queue);
-  void CreateNext(Manager &mgr, const QueueItem &ele, Queue &queue);
+  void CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue);
 
 
 protected:
@@ -85,7 +85,10 @@ class HyposForCubePruning
 public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
 	  // bitmap and current endPos of hypos
-  typedef boost::unordered_map<HypoCoverage, CubeEdge::Hypotheses> Coll;
+  typedef boost::unordered_map<HypoCoverage, CubeEdge::Hypotheses,
+		  boost::hash<HypoCoverage>, std::equal_to<HypoCoverage>,
+		  MemPoolAllocator<std::pair<HypoCoverage const, CubeEdge::Hypotheses> >
+  	  	  	  > Coll;
 
   typedef Coll::value_type value_type;
   typedef Coll::iterator iterator;
