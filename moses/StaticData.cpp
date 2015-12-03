@@ -73,6 +73,7 @@ StaticData::StaticData()
 
   // memory pools
   Phrase::InitializeMemPool();
+  SetTask(); // to avoid having to call it in each and every int main()
 }
 
 StaticData::~StaticData()
