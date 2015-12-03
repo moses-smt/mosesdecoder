@@ -1750,10 +1750,10 @@ OutputSurface(std::ostream &out, const Hypothesis &edge) const
 
   FactorType placeholderFactor = options().input.placeholder_factor;
   std::map<size_t, const Factor*> placeholders;
-    if (placeholderFactor != NOT_FOUND) {
-      // creates map of target position -> factor for placeholders
-      placeholders = GetPlaceholders(edge, placeholderFactor);
-    }
+  if (placeholderFactor != NOT_FOUND) {
+    // creates map of target position -> factor for placeholders
+    placeholders = GetPlaceholders(edge, placeholderFactor);
+  }
 
   bool markUnknown = options().unk.mark;
   std::string const& fd = options().output.FactorDelimiter;
@@ -1776,19 +1776,19 @@ OutputSurface(std::ostream &out, const Hypothesis &edge) const
     const Word &word = phrase.GetWord(pos);
     if(markUnknown && word.IsOOV()) {
       out << options().unk.prefix;
-    } 
-      
+    }
+
     out << *factor;
     for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
       UTIL_THROW_IF2(factor==NULL,"No factor "<<i<<" at position "<< pos);
       out << fd << *factor;
     }
-    
+
     if(markUnknown && word.IsOOV()) {
       out << options().unk.suffix;
     }
-    
+
     out << " ";
 
   }

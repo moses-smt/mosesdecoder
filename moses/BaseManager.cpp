@@ -94,7 +94,7 @@ OutputSearchGraphAsHypergraph(std::string const& fname, size_t const precision) 
 /***
  * print surface factor only for the given phrase
  */
-void 
+void
 BaseManager::
 OutputSurface(std::ostream &out, Phrase const& phrase) const
 {
@@ -107,12 +107,12 @@ OutputSurface(std::ostream &out, Phrase const& phrase) const
   for (size_t pos = 0 ; pos < size ; pos++) {
     const Factor *factor = phrase.GetFactor(pos, factor_order[0]);
     UTIL_THROW_IF2(factor == NULL, "Empty factor 0 at position " << pos);
-      
+
     const Word &word = phrase.GetWord(pos);
     if(markUnknown && word.IsOOV()) {
       out << options().unk.prefix;
-    } 
-      
+    }
+
     out << *factor;
 
     for (size_t i = 1 ; i < factor_order.size() ; i++) {
@@ -120,7 +120,7 @@ OutputSurface(std::ostream &out, Phrase const& phrase) const
       UTIL_THROW_IF2(!factor, "Empty factor " << i << " at position " << pos);
       out << fd << *factor;
     }
-    
+
     if(markUnknown && word.IsOOV()) {
       out << options().unk.suffix;
     }

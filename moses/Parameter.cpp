@@ -451,11 +451,11 @@ LoadParam(const string &filePath)
   return LoadParam(3, (char const**) argv);
 }
 
-/// Print out version information about the things that went into this 
-/// executable. 
+/// Print out version information about the things that went into this
+/// executable.
 void show_version()
 {
-  std::cout << "\nMoses code version (git tag or commit hash):\n   " 
+  std::cout << "\nMoses code version (git tag or commit hash):\n   "
             << MOSES_VERSION_ID << std::endl
             << "Libraries used:" << std::endl
             << "      Boost  version "
@@ -466,7 +466,7 @@ void show_version()
 #ifdef HAVE_XMLRPC_C
   unsigned int major, minor, point;
   xmlrpc_server_version(&major, &minor, &point);
-  std::cout << "   Xmlrpc-c  version " 
+  std::cout << "   Xmlrpc-c  version "
             << major << "." << minor << "." << point << std::endl;
 #endif
 #ifdef HAVE_CMPH
@@ -475,7 +475,7 @@ void show_version()
 #endif
 
 #ifdef MMT_VERSION_ID
-  std::cout << string(20,'-') 
+  std::cout << string(20,'-')
             << "\nMMT extras version: " << MMT_VERSION_ID << std::endl;
 #endif
 }
