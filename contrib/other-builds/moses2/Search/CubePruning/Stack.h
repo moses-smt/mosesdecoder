@@ -14,14 +14,35 @@
 #include "../../TypeDef.h"
 #include "../../legacy/Util2.h"
 
+class Manager;
+
 namespace NSCubePruning
 {
 
-typedef boost::unordered_set<const Hypothesis*,
-		  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>,
-		  MemPoolAllocator<const Hypothesis*> > _HCType;
-typedef std::pair<_HCType, CubeEdge::Hypotheses>  HypothesisSet;
+class HypothesisSet
+{
+public:
+	typedef boost::unordered_set<const Hypothesis*,
+			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>,
+			  MemPoolAllocator<const Hypothesis*> > _HCType;
 
+	_HCType &GetColl()
+	{ return m_coll; }
+
+	const _HCType &GetColl() const
+	{ return m_coll; }
+
+	CubeEdge::Hypotheses &GetSortedHypos(const Manager &mgr) const;
+
+protected:
+	_HCType m_coll;
+	mutable CubeEdge::Hypotheses m_sortedHypos;
+
+	void SortAndPruneHypos(const Manager &mgr) const;
+
+};
+
+/////////////////////////////////////////////
 class Stack {
 protected:
 
@@ -49,7 +70,7 @@ protected:
 
 	StackAdd Add(const Hypothesis *hypo);
 
-	_HCType &GetColl(const HypoCoverage &key);
+	HypothesisSet &GetHypothesisSet(const HypoCoverage &key);
 
 };
 

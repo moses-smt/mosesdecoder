@@ -116,14 +116,10 @@ void Search::PostDecode(size_t stackInd)
 {
   Stack &stack = m_stacks[stackInd];
 
-  BOOST_FOREACH(Stack::Coll::value_type &val, stack.GetColl()) {
+  BOOST_FOREACH(const Stack::Coll::value_type &val, stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
 	  size_t hypoEndPos = val.first.second;
-	  const _HCType &unsortedHypos = val.second.first;
 	  //cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
-
-	  // sort hypo for a particular bitmap and hypoEndPos
-	  CubeEdge::Hypotheses &sortedHypos = val.second.second;
 
 	  // create edges to next hypos from existing hypos
 	  const InputPaths &paths = m_mgr.GetInputPaths();
@@ -142,11 +138,8 @@ void Search::PostDecode(size_t stackInd)
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  				if (unsortedHypos.size() && sortedHypos.size() == 0) {
-  				  // create sortedHypos first
-    			  sortedHypos.insert(sortedHypos.end(), unsortedHypos.begin(), unsortedHypos.end());
-  	  			  SortAndPruneHypos(sortedHypos);
-  				}
+  			  // sort hypo for a particular bitmap and hypoEndPos
+  			  CubeEdge::Hypotheses &sortedHypos = val.second.GetSortedHypos(m_mgr);
 
   		  		CubeEdge *edge = new CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		std::vector<CubeEdge*> &edges = m_cubeEdges[numWords];
@@ -155,47 +148,6 @@ void Search::PostDecode(size_t stackInd)
   		}
   	  }
   }
-}
-
-void Search::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
-{
-  size_t stackSize = m_mgr.system.stackSize;
-  Recycler<Hypothesis*> &recycler = m_mgr.GetHypoRecycle();
-
-  /*
-  cerr << "UNSORTED hypos:" << endl;
-  for (size_t i = 0; i < hypos.size(); ++i) {
-	  const Hypothesis *hypo = hypos[i];
-	  cerr << *hypo << endl;
-  }
-  cerr << endl;
-  */
-  std::vector<const Hypothesis*>::iterator iterMiddle;
-  iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
-			   ? hypos.end()
-			   : hypos.begin() + stackSize;
-
-  std::partial_sort(hypos.begin(), iterMiddle, hypos.end(),
-		  HypothesisFutureScoreOrderer());
-
-  // prune
-  if (stackSize && hypos.size() > stackSize) {
-	  for (size_t i = stackSize; i < hypos.size(); ++i) {
-		  Hypothesis *hypo = const_cast<Hypothesis*>(hypos[i]);
-		  recycler.Add(hypo);
-	  }
-	  hypos.resize(stackSize);
-  }
-
-  /*
-  cerr << "sorted hypos:" << endl;
-  for (size_t i = 0; i < hypos.size(); ++i) {
-	  const Hypothesis *hypo = hypos[i];
-	  cerr << hypo << " " << *hypo << endl;
-  }
-  cerr << endl;
-  */
-
 }
 
 const Hypothesis *Search::GetBestHypothesis() const

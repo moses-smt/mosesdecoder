@@ -8,13 +8,67 @@
 #include <boost/foreach.hpp>
 #include "Stack.h"
 #include "../Hypothesis.h"
+#include "../Manager.h"
 #include "../../Scores.h"
+#include "../../System.h"
 
 using namespace std;
 
 namespace NSCubePruning
 {
+CubeEdge::Hypotheses &HypothesisSet::GetSortedHypos(const Manager &mgr) const
+{
+  if (m_coll.size() && m_sortedHypos.size() == 0) {
+    // create sortedHypos first
+	m_sortedHypos.insert(m_sortedHypos.end(), m_coll.begin(), m_coll.end());
+    SortAndPruneHypos(mgr);
+  }
 
+  return m_sortedHypos;
+}
+
+void HypothesisSet::SortAndPruneHypos(const Manager &mgr) const
+{
+  size_t stackSize = mgr.system.stackSize;
+  Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+
+  /*
+  cerr << "UNSORTED hypos:" << endl;
+  for (size_t i = 0; i < hypos.size(); ++i) {
+	  const Hypothesis *hypo = hypos[i];
+	  cerr << *hypo << endl;
+  }
+  cerr << endl;
+  */
+  std::vector<const Hypothesis*>::iterator iterMiddle;
+  iterMiddle = (stackSize == 0 || m_sortedHypos.size() < stackSize)
+			   ? m_sortedHypos.end()
+			   : m_sortedHypos.begin() + stackSize;
+
+  std::partial_sort(m_sortedHypos.begin(), iterMiddle, m_sortedHypos.end(),
+		  HypothesisFutureScoreOrderer());
+
+  // prune
+  if (stackSize && m_sortedHypos.size() > stackSize) {
+	  for (size_t i = stackSize; i < m_sortedHypos.size(); ++i) {
+		  Hypothesis *hypo = const_cast<Hypothesis*>(m_sortedHypos[i]);
+		  recycler.Add(hypo);
+	  }
+	  m_sortedHypos.resize(stackSize);
+  }
+
+  /*
+  cerr << "sorted hypos:" << endl;
+  for (size_t i = 0; i < hypos.size(); ++i) {
+	  const Hypothesis *hypo = hypos[i];
+	  cerr << hypo << " " << *hypo << endl;
+  }
+  cerr << endl;
+  */
+
+}
+
+///////////////////////////////////////////////////////////////
 Stack::Stack() {
 	// TODO Auto-generated constructor stub
 
@@ -37,8 +91,8 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 StackAdd Stack::Add(const Hypothesis *hypo)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetRange().GetEndPos());
-  _HCType &innerColl = GetColl(key);
-  std::pair<_HCType::iterator, bool> addRet = innerColl.insert(hypo);
+  HypothesisSet::_HCType &innerColl = GetHypothesisSet(key).GetColl();
+  std::pair<HypothesisSet::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
 
   // CHECK RECOMBINATION
   if (addRet.second) {
@@ -52,7 +106,7 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 		  innerColl.erase(addRet.first);
 
 		  // re-add. It better go in
-		  std::pair<_HCType::iterator, bool> addRet = innerColl.insert(hypo);
+		  std::pair<HypothesisSet::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
 		  assert(addRet.second);
 
 		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
@@ -72,7 +126,7 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 {
   std::vector<const Hypothesis*> ret;
   BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		const _HCType &hypos = val.second.first;
+		const HypothesisSet::_HCType &hypos = val.second.GetColl();
 		ret.insert(ret.end(), hypos.begin(), hypos.end());
   }
 
@@ -91,13 +145,13 @@ size_t Stack::GetHypoSize() const
 {
 	size_t ret = 0;
 	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		const _HCType &hypos = val.second.first;
+		const HypothesisSet::_HCType &hypos = val.second.GetColl();
 		ret += hypos.size();
 	}
 	return ret;
 }
 
-_HCType &Stack::GetColl(const HypoCoverage &key)
+HypothesisSet &Stack::GetHypothesisSet(const HypoCoverage &key)
 {
 	/*
 	_HCType *ret;
@@ -111,7 +165,7 @@ _HCType &Stack::GetColl(const HypoCoverage &key)
 	}
 	return *ret;
 	*/
-	return m_coll[key].first;
+	return m_coll[key];
 }
 
 }
