@@ -30,7 +30,7 @@ MemPool::MemPool(size_t initSize)
 	m_pages.push_back(Page(m_currSize));
 	current_ = m_pages.back().mem;
 
-	cerr << "new memory pool";
+	//cerr << "new memory pool";
 }
 
 MemPool::~MemPool()
