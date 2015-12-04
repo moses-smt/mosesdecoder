@@ -35,8 +35,9 @@ MemPool::MemPool(size_t initSize)
 
 MemPool::~MemPool()
 {
+  //cerr << "delete memory pool" << endl;
   BOOST_FOREACH(const Page &page, m_pages) {
-	  delete page.mem;
+	  free(page.mem);
   }
 }
 
@@ -77,7 +78,7 @@ void MemPool::Reset()
 
 	if (m_count == 1000) {
 		for (size_t i = 1; i < m_pages.size(); ++i) {
-			delete m_pages[i].mem;
+			free(m_pages[i].mem);
 		}
 		m_pages.resize(1);
 
