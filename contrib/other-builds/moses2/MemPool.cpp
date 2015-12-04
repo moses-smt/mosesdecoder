@@ -75,7 +75,7 @@ void MemPool::Reset()
 {
 	m_currPage = 0;
 
-	if (m_count == 10) {
+	if (m_count == 1000) {
 		//cerr << "chop ";
 		for (size_t i = 0; i < m_pages.size(); ++i) {
 			free(m_pages[i].mem);
