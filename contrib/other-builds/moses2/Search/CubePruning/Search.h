@@ -39,6 +39,8 @@ protected:
 
 	// CUBE PRUNING
 	// decoding
+	CubeEdge::Queue m_queue;
+
 	void Decode(size_t stackInd);
 	void PostDecode(size_t stackInd);
 

@@ -71,14 +71,14 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-
-	CubeEdge::Queue queue;
+	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &queueContainer = Container(m_queue);
+	queueContainer.clear();
 
 	// add top hypo from every edge into queue
 	CubeEdges &edges = m_cubeEdges[stackInd];
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		edge->CreateFirst(m_mgr, queue);
+		edge->CreateFirst(m_mgr, m_queue);
 	}
 
 	/*
@@ -93,18 +93,18 @@ void Search::Decode(size_t stackInd)
 	*/
 
 	size_t pops = 0;
-	while (!queue.empty() && pops < m_mgr.system.popLimit) {
+	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
-		QueueItem *ele = queue.top();
-		queue.pop();
+		QueueItem *ele = m_queue.top();
+		m_queue.pop();
 
 		Hypothesis *hypo = ele->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
 		CubeEdge &edge = ele->edge;
-		edge.CreateNext(m_mgr, ele, queue);
+		edge.CreateNext(m_mgr, ele, m_queue);
 
 		++pops;
 	}
