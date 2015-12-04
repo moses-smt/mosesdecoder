@@ -14,7 +14,7 @@
 
 class Stack {
 protected:
-  typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>, MemPoolAllocator<const Hypothesis*> > _HCType;
+  typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis> > _HCType;
 	  _HCType m_hypos;
 public:
   typedef _HCType::iterator iterator;

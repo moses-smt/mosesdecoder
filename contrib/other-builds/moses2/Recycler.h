@@ -12,7 +12,7 @@
 
 template<typename T>
 class Recycler {
-	typedef std::vector<T, MemPoolAllocator<T> > Coll;
+	typedef std::vector<T> Coll;
 
 public:
 	  typedef typename Coll::iterator iterator;

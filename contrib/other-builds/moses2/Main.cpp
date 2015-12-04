@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 
 void Temp()
 {
-	vector<int, MemPoolAllocator<int> > v;
+	vector<int> v;
 	v.push_back(33);
 
 }

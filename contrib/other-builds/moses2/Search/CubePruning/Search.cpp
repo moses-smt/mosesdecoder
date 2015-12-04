@@ -11,6 +11,7 @@
 #include "../../InputPaths.h"
 #include "../../InputPath.h"
 #include "../../System.h"
+#include "../../legacy/Util2.h"
 
 using namespace std;
 
@@ -71,7 +72,7 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &queueContainer = Container(m_queue);
+	std::vector<QueueItem*> &queueContainer = Container(m_queue);
 	queueContainer.clear();
 
 	// add top hypo from every edge into queue
@@ -108,6 +109,8 @@ void Search::Decode(size_t stackInd)
 
 		++pops;
 	}
+
+	RemoveAllInColl(edges);
 }
 
 void Search::PostDecode(size_t stackInd)

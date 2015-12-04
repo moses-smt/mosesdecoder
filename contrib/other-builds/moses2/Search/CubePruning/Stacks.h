@@ -33,7 +33,7 @@ public:
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 protected:
-	std::vector<Stack, MemPoolAllocator<Stack> > m_stacks;
+	std::vector<Stack> m_stacks;
 };
 
 

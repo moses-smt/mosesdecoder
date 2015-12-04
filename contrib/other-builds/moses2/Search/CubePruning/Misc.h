@@ -54,7 +54,7 @@ class CubeEdge
 public:
 	typedef std::vector<const Hypothesis*>  Hypotheses;
 	typedef std::priority_queue<QueueItem*,
-				std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >,
+				std::vector<QueueItem*>,
 				QueueItemOrderer> Queue;
 
 	const Hypotheses &hypos;

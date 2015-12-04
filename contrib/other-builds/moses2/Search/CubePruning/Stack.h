@@ -23,8 +23,8 @@ class HypothesisSet
 {
 public:
 	typedef boost::unordered_set<const Hypothesis*,
-			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>,
-			  MemPoolAllocator<const Hypothesis*> > _HCType;
+			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>
+			> _HCType;
 
 	_HCType &GetColl()
 	{ return m_coll; }
