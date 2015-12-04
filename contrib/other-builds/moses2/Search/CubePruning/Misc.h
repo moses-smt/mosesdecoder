@@ -68,6 +68,7 @@ public:
 			const InputPath &path,
 			const TargetPhrases &tps,
 			const Bitmap &newBitmap);
+	void Finalize();
 
   bool SeenPosition(const size_t x, const size_t y) const;
   void SetSeenPosition(const size_t x, const size_t y);
@@ -77,7 +78,7 @@ public:
 
 
 protected:
-    boost::unordered_set< int > m_seenPosition;
+    boost::unordered_set< int > *m_seenPosition;
 
 };
 

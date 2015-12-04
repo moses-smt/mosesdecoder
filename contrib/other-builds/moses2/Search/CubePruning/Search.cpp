@@ -25,7 +25,6 @@ Search::Search(Manager &mgr)
 }
 
 Search::~Search() {
-	// TODO Auto-generated destructor stub
 }
 
 void Search::Decode()
@@ -77,6 +76,7 @@ void Search::Decode(size_t stackInd)
 
 	// add top hypo from every edge into queue
 	CubeEdges &edges = m_cubeEdges[stackInd];
+
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
 		edge->CreateFirst(m_mgr, m_queue);
@@ -110,7 +110,11 @@ void Search::Decode(size_t stackInd)
 		++pops;
 	}
 
-	RemoveAllInColl(edges);
+	// delete cube edges
+	BOOST_FOREACH(CubeEdge *edge, edges) {
+		edge->Finalize();
+	}
+
 }
 
 void Search::PostDecode(size_t stackInd)

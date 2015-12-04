@@ -49,6 +49,7 @@ CubeEdge::CubeEdge(
 ,path(path)
 ,tps(tps)
 ,newBitmap(newBitmap)
+,m_seenPosition(new boost::unordered_set< int >)
 {
 	estimatedScore = mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
 }
@@ -62,8 +63,8 @@ std::ostream& operator<<(std::ostream &out, const CubeEdge &obj)
 bool
 CubeEdge::SeenPosition(const size_t x, const size_t y) const
 {
-  boost::unordered_set< int >::iterator iter = m_seenPosition.find((x<<16) + y);
-  return (iter != m_seenPosition.end());
+  boost::unordered_set< int >::iterator iter = m_seenPosition->find((x<<16) + y);
+  return (iter != m_seenPosition->end());
 }
 
 void
@@ -72,7 +73,7 @@ CubeEdge::SetSeenPosition(const size_t x, const size_t y)
   UTIL_THROW_IF2(x >= (1<<17), "Error");
   UTIL_THROW_IF2(y >= (1<<17), "Error");
 
-  m_seenPosition.insert((x<<16) + y);
+  m_seenPosition->insert((x<<16) + y);
 }
 
 void CubeEdge::CreateFirst(Manager &mgr, Queue &queue)
@@ -108,7 +109,10 @@ void CubeEdge::CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
+void CubeEdge::Finalize()
+{
+	delete m_seenPosition;
+}
 
 }
 
