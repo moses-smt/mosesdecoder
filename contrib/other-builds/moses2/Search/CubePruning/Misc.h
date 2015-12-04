@@ -5,6 +5,8 @@
  *      Author: hieu
  */
 #pragma once
+#include <boost/pool/pool.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include <vector>
@@ -54,7 +56,7 @@ class CubeEdge
 public:
 	typedef std::vector<const Hypothesis*>  Hypotheses;
 	typedef std::priority_queue<QueueItem*,
-				std::vector<QueueItem*>,
+				std::vector<QueueItem*, boost::pool_allocator<QueueItem*> >,
 				QueueItemOrderer> Queue;
 
 	const Hypotheses &hypos;

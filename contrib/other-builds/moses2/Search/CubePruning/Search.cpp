@@ -71,7 +71,7 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	std::vector<QueueItem*> &queueContainer = Container(m_queue);
+	std::vector<QueueItem*, boost::pool_allocator<QueueItem*> > &queueContainer = Container(m_queue);
 	queueContainer.clear();
 
 	// add top hypo from every edge into queue

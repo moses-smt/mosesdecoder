@@ -5,7 +5,8 @@
  *      Author: hieu
  */
 #pragma once
-
+#include <boost/pool/pool.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "../Hypothesis.h"
@@ -23,8 +24,8 @@ class HypothesisSet
 {
 public:
 	typedef boost::unordered_set<const Hypothesis*,
-			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>
-			> _HCType;
+			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>,
+			  boost::fast_pool_allocator<const Hypothesis*> > _HCType;
 
 	_HCType &GetColl()
 	{ return m_coll; }
