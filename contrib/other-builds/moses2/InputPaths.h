@@ -16,7 +16,7 @@ class PhraseImpl;
 class System;
 
 class InputPaths {
-	typedef std::vector<InputPath, MemPoolAllocator<InputPath> > Coll;
+	typedef std::vector<InputPath> Coll;
 public:
 	InputPaths() {}
 	void Init(const PhraseImpl &input, const System &system);
