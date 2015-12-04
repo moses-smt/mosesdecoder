@@ -9,6 +9,8 @@
 #include "MemPool.h"
 #include "util/scoped.hh"
 
+using namespace std;
+
 MemPool::Page::Page(std::size_t vSize)
 :size(vSize)
 {
@@ -26,6 +28,8 @@ MemPool::MemPool(size_t initSize)
 {
 	m_pages.push_back(Page(m_currSize));
 	current_ = m_pages.back().mem;
+
+	cerr << "new memory pool";
 }
 
 MemPool::~MemPool()

@@ -32,10 +32,10 @@ public:
 	virtual ~Manager();
 
 	MemPool &GetPool() const
-	{ return m_pool; }
+	{ return *m_pool; }
 
 	Recycler<Hypothesis*> &GetHypoRecycle() const
-	{ return m_hypoRecycle; }
+	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
@@ -60,8 +60,8 @@ public:
     void OutputBest(std::ostream &out) const;
 
 protected:
-	mutable MemPool m_pool;
-	mutable Recycler<Hypothesis*> m_hypoRecycle;
+	mutable MemPool *m_pool;
+	mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
     std::string m_inputStr;
 	PhraseImpl *m_input;

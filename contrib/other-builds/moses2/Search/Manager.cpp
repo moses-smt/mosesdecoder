@@ -38,8 +38,8 @@ Manager::~Manager() {
 void Manager::Init()
 {
 	// init pools etc
-	//m_pool = &system.GetManagerPool();
-	//m_hypoRecycle = &system.GetHypoRecycler();
+	m_pool = &system.GetManagerPool();
+	m_hypoRecycle = &system.GetHypoRecycler();
 
 	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), system, 0);
 
