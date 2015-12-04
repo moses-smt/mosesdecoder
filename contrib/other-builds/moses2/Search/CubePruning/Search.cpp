@@ -114,12 +114,12 @@ void Search::Decode(size_t stackInd)
 
 void Search::PostDecode(size_t stackInd)
 {
-  NSCubePruning::Stack &stack = m_stacks[stackInd];
+  Stack &stack = m_stacks[stackInd];
 
-  BOOST_FOREACH(NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
+  BOOST_FOREACH(Stack::Coll::value_type &val, stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
 	  size_t hypoEndPos = val.first.second;
-	  const NSCubePruning::Stack::_HCType &unsortedHypos = val.second.first;
+	  const _HCType &unsortedHypos = val.second.first;
 	  //cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
 
 	  // sort hypo for a particular bitmap and hypoEndPos
@@ -200,7 +200,7 @@ void Search::SortAndPruneHypos(CubeEdge::Hypotheses &hypos)
 
 const Hypothesis *Search::GetBestHypothesis() const
 {
-	const NSCubePruning::Stack &lastStack = m_stacks.Back();
+	const Stack &lastStack = m_stacks.Back();
 	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
 
 	const Hypothesis *best = NULL;

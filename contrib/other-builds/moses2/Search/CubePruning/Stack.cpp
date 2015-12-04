@@ -97,7 +97,7 @@ size_t Stack::GetHypoSize() const
 	return ret;
 }
 
-Stack::_HCType &Stack::GetColl(const HypoCoverage &key)
+_HCType &Stack::GetColl(const HypoCoverage &key)
 {
 	/*
 	_HCType *ret;
