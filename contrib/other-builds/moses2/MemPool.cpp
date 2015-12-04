@@ -25,6 +25,7 @@ MemPool::Page::~Page()
 MemPool::MemPool(size_t initSize)
 :m_currSize(initSize)
 ,m_currPage(0)
+,m_count(0)
 {
 	m_pages.push_back(Page(m_currSize));
 	current_ = m_pages.back().mem;
@@ -68,3 +69,22 @@ void *MemPool::More(std::size_t size)
 		}
 	}
 }
+
+void MemPool::Reset()
+{
+	m_currPage = 0;
+	current_ = m_pages[0].mem;
+
+	if (m_count == 1000) {
+		for (size_t i = 1; i < m_pages.size(); ++i) {
+			delete m_pages[i].mem;
+		}
+		m_pages.resize(1);
+
+		m_count = 0;
+	}
+	else {
+		++m_count;
+	}
+}
+

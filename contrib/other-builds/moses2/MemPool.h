@@ -57,11 +57,8 @@ class MemPool {
     	return (T*) ret;
     }
 
-    void Reset()
-    {
-    	m_currPage = 0;
-    	current_ = m_pages[0].mem;
-    }
+    void Reset();
+
   private:
     void *More(std::size_t size);
 
@@ -70,6 +67,8 @@ class MemPool {
     size_t m_currSize;
     size_t m_currPage;
     uint8_t *current_;
+
+    size_t m_count;
 
     // no copying
     MemPool(const MemPool &);
