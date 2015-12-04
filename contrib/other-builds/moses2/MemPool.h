@@ -69,8 +69,6 @@ class MemPool {
     size_t m_currPage;
     uint8_t *current_;
 
-    size_t m_count;
-
     // no copying
     MemPool(const MemPool &);
     MemPool &operator=(const MemPool &);

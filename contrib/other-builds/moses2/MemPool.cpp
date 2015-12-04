@@ -27,7 +27,6 @@ MemPool::Page::~Page()
 MemPool::MemPool(size_t initSize)
 :m_currSize(initSize)
 ,m_currPage(0)
-,m_count(0)
 {
 	Page *page = new Page(m_currSize);
 	m_pages.push_back(page);
@@ -76,26 +75,6 @@ void *MemPool::More(std::size_t size)
 void MemPool::Reset()
 {
 	m_currPage = 0;
-
-	if (m_count == 1000) {
-		//cerr << "chop ";
-		for (size_t i = 0; i < m_pages.size(); ++i) {
-			//cerr << i << " ";
-		}
-		//cerr << endl;
-		RemoveAllInColl(m_pages);
-
-		Page *page = new Page(m_currSize);
-		m_pages.push_back(page);
-
-		current_ = page->mem;
-
-		m_count = 0;
-	}
-	else {
-		current_ = m_pages[0]->mem;
-
-		++m_count;
-	}
+	current_ = m_pages[0]->mem;
 }
 
