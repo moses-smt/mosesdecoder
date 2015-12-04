@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include "MemPool.h"
 #include "util/scoped.hh"
+#include "legacy/Util2.h"
 
 using namespace std;
 
