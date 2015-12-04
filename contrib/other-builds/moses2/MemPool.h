@@ -36,7 +36,7 @@ class MemPool {
       void *ret = current_;
       current_ += size;
 
-      Page &page = m_pages[m_currPage];
+      Page &page = *m_pages[m_currPage];
       if (current_ < page.end) {
     	  // return what we got
       } else {
@@ -63,7 +63,7 @@ class MemPool {
   private:
     void *More(std::size_t size);
 
-    std::vector<Page> m_pages;
+    std::vector<Page*> m_pages;
 
     size_t m_currSize;
     size_t m_currPage;

@@ -20,6 +20,7 @@ MemPool::Page::Page(std::size_t vSize)
 
 MemPool::Page::~Page()
 {
+	free(mem);
 }
 ////////////////////////////////////////////////////
 MemPool::MemPool(size_t initSize)
@@ -27,18 +28,17 @@ MemPool::MemPool(size_t initSize)
 ,m_currPage(0)
 ,m_count(0)
 {
-	m_pages.push_back(Page(m_currSize));
-	current_ = m_pages.back().mem;
+	Page *page = new Page(m_currSize);
+	m_pages.push_back(page);
 
+	current_ = page->mem;
 	//cerr << "new memory pool";
 }
 
 MemPool::~MemPool()
 {
   //cerr << "delete memory pool" << endl;
-  BOOST_FOREACH(const Page &page, m_pages) {
-	  free(page.mem);
-  }
+  RemoveAllInColl(m_pages);
 }
 
 
@@ -49,16 +49,17 @@ void *MemPool::More(std::size_t size)
 		// add new page
 		m_currSize <<= 1;
 		std::size_t amount = std::max(m_currSize, size);
-		m_pages.push_back(Page(amount));
 
-		Page &page = m_pages.back();
-		uint8_t *ret = page.mem;
+		Page *page = new Page(amount);
+		m_pages.push_back(page);
+
+		uint8_t *ret = page->mem;
 		current_ = ret + size;
 		return ret;
 	}
 	else {
 		// use existing page
-		Page &page = m_pages[m_currPage];
+		Page &page = *m_pages[m_currPage];
 		if (size <= page.size) {
 			uint8_t *ret = page.mem;
 			current_ = ret + size;
@@ -78,19 +79,20 @@ void MemPool::Reset()
 	if (m_count == 1000) {
 		//cerr << "chop ";
 		for (size_t i = 0; i < m_pages.size(); ++i) {
-			free(m_pages[i].mem);
 			//cerr << i << " ";
 		}
 		//cerr << endl;
-		m_pages.clear();
+		RemoveAllInColl(m_pages);
 
-		m_pages.push_back(Page(m_currSize));
-		current_ = m_pages.back().mem;
+		Page *page = new Page(m_currSize);
+		m_pages.push_back(page);
+
+		current_ = page->mem;
 
 		m_count = 0;
 	}
 	else {
-		current_ = m_pages[0].mem;
+		current_ = m_pages[0]->mem;
 
 		++m_count;
 	}
