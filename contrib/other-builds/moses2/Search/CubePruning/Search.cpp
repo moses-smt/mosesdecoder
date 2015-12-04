@@ -75,7 +75,7 @@ void Search::Decode(size_t stackInd)
 	CubeEdge::Queue queue;
 
 	// add top hypo from every edge into queue
-	std::vector<CubeEdge*> &edges = m_cubeEdges[stackInd];
+	CubeEdges &edges = m_cubeEdges[stackInd];
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
 		edge->CreateFirst(m_mgr, queue);
@@ -142,7 +142,7 @@ void Search::PostDecode(size_t stackInd)
   			  CubeEdge::Hypotheses &sortedHypos = val.second.GetSortedHypos(m_mgr);
 
   		  		CubeEdge *edge = new CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
-  		  		std::vector<CubeEdge*> &edges = m_cubeEdges[numWords];
+  		  		CubeEdges &edges = m_cubeEdges[numWords];
   		  		edges.push_back(edge);
   			}
   		}
