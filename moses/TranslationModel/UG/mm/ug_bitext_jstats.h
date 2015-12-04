@@ -39,7 +39,7 @@ namespace sapt
 
     std::vector<std::pair<size_t, std::vector<unsigned char> > > const & aln() const;
 
-    void 
+    size_t 
     add(float w, float b, std::vector<unsigned char> const& a, uint32_t const cnt2, 
 	uint32_t fwd_orient, uint32_t bwd_orient, int const docid);
 

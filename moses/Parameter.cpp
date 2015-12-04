@@ -35,6 +35,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/random.hh"
 #include <boost/program_options.hpp>
 
+#ifdef HAVE_XMLRPC_C
+#include <xmlrpc_server.h>
+#endif
 
 using namespace std;
 using namespace boost::algorithm;
@@ -53,6 +56,7 @@ Parameter::Parameter()
   AddParam(main_opts,"input-file", "i", "location of the input file to be translated");
 
   AddParam(main_opts,"verbose", "v", "verbosity level of the logging");
+  AddParam(main_opts,"version", "show version of Moses and libraries used");
   AddParam(main_opts,"show-weights", "print feature weights and exit");
   AddParam(main_opts,"time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
 
@@ -447,6 +451,35 @@ LoadParam(const string &filePath)
   return LoadParam(3, (char const**) argv);
 }
 
+/// Print out version information about the things that went into this
+/// executable.
+void show_version()
+{
+  std::cout << "\nMoses code version (git tag or commit hash):\n   "
+            << MOSES_VERSION_ID << std::endl
+            << "Libraries used:" << std::endl
+            << "      Boost  version "
+            << BOOST_VERSION / 100000     << "."  // major version
+            << BOOST_VERSION / 100 % 1000 << "."  // minor version
+            << BOOST_VERSION % 100                // patch level
+            << std::endl;
+#ifdef HAVE_XMLRPC_C
+  unsigned int major, minor, point;
+  xmlrpc_server_version(&major, &minor, &point);
+  std::cout << "   Xmlrpc-c  version "
+            << major << "." << minor << "." << point << std::endl;
+#endif
+#ifdef HAVE_CMPH
+  // there's no easy way to determine the cmph version at compile time
+  std::cout << "       CMPH (version unknown)" << std::endl;
+#endif
+
+#ifdef MMT_VERSION_ID
+  std::cout << string(20,'-')
+            << "\nMMT extras version: " << MMT_VERSION_ID << std::endl;
+#endif
+}
+
 /** load all parameters from the configuration file and the command line switches */
 bool
 Parameter::
@@ -459,7 +492,13 @@ LoadParam(int argc, char const* xargv[])
     argv[i] = xargv[i];
     if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
       ++argv[i];
+    if (!strcmp(argv[i],"-version")) {
+      show_version();
+      exit(0);
+    }
   }
+
+
 
   // config file (-f) arg mandatory
   string configPath;

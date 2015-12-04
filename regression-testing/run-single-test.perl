@@ -182,9 +182,11 @@ sub exec_moses_server {
   }
   while( 1==1 ) # wait until the server is listening for requests
   {
-    sleep 5;
-    my $str = `grep "Listening on port $serverport" $results/run.stderr`;
-    last if($str =~ /Listening/);
+      sleep 5;
+      my $res = waitpid($pid, WNOHANG);
+      die "Moses crashed or aborted! Check $results/run.stderr for error messages.\n" if ($res);
+      my $str = `grep "Listening on port $serverport" $results/run.stderr`;
+      last if($str =~ /Listening/);
   }
   my $proxy = XMLRPC::Lite->proxy($url);
   warn "Opening file $input to write to $results\n";

@@ -50,7 +50,7 @@ class FFState;
 class StatelessFeatureFunction;
 class StatefulFeatureFunction;
 class Manager;
-class ReportingOptions;
+struct ReportingOptions;
 
 typedef std::vector<Hypothesis*> ArcList;
 

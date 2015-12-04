@@ -257,7 +257,6 @@ void ChartHypothesis::CleanupArcList()
    * so we'll keep all of arc list if nedd distinct n-best list
    */
   AllOptions const& opts = StaticData::Instance().options();
-  const StaticData &staticData = StaticData::Instance();
   size_t nBestSize = opts.nbest.nbest_size;
   bool distinctNBest = (opts.nbest.only_distinct
                         || opts.mbr.enabled

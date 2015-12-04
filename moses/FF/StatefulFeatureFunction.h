@@ -10,7 +10,7 @@ class FFState;
 
 namespace Syntax
 {
-class SHyperedge;
+struct SHyperedge;
 }
 
 /** base class for all stateful feature functions.

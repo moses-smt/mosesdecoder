@@ -8,7 +8,7 @@ namespace Moses
 
 namespace Syntax
 {
-class SHyperedge;
+struct SHyperedge;
 }
 
 /** base class for all stateless feature functions.

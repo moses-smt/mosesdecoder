@@ -107,7 +107,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
 
     // print the translation ID, surface factors, and scores
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    OutputSurface(out, outputPhrase); // , outputFactorOrder, false);
     out << " ||| ";
     bool with_labels = options().nbest.include_feature_labels;
     derivation.scoreBreakdown.OutputAllFeatureScores(out, with_labels);

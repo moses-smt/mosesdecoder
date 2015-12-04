@@ -248,8 +248,6 @@ void BilingualLM::getAllAlignments(const ChartHypothesis& cur_hypo, size_t featu
   int source_word_mid_idx; //The word alignment
 
   //Get source sent
-  const ChartManager& manager = cur_hypo.GetManager();
-  const Sentence& source_sent = static_cast<const Sentence&>(manager.GetSource());
   const AlignmentInfo& alignments = targetPhrase.GetAlignTerm();
 
   // get absolute position in source sentence for each source word in rule

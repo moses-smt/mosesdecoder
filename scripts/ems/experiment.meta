@@ -1145,7 +1145,7 @@ filter
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
-	ignore-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt
 	error: already exists. Please delete
 filter-devtest
 	in: input-devtest TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table
@@ -1159,7 +1159,7 @@ apply-filter
 	in: TRAINING:bin-config filtered-dir
 	out: filtered-config
 	default-name: tuning/moses.filtered.ini
-	ignore-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 apply-filter-devtest
 	in: TRAINING:bin-config filtered-dir-devtest
@@ -1288,14 +1288,14 @@ filter
 	out: filtered-dir 
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
-	pass-if: TRAINING:binarize-all
+	pass-if: TRAINING:binarize-all TRAINING:mmsapt
 	ignore-if: use-hiero
 	error: already exists. Please delete
 apply-filter
 	in: filtered-dir TRAINING:config TUNING:config-with-reused-weights
 	out: filtered-config
 	default-name: evaluation/filtered.ini
-	ignore-if: TRAINING:binarize-all thot
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt thot
 	template: $moses-script-dir/ems/support/substitute-filtered-tables-and-weights.perl IN/moses.ini IN1 IN2 OUT
 decode
 	in: TUNING:config-with-reused-weights input filtered-config

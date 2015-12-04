@@ -26,7 +26,7 @@ bool
 TreeInput::
 ProcessAndStripXMLTags(AllOptions const& opts, string &line,
                        std::vector<XMLParseOutput> &sourceLabels,
-                       std::vector<XmlOption*> &xmlOptions)
+                       std::vector<XmlOption const*> &xmlOptions)
 {
   //parse XML markup in translation line
 

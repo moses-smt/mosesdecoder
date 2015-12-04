@@ -131,7 +131,7 @@ void Manager::Decode()
     TRACE_ERR("Line "<< m_source.GetTranslationId()
               << ": Collecting options took "
               << GetSentenceStats().GetTimeCollectOpts() << " seconds at "
-              << __FILE__ << ":" << __LINE__ << endl);
+              << __FILE__ << " Line " << __LINE__ << endl);
   }
 
   // search for best translation with the specified algorithm
@@ -1666,7 +1666,7 @@ OutputNBest(std::ostream& out,
             const std::vector<Moses::FactorType>& outputFactorOrder,
             long translationId, char reportSegmentation) const
 {
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
   NBestOptions const& nbo = options().nbest;
   bool reportAllFactors     = nbo.include_all_factors;
   bool includeSegmentation  = nbo.include_segmentation;
@@ -1681,8 +1681,7 @@ OutputNBest(std::ostream& out,
     out << translationId << " ||| ";
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
-      OutputSurface(out, edge, outputFactorOrder, reportSegmentation,
-                    reportAllFactors);
+      OutputSurface(out, edge); //, outputFactorOrder, reportSegmentation, reportAllFactors);
     }
     out << " |||";
 
@@ -1743,57 +1742,59 @@ OutputNBest(std::ostream& out,
  */
 void
 Manager::
-OutputSurface(std::ostream &out, const Hypothesis &edge,
-              const std::vector<FactorType> &outputFactorOrder,
-              char reportSegmentation, bool reportAllFactors) const
+OutputSurface(std::ostream &out, const Hypothesis &edge) const
 {
+  std::vector<FactorType> outputFactorOrder = options().output.factor_order;
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
                  "Must specific at least 1 output factor");
-  const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
+
+  FactorType placeholderFactor = options().input.placeholder_factor;
+  std::map<size_t, const Factor*> placeholders;
+  if (placeholderFactor != NOT_FOUND) {
+    // creates map of target position -> factor for placeholders
+    placeholders = GetPlaceholders(edge, placeholderFactor);
+  }
+
   bool markUnknown = options().unk.mark;
-  if (reportAllFactors == true) {
-    out << phrase;
-  } else {
-    FactorType placeholderFactor = options().input.placeholder_factor;
+  std::string const& fd = options().output.FactorDelimiter;
 
-    std::map<size_t, const Factor*> placeholders;
-    if (placeholderFactor != NOT_FOUND) {
-      // creates map of target position -> factor for placeholders
-      placeholders = GetPlaceholders(edge, placeholderFactor);
+  TargetPhrase const& phrase = edge.GetCurrTargetPhrase();
+  size_t size = phrase.GetSize();
+  for (size_t pos = 0 ; pos < size ; pos++) {
+    const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+    if (placeholders.size()) {
+      // do placeholders
+      std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
+      if (iter != placeholders.end()) {
+        factor = iter->second;
+      }
     }
 
-    size_t size = phrase.GetSize();
-    for (size_t pos = 0 ; pos < size ; pos++) {
-      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+    UTIL_THROW_IF2(factor == NULL, "No factor 0 at position " << pos);
 
-      if (placeholders.size()) {
-        // do placeholders
-        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
-        if (iter != placeholders.end()) {
-          factor = iter->second;
-        }
-      }
-
-      UTIL_THROW_IF2(factor == NULL, "No factor 0 at position " << pos);
-
-      //preface surface form with UNK if marking unknowns
-      const Word &word = phrase.GetWord(pos);
-      if(markUnknown && word.IsOOV()) {
-        out << options().unk.prefix << *factor << options().unk.suffix;
-      } else {
-        out << *factor;
-      }
-
-      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
-        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        UTIL_THROW_IF2(factor==NULL,"No factor "<<i<<" at position "<< pos);
-        out << "|" << *factor;
-      }
-      out << " ";
+    //preface surface form with UNK if marking unknowns
+    const Word &word = phrase.GetWord(pos);
+    if(markUnknown && word.IsOOV()) {
+      out << options().unk.prefix;
     }
+
+    out << *factor;
+    for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
+      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+      UTIL_THROW_IF2(factor==NULL,"No factor "<<i<<" at position "<< pos);
+      out << fd << *factor;
+    }
+
+    if(markUnknown && word.IsOOV()) {
+      out << options().unk.suffix;
+    }
+
+    out << " ";
+
   }
 
   // trace ("report segmentation") option "-t" / "-tt"
+  int reportSegmentation = options().output.ReportSegmentation;
   if (reportSegmentation > 0 && phrase.GetSize() > 0) {
     const Range &sourceRange = edge.GetCurrSourceWordsRange();
     const int sourceStart = sourceRange.GetStartPos();
@@ -2080,7 +2081,8 @@ OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,
 
   for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
     const Hypothesis &edge = *edges[currEdge];
-    OutputSurface(out, edge, StaticData::Instance().GetOutputFactorOrder(), reportSegmentation, reportAllFactors);
+    OutputSurface(out, edge);
+    // , StaticData::Instance().GetOutputFactorOrder(), reportSegmentation, reportAllFactors);
   }
   out << endl;
 }

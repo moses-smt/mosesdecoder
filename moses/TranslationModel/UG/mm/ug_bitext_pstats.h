@@ -41,7 +41,7 @@ namespace sapt
     void register_worker();
     size_t count_workers() { return in_progress; }
 
-    bool
+    size_t
     add(uint64_t const  pid, // target phrase id
         float const       w, // sample weight (1./(# of phrases extractable))
         float const       b, // sample bias score

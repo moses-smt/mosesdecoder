@@ -315,15 +315,15 @@ void ChartManager::OutputBest(OutputCollector *collector) const
 
 void ChartManager::OutputNBest(OutputCollector *collector) const
 {
-  const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.options().nbest.nbest_size;
+  // const StaticData &staticData = StaticData::Instance();
+  size_t nBestSize = options().nbest.nbest_size;
   if (nBestSize > 0) {
     const size_t translationId = m_source.GetTranslationId();
 
     VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO "
-            << staticData.options().nbest.output_file_path << endl);
+            << options().nbest.output_file_path << endl);
     std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
-    CalcNBest(nBestSize, nBestList,staticData.options().nbest.only_distinct);
+    CalcNBest(nBestSize, nBestList, options().nbest.only_distinct);
     OutputNBestList(collector, nBestList, translationId);
     IFVERBOSE(2) {
       PrintUserTime("N-Best Hypotheses Generation Time:");
@@ -336,8 +336,8 @@ void ChartManager::OutputNBestList(OutputCollector *collector,
                                    const ChartKBestExtractor::KBestVec &nBestList,
                                    long translationId) const
 {
-  const StaticData &staticData = StaticData::Instance();
-  const std::vector<Moses::FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
+  // const StaticData &staticData = StaticData::Instance();
+  // const std::vector<Moses::FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
 
   std::ostringstream out;
 
@@ -347,7 +347,7 @@ void ChartManager::OutputNBestList(OutputCollector *collector,
     FixPrecision(out);
   }
 
-  NBestOptions const& nbo = StaticData::Instance().options().nbest;
+  NBestOptions const& nbo = options().nbest;
   bool includeWordAlignment = nbo.include_alignment_info;
   bool PrintNBestTrees = nbo.print_trees;
 
@@ -366,7 +366,7 @@ void ChartManager::OutputNBestList(OutputCollector *collector,
 
     // print the translation ID, surface factors, and scores
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    OutputSurface(out, outputPhrase); // , outputFactorOrder, false);
     out << " ||| ";
     boost::shared_ptr<ScoreComponentCollection> scoreBreakdown = ChartKBestExtractor::GetOutputScoreBreakdown(derivation);
     bool with_labels = options().nbest.include_feature_labels;

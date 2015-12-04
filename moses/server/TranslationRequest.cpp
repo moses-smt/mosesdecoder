@@ -378,8 +378,9 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
   // target string
   ostringstream target;
   BOOST_REVERSE_FOREACH(Hypothesis const* e, edges) {
-    manager.OutputSurface(target, *e, m_options.output.factor_order,
-                          m_options.output.ReportSegmentation, m_options.output.ReportAllFactors);
+    manager.OutputSurface(target, *e); 
+    // , m_options.output.factor_order,
+    // m_options.output.ReportSegmentation, m_options.output.ReportAllFactors);
   }
   XVERBOSE(1, "BEST TRANSLATION: " << *(manager.GetBestHypothesis()) << std::endl);
 //  XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
