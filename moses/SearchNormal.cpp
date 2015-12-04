@@ -24,15 +24,6 @@ SearchNormal(Manager& manager, const InputType &source,
 {
   VERBOSE(1, "Translating: " << m_source << endl);
 
-  // m_beam_width = manager.options().search.beam_width;
-  // m_stack_size = manager.options().search.stack_size;
-  // m_stack_diversity = manager.options().search.stack_diversity;
-  // m_timeout = manager.options().search.timeout;
-  // m_max_distortion = manager.options().reordering.max_distortion;
-
-  // only if constraint decoding (having to match a specified output)
-  // long sentenceID = source.GetTranslationId();
-
   // initialize the stacks: create data structure and set limits
   std::vector < HypothesisStackNormal >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
@@ -82,8 +73,6 @@ ProcessOneStack(HypothesisStack* hstack)
  */
 void SearchNormal::Decode()
 {
-  // SentenceStats &stats = m_manager.GetSentenceStats();
-
   // initial seed hypothesis: nothing translated, no words produced
   const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
   Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap, m_manager.GetNextHypoId());
@@ -109,7 +98,6 @@ SearchNormal::
 ProcessOneHypothesis(const Hypothesis &hypothesis)
 {
   // since we check for reordering limits, its good to have that limit handy
-  // int maxDistortion  = StaticData::Instance().GetMaxDistortion();
   bool isWordLattice = m_source.GetType() == WordLatticeInput;
 
   const Bitmap &hypoBitmap = hypothesis.GetWordsBitmap();

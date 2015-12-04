@@ -128,8 +128,6 @@ void SearchCubePruning::Decode()
       BCQueue.push(bmIter->second);
       m_manager.GetSentenceStats().StopTimeManageCubes();
 
-      // old algorithm
-      // bmIter->second->EnsureMinStackHyps(PopLimit);
     }
 
     // main search loop, pop k best hyps
