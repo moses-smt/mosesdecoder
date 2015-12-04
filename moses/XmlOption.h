@@ -31,7 +31,7 @@ bool isXmlTag(const std::string& tag, const std::string& lbrackStr="<", const st
 std::vector<std::string> TokenizeXml(const std::string& str, const std::string& lbrackStr="<", const std::string& rbrackStr=">");
 
 bool ProcessAndStripXMLTags(AllOptions const& opts,
-                            std::string &line, std::vector<XmlOption*> &res,
+                            std::string &line, std::vector<XmlOption const*> &res,
                             ReorderingConstraint &reorderingConstraint, std::vector< size_t > &walls,
                             std::vector< std::pair<size_t, std::string> > &placeholders,
                             int offset,

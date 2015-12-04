@@ -45,7 +45,7 @@ protected:
 
   bool ProcessAndStripXMLTags(AllOptions const& opts, std::string &line,
                               std::vector<XMLParseOutput> &sourceLabels,
-                              std::vector<XmlOption*> &res);
+                              std::vector<XmlOption const*> &res);
 
 public:
   TreeInput() : Sentence() { }

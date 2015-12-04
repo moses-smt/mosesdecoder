@@ -206,7 +206,7 @@ init(string line, std::vector<FactorType> const& factorOrder,
   // only fill the vector if we are parsing XML
   if (opts.input.xml_policy != XmlPassThrough) {
     m_xmlCoverageMap.assign(GetSize(), false);
-    BOOST_FOREACH(XmlOption* o, m_xmlOptions) {
+    BOOST_FOREACH(XmlOption const* o, m_xmlOptions) {
       Range const& r = o->range;
       for(size_t j = r.GetStartPos(); j <= r.GetEndPos(); ++j)
         m_xmlCoverageMap[j]=true;
@@ -291,7 +291,7 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const
 
 void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list) const
 {
-  for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
+  for (std::vector<XmlOption const*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
        iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
     const XmlOption &xmlOption = **iterXMLOpts;
     const Range &range = xmlOption.range;
@@ -305,7 +305,7 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
 {
   //iterate over XmlOptions list, find exact source/target matches
 
-  for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
+  for (std::vector<XmlOption const*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
        iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
     const XmlOption &xmlOption = **iterXMLOpts;
     const Range &range = xmlOption.range;
@@ -338,7 +338,7 @@ GetXmlChartTranslationOptions(AllOptions const& opts) const
 
     //iterXMLOpts will be empty for XmlIgnore
     //look at each column
-    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = m_xmlOptions.begin();
+    for(std::vector<XmlOption const*>::const_iterator iterXmlOpts = m_xmlOptions.begin();
         iterXmlOpts != m_xmlOptions.end(); iterXmlOpts++) {
 
       const XmlOption &xmlOption = **iterXmlOpts;
