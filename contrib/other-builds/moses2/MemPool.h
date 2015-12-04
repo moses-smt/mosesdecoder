@@ -22,6 +22,7 @@ class MemPool {
 		uint8_t *end;
 		size_t size;
 
+		Page() {}
 		Page(std::size_t size);
 		~Page();
 	};
