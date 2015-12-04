@@ -4,6 +4,8 @@
 import option ;
 import path ;
 
+external-lib boost_serialization ;
+
  exe moses2 :
  	 InputPath.cpp 
  	 InputPaths.cpp
@@ -66,5 +68,6 @@ import path ;
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 
  ../../..//boost_filesystem  
- : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) <cxxflags>-std=c++11 ;
+ : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) <cxxflags>-std=c++11 <library>boost_serialization ;
+# MUST have space before semicolon ;
 
