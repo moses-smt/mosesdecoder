@@ -421,8 +421,10 @@ void
 TranslationRequest::
 run_phrase_decoder()
 {
-  if (m_withGraphInfo || m_options.nbest.nbest_size>0)
+  if (m_withGraphInfo || m_options.nbest.nbest_size>0) {
     m_options.output.SearchGraph = "true";
+    m_options.nbest.enabled = true;
+  }
 
   Manager manager(this->self());
   // if (m_bias.size()) manager.SetBias(&m_bias);
