@@ -34,7 +34,7 @@ protected:
 
 	// CUBE PRUNING VARIABLES
 	// setup
-	typedef std::vector<CubeEdge*, boost:: pool_allocator<CubeEdge*> > CubeEdges;
+	typedef std::vector<CubeEdge*> CubeEdges;
 	std::vector<CubeEdges> m_cubeEdges;
 
 	// CUBE PRUNING
