@@ -57,6 +57,7 @@ protected:
   DALM::LM *m_lm;
   DALM::VocabId wid_start, wid_end;
 
+  void CreateVocabMapping(const std::string &wordstxt);
 
 };
 
