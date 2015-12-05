@@ -1,5 +1,5 @@
 /*
- * DALM.h
+ * LanguageModelDALM.h
  *
  *  Created on: 5 Dec 2015
  *      Author: hieu
@@ -9,11 +9,23 @@
 #include "../FF/StatefulFeatureFunction.h"
 #include "../legacy/Util2.h"
 
-class DALM : public StatefulFeatureFunction
+namespace DALM
+{
+class Logger;
+class Vocabulary;
+class State;
+class LM;
+union Fragment;
+class Gap;
+
+typedef unsigned int VocabId;
+}
+
+class LanguageModelDALM : public StatefulFeatureFunction
 {
 public:
-	DALM(size_t startInd, const std::string &line);
-	virtual ~DALM();
+	LanguageModelDALM(size_t startInd, const std::string &line);
+	virtual ~LanguageModelDALM();
 
 	virtual void Load(System &system);
 	virtual void SetParameter(const std::string& key, const std::string& value);
@@ -34,9 +46,17 @@ public:
 		FFState &state) const;
 
 protected:
-	std::string m_path;
-	FactorType m_factorType;
-	size_t m_order;
+  FactorType m_factorType;
+
+  std::string	m_filePath;
+  size_t			m_nGramOrder; //! max n-gram length contained in this LM
+  size_t			m_ContextSize;
+
+  DALM::Logger *m_logger;
+  DALM::Vocabulary *m_vocab;
+  DALM::LM *m_lm;
+  DALM::VocabId wid_start, wid_end;
+
 
 };
 

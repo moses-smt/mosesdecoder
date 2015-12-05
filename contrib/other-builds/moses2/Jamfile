@@ -28,7 +28,7 @@ external-lib boost_serialization ;
     FF/StatefulFeatureFunction.cpp
     FF/StatelessFeatureFunction.cpp
     FF/WordPenalty.cpp
-    LM/DALM.cpp
+    LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
     LM/KENLM.cpp
  	 	TranslationModel/PhraseTable.cpp 
