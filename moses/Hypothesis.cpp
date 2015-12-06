@@ -332,57 +332,22 @@ GetTargetPhraseStringRep() const
   return GetTargetPhraseStringRep(allFactors);
 }
 
-void
+size_t
 Hypothesis::
-OutputAlignment(std::ostream &out, WordAlignmentSort sortOrder) const
+OutputAlignment(std::ostream &out, bool recursive=true) const
 {
-  std::vector<const Hypothesis *> edges;
-  const Hypothesis *currentHypo = this;
-  while (currentHypo) {
-    edges.push_back(currentHypo);
-    currentHypo = currentHypo->GetPrevHypo();
-  }
+  WordAlignmentSort const& waso = m_manager.options().output.WA_SortOrder;
+  TargetPhrase const& tp = GetCurrTargetPhrase();
 
-  OutputAlignment(out, edges, sortOrder);
-
-}
-
-void
-Hypothesis::
-OutputAlignment(ostream &out,
-                vector<const Hypothesis *> const& edges,
-                WordAlignmentSort waso)
-{
-  size_t targetOffset = 0;
-
-  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
-    const Hypothesis &edge = *edges[currEdge];
-    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
-    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-
-    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset, waso);
-
-    targetOffset += tp.GetSize();
-  }
-  // Used by --print-alignment-info, so no endl
-}
-
-void
-Hypothesis::
-OutputAlignment(ostream &out, const AlignmentInfo &ai,
-                size_t sourceOffset, size_t targetOffset,
-                WordAlignmentSort waso)
-{
-  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
-  AlignVec alignments = ai.GetSortedAlignments(waso);
-
-  AlignVec::const_iterator it;
-  for (it = alignments.begin(); it != alignments.end(); ++it) {
-    const std::pair<size_t,size_t> &alignment = **it;
-    out << alignment.first  + sourceOffset << "-"
-        << alignment.second + targetOffset << " ";
-  }
-
+  // call with head recursion to output things in the right order
+  size_t trg_off = recursive && m_prevHypo ?  m_prevHypo->OutputAlignment(out) : 0;
+  size_t src_off = GetCurrSourceWordsRange().GetStartPos();
+  
+  typedef std::pair<size_t,size_t> const* entry;
+  std::vector<entry> alnvec = tp.GetAlignTerm().GetSortedAlignments(waso);
+  BOOST_FOREACH(entry e, alnvec)
+    out << e->first + src_off << "-" << e->second + trg_off << " ";
+  return trg_off + tp.GetSize();
 }
 
 void
@@ -489,8 +454,9 @@ OutputSurface(std::ostream &out, const Hypothesis &edge,
     out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
     if (options.ReportSegmentation == 2) {
       out << ",wa=";
-      const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-      Hypothesis::OutputAlignment(out, ai, 0, 0, options.WA_SortOrder);
+      edge.OutputAlignment(out, false);
+      // const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
+      // Hypothesis::OutputAlignment(out, ai, 0, 0, options.WA_SortOrder);
       out << ",total=";
       out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
       out << ",";

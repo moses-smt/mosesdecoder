@@ -88,19 +88,31 @@ namespace Moses {
     
     std::map<std::string, xmlrpc_c::value>::const_iterator m;
     m = param.find("output-factors");
-    if (m  != param.end()) 
-      factor_order = Tokenize<FactorType>(xmlrpc_c::value_string(m->second), ",");
-    
+    if (m  != param.end()) {
+      factor_order=Tokenize<FactorType>(xmlrpc_c::value_string(m->second),",");
+    }
+
     if (ReportAllFactors) {
       factor_order.clear();
       for (size_t i = 0; i < MAX_NUM_FACTORS; ++i)
         factor_order.push_back(i);
     }
+    
+    m = param.find("align");
+    if (m != param.end() && Scan<bool>(xmlrpc_c::value_string(m->second)))
+      ReportSegmentation = 1;
+    
+    PrintAlignmentInfo = check(param,"word-align",PrintAlignmentInfo);
 
     m = param.find("factor-delimiter");
-    if (m != param.end()) FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
+    if (m != param.end()) { 
+      FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
+    }
+
     m = param.find("output-factor-delimiter");
-    if (m != param.end()) FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
+    if (m != param.end()) { 
+      FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
+    }
 
     return true;
   }

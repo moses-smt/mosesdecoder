@@ -31,19 +31,6 @@ GetContextWindow() const
   return m_context;
 }
 
-// SPTR<std::map<std::string, float> const>
-// TranslationTask::GetContextWeights() const
-// {
-//   return m_context_weights;
-// }
-
-// void
-// TranslationTask
-// ::ReSetContextWeights(std::map<std::string, float> const& new_weights)
-// {
-//   m_context_weights.reset(new std::map<string,float>(new_weights));
-// }
-
 void
 TranslationTask::
 SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw)

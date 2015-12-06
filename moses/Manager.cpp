@@ -246,7 +246,7 @@ printThisHypothesis(long translationId, const Hypothesis* hypo,
  * \param count the number of n-best translations to produce
  * \param ret holds the n-best list that was calculated
  */
-void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) const
+void Manager::CalcNBest(size_t count, TrellisPathList &ret, bool onlyDistinct) const
 {
   if (count <= 0)
     return;
@@ -1572,7 +1572,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
         exit(1);
       }
       TrellisPathList nBestList;
-      CalcNBest(nBestSize, nBestList,true);
+      CalcNBest(nBestSize, nBestList, true);
       VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
       IFVERBOSE(2) {
         PrintUserTime("calculated n-best list for (L)MBR decoding");
@@ -1589,9 +1589,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
         } else {
           //Lattice MBR decoding
           vector<Word> mbrBestHypo = doLatticeMBR(*this,nBestList);
-          OutputBestHypo(mbrBestHypo, translationId,
-                         options().output.ReportSegmentation,
-                         options().output.ReportAllFactors, out);
+          OutputBestHypo(mbrBestHypo, out);
           IFVERBOSE(2) {
             PrintUserTime("finished Lattice MBR decoding");
           }
@@ -1601,9 +1599,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
       // consensus decoding
       else if (options().search.consensus) {
         const TrellisPath &conBestHypo = doConsensusDecoding(*this,nBestList);
-        OutputBestHypo(conBestHypo, translationId,
-                       options().output.ReportSegmentation,
-                       options().output.ReportAllFactors, out);
+        OutputBestHypo(conBestHypo, out);
         OutputAlignment(m_alignmentOut, conBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished Consensus decoding");
@@ -1613,9 +1609,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
       // n-best MBR decoding
       else {
         const TrellisPath &mbrBestHypo = doMBR(nBestList);
-        OutputBestHypo(mbrBestHypo, translationId,
-                       options().output.ReportSegmentation,
-                       options().output.ReportAllFactors, out);
+        OutputBestHypo(mbrBestHypo, out);
         OutputAlignment(m_alignmentOut, mbrBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished MBR decoding");
@@ -1638,22 +1632,16 @@ void Manager::OutputNBest(OutputCollector *collector) const
     return;
   }
 
-  const StaticData &staticData = StaticData::Instance();
-  long translationId = m_source.GetTranslationId();
-
   if (options().lmbr.enabled) {
     if (options().nbest.enabled) {
-      collector->Write(translationId, m_latticeNBestOut.str());
+      collector->Write(m_source.GetTranslationId(), m_latticeNBestOut.str());
     }
   } else {
     TrellisPathList nBestList;
     ostringstream out;
-    CalcNBest(options().nbest.nbest_size, nBestList,
-              options().nbest.only_distinct);
-    OutputNBest(out, nBestList,
-                staticData.GetOutputFactorOrder(),
-                m_source.GetTranslationId(),
-                options().output.ReportSegmentation);
+    NBestOptions const& nbo = options().nbest;
+    CalcNBest(nbo.nbest_size, nBestList, nbo.only_distinct);
+    OutputNBest(out, nBestList);
     collector->Write(m_source.GetTranslationId(), out.str());
   }
 
@@ -1661,12 +1649,8 @@ void Manager::OutputNBest(OutputCollector *collector) const
 
 void
 Manager::
-OutputNBest(std::ostream& out,
-            const Moses::TrellisPathList &nBestList,
-            const std::vector<Moses::FactorType>& outputFactorOrder,
-            long translationId, char reportSegmentation) const
+OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
 {
-  // const StaticData &staticData = StaticData::Instance();
   NBestOptions const& nbo = options().nbest;
   bool reportAllFactors     = nbo.include_all_factors;
   bool includeSegmentation  = nbo.include_segmentation;
@@ -1678,10 +1662,10 @@ OutputNBest(std::ostream& out,
     const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
     // print the surface factor of the translation
-    out << translationId << " ||| ";
+    out << m_source.GetTranslationId() << " ||| ";
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
-      OutputSurface(out, edge); //, outputFactorOrder, reportSegmentation, reportAllFactors);
+      OutputSurface(out, edge); 
     }
     out << " |||";
 
@@ -1862,7 +1846,8 @@ std::map<size_t, const Factor*> Manager::GetPlaceholders(const Hypothesis &hypo,
   for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
     const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
     if (factor) {
-      std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
+      TargetPhrase const& tp = hypo.GetTranslationOption().GetTargetPhrase();
+      std::set<size_t> targetPos = tp.GetAlignTerm().GetAlignmentsForSource(sourcePos);
       UTIL_THROW_IF2(targetPos.size() != 1,
                      "Placeholder should be aligned to 1, and only 1, word");
       ret[*targetPos.begin()] = factor;
@@ -1879,10 +1864,7 @@ void Manager::OutputLatticeSamples(OutputCollector *collector) const
     TrellisPathList latticeSamples;
     ostringstream out;
     CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-    OutputNBest(out,latticeSamples,
-                staticData.GetOutputFactorOrder(),
-                m_source.GetTranslationId(),
-                options().output.ReportSegmentation);
+    OutputNBest(out,latticeSamples);
     collector->Write(m_source.GetTranslationId(), out.str());
   }
 
@@ -1903,37 +1885,23 @@ void Manager::OutputAlignment(OutputCollector *collector) const
       edges.push_back(currentHypo);
       currentHypo = currentHypo->GetPrevHypo();
     }
-
-    OutputAlignment(collector,m_source.GetTranslationId(), edges);
+    ostringstream out;
+    size_t targetOffset = 0;
+    BOOST_REVERSE_FOREACH(Hypothesis const* e, edges) {
+      const TargetPhrase &tp = e->GetCurrTargetPhrase();
+      size_t sourceOffset = e->GetCurrSourceWordsRange().GetStartPos();
+      OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
+      targetOffset += tp.GetSize();
+    }
+    out << std::endl; // Used by --alignment-output-file so requires endl
+    collector->Write(m_source.GetTranslationId(), out.str());
+    
   }
 }
 
-void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges) const
-{
-  ostringstream out;
-  OutputAlignment(out, edges);
-
-  collector->Write(lineNo,out.str());
-}
-
-void Manager::OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges) const
-{
-  size_t targetOffset = 0;
-
-  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
-    const Hypothesis &edge = *edges[currEdge];
-    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
-    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-
-    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
-
-    targetOffset += tp.GetSize();
-  }
-  // Used by --alignment-output-file so requires endl
-  out << std::endl;
-}
-
-void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
+void 
+Manager::
+OutputDetailedTranslationReport(OutputCollector *collector) const
 {
   if (collector) {
     ostringstream out;
@@ -1944,7 +1912,9 @@ void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
 
 }
 
-void Manager::OutputUnknowns(OutputCollector *collector) const
+void 
+Manager::
+OutputUnknowns(OutputCollector *collector) const
 {
   if (collector) {
     long translationId = m_source.GetTranslationId();
@@ -1959,7 +1929,9 @@ void Manager::OutputUnknowns(OutputCollector *collector) const
 
 }
 
-void Manager::OutputWordGraph(OutputCollector *collector) const
+void 
+Manager::
+OutputWordGraph(OutputCollector *collector) const
 {
   if (collector) {
     long translationId = m_source.GetTranslationId();
@@ -1970,7 +1942,9 @@ void Manager::OutputWordGraph(OutputCollector *collector) const
   }
 }
 
-void Manager::OutputSearchGraph(OutputCollector *collector) const
+void 
+Manager::
+OutputSearchGraph(OutputCollector *collector) const
 {
   if (collector) {
     long translationId = m_source.GetTranslationId();
@@ -2058,31 +2032,28 @@ void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSo
   }
 }
 
-void Manager::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, char /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out) const
+void 
+Manager::
+OutputBestHypo(const std::vector<Word>&  mbrBestHypo, ostream& out) const
 {
-
+  FactorType f = options().output.factor_order[0];
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
-    const Factor *factor = mbrBestHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
-    UTIL_THROW_IF2(factor == NULL,
-                   "No factor 0 at position " << i);
-    if (i>0) out << " " << *factor;
-    else     out << *factor;
+    const Factor *factor = mbrBestHypo[i].GetFactor(f);
+    UTIL_THROW_IF2(factor == NULL, "No factor " << f << " at position " << i);
+    if (i) out << " ";
+    out << *factor;
   }
   out << endl;
 }
 
 void
 Manager::
-OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,
-               char reportSegmentation, bool reportAllFactors,
-               std::ostream &out) const
+OutputBestHypo(const Moses::TrellisPath &path, std::ostream &out) const
 {
-  const std::vector<const Hypothesis *> &edges = path.GetEdges();
-
+  std::vector<const Hypothesis *> const& edges = path.GetEdges();
   for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
-    const Hypothesis &edge = *edges[currEdge];
+    Hypothesis const& edge = *edges[currEdge];
     OutputSurface(out, edge);
-    // , StaticData::Instance().GetOutputFactorOrder(), reportSegmentation, reportAllFactors);
   }
   out << endl;
 }
@@ -2092,7 +2063,9 @@ Manager::
 OutputAlignment(std::ostringstream &out, const TrellisPath &path) const
 {
   WordAlignmentSort waso = options().output.WA_SortOrder;
-  Hypothesis::OutputAlignment(out, path.GetEdges(), waso);
+  BOOST_REVERSE_FOREACH(Hypothesis const* e, path.GetEdges())
+    e->OutputAlignment(out, false);
+  // Hypothesis::OutputAlignment(out, path.GetEdges(), waso);
   // Used by --alignment-output-file so requires endl
   out << std::endl;
 }

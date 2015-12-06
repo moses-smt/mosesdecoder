@@ -62,7 +62,6 @@ Run()
       Session const& S = m_translator->get_session(m_session_id);
       m_scope = S.scope;
       m_session_id = S.id;
-      // cerr << "SESSION ID" << m_session_id << endl;
     }
   else m_scope.reset(new Moses::ContextScope);
 
@@ -72,18 +71,11 @@ Run()
   
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
-  //Make sure alternative paths are retained, if necessary
-  // if (m_withGraphInfo || m_nbestSize>0)
-  // why on earth is this a global variable? Is this even thread-safe???? UG
-  // (const_cast<Moses::StaticData&>(SD)).SetOutputSearchGraph(true);
-  // std::stringstream out, graphInfo, transCollOpts;
-  
   if (SD.IsSyntax())
     run_chart_decoder();
   else
     run_phrase_decoder();
 
-  // XVERBOSE(1,"Output: " << out.str() << endl);
   {
     boost::lock_guard<boost::mutex> lock(m_mutex);
     m_done = true;
@@ -166,30 +158,16 @@ insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData)
   retData["sg"] = xmlrpc_c::value_array(searchGraphXml);
 }
 
-// void
-// TranslationRequest::
-// output_phrase(ostream& out, Phrase const& phrase) const
-// {
-//   if (!m_options.output.ReportAllFactors) {
-//     for (size_t i = 0 ; i < phrase.GetSize(); ++i)
-//       out << *phrase.GetFactor(i, 0) << " ";
-//   } else out << phrase;
-// }
-
 void
 TranslationRequest::
 outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
 {
   TrellisPathList nBestList;
   vector<xmlrpc_c::value> nBestXml;
-  manager.CalcNBest(m_options.nbest.nbest_size, nBestList, 
-		    m_options.nbest.only_distinct);
-  
-  StaticData const& SD = StaticData::Instance();
-  manager.OutputNBest(cout, nBestList, 
-		      SD.GetOutputFactorOrder(),
-		      m_source->GetTranslationId(),
-		      options().output.ReportSegmentation);
+
+  Moses::NBestOptions const& nbo = m_options.nbest; 
+  manager.CalcNBest(nbo.nbest_size, nBestList, nbo.only_distinct);
+  manager.OutputNBest(cout, nBestList); 
 
   BOOST_FOREACH(Moses::TrellisPath const* path, nBestList) {
     vector<const Hypothesis *> const& E = path->GetEdges();
@@ -199,10 +177,9 @@ outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
     if (m_withScoreBreakdown) {
       // should the score breakdown be reported in a more structured manner?
       ostringstream buf;
-      bool with_labels = m_options.nbest.include_feature_labels;
+      bool with_labels = nbo.include_feature_labels;
       path->GetScoreBreakdown()->OutputAllFeatureScores(buf, with_labels);
       nBestXmlItem["fvals"] = xmlrpc_c::value_string(buf.str());
-
       nBestXmlItem["scores"] = PackScores(*path->GetScoreBreakdown());
     }
 
@@ -218,30 +195,27 @@ TranslationRequest::
 insertTranslationOptions(Moses::Manager& manager,
                          std::map<std::string, xmlrpc_c::value>& retData)
 {
-  const TranslationOptionCollection* toptsColl
-  = manager.getSntTranslationOptions();
+  std::vector<Moses::FactorType> const& ofactor_order = options().output.factor_order;
+  
+  const TranslationOptionCollection* toptsColl = manager.getSntTranslationOptions();
   vector<xmlrpc_c::value> toptsXml;
   size_t const stop = toptsColl->GetSource().GetSize();
   TranslationOptionList const* tol;
   for (size_t s = 0 ; s < stop ; ++s) {
-    for (size_t e = s;
-         (tol = toptsColl->GetTranslationOptionList(s,e)) != NULL;
-         ++e) {
+    for (size_t e=s;(tol=toptsColl->GetTranslationOptionList(s,e))!=NULL;++e) {
       BOOST_FOREACH(TranslationOption const* topt, *tol) {
         std::map<std::string, xmlrpc_c::value> toptXml;
         TargetPhrase const& tp = topt->GetTargetPhrase();
-        StaticData const& GLOBAL = StaticData::Instance();
-        std::string tphrase = tp.GetStringRep(GLOBAL.GetOutputFactorOrder());
+        std::string tphrase = tp.GetStringRep(ofactor_order);
         toptXml["phrase"] = xmlrpc_c::value_string(tphrase);
         toptXml["fscore"] = xmlrpc_c::value_double(topt->GetFutureScore());
         toptXml["start"]  = xmlrpc_c::value_int(s);
         toptXml["end"]    = xmlrpc_c::value_int(e);
         vector<xmlrpc_c::value> scoresXml;
         const std::valarray<FValue> &scores
-        = topt->GetScoreBreakdown().getCoreFeatures();
+	  = topt->GetScoreBreakdown().getCoreFeatures();
         for (size_t j = 0; j < scores.size(); ++j)
           scoresXml.push_back(xmlrpc_c::value_double(scores[j]));
-
         toptXml["scores"] = xmlrpc_c::value_array(scoresXml);
         toptsXml.push_back(xmlrpc_c::value_struct(toptXml));
       }
@@ -254,7 +228,6 @@ TranslationRequest::
 TranslationRequest(xmlrpc_c::paramList const& paramList,
                    boost::condition_variable& cond, boost::mutex& mut)
   : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
-    // , m_nbestSize(0)
   , m_session_id(0)
 { 
   m_options = StaticData::Instance().options();
@@ -276,9 +249,7 @@ TranslationRequest::
 parse_request(std::map<std::string, xmlrpc_c::value> const& params)
 {
   // parse XMLRPC request
-  // params_t const params = m_paramList.getStruct(0);
   m_paramList.verifyEnd(1); // ??? UG
-
   m_options.update(params);
 
   // source text must be given, or we don't know what to translate
@@ -295,8 +266,6 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   else
     m_session_id = 0;
   
-  m_withAlignInfo       = check(params, "align");
-  m_withWordAlignInfo   = check(params, "word-align");
   m_withGraphInfo       = check(params, "sg");
   m_withTopts           = check(params, "topt");
   m_withScoreBreakdown  = check(params, "add-score-breakdown");
@@ -320,10 +289,6 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
 	}
     }
   
-  // si = params.find("nbest");
-  // if (si != params.end())
-  //   m_nbestSize = xmlrpc_c::value_int(si->second);
-
   si = params.find("context");
   if (si != params.end()) 
     {
@@ -379,14 +344,13 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
   ostringstream target;
   BOOST_REVERSE_FOREACH(Hypothesis const* e, edges) {
     manager.OutputSurface(target, *e); 
-    // , m_options.output.factor_order,
-    // m_options.output.ReportSegmentation, m_options.output.ReportAllFactors);
   }
-  XVERBOSE(1, "BEST TRANSLATION: " << *(manager.GetBestHypothesis()) << std::endl);
-//  XVERBOSE(1,"SERVER TRANSLATION: " << target.str() << std::endl);
+  XVERBOSE(1, "BEST TRANSLATION: " << *(manager.GetBestHypothesis()) 
+	   << std::endl);
   dest[key] = xmlrpc_c::value_string(target.str());
 
-  if (m_withAlignInfo) {
+  // if (m_withAlignInfo) {
+  if (options().output.ReportSegmentation) {
     // phrase alignment, if requested
 
     vector<xmlrpc_c::value> p_aln;
@@ -395,7 +359,8 @@ pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const&
     dest["align"] = xmlrpc_c::value_array(p_aln);
   }
 
-  if (m_withWordAlignInfo) {
+  // if (m_withWordAlignInfo) {
+  if (options().output.PrintAlignmentInfo) { 
     // word alignment, if requested
     vector<xmlrpc_c::value> w_aln;
     BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
@@ -421,15 +386,13 @@ void
 TranslationRequest::
 run_phrase_decoder()
 {
-  if (m_withGraphInfo || m_options.nbest.nbest_size>0)
+  if (m_withGraphInfo || m_options.nbest.nbest_size > 0) {
     m_options.output.SearchGraph = "true";
+    m_options.nbest.enabled = true;
+  }
 
   Manager manager(this->self());
-  // if (m_bias.size()) manager.SetBias(&m_bias);
-
-    
   manager.Decode();
-
   pack_hypothesis(manager, manager.GetBestHypothesis(), "text", m_retData);
   if (m_session_id)
     m_retData["session-id"] = xmlrpc_c::value_int(m_session_id);
@@ -437,10 +400,6 @@ run_phrase_decoder()
   if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
   if (m_withTopts) insertTranslationOptions(manager,m_retData);
   if (m_options.nbest.nbest_size) outputNBest(manager, m_retData);
-
-  // (const_cast<StaticData&>(Moses::StaticData::Instance()))
-  // .SetOutputSearchGraph(false);
-  // WTF? one more reason not to have this as global variable! --- UG
 
 }
 }
