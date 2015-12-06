@@ -8,6 +8,7 @@
 #pragma once
 #include "../FF/StatefulFeatureFunction.h"
 #include "../legacy/Util2.h"
+#include "../legacy/Factor.h"
 
 namespace DALM
 {
@@ -57,7 +58,11 @@ protected:
   DALM::LM *m_lm;
   DALM::VocabId wid_start, wid_end;
 
-  void CreateVocabMapping(const std::string &wordstxt);
+  const Factor *m_beginSentenceFactor;
+
+  mutable std::vector<DALM::VocabId> m_vocabMap;
+
+  void CreateVocabMapping(const std::string &wordstxt, const System &system);
 
 };
 

@@ -65,8 +65,8 @@ void LanguageModel::Load(System &system)
 {
   FactorCollection &fc = system.GetVocab();
 
-  m_bos = fc.AddFactor("<s>", system, false);
-  m_eos = fc.AddFactor("</s>", system, false);
+  m_bos = fc.AddFactor(BOS_, system, false);
+  m_eos = fc.AddFactor(EOS_, system, false);
 
   InputFileStream infile(m_path);
   size_t lineNum = 0;

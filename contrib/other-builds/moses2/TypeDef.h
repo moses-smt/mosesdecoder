@@ -10,6 +10,13 @@
 
 class Hypothesis;
 
+#ifndef BOS_
+#define BOS_ "<s>" //Beginning of sentence symbol
+#endif
+#ifndef EOS_
+#define EOS_ "</s>" //End of sentence symbol
+#endif
+
 typedef float SCORE;
 
 // Note: StaticData uses SearchAlgorithm to determine whether the translation

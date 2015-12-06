@@ -81,8 +81,8 @@ void KENLM::Load(System &system)
 {
   FactorCollection &fc = system.GetVocab();
 
-  m_bos = fc.AddFactor("<s>", system, false);
-  m_eos = fc.AddFactor("</s>", system, false);
+  m_bos = fc.AddFactor(BOS_, system, false);
+  m_eos = fc.AddFactor(EOS_, system, false);
 
   lm::ngram::Config config;
   config.messages = NULL;
