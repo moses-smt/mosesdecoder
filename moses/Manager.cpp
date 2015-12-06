@@ -73,7 +73,7 @@ Manager::Manager(ttasksptr const& ttask)
   m_transOptColl = source->CreateTranslationOptionCollection(ttask);
 
   const StaticData &staticData = StaticData::Instance();
-  SearchAlgorithm searchAlgorithm = staticData.options().search.algo;
+  SearchAlgorithm searchAlgorithm = options().search.algo;
   m_search = Search::CreateSearch(*this, *source, searchAlgorithm,
                                   *m_transOptColl);
 
@@ -270,8 +270,9 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret, bool onlyDistinct) c
     contenders.Add(new TrellisPath(*iterBestHypo));
   }
 
-  // factor defines stopping point for distinct n-best list if too many candidates identical
-  size_t nBestFactor = StaticData::Instance().options().nbest.factor;
+  // factor defines stopping point for distinct n-best list if too
+  // many candidates identical
+  size_t nBestFactor = options().nbest.factor;
   if (nBestFactor < 1) nBestFactor = 1000; // 0 = unlimited
 
   // MAIN loop
@@ -295,7 +296,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret, bool onlyDistinct) c
 
 
     if(onlyDistinct) {
-      const size_t nBestFactor = StaticData::Instance().options().nbest.factor;
+      const size_t nBestFactor = options().nbest.factor;
       if (nBestFactor > 0)
         contenders.Prune(count * nBestFactor);
     } else {
@@ -552,26 +553,9 @@ void Manager::OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothe
     }
   }
 
-  // lexicalised re-ordering
-  /*
-  const std::vector<LexicalReordering*> &lexOrderings = StaticData::Instance().GetReorderModels();
-  std::vector<LexicalReordering*>::const_iterator iterLexOrdering;
-  for (iterLexOrdering = lexOrderings.begin() ; iterLexOrdering != lexOrderings.end() ; ++iterLexOrdering) {
-    LexicalReordering *lexicalReordering = *iterLexOrdering;
-    vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lexicalReordering);
-
-    outputWordGraphStream << scores[0];
-    vector<float>::const_iterator iterScore;
-    for (iterScore = ++scores.begin() ; iterScore != scores.end() ; ++iterScore) {
-      outputWordGraphStream << ", " << *iterScore;
-    }
-  }
-  */
-  // words !!
-//  outputWordGraphStream << "\tw=" << hypo->GetCurrTargetPhrase();
-
   // output both source and target phrases in the word graph
-  outputWordGraphStream << "\tw=" << hypo->GetSourcePhraseStringRep() << "|" << hypo->GetCurrTargetPhrase();
+  outputWordGraphStream << "\tw=" << hypo->GetSourcePhraseStringRep() 
+                        << "|" << hypo->GetCurrTargetPhrase();
 
   outputWordGraphStream << endl;
 }
@@ -1118,22 +1102,23 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
 
 }
 
+
 void
 OutputSearchNode(AllOptions const& opts, long translationId,
-                 std::ostream &outputSearchGraphStream,
+                 std::ostream &out,
                  SearchGraphNode const& searchNode)
 {
   const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
   bool extendedFormat = opts.output.SearchGraphExtended.size();
-  outputSearchGraphStream << translationId;
+  out << translationId;
 
   // special case: initial hypothesis
   if ( searchNode.hypo->GetId() == 0 ) {
-    outputSearchGraphStream << " hyp=0 stack=0";
+    out << " hyp=0 stack=0";
     if (extendedFormat) {
-      outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore;
+      out << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore;
     }
-    outputSearchGraphStream << endl;
+    out << endl;
     return;
   }
 
@@ -1141,50 +1126,42 @@ OutputSearchNode(AllOptions const& opts, long translationId,
 
   // output in traditional format
   if (!extendedFormat) {
-    outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId()
-                            << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
-                            << " back=" << prevHypo->GetId()
-                            << " score=" << searchNode.hypo->GetScore()
-                            << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
-
+    out << " hyp=" << searchNode.hypo->GetId()
+        << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
+        << " back=" << prevHypo->GetId()
+        << " score=" << searchNode.hypo->GetScore()
+        << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
+    
     if (searchNode.recombinationHypo != NULL)
-      outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
+      out << " recombined=" << searchNode.recombinationHypo->GetId();
 
-    outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
-                            << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
-                            << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos()
-                            << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder)
-                            << endl;
+    out << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
+        << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
+        << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos()
+        << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder)
+        << endl;
     return;
   }
 
-  // output in extended format
-//  if (searchNode.recombinationHypo != NULL)
-//    outputSearchGraphStream << " hyp=" << searchNode.recombinationHypo->GetId();
-//  else
-  outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId();
-
-  outputSearchGraphStream << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
-                          << " back=" << prevHypo->GetId()
-                          << " score=" << searchNode.hypo->GetScore()
-                          << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
+  out << " hyp=" << searchNode.hypo->GetId();
+  out << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
+      << " back=" << prevHypo->GetId()
+      << " score=" << searchNode.hypo->GetScore()
+      << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
 
   if (searchNode.recombinationHypo != NULL)
-    outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
-
-  outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
-                          << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
-                          << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
+    out << " recombined=" << searchNode.recombinationHypo->GetId();
+  
+  out << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
+      << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
+      << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
 
   // Modified so that -osgx is a superset of -osg (GST Oct 2011)
   ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
   scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
-  //outputSearchGraphStream << " scores = [ " << StaticData::Instance().GetAllWeights();
-  outputSearchGraphStream << " scores=\"" << scoreBreakdown << "\"";
-
-  outputSearchGraphStream << " out=\"" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
-                          searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << "\"" << endl;
-//  outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
+  out << " scores=\"" << scoreBreakdown << "\""
+      << " out=\"" << searchNode.hypo->GetSourcePhraseStringRep() 
+      << "|" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << "\"" << endl;
 }
 
 void Manager::GetConnectedGraph(
@@ -1508,7 +1485,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
     FixPrecision(debug,PRECISION);
 
     // all derivations - send them to debug stream
-    if (staticData.PrintAllDerivations()) {
+    if (options().output.PrintAllDerivations) {
       additionalReportingTime.start();
       PrintAllDerivations(translationId, debug);
       additionalReportingTime.stop();
@@ -1530,7 +1507,6 @@ void Manager::OutputBest(OutputCollector *collector)  const
           out << "||| ";
         }
 
-        // const PARAM_VEC *params = staticData.GetParameter().GetParam("print-id");
         if (options().output.PrintID) {
           out << translationId << " ";
         }
@@ -1544,10 +1520,11 @@ void Manager::OutputBest(OutputCollector *collector)  const
         if (options().output.ReportSegmentation == 2) {
           GetOutputLanguageModelOrder(out, bestHypo);
         }
-        bestHypo->OutputBestSurface(
-          out,
-          staticData.GetOutputFactorOrder(),
-          options().output);
+        OutputSurface(out,*bestHypo,true);
+        // bestHypo->OutputBestSurface(
+        //   out,
+        //   staticData.GetOutputFactorOrder(),
+        //   options().output);
         if (options().output.PrintAlignmentInfo) {
           out << "||| ";
           bestHypo->OutputAlignment(out, options().output.WA_SortOrder);
@@ -1726,8 +1703,12 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
  */
 void
 Manager::
-OutputSurface(std::ostream &out, const Hypothesis &edge) const
+OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) const
 {
+  if (recursive && edge.GetPrevHypo()) {
+    OutputSurface(out,*edge.GetPrevHypo(), true);
+  }
+
   std::vector<FactorType> outputFactorOrder = options().output.factor_order;
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
                  "Must specific at least 1 output factor");

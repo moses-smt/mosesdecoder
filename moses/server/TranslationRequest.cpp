@@ -89,7 +89,8 @@ void
 TranslationRequest::
 add_phrase_aln_info(Hypothesis const& h, vector<xmlrpc_c::value>& aInfo) const
 {
-  if (!m_withAlignInfo) return;
+  // if (!m_withAlignInfo) return;
+  if (!options().output.ReportSegmentation) return;
   Range const& trg = h.GetCurrTargetWordsRange();
   Range const& src = h.GetCurrSourceWordsRange();
 
@@ -337,7 +338,8 @@ run_chart_decoder()
 
 void
 TranslationRequest::
-pack_hypothesis(const Moses::Manager& manager, vector<Hypothesis const* > const& edges, string const& key,
+pack_hypothesis(const Moses::Manager& manager, 
+		vector<Hypothesis const* > const& edges, string const& key,
                 map<string, xmlrpc_c::value> & dest) const
 {
   // target string

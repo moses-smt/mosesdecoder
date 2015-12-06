@@ -171,12 +171,12 @@ StaticData
                                     "output-unknowns", "");
 
   //Print Translation Options
-  m_parameter->SetParameter(m_printTranslationOptions,
-                            "print-translation-option", false );
+  // m_parameter->SetParameter(m_printTranslationOptions,
+  // "print-translation-option", false );
 
   //Print All Derivations
-  m_parameter->SetParameter(m_printAllDerivations ,
-                            "print-all-derivations", false );
+  // m_parameter->SetParameter(m_printAllDerivations ,
+  //                           "print-all-derivations", false );
 
   m_parameter->SetParameter<long>(m_startTranslationId,
                                   "start-translation-id", 0);

@@ -133,7 +133,9 @@ protected:
   mutable std::ostringstream m_alignmentOut;
 public:
   void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList) const;
-  void OutputSurface(std::ostream &out, const Hypothesis &edge) const;
+  void OutputSurface(std::ostream &out, 
+		     Hypothesis const& edge, 
+		     bool const recursive=false) const;
 
   void OutputAlignment(std::ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset) const;
   void OutputInput(std::ostream& os, const Hypothesis* hypo) const;

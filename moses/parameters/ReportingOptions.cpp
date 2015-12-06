@@ -22,6 +22,10 @@ namespace Moses {
     std::string e; // hack to save us param.SetParameter<string>(...)
     param.SetParameter(AlignmentOutputFile,"alignment-output-file", e);
 
+
+    param.SetParameter(PrintAllDerivations, "print-all-derivations", false);
+    param.SetParameter(PrintTranslationOptions, "print-translation-option", false);
+
     // output a word graph
     PARAM_VEC const* params;
     params = param.GetParam("output-word-graph");

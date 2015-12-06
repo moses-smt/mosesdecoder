@@ -130,16 +130,15 @@ void ChartManager::Decode()
  */
 void ChartManager::AddXmlChartOptions()
 {
-  // const StaticData &staticData = StaticData::Instance();
-
-  const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
+  const std::vector <ChartTranslationOptions*> xmlChartOptionsList 
+    = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {
     cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl;
   }
   if (xmlChartOptionsList.size() == 0) return;
 
-  for(std::vector<ChartTranslationOptions*>::const_iterator i = xmlChartOptionsList.begin();
-      i != xmlChartOptionsList.end(); ++i) {
+  typedef std::vector<ChartTranslationOptions*>::const_iterator citer;
+  for(citer i = xmlChartOptionsList.begin(); i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
     const Range &range = opt->GetSourceWordsRange();
@@ -206,8 +205,7 @@ void ChartManager::CalcNBest(
   // than n.  The n-best factor determines how much bigger the limit should be,
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
-  const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.options().nbest.factor;
+  const std::size_t nBestFactor = options().nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? n*1000 : n*nBestFactor;
 
   // Extract the derivations.
@@ -317,7 +315,6 @@ void ChartManager::OutputBest(OutputCollector *collector) const
 
 void ChartManager::OutputNBest(OutputCollector *collector) const
 {
-  // const StaticData &staticData = StaticData::Instance();
   size_t nBestSize = options().nbest.nbest_size;
   if (nBestSize > 0) {
     const size_t translationId = m_source.GetTranslationId();
@@ -338,9 +335,6 @@ void ChartManager::OutputNBestList(OutputCollector *collector,
                                    const ChartKBestExtractor::KBestVec &nBestList,
                                    long translationId) const
 {
-  // const StaticData &staticData = StaticData::Instance();
-  // const std::vector<Moses::FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
-
   std::ostringstream out;
 
   if (collector->OutputIsCout()) {
@@ -617,13 +611,11 @@ void ChartManager::OutputDetailedTranslationReport(
   collector->Write(translationId, out.str());
 
   //DIMw
-  const StaticData &staticData = StaticData::Instance();
-
   if (options().output.detailed_all_transrep_filepath.size()) {
     const Sentence &sentence = static_cast<const Sentence &>(m_source);
-    size_t nBestSize = staticData.options().nbest.nbest_size;
+    size_t nBestSize = options().nbest.nbest_size;
     std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
-    CalcNBest(nBestSize, nBestList, staticData.options().nbest.nbest_size);
+    CalcNBest(nBestSize, nBestList, options().nbest.only_distinct);
     OutputDetailedAllTranslationReport(collector, nBestList, sentence, translationId);
   }
 
@@ -727,7 +719,8 @@ void ChartManager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector 
   OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
 
   //Tree of full sentence
-  const StatefulFeatureFunction* treeStructure = StaticData::Instance().GetTreeStructure();
+  const StatefulFeatureFunction* treeStructure;
+  treeStructure = StaticData::Instance().GetTreeStructure();
   if (treeStructure != NULL) {
     const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
     for( size_t i=0; i<sff.size(); i++ ) {
@@ -815,15 +808,6 @@ void ChartManager::OutputDetailedAllTranslationReport(
   collector->Write(translationId, out.str());
 }
 
-// void ChartManager::OutputSearchGraphHypergraph() const
-// {
-//   const StaticData &staticData = StaticData::Instance();
-//   if (staticData.GetOutputSearchGraphHypergraph()) {
-//     HypergraphOutput<ChartManager> hypergraphOutputChart(PRECISION);
-//     hypergraphOutputChart.Write(*this);
-//   }
-// }
-
 void ChartManager::OutputBestHypo(OutputCollector *collector, const ChartHypothesis *hypo, long translationId) const
 {
   if (!collector)
@@ -853,9 +837,7 @@ void ChartManager::OutputBestHypo(OutputCollector *collector, const ChartHypothe
     outPhrase.RemoveWord(0);
     outPhrase.RemoveWord(outPhrase.GetSize() - 1);
 
-    const std::vector<FactorType> outputFactorOrder
-    = StaticData::Instance().GetOutputFactorOrder();
-    string output = outPhrase.GetStringRep(outputFactorOrder);
+    string output = outPhrase.GetStringRep(options().output.factor_order);
     out << output << endl;
   } else {
     VERBOSE(1, "NO BEST TRANSLATION" << endl);

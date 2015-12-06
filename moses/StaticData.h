@@ -249,76 +249,89 @@ public:
     return m_options.output.factor_order;
   }
 
-  inline bool GetSourceStartPosMattersForRecombination() const {
+  inline bool 
+  GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
   }
-  // inline bool GetDropUnknown() const {
-  //   return m_dropUnknown;
-  // }
-  // inline bool GetMarkUnknown() const {
-  //   return m_markUnknown;
-  // }
-  // inline std::string GetUnknownWordPrefix() const {
-  //   return m_unknownWordPrefix;
-  // }
-  // inline std::string GetUnknownWordSuffix() const {
-  //   return m_unknownWordSuffix;
-  // }
-  inline bool GetDisableDiscarding() const {
+
+  inline bool 
+  GetDisableDiscarding() const {
     return m_disableDiscarding;
   }
-  inline size_t GetMaxNoTransOptPerCoverage() const {
+
+  inline size_t 
+  GetMaxNoTransOptPerCoverage() const {
     return m_options.search.max_trans_opt_per_cov;
   }
-  inline size_t GetMaxNoPartTransOpt() const {
+
+  inline size_t 
+  GetMaxNoPartTransOpt() const {
     return m_options.search.max_partial_trans_opt;
   }
-  inline size_t GetMaxPhraseLength() const {
+
+  inline size_t 
+  GetMaxPhraseLength() const {
     return m_options.search.max_phrase_length;
   }
-  bool IsWordDeletionEnabled() const {
+
+  bool 
+  IsWordDeletionEnabled() const {
     return m_wordDeletionEnabled;
   }
 
-  int GetMaxDistortion() const {
+  int 
+  GetMaxDistortion() const {
     return m_options.reordering.max_distortion;
   }
-  bool UseReorderingConstraint() const {
+
+  bool 
+  UseReorderingConstraint() const {
     return m_reorderingConstraint;
   }
 
-  bool UseEarlyDiscarding() const {
+  bool 
+  UseEarlyDiscarding() const {
     return m_options.search.early_discarding_threshold
-           != -std::numeric_limits<float>::infinity();
-  }
-  bool UseEarlyDistortionCost() const {
-    return m_options.reordering.use_early_distortion_cost;
-    // return m_useEarlyDistortionCost;
-  }
-  float GetTranslationOptionThreshold() const {
-    return m_options.search.trans_opt_threshold;
+      != -std::numeric_limits<float>::infinity();
   }
 
-  size_t GetVerboseLevel() const {
+  bool 
+  UseEarlyDistortionCost() const {
+    return m_options.reordering.use_early_distortion_cost;
+  }
+
+  float 
+  GetTranslationOptionThreshold() const {
+    return m_options.search.trans_opt_threshold;
+  }
+  
+  size_t 
+  GetVerboseLevel() const {
     return m_verboseLevel;
   }
-  void SetVerboseLevel(int x) const {
+
+  void 
+  SetVerboseLevel(int x) const {
     m_verboseLevel = x;
   }
 
-  bool UseMinphrInMemory() const {
+  bool 
+  UseMinphrInMemory() const {
     return m_minphrMemory;
   }
 
-  bool UseMinlexrInMemory() const {
+  bool 
+  UseMinlexrInMemory() const {
     return m_minlexrMemory;
   }
-
-  size_t GetLatticeSamplesSize() const {
+  
+  size_t 
+  GetLatticeSamplesSize() const {
     return m_latticeSamplesSize;
   }
 
-  const std::string& GetLatticeSamplesFilePath() const {
+  const std::string& 
+  GetLatticeSamplesFilePath() const {
     return m_latticeSamplesFilePath;
   }
 
@@ -373,21 +386,17 @@ public:
     return m_includeLHSInSearchGraph;
   }
 
-  // XmlInputType GetXmlInputType() const {
-  //   return m_xmlInputType;
-  // }
-
   std::pair<std::string,std::string> GetXmlBrackets() const {
     return m_xmlBrackets;
   }
 
-  bool PrintTranslationOptions() const {
-    return m_printTranslationOptions;
-  }
+  // bool PrintTranslationOptions() const {
+  //   return m_printTranslationOptions;
+  // }
 
-  bool PrintAllDerivations() const {
-    return m_printAllDerivations;
-  }
+  // bool PrintAllDerivations() const {
+  //   return m_printAllDerivations;
+  // }
 
   const UnknownLHSList &GetUnknownLHS() const {
     return m_unknownLHS;
@@ -525,10 +534,6 @@ public:
 
   std::map<std::string, std::string> OverrideFeatureNames();
   void OverrideFeatures();
-
-  // FactorType GetPlaceholderFactor() const {
-  //   return m_placeHolderFactor;
-  // }
 
   const FeatureRegistry &GetFeatureRegistry() const {
     return m_registry;
