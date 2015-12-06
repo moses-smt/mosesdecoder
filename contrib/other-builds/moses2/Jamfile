@@ -6,6 +6,9 @@ import path ;
 
 external-lib boost_serialization ;
 
+lib dalm : : <search>$(with-dalm)/lib ;
+alias dalm-libs : dalm ;
+
  exe moses2 :
  	 InputPath.cpp 
  	 InputPaths.cpp
@@ -69,6 +72,10 @@ external-lib boost_serialization ;
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 
  ../../..//boost_filesystem  
- : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) <cxxflags>-std=c++11 <library>boost_serialization ;
+ dalm-libs
+ : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) <cxxflags>-std=c++11 <library>boost_serialization <include>/home/hieu/workspace/github/DALM/include <include>/home/hieu/workspace/github/DALM/darts-clone ;
 # MUST have space before semicolon ;
+
+  alias dalmALIAS : dalm-libs : : : <define>LM_DALM ;
+  dependencies += dalmALIAS ;
 

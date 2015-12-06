@@ -12,26 +12,7 @@
 using namespace std;
 
 /////////////////////////
-void read_ini(const char *inifile, string &model, string &words, string &wordstxt)
-{
-  ifstream ifs(inifile);
-  string line;
-
-  getline(ifs, line);
-  while(ifs) {
-    unsigned int pos = line.find("=");
-    string key = line.substr(0, pos);
-    string value = line.substr(pos+1, line.size()-pos);
-    if(key=="MODEL") {
-      model = value;
-    } else if(key=="WORDS") {
-      words = value;
-    } else if(key=="WORDSTXT") {
-      wordstxt = value;
-    }
-    getline(ifs, line);
-  }
-}
+extern void read_ini(const char *inifile, string &model, string &words, string &wordstxt);
 /////////////////////////
 
 LanguageModelDALM::LanguageModelDALM(size_t startInd, const std::string &line)
