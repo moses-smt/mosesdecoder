@@ -176,7 +176,11 @@ sub exec_moses_server {
   } elsif ($pid == 0) {
       setpgrp(0, 0);
       warn "Starting Moses server on port $serverport ...\n";
-      ($o, $ec, $sig) = run_command("$decoder --server --server-port $serverport -f $conf -verbose 2 --server-log $results/run.stderr.server 2> $results/run.stderr ");
+      my $cmd = "$decoder --server --server-port $serverport -f $conf -verbose 2 --server-log $results/run.stderr.server 2> $results/run.stderr ";
+      open  CMD, ">$results/cmd_line";
+      print CMD "$cmd\n";
+      close CMD;
+      ($o, $ec, $sig) = run_command($cmd);
       exit;
       # this should not be reached unless the server fails to start
   }
