@@ -4,6 +4,7 @@
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
+#include <boost/functional/hash.hpp>
 #include <vector>
 #include "Phrase.h"
 #include "Word.h"
@@ -12,6 +13,20 @@
 
 using namespace std;
 
+size_t Phrase::hash() const
+{
+  size_t  seed = 0;
+
+  for (size_t i = 0; i < GetSize(); ++i) {
+	  const Word &word = (*this)[i];
+	  size_t wordHash = word.hash();
+	  boost::hash_combine(seed, wordHash);
+  }
+
+  return seed;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
 PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab, const System &system, const std::string &str)
 {
 	vector<string> toks = Tokenize(str);
@@ -62,7 +77,7 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 }
 
 
-////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 SubPhrase::SubPhrase(const PhraseImpl &origPhrase, size_t start, size_t end)
 :m_origPhrase(&origPhrase)
 ,m_start(start)

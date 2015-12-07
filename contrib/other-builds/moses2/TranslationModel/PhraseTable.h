@@ -44,5 +44,16 @@ protected:
   size_t m_ptInd;
   size_t m_tableLimit;
 
+  // cache
+  size_t m_maxCacheSize; // 0 = no caching
+
+  typedef std::pair<TargetPhrases::shared_const_ptr, clock_t> CacheCollEntry;
+  typedef boost::unordered_map<size_t, CacheCollEntry> CacheColl;
+  mutable boost::thread_specific_ptr<CacheColl> m_cache;
+
+
+  CacheColl &GetCache() const;
+  void ReduceCache() const;
+
 };
 

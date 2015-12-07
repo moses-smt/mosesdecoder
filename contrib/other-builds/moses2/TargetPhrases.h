@@ -42,6 +42,7 @@ public:
 
 	void SortAndPrune(size_t tableLimit);
 
+	const TargetPhrases *Clone() const;
 protected:
 	Coll m_coll;
 

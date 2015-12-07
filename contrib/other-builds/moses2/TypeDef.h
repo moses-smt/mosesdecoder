@@ -10,6 +10,8 @@
 
 class Hypothesis;
 
+const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
+
 #ifndef BOS_
 #define BOS_ "<s>" //Beginning of sentence symbol
 #endif

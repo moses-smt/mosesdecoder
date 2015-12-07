@@ -22,6 +22,7 @@ class Phrase
 public:
   virtual const Word& operator[](size_t pos) const = 0;
   virtual size_t GetSize() const = 0;
+  size_t hash() const;
 };
 
 class PhraseImpl : public Phrase

@@ -5,14 +5,18 @@
  *      Author: hieu
  */
 #include <boost/foreach.hpp>
+#include <queue>
 #include "PhraseTable.h"
 #include "../InputPaths.h"
+#include "../legacy/Util2.h"
+#include "../TypeDef.h"
 
 using namespace std;
 
 PhraseTable::PhraseTable(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
 ,m_tableLimit(20) // default
+,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
 	ReadParameters();
 }
@@ -42,21 +46,54 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 
 void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
-	  BOOST_FOREACH(InputPath &path, inputPaths) {
-			const SubPhrase &phrase = path.subPhrase;
-			TargetPhrases::shared_const_ptr tps = Lookup(mgr, path);
+  CacheColl &cache = GetCache();
+  BOOST_FOREACH(InputPath &path, inputPaths) {
+	  const SubPhrase &phrase = path.subPhrase;
 
-			/*
-			cerr << "path=" << path.GetRange() << " ";
-			cerr << "tps=" << tps << " ";
-			if (tps.get()) {
-				cerr << tps.get()->GetSize();
-			}
-			cerr << endl;
-			*/
+	  TargetPhrases::shared_const_ptr tpsPtr;
+	  if (m_maxCacheSize) {
+		size_t hash = phrase.hash();
 
-			path.AddTargetPhrases(*this, tps);
+		CacheColl::iterator iter;
+		iter = cache.find(hash);
+
+		if (iter == cache.end()) {
+		  // not in cache, need to look up from phrase table
+			tpsPtr = Lookup(mgr, path);
+
+		  // create a copy using the pt's own mem pool
+		  const TargetPhrases *tpsLookup = tpsPtr.get();
+
+		  TargetPhrases::shared_const_ptr tpsPtrCache;
+		  if (tpsLookup) {
+			  const TargetPhrases *tpsCache = tpsLookup->Clone();
+			  tpsPtrCache.reset(tpsCache);
+		  }
+
+		  typedef std::pair<const TargetPhrases::shared_const_ptr , clock_t> entry;
+		  cache[hash] = entry(tpsPtrCache, clock());
+		}
+		else {
+		  // in cache. just use it
+		  iter->second.second = clock();
+		  tpsPtr = iter->second.first;
+		}
+	  } else {
+		// don't use cache. look up from phrase table
+		  tpsPtr = Lookup(mgr, path);
 	  }
+
+		/*
+		cerr << "path=" << path.GetRange() << " ";
+		cerr << "tps=" << tps << " ";
+		if (tps.get()) {
+			cerr << tps.get()->GetSize();
+		}
+		cerr << endl;
+		*/
+
+		path.AddTargetPhrases(*this, tpsPtr);
+  }
 
 }
 
@@ -71,5 +108,40 @@ PhraseTable::EvaluateInIsolation(const System &system,
 		Scores &scores,
 		Scores *estimatedScores) const
 {
-
 }
+
+PhraseTable::CacheColl &PhraseTable::GetCache() const
+{
+  CacheColl &ret = GetThreadSpecificObj(m_cache);
+  return ret;
+}
+
+// reduce presistent cache by half of maximum size
+void PhraseTable::ReduceCache() const
+{
+  CacheColl &cache = GetCache();
+  if (cache.size() <= m_maxCacheSize) return; // not full
+
+  // find cutoff for last used time
+  priority_queue< clock_t > lastUsedTimes;
+  CacheColl::iterator iter;
+  iter = cache.begin();
+  while( iter != cache.end() ) {
+    lastUsedTimes.push( iter->second.second );
+    iter++;
+  }
+  for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
+    lastUsedTimes.pop();
+  clock_t cutoffLastUsedTime = lastUsedTimes.top();
+
+  // remove all old entries
+  iter = cache.begin();
+  while( iter != cache.end() ) {
+    if (iter->second.second < cutoffLastUsedTime) {
+      CacheColl::iterator iterRemove = iter++;
+      // delete iterRemove->second.first;
+      cache.erase(iterRemove);
+    } else iter++;
+  }
+}
+
