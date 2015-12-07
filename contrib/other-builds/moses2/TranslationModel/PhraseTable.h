@@ -47,8 +47,17 @@ protected:
   // cache
   size_t m_maxCacheSize; // 0 = no caching
 
-  typedef std::pair<TargetPhrases::shared_const_ptr, clock_t> CacheCollEntry;
-  typedef boost::unordered_map<size_t, CacheCollEntry> CacheColl;
+  struct CacheCollEntry2
+  {
+	  TargetPhrases::shared_const_ptr tpsPtr;
+	  clock_t clock;
+	  MemPool *pool;
+
+	  CacheCollEntry2();
+	  virtual ~CacheCollEntry2();
+  };
+
+  typedef boost::unordered_map<size_t, CacheCollEntry2> CacheColl;
   mutable boost::thread_specific_ptr<CacheColl> m_cache;
 
 

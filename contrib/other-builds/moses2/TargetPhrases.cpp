@@ -45,7 +45,7 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
   //cerr << "TargetPhrases=" << GetSize() << endl;
 }
 
-const TargetPhrases *TargetPhrases::Clone() const
+const TargetPhrases *TargetPhrases::Clone(MemPool &pool) const
 {
 
 }

@@ -13,6 +13,17 @@
 
 using namespace std;
 
+PhraseTable::CacheCollEntry2::CacheCollEntry2()
+:pool(NULL)
+{
+}
+
+PhraseTable::CacheCollEntry2::~CacheCollEntry2()
+{
+	delete pool;
+}
+
+////////////////////////////////////////////////////////////////////////////
 PhraseTable::PhraseTable(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
 ,m_tableLimit(20) // default
@@ -27,7 +38,10 @@ PhraseTable::~PhraseTable() {
 
 void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "path") {
+  if (key == "cache-size") {
+    m_maxCacheSize = Scan<size_t>(value);
+  }
+  else if (key == "path") {
 	  m_path = value;
   }
   else if (key == "input-factor") {
@@ -59,24 +73,30 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 		if (iter == cache.end()) {
 		  // not in cache, need to look up from phrase table
-			tpsPtr = Lookup(mgr, path);
+		  tpsPtr = Lookup(mgr, path);
 
 		  // create a copy using the pt's own mem pool
 		  const TargetPhrases *tpsLookup = tpsPtr.get();
 
+		  CacheColl::value_type val(hash, CacheCollEntry2());
+		  std::pair<CacheColl::iterator, bool> retIns = cache.insert(val);
+		  assert(retIns.second);
+
+		  CacheCollEntry2 &entry = retIns.first->second;
+		  entry.clock = clock();
+		  entry.pool = new MemPool();
+
 		  TargetPhrases::shared_const_ptr tpsPtrCache;
 		  if (tpsLookup) {
-			  const TargetPhrases *tpsCache = tpsLookup->Clone();
-			  tpsPtrCache.reset(tpsCache);
+			  const TargetPhrases *tpsCache = tpsLookup->Clone(*entry.pool);
+			  entry.tpsPtr = tpsPtrCache;
 		  }
 
-		  typedef std::pair<const TargetPhrases::shared_const_ptr , clock_t> entry;
-		  cache[hash] = entry(tpsPtrCache, clock());
 		}
 		else {
 		  // in cache. just use it
-		  iter->second.second = clock();
-		  tpsPtr = iter->second.first;
+		  iter->second.clock = clock();
+		  tpsPtr = iter->second.tpsPtr;
 		}
 	  } else {
 		// don't use cache. look up from phrase table
@@ -127,7 +147,7 @@ void PhraseTable::ReduceCache() const
   CacheColl::iterator iter;
   iter = cache.begin();
   while( iter != cache.end() ) {
-    lastUsedTimes.push( iter->second.second );
+    lastUsedTimes.push( iter->second.clock );
     iter++;
   }
   for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
@@ -137,7 +157,7 @@ void PhraseTable::ReduceCache() const
   // remove all old entries
   iter = cache.begin();
   while( iter != cache.end() ) {
-    if (iter->second.second < cutoffLastUsedTime) {
+    if (iter->second.clock < cutoffLastUsedTime) {
       CacheColl::iterator iterRemove = iter++;
       // delete iterRemove->second.first;
       cache.erase(iterRemove);
