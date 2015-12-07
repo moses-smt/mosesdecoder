@@ -244,10 +244,6 @@ public:
   void OutputInput(std::ostream& os) const;
   static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
 
-  // void OutputBestSurface(std::ostream &out, const std::vector<Moses::FactorType> &outputFactorOrder, const ReportingOptions &options) const;
-  // void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-  // const ReportingOptions &options) const;
-
   // creates a map of TARGET positions which should be replaced by word using placeholder
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
 

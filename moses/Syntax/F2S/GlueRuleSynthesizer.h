@@ -17,7 +17,7 @@ namespace F2S
 class GlueRuleSynthesizer : public HyperTreeCreator
 {
 public:
-  GlueRuleSynthesizer(HyperTree &);
+  GlueRuleSynthesizer(HyperTree &, std::vector<FactorType> const& iFactors);
 
   // Synthesize the minimal, monotone rule that can be applied to the given
   // hyperedge and add it to the rule trie.

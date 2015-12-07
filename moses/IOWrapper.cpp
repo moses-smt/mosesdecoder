@@ -87,8 +87,8 @@ IOWrapper::IOWrapper()
 
   m_currentLine = staticData.GetStartTranslationId();
 
-  m_inputFactorOrder = &staticData.GetInputFactorOrder();
-
+  m_inputFactorOrder = &staticData.options().input.factor_order;
+  
   size_t nBestSize = staticData.options().nbest.nbest_size;
   string nBestFilePath = staticData.options().nbest.output_file_path;
 
@@ -129,8 +129,8 @@ IOWrapper::IOWrapper()
   P.SetParameter<string>(path, "output-word-graph", "");
   if (path.size()) m_wordGraphCollector.reset(new OutputCollector(path));
 
-  size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
-  string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
+  size_t latticeSamplesSize = staticData.options().output.lattice_sample_size;
+  string latticeSamplesFile = staticData.options().output.lattice_sample_filepath;
   if (latticeSamplesSize) {
     m_latticeSamplesCollector.reset(new OutputCollector(latticeSamplesFile));
     if (m_latticeSamplesCollector->OutputIsCout()) {

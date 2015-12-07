@@ -13,13 +13,14 @@ namespace Syntax
 namespace F2S
 {
 
-GlueRuleSynthesizer::GlueRuleSynthesizer(HyperTree &trie)
+GlueRuleSynthesizer::
+GlueRuleSynthesizer(HyperTree &trie, const std::vector<FactorType> &iFactors)
   : m_hyperTree(trie)
 {
-  const std::vector<FactorType> &inputFactorOrder =
-    StaticData::Instance().GetInputFactorOrder();
+  // const std::vector<FactorType> &inputFactorOrder =
+  // StaticData::Instance().GetInputFactorOrder();
   Word *lhs = NULL;
-  m_dummySourcePhrase.CreateFromString(Input, inputFactorOrder, "hello", &lhs);
+  m_dummySourcePhrase.CreateFromString(Input, iFactors, "hello", &lhs);
   delete lhs;
 }
 

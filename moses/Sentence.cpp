@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "XmlOption.h"
 #include "FactorCollection.h"
+#include "TranslationTask.h"
 
 using namespace std;
 
@@ -265,11 +266,14 @@ TranslationOptionCollection*
 Sentence::
 CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
-  size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
-  float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
+  size_t maxNoTransOptPerCoverage = ttask->options().search.max_trans_opt_per_cov;
+  // StaticData::Instance().GetMaxNoTransOptPerCoverage();
+  float transOptThreshold = ttask->options().search.trans_opt_threshold;
+  // StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
-  = new TranslationOptionCollectionText(ttask, *this, maxNoTransOptPerCoverage,
-                                        transOptThreshold);
+    = new TranslationOptionCollectionText(ttask, *this, 
+					  maxNoTransOptPerCoverage,
+					  transOptThreshold);
   assert(rv);
   return rv;
 }
@@ -378,7 +382,7 @@ Sentence(size_t const transId,
   : InputType(transId)
 {
   if (IFO) init(stext, *IFO, opts);
-  else init(stext, StaticData::Instance().GetInputFactorOrder(), opts);
+  else init(stext, opts.input.factor_order, opts);
 }
 
 }

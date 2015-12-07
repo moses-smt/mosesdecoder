@@ -194,7 +194,7 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption co
   string cleanLine; // return string (text without xml)
   size_t wordPos = 0; // position in sentence (in terms of number of words)
 
-  const vector<FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
+  const vector<FactorType> &outputFactorOrder = opts.output.factor_order;
   // const string &factorDelimiter = staticData.GetFactorDelimiter();
 
   // loop through the tokens

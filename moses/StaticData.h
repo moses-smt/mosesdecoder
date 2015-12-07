@@ -241,13 +241,13 @@ public:
     return m_options;
   }
 
-  const std::vector<FactorType> &GetInputFactorOrder() const {
-    return m_options.input.factor_order;
-  }
+  // const std::vector<FactorType> &GetInputFactorOrder() const {
+  //   return m_options.input.factor_order;
+  // }
 
-  const std::vector<FactorType> &GetOutputFactorOrder() const {
-    return m_options.output.factor_order;
-  }
+  // const std::vector<FactorType> &GetOutputFactorOrder() const {
+  //   return m_options.output.factor_order;
+  // }
 
   inline bool 
   GetSourceStartPosMattersForRecombination() const {
@@ -259,20 +259,20 @@ public:
     return m_disableDiscarding;
   }
 
-  inline size_t 
-  GetMaxNoTransOptPerCoverage() const {
-    return m_options.search.max_trans_opt_per_cov;
-  }
+  // inline size_t 
+  // GetMaxNoTransOptPerCoverage() const {
+  //   return m_options.search.max_trans_opt_per_cov;
+  // }
 
-  inline size_t 
-  GetMaxNoPartTransOpt() const {
-    return m_options.search.max_partial_trans_opt;
-  }
+  // inline size_t 
+  // GetMaxNoPartTransOpt() const {
+  //   return m_options.search.max_partial_trans_opt;
+  // }
 
-  inline size_t 
-  GetMaxPhraseLength() const {
-    return m_options.search.max_phrase_length;
-  }
+  // inline size_t 
+  // GetMaxPhraseLength() const {
+  //   return m_options.search.max_phrase_length;
+  // }
 
   bool 
   IsWordDeletionEnabled() const {
@@ -325,16 +325,6 @@ public:
     return m_minlexrMemory;
   }
   
-  size_t 
-  GetLatticeSamplesSize() const {
-    return m_latticeSamplesSize;
-  }
-
-  const std::string& 
-  GetLatticeSamplesFilePath() const {
-    return m_latticeSamplesFilePath;
-  }
-
   bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
     if (algo == DefaultSearchAlgorithm)
       algo = m_options.search.algo;

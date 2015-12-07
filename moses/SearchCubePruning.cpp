@@ -50,10 +50,9 @@ public:
 };
 
 SearchCubePruning::
-SearchCubePruning(Manager& manager, const InputType &source,
-                  const TranslationOptionCollection &transOptColl)
-  : Search(manager, source)
-  , m_hypoStackColl(source.GetSize() + 1)
+SearchCubePruning(Manager& manager, TranslationOptionCollection const& transOptColl)
+  : Search(manager)
+  , m_hypoStackColl(manager.GetSource().GetSize() + 1)
   , m_transOptColl(transOptColl)
 {
   std::vector < HypothesisStackCubePruning >::iterator iterStack;

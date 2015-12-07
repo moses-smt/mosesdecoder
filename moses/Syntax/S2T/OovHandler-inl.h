@@ -52,11 +52,12 @@ Phrase *OovHandler<RuleTrie>::SynthesizeSourcePhrase(const Word &sourceWord)
 }
 
 template<typename RuleTrie>
-Word *OovHandler<RuleTrie>::SynthesizeTargetLhs(const std::string &lhsStr)
+Word *
+OovHandler<RuleTrie>::SynthesizeTargetLhs(const std::string &lhsStr)
 {
   Word *targetLhs = new Word(true);
   targetLhs->CreateFromString(Output,
-                              StaticData::Instance().GetOutputFactorOrder(),
+                              StaticData::Instance().options().output.factor_order,
                               lhsStr, true);
   UTIL_THROW_IF2(targetLhs->GetFactor(0) == NULL, "Null factor for target LHS");
   return targetLhs;

@@ -33,7 +33,7 @@ Manager<RuleMatcher>::Manager(ttasksptr const& ttask)
 {
   if (const TreeInput *p = dynamic_cast<const TreeInput*>(&m_source)) {
     // Construct the InputTree.
-    InputTreeBuilder builder;
+    InputTreeBuilder builder(options().output.factor_order);
     builder.Build(*p, "Q", m_inputTree);
   } else {
     UTIL_THROW2("ERROR: T2S::Manager requires input to be a tree");

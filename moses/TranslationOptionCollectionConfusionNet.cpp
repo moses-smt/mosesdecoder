@@ -218,16 +218,19 @@ CreateTranslationOptionsForRangeNew
 
 bool
 TranslationOptionCollectionConfusionNet::
-CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph, size_t startPos,
-                                       size_t endPos, bool adhereTableLimit, size_t graphInd)
+CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph, 
+                                       size_t startPos, size_t endPos, 
+                                       bool adhereTableLimit, size_t graphInd)
 {
   bool retval = true;
+  size_t const max_phrase_length 
+    = StaticData::Instance().options().search.max_phrase_length;
   XmlInputType intype = m_ttask.lock()->options().input.xml_policy;
   if ((intype != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     InputPathList &inputPathList = GetInputPathList(startPos, endPos);
 
     // partial trans opt stored in here
-    PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+    PartialTranslOptColl* oldPtoc = new PartialTranslOptColl(max_phrase_length);
     size_t totalEarlyPruned = 0;
 
     // initial translation step
@@ -248,7 +251,7 @@ CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph, size_t st
       const DecodeStepTranslation *transStep =dynamic_cast<const DecodeStepTranslation*>(decodeStep);
       const DecodeStepGeneration *genStep =dynamic_cast<const DecodeStepGeneration*>(decodeStep);
 
-      PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
+      PartialTranslOptColl* newPtoc = new PartialTranslOptColl(max_phrase_length);
 
       // go thru each intermediate trans opt just created
       const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();

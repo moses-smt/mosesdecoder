@@ -152,7 +152,7 @@ insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData)
         x["recombined"] = value_int(n.recombinationHypo->GetId());
       x["cover-start"] = value_int(hypo->GetCurrSourceWordsRange().GetStartPos());
       x["cover-end"] = value_int(hypo->GetCurrSourceWordsRange().GetEndPos());
-      x["out"] = value_string(hypo->GetCurrTargetPhrase().GetStringRep(StaticData::Instance().GetOutputFactorOrder()));
+      x["out"] = value_string(hypo->GetCurrTargetPhrase().GetStringRep(options().output.factor_order));
     }
     searchGraphXml.push_back(value_struct(x));
   }
@@ -317,7 +317,7 @@ run_chart_decoder()
 {
   Moses::TreeInput tinput;
   istringstream buf(m_source_string + "\n");
-  tinput.Read(buf, StaticData::Instance().GetInputFactorOrder(), m_options);
+  tinput.Read(buf, options().input.factor_order, m_options);
   
   Moses::ChartManager manager(this->self());
   manager.Decode();

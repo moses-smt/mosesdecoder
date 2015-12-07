@@ -11,7 +11,7 @@
 #include "Sentence.h"
 #include "moses/FF/InputFeature.h"
 #include "util/exception.hh"
-
+#include "moses/TranslationTask.h"
 namespace Moses
 {
 struct CNStats {
@@ -282,9 +282,11 @@ ConfusionNet::
 CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   size_t maxNoTransOptPerCoverage
-  = StaticData::Instance().GetMaxNoTransOptPerCoverage();
+    = ttask->options().search.max_trans_opt_per_cov; 
+  // StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold
-  = StaticData::Instance().GetTranslationOptionThreshold();
+    = ttask->options().search.trans_opt_threshold;
+  // StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
   = new TranslationOptionCollectionConfusionNet
   (ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);

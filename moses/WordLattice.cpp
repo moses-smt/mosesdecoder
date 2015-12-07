@@ -7,6 +7,7 @@
 #include "TranslationOptionCollectionLattice.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "moses/FF/InputFeature.h"
+#include "moses/TranslationTask.h"
 
 namespace Moses
 {
@@ -52,7 +53,7 @@ void WordLattice::Print(std::ostream& out) const
 int
 WordLattice::
 InitializeFromPCNDataType
-(const PCN::CN& cn,
+(const PCN::CN& cn, size_t const maxPhraseLength,
  const std::vector<FactorType>& factorOrder,
  const std::string& debug_line)
 {
@@ -61,7 +62,7 @@ InitializeFromPCNDataType
   size_t numInputScores = inputFeature->GetNumInputScores();
   size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
 
-  size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+  // size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 
   bool addRealWordCount = (numRealWordCount > 0);
 
@@ -118,8 +119,8 @@ InitializeFromPCNDataType
       // String2Word(alt.m_word, data[i][j]. first, factorOrder);
       next_nodes[i][j] = alt.m_next;
 
-      if(next_nodes[i][j] > maxSizePhrase) {
-        TRACE_ERR("ERROR: Jump length " << next_nodes[i][j] << " in word lattice exceeds maximum phrase length " << maxSizePhrase << ".\n");
+      if(next_nodes[i][j] > maxPhraseLength) {
+        TRACE_ERR("ERROR: Jump length " << next_nodes[i][j] << " in word lattice exceeds maximum phrase length " << maxPhraseLength << ".\n");
         TRACE_ERR("ERROR: Increase max-phrase-length to process this lattice.\n");
         return false;
       }
@@ -162,7 +163,8 @@ Read(std::istream& in,
   }
 
   PCN::CN cn = PCN::parsePCN(line);
-  return InitializeFromPCNDataType(cn, factorOrder, line);
+  return InitializeFromPCNDataType(cn, opts.search.max_phrase_length, 
+				   factorOrder, line);
 }
 
 void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
@@ -226,8 +228,14 @@ TranslationOptionCollection*
 WordLattice
 ::CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
-  size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
-  float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
+  // size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
+  // float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
+
+  size_t maxNoTransOptPerCoverage = ttask->options().search.max_trans_opt_per_cov; 
+  // StaticData::Instance().GetMaxNoTransOptPerCoverage();
+  float translationOptionThreshold = ttask->options().search.trans_opt_threshold;
+    // StaticData::Instance().GetTranslationOptionThreshold();
+
 
   TranslationOptionCollection *rv = NULL;
   //rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);

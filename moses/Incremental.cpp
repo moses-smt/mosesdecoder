@@ -329,7 +329,7 @@ OutputNBestList(OutputCollector *collector,
 {
   const StaticData &staticData = StaticData::Instance();
   const std::vector<Moses::FactorType> &outputFactorOrder
-  = staticData.GetOutputFactorOrder();
+    = options().output.factor_order;
 
   std::ostringstream out;
   // wtf? copied from the original OutputNBestList
@@ -519,7 +519,7 @@ void Manager::OutputBestHypo(OutputCollector *collector, search::Applied applied
                  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
   outPhrase.RemoveWord(0);
   outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-  out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
+  out << outPhrase.GetStringRep(options().output.factor_order);
   out << '\n';
   collector->Write(translationId, out.str());
 

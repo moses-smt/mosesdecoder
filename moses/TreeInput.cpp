@@ -30,6 +30,8 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
 {
   //parse XML markup in translation line
 
+  vector<FactorType> const& oFactors = opts.output.factor_order;
+
   // no xml tag? we're done.
   if (line.find_first_of('<') == string::npos) {
     return true;
@@ -52,10 +54,6 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
 
   string cleanLine; // return string (text without xml)
   size_t wordPos = 0; // position in sentence (in terms of number of words)
-
-  // keep this handy for later
-  const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-  // const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -184,8 +182,7 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
             TargetPhrase targetPhrase(firstPt);
-            // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
-            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
+            targetPhrase.CreateFromString(Output, oFactors, altTexts[i], NULL);
 
             // set constituent label
             string targetLHSstr;
@@ -197,7 +194,7 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
               targetLHSstr = iterLHS->first;
             }
             Word *targetLHS = new Word(true);
-            targetLHS->CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
+            targetLHS->CreateFromString(Output, oFactors, targetLHSstr, true);
             UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL,
                            "Null factor left-hand-side");
             targetPhrase.SetTargetLHS(targetLHS);

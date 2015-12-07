@@ -40,7 +40,9 @@ public:
   /** Given a lattice represented using the PCN::CN data type (topologically sorted agency list
    * representation), initialize the WordLattice object
    */
-  int InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line = "");
+  int InitializeFromPCNDataType(const PCN::CN& cn, size_t const maxPhraseLength, 
+				const std::vector<FactorType>& factorOrder, 
+				const std::string& debug_line = "");
   /** Read from PLF format (1 lattice per line)
    */
   int Read(std::istream& in,

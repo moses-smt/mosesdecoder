@@ -1,11 +1,8 @@
-#include "Manager.h"
-
 #include <sstream>
-
-#include "moses/OutputCollector.h"
-#include "moses/StaticData.h"
-
+#include "Manager.h"
 #include "PVertex.h"
+#include "moses/OutputCollector.h"
+#include "moses/Util.h"
 
 namespace Moses
 {
@@ -40,7 +37,7 @@ void Manager::OutputBest(OutputCollector *collector) const
                    "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
     yield.RemoveWord(0);
     yield.RemoveWord(yield.GetSize()-1);
-    out << yield.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
+    out << yield.GetStringRep(options().output.factor_order);
     out << '\n';
   }
   collector->Write(m_source.GetTranslationId(), out.str());
@@ -76,10 +73,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
                               const KBestExtractor::KBestVec &nBestList,
                               long translationId) const
 {
-  const StaticData &staticData = StaticData::Instance();
-
-  const std::vector<FactorType> &outputFactorOrder =
-    staticData.GetOutputFactorOrder();
+  const std::vector<FactorType> &outputFactorOrder = options().output.factor_order;
 
   std::ostringstream out;
 
@@ -89,8 +83,8 @@ void Manager::OutputNBestList(OutputCollector *collector,
     FixPrecision(out);
   }
 
-  bool includeWordAlignment = staticData.options().nbest.include_alignment_info;
-  bool PrintNBestTrees = staticData.options().nbest.print_trees; // PrintNBestTrees();
+  bool includeWordAlignment = options().nbest.include_alignment_info;
+  bool PrintNBestTrees = options().nbest.print_trees; // PrintNBestTrees();
 
   for (KBestExtractor::KBestVec::const_iterator p = nBestList.begin();
        p != nBestList.end(); ++p) {

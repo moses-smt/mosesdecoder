@@ -60,6 +60,7 @@ TranslationOptionCollection(ttasksptr const& ttask,
   , m_estimatedScores(src.GetSize())
   , m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
   , m_translationOptionThreshold(translationOptionThreshold)
+  , m_max_phrase_length(ttask->options().search.max_phrase_length)
 {
   // create 2-d vector
   size_t size = src.GetSize();
@@ -67,8 +68,7 @@ TranslationOptionCollection(ttasksptr const& ttask,
     m_collection.push_back( vector< TranslationOptionList >() );
 
     size_t maxSize = size - sPos;
-    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-    maxSize = std::min(maxSize, maxSizePhrase);
+    maxSize = std::min(maxSize, m_max_phrase_length);
 
     for (size_t ePos = 0 ; ePos < maxSize ; ++ePos) {
       m_collection[sPos].push_back( TranslationOptionList() );
@@ -354,8 +354,8 @@ CreateTranslationOptions()
     // iterate over spans
     for (size_t sPos = 0 ; sPos < size; sPos++) {
       size_t maxSize = size - sPos; // don't go over end of sentence
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = std::min(maxSize, maxSizePhrase);
+      // size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+      maxSize = std::min(maxSize, m_max_phrase_length);
 
       for (size_t ePos = sPos ; ePos < sPos + maxSize ; ePos++) {
         if (gidx && backoff &&
@@ -391,7 +391,7 @@ CreateTranslationOptionsForRange
       || !HasXmlOptionsOverlappingRange(sPos,ePos)) {
 
     // partial trans opt stored in here
-    PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+    PartialTranslOptColl* oldPtoc = new PartialTranslOptColl(m_max_phrase_length);
     size_t totalEarlyPruned = 0;
 
     // initial translation step
@@ -411,7 +411,7 @@ CreateTranslationOptionsForRange
 
     for (++d ; d != dgraph.end() ; ++d) {
       const DecodeStep *dstep = *d;
-      PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
+      PartialTranslOptColl* newPtoc = new PartialTranslOptColl(m_max_phrase_length);
 
       // go thru each intermediate trans opt just created
       const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
