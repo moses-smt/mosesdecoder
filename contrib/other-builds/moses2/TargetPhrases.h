@@ -27,6 +27,7 @@ public:
   }
 
 	TargetPhrases();
+	TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy);
 	virtual ~TargetPhrases();
 
 	void AddTargetPhrase(const TargetPhrase &targetPhrase)
@@ -42,7 +43,7 @@ public:
 
 	void SortAndPrune(size_t tableLimit);
 
-	const TargetPhrases *Clone(MemPool &pool) const;
+	const TargetPhrases *Clone(MemPool &pool, const System &system) const;
 protected:
 	Coll m_coll;
 

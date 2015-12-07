@@ -54,6 +54,16 @@ PhraseImpl::PhraseImpl(MemPool &pool, size_t size)
 
 }
 
+PhraseImpl::PhraseImpl(MemPool &pool, const PhraseImpl &copy)
+:m_size(copy.GetSize())
+{
+  m_words = new (pool.Allocate<Word>(m_size)) Word[m_size];
+	for (size_t i = 0; i < m_size; ++i) {
+		const Word &word = copy[i];
+		(*this)[i] = word;
+	}
+}
+
 PhraseImpl::~PhraseImpl() {
 
 }

@@ -21,6 +21,8 @@ class TargetPhrase : public PhraseImpl
 public:
   static TargetPhrase *CreateFromString(MemPool &pool, const System &system, const std::string &str);
   TargetPhrase(MemPool &pool, const System &system, size_t size);
+  TargetPhrase(MemPool &pool, const System &system, const TargetPhrase &copy);
+
   virtual ~TargetPhrase();
 
   Scores &GetScores()

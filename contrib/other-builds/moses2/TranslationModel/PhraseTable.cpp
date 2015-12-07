@@ -10,6 +10,7 @@
 #include "../InputPaths.h"
 #include "../legacy/Util2.h"
 #include "../TypeDef.h"
+#include "../Search/Manager.h"
 
 using namespace std;
 
@@ -86,10 +87,9 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 		  entry.clock = clock();
 		  entry.pool = new MemPool();
 
-		  TargetPhrases::shared_const_ptr tpsPtrCache;
 		  if (tpsLookup) {
-			  const TargetPhrases *tpsCache = tpsLookup->Clone(*entry.pool);
-			  entry.tpsPtr = tpsPtrCache;
+			  const TargetPhrases *tpsCache = tpsLookup->Clone(*entry.pool, mgr.system);
+			  entry.tpsPtr.reset(tpsCache);
 		  }
 
 		}

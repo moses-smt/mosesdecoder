@@ -16,6 +16,8 @@ class Word {
 	  friend std::ostream& operator<<(std::ostream &, const Word &);
 public:
   Word();
+  Word(const Word &copy);
+
   virtual ~Word();
 
   void CreateFromString(FactorCollection &vocab, const System &system, const std::string &str);

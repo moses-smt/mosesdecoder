@@ -32,6 +32,14 @@ TargetPhrase::TargetPhrase(MemPool &pool, const System &system, size_t size)
 	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 }
 
+TargetPhrase::TargetPhrase(MemPool &pool, const System &system, const TargetPhrase &copy)
+:PhraseImpl(pool, copy)
+{
+	// scores
+	m_estimatedScore = copy.m_estimatedScore;
+	m_scores = new (pool.Allocate<Scores>()) Scores(pool, system.featureFunctions.GetNumScores(), copy.GetScores());
+}
+
 TargetPhrase::~TargetPhrase() {
 	// TODO Auto-generated destructor stub
 }

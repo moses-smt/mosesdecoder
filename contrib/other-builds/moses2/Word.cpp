@@ -17,6 +17,11 @@ Word::Word() {
 	Init<const Factor*>(m_factors, MAX_NUM_FACTORS, NULL);
 }
 
+Word::Word(const Word &copy)
+{
+	memcpy(m_factors, copy.m_factors, sizeof(const Factor *) * MAX_NUM_FACTORS);
+}
+
 Word::~Word() {
 	// TODO Auto-generated destructor stub
 }

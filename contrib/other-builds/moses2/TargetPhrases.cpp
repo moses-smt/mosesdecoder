@@ -4,7 +4,7 @@
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
-
+#include <cassert>
 #include <boost/foreach.hpp>
 #include "TargetPhrases.h"
 
@@ -12,8 +12,19 @@ using namespace std;
 
 TargetPhrases::TargetPhrases() {
 	// TODO Auto-generated constructor stub
-
 }
+
+TargetPhrases::TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy)
+:m_coll(copy.m_coll.size())
+{
+	for (size_t i = 0; i < copy.m_coll.size(); ++i) {
+		const TargetPhrase *tpOrig = copy.m_coll[i];
+		assert(tpOrig);
+		const TargetPhrase *tpClone = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, *tpOrig);
+		m_coll[i] = tpClone;
+	}
+}
+
 
 TargetPhrases::~TargetPhrases() {
 	// TODO Auto-generated destructor stub
@@ -45,9 +56,10 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
   //cerr << "TargetPhrases=" << GetSize() << endl;
 }
 
-const TargetPhrases *TargetPhrases::Clone(MemPool &pool) const
+const TargetPhrases *TargetPhrases::Clone(MemPool &pool, const System &system) const
 {
-
+	const TargetPhrases *ret = new TargetPhrases(pool, system, *this);
+	return ret;
 }
 
 
