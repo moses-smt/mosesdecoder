@@ -140,15 +140,14 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	return ret;
 }
 
-const FeatureFunction &FeatureFunctions::FindFeatureFunction(const std::string &name) const
+const FeatureFunction *FeatureFunctions::FindFeatureFunction(const std::string &name) const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
 	  if (ff->GetName() == name) {
-		  return *ff;
+		  return ff;
 	  }
   }
-  UTIL_THROW2(name << " not found");
-
+  return NULL;
 }
 
 const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd)

@@ -66,10 +66,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 		if (iter == cache.end()) {
 		  // not in cache, need to look up from phrase table
-		  tpsPtr = Lookup(mgr, path);
-
-		  // create a copy using the pt's own mem pool
-		  const TargetPhrases *tpsLookup = tpsPtr.get();
+		  tpsPtr = Lookup(mgr, pool, path);
 
 		  CacheColl::value_type val(hash, CacheCollEntry2());
 		  std::pair<CacheColl::iterator, bool> retIns = cache.insert(val);
@@ -77,11 +74,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 		  CacheCollEntry2 &entry = retIns.first->second;
 		  entry.clock = clock();
-
-		  if (tpsLookup) {
-			  const TargetPhrases *tpsCache = tpsLookup->Clone(pool, mgr.system);
-			  entry.tpsPtr.reset(tpsCache);
-		  }
+		  entry.tpsPtr = tpsPtr;
 
 		}
 		else {
@@ -91,7 +84,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 		}
 	  } else {
 		// don't use cache. look up from phrase table
-		  tpsPtr = Lookup(mgr, path);
+		  tpsPtr = Lookup(mgr, mgr.GetPool(), path);
 	  }
 
 		/*
@@ -108,7 +101,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 }
 
-TargetPhrases::shared_const_ptr PhraseTable::Lookup(const Manager &mgr, InputPath &inputPath) const
+TargetPhrases::shared_const_ptr PhraseTable::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
 {
   UTIL_THROW2("Not implemented");
 }

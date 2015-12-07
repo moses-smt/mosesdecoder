@@ -90,9 +90,10 @@ void System::LoadMappings()
   }
 
   // unk pt
-  const UnknownWordPenalty &unkWP = dynamic_cast<const UnknownWordPenalty&>(featureFunctions.FindFeatureFunction("UnknownWordPenalty0"));
-  mappings.push_back(&unkWP);
-
+  const UnknownWordPenalty *unkWP = dynamic_cast<const UnknownWordPenalty*>(featureFunctions.FindFeatureFunction("UnknownWordPenalty0"));
+  if (unkWP) {
+	  mappings.push_back(unkWP);
+  }
 }
 
 MemPool &System::GetManagerPool() const

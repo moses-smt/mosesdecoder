@@ -89,10 +89,10 @@ uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
   }
 }
 
-TargetPhrases::shared_const_ptr ProbingPT::Lookup(const Manager &mgr, InputPath &inputPath) const
+TargetPhrases::shared_const_ptr ProbingPT::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
 {
 	const Phrase &sourcePhrase = inputPath.subPhrase;
-	TargetPhrases::shared_const_ptr ret = CreateTargetPhrase(mgr.GetPool(), mgr.system, sourcePhrase);
+	TargetPhrases::shared_const_ptr ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase);
 	return ret;
 }
 

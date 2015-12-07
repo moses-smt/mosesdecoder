@@ -24,7 +24,7 @@ public:
   virtual ~ProbingPT();
   void Load(System &system);
 
-  TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, InputPath &inputPath) const;
+  TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
 protected:
   typedef boost::bimap<const Factor *, uint64_t> SourceVocabMap;

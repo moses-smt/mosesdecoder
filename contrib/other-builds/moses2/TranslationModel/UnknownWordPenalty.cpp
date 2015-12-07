@@ -21,8 +21,10 @@ UnknownWordPenalty::~UnknownWordPenalty() {
 	// TODO Auto-generated destructor stub
 }
 
-TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, InputPath &inputPath) const
+TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
 {
+	const System &system = mgr.system;
+
 	TargetPhrases::shared_const_ptr ret;
 
 	size_t numWords = inputPath.range.GetNumWordsCovered();
@@ -46,9 +48,6 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, I
 	const Factor *factor = sourceWord[0];
 
 	TargetPhrases *tps = new TargetPhrases();
-
-	MemPool &pool = mgr.GetPool();
-	const System &system = mgr.system;
 
 	TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
 	Word &word = (*target)[0];

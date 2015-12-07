@@ -57,9 +57,10 @@ void Weights::CreateFromString(const FeatureFunctions &ffs, const std::string &l
 	ffName = ffName.substr(0, ffName.size() - 1);
 	//cerr << "ffName=" << ffName << endl;
 
-	const FeatureFunction &ff = ffs.FindFeatureFunction(ffName);
-	size_t startInd = ff.GetStartInd();
-	size_t numScores = ff.GetNumScores();
+	const FeatureFunction *ff = ffs.FindFeatureFunction(ffName);
+	assert(ff);
+	size_t startInd = ff->GetStartInd();
+	size_t numScores = ff->GetNumScores();
 	assert(numScores == toks.size() -1);
 
 	for (size_t i = 0; i < numScores; ++i) {

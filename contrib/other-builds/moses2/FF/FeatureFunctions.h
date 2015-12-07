@@ -39,7 +39,7 @@ public:
 	void Create();
     void Load();
 
-    const FeatureFunction &FindFeatureFunction(const std::string &name) const;
+    const FeatureFunction *FindFeatureFunction(const std::string &name) const;
     const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
 
 	  virtual void
