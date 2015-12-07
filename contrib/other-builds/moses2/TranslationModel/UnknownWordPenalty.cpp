@@ -4,7 +4,7 @@
  *  Created on: 28 Oct 2015
  *      Author: hieu
  */
-
+#include <boost/foreach.hpp>
 #include "UnknownWordPenalty.h"
 #include "../System.h"
 #include "../InputPath.h"
@@ -19,6 +19,18 @@ UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line)
 
 UnknownWordPenalty::~UnknownWordPenalty() {
 	// TODO Auto-generated destructor stub
+}
+
+void UnknownWordPenalty::Lookup(const Manager &mgr, InputPaths &inputPaths) const
+{
+  BOOST_FOREACH(InputPath &path, inputPaths) {
+	  const SubPhrase &phrase = path.subPhrase;
+
+	TargetPhrases::shared_const_ptr tpsPtr;
+	tpsPtr = Lookup(mgr, mgr.GetPool(), path);
+	path.AddTargetPhrases(*this, tpsPtr);
+  }
+
 }
 
 TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
