@@ -144,6 +144,7 @@ void PhraseTable::ReduceCache() const
   CacheColl &cache = GetCache();
   if (cache.size() <= m_maxCacheSize) return; // not full
 
+  cerr << endl << "clearing cache" << endl;
   cache.clear();
   GetCacheMemPool().Reset();
   return;
