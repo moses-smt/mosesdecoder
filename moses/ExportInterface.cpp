@@ -64,6 +64,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef HAVE_XMLRPC_C
 #include "moses/server/Server.h"
 #endif
+#include <signal.h>
 
 using namespace std;
 using namespace Moses;
@@ -140,11 +141,27 @@ void SimpleTranslationInterface::DestroyFeatureFunctionStatic()
 
 Parameter params;
 
+void 
+signal_handler(int signum)
+{
+  if (signum == SIGALRM) {
+    exit(0); // that's what we expected from the child process after forking
+  }
+  else if (signum == SIGTERM || signum == SIGKILL) { 
+    exit(0);
+  }
+  else {
+    std::cerr << "Unexpected signal " << signum << std::endl;
+    exit(signum); 
+  }
+}
+
 //! run moses in server mode
 int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
+  kill(getppid(),SIGALRM); 
   MosesServer::Server server(params);
   return server.run(); // actually: don't return. see Server::run()
 #else
@@ -322,17 +339,25 @@ int decoder_main(int argc, char const** argv)
     if (!StaticData::LoadDataStatic(&params, argv[0]))
       exit(1);
 
+    //
+#if 1
+    pid_t pid;
+    if (params.GetParam("daemon")) {
+      pid = fork();
+      if (pid) { pause(); exit(0); } // parent process
+    }
+#endif
     // setting "-show-weights" -> just dump out weights and exit
     if (params.isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
 
-    if (params.GetParam("server"))
+    if (params.GetParam("server")) {
+      std::cerr << "RUN SERVER at pid " << pid << std::endl;
       return run_as_server();
-    else
+    } else 
       return batch_run();
-
   }
 #ifdef NDEBUG
   catch (const std::exception &e) {
