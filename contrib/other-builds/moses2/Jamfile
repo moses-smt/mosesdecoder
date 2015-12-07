@@ -22,6 +22,7 @@ external-lib boost_serialization ;
    TargetPhrase.cpp 
    TargetPhrases.cpp
    TranslationTask.cpp
+   Vector.cpp
    Weights.cpp 
 		Word.cpp 
 		FF/Distortion.cpp
