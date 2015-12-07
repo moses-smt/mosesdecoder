@@ -101,7 +101,7 @@ protected:
   // std::string m_unknownWordSuffix;
   bool m_wordDeletionEnabled;
 
-  bool m_disableDiscarding;
+  // bool m_disableDiscarding;
   bool m_printAllDerivations;
   bool m_printTranslationOptions;
 
@@ -117,7 +117,7 @@ protected:
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
 
-  bool m_isAlwaysCreateDirectTranslationOption;
+  // bool m_isAlwaysCreateDirectTranslationOption;
   //! constructor. only the 1 static variable can be created
 
   bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
@@ -174,29 +174,17 @@ protected:
 
   const StatefulFeatureFunction* m_treeStructure;
 
-  void ini_compact_table_options();
-  void ini_consensus_decoding_options();
-  void ini_cube_pruning_options();
-  void ini_distortion_options();
-  void ini_factor_maps();
   void ini_input_options();
-  void ini_lm_options();
-  void ini_lmbr_options();
-  void ini_mbr_options();
-  void ini_mira_options();
   void ini_oov_options();
   bool ini_output_options();
   bool ini_performance_options();
-  void ini_phrase_lookup_options();
-  bool ini_stack_decoding_options();
-  void ini_zombie_options();
 
   void initialize_features();
 public:
 
-  bool IsAlwaysCreateDirectTranslationOption() const {
-    return m_isAlwaysCreateDirectTranslationOption;
-  }
+  // bool IsAlwaysCreateDirectTranslationOption() const {
+  //   return m_isAlwaysCreateDirectTranslationOption;
+  // }
   //! destructor
   ~StaticData();
 
@@ -241,42 +229,15 @@ public:
     return m_options;
   }
 
-  // const std::vector<FactorType> &GetInputFactorOrder() const {
-  //   return m_options.input.factor_order;
-  // }
-
-  // const std::vector<FactorType> &GetOutputFactorOrder() const {
-  //   return m_options.output.factor_order;
-  // }
-
   inline bool 
   GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
   }
 
-  inline bool 
-  GetDisableDiscarding() const {
-    return m_disableDiscarding;
-  }
-
-  // inline size_t 
-  // GetMaxNoTransOptPerCoverage() const {
-  //   return m_options.search.max_trans_opt_per_cov;
-  // }
-
-  // inline size_t 
-  // GetMaxNoPartTransOpt() const {
-  //   return m_options.search.max_partial_trans_opt;
-  // }
-
-  // inline size_t 
-  // GetMaxPhraseLength() const {
-  //   return m_options.search.max_phrase_length;
-  // }
-
   bool 
   IsWordDeletionEnabled() const {
-    return m_wordDeletionEnabled;
+    // return m_wordDeletionEnabled;
+    return m_options.unk.word_deletion_enabled;
   }
 
   int 
@@ -564,9 +525,9 @@ public:
     return m_defaultNonTermOnlyForEmptyRange;
   }
 
-  S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
-    return m_s2tParsingAlgorithm;
-  }
+  // S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
+  //   return m_s2tParsingAlgorithm;
+  // }
 
   bool RequireSortingAfterSourceContext() const {
     return m_requireSortingAfterSourceContext;

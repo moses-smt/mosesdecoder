@@ -2,7 +2,7 @@
 #include "InputOptions.h"
 #include <vector>
 #include <iostream>
-// #include "moses/StaticData.h"
+#include "moses/StaticData.h"
 #include "moses/TypeDef.h"
 
 namespace Moses {
@@ -20,7 +20,6 @@ namespace Moses {
   init(Parameter const& param)
   {
     param.SetParameter(input_type, "inputtype", SentenceInput);
-#if 0
     if (input_type == SentenceInput) 
       { VERBOSE(2, "input type is: text input"); }
     else if (input_type == ConfusionNetworkInput)
@@ -33,12 +32,13 @@ namespace Moses {
       { VERBOSE(2, "input type is: tabbed sentence"); }
     else if (input_type == ForestInputType)
       { VERBOSE(2, "input type is: forest"); }
-#endif
+
     param.SetParameter(continue_partial_translation, 
 		       "continue-partial-translation", false);
     param.SetParameter(default_non_term_only_for_empty_range,
 		       "default-non-term-for-empty-range-only", false);
 
+    
     param.SetParameter<XmlInputType>(xml_policy, "xml-input", XmlPassThrough);
     
     // specify XML tags opening and closing brackets for XML option
@@ -52,6 +52,13 @@ namespace Moses {
           {
             std::cerr << "invalid xml-brackets value, "
                       << "must specify exactly 2 blank-delimited strings "
+<<<<<<< HEAD
+                      << "for XML tags opening and closing brackets" << std::endl;
+            exit(1);
+          }
+        xml_brackets.first= brackets[0];
+        xml_brackets.second=brackets[1];
+=======
                       << "for XML tags opening and closing brackets" 
                       << std::endl;
             exit(1);
@@ -60,16 +67,13 @@ namespace Moses {
         xml_brackets.first= brackets[0];
         xml_brackets.second=brackets[1];
         
-#if 0
+>>>>>>> b733804fdcf20a5a9e822861471248c8fdbc0e2d
         VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
                 << xml_brackets.first << " and " 
                 << xml_brackets.second << std::endl);
-#endif
       }
 
-    pspec = param.GetParam("input-factors");
-    if (pspec) factor_order = Scan<FactorType>(*pspec);
-    if (factor_order.empty()) factor_order.assign(1,0);
+<<<<<<< HEAD
     param.SetParameter(placeholder_factor, "placeholder-factor", NOT_FOUND);
 
     return true;
@@ -89,4 +93,13 @@ namespace Moses {
   }
 #endif
 
+=======
+    pspec = param.GetParam("input-factors");
+    if (pspec) factor_order = Scan<FactorType>(*pspec);
+    if (factor_order.empty()) factor_order.assign(1,0);
+
+    return true;
+  }
+  
+>>>>>>> b733804fdcf20a5a9e822861471248c8fdbc0e2d
 }

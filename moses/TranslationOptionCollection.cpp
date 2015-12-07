@@ -145,12 +145,14 @@ ProcessUnknownWord()
     }
   }
 
-  bool alwaysCreateDirectTranslationOption
-  = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+  // bool alwaysCreateDirectTranslationOption
+  // = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+  bool always = m_ttask.lock()->options().unk.always_create_direct_transopt;
+
   // create unknown words for 1 word coverage where we don't have any trans options
   for (size_t pos = 0 ; pos < size ; ++pos) {
     TranslationOptionList* fullList = GetTranslationOptionList(pos, pos);
-    if (!fullList || fullList->size() == 0 || alwaysCreateDirectTranslationOption)
+    if (!fullList || fullList->size() == 0 || always)
       ProcessUnknownWord(pos);
   }
 }

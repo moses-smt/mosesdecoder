@@ -8,16 +8,11 @@
 namespace Moses
 {
   struct 
-  OOVHandlingOptions : public OptionsBaseClass
+  SyntaxOptions : public OptionsBaseClass
   {
-    bool drop;
-    bool mark;
-    std::string prefix;
-    std::string suffix;
-    
-    bool word_deletion_enabled;
-    bool always_create_direct_transopt;
-    OOVHandlingOptions();
+    S2TParsingAlgorithm s2t_parsing_algo;
+
+    SyntaxOptions();
 
     bool init(Parameter const& param);
     bool update(std::map<std::string,xmlrpc_c::value>const& param);

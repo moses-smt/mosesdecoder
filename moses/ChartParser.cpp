@@ -210,10 +210,14 @@ void ChartParser::Create(const Range &range, ChartParserCallback &to)
       ruleLookupManager.GetChartRuleCollection(inputPath, last, to);
     }
   }
-
-  if (range.GetNumWordsCovered() == 1 && range.GetStartPos() != 0 && range.GetStartPos() != m_source.GetSize()-1) {
-    bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
-    if (to.Empty() || alwaysCreateDirectTranslationOption) {
+  
+  if (range.GetNumWordsCovered() == 1 
+      && range.GetStartPos() != 0 
+      && range.GetStartPos() != m_source.GetSize()-1) {
+    bool always = m_ttask.lock()->options().unk.always_create_direct_transopt; 
+    // bool alwaysCreateDirectTranslationOption 
+    // = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+    if (to.Empty() || always) {
       // create unknown words for 1 word coverage where we don't have any trans options
       const Word &sourceWord = m_source.GetWord(range.GetStartPos());
       m_unknown.Process(sourceWord, range, to);

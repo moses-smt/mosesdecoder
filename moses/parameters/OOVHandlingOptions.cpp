@@ -14,6 +14,8 @@ namespace Moses {
     mark = false;
     prefix = "UNK";
     suffix = "";
+    word_deletion_enabled = false;
+    always_create_direct_transopt = false;
   }
 
   bool
@@ -22,6 +24,8 @@ namespace Moses {
   {
     param.SetParameter(drop,"drop-unknown",false);
     param.SetParameter(mark,"mark-unknown",false);
+    param.SetParameter(word_deletion_enabled, "phrase-drop-allowed", false);
+    param.SetParameter(always_create_direct_transopt, "always-create-direct-transopt", false);
     param.SetParameter<std::string>(prefix,"unknown-word-prefix","UNK");
     param.SetParameter<std::string>(suffix,"unknown-word-suffix","");
     return true;

@@ -104,7 +104,7 @@ TranslationTask
 
   else if (algo == SyntaxS2T) {
     // new-style string-to-tree decoding (ask Phil Williams)
-    S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+    S2TParsingAlgorithm algorithm = options().syntax.s2t_parsing_algo; // staticData.GetS2TParsingAlgorithm();
     if (algorithm == RecursiveCYKPlus) {
       typedef Syntax::S2T::EagerParserCallback Callback;
       typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;

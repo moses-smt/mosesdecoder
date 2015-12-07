@@ -13,6 +13,7 @@
 #include "LMBR_Options.h"
 #include "ReportingOptions.h"
 #include "OOVHandlingOptions.h"
+#include "SyntaxOptions.h"
 
 namespace Moses
 {
@@ -29,6 +30,7 @@ namespace Moses
     LMBR_Options            lmbr;
     ReportingOptions      output; 
     OOVHandlingOptions       unk;
+    SyntaxOptions         syntax;
     bool mira;
 
     // StackOptions      stack;

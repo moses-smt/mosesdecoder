@@ -31,7 +31,8 @@ namespace Moses
                        DEFAULT_MAX_PART_TRANS_OPT_SIZE);
 
     param.SetParameter(consensus, "consensus-decoding", false);
-
+    param.SetParameter(disable_discarding, "disable-discarding", false);
+    
     // transformation to log of a few scores
     beam_width = TransformScore(beam_width);
     trans_opt_threshold = TransformScore(trans_opt_threshold);

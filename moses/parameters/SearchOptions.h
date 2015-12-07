@@ -14,9 +14,10 @@ namespace Moses
     SearchAlgorithm algo;
     
     // stack decoding
-    size_t stack_size;      // maxHypoStackSize;
-    size_t stack_diversity; // minHypoStackDiversity;
-
+    size_t stack_size;       // maxHypoStackSize;
+    size_t stack_diversity;  // minHypoStackDiversity;
+    bool disable_discarding; 
+    // Disable discarding of bad hypotheses from HypothesisStackNormal
     size_t max_phrase_length;
     size_t max_trans_opt_per_cov; 
     size_t max_partial_trans_opt;

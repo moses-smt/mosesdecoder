@@ -63,7 +63,7 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   : m_sourceStartPosMattersForRecombination(false)
   , m_requireSortingAfterSourceContext(false)
-  , m_isAlwaysCreateDirectTranslationOption(false)
+    // , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
   , m_treeStructure(NULL)
 {
@@ -132,9 +132,6 @@ StaticData
   m_parameter->SetParameter(m_continuePartialTranslation,
                             "continue-partial-translation", false );
 
-  // use of xml in input
-  // m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
-
   // specify XML tags opening and closing brackets for XML option
   params = m_parameter->GetParam("xml-brackets");
   if (params && params->size()) {
@@ -170,35 +167,10 @@ StaticData
   m_parameter->SetParameter<string>(m_outputUnknownsFile,
                                     "output-unknowns", "");
 
-  //Print Translation Options
-  // m_parameter->SetParameter(m_printTranslationOptions,
-  // "print-translation-option", false );
-
-  //Print All Derivations
-  // m_parameter->SetParameter(m_printAllDerivations ,
-  //                           "print-all-derivations", false );
-
   m_parameter->SetParameter<long>(m_startTranslationId,
                                   "start-translation-id", 0);
 
-  //lattice samples
   return true;
-}
-
-void
-StaticData::
-ini_compact_table_options()
-{
-  // Compact phrase table and reordering model
-  m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
-  m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
-}
-
-void
-StaticData::
-ini_lm_options()
-{
-  m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
 }
 
 // threads, timeouts, etc.
@@ -207,8 +179,6 @@ StaticData
 ::ini_performance_options()
 {
   const PARAM_VEC *params;
-  // m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
-  // m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
 
   m_threadCount = 1;
   params = m_parameter->GetParam("threads");
@@ -242,62 +212,6 @@ StaticData
   return true;
 }
 
-void
-StaticData::
-ini_factor_maps()
-{
-  const PARAM_VEC *params;
-  // factor delimiter
-  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
-  if (m_factorDelimiter == "none") {
-    m_factorDelimiter = "";
-  }
-
-  // //input factors
-  // params = m_parameter->GetParam("input-factors");
-  // if (params) {
-  //   m_inputFactorOrder = Scan<FactorType>(*params);
-  // }
-  // if(m_inputFactorOrder.empty()) {
-  //   m_inputFactorOrder.push_back(0);
-  // }
-
-  //output factors
-  // params = m_parameter->GetParam("output-factors");
-  // if (params) {
-  //   m_outputFactorOrder = Scan<FactorType>(*params);
-  // }
-  // if(m_outputFactorOrder.empty()) {
-  //   // default. output factor 0
-  //   m_outputFactorOrder.push_back(0);
-  // }
-}
-
-void
-StaticData::
-ini_oov_options()
-{
-  // unknown word processing
-  // m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
-  // m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
-  // m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
-  // m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
-
-  //source word deletion
-  m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
-
-  m_parameter->SetParameter(m_isAlwaysCreateDirectTranslationOption, "always-create-direct-transopt", false );
-}
-
-void
-StaticData::
-ini_zombie_options()
-{
-  //Disable discarding
-  m_parameter->SetParameter(m_disableDiscarding, "disable-discarding", false);
-
-}
-
 bool StaticData::LoadData(Parameter *parameter)
 {
   m_parameter = parameter;
@@ -311,7 +225,10 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // ORDER HERE MATTERS, SO DON'T CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING!
   // input, output
-  ini_factor_maps();
+
+  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
+  m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
+
   ini_input_options();
   m_bookkeeping_options.init(*parameter);
   if (!ini_output_options()) return false;
@@ -319,21 +236,11 @@ bool StaticData::LoadData(Parameter *parameter)
   // threading etc.
   if (!ini_performance_options()) return false;
 
-  // model loading
-  ini_compact_table_options();
-
-  // search
-  ini_oov_options();
+  // Compact phrase table and reordering model
+  m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
+  m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
 
   // S2T decoder
-  m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",
-                            RecursiveCYKPlus);
-
-
-  ini_zombie_options(); // probably dead, or maybe not
-
-  // m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
-  // NOT_FOUND);
 
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
   initialize_features();
