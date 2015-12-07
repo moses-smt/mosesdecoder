@@ -6,10 +6,10 @@ import path ;
 
 external-lib boost_serialization ;
 
-local with-dalm = [ option.get "with-dalm" ] ;
+#local with-dalm = [ option.get "with-dalm" ] ;
 
-lib dalm : : <search>$(with-dalm)/lib ;
-alias dalm-libs : dalm ;
+#lib dalm : : <search>$(with-dalm)/lib ;
+#alias dalm-libs : dalm ;
 
  exe moses2 :
  	 InputPath.cpp 
@@ -33,7 +33,7 @@ alias dalm-libs : dalm ;
     FF/StatefulFeatureFunction.cpp
     FF/StatelessFeatureFunction.cpp
     FF/WordPenalty.cpp
-    LM/LanguageModelDALM.cpp
+ #   LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
     LM/KENLM.cpp
  	 	TranslationModel/PhraseTable.cpp 
@@ -74,10 +74,10 @@ alias dalm-libs : dalm ;
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 
  ../../..//boost_filesystem  
- dalm-libs
+# dalm-libs
  : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) <cxxflags>-std=c++11 <library>boost_serialization <include>$(with-dalm)/include <include>$(with-dalm)/darts-clone ;
 # MUST have space before semicolon ;
 
-  alias dalmALIAS : dalm-libs : : : <define>LM_DALM ;
-  dependencies += dalmALIAS ;
+#  alias dalmALIAS : dalm-libs : : : <define>LM_DALM ;
+#  dependencies += dalmALIAS ;
 

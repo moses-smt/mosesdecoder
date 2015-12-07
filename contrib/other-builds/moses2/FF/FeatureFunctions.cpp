@@ -21,7 +21,7 @@
 #include "../TranslationModel/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../LM/LanguageModel.h"
-#include "../LM/LanguageModelDALM.h"
+//#include "../LM/LanguageModelDALM.h"
 #include "../LM/KENLM.h"
 #include "util/exception.hh"
 
@@ -116,7 +116,7 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 		ret = new LanguageModel(m_ffStartInd, line);
 	}
 	else if (toks[0] == "LanguageModelDALM") {
-		ret = new LanguageModelDALM(m_ffStartInd, line);
+	  //ret = new LanguageModelDALM(m_ffStartInd, line);
 	}
 	else if (toks[0] == "KENLM") {
 		ret = new KENLM(m_ffStartInd, line);
