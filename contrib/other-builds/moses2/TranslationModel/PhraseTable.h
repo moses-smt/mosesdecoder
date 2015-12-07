@@ -39,6 +39,8 @@ public:
 			  Scores &scores,
 			  Scores *estimatedScores) const;
 
+	  virtual void CleanUpAfterSentenceProcessing();
+
 protected:
   std::string m_path;
   size_t m_ptInd;
@@ -51,17 +53,17 @@ protected:
   {
 	  TargetPhrases::shared_const_ptr tpsPtr;
 	  clock_t clock;
-	  MemPool *pool;
-
-	  CacheCollEntry2();
-	  virtual ~CacheCollEntry2();
   };
 
   typedef boost::unordered_map<size_t, CacheCollEntry2> CacheColl;
   mutable boost::thread_specific_ptr<CacheColl> m_cache;
 
+  mutable boost::thread_specific_ptr<MemPool> m_cacheMemPool;
+
 
   CacheColl &GetCache() const;
+  MemPool &GetCacheMemPool() const;
+
   void ReduceCache() const;
 
 };

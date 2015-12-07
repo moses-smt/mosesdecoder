@@ -14,16 +14,6 @@
 
 using namespace std;
 
-PhraseTable::CacheCollEntry2::CacheCollEntry2()
-:pool(NULL)
-{
-}
-
-PhraseTable::CacheCollEntry2::~CacheCollEntry2()
-{
-	delete pool;
-}
-
 ////////////////////////////////////////////////////////////////////////////
 PhraseTable::PhraseTable(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
@@ -62,6 +52,8 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
   CacheColl &cache = GetCache();
+  MemPool &pool = GetCacheMemPool();
+
   BOOST_FOREACH(InputPath &path, inputPaths) {
 	  const SubPhrase &phrase = path.subPhrase;
 
@@ -85,10 +77,9 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 		  CacheCollEntry2 &entry = retIns.first->second;
 		  entry.clock = clock();
-		  entry.pool = new MemPool();
 
 		  if (tpsLookup) {
-			  const TargetPhrases *tpsCache = tpsLookup->Clone(*entry.pool, mgr.system);
+			  const TargetPhrases *tpsCache = tpsLookup->Clone(pool, mgr.system);
 			  entry.tpsPtr.reset(tpsCache);
 		  }
 
@@ -130,9 +121,20 @@ PhraseTable::EvaluateInIsolation(const System &system,
 {
 }
 
+void PhraseTable::CleanUpAfterSentenceProcessing()
+{
+	ReduceCache();
+}
+
 PhraseTable::CacheColl &PhraseTable::GetCache() const
 {
   CacheColl &ret = GetThreadSpecificObj(m_cache);
+  return ret;
+}
+
+MemPool &PhraseTable::GetCacheMemPool() const
+{
+  MemPool &ret = GetThreadSpecificObj(m_cacheMemPool);
   return ret;
 }
 
@@ -141,6 +143,10 @@ void PhraseTable::ReduceCache() const
 {
   CacheColl &cache = GetCache();
   if (cache.size() <= m_maxCacheSize) return; // not full
+
+  cache.clear();
+  GetCacheMemPool().Reset();
+  return;
 
   // find cutoff for last used time
   priority_queue< clock_t > lastUsedTimes;

@@ -48,6 +48,9 @@ public:
 	          Scores &scores,
 	          Scores *estimatedScores) const = 0;
 
+	  // clean up temporary memory, called after processing each sentence
+	  virtual void CleanUpAfterSentenceProcessing() {}
+
 protected:
 	size_t m_startInd;
 	size_t m_numScores;
