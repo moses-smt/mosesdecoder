@@ -24,6 +24,7 @@ public:
   virtual ~ProbingPT();
   void Load(System &system);
 
+  void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
   TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
 protected:

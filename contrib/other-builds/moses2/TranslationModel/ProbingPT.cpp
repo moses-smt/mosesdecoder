@@ -4,7 +4,7 @@
  *  Created on: 3 Nov 2015
  *      Author: hieu
  */
-
+#include <boost/foreach.hpp>
 #include "ProbingPT.h"
 #include "../System.h"
 #include "../Scores.h"
@@ -87,6 +87,18 @@ uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
     // not in mapping. Must be UNK
     return m_unkId;
   }
+}
+
+void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
+{
+  BOOST_FOREACH(InputPath &path, inputPaths) {
+	  const SubPhrase &phrase = path.subPhrase;
+
+	TargetPhrases::shared_const_ptr tpsPtr;
+	tpsPtr = Lookup(mgr, mgr.GetPool(), path);
+	path.AddTargetPhrases(*this, tpsPtr);
+  }
+
 }
 
 TargetPhrases::shared_const_ptr ProbingPT::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
