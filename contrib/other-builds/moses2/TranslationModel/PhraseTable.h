@@ -53,6 +53,7 @@ protected:
   {
 	  TargetPhrases::shared_const_ptr tpsPtr;
 	  clock_t clock;
+	  size_t count;
   };
 
   typedef boost::unordered_map<size_t, CacheCollEntry2> CacheColl;

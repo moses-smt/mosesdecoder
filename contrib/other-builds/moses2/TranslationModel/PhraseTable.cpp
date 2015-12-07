@@ -68,26 +68,46 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 		  // not in cache, need to look up from phrase table
 		  tpsPtr = Lookup(mgr, path);
 
-		  // create a copy using the pt's own mem pool
-		  const TargetPhrases *tpsLookup = tpsPtr.get();
-
+		  // create a copy using the pt's own cache pool
 		  CacheColl::value_type val(hash, CacheCollEntry2());
 		  std::pair<CacheColl::iterator, bool> retIns = cache.insert(val);
 		  assert(retIns.second);
 
 		  CacheCollEntry2 &entry = retIns.first->second;
 		  entry.clock = clock();
-
-		  if (tpsLookup) {
-			  const TargetPhrases *tpsCache = tpsLookup->Clone(pool, mgr.system);
-			  entry.tpsPtr.reset(tpsCache);
-		  }
-
+		  entry.count = 1;
 		}
 		else {
-		  // in cache. just use it
+		  // we've seen it before.
 		  iter->second.clock = clock();
-		  tpsPtr = iter->second.tpsPtr;
+		  ++(iter->second.count);
+
+		  if (iter->second.count < 2) {
+			  // lookup, don't cache yet
+			  tpsPtr = Lookup(mgr, path);
+		  }
+		  else if (iter->second.count == 2) {
+			  // time create cache
+			  tpsPtr = Lookup(mgr, path);
+
+			  // create a copy using the pt's own cache pool
+			  CacheColl::value_type val(hash, CacheCollEntry2());
+			  std::pair<CacheColl::iterator, bool> retIns = cache.insert(val);
+			  assert(retIns.second);
+
+			  CacheCollEntry2 &entry = retIns.first->second;
+			  entry.clock = clock();
+
+			  const TargetPhrases *tpsLookup = tpsPtr.get();
+			  if (tpsLookup) {
+				  const TargetPhrases *tpsCache = tpsLookup->Clone(pool, mgr.system);
+				  entry.tpsPtr.reset(tpsCache);
+			  }
+		  }
+		  else if (iter->second.count > 2){
+			  // should already by cache. just use it
+			  tpsPtr = iter->second.tpsPtr;
+		  }
 		}
 	  } else {
 		// don't use cache. look up from phrase table
