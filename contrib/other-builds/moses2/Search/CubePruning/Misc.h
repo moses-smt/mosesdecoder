@@ -78,7 +78,7 @@ public:
 
 
 protected:
-    boost::unordered_set< int > *m_seenPosition;
+    boost::unordered_set< int > m_seenPosition;
 
 };
 
