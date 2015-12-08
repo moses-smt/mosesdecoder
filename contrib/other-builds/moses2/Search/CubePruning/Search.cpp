@@ -11,6 +11,7 @@
 #include "../../InputPaths.h"
 #include "../../InputPath.h"
 #include "../../System.h"
+#include "../../TranslationTask.h"
 #include "../../legacy/Util2.h"
 
 using namespace std;
@@ -71,17 +72,19 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	std::vector<QueueItem*> &queueContainer = Container(m_queue);
+	NSCubePruning::CubeEdge::Queue &queue = m_mgr.task.queue;
+	std::vector<QueueItem*> &queueContainer = Container(queue);
 	queueContainer.clear();
 
-	m_seenPositions.clear();
+	NSCubePruning::CubeEdge::SeenPositions &seenPositions = m_mgr.task.seenPositions;
+	seenPositions.clear();
 
 	// add top hypo from every edge into queue
 	CubeEdges &edges = m_cubeEdges[stackInd];
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		edge->CreateFirst(m_mgr, m_queue, m_seenPositions);
+		edge->CreateFirst(m_mgr, queue, seenPositions);
 	}
 
 	/*
@@ -96,18 +99,18 @@ void Search::Decode(size_t stackInd)
 	*/
 
 	size_t pops = 0;
-	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {
+	while (!queue.empty() && pops < m_mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
-		QueueItem *ele = m_queue.top();
-		m_queue.pop();
+		QueueItem *ele = queue.top();
+		queue.pop();
 
 		Hypothesis *hypo = ele->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
 		CubeEdge &edge = ele->edge;
-		edge.CreateNext(m_mgr, ele, m_queue, m_seenPositions);
+		edge.CreateNext(m_mgr, ele, queue, seenPositions);
 
 		++pops;
 	}
