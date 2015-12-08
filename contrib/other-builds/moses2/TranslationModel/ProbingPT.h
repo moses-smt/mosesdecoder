@@ -28,10 +28,8 @@ public:
   TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
 protected:
-  typedef boost::bimap<const Factor *, uint64_t> SourceVocabMap;
-  mutable SourceVocabMap m_sourceVocabMap;
-
-  std::vector<const Factor*> m_targetVocab;
+  std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
+  std::vector<const Factor*> m_targetVocab; // pt id -> factor*
 
   uint64_t m_unkId;
   QueryEngine *m_engine;

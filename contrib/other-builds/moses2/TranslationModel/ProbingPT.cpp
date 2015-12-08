@@ -43,10 +43,12 @@ void ProbingPT::Load(System &system)
 	const Factor *factor = vocab.AddFactor(wordStr, system);
 
 	uint64_t probingId = iterSource->first;
+	size_t factorId = factor->GetId();
 
-	SourceVocabMap::value_type entry(factor, probingId);
-	m_sourceVocabMap.insert(entry);
-
+	if (factorId >= m_sourceVocab.size()) {
+		m_sourceVocab.resize(factorId + 1, m_unkId);
+	}
+	m_sourceVocab[factorId] = probingId;
   }
 
   // target vocab
@@ -60,8 +62,8 @@ void ProbingPT::Load(System &system)
 
 	if (probingId >= m_targetVocab.size()) {
 		m_targetVocab.resize(probingId + 1, NULL);
-		m_targetVocab[probingId] = factor;
 	}
+	m_targetVocab[probingId] = factor;
   }
 }
 
@@ -76,14 +78,11 @@ const Factor *ProbingPT::GetTargetFactor(uint64_t probingId) const
 
 uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
 {
-  SourceVocabMap::left_map::const_iterator iter;
-  iter = m_sourceVocabMap.left.find(factor);
-  if (iter != m_sourceVocabMap.left.end()) {
-    return iter->second;
-  } else {
-    // not in mapping. Must be UNK
-    return m_unkId;
+  size_t factorId = factor->GetId();
+  if (factorId >= m_sourceVocab.size()) {
+	  return m_unkId;
   }
+  return m_sourceVocab[factorId];
 }
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
