@@ -51,7 +51,7 @@ GlobalLexicalModel::~GlobalLexicalModel()
   }
 }
 
-void GlobalLexicalModel::Load()
+void GlobalLexicalModel::Load(AllOptions const& opts)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();

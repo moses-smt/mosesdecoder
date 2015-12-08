@@ -21,7 +21,7 @@ public:
   ProbingPT(const std::string &line);
   ~ProbingPT();
 
-  void Load();
+  void Load(AllOptions const& opts);
 
   void InitializeForInput(ttasksptr const& ttask);
 

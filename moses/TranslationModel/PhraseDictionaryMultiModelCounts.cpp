@@ -83,7 +83,7 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
 }
 
 
-void PhraseDictionaryMultiModelCounts::Load()
+void PhraseDictionaryMultiModelCounts::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
   for(size_t i = 0; i < m_numModels; ++i) {

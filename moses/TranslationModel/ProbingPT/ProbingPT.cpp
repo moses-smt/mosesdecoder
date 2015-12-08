@@ -25,7 +25,7 @@ ProbingPT::~ProbingPT()
   delete m_engine;
 }
 
-void ProbingPT::Load()
+void ProbingPT::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
 

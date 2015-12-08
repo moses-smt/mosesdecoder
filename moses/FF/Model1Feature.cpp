@@ -159,7 +159,7 @@ void Model1Feature::SetParameter(const std::string& key, const std::string& valu
   }
 }
 
-void Model1Feature::Load()
+void Model1Feature::Load(AllOptions const& opts)
 {
   FEATUREVERBOSE(2, GetScoreProducerDescription() << ": Loading source vocabulary from file " << m_fileNameVcbS << " ...");
   Model1Vocabulary vcbS;

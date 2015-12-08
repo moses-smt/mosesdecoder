@@ -84,7 +84,7 @@ LexicalReordering::
 
 void
 LexicalReordering::
-Load()
+Load(AllOptions const& opts)
 {
   typedef LexicalReorderingTable LRTable;
   if (m_filePath.size())

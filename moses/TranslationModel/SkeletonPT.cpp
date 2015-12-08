@@ -12,7 +12,7 @@ SkeletonPT::SkeletonPT(const std::string &line)
   ReadParameters();
 }
 
-void SkeletonPT::Load()
+void SkeletonPT::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
 }

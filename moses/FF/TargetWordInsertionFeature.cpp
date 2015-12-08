@@ -34,7 +34,7 @@ void TargetWordInsertionFeature::SetParameter(const std::string& key, const std:
   }
 }
 
-void TargetWordInsertionFeature::Load()
+void TargetWordInsertionFeature::Load(AllOptions const& opts)
 {
   if (m_filename.empty())
     return;

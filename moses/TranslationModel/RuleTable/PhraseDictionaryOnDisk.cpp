@@ -47,7 +47,7 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
 }
 
-void PhraseDictionaryOnDisk::Load()
+void PhraseDictionaryOnDisk::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
 }

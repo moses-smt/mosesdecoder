@@ -79,7 +79,7 @@ PhraseDictionaryMultiModel::
 ~PhraseDictionaryMultiModel()
 { }
 
-void PhraseDictionaryMultiModel::Load()
+void PhraseDictionaryMultiModel::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
 

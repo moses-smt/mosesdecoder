@@ -23,7 +23,7 @@ InputFeature::InputFeature(const std::string &line)
   s_instance = this;
 }
 
-void InputFeature::Load()
+void InputFeature::Load(AllOptions const& opts)
 {
 
   const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];

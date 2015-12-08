@@ -108,7 +108,7 @@ public:
     return *s_instance;
   }
 
-  void Load();
+  void Load(AllOptions const& opts);
   void Load(const std::string files);
 
   TargetPhraseCollection::shared_ptr

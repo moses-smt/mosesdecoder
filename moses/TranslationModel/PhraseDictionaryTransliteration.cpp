@@ -22,7 +22,7 @@ PhraseDictionaryTransliteration::PhraseDictionaryTransliteration(const std::stri
                  m_outputLang.empty(), "Must specify all arguments");
 }
 
-void PhraseDictionaryTransliteration::Load()
+void PhraseDictionaryTransliteration::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
 }

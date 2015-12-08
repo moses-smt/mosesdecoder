@@ -47,19 +47,17 @@ using namespace boost::algorithm;
 
 namespace Moses
 {
-bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
-                                   , const std::vector<FactorType> &output
-                                   , const std::string &inFile
-                                   , size_t tableLimit
-                                   , RuleTableTrie &ruleTable)
+  
+bool 
+RuleTableLoaderStandard::
+Load(AllOptions const& opts
+     , const std::vector<FactorType> &input
+     , const std::vector<FactorType> &output
+     , const std::string &inFile
+     , size_t tableLimit
+     , RuleTableTrie &ruleTable)
 {
-  bool ret = Load(MosesFormat
-                  ,input, output
-                  ,inFile
-                  ,tableLimit
-                  ,ruleTable);
-  return ret;
-
+  return Load(opts, MosesFormat,input, output ,inFile ,tableLimit ,ruleTable);
 }
 
 void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t, size_t> > &ntAlign)
@@ -142,7 +140,7 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   out = ret.str();
 }
 
-bool RuleTableLoaderStandard::Load(FormatType format
+bool RuleTableLoaderStandard::Load(AllOptions const& opts, FormatType format
                                    , const std::vector<FactorType> &input
                                    , const std::vector<FactorType> &output
                                    , const std::string &inFile

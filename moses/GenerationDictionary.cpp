@@ -44,7 +44,7 @@ GenerationDictionary::GenerationDictionary(const std::string &line)
   ReadParameters();
 }
 
-void GenerationDictionary::Load()
+void GenerationDictionary::Load(AllOptions const& opts)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 

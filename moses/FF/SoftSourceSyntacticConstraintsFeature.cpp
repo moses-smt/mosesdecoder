@@ -88,7 +88,7 @@ void SoftSourceSyntacticConstraintsFeature::SetParameter(const std::string& key,
   }
 }
 
-void SoftSourceSyntacticConstraintsFeature::Load()
+void SoftSourceSyntacticConstraintsFeature::Load(AllOptions const& opts)
 {
   // don't change the loading order!
   LoadSourceLabelSet();

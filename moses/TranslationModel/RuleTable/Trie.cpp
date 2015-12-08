@@ -34,7 +34,7 @@ RuleTableTrie::~RuleTableTrie()
 {
 }
 
-void RuleTableTrie::Load()
+void RuleTableTrie::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
 
@@ -44,8 +44,7 @@ void RuleTableTrie::Load()
     throw runtime_error("Error: Loading " + m_filePath);
   }
 
-  bool ret = loader->Load(m_input, m_output, m_filePath, m_tableLimit,
-                          *this);
+  bool ret = loader->Load(opts, m_input, m_output, m_filePath, m_tableLimit, *this);
   if (!ret) {
     throw runtime_error("Error: Loading " + m_filePath);
   }

@@ -93,7 +93,7 @@ PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
   delete m_FuzzyMatchWrapper;
 }
 
-void PhraseDictionaryFuzzyMatch::Load()
+void PhraseDictionaryFuzzyMatch::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
 

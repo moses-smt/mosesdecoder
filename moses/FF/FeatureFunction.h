@@ -7,12 +7,13 @@
 #include <string>
 #include "moses/FeatureVector.h"
 #include "moses/TypeDef.h"
-
+#include "moses/parameters/AllOptions.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
 
+class AllOptions;
 class Phrase;
 class TargetPhrase;
 class TranslationOptionList;
@@ -69,7 +70,7 @@ public:
   virtual ~FeatureFunction();
 
   //! override to load model files
-  virtual void Load() {
+  virtual void Load(AllOptions const& opts) {
   }
 
   static void ResetDescriptionCounts() {

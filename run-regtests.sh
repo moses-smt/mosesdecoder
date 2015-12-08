@@ -6,7 +6,7 @@ set -e -o pipefail
 
 opt=$(pwd)/opt
 
-args=$(getopt -oj:aq -lwith-irstlm:,with-boost:,with-cmph:,with-regtest:,no-server,with-xmlrpc-c:,full -- "$@")
+args=$(getopt -oj:aq -lwith-irstlm:,with-boost:,with-cmph:,with-regtest:,no-xmlrpc-c,with-xmlrpc-c:,full -- "$@")
 eval set -- "$args"
 
 # default settings
@@ -16,7 +16,7 @@ j=$(getconf _NPROCESSORS_ONLN)
 irstlm=$opt
 boost=$opt
 cmph=$opt
-xmlrpc=$opt 
+xmlrpc=--with-xmlrpc-c\=$opt 
 regtest=$(pwd)/regtest
 unset q
 unset a
@@ -30,12 +30,13 @@ while true ; do
 	-j ) j=$2; shift 2 ;;
 	-a ) a=-a; shift ;;
 	-q ) q=-q; shift ;;
+	--no-xmlrpc-c   ) xmlrpc=$1;     shift ;;  
+	--with-xmlrpc-c ) 
+	    xmlrpc=--with-xmlrpc-c\=$2;  shift 2 ;;  
 	--with-irstlm   ) irstlm=$2;     shift 2 ;;
 	--with-boost    ) boost=$2;      shift 2 ;;
 	--with-cmph     ) cmph=$2;       shift 2 ;;
 	--with-regtest  ) regtest=$2;    shift 2 ;;
-	--no-server     ) noserver=true; shift 2 ;;  
-	--with-xmlrpc-c ) xmlrpc=$2;     shift 2 ;;  
 	--full          ) full=true;     shift 2 ;;  
 	-- ) shift; break ;;
 	* ) break ;;
@@ -54,14 +55,14 @@ set -x
 if [ "$full" == true ] ; then
     ./bjam -j$j --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph --no-xmlrpc-c --with-regtest=$regtest -a $skipcompact $@ $q || exit $?
     if ./regression-testing/run-single-test.perl --server --startuptest  ; then
-    	./bjam -j$j --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph --with-xmlrpc-c=$xmlrpc --with-regtest=$regtest -a $skipcompact $@ $q 
+    	./bjam -j$j --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph $xmlrpc --with-regtest=$regtest -a $skipcompact $@ $q 
     fi
 else
    # when investigating failures, always run single-threaded
    if [ "$q" == "-q" ] ; then j=1; fi 
 
    if ./regression-testing/run-single-test.perl --server --startuptest  ; then
-       ./bjam -j$j $q $a --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph --with-xmlrpc-c=$xmlrpc --with-regtest=$regtest $skipcompact $@ 
+       ./bjam -j$j $q $a --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph $xmlrpc --with-regtest=$regtest $skipcompact $@ 
    else
        ./bjam -j$j $q $a --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph --no-xmlrpc-c --with-regtest=$regtest $skipcompact $@ 
    fi

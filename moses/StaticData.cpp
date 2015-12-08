@@ -649,7 +649,7 @@ void StaticData::LoadFeatureFunctions()
 
     if (doLoad) {
       VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
-      ff->Load();
+      ff->Load(options());
     }
   }
 
@@ -657,7 +657,7 @@ void StaticData::LoadFeatureFunctions()
   for (size_t i = 0; i < pts.size(); ++i) {
     PhraseDictionary *pt = pts[i];
     VERBOSE(1, "Loading " << pt->GetScoreProducerDescription() << endl);
-    pt->Load();
+    pt->Load(options());
   }
 
   CheckLEGACYPT();

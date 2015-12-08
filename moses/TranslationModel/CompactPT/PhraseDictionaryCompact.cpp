@@ -57,7 +57,7 @@ PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
   ReadParameters();
 }
 
-void PhraseDictionaryCompact::Load()
+void PhraseDictionaryCompact::Load(AllOptions const& opts)
 {
   const StaticData &staticData = StaticData::Instance();
 

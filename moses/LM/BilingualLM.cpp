@@ -20,7 +20,7 @@ BilingualLM::BilingualLM(const std::string &line)
 
 }
 
-void BilingualLM::Load()
+void BilingualLM::Load(AllOptions const& opts)
 {
   ReadParameters();
   loadModel();

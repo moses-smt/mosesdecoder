@@ -60,7 +60,7 @@ PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()
   Clear();
 }
 
-void PhraseDictionaryDynamicCacheBased::Load()
+void PhraseDictionaryDynamicCacheBased::Load(AllOptions const& opts)
 {
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load()" << std::endl);
   SetFeaturesToApply();

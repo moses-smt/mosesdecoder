@@ -73,7 +73,7 @@ void PhraseDictionaryGroup::SetParameter(const string& key, const string& value)
   }
 }
 
-void PhraseDictionaryGroup::Load()
+void PhraseDictionaryGroup::Load(AllOptions const& opts)
 {
   SetFeaturesToApply();
   m_pdFeature.push_back(const_cast<PhraseDictionaryGroup*>(this));

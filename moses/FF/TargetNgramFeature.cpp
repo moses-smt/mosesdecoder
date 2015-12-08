@@ -74,7 +74,7 @@ void TargetNgramFeature::SetParameter(const std::string& key, const std::string&
   }
 }
 
-void TargetNgramFeature::Load()
+void TargetNgramFeature::Load(AllOptions const& opts)
 {
   if (m_file == "") return; //allow all, for now
 
