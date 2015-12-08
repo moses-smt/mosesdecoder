@@ -5,7 +5,6 @@
  *      Author: hieu
  */
 #pragma once
-#include <boost/pool/pool_alloc.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "../Hypothesis.h"
@@ -22,10 +21,9 @@ namespace NSCubePruning
 class HypothesisSet
 {
 public:
-	typedef boost::fast_pool_allocator<const Hypothesis*> StackAllocator;
 	typedef boost::unordered_set<const Hypothesis*,
-			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>,
-			  StackAllocator > _HCType;
+			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>
+			   > _HCType;
 
 	_HCType &GetColl()
 	{ return m_coll; }
