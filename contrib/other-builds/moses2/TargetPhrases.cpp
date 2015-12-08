@@ -10,8 +10,9 @@
 
 using namespace std;
 
-TargetPhrases::TargetPhrases() {
-	// TODO Auto-generated constructor stub
+TargetPhrases::TargetPhrases(size_t reserve)
+{
+	m_coll.reserve(reserve);
 }
 
 TargetPhrases::TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy)

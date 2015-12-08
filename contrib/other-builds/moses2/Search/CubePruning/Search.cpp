@@ -146,12 +146,12 @@ void Search::PostDecode(size_t stackInd)
   		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
   		size_t numWords = newBitmap.GetNumWordsCovered();
 
+		// sort hypo for a particular bitmap and hypoEndPos
+		CubeEdge::Hypotheses &sortedHypos = val.second.GetSortedHypos(m_mgr);
+
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  			  // sort hypo for a particular bitmap and hypoEndPos
-  			  CubeEdge::Hypotheses &sortedHypos = val.second.GetSortedHypos(m_mgr);
-
   		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		CubeEdges &edges = m_cubeEdges[numWords];
   		  		edges.push_back(edge);
