@@ -11,6 +11,7 @@ class TranslationTask : public Task
 {
 public:
 	mutable boost::object_pool<NSCubePruning::CubeEdge> poolCubeEdge;
+	mutable boost::object_pool<NSCubePruning::QueueItem> poolQueueItem;
 
 	TranslationTask(System &system, const std::string &line);
 	virtual ~TranslationTask();
