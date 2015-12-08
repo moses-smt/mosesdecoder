@@ -115,7 +115,13 @@ void Search::Decode(size_t stackInd)
 		++pops;
 	}
 
-	//m_mgr.task.poolQueueItem;
+	// clear queue
+	while (!m_queue.empty()) {
+		QueueItem *item = m_queue.top();
+		m_queue.pop();
+
+		m_mgr.task.poolQueueItem.free(item);
+	}
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
