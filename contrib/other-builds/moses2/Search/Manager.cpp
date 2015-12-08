@@ -56,7 +56,7 @@ void Manager::Init()
 		//cerr << "Looking up from " << pt.GetName() << endl;
 		pt.Lookup(*this, m_inputPaths);
 	}
-	m_inputPaths.DeleteUnusedPaths();
+	//m_inputPaths.DeleteUnusedPaths();
 
 	CalcFutureScore();
 
