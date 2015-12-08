@@ -18,6 +18,7 @@
 #include "../legacy/SquareMatrix.h"
 
 class System;
+class TranslationTask;
 class PhraseImpl;
 class SearchNormal;
 class Search;
@@ -26,8 +27,9 @@ class Hypothesis;
 class Manager {
 public:
 	const System &system;
+	const TranslationTask &task;
 
-	Manager(System &sys, const std::string &inputStr);
+	Manager(System &sys, const TranslationTask &task, const std::string &inputStr);
 
 	virtual ~Manager();
 

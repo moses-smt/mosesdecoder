@@ -6,7 +6,7 @@ using namespace std;
 
 TranslationTask::TranslationTask(System &system, const std::string &line)
 {
-	m_mgr = new Manager(system, line);
+	m_mgr = new Manager(system, *this, line);
 }
 
 TranslationTask::~TranslationTask()

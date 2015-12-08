@@ -136,6 +136,9 @@ void Search::PostDecode(size_t stackInd)
   		const Range &pathRange = path.range;
   		//cerr << "pathRange=" << pathRange << endl;
 
+  		if (!path.IsUsed()) {
+  			continue;
+  		}
   		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
   			continue;
   		}

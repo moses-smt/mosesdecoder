@@ -16,6 +16,7 @@ InputPath::InputPath(const SubPhrase &subPhrase,
 ,range(range)
 ,targetPhrases(numPt)
 ,prefixPath(prefixPath)
+,m_isUsed(false)
 {
 
 }
@@ -24,23 +25,28 @@ InputPath::~InputPath() {
 	// TODO Auto-generated destructor stub
 }
 
-void InputPath::AddTargetPhrases(const PhraseTable &pt, TargetPhrases::shared_const_ptr tps)
+void InputPath::AddTargetPhrases(const PhraseTable &pt, const TargetPhrases::shared_const_ptr &tpsPtr)
 {
 	size_t ptInd = pt.GetPtInd();
-	targetPhrases[ptInd] = tps;
-}
+	targetPhrases[ptInd] = tpsPtr;
 
+    const TargetPhrases *tps = tpsPtr.get();
+	if (tps && tps->GetSize()) {
+		m_isUsed = true;
+	}
+}
+/*
 bool InputPath::IsUsed() const
 {
   BOOST_FOREACH(const TargetPhrases::shared_const_ptr &sharedPtr, targetPhrases) {
 	  const TargetPhrases *tps = sharedPtr.get();
 	  if (tps && tps->GetSize()) {
-		  return false;
+		  return true;
 	  }
   }
-  return true;
+  return false;
 }
-
+*/
 std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 {
 	out << obj.range << " " << obj.subPhrase;

@@ -20,8 +20,9 @@
 
 using namespace std;
 
-Manager::Manager(System &sys, const std::string &inputStr)
+Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr)
 :system(sys)
+,task(task)
 ,m_inputStr(inputStr)
 ,m_initRange(NOT_FOUND, NOT_FOUND)
 {}

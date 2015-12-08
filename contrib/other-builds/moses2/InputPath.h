@@ -26,11 +26,13 @@ public:
 	InputPath(const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPath *prefixPath);
 	virtual ~InputPath();
 
-	void AddTargetPhrases(const PhraseTable &pt, TargetPhrases::shared_const_ptr tps);
+	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases::shared_const_ptr &tpsPtr);
 
-	bool IsUsed() const;
+	inline bool IsUsed() const
+	{ return m_isUsed; }
 
 protected:
+	bool m_isUsed;
 };
 
 #endif /* INPUTPATH_H_ */
