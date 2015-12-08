@@ -110,10 +110,6 @@ void CubeEdge::CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue, Seen
 	}
 }
 
-void CubeEdge::Finalize()
-{
-}
-
 }
 
 

@@ -69,7 +69,6 @@ public:
 			const InputPath &path,
 			const TargetPhrases &tps,
 			const Bitmap &newBitmap);
-	void Finalize();
 
   bool SeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
   void SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;

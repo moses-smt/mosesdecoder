@@ -111,12 +111,6 @@ void Search::Decode(size_t stackInd)
 
 		++pops;
 	}
-
-	// delete cube edges
-	BOOST_FOREACH(CubeEdge *edge, edges) {
-		edge->Finalize();
-	}
-
 }
 
 void Search::PostDecode(size_t stackInd)
@@ -146,6 +140,8 @@ void Search::PostDecode(size_t stackInd)
   		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
   		size_t numWords = newBitmap.GetNumWordsCovered();
 
+  		CubeEdges &edges = m_cubeEdges[numWords];
+
 		// sort hypo for a particular bitmap and hypoEndPos
 		CubeEdge::Hypotheses &sortedHypos = val.second.GetSortedHypos(m_mgr);
 
@@ -153,7 +149,6 @@ void Search::PostDecode(size_t stackInd)
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
   		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
-  		  		CubeEdges &edges = m_cubeEdges[numWords];
   		  		edges.push_back(edge);
   			}
   		}
