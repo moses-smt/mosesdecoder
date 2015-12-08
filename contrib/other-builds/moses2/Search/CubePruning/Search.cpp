@@ -111,11 +111,6 @@ void Search::Decode(size_t stackInd)
 
 		++pops;
 	}
-
-	BOOST_FOREACH(CubeEdge *edge, edges) {
-		//cerr << "edge=" << *edge << endl;
-		m_poolCubeEdge.destroy(edge);
-	}
 }
 
 void Search::PostDecode(size_t stackInd)
@@ -153,7 +148,7 @@ void Search::PostDecode(size_t stackInd)
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new (m_poolCubeEdge.malloc()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
+  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		edges.push_back(edge);
   			}
   		}
