@@ -25,13 +25,13 @@ class CubeEdge;
 ///////////////////////////////////////////
 class QueueItem
 {
+	~QueueItem(); // NOT IMPLEMENTED. Use MemPool
 public:
 	QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
 	CubeEdge &edge;
 	size_t hypoIndex, tpIndex;
 	Hypothesis *hypo;
 
-	~QueueItem() {}
 protected:
 	void CreateHypothesis(Manager &mgr);
 };
@@ -70,8 +70,6 @@ public:
 			const TargetPhrases &tps,
 			const Bitmap &newBitmap);
 
-	~CubeEdge() {}
-
   bool SeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
   void SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
 
@@ -81,7 +79,6 @@ public:
 
 protected:
 
-private:
 };
 
 

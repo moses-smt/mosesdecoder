@@ -8,7 +8,6 @@
 #include "Misc.h"
 #include "../Manager.h"
 #include "../../MemPool.h"
-#include "../../TranslationTask.h"
 
 using namespace std;
 
@@ -83,20 +82,20 @@ void CubeEdge::CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositi
 	assert(hypos.size());
 	assert(tps.GetSize());
 
-	boost::object_pool<NSCubePruning::QueueItem> &pool = mgr.task.poolQueueItem;
+    MemPool &pool = mgr.GetPool();
 
-	QueueItem *newEle = new (pool.malloc()) QueueItem(mgr, *this, 0, 0);
+	QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, 0, 0);
 	queue.push(newEle);
 	SetSeenPosition(0, 0, seenPositions);
 }
 
 void CubeEdge::CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue, SeenPositions &seenPositions)
 {
-	boost::object_pool<NSCubePruning::QueueItem> &pool = mgr.task.poolQueueItem;
+    MemPool &pool = mgr.GetPool();
 
     size_t hypoIndex = ele->hypoIndex + 1;
 	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele->tpIndex, seenPositions)) {
-		QueueItem *newEle = new (pool.malloc()) QueueItem(mgr, *this, hypoIndex, ele->tpIndex);
+		QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, ele->tpIndex);
 		queue.push(newEle);
 
 		SetSeenPosition(hypoIndex, ele->tpIndex, seenPositions);
@@ -104,7 +103,7 @@ void CubeEdge::CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue, Seen
 
 	size_t tpIndex = ele->tpIndex + 1;
 	if (tpIndex < tps.GetSize() && !SeenPosition(ele->hypoIndex, tpIndex, seenPositions)) {
-		QueueItem *newEle = new (pool.malloc()) QueueItem(mgr, *this, ele->hypoIndex, tpIndex);
+		QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, ele->hypoIndex, tpIndex);
 		queue.push(newEle);
 
 		SetSeenPosition(ele->hypoIndex, tpIndex, seenPositions);
