@@ -67,15 +67,6 @@ void ProbingPT::Load(System &system)
   }
 }
 
-
-const Factor *ProbingPT::GetTargetFactor(uint64_t probingId) const
-{
-  if (probingId >= m_targetVocab.size()) {
-	  return NULL;
-  }
-  return m_targetVocab[probingId];
-}
-
 uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
 {
   size_t factorId = factor->GetId();

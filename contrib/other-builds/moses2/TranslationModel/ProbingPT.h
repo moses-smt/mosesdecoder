@@ -39,7 +39,14 @@ protected:
 
   std::vector<uint64_t> ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const;
 
-  const Factor *GetTargetFactor(uint64_t probingId) const;
+  inline const Factor *GetTargetFactor(uint64_t probingId) const
+  {
+	  if (probingId >= m_targetVocab.size()) {
+		  return NULL;
+	  }
+	  return m_targetVocab[probingId];
+  }
+
   uint64_t GetSourceProbingId(const Factor *factor) const;
 
 };
