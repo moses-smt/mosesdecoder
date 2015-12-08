@@ -6,7 +6,6 @@
  */
 
 #pragma once
-#include <boost/pool/object_pool.hpp>
 #include "../Search.h"
 #include "Misc.h"
 #include "Stacks.h"
@@ -36,8 +35,6 @@ protected:
 	// setup
 	typedef std::list<CubeEdge*> CubeEdges;
 	std::vector<CubeEdges> m_cubeEdges;
-
-	boost::object_pool<CubeEdge> m_poolCubeEdge;
 
 	// CUBE PRUNING
 	// decoding

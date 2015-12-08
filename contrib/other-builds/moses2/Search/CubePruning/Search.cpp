@@ -11,6 +11,7 @@
 #include "../../InputPaths.h"
 #include "../../InputPath.h"
 #include "../../System.h"
+#include "../../TranslationTask.h"
 #include "../../legacy/Util2.h"
 
 using namespace std;
@@ -114,7 +115,7 @@ void Search::Decode(size_t stackInd)
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		m_poolCubeEdge.destroy(edge);
+		m_mgr.task.poolCubeEdge.destroy(edge);
 	}
 }
 
@@ -153,7 +154,7 @@ void Search::PostDecode(size_t stackInd)
   		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
   			const TargetPhrases *tps = tpsPtr.get();
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new (m_poolCubeEdge.malloc()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
+  		  		CubeEdge *edge = new (m_mgr.task.poolCubeEdge.malloc()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		edges.push_back(edge);
   			}
   		}
