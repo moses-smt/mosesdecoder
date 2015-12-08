@@ -58,23 +58,20 @@ void ProbingPT::Load(System &system)
 
 	unsigned int probingId = iter->first;
 
-	TargetVocabMap::value_type entry(factor, probingId);
-	m_vocabMap.insert(entry);
-
+	if (probingId >= m_targetVocab.size()) {
+		m_targetVocab.resize(probingId + 1, NULL);
+		m_targetVocab[probingId] = factor;
+	}
   }
 }
 
 
 const Factor *ProbingPT::GetTargetFactor(uint64_t probingId) const
 {
-  TargetVocabMap::right_map::const_iterator iter;
-  iter = m_vocabMap.right.find(probingId);
-  if (iter != m_vocabMap.right.end()) {
-    return iter->second;
-  } else {
-    // not in mapping. Must be UNK
-    return NULL;
+  if (probingId >= m_targetVocab.size()) {
+	  return NULL;
   }
+  return m_targetVocab[probingId];
 }
 
 uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const

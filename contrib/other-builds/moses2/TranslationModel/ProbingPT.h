@@ -31,8 +31,7 @@ protected:
   typedef boost::bimap<const Factor *, uint64_t> SourceVocabMap;
   mutable SourceVocabMap m_sourceVocabMap;
 
-  typedef boost::bimap<const Factor *, unsigned int> TargetVocabMap;
-  mutable TargetVocabMap m_vocabMap;
+  std::vector<const Factor*> m_targetVocab;
 
   uint64_t m_unkId;
   QueryEngine *m_engine;
