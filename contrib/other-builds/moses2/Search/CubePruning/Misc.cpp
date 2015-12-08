@@ -60,22 +60,24 @@ std::ostream& operator<<(std::ostream &out, const CubeEdge &obj)
 }
 
 bool
-CubeEdge::SeenPosition(const size_t x, const size_t y) const
+CubeEdge::SeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const
 {
-  boost::unordered_set< int >::iterator iter = m_seenPosition.find((x<<16) + y);
-  return (iter != m_seenPosition.end());
+  std::pair<const CubeEdge*, int> val(this, (x<<16) + y);
+  boost::unordered_set< std::pair<const CubeEdge*, int> >::iterator iter = seenPositions.find(val);
+  return (iter != seenPositions.end());
 }
 
 void
-CubeEdge::SetSeenPosition(const size_t x, const size_t y)
+CubeEdge::SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const
 {
   //UTIL_THROW_IF2(x >= (1<<17), "Error");
   //UTIL_THROW_IF2(y >= (1<<17), "Error");
 
-  m_seenPosition.insert((x<<16) + y);
+  std::pair<const CubeEdge*, int> val(this, (x<<16) + y);
+  seenPositions.insert(val);
 }
 
-void CubeEdge::CreateFirst(Manager &mgr, Queue &queue)
+void CubeEdge::CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions)
 {
 	assert(hypos.size());
 	assert(tps.GetSize());
@@ -84,27 +86,27 @@ void CubeEdge::CreateFirst(Manager &mgr, Queue &queue)
 
 	QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, 0, 0);
 	queue.push(newEle);
-	SetSeenPosition(0, 0);
+	SetSeenPosition(0, 0, seenPositions);
 }
 
-void CubeEdge::CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue)
+void CubeEdge::CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue, SeenPositions &seenPositions)
 {
     MemPool &pool = mgr.GetPool();
 
     size_t hypoIndex = ele->hypoIndex + 1;
-	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele->tpIndex)) {
+	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele->tpIndex, seenPositions)) {
 		QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, ele->tpIndex);
 		queue.push(newEle);
 
-		SetSeenPosition(hypoIndex, ele->tpIndex);
+		SetSeenPosition(hypoIndex, ele->tpIndex, seenPositions);
 	}
 
 	size_t tpIndex = ele->tpIndex + 1;
-	if (tpIndex < tps.GetSize() && !SeenPosition(ele->hypoIndex, tpIndex)) {
+	if (tpIndex < tps.GetSize() && !SeenPosition(ele->hypoIndex, tpIndex, seenPositions)) {
 		QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, ele->hypoIndex, tpIndex);
 		queue.push(newEle);
 
-		SetSeenPosition(ele->hypoIndex, tpIndex);
+		SetSeenPosition(ele->hypoIndex, tpIndex, seenPositions);
 	}
 }
 

@@ -40,6 +40,7 @@ protected:
 	// CUBE PRUNING
 	// decoding
 	CubeEdge::Queue m_queue;
+	CubeEdge::SeenPositions m_seenPositions;
 
 	void Decode(size_t stackInd);
 	void PostDecode(size_t stackInd);

@@ -56,6 +56,7 @@ public:
 	typedef std::priority_queue<QueueItem*,
 				std::vector<QueueItem*>,
 				QueueItemOrderer> Queue;
+	typedef boost::unordered_set< std::pair<const CubeEdge*, int> > SeenPositions;
 
 	const Hypotheses &hypos;
 	const InputPath &path;
@@ -70,15 +71,14 @@ public:
 			const Bitmap &newBitmap);
 	void Finalize();
 
-  bool SeenPosition(const size_t x, const size_t y) const;
-  void SetSeenPosition(const size_t x, const size_t y);
+  bool SeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
+  void SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
 
-  void CreateFirst(Manager &mgr, Queue &queue);
-  void CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue);
+  void CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions);
+  void CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue, SeenPositions &seenPositions);
 
 
 protected:
-    boost::unordered_set< int > m_seenPosition;
 
 };
 

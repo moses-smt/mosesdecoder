@@ -74,12 +74,14 @@ void Search::Decode(size_t stackInd)
 	std::vector<QueueItem*> &queueContainer = Container(m_queue);
 	queueContainer.clear();
 
+	m_seenPositions.clear();
+
 	// add top hypo from every edge into queue
 	CubeEdges &edges = m_cubeEdges[stackInd];
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		edge->CreateFirst(m_mgr, m_queue);
+		edge->CreateFirst(m_mgr, m_queue, m_seenPositions);
 	}
 
 	/*
@@ -105,7 +107,7 @@ void Search::Decode(size_t stackInd)
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
 		CubeEdge &edge = ele->edge;
-		edge.CreateNext(m_mgr, ele, m_queue);
+		edge.CreateNext(m_mgr, ele, m_queue, m_seenPositions);
 
 		++pops;
 	}
