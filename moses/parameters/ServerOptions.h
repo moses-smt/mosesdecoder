@@ -24,6 +24,7 @@ namespace Moses
     
     bool init(Parameter const& param);
     ServerOptions(Parameter const& param);
+    ServerOptions();
   };
 
 }

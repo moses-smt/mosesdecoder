@@ -9,8 +9,8 @@ namespace Moses {
 
   SyntaxOptions::
   SyntaxOptions()
-  { 
-  }
+    : s2t_parsing_algo(RecursiveCYKPlus)
+  { }
 
   bool
   SyntaxOptions::

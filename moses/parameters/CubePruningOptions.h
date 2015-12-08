@@ -16,7 +16,7 @@ namespace Moses
 
     bool init(Parameter const& param);
     CubePruningOptions(Parameter const& param);
-    CubePruningOptions() {};
+    CubePruningOptions();
 
     bool 
     update(std::map<std::string,xmlrpc_c::value>const& params);

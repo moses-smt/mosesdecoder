@@ -9,10 +9,15 @@ namespace Moses {
 
   InputOptions::
   InputOptions()
+    : continue_partial_translation(false)
+    , default_non_term_only_for_empty_range(false)
+    , input_type(SentenceInput)
+    , xml_policy(XmlPassThrough)
+    , placeholder_factor(NOT_FOUND)
   { 
     xml_brackets.first  = "<";
     xml_brackets.second = ">";
-    input_type = SentenceInput;
+    factor_order.assign(1,0);
   }
 
   bool

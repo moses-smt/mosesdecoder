@@ -9,6 +9,7 @@ namespace Moses
   {
     bool need_alignment_info;
     bool init(Parameter const& param);
+    BookkeepingOptions();
   };
   
 

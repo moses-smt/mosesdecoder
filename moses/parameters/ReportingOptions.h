@@ -38,9 +38,6 @@ namespace Moses
     bool PrintID;
     bool PrintPassThrough;
 
-    // print ..
-    bool aln_info;    // m_PrintAlignmentInfo;
-
     // transrep = translation reporting
     std::string detailed_transrep_filepath;
     std::string detailed_tree_transrep_filepath;
@@ -59,7 +56,10 @@ namespace Moses
 #ifdef HAVE_XMLRPC_C
     bool update(std::map<std::string, xmlrpc_c::value>const& param);
 #endif
-  };
 
+    
+    ReportingOptions();
+  };
+  
 }
 

@@ -37,7 +37,7 @@ namespace Moses
 
     bool init(Parameter const& param);
     SearchOptions(Parameter const& param);
-    SearchOptions() {}
+    SearchOptions();
 
     bool 
     UseEarlyDiscarding() const {

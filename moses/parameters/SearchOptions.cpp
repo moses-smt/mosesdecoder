@@ -3,6 +3,23 @@
 
 namespace Moses
 {
+
+  SearchOptions::
+  SearchOptions()
+    : algo(Normal)
+    , stack_size(DEFAULT_MAX_HYPOSTACK_SIZE)
+    , stack_diversity(0)
+    , disable_discarding(false)
+    , max_phrase_length(DEFAULT_MAX_PHRASE_LENGTH)
+    , max_trans_opt_per_cov(DEFAULT_MAX_TRANS_OPT_SIZE)
+    , max_partial_trans_opt(DEFAULT_MAX_PART_TRANS_OPT_SIZE)
+    , beam_width(DEFAULT_BEAM_WIDTH)
+    , timeout(0)
+    , consensus(false)
+    , early_discarding_threshold(DEFAULT_EARLY_DISCARDING_THRESHOLD)
+    , trans_opt_threshold(DEFAULT_TRANSLATION_OPTION_THRESHOLD)
+  { }
+
   SearchOptions::
   SearchOptions(Parameter const& param)
     : stack_diversity(0)

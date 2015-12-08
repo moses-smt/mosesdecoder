@@ -4,6 +4,26 @@
 
 namespace Moses {
   using namespace std;
+
+  ReportingOptions::
+  ReportingOptions()
+    : ReportAllFactors(false)
+    , ReportSegmentation(0)
+    , PrintAlignmentInfo(false)
+    , PrintAllDerivations(false)
+    , PrintTranslationOptions(false)
+    , WA_SortOrder(NoSort)
+    , WordGraph(false)
+    , DontPruneSearchGraph(false)
+    , RecoverPath(false)
+    , ReportHypoScore(false)
+    , PrintID(false)
+    , PrintPassThrough(false)
+    , lattice_sample_size(0)
+  {
+    factor_order.assign(1,0);
+  }
+  
   bool
   ReportingOptions::
   init(Parameter const& param)
@@ -21,16 +41,16 @@ namespace Moses {
     param.SetParameter(WA_SortOrder, "sort-word-alignment", NoSort);
     std::string e; // hack to save us param.SetParameter<string>(...)
     param.SetParameter(AlignmentOutputFile,"alignment-output-file", e);
-
-
+    
+    
     param.SetParameter(PrintAllDerivations, "print-all-derivations", false);
     param.SetParameter(PrintTranslationOptions, "print-translation-option", false);
-
+    
     // output a word graph
     PARAM_VEC const* params;
     params = param.GetParam("output-word-graph");
     WordGraph = (params && params->size() == 2); // what are the two options?
-
+    
     // dump the search graph
     param.SetParameter(SearchGraph, "output-search-graph", e);
     param.SetParameter(SearchGraphExtended, "output-search-graph-extended", e);
@@ -39,7 +59,7 @@ namespace Moses {
 #ifdef HAVE_PROTOBUF
     param.SetParameter(SearchGraphPB, "output-search-graph-pb", e);
 #endif
-
+    
     param.SetParameter(DontPruneSearchGraph, "unpruned-search-graph", false);
     
     
@@ -63,8 +83,6 @@ namespace Moses {
         std::cerr <<"wrong format for switch -lattice-samples file size";
         return false;
       }
-    } else {
-      lattice_sample_size = 0;
     }
 
     params= param.GetParam("output-factors");
@@ -81,7 +99,7 @@ namespace Moses {
     
     return true;
   }
-
+  
 #ifdef HAVE_XMLRPC_C
   bool 
   ReportingOptions::
@@ -121,5 +139,4 @@ namespace Moses {
     return true;
   }
 #endif
-
 }
