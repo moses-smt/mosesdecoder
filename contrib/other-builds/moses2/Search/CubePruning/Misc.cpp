@@ -70,8 +70,8 @@ CubeEdge::SeenPosition(const size_t x, const size_t y) const
 void
 CubeEdge::SetSeenPosition(const size_t x, const size_t y)
 {
-  UTIL_THROW_IF2(x >= (1<<17), "Error");
-  UTIL_THROW_IF2(y >= (1<<17), "Error");
+  //UTIL_THROW_IF2(x >= (1<<17), "Error");
+  //UTIL_THROW_IF2(y >= (1<<17), "Error");
 
   m_seenPosition->insert((x<<16) + y);
 }
