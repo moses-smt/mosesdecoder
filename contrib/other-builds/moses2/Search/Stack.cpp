@@ -41,11 +41,10 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 	  const Hypothesis *hypoExisting = *addRet.first;
 	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
 		  // incoming hypo is better than the one we have
-		  m_hypos.erase(addRet.first);
 
-		  // re-add. It better go in
-		  std::pair<iterator, bool> addRet = m_hypos.insert(hypo);
-		  assert(addRet.second);
+		  const Hypothesis *const &h1 = *addRet.first;
+		  const Hypothesis *&h2 = const_cast<const Hypothesis *&>(h1);
+		  h2 = hypo;
 
 		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
 		  /*
