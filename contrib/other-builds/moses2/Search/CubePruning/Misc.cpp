@@ -4,7 +4,7 @@
  *  Created on: 27 Nov 2015
  *      Author: hieu
  */
-
+#include <algorithm>
 #include "Misc.h"
 #include "../Manager.h"
 #include "../../MemPool.h"
@@ -84,9 +84,18 @@ void CubeEdge::CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositi
 
     MemPool &pool = mgr.GetPool();
 
+    /*
 	QueueItem *item = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, 0, 0);
 	queue.push(item);
 	SetSeenPosition(0, 0, seenPositions);
+	*/
+
+    size_t maxTP = std::min(tps.GetSize(), (size_t) 5);
+    for (size_t tpIndex = 0; tpIndex < maxTP; ++tpIndex) {
+    	QueueItem *item = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, 0, tpIndex);
+    	queue.push(item);
+    	SetSeenPosition(0, tpIndex, seenPositions);
+    }
 }
 
 void CubeEdge::CreateNext(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions)
