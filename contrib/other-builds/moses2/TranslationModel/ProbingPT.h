@@ -27,10 +27,8 @@ public:
   void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
   TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
-	size_t HasVocabInd() const
-	{ return true; }
-
 protected:
+  std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector<const Factor*> m_targetVocab; // pt id -> factor*
 
   uint64_t m_unkId;

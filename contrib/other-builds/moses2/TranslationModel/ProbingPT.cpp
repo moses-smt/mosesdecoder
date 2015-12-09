@@ -31,7 +31,7 @@ void ProbingPT::Load(System &system)
 {
   m_engine = new QueryEngine(m_path.c_str());
 
-  m_unkId = 0;
+  m_unkId = 456456546456;
 
   FactorCollection &vocab = system.GetVocab();
 
@@ -43,8 +43,12 @@ void ProbingPT::Load(System &system)
 	const Factor *factor = vocab.AddFactor(wordStr, system);
 
 	uint64_t probingId = iterSource->first;
+	size_t factorId = factor->GetId();
 
-	factor->ffData[m_vocabInd] = (void*) probingId;
+	if (factorId >= m_sourceVocab.size()) {
+		m_sourceVocab.resize(factorId + 1, m_unkId);
+	}
+	m_sourceVocab[factorId] = probingId;
   }
 
   // target vocab
@@ -65,7 +69,11 @@ void ProbingPT::Load(System &system)
 
 uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
 {
-	return (uint64_t) factor->ffData[m_vocabInd];
+  size_t factorId = factor->GetId();
+  if (factorId >= m_sourceVocab.size()) {
+	  return m_unkId;
+  }
+  return m_sourceVocab[factorId];
 }
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
