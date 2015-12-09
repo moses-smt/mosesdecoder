@@ -88,7 +88,11 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 
 void PhraseImpl::Prefetch() const
 {
-	 __builtin_prefetch(m_words);
+	for (size_t i = 0; i < m_size; ++i) {
+		const Word &word = m_words[i];
+		const Factor *factor = word[0];
+		 __builtin_prefetch(factor);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
