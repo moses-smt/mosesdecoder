@@ -182,10 +182,20 @@ void Search::Prefetch(size_t stackInd)
 
 		 BOOST_FOREACH(const Hypothesis *hypo, edge->hypos) {
 			 __builtin_prefetch(hypo);
+
+			 const TargetPhrase &tp = hypo->GetTargetPhrase();
+			 __builtin_prefetch(&tp);
+
 		 }
 
 		 BOOST_FOREACH(const TargetPhrase *tp, edge->tps) {
 			 __builtin_prefetch(tp);
+
+			 size_t size = tp->GetSize();
+			 for (size_t i = 0; i < size; ++i) {
+				 const Word &word = (*tp)[i];
+				 __builtin_prefetch(&word);
+			 }
 		 }
 
 	}
