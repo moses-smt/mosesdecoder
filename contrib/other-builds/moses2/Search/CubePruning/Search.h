@@ -31,6 +31,7 @@ public:
 
 protected:
 	NSCubePruning::Stacks m_stacks;
+	NSCubePruning::CubeEdge::Queue &m_queue;
 
 	// CUBE PRUNING VARIABLES
 	// setup

@@ -158,3 +158,9 @@ ObjectPoolContiguous<Hypothesis*> &System::GetBatchForEval() const
   ObjectPoolContiguous<Hypothesis*> &ret = GetThreadSpecificObj(m_batchForEval);
   return ret;
 }
+
+NSCubePruning::CubeEdge::Queue &System::GetQueue() const
+{
+  NSCubePruning::CubeEdge::Queue &ret = GetThreadSpecificObj(m_queue);
+  return ret;
+}

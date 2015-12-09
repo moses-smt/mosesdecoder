@@ -15,6 +15,7 @@
 #include "legacy/FactorCollection.h"
 #include "legacy/Parameter.h"
 #include "TypeDef.h"
+#include "Search/CubePruning/Misc.h"
 
 class FeatureFunction;
 class StatefulFeatureFunction;
@@ -52,12 +53,15 @@ public:
 
 	Recycler<Hypothesis*> &GetHypoRecycler() const;
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
+	NSCubePruning::CubeEdge::Queue &GetQueue() const;
 
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
   mutable boost::thread_specific_ptr< Recycler<Hypothesis*> > m_hypoRecycler;
   mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_batchForEval;
+
+  mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::Queue> m_queue;
 
   void LoadWeights();
   void LoadMappings();

@@ -22,6 +22,7 @@ namespace NSCubePruning
 ////////////////////////////////////////////////////////////////////////
 Search::Search(Manager &mgr)
 : ::Search(mgr)
+,m_queue(mgr.system.GetQueue())
 {
 }
 
@@ -72,8 +73,7 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	NSCubePruning::CubeEdge::Queue &queue = m_mgr.task.queue;
-	std::vector<QueueItem*> &queueContainer = Container(queue);
+	std::vector<QueueItem*> &queueContainer = Container(m_queue);
 	queueContainer.clear();
 
 	NSCubePruning::CubeEdge::SeenPositions &seenPositions = m_mgr.task.seenPositions;
@@ -86,7 +86,7 @@ void Search::Decode(size_t stackInd)
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		edge->CreateFirst(m_mgr, queue, seenPositions);
+		edge->CreateFirst(m_mgr, m_queue, seenPositions);
 	}
 
 	/*
@@ -101,22 +101,22 @@ void Search::Decode(size_t stackInd)
 	*/
 
 	size_t pops = 0;
-	while (!queue.empty() && pops < m_mgr.system.popLimit) {
+	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
-		QueueItem *item = queue.top();
-		queue.pop();
+		QueueItem *item = m_queue.top();
+		m_queue.pop();
 
 		Hypothesis::Prefetch(m_mgr);
 
 		CubeEdge &edge = item->edge;
-		edge.Prefetch(m_mgr, item, queue, seenPositions);
+		edge.Prefetch(m_mgr, item, m_queue, seenPositions);
 
 		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
-		edge.CreateNext(m_mgr, item, queue, seenPositions);
+		edge.CreateNext(m_mgr, item, m_queue, seenPositions);
 
 		++pops;
 	}
