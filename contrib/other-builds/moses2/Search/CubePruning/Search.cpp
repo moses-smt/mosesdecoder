@@ -107,11 +107,17 @@ void Search::Decode(size_t stackInd)
 		QueueItem *item = m_queue.top();
 		m_queue.pop();
 
-		Hypothesis::Prefetch(m_mgr);
-
 		CubeEdge &edge = item->edge;
-		edge.Prefetch(m_mgr, item, m_queue, m_seenPositions);
 
+		// prefetching
+		Hypothesis::Prefetch(m_mgr); // next hypo in recycler
+		edge.Prefetch(m_mgr, item, m_queue, m_seenPositions); //next hypos of current item
+
+		QueueItem *itemNext = m_queue.top();
+		CubeEdge &edgeNext = itemNext->edge;
+		edgeNext.Prefetch(m_mgr, itemNext, m_queue, m_seenPositions); //next hypos of NEXT item
+
+		// add hypo to stack
 		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
