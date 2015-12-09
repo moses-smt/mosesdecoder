@@ -110,12 +110,14 @@ void Search::Decode(size_t stackInd)
 		CubeEdge &edge = item->edge;
 
 		// prefetching
+		/*
 		Hypothesis::Prefetch(m_mgr); // next hypo in recycler
 		edge.Prefetch(m_mgr, item, m_queue, m_seenPositions); //next hypos of current item
 
 		QueueItem *itemNext = m_queue.top();
 		CubeEdge &edgeNext = itemNext->edge;
 		edgeNext.Prefetch(m_mgr, itemNext, m_queue, m_seenPositions); //next hypos of NEXT item
+		*/
 
 		// add hypo to stack
 		Hypothesis *hypo = item->hypo;
