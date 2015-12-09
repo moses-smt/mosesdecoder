@@ -164,3 +164,9 @@ NSCubePruning::CubeEdge::Queue &System::GetQueue() const
   NSCubePruning::CubeEdge::Queue &ret = GetThreadSpecificObj(m_queue);
   return ret;
 }
+
+NSCubePruning::CubeEdge::SeenPositions &System::GetSeenPositions() const
+{
+  NSCubePruning::CubeEdge::SeenPositions &ret = GetThreadSpecificObj(m_seenPositions);
+  return ret;
+}

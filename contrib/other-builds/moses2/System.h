@@ -54,6 +54,7 @@ public:
 	Recycler<Hypothesis*> &GetHypoRecycler() const;
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
 	NSCubePruning::CubeEdge::Queue &GetQueue() const;
+	NSCubePruning::CubeEdge::SeenPositions &GetSeenPositions() const;
 
 protected:
   mutable FactorCollection m_vocab;
@@ -62,6 +63,7 @@ protected:
   mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_batchForEval;
 
   mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::Queue> m_queue;
+  mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::SeenPositions> m_seenPositions;
 
   void LoadWeights();
   void LoadMappings();

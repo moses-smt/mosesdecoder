@@ -23,6 +23,7 @@ namespace NSCubePruning
 Search::Search(Manager &mgr)
 : ::Search(mgr)
 ,m_queue(mgr.system.GetQueue())
+,m_seenPositions(mgr.system.GetSeenPositions())
 {
 }
 
@@ -76,8 +77,7 @@ void Search::Decode(size_t stackInd)
 	std::vector<QueueItem*> &queueContainer = Container(m_queue);
 	queueContainer.clear();
 
-	NSCubePruning::CubeEdge::SeenPositions &seenPositions = m_mgr.task.seenPositions;
-	seenPositions.clear();
+	m_seenPositions.clear();
 
 	//Prefetch(stackInd);
 
@@ -86,7 +86,7 @@ void Search::Decode(size_t stackInd)
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		edge->CreateFirst(m_mgr, m_queue, seenPositions);
+		edge->CreateFirst(m_mgr, m_queue, m_seenPositions);
 	}
 
 	/*
@@ -110,13 +110,13 @@ void Search::Decode(size_t stackInd)
 		Hypothesis::Prefetch(m_mgr);
 
 		CubeEdge &edge = item->edge;
-		edge.Prefetch(m_mgr, item, m_queue, seenPositions);
+		edge.Prefetch(m_mgr, item, m_queue, m_seenPositions);
 
 		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
-		edge.CreateNext(m_mgr, item, m_queue, seenPositions);
+		edge.CreateNext(m_mgr, item, m_queue, m_seenPositions);
 
 		++pops;
 	}
