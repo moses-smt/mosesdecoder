@@ -23,7 +23,7 @@ private:
   std::vector<std::vector<int> > distances;
 
 public:
-  WordLattice();
+  WordLattice(AllOptions::ptr const& opts);
 
   InputTypeEnum GetType() const {
     return WordLatticeInput;

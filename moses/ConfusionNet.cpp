@@ -62,7 +62,7 @@ GetColumnIncrement(size_t i, size_t j) const
 }
 
 ConfusionNet::
-ConfusionNet() : InputType()
+ConfusionNet(AllOptions::ptr const& opts) : InputType(opts)
 {
   stats.createOne();
 
@@ -80,7 +80,7 @@ ConfusionNet::
 }
 
 ConfusionNet::
-ConfusionNet(Sentence const& s) : InputType()
+ConfusionNet(Sentence const& s) : InputType(s.options())
 {
   data.resize(s.GetSize());
   for(size_t i=0; i<s.GetSize(); ++i) {
@@ -282,10 +282,10 @@ ConfusionNet::
 CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   size_t maxNoTransOptPerCoverage
-  = ttask->options().search.max_trans_opt_per_cov;
+  = ttask->options()->search.max_trans_opt_per_cov;
   // StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold
-  = ttask->options().search.trans_opt_threshold;
+  = ttask->options()->search.trans_opt_threshold;
   // StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
   = new TranslationOptionCollectionConfusionNet

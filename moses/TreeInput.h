@@ -48,7 +48,7 @@ protected:
                               std::vector<XmlOption const*> &res);
 
 public:
-  TreeInput() : Sentence() { }
+  TreeInput(AllOptions::ptr const& opts) : Sentence(opts) { }
 
   InputTypeEnum GetType() const {
     return TreeInputType;

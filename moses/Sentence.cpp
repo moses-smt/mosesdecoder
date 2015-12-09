@@ -41,7 +41,7 @@ namespace Moses
 {
 
 Sentence::
-Sentence() : Phrase(0) , InputType()
+Sentence(AllOptions::ptr const& opts) : Phrase(0) , InputType(opts)
 {
   const StaticData& SD = StaticData::Instance();
   if (SD.IsSyntax())
@@ -167,8 +167,7 @@ aux_interpret_xml(AllOptions const& opts, std::string& line, std::vector<size_t>
 
 void
 Sentence::
-init(string line, std::vector<FactorType> const& factorOrder,
-     AllOptions const& opts)
+init(AllOptions::ptr const& opts, string line, std::vector<FactorType> const& factorOrder)
 {
   using namespace std;
   const StaticData &SD = StaticData::Instance();
@@ -192,7 +191,7 @@ init(string line, std::vector<FactorType> const& factorOrder,
 
   vector<size_t> xmlWalls;
   vector<pair<size_t, string> >placeholders;
-  aux_interpret_xml(opts, line, xmlWalls, placeholders);
+  aux_interpret_xml(*opts, line, xmlWalls, placeholders);
 
   Phrase::CreateFromString(Input, factorOrder, line, NULL);
 
@@ -205,7 +204,7 @@ init(string line, std::vector<FactorType> const& factorOrder,
   // our XmlOptions and create TranslationOptions
 
   // only fill the vector if we are parsing XML
-  if (opts.input.xml_policy != XmlPassThrough) {
+  if (opts->input.xml_policy != XmlPassThrough) {
     m_xmlCoverageMap.assign(GetSize(), false);
     BOOST_FOREACH(XmlOption const* o, m_xmlOptions) {
       Range const& r = o->range;
@@ -240,7 +239,7 @@ Read(std::istream& in,
   std::string line;
   if (getline(in, line, '\n').eof())
     return 0;
-  init(line, factorOrder, opts);
+  init(m_options, line, factorOrder);
   return 1;
 }
 
@@ -266,9 +265,9 @@ TranslationOptionCollection*
 Sentence::
 CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
-  size_t maxNoTransOptPerCoverage = ttask->options().search.max_trans_opt_per_cov;
+  size_t maxNoTransOptPerCoverage = ttask->options()->search.max_trans_opt_per_cov;
   // StaticData::Instance().GetMaxNoTransOptPerCoverage();
-  float transOptThreshold = ttask->options().search.trans_opt_threshold;
+  float transOptThreshold = ttask->options()->search.trans_opt_threshold;
   // StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
   = new TranslationOptionCollectionText(ttask, *this,
@@ -375,14 +374,12 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(size_t const transId,
-         string const& stext,
-         AllOptions const& opts,
-         vector<FactorType> const* IFO)
-  : InputType(transId)
+Sentence(AllOptions::ptr const& opts, size_t const transId,
+         string stext, vector<FactorType> const* IFO)
+  : InputType(opts, transId)
 {
-  if (IFO) init(stext, *IFO, opts);
-  else init(stext, opts.input.factor_order, opts);
+  if (IFO) init(opts,stext, *IFO);
+  else init(opts, stext, opts->input.factor_order);
 }
 
 }

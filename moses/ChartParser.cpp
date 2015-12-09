@@ -214,7 +214,7 @@ void ChartParser::Create(const Range &range, ChartParserCallback &to)
   if (range.GetNumWordsCovered() == 1
       && range.GetStartPos() != 0
       && range.GetStartPos() != m_source.GetSize()-1) {
-    bool always = m_ttask.lock()->options().unk.always_create_direct_transopt;
+    bool always = m_ttask.lock()->options()->unk.always_create_direct_transopt;
     // bool alwaysCreateDirectTranslationOption
     // = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
     if (to.Empty() || always) {

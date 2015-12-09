@@ -14,12 +14,14 @@
 #include "ReportingOptions.h"
 #include "OOVHandlingOptions.h"
 #include "SyntaxOptions.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
   struct 
   AllOptions : public OptionsBaseClass
   {
+    typedef boost::shared_ptr<AllOptions const> ptr;
     SearchOptions         search;
     CubePruningOptions      cube;
     NBestOptions           nbest;

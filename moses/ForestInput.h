@@ -21,7 +21,7 @@ class ForestInput : public Sentence
 public:
   friend std::ostream &operator<<(std::ostream&, const ForestInput &);
 
-  ForestInput() : Sentence(), m_rootVertex(NULL) {}
+  ForestInput(AllOptions::ptr const& opts) : Sentence(opts), m_rootVertex(NULL) {}
 
   InputTypeEnum GetType() const {
     return ForestInputType;

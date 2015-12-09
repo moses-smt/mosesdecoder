@@ -32,7 +32,7 @@ TranslationOptionCollectionLattice
   const InputFeature *inputFeature = InputFeature::InstancePtr();
   UTIL_THROW_IF2(inputFeature == NULL, "Input feature must be specified");
 
-  size_t maxPhraseLength = ttask->options().search.max_phrase_length;  //StaticData::Instance().GetMaxPhraseLength();
+  size_t maxPhraseLength = ttask->options()->search.max_phrase_length;  //StaticData::Instance().GetMaxPhraseLength();
   size_t size = input.GetSize();
 
   // 1-word phrases
@@ -69,7 +69,7 @@ TranslationOptionCollectionLattice
       m_inputPathQueue.push_back(path);
 
       // recursive
-      Extend(*path, input, ttask->options().search.max_phrase_length);
+      Extend(*path, input, ttask->options()->search.max_phrase_length);
 
     }
   }

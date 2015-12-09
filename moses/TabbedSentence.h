@@ -53,7 +53,7 @@ class TabbedSentence : public Sentence
 {
 
 public:
-  TabbedSentence() : Sentence() {}
+  TabbedSentence(AllOptions::ptr const& opts) : Sentence(opts) {}
   ~TabbedSentence() {}
 
   InputTypeEnum GetType() const {

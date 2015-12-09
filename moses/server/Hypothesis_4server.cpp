@@ -11,7 +11,7 @@ namespace Moses {
     Range const& src = this->GetCurrSourceWordsRange();
     Range const& trg = this->GetCurrTargetWordsRange();
 
-    WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
+    WordAlignmentSort waso = m_manager.options()->output.WA_SortOrder;
     vector<pair<size_t,size_t> const* > a
       = this->GetCurrTargetPhrase().GetAlignTerm().GetSortedAlignments(waso);
     typedef pair<size_t,size_t> item;

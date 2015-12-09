@@ -167,7 +167,7 @@ int main(int argc, char const* argv[])
   MBR_Options&   mbr = SD.options().mbr;
   lmbr.enabled = true;
 
-  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper(SD.options()));
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }

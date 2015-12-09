@@ -11,7 +11,7 @@
 
 namespace Moses
 {
-WordLattice::WordLattice()  : ConfusionNet()
+WordLattice::WordLattice(AllOptions::ptr const& opts)  : ConfusionNet(opts)
 {
   UTIL_THROW_IF2(InputFeature::InstancePtr() == NULL,
                  "Input feature must be specified");
@@ -231,9 +231,9 @@ WordLattice
   // size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   // float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
 
-  size_t maxNoTransOptPerCoverage = ttask->options().search.max_trans_opt_per_cov;
+  size_t maxNoTransOptPerCoverage = ttask->options()->search.max_trans_opt_per_cov;
   // StaticData::Instance().GetMaxNoTransOptPerCoverage();
-  float translationOptionThreshold = ttask->options().search.trans_opt_threshold;
+  float translationOptionThreshold = ttask->options()->search.trans_opt_threshold;
   // StaticData::Instance().GetTranslationOptionThreshold();
 
 

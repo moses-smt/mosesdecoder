@@ -39,8 +39,8 @@ MockHypothesisGuard
 {
   BOOST_CHECK_EQUAL(alignments.size(), targetSegments.size());
   std::vector<Moses::FactorType> factors(1,0);
-  AllOptions const& opts = StaticData::Instance().options();
-  m_sentence.reset(new Sentence(0, sourceSentence, opts, &factors));
+  AllOptions::ptr opts(new AllOptions(StaticData::Instance().options()));
+  m_sentence.reset(new Sentence(opts,0, sourceSentence, &factors));
   m_ttask = TranslationTask::create(m_sentence);
   m_manager.reset(new Manager(m_ttask));
 

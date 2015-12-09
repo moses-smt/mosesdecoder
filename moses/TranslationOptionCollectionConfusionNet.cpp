@@ -41,7 +41,7 @@ TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
   size_t inputSize = input.GetSize();
   m_inputPathMatrix.resize(inputSize);
 
-  size_t maxSizePhrase = ttask->options().search.max_phrase_length;
+  size_t maxSizePhrase = ttask->options()->search.max_phrase_length;
   maxSizePhrase = std::min(inputSize, maxSizePhrase);
 
   // 1-word phrases
@@ -225,7 +225,7 @@ CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph,
   bool retval = true;
   size_t const max_phrase_length
   = StaticData::Instance().options().search.max_phrase_length;
-  XmlInputType intype = m_ttask.lock()->options().input.xml_policy;
+  XmlInputType intype = m_ttask.lock()->options()->input.xml_policy;
   if ((intype != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     InputPathList &inputPathList = GetInputPathList(startPos, endPos);
 

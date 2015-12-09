@@ -49,7 +49,7 @@ public:
   //! the input sentence being decoded
   const InputType& GetSource() const;
   const ttasksptr  GetTtask() const;
-  AllOptions const& options() const;
+  AllOptions::ptr const& options() const;
 
   virtual void Decode() = 0;
   // outputs

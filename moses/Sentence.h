@@ -63,9 +63,8 @@ protected:
   std::vector<std::map<std::string,std::string> > m_dlt_meta;
 
 public:
-  Sentence();
-  Sentence(size_t const transId, std::string const& stext,
-           AllOptions const& opts,
+  Sentence(AllOptions::ptr const& opts);
+  Sentence(AllOptions::ptr const& opts, size_t const transId, std::string stext,
            std::vector<FactorType> const* IFO = NULL);
   // Sentence(size_t const transId, std::string const& stext);
   ~Sentence();
@@ -117,8 +116,8 @@ public:
 
 
   void
-  init(std::string line, std::vector<FactorType> const& factorOrder,
-       AllOptions const& opts);
+  init(AllOptions::ptr const& opts, std::string line, 
+       std::vector<FactorType> const& factorOrder);
 
   std::vector<std::map<std::string,std::string> > const&
   GetDltMeta() const {

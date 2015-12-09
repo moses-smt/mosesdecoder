@@ -51,7 +51,7 @@ ChartCellBase::~ChartCellBase() {}
 ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
   ChartCellBase(startPos, endPos), m_manager(manager)
 {
-  m_nBestIsEnabled = manager.options().nbest.enabled;
+  m_nBestIsEnabled = manager.options()->nbest.enabled;
 }
 
 ChartCell::~ChartCell() {}
@@ -67,7 +67,7 @@ bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
   MapType::iterator m = m_hypoColl.find(targetLHS);
   if (m == m_hypoColl.end()) {
     std::pair<Word, ChartHypothesisCollection>
-    e(targetLHS, ChartHypothesisCollection(m_manager.options()));
+    e(targetLHS, ChartHypothesisCollection(*m_manager.options()));
     m = m_hypoColl.insert(e).first;
   }
   return m->second.AddHypothesis(hypo, m_manager);
@@ -102,7 +102,7 @@ void ChartCell::Decode(const ChartTranslationOptionList &transOptList
   }
 
   // pluck things out of queue and add to hypo collection
-  const size_t popLimit = m_manager.options().cube.pop_limit;
+  const size_t popLimit = m_manager.options()->cube.pop_limit;
   for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) {
     ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);
