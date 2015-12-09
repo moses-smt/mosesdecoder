@@ -46,6 +46,8 @@ public:
   { return m_size; }
 
   SubPhrase GetSubPhrase(size_t start, size_t end) const;
+
+  void Prefetch() const;
 protected:
   size_t m_size;
   Word *m_words;

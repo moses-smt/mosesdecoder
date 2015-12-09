@@ -86,6 +86,10 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 	return out;
 }
 
+void PhraseImpl::Prefetch() const
+{
+	 __builtin_prefetch(m_words);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 SubPhrase::SubPhrase(const PhraseImpl &origPhrase, size_t start, size_t end)
