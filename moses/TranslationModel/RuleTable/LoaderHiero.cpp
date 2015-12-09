@@ -15,7 +15,7 @@ namespace Moses
 {
 
 bool RuleTableLoaderHiero::Load(AllOptions const& opts,
-				const std::vector<FactorType> &input,
+                                const std::vector<FactorType> &input,
                                 const std::vector<FactorType> &output,
                                 const std::string &inFile,
                                 size_t tableLimit,

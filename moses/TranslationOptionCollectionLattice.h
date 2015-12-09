@@ -33,7 +33,7 @@ public:
 
 protected:
   void Extend(const InputPath &prevPath, const WordLattice &input,
-	      size_t const maxPhraseLength);
+              size_t const maxPhraseLength);
 
 };
 

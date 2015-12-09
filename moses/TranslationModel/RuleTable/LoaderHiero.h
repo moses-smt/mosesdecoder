@@ -19,7 +19,7 @@ class RuleTableLoaderHiero : public RuleTableLoaderStandard
 {
 public:
   bool Load(AllOptions const& opts,
-	    const std::vector<FactorType> &input,
+            const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
             size_t tableLimit,

@@ -26,14 +26,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 Moses::TrellisPath const
 doMBR(Moses::TrellisPathList const& nBestList, Moses::AllOptions const& opts);
 
-void 
-GetOutputFactors(const Moses::TrellisPath &path, Moses::FactorType const f, 
-		 std::vector <const Moses::Factor*> &translation);
+void
+GetOutputFactors(const Moses::TrellisPath &path, Moses::FactorType const f,
+                 std::vector <const Moses::Factor*> &translation);
 
-float 
-calculate_score(const std::vector< std::vector<const Moses::Factor*> > & sents, 
-		int ref, int hyp,  
-		std::vector<std::map<std::vector<const Moses::Factor*>,int> > & 
-		ngram_stats );
+float
+calculate_score(const std::vector< std::vector<const Moses::Factor*> > & sents,
+                int ref, int hyp,
+                std::vector<std::map<std::vector<const Moses::Factor*>,int> > &
+                ngram_stats );
 
 #endif

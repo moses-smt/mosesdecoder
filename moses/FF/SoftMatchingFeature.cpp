@@ -124,8 +124,8 @@ const std::string& SoftMatchingFeature::GetOrSetFeatureName(const Word& RHS, con
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
   std::string &name = m_nameCache[RHS[0]->GetId()][LHS[0]->GetId()];
-  const std::vector<FactorType> & oFactors 
-    = StaticData::Instance().options().output.factor_order;
+  const std::vector<FactorType> & oFactors
+  = StaticData::Instance().options().output.factor_order;
   std::string LHS_string = LHS.GetString(oFactors, false);
   std::string RHS_string = RHS.GetString(oFactors, false);
   name = LHS_string + "->" + RHS_string;

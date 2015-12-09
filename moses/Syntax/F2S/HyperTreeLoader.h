@@ -24,7 +24,7 @@ class HyperTreeLoader : public HyperTreeCreator
 {
 public:
   bool Load(AllOptions const& opts,
-	    const std::vector<FactorType> &input,
+            const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
             const RuleTableFF &,

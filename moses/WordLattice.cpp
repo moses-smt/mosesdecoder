@@ -163,8 +163,8 @@ Read(std::istream& in,
   }
 
   PCN::CN cn = PCN::parsePCN(line);
-  return InitializeFromPCNDataType(cn, opts.search.max_phrase_length, 
-				   factorOrder, line);
+  return InitializeFromPCNDataType(cn, opts.search.max_phrase_length,
+                                   factorOrder, line);
 }
 
 void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
@@ -231,10 +231,10 @@ WordLattice
   // size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   // float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
 
-  size_t maxNoTransOptPerCoverage = ttask->options().search.max_trans_opt_per_cov; 
+  size_t maxNoTransOptPerCoverage = ttask->options().search.max_trans_opt_per_cov;
   // StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold = ttask->options().search.trans_opt_threshold;
-    // StaticData::Instance().GetTranslationOptionThreshold();
+  // StaticData::Instance().GetTranslationOptionThreshold();
 
 
   TranslationOptionCollection *rv = NULL;

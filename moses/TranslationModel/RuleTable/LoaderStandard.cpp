@@ -47,8 +47,8 @@ using namespace boost::algorithm;
 
 namespace Moses
 {
-  
-bool 
+
+bool
 RuleTableLoaderStandard::
 Load(AllOptions const& opts
      , const std::vector<FactorType> &input

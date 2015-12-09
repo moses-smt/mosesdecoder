@@ -329,7 +329,7 @@ OutputNBestList(OutputCollector *collector,
 {
   const StaticData &staticData = StaticData::Instance();
   const std::vector<Moses::FactorType> &outputFactorOrder
-    = options().output.factor_order;
+  = options().output.factor_order;
 
   std::ostringstream out;
   // wtf? copied from the original OutputNBestList

@@ -30,7 +30,7 @@ class RuleTableLoaderStandard : public RuleTableLoader
 protected:
 
   bool Load(AllOptions const& opts,
-	    FormatType format,
+            FormatType format,
             const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
@@ -38,7 +38,7 @@ protected:
             RuleTableTrie &);
 public:
   bool Load(AllOptions const& opts,
-	    const std::vector<FactorType> &input,
+            const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
             size_t tableLimit,

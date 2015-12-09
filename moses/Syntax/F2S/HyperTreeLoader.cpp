@@ -40,7 +40,7 @@ namespace F2S
 {
 
 bool HyperTreeLoader::Load(AllOptions const& opts,
-			   const std::vector<FactorType> &input,
+                           const std::vector<FactorType> &input,
                            const std::vector<FactorType> &output,
                            const std::string &inFile,
                            const RuleTableFF &ff,

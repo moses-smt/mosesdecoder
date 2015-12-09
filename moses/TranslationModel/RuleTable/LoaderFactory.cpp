@@ -35,7 +35,7 @@ namespace Moses
 
 // Determines the rule table type by peeking inside the file then creates
 // a suitable RuleTableLoader object.
-std::auto_ptr<RuleTableLoader> 
+std::auto_ptr<RuleTableLoader>
 RuleTableLoaderFactory::
 Create(const std::string &path)
 {

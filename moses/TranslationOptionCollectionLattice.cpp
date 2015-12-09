@@ -70,14 +70,14 @@ TranslationOptionCollectionLattice
 
       // recursive
       Extend(*path, input, ttask->options().search.max_phrase_length);
-      
+
     }
   }
 }
 
-void 
+void
 TranslationOptionCollectionLattice::
-Extend(const InputPath &prevPath, const WordLattice &input, 
+Extend(const InputPath &prevPath, const WordLattice &input,
        size_t const maxPhraseLength)
 {
   size_t nextPos = prevPath.GetWordsRange().GetEndPos() + 1;

@@ -88,7 +88,7 @@ IOWrapper::IOWrapper()
   m_currentLine = staticData.GetStartTranslationId();
 
   m_inputFactorOrder = &staticData.options().input.factor_order;
-  
+
   size_t nBestSize = staticData.options().nbest.nbest_size;
   string nBestFilePath = staticData.options().nbest.output_file_path;
 

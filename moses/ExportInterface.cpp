@@ -141,18 +141,16 @@ void SimpleTranslationInterface::DestroyFeatureFunctionStatic()
 
 Parameter params;
 
-void 
+void
 signal_handler(int signum)
 {
   if (signum == SIGALRM) {
     exit(0); // that's what we expected from the child process after forking
-  }
-  else if (signum == SIGTERM || signum == SIGKILL) { 
+  } else if (signum == SIGTERM || signum == SIGKILL) {
     exit(0);
-  }
-  else {
+  } else {
     std::cerr << "Unexpected signal " << signum << std::endl;
-    exit(signum); 
+    exit(signum);
   }
 }
 
@@ -161,7 +159,7 @@ int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
-  kill(getppid(),SIGALRM); 
+  kill(getppid(),SIGALRM);
   MosesServer::Server server(params);
   return server.run(); // actually: don't return. see Server::run()
 #else
@@ -344,7 +342,10 @@ int decoder_main(int argc, char const** argv)
     pid_t pid;
     if (params.GetParam("daemon")) {
       pid = fork();
-      if (pid) { pause(); exit(0); } // parent process
+      if (pid) {
+        pause();  // parent process
+        exit(0);
+      }
     }
 #endif
     // setting "-show-weights" -> just dump out weights and exit
@@ -356,7 +357,7 @@ int decoder_main(int argc, char const** argv)
     if (params.GetParam("server")) {
       std::cerr << "RUN SERVER at pid " << pid << std::endl;
       return run_as_server();
-    } else 
+    } else
       return batch_run();
   }
 #ifdef NDEBUG

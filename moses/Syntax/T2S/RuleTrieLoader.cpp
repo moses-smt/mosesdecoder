@@ -36,7 +36,7 @@ namespace T2S
 {
 
 bool RuleTrieLoader::Load(Moses::AllOptions const& opts,
-			  const std::vector<FactorType> &input,
+                          const std::vector<FactorType> &input,
                           const std::vector<FactorType> &output,
                           const std::string &inFile,
                           const RuleTableFF &ff,

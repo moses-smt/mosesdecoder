@@ -130,8 +130,8 @@ void ChartManager::Decode()
  */
 void ChartManager::AddXmlChartOptions()
 {
-  const std::vector <ChartTranslationOptions*> xmlChartOptionsList 
-    = m_source.GetXmlChartTranslationOptions();
+  const std::vector <ChartTranslationOptions*> xmlChartOptionsList
+  = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {
     cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl;
   }

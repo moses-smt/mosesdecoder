@@ -169,15 +169,15 @@ TrellisPath::
 GetScoreBreakdown() const
 {
   if (!m_scoreBreakdown) {
-    float totalScore = m_path[0]->GetWinningHypo()->GetFutureScore(); 
+    float totalScore = m_path[0]->GetWinningHypo()->GetFutureScore();
     // calculated for sanity check only
 
     m_scoreBreakdown.reset(new ScoreComponentCollection());
     m_scoreBreakdown->PlusEquals(m_path[0]->GetWinningHypo()->GetScoreBreakdown());
-    
+
     // adjust score
     // I assume things are done this way on the assumption that most hypothesis edges
-    // are shared with the winning path, so that score adjustments are cheaper than 
+    // are shared with the winning path, so that score adjustments are cheaper than
     // recomputing the score from scratch. UG
     size_t sizePath = m_path.size();
     for (size_t pos = 0 ; pos < sizePath ; pos++) {

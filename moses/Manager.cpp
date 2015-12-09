@@ -561,7 +561,7 @@ void Manager::OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothe
   }
 
   // output both source and target phrases in the word graph
-  outputWordGraphStream << "\tw=" << hypo->GetSourcePhraseStringRep() 
+  outputWordGraphStream << "\tw=" << hypo->GetSourcePhraseStringRep()
                         << "|" << hypo->GetCurrTargetPhrase();
 
   outputWordGraphStream << endl;
@@ -821,9 +821,9 @@ size_t Manager::OutputFeatureWeightsForSLF(size_t index, const FeatureFunction* 
   }
 }
 
-size_t 
+size_t
 Manager::
-OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypothesis* hypo, 
+OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypothesis* hypo,
                           const FeatureFunction* ff, std::ostream &out) const
 {
   const ScoreComponentCollection& scoreCollection = hypo->GetScoreBreakdown();
@@ -836,7 +836,7 @@ OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypothesis* hypo,
 }
 
 /**! Output search graph in hypergraph format of Kenneth Heafield's lazy hypergraph decoder */
-void 
+void
 Manager::
 OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const
 {
@@ -1112,7 +1112,7 @@ OutputSearchNode(AllOptions const& opts, long translationId,
         << " back=" << prevHypo->GetId()
         << " score=" << searchNode.hypo->GetScore()
         << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
-    
+
     if (searchNode.recombinationHypo != NULL)
       out << " recombined=" << searchNode.recombinationHypo->GetId();
 
@@ -1132,7 +1132,7 @@ OutputSearchNode(AllOptions const& opts, long translationId,
 
   if (searchNode.recombinationHypo != NULL)
     out << " recombined=" << searchNode.recombinationHypo->GetId();
-  
+
   out << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
       << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
       << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
@@ -1141,7 +1141,7 @@ OutputSearchNode(AllOptions const& opts, long translationId,
   ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
   scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
   out << " scores=\"" << scoreBreakdown << "\""
-      << " out=\"" << searchNode.hypo->GetSourcePhraseStringRep() 
+      << " out=\"" << searchNode.hypo->GetSourcePhraseStringRep()
       << "|" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << "\"" << endl;
 }
 
@@ -1153,8 +1153,8 @@ void Manager::GetConnectedGraph(
   std::vector< const Hypothesis *>& connectedList = *pConnectedList;
 
   // start with the ones in the final stack
-  const std::vector < HypothesisStack* > &hypoStackColl 
-    = m_search->GetHypothesisStacks();
+  const std::vector < HypothesisStack* > &hypoStackColl
+  = m_search->GetHypothesisStacks();
   const HypothesisStack &finalStack = *hypoStackColl.back();
   HypothesisStack::const_iterator iterHypo;
   for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo) {
@@ -1620,7 +1620,7 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
     out << m_source.GetTranslationId() << " ||| ";
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
-      OutputSurface(out, edge); 
+      OutputSurface(out, edge);
     }
     out << " |||";
 
@@ -1853,11 +1853,11 @@ void Manager::OutputAlignment(OutputCollector *collector) const
     }
     out << std::endl; // Used by --alignment-output-file so requires endl
     collector->Write(m_source.GetTranslationId(), out.str());
-    
+
   }
 }
 
-void 
+void
 Manager::
 OutputDetailedTranslationReport(OutputCollector *collector) const
 {
@@ -1870,7 +1870,7 @@ OutputDetailedTranslationReport(OutputCollector *collector) const
 
 }
 
-void 
+void
 Manager::
 OutputUnknowns(OutputCollector *collector) const
 {
@@ -1887,7 +1887,7 @@ OutputUnknowns(OutputCollector *collector) const
 
 }
 
-void 
+void
 Manager::
 OutputWordGraph(OutputCollector *collector) const
 {
@@ -1900,7 +1900,7 @@ OutputWordGraph(OutputCollector *collector) const
   }
 }
 
-void 
+void
 Manager::
 OutputSearchGraph(OutputCollector *collector) const
 {
@@ -1976,7 +1976,7 @@ void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSo
   }
 }
 
-void 
+void
 Manager::
 OutputBestHypo(const std::vector<Word>&  mbrBestHypo, ostream& out) const
 {
@@ -2008,7 +2008,7 @@ OutputAlignment(std::ostringstream &out, const TrellisPath &path) const
 {
   WordAlignmentSort waso = options().output.WA_SortOrder;
   BOOST_REVERSE_FOREACH(Hypothesis const* e, path.GetEdges())
-    e->OutputAlignment(out, false);
+  e->OutputAlignment(out, false);
   // Hypothesis::OutputAlignment(out, path.GetEdges(), waso);
   // Used by --alignment-output-file so requires endl
   out << std::endl;

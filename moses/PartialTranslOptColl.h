@@ -65,7 +65,7 @@ public:
   }
 
   PartialTranslOptColl(size_t const maxSize);
-  
+
   /** destructor, cleans out list */
   ~PartialTranslOptColl() {
     RemoveAllInColl( m_list );

@@ -50,8 +50,8 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(ttasksptr const& ttask)
   AllOptions const& opts = ttask->options();
   bool ret = loader->Load(opts, m_input, m_output, grammarFile, m_tableLimit, *this);
 
-  UTIL_THROW_IF2(!ret, "Rules not successfully loaded for sentence id " 
-		 << translationId);
+  UTIL_THROW_IF2(!ret, "Rules not successfully loaded for sentence id "
+                 << translationId);
 }
 
 void PhraseDictionaryALSuffixArray::CleanUpAfterSentenceProcessing(const InputType &source)

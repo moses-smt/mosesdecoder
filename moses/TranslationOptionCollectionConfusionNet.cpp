@@ -218,13 +218,13 @@ CreateTranslationOptionsForRangeNew
 
 bool
 TranslationOptionCollectionConfusionNet::
-CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph, 
-                                       size_t startPos, size_t endPos, 
+CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeGraph,
+                                       size_t startPos, size_t endPos,
                                        bool adhereTableLimit, size_t graphInd)
 {
   bool retval = true;
-  size_t const max_phrase_length 
-    = StaticData::Instance().options().search.max_phrase_length;
+  size_t const max_phrase_length
+  = StaticData::Instance().options().search.max_phrase_length;
   XmlInputType intype = m_ttask.lock()->options().input.xml_policy;
   if ((intype != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     InputPathList &inputPathList = GetInputPathList(startPos, endPos);

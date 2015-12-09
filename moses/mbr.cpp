@@ -119,7 +119,7 @@ const TrellisPath doMBR(const TrellisPathList& nBestList, AllOptions const& opts
     // get words in translation
     vector<const Factor*> translation;
     GetOutputFactors(path, oFactors[0], translation);
-    
+
     // collect n-gram counts
     map < vector < const Factor *>, int > counts;
     extract_ngrams(translation,counts);
@@ -158,9 +158,9 @@ const TrellisPath doMBR(const TrellisPathList& nBestList, AllOptions const& opts
   //return translations[minMBRLossIdx];
 }
 
-void 
+void
 GetOutputFactors(const TrellisPath &path, FactorType const oFactor,
-		 vector <const Factor*> &translation)
+                 vector <const Factor*> &translation)
 {
   const std::vector<const Hypothesis *> &edges = path.GetEdges();
 

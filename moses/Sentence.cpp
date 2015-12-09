@@ -271,9 +271,9 @@ CreateTranslationOptionCollection(ttasksptr const& ttask) const
   float transOptThreshold = ttask->options().search.trans_opt_threshold;
   // StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
-    = new TranslationOptionCollectionText(ttask, *this, 
-					  maxNoTransOptPerCoverage,
-					  transOptThreshold);
+  = new TranslationOptionCollectionText(ttask, *this,
+                                        maxNoTransOptPerCoverage,
+                                        transOptThreshold);
   assert(rv);
   return rv;
 }

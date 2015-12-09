@@ -133,16 +133,16 @@ protected:
   mutable std::ostringstream m_alignmentOut;
 public:
   void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList) const;
-  void OutputSurface(std::ostream &out, 
-		     Hypothesis const& edge, 
-		     bool const recursive=false) const;
+  void OutputSurface(std::ostream &out,
+                     Hypothesis const& edge,
+                     bool const recursive=false) const;
 
   void OutputAlignment(std::ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset) const;
   void OutputInput(std::ostream& os, const Hypothesis* hypo) const;
   void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo) const;
   void OutputPassthroughInformation(std::ostream& os, const Hypothesis* hypo) const;
 
-  std::map<size_t, const Factor*> 
+  std::map<size_t, const Factor*>
   GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const;
 
   void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId) const;
@@ -192,11 +192,11 @@ public:
   /***
    *For Lattice MBR
   */
-  void 
+  void
   GetForwardBackwardSearchGraph
   ( std::map< int, bool >* pConnected,
-    std::vector< const Hypothesis* >* pConnectedList, 
-    std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps, 
+    std::vector< const Hypothesis* >* pConnectedList,
+    std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps,
     std::vector< float>* pFwdBwdScores) const;
 
   // outputs

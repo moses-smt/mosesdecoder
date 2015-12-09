@@ -229,63 +229,63 @@ public:
     return m_options;
   }
 
-  inline bool 
+  inline bool
   GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
   }
 
-  bool 
+  bool
   IsWordDeletionEnabled() const {
     // return m_wordDeletionEnabled;
     return m_options.unk.word_deletion_enabled;
   }
 
-  int 
+  int
   GetMaxDistortion() const {
     return m_options.reordering.max_distortion;
   }
 
-  bool 
+  bool
   UseReorderingConstraint() const {
     return m_reorderingConstraint;
   }
 
-  bool 
+  bool
   UseEarlyDiscarding() const {
     return m_options.search.early_discarding_threshold
-      != -std::numeric_limits<float>::infinity();
+           != -std::numeric_limits<float>::infinity();
   }
 
-  bool 
+  bool
   UseEarlyDistortionCost() const {
     return m_options.reordering.use_early_distortion_cost;
   }
 
-  float 
+  float
   GetTranslationOptionThreshold() const {
     return m_options.search.trans_opt_threshold;
   }
-  
-  size_t 
+
+  size_t
   GetVerboseLevel() const {
     return m_verboseLevel;
   }
 
-  void 
+  void
   SetVerboseLevel(int x) const {
     m_verboseLevel = x;
   }
 
-  bool 
+  bool
   UseMinphrInMemory() const {
     return m_minphrMemory;
   }
 
-  bool 
+  bool
   UseMinlexrInMemory() const {
     return m_minlexrMemory;
   }
-  
+
   bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
     if (algo == DefaultSearchAlgorithm)
       algo = m_options.search.algo;

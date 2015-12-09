@@ -342,11 +342,11 @@ OutputAlignment(std::ostream &out, bool recursive=true) const
   // call with head recursion to output things in the right order
   size_t trg_off = recursive && m_prevHypo ?  m_prevHypo->OutputAlignment(out) : 0;
   size_t src_off = GetCurrSourceWordsRange().GetStartPos();
-  
+
   typedef std::pair<size_t,size_t> const* entry;
   std::vector<entry> alnvec = tp.GetAlignTerm().GetSortedAlignments(waso);
   BOOST_FOREACH(entry e, alnvec)
-    out << e->first + src_off << "-" << e->second + trg_off << " ";
+  out << e->first + src_off << "-" << e->second + trg_off << " ";
   return trg_off + tp.GetSize();
 }
 

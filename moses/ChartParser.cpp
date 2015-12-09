@@ -91,8 +91,8 @@ void ChartParserUnknown::Process(const Word &sourceWord, const Range &range, Cha
       //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
       Word *targetLHS = new Word(true);
 
-      targetLHS->CreateFromString(Output, staticData.options().output.factor_order, 
-				  targetLHSStr, true);
+      targetLHS->CreateFromString(Output, staticData.options().output.factor_order,
+                                  targetLHSStr, true);
       UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       // add to dictionary
@@ -133,8 +133,8 @@ void ChartParserUnknown::Process(const Word &sourceWord, const Range &range, Cha
       //float prob = iterLHS->second;
 
       Word *targetLHS = new Word(true);
-      targetLHS->CreateFromString(Output, staticData.options().output.factor_order, 
-				  targetLHSStr, true);
+      targetLHS->CreateFromString(Output, staticData.options().output.factor_order,
+                                  targetLHSStr, true);
       UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
@@ -210,12 +210,12 @@ void ChartParser::Create(const Range &range, ChartParserCallback &to)
       ruleLookupManager.GetChartRuleCollection(inputPath, last, to);
     }
   }
-  
-  if (range.GetNumWordsCovered() == 1 
-      && range.GetStartPos() != 0 
+
+  if (range.GetNumWordsCovered() == 1
+      && range.GetStartPos() != 0
       && range.GetStartPos() != m_source.GetSize()-1) {
-    bool always = m_ttask.lock()->options().unk.always_create_direct_transopt; 
-    // bool alwaysCreateDirectTranslationOption 
+    bool always = m_ttask.lock()->options().unk.always_create_direct_transopt;
+    // bool alwaysCreateDirectTranslationOption
     // = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
     if (to.Empty() || always) {
       // create unknown words for 1 word coverage where we don't have any trans options
