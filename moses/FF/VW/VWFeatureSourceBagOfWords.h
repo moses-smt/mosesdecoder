@@ -19,7 +19,7 @@ public:
 
   void operator()(const InputType &input
                   , const InputPath &inputPath
-                  , const WordsRange &sourceRange
+                  , const Range &sourceRange
                   , Discriminative::Classifier &classifier) const {
     for (size_t i = 0; i < input.GetSize(); i++) {
       classifier.AddLabelIndependentFeature("bow^" + GetWord(input, i));

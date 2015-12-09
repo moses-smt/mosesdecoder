@@ -19,7 +19,7 @@ public:
 
   void operator()(const InputType &input
                   , const InputPath &inputPath
-                  , const WordsRange &sourceRange
+                  , const Range &sourceRange
                   , Discriminative::Classifier &classifier) const {
     for (size_t i = 1; i < input.GetSize(); i++) {
       classifier.AddLabelIndependentFeature("bigram^" + GetWord(input, i - 1) + "^" + GetWord(input, i));
