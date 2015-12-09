@@ -36,6 +36,9 @@ public:
 	MemPool &GetPool() const
 	{ return *m_pool; }
 
+	Recycler<Hypothesis*> &GetHypoRecycle() const
+	{ return *m_hypoRecycle; }
+
 	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
 

@@ -39,7 +39,7 @@ void Search::Decode()
 	initHypo->Init(m_mgr.GetInitPhrase(), m_mgr.GetInitRange(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
-	m_stacks.Add(initHypo, m_mgr.task.hypoPool);
+	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
 		//cerr << "stackInd=" << stackInd << endl;
@@ -114,7 +114,7 @@ void Search::Decode(size_t stackInd)
 
 		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-		m_stacks.Add(hypo, m_mgr.task.hypoPool);
+		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
 		edge.CreateNext(m_mgr, item, queue, seenPositions);
 

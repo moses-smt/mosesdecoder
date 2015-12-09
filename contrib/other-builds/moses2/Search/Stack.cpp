@@ -21,12 +21,12 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-void Stack::Add(const Hypothesis *hypo, boost::object_pool<Hypothesis> &hypoPool)
+void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
 	StackAdd added = Add(hypo);
 
 	if (added.toBeDeleted) {
-		hypoPool.free(added.toBeDeleted);
+		hypoRecycle.Add(added.toBeDeleted);
 	}
 }
 
@@ -59,13 +59,13 @@ StackAdd Stack::Add(const Hypothesis *hypo)
   }
 }
 
-std::vector<const Hypothesis*> Stack::GetBestHyposAndPrune(size_t num, boost::object_pool<Hypothesis> &hypoPool) const
+std::vector<const Hypothesis*> Stack::GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const
 {
   std::vector<const Hypothesis*> ret = GetBestHypos(num);
   if (num && ret.size() > num) {
 	  for (size_t i = num; i < ret.size(); ++i) {
 		  Hypothesis *hypo = const_cast<Hypothesis*>(ret[i]);
-		  hypoPool.free(hypo);
+		  recycler.Add(hypo);
 	  }
 	  ret.resize(num);
   }
