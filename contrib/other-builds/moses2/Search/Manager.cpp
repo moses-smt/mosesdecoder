@@ -41,7 +41,6 @@ void Manager::Init()
 {
 	// init pools etc
 	m_pool = &system.GetManagerPool();
-	m_hypoPool = &system.GetHypoPool();
 
 	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), system, 0);
 

@@ -32,7 +32,7 @@ CubeEdge::Hypotheses &HypothesisSet::GetSortedHypos(const Manager &mgr) const
 void HypothesisSet::SortAndPruneHypos(const Manager &mgr) const
 {
   size_t stackSize = mgr.system.stackSize;
-  boost::object_pool<Hypothesis> &recycler = mgr.GetHypoPool();
+  boost::object_pool<Hypothesis> &recycler = mgr.task.hypoPool;
 
   /*
   cerr << "UNSORTED hypos:" << endl;

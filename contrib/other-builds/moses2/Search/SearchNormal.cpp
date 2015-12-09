@@ -39,7 +39,7 @@ void SearchNormal::Decode()
 	initHypo->Init(m_mgr.GetInitPhrase(), m_mgr.GetInitRange(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
-	m_stacks.Add(initHypo, m_mgr.GetHypoPool());
+	m_stacks.Add(initHypo, m_mgr.task.hypoPool);
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
 		Decode(stackInd);
@@ -61,7 +61,7 @@ void SearchNormal::Decode(size_t stackInd)
 	  return;
   }
 
-  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoPool());
+  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.task.hypoPool);
 
 	const InputPaths &paths = m_mgr.GetInputPaths();
 
@@ -118,7 +118,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	newHypo->Init(hypo, tp, pathRange, newBitmap, estimatedScore);
 	newHypo->EvaluateWhenApplied();
 
-	m_stacks.Add(newHypo, m_mgr.GetHypoPool());
+	m_stacks.Add(newHypo, m_mgr.task.hypoPool);
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);

@@ -7,7 +7,6 @@
 
 #pragma once
 #include <vector>
-#include <boost/pool/object_pool.hpp>
 #include <boost/thread/tss.hpp>
 #include "FF/FeatureFunctions.h"
 #include "Weights.h"
@@ -16,7 +15,6 @@
 #include "legacy/FactorCollection.h"
 #include "legacy/Parameter.h"
 #include "TypeDef.h"
-#include "Search/Hypothesis.h"
 
 class FeatureFunction;
 class StatefulFeatureFunction;
@@ -52,15 +50,12 @@ public:
 	MemPool &GetManagerPool() const;
 	FactorCollection &GetVocab() const;
 
-	boost::object_pool<Hypothesis> &GetHypoPool() const;
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
 
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
   mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_batchForEval;
-
-  mutable boost::thread_specific_ptr< boost::object_pool<Hypothesis> > m_hypoPool;
 
   void LoadWeights();
   void LoadMappings();
