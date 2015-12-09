@@ -15,6 +15,7 @@
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
 #include "../System.h"
+#include "../TranslationTask.h"
 #include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
@@ -41,7 +42,7 @@ void SearchNormalBatch::Decode()
 	initHypo->Init(m_mgr.GetInitPhrase(), m_mgr.GetInitRange(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
-	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
+	m_stacks.Add(initHypo, m_mgr.task.hypoPool);
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
 		Decode(stackInd);
@@ -60,7 +61,7 @@ void SearchNormalBatch::Decode(size_t stackInd)
 {
   Stack &stack = m_stacks[stackInd];
 
-  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoRecycle());
+  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.task.hypoPool);
   BOOST_FOREACH(const Hypothesis *hypo, hypos) {
 		Extend(*hypo);
   }
@@ -157,7 +158,7 @@ void SearchNormalBatch::AddHypos()
 {
   for (size_t i = 0; i < m_batchForEval->GetSize(); ++i) {
 	Hypothesis *hypo = (*m_batchForEval)[i];
-	m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
+	m_stacks.Add(hypo, m_mgr.task.hypoPool);
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);

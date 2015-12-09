@@ -11,6 +11,7 @@
 #include "SearchNormalBatch.h"
 #include "CubePruning/Search.h"
 #include "../System.h"
+#include "../TranslationTask.h"
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
 #include "../InputPaths.h"
@@ -33,14 +34,13 @@ Manager::~Manager() {
 	delete m_estimatedScores;
 
 	GetPool().Reset();
-	GetHypoRecycle().Reset();
+	//task.hypoPool.purge_memory();
 }
 
 void Manager::Init()
 {
 	// init pools etc
 	m_pool = &system.GetManagerPool();
-	m_hypoRecycle = &system.GetHypoRecycler();
 
 	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), system, 0);
 

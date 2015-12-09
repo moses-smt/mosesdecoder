@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <boost/pool/object_pool.hpp>
 #include <vector>
 #include "Stack.h"
 
@@ -32,7 +33,7 @@ public:
     	m_stacks[ind] = NULL;
     }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, boost::object_pool<Hypothesis> &hypoPool);
 
 protected:
 	std::vector<Stack*> m_stacks;

@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #pragma once
+#include <boost/pool/object_pool.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "../Hypothesis.h"
@@ -61,7 +62,7 @@ public:
 	Coll &GetColl()
 	{ return m_coll; }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, boost::object_pool<Hypothesis> &hypoPool);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 protected:

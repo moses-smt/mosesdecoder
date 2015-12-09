@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include <boost/pool/object_pool.hpp>
 #include <boost/unordered_set.hpp>
 #include "Hypothesis.h"
 #include "../Recycler.h"
@@ -34,9 +35,9 @@ public:
 	size_t GetSize() const
 	{ return m_hypos.size(); }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, boost::object_pool<Hypothesis> &hypoPool);
 
-	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const;
+	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, boost::object_pool<Hypothesis> &hypoPool) const;
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 protected:
 	StackAdd Add(const Hypothesis *hypo);

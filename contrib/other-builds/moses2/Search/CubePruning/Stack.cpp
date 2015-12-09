@@ -5,12 +5,14 @@
  *      Author: hieu
  */
 #include <algorithm>
+#include <boost/pool/object_pool.hpp>
 #include <boost/foreach.hpp>
 #include "Stack.h"
 #include "../Hypothesis.h"
 #include "../Manager.h"
 #include "../../Scores.h"
 #include "../../System.h"
+#include "../../TranslationTask.h"
 
 using namespace std;
 
@@ -30,7 +32,7 @@ CubeEdge::Hypotheses &HypothesisSet::GetSortedHypos(const Manager &mgr) const
 void HypothesisSet::SortAndPruneHypos(const Manager &mgr) const
 {
   size_t stackSize = mgr.system.stackSize;
-  Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+  boost::object_pool<Hypothesis> &recycler = mgr.task.hypoPool;
 
   /*
   cerr << "UNSORTED hypos:" << endl;
@@ -52,7 +54,7 @@ void HypothesisSet::SortAndPruneHypos(const Manager &mgr) const
   if (stackSize && m_sortedHypos.size() > stackSize) {
 	  for (size_t i = stackSize; i < m_sortedHypos.size(); ++i) {
 		  Hypothesis *hypo = const_cast<Hypothesis*>(m_sortedHypos[i]);
-		  recycler.Add(hypo);
+		  recycler.free(hypo);
 	  }
 	  m_sortedHypos.resize(stackSize);
   }
@@ -78,12 +80,12 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
+void Stack::Add(const Hypothesis *hypo, boost::object_pool<Hypothesis> &hypoPool)
 {
 	StackAdd added = Add(hypo);
 
 	if (added.toBeDeleted) {
-		hypoRecycle.Add(added.toBeDeleted);
+		hypoPool.free(added.toBeDeleted);
 	}
 
 }

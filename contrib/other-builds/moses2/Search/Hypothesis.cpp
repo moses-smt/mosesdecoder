@@ -12,6 +12,7 @@
 #include "../System.h"
 #include "../Scores.h"
 #include "../Recycler.h"
+#include "../TranslationTask.h"
 #include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
@@ -22,21 +23,13 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
 {
 //	++g_numHypos;
 	Hypothesis *ret;
-
-	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
-	if (recycler.IsEmpty()) {
-		MemPool &pool = mgr.GetPool();
-		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(mgr);
-	}
-	else {
-		ret = recycler.Get();
-		recycler.Pop();
-	}
+	ret = new (mgr.task.hypoPool.malloc()) Hypothesis(mgr);
 	return ret;
 }
 
 void Hypothesis::Prefetch(Manager &mgr)
 {
+	/*
 	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
 	if (recycler.IsEmpty()) {
 		// do nothing
@@ -47,7 +40,7 @@ void Hypothesis::Prefetch(Manager &mgr)
 	 __builtin_prefetch(hypo);
 	 __builtin_prefetch(hypo->m_ffStates);
 	 __builtin_prefetch(hypo->m_scores);
-
+	*/
 }
 
 Hypothesis::Hypothesis(Manager &mgr)
