@@ -7,7 +7,8 @@ namespace Moses {
 
   ReportingOptions::
   ReportingOptions()
-    : ReportAllFactors(false)
+    : start_translation_id(0)
+    , ReportAllFactors(false)
     , ReportSegmentation(0)
     , PrintAlignmentInfo(false)
     , PrintAllDerivations(false)
@@ -28,6 +29,8 @@ namespace Moses {
   ReportingOptions::
   init(Parameter const& param)
   {
+    param.SetParameter<long>(start_translation_id, "start-translation-id", 0);
+
     // including factors in the output
     param.SetParameter(ReportAllFactors, "report-all-factors", false);
     
@@ -135,7 +138,7 @@ namespace Moses {
     if (m != param.end()) { 
       FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
     }
-
+    
     return true;
   }
 #endif

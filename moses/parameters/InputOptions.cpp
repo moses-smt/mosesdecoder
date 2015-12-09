@@ -10,7 +10,6 @@ namespace Moses {
   InputOptions::
   InputOptions()
     : continue_partial_translation(false)
-    , default_non_term_only_for_empty_range(false)
     , input_type(SentenceInput)
     , xml_policy(XmlPassThrough)
     , placeholder_factor(NOT_FOUND)
@@ -39,11 +38,11 @@ namespace Moses {
     else if (input_type == ForestInputType)
       { VERBOSE(2, "input type is: forest"); }
 #endif
-    param.SetParameter(continue_partial_translation, 
-		       "continue-partial-translation", false);
-    param.SetParameter(default_non_term_only_for_empty_range,
-		       "default-non-term-for-empty-range-only", false);
+    
 
+    param.SetParameter(continue_partial_translation, 
+                       "continue-partial-translation", false);
+    
     param.SetParameter<XmlInputType>(xml_policy, "xml-input", XmlPassThrough);
     
     // specify XML tags opening and closing brackets for XML option
@@ -76,6 +75,8 @@ namespace Moses {
     if (pspec) factor_order = Scan<FactorType>(*pspec);
     if (factor_order.empty()) factor_order.assign(1,0);
     param.SetParameter(placeholder_factor, "placeholder-factor", NOT_FOUND);
+
+    param.SetParameter<std::string>(input_file_path,"input-file","");
 
     return true;
   }

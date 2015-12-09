@@ -4,6 +4,12 @@
 namespace Moses
 {
   AllOptions::
+  AllOptions()
+    : mira(false)
+    , use_legacy_pt(false)
+  { }
+
+  AllOptions::
   AllOptions(Parameter const& param)
   {
     init(param);

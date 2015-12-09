@@ -32,12 +32,12 @@ namespace Moses
     OOVHandlingOptions       unk;
     SyntaxOptions         syntax;
     bool mira;
-
+    bool use_legacy_pt;
     // StackOptions      stack;
     // BeamSearchOptions  beam;
     bool init(Parameter const& param);
     bool sanity_check();
-    AllOptions() {}
+    AllOptions();
     AllOptions(Parameter const& param);
 
     bool update(std::map<std::string,xmlrpc_c::value>const& param);

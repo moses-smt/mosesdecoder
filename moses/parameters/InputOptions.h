@@ -11,13 +11,12 @@ namespace Moses
   InputOptions : public OptionsBaseClass
   {
     bool continue_partial_translation; 
-    bool default_non_term_only_for_empty_range; // whatever that means
     InputTypeEnum input_type;
     XmlInputType  xml_policy; // pass through, ignore, exclusive, inclusive
     std::vector<FactorType> factor_order; // input factor order
 
     FactorType placeholder_factor; // where to store original text for placeholders 
-
+    std::string input_file_path;
     
     std::pair<std::string,std::string> xml_brackets; 
     // strings to use as XML tags' opening and closing brackets. 
