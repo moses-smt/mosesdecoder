@@ -84,29 +84,29 @@ void CubeEdge::CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositi
 
     MemPool &pool = mgr.GetPool();
 
-	QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, 0, 0);
-	queue.push(newEle);
+	QueueItem *item = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, 0, 0);
+	queue.push(item);
 	SetSeenPosition(0, 0, seenPositions);
 }
 
-void CubeEdge::CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue, SeenPositions &seenPositions)
+void CubeEdge::CreateNext(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions)
 {
     MemPool &pool = mgr.GetPool();
 
-    size_t hypoIndex = ele->hypoIndex + 1;
-	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, ele->tpIndex, seenPositions)) {
-		QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, ele->tpIndex);
-		queue.push(newEle);
+    size_t hypoIndex = item->hypoIndex + 1;
+	if (hypoIndex < hypos.size() && !SeenPosition(hypoIndex, item->tpIndex, seenPositions)) {
+		QueueItem *newItem = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, item->tpIndex);
+		queue.push(newItem);
 
-		SetSeenPosition(hypoIndex, ele->tpIndex, seenPositions);
+		SetSeenPosition(hypoIndex, item->tpIndex, seenPositions);
 	}
 
-	size_t tpIndex = ele->tpIndex + 1;
-	if (tpIndex < tps.GetSize() && !SeenPosition(ele->hypoIndex, tpIndex, seenPositions)) {
-		QueueItem *newEle = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, ele->hypoIndex, tpIndex);
-		queue.push(newEle);
+	size_t tpIndex = item->tpIndex + 1;
+	if (tpIndex < tps.GetSize() && !SeenPosition(item->hypoIndex, tpIndex, seenPositions)) {
+		QueueItem *newItem = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, item->hypoIndex, tpIndex);
+		queue.push(newItem);
 
-		SetSeenPosition(ele->hypoIndex, tpIndex, seenPositions);
+		SetSeenPosition(item->hypoIndex, tpIndex, seenPositions);
 	}
 }
 

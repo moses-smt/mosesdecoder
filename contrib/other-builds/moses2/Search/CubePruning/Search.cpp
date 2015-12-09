@@ -104,15 +104,15 @@ void Search::Decode(size_t stackInd)
 	while (!queue.empty() && pops < m_mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
-		QueueItem *ele = queue.top();
+		QueueItem *item = queue.top();
 		queue.pop();
 
-		Hypothesis *hypo = ele->hypo;
+		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
-		CubeEdge &edge = ele->edge;
-		edge.CreateNext(m_mgr, ele, queue, seenPositions);
+		CubeEdge &edge = item->edge;
+		edge.CreateNext(m_mgr, item, queue, seenPositions);
 
 		++pops;
 	}

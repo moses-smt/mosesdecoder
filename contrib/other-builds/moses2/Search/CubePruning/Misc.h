@@ -74,7 +74,7 @@ public:
   void SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
 
   void CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions);
-  void CreateNext(Manager &mgr, const QueueItem *ele, Queue &queue, SeenPositions &seenPositions);
+  void CreateNext(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions);
 
 
 protected:
