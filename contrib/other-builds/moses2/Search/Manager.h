@@ -10,6 +10,7 @@
 #include <queue>
 #include <cstddef>
 #include <string>
+#include <boost/pool/object_pool.hpp>
 #include "../InputPaths.h"
 #include "../TargetPhrase.h"
 #include "../MemPool.h"
@@ -36,6 +37,9 @@ public:
 	MemPool &GetPool() const
 	{ return *m_pool; }
 
+	boost::object_pool<Hypothesis> &GetHypoPool() const
+	{ return *m_hypoPool; }
+
 	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
 
@@ -60,7 +64,7 @@ public:
 
 protected:
 	mutable MemPool *m_pool;
-	mutable Recycler<Hypothesis*> *m_hypoRecycle;
+	mutable boost::object_pool<Hypothesis> *m_hypoPool;
 
     std::string m_inputStr;
 	PhraseImpl *m_input;

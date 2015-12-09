@@ -152,3 +152,10 @@ ObjectPoolContiguous<Hypothesis*> &System::GetBatchForEval() const
   ObjectPoolContiguous<Hypothesis*> &ret = GetThreadSpecificObj(m_batchForEval);
   return ret;
 }
+
+boost::object_pool<Hypothesis> &System::GetHypoPool() const
+{
+	boost::object_pool<Hypothesis> &ret = GetThreadSpecificObj(m_hypoPool);
+	  return ret;
+}
+

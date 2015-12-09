@@ -23,7 +23,7 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
 {
 //	++g_numHypos;
 	Hypothesis *ret;
-	ret = new (mgr.task.hypoPool.malloc()) Hypothesis(mgr);
+	ret = new (mgr.GetHypoPool().malloc()) Hypothesis(mgr);
 	return ret;
 }
 
