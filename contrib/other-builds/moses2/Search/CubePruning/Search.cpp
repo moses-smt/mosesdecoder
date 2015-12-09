@@ -79,7 +79,7 @@ void Search::Decode(size_t stackInd)
 	NSCubePruning::CubeEdge::SeenPositions &seenPositions = m_mgr.task.seenPositions;
 	seenPositions.clear();
 
-	Prefetch(stackInd);
+	//Prefetch(stackInd);
 
 	// add top hypo from every edge into queue
 	CubeEdges &edges = m_cubeEdges[stackInd];
@@ -107,11 +107,13 @@ void Search::Decode(size_t stackInd)
 		QueueItem *item = queue.top();
 		queue.pop();
 
+		CubeEdge &edge = item->edge;
+		edge.Prefetch(m_mgr, item, queue, seenPositions);
+
 		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
-		CubeEdge &edge = item->edge;
 		edge.CreateNext(m_mgr, item, queue, seenPositions);
 
 		++pops;

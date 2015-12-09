@@ -76,6 +76,7 @@ public:
   void CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions);
   void CreateNext(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions);
 
+  void Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions);
 
 protected:
 
