@@ -107,6 +107,8 @@ void Search::Decode(size_t stackInd)
 		QueueItem *item = queue.top();
 		queue.pop();
 
+		Hypothesis::Prefetch(m_mgr);
+
 		CubeEdge &edge = item->edge;
 		edge.Prefetch(m_mgr, item, queue, seenPositions);
 

@@ -35,6 +35,21 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
 	return ret;
 }
 
+void Hypothesis::Prefetch(Manager &mgr)
+{
+	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+	if (recycler.IsEmpty()) {
+		// do nothing
+		return;
+	}
+
+	Hypothesis *hypo = recycler.Get();
+	 __builtin_prefetch(hypo);
+	 __builtin_prefetch(hypo->m_ffStates);
+	 __builtin_prefetch(hypo->m_scores);
+
+}
+
 Hypothesis::Hypothesis(Manager &mgr)
 :mgr(mgr)
 ,m_currTargetWordsRange()

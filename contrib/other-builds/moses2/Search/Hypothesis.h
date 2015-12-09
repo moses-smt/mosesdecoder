@@ -30,6 +30,7 @@ public:
   Manager &mgr;
 
   static Hypothesis *Create(Manager &mgr);
+  static void Prefetch(Manager &mgr);
   virtual ~Hypothesis();
 
   // initial, empty hypo
