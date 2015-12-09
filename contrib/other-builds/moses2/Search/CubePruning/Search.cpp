@@ -79,6 +79,8 @@ void Search::Decode(size_t stackInd)
 	NSCubePruning::CubeEdge::SeenPositions &seenPositions = m_mgr.task.seenPositions;
 	seenPositions.clear();
 
+	Prefetch(stackInd);
+
 	// add top hypo from every edge into queue
 	CubeEdges &edges = m_cubeEdges[stackInd];
 
@@ -169,6 +171,24 @@ const Hypothesis *Search::GetBestHypothesis() const
 		best = sortedHypos[0];
 	}
 	return best;
+}
+
+void Search::Prefetch(size_t stackInd)
+{
+	CubeEdges &edges = m_cubeEdges[stackInd];
+
+	BOOST_FOREACH(CubeEdge *edge, edges) {
+		 __builtin_prefetch(edge);
+
+		 BOOST_FOREACH(const Hypothesis *hypo, edge->hypos) {
+			 __builtin_prefetch(hypo);
+		 }
+
+		 BOOST_FOREACH(const TargetPhrase *tp, edge->tps) {
+			 __builtin_prefetch(tp);
+		 }
+
+	}
 }
 
 }
