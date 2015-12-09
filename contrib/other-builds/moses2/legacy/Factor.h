@@ -56,8 +56,6 @@ class Factor
   Factor &operator=(const Factor &factor);
 
 public:
-  mutable void** ffData;
-
   //! original string representation of the factor
   StringPiece GetString() const {
     return m_string;

@@ -45,23 +45,25 @@ struct KenLMState : public FFState {
 class MappingBuilder : public lm::EnumerateVocab
 {
 public:
-  MappingBuilder(FactorCollection &factorCollection, System &system, size_t vocabInd)
+  MappingBuilder(FactorCollection &factorCollection, System &system, std::vector<lm::WordIndex> &mapping)
     : m_factorCollection(factorCollection)
 	, m_system(system)
-	, m_vocabInd(vocabInd)
+	, m_mapping(mapping)
   {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
-	const Factor *factor = m_factorCollection.AddFactor(str, m_system);
-	//cerr << "m_vocabInd=" << m_vocabInd << " ffData=" << factor->ffData.size() << endl;
-
-	factor->ffData[m_vocabInd] = (void*) index;
+	std::size_t factorId = m_factorCollection.AddFactor(str, m_system)->GetId();
+	if (m_mapping.size() <= factorId) {
+	  // 0 is <unk> :-)
+	  m_mapping.resize(factorId + 1);
+	}
+	m_mapping[factorId] = index;
   }
 
 private:
   FactorCollection &m_factorCollection;
+  std::vector<lm::WordIndex> &m_mapping;
   System &m_system;
-  size_t m_vocabInd;
 };
 
 /////////////////////////////////////////////////////////////////
@@ -88,7 +90,7 @@ void KENLM::Load(System &system)
   config.messages = NULL;
 
   FactorCollection &collection = system.GetVocab();
-  MappingBuilder builder(collection, system, m_vocabInd);
+  MappingBuilder builder(collection, system, m_lmIdLookup);
   config.enumerate_vocab = &builder;
   config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 
@@ -262,9 +264,8 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 }
 
 lm::WordIndex KENLM::TranslateID(const Word &word) const {
-  const Factor *factor = word[m_factorType];
-  lm::WordIndex ret = (lm::WordIndex)(size_t) factor->ffData[m_vocabInd];
-  return ret;
+  std::size_t factor = word[m_factorType]->GetId();
+  return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
 }
 
 // Convert last words of hypothesis into vocab ids, returning an end pointer.
@@ -280,5 +281,5 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
     }
     *index = TranslateID(hypo.GetWord(position));
   }
-  return NULL;
 }
+

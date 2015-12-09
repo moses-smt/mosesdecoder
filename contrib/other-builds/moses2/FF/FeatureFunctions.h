@@ -25,7 +25,6 @@ class Scores;
 
 class FeatureFunctions {
 public:
-    std::vector<const FeatureFunction*> hasVocabInd;
 
     FeatureFunctions(System &system);
 	virtual ~FeatureFunctions();
