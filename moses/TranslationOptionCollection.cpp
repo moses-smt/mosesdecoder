@@ -60,7 +60,7 @@ TranslationOptionCollection(ttasksptr const& ttask,
   , m_estimatedScores(src.GetSize())
   , m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
   , m_translationOptionThreshold(translationOptionThreshold)
-  , m_max_phrase_length(ttask->options().search.max_phrase_length)
+  , m_max_phrase_length(ttask->options()->search.max_phrase_length)
 {
   // create 2-d vector
   size_t size = src.GetSize();
@@ -147,7 +147,7 @@ ProcessUnknownWord()
 
   // bool alwaysCreateDirectTranslationOption
   // = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
-  bool always = m_ttask.lock()->options().unk.always_create_direct_transopt;
+  bool always = m_ttask.lock()->options()->unk.always_create_direct_transopt;
 
   // create unknown words for 1 word coverage where we don't have any trans options
   for (size_t pos = 0 ; pos < size ; ++pos) {
@@ -194,7 +194,7 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
   const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
   const StringPiece s = f->GetString();
   bool isEpsilon = (s=="" || s==EPSILON);
-  bool dropUnk = GetTranslationTask()->options().unk.drop;
+  bool dropUnk = GetTranslationTask()->options()->unk.drop;
   if (dropUnk) {
     isDigit = s.find_first_of("0123456789");
     if (isDigit == string::npos)
@@ -388,7 +388,7 @@ CreateTranslationOptionsForRange
 {
   typedef DecodeStepTranslation Tstep;
   typedef DecodeStepGeneration Gstep;
-  XmlInputType xml_policy = m_ttask.lock()->options().input.xml_policy;
+  XmlInputType xml_policy = m_ttask.lock()->options()->input.xml_policy;
   if ((xml_policy != XmlExclusive)
       || !HasXmlOptionsOverlappingRange(sPos,ePos)) {
 

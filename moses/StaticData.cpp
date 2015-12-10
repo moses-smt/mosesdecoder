@@ -219,6 +219,8 @@ bool StaticData::LoadData(Parameter *parameter)
   const PARAM_VEC *params;
 
   m_options.init(*parameter);
+  if (is_syntax(m_options.search.algo))
+    m_options.syntax.LoadNonTerminals(*parameter, FactorCollection::Instance());
 
   if (IsSyntax())
     LoadChartDecodingParameters();

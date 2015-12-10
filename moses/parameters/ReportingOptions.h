@@ -10,6 +10,8 @@ namespace Moses
   struct 
   ReportingOptions : public OptionsBaseClass
   {
+    long start_translation_id;
+
     std::vector<FactorType> factor_order;
     
     bool ReportAllFactors; // m_reportAllFactors;

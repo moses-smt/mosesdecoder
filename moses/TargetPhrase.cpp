@@ -72,7 +72,7 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   // XXX should this really be InputFactorOrder???
-  CreateFromString(Output, ttask->options().input.factor_order, out_string,
+  CreateFromString(Output, ttask->options()->input.factor_order, out_string,
                    NULL);
 }
 

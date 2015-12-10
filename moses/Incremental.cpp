@@ -329,7 +329,7 @@ OutputNBestList(OutputCollector *collector,
 {
   const StaticData &staticData = StaticData::Instance();
   const std::vector<Moses::FactorType> &outputFactorOrder
-  = options().output.factor_order;
+  = options()->output.factor_order;
 
   std::ostringstream out;
   // wtf? copied from the original OutputNBestList
@@ -351,7 +351,7 @@ OutputNBestList(OutputCollector *collector,
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase); // , outputFactorOrder, false);
     out << " ||| ";
-    bool with_labels = options().nbest.include_feature_labels;
+    bool with_labels = options()->nbest.include_feature_labels;
     features.OutputAllFeatureScores(out, with_labels);
     out << " ||| " << i->GetScore() << '\n';
   }
@@ -509,7 +509,7 @@ void Manager::OutputBestHypo(OutputCollector *collector, search::Applied applied
   if (collector == NULL) return;
   std::ostringstream out;
   FixPrecision(out);
-  if (options().output.ReportHypoScore) {
+  if (options()->output.ReportHypoScore) {
     out << applied.GetScore() << ' ';
   }
   Phrase outPhrase;
@@ -519,7 +519,7 @@ void Manager::OutputBestHypo(OutputCollector *collector, search::Applied applied
                  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
   outPhrase.RemoveWord(0);
   outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-  out << outPhrase.GetStringRep(options().output.factor_order);
+  out << outPhrase.GetStringRep(options()->output.factor_order);
   out << '\n';
   collector->Write(translationId, out.str());
 
@@ -531,7 +531,7 @@ Manager::
 OutputBestNone(OutputCollector *collector, long translationId) const
 {
   if (collector == NULL) return;
-  if (options().output.ReportHypoScore) {
+  if (options()->output.ReportHypoScore) {
     collector->Write(translationId, "0 \n");
   } else {
     collector->Write(translationId, "\n");

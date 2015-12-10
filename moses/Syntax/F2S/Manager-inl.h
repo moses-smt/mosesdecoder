@@ -42,7 +42,7 @@ Manager<RuleMatcher>::Manager(ttasksptr const& ttask)
     m_rootVertex = p->GetRootVertex();
     m_sentenceLength = p->GetSize();
   } else if (const TreeInput *p = dynamic_cast<const TreeInput*>(&m_source)) {
-    T2S::InputTreeBuilder builder(options().output.factor_order);
+    T2S::InputTreeBuilder builder(options()->output.factor_order);
     T2S::InputTree tmpTree;
     builder.Build(*p, "Q", tmpTree);
     boost::shared_ptr<Forest> forest = boost::make_shared<Forest>();
@@ -74,8 +74,7 @@ void Manager<RuleMatcher>::Decode()
   RuleMatcherCallback callback(m_stackMap, ruleLimit);
 
   // Create a glue rule synthesizer.
-  GlueRuleSynthesizer glueRuleSynthesizer(*m_glueRuleTrie,
-                                          options().input.factor_order);
+  GlueRuleSynthesizer glueRuleSynthesizer(*options(), *m_glueRuleTrie);
 
   // Sort the input forest's vertices into bottom-up topological order.
   std::vector<const Forest::Vertex *> sortedVertices;

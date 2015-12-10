@@ -53,7 +53,7 @@ class TabbedSentence : public Sentence
 {
 
 public:
-  TabbedSentence() : Sentence() {}
+  TabbedSentence(AllOptions::ptr const& opts) : Sentence(opts) {}
   ~TabbedSentence() {}
 
   InputTypeEnum GetType() const {
@@ -68,8 +68,7 @@ public:
                                 , const std::string &tabbedString);
 
   virtual int
-  Read(std::istream& in,const std::vector<FactorType>& factorOrder,
-       AllOptions const& opts);
+  Read(std::istream& in);
 
   const TabbedColumns& GetColumns() const {
     return m_columns;

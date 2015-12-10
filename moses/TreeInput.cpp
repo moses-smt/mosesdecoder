@@ -240,25 +240,20 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
 //! populate this InputType with data from in stream
 int
 TreeInput::
-Read(std::istream& in, const std::vector<FactorType>& factorOrder,
-     AllOptions const& opts)
+Read(std::istream& in)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   string line;
   if (getline(in, line, '\n').eof())
     return 0;
-  // remove extra spaces
-  //line = Trim(line);
-
+  
   m_labelledSpans.clear();
-  ProcessAndStripXMLTags(opts, line, m_labelledSpans, m_xmlOptions);
+  ProcessAndStripXMLTags(*m_options, line, m_labelledSpans, m_xmlOptions);
 
   // do words 1st - hack
   stringstream strme;
   strme << line << endl;
 
-  Sentence::Read(strme, factorOrder, opts);
+  Sentence::Read(strme); 
 
   // size input chart
   size_t sourceSize = GetSize();
@@ -270,19 +265,21 @@ Read(std::istream& in, const std::vector<FactorType>& factorOrder,
 
   // do source labels
   vector<XMLParseOutput>::const_iterator iterLabel;
-  for (iterLabel = m_labelledSpans.begin(); iterLabel != m_labelledSpans.end(); ++iterLabel) {
+  for (iterLabel = m_labelledSpans.begin(); 
+       iterLabel != m_labelledSpans.end(); ++iterLabel) {
     const XMLParseOutput &labelItem = *iterLabel;
     const Range &range = labelItem.m_range;
     const string &label = labelItem.m_label;
-    AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label, factorOrder);
+    AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label);
   }
 
   // default label
+  bool only4empty = m_options->syntax.default_non_term_only_for_empty_range;
   for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
       NonTerminalSet &list = GetLabelSet(startPos, endPos);
-      if (list.size() == 0 || !staticData.GetDefaultNonTermOnlyForEmptyRange()) {
-        AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
+      if (list.size() == 0 || ! only4empty ) {
+        AddChartLabel(startPos, endPos, m_options->syntax.input_default_non_terminal); 
       }
     }
   }
@@ -303,13 +300,13 @@ TranslationOptionCollection* TreeInput::CreateTranslationOptionCollection() cons
   return NULL;
 }
 
-void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
-                              , const std::vector<FactorType>& /* factorOrder */)
+void 
+TreeInput::
+AddChartLabel(size_t startPos, size_t endPos, const Word &label)
 {
   UTIL_THROW_IF2(!label.IsNonTerminal(),
                  "Label must be a non-terminal");
-
-  SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
+  SourceLabelOverlap overlapType = m_options->syntax.source_label_overlap;
   NonTerminalSet &list = GetLabelSet(startPos, endPos);
   switch (overlapType) {
   case SourceLabelOverlapAdd:
@@ -327,14 +324,17 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
   }
 }
 
-void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &label
-                              , const std::vector<FactorType>& factorOrder)
+void 
+TreeInput::
+AddChartLabel(size_t startPos, size_t endPos, const string &label)
 {
+  const std::vector<FactorType>& fOrder = m_options->input.factor_order;
   Word word(true);
-  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label, true); // TODO - no factors
+  const Factor *factor 
+    = FactorCollection::Instance().AddFactor(Input, fOrder[0], label, true); 
+  // TODO - no factors
   word.SetFactor(0, factor);
-
-  AddChartLabel(startPos, endPos, word, factorOrder);
+  AddChartLabel(startPos, endPos, word);
 }
 
 std::ostream& operator<<(std::ostream &out, const TreeInput &input)

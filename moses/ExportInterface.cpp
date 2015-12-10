@@ -101,7 +101,7 @@ SimpleTranslationInterface::~SimpleTranslationInterface()
 //the simplified version of string input/output translation
 string SimpleTranslationInterface::translate(const string &inputString)
 {
-  boost::shared_ptr<Moses::IOWrapper> ioWrapper(new IOWrapper);
+  boost::shared_ptr<Moses::IOWrapper> ioWrapper(new IOWrapper(StaticData::Instance().options()));
   // main loop over set of input sentences
   size_t sentEnd = inputString.rfind('\n'); //find the last \n, the input stream has to be appended with \n to be translated
   const string &newString = sentEnd != string::npos ? inputString : inputString + '\n';
@@ -180,7 +180,7 @@ batch_run()
   IFVERBOSE(1) PrintUserTime("Created input-output object");
 
   // set up read/writing class:
-  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper(staticData.options()));
   UTIL_THROW_IF2(ioWrapper == NULL, "Error; Failed to create IO object"
                  << " [" << HERE << "]");
 

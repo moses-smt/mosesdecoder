@@ -336,7 +336,7 @@ size_t
 Hypothesis::
 OutputAlignment(std::ostream &out, bool recursive=true) const
 {
-  WordAlignmentSort const& waso = m_manager.options().output.WA_SortOrder;
+  WordAlignmentSort const& waso = m_manager.options()->output.WA_SortOrder;
   TargetPhrase const& tp = GetCurrTargetPhrase();
 
   // call with head recursion to output things in the right order

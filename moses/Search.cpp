@@ -10,7 +10,7 @@ namespace Moses
 Search::Search(Manager& manager)
   : m_manager(manager)
   , m_source(manager.GetSource())
-  , m_options(manager.options())
+  , m_options(*manager.options())
   , m_inputPath()
   , m_initialTransOpt()
   , m_bitmaps(manager.GetSource().GetSize(), manager.GetSource().m_sourceCompleted)

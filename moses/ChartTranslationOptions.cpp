@@ -68,7 +68,7 @@ void ChartTranslationOptions::EvaluateWithSourceContext(const InputType &input, 
 {
   SetInputPath(&inputPath);
   // if (StaticData::Instance().GetPlaceholderFactor() != NOT_FOUND) {
-  if (inputPath.ttask.lock()->options().input.placeholder_factor != NOT_FOUND) {
+  if (inputPath.ttask.lock()->options()->input.placeholder_factor != NOT_FOUND) {
     CreateSourceRuleFromInputPath();
   }
 

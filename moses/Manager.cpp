@@ -73,7 +73,7 @@ Manager::Manager(ttasksptr const& ttask)
   boost::shared_ptr<InputType> source = ttask->GetSource();
   m_transOptColl = source->CreateTranslationOptionCollection(ttask);
 
-  switch(options().search.algo) {
+  switch(options()->search.algo) {
   case Normal:
     m_search = new SearchNormal(*this, *m_transOptColl);
     break;
@@ -279,7 +279,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret, bool onlyDistinct) c
 
   // factor defines stopping point for distinct n-best list if too
   // many candidates identical
-  size_t nBestFactor = options().nbest.factor;
+  size_t nBestFactor = options()->nbest.factor;
   if (nBestFactor < 1) nBestFactor = 1000; // 0 = unlimited
 
   // MAIN loop
@@ -303,7 +303,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret, bool onlyDistinct) c
 
 
     if(onlyDistinct) {
-      const size_t nBestFactor = options().nbest.factor;
+      const size_t nBestFactor = options()->nbest.factor;
       if (nBestFactor > 0)
         contenders.Prune(count * nBestFactor);
     } else {
@@ -1343,7 +1343,7 @@ OutputSearchGraph(long translationId, std::ostream &out) const
   vector<SearchGraphNode> searchGraph;
   GetSearchGraph(searchGraph);
   for (size_t i = 0; i < searchGraph.size(); ++i) {
-    OutputSearchNode(options(),translationId,out,searchGraph[i]);
+    OutputSearchNode(*options(),translationId,out,searchGraph[i]);
   }
 }
 
@@ -1467,7 +1467,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
     FixPrecision(debug,PRECISION);
 
     // all derivations - send them to debug stream
-    if (options().output.PrintAllDerivations) {
+    if (options()->output.PrintAllDerivations) {
       additionalReportingTime.start();
       PrintAllDerivations(translationId, debug);
       additionalReportingTime.stop();
@@ -1478,34 +1478,34 @@ void Manager::OutputBest(OutputCollector *collector)  const
 
     // MAP decoding: best hypothesis
     const Hypothesis* bestHypo = NULL;
-    if (!options().mbr.enabled) {
+    if (!options()->mbr.enabled) {
       bestHypo = GetBestHypothesis();
       if (bestHypo) {
-        if (options().output.ReportHypoScore) {
+        if (options()->output.ReportHypoScore) {
           out << bestHypo->GetFutureScore() << ' ';
         }
-        if (options().output.RecoverPath) {
+        if (options()->output.RecoverPath) {
           bestHypo->OutputInput(out);
           out << "||| ";
         }
 
-        if (options().output.PrintID) {
+        if (options()->output.PrintID) {
           out << translationId << " ";
         }
 
         // VN : I put back the code for OutputPassthroughInformation
-        if (options().output.PrintPassThrough) {
+        if (options()->output.PrintPassThrough) {
           OutputPassthroughInformation(out, bestHypo);
         }
         // end of add back
 
-        if (options().output.ReportSegmentation == 2) {
+        if (options()->output.ReportSegmentation == 2) {
           GetOutputLanguageModelOrder(out, bestHypo);
         }
         OutputSurface(out,*bestHypo, true);
-        if (options().output.PrintAlignmentInfo) {
+        if (options()->output.PrintAlignmentInfo) {
           out << "||| ";
-          bestHypo->OutputAlignment(out, options().output.WA_SortOrder);
+          bestHypo->OutputAlignment(out, options()->output.WA_SortOrder);
         }
 
         IFVERBOSE(1) {
@@ -1521,7 +1521,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
     // MBR decoding (n-best MBR, lattice MBR, consensus)
     else {
       // we first need the n-best translations
-      size_t nBestSize = options().mbr.size;
+      size_t nBestSize = options()->mbr.size;
       if (nBestSize <= 0) {
         cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
         exit(1);
@@ -1534,11 +1534,11 @@ void Manager::OutputBest(OutputCollector *collector)  const
       }
 
       // lattice MBR
-      if (options().lmbr.enabled) {
-        if (options().nbest.enabled) {
+      if (options()->lmbr.enabled) {
+        if (options()->nbest.enabled) {
           //lattice mbr nbest
           vector<LatticeMBRSolution> solutions;
-          size_t n  = min(nBestSize, options().nbest.nbest_size);
+          size_t n  = min(nBestSize, options()->nbest.nbest_size);
           getLatticeMBRNBest(*this,nBestList,solutions,n);
           OutputLatticeMBRNBest(m_latticeNBestOut, solutions, translationId);
         } else {
@@ -1552,7 +1552,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
       }
 
       // consensus decoding
-      else if (options().search.consensus) {
+      else if (options()->search.consensus) {
         const TrellisPath &conBestHypo = doConsensusDecoding(*this,nBestList);
         OutputBestHypo(conBestHypo, out);
         OutputAlignment(m_alignmentOut, conBestHypo);
@@ -1563,7 +1563,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
 
       // n-best MBR decoding
       else {
-        const TrellisPath &mbrBestHypo = doMBR(nBestList, options());
+        const TrellisPath &mbrBestHypo = doMBR(nBestList, *options());
         OutputBestHypo(mbrBestHypo, out);
         OutputAlignment(m_alignmentOut, mbrBestHypo);
         IFVERBOSE(2) {
@@ -1587,14 +1587,14 @@ void Manager::OutputNBest(OutputCollector *collector) const
     return;
   }
 
-  if (options().lmbr.enabled) {
-    if (options().nbest.enabled) {
+  if (options()->lmbr.enabled) {
+    if (options()->nbest.enabled) {
       collector->Write(m_source.GetTranslationId(), m_latticeNBestOut.str());
     }
   } else {
     TrellisPathList nBestList;
     ostringstream out;
-    NBestOptions const& nbo = options().nbest;
+    NBestOptions const& nbo = options()->nbest;
     CalcNBest(nbo.nbest_size, nBestList, nbo.only_distinct);
     OutputNBest(out, nBestList);
     collector->Write(m_source.GetTranslationId(), out.str());
@@ -1606,7 +1606,7 @@ void
 Manager::
 OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
 {
-  NBestOptions const& nbo = options().nbest;
+  NBestOptions const& nbo = options()->nbest;
   bool reportAllFactors     = nbo.include_all_factors;
   bool includeSegmentation  = nbo.include_segmentation;
   bool includeWordAlignment = nbo.include_alignment_info;
@@ -1625,7 +1625,7 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
     out << " |||";
 
     // print scores with feature names
-    bool with_labels = options().nbest.include_feature_labels;
+    bool with_labels = options()->nbest.include_feature_labels;
     path.GetScoreBreakdown()->OutputAllFeatureScores(out, with_labels);
 
     // total
@@ -1664,7 +1664,7 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
       }
     }
 
-    if (options().output.RecoverPath) {
+    if (options()->output.RecoverPath) {
       out << " ||| ";
       OutputInput(out, edges[0]);
     }
@@ -1687,19 +1687,19 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
     OutputSurface(out,*edge.GetPrevHypo(), true);
   }
 
-  std::vector<FactorType> outputFactorOrder = options().output.factor_order;
+  std::vector<FactorType> outputFactorOrder = options()->output.factor_order;
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
                  "Must specific at least 1 output factor");
 
-  FactorType placeholderFactor = options().input.placeholder_factor;
+  FactorType placeholderFactor = options()->input.placeholder_factor;
   std::map<size_t, const Factor*> placeholders;
   if (placeholderFactor != NOT_FOUND) {
     // creates map of target position -> factor for placeholders
     placeholders = GetPlaceholders(edge, placeholderFactor);
   }
 
-  bool markUnknown = options().unk.mark;
-  std::string const& fd = options().output.FactorDelimiter;
+  bool markUnknown = options()->unk.mark;
+  std::string const& fd = options()->output.FactorDelimiter;
 
   TargetPhrase const& phrase = edge.GetCurrTargetPhrase();
   size_t size = phrase.GetSize();
@@ -1718,7 +1718,7 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
     //preface surface form with UNK if marking unknowns
     const Word &word = phrase.GetWord(pos);
     if(markUnknown && word.IsOOV()) {
-      out << options().unk.prefix;
+      out << options()->unk.prefix;
     }
 
     out << *factor;
@@ -1729,7 +1729,7 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
     }
 
     if(markUnknown && word.IsOOV()) {
-      out << options().unk.suffix;
+      out << options()->unk.suffix;
     }
 
     out << " ";
@@ -1737,7 +1737,7 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
   }
 
   // trace ("report segmentation") option "-t" / "-tt"
-  int reportSegmentation = options().output.ReportSegmentation;
+  int reportSegmentation = options()->output.ReportSegmentation;
   if (reportSegmentation > 0 && phrase.GetSize() > 0) {
     const Range &sourceRange = edge.GetCurrSourceWordsRange();
     const int sourceStart = sourceRange.GetStartPos();
@@ -1752,7 +1752,7 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      bool with_labels = options().nbest.include_feature_labels;
+      bool with_labels = options()->nbest.include_feature_labels;
       scoreBreakdown.OutputAllFeatureScores(out, with_labels);
     }
     out << "| ";
@@ -1765,7 +1765,7 @@ OutputAlignment(ostream &out, const AlignmentInfo &ai,
                 size_t sourceOffset, size_t targetOffset) const
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
-  AlignVec alignments = ai.GetSortedAlignments(options().output.WA_SortOrder);
+  AlignVec alignments = ai.GetSortedAlignments(options()->output.WA_SortOrder);
 
   AlignVec::const_iterator it;
   for (it = alignments.begin(); it != alignments.end(); ++it) {
@@ -1821,7 +1821,7 @@ void Manager::OutputLatticeSamples(OutputCollector *collector) const
   if (collector) {
     TrellisPathList latticeSamples;
     ostringstream out;
-    CalcLatticeSamples(options().output.lattice_sample_size, latticeSamples);
+    CalcLatticeSamples(options()->output.lattice_sample_size, latticeSamples);
     OutputNBest(out,latticeSamples);
     collector->Write(m_source.GetTranslationId(), out.str());
   }
@@ -1932,7 +1932,7 @@ void Manager::OutputSearchGraphSLF() const
   long translationId = m_source.GetTranslationId();
 
   // Output search graph in HTK standard lattice format (SLF)
-  std::string const& slf = options().output.SearchGraphSLF;
+  std::string const& slf = options()->output.SearchGraphSLF;
   if (slf.size()) {
     util::StringStream fileName;
     fileName << slf << "/" << translationId << ".slf";
@@ -1959,7 +1959,7 @@ void Manager::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSo
     out << " |||";
     const vector<Word> mbrHypo = si->GetWords();
     for (size_t i = 0 ; i < mbrHypo.size() ; i++) {
-      const Factor *factor = mbrHypo[i].GetFactor(options().output.factor_order[0]);
+      const Factor *factor = mbrHypo[i].GetFactor(options()->output.factor_order[0]);
       if (i>0) out << " " << *factor;
       else     out << *factor;
     }
@@ -1980,7 +1980,7 @@ void
 Manager::
 OutputBestHypo(const std::vector<Word>&  mbrBestHypo, ostream& out) const
 {
-  FactorType f = options().output.factor_order[0];
+  FactorType f = options()->output.factor_order[0];
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i].GetFactor(f);
     UTIL_THROW_IF2(factor == NULL, "No factor " << f << " at position " << i);
@@ -2006,7 +2006,7 @@ void
 Manager::
 OutputAlignment(std::ostringstream &out, const TrellisPath &path) const
 {
-  WordAlignmentSort waso = options().output.WA_SortOrder;
+  WordAlignmentSort waso = options()->output.WA_SortOrder;
   BOOST_REVERSE_FOREACH(Hypothesis const* e, path.GetEdges())
   e->OutputAlignment(out, false);
   // Hypothesis::OutputAlignment(out, path.GetEdges(), waso);

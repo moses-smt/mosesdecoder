@@ -63,8 +63,9 @@ using namespace std;
 namespace Moses
 {
 
-IOWrapper::IOWrapper()
-  : m_nBestStream(NULL)
+IOWrapper::IOWrapper(AllOptions const& opts)
+  : m_options(new AllOptions(opts))
+  , m_nBestStream(NULL)
   , m_surpressSingleBestOutput(false)
   , m_look_ahead(0)
   , m_look_back(0)

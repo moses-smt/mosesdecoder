@@ -1,7 +1,6 @@
 #include "CountNonTerms.h"
 #include "moses/Util.h"
 #include "moses/TargetPhrase.h"
-#include "moses/StaticData.h"
 
 using namespace std;
 
@@ -21,8 +20,6 @@ void CountNonTerms::EvaluateInIsolation(const Phrase &sourcePhrase
                                         , ScoreComponentCollection &scoreBreakdown
                                         , ScoreComponentCollection &estimatedScores) const
 {
-  const StaticData &staticData = StaticData::Instance();
-
   vector<float> scores(m_numScoreComponents, 0);
   size_t indScore = 0;
 
@@ -39,7 +36,7 @@ void CountNonTerms::EvaluateInIsolation(const Phrase &sourcePhrase
   if (m_targetSyntax) {
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
       const Word &word = targetPhrase.GetWord(i);
-      if (word.IsNonTerminal() && word != staticData.GetOutputDefaultNonTerminal()) {
+      if (word.IsNonTerminal() && word != m_output_default_nonterminal) {
         ++scores[indScore];
       }
     }
@@ -49,7 +46,7 @@ void CountNonTerms::EvaluateInIsolation(const Phrase &sourcePhrase
   if (m_sourceSyntax) {
     for (size_t i = 0; i < sourcePhrase.GetSize(); ++i) {
       const Word &word = sourcePhrase.GetWord(i);
-      if (word.IsNonTerminal() && word != staticData.GetInputDefaultNonTerminal()) {
+      if (word.IsNonTerminal() && word != m_input_default_nonterminal) {
         ++scores[indScore];
       }
     }
@@ -70,6 +67,14 @@ void CountNonTerms::SetParameter(const std::string& key, const std::string& valu
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
+}
+
+void
+CountNonTerms::
+Load(AllOptions const& opts)
+{
+  m_input_default_nonterminal  = opts.syntax.input_default_non_terminal;
+  m_output_default_nonterminal = opts.syntax.output_default_non_terminal;
 }
 
 

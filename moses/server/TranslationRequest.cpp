@@ -57,13 +57,6 @@ Run()
   parse_request(params);
   // cerr << "SESSION ID" << ret->m_session_id << endl;
 
-  if (m_session_id)
-    {
-      Session const& S = m_translator->get_session(m_session_id);
-      m_scope = S.scope;
-      m_session_id = S.id;
-    }
-  else m_scope.reset(new Moses::ContextScope);
 
   // settings within the session scope
   param_t::const_iterator si = params.find("context-weights");
@@ -90,7 +83,7 @@ TranslationRequest::
 add_phrase_aln_info(Hypothesis const& h, vector<xmlrpc_c::value>& aInfo) const
 {
   // if (!m_withAlignInfo) return;
-  if (!options().output.ReportSegmentation) return;
+  if (!options()->output.ReportSegmentation) return;
   Range const& trg = h.GetCurrTargetWordsRange();
   Range const& src = h.GetCurrSourceWordsRange();
 
@@ -152,7 +145,7 @@ insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData)
         x["recombined"] = value_int(n.recombinationHypo->GetId());
       x["cover-start"] = value_int(hypo->GetCurrSourceWordsRange().GetStartPos());
       x["cover-end"] = value_int(hypo->GetCurrSourceWordsRange().GetEndPos());
-      x["out"] = value_string(hypo->GetCurrTargetPhrase().GetStringRep(options().output.factor_order));
+      x["out"] = value_string(hypo->GetCurrTargetPhrase().GetStringRep(options()->output.factor_order));
     }
     searchGraphXml.push_back(value_struct(x));
   }
@@ -166,7 +159,7 @@ outputNBest(const Manager& manager, map<string, xmlrpc_c::value>& retData)
   TrellisPathList nBestList;
   vector<xmlrpc_c::value> nBestXml;
 
-  Moses::NBestOptions const& nbo = m_options.nbest; 
+  Moses::NBestOptions const& nbo = m_options->nbest; 
   manager.CalcNBest(nbo.nbest_size, nBestList, nbo.only_distinct);
   manager.OutputNBest(cout, nBestList); 
 
@@ -196,7 +189,7 @@ TranslationRequest::
 insertTranslationOptions(Moses::Manager& manager,
                          std::map<std::string, xmlrpc_c::value>& retData)
 {
-  std::vector<Moses::FactorType> const& ofactor_order = options().output.factor_order;
+  std::vector<Moses::FactorType> const& ofactor_order = options()->output.factor_order;
   
   const TranslationOptionCollection* toptsColl = manager.getSntTranslationOptions();
   vector<xmlrpc_c::value> toptsXml;
@@ -231,7 +224,7 @@ TranslationRequest(xmlrpc_c::paramList const& paramList,
   : m_cond(cond), m_mutex(mut), m_done(false), m_paramList(paramList)
   , m_session_id(0)
 { 
-  m_options = StaticData::Instance().options();
+
 }
 
 bool
@@ -251,23 +244,42 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
 {
   // parse XMLRPC request
   m_paramList.verifyEnd(1); // ??? UG
-  m_options.update(params);
+
+  typedef std::map<std::string, xmlrpc_c::value> params_t;
+  params_t::const_iterator si;
+
+  si = params.find("session-id");
+  if (si != params.end()) 
+    {
+      m_session_id = xmlrpc_c::value_int(si->second);
+      Session const& S = m_translator->get_session(m_session_id);
+      m_scope = S.scope;
+      m_session_id = S.id;
+    } 
+  else
+    {
+      m_session_id = 0;
+      m_scope.reset(new Moses::ContextScope);
+    }
+
+  boost::shared_ptr<Moses::AllOptions> opts(new Moses::AllOptions(StaticData::Instance().options()));
+  opts->update(params);
+
+  m_withGraphInfo = check(params, "sg");
+  if (m_withGraphInfo || opts->nbest.nbest_size > 0) {
+    opts->output.SearchGraph = "true";
+    opts->nbest.enabled = true;
+  }
+
+  m_options = opts;
 
   // source text must be given, or we don't know what to translate
-  typedef std::map<std::string, xmlrpc_c::value> params_t;
-  params_t::const_iterator si = params.find("text");
+  si = params.find("text");
   if (si == params.end())
     throw xmlrpc_c::fault("Missing source text", xmlrpc_c::fault::CODE_PARSE);
   m_source_string = xmlrpc_c::value_string(si->second);
   XVERBOSE(1,"Input: " << m_source_string << endl);
-
-  si = params.find("session-id");
-  if (si != params.end())
-    m_session_id = xmlrpc_c::value_int(si->second);
-  else
-    m_session_id = 0;
   
-  m_withGraphInfo       = check(params, "sg");
   m_withTopts           = check(params, "topt");
   m_withScoreBreakdown  = check(params, "add-score-breakdown");
   si = params.find("lambda");
@@ -284,8 +296,6 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
 	  string const model_name = xmlrpc_c::value_string(si->second);
 	  PhraseDictionaryMultiModel* pdmm
 	    = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
-	  // Moses::PhraseDictionaryMultiModel* pdmm
-	  // = FindPhraseDictionary(model_name);
 	  pdmm->SetTemporaryMultiModelWeightsVector(w);
 	}
     }
@@ -307,7 +317,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   // 	for (size_t i = 1; i < tmp.size(); i += 2)
   // 	  m_bias[xmlrpc_c::value_int(tmp[i-1])] = xmlrpc_c::value_double(tmp[i]);
   //   }
-  m_source.reset(new Sentence(0,m_source_string,m_options));
+  m_source.reset(new Sentence(m_options,0,m_source_string));
 } // end of Translationtask::parse_request()
 
 
@@ -315,9 +325,9 @@ void
 TranslationRequest::
 run_chart_decoder()
 {
-  Moses::TreeInput tinput;
+  Moses::TreeInput tinput(m_options);
   istringstream buf(m_source_string + "\n");
-  tinput.Read(buf, options().input.factor_order, m_options);
+  tinput.Read(buf);
   
   Moses::ChartManager manager(this->self());
   manager.Decode();
@@ -352,7 +362,7 @@ pack_hypothesis(const Moses::Manager& manager,
   dest[key] = xmlrpc_c::value_string(target.str());
 
   // if (m_withAlignInfo) {
-  if (options().output.ReportSegmentation) {
+  if (options()->output.ReportSegmentation) {
     // phrase alignment, if requested
 
     vector<xmlrpc_c::value> p_aln;
@@ -362,7 +372,7 @@ pack_hypothesis(const Moses::Manager& manager,
   }
 
   // if (m_withWordAlignInfo) {
-  if (options().output.PrintAlignmentInfo) { 
+  if (options()->output.PrintAlignmentInfo) { 
     // word alignment, if requested
     vector<xmlrpc_c::value> w_aln;
     BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)
@@ -388,11 +398,6 @@ void
 TranslationRequest::
 run_phrase_decoder()
 {
-  if (m_withGraphInfo || m_options.nbest.nbest_size > 0) {
-    m_options.output.SearchGraph = "true";
-    m_options.nbest.enabled = true;
-  }
-
   Manager manager(this->self());
   manager.Decode();
   pack_hypothesis(manager, manager.GetBestHypothesis(), "text", m_retData);
@@ -401,7 +406,7 @@ run_phrase_decoder()
   
   if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
   if (m_withTopts) insertTranslationOptions(manager,m_retData);
-  if (m_options.nbest.nbest_size) outputNBest(manager, m_retData);
+  if (m_options->nbest.nbest_size) outputNBest(manager, m_retData);
 
 }
 }
