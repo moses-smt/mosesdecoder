@@ -43,9 +43,8 @@ namespace Moses
 Sentence::
 Sentence(AllOptions::ptr const& opts) : Phrase(0) , InputType(opts)
 {
-  const StaticData& SD = StaticData::Instance();
-  if (SD.IsSyntax())
-    m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
+  if (is_syntax(opts->search.algo))
+    m_defaultLabelSet.insert(opts->syntax.input_default_non_terminal);
 }
 
 Sentence::
@@ -146,65 +145,59 @@ aux_interpret_dlt(string& line) // whatever DLT means ... --- UG
 
 void
 Sentence::
-aux_interpret_xml(AllOptions const& opts, std::string& line, std::vector<size_t> & xmlWalls,
+aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
                   std::vector<std::pair<size_t, std::string> >& placeholders)
 {
   // parse XML markup in translation line
-
-  const StaticData &SD = StaticData::Instance();
-
   using namespace std;
-  if (opts.input.xml_policy != XmlPassThrough) {
-    int offset = SD.IsSyntax() ? 1 : 0;
-    bool OK = ProcessAndStripXMLTags(opts, line, m_xmlOptions,
+  if (m_options->input.xml_policy != XmlPassThrough) {
+    bool OK = ProcessAndStripXMLTags(*m_options, line, 
+				     m_xmlOptions,
                                      m_reorderingConstraint,
-                                     xmlWalls, placeholders, offset,
-                                     SD.GetXmlBrackets().first,
-                                     SD.GetXmlBrackets().second);
-    UTIL_THROW_IF2(!OK, "Unable to parse XML in line: " << line);
+                                     xmlWalls, placeholders);
+      UTIL_THROW_IF2(!OK, "Unable to parse XML in line: " << line);
   }
 }
 
 void
 Sentence::
-init(AllOptions::ptr const& opts, string line, std::vector<FactorType> const& factorOrder)
+init(string line)
 {
   using namespace std;
-  const StaticData &SD = StaticData::Instance();
 
   m_frontSpanCoveredLength = 0;
   m_sourceCompleted.resize(0);
 
-  if (SD.ContinuePartialTranslation())
+  if (m_options->input.continue_partial_translation)
     aux_init_partial_translation(line);
-
+  
   line = Trim(line);
   aux_interpret_sgml_markup(line); // for "<seg id=..." markup
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
 
   // if sentences is specified as "<passthrough tag1=""/>"
-  if (SD.options().output.PrintPassThrough ||
-      SD.options().nbest.include_passthrough) {
+  if (m_options->output.PrintPassThrough ||m_options->nbest.include_passthrough) {
     string pthru = PassthroughSGML(line,"passthrough");
     this->SetPassthroughInformation(pthru);
   }
 
   vector<size_t> xmlWalls;
   vector<pair<size_t, string> >placeholders;
-  aux_interpret_xml(*opts, line, xmlWalls, placeholders);
+  aux_interpret_xml(line, xmlWalls, placeholders);
 
-  Phrase::CreateFromString(Input, factorOrder, line, NULL);
+  Phrase::CreateFromString(Input, m_options->input.factor_order, line, NULL);
 
   ProcessPlaceholders(placeholders);
 
-  if (SD.IsSyntax()) InitStartEndWord();
+  if (is_syntax(m_options->search.algo))
+    InitStartEndWord();
 
   // now that we have final word positions in phrase (from
   // CreateFromString), we can make input phrase objects to go with
   // our XmlOptions and create TranslationOptions
 
   // only fill the vector if we are parsing XML
-  if (opts->input.xml_policy != XmlPassThrough) {
+  if (m_options->input.xml_policy != XmlPassThrough) {
     m_xmlCoverageMap.assign(GetSize(), false);
     BOOST_FOREACH(XmlOption const* o, m_xmlOptions) {
       Range const& r = o->range;
@@ -217,7 +210,7 @@ init(AllOptions::ptr const& opts, string line, std::vector<FactorType> const& fa
   m_reorderingConstraint.InitializeWalls(GetSize());
 
   // set reordering walls, if "-monotone-at-punction" is set
-  if (SD.UseReorderingConstraint() && GetSize()) {
+  if (m_options->reordering.monotone_at_punct && GetSize()) {
     Range r(0, GetSize()-1);
     m_reorderingConstraint.SetMonotoneAtPunctuation(GetSubString(r));
   }
@@ -232,14 +225,12 @@ init(AllOptions::ptr const& opts, string line, std::vector<FactorType> const& fa
 
 int
 Sentence::
-Read(std::istream& in,
-     const std::vector<FactorType>& factorOrder,
-     AllOptions const& opts)
+Read(std::istream& in)
 {
   std::string line;
   if (getline(in, line, '\n').eof())
     return 0;
-  init(m_options, line, factorOrder);
+  init(line);
   return 1;
 }
 
@@ -247,7 +238,7 @@ void
 Sentence::
 ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
+  FactorType placeholderFactor = m_options->input.placeholder_factor;
   if (placeholderFactor == NOT_FOUND) {
     return;
   }
@@ -325,7 +316,7 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
 
 std::vector <ChartTranslationOptions*>
 Sentence::
-GetXmlChartTranslationOptions(AllOptions const& opts) const
+GetXmlChartTranslationOptions() const
 {
   std::vector <ChartTranslationOptions*> ret;
 
@@ -333,7 +324,7 @@ GetXmlChartTranslationOptions(AllOptions const& opts) const
   // this code is a copy of the 1 in Sentence.
 
   //only fill the vector if we are parsing XML
-  if (opts.input.xml_policy != XmlPassThrough ) {
+  if (m_options->input.xml_policy != XmlPassThrough ) {
     //TODO: needed to handle exclusive
     //for (size_t i=0; i<GetSize(); i++) {
     //  m_xmlCoverageMap.push_back(false);
@@ -374,12 +365,10 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(AllOptions::ptr const& opts, size_t const transId,
-         string stext, vector<FactorType> const* IFO)
+Sentence(AllOptions::ptr const& opts, size_t const transId, string stext) 
   : InputType(opts, transId)
 {
-  if (IFO) init(opts,stext, *IFO);
-  else init(opts, stext, opts->input.factor_order);
+  init(stext);
 }
 
 }

@@ -64,8 +64,8 @@ protected:
 
 public:
   Sentence(AllOptions::ptr const& opts);
-  Sentence(AllOptions::ptr const& opts, size_t const transId, std::string stext,
-           std::vector<FactorType> const* IFO = NULL);
+  Sentence(AllOptions::ptr const& opts, size_t const transId, std::string stext);
+  // std::vector<FactorType> const* IFO = NULL);
   // Sentence(size_t const transId, std::string const& stext);
   ~Sentence();
 
@@ -94,11 +94,11 @@ public:
   //! populates vector argument with XML force translation options for the specific range passed
   void GetXmlTranslationOptions(std::vector<TranslationOption*> &list) const;
   void GetXmlTranslationOptions(std::vector<TranslationOption*> &list, size_t startPos, size_t endPos) const;
-  std::vector<ChartTranslationOptions*> GetXmlChartTranslationOptions(AllOptions const& opts) const;
+  std::vector<ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 
   virtual int
-  Read(std::istream& in, const std::vector<FactorType>& factorOrder,
-       AllOptions const& opts);
+  Read(std::istream& in);
+  // , const std::vector<FactorType>& factorOrder, AllOptions const& opts);
 
   void Print(std::ostream& out) const;
 
@@ -115,9 +115,7 @@ public:
   }
 
 
-  void
-  init(AllOptions::ptr const& opts, std::string line, 
-       std::vector<FactorType> const& factorOrder);
+  void init(std::string line);  
 
   std::vector<std::map<std::string,std::string> > const&
   GetDltMeta() const {
@@ -139,7 +137,7 @@ private:
 
   void
   aux_interpret_xml
-  (AllOptions const& opts, std::string& line, std::vector<size_t> & xmlWalls,
+  (std::string& line, std::vector<size_t> & xmlWalls,
    std::vector<std::pair<size_t, std::string> >& placeholders);
 
   void

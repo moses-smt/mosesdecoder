@@ -74,8 +74,7 @@ void Manager<RuleMatcher>::Decode()
   RuleMatcherCallback callback(m_stackMap, ruleLimit);
 
   // Create a glue rule synthesizer.
-  GlueRuleSynthesizer glueRuleSynthesizer(*m_glueRuleTrie,
-                                          options()->input.factor_order);
+  GlueRuleSynthesizer glueRuleSynthesizer(*options(), *m_glueRuleTrie);
 
   // Sort the input forest's vertices into bottom-up topological order.
   std::vector<const Forest::Vertex *> sortedVertices;

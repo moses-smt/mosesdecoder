@@ -327,7 +327,7 @@ run_chart_decoder()
 {
   Moses::TreeInput tinput(m_options);
   istringstream buf(m_source_string + "\n");
-  tinput.Read(buf, options()->input.factor_order, *m_options);
+  tinput.Read(buf);
   
   Moses::ChartManager manager(this->self());
   manager.Decode();

@@ -68,8 +68,7 @@ public:
                                 , const std::string &tabbedString);
 
   virtual int
-  Read(std::istream& in,const std::vector<FactorType>& factorOrder,
-       AllOptions const& opts);
+  Read(std::istream& in);
 
   const TabbedColumns& GetColumns() const {
     return m_columns;

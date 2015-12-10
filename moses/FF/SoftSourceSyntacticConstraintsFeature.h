@@ -101,6 +101,7 @@ protected:
   std::pair<float,float> GetLabelPairProbabilities(const Factor* target,
       const size_t source) const;
 
+  Word m_output_default_nonterminal;
 };
 
 

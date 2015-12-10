@@ -111,7 +111,8 @@ void Manager<RuleMatcher>::Decode()
   F2S::RuleMatcherCallback callback(m_stackMap, ruleLimit);
 
   // Create a glue rule synthesizer.
-  GlueRuleSynthesizer glueRuleSynthesizer(*m_glueRuleTrie);
+  Word dflt_nonterm = options()->syntax.output_default_non_terminal;
+  GlueRuleSynthesizer glueRuleSynthesizer(*m_glueRuleTrie, dflt_nonterm);
 
   // Visit each node of the input tree in post-order.
   for (std::vector<InputTree::Node>::const_iterator p =

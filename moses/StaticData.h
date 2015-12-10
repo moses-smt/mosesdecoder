@@ -337,31 +337,8 @@ public:
     return m_includeLHSInSearchGraph;
   }
 
-  std::pair<std::string,std::string> GetXmlBrackets() const {
-    return m_xmlBrackets;
-  }
-
-  // bool PrintTranslationOptions() const {
-  //   return m_printTranslationOptions;
-  // }
-
-  // bool PrintAllDerivations() const {
-  //   return m_printAllDerivations;
-  // }
-
   const UnknownLHSList &GetUnknownLHS() const {
     return m_unknownLHS;
-  }
-
-  const Word &GetInputDefaultNonTerminal() const {
-    return m_inputDefaultNonTerminal;
-  }
-  const Word &GetOutputDefaultNonTerminal() const {
-    return m_outputDefaultNonTerminal;
-  }
-
-  SourceLabelOverlap GetSourceLabelOverlap() const {
-    return m_sourceLabelOverlap;
   }
 
   size_t GetRuleLimit() const {
