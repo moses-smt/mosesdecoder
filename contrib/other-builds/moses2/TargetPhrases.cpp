@@ -60,7 +60,7 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
 
 const TargetPhrases *TargetPhrases::Clone(MemPool &pool, const System &system) const
 {
-	const TargetPhrases *ret = new TargetPhrases(pool, system, *this);
+	const TargetPhrases *ret = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, system, *this);
 	return ret;
 }
 

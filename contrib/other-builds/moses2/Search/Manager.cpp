@@ -94,11 +94,10 @@ void Manager::CalcFutureScore()
     // walk all the translation options and record the cheapest option for each span
 	BOOST_FOREACH(const InputPath &path, m_inputPaths) {
 		const Range &range = path.range;
-		const std::vector<TargetPhrases::shared_const_ptr> &allTps = path.targetPhrases;
+		const std::vector<const TargetPhrases*> &allTps = path.targetPhrases;
 		SCORE bestScore = -numeric_limits<SCORE>::infinity();
 
-	    BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsSharedPtr, allTps) {
-     	  const TargetPhrases *tps = tpsSharedPtr.get();
+	    BOOST_FOREACH(const TargetPhrases *tps, allTps) {
      	  if (tps) {
      		 BOOST_FOREACH(const TargetPhrase *tp, *tps) {
      			SCORE score = tp->GetFutureScore();

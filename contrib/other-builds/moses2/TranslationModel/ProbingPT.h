@@ -25,7 +25,7 @@ public:
   void Load(System &system);
 
   void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
-  TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
+  TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
@@ -34,7 +34,7 @@ protected:
   uint64_t m_unkId;
   QueryEngine *m_engine;
 
-  TargetPhrases::shared_ptr CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const;
+  TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
 
   std::vector<uint64_t> ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const;

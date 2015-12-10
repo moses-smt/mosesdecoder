@@ -21,12 +21,12 @@ public:
 	const InputPath *prefixPath;
 	SubPhrase subPhrase;
 	Range range;
-	std::vector<TargetPhrases::shared_const_ptr> targetPhrases;
+	std::vector<const TargetPhrases*> targetPhrases;
 
 	InputPath(const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPath *prefixPath);
 	virtual ~InputPath();
 
-	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases::shared_const_ptr &tpsPtr);
+	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);
 
 	inline bool IsUsed() const
 	{ return m_isUsed; }

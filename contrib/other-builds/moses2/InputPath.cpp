@@ -14,7 +14,7 @@ InputPath::InputPath(const SubPhrase &subPhrase,
 		const InputPath *prefixPath)
 :subPhrase(subPhrase)
 ,range(range)
-,targetPhrases(numPt)
+,targetPhrases(numPt, NULL)
 ,prefixPath(prefixPath)
 ,m_isUsed(false)
 {
@@ -25,12 +25,11 @@ InputPath::~InputPath() {
 	// TODO Auto-generated destructor stub
 }
 
-void InputPath::AddTargetPhrases(const PhraseTable &pt, const TargetPhrases::shared_const_ptr &tpsPtr)
+void InputPath::AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps)
 {
 	size_t ptInd = pt.GetPtInd();
-	targetPhrases[ptInd] = tpsPtr;
+	targetPhrases[ptInd] = tps;
 
-    const TargetPhrases *tps = tpsPtr.get();
 	if (tps && tps->GetSize()) {
 		m_isUsed = true;
 	}

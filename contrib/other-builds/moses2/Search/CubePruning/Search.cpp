@@ -162,8 +162,7 @@ void Search::PostDecode(size_t stackInd)
 		// sort hypo for a particular bitmap and hypoEndPos
 		CubeEdge::Hypotheses &sortedHypos = val.second.GetSortedHypos(m_mgr);
 
-  		BOOST_FOREACH(const TargetPhrases::shared_const_ptr &tpsPtr, path.targetPhrases) {
-  			const TargetPhrases *tps = tpsPtr.get();
+  		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
   			if (tps && tps->GetSize()) {
   		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		edges.push_back(edge);

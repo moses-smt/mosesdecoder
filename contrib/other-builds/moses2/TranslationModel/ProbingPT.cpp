@@ -81,27 +81,27 @@ void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
   BOOST_FOREACH(InputPath &path, inputPaths) {
 	  const SubPhrase &phrase = path.subPhrase;
 
-	TargetPhrases::shared_const_ptr tpsPtr;
+	TargetPhrases *tpsPtr;
 	tpsPtr = Lookup(mgr, mgr.GetPool(), path);
 	path.AddTargetPhrases(*this, tpsPtr);
   }
 
 }
 
-TargetPhrases::shared_const_ptr ProbingPT::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
+TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
 {
 	const Phrase &sourcePhrase = inputPath.subPhrase;
-	TargetPhrases::shared_const_ptr ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase);
+	TargetPhrases *ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase);
 	return ret;
 }
 
-TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const
+TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const
 {
 
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   assert(sourcePhrase.GetSize());
 
-  TargetPhrases::shared_ptr tpSharedPtr;
+  TargetPhrases *tpSharedPtr = NULL;
   bool ok;
   vector<uint64_t> probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok);
   if (!ok) {
@@ -118,7 +118,7 @@ TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(MemPool &pool, const Sys
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
 	const std::vector<target_text> &probingTargetPhrases = query_result.second;
-    tpSharedPtr.reset(new TargetPhrases(pool, probingTargetPhrases.size()));
+    tpSharedPtr = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
 
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
       const target_text &probingTargetPhrase = probingTargetPhrases[i];

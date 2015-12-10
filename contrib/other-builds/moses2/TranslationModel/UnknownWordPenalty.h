@@ -17,7 +17,7 @@ public:
 	virtual ~UnknownWordPenalty();
 
   void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
-  virtual TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
+  virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
 	  virtual void
 	  EvaluateInIsolation(const System &system,

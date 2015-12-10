@@ -26,32 +26,32 @@ void UnknownWordPenalty::Lookup(const Manager &mgr, InputPaths &inputPaths) cons
   BOOST_FOREACH(InputPath &path, inputPaths) {
 	  const SubPhrase &phrase = path.subPhrase;
 
-	TargetPhrases::shared_const_ptr tpsPtr;
+	TargetPhrases *tpsPtr;
 	tpsPtr = Lookup(mgr, mgr.GetPool(), path);
 	path.AddTargetPhrases(*this, tpsPtr);
   }
 
 }
 
-TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
+TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
 {
 	const System &system = mgr.system;
 
-	TargetPhrases::shared_const_ptr ret;
+	TargetPhrases *tps = NULL;
 
 	size_t numWords = inputPath.range.GetNumWordsCovered();
 	if (numWords > 1) {
 		// only create 1 word phrases
-		return ret;
+		return tps;
 	}
 
 	// any other pt translate this?
-	const std::vector<TargetPhrases::shared_const_ptr> &allTPS = inputPath.targetPhrases;
+	const std::vector<const TargetPhrases*> &allTPS = inputPath.targetPhrases;
 	for (size_t i = 0; i < allTPS.size(); ++i) {
-		const TargetPhrases::shared_const_ptr &tps = allTPS[i];
+		const TargetPhrases *otherTps = allTPS[i];
 
-		if (tps.get() && tps.get()->GetSize()) {
-			return ret;
+		if (otherTps && otherTps->GetSize()) {
+			return tps;
 		}
 	}
 
@@ -59,7 +59,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, M
 	const Word &sourceWord = source[0];
 	const Factor *factor = sourceWord[0];
 
-	TargetPhrases *tps = new TargetPhrases(pool, 1);
+	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, 1);
 
 	TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
 	Word &word = (*target)[0];
@@ -75,9 +75,8 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, M
 	system.featureFunctions.EvaluateInIsolation(memPool, system, source, *target);
 
 	tps->AddTargetPhrase(*target);
-	ret.reset(tps);
 
-	return ret;
+	return tps;
 }
 
 void

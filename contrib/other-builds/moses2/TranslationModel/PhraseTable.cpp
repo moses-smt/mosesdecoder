@@ -57,7 +57,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
   BOOST_FOREACH(InputPath &path, inputPaths) {
 	  const SubPhrase &phrase = path.subPhrase;
 
-	  TargetPhrases::shared_const_ptr tpsPtr;
+	  TargetPhrases *tpsPtr = NULL;
 	  if (m_maxCacheSize) {
 		size_t hash = phrase.hash();
 
@@ -101,7 +101,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 }
 
-TargetPhrases::shared_const_ptr PhraseTable::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
+TargetPhrases *PhraseTable::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
 {
   UTIL_THROW2("Not implemented");
 }

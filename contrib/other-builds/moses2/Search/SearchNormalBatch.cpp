@@ -119,9 +119,9 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo, const InputPath &path)
     //SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcFutureScore2(hypoBitmap, pathRange.GetStartPos(), pathRange.GetEndPos());
     SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
 
-	const std::vector<TargetPhrases::shared_const_ptr> &tpsAllPt = path.targetPhrases;
+	const std::vector<const TargetPhrases*> &tpsAllPt = path.targetPhrases;
 	for (size_t i = 0; i < tpsAllPt.size(); ++i) {
-		const TargetPhrases *tps = tpsAllPt[i].get();
+		const TargetPhrases *tps = tpsAllPt[i];
 		if (tps) {
 			Extend(hypo, *tps, pathRange, newBitmap, estimatedScore);
 		}

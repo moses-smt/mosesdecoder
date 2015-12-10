@@ -26,7 +26,7 @@ public:
 
 	virtual void SetParameter(const std::string& key, const std::string& value);
 	virtual void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
-	virtual TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
+	virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
 	void SetPtInd(size_t ind)
 	{ m_ptInd = ind; }
@@ -51,7 +51,7 @@ protected:
 
   struct CacheCollEntry2
   {
-	  TargetPhrases::shared_const_ptr tpsPtr;
+	  TargetPhrases *tpsPtr;
 	  clock_t clock;
   };
 
