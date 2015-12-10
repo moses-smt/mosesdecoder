@@ -118,7 +118,7 @@ TargetPhrases::shared_ptr ProbingPT::CreateTargetPhrase(MemPool &pool, const Sys
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
 	const std::vector<target_text> &probingTargetPhrases = query_result.second;
-    tpSharedPtr.reset(new TargetPhrases(probingTargetPhrases.size()));
+    tpSharedPtr.reset(new TargetPhrases(pool, probingTargetPhrases.size()));
 
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
       const target_text &probingTargetPhrase = probingTargetPhrases[i];

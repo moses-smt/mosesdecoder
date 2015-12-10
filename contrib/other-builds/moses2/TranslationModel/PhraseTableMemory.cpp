@@ -76,7 +76,7 @@ void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool)
 
   // prune target phrases in this node
   if (m_unsortedTPS) {
-	  TargetPhrases *tps = new TargetPhrases(m_unsortedTPS->size());
+	  TargetPhrases *tps = new TargetPhrases(pool, m_unsortedTPS->size());
 
 	  for (size_t i = 0; i < m_unsortedTPS->size(); ++i) {
 		  TargetPhrase *tp = (*m_unsortedTPS)[i];

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-TargetPhrases::TargetPhrases(size_t reserve)
+TargetPhrases::TargetPhrases(MemPool &pool, size_t reserve)
 {
 	m_coll.reserve(reserve);
 }
