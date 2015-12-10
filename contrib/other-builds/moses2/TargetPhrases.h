@@ -7,6 +7,7 @@
 
 #pragma once
 #include <vector>
+#include "Vector.h"
 #include "TargetPhrase.h"
 
 class TargetPhrases {
@@ -26,7 +27,7 @@ public:
 	return m_coll.end();
   }
 
-	TargetPhrases(size_t reserve = 20);
+	TargetPhrases(size_t reserve = 100);
 	TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy);
 	virtual ~TargetPhrases();
 
