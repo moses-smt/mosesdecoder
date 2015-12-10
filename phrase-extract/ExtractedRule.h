@@ -26,7 +26,7 @@
 #include <sstream>
 #include <map>
 
-#include "extract-ghkm/PhraseOrientation.h"
+#include "PhraseOrientation.h"
 
 namespace MosesTraining
 {
@@ -51,8 +51,8 @@ public:
   int endS;
   float count;
   double pcfgScore;
-  Syntax::GHKM::PhraseOrientation::REO_CLASS l2rOrientation;
-  Syntax::GHKM::PhraseOrientation::REO_CLASS r2lOrientation;
+  PhraseOrientation::REO_CLASS l2rOrientation;
+  PhraseOrientation::REO_CLASS r2lOrientation;
 
   ExtractedRule(int sT, int eT, int sS, int eS)
     : source()
@@ -71,8 +71,8 @@ public:
     , endS(eS)
     , count(0)
     , pcfgScore(0.0) 
-    , l2rOrientation(Syntax::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN)
-    , r2lOrientation(Syntax::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN)
+    , l2rOrientation(PhraseOrientation::REO_CLASS_UNKNOWN)
+    , r2lOrientation(PhraseOrientation::REO_CLASS_UNKNOWN)
   { }
 };
 

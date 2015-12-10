@@ -46,7 +46,7 @@
 #include "XmlTree.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
-#include "extract-ghkm/PhraseOrientation.h"
+#include "PhraseOrientation.h"
 
 using namespace std;
 using namespace MosesTraining;
@@ -63,7 +63,7 @@ private:
   Moses::OutputFileStream& m_extractFileInv;
   Moses::OutputFileStream& m_extractFileContext;
   Moses::OutputFileStream& m_extractFileContextInv;
-  Syntax::GHKM::PhraseOrientation m_phraseOrientation;
+  PhraseOrientation m_phraseOrientation;
 
   vector< ExtractedRule > m_extractedRules;
 
@@ -406,7 +406,7 @@ void ExtractTask::extractRules()
   // initialize phrase orientation scoring object (for lexicalized reordering model)
   if (m_options.phraseOrientation) {
     m_sentence.invertAlignment(); // fill m_sentence.alignedToS
-    m_phraseOrientation = Syntax::GHKM::PhraseOrientation(countS, countT, m_sentence.alignedToT, m_sentence.alignedToS, m_sentence.alignedCountS);
+    m_phraseOrientation = PhraseOrientation(countS, countT, m_sentence.alignedToT, m_sentence.alignedToS, m_sentence.alignedCountS);
   }
 
   // phrase repository for creating hiero phrases
@@ -1021,11 +1021,11 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
 
   // phrase orientation (lexicalized reordering model)
   if (m_options.phraseOrientation) {
-    rule.l2rOrientation = m_phraseOrientation.GetOrientationInfo(startS,endS,Syntax::GHKM::PhraseOrientation::REO_DIR_L2R);
-    rule.r2lOrientation = m_phraseOrientation.GetOrientationInfo(startS,endS,Syntax::GHKM::PhraseOrientation::REO_DIR_R2L);
+    rule.l2rOrientation = m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_L2R);
+    rule.r2lOrientation = m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_R2L);
     // std::cerr << "span " << startS << " " << endS << std::endl;
-    // std::cerr << "phraseOrientationL2R " << m_phraseOrientation.GetOrientationInfo(startS,endS,Syntax::GHKM::PhraseOrientation::REO_DIR_L2R) << std::endl;
-    // std::cerr << "phraseOrientationR2L " << m_phraseOrientation.GetOrientationInfo(startS,endS,Syntax::GHKM::PhraseOrientation::REO_DIR_R2L) << std::endl;
+    // std::cerr << "phraseOrientationL2R " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_L2R) << std::endl;
+    // std::cerr << "phraseOrientationR2L " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_R2L) << std::endl;
   }
 
   addRuleToCollection( rule );
@@ -1101,8 +1101,8 @@ void ExtractTask::writeRulesToFile()
       m_phraseOrientation.WriteOrientation(out,rule->l2rOrientation);
       out << " ";
       m_phraseOrientation.WriteOrientation(out,rule->r2lOrientation);
-      m_phraseOrientation.IncrementPriorCount(Syntax::GHKM::PhraseOrientation::REO_DIR_L2R,rule->l2rOrientation,1);
-      m_phraseOrientation.IncrementPriorCount(Syntax::GHKM::PhraseOrientation::REO_DIR_R2L,rule->r2lOrientation,1);
+      m_phraseOrientation.IncrementPriorCount(PhraseOrientation::REO_DIR_L2R,rule->l2rOrientation,1);
+      m_phraseOrientation.IncrementPriorCount(PhraseOrientation::REO_DIR_R2L,rule->r2lOrientation,1);
       out << "}}";
     }
     out << "\n";
@@ -1234,7 +1234,7 @@ void writePhraseOrientationPriors(const string &fileName)
 {
   ofstream outFile;
   outFile.open(fileName.c_str());
-  Syntax::GHKM::PhraseOrientation::WritePriorCounts(outFile);
+  PhraseOrientation::WritePriorCounts(outFile);
   outFile.close();
 }
 
