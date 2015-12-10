@@ -9,9 +9,10 @@
 #include <boost/unordered_set.hpp>
 #include <vector>
 #include <queue>
+#include "../../legacy/Range.h"
 #include "../Hypothesis.h"
 #include "../../TypeDef.h"
-#include "../../legacy/Range.h"
+#include "../../Vector.h"
 
 class Manager;
 class InputPath;
@@ -52,7 +53,7 @@ class CubeEdge
   friend std::ostream& operator<<(std::ostream &, const CubeEdge &);
 
 public:
-	typedef std::vector<const Hypothesis*>  Hypotheses;
+	typedef Vector<const Hypothesis*>  Hypotheses;
 	typedef std::priority_queue<QueueItem*,
 				std::vector<QueueItem*>,
 				QueueItemOrderer> Queue;

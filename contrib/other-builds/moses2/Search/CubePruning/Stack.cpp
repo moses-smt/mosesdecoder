@@ -18,13 +18,21 @@ namespace NSCubePruning
 {
 CubeEdge::Hypotheses &HypothesisSet::GetSortedHypos(const Manager &mgr) const
 {
-  if (m_coll.size() && m_sortedHypos.size() == 0) {
+  if (m_sortedHypos == NULL) {
     // create sortedHypos first
-	m_sortedHypos.insert(m_sortedHypos.end(), m_coll.begin(), m_coll.end());
+    MemPool &pool = mgr.GetPool();
+	m_sortedHypos = new (pool.Allocate< Vector<const Hypothesis*> >()) Vector<const Hypothesis*>(pool, m_coll.size());
+
+	  size_t ind = 0;
+	  BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
+		  (*m_sortedHypos)[ind] = hypo;
+		  ++ind;
+	  }
+
     SortAndPruneHypos(mgr);
   }
 
-  return m_sortedHypos;
+  return *m_sortedHypos;
 }
 
 void HypothesisSet::SortAndPruneHypos(const Manager &mgr) const
@@ -40,21 +48,21 @@ void HypothesisSet::SortAndPruneHypos(const Manager &mgr) const
   }
   cerr << endl;
   */
-  std::vector<const Hypothesis*>::iterator iterMiddle;
-  iterMiddle = (stackSize == 0 || m_sortedHypos.size() < stackSize)
-			   ? m_sortedHypos.end()
-			   : m_sortedHypos.begin() + stackSize;
+  Vector<const Hypothesis*>::iterator iterMiddle;
+  iterMiddle = (stackSize == 0 || m_sortedHypos->size() < stackSize)
+			   ? m_sortedHypos->end()
+			   : m_sortedHypos->begin() + stackSize;
 
-  std::partial_sort(m_sortedHypos.begin(), iterMiddle, m_sortedHypos.end(),
+  std::partial_sort(m_sortedHypos->begin(), iterMiddle, m_sortedHypos->end(),
 		  HypothesisFutureScoreOrderer());
 
   // prune
-  if (stackSize && m_sortedHypos.size() > stackSize) {
-	  for (size_t i = stackSize; i < m_sortedHypos.size(); ++i) {
-		  Hypothesis *hypo = const_cast<Hypothesis*>(m_sortedHypos[i]);
+  if (stackSize && m_sortedHypos->size() > stackSize) {
+	  for (size_t i = stackSize; i < m_sortedHypos->size(); ++i) {
+		  Hypothesis *hypo = const_cast<Hypothesis*>((*m_sortedHypos)[i]);
 		  recycler.Add(hypo);
 	  }
-	  m_sortedHypos.resize(stackSize);
+	  m_sortedHypos->resize(stackSize);
   }
 
   /*

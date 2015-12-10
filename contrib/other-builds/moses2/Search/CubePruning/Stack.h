@@ -11,6 +11,7 @@
 #include "Misc.h"
 #include "../../Recycler.h"
 #include "../../TypeDef.h"
+#include "../../Vector.h"
 #include "../../legacy/Util2.h"
 
 class Manager;
@@ -25,6 +26,9 @@ public:
 			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>
 			   > _HCType;
 
+	HypothesisSet()
+	{}
+
 	_HCType &GetColl()
 	{ return m_coll; }
 
@@ -35,7 +39,7 @@ public:
 
 protected:
 	_HCType m_coll;
-	mutable CubeEdge::Hypotheses m_sortedHypos;
+	mutable CubeEdge::Hypotheses *m_sortedHypos;
 
 	void SortAndPruneHypos(const Manager &mgr) const;
 
