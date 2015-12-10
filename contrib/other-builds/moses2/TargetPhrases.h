@@ -12,7 +12,7 @@
 
 class TargetPhrases {
 	friend std::ostream& operator<<(std::ostream &, const TargetPhrases &);
-	typedef std::vector<const TargetPhrase*> Coll;
+	typedef Vector<const TargetPhrase*> Coll;
 public:
   typedef boost::shared_ptr<TargetPhrases> shared_ptr;
   typedef boost::shared_ptr<TargetPhrases const> shared_const_ptr;
@@ -33,7 +33,7 @@ public:
 
 	void AddTargetPhrase(const TargetPhrase &targetPhrase)
 	{
-		m_coll.push_back(&targetPhrase);
+		m_coll[m_currInd++] = &targetPhrase;
 	}
 
 	size_t GetSize() const
@@ -47,6 +47,6 @@ public:
 	const TargetPhrases *Clone(MemPool &pool, const System &system) const;
 protected:
 	Coll m_coll;
-
+	size_t m_currInd;
 };
 

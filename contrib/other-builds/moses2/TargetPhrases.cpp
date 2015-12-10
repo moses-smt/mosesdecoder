@@ -11,12 +11,13 @@
 using namespace std;
 
 TargetPhrases::TargetPhrases(MemPool &pool, size_t reserve)
+:m_coll(pool, reserve)
+,m_currInd(0)
 {
-	m_coll.reserve(reserve);
 }
 
 TargetPhrases::TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy)
-:m_coll(copy.m_coll.size())
+:m_coll(pool, copy.m_coll.size())
 {
 	for (size_t i = 0; i < copy.m_coll.size(); ++i) {
 		const TargetPhrase *tpOrig = copy.m_coll[i];
