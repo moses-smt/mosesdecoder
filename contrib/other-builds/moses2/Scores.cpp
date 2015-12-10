@@ -95,6 +95,26 @@ void Scores::PlusEquals(const System &system,
 	}
 }
 
+void Scores::PlusEquals(const System &system,
+		const FeatureFunction &featureFunction,
+		const Vector<SCORE> &scores)
+{
+	assert(scores.size() == featureFunction.GetNumScores());
+
+	const Weights &weights = system.weights;
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+	for (size_t i = 0; i < scores.size(); ++i) {
+		SCORE incrScore = scores[i];
+		if (m_scores) {
+			m_scores[ffStartInd + i] += incrScore;
+		}
+		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
+		SCORE weight = weights[ffStartInd + i];
+		m_total += incrScore * weight;
+	}
+}
+
 void Scores::PlusEquals(const System &system, const Scores &other)
 {
 	size_t numScores = system.featureFunctions.GetNumScores();

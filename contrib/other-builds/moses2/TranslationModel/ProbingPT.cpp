@@ -156,7 +156,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
   }
 
   // score for this phrase table
-  vector<SCORE> scores = probingTargetPhrase.prob;
+  Vector<SCORE> scores(pool, probingTargetPhrase.prob);
   std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
   tp->GetScores().PlusEquals(system, *this, scores);
 

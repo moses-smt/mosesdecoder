@@ -35,6 +35,16 @@ public:
 	  m_arr = pool.Allocate<T>(size);
   }
 
+  Vector(MemPool &pool, const std::vector<T> &vec)
+  :m_size(vec.size())
+  ,m_maxSize(vec.size())
+  {
+	  m_arr = pool.Allocate<T>(m_size);
+	  for (size_t i = 0; i < m_size; ++i) {
+		  m_arr[i] = vec[i];
+	  }
+  }
+
   virtual ~Vector()
   {
 
