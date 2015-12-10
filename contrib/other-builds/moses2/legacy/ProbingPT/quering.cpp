@@ -89,7 +89,7 @@ QueryEngine::~QueryEngine()
 
 }
 
-std::pair<bool, std::vector<target_text> > QueryEngine::query(std::vector<uint64_t> source_phrase)
+std::pair<bool, std::vector<target_text> > QueryEngine::query(const std::vector<uint64_t> &source_phrase)
 {
   bool found;
   std::vector<target_text> translation_entries;
@@ -129,7 +129,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(std::vector<uint64
 
 }
 
-std::pair<bool, std::vector<target_text> > QueryEngine::query(StringPiece source_phrase)
+std::pair<bool, std::vector<target_text> > QueryEngine::query(const StringPiece &source_phrase)
 {
   bool found;
   std::vector<target_text> translation_entries;
@@ -173,7 +173,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(StringPiece source
 
 }
 
-void QueryEngine::printTargetInfo(std::vector<target_text> target_phrases)
+void QueryEngine::printTargetInfo(const std::vector<target_text> &target_phrases)
 {
   int entries = target_phrases.size();
 

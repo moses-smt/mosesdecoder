@@ -1,11 +1,13 @@
 #pragma once
 
-#include "probing_hash_utils.hh"
-#include "huffmanish.hh"
-#include "hash.hh" //Includes line splitter
 #include <sys/stat.h> //For finding size of file
 #include "vocabid.hh"
 #include <algorithm> //toLower
+#include "probing_hash_utils.hh"
+#include "huffmanish.hh"
+#include "hash.hh" //Includes line splitter
+#include "../../Vector.h"
+
 #define API_VERSION 3
 
 namespace Moses2
@@ -31,9 +33,9 @@ class QueryEngine
 public:
   QueryEngine (const char *);
   ~QueryEngine();
-  std::pair<bool, std::vector<target_text> > query(StringPiece source_phrase);
-  std::pair<bool, std::vector<target_text> > query(std::vector<uint64_t> source_phrase);
-  void printTargetInfo(std::vector<target_text> target_phrases);
+  std::pair<bool, std::vector<target_text> > query(const StringPiece &source_phrase);
+  std::pair<bool, std::vector<target_text> > query(const std::vector<uint64_t> &source_phrase);
+  void printTargetInfo(const std::vector<target_text> &target_phrases);
   const std::map<unsigned int, std::string> getVocab() const {
     return decoder.get_target_lookup_map();
   }
