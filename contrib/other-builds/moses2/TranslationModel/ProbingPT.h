@@ -10,6 +10,7 @@
 
 #include <boost/bimap.hpp>
 #include "PhraseTable.h"
+#include "../Vector.h"
 
 namespace Moses2
 {
@@ -40,7 +41,7 @@ protected:
   TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
 
-  std::vector<uint64_t> ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const;
+  Vector<uint64_t> *ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, MemPool &pool) const;
 
   inline const Factor *GetTargetFactor(uint64_t probingId) const
   {

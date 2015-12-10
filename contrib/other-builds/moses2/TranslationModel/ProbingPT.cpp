@@ -106,7 +106,7 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system
 
   TargetPhrases *tpSharedPtr = NULL;
   bool ok;
-  vector<uint64_t> probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok);
+  Vector<uint64_t> *probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok, pool);
   if (!ok) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
@@ -116,7 +116,7 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system
   std::pair<bool, std::vector<target_text> > query_result;
 
   //Actual lookup
-  query_result = m_engine->query(probingSource);
+  query_result = m_engine->query(*probingSource);
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
@@ -177,11 +177,11 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
 
 }
 
-std::vector<uint64_t> ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const
+Vector<uint64_t> *ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, MemPool &pool) const
 {
 
   size_t size = sourcePhrase.GetSize();
-  std::vector<uint64_t> ret(size);
+  Vector<uint64_t> *ret = new (pool.Allocate< Vector<uint64_t> >()) Vector<uint64_t>(pool, size);
   for (size_t i = 0; i < size; ++i) {
     const Factor *factor = sourcePhrase[i][0];
     uint64_t probingId = GetSourceProbingId(factor);
@@ -189,7 +189,7 @@ std::vector<uint64_t> ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sour
       ok = false;
       return ret;
     } else {
-      ret[i] = probingId;
+      (*ret)[i] = probingId;
     }
   }
 

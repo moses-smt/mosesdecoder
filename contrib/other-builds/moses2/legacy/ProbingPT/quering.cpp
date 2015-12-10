@@ -89,7 +89,7 @@ QueryEngine::~QueryEngine()
 
 }
 
-std::pair<bool, std::vector<target_text> > QueryEngine::query(const std::vector<uint64_t> &source_phrase)
+std::pair<bool, std::vector<target_text> > QueryEngine::query(const Vector<uint64_t> &source_phrase)
 {
   bool found;
   std::vector<target_text> translation_entries;
