@@ -1154,10 +1154,14 @@ void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, 
 {
   ofstream grammarFile;
   grammarFile.open(fileName.c_str());
+  std::string glueRulesPhraseProperty = "";
+  if (options.phraseOrientation) {
+    glueRulesPhraseProperty.append(" ||| ||| {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}");
+  }
   if (!options.targetSyntax) {
-    grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0" << endl
-                << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 1-1 ||| 0" << endl
-                << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << endl;
+    grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0" << glueRulesPhraseProperty << endl
+                << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 1-1 ||| 0" << glueRulesPhraseProperty << endl
+                << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << glueRulesPhraseProperty << endl;
   } else {
     // chose a top label that is not already a label
     string topLabel = "QQQQQQ";
