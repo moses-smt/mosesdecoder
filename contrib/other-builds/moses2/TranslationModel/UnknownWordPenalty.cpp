@@ -59,7 +59,7 @@ TargetPhrases::shared_const_ptr UnknownWordPenalty::Lookup(const Manager &mgr, M
 	const Word &sourceWord = source[0];
 	const Factor *factor = sourceWord[0];
 
-	TargetPhrases *tps = new TargetPhrases();
+	TargetPhrases *tps = new TargetPhrases(1);
 
 	TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
 	Word &word = (*target)[0];

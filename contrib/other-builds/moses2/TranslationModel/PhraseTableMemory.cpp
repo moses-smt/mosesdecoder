@@ -18,6 +18,7 @@
 using namespace std;
 
 PhraseTableMemory::Node::Node()
+:m_unsortedTPS(NULL)
 {}
 
 PhraseTableMemory::Node::~Node()
@@ -32,13 +33,11 @@ void PhraseTableMemory::Node::AddRule(PhraseImpl &source, TargetPhrase *target)
 PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(PhraseImpl &source, TargetPhrase *target, size_t pos)
 {
 	if (pos == source.GetSize()) {
-		TargetPhrases *tp = m_targetPhrases.get();
-		if (tp == NULL) {
-			tp = new TargetPhrases();
-			m_targetPhrases.reset(tp);
+		if (m_unsortedTPS == NULL) {
+			m_unsortedTPS = new std::vector<TargetPhrase*>();
 		}
 
-		tp->AddTargetPhrase(*target);
+		m_unsortedTPS->push_back(target);
 		return *this;
 	}
 	else {
@@ -68,17 +67,26 @@ TargetPhrases::shared_const_ptr PhraseTableMemory::Node::Find(const Phrase &sour
 	}
 }
 
-void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit)
+void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool)
 {
   BOOST_FOREACH(Children::value_type &val, m_children) {
 	  Node &child = val.second;
-	  child.SortAndPrune(tableLimit);
+	  child.SortAndPrune(tableLimit, pool);
   }
 
   // prune target phrases in this node
-  TargetPhrases *tps = m_targetPhrases.get();
-  if (tps) {
+  if (m_unsortedTPS) {
+	  TargetPhrases *tps = new TargetPhrases(m_unsortedTPS->size());
+
+	  for (size_t i = 0; i < m_unsortedTPS->size(); ++i) {
+		  TargetPhrase *tp = (*m_unsortedTPS)[i];
+		  tps->AddTargetPhrase(*tp);
+	  }
+
 	  tps->SortAndPrune(tableLimit);
+
+	  m_targetPhrases.reset(tps);
+	  delete m_unsortedTPS;
   }
 }
 
@@ -124,7 +132,7 @@ void PhraseTableMemory::Load(System &system)
 		m_root.AddRule(*source, target);
 	}
 
-	m_root.SortAndPrune(m_tableLimit);
+	m_root.SortAndPrune(m_tableLimit, system.systemPool);
 }
 
 TargetPhrases::shared_const_ptr PhraseTableMemory::Lookup(const Manager &mgr, InputPath &inputPath) const

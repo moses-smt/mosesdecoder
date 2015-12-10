@@ -27,7 +27,7 @@ public:
 	return m_coll.end();
   }
 
-	TargetPhrases(size_t reserve = 100);
+	TargetPhrases(size_t reserve);
 	TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy);
 	virtual ~TargetPhrases();
 
