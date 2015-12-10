@@ -27,7 +27,7 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
 
-  virtual void Load(AllOptions const& opts);
+  virtual void Load(AllOptions::ptr const& opts);
 
 };
 

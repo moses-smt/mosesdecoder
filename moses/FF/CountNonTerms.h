@@ -7,6 +7,8 @@ namespace Moses
 
 class CountNonTerms : public StatelessFeatureFunction
 {
+  Word m_input_default_nonterminal;
+  Word m_output_default_nonterminal;
 public:
   CountNonTerms(const std::string &line);
   bool IsUseable(const FactorMask &mask) const {
@@ -41,6 +43,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  void Load(AllOptions::ptr const& opts);
 protected:
   bool m_all, m_sourceSyntax, m_targetSyntax;
 };

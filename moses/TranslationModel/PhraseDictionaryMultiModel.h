@@ -70,7 +70,7 @@ public:
   PhraseDictionaryMultiModel(const std::string &line);
   PhraseDictionaryMultiModel(int type, const std::string &line);
   ~PhraseDictionaryMultiModel();
-  void Load(AllOptions const& opts);
+  void Load(AllOptions::ptr const& opts);
 
   virtual void
   CollectSufficientStatistics

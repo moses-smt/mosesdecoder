@@ -28,7 +28,7 @@ public:
   LanguageModelDALM(const std::string &line);
   virtual ~LanguageModelDALM();
 
-  void Load(AllOptions const& opts);
+  void Load(AllOptions::ptr const& opts);
 
   virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 

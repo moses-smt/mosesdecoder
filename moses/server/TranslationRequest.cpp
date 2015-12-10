@@ -262,7 +262,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
       m_scope.reset(new Moses::ContextScope);
     }
 
-  boost::shared_ptr<Moses::AllOptions> opts(new Moses::AllOptions(StaticData::Instance().options()));
+  boost::shared_ptr<Moses::AllOptions> opts(new Moses::AllOptions(*StaticData::Instance().options()));
   opts->update(params);
 
   m_withGraphInfo = check(params, "sg");
@@ -327,7 +327,7 @@ run_chart_decoder()
 {
   Moses::TreeInput tinput(m_options);
   istringstream buf(m_source_string + "\n");
-  tinput.Read(buf, options()->input.factor_order, *m_options);
+  tinput.Read(buf);
   
   Moses::ChartManager manager(this->self());
   manager.Decode();

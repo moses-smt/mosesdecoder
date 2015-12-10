@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StatelessFeatureFunction.h"
+#include "moses/parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -8,6 +9,7 @@ namespace Moses
 // assumes that source-side syntax labels are stored in the target non-terminal field of the rules
 class SourceGHKMTreeInputMatchFeature : public StatelessFeatureFunction
 {
+  // Word m_output_default_nonterminal;
 public:
   SourceGHKMTreeInputMatchFeature(const std::string &line);
 
@@ -40,6 +42,7 @@ public:
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
                            ScoreComponentCollection* accumulator) const {};
 
+  void Load(AllOptions::ptr const& opts);
 };
 
 

@@ -67,7 +67,7 @@ protected:
 public:
   PhraseDictionaryOnDisk(const std::string &line);
   ~PhraseDictionaryOnDisk();
-  void Load(AllOptions const& opts);
+  void Load(AllOptions::ptr const& opts);
 
   // PhraseDictionary impl
   virtual ChartRuleLookupManager *CreateRuleLookupManager(

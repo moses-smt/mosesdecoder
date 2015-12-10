@@ -52,8 +52,8 @@ bool SoftMatchingFeature::Load(const std::string& filePath)
     }
 
     Word LHS, RHS;
-    LHS.CreateFromString(Output, SD.options().output.factor_order, tokens[0], true);
-    RHS.CreateFromString(Output, SD.options().output.factor_order, tokens[1], true);
+    LHS.CreateFromString(Output, SD.options()->output.factor_order, tokens[0], true);
+    RHS.CreateFromString(Output, SD.options()->output.factor_order, tokens[1], true);
 
     m_softMatches[RHS[0]->GetId()].push_back(LHS);
     GetOrSetFeatureName(RHS, LHS);
@@ -125,7 +125,7 @@ const std::string& SoftMatchingFeature::GetOrSetFeatureName(const Word& RHS, con
 #endif
   std::string &name = m_nameCache[RHS[0]->GetId()][LHS[0]->GetId()];
   const std::vector<FactorType> & oFactors
-  = StaticData::Instance().options().output.factor_order;
+  = StaticData::Instance().options()->output.factor_order;
   std::string LHS_string = LHS.GetString(oFactors, false);
   std::string RHS_string = RHS.GetString(oFactors, false);
   name = LHS_string + "->" + RHS_string;

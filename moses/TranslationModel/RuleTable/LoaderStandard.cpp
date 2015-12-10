@@ -149,7 +149,7 @@ bool RuleTableLoaderStandard::Load(AllOptions const& opts, FormatType format
 {
   PrintUserTime(string("Start loading text phrase table. ") + (format==MosesFormat?"Moses":"Hiero") + " format");
 
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
   string lineOrig;
   size_t count = 0;
@@ -190,7 +190,7 @@ bool RuleTableLoaderStandard::Load(AllOptions const& opts, FormatType format
     }
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
-    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+    if (isLHSEmpty && !opts.unk.word_deletion_enabled) {
       TRACE_ERR( ruleTable.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
       continue;
     }

@@ -78,20 +78,19 @@ IOWrapper::IOWrapper(AllOptions const& opts)
   Parameter const& P = staticData.GetParameter();
 
   // context buffering for context-sensitive decoding
-  m_look_ahead = staticData.options().context.look_ahead;
-  m_look_back  = staticData.options().context.look_back;
-
-  m_inputType = staticData.options().input.input_type;
+  m_look_ahead = staticData.options()->context.look_ahead;
+  m_look_back  = staticData.options()->context.look_back;
+  m_inputType  = staticData.options()->input.input_type;
 
   UTIL_THROW_IF2((m_look_ahead || m_look_back) && m_inputType != SentenceInput,
                  "Context-sensitive decoding currently works only with sentence input.");
 
   m_currentLine = staticData.GetStartTranslationId();
 
-  m_inputFactorOrder = &staticData.options().input.factor_order;
+  m_inputFactorOrder = &staticData.options()->input.factor_order;
 
-  size_t nBestSize = staticData.options().nbest.nbest_size;
-  string nBestFilePath = staticData.options().nbest.output_file_path;
+  size_t nBestSize = staticData.options()->nbest.nbest_size;
+  string nBestFilePath = staticData.options()->nbest.output_file_path;
 
   staticData.GetParameter().SetParameter<string>(m_inputFilePath, "input-file", "");
   if (m_inputFilePath.empty()) {
@@ -130,8 +129,8 @@ IOWrapper::IOWrapper(AllOptions const& opts)
   P.SetParameter<string>(path, "output-word-graph", "");
   if (path.size()) m_wordGraphCollector.reset(new OutputCollector(path));
 
-  size_t latticeSamplesSize = staticData.options().output.lattice_sample_size;
-  string latticeSamplesFile = staticData.options().output.lattice_sample_filepath;
+  size_t latticeSamplesSize = staticData.options()->output.lattice_sample_size;
+  string latticeSamplesFile = staticData.options()->output.lattice_sample_filepath;
   if (latticeSamplesSize) {
     m_latticeSamplesCollector.reset(new OutputCollector(latticeSamplesFile));
     if (m_latticeSamplesCollector->OutputIsCout()) {

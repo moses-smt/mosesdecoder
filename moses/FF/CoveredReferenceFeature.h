@@ -44,7 +44,7 @@ public:
     ReadParameters();
   }
 
-  void Load(AllOptions const& opts);
+  void Load(AllOptions::ptr const& opts);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

@@ -208,7 +208,7 @@ Manager::Manager(ttasksptr const& ttask)
   : BaseManager(ttask)
   , cells_(m_source, ChartCellBaseFactory(), parser_)
   , parser_(ttask, cells_)
-  , n_best_(search::NBestConfig(StaticData::Instance().options().nbest.nbest_size))
+  , n_best_(search::NBestConfig(StaticData::Instance().options()->nbest.nbest_size))
 { }
 
 Manager::~Manager()
@@ -232,8 +232,8 @@ PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &
   const StaticData &data = StaticData::Instance();
   const float lm_weight = data.GetWeights(&abstract)[0];
   const float oov_weight = abstract.OOVFeatureEnabled() ? data.GetWeights(&abstract)[1] : 0.0;
-  size_t cpl = data.options().cube.pop_limit;
-  size_t nbs = data.options().nbest.nbest_size;
+  size_t cpl = data.options()->cube.pop_limit;
+  size_t nbs = data.options()->nbest.nbest_size;
   search::Config config(lm_weight * log_10, cpl, search::NBestConfig(nbs));
   search::Context<Model> context(config, model);
 
@@ -261,7 +261,7 @@ PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &
 
 template <class Model> void Manager::LMCallback(const Model &model, const std::vector<lm::WordIndex> &words)
 {
-  std::size_t nbest = StaticData::Instance().options().nbest.nbest_size;
+  std::size_t nbest = StaticData::Instance().options()->nbest.nbest_size;
   if (nbest <= 1) {
     search::History ret = PopulateBest(model, words, single_best_);
     if (ret) {

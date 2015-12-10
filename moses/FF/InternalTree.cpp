@@ -8,7 +8,7 @@ InternalTree::InternalTree(const std::string & line, size_t start, size_t len, c
 {
 
   std::vector<FactorType> const& oFactors
-  = StaticData::Instance().options().output.factor_order;
+  = StaticData::Instance().options()->output.factor_order;
   if (len > 0) {
     m_value.CreateFromString(Output, oFactors, StringPiece(line).substr(start, len),
                              nonterminal);
@@ -22,7 +22,7 @@ InternalTree::InternalTree(const std::string & line, const bool nonterminal)
 
   if (found == line.npos) {
     m_value.CreateFromString(Output,
-                             StaticData::Instance().options().output.factor_order,
+                             StaticData::Instance().options()->output.factor_order,
                              line, nonterminal);
   } else {
     AddSubTree(line, 0);
@@ -50,7 +50,7 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos)
       } else {
         if (len > 0) {
           m_value.CreateFromString(Output,
-                                   StaticData::Instance().options().output.factor_order,
+                                   StaticData::Instance().options()->output.factor_order,
                                    StringPiece(line).substr(oldpos, len), false);
           has_value = true;
         }
@@ -59,7 +59,7 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos)
     } else if (token == ' ' || token == ']') {
       if (len > 0 && !has_value) {
         m_value.CreateFromString(Output,
-                                 StaticData::Instance().options().output.factor_order,
+                                 StaticData::Instance().options()->output.factor_order,
                                  StringPiece(line).substr(oldpos, len), true);
         has_value = true;
       } else if (len > 0) {
@@ -90,7 +90,7 @@ std::string InternalTree::GetString(bool start) const
     ret += "[";
   }
 
-  ret += m_value.GetString(StaticData::Instance().options().output.factor_order, false);
+  ret += m_value.GetString(StaticData::Instance().options()->output.factor_order, false);
   for (std::vector<TreePointer>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
     ret += (*it)->GetString(false);
   }

@@ -52,7 +52,7 @@ protected:
 
   boost::shared_ptr<ChartTranslationOption> m_transOpt;
 
-  Range					m_currSourceWordsRange;
+  Range m_currSourceWordsRange;
   std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   /*! sum of scores of this hypothesis, and previous hypotheses. Lazily initialised.  */
   mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown;
@@ -62,8 +62,8 @@ protected:
   ,m_lmPrefix;
   float m_totalScore;
 
-  ChartArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
-  const ChartHypothesis 	*m_winningHypo;
+  ChartArcList *m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
+  const ChartHypothesis *m_winningHypo;
 
   std::vector<const ChartHypothesis*> m_prevHypos; // always sorted by source position?
 

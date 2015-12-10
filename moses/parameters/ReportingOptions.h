@@ -44,6 +44,8 @@ namespace Moses
     std::string detailed_transrep_filepath;
     std::string detailed_tree_transrep_filepath;
     std::string detailed_all_transrep_filepath;
+    bool include_lhs_in_search_graph;
+
     
     std::string lattice_sample_filepath; 
     size_t lattice_sample_size;

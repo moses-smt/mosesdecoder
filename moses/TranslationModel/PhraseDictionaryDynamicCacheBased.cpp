@@ -60,8 +60,9 @@ PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()
   Clear();
 }
 
-void PhraseDictionaryDynamicCacheBased::Load(AllOptions const& opts)
+void PhraseDictionaryDynamicCacheBased::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load()" << std::endl);
   SetFeaturesToApply();
 
@@ -336,7 +337,7 @@ void PhraseDictionaryDynamicCacheBased::ClearEntries(std::string sourcePhraseStr
   //target
   targetPhrase.Clear();
   VERBOSE(3, "targetPhraseString:|" << targetPhraseString << "|" << std::endl);
-  targetPhrase.CreateFromString(Output, staticData.options().output.factor_order,
+  targetPhrase.CreateFromString(Output, staticData.options()->output.factor_order,
                                 targetPhraseString, /*factorDelimiter,*/ NULL);
   VERBOSE(2, "targetPhrase:|" << targetPhrase << "|" << std::endl);
 
@@ -344,7 +345,7 @@ void PhraseDictionaryDynamicCacheBased::ClearEntries(std::string sourcePhraseStr
   //consistent across phrase table implementations
   sourcePhrase.Clear();
   VERBOSE(3, "sourcePhraseString:|" << sourcePhraseString << "|" << std::endl);
-  sourcePhrase.CreateFromString(Input, staticData.options().input.factor_order,
+  sourcePhrase.CreateFromString(Input, staticData.options()->input.factor_order,
                                 sourcePhraseString, /*factorDelimiter,*/ NULL);
   VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
   ClearEntries(sourcePhrase, targetPhrase);
@@ -435,7 +436,7 @@ void PhraseDictionaryDynamicCacheBased::ClearSource(std::vector<std::string> ent
 
     sourcePhrase.Clear();
     VERBOSE(3, "sourcePhraseString:|" << (*it) << "|" << std::endl);
-    sourcePhrase.CreateFromString(Input, staticData.options().input.factor_order,
+    sourcePhrase.CreateFromString(Input, staticData.options()->input.factor_order,
                                   *it, /*factorDelimiter,*/ NULL);
     VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
 
@@ -529,7 +530,7 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
   //target
   targetPhrase.Clear();
   VERBOSE(3, "targetPhraseString:|" << targetPhraseString << "|" << std::endl);
-  targetPhrase.CreateFromString(Output, staticData.options().output.factor_order,
+  targetPhrase.CreateFromString(Output, staticData.options()->output.factor_order,
                                 targetPhraseString, /*factorDelimiter,*/ NULL);
   VERBOSE(3, "targetPhrase:|" << targetPhrase << "|" << std::endl);
 
@@ -537,7 +538,7 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
   //consistent across phrase table implementations
   sourcePhrase.Clear();
   VERBOSE(3, "sourcePhraseString:|" << sourcePhraseString << "|" << std::endl);
-  sourcePhrase.CreateFromString(Input, staticData.options().input.factor_order, sourcePhraseString, /*factorDelimiter,*/ NULL);
+  sourcePhrase.CreateFromString(Input, staticData.options()->input.factor_order, sourcePhraseString, /*factorDelimiter,*/ NULL);
   VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
 
   if (!waString.empty()) VERBOSE(3, "waString:|" << waString << "|" << std::endl);

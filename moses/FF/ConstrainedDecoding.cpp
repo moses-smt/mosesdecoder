@@ -46,11 +46,12 @@ ConstrainedDecoding::ConstrainedDecoding(const std::string &line)
   ReadParameters();
 }
 
-void ConstrainedDecoding::Load(AllOptions const& opts)
+void ConstrainedDecoding::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   const StaticData &staticData = StaticData::Instance();
   bool addBeginEndWord
-  = ((opts.search.algo == CYKPlus) || (opts.search.algo == ChartIncremental));
+  = ((opts->search.algo == CYKPlus) || (opts->search.algo == ChartIncremental));
 
   for(size_t i = 0; i < m_paths.size(); ++i) {
     InputFileStream constraintFile(m_paths[i]);
@@ -62,10 +63,10 @@ void ConstrainedDecoding::Load(AllOptions const& opts)
       Phrase phrase(0);
       if (vecStr.size() == 1) {
         sentenceID++;
-        phrase.CreateFromString(Output, opts.output.factor_order, vecStr[0], NULL);
+        phrase.CreateFromString(Output, opts->output.factor_order, vecStr[0], NULL);
       } else if (vecStr.size() == 2) {
         sentenceID = Scan<long>(vecStr[0]);
-        phrase.CreateFromString(Output, opts.output.factor_order, vecStr[1], NULL);
+        phrase.CreateFromString(Output, opts->output.factor_order, vecStr[1], NULL);
       } else {
         UTIL_THROW(util::Exception, "Reference file not loaded");
       }

@@ -53,11 +53,16 @@ protected:
   size_t *m_localWall;	/**< flag for each word if it is a local wall */
   std::vector< std::vector< size_t > > m_zone; /** zones that limit reordering */
   bool   m_active; /**< flag indicating, if there are any active constraints */
-
+  int m_max_distortion;
 public:
 
   //! create ReorderingConstraint of length size and initialise to zero
-  ReorderingConstraint() :m_wall(NULL),m_localWall(NULL),m_active(false) {}
+  ReorderingConstraint(int max_distortion) 
+  : m_wall(NULL)
+  , m_localWall(NULL)
+  , m_active(false) 
+  , m_max_distortion(max_distortion)
+  {}
 
   //! destructer
   ~ReorderingConstraint() {

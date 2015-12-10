@@ -190,9 +190,10 @@ public:
 
   //! populate this InputType with data from in stream
   virtual int
-  Read(std::istream& in,
-       std::vector<FactorType> const& factorOrder,
-       AllOptions const& opts) =0;
+  Read(std::istream& in) = 0; 
+    // ,
+    //    std::vector<FactorType> const& factorOrder,
+    //    AllOptions const& opts) =0;
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const =0;

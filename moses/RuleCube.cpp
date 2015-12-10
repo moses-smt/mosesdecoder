@@ -43,7 +43,7 @@ RuleCube::RuleCube(const ChartTranslationOptions &transOpt,
 {
   RuleCubeItem *item = new RuleCubeItem(transOpt, allChartCells);
   m_covered.insert(item);
-  if (StaticData::Instance().options().cube.lazy_scoring) {
+  if (StaticData::Instance().options()->cube.lazy_scoring) {
     item->EstimateScore();
   } else {
     item->CreateHypothesis(transOpt, manager);
@@ -91,7 +91,7 @@ void RuleCube::CreateNeighbor(const RuleCubeItem &item, int dimensionIndex,
   if (!result.second) {
     delete newItem;  // already seen it
   } else {
-    if (StaticData::Instance().options().cube.lazy_scoring) {
+    if (StaticData::Instance().options()->cube.lazy_scoring) {
       newItem->EstimateScore();
     } else {
       newItem->CreateHypothesis(m_transOpt, manager);

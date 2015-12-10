@@ -51,7 +51,7 @@ int main(int argc, char **argv)
   std::stringstream ss;
   ss << nscores;
   PhraseDictionaryCompact pdc("PhraseDictionaryCompact input-factor=0 output-factor=0 num-features=" + ss.str() + " path=" + ttable);
-  AllOptions opts;
+  AllOptions::ptr opts(new AllOptions);
   pdc.Load(opts);
 
   std::string line;

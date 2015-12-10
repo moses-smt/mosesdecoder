@@ -20,6 +20,7 @@ namespace Moses {
     , ReportHypoScore(false)
     , PrintID(false)
     , PrintPassThrough(false)
+    , include_lhs_in_search_graph(false)
     , lattice_sample_size(0)
   {
     factor_order.assign(1,0);
@@ -64,7 +65,9 @@ namespace Moses {
 #endif
     
     param.SetParameter(DontPruneSearchGraph, "unpruned-search-graph", false);
-    
+    param.SetParameter(include_lhs_in_search_graph,
+                       "include-lhs-in-search-graph", false );
+
     
     // miscellaneous 
     param.SetParameter(RecoverPath, "recover-input-path",false);

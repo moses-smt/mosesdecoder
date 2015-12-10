@@ -75,8 +75,9 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
 }
 
 
-void PhraseOrientationFeature::Load(AllOptions const& opts)
+void PhraseOrientationFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if ( !m_filenameTargetWordList.empty() ) {
     LoadWordList(m_filenameTargetWordList,m_targetWordList);
     m_useTargetWordList = true;

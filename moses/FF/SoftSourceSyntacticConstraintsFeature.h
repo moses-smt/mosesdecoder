@@ -31,7 +31,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Load(AllOptions const& opts);
+  void Load(AllOptions::ptr const& opts);
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
@@ -101,6 +101,7 @@ protected:
   std::pair<float,float> GetLabelPairProbabilities(const Factor* target,
       const size_t source) const;
 
+  // Word m_output_default_nonterminal;
 };
 
 

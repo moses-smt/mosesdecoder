@@ -82,7 +82,7 @@ void ChartKBestExtractor::Extract(
 // Generate the target-side yield of the derivation d.
 Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
 {
-  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
+  FactorType placeholderFactor = StaticData::Instance().options()->input.placeholder_factor;
 
   Phrase ret(ARRAY_SIZE_INCR);
 

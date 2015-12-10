@@ -44,8 +44,9 @@ GenerationDictionary::GenerationDictionary(const std::string &line)
   ReadParameters();
 }
 
-void GenerationDictionary::Load(AllOptions const& opts)
+void GenerationDictionary::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();

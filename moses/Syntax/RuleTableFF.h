@@ -27,7 +27,7 @@ public:
   // FIXME Delete m_table?
   ~RuleTableFF() {}
 
-  void Load(AllOptions const& opts);
+  void Load(AllOptions::ptr const& opts);
 
   const RuleTable *GetTable() const {
     return m_table;

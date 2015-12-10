@@ -61,7 +61,7 @@ public:
     , m_transOptRange(transOptRange) {
     m_totalWeightDistortion = 0;
     const StaticData &staticData = StaticData::Instance();
-
+    
     const std::vector<const DistortionScoreProducer*> &ffs = DistortionScoreProducer::GetDistortionFeatureFunctions();
     std::vector<const DistortionScoreProducer*>::const_iterator iter;
     for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
@@ -139,7 +139,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   // Fetch the things we need for distortion cost computation.
-  int maxDistortion = StaticData::Instance().GetMaxDistortion();
+  // int maxDistortion = StaticData::Instance().GetMaxDistortion();
+  int maxDistortion  = itype.options()->reordering.max_distortion;
 
   if (maxDistortion == -1) {
     for (HypothesisSet::const_iterator iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter) {

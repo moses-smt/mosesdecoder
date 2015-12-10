@@ -36,8 +36,9 @@ void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::
   }
 }
 
-void SourceWordDeletionFeature::Load(AllOptions const& opts)
+void SourceWordDeletionFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if (m_filename.empty())
     return;
 

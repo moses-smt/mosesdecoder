@@ -61,16 +61,11 @@ bool g_mosesDebug = false;
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  : m_sourceStartPosMattersForRecombination(false)
+  : m_options(new AllOptions)
   , m_requireSortingAfterSourceContext(false)
-  // , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
   , m_treeStructure(NULL)
 {
-  m_xmlBrackets.first="<";
-  m_xmlBrackets.second=">";
-
-  // memory pools
   Phrase::InitializeMemPool();
 }
 
@@ -123,34 +118,6 @@ StaticData
 
 }
 
-void
-StaticData
-::ini_input_options()
-{
-  const PARAM_VEC *params;
-
-  m_parameter->SetParameter(m_continuePartialTranslation,
-                            "continue-partial-translation", false );
-
-  // specify XML tags opening and closing brackets for XML option
-  params = m_parameter->GetParam("xml-brackets");
-  if (params && params->size()) {
-    std::vector<std::string> brackets = Tokenize(params->at(0));
-    if(brackets.size()!=2) {
-      cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
-      exit(1);
-    }
-    m_xmlBrackets.first= brackets[0];
-    m_xmlBrackets.second=brackets[1];
-    VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
-            << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
-  }
-
-  m_parameter->SetParameter(m_defaultNonTermOnlyForEmptyRange,
-                            "default-non-term-for-empty-range-only", false );
-
-}
-
 bool
 StaticData
 ::ini_output_options()
@@ -161,8 +128,6 @@ StaticData
   m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
 
 
-  m_parameter->SetParameter(m_includeLHSInSearchGraph,
-                            "include-lhs-in-search-graph", false );
 
   m_parameter->SetParameter<string>(m_outputUnknownsFile,
                                     "output-unknowns", "");
@@ -218,7 +183,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
   const PARAM_VEC *params;
 
-  m_options.init(*parameter);
+  m_options->init(*parameter);
+  if (is_syntax(m_options->search.algo))
+    m_options->syntax.LoadNonTerminals(*parameter, FactorCollection::Instance());
 
   if (IsSyntax())
     LoadChartDecodingParameters();
@@ -229,7 +196,6 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
   m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
 
-  ini_input_options();
   m_bookkeeping_options.init(*parameter);
   if (!ini_output_options()) return false;
 
@@ -876,7 +842,7 @@ StaticData
 
   // FIXME Does this make sense for F2S?  Perhaps it should be changed once
   // FIXME the pipeline uses RuleTable consistently.
-  SearchAlgorithm algo = m_options.search.algo;
+  SearchAlgorithm algo = m_options->search.algo;
   if (algo == SyntaxS2T || algo == SyntaxT2S ||
       algo == SyntaxT2S_SCFG || algo == SyntaxF2S) {
     // Automatically override PhraseDictionary{Memory,Scope3}.  This will

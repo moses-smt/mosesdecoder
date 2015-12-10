@@ -66,9 +66,8 @@ ConfusionNet(AllOptions::ptr const& opts) : InputType(opts)
 {
   stats.createOne();
 
-  const StaticData& SD = StaticData::Instance();
-  if (SD.IsSyntax()) {
-    m_defaultLabelSet.insert(SD.GetInputDefaultNonTerminal());
+  if (is_syntax(opts->search.algo)) {
+    m_defaultLabelSet.insert(opts->syntax.input_default_non_terminal);
   }
   UTIL_THROW_IF2(InputFeature::InstancePtr() == NULL, "Input feature must be specified");
 }
@@ -92,14 +91,14 @@ ConfusionNet(Sentence const& s) : InputType(s.options())
 
 bool
 ConfusionNet::
-ReadF(std::istream& in, const std::vector<FactorType>& factorOrder, int format)
+ReadF(std::istream& in, int format)
 {
   VERBOSE(2, "read confusion net with format "<<format<<"\n");
   switch(format) {
   case 0:
-    return ReadFormat0(in,factorOrder);
+    return ReadFormat0(in);
   case 1:
-    return ReadFormat1(in,factorOrder);
+    return ReadFormat1(in);
   default:
     std::cerr << "ERROR: unknown format '"<<format
               <<"' in ConfusionNet::Read";
@@ -109,22 +108,20 @@ ReadF(std::istream& in, const std::vector<FactorType>& factorOrder, int format)
 
 int
 ConfusionNet::
-Read(std::istream& in,
-     const std::vector<FactorType>& factorOrder,
-     AllOptions const& opts)
+Read(std::istream& in)
 {
-  int rv=ReadF(in,factorOrder,0);
+  int rv=ReadF(in,0);
   if(rv) stats.collect(*this);
   return rv;
 }
 
 bool
 ConfusionNet::
-ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
+ReadFormat0(std::istream& in)
 {
   Clear();
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
 
-  // const StaticData   &staticData   = StaticData::Instance();
   const InputFeature *inputFeature = InputFeature::InstancePtr();
   size_t numInputScores   = inputFeature->GetNumInputScores();
   size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
@@ -140,7 +137,6 @@ ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
     Column col;
     while(is>>word) {
       Word w;
-      // String2Word(word,w,factorOrder);
       w.CreateFromString(Input,factorOrder,StringPiece(word),false,false);
       std::vector<float> probs(totalCount, 0.0);
       for(size_t i=0; i < numInputScores; i++) {
@@ -179,9 +175,10 @@ ReadFormat0(std::istream& in, const std::vector<FactorType>& factorOrder)
 
 bool
 ConfusionNet::
-ReadFormat1(std::istream& in, const std::vector<FactorType>& factorOrder)
+ReadFormat1(std::istream& in)
 {
   Clear();
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
   std::string line;
   if(!getline(in,line)) return 0;
   size_t s;

@@ -37,8 +37,9 @@ PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
 }
 
-void PhraseDictionaryTreeAdaptor::Load(AllOptions const& opts)
+void PhraseDictionaryTreeAdaptor::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 }
 

@@ -33,7 +33,7 @@ class LexicalReordering : public StatefulFeatureFunction
 public:
   LexicalReordering(const std::string &line);
   virtual ~LexicalReordering();
-  void Load(AllOptions const& opts);
+  void Load(AllOptions::ptr const& opts);
 
   virtual
   bool

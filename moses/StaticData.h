@@ -72,7 +72,7 @@ private:
   static StaticData s_instance;
 protected:
   Parameter *m_parameter;
-  AllOptions m_options;
+  boost::shared_ptr<AllOptions> m_options;
 
   mutable ScoreComponentCollection m_allWeights;
 
@@ -95,30 +95,21 @@ protected:
   size_t m_latticeSamplesSize;
 
   std::string  m_latticeSamplesFilePath;
-  // bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
-  // bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
-  // std::string m_unknownWordPrefix;
-  // std::string m_unknownWordSuffix;
-  bool m_wordDeletionEnabled;
+  // bool m_wordDeletionEnabled;
 
-  // bool m_disableDiscarding;
   bool m_printAllDerivations;
   bool m_printTranslationOptions;
 
-  bool m_sourceStartPosMattersForRecombination;
+  // bool m_sourceStartPosMattersForRecombination;
   bool m_requireSortingAfterSourceContext;
 
   mutable size_t m_verboseLevel;
 
   std::string m_factorDelimiter; //! by default, |, but it can be changed
 
-  // XmlInputType m_xmlInputType; //! method for handling sentence XML input
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
-
-  // bool m_isAlwaysCreateDirectTranslationOption;
-  //! constructor. only the 1 static variable can be created
 
   bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
   std::string m_outputUnknownsFile; //! output unknowns in this file
@@ -144,7 +135,6 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  // FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
   S2TParsingAlgorithm m_s2tParsingAlgorithm;
@@ -174,7 +164,6 @@ protected:
 
   const StatefulFeatureFunction* m_treeStructure;
 
-  void ini_input_options();
   void ini_oov_options();
   bool ini_output_options();
   bool ini_performance_options();
@@ -182,9 +171,6 @@ protected:
   void initialize_features();
 public:
 
-  // bool IsAlwaysCreateDirectTranslationOption() const {
-  //   return m_isAlwaysCreateDirectTranslationOption;
-  // }
   //! destructor
   ~StaticData();
 
@@ -219,51 +205,35 @@ public:
     return *m_parameter;
   }
 
-  AllOptions const&
+  AllOptions::ptr const
   options() const {
     return m_options;
   }
 
-  AllOptions&
-  options() {
-    return m_options;
-  }
+  // AllOptions&
+  // options() {
+  //   return m_options;
+  // }
 
-  inline bool
-  GetSourceStartPosMattersForRecombination() const {
-    return m_sourceStartPosMattersForRecombination;
-  }
-
-  bool
-  IsWordDeletionEnabled() const {
-    // return m_wordDeletionEnabled;
-    return m_options.unk.word_deletion_enabled;
-  }
-
-  int
-  GetMaxDistortion() const {
-    return m_options.reordering.max_distortion;
-  }
-
-  bool
-  UseReorderingConstraint() const {
-    return m_reorderingConstraint;
-  }
+  // inline bool
+  // GetSourceStartPosMattersForRecombination() const {
+  //   return m_sourceStartPosMattersForRecombination;
+  // }
 
   bool
   UseEarlyDiscarding() const {
-    return m_options.search.early_discarding_threshold
+    return m_options->search.early_discarding_threshold
            != -std::numeric_limits<float>::infinity();
   }
 
   bool
   UseEarlyDistortionCost() const {
-    return m_options.reordering.use_early_distortion_cost;
+    return m_options->reordering.use_early_distortion_cost;
   }
 
   float
   GetTranslationOptionThreshold() const {
-    return m_options.search.trans_opt_threshold;
+    return m_options->search.trans_opt_threshold;
   }
 
   size_t
@@ -288,7 +258,7 @@ public:
 
   bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
     if (algo == DefaultSearchAlgorithm)
-      algo = m_options.search.algo;
+      algo = m_options->search.algo;
 
     return (algo == CYKPlus   || algo == ChartIncremental ||
             algo == SyntaxS2T || algo == SyntaxT2S ||
@@ -333,35 +303,12 @@ public:
     return m_outputUnknownsFile;
   }
 
-  bool GetIncludeLHSInSearchGraph() const {
-    return m_includeLHSInSearchGraph;
-  }
-
-  std::pair<std::string,std::string> GetXmlBrackets() const {
-    return m_xmlBrackets;
-  }
-
-  // bool PrintTranslationOptions() const {
-  //   return m_printTranslationOptions;
-  // }
-
-  // bool PrintAllDerivations() const {
-  //   return m_printAllDerivations;
+  // bool GetIncludeLHSInSearchGraph() const {
+  //   return m_includeLHSInSearchGraph;
   // }
 
   const UnknownLHSList &GetUnknownLHS() const {
     return m_unknownLHS;
-  }
-
-  const Word &GetInputDefaultNonTerminal() const {
-    return m_inputDefaultNonTerminal;
-  }
-  const Word &GetOutputDefaultNonTerminal() const {
-    return m_outputDefaultNonTerminal;
-  }
-
-  SourceLabelOverlap GetSourceLabelOverlap() const {
-    return m_sourceLabelOverlap;
   }
 
   size_t GetRuleLimit() const {
@@ -473,7 +420,6 @@ public:
   }
 
   //sentence (and thread) specific initialisationn and cleanup
-  // void InitializeForInput(const InputType& source, ttaskptr const& ttask) const;
   void InitializeForInput(ttasksptr const& ttask) const;
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const;
 
@@ -524,10 +470,6 @@ public:
   bool GetDefaultNonTermOnlyForEmptyRange() const {
     return m_defaultNonTermOnlyForEmptyRange;
   }
-
-  // S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
-  //   return m_s2tParsingAlgorithm;
-  // }
 
   bool RequireSortingAfterSourceContext() const {
     return m_requireSortingAfterSourceContext;

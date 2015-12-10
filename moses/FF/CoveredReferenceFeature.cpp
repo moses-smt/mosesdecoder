@@ -52,8 +52,9 @@ void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
   estimatedScores->Assign(this, scores);
 }
 
-void CoveredReferenceFeature::Load(AllOptions const& opts)
+void CoveredReferenceFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   InputFileStream refFile(m_path);
   std::string line;
   const StaticData &staticData = StaticData::Instance();

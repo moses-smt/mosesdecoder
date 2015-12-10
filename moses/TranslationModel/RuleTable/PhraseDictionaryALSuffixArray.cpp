@@ -32,8 +32,9 @@ PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &
   ReadParameters();
 }
 
-void PhraseDictionaryALSuffixArray::Load(AllOptions const& opts)
+void PhraseDictionaryALSuffixArray::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 }
 
