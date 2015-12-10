@@ -28,10 +28,6 @@
 
 namespace MosesTraining
 {
-namespace Syntax
-{
-namespace GHKM
-{
 
 std::vector<float> PhraseOrientation::m_l2rOrientationPriorCounts = boost::assign::list_of(0)(0)(0)(0)(0);
 std::vector<float> PhraseOrientation::m_r2lOrientationPriorCounts = boost::assign::list_of(0)(0)(0)(0)(0);
@@ -97,6 +93,18 @@ PhraseOrientation::PhraseOrientation(int sourceSize,
     m_alignedToT[it->second].push_back(it->first);
   }
 
+  Init(sourceSize, targetSize, m_alignedToT, alignedToS, alignedCountS);
+}
+
+PhraseOrientation::PhraseOrientation(int sourceSize,
+                                     int targetSize,
+                                     const std::vector<std::vector<int> > &alignedToT,
+                                     const std::vector<std::vector<int> > &alignedToS,
+                                     const std::vector<int> &alignedCountS)
+  : m_countF(sourceSize)
+  , m_countE(targetSize)
+  , m_alignedToT(alignedToT)
+{
   Init(sourceSize, targetSize, m_alignedToT, alignedToS, alignedCountS);
 }
 
@@ -470,6 +478,4 @@ void PhraseOrientation::WritePriorCounts(std::ostream& out, const REO_MODEL_TYPE
   }
 }
 
-}  // namespace GHKM
-}  // namespace Syntax
 }  // namespace MosesTraining
