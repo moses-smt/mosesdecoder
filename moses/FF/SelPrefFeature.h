@@ -5,10 +5,11 @@
 #include "FFState.h"
 #include "moses/Word.h"
 #include "InternalTree.h"
-//#include "moses/LM/Ken.h"
-//#include "lm/model.hh"
+#include "moses/LM/Ken.h"
+#include "lm/model.hh"
 
 #include <unordered_map>
+#include <set>
 
 namespace Moses{
 
@@ -32,7 +33,10 @@ public:
     }
 
   bool FindHeadRecursively(TreePointer tree, const std::vector<TreePointer> &previous_trees, const std::vector<HeadsPointer> &previous_heads, std::unordered_map<InternalTree*, const Word*> &childrenHeadWords, size_t &childId) const;
-  void MakeTuples(TreePointer tree, std::unordered_map<InternalTree*,const Word*> &childrenHeadWords, std::vector<std::vector<std::string>> &depRelTuples) const;
+  std::vector<std::string> ProcessChild(TreePointer child, size_t childId, TreePointer currentNode, const std::vector<TreePointer> &previous_trees) const;
+  void MakeTuples(TreePointer tree, const std::vector<TreePointer> &previous_trees, std::vector<std::vector<std::string>> &depRelTuples) const;
+
+  float GetWBScore(std::vector<std::string>& depRel) const;
 
   void EvaluateInIsolation(const Phrase &source
                   , const TargetPhrase &targetPhrase
@@ -59,11 +63,30 @@ public:
       int /* featureID - used to index the state in the previous hypotheses */,
       ScoreComponentCollection* accumulator) const;
 
+  void ReadLemmaMap();
+
   void Load();
 
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
+
+  static float score;
+
 protected:
+  // WB model file in ARPA format
+  std::string m_modelFileARPA;
+
+  std::string m_lemmaFile;
+
+  // Pointer to the dependency language model
+  std::shared_ptr<lm::ngram::Model> m_WBmodel;
+
+  // Dependency relations that are considered by this feature
+  std::set<std::string> m_allowedLabels;
+
+  // todo: initalize
+  std::shared_ptr<std::unordered_map<std::string, std::string>> m_lemmaMap;
+
 
 };
 

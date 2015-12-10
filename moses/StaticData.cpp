@@ -47,6 +47,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationModel/PhraseDictionary.h"
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
 
+#include "moses/FF/SelPrefFeature.h"
+
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #endif

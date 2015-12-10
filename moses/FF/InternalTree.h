@@ -21,12 +21,15 @@ typedef boost::shared_ptr<InternalTree> TreePointer;
 class InternalTree
 {
   Word m_value;
+  std::shared_ptr<Word> m_head;
   std::vector<TreePointer> m_children;
+protected:
+  const boost::shared_ptr<InternalTree> createChild(const std::string & line, size_t start, size_t len, const bool nonterminal);
 public:
   InternalTree(const std::string & line, size_t start, size_t len, const bool terminal);
   InternalTree(const std::string & line, const bool nonterminal = true);
   InternalTree(const InternalTree & tree):
-    m_value(tree.m_value) {
+    m_value(tree.m_value), m_head(nullptr) {
     const std::vector<TreePointer> & children = tree.m_children;
     for (std::vector<TreePointer>::const_iterator it = children.begin(); it != children.end(); it++) {
       m_children.push_back(boost::make_shared<InternalTree>(**it));
@@ -40,6 +43,15 @@ public:
   void GetUnbinarizedChildren(std::vector<TreePointer> &children) const;
   const Word & GetLabel() const {
     return m_value;
+  }
+
+  std::shared_ptr<Word> GetHead(){
+	  return m_head;
+  }
+
+  void SetHead(std::shared_ptr<Word> head){
+	  head.swap(m_head);
+
   }
 
   size_t GetLength() const {

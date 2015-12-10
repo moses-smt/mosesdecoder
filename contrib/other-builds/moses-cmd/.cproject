@@ -59,6 +59,7 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.998577284" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="moses"/>
+									<listOptionValue builtIn="false" value="boost_regex"/>
 									<listOptionValue builtIn="false" value="cmph"/>
 									<listOptionValue builtIn="false" value="search"/>
 									<listOptionValue builtIn="false" value="OnDiskPt"/>

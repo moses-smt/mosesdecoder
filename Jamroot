@@ -141,6 +141,14 @@ if [ option.get "filter-warnings" : : "yes" ] {
   requirements += <cxxflags>-Wno-overloaded-virtual ;
 }
 
+requirements += <cxxflags>-std=c++11 ;
+requirements += <cxxflags>-stdlib=libc++ ;
+requirements += <linkflags>-std=c++11 ;
+requirements += <linkflags>-stdlib=libc++ ;
+requirements += <library>boost_regex ;
+external-lib boost_regex ;
+
+
 if [ option.get "debug-build" : : "yes" ] {
    requirements += <cxxflags>-Og ;
    echo "Building with -Og to enable easier profiling and debugging. Only available on gcc 4.8+." ;

@@ -4,7 +4,7 @@
 namespace Moses
 {
 
-InternalTree::InternalTree(const std::string & line, size_t start, size_t len, const bool nonterminal)
+InternalTree::InternalTree(const std::string & line, size_t start, size_t len, const bool nonterminal): m_head(nullptr)
 {
 
   if (len > 0) {
@@ -12,7 +12,7 @@ InternalTree::InternalTree(const std::string & line, size_t start, size_t len, c
   }
 }
 
-InternalTree::InternalTree(const std::string & line, const bool nonterminal)
+InternalTree::InternalTree(const std::string & line, const bool nonterminal): m_head(nullptr)
 {
 
   size_t found = line.find_first_of("[] ");
@@ -40,7 +40,7 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos)
 
     if (token == '[') {
       if (has_value) {
-        m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, true));
+        m_children.push_back(createChild(line, oldpos, len, true));
         pos = m_children.back()->AddSubTree(line, pos+1);
       } else {
         if (len > 0) {
@@ -54,7 +54,7 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos)
         m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), StringPiece(line).substr(oldpos, len), true);
         has_value = true;
       } else if (len > 0) {
-        m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, false));
+        m_children.push_back(createChild(line, oldpos, len, false));
       }
       if (token == ' ') {
         pos++;
@@ -67,6 +67,10 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos)
   }
   return std::min(line.size(),pos+1);
 
+}
+
+const boost::shared_ptr<InternalTree> InternalTree::createChild(const std::string & line, size_t start, size_t len, const bool nonterminal) {
+  return boost::make_shared<InternalTree>(line, start, len, nonterminal);
 }
 
 std::string InternalTree::GetString(bool start) const
