@@ -8,6 +8,9 @@
 
 #include "SkeletonStatelessFF.h"
 
+namespace Moses2
+{
+
 SkeletonStatelessFF::SkeletonStatelessFF(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
 {
@@ -26,3 +29,6 @@ SkeletonStatelessFF::EvaluateInIsolation(const System &system,
 {
 
 }
+
+}
+

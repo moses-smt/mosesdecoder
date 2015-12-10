@@ -13,6 +13,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 Word::Word() {
 	Init<const Factor*>(m_factors, MAX_NUM_FACTORS, NULL);
 }
@@ -77,3 +80,6 @@ std::ostream& operator<<(std::ostream &out, const Word &obj)
 	}
 	return out;
 }
+
+}
+

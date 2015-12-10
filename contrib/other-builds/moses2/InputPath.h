@@ -12,7 +12,10 @@
 #include "Phrase.h"
 #include "TargetPhrases.h"
 #include "legacy/Range.h"
-;
+
+namespace Moses2
+{
+
 class PhraseTable;
 
 class InputPath {
@@ -34,5 +37,7 @@ public:
 protected:
 	bool m_isUsed;
 };
+
+}
 
 #endif /* INPUTPATH_H_ */

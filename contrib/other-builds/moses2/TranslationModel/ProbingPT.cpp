@@ -16,6 +16,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 ProbingPT::ProbingPT(size_t startInd, const std::string &line)
 :PhraseTable(startInd, line)
 {
@@ -192,6 +195,8 @@ std::vector<uint64_t> ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sour
 
   ok = true;
   return ret;
+
+}
 
 }
 

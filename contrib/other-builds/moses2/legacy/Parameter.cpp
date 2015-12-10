@@ -38,6 +38,9 @@ using namespace std;
 using namespace boost::algorithm;
 namespace po = boost::program_options;
 
+namespace Moses2
+{
+
 /** define allowed parameters */
 Parameter::Parameter()
 {
@@ -1620,6 +1623,8 @@ Parameter::
 SetParameter(bool& var, std::string const& name)
 {
   SetParameter(var,name,false);
+}
+
 }
 
 

@@ -12,6 +12,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 Stack::Stack() {
 	// TODO Auto-generated constructor stub
 
@@ -85,6 +88,8 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 		  HypothesisFutureScoreOrderer());
 
   return ret;
+}
+
 }
 
 

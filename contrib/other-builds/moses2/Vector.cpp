@@ -7,3 +7,8 @@
 
 #include "Vector.h"
 
+namespace Moses2
+{
+
+}
+

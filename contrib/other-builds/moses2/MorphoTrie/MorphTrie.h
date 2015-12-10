@@ -4,6 +4,9 @@
 #include <vector>
 #include "Node.h"
 
+namespace Moses2
+{
+
 template<class KeyClass, class ValueClass>
 class MorphTrie
 {
@@ -86,6 +89,8 @@ std::vector<const Node<KeyClass, ValueClass>* > MorphTrie<KeyClass, ValueClass>:
 
     stoppedAtInd = words.size();
     return ret;
+}
+
 }
 
 

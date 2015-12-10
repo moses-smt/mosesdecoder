@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 //////////////////////////////////////////////////////////////////////////////////////////
 class Murmur: public DALM::State::HashFunction
 {
@@ -218,12 +221,14 @@ void LanguageModelDALM::EmptyHypothesisState(FFState &state, const Manager &mgr,
 
  }
 
- void LanguageModelDALM::EvaluateWhenApplied(const Manager &mgr,
-    const Hypothesis &hypo,
-    const FFState &prevState,
-    Scores &scores,
-	FFState &state) const
- {
+void LanguageModelDALM::EvaluateWhenApplied(const Manager &mgr,
+const Hypothesis &hypo,
+const FFState &prevState,
+Scores &scores,
+FFState &state) const
+{
 
- }
+}
+
+}
 

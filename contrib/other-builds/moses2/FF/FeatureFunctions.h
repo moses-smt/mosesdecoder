@@ -12,6 +12,9 @@
 #include <string>
 #include "../legacy/Parameter.h"
 
+namespace Moses2
+{
+
 class System;
 class FeatureFunction;
 class StatefulFeatureFunction;
@@ -56,5 +59,7 @@ protected:
 	FeatureFunction *Create(const std::string &line);
 
 };
+
+}
 
 #endif /* FEATUREFUNCTIONS_H_ */

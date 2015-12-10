@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system, const std::string &str)
 {
 	FactorCollection &vocab = system.GetVocab();
@@ -51,4 +54,6 @@ std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
 {
 	out << (const PhraseImpl&) obj << " SCORES:" << obj.GetScores();
 	return out;
+}
+
 }

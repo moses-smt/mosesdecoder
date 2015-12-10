@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fstream>
 #include <string>
 
+namespace Moses2
+{
+
 /** Used in place of std::istream, can read zipped files if it ends in .gz
 */
 class InputFileStream : public std::istream
@@ -38,4 +41,6 @@ public:
 
   void Close();
 };
+
+}
 

@@ -4,6 +4,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 TranslationTask::TranslationTask(System &system, const std::string &line)
 {
 	m_mgr = new Manager(system, *this, line);
@@ -19,3 +22,6 @@ void TranslationTask::Run()
 	m_mgr->Decode();
 	m_mgr->OutputBest(cout);
 }
+
+}
+

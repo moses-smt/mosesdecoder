@@ -9,6 +9,9 @@
 #include "util/tokenize_piece.hh"
 #include <vector>
 
+namespace Moses2
+{
+
 //Struct for holding processed line
 struct line_text {
   StringPiece source_phrase;
@@ -29,3 +32,6 @@ struct target_text {
 line_text splitLine(StringPiece textin);
 
 std::vector<unsigned char> splitWordAll1(StringPiece textin);
+
+}
+

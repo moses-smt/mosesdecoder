@@ -12,6 +12,9 @@
 #include "../TypeDef.h"
 #include "../legacy/Util2.h"
 
+namespace Moses2
+{
+
 class Stack {
 protected:
   typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis> > _HCType;
@@ -43,4 +46,6 @@ protected:
 
 
 };
+
+}
 

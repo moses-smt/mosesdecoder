@@ -10,6 +10,9 @@
 #include <vector>
 #include "Stack.h"
 
+namespace Moses2
+{
+
 class Stacks {
 	  friend std::ostream& operator<<(std::ostream &, const Stacks &);
 public:
@@ -37,4 +40,6 @@ public:
 protected:
 	std::vector<Stack*> m_stacks;
 };
+
+}
 

@@ -13,11 +13,11 @@ using namespace std;
 
 //extern size_t g_numHypos;
 
-istream &GetInputStream(Parameter &params)
+istream &GetInputStream(Moses2::Parameter &params)
 {
-	const PARAM_VEC *vec = params.GetParam("input-file");
+	const Moses2::PARAM_VEC *vec = params.GetParam("input-file");
 	if (vec && vec->size()) {
-		InputFileStream *stream = new InputFileStream(vec->at(0));
+		Moses2::InputFileStream *stream = new Moses2::InputFileStream(vec->at(0));
 		return *stream;
 	}
 	else {
@@ -33,9 +33,9 @@ int main(int argc, char** argv)
 
 	//Temp();
 
-	Parameter params;
+	Moses2::Parameter params;
 	params.LoadParam(argc, argv);
-	System system(params);
+	Moses2::System system(params);
 
 	istream &inStream = GetInputStream(params);
 
@@ -43,11 +43,11 @@ int main(int argc, char** argv)
 	Moses2::Timer timer;
 	timer.start();
 
-	ThreadPool pool(system.numThreads);
+	Moses2::ThreadPool pool(system.numThreads);
 
 	string line;
 	while (getline(inStream, line)) {
-	    boost::shared_ptr<TranslationTask> task(new TranslationTask(system, line));
+	    boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line));
 
 		pool.Submit(task);
 		//task->Run();

@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses2
+{
+
 void SquareMatrix::InitTriangle(float val)
 {
   for(size_t row=0; row < m_size; row++) {
@@ -116,4 +119,7 @@ float SquareMatrix::CalcEstimatedScore( Bitmap const &bitmap, size_t startPos, s
 
   return estimatedScore;
 }
+
+}
+
 

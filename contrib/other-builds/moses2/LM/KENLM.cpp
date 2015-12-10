@@ -18,6 +18,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 struct KenLMState : public FFState {
   lm::ngram::State state;
   virtual size_t hash() const {
@@ -281,5 +284,7 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
     }
     *index = TranslateID(hypo.GetWord(position));
   }
+}
+
 }
 

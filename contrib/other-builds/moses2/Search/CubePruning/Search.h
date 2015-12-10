@@ -12,6 +12,9 @@
 #include "Stacks.h"
 #include "../../legacy/Range.h"
 
+namespace Moses2
+{
+
 class Bitmap;
 class Hypothesis;
 class InputPath;
@@ -20,7 +23,7 @@ class TargetPhrases;
 namespace NSCubePruning
 {
 
-class Search : public ::Search
+class Search : public Moses2::Search
 {
 public:
 	Search(Manager &mgr);
@@ -48,4 +51,5 @@ protected:
 
 }
 
+}
 

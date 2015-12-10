@@ -17,6 +17,9 @@
 #include "Search.h"
 #include "Stacks.h"
 
+namespace Moses2
+{
+
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
@@ -54,5 +57,7 @@ protected:
 	void AddHypos();
 
 };
+
+}
 
 

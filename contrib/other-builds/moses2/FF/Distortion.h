@@ -12,6 +12,9 @@
 #include "../legacy/Range.h"
 #include "../TypeDef.h"
 
+namespace Moses2
+{
+
 class Distortion : public StatefulFeatureFunction
 {
 public:
@@ -52,5 +55,7 @@ protected:
   int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 
 };
+
+}
 
 #endif /* DISTORTION_H_ */

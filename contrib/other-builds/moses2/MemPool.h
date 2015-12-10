@@ -16,6 +16,9 @@
 #include <limits>
 #include <iostream>
 
+namespace Moses2
+{
+
 class MemPool {
 	struct Page {
 		uint8_t *mem;
@@ -159,5 +162,8 @@ std::ostream& operator<<(std::ostream &out, const ObjectPoolContiguous<T> &obj)
 	}
 	return out;
 }
+
+}
+
 
 #endif /* MEMPOOL_H_ */

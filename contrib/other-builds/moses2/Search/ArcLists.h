@@ -10,6 +10,9 @@
 #include <vector>
 #include <boost/unordered_map.hpp>
 
+namespace Moses2
+{
+
 class Hypothesis;
 
 typedef std::vector<const Hypothesis*> ArcList;
@@ -29,5 +32,7 @@ protected:
 	ArcList *GetAndDetachArcList(const Hypothesis *hypo);
 
 };
+
+}
 
 #endif /* ARCLISTS_H_ */

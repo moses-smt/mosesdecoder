@@ -10,6 +10,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 TargetPhrases::TargetPhrases(MemPool &pool, size_t reserve)
 :m_coll(pool, reserve)
 ,m_currInd(0)
@@ -62,6 +65,8 @@ const TargetPhrases *TargetPhrases::Clone(MemPool &pool, const System &system) c
 {
 	const TargetPhrases *ret = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, system, *this);
 	return ret;
+}
+
 }
 
 

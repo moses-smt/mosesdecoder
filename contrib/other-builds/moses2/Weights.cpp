@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 Weights::Weights()
 {
 	// TODO Auto-generated constructor stub
@@ -68,3 +71,6 @@ void Weights::CreateFromString(const FeatureFunctions &ffs, const std::string &l
 		m_weights[i + startInd] = score;
 	}
 }
+
+}
+

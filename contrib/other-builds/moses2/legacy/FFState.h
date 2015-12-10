@@ -4,6 +4,9 @@
 #include <stddef.h>
 #include "util/exception.hh"
 
+namespace Moses2
+{
+
 class FFState
 {
 public:
@@ -40,3 +43,7 @@ public:
   }
 
 };
+
+}
+
+

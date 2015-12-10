@@ -40,6 +40,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/pool.hh"
 #include "Factor.h"
 
+namespace Moses2
+{
+
 class System;
 
 /** We don't want Factor to be copyable by anybody.  But we also want to store
@@ -64,7 +67,7 @@ struct FactorFriend {
 class FactorCollection
 {
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
-  friend class ::System;
+  friend class System;
 
   struct HashFactor : public std::unary_function<const FactorFriend &, std::size_t> {
     std::size_t operator()(const FactorFriend &factor) const {
@@ -111,4 +114,6 @@ public:
   const Factor *GetFactor(const StringPiece &factorString, bool isNonTerminal = false);
 
 };
+
+}
 

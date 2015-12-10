@@ -5,6 +5,9 @@
 #include <boost/unordered_map.hpp>
 #include <boost/foreach.hpp>
 
+namespace Moses2
+{
+
 template<class KeyClass, class ValueClass> 
 class Node
 {
@@ -76,6 +79,8 @@ Node<KeyClass, ValueClass>* Node<KeyClass, ValueClass>::findSub(const KeyClass& 
 		return node;
 	}
     return NULL;
+}
+
 }
 
 #endif /* end of include guard: NODE_H_ */

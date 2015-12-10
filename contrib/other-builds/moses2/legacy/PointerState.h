@@ -3,6 +3,9 @@
 #include <sstream>
 #include "FFState.h"
 
+namespace Moses2
+{
+
 struct PointerState : public FFState {
   const void* lmstate;
 
@@ -30,4 +33,6 @@ struct PointerState : public FFState {
   }
 
 };
+
+}
 

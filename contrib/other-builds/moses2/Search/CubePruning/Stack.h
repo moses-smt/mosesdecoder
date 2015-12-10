@@ -14,6 +14,9 @@
 #include "../../Vector.h"
 #include "../../legacy/Util2.h"
 
+namespace Moses2
+{
+
 class Manager;
 
 namespace NSCubePruning
@@ -76,6 +79,8 @@ protected:
 	HypothesisSet &GetHypothesisSet(const HypoCoverage &key);
 
 };
+
+}
 
 }
 

@@ -6,6 +6,9 @@
 #include "Bitmap.h"
 #include "Util2.h"
 
+namespace Moses2
+{
+
 class Bitmaps
 {
   typedef boost::unordered_map<Range, const Bitmap*> NextBitmaps;
@@ -25,4 +28,6 @@ public:
   const Bitmap &GetBitmap(const Bitmap &bm, const Range &range);
 
 };
+
+}
 

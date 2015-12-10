@@ -11,6 +11,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 ArcLists::ArcLists() {
 	// TODO Auto-generated constructor stub
 
@@ -66,5 +69,7 @@ ArcList *ArcLists::GetAndDetachArcList(const Hypothesis *hypo)
 	m_coll.erase(iter);
 
 	return arcList;
+}
+
 }
 

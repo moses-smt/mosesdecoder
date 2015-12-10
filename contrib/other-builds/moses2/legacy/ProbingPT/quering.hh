@@ -8,6 +8,8 @@
 #include <algorithm> //toLower
 #define API_VERSION 3
 
+namespace Moses2
+{
 
 char * read_binary_file(char * filename);
 
@@ -41,5 +43,7 @@ public:
   }
 
 };
+
+}
 
 

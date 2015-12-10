@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/functional/hash.hpp>
 #include "Bitmap.h"
 
+namespace Moses2
+{
+
 Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer)
   :m_bitmap(initializer.begin(), initializer.end())
 {
@@ -84,5 +87,7 @@ std::ostream& operator<<(std::ostream& out, const Bitmap& bitmap)
     out << int(bitmap.GetValue(i));
   }
   return out;
+}
+
 }
 

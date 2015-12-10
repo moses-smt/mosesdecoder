@@ -31,6 +31,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #undef max
 #endif
 
+namespace Moses2
+{
+
 /***
  * Efficient version of Bitmap for contiguous ranges
  */
@@ -97,5 +100,7 @@ inline size_t hash_value(const Range& range)
   size_t  seed = range.GetStartPos();
   boost::hash_combine(seed, range.GetEndPos());
   return seed;
+}
+
 }
 

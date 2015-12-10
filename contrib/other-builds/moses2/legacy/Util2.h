@@ -11,6 +11,9 @@
 #include <cmath>
 #include "../TypeDef.h"
 
+namespace Moses2
+{
+
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 typedef size_t FactorType;
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
@@ -263,3 +266,6 @@ T &GetThreadSpecificObj(boost::thread_specific_ptr<T> &coll)
   return *obj;
 
 }
+
+}
+

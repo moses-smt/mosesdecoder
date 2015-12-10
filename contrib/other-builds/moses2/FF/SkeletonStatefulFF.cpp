@@ -11,6 +11,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 class SkeletonState : public FFState
 {
 public:
@@ -78,3 +81,6 @@ void SkeletonStatefulFF::EvaluateWhenApplied(const Manager &mgr,
 	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
 	stateCast.targetLen = hypo.GetTargetPhrase().GetSize();
 }
+
+}
+

@@ -30,6 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdlib>
 #include "Range.h"
 
+namespace Moses2
+{
+
 typedef unsigned long WordsBitmapID;
 
 /** Vector of boolean to represent whether a word has been translated or not.
@@ -240,3 +243,4 @@ public:
 
 };
 
+}

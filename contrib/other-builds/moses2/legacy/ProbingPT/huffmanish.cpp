@@ -1,5 +1,8 @@
 #include "huffmanish.hh"
 
+namespace Moses2
+{
+
 Huffman::Huffman (const char * filepath)
 {
   //Read the file
@@ -449,3 +452,6 @@ std::vector<unsigned char> vbyte_encode_line(std::vector<unsigned int> line)
 
   return retvec;
 }
+
+}
+

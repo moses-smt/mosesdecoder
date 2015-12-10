@@ -13,6 +13,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 struct DistortionState_traditional : public FFState {
   Range range;
   int first_gap;
@@ -166,3 +169,6 @@ int Distortion::ComputeDistortionDistance(const Range& prev, const Range& curren
   }
   return abs(dist);
 }
+
+}
+

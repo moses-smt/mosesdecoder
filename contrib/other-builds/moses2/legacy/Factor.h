@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "util/string_piece.hh"
 
+namespace Moses2
+{
+
 struct FactorFriend;
 class FactorCollection;
 
@@ -89,4 +92,6 @@ public:
 };
 
 size_t hash_value(const Factor &f);
+
+}
 

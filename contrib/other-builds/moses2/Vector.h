@@ -9,6 +9,9 @@
 #include <cassert>
 #include "MemPool.h"
 
+namespace Moses2
+{
+
 template <typename T>
 class Vector {
 public:
@@ -55,4 +58,6 @@ protected:
   size_t m_size, m_maxSize;
   T *m_arr;
 };
+
+}
 

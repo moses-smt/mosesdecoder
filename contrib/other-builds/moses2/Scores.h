@@ -11,6 +11,9 @@
 #include "TypeDef.h"
 #include "MemPool.h"
 
+namespace Moses2
+{
+
 class FeatureFunction;
 class FeatureFunctions;
 class System;
@@ -57,4 +60,6 @@ protected:
 	SCORE *m_scores;
 	SCORE m_total;
 };
+
+}
 

@@ -12,6 +12,9 @@
 #include "../FF/StatelessFeatureFunction.h"
 #include "../legacy/Util2.h"
 
+namespace Moses2
+{
+
 class System;
 class InputPaths;
 class InputPath;
@@ -67,4 +70,6 @@ protected:
   void ReduceCache() const;
 
 };
+
+}
 

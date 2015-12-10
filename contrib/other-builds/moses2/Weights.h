@@ -12,6 +12,9 @@
 #include <vector>
 #include "TypeDef.h"
 
+namespace Moses2
+{
+
 class FeatureFunctions;
 
 class Weights {
@@ -32,5 +35,8 @@ public:
 protected:
   std::vector<SCORE> m_weights;
 };
+
+}
+
 
 #endif /* WEIGHTS_H_ */

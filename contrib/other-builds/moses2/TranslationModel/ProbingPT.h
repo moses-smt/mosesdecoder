@@ -11,6 +11,9 @@
 #include <boost/bimap.hpp>
 #include "PhraseTable.h"
 
+namespace Moses2
+{
+
 class Phrase;
 class QueryEngine;
 class target_text;
@@ -50,5 +53,7 @@ protected:
   uint64_t GetSourceProbingId(const Factor *factor) const;
 
 };
+
+}
 
 #endif /* FF_TRANSLATIONMODEL_PROBINGPT_H_ */

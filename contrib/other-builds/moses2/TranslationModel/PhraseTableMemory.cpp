@@ -17,6 +17,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 PhraseTableMemory::Node::Node()
 :m_unsortedTPS(NULL)
 {}
@@ -140,5 +143,7 @@ TargetPhrases::shared_const_ptr PhraseTableMemory::Lookup(const Manager &mgr, In
 	const SubPhrase &phrase = inputPath.subPhrase;
 	TargetPhrases::shared_const_ptr tps = m_root.Find(phrase);
 	return tps;
+}
+
 }
 

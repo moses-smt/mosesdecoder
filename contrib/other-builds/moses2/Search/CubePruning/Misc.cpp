@@ -11,6 +11,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 namespace NSCubePruning
 {
 
@@ -138,6 +141,8 @@ void CubeEdge::Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenP
 
 
 	}
+}
+
 }
 
 }

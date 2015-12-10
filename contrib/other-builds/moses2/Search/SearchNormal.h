@@ -15,6 +15,9 @@
 #include "Search.h"
 #include "Stacks.h"
 
+namespace Moses2
+{
+
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
@@ -47,5 +50,8 @@ protected:
 			SCORE estimatedScore);
 
 };
+
+}
+
 
 #endif /* SEARCHNORMAL_H_ */

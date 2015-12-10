@@ -11,6 +11,9 @@
 #include "../legacy/Bitmap.h"
 #include "../legacy/Range.h"
 
+namespace Moses2
+{
+
 Search::Search(Manager &mgr)
 :m_mgr(mgr)
 {
@@ -112,3 +115,7 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const R
 
     return true;
 }
+
+}
+
+

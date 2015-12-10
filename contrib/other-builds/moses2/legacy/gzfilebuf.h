@@ -6,6 +6,9 @@
 #include <zlib.h>
 #include <cstring>
 
+namespace Moses2
+{
+
 /** wrapper around gzip input stream. Unknown parentage
  *  @todo replace with boost version - output stream already uses it
  */
@@ -87,5 +90,7 @@ private:
   static const unsigned int _buffsize = 1024;
   char _buff[_buffsize];
 };
+
+}
 
 #endif

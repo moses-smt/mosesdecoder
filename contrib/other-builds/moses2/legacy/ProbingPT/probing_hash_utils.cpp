@@ -1,5 +1,8 @@
 #include "probing_hash_utils.hh"
 
+namespace Moses2
+{
+
 //Read table from disk, return memory map location
 char * readTable(const char * filename, size_t size)
 {
@@ -32,3 +35,6 @@ void serialize_table(char *mem, size_t size, const char * filename)
   os.close();
 
 }
+
+}
+

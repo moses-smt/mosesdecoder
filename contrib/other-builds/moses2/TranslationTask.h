@@ -2,6 +2,9 @@
 #include <string>
 #include "legacy/ThreadPool.h"
 
+namespace Moses2
+{
+
 class System;
 class Manager;
 
@@ -16,3 +19,6 @@ public:
 protected:
 	Manager *m_mgr;
 };
+
+}
+

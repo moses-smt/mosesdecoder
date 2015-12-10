@@ -17,6 +17,9 @@
 #include "../legacy/Bitmaps.h"
 #include "../legacy/SquareMatrix.h"
 
+namespace Moses2
+{
+
 class System;
 class TranslationTask;
 class PhraseImpl;
@@ -80,4 +83,6 @@ protected:
 
 	void CalcFutureScore();
 };
+
+}
 

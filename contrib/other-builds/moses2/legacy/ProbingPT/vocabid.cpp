@@ -1,5 +1,8 @@
 #include "vocabid.hh"
 
+namespace Moses2
+{
+
 void add_to_map(std::map<uint64_t, std::string> *karta, StringPiece textin)
 {
   //Tokenize
@@ -30,3 +33,7 @@ void read_map(std::map<uint64_t, std::string> *karta, const char* filename)
   //Close the stream after we are done.
   is.close();
 }
+
+}
+
+

@@ -9,6 +9,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 Stacks::Stacks() {
 	// TODO Auto-generated constructor stub
 
@@ -49,6 +52,8 @@ void Stacks::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 	//cerr << "numWordsCovered=" << numWordsCovered << endl;
 	Stack &stack = *m_stacks[numWordsCovered];
 	stack.Add(hypo, hypoRecycle);
+
+}
 
 }
 

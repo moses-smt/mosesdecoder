@@ -10,6 +10,7 @@
 #include "../legacy/Util2.h"
 #include "../legacy/Factor.h"
 
+
 namespace DALM
 {
 class Logger;
@@ -21,6 +22,9 @@ class Gap;
 
 typedef unsigned int VocabId;
 }
+
+namespace Moses2
+{
 
 class LanguageModelDALM : public StatefulFeatureFunction
 {
@@ -65,4 +69,6 @@ protected:
   void CreateVocabMapping(const std::string &wordstxt, const System &system);
 
 };
+
+}
 

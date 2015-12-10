@@ -13,6 +13,9 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
+namespace Moses2
+{
+
 //Sorting for the second
 struct sort_pair {
   bool operator()(const std::pair<std::string, unsigned int> &left, const std::pair<std::string, unsigned int> &right) {
@@ -110,3 +113,7 @@ std::vector<unsigned char> vbyte_encode_line(std::vector<unsigned int> line);
 inline std::vector<unsigned char> vbyte_encode(unsigned int num);
 std::vector<unsigned int> vbyte_decode_line(std::vector<unsigned char> line);
 inline unsigned int bytes_to_int(std::vector<unsigned char> number);
+
+}
+
+

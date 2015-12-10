@@ -9,6 +9,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 inline void ParseLineByChar(string& line, char c, vector<string>& substrings) {
     size_t i = 0;
     size_t j = line.find(c);
@@ -22,3 +25,6 @@ inline void ParseLineByChar(string& line, char c, vector<string>& substrings) {
             substrings.push_back(line.substr(i, line.length()));
     }
 }
+
+}
+

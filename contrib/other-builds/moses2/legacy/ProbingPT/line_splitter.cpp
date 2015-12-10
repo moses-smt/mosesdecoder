@@ -1,5 +1,8 @@
 #include "line_splitter.hh"
 
+namespace Moses2
+{
+
 line_text splitLine(StringPiece textin)
 {
   const char delim[] = " ||| ";
@@ -49,6 +52,8 @@ std::vector<unsigned char> splitWordAll1(StringPiece textin)
   }
 
   return output;
+
+}
 
 }
 

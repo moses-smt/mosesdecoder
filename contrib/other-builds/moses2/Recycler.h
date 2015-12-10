@@ -10,6 +10,9 @@
 
 #include <vector>
 
+namespace Moses2
+{
+
 template<typename T>
 class Recycler {
 	typedef std::vector<T> Coll;
@@ -61,5 +64,8 @@ public:
 protected:
 	Coll m_coll;
 };
+
+}
+
 
 #endif /* RECYCLER_H_ */

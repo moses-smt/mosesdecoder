@@ -19,10 +19,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Range.h"
 
+namespace Moses2
+{
 
 std::ostream& operator << (std::ostream& out, const Range& range)
 {
   out << "[" << range.m_startPos << ".." << range.m_endPos << "]";
   return out;
+}
+
 }
 

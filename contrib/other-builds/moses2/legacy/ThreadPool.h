@@ -39,6 +39,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 //#include "Util.h"
 
+namespace Moses2
+{
 
 /**
   * Classes to implement a ThreadPool.
@@ -124,4 +126,6 @@ private:
   int m_id;
 };
 
+
+}
 

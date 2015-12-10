@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 namespace NSCubePruning
 {
 CubeEdge::Hypotheses &HypothesisSet::GetSortedHypos(const Manager &mgr) const
@@ -174,6 +177,8 @@ HypothesisSet &Stack::GetHypothesisSet(const HypoCoverage &key)
 	return *ret;
 	*/
 	return m_coll[key];
+}
+
 }
 
 }

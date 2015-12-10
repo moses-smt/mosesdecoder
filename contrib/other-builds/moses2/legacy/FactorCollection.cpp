@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses2
+{
+
 const Factor *FactorCollection::AddFactor(const StringPiece &factorString, const System &system, bool isNonTerminal)
 {
   FactorFriend to_ins;
@@ -98,5 +101,5 @@ ostream& operator<<(ostream& out, const FactorCollection& factorCollection)
   return out;
 }
 
-
+}
 

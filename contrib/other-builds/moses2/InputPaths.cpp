@@ -12,6 +12,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 InputPaths::~InputPaths() {
 	// TODO Auto-generated destructor stub
 }
@@ -56,5 +59,7 @@ void InputPaths::DeleteUnusedPaths()
 			++ind;
 		}
 	}
+}
+
 }
 

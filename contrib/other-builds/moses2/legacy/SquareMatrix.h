@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util2.h"
 #include "Bitmap.h"
 
+namespace Moses2
+{
 
 //! A square array of floats to store future costs in the phrase-based decoder
 class SquareMatrix
@@ -75,5 +77,7 @@ inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
   }
 
   return out;
+}
+
 }
 

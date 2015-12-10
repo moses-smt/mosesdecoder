@@ -18,6 +18,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 struct LMState : public PointerState
 {
   LMState()
@@ -309,3 +312,6 @@ void LanguageModel::DebugContext(const std::vector<const Factor*> &context) cons
 	}
 	cerr << endl;
 }
+
+}
+

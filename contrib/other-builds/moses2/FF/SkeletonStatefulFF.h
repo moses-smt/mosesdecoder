@@ -10,6 +10,9 @@
 
 #include "StatefulFeatureFunction.h"
 
+namespace Moses2
+{
+
 class SkeletonStatefulFF : public StatefulFeatureFunction
 {
 public:
@@ -32,5 +35,7 @@ public:
 	FFState &state) const;
 
 };
+
+}
 
 #endif /* SKELETONSTATEFULFF_H_ */

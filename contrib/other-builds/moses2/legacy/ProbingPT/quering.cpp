@@ -1,5 +1,8 @@
 #include "quering.hh"
 
+namespace Moses2
+{
+
 unsigned char * read_binary_file(const char * filename, size_t filesize)
 {
   //Get filesize
@@ -196,3 +199,6 @@ void QueryEngine::printTargetInfo(std::vector<target_text> target_phrases)
     std::cout << std::endl;
   }
 }
+
+}
+

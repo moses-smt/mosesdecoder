@@ -12,6 +12,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 MemPool::Page::Page(std::size_t vSize)
 :size(vSize)
 {
@@ -76,5 +79,7 @@ void MemPool::Reset()
 {
 	m_currPage = 0;
 	current_ = m_pages[0]->mem;
+}
+
 }
 

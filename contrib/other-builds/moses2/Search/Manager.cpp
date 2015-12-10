@@ -20,6 +20,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr)
 :system(sys)
 ,task(task)
@@ -158,6 +161,8 @@ void Manager::OutputBest(std::ostream &out) const
 	out << endl;
 	cerr << endl;
 
+
+}
 
 }
 

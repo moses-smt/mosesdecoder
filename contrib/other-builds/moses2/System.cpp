@@ -17,6 +17,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 System::System(const Parameter &paramsArg)
 :params(paramsArg)
 ,featureFunctions(*this)
@@ -170,3 +173,6 @@ NSCubePruning::CubeEdge::SeenPositions &System::GetSeenPositions() const
   NSCubePruning::CubeEdge::SeenPositions &ret = GetThreadSpecificObj(m_seenPositions);
   return ret;
 }
+
+}
+

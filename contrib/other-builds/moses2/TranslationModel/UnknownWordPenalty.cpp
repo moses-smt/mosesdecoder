@@ -11,6 +11,9 @@
 #include "../Scores.h"
 #include "../Search/Manager.h"
 
+namespace Moses2
+{
+
 UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line)
 :PhraseTable(startInd, line)
 {
@@ -87,3 +90,6 @@ UnknownWordPenalty::EvaluateInIsolation(const System &system,
 {
 
 }
+
+}
+

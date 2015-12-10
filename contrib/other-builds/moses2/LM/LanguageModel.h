@@ -14,6 +14,9 @@
 #include "../legacy/Factor.h"
 #include "../legacy/Util2.h"
 
+namespace Moses2
+{
+
 ////////////////////////////////////////////////////////////////////////////////////////
 struct LMScores
 {
@@ -81,5 +84,8 @@ protected:
 
     void DebugContext(const std::vector<const Factor*> &context) const;
 };
+
+}
+
 
 #endif /* LANGUAGEMODEL_H_ */

@@ -27,6 +27,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 FeatureFunctions::FeatureFunctions(System &system)
 :m_system(system)
 ,m_ffStartInd(0)
@@ -101,7 +104,7 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 		ret = new PhraseTableMemory(m_ffStartInd, line);
 	}
 	else if (toks[0] == "ProbingPT") {
-		ret = new ProbingPT(m_ffStartInd, line);
+		ret = new Moses2::ProbingPT(m_ffStartInd, line);
 	}
 	else if (toks[0] == "UnknownWordPenalty") {
 		ret = new UnknownWordPenalty(m_ffStartInd, line);
@@ -180,3 +183,6 @@ FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 	  targetPhrase.SetEstimatedScore(estimatedScores->GetTotalScore());
   }
 }
+
+}
+

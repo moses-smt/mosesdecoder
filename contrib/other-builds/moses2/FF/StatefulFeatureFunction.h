@@ -13,6 +13,9 @@
 #include "../MemPool.h"
 #include "../Recycler.h"
 
+namespace Moses2
+{
+
 class Hypothesis;
 
 class StatefulFeatureFunction : public FeatureFunction
@@ -52,5 +55,8 @@ protected:
 
 
 };
+
+}
+
 
 #endif /* STATEFULFEATUREFUNCTION_H_ */

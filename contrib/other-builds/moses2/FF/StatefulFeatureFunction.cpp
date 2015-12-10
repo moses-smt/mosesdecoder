@@ -13,6 +13,9 @@
 #include "StatefulFeatureFunction.h"
 #include "../Search/Hypothesis.h"
 
+namespace Moses2
+{
+
 StatefulFeatureFunction::StatefulFeatureFunction(size_t startInd, const std::string &line)
 :FeatureFunction(startInd, line)
 {
@@ -52,3 +55,6 @@ void StatefulFeatureFunction::EvaluateWhenApplied(const ObjectPoolContiguous<Hyp
 	//    s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpusetOrig);
 #endif
 }
+
+}
+

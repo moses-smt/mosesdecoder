@@ -14,6 +14,9 @@
 #include "MemPool.h"
 #include "legacy/FactorCollection.h"
 
+namespace Moses2
+{
+
 class SubPhrase;
 
 class Phrase
@@ -89,3 +92,6 @@ public:
 	return a.GetSize() < b.GetSize();
   }
 };
+
+}
+

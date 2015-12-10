@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses2
+{
 
 // friend
 ostream& operator<<(ostream& out, const Factor& factor)
@@ -39,5 +41,6 @@ size_t hash_value(const Factor& f)
   return hasher(f.GetId());
 }
 
+}
 
 

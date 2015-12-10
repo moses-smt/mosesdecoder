@@ -8,6 +8,9 @@
 #include "InputPath.h"
 #include "TranslationModel/PhraseTable.h"
 
+namespace Moses2
+{
+
 InputPath::InputPath(const SubPhrase &subPhrase,
 		const Range &range,
 		size_t numPt,
@@ -51,3 +54,6 @@ std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 	out << obj.range << " " << obj.subPhrase;
 	return out;
 }
+
+}
+

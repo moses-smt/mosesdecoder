@@ -10,6 +10,9 @@
 
 #include "StatelessFeatureFunction.h"
 
+namespace Moses2
+{
+
 class WordPenalty  : public StatelessFeatureFunction
 {
 public:
@@ -24,6 +27,8 @@ public:
 			  Scores *estimatedScores) const;
 
 };
+
+}
 
 #endif /* WORDPENALTY_H_ */
 

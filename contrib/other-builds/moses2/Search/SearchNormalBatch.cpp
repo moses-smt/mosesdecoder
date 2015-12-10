@@ -19,6 +19,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 SearchNormalBatch::SearchNormalBatch(Manager &mgr)
 :Search(mgr)
 ,m_batchForEval(&mgr.system.GetBatchForEval())
@@ -174,5 +177,7 @@ const Hypothesis *SearchNormalBatch::GetBestHypothesis() const
 		best = sortedHypos[0];
 	}
 	return best;
+}
+
 }
 

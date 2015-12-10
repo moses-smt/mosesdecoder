@@ -30,6 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace Moses2
+{
+
 #define handle_error_en(en, msg) \
   do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
 
@@ -132,5 +135,7 @@ void ThreadPool::Stop(bool processRemainingJobs)
   m_threadNeeded.notify_all();
 
   m_threads.join_all();
+}
+
 }
 

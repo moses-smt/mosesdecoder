@@ -10,6 +10,9 @@
 #include "Vector.h"
 #include "TargetPhrase.h"
 
+namespace Moses2
+{
+
 class TargetPhrases {
 	friend std::ostream& operator<<(std::ostream &, const TargetPhrases &);
 	typedef Vector<const TargetPhrase*> Coll;
@@ -49,4 +52,6 @@ protected:
 	Coll m_coll;
 	size_t m_currInd;
 };
+
+}
 

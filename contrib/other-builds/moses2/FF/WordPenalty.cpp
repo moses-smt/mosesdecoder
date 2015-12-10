@@ -10,6 +10,9 @@
 #include "../Scores.h"
 #include "../TargetPhrase.h"
 
+namespace Moses2
+{
+
 WordPenalty::WordPenalty(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
 {
@@ -29,6 +32,8 @@ WordPenalty::EvaluateInIsolation(const System &system,
 {
   SCORE score = - (SCORE) targetPhrase.GetSize();
   scores.PlusEquals(system, *this, score);
+}
+
 }
 
 

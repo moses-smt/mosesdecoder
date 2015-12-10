@@ -10,6 +10,9 @@
 #include <vector>
 #include "Stack.h"
 
+namespace Moses2
+{
+
 namespace NSCubePruning
 {
 
@@ -36,6 +39,8 @@ protected:
 	std::vector<Stack> m_stacks;
 };
 
+
+}
 
 }
 

@@ -12,6 +12,9 @@
 #include "legacy/Factor.h"
 #include "legacy/FactorCollection.h"
 
+namespace Moses2
+{
+
 class Word {
 	  friend std::ostream& operator<<(std::ostream &, const Word &);
 public:
@@ -45,4 +48,6 @@ protected:
   const Factor *m_factors[MAX_NUM_FACTORS];
 
 };
+
+}
 

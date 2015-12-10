@@ -17,6 +17,9 @@
 #include "TypeDef.h"
 #include "Search/CubePruning/Misc.h"
 
+namespace Moses2
+{
+
 class FeatureFunction;
 class StatefulFeatureFunction;
 class PhraseTable;
@@ -70,4 +73,6 @@ protected:
 
   void ini_performance_options();
 };
+
+}
 

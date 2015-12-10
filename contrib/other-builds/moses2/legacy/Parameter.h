@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/program_options.hpp>
 #include "Util2.h"
 
+namespace Moses2
+{
+
 typedef std::vector<std::string>            PARAM_VEC;
 typedef std::map<std::string, PARAM_VEC >   PARAM_MAP;
 typedef std::map<std::string, bool>         PARAM_BOOL;
@@ -162,4 +165,6 @@ public:
 
 template<>
 void Parameter::SetParameter<bool>(bool &var, const std::string &name, const bool &defaultValue) const;
+
+}
 

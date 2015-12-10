@@ -4,6 +4,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 Bitmaps::Bitmaps(size_t inputSize, const std::vector<bool> &initSourceCompleted)
 {
   m_initBitmap = new Bitmap(inputSize, initSourceCompleted);
@@ -50,5 +53,7 @@ const Bitmap &Bitmaps::GetBitmap(const Bitmap &bm, const Range &range)
     newBM = iterNext->second;
   }
   return *newBM;
+}
+
 }
 

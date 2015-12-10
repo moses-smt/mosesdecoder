@@ -11,6 +11,9 @@
 #include "Phrase.h"
 #include "MemPool.h"
 
+namespace Moses2
+{
+
 class Scores;
 class Manager;
 class System;
@@ -53,4 +56,6 @@ struct CompareFutureScore {
 	  return a.GetFutureScore() > b.GetFutureScore();
   }
 };
+
+}
 

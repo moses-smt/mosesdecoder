@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 ////////////////////////////////////////////////////////////////////////////
 PhraseTable::PhraseTable(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
@@ -163,5 +166,7 @@ void PhraseTable::ReduceCache() const
       cache.erase(iterRemove);
     } else iter++;
   }
+}
+
 }
 

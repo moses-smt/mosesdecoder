@@ -14,6 +14,9 @@
 #include "../legacy/Factor.h"
 #include "../legacy/Util2.h"
 
+namespace Moses2
+{
+
 class Word;
 
 class KENLM : public StatefulFeatureFunction
@@ -77,5 +80,7 @@ protected:
   std::vector<lm::WordIndex> m_lmIdLookup;
 
 };
+
+}
 
 #endif /* FF_LM_KENLM_H_ */

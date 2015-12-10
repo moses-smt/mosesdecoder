@@ -15,6 +15,9 @@
 #include "../TargetPhrase.h"
 #include "../legacy/Range.h"
 
+namespace Moses2
+{
+
 class Manager;
 class PhraseImpl;
 class TargetPhrase;
@@ -126,4 +129,6 @@ public:
     return ret;
   }
 };
+
+}
 

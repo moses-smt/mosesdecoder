@@ -10,6 +10,9 @@
 #include "PhraseTable.h"
 #include "../legacy/Util2.h"
 
+namespace Moses2
+{
+
 class PhraseTableMemory : public PhraseTable
 {
 //////////////////////////////////////
@@ -43,5 +46,8 @@ public:
 protected:
 	Node m_root;
 };
+
+}
+
 
 #endif /* PHRASETABLEMEMORY_H_ */

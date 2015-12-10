@@ -9,6 +9,9 @@
 
 #include "StatelessFeatureFunction.h"
 
+namespace Moses2
+{
+
 class SkeletonStatelessFF : public StatelessFeatureFunction
 {
 public:
@@ -22,3 +25,6 @@ public:
 			  Scores *estimatedScores) const;
 
 };
+
+}
+

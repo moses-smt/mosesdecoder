@@ -10,6 +10,9 @@
 
 #include <stddef.h>
 
+namespace Moses2
+{
+
 class Manager;
 class Stack;
 class Hypothesis;
@@ -32,5 +35,8 @@ protected:
 	int ComputeDistortionDistance(size_t prevEndPos, size_t currStartPos) const;
 
 };
+
+}
+
 
 #endif /* SEARCH_SEARCH_H_ */

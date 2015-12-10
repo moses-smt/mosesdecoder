@@ -17,6 +17,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 SearchNormal::SearchNormal(Manager &mgr)
 :Search(mgr)
 {
@@ -134,5 +137,7 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
 		best = sortedHypos[0];
 	}
 	return best;
+}
+
 }
 

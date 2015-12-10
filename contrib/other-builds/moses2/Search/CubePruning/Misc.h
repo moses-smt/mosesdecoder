@@ -14,6 +14,9 @@
 #include "../../TypeDef.h"
 #include "../../Vector.h"
 
+namespace Moses2
+{
+
 class Manager;
 class InputPath;
 class TargetPhrases;
@@ -83,6 +86,7 @@ protected:
 
 };
 
+}
 
 }
 

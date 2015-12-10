@@ -13,6 +13,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 size_t Phrase::hash() const
 {
   size_t  seed = 0;
@@ -116,3 +119,6 @@ std::ostream& operator<<(std::ostream &out, const SubPhrase &obj)
 	}
 	return out;
 }
+
+}
+

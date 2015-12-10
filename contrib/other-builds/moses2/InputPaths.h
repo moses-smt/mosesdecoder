@@ -12,6 +12,9 @@
 #include "InputPath.h"
 #include "MemPool.h"
 
+namespace Moses2
+{
+
 class PhraseImpl;
 class System;
 
@@ -45,5 +48,8 @@ public:
 protected:
 	Coll m_inputPaths;
 };
+
+}
+
 
 #endif /* INPUTPATHS_H_ */

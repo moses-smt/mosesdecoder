@@ -16,6 +16,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 //size_t g_numHypos = 0;
 
 Hypothesis *Hypothesis::Create(Manager &mgr)
@@ -235,14 +238,16 @@ const Word &Hypothesis::GetWord(size_t pos) const {
 
 void Hypothesis::Swap(Hypothesis &other)
 {
-	::Swap(m_targetPhrase, other.m_targetPhrase);
-	::Swap(m_sourceCompleted, other.m_sourceCompleted);
-	::Swap(m_range, other.m_range);
-	::Swap(m_prevHypo, other.m_prevHypo);
-	::Swap(m_ffStates, other.m_ffStates);
-	::Swap(m_estimatedScore, other.m_estimatedScore);
-	::Swap(m_currTargetWordsRange, other.m_currTargetWordsRange);
-
+	/*
+	Swap(m_targetPhrase, other.m_targetPhrase);
+	Swap(m_sourceCompleted, other.m_sourceCompleted);
+	Swap(m_range, other.m_range);
+	Swap(m_prevHypo, other.m_prevHypo);
+	Swap(m_ffStates, other.m_ffStates);
+	Swap(m_estimatedScore, other.m_estimatedScore);
+	Swap(m_currTargetWordsRange, other.m_currTargetWordsRange);
+	*/
+}
 
 }
 

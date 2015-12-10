@@ -7,6 +7,9 @@
 
 #include "StatelessFeatureFunction.h"
 
+namespace Moses2
+{
+
 StatelessFeatureFunction::StatelessFeatureFunction(size_t startInd, const std::string &line)
 :FeatureFunction(startInd, line)
 {
@@ -16,5 +19,7 @@ StatelessFeatureFunction::StatelessFeatureFunction(size_t startInd, const std::s
 
 StatelessFeatureFunction::~StatelessFeatureFunction() {
 	// TODO Auto-generated destructor stub
+}
+
 }
 

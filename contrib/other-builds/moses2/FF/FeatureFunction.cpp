@@ -13,6 +13,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 FeatureFunction::FeatureFunction(size_t startInd, const std::string &line)
 :m_startInd(startInd)
 ,m_numScores(1)
@@ -79,3 +82,6 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
     UTIL_THROW2(GetName() << ": Unknown argument " << key << "=" << value);
   }
 }
+
+}
+

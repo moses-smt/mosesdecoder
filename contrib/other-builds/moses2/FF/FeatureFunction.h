@@ -12,6 +12,9 @@
 #include <string>
 #include <vector>
 
+namespace Moses2
+{
+
 class System;
 class Phrase;
 class PhraseImpl;
@@ -63,5 +66,8 @@ protected:
 	virtual void ReadParameters();
 	void ParseLine(const std::string &line);
 };
+
+}
+
 
 #endif /* FEATUREFUNCTION_H_ */

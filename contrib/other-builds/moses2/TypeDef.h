@@ -8,6 +8,9 @@
 
 #include <cstddef>
 
+namespace Moses2
+{
+
 class Hypothesis;
 
 const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
@@ -51,6 +54,8 @@ public:
 	{
 	}
 };
+
+}
 
 
 

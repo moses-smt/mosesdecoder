@@ -1,6 +1,9 @@
 #include "Util2.h"
 #include "util/exception.hh"
 
+namespace Moses2
+{
+
 class BoolValueException : public util::Exception {};
 
 template<>
@@ -20,3 +23,6 @@ const std::string ToLower(const std::string& str)
   std::transform(lc.begin(), lc.end(), lc.begin(), (int(*)(int))std::tolower);
   return lc;
 }
+
+}
+

@@ -9,6 +9,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 namespace NSCubePruning
 {
 
@@ -42,6 +45,8 @@ void Stacks::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 	//cerr << "numWordsCovered=" << numWordsCovered << endl;
 	Stack &stack = m_stacks[numWordsCovered];
 	stack.Add(hypo, hypoRecycle);
+
+}
 
 }
 

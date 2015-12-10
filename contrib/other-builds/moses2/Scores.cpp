@@ -17,6 +17,9 @@
 
 using namespace std;
 
+namespace Moses2
+{
+
 Scores::Scores(const System &system, MemPool &pool, size_t numScores)
 :m_total(0)
 {
@@ -183,3 +186,6 @@ std::ostream& operator<<(std::ostream &out, const Scores &obj)
 	}
 	return out;
 }
+
+}
+

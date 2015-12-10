@@ -10,6 +10,9 @@
 
 #include "PhraseTable.h"
 
+namespace Moses2
+{
+
 class UnknownWordPenalty : public PhraseTable
 {
 public:
@@ -26,5 +29,7 @@ public:
 			  Scores *estimatedScores) const;
 
 };
+
+}
 
 #endif /* UNKNOWNWORDPENALTY_H_ */

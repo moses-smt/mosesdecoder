@@ -8,6 +8,9 @@
 #include "PhrasePenalty.h"
 #include "../Scores.h"
 
+namespace Moses2
+{
+
 PhrasePenalty::PhrasePenalty(size_t startInd, const std::string &line)
 :StatelessFeatureFunction(startInd, line)
 {
@@ -26,3 +29,6 @@ PhrasePenalty::EvaluateInIsolation(const System &system,
 {
   scores.PlusEquals(system, *this, 1);
 }
+
+}
+
