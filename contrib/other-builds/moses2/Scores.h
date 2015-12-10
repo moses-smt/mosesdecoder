@@ -49,6 +49,10 @@ public:
 		  const Vector<SCORE> &scores);
 
   void PlusEquals(const System &system,
+  		const FeatureFunction &featureFunction,
+  		SCORE scores[]);
+
+  void PlusEquals(const System &system,
 		  const Scores &scores);
 
   void Assign(const System &system,

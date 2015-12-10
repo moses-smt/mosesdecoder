@@ -156,8 +156,9 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
   }
 
   // score for this phrase table
-  Vector<SCORE> scores(pool, probingTargetPhrase.prob);
-  std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
+  SCORE scores[probingTargetPhrase.prob.size()];
+  std::copy(probingTargetPhrase.prob.begin(), probingTargetPhrase.prob.end(), scores);
+  std::transform(scores, scores + probingTargetPhrase.prob.size(), scores, TransformScore);
   tp->GetScores().PlusEquals(system, *this, scores);
 
 //  // alignment
