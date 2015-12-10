@@ -41,7 +41,7 @@ protected:
   TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
 
-  Vector<uint64_t> *ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, MemPool &pool) const;
+  void ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, uint64_t probingSource[]) const;
 
   inline const Factor *GetTargetFactor(uint64_t probingId) const
   {

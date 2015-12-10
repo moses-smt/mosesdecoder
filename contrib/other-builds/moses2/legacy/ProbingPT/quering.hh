@@ -34,7 +34,7 @@ public:
   QueryEngine (const char *);
   ~QueryEngine();
   std::pair<bool, std::vector<target_text> > query(const StringPiece &source_phrase);
-  std::pair<bool, std::vector<target_text> > query(const Vector<uint64_t> &source_phrase);
+  std::pair<bool, std::vector<target_text> > query(uint64_t source_phrase[], size_t size);
   void printTargetInfo(const std::vector<target_text> &target_phrases);
   const std::map<unsigned int, std::string> getVocab() const {
     return decoder.get_target_lookup_map();
