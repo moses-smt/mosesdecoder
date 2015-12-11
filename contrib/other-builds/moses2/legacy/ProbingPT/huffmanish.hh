@@ -93,15 +93,15 @@ public:
 
   inline std::string getTargetWordFromID(unsigned int id);
 
-  std::string getTargetWordsFromIDs(std::vector<unsigned int> ids);
+  std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids);
 
-  target_text decode_line (std::vector<unsigned int> input, int num_scores);
+  target_text decode_line (const std::vector<unsigned int> &input, int num_scores);
 
   //Variable byte decodes a all target phrases contained here and then passes them to decode_line
-  std::vector<target_text> full_decode_line (std::vector<unsigned char> lines, int num_scores);
+  std::vector<target_text> full_decode_line (const std::vector<unsigned char> &lines, int num_scores);
 };
 
-std::string getTargetWordsFromIDs(std::vector<unsigned int> ids, std::map<unsigned int, std::string> * lookup_target_phrase);
+std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, std::map<unsigned int, std::string> * lookup_target_phrase);
 
 inline std::string getTargetWordFromID(unsigned int id, std::map<unsigned int, std::string> * lookup_target_phrase);
 
@@ -109,10 +109,10 @@ inline unsigned int reinterpret_float(float * num);
 
 inline float reinterpret_uint(unsigned int * num);
 
-std::vector<unsigned char> vbyte_encode_line(std::vector<unsigned int> line);
+std::vector<unsigned char> vbyte_encode_line(const std::vector<unsigned int> &line);
 inline std::vector<unsigned char> vbyte_encode(unsigned int num);
-std::vector<unsigned int> vbyte_decode_line(std::vector<unsigned char> line);
-inline unsigned int bytes_to_int(std::vector<unsigned char> number);
+std::vector<unsigned int> vbyte_decode_line(const std::vector<unsigned char> &line);
+inline unsigned int bytes_to_int(const std::vector<unsigned char> &number);
 
 }
 

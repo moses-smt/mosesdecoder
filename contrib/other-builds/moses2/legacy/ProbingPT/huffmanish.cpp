@@ -222,7 +222,7 @@ HuffmanDecoder::HuffmanDecoder (std::map<unsigned int, std::string> * lookup_tar
   lookup_word_all1 = *lookup_word1;
 }
 
-std::vector<target_text> HuffmanDecoder::full_decode_line (std::vector<unsigned char> lines, int num_scores)
+std::vector<target_text> HuffmanDecoder::full_decode_line (const std::vector<unsigned char> &lines, int num_scores)
 {
   std::vector<target_text> retvector; //All target phrases
   std::vector<unsigned int> decoded_lines = vbyte_decode_line(lines); //All decoded lines
@@ -266,7 +266,7 @@ std::vector<target_text> HuffmanDecoder::full_decode_line (std::vector<unsigned 
 
 }
 
-target_text HuffmanDecoder::decode_line (std::vector<unsigned int> input, int num_scores)
+target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input, int num_scores)
 {
   //demo decoder
   target_text ret;
@@ -315,10 +315,10 @@ inline std::string HuffmanDecoder::getTargetWordFromID(unsigned int id)
   return lookup_target_phrase.find(id)->second;
 }
 
-std::string HuffmanDecoder::getTargetWordsFromIDs(std::vector<unsigned int> ids)
+std::string HuffmanDecoder::getTargetWordsFromIDs(const std::vector<unsigned int> &ids)
 {
   std::string returnstring;
-  for (std::vector<unsigned int>::iterator it = ids.begin(); it != ids.end(); it++) {
+  for (std::vector<unsigned int>::const_iterator it = ids.begin(); it != ids.end(); it++) {
     returnstring.append(getTargetWordFromID(*it) + " ");
   }
 
@@ -330,10 +330,10 @@ inline std::string getTargetWordFromID(unsigned int id, std::map<unsigned int, s
   return lookup_target_phrase->find(id)->second;
 }
 
-std::string getTargetWordsFromIDs(std::vector<unsigned int> ids, std::map<unsigned int, std::string> * lookup_target_phrase)
+std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, std::map<unsigned int, std::string> * lookup_target_phrase)
 {
   std::string returnstring;
-  for (std::vector<unsigned int>::iterator it = ids.begin(); it != ids.end(); it++) {
+  for (std::vector<unsigned int>::const_iterator it = ids.begin(); it != ids.end(); it++) {
     returnstring.append(getTargetWordFromID(*it, lookup_target_phrase) + " ");
   }
 
@@ -409,12 +409,12 @@ b1:
   return byte_vector;
 }
 
-std::vector<unsigned int> vbyte_decode_line(std::vector<unsigned char> line)
+std::vector<unsigned int> vbyte_decode_line(const std::vector<unsigned char> &line)
 {
   std::vector<unsigned int> huffman_line;
   std::vector<unsigned char> current_num;
 
-  for (std::vector<unsigned char>::iterator it = line.begin(); it != line.end(); it++) {
+  for (std::vector<unsigned char>::const_iterator it = line.begin(); it != line.end(); it++) {
     current_num.push_back(*it);
     if ((*it >> 7) != 1) {
       //We don't have continuation in the next bit
@@ -425,10 +425,10 @@ std::vector<unsigned int> vbyte_decode_line(std::vector<unsigned char> line)
   return huffman_line;
 }
 
-inline unsigned int bytes_to_int(std::vector<unsigned char> number)
+inline unsigned int bytes_to_int(const std::vector<unsigned char> &number)
 {
   unsigned int retvalue = 0;
-  std::vector<unsigned char>::iterator it = number.begin();
+  std::vector<unsigned char>::const_iterator it = number.begin();
   unsigned char shift = 0; //By how many bits to shift
 
   while (it != number.end()) {
@@ -440,12 +440,12 @@ inline unsigned int bytes_to_int(std::vector<unsigned char> number)
   return retvalue;
 }
 
-std::vector<unsigned char> vbyte_encode_line(std::vector<unsigned int> line)
+std::vector<unsigned char> vbyte_encode_line(const std::vector<unsigned int> &line)
 {
   std::vector<unsigned char> retvec;
 
   //For each unsigned int in the line, vbyte encode it and add it to a vector of unsigned chars.
-  for (std::vector<unsigned int>::iterator it = line.begin(); it != line.end(); it++) {
+  for (std::vector<unsigned int>::const_iterator it = line.begin(); it != line.end(); it++) {
     std::vector<unsigned char> vbyte_encoded = vbyte_encode(*it);
     retvec.insert(retvec.end(), vbyte_encoded.begin(), vbyte_encoded.end());
   }
