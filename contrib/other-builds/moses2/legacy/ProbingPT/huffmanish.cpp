@@ -407,30 +407,30 @@ b1:
 std::vector<unsigned int> vbyte_decode_line(unsigned char line[], size_t linesSize)
 {
   std::vector<unsigned int> huffman_line;
-  std::vector<unsigned char> current_num;
+  unsigned char current_num[linesSize];
 
+  size_t current_num_ind = 0;
   for (size_t i = 0; i < linesSize; ++i) {
 	unsigned char c = line[i];
-    current_num.push_back(c);
+    current_num[current_num_ind++] = c;
     if ((c >> 7) != 1) {
       //We don't have continuation in the next bit
-      huffman_line.push_back(bytes_to_int(current_num));
-      current_num.clear();
+      huffman_line.push_back(bytes_to_int(current_num, current_num_ind));
+      current_num_ind = 0;
     }
   }
   return huffman_line;
 }
 
-inline unsigned int bytes_to_int(const std::vector<unsigned char> &number)
+inline unsigned int bytes_to_int(unsigned char number[], size_t numberSize)
 {
   unsigned int retvalue = 0;
-  std::vector<unsigned char>::const_iterator it = number.begin();
   unsigned char shift = 0; //By how many bits to shift
 
-  while (it != number.end()) {
-    retvalue |= (*it & 0x7f) << shift;
+  for (size_t i = 0; i < numberSize; ++i) {
+	unsigned char c = number[i];
+    retvalue |= (c & 0x7f) << shift;
     shift += 7;
-    it++;
   }
 
   return retvalue;

@@ -112,7 +112,7 @@ inline float reinterpret_uint(unsigned int * num);
 std::vector<unsigned char> vbyte_encode_line(const std::vector<unsigned int> &line);
 inline std::vector<unsigned char> vbyte_encode(unsigned int num);
 std::vector<unsigned int> vbyte_decode_line(unsigned char line[], size_t linesSize);
-inline unsigned int bytes_to_int(const std::vector<unsigned char> &number);
+inline unsigned int bytes_to_int(unsigned char number[], size_t numberSize);
 
 }
 
