@@ -299,7 +299,7 @@ target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
     counter++;
   }
 
-  ret.word_all1 = lookup_word_all1.find(wAll)->second;
+  ret.word_all1 = &lookup_word_all1.find(wAll)->second;
 
   return ret;
 

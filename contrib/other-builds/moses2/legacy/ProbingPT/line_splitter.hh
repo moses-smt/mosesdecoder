@@ -25,7 +25,7 @@ struct line_text {
 struct target_text {
   std::vector<unsigned int> target_phrase;
   std::vector<float> prob;
-  std::vector<unsigned char> word_all1;
+  std::vector<unsigned char> *word_all1;
 };
 
 //Ask if it's better to have it receive a pointer to a line_text struct
