@@ -226,7 +226,6 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
   return ret;
 }
 
-namespace {
 // Do a paraonoid copy of history, assuming new_word has already been copied
 // (hence the -1).  out_state.length could be zero so I avoided using
 // std::copy.
@@ -235,7 +234,6 @@ void CopyRemainingHistory(const WordIndex *from, State &out_state) {
   const WordIndex *in_end = from + static_cast<ptrdiff_t>(out_state.length) - 1;
   for (const WordIndex *in = from; in < in_end; ++in, ++out) *out = *in;
 }
-} // namespace
 
 /* Ugly optimized function.  Produce a score excluding backoff.
  * The search goes in increasing order of ngram length.

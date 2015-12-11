@@ -66,6 +66,8 @@ template <class Value> class HashedSearch {
     typedef typename Value::ProbingProxy UnigramPointer;
     typedef typename Value::ProbingProxy MiddlePointer;
     typedef ::lm::ngram::detail::LongestPointer LongestPointer;
+    typedef util::ProbingHashTable<typename Value::ProbingEntry, util::IdentityHash> Middle;
+    typedef util::ProbingHashTable<ProbEntry, util::IdentityHash> Longest;
 
     static const ModelType kModelType = Value::kProbingModelType;
     static const bool kDifferentRest = Value::kDifferentRest;
@@ -105,6 +107,25 @@ template <class Value> class HashedSearch {
       return MiddlePointer(middle_[extend_length - 2].MustFind(extend_pointer)->value);
     }
 
+    /** Iterator lookup and advance node: first part of two-part LookupMiddle() split for prefetching */
+    typename Middle::ConstIterator MiddleAdvance(unsigned char order_minus_2, WordIndex word, Node &node) const {
+      node = CombineWordHash(node, word);
+      return middle_[order_minus_2].Ideal(node);
+    }
+    
+    /** Actual lookup: second part of two-part LookupMiddle() split for prefetching */
+    MiddlePointer LookupMiddleFromIterator(unsigned char order_minus_2, Node &node, bool &independent_left, uint64_t &extend_pointer, typename Middle::ConstIterator it) const {
+      //node = CombineWordHash(node, word); // see above in LookupMiddleIterator()
+      if (!middle_[order_minus_2].FindFromIdeal(node, it)) {
+        independent_left = true;
+        return MiddlePointer();
+      }
+      extend_pointer = node;
+      MiddlePointer ret(it->value);
+      independent_left = ret.IndependentLeft();
+      return ret;
+    }
+    
     MiddlePointer LookupMiddle(unsigned char order_minus_2, WordIndex word, Node &node, bool &independent_left, uint64_t &extend_pointer) const {
       node = CombineWordHash(node, word);
       typename Middle::ConstIterator found;
@@ -118,6 +139,18 @@ template <class Value> class HashedSearch {
       return ret;
     }
 
+    /** Iterator lookup and advance node: first part of two-part LookupLongest() split for prefetching */
+    typename Longest::ConstIterator LongestAdvance(WordIndex word, Node &node) const {
+      node = CombineWordHash(node, word);
+      return longest_.Ideal(node);
+    }
+    
+    LongestPointer LookupLongestFromIterator(const Node &node, typename Longest::ConstIterator it) const {
+      // Sign bit is always on because longest n-grams do not extend left.
+      if (!longest_.FindFromIdeal(node, it)) return LongestPointer();
+      return LongestPointer(it->value.prob);
+    }
+    
     LongestPointer LookupLongest(WordIndex word, const Node &node) const {
       // Sign bit is always on because longest n-grams do not extend left.
       typename Longest::ConstIterator found;
@@ -178,10 +211,8 @@ template <class Value> class HashedSearch {
 
     Unigram unigram_;
 
-    typedef util::ProbingHashTable<typename Value::ProbingEntry, util::IdentityHash> Middle;
     std::vector<Middle> middle_;
 
-    typedef util::ProbingHashTable<ProbEntry, util::IdentityHash> Longest;
     Longest longest_;
 };
 
