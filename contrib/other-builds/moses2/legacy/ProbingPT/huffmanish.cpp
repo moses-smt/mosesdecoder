@@ -215,11 +215,11 @@ HuffmanDecoder::HuffmanDecoder (const char * dirname)
 
 }
 
-HuffmanDecoder::HuffmanDecoder (std::map<unsigned int, std::string> * lookup_target,
-                                std::map<unsigned int, std::vector<unsigned char> > * lookup_word1)
+HuffmanDecoder::HuffmanDecoder (const std::map<unsigned int, std::string> &lookup_target,
+                                const std::map<unsigned int, std::vector<unsigned char> > &lookup_word1)
 {
-  lookup_target_phrase = *lookup_target;
-  lookup_word_all1 = *lookup_word1;
+  lookup_target_phrase = lookup_target;
+  lookup_word_all1 = lookup_word1;
 }
 
 std::vector<target_text> HuffmanDecoder::full_decode_line (unsigned char lines[], size_t linesCount, int num_scores)

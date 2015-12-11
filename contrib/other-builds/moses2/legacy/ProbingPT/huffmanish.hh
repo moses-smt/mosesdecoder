@@ -81,7 +81,7 @@ class HuffmanDecoder
 
 public:
   HuffmanDecoder (const char *);
-  HuffmanDecoder (std::map<unsigned int, std::string> *, std::map<unsigned int, std::vector<unsigned char> > *);
+  HuffmanDecoder (const std::map<unsigned int, std::string> &, const std::map<unsigned int, std::vector<unsigned char> > &);
 
   //Getters
   const std::map<unsigned int, std::string> &get_target_lookup_map() const {
